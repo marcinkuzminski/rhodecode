@@ -19,7 +19,10 @@ def make_map():
     map.connect('/error/{action}/{id}', controller = 'error')
 
     # CUSTOM ROUTES HERE
-    map.connect('hg', '/{path_info:.*}', controller = 'hg', action = "view",
+    map.connect('hg_add', '/add/{new_repo:[a-z]*}',
+                controller = 'hg', action = 'add_repo')
+    map.connect('hg', '/{path_info:.*}',
+                controller = 'hg', action = "view",
                 path_info = '/', conditions = {'method':'GET'})
 
     return map
