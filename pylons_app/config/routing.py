@@ -23,6 +23,6 @@ def make_map():
                 controller = 'hg', action = 'add_repo')
     map.connect('hg', '/{path_info:.*}',
                 controller = 'hg', action = "view",
-                path_info = '/', conditions = {'method':'GET'})
+                path_info = '/')
 
     return map

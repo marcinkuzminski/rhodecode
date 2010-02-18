@@ -15,38 +15,47 @@ log = logging.getLogger(__name__)
 from mercurial import ui, hg
 from mercurial.error import RepoError
 from ConfigParser import ConfigParser
-#http://bel-epa.com/hg/
-#def make_web_app():
-#    repos = "hgwebdir.config"
-#    hgwebapp = hgwebdir(repos)
-#    return hgwebapp
-#
-#class HgController(BaseController):
-#
-#    def index(self):
-#        hgapp = wsgiapplication(make_web_app)
-#        return hgapp(request.environ, self.start_response)
-#
-#    def view(self, *args, **kwargs):
-#        return u'dupa'
-#        #pprint(request.environ)
-#        hgapp = wsgiapplication(make_web_app)
-#        return hgapp(request.environ, self.start_response)
 
-def _make_app():
-    #for single a repo
-    #return hgweb("/path/to/repo", "Name")
+def make_web_app():
     repos = "hgwebdir.config"
-    return  hgwebdir(repos)
-
-def wsgi_app(environ, start_response):
-    start_response('200 OK', [('Content-type', 'text/html')])
-    return ['<html>\n<body>\nHello World!\n</body>\n</html>']
+    hgwebapp = hgwebdir(repos)
+    return hgwebapp
 
 class HgController(BaseController):
+    #based on
+    #http://bel-epa.com/hg/
+    def index(self):
+        hgapp = wsgiapplication(make_web_app)
+        return hgapp(request.environ, self.start_response)
+
+    def view(self, *args, **kwargs):
+        hgapp = wsgiapplication(make_web_app)
+        return hgapp(request.environ, self.start_response)
+
+    def add_repo(self, new_repo):
+        tmpl = '''
+                  <html>
+                    <body>
+                        %(msg)s%(new_repo)s!<br \>
+                        <a href="/">repos</a>
+                    </body>
+                  </html>
+                '''
+        #extra check it can be add since it's the command
+        if new_repo == 'add':
+            return [tmpl % ({'new_repo':'', 'msg':'you basstard ! this repo is a command'})]
+
+        new_repo = new_repo.replace(" ", "_")
+        new_repo = new_repo.replace("-", "_")
+
+        try:
+            self._create_repo(new_repo)
+        except Exception as e:
+            return [tmpl % ({'new_repo':' Exception when adding: ' + new_repo, 'msg':str(e)})]
+
+        return [tmpl % ({'new_repo':new_repo, 'msg':'added repo: '})]
 
     def _check_repo(self, repo_name):
-
         p = os.path.dirname(__file__)
         config_path = os.path.join(p, '../..', 'hgwebdir.config')
         print config_path
@@ -83,43 +92,25 @@ class HgController(BaseController):
                     % (self.repo_path, self.repo_path)
             os.popen(cmd)
 
+#def _make_app():
+#    #for single a repo
+#    #return hgweb("/path/to/repo", "Name")
+#    repos = "hgwebdir.config"
+#    return  hgwebdir(repos)
+#
 
-    def add_repo(self, new_repo):
-        tmpl = '''
-                  <html>
-                    <body>
-                        %(msg)s%(new_repo)s!<br \>
-                        <a href="/">repos</a>
-                    </body>
-                  </html>
-                '''
-        #extra check it can be add since it's the command
-        if new_repo == 'add':
-            return [tmpl % ({'new_repo':'', 'msg':'you basstard ! this repo is a command'})]
-
-        new_repo = new_repo.replace(" ", "_")
-        new_repo = new_repo.replace("-", "_")
-
-        try:
-            self._create_repo(new_repo)
-        except Exception as e:
-            return [tmpl % ({'new_repo':' Exception when adding: ' + new_repo, 'msg':str(e)})]
-
-        return [tmpl % ({'new_repo':new_repo, 'msg':'added repo: '})]
-
-    def view(self, environ, start_response):
-        #the following is only needed when using hgwebdir
-        app = _make_app()
-        #return wsgi_app(environ, start_response)
-        response = app(request.environ, self.start_response)
-
-        if environ['PATH_INFO'].find("static") != -1:
-            return response
-        else:
-            #wrap the murcurial response in a mako template.
-            template = Template("".join(response),
-                                lookup = environ['pylons.pylons']\
-                                .config['pylons.g'].mako_lookup)
-
-            return template.render(g = g, c = c, session = session, h = h)
-
+#    def view(self, environ, start_response):
+#        #the following is only needed when using hgwebdir
+#        app = _make_app()
+#        #return wsgi_app(environ, start_response)
+#        response = app(request.environ, self.start_response)
+#
+#        if environ['PATH_INFO'].find("static") != -1:
+#            return response
+#        else:
+#            #wrap the murcurial response in a mako template.
+#            template = Template("".join(response),
+#                                lookup = environ['pylons.pylons']\
+#                                .config['pylons.g'].mako_lookup)
+#
+#            return template.render(g = g, c = c, session = session, h = h)
