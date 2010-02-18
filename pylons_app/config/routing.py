@@ -19,7 +19,7 @@ def make_map():
     map.connect('/error/{action}/{id}', controller = 'error')
 
     # CUSTOM ROUTES HERE
-    map.connect('hg_add', '/add/{new_repo:[a-z _-]*}',
+    map.connect('hg_add', '/add/{new_repo:[a-z0-9\. _-]*}',
                 controller = 'hg', action = 'add_repo')
     map.connect('hg', '/{path_info:.*}',
                 controller = 'hg', action = "view",

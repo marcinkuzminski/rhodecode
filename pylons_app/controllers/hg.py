@@ -5,11 +5,15 @@ from pylons_app.lib.base import BaseController
 from pylons import c, g, session, h, request
 from mako.template import Template
 from pprint import pprint
+import os
 #uncomment the following if you want to serve a single repo
 #from mercurial.hgweb.hgweb_mod import hgweb
 from mercurial.hgweb.hgwebdir_mod import hgwebdir
 from mercurial.hgweb.request import wsgiapplication
 log = logging.getLogger(__name__)
+
+from mercurial import ui, hg
+from mercurial.error import RepoError
 
 #http://bel-epa.com/hg/
 #def make_web_app():
@@ -41,7 +45,55 @@ def wsgi_app(environ, start_response):
 
 class HgController(BaseController):
 
+    def _check_repo(self, repo_name):
+        repos_path = '/home/marcink/python_workspace'
+        self.repo_path = os.path.join(repos_path, repo_name)
 
+        try:
+            r = hg.repository(ui.ui(), self.repo_path)
+            hg.verify(r)
+            #here we hnow that repo exists it was verified
+            log.info('%s repo is already created', repo_name)
+            raise Exception('Repo exists')
+        except RepoError:
+            log.info('%s repo is free for creation', repo_name)
+            #it means that there is no valid repo there...
+            return True
+
+
+    def _create_repo(self, repo_name):
+        if repo_name in [None, '', 'add']:
+            raise Exception('undefined repo_name of repo')
+
+        if self._check_repo(repo_name):
+            log.info('creating repo %s', repo_name)
+            cmd = """mkdir %s && hg init %s""" \
+                    % (self.repo_path, self.repo_path)
+            os.popen(cmd)
+
+
+    def add_repo(self, new_repo):
+        tmpl = '''
+                  <html>
+                    <body>
+                        %(msg)s%(new_repo)s!<br \>
+                        <a href="/">repos</a>
+                    </body>
+                  </html>
+                '''
+        #extra check it can be add since it's the command
+        if new_repo == 'add':
+            return [tmpl % ({'new_repo':'', 'msg':'you basstard ! this repo is a command'})]
+
+        new_repo = new_repo.replace(" ", "_")
+        new_repo = new_repo.replace("-", "_")
+
+        try:
+            self._create_repo(new_repo)
+        except Exception as e:
+            return [tmpl % ({'new_repo':' Exception when adding: ' + new_repo, 'msg':str(e)})]
+
+        return [tmpl % ({'new_repo':new_repo, 'msg':'added repo: '})]
 
     def view(self, environ, start_response):
         #the following is only needed when using hgwebdir
