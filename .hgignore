@@ -1,3 +1,9 @@
 
 syntax: regexp
 ^data$
+syntax: regexp
+^\.settings$
+syntax: regexp
+^\.project$
+syntax: regexp
+^\.pydevproject$
