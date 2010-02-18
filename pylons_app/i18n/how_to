@@ -1,0 +1,15 @@
+#goto pylons folder app (the on holding .ini files)
+
+# to create new 
+python setup.py extract_messages -> get messages from project
+python setup.py init_catalog -l pl -> create a language directory
+edit the new po file with poedit
+python setup.py compile_catalog -> create translation files
+#done 
+ 
+ # to update
+python setup.py extract_messages -> get messages from project
+python setup.py update_catalog -> to update the translations
+edit the new updated po file with poedit
+python setup.py compile_catalog -> create translation files
+#done

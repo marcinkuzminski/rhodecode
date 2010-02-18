@@ -1,0 +1,110 @@
+ ## -*- coding: utf-8 -*-
+<%inherit file = "base/base.html"/>
+
+<%def name="page_title()">
+    ${_('Wire transfer')}
+</%def>
+
+<%def name="body()">
+    <h3> ${h.link('Home','/')} / ${_('Wire transfer')}</h3>
+    ${h.secure_form('/home/make_payment',method='post',id="secure_form")}
+    ##Secure Form Tag for prevention of Cross-site request forgery (CSRF) attacks.
+    ##Generates form tags that include client-specific authorization tokens to be verified by the destined web app.
+
+        <table class="editor_disp">
+            <tr>
+                <td colspan="3">${h.get_error('_authentication_token',c.form_errors)}</td>
+            </tr>
+            <tr>
+                <td class="label">${_('Account number')}</td>
+                <td>${h.text('account_number',size=44,maxlength=38)}</td>
+                <td id="e_account_number">${h.get_error('account_number',c.form_errors)}</td>
+            </tr>
+            <tr>
+                <td class="label">${_('Title')}</td>
+                <td>${h.textarea("title", "", cols=43, rows=5,maxlength=20)}</td>
+                <td id="e_title">${h.get_error('title',c.form_errors)}</td>
+            </tr>
+            <tr>
+                <td class="label">${_('Recipient')}</td>
+                <td>${h.select('recipient',1,c.recipients_list)}</td>
+                <td id="e_recipient">${h.get_error('recipient',c.form_errors)}</td>                
+            </tr>
+            <tr>
+                <td class="label">${_('Recipient address')}</td>
+                <td>${h.text('recipient_address',size=44)}</td>
+                <td id="e_recipient_address">${h.get_error('recipient_address',c.form_errors)}</td>                
+            </tr>
+            <tr>
+                <td class="label">${_('Amount')}</td>
+                <td>${h.text('amount',size='7')}zł</td>
+                <td id="e_amount">${h.get_error('amount',c.form_errors)}</td>                
+            </tr>
+            <tr>
+                <td class="label"></td>
+                <td>${h.submit('send',_('send'))}</td>
+            </tr>            
+        </table>
+    ${h.end_form()}
+
+    ${c.name}
+
+<script type="text/javascript"> 
+    YAHOO.util.Event.onDOMReady(function(){
+     
+        var D = YAHOO.util.Dom;
+        var E = YAHOO.util.Event;
+
+        function set_error_msg(id_ele,err_msg){
+            ele = D.get(id_ele);
+            if(ele){
+                ele.innerHTML = '<span class="error_msg">'+err_msg+'</span>';
+            }
+        };
+        
+        function clear_error_msg(id_ele){
+            ele = D.get(id_ele);
+            if(ele){
+                ele.innerHTML = '<span style="color:green">ok</span>';
+            }
+        };
+        
+        function validation(){
+            //Clean the "fishy" fields :)
+            an = D.get('account_number');
+            an.value = String(an.value).replace(/ /g,'').replace(/-/g,'');
+            am = D.get('amount');
+            am.value = String(am.value).replace(/,/g,'.').replace(';','.');
+            
+            //console.log(an.value.length);
+
+            //ok we cleaned a little bit now validate the account...
+            if(!/^[0-9]{26}$/.test(an.value)){
+                set_error_msg('e_account_number','${_("Account number is invalid, it must be 26 digits")}');
+                return false;
+            }
+            else{
+                clear_error_msg('e_account_number');
+                return true;
+            }      
+        };
+        
+        E.addListener(['account_number','amount'],'keyup',function(e){
+            if (validation()){
+                return true;
+            }
+            return false;
+        });
+        
+        E.addListener('secure_form','submit',function(e){
+        	if (!validation()){
+                //this will hold the event == form submition
+                E.stopEvent(e);        	    
+            }
+        })  
+    });
+        
+</script>
+
+    
+</%def>
