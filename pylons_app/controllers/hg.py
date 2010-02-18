@@ -14,7 +14,7 @@ log = logging.getLogger(__name__)
 
 from mercurial import ui, hg
 from mercurial.error import RepoError
-
+from ConfigParser import ConfigParser
 #http://bel-epa.com/hg/
 #def make_web_app():
 #    repos = "hgwebdir.config"
@@ -46,7 +46,19 @@ def wsgi_app(environ, start_response):
 class HgController(BaseController):
 
     def _check_repo(self, repo_name):
-        repos_path = '/home/marcink/python_workspace'
+
+        p = os.path.dirname(__file__)
+        config_path = os.path.join(p, '../..', 'hgwebdir.config')
+        print config_path
+
+        cp = ConfigParser()
+
+        cp.read(config_path)
+        repos_path = cp.get('paths', '/').replace("**", '')
+
+        if not repos_path:
+            raise Exception('Could not read config !')
+
         self.repo_path = os.path.join(repos_path, repo_name)
 
         try:
@@ -66,7 +78,7 @@ class HgController(BaseController):
             raise Exception('undefined repo_name of repo')
 
         if self._check_repo(repo_name):
-            log.info('creating repo %s', repo_name)
+            log.info('creating repo %s in %s', repo_name, self.repo_path)
             cmd = """mkdir %s && hg init %s""" \
                     % (self.repo_path, self.repo_path)
             os.popen(cmd)
