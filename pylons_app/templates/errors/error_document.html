@@ -6,14 +6,19 @@
 <head>
     <title>Error - ${c.error_message}</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <meta http-equiv="refresh" content="${c.redirect_time}; url=${c.url_redirect}"/>
+    
+    %if c.redirect_time:
+        <meta http-equiv="refresh" content="${c.redirect_time}; url=${c.url_redirect}"/>
+    %endif
+    
+    
     <style type="text/css">
      
      body {
        font-family: sans-serif;
      }
      #main_div{
-       border: 2px solid #8daed8;
+       border: 0px solid #000;
        width: 500px;
        margin: auto;
        text-align: center;
@@ -31,7 +36,10 @@
 		<h1 class="error_message">${c.error_message}</h1>
 		
 		<p>${c.error_explanation}</p>
-		<p>${_('You will be redirected to %s in %s seconds') % (c.redirect_module,c.redirect_time)}</p>
+        %if c.redirect_time:
+            <p>${_('You will be redirected to %s in %s seconds') % (c.redirect_module,c.redirect_time)}</p>
+	    %endif		
+		
 	</div>
 </body>
 </html>
