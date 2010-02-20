@@ -6,31 +6,18 @@ from pylons import c, g, session, h, request
 from mako.template import Template
 from pprint import pprint
 import os
-#uncomment the following if you want to serve a single repo
-#from mercurial.hgweb.hgweb_mod import hgweb
-from mercurial.hgweb.hgwebdir_mod import hgwebdir
-from mercurial.hgweb.request import wsgiapplication
-log = logging.getLogger(__name__)
-
 from mercurial import ui, hg
 from mercurial.error import RepoError
 from ConfigParser import ConfigParser
 
-def make_web_app():
-    repos = "hgwebdir.config"
-    hgwebapp = hgwebdir(repos)
-    return hgwebapp
+log = logging.getLogger(__name__)
 
 class HgController(BaseController):
-    #based on
-    #http://bel-epa.com/hg/
     def index(self):
-        hgapp = wsgiapplication(make_web_app)
-        return hgapp(request.environ, self.start_response)
+        return g.hgapp(request.environ, self.start_response)
 
     def view(self, *args, **kwargs):
-        hgapp = wsgiapplication(make_web_app)
-        return hgapp(request.environ, self.start_response)
+        return g.hgapp(request.environ, self.start_response)
 
     def add_repo(self, new_repo):
         tmpl = '''
@@ -58,7 +45,6 @@ class HgController(BaseController):
     def _check_repo(self, repo_name):
         p = os.path.dirname(__file__)
         config_path = os.path.join(p, '../..', 'hgwebdir.config')
-        print config_path
 
         cp = ConfigParser()
 

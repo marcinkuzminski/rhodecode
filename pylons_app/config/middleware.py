@@ -67,8 +67,8 @@ def make_app(global_conf, full_stack = True, static_files = True, **app_conf):
         app = Cascade([static_app, app])
 
     #dozer debug
-#    if asbool(config['debug']):
-#        from dozer import Logview
-#        app = Logview(app, config)
+    if asbool(config['debug']):
+        from dozer import Logview
+        app = Logview(app, config)
 
     return app
