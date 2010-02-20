@@ -20,7 +20,7 @@ class HgController(BaseController):
         return g.hgapp(request.environ, self.start_response)
 
     def add_repo(self, new_repo):
-        tmpl = '''
+        tmpl = u'''
                   <html>
                     <body>
                         %(msg)s%(new_repo)s!<br \>
@@ -43,8 +43,8 @@ class HgController(BaseController):
         return [tmpl % ({'new_repo':new_repo, 'msg':'added repo: '})]
 
     def _check_repo(self, repo_name):
-        p = os.path.dirname(__file__)
-        config_path = os.path.join(p, '../..', 'hgwebdir.config')
+        p = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+        config_path = os.path.join(p, 'hgwebdir.config')
 
         cp = ConfigParser()
 
