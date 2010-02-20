@@ -10,7 +10,7 @@
 ### END INIT INFO
 
 project_name=hg_app
-conf_name=development.ini
+conf_name=production.ini
 project_path=/home/marcink/python_workspace/$project_name
 virt_python=/home/marcink/virt_python
 
