@@ -8,8 +8,8 @@ from pylons import config
 from pylons.middleware import ErrorHandler, StatusCodeRedirect
 from pylons.wsgiapp import PylonsApp
 from routes.middleware import RoutesMiddleware
-from pylons_app.config.environment import load_environment
 
+from pylons_app.config.environment import load_environment
 
 
 def make_app(global_conf, full_stack = True, **app_conf):
