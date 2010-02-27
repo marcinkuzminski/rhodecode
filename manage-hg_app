@@ -1,0 +1,35 @@
+#!/bin/sh -e
+### BEGIN INIT INFO
+# Provides:         pylons-manage          
+# Required-Start:    $all
+# Required-Stop:     $all
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: starts pylons app
+# Description:       starts pylons app
+### END INIT INFO
+
+project_name=hg_app
+conf_name=production.ini
+project_path=/home/marcink/python_workspace/$project_name
+pid_path=$project_path
+log_path=$project_path
+virt_python=/home/marcink/virt_python
+run_user=root
+run_group=root
+
+cd $project_path
+case "$1" in
+  start)
+    $virt_python/bin/paster serve --daemon --user= $run_user --group=$run_group --pid-file=$pid_path/$project_name.pid --log-file=$log_path/$project_name.log $project_path/$conf_name start
+    ;;
+  stop)
+    $virt_python/bin/paster serve --daemon --user= $run_user --group=$run_group --pid-file=$pid_path/$project_name.pid --log-file=$log_path/$project_namete.log $project_path/$conf_name stop
+    ;;
+  restart)
+    $virt_python/bin/paster serve --daemon --user= $run_user --group=$run_group --pid-file=$pid_path/$project_name.pid --log-file=$log_path/$project_name.log $project_path/$conf_name restart
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|restart}"
+    exit 1
+esac
