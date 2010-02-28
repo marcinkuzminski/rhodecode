@@ -41,6 +41,8 @@ def make_app(global_conf, full_stack = True, **app_conf):
 
     # Routing/Session/Cache Middleware
     app = RoutesMiddleware(app, config['routes.map'])
+    app = SessionMiddleware(app, config)
+    app = CacheMiddleware(app, config)
 
     if asbool(full_stack):
         # Handle Python exceptions

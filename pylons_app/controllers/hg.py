@@ -13,11 +13,23 @@ from ConfigParser import ConfigParser
 log = logging.getLogger(__name__)
 
 class HgController(BaseController):
-    def index(self):
-        return g.hgapp(request.environ, self.start_response)
+
+    def __before__(self):
+        c.repos_prefix = 'etelko'
+
 
     def view(self, *args, **kwargs):
-        return g.hgapp(request.environ, self.start_response)
+        response = g.hgapp(request.environ, self.start_response)
+        #for mercurial protocols we can't wrap into mako
+        if request.environ['HTTP_ACCEPT'].find("mercurial") >= 0:
+                    return response
+
+        #wrap the murcurial response in a mako template.
+        template = Template("".join(response),
+                            lookup = request.environ['pylons.pylons']\
+                            .config['pylons.g'].mako_lookup)
+
+        return template.render(g = g, c = c, session = session, h = h)
 
     def add_repo(self, new_repo):
         c.staticurl = g.statics
