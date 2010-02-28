@@ -43,6 +43,7 @@ class BackupManager(object):
             logging.info('backing up %s', dir)
             tar.add(os.path.join(self.repos_path, dir), dir)
         tar.close()
+        logging.info('finished backup of mercurial repositories')
 
 
 if __name__ == "__main__":
