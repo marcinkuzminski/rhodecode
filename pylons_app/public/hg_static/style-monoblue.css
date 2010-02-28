@@ -51,6 +51,34 @@ div.page-header {
   div.page-header a {
     text-decoration: none;
   }
+  div.rss_logo { 
+    float: right; white-space: nowrap; 
+  }
+  div.rss_logo a {
+    padding:3px 6px; line-height:10px;
+    border:1px solid; border-color:#fcc7a5 #7d3302 #3e1a01 #ff954e;
+    color:#ffffff; background-color:#ff6600;
+    font-weight:bold; font-family:sans-serif; font-size:10px;
+    text-align:center; text-decoration:none;
+}
+  div.rss_logo a:hover { 
+    background-color:#ee5500; 
+  }
+
+  td.indexlinks { 
+	   white-space: nowrap; 
+  }
+  td.indexlinks a {
+	  padding: 2px 5px; line-height: 10px;
+	  border: 1px solid;
+	  color: #ffffff; background-color: #7777bb;
+	  border-color: #aaaadd #333366 #333366 #aaaadd;
+	  font-weight: bold;  text-align: center; text-decoration: none;
+	  font-size: 10px;
+  }
+  td.indexlinks a:hover {
+	 background-color: #6666aa; 
+  }
 
   div.page-header form {
     position: absolute;
@@ -195,7 +223,7 @@ p.normal {
 
 table {
   margin: 10px 0 0 20px;
-  width: 95%;
+  width: auto;
   border-collapse: collapse;
 }
 table tr td {
