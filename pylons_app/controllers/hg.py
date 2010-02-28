@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import logging
-from pylons_app.lib.base import BaseController
+from pylons_app.lib.base import BaseController, render
 from pylons import c, g, session, h, request
 from mako.template import Template
 from pprint import pprint
@@ -20,27 +20,26 @@ class HgController(BaseController):
         return g.hgapp(request.environ, self.start_response)
 
     def add_repo(self, new_repo):
-        tmpl = u'''
-                  <html>
-                    <body>
-                        %(msg)s%(new_repo)s!<br \>
-                        <a href="/">repos</a>
-                    </body>
-                  </html>
-                '''
+        c.staticurl = g.statics
+
         #extra check it can be add since it's the command
         if new_repo == 'add':
-            return [tmpl % ({'new_repo':'', 'msg':'you basstard ! this repo is a command'})]
+            c.msg = 'you basstard ! this repo is a command'
+            c.new_repo = ''
+            return render('add.html')
 
         new_repo = new_repo.replace(" ", "_")
         new_repo = new_repo.replace("-", "_")
 
         try:
             self._create_repo(new_repo)
+            c.new_repo = new_repo
+            c.msg = 'added repo'
         except Exception as e:
-            return [tmpl % ({'new_repo':' Exception when adding: ' + new_repo, 'msg':str(e)})]
+            c.new_repo = 'Exception when adding: %s' % new_repo
+            c.msg = str(e)
 
-        return [tmpl % ({'new_repo':new_repo, 'msg':'added repo: '})]
+        return render('add.html')
 
     def _check_repo(self, repo_name):
         p = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))

@@ -1,0 +1,50 @@
+{header}
+<div id="container">
+    <div class="page-header">
+        <h1><a href="{url}summary{sessionvars%urlparameter}">{repo|escape}</a> / files</h1>
+
+        <ul class="object-tools">
+            <li><a href="{url}summary{sessionvars%urlparameter}">summary</a></li>
+            <li><a href="{url}shortlog{sessionvars%urlparameter}">shortlog</a></li>
+            <li><a href="{url}changelog{sessionvars%urlparameter}">changelog</a></li>
+            <li><a href="{url}graph/{node|short}{sessionvars%urlparameter}">graph</a></li>
+            <li><a href="{url}tags{sessionvars%urlparameter}">tags</a></li>
+            <li><a href="{url}file/{node|short}{sessionvars%urlparameter}">files</a></li>
+        </ul>
+        <br class="clear"/>
+        <ul class="object-tools" style="margin-top:-2em">
+            <li class="current"><a href="{url}rev/{node|short}">changeset</a></li>
+            <li><a href="{url}raw-rev/{node|short}">raw</a></li>
+            {archives%archiveentry}
+        </ul>
+    </div>
+
+    
+
+    <div class="module">
+    <h2 class="no-link no-border">changeset</h2>
+
+    <h3 class="changeset"><a href="{url}raw-rev/{node|short}">{desc|strip|escape|firstline} <span class="logtags">{inbranch%inbranchtag}{branches%branchtag}{tags%tagtag}</span></a>, <span>{date|age} ago</span></h3>
+
+    <dl class="overview">
+        <dt>author</dt>
+        <dd>{author|obfuscate}</dd>
+        <dt>date</dt>
+        <dd>{date|date}</dd>
+        {branch%changesetbranch}
+        <dt>changeset {rev}</dt>
+        <dd>{node|short}</dd>
+        {parent%changesetparent}
+        {child%changesetchild}
+    </dl>
+
+    <pre class="description">{desc|strip|escape|addbreaks}</pre>
+
+    <table>
+    {files}
+    </table>
+
+    {diff}
+
+    </div>
+{footer}

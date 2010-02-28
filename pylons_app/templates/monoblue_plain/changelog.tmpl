@@ -1,0 +1,31 @@
+{header}
+<div id="container">
+    <div class="page-header">
+        <h1><a href="{url}summary{sessionvars%urlparameter}">{repo|escape}</a> / changelog</h1>
+
+        <ul class="object-tools">
+            <li><a href="{url}summary{sessionvars%urlparameter}">summary</a></li>
+            <li><a href="{url}shortlog{sessionvars%urlparameter}">shortlog</a></li>
+            <li class="current"><a href="{url}log{sessionvars%urlparameter}">changelog</a></li>
+            <li><a href="{url}graph/{node|short}{sessionvars%urlparameter}">graph</a></li>
+            <li><a href="{url}tags{sessionvars%urlparameter}">tags</a></li>
+            <li><a href="{url}file/{node|short}{sessionvars%urlparameter}">files</a></li>
+        </ul>
+        <br class="clear"/>
+        <ul class="object-tools" style="margin-top:-2em">
+            <li class="current"><a href="{url}rev/{node|short}">changeset</a></li>
+            <li><a href="{url}raw-rev/{node|short}">raw</a> </li>
+            {archives%archiveentry}
+        </ul>
+    </div>
+
+    <div class="module">
+    <h2>changelog</h2>
+    {entries%changelogentry}
+    </div>
+
+    <div class="page-path">
+{changenav%naventry}
+    </div>
+
+{footer}

@@ -1,0 +1,94 @@
+{header}
+<div id="container">
+    <div class="page-header">
+        <h1><a href="{url}summary{sessionvars%urlparameter}">{repo|escape}</a> / summary</h1>
+
+        <ul class="object-tools">
+            <li class="current"><a href='{url}summary{sessionvars%urlparameter}'>summary</a></li>
+            <li><a href="{url}shortlog{sessionvars%urlparameter}">shortlog</a></li>
+            <li><a href="{url}log{sessionvars%urlparameter}">changelog</a></li>
+            <li><a href="{url}graph/{node|short}{sessionvars%urlparameter}">graph</a></li>
+            <li><a href="{url}tags{sessionvars%urlparameter}">tags</a></li>
+            <li><a href="{url}file/{node|short}{sessionvars%urlparameter}">files</a></li>
+        </ul>
+        <br class="clear"/>
+        <ul class="object-tools" style="margin-top:-2em">
+            <li class="current"><a href="{url}rev/{node|short}">changeset</a></li>
+            {archives%archiveentry}
+        </ul>
+    </div>
+
+    <div class="module">
+    <h2 class="no-link no-border">Mercurial Repository Overview</h2>
+    <div style="float:right; margin:10px;">
+            <form action="{url}log">
+                {sessionvars%hiddenformentry}
+                <label>Search: </label>
+                <input type="text" name="rev" />
+            </form>
+    </div>
+    <dl class="overview">
+        <dt>name</dt>
+        <dd>{repo|escape}</dd>
+        <dt>description</dt>
+        <dd>{desc}</dd>
+        <dt>owner</dt>
+        <dd>{owner|obfuscate}</dd>
+        <dt>last change</dt>
+        <dd>{lastchange|rfc822date}</dd>
+    </dl>
+    </div>
+    <div id="changelist" class="module">
+    <table cellspacing="0" id="changes_list">
+        <caption>Changes</caption>
+        <thead>
+            <th width="10%">Age</th>
+            <th width="10%">Author</th>
+            <th width="60%">Message</th>
+            <th width="15%"> </th>
+        </thead>
+        <tbody>
+        {shortlog}
+        <tr class="light">
+            <td colspan="4"><a class="list" href="{url}shortlog{sessionvars%urlparameter}">...</a></td>
+        </tr>
+        </tbody>
+    </table>
+    </div>
+
+    <div id="changelist" class="module">
+    <table>
+        <caption>Tags</caption>
+        <thead>
+            <th>Age</th>
+            <th>Name</th>
+            <th> </th>
+        </thead>
+        <tbody>
+        {tags}
+        <tr class="light">
+            <td colspan="3"><a class="list" href="{url}tags{sessionvars%urlparameter}">...</a></td>
+        </tr>
+        </tbody>
+    </table>
+    </div>
+
+    <div id="changelist" class="module">
+    <table>
+        <caption>Branches</caption>
+        <thead>
+            <th>Ago </th>
+            <th>Rev</th>
+            <th>Name </th>
+            <th> </th>
+        </thead>
+        <tbody>
+        {branches%branchentry}
+        <tr class="light">
+          <td colspan="4"><a class="list"  href="#">...</a></td>
+        </tr>
+        </tbody>
+    </table>
+    </div>
+{footer}
+</div>
