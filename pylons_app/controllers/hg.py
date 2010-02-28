@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 import logging
 from pylons_app.lib.base import BaseController, render
-from pylons import c, g, session, h, request
+from pylons import c, g, session, request
+from pylons_app.lib import helpers as h
 from mako.template import Template
 from pprint import pprint
 import os
@@ -30,6 +31,10 @@ class HgController(BaseController):
                             .config['pylons.g'].mako_lookup)
 
         return template.render(g = g, c = c, session = session, h = h)
+
+
+    def manage_hgrc(self):
+        pass
 
     def add_repo(self, new_repo):
         c.staticurl = g.statics

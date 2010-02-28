@@ -1,7 +1,5 @@
 {header}
     <title>{repo|escape}: Mercurial repository not found</title>
-    <link rel="alternate" type="application/atom+xml" href="{url}atom-log" title="Atom feed for {repo|escape}"/>
-    <link rel="alternate" type="application/rss+xml" href="{url}rss-log" title="RSS feed for {repo|escape}"/>
 </head>
 
 <body>
@@ -15,14 +13,14 @@
 
     <h2 class="no-link no-border">Not Found</h2>
     <p class="normal">The specified repository "{repo|escape}" is unknown, sorry.</p>
-    <p class="normal">Please go back to the <a href="{url}">main repository list page</a>.</p>
-
+    <p class="normal"><a href="/add/{repo|escape}">Create "{repo|escape}" repository </a></p>
+    <p class="normal">Go back to the <a href="{url}">main repository list page</a>.</p>
     <div class="page-footer">
-        <p>Mercurial Repository: atom-log</p>
+        <p>Mercurial Repository: {repo|escape}</p>
     </div>
 
     <div id="powered-by">
-        <p><a href="http://mercurial.selenic.com/" title="Mercurial"><img src="/hg_static/hglogo.png" width=75 height=90 border=0 alt="mercurial"></a></p>
+        <p><a href="http://mercurial.selenic.com/" title="Mercurial"><img src="{staticurl}hglogo.png" width=75 height=90 border=0 alt="mercurial"></a></p>
 
     </div>
 
