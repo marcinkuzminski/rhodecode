@@ -47,7 +47,7 @@ class BackupManager(object):
         bckp_file = os.path.join(self.backup_file_path, self.backup_file_name)
         tar = tarfile.open(bckp_file, "w:gz")
 
-        for dir in os.listdir(self.repos_path)[:2]:
+        for dir in os.listdir(self.repos_path):
             logging.info('backing up %s', dir)
             tar.add(os.path.join(self.repos_path, dir), dir)
         tar.close()
