@@ -10,11 +10,12 @@ logging.basicConfig(level = logging.DEBUG,
 class BackupManager(object):
     def __init__(self):
 
+        cur_dir = os.path.realpath(__file__)
         dn = os.path.dirname
-        self.backup_file_path = os.path.join(dn(dn(dn(__file__))), 'data')
+        self.backup_file_path = os.path.join(dn(dn(dn(cur_dir))), 'data')
         cfg = config.config()
         try:
-            cfg.read(os.path.join(dn(dn(dn(__file__))), 'hgwebdir.config'))
+            cfg.read(os.path.join(dn(dn(dn(cur_dir))), 'hgwebdir.config'))
         except IOError:
             logging.error('Could not read hgwebdir.config')
             sys.exit()
