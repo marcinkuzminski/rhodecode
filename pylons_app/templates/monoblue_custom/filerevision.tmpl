@@ -1,3 +1,4 @@
+## -*- coding: utf-8 -*-
 {header}
 <title>{repo|escape}: {file|escape}@{node|short}</title>
     <link rel="alternate" type="application/atom+xml" href="{url}atom-log" title="Atom feed for {repo|escape}"/>
@@ -57,7 +58,9 @@
     <p class="description">{desc|strip|escape|addbreaks|nonempty}</p>
 
     <div class="source">
-    {text%fileline}
+		<%text filter="n">
+			{text%fileline}
+		</%text>    
     </div>
 
 {footer}

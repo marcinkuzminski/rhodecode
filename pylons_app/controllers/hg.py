@@ -10,7 +10,7 @@ import os
 from mercurial import ui, hg
 from mercurial.error import RepoError
 from ConfigParser import ConfigParser
-
+import encodings
 log = logging.getLogger(__name__)
 
 class HgController(BaseController):
@@ -18,23 +18,27 @@ class HgController(BaseController):
     def __before__(self):
         c.repos_prefix = 'etelko'
 
-
     def view(self, *args, **kwargs):
         response = g.hgapp(request.environ, self.start_response)
-        #for mercurial protocols we can't wrap into mako
-        if request.environ['HTTP_ACCEPT'].find("mercurial") >= 0:
+        #for mercurial protocols and raw files we can't wrap into mako
+        if request.environ['HTTP_ACCEPT'].find("mercurial") != -1 or \
+        request.environ['PATH_INFO'].find('raw-file') != -1:
                     return response
 
-        #wrap the murcurial response in a mako template.
-        template = Template("".join(response),
-                            lookup = request.environ['pylons.pylons']\
+        tmpl = ''.join(response)
+
+        template = Template(tmpl, lookup=request.environ['pylons.pylons']\
                             .config['pylons.g'].mako_lookup)
 
-        return template.render(g = g, c = c, session = session, h = h)
+        return template.render(g=g, c=c, session=session, h=h)
 
 
     def manage_hgrc(self):
         pass
+
+    def hgrc(self, dirname):
+        filename = os.path.join(dirname, '.hg', 'hgrc')
+        return filename
 
     def add_repo(self, new_repo):
         c.staticurl = g.statics

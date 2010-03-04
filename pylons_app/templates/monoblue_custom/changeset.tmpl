@@ -1,3 +1,4 @@
+## -*- coding: utf-8 -*-
 {header}
 <title>{repo|escape}: changeset {rev}:{node|short}</title>
     <link rel="alternate" type="application/atom+xml" href="{url}atom-log" title="Atom feed for {repo|escape}"/>
@@ -57,7 +58,9 @@
     </table>
 
     <div class="diff">
-    {diff}
+    <%text filter="n">
+		{diff}
+	</%text>
     </div>
 
 {footer}

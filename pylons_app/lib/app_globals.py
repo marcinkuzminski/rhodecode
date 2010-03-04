@@ -38,7 +38,16 @@ class Globals(object):
             baseui.setconfig('web', k, v)
         #magic trick to make our custom template dir working
         templater.path.append(cfg.get('web', 'templates', None))
-        hgwebapp = hgwebdir(paths, baseui = baseui)
+
+        #baseui.setconfig('web', 'description', '')
+        #baseui.setconfig('web', 'name', '')
+        #baseui.setconfig('web', 'contact', '')
+        #baseui.setconfig('web', 'allow_archive', '')
+        #baseui.setconfig('web', 'style', 'monoblue_plain')
+        #baseui.setconfig('web', 'baseurl', '')
+        #baseui.setconfig('web', 'staticurl', '')
+        
+        hgwebapp = hgwebdir(paths, baseui=baseui)
         return hgwebapp
 
 
