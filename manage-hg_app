@@ -21,13 +21,13 @@ run_group=root
 cd $project_path
 case "$1" in
   start)
-    $virt_python/bin/paster serve --daemon --user= $run_user --group=$run_group --pid-file=$pid_path/$project_name.pid --log-file=$log_path/$project_name.log $project_path/$conf_name start
+    $virt_python/bin/paster serve --daemon --user=$run_user --group=$run_group --pid-file=$pid_path/$project_name.pid --log-file=$log_path/$project_name.log $project_path/$conf_name start
     ;;
   stop)
-    $virt_python/bin/paster serve --daemon --user= $run_user --group=$run_group --pid-file=$pid_path/$project_name.pid --log-file=$log_path/$project_namete.log $project_path/$conf_name stop
+    $virt_python/bin/paster serve --daemon --user=$run_user --group=$run_group --pid-file=$pid_path/$project_name.pid --log-file=$log_path/$project_namete.log $project_path/$conf_name stop
     ;;
   restart)
-    $virt_python/bin/paster serve --daemon --user= $run_user --group=$run_group --pid-file=$pid_path/$project_name.pid --log-file=$log_path/$project_name.log $project_path/$conf_name restart
+    $virt_python/bin/paster serve --daemon --user=$run_user --group=$run_group --pid-file=$pid_path/$project_name.pid --log-file=$log_path/$project_name.log $project_path/$conf_name restart
     ;;
   *)
     echo "Usage: $0 {start|stop|restart}"
