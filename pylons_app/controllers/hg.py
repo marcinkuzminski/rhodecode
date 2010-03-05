@@ -24,11 +24,18 @@ class HgController(BaseController):
         if request.environ['HTTP_ACCEPT'].find("mercurial") != -1 or \
         request.environ['PATH_INFO'].find('raw-file') != -1:
                     return response
-
-        tmpl = ''.join(response)
-
-        template = Template(tmpl, lookup=request.environ['pylons.pylons']\
+        try:
+            tmpl = u''.join(response)
+            template = Template(tmpl, lookup=request.environ['pylons.pylons']\
                             .config['pylons.g'].mako_lookup)
+                        
+        except (RuntimeError, UnicodeDecodeError):
+            log.info('disabling unicode due to encoding error')
+            response = g.hgapp(request.environ, self.start_response)
+            tmpl = ''.join(response)
+            template = Template(tmpl, lookup=request.environ['pylons.pylons']\
+                            .config['pylons.g'].mako_lookup, disable_unicode=True)
+
 
         return template.render(g=g, c=c, session=session, h=h)
 
