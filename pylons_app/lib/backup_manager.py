@@ -1,3 +1,4 @@
+'''BACKUP MANAGER'''
 import logging
 from mercurial import config
 import tarfile
@@ -10,6 +11,8 @@ logging.basicConfig(level=logging.DEBUG,
 
 class BackupManager(object):
     def __init__(self):
+        self.repos_path = None
+        self.backup_file_name = None
         self.id_rsa_path = '/home/pylons/id_rsa'
         self.check_id_rsa()
         cur_dir = os.path.realpath(__file__)
@@ -30,7 +33,8 @@ class BackupManager(object):
 
     def check_id_rsa(self):
         if not os.path.isfile(self.id_rsa_path):
-            logging.error('Could not load id_rsa key file in %s', self.id_rsa_path)
+            logging.error('Could not load id_rsa key file in %s',
+                          self.id_rsa_path)
             sys.exit()
 
     def set_repos_path(self, paths):
@@ -47,9 +51,9 @@ class BackupManager(object):
         bckp_file = os.path.join(self.backup_file_path, self.backup_file_name)
         tar = tarfile.open(bckp_file, "w:gz")
 
-        for dir in os.listdir(self.repos_path):
-            logging.info('backing up %s', dir)
-            tar.add(os.path.join(self.repos_path, dir), dir)
+        for dir_name in os.listdir(self.repos_path):
+            logging.info('backing up %s', dir_name)
+            tar.add(os.path.join(self.repos_path, dir_name), dir_name)
         tar.close()
         logging.info('finished backup of mercurial repositories')
 
@@ -70,14 +74,14 @@ class BackupManager(object):
         
     
     def rm_file(self):
-        os.remove(self.backup_file_path)
+        os.remove(os.path.join(self.backup_file_path, self.backup_file_name))
     
 
 
 if __name__ == "__main__":
-    bm = BackupManager()
-    bm.backup_repos()
-    bm.transfer_files()
-    bm.rm_file()
+    B_MANAGER = BackupManager()
+    B_MANAGER.backup_repos()
+    B_MANAGER.transfer_files()
+    B_MANAGER.rm_file()
 
 
