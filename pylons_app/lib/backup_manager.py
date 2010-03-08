@@ -5,8 +5,8 @@ import os
 import datetime
 import sys
 import subprocess
-logging.basicConfig(level = logging.DEBUG,
-                    format = "%(asctime)s %(levelname)-5.5s %(message)s")
+logging.basicConfig(level=logging.DEBUG,
+                    format="%(asctime)s %(levelname)-5.5s %(message)s")
 
 class BackupManager(object):
     def __init__(self):
@@ -67,11 +67,17 @@ class BackupManager(object):
 
         subprocess.Popen(cmd)
         logging.info('Transfered file %s to %s', self.backup_file_name, cmd[4])
+        
+    
+    def rm_file(self):
+        os.remove(self.backup_file_path)
+    
 
 
 if __name__ == "__main__":
     bm = BackupManager()
     bm.backup_repos()
     bm.transfer_files()
+    bm.rm_file()
 
 
