@@ -69,7 +69,7 @@ class BackupManager(object):
                '%(backup_file_path)s/%(backup_file_name)s' % params,
                'root@192.168.2.102:/backups/mercurial' % params]
 
-        subprocess.Popen(cmd)
+        subprocess.call(cmd)
         logging.info('Transfered file %s to %s', self.backup_file_name, cmd[4])
         
     
