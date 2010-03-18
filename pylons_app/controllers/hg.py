@@ -11,6 +11,7 @@ from mercurial import ui, hg
 from mercurial.error import RepoError
 from ConfigParser import ConfigParser
 import encodings
+from pylons.controllers.util import abort
 log = logging.getLogger(__name__)
 
 class HgController(BaseController):
@@ -20,8 +21,13 @@ class HgController(BaseController):
 
     def view(self, *args, **kwargs):
         response = g.hgapp(request.environ, self.start_response)
+        
+        http_accept = request.environ.get('HTTP_ACCEPT', False)
+        if not http_accept:
+            return abort(status_code=400, detail='no http accept in header')
+        
         #for mercurial protocols and raw files we can't wrap into mako
-        if request.environ['HTTP_ACCEPT'].find("mercurial") != -1 or \
+        if http_accept.find("mercurial") != -1 or \
         request.environ['PATH_INFO'].find('raw-file') != -1:
                     return response
         try:
