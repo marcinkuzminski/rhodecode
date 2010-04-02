@@ -1,6 +1,6 @@
 #!/bin/sh -e
 ### BEGIN INIT INFO
-# Provides:         pylons-manage          
+# Provides:         manage-hg_app          
 # Required-Start:    $all
 # Required-Stop:     $all
 # Default-Start:     2 3 4 5
