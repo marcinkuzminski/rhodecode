@@ -65,7 +65,7 @@ class BackupManager(object):
                   'backup_file_path':self.backup_file_path,
                   'backup_file_name':self.backup_file_name,
                   }
-        cmd = ['scp', '-l', 40000, '-i', '%(id_rsa_key)s' % params,
+        cmd = ['scp', '-l', '40000', '-i', '%(id_rsa_key)s' % params,
                '%(backup_file_path)s/%(backup_file_name)s' % params,
                'root@192.168.2.102:/backups/mercurial' % params]
 
