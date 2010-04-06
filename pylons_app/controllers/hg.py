@@ -1,23 +1,22 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import logging
+import os
 from pylons_app.lib.base import BaseController, render
-from pylons import c, g, session, request
+from pylons import tmpl_context as c, app_globals as g, session, request, config
 from pylons_app.lib import helpers as h
 from mako.template import Template
-from pprint import pprint
-import os
 from mercurial import ui, hg
 from mercurial.error import RepoError
 from ConfigParser import ConfigParser
-import encodings
 from pylons.controllers.util import abort
+
 log = logging.getLogger(__name__)
 
 class HgController(BaseController):
 
     def __before__(self):
-        c.repos_prefix = 'etelko'
+        c.repos_prefix = config['repos_name']
 
     def view(self, *args, **kwargs):
         response = g.hgapp(request.environ, self.start_response)
@@ -33,14 +32,14 @@ class HgController(BaseController):
         try:
             tmpl = u''.join(response)
             template = Template(tmpl, lookup=request.environ['pylons.pylons']\
-                            .config['pylons.g'].mako_lookup)
+                            .config['pylons.app_globals'].mako_lookup)
                         
         except (RuntimeError, UnicodeDecodeError):
             log.info('disabling unicode due to encoding error')
             response = g.hgapp(request.environ, self.start_response)
             tmpl = ''.join(response)
             template = Template(tmpl, lookup=request.environ['pylons.pylons']\
-                            .config['pylons.g'].mako_lookup, disable_unicode=True)
+                            .config['pylons.app_globals'].mako_lookup, disable_unicode=True)
 
 
         return template.render(g=g, c=c, session=session, h=h)

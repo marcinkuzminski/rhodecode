@@ -28,17 +28,16 @@ def load_environment(global_conf, app_conf):
                     template_engine='mako', paths=paths)
 
     config['routes.map'] = make_map()
-    config['pylons.g'] = app_globals.Globals()
+    config['pylons.app_globals'] = app_globals.Globals()
     config['pylons.h'] = pylons_app.lib.helpers
 
     # Create the Mako TemplateLookup, with the default auto-escaping
-    config['pylons.g'].mako_lookup = TemplateLookup(
+    config['pylons.app_globals'].mako_lookup = TemplateLookup(
         directories=paths['templates'],
         error_handler=handle_mako_error,
         module_directory=os.path.join(app_conf['cache_dir'], 'templates'),
-        output_encoding='utf-8',
-        imports=['from webhelpers.html import escape'],
-        default_filters=['escape'])
+        input_encoding='utf-8', default_filters=['escape'],
+        imports=['from webhelpers.html import escape'])
 
     # CONFIGURATION OPTIONS HERE (note: all config options will override
     # any Pylons config options)
