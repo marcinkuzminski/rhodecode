@@ -52,7 +52,7 @@ def make_app(global_conf, full_stack=True, static_files=True, **app_conf):
         # 500 when debug is disabled)
         if asbool(config['debug']):
             #don't handle 404, since mercurial does it for us.
-            app = StatusCodeRedirect(app, [400, 401, 403, 500])
+            app = StatusCodeRedirect(app, [400, 401, 403])
         else:
             app = StatusCodeRedirect(app, [400, 401, 403, 500])
     

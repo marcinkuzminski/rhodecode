@@ -52,15 +52,15 @@ def load_environment(global_conf, app_conf):
     
     #MULTIPLE DB configs
     # Setup the SQLAlchemy database engine
-#    if config['debug']:
-#        #use query time debugging.
-#        from pylons_app.lib.timer_proxy import TimerProxy
-#        sa_engine_db1 = engine_from_config(config, 'sqlalchemy.db1.',
-#                                                            proxy=TimerProxy())
-#    else:
-#        sa_engine_db1 = engine_from_config(config, 'sqlalchemy.db1.')
+    if config['debug']:
+        #use query time debugging.
+        from pylons_app.lib.timerproxy import TimerProxy
+        sa_engine_db1 = engine_from_config(config, 'sqlalchemy.db1.',
+                                                            proxy=TimerProxy())
+    else:
+        sa_engine_db1 = engine_from_config(config, 'sqlalchemy.db1.')
 
-    #init_model(sa_engine_db1)
+    init_model(sa_engine_db1)
 
     # CONFIGURATION OPTIONS HERE (note: all config options will override
     # any Pylons config options)

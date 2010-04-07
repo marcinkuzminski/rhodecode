@@ -4,7 +4,9 @@ from pylons import request, response, session, tmpl_context as c, url, app_globa
 from pylons.controllers.util import abort, redirect
 
 from pylons_app.lib.base import BaseController, render
-from pylons_app.lib import auth
+from formencode import htmlfill
+from pylons_app.model import meta
+from pylons_app.model.db import Users, UserLogs
 log = logging.getLogger(__name__)
 
 class UsersController(BaseController):
@@ -16,14 +18,13 @@ class UsersController(BaseController):
         c.staticurl = g.statics
         c.admin_user = session.get('admin_user')
         c.admin_username = session.get('admin_username')
-        self.conn, self.cur = auth.get_sqlite_conn_cur()
+        self.sa = meta.Session
         
     def index(self, format='html'):
         """GET /users: All items in the collection"""
         # url('users')
         
-        self.cur.execute('SELECT * FROM users')
-        c.users_list = self.cur.fetchall()        
+        c.users_list = self.sa.query(Users).all()     
         return render('/users.html')
     
     def create(self):
@@ -52,20 +53,24 @@ class UsersController(BaseController):
         #           method='delete')
         # url('user', id=ID)
         try:
-            self.cur.execute("DELETE FROM users WHERE user_id=?", (id,))
-            self.conn.commit()
+            self.sa.delete(self.sa.query(Users).get(id))
+            self.sa.commit()
         except:
-            self.conn.rollback()
+            self.sa.rollback()
             raise
         return redirect(url('users'))
         
     def show(self, id, format='html'):
         """GET /users/id: Show a specific item"""
         # url('user', id=ID)
-        self.cur.execute("SELECT * FROM users WHERE user_id=?", (id,))
-        ret = self.cur.fetchone()
-        c.user_name = ret[1]
-        return render('/users_show.html')
+        c.user = self.sa.query(Users).get(id)
+
+        return htmlfill.render(
+            render('/users_show.html'),
+            defaults=c.user.__dict__,
+            encoding="UTF-8",
+            force_defaults=False
+        )        
     
     def edit(self, id, format='html'):
         """GET /users/id/edit: Form to edit an existing item"""
