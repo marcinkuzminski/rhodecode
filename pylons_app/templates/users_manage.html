@@ -7,28 +7,41 @@
     / 
     ${h.link_to(u'Admin',h.url('admin_home'))}
     /
-    ${h.link_to(u'Users managment',h.url('admin_users_manage'))}
+    ${h.link_to(u'Users managment',h.url('users'))}
 </%def>
 <%def name="page_nav()">
     <li>${h.link_to(u'Home',h.url('/'))}</li>
     <li class="current">${_('Admin')}</li>
 </%def>
 <%def name="main()">
-
+    <ul class="submenu">
+        <li>
+            ${h.link_to(u'Repos',h.url('repos'))}
+        </li>
+        <li class="current_submenu">
+            ${h.link_to(u'Users',h.url('users'))}
+        </li>
+    </ul>
+	<div>
+        <h2>${_('Mercurial users')}</h2>
         <table cellspacing="0">
          <tr>
             <th>Id</th>
             <th>Username</th>
             <th>Password</th>
             <th>Active</th>
-         </tr>    
+            <th>Admin</th>
+         </tr>
             %for i in c.users_list:
                 <tr>
                     <td>${i[0]}</td>
                     <td>${i[1]}</td>
                     <td>${i[2]}</td>
                     <td>${i[3]}</td>
+                    <td>${i[4]}</td>
                 </tr>
             %endfor
-        </table>
+        </table>        
+    </div>
+
 </%def>    

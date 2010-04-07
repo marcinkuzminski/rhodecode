@@ -52,18 +52,6 @@ class AdminController(BaseController):
                 )
         return render('/admin.html')
 
-    def repos_manage(self):
-        return render('/repos_manage.html')
-    
-    def users_manage(self):
-        conn, cur = auth.get_sqlite_conn_cur()
-        cur.execute('SELECT * FROM users')
-        c.users_list = cur.fetchall()        
-        return render('/users_manage.html')
-                
-    def manage_hgrc(self):
-        pass
-
     def hgrc(self, dirname):
         filename = os.path.join(dirname, '.hg', 'hgrc')
         return filename

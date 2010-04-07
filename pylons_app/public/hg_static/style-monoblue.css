@@ -146,7 +146,9 @@ ul.submenu li {
   font-size: 1.2em;
   display: inline;
 }
-
+ul.submenu li.current_submenu {
+	border-bottom: 2px solid #006699;
+}
 h2 {
   margin: 20px 0 10px;
   height: 30px;

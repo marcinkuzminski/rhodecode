@@ -7,34 +7,22 @@
     / 
     ${h.link_to(u'Admin',h.url('admin_home'))}
     /
-    ${h.link_to(u'Repos managment',h.url('admin_repos_manage'))}
+    ${h.link_to(u'Repos managment',h.url('repos'))}
 </%def>
 <%def name="page_nav()">
 	<li>${h.link_to(u'Home',h.url('/'))}</li>
 	<li class="current">${_('Admin')}</li>
 </%def>
 <%def name="main()">
-
-
-<div class="twocol-form">
-        <h2>Create new repository</h2>
-        <form method="post" action="/repo/create/">
-            <table>
-                <tbody><tr><th><label for="id_name">Name:</label></th><td><input type="text" maxlength="255" name="name" id="id_name"></td></tr>
-<tr><th><label for="id_description">Description:</label></th><td><textarea name="description" cols="40" rows="10" id="id_description"></textarea></td></tr>
-<tr><th><label for="id_website">Website:</label></th><td><input type="text" maxlength="128" name="website" id="id_website"></td></tr>
-<tr><th><label for="id_is_private">Private:</label></th><td><input type="checkbox" id="id_is_private" name="is_private"></td></tr>
-<tr><th><label for="id_has_issues">Issue tracking:</label></th><td><input type="checkbox" id="id_has_issues" name="has_issues" checked="checked"></td></tr>
-<tr><th><label for="id_has_wiki">Wiki:</label></th><td><input type="checkbox" id="id_has_wiki" name="has_wiki" checked="checked"></td></tr>
-                
-                
-                <tr><td colspan="2">&nbsp;</td></tr>
-                <tr>
-                    <td colspan="2">
-                        <input type="submit" class="primary-button" value="Create repository"> <input type="reset" onclick="document.location='http://bitbucket.org/';" class="secondary-button secondary-button-darkbg" value="Cancel">
-                    </td>
-                </tr>
-            </tbody></table>
-        </form>
+    <ul class="submenu">
+        <li class="current_submenu">
+            ${h.link_to(u'Repos',h.url('repos'))}
+        </li>
+        <li>
+            ${h.link_to(u'Users',h.url('users'))}
+        </li>
+    </ul>
+	<div>
+        <h2>${_('Mercurial repos')}</h2>
     </div>
 </%def>    
