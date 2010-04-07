@@ -30,8 +30,7 @@ class AdminController(BaseController):
 
             try:
                 c.form_result = login_form.to_python(dict(request.params))
-                if auth.authfunc(None, c.form_result['username'], c.form_result['password']) and\
-                    c.form_result['username'] == 'admin':
+                if auth.admin_auth(c.form_result['username'], c.form_result['password']):
                     session['admin_user'] = True
                     session['admin_username'] = c.form_result['username']
                     session.save()

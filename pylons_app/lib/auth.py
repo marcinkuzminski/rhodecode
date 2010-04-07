@@ -13,6 +13,28 @@ def get_sqlite_conn_cur():
     cur = conn.cursor()
     return conn, cur
 
+
+def admin_auth(username, password):
+    conn, cur = get_sqlite_conn_cur()
+    password_crypt = crypt.crypt(password, '6a')
+
+    try:
+        cur.execute("SELECT * FROM users WHERE username=?", (username,))
+        data = cur.fetchone()
+    except sqlite3.OperationalError as e:
+        data = None
+        log.error(e)
+        
+    if data:
+        if data[3]:
+            if data[1] == username and data[2] == password_crypt and data[4]:
+                log.info('user %s authenticated correctly', username)
+                return True
+        else:
+            log.error('user %s is disabled', username)
+            
+    return False
+
 def authfunc(environ, username, password):
     conn, cur = get_sqlite_conn_cur()
     password_crypt = crypt.crypt(password, '6a')
@@ -65,7 +87,8 @@ def create_user_table():
                         (id INTEGER PRIMARY KEY AUTOINCREMENT, 
                          username TEXT, 
                          password TEXT,
-                         active INTEGER)''')
+                         active INTEGER,
+                         admin INTEGER)''')
         log.info('creating table %s', 'user_logs')
         cur.execute('''DROP TABLE IF EXISTS user_logs ''')
         cur.execute('''CREATE TABLE user_logs
@@ -80,14 +103,13 @@ def create_user_table():
     
     cur.close()
     
-def create_user(username, password):
+def create_user(username, password, admin=False):
     conn, cur = get_sqlite_conn_cur()    
     password_crypt = crypt.crypt(password, '6a')
-    cur_date = datetime.now()
     log.info('creating user %s', username)
     try:
-        cur.execute('''INSERT INTO users values (?,?,?,?) ''',
-                    (None, username, password_crypt, 1,))     
+        cur.execute('''INSERT INTO users values (?,?,?,?,?) ''',
+                    (None, username, password_crypt, 1, admin))     
         conn.commit()
     except:
         conn.rollback()
@@ -95,7 +117,7 @@ def create_user(username, password):
     
 if __name__ == "__main__":
     create_user_table()
-    create_user('marcink', 'qweqwe')
+    create_user('marcink', 'qweqwe', True)
     create_user('lukaszd', 'qweqwe')
     create_user('adriand', 'qweqwe')
     create_user('radek', 'qweqwe')
@@ -103,6 +125,5 @@ if __name__ == "__main__":
     create_user('bart', 'qweqwe')
     create_user('maho', 'qweqwe')
     create_user('michalg', 'qweqwe')
-    create_user('admin', 'qwe123qwe')
     
     #authfunc('', 'marcink', 'qweqwe')
