@@ -22,7 +22,8 @@ def make_map(config):
     with map.submapper(path_prefix='/_admin', controller='admin') as m:
         m.connect('admin_home', '/', action='index')#main page
         m.connect('admin_add_repo', '/add_repo/{new_repo:[a-z0-9\. _-]*}', action='add_repo')
-        m.connect('admin_manage_users', '/manage_users', action='index')
+        m.connect('admin_users_manage', '/repos_manage', action='users_manage')
+        m.connect('admin_repos_manage', '/users_manage', action='repos_manage')
         
     map.connect('hg', '/{path_info:.*}', controller='hg',
                 action="view", path_info='/')

@@ -8,13 +8,13 @@ import crypt
 log = logging.getLogger(__name__)
 ROOT = dn(dn(dn(os.path.realpath(__file__))))
 
-def get_sqlite_cur_conn():
+def get_sqlite_conn_cur():
     conn = sqlite3.connect(os.path.join(ROOT, 'auth.sqlite'))
     cur = conn.cursor()
     return conn, cur
 
 def authfunc(environ, username, password):
-    conn, cur = get_sqlite_cur_conn()
+    conn, cur = get_sqlite_conn_cur()
     password_crypt = crypt.crypt(password, '6a')
 
     try:
@@ -59,7 +59,7 @@ def create_user_table():
     '''
     Create a auth database
     '''
-    conn, cur = get_sqlite_cur_conn()
+    conn, cur = get_sqlite_conn_cur()
     try:
         log.info('creating table %s', 'users')
         cur.execute('''DROP TABLE IF EXISTS users ''')
@@ -83,7 +83,7 @@ def create_user_table():
     cur.close()
     
 def create_user(username, password):
-    conn, cur = get_sqlite_cur_conn()    
+    conn, cur = get_sqlite_conn_cur()    
     password_crypt = crypt.crypt(password, '6a')
     cur_date = datetime.now()
     log.info('creating user %s', username)
@@ -105,5 +105,6 @@ if __name__ == "__main__":
     create_user('bart', 'qweqwe')
     create_user('maho', 'qweqwe')
     create_user('michalg', 'qweqwe')
+    create_user('admin', 'qwe123qwe')
     
     #authfunc('', 'marcink', 'qweqwe')

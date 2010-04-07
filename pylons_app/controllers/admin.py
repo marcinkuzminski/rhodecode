@@ -8,6 +8,7 @@ import os
 from mercurial import ui, hg
 from mercurial.error import RepoError
 from ConfigParser import ConfigParser
+from pylons_app.lib import auth
 log = logging.getLogger(__name__)
 
 class AdminController(BaseController):
@@ -15,12 +16,21 @@ class AdminController(BaseController):
 
     def __before__(self):
         c.staticurl = g.statics
+        c.admin_user = True
         
     def index(self):
         # Return a rendered template
         return render('/admin.html')
 
-
+    def repos_manage(self):
+        return render('/repos_manage.html')
+    
+    def users_manage(self):
+        conn, cur = auth.get_sqlite_conn_cur()
+        cur.execute('SELECT * FROM users')
+        c.users_list = cur.fetchall()        
+        return render('/users_manage.html')
+                
     def manage_hgrc(self):
         pass
 
@@ -32,8 +42,8 @@ class AdminController(BaseController):
         
 
         #extra check it can be add since it's the command
-        if new_repo == 'add':
-            c.msg = 'you basstard ! this repo is a command'
+        if new_repo == '_admin':
+            c.msg = 'DENIED'
             c.new_repo = ''
             return render('add.html')
 

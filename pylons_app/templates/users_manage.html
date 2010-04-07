@@ -1,0 +1,34 @@
+<%inherit file="base/base.html"/>
+<%def name="title()">
+    ${_('Repository managment')}
+</%def>
+<%def name="breadcrumbs()">
+    ${h.link_to(u'Home',h.url('/'))}
+    / 
+    ${h.link_to(u'Admin',h.url('admin_home'))}
+    /
+    ${h.link_to(u'Users managment',h.url('admin_users_manage'))}
+</%def>
+<%def name="page_nav()">
+    <li>${h.link_to(u'Home',h.url('/'))}</li>
+    <li class="current">${_('Admin')}</li>
+</%def>
+<%def name="main()">
+
+        <table cellspacing="0">
+         <tr>
+            <th>Id</th>
+            <th>Username</th>
+            <th>Password</th>
+            <th>Active</th>
+         </tr>    
+            %for i in c.users_list:
+                <tr>
+                    <td>${i[0]}</td>
+                    <td>${i[1]}</td>
+                    <td>${i[2]}</td>
+                    <td>${i[3]}</td>
+                </tr>
+            %endfor
+        </table>
+</%def>    
