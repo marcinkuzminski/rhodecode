@@ -31,33 +31,28 @@ class ValidAuthToken(formencode.validators.FancyValidator):
     def validate_python(self, value, state):
 
         if value != authentication_token():
-            raise formencode.Invalid(self.message('invalid_token', state, search_number = value), value, state)
+            raise formencode.Invalid(self.message('invalid_token', state, search_number=value), value, state)
 
 
-class WireTransferForm(object):
-    '''
-    A factory wrapper class. It might return the instance of class for a validation, but also it can
-    return the list for select fields values.
-    @param ret_type: type to return defaut: 'class'
-    '''
-    #class attributes here
-    #it might be fetched from db,from models and so on
-    recipients_list = [
-                       (1, 'a'),
-                       (2, 'b')
-                       ]
+class LoginForm(formencode.Schema):
+    allow_extra_fields = True
+    filter_extra_fields = True
+    username = UnicodeString(
+                             strip=True,
+                             min=3,
+                             not_empty=True,
+                             messages={
+                                       'empty':_('Please enter a login'),
+                                       'tooShort':_('Enter a value %(min)i characters long or more')}
+                            )
 
-    def _form(self):
-        class _WireTransferForm(formencode.Schema):
-            allow_extra_fields = True
-            _authentication_token = ValidAuthToken()
-            account_number = Regex(r'[0-9]{26}', not_empty = True, messages = {
-                                                'invalid': _("Account number is invalid, it must be 26 digits")})
-            title = UnicodeString(not_empty = True, min = 3, strip = True)
-            recipient = formencode.All(OneOf([i[0] for i in WireTransferForm.recipients_list],
-                                             testValueList = True, hideList = True), Int())
-            recipient_address = UnicodeString(not_empty = True, strip = True)
-            amount = Number(not_empty = True, min = 1)
+    password = UnicodeString(
+                            strip=True,
+                            min=3,
+                            not_empty=True,
+                            messages={
+                                      'empty':_('Please enter a password'),
+                                      'tooShort':_('Enter a value %(min)i characters long or more')}
+                                )
 
-        return _WireTransferForm()
 

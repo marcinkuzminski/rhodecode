@@ -1,5 +1,14 @@
 ## -*- coding: utf-8 -*-
 <%inherit file="base/base.html"/>
+ <%def name="get_form_error(element)">
+    %if type(c.form_errors) == dict:
+        %if c.form_errors.get(element,False):
+            <span class="error-message">
+                ${c.form_errors.get(element,'')}
+            </span>
+        %endif
+    %endif           
+ </%def>
 <%def name="title()">
     ${_('Repository managment')}
 </%def>
@@ -36,10 +45,12 @@
             <tr>
                 <td>${_('Username')}</td>
                 <td>${h.text('username')}</td>
+                <td>${get_form_error('username')} </td>
             </tr>
             <tr>
                 <td>${_('Password')}</td>
-                <td>${h.text('password')}</td>
+                <td>${h.password('password')}</td>
+                <td>${get_form_error('password')}</td> 
             </tr>
             <tr>
                 <td></td>

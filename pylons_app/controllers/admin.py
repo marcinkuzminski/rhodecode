@@ -9,6 +9,9 @@ from mercurial import ui, hg
 from mercurial.error import RepoError
 from ConfigParser import ConfigParser
 from pylons_app.lib import auth
+from pylons_app.model.forms import LoginForm
+import formencode
+import formencode.htmlfill as htmlfill
 log = logging.getLogger(__name__)
 
 class AdminController(BaseController):
@@ -16,10 +19,38 @@ class AdminController(BaseController):
 
     def __before__(self):
         c.staticurl = g.statics
-        c.admin_user = True
+        c.admin_user = session.get('admin_user')
+        c.admin_username = session.get('admin_username')
         
     def index(self):
         # Return a rendered template
+        if request.POST:
+            #import Login Form validator class
+            login_form = LoginForm()
+
+            try:
+                c.form_result = login_form.to_python(dict(request.params))
+                if auth.authfunc(None, c.form_result['username'], c.form_result['password']) and\
+                    c.form_result['username'] == 'admin':
+                    session['admin_user'] = True
+                    session['admin_username'] = c.form_result['username']
+                    session.save()
+                    return redirect(url('admin_home'))
+                else:
+                    raise formencode.Invalid('Login Error', None, None,
+                                             error_dict={'username':'invalid login',
+                                                         'password':'invalid password'})
+                                      
+            except formencode.Invalid, error:
+                c.form_result = error.value
+                c.form_errors = error.error_dict or {}
+                html = render('/admin.html')
+
+                return htmlfill.render(
+                    html,
+                    defaults=c.form_result,
+                    encoding="UTF-8"
+                )
         return render('/admin.html')
 
     def repos_manage(self):

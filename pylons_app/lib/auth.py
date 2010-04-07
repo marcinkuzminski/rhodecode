@@ -23,32 +23,30 @@ def authfunc(environ, username, password):
     except sqlite3.OperationalError as e:
         data = None
         log.error(e)
-
     if data:
         if data[3]:
             if data[1] == username and data[2] == password_crypt:
                 log.info('user %s authenticated correctly', username)
-                
-                http_accept = environ.get('HTTP_ACCEPT')
-        
-                if http_accept.startswith('application/mercurial') or \
-                    environ['PATH_INFO'].find('raw-file') != -1:
-                    cmd = environ['PATH_INFO']
-                    for qry in environ['QUERY_STRING'].split('&'):
-                        if qry.startswith('cmd'):
-                            cmd += "|" + qry
-                            
-                            try:
-                                cur.execute('''INSERT INTO 
-                                                    user_logs 
-                                               VALUES(?,?,?,?)''',
-                                                (None, data[0], cmd, datetime.now()))
-                                conn.commit()
-                            except Exception as e:
-                                conn.rollback()
-                                log.error(e)
-                            
+                if environ:
+                    http_accept = environ.get('HTTP_ACCEPT')
+            
+                    if http_accept.startswith('application/mercurial') or \
+                        environ['PATH_INFO'].find('raw-file') != -1:
+                        cmd = environ['PATH_INFO']
+                        for qry in environ['QUERY_STRING'].split('&'):
+                            if qry.startswith('cmd'):
+                                cmd += "|" + qry
                                 
+                                try:
+                                    cur.execute('''INSERT INTO 
+                                                        user_logs 
+                                                   VALUES(?,?,?,?)''',
+                                                    (None, data[0], cmd, datetime.now()))
+                                    conn.commit()
+                                except Exception as e:
+                                    conn.rollback()
+                                    log.error(e)
+                                  
                 return True
         else:
             log.error('user %s is disabled', username)
