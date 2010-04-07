@@ -20,7 +20,7 @@ class ReposController(BaseController):
     def index(self, format='html'):
         """GET /repos: All items in the collection"""
         # url('repos')
-        return render('/repos_manage.html')
+        return render('/repos.html')
     
     def create(self):
         """POST /repos: Create a new item"""
@@ -51,7 +51,7 @@ class ReposController(BaseController):
     def show(self, id, format='html'):
         """GET /repos/id: Show a specific item"""
         # url('repo', id=ID)
-
+        return render('/repos_show.html')
     def edit(self, id, format='html'):
         """GET /repos/id/edit: Form to edit an existing item"""
         # url('edit_repo', id=ID)

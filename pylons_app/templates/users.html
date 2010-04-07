@@ -24,21 +24,25 @@
     </ul>
 	<div>
         <h2>${_('Mercurial users')}</h2>
-        <table cellspacing="0">
+        <table>
          <tr>
             <th>Id</th>
             <th>Username</th>
-            <th>Password</th>
             <th>Active</th>
             <th>Admin</th>
+            <th>Action</th>
          </tr>
             %for i in c.users_list:
                 <tr>
                     <td>${i[0]}</td>
-                    <td>${i[1]}</td>
-                    <td>${i[2]}</td>
+                    <td>${h.link_to(i[1],h.url('user', id=i[0]))}</td>
                     <td>${i[3]}</td>
                     <td>${i[4]}</td>
+                    <td>
+	                    ${h.form(url('user', id=i[0]),method='delete')}
+	                    	${h.submit('remove','remove',class_="submit")}
+	                    ${h.end_form()}
+        			</td>
                 </tr>
             %endfor
         </table>        

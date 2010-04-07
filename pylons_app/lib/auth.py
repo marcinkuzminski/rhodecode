@@ -84,7 +84,7 @@ def create_user_table():
         log.info('creating table %s', 'users')
         cur.execute('''DROP TABLE IF EXISTS users ''')
         cur.execute('''CREATE TABLE users
-                        (id INTEGER PRIMARY KEY AUTOINCREMENT, 
+                        (user_id INTEGER PRIMARY KEY AUTOINCREMENT, 
                          username TEXT, 
                          password TEXT,
                          active INTEGER,
