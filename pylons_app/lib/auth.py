@@ -17,8 +17,12 @@ def authfunc(environ, username, password):
     conn, cur = get_sqlite_cur_conn()
     password_crypt = crypt.crypt(password, '6a')
 
-    cur.execute("SELECT * FROM users WHERE username=?", (username,))
-    data = cur.fetchone()
+    try:
+        cur.execute("SELECT * FROM users WHERE username=?", (username,))
+        data = cur.fetchone()
+    except sqlite3.OperationalError as e:
+        data = None
+        log.error(e)
 
     if data:
         if data[3]:
