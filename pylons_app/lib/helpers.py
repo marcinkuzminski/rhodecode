@@ -3,8 +3,7 @@
 Consists of functions to typically be used within templates, but also
 available to Controllers. This module is available to both as 'h'.
 """
-from routes import redirect_to, url_for
-
+from pylons import url
 from webhelpers.html import (literal, HTML, escape)
 from webhelpers.html.tools import (auto_link, button_to, highlight, js_obfuscate
                                    , mail_to, strip_links, strip_tags, tag_re)
@@ -30,10 +29,10 @@ class _Link(object):
     @param url: the url for link
     '''
 
-    def __call__(self, label = '', *url, **urlargs):
+    def __call__(self, label='', *url_, **urlargs):
         if label is None or '':
             label = url
-        link_fn = link_to(label, url_for(*url, **urlargs))
+        link_fn = link_to(label, url(*url_, **urlargs))
         return link_fn
 
 

@@ -6,6 +6,9 @@ from mercurial import templater
 from mercurial.hgweb.request import wsgiapplication
 from mercurial import ui, config
 import os
+from beaker.cache import CacheManager
+from beaker.util import parse_cache_config_options
+
 class Globals(object):
 
     """Globals acts as a container for objects available throughout the
@@ -13,7 +16,7 @@ class Globals(object):
 
     """
 
-    def __init__(self):
+    def __init__(self, config):
         """One instance of Globals is created during application
         initialization and is available during requests via the
         'app_globals' variable
@@ -22,6 +25,7 @@ class Globals(object):
         #two ways of building the merc app i don't know 
         #the fastest one but belive the wsgiapp is better
         #self.hgapp = self.make_web_app()
+        self.cache = CacheManager(**parse_cache_config_options(config))
         self.hgapp = wsgiapplication(self.make_web_app)
 
 

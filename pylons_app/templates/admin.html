@@ -1,0 +1,51 @@
+## -*- coding: utf-8 -*-
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <link rel="icon" href="${c.staticurl}hgicon.png" type="image/png" />
+    <meta name="robots" content="index, nofollow"/>
+    <link rel="stylesheet" href="${c.staticurl}style-monoblue.css" type="text/css" />
+       <title>Mercurial repositories Admin</title>
+</head>
+
+<body>
+<div id="container">
+    <div class="page-header">
+        <h1><a href="/">Home</a> / Admin</h1>
+        <ul class="page-nav">
+        </ul>
+    </div>
+    <table cellspacing="0">
+        <tr>
+            <td>${h.link_to(u'Create "ccc" repository',h.url('admin_add_repo',new_repo='ccc'))}</td>
+        </tr>
+        <tr>
+            <td>${h.link_to(u'Create "ccc" repository',h.url('admin_add_repo',new_repo='ccc'))}</td>
+        </tr>
+        <tr>
+            <td>${h.link_to(u'Create "ccc" repository',h.url('admin_add_repo',new_repo='ccc'))}</td>
+        </tr>
+        <tr>
+            <td><h2>${c.new_repo}</h2></td>
+        </tr>
+    </table>    
+    <div class="page-footer">
+        Mercurial Repository: admin
+    </div>
+
+    <div id="powered-by">
+        <p>
+        <a href="http://mercurial.selenic.com/" title="Mercurial">
+            <img src="${c.staticurl}hglogo.png" width="75" height="90" alt="mercurial"></a>
+        </p>
+    </div>
+
+    <div id="corner-top-left"></div>
+    <div id="corner-top-right"></div>
+    <div id="corner-bottom-left"></div>
+    <div id="corner-bottom-right"></div>
+
+</div>
+</body>
+</html>
+        
