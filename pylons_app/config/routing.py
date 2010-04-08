@@ -25,6 +25,8 @@ def make_map(config):
     
     map.resource('repo', 'repos', path_prefix='/_admin')
     map.resource('user', 'users', path_prefix='/_admin')
+    
+    map.connect('hg_home', '/', controller='hg', action='index')
         
     map.connect('hg', '/{path_info:.*}', controller='hg',
                 action="view", path_info='/')

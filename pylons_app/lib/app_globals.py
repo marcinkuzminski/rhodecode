@@ -28,14 +28,15 @@ class Globals(object):
         self.cache = CacheManager(**parse_cache_config_options(config))
         self.hgapp = wsgiapplication(self.make_web_app)
 
-
     def make_web_app(self):
         repos = "hgwebdir.config"
         baseui = ui.ui()
         cfg = config.config()
         cfg.read(repos)
         paths = cfg.items('paths')
+        self.paths = paths
         self.check_repo_dir(paths)
+        
         self.set_statics(cfg)
 
         for k, v in cfg.items('web'):

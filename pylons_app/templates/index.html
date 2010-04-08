@@ -1,161 +1,47 @@
- ## -*- coding: utf-8 -*-
-<%inherit file = "base/base.html"/>
+## -*- coding: utf-8 -*-
 
-<%def name="page_title()">
-    ${_('Wire transfer')}
+<%inherit file="base/base.html"/>
+<%def name="title()">
+    ${c.repos_prefix} Mercurial Repositories
 </%def>
-
-<%def name="body()">
-  <div id="header">
-
-  <h1 id="logo"><a href="index.html">Luminous Studios</a></h1>
-
-  </div><!-- /header -->
-
-  <div id="navigation">
-  <ul>
-    <li><a href="index.html" id="home-button">Home</a></li>
-    <li><a href="about.html" id="about-button">About</a></li>
-    <li><a href="services.html" id="services-button">Services</a></li>
-    <li><a href="portfolio.html" id="portfolio-button">Portfolio</a></li>
-    <li><a href="blog.html" id="blog-button">Blog</a></li>
-    <li><a href="scontact.php" id="contact-button">Contact</a></li>
-  </ul>
-  </div><!-- /navigation -->
-
-  <!-- /featured -->
-
-  <div id="main" class="clearfix">
-
-  <div id="sidebar">
-
-  <div class="sidebox">
-  <h2 id="recent-posts-title">Recent Blog Posts</h2>
-  <div class="sidebox-content">
-  <ul id="recent-posts">
-    <li><a href="#">Lorem Ipsum is simply dummy text of the printing industry. <span class="more-link">More »</span></a></li>
-    <li><a href="#">Lorem Ipsum is simply dummy text of the printing industry. <span class="more-link">More »</span></a></li>
-    <li><a href="#">Lorem Ipsum is simply dummy text of the printing industry. <span class="more-link">More »</span></a></li>
-  </ul>
-  </div>
-  </div><!-- /sidebox -->
-
-  <div class="sidebox">
-  <h2 id="clients-title">What Clients Say</h2>
-  <div class="sidebox-content">
-  <p>"Sed ut perspiciatis unde omnis iste natus error sit voluptatem 
-accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab
- illo inventore veritatis et quasi architecto beatae vitae dicta sunt 
-explicabo."</p>
-  <strong>- John Doe</strong>
-  </div>
-  </div><!-- /sidebox -->
-
-  </div><!-- /sidebar -->
-
-  <div id="content">
-
-  <h2>Hello we are Luminous</h2>
-  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do 
-eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad 
-minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip 
-ex ea commodo consequat.</p><br class="br">
-
-  <h2>What we do</h2>
-
-  <div class="frontpage-box clearfix">
-
-  <img class="frontpage-box-img" src="/computer_48.png" 
-alt="" width="48" height="48">
-
-  <div class="frontpage-box-text">
-  <h3>Design</h3>
-  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do 
-eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad 
-minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip 
-ex ea. <a href="#">More »</a></p>
-  </div>
-
-  </div><!-- /frontpage-box  -->
-
-  <div class="frontpage-box clearfix">
-
-  <img class="frontpage-box-img" src="/app_48.png" alt="" 
-width="48" height="48">
-
-  <div class="frontpage-box-text">
-  <h3>Development</h3>
-  <p>${h.secure_form('/home/make_payment',method='post',id="secure_form")}
-    ##Secure Form Tag for prevention of Cross-site request forgery (CSRF) attacks.
-    ##Generates form tags that include client-specific authorization tokens to be verified by the destined web app.
-
-        <table class="editor_disp">
-            <tr>
-                <td colspan="3">${h.get_error('_authentication_token',c.form_errors)}</td>
-            </tr>
-            <tr>
-                <td class="label">${_('Account number')}</td>
-                <td>${h.text('account_number',size=44,maxlength=38)}</td>
-                <td id="e_account_number">${h.get_error('account_number',c.form_errors)}</td>
-            </tr>
-            <tr>
-                <td class="label">${_('Title')}</td>
-                <td>${h.textarea("title", "", cols=43, rows=5,maxlength=20)}</td>
-                <td id="e_title">${h.get_error('title',c.form_errors)}</td>
-            </tr>
-            <tr>
-                <td class="label">${_('Recipient')}</td>
-                <td>${h.select('recipient',1,c.recipients_list)}</td>
-                <td id="e_recipient">${h.get_error('recipient',c.form_errors)}</td>                
-            </tr>
-            <tr>
-                <td class="label">${_('Recipient address')}</td>
-                <td>${h.text('recipient_address',size=44)}</td>
-                <td id="e_recipient_address">${h.get_error('recipient_address',c.form_errors)}</td>                
-            </tr>
-            <tr>
-                <td class="label">${_('Amount')}</td>
-                <td>${h.text('amount',size='7')}zł</td>
-                <td id="e_amount">${h.get_error('amount',c.form_errors)}</td>                
-            </tr>
-            <tr>
-                <td class="label"></td>
-                <td>${h.submit('send',_('send'))}</td>
-            </tr>            
-        </table>
-    ${h.end_form()}<a href="#">More »</a></p>
-  </div>
-
-  </div><!-- /frontpage-box  -->
-
-  <div class="frontpage-box clearfix">
-
-  <img class="frontpage-box-img" src="/globe_48.png" alt="" width="48" height="48">
-
-  <div class="frontpage-box-text">
-  <h3>Marketing</h3>
-  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do 
-eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad 
-minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip 
-ex ea. <a href="#">More »</a></p>
-  </div>
-
-  </div><!-- /frontpage-box  -->
-
-  </div><!-- /content -->
-
-  </div><!-- /main -->
-
+<%def name="breadcrumbs()">
+<h1>${c.repos_prefix} Mercurial Repositories</h1>
 </%def>
-
-<%def name="footer()">
-  <p id="footer-copyright">© 2009</p>
-
-  <ul id="footer-nav">
-    <li><a href="#">Home</a></li>
-    <li><a href="#">About</a></li>
-    <li><a href="#">Services</a></li>
-    <li><a href="#">Portfolio</a></li>
-    <li><a href="#">Contact</a></li>
-  </ul>
+<%def name="page_nav()">
+	<li class="current">${_('Home')}</li>
+	<li>${h.link_to(u'Admin',h.url('admin_home'))}</li>
 </%def>
+<%def name="main()">
+	<%def name="get_sort(name)">
+		<a href="?sort=${name.lower().replace(' ','-')}">${name}</a>
+	</%def>
+	<table>
+	  <tr>
+	    <td>${get_sort(_('Name'))}</td>
+	    <td>${get_sort(_('Description'))}</td>
+	    <td>${get_sort(_('Last change'))}</td>
+	    <td>${get_sort(_('Tip'))}</td>
+	    <td>${get_sort(_('Contact'))}</td>
+	  </tr>	
+	%for cnt,repo in enumerate(c.repos_list):
+ 		<tr class="parity${cnt%2}">
+		    <td><a href="/${repo['name']}">${repo['name']}</a></td>
+		    <td>${repo['desc']}</td>
+	        <td>${repo['last_change']}</td>
+	        <td>r${repo['rev']}:${repo['tip']}</td>
+	        <td>${repo['contact']}</td>
+	        <td class="indexlinks">
+	        	<a href="/${repo['name']}/archive/tip.zip">zip</a> 
+	        	<a href="/${repo['name']}/archive/tip.tar.gz">gz</a> 
+	        	<a href="/${repo['name']}/archive/tip.tar.bz2">bz2</a> 
+	        </td>
+			<td>
+				<div class="rss_logo">
+				<a href="/${repo['name']}/rss-log">RSS</a>
+				<a href="/${repo['name']}/atom-log">Atom</a>
+				</div>
+			</td>        
+		</tr>
+	%endfor
+	</table>
+</%def>    
