@@ -5,7 +5,7 @@
     ${c.repos_prefix} Mercurial Repositories
 </%def>
 <%def name="breadcrumbs()">
-<h1>${c.repos_prefix} Mercurial Repositories</h1>
+	${c.repos_prefix} Mercurial Repositories
 </%def>
 <%def name="page_nav()">
 	<li class="current">${_('Home')}</li>
@@ -13,11 +13,16 @@
 </%def>
 <%def name="main()">
 	<%def name="get_sort(name)">
-		<%name_slug = name.lower().replace(' ','-') %>
-		%if not name_slug.startswith('-') and c.current_sort:
-			<%name_slug = '-'+name_slug%> 
+		<%name_slug = name.lower().replace(' ','_') %>
+		%if name_slug == c.cs_slug:
+			<span style="font-weight: bold;color:#006699">${name}</span>
+		%else:
+			<span style="font-weight: bold">${name}</span>
 		%endif
-		<a href="?sort=${name_slug}">${name}</a>
+		
+		<a href="?sort=${name_slug}">&darr;</a>
+		<a href="?sort=-${name_slug}">&uarr;</a>
+		
 	</%def>
 	<table>
 	  <tr>
@@ -26,11 +31,13 @@
 	    <td>${get_sort(_('Last change'))}</td>
 	    <td>${get_sort(_('Tip'))}</td>
 	    <td>${get_sort(_('Contact'))}</td>
+	    <td></td>
+	    <td></td>
 	  </tr>	
 	%for cnt,repo in enumerate(c.repos_list):
  		<tr class="parity${cnt%2}">
 		    <td><a href="/${repo['name']}">${repo['name']}</a></td>
-		    <td>${repo['desc']}</td>
+		    <td>${repo['description']}</td>
 	        <td>${repo['last_change']}</td>
 	        <td>r${repo['rev']}:<a href="/${repo['name']}/rev/${repo['tip']}/">${repo['tip']}</a></td>
 	        <td>${repo['contact']}</td>

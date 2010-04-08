@@ -15,6 +15,7 @@ except ImportError:
 from mercurial.util import matchdate, Abort, makedate
 from mercurial.hgweb.common import get_contact
 from mercurial.templatefilters import age
+from operator import itemgetter
 log = logging.getLogger(__name__)
 
 class HgController(BaseController):
@@ -25,6 +26,7 @@ class HgController(BaseController):
 
     def index(self):
         c.repos_list = []
+        c.current_sort = request.GET.get('sort', 'name')
         
         def get_mtime(spath):
             cl_path = os.path.join(spath, "00changelog.i")
@@ -40,20 +42,37 @@ class HgController(BaseController):
                                                     untrusted=True):
                     yield {"type" : i[0], "extension": i[1],
                            "node": nodeid, "url": url}
-                                    
+
         for name, r in get_repositories(g.paths[0][0], g.paths[0][1]).items():
             last_change = (get_mtime(r.spath), makedate()[1])
             tip = r.changectx('tip')
             tmp_d = {}
             tmp_d['name'] = name
-            tmp_d['desc'] = r.ui.config('web', 'description', 'Unknown', untrusted=True)
+            tmp_d['name_sort'] = tmp_d['name']
+            tmp_d['description'] = r.ui.config('web', 'description', 'Unknown', untrusted=True)
+            tmp_d['description_sort'] = tmp_d['description']
             tmp_d['last_change'] = age(last_change)
+            tmp_d['last_change_sort'] = last_change[1] - last_change[0]
             tmp_d['tip'] = str(tip)
+            tmp_d['tip_sort'] = tip.rev()
             tmp_d['rev'] = tip.rev()
             tmp_d['contact'] = get_contact(r.ui.config)
+            tmp_d['contact_sort'] = get_contact(r.ui.config)
             tmp_d['repo_archives'] = archivelist(r.ui, "tip", 'sa')
             
             c.repos_list.append(tmp_d)
+        
+        cs = c.current_sort
+        c.cs_slug = cs.replace('-', '')
+        sortables = ['name', 'description', 'last_change', 'tip', 'contact']
+        
+        if cs and c.cs_slug in sortables:
+            sort_key = c.cs_slug + '_sort'
+            if cs.startswith('-'):
+                c.repos_list.sort(key=itemgetter(sort_key), reverse=True)
+            else:
+                c.repos_list.sort(key=itemgetter(sort_key), reverse=False)
+            
         return render('/index.html')
 
     def view(self, *args, **kwargs):
