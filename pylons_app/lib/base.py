@@ -16,4 +16,4 @@ class BaseController(WSGIController):
         try:
             return WSGIController.__call__(self, environ, start_response)
         finally:
-            pass
+            meta.Session.remove()
