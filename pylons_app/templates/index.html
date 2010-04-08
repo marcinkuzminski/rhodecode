@@ -13,7 +13,11 @@
 </%def>
 <%def name="main()">
 	<%def name="get_sort(name)">
-		<a href="?sort=${name.lower().replace(' ','-')}">${name}</a>
+		<%name_slug = name.lower().replace(' ','-') %>
+		%if not name_slug.startswith('-') and c.current_sort:
+			<%name_slug = '-'+name_slug%> 
+		%endif
+		<a href="?sort=${name_slug}">${name}</a>
 	</%def>
 	<table>
 	  <tr>
@@ -28,12 +32,12 @@
 		    <td><a href="/${repo['name']}">${repo['name']}</a></td>
 		    <td>${repo['desc']}</td>
 	        <td>${repo['last_change']}</td>
-	        <td>r${repo['rev']}:${repo['tip']}</td>
+	        <td>r${repo['rev']}:<a href="/${repo['name']}/rev/${repo['tip']}/">${repo['tip']}</a></td>
 	        <td>${repo['contact']}</td>
 	        <td class="indexlinks">
-	        	<a href="/${repo['name']}/archive/tip.zip">zip</a> 
-	        	<a href="/${repo['name']}/archive/tip.tar.gz">gz</a> 
-	        	<a href="/${repo['name']}/archive/tip.tar.bz2">bz2</a> 
+	        	%for archive in repo['repo_archives']:
+					<a href="/${repo['name']}/archive/${archive['node']}${archive['extension']}">${archive['type']}</a>
+				%endfor
 	        </td>
 			<td>
 				<div class="rss_logo">

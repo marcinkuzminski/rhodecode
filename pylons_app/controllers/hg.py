@@ -14,7 +14,7 @@ except ImportError:
     print 'You have to import vcs module'
 from mercurial.util import matchdate, Abort, makedate
 from mercurial.hgweb.common import get_contact
-
+from mercurial.templatefilters import age
 log = logging.getLogger(__name__)
 
 class HgController(BaseController):
@@ -32,18 +32,28 @@ class HgController(BaseController):
                 return os.stat(cl_path).st_mtime
             else:
                 return os.stat(spath).st_mtime   
-                
+        
+        def archivelist(ui, nodeid, url):
+            allowed = g.baseui.configlist("web", "allow_archive", untrusted=True)
+            for i in [('zip', '.zip'), ('gz', '.tar.gz'), ('bz2', '.tar.bz2')]:
+                if i[0] in allowed or ui.configbool("web", "allow" + i[0],
+                                                    untrusted=True):
+                    yield {"type" : i[0], "extension": i[1],
+                           "node": nodeid, "url": url}
+                                    
         for name, r in get_repositories(g.paths[0][0], g.paths[0][1]).items():
             last_change = (get_mtime(r.spath), makedate()[1])
-            tmp = {}
-            tmp['name'] = name
-            tmp['desc'] = r.ui.config('web', 'description', 'Unknown', untrusted=True)
-            tmp['last_change'] = last_change,
             tip = r.changectx('tip')
-            tmp['tip'] = tip.__str__(),
-            tmp['rev'] = tip.rev()
-            tmp['contact'] = get_contact(r.ui.config)
-            c.repos_list.append(tmp)
+            tmp_d = {}
+            tmp_d['name'] = name
+            tmp_d['desc'] = r.ui.config('web', 'description', 'Unknown', untrusted=True)
+            tmp_d['last_change'] = age(last_change)
+            tmp_d['tip'] = str(tip)
+            tmp_d['rev'] = tip.rev()
+            tmp_d['contact'] = get_contact(r.ui.config)
+            tmp_d['repo_archives'] = archivelist(r.ui, "tip", 'sa')
+            
+            c.repos_list.append(tmp_d)
         return render('/index.html')
 
     def view(self, *args, **kwargs):

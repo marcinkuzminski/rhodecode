@@ -43,7 +43,7 @@ class Globals(object):
             baseui.setconfig('web', k, v)
         #magic trick to make our custom template dir working
         templater.path.append(cfg.get('web', 'templates', None))
-
+        self.baseui = baseui
         #baseui.setconfig('web', 'description', '')
         #baseui.setconfig('web', 'name', '')
         #baseui.setconfig('web', 'contact', '')
