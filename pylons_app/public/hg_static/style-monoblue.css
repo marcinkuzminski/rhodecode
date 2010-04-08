@@ -173,6 +173,7 @@ h2 {
   border-top: dotted 1px #D5E1E6;
   font-weight: bold;
 }
+
 h2.no-link {
   color:#006699;
 }
@@ -184,6 +185,15 @@ h2.no-border {
 h2 a {
   font-weight:bold;
   color:#006699;
+}
+h3 {
+  margin: 20px 0 10px;
+  height: 30px;
+  line-height: 30px;
+  text-indent: 20px;
+  background: #FFF;
+  font-size: 1.1em;
+  font-weight: bold;
 }
 
 div.page-path {

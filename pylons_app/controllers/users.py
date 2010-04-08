@@ -7,6 +7,7 @@ from pylons_app.lib.base import BaseController, render
 from formencode import htmlfill
 from pylons_app.model import meta
 from pylons_app.model.db import Users, UserLogs
+import crypt
 log = logging.getLogger(__name__)
 
 class UsersController(BaseController):
@@ -14,6 +15,7 @@ class UsersController(BaseController):
     # To properly map this controller, ensure your config/routing.py
     # file has a resource setup:
     #     map.resource('user', 'users')
+    
     def __before__(self):
         c.staticurl = g.statics
         c.admin_user = session.get('admin_user')
@@ -30,10 +32,26 @@ class UsersController(BaseController):
     def create(self):
         """POST /users: Create a new item"""
         # url('users')
+        params = dict(request.params)
 
+        try:
+            new_user = Users()
+            new_user.active = params.get('active', False)
+            new_user.username = params.get('username')
+            new_user.password = crypt.crypt(params.get('password'), '6a')
+            new_user.admin = False
+            self.sa.add(new_user)
+            self.sa.commit()
+        except:
+            self.sa.rollback()
+            raise      
+          
+        return redirect(url('users'))
+    
     def new(self, format='html'):
         """GET /users/new: Form to create a new item"""
         # url('new_user')
+        return render('/user_add.html')
 
     def update(self, id):
         """PUT /users/id: Update an existing item"""
@@ -43,7 +61,23 @@ class UsersController(BaseController):
         #    h.form(url('user', id=ID),
         #           method='put')
         # url('user', id=ID)
+        params = dict(request.params)
 
+        try:
+            new_user = self.sa.query(Users).get(id)
+            new_user.active = params.get('active')
+            new_user.username = params.get('username')
+            print params
+            if params.get('new_password'):
+                new_user.password = crypt.crypt(params.get('new_password'), '6a')
+            self.sa.add(new_user)
+            self.sa.commit()
+        except:
+            self.sa.rollback()
+            raise      
+          
+        return redirect(url('users'))
+    
     def delete(self, id):
         """DELETE /users/id: Delete an existing item"""
         # Forms posted to this method should contain a hidden field:
@@ -63,15 +97,16 @@ class UsersController(BaseController):
     def show(self, id, format='html'):
         """GET /users/id: Show a specific item"""
         # url('user', id=ID)
-        c.user = self.sa.query(Users).get(id)
-
-        return htmlfill.render(
-            render('/users_show.html'),
-            defaults=c.user.__dict__,
-            encoding="UTF-8",
-            force_defaults=False
-        )        
+    
     
     def edit(self, id, format='html'):
         """GET /users/id/edit: Form to edit an existing item"""
         # url('edit_user', id=ID)
+        c.user = self.sa.query(Users).get(id)
+
+        return htmlfill.render(
+            render('/user_edit.html'),
+            defaults=c.user.__dict__,
+            encoding="UTF-8",
+            force_defaults=False
+        )    
