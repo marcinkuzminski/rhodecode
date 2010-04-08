@@ -12,14 +12,14 @@ from pylons_app.lib import auth
 from pylons_app.model.forms import LoginForm
 import formencode
 import formencode.htmlfill as htmlfill
+from pylons_app.lib.auth import authenticate
 log = logging.getLogger(__name__)
 
 class AdminController(BaseController):
 
-
     def __before__(self):
         c.staticurl = g.statics
-        c.admin_user = session.get('admin_user')
+        c.admin_user = session.get('admin_user', False)
         c.admin_username = session.get('admin_username')
         
     def index(self):

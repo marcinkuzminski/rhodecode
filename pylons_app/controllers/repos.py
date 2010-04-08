@@ -6,6 +6,8 @@ from pylons_app.lib import auth
 from pylons_app.lib.base import BaseController, render
 from pylons_app.model import meta
 from pylons_app.model.db import Users, UserLogs
+from pylons_app.lib.auth import authenticate
+
 log = logging.getLogger(__name__)
 
 class ReposController(BaseController):
@@ -13,6 +15,8 @@ class ReposController(BaseController):
     # To properly map this controller, ensure your config/routing.py
     # file has a resource setup:
     #     map.resource('repo', 'repos')
+    
+    @authenticate
     def __before__(self):
         c.staticurl = g.statics
         c.admin_user = session.get('admin_user')

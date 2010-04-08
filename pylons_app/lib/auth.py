@@ -4,7 +4,9 @@ import logging
 from os.path import dirname as dn
 from datetime import datetime
 import crypt
-
+from pylons import session, url
+from pylons.controllers.util import abort, redirect
+from decorator import decorator
 log = logging.getLogger(__name__)
 ROOT = dn(dn(dn(os.path.realpath(__file__))))
 
@@ -60,9 +62,9 @@ def authfunc(environ, username, password):
                                 cmd += "|" + qry
                                 
                                 try:
-                                    cur.execute('''INSERT INTO 
+                                    cur.execute("""INSERT INTO 
                                                         user_logs 
-                                                   VALUES(?,?,?,?)''',
+                                                   VALUES(?,?,?,?)""",
                                                     (None, data[0], cmd, datetime.now()))
                                     conn.commit()
                                 except Exception as e:
@@ -75,27 +77,34 @@ def authfunc(environ, username, password):
             
     return False
 
+
+@decorator
+def authenticate(fn, *args, **kwargs):
+    if not session.get('admin_user', False):
+        redirect(url('admin_home'), 301)
+    return fn(*args, **kwargs)
+
 def create_user_table():
-    '''
+    """
     Create a auth database
-    '''
+    """
     conn, cur = get_sqlite_conn_cur()
     try:
         log.info('creating table %s', 'users')
-        cur.execute('''DROP TABLE IF EXISTS users ''')
-        cur.execute('''CREATE TABLE users
+        cur.execute("""DROP TABLE IF EXISTS users """)
+        cur.execute("""CREATE TABLE users
                         (user_id INTEGER PRIMARY KEY AUTOINCREMENT, 
                          username TEXT, 
                          password TEXT,
                          active INTEGER,
-                         admin INTEGER)''')
+                         admin INTEGER)""")
         log.info('creating table %s', 'user_logs')
-        cur.execute('''DROP TABLE IF EXISTS user_logs ''')
-        cur.execute('''CREATE TABLE user_logs
+        cur.execute("""DROP TABLE IF EXISTS user_logs """)
+        cur.execute("""CREATE TABLE user_logs
                         (id INTEGER PRIMARY KEY AUTOINCREMENT,
                             user_id INTEGER,
                             last_action TEXT, 
-                            last_action_date DATETIME)''')
+                            last_action_date DATETIME)""")
         conn.commit()
     except:
         conn.rollback()
@@ -108,7 +117,7 @@ def create_user(username, password, admin=False):
     password_crypt = crypt.crypt(password, '6a')
     log.info('creating user %s', username)
     try:
-        cur.execute('''INSERT INTO users values (?,?,?,?,?) ''',
+        cur.execute("""INSERT INTO users values (?,?,?,?,?) """,
                     (None, username, password_crypt, 1, admin))     
         conn.commit()
     except:
