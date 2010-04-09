@@ -24,5 +24,18 @@
     </ul>
 	<div>
         <h2>${_('Mercurial repos')}</h2>
+        <table>
+	        %for cnt,repo in enumerate(c.repos_list):
+	 		<tr class="parity${cnt%2}">
+			    <td><a href="/${repo['name']}">${repo['name']}</a></td>
+		        <td>r${repo['rev']}:${repo['tip']}</td>
+                <td>
+                  ${h.form(url('repo', id=repo['name']),method='delete')}
+                  	${h.submit('remove','remove',class_="submit",onclick="return confirm('Confirm to delete this repository');")}
+                  ${h.end_form()}
+     			</td>
+			</tr>
+			%endfor
+		</table>
     </div>
 </%def>    
