@@ -9,12 +9,8 @@ Created on Apr 9, 2010
 @author: marcink
 '''
 import os
-from pylons_app.lib.base import BaseController
 from pylons import tmpl_context as c, app_globals as g, session, request, config
-from pylons_app.lib import helpers as h
-from mako.template import Template
 from pylons.controllers.util import abort
-from pylons_app.lib.base import BaseController, render
 try:
     from vcs.backends.hg import get_repositories
 except ImportError:
@@ -22,7 +18,6 @@ except ImportError:
 from mercurial.util import matchdate, Abort, makedate
 from mercurial.hgweb.common import get_contact
 from mercurial.templatefilters import age
-from operator import itemgetter
 
 class HgModel(object):
     """
@@ -65,7 +60,7 @@ class HgModel(object):
             tmp_d['tip'] = str(tip)
             tmp_d['tip_sort'] = tip.rev()
             tmp_d['rev'] = tip.rev()
-            tmp_d['contact'] = get_contact(r.ui.config)
+            tmp_d['contact'] = get_contact(r.ui.config) or 'unknown'
             tmp_d['contact_sort'] = get_contact(r.ui.config)
             tmp_d['repo_archives'] = self.archivelist(r.ui, "tip", 'sa')
             
