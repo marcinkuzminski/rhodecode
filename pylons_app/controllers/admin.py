@@ -12,7 +12,8 @@ from pylons_app.lib import auth
 from pylons_app.model.forms import LoginForm
 import formencode
 import formencode.htmlfill as htmlfill
-from pylons_app.lib.auth import authenticate
+from pylons_app.model import meta
+from pylons_app.model.db import Users, UserLogs
 log = logging.getLogger(__name__)
 
 class AdminController(BaseController):
@@ -50,6 +51,9 @@ class AdminController(BaseController):
                     defaults=c.form_result,
                     encoding="UTF-8"
                 )
+        if c.admin_user:
+            sa = meta.Session
+            c.users_log = sa.query(UserLogs).limit(10).all()
         return render('/admin.html')
 
     def hgrc(self, dirname):

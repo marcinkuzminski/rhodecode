@@ -21,6 +21,7 @@ class UserLogs(Base):
     __table_args__ = {'useexisting':True}
     id = Column("id", SLInteger(), nullable=False, unique=True, default=None, primary_key=1)
     user_id = Column("user_id", SLInteger(), ForeignKey(u'users.user_id'), nullable=True, unique=None, default=None)
-    last_action = Column("last_action", SLText(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
-    last_action_date = Column("last_action_date", SLDateTime(timezone=False), nullable=True, unique=None, default=None)
+    repository = Column("repository", SLText(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    action = Column("action", SLText(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    action_date = Column("action_date", SLDateTime(timezone=False), nullable=True, unique=None, default=None)
     user = relation('Users')

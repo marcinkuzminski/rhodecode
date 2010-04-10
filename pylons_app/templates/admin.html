@@ -33,8 +33,29 @@
     </ul>
     <br/>
     <div>
-    
-        <h2>Hi !</h2>
+        <h2>Welcome ${c.admin_username}</h2>
+        <div>Last 5 user actions</div>
+        %if c.users_log:
+	        <table>
+	        <tr>
+	        	<td>${_('Username')}</td>
+	        	<td>${_('Repository')}</td>
+	        	<td>${_('Action')}</td>
+	        	<td>${_('Date')}</td>
+	        </tr>
+	        %for cnt,l in enumerate(c.users_log):
+				<tr class="parity${cnt%2}">
+					<td>${l.user.username}</td>
+					<td>${l.repository}</td>
+					<td>${l.action}</td>
+					<td>${l.action_date}</td>
+				</tr>
+			%endfor
+			</table>        
+		%else:
+			${_('No actions yet')}
+		%endif
+
     </div>
     %else:
         <div>
