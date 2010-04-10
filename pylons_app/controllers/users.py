@@ -68,9 +68,8 @@ class UsersController(BaseController):
 
         try:
             new_user = self.sa.query(Users).get(id)
-            new_user.active = params.get('active')
+            new_user.active = params.get('active', False)
             new_user.username = params.get('username')
-            print params
             if params.get('new_password'):
                 new_user.password = crypt.crypt(params.get('new_password'), '6a')
             self.sa.add(new_user)
@@ -106,7 +105,7 @@ class UsersController(BaseController):
         """GET /users/id/edit: Form to edit an existing item"""
         # url('edit_user', id=ID)
         c.user = self.sa.query(Users).get(id)
-
+        print c.user.__dict__
         return htmlfill.render(
             render('/user_edit.html'),
             defaults=c.user.__dict__,
