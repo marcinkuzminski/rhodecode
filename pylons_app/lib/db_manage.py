@@ -31,9 +31,9 @@ def create_tables():
                          password TEXT,
                          active INTEGER,
                          admin INTEGER)""")
-        logging.info('creating table %s', 'user_loggings')
-        cur.execute("""DROP TABLE IF EXISTS user_loggings """)
-        cur.execute("""CREATE TABLE user_loggings
+        logging.info('creating table %s', 'user_logs')
+        cur.execute("""DROP TABLE IF EXISTS user_logs """)
+        cur.execute("""CREATE TABLE user_logs
                         (id INTEGER PRIMARY KEY AUTOINCREMENT,
                             user_id INTEGER,
                             repository TEXT,
