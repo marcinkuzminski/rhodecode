@@ -105,10 +105,10 @@ class UsersController(BaseController):
         """GET /users/id/edit: Form to edit an existing item"""
         # url('edit_user', id=ID)
         c.user = self.sa.query(Users).get(id)
-        print c.user.__dict__
+        defaults = c.user.__dict__
         return htmlfill.render(
             render('/user_edit.html'),
-            defaults=c.user.__dict__,
+            defaults=defaults,
             encoding="UTF-8",
             force_defaults=False
         )    
