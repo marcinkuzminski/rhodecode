@@ -12,7 +12,7 @@ import os
 from pylons import tmpl_context as c, app_globals as g, session, request, config
 from pylons.controllers.util import abort
 try:
-    from vcs.backends.hg import get_repositories
+    from vcs.backends.hg import get_repositories, MercurialRepository
 except ImportError:
     print 'You have to import vcs module'
 from mercurial.templatefilters import age
@@ -53,3 +53,8 @@ class HgModel(object):
             tmp_d['repo_archives'] = mercurial_repo._get_archive_list()
             
             yield tmp_d
+
+    def get_repo(self, repo_name):
+        path = g.paths[0][1]
+        repo = MercurialRepository(os.path.join(path, repo_name), g.baseui)
+        return repo

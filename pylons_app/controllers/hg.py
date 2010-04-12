@@ -39,6 +39,10 @@ class HgController(BaseController):
 
     def view(self, *args, **kwargs):
         #TODO: reimplement this not tu use hgwebdir
+        
+        vcs_impl = self._get_vcs_impl(request.environ) 
+        if vcs_impl:
+            return vcs_impl
         response = g.hgapp(request.environ, self.start_response)
         
         http_accept = request.environ.get('HTTP_ACCEPT', False)
@@ -63,3 +67,18 @@ class HgController(BaseController):
 
 
         return template.render(g=g, c=c, session=session, h=h)
+    
+    
+    
+    
+    def _get_vcs_impl(self, environ):
+        path_info = environ['PATH_INFO']
+        c.repo_name = path_info.split('/')[-2]
+        action = path_info.split('/')[-1]
+        if not action.startswith('_'):
+            return False
+        else:
+            hg_model = HgModel()
+            c.repo_info = hg_model.get_repo(c.repo_name)
+            c.repo_changesets = c.repo_info.get_changesets(10)
+            return render('/summary.html')
