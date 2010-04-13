@@ -1,15 +1,13 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import logging
-import os
-from pylons_app.lib.base import BaseController
 from pylons import tmpl_context as c, app_globals as g, session, request, config
 from pylons_app.lib import helpers as h
+from pylons_app.lib.base import BaseController, render
 from mako.template import Template
 from pylons.controllers.util import abort
-from pylons_app.lib.base import BaseController, render
-from operator import itemgetter
 
+from operator import itemgetter
 from pylons_app.model.hg_model import HgModel
 log = logging.getLogger(__name__)
 
