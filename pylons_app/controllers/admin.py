@@ -53,7 +53,8 @@ class AdminController(BaseController):
                 )
         if c.admin_user:
             sa = meta.Session
-            c.users_log = sa.query(UserLogs).limit(10).all()
+            c.users_log = sa.query(UserLogs)\
+                .order_by(UserLogs.action_date.desc()).limit(10).all()
         return render('/admin.html')
 
     def hgrc(self, dirname):
