@@ -40,14 +40,14 @@
         <dt>contact</dt>
         <dd>${c.repo_info.contact}</dd>
         <dt>last change</dt>
-        <dd>${c.repo_info.last_change|n,self.f.time_ago}</dd>
+        <dd>${c.repo_info.last_change|n,self.f.rfc822date} - ${c.repo_info.last_change|n,self.f.age}</dd>
     </dl>
 
     <h2><a href="{url}shortlog{sessionvars%urlparameter}">Changes</a></h2>
     <table>
 	%for cnt,cs in enumerate(c.repo_changesets):
 		<tr class="parity${cnt%2}">
-			<td>${cs._ctx.date()|n,self.f.time_ago}</td>
+			<td>${cs._ctx.date()|n,self.f.age}</td>
 			<td>${cs.author}</td>
 			<td>${h.link_to(cs.message,h.url('rev/'+str(cs._ctx)))}</td>
 			<td class="nowrap">
