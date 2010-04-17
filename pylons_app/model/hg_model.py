@@ -49,7 +49,7 @@ class HgModel(object):
             tmp_d['rev'] = tip.rev()
             tmp_d['contact'] = mercurial_repo.contact
             tmp_d['contact_sort'] = tmp_d['contact']
-            tmp_d['repo_archives'] = mercurial_repo._get_archive_list()
+            tmp_d['repo_archives'] = mercurial_repo._get_archives()
             
             yield tmp_d
 

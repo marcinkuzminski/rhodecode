@@ -6,7 +6,7 @@ from pylons_app.lib import helpers as h
 from pylons_app.lib.base import BaseController, render
 from mako.template import Template
 from pylons.controllers.util import abort
-
+from pylons_app.lib.utils import get_repo_slug
 from operator import itemgetter
 from pylons_app.model.hg_model import HgModel
 log = logging.getLogger(__name__)
@@ -16,7 +16,8 @@ class HgController(BaseController):
     def __before__(self):
         c.repos_prefix = config['repos_name']
         c.staticurl = g.statics
-
+        c.repo_name = get_repo_slug(request)
+        
     def index(self):
         hg_model = HgModel()
         c.repos_list = list(hg_model.get_repos())
@@ -37,13 +38,7 @@ class HgController(BaseController):
 
     def view(self, *args, **kwargs):
         #TODO: reimplement this not tu use hgwebdir
-        
-        #patch for replacing mercurial servings with hg_app servings
-        vcs_impl = self._get_vcs_impl(request.environ) 
-        if vcs_impl:
-            return vcs_impl
-        
-        
+    
         response = g.hgapp(request.environ, self.start_response)
         
         http_accept = request.environ.get('HTTP_ACCEPT', False)
@@ -68,21 +63,3 @@ class HgController(BaseController):
 
 
         return template.render(g=g, c=c, session=session, h=h)
-    
-    
-    
-    
-    def _get_vcs_impl(self, environ):
-        path_info = environ['PATH_INFO']
-        c.repo_name = path_info.split('/')[-2]
-        action = path_info.split('/')[-1]
-        if not action.startswith('_'):
-            return False
-        else:
-            hg_model = HgModel()
-            c.repo_info = hg_model.get_repo(c.repo_name)
-            c.repo_changesets = c.repo_info.get_changesets(10)
-#            c.repo_tags = c.repo_info.get_tags(limit=10)
-#            c.repo_branches = c.repo_info.get_branches(limit=10)
-            return render('/summary.html')
-
