@@ -14,6 +14,7 @@ import formencode
 import formencode.htmlfill as htmlfill
 from pylons_app.model import meta
 from pylons_app.model.db import Users, UserLogs
+from webhelpers.paginate import Page
 log = logging.getLogger(__name__)
 
 class AdminController(BaseController):
@@ -53,8 +54,11 @@ class AdminController(BaseController):
                 )
         if c.admin_user:
             sa = meta.Session
-            c.users_log = sa.query(UserLogs)\
-                .order_by(UserLogs.action_date.desc()).limit(10).all()
+                             
+            users_log = sa.query(UserLogs)\
+                .order_by(UserLogs.action_date.desc())
+            p = int(request.params.get('page', 1))
+            c.users_log = Page(users_log, page=p, items_per_page=10)
         return render('/admin.html')
 
     def hgrc(self, dirname):

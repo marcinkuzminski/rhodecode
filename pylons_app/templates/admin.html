@@ -51,6 +51,9 @@
 					<td>${l.action_date}</td>
 				</tr>
 			%endfor
+			<tr>
+				<td>${c.users_log.pager('$link_previous ~2~ $link_next')}</td>
+			</tr>
 			</table>        
 		%else:
 			${_('No actions yet')}
