@@ -1,0 +1,29 @@
+%if c.users_log:
+<table>
+	<tr>
+		<td>${_('Username')}</td>
+		<td>${_('Repository')}</td>
+		<td>${_('Action')}</td>
+		<td>${_('Date')}</td>
+	</tr>
+
+	%for cnt,l in enumerate(c.users_log):
+	<tr class="parity${cnt%2}">
+		<td>${l.user.username}</td>
+		<td>${l.repository}</td>
+		<td>${l.action}</td>
+		<td>${l.action_date}</td>
+	</tr>
+	%endfor
+
+	<tr>
+		<td>${c.users_log.pager('$link_previous ~2~ $link_next',
+		onclick="""YAHOO.util.Connect.asyncRequest('GET','$partial_url',{
+		success:function(o){YAHOO.util.Dom.get('user_log').innerHTML=o.responseText;}
+		},null); return false;""")}</td>
+	</tr>
+</table>
+
+%else: 
+	${_('No actions yet')} 
+%endif

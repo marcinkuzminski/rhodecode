@@ -59,6 +59,9 @@ class AdminController(BaseController):
                 .order_by(UserLogs.action_date.desc())
             p = int(request.params.get('page', 1))
             c.users_log = Page(users_log, page=p, items_per_page=10)
+            c.log_data = render('admin_log.html')
+            if request.params.get('partial'):
+                return c.log_data
         return render('/admin.html')
 
     def hgrc(self, dirname):

@@ -9,6 +9,7 @@
     <meta name="robots" content="index, nofollow"/>
     <link rel="stylesheet" href="${c.staticurl}style-monoblue.css" type="text/css" />
        <title>${next.title()}</title>
+    ${self.js()}
 </head>
 
 <body>
@@ -41,3 +42,8 @@
 </div>
 </body>
 </html>
+
+
+<%def name="js()">
+<script type="text/javascript" src="/js/yui/utilities/utilities.js"></script>
+</%def>
