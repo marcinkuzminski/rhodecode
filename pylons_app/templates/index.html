@@ -36,9 +36,9 @@
 	  </tr>	
 	%for cnt,repo in enumerate(c.repos_list):
  		<tr class="parity${cnt%2}">
-		    <td><a href="/${repo['name']}">${repo['name']}</a></td>
+		    <td>${h.link(repo['name'],h.url('summary_home',repo_name=repo['name']))}</td>
 		    <td>${repo['description']}</td>
-	        <td>${repo['last_change']}</td>
+	        <td>${repo['last_change']|n,self.f.age}</td>
 	        <td>r${repo['rev']}:<a href="/${repo['name']}/rev/${repo['tip']}/">${repo['tip']}</a></td>
 	        <td>${repo['contact']}</td>
 	        <td class="indexlinks">

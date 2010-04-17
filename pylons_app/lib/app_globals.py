@@ -22,9 +22,6 @@ class Globals(object):
         'app_globals' variable
 
         """
-        #two ways of building the merc app i don't know 
-        #the fastest one but belive the wsgiapp is better
-        #self.hgapp = self.make_web_app()
         self.cache = CacheManager(**parse_cache_config_options(config))
         self.hgapp = wsgiapplication(self.make_web_app)
 

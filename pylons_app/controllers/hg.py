@@ -38,9 +38,12 @@ class HgController(BaseController):
     def view(self, *args, **kwargs):
         #TODO: reimplement this not tu use hgwebdir
         
+        #patch for replacing mercurial servings with hg_app servings
         vcs_impl = self._get_vcs_impl(request.environ) 
         if vcs_impl:
             return vcs_impl
+        
+        
         response = g.hgapp(request.environ, self.start_response)
         
         http_accept = request.environ.get('HTTP_ACCEPT', False)
@@ -79,4 +82,7 @@ class HgController(BaseController):
             hg_model = HgModel()
             c.repo_info = hg_model.get_repo(c.repo_name)
             c.repo_changesets = c.repo_info.get_changesets(10)
+#            c.repo_tags = c.repo_info.get_tags(limit=10)
+#            c.repo_branches = c.repo_info.get_branches(limit=10)
             return render('/summary.html')
+

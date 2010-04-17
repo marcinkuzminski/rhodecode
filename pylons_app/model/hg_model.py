@@ -15,7 +15,6 @@ try:
     from vcs.backends.hg import get_repositories, MercurialRepository
 except ImportError:
     print 'You have to import vcs module'
-from mercurial.templatefilters import age
 
 class HgModel(object):
     """
@@ -43,7 +42,7 @@ class HgModel(object):
             tmp_d['name_sort'] = tmp_d['name']
             tmp_d['description'] = mercurial_repo.description
             tmp_d['description_sort'] = tmp_d['description']
-            tmp_d['last_change'] = age(last_change)
+            tmp_d['last_change'] = last_change
             tmp_d['last_change_sort'] = last_change[1] - last_change[0]
             tmp_d['tip'] = str(tip)
             tmp_d['tip_sort'] = tip.rev()
@@ -55,6 +54,6 @@ class HgModel(object):
             yield tmp_d
 
     def get_repo(self, repo_name):
-        path = g.paths[0][1]
-        repo = MercurialRepository(os.path.join(path, repo_name), g.baseui)
+        path = g.paths[0][1].replace('*', '')
+        repo = MercurialRepository(os.path.join(path, repo_name), baseui=g.baseui)
         return repo

@@ -40,20 +40,20 @@
         <dt>contact</dt>
         <dd>${c.repo_info.contact}</dd>
         <dt>last change</dt>
-        <dd>${c.repo_info.last_change|n,self.f.rfc822date}</dd>
+        <dd>${c.repo_info.last_change|n,self.f.time_ago}</dd>
     </dl>
 
     <h2><a href="{url}shortlog{sessionvars%urlparameter}">Changes</a></h2>
     <table>
 	%for cnt,cs in enumerate(c.repo_changesets):
 		<tr class="parity${cnt%2}">
-			<td>${cs.date}</td>
+			<td>${cs._ctx.date()|n,self.f.time_ago}</td>
 			<td>${cs.author}</td>
-			<td>${cs.message}</td>
+			<td>${h.link_to(cs.message,h.url('rev/'+str(cs._ctx)))}</td>
 			<td class="nowrap">
-			${h.link_to(u'changset')}
+			${h.link_to(_('changeset'),h.url('file/'+str(cs._ctx)))}
 			|
-			${h.link_to(u'files')}
+			${h.link_to(_('files'),h.url('file/'+str(cs._ctx)))}
 			</td>
 		</tr>
 	%endfor
@@ -62,9 +62,11 @@
         </tr>
     </table>
 
-    <h2><a href="{url}tags{sessionvars%urlparameter}">Tags</a></h2>
+    <h2><a href="{url}tags{sessionvars%urlparameter}">${_('Tags')}</a></h2>
     <table>
-{tags}
+		%for tag in c.repo_tags:
+			${tag}
+		%endfor
         <tr class="light">
             <td colspan="3"><a class="list" href="{url}tags{sessionvars%urlparameter}">...</a></td>
         </tr>
@@ -72,7 +74,9 @@
 
     <h2 class="no-link">Branches</h2>
     <table>
-    {branches%branchentry}
+		%for branch in c.repo_branches:
+			${branch}
+		%endfor
         <tr class="light">
           <td colspan="4"><a class="list"  href="#">...</a></td>
         </tr>
