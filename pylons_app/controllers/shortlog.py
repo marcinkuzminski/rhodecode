@@ -7,6 +7,7 @@ from pylons_app.lib.base import BaseController, render
 from pylons_app.lib.utils import get_repo_slug
 from pylons_app.model.hg_model import HgModel
 from webhelpers.paginate import Page
+
 log = logging.getLogger(__name__)
 
 class ShortlogController(BaseController):
@@ -24,12 +25,10 @@ class ShortlogController(BaseController):
         cnt = repo.revisions[-1]
         gen = repo.get_changesets(None)
         repo_changesets = list(gen)
-        repo_changesets2 = list(gen)
-        repo_changesets3 = list(gen)
-        repo_changesets4 = list(gen)
          
         c.repo_changesets = Page(repo_changesets, page=p, item_count=cnt, items_per_page=lim)
         c.shortlog_data = render('shortlog_data.html')
         if request.params.get('partial'):
             return c.shortlog_data
-        return render('/shortlog.html')
+        r = render('/shortlog.html')
+        return r
