@@ -1,0 +1,35 @@
+## -*- coding: utf-8 -*-
+<%!
+from pylons_app.lib import filters
+%>
+<%inherit file="./../base/base.html"/>
+            
+<%def name="title()">
+    ${_('Repository not found')}
+</%def>
+
+<%def name="breadcrumbs()">
+	${h.link_to(u'Home',h.url('hg_home'))}
+	 / 
+	${h.link_to(u'Admin',h.url('admin_home'))}
+</%def>
+
+<%def name="page_nav()">
+<li>${h.link_to(u'Home',h.url('hg_home'))}</li>
+<li class="current">${_('Admin')}</li>
+</%def>
+<%def name="js()">
+
+</%def>
+<%def name="main()">
+
+    <h2 class="no-link no-border">Not Found</h2>
+    <p class="normal">The specified repository "${c.repo_name}" is unknown, sorry.</p>
+    <p class="normal">
+    <a href="/_admin/add_repo/${c.repo_name|n,filters.clean_repo}">Create "${c.repo_name}" repository as ${c.repo_name|n,filters.clean_repo}</a>
+
+    </p>
+    <p class="normal">Go back to the ${h.link_to(_('main repository list page'),h.url('hg_home'))}.</p>
+    <div class="page-footer">
+    </div>
+</%def>

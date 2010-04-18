@@ -1,5 +1,13 @@
 from mercurial import util
 from mercurial.templatefilters import age as _age, person as _person
+from string import punctuation
+
+def clean_repo(repo_name):
+    for x in punctuation:
+        if x != '_':
+            repo_name = repo_name.replace(x, '')
+    repo_name = repo_name.lower().strip()
+    return repo_name.replace(' ', '_')
 
 age = lambda  x:_age(x)
 capitalize = lambda x: x.capitalize()

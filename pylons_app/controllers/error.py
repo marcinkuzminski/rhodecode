@@ -1,7 +1,7 @@
 import logging
 from paste.urlparser import PkgResourcesParser
 import paste.fileapp
-from pylons import request, tmpl_context as c
+from pylons import tmpl_context as c, app_globals as g, request, config
 from pylons.controllers.util import forward
 from pylons.i18n.translation import _
 from pylons_app.lib.base import BaseController, render
@@ -22,16 +22,26 @@ class ErrorController(BaseController):
     """
 #
     def __before__(self):
-        pass
-
+        c.repos_prefix = config['repos_name']
+        c.staticurl = g.statics
+        c.repo_name = request.environ['pylons.original_request']\
+            .environ.get('PATH_INFO').split('/')[-1]
+        
     def document(self):
-
         resp = request.environ.get('pylons.original_response')
         log.debug(resp.status)
+
+        e = request.environ
+        c.serv_p = r'%(protocol)s://%(host)s/' % {
+                                                'protocol': e.get('wsgi.url_scheme'),
+                                                'host':e.get('HTTP_HOST'),
+                                                }
+                
+        if resp.status_int == 404:
+            return render('/errors/error_404.html')
+                
         c.error_message = cgi.escape(request.GET.get('code', str(resp.status)))
         c.error_explanation = self.get_error_explanation(resp.status_int)
-
-        c.serv_p = ''.join(['http://', request.environ.get('HTTP_HOST', '')])
 
         #redirect to when error with given seconds
         c.redirect_time = 0
