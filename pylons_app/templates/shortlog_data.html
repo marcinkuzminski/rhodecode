@@ -22,7 +22,7 @@ from pylons_app.lib import filters
 		YAHOO.util.Event.addListener(YAHOO.util.Dom.getElementsByClassName('pager_link'),"click",function(){
 				YAHOO.util.Dom.setStyle('shortlog_data','opacity','0.3');});});
 	</script>
-		<td>${c.repo_changesets.pager('$link_previous ~2~ $link_next',
+		<td colspan=3>${c.repo_changesets.pager('$link_previous ~2~ $link_next',
 		onclick="""YAHOO.util.Connect.asyncRequest('GET','$partial_url',{
 		success:function(o){YAHOO.util.Dom.get(data_div).innerHTML=o.responseText;
 		YAHOO.util.Event.addListener(YAHOO.util.Dom.getElementsByClassName('pager_link'),"click",function(){
