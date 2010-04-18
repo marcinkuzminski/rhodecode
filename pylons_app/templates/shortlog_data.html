@@ -1,38 +1,32 @@
 ## -*- coding: utf-8 -*-
-%if c.users_log:
+<%!
+from pylons_app.lib import filters
+%>
 <table>
-	<tr>
-		<td>${_('Username')}</td>
-		<td>${_('Repository')}</td>
-		<td>${_('Action')}</td>
-		<td>${_('Date')}</td>
-	</tr>
-
-	%for cnt,l in enumerate(c.users_log):
+%for cnt,cs in enumerate(c.repo_changesets):
 	<tr class="parity${cnt%2}">
-		<td>${l.user.username}</td>
-		<td>${l.repository}</td>
-		<td>${l.action}</td>
-		<td>${l.action_date}</td>
+		<td>${cs._ctx.date()|n,filters.age}</td>
+		<td title="${cs.author}">${cs.author|n,filters.person}</td>
+		<td>${h.link_to(cs.message,h.url('rev/'+str(cs._ctx)))}</td>
+		<td class="nowrap">
+		${h.link_to(_('changeset'),h.url('file/'+str(cs._ctx)))}
+		|
+		${h.link_to(_('files'),h.url('file/'+str(cs._ctx)))}
+		</td>
 	</tr>
-	%endfor
-
+%endfor
 	<tr>
 	<script type="text/javascript">
-	var data_div = 'user_log';
+	var data_div = 'shortlog_data';
 	YAHOO.util.Event.onDOMReady(function(){
 		YAHOO.util.Event.addListener(YAHOO.util.Dom.getElementsByClassName('pager_link'),"click",function(){
 				YAHOO.util.Dom.setStyle('shortlog_data','opacity','0.3');});});
 	</script>
-		<td>${c.users_log.pager('$link_previous ~2~ $link_next',
+		<td>${c.repo_changesets.pager('$link_previous ~2~ $link_next',
 		onclick="""YAHOO.util.Connect.asyncRequest('GET','$partial_url',{
 		success:function(o){YAHOO.util.Dom.get(data_div).innerHTML=o.responseText;
 		YAHOO.util.Event.addListener(YAHOO.util.Dom.getElementsByClassName('pager_link'),"click",function(){
 				YAHOO.util.Dom.setStyle(data_div,'opacity','0.3');});		
 		YAHOO.util.Dom.setStyle(data_div,'opacity','1');}},null); return false;""")}</td>
-	</tr>	
-</table>
-
-%else: 
-	${_('No actions yet')} 
-%endif
+	</tr>
+</table>	

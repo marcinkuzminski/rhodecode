@@ -31,6 +31,7 @@ def make_map(config):
     
     
     map.connect('summary_home', '/{repo_name}/_summary', controller='summary')
+    map.connect('shortlog_home', '/{repo_name}/_shortlog', controller='shortlog')
     
     map.connect('hg', '/{path_info:.*}', controller='hg',
                 action="view", path_info='/')

@@ -1,5 +1,7 @@
 <%inherit file="base/base.html"/>
-
+<%!
+from pylons_app.lib import filters
+%>
 <%def name="title()">
     ${_('Repository managment')}
 </%def>
@@ -19,8 +21,8 @@
         </form>
 
         <ul class="page-nav">
-            <li class="current">summary</li>
-            <li><a href="shortlog">shortlog</a></li>
+            <li class="current">${_('summary')}</li>
+            <li>${h.link(_('shortlog'),h.url('shortlog_home',repo_name=c.repo_name))}</li>
             <li><a href="log">changelog</a></li>
             <li><a href="graph/{node|short}">graph</a></li>
             <li><a href="tags">tags</a></li>
@@ -39,7 +41,7 @@
         <dt>${_('contact')}</dt>
         <dd>${c.repo_info.contact}</dd>
         <dt>${_('last change')}</dt>
-        <dd>${c.repo_info.last_change|n,self.f.rfc822date} - ${c.repo_info.last_change|n,self.f.age}</dd>
+        <dd>${c.repo_info.last_change|n,filters.rfc822date} - ${c.repo_info.last_change|n,filters.age}</dd>
         <dt>${_('url')}</dt>
         <dd><pre>$ hg clone <a href="${c.clone_repo_url}">${c.clone_repo_url}</a></pre></dd>
         <dt>${_('Download')}</dt>
@@ -57,7 +59,7 @@
     <table>
 	%for cnt,cs in enumerate(c.repo_changesets):
 		<tr class="parity${cnt%2}">
-			<td>${cs._ctx.date()|n,self.f.age}</td>
+			<td>${cs._ctx.date()|n,filters.age}</td>
 			<td>${cs.author}</td>
 			<td>${h.link_to(cs.message,h.url('rev/'+str(cs._ctx)))}</td>
 			<td class="nowrap">

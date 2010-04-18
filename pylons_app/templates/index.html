@@ -1,5 +1,7 @@
 ## -*- coding: utf-8 -*-
-
+<%!
+from pylons_app.lib import filters
+%>
 <%inherit file="base/base.html"/>
 <%def name="title()">
     ${c.repos_prefix} Mercurial Repositories
@@ -38,7 +40,7 @@
  		<tr class="parity${cnt%2}">
 		    <td>${h.link(repo['name'],h.url('summary_home',repo_name=repo['name']))}</td>
 		    <td>${repo['description']}</td>
-	        <td>${repo['last_change']|n,self.f.age}</td>
+	        <td>${repo['last_change']|n,filters.age}</td>
 	        <td>r${repo['rev']}:<a href="/${repo['name']}/rev/${repo['tip']}/">${repo['tip']}</a></td>
 	        <td>${repo['contact']}</td>
 	        <td class="indexlinks">
