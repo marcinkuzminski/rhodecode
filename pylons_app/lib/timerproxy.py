@@ -1,7 +1,7 @@
 from sqlalchemy.interfaces import ConnectionProxy
 import time
 import logging
-log = logging.getLogger(__name__)
+log = logging.getLogger('timerproxy')
 
 class TimerProxy(ConnectionProxy):
     def cursor_execute(self, execute, cursor, statement, parameters, context, executemany):
@@ -11,5 +11,8 @@ class TimerProxy(ConnectionProxy):
             return execute(cursor, statement, parameters, context)
         finally:
             total = time.time() - now
-            log.info("Query: %s" % statement % parameters)
+            try:
+                log.info("Query: %s" % statement % parameters)
+            except TypeError:
+                log.info("Query: %s %s" % (statement, parameters))
             log.info("<<<<< TOTAL TIME: %f <<<<<" % total)
