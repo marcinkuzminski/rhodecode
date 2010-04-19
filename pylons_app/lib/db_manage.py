@@ -12,15 +12,16 @@ def get_sqlite_conn_cur():
     cur = conn.cursor()
     return conn, cur
 
-def check_for_db():
-    if os.path.isfile(os.path.join(ROOT, 'hg_app.db')):
-        raise Exception('database already exists')
+def check_for_db(override):
+    if not override:
+        if os.path.isfile(os.path.join(ROOT, 'hg_app.db')):
+            raise Exception('database already exists')
 
-def create_tables():
+def create_tables(override=False):
     """
     Create a auth database
     """
-    check_for_db()
+    check_for_db(override)
     conn, cur = get_sqlite_conn_cur()
     try:
         logging.info('creating table %s', 'users')
@@ -65,7 +66,7 @@ def create_user(username, password, admin=False):
         raise
     
 if __name__ == '__main__':
-    create_tables()
+    create_tables(True)
     admin_prompt()  
 
 
