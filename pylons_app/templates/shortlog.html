@@ -18,15 +18,7 @@
             </dl>
         </form>
 
-        <ul class="page-nav">
-            <li>${h.link(_('summary'),h.url('summary_home',repo_name=c.repo_name))}</li>
-            <li class="current">${_('shortlog')}</li>
-            <li><a href="log">changelog</a></li>
-            <li><a href="graph/{node|short}">graph</a></li>
-            <li><a href="tags">tags</a></li>
-            <li><a href="branches">branches</a></li>
-            <li><a href="file/{node|short}">files</a></li>
-        </ul>      
+		${self.menu('changelog')}     
 </%def>
 <%def name="main()">
 

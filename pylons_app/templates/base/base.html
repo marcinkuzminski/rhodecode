@@ -16,7 +16,7 @@
             ${next.breadcrumbs()}
         </h1>
         <ul class="page-nav">
-            ${next.page_nav()}
+            ${self.page_nav()}
         </ul>
     </div>
     ${next.main()}
@@ -39,6 +39,50 @@
 </div>
 </body>
 </html>
+
+<%def name="page_nav()">
+
+	${self.menu()}
+
+</%def>
+
+
+<%def name="menu(current)">
+        <ul class="page-nav">
+
+            <li 
+            %if current=='summary':
+            	class='current' 
+            %endif
+            >${h.link_to_unless(current=='summary',_('summary'),h.url('summary_home',repo_name=c.repo_name))}</li>
+            <li 
+            %if current=='changelog':
+            	class='current' 
+            %endif
+            >${h.link_to_unless(current=='changelog',_('changelog'),h.url('changelog_home',repo_name=c.repo_name))}</li>
+            <li 
+            %if current=='branches':
+            	class='current' 
+            %endif
+            >${h.link_to_unless(current=='branches',_('branches'),h.url('branches_home',repo_name=c.repo_name))}</li>
+            <li 
+            %if current=='tags':
+            	class='current' 
+            %endif
+            >${h.link_to_unless(current=='tags',_('tags'),h.url('tags_home',repo_name=c.repo_name))}</li>
+            <li 
+            %if current=='graph':
+            	class='current' 
+            %endif
+            >${h.link_to_unless(current=='graph',_('graph'),h.url('graph_home',repo_name=c.repo_name))}</li>
+            <li 
+            %if current=='files':
+            	class='current' 
+            %endif
+            >${h.link_to_unless(current=='files',_('files'),h.url('files_home',repo_name=c.repo_name))}</li>
+        </ul>
+</%def>
+
 
 
 <%def name="js()">

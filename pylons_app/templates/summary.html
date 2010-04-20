@@ -20,15 +20,7 @@ from pylons_app.lib import filters
             </dl>
         </form>
 
-        <ul class="page-nav">
-            <li class="current">${_('summary')}</li>
-            <li>${h.link(_('shortlog'),h.url('shortlog_home',repo_name=c.repo_name))}</li>
-            <li><a href="log">changelog</a></li>
-            <li><a href="graph/{node|short}">graph</a></li>
-            <li><a href="tags">tags</a></li>
-            <li><a href="branches">branches</a></li>
-            <li><a href="file/{node|short}">files</a></li>
-        </ul>      
+		${self.menu('summary')}    
 </%def>
 <%def name="main()">
 
