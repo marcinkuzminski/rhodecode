@@ -10,7 +10,7 @@ from webhelpers.paginate import Page
 
 log = logging.getLogger(__name__)
 
-class ShortlogController(BaseController):
+class ChangelogController(BaseController):
     def __before__(self):
         c.repos_prefix = config['repos_name']
         c.staticurl = g.statics

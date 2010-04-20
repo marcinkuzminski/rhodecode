@@ -15,6 +15,7 @@ try:
     from vcs.backends.hg import get_repositories, MercurialRepository
 except ImportError:
     print 'You have to import vcs module'
+    raise
 
 class HgModel(object):
     """
@@ -49,7 +50,7 @@ class HgModel(object):
             tmp_d['rev'] = tip.rev()
             tmp_d['contact'] = mercurial_repo.contact
             tmp_d['contact_sort'] = tmp_d['contact']
-            tmp_d['repo_archives'] = mercurial_repo._get_archives()
+            tmp_d['repo_archives'] = list(mercurial_repo._get_archives())
             
             yield tmp_d
 

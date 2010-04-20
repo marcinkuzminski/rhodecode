@@ -23,35 +23,53 @@ class Globals(object):
 
         """
         self.cache = CacheManager(**parse_cache_config_options(config))
-        self.hgapp = wsgiapplication(self.make_web_app)
+        self.baseui = self.make_ui('hgwebdir.config')
 
-    def make_web_app(self):
-        repos = "hgwebdir.config"
+
+    def make_ui(self, path='hgwebdir.config'):        
+        """
+        A funcion that will read python rc files and make an ui from read options
+        
+        @param path: path to mercurial config file
+        """
+        #propagated from mercurial documentation
+        sections = [
+                    'alias',
+                    'auth',
+                    'decode/encode',
+                    'defaults',
+                    'diff',
+                    'email',
+                    'extensions',
+                    'format',
+                    'merge-patterns',
+                    'merge-tools',
+                    'hooks',
+                    'http_proxy',
+                    'smtp',
+                    'patch',
+                    'paths',
+                    'profiling',
+                    'server',
+                    'trusted',
+                    'ui',
+                    'web',
+                    ]
+    
+        repos = path
         baseui = ui.ui()
         cfg = config.config()
         cfg.read(repos)
-        paths = cfg.items('paths')
-        self.paths = paths
-        self.check_repo_dir(paths)
-        
+        self.paths = cfg.items('paths')
+        self.base_path = self.paths[0][1].replace('*', '')
+        self.check_repo_dir(self.paths)
         self.set_statics(cfg)
-
-        for k, v in cfg.items('web'):
-            baseui.setconfig('web', k, v)
-        #magic trick to make our custom template dir working
-        templater.path.append(cfg.get('web', 'templates', None))
-        self.baseui = baseui
-        #baseui.setconfig('web', 'description', '')
-        #baseui.setconfig('web', 'name', '')
-        #baseui.setconfig('web', 'contact', '')
-        #baseui.setconfig('web', 'allow_archive', '')
-        #baseui.setconfig('web', 'style', 'monoblue_plain')
-        #baseui.setconfig('web', 'baseurl', '')
-        #baseui.setconfig('web', 'staticurl', '')
+    
+        for section in sections:
+            for k, v in cfg.items(section):
+                baseui.setconfig(section, k, v)
         
-        hgwebapp = hgwebdir(paths, baseui=baseui)
-        return hgwebapp
-
+        return baseui
 
     def set_statics(self, cfg):
         '''
