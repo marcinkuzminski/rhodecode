@@ -21,19 +21,23 @@ def make_map(config):
     # CUSTOM ROUTES HERE
     map.connect('hg_home', '/', controller='hg', action='index')
     
+    
+    #REST controllers
     map.resource('repo', 'repos', path_prefix='/_admin')
     map.resource('user', 'users', path_prefix='/_admin')
     
-    
+    #ADMIN
     with map.submapper(path_prefix='/_admin', controller='admin') as m:
         m.connect('admin_home', '/', action='index')#main page
         m.connect('admin_add_repo', '/add_repo/{new_repo:[a-z0-9\. _-]*}', action='add_repo')
     
     
-    map.connect('summary_home', '/{repo_name}/_summary', controller='summary')
-    map.connect('shortlog_home', '/{repo_name}/_shortlog', controller='shortlog')
+    map.connect('summary_home', '/{repo_name}/summary', controller='summary')
+    map.connect('changelog_home', '/{repo_name}/changelog', controller='changelog')
+    map.connect('branches_home', '/{repo_name}/branches', controller='branches')
+    map.connect('tags_home', '/{repo_name}/tags', controller='tags')
+    map.connect('graph_home', '/{repo_name}/graph/{revision}', controller='graph', revision='tip')    
+    map.connect('files_home', '/{repo_name}/files/{revision}/{path_info:.*}', controller='files', revision='tip', path_info='')
     
-    map.connect('hg', '/{path_info:.*}', controller='hg',
-                action="view", path_info='/')
 
     return map
