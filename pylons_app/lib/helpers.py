@@ -12,11 +12,11 @@ from webhelpers.html.tags import (auto_discovery_link, checkbox, css_classes,
                                   javascript_link, link_to, link_to_if,
                                   link_to_unless, ol, required_legend,
                                   select, stylesheet_link,
-                                  submit, text, password, textarea, title, ul, xml_declaration)
+                                  submit, text, password, textarea, title,
+                                  ul, xml_declaration)
 from webhelpers.text import (chop_at, collapse, convert_accented_entities,
-                             convert_misc_characters, convert_misc_entities,
-                             lchop, plural, rchop, remove_formatting, replace_whitespace,
-                             urlify)
+                             convert_misc_entities, lchop, plural, rchop,
+                             remove_formatting, replace_whitespace, urlify)
 
 from webhelpers.pylonslib import Flash as _Flash
 from webhelpers.pylonslib.secure_form import secure_form
