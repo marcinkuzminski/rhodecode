@@ -1,0 +1,95 @@
+<%inherit file="base/base.html"/>
+
+<%def name="title()">
+    ${_('Repository managment')}
+</%def>
+<%def name="breadcrumbs()">
+    ${h.link_to(u'Home',h.url('/'))}
+    / 
+    ${h.link_to(c.repo_name,h.url('files_home',repo_name=c.repo_name))}
+    /
+    ${_('files')}
+</%def>
+<%def name="page_nav()">
+        <form action="log">
+            <dl class="search">
+                <dt><label>Search: </label></dt>
+                <dd><input type="text" name="rev" /></dd>
+            </dl>
+        </form>
+
+		${self.menu('files')}     
+</%def>
+<%def name="css()">
+<link rel="stylesheet" href="/css/style-monoblue_custom.css" type="text/css" />
+<link rel="stylesheet" href="/css/pygments.css" type="text/css" />
+</%def>
+<%def name="main()">
+
+    <h2 class="no-link no-border">${_('Files')}</h2>
+	<div id="files_data">
+		<h2>${_('File')}: ${c.repo_name}/${c.f_path}</h2>
+		%if c.files_list.is_dir():
+        <table class="code-browser">
+            <thead>
+                <tr>
+                    <th class="width-50 lefted">${_('Name')}</th>
+                    <th class="width-10 righted">${_('Size')}</th>
+                    <th class="width-10 righted">${_('Revision')}</th>
+                    <th class="width-15 righted">${_('Last modified')}</th>
+                    <th class="width-15 righted">${_('Last commiter')}</th>
+                </tr>
+            </thead>
+            	<tr>
+            		% if c.files_list.parent:
+            		<td colspan="5" class="browser-dir">
+            		${h.link_to('..',h.url('files_home',repo_name=c.repo_name,revision=c.cur_rev,f_path=c.files_list.parent))}
+            		</td>
+            		%endif
+            	</tr>
+					<%def name="file_class(node)">
+						%if node.is_file():
+							browser-file
+						%else:
+							browser-dir
+						%endif
+					</%def>
+			
+
+	            %for cnt,node in enumerate(c.files_list):
+					<tr class="parity${cnt%2}">
+	
+	                    <td class="${file_class(node)}">
+							${h.link_to(node.name,h.url('files_home',repo_name=c.repo_name,revision=c.cur_rev,f_path=node.path),class_='file or dir')}
+	                    </td>
+	                    <td>
+	                        %if node.is_file():
+	                    		${h.filesizeformat(node.size)}
+	                    	%endif
+	                    </td>
+	                    <td>
+	                    	%if node.is_file():
+	                    		${node.last_changeset.revision}
+	                    	%endif
+	                    </td>
+	                    <td>
+	                    	%if node.is_file():
+	                    		${node.last_changeset.date}
+	                    	%endif
+	                    </td>
+	                    <td>
+	                    	%if node.is_file():
+	                    		${node.last_changeset.author}
+	                    	%endif                    
+	                    	
+	                    </td>
+					</tr>
+				%endfor
+			</table>
+			%else:
+				<div id="body" class="codeblock">
+				${h.pygmentize(c.files_list.content,linenos=True,anchorlinenos=True,cssclass="code-highlight")}
+				</div>				
+			%endif
+	</div>
+</%def>    

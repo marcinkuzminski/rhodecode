@@ -37,7 +37,7 @@ def make_map(config):
     map.connect('branches_home', '/{repo_name}/branches', controller='branches')
     map.connect('tags_home', '/{repo_name}/tags', controller='tags')
     map.connect('graph_home', '/{repo_name}/graph/{revision}', controller='graph', revision='tip')    
-    map.connect('files_home', '/{repo_name}/files/{revision}/{path_info:.*}', controller='files', revision='tip', path_info='')
+    map.connect('files_home', '/{repo_name}/files/{revision}/{f_path:.*}', controller='files', revision='tip', f_path='')
     
 
     return map
