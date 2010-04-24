@@ -6,6 +6,7 @@ available to Controllers. This module is available to both as 'h'.
 from pylons import url
 from pylons.i18n.translation import _, ungettext
 from webhelpers.html import (literal, HTML, escape)
+from webhelpers.html.builder import make_tag
 from webhelpers.html.tools import (auto_link, button_to, highlight, js_obfuscate
                                    , mail_to, strip_links, strip_tags, tag_re)
 from webhelpers.html.tags import (auto_discovery_link, checkbox, css_classes,
@@ -21,6 +22,11 @@ from webhelpers.text import (chop_at, collapse, convert_accented_entities,
 
 from webhelpers.pylonslib import Flash as _Flash
 from webhelpers.pylonslib.secure_form import secure_form
+
+from pygments import highlight
+from pygments.formatters import HtmlFormatter
+from pygments.lexers import guess_lexer
+from pygments.lexers import get_lexer_by_name
 
 #Custom helper here :)
 class _Link(object):
@@ -44,7 +50,7 @@ class _GetError(object):
         if form_errors and form_errors.has_key(field_name):
             return literal(tmpl % form_errors.get(field_name))
 
-class _FileSizeFormat():
+class _FileSizeFormat(object):
     """
     Formats the value like a 'human-readable' file size (i.e. 13 KB, 4.1 MB,
     102 bytes, etc).
@@ -62,6 +68,15 @@ class _FileSizeFormat():
         if bytes < 1024 * 1024 * 1024:
             return _("%.1f MB") % (bytes / (1024 * 1024))
         return _("%.1f GB") % (bytes / (1024 * 1024 * 1024))
+
+
+
+def pygmentize(code, **kwargs):
+    '''
+    Filter for chunks of html to replace code tags with pygmented code
+    '''
+    return literal(highlight(code, guess_lexer(code), HtmlFormatter(**kwargs)))
+
 
 
 filesizeformat = _FileSizeFormat()

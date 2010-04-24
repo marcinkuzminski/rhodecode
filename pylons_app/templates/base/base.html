@@ -4,8 +4,8 @@
 <head>
     <link rel="icon" href="${c.staticurl}hgicon.png" type="image/png" />
     <meta name="robots" content="index, nofollow"/>
-    <link rel="stylesheet" href="${c.staticurl}style-monoblue.css" type="text/css" />
-       <title>${next.title()}</title>
+    <title>${next.title()}</title>
+    ${self.css()}
     ${self.js()}
 </head>
 
@@ -83,7 +83,9 @@
         </ul>
 </%def>
 
-
+<%def name="css()">
+<link rel="stylesheet" href="/css/style-monoblue_custom.css" type="text/css" />
+</%def>
 
 <%def name="js()">
 <script type="text/javascript" src="/js/yui/utilities/utilities.js"></script>
