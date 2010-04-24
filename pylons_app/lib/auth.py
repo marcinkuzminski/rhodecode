@@ -36,7 +36,6 @@ def admin_auth(username, password):
 def authfunc(environ, username, password):
     sa = meta.Session
     password_crypt = get_crypt_password(password)
-    
     try:
         user = sa.query(Users).filter(Users.username == username).one()
     except (NoResultFound, MultipleResultsFound, OperationalError) as e:
