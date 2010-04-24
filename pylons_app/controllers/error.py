@@ -23,7 +23,7 @@ class ErrorController(BaseController):
 #
     def __before__(self):
         c.repos_prefix = config['repos_name']
-        c.staticurl = g.statics
+        
         c.repo_name = request.environ['pylons.original_request']\
             .environ.get('PATH_INFO').split('/')[-1]
         

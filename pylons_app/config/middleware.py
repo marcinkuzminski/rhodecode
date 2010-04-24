@@ -8,6 +8,7 @@ from pylons.middleware import ErrorHandler, StatusCodeRedirect
 from pylons.wsgiapp import PylonsApp
 from routes.middleware import RoutesMiddleware
 from paste.auth.basic import AuthBasicHandler
+from pylons_app.lib.simplehg import SimpleHg
 from pylons_app.config.environment import load_environment
 from pylons_app.lib.auth import authfunc 
 
@@ -37,12 +38,14 @@ def make_app(global_conf, full_stack=True, static_files=True, **app_conf):
     # The Pylons WSGI app
     app = PylonsApp(config=config)
 
-    # CUSTOM MIDDLEWARE HERE (filtered by error handling middlewares)
-
+    
     # Routing/Session/Cache Middleware
     app = RoutesMiddleware(app, config['routes.map'])
     app = SessionMiddleware(app, config)
-    app = AuthBasicHandler(app, config['repos_name'] + ' mercurial repository', authfunc)
+    
+    # CUSTOM MIDDLEWARE HERE (filtered by error handling middlewares)    
+    app = SimpleHg(app, config)
+    app = AuthBasicHandler(app, config['repos_name'] + ' mercurial repository', authfunc)    
     
     if asbool(full_stack):
         # Handle Python exceptions

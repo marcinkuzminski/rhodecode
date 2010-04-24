@@ -20,7 +20,7 @@ log = logging.getLogger(__name__)
 class AdminController(BaseController):
 
     def __before__(self):
-        c.staticurl = g.statics
+        
         c.admin_user = session.get('admin_user', False)
         c.admin_username = session.get('admin_username')
         

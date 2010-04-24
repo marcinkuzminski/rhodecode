@@ -20,7 +20,7 @@ class UsersController(BaseController):
     
     @authenticate
     def __before__(self):
-        c.staticurl = g.statics
+        
         c.admin_user = session.get('admin_user')
         c.admin_username = session.get('admin_username')
         self.sa = meta.Session

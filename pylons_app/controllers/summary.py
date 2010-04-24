@@ -11,7 +11,7 @@ log = logging.getLogger(__name__)
 class SummaryController(BaseController):
     def __before__(self):
         c.repos_prefix = config['repos_name']
-        c.staticurl = g.statics
+        
         c.repo_name = get_repo_slug(request)
         
     def index(self):
