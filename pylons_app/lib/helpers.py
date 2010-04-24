@@ -4,6 +4,7 @@ Consists of functions to typically be used within templates, but also
 available to Controllers. This module is available to both as 'h'.
 """
 from pylons import url
+from pylons.i18n.translation import _, ungettext
 from webhelpers.html import (literal, HTML, escape)
 from webhelpers.html.tools import (auto_link, button_to, highlight, js_obfuscate
                                    , mail_to, strip_links, strip_tags, tag_re)
@@ -43,6 +44,27 @@ class _GetError(object):
         if form_errors and form_errors.has_key(field_name):
             return literal(tmpl % form_errors.get(field_name))
 
+class _FileSizeFormat():
+    """
+    Formats the value like a 'human-readable' file size (i.e. 13 KB, 4.1 MB,
+    102 bytes, etc).
+    """
+    def __call__(self, bytes):
+        try:
+            bytes = float(bytes)
+        except TypeError:
+            return u"0 bytes"
+    
+        if bytes < 1024:
+            return ungettext("%(size)d byte", "%(size)d bytes", bytes) % {'size': bytes}
+        if bytes < 1024 * 1024:
+            return _("%.1f KB") % (bytes / 1024)
+        if bytes < 1024 * 1024 * 1024:
+            return _("%.1f MB") % (bytes / (1024 * 1024))
+        return _("%.1f GB") % (bytes / (1024 * 1024 * 1024))
+
+
+filesizeformat = _FileSizeFormat()
 link = _Link()
 flash = _Flash()
 get_error = _GetError()
