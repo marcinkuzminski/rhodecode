@@ -32,6 +32,7 @@ def make_map(config):
         m.connect('admin_add_repo', '/add_repo/{new_repo:[a-z0-9\. _-]*}', action='add_repo')
     
     
+    map.connect('changeset_home', '/{repo_name}/changeset/{revision}', controller='changeset', revision='tip')
     map.connect('summary_home', '/{repo_name}/summary', controller='summary')
     map.connect('changelog_home', '/{repo_name}/changelog', controller='changelog')
     map.connect('branches_home', '/{repo_name}/branches', controller='branches')
