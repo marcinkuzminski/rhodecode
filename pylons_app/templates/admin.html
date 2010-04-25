@@ -1,13 +1,15 @@
 ## -*- coding: utf-8 -*-
 <%inherit file="base/base.html"/>
  <%def name="get_form_error(element)">
-    %if type(c.form_errors) == dict:
-        %if c.form_errors.get(element,False):
-            <span class="error-message">
-                ${c.form_errors.get(element,'')}
-            </span>
-        %endif
-    %endif           
+ 	%if hasattr(c,'form_errors'):
+	    %if type(c.form_errors) == dict:
+	        %if c.form_errors.get(element,False):
+	            <span class="error-message">
+	                ${c.form_errors.get(element,'')}
+	            </span>
+	        %endif
+	    %endif
+	%endif           
  </%def>
 <%def name="title()">
     ${_('Repository managment')}
