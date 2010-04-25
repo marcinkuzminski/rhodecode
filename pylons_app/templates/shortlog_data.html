@@ -7,26 +7,29 @@ from pylons_app.lib import filters
 	<tr class="parity${cnt%2}">
 		<td>${cs._ctx.date()|n,filters.age}</td>
 		<td title="${cs.author}">${cs.author|n,filters.person}</td>
-		<td>${h.link_to(cs.message,h.url('rev/'+str(cs._ctx)))}</td>
+		<td>${h.link_to(cs.message,h.url('changeset_home',repo_name=c.repo_name,revision=cs._short))}</td>
 		<td class="nowrap">
-		${h.link_to(_('changeset'),h.url('file/'+str(cs._ctx)))}
+		${h.link_to(_('changeset'),h.url('changeset_home',repo_name=c.repo_name,revision=cs._short))}
 		|
-		${h.link_to(_('files'),h.url('file/'+str(cs._ctx)))}
+		${h.link_to(_('files'),h.url('files_home',repo_name=c.repo_name,revision=cs._short))}
 		</td>
-	</tr>
+	</tr>	
 %endfor
-	<tr>
-	<script type="text/javascript">
-	var data_div = 'shortlog_data';
-	YAHOO.util.Event.onDOMReady(function(){
-		YAHOO.util.Event.addListener(YAHOO.util.Dom.getElementsByClassName('pager_link'),"click",function(){
-				YAHOO.util.Dom.setStyle('shortlog_data','opacity','0.3');});});
-	</script>
-		<td colspan=3>${c.repo_changesets.pager('$link_previous ~2~ $link_next',
+
+</table>
+	<div>
+		<script type="text/javascript">
+		var data_div = 'shortlog_data';
+		YAHOO.util.Event.onDOMReady(function(){
+			YAHOO.util.Event.addListener(YAHOO.util.Dom.getElementsByClassName('pager_link'),"click",function(){
+					YAHOO.util.Dom.setStyle('shortlog_data','opacity','0.3');});});
+		</script>	
+		<h2>
+		${c.repo_changesets.pager('$link_previous ~2~ $link_next',
 		onclick="""YAHOO.util.Connect.asyncRequest('GET','$partial_url',{
 		success:function(o){YAHOO.util.Dom.get(data_div).innerHTML=o.responseText;
 		YAHOO.util.Event.addListener(YAHOO.util.Dom.getElementsByClassName('pager_link'),"click",function(){
 				YAHOO.util.Dom.setStyle(data_div,'opacity','0.3');});		
-		YAHOO.util.Dom.setStyle(data_div,'opacity','1');}},null); return false;""")}</td>
-	</tr>
-</table>	
+		YAHOO.util.Dom.setStyle(data_div,'opacity','1');}},null); return false;""")}
+		</h2>
+	</div>	

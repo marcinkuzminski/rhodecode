@@ -47,43 +47,34 @@ from pylons_app.lib import filters
         </dd>
     </dl>
 
-    <h2><a href="{url}shortlog">Changes</a></h2>
+    <h2>${h.link_to(_('Changes'),h.url('changelog_home',repo_name=c.repo_name))}</h2>
     <table>
 	%for cnt,cs in enumerate(c.repo_changesets):
 		<tr class="parity${cnt%2}">
 			<td>${cs._ctx.date()|n,filters.age}</td>
 			<td>${cs.author}</td>
-			<td>${h.link_to(cs.message,h.url('rev/'+str(cs._ctx)))}</td>
+			<td>${h.link_to(cs.message,h.url('changeset_home',repo_name=c.repo_name,revision=cs._short))}</td>
 			<td class="nowrap">
-			${h.link_to(_('changeset'),h.url('file/'+str(cs._ctx)))}
+			${h.link_to(_('changeset'),h.url('changeset_home',repo_name=c.repo_name,revision=cs._short))}
 			|
-			${h.link_to(_('files'),h.url('file/'+str(cs._ctx)))}
+			${h.link_to(_('files'),h.url('files_home',repo_name=c.repo_name,revision=cs._short))}
 			</td>
 		</tr>
 	%endfor
-        <tr class="light">
-            <td colspan="4"><a class="list" href="shortlog">...</a></td>
-        </tr>
     </table>
 
-    <h2><a href="{url}tags">${_('Tags')}</a></h2>
+    <h2>${h.link_to(_('Tags'),h.url('tags_home',repo_name=c.repo_name))}</h2>
     <table>
 		%for tag in c.repo_tags:
 			${tag}
 		%endfor
-        <tr class="light">
-            <td colspan="3"><a class="list" href="tags">...</a></td>
-        </tr>
     </table>
 
-    <h2 class="no-link">Branches</h2>
+    <h2>${h.link_to(_('Branches'),h.url('branches_home',repo_name=c.repo_name))}</h2>
     <table>
 		%for branch in c.repo_branches:
 			${branch}
 		%endfor
-        <tr class="light">
-          <td colspan="4"><a class="list"  href="branches">...</a></td>
-        </tr>
     </table>
 
 </%def>    

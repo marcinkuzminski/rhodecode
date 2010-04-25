@@ -25,6 +25,9 @@ a {
 
 
 /** common settings **/
+div#main{
+padding:5px;
+}
 div#container {
   background: #FFFFFF;
   position: relative;
@@ -526,4 +529,9 @@ table.code-browser tbody td {
 	padding-left:20px;
 	padding-top:5px;
 	text-align:left;
+}
+
+.current_submenu{
+	border-bottom: 2px solid;
+
 }
