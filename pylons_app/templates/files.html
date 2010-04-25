@@ -42,13 +42,13 @@
             </thead>
             	<tr>
             		% if c.files_list.parent:
-            		<td>
-            		${h.link_to('..',h.url('files_home',repo_name=c.repo_name,revision=c.cur_rev,f_path=c.files_list.parent),class_="browser-dir")}
-            		</td>
-            		<td></td>
-            		<td></td>
-            		<td></td>
-            		<td></td>
+	            		<td>
+	            			${h.link_to('..',h.url('files_home',repo_name=c.repo_name,revision=c.cur_rev,f_path=c.files_list.parent),class_="browser-dir")}
+	            		</td>
+	            		<td></td>
+	            		<td></td>
+	            		<td></td>
+	            		<td></td>
             		%endif
             	</tr>
 					<%def name="file_class(node)">
