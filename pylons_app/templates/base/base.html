@@ -51,7 +51,36 @@
 
 <%def name="menu(current)">
         <ul class="page-nav">
-
+        	<script>
+        	YAHOO.util.Event.onDOMReady(function(){
+				YAHOO.util.Event.addListener('repo_switcher','click',function(){
+					if(YAHOO.util.Dom.hasClass('repo_switcher','selected')){
+						YAHOO.util.Dom.setStyle('switch_repos','display','none');
+						YAHOO.util.Dom.removeClass('repo_switcher','selected');
+					}
+					else{
+						YAHOO.util.Dom.setStyle('switch_repos','display','');
+						YAHOO.util.Dom.addClass('repo_switcher','selected');
+					}
+					});
+				YAHOO.util.Event.addListener('repos_list','change',function(e){
+		            var wa = YAHOO.util.Dom.get('repos_list').value;
+		        	
+		            var url = "${h.url('summary_home',repo_name='__REPLACE__')}".replace('__REPLACE__',wa);
+			        window.location = url;
+				})
+            });
+        	</script>
+			<li>
+				<a id="repo_switcher" title="${_('Switch repository')}" href="#">&darr;</a>
+				<div id="switch_repos" style="display:none;position: absolute;width: 150px;height: 25px;background-color: #DDDDDD">
+					<select id="repos_list">
+					%for repo in c.repo_list:
+						<option value="${repo}">${repo}</option>
+					%endfor
+					</select>
+				</div>			
+			</li>
             <li 
             %if current=='summary':
             	class='current' 

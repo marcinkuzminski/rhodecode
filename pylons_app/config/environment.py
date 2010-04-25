@@ -48,7 +48,7 @@ def load_environment(global_conf, app_conf):
         imports=['from webhelpers.html import escape'])
 
     #sets the c attribute access when don't existing attribute ar accessed
-    config['pylons.strict_tmpl_context'] = False
+    config['pylons.strict_tmpl_context'] = True
     
     #MULTIPLE DB configs
     # Setup the SQLAlchemy database engine
