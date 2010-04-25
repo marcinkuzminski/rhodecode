@@ -21,14 +21,14 @@
 		${self.menu('files')}     
 </%def>
 <%def name="css()">
-<link rel="stylesheet" href="/css/style-monoblue_custom.css" type="text/css" />
+<link rel="stylesheet" href="/css/monoblue_custom.css" type="text/css" />
 <link rel="stylesheet" href="/css/pygments.css" type="text/css" />
 </%def>
 <%def name="main()">
 
     <h2 class="no-link no-border">${_('Files')}</h2>
 	<div id="files_data">
-		<h2>${_('File')}: ${c.repo_name}/${c.f_path}</h2>
+		<h2>${_('File')}: ${h.files_breadcrumbs(c.repo_name,c.cur_rev,c.files_list.path)}</h2>
 		%if c.files_list.is_dir():
         <table class="code-browser">
             <thead>
@@ -42,16 +42,20 @@
             </thead>
             	<tr>
             		% if c.files_list.parent:
-            		<td colspan="5" class="browser-dir">
-            		${h.link_to('..',h.url('files_home',repo_name=c.repo_name,revision=c.cur_rev,f_path=c.files_list.parent))}
+            		<td>
+            		${h.link_to('..',h.url('files_home',repo_name=c.repo_name,revision=c.cur_rev,f_path=c.files_list.parent),class_="browser-dir")}
             		</td>
+            		<td></td>
+            		<td></td>
+            		<td></td>
+            		<td></td>
             		%endif
             	</tr>
 					<%def name="file_class(node)">
 						%if node.is_file():
-							browser-file
+							<%return "browser-file" %>
 						%else:
-							browser-dir
+							<%return "browser-dir"%>
 						%endif
 					</%def>
 			
@@ -59,8 +63,8 @@
 	            %for cnt,node in enumerate(c.files_list):
 					<tr class="parity${cnt%2}">
 	
-	                    <td class="${file_class(node)}">
-							${h.link_to(node.name,h.url('files_home',repo_name=c.repo_name,revision=c.cur_rev,f_path=node.path),class_='file or dir')}
+	                    <td>
+							${h.link_to(node.name,h.url('files_home',repo_name=c.repo_name,revision=c.cur_rev,f_path=node.path),class_=file_class(node))}
 	                    </td>
 	                    <td>
 	                        %if node.is_file():
@@ -87,6 +91,27 @@
 				%endfor
 			</table>
 			%else:
+			<table class="info-table">
+				<tr>
+					<td>r70:17ecc1c97401</td>
+					<td>374 loc</td>
+					<td>12.5 KB</td>
+					<td>
+						<a href="/marcinkuzminski/vcs/history/vcs/backends/hg.py">history</a> / 
+						<a href="/marcinkuzminski/vcs/annotate/17ecc1c97401/vcs/backends/hg.py">annotate</a> / 
+						<a href="/marcinkuzminski/vcs/raw/17ecc1c97401/vcs/backends/hg.py">raw</a> / 
+						<form class="source-view-form" method="get" action="/marcinkuzminski/vcs/diff/vcs/backends/hg.py">
+							
+							<input type="hidden" value="17ecc1c97401" name="diff2">
+								<select class="smaller" name="diff1">
+									<option>history</option>							
+								</select>
+								<input type="submit" class="smaller" value="diff">
+							
+						</form>
+					</td>
+				</tr>
+			</table>			
 				<div id="body" class="codeblock">
 				${h.pygmentize(c.files_list.content,linenos=True,anchorlinenos=True,cssclass="code-highlight")}
 				</div>				

@@ -69,7 +69,17 @@ class _FileSizeFormat(object):
             return _("%.1f MB") % (bytes / (1024 * 1024))
         return _("%.1f GB") % (bytes / (1024 * 1024 * 1024))
 
+class _FilesBreadCrumbs(object):
+    
+    def __call__(self, repo_name, rev, paths):
+        url_l = [link_to(repo_name, url('files_home', repo_name=repo_name, f_path=''))]
+        paths_l = paths.split('/')
+        
+        for cnt, p in enumerate(paths_l, 1):
+            if p != '':
+                url_l.append(link_to(p, url('files_home', repo_name=repo_name, f_path='/'.join(paths_l[:cnt]))))
 
+        return literal(' / '.join(url_l))
 
 def pygmentize(code, **kwargs):
     '''
@@ -78,7 +88,7 @@ def pygmentize(code, **kwargs):
     return literal(highlight(code, guess_lexer(code), HtmlFormatter(**kwargs)))
 
 
-
+files_breadcrumbs = _FilesBreadCrumbs()
 filesizeformat = _FileSizeFormat()
 link = _Link()
 flash = _Flash()

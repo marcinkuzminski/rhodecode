@@ -14,7 +14,7 @@ html {
 body {
   font-size: 77%;
   margin: 15px 50px;
-  background: #4B4B4C;
+  background: #DBD4C6;
 }
 
 a {
@@ -33,7 +33,7 @@ div#container {
 
 div.page-header {
   padding: 50px 20px 0;
-  background: #006699 top left repeat-x;
+  background: #556cb5 top left repeat-x;
   position: relative;
 }
   div.page-header h1 {
@@ -194,33 +194,32 @@ p.normal {
 }
 
 table {
-  margin: 10px 0 0 20px;
-  width: 95%;
+  margin: 0 0 0 0;  
   border-collapse: collapse;
 }
+/*
 table tr td {
   font-size: 1.1em;
 }
 table tr td.nowrap {
   white-space: nowrap;
 }
-/*
-table tr.parity0:hover,
-table tr.parity1:hover {
+*/
+table tr.parity0:hover,table tr.parity1:hover {
   background: #D5E1E6;
 }
-*/
+
 table tr.parity0 {
-  background: #F1F6F7;
+  background: #EAEAE9;
 }
 table tr.parity1 {
   background: #FFFFFF;
 }
 table tr td {
-  padding: 5px 5px;
+  padding: 3px 3px;
 }
 table.annotated tr td {
-  padding: 0px 5px;
+  padding: 0px 3px;
 }
 
 span.logtags span {
@@ -471,6 +470,45 @@ ul#graphnodes li .info {
 }
 /** end of canvas **/
 
+table.code-browser{
+	
+}
+table.code-browser thead th {
+	background-color:#EEEEEE;
+	border:1px solid #999999;
+	height:20px;
+	font-size: 1.1em;
+	font-weight: bold;
+}
+table.code-browser tbody td {
+	border:1px solid #999999;
+	height:20px;
+}
+.info-table {
+	background:none repeat scroll 0 0 #FAFAFA;
+	border-bottom:1px solid #DDDDDD;
+	width:100%;
+}
+.rss_logo{
+	background-image:url("/images/feed.png");
+	background-repeat:no-repeat;
+	display:block;
+	height:16px;
+	padding-left:20px;
+	padding-top:0px;
+	text-align:left;
+	
+}
+.atom_logo{
+	background-image:url("/images/atom.png");
+	background-repeat:no-repeat;
+	display:block;
+	height:16px;
+	padding-left:20px;
+	padding-top:0px;
+	text-align:left;
+	
+}
 .browser-file {
 	background-image:url("/images/file.png");
 	background-repeat:no-repeat;

@@ -35,6 +35,7 @@ from pylons_app.lib import filters
 	    <td>${get_sort(_('Contact'))}</td>
 	    <td></td>
 	    <td></td>
+	    <td></td>
 	  </tr>	
 	%for cnt,repo in enumerate(c.repos_list):
  		<tr class="parity${cnt%2}">
@@ -49,11 +50,11 @@ from pylons_app.lib import filters
 				%endfor
 	        </td>
 			<td>
-				<div class="rss_logo">
-				<a href="/${repo['name']}/rss-log">RSS</a>
-				<a href="/${repo['name']}/atom-log">Atom</a>
-				</div>
+				<a  class="rss_logo" href="/${repo['name']}/rss-log">RSS</a>
 			</td>        
+			<td>
+				<a  class="atom_logo" href="/${repo['name']}/atom-log">Atom</a>
+			</td>
 		</tr>
 	%endfor
 	</table>
