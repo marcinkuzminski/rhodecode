@@ -53,7 +53,16 @@ from pylons_app.lib import filters
 		<tr class="parity${cnt%2}">
 			<td>${cs._ctx.date()|n,filters.age}</td>
 			<td>${cs.author}</td>
-			<td>${h.link_to(cs.message,h.url('changeset_home',repo_name=c.repo_name,revision=cs._short))}</td>
+			<td>
+				
+				${h.link_to(cs.message,h.url('changeset_home',repo_name=c.repo_name,revision=cs._short))}
+				<span class="logtags">
+					<span class="branchtag">${cs.branch}</span>
+					%for tag in cs.tags:
+						<span class="tagtag">${tag}</span>
+					%endfor
+				</span>
+			</td>
 			<td class="nowrap">
 			${h.link_to(_('changeset'),h.url('changeset_home',repo_name=c.repo_name,revision=cs._short))}
 			|
