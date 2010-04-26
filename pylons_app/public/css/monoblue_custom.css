@@ -538,3 +538,8 @@ table.code-browser tbody td {
 	border-bottom: 2px solid;
 
 }
+#repos_list{
+border:1px solid #556CB5;
+background: #FFFFFF;
+
+}

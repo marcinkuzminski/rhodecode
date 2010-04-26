@@ -56,10 +56,12 @@
 				YAHOO.util.Event.addListener('repo_switcher','click',function(){
 					if(YAHOO.util.Dom.hasClass('repo_switcher','selected')){
 						YAHOO.util.Dom.setStyle('switch_repos','display','none');
+						YAHOO.util.Dom.setStyle('repo_switcher','background','');
 						YAHOO.util.Dom.removeClass('repo_switcher','selected');
 					}
 					else{
 						YAHOO.util.Dom.setStyle('switch_repos','display','');
+						YAHOO.util.Dom.setStyle('repo_switcher','background','#FFFFFF');
 						YAHOO.util.Dom.addClass('repo_switcher','selected');
 					}
 					});
@@ -73,7 +75,7 @@
         	</script>
 			<li>
 				<a id="repo_switcher" title="${_('Switch repository')}" href="#">&darr;</a>
-				<div id="switch_repos" style="display:none;position: absolute;width: 150px;height: 25px;background-color: #DDDDDD">
+				<div id="switch_repos" style="display:none;position: absolute;width: 150px;height: 25px">
 					<select id="repos_list">
 					%for repo in c.repo_list:
 						<option value="${repo}">${repo}</option>
