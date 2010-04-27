@@ -1,7 +1,5 @@
 """The application's Globals object"""
-#uncomment the following if you want to serve a single repo
-#from mercurial.hgweb.hgweb_mod import hgweb
-import os
+
 from beaker.cache import CacheManager
 from beaker.util import parse_cache_config_options
 from pylons_app.lib.utils import make_ui
