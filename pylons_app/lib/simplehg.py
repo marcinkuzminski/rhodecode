@@ -1,13 +1,7 @@
 import os
-
-import cgi
-from mercurial import util
-from mercurial.hgweb.request import wsgirequest, normalize
 from mercurial.hgweb import hgweb
-from pylons.controllers.util import Response
 from mercurial.hgweb.request import wsgiapplication
-
-
+from pylons_app.lib.utils import make_ui
 class SimpleHg(object):
 
     def __init__(self, application, config):
@@ -18,14 +12,33 @@ class SimpleHg(object):
         if not is_mercurial(environ):
             return self.application(environ, start_response)
         else:
-            from pprint import pprint
-            pprint(environ)
-
-            repo_path = os.path.join('/home/marcink/python_workspace/', environ['PATH_INFO'].replace('/', ''))
-            def _make_app():return hgweb(repo_path, "Name")
-            app = wsgiapplication(_make_app)
+            repo_name = environ['PATH_INFO'].replace('/', '')
+            if not environ['PATH_INFO'].endswith == '/':
+                environ['PATH_INFO'] += '/'
+            #environ['SCRIPT_NAME'] = request.path
+            environ['PATH_INFO'] = '/'
+            self.baseui = make_ui()
+            self.basepath = self.baseui.configitems('paths')[0][1].replace('*', '')
+            self.repo_path = os.path.join(self.basepath, repo_name)
+            app = wsgiapplication(self._make_app)
             return app(environ, start_response)            
+
+    def _make_app(self):
+        hgserve = hgweb(self.repo_path)
+        return  self.load_web_settings(hgserve)
+        
                 
+    def load_web_settings(self, hgserve):
+        repoui = make_ui(os.path.join(self.repo_path, '.hg', 'hgrc'), False)
+        #set the global ui for hgserve
+        hgserve.repo.ui = self.baseui
+        
+        if repoui:
+            #set the repository based config
+            hgserve.repo.ui = repoui
+            
+        return hgserve
+                                
 def is_mercurial(environ):
     """
     Returns True if request's target is mercurial server - header
@@ -35,3 +48,5 @@ def is_mercurial(environ):
     if http_accept and http_accept.startswith('application/mercurial'):
         return True
     return False
+
+
