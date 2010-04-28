@@ -12,7 +12,8 @@ class SimpleHg(object):
         if not is_mercurial(environ):
             return self.application(environ, start_response)
         else:
-            repo_name = environ['PATH_INFO'].replace('/', '')
+            #repo_name = environ['PATH_INFO'].replace('/', '')
+            repo_name = environ['PATH_INFO'].split('/')[1]
             if not environ['PATH_INFO'].endswith == '/':
                 environ['PATH_INFO'] += '/'
             #environ['SCRIPT_NAME'] = request.path
