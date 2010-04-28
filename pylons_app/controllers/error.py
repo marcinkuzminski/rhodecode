@@ -1,13 +1,13 @@
 import logging
-from paste.urlparser import PkgResourcesParser
+import cgi
+import os
 import paste.fileapp
 from pylons import tmpl_context as c, app_globals as g, request, config
 from pylons.controllers.util import forward
 from pylons.i18n.translation import _
 from pylons_app.lib.base import BaseController, render
-from pylons.middleware  import error_document_template, media_path
-import cgi
-import os
+from pylons.middleware import  media_path
+from pylons_app.lib.utils import check_repo
 
 log = logging.getLogger(__name__)
 class ErrorController(BaseController):
@@ -25,7 +25,7 @@ class ErrorController(BaseController):
         c.repos_prefix = config['repos_name']
         
         c.repo_name = request.environ['pylons.original_request']\
-            .environ.get('PATH_INFO').split('/')[-1]
+            .environ.get('PATH_INFO').split('/')[1]
         
     def document(self):
         resp = request.environ.get('pylons.original_response')
@@ -36,9 +36,11 @@ class ErrorController(BaseController):
                                                 'protocol': e.get('wsgi.url_scheme'),
                                                 'host':e.get('HTTP_HOST'),
                                                 }
-                
+
+                        
         if resp.status_int == 404:
-            return render('/errors/error_404.html')
+            if check_repo(c.repo_name, g.base_path):
+                return render('/errors/error_404.html')
                 
         c.error_message = cgi.escape(request.GET.get('code', str(resp.status)))
         c.error_explanation = self.get_error_explanation(resp.status_int)

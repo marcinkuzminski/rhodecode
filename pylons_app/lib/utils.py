@@ -1,7 +1,10 @@
-from mercurial import ui, config
 import os
 import logging
-   
+from mercurial import ui, config, hg
+from mercurial.error import RepoError
+log = logging.getLogger(__name__)
+
+
 def get_repo_slug(request):
     path_info = request.environ.get('PATH_INFO')
     uri_lst = path_info.split('/')   
@@ -26,7 +29,23 @@ def check_repo_dir(paths):
         repos_path[0] = '/'
     if not os.path.isdir(os.path.join(*repos_path)):
         raise Exception('Not a valid repository in %s' % paths[0][1])
-        
+
+def check_repo(repo_name, base_path):
+
+    repo_path = os.path.join(base_path, repo_name)
+
+    try:
+        r = hg.repository(ui.ui(), repo_path)
+        hg.verify(r)
+        #here we hnow that repo exists it was verified
+        log.info('%s repo is already created', repo_name)
+        return False
+        #raise Exception('Repo exists')
+    except RepoError:
+        log.info('%s repo is free for creation', repo_name)
+        #it means that there is no valid repo there...
+        return True
+                
 def make_ui(path='hgwebdir.config', checkpaths=True):        
     """
     A funcion that will read python rc files and make an ui from read options
@@ -34,7 +53,7 @@ def make_ui(path='hgwebdir.config', checkpaths=True):
     @param path: path to mercurial config file
     """
     if not os.path.isfile(path):
-        logging.error('Unable to read config file %s' % path)
+        log.error('Unable to read config file %s' % path)
         return False
     #propagated from mercurial documentation
     sections = [

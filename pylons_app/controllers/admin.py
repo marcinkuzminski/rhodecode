@@ -5,9 +5,6 @@ from pylons.controllers.util import abort, redirect
 
 from pylons_app.lib.base import BaseController, render
 import os
-from mercurial import ui, hg
-from mercurial.error import RepoError
-from ConfigParser import ConfigParser
 from pylons_app.lib import auth
 from pylons_app.model.forms import LoginForm
 import formencode
@@ -15,6 +12,7 @@ import formencode.htmlfill as htmlfill
 from pylons_app.model import meta
 from pylons_app.model.db import Users, UserLogs
 from webhelpers.paginate import Page
+from pylons_app.lib.utils import check_repo
 log = logging.getLogger(__name__)
 
 class AdminController(BaseController):
@@ -90,37 +88,12 @@ class AdminController(BaseController):
 
         return render('add.html')
 
-    def _check_repo(self, repo_name):
-        p = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-        config_path = os.path.join(p, 'hgwebdir.config')
-
-        cp = ConfigParser()
-
-        cp.read(config_path)
-        repos_path = cp.get('paths', '/').replace("**", '')
-
-        if not repos_path:
-            raise Exception('Could not read config !')
-
-        self.repo_path = os.path.join(repos_path, repo_name)
-
-        try:
-            r = hg.repository(ui.ui(), self.repo_path)
-            hg.verify(r)
-            #here we hnow that repo exists it was verified
-            log.info('%s repo is already created', repo_name)
-            raise Exception('Repo exists')
-        except RepoError:
-            log.info('%s repo is free for creation', repo_name)
-            #it means that there is no valid repo there...
-            return True
-
 
     def _create_repo(self, repo_name):
         if repo_name in [None, '', 'add']:
             raise Exception('undefined repo_name of repo')
 
-        if self._check_repo(repo_name):
+        if check_repo(repo_name, g.base_path):
             log.info('creating repo %s in %s', repo_name, self.repo_path)
             cmd = """mkdir %s && hg init %s""" \
                     % (self.repo_path, self.repo_path)
