@@ -21,12 +21,10 @@ class HgController(BaseController):
 
     def __before__(self):
         c.repos_prefix = config['repos_name']
-        
         c.repo_name = get_repo_slug(request)
         
     def index(self):
         
-
         hg_model = HgModel()
         @cache_region('short_term', 'repo_list')
         def _list():
@@ -47,38 +45,3 @@ class HgController(BaseController):
                 c.repos_list.sort(key=itemgetter(sort_key), reverse=False)
             
         return render('/index.html')
-
-    def view(self, environ, start_response, path_info):
-        print path_info
-        
-        def app_maker():           
-            
-            path = os.path.join(g.base_path, c.repo_name)
-            repo = repository(g.baseui, path)
-            hgwebapp = hgweb(repo, c.repo_name)
-            return hgwebapp
-        
-        a = wsgiapplication(app_maker)
-        resp = a(environ, start_response)
-
-        http_accept = request.environ.get('HTTP_ACCEPT', False)
-        if not http_accept:
-            return abort(status_code=400, detail='no http accept in header')
-        
-        #for mercurial protocols and raw files we can't wrap into mako
-        if http_accept.find("mercurial") != -1 or \
-        request.environ['PATH_INFO'].find('raw-file') != -1:
-                    return resp
-        try:
-            tmpl = u''.join(resp)
-            template = Template(tmpl, lookup=request.environ['pylons.pylons']\
-                            .config['pylons.app_globals'].mako_lookup)
-                        
-        except (RuntimeError, UnicodeDecodeError):
-            log.info('disabling unicode due to encoding error')
-            resp = g.hgapp(request.environ, self.start_response)
-            tmpl = ''.join(resp)
-            template = Template(tmpl, lookup=request.environ['pylons.pylons']\
-                            .config['pylons.app_globals'].mako_lookup, disable_unicode=True)
-
-        return template.render(g=g, c=c, session=session, h=h)
