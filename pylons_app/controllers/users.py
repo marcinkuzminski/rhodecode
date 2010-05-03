@@ -30,7 +30,7 @@ class UsersController(BaseController):
         # url('users')
         
         c.users_list = self.sa.query(Users).all()     
-        return render('/users.html')
+        return render('admin/users/users.html')
     
     def create(self):
         """POST /users: Create a new item"""
@@ -54,7 +54,7 @@ class UsersController(BaseController):
     def new(self, format='html'):
         """GET /users/new: Form to create a new item"""
         # url('new_user')
-        return render('/user_add.html')
+        return render('admin/users/user_add.html')
 
     def update(self, id):
         """PUT /users/id: Update an existing item"""
@@ -107,7 +107,7 @@ class UsersController(BaseController):
         c.user = self.sa.query(Users).get(id)
         defaults = c.user.__dict__
         return htmlfill.render(
-            render('/user_edit.html'),
+            render('admin/users/user_edit.html'),
             defaults=defaults,
             encoding="UTF-8",
             force_defaults=False

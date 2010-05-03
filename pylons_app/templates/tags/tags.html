@@ -1,0 +1,48 @@
+<%inherit file="/base/base.html"/>
+<%!
+from pylons_app.lib import filters
+%>
+<%def name="title()">
+    ${_('Tags')}
+</%def>
+<%def name="breadcrumbs()">
+    ${h.link_to(u'Home',h.url('/'))}
+    / 
+    ${h.link_to(c.repo_name,h.url('summary_home',repo_name=c.repo_name))}
+    /
+    ${_('tags')}
+</%def>
+<%def name="page_nav()">
+        <form action="log">
+            <dl class="search">
+                <dt><label>Search: </label></dt>
+                <dd><input type="text" name="rev" /></dd>
+            </dl>
+        </form>
+
+		${self.menu('tags')}    
+</%def>
+<%def name="main()">
+
+    <h2 class="no-link no-border">${_('Tags')}</h2>
+
+    <table>
+		%for cnt,tag in enumerate(c.repo_tags):
+		<tr class="parity${cnt%2}">
+			<td>${tag._ctx.date()|n,filters.age}</td>
+			<td></td>
+			<td>
+				<span class="logtags">
+					<span class="tagtag">${h.link_to(tag.tags[-1],h.url('changeset_home',repo_name=c.repo_name,revision=tag._short))}</span>
+				</span>
+			</td>
+			<td class="nowrap">
+			${h.link_to(_('changeset'),h.url('changeset_home',repo_name=c.repo_name,revision=tag._short))}
+			|
+			${h.link_to(_('files'),h.url('files_home',repo_name=c.repo_name,revision=tag._short))}
+			</td>
+		</tr>	
+		%endfor
+    </table>
+
+</%def>    

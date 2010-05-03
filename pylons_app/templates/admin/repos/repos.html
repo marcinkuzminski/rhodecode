@@ -1,4 +1,4 @@
-<%inherit file="base/base.html"/>
+<%inherit file="/base/base.html"/>
 <%def name="title()">
     ${_('Repository managment')}
 </%def>
@@ -27,7 +27,7 @@
         <table>
 	        %for cnt,repo in enumerate(c.repos_list):
 	 		<tr class="parity${cnt%2}">
-			    <td><a href="/${repo['name']}">${repo['name']}</a></td>
+			    <td>${h.link_to(repo['name'],h.url('summary_home',repo_name=repo['name']))}</td>
 		        <td>r${repo['rev']}:${repo['tip']}</td>
                 <td>
                   ${h.form(url('repo', id=repo['name']),method='delete')}

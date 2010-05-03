@@ -13,17 +13,15 @@ log = logging.getLogger(__name__)
 class ShortlogController(BaseController):
     def __before__(self):
         c.repos_prefix = config['repos_name']
-        
         c.repo_name = get_repo_slug(request)
-        
         
     def index(self):
         hg_model = HgModel()
         p = int(request.params.get('page', 1))
         repo = hg_model.get_repo(c.repo_name)
         c.repo_changesets = Page(repo, page=p, items_per_page=20)
-        c.shortlog_data = render('shortlog_data.html')
+        c.shortlog_data = render('shortlog/shortlog_data.html')
         if request.params.get('partial'):
             return c.shortlog_data
-        r = render('/shortlog.html')
+        r = render('shortlog/shortlog.html')
         return r

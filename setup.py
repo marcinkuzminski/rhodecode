@@ -6,29 +6,29 @@ except ImportError:
     from setuptools import setup, find_packages
 
 setup(
-    name = 'pylons_app',
-    version = '1.0',
-    description = '',
-    author = 'marcin kuzminski',
-    author_email = 'marcin@python-blog.com',
-    url = '',
-    install_requires = [
-        "Pylons>=0.9.7,<=0.9.7.99",
-        "SQLAlchemy>=0.5,<=0.5.99",
-        "Mako>=0.2.2,<=0.2.99",
+    name='pylons_app',
+    version='1.0',
+    description='',
+    author='marcin kuzminski',
+    author_email='marcin@python-blog.com',
+    url='',
+    install_requires=[
+        "Pylons>=1.0.0",
+        "SQLAlchemy>=0.6",
+        "Mako>=0.3.2",
     ],
-    setup_requires = ["PasteScript>=1.6.3"],
-    packages = find_packages(exclude = ['ez_setup']),
-    include_package_data = True,
-    test_suite = 'nose.collector',
-    package_data = {'pylons_app': ['i18n/*/LC_MESSAGES/*.mo']},
-    message_extractors = {'pylons_app': [
+    setup_requires=["PasteScript>=1.6.3"],
+    packages=find_packages(exclude=['ez_setup']),
+    include_package_data=True,
+    test_suite='nose.collector',
+    package_data={'pylons_app': ['i18n/*/LC_MESSAGES/*.mo']},
+    message_extractors={'pylons_app': [
             ('**.py', 'python', None),
             ('templates/**.mako', 'mako', {'input_encoding': 'utf-8'}),
             ('public/**', 'ignore', None)]},
-    zip_safe = False,
-    paster_plugins = ['PasteScript', 'Pylons'],
-    entry_points = """
+    zip_safe=False,
+    paster_plugins=['PasteScript', 'Pylons'],
+    entry_points="""
     [paste.app_factory]
     main = pylons_app.config.middleware:make_app
 

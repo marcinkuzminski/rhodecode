@@ -1,6 +1,6 @@
-<%inherit file="base/base.html"/>
+<%inherit file="/base/base.html"/>
 <%def name="title()">
-    ${_('User')} - ${c.user.username}
+    ${_('User')} - ${_('add new')}
 </%def>
 <%def name="breadcrumbs()">
     ${h.link_to(u'Home',h.url('/'))}
@@ -23,24 +23,24 @@
         </li>
     </ul>
 	<div>
-        <h2>${_('User')} - ${c.user.username}</h2>
-        ${h.form(url('user', id=c.user.user_id),method='put')}
+        <h2>${_('User')} - ${_('add new')}</h2>
+        ${h.form(url('users'))}
         <table>
         	<tr>
         		<td>${_('Username')}</td>
         		<td>${h.text('username')}</td>
         	</tr>
         	<tr>
-        		<td>${_('New password')}</td>
-        		<td>${h.text('new_password')}</td>
+        		<td>${_('password')}</td>
+        		<td>${h.text('password')}</td>
         	</tr>
         	<tr>
         		<td>${_('Active')}</td>
-        		<td>${h.checkbox('active',value=True)}</td>
+        		<td>${h.checkbox('active')}</td>
         	</tr>
         	<tr>
         		<td></td>
-        		<td>${h.submit('save','save')}</td>
+        		<td>${h.submit('add','add')}</td>
         	</tr>
         	        	        	
         </table>

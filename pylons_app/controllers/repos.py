@@ -31,7 +31,7 @@ class ReposController(BaseController):
         hg_model = HgModel()
         c.repos_list = list(hg_model.get_repos())
         c.repos_list.sort(key=itemgetter('name'))
-        return render('/repos.html')
+        return render('admin/repos/repos.html')
     
     def create(self):
         """POST /repos: Create a new item"""

@@ -43,7 +43,7 @@ class AdminController(BaseController):
             except formencode.Invalid, error:
                 c.form_result = error.value
                 c.form_errors = error.error_dict or {}
-                html = render('/admin.html')
+                html = render('admin/admin.html')
 
                 return htmlfill.render(
                     html,
@@ -57,10 +57,10 @@ class AdminController(BaseController):
                 .order_by(UserLogs.action_date.desc())
             p = int(request.params.get('page', 1))
             c.users_log = Page(users_log, page=p, items_per_page=10)
-            c.log_data = render('admin_log.html')
+            c.log_data = render('admin/admin_log.html')
             if request.params.get('partial'):
                 return c.log_data
-        return render('/admin.html')
+        return render('admin/admin.html')
 
     def hgrc(self, dirname):
         filename = os.path.join(dirname, '.hg', 'hgrc')
