@@ -1,0 +1,57 @@
+<%def name="file_class(node)">
+	%if node.is_file():
+		<%return "browser-file" %>
+	%else:
+		<%return "browser-dir"%>
+	%endif
+</%def>
+		
+<table class="code-browser">
+         <thead>
+             <tr>
+                 <th class="width-50 lefted">${_('Name')}</th>
+                 <th class="width-10 righted">${_('Size')}</th>
+                 <th class="width-10 righted">${_('Revision')}</th>
+                 <th class="width-15 righted">${_('Last modified')}</th>
+                 <th class="width-15 righted">${_('Last commiter')}</th>
+             </tr>
+         </thead>
+         	<tr>
+         		% if c.files_list.parent:
+          		<td>
+          			${h.link_to('..',h.url('files_home',repo_name=c.repo_name,revision=c.cur_rev,f_path=c.files_list.parent),class_="browser-dir")}
+          		</td>
+          		<td></td>
+          		<td></td>
+          		<td></td>
+          		<td></td>
+         		%endif
+         	</tr>
+    %for cnt,node in enumerate(c.files_list):
+		<tr class="parity${cnt%2}">
+             <td>
+				${h.link_to(node.name,h.url('files_home',repo_name=c.repo_name,revision=c.cur_rev,f_path=node.path),class_=file_class(node))}
+             </td>
+             <td>
+                %if node.is_file():
+             		${h.filesizeformat(node.size)}
+             	%endif
+             </td>
+             <td>
+             	%if node.is_file():
+             		${node.last_changeset.revision}
+             	%endif
+             </td>
+             <td>
+             	%if node.is_file():
+             		${node.last_changeset.date}
+             	%endif
+             </td>
+             <td>
+             	%if node.is_file():
+             		${node.last_changeset.author}
+             	%endif                    
+             </td>
+		</tr>
+	%endfor
+</table>

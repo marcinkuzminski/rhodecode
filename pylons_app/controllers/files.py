@@ -22,4 +22,18 @@ class FilesController(BaseController):
         
         c.files_list = c.changeset.get_node(f_path)
         
-        return render('/files.html')
+        c.file_history = self._get_history(repo, c.files_list, f_path)
+        return render('files/files.html')
+
+
+    def _get_history(self, repo, node, f_path):
+        from vcs.nodes import NodeKind
+        if not node.kind is NodeKind.FILE:
+            return []
+        changesets = list(node.history)
+        changesets.reverse()
+        hist_l = []
+        for chs in changesets:
+            n_desc = 'r%s:%s' % (chs.revision, chs._short)
+            hist_l.append((chs._short, n_desc,))
+        return hist_l
