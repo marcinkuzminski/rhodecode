@@ -34,7 +34,7 @@ def make_map(config):
     
     map.connect('changeset_home', '/{repo_name}/changeset/{revision}', controller='changeset', revision='tip')
     map.connect('summary_home', '/{repo_name}/summary', controller='summary')
-    map.connect('changelog_home', '/{repo_name}/changelog', controller='changelog')
+    map.connect('changelog_home', '/{repo_name}/changelog/{revision}', controller='changelog', revision='tip')
     map.connect('branches_home', '/{repo_name}/branches', controller='branches')
     map.connect('tags_home', '/{repo_name}/tags', controller='tags')
     map.connect('graph_home', '/{repo_name}/graph/{revision}', controller='graph', revision='tip')    

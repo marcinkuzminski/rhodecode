@@ -27,6 +27,6 @@ class SummaryController(BaseController):
                                                 'repo_name':c.repo_name,
                                                 }
         c.clone_repo_url = url(uri)
-        c.repo_tags = []#c.repo_info.get_tags(limit=10)
-        c.repo_branches = []#c.repo_info.get_branches(limit=10)
+        c.repo_tags = c.repo_info.tags[:10]
+        c.repo_branches = c.repo_info.branches[:10]
         return render('/summary.html')
