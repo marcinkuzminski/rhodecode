@@ -7,7 +7,7 @@
 	<dd>history  / annotate  / raw  </dd>
 	<dt>${_('History')}</dt>
 	<dd>
-		${h.form(h.url.current())}
+		${h.form(h.url('files_diff_home',repo_name=c.repo_name,f_path=c.f_path),method='GET')}
 		${h.hidden('diff2',c.files_list.changeset._short)}
 		${h.select('diff1','',c.file_history)}
 		${h.submit('diff','diff')}

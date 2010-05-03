@@ -25,13 +25,29 @@ class FilesController(BaseController):
         c.file_history = self._get_history(repo, c.files_list, f_path)
         return render('files/files.html')
 
-
+    def diff(self, repo_name, f_path):
+        hg_model = HgModel()
+        diff1 = request.GET.get('diff1')
+        diff2 = request.GET.get('diff2')
+        c.f_path = f_path
+        c.repo = hg_model.get_repo(c.repo_name)
+        c.changeset_1 = c.repo.get_changeset(diff1)
+        c.changeset_2 = c.repo.get_changeset(diff2)
+        
+        c.file_1 = c.changeset_1.get_node(f_path).content
+        c.file_2 = c.changeset_2.get_node(f_path).content
+        c.diff1 = 'r%s:%s' % (c.changeset_1.revision, c.changeset_1._short)
+        c.diff2 = 'r%s:%s' % (c.changeset_2.revision, c.changeset_2._short)
+        from difflib import unified_diff
+        d = unified_diff(c.file_1.splitlines(1), c.file_2.splitlines(1))
+        c.diff = ''.join(d)
+        return render('files/file_diff.html')
+    
     def _get_history(self, repo, node, f_path):
         from vcs.nodes import NodeKind
         if not node.kind is NodeKind.FILE:
             return []
-        changesets = list(node.history)
-        changesets.reverse()
+        changesets = node.history
         hist_l = []
         for chs in changesets:
             n_desc = 'r%s:%s' % (chs.revision, chs._short)

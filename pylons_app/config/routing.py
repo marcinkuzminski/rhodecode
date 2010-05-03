@@ -39,6 +39,6 @@ def make_map(config):
     map.connect('tags_home', '/{repo_name}/tags', controller='tags')
     map.connect('graph_home', '/{repo_name}/graph/{revision}', controller='graph', revision='tip')    
     map.connect('files_home', '/{repo_name}/files/{revision}/{f_path:.*}', controller='files', revision='tip', f_path='')
-    
+    map.connect('files_diff_home', '/{repo_name}/diff/{f_path:.*}', controller='files', action='diff', revision='tip', f_path='')
 
     return map
