@@ -32,4 +32,40 @@
 			${h.pygmentize(c.diff,linenos=True,anchorlinenos=True,cssclass="code-diff")}
 		</div>
 	</div>
+	<div style="clear:both"></div>
+    <div id="files_data">
+        <div id="body" class="codeblock">
+            <table class='highlighttable'>
+            %for x in c.diff_2[0]['chunks']:
+                %for y in x:
+                    <tr class="line ${y['action']}">
+                        <td class="lineno_new">
+                            <div class="linenodiv">
+                                <pre>
+                                    ${y['new_lineno']}
+                                </pre>
+                            </div>
+                        </td>
+                        <td class="lineno_old">
+                            <div class="linenodiv">
+                                <pre>
+                                    ${y['old_lineno']}
+                                </pre>
+                            </div>
+                        </td>                        
+                        <td class="code">
+	                        <div class="code-diff">
+	                           <pre>
+	                               <span>
+	                               ${y}
+	                               </span>
+	                           </pre>
+	                        </div>
+                        </td>
+                    </tr>
+                %endfor$
+            %endfor
+            </table>
+        </div>
+    </div>	
 </%def>    

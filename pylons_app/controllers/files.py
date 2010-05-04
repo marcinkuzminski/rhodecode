@@ -41,6 +41,11 @@ class FilesController(BaseController):
         from difflib import unified_diff
         d = unified_diff(c.file_1.splitlines(1), c.file_2.splitlines(1))
         c.diff = ''.join(d)
+        
+        from pylons_app.lib.differ import render_udiff
+        d2 = unified_diff(c.file_1.splitlines(1), c.file_2.splitlines(1))
+        c.diff_2 = render_udiff(udiff=d2)
+        
         return render('files/file_diff.html')
     
     def _get_history(self, repo, node, f_path):
