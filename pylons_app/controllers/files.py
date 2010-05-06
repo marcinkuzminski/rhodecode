@@ -6,6 +6,9 @@ from pylons.controllers.util import abort, redirect
 from pylons_app.lib.base import BaseController, render
 from pylons_app.lib.utils import get_repo_slug
 from pylons_app.model.hg_model import HgModel
+from difflib import unified_diff
+from pylons_app.lib.differ import render_udiff
+        
 log = logging.getLogger(__name__)
 
 class FilesController(BaseController):
@@ -29,6 +32,7 @@ class FilesController(BaseController):
         hg_model = HgModel()
         diff1 = request.GET.get('diff1')
         diff2 = request.GET.get('diff2')
+        c.no_changes = diff1 == diff2
         c.f_path = f_path
         c.repo = hg_model.get_repo(c.repo_name)
         c.changeset_1 = c.repo.get_changeset(diff1)
@@ -38,14 +42,12 @@ class FilesController(BaseController):
         c.file_2 = c.changeset_2.get_node(f_path).content
         c.diff1 = 'r%s:%s' % (c.changeset_1.revision, c.changeset_1._short)
         c.diff2 = 'r%s:%s' % (c.changeset_2.revision, c.changeset_2._short)
-        from difflib import unified_diff
-        d = unified_diff(c.file_1.splitlines(1), c.file_2.splitlines(1))
-        c.diff = ''.join(d)
-        
-        from pylons_app.lib.differ import render_udiff
+
         d2 = unified_diff(c.file_1.splitlines(1), c.file_2.splitlines(1))
-        c.diff_2 = render_udiff(udiff=d2)
+        c.diff_files = render_udiff(udiff=d2)
         
+        if len(c.diff_files) < 1:
+            c.no_changes = True
         return render('files/file_diff.html')
     
     def _get_history(self, repo, node, f_path):
