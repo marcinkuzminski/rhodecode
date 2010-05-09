@@ -3,7 +3,6 @@ import os
 
 from pylons import request, response, session, tmpl_context as c, url, app_globals as g
 from pylons.controllers.util import abort, redirect
-from beaker.cache import region_invalidate
 from pylons_app.lib.base import BaseController, render
 from pylons_app.lib import auth
 from pylons_app.model.forms import LoginForm
@@ -12,7 +11,8 @@ import formencode.htmlfill as htmlfill
 from pylons_app.model import meta
 from pylons_app.model.db import Users, UserLogs
 from webhelpers.paginate import Page
-from pylons_app.lib.utils import check_repo
+from pylons_app.lib.utils import check_repo, invalidate_cache
+
 log = logging.getLogger(__name__)
 
 class AdminController(BaseController):
@@ -81,9 +81,8 @@ class AdminController(BaseController):
             self._create_repo(new_repo)
             c.new_repo = new_repo
             c.msg = 'added repo'
-            from pylons_app.lib.base import _get_repos
             #clear our cached list for refresh with new repo
-            region_invalidate(_get_repos, None, 'repo_list_2')
+            invalidate_cache('repo_list_2')
         except Exception as e:
             c.new_repo = 'Exception when adding: %s' % new_repo
             c.msg = str(e)

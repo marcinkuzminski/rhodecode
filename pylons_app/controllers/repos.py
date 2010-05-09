@@ -10,6 +10,7 @@ from pylons_app.lib.auth import authenticate
 from pylons_app.model.hg_model import HgModel
 from operator import itemgetter
 import shutil
+from pylons_app.lib.utils import invalidate_cache
 log = logging.getLogger(__name__)
 
 class ReposController(BaseController):
@@ -64,6 +65,10 @@ class ReposController(BaseController):
         log.info("Removing %s", rm_path)
         shutil.move(os.path.join(rm_path, '.hg'), os.path.join(rm_path, 'rm__.hg'))
         shutil.move(rm_path, os.path.join(path, 'rm__%s-%s' % (datetime.today(), id)))
+        
+        #clear our cached list for refresh with new repo
+        invalidate_cache('repo_list_2')
+                    
         return redirect(url('repos'))
         
 

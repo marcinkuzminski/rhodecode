@@ -90,6 +90,14 @@ def make_ui(path='hgwebdir.config', checkpaths=True):
     
     return baseui
 
+def invalidate_cache(name):
+    from beaker.cache import region_invalidate
+    if name == 'repo_list_2':
+        log.info('INVALIDATING CACHE FOR %s', name)
+        from pylons_app.lib.base import _get_repos
+        #clear our cached list for refresh with new repo
+        region_invalidate(_get_repos, None, 'repo_list_2')
+
 from vcs.backends.base import BaseChangeset
 from vcs.utils.lazy import LazyProperty
 class EmptyChangeset(BaseChangeset):
