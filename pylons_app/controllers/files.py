@@ -18,12 +18,14 @@ class FilesController(BaseController):
         c.repo_name = get_repo_slug(request)
 
     def index(self, repo_name, revision, f_path):
+        revision = request.POST.get('at_rev', None) or revision
         hg_model = HgModel()
         c.repo = repo = hg_model.get_repo(c.repo_name)
-        c.cur_rev = revision
         c.f_path = f_path
         try:
             c.changeset = repo.get_changeset(repo._get_revision(revision))
+            c.cur_rev = c.changeset.raw_id
+            c.rev_nr = c.changeset.revision
             c.files_list = c.changeset.get_node(f_path)
             c.file_history = self._get_history(repo, c.files_list, f_path)
         except RepositoryError:
