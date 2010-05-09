@@ -49,13 +49,25 @@ from pylons_app.lib import filters
 
     <h2>${h.link_to(_('Changes'),h.url('changelog_home',repo_name=c.repo_name))}</h2>
     <table>
+	<%def name="message_slug(msg)">
+		<%
+		limit = 60
+		if len(msg) > limit:
+			return msg[:limit]+'...'
+		else:
+			return msg
+		%>
+	</%def>    
 	%for cnt,cs in enumerate(c.repo_changesets):
 		<tr class="parity${cnt%2}">
 			<td>${cs._ctx.date()|n,filters.age}</td>
-			<td>${cs.author}</td>
+			<td>${cs.author|n,filters.person}</td>
 			<td>
-				
-				${h.link_to(cs.message,h.url('changeset_home',repo_name=c.repo_name,revision=cs._short))}
+				${h.link_to(message_slug(cs.message),
+				h.url('changeset_home',repo_name=c.repo_name,revision=cs._short),
+				title=cs.message)}
+			</td>
+			<td>
 				<span class="logtags">
 					<span class="branchtag">${cs.branch}</span>
 					%for tag in cs.tags:
