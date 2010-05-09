@@ -8,6 +8,7 @@ from pylons_app.lib.utils import get_repo_slug
 from pylons_app.model.hg_model import HgModel
 from difflib import unified_diff
 from pylons_app.lib.differ import render_udiff
+from vcs.exceptions import RepositoryError
         
 log = logging.getLogger(__name__)
 
@@ -21,11 +22,13 @@ class FilesController(BaseController):
         c.repo = repo = hg_model.get_repo(c.repo_name)
         c.cur_rev = revision
         c.f_path = f_path
-        c.changeset = repo.get_changeset(repo._get_revision(revision))
+        try:
+            c.changeset = repo.get_changeset(repo._get_revision(revision))
+            c.files_list = c.changeset.get_node(f_path)
+            c.file_history = self._get_history(repo, c.files_list, f_path)
+        except RepositoryError:
+            c.files_list = None
         
-        c.files_list = c.changeset.get_node(f_path)
-        
-        c.file_history = self._get_history(repo, c.files_list, f_path)
         return render('files/files.html')
 
     def diff(self, repo_name, f_path):
