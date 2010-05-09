@@ -1,10 +1,10 @@
 import logging
+import os
 
 from pylons import request, response, session, tmpl_context as c, url, app_globals as g
 from pylons.controllers.util import abort, redirect
-
+from beaker.cache import region_invalidate
 from pylons_app.lib.base import BaseController, render
-import os
 from pylons_app.lib import auth
 from pylons_app.model.forms import LoginForm
 import formencode
@@ -18,7 +18,6 @@ log = logging.getLogger(__name__)
 class AdminController(BaseController):
 
     def __before__(self):
-        
         c.admin_user = session.get('admin_user', False)
         c.admin_username = session.get('admin_username')
         
@@ -73,7 +72,7 @@ class AdminController(BaseController):
         if new_repo == '_admin':
             c.msg = 'DENIED'
             c.new_repo = ''
-            return render('add.html')
+            return render('admin/add.html')
 
         new_repo = new_repo.replace(" ", "_")
         new_repo = new_repo.replace("-", "_")
@@ -82,19 +81,22 @@ class AdminController(BaseController):
             self._create_repo(new_repo)
             c.new_repo = new_repo
             c.msg = 'added repo'
+            from pylons_app.lib.base import _get_repos
+            #clear our cached list for refresh with new repo
+            region_invalidate(_get_repos, None, 'repo_list_2')
         except Exception as e:
             c.new_repo = 'Exception when adding: %s' % new_repo
             c.msg = str(e)
 
-        return render('add.html')
+        return render('admin/add.html')
 
 
     def _create_repo(self, repo_name):
         if repo_name in [None, '', 'add']:
             raise Exception('undefined repo_name of repo')
-
+        repo_path = os.path.join(g.base_path, repo_name)
         if check_repo(repo_name, g.base_path):
-            log.info('creating repo %s in %s', repo_name, self.repo_path)
-            cmd = """mkdir %s && hg init %s""" \
-                    % (self.repo_path, self.repo_path)
-            os.popen(cmd)
+            log.info('creating repo %s in %s', repo_name, repo_path)
+            from vcs.backends.hg import MercurialRepository
+            MercurialRepository(repo_path, create=True)        
+                
