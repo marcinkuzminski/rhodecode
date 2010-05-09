@@ -28,11 +28,16 @@
 
     <h2 class="no-link no-border">${_('Files')}</h2>
 	<div id="files_data">
+	%if c.files_list:
 		<h2>${_('Location')}: ${h.files_breadcrumbs(c.repo_name,c.cur_rev,c.files_list.path)}</h2>
 			%if c.files_list.is_dir():
 				<%include file='files_browser.html'/>
 			%else:
 				<%include file='files_source.html'/>			
-			%endif
+			%endif	
+	%else:
+		<h2>${_('No files')}</h2>
+	%endif
+
 	</div>
 </%def>    
