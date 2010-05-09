@@ -22,50 +22,38 @@
 </%def>
 <%def name="css()">
 <link rel="stylesheet" href="/css/monoblue_custom.css" type="text/css" />
-<link rel="stylesheet" href="/css/pygments_diff.css" type="text/css" />
+<link rel="stylesheet" href="/css/diff.css" type="text/css" />
 </%def>
-<div></div>
 <%def name="main()">
-    <h2 class="no-link no-border">${'%s: %s@%s %s %s' % (_('File diff'),c.f_path,c.diff2,'&rarr;',c.diff1)|n}</h2>
-	<div id="files_data">
-		<div id="body" class="codeblock">
-			${h.pygmentize(c.diff,linenos=True,anchorlinenos=True,cssclass="code-diff")}
-		</div>
+    <h2 class="no-link no-border">${'%s:  %s %s %s' % (_('File diff'),c.diff2,'&rarr;',c.diff1)|n}</h2>
+<div id="body" class="diffblock">
+	<div class="code-header">
+		<span>${h.link_to(c.f_path,h.url('files_home',repo_name=c.repo_name,revision=c.diff2.split(':')[1],f_path=c.f_path))}</span>
 	</div>
-	<div style="clear:both"></div>
-    <div id="files_data">
-        <div id="body" class="codeblock">
-            <table class='highlighttable'>
-            %for x in c.diff_2[0]['chunks']:
-                %for y in x:
-                    <tr class="line ${y['action']}">
-                        <td class="lineno_new">
-                            <div class="linenodiv">
-                                <pre>
-                                    ${y['new_lineno']}
-                                </pre>
-                            </div>
-                        </td>
-                        <td class="lineno_old">
-                            <div class="linenodiv">
-                                <pre>
-                                    ${y['old_lineno']}
-                                </pre>
-                            </div>
-                        </td>                        
-                        <td class="code">
-	                        <div class="code-diff">
-	                           <pre>
-	                               <span>
-	                               ${y}
-	                               </span>
-	                           </pre>
-	                        </div>
-                        </td>
-                    </tr>
-                %endfor$
-            %endfor
-            </table>
-        </div>
-    </div>	
+	<div class="code-body">
+ 			%if c.no_changes:
+            	${_('No changes')}
+            %else:        
+	            <table class='code-difftable'>
+	            %for diff in c.diff_files:
+		            %for x in diff['chunks']:
+		                %for y in x:
+		                    <tr class="line ${y['action']}">
+		                        <td id="#${diff['filename']}_N${y['new_lineno']}"class="lineno new">
+		                              <pre><a href="#${diff['filename']}_N${y['new_lineno']}">${y['new_lineno']}</a></pre>
+		                        </td>
+		                        <td id="#${diff['filename']}_O${y['old_lineno']}" class="lineno old">
+		                              <pre><a href="#${diff['filename']}_O${y['old_lineno']}">${y['old_lineno']}</a></pre>
+		                        </td>                        
+		                       <td class="code">
+		                           <pre>${y['line']|n}</pre>
+		                       </td>
+		                    </tr>
+		                %endfor$
+		            %endfor
+		        %endfor
+	            </table>
+            %endif
+	</div>
+</div>
 </%def>    

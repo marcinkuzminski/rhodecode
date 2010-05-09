@@ -1,14 +1,14 @@
 <dl class="overview">
 	<dt>${_('Revision')}</dt>
-	<dd>r${c.files_list.changeset.revision}:${c.files_list.changeset._short}</dd>
+	<dd>r${c.files_list.last_changeset.revision}:${c.files_list.last_changeset._short}</dd>
 	<dt>${_('Size')}</dt>
 	<dd>${h.filesizeformat(c.files_list.size)}</dd>
 	<dt>${_('Options')}</dt>
-	<dd>history  / annotate  / raw  </dd>
+	<dd>${h.link_to(_('annotate'),h.url('#'))}  / ${h.link_to(_('raw'),h.url('#'))}</dd>
 	<dt>${_('History')}</dt>
 	<dd>
 		${h.form(h.url('files_diff_home',repo_name=c.repo_name,f_path=c.f_path),method='GET')}
-		${h.hidden('diff2',c.files_list.changeset._short)}
+		${h.hidden('diff2',c.files_list.last_changeset._short)}
 		${h.select('diff1','',c.file_history)}
 		${h.submit('diff','diff')}
 		${h.end_form()}
@@ -16,5 +16,10 @@
 					
 </dl>		
 <div id="body" class="codeblock">
-	${h.pygmentize(c.files_list.content,linenos=True,anchorlinenos=True,cssclass="code-highlight")}
+	<div class="code-header">
+		<span>${c.files_list.name}@r${c.files_list.last_changeset.revision}:${c.files_list.last_changeset._short}</span>
+	</div>
+	<div class="code-body">
+		${h.pygmentize(c.files_list.content,linenos=True,anchorlinenos=True,cssclass="code-highlight")}
+	</div>
 </div>

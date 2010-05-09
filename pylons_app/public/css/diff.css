@@ -1,0 +1,95 @@
+div.diffblock {
+    overflow: auto;
+    padding: 0px;
+    border: 1px solid #ccc;
+    background: #f8f8f8;
+    font-size: 100%;
+    line-height: 100%;
+    /* new */
+    line-height: 125%;
+}
+div.diffblock .code-header{
+	border-bottom: 1px solid #CCCCCC;
+	background: #EEEEEE;
+	color:blue;
+	padding:10px 0 10px 0;
+}
+div.diffblock .code-header span{
+	margin-left:25px;
+	font-weight: bold;
+}
+div.diffblock .code-body{
+	background: #EEEEEE;
+}
+
+.code-difftable{
+	border-collapse: collapse;
+}
+.code-difftable .add{
+	background:none repeat scroll 0 0 #DDFFDD;
+}
+.code-difftable .add ins{
+	background:none repeat scroll 0 0 #AAFFAA;
+	text-decoration:none;
+}
+
+.code-difftable .del{
+	background:none repeat scroll 0 0 #FFDDDD;
+}
+.code-difftable .del del{
+	background:none repeat scroll 0 0 #FFAAAA;
+	text-decoration:none;
+}
+
+.code-difftable .lineno{
+	background:none repeat scroll 0 0 #EEEEEE !important;
+	border-right:1px solid #DDDDDD;
+	padding-left:2px;
+	padding-right:2px;
+	text-align:right;
+	width:20px;
+	-moz-user-select:none;
+	-webkit-user-select: none;
+}
+.code-difftable .lineno pre{
+	color:#747474 !important;
+	font:11px "Bitstream Vera Sans Mono",Monaco,"Courier New",Courier,monospace !important;
+	letter-spacing:-1px;
+	text-align:right;
+	width:20px;
+}
+.code-difftable .lineno a{
+	color:#0000CC !important;
+}
+.code-difftable .code td{
+	margin:0;
+	padding: 0;
+}
+.code-difftable .code pre{
+	margin:0;
+	padding:0;
+}
+
+
+.code { 
+	display: block;
+	width: 100%;
+}
+.code-diff {
+    padding: 0px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    border-left: 2px solid #ccc;
+}
+.code-diff pre, .line pre { 
+	padding: 3px;
+    margin: 0;
+}
+.lineno a { 
+	text-decoration: none; 
+}
+
+.line{
+	padding:0;
+	margin:0;
+}

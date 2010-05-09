@@ -8,6 +8,16 @@ div.codeblock {
     /* new */
     line-height: 125%;
 }
+div.codeblock .code-header{
+	border-bottom: 1px solid #CCCCCC;
+	background: #EEEEEE;
+	color:blue;
+	padding:10px 0 10px 0;
+}
+div.codeblock .code-header span{
+	margin-left:25px;
+	font-weight: bold;
+}
 
 .code-highlight {
     padding: 0px;
