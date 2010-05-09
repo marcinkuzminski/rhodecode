@@ -6,9 +6,9 @@
 <%def name="breadcrumbs()">
     ${h.link_to(u'Home',h.url('/'))}
     / 
-    ${h.link_to(c.repo_name,h.url('graph_home',repo_name=c.repo_name))}
+    ${h.link_to(c.repo_name,h.url('changelog_home',repo_name=c.repo_name))}
     /
-    ${_('graph')}
+    ${_('changelog')}
 </%def>
 <%def name="page_nav()">
         <form action="log">
@@ -18,23 +18,26 @@
             </dl>
         </form>
 
-		${self.menu('graph')}     
+		${self.menu('changelog')}     
 </%def>
 
 <%def name="main()">
 
-    <h2 class="no-link no-border">${_('Graph')} - ${_('showing ')} ${c.size} ${_('revisions')}</h2>
+    <h2 class="no-link no-border">${_('Changelog')} - ${_('showing ')} ${c.size} ${_('revisions')}</h2>
 	<noscript>${_('The revision graph only works with JavaScript-enabled browsers.')}</noscript>
 <div>
 ${h.form(h.url.current(),method='get')}
-	${_('Show')}: ${h.text('size',size=10,value=c.size)} ${_('revisions')}
+	${_('Show')}: ${h.text('size',size=5,value=c.size)} ${_('revisions')}
 	${h.submit('','set')}
 ${h.end_form()}
 </div>
-<div id="wrapper">
-<ul id="nodebgs"></ul>
-<canvas id="graph" width="224" height="${c.canvasheight}"></canvas>
-<ul id="graphnodes"></ul>
+<div id="wrapper"  style="height:${c.canvasheight}px">
+	<div style="float:left;height:${c.canvasheight}px">
+		<canvas id="graph" width="224" height="${c.canvasheight}"></canvas>
+	</div>
+	<div style="float:left;height:${c.canvasheight}px">
+		<ul id="graphnodes"></ul>
+	</div>
 </div>
 
 <script type="text/javascript" src="/js/graph.js"></script>

@@ -1,15 +1,16 @@
 ## -*- coding: utf-8 -*-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html xmlns="http://www.w3.org/1999/xhtml" id="mainhtml">
 <head>
     <link rel="icon" href="/images/hgicon.png" type="image/png" />
     <meta name="robots" content="index, nofollow"/>
     <title>${next.title()}</title>
+    ##<link rel="stylesheet" href="/js/yui/reset-fonts-grids/reset-fonts-grids.css" type="text/css" />
     ${self.css()}
     ${self.js()}
 </head>
 
-<body>
+<body class="mainbody">
 <div id="container">
     <div class="page-header">
         <h1>
@@ -83,36 +84,20 @@
 					</select>
 				</div>			
 			</li>
-            <li 
-            %if current=='summary':
-            	class='current' 
-            %endif
-            >${h.link_to_unless(current=='summary',_('summary'),h.url('summary_home',repo_name=c.repo_name))}</li>
-            <li 
-            %if current=='changelog':
-            	class='current' 
-            %endif
-            >${h.link_to_unless(current=='changelog',_('changelog'),h.url('changelog_home',repo_name=c.repo_name))}</li>
-            <li 
-            %if current=='branches':
-            	class='current' 
-            %endif
-            >${h.link_to_unless(current=='branches',_('branches'),h.url('branches_home',repo_name=c.repo_name))}</li>
-            <li 
-            %if current=='tags':
-            	class='current' 
-            %endif
-            >${h.link_to_unless(current=='tags',_('tags'),h.url('tags_home',repo_name=c.repo_name))}</li>
-            <li 
-            %if current=='graph':
-            	class='current' 
-            %endif
-            >${h.link_to_unless(current=='graph',_('graph'),h.url('graph_home',repo_name=c.repo_name))}</li>
-            <li 
-            %if current=='files':
-            	class='current' 
-            %endif
-            >${h.link_to_unless(current=='files',_('files'),h.url('files_home',repo_name=c.repo_name))}</li>
+			<%def name="is_current(selected)">
+				<%
+				if selected == current:
+					return 'current'
+				else:
+					return ''
+				%>
+			</%def>
+            <li class="${is_current('summary')}">${h.link_to(_('summary'),h.url('summary_home',repo_name=c.repo_name))}</li>
+            <li class="${is_current('shortlog')}">${h.link_to(_('shortlog'),h.url('shortlog_home',repo_name=c.repo_name))}</li>
+			<li class="${is_current('changelog')}">${h.link_to(_('changelog'),h.url('changelog_home',repo_name=c.repo_name))}</li>            
+            <li class="${is_current('branches')}">${h.link_to(_('branches'),h.url('branches_home',repo_name=c.repo_name))}</li>
+            <li class="${is_current('tags')}">${h.link_to(_('tags'),h.url('tags_home',repo_name=c.repo_name))}</li>
+            <li class="${is_current('files')}">${h.link_to(_('files'),h.url('files_home',repo_name=c.repo_name))}</li>
         </ul>
 </%def>
 
