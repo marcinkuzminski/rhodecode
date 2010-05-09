@@ -3,6 +3,7 @@
 #
 # Copyright (c) 2010 marcink.  All rights reserved.
 #
+from vcs.exceptions import RepositoryError
 '''
 Created on Apr 9, 2010
 
@@ -37,8 +38,12 @@ class HgModel(object):
                 continue
             
             last_change = mercurial_repo.last_change
-            tip_rev = mercurial_repo._get_revision('tip')
-            tip = mercurial_repo.get_changeset(tip_rev)
+            try:
+                tip = mercurial_repo.get_changeset('tip')
+            except RepositoryError:
+                from pylons_app.lib.utils import EmptyChangeset
+                tip = EmptyChangeset()
+                
             tmp_d = {}
             tmp_d['name'] = mercurial_repo.name
             tmp_d['name_sort'] = tmp_d['name']
@@ -46,9 +51,9 @@ class HgModel(object):
             tmp_d['description_sort'] = tmp_d['description']
             tmp_d['last_change'] = last_change
             tmp_d['last_change_sort'] = last_change[1] - last_change[0]
-            tmp_d['tip'] = tip._short
-            tmp_d['tip_sort'] = tip_rev
-            tmp_d['rev'] = tip_rev
+            tmp_d['tip'] = tip.raw_id
+            tmp_d['tip_sort'] = tip.revision 
+            tmp_d['rev'] = tip.revision
             tmp_d['contact'] = mercurial_repo.contact
             tmp_d['contact_sort'] = tmp_d['contact']
             tmp_d['repo_archives'] = list(mercurial_repo._get_archives())

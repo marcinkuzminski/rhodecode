@@ -90,5 +90,17 @@ def make_ui(path='hgwebdir.config', checkpaths=True):
     
     return baseui
 
+from vcs.backends.base import BaseChangeset
+from vcs.utils.lazy import LazyProperty
+class EmptyChangeset(BaseChangeset):
+    
+    revision = -1
 
+    @LazyProperty
+    def raw_id(self):
+        """
+        Returns raw string identifing this changeset, useful for web
+        representation.
+        """
+        return '0' * 12
 
