@@ -89,7 +89,6 @@ from pylons_app.lib import filters
 		%for cnt,tag in enumerate(c.repo_tags):
 		<tr class="parity${cnt%2}">
 			<td>${tag._ctx.date()|n,filters.age}</td>
-			<td></td>
 			<td>
 				<span class="logtags">
 					<span class="tagtag">${h.link_to(tag.tags[-1],h.url('changeset_home',repo_name=c.repo_name,revision=tag._short))}</span>
@@ -109,7 +108,6 @@ from pylons_app.lib import filters
 		%for cnt,branch in enumerate(c.repo_branches):
 		<tr class="parity${cnt%2}">
 			<td>${branch._ctx.date()|n,filters.age}</td>
-			<td></td>
 			<td>
 				<span class="logtags">
 					<span class="branchtag">${h.link_to(branch.branch,h.url('changeset_home',repo_name=c.repo_name,revision=branch._short))}</span>
