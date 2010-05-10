@@ -8,7 +8,7 @@
 <div id="body" class="browserblock">
 	<div class="browser-header">
 		${h.form(h.url.current())}
-		<span>${_('view')}@rev:${h.text('at_rev',value=c.rev_nr,size='5')}</span>
+		<span>${_('view')}@rev ${h.submit('view_low','-')}${h.text('at_rev',value=c.rev_nr,size='5')}${h.submit('view_high','+')}</span>
 		${h.submit('view','view')}
 		${h.end_form()}
 	</div>
