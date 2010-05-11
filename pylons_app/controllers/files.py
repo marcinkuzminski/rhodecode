@@ -31,17 +31,34 @@ class FilesController(BaseController):
                 revision = max_rev
                 
         c.f_path = f_path
+
+        
         try:
             c.changeset = repo.get_changeset(repo._get_revision(revision))
+            try:
+                c.file_msg = c.changeset.get_file_message(f_path)
+            except:
+                c.file_msg = None
+                        
             c.cur_rev = c.changeset.raw_id
             c.rev_nr = c.changeset.revision
             c.files_list = c.changeset.get_node(f_path)
             c.file_history = self._get_history(repo, c.files_list, f_path)
+            
         except (RepositoryError, ChangesetError):
             c.files_list = None
         
         return render('files/files.html')
 
+    def rawfile(self, repo_name, revision, f_path):
+        hg_model = HgModel()
+        c.repo = hg_model.get_repo(c.repo_name)
+        file_node = c.repo.get_changeset(revision).get_node(f_path)
+        response.headers['Content-type'] = file_node.mimetype
+        response.headers['Content-disposition'] = 'attachment; filename=%s' \
+                                                    % f_path.split('/')[-1] 
+        return file_node.content
+    
     def diff(self, repo_name, f_path):
         hg_model = HgModel()
         diff1 = request.GET.get('diff1')
@@ -52,8 +69,8 @@ class FilesController(BaseController):
         c.changeset_1 = c.repo.get_changeset(diff1)
         c.changeset_2 = c.repo.get_changeset(diff2)
         
-        c.file_1 = c.changeset_1.get_node(f_path).content
-        c.file_2 = c.changeset_2.get_node(f_path).content
+        c.file_1 = c.changeset_1.get_file_content(f_path)
+        c.file_2 = c.changeset_2.get_file_content(f_path)
         c.diff1 = 'r%s:%s' % (c.changeset_1.revision, c.changeset_1._short)
         c.diff2 = 'r%s:%s' % (c.changeset_2.revision, c.changeset_2._short)
 
