@@ -4,7 +4,7 @@
 	<dt>${_('Size')}</dt>
 	<dd>${h.filesizeformat(c.files_list.size)}</dd>
 	<dt>${_('Options')}</dt>
-	<dd>${h.link_to(_('annotate'),h.url('#'))}  / ${h.link_to(_('raw'),h.url('#'))}</dd>
+	<dd>${h.link_to(_('annotate'),h.url('#'))}  / ${h.link_to(_('raw'),h.url('files_raw_home',repo_name=c.repo_name,revision=c.cur_rev,f_path=c.f_path))}</dd>
 	<dt>${_('History')}</dt>
 	<dd>
 		${h.form(h.url('files_diff_home',repo_name=c.repo_name,f_path=c.f_path),method='GET')}
@@ -18,6 +18,7 @@
 <div id="body" class="codeblock">
 	<div class="code-header">
 		<span>${c.files_list.name}@r${c.files_list.last_changeset.revision}:${c.files_list.last_changeset._short}</span>
+		 <span style="font-size:70%">"${c.file_msg}"</span>
 	</div>
 	<div class="code-body">
 		${h.pygmentize(c.files_list.content,linenos=True,anchorlinenos=True,cssclass="code-highlight")}
