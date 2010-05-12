@@ -29,7 +29,8 @@ def make_map(config):
     #ADMIN
     with map.submapper(path_prefix='/_admin', controller='admin') as m:
         m.connect('admin_home', '/', action='index')#main page
-        m.connect('admin_add_repo', '/add_repo/{new_repo:[a-z0-9\. _-]*}', action='add_repo')
+        m.connect('admin_add_repo', '/add_repo/{new_repo:[a-z0-9\. _-]*}',
+                  action='add_repo')
     
     
     map.connect('changeset_home', '/{repo_name}/changeset/{revision}',
@@ -50,4 +51,6 @@ def make_map(config):
                 controller='files', action='diff', revision='tip', f_path='')
     map.connect('files_raw_home', '/{repo_name}/rawfile/{revision}/{f_path:.*}',
                 controller='files', action='rawfile', revision='tip', f_path='')
+    map.connect('files_archive_home', '/{repo_name}/archive/{revision}/{fileformat}',
+                controller='files', action='archivefile', revision='tip')
     return map

@@ -20,21 +20,33 @@ class FilesController(BaseController):
     def index(self, repo_name, revision, f_path):
         hg_model = HgModel()
         c.repo = repo = hg_model.get_repo(c.repo_name)
-        
         revision = request.POST.get('at_rev', None) or revision
-        if request.POST.get('view_low'):
-            revision = int(revision) - 1
-        if request.POST.get('view_high'):
-            revision = int(revision) + 1
+        
+        def get_next_rev(cur):
             max_rev = len(c.repo.revisions) - 1
-            if revision > max_rev:
-                revision = max_rev
-                
-        c.f_path = f_path
+            r = cur + 1
+            if r > max_rev:
+                r = max_rev
+            return r
+            
+        def get_prev_rev(cur):
+            r = cur - 1
+            return r
 
+        c.f_path = f_path
+     
         
         try:
-            c.changeset = repo.get_changeset(repo._get_revision(revision))
+            cur_rev = repo.get_changeset(revision).revision
+            prev_rev = repo.get_changeset(get_prev_rev(cur_rev)).raw_id
+            next_rev = repo.get_changeset(get_next_rev(cur_rev)).raw_id
+                    
+            c.url_prev = url('files_home', repo_name=c.repo_name,
+                             revision=prev_rev, f_path=f_path) 
+            c.url_next = url('files_home', repo_name=c.repo_name,
+                             revision=next_rev, f_path=f_path)   
+                    
+            c.changeset = repo.get_changeset(revision)
             try:
                 c.file_msg = c.changeset.get_file_message(f_path)
             except:
@@ -58,6 +70,9 @@ class FilesController(BaseController):
         response.headers['Content-disposition'] = 'attachment; filename=%s' \
                                                     % f_path.split('/')[-1] 
         return file_node.content
+    
+    def archivefile(self, repo_name, revision, fileformat):
+        return '%s %s %s' % (repo_name, revision, fileformat)
     
     def diff(self, repo_name, f_path):
         hg_model = HgModel()

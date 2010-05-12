@@ -38,12 +38,14 @@ from pylons_app.lib import filters
         <dd><pre>hg clone <a href="${c.clone_repo_url}">${c.clone_repo_url}</a></pre></dd>
         <dt>${_('Download')}</dt>
         <dd>
-       	%for archive in c.repo_info._get_archives():
-				| <a href="/${c.repo_info.name}/archive/${archive['node']}${archive['extension']}">
-				${c.repo_info.name}.${archive['type']}
-				</a>
+       	%for cnt,archive in enumerate(c.repo_info._get_archives()):
+       		 %if cnt >=1:
+       		 |
+       		 %endif
+       		 ${h.link_to(c.repo_info.name+'.'+archive['type'],
+       			h.url('files_archive_home',repo_name=c.repo_info.name,
+       			revision='tip',fileformat=archive['extension']))}
 		%endfor
-		| 
         </dd>
     </dl>
 

@@ -8,11 +8,11 @@
 <div id="body" class="browserblock">
 	<div class="browser-header">
 		${h.form(h.url.current())}
-		<span>${_('view')}@rev ${h.submit('view_low','-')}${h.text('at_rev',value=c.rev_nr,size='5')}${h.submit('view_high','+')}</span>
+		<span>${_('view')}@rev <a style="font-size: 1.3em"  href="${c.url_prev}">&laquo;</a>${h.text('at_rev',value=c.rev_nr,size='5')}<a style="font-size: 1.3em" href="${c.url_next}">&raquo;</a></span>
 		${h.submit('view','view')}
 		${h.end_form()}
 	</div>
-	<div class="browser-body">		
+	<div class="browser-body">
 		<table class="code-browser">
 		         <thead>
 		             <tr>
