@@ -35,7 +35,7 @@ from pylons_app.lib import filters
         <dt>${_('last change')}</dt>
         <dd>${c.repo_info.last_change|n,filters.rfc822date} - ${c.repo_info.last_change|n,filters.age}</dd>
         <dt>${_('url')}</dt>
-        <dd><pre>hg clone <a href="${c.clone_repo_url}">${c.clone_repo_url}</a></pre></dd>
+        <dd><pre style="margin:0">hg clone <a href="${c.clone_repo_url}">${c.clone_repo_url}</a></pre></dd>
         <dt>${_('Download')}</dt>
         <dd>
        	%for cnt,archive in enumerate(c.repo_info._get_archives()):
