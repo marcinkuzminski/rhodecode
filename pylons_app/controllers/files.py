@@ -83,15 +83,19 @@ class FilesController(BaseController):
         c.repo = hg_model.get_repo(c.repo_name)
         c.changeset_1 = c.repo.get_changeset(diff1)
         c.changeset_2 = c.repo.get_changeset(diff2)
-        
-        c.file_1 = c.changeset_1.get_file_content(f_path)
-        c.file_2 = c.changeset_2.get_file_content(f_path)
+        f1 = c.changeset_1.get_node(f_path)
+        f2 = c.changeset_2.get_node(f_path)
+
         c.diff1 = 'r%s:%s' % (c.changeset_1.revision, c.changeset_1._short)
         c.diff2 = 'r%s:%s' % (c.changeset_2.revision, c.changeset_2._short)
 
-        d2 = unified_diff(c.file_1.splitlines(1), c.file_2.splitlines(1))
-        c.diff_files = render_udiff(udiff=d2)
+        f_udiff = unified_diff(f1.content.splitlines(True),
+                               f2.content.splitlines(True),
+                               f1.name,
+                               f2.name)
         
+        c.diff_files = render_udiff(udiff=f_udiff, differ='difflib')
+        print c.diff_files
         if len(c.diff_files) < 1:
             c.no_changes = True
         return render('files/file_diff.html')

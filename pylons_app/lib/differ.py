@@ -40,11 +40,18 @@ class DiffProcessor(object):
         """Extract the filename and revision hint from a line."""
         try:
             if line1.startswith('--- ') and line2.startswith('+++ '):
-                filename, old_rev = line1[4:].split(None, 1)
-                new_rev = line2[4:].split(None, 1)[1]
-                return filename, 'old', 'new'
+                l1 = line1[4:].split(None, 1)
+                old_filename = l1[0] if len(l1) >= 1 else None
+                old_rev = l1[1] if len(l1) == 2 else 'old'
+                
+                l2 = line1[4:].split(None, 1)
+                new_filename = l2[0] if len(l2) >= 1 else None
+                new_rev = l2[1] if len(l2) == 2 else 'new'
+                                 
+                return old_filename, new_rev, old_rev
         except (ValueError, IndexError):
             pass
+        
         return None, None, None
 
     def _highlight_line_difflib(self, line, next):
