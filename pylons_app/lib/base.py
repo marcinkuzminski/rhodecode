@@ -21,6 +21,7 @@ class BaseController(WSGIController):
         # the request is routed to. This routing information is
         # available in environ['pylons.routes_dict']
         c.repo_list = _get_repos()
+        self.sa = meta.Session
         try:
             return WSGIController.__call__(self, environ, start_response)
         finally:

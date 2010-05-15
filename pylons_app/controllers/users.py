@@ -5,7 +5,6 @@ from pylons.controllers.util import abort, redirect
 
 from pylons_app.lib.base import BaseController, render
 from formencode import htmlfill
-from pylons_app.model import meta
 from pylons_app.model.db import Users, UserLogs
 from pylons_app.lib.auth import authenticate
 import crypt
@@ -20,10 +19,8 @@ class UsersController(BaseController):
     
     @authenticate
     def __before__(self):
-        
         c.admin_user = session.get('admin_user')
         c.admin_username = session.get('admin_username')
-        self.sa = meta.Session
         
     def index(self, format='html'):
         """GET /users: All items in the collection"""

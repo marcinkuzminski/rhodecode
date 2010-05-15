@@ -4,7 +4,6 @@ from pylons import request, response, session, tmpl_context as c, url, app_globa
 from pylons.controllers.util import abort, redirect
 from pylons_app.lib import auth
 from pylons_app.lib.base import BaseController, render
-from pylons_app.model import meta
 from pylons_app.model.db import Users, UserLogs
 from pylons_app.lib.auth import authenticate
 from pylons_app.model.hg_model import HgModel
@@ -21,10 +20,8 @@ class ReposController(BaseController):
     
     @authenticate
     def __before__(self):
-        
         c.admin_user = session.get('admin_user')
         c.admin_username = session.get('admin_username')
-        self.sa = meta.Session
                 
     def index(self, format='html'):
         """GET /repos: All items in the collection"""
