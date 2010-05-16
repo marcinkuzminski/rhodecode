@@ -10,8 +10,10 @@ from pylons_app.lib import filters
 	${c.repos_prefix} Mercurial Repositories
 </%def>
 <%def name="page_nav()">
-	<li class="current">${_('Home')}</li>
-	<li>${h.link_to(u'Admin',h.url('admin_home'))}</li>
+	<ul class="page-nav">
+		<li class="current">${_('Home')}</li>
+		<li>${h.link_to(u'Admin',h.url('admin_home'))}</li>
+	</ul>
 </%def>
 <%def name="main()">
 	<%def name="get_sort(name)">
