@@ -13,12 +13,8 @@
 <body class="mainbody">
 <div id="container">
     <div class="page-header">
-        <h1>
-            ${next.breadcrumbs()}
-        </h1>
-        <ul class="page-nav">
-            ${self.page_nav()}
-        </ul>
+        <h1>${next.breadcrumbs()}</h1>
+        ${self.page_nav()}
     </div>
     <div id="main">
     	${next.main()}
@@ -44,9 +40,7 @@
 </html>
 
 <%def name="page_nav()">
-
 	${self.menu()}
-
 </%def>
 
 
