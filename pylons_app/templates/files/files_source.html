@@ -17,8 +17,8 @@
 </dl>		
 <div id="body" class="codeblock">
 	<div class="code-header">
-		<span>${c.files_list.name}@r${c.files_list.last_changeset.revision}:${c.files_list.last_changeset._short}</span>
-		 <span style="font-size:70%">"${c.file_msg}"</span>
+		<div class="revision">${c.files_list.name}@r${c.files_list.last_changeset.revision}:${c.files_list.last_changeset._short}</div>
+		<div class="commit" style="font-size:70%">"${c.file_msg}"</div>
 	</div>
 	<div class="code-body">
 		${h.pygmentize(c.files_list.content,linenos=True,anchorlinenos=True,cssclass="code-highlight")}

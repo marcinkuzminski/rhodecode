@@ -14,9 +14,13 @@ div.codeblock .code-header{
 	color:blue;
 	padding:10px 0 10px 0;
 }
-div.codeblock .code-header span{
+div.codeblock .code-header .revision{
 	margin-left:25px;
 	font-weight: bold;
+}
+div.codeblock .code-header .commit{
+	margin-left:25px;
+	font-weight: normal;
 }
 
 .code-highlight {

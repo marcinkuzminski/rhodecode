@@ -34,25 +34,7 @@
  			%if c.no_changes:
             	${_('No changes')}
             %else:        
-	            <table class='code-difftable'>
-	            %for diff in c.diff_files:
-		            %for x in diff['chunks']:
-		                %for y in x:
-		                    <tr class="line ${y['action']}">
-		                        <td id="#${diff['filename']}_O${y['old_lineno']}" class="lineno old">
-		                              <pre><a href="#${diff['filename']}_O${y['old_lineno']}">${y['old_lineno']}</a></pre>
-		                        </td>		                    
-		                        <td id="#${diff['filename']}_N${y['new_lineno']}"class="lineno new">
-		                              <pre><a href="#${diff['filename']}_N${y['new_lineno']}">${y['new_lineno']}</a></pre>
-		                        </td>                        
-		                       <td class="code">
-		                           <pre>${y['line']|n}</pre>
-		                       </td>
-		                    </tr>
-		                %endfor$
-		            %endfor
-		        %endfor
-	            </table>
+				${c.differ.as_HTML()|n}
             %endif
 	</div>
 </div>

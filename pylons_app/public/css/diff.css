@@ -24,6 +24,14 @@ div.diffblock .code-body{
 
 .code-difftable{
 	border-collapse: collapse;
+	width: 99%;
+}
+.code-difftable td:target *{
+	background:  repeat scroll 0 0 #FFFFBE !important;
+	text-decoration: underline;
+}
+.code-difftable .context{
+	background:none repeat scroll 0 0 #DDE7EF;
 }
 .code-difftable .add{
 	background:none repeat scroll 0 0 #DDFFDD;

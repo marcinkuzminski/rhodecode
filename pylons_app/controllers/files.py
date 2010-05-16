@@ -6,8 +6,7 @@ from pylons.controllers.util import abort, redirect
 from pylons_app.lib.base import BaseController, render
 from pylons_app.lib.utils import get_repo_slug
 from pylons_app.model.hg_model import HgModel
-from difflib import unified_diff
-from pylons_app.lib.differ import render_udiff
+from vcs.utils import diffs as differ
 from vcs.exceptions import RepositoryError, ChangesetError
         
 log = logging.getLogger(__name__)
@@ -83,21 +82,14 @@ class FilesController(BaseController):
         c.repo = hg_model.get_repo(c.repo_name)
         c.changeset_1 = c.repo.get_changeset(diff1)
         c.changeset_2 = c.repo.get_changeset(diff2)
-        f1 = c.changeset_1.get_node(f_path)
-        f2 = c.changeset_2.get_node(f_path)
 
         c.diff1 = 'r%s:%s' % (c.changeset_1.revision, c.changeset_1._short)
         c.diff2 = 'r%s:%s' % (c.changeset_2.revision, c.changeset_2._short)
-
-        f_udiff = unified_diff(f1.content.splitlines(True),
-                               f2.content.splitlines(True),
-                               f1.name,
-                               f2.name)
         
-        c.diff_files = render_udiff(udiff=f_udiff, differ='difflib')
-        print c.diff_files
-        if len(c.diff_files) < 1:
-            c.no_changes = True
+        
+        f_udiff = differ.get_udiff(c.changeset_1.get_node(f_path),
+                            c.changeset_2.get_node(f_path))
+        c.differ = differ.DiffProcessor(f_udiff)
         return render('files/file_diff.html')
     
     def _get_history(self, repo, node, f_path):
