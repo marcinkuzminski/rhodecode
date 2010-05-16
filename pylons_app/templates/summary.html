@@ -19,11 +19,9 @@ from pylons_app.lib import filters
                 <dd><input type="text" name="rev" /></dd>
             </dl>
         </form>
-
 		${self.menu('summary')}    
 </%def>
 <%def name="main()">
-
     <h2 class="no-link no-border">${_('Mercurial Repository Overview')}</h2>
     <dl class="overview">
         <dt>${_('name')}</dt>
