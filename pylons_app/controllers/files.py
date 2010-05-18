@@ -65,8 +65,8 @@ class FilesController(BaseController):
         hg_model = HgModel()
         c.repo = hg_model.get_repo(c.repo_name)
         file_node = c.repo.get_changeset(revision).get_node(f_path)
-        response.headers['Content-type'] = file_node.mimetype
-        response.headers['Content-disposition'] = 'attachment; filename=%s' \
+        response.content_type = file_node.mimetype
+        response.content_disposition = 'attachment; filename=%s' \
                                                     % f_path.split('/')[-1] 
         return file_node.content
     
@@ -77,6 +77,7 @@ class FilesController(BaseController):
         hg_model = HgModel()
         diff1 = request.GET.get('diff1')
         diff2 = request.GET.get('diff2')
+        c.action = action = request.GET.get('diff')
         c.no_changes = diff1 == diff2
         c.f_path = f_path
         c.repo = hg_model.get_repo(c.repo_name)
@@ -85,11 +86,23 @@ class FilesController(BaseController):
 
         c.diff1 = 'r%s:%s' % (c.changeset_1.revision, c.changeset_1._short)
         c.diff2 = 'r%s:%s' % (c.changeset_2.revision, c.changeset_2._short)
-        
-        
         f_udiff = differ.get_udiff(c.changeset_1.get_node(f_path),
                             c.changeset_2.get_node(f_path))
-        c.differ = differ.DiffProcessor(f_udiff)
+        
+        diff = differ.DiffProcessor(f_udiff)
+                                
+        if action == 'download':
+            diff_name = '%s_vs_%s.diff' % (diff1, diff2)
+            response.content_type = 'text/plain'
+            response.content_disposition = 'attachment; filename=%s' \
+                                                    % diff_name             
+            return diff.raw_diff()
+        
+        elif action == 'raw':
+            c.cur_diff = '<pre class="raw">%s</pre>' % diff.raw_diff()
+        elif action == 'diff':
+            c.cur_diff = diff.as_html()
+
         return render('files/file_diff.html')
     
     def _get_history(self, repo, node, f_path):

@@ -12,7 +12,9 @@ a {
 a:HOVER{
 	text-decoration: underline;
 }
-/*** end of Initial Settings ***/ /** common settings **/
+/*** end of Initial Settings ***/ 
+
+/** common settings **/
 div#main {
 	padding: 5px;
 }
@@ -381,76 +383,97 @@ p.files {
 /** end of file **/ 
 
 /** changeset **/
-h3.changeset {
-	margin: 20px 0 5px 20px;
-	padding: 0 0 2px;
-	font-size: 1.6em;
-	border-bottom: dotted 1px #D5E1E6;
-}
 
-p.changeset-age {
-	position: relative;
+.cs_files{
+	border: 2px solid #CCCCCC;
+	width: 60%;
+	
 }
-
-p.changeset-age span {
-	position: absolute;
-	top: -25px;
-	right: 10px;
-	font-size: 1.4em;
-	color: #CCC;
-	font-weight: bold;
-	font-style: italic;
+.cs_files .cs_added{
+	background:#BBFFBB;
 }
-
-p.description {
-	margin: 10px 30px 0 30px;
-	padding: 10px;
-	border: solid 1px #CCC;
-	font-size: 1.2em;
+.cs_files .cs_changed{
+	background: #FFDD88;
+}
+.cs_files .cs_removed{
+	background: #FF8888;
 }
 
 /** end of changeset **/ 
 
 /** canvas **/
-div#wrapper {
-	position: relative;
-	font-size: 1.2em;
-}
-
 canvas {
 	position: absolute;
 	z-index: 5;
 	top: -0.7em;
 }
+#graph{
+	overflow: hidden;
 
-ul#nodebgs li.parity0 {
-	background: #F1F6F7;
+}
+#graph_nodes{
+	width:160px;
+	float:left;
 }
 
-ul#nodebgs li.parity1 {
-	background: #FFFFFF;
+#graph_content{
+	width:800px;
+	float:left;
+}
+#graph_content .container_header{
+	border:1px solid #CCCCCC;
+	height:30px;
+	background: #EEEEEE;
 }
 
-ul#graphnodes {
-	position: absolute;
-	z-index: 10;
-	top: 7px;
-	list-style: none inside none;
+
+#graph_content .container .wrapper{
+	width: 600px;
+}
+#graph_content .container{
+	border-bottom: 1px solid #CCCCCC;
+	border-left: 1px solid #CCCCCC;
+	border-right: 1px solid #CCCCCC;
+	height:120px;
 }
 
-ul#nodebgs {
-	list-style: none inside none;
+#graph_content .container .left{
+	float:left;
+	width: 70%;
+	padding-left: 5px;
 }
 
-ul#graphnodes li,ul#nodebgs li {
-	height: 39px;
+#graph_content .container .right{
+	float:right;
+	width: 25%;
+}
+#graph_content .container .left .date{
+	font-weight:bold;
+}
+#graph_content .container .left .author{
+	
+}
+#graph_content .container .left .message{
+	font-size: 80%;
 }
 
-ul#graphnodes li .info {
-	display: block;
-	position: relative;
+.right .added,.changed,.removed{
+	border:1px solid #DDDDDD;
+	display:block;
+	float:right;
+	font-size:0.75em;
+	text-align:center;
+	min-width:15px;
 }
-
+.right .added{
+	background:#BBFFBB; 
+}
+.right .changed{
+	background: #FFDD88;
+}
+.right .removed{
+	background: #FF8888;
+}
 /** end of canvas **/
 
 /* FILE BROWSER */
@@ -479,7 +502,8 @@ div.browserblock .browser-body{
 }
 
 table.code-browser {
-	border-collapse:collapse;	
+	border-collapse:collapse;
+	width: 100%;
 }
 table.code-browser tr{
 	margin:3px;	
@@ -491,6 +515,8 @@ table.code-browser thead th {
 	font-size: 1.1em;
 	font-weight: bold;
 	text-align: center;
+	text-align: left;
+	padding-left: 10px;
 }
 table.code-browser tbody tr {
 	

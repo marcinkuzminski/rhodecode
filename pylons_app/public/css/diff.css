@@ -14,12 +14,16 @@ div.diffblock .code-header{
 	color:blue;
 	padding:10px 0 10px 0;
 }
-div.diffblock .code-header span{
+div.diffblock .code-header div{
 	margin-left:25px;
 	font-weight: bold;
 }
 div.diffblock .code-body{
 	background: #EEEEEE;
+}
+div.diffblock pre.raw{
+	background: #FFFFFF;
+	color:#000000;
 }
 
 .code-difftable{
