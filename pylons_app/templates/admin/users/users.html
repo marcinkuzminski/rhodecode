@@ -10,8 +10,10 @@
     ${h.link_to(u'Users managment',h.url('users'))}
 </%def>
 <%def name="page_nav()">
-    <li>${h.link_to(u'Home',h.url('/'))}</li>
-    <li class="current">${_('Admin')}</li>
+<ul class="page-nav">
+	<li>${h.link_to(u'Home',h.url('/'))}</li>
+	<li class="current">${_('Admin')}</li>
+</ul>
 </%def>
 <%def name="main()">
     <ul class="submenu">

@@ -15,8 +15,10 @@ from pylons_app.lib import filters
 </%def>
 
 <%def name="page_nav()">
-<li>${h.link_to(u'Home',h.url('hg_home'))}</li>
-<li class="current">${_('Admin')}</li>
+<ul class="page-nav">
+	<li>${h.link_to(u'Home',h.url('hg_home'))}</li>
+	<li class="current">${_('Admin')}</li>
+</ul>
 </%def>
 <%def name="js()">
 
