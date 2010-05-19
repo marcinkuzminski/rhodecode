@@ -62,6 +62,7 @@ from pylons_app.lib import filters
 		<tr class="parity${cnt%2}">
 			<td>${cs._ctx.date()|n,filters.age}</td>
 			<td>${cs.author|n,filters.person}</td>
+			<td>r${cs.revision}</td>
 			<td>
 				${h.link_to(message_slug(cs.message),
 				h.url('changeset_home',repo_name=c.repo_name,revision=cs._short),
