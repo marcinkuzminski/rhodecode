@@ -100,3 +100,14 @@
 <%def name="js()">
 <script type="text/javascript" src="/js/yui/utilities/utilities.js"></script>
 </%def>
+
+<!-- DEFINITION OF FORM ERROR FETCHER -->
+<%def name="get_form_error(element)">
+	%if hasattr(c,'form_errors') and type(c.form_errors) == dict:
+        %if c.form_errors.get(element,False):
+            <span class="error-message">
+                ${c.form_errors.get(element,'')}
+            </span>
+        %endif
+	%endif           
+</%def>
