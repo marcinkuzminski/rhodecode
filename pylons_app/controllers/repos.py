@@ -26,9 +26,7 @@ class ReposController(BaseController):
     def index(self, format='html'):
         """GET /repos: All items in the collection"""
         # url('repos')
-        hg_model = HgModel()
-        c.repos_list = list(hg_model.get_repos())
-        c.repos_list.sort(key=itemgetter('name'))
+        c.repos_list = c.cached_repo_list
         return render('admin/repos/repos.html')
     
     def create(self):
@@ -64,7 +62,7 @@ class ReposController(BaseController):
         shutil.move(rm_path, os.path.join(path, 'rm__%s-%s' % (datetime.today(), id)))
         
         #clear our cached list for refresh with new repo
-        invalidate_cache('repo_list_2')
+        invalidate_cache('cached_repo_list')
                     
         return redirect(url('repos'))
         
