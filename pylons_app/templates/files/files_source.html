@@ -2,9 +2,11 @@
 	<dt>${_('Revision')}</dt>
 	<dd>r${c.files_list.last_changeset.revision}:${c.files_list.last_changeset._short}</dd>
 	<dt>${_('Size')}</dt>
-	<dd>${h.filesizeformat(c.files_list.size)}</dd>
+	<dd>${h.format_byte_size(c.files_list.size,binary=True)}</dd>
 	<dt>${_('Options')}</dt>
-	<dd>${h.link_to(_('annotate'),h.url('#'))}  / ${h.link_to(_('raw'),h.url('files_raw_home',repo_name=c.repo_name,revision=c.cur_rev,f_path=c.f_path))}</dd>
+	<dd>${h.link_to(_('annotate'),
+	h.url('files_annotate_home',repo_name=c.repo_name,revision=c.cur_rev,f_path=c.f_path))}  / ${h.link_to(_('raw'),
+	h.url('files_raw_home',repo_name=c.repo_name,revision=c.cur_rev,f_path=c.f_path))}</dd>
 	<dt>${_('History')}</dt>
 	<dd>
 		${h.form(h.url('files_diff_home',repo_name=c.repo_name,f_path=c.f_path),method='GET')}
