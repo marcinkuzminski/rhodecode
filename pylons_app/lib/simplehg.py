@@ -1,7 +1,7 @@
 import os
 from mercurial.hgweb import hgweb
 from mercurial.hgweb.request import wsgiapplication
-from pylons_app.lib.utils import make_ui
+from pylons_app.lib.utils import make_ui, invalidate_cache
 from pylons.controllers.util import abort
 from webob.exc import HTTPNotFound
 class SimpleHg(object):
@@ -22,12 +22,17 @@ class SimpleHg(object):
             #since we wrap into hgweb, just reset the path
             environ['PATH_INFO'] = '/'
             self.baseui = make_ui()
-            self.basepath = self.baseui.configitems('paths')[0][1].replace('*', '')
+            self.basepath = self.baseui.configitems('paths')[0][1]\
+                                                            .replace('*', '')
             self.repo_path = os.path.join(self.basepath, repo_name)
             try:
                 app = wsgiapplication(self._make_app)
             except Exception as e:
                 return HTTPNotFound()(environ, start_response)
+            
+            """we know that some change was made to repositories and we should
+            invalidate the cache to see the changes right away"""
+            invalidate_cache('full_changelog', repo_name)
             return app(environ, start_response)            
 
     def _make_app(self):

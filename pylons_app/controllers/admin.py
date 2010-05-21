@@ -82,7 +82,7 @@ class AdminController(BaseController):
             c.new_repo = new_repo
             c.msg = 'added repo'
             #clear our cached list for refresh with new repo
-            invalidate_cache('repo_list_2')
+            invalidate_cache('cached_repo_list')
         except Exception as e:
             c.new_repo = 'Exception when adding: %s' % new_repo
             c.msg = str(e)

@@ -90,14 +90,25 @@ def make_ui(path='hgwebdir.config', checkpaths=True):
     
     return baseui
 
-def invalidate_cache(name):
+def invalidate_cache(name, *args):
     from beaker.cache import region_invalidate
-    if name == 'repo_list_2':
-        log.info('INVALIDATING CACHE FOR %s', name)
-        from pylons_app.lib.base import _get_repos
-        #clear our cached list for refresh with new repo
-        region_invalidate(_get_repos, None, 'repo_list_2')
-
+    log.info('INVALIDATING CACHE FOR %s', name)
+    
+    """propaget our arguments to make sure invalidation works. First
+    argument has to be the name of cached func name give to cache decorator
+    without that the invalidation would not work"""
+    tmp = [name]
+    tmp.extend(args)
+    args = tuple(tmp)
+    
+    if name == 'cached_repo_list':
+        from pylons_app.lib.base import _get_repos_cached
+        region_invalidate(_get_repos_cached, None, *args)
+        
+    if name == 'full_changelog':
+        from pylons_app.controllers.changelog import _full_changelog_cached
+        region_invalidate(_full_changelog_cached, None, *args)
+        
 from vcs.backends.base import BaseChangeset
 from vcs.utils.lazy import LazyProperty
 class EmptyChangeset(BaseChangeset):
