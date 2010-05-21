@@ -1,0 +1,42 @@
+## -*- coding: utf-8 -*-
+<%!
+from pylons_app.lib import filters
+%>
+<%inherit file="base/base.html"/>
+<%def name="title()">
+    ${c.repos_prefix} Mercurial Repositories
+</%def>
+<%def name="breadcrumbs()">
+	${c.repos_prefix} Mercurial Repositories
+</%def>
+<%def name="page_nav()">
+	${self.menu('home')}
+</%def>
+<%def name="main()">
+        <div>
+        <br />
+        <h2>${_('Login')}</h2>
+        ${h.form(h.url.current())}
+        <table>
+            <tr>
+                <td>${_('Username')}</td>
+                <td>${h.text('username')}</td>
+                <td>${self.get_form_error('username')} 
+
+                </td>
+            </tr>
+            <tr>
+                <td>${_('Password')}</td>
+                <td>${h.password('password')}</td>
+                <td>${self.get_form_error('password')}</td> 
+            </tr>
+            <tr>
+                <td></td>
+                <td>${h.submit('login','login')}</td>
+            </tr>            
+        </table>
+        ${h.end_form()}
+        </div>
+</%def>    
+
+

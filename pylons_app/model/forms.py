@@ -16,24 +16,88 @@ ignore_key_missing      False     If True, then missing keys will be missing in 
 <name> = formencode.validators.<name of validator>
 <name> must equal form name
 list=[1,2,3,4,5]
-for select use formencode.All(OneOf(list), Int())
+for SELECT use formencode.All(OneOf(list), Int())
     
 """
-
-import formencode
 from formencode.validators import UnicodeString, OneOf, Int, Number, Regex
+from pylons import session
 from pylons.i18n.translation import _
+from pylons_app.lib.auth import get_crypt_password
+from pylons_app.model import meta
+from pylons_app.model.db import Users
+from sqlalchemy.exc import OperationalError
+from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from webhelpers.pylonslib.secure_form import authentication_token
+import formencode
+import logging
+log = logging.getLogger(__name__)
 
+
+#this is needed to translate the messages using _() in validators
+class State_obj(object):
+    _ = staticmethod(_)
+    
+#===============================================================================
+# VALIDATORS
+#===============================================================================
 class ValidAuthToken(formencode.validators.FancyValidator):
     messages = {'invalid_token':_('Token mismatch')}
 
     def validate_python(self, value, state):
 
         if value != authentication_token():
-            raise formencode.Invalid(self.message('invalid_token', state, search_number=value), value, state)
+            raise formencode.Invalid(self.message('invalid_token', state,
+                                            search_number=value), value, state)
 
-
+class ValidAuth(formencode.validators.FancyValidator):
+    messages = {
+            'invalid_password':_('invalid password'),
+            'invalid_login':_('invalid user name'),
+            'disabled_account':_('Your acccount is disabled')
+            
+            }
+    #error mapping
+    e_dict = {'username':messages['invalid_login'],
+              'password':messages['invalid_password']}
+    
+    def validate_python(self, value, state):
+        sa = meta.Session
+        crypted_passwd = get_crypt_password(value['password'])
+        username = value['username']
+        try:
+            user = sa.query(Users).filter(Users.username == username).one()
+        except (NoResultFound, MultipleResultsFound, OperationalError) as e:
+            log.error(e)
+            user = None
+        print value
+        if user:
+            if user.active:
+                if user.username == username and user.password == crypted_passwd:
+                    log.info('user %s authenticated correctly', username)
+                    from pylons_app.lib.auth import AuthUser
+                    auth_user = AuthUser()
+                    auth_user.username = username
+                    auth_user.is_authenticated = True
+                    auth_user.is_admin = user.admin
+                    session['hg_app_user'] = auth_user
+                    session.save()
+                    return value
+                else:
+                    log.warning('user %s not authenticated', username)
+                    raise formencode.Invalid(self.message('invalid_password',
+                                             state=State_obj), value, state,
+                                             error_dict=self.e_dict)
+            else:
+                log.warning('user %s is disabled', username)
+                raise formencode.Invalid(self.message('disabled_account',
+                                         state=State_obj),
+                                         value, state, error_dict=self.e_dict)
+            
+            
+        
+#===============================================================================
+# FORMS        
+#===============================================================================
 class LoginForm(formencode.Schema):
     allow_extra_fields = True
     filter_extra_fields = True
@@ -55,4 +119,8 @@ class LoginForm(formencode.Schema):
                                       'tooShort':_('Enter a value %(min)i characters long or more')}
                                 )
 
+
+    #chained validators have access to all data
+    chained_validators = [ValidAuth]
+    
 
