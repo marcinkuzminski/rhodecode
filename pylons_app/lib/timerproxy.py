@@ -10,18 +10,28 @@ def color_sql(sql):
     normal = '\x1b[0m'
     return COLOR_SEQ % COLOR_SQL + sql + normal 
 
+def one_space_trim(s):
+    if s.find("  ") == -1:
+        return s
+    else:
+        s = s.replace('  ', ' ')
+        return one_space_trim(s)
+    
 def format_sql(sql):
     sql = color_sql(sql)
-    sql = sql.replace('SELECT', '\n    SELECT \n\t')\
-        .replace('FROM', '\n    FROM')\
-        .replace('ORDER BY', '\n    ORDER BY')\
-        .replace('LIMIT', '\n    LIMIT')\
-        .replace('WHERE', '\n    WHERE')\
-        .replace('AND', '\n    AND')\
-        .replace('LEFT', '\n    LEFT')\
-        .replace('INNER', '\n    INNER')\
-        .replace('INSERT', '\n    INSERT')\
-        .replace('DELETE', '\n    DELETE')
+    sql = sql.replace('\n', '')
+    sql = one_space_trim(sql)
+    sql = sql\
+        .replace('SELECT', '\n\tSELECT \n\t')\
+        .replace('FROM', '\n\tFROM')\
+        .replace('ORDER BY', '\n\tORDER BY')\
+        .replace('LIMIT', '\n\tLIMIT')\
+        .replace('WHERE', '\n\tWHERE')\
+        .replace('AND', '\n\tAND')\
+        .replace('LEFT', '\n\tLEFT')\
+        .replace('INNER', '\n\tINNER')\
+        .replace('INSERT', '\n\tINSERT')\
+        .replace('DELETE', '\n\tDELETE')
     return sql
 
 
