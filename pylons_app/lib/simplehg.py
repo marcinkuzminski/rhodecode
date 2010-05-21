@@ -1,8 +1,21 @@
+#!/usr/bin/env python
+# encoding: utf-8
+#
+# Copyright (c) 2010 marcink.  All rights reserved.
+#
+"""
+Created on 2010-04-28
+
+@author: marcink
+SimpleHG middleware for handling mercurial protocol request (push/clone etc.)
+It's implemented with basic auth function
+"""
+
 from mercurial.hgweb import hgweb
 from mercurial.hgweb.request import wsgiapplication
 from paste.auth.basic import AuthBasicAuthenticator
 from paste.httpheaders import REMOTE_USER, AUTH_TYPE
-from pylons.controllers.util import abort
+from pylons_app.lib.utils import is_mercurial
 from pylons_app.lib.auth import authfunc
 from pylons_app.lib.utils import make_ui, invalidate_cache
 from webob.exc import HTTPNotFound
@@ -69,17 +82,5 @@ class SimpleHg(object):
             hgserve.repo.ui = repoui
             
         return hgserve
-
-
-                                
-def is_mercurial(environ):
-    """
-    Returns True if request's target is mercurial server - header
-    ``HTTP_ACCEPT`` of such request would start with ``application/mercurial``.
-    """
-    http_accept = environ.get('HTTP_ACCEPT')
-    if http_accept and http_accept.startswith('application/mercurial'):
-        return True
-    return False
 
 
