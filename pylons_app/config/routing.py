@@ -32,6 +32,8 @@ def make_map(config):
         m.connect('admin_add_repo', '/add_repo/{new_repo:[a-z0-9\. _-]*}',
                   action='add_repo')
     
+    map.connect('login_home', '/login', controller='login')
+    map.connect('logout_home', '/logout', controller='login', action='logout')
     
     map.connect('changeset_home', '/{repo_name}/changeset/{revision}',
                 controller='changeset', revision='tip')
@@ -51,6 +53,8 @@ def make_map(config):
                 controller='files', action='diff', revision='tip', f_path='')
     map.connect('files_raw_home', '/{repo_name}/rawfile/{revision}/{f_path:.*}',
                 controller='files', action='rawfile', revision='tip', f_path='')
+    map.connect('files_annotate_home', '/{repo_name}/annotate/{revision}/{f_path:.*}',
+                controller='files', action='annotate', revision='tip', f_path='')    
     map.connect('files_archive_home', '/{repo_name}/archive/{revision}/{fileformat}',
                 controller='files', action='archivefile', revision='tip')
     return map
