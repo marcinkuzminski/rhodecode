@@ -1,19 +1,38 @@
-import os
 from mercurial.hgweb import hgweb
 from mercurial.hgweb.request import wsgiapplication
-from pylons_app.lib.utils import make_ui, invalidate_cache
+from paste.auth.basic import AuthBasicAuthenticator
+from paste.httpheaders import REMOTE_USER, AUTH_TYPE
 from pylons.controllers.util import abort
+from pylons_app.lib.auth import authfunc
+from pylons_app.lib.utils import make_ui, invalidate_cache
 from webob.exc import HTTPNotFound
+import os
+
 class SimpleHg(object):
 
     def __init__(self, application, config):
         self.application = application
         self.config = config
+        #authenticate this mercurial request using 
+        realm = '%s %s' % (config['repos_name'], 'mercurial repository')
+        self.authenticate = AuthBasicAuthenticator(realm, authfunc)
         
     def __call__(self, environ, start_response):
         if not is_mercurial(environ):
             return self.application(environ, start_response)
         else:
+            #===================================================================
+            # AUTHENTICATE THIS MERCURIAL REQUEST
+            #===================================================================
+            username = REMOTE_USER(environ)
+            if not username:
+                result = self.authenticate(environ)
+                if isinstance(result, str):
+                    AUTH_TYPE.update(environ, 'basic')
+                    REMOTE_USER.update(environ, result)
+                else:
+                    return result.wsgi_application(environ, start_response)
+            
             try:
                 repo_name = environ['PATH_INFO'].split('/')[1]
             except:
@@ -50,6 +69,8 @@ class SimpleHg(object):
             hgserve.repo.ui = repoui
             
         return hgserve
+
+
                                 
 def is_mercurial(environ):
     """

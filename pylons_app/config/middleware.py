@@ -10,7 +10,6 @@ from routes.middleware import RoutesMiddleware
 from paste.auth.basic import AuthBasicHandler
 from pylons_app.lib.simplehg import SimpleHg
 from pylons_app.config.environment import load_environment
-from pylons_app.lib.auth import authfunc 
 
 def make_app(global_conf, full_stack=True, static_files=True, **app_conf):
     """Create a Pylons WSGI application and return it
@@ -45,7 +44,6 @@ def make_app(global_conf, full_stack=True, static_files=True, **app_conf):
     
     # CUSTOM MIDDLEWARE HERE (filtered by error handling middlewares)    
     app = SimpleHg(app, config)
-    app = AuthBasicHandler(app, config['repos_name'] + ' mercurial repository', authfunc)    
     
     if asbool(full_stack):
         # Handle Python exceptions
