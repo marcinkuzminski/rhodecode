@@ -8,8 +8,7 @@
     ${h.link_to(u'Repos managment',h.url('repos'))}
 </%def>
 <%def name="page_nav()">
-	<li>${h.link_to(u'Home',h.url('/'))}</li>
-	<li class="current">${_('Admin')}</li>
+	${self.menu('admin')}
 </%def>
 <%def name="main()">
     <ul class="submenu">

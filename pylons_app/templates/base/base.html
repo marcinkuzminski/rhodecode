@@ -39,58 +39,66 @@
 </body>
 </html>
 
+### MAKO DEFS ### 
+
 <%def name="page_nav()">
 	${self.menu()}
 </%def>
 
-
 <%def name="menu(current)">
-       <script type="text/javascript">
-       	YAHOO.util.Event.onDOMReady(function(){
-			YAHOO.util.Event.addListener('repo_switcher','click',function(){
-				if(YAHOO.util.Dom.hasClass('repo_switcher','selected')){
-					YAHOO.util.Dom.setStyle('switch_repos','display','none');
-					YAHOO.util.Dom.setStyle('repo_switcher','background','');
-					YAHOO.util.Dom.removeClass('repo_switcher','selected');
-				}
-				else{
-					YAHOO.util.Dom.setStyle('switch_repos','display','');
-					YAHOO.util.Dom.setStyle('repo_switcher','background','#FFFFFF');
-					YAHOO.util.Dom.addClass('repo_switcher','selected');
-				}
-				});
-			YAHOO.util.Event.addListener('repos_list','change',function(e){
-	            var wa = YAHOO.util.Dom.get('repos_list').value;
-	        	
-	            var url = "${h.url('summary_home',repo_name='__REPLACE__')}".replace('__REPLACE__',wa);
-		        window.location = url;
-			})
-           });
-       	</script>
-        <ul class="page-nav">
-			<li>
-				<a id="repo_switcher" title="${_('Switch repository')}" href="#">&darr;</a>
-				<div id="switch_repos" style="display:none;position: absolute;width: 150px;height: 25px">
-					<select id="repos_list" size="=10">
-					%for repo in c.cached_repo_list:
-						<option value="${repo['name']}">${repo['name']}</option>
-					%endfor
-					</select>
-				</div>			
-			</li>
-			<%def name="is_current(selected)">
-				<%
-					if selected == current:
-						return 'class="current"'
-				%>
-			</%def>
-            <li ${is_current('summary')|n}>${h.link_to(_('summary'),h.url('summary_home',repo_name=c.repo_name))}</li>
-            <li ${is_current('shortlog')|n}>${h.link_to(_('shortlog'),h.url('shortlog_home',repo_name=c.repo_name))}</li>
-			<li ${is_current('changelog')|n}>${h.link_to(_('changelog'),h.url('changelog_home',repo_name=c.repo_name))}</li>            
-            <li ${is_current('branches')|n}>${h.link_to(_('branches'),h.url('branches_home',repo_name=c.repo_name))}</li>
-            <li ${is_current('tags')|n}>${h.link_to(_('tags'),h.url('tags_home',repo_name=c.repo_name))}</li>
-            <li ${is_current('files')|n}>${h.link_to(_('files'),h.url('files_home',repo_name=c.repo_name))}</li>
-        </ul>
+<% 
+def is_current(selected):
+	if selected == current:
+		return 'class=current'
+%>
+		%if current not in ['home','admin']:
+	       <script type="text/javascript">
+	       	YAHOO.util.Event.onDOMReady(function(){
+				YAHOO.util.Event.addListener('repo_switcher','click',function(){
+					if(YAHOO.util.Dom.hasClass('repo_switcher','selected')){
+						YAHOO.util.Dom.setStyle('switch_repos','display','none');
+						YAHOO.util.Dom.setStyle('repo_switcher','background','');
+						YAHOO.util.Dom.removeClass('repo_switcher','selected');
+					}
+					else{
+						YAHOO.util.Dom.setStyle('switch_repos','display','');
+						YAHOO.util.Dom.setStyle('repo_switcher','background','#FFFFFF');
+						YAHOO.util.Dom.addClass('repo_switcher','selected');
+					}
+					});
+				YAHOO.util.Event.addListener('repos_list','change',function(e){
+		            var wa = YAHOO.util.Dom.get('repos_list').value;
+		        	
+		            var url = "${h.url('summary_home',repo_name='__REPLACE__')}".replace('__REPLACE__',wa);
+			        window.location = url;
+				})
+	           });
+	       	</script>
+	        <ul class="page-nav">
+				<li>
+					<a id="repo_switcher" title="${_('Switch repository')}" href="#">&darr;</a>
+					<div id="switch_repos" style="display:none;position: absolute;width: 150px;height: 25px">
+						<select id="repos_list" size="=10">
+						%for repo in c.cached_repo_list:
+							<option value="${repo['name']}">${repo['name']}</option>
+						%endfor
+						</select>
+					</div>			
+				</li>
+	            <li ${is_current('summary')}>${h.link_to(_('summary'),h.url('summary_home',repo_name=c.repo_name))}</li>
+	            <li ${is_current('shortlog')}>${h.link_to(_('shortlog'),h.url('shortlog_home',repo_name=c.repo_name))}</li>
+				<li ${is_current('changelog')}>${h.link_to(_('changelog'),h.url('changelog_home',repo_name=c.repo_name))}</li>            
+	            <li ${is_current('branches')}>${h.link_to(_('branches'),h.url('branches_home',repo_name=c.repo_name))}</li>
+	            <li ${is_current('tags')}>${h.link_to(_('tags'),h.url('tags_home',repo_name=c.repo_name))}</li>
+	            <li ${is_current('files')}>${h.link_to(_('files'),h.url('files_home',repo_name=c.repo_name))}</li>
+	        </ul>
+		%else:
+			<ul class="page-nav">
+				<li ${is_current('home')}>${h.link_to(_('Home'),h.url('/'))}</li>
+				<li ${is_current('admin')}>${h.link_to(_('Admin'),h.url('admin_home'))}</li>
+				<li class="logout">${h.link_to(u'Logout',h.url('logout_home'))}</li>
+			</ul>
+		%endif    
 </%def>
 
 <%def name="css()">
