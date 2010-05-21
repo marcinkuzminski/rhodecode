@@ -1,10 +1,8 @@
 <%inherit file="/base/base.html"/>
 <%def name="title()">
-    ${_('Repository managment')}
+    ${_('Users managment')}
 </%def>
 <%def name="breadcrumbs()">
-    ${h.link_to(u'Home',h.url('/'))}
-    / 
     ${h.link_to(u'Admin',h.url('admin_home'))}
     /
     ${h.link_to(u'Users managment',h.url('users'))}
