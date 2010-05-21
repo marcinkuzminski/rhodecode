@@ -1,23 +1,12 @@
 ## -*- coding: utf-8 -*-
 <%inherit file="/base/base.html"/>
- <%def name="get_form_error(element)">
- 	%if hasattr(c,'form_errors'):
-	    %if type(c.form_errors) == dict:
-	        %if c.form_errors.get(element,False):
-	            <span class="error-message">
-	                ${c.form_errors.get(element,'')}
-	            </span>
-	        %endif
-	    %endif
-	%endif           
- </%def>
+
 <%def name="title()">
     ${_('Repository managment')}
 </%def>
 <%def name="breadcrumbs()">
 	${h.link_to(u'Admin',h.url('admin_home'))}
-	 / 
-	 
+	 /  
 </%def>
 <%def name="page_nav()">
 <ul class="page-nav">
@@ -27,44 +16,23 @@
 </%def>
 <%def name="main()">
     %if c.admin_user:
-    <ul class="submenu">
-        <li>
-            ${h.link_to(u'Repos',h.url('repos'))}
-        </li>
-        <li>
-            ${h.link_to(u'Users',h.url('users'))}
-        </li>
-    </ul>
-    <br/>
-    <div>
-        <h2>Welcome ${c.admin_username}</h2>
-		    <div id="user_log">
-				${c.log_data}
-			</div>
-    </div>
+	    <ul class="submenu">
+	        <li>
+	            ${h.link_to(u'Repos',h.url('repos'))}
+	        </li>
+	        <li>
+	            ${h.link_to(u'Users',h.url('users'))}
+	        </li>
+	    </ul>
+	    <br/>
+	    <div>
+	        <h2>Welcome ${c.admin_username}</h2>
+			    <div id="user_log">
+					${c.log_data}
+				</div>
+	    </div>
     %else:
-        <div>
-        <br />
-        <h2>${_('Login')}</h2>
-        ${h.form(h.url.current())}
-        <table>
-            <tr>
-                <td>${_('Username')}</td>
-                <td>${h.text('username')}</td>
-                <td>${get_form_error('username')} </td>
-            </tr>
-            <tr>
-                <td>${_('Password')}</td>
-                <td>${h.password('password')}</td>
-                <td>${get_form_error('password')}</td> 
-            </tr>
-            <tr>
-                <td></td>
-                <td>${h.submit('login','login')}</td>
-            </tr>            
-        </table>
-        ${h.end_form()}
-        </div>
+		<h2>${_('Sorry only admin users can acces this area')}</h2>
     %endif
     
 </%def>
