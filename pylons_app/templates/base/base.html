@@ -71,9 +71,9 @@
 			<li>
 				<a id="repo_switcher" title="${_('Switch repository')}" href="#">&darr;</a>
 				<div id="switch_repos" style="display:none;position: absolute;width: 150px;height: 25px">
-					<select id="repos_list">
-					%for repo in c.repo_list:
-						<option value="${repo}">${repo}</option>
+					<select id="repos_list" size="=10">
+					%for repo in c.cached_repo_list:
+						<option value="${repo['name']}">${repo['name']}</option>
 					%endfor
 					</select>
 				</div>			
