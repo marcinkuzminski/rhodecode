@@ -27,7 +27,7 @@ class SimpleHg(object):
         self.application = application
         self.config = config
         #authenticate this mercurial request using 
-        realm = '%s %s' % (config['repos_name'], 'mercurial repository')
+        realm = '%s %s' % (config['hg_app_name'], 'mercurial repository')
         self.authenticate = AuthBasicAuthenticator(realm, authfunc)
         
     def __call__(self, environ, start_response):

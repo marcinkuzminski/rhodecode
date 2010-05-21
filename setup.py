@@ -1,3 +1,4 @@
+from pylons_app import get_version
 try:
     from setuptools import setup, find_packages
 except ImportError:
@@ -7,7 +8,7 @@ except ImportError:
 
 setup(
     name='pylons_app',
-    version='1.0',
+    version=get_version(),
     description='',
     author='marcin kuzminski',
     author_email='marcin@python-blog.com',

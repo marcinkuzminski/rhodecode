@@ -2,26 +2,35 @@
 
 Provides the BaseController class for subclassing.
 """
+from beaker.cache import cache_region
+from pylons import config, tmpl_context as c, request, session
 from pylons.controllers import WSGIController
 from pylons.templating import render_mako as render
+from pylons_app.lib.auth import LoginRequired, AuthUser
+from pylons_app.lib.utils import get_repo_slug
 from pylons_app.model import meta
-from beaker.cache import cache_region
-from pylons import tmpl_context as c
 from pylons_app.model.hg_model import HgModel
+from pylons_app import get_version
 
 @cache_region('long_term', 'cached_repo_list')
 def _get_repos_cached():
     return [rep for rep in HgModel().get_repos()]
 
 class BaseController(WSGIController):
-        
+    
+    def __before__(self):
+        c.hg_app_version = get_version()
+        c.repos_prefix = config['hg_app_name']
+        c.repo_name = get_repo_slug(request)
+        c.hg_app_user = session.get('hg_app_user', AuthUser())
+        c.cached_repo_list = _get_repos_cached()
+        self.sa = meta.Session
+    
     def __call__(self, environ, start_response):
         """Invoke the Controller"""
         # WSGIController.__call__ dispatches to the Controller method
         # the request is routed to. This routing information is
         # available in environ['pylons.routes_dict']
-        c.cached_repo_list = _get_repos_cached()
-        self.sa = meta.Session
         try:
             return WSGIController.__call__(self, environ, start_response)
         finally:
