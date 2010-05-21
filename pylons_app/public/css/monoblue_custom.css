@@ -112,7 +112,9 @@ ul.page-nav li a {
 	display: block;
 	text-decoration: none;
 }
-
+ul.page-nav li.logout a {
+	color: red;
+}
 ul.page-nav li a:hover {
 	color: #333;
 	background: #FFF;
