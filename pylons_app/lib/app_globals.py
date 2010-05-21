@@ -21,3 +21,4 @@ class Globals(object):
         self.baseui = make_ui('hgwebdir.config')
         self.paths = self.baseui.configitems('paths')
         self.base_path = self.paths[0][1].replace('*', '')
+        self.changeset_annotation_colors = {}
