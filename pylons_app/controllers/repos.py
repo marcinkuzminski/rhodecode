@@ -5,7 +5,6 @@ from pylons.controllers.util import abort, redirect
 from pylons_app.lib import auth
 from pylons_app.lib.base import BaseController, render
 from pylons_app.model.db import Users, UserLogs
-from pylons_app.lib.auth import authenticate
 from pylons_app.model.hg_model import HgModel
 from operator import itemgetter
 import shutil
@@ -18,10 +17,10 @@ class ReposController(BaseController):
     # file has a resource setup:
     #     map.resource('repo', 'repos')
     
-    @authenticate
     def __before__(self):
         c.admin_user = session.get('admin_user')
         c.admin_username = session.get('admin_username')
+        super(ReposController, self).__before__()
                 
     def index(self, format='html'):
         """GET /repos: All items in the collection"""

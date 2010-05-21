@@ -20,12 +20,6 @@ class ErrorController(BaseController):
     This behaviour can be altered by changing the parameters to the
     ErrorDocuments middleware in your config/middleware.py file.
     """
-#
-    def __before__(self):
-        c.repos_prefix = config['repos_name']
-        
-        c.repo_name = request.environ['pylons.original_request']\
-            .environ.get('PATH_INFO').split('/')[1]
         
     def document(self):
         resp = request.environ.get('pylons.original_response')

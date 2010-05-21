@@ -8,13 +8,15 @@ from pylons_app.lib.utils import get_repo_slug
 from pylons_app.model.hg_model import HgModel
 from vcs.utils import diffs as differ
 from vcs.exceptions import RepositoryError, ChangesetError
+from pylons_app.lib.auth import LoginRequired
         
 log = logging.getLogger(__name__)
 
 class FilesController(BaseController):
+    
+    @LoginRequired()
     def __before__(self):
-        c.repos_prefix = config['repos_name']
-        c.repo_name = get_repo_slug(request)
+        super(FilesController, self).__before__()
 
     def index(self, repo_name, revision, f_path):
         hg_model = HgModel()
@@ -70,6 +72,17 @@ class FilesController(BaseController):
                                                     % f_path.split('/')[-1] 
         return file_node.content
     
+    def annotate(self, repo_name, revision, f_path):
+        hg_model = HgModel()
+        c.repo = hg_model.get_repo(c.repo_name)
+        cs = c.repo.get_changeset(revision)
+        c.file = cs.get_node(f_path)
+        c.file_msg = cs.get_file_message(f_path)
+        c.cur_rev = cs.raw_id
+        c.f_path = f_path
+        c.annotate = cs.get_file_annotate(f_path)
+        return render('files/files_annotate.html')
+      
     def archivefile(self, repo_name, revision, fileformat):
         return '%s %s %s' % (repo_name, revision, fileformat)
     

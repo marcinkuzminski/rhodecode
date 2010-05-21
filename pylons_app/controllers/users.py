@@ -6,7 +6,6 @@ from pylons.controllers.util import abort, redirect
 from pylons_app.lib.base import BaseController, render
 from formencode import htmlfill
 from pylons_app.model.db import Users, UserLogs
-from pylons_app.lib.auth import authenticate
 import crypt
 
 log = logging.getLogger(__name__)
@@ -17,10 +16,10 @@ class UsersController(BaseController):
     # file has a resource setup:
     #     map.resource('user', 'users')
     
-    @authenticate
     def __before__(self):
         c.admin_user = session.get('admin_user')
         c.admin_username = session.get('admin_username')
+        super(UsersController, self).__before__()
         
     def index(self, format='html'):
         """GET /users: All items in the collection"""

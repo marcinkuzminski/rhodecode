@@ -7,13 +7,15 @@ from pylons_app.lib.base import BaseController, render
 from pylons_app.lib.utils import get_repo_slug
 from pylons_app.model.hg_model import HgModel
 from webhelpers.paginate import Page
+from pylons_app.lib.auth import LoginRequired
 
 log = logging.getLogger(__name__)
 
 class ShortlogController(BaseController):
+    
+    @LoginRequired()
     def __before__(self):
-        c.repos_prefix = config['repos_name']
-        c.repo_name = get_repo_slug(request)
+        super(ShortlogController, self).__before__()
         
     def index(self):
         hg_model = HgModel()

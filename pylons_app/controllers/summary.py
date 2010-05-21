@@ -1,17 +1,20 @@
-import logging
-
-from pylons import tmpl_context as c, app_globals as g, session, request, config, url
+from pylons import tmpl_context as c, app_globals as g, session, request, config, \
+    url
 from pylons.controllers.util import abort, redirect
-
+from pylons_app.lib.auth import LoginRequired
 from pylons_app.lib.base import BaseController, render
 from pylons_app.lib.utils import get_repo_slug
 from pylons_app.model.hg_model import HgModel
+import logging
+
+
 log = logging.getLogger(__name__)
 
 class SummaryController(BaseController):
+    
+    @LoginRequired()
     def __before__(self):
-        c.repos_prefix = config['repos_name']
-        c.repo_name = get_repo_slug(request)
+        super(SummaryController, self).__before__()
         
     def index(self):
         hg_model = HgModel()
@@ -19,13 +22,14 @@ class SummaryController(BaseController):
         c.repo_changesets = c.repo_info.get_changesets(10)
         
         e = request.environ
-        uri = r'%(protocol)s://%(user)s@%(host)s/%(repo_name)s' % {
+        #BUG: protocol doesnt show https
+        uri = u'%(protocol)s://%(user)s@%(host)s/%(repo_name)s' % {
                                                 'protocol': e.get('wsgi.url_scheme'),
-                                                'user':e.get('REMOTE_USER'),
+                                                'user':str(c.hg_app_user.username),
                                                 'host':e.get('HTTP_HOST'),
                                                 'repo_name':c.repo_name,
                                                 }
-        c.clone_repo_url = url(uri)
+        c.clone_repo_url = uri
         c.repo_tags = c.repo_info.tags[:10]
         c.repo_branches = c.repo_info.branches[:10]
-        return render('/summary.html')
+        return render('summary/summary.html')
