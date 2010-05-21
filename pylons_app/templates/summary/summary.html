@@ -1,0 +1,126 @@
+<%inherit file="/base/base.html"/>
+<%!
+from pylons_app.lib import filters
+%>
+<%def name="title()">
+    ${_('Repository managment')}
+</%def>
+<%def name="breadcrumbs()">
+    ${h.link_to(u'Home',h.url('/'))}
+    / 
+    ${h.link_to(c.repo_name,h.url('summary_home',repo_name=c.repo_name))}
+    /
+    ${_('summary')}
+</%def>
+<%def name="page_nav()">
+        <form action="log">
+            <dl class="search">
+                <dt><label>Search: </label></dt>
+                <dd><input type="text" name="rev" /></dd>
+            </dl>
+        </form>
+		${self.menu('summary')}    
+</%def>
+<%def name="main()">
+    <h2 class="no-link no-border">${_('Mercurial Repository Overview')}</h2>
+    <dl class="overview">
+        <dt>${_('name')}</dt>
+        <dd>${c.repo_info.name}</dd>
+        <dt>${_('description')}</dt>
+        <dd>${c.repo_info.description}</dd>
+        <dt>${_('contact')}</dt>
+        <dd>${c.repo_info.contact}</dd>
+        <dt>${_('last change')}</dt>
+        <dd>${c.repo_info.last_change|n,filters.rfc822date} - ${c.repo_info.last_change|n,filters.age}</dd>
+        <dt>${_('url')}</dt>
+        <dd><pre style="margin:0">hg clone <a href="${c.clone_repo_url}">${c.clone_repo_url}</a></pre></dd>
+        <dt>${_('Download')}</dt>
+        <dd>
+       	%for cnt,archive in enumerate(c.repo_info._get_archives()):
+       		 %if cnt >=1:
+       		 |
+       		 %endif
+       		 ${h.link_to(c.repo_info.name+'.'+archive['type'],
+       			h.url('files_archive_home',repo_name=c.repo_info.name,
+       			revision='tip',fileformat=archive['extension']))}
+		%endfor
+        </dd>
+    </dl>
+
+    <h2>${h.link_to(_('Changes'),h.url('changelog_home',repo_name=c.repo_name))}</h2>
+    <table>
+	<%def name="message_slug(msg)">
+		<%
+		limit = 60
+		if len(msg) > limit:
+			return msg[:limit]+'...'
+		else:
+			return msg
+		%>
+	</%def>    
+	%for cnt,cs in enumerate(c.repo_changesets):
+		<tr class="parity${cnt%2}">
+			<td>${cs._ctx.date()|n,filters.age}</td>
+			<td>${cs.author|n,filters.person}</td>
+			<td>r${cs.revision}</td>
+			<td>
+				${h.link_to(message_slug(cs.message),
+				h.url('changeset_home',repo_name=c.repo_name,revision=cs._short),
+				title=cs.message)}
+			</td>
+			<td>
+				<span class="logtags">
+					<span class="branchtag">${cs.branch}</span>
+					%for tag in cs.tags:
+						<span class="tagtag">${tag}</span>
+					%endfor
+				</span>
+			</td>
+			<td class="nowrap">
+			${h.link_to(_('changeset'),h.url('changeset_home',repo_name=c.repo_name,revision=cs._short))}
+			|
+			${h.link_to(_('files'),h.url('files_home',repo_name=c.repo_name,revision=cs._short))}
+			</td>
+		</tr>
+	%endfor
+    </table>
+
+    <h2>${h.link_to(_('Tags'),h.url('tags_home',repo_name=c.repo_name))}</h2>
+    <table>
+		%for cnt,tag in enumerate(c.repo_tags):
+		<tr class="parity${cnt%2}">
+			<td>${tag._ctx.date()|n,filters.age}</td>
+			<td>
+				<span class="logtags">
+					<span class="tagtag">${h.link_to(tag.tags[-1],h.url('changeset_home',repo_name=c.repo_name,revision=tag._short))}</span>
+				</span>
+			</td>
+			<td class="nowrap">
+			${h.link_to(_('changeset'),h.url('changeset_home',repo_name=c.repo_name,revision=tag._short))}
+			|
+			${h.link_to(_('files'),h.url('files_home',repo_name=c.repo_name,revision=tag._short))}
+			</td>
+		</tr>	
+		%endfor
+    </table>
+
+    <h2>${h.link_to(_('Branches'),h.url('branches_home',repo_name=c.repo_name))}</h2>
+    <table>
+		%for cnt,branch in enumerate(c.repo_branches):
+		<tr class="parity${cnt%2}">
+			<td>${branch._ctx.date()|n,filters.age}</td>
+			<td>
+				<span class="logtags">
+					<span class="branchtag">${h.link_to(branch.branch,h.url('changeset_home',repo_name=c.repo_name,revision=branch._short))}</span>
+				</span>			
+			</td>
+			<td class="nowrap">
+			${h.link_to(_('changeset'),h.url('changeset_home',repo_name=c.repo_name,revision=branch._short))}
+			|
+			${h.link_to(_('files'),h.url('files_home',repo_name=c.repo_name,revision=branch._short))}
+			</td>
+		</tr>	
+		%endfor
+    </table>
+
+</%def>    
