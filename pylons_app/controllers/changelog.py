@@ -1,54 +1,69 @@
-import logging
+from beaker.cache import cache_region
+from mercurial.graphmod import revisions as graph_rev, colored, CHANGESET
+from mercurial.node import short
 from pylons import request, response, session, tmpl_context as c, url, config, \
     app_globals as g
 from pylons.controllers.util import abort, redirect
+from pylons_app.lib.auth import LoginRequired
 from pylons_app.lib.base import BaseController, render
+from pylons_app.lib.filters import age as _age, person
 from pylons_app.lib.utils import get_repo_slug
 from pylons_app.model.hg_model import HgModel
-
-from mercurial.graphmod import revisions as graph_rev, colored, CHANGESET
-from pylons_app.lib.filters import age as _age, person
 from simplejson import dumps
-from mercurial.node import short
 from webhelpers.paginate import Page
+import logging
+
         
-        
+@cache_region('long_term', 'full_changelog')
+def _full_changelog_cached(repo_name):
+    hg_model = HgModel()
+    return list(reversed(list(hg_model.get_repo(repo_name))))        
 
 log = logging.getLogger(__name__)
 
 class ChangelogController(BaseController):
+    
+    @LoginRequired()
     def __before__(self):
-        c.repos_prefix = config['repos_name']
-        c.repo_name = get_repo_slug(request)
-        
+        super(ChangelogController, self).__before__()
+                
     def index(self):
-        # Return a rendered template
         hg_model = HgModel()
-        if request.POST.get('size'):
-            c.size = int(request.params.get('size', 20))
+        if request.params.get('size'):
+            c.size = int(request.params['size'])
+            session['changelog_size'] = c.size
+            session.save()
         else:
-            c.size = int(request.params.get('size', 20))
-        c.jsdata, c.canvasheight = self.graph(hg_model.get_repo(c.repo_name), c.size)
+            c.size = session.get('changelog_size', 20)
+            
+
+                    
+        changesets = _full_changelog_cached(c.repo_name)
+            
+        p = int(request.params.get('page', 1))
+        c.pagination = Page(changesets, page=p, item_count=len(changesets),
+                            items_per_page=c.size)
+            
+        #self._graph(c.repo, c.size,p)
         
         return render('changelog/changelog.html')
 
 
-    def graph(self, repo, size):
+    def _graph(self, repo, size, p):
         revcount = size
-        p = int(request.params.get('page', 1))
-        c.pagination = Page(repo.revisions, page=p, item_count=len(repo.revisions), items_per_page=revcount)
         if not repo.revisions:return dumps([]), 0
         
         max_rev = repo.revisions[-1]
         offset = 1 if p == 1 else  ((p - 1) * revcount)
         rev_start = repo.revisions[(-1 * offset)]
-        bg_height = 39
+        c.bg_height = 120
         
         revcount = min(max_rev, revcount)
         rev_end = max(0, rev_start - revcount)
         dag = graph_rev(repo.repo, rev_start, rev_end)
-        tree = list(colored(dag))
-        canvasheight = (len(tree) + 1) * bg_height - 27
+        
+        c.dag = tree = list(colored(dag))
+        canvasheight = (len(tree) + 1) * c.bg_height - 27
         data = []
         for (id, type, ctx, vtx, edges) in tree:
             if type != CHANGESET:
@@ -61,5 +76,6 @@ class ChangelogController(BaseController):
             branch = branch, repo.repo.branchtags().get(branch) == ctx.node()
             data.append((node, vtx, edges, desc, user, age, branch, ctx.tags()))
     
-        return dumps(data), canvasheight
+        c.jsdata = dumps(data) 
+        c.canvasheight = canvasheight 
 
