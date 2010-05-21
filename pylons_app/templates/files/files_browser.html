@@ -41,7 +41,7 @@
 		             </td>
 		             <td>
 		                %if node.is_file():
-		             		${h.filesizeformat(node.size)}
+		             		${h.format_byte_size(node.size,binary=True)}
 		             	%endif
 		             </td>
 		             <td>
