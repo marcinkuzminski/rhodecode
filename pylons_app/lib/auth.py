@@ -41,7 +41,7 @@ class  AuthUser(object):
     """
     A simple object that handles a mercurial username for authentication
     """
-    username = 'Empty'
+    username = 'None'
     is_authenticated = False
     is_admin = False
     permissions = set()
@@ -61,16 +61,17 @@ class LoginRequired(object):
         pass
     
     def __call__(self, func):
-        user = session.get('hg_app_user', AuthUser())
-        log.info('Checking login required for %s', user.username)
         
         @wraps(func)
         def _wrapper(*fargs, **fkwargs):
+            user = session.get('hg_app_user', AuthUser())
+            log.info('Checking login required for user:%s', user.username)            
             if user.is_authenticated:
                     log.info('user %s is authenticated', user.username)
                     func(*fargs)
             else:
                 logging.info('user %s not authenticated', user.username)
+                logging.info('redirecting to login page')
                 return redirect(url('login_home'))
 
         return _wrapper
