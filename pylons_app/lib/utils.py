@@ -108,7 +108,7 @@ def invalidate_cache(name, *args):
         region_invalidate(_get_repos_cached, None, *args)
         
     if name == 'full_changelog':
-        from pylons_app.controllers.changelog import _full_changelog_cached
+        from pylons_app.lib.base import _full_changelog_cached
         region_invalidate(_full_changelog_cached, None, *args)
         
 from vcs.backends.base import BaseChangeset

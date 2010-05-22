@@ -4,7 +4,7 @@ from functools import wraps
 from pylons import session, url
 from pylons.controllers.util import abort, redirect
 from pylons_app.model import meta
-from pylons_app.model.db import Users, UserLogs
+from pylons_app.model.db import Users
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 import crypt
@@ -31,28 +31,6 @@ def authfunc(environ, username, password):
         if user.active:
             if user.username == username and user.password == password_crypt:
                 log.info('user %s authenticated correctly', username)
-                if environ:
-                    http_accept = environ.get('HTTP_ACCEPT')
-            
-                    if http_accept.startswith('application/mercurial') or \
-                        environ['PATH_INFO'].find('raw-file') != -1:
-                        repo = environ['PATH_INFO']
-                        for qry in environ['QUERY_STRING'].split('&'):
-                            if qry.startswith('cmd'):
-                                
-                                try:
-                                    user_log = UserLogs()
-                                    user_log.user_id = user.user_id
-                                    user_log.action = qry
-                                    user_log.repository = repo
-                                    user_log.action_date = datetime.now()
-                                    sa.add(user_log)
-                                    sa.commit()
-                                    log.info('Adding user %s, action %s', username, qry)
-                                except Exception as e:
-                                    sa.rollback()
-                                    log.error(e)
-                                  
                 return True
         else:
             log.error('user %s is disabled', username)
