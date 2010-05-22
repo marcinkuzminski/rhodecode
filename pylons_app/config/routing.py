@@ -32,6 +32,12 @@ def make_map(config):
         m.connect('admin_add_repo', '/add_repo/{new_repo:[a-z0-9\. _-]*}',
                   action='add_repo')
     
+    #FEEDS
+    map.connect('rss_feed_home', '/{repo_name}/feed/rss',
+                controller='feed', action='rss')
+    map.connect('atom_feed_home', '/{repo_name}/feed/atom',
+                controller='feed', action='atom')
+    
     map.connect('login_home', '/login', controller='login')
     map.connect('logout_home', '/logout', controller='login', action='logout')
     
@@ -39,7 +45,7 @@ def make_map(config):
                 controller='changeset', revision='tip')
     map.connect('summary_home', '/{repo_name}/summary',
                 controller='summary')
-    map.connect('shortlog_home', '/{repo_name}/shortlog/',
+    map.connect('shortlog_home', '/{repo_name}/shortlog',
                 controller='shortlog')
     map.connect('branches_home', '/{repo_name}/branches',
                 controller='branches')

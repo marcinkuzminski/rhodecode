@@ -20,10 +20,8 @@ from pylons_app.lib import filters
 		%else:
 			<span style="font-weight: bold">${name}</span>
 		%endif
-		
 		<a href="?sort=${name_slug}">&darr;</a>
 		<a href="?sort=-${name_slug}">&uarr;</a>
-		
 	</%def>
 	<table>
 	  <tr>
@@ -49,10 +47,10 @@ from pylons_app.lib import filters
 				%endfor
 	        </td>
 			<td>
-				<a  class="rss_logo" href="/${repo['name']}/rss-log">RSS</a>
+				${h.link_to(_('RSS'),h.url('rss_feed_home',repo_name=repo['name']),class_='rss_logo')}
 			</td>        
 			<td>
-				<a  class="atom_logo" href="/${repo['name']}/atom-log">Atom</a>
+				${h.link_to(_('Atom'),h.url('rss_feed_home',repo_name=repo['name']),class_='atom_logo')}
 			</td>
 		</tr>
 	%endfor
