@@ -12,7 +12,8 @@ log = logging.getLogger(__name__)
 class LoginController(BaseController):
 
     def index(self):
-        if session.get('hg_app_user', AuthUser()).is_authenticated:
+        #redirect if already logged in
+        if c.hg_app_user.is_authenticated:
             return redirect(url('hg_home'))
         
         if request.POST:

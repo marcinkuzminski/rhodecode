@@ -69,7 +69,6 @@ class ValidAuth(formencode.validators.FancyValidator):
         except (NoResultFound, MultipleResultsFound, OperationalError) as e:
             log.error(e)
             user = None
-        print value
         if user:
             if user.active:
                 if user.username == username and user.password == crypted_passwd:

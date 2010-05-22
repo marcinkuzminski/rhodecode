@@ -12,10 +12,11 @@ Created on Apr 9, 2010
 import os
 from pylons import tmpl_context as c, app_globals as g, session, request, config
 from pylons.controllers.util import abort
+import sys
 try:
     from vcs.backends.hg import get_repositories, MercurialRepository
 except ImportError:
-    print 'You have to import vcs module'
+    sys.stderr.write('You have to import vcs module')
     raise Exception('Unable to import vcs')
 
 class HgModel(object):
