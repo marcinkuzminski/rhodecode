@@ -72,7 +72,6 @@ class ValidAuth(formencode.validators.FancyValidator):
         if user:
             if user.active:
                 if user.username == username and user.password == crypted_passwd:
-                    log.info('user %s authenticated correctly', username)
                     from pylons_app.lib.auth import AuthUser
                     auth_user = AuthUser()
                     auth_user.username = username
@@ -80,6 +79,7 @@ class ValidAuth(formencode.validators.FancyValidator):
                     auth_user.is_admin = user.admin
                     session['hg_app_user'] = auth_user
                     session.save()
+                    log.info('user %s is now authenticated', username)
                     return value
                 else:
                     log.warning('user %s not authenticated', username)
