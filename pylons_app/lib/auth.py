@@ -83,11 +83,11 @@ class LoginRequired(object):
         pass
     
     def __call__(self, func):
-        log.info('Checking login required')
+        user = session.get('hg_app_user', AuthUser())
+        log.info('Checking login required for %s', user.username)
         
         @wraps(func)
         def _wrapper(*fargs, **fkwargs):
-            user = session.get('hg_app_user', AuthUser())
             if user.is_authenticated:
                     log.info('user %s is authenticated', user.username)
                     func(*fargs)

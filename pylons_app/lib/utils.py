@@ -91,10 +91,12 @@ def make_ui(path='hgwebdir.config', checkpaths=True):
     return baseui
 
 def invalidate_cache(name, *args):
+    """Invalidates given name cache"""
+    
     from beaker.cache import region_invalidate
     log.info('INVALIDATING CACHE FOR %s', name)
     
-    """propaget our arguments to make sure invalidation works. First
+    """propagate our arguments to make sure invalidation works. First
     argument has to be the name of cached func name give to cache decorator
     without that the invalidation would not work"""
     tmp = [name]

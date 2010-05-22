@@ -65,6 +65,7 @@ class SimpleHg(object):
             """we know that some change was made to repositories and we should
             invalidate the cache to see the changes right away"""
             invalidate_cache('full_changelog', repo_name)
+            invalidate_cache('cached_repo_list')
             return app(environ, start_response)            
 
     def _make_app(self):
