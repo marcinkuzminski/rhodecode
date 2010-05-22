@@ -16,6 +16,10 @@ from pylons_app import get_version
 def _get_repos_cached():
     return [rep for rep in HgModel().get_repos()]
 
+@cache_region('long_term', 'full_changelog')
+def _full_changelog_cached(repo_name):
+    return list(reversed(list(HgModel().get_repo(repo_name))))  
+
 class BaseController(WSGIController):
     
     def __before__(self):

@@ -5,21 +5,14 @@ from pylons import request, response, session, tmpl_context as c, url, config, \
     app_globals as g
 from pylons.controllers.util import abort, redirect
 from pylons_app.lib.auth import LoginRequired
-from pylons_app.lib.base import BaseController, render
+from pylons_app.lib.base import BaseController, render, _full_changelog_cached
 from pylons_app.lib.filters import age as _age, person
 from pylons_app.lib.utils import get_repo_slug
 from pylons_app.model.hg_model import HgModel
 from simplejson import dumps
 from webhelpers.paginate import Page
 import logging
-
-        
-@cache_region('long_term', 'full_changelog')
-def _full_changelog_cached(repo_name):
-    hg_model = HgModel()
-    return list(reversed(list(hg_model.get_repo(repo_name))))        
-
-log = logging.getLogger(__name__)
+log = logging.getLogger(__name__)     
 
 class ChangelogController(BaseController):
     
@@ -28,16 +21,13 @@ class ChangelogController(BaseController):
         super(ChangelogController, self).__before__()
                 
     def index(self):
-        hg_model = HgModel()
         if request.params.get('size'):
             c.size = int(request.params['size'])
             session['changelog_size'] = c.size
             session.save()
         else:
             c.size = session.get('changelog_size', 20)
-            
 
-                    
         changesets = _full_changelog_cached(c.repo_name)
             
         p = int(request.params.get('page', 1))
