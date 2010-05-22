@@ -7,7 +7,6 @@ from paste.deploy.converters import asbool
 from pylons.middleware import ErrorHandler, StatusCodeRedirect
 from pylons.wsgiapp import PylonsApp
 from routes.middleware import RoutesMiddleware
-from paste.auth.basic import AuthBasicHandler
 from pylons_app.lib.simplehg import SimpleHg
 from pylons_app.config.environment import load_environment
 
