@@ -50,7 +50,7 @@ from pylons_app.lib import filters
 				${h.link_to(_('RSS'),h.url('rss_feed_home',repo_name=repo['name']),class_='rss_logo')}
 			</td>        
 			<td>
-				${h.link_to(_('Atom'),h.url('rss_feed_home',repo_name=repo['name']),class_='atom_logo')}
+				${h.link_to(_('Atom'),h.url('atom_feed_home',repo_name=repo['name']),class_='atom_logo')}
 			</td>
 		</tr>
 	%endfor
