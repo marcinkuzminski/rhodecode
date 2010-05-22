@@ -1,5 +1,3 @@
-from datetime import datetime
-from decorator import decorator
 from functools import wraps
 from pylons import session, url
 from pylons.controllers.util import abort, redirect
