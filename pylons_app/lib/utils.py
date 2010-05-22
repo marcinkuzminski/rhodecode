@@ -53,7 +53,7 @@ def make_ui(path='hgwebdir.config', checkpaths=True):
     @param path: path to mercurial config file
     """
     if not os.path.isfile(path):
-        log.error('Unable to read config file %s' % path)
+        log.warning('Unable to read config file %s' % path)
         return False
     #propagated from mercurial documentation
     sections = [

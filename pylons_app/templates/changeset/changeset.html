@@ -1,0 +1,33 @@
+<%!
+from pylons_app.lib import filters
+%>
+<%inherit file="/base/base.html"/>
+
+<%def name="title()">
+    ${_('Changeset')}
+</%def>
+<%def name="breadcrumbs()">
+    ${h.link_to(u'Home',h.url('/'))}
+    / 
+    ${h.link_to(c.repo_name,h.url('changeset_home',repo_name=c.repo_name))}
+    /
+    ${_('changeset')}
+</%def>
+<%def name="page_nav()">
+    ${self.menu('changelog')}     
+</%def>
+
+<%def name="main()">
+    <h2 class="no-link no-border">${_('Changeset')}</h2>
+    <div class="cs_files">
+			%for filenode in c.changeset.added:
+				<p class="cs_added">${filenode}</p>
+			%endfor
+			%for filenode in c.changeset.changed:
+				<p class="cs_changed">${filenode}</p>
+			%endfor
+			%for filenode in c.changeset.removed:
+				<p class="cs_removed">${filenode}</p>
+			%endfor
+	</div>			
+</%def>    

@@ -1,7 +1,10 @@
+<%!
+from pylons_app.lib import filters
+%>
 <%inherit file="/base/base.html"/>
 
 <%def name="title()">
-    ${_('Repository managment')}
+    ${_('Changelog - %s') % c.repo_name}
 </%def>
 <%def name="breadcrumbs()">
     ${h.link_to(u'Home',h.url('/'))}
@@ -11,104 +14,66 @@
     ${_('changelog')}
 </%def>
 <%def name="page_nav()">
-        <form action="log">
-            <dl class="search">
-                <dt><label>Search: </label></dt>
-                <dd><input type="text" name="rev" /></dd>
-            </dl>
-        </form>
-
-		${self.menu('changelog')}     
+	${self.menu('changelog')}     
 </%def>
 
 <%def name="main()">
 
     <h2 class="no-link no-border">${_('Changelog')} - ${_('showing ')} ${c.size} ${_('revisions')}</h2>
 	<noscript>${_('The revision graph only works with JavaScript-enabled browsers.')}</noscript>
-<div>
-${h.form(h.url.current(),method='get')}
-	${_('Show')}: ${h.text('size',size=5,value=c.size)} ${_('revisions')}
-	${h.submit('','set')}
-${h.end_form()}
-</div>
-<div id="wrapper"  style="height:${c.canvasheight}px">
-	<div style="float:left;height:${c.canvasheight}px">
-		<canvas id="graph" width="224" height="${c.canvasheight}"></canvas>
+
+<div id="graph">
+	##<div id="graph_nodes" style="height:1000px">
+	##	<canvas id="graph" width="160"></canvas>
+	##</div>
+	<div id="graph_content">
+		<div class="container_header">
+			${h.form(h.url.current(),method='get')}
+				${_('Show')}: ${h.text('size',size=5,value=c.size)} ${_('revisions')}
+				${h.submit('','set')}
+			${h.end_form()}
+		</div>
+	%for cnt,cs in enumerate(c.pagination):
+		<div class="container">
+			<div class="left">
+				<div class="date">${_('commit')} ${cs.revision}: ${cs.raw_id}@${cs.date}</div>
+				<div class="author">${cs.author}</div>
+				<div id="chg_${cnt}" class="message">
+					${h.link_to(cs.message,
+					h.url('changeset_home',repo_name=c.repo_name,revision=cs._short),
+					title=cs.message)}
+				</div>
+					<span class="logtags">
+						<span class="branchtag">${cs.branch}</span>
+						%for tag in cs.tags:
+							<span class="tagtag">${tag}</span>
+						%endfor
+					</span>
+			</div>	
+				<div class="right">
+					<span class="removed" title="${_('removed')}">${len(cs.removed)}</span>
+					<span class="changed" title="${_('changed')}">${len(cs.changed)}</span>
+					<span class="added" title="${_('added')}">${len(cs.added)}</span>
+				</div>
+		</div>
+		
+	%endfor
 	</div>
-	<div style="float:left;height:${c.canvasheight}px">
-		<ul id="graphnodes"></ul>
-	</div>
 </div>
 
-<script type="text/javascript" src="/js/graph.js"></script>
-<script>
-<!-- hide script content
+##<script type="text/javascript" src="/js/graph2.js"></script>
+##<script type="text/javascript" src="http://bitbucket-assets.s3.amazonaws.com/js/lib/bundle.160310Mar.js"></script>
+##
+##<script>
+##<!-- hide script content
+##
+##var jsdata = ${c.jsdata|n};
+##var r = new BranchRenderer();
+##r.render(jsdata); 
 
-var data = ${c.jsdata|n};
-var graph = new Graph();
-graph.scale(39);
+##// stop hiding script -->
+##</script>
 
-graph.edge = function(x0, y0, x1, y1, color) {
-	
-	this.setColor(color, 0.0, 0.65);
-	this.ctx.beginPath();
-	this.ctx.moveTo(x0, y0);
-	this.ctx.lineTo(x1, y1);
-	this.ctx.stroke();
-	
-}
-
-var revlink = '<li style="_STYLE"><span class="desc">';
-revlink += '<a class="list" href="/${c.repo_name}/changeset/_NODEID" title="_NODEID"><b>_DESC</b></a>';
-revlink += '</span> _TAGS';
-revlink += '<span class="info">_DATE, by _USER</span></li>';
-
-graph.vertex = function(x, y, color, parity, cur) {
-	
-	this.ctx.beginPath();
-	color = this.setColor(color, 0.25, 0.75);
-	this.ctx.arc(x, y, radius, 0, Math.PI * 2, true);
-	this.ctx.fill();
-	
-	var bg = '<li class="bg parity' + parity + '"></li>';
-	var left = (this.columns + 1) * this.bg_height;
-	var nstyle = 'padding-left: ' + left + 'px;';
-	var item = revlink.replace(/_STYLE/, nstyle);
-	item = item.replace(/_PARITY/, 'parity' + parity);
-	item = item.replace(/_NODEID/, cur[0]);
-	item = item.replace(/_NODEID/, cur[0]);
-	item = item.replace(/_DESC/, cur[3]);
-	item = item.replace(/_USER/, cur[4]);
-	item = item.replace(/_DATE/, cur[5]);
-	
-	var tagspan = '';
-	if (cur[7].length || (cur[6][0] != 'default' || cur[6][1])) {
-		tagspan = '<span class="logtags">';
-		if (cur[6][1]) {
-			tagspan += '<span class="branchtag" title="' + cur[6][0] + '">';
-			tagspan += cur[6][0] + '</span> ';
-		} else if (!cur[6][1] && cur[6][0] != 'default') {
-			tagspan += '<span class="inbranchtag" title="' + cur[6][0] + '">';
-			tagspan += cur[6][0] + '</span> ';
-		}
-		if (cur[7].length) {
-			for (var t in cur[7]) {
-				var tag = cur[7][t];
-				tagspan += '<span class="tagtag">' + tag + '</span> ';
-			}
-		}
-		tagspan += '</span>';
-	}
-	
-	item = item.replace(/_TAGS/, tagspan);
-	return [bg, item];
-	
-}
-
-graph.render(data);
-
-// stop hiding script -->
-</script>
 <div>
 	<h2>${c.pagination.pager('$link_previous ~2~ $link_next')}</h2>
 </div>	

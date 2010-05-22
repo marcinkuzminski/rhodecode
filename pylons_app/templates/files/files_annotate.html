@@ -1,0 +1,44 @@
+<%inherit file="/base/base.html"/>
+
+<%def name="title()">
+    ${_('File annotate')}
+</%def>
+<%def name="breadcrumbs()">
+    ${h.link_to(u'Home',h.url('/'))}
+    / 
+    ${h.link_to(c.repo_name,h.url('files_home',repo_name=c.repo_name))}
+    /
+    ${_('files')}
+</%def>
+<%def name="page_nav()">
+		${self.menu('files')}     
+</%def>
+<%def name="css()">
+	<link rel="stylesheet" href="/css/monoblue_custom.css" type="text/css" />
+	<link rel="stylesheet" href="/css/pygments.css" type="text/css" />
+</%def>
+<%def name="main()">
+    <h2 class="no-link no-border">${_('Annotate')}</h2>
+	<div id="files_data">
+		<h2>${_('Location')}: ${h.files_breadcrumbs(c.repo_name,c.cur_rev,c.file.path)}</h2>
+		<dl class="overview">
+			<dt>${_('Revision')}</dt>
+			<dd>r${c.file.last_changeset.revision}:${c.file.last_changeset._short}</dd>
+			<dt>${_('Size')}</dt>
+			<dd>${h.format_byte_size(c.file.size,binary=True)}</dd>
+			<dt>${_('Options')}</dt>
+			<dd>${h.link_to(_('source'),
+			h.url('files_home',repo_name=c.repo_name,revision=c.cur_rev,f_path=c.f_path))}  / ${h.link_to(_('raw'),
+			h.url('files_raw_home',repo_name=c.repo_name,revision=c.cur_rev,f_path=c.f_path))}</dd>				
+		</dl>
+		<div id="body" class="codeblock">
+			<div class="code-header">
+				<div class="revision">${c.file.name}@r${c.file.last_changeset.revision}:${c.file.last_changeset._short}</div>
+				<div class="commit" style="font-size:70%">"${c.file_msg}"</div>
+			</div>
+			<div class="code-body">
+				${h.pygmentize_annotation(c.annotate,c.repo_name)}
+			</div>
+		</div>
+	</div>
+</%def> 
