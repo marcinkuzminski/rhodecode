@@ -34,8 +34,6 @@ class SimpleHg(object):
         self.authenticate = AuthBasicAuthenticator(realm, authfunc)
         
     def __call__(self, environ, start_response):
-        #dirty fix for https
-        environ['wsgi.url_scheme'] = 'https'
         if not is_mercurial(environ):
             return self.application(environ, start_response)
         else:

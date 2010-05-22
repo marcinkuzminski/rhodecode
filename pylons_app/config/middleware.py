@@ -7,7 +7,8 @@ from paste.deploy.converters import asbool
 from pylons.middleware import ErrorHandler, StatusCodeRedirect
 from pylons.wsgiapp import PylonsApp
 from routes.middleware import RoutesMiddleware
-from pylons_app.lib.simplehg import SimpleHg
+from pylons_app.lib.middleware.simplehg import SimpleHg
+from pylons_app.lib.middleware.https_fixup import HttpsFixup
 from pylons_app.config.environment import load_environment
 
 def make_app(global_conf, full_stack=True, static_files=True, **app_conf):
@@ -41,7 +42,9 @@ def make_app(global_conf, full_stack=True, static_files=True, **app_conf):
     app = RoutesMiddleware(app, config['routes.map'])
     app = SessionMiddleware(app, config)
     
-    # CUSTOM MIDDLEWARE HERE (filtered by error handling middlewares)    
+    # CUSTOM MIDDLEWARE HERE (filtered by error handling middlewares)
+    #set the https based on HTTP_X_URL_SCHEME
+    app = HttpsFixup(app)
     app = SimpleHg(app, config)
     
     if asbool(full_stack):
