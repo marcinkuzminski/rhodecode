@@ -11,6 +11,9 @@ log = logging.getLogger(__name__)
 
 class LoginController(BaseController):
 
+    def __before__(self):
+        super(LoginController, self).__before__()
+
     def index(self):
         #redirect if already logged in
         if c.hg_app_user.is_authenticated:
@@ -35,4 +38,5 @@ class LoginController(BaseController):
     def logout(self):
         session['hg_app_user'] = AuthUser()
         session.save()
+        log.info('Logging out and setting user as Empty')
         redirect(url('hg_home'))
