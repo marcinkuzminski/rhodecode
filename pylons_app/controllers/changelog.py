@@ -18,9 +18,9 @@ class ChangelogController(BaseController):
         super(ChangelogController, self).__before__()
                 
     def index(self):
+        limit = 100
+        default = 20
         if request.params.get('size'):
-            limit = 100
-            default = 20
             try:
                 int_size = int(request.params.get('size'))
             except ValueError:
