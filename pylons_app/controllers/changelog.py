@@ -1,4 +1,3 @@
-from beaker.cache import cache_region
 from mercurial.graphmod import revisions as graph_rev, colored, CHANGESET
 from mercurial.node import short
 from pylons import request, response, session, tmpl_context as c, url, config, \
@@ -7,8 +6,6 @@ from pylons.controllers.util import abort, redirect
 from pylons_app.lib.auth import LoginRequired
 from pylons_app.lib.base import BaseController, render, _full_changelog_cached
 from pylons_app.lib.filters import age as _age, person
-from pylons_app.lib.utils import get_repo_slug
-from pylons_app.model.hg_model import HgModel
 from simplejson import dumps
 from webhelpers.paginate import Page
 import logging
@@ -22,11 +19,18 @@ class ChangelogController(BaseController):
                 
     def index(self):
         if request.params.get('size'):
-            c.size = int(request.params['size'])
+            limit = 100
+            default = 20
+            try:
+                int_size = int(request.params.get('size'))
+            except ValueError:
+                int_size = default
+            int_size = int_size if int_size <= limit else limit 
+            c.size = int_size
             session['changelog_size'] = c.size
             session.save()
         else:
-            c.size = session.get('changelog_size', 20)
+            c.size = session.get('changelog_size', default)
 
         changesets = _full_changelog_cached(c.repo_name)
             
