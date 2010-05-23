@@ -1,14 +1,16 @@
-import logging
-
-from pylons import request, response, session, tmpl_context as c, url, config, app_globals as g
+import tempfile
+from pylons import request, response, session, tmpl_context as c, url, config, \
+    app_globals as g
 from pylons.controllers.util import abort, redirect
-
+from pylons_app.lib.auth import LoginRequired
 from pylons_app.lib.base import BaseController, render
 from pylons_app.lib.utils import get_repo_slug
 from pylons_app.model.hg_model import HgModel
-from vcs.utils import diffs as differ
 from vcs.exceptions import RepositoryError, ChangesetError
-from pylons_app.lib.auth import LoginRequired
+from vcs.utils import diffs as differ
+import logging
+from mercurial import archival
+
         
 log = logging.getLogger(__name__)
 
@@ -84,7 +86,32 @@ class FilesController(BaseController):
         return render('files/files_annotate.html')
       
     def archivefile(self, repo_name, revision, fileformat):
-        return '%s %s %s' % (repo_name, revision, fileformat)
+        archive_specs = {
+          '.tar.bz2': ('application/x-tar', 'tbz2'),
+          '.tar.gz': ('application/x-tar', 'tgz'),
+          '.zip': ('application/zip', 'zip'),
+        }
+        if not archive_specs.has_key(fileformat):
+            return 'Unknown archive type %s' % fileformat
+                        
+        def read_in_chunks(file_object, chunk_size=1024 * 40):
+            """Lazy function (generator) to read a file piece by piece.
+            Default chunk size: 40k."""
+            while True:
+                data = file_object.read(chunk_size)
+                if not data:
+                    break
+                yield data        
+            
+        archive = tempfile.TemporaryFile()
+        repo = HgModel().get_repo(repo_name).repo
+        fname = '%s-%s%s' % (repo_name, revision, fileformat)
+        archival.archive(repo, archive, revision, archive_specs[fileformat][1],
+                         prefix='%s-%s' % (repo_name, revision))
+        response.content_type = archive_specs[fileformat][0]
+        response.content_disposition = 'attachment; filename=%s' % fname
+        archive.seek(0)
+        return read_in_chunks(archive)
     
     def diff(self, repo_name, f_path):
         hg_model = HgModel()
