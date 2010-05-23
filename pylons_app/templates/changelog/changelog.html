@@ -40,7 +40,7 @@ from pylons_app.lib import filters
 				<div class="author">${cs.author}</div>
 				<div id="chg_${cnt}" class="message">
 					${h.link_to(cs.message,
-					h.url('changeset_home',repo_name=c.repo_name,revision=cs._short),
+					h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id),
 					title=cs.message)}
 				</div>
 					<span class="logtags">
@@ -55,6 +55,19 @@ from pylons_app.lib import filters
 					<span class="changed" title="${_('changed')}">${len(cs.changed)}</span>
 					<span class="added" title="${_('added')}">${len(cs.added)}</span>
 				</div>
+					<div class="right">
+						%if len(cs.parents)>1:
+						<div class="merge">
+						${_('merge')}
+						<img alt="merge" src="/images/icons/arrow_join.png">
+						</div>
+						%endif						
+						%for p_cs in reversed(cs.parents):
+							<div class="parent">${_('Parrent')} ${p_cs.revision}: ${h.link_to(p_cs.raw_id,
+					h.url('changeset_home',repo_name=c.repo_name,revision=p_cs.raw_id),
+					title=p_cs.message)}</div>
+						%endfor								
+					</div>				
 		</div>
 		
 	%endfor

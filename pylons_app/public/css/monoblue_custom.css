@@ -476,6 +476,22 @@ canvas {
 .right .removed{
 	background: #FF8888;
 }
+
+.right .merge{
+	float: right;
+	vertical-align: top;
+	font-size: 60%;
+	font-weight: bold;
+}
+.right .merge img{
+	vertical-align: bottom;	
+}
+
+.right .parent{
+float:right;
+font-size: 90%;
+font-family: monospace;
+}
 /** end of canvas **/
 
 /* FILE BROWSER */
