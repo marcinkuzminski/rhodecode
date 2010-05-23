@@ -234,16 +234,16 @@ span.logtags span {
 }
 
 span.logtags span.tagtag {
-	background-image: url("/images/label_16.png");
+	background-image: url("/images/icons/tag_green.png");
 }
 
 span.logtags span.branchtag {
-	background-image: url("/images/left_16.png");
+	background-image: url("/images/icons/arrow_branch.png");
 	color: #628F53;
 }
 
 span.logtags span.inbranchtag {
-	background-image: url("/images/left_16.png");
+	background-image: url("/images/icons/arrow_branch.png");
 }
 
 div.diff pre {
@@ -537,9 +537,7 @@ table.code-browser tbody td {
 }
 
 .rss_logo {
-	background-image: url("/images/feed.png");
-	background-repeat: no-repeat;
-	display: block;
+	background: url("/images/icons/rss_16.png") no-repeat scroll 3px;
 	height: 16px;
 	padding-left: 20px;
 	padding-top: 0px;
@@ -547,32 +545,30 @@ table.code-browser tbody td {
 }
 
 .atom_logo {
-	background-image: url("/images/atom.png");
-	background-repeat: no-repeat;
-	display: block;
+	background: url("/images/icons/atom.png") no-repeat scroll 3px;
 	height: 16px;
 	padding-left: 20px;
 	padding-top: 0px;
+	text-align: left;
+}
+.archive_logo{
+	background: url("/images/icons/compress.png") no-repeat scroll 3px;
+	height: 16px;
+	padding-left: 20px;
 	text-align: left;
 }
 
 .browser-file {
-	background-image: url("/images/document_16.png");
-	background-repeat: no-repeat;
-	display: block;
+	background: url("/images/icons/document_16.png") no-repeat scroll 3px;
 	height: 16px;
 	padding-left: 20px;
-	padding-top: 0px;
 	text-align: left;
 }
 
 .browser-dir {
-	background-image: url("/images/folder_16.png");
-	background-repeat: no-repeat;
-	display: block;
+	background: url("/images/icons/folder_16.png") no-repeat scroll 3px;
 	height: 16px;
 	padding-left: 20px;
-	padding-top: 0px;
 	text-align: left;
 }
 

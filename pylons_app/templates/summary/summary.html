@@ -28,7 +28,7 @@ from pylons_app.lib import filters
         <dd>${c.repo_info.last_change|n,filters.rfc822date} - ${c.repo_info.last_change|n,filters.age}</dd>
         <dt>${_('url')}</dt>
         <dd><pre style="margin:0">hg clone <a href="${c.clone_repo_url}">${c.clone_repo_url}</a></pre></dd>
-        <dt>${_('Download')}</dt>
+        <dt>${_('download')}</dt>
         <dd>
        	%for cnt,archive in enumerate(c.repo_info._get_archives()):
        		 %if cnt >=1:
@@ -36,7 +36,7 @@ from pylons_app.lib import filters
        		 %endif
        		 ${h.link_to(c.repo_info.name+'.'+archive['type'],
        			h.url('files_archive_home',repo_name=c.repo_info.name,
-       			revision='tip',fileformat=archive['extension']))}
+       			revision='tip',fileformat=archive['extension']),class_="archive_logo")}
 		%endfor
         </dd>
     </dl>

@@ -41,11 +41,15 @@ from pylons_app.lib import filters
 	        <td>${repo['last_change']|n,filters.age}</td>
 	        <td>r${repo['rev']}:<a href="/${repo['name']}/rev/${repo['tip']}/">${repo['tip']}</a></td>
 	        <td>${repo['contact']}</td>
-	        <td class="indexlinks">
+	        
 	        	%for archive in repo['repo_archives']:
-					<a href="/${repo['name']}/archive/${archive['node']}${archive['extension']}">${archive['type']}</a>
+	        	<td class="indexlinks">
+	        		${h.link_to(archive['type'],
+       				h.url('files_archive_home',repo_name=repo['name'],
+       				revision='tip',fileformat=archive['extension']),class_="archive_logo" )}
+				</td>
 				%endfor
-	        </td>
+	        
 			<td>
 				${h.link_to(_('RSS'),h.url('rss_feed_home',repo_name=repo['name']),class_='rss_logo')}
 			</td>        
