@@ -44,7 +44,7 @@ def make_app(global_conf, full_stack=True, static_files=True, **app_conf):
     
     # CUSTOM MIDDLEWARE HERE (filtered by error handling middlewares)
     #set the https based on HTTP_X_URL_SCHEME
-    app = HttpsFixup(app)
+    
     app = SimpleHg(app, config)
     
     if asbool(full_stack):
@@ -58,6 +58,7 @@ def make_app(global_conf, full_stack=True, static_files=True, **app_conf):
         else:
             app = StatusCodeRedirect(app, [400, 401, 403, 404, 500])
     
+    app = HttpsFixup(app)
     # Establish the Registry for this application
     app = RegistryManager(app)
 
