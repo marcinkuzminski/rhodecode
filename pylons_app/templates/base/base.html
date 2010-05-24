@@ -5,6 +5,7 @@
     <link rel="icon" href="/images/hgicon.png" type="image/png" />
     <meta name="robots" content="index, nofollow"/>
     <title>${next.title()}</title>
+    ##For future use yui reset for cross browser compatability.
     ##<link rel="stylesheet" href="/js/yui/reset-fonts-grids/reset-fonts-grids.css" type="text/css" />
     ${self.css()}
     ${self.js()}
@@ -15,12 +16,11 @@
     <div class="page-header">
         <h1>${next.breadcrumbs()}</h1>
         ${self.page_nav()}
-    </div>
     <div id="main">
     	${next.main()}
     </div>
     <div class="page-footer">
-        Hg App ${c.hg_app_version} &copy; 2010
+        Hg App ${c.hg_app_version} &copy; 2010 by Marcin Kuzminski
     </div>   
 
     <div id="powered-by">
@@ -43,6 +43,7 @@
 
 <%def name="page_nav()">
 	${self.menu()}
+	${self.submenu()}
 </%def>
 
 <%def name="menu(current)">
@@ -52,6 +53,7 @@ def is_current(selected):
 		return "class='current'"
 %>
 		%if current not in ['home','admin']:
+		##regular menu
 	       <script type="text/javascript">
 	       	YAHOO.util.Event.onDOMReady(function(){
 				YAHOO.util.Event.addListener('repo_switcher','click',function(){
@@ -93,13 +95,32 @@ def is_current(selected):
 	            <li ${is_current('files')}>${h.link_to(_('files'),h.url('files_home',repo_name=c.repo_name))}</li>
 	        </ul>
 		%else:
+		##Root menu
 			<ul class="page-nav">
 				<li ${is_current('home')}>${h.link_to(_('Home'),h.url('/'))}</li>
 				<li ${is_current('admin')}>${h.link_to(_('Admin'),h.url('admin_home'))}</li>
 				<li class="logout">${h.link_to(u'Logout',h.url('logout_home'))}</li>
 			</ul>
 		%endif    
+		</div>
 </%def>
+<%def name="submenu(current=None)">
+	<% 
+	def is_current(selected):
+		if selected == current:
+			return "class='current_submenu'"
+	%>
+	%if current != None:
+	<div>
+    <ul class="submenu">
+        <li ${is_current('repos')}>${h.link_to(u'repos',h.url('repos'))}</li>
+        <li ${is_current('users')}>${h.link_to(u'users',h.url('users'))}</li>
+    </ul>
+    <br/>
+    </div>
+    %endif
+</%def>
+
 
 <%def name="css()">
 <link rel="stylesheet" href="/css/monoblue_custom.css" type="text/css" />

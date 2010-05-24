@@ -2,7 +2,7 @@
 <%inherit file="/base/base.html"/>
 
 <%def name="title()">
-    ${_('Repository managment')}
+    ${_('Administration')}
 </%def>
 <%def name="breadcrumbs()">
 	${h.link_to(u'Admin',h.url('admin_home'))}
@@ -10,20 +10,13 @@
 </%def>
 <%def name="page_nav()">
 	${self.menu('admin')}
+	${self.submenu('')}
 </%def>
 <%def name="main()">
     %if c.admin_user:
-	    <ul class="submenu">
-	        <li>
-	            ${h.link_to(u'Repos',h.url('repos'))}
-	        </li>
-	        <li>
-	            ${h.link_to(u'Users',h.url('users'))}
-	        </li>
-	    </ul>
-	    <br/>
 	    <div>
 	        <h2>Welcome ${c.admin_username}</h2>
+	        ${_('Last actions')}
 			    <div id="user_log">
 					${c.log_data}
 				</div>

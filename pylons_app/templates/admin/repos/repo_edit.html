@@ -1,25 +1,40 @@
-<%inherit file="base/base.html"/>
+## -*- coding: utf-8 -*-
+<%inherit file="/base/base.html"/>
+
 <%def name="title()">
-    ${_('Repository managment')}
+    ${_('Repositories administration')}
 </%def>
 <%def name="breadcrumbs()">
-    ${h.link_to(u'Admin',h.url('admin_home'))}
-    /
-    ${h.link_to(u'Repos managment',h.url('repos'))}
+	${h.link_to(u'Admin',h.url('admin_home'))}
+	 /  
 </%def>
 <%def name="page_nav()">
 	${self.menu('admin')}
+	${self.submenu('repos')}
 </%def>
 <%def name="main()">
-    <ul class="submenu">
-        <li class="current_submenu">
-            ${h.link_to(u'Repos',h.url('repos'))}
-        </li>
-        <li>
-            ${h.link_to(u'Users',h.url('users'))}
-        </li>
-    </ul>
 	<div>
-        <h2>${_('Mercurial repos')}</h2>
+        <h2>${_('Repositories')} - ${_('edit')}</h2>
+        ${h.form(url('repos'))}
+        <table>
+        	<tr>
+        		<td>${_('Name')}</td>
+        		<td>${h.text('name',c.new_repo)}</td>
+        	</tr>
+        	<tr>
+        		<td>${_('Description')}</td>
+        		<td>${h.textarea('description',cols=23,rows=5)}</td>
+        	</tr>
+        	<tr>
+        		<td>${_('Private')}</td>
+        		<td>${h.checkbox('private')}</td>
+        	</tr>
+        	<tr>
+        		<td></td>
+        		<td>${h.submit('add','add')}</td>
+        	</tr>
+        	        	        	
+        </table>
+        ${h.end_form()}
     </div>
-</%def>    
+</%def>   

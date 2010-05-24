@@ -1,26 +1,20 @@
+## -*- coding: utf-8 -*-
 <%inherit file="/base/base.html"/>
+
 <%def name="title()">
-    ${_('Repository managment')}
+    ${_('Repositories administration')}
 </%def>
 <%def name="breadcrumbs()">
-    ${h.link_to(u'Admin',h.url('admin_home'))}
-    /
-    ${h.link_to(u'Repos managment',h.url('repos'))}
+	${h.link_to(u'Admin',h.url('admin_home'))}
+	 /  
 </%def>
 <%def name="page_nav()">
 	${self.menu('admin')}
+	${self.submenu('repos')}
 </%def>
 <%def name="main()">
-    <ul class="submenu">
-        <li>
-            ${h.link_to(u'Repos',h.url('repos'), class_="current_submenu")}
-        </li>
-        <li>
-            ${h.link_to(u'Users',h.url('users'))}
-        </li>
-    </ul>
 	<div>
-        <h2>${_('Mercurial repos')}</h2>
+        <h2>${_('Repositories administration')}</h2>
         <table>
 	        %for cnt,repo in enumerate(c.repos_list):
 	 		<tr class="parity${cnt%2}">

@@ -1,24 +1,18 @@
+## -*- coding: utf-8 -*-
 <%inherit file="/base/base.html"/>
+
 <%def name="title()">
-    ${_('Users managment')}
+    ${_('Users administration')}
 </%def>
 <%def name="breadcrumbs()">
-    ${h.link_to(u'Admin',h.url('admin_home'))}
-    /
-    ${h.link_to(u'Users managment',h.url('users'))}
+	${h.link_to(u'Admin',h.url('admin_home'))}
+	 /  
 </%def>
 <%def name="page_nav()">
 	${self.menu('admin')}
+	${self.submenu('users')}
 </%def>
 <%def name="main()">
-    <ul class="submenu">
-        <li>
-            ${h.link_to(u'Repos',h.url('repos'))}
-        </li>
-        <li>
-            ${h.link_to(u'Users',h.url('users'), class_="current_submenu")}
-        </li>
-    </ul>
 	<div>
         <h2>${_('Mercurial users')}</h2>
         <table>
@@ -45,5 +39,4 @@
         </table>
         <h3>${h.link_to(u'Add user',h.url('new_user'))}</h3>        
     </div>
-
-</%def>    
+</%def>

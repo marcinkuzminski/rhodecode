@@ -2,39 +2,39 @@
 <%inherit file="/base/base.html"/>
 
 <%def name="title()">
-    ${_('Add new repository')}
+    ${_('Repositories administration')}
 </%def>
-
 <%def name="breadcrumbs()">
 	${h.link_to(u'Admin',h.url('admin_home'))}
-	 / 
+	 /  
 </%def>
-
 <%def name="page_nav()">
 	${self.menu('admin')}
+	${self.submenu('repos')}
 </%def>
-
 <%def name="main()">
-     <table cellspacing="0">
-        <tr>
-            <td><h1>${c.msg}</h1></td>
-        </tr>
-        <tr>
-            <td><h2>${c.new_repo}</h2></td>
-        </tr>
-    </table>   
-</%def>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	<div>
+        <h2>${_('Repositories')} - ${_('add new')}</h2>
+        ${h.form(url('repos'))}
+        <table>
+        	<tr>
+        		<td>${_('Name')}</td>
+        		<td>${h.text('name',c.new_repo)}</td>
+        	</tr>
+        	<tr>
+        		<td>${_('Description')}</td>
+        		<td>${h.textarea('description',cols=23,rows=5)}</td>
+        	</tr>
+        	<tr>
+        		<td>${_('Private')}</td>
+        		<td>${h.checkbox('private')}</td>
+        	</tr>
+        	<tr>
+        		<td></td>
+        		<td>${h.submit('add','add')}</td>
+        	</tr>
+        	        	        	
+        </table>
+        ${h.end_form()}
+    </div>
+</%def>   

@@ -1,24 +1,18 @@
+## -*- coding: utf-8 -*-
 <%inherit file="/base/base.html"/>
+
 <%def name="title()">
-    ${_('User')} - ${c.user.username}
+    ${_('User administration')}
 </%def>
 <%def name="breadcrumbs()">
-    ${h.link_to(u'Admin',h.url('admin_home'))}
-    /
-    ${h.link_to(u'Users',h.url('users'))}
+	${h.link_to(u'Admin',h.url('admin_home'))}
+	 /  
 </%def>
 <%def name="page_nav()">
 	${self.menu('admin')}
+	${self.submenu('users')}
 </%def>
 <%def name="main()">
-    <ul class="submenu">
-        <li>
-            ${h.link_to(u'Repos',h.url('repos'))}
-        </li>
-        <li class="current_submenu">
-            ${h.link_to(u'Users',h.url('users'))}
-        </li>
-    </ul>
 	<div>
         <h2>${_('User')} - ${c.user.username}</h2>
         ${h.form(url('user', id=c.user.user_id),method='put')}
@@ -41,7 +35,6 @@
         	</tr>
         	        	        	
         </table>
-        	
         ${h.end_form()}
     </div>
-</%def>    
+</%def>  
