@@ -168,6 +168,9 @@ div.page-path {
 div.page-footer {
 	margin: 50px 0 0;
 	position: relative;
+	text-align: center;
+	font-weight: bold;
+	font-size: 90%;
 }
 
 div.page-footer p {
@@ -385,20 +388,78 @@ p.files {
 /** end of file **/ 
 
 /** changeset **/
+#changeset_content{
+	width:60%;
+	float:left;
+}
+
+#changeset_content .container .wrapper{
+	width: 600px;
+}
+#changeset_content .container{
+	border:1px solid #CCCCCC;
+	height:120px;
+}
+
+#changeset_content .container .left{
+	float:left;
+	width: 70%;
+	padding-left: 5px;
+}
+
+#changeset_content .container .right{
+	float:right;
+	width: 25%;
+	text-align: right;
+}
+
+#changeset_content .container .left .date{
+	font-weight:bold;
+}
+#changeset_content .container .left .author{
+	
+}
+#changeset_content .container .left .message{
+
+}
+
+
+
+
+
+
+
+
 
 .cs_files{
-	border: 2px solid #CCCCCC;
+	border: 1px solid #CCCCCC;
 	width: 60%;
 	
 }
+
 .cs_files .cs_added{
-	background:#BBFFBB;
+	background: url("/images/icons/page_white_add.png") no-repeat scroll 3px;
+	/*background-color:#BBFFBB;*/
+	height: 16px;
+	padding-left: 20px;
+	margin-top: 7px;
+	text-align: left;	
 }
 .cs_files .cs_changed{
-	background: #FFDD88;
+	background: url("/images/icons/page_white_edit.png") no-repeat scroll 3px;
+	/*background-color: #FFDD88;*/
+	height: 16px;
+	padding-left: 20px;
+	margin-top: 7px;
+	text-align: left;	
 }
 .cs_files .cs_removed{
-	background: #FF8888;
+	background: url("/images/icons/page_white_delete.png") no-repeat scroll 3px;
+	/*background-color: #FF8888;*/
+	height: 16px;
+	padding-left: 20px;
+	margin-top: 7px;
+	text-align: left;	
 }
 
 /** end of changeset **/ 
@@ -448,6 +509,7 @@ canvas {
 #graph_content .container .right{
 	float:right;
 	width: 25%;
+	text-align: right;
 }
 #graph_content .container .left .date{
 	font-weight:bold;
@@ -459,7 +521,10 @@ canvas {
 	font-size: 80%;
 }
 
-.right .added,.changed,.removed{
+.right div{
+	clear: both;
+}
+.right .changes .added,.changed,.removed{
 	border:1px solid #DDDDDD;
 	display:block;
 	float:right;
@@ -467,18 +532,17 @@ canvas {
 	text-align:center;
 	min-width:15px;
 }
-.right .added{
+.right .changes .added{
 	background:#BBFFBB; 
 }
-.right .changed{
+.right .changes .changed{
 	background: #FFDD88;
 }
-.right .removed{
+.right .changes .removed{
 	background: #FF8888;
 }
 
 .right .merge{
-	float: right;
 	vertical-align: top;
 	font-size: 60%;
 	font-weight: bold;
@@ -488,9 +552,8 @@ canvas {
 }
 
 .right .parent{
-float:right;
-font-size: 90%;
-font-family: monospace;
+	font-size: 90%;
+	font-family: monospace;
 }
 /** end of canvas **/
 
