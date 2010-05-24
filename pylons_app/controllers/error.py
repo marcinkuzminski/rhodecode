@@ -8,8 +8,9 @@ from pylons.i18n.translation import _
 from pylons_app.lib.base import BaseController, render
 from pylons.middleware import  media_path
 from pylons_app.lib.utils import check_repo
-
+from pylons_app.lib.filters import clean_repo
 log = logging.getLogger(__name__)
+
 class ErrorController(BaseController):
     """
     Generates error documents as and when they are required.
@@ -20,9 +21,12 @@ class ErrorController(BaseController):
     This behaviour can be altered by changing the parameters to the
     ErrorDocuments middleware in your config/middleware.py file.
     """
+#    def __before__(self):
+#        super(ErrorController, self).__before__()
         
     def document(self):
         resp = request.environ.get('pylons.original_response')
+        
         log.debug(resp.status)
 
         e = request.environ
@@ -33,7 +37,10 @@ class ErrorController(BaseController):
 
                         
         if resp.status_int == 404:
-            if check_repo(c.repo_name, g.base_path):
+            org_e = request.environ.get('pylons.original_request').environ
+            c.repo_name = repo_name = org_e['PATH_INFO'].split('/')[1]
+            c.repo_name_cleaned = clean_repo(c.repo_name)
+            if check_repo(repo_name, g.base_path):
                 return render('/errors/error_404.html')
                 
         c.error_message = cgi.escape(request.GET.get('code', str(resp.status)))

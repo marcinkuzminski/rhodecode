@@ -22,13 +22,14 @@ from pylons_app.lib import filters
 </%def>
 <%def name="main()">
 
-    <h2 class="no-link no-border">Not Found</h2>
-    <p class="normal">The specified repository "${c.repo_name}" is unknown, sorry.</p>
+    <h2 class="no-link no-border">${_('Not Found')}</h2>
+    <p class="normal">${_('The specified repository "%s" is unknown, sorry.') % c.repo_name}</p>
     <p class="normal">
-    <a href="/_admin/add_repo/${c.repo_name|n,filters.clean_repo}">Create "${c.repo_name}" repository as ${c.repo_name|n,filters.clean_repo}</a>
+    <a href="${h.url('new_repo',repo=c.repo_name_cleaned)}">
+    ${_('Create "%s" repository as %s' % (c.repo_name,c.repo_name_cleaned))}</a>
 
     </p>
-    <p class="normal">Go back to the ${h.link_to(_('main repository list page'),h.url('hg_home'))}.</p>
+    <p class="normal">${h.link_to(_('Go back to the main repository list page'),h.url('hg_home'))}</p>
     <div class="page-footer">
     </div>
 </%def>

@@ -1,14 +1,12 @@
+from pylons import request, response, session, tmpl_context as c, url, \
+    app_globals as g
+from pylons.controllers.util import abort, redirect
+from pylons_app.lib.base import BaseController, render
+from pylons_app.lib.utils import check_repo, invalidate_cache
 import logging
 import os
-from pylons import request, response, session, tmpl_context as c, url, app_globals as g
-from pylons.controllers.util import abort, redirect
-from pylons_app.lib import auth
-from pylons_app.lib.base import BaseController, render
-from pylons_app.model.db import Users, UserLogs
-from pylons_app.model.hg_model import HgModel
-from operator import itemgetter
 import shutil
-from pylons_app.lib.utils import invalidate_cache
+from pylons_app.lib.filters import clean_repo
 log = logging.getLogger(__name__)
 
 class ReposController(BaseController):
@@ -31,10 +29,31 @@ class ReposController(BaseController):
     def create(self):
         """POST /repos: Create a new item"""
         # url('repos')
+        name = request.POST.get('name')
+
+        try:
+            self._create_repo(name)
+            #clear our cached list for refresh with new repo
+            invalidate_cache('cached_repo_list')
+        except Exception as e:
+            log.error(e)
+        
+        return redirect('repos')
+        
+    def _create_repo(self, repo_name):        
+        repo_path = os.path.join(g.base_path, repo_name)
+        if check_repo(repo_name, g.base_path):
+            log.info('creating repo %s in %s', repo_name, repo_path)
+            from vcs.backends.hg import MercurialRepository
+            MercurialRepository(repo_path, create=True)
+                        
 
     def new(self, format='html'):
         """GET /repos/new: Form to create a new item"""
-        # url('new_repo')
+        new_repo = request.GET.get('repo', '')
+        c.new_repo = clean_repo(new_repo)
+
+        return render('admin/repos/repo_add.html')
 
     def update(self, id):
         """PUT /repos/id: Update an existing item"""
