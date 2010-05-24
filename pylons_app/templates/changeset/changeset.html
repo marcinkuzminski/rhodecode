@@ -16,18 +16,75 @@ from pylons_app.lib import filters
 <%def name="page_nav()">
     ${self.menu('changelog')}     
 </%def>
-
+<%def name="css()">
+<link rel="stylesheet" href="/css/monoblue_custom.css" type="text/css" />
+<link rel="stylesheet" href="/css/diff.css" type="text/css" />
+</%def>
 <%def name="main()">
-    <h2 class="no-link no-border">${_('Changeset')}</h2>
+    <h2 class="no-link no-border">${_('Changeset')} - r${c.changeset.revision}:${c.changeset.raw_id}</h2>
+    
+    <div id="changeset_content">
+		<div class="container">
+			<div class="left">
+				<div class="date">${_('Date')}: ${c.changeset.date}</div>
+				<div class="author">${_('Author')}: ${c.changeset.author}</div>
+				<div class="message">
+					${c.changeset.message}
+				</div>
+			</div>	
+			<div class="right">
+				<span class="logtags">
+					<span class="branchtag">${c.changeset.branch}</span>
+					%for tag in c.changeset.tags:
+						<span class="tagtag">${tag}</span>
+					%endfor
+				</span>					
+				%if len(c.changeset.parents)>1:
+				<div class="merge">		
+				${_('merge')}
+				<img alt="merge" src="/images/icons/arrow_join.png">
+				</div>
+				%endif						
+				%for p_cs in reversed(c.changeset.parents):
+					<div class="parent">${_('Parrent')} ${p_cs.revision}: ${h.link_to(p_cs.raw_id,
+						h.url('changeset_home',repo_name=c.repo_name,revision=p_cs.raw_id),title=p_cs.message)}
+					</div>
+				%endfor								
+			</div>		
+		</div>    
+    </div>
+    
+    <div style="clear: both"></div>
     <div class="cs_files">
-			%for filenode in c.changeset.added:
-				<p class="cs_added">${filenode}</p>
+			%for change,filenode,diff in c.changes:
+				<div class="cs_${change}">${h.link_to(filenode.path,h.url.current(anchor='CHANGE-%s'%filenode.path))}</div>
 			%endfor
-			%for filenode in c.changeset.changed:
-				<p class="cs_changed">${filenode}</p>
-			%endfor
-			%for filenode in c.changeset.removed:
-				<p class="cs_removed">${filenode}</p>
-			%endfor
-	</div>			
+	</div>
+	
+	%for change,filenode,diff in c.changes:
+		%if change !='removed':
+		<div style="clear:both;height:10px"></div>
+		<div id="body" class="diffblock">
+			<div id="${'CHANGE-%s'%filenode.path}" class="code-header">
+				<div>
+				<span>
+					${h.link_to_if(change!='removed',filenode.path,h.url('files_home',repo_name=c.repo_name,
+					revision=filenode.changeset.raw_id,f_path=filenode.path))}
+				</span>
+				
+				##&raquo; <span style="font-size:77%">${h.link_to(_('diff'),
+				##h.url.current(diff2=c.diff2,diff1=c.diff1,diff='diff'))}</span>
+				##&raquo; <span style="font-size:77%">${h.link_to(_('raw diff'),
+				##h.url.current(diff2=c.diff2,diff1=c.diff1.split(':')[-1],diff='raw'))}</span>
+				##&raquo; <span style="font-size:77%">${h.link_to(_('download diff'),
+				##h.url.current(diff2=c.diff2,diff1=c.diff1,diff='download'))}</span>
+				</div>
+			</div>
+			<div class="code-body">        
+					${diff|n}
+			</div>
+		</div>
+		%endif
+	%endfor
+			
 </%def>    

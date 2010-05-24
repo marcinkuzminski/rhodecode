@@ -64,7 +64,6 @@ class SimpleHg(object):
                 app = wsgiapplication(self.__make_app)
             except Exception as e:
                 return HTTPNotFound()(environ, start_response)
-            
             action = self.__get_action(environ)            
             #invalidate cache on push
             if action == 'push':
@@ -72,12 +71,13 @@ class SimpleHg(object):
             
             if action:
                 username = self.__get_environ_user(environ)
-                self.__log_user_action(username, action, repo_name)            
+                self.__log_user_action(username, action, repo_name)
+                         
             return app(environ, start_response)            
 
     def __make_app(self):
         hgserve = hgweb(self.repo_path)
-        return  self.load_web_settings(hgserve)
+        return  self.__load_web_settings(hgserve)
     
     def __get_environ_user(self, environ):
         return environ.get('REMOTE_USER')
@@ -125,7 +125,7 @@ class SimpleHg(object):
         invalidate_cache('full_changelog', repo_name)
            
                    
-    def load_web_settings(self, hgserve):
+    def __load_web_settings(self, hgserve):
         repoui = make_ui(os.path.join(self.repo_path, '.hg', 'hgrc'), False)
         #set the global ui for hgserve
         hgserve.repo.ui = self.baseui
@@ -135,5 +135,3 @@ class SimpleHg(object):
             hgserve.repo.ui = repoui
             
         return hgserve
-
-
