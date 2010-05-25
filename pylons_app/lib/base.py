@@ -10,7 +10,7 @@ from pylons_app.lib.auth import LoginRequired, AuthUser
 from pylons_app.lib.utils import get_repo_slug
 from pylons_app.model import meta
 from pylons_app.model.hg_model import HgModel
-from pylons_app import get_version
+from pylons_app import __version__
 
 @cache_region('long_term', 'cached_repo_list')
 def _get_repos_cached():
@@ -23,7 +23,7 @@ def _full_changelog_cached(repo_name):
 class BaseController(WSGIController):
     
     def __before__(self):
-        c.hg_app_version = get_version()
+        c.hg_app_version = __version__
         c.repos_prefix = config['hg_app_name']
         c.repo_name = get_repo_slug(request)
         c.hg_app_user = session.get('hg_app_user', AuthUser())
