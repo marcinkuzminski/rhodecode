@@ -47,7 +47,7 @@ class HgModel(object):
                 
             tmp_d = {}
             tmp_d['name'] = mercurial_repo.name
-            tmp_d['name_sort'] = tmp_d['name']
+            tmp_d['name_sort'] = tmp_d['name'].lower()
             tmp_d['description'] = mercurial_repo.description
             tmp_d['description_sort'] = tmp_d['description']
             tmp_d['last_change'] = last_change
