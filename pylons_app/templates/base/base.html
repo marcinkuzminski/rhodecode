@@ -113,10 +113,10 @@ def is_current(selected):
 	%if current != None:
 	<div>
     <ul class="submenu">
-        <li ${is_current('repos')}>${h.link_to(u'repos',h.url('repos'))}</li>
-        <li ${is_current('users')}>${h.link_to(u'users',h.url('users'))}</li>
+        <li ${is_current('repos')}>${h.link_to(u'repos',h.url('repos'),class_='repos')}</li>
+        <li ${is_current('users')}>${h.link_to(u'users',h.url('users'),class_='users')}</li>
+        <li ${is_current('permissions')}>${h.link_to(u'permissions',h.url('permissions'),class_='permissions')}</li>
     </ul>
-    <br/>
     </div>
     %endif
 </%def>

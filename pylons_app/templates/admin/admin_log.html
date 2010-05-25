@@ -1,7 +1,7 @@
 ## -*- coding: utf-8 -*-
 %if c.users_log:
-<table>
-	<tr>
+<table class="table_disp">
+	<tr class="header">
 		<td>${_('Username')}</td>
 		<td>${_('Repository')}</td>
 		<td>${_('Action')}</td>
@@ -20,8 +20,8 @@
 </table>
 <div>
 		<script type="text/javascript">
-		var data_div = 'user_log';
-		YAHOO.util.Event.onDOMReady(function(){
+		  var data_div = 'user_log';
+		  YAHOO.util.Event.onDOMReady(function(){
 			YAHOO.util.Event.addListener(YAHOO.util.Dom.getElementsByClassName('pager_link'),"click",function(){
 					YAHOO.util.Dom.setStyle('shortlog_data','opacity','0.3');});});
 		</script>

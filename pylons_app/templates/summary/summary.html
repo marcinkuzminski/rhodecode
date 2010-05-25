@@ -15,6 +15,22 @@ from pylons_app.lib import filters
 <%def name="page_nav()">
 	${self.menu('summary')}    
 </%def>
+
+<%def name="js()">
+<script type="text/javascript" src="/js/yui/utilities/utilities.js"></script>
+<script type="text/javascript">
+var E = YAHOO.util.Event;
+var D = YAHOO.util.Dom;
+
+E.onDOMReady(function(e){
+    id = 'clone_url';
+	E.addListener(id,'click',function(e){
+	    D.get('clone_url').select();
+	})
+})
+</script>
+</%def>
+
 <%def name="main()">
     <h2 class="no-link no-border">${_('Mercurial Repository Overview')}</h2>
     <dl class="overview">
@@ -26,8 +42,8 @@ from pylons_app.lib import filters
         <dd>${c.repo_info.contact}</dd>
         <dt>${_('last change')}</dt>
         <dd>${c.repo_info.last_change|n,filters.rfc822date} - ${c.repo_info.last_change|n,filters.age}</dd>
-        <dt>${_('url')}</dt>
-        <dd><pre style="margin:0">hg clone <a href="${c.clone_repo_url}">${c.clone_repo_url}</a></pre></dd>
+        <dt>${_('clone url')}</dt>
+        <dd><input type="text" id="clone_url"  readonly="readonly" value="hg clone ${c.clone_repo_url}" size="40"/></dd>
         <dt>${_('download')}</dt>
         <dd>
        	%for cnt,archive in enumerate(c.repo_info._get_archives()):

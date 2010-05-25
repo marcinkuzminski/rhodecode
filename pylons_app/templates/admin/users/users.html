@@ -15,13 +15,13 @@
 <%def name="main()">
 	<div>
         <h2>${_('Mercurial users')}</h2>
-        <table>
-         <tr>
-            <th>Id</th>
-            <th>Username</th>
-            <th>Active</th>
-            <th>Admin</th>
-            <th>Action</th>
+        <table class="table_disp">
+         <tr class="header">
+            <td>ID</td>
+            <td>Username</td>
+            <td>Active</td>
+            <td>Admin</td>
+            <td>Action</td>
          </tr>
             %for user in c.users_list:
                 <tr>
@@ -31,12 +31,12 @@
                     <td>${user.admin}</td>
                     <td>
 	                    ${h.form(url('user', id=user.user_id),method='delete')}
-	                    	${h.submit('remove','remove',class_="submit")}
+	                    	${h.submit('remove','delete',class_="delete_icon action_button")}
 	                    ${h.end_form()}
         			</td>
                 </tr>
             %endfor
         </table>
-        <h3>${h.link_to(u'Add user',h.url('new_user'))}</h3>        
+        <span class="add_icon">${h.link_to(u'add user',h.url('new_user'))}</span>        
     </div>
 </%def>

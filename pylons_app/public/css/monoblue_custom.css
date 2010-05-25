@@ -6,15 +6,99 @@
 }
 
 a {
-	color: #0000cc;
+	color: #556CB5;
 	text-decoration: none;
 }
 a:HOVER{
 	text-decoration: underline;
 }
+
 /*** end of Initial Settings ***/ 
 
+/*** ***/
+.table_disp {
+    border-left: 0px solid #666666;
+    border-bottom: 1px solid #666666;
+    border-right: 1px solid #666666;
+    padding: 0px;
+    margin: 0px;
+    border-spacing: 0px;    
+}
+
+.table_disp .header {
+    border-top: 1px solid #666666;
+    background-color: #556CB5;
+    font-weight: bold;
+    color: white;
+    vertical-align: middle;
+    padding: 3px 5px;
+    text-align: left;
+    font-size: 0.9em;
+}
+
+.table_disp .header td {
+    padding: 4px;
+    vertical-align: middle;
+    border-top: 1px solid #AAAAAA;
+    border-bottom: 2px solid #666666;
+}
+.table_disp td {
+    border-left: 1px solid #AAAAAA;
+    padding-left: 2px;
+    padding-right: 0px;
+}
+
+table tr.parity0:hover,table tr.parity1:hover {
+    background: #D5E1E6;
+}
+
+table tr.parity0 {
+    background: #EAEAE9;
+}
+
+table tr.parity1 {
+    background: #FFFFFF;
+}
+
+
+/*** ***/
+
 /** common settings **/
+.add_icon{
+    background: url("/images/icons/add.png") no-repeat scroll 3px;
+    height: 16px;
+    padding-left: 20px;
+    padding-top: 0px;
+    text-align: left;
+
+}
+.edit_icon{
+    background: url("/images/icons/folder_edit.png") no-repeat scroll 3px;
+    height: 16px;
+    padding-left: 20px;
+    padding-top: 0px;
+    text-align: left;
+}
+
+.delete_icon{
+    background: url("/images/icons/delete.png") no-repeat scroll 3px;
+    height: 16px;
+    padding-left: 20px;
+    padding-top: 0px;
+    text-align: left;
+
+}
+
+.action_button{
+    border:0px;
+    display: block;
+}
+.action_button:hover{
+    border:0px;
+    font-style:italic;
+    cursor: pointer;
+}
+
 div#main {
 	padding: 5px;
 }
@@ -121,14 +205,41 @@ ul.page-nav li a:hover {
 }
 
 ul.submenu {
-	margin: 10px 0 -10px 20px;
+	margin: 5px 0px -20px 0px;
 	list-style-type: none;
 }
 
 ul.submenu li {
 	margin: 0 10px 0 0;
-	font-size: 1.2em;
+	font-size: 0.9em;
+	font-weight:bold;
 	display: inline;
+}
+ul.submenu .repos {
+    background: url("/images/icons/folder_edit.png") no-repeat scroll 3px;
+    height: 16px;
+    padding-left: 20px;
+    padding-top: 0px;
+    text-align: left;
+   
+}
+ul.submenu .users {
+    background: url("/images/icons/user_edit.png") no-repeat scroll 3px;
+    height: 16px;
+    padding-left: 20px;
+    padding-top: 0px;
+    text-align: left;
+}
+ul.submenu .permissions {
+    background: url("/images/icons/folder_key.png") no-repeat scroll 3px;
+    height: 16px;
+    padding-left: 20px;
+    padding-top: 0px;
+    text-align: left;
+}
+
+ul.submenu .current_submenu {
+    border-bottom: 2px solid #556CB5;
 }
 
 h2 {
@@ -140,6 +251,7 @@ h2 {
 	font-size: 1.2em;
 	border-top: dotted 1px #D5E1E6;
 	font-weight: bold;
+	color:#556CB5;
 }
 
 h2.no-link {
@@ -213,18 +325,6 @@ div.rss-logo li a:hover {
 p.normal {
 	margin: 20px 0 20px 30px;
 	font-size: 1.2em;
-}
-
-table tr.parity0:hover,table tr.parity1:hover {
-	background: #D5E1E6;
-}
-
-table tr.parity0 {
-	background: #EAEAE9;
-}
-
-table tr.parity1 {
-	background: #FFFFFF;
 }
 
 span.logtags span {
@@ -336,6 +436,9 @@ dl.overview dt {
 	width: 150px;
 }
 
+#clone_url{
+    border: 0px;
+}
 /** end of summary **/ 
 
 /** chagelog **/
@@ -649,10 +752,6 @@ table.code-browser tbody td {
 	height: 16px;
 	padding-left: 20px;
 	text-align: left;
-}
-
-.current_submenu {
-	border-bottom: 2px solid;
 }
 
 #repos_list {

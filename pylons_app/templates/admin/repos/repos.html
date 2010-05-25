@@ -15,18 +15,24 @@
 <%def name="main()">
 	<div>
         <h2>${_('Repositories administration')}</h2>
-        <table>
+        <table class="table_disp">
+        <tr class="header">
+            <td>${_('name')}</td>
+            <td>${_('last revision')}</td>
+            <td>${_('action')}</td>
+        </tr>
 	        %for cnt,repo in enumerate(c.repos_list):
 	 		<tr class="parity${cnt%2}">
 			    <td>${h.link_to(repo['name'],h.url('summary_home',repo_name=repo['name']))}</td>
 		        <td>r${repo['rev']}:${repo['tip']}</td>
                 <td>
                   ${h.form(url('repo', id=repo['name']),method='delete')}
-                  	${h.submit('remove','remove',class_="submit",onclick="return confirm('Confirm to delete this repository');")}
+                  	${h.submit('remove','delete',class_="delete_icon action_button",onclick="return confirm('Confirm to delete this repository');")}
                   ${h.end_form()}
      			</td>
 			</tr>
 			%endfor
 		</table>
+		<span class="add_icon">${h.link_to(u'add repo',h.url('new_repo'))}</span>    
     </div>
 </%def>    
