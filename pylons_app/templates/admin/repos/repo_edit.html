@@ -15,7 +15,7 @@
 <%def name="main()">
 	<div>
         <h2>${_('Repositories')} - ${_('edit')}</h2>
-        ${h.form(url('repos'))}
+        ${h.form(url('repo', id=ID),method='put'))}
         <table>
         	<tr>
         		<td>${_('Name')}</td>
@@ -31,7 +31,7 @@
         	</tr>
         	<tr>
         		<td></td>
-        		<td>${h.submit('add','add')}</td>
+        		<td>${h.submit('update','update')}</td>
         	</tr>
         	        	        	
         </table>

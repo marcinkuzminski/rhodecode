@@ -88,7 +88,9 @@ class ReposController(BaseController):
     def show(self, id, format='html'):
         """GET /repos/id: Show a specific item"""
         # url('repo', id=ID)
-        return render('/repos_show.html')
+        
     def edit(self, id, format='html'):
         """GET /repos/id/edit: Form to edit an existing item"""
         # url('edit_repo', id=ID)
+        c.new_repo = id
+        return render('admin/repos/repo_edit.html')
