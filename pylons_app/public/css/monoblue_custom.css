@@ -173,13 +173,13 @@ ul.page-nav {
 }
 
 ul.page-nav li {
-	margin: 0 2px 0 0;
+	margin: 0 4px 0 0;
 	float: left;
 	height: 24px;
 	font-size: 1.1em;
 	line-height: 24px;
 	text-align: center;
-	background: #DDD;
+	background: #556CB5;
 }
 
 ul.page-nav li.current {
@@ -187,21 +187,24 @@ ul.page-nav li.current {
 	padding-right: 5px;
 	padding-left: 5px;
 }
-
+ul.page-nav li.current a {
+	color: #556CB5;
+}
 ul.page-nav li a {
 	height: 24px;
-	color: #666;
+	color: #FFF;
 	padding-right: 5px;
 	padding-left: 5px;
 	display: block;
 	text-decoration: none;
+	font-weight: bold;
 }
 ul.page-nav li.logout a {
-	color: red;
+	color: #FDAC9D;
 }
 ul.page-nav li a:hover {
-	color: #333;
 	background: #FFF;
+	color: #556CB5;
 }
 
 ul.submenu {
@@ -523,21 +526,12 @@ p.files {
 	
 }
 #changeset_content .container .left .message{
-
+	font-style: italic;
+	color: #556CB5;
 }
 
-
-
-
-
-
-
-
-
 .cs_files{
-	border: 1px solid #CCCCCC;
 	width: 60%;
-	
 }
 
 .cs_files .cs_added{

@@ -41,7 +41,7 @@ E.onDOMReady(function(e){
         <dt>${_('contact')}</dt>
         <dd>${c.repo_info.contact}</dd>
         <dt>${_('last change')}</dt>
-        <dd>${c.repo_info.last_change|n,filters.rfc822date} - ${c.repo_info.last_change|n,filters.age}</dd>
+        <dd>${c.repo_info.last_change|n,filters.age} - ${c.repo_info.last_change|n,filters.rfc822date}</dd>
         <dt>${_('clone url')}</dt>
         <dd><input type="text" id="clone_url"  readonly="readonly" value="hg clone ${c.clone_repo_url}" size="40"/></dd>
         <dt>${_('download')}</dt>
@@ -54,6 +54,11 @@ E.onDOMReady(function(e){
        			h.url('files_archive_home',repo_name=c.repo_info.name,
        			revision='tip',fileformat=archive['extension']),class_="archive_logo")}
 		%endfor
+        </dd>
+        <dt>${_('feeds')}</dt>
+        <dd>
+        	${h.link_to(_('RSS'),h.url('rss_feed_home',repo_name=c.repo_info.name),class_='rss_logo')}
+			${h.link_to(_('Atom'),h.url('atom_feed_home',repo_name=c.repo_info.name),class_='atom_logo')}
         </dd>
     </dl>
 

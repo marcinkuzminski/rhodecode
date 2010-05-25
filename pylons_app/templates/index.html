@@ -39,16 +39,16 @@ from pylons_app.lib import filters
 		    <td>${h.link(repo['name'],h.url('summary_home',repo_name=repo['name']))}</td>
 		    <td>${repo['description']}</td>
 	        <td>${repo['last_change']|n,filters.age}</td>
-	        <td>r${repo['rev']}:<a href="/${repo['name']}/rev/${repo['tip']}/">${repo['tip']}</a></td>
-	        <td>${repo['contact']}</td>
+	        <td>${h.link_to('r%s:%s' % (repo['rev'],repo['tip']),h.url('changeset_home',repo_name=repo['name'],revision=repo['tip']))}</td>
+	        <td title="${repo['contact']}">${repo['contact']|n,filters.person}</td>
 	        
-	        	%for archive in repo['repo_archives']:
-	        	<td class="indexlinks">
-	        		${h.link_to(archive['type'],
-       				h.url('files_archive_home',repo_name=repo['name'],
-       				revision='tip',fileformat=archive['extension']),class_="archive_logo" )}
-				</td>
-				%endfor
+	        	##%for archive in repo['repo_archives']:
+	        	##<td class="indexlinks">
+	        	##	${h.link_to(archive['type'],
+       			##	h.url('files_archive_home',repo_name=repo['name'],
+       			##	revision='tip',fileformat=archive['extension']),class_="archive_logo" )}
+				##</td>
+				##%endfor
 	        
 			<td>
 				${h.link_to(_('RSS'),h.url('rss_feed_home',repo_name=repo['name']),class_='rss_logo')}
