@@ -2,13 +2,17 @@ import logging
 from os.path import dirname as dn
 from sqlalchemy.engine import create_engine
 import os
+import sys
+ROOT = dn(dn(dn(os.path.realpath(__file__))))
+sys.path.append(ROOT)
+
 from pylons_app.model.db import Users
 from pylons_app.model.meta import Session
 
 from pylons_app.lib.auth import get_crypt_password
 from pylons_app.model import init_model
 
-ROOT = dn(dn(dn(os.path.realpath(__file__))))
+
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s.%(msecs)03d %(levelname)-5.5s [%(name)s] %(message)s')
 from pylons_app.model.meta import Base
 
