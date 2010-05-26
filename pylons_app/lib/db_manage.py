@@ -7,44 +7,51 @@ ROOT = dn(dn(dn(os.path.realpath(__file__))))
 sys.path.append(ROOT)
 
 from pylons_app.model.db import Users
-from pylons_app.model.meta import Session
+from pylons_app.model.meta import Session, Base
 
 from pylons_app.lib.auth import get_crypt_password
 from pylons_app.model import init_model
 
-
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s.%(msecs)03d %(levelname)-5.5s [%(name)s] %(message)s')
-from pylons_app.model.meta import Base
+log = logging.getLogger('db manage')
+log.setLevel(logging.DEBUG)
+console_handler = logging.StreamHandler()
+console_handler.setFormatter(logging.Formatter("%(asctime)s.%(msecs)03d" 
+                                    " %(levelname)-5.5s [%(name)s] %(message)s"))
+log.addHandler(console_handler)
 
 class DbManage(object):
-    def __init__(self):
-        dburi = 'sqlite:////%s' % os.path.join(ROOT, 'hg_app.db')
-        engine = create_engine(dburi) 
+    def __init__(self, log_sql):
+        self.dbname = 'hg_app.db'
+        dburi = 'sqlite:////%s' % os.path.join(ROOT, self.dbname)
+        engine = create_engine(dburi, echo=log_sql) 
         init_model(engine)
         self.sa = Session()
     
     def check_for_db(self, override):
-        if not override:
-            if os.path.isfile(os.path.join(ROOT, 'hg_app.db')):
+        log.info('checking for exisiting db')
+        if os.path.isfile(os.path.join(ROOT, self.dbname)):
+            log.info('database exisist')
+            if not override:
                 raise Exception('database already exists')
-    
+
     def create_tables(self, override=False):
         """
         Create a auth database
         """
         self.check_for_db(override)
-                
+        if override:
+            log.info("database exisist and it's going to be destroyed")
         Base.metadata.create_all(checkfirst=override)
-        logging.info('Created tables')
+        log.info('Created tables for %s', self.dbname)
     
     def admin_prompt(self):
         import getpass
-        username = raw_input('give admin username:')
+        username = raw_input('Specify admin username:')
         password = getpass.getpass('Specify admin password:')
         self.create_user(username, password, True)
         
     def create_user(self, username, password, admin=False):
-        logging.info('creating user %s', username)
+        log.info('creating administrator user %s', username)
         
         new_user = Users()
         new_user.username = username
@@ -60,7 +67,7 @@ class DbManage(object):
             raise
     
 if __name__ == '__main__':
-    dbmanage = DbManage()
+    dbmanage = DbManage(log_sql=True)
     dbmanage.create_tables(override=True)
     dbmanage.admin_prompt()  
 
