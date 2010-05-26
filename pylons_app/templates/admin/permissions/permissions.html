@@ -1,0 +1,21 @@
+## -*- coding: utf-8 -*-
+<%inherit file="/base/base.html"/>
+
+<%def name="title()">
+    ${_('Permissions administration')}
+</%def>
+<%def name="breadcrumbs()">
+	${h.link_to(u'Admin',h.url('admin_home'))}
+	 /  
+	 ${_('Permissions')}
+</%def>
+<%def name="page_nav()">
+	${self.menu('admin')}
+	${self.submenu('permissions')}
+</%def>
+<%def name="main()">
+	<div>
+	<h2>${_('Permissions')}</h2>
+	todo :) 
+    </div>
+</%def>    

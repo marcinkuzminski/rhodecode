@@ -25,6 +25,7 @@ def make_map(config):
     #REST controllers
     map.resource('repo', 'repos', path_prefix='/_admin')
     map.resource('user', 'users', path_prefix='/_admin')
+    map.resource('permission', 'permissions', path_prefix='/_admin')
     
     #ADMIN
     with map.submapper(path_prefix='/_admin', controller='admin') as m:
