@@ -59,6 +59,7 @@ class ValidAuth(formencode.validators.FancyValidator):
     #error mapping
     e_dict = {'username':messages['invalid_login'],
               'password':messages['invalid_password']}
+    e_dict_disable = {'username':messages['disabled_account']}
     
     def validate_python(self, value, state):
         sa = meta.Session
@@ -90,7 +91,8 @@ class ValidAuth(formencode.validators.FancyValidator):
                 log.warning('user %s is disabled', username)
                 raise formencode.Invalid(self.message('disabled_account',
                                          state=State_obj),
-                                         value, state, error_dict=self.e_dict)
+                                         value, state,
+                                         error_dict=self.e_dict_disable)
             
             
         
