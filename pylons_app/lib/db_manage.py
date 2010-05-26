@@ -1,72 +1,63 @@
 import logging
-import sqlite3 
-
-import os
-import crypt
 from os.path import dirname as dn
+from sqlalchemy.engine import create_engine
+import os
+from pylons_app.model.db import Users
+from pylons_app.model.meta import Session
+
+from pylons_app.lib.auth import get_crypt_password
+from pylons_app.model import init_model
+
 ROOT = dn(dn(dn(os.path.realpath(__file__))))
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s.%(msecs)03d %(levelname)-5.5s [%(name)s] %(message)s')
+from pylons_app.model.meta import Base
 
-def get_sqlite_conn_cur():
-    conn = sqlite3.connect(os.path.join(ROOT, 'hg_app.db'))
-    cur = conn.cursor()
-    return conn, cur
-
-def check_for_db(override):
-    if not override:
-        if os.path.isfile(os.path.join(ROOT, 'hg_app.db')):
-            raise Exception('database already exists')
-
-def create_tables(override=False):
-    """
-    Create a auth database
-    """
-    check_for_db(override)
-    conn, cur = get_sqlite_conn_cur()
-    try:
-        logging.info('creating table %s', 'users')
-        cur.execute("""DROP TABLE IF EXISTS users """)
-        cur.execute("""CREATE TABLE users
-                        (user_id INTEGER PRIMARY KEY AUTOINCREMENT, 
-                         username TEXT, 
-                         password TEXT,
-                         active INTEGER,
-                         admin INTEGER)""")
-        logging.info('creating table %s', 'user_logs')
-        cur.execute("""DROP TABLE IF EXISTS user_logs """)
-        cur.execute("""CREATE TABLE user_logs
-                        (id INTEGER PRIMARY KEY AUTOINCREMENT,
-                            user_id INTEGER,
-                            repository TEXT,
-                            action TEXT, 
-                            action_date DATETIME)""")
-        conn.commit()
-    except:
-        conn.rollback()
-        raise
+class DbManage(object):
+    def __init__(self):
+        dburi = 'sqlite:////%s' % os.path.join(ROOT, 'hg_app.db')
+        engine = create_engine(dburi) 
+        init_model(engine)
+        self.sa = Session()
     
-    cur.close()
-
-def admin_prompt():
-    import getpass
-    username = raw_input('give username:')
-    password = getpass.getpass('Specify admin password:')
-    create_user(username, password, True)
+    def check_for_db(self, override):
+        if not override:
+            if os.path.isfile(os.path.join(ROOT, 'hg_app.db')):
+                raise Exception('database already exists')
     
-def create_user(username, password, admin=False):
-    conn, cur = get_sqlite_conn_cur()    
-    password_crypt = crypt.crypt(password, '6a')
-    logging.info('creating user %s', username)
-    try:
-        cur.execute("""INSERT INTO users values (?,?,?,?,?) """,
-                    (None, username, password_crypt, 1, admin))     
-        conn.commit()
-    except:
-        conn.rollback()
-        raise
+    def create_tables(self, override=False):
+        """
+        Create a auth database
+        """
+        self.check_for_db(override)
+                
+        Base.metadata.create_all(checkfirst=override)
+        logging.info('Created tables')
+    
+    def admin_prompt(self):
+        import getpass
+        username = raw_input('give admin username:')
+        password = getpass.getpass('Specify admin password:')
+        self.create_user(username, password, True)
+        
+    def create_user(self, username, password, admin=False):
+        logging.info('creating user %s', username)
+        
+        new_user = Users()
+        new_user.username = username
+        new_user.password = get_crypt_password(password)
+        new_user.admin = admin
+        new_user.active = True
+        
+        try:
+            self.sa.add(new_user)
+            self.sa.commit()
+        except:
+            self.sa.rollback()
+            raise
     
 if __name__ == '__main__':
-    create_tables(True)
-    admin_prompt()  
+    dbmanage = DbManage()
+    dbmanage.create_tables(override=True)
+    dbmanage.admin_prompt()  
 
 
