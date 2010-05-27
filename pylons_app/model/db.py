@@ -16,6 +16,9 @@ class Users(Base):
     last_login = Column("last_login", DATETIME(timezone=False), nullable=True, unique=None, default=None)
     
     user_log = relation('UserLogs')
+    
+    def __repr__(self):
+        return "<User('%s:%s')>" % (self.user_id, self.username)
       
 class UserLogs(Base): 
     __tablename__ = 'user_logs'
@@ -34,3 +37,6 @@ class Permissions(Base):
     __table_args__ = {'useexisting':True}
     permission_id = Column("id", INTEGER(), nullable=False, unique=True, default=None, primary_key=1)
     permission_name = Column("permission_name", TEXT(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+
+    def __repr__(self):
+        return "<Permission('%s:%s')>" % (self.permission_id, self.permission_name)
