@@ -1,12 +1,13 @@
 import logging
 from os.path import dirname as dn
+from os.path import join as jn
 from sqlalchemy.engine import create_engine
 import os
 import sys
 ROOT = dn(dn(dn(os.path.realpath(__file__))))
 sys.path.append(ROOT)
 
-from pylons_app.model.db import Users
+from pylons_app.model.db import User
 from pylons_app.model.meta import Session, Base
 
 from pylons_app.lib.auth import get_crypt_password
@@ -22,14 +23,14 @@ log.addHandler(console_handler)
 class DbManage(object):
     def __init__(self, log_sql):
         self.dbname = 'hg_app.db'
-        dburi = 'sqlite:////%s' % os.path.join(ROOT, self.dbname)
+        dburi = 'sqlite:////%s' % jn(ROOT, self.dbname)
         engine = create_engine(dburi, echo=log_sql) 
         init_model(engine)
         self.sa = Session()
     
     def check_for_db(self, override):
         log.info('checking for exisiting db')
-        if os.path.isfile(os.path.join(ROOT, self.dbname)):
+        if os.path.isfile(jn(ROOT, self.dbname)):
             log.info('database exisist')
             if not override:
                 raise Exception('database already exists')
@@ -41,6 +42,7 @@ class DbManage(object):
         self.check_for_db(override)
         if override:
             log.info("database exisist and it's going to be destroyed")
+            os.remove(jn(ROOT, self.dbname))
         Base.metadata.create_all(checkfirst=override)
         log.info('Created tables for %s', self.dbname)
     
@@ -53,7 +55,7 @@ class DbManage(object):
     def create_user(self, username, password, admin=False):
         log.info('creating administrator user %s', username)
         
-        new_user = Users()
+        new_user = User()
         new_user.username = username
         new_user.password = get_crypt_password(password)
         new_user.admin = admin

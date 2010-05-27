@@ -2,7 +2,7 @@ from functools import wraps
 from pylons import session, url
 from pylons.controllers.util import abort, redirect
 from pylons_app.model import meta
-from pylons_app.model.db import Users
+from pylons_app.model.db import User
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 import crypt
@@ -20,7 +20,7 @@ def authfunc(environ, username, password):
     sa = meta.Session
     password_crypt = get_crypt_password(password)
     try:
-        user = sa.query(Users).filter(Users.username == username).one()
+        user = sa.query(User).filter(User.username == username).one()
     except (NoResultFound, MultipleResultsFound, OperationalError) as e:
         log.error(e)
         user = None

@@ -5,7 +5,7 @@ from pylons.controllers.util import abort, redirect
 
 from pylons_app.lib.base import BaseController, render
 from formencode import htmlfill
-from pylons_app.model.db import Users, UserLogs
+from pylons_app.model.db import User, UserLog
 import crypt
 
 log = logging.getLogger(__name__)
@@ -25,7 +25,7 @@ class UsersController(BaseController):
         """GET /users: All items in the collection"""
         # url('users')
         
-        c.users_list = self.sa.query(Users).all()     
+        c.users_list = self.sa.query(User).all()     
         return render('admin/users/users.html')
     
     def create(self):
@@ -34,7 +34,7 @@ class UsersController(BaseController):
         params = dict(request.params)
 
         try:
-            new_user = Users()
+            new_user = User()
             new_user.active = params.get('active', False)
             new_user.username = params.get('username')
             new_user.password = crypt.crypt(params.get('password'), '6a')
@@ -63,7 +63,7 @@ class UsersController(BaseController):
         params = dict(request.params)
 
         try:
-            new_user = self.sa.query(Users).get(id)
+            new_user = self.sa.query(User).get(id)
             new_user.active = params.get('active', False)
             new_user.username = params.get('username')
             if params.get('new_password'):
@@ -85,7 +85,7 @@ class UsersController(BaseController):
         #           method='delete')
         # url('user', id=ID)
         try:
-            self.sa.delete(self.sa.query(Users).get(id))
+            self.sa.delete(self.sa.query(User).get(id))
             self.sa.commit()
         except:
             self.sa.rollback()
@@ -100,7 +100,7 @@ class UsersController(BaseController):
     def edit(self, id, format='html'):
         """GET /users/id/edit: Form to edit an existing item"""
         # url('edit_user', id=ID)
-        c.user = self.sa.query(Users).get(id)
+        c.user = self.sa.query(User).get(id)
         defaults = c.user.__dict__
         return htmlfill.render(
             render('admin/users/user_edit.html'),

@@ -24,7 +24,7 @@ from pylons import session
 from pylons.i18n.translation import _
 from pylons_app.lib.auth import get_crypt_password
 from pylons_app.model import meta
-from pylons_app.model.db import Users
+from pylons_app.model.db import User
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from webhelpers.pylonslib.secure_form import authentication_token
@@ -66,7 +66,7 @@ class ValidAuth(formencode.validators.FancyValidator):
         crypted_passwd = get_crypt_password(value['password'])
         username = value['username']
         try:
-            user = sa.query(Users).filter(Users.username == username).one()
+            user = sa.query(User).filter(User.username == username).one()
         except (NoResultFound, MultipleResultsFound, OperationalError) as e:
             log.error(e)
             user = None

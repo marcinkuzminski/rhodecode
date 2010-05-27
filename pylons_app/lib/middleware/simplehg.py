@@ -18,7 +18,7 @@ from paste.httpheaders import REMOTE_USER, AUTH_TYPE
 from pylons_app.lib.auth import authfunc
 from pylons_app.lib.utils import is_mercurial, make_ui, invalidate_cache
 from pylons_app.model import meta
-from pylons_app.model.db import UserLogs, Users
+from pylons_app.model.db import UserLog, User
 from webob.exc import HTTPNotFound
 import logging
 import os
@@ -102,9 +102,8 @@ class SimpleHg(object):
     def __log_user_action(self, username, action, repo):
         sa = meta.Session
         try:
-            user = sa.query(Users)\
-                    .filter(Users.username == username).one()
-            user_log = UserLogs()
+            user = sa.query(User).filter(User.username == username).one()
+            user_log = UserLog()
             user_log.user_id = user.user_id
             user_log.action = action
             user_log.repository = repo.replace('/', '')
