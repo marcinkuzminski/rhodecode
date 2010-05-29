@@ -1,12 +1,13 @@
 from pylons import request, response, session, tmpl_context as c, url, \
     app_globals as g
 from pylons.controllers.util import abort, redirect
+from pylons_app.lib.auth import LoginRequired
 from pylons_app.lib.base import BaseController, render
+from pylons_app.lib.filters import clean_repo
 from pylons_app.lib.utils import check_repo, invalidate_cache
 import logging
 import os
 import shutil
-from pylons_app.lib.filters import clean_repo
 log = logging.getLogger(__name__)
 
 class ReposController(BaseController):
@@ -14,7 +15,7 @@ class ReposController(BaseController):
     # To properly map this controller, ensure your config/routing.py
     # file has a resource setup:
     #     map.resource('repo', 'repos')
-    
+    @LoginRequired()
     def __before__(self):
         c.admin_user = session.get('admin_user')
         c.admin_username = session.get('admin_username')

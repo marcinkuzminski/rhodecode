@@ -1,12 +1,16 @@
+from formencode import htmlfill
+from pylons import request, response, session, tmpl_context as c, url, \
+    app_globals as g
+from pylons.controllers.util import abort, redirect
+from pylons_app.lib.auth import LoginRequired
+from pylons_app.lib.base import BaseController, render
+from pylons_app.model.db import User, UserLog
+from pylons_app.model.forms import UserForm
+from pylons_app.model.user_model import UserModel
+import formencode
 import logging
 
-from pylons import request, response, session, tmpl_context as c, url, app_globals as g
-from pylons.controllers.util import abort, redirect
 
-from pylons_app.lib.base import BaseController, render
-from formencode import htmlfill
-from pylons_app.model.db import User, UserLog
-import crypt
 
 log = logging.getLogger(__name__)
 
@@ -15,7 +19,7 @@ class UsersController(BaseController):
     # To properly map this controller, ensure your config/routing.py
     # file has a resource setup:
     #     map.resource('user', 'users')
-    
+    @LoginRequired()
     def __before__(self):
         c.admin_user = session.get('admin_user')
         c.admin_username = session.get('admin_username')
@@ -31,21 +35,20 @@ class UsersController(BaseController):
     def create(self):
         """POST /users: Create a new item"""
         # url('users')
-        params = dict(request.params)
-
+        
+        user_model = UserModel()
+        login_form = UserForm()
         try:
-            new_user = User()
-            new_user.active = params.get('active', False)
-            new_user.username = params.get('username')
-            new_user.password = crypt.crypt(params.get('password'), '6a')
-            new_user.admin = False
-            self.sa.add(new_user)
-            self.sa.commit()
-        except:
-            self.sa.rollback()
-            raise      
-          
-        return redirect(url('users'))
+            form_result = login_form.to_python(dict(request.POST))
+            user_model.create(form_result)
+            return redirect(url('users'))
+                           
+        except formencode.Invalid as errors:
+            c.form_errors = errors.error_dict
+            return htmlfill.render(
+                 render('admin/users/user_add.html'),
+                defaults=errors.value,
+                encoding="UTF-8")
     
     def new(self, format='html'):
         """GET /users/new: Form to create a new item"""
@@ -60,21 +63,21 @@ class UsersController(BaseController):
         #    h.form(url('user', id=ID),
         #           method='put')
         # url('user', id=ID)
-        params = dict(request.params)
-
+        user_model = UserModel()
+        login_form = UserForm()
         try:
-            new_user = self.sa.query(User).get(id)
-            new_user.active = params.get('active', False)
-            new_user.username = params.get('username')
-            if params.get('new_password'):
-                new_user.password = crypt.crypt(params.get('new_password'), '6a')
-            self.sa.add(new_user)
-            self.sa.commit()
-        except:
-            self.sa.rollback()
-            raise      
-          
-        return redirect(url('users'))
+            form_result = login_form.to_python(dict(request.POST))
+            user_model.update(id, form_result)
+            return redirect(url('users'))
+                           
+        except formencode.Invalid as errors:
+            errors.value
+            c.user = user_model.get_user(id)
+            c.form_errors = errors.error_dict
+            return htmlfill.render(
+                 render('admin/users/user_edit.html'),
+                defaults=errors.value,
+                encoding="UTF-8")
     
     def delete(self, id):
         """DELETE /users/id: Delete an existing item"""

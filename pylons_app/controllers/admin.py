@@ -1,6 +1,4 @@
 import logging
-import os
-
 from pylons import request, response, session, tmpl_context as c, url, app_globals as g
 from pylons.controllers.util import abort, redirect
 from pylons_app.lib.base import BaseController, render
