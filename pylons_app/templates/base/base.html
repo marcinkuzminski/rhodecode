@@ -16,7 +16,17 @@
     <div class="page-header">
         <h1>${next.breadcrumbs()}</h1>
         ${self.page_nav()}
-    <div id="main">
+    <div class="flash_msg">
+    <% messages = h.flash.pop_messages() %>
+		% if messages:
+		<ul id="flash-messages">
+		    % for message in messages:
+		    <li class="${message.category}_msg">${message}</li>
+		    % endfor
+		</ul>
+		% endif
+    </div>        
+    <div id="main"> 
     	${next.main()}
     </div>
     <div class="page-footer">
