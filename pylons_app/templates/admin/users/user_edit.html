@@ -21,14 +21,32 @@
         	<tr>
         		<td>${_('Username')}</td>
         		<td>${h.text('username')}</td>
+        		<td>${self.get_form_error('username')}</td>
         	</tr>
         	<tr>
         		<td>${_('New password')}</td>
         		<td>${h.text('new_password')}</td>
+        		<td>${self.get_form_error('new_password')}</td>
         	</tr>
+        	<tr>
+        		<td>${_('Name')}</td>
+        		<td>${h.text('name')}</td>
+        		<td>${self.get_form_error('name')}</td>
+        	</tr>
+        	<tr>
+        		<td>${_('Lastname')}</td>
+        		<td>${h.text('lastname')}</td>
+        		<td>${self.get_form_error('lastname')}</td>
+        	</tr>
+        	<tr>
+        		<td>${_('Email')}</td>
+        		<td>${h.text('email')}</td>
+        		<td>${self.get_form_error('email')}</td>
+        	</tr>        	        	
         	<tr>
         		<td>${_('Active')}</td>
         		<td>${h.checkbox('active',value=True)}</td>
+        		<td>${self.get_form_error('active')}</td>
         	</tr>
         	<tr>
         		<td></td>

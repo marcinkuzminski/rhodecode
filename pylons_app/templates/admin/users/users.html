@@ -18,16 +18,18 @@
         <h2>${_('Mercurial users')}</h2>
         <table class="table_disp">
          <tr class="header">
-            <td>${_('id')}</td>
             <td>${_('username')}</td>
+            <td>${_('name')}</td>
+            <td>${_('lastname')}</td>
             <td>${_('active')}</td>
             <td>${_('admin')}</td>
             <td>${_('action')}</td>
          </tr>
             %for user in c.users_list:
                 <tr>
-                    <td>${user.user_id}</td>
                     <td>${h.link_to(user.username,h.url('edit_user', id=user.user_id))}</td>
+                    <td>${user.name}</td>
+                    <td>${user.lastname}</td>
                     <td>${user.active}</td>
                     <td>${user.admin}</td>
                     <td>

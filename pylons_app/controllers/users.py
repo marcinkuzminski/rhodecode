@@ -1,6 +1,8 @@
 from formencode import htmlfill
 from pylons import request, response, session, tmpl_context as c, url, \
     app_globals as g
+from pylons.i18n.translation import _
+from pylons_app.lib import helpers as h    
 from pylons.controllers.util import abort, redirect
 from pylons_app.lib.auth import LoginRequired
 from pylons_app.lib.base import BaseController, render
@@ -37,10 +39,11 @@ class UsersController(BaseController):
         # url('users')
         
         user_model = UserModel()
-        login_form = UserForm()
+        login_form = UserForm()()
         try:
             form_result = login_form.to_python(dict(request.POST))
             user_model.create(form_result)
+            h.flash(_('created user %s') % form_result['username'], category='success')
             return redirect(url('users'))
                            
         except formencode.Invalid as errors:
@@ -64,14 +67,14 @@ class UsersController(BaseController):
         #           method='put')
         # url('user', id=ID)
         user_model = UserModel()
-        login_form = UserForm()
+        login_form = UserForm(edit=True)()
         try:
             form_result = login_form.to_python(dict(request.POST))
             user_model.update(id, form_result)
+            h.flash(_('User updated succesfully'), category='success')
             return redirect(url('users'))
                            
         except formencode.Invalid as errors:
-            errors.value
             c.user = user_model.get_user(id)
             c.form_errors = errors.error_dict
             return htmlfill.render(
@@ -90,6 +93,7 @@ class UsersController(BaseController):
         try:
             self.sa.delete(self.sa.query(User).get(id))
             self.sa.commit()
+            h.flash(_('sucessfully deleted user'), category='success')
         except:
             self.sa.rollback()
             raise

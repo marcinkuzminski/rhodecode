@@ -7,7 +7,7 @@
 <%def name="breadcrumbs()">
 	${h.link_to(u'Admin',h.url('admin_home'))}
 	 /  
-	 ${_('Users')}
+	${_('Users')}
 </%def>
 <%def name="page_nav()">
 	${self.menu('admin')}
@@ -21,20 +21,37 @@
         	<tr>
         		<td>${_('Username')}</td>
         		<td>${h.text('username')}</td>
+        		<td>${self.get_form_error('username')}</td>
         	</tr>
         	<tr>
-        		<td>${_('password')}</td>
-        		<td>${h.text('password')}</td>
+        		<td>${_('Password')}</td>
+        		<td>${h.password('password')}</td>
+        		<td>${self.get_form_error('password')}</td>
+        	</tr>        	
+        	<tr>
+        		<td>${_('Name')}</td>
+        		<td>${h.text('name')}</td>
+        		<td>${self.get_form_error('name')}</td>
         	</tr>
+        	<tr>
+        		<td>${_('Lastname')}</td>
+        		<td>${h.text('lastname')}</td>
+        		<td>${self.get_form_error('lastname')}</td>
+        	</tr>
+        	<tr>
+        		<td>${_('Email')}</td>
+        		<td>${h.text('email')}</td>
+        		<td>${self.get_form_error('email')}</td>
+        	</tr>        	        	
         	<tr>
         		<td>${_('Active')}</td>
-        		<td>${h.checkbox('active')}</td>
+        		<td>${h.checkbox('active',value=True)}</td>
+        		<td>${self.get_form_error('active')}</td>
         	</tr>
         	<tr>
         		<td></td>
-        		<td>${h.submit('add','add')}</td>
+        		<td>${h.submit('save','save')}</td>
         	</tr>
-        	        	        	
         </table>
         ${h.end_form()}
     </div>

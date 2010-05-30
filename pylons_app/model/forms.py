@@ -19,7 +19,9 @@ list=[1,2,3,4,5]
 for SELECT use formencode.All(OneOf(list), Int())
     
 """
-from formencode.validators import UnicodeString, OneOf, Int, Number, Regex
+from formencode.validators import UnicodeString, OneOf, Int, Number, Regex, \
+    Email, Bool, StringBoolean
+from formencode import All
 from pylons import session
 from pylons.i18n.translation import _
 from pylons_app.lib.auth import get_crypt_password
@@ -48,7 +50,16 @@ class ValidAuthToken(formencode.validators.FancyValidator):
         if value != authentication_token():
             raise formencode.Invalid(self.message('invalid_token', state,
                                             search_number=value), value, state)
+class ValidUsername(formencode.validators.FancyValidator):
 
+    def validate_python(self, value, state):
+        pass
+    
+class ValidPassword(formencode.validators.FancyValidator):
+    
+    def to_python(self, value, state):
+        return get_crypt_password(value)
+        
 class ValidAuth(formencode.validators.FancyValidator):
     messages = {
             'invalid_password':_('invalid password'),
@@ -70,6 +81,9 @@ class ValidAuth(formencode.validators.FancyValidator):
         except (NoResultFound, MultipleResultsFound, OperationalError) as e:
             log.error(e)
             user = None
+            raise formencode.Invalid(self.message('invalid_password',
+                                     state=State_obj), value, state,
+                                     error_dict=self.e_dict)            
         if user:
             if user.active:
                 if user.username == username and user.password == crypted_passwd:
@@ -124,4 +138,18 @@ class LoginForm(formencode.Schema):
     #chained validators have access to all data
     chained_validators = [ValidAuth]
     
-
+def UserForm(edit=False):
+    class _UserForm(formencode.Schema):
+        allow_extra_fields = True
+        filter_extra_fields = True
+        username = All(UnicodeString(strip=True, min=3, not_empty=True), ValidUsername)
+        if edit:
+            new_password = All(UnicodeString(strip=True, min=3, not_empty=False), ValidPassword)
+        else:
+            password = All(UnicodeString(strip=True, min=3, not_empty=False), ValidPassword)
+        active = StringBoolean(if_missing=False)
+        name = UnicodeString(strip=True, min=3, not_empty=True)
+        lastname = UnicodeString(strip=True, min=3, not_empty=True)
+        email = Email(not_empty=True)
+        
+    return _UserForm
