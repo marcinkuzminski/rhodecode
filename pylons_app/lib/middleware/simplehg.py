@@ -56,7 +56,7 @@ class SimpleHg(object):
             
             #since we wrap into hgweb, just reset the path
             environ['PATH_INFO'] = '/'
-            self.baseui = make_ui()
+            self.baseui = make_ui(self.config['hg_app_repo_conf'])
             self.basepath = self.baseui.configitems('paths')[0][1]\
                                                             .replace('*', '')
             self.repo_path = os.path.join(self.basepath, repo_name)

@@ -16,3 +16,9 @@ with authentication, permissions. Based on vcs library.
 This software is still in beta mode. I don't guarantee that it'll work.
 I started this project since i was tired of sad looks, and zero controll over
 our company regular hgwebdir.
+
+
+== INSTALATION
+run dbmanage.py from pylons_app/lib it should create all needed table and
+an admin account, Edit file repositories.config and change the path for you 
+mercurial repositories, remember about permissions.

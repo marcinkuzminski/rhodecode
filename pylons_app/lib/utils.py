@@ -46,12 +46,15 @@ def check_repo(repo_name, base_path):
         #it means that there is no valid repo there...
         return True
                 
-def make_ui(path='hgwebdir.config', checkpaths=True):        
+def make_ui(path=None, checkpaths=True):        
     """
     A funcion that will read python rc files and make an ui from read options
     
     @param path: path to mercurial config file
     """
+    if not path:
+        log.error('repos config path is empty !')
+    
     if not os.path.isfile(path):
         log.warning('Unable to read config file %s' % path)
         return False

@@ -18,7 +18,7 @@ class Globals(object):
 
         """
         self.cache = CacheManager(**parse_cache_config_options(config))
-        self.baseui = make_ui('hgwebdir.config')
+        self.baseui = make_ui(config['hg_app_repo_conf'])
         self.paths = self.baseui.configitems('paths')
         self.base_path = self.paths[0][1].replace('*', '')
         self.changeset_annotation_colors = {}

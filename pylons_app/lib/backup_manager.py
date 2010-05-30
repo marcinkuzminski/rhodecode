@@ -10,19 +10,19 @@ logging.basicConfig(level=logging.DEBUG,
                     format="%(asctime)s %(levelname)-5.5s %(message)s")
 
 class BackupManager(object):
-    def __init__(self):
+    def __init__(self, id_rsa_path, repo_conf):
         self.repos_path = None
         self.backup_file_name = None
-        self.id_rsa_path = '/home/pylons/id_rsa'
+        self.id_rsa_path = id_rsa_path
         self.check_id_rsa()
         cur_dir = os.path.realpath(__file__)
         dn = os.path.dirname
         self.backup_file_path = os.path.join(dn(dn(dn(cur_dir))), 'data')
         cfg = config.config()
         try:
-            cfg.read(os.path.join(dn(dn(dn(cur_dir))), 'hgwebdir.config'))
+            cfg.read(os.path.join(dn(dn(dn(cur_dir))), repo_conf))
         except IOError:
-            logging.error('Could not read hgwebdir.config')
+            logging.error('Could not read %s', repo_conf)
             sys.exit()
         self.set_repos_path(cfg.items('paths'))
         logging.info('starting backup for %s', self.repos_path)
@@ -80,7 +80,7 @@ class BackupManager(object):
 
 
 if __name__ == "__main__":
-    B_MANAGER = BackupManager()
+    B_MANAGER = BackupManager('/home/pylons/id_rsa', 'repositories.config')
     B_MANAGER.backup_repos()
     B_MANAGER.transfer_files()
     B_MANAGER.rm_file()
