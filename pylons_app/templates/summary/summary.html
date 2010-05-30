@@ -43,7 +43,7 @@ E.onDOMReady(function(e){
         <dt>${_('last change')}</dt>
         <dd>${c.repo_info.last_change|n,filters.age} - ${c.repo_info.last_change|n,filters.rfc822date}</dd>
         <dt>${_('clone url')}</dt>
-        <dd><input type="text" id="clone_url"  readonly="readonly" value="hg clone ${c.clone_repo_url}" size="40"/></dd>
+        <dd><input type="text" id="clone_url"  readonly="readonly" value="hg clone ${c.clone_repo_url}" size="70"/></dd>
         <dt>${_('download')}</dt>
         <dd>
        	%for cnt,archive in enumerate(c.repo_info._get_archives()):

@@ -68,7 +68,8 @@ class DbManage(object):
             raise
     
     def create_permissions(self):
-        perms = [('can_view_admin_users', 'Access to admin user view'),
+        #module.(access|create|change|delete)_[name]
+        perms = [('admin.access_home', 'Access to admin user view'),
                  
                  ]
         
