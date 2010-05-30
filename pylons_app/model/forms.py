@@ -19,9 +19,9 @@ list=[1,2,3,4,5]
 for SELECT use formencode.All(OneOf(list), Int())
     
 """
+from formencode import All
 from formencode.validators import UnicodeString, OneOf, Int, Number, Regex, \
     Email, Bool, StringBoolean
-from formencode import All
 from pylons import session
 from pylons.i18n.translation import _
 from pylons_app.lib.auth import get_crypt_password
@@ -30,6 +30,7 @@ from pylons_app.model.db import User
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from webhelpers.pylonslib.secure_form import authentication_token
+import datetime
 import formencode
 import logging
 log = logging.getLogger(__name__)
@@ -95,6 +96,15 @@ class ValidAuth(formencode.validators.FancyValidator):
                     session['hg_app_user'] = auth_user
                     session.save()
                     log.info('user %s is now authenticated', username)
+                    
+                    try:
+                        user.last_login = datetime.datetime.now()
+                        sa.add(user)
+                        sa.commit()                        
+                    except (OperationalError) as e:
+                        log.error(e)
+                        sa.rollback()
+                    
                     return value
                 else:
                     log.warning('user %s not authenticated', username)

@@ -34,7 +34,13 @@ class UserLog(Base):
 class Repository(Base):
     __tablename__ = 'repositories'
     repo_id = Column("repo_id", INTEGER(), nullable=False, unique=True, default=None, primary_key=1)
-
+    repo_name = Column("repo_name", TEXT(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    user_id = Column("user_id", INTEGER(), ForeignKey(u'users.user_id'), nullable=True, unique=None, default=None)
+    private = Column("private", BOOLEAN(), nullable=True, unique=None, default=None)
+    
+    user = relation('User')
+    
+    
 class Permission(Base):
     __tablename__ = 'permissions'
     __table_args__ = {'useexisting':True}
