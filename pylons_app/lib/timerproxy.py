@@ -23,6 +23,8 @@ def format_sql(sql):
     sql = one_space_trim(sql)
     sql = sql\
         .replace('SELECT', '\n\tSELECT \n\t')\
+        .replace('UPDATE', '\n\tUPDATE \n\t')\
+        .replace('DELETE', '\n\tDELETE \n\t')\
         .replace('FROM', '\n\tFROM')\
         .replace('ORDER BY', '\n\tORDER BY')\
         .replace('LIMIT', '\n\tLIMIT')\
