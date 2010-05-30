@@ -22,3 +22,4 @@ class Globals(object):
         self.paths = self.baseui.configitems('paths')
         self.base_path = self.paths[0][1].replace('*', '')
         self.changeset_annotation_colors = {}
+        self.available_permissions = None # propagated after init_model

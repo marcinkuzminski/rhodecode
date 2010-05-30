@@ -12,15 +12,10 @@
 	${self.submenu('')}
 </%def>
 <%def name="main()">
-    %if c.admin_user:
-	    <div>
-	        <h2>Welcome ${c.admin_username}</h2>
-			    <div id="user_log">
-					${c.log_data}
-				</div>
-	    </div>
-    %else:
-		<h2>${_('Sorry only admin users can acces this area')}</h2>
-    %endif
-    
+    <div>
+        <h2>Welcome ${c.admin_username}</h2>
+		    <div id="user_log">
+				${c.log_data}
+			</div>
+    </div>
 </%def>

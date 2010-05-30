@@ -1,17 +1,16 @@
-import logging
-from os.path import dirname as dn
-from os.path import join as jn
+from os.path import dirname as dn, join as jn
+from pylons_app.lib.auth import get_crypt_password
+from pylons_app.model import init_model
+from pylons_app.model.db import User, Permission
+from pylons_app.model.meta import Session, Base
 from sqlalchemy.engine import create_engine
+import logging
 import os
 import sys
 ROOT = dn(dn(dn(os.path.realpath(__file__))))
 sys.path.append(ROOT)
 
-from pylons_app.model.db import User
-from pylons_app.model.meta import Session, Base
 
-from pylons_app.lib.auth import get_crypt_password
-from pylons_app.model import init_model
 
 log = logging.getLogger('db manage')
 log.setLevel(logging.DEBUG)
@@ -68,9 +67,28 @@ class DbManage(object):
             self.sa.rollback()
             raise
     
+    def create_permissions(self):
+        perms = [('can_view_admin_users', 'Access to admin user view'),
+                 
+                 ]
+        
+        for p in perms:
+            new_perm = Permission()
+            new_perm.permission_name = p[0]
+            new_perm.permission_longname = p[1]
+            try:
+                self.sa.add(new_perm)
+                self.sa.commit()
+            except:
+                self.sa.rollback()
+                raise
+        
+        
+        
 if __name__ == '__main__':
     dbmanage = DbManage(log_sql=True)
     dbmanage.create_tables(override=True)
-    dbmanage.admin_prompt()  
+    dbmanage.admin_prompt()
+    dbmanage.create_permissions()  
 
 

@@ -4,7 +4,7 @@ from pylons import request, response, session, tmpl_context as c, url, \
 from pylons.i18n.translation import _
 from pylons_app.lib import helpers as h    
 from pylons.controllers.util import abort, redirect
-from pylons_app.lib.auth import LoginRequired
+from pylons_app.lib.auth import LoginRequired, CheckPermissionAll
 from pylons_app.lib.base import BaseController, render
 from pylons_app.model.db import User, UserLog
 from pylons_app.model.forms import UserForm
@@ -26,7 +26,8 @@ class UsersController(BaseController):
         c.admin_user = session.get('admin_user')
         c.admin_username = session.get('admin_username')
         super(UsersController, self).__before__()
-        
+    
+
     def index(self, format='html'):
         """GET /users: All items in the collection"""
         # url('users')
