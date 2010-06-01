@@ -19,6 +19,17 @@ our company regular hgwebdir.
 
 
 == INSTALATION
-run dbmanage.py from pylons_app/lib it should create all needed table and
-an admin account, Edit file repositories.config and change the path for you 
-mercurial repositories, remember about permissions.
+ - create new virtualenv,
+ - run python setup.py install
+ - goto build/ directory
+ - goto pylons_app/lib and run python db_manage.py it should create all 
+   needed tables and an admin account. 
+ - Edit file repositories.config and change the [paths] where you keep your
+   mercurial repositories, remember about permissions for accessing this dir by
+   hg app.
+ - run paster serve production.ini 
+   the app should be available at the 127.0.0.1:8001, the static files should be
+   missing since in production.ini sets static_files = false change it to true
+   for serving static files in hg app, but i highly recommend to serve 
+   statics by proxy (nginx or similar).
+ - use admin account you created to login.   

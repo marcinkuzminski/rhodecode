@@ -11,13 +11,13 @@ setup(
     version=get_version(),
     description='',
     author='marcin kuzminski',
-    author_email='marcin@python-blog.com',
+    author_email='marcin@python-works.com',
     url='',
     install_requires=[
         "Pylons>=1.0.0",
         "SQLAlchemy>=0.6",
         "Mako>=0.3.2",
-        "vcs>=0.1.1",
+        "vcs>=0.1.2",
         "pygments>=1.3.0"
     ],
     setup_requires=["PasteScript>=1.6.3"],
