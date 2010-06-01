@@ -26,10 +26,12 @@ class DbManage(object):
         engine = create_engine(dburi, echo=log_sql) 
         init_model(engine)
         self.sa = Session()
+        self.db_exists = False
     
     def check_for_db(self, override):
         log.info('checking for exisiting db')
         if os.path.isfile(jn(ROOT, self.dbname)):
+            self.db_exists = True
             log.info('database exisist')
             if not override:
                 raise Exception('database already exists')
@@ -41,7 +43,8 @@ class DbManage(object):
         self.check_for_db(override)
         if override:
             log.info("database exisist and it's going to be destroyed")
-            os.remove(jn(ROOT, self.dbname))
+            if self.db_exists:
+                os.remove(jn(ROOT, self.dbname))
         Base.metadata.create_all(checkfirst=override)
         log.info('Created tables for %s', self.dbname)
     
