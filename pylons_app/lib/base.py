@@ -2,23 +2,14 @@
 
 Provides the BaseController class for subclassing.
 """
-from beaker.cache import cache_region
 from pylons import config, tmpl_context as c, request, session
 from pylons.controllers import WSGIController
 from pylons.templating import render_mako as render
 from pylons_app.lib.auth import LoginRequired, AuthUser
 from pylons_app.lib.utils import get_repo_slug
 from pylons_app.model import meta
-from pylons_app.model.hg_model import HgModel
+from pylons_app.model.hg_model import _get_repos_cached
 from pylons_app import __version__
-
-@cache_region('long_term', 'cached_repo_list')
-def _get_repos_cached():
-    return [rep for rep in HgModel().get_repos()]
-
-@cache_region('long_term', 'full_changelog')
-def _full_changelog_cached(repo_name):
-    return list(reversed(list(HgModel().get_repo(repo_name))))  
 
 class BaseController(WSGIController):
     

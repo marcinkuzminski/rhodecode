@@ -1,9 +1,8 @@
 from formencode import htmlfill
-from pylons import request, response, session, tmpl_context as c, url, \
-    app_globals as g
-from pylons.i18n.translation import _
-from pylons_app.lib import helpers as h    
+from pylons import request, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
+from pylons.i18n.translation import _
+from pylons_app.lib import helpers as h
 from pylons_app.lib.auth import LoginRequired, CheckPermissionAll
 from pylons_app.lib.base import BaseController, render
 from pylons_app.model.db import User, UserLog
@@ -11,8 +10,6 @@ from pylons_app.model.forms import UserForm
 from pylons_app.model.user_model import UserModel
 import formencode
 import logging
-
-
 
 log = logging.getLogger(__name__)
 

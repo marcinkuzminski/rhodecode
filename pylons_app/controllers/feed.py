@@ -1,13 +1,10 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-import logging
-from operator import itemgetter
-from pylons import tmpl_context as c, request, config, url, response
-from pylons_app.lib.base import BaseController, render, _full_changelog_cached
-from pylons_app.lib.utils import get_repo_slug
-from pylons_app.model.hg_model import HgModel
-from pylons_app.lib.auth import LoginRequired
+from pylons import tmpl_context as c, url, response
+from pylons_app.lib.base import BaseController, render
+from pylons_app.model.hg_model import _full_changelog_cached
 from webhelpers.feedgenerator import Atom1Feed, Rss201rev2Feed
+import logging
 log = logging.getLogger(__name__)
 
 class FeedController(BaseController):
@@ -35,8 +32,9 @@ class FeedController(BaseController):
             if cnt > self.feed_nr:
                 break
             feed.add_item(title=cs.message,
-                          link=url('changeset_home', repo_name=repo_name, revision=cs.raw_id, qualified=True),
-                          description=str(cs.date))
+                          link=url('changeset_home', repo_name=repo_name,
+                                   revision=cs.raw_id, qualified=True),
+                                   description=str(cs.date))
         
         response.content_type = feed.mime_type
         return feed.writeString('utf-8')

@@ -1,15 +1,12 @@
-import tempfile
-from pylons import request, response, session, tmpl_context as c, url, config, \
-    app_globals as g
-from pylons.controllers.util import abort, redirect
+from mercurial import archival
+from pylons import request, response, session, tmpl_context as c, url
 from pylons_app.lib.auth import LoginRequired
 from pylons_app.lib.base import BaseController, render
-from pylons_app.lib.utils import get_repo_slug
 from pylons_app.model.hg_model import HgModel
 from vcs.exceptions import RepositoryError, ChangesetError
 from vcs.utils import diffs as differ
 import logging
-from mercurial import archival
+import tempfile
 
         
 log = logging.getLogger(__name__)

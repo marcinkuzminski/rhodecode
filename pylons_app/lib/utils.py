@@ -107,11 +107,11 @@ def invalidate_cache(name, *args):
     args = tuple(tmp)
     
     if name == 'cached_repo_list':
-        from pylons_app.lib.base import _get_repos_cached
+        from pylons_app.model.hg_model import _get_repos_cached
         region_invalidate(_get_repos_cached, None, *args)
         
     if name == 'full_changelog':
-        from pylons_app.lib.base import _full_changelog_cached
+        from pylons_app.model.hg_model import _full_changelog_cached
         region_invalidate(_full_changelog_cached, None, *args)
         
 from vcs.backends.base import BaseChangeset
@@ -128,3 +128,17 @@ class EmptyChangeset(BaseChangeset):
         """
         return '0' * 12
 
+
+def repo2db_mapper():
+    """
+    put !
+    """
+    pass
+    #scann all dirs for .hgdbid
+    #if some dir doesn't have one generate one.
+    #
+    
+    
+    
+    
+    
