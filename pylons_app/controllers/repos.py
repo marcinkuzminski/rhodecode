@@ -5,9 +5,11 @@ from pylons_app.lib.auth import LoginRequired
 from pylons_app.lib.base import BaseController, render
 from pylons_app.lib.filters import clean_repo
 from pylons_app.lib.utils import check_repo, invalidate_cache
+from pylons_app.model.hg_model import HgModel
 import logging
 import os
 import shutil
+from operator import itemgetter
 log = logging.getLogger(__name__)
 
 class ReposController(BaseController):
@@ -24,7 +26,8 @@ class ReposController(BaseController):
     def index(self, format='html'):
         """GET /repos: All items in the collection"""
         # url('repos')
-        c.repos_list = c.cached_repo_list
+        cached_repo_list = HgModel().get_repos()
+        c.repos_list = sorted(cached_repo_list, key=itemgetter('name'))
         return render('admin/repos/repos.html')
     
     def create(self):

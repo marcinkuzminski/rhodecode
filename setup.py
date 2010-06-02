@@ -18,7 +18,9 @@ setup(
         "SQLAlchemy>=0.6",
         "Mako>=0.3.2",
         "vcs>=0.1.2",
-        "pygments>=1.3.0"
+        "pygments>=1.3.0",
+        "mercurial>=1.5",
+        "pysqlite"
     ],
     setup_requires=["PasteScript>=1.6.3"],
     packages=find_packages(exclude=['ez_setup']),
