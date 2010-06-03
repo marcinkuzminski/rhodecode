@@ -27,7 +27,7 @@ class ReposController(BaseController):
         """GET /repos: All items in the collection"""
         # url('repos')
         cached_repo_list = HgModel().get_repos()
-        c.repos_list = sorted(cached_repo_list, key=itemgetter('name'))
+        c.repos_list = sorted(cached_repo_list, key=itemgetter('name_sort'))
         return render('admin/repos/repos.html')
     
     def create(self):
