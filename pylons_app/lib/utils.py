@@ -6,10 +6,7 @@ log = logging.getLogger(__name__)
 
 
 def get_repo_slug(request):
-    path_info = request.environ.get('PATH_INFO')
-    uri_lst = path_info.split('/')   
-    repo_name = uri_lst[1]
-    return repo_name
+    return request.environ['pylons.routes_dict'].get('repo_name')
 
 def is_mercurial(environ):
     """
@@ -131,14 +128,7 @@ class EmptyChangeset(BaseChangeset):
 
 def repo2db_mapper():
     """
-    put !
+    scann all dirs for .hgdbid
+    if some dir doesn't have one generate one.
     """
     pass
-    #scann all dirs for .hgdbid
-    #if some dir doesn't have one generate one.
-    #
-    
-    
-    
-    
-    

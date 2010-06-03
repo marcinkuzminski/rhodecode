@@ -50,8 +50,9 @@ class SimpleHg(object):
                     return result.wsgi_application(environ, start_response)
             
             try:
-                repo_name = environ['PATH_INFO'].split('/')[1]
-            except:
+                repo_name = '/'.join(environ['PATH_INFO'].split('/')[1:])
+            except Exception as e:
+                log.error(e)
                 return HTTPNotFound()(environ, start_response)
             
             #since we wrap into hgweb, just reset the path
@@ -63,6 +64,7 @@ class SimpleHg(object):
             try:
                 app = wsgiapplication(self.__make_app)
             except Exception as e:
+                log.error(e)
                 return HTTPNotFound()(environ, start_response)
             action = self.__get_action(environ)            
             #invalidate cache on push

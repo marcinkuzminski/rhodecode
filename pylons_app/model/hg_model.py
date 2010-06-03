@@ -82,7 +82,13 @@ class HgModel(object):
         repos_list = {}
         for name, path in repos:
             try:
-                repos_list[name] = MercurialRepository(path, baseui=baseui)
+                #name = name.split('/')[-1]
+                if repos_list.has_key(name):
+                    raise RepositoryError('Duplicate repository name %s found in'
+                                    ' %s' % (name, path))
+                else:
+                    repos_list[name] = MercurialRepository(path, baseui=baseui)
+                    repos_list[name].name = name
             except OSError:
                 continue
         return repos_list

@@ -2,6 +2,8 @@ from pylons import request, response, session, tmpl_context as c, url, \
     app_globals as g
 from pylons.controllers.util import abort, redirect
 from pylons_app.lib.auth import LoginRequired
+from pylons.i18n.translation import _
+from pylons_app.lib import helpers as h
 from pylons_app.lib.base import BaseController, render
 from pylons_app.lib.filters import clean_repo
 from pylons_app.lib.utils import check_repo, invalidate_cache
@@ -39,6 +41,7 @@ class ReposController(BaseController):
             self._create_repo(name)
             #clear our cached list for refresh with new repo
             invalidate_cache('cached_repo_list')
+            h.flash(_('created repository %s') % name, category='success')
         except Exception as e:
             log.error(e)
         
@@ -85,7 +88,7 @@ class ReposController(BaseController):
         
         #clear our cached list for refresh with new repo
         invalidate_cache('cached_repo_list')
-                    
+        h.flash(_('deleted repository %s') % rm_path, category='success')            
         return redirect(url('repos'))
         
 
