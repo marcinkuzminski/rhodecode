@@ -23,6 +23,6 @@
 		<div class="commit" style="font-size:70%">"${c.file_msg}"</div>
 	</div>
 	<div class="code-body">
-		${h.pygmentize(c.files_list.content,linenos=True,anchorlinenos=True,cssclass="code-highlight")}
+		${h.pygmentize(c.files_list,linenos=True,anchorlinenos=True,lineanchors='S',cssclass="code-highlight")}
 	</div>
 </div>

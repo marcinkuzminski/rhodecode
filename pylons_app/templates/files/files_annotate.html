@@ -37,7 +37,7 @@
 				<div class="commit" style="font-size:70%">"${c.file_msg}"</div>
 			</div>
 			<div class="code-body">
-				${h.pygmentize_annotation(c.annotate,c.repo_name)}
+				${h.pygmentize_annotation(c.file,linenos=True,anchorlinenos=True,lineanchors='S',cssclass="code-highlight")}
 			</div>
 		</div>
 	</div>
