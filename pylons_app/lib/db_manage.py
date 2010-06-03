@@ -1,16 +1,15 @@
 from os.path import dirname as dn, join as jn
+import os
+import sys
+ROOT = dn(dn(dn(os.path.realpath(__file__))))
+sys.path.append(ROOT)
+
 from pylons_app.lib.auth import get_crypt_password
 from pylons_app.model import init_model
 from pylons_app.model.db import User, Permission
 from pylons_app.model.meta import Session, Base
 from sqlalchemy.engine import create_engine
 import logging
-import os
-import sys
-ROOT = dn(dn(dn(os.path.realpath(__file__))))
-sys.path.append(ROOT)
-
-
 
 log = logging.getLogger('db manage')
 log.setLevel(logging.DEBUG)
