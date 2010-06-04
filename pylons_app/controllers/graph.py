@@ -1,19 +1,37 @@
+#!/usr/bin/env python
+# encoding: utf-8
+# graph controller for pylons
+# Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
+ 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; version 2
+# of the License or (at your opinion) any later version of the license.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+# MA  02110-1301, USA.
+"""
+Created on April 21, 2010
+graph controller for pylons
+@author: marcink
+"""
 from mercurial.graphmod import revisions as graph_rev, colored, CHANGESET
 from mercurial.node import short
-from pylons import request, response, session, tmpl_context as c, url, config, \
-    app_globals as g
-from pylons.controllers.util import abort, redirect
+from pylons import request, tmpl_context as c
 from pylons_app.lib.auth import LoginRequired
 from pylons_app.lib.base import BaseController, render
 from pylons_app.lib.filters import age as _age, person
-from pylons_app.lib.utils import get_repo_slug
 from pylons_app.model.hg_model import HgModel
 from simplejson import dumps
 from webhelpers.paginate import Page
 import logging
-
-        
-        
 
 log = logging.getLogger(__name__)
 

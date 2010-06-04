@@ -1,3 +1,27 @@
+#!/usr/bin/env python
+# encoding: utf-8
+# login controller for pylons
+# Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
+ 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; version 2
+# of the License or (at your opinion) any later version of the license.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+# MA  02110-1301, USA.
+"""
+Created on April 22, 2010
+login controller for pylons
+@author: marcink
+"""
 import logging
 from formencode import htmlfill
 from pylons import request, response, session, tmpl_context as c, url

@@ -4,14 +4,13 @@ from pylons.configuration import PylonsConfig
 from pylons.error import handle_mako_error
 from pylons_app.config.routing import make_map
 from pylons_app.lib.auth import set_available_permissions
+from pylons_app.lib.utils import repo2db_mapper
 from pylons_app.model import init_model
 from sqlalchemy import engine_from_config
 import logging
 import os
 import pylons_app.lib.app_globals as app_globals
 import pylons_app.lib.helpers
-
-
 
 log = logging.getLogger(__name__)
 
@@ -39,7 +38,6 @@ def load_environment(global_conf, app_conf):
     import pylons
     pylons.cache._push_object(config['pylons.app_globals'].cache)
     
-
     # Create the Mako TemplateLookup, with the default auto-escaping
     config['pylons.app_globals'].mako_lookup = TemplateLookup(
         directories=paths['templates'],
@@ -48,7 +46,7 @@ def load_environment(global_conf, app_conf):
         input_encoding='utf-8', default_filters=['escape'],
         imports=['from webhelpers.html import escape'])
 
-    #sets the c attribute access when don't existing attribute ar accessed
+    #sets the c attribute access when don't existing attribute are accessed
     config['pylons.strict_tmpl_context'] = True
     
     #MULTIPLE DB configs
@@ -62,7 +60,7 @@ def load_environment(global_conf, app_conf):
         sa_engine_db1 = engine_from_config(config, 'sqlalchemy.db1.')
 
     init_model(sa_engine_db1)
-
+    repo2db_mapper()
     set_available_permissions(config)
     # CONFIGURATION OPTIONS HERE (note: all config options will override
     # any Pylons config options)
