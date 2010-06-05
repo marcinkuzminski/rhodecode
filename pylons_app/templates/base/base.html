@@ -71,6 +71,7 @@ def is_current(selected):
 						YAHOO.util.Dom.setStyle('switch_repos','display','none');
 						YAHOO.util.Dom.setStyle('repo_switcher','background','');
 						YAHOO.util.Dom.removeClass('repo_switcher','selected');
+						YAHOO.util.Dom.get('repo_switcher').removeAttribute('style');
 					}
 					else{
 						YAHOO.util.Dom.setStyle('switch_repos','display','');
