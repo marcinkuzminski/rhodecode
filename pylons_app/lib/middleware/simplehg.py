@@ -37,6 +37,7 @@ from pylons_app.model.db import UserLog, User
 from webob.exc import HTTPNotFound
 import logging
 import os
+from itertools import chain
 log = logging.getLogger(__name__)
 
 class SimpleHg(object):
@@ -89,8 +90,24 @@ class SimpleHg(object):
             if action:
                 username = self.__get_environ_user(environ)
                 self.__log_user_action(username, action, repo_name)
-                         
-            return app(environ, start_response)            
+            messages = ['thanks for using hg app !']
+            return self.msg_wrapper(app, environ, start_response, messages)            
+
+
+    def msg_wrapper(self, app, environ, start_response, messages):
+        """
+        Wrapper for custom messages that come out of mercurial respond messages
+        is a list of messages that the user will see at the end of response from
+        merurial protocol actions that involves remote answers
+        @param app:
+        @param environ:
+        @param start_response:
+        """
+        def custom_messages(msg_list):
+            for msg in msg_list:
+                yield msg + '\n'
+        org_response = app(environ, start_response)
+        return chain(org_response, custom_messages(messages))
 
     def __make_app(self):
         hgserve = hgweb(self.repo_path)
