@@ -134,7 +134,8 @@ class ReposController(BaseController):
         repo = repo_model.get(id)
         if not repo:
             h.flash(_('%s repository is not mapped to db perhaps' 
-                      ' it was moved or renamed please run the application again'
+                      ' it was moved or renamed  from the filesystem'
+                      ' please run the application again'
                       ' in order to rescan repositories') % id, category='error')
         
             return redirect(url('repos'))
@@ -156,7 +157,14 @@ class ReposController(BaseController):
         """GET /repos/id/edit: Form to edit an existing item"""
         # url('edit_repo', id=ID)
         repo_model = RepoModel()
-        c.repo_info = repo_model.get(id)
+        c.repo_info = repo = repo_model.get(id)
+        if not repo:
+            h.flash(_('%s repository is not mapped to db perhaps' 
+                      ' it was created or renamed from the filesystem'
+                      ' please run the application again'
+                      ' in order to rescan repositories') % id, category='error')
+        
+            return redirect(url('repos'))        
         defaults = c.repo_info.__dict__
         defaults.update({'user':c.repo_info.user.username})        
         return htmlfill.render(
