@@ -37,7 +37,7 @@ from pylons_app.lib import filters
 	%for cnt,repo in enumerate(c.repos_list):
  		<tr class="parity${cnt%2}">
 		    <td>${h.link(repo['name'],h.url('summary_home',repo_name=repo['name']))}</td>
-		    <td>${repo['description']}</td>
+		    <td title="${repo['description']}">${self.message_slug(repo['description'])}</td>
 	        <td>${repo['last_change']|n,filters.age}</td>
 	        <td>${h.link_to('r%s:%s' % (repo['rev'],repo['tip']),h.url('changeset_home',repo_name=repo['name'],revision=repo['tip']))}</td>
 	        <td title="${repo['contact']}">${repo['contact']|n,filters.person}</td>

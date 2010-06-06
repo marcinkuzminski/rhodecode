@@ -152,3 +152,14 @@ def is_current(selected):
         %endif
 	%endif           
 </%def>
+
+<!-- SHORTER LONGER STRINGS -->
+<%def name="message_slug(msg)">
+	<%
+	limit = 60
+	if len(msg) > limit:
+		return msg[:limit]+'...'
+	else:
+		return msg
+	%>
+</%def>
