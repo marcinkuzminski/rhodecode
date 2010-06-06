@@ -8,7 +8,7 @@ from pylons.i18n.translation import _
 from pylons_app.lib.base import BaseController, render
 from pylons.middleware import  media_path
 from pylons_app.lib.utils import check_repo
-from pylons_app.lib.filters import clean_repo
+import pylons_app.lib.helpers as h
 log = logging.getLogger(__name__)
 
 class ErrorController(BaseController):
@@ -39,7 +39,7 @@ class ErrorController(BaseController):
         if resp.status_int == 404:
             org_e = request.environ.get('pylons.original_request').environ
             c.repo_name = repo_name = org_e['PATH_INFO'].split('/')[1]
-            c.repo_name_cleaned = clean_repo(c.repo_name)
+            c.repo_name_cleaned = h.repo_name_slug(c.repo_name)
             if check_repo(repo_name, g.base_path):
                 return render('/errors/error_404.html')
                 

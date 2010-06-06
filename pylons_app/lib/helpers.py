@@ -21,7 +21,7 @@ from webhelpers.pylonslib import Flash as _Flash
 from webhelpers.pylonslib.secure_form import secure_form
 from webhelpers.text import chop_at, collapse, convert_accented_entities, \
     convert_misc_entities, lchop, plural, rchop, remove_formatting, \
-    replace_whitespace, urlify
+    replace_whitespace, urlify, truncate
 
 
 #Custom helper here :)
@@ -92,6 +92,35 @@ def pygmentize_annotation(filenode, **kwargs):
            
     return literal(annotate_highlight(filenode, url_func, **kwargs))
 
+def recursive_replace(str, replace=' '):
+    """
+    Recursive replace of given sign to just one instance
+    @param str: given string
+    @param replace:char to find and replace multiple instances
+        
+    Examples::
+    >>> recursive_replace("Mighty---Mighty-Bo--sstones",'-')
+    'Mighty-Mighty-Bo-sstones'
+    """
+
+    if str.find(replace * 2) == -1:
+        return str
+    else:
+        str = str.replace(replace * 2, replace)
+        return recursive_replace(str, replace)  
+      
+def repo_name_slug(value):
+    """
+    Return slug of name of repository
+    """
+    slug = urlify(value)
+    for c in """=[]\;',/~!@#$%^&*()+{}|:""":
+        slug = slug.replace(c, '-')
+    print slug
+    slug = recursive_replace(slug, '-')
+    print slug    
+    return slug
+    
 files_breadcrumbs = _FilesBreadCrumbs()
 link = _Link()
 flash = _Flash()

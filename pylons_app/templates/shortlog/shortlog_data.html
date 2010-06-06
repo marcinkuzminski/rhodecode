@@ -9,7 +9,7 @@ from pylons_app.lib import filters
 		<td title="${cs.author}">${cs.author|n,filters.person}</td>
 		<td>r${cs.revision}</td>
 		<td>
-			${h.link_to(self.message_slug(cs.message),
+			${h.link_to(h.truncate(cs.message,60),
 			h.url('changeset_home',repo_name=c.repo_name,revision=cs._short),
 			title=cs.message)}
 		</td>
