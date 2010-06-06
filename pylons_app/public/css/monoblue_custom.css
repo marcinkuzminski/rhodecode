@@ -153,6 +153,9 @@ table tr.parity1 {
 	width:16px;
 }
 
+.error-message{
+	color:#CC3300;
+}
 
 div#main {
 	padding: 5px;
