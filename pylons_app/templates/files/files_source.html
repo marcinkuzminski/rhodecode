@@ -20,7 +20,7 @@
 <div id="body" class="codeblock">
 	<div class="code-header">
 		<div class="revision">${c.files_list.name}@r${c.files_list.last_changeset.revision}:${c.files_list.last_changeset._short}</div>
-		<div class="commit" style="font-size:70%">"${c.file_msg}"</div>
+		<div class="commit" style="font-size:70%">"${c.files_list.last_changeset.message}"</div>
 	</div>
 	<div class="code-body">
 		${h.pygmentize(c.files_list,linenos=True,anchorlinenos=True,lineanchors='S',cssclass="code-highlight")}

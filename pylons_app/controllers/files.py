@@ -71,10 +71,7 @@ class FilesController(BaseController):
                              revision=next_rev, f_path=f_path)   
                     
             c.changeset = repo.get_changeset(revision)
-            try:
-                c.file_msg = c.changeset.get_file_message(f_path)
-            except:
-                c.file_msg = None
+
                         
             c.cur_rev = c.changeset.raw_id
             c.rev_nr = c.changeset.revision
