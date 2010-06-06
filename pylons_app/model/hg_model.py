@@ -27,8 +27,9 @@ Model for hg app
 from beaker.cache import cache_region
 from mercurial import ui
 from mercurial.hgweb.hgwebdir_mod import findrepos
-from pylons import app_globals as g
 from vcs.exceptions import RepositoryError, VCSError
+from pylons_app.model.meta import Session
+from pylons_app.model.db import Repository
 import logging
 import os
 import sys
@@ -40,12 +41,19 @@ except ImportError:
     sys.stderr.write('You have to import vcs module')
     raise Exception('Unable to import vcs')
 
+def _get_repos_cached_initial(app_globals):
+    """
+    return cached dict with repos
+    """
+    g = app_globals
+    return HgModel.repo_scan(g.paths[0][0], g.paths[0][1], g.baseui)
 
 @cache_region('long_term', 'cached_repo_list')
 def _get_repos_cached():
     """
     return cached dict with repos
     """
+    from pylons import app_globals as g
     return HgModel.repo_scan(g.paths[0][0], g.paths[0][1], g.baseui)
 
 @cache_region('long_term', 'full_changelog')
@@ -62,7 +70,6 @@ class HgModel(object):
         """
         Constructor
         """
-        pass
     
     @staticmethod
     def repo_scan(repos_prefix, repos_path, baseui):
@@ -72,6 +79,7 @@ class HgModel(object):
         :param repos_path: path to directory it could take syntax with 
         * or ** for deep recursive displaying repositories
         """
+        sa = Session()
         def check_repo_dir(path):
             """
             Checks the repository
@@ -102,8 +110,13 @@ class HgModel(object):
                     raise RepositoryError('Duplicate repository name %s found in'
                                     ' %s' % (name, path))
                 else:
+                    
                     repos_list[name] = MercurialRepository(path, baseui=baseui)
                     repos_list[name].name = name
+                    dbrepo = sa.query(Repository).get(name)
+                    if dbrepo:
+                        repos_list[name].description = dbrepo.description
+                        repos_list[name].contact = dbrepo.user.full_contact
             except OSError:
                 continue
         return repos_list

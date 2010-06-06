@@ -26,6 +26,8 @@ Model for users
 
 from pylons_app.model.db import User
 from pylons_app.model.meta import Session
+import logging
+log = logging.getLogger(__name__)
 
 class UserModel(object):
 
@@ -43,7 +45,8 @@ class UserModel(object):
                 
             self.sa.add(new_user)
             self.sa.commit()
-        except:
+        except Exception as e:
+            log.error(e)
             self.sa.rollback()
             raise      
     
@@ -59,6 +62,16 @@ class UserModel(object):
                 
             self.sa.add(new_user)
             self.sa.commit()
-        except:
+        except Exception as e:
+            log.error(e)
             self.sa.rollback()
             raise      
+
+    def delete(self, id):
+        try:
+            self.sa.delete(self.sa.query(User).get(id))
+            self.sa.commit()            
+        except Exception as e:
+            log.error(e)
+            self.sa.rollback()
+            raise        

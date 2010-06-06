@@ -114,11 +114,9 @@ def repo_name_slug(value):
     Return slug of name of repository
     """
     slug = urlify(value)
-    for c in """=[]\;',/~!@#$%^&*()+{}|:""":
+    for c in """=[]\;'"<>,/~!@#$%^&*()+{}|:""":
         slug = slug.replace(c, '-')
-    print slug
     slug = recursive_replace(slug, '-')
-    print slug    
     return slug
     
 files_breadcrumbs = _FilesBreadCrumbs()

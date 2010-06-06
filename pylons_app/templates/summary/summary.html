@@ -70,7 +70,7 @@ E.onDOMReady(function(e){
 			<td>${cs.author|n,filters.person}</td>
 			<td>r${cs.revision}</td>
 			<td>
-				${h.link_to(truncate(cs.message,60),
+				${h.link_to(h.truncate(cs.message,60),
 				h.url('changeset_home',repo_name=c.repo_name,revision=cs._short),
 				title=cs.message)}
 			</td>

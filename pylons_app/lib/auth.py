@@ -65,6 +65,7 @@ class  AuthUser(object):
     A simple object that handles a mercurial username for authentication
     """
     username = 'None'
+    user_id = None
     is_authenticated = False
     is_admin = False
     permissions = set()

@@ -28,6 +28,7 @@ import os
 import logging
 from mercurial import ui, config, hg
 from mercurial.error import RepoError
+from pylons_app.model.db import Repository, User
 log = logging.getLogger(__name__)
 
 
@@ -152,9 +153,28 @@ class EmptyChangeset(BaseChangeset):
         return '0' * 12
 
 
-def repo2db_mapper():
+def repo2db_mapper(initial_repo_list):
     """
-    scann all dirs for .hgdbid
-    if some dir doesn't have one generate one.
+    maps all found repositories into db
     """
-    pass
+    from pylons_app.model.meta import Session
+    sa = Session()
+    user = sa.query(User).filter(User.admin == True).first()
+    for name, repo in initial_repo_list.items():
+        if not sa.query(Repository).get(name):
+            log.info('%s not found creating default', name)
+            try:
+                
+                new_repo = Repository()
+                new_repo.repo_name = name
+                desc = repo.description if repo.description != 'unknown' else \
+                                            'auto description for %s' % name
+                new_repo.description = desc
+                new_repo.user_id = user.user_id
+                new_repo.private = False
+                sa.add(new_repo)
+                sa.commit()
+            except:
+                sa.rollback()
+                raise
+            

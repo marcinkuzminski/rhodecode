@@ -2,7 +2,6 @@
 # encoding: utf-8
 # repos controller for pylons
 # Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
- 
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
@@ -22,20 +21,25 @@ Created on April 7, 2010
 admin controller for pylons
 @author: marcink
 """
-import logging
+from operator import itemgetter
 from pylons import request, response, session, tmpl_context as c, url, \
     app_globals as g
 from pylons.controllers.util import abort, redirect
-from pylons_app.lib.auth import LoginRequired
 from pylons.i18n.translation import _
 from pylons_app.lib import helpers as h
+from pylons_app.lib.auth import LoginRequired
 from pylons_app.lib.base import BaseController, render
-from pylons_app.lib.filters import clean_repo
-from pylons_app.lib.utils import check_repo, invalidate_cache
+from pylons_app.lib.utils import invalidate_cache
+from pylons_app.model.repo_model import RepoModel
 from pylons_app.model.hg_model import HgModel
+from pylons_app.model.forms import RepoForm
+from pylons_app.model.meta import Session
+from datetime import datetime
+import formencode
+from formencode import htmlfill
+import logging
 import os
 import shutil
-from operator import itemgetter
 log = logging.getLogger(__name__)
 
 class ReposController(BaseController):
@@ -59,30 +63,33 @@ class ReposController(BaseController):
     def create(self):
         """POST /repos: Create a new item"""
         # url('repos')
-        name = request.POST.get('name')
-
+        repo_model = RepoModel()
+        _form = RepoForm()()
         try:
-            self._create_repo(name)
-            #clear our cached list for refresh with new repo
+            form_result = _form.to_python(dict(request.POST))
+            repo_model.create(form_result, c.hg_app_user)
             invalidate_cache('cached_repo_list')
-            h.flash(_('created repository %s') % name, category='success')
-        except Exception as e:
-            log.error(e)
-        
+            h.flash(_('created repository %s') % form_result['repo_name'],
+                    category='success')
+                                                             
+        except formencode.Invalid as errors:
+            c.form_errors = errors.error_dict
+            c.new_repo = errors.value['repo_name']
+            return htmlfill.render(
+                 render('admin/repos/repo_add.html'),
+                defaults=errors.value,
+                encoding="UTF-8")        
+
+        except Exception:
+            h.flash(_('error occured during creation of repository %s') \
+                    % form_result['repo_name'], category='error')
+            
         return redirect('repos')
-        
-    def _create_repo(self, repo_name):        
-        repo_path = os.path.join(g.base_path, repo_name)
-        if check_repo(repo_name, g.base_path):
-            log.info('creating repo %s in %s', repo_name, repo_path)
-            from vcs.backends.hg import MercurialRepository
-            MercurialRepository(repo_path, create=True)
-                        
 
     def new(self, format='html'):
         """GET /repos/new: Form to create a new item"""
         new_repo = request.GET.get('repo', '')
-        c.new_repo = clean_repo(new_repo)
+        c.new_repo = h.repo_name_slug(new_repo)
 
         return render('admin/repos/repo_add.html')
 
@@ -94,7 +101,26 @@ class ReposController(BaseController):
         #    h.form(url('repo', id=ID),
         #           method='put')
         # url('repo', id=ID)
-
+        repo_model = RepoModel()
+        _form = RepoForm(edit=True)()
+        try:
+            form_result = _form.to_python(dict(request.POST))
+            repo_model.update(id, form_result)
+            invalidate_cache('cached_repo_list')
+            h.flash(_('Repository updated succesfully'), category='success')
+                           
+        except formencode.Invalid as errors:
+            c.repo_info = repo_model.get(id)
+            c.form_errors = errors.error_dict
+            return htmlfill.render(
+                 render('admin/repos/repo_edit.html'),
+                defaults=errors.value,
+                encoding="UTF-8")
+        except Exception:
+            h.flash(_('error occured during update of repository %s') \
+                    % form_result['repo_name'], category='error')
+        return redirect(url('repos'))
+    
     def delete(self, id):
         """DELETE /repos/id: Delete an existing item"""
         # Forms posted to this method should contain a hidden field:
@@ -103,19 +129,25 @@ class ReposController(BaseController):
         #    h.form(url('repo', id=ID),
         #           method='delete')
         # url('repo', id=ID)
-        from datetime import datetime
-        path = g.paths[0][1].replace('*', '')
-        rm_path = os.path.join(path, id)
-        log.info("Removing %s", rm_path)
-        shutil.move(os.path.join(rm_path, '.hg'), os.path.join(rm_path, 'rm__.hg'))
-        shutil.move(rm_path, os.path.join(path, 'rm__%s-%s' % (datetime.today(), id)))
         
-        #clear our cached list for refresh with new repo
-        invalidate_cache('cached_repo_list')
-        h.flash(_('deleted repository %s') % rm_path, category='success')            
+        repo_model = RepoModel()
+        repo = repo_model.get(id)
+        if not repo:
+            h.flash(_('%s repository is not mapped to db perhaps' 
+                      ' it was moved or renamed please run the application again'
+                      ' in order to rescan repositories') % id, category='error')
+        
+            return redirect(url('repos'))
+        try:
+            repo_model.delete(repo)            
+            invalidate_cache('cached_repo_list')
+            h.flash(_('deleted repository %s') % id, category='success')
+        except Exception:
+            h.flash(_('An error occured during deletion of %s') % id,
+                    category='error')
+        
         return redirect(url('repos'))
         
-
     def show(self, id, format='html'):
         """GET /repos/id: Show a specific item"""
         # url('repo', id=ID)
@@ -123,5 +155,13 @@ class ReposController(BaseController):
     def edit(self, id, format='html'):
         """GET /repos/id/edit: Form to edit an existing item"""
         # url('edit_repo', id=ID)
-        c.new_repo = id
-        return render('admin/repos/repo_edit.html')
+        repo_model = RepoModel()
+        c.repo_info = repo_model.get(id)
+        defaults = c.repo_info.__dict__
+        defaults.update({'user':c.repo_info.user.username})        
+        return htmlfill.render(
+            render('admin/repos/repo_edit.html'),
+            defaults=defaults,
+            encoding="UTF-8",
+            force_defaults=False
+        )          

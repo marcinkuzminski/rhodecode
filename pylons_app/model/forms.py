@@ -25,8 +25,9 @@ from formencode.validators import UnicodeString, OneOf, Int, Number, Regex, \
 from pylons import session
 from pylons.i18n.translation import _
 from pylons_app.lib.auth import get_crypt_password
+import pylons_app.lib.helpers as h
 from pylons_app.model import meta
-from pylons_app.model.db import User
+from pylons_app.model.db import User, Repository
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from webhelpers.pylonslib.secure_form import authentication_token
@@ -93,6 +94,7 @@ class ValidAuth(formencode.validators.FancyValidator):
                     auth_user.username = username
                     auth_user.is_authenticated = True
                     auth_user.is_admin = user.admin
+                    auth_user.user_id = user.user_id
                     session['hg_app_user'] = auth_user
                     session.save()
                     log.info('user %s is now authenticated', username)
@@ -119,7 +121,30 @@ class ValidAuth(formencode.validators.FancyValidator):
                                          error_dict=self.e_dict_disable)
             
             
-        
+class ValidRepoUser(formencode.validators.FancyValidator):
+            
+    def to_python(self, value, state):
+        sa = meta.Session
+        try:
+            self.user_db = sa.query(User).filter(User.username == value).one()
+        except Exception:
+            raise formencode.Invalid(_('This username is not valid'),
+                                     value, state)
+        return self.user_db.user_id
+
+def ValidRepoName(edit=False):    
+    class _ValidRepoName(formencode.validators.FancyValidator):
+            
+        def to_python(self, value, state):
+            slug = h.repo_name_slug(value)
+            
+            sa = meta.Session
+            if sa.query(Repository).get(slug) and not edit:
+                raise formencode.Invalid(_('This repository already exists'),
+                                         value, state)
+                        
+            return slug 
+    return _ValidRepoName
 #===============================================================================
 # FORMS        
 #===============================================================================
@@ -163,3 +188,16 @@ def UserForm(edit=False):
         email = Email(not_empty=True)
         
     return _UserForm
+
+def RepoForm(edit=False):
+    class _RepoForm(formencode.Schema):
+        allow_extra_fields = True
+        filter_extra_fields = True
+        repo_name = All(UnicodeString(strip=True, min=1, not_empty=True), ValidRepoName(edit))
+        description = UnicodeString(strip=True, min=3, not_empty=True)
+        private = StringBoolean(if_missing=False)
+        
+        if edit:
+            user = All(Int(not_empty=True), ValidRepoUser)
+        
+    return _RepoForm
