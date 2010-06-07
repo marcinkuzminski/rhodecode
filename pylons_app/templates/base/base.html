@@ -91,8 +91,8 @@ def is_current(selected):
 	        <ul class="page-nav">
 				<li>
 					<a id="repo_switcher" title="${_('Switch repository')}" href="#">&darr;</a>
-					<div id="switch_repos" style="display:none;position: absolute;width: 150px;height: 25px">
-						<select id="repos_list" size="=10">
+					<div id="switch_repos" style="display:none;position: absolute;height: 25px">
+						<select id="repos_list" size="=10" style="min-width: 150px">
 						%for repo in sorted(x.name.lower() for x in c.cached_repo_list.values()):
 							<option value="${repo}">${repo}</option>
 						%endfor
