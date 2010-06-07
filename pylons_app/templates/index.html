@@ -16,23 +16,22 @@ from pylons_app.lib import filters
 	<%def name="get_sort(name)">
 		<%name_slug = name.lower().replace(' ','_') %>
 		%if name_slug == c.cs_slug:
-			<span style="font-weight: bold;color:#006699">${name}</span>
+			<span style="font-weight: bold;text-decoration: underline;">${name}</span>
 		%else:
 			<span style="font-weight: bold">${name}</span>
 		%endif
-		<a href="?sort=${name_slug}">&darr;</a>
-		<a href="?sort=-${name_slug}">&uarr;</a>
+		<a style="color:#FFF" href="?sort=${name_slug}">&darr;</a>
+		<a style="color:#FFF" href="?sort=-${name_slug}">&uarr;</a>
 	</%def>
-	<table>
-	  <tr>
+	<table class="table_disp">
+	  <tr class="header">
 	    <td>${get_sort(_('Name'))}</td>
 	    <td>${get_sort(_('Description'))}</td>
 	    <td>${get_sort(_('Last change'))}</td>
 	    <td>${get_sort(_('Tip'))}</td>
 	    <td>${get_sort(_('Contact'))}</td>
-	    <td></td>
-	    <td></td>
-	    <td></td>
+	    <td>${_('RSS')}</td>
+	    <td>${_('Atom')}</td>
 	  </tr>	
 	%for cnt,repo in enumerate(c.repos_list):
  		<tr class="parity${cnt%2}">
@@ -41,20 +40,11 @@ from pylons_app.lib import filters
 	        <td>${repo['last_change']|n,filters.age}</td>
 	        <td>${h.link_to('r%s:%s' % (repo['rev'],repo['tip']),h.url('changeset_home',repo_name=repo['name'],revision=repo['tip']))}</td>
 	        <td title="${repo['contact']}">${repo['contact']|n,filters.person}</td>
-	        
-	        	##%for archive in repo['repo_archives']:
-	        	##<td class="indexlinks">
-	        	##	${h.link_to(archive['type'],
-       			##	h.url('files_archive_home',repo_name=repo['name'],
-       			##	revision='tip',fileformat=archive['extension']),class_="archive_logo" )}
-				##</td>
-				##%endfor
-	        
 			<td>
-				${h.link_to(_('RSS'),h.url('rss_feed_home',repo_name=repo['name']),class_='rss_logo')}
+				<a title="${_('Subscribe to %s rss feed')%repo['name']}" class="rss_logo"  href="${h.url('rss_feed_home',repo_name=repo['name'])}"></a>
 			</td>        
 			<td>
-				${h.link_to(_('Atom'),h.url('atom_feed_home',repo_name=repo['name']),class_='atom_logo')}
+				<a title="${_('Subscribe to %s atom feed')%repo['name']}"  class="atom_logo" href="${h.url('atom_feed_home',repo_name=repo['name'])}"></a>
 			</td>
 		</tr>
 	%endfor
