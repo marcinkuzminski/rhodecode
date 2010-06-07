@@ -69,7 +69,7 @@ def make_app(global_conf, full_stack=True, static_files=True, **app_conf):
         static_app = StaticURLParser(config['pylons.paths']['static_files'])
         app = Cascade([static_app, app])
     
-        app.config = config
+    app.config = config
 
     return app
 
