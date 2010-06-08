@@ -48,17 +48,39 @@ class ChangesetController(BaseController):
                 
         for node in c.changeset.added:
             filenode_old = FileNode(node.path, '')
-            f_udiff = differ.get_udiff(filenode_old, node)
-            diff = differ.DiffProcessor(f_udiff).as_html()
-            c.changes.append(('added', node, diff))
+            if filenode_old.is_binary or node.is_binary:
+                diff = 'binary file'
+            else:    
+                f_udiff = differ.get_udiff(filenode_old, node)
+                diff = differ.DiffProcessor(f_udiff).as_html()
+                try:
+                    diff = unicode(diff)
+                except:
+                    log.warning('Decoding failed of %s', filenode_old)
+                    log.warning('Decoding failed of %s', node)
+                    diff = 'unsupported type'
+            cs1 = None
+            cs2 = node.last_changeset.raw_id                                        
+            c.changes.append(('added', node, diff, cs1, cs2))
             
         for node in c.changeset.changed:
             filenode_old = c.changeset_old.get_node(node.path)
-            f_udiff = differ.get_udiff(filenode_old, node)
-            diff = differ.DiffProcessor(f_udiff).as_html()
-            c.changes.append(('changed', node, diff))
+            if filenode_old.is_binary or node.is_binary:
+                diff = 'binary file'
+            else:    
+                f_udiff = differ.get_udiff(filenode_old, node)
+                diff = differ.DiffProcessor(f_udiff).as_html()
+                try:
+                    diff = unicode(diff)
+                except:
+                    log.warning('Decoding failed of %s', filenode_old)
+                    log.warning('Decoding failed of %s', node)                    
+                    diff = 'unsupported type'
+            cs1 = filenode_old.last_changeset.raw_id
+            cs2 = node.last_changeset.raw_id                    
+            c.changes.append(('changed', node, diff, cs1, cs2))
             
         for node in c.changeset.removed:
-            c.changes.append(('removed', node, None))            
+            c.changes.append(('removed', node, None, None, None))            
             
         return render('changeset/changeset.html')
