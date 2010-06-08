@@ -46,7 +46,7 @@ from pylons_app.lib import filters
 				</div>
 				%endif						
 				%for p_cs in reversed(c.changeset.parents):
-					<div class="parent">${_('Parrent')} ${p_cs.revision}: ${h.link_to(p_cs.raw_id,
+					<div class="parent">${_('Parent')} ${p_cs.revision}: ${h.link_to(p_cs.raw_id,
 						h.url('changeset_home',repo_name=c.repo_name,revision=p_cs.raw_id),title=p_cs.message)}
 					</div>
 				%endfor								
