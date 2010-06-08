@@ -56,12 +56,12 @@ from pylons_app.lib import filters
     
     <div style="clear:both;height:10px"></div>
     <div class="cs_files">
-			%for change,filenode,diff in c.changes:
+			%for change,filenode,diff,cs1,cs2 in c.changes:
 				<div class="cs_${change}">${h.link_to(filenode.path,h.url.current(anchor='CHANGE-%s'%filenode.path))}</div>
 			%endfor
 	</div>
 	
-	%for change,filenode,diff in c.changes:
+	%for change,filenode,diff,cs1,cs2 in c.changes:
 		%if change !='removed':
 		<div style="clear:both;height:10px"></div>
 		<div id="body" class="diffblock">
@@ -71,13 +71,14 @@ from pylons_app.lib import filters
 						${h.link_to_if(change!='removed',filenode.path,h.url('files_home',repo_name=c.repo_name,
 						revision=filenode.changeset.raw_id,f_path=filenode.path))}
 					</span>
-					
-					##&raquo; <span style="font-size:77%">${h.link_to(_('diff'),
-					##h.url.current(diff2=c.diff2,diff1=c.diff1,diff='diff'))}</span>
-					##&raquo; <span style="font-size:77%">${h.link_to(_('raw diff'),
-					##h.url.current(diff2=c.diff2,diff1=c.diff1.split(':')[-1],diff='raw'))}</span>
-					##&raquo; <span style="font-size:77%">${h.link_to(_('download diff'),
-					##h.url.current(diff2=c.diff2,diff1=c.diff1,diff='download'))}</span>
+					%if 1:
+					&raquo; <span style="font-size:77%">${h.link_to(_('diff'),
+					h.url('files_diff_home',repo_name=c.repo_name,f_path=filenode.path,diff2=cs2,diff1=cs1,diff='diff'))}</span>
+					&raquo; <span style="font-size:77%">${h.link_to(_('raw diff'),
+					h.url('files_diff_home',repo_name=c.repo_name,f_path=filenode.path,diff2=cs2,diff1=cs1,diff='raw'))}</span>
+					&raquo; <span style="font-size:77%">${h.link_to(_('download diff'),
+					h.url('files_diff_home',repo_name=c.repo_name,f_path=filenode.path,diff2=cs2,diff1=cs1,diff='download'))}</span>
+					%endif
 				</div>
 			</div>
 			<div class="code-body">        
