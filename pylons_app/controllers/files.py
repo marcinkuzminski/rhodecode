@@ -26,6 +26,7 @@ from mercurial import archival
 from pylons import request, response, session, tmpl_context as c, url
 from pylons_app.lib.auth import LoginRequired
 from pylons_app.lib.base import BaseController, render
+import pylons_app.lib.helpers as h 
 from pylons_app.model.hg_model import HgModel
 from vcs.exceptions import RepositoryError, ChangesetError
 from vcs.utils import diffs as differ
@@ -157,7 +158,7 @@ class FilesController(BaseController):
             return diff.raw_diff()
         
         elif action == 'raw':
-            c.cur_diff = '<pre class="raw">%s</pre>' % diff.raw_diff()
+            c.cur_diff = '<pre class="raw">%s</pre>' % h.escape(diff.raw_diff())
         elif action == 'diff':
             c.cur_diff = diff.as_html()
 
