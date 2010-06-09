@@ -2,6 +2,19 @@
 # encoding: utf-8
 # files controller for pylons
 # Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
+from mercurial import archival
+from pylons import request, response, session, tmpl_context as c, url
+from pylons.controllers.util import redirect
+from pylons_app.lib.auth import LoginRequired
+from pylons_app.lib.base import BaseController, render
+from pylons_app.lib.utils import EmptyChangeset
+from pylons_app.model.hg_model import HgModel
+from vcs.exceptions import RepositoryError, ChangesetError
+from vcs.nodes import FileNode
+from vcs.utils import diffs as differ
+import logging
+import pylons_app.lib.helpers as h
+import tempfile
  
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -22,16 +35,6 @@ Created on April 21, 2010
 files controller for pylons
 @author: marcink
 """
-from mercurial import archival
-from pylons import request, response, session, tmpl_context as c, url
-from pylons_app.lib.auth import LoginRequired
-from pylons_app.lib.base import BaseController, render
-import pylons_app.lib.helpers as h 
-from pylons_app.model.hg_model import HgModel
-from vcs.exceptions import RepositoryError, ChangesetError
-from vcs.utils import diffs as differ
-import logging
-import tempfile
 
         
 log = logging.getLogger(__name__)
@@ -140,13 +143,27 @@ class FilesController(BaseController):
         c.no_changes = diff1 == diff2
         c.f_path = f_path
         c.repo = hg_model.get_repo(c.repo_name)
-        c.changeset_1 = c.repo.get_changeset(diff1)
-        c.changeset_2 = c.repo.get_changeset(diff2)
 
-        c.diff1 = 'r%s:%s' % (c.changeset_1.revision, c.changeset_1._short)
-        c.diff2 = 'r%s:%s' % (c.changeset_2.revision, c.changeset_2._short)
-        f_udiff = differ.get_udiff(c.changeset_1.get_node(f_path),
-                            c.changeset_2.get_node(f_path))
+        try:
+            if diff1 not in ['', None, 'None', '0' * 12]:
+                c.changeset_1 = c.repo.get_changeset(diff1)
+                node1 = c.changeset_1.get_node(f_path)
+            else:
+                c.changeset_1 = EmptyChangeset()
+                node1 = FileNode('.', '')
+            if diff2 not in ['', None, 'None', '0' * 12]:
+                c.changeset_2 = c.repo.get_changeset(diff2)
+                node2 = c.changeset_2.get_node(f_path)
+            else:
+                c.changeset_2 = EmptyChangeset()
+                node2 = FileNode('.', '') 
+        except RepositoryError:
+            return redirect(url('files_home',
+                                repo_name=c.repo_name, f_path=f_path))
+
+        c.diff1 = 'r%s:%s' % (c.changeset_1.revision, c.changeset_1.raw_id)
+        c.diff2 = 'r%s:%s' % (c.changeset_2.revision, c.changeset_2.raw_id)
+        f_udiff = differ.get_udiff(node1, node2)
         
         diff = differ.DiffProcessor(f_udiff)
                                 
