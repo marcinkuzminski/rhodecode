@@ -53,6 +53,7 @@ def _get_repos_cached():
     """
     return cached dict with repos
     """
+    log.info('getting all repositories list')
     from pylons import app_globals as g
     return HgModel.repo_scan(g.paths[0][0], g.paths[0][1], g.baseui)
 

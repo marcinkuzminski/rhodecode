@@ -25,7 +25,7 @@ changelog controller for pylons
 from pylons import request, session, tmpl_context as c
 from pylons_app.lib.auth import LoginRequired
 from pylons_app.lib.base import BaseController, render
-from pylons_app.model.hg_model import _full_changelog_cached
+from pylons_app.model.hg_model import HgModel
 from webhelpers.paginate import Page
 import logging
 log = logging.getLogger(__name__)     
@@ -51,7 +51,7 @@ class ChangelogController(BaseController):
         else:
             c.size = session.get('changelog_size', default)
 
-        changesets = _full_changelog_cached(c.repo_name)
+        changesets = HgModel().get_repo(c.repo_name)
             
         p = int(request.params.get('page', 1))
         c.pagination = Page(changesets, page=p, item_count=len(changesets),
