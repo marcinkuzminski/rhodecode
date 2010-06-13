@@ -19,7 +19,7 @@ from pylons_app.lib import filters
 
 <%def name="main()">
 
-    <h2 class="no-link no-border">${_('Changelog')} - ${_('showing ')} ${c.size} ${_('revisions')}</h2>
+    <h2 class="no-link no-border">${_('Changelog')} - ${_('showing last ')} ${c.size} ${_('revisions')}</h2>
 	<noscript>${_('The revision graph only works with JavaScript-enabled browsers.')}</noscript>
 
 <div id="graph">
@@ -29,7 +29,7 @@ from pylons_app.lib import filters
 	<div id="graph_content">
 		<div class="container_header">
 			${h.form(h.url.current(),method='get')}
-				${_('Show')}: ${h.text('size',size=5,value=c.size)} ${_('revisions')}
+				${_('Show')}: ${h.text('size',size=2,value=c.size)} ${_('revisions')}
 				${h.submit('','set')}
 			${h.end_form()}
 		</div>

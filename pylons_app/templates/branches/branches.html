@@ -17,10 +17,17 @@
 
     <h2 class="no-link no-border">${_('Branches')}</h2>
 
-    <table>
+    <table class="table_disp">
+    	<tr class="header">
+			<td>${_('date')}</td>
+			<td>${_('revision')}</td>
+			<td>${_('name')}</td>
+			<td>${_('links')}</td>
+    	</tr>
 		%for cnt,branch in enumerate(c.repo_branches.items()):
 		<tr class="parity${cnt%2}">
 			<td>${branch[1]._ctx.date()|n,filters.age}</td>
+			<td>r${branch[1].revision}:${branch[1].raw_id}</td>
 			<td>
 				<span class="logtags">
 					<span class="branchtag">${h.link_to(branch[0],

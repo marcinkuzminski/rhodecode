@@ -17,16 +17,16 @@ from pylons_app.lib import filters
 	<tr class="parity${cnt%2}">
 		<td>${cs._ctx.date()|n,filters.age}</td>
 		<td title="${cs.author}">${cs.author|n,filters.person}</td>
-		<td>r${cs.revision}</td>
+		<td>r${cs.revision}:${cs.raw_id}</td>
 		<td>
 			${h.link_to(h.truncate(cs.message,60),
 			h.url('changeset_home',repo_name=c.repo_name,revision=cs._short),
 			title=cs.message)}
 		</td>
 		<td>
-				<span class="logtags">
-					<span class="branchtag">${cs.branch}</span>
-				</span>
+			<span class="logtags">
+				<span class="branchtag">${cs.branch}</span>
+			</span>
 		</td>
 		<td>
 			<span class="logtags">

@@ -9,6 +9,7 @@
 	<div class="browser-header">
 		${h.form(h.url.current())}
 		<span>${_('view')}@rev <a style="font-size: 1.3em"  href="${c.url_prev}">&laquo;</a>${h.text('at_rev',value=c.rev_nr,size='5')}<a style="font-size: 1.3em" href="${c.url_next}">&raquo;</a></span>
+		${c.cur_rev} 
 		${h.submit('view','view')}
 		${h.end_form()}
 	</div>
