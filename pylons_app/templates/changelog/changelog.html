@@ -40,9 +40,8 @@
 				<div class="date">${_('commit')} ${cs.revision}: ${cs.raw_id}@${cs.date}</div>
 				<div class="author">${cs.author}</div>
 				<div id="chg_${cnt}" class="message">
-					${h.link_to(cs.message,
-					h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id),
-					title=cs.message)}
+					${h.link_to(h.wrap_paragraphs(cs.message),
+					h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id))}
 				</div>
 					<span class="logtags">
 						<span class="branchtag">${cs.branch}</span>

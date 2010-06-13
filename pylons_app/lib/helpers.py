@@ -112,11 +112,18 @@ class _ToolTip(object):
                 showdelay:20,
             });
             
-            //Mouse subscribe optional arguments
+            //Mouse Over event disabled for new repositories since they dont
+            //have last commit message
             myToolTips.contextMouseOverEvent.subscribe(
                 function(type, args) {
                     var context = args[0];
-                    return true;
+                    var txt = context.getAttribute('tooltip_title');
+                    if(txt){
+                        return true;
+                    }
+                    else{
+                        return false;
+                    }
                 });
             
             // Set the text for the tooltip just before we display it. Lazy method
