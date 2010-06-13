@@ -24,7 +24,7 @@ Hg app, a web based mercurial repository managment based on pylons
 @author: marcink
 """
 
-VERSION = (0, 7, 6, 'beta')
+VERSION = (0, 7, 7, 'beta')
 
 __version__ = '.'.join((str(each) for each in VERSION[:4]))
 
