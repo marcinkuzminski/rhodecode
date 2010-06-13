@@ -39,6 +39,8 @@ class TagsController(BaseController):
     def index(self):
         hg_model = HgModel()
         c.repo_info = hg_model.get_repo(c.repo_name)
-        c.repo_tags = c.repo_info.tags
+        c.repo_tags = {}
+        for name, hash in c.repo_info.tags.items():
+            c.repo_tags[name] = c.repo_info.get_changeset(hash)
         
         return render('tags/tags.html')

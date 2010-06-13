@@ -22,7 +22,7 @@ Created on April 21, 2010
 branches controller for pylons
 @author: marcink
 """
-from pylons import tmpl_context as c, app_globals as g
+from pylons import tmpl_context as c
 from pylons_app.lib.auth import LoginRequired
 from pylons_app.lib.base import BaseController, render
 from pylons_app.model.hg_model import HgModel
@@ -39,6 +39,8 @@ class BranchesController(BaseController):
     def index(self):
         hg_model = HgModel()
         c.repo_info = hg_model.get_repo(c.repo_name)
-        c.repo_branches = c.repo_info.branches
+        c.repo_branches = {}
+        for name, hash in c.repo_info.branches.items():
+            c.repo_branches[name] = c.repo_info.get_changeset(hash)
                 
         return render('branches/branches.html')

@@ -18,18 +18,19 @@
     <h2 class="no-link no-border">${_('Branches')}</h2>
 
     <table>
-		%for cnt,branch in enumerate(c.repo_branches):
+		%for cnt,branch in enumerate(c.repo_branches.items()):
 		<tr class="parity${cnt%2}">
-			<td>${branch._ctx.date()|n,filters.age}</td>
+			<td>${branch[1]._ctx.date()|n,filters.age}</td>
 			<td>
 				<span class="logtags">
-					<span class="branchtag">${h.link_to(branch.branch,h.url('changeset_home',repo_name=c.repo_name,revision=branch._short))}</span>
+					<span class="branchtag">${h.link_to(branch[0],
+					h.url('changeset_home',repo_name=c.repo_name,revision=branch[1].raw_id))}</span>
 				</span>			
 			</td>
 			<td class="nowrap">
-			${h.link_to(_('changeset'),h.url('changeset_home',repo_name=c.repo_name,revision=branch._short))}
+			${h.link_to(_('changeset'),h.url('changeset_home',repo_name=c.repo_name,revision=branch[1].raw_id))}
 			|
-			${h.link_to(_('files'),h.url('files_home',repo_name=c.repo_name,revision=branch._short))}
+			${h.link_to(_('files'),h.url('files_home',repo_name=c.repo_name,revision=branch[1].raw_id))}
 			</td>
 		</tr>	
 		%endfor
