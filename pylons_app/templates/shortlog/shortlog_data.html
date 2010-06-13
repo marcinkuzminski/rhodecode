@@ -2,7 +2,17 @@
 <%!
 from pylons_app.lib import filters
 %>
-<table>
+<table class="table_disp">
+	<tr class="header">
+		<td>${_('date')}</td>
+		<td>${_('author')}</td>
+		<td>${_('revision')}</td>
+		<td>${_('commit message')}</td>
+		<td>${_('branch')}</td>
+		<td>${_('tags')}</td>
+		<td>${_('links')}</td>
+		
+	</tr>
 %for cnt,cs in enumerate(c.repo_changesets):
 	<tr class="parity${cnt%2}">
 		<td>${cs._ctx.date()|n,filters.age}</td>
@@ -16,10 +26,14 @@ from pylons_app.lib import filters
 		<td>
 				<span class="logtags">
 					<span class="branchtag">${cs.branch}</span>
-					%for tag in cs.tags:
-						<span class="tagtag">${tag}</span>
-					%endfor
 				</span>
+		</td>
+		<td>
+			<span class="logtags">
+				%for tag in cs.tags:
+					<span class="tagtag">${tag}</span>
+				%endfor
+			</span>
 		</td>
 		<td class="nowrap">
 		${h.link_to(_('changeset'),h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id))}
