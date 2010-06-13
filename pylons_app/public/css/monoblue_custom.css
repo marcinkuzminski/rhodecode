@@ -156,6 +156,31 @@ table tr.parity1 {
 .error-message{
 	color:#CC3300;
 }
+/**** Tooltip ****/
+.yui-overlay,
+.yui-panel-container {
+    visibility:hidden;
+    position:absolute;
+    z-index: 2;
+}
+
+.yui-tt {
+    visibility:hidden;
+    position:absolute;
+    color:#666666;
+    background-color:#FFFFFF;
+    font-family:arial,helvetica,verdana,sans-serif;
+    padding:8px;
+    border:2px solid #556CB5;
+    font:100% sans-serif;
+    width:auto;
+}
+
+.yui-tt-shadow {
+    display: none;
+}
+/** end of Tooltip **/ 
+
 
 div#main {
 	padding: 5px;

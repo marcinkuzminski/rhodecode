@@ -9,11 +9,12 @@ from pylons import url, app_globals as g
 from pylons.i18n.translation import _, ungettext
 from vcs.utils.annotate import annotate_highlight
 from webhelpers.html import literal, HTML, escape
+from webhelpers.html.tools import *
 from webhelpers.html.builder import make_tag
 from webhelpers.html.tags import auto_discovery_link, checkbox, css_classes, \
     end_form, file, form, hidden, image, javascript_link, link_to, link_to_if, \
     link_to_unless, ol, required_legend, select, stylesheet_link, submit, text, \
-    password, textarea, title, ul, xml_declaration
+    password, textarea, title, ul, xml_declaration, radio
 from webhelpers.html.tools import auto_link, button_to, highlight, js_obfuscate, \
     mail_to, strip_links, strip_tags, tag_re
 from webhelpers.number import format_byte_size, format_bit_size
@@ -21,10 +22,10 @@ from webhelpers.pylonslib import Flash as _Flash
 from webhelpers.pylonslib.secure_form import secure_form
 from webhelpers.text import chop_at, collapse, convert_accented_entities, \
     convert_misc_entities, lchop, plural, rchop, remove_formatting, \
-    replace_whitespace, urlify, truncate
+    replace_whitespace, urlify, truncate, wrap_paragraphs
 
 
-#Custom helper here :)
+#Custom helpers here :)
 class _Link(object):
     '''
     Make a url based on label and url with help of url_for
@@ -38,6 +39,7 @@ class _Link(object):
         link_fn = link_to(label, url(*url_, **urlargs))
         return link_fn
 
+link = _Link()
 
 class _GetError(object):
 
@@ -46,17 +48,103 @@ class _GetError(object):
         if form_errors and form_errors.has_key(field_name):
             return literal(tmpl % form_errors.get(field_name))
 
+get_error = _GetError()
+
+def recursive_replace(str, replace=' '):
+    """
+    Recursive replace of given sign to just one instance
+    @param str: given string
+    @param replace:char to find and replace multiple instances
+        
+    Examples::
+    >>> recursive_replace("Mighty---Mighty-Bo--sstones",'-')
+    'Mighty-Mighty-Bo-sstones'
+    """
+
+    if str.find(replace * 2) == -1:
+        return str
+    else:
+        str = str.replace(replace * 2, replace)
+        return recursive_replace(str, replace)  
+
+class _ToolTip(object):
+    
+    def __call__(self, tooltip_title, trim_at=50):
+        """
+        Special function just to wrap our text into nice formatted autowrapped
+        text
+        @param tooltip_title:
+        """
+        
+        return literal(wrap_paragraphs(tooltip_title, trim_at)\
+                       .replace('\n', '<br/>')) 
+    
+    def activate(self):
+        """
+        Adds tooltip mechanism to the given Html all tooltips have to have 
+        set class tooltip and set attribute tooltip_title.
+        Then a tooltip will be generated based on that
+        All with yui js tooltip
+        """
+        
+        js = '''
+        YAHOO.util.Event.onDOMReady(function(){
+            function toolTipsId(){
+                var ids = [];
+                var tts = YAHOO.util.Dom.getElementsByClassName('tooltip');
+                
+                for (var i = 0; i < tts.length; i++) {
+                    //if element doesn not have and id autgenerate one for tooltip
+                    
+                    if (!tts[i].id){
+                        tts[i].id='tt'+i*100;
+                    }
+                    ids.push(tts[i].id);
+                }
+                return ids        
+            };
+            var myToolTips = new YAHOO.widget.Tooltip("tooltip", { 
+                context: toolTipsId(),
+                monitorresize:false,
+                xyoffset :[0,0],
+                autodismissdelay:300000,
+                hidedelay:5,
+                showdelay:20,
+            });
+            
+            //Mouse subscribe optional arguments
+            myToolTips.contextMouseOverEvent.subscribe(
+                function(type, args) {
+                    var context = args[0];
+                    return true;
+                });
+            
+            // Set the text for the tooltip just before we display it. Lazy method
+            myToolTips.contextTriggerEvent.subscribe( 
+                 function(type, args) { 
+                        var context = args[0]; 
+                        var txt = context.getAttribute('tooltip_title');
+                        this.cfg.setProperty("text", txt);                     
+                  });
+        });
+        '''         
+        return literal(js)
+
+tooltip = _ToolTip()
+
 class _FilesBreadCrumbs(object):
     
     def __call__(self, repo_name, rev, paths):
         url_l = [link_to(repo_name, url('files_home', repo_name=repo_name, revision=rev, f_path=''))]
-        paths_l = paths.split('/')
+        paths_l = paths.split(' / ')
         
         for cnt, p in enumerate(paths_l, 1):
             if p != '':
-                url_l.append(link_to(p, url('files_home', repo_name=repo_name, revision=rev, f_path='/'.join(paths_l[:cnt]))))
+                url_l.append(link_to(p, url('files_home', repo_name=repo_name, revision=rev, f_path=' / '.join(paths_l[:cnt]))))
 
         return literal(' / '.join(url_l))
+
+files_breadcrumbs = _FilesBreadCrumbs()
 
 def pygmentize(filenode, **kwargs):
     """
@@ -81,32 +169,28 @@ def pygmentize_annotation(filenode, **kwargs):
         else:
             color_dict[cs] = gen_color()
             col = color_dict[cs]
-        return "color: rgb(%s) ! important;" % (','.join(col))
+        return "color: rgb(%s) ! important;" % (', '.join(col))
         
     def url_func(changeset):
-        return '%s\n' % (link_to('r%s:%s' % (changeset.revision, changeset.raw_id),
-        url('changeset_home', repo_name='test', revision=changeset.raw_id),
-        title=_('author') + ':%s - %s' % (changeset.author, changeset.message,),
-        style=get_color_string(changeset.raw_id)))
-           
-    return literal(annotate_highlight(filenode, url_func, **kwargs))
-
-def recursive_replace(str, replace=' '):
-    """
-    Recursive replace of given sign to just one instance
-    @param str: given string
-    @param replace:char to find and replace multiple instances
+        tooltip_html = "<div style='font-size:0.8em'><b>Author:</b> %s<br/><b>Date:</b> %s</b><br/><b>Message:</b> %s<br/></div>" 
         
-    Examples::
-    >>> recursive_replace("Mighty---Mighty-Bo--sstones",'-')
-    'Mighty-Mighty-Bo-sstones'
-    """
-
-    if str.find(replace * 2) == -1:
-        return str
-    else:
-        str = str.replace(replace * 2, replace)
-        return recursive_replace(str, replace)  
+        tooltip_html = tooltip_html % (changeset.author,
+                                               changeset.date,
+                                               tooltip(changeset.message))
+        lnk_format = 'r%s:%s' % (changeset.revision,
+                                 changeset.raw_id)
+        uri = link_to(
+                lnk_format,
+                url('changeset_home', repo_name='test',
+                    revision=changeset.raw_id),
+                style=get_color_string(changeset.raw_id),
+                class_='tooltip',
+                tooltip_title=tooltip_html
+              )
+        
+        uri += '\n'
+        return uri   
+    return literal(annotate_highlight(filenode, url_func, **kwargs))
       
 def repo_name_slug(value):
     """
@@ -117,8 +201,5 @@ def repo_name_slug(value):
         slug = slug.replace(c, '-')
     slug = recursive_replace(slug, '-')
     return slug
-    
-files_breadcrumbs = _FilesBreadCrumbs()
-link = _Link()
+
 flash = _Flash()
-get_error = _GetError()

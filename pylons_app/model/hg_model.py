@@ -148,6 +148,7 @@ class HgModel(object):
             tmp_d['contact'] = repo.contact
             tmp_d['contact_sort'] = tmp_d['contact']
             tmp_d['repo_archives'] = list(repo._get_archives())
+            tmp_d['last_msg'] = tip.message
             
             yield tmp_d
 

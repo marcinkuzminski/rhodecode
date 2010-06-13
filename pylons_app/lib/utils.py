@@ -143,7 +143,8 @@ from vcs.utils.lazy import LazyProperty
 class EmptyChangeset(BaseChangeset):
     
     revision = -1
-
+    message = ''
+    
     @LazyProperty
     def raw_id(self):
         """

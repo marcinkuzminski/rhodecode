@@ -28,6 +28,7 @@
     </div>        
     <div id="main"> 
     	${next.main()}
+    	<script>${h.tooltip.activate()}</script>    	
     </div>
     <div class="page-footer">
         Hg App ${c.hg_app_version} &copy; 2010 by Marcin Kuzminski
@@ -140,6 +141,7 @@ def is_current(selected):
 
 <%def name="js()">
 <script type="text/javascript" src="/js/yui/utilities/utilities.js"></script>
+<script type="text/javascript" src="/js/yui/container/container-min.js"></script>
 </%def>
 
 <!-- DEFINITION OF FORM ERROR FETCHER -->

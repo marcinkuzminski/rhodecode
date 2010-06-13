@@ -35,10 +35,14 @@ from pylons_app.lib import filters
 	  </tr>	
 	%for cnt,repo in enumerate(c.repos_list):
  		<tr class="parity${cnt%2}">
-		    <td>${h.link(repo['name'],h.url('summary_home',repo_name=repo['name']))}</td>
+		    <td>${h.link_to(repo['name'],
+		    	h.url('summary_home',repo_name=repo['name']))}</td>
 		    <td title="${repo['description']}">${h.truncate(repo['description'],60)}</td>
 	        <td>${repo['last_change']|n,filters.age}</td>
-	        <td>${h.link_to('r%s:%s' % (repo['rev'],repo['tip']),h.url('changeset_home',repo_name=repo['name'],revision=repo['tip']))}</td>
+	        <td>${h.link_to('r%s:%s' % (repo['rev'],repo['tip']),
+		        h.url('changeset_home',repo_name=repo['name'],revision=repo['tip']),
+	        	class_="tooltip",
+		    	tooltip_title=h.tooltip(repo['last_msg']))}</td>
 	        <td title="${repo['contact']}">${repo['contact']|n,filters.person}</td>
 			<td>
 				<a title="${_('Subscribe to %s rss feed')%repo['name']}" class="rss_logo"  href="${h.url('rss_feed_home',repo_name=repo['name'])}"></a>
