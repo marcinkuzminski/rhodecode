@@ -26,7 +26,7 @@
 				<div class="date">${_('Date')}: ${c.changeset.date}</div>
 				<div class="author">${_('Author')}: ${c.changeset.author}</div>
 				<div class="message">
-					${c.changeset.message}
+					${h.wrap_paragraphs(c.changeset.message)}
 				</div>
 			</div>	
 			<div class="right">

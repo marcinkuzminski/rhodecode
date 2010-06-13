@@ -36,7 +36,7 @@
 		    	h.url('summary_home',repo_name=repo['name']))}</td>
 		    <td title="${repo['description']}">${h.truncate(repo['description'],60)}</td>
 	        <td>${h.age(repo['last_change'])}</td>
-	        <td>${h.link_to('r%s:%s' % (repo['rev'],repo['tip']),
+	        <td>${h.link_to_if(repo['rev']>=0,'r%s:%s' % (repo['rev'],repo['tip']),
 		        h.url('changeset_home',repo_name=repo['name'],revision=repo['tip']),
 	        	class_="tooltip",
 		    	tooltip_title=h.tooltip(repo['last_msg']))}</td>
