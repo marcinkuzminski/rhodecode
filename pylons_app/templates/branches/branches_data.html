@@ -1,0 +1,30 @@
+% if c.repo_branches:
+    <table class="table_disp">
+    	<tr class="header">
+			<td>${_('date')}</td>
+			<td>${_('revision')}</td>
+			<td>${_('name')}</td>
+			<td>${_('links')}</td>
+    	</tr>
+		%for cnt,branch in enumerate(c.repo_branches.items()):
+		<tr class="parity${cnt%2}">
+			<td>${h.age(branch[1]._ctx.date())}</td>
+			<td>r${branch[1].revision}:${branch[1].raw_id}</td>
+			<td>
+				<span class="logtags">
+					<span class="branchtag">${h.link_to(branch[0],
+					h.url('changeset_home',repo_name=c.repo_name,revision=branch[1].raw_id))}</span>
+				</span>			
+			</td>
+			<td class="nowrap">
+			${h.link_to(_('changeset'),h.url('changeset_home',repo_name=c.repo_name,revision=branch[1].raw_id))}
+			|
+			${h.link_to(_('files'),h.url('files_home',repo_name=c.repo_name,revision=branch[1].raw_id))}
+			</td>
+		</tr>	
+		%endfor
+    </table>
+%else:
+	${_('There are no branches yet')}
+%endif
+

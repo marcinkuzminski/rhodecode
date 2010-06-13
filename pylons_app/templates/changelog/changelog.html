@@ -1,6 +1,3 @@
-<%!
-from pylons_app.lib import filters
-%>
 <%inherit file="/base/base.html"/>
 
 <%def name="title()">
@@ -19,8 +16,12 @@ from pylons_app.lib import filters
 
 <%def name="main()">
 
-    <h2 class="no-link no-border">${_('Changelog')} - ${_('showing last ')} ${c.size} ${_('revisions')}</h2>
+    <h2 class="no-link no-border">${_('Changelog')} - ${_('showing ')} 
+    	${c.size if c.size <= c.total_cs else c.total_cs}
+    	${_('out of')} ${c.total_cs} ${_('revisions')}
+    </h2>
 	<noscript>${_('The revision graph only works with JavaScript-enabled browsers.')}</noscript>
+% if c.pagination:
 
 <div id="graph">
 	##<div id="graph_nodes" style="height:1000px">
@@ -89,4 +90,7 @@ from pylons_app.lib import filters
 <div>
 	<h2>${c.pagination.pager('$link_previous ~2~ $link_next')}</h2>
 </div>	
+%else:
+	${_('There are no changes yet')}
+%endif
 </%def>    

@@ -1,7 +1,4 @@
 <%inherit file="/base/base.html"/>
-<%!
-from pylons_app.lib import filters
-%>
 <%def name="title()">
     ${_('Tags')}
 </%def>
@@ -18,30 +15,6 @@ from pylons_app.lib import filters
 <%def name="main()">
 
     <h2 class="no-link no-border">${_('Tags')}</h2>
-    <table class="table_disp">
-    	<tr class="header">
-			<td>${_('date')}</td>
-			<td>${_('revision')}</td>
-			<td>${_('name')}</td>
-			<td>${_('links')}</td>
-    	</tr>
-		%for cnt,tag in enumerate(c.repo_tags.items()):
-		<tr class="parity${cnt%2}">
-			<td>${tag[1]._ctx.date()|n,filters.age}</td>
-			<td>r${tag[1].revision}:${tag[1].raw_id}</td>
-			<td>
-				<span class="logtags">
-					<span class="tagtag">${h.link_to(tag[0],
-					h.url('changeset_home',repo_name=c.repo_name,revision=tag[1].raw_id))}</span>
-				</span>
-			</td>
-			<td class="nowrap">
-			${h.link_to(_('changeset'),h.url('changeset_home',repo_name=c.repo_name,revision=tag[1].raw_id))}
-			|
-			${h.link_to(_('files'),h.url('files_home',repo_name=c.repo_name,revision=tag[1].raw_id))}
-			</td>
-		</tr>	
-		%endfor
-    </table>
+	<%include file='tags_data.html'/>
 
 </%def>    

@@ -1,7 +1,6 @@
 ## -*- coding: utf-8 -*-
-<%!
-from pylons_app.lib import filters
-%>
+% if c.repo_changesets:
+
 <table class="table_disp">
 	<tr class="header">
 		<td>${_('date')}</td>
@@ -15,8 +14,8 @@ from pylons_app.lib import filters
 	</tr>
 %for cnt,cs in enumerate(c.repo_changesets):
 	<tr class="parity${cnt%2}">
-		<td>${cs._ctx.date()|n,filters.age}</td>
-		<td title="${cs.author}">${cs.author|n,filters.person}</td>
+		<td>${h.age(cs._ctx.date())}</td>
+		<td title="${cs.author}">${h.person(cs.author)}</td>
 		<td>r${cs.revision}:${cs.raw_id}</td>
 		<td>
 			${h.link_to(h.truncate(cs.message,60),
@@ -60,3 +59,6 @@ from pylons_app.lib import filters
 		YAHOO.util.Dom.setStyle(data_div,'opacity','1');}},null); return false;""")}
 		</h2>
 	</div>	
+%else:
+	${_('There are no commits yet')}
+%endif

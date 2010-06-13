@@ -25,9 +25,9 @@ graph controller for pylons
 from mercurial.graphmod import revisions as graph_rev, colored, CHANGESET
 from mercurial.node import short
 from pylons import request, tmpl_context as c
+import pylons_app.lib.helpers as h
 from pylons_app.lib.auth import LoginRequired
 from pylons_app.lib.base import BaseController, render
-from pylons_app.lib.filters import age as _age, person
 from pylons_app.model.hg_model import HgModel
 from simplejson import dumps
 from webhelpers.paginate import Page
@@ -74,9 +74,9 @@ class GraphController(BaseController):
             if type != CHANGESET:
                 continue
             node = short(ctx.node())
-            age = _age(ctx.date())
+            age = h.age(ctx.date())
             desc = ctx.description()
-            user = person(ctx.user())
+            user = h.person(ctx.user())
             branch = ctx.branch()
             branch = branch, repo.repo.branchtags().get(branch) == ctx.node()
             data.append((node, vtx, edges, desc, user, age, branch, ctx.tags()))

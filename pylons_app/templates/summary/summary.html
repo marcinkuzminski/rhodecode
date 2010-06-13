@@ -1,7 +1,4 @@
 <%inherit file="/base/base.html"/>
-<%!
-from pylons_app.lib import filters
-%>
 <%def name="title()">
     ${_('Repository managment')}
 </%def>
@@ -41,7 +38,7 @@ E.onDOMReady(function(e){
         <dt>${_('contact')}</dt>
         <dd>${c.repo_info.contact}</dd>
         <dt>${_('last change')}</dt>
-        <dd>${c.repo_info.last_change|n,filters.age} - ${c.repo_info.last_change|n,filters.rfc822date}</dd>
+        <dd>${h.age(c.repo_info.last_change)} - ${h.rfc822date(c.repo_info.last_change)}</dd>
         <dt>${_('clone url')}</dt>
         <dd><input type="text" id="clone_url"  readonly="readonly" value="hg clone ${c.clone_repo_url}" size="70"/></dd>
         <dt>${_('download')}</dt>
@@ -63,100 +60,12 @@ E.onDOMReady(function(e){
     </dl>
 
     <h2>${h.link_to(_('Last ten changes'),h.url('changelog_home',repo_name=c.repo_name))}</h2>
-<table class="table_disp">
-	<tr class="header">
-		<td>${_('date')}</td>
-		<td>${_('author')}</td>
-		<td>${_('revision')}</td>
-		<td>${_('commit message')}</td>
-		<td>${_('branch')}</td>
-		<td>${_('tags')}</td>
-		<td>${_('links')}</td>
-		
-	</tr>
-	%for cnt,cs in enumerate(c.repo_changesets):
-		<tr class="parity${cnt%2}">
-			<td>${cs._ctx.date()|n,filters.age}</td>
-			<td>${cs.author|n,filters.person}</td>
-			<td>r${cs.revision}:${cs.raw_id}</td>
-			<td>
-				${h.link_to(h.truncate(cs.message,60),
-				h.url('changeset_home',repo_name=c.repo_name,revision=cs._short),
-				title=cs.message)}
-			</td>
-			<td>
-				<span class="logtags">
-					<span class="branchtag">${cs.branch}</span>
-				</span>
-			</td>
-			<td>
-				<span class="logtags">
-					%for tag in cs.tags:
-						<span class="tagtag">${tag}</span>
-					%endfor
-				</span>
-			</td>
-			<td class="nowrap">
-			${h.link_to(_('changeset'),h.url('changeset_home',repo_name=c.repo_name,revision=cs._short))}
-			|
-			${h.link_to(_('files'),h.url('files_home',repo_name=c.repo_name,revision=cs._short))}
-			</td>
-		</tr>
-	%endfor
-    </table>
+	<%include file='../shortlog/shortlog_data.html'/>
 
     <h2>${h.link_to(_('Last ten tags'),h.url('tags_home',repo_name=c.repo_name))}</h2>
-    <table class="table_disp">
-    	<tr class="header">
-			<td>${_('date')}</td>
-			<td>${_('revision')}</td>
-			<td>${_('name')}</td>
-			<td>${_('links')}</td>
-    	</tr>
-		%for cnt,tag in enumerate(c.repo_tags.items()):
-		<tr class="parity${cnt%2}">
-			<td>${tag[1]._ctx.date()|n,filters.age}</td>
-			<td>r${tag[1].revision}:${tag[1].raw_id}</td>
-			<td>
-				<span class="logtags">
-					<span class="tagtag">${h.link_to(tag[0],
-					h.url('changeset_home',repo_name=c.repo_name,revision=tag[1].raw_id))}</span>
-				</span>
-			</td>
-			<td class="nowrap">
-			${h.link_to(_('changeset'),h.url('changeset_home',repo_name=c.repo_name,revision=tag[1].raw_id))}
-			|
-			${h.link_to(_('files'),h.url('files_home',repo_name=c.repo_name,revision=tag[1].raw_id))}
-			</td>
-		</tr>	
-		%endfor
-    </table>
-
+	<%include file='../tags/tags_data.html'/>
+    
     <h2>${h.link_to(_('Last ten branches'),h.url('branches_home',repo_name=c.repo_name))}</h2>
-    <table class="table_disp">
-    	<tr class="header">
-			<td>${_('date')}</td>
-			<td>${_('revision')}</td>
-			<td>${_('name')}</td>
-			<td>${_('links')}</td>
-    	</tr>
-		%for cnt,branch in enumerate(c.repo_branches.items()):
-		<tr class="parity${cnt%2}">
-			<td>${branch[1]._ctx.date()|n,filters.age}</td>
-			<td>r${branch[1].revision}:${branch[1].raw_id}</td>
-			<td>
-				<span class="logtags">
-					<span class="branchtag">${h.link_to(branch[0],
-					h.url('changeset_home',repo_name=c.repo_name,revision=branch[1].raw_id))}</span>
-				</span>			
-			</td>
-			<td class="nowrap">
-			${h.link_to(_('changeset'),h.url('changeset_home',repo_name=c.repo_name,revision=branch[1].raw_id))}
-			|
-			${h.link_to(_('files'),h.url('files_home',repo_name=c.repo_name,revision=branch[1].raw_id))}
-			</td>
-		</tr>	
-		%endfor
-    </table>
+	<%include file='../branches/branches_data.html'/>
 
 </%def>    

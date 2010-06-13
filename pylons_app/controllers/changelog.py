@@ -49,12 +49,13 @@ class ChangelogController(BaseController):
             session['changelog_size'] = c.size
             session.save()
         else:
-            c.size = session.get('changelog_size', default)
+            c.size = int(session.get('changelog_size', default))
 
         changesets = HgModel().get_repo(c.repo_name)
             
         p = int(request.params.get('page', 1))
-        c.pagination = Page(changesets, page=p, item_count=len(changesets),
+        c.total_cs = len(changesets)
+        c.pagination = Page(changesets, page=p, item_count=c.total_cs,
                             items_per_page=c.size)
             
         #self._graph(c.repo, c.size,p)

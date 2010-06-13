@@ -1,0 +1,29 @@
+%if c.repo_tags:    
+    <table class="table_disp">
+    	<tr class="header">
+			<td>${_('date')}</td>
+			<td>${_('revision')}</td>
+			<td>${_('name')}</td>
+			<td>${_('links')}</td>
+    	</tr>
+		%for cnt,tag in enumerate(c.repo_tags.items()):
+		<tr class="parity${cnt%2}">
+			<td>${h.age(tag[1]._ctx.date())}</td>
+			<td>r${tag[1].revision}:${tag[1].raw_id}</td>
+			<td>
+				<span class="logtags">
+					<span class="tagtag">${h.link_to(tag[0],
+					h.url('changeset_home',repo_name=c.repo_name,revision=tag[1].raw_id))}</span>
+				</span>
+			</td>
+			<td class="nowrap">
+			${h.link_to(_('changeset'),h.url('changeset_home',repo_name=c.repo_name,revision=tag[1].raw_id))}
+			|
+			${h.link_to(_('files'),h.url('files_home',repo_name=c.repo_name,revision=tag[1].raw_id))}
+			</td>
+		</tr>	
+		%endfor
+    </table>
+%else:
+	${_('There are no tags yet')}
+%endif    

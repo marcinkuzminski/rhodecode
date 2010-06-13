@@ -25,7 +25,8 @@ summary controller for pylons
 from pylons import tmpl_context as c, request
 from pylons_app.lib.auth import LoginRequired
 from pylons_app.lib.base import BaseController, render
-from pylons_app.model.hg_model import HgModel, _full_changelog_cached
+from pylons_app.model.hg_model import HgModel
+from webhelpers.paginate import Page
 import logging
 
 log = logging.getLogger(__name__)
@@ -39,7 +40,7 @@ class SummaryController(BaseController):
     def index(self):
         hg_model = HgModel()
         c.repo_info = hg_model.get_repo(c.repo_name)
-        c.repo_changesets = _full_changelog_cached(c.repo_name)[:10]
+        c.repo_changesets = Page(list(c.repo_info[:10]), page=1, items_per_page=20)
         e = request.environ
         uri = u'%(protocol)s://%(user)s@%(host)s/%(repo_name)s' % {
                                         'protocol': e.get('wsgi.url_scheme'),
