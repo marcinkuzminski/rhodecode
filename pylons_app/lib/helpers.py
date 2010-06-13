@@ -84,10 +84,9 @@ def pygmentize_annotation(filenode, **kwargs):
         return "color: rgb(%s) ! important;" % (','.join(col))
         
     def url_func(changeset):
-        return '%s\n' % (link_to(changeset.raw_id,
+        return '%s\n' % (link_to('r%s:%s' % (changeset.revision, changeset.raw_id),
         url('changeset_home', repo_name='test', revision=changeset.raw_id),
-        title=_('author') + ':%s rev:%s %s' % (changeset.author, changeset.revision,
-                                                changeset.message,),
+        title=_('author') + ':%s - %s' % (changeset.author, changeset.message,),
         style=get_color_string(changeset.raw_id)))
            
     return literal(annotate_highlight(filenode, url_func, **kwargs))

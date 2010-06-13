@@ -27,9 +27,11 @@
 			<dt>${_('Size')}</dt>
 			<dd>${h.format_byte_size(c.file.size,binary=True)}</dd>
 			<dt>${_('Options')}</dt>
-			<dd>${h.link_to(_('source'),
-			h.url('files_home',repo_name=c.repo_name,revision=c.cur_rev,f_path=c.f_path))}  / ${h.link_to(_('raw'),
-			h.url('files_raw_home',repo_name=c.repo_name,revision=c.cur_rev,f_path=c.f_path))}</dd>				
+			<dd>${h.link_to(_('show source'),
+					h.url('files_home',repo_name=c.repo_name,revision=c.cur_rev,f_path=c.f_path))}  
+				/ ${h.link_to(_('download as raw'),
+					h.url('files_raw_home',repo_name=c.repo_name,revision=c.cur_rev,f_path=c.f_path))}
+			</dd>				
 		</dl>
 		<div id="body" class="codeblock">
 			<div class="code-header">
