@@ -3,16 +3,13 @@
 # changelog controller for pylons
 # Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
 from json import dumps
-from mercurial.graphmod import colored, CHANGESET
-from mercurial.node import short
-from mercurial.templatefilters import person
+from mercurial.graphmod import colored, CHANGESET, revisions as graph_rev
 from pylons import request, session, tmpl_context as c
 from pylons_app.lib.auth import LoginRequired
 from pylons_app.lib.base import BaseController, render
 from pylons_app.model.hg_model import HgModel
 from webhelpers.paginate import Page
 import logging
-from mercurial.graphmod import revisions as graph_rev
  
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -85,13 +82,7 @@ class ChangelogController(BaseController):
         for (id, type, ctx, vtx, edges) in tree:
             if type != CHANGESET:
                 continue
-            node = short(ctx.node())
-            age = ctx.date()
-            desc = ctx.description()
-            user = person(ctx.user())
-            branch = ctx.branch()
-            branch = branch, repo.repo.branchtags().get(branch) == ctx.node()
-            data.append((node, vtx, edges, desc, user, age, branch, ctx.tags()))
+            data.append(('', vtx, edges))
     
         c.jsdata = dumps(data) 
 
