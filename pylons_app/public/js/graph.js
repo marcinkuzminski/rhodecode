@@ -105,7 +105,8 @@ function BranchRenderer() {
 				this.ctx.beginPath();
 				this.ctx.moveTo(x, y);
 				
-				y += row.clientHeight;
+				//i don't know why it's +1 just fixes some drawing graph.
+				y += row.clientHeight+1;
 				x = pad-((1 + this.box_size * end) + this.bg_height-2);
 				this.ctx.lineTo(x,y+extra);
 				this.ctx.stroke();

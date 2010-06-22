@@ -30,8 +30,12 @@
 	<div id="graph_content">
 		<div class="container_header">
 			${h.form(h.url.current(),method='get')}
-				${_('Show')}: ${h.text('size',size=2,value=c.size)} ${_('revisions')}
-				${h.submit('','set')}
+			<div>
+				<span>${_('Show')}: </span>
+				<span>${h.text('size',size=2,value=c.size)}</span>
+				<span>${_('revisions')}</span>
+				${h.submit('set',_('set'))}
+			</div>
 			${h.end_form()}
 		</div>
 	%for cnt,cs in enumerate(c.pagination):
@@ -39,7 +43,7 @@
 			<div class="left">
 				<div class="date">${_('commit')} ${cs.revision}: ${cs.raw_id}@${cs.date}</div>
 				<div class="author">${cs.author}</div>
-				<div id="chg_${cnt}" class="message">
+				<div class="message">
 					${h.link_to(h.wrap_paragraphs(cs.message),
 					h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id))}
 				</div>
@@ -58,7 +62,7 @@
 						</div>					
 							%if len(cs.parents)>1:
 							<div class="merge">
-								${_('merge')}<img alt="merge" src="/images/icons/arrow_join.png">
+								${_('merge')}<img alt="merge" src="/images/icons/arrow_join.png"/>
 							</div>
 							%endif						
 						%for p_cs in reversed(cs.parents):
