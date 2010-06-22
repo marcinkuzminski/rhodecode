@@ -170,12 +170,17 @@ tooltip = _ToolTip()
 class _FilesBreadCrumbs(object):
     
     def __call__(self, repo_name, rev, paths):
-        url_l = [link_to(repo_name, url('files_home', repo_name=repo_name, revision=rev, f_path=''))]
-        paths_l = paths.split(' / ')
+        url_l = [link_to(repo_name, url('files_home',
+                                        repo_name=repo_name,
+                                        revision=rev, f_path=''))]
+        paths_l = paths.split('/')
         
         for cnt, p in enumerate(paths_l, 1):
             if p != '':
-                url_l.append(link_to(p, url('files_home', repo_name=repo_name, revision=rev, f_path=' / '.join(paths_l[:cnt]))))
+                url_l.append(link_to(p, url('files_home',
+                                            repo_name=repo_name,
+                                            revision=rev,
+                                            f_path='/'.join(paths_l[:cnt]))))
 
         return literal(' / '.join(url_l))
 
