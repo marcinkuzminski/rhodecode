@@ -24,9 +24,9 @@
 % if c.pagination:
 
 <div id="graph">
-	##<div id="graph_nodes" style="height:1000px">
-	##	<canvas id="graph" width="160"></canvas>
-	##</div>
+	<div id="graph_nodes">
+		<canvas id="graph_canvas"></canvas>
+	</div>
 	<div id="graph_content">
 		<div class="container_header">
 			${h.form(h.url.current(),method='get')}
@@ -35,7 +35,7 @@
 			${h.end_form()}
 		</div>
 	%for cnt,cs in enumerate(c.pagination):
-		<div class="container">
+		<div id="chg_${cnt+1}" class="container">
 			<div class="left">
 				<div class="date">${_('commit')} ${cs.revision}: ${cs.raw_id}@${cs.date}</div>
 				<div class="author">${cs.author}</div>
@@ -72,19 +72,28 @@
 	%endfor
 	</div>
 </div>
+<script type="text/javascript" src="/js/graph.js"></script>
 
-##<script type="text/javascript" src="/js/graph2.js"></script>
-##<script type="text/javascript" src="http://bitbucket-assets.s3.amazonaws.com/js/lib/bundle.160310Mar.js"></script>
-##
-##<script>
-##<!-- hide script content
-##
-##var jsdata = ${c.jsdata|n};
-##var r = new BranchRenderer();
-##r.render(jsdata); 
+<script type="text/javascript">
+YAHOO.util.Event.onDOMReady(function(){
+	function set_canvas() {
+		var c = document.getElementById('graph_nodes');
+		var t = document.getElementById('graph_content');
+		canvas = document.getElementById('graph_canvas');
+		var div_h = t.clientHeight;
+		c.style.height=div_h+'px';
+		canvas.setAttribute('height',div_h);
+		canvas.setAttribute('width',160);
+	};
 
-##// stop hiding script -->
-##</script>
+	set_canvas();
+	
+	var jsdata = ${c.jsdata|n};
+	var r = new BranchRenderer();
+	r.render(jsdata); 
+
+});
+</script>
 
 <div>
 	<h2>${c.pagination.pager('$link_previous ~2~ $link_next')}</h2>

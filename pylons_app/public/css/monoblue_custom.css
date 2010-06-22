@@ -645,10 +645,8 @@ p.files {
 /** end of changeset **/ 
 
 /** canvas **/
-canvas {
-	position: absolute;
-	z-index: 5;
-	top: -0.7em;
+#graph_nodes{
+	margin-top:8px;
 }
 #graph{
 	overflow: hidden;

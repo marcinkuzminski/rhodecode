@@ -2,6 +2,17 @@
 # encoding: utf-8
 # changelog controller for pylons
 # Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
+from json import dumps
+from mercurial.graphmod import colored, CHANGESET
+from mercurial.node import short
+from mercurial.templatefilters import person
+from pylons import request, session, tmpl_context as c
+from pylons_app.lib.auth import LoginRequired
+from pylons_app.lib.base import BaseController, render
+from pylons_app.model.hg_model import HgModel
+from webhelpers.paginate import Page
+import logging
+from mercurial.graphmod import revisions as graph_rev
  
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -22,12 +33,6 @@ Created on April 21, 2010
 changelog controller for pylons
 @author: marcink
 """
-from pylons import request, session, tmpl_context as c
-from pylons_app.lib.auth import LoginRequired
-from pylons_app.lib.base import BaseController, render
-from pylons_app.model.hg_model import HgModel
-from webhelpers.paginate import Page
-import logging
 log = logging.getLogger(__name__)     
 
 class ChangelogController(BaseController):
@@ -58,39 +63,35 @@ class ChangelogController(BaseController):
         c.pagination = Page(changesets, page=p, item_count=c.total_cs,
                             items_per_page=c.size)
             
-        #self._graph(c.repo, c.size,p)
+        self._graph(changesets, c.size, p)
         
         return render('changelog/changelog.html')
 
 
     def _graph(self, repo, size, p):
-        pass
-#        revcount = size
-#        if not repo.revisions:return dumps([]), 0
-#        
-#        max_rev = repo.revisions[-1]
-#        offset = 1 if p == 1 else  ((p - 1) * revcount)
-#        rev_start = repo.revisions[(-1 * offset)]
-#        c.bg_height = 120
-#        
-#        revcount = min(max_rev, revcount)
-#        rev_end = max(0, rev_start - revcount)
-#        dag = graph_rev(repo.repo, rev_start, rev_end)
-#        
-#        c.dag = tree = list(colored(dag))
-#        canvasheight = (len(tree) + 1) * c.bg_height - 27
-#        data = []
-#        for (id, type, ctx, vtx, edges) in tree:
-#            if type != CHANGESET:
-#                continue
-#            node = short(ctx.node())
-#            age = _age(ctx.date())
-#            desc = ctx.description()
-#            user = person(ctx.user())
-#            branch = ctx.branch()
-#            branch = branch, repo.repo.branchtags().get(branch) == ctx.node()
-#            data.append((node, vtx, edges, desc, user, age, branch, ctx.tags()))
-#    
-#        c.jsdata = dumps(data) 
-#        c.canvasheight = canvasheight 
+        revcount = size
+        if not repo.revisions:return dumps([]), 0
+        
+        max_rev = repo.revisions[-1]
+        offset = 1 if p == 1 else  ((p - 1) * revcount)
+        rev_start = repo.revisions[(-1 * offset)]
+        
+        revcount = min(max_rev, revcount)
+        rev_end = max(0, rev_start - revcount)
+        dag = graph_rev(repo.repo, rev_start, rev_end)
+        
+        c.dag = tree = list(colored(dag))
+        data = []
+        for (id, type, ctx, vtx, edges) in tree:
+            if type != CHANGESET:
+                continue
+            node = short(ctx.node())
+            age = ctx.date()
+            desc = ctx.description()
+            user = person(ctx.user())
+            branch = ctx.branch()
+            branch = branch, repo.repo.branchtags().get(branch) == ctx.node()
+            data.append((node, vtx, edges, desc, user, age, branch, ctx.tags()))
+    
+        c.jsdata = dumps(data) 
 
