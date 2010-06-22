@@ -10,8 +10,11 @@ Fully customizable, with authentication, permissions. Based on vcs library.
   be logged and authenticated + threaded performance unlikely to hgweb
 - mako templates let's you cusmotize look and feel of appplication.
 - diffs annotations and source code all colored by pygments.
+- mercurial branch graph
 - admin interface for performing user/permission managments as well as repository
   managment
+- setup project descriptions and info inside built in db for easy, non 
+  file-system operations
 - added cache with invalidation on push/repo managment for high performance and
   always upto date data.
 - rss /atom feed customizable
@@ -21,7 +24,6 @@ Fully customizable, with authentication, permissions. Based on vcs library.
 **Incoming**
 
 - full permissions per project
-- setup project descriptions and info into db
 - git support (when vcs can handle it)
 
 .. note::
