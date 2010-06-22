@@ -119,6 +119,9 @@ class _ToolTip(object):
                     var context = args[0];
                     var txt = context.getAttribute('tooltip_title');
                     if(txt){
+                        this.cfg.config.x.value = 0;
+                        this.cfg.config.y.value = 0;
+                                        
                         return true;
                     }
                     else{
@@ -126,13 +129,38 @@ class _ToolTip(object):
                     }
                 });
             
+                            
             // Set the text for the tooltip just before we display it. Lazy method
             myToolTips.contextTriggerEvent.subscribe( 
                  function(type, args) { 
                         var context = args[0]; 
                         var txt = context.getAttribute('tooltip_title');
-                        this.cfg.setProperty("text", txt);                     
+                        this.cfg.setProperty("text", txt);
+                        //autocenter
+                        var w = this.element.clientWidth;
+                        var h = this.element.clientHeight;
+                        var cur_x = this.pageX - (w / 2);
+                        var cur_y = this.pageY - h - 10;
+
+                        this.cfg.setProperty("xy",[cur_x,cur_y]);
+
                   });
+            //Mouse out 
+            myToolTips.contextMouseOutEvent.subscribe(
+                function(type, args) {
+                    var context = args[0];
+                    
+                    //console.log(this.cfg.config.x.value);
+                    //console.log(this.cfg.config.y.value);
+                    //console.log(this.cfg.config.xy.value);
+                    //console.log(this.cfg.config);
+                    //this.cfg.config.xy = [0,0];
+                    //this.cfg.config.xyoffset = [0,0];
+                    
+                    
+                    
+                });
+                                  
         });
         '''         
         return literal(js)
