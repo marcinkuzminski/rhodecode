@@ -174,6 +174,7 @@ table tr.parity1 {
     border:2px solid #556CB5;
     font:100% sans-serif;
     width:auto;
+    opacity:1.0;
 }
 
 .yui-tt-shadow {

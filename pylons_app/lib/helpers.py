@@ -149,7 +149,7 @@ class _ToolTip(object):
                         var pos_y = YAHOO.util.Dom.getY(context);
 
                         var display_strategy = 'top';
-                        var xy_pos= [0,0]
+                        var xy_pos = [0,0];
                         switch (display_strategy){
                         
                             case 'top':
@@ -172,7 +172,12 @@ class _ToolTip(object):
                                 var cur_y = pos_y-((tt_h/2)-context_h/2);
                                 xy_pos = [cur_x,cur_y];                                
                                 break;
-                        
+                             default:
+                                var cur_x = (pos_x+context_w/2)-(tt_w/2);
+                                var cur_y = pos_y-tt_h-4;
+                                xy_pos = [cur_x,cur_y];                                
+                                break;                             
+                                 
                         }
 
                         this.cfg.setProperty("xy",xy_pos);
