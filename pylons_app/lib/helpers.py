@@ -118,10 +118,7 @@ class _ToolTip(object):
                 function(type, args) {
                     var context = args[0];
                     var txt = context.getAttribute('tooltip_title');
-                    if(txt){
-                        this.cfg.config.x.value = 0;
-                        this.cfg.config.y.value = 0;
-                                        
+                    if(txt){                                       
                         return true;
                     }
                     else{
@@ -133,34 +130,61 @@ class _ToolTip(object):
             // Set the text for the tooltip just before we display it. Lazy method
             myToolTips.contextTriggerEvent.subscribe( 
                  function(type, args) { 
+
+                 
                         var context = args[0]; 
+                        
                         var txt = context.getAttribute('tooltip_title');
                         this.cfg.setProperty("text", txt);
-                        //autocenter
-                        var w = this.element.clientWidth;
-                        var h = this.element.clientHeight;
-                        var cur_x = this.pageX - (w / 2);
-                        var cur_y = this.pageY - h - 10;
+                        
+                        
+                        // positioning of tooltip
+                        var tt_w = this.element.clientWidth;
+                        var tt_h = this.element.clientHeight;
+                        
+                        var context_w = context.offsetWidth;
+                        var context_h = context.offsetHeight;
+                        
+                        var pos_x = YAHOO.util.Dom.getX(context);
+                        var pos_y = YAHOO.util.Dom.getY(context);
 
-                        this.cfg.setProperty("xy",[cur_x,cur_y]);
+                        var display_strategy = 'top';
+                        var xy_pos= [0,0]
+                        switch (display_strategy){
+                        
+                            case 'top':
+                                var cur_x = (pos_x+context_w/2)-(tt_w/2);
+                                var cur_y = pos_y-tt_h-4;
+                                xy_pos = [cur_x,cur_y];                                
+                                break;
+                            case 'bottom':
+                                var cur_x = (pos_x+context_w/2)-(tt_w/2);
+                                var cur_y = pos_y+context_h+4;
+                                xy_pos = [cur_x,cur_y];                                
+                                break;
+                            case 'left':
+                                var cur_x = (pos_x-tt_w-4);
+                                var cur_y = pos_y-((tt_h/2)-context_h/2);
+                                xy_pos = [cur_x,cur_y];                                
+                                break;
+                            case 'right':
+                                var cur_x = (pos_x+context_w+4);
+                                var cur_y = pos_y-((tt_h/2)-context_h/2);
+                                xy_pos = [cur_x,cur_y];                                
+                                break;
+                        
+                        }
+
+                        this.cfg.setProperty("xy",xy_pos);
 
                   });
+                  
             //Mouse out 
             myToolTips.contextMouseOutEvent.subscribe(
                 function(type, args) {
                     var context = args[0];
                     
-                    //console.log(this.cfg.config.x.value);
-                    //console.log(this.cfg.config.y.value);
-                    //console.log(this.cfg.config.xy.value);
-                    //console.log(this.cfg.config);
-                    //this.cfg.config.xy = [0,0];
-                    //this.cfg.config.xyoffset = [0,0];
-                    
-                    
-                    
                 });
-                                  
         });
         '''         
         return literal(js)
