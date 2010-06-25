@@ -39,11 +39,71 @@
         		<td>${self.get_form_error('user')}</td>
         	</tr>
         	<tr>
+        		<td>${_('Permissions')}</td>
+        		<td>
+        			<table>
+        				<tr>
+        					<td>${_('none')}</td>
+        					<td>${_('read')}</td>
+        					<td>${_('write')}</td>
+        					<td>${_('admin')}</td>
+        					<td>${_('user')}</td>
+        				</tr>
+        				
+        				%for r2p in c.repo_info.repo2perm:
+	        				<tr>
+	        					<td>${h.radio('perm_%s' % r2p.user.username,'repository.none')}</td>
+	        					<td>${h.radio('perm_%s' % r2p.user.username,'repository.read')}</td>
+	        					<td>${h.radio('perm_%s' % r2p.user.username,'repository.write')}</td>
+	        					<td>${h.radio('perm_%s' % r2p.user.username,'repository.admin')}</td>
+	        					<td>${r2p.user.username}</td>
+	        				</tr>
+						%endfor
+
+						
+						<%
+							
+							if not hasattr(c,'form_errors'):
+								d = 'display:none;'
+							else:
+								d=''
+						%>
+
+        				<tr id="add_perm_input" style="${d}">
+        					<td>${h.radio('perm_new_user','repository.none')}</td>
+        					<td>${h.radio('perm_new_user','repository.read')}</td>
+        					<td>${h.radio('perm_new_user','repository.write')}</td>
+        					<td>${h.radio('perm_new_user','repository.admin')}</td>
+        					<td>${h.text('perm_new_user_name',size=10)}</td>
+        					<td>${self.get_form_error('perm_new_user_name')}</td>     					
+        				</tr>
+        				<tr>
+        					<td colspan="4">
+        						<span id="add_perm" class="add_icon" style="cursor: pointer;">
+        						${_('Add another user')}
+        						</span>
+        					</td>
+        				</tr>
+        			</table>
+        		</td>
+        		
+        	</tr>
+        	<tr>
         		<td></td>
         		<td>${h.submit('update','update')}</td>
         	</tr>
         	        	        	
         </table>
         ${h.end_form()}
+        <script type="text/javascript">
+        	YAHOO.util.Event.onDOMReady(function(){
+				var D = YAHOO.util.Dom;
+				YAHOO.util.Event.addListener('add_perm','click',function(){
+					D.setStyle('add_perm_input','display','');
+					D.setStyle('add_perm','opacity','0.6');
+					D.setStyle('add_perm','cursor','default');
+				});
+            });
+        </script>
     </div>
 </%def>   

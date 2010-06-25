@@ -107,10 +107,11 @@ class ReposController(BaseController):
             form_result = _form.to_python(dict(request.POST))
             repo_model.update(id, form_result)
             invalidate_cache('cached_repo_list')
-            h.flash(_('Repository updated succesfully'), category='success')
+            h.flash(_('Repository %s updated succesfully' % id), category='success')
                            
         except formencode.Invalid as errors:
             c.repo_info = repo_model.get(id)
+            errors.value.update({'user':c.repo_info.user.username})
             c.form_errors = errors.error_dict
             return htmlfill.render(
                  render('admin/repos/repo_edit.html'),
@@ -166,7 +167,12 @@ class ReposController(BaseController):
         
             return redirect(url('repos'))        
         defaults = c.repo_info.__dict__
-        defaults.update({'user':c.repo_info.user.username})        
+        defaults.update({'user':c.repo_info.user.username})
+        
+        for p in c.repo_info.repo2perm:
+            defaults.update({'perm_%s' % p.user.username: 
+                             p.permission.permission_name})
+                
         return htmlfill.render(
             render('admin/repos/repo_edit.html'),
             defaults=defaults,

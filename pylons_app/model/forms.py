@@ -55,7 +55,8 @@ class ValidAuthToken(formencode.validators.FancyValidator):
 class ValidUsername(formencode.validators.FancyValidator):
 
     def validate_python(self, value, state):
-        pass
+        if value in ['default', 'new_user']:
+            raise formencode.Invalid(_('Invalid username'), value, state)
     
 class ValidPassword(formencode.validators.FancyValidator):
     
@@ -145,6 +146,39 @@ def ValidRepoName(edit=False):
                         
             return slug 
     return _ValidRepoName
+
+class ValidPerms(formencode.validators.FancyValidator):
+    messages = {'perm_new_user_name':_('This username is not valid')}
+    
+    def to_python(self, value, state):
+        perms_update = []
+        perms_new = []
+        #build a list of permission to update and new permission to create
+        for k, v in value.items():
+            print k, v
+            if k.startswith('perm_'):
+                if  k.startswith('perm_new_user'):
+                    new_perm = value.get('perm_new_user', False)
+                    new_user = value.get('perm_new_user_name', False)
+                    if new_user and new_perm:
+                        if (new_user, new_perm) not in perms_new:
+                            perms_new.append((new_user, new_perm))
+                else:
+                    perms_update.append((k[5:], v))
+                #clear from form list
+                #del value[k]
+        value['perms_updates'] = perms_update
+        value['perms_new'] = perms_new
+        sa = meta.Session
+        for k, v in perms_new:
+            try:
+                self.user_db = sa.query(User).filter(User.username == k).one()
+            except Exception:
+                msg = self.message('perm_new_user_name',
+                                     state=State_obj)
+                raise formencode.Invalid(msg, value, state, error_dict={'perm_new_user_name':msg})            
+        return value
+                
 #===============================================================================
 # FORMS        
 #===============================================================================
@@ -192,7 +226,7 @@ def UserForm(edit=False):
 def RepoForm(edit=False):
     class _RepoForm(formencode.Schema):
         allow_extra_fields = True
-        filter_extra_fields = True
+        filter_extra_fields = False
         repo_name = All(UnicodeString(strip=True, min=1, not_empty=True), ValidRepoName(edit))
         description = UnicodeString(strip=True, min=3, not_empty=True)
         private = StringBoolean(if_missing=False)
@@ -200,4 +234,5 @@ def RepoForm(edit=False):
         if edit:
             user = All(Int(not_empty=True), ValidRepoUser)
         
+        chained_validators = [ValidPerms]
     return _RepoForm

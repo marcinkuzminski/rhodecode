@@ -80,12 +80,25 @@ class DbManage(object):
         self.create_user(username, password, True)
         
     def create_user(self, username, password, admin=False):
-        log.info('creating administrator user %s', username)
         
+        log.info('creating default user')
+        #create default user for handling default permissions.
+        def_user = User()
+        def_user.username = 'default'
+        def_user.password = 'default'
+        def_user.name = 'default'
+        def_user.lastname = 'default'
+        def_user.email = 'default@default'
+        def_user.admin = False
+        def_user.active = False
+        
+        self.sa.add(def_user)
+        
+        log.info('creating administrator user %s', username)
         new_user = User()
         new_user.username = username
         new_user.password = get_crypt_password(password)
-        new_user.name = 'Admin'
+        new_user.name = 'Hg'
         new_user.lastname = 'Admin'
         new_user.email = 'admin@localhost'
         new_user.admin = admin
@@ -100,8 +113,11 @@ class DbManage(object):
     
     def create_permissions(self):
         #module.(access|create|change|delete)_[name]
-        perms = [('admin.access_home', 'Access to admin user view'),
-                 
+        #module.(read|write|owner)
+        perms = [('repository.none', 'Repository no access'),
+                 ('repository.read', 'Repository read access'),
+                 ('repository.write', 'Repository write access'),
+                 ('repository.admin', 'Repository admin access'),
                  ]
         
         for p in perms:
