@@ -106,6 +106,7 @@ def is_current(selected):
 	            <li ${is_current('branches')}>${h.link_to(_('branches'),h.url('branches_home',repo_name=c.repo_name))}</li>
 	            <li ${is_current('tags')}>${h.link_to(_('tags'),h.url('tags_home',repo_name=c.repo_name))}</li>
 	            <li ${is_current('files')}>${h.link_to(_('files'),h.url('files_home',repo_name=c.repo_name))}</li>
+				<li>${h.link_to(_('settings'),h.url('edit_repo',id=c.repo_name))}</li>	        
 	        </ul>
 		%else:
 		##Root menu
@@ -142,6 +143,8 @@ def is_current(selected):
 <%def name="js()">
 <script type="text/javascript" src="/js/yui/utilities/utilities.js"></script>
 <script type="text/javascript" src="/js/yui/container/container-min.js"></script>
+<script type="text/javascript" src="/js/yui/datasource/datasource-min.js"></script>
+<script type="text/javascript" src="/js/yui/autocomplete/autocomplete-min.js"></script>
 </%def>
 
 <!-- DEFINITION OF FORM ERROR FETCHER -->

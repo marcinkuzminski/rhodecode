@@ -35,7 +35,12 @@
         	</tr>
         	<tr>
         		<td>${_('Owner')}</td>
-        		<td>${h.text('user')}</td>
+				<td class='ac'>
+					<div id="perm_ac">
+						${h.text('user',class_='yui-ac-input')}
+						<div id="owner_container"></div>
+					</div>
+				</td>        		
         		<td>${self.get_form_error('user')}</td>
         	</tr>
         	<tr>
@@ -59,10 +64,7 @@
 	        					<td>${r2p.user.username}</td>
 	        				</tr>
 						%endfor
-
-						
 						<%
-							
 							if not hasattr(c,'form_errors'):
 								d = 'display:none;'
 							else:
@@ -74,7 +76,12 @@
         					<td>${h.radio('perm_new_user','repository.read')}</td>
         					<td>${h.radio('perm_new_user','repository.write')}</td>
         					<td>${h.radio('perm_new_user','repository.admin')}</td>
-        					<td>${h.text('perm_new_user_name',size=10)}</td>
+        					<td class='ac'>
+        						<div id="perm_ac">
+        							${h.text('perm_new_user_name',class_='yui-ac-input')}
+									<div id="perm_container"></div>
+        						</div>
+        					</td>
         					<td>${self.get_form_error('perm_new_user_name')}</td>     					
         				</tr>
         				<tr>
@@ -105,5 +112,114 @@
 				});
             });
         </script>
+		<script type="text/javascript">    
+		YAHOO.example.FnMultipleFields = function(){
+		    var myContacts = ${c.users_array|n}
+		    
+		    // Define a custom search function for the DataSource
+		    var matchNames = function(sQuery) {
+		        // Case insensitive matching
+		        var query = sQuery.toLowerCase(),
+		            contact,
+		            i=0,
+		            l=myContacts.length,
+		            matches = [];
+		        
+		        // Match against each name of each contact
+		        for(; i<l; i++) {
+		            contact = myContacts[i];
+		            if((contact.fname.toLowerCase().indexOf(query) > -1) ||
+		                (contact.lname.toLowerCase().indexOf(query) > -1) ||
+		                (contact.nname && (contact.nname.toLowerCase().indexOf(query) > -1))) {
+		                matches[matches.length] = contact;
+		            }
+		        }
+		
+		        return matches;
+		    };
+		
+		    // Use a FunctionDataSource
+		    var oDS = new YAHOO.util.FunctionDataSource(matchNames);
+		    oDS.responseSchema = {
+		        fields: ["id", "fname", "lname", "nname"]
+		    }
+		
+		    // Instantiate AutoComplete for perms
+		    var oAC_perms = new YAHOO.widget.AutoComplete("perm_new_user_name", "perm_container", oDS);
+		    oAC_perms.useShadow = false;
+		    oAC_perms.resultTypeList = false;
+		    
+		    // Instantiate AutoComplete for owner
+		 	var oAC_owner = new YAHOO.widget.AutoComplete("user", "owner_container", oDS);
+		 	oAC_owner.useShadow = false;
+		 	oAC_owner.resultTypeList = false;
+		    
+		    
+		    // Custom formatter to highlight the matching letters
+		    var custom_formatter = function(oResultData, sQuery, sResultMatch) {
+		        var query = sQuery.toLowerCase(),
+		            fname = oResultData.fname,
+		            lname = oResultData.lname,
+		            nname = oResultData.nname || "", // Guard against null value
+		            query = sQuery.toLowerCase(),
+		            fnameMatchIndex = fname.toLowerCase().indexOf(query),
+		            lnameMatchIndex = lname.toLowerCase().indexOf(query),
+		            nnameMatchIndex = nname.toLowerCase().indexOf(query),
+		            displayfname, displaylname, displaynname;
+		            
+		        if(fnameMatchIndex > -1) {
+		            displayfname = highlightMatch(fname, query, fnameMatchIndex);
+		        }
+		        else {
+		            displayfname = fname;
+		        }
+		
+		        if(lnameMatchIndex > -1) {
+		            displaylname = highlightMatch(lname, query, lnameMatchIndex);
+		        }
+		        else {
+		            displaylname = lname;
+		        }
+		
+		        if(nnameMatchIndex > -1) {
+		            displaynname = "(" + highlightMatch(nname, query, nnameMatchIndex) + ")";
+		        }
+		        else {
+		            displaynname = nname ? "(" + nname + ")" : "";
+		        }
+		
+		        return displayfname + " " + displaylname + " " + displaynname;
+		        
+		    };
+		    oAC_perms.formatResult = custom_formatter; 
+		    oAC_owner.formatResult = custom_formatter;
+		    			    
+		    // Helper function for the formatter
+		    var highlightMatch = function(full, snippet, matchindex) {
+		        return full.substring(0, matchindex) + 
+		                "<span class='match'>" + 
+		                full.substr(matchindex, snippet.length) + 
+		                "</span>" +
+		                full.substring(matchindex + snippet.length);
+		    };
+		
+		    var myHandler = function(sType, aArgs) {
+		        var myAC = aArgs[0]; // reference back to the AC instance
+		        var elLI = aArgs[1]; // reference to the selected LI element
+		        var oData = aArgs[2]; // object literal of selected item's result data
+		        myAC.getInputEl().value = oData.nname;
+		    };
+
+		    oAC_perms.itemSelectEvent.subscribe(myHandler);
+		    oAC_owner.itemSelectEvent.subscribe(myHandler);
+		    
+		    return {
+		        oDS: oDS,
+		        oAC_perms: oAC_perms,
+		        oAC_owner: oAC_owner, 
+		    };
+		}();
+		    
+		</script>        
     </div>
 </%def>   

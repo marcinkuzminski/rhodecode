@@ -111,6 +111,7 @@ class ReposController(BaseController):
                            
         except formencode.Invalid as errors:
             c.repo_info = repo_model.get(id)
+            c.users_array = repo_model.get_users_js()
             errors.value.update({'user':c.repo_info.user.username})
             c.form_errors = errors.error_dict
             return htmlfill.render(
@@ -168,6 +169,8 @@ class ReposController(BaseController):
             return redirect(url('repos'))        
         defaults = c.repo_info.__dict__
         defaults.update({'user':c.repo_info.user.username})
+        
+        c.users_array = repo_model.get_users_js()
         
         for p in c.repo_info.repo2perm:
             defaults.update({'perm_%s' % p.user.username: 

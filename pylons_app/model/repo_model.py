@@ -41,6 +41,15 @@ class RepoModel(object):
     def get(self, id):
         return self.sa.query(Repository).get(id)
         
+    def get_users_js(self):
+        
+        users = self.sa.query(User).all()
+        u_tmpl = '''{id:%s, fname:"%s", lname:"%s", nname:"%s"},'''
+        users_array = '[%s];' % '\n'.join([u_tmpl % (u.user_id, u.name,
+                                                    u.lastname, u.username) 
+                                        for u in users])
+        return users_array        
+        
     
     def update(self, repo_id, form_data):
         try:
