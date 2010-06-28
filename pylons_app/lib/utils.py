@@ -53,22 +53,28 @@ def check_repo_dir(paths):
     if not os.path.isdir(os.path.join(*repos_path)):
         raise Exception('Not a valid repository in %s' % paths[0][1])
 
-def check_repo(repo_name, base_path):
+def check_repo_fast(repo_name, base_path):
+    if os.path.isdir(os.path.join(base_path, repo_name)):return False
+    return True
+
+def check_repo(repo_name, base_path, verify=True):
 
     repo_path = os.path.join(base_path, repo_name)
 
     try:
+        if not check_repo_fast(repo_name, base_path):
+            return False
         r = hg.repository(ui.ui(), repo_path)
-        hg.verify(r)
+        if verify:
+            hg.verify(r)
         #here we hnow that repo exists it was verified
         log.info('%s repo is already created', repo_name)
         return False
-        #raise Exception('Repo exists')
     except RepoError:
-        log.info('%s repo is free for creation', repo_name)
         #it means that there is no valid repo there...
+        log.info('%s repo is free for creation', repo_name)
         return True
-                
+
 def make_ui(path=None, checkpaths=True):        
     """
     A funcion that will read python rc files and make an ui from read options
