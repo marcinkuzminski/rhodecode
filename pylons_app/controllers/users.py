@@ -22,18 +22,18 @@ Created on April 4, 2010
 users controller for pylons
 @author: marcink
 """
-import logging
+from formencode import htmlfill
 from pylons import request, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
 from pylons.i18n.translation import _
 from pylons_app.lib import helpers as h
-from pylons_app.lib.auth import LoginRequired
+from pylons_app.lib.auth import LoginRequired, HasPermissionAllDecorator
 from pylons_app.lib.base import BaseController, render
 from pylons_app.model.db import User, UserLog
 from pylons_app.model.forms import UserForm
 from pylons_app.model.user_model import UserModel
 import formencode
-from formencode import htmlfill
+import logging
 
 log = logging.getLogger(__name__)
 
@@ -42,7 +42,9 @@ class UsersController(BaseController):
     # To properly map this controller, ensure your config/routing.py
     # file has a resource setup:
     #     map.resource('user', 'users')
+    
     @LoginRequired()
+    @HasPermissionAllDecorator('hg.admin')
     def __before__(self):
         c.admin_user = session.get('admin_user')
         c.admin_username = session.get('admin_username')
@@ -110,7 +112,7 @@ class UsersController(BaseController):
                     % form_result['username'], category='error')
             
         return redirect(url('users'))
-                    
+    
     def delete(self, id):
         """DELETE /users/id: Delete an existing item"""
         # Forms posted to this method should contain a hidden field:

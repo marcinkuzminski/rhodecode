@@ -22,12 +22,18 @@ Created on April 27, 2010
 permissions controller for pylons
 @author: marcink
 """
-import logging
-
-from pylons import request, response, session, tmpl_context as c, url
+from formencode import htmlfill
+from pylons import request, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
-
+from pylons.i18n.translation import _
+from pylons_app.lib import helpers as h
+from pylons_app.lib.auth import LoginRequired, HasPermissionAllDecorator
 from pylons_app.lib.base import BaseController, render
+from pylons_app.model.db import User, UserLog
+from pylons_app.model.forms import UserForm
+from pylons_app.model.user_model import UserModel
+import formencode
+import logging
 
 log = logging.getLogger(__name__)
 
@@ -36,7 +42,14 @@ class PermissionsController(BaseController):
     # To properly map this controller, ensure your config/routing.py
     # file has a resource setup:
     #     map.resource('permission', 'permissions')
-
+    
+    @LoginRequired()
+    @HasPermissionAllDecorator('hg.admin')
+    def __before__(self):
+        c.admin_user = session.get('admin_user')
+        c.admin_username = session.get('admin_username')
+        super(PermissionsController, self).__before__()
+        
     def index(self, format='html'):
         """GET /permissions: All items in the collection"""
         # url('permissions')

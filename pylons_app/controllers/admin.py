@@ -28,7 +28,7 @@ from pylons_app.lib.base import BaseController, render
 from pylons_app.model import meta
 from pylons_app.model.db import UserLog
 from webhelpers.paginate import Page
-from pylons_app.lib.auth import LoginRequired
+from pylons_app.lib.auth import LoginRequired, HasPermissionAllDecorator
 
 log = logging.getLogger(__name__)
 
@@ -36,11 +36,9 @@ class AdminController(BaseController):
     
     @LoginRequired()
     def __before__(self):
-        user = session['hg_app_user']
-        c.admin_user = user.is_admin
-        c.admin_username = user.username
         super(AdminController, self).__before__()
-        
+    
+    @HasPermissionAllDecorator('hg.admin')        
     def index(self):
         sa = meta.Session
                          
