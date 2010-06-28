@@ -118,6 +118,7 @@ class DbManage(object):
                  ('repository.read', 'Repository read access'),
                  ('repository.write', 'Repository write access'),
                  ('repository.admin', 'Repository admin access'),
+                 ('hg.admin', 'Hg Administrator'),
                  ]
         
         for p in perms:

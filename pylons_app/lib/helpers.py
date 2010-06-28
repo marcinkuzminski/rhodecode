@@ -296,5 +296,10 @@ rfc3339date = lambda  x: util.datestr(x, "%Y-%m-%dT%H:%M:%S%1:%2")
 time_ago = lambda x: util.datestr(_age(x), "%a, %d %b %Y %H:%M:%S %1%2")
 
 
+#===============================================================================
+# PERMS
+#===============================================================================
+from pylons_app.lib.auth import HasPermissionAny, HasPermissionAll, \
+HasRepoPermissionAny, HasRepoPermissionAll
 
 
