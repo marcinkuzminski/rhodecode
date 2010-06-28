@@ -15,22 +15,22 @@
 </%def>
 <%def name="main()">
 	<div>
-        <h2>${_('Repositories')} - ${_('edit')}</h2>
-        ${h.form(url('repo', id=c.repo_info.repo_name),method='put')}
+        <h2>${_('Repositories')} - ${_('edit')} "${c.repo_name}"</h2>
+        ${h.form(url('repo', repo_name=c.repo_info.repo_name),method='put')}
         <table>
         	<tr>
         		<td>${_('Name')}</td>
-        		<td>${h.text('repo_name')}</td>
+        		<td>${h.text('repo_name',size="28")}</td>
         		<td>${self.get_form_error('repo_name')}</td>
         	</tr>
         	<tr>
         		<td>${_('Description')}</td>
-        		<td>${h.textarea('description',cols=23,rows=5)}</td>
+        		<td>${h.textarea('description',cols=32,rows=5)}</td>
         		<td>${self.get_form_error('description')}</td>
         	</tr>
         	<tr>
         		<td>${_('Private')}</td>
-        		<td>${h.checkbox('private')}</td>
+        		<td>${h.checkbox('private',value="True")}</td>
         		<td>${self.get_form_error('private')}</td>
         	</tr>
         	<tr>
@@ -56,13 +56,37 @@
         				</tr>
         				
         				%for r2p in c.repo_info.repo2perm:
-	        				<tr>
+        					%if r2p.user.username =='default' and c.repo_info.private:
+        						<tr>
+									<td colspan="4">
+										<span style="font-size: 0.8em">${_('disabled for private repository')}</span></td>
+									<td>${r2p.user.username}</td>
+								</tr>
+							%else:
+	        				<tr id=${id(r2p.user.username)}>
 	        					<td>${h.radio('perm_%s' % r2p.user.username,'repository.none')}</td>
 	        					<td>${h.radio('perm_%s' % r2p.user.username,'repository.read')}</td>
 	        					<td>${h.radio('perm_%s' % r2p.user.username,'repository.write')}</td>
 	        					<td>${h.radio('perm_%s' % r2p.user.username,'repository.admin')}</td>
 	        					<td>${r2p.user.username}</td>
+	        					<td>
+	        					  %if r2p.user.username !='default':
+				                  	<span class="delete_icon action_button" onclick="ajaxAction(${r2p.user.user_id},${id(r2p.user.username)})">
+				                  		<script type="text/javascript">
+											function ajaxAction(user_id,field_id){
+												var sUrl = "${h.url('delete_repo_user',repo_name=c.repo_name)}";
+												var callback = { success:function(o){
+																YAHOO.util.Dom.get(String(field_id)).innerHTML = '<td colspan="6"></td>';
+															 }};
+												var postData = '_method=delete&user_id='+user_id; 
+												var request = YAHOO.util.Connect.asyncRequest('POST', sUrl, callback, postData); 
+						                	};
+										</script>       	
+				                  	</span>
+				                  %endif					
+	        					</td>
 	        				</tr>
+	        				%endif
 						%endfor
 						<%
 							if not hasattr(c,'form_errors'):

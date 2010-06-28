@@ -155,7 +155,6 @@ class ValidPerms(formencode.validators.FancyValidator):
         perms_new = []
         #build a list of permission to update and new permission to create
         for k, v in value.items():
-            print k, v
             if k.startswith('perm_'):
                 if  k.startswith('perm_new_user'):
                     new_perm = value.get('perm_new_user', False)
@@ -164,9 +163,12 @@ class ValidPerms(formencode.validators.FancyValidator):
                         if (new_user, new_perm) not in perms_new:
                             perms_new.append((new_user, new_perm))
                 else:
-                    perms_update.append((k[5:], v))
-                #clear from form list
-                #del value[k]
+                    usr = k[5:]                    
+                    if usr == 'default':
+                        if value['private']:
+                            #set none for default when updating to private repo
+                            v = 'repository.none'
+                    perms_update.append((usr, v))
         value['perms_updates'] = perms_update
         value['perms_new'] = perms_new
         sa = meta.Session

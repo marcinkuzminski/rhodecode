@@ -34,12 +34,9 @@ from pylons_app.model.repo_model import RepoModel
 from pylons_app.model.hg_model import HgModel
 from pylons_app.model.forms import RepoForm
 from pylons_app.model.meta import Session
-from datetime import datetime
 import formencode
 from formencode import htmlfill
 import logging
-import os
-import shutil
 log = logging.getLogger(__name__)
 
 class ReposController(BaseController):
@@ -93,24 +90,24 @@ class ReposController(BaseController):
 
         return render('admin/repos/repo_add.html')
 
-    def update(self, id):
-        """PUT /repos/id: Update an existing item"""
+    def update(self, repo_name):
+        """PUT /repos/repo_name: Update an existing item"""
         # Forms posted to this method should contain a hidden field:
         #    <input type="hidden" name="_method" value="PUT" />
         # Or using helpers:
-        #    h.form(url('repo', id=ID),
+        #    h.form(url('repo', repo_name=ID),
         #           method='put')
-        # url('repo', id=ID)
+        # url('repo', repo_name=ID)
         repo_model = RepoModel()
         _form = RepoForm(edit=True)()
         try:
             form_result = _form.to_python(dict(request.POST))
-            repo_model.update(id, form_result)
+            repo_model.update(repo_name, form_result)
             invalidate_cache('cached_repo_list')
-            h.flash(_('Repository %s updated succesfully' % id), category='success')
+            h.flash(_('Repository %s updated succesfully' % repo_name), category='success')
                            
         except formencode.Invalid as errors:
-            c.repo_info = repo_model.get(id)
+            c.repo_info = repo_model.get(repo_name)
             c.users_array = repo_model.get_users_js()
             errors.value.update({'user':c.repo_info.user.username})
             c.form_errors = errors.error_dict
@@ -123,59 +120,72 @@ class ReposController(BaseController):
                     % form_result['repo_name'], category='error')
         return redirect(url('repos'))
     
-    def delete(self, id):
-        """DELETE /repos/id: Delete an existing item"""
+    def delete(self, repo_name):
+        """DELETE /repos/repo_name: Delete an existing item"""
         # Forms posted to this method should contain a hidden field:
         #    <input type="hidden" name="_method" value="DELETE" />
         # Or using helpers:
-        #    h.form(url('repo', id=ID),
+        #    h.form(url('repo', repo_name=ID),
         #           method='delete')
-        # url('repo', id=ID)
+        # url('repo', repo_name=ID)
         
         repo_model = RepoModel()
-        repo = repo_model.get(id)
+        repo = repo_model.get(repo_name)
         if not repo:
             h.flash(_('%s repository is not mapped to db perhaps' 
                       ' it was moved or renamed  from the filesystem'
                       ' please run the application again'
-                      ' in order to rescan repositories') % id, category='error')
+                      ' in order to rescan repositories') % repo_name, category='error')
         
             return redirect(url('repos'))
         try:
             repo_model.delete(repo)            
             invalidate_cache('cached_repo_list')
-            h.flash(_('deleted repository %s') % id, category='success')
+            h.flash(_('deleted repository %s') % repo_name, category='success')
         except Exception:
-            h.flash(_('An error occured during deletion of %s') % id,
+            h.flash(_('An error occured during deletion of %s') % repo_name,
                     category='error')
         
         return redirect(url('repos'))
         
-    def show(self, id, format='html'):
-        """GET /repos/id: Show a specific item"""
-        # url('repo', id=ID)
+    def delete_perm_user(self, repo_name):
+        """
+        DELETE an existing repository permission user
+        @param repo_name:
+        """
         
-    def edit(self, id, format='html'):
-        """GET /repos/id/edit: Form to edit an existing item"""
-        # url('edit_repo', id=ID)
+        try:
+            repo_model = RepoModel()
+            repo_model.delete_perm_user(request.POST, repo_name)            
+        except Exception as e:
+            h.flash(_('An error occured during deletion of repository user'),
+                    category='error')
+        
+        
+    def show(self, repo_name, format='html'):
+        """GET /repos/repo_name: Show a specific item"""
+        # url('repo', repo_name=ID)
+        
+    def edit(self, repo_name, format='html'):
+        """GET /repos/repo_name/edit: Form to edit an existing item"""
+        # url('edit_repo', repo_name=ID)
         repo_model = RepoModel()
-        c.repo_info = repo = repo_model.get(id)
+        c.repo_info = repo = repo_model.get(repo_name)
         if not repo:
             h.flash(_('%s repository is not mapped to db perhaps' 
                       ' it was created or renamed from the filesystem'
                       ' please run the application again'
-                      ' in order to rescan repositories') % id, category='error')
+                      ' in order to rescan repositories') % repo_name, category='error')
         
             return redirect(url('repos'))        
         defaults = c.repo_info.__dict__
         defaults.update({'user':c.repo_info.user.username})
-        
         c.users_array = repo_model.get_users_js()
         
         for p in c.repo_info.repo2perm:
             defaults.update({'perm_%s' % p.user.username: 
                              p.permission.permission_name})
-                
+            
         return htmlfill.render(
             render('admin/repos/repo_edit.html'),
             defaults=defaults,

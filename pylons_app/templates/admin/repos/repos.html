@@ -24,10 +24,10 @@
         </tr>
 	        %for cnt,repo in enumerate(c.repos_list):
 	 		<tr class="parity${cnt%2}">
-			    <td>${h.link_to(repo['name'],h.url('edit_repo',id=repo['name']))}</td>
+			    <td>${h.link_to(repo['name'],h.url('edit_repo',repo_name=repo['name']))}</td>
 		        <td>r${repo['rev']}:${repo['tip']}</td>
                 <td>
-                  ${h.form(url('repo', id=repo['name']),method='delete')}
+                  ${h.form(url('repo', repo_name=repo['name']),method='delete')}
                   	${h.submit('remove','delete',class_="delete_icon action_button",onclick="return confirm('Confirm to delete this repository');")}
                   ${h.end_form()}
      			</td>

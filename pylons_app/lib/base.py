@@ -5,7 +5,7 @@ Provides the BaseController class for subclassing.
 from pylons import config, tmpl_context as c, request, session
 from pylons.controllers import WSGIController
 from pylons.templating import render_mako as render
-from pylons_app.lib.auth import LoginRequired, AuthUser
+from pylons_app.lib import auth
 from pylons_app.lib.utils import get_repo_slug
 from pylons_app.model import meta
 from pylons_app.model.hg_model import _get_repos_cached
@@ -17,7 +17,7 @@ class BaseController(WSGIController):
         c.hg_app_version = __version__
         c.repos_prefix = config['hg_app_name']
         c.repo_name = get_repo_slug(request)
-        c.hg_app_user = session.get('hg_app_user', AuthUser())
+        c.hg_app_user = auth.get_user(session)
         c.cached_repo_list = _get_repos_cached()
         self.sa = meta.Session
     

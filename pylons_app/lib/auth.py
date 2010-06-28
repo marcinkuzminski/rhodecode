@@ -27,7 +27,7 @@ from functools import wraps
 from pylons import session, url, app_globals as g
 from pylons.controllers.util import abort, redirect
 from pylons_app.model import meta
-from pylons_app.model.db import User
+from pylons_app.model.db import User, Repo2Perm
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 import crypt
@@ -91,7 +91,18 @@ def set_available_permissions(config):
     all_perms = sa.query(Permission).all()
     config['pylons.app_globals'].available_permissions = [x.permission_name for x in all_perms]
 
-
+def get_user(session):
+    """
+    Gets user from session, and wraps permissions into user
+    @param session:
+    """
+    user = session.get('hg_app_user', AuthUser())
+    if user.is_authenticated:
+        sa = meta.Session
+        user.permissions = sa.query(Repo2Perm)\
+        .filter(Repo2Perm.user_id == user.user_id).all()
+        
+    return user
         
 #===============================================================================
 # DECORATORS

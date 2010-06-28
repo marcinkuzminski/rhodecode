@@ -104,8 +104,10 @@ class RepoModel(object):
 
             #create default permission
             repo2perm = Repo2Perm()
+            default_perm = 'repository.none' if form_data['private'] \
+                                                        else 'repository.read'
             repo2perm.permission_id = self.sa.query(Permission)\
-                    .filter(Permission.permission_name == 'repository.read')\
+                    .filter(Permission.permission_name == default_perm)\
                     .one().permission_id
                         
             repo2perm.repository = repo_name
@@ -130,7 +132,16 @@ class RepoModel(object):
             log.error(traceback.format_exc())
             self.sa.rollback()
             raise
-       
+    def delete_perm_user(self, form_data, repo_name):
+        try:
+            r2p = self.sa.query(Repo2Perm).filter(Repo2Perm.repository == repo_name)\
+            .filter(Repo2Perm.user_id == form_data['user_id']).delete()
+            self.sa.commit()
+        except:
+            log.error(traceback.format_exc())
+            self.sa.rollback()
+            raise
+           
     def __create_repo(self, repo_name):        
         repo_path = os.path.join(g.base_path, repo_name)
         if check_repo(repo_name, g.base_path):

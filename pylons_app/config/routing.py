@@ -35,19 +35,22 @@ def make_map(config):
              action="new", conditions=dict(method=["GET"]))
         m.connect("formatted_new_repo", "/repos/new.{format}",
              action="new", conditions=dict(method=["GET"]))
-        m.connect("/repos/{id:.*}",
+        m.connect("/repos/{repo_name:.*}",
              action="update", conditions=dict(method=["PUT"]))
-        m.connect("/repos/{id:.*}",
+        m.connect("/repos/{repo_name:.*}",
              action="delete", conditions=dict(method=["DELETE"]))
-        m.connect("edit_repo", "/repos/{id:.*}/edit",
+        m.connect("edit_repo", "/repos/{repo_name:.*}/edit",
              action="edit", conditions=dict(method=["GET"]))
-        m.connect("formatted_edit_repo", "/repos/{id:.*}.{format}/edit",
+        m.connect("formatted_edit_repo", "/repos/{repo_name:.*}.{format}/edit",
              action="edit", conditions=dict(method=["GET"]))
-        m.connect("repo", "/repos/{id:.*}",
+        m.connect("repo", "/repos/{repo_name:.*}",
              action="show", conditions=dict(method=["GET"]))
-        m.connect("formatted_repo", "/repos/{id:.*}.{format}",
+        m.connect("formatted_repo", "/repos/{repo_name:.*}.{format}",
              action="show", conditions=dict(method=["GET"]))
-
+        #ajax delete repo perm user
+        m.connect('delete_repo_user', "/repos_delete_user/{repo_name:.*}",
+             action="delete_perm_user", conditions=dict(method=["DELETE"]))
+        
     map.resource('user', 'users', path_prefix='/_admin')
     map.resource('permission', 'permissions', path_prefix='/_admin')
     
