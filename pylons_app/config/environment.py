@@ -63,6 +63,7 @@ def load_environment(global_conf, app_conf):
     init_model(sa_engine_db1)
     repo2db_mapper(_get_repos_cached_initial(config['pylons.app_globals']))
     set_available_permissions(config)
+    config['base_path'] = config['pylons.app_globals'].base_path
     # CONFIGURATION OPTIONS HERE (note: all config options will override
     # any Pylons config options)
     
