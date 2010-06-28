@@ -2,6 +2,7 @@
 # encoding: utf-8
 # Model for hg app
 # Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
+from sqlalchemy.orm import joinedload
  
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -116,6 +117,7 @@ class HgModel(object):
                     repos_list[name].name = name
                     dbrepo = sa.query(Repository).get(name)
                     if dbrepo:
+                        repos_list[name].dbrepo = dbrepo
                         repos_list[name].description = dbrepo.description
                         repos_list[name].contact = dbrepo.user.full_contact
             except OSError:
@@ -149,7 +151,7 @@ class HgModel(object):
             tmp_d['contact_sort'] = tmp_d['contact']
             tmp_d['repo_archives'] = list(repo._get_archives())
             tmp_d['last_msg'] = tip.message
-            
+            tmp_d['repo'] = repo
             yield tmp_d
 
     def get_repo(self, repo_name):

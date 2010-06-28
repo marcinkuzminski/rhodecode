@@ -10,7 +10,7 @@ class User(Base):
     username = Column("username", TEXT(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     password = Column("password", TEXT(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     active = Column("active", BOOLEAN(), nullable=True, unique=None, default=None)
-    admin = Column("admin", BOOLEAN(), nullable=True, unique=None, default=None)
+    admin = Column("admin", BOOLEAN(), nullable=True, unique=None, default=False)
     name = Column("name", TEXT(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     lastname = Column("lastname", TEXT(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     email = Column("email", TEXT(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
