@@ -26,18 +26,19 @@ SimpleHG middleware for handling mercurial protocol request (push/clone etc.)
 It's implemented with basic auth function
 """
 from datetime import datetime
+from itertools import chain
 from mercurial.hgweb import hgweb
 from mercurial.hgweb.request import wsgiapplication
 from paste.auth.basic import AuthBasicAuthenticator
 from paste.httpheaders import REMOTE_USER, AUTH_TYPE
-from pylons_app.lib.auth import authfunc
+from pylons_app.lib.auth import authfunc, HasPermissionAnyMiddleware
 from pylons_app.lib.utils import is_mercurial, make_ui, invalidate_cache
 from pylons_app.model import meta
 from pylons_app.model.db import UserLog, User
-from webob.exc import HTTPNotFound
+from webob.exc import HTTPNotFound, HTTPForbidden
 import logging
 import os
-from itertools import chain
+import traceback
 log = logging.getLogger(__name__)
 
 class SimpleHg(object):
@@ -46,7 +47,7 @@ class SimpleHg(object):
         self.application = application
         self.config = config
         #authenticate this mercurial request using 
-        realm = '%s %s' % (config['hg_app_name'], 'mercurial repository')
+        realm = '%s %s' % (self.config['hg_app_name'], 'mercurial repository')
         self.authenticate = AuthBasicAuthenticator(realm, authfunc)
         
     def __call__(self, environ, start_response):
@@ -68,28 +69,55 @@ class SimpleHg(object):
             try:
                 repo_name = '/'.join(environ['PATH_INFO'].split('/')[1:])
             except Exception as e:
-                log.error(e)
+                log.error(traceback.format_exc())
                 return HTTPNotFound()(environ, start_response)
             
-            #since we wrap into hgweb, just reset the path
-            environ['PATH_INFO'] = '/'
+            #===================================================================
+            # CHECK PERMISSIONS FOR THIS REQUEST
+            #===================================================================
+            action = self.__get_action(environ)
+            if action:
+                username = self.__get_environ_user(environ)
+                try:
+                    sa = meta.Session
+                    user = sa.query(User)\
+                        .filter(User.username == username).one()
+                except:
+                    return HTTPNotFound()(environ, start_response)
+                #check permissions for this repository
+                if action == 'pull':
+                    if not HasPermissionAnyMiddleware('repository.read',
+                                                      'repository.write',
+                                                      'repository.admin')\
+                                                        (user, repo_name):
+                        return HTTPForbidden()(environ, start_response)
+                if action == 'push':
+                    if not HasPermissionAnyMiddleware('repository.write',
+                                                      'repository.admin')\
+                                                        (user, repo_name):
+                        return HTTPForbidden()(environ, start_response)
+                
+                #log action    
+                self.__log_user_action(user, action, repo_name)            
+            
+            #===================================================================
+            # MERCURIAL REQUEST HANDLING
+            #===================================================================
+            environ['PATH_INFO'] = '/'#since we wrap into hgweb, reset the path
             self.baseui = make_ui(self.config['hg_app_repo_conf'])
-            self.basepath = self.baseui.configitems('paths')[0][1]\
-                                                            .replace('*', '')
+            self.basepath = self.config['base_path']
             self.repo_path = os.path.join(self.basepath, repo_name)
             try:
                 app = wsgiapplication(self.__make_app)
-            except Exception as e:
-                log.error(e)
+            except Exception:
+                log.error(traceback.format_exc())
                 return HTTPNotFound()(environ, start_response)
-            action = self.__get_action(environ)            
+            
+            
             #invalidate cache on push
             if action == 'push':
                 self.__invalidate_cache(repo_name)
-            
-            if action:
-                username = self.__get_environ_user(environ)
-                self.__log_user_action(username, action, repo_name)
+                
             messages = ['thanks for using hg app !']
             return self.msg_wrapper(app, environ, start_response, messages)            
 
@@ -97,8 +125,8 @@ class SimpleHg(object):
     def msg_wrapper(self, app, environ, start_response, messages):
         """
         Wrapper for custom messages that come out of mercurial respond messages
-        is a list of messages that the user will see at the end of response from
-        merurial protocol actions that involves remote answers
+        is a list of messages that the user will see at the end of response 
+        from merurial protocol actions that involves remote answers
         @param app:
         @param environ:
         @param start_response:
@@ -133,10 +161,9 @@ class SimpleHg(object):
                 if mapping.has_key(cmd):
                     return mapping[cmd]
     
-    def __log_user_action(self, username, action, repo):
+    def __log_user_action(self, user, action, repo):
         sa = meta.Session
         try:
-            user = sa.query(User).filter(User.username == username).one()
             user_log = UserLog()
             user_log.user_id = user.user_id
             user_log.action = action
@@ -145,7 +172,7 @@ class SimpleHg(object):
             sa.add(user_log)
             sa.commit()
             log.info('Adding user %s, action %s on %s',
-                                            username, action, repo)
+                                            user.username, action, repo)
         except Exception as e:
             sa.rollback()
             log.error('could not log user action:%s', str(e))
