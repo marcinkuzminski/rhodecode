@@ -138,7 +138,9 @@ def ValidRepoName(edit=False):
             
         def to_python(self, value, state):
             slug = h.repo_name_slug(value)
-            
+            if slug in ['_admin']:
+                raise formencode.Invalid(_('This repository name is disallowed'),
+                                         value, state)
             sa = meta.Session
             if sa.query(Repository).get(slug) and not edit:
                 raise formencode.Invalid(_('This repository already exists'),
