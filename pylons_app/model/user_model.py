@@ -26,8 +26,11 @@ Model for users
 
 from pylons_app.model.db import User
 from pylons_app.model.meta import Session
+from pylons.i18n.translation import _
 import logging
 log = logging.getLogger(__name__)
+
+class DefaultUserException(Exception):pass
 
 class UserModel(object):
 
@@ -53,6 +56,10 @@ class UserModel(object):
     def update(self, id, form_data):
         try:
             new_user = self.sa.query(User).get(id)
+            if new_user.username == 'default':
+                raise DefaultUserException(
+                                _("You can't Edit this user since it's" 
+                                  " crucial for entire application"))
             for k, v in form_data.items():
                 if k == 'new_password' and v != '':
                     
@@ -68,8 +75,15 @@ class UserModel(object):
             raise      
 
     def delete(self, id):
+        
         try:
-            self.sa.delete(self.sa.query(User).get(id))
+            
+            user = self.sa.query(User).get(id)
+            if user.username == 'default':
+                raise DefaultUserException(
+                                _("You can't remove this user since it's" 
+                                  " crucial for entire application"))
+            self.sa.delete(user)
             self.sa.commit()            
         except Exception as e:
             log.error(e)
