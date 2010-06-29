@@ -21,13 +21,13 @@ class ErrorController(BaseController):
     This behaviour can be altered by changing the parameters to the
     ErrorDocuments middleware in your config/middleware.py file.
     """
-#    def __before__(self):
-#        super(ErrorController, self).__before__()
+    def __before__(self):
+        pass#disable all base actions since we don't need them here
         
     def document(self):
         resp = request.environ.get('pylons.original_response')
         
-        log.debug(resp.status)
+        log.debug('### %s ###', resp.status)
 
         e = request.environ
         c.serv_p = r'%(protocol)s://%(host)s/' % {
@@ -35,7 +35,6 @@ class ErrorController(BaseController):
                                                 'host':e.get('HTTP_HOST'),
                                                 }
 
-                        
         if resp.status_int == 404:
             org_e = request.environ.get('pylons.original_request').environ
             c.repo_name = repo_name = org_e['PATH_INFO'].split('/')[1]
