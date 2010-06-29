@@ -33,10 +33,8 @@ def make_app(global_conf, full_stack=True, static_files=True, **app_conf):
     # Configure the Pylons environment
     config = load_environment(global_conf, app_conf)
 
-
     # The Pylons WSGI app
     app = PylonsApp(config=config)
-
     
     # Routing/Session/Cache Middleware
     app = RoutesMiddleware(app, config['routes.map'])
