@@ -22,17 +22,17 @@ Created on April 21, 2010
 branches controller for pylons
 @author: marcink
 """
-from pylons import tmpl_context as c
-from pylons_app.lib.auth import LoginRequired
+from pylons import tmpl_context as c, request
+from pylons_app.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from pylons_app.lib.base import BaseController, render
 from pylons_app.model.hg_model import HgModel
 import logging
-
 log = logging.getLogger(__name__)
 
 class BranchesController(BaseController):
     
     @LoginRequired()
+    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write', 'repository.admin')
     def __before__(self):
         super(BranchesController, self).__before__()
     
@@ -40,7 +40,7 @@ class BranchesController(BaseController):
         hg_model = HgModel()
         c.repo_info = hg_model.get_repo(c.repo_name)
         c.repo_branches = {}
-        for name, hash in c.repo_info.branches.items():
-            c.repo_branches[name] = c.repo_info.get_changeset(hash)
+        for name, hash_ in c.repo_info.branches.items():
+            c.repo_branches[name] = c.repo_info.get_changeset(hash_)
                 
         return render('branches/branches.html')

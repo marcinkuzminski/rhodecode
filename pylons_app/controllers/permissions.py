@@ -44,7 +44,7 @@ class PermissionsController(BaseController):
     #     map.resource('permission', 'permissions')
     
     @LoginRequired()
-    @HasPermissionAllDecorator('hg.admin')
+    #@HasPermissionAllDecorator('hg.admin')
     def __before__(self):
         c.admin_user = session.get('admin_user')
         c.admin_username = session.get('admin_username')

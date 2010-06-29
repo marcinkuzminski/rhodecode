@@ -2,20 +2,7 @@
 # encoding: utf-8
 # files controller for pylons
 # Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
-from mercurial import archival
-from pylons import request, response, session, tmpl_context as c, url
-from pylons.controllers.util import redirect
-from pylons_app.lib.auth import LoginRequired
-from pylons_app.lib.base import BaseController, render
-from pylons_app.lib.utils import EmptyChangeset
-from pylons_app.model.hg_model import HgModel
-from vcs.exceptions import RepositoryError, ChangesetError
-from vcs.nodes import FileNode
-from vcs.utils import diffs as differ
-import logging
-import pylons_app.lib.helpers as h
-import tempfile
- 
+
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
@@ -35,13 +22,27 @@ Created on April 21, 2010
 files controller for pylons
 @author: marcink
 """
-
+from mercurial import archival
+from pylons import request, response, session, tmpl_context as c, url
+from pylons.controllers.util import redirect
+from pylons_app.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
+from pylons_app.lib.base import BaseController, render
+from pylons_app.lib.utils import EmptyChangeset, get_repo_slug
+from pylons_app.model.hg_model import HgModel
+from vcs.exceptions import RepositoryError, ChangesetError
+from vcs.nodes import FileNode
+from vcs.utils import diffs as differ
+import logging
+import pylons_app.lib.helpers as h
+import tempfile
         
 log = logging.getLogger(__name__)
 
 class FilesController(BaseController):
     
     @LoginRequired()
+    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
+                                   'repository.admin')       
     def __before__(self):
         super(FilesController, self).__before__()
 

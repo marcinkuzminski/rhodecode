@@ -2,16 +2,6 @@
 # encoding: utf-8
 # changeset controller for pylons
 # Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
-from pylons import tmpl_context as c, url
-from pylons.controllers.util import redirect
-from pylons_app.lib.auth import LoginRequired
-from pylons_app.lib.base import BaseController, render
-from pylons_app.model.hg_model import HgModel
-from vcs.exceptions import RepositoryError
-from vcs.nodes import FileNode
-from vcs.utils import diffs as differ
-import logging
-import traceback
  
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -32,13 +22,24 @@ Created on April 25, 2010
 changeset controller for pylons
 @author: marcink
 """
-
+from pylons import tmpl_context as c, url, request
+from pylons.controllers.util import redirect
+from pylons_app.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
+from pylons_app.lib.base import BaseController, render
+from pylons_app.model.hg_model import HgModel
+from vcs.exceptions import RepositoryError
+from vcs.nodes import FileNode
+from vcs.utils import diffs as differ
+import logging
+import traceback
 
 log = logging.getLogger(__name__)
 
 class ChangesetController(BaseController):
     
     @LoginRequired()
+    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
+                                   'repository.admin')       
     def __before__(self):
         super(ChangesetController, self).__before__()
         

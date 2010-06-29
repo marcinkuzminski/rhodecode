@@ -22,17 +22,17 @@ Created on April 21, 2010
 tags controller for pylons
 @author: marcink
 """
-from pylons import tmpl_context as c
-from pylons_app.lib.auth import LoginRequired
+from pylons import tmpl_context as c, request
+from pylons_app.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from pylons_app.lib.base import BaseController, render
 from pylons_app.model.hg_model import HgModel
 import logging
-
 log = logging.getLogger(__name__)
 
 class TagsController(BaseController):
     
     @LoginRequired()
+    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write', 'repository.admin')       
     def __before__(self):
         super(TagsController, self).__before__()
         

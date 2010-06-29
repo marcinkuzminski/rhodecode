@@ -106,13 +106,17 @@ def is_current(selected):
 	            <li ${is_current('branches')}>${h.link_to(_('branches'),h.url('branches_home',repo_name=c.repo_name))}</li>
 	            <li ${is_current('tags')}>${h.link_to(_('tags'),h.url('tags_home',repo_name=c.repo_name))}</li>
 	            <li ${is_current('files')}>${h.link_to(_('files'),h.url('files_home',repo_name=c.repo_name))}</li>
-				<li>${h.link_to(_('settings'),h.url('edit_repo',repo_name=c.repo_name))}</li>	        
+				%if h.HasRepoPermissionAll('repository.admin')(c.repo_name):
+					<li>${h.link_to(_('settings'),h.url('edit_repo',repo_name=c.repo_name))}</li>
+				%endif					        
 	        </ul>
 		%else:
 		##Root menu
 			<ul class="page-nav">
 				<li ${is_current('home')}>${h.link_to(_('Home'),h.url('/'))}</li>
-				<li ${is_current('admin')}>${h.link_to(_('Admin'),h.url('admin_home'))}</li>
+				%if h.HasPermissionAll('hg.admin')('access admin main page'):
+					<li ${is_current('admin')}>${h.link_to(_('Admin'),h.url('admin_home'))}</li>
+				%endif
 				<li class="logout">${h.link_to(u'Logout',h.url('logout_home'))}</li>
 			</ul>
 		%endif    
@@ -129,7 +133,7 @@ def is_current(selected):
     <ul class="submenu">
         <li ${is_current('repos')}>${h.link_to(u'repos',h.url('repos'),class_='repos')}</li>
         <li ${is_current('users')}>${h.link_to(u'users',h.url('users'),class_='users')}</li>
-        <li ${is_current('permissions')}>${h.link_to(u'permissions',h.url('permissions'),class_='permissions')}</li>
+        ##comented for now<li ${is_current('permissions')}>${h.link_to(u'permissions',h.url('permissions'),class_='permissions')}</li>
     </ul>
     </div>
     %endif

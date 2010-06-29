@@ -21,21 +21,19 @@ Created on April 7, 2010
 admin controller for pylons
 @author: marcink
 """
+from formencode import htmlfill
 from operator import itemgetter
-from pylons import request, response, session, tmpl_context as c, url, \
-    app_globals as g
+from pylons import request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
 from pylons.i18n.translation import _
 from pylons_app.lib import helpers as h
-from pylons_app.lib.auth import LoginRequired
+from pylons_app.lib.auth import LoginRequired, HasPermissionAllDecorator
 from pylons_app.lib.base import BaseController, render
 from pylons_app.lib.utils import invalidate_cache
-from pylons_app.model.repo_model import RepoModel
-from pylons_app.model.hg_model import HgModel
 from pylons_app.model.forms import RepoForm
-from pylons_app.model.meta import Session
+from pylons_app.model.hg_model import HgModel
+from pylons_app.model.repo_model import RepoModel
 import formencode
-from formencode import htmlfill
 import logging
 log = logging.getLogger(__name__)
 
@@ -44,7 +42,9 @@ class ReposController(BaseController):
     # To properly map this controller, ensure your config/routing.py
     # file has a resource setup:
     #     map.resource('repo', 'repos')
+    
     @LoginRequired()
+    @HasPermissionAllDecorator('hg.admin')
     def __before__(self):
         c.admin_user = session.get('admin_user')
         c.admin_username = session.get('admin_username')
@@ -104,7 +104,8 @@ class ReposController(BaseController):
             form_result = _form.to_python(dict(request.POST))
             repo_model.update(repo_name, form_result)
             invalidate_cache('cached_repo_list')
-            h.flash(_('Repository %s updated succesfully' % repo_name), category='success')
+            h.flash(_('Repository %s updated succesfully' % repo_name),
+                    category='success')
                            
         except formencode.Invalid as errors:
             c.repo_info = repo_model.get(repo_name)
@@ -135,7 +136,8 @@ class ReposController(BaseController):
             h.flash(_('%s repository is not mapped to db perhaps' 
                       ' it was moved or renamed  from the filesystem'
                       ' please run the application again'
-                      ' in order to rescan repositories') % repo_name, category='error')
+                      ' in order to rescan repositories') % repo_name,
+                      category='error')
         
             return redirect(url('repos'))
         try:
@@ -175,7 +177,8 @@ class ReposController(BaseController):
             h.flash(_('%s repository is not mapped to db perhaps' 
                       ' it was created or renamed from the filesystem'
                       ' please run the application again'
-                      ' in order to rescan repositories') % repo_name, category='error')
+                      ' in order to rescan repositories') % repo_name,
+                      category='error')
         
             return redirect(url('repos'))        
         defaults = c.repo_info.__dict__

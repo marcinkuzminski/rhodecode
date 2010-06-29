@@ -31,7 +31,7 @@ from pylons_app.lib.auth import LoginRequired, HasPermissionAllDecorator
 from pylons_app.lib.base import BaseController, render
 from pylons_app.model.db import User, UserLog
 from pylons_app.model.forms import UserForm
-from pylons_app.model.user_model import UserModel
+from pylons_app.model.user_model import UserModel, DefaultUserException
 import formencode
 import logging
 
@@ -125,10 +125,11 @@ class UsersController(BaseController):
         try:
             user_model.delete(id)
             h.flash(_('sucessfully deleted user'), category='success')
+        except DefaultUserException as e:
+            h.flash(str(e), category='warning')
         except Exception:
             h.flash(_('An error occured during deletion of user'),
-                    category='error')
-        
+                    category='error')            
         return redirect(url('users'))
         
     def show(self, id, format='html'):
@@ -140,6 +141,11 @@ class UsersController(BaseController):
         """GET /users/id/edit: Form to edit an existing item"""
         # url('edit_user', id=ID)
         c.user = self.sa.query(User).get(id)
+        if c.user.username == 'default':
+            h.flash(_("You can't edit this user since it's" 
+              " crucial for entire application"), category='warning')
+            return redirect(url('users'))
+        
         defaults = c.user.__dict__
         return htmlfill.render(
             render('admin/users/user_edit.html'),

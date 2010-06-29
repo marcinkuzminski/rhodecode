@@ -23,20 +23,21 @@ summary controller for pylons
 @author: marcink
 """
 from pylons import tmpl_context as c, request
-from pylons_app.lib.auth import LoginRequired
+from pylons_app.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from pylons_app.lib.base import BaseController, render
 from pylons_app.model.hg_model import HgModel
 from webhelpers.paginate import Page
 import logging
-
 log = logging.getLogger(__name__)
 
 class SummaryController(BaseController):
     
     @LoginRequired()
+    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
+                                   'repository.admin')           
     def __before__(self):
         super(SummaryController, self).__before__()
-        
+                
     def index(self):
         hg_model = HgModel()
         c.repo_info = hg_model.get_repo(c.repo_name)

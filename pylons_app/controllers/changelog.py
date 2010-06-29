@@ -2,14 +2,6 @@
 # encoding: utf-8
 # changelog controller for pylons
 # Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
-from json import dumps
-from mercurial.graphmod import colored, CHANGESET, revisions as graph_rev
-from pylons import request, session, tmpl_context as c
-from pylons_app.lib.auth import LoginRequired
-from pylons_app.lib.base import BaseController, render
-from pylons_app.model.hg_model import HgModel
-from webhelpers.paginate import Page
-import logging
  
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -30,11 +22,21 @@ Created on April 21, 2010
 changelog controller for pylons
 @author: marcink
 """
-log = logging.getLogger(__name__)     
+from json import dumps
+from mercurial.graphmod import colored, CHANGESET, revisions as graph_rev
+from pylons import request, session, tmpl_context as c
+from pylons_app.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
+from pylons_app.lib.base import BaseController, render
+from pylons_app.model.hg_model import HgModel
+from webhelpers.paginate import Page
+import logging
+log = logging.getLogger(__name__)
 
 class ChangelogController(BaseController):
     
     @LoginRequired()
+    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
+                                   'repository.admin')    
     def __before__(self):
         super(ChangelogController, self).__before__()
                 
