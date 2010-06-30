@@ -2,7 +2,6 @@
 # encoding: utf-8
 # Model for hg app
 # Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
-from sqlalchemy.orm import joinedload
  
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -31,6 +30,7 @@ from mercurial.hgweb.hgwebdir_mod import findrepos
 from vcs.exceptions import RepositoryError, VCSError
 from pylons_app.model.meta import Session
 from pylons_app.model.db import Repository
+from sqlalchemy.orm import joinedload
 import logging
 import os
 import sys

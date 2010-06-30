@@ -12,7 +12,7 @@ setup(
     description='',
     author='marcin kuzminski',
     author_email='marcin@python-works.com',
-    url='',
+    url='http://hg.python-works.com',
     install_requires=[
         "Pylons>=1.0.0",
         "SQLAlchemy>=0.6",
