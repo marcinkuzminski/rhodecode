@@ -40,16 +40,15 @@ Installation
    I recomend to install tip version of vcs while the app is in beta mode.
    
    
-- create new virtualenv and activate it
+- create new virtualenv and activate it - highly recommend that you use separate
+  virtual-env for whole application
 - download hg app from default (not demo) branch from bitbucket and run 
   'python setup.py install' this will install all required dependencies needed
-- goto pylons_app/lib and run python db_manage.py it should create all 
-  needed tables and an admin account. You can play with this file if you wish to
-  use different db than sqlite 
-- edit file repositories.config and change the [paths] where you keep your
-  mercurial repositories, remember about permissions for accessing this dir by
-  hg app.
-- run paster serve development.ini 
+- run paster setup-app production.ini it should create all needed tables 
+  and an admin account. Also it will create repositories.config for mercurial 
+  commands, remember that the given path for mercurial repositories must be write
+  accessible for the application
+- run paster serve development.ini - or you can use manage-hg_app script.
   the app should be available at the 127.0.0.1:5000
 - use admin account you created to login.
 - default permissions on each repository is read, and owner is admin. So remember

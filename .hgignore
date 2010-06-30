@@ -9,3 +9,5 @@ syntax: regexp
 ^\.pydevproject$
 syntax: regexp
 ^hg_app\.db$
+syntax: regexp
+^repositories\.config$

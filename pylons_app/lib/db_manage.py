@@ -27,6 +27,7 @@ database managment and creation for hg app
 from os.path import dirname as dn, join as jn
 import os
 import sys
+import uuid
 ROOT = dn(dn(dn(os.path.realpath(__file__))))
 sys.path.append(ROOT)
 
@@ -41,7 +42,7 @@ log = logging.getLogger('db manage')
 log.setLevel(logging.DEBUG)
 console_handler = logging.StreamHandler()
 console_handler.setFormatter(logging.Formatter("%(asctime)s.%(msecs)03d" 
-                                    " %(levelname)-5.5s [%(name)s] %(message)s"))
+                                  " %(levelname)-5.5s [%(name)s] %(message)s"))
 log.addHandler(console_handler)
 
 class DbManage(object):
@@ -85,10 +86,10 @@ class DbManage(object):
         #create default user for handling default permissions.
         def_user = User()
         def_user.username = 'default'
-        def_user.password = 'default'
+        def_user.password = get_crypt_password(str(uuid.uuid1())[:8])
         def_user.name = 'default'
         def_user.lastname = 'default'
-        def_user.email = 'default@default'
+        def_user.email = 'default@default.com'
         def_user.admin = False
         def_user.active = False
         
@@ -131,13 +132,3 @@ class DbManage(object):
             except:
                 self.sa.rollback()
                 raise
-        
-        
-        
-if __name__ == '__main__':
-    dbmanage = DbManage(log_sql=True)
-    dbmanage.create_tables(override=True)
-    dbmanage.admin_prompt()
-    dbmanage.create_permissions()  
-
-

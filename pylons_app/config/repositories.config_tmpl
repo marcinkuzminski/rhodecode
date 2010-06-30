@@ -11,4 +11,4 @@ baseurl = /
 
 [paths]
 #this path should point to mercurial repositories remeber about '*' at the end
-/ = /home/marcink/python_workspace/*
+/ = %(repo_location)s
