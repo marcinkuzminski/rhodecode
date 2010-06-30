@@ -115,4 +115,12 @@ def make_map(config):
     map.connect('files_archive_home', '/{repo_name:.*}/archive/{revision}/{fileformat}',
                 controller='files', action='archivefile', revision='tip',
                 conditions=dict(function=check_repo))
+    map.connect('repo_settings_update', '/{repo_name:.*}/settings',
+                controller='settings', action="update",
+                conditions=dict(method=["PUT"], function=check_repo))
+    map.connect('repo_settings_home', '/{repo_name:.*}/settings',
+                controller='settings', action='index',
+                conditions=dict(function=check_repo))
+
+    
     return map

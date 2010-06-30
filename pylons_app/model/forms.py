@@ -182,7 +182,15 @@ class ValidPerms(formencode.validators.FancyValidator):
                                      state=State_obj)
                 raise formencode.Invalid(msg, value, state, error_dict={'perm_new_user_name':msg})            
         return value
-                
+    
+class ValidSettings(formencode.validators.FancyValidator):
+    
+    def to_python(self, value, state):
+        #settings  form can't edit user
+        if value.has_key('user'):
+            del['value']['user']
+        
+        return value                
 #===============================================================================
 # FORMS        
 #===============================================================================
@@ -240,3 +248,18 @@ def RepoForm(edit=False):
         
         chained_validators = [ValidPerms]
     return _RepoForm
+
+def RepoSettingsForm(edit=False):
+    class _RepoForm(formencode.Schema):
+        allow_extra_fields = True
+        filter_extra_fields = False
+        repo_name = All(UnicodeString(strip=True, min=1, not_empty=True), ValidRepoName(edit))
+        description = UnicodeString(strip=True, min=3, not_empty=True)
+        private = StringBoolean(if_missing=False)
+        
+        chained_validators = [ValidPerms, ValidSettings]
+    return _RepoForm
+
+
+
+
