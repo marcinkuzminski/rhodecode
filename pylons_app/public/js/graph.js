@@ -1,5 +1,6 @@
 // branch_renderer.js - Rendering of branch DAGs on the client side
 //
+// Copyright 2010 Marcin Kuzminski <marcin AT python-works DOT com>
 // Copyright 2008 Jesper Noehr <jesper AT noehr DOT org>
 // Copyright 2008 Dirkjan Ochtman <dirkjan AT ochtman DOT nl>
 // Copyright 2006 Alexander Schremmer <alex AT alexanderweb DOT de>
@@ -32,7 +33,8 @@ function BranchRenderer() {
 	this.ctx.fillStyle = 'rgb(0, 0, 0)';
 	this.cur = [0, 0];
 	this.max_column = 1;
-	this.line_width = 3;
+	this.line_width = 2.5;
+	this.dot_radius = 5.5;
 	this.bg = [0, 4];
 	this.cell = [2, 0];
 	this.revlink = '';
@@ -60,7 +62,7 @@ function BranchRenderer() {
 		var idx = 1;
 		var rela = document.getElementById('graph');
 		var pad = 160;
-		var scale = 20;
+		var scale = 22;
 		
 		for (var i in data) {
 			this.scale(scale);
@@ -102,20 +104,21 @@ function BranchRenderer() {
 				
 				y = row.offsetTop-rela.offsetTop+4;
 				x = pad-((this.cell[0] + this.box_size * start - 1) + this.bg_height-2);
+				this.ctx.lineWidth=this.line_width;
 				this.ctx.beginPath();
 				this.ctx.moveTo(x, y);
 				
 				//i don't know why it's +1 just fixes some drawing graph.
 				y += row.clientHeight+1;
 				x = pad-((1 + this.box_size * end) + this.bg_height-2);
-				this.ctx.lineTo(x,y+extra);
+				this.ctx.lineTo(x,y+extra,3);
 				this.ctx.stroke();
 			}
 			
 			column = node[0]
 			color = node[1]
 			
-			radius = 4;
+			radius = this.dot_radius;
 			y = row.offsetTop-rela.offsetTop+4;
 			x = pad-(Math.round(this.cell[0] * scale/2 * column + radius) + 15 - (column*4));
 		

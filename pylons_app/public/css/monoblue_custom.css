@@ -742,9 +742,6 @@ p.files {
 }
 
 /** end of changeset **/ /** canvas **/
-#graph_nodes {
-	margin-top: 8px;
-}
 
 #graph {
 	overflow: hidden;
@@ -753,6 +750,8 @@ p.files {
 #graph_nodes {
 	width: 160px;
 	float: left;
+	margin-left:-50px;
+	margin-top: 5px;
 }
 
 #graph_content {
@@ -774,7 +773,8 @@ p.files {
 	border-bottom: 1px solid #CCCCCC;
 	border-left: 1px solid #CCCCCC;
 	border-right: 1px solid #CCCCCC;
-	height: 120px;
+	min-height: 80px;
+	overflow: hidden;
 }
 
 #graph_content .container .left {

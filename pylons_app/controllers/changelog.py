@@ -72,7 +72,7 @@ class ChangelogController(BaseController):
         if not repo.revisions:return dumps([]), 0
         
         max_rev = repo.revisions[-1]
-        offset = 1 if p == 1 else  ((p - 1) * revcount)
+        offset = 1 if p == 1 else  ((p - 1) * revcount + 1)
         rev_start = repo.revisions[(-1 * offset)]
         
         revcount = min(max_rev, revcount)
