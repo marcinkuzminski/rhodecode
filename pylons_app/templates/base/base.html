@@ -131,9 +131,10 @@ def is_current(selected):
 	%if current != None:
 	<div>
     <ul class="submenu">
-        <li ${is_current('repos')}>${h.link_to(u'repos',h.url('repos'),class_='repos')}</li>
-        <li ${is_current('users')}>${h.link_to(u'users',h.url('users'),class_='users')}</li>
-        ##comented for now<li ${is_current('permissions')}>${h.link_to(u'permissions',h.url('permissions'),class_='permissions')}</li>
+        <li ${is_current('repos')}>${h.link_to(_('repositories'),h.url('repos'),class_='repos')}</li>
+        <li ${is_current('users')}>${h.link_to(_('users'),h.url('users'),class_='users')}</li>
+        ##commented<li ${is_current('permissions')}>${h.link_to(_('permissions'),h.url('permissions'),class_='permissions')}</li>
+		##commented<li ${is_current('settings')}>${h.link_to(_('settings'),h.url('hgapp_settings'),class_='settings')}</li>        
     </ul>
     </div>
     %endif

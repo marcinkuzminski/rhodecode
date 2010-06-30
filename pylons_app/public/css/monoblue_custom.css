@@ -420,6 +420,13 @@ ul.submenu .permissions {
 	padding-top: 0px;
 	text-align: left;
 }
+ul.submenu .settings {
+	background: url("/images/icons/cog.png") no-repeat scroll 3px;
+	height: 16px;
+	padding-left: 20px;
+	padding-top: 0px;
+	text-align: left;
+}
 
 ul.submenu .current_submenu {
 	border-bottom: 2px solid #556CB5;
