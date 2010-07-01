@@ -25,9 +25,7 @@
 			<div class="left">
 				<div class="date">${_('Date')}: ${c.changeset.date}</div>
 				<div class="author">${_('Author')}: ${c.changeset.author}</div>
-				<div class="message">
-					${h.wrap_paragraphs(c.changeset.message)}
-				</div>
+				<div class="message">${h.wrap_paragraphs(c.changeset.message)}</div>
 			</div>	
 			<div class="right">
 				<span class="logtags">
@@ -48,16 +46,15 @@
 					</div>
 				%endfor								
 			</div>		
-		</div>    
+		</div>
+		<span style="font-size:1.1em;font-weight: bold">${_('Files affected')}</span>
+	    <div class="cs_files">
+				%for change,filenode,diff,cs1,cs2 in c.changes:
+					<div class="cs_${change}">${h.link_to(filenode.path,h.url.current(anchor='CHANGE-%s'%filenode.path))}</div>
+				%endfor
+		</div>		    
     </div>
-    
-    <div style="clear:both;height:10px"></div>
-    <div class="cs_files">
-			%for change,filenode,diff,cs1,cs2 in c.changes:
-				<div class="cs_${change}">${h.link_to(filenode.path,h.url.current(anchor='CHANGE-%s'%filenode.path))}</div>
-			%endfor
-	</div>
-	
+    	
 	%for change,filenode,diff,cs1,cs2 in c.changes:
 		%if change !='removed':
 		<div style="clear:both;height:10px"></div>

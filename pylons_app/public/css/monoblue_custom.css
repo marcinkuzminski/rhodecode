@@ -677,8 +677,8 @@ p.files {
 
 /** end of file **/ /** changeset **/
 #changeset_content {
-	width: 60%;
-	float: left;
+	border:1px solid #CCCCCC;
+	padding:5px;
 }
 
 #changeset_content .container .wrapper {
@@ -686,7 +686,6 @@ p.files {
 }
 
 #changeset_content .container {
-	border: 1px solid #CCCCCC;
 	height: 120px;
 }
 
@@ -716,7 +715,7 @@ p.files {
 }
 
 .cs_files {
-	width: 60%;
+
 }
 
 .cs_files .cs_added {
