@@ -49,6 +49,11 @@
         		<td>${self.get_form_error('active')}</td>
         	</tr>
         	<tr>
+        		<td>${_('Admin')}</td>
+        		<td>${h.checkbox('admin',value=True)}</td>
+        		<td>${self.get_form_error('admin')}</td>
+        	</tr>        	
+        	<tr>
         		<td></td>
         		<td>${h.submit('save','save')}</td>
         	</tr>

@@ -230,6 +230,7 @@ def UserForm(edit=False):
         username = All(UnicodeString(strip=True, min=3, not_empty=True), ValidUsername)
         if edit:
             new_password = All(UnicodeString(strip=True, min=3, not_empty=False), ValidPassword)
+            admin = StringBoolean(if_missing=False)
         else:
             password = All(UnicodeString(strip=True, min=3, not_empty=False), ValidPassword)
         active = StringBoolean(if_missing=False)
