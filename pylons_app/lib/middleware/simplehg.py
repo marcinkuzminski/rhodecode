@@ -149,12 +149,13 @@ class SimpleHg(object):
         Maps mercurial request commands into a pull or push command.
         @param environ:
         """
-        mapping = {
-            'changegroup': 'pull',
-            'changegroupsubset': 'pull',
-            'unbundle': 'push',
-            'stream_out': 'pull',
-        }                    
+        mapping = {'changegroup': 'pull',
+                   'changegroupsubset': 'pull',
+                   'stream_out': 'pull',
+                   'listkeys': 'pull',
+                   'unbundle': 'push',
+                   'pushkey': 'push', }
+        
         for qry in environ['QUERY_STRING'].split('&'):
             if qry.startswith('cmd'):
                 cmd = qry.split('=')[-1]
