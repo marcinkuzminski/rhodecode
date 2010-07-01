@@ -60,7 +60,7 @@ class Permission(Base):
 
 class Repo2Perm(Base):
     __tablename__ = 'repo_to_perm'
-    __table_args__ = (UniqueConstraint('user_id', 'permission_id', 'repository'), {'useexisting':True})
+    __table_args__ = (UniqueConstraint('user_id', 'repository'), {'useexisting':True})
     repo2perm_id = Column("repo2perm_id", INTEGER(), nullable=False, unique=True, default=None, primary_key=True)
     user_id = Column("user_id", INTEGER(), ForeignKey(u'users.user_id'), nullable=False, unique=None, default=None)
     permission_id = Column("permission_id", INTEGER(), ForeignKey(u'permissions.permission_id'), nullable=False, unique=None, default=None)

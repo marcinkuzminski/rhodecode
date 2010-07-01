@@ -127,7 +127,9 @@ class ValidRepoUser(formencode.validators.FancyValidator):
     def to_python(self, value, state):
         sa = meta.Session
         try:
-            self.user_db = sa.query(User).filter(User.username == value).one()
+            self.user_db = sa.query(User)\
+                .filter(User.active == True)\
+                .filter(User.username == value).one()
         except Exception:
             raise formencode.Invalid(_('This username is not valid'),
                                      value, state)
@@ -176,7 +178,9 @@ class ValidPerms(formencode.validators.FancyValidator):
         sa = meta.Session
         for k, v in perms_new:
             try:
-                self.user_db = sa.query(User).filter(User.username == k).one()
+                self.user_db = sa.query(User)\
+                    .filter(User.active == True)\
+                    .filter(User.username == k).one()
             except Exception:
                 msg = self.message('perm_new_user_name',
                                      state=State_obj)

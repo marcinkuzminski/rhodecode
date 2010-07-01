@@ -43,7 +43,7 @@ class RepoModel(object):
         
     def get_users_js(self):
         
-        users = self.sa.query(User).all()
+        users = self.sa.query(User).filter(User.active == True).all()
         u_tmpl = '''{id:%s, fname:"%s", lname:"%s", nname:"%s"},'''
         users_array = '[%s];' % '\n'.join([u_tmpl % (u.user_id, u.name,
                                                     u.lastname, u.username) 

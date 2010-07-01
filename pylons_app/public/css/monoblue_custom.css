@@ -208,7 +208,7 @@ table tr.parity1 {
 	font-size: 100%;
 }
 
-.ac #perm_ac{
+.ac .perm_ac{
 	width:15em;
 }
 /* styles for input field */

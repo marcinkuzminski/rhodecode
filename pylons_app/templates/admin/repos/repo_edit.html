@@ -36,7 +36,7 @@
         	<tr>
         		<td>${_('Owner')}</td>
 				<td class='ac'>
-					<div id="perm_ac">
+					<div class="perm_ac">
 						${h.text('user',class_='yui-ac-input')}
 						<div id="owner_container"></div>
 					</div>
@@ -63,7 +63,7 @@
 									<td>${r2p.user.username}</td>
 								</tr>
 							%else:
-	        				<tr id=${id(r2p.user.username)}>
+	        				<tr id="id${id(r2p.user.username)}">
 	        					<td>${h.radio('perm_%s' % r2p.user.username,'repository.none')}</td>
 	        					<td>${h.radio('perm_%s' % r2p.user.username,'repository.read')}</td>
 	        					<td>${h.radio('perm_%s' % r2p.user.username,'repository.write')}</td>
@@ -71,16 +71,15 @@
 	        					<td>${r2p.user.username}</td>
 	        					<td>
 	        					  %if r2p.user.username !='default':
-				                  	<span class="delete_icon action_button" onclick="ajaxAction(${r2p.user.user_id},${id(r2p.user.username)})">
+				                  	<span class="delete_icon action_button" onclick="ajaxAction(${r2p.user.user_id},'${'id%s'%id(r2p.user.username)}')">
 				                  		<script type="text/javascript">
 											function ajaxAction(user_id,field_id){
 												var sUrl = "${h.url('delete_repo_user',repo_name=c.repo_name)}";
 												var callback = { success:function(o){
-																YAHOO.util.Dom.get(String(field_id)).innerHTML = '<td colspan="6"></td>';
-															 }};
+												var tr = YAHOO.util.Dom.get(String(field_id));
+												tr.parentNode.removeChild(tr);}};
 												var postData = '_method=delete&user_id='+user_id; 
-												var request = YAHOO.util.Connect.asyncRequest('POST', sUrl, callback, postData); 
-						                	};
+												var request = YAHOO.util.Connect.asyncRequest('POST', sUrl, callback, postData);};
 										</script>       	
 				                  	</span>
 				                  %endif					
@@ -101,7 +100,7 @@
         					<td>${h.radio('perm_new_user','repository.write')}</td>
         					<td>${h.radio('perm_new_user','repository.admin')}</td>
         					<td class='ac'>
-        						<div id="perm_ac">
+        						<div class="perm_ac" id="perm_ac">
         							${h.text('perm_new_user_name',class_='yui-ac-input')}
 									<div id="perm_container"></div>
         						</div>
