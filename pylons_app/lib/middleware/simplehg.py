@@ -98,7 +98,10 @@ class SimpleHg(object):
                         return HTTPForbidden()(environ, start_response)
                 
                 #log action    
-                self.__log_user_action(user, action, repo_name)            
+                proxy_key = 'HTTP_X_REAL_IP'
+                def_key = 'REMOTE_ADDR'
+                ipaddr = environ.get(proxy_key, environ.get(def_key, '0.0.0.0'))
+                self.__log_user_action(user, action, repo_name, ipaddr)            
             
             #===================================================================
             # MERCURIAL REQUEST HANDLING
@@ -162,7 +165,7 @@ class SimpleHg(object):
                 if mapping.has_key(cmd):
                     return mapping[cmd]
     
-    def __log_user_action(self, user, action, repo):
+    def __log_user_action(self, user, action, repo, ipaddr):
         sa = meta.Session
         try:
             user_log = UserLog()
@@ -170,6 +173,7 @@ class SimpleHg(object):
             user_log.action = action
             user_log.repository = repo.replace('/', '')
             user_log.action_date = datetime.now()
+            user_log.user_ip = ipaddr
             sa.add(user_log)
             sa.commit()
             log.info('Adding user %s, action %s on %s',

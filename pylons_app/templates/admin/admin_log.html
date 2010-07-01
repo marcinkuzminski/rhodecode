@@ -6,6 +6,7 @@
 		<td>${_('Repository')}</td>
 		<td>${_('Action')}</td>
 		<td>${_('Date')}</td>
+		<td>${_('From IP')}</td>
 	</tr>
 
 	%for cnt,l in enumerate(c.users_log):
@@ -14,6 +15,7 @@
 		<td>${l.repository}</td>
 		<td>${l.action}</td>
 		<td>${l.action_date}</td>
+		<td>${l.user_ip}</td>
 	</tr>
 	%endfor
 
