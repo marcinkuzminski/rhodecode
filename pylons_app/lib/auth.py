@@ -282,7 +282,9 @@ class PermsFunction(object):
         self.repo_name = None
         
     def __call__(self, check_Location=''):
-        user = session['hg_app_user']
+        user = session.get('hg_app_user', False)
+        if not user:
+            return False
         self.user_perms = user.permissions
         self.granted_for = user.username        
         log.debug('checking %s %s', self.__class__.__name__, self.required_perms)            
