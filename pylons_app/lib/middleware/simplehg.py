@@ -2,6 +2,7 @@
 # encoding: utf-8
 # middleware to handle mercurial api calls
 # Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
+from mercurial.error import RepoError
  
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -32,10 +33,11 @@ from mercurial.hgweb.request import wsgiapplication
 from paste.auth.basic import AuthBasicAuthenticator
 from paste.httpheaders import REMOTE_USER, AUTH_TYPE
 from pylons_app.lib.auth import authfunc, HasPermissionAnyMiddleware
-from pylons_app.lib.utils import is_mercurial, make_ui, invalidate_cache
+from pylons_app.lib.utils import is_mercurial, make_ui, invalidate_cache, \
+    check_repo_fast
 from pylons_app.model import meta
 from pylons_app.model.db import UserLog, User
-from webob.exc import HTTPNotFound, HTTPForbidden
+from webob.exc import HTTPNotFound, HTTPForbidden, HTTPInternalServerError
 import logging
 import os
 import traceback
@@ -68,9 +70,9 @@ class SimpleHg(object):
             
             try:
                 repo_name = '/'.join(environ['PATH_INFO'].split('/')[1:])
-            except Exception as e:
+            except:
                 log.error(traceback.format_exc())
-                return HTTPNotFound()(environ, start_response)
+                return HTTPInternalServerError()(environ, start_response)
             
             #===================================================================
             # CHECK PERMISSIONS FOR THIS REQUEST
@@ -83,7 +85,8 @@ class SimpleHg(object):
                     user = sa.query(User)\
                         .filter(User.username == username).one()
                 except:
-                    return HTTPNotFound()(environ, start_response)
+                    log.error(traceback.format_exc())
+                    return HTTPInternalServerError()(environ, start_response)
                 #check permissions for this repository
                 if action == 'pull':
                     if not HasPermissionAnyMiddleware('repository.read',
@@ -110,11 +113,19 @@ class SimpleHg(object):
             self.baseui = make_ui(self.config['hg_app_repo_conf'])
             self.basepath = self.config['base_path']
             self.repo_path = os.path.join(self.basepath, repo_name)
+
+            #quick check if that dir exists...
+            if check_repo_fast(repo_name, self.basepath):
+                return HTTPNotFound()(environ, start_response)
+            
             try:
                 app = wsgiapplication(self.__make_app)
+            except RepoError as e:
+                if str(e).find('not found') != -1:
+                    return HTTPNotFound()(environ, start_response)
             except Exception:
                 log.error(traceback.format_exc())
-                return HTTPNotFound()(environ, start_response)
+                return HTTPInternalServerError()(environ, start_response)
             
             
             #invalidate cache on push
