@@ -105,7 +105,7 @@ class FilesController(BaseController):
         c.file_msg = cs.get_file_message(f_path)
         c.cur_rev = cs.raw_id
         c.f_path = f_path
-        c.annotate = cs.get_file_annotate(f_path)
+
         return render('files/files_annotate.html')
       
     def archivefile(self, repo_name, revision, fileformat):
