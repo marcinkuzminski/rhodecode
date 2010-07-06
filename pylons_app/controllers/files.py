@@ -140,7 +140,7 @@ class FilesController(BaseController):
         hg_model = HgModel()
         diff1 = request.GET.get('diff1')
         diff2 = request.GET.get('diff2')
-        c.action = action = request.GET.get('diff')
+        c.action = request.GET.get('diff')
         c.no_changes = diff1 == diff2
         c.f_path = f_path
         c.repo = hg_model.get_repo(c.repo_name)
@@ -168,18 +168,20 @@ class FilesController(BaseController):
         
         diff = differ.DiffProcessor(f_udiff)
                                 
-        if action == 'download':
+        if c.action == 'download':
             diff_name = '%s_vs_%s.diff' % (diff1, diff2)
             response.content_type = 'text/plain'
             response.content_disposition = 'attachment; filename=%s' \
                                                     % diff_name             
             return diff.raw_diff()
         
-        elif action == 'raw':
+        elif c.action == 'raw':
             c.cur_diff = '<pre class="raw">%s</pre>' % h.escape(diff.raw_diff())
-        elif action == 'diff':
+        elif c.action == 'diff':
             c.cur_diff = diff.as_html()
-
+        else:
+            #default option
+            c.cur_diff = diff.as_html()
         return render('files/file_diff.html')
     
     def _get_history(self, repo, node, f_path):
