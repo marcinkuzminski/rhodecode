@@ -76,8 +76,9 @@ class UsersController(BaseController):
                 defaults=errors.value,
                 encoding="UTF-8")
         except Exception:
-            h.flash(_('error occured during creation of user %s') \
-                    % form_result['username'], category='error')            
+            
+            h.flash(_('error occured during creation of user') \
+                    % request.POST.get('username'), category='error')            
         return redirect(url('users'))
     
     def new(self, format='html'):
