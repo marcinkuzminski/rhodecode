@@ -39,8 +39,12 @@ class HgController(BaseController):
     def index(self):
         c.current_sort = request.GET.get('sort', 'name')
         cs = c.current_sort
-        c.cs_slug = cs.replace('-', '')
         sortables = ['name', 'description', 'last_change', 'tip', 'contact']
+        
+        if cs not in sortables:
+            cs = 'name'
+        c.cs_slug = cs.replace('-', '')
+        
         cached_repo_list = HgModel().get_repos()
         if cs and c.cs_slug in sortables:
             sort_key = c.cs_slug + '_sort'
