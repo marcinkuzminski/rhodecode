@@ -218,7 +218,7 @@ class HasPermissionAllDecorator(PermsDecorator):
     """
         
     def check_permissions(self):
-        if self.required_perms.issubset(self.user_perms['global']):
+        if self.required_perms.issubset(self.user_perms.get('global')):
             return True
         return False
             
@@ -230,7 +230,7 @@ class HasPermissionAnyDecorator(PermsDecorator):
     """
     
     def check_permissions(self):
-        if self.required_perms.intersection(self.user_perms['global']):
+        if self.required_perms.intersection(self.user_perms.get('global')):
             return True
         return False
 
@@ -242,7 +242,10 @@ class HasRepoPermissionAllDecorator(PermsDecorator):
             
     def check_permissions(self):
         repo_name = get_repo_slug(request)
-        user_perms = set([self.user_perms['repositories'][repo_name]])
+        try:
+            user_perms = set([self.user_perms['repositories'][repo_name]])
+        except KeyError:
+            return False
         if self.required_perms.issubset(user_perms):
             return True
         return False
@@ -257,7 +260,10 @@ class HasRepoPermissionAnyDecorator(PermsDecorator):
     def check_permissions(self):
         repo_name = get_repo_slug(request)
         
-        user_perms = set([self.user_perms['repositories'][repo_name]])
+        try:
+            user_perms = set([self.user_perms['repositories'][repo_name]])
+        except KeyError:
+            return False
         if self.required_perms.intersection(user_perms):
             return True
         return False
@@ -307,13 +313,13 @@ class PermsFunction(object):
         
 class HasPermissionAll(PermsFunction):
     def check_permissions(self):
-        if self.required_perms.issubset(self.user_perms['global']):
+        if self.required_perms.issubset(self.user_perms.get('global')):
             return True
         return False
 
 class HasPermissionAny(PermsFunction):
     def check_permissions(self):
-        if self.required_perms.intersection(self.user_perms['global']):
+        if self.required_perms.intersection(self.user_perms.get('global')):
             return True
         return False
 
@@ -327,8 +333,11 @@ class HasRepoPermissionAll(PermsFunction):
         if not self.repo_name:
             self.repo_name = get_repo_slug(request)
 
-        self.user_perms = set([self.user_perms['repositories']\
-                               .get(self.repo_name)])
+        try:
+            self.user_perms = set([self.user_perms['repositories']\
+                                   [self.repo_name]])
+        except KeyError:
+            return False
         self.granted_for = self.repo_name       
         if self.required_perms.issubset(self.user_perms):
             return True
@@ -345,8 +354,11 @@ class HasRepoPermissionAny(PermsFunction):
         if not self.repo_name:
             self.repo_name = get_repo_slug(request)
 
-        self.user_perms = set([self.user_perms['repositories']\
-                               .get(self.repo_name)])
+        try:
+            self.user_perms = set([self.user_perms['repositories']\
+                                   [self.repo_name]])
+        except KeyError:
+            return False
         self.granted_for = self.repo_name
         if self.required_perms.intersection(self.user_perms):
             return True
