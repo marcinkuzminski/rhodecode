@@ -2,7 +2,6 @@
 # encoding: utf-8
 # middleware to handle mercurial api calls
 # Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
-from mercurial.error import RepoError
  
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -30,6 +29,7 @@ from datetime import datetime
 from itertools import chain
 from mercurial.hgweb import hgweb
 from mercurial.hgweb.request import wsgiapplication
+from mercurial.error import RepoError
 from paste.auth.basic import AuthBasicAuthenticator
 from paste.httpheaders import REMOTE_USER, AUTH_TYPE
 from pylons_app.lib.auth import authfunc, HasPermissionAnyMiddleware
@@ -37,6 +37,7 @@ from pylons_app.lib.utils import is_mercurial, make_ui, invalidate_cache, \
     check_repo_fast
 from pylons_app.model import meta
 from pylons_app.model.db import UserLog, User
+import pylons_app.lib.helpers as h
 from webob.exc import HTTPNotFound, HTTPForbidden, HTTPInternalServerError
 import logging
 import os
@@ -127,16 +128,18 @@ class SimpleHg(object):
                 log.error(traceback.format_exc())
                 return HTTPInternalServerError()(environ, start_response)
             
-            
             #invalidate cache on push
             if action == 'push':
                 self.__invalidate_cache(repo_name)
-                
-            messages = ['thanks for using hg app !']
-            return self.msg_wrapper(app, environ, start_response, messages)            
+                messages = []
+                messages.append('thank you for using hg-app')
+            
+                return self.msg_wrapper(app, environ, start_response, messages)
+            else:
+                return app(environ, start_response)           
 
 
-    def msg_wrapper(self, app, environ, start_response, messages):
+    def msg_wrapper(self, app, environ, start_response, messages=[]):
         """
         Wrapper for custom messages that come out of mercurial respond messages
         is a list of messages that the user will see at the end of response 
@@ -157,6 +160,15 @@ class SimpleHg(object):
     
     def __get_environ_user(self, environ):
         return environ.get('REMOTE_USER')
+    
+    def __get_size(self, repo_path, content_size):
+        size = int(content_size)
+        for path, dirs, files in os.walk(repo_path):
+            if path.find('.hg') == -1:
+                for f in files:
+                    size += os.path.getsize(os.path.join(path, f))
+        return size
+        return h.format_byte_size(size)
         
     def __get_action(self, environ):
         """
