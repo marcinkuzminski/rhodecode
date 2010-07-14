@@ -16,6 +16,38 @@
 <%def name="main()">
 	<div>
 	<h2>${_('Settings administration')}</h2>
-	
+
+     ${h.form(url('admin_setting', id='mapping'),method='put')}
+       <table class="table_disp">
+           <tr class="header">
+            <td colspan="2">${_('Remap andv rescan repositories')}</td>
+           </tr>
+           <tr align="right">
+            <td><span class="tooltip" tooltip_title="${h.tooltip(_('In case a repository was deleted from filesystem and there are leftovers in the database check this option to scan obsolete data in database and remove it.'))}">
+            ${_('destroy old data')}</span> ${h.checkbox('destroy',True)}</td>
+            <td>${h.submit('rescan','rescan repositories')}</td>   
+       </table>
+     ${h.end_form()}
+     <br/>	
+     ${h.form(url('admin_setting', id='global'),method='put')}
+	   <table class="table_disp">
+	       <tr class="header">
+	           <td colspan="3">${_('Global application settings')}</td>
+	       </tr>
+	       <tr>
+	           <td>${_('Application name')}</td>
+	           <td>${h.text('app_title')}</td>
+	       </tr>
+           <tr>
+               <td>${_('Realm text')}</td>
+               <td>${h.text('app_auth_realm')}</td>
+           </tr>
+           <tr>
+	           <td></td>
+	           <td>${h.submit('save','save settings')}</td>   
+           </tr>
+	   </table>
+     ${h.end_form()}
+    
     </div>
 </%def>    

@@ -23,14 +23,16 @@ settings controller for pylons
 @author: marcink
 """
 from formencode import htmlfill
-from pylons import request, session, tmpl_context as c, url
+from pylons import request, session, tmpl_context as c, url, app_globals as g
 from pylons.controllers.util import abort, redirect
 from pylons.i18n.translation import _
 from pylons_app.lib import helpers as h
 from pylons_app.lib.auth import LoginRequired, HasPermissionAllDecorator
 from pylons_app.lib.base import BaseController, render
+from pylons_app.lib.utils import repo2db_mapper, invalidate_cache
 from pylons_app.model.db import User, UserLog
 from pylons_app.model.forms import UserForm
+from pylons_app.model.hg_model import HgModel
 from pylons_app.model.user_model import UserModel
 import formencode
 import logging
@@ -74,6 +76,20 @@ class SettingsController(BaseController):
         #    h.form(url('admin_setting', id=ID),
         #           method='put')
         # url('admin_setting', id=ID)
+        if id == 'mapping':
+            rm_obsolete = request.POST.get('destroy', False)
+            log.debug('Rescanning directories with destroy=%s', rm_obsolete)
+
+            initial = HgModel.repo_scan(g.paths[0][0], g.paths[0][1], g.baseui)
+            repo2db_mapper(initial, rm_obsolete)
+            invalidate_cache('cached_repo_list')
+            
+            
+        return redirect(url('admin_settings'))
+
+
+
+
 
     def delete(self, id):
         """DELETE /admin/settings/id: Delete an existing item"""

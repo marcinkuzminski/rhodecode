@@ -177,11 +177,10 @@ class EmptyChangeset(BaseChangeset):
         return '0' * 12
 
 
-def repo2db_mapper(initial_repo_list):
+def repo2db_mapper(initial_repo_list, remove_obsolete=False):
     """
     maps all found repositories into db
     """
-    from pylons_app.model.meta import Session
     from pylons_app.model.repo_model import RepoModel
     
     sa = Session()
@@ -200,3 +199,12 @@ def repo2db_mapper(initial_repo_list):
                          'private':False
                          }
             rm.create(form_data, user, just_db=True)
+
+
+    if remove_obsolete:
+        #remove from database those repositories that are not in the filesystem
+        for repo in sa.query(Repository).all():
+            if repo.repo_name not in initial_repo_list.keys():
+                sa.delete(repo)
+                sa.commit()
+
