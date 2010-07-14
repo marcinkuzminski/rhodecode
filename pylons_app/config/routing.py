@@ -32,7 +32,7 @@ def make_map(config):
         return not cr(repo_name, config['base_path'])
  
     #REST routes
-    with map.submapper(path_prefix='/_admin', controller='pylons_app.controllers.admin.repos:ReposController') as m:
+    with map.submapper(path_prefix='/_admin', controller='admin/repos') as m:
         m.connect("repos", "/repos",
              action="create", conditions=dict(method=["POST"]))
         m.connect("repos", "/repos",
@@ -67,11 +67,12 @@ def make_map(config):
              action="delete_perm_user", conditions=dict(method=["DELETE"],
                                                         function=check_repo))
         
-    map.resource('user', 'users', controller='pylons_app.controllers.admin.users:UsersController', path_prefix='/_admin')
-    map.resource('permission', 'permissions', controller='pylons_app.controllers.admin.permissions:PermissionsController', path_prefix='/_admin')
+    map.resource('user', 'users', controller='admin/users', path_prefix='/_admin')
+    map.resource('permission', 'permissions', controller='admin/permissions', path_prefix='/_admin')
+    map.resource('setting', 'settings', controller='admin/settings', path_prefix='/_admin', name_prefix='admin_')
     
     #ADMIN
-    with map.submapper(path_prefix='/_admin', controller='pylons_app.controllers.admin.admin:AdminController') as m:
+    with map.submapper(path_prefix='/_admin', controller='admin/admin') as m:
         m.connect('admin_home', '', action='index')#main page
         m.connect('admin_add_repo', '/add_repo/{new_repo:[a-z0-9\. _-]*}',
                   action='add_repo')
