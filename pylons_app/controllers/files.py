@@ -182,6 +182,8 @@ class FilesController(BaseController):
         else:
             #default option
             c.cur_diff = diff.as_html()
+        
+        if not c.cur_diff: c.no_changes = True    
         return render('files/file_diff.html')
     
     def _get_history(self, repo, node, f_path):
