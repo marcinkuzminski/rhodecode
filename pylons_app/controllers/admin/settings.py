@@ -2,7 +2,7 @@
 # encoding: utf-8
 # settings controller for pylons
 # Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
- 
+
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
@@ -23,20 +23,23 @@ settings controller for pylons
 @author: marcink
 """
 from formencode import htmlfill
-from pylons import request, session, tmpl_context as c, url, app_globals as g
+from pylons import request, session, tmpl_context as c, url, app_globals as g, \
+    config
 from pylons.controllers.util import abort, redirect
 from pylons.i18n.translation import _
 from pylons_app.lib import helpers as h
 from pylons_app.lib.auth import LoginRequired, HasPermissionAllDecorator
 from pylons_app.lib.base import BaseController, render
-from pylons_app.lib.utils import repo2db_mapper, invalidate_cache
-from pylons_app.model.db import User, UserLog
-from pylons_app.model.forms import UserForm
+from pylons_app.lib.utils import repo2db_mapper, invalidate_cache, \
+    set_hg_app_config
+from pylons_app.model.db import User, UserLog, HgAppSettings
+from pylons_app.model.forms import UserForm, ApplicationSettingsForm
 from pylons_app.model.hg_model import HgModel
 from pylons_app.model.user_model import UserModel
 import formencode
 import logging
-
+import traceback
+ 
 log = logging.getLogger(__name__)
 
 
@@ -58,7 +61,15 @@ class SettingsController(BaseController):
     def index(self, format='html'):
         """GET /admin/settings: All items in the collection"""
         # url('admin_settings')
-        return render('admin/settings/settings.html')
+
+        hgsettings = self.sa.query(HgAppSettings).scalar()
+        defaults = hgsettings.__dict__ if hgsettings else {}
+        return htmlfill.render(
+            render('admin/settings/settings.html'),
+            defaults=defaults,
+            encoding="UTF-8",
+            force_defaults=False
+        )  
     
     def create(self):
         """POST /admin/settings: Create a new item"""
@@ -83,7 +94,46 @@ class SettingsController(BaseController):
             initial = HgModel.repo_scan(g.paths[0][0], g.paths[0][1], g.baseui)
             repo2db_mapper(initial, rm_obsolete)
             invalidate_cache('cached_repo_list')
+        
+        if id == 'global':
             
+            application_form = ApplicationSettingsForm()()
+            try:
+                form_result = application_form.to_python(dict(request.POST))
+                title = form_result['app_title']
+                realm = form_result['app_auth_realm']
+            
+                try:
+                    hgsettings = self.sa.query(HgAppSettings).get(1)
+                    hgsettings.app_auth_realm = realm
+                    hgsettings.app_title = title
+                    
+                    self.sa.add(hgsettings)
+                    self.sa.commit()
+                    set_hg_app_config(config)
+                    h.flash(_('Updated application settings'),
+                            category='success')
+                                    
+                except:
+                    log.error(traceback.format_exc())
+                    h.flash(_('error occured during chaning application settings'),
+                            category='error')
+                                
+                    self.sa.rollback()
+                    
+
+            except formencode.Invalid as errors:
+                c.form_errors = errors.error_dict
+                return htmlfill.render(
+                     render('admin/settings/settings.html'),
+                    defaults=errors.value,
+                    encoding="UTF-8") 
+                        
+            
+            
+            
+            
+
             
         return redirect(url('admin_settings'))
 

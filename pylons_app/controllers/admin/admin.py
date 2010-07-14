@@ -40,9 +40,8 @@ class AdminController(BaseController):
     
     @HasPermissionAllDecorator('hg.admin')        
     def index(self):
-        sa = meta.Session
-                         
-        users_log = sa.query(UserLog).order_by(UserLog.action_date.desc())
+                                 
+        users_log = self.sa.query(UserLog).order_by(UserLog.action_date.desc())
         p = int(request.params.get('page', 1))
         c.users_log = Page(users_log, page=p, items_per_page=10)
         c.log_data = render('admin/admin_log.html')

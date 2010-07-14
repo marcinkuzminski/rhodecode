@@ -28,7 +28,7 @@ from beaker.cache import cache_region
 from mercurial import ui
 from mercurial.hgweb.hgwebdir_mod import findrepos
 from vcs.exceptions import RepositoryError, VCSError
-from pylons_app.model.meta import Session
+from pylons_app.model import meta
 from pylons_app.model.db import Repository
 from sqlalchemy.orm import joinedload
 import logging
@@ -81,7 +81,7 @@ class HgModel(object):
         :param repos_path: path to directory it could take syntax with 
         * or ** for deep recursive displaying repositories
         """
-        sa = Session()
+        sa = meta.Session()
         def check_repo_dir(path):
             """
             Checks the repository
@@ -122,6 +122,7 @@ class HgModel(object):
                         repos_list[name].contact = dbrepo.user.full_contact
             except OSError:
                 continue
+        meta.Session.remove()
         return repos_list
         
     def get_repos(self):

@@ -20,7 +20,7 @@
      ${h.form(url('admin_setting', id='mapping'),method='put')}
        <table class="table_disp">
            <tr class="header">
-            <td colspan="2">${_('Remap andv rescan repositories')}</td>
+            <td colspan="2">${_('Remap and rescan repositories')}</td>
            </tr>
            <tr align="right">
             <td><span class="tooltip" tooltip_title="${h.tooltip(_('In case a repository was deleted from filesystem and there are leftovers in the database check this option to scan obsolete data in database and remove it.'))}">
@@ -36,11 +36,11 @@
 	       </tr>
 	       <tr>
 	           <td>${_('Application name')}</td>
-	           <td>${h.text('app_title')}</td>
+	           <td>${h.text('app_title',size=30)}${self.get_form_error('app_title')}</td>
 	       </tr>
            <tr>
                <td>${_('Realm text')}</td>
-               <td>${h.text('app_auth_realm')}</td>
+               <td>${h.text('app_auth_realm',size=30)}${self.get_form_error('app_auth_realm')}</td>
            </tr>
            <tr>
 	           <td></td>

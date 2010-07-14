@@ -52,8 +52,7 @@ class SimpleHg(object):
         self.application = application
         self.config = config
         #authenticate this mercurial request using 
-        realm = self.config['hg_app_auth_realm']
-        self.authenticate = AuthBasicAuthenticator(realm, authfunc)
+        self.authenticate = AuthBasicAuthenticator('', authfunc)
         
     def __call__(self, environ, start_response):
         if not is_mercurial(environ):
@@ -64,6 +63,7 @@ class SimpleHg(object):
         #===================================================================
         username = REMOTE_USER(environ)
         if not username:
+            self.authenticate.realm = self.config['hg_app_auth_realm']
             result = self.authenticate(environ)
             if isinstance(result, str):
                 AUTH_TYPE.update(environ, 'basic')
@@ -208,7 +208,9 @@ class SimpleHg(object):
         except Exception as e:
             sa.rollback()
             log.error('could not log user action:%s', str(e))
-    
+        finally:
+            meta.Session.remove()
+        
     def __invalidate_cache(self, repo_name):
         """we know that some change was made to repositories and we should
         invalidate the cache to see the changes right away but only for

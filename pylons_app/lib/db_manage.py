@@ -34,7 +34,7 @@ sys.path.append(ROOT)
 from pylons_app.lib.auth import get_crypt_password
 from pylons_app.model import init_model
 from pylons_app.model.db import User, Permission, HgAppUi, HgAppSettings
-from pylons_app.model.meta import Session, Base
+from pylons_app.model import meta
 from sqlalchemy.engine import create_engine
 import logging
 
@@ -51,7 +51,7 @@ class DbManage(object):
         dburi = 'sqlite:////%s' % jn(ROOT, self.dbname)
         engine = create_engine(dburi, echo=log_sql) 
         init_model(engine)
-        self.sa = Session()
+        self.sa = meta.Session
         self.db_exists = False
     
     def check_for_db(self, override):
@@ -71,7 +71,7 @@ class DbManage(object):
             log.info("database exisist and it's going to be destroyed")
             if self.db_exists:
                 os.remove(jn(ROOT, self.dbname))
-        Base.metadata.create_all(checkfirst=override)
+        meta.Base.metadata.create_all(checkfirst=override)
         log.info('Created tables for %s', self.dbname)
     
     def admin_prompt(self):

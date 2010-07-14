@@ -47,7 +47,10 @@ def get_crypt_password(password):
 @cache_region('super_short_term', 'cached_user')
 def get_user_cached(username):
     sa = meta.Session
-    user = sa.query(User).filter(User.username == username).one()
+    try:
+        user = sa.query(User).filter(User.username == username).one()
+    finally:
+        meta.Session.remove()
     return user
 
 def authfunc(environ, username, password):
@@ -89,8 +92,12 @@ def set_available_permissions(config):
     @param config:
     """
     log.info('getting information about all available permissions')
-    sa = meta.Session
-    all_perms = sa.query(Permission).all()
+    try:
+        sa = meta.Session
+        all_perms = sa.query(Permission).all()
+    finally:
+        meta.Session.remove()
+    
     config['available_permissions'] = [x.permission_name for x in all_perms]
 
 def set_base_path(config):
@@ -140,7 +147,8 @@ def fill_perms(user):
                 p = 'repository.write'
             else:
                 p = perm.Permission.permission_name
-            user.permissions['repositories'][perm.Repo2Perm.repository] = p            
+            user.permissions['repositories'][perm.Repo2Perm.repository] = p
+    meta.Session.remove()         
     return user
     
 def get_user(session):

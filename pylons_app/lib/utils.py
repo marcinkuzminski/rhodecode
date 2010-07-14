@@ -29,7 +29,7 @@ import logging
 from mercurial import ui, config, hg
 from mercurial.error import RepoError
 from pylons_app.model.db import Repository, User, HgAppUi, HgAppSettings
-from pylons_app.model.meta import Session
+from pylons_app.model import meta
 log = logging.getLogger(__name__)
 
 
@@ -80,12 +80,21 @@ def check_repo(repo_name, base_path, verify=True):
 
 @cache_region('super_short_term', 'cached_hg_ui')
 def get_hg_ui_cached():
-    sa = Session()
-    return sa.query(HgAppUi).all()    
+    try:
+        sa = meta.Session
+        ret = sa.query(HgAppUi).all()
+    finally:
+        meta.Session.remove()
+    return ret
+
 
 def get_hg_settings():
-    sa = Session()
-    ret = sa.query(HgAppSettings).scalar()
+    try:
+        sa = meta.Session
+        ret = sa.query(HgAppSettings).scalar()
+    finally:
+        meta.Session.remove()
+        
     if not ret:
         raise Exception('Could not get application settings !')
     return ret
@@ -183,7 +192,7 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False):
     """
     from pylons_app.model.repo_model import RepoModel
     
-    sa = Session()
+    sa = meta.Session
     user = sa.query(User).filter(User.admin == True).first()
     
     rm = RepoModel()
@@ -208,3 +217,5 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False):
                 sa.delete(repo)
                 sa.commit()
 
+    
+    meta.Session.remove()
