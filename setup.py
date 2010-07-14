@@ -19,9 +19,9 @@ setup(
         "Pylons>=1.0.0",
         "SQLAlchemy>=0.6",
         "Mako>=0.3.2",
-        "vcs>=0.1.3",
+        "vcs>=0.1.4",
         "pygments>=1.3.0",
-        "mercurial>=1.5",
+        "mercurial>=1.6",
         "pysqlite"
     ],
     setup_requires=["PasteScript>=1.6.3"],
