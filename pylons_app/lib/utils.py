@@ -27,7 +27,7 @@ import os
 import logging
 from mercurial import ui, config, hg
 from mercurial.error import RepoError
-from pylons_app.model.db import Repository, User
+from pylons_app.model.db import Repository, User, HgAppUi
 log = logging.getLogger(__name__)
 
 
@@ -75,52 +75,57 @@ def check_repo(repo_name, base_path, verify=True):
         log.info('%s repo is free for creation', repo_name)
         return True
 
-def make_ui(path=None, checkpaths=True):        
+def make_ui(read_from='file', path=None, checkpaths=True):        
     """
-    A funcion that will read python rc files and make an ui from read options
+    A function that will read python rc files or database
+    and make an mercurial ui object from read options
     
     @param path: path to mercurial config file
+    @param checkpaths: check the path
+    @param read_from: read from 'file' or 'db'
     """
-    if not path:
-        log.error('repos config path is empty !')
-    
-    if not os.path.isfile(path):
-        log.warning('Unable to read config file %s' % path)
-        return False
     #propagated from mercurial documentation
-    sections = [
-                'alias',
-                'auth',
-                'decode/encode',
-                'defaults',
-                'diff',
-                'email',
-                'extensions',
-                'format',
-                'merge-patterns',
-                'merge-tools',
-                'hooks',
-                'http_proxy',
-                'smtp',
-                'patch',
-                'paths',
-                'profiling',
-                'server',
-                'trusted',
-                'ui',
-                'web',
-                ]
-
+    sections = ['alias', 'auth',
+                'decode/encode', 'defaults',
+                'diff', 'email',
+                'extensions', 'format',
+                'merge-patterns', 'merge-tools',
+                'hooks', 'http_proxy',
+                'smtp', 'patch',
+                'paths', 'profiling',
+                'server', 'trusted',
+                'ui', 'web', ]
     baseui = ui.ui()
-    cfg = config.config()
-    cfg.read(path)
-    if checkpaths:check_repo_dir(cfg.items('paths'))
 
-    for section in sections:
-        for k, v in cfg.items(section):
-            baseui.setconfig(section, k, v)
+                
+    if read_from == 'file':
+        if not os.path.isfile(path):
+            log.warning('Unable to read config file %s' % path)
+            return False
+        
+        cfg = config.config()
+        cfg.read(path)
+        for section in sections:
+            for k, v in cfg.items(section):
+                baseui.setconfig(section, k, v)
+        if checkpaths:check_repo_dir(cfg.items('paths'))                
+              
+        
+    elif read_from == 'db':
+        from pylons_app.model.meta import Session
+        sa = Session()
+            
+        hg_ui = sa.query(HgAppUi).all()
+        for ui_ in hg_ui:
+            baseui.setconfig(ui_.ui_section, ui_.ui_key, ui_.ui_value)
+        
     
     return baseui
+
+
+def set_hg_app_config(config):
+    config['hg_app_auth_realm'] = 'realm'
+    config['hg_app_name'] = 'app name'
 
 def invalidate_cache(name, *args):
     """Invalidates given name cache"""

@@ -4,7 +4,7 @@ from pylons.configuration import PylonsConfig
 from pylons.error import handle_mako_error
 from pylons_app.config.routing import make_map
 from pylons_app.lib.auth import set_available_permissions, set_base_path
-from pylons_app.lib.utils import repo2db_mapper
+from pylons_app.lib.utils import repo2db_mapper, make_ui, set_hg_app_config
 from pylons_app.model import init_model
 from pylons_app.model.hg_model import _get_repos_cached_initial
 from sqlalchemy import engine_from_config
@@ -61,9 +61,12 @@ def load_environment(global_conf, app_conf):
         sa_engine_db1 = engine_from_config(config, 'sqlalchemy.db1.')
 
     init_model(sa_engine_db1)
+    config['pylons.app_globals'].baseui = make_ui('db')
+    
     repo2db_mapper(_get_repos_cached_initial(config['pylons.app_globals']))
     set_available_permissions(config)
     set_base_path(config)
+    set_hg_app_config(config)
     # CONFIGURATION OPTIONS HERE (note: all config options will override
     # any Pylons config options)
     

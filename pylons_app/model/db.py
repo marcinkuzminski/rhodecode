@@ -3,6 +3,21 @@ from sqlalchemy.orm import relation, backref
 from sqlalchemy import *
 from vcs.utils.lazy import LazyProperty
 
+class HgAppSettings(Base):
+    __tablename__ = 'hg_app_settings'
+    __table_args__ = {'useexisting':True}
+    app_settings_id = Column("app_settings_id", INTEGER(), nullable=False, unique=True, default=None, primary_key=True)
+    app_title = Column("app_title", TEXT(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    app_auth_realm = Column("auth_realm", TEXT(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+
+class HgAppUi(Base):
+    __tablename__ = 'hg_app_ui'
+    __table_args__ = {'useexisting':True}
+    ui_id = Column("ui_id", INTEGER(), nullable=False, unique=True, default=None, primary_key=True)
+    ui_section = Column("ui_section", TEXT(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    ui_key = Column("ui_key", TEXT(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    ui_value = Column("ui_value", TEXT(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+
 class User(Base): 
     __tablename__ = 'users'
     __table_args__ = {'useexisting':True}

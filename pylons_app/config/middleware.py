@@ -41,7 +41,6 @@ def make_app(global_conf, full_stack=True, static_files=True, **app_conf):
     app = SessionMiddleware(app, config)
     
     # CUSTOM MIDDLEWARE HERE (filtered by error handling middlewares)
-    #set the https based on HTTP_X_URL_SCHEME
     
     app = SimpleHg(app, config)
     

@@ -33,7 +33,7 @@ sys.path.append(ROOT)
 
 from pylons_app.lib.auth import get_crypt_password
 from pylons_app.model import init_model
-from pylons_app.model.db import User, Permission
+from pylons_app.model.db import User, Permission, HgAppUi
 from pylons_app.model.meta import Session, Base
 from sqlalchemy.engine import create_engine
 import logging
@@ -79,7 +79,62 @@ class DbManage(object):
         username = raw_input('Specify admin username:')
         password = getpass.getpass('Specify admin password:')
         self.create_user(username, password, True)
+    
+    def config_prompt(self):
+        log.info('Seting up repositories.config')
         
+        
+        path = raw_input('Specify valid full path to your repositories'
+                        ' you can change this later application settings:')
+        
+        if not os.path.isdir(path):
+            log.error('You entered wrong path')
+            sys.exit()
+        
+        hooks = HgAppUi()
+        hooks.ui_section = 'hooks'
+        hooks.ui_key = 'changegroup'
+        hooks.ui_value = 'hg update >&2'
+        
+        web1 = HgAppUi()
+        web1.ui_section = 'web'
+        web1.ui_key = 'push_ssl'
+        web1.ui_value = 'false'
+                
+        web2 = HgAppUi()
+        web2.ui_section = 'web'
+        web2.ui_key = 'allow_archive'
+        web2.ui_value = 'gz zip bz2'
+                
+        web3 = HgAppUi()
+        web3.ui_section = 'web'
+        web3.ui_key = 'allow_push'
+        web3.ui_value = '*'
+        
+        web4 = HgAppUi()
+        web4.ui_section = 'web'
+        web4.ui_key = 'baseurl'
+        web4.ui_value = '/'                        
+        
+        paths = HgAppUi()
+        paths.ui_section = 'paths'
+        paths.ui_key = '/'
+        paths.ui_value = os.path.join(path, '*')
+        
+        
+        try:
+            self.sa.add(hooks)
+            self.sa.add(web1)
+            self.sa.add(web2)
+            self.sa.add(web3)
+            self.sa.add(web4)
+            self.sa.add(paths)
+            self.sa.commit()
+        except:
+            self.sa.rollback()
+            raise        
+        log.info('created ui config')
+                    
     def create_user(self, username, password, admin=False):
         
         log.info('creating default user')
@@ -93,8 +148,6 @@ class DbManage(object):
         def_user.admin = False
         def_user.active = False
         
-        self.sa.add(def_user)
-        
         log.info('creating administrator user %s', username)
         new_user = User()
         new_user.username = username
@@ -106,6 +159,7 @@ class DbManage(object):
         new_user.active = True
         
         try:
+            self.sa.add(def_user)
             self.sa.add(new_user)
             self.sa.commit()
         except:

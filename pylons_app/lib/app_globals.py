@@ -2,10 +2,9 @@
 
 from beaker.cache import CacheManager
 from beaker.util import parse_cache_config_options
-from pylons_app.lib.utils import make_ui
+from vcs.utils.lazy import LazyProperty
 
 class Globals(object):
-
     """Globals acts as a container for objects available throughout the
     life of the application
 
@@ -18,8 +17,17 @@ class Globals(object):
 
         """
         self.cache = CacheManager(**parse_cache_config_options(config))
-        self.baseui = make_ui(config['hg_app_repo_conf'])
-        self.paths = self.baseui.configitems('paths')
-        self.base_path = self.paths[0][1].replace('*', '')
         self.changeset_annotation_colors = {}
-        self.available_permissions = None # propagated after init_model
+        self.available_permissions = None   # propagated after init_model
+        self.app_title = None               # propagated after init_model
+        self.baseui = None                  # propagated after init_model        
+        
+    @LazyProperty
+    def paths(self):
+        if self.baseui:
+            return self.baseui.configitems('paths')
+    
+    @LazyProperty
+    def base_path(self):
+        if self.baseui:
+            return self.paths[0][1].replace('*', '')            

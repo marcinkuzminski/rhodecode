@@ -70,8 +70,6 @@ class SettingsController(BaseController):
         )  
 
     def update(self, repo_name):
-        print request.POST
-        print 'x' * 110
         repo_model = RepoModel()
         _form = RepoSettingsForm(edit=True)()
         try:

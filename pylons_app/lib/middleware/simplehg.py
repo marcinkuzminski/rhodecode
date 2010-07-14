@@ -50,7 +50,7 @@ class SimpleHg(object):
         self.application = application
         self.config = config
         #authenticate this mercurial request using 
-        realm = '%s %s' % (self.config['hg_app_name'], 'mercurial repository')
+        realm = self.config['hg_app_auth_realm']
         self.authenticate = AuthBasicAuthenticator(realm, authfunc)
         
     def __call__(self, environ, start_response):
@@ -111,14 +111,13 @@ class SimpleHg(object):
             # MERCURIAL REQUEST HANDLING
             #===================================================================
             environ['PATH_INFO'] = '/'#since we wrap into hgweb, reset the path
-            self.baseui = make_ui(self.config['hg_app_repo_conf'])
+            self.baseui = make_ui('db')
             self.basepath = self.config['base_path']
             self.repo_path = os.path.join(self.basepath, repo_name)
 
             #quick check if that dir exists...
             if check_repo_fast(repo_name, self.basepath):
                 return HTTPNotFound()(environ, start_response)
-            
             try:
                 app = wsgiapplication(self.__make_app)
             except RepoError as e:
@@ -155,7 +154,7 @@ class SimpleHg(object):
         return chain(org_response, custom_messages(messages))
 
     def __make_app(self):
-        hgserve = hgweb(self.repo_path)
+        hgserve = hgweb(str(self.repo_path), baseui=self.baseui)
         return  self.__load_web_settings(hgserve)
     
     def __get_environ_user(self, environ):
@@ -214,9 +213,11 @@ class SimpleHg(object):
            
                    
     def __load_web_settings(self, hgserve):
-        repoui = make_ui(os.path.join(self.repo_path, '.hg', 'hgrc'), False)
         #set the global ui for hgserve
         hgserve.repo.ui = self.baseui
+        
+        hgrc = os.path.join(self.repo_path, '.hg', 'hgrc')
+        repoui = make_ui('file', hgrc, False)
         
         if repoui:
             #set the repository based config
