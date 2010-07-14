@@ -61,7 +61,8 @@ class ValidUsername(formencode.validators.FancyValidator):
 class ValidPassword(formencode.validators.FancyValidator):
     
     def to_python(self, value, state):
-        return get_crypt_password(value)
+        if value:
+            return get_crypt_password(value)
         
 class ValidAuth(formencode.validators.FancyValidator):
     messages = {

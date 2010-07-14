@@ -62,7 +62,6 @@ class UserModel(object):
                                   " crucial for entire application"))
             for k, v in form_data.items():
                 if k == 'new_password' and v != '':
-                    
                     new_user.password = v
                 else:
                     setattr(new_user, k, v)
