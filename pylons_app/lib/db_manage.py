@@ -33,7 +33,7 @@ sys.path.append(ROOT)
 
 from pylons_app.lib.auth import get_crypt_password
 from pylons_app.model import init_model
-from pylons_app.model.db import User, Permission, HgAppUi
+from pylons_app.model.db import User, Permission, HgAppUi, HgAppSettings
 from pylons_app.model.meta import Session, Base
 from sqlalchemy.engine import create_engine
 import logging
@@ -81,7 +81,7 @@ class DbManage(object):
         self.create_user(username, password, True)
     
     def config_prompt(self):
-        log.info('Seting up repositories.config')
+        log.info('Setting up repositories config')
         
         
         path = raw_input('Specify valid full path to your repositories'
@@ -122,6 +122,10 @@ class DbManage(object):
         paths.ui_value = os.path.join(path, '*')
         
         
+        hgsettings = HgAppSettings()
+        hgsettings.app_auth_realm = 'hg-app authentication'
+        hgsettings.app_title = 'hg-app'
+        
         try:
             self.sa.add(hooks)
             self.sa.add(web1)
@@ -129,6 +133,7 @@ class DbManage(object):
             self.sa.add(web3)
             self.sa.add(web4)
             self.sa.add(paths)
+            self.sa.add(hgsettings)
             self.sa.commit()
         except:
             self.sa.rollback()

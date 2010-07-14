@@ -28,7 +28,8 @@ import os
 import logging
 from mercurial import ui, config, hg
 from mercurial.error import RepoError
-from pylons_app.model.db import Repository, User, HgAppUi
+from pylons_app.model.db import Repository, User, HgAppUi, HgAppSettings
+from pylons_app.model.meta import Session
 log = logging.getLogger(__name__)
 
 
@@ -79,10 +80,16 @@ def check_repo(repo_name, base_path, verify=True):
 
 @cache_region('super_short_term', 'cached_hg_ui')
 def get_hg_ui_cached():
-    from pylons_app.model.meta import Session
     sa = Session()
     return sa.query(HgAppUi).all()    
 
+def get_hg_settings():
+    sa = Session()
+    ret = sa.query(HgAppSettings).scalar()
+    if not ret:
+        raise Exception('Could not get application settings !')
+    return ret
+    
 def make_ui(read_from='file', path=None, checkpaths=True):        
     """
     A function that will read python rc files or database
@@ -129,8 +136,9 @@ def make_ui(read_from='file', path=None, checkpaths=True):
 
 
 def set_hg_app_config(config):
-    config['hg_app_auth_realm'] = 'realm'
-    config['hg_app_name'] = 'app name'
+    hgsettings = get_hg_settings()
+    config['hg_app_auth_realm'] = hgsettings.app_auth_realm
+    config['hg_app_name'] = hgsettings.app_title
 
 def invalidate_cache(name, *args):
     """Invalidates given name cache"""
