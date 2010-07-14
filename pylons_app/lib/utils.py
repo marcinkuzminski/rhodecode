@@ -16,6 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
+from beaker.cache import cache_region
 
 """
 Created on April 18, 2010
@@ -75,6 +76,13 @@ def check_repo(repo_name, base_path, verify=True):
         log.info('%s repo is free for creation', repo_name)
         return True
 
+
+@cache_region('super_short_term', 'cached_hg_ui')
+def get_hg_ui_cached():
+    from pylons_app.model.meta import Session
+    sa = Session()
+    return sa.query(HgAppUi).all()    
+
 def make_ui(read_from='file', path=None, checkpaths=True):        
     """
     A function that will read python rc files or database
@@ -112,10 +120,7 @@ def make_ui(read_from='file', path=None, checkpaths=True):
               
         
     elif read_from == 'db':
-        from pylons_app.model.meta import Session
-        sa = Session()
-            
-        hg_ui = sa.query(HgAppUi).all()
+        hg_ui = get_hg_ui_cached()
         for ui_ in hg_ui:
             baseui.setconfig(ui_.ui_section, ui_.ui_key, ui_.ui_value)
         

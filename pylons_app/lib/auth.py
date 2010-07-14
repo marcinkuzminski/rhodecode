@@ -22,18 +22,18 @@ Created on April 4, 2010
 
 @author: marcink
 """
-
+from beaker.cache import cache_region
 from functools import wraps
-from pylons import session, url, request
+from pylons import config, session, url, request
 from pylons.controllers.util import abort, redirect
+from pylons_app.lib.utils import get_repo_slug
 from pylons_app.model import meta
 from pylons_app.model.db import User, Repo2Perm, Repository, Permission
-from pylons_app.lib.utils import get_repo_slug
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 import crypt
 import logging
-from pylons import config
+
 log = logging.getLogger(__name__) 
 
 def get_crypt_password(password):
@@ -43,11 +43,17 @@ def get_crypt_password(password):
     """
     return crypt.crypt(password, '6a')
 
-def authfunc(environ, username, password):
+
+@cache_region('super_short_term', 'cached_user')
+def get_user_cached(username):
     sa = meta.Session
+    user = sa.query(User).filter(User.username == username).one()
+    return user
+
+def authfunc(environ, username, password):
     password_crypt = get_crypt_password(password)
     try:
-        user = sa.query(User).filter(User.username == username).one()
+        user = get_user_cached(username)
     except (NoResultFound, MultipleResultsFound, OperationalError) as e:
         log.error(e)
         user = None
