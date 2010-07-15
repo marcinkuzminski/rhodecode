@@ -16,20 +16,21 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
-from beaker.cache import cache_region
 
 """
 Created on April 18, 2010
 Utilities for hg app
 @author: marcink
 """
-
-import os
-import logging
+from beaker.cache import cache_region
 from mercurial import ui, config, hg
 from mercurial.error import RepoError
-from pylons_app.model.db import Repository, User, HgAppUi, HgAppSettings
 from pylons_app.model import meta
+from pylons_app.model.db import Repository, User, HgAppUi, HgAppSettings
+from vcs.backends.base import BaseChangeset
+from vcs.utils.lazy import LazyProperty
+import logging
+import os
 log = logging.getLogger(__name__)
 
 
@@ -77,7 +78,15 @@ def check_repo(repo_name, base_path, verify=True):
         log.info('%s repo is free for creation', repo_name)
         return True
 
-
+def ask_ok(prompt, retries=4, complaint='Yes or no, please!'):
+    while True:
+        ok = raw_input(prompt)
+        if ok in ('y', 'ye', 'yes'): return True
+        if ok in ('n', 'no', 'nop', 'nope'): return False
+        retries = retries - 1
+        if retries < 0: raise IOError
+        print complaint
+        
 @cache_region('super_short_term', 'cached_hg_ui')
 def get_hg_ui_cached():
     try:
@@ -170,8 +179,6 @@ def invalidate_cache(name, *args):
         from pylons_app.model.hg_model import _full_changelog_cached
         region_invalidate(_full_changelog_cached, None, *args)
         
-from vcs.backends.base import BaseChangeset
-from vcs.utils.lazy import LazyProperty
 class EmptyChangeset(BaseChangeset):
     
     revision = -1

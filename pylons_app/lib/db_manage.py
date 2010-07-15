@@ -2,7 +2,7 @@
 # encoding: utf-8
 # database managment for hg app
 # Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
- 
+#
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
@@ -32,18 +32,14 @@ ROOT = dn(dn(dn(os.path.realpath(__file__))))
 sys.path.append(ROOT)
 
 from pylons_app.lib.auth import get_crypt_password
+from pylons_app.lib.utils import ask_ok
 from pylons_app.model import init_model
 from pylons_app.model.db import User, Permission, HgAppUi, HgAppSettings
 from pylons_app.model import meta
 from sqlalchemy.engine import create_engine
 import logging
 
-log = logging.getLogger('db manage')
-log.setLevel(logging.DEBUG)
-console_handler = logging.StreamHandler()
-console_handler.setFormatter(logging.Formatter("%(asctime)s.%(msecs)03d" 
-                                  " %(levelname)-5.5s [%(name)s] %(message)s"))
-log.addHandler(console_handler)
+log = logging.getLogger(__name__)
 
 class DbManage(object):
     def __init__(self, log_sql):
@@ -69,9 +65,13 @@ class DbManage(object):
         self.check_for_db(override)
         if override:
             log.info("database exisist and it's going to be destroyed")
-            if self.db_exists:
+            destroy = ask_ok('Are you sure to destroy old database ? [y/n]')
+            if not destroy:
+                sys.exit()
+            if self.db_exists and destroy:
                 os.remove(jn(ROOT, self.dbname))
-        meta.Base.metadata.create_all(checkfirst=override)
+        checkfirst = not override
+        meta.Base.metadata.create_all(checkfirst=checkfirst)
         log.info('Created tables for %s', self.dbname)
     
     def admin_prompt(self):
@@ -83,9 +83,8 @@ class DbManage(object):
     def config_prompt(self):
         log.info('Setting up repositories config')
         
-        
         path = raw_input('Specify valid full path to your repositories'
-                        ' you can change this later application settings:')
+                        ' you can change this later in application settings:')
         
         if not os.path.isdir(path):
             log.error('You entered wrong path')
