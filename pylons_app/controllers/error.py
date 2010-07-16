@@ -38,10 +38,14 @@ class ErrorController(BaseController):
 
         if resp.status_int == 404:
             org_e = request.environ.get('pylons.original_request').environ
-            c.repo_name = repo_name = org_e['PATH_INFO'].split('/')[1]
+            try:
+                c.repo_name = org_e['PATH_INFO'].split('/')[1]
+            except IndexError:
+                c.repo_name = ''
+            
             c.hg_app_version = __version__
             c.repo_name_cleaned = h.repo_name_slug(c.repo_name)
-            if check_repo(repo_name, g.base_path):
+            if check_repo(c.repo_name, g.base_path):
                 return render('/errors/error_404.html')
                 
         c.error_message = cgi.escape(request.GET.get('code', str(resp.status)))
