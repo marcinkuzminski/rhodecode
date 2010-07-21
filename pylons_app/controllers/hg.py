@@ -2,7 +2,7 @@
 # encoding: utf-8
 # hg controller for pylons
 # Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
- 
+# 
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
@@ -38,19 +38,20 @@ class HgController(BaseController):
         
     def index(self):
         c.current_sort = request.GET.get('sort', 'name')
-        cs = c.current_sort
+        sort_by = c.current_sort
         sortables = ['name', 'description', 'last_change', 'tip', 'contact']
         
-        if cs not in sortables:
-            cs = 'name'
-        c.cs_slug = cs.replace('-', '')
+        c.cs_slug = sort_by.replace('-', '')
+        
+        if c.cs_slug not in sortables:
+            sort_by = 'name'
         
         cached_repo_list = HgModel().get_repos()
-        if cs and c.cs_slug in sortables:
-            sort_key = c.cs_slug + '_sort'
-            if cs.startswith('-'):
-                c.repos_list = sorted(cached_repo_list, key=itemgetter(sort_key), reverse=True)
-            else:
-                c.repos_list = sorted(cached_repo_list, key=itemgetter(sort_key), reverse=False)
+        
+        sort_key = c.cs_slug + '_sort'
+        if sort_by.startswith('-'):
+            c.repos_list = sorted(cached_repo_list, key=itemgetter(sort_key), reverse=True)
+        else:
+            c.repos_list = sorted(cached_repo_list, key=itemgetter(sort_key), reverse=False)
             
         return render('/index.html')
