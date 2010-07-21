@@ -77,6 +77,8 @@ class  AuthUser(object):
     """
     def __init__(self):
         self.username = 'None'
+        self.name = ''
+        self.lastname = ''
         self.user_id = None
         self.is_authenticated = False
         self.is_admin = False
