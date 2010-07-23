@@ -2,7 +2,7 @@
 # encoding: utf-8
 # settings controller for pylons
 # Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
-
+#
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
@@ -94,6 +94,7 @@ class SettingsController(BaseController):
             initial = HgModel.repo_scan(g.paths[0][0], g.paths[0][1], g.baseui)
             repo2db_mapper(initial, rm_obsolete)
             invalidate_cache('cached_repo_list')
+            h.flash(_('Repositories sucessfully rescanned'), category='success')            
         
         if id == 'global':
             
@@ -123,23 +124,14 @@ class SettingsController(BaseController):
                     
 
             except formencode.Invalid as errors:
-                c.form_errors = errors.error_dict
                 return htmlfill.render(
                      render('admin/settings/settings.html'),
-                    defaults=errors.value,
-                    encoding="UTF-8") 
+                     defaults=errors.value,
+                     errors=errors.error_dict or {},
+                     prefix_error=False,
+                     encoding="UTF-8") 
                         
-            
-            
-            
-            
-
-            
         return redirect(url('admin_settings'))
-
-
-
-
 
     def delete(self, id):
         """DELETE /admin/settings/id: Delete an existing item"""
