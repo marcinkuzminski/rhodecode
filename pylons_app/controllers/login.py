@@ -2,7 +2,7 @@
 # encoding: utf-8
 # login controller for pylons
 # Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
- 
+# 
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
@@ -51,10 +51,11 @@ class LoginController(BaseController):
                 return redirect(url('hg_home'))
                                
             except formencode.Invalid as errors:
-                c.form_errors = errors.error_dict
                 return htmlfill.render(
                     render('/login.html'),
                     defaults=errors.value,
+                    errors=errors.error_dict or {},
+                    prefix_error=False,
                     encoding="UTF-8")
                         
         return render('/login.html')
