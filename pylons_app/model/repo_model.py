@@ -54,6 +54,7 @@ class RepoModel(object):
     def update(self, repo_id, form_data):
         try:
             if repo_id != form_data['repo_name']:
+                #rename our data
                 self.__rename_repo(repo_id, form_data['repo_name'])
             cur_repo = self.sa.query(Repository).get(repo_id)
             for k, v in form_data.items():
@@ -150,9 +151,13 @@ class RepoModel(object):
             MercurialRepository(repo_path, create=True)
 
     def __rename_repo(self, old, new):
-        log.info('renaming repoo from %s to %s', old, new)
+        log.info('renaming repo from %s to %s', old, new)
+        
         old_path = os.path.join(g.base_path, old)
         new_path = os.path.join(g.base_path, new)
+        if os.path.isdir(new_path):
+            raise Exception('Was trying to rename to already existing dir %s',
+                            new_path)        
         shutil.move(old_path, new_path)
     
     def __delete_repo(self, name):

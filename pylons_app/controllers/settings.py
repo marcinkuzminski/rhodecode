@@ -2,7 +2,7 @@
 # encoding: utf-8
 # settings controller for pylons
 # Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
- 
+# 
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
@@ -17,11 +17,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
-"""
-Created on June 30, 2010
-settings controller for pylons
-@author: marcink
-"""
 from formencode import htmlfill
 from pylons import tmpl_context as c, request, url
 from pylons.controllers.util import redirect
@@ -34,6 +29,12 @@ from pylons_app.model.repo_model import RepoModel
 import formencode
 import logging
 import pylons_app.lib.helpers as h
+import traceback
+"""
+Created on June 30, 2010
+settings controller for pylons
+@author: marcink
+"""
 log = logging.getLogger(__name__)
 
 class SettingsController(BaseController):
@@ -71,7 +72,7 @@ class SettingsController(BaseController):
 
     def update(self, repo_name):
         repo_model = RepoModel()
-        _form = RepoSettingsForm(edit=True)()
+        _form = RepoSettingsForm(edit=True, old_data={'repo_name':repo_name})()
         try:
             form_result = _form.to_python(dict(request.POST))
             repo_model.update(repo_name, form_result)
@@ -83,13 +84,15 @@ class SettingsController(BaseController):
             c.repo_info = repo_model.get(repo_name)
             c.users_array = repo_model.get_users_js()
             errors.value.update({'user':c.repo_info.user.username})
-            c.form_errors = errors.error_dict
             return htmlfill.render(
-                 render('admin/repos/repo_edit.html'),
+                render('settings/repo_settings.html'),
                 defaults=errors.value,
-                encoding="UTF-8")
+                errors=errors.error_dict or {},
+                prefix_error=False,
+                encoding="UTF-8") 
         except Exception:
+            log.error(traceback.format_exc())
             h.flash(_('error occured during update of repository %s') \
                     % form_result['repo_name'], category='error')
                     
-        return redirect(url('repo_settings_home', repo_name=repo_name))
+        return redirect(url('repo_settings_home', repo_name=form_result['repo_name']))

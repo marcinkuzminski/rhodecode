@@ -124,7 +124,9 @@ class ValidAuth(formencode.validators.FancyValidator):
                                          value, state,
                                          error_dict=self.e_dict_disable)
             
-        meta.Session.remove()                
+        meta.Session.remove()
+
+                   
 class ValidRepoUser(formencode.validators.FancyValidator):
             
     def to_python(self, value, state):
@@ -136,9 +138,10 @@ class ValidRepoUser(formencode.validators.FancyValidator):
         except Exception:
             raise formencode.Invalid(_('This username is not valid'),
                                      value, state)
+        meta.Session.remove()            
         return self.user_db.user_id
 
-def ValidRepoName(edit=False):    
+def ValidRepoName(edit, old_data):    
     class _ValidRepoName(formencode.validators.FancyValidator):
             
         def to_python(self, value, state):
@@ -146,12 +149,16 @@ def ValidRepoName(edit=False):
             if slug in ['_admin']:
                 raise formencode.Invalid(_('This repository name is disallowed'),
                                          value, state)
-            sa = meta.Session
-            if sa.query(Repository).get(slug) and not edit:
-                raise formencode.Invalid(_('This repository already exists'),
-                                         value, state)
-                        
+            
+            if old_data.get('repo_name') != value or not edit:    
+                sa = meta.Session
+                if sa.query(Repository).get(slug):
+                    raise formencode.Invalid(_('This repository already exists') ,
+                                             value, state)
+                meta.Session.remove()
             return slug 
+        
+        
     return _ValidRepoName
 
 class ValidPerms(formencode.validators.FancyValidator):
@@ -243,11 +250,11 @@ def UserForm(edit=False):
         
     return _UserForm
 
-def RepoForm(edit=False):
+def RepoForm(edit=False, old_data={}):
     class _RepoForm(formencode.Schema):
         allow_extra_fields = True
         filter_extra_fields = False
-        repo_name = All(UnicodeString(strip=True, min=1, not_empty=True), ValidRepoName(edit))
+        repo_name = All(UnicodeString(strip=True, min=1, not_empty=True), ValidRepoName(edit, old_data))
         description = UnicodeString(strip=True, min=3, not_empty=True)
         private = StringBoolean(if_missing=False)
         
@@ -257,11 +264,11 @@ def RepoForm(edit=False):
         chained_validators = [ValidPerms]
     return _RepoForm
 
-def RepoSettingsForm(edit=False):
+def RepoSettingsForm(edit=False, old_data={}):
     class _RepoForm(formencode.Schema):
         allow_extra_fields = True
         filter_extra_fields = False
-        repo_name = All(UnicodeString(strip=True, min=1, not_empty=True), ValidRepoName(edit))
+        repo_name = All(UnicodeString(strip=True, min=1, not_empty=True), ValidRepoName(edit, old_data))
         description = UnicodeString(strip=True, min=3, not_empty=True)
         private = StringBoolean(if_missing=False)
         

@@ -16,11 +16,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
-"""
-Created on April 7, 2010
-admin controller for pylons
-@author: marcink
-"""
 from formencode import htmlfill
 from operator import itemgetter
 from pylons import request, response, session, tmpl_context as c, url
@@ -35,6 +30,12 @@ from pylons_app.model.hg_model import HgModel
 from pylons_app.model.repo_model import RepoModel
 import formencode
 import logging
+import traceback
+"""
+Created on April 7, 2010
+admin controller for pylons
+@author: marcink
+"""
 log = logging.getLogger(__name__)
 
 class ReposController(BaseController):
@@ -62,6 +63,7 @@ class ReposController(BaseController):
         # url('repos')
         repo_model = RepoModel()
         _form = RepoForm()()
+        form_result = None
         try:
             form_result = _form.to_python(dict(request.POST))
             repo_model.create(form_result, c.hg_app_user)
@@ -70,16 +72,22 @@ class ReposController(BaseController):
                     category='success')
                                                              
         except formencode.Invalid as errors:
-            c.form_errors = errors.error_dict
             c.new_repo = errors.value['repo_name']
             return htmlfill.render(
-                 render('admin/repos/repo_add.html'),
+                render('admin/repos/repo_add.html'),
                 defaults=errors.value,
-                encoding="UTF-8")        
+                errors=errors.error_dict or {},
+                prefix_error=False,
+                encoding="UTF-8")      
 
         except Exception:
-            h.flash(_('error occured during creation of repository %s') \
-                    % form_result['repo_name'], category='error')
+            log.error(traceback.format_exc())
+            if form_result:
+                msg = _('error occured during creation of repository %s') \
+                    % form_result['repo_name']
+            else:
+                msg = _('error occured during creation of repository') 
+            h.flash(msg, category='error')
             
         return redirect('repos')
 
@@ -99,27 +107,34 @@ class ReposController(BaseController):
         #           method='put')
         # url('repo', repo_name=ID)
         repo_model = RepoModel()
-        _form = RepoForm(edit=True)()
+        changed_name = repo_name
+        _form = RepoForm(edit=True, old_data={'repo_name':repo_name})()
+        
         try:
             form_result = _form.to_python(dict(request.POST))
             repo_model.update(repo_name, form_result)
             invalidate_cache('cached_repo_list')
             h.flash(_('Repository %s updated succesfully' % repo_name),
                     category='success')
-                           
+            changed_name = form_result['repo_name']
         except formencode.Invalid as errors:
             c.repo_info = repo_model.get(repo_name)
             c.users_array = repo_model.get_users_js()
             errors.value.update({'user':c.repo_info.user.username})
-            c.form_errors = errors.error_dict
             return htmlfill.render(
-                 render('admin/repos/repo_edit.html'),
+                render('admin/repos/repo_edit.html'),
                 defaults=errors.value,
+                errors=errors.error_dict or {},
+                prefix_error=False,
                 encoding="UTF-8")
+ 
         except Exception:
+            log.error(traceback.format_exc())
             h.flash(_('error occured during update of repository %s') \
-                    % form_result['repo_name'], category='error')
-        return redirect(url('repos'))
+                    % repo_name, category='error')
+            
+        
+        return redirect(url('edit_repo', repo_name=changed_name))
     
     def delete(self, repo_name):
         """DELETE /repos/repo_name: Delete an existing item"""
