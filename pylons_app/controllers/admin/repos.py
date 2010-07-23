@@ -63,7 +63,7 @@ class ReposController(BaseController):
         # url('repos')
         repo_model = RepoModel()
         _form = RepoForm()()
-        form_result = None
+        form_result = {}
         try:
             form_result = _form.to_python(dict(request.POST))
             repo_model.create(form_result, c.hg_app_user)
@@ -82,11 +82,8 @@ class ReposController(BaseController):
 
         except Exception:
             log.error(traceback.format_exc())
-            if form_result:
-                msg = _('error occured during creation of repository %s') \
-                    % form_result['repo_name']
-            else:
-                msg = _('error occured during creation of repository') 
+            msg = _('error occured during creation of repository %s') \
+                    % form_result.get('repo_name')
             h.flash(msg, category='error')
             
         return redirect('repos')

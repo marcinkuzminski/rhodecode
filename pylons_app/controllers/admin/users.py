@@ -2,7 +2,7 @@
 # encoding: utf-8
 # users controller for pylons
 # Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
- 
+# 
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
@@ -17,11 +17,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
-"""
-Created on April 4, 2010
-users controller for pylons
-@author: marcink
-"""
 from formencode import htmlfill
 from pylons import request, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
@@ -34,6 +29,12 @@ from pylons_app.model.forms import UserForm
 from pylons_app.model.user_model import UserModel, DefaultUserException
 import formencode
 import logging
+import traceback
+"""
+Created on April 4, 2010
+users controller for pylons
+@author: marcink
+"""
 
 log = logging.getLogger(__name__)
 
@@ -70,13 +71,15 @@ class UsersController(BaseController):
             h.flash(_('created user %s') % form_result['username'],
                     category='success')
         except formencode.Invalid as errors:
-            c.form_errors = errors.error_dict
             return htmlfill.render(
-                 render('admin/users/user_add.html'),
+                render('admin/users/user_add.html'),
                 defaults=errors.value,
-                encoding="UTF-8")
+                errors=errors.error_dict or {},
+                prefix_error=False,
+                encoding="UTF-8") 
         except Exception:
-            h.flash(_('error occured during creation of user') \
+            log.error(traceback.format_exc())
+            h.flash(_('error occured during creation of user %s') \
                     % request.POST.get('username'), category='error')            
         return redirect(url('users'))
     
@@ -94,7 +97,8 @@ class UsersController(BaseController):
         #           method='put')
         # url('user', id=ID)
         user_model = UserModel()
-        _form = UserForm(edit=True)()
+        _form = UserForm(edit=True, old_data={'user_id':id})()
+        form_result = {}
         try:
             form_result = _form.to_python(dict(request.POST))
             user_model.update(id, form_result)
@@ -102,14 +106,16 @@ class UsersController(BaseController):
                            
         except formencode.Invalid as errors:
             c.user = user_model.get_user(id)
-            c.form_errors = errors.error_dict
             return htmlfill.render(
-                 render('admin/users/user_edit.html'),
+                render('admin/users/user_edit.html'),
                 defaults=errors.value,
-                encoding="UTF-8")
+                errors=errors.error_dict or {},
+                prefix_error=False,
+                encoding="UTF-8") 
         except Exception:
+            log.error(traceback.format_exc())
             h.flash(_('error occured during update of user %s') \
-                    % form_result['username'], category='error')
+                    % form_result.get('username'), category='error')
             
         return redirect(url('users'))
     

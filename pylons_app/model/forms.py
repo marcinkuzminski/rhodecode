@@ -52,11 +52,26 @@ class ValidAuthToken(formencode.validators.FancyValidator):
         if value != authentication_token():
             raise formencode.Invalid(self.message('invalid_token', state,
                                             search_number=value), value, state)
-class ValidUsername(formencode.validators.FancyValidator):
-
-    def validate_python(self, value, state):
-        if value in ['default', 'new_user']:
-            raise formencode.Invalid(_('Invalid username'), value, state)
+            
+def ValidUsername(edit, old_data):             
+    class _ValidUsername(formencode.validators.FancyValidator):
+    
+        def validate_python(self, value, state):
+            if value in ['default', 'new_user']:
+                raise formencode.Invalid(_('Invalid username'), value, state)
+            #check if user is uniq
+            sa = meta.Session
+            old_un = None
+            if edit:
+                old_un = sa.query(User).get(old_data.get('user_id')).username
+                
+            if old_un != value or not edit:    
+                if sa.query(User).filter(User.username == value).scalar():
+                    raise formencode.Invalid(_('This username already exists') ,
+                                             value, state)
+            meta.Session.remove()
+                            
+    return _ValidUsername   
     
 class ValidPassword(formencode.validators.FancyValidator):
     
@@ -233,16 +248,16 @@ class LoginForm(formencode.Schema):
     #chained validators have access to all data
     chained_validators = [ValidAuth]
     
-def UserForm(edit=False):
+def UserForm(edit=False, old_data={}):
     class _UserForm(formencode.Schema):
         allow_extra_fields = True
         filter_extra_fields = True
-        username = All(UnicodeString(strip=True, min=3, not_empty=True), ValidUsername)
+        username = All(UnicodeString(strip=True, min=3, not_empty=True), ValidUsername(edit, old_data))
         if edit:
             new_password = All(UnicodeString(strip=True, min=3, not_empty=False), ValidPassword)
             admin = StringBoolean(if_missing=False)
         else:
-            password = All(UnicodeString(strip=True, min=3, not_empty=False), ValidPassword)
+            password = All(UnicodeString(strip=True, min=8, not_empty=True), ValidPassword)
         active = StringBoolean(if_missing=False)
         name = UnicodeString(strip=True, min=3, not_empty=True)
         lastname = UnicodeString(strip=True, min=3, not_empty=True)
