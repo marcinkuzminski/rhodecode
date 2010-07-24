@@ -77,6 +77,11 @@ def make_map(config):
         m.connect('admin_add_repo', '/add_repo/{new_repo:[a-z0-9\. _-]*}',
                   action='add_repo')
     
+    #LOGIN/LOGOUT
+    map.connect('login_home', '/_admin/login', controller='login')
+    map.connect('logout_home', '/_admin/logout', controller='login', action='logout')
+    map.connect('register', '/_admin/register', controller='login', action='register')
+        
     #FEEDS
     map.connect('rss_feed_home', '/{repo_name:.*}/feed/rss',
                 controller='feed', action='rss',
@@ -85,9 +90,6 @@ def make_map(config):
                 controller='feed', action='atom',
                 conditions=dict(function=check_repo))
     
-    #LOGIN/LOGOUT
-    map.connect('login_home', '/login', controller='login')
-    map.connect('logout_home', '/logout', controller='login', action='logout')
     
     #OTHERS
     map.connect('changeset_home', '/{repo_name:.*}/changeset/{revision}',

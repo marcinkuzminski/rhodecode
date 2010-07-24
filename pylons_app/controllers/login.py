@@ -17,19 +17,20 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
+from formencode import htmlfill
+from pylons import request, response, session, tmpl_context as c, url
+from pylons.controllers.util import abort, redirect
+from pylons_app.lib.auth import AuthUser
+from pylons_app.lib.base import BaseController, render
+from pylons_app.model.forms import LoginForm, RegisterForm
+from pylons_app.model.user_model import UserModel
+import formencode
+import logging
 """
 Created on April 22, 2010
 login controller for pylons
 @author: marcink
 """
-import logging
-from formencode import htmlfill
-from pylons import request, response, session, tmpl_context as c, url
-from pylons.controllers.util import abort, redirect
-from pylons_app.lib.base import BaseController, render
-import formencode
-from pylons_app.model.forms import LoginForm
-from pylons_app.lib.auth import AuthUser
 
 log = logging.getLogger(__name__)
 
@@ -59,6 +60,26 @@ class LoginController(BaseController):
                     encoding="UTF-8")
                         
         return render('/login.html')
+    
+    
+    def register(self):
+        if request.POST:
+            user_model = UserModel()
+            register_form = RegisterForm()()
+            try:
+                form_result = register_form.to_python(dict(request.POST))
+                user_model.create_registration(form_result)
+                return redirect(url('login_home'))
+                               
+            except formencode.Invalid as errors:
+                return htmlfill.render(
+                    render('/register.html'),
+                    defaults=errors.value,
+                    errors=errors.error_dict or {},
+                    prefix_error=False,
+                    encoding="UTF-8")
+        
+        return render('/register.html')
     
     def logout(self):
         session['hg_app_user'] = AuthUser()

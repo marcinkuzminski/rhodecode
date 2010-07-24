@@ -265,6 +265,9 @@ def UserForm(edit=False, old_data={}):
         
     return _UserForm
 
+RegisterForm = UserForm
+    
+    
 def RepoForm(edit=False, old_data={}):
     class _RepoForm(formencode.Schema):
         allow_extra_fields = True

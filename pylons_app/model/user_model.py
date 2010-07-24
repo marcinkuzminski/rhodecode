@@ -53,6 +53,21 @@ class UserModel(object):
             self.sa.rollback()
             raise      
     
+    def create_registration(self, form_data):
+        try:
+            new_user = User()
+            for k, v in form_data.items():
+                if k != 'admin' or k != 'active':
+                    setattr(new_user, k, v)
+                setattr(new_user, 'active', True)
+                
+            self.sa.add(new_user)
+            self.sa.commit()
+        except Exception as e:
+            log.error(e)
+            self.sa.rollback()
+            raise      
+    
     def update(self, id, form_data):
         try:
             new_user = self.sa.query(User).get(id)
