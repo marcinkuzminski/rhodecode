@@ -3,41 +3,47 @@
 <%def name="title()">
     ${_('Repository managment')}
 </%def>
-<%def name="breadcrumbs()">
+<%def name="breadcrumbs_links()">
     ${h.link_to(u'Home',h.url('/'))}
-    / 
-    ${h.link_to(c.repo_name,h.url('files_home',repo_name=c.repo_name))}
-    /
-    ${_('files')}
+    &raquo;
+    ${h.link_to(c.repo_name,h.url('summary_home',repo_name=c.repo_name))}
+    &raquo;
+    ${'%s:  %s %s %s' % (_('File diff'),c.diff2,'&rarr;',c.diff1)|n}
 </%def>
+
 <%def name="page_nav()">
     ${self.menu('files')}     
 </%def>
-<%def name="css()">
-<link rel="stylesheet" href="/css/monoblue_custom.css" type="text/css" />
-<link rel="stylesheet" href="/css/diff.css" type="text/css" />
-</%def>
 <%def name="main()">
-    <h2 class="no-link no-border">${'%s:  %s %s %s' % (_('File diff'),c.diff2,'&rarr;',c.diff1)|n}</h2>
-<div id="body" class="diffblock">
-	<div class="code-header">
-		<div>
-		<span>${h.link_to(c.f_path,h.url('files_home',repo_name=c.repo_name,
-		revision=c.diff2.split(':')[1],f_path=c.f_path))}</span>
-		 &raquo; <span style="font-size:77%">${h.link_to(_('diff'),
-		h.url.current(diff2=c.diff2.split(':')[-1],diff1=c.diff1.split(':')[-1],diff='diff'))}</span>
-		 &raquo; <span style="font-size:77%">${h.link_to(_('raw diff'),
-		h.url.current(diff2=c.diff2.split(':')[-1],diff1=c.diff1.split(':')[-1],diff='raw'))}</span>
-		 &raquo; <span style="font-size:77%">${h.link_to(_('download diff'),
-		h.url.current(diff2=c.diff2.split(':')[-1],diff1=c.diff1.split(':')[-1],diff='download'))}</span>
-		</div>
-	</div>
-	<div class="code-body">
- 			%if c.no_changes:
-            	${_('No changes')}
-            %else:        
-				${c.cur_diff|n}
-            %endif
-	</div>
-</div>
-</%def>    
+<div class="box">
+    <!-- box / title -->
+    <div class="title">
+        ${self.breadcrumbs()}
+    </div>
+    <div class="table">
+		<div id="body" class="diffblock">
+			<div class="code-header">
+				<div>
+				<span>${h.link_to(c.f_path,h.url('files_home',repo_name=c.repo_name,
+				revision=c.diff2.split(':')[1],f_path=c.f_path))}</span>
+				 &raquo; <span style="font-size:77%">${h.link_to(_('diff'),
+				h.url.current(diff2=c.diff2.split(':')[-1],diff1=c.diff1.split(':')[-1],diff='diff'))}</span>
+				 &raquo; <span style="font-size:77%">${h.link_to(_('raw diff'),
+				h.url.current(diff2=c.diff2.split(':')[-1],diff1=c.diff1.split(':')[-1],diff='raw'))}</span>
+				 &raquo; <span style="font-size:77%">${h.link_to(_('download diff'),
+				h.url.current(diff2=c.diff2.split(':')[-1],diff1=c.diff1.split(':')[-1],diff='download'))}</span>
+				</div>
+			</div>
+			<div class="code-body">
+		 			%if c.no_changes:
+		            	${_('No changes')}
+		            %else:        
+						${c.cur_diff|n}
+		            %endif
+			</div>
+		</div>   
+    </div>
+</div>    
+</%def>  
+
+   

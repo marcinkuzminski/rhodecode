@@ -1,10 +1,10 @@
 ## -*- coding: utf-8 -*-
 <%inherit file="base/base.html"/>
 <%def name="title()">
-    ${c.repos_prefix}
+    ${c.hg_app_name}
 </%def>
 <%def name="breadcrumbs()">
-	${c.repos_prefix}
+	${c.hg_app_name}
 </%def>
 <%def name="page_nav()">
 	${self.menu('home')}
@@ -17,46 +17,61 @@
 		%else:
 			<span style="font-weight: bold">${name}</span>
 		%endif
-		<a style="color:#FFF" href="?sort=${name_slug}">&darr;</a>
-		<a style="color:#FFF" href="?sort=-${name_slug}">&uarr;</a>
+		<a href="?sort=${name_slug}">&darr;</a>
+		<a href="?sort=-${name_slug}">&uarr;</a>
 	</%def>
-	<table class="table_disp">
-	  <tr class="header">
-	    <td>${get_sort(_('Name'))}</td>
-	    <td>${get_sort(_('Description'))}</td>
-	    <td>${get_sort(_('Last change'))}</td>
-	    <td>${get_sort(_('Tip'))}</td>
-	    <td>${get_sort(_('Contact'))}</td>
-	    <td>${_('RSS')}</td>
-	    <td>${_('Atom')}</td>
-	  </tr>	
-	%for cnt,repo in enumerate(c.repos_list):
-		%if h.HasRepoPermissionAny('repository.write','repository.read','repository.admin')(repo['name'],'main page check'):
-
- 		<tr class="parity${cnt%2}">
-		    <td>
- 			 %if repo['repo'].dbrepo.private:
-				<img alt="${_('private')}" src="/images/icons/lock.png">
-			 %else:
-			 	<img alt="${_('public')}" src="/images/icons/lock_open.png">
-			 %endif	 
-		    ${h.link_to(repo['name'],
-		    	h.url('summary_home',repo_name=repo['name']))}</td>
-		    <td title="${repo['description']}">${h.truncate(repo['description'],60)}</td>
-	        <td>${h.age(repo['last_change'])}</td>
-	        <td>${h.link_to_if(repo['rev']>=0,'r%s:%s' % (repo['rev'],repo['tip']),
-		        h.url('changeset_home',repo_name=repo['name'],revision=repo['tip']),
-	        	class_="tooltip",
-		    	tooltip_title=h.tooltip(repo['last_msg']))}</td>
-	        <td title="${repo['contact']}">${h.person(repo['contact'])}</td>
-			<td>
-				<a title="${_('Subscribe to %s rss feed')%repo['name']}" class="rss_logo"  href="${h.url('rss_feed_home',repo_name=repo['name'])}"></a>
-			</td>        
-			<td>
-				<a title="${_('Subscribe to %s atom feed')%repo['name']}"  class="atom_logo" href="${h.url('atom_feed_home',repo_name=repo['name'])}"></a>
-			</td>
-		</tr>
-		%endif
-	%endfor
-	</table>
+	
+	
+	
+    <div class="box">
+	    <!-- box / title -->
+	    <div class="title">
+	        <h5>${_('Dashboard')}</h5>
+	    </div>
+	    <!-- end box / title -->
+        <div class="table">
+                    <table>
+            <thead>
+	            <tr>
+			        <th class="left">${get_sort(_('Name'))}</th>
+			        <th class="left">${get_sort(_('Description'))}</th>
+			        <th class="left">${get_sort(_('Last change'))}</th>
+			        <th class="left">${get_sort(_('Tip'))}</th>
+			        <th class="left">${get_sort(_('Contact'))}</th>
+			        <th class="left">${_('RSS')}</th>
+			        <th class="left">${_('Atom')}</th>
+	            </tr>
+            </thead>
+                        <tbody>
+					    %for cnt,repo in enumerate(c.repos_list):
+					        %if h.HasRepoPermissionAny('repository.write','repository.read','repository.admin')(repo['name'],'main page check'):
+					        <tr class="parity${cnt%2}">
+					            <td>
+					             %if repo['repo'].dbrepo.private:
+					                <img alt="${_('private')}" src="/images/icons/lock.png"/>
+					             %else:
+					                <img alt="${_('public')}" src="/images/icons/lock_open.png"/>
+					             %endif  
+					            ${h.link_to(repo['name'],
+					                h.url('summary_home',repo_name=repo['name']))}</td>
+					            <td title="${repo['description']}">${h.truncate(repo['description'],60)}</td>
+					            <td>${h.age(repo['last_change'])}</td>
+					            <td>${h.link_to_if(repo['rev']>=0,'r%s:%s' % (repo['rev'],repo['tip']),
+					                h.url('changeset_home',repo_name=repo['name'],revision=repo['tip']),
+					                class_="tooltip",
+					                tooltip_title=h.tooltip(repo['last_msg']))}</td>
+					            <td title="${repo['contact']}">${h.person(repo['contact'])}</td>
+					            <td>
+					                <a title="${_('Subscribe to %s rss feed')%repo['name']}" class="rss_icon"  href="${h.url('rss_feed_home',repo_name=repo['name'])}"></a>
+					            </td>        
+					            <td>
+					                <a title="${_('Subscribe to %s atom feed')%repo['name']}"  class="atom_icon" href="${h.url('atom_feed_home',repo_name=repo['name'])}"></a>
+					            </td>
+					        </tr>
+					        %endif
+					    %endfor
+                        </tbody>
+                    </table>
+            </div>
+    </div>	
 </%def>    

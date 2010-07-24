@@ -1,38 +1,76 @@
 ## -*- coding: utf-8 -*-
-<%inherit file="base/base.html"/>
-<%def name="title()">
-    ${c.repos_prefix}
-</%def>
-<%def name="breadcrumbs()">
-	${c.repos_prefix}
-</%def>
-<%def name="page_nav()">
-	&nbsp;
-	</div>
-</%def>
-<%def name="main()">
-        <div>
-        <br />
-        <h2>${_('Login to hg app')}</h2>
-        ${h.form(h.url.current())}
-        <table>
-            <tr>
-                <td>${_('Username')}</td>
-                <td>${h.text('username')}</td>
-                <td>${self.get_form_error('username')}</td>
-            </tr>
-            <tr>
-                <td>${_('Password')}</td>
-                <td>${h.password('password')}</td>
-                <td>${self.get_form_error('password')}</td> 
-            </tr>
-            <tr>
-                <td></td>
-                <td>${h.submit('login','login')}</td>
-            </tr>            
-        </table>
-        ${h.end_form()}
-        </div>
-</%def>    
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" id="mainhtml">
+    <head>
+        <title>${_('Sign In to hg-app')}</title>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <link rel="icon" href="/images/hgicon.png" type="image/png" />
+        <meta name="robots" content="index, nofollow"/>
+            
+        <!-- stylesheets -->
+        <link rel="stylesheet" type="text/css" href="/css/reset.css" />
+        <link rel="stylesheet" type="text/css" href="/css/style.css" media="screen" />
+        <link id="color" rel="stylesheet" type="text/css" href="/css/colors/blue.css" />
 
+        <!-- scripts -->
+
+    </head>
+    <body>
+<div id="login">
+            <!-- login -->
+            <div class="title">
+                <h5>${_('Sign In to hg-app')}</h5>
+                <div class="corner tl"></div>
+                <div class="corner tr"></div>
+            </div>
+            <div class="inner">            
+                ${h.form(h.url.current())}
+                <div class="form">
+                    <!-- fields -->
+
+                    <div class="fields">
+                        <div class="field">
+                            <div class="label">
+                                <label for="username">${_('Username')}:</label>
+                            </div>
+                            <div class="input">
+                                ${h.text('username',class_='focus',size=40)}
+                            </div>
+                            
+                        </div>                     
+                        <div class="field">
+                            <div class="label">
+                                <label for="password">${_('Password')}:</label>
+                            </div>
+                            <div class="input">
+                                ${h.password('password',class_='focus',size=40)}
+                            </div>
+                            
+                        </div>
+                        ##<div class="field">
+                        ##    <div class="checkbox">
+                        ##        <input type="checkbox" id="remember" name="remember" />
+                        ##        <label for="remember">Remember me</label>
+                        ##    </div>
+                        ##</div>
+                        <div class="buttons">
+                            ${h.submit('sign_in','Sign In',class_="ui-button ui-widget ui-state-default ui-corner-all")}
+                        </div>
+                    </div>
+                    <!-- end fields -->
+                    <!-- links -->
+                    <div class="links">
+                        ${h.link_to(_('Forgot your password ?'),h.url('#'))}
+                         / 
+                        ${h.link_to(_("Don't have an account ?"),h.url('register'))}
+                    </div>
+
+                    <!-- end links -->
+                </div>
+                ${h.end_form()}
+            </div>
+            <!-- end login -->
+        </div>
+    </body>
+</html>
 

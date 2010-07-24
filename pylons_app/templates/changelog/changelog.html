@@ -3,106 +3,107 @@
 <%def name="title()">
     ${_('Changelog - %s') % c.repo_name}
 </%def>
-<%def name="breadcrumbs()">
+
+<%def name="breadcrumbs_links()">
     ${h.link_to(u'Home',h.url('/'))}
-    / 
-    ${h.link_to(c.repo_name,h.url('changelog_home',repo_name=c.repo_name))}
-    /
-    ${_('changelog')}
+    &raquo;
+    ${h.link_to(c.repo_name,h.url('summary_home',repo_name=c.repo_name))}
+    &raquo;
+    ${_('Changelog')} - ${_('showing ')} ${c.size if c.size <= c.total_cs else c.total_cs} ${_('out of')} ${c.total_cs} ${_('revisions')}  
 </%def>
+
 <%def name="page_nav()">
 	${self.menu('changelog')}     
 </%def>
 
 <%def name="main()">
-
-    <h2 class="no-link no-border">${_('Changelog')} - ${_('showing ')} 
-    	${c.size if c.size <= c.total_cs else c.total_cs}
-    	${_('out of')} ${c.total_cs} ${_('revisions')}
-    </h2>
-	<noscript>${_('The revision graph only works with JavaScript-enabled browsers.')}</noscript>
-% if c.pagination:
-
-<div id="graph">
-	<div id="graph_nodes">
-		<canvas id="graph_canvas"></canvas>
-	</div>
-	<div id="graph_content">
-		<div class="container_header">
-			${h.form(h.url.current(),method='get')}
-			<div>
-				<span>${_('Show')}: </span>
-				<span>${h.text('size',size=2,value=c.size)}</span>
-				<span>${_('revisions')}</span>
-				${h.submit('set',_('set'))}
-			</div>
-			${h.end_form()}
-		</div>
-	%for cnt,cs in enumerate(c.pagination):
-		<div id="chg_${cnt+1}" class="container">
-			<div class="left">
-				<div class="date">${_('commit')} ${cs.revision}: ${cs.raw_id}@${cs.date}</div>
-					<span class="logtags">
-						<span class="branchtag">${cs.branch}</span>
-						%for tag in cs.tags:
-							<span class="tagtag">${tag}</span>
-						%endfor
-					</span>					
-				<div class="author">${cs.author}</div>
-				<div class="message">
-					${h.link_to(h.wrap_paragraphs(cs.message),
-					h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id))}
+<div class="box">
+    <!-- box / title -->
+    <div class="title">
+        ${self.breadcrumbs()}
+    </div>
+    <div class="table">
+		% if c.pagination:
+			<div id="graph">
+				<div id="graph_nodes">
+					<canvas id="graph_canvas"></canvas>
 				</div>
-			</div>	
-			<div class="right">
-						<div class="changes">
-							<span class="removed" title="${_('removed')}">${len(cs.removed)}</span>
-							<span class="changed" title="${_('changed')}">${len(cs.changed)}</span>
-							<span class="added" title="${_('added')}">${len(cs.added)}</span>
-						</div>					
-							%if len(cs.parents)>1:
-							<div class="merge">
-								${_('merge')}<img alt="merge" src="/images/icons/arrow_join.png"/>
+				<div id="graph_content">
+					<div class="container_header">
+						
+        ${h.form(h.url.current(),method='get')}
+        <div class="info_box">
+          <span>${_('Show')}:</span>
+          ${h.text('size',size=1,value=c.size)}
+          <span>${_('revisions')}</span>
+          ${h.submit('set',_('set'))}
+        </div>
+        ${h.end_form()}
+						
+					</div>
+				%for cnt,cs in enumerate(c.pagination):
+					<div id="chg_${cnt+1}" class="container">
+						<div class="left">
+							<div class="date">${_('commit')} ${cs.revision}: ${cs.raw_id}@${cs.date}</div>
+								<span class="logtags">
+									<span class="branchtag">${cs.branch}</span>
+									%for tag in cs.tags:
+										<span class="tagtag">${tag}</span>
+									%endfor
+								</span>					
+							<div class="author">${cs.author}</div>
+							<div class="message">
+								${h.link_to(h.wrap_paragraphs(cs.message),
+								h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id))}
 							</div>
-							%endif						
-						%for p_cs in reversed(cs.parents):
-							<div class="parent">${_('Parent')} ${p_cs.revision}: ${h.link_to(p_cs.raw_id,
-								h.url('changeset_home',repo_name=c.repo_name,revision=p_cs.raw_id),title=p_cs.message)}
-							</div>
-						%endfor								
-			</div>				
-		</div>
-		
-	%endfor
-	</div>
-</div>
-<script type="text/javascript" src="/js/graph.js"></script>
-
-<script type="text/javascript">
-YAHOO.util.Event.onDOMReady(function(){
-	function set_canvas() {
-		var c = document.getElementById('graph_nodes');
-		var t = document.getElementById('graph_content');
-		canvas = document.getElementById('graph_canvas');
-		var div_h = t.clientHeight;
-		c.style.height=div_h+'px';
-		canvas.setAttribute('height',div_h);
-		canvas.setAttribute('width',160);
-	};
-
-	set_canvas();
-	
-	var jsdata = ${c.jsdata|n};
-	var r = new BranchRenderer();
-	r.render(jsdata); 
-
-});
-</script>
-
-<div>
-	<h2>${c.pagination.pager('$link_previous ~2~ $link_next')}</h2>
-</div>	
-%else:
-	${_('There are no changes yet')}
-%endif
-</%def>    
+						</div>	
+						<div class="right">
+									<div class="changes">
+										<span class="removed" title="${_('removed')}">${len(cs.removed)}</span>
+										<span class="changed" title="${_('changed')}">${len(cs.changed)}</span>
+										<span class="added" title="${_('added')}">${len(cs.added)}</span>
+									</div>					
+										%if len(cs.parents)>1:
+										<div class="merge">
+											${_('merge')}<img alt="merge" src="/images/icons/arrow_join.png"/>
+										</div>
+										%endif						
+									%for p_cs in reversed(cs.parents):
+										<div class="parent">${_('Parent')} ${p_cs.revision}: ${h.link_to(p_cs.raw_id,
+											h.url('changeset_home',repo_name=c.repo_name,revision=p_cs.raw_id),title=p_cs.message)}
+										</div>
+									%endfor								
+						</div>				
+					</div>
+					
+				%endfor
+				<div class="pagination-wh pagination-left">
+					${c.pagination.pager('$link_previous ~2~ $link_next')}
+				</div>			
+				</div>
+			</div>
+			
+			<script type="text/javascript" src="/js/graph.js"></script>
+			<script type="text/javascript">
+				YAHOO.util.Event.onDOMReady(function(){
+					function set_canvas() {
+						var c = document.getElementById('graph_nodes');
+						var t = document.getElementById('graph_content');
+						canvas = document.getElementById('graph_canvas');
+						var div_h = t.clientHeight;
+						c.style.height=div_h+'px';
+						canvas.setAttribute('height',div_h);
+						canvas.setAttribute('width',160);
+					};
+					set_canvas();
+					var jsdata = ${c.jsdata|n};
+					var r = new BranchRenderer();
+					r.render(jsdata); 
+				});
+			</script>
+		%else:
+			${_('There are no changes yet')}
+		%endif  
+    </div>
+</div>    
+</%def>

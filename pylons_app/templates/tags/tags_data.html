@@ -1,10 +1,10 @@
 %if c.repo_tags:    
-    <table class="table_disp">
-    	<tr class="header">
-			<td>${_('date')}</td>
-			<td>${_('revision')}</td>
-			<td>${_('name')}</td>
-			<td>${_('links')}</td>
+    <table>
+    	<tr>
+			<th class="left">${_('date')}</th>
+			<th class="left">${_('revision')}</th>
+			<th class="left">${_('name')}</th>
+			<th class="left">${_('links')}</th>
     	</tr>
 		%for cnt,tag in enumerate(c.repo_tags.items()):
 		<tr class="parity${cnt%2}">

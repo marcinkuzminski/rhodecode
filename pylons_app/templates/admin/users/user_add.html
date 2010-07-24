@@ -4,55 +4,88 @@
 <%def name="title()">
     ${_('User administration')}
 </%def>
-<%def name="breadcrumbs()">
-	${h.link_to(u'Admin',h.url('admin_home'))}
-	 /  
-	${_('Users')}
+<%def name="breadcrumbs_links()">
+    ${h.link_to(_('Admin'),h.url('admin_home'))} 
+    &raquo; 
+    ${h.link_to(_('Users'),h.url('users'))} 
+    &raquo;
+    ${_('add new user')}
 </%def>
+
 <%def name="page_nav()">
 	${self.menu('admin')}
-	${self.submenu('users')}
 </%def>
+
 <%def name="main()">
-	<div>
-        <h2>${_('User')} - ${_('add new')}</h2>
-        ${h.form(url('users'))}
-        <table>
-        	<tr>
-        		<td>${_('Username')}</td>
-        		<td>${h.text('username')}</td>
-        		<td>${self.get_form_error('username')}</td>
-        	</tr>
-        	<tr>
-        		<td>${_('Password')}</td>
-        		<td>${h.password('password')}</td>
-        		<td>${self.get_form_error('password')}</td>
-        	</tr>        	
-        	<tr>
-        		<td>${_('Name')}</td>
-        		<td>${h.text('name')}</td>
-        		<td>${self.get_form_error('name')}</td>
-        	</tr>
-        	<tr>
-        		<td>${_('Lastname')}</td>
-        		<td>${h.text('lastname')}</td>
-        		<td>${self.get_form_error('lastname')}</td>
-        	</tr>
-        	<tr>
-        		<td>${_('Email')}</td>
-        		<td>${h.text('email')}</td>
-        		<td>${self.get_form_error('email')}</td>
-        	</tr>        	        	
-        	<tr>
-        		<td>${_('Active')}</td>
-        		<td>${h.checkbox('active',value=True)}</td>
-        		<td>${self.get_form_error('active')}</td>
-        	</tr>
-        	<tr>
-        		<td></td>
-        		<td>${h.submit('save','save')}</td>
-        	</tr>
-        </table>
-        ${h.end_form()}
+<div class="box">
+    <!-- box / title -->
+    <div class="title">
+        ${self.breadcrumbs()}       
     </div>
+    <!-- end box / title -->
+    ${h.form(url('users'))}
+    <div class="form">
+        <!-- fields -->
+        <div class="fields">
+             <div class="field">
+                <div class="label">
+                    <label for="username">${_('Username')}:</label>
+                </div>
+                <div class="input">
+                    ${h.text('username')}
+                </div>
+             </div>
+            
+             <div class="field">
+                <div class="label">
+                    <label for="password">${_('Password')}:</label>
+                </div>
+                <div class="input">
+                    ${h.password('password')}
+                </div>
+             </div>
+            
+             <div class="field">
+                <div class="label">
+                    <label for="name">${_('Name')}:</label>
+                </div>
+                <div class="input">
+                    ${h.text('name')}
+                </div>
+             </div>
+            
+             <div class="field">
+                <div class="label">
+                    <label for="lastname">${_('Lastname')}:</label>
+                </div>
+                <div class="input">
+                    ${h.text('lastname')}
+                </div>
+             </div>
+            
+             <div class="field">
+                <div class="label">
+                    <label for="email">${_('Email')}:</label>
+                </div>
+                <div class="input">
+                    ${h.text('email')}
+                </div>
+             </div>
+            
+             <div class="field">
+                <div class="label label-checkbox">
+                    <label for="active">${_('Active')}:</label>
+                </div>
+                <div class="checkboxes">
+                    ${h.checkbox('active',value=True)}
+                </div>
+             </div>
+            
+            <div class="buttons">
+              ${h.submit('save','save',class_="ui-button ui-widget ui-state-default ui-corner-all")}
+            </div>             
+    	</div>
+    </div>
+    ${h.end_form()}
+</div>    
 </%def>    

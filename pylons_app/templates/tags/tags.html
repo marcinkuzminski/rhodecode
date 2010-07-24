@@ -1,20 +1,31 @@
+## -*- coding: utf-8 -*-
 <%inherit file="/base/base.html"/>
+
 <%def name="title()">
-    ${_('Tags')}
+    ${_('Administration')}
 </%def>
-<%def name="breadcrumbs()">
+
+
+<%def name="breadcrumbs_links()">
     ${h.link_to(u'Home',h.url('/'))}
-    / 
+    &raquo; 
     ${h.link_to(c.repo_name,h.url('summary_home',repo_name=c.repo_name))}
-    /
+    &raquo;
     ${_('tags')}
 </%def>
+
 <%def name="page_nav()">
-	${self.menu('tags')}    
+    ${self.menu('tags')}
 </%def>
 <%def name="main()">
-
-    <h2 class="no-link no-border">${_('Tags')}</h2>
-	<%include file='tags_data.html'/>
-
-</%def>    
+<div class="box">
+    <!-- box / title -->
+    <div class="title">
+        ${self.breadcrumbs()}
+    </div>
+    <!-- end box / title -->
+    <div class="table">
+        <%include file='tags_data.html'/>
+    </div>
+</div>    
+</%def> 

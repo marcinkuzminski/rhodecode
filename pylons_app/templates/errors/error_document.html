@@ -1,46 +1,53 @@
 ## -*- coding: utf-8 -*-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" id="mainhtml">
-<head>
-	<link rel="icon" href="/images/hgicon.png" type="image/png" />
-    <title>Error - ${c.error_message}</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <head>
+        <title>Error - ${c.error_message}</title>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+	    %if c.redirect_time:
+	        <meta http-equiv="refresh" content="${c.redirect_time}; url=${c.url_redirect}"/>
+	    %endif        
+        <link rel="icon" href="/images/hgicon.png" type="image/png" />
+        <meta name="robots" content="index, nofollow"/>
+            
+        <!-- stylesheets -->
+        <link rel="stylesheet" type="text/css" href="/css/reset.css" />
+        <link rel="stylesheet" type="text/css" href="/css/style.css" media="screen" />
+        <link id="color" rel="stylesheet" type="text/css" href="/css/colors/blue.css" />
+	    <style type="text/css">
+	     #main_div{
+	       border: 0px solid #000;
+	       width: 500px;
+	       margin: auto;
+	       text-align: center;
+	       margin-top: 200px;
+	       font-size: 1.8em;
+	     }
+	     .error_message{
+	        text-align: center;
+	        color:red;
+	        font-size: 1.8em;
+	     }
+	    </style>
     
-    %if c.redirect_time:
-        <meta http-equiv="refresh" content="${c.redirect_time}; url=${c.url_redirect}"/>
-    %endif
-    
-    
-    <style type="text/css">
-     
-     body {
-       font-family: sans-serif;
-     }
-     #main_div{
-       border: 0px solid #000;
-       width: 500px;
-       margin: auto;
-       text-align: center;
-       margin-top: 200px;
-     }
-     .error_message{
-        text-align: center;
-        color:red;
-     }
-    </style>
-</head>
-       
-<body>
-	<div id="main_div">
-		<h1 class="error_message">${c.error_message}</h1>
-		
-		<p>${c.error_explanation}</p>
-        %if c.redirect_time:
-            <p>${_('You will be redirected to %s in %s seconds') % (c.redirect_module,c.redirect_time)}</p>
-	    %endif		
-		
-	</div>
-</body>
-</html>
+    </head>
+    <body>
 
+        <div id="login">
+            <div class="table">            
+				<div id="main_div">
+					<h1 class="error_message">${c.error_message}</h1>
+					
+					<p>${c.error_explanation}</p>
+			        %if c.redirect_time:
+			            <p>${_('You will be redirected to %s in %s seconds') % (c.redirect_module,c.redirect_time)}</p>
+				    %endif		
+					
+				</div>
+            </div>
+            <!-- end login -->
+        </div>
+    </body>
+    
+</html>
 

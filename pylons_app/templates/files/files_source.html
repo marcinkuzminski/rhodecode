@@ -1,5 +1,5 @@
-<dl class="overview">
-	<dt>${_('Revision')}</dt>
+<dl>
+	<dt>${_('Last revision')}</dt>
 	<dd>r${c.files_list.last_changeset.revision}:${c.files_list.last_changeset._short}</dd>
 	<dt>${_('Size')}</dt>
 	<dd>${h.format_byte_size(c.files_list.size,binary=True)}</dd>
@@ -14,11 +14,12 @@
 		${h.form(h.url('files_diff_home',repo_name=c.repo_name,f_path=c.f_path),method='GET')}
 		${h.hidden('diff2',c.files_list.last_changeset._short)}
 		${h.select('diff1','',c.file_history)}
-		${h.submit('diff','diff')}
+		${h.submit('diff','diff',class_="ui-button ui-widget ui-state-default ui-corner-all")}
 		${h.end_form()}
 	</dd>
-					
-</dl>		
+</dl>	
+
+	
 <div id="body" class="codeblock">
 	<div class="code-header">
 		<div class="revision">${c.files_list.name}@r${c.files_list.last_changeset.revision}:${c.files_list.last_changeset._short}</div>

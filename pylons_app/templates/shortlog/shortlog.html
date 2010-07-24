@@ -2,23 +2,32 @@
 <%inherit file="/base/base.html"/>
 
 <%def name="title()">
-    ${_('Repository managment')}
+    ${_('Shortlog')}
 </%def>
-<%def name="breadcrumbs()">
+
+
+<%def name="breadcrumbs_links()">
     ${h.link_to(u'Home',h.url('/'))}
-    / 
-    ${h.link_to(c.repo_name,h.url('shortlog_home',repo_name=c.repo_name))}
-    /
+    &raquo; 
+    ${h.link_to(c.repo_name,h.url('summary_home',repo_name=c.repo_name))}
+    &raquo;
     ${_('shortlog')}
 </%def>
+
 <%def name="page_nav()">
-	${self.menu('shortlog')}     
+    ${self.menu('shortlog')}
 </%def>
 <%def name="main()">
-
-    <h2 class="no-link no-border">${_('Shortlog')}</h2>
-
-	<div id="shortlog_data">
-		${c.shortlog_data}
-	</div>
-</%def>    
+<div class="box">
+    <!-- box / title -->
+    <div class="title">
+        ${self.breadcrumbs()}
+    </div>
+    <!-- end box / title -->
+    <div class="table">
+	    <div id="shortlog_data">
+	        ${c.shortlog_data}
+	    </div>
+    </div>
+</div>    
+</%def>

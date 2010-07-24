@@ -4,41 +4,57 @@
 <%def name="title()">
     ${_('Repositories administration')}
 </%def>
-<%def name="breadcrumbs()">
-	${h.link_to(u'Admin',h.url('admin_home'))}
-	 /  
-	${_('Repos')}
+
+<%def name="breadcrumbs_links()">
+    ${h.link_to(_('Admin'),h.url('admin_home'))} 
+    &raquo; 
+    ${h.link_to(_('Repositories'),h.url('repos'))} 
+    &raquo;
+    ${_('add new')}
 </%def>
+
 <%def name="page_nav()">
 	${self.menu('admin')}
-	${self.submenu('repos')}
 </%def>
 <%def name="main()">
-	<div>
-        <h2>${_('Repositories')} - ${_('add new')}</h2>
-        ${h.form(url('repos'))}
-        <table>
-        	<tr>
-        		<td>${_('Name')}</td>
-        		<td>${h.text('repo_name',c.new_repo)}</td>
-        		<td>${self.get_form_error('repo_name')}</td>
-        	</tr>
-        	<tr>
-        		<td>${_('Description')}</td>
-        		<td>${h.textarea('description',cols=23,rows=5)}</td>
-        		<td>${self.get_form_error('description')}</td>
-        	</tr>
-        	<tr>
-        		<td>${_('Private')}</td>
-        		<td>${h.checkbox('private',value="True")}</td>
-        		<td>${self.get_form_error('private')}</td>
-        	</tr>
-        	<tr>
-        		<td></td>
-        		<td>${h.submit('add','add')}</td>
-        	</tr>
-        	        	        	
-        </table>
-        ${h.end_form()}
+<div class="box">
+    <!-- box / title -->
+    <div class="title">
+        ${self.breadcrumbs()}      
     </div>
+    ${h.form(url('repos'))}
+    <div class="form">
+        <!-- fields -->
+        <div class="fields">
+            <div class="field">
+	            <div class="label">
+	                <label for="repo_name">${_('Name')}:</label>
+	            </div>
+	            <div class="input">
+	                ${h.text('repo_name',c.new_repo)}
+	            </div>
+             </div>
+            <div class="field">
+                <div class="label label-textarea">
+                    <label for="description">${_('Description')}:</label>
+                </div>
+                <div class="textarea text-area editor">
+                    ${h.textarea('description',cols=23,rows=5)}
+                </div>
+             </div>
+            <div class="field">
+                <div class="label label-checkbox">
+                    <label for="private">${_('Private')}:</label>
+                </div>
+                <div class="checkboxes">
+                    ${h.checkbox('private',value="True")}
+                </div>
+             </div>
+	        <div class="buttons">
+	          ${h.submit('add','add',class_="ui-button ui-widget ui-state-default ui-corner-all")}
+	        </div>                                                          
+        </div>
+    </div>    
+    ${h.end_form()}    
+</div>
 </%def>   

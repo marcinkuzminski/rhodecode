@@ -4,42 +4,52 @@
 <%def name="title()">
     ${_('Repositories administration')}
 </%def>
-<%def name="breadcrumbs()">
-	${h.link_to(u'Admin',h.url('admin_home'))}
-	 /  
-	 ${_('Repos')}
+
+
+<%def name="breadcrumbs_links()">
+    ${h.link_to(_('Admin'),h.url('admin_home'))} &raquo; ${_('Repositories')}
 </%def>
 <%def name="page_nav()">
 	${self.menu('admin')}
-	${self.submenu('repos')}
 </%def>
 <%def name="main()">
-	<div>
-        <h2>${_('Repositories administration')}</h2>
+<div class="box">
+    <!-- box / title -->
+    <div class="title">
+        ${self.breadcrumbs()}
+        <ul class="links">
+          <li>
+            <span>${h.link_to(u'ADD NEW REPO',h.url('new_repo'),class_="add_icon")}</span>
+          </li>          
+        </ul>        
+    </div>
+    <!-- end box / title -->
+    <div class="table">
         <table class="table_disp">
         <tr class="header">
-            <td>${_('name')}</td>
-            <td>${_('last revision')}</td>
-            <td>${_('action')}</td>
+            <th class="left">${_('name')}</th>
+            <th class="left">${_('last revision')}</th>
+            <th class="left">${_('action')}</th>
         </tr>
-	        %for cnt,repo in enumerate(c.repos_list):
-	 		<tr class="parity${cnt%2}">
-	 			 <td>
-	 			 %if repo['repo'].dbrepo.private:
-					<img alt="${_('private')}" src="/images/icons/lock.png">
-				 %else:
-				 	<img alt="${_('public')}" src="/images/icons/lock_open.png">
-				 %endif	 		
-			    ${h.link_to(repo['name'],h.url('edit_repo',repo_name=repo['name']))}</td>
-		        <td>r${repo['rev']}:${repo['tip']}</td>
+            %for cnt,repo in enumerate(c.repos_list):
+            <tr class="parity${cnt%2}">
+                 <td>
+                 %if repo['repo'].dbrepo.private:
+                    <img alt="${_('private')}" src="/images/icons/lock.png"/>
+                 %else:
+                    <img alt="${_('public')}" src="/images/icons/lock_open.png"/>
+                 %endif         
+                ${h.link_to(repo['name'],h.url('edit_repo',repo_name=repo['name']))}</td>
+                <td>r${repo['rev']}:${repo['tip']}</td>
                 <td>
                   ${h.form(url('repo', repo_name=repo['name']),method='delete')}
-                  	${h.submit('remove','delete',class_="delete_icon action_button",onclick="return confirm('Confirm to delete this repository');")}
+                    ${h.submit('remove','delete',class_="delete_icon action_button",onclick="return confirm('Confirm to delete this repository');")}
                   ${h.end_form()}
-     			</td>
-			</tr>
-			%endfor
-		</table>
-		<span class="add_icon">${h.link_to(u'add repo',h.url('new_repo'))}</span>    
+                </td>
+            </tr>
+            %endfor
+        </table>
     </div>
+</div> 
+		   
 </%def>    

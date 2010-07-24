@@ -1,71 +1,270 @@
 <%inherit file="/base/base.html"/>
+
 <%def name="title()">
-    ${_('Repository managment')}
+    ${_('Mercurial Repository Overview')}
 </%def>
-<%def name="breadcrumbs()">
+
+
+
+<%def name="breadcrumbs_links()">
     ${h.link_to(u'Home',h.url('/'))}
-    / 
+    &raquo; 
     ${h.link_to(c.repo_name,h.url('summary_home',repo_name=c.repo_name))}
-    /
+    &raquo;
     ${_('summary')}
 </%def>
+
 <%def name="page_nav()">
 	${self.menu('summary')}    
 </%def>
 
-<%def name="js()">
-<script type="text/javascript" src="/js/yui/utilities/utilities.js"></script>
+<%def name="main()">
 <script type="text/javascript">
 var E = YAHOO.util.Event;
 var D = YAHOO.util.Dom;
 
 E.onDOMReady(function(e){
     id = 'clone_url';
-	E.addListener(id,'click',function(e){
-	    D.get('clone_url').select();
-	})
+    E.addListener(id,'click',function(e){
+        D.get('clone_url').select();
+    })
 })
 </script>
-</%def>
-
-<%def name="main()">
-    <h2 class="no-link no-border">${_('Mercurial Repository Overview')}</h2>
-    <dl class="overview">
-        <dt>${_('name')}</dt>
-        <dd>${c.repo_info.name}</dd>
-        <dt>${_('description')}</dt>
-        <dd>${c.repo_info.description}</dd>
-        <dt>${_('contact')}</dt>
-        <dd>${c.repo_info.contact}</dd>
-        <dt>${_('last change')}</dt>
-        <dd>${h.age(c.repo_info.last_change)} - ${h.rfc822date(c.repo_info.last_change)}</dd>
-        <dt>${_('clone url')}</dt>
-        <dd><input type="text" id="clone_url"  readonly="readonly" value="hg clone ${c.clone_repo_url}" size="70"/></dd>
-        <dt>${_('download')}</dt>
-        <dd>
-       	%for cnt,archive in enumerate(c.repo_info._get_archives()):
-       		 %if cnt >=1:
-       		 |
-       		 %endif
-       		 ${h.link_to(c.repo_info.name+'.'+archive['type'],
-       			h.url('files_archive_home',repo_name=c.repo_info.name,
-       			revision='tip',fileformat=archive['extension']),class_="archive_logo")}
-		%endfor
-        </dd>
-        <dt>${_('feeds')}</dt>
-        <dd>
-        	${h.link_to(_('RSS'),h.url('rss_feed_home',repo_name=c.repo_info.name),class_='rss_logo')}
-			${h.link_to(_('Atom'),h.url('atom_feed_home',repo_name=c.repo_info.name),class_='atom_logo')}
-        </dd>
-    </dl>
-
-    <h2>${h.link_to(_('Last ten changes'),h.url('changelog_home',repo_name=c.repo_name))}</h2>
-	<%include file='../shortlog/shortlog_data.html'/>
-
-    <h2>${h.link_to(_('Last ten tags'),h.url('tags_home',repo_name=c.repo_name))}</h2>
-	<%include file='../tags/tags_data.html'/>
+<div class="box box-left">
+    <!-- box / title -->
+    <div class="title">
+        ${self.breadcrumbs()}
+    </div>
+    <!-- end box / title -->
+	<div class="form">
+	  <div class="fields">
+		 
+			 <div class="field">
+			  <div class="label">
+			      <label>${_('Name')}:</label>
+			  </div>
+			  <div class="input-short">
+			      ${c.repo_info.name}
+			  </div>
+			 </div>
+			
+			
+			 <div class="field">
+			  <div class="label">
+			      <label>${_('Description')}:</label>
+			  </div>
+			  <div class="input-short">
+			      ${c.repo_info.description}
+			  </div>
+			 </div>
+			
+			
+			 <div class="field">
+			  <div class="label">
+			      <label>${_('Contact')}:</label>
+			  </div>
+			  <div class="input-short">
+			      ${c.repo_info.contact}
+			  </div>
+			 </div>
+			
+			 <div class="field">
+			  <div class="label">
+			      <label>${_('Last change')}:</label>
+			  </div>
+			  <div class="input-short">
+			      ${h.age(c.repo_info.last_change)} - ${h.rfc822date(c.repo_info.last_change)}
+			  </div>
+			 </div>
+			
+			 <div class="field">
+			  <div class="label">
+			      <label>${_('Clone url')}:</label>
+			  </div>
+			  <div class="input-short">
+			      <input type="text" id="clone_url"  readonly="readonly" value="hg clone ${c.clone_repo_url}" size="70"/>
+			  </div>
+			 </div>
+			
+			 <div class="field">
+			  <div class="label">
+			      <label>${_('Download')}:</label>
+			  </div>
+			  <div class="input-short">
+		        %for cnt,archive in enumerate(c.repo_info._get_archives()):
+		             %if cnt >=1:
+		             |
+		             %endif
+		             ${h.link_to(c.repo_info.name+'.'+archive['type'],
+		                h.url('files_archive_home',repo_name=c.repo_info.name,
+		                revision='tip',fileformat=archive['extension']),class_="archive_icon")}
+		        %endfor
+			  </div>
+			 </div>
+			 
+			 <div class="field">
+			  <div class="label">
+			      <label>${_('Feeds')}:</label>
+			  </div>
+			  <div class="input-short">
+	            ${h.link_to(_('RSS'),h.url('rss_feed_home',repo_name=c.repo_info.name),class_='rss_icon')}
+	            ${h.link_to(_('Atom'),h.url('atom_feed_home',repo_name=c.repo_info.name),class_='atom_icon')}
+			  </div>
+			 </div>				 			 			 
+	  </div>		 
+	</div>				
+</div>
+        
+<div class="box box-right">
+    <!-- box / title -->
+    <div class="title">
+        <h5>${_('Last month commit activity')}</h5>
+    </div>
     
-    <h2>${h.link_to(_('Last ten branches'),h.url('branches_home',repo_name=c.repo_name))}</h2>
-	<%include file='../branches/branches_data.html'/>
+    <div class="table">
+        <div id="commit_history" style="width:600px;height:370px;float:left"></div>
+    	<div id="legend_data">
+	    	<div id="legend_container"></div>
+	    	<div id="legend_choices">
+				<table id="legend_choices_tables" style="font-size:smaller;color:#545454">
+				
+				</table>
+	    	</div>
+    	</div>
+		<script type="text/javascript">
+		
+		(function () {
+			var datasets = {${c.commit_data|n}};
+			var i = 0;
+		    var choiceContainer = YAHOO.util.Dom.get("legend_choices");
+		    var choiceContainerTable = YAHOO.util.Dom.get("legend_choices_tables");
+		    for(var key in datasets) {
+		        datasets[key].color = i;
+		        i++;
+		        choiceContainerTable.innerHTML += '<tr>'+
+		        									'<td>'+
+		        									'<input type="checkbox" name="' + key +'" checked="checked" />'+datasets[key].label+
+		        									'</td>'+
+		        								  '</tr>';
+		    };
+		    
+
+		    function plotAccordingToChoices() {
+		        var data = [];
+
+		        var inputs = choiceContainer.getElementsByTagName("input");
+		        for(var i=0; i<inputs.length; i++) {
+		            if(!inputs[i].checked)
+		                continue;
+
+		            var key = inputs[i].name;
+		            if (key && datasets[key])
+		                data.push(datasets[key]);
+		        };
+
+		        if (data.length > 0){
+				    var plot = YAHOO.widget.Flot("commit_history", data,
+					        { bars: { show: true, align:'left' },
+			    			  points: { show: true, radius:0,fill:true },
+			    			  legend:{show:true, container:"legend_container"},
+			    	          selection: { mode: "xy" },
+			    	          yaxis:{tickSize:[1]},
+				              xaxis: { mode: "time", timeformat: "%d",tickSize:[1, "day"],min:${c.ts_min},max:${c.ts_max} }, 
+				              grid: { hoverable: true, clickable: true,autoHighlight:true },
+					        });
+		        
+				    function showTooltip(x, y, contents) {
+				        var div=document.getElementById('tooltip');
+				        if(!div) {
+				            div = document.createElement('div');
+				            div.id="tooltip";
+				            div.style.position="absolute";
+				            div.style.border='1px solid #fdd';
+				            div.style.padding='2px';
+				            div.style.backgroundColor='#fee';
+				            document.body.appendChild(div);
+				        }
+				        YAHOO.util.Dom.setStyle(div, 'opacity', 0);
+				        div.innerHTML = contents;
+				        div.style.top=(y + 5) + "px";
+				        div.style.left=(x + 5) + "px";
+		
+				        var anim = new YAHOO.util.Anim(div, {opacity: {to: 0.8}}, 0.2);
+				        anim.animate();
+				    }
+
+			        var previousPoint = null;
+			        plot.subscribe("plothover", function (o) {
+				        var pos = o.pos;
+				        var item = o.item;
+				        
+				        //YAHOO.util.Dom.get("x").innerHTML = pos.x.toFixed(2);
+				        //YAHOO.util.Dom.get("y").innerHTML = pos.y.toFixed(2);
+		                if (item) {
+		                    if (previousPoint != item.datapoint) {
+		                        previousPoint = item.datapoint;
+		                        
+		                        var tooltip = YAHOO.util.Dom.get("tooltip");
+		                        if(tooltip) {
+		                        	  tooltip.parentNode.removeChild(tooltip);
+		                        }
+		                        var x = item.datapoint.x.toFixed(2);
+		                        var y = item.datapoint.y.toFixed(2);
+
+		                        if (!item.series.label){
+		                            item.series.label = 'commits';
+			                    }
+		                        var d = new Date(x*1000);
+		                        var fd = d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
+		                        var nr_commits = parseInt(y);
+		                        showTooltip(item.pageX, item.pageY, item.series.label + " on " + fd + ": " + nr_commits+" commits");
+		                    }
+		                }
+		                else {
+		                	  var tooltip = YAHOO.util.Dom.get("tooltip");
+		                	  
+					          if(tooltip) {
+					                tooltip.parentNode.removeChild(tooltip);
+					          }
+		                    previousPoint = null;
+		                }
+			        });
+
+			    }
+		    }
+
+		    YAHOO.util.Event.on(choiceContainer.getElementsByTagName("input"), "click", plotAccordingToChoices);
+
+		    plotAccordingToChoices();
+		    })();
+         </script>
+
+    </div>
+</div>    
+
+<div class="box">    
+    <div class="title">
+        <div class="breadcrumbs">${h.link_to(_('Last ten changes'),h.url('changelog_home',repo_name=c.repo_name))}</div>
+    </div>    
+    <div class="table">
+        <%include file='../shortlog/shortlog_data.html'/>
+    </div>
+</div>
+<div class="box">    
+    <div class="title">
+        <div class="breadcrumbs">${h.link_to(_('Last ten tags'),h.url('tags_home',repo_name=c.repo_name))}</div>
+    </div>    
+    <div class="table">
+        <%include file='../tags/tags_data.html'/>
+    </div>
+</div>
+<div class="box">
+    <div class="title">
+        <div class="breadcrumbs">${h.link_to(_('Last ten branches'),h.url('branches_home',repo_name=c.repo_name))}</div>
+    </div>    
+    <div class="table">
+        <%include file='../branches/branches_data.html'/>
+    </div>      
+</div> 
 
 </%def>    

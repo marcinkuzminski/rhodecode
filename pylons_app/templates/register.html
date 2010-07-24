@@ -1,0 +1,88 @@
+## -*- coding: utf-8 -*-
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" id="mainhtml">
+    <head>
+        <title>${_('Sign Up to hg-app')}</title>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <link rel="icon" href="/images/hgicon.png" type="image/png" />
+        <meta name="robots" content="index, nofollow"/>
+            
+        <!-- stylesheets -->
+        <link rel="stylesheet" type="text/css" href="/css/reset.css" />
+        <link rel="stylesheet" type="text/css" href="/css/style.css" media="screen" />
+        <link id="color" rel="stylesheet" type="text/css" href="/css/colors/blue.css" />
+
+        <!-- scripts -->
+
+    </head>
+    <body>
+		<div id="register">
+			
+			<div class="title">
+				<h5>${_('Sign Up to hg-app')}</h5>
+                <div class="corner tl"></div>
+                <div class="corner tr"></div>				
+			</div>
+			<div class="inner">
+			    ${h.form(url('register'))}
+			    <div class="form">
+			        <!-- fields -->
+			        <div class="fields">
+			             <div class="field">
+			                <div class="label">
+			                    <label for="username">${_('Username')}:</label>
+			                </div>
+			                <div class="input">
+			                    ${h.text('username')}
+			                </div>
+			             </div>
+			            
+			             <div class="field">
+			                <div class="label">
+			                    <label for="password">${_('New Password')}:</label>
+			                </div>
+			                <div class="input">
+			                    ${h.password('password')}
+			                </div>
+			             </div>
+			            
+			             <div class="field">
+			                <div class="label">
+			                    <label for="name">${_('First Name')}:</label>
+			                </div>
+			                <div class="input">
+			                    ${h.text('name')}
+			                </div>
+			             </div>
+			            
+			             <div class="field">
+			                <div class="label">
+			                    <label for="lastname">${_('Last Name')}:</label>
+			                </div>
+			                <div class="input">
+			                    ${h.text('lastname')}
+			                </div>
+			             </div>
+			            
+			             <div class="field">
+			                <div class="label">
+			                    <label for="email">${_('Email')}:</label>
+			                </div>
+			                <div class="input">
+			                    ${h.text('email')}
+			                </div>
+			             </div>
+			                        
+			            <div class="buttons">
+				            <div class="nohighlight">
+				              ${h.submit('sign_up','Sign Up',class_="ui-button ui-widget ui-state-default ui-corner-all")}
+				            </div>
+			            </div>             
+			    	</div>
+			    </div>
+			    ${h.end_form()}
+			</div>    
+	    </div>
+    </body>
+</html>
+

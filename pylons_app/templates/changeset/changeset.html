@@ -3,23 +3,26 @@
 <%def name="title()">
     ${_('Changeset')}
 </%def>
-<%def name="breadcrumbs()">
+
+<%def name="breadcrumbs_links()">
     ${h.link_to(u'Home',h.url('/'))}
-    / 
-    ${h.link_to(c.repo_name,h.url('changeset_home',repo_name=c.repo_name))}
-    /
-    ${_('changeset')}
+    &raquo;
+    ${h.link_to(c.repo_name,h.url('summary_home',repo_name=c.repo_name))}
+    &raquo;
+    ${_('Changeset')} - r${c.changeset.revision}:${c.changeset.raw_id}
 </%def>
+
 <%def name="page_nav()">
     ${self.menu('changelog')}     
 </%def>
-<%def name="css()">
-<link rel="stylesheet" href="/css/monoblue_custom.css" type="text/css" />
-<link rel="stylesheet" href="/css/diff.css" type="text/css" />
-</%def>
+
 <%def name="main()">
-    <h2 class="no-link no-border">${_('Changeset')} - r${c.changeset.revision}:${c.changeset.raw_id}</h2>
-    
+<div class="box">
+    <!-- box / title -->
+    <div class="title">
+        ${self.breadcrumbs()}
+    </div>
+    <div class="table">
     <div id="changeset_content">
 		<div class="container">
 			<div class="left">
@@ -84,6 +87,8 @@
 			</div>
 		</div>
 		%endif
-	%endfor
-			
-</%def>    
+	%endfor 
+    </div>
+</div>    
+	
+</%def>

@@ -4,50 +4,81 @@
 <%def name="title()">
     ${_('Settings administration')}
 </%def>
-<%def name="breadcrumbs()">
-	${h.link_to(u'Admin',h.url('admin_home'))}
-	 /  
-	 ${_('Settings')}
+
+
+
+<%def name="breadcrumbs_links()">
+    ${h.link_to(_('Admin'),h.url('admin_home'))} &raquo; ${_('Settings')}
 </%def>
+
 <%def name="page_nav()">
 	${self.menu('admin')}
-	${self.submenu('settings')}
 </%def>
-<%def name="main()">
-	<div>
-	<h2>${_('Settings administration')}</h2>
 
-     ${h.form(url('admin_setting', id='mapping'),method='put')}
-       <table class="table_disp">
-           <tr class="header">
-            <td colspan="2">${_('Remap and rescan repositories')}</td>
-           </tr>
-           <tr align="right">
-            <td><span class="tooltip" tooltip_title="${h.tooltip(_('In case a repository was deleted from filesystem and there are leftovers in the database check this option to scan obsolete data in database and remove it.'))}">
-            ${_('destroy old data')}</span> ${h.checkbox('destroy',True)}</td>
-            <td>${h.submit('rescan','rescan repositories')}</td>   
-       </table>
-     ${h.end_form()}
-     <br/>	
-     ${h.form(url('admin_setting', id='global'),method='put')}
-	   <table class="table_disp">
-	       <tr class="header">
-	           <td colspan="3">${_('Global application settings')}</td>
-	       </tr>
-	       <tr>
-	           <td>${_('Application name')}</td>
-	           <td>${h.text('app_title',size=30)}${self.get_form_error('app_title')}</td>
-	       </tr>
-           <tr>
-               <td>${_('Realm text')}</td>
-               <td>${h.text('app_auth_realm',size=30)}${self.get_form_error('app_auth_realm')}</td>
-           </tr>
-           <tr>
-	           <td></td>
-	           <td>${h.submit('save','save settings')}</td>   
-           </tr>
-	   </table>
-     ${h.end_form()}
-    
+<%def name="main()">
+<div class="box">
+    <!-- box / title -->
+    <div class="title">
+        ${self.breadcrumbs()}       
     </div>
+    <!-- end box / title -->
+    
+    ${h.form(url('admin_setting', id='mapping'),method='put')}
+    <div class="form">
+        <!-- fields -->
+        <h3>${_('Remap and rescan repositories')}</h3>
+        <div class="fields">
+			<div class="field">
+		        <div class="label label-checkbox">
+		            <label for="-button">${_('rescan option')}:</label>
+		        </div>
+		        <div class="checkboxes">
+		            <div class="checkbox">
+		                ${h.checkbox('destroy',True)}
+		                <label for="checkbox-1">
+		                <span class="tooltip" tooltip_title="${h.tooltip(_('In case a repository was deleted from filesystem and there are leftovers in the database check this option to scan obsolete data in database and remove it.'))}">
+		                ${_('destroy old data')}</span> </label>
+		            </div>
+		        </div>
+			</div>
+                            
+            <div class="buttons">
+            ${h.submit('rescan','rescan repositories',class_="ui-button ui-widget ui-state-default ui-corner-all")}</td>
+            </div>                                                          
+        </div>
+    </div>  
+    ${h.end_form()}
+     
+    ${h.form(url('admin_setting', id='global'),method='put')}
+    <div class="form">
+        <!-- fields -->
+        <h3>${_('Global application settings')}</h3>
+        <div class="fields">
+             
+             <div class="field">
+                <div class="label">
+                    <label for="input-small">${_('Application name')}:</label>
+                </div>
+                <div class="input">
+                    ${h.text('app_title',size=30)}
+                </div>
+             </div>
+                          
+            <div class="field">
+                <div class="label">
+                    <label for="input-small">${_('Realm text')}:</label>
+                </div>
+                <div class="input">
+                    ${h.text('app_auth_realm',size=30)}
+                </div>
+            </div>
+                                     
+            <div class="buttons">
+                ${h.submit('save','save settings',class_="ui-button ui-widget ui-state-default ui-corner-all")}
+           </div>                                                          
+        </div>
+    </div>      
+    ${h.end_form()}
+    
+</div>
 </%def>    

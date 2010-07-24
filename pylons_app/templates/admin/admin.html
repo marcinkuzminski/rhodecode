@@ -4,18 +4,25 @@
 <%def name="title()">
     ${_('Administration')}
 </%def>
-<%def name="breadcrumbs()">
-	${h.link_to(u'Admin',h.url('admin_home'))}
+
+<%def name="breadcrumbs_links()">
+    ${_('Admin dashboard - journal')}
 </%def>
+
 <%def name="page_nav()">
 	${self.menu('admin')}
-	${self.submenu('')}
 </%def>
 <%def name="main()">
-    <div>
-        <h2>Welcome ${c.hg_app_user.username}</h2>
-		    <div id="user_log">
-				${c.log_data}
-			</div>
-    </div>
+<div class="box">
+	<!-- box / title -->
+	<div class="title">
+	    ${self.breadcrumbs()}
+	</div>
+	<!-- end box / title -->
+	<div class="table">
+	    <div id="user_log">
+	        ${c.log_data}
+	    </div>
+	</div>
+</div>    
 </%def>

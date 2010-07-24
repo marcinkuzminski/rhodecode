@@ -4,42 +4,55 @@
 <%def name="title()">
     ${_('Users administration')}
 </%def>
-<%def name="breadcrumbs()">
-	${h.link_to(u'Admin',h.url('admin_home'))}
-	 /  
-	 ${_('Users')}
+
+<%def name="breadcrumbs_links()">
+    ${h.link_to(_('Admin'),h.url('admin_home'))} &raquo; ${_('Users')}
 </%def>
+
 <%def name="page_nav()">
 	${self.menu('admin')}
-	${self.submenu('users')}
 </%def>
+
 <%def name="main()">
-	<div>
-        <h2>${_('Users administration')}</h2>
+<div class="box">
+    <!-- box / title -->
+    <div class="title">
+        ${self.breadcrumbs()}
+        <ul class="links">
+          <li>
+            <span>${h.link_to(u'ADD NEW USER',h.url('new_user'),class_="add_icon")}</span>
+          </li>
+          
+        </ul>        
+    </div>
+    <!-- end box / title -->
+    <div class="table">
         <table class="table_disp">
-         <tr class="header">
-            <td>${_('username')}</td>
-            <td>${_('name')}</td>
-            <td>${_('lastname')}</td>
-            <td>${_('active')}</td>
-            <td>${_('admin')}</td>
-            <td>${_('action')}</td>
-         </tr>
-            %for user in c.users_list:
-                <tr>
+        <tr class="header">
+            <th class="left">${_('username')}</th>
+            <th class="left">${_('name')}</th>
+            <th class="left">${_('lastname')}</th>
+            <th class="left">${_('active')}</th>
+            <th class="left">${_('admin')}</th>
+            <th class="left">${_('action')}</th>
+        </tr>
+            %for cnt,user in enumerate(c.users_list):
+             %if user.name !='default':
+                <tr class="parity${cnt%2}">
                     <td>${h.link_to(user.username,h.url('edit_user', id=user.user_id))}</td>
                     <td>${user.name}</td>
                     <td>${user.lastname}</td>
                     <td>${user.active}</td>
                     <td>${user.admin}</td>
                     <td>
-	                    ${h.form(url('user', id=user.user_id),method='delete')}
-	                    	${h.submit('remove','delete',class_="delete_icon action_button")}
-	                    ${h.end_form()}
-        			</td>
+                        ${h.form(url('user', id=user.user_id),method='delete')}
+                            ${h.submit('remove','delete',class_="delete_icon action_button")}
+                        ${h.end_form()}
+                    </td>
                 </tr>
+             %endif
             %endfor
         </table>
-        <span class="add_icon">${h.link_to(u'add user',h.url('new_user'))}</span>        
     </div>
+</div>
 </%def>

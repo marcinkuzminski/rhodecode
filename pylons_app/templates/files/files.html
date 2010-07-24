@@ -1,38 +1,48 @@
 <%inherit file="/base/base.html"/>
 
 <%def name="title()">
-    ${_('Repository managment')}
-</%def>
-<%def name="breadcrumbs()">
-    ${h.link_to(u'Home',h.url('/'))}
-    / 
-    ${h.link_to(c.repo_name,h.url('files_home',repo_name=c.repo_name))}
-    /
     ${_('files')}
 </%def>
+
+<%def name="breadcrumbs_links()">
+    ${h.link_to(u'Home',h.url('/'))}
+    &raquo;
+    ${h.link_to(c.repo_name,h.url('files_home',repo_name=c.repo_name))}
+    &raquo;
+    ${_('files')}
+    %if c.files_list:
+        @ R${c.rev_nr}:${c.cur_rev}
+    %endif        
+</%def>
+
 <%def name="page_nav()">
     ${self.menu('files')}     
 </%def>
-<%def name="css()">
-<link rel="stylesheet" href="/css/monoblue_custom.css" type="text/css" />
-<link rel="stylesheet" href="/css/pygments.css" type="text/css" />
-</%def>
-<%def name="main()">
-    <h2 class="no-link no-border">${_('Files')}</h2>
-	<div id="files_data">
-	%if c.files_list:
-		<h2>${_('Location')}: ${h.files_breadcrumbs(c.repo_name,c.cur_rev,c.files_list.path)}</h2>
-			%if c.files_list.is_dir():
-				<%include file='files_browser.html'/>
-			%else:
-				<%include file='files_source.html'/>			
-			%endif	
-	%else:
-		<h2>
-			<a href="#" onClick="javascript:parent.history.back();" target="main">${_('Go back')}</a> 
-			${_('No files at given path')}: "${c.f_path or "/"}" 
-		</h2>
-	%endif
 
-	</div>
+<%def name="main()">
+<div class="box">
+    <!-- box / title -->
+    <div class="title">
+        ${self.breadcrumbs()}     
+    </div>
+    <div class="table">
+		<div id="files_data">
+			%if c.files_list:
+				<h2>${_('Location')}: ${h.files_breadcrumbs(c.repo_name,c.cur_rev,c.files_list.path)}</h2>
+					%if c.files_list.is_dir():
+						<%include file='files_browser.html'/>
+					%else:
+						<%include file='files_source.html'/>			
+					%endif	
+			%else:
+				<h2>
+					<a href="#" onClick="javascript:parent.history.back();" target="main">${_('Go back')}</a> 
+					${_('No files at given path')}: "${c.f_path or "/"}" 
+				</h2>
+			%endif
+		
+		</div>    
+    </div>
+</div>    
+	
 </%def>    

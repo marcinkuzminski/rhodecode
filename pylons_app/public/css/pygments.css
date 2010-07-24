@@ -22,6 +22,15 @@ div.codeblock .code-header .commit{
 	margin-left:25px;
 	font-weight: normal;
 }
+div.codeblock .code-body table{
+    width: 0 !important;    
+}
+
+div.annotatediv{
+	margin-left:2px;
+	margin-right:4px;
+}
+
 
 .code-highlight {
     padding: 0px;

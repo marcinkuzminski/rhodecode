@@ -26,14 +26,22 @@ div.diffblock pre.raw{
 	color:#000000;
 }
 
-.code-difftable{
+table.code-difftable{
 	border-collapse: collapse;
 	width: 99%;
 }
-.code-difftable td:target *{
+table.code-difftable td:target *{
 	background:  repeat scroll 0 0 #FFFFBE !important;
 	text-decoration: underline;
 }
+
+table.code-difftable td {
+    padding: 0 !important; 
+    background: none !important; 
+    border:0 !important;    
+}
+
+
 .code-difftable .context{
 	background:none repeat scroll 0 0 #DDE7EF;
 }
@@ -81,7 +89,6 @@ div.diffblock pre.raw{
 	margin:0;
 	padding:0;
 }
-
 
 .code { 
 	display: block;
