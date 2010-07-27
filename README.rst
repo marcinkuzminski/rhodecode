@@ -11,7 +11,7 @@ Fully customizable, with authentication, permissions. Based on vcs library.
 - full permissions per project read/write/admin access even on mercurial request
 - mako templates let's you cusmotize look and feel of appplication.
 - diffs annotations and source code all colored by pygments.
-- mercurial branch graph
+- mercurial branch graph and yui-flot powered graphs
 - admin interface for performing user/permission managments as well as repository
   managment. Additionall settings for mercurial web, (hooks editable from admin
   panel !) 
