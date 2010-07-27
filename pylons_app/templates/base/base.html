@@ -17,7 +17,7 @@
         <!-- user -->
         <ul id="logged-user">
             <li class="first">
-            ${h.link_to('%s %s (%s)'%(c.hg_app_user.name,c.hg_app_user.lastname,c.hg_app_user.username),h.url('edit_user', id=c.hg_app_user.user_id))}
+            ${h.link_to('%s %s (%s)'%(c.hg_app_user.name,c.hg_app_user.lastname,c.hg_app_user.username),h.url('admin_settings_my_account'))}
             </li>
             <li class="last highlight">${h.link_to(u'Logout',h.url('logout_home'))}</li>
         </ul>

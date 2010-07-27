@@ -52,12 +52,13 @@ class SettingsController(BaseController):
 
 
     @LoginRequired()
-    #@HasPermissionAllDecorator('hg.admin')
     def __before__(self):
         c.admin_user = session.get('admin_user')
         c.admin_username = session.get('admin_username')
         super(SettingsController, self).__before__()
-        
+    
+    
+    @HasPermissionAllDecorator('hg.admin')    
     def index(self, format='html'):
         """GET /admin/settings: All items in the collection"""
         # url('admin_settings')
@@ -71,23 +72,26 @@ class SettingsController(BaseController):
             force_defaults=False
         )  
     
+    @HasPermissionAllDecorator('hg.admin')
     def create(self):
         """POST /admin/settings: Create a new item"""
         # url('admin_settings')
-
+    
+    @HasPermissionAllDecorator('hg.admin')
     def new(self, format='html'):
         """GET /admin/settings/new: Form to create a new item"""
         # url('admin_new_setting')
-
-    def update(self, id):
-        """PUT /admin/settings/id: Update an existing item"""
+        
+    @HasPermissionAllDecorator('hg.admin')
+    def update(self, setting_id):
+        """PUT /admin/settings/setting_id: Update an existing item"""
         # Forms posted to this method should contain a hidden field:
         #    <input type="hidden" name="_method" value="PUT" />
         # Or using helpers:
-        #    h.form(url('admin_setting', id=ID),
+        #    h.form(url('admin_setting', setting_id=ID),
         #           method='put')
-        # url('admin_setting', id=ID)
-        if id == 'mapping':
+        # url('admin_setting', setting_id=ID)
+        if setting_id == 'mapping':
             rm_obsolete = request.POST.get('destroy', False)
             log.debug('Rescanning directories with destroy=%s', rm_obsolete)
 
@@ -96,7 +100,7 @@ class SettingsController(BaseController):
             invalidate_cache('cached_repo_list')
             h.flash(_('Repositories sucessfully rescanned'), category='success')            
         
-        if id == 'global':
+        if setting_id == 'global':
             
             application_form = ApplicationSettingsForm()()
             try:
@@ -132,20 +136,77 @@ class SettingsController(BaseController):
                      encoding="UTF-8") 
                         
         return redirect(url('admin_settings'))
-
-    def delete(self, id):
-        """DELETE /admin/settings/id: Delete an existing item"""
+    
+    @HasPermissionAllDecorator('hg.admin')
+    def delete(self, setting_id):
+        """DELETE /admin/settings/setting_id: Delete an existing item"""
         # Forms posted to this method should contain a hidden field:
         #    <input type="hidden" name="_method" value="DELETE" />
         # Or using helpers:
-        #    h.form(url('admin_setting', id=ID),
+        #    h.form(url('admin_setting', setting_id=ID),
         #           method='delete')
-        # url('admin_setting', id=ID)
+        # url('admin_setting', setting_id=ID)
+    
+    @HasPermissionAllDecorator('hg.admin')
+    def show(self, setting_id, format='html'):
+        """GET /admin/settings/setting_id: Show a specific item"""
+        # url('admin_setting', setting_id=ID)
+    
+    @HasPermissionAllDecorator('hg.admin')         
+    def edit(self, setting_id, format='html'):
+        """GET /admin/settings/setting_id/edit: Form to edit an existing item"""
+        # url('admin_edit_setting', setting_id=ID)
 
-    def show(self, id, format='html'):
-        """GET /admin/settings/id: Show a specific item"""
-        # url('admin_setting', id=ID)
 
-    def edit(self, id, format='html'):
-        """GET /admin/settings/id/edit: Form to edit an existing item"""
-        # url('admin_edit_setting', id=ID)
+    def my_account(self):
+        """
+        GET /_admin/my_account Displays info about my account 
+        """
+        # url('admin_settings_my_account')
+        c.user = self.sa.query(User).get(c.hg_app_user.user_id)
+        if c.user.username == 'default':
+            h.flash(_("You can't edit this user since it's" 
+              " crucial for entire application"), category='warning')
+            return redirect(url('users'))
+        
+        defaults = c.user.__dict__
+        return htmlfill.render(
+            render('admin/users/user_edit_my_account.html'),
+            defaults=defaults,
+            encoding="UTF-8",
+            force_defaults=False
+        ) 
+
+    def my_account_update(self):
+        """PUT /_admin/my_account_update: Update an existing item"""
+        # Forms posted to this method should contain a hidden field:
+        #    <input type="hidden" name="_method" value="PUT" />
+        # Or using helpers:
+        #    h.form(url('admin_settings_my_account_update'),
+        #           method='put')
+        # url('admin_settings_my_account_update', id=ID)
+        user_model = UserModel()
+        uid = c.hg_app_user.user_id
+        _form = UserForm(edit=True, old_data={'user_id':uid})()
+        form_result = {}
+        try:
+            form_result = _form.to_python(dict(request.POST))
+            user_model.update_my_account(uid, form_result)
+            h.flash(_('Your account was updated succesfully'), category='success')
+                           
+        except formencode.Invalid as errors:
+            #c.user = self.sa.query(User).get(c.hg_app_user.user_id)
+            return htmlfill.render(
+                render('admin/users/user_edit_my_account.html'),
+                defaults=errors.value,
+                errors=errors.error_dict or {},
+                prefix_error=False,
+                encoding="UTF-8")
+        except Exception:
+            log.error(traceback.format_exc())
+            h.flash(_('error occured during update of user %s') \
+                    % form_result.get('username'), category='error')
+                    
+        return redirect(url('my_account'))
+    
+

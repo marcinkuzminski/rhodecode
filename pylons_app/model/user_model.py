@@ -68,9 +68,9 @@ class UserModel(object):
             self.sa.rollback()
             raise      
     
-    def update(self, id, form_data):
+    def update(self, uid, form_data):
         try:
-            new_user = self.sa.query(User).get(id)
+            new_user = self.sa.query(User).get(uid)
             if new_user.username == 'default':
                 raise DefaultUserException(
                                 _("You can't Edit this user since it's" 
@@ -87,7 +87,28 @@ class UserModel(object):
             log.error(e)
             self.sa.rollback()
             raise      
-
+        
+    def update_my_account(self, uid, form_data):
+        try:
+            new_user = self.sa.query(User).get(uid)
+            if new_user.username == 'default':
+                raise DefaultUserException(
+                                _("You can't Edit this user since it's" 
+                                  " crucial for entire application"))
+            for k, v in form_data.items():
+                if k == 'new_password' and v != '':
+                    new_user.password = v
+                else:
+                    if k not in ['admin', 'active']:
+                        setattr(new_user, k, v)
+                
+            self.sa.add(new_user)
+            self.sa.commit()
+        except Exception as e:
+            log.error(e)
+            self.sa.rollback()
+            raise 
+                
     def delete(self, id):
         
         try:

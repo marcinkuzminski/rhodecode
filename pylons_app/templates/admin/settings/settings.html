@@ -23,7 +23,7 @@
     </div>
     <!-- end box / title -->
     
-    ${h.form(url('admin_setting', id='mapping'),method='put')}
+    ${h.form(url('admin_setting', setting_id='mapping'),method='put')}
     <div class="form">
         <!-- fields -->
         <h3>${_('Remap and rescan repositories')}</h3>
@@ -49,7 +49,7 @@
     </div>  
     ${h.end_form()}
      
-    ${h.form(url('admin_setting', id='global'),method='put')}
+    ${h.form(url('admin_setting', setting_id='global'),method='put')}
     <div class="form">
         <!-- fields -->
         <h3>${_('Global application settings')}</h3>

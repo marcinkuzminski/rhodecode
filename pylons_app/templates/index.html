@@ -27,6 +27,13 @@
 	    <!-- box / title -->
 	    <div class="title">
 	        <h5>${_('Dashboard')}</h5>
+	        ##%if h.HasPermissionAll('repository.create')():
+	        <ul class="links">
+	          <li>
+	            <span>${h.link_to(u'ADD NEW REPO',h.url('new_repo'),class_="add_icon")}</span>
+	          </li>          
+	        </ul>  	        
+	        ##%endif
 	    </div>
 	    <!-- end box / title -->
         <div class="table">

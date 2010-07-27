@@ -1,0 +1,79 @@
+## -*- coding: utf-8 -*-
+<%inherit file="/base/base.html"/>
+
+<%def name="title()">
+    ${_('User administration')}
+</%def>
+
+<%def name="breadcrumbs_links()">
+    ${_('My Account')}
+</%def>
+
+<%def name="page_nav()">
+	${self.menu('admin')}
+</%def>
+
+<%def name="main()">
+<div class="box">
+    <!-- box / title -->
+    <div class="title">
+        ${self.breadcrumbs()}       
+    </div>
+    <!-- end box / title -->
+    ${h.form(url('admin_settings_my_account_update'),method='put')}
+    <div class="form">
+        <!-- fields -->
+        <div class="fields">
+             <div class="field">
+                <div class="label">
+                    <label for="username">${_('Username')}:</label>
+                </div>
+                <div class="input">
+                    ${h.text('username')}
+                </div>
+             </div>
+            
+             <div class="field">
+                <div class="label">
+                    <label for="new_password">${_('New password')}:</label>
+                </div>
+                <div class="input">
+                    ${h.password('new_password')}
+                </div>
+             </div>
+            
+             <div class="field">
+                <div class="label">
+                    <label for="name">${_('Name')}:</label>
+                </div>
+                <div class="input">
+                    ${h.text('name')}
+                </div>
+             </div>
+            
+             <div class="field">
+                <div class="label">
+                    <label for="lastname">${_('Lastname')}:</label>
+                </div>
+                <div class="input">
+                    ${h.text('lastname')}
+                </div>
+             </div>
+            
+             <div class="field">
+                <div class="label">
+                    <label for="email">${_('Email')}:</label>
+                </div>
+                <div class="input">
+                    ${h.text('email')}
+                </div>
+             </div>
+            
+            <div class="buttons">
+              ${h.submit('save','save',class_="ui-button ui-widget ui-state-default ui-corner-all")}
+            </div>             
+    	</div>    
+    </div>
+    ${h.end_form()}
+</div>    
+</%def>  

@@ -177,8 +177,9 @@ class DbManage(object):
                  ('repository.read', 'Repository read access'),
                  ('repository.write', 'Repository write access'),
                  ('repository.admin', 'Repository admin access'),
+                 ('repository.create', 'Repository create'),
                  ('hg.admin', 'Hg Administrator'),
-                 ]
+                ]
         
         for p in perms:
             new_perm = Permission()

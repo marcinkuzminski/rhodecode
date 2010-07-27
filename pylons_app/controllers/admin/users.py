@@ -17,6 +17,12 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
+"""
+Created on April 4, 2010
+users controller for pylons
+@author: marcink
+"""
+
 from formencode import htmlfill
 from pylons import request, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
@@ -30,11 +36,7 @@ from pylons_app.model.user_model import UserModel, DefaultUserException
 import formencode
 import logging
 import traceback
-"""
-Created on April 4, 2010
-users controller for pylons
-@author: marcink
-"""
+
 
 log = logging.getLogger(__name__)
 

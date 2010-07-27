@@ -104,7 +104,23 @@ def set_available_permissions(config):
 
 def set_base_path(config):
     config['base_path'] = config['pylons.app_globals'].base_path
-        
+
+def fill_data(user):
+    """
+    Fills user data with those from database
+    @param user:
+    """
+    sa = meta.Session
+    dbuser = sa.query(User).get(user.user_id)
+    
+    user.username = dbuser.username
+    user.is_admin = dbuser.admin
+    user.name = dbuser.name
+    user.lastname = dbuser.lastname
+    
+    meta.Session.remove()
+    return user
+            
 def fill_perms(user):
     """
     Fills user permission attribute with permissions taken from database
@@ -113,6 +129,7 @@ def fill_perms(user):
     
     sa = meta.Session
     user.permissions['repositories'] = {}
+    user.permissions['global'] = set()
     
     #first fetch default permissions
     default_perms = sa.query(Repo2Perm, Repository, Permission)\
@@ -122,14 +139,14 @@ def fill_perms(user):
                                             'default').one().user_id).all()
 
     if user.is_admin:
-        user.permissions['global'] = set(['hg.admin'])
+        user.permissions['global'].add('hg.admin')
         #admin have all rights full
         for perm in default_perms:
             p = 'repository.admin'
             user.permissions['repositories'][perm.Repo2Perm.repository.repo_name] = p
     
     else:
-        user.permissions['global'] = set()
+        user.permissions['global'].add('')
         for perm in default_perms:
             if perm.Repository.private:
                 #disable defaults for private repos,
@@ -164,8 +181,8 @@ def get_user(session):
     @param session:
     """
     user = session.get('hg_app_user', AuthUser())
-  
     if user.is_authenticated:
+        user = fill_data(user)
         user = fill_perms(user)
     session['hg_app_user'] = user
     session.save()
