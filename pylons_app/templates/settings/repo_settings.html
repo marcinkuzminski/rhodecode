@@ -26,16 +26,16 @@
         <div class="fields">
             <div class="field">
                 <div class="label">
-                    <label for="input-medium">${_('Name')}:</label>
+                    <label for="repo_name">${_('Name')}:</label>
                 </div>
-                <div class="input">
+                <div class="input input-medium">
                     ${h.text('repo_name')}
                 </div>
              </div>
              
             <div class="field">
                 <div class="label label-textarea">
-                    <label for="input-small">${_('Description')}:</label>
+                    <label for="description">${_('Description')}:</label>
                 </div>
                 <div class="textarea text-area editor">
                     ${h.textarea('description',cols=23,rows=5)}
@@ -44,7 +44,7 @@
             
             <div class="field">
                 <div class="label label-checkbox">
-                    <label for="input-small">${_('Private')}:</label>
+                    <label for="private">${_('Private')}:</label>
                 </div>
                 <div class="checkboxes">
                     ${h.checkbox('private',value="True")}
@@ -53,7 +53,7 @@
              
              <div class="field">
                 <div class="label">
-                    <label for="input-small">${_('Permissions')}:</label>
+                    <label for="">${_('Permissions')}:</label>
                 </div>
                 <div class="input">
                     <table id="permissions_manage">
@@ -69,12 +69,12 @@
                         %for r2p in c.repo_info.repo2perm:
                             %if r2p.user.username =='default' and c.repo_info.private:
                                 <tr>
-                                    <td colspan="6">
+                                    <td colspan="4">
                                         <span class="private_repo_msg">
-                                        ${_('disabled for private repository')}
+                                        ${_('private repository')}
                                         </span>
                                     </td>
-                                    <td>${r2p.user.username}</td>
+                                    <td class="private_repo_msg">${r2p.user.username}</td>
                                 </tr>
                             %else:
                             <tr id="id${id(r2p.user.username)}">
@@ -91,7 +91,8 @@
                                                 var sUrl = "${h.url('delete_repo_user',repo_name=c.repo_name)}";
                                                 var callback = { success:function(o){
                                                 var tr = YAHOO.util.Dom.get(String(field_id));
-                                                tr.parentNode.removeChild(tr);}};
+                                                tr.parentNode.removeChild(tr);},failure:function(o){
+                                                	alert("${_('Failed to remove user')}");},};
                                                 var postData = '_method=delete&user_id='+user_id; 
                                                 var request = YAHOO.util.Connect.asyncRequest('POST', sUrl, callback, postData);};
                                         </script>           
@@ -135,6 +136,9 @@
         <script type="text/javascript">
             YAHOO.util.Event.onDOMReady(function(){
                 var D = YAHOO.util.Dom;
+                if(!D.hasClass('perm_new_user_name','error')){
+                    D.setStyle('add_perm_input','display','none');
+                }
                 YAHOO.util.Event.addListener('add_perm','click',function(){
                     D.setStyle('add_perm_input','display','');
                     D.setStyle('add_perm','opacity','0.6');

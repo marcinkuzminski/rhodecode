@@ -84,12 +84,12 @@
                         %for r2p in c.repo_info.repo2perm:
                             %if r2p.user.username =='default' and c.repo_info.private:
                                 <tr>
-                                    <td colspan="6">
+                                    <td colspan="4">
                                         <span class="private_repo_msg">
-                                        ${_('disabled for private repository')}
+                                        ${_('private repository')}
                                         </span>
                                     </td>
-                                    <td>${r2p.user.username}</td>
+                                    <td class="private_repo_msg">${r2p.user.username}</td>
                                 </tr>
                             %else:
                             <tr id="id${id(r2p.user.username)}">
@@ -106,7 +106,8 @@
                                                 var sUrl = "${h.url('delete_repo_user',repo_name=c.repo_name)}";
                                                 var callback = { success:function(o){
                                                 var tr = YAHOO.util.Dom.get(String(field_id));
-                                                tr.parentNode.removeChild(tr);}};
+                                                tr.parentNode.removeChild(tr);},failure:function(o){
+                                                    alert("${_('Failed to remove user')}");},};
                                                 var postData = '_method=delete&user_id='+user_id; 
                                                 var request = YAHOO.util.Connect.asyncRequest('POST', sUrl, callback, postData);};
                                         </script>           
@@ -117,7 +118,7 @@
                             %endif
                         %endfor
 
-                        <tr id="add_perm_input" >
+                        <tr id="add_perm_input">
                             <td>${h.radio('perm_new_user','repository.none')}</td>
                             <td>${h.radio('perm_new_user','repository.read')}</td>
                             <td>${h.radio('perm_new_user','repository.write')}</td>
