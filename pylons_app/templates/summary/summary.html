@@ -217,7 +217,11 @@ E.onDOMReady(function(e){
 		                        var d = new Date(x*1000);
 		                        var fd = d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
 		                        var nr_commits = parseInt(y);
-		                        showTooltip(item.pageX, item.pageY, item.series.label + " on " + fd + ": " + nr_commits+" commits");
+		                        var suffix = '';
+		                        if(nr_commits > 1){
+									var suffix = 's';		
+				                }
+		                        showTooltip(item.pageX, item.pageY, item.series.label + " on " + fd + ": " + nr_commits+" commit" + suffix);
 		                    }
 		                }
 		                else {
