@@ -17,13 +17,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
-
 """
 Created on April 9, 2010
 Model for hg app
 @author: marcink
 """
-
 from beaker.cache import cache_region
 from mercurial import ui
 from mercurial.hgweb.hgwebdir_mod import findrepos
@@ -42,12 +40,12 @@ except ImportError:
     sys.stderr.write('You have to import vcs module')
     raise Exception('Unable to import vcs')
 
-def _get_repos_cached_initial(app_globals):
+def _get_repos_cached_initial(app_globals, initial):
     """
     return cached dict with repos
     """
     g = app_globals
-    return HgModel.repo_scan(g.paths[0][0], g.paths[0][1], g.baseui)
+    return HgModel.repo_scan(g.paths[0][0], g.paths[0][1], g.baseui, initial)
 
 @cache_region('long_term', 'cached_repo_list')
 def _get_repos_cached():
@@ -74,7 +72,7 @@ class HgModel(object):
         """
     
     @staticmethod
-    def repo_scan(repos_prefix, repos_path, baseui):
+    def repo_scan(repos_prefix, repos_path, baseui, initial=False):
         """
         Listing of repositories in given path. This path should not be a 
         repository itself. Return a dictionary of repository objects
@@ -115,8 +113,14 @@ class HgModel(object):
                     
                     repos_list[name] = MercurialRepository(path, baseui=baseui)
                     repos_list[name].name = name
-                    dbrepo = sa.query(Repository).get(name)
+                    
+                    dbrepo = None
+                    if not initial:
+                        dbrepo = sa.query(Repository)\
+                            .filter(Repository.repo_name == name).scalar()
+                            
                     if dbrepo:
+                        log.info('Adding db instance to cached list')
                         repos_list[name].dbrepo = dbrepo
                         repos_list[name].description = dbrepo.description
                         repos_list[name].contact = dbrepo.user.full_contact

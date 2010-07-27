@@ -17,7 +17,6 @@ class BaseController(WSGIController):
         c.hg_app_version = __version__
         c.hg_app_name = config['hg_app_name']
         c.repo_name = get_repo_slug(request)
-        c.hg_app_user = auth.get_user(session)
         c.cached_repo_list = _get_repos_cached()
         self.sa = meta.Session
     
@@ -27,6 +26,8 @@ class BaseController(WSGIController):
         # the request is routed to. This routing information is
         # available in environ['pylons.routes_dict']
         try:
+            #putting this here makes sure that we update permissions every time
+            c.hg_app_user = auth.get_user(session)
             return WSGIController.__call__(self, environ, start_response)
         finally:
             meta.Session.remove()
