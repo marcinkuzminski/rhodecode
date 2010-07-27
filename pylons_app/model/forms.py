@@ -164,10 +164,9 @@ def ValidRepoName(edit, old_data):
             if slug in ['_admin']:
                 raise formencode.Invalid(_('This repository name is disallowed'),
                                          value, state)
-            
             if old_data.get('repo_name') != value or not edit:    
                 sa = meta.Session
-                if sa.query(Repository).get(slug):
+                if sa.query(Repository).filter(Repository.repo_name == slug).scalar():
                     raise formencode.Invalid(_('This repository already exists') ,
                                              value, state)
                 meta.Session.remove()

@@ -126,7 +126,7 @@ class DbManage(object):
         hgsettings.app_title = 'hg-app'
         
         try:
-            self.sa.add(hooks)
+            #self.sa.add(hooks)
             self.sa.add(web1)
             self.sa.add(web2)
             self.sa.add(web3)

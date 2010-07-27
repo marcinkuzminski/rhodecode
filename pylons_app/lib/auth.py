@@ -106,12 +106,17 @@ def set_base_path(config):
     config['base_path'] = config['pylons.app_globals'].base_path
         
 def fill_perms(user):
+    """
+    Fills user permission attribute with permissions taken from database
+    @param user:
+    """
+    
     sa = meta.Session
     user.permissions['repositories'] = {}
     
     #first fetch default permissions
     default_perms = sa.query(Repo2Perm, Repository, Permission)\
-        .join((Repository, Repo2Perm.repository == Repository.repo_name))\
+        .join((Repository, Repo2Perm.repository_id == Repository.repo_id))\
         .join((Permission, Repo2Perm.permission_id == Permission.permission_id))\
         .filter(Repo2Perm.user_id == sa.query(User).filter(User.username == 
                                             'default').one().user_id).all()
@@ -121,7 +126,7 @@ def fill_perms(user):
         #admin have all rights full
         for perm in default_perms:
             p = 'repository.admin'
-            user.permissions['repositories'][perm.Repo2Perm.repository] = p
+            user.permissions['repositories'][perm.Repo2Perm.repository.repo_name] = p
     
     else:
         user.permissions['global'] = set()
@@ -135,11 +140,11 @@ def fill_perms(user):
             else:
                 p = perm.Permission.permission_name
                 
-            user.permissions['repositories'][perm.Repo2Perm.repository] = p
+            user.permissions['repositories'][perm.Repo2Perm.repository.repo_name] = p
                                                 
         
         user_perms = sa.query(Repo2Perm, Permission, Repository)\
-            .join((Repository, Repo2Perm.repository == Repository.repo_name))\
+            .join((Repository, Repo2Perm.repository_id == Repository.repo_id))\
             .join((Permission, Repo2Perm.permission_id == Permission.permission_id))\
             .filter(Repo2Perm.user_id == user.user_id).all()
         #overwrite userpermissions with defaults
@@ -149,7 +154,7 @@ def fill_perms(user):
                 p = 'repository.write'
             else:
                 p = perm.Permission.permission_name
-            user.permissions['repositories'][perm.Repo2Perm.repository] = p
+            user.permissions['repositories'][perm.Repo2Perm.repository.repo_name] = p
     meta.Session.remove()         
     return user
     
@@ -159,10 +164,9 @@ def get_user(session):
     @param session:
     """
     user = session.get('hg_app_user', AuthUser())
-        
+  
     if user.is_authenticated:
         user = fill_perms(user)
-
     session['hg_app_user'] = user
     session.save()
     return user

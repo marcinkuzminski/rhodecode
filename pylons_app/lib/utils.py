@@ -205,7 +205,7 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False):
     rm = RepoModel()
     
     for name, repo in initial_repo_list.items():
-        if not sa.query(Repository).get(name):
+        if not sa.query(Repository).filter(Repository.repo_name == name).scalar():
             log.info('repository %s not found creating default', name)
                 
             form_data = {

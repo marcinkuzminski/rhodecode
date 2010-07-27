@@ -17,6 +17,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
+"""
+Created on June 30, 2010
+settings controller for pylons
+@author: marcink
+"""
 from formencode import htmlfill
 from pylons import tmpl_context as c, request, url
 from pylons.controllers.util import redirect
@@ -30,11 +35,7 @@ import formencode
 import logging
 import pylons_app.lib.helpers as h
 import traceback
-"""
-Created on June 30, 2010
-settings controller for pylons
-@author: marcink
-"""
+
 log = logging.getLogger(__name__)
 
 class SettingsController(BaseController):
@@ -72,6 +73,7 @@ class SettingsController(BaseController):
 
     def update(self, repo_name):
         repo_model = RepoModel()
+        changed_name = repo_name
         _form = RepoSettingsForm(edit=True, old_data={'repo_name':repo_name})()
         try:
             form_result = _form.to_python(dict(request.POST))
@@ -79,7 +81,7 @@ class SettingsController(BaseController):
             invalidate_cache('cached_repo_list')
             h.flash(_('Repository %s updated succesfully' % repo_name),
                     category='success')
-                           
+            changed_name = form_result['repo_name']               
         except formencode.Invalid as errors:
             c.repo_info = repo_model.get(repo_name)
             c.users_array = repo_model.get_users_js()
@@ -93,6 +95,6 @@ class SettingsController(BaseController):
         except Exception:
             log.error(traceback.format_exc())
             h.flash(_('error occured during update of repository %s') \
-                    % form_result['repo_name'], category='error')
+                    % repo_name, category='error')
                     
-        return redirect(url('repo_settings_home', repo_name=form_result['repo_name']))
+        return redirect(url('repo_settings_home', repo_name=changed_name))

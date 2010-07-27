@@ -54,8 +54,9 @@ class UserLog(Base):
     
 class Repository(Base):
     __tablename__ = 'repositories'
-    __table_args__ = {'useexisting':True}
-    repo_name = Column("repo_name", TEXT(length=None, convert_unicode=False, assert_unicode=None), nullable=False, unique=True, default=None, primary_key=True)
+    __table_args__ = (UniqueConstraint('repo_name'), {'useexisting':True},)
+    repo_id = Column("repo_id", INTEGER(), nullable=False, unique=True, default=None, primary_key=True)
+    repo_name = Column("repo_name", TEXT(length=None, convert_unicode=False, assert_unicode=None), nullable=False, unique=True, default=None)
     user_id = Column("user_id", INTEGER(), ForeignKey(u'users.user_id'), nullable=False, unique=False, default=None)
     private = Column("private", BOOLEAN(), nullable=True, unique=None, default=None)
     description = Column("description", TEXT(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
@@ -75,12 +76,12 @@ class Permission(Base):
 
 class Repo2Perm(Base):
     __tablename__ = 'repo_to_perm'
-    __table_args__ = (UniqueConstraint('user_id', 'repository'), {'useexisting':True})
+    __table_args__ = (UniqueConstraint('user_id', 'repository_id'), {'useexisting':True})
     repo2perm_id = Column("repo2perm_id", INTEGER(), nullable=False, unique=True, default=None, primary_key=True)
     user_id = Column("user_id", INTEGER(), ForeignKey(u'users.user_id'), nullable=False, unique=None, default=None)
     permission_id = Column("permission_id", INTEGER(), ForeignKey(u'permissions.permission_id'), nullable=False, unique=None, default=None)
-    repository = Column("repository", TEXT(length=None, convert_unicode=False, assert_unicode=None), ForeignKey(u'repositories.repo_name'), nullable=False, unique=None, default=None) 
+    repository_id = Column("repository_id", INTEGER(), ForeignKey(u'repositories.repo_id'), nullable=False, unique=None, default=None) 
     
     user = relation('User')
     permission = relation('Permission')
-    
+    repository = relation('Repository')
