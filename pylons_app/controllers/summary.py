@@ -72,7 +72,6 @@ class SummaryController(BaseController):
     def __get_commit_stats(self, repo):
         aggregate = OrderedDict()
         
-        
         #graph range
         td = datetime.today() 
         y = td.year
@@ -80,23 +79,7 @@ class SummaryController(BaseController):
         d = td.day
         c.ts_min = mktime((y, (td - timedelta(days=calendar.mdays[m] - 1)).month, d, 0, 0, 0, 0, 0, 0,))
         c.ts_max = mktime((y, m, d, 0, 0, 0, 0, 0, 0,))
-        
-        
-#        #generate this monhts keys
-#        dates_range = OrderedDict()
-#        year_range = range(2010, datetime.today().year + 1)
-#        month_range = range(1, datetime.today().month + 1)
-#        
-#
-#        
-#        for y in year_range:
-#            for m in month_range:
-#                for d in range(1, calendar.mdays[m] + 1):
-#                    k = '%s-%s-%s' % (y, m, d)
-#                    timetupple = [int(x) for x in k.split('-')]
-#                    timetupple.extend([0 for _ in xrange(6)])
-#                    k = mktime(timetupple)                    
-#                    dates_range[k] = 0
+
         
         def author_key_cleaner(k):
             k = person(k)

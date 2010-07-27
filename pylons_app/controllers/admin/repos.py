@@ -16,6 +16,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
+"""
+Created on April 7, 2010
+admin controller for pylons
+@author: marcink
+"""
 from formencode import htmlfill
 from operator import itemgetter
 from pylons import request, response, session, tmpl_context as c, url
@@ -31,11 +36,8 @@ from pylons_app.model.repo_model import RepoModel
 import formencode
 import logging
 import traceback
-"""
-Created on April 7, 2010
-admin controller for pylons
-@author: marcink
-"""
+from paste.httpexceptions import HTTPInternalServerError
+
 log = logging.getLogger(__name__)
 
 class ReposController(BaseController):
@@ -130,7 +132,6 @@ class ReposController(BaseController):
             h.flash(_('error occured during update of repository %s') \
                     % repo_name, category='error')
             
-        
         return redirect(url('edit_repo', repo_name=changed_name))
     
     def delete(self, repo_name):
@@ -174,7 +175,7 @@ class ReposController(BaseController):
         except Exception as e:
             h.flash(_('An error occured during deletion of repository user'),
                     category='error')
-        
+            raise HTTPInternalServerError()
         
     def show(self, repo_name, format='html'):
         """GET /repos/repo_name: Show a specific item"""

@@ -15,7 +15,7 @@ import pylons_app.lib.helpers
 
 log = logging.getLogger(__name__)
 
-def load_environment(global_conf, app_conf):
+def load_environment(global_conf, app_conf, initial=False):
     """Configure the Pylons environment via the ``pylons.config``
     object
     """
@@ -63,7 +63,7 @@ def load_environment(global_conf, app_conf):
     init_model(sa_engine_db1)
     config['pylons.app_globals'].baseui = make_ui('db')
     
-    repo2db_mapper(_get_repos_cached_initial(config['pylons.app_globals']))
+    repo2db_mapper(_get_repos_cached_initial(config['pylons.app_globals'], initial))
     set_available_permissions(config)
     set_base_path(config)
     set_hg_app_config(config)
