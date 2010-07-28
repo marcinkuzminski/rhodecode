@@ -9,7 +9,7 @@
     &raquo;
     ${h.link_to(c.repo_name,h.url('summary_home',repo_name=c.repo_name))}
     &raquo;
-    ${_('annotate')}  
+    ${_('annotate')} @ R${c.rev_nr}:${c.cur_rev}
 </%def>
 
 <%def name="page_nav()">
@@ -25,7 +25,7 @@
 		<div id="files_data">
 			<h2>${_('Location')}: ${h.files_breadcrumbs(c.repo_name,c.cur_rev,c.file.path)}</h2>
 			<dl class="overview">
-				<dt>${_('Revision')}</dt>
+				<dt>${_('Last revision')}</dt>
 				<dd>r${c.file.last_changeset.revision}:${c.file.last_changeset._short}</dd>
 				<dt>${_('Size')}</dt>
 				<dd>${h.format_byte_size(c.file.size,binary=True)}</dd>

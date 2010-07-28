@@ -104,6 +104,7 @@ class FilesController(BaseController):
         c.file = cs.get_node(f_path)
         c.file_msg = cs.get_file_message(f_path)
         c.cur_rev = cs.raw_id
+        c.rev_nr = cs.revision        
         c.f_path = f_path
 
         return render('files/files_annotate.html')

@@ -3019,10 +3019,14 @@ table.code-browser .browser-dir {
     margin-left:3px;
     margin-righ:3px;
 }
-.info_box input {
-    padding:3px 6px;
+.info_box input#at_rev {
+	padding:1px 3px 3px 2px;
+	text-align:center;
 }
-
+.info_box input#view {
+	padding:0px 3px 2px 2px;
+	text-align:center;
+}
 /* -----------------------------------------------------------
     TOOLTIP
 ----------------------------------------------------------- */
