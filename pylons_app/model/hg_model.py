@@ -2,7 +2,7 @@
 # encoding: utf-8
 # Model for hg app
 # Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
- 
+# 
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
@@ -25,10 +25,12 @@ Model for hg app
 from beaker.cache import cache_region
 from mercurial import ui
 from mercurial.hgweb.hgwebdir_mod import findrepos
-from vcs.exceptions import RepositoryError, VCSError
+from pylons.i18n.translation import _
+from pylons_app.lib.auth import HasRepoPermissionAny
 from pylons_app.model import meta
 from pylons_app.model.db import Repository
 from sqlalchemy.orm import joinedload
+from vcs.exceptions import RepositoryError, VCSError
 import logging
 import os
 import sys
@@ -55,6 +57,15 @@ def _get_repos_cached():
     log.info('getting all repositories list')
     from pylons import app_globals as g
     return HgModel.repo_scan(g.paths[0][0], g.paths[0][1], g.baseui)
+
+@cache_region('super_short_term', 'cached_repos_switcher_list')
+def _get_repos_switcher_cached(cached_repo_list):
+    repos_lst = []
+    for repo in sorted(x.name.lower() for x in cached_repo_list.values()):
+        if HasRepoPermissionAny('repository.write', 'repository.read', 'repository.admin')(repo, 'main page check'):
+            repos_lst.append(repo)
+    
+    return repos_lst
 
 @cache_region('long_term', 'full_changelog')
 def _full_changelog_cached(repo_name):
