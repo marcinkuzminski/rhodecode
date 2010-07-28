@@ -51,7 +51,7 @@
             </thead>
                         <tbody>
 					    %for cnt,repo in enumerate(c.repos_list):
-					        %if repo['name'] in c.repo_switcher_list:
+					        %if h.HasRepoPermissionAny('repository.write','repository.read','repository.admin')(repo['name'],'main page check'):
 					        <tr class="parity${cnt%2}">
 					            <td>
 					             %if repo['repo'].dbrepo.private:
