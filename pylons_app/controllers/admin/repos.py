@@ -24,6 +24,7 @@ admin controller for pylons
 """
 from formencode import htmlfill
 from operator import itemgetter
+from paste.httpexceptions import HTTPInternalServerError
 from pylons import request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
 from pylons.i18n.translation import _
@@ -31,13 +32,13 @@ from pylons_app.lib import helpers as h
 from pylons_app.lib.auth import LoginRequired, HasPermissionAllDecorator
 from pylons_app.lib.base import BaseController, render
 from pylons_app.lib.utils import invalidate_cache
+from pylons_app.model.db import User
 from pylons_app.model.forms import RepoForm
 from pylons_app.model.hg_model import HgModel
 from pylons_app.model.repo_model import RepoModel
 import formencode
 import logging
 import traceback
-from paste.httpexceptions import HTTPInternalServerError
 
 log = logging.getLogger(__name__)
 
@@ -196,7 +197,13 @@ class ReposController(BaseController):
         
             return redirect(url('repos'))        
         defaults = c.repo_info.__dict__
-        defaults.update({'user':c.repo_info.user.username})
+        if c.repo_info.user:
+            defaults.update({'user':c.repo_info.user.username})
+        else:
+            replacement_user = self.sa.query(User)\
+            .filter(User.admin == True).first().username
+            defaults.update({'user':replacement_user})
+            
         c.users_array = repo_model.get_users_js()
         
         for p in c.repo_info.repo2perm:

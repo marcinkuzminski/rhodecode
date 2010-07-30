@@ -28,7 +28,7 @@ from mercurial.hgweb.hgwebdir_mod import findrepos
 from pylons.i18n.translation import _
 from pylons_app.lib.auth import HasRepoPermissionAny
 from pylons_app.model import meta
-from pylons_app.model.db import Repository
+from pylons_app.model.db import Repository, User
 from sqlalchemy.orm import joinedload
 from vcs.exceptions import RepositoryError, VCSError
 import logging
@@ -134,7 +134,11 @@ class HgModel(object):
                         log.info('Adding db instance to cached list')
                         repos_list[name].dbrepo = dbrepo
                         repos_list[name].description = dbrepo.description
-                        repos_list[name].contact = dbrepo.user.full_contact
+                        if dbrepo.user:
+                            repos_list[name].contact = dbrepo.user.full_contact
+                        else:
+                            repos_list[name].contact = sa.query(User)\
+                            .filter(User.admin == True).first().full_contact
             except OSError:
                 continue
         meta.Session.remove()
