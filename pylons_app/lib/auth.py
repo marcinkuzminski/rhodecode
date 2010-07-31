@@ -2,7 +2,7 @@
 # encoding: utf-8
 # authentication and permission libraries
 # Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
-
+#
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
@@ -17,13 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
-"""
-Created on April 4, 2010
-
-@author: marcink
-"""
 from beaker.cache import cache_region
-from functools import wraps
 from pylons import config, session, url, request
 from pylons.controllers.util import abort, redirect
 from pylons_app.lib.utils import get_repo_slug
@@ -32,7 +26,13 @@ from pylons_app.model.db import User, Repo2Perm, Repository, Permission
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 import crypt
+from decorator import decorator
 import logging
+"""
+Created on April 4, 2010
+
+@author: marcink
+"""
 
 log = logging.getLogger(__name__) 
 
@@ -146,7 +146,7 @@ def fill_perms(user):
             user.permissions['repositories'][perm.Repo2Perm.repository.repo_name] = p
     
     else:
-        user.permissions['global'].add('')
+        user.permissions['global'].add('repository.create')
         for perm in default_perms:
             if perm.Repository.private:
                 #disable defaults for private repos,
@@ -192,29 +192,24 @@ def get_user(session):
 # CHECK DECORATORS
 #===============================================================================
 class LoginRequired(object):
-    """
-    Must be logged in to execute this function else redirect to login page
-    """
+    """Must be logged in to execute this function else redirect to login page"""
    
     def __call__(self, func):
-        @wraps(func)
-        def _wrapper(*fargs, **fkwargs):
-            user = session.get('hg_app_user', AuthUser())
-            log.debug('Checking login required for user:%s', user.username)
-            if user.is_authenticated:
-                log.debug('user %s is authenticated', user.username)
-                func(*fargs)
-            else:
-                log.warn('user %s not authenticated', user.username)
-                log.debug('redirecting to login page')
-                return redirect(url('login_home'))
-
-        return _wrapper
+        return decorator(self.__wrapper, func)
+    
+    def __wrapper(self, func, *fargs, **fkwargs):
+        user = session.get('hg_app_user', AuthUser())
+        log.debug('Checking login required for user:%s', user.username)
+        if user.is_authenticated:
+            log.debug('user %s is authenticated', user.username)
+            return func(*fargs, **fkwargs)
+        else:
+            log.warn('user %s not authenticated', user.username)
+            log.debug('redirecting to login page')
+            return redirect(url('login_home'))
 
 class PermsDecorator(object):
-    """
-    Base class for decorators
-    """
+    """Base class for decorators"""
     
     def __init__(self, *required_perms):
         available_perms = config['available_permissions']
@@ -225,33 +220,37 @@ class PermsDecorator(object):
         self.user_perms = None
         
     def __call__(self, func):
-        @wraps(func)
-        def _wrapper(*fargs, **fkwargs):
-            self.user_perms = session.get('hg_app_user', AuthUser()).permissions
-            log.debug('checking %s permissions %s for %s',
-               self.__class__.__name__, self.required_perms, func.__name__)
+        return decorator(self.__wrapper, func)
+    
+    
+    def __wrapper(self, func, *fargs, **fkwargs):
+#        _wrapper.__name__ = func.__name__
+#        _wrapper.__dict__.update(func.__dict__)
+#        _wrapper.__doc__ = func.__doc__
+
+        self.user_perms = session.get('hg_app_user', AuthUser()).permissions
+        log.debug('checking %s permissions %s for %s',
+           self.__class__.__name__, self.required_perms, func.__name__)
+        
+        if self.check_permissions():
+            log.debug('Permission granted for %s', func.__name__)
             
-            if self.check_permissions():
-                log.debug('Permission granted for %s', func.__name__)
-                return func(*fargs)
-            
-            else:
-                log.warning('Permission denied for %s', func.__name__)
-                #redirect with forbidden ret code
-                return abort(403)
-        return _wrapper
+            return func(*fargs, **fkwargs)
+        
+        else:
+            log.warning('Permission denied for %s', func.__name__)
+            #redirect with forbidden ret code
+            return abort(403)
+
         
         
     def check_permissions(self):
-        """
-        Dummy function for overriding
-        """
+        """Dummy function for overriding"""
         raise Exception('You have to write this function in child class')
 
 class HasPermissionAllDecorator(PermsDecorator):
-    """
-    Checks for access permission for all given predicates. All of them have to
-    be meet in order to fulfill the request
+    """Checks for access permission for all given predicates. All of them 
+    have to be meet in order to fulfill the request
     """
         
     def check_permissions(self):
@@ -261,8 +260,7 @@ class HasPermissionAllDecorator(PermsDecorator):
             
 
 class HasPermissionAnyDecorator(PermsDecorator):
-    """
-    Checks for access permission for any of given predicates. In order to 
+    """Checks for access permission for any of given predicates. In order to 
     fulfill the request any of predicates must be meet
     """
     
@@ -272,8 +270,7 @@ class HasPermissionAnyDecorator(PermsDecorator):
         return False
 
 class HasRepoPermissionAllDecorator(PermsDecorator):
-    """
-    Checks for access permission for all given predicates for specific 
+    """Checks for access permission for all given predicates for specific 
     repository. All of them have to be meet in order to fulfill the request
     """
             
@@ -289,8 +286,7 @@ class HasRepoPermissionAllDecorator(PermsDecorator):
             
 
 class HasRepoPermissionAnyDecorator(PermsDecorator):
-    """
-    Checks for access permission for any of given predicates for specific 
+    """Checks for access permission for any of given predicates for specific 
     repository. In order to fulfill the request any of predicates must be meet
     """
             
@@ -309,9 +305,7 @@ class HasRepoPermissionAnyDecorator(PermsDecorator):
 #===============================================================================
 
 class PermsFunction(object):
-    """
-    Base function for other check functions
-    """
+    """Base function for other check functions"""
     
     def __init__(self, *perms):
         available_perms = config['available_permissions']
@@ -343,9 +337,7 @@ class PermsFunction(object):
             return False 
     
     def check_permissions(self):
-        """
-        Dummy function for overriding
-        """
+        """Dummy function for overriding"""
         raise Exception('You have to write this function in child class')
         
 class HasPermissionAll(PermsFunction):
@@ -381,7 +373,6 @@ class HasRepoPermissionAll(PermsFunction):
         return False
             
 class HasRepoPermissionAny(PermsFunction):
-    
     
     def __call__(self, repo_name=None, check_Location=''):
         self.repo_name = repo_name
