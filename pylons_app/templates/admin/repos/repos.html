@@ -45,7 +45,7 @@
                 <td>r${repo['rev']}:${repo['tip']}</td>
                 <td>
                   ${h.form(url('repo', repo_name=repo['name']),method='delete')}
-                    ${h.submit('remove','delete',class_="delete_icon action_button",onclick="return confirm('Confirm to delete this repository');")}
+                    ${h.submit('remove_%s' % repo['name'],'delete',class_="delete_icon action_button",onclick="return confirm('Confirm to delete this repository');")}
                   ${h.end_form()}
                 </td>
             </tr>

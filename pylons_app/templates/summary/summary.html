@@ -122,13 +122,11 @@ E.onDOMReady(function(e){
     </div>
     
     <div class="table">
-        <div id="commit_history" style="width:600px;height:370px;float:left"></div>
+        <div id="commit_history" style="width:460px;height:370px;float:left"></div>
     	<div id="legend_data">
 	    	<div id="legend_container"></div>
 	    	<div id="legend_choices">
-				<table id="legend_choices_tables" style="font-size:smaller;color:#545454">
-				
-				</table>
+				<table id="legend_choices_tables" style="font-size:smaller;color:#545454"></table>
 	    	</div>
     	</div>
 		<script type="text/javascript">
@@ -164,7 +162,7 @@ E.onDOMReady(function(e){
 
 		        if (data.length > 0){
 				    var plot = YAHOO.widget.Flot("commit_history", data,
-					        { bars: { show: true, align:'left' },
+					        { bars: { show: true, align:'center' },
 			    			  points: { show: true, radius:0,fill:true },
 			    			  legend:{show:true, container:"legend_container"},
 			    	          selection: { mode: "xy" },
