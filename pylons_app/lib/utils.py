@@ -100,13 +100,17 @@ def get_hg_ui_cached():
 def get_hg_settings():
     try:
         sa = meta.Session
-        ret = sa.query(HgAppSettings).scalar()
+        ret = sa.query(HgAppSettings).all()
     finally:
         meta.Session.remove()
         
     if not ret:
         raise Exception('Could not get application settings !')
-    return ret
+    settings = {}
+    for each in ret:
+        settings['hg_app_' + each.app_settings_name] = each.app_settings_value    
+    
+    return settings
     
 def make_ui(read_from='file', path=None, checkpaths=True):        
     """
@@ -155,8 +159,9 @@ def make_ui(read_from='file', path=None, checkpaths=True):
 
 def set_hg_app_config(config):
     hgsettings = get_hg_settings()
-    config['hg_app_auth_realm'] = hgsettings.app_auth_realm
-    config['hg_app_name'] = hgsettings.app_title
+    
+    for k, v in hgsettings.items():
+        config[k] = v
 
 def invalidate_cache(name, *args):
     """Invalidates given name cache"""

@@ -5,10 +5,10 @@ from vcs.utils.lazy import LazyProperty
 
 class HgAppSettings(Base):
     __tablename__ = 'hg_app_settings'
-    __table_args__ = {'useexisting':True}
+    __table_args__ = (UniqueConstraint('app_settings_name'), {'useexisting':True})
     app_settings_id = Column("app_settings_id", INTEGER(), nullable=False, unique=True, default=None, primary_key=True)
-    app_title = Column("app_title", TEXT(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
-    app_auth_realm = Column("auth_realm", TEXT(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    app_settings_name = Column("app_settings_name", TEXT(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    app_settings_value = Column("app_settings_value", TEXT(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
 
 class HgAppUi(Base):
     __tablename__ = 'hg_app_ui'

@@ -32,7 +32,7 @@ from pylons_app.lib.auth import LoginRequired, HasPermissionAllDecorator, \
     HasPermissionAnyDecorator
 from pylons_app.lib.base import BaseController, render
 from pylons_app.lib.utils import repo2db_mapper, invalidate_cache, \
-    set_hg_app_config
+    set_hg_app_config, get_hg_settings
 from pylons_app.model.db import User, UserLog, HgAppSettings
 from pylons_app.model.forms import UserForm, ApplicationSettingsForm
 from pylons_app.model.hg_model import HgModel
@@ -64,8 +64,8 @@ class SettingsController(BaseController):
         """GET /admin/settings: All items in the collection"""
         # url('admin_settings')
 
-        hgsettings = self.sa.query(HgAppSettings).scalar()
-        defaults = hgsettings.__dict__ if hgsettings else {}
+        defaults = get_hg_settings()
+
         return htmlfill.render(
             render('admin/settings/settings.html'),
             defaults=defaults,
@@ -106,15 +106,17 @@ class SettingsController(BaseController):
             application_form = ApplicationSettingsForm()()
             try:
                 form_result = application_form.to_python(dict(request.POST))
-                title = form_result['app_title']
-                realm = form_result['app_auth_realm']
             
                 try:
-                    hgsettings = self.sa.query(HgAppSettings).get(1)
-                    hgsettings.app_auth_realm = realm
-                    hgsettings.app_title = title
+                    hgsettings1 = self.sa.query(HgAppSettings).filter(HgAppSettings.app_settings_name == 'title').one()
+                    hgsettings1.app_settings_value = form_result['hg_app_title'] 
                     
-                    self.sa.add(hgsettings)
+                    hgsettings2 = self.sa.query(HgAppSettings).filter(HgAppSettings.app_settings_name == 'realm').one()
+                    hgsettings2.app_settings_value = form_result['hg_app_realm'] 
+                    
+                    
+                    self.sa.add(hgsettings1)
+                    self.sa.add(hgsettings2)
                     self.sa.commit()
                     set_hg_app_config(config)
                     h.flash(_('Updated application settings'),
@@ -122,7 +124,7 @@ class SettingsController(BaseController):
                                     
                 except:
                     log.error(traceback.format_exc())
-                    h.flash(_('error occured during chaning application settings'),
+                    h.flash(_('error occured during updating application settings'),
                             category='error')
                                 
                     self.sa.rollback()

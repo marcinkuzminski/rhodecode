@@ -17,6 +17,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
+"""
+Created on April 4, 2010
+
+@author: marcink
+"""
 from beaker.cache import cache_region
 from pylons import config, session, url, request
 from pylons.controllers.util import abort, redirect
@@ -28,11 +33,6 @@ from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 import crypt
 from decorator import decorator
 import logging
-"""
-Created on April 4, 2010
-
-@author: marcink
-"""
 
 log = logging.getLogger(__name__) 
 
@@ -186,7 +186,6 @@ def get_user(session):
         user = fill_perms(user)
     session['hg_app_user'] = user
     session.save()
-    print user.permissions
     return user
         
 #===============================================================================

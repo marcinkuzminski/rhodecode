@@ -121,9 +121,14 @@ class DbManage(object):
         paths.ui_value = os.path.join(path, '*')
         
         
-        hgsettings = HgAppSettings()
-        hgsettings.app_auth_realm = 'hg-app authentication'
-        hgsettings.app_title = 'hg-app'
+        hgsettings1 = HgAppSettings()
+        
+        hgsettings1.app_settings_name = 'realm'
+        hgsettings1.app_settings_value = 'hg-app authentication'
+        
+        hgsettings2 = HgAppSettings()
+        hgsettings2.app_settings_name = 'title'
+        hgsettings2.app_settings_value = 'hg-app'      
         
         try:
             #self.sa.add(hooks)
@@ -132,7 +137,8 @@ class DbManage(object):
             self.sa.add(web3)
             self.sa.add(web4)
             self.sa.add(paths)
-            self.sa.add(hgsettings)
+            self.sa.add(hgsettings1)
+            self.sa.add(hgsettings2)
             self.sa.commit()
         except:
             self.sa.rollback()

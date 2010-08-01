@@ -16,7 +16,7 @@ class BaseController(WSGIController):
     
     def __before__(self):
         c.hg_app_version = __version__
-        c.hg_app_name = config['hg_app_name']
+        c.hg_app_name = config['hg_app_title']
         c.repo_name = get_repo_slug(request)
         c.cached_repo_list = _get_repos_cached()
         c.repo_switcher_list = _get_repos_switcher_cached(c.cached_repo_list)

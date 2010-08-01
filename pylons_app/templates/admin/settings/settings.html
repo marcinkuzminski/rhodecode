@@ -5,8 +5,6 @@
     ${_('Settings administration')}
 </%def>
 
-
-
 <%def name="breadcrumbs_links()">
     ${h.link_to(_('Admin'),h.url('admin_home'))} &raquo; ${_('Settings')}
 </%def>
@@ -30,7 +28,7 @@
         <div class="fields">
 			<div class="field">
 		        <div class="label label-checkbox">
-		            <label for="-button">${_('rescan option')}:</label>
+		            <label for="destroy">${_('rescan option')}:</label>
 		        </div>
 		        <div class="checkboxes">
 		            <div class="checkbox">
@@ -60,7 +58,7 @@
                     <label for="input-small">${_('Application name')}:</label>
                 </div>
                 <div class="input">
-                    ${h.text('app_title',size=30)}
+                    ${h.text('hg_app_title',size=30)}
                 </div>
              </div>
                           
@@ -69,7 +67,7 @@
                     <label for="input-small">${_('Realm text')}:</label>
                 </div>
                 <div class="input">
-                    ${h.text('app_auth_realm',size=30)}
+                    ${h.text('hg_app_realm',size=30)}
                 </div>
             </div>
                                      
