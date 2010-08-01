@@ -140,7 +140,7 @@ def fill_perms(user):
 
     if user.is_admin:
         user.permissions['global'].add('hg.admin')
-        #admin have all rights full
+        #admin have all rights set to admin
         for perm in default_perms:
             p = 'repository.admin'
             user.permissions['repositories'][perm.Repo2Perm.repository.repo_name] = p
@@ -148,7 +148,7 @@ def fill_perms(user):
     else:
         user.permissions['global'].add('repository.create')
         for perm in default_perms:
-            if perm.Repository.private:
+            if perm.Repository.private and not perm.Repository.user_id == user.user_id:
                 #disable defaults for private repos,
                 p = 'repository.none'
             elif perm.Repository.user_id == user.user_id:
@@ -186,6 +186,7 @@ def get_user(session):
         user = fill_perms(user)
     session['hg_app_user'] = user
     session.save()
+    print user.permissions
     return user
         
 #===============================================================================

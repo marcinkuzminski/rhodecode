@@ -29,7 +29,8 @@ from pylons import request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
 from pylons.i18n.translation import _
 from pylons_app.lib import helpers as h
-from pylons_app.lib.auth import LoginRequired, HasPermissionAllDecorator
+from pylons_app.lib.auth import LoginRequired, HasPermissionAllDecorator, \
+    HasPermissionAnyDecorator
 from pylons_app.lib.base import BaseController, render
 from pylons_app.lib.utils import invalidate_cache
 from pylons_app.model.db import User
@@ -49,12 +50,13 @@ class ReposController(BaseController):
     #     map.resource('repo', 'repos')
     
     @LoginRequired()
-    @HasPermissionAllDecorator('hg.admin')
+    @HasPermissionAnyDecorator('hg.admin', 'repository.create')
     def __before__(self):
         c.admin_user = session.get('admin_user')
         c.admin_username = session.get('admin_username')
         super(ReposController, self).__before__()
-                
+    
+    @HasPermissionAllDecorator('hg.admin')            
     def index(self, format='html'):
         """GET /repos: All items in the collection"""
         # url('repos')
@@ -62,6 +64,7 @@ class ReposController(BaseController):
         c.repos_list = sorted(cached_repo_list, key=itemgetter('name_sort'))
         return render('admin/repos/repos.html')
     
+    @HasPermissionAnyDecorator('hg.admin', 'repository.create')
     def create(self):
         """POST /repos: Create a new item"""
         # url('repos')
@@ -77,8 +80,14 @@ class ReposController(BaseController):
                                                              
         except formencode.Invalid as errors:
             c.new_repo = errors.value['repo_name']
+            
+            if request.POST.get('user_created'):
+                r = render('admin/repos/repo_add_create_repository.html')
+            else:
+                r = render('admin/repos/repo_add.html')
+            
             return htmlfill.render(
-                render('admin/repos/repo_add.html'),
+                r,
                 defaults=errors.value,
                 errors=errors.error_dict or {},
                 prefix_error=False,
@@ -89,16 +98,19 @@ class ReposController(BaseController):
             msg = _('error occured during creation of repository %s') \
                     % form_result.get('repo_name')
             h.flash(msg, category='error')
-            
-        return redirect('repos')
-
+        if request.POST.get('user_created'):
+            return redirect(url('hg_home'))    
+        return redirect(url('repos'))
+    
+    @HasPermissionAllDecorator('hg.admin')
     def new(self, format='html'):
         """GET /repos/new: Form to create a new item"""
         new_repo = request.GET.get('repo', '')
         c.new_repo = h.repo_name_slug(new_repo)
 
         return render('admin/repos/repo_add.html')
-
+    
+    @HasPermissionAllDecorator('hg.admin')
     def update(self, repo_name):
         """PUT /repos/repo_name: Update an existing item"""
         # Forms posted to this method should contain a hidden field:
@@ -136,6 +148,7 @@ class ReposController(BaseController):
             
         return redirect(url('edit_repo', repo_name=changed_name))
     
+    @HasPermissionAllDecorator('hg.admin')
     def delete(self, repo_name):
         """DELETE /repos/repo_name: Delete an existing item"""
         # Forms posted to this method should contain a hidden field:
@@ -164,7 +177,8 @@ class ReposController(BaseController):
                     category='error')
         
         return redirect(url('repos'))
-        
+    
+    @HasPermissionAllDecorator('hg.admin')        
     def delete_perm_user(self, repo_name):
         """
         DELETE an existing repository permission user
@@ -178,11 +192,13 @@ class ReposController(BaseController):
             h.flash(_('An error occured during deletion of repository user'),
                     category='error')
             raise HTTPInternalServerError()
-        
+    
+    @HasPermissionAllDecorator('hg.admin')    
     def show(self, repo_name, format='html'):
         """GET /repos/repo_name: Show a specific item"""
         # url('repo', repo_name=ID)
-        
+    
+    @HasPermissionAllDecorator('hg.admin')    
     def edit(self, repo_name, format='html'):
         """GET /repos/repo_name/edit: Form to edit an existing item"""
         # url('edit_repo', repo_name=ID)

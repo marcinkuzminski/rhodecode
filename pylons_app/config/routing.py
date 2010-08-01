@@ -100,6 +100,8 @@ def make_map(config):
              action="my_account", conditions=dict(method=["GET"]))
         m.connect("admin_settings_my_account_update", "/my_account_update",
              action="my_account_update", conditions=dict(method=["PUT"]))
+        m.connect("admin_settings_create_repository", "/create_repository",
+             action="create_repository", conditions=dict(method=["GET"]))
     
     #ADMIN
     with map.submapper(path_prefix='/_admin', controller='admin/admin') as m:

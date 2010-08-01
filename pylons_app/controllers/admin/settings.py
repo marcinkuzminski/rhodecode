@@ -28,7 +28,8 @@ from pylons import request, session, tmpl_context as c, url, app_globals as g, \
 from pylons.controllers.util import abort, redirect
 from pylons.i18n.translation import _
 from pylons_app.lib import helpers as h
-from pylons_app.lib.auth import LoginRequired, HasPermissionAllDecorator
+from pylons_app.lib.auth import LoginRequired, HasPermissionAllDecorator, \
+    HasPermissionAnyDecorator
 from pylons_app.lib.base import BaseController, render
 from pylons_app.lib.utils import repo2db_mapper, invalidate_cache, \
     set_hg_app_config
@@ -209,4 +210,11 @@ class SettingsController(BaseController):
                     
         return redirect(url('my_account'))
     
+    @HasPermissionAnyDecorator('repository.create', 'hg.admin')
+    def create_repository(self):
+        """GET /_admin/create_repository: Form to create a new item"""
+        new_repo = request.GET.get('repo', '')
+        c.new_repo = h.repo_name_slug(new_repo)
 
+        return render('admin/repos/repo_add_create_repository.html')
+        
