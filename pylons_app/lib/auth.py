@@ -107,17 +107,19 @@ def set_base_path(config):
 
 def fill_data(user):
     """
-    Fills user data with those from database
+    Fills user data with those from database and log out user if not present
+    in database
     @param user:
     """
     sa = meta.Session
     dbuser = sa.query(User).get(user.user_id)
-    
-    user.username = dbuser.username
-    user.is_admin = dbuser.admin
-    user.name = dbuser.name
-    user.lastname = dbuser.lastname
-    
+    if dbuser:
+        user.username = dbuser.username
+        user.is_admin = dbuser.admin
+        user.name = dbuser.name
+        user.lastname = dbuser.lastname
+    else:
+        user.is_authenticated = False
     meta.Session.remove()
     return user
             
