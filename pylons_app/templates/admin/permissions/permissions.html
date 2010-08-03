@@ -8,21 +8,38 @@
 <%def name="breadcrumbs_links()">
     ${h.link_to(_('Admin'),h.url('admin_home'))} 
     &raquo;
-    ${_('Permissions')}
-    
+    ${_('Permissions')}    
 </%def>
+
 <%def name="page_nav()">
 	${self.menu('admin')}
 </%def>
+
 <%def name="main()">
 <div class="box">
     <!-- box / title -->
     <div class="title">
         ${self.breadcrumbs()}       
     </div>
-    <!-- end box / title -->
-    <div class="table">
-    To implement
-    </div>
+    <h3>${_('Repositories permissions')}</h3>
+    ${h.form(url('permission', id='default_perm'),method='put')}
+    <div class="form">
+        <!-- fields -->
+        <div class="fields">
+        
+			<div class="field">
+				<div class="label">
+					<label for="default_perm">${_('default repository permission')}:</label>
+				</div>
+				<div class="select">
+					${h.select('default_perm','repository.read',['repository.none','repository.read','repository.write','repository.admin'])}
+				</div>
+			</div>           
+	        <div class="buttons">
+	        ${h.submit('set','set',class_="ui-button ui-widget ui-state-default ui-corner-all")}
+	        </div>                                                          
+        </div>
+    </div>  
+    ${h.end_form()}
 </div>
 </%def>    
