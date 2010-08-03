@@ -21,10 +21,11 @@
     </div>
     <!-- end box / title -->
     
+    <h3>${_('Remap and rescan repositories')}</h3>
     ${h.form(url('admin_setting', setting_id='mapping'),method='put')}
     <div class="form">
         <!-- fields -->
-        <h3>${_('Remap and rescan repositories')}</h3>
+        
         <div class="fields">
 			<div class="field">
 		        <div class="label label-checkbox">
@@ -47,10 +48,11 @@
     </div>  
     ${h.end_form()}
      
+    <h3>${_('Global application settings')}</h3> 
     ${h.form(url('admin_setting', setting_id='global'),method='put')}
     <div class="form">
         <!-- fields -->
-        <h3>${_('Global application settings')}</h3>
+        
         <div class="fields">
              
              <div class="field">
