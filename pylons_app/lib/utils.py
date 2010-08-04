@@ -111,7 +111,18 @@ def get_hg_settings():
         settings['hg_app_' + each.app_settings_name] = each.app_settings_value    
     
     return settings
-    
+
+ui_sections = ['alias', 'auth',
+                'decode/encode', 'defaults',
+                'diff', 'email',
+                'extensions', 'format',
+                'merge-patterns', 'merge-tools',
+                'hooks', 'http_proxy',
+                'smtp', 'patch',
+                'paths', 'profiling',
+                'server', 'trusted',
+                'ui', 'web', ]
+        
 def make_ui(read_from='file', path=None, checkpaths=True):        
     """
     A function that will read python rc files or database
@@ -122,16 +133,7 @@ def make_ui(read_from='file', path=None, checkpaths=True):
     @param read_from: read from 'file' or 'db'
     """
     #propagated from mercurial documentation
-    sections = ['alias', 'auth',
-                'decode/encode', 'defaults',
-                'diff', 'email',
-                'extensions', 'format',
-                'merge-patterns', 'merge-tools',
-                'hooks', 'http_proxy',
-                'smtp', 'patch',
-                'paths', 'profiling',
-                'server', 'trusted',
-                'ui', 'web', ]
+
     baseui = ui.ui()
 
                 
@@ -142,7 +144,7 @@ def make_ui(read_from='file', path=None, checkpaths=True):
         
         cfg = config.config()
         cfg.read(path)
-        for section in sections:
+        for section in ui_sections:
             for k, v in cfg.items(section):
                 baseui.setconfig(section, k, v)
         if checkpaths:check_repo_dir(cfg.items('paths'))                
