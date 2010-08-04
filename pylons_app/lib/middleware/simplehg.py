@@ -2,7 +2,7 @@
 # encoding: utf-8
 # middleware to handle mercurial api calls
 # Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
-
+#
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
@@ -17,14 +17,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
-
-"""
-Created on 2010-04-28
-
-@author: marcink
-SimpleHG middleware for handling mercurial protocol request (push/clone etc.)
-It's implemented with basic auth function
-"""
 from datetime import datetime
 from itertools import chain
 from mercurial.error import RepoError
@@ -35,7 +27,7 @@ from paste.httpheaders import REMOTE_USER, AUTH_TYPE
 from pylons_app.lib.auth import authfunc, HasPermissionAnyMiddleware, \
     get_user_cached
 from pylons_app.lib.utils import is_mercurial, make_ui, invalidate_cache, \
-    check_repo_fast
+    check_repo_fast, ui_sections
 from pylons_app.model import meta
 from pylons_app.model.db import UserLog, User
 from webob.exc import HTTPNotFound, HTTPForbidden, HTTPInternalServerError
@@ -43,6 +35,14 @@ import logging
 import os
 import pylons_app.lib.helpers as h
 import traceback
+
+"""
+Created on 2010-04-28
+
+@author: marcink
+SimpleHG middleware for handling mercurial protocol request (push/clone etc.)
+It's implemented with basic auth function
+"""
  
 log = logging.getLogger(__name__)
 
@@ -226,8 +226,25 @@ class SimpleHg(object):
         hgrc = os.path.join(self.repo_path, '.hg', 'hgrc')
         repoui = make_ui('file', hgrc, False)
         
+        
         if repoui:
-            #set the repository based config
-            hgserve.repo.ui = repoui
+            #overwrite our ui instance with the section from hgrc file
+            for section in ui_sections:
+                for k, v in repoui.configitems(section):
+                    hgserve.repo.ui.setconfig(section, k, v)
             
         return hgserve
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
