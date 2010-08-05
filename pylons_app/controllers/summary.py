@@ -55,11 +55,11 @@ class SummaryController(BaseController):
                                         'host':e.get('HTTP_HOST'),
                                         'repo_name':c.repo_name, }
         c.clone_repo_url = uri
-        c.repo_tags = {}
+        c.repo_tags = OrderedDict()
         for name, hash in c.repo_info.tags.items()[:10]:
             c.repo_tags[name] = c.repo_info.get_changeset(hash)
         
-        c.repo_branches = {}
+        c.repo_branches = OrderedDict()
         for name, hash in c.repo_info.branches.items()[:10]:
             c.repo_branches[name] = c.repo_info.get_changeset(hash)
 

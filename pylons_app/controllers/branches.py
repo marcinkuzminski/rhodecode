@@ -2,7 +2,7 @@
 # encoding: utf-8
 # branches controller for pylons
 # Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
- 
+# 
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
@@ -22,9 +22,10 @@ Created on April 21, 2010
 branches controller for pylons
 @author: marcink
 """
-from pylons import tmpl_context as c, request
+from pylons import tmpl_context as c
 from pylons_app.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from pylons_app.lib.base import BaseController, render
+from pylons_app.lib.utils import OrderedDict
 from pylons_app.model.hg_model import HgModel
 import logging
 log = logging.getLogger(__name__)
@@ -39,7 +40,7 @@ class BranchesController(BaseController):
     def index(self):
         hg_model = HgModel()
         c.repo_info = hg_model.get_repo(c.repo_name)
-        c.repo_branches = {}
+        c.repo_branches = OrderedDict()
         for name, hash_ in c.repo_info.branches.items():
             c.repo_branches[name] = c.repo_info.get_changeset(hash_)
                 
