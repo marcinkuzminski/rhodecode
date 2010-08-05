@@ -25,7 +25,6 @@ from formencode.validators import UnicodeString, OneOf, Int, Number, Regex, \
 from pylons import session
 from pylons.i18n.translation import _
 from pylons_app.lib.auth import get_crypt_password
-import pylons_app.lib.helpers as h
 from pylons_app.model import meta
 from pylons_app.model.db import User, Repository
 from sqlalchemy.exc import OperationalError
@@ -34,6 +33,8 @@ from webhelpers.pylonslib.secure_form import authentication_token
 import datetime
 import formencode
 import logging
+import os
+import pylons_app.lib.helpers as h
 log = logging.getLogger(__name__)
 
 
@@ -218,7 +219,21 @@ class ValidSettings(formencode.validators.FancyValidator):
         if value.has_key('user'):
             del['value']['user']
         
-        return value                
+        return value
+    
+class ValidPath(formencode.validators.FancyValidator):
+    def to_python(self, value, state):
+        isdir = os.path.isdir(value.replace('*', ''))
+        if (value.endswith('/*') or value.endswith('/**')) and isdir:
+            return value
+        elif not isdir:
+            msg = _('This is not a valid path') 
+        else:
+            msg = _('You need to specify * or ** at the end of path (ie. /tmp/*)')
+        
+        raise formencode.Invalid(msg, value, state,
+                                     error_dict={'paths_root_path':msg})            
+                       
 #===============================================================================
 # FORMS        
 #===============================================================================
@@ -302,5 +317,12 @@ def ApplicationSettingsForm():
         
     return _ApplicationSettingsForm
  
-
+def ApplicationUiSettingsForm():
+    class _ApplicationUiSettingsForm(formencode.Schema):
+        allow_extra_fields = True
+        filter_extra_fields = False
+        web_push_ssl = OneOf(['true', 'false'], if_missing='false')
+        paths_root_path = All(ValidPath(), UnicodeString(strip=True, min=3, not_empty=True))
+        
+    return _ApplicationUiSettingsForm
 

@@ -61,6 +61,7 @@ def load_environment(global_conf, app_conf, initial=False):
         sa_engine_db1 = engine_from_config(config, 'sqlalchemy.db1.')
 
     init_model(sa_engine_db1)
+    #init baseui
     config['pylons.app_globals'].baseui = make_ui('db')
     
     repo2db_mapper(_get_repos_cached_initial(config['pylons.app_globals'], initial))

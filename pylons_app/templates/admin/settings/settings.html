@@ -57,7 +57,7 @@
              
              <div class="field">
                 <div class="label">
-                    <label for="input-small">${_('Application name')}:</label>
+                    <label for="hg_app_title">${_('Application name')}:</label>
                 </div>
                 <div class="input">
                     ${h.text('hg_app_title',size=30)}
@@ -66,7 +66,7 @@
                           
             <div class="field">
                 <div class="label">
-                    <label for="input-small">${_('Realm text')}:</label>
+                    <label for="hg_app_realm">${_('Realm text')}:</label>
                 </div>
                 <div class="input">
                     ${h.text('hg_app_realm',size=30)}
@@ -79,6 +79,51 @@
         </div>
     </div>      
     ${h.end_form()}
+
+    <h3>${_('Mercurial settings')}</h3> 
+    ${h.form(url('admin_setting', setting_id='mercurial'),method='put')}
+    <div class="form">
+        <!-- fields -->
+        
+        <div class="fields">
+             
+             <div class="field">
+                <div class="label label-checkbox">
+                    <label for="web_push_ssl">${_('Push ssl')}:</label>
+                </div>
+                <div class="checkboxes">
+					<div class="checkbox">
+						${h.checkbox('web_push_ssl','true')}
+						<label for="web_push_ssl">${_('require ssl for pushing')}</label>
+					</div>
+				</div>
+             </div>						
+							                          
+            <div class="field">
+                <div class="label">
+                    <label for="paths_root_path">${_('Repositories location')}:</label>
+                </div>
+                <div class="input">
+                    ${h.text('paths_root_path',size=30,disabled="disabled")}
+					<span id="path_unlock" class="tooltip" tooltip_title="${h.tooltip(_('This a crucial application setting. If You really sure you need to change this, you must restart application in order to make this settings take effect. Click this label to unlock.'))}">
+		                ${_('unlock')}</span>
+                </div>
+            </div>
+                                     
+            <div class="buttons">
+                ${h.submit('save','save settings',class_="ui-button ui-widget ui-state-default ui-corner-all")}
+           </div>                                                          
+        </div>
+    </div>      
+    ${h.end_form()}
+    
+    <script type="text/javascript">
+        YAHOO.util.Event.onDOMReady(function(){
+            YAHOO.util.Event.addListener('path_unlock','click',function(){
+                YAHOO.util.Dom.get('paths_root_path').disabled=false;
+            });
+        });
+    </script>
     
 </div>
 </%def>    

@@ -32,9 +32,10 @@ from pylons_app.lib.auth import LoginRequired, HasPermissionAllDecorator, \
     HasPermissionAnyDecorator
 from pylons_app.lib.base import BaseController, render
 from pylons_app.lib.utils import repo2db_mapper, invalidate_cache, \
-    set_hg_app_config, get_hg_settings
-from pylons_app.model.db import User, UserLog, HgAppSettings
-from pylons_app.model.forms import UserForm, ApplicationSettingsForm
+    set_hg_app_config, get_hg_settings, get_hg_ui_settings, make_ui
+from pylons_app.model.db import User, UserLog, HgAppSettings, HgAppUi
+from pylons_app.model.forms import UserForm, ApplicationSettingsForm, \
+    ApplicationUiSettingsForm
 from pylons_app.model.hg_model import HgModel
 from pylons_app.model.user_model import UserModel
 import formencode
@@ -65,7 +66,7 @@ class SettingsController(BaseController):
         # url('admin_settings')
 
         defaults = get_hg_settings()
-
+        defaults.update(get_hg_ui_settings())
         return htmlfill.render(
             render('admin/settings/settings.html'),
             defaults=defaults,
@@ -108,10 +109,12 @@ class SettingsController(BaseController):
                 form_result = application_form.to_python(dict(request.POST))
             
                 try:
-                    hgsettings1 = self.sa.query(HgAppSettings).filter(HgAppSettings.app_settings_name == 'title').one()
+                    hgsettings1 = self.sa.query(HgAppSettings)\
+                    .filter(HgAppSettings.app_settings_name == 'title').one()
                     hgsettings1.app_settings_value = form_result['hg_app_title'] 
                     
-                    hgsettings2 = self.sa.query(HgAppSettings).filter(HgAppSettings.app_settings_name == 'realm').one()
+                    hgsettings2 = self.sa.query(HgAppSettings)\
+                    .filter(HgAppSettings.app_settings_name == 'realm').one()
                     hgsettings2.app_settings_value = form_result['hg_app_realm'] 
                     
                     
@@ -137,6 +140,46 @@ class SettingsController(BaseController):
                      errors=errors.error_dict or {},
                      prefix_error=False,
                      encoding="UTF-8") 
+        
+        if setting_id == 'mercurial':
+            application_form = ApplicationUiSettingsForm()()
+            try:
+                form_result = application_form.to_python(dict(request.POST))
+            
+                try:
+                    
+                    hgsettings1 = self.sa.query(HgAppUi)\
+                    .filter(HgAppUi.ui_key == 'push_ssl').one()
+                    hgsettings1.ui_value = form_result['web_push_ssl']
+                    
+                    hgsettings2 = self.sa.query(HgAppUi)\
+                    .filter(HgAppUi.ui_key == '/').one()
+                    hgsettings2.ui_value = form_result['paths_root_path']                    
+                    
+                    self.sa.add(hgsettings1)
+                    self.sa.add(hgsettings2)
+                    self.sa.commit()
+                    
+                    h.flash(_('Updated application settings'),
+                            category='success')
+                                    
+                except:
+                    log.error(traceback.format_exc())
+                    h.flash(_('error occured during updating application settings'),
+                            category='error')
+                                
+                    self.sa.rollback()
+                    
+
+            except formencode.Invalid as errors:
+                return htmlfill.render(
+                     render('admin/settings/settings.html'),
+                     defaults=errors.value,
+                     errors=errors.error_dict or {},
+                     prefix_error=False,
+                     encoding="UTF-8") 
+                
+                
                         
         return redirect(url('admin_settings'))
     

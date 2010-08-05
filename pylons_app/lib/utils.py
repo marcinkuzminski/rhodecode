@@ -112,6 +112,23 @@ def get_hg_settings():
     
     return settings
 
+def get_hg_ui_settings():
+    try:
+        sa = meta.Session
+        ret = sa.query(HgAppUi).all()
+    finally:
+        meta.Session.remove()
+        
+    if not ret:
+        raise Exception('Could not get application ui settings !')
+    settings = {}
+    for each in ret:
+        k = each.ui_key if each.ui_key != '/' else 'root_path'
+        settings[each.ui_section + '_' + k] = each.ui_value    
+    
+    return settings
+
+#propagated from mercurial documentation
 ui_sections = ['alias', 'auth',
                 'decode/encode', 'defaults',
                 'diff', 'email',
@@ -132,27 +149,27 @@ def make_ui(read_from='file', path=None, checkpaths=True):
     @param checkpaths: check the path
     @param read_from: read from 'file' or 'db'
     """
-    #propagated from mercurial documentation
 
     baseui = ui.ui()
 
-                
     if read_from == 'file':
         if not os.path.isfile(path):
             log.warning('Unable to read config file %s' % path)
             return False
-        
+        log.debug('reading hgrc from %s', path)
         cfg = config.config()
         cfg.read(path)
         for section in ui_sections:
             for k, v in cfg.items(section):
                 baseui.setconfig(section, k, v)
+                log.debug('settings ui from file[%s]%s:%s', section, k, v)
         if checkpaths:check_repo_dir(cfg.items('paths'))                
               
         
     elif read_from == 'db':
         hg_ui = get_hg_ui_cached()
         for ui_ in hg_ui:
+            log.debug('settings ui from db[%s]%s:%s', ui_.ui_section, ui_.ui_key, ui_.ui_value)
             baseui.setconfig(ui_.ui_section, ui_.ui_key, ui_.ui_value)
         
     
