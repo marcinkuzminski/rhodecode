@@ -73,7 +73,7 @@ class SummaryController(BaseController):
         aggregate = OrderedDict()
         
         #graph range
-        td = datetime.today() 
+        td = datetime.today() + timedelta(days=1) 
         y = td.year
         m = td.month
         d = td.day

@@ -162,7 +162,7 @@ E.onDOMReady(function(e){
 
 		        if (data.length > 0){
 				    var plot = YAHOO.widget.Flot("commit_history", data,
-					        { bars: { show: true, align:'center' },
+					        { bars: { show: true, align:'center',lineWidth:4 },
 			    			  points: { show: true, radius:0,fill:true },
 			    			  legend:{show:true, container:"legend_container"},
 			    	          selection: { mode: "xy" },
