@@ -323,6 +323,8 @@ def ApplicationUiSettingsForm():
         filter_extra_fields = False
         web_push_ssl = OneOf(['true', 'false'], if_missing='false')
         paths_root_path = All(ValidPath(), UnicodeString(strip=True, min=3, not_empty=True))
+        hooks_changegroup_update = OneOf(['True', 'False'], if_missing=False)
+        hooks_changegroup_repo_size = OneOf(['True', 'False'], if_missing=False)
         
     return _ApplicationUiSettingsForm
 

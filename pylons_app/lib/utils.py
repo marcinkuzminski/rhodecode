@@ -123,8 +123,18 @@ def get_hg_ui_settings():
         raise Exception('Could not get application ui settings !')
     settings = {}
     for each in ret:
-        k = each.ui_key if each.ui_key != '/' else 'root_path'
-        settings[each.ui_section + '_' + k] = each.ui_value    
+        k = each.ui_key
+        v = each.ui_value
+        if k == '/':
+            k = 'root_path'
+        
+        if k.find('.') != -1:
+            k = k.replace('.', '_')
+        
+        if each.ui_section == 'hooks':
+            v = each.ui_active
+        
+        settings[each.ui_section + '_' + k] = v  
     
     return settings
 

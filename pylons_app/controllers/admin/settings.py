@@ -156,8 +156,23 @@ class SettingsController(BaseController):
                     .filter(HgAppUi.ui_key == '/').one()
                     hgsettings2.ui_value = form_result['paths_root_path']                    
                     
+                    
+                    #HOOKS
+                    hgsettings3 = self.sa.query(HgAppUi)\
+                    .filter(HgAppUi.ui_key == 'changegroup.update').one()
+                    hgsettings3.ui_active = bool(form_result['hooks_changegroup_update'])  
+                    
+                    hgsettings4 = self.sa.query(HgAppUi)\
+                    .filter(HgAppUi.ui_key == 'changegroup.repo_size').one()
+                    hgsettings4.ui_active = bool(form_result['hooks_changegroup_repo_size'])                                          
+                    
+                    
+                    
+                    
                     self.sa.add(hgsettings1)
                     self.sa.add(hgsettings2)
+                    self.sa.add(hgsettings3)
+                    self.sa.add(hgsettings4)
                     self.sa.commit()
                     
                     h.flash(_('Updated application settings'),
