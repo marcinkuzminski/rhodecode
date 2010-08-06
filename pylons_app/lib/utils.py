@@ -169,8 +169,9 @@ def make_ui(read_from='file', path=None, checkpaths=True):
     elif read_from == 'db':
         hg_ui = get_hg_ui_cached()
         for ui_ in hg_ui:
-            log.debug('settings ui from db[%s]%s:%s', ui_.ui_section, ui_.ui_key, ui_.ui_value)
-            baseui.setconfig(ui_.ui_section, ui_.ui_key, ui_.ui_value)
+            if ui_.ui_active:
+                log.debug('settings ui from db[%s]%s:%s', ui_.ui_section, ui_.ui_key, ui_.ui_value)
+                baseui.setconfig(ui_.ui_section, ui_.ui_key, ui_.ui_value)
         
     
     return baseui

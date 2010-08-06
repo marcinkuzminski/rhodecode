@@ -17,7 +17,9 @@ class HgAppUi(Base):
     ui_section = Column("ui_section", TEXT(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     ui_key = Column("ui_key", TEXT(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     ui_value = Column("ui_value", TEXT(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
-
+    ui_active = Column("ui_active", BOOLEAN(), nullable=True, unique=None, default=True)
+    
+    
 class User(Base): 
     __tablename__ = 'users'
     __table_args__ = {'useexisting':True}

@@ -90,11 +90,16 @@ class DbManage(object):
             log.error('You entered wrong path')
             sys.exit()
         
-        hooks = HgAppUi()
-        hooks.ui_section = 'hooks'
-        hooks.ui_key = 'changegroup'
-        hooks.ui_value = 'hg update >&2'
+        hooks1 = HgAppUi()
+        hooks1.ui_section = 'hooks'
+        hooks1.ui_key = 'changegroup.update'
+        hooks1.ui_value = 'hg update >&2'
         
+        hooks2 = HgAppUi()
+        hooks2.ui_section = 'hooks'
+        hooks2.ui_key = 'changegroup.repo_size'
+        hooks2.ui_value = 'python:pylons_app.lib.hooks.repo_size' 
+                
         web1 = HgAppUi()
         web1.ui_section = 'web'
         web1.ui_key = 'push_ssl'
@@ -131,7 +136,8 @@ class DbManage(object):
         hgsettings2.app_settings_value = 'hg-app'      
         
         try:
-            #self.sa.add(hooks)
+            self.sa.add(hooks1)
+            self.sa.add(hooks2)
             self.sa.add(web1)
             self.sa.add(web2)
             self.sa.add(web3)

@@ -17,6 +17,13 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
+"""
+Created on 2010-04-28
+
+@author: marcink
+SimpleHG middleware for handling mercurial protocol request (push/clone etc.)
+It's implemented with basic auth function
+"""
 from datetime import datetime
 from itertools import chain
 from mercurial.error import RepoError
@@ -35,14 +42,6 @@ import logging
 import os
 import pylons_app.lib.helpers as h
 import traceback
-
-"""
-Created on 2010-04-28
-
-@author: marcink
-SimpleHG middleware for handling mercurial protocol request (push/clone etc.)
-It's implemented with basic auth function
-"""
  
 log = logging.getLogger(__name__)
 
@@ -162,17 +161,6 @@ class SimpleHg(object):
     
     def __get_user(self, username):
         return get_user_cached(username)
-        
-        
-                        
-    def __get_size(self, repo_path, content_size):
-        size = int(content_size)
-        for path, dirs, files in os.walk(repo_path):
-            if path.find('.hg') == -1:
-                for f in files:
-                    size += os.path.getsize(os.path.join(path, f))
-        return size
-        return h.format_byte_size(size)
         
     def __get_action(self, environ):
         """

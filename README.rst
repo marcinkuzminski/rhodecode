@@ -9,17 +9,18 @@ Fully customizable, with authentication, permissions. Based on vcs library.
 - has it's own middleware to handle mercurial protocol request each request can 
   be logged and authenticated + threaded performance unlikely to hgweb
 - full permissions per project read/write/admin access even on mercurial request
-- mako templates let's you cusmotize look and feel of appplication.
+- mako templates let's you cusmotize look and feel of application.
 - diffs annotations and source code all colored by pygments.
 - mercurial branch graph and yui-flot powered graphs
 - admin interface for performing user/permission managments as well as repository
-  managment. Additionall settings for mercurial web, (hooks editable from admin
-  panel !) 
+  managment. 
+- Additionall settings for mercurial web, (hooks editable from admin
+  panel !) also paths,archive,remote messages  
 - backup scripts can do backup of whole app and send it over scp to desired location
 - setup project descriptions and info inside built in db for easy, non 
   file-system operations
 - added cache with invalidation on push/repo managment for high performance and
-  always upto date data.
+  always upto date data. 
 - rss /atom feed customizable
 - based on pylons 1.0 / sqlalchemy 0.6
 
@@ -28,10 +29,12 @@ Fully customizable, with authentication, permissions. Based on vcs library.
 - code review based on hg-review (when it's stable)
 - git support (when vcs can handle it)
 - other cools stuff that i can figure out
+- full text search of source codes
 - manage hg ui() per repo, add hooks settings, per repo, and not globally
 
 .. note::
-   This software is still in beta mode. I don't guarantee that it'll work.
+   This software is still in beta mode. 
+   I don't guarantee that it'll work correctly.
    
 
 -------------
