@@ -1252,7 +1252,7 @@ div.options a:hover
 
 #content div.box div.form div.fields div.field div.label-checkbox
 {
-	padding: 0 0 0 5px;
+	padding:0 0 0 5px !important;
 }
 
 /* -----------------------------------------------------------
@@ -1261,7 +1261,7 @@ div.options a:hover
 
 #content div.box div.form div.fields div.field div.label-radio
 {
-	padding: 0 0 0 5px;
+	padding:0 0 0 5px !important;
 }
 
 /* -----------------------------------------------------------
@@ -1270,13 +1270,13 @@ div.options a:hover
 
 #content div.box div.form div.fields div.field div.label-textarea
 {
-	padding: 0 0 0 5px;
+	padding:0 0 0 5px !important;
 }
 
 #content div.box-left div.form div.fields div.field div.label-textarea,
 #content div.box-right div.form div.fields div.field div.label-textarea
 {
-	padding: 0 0 8px 0;
+	padding: 0 0 8px 0 !important;
 }
 
 /* -----------------------------------------------------------

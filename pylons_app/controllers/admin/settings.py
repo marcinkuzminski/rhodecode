@@ -175,7 +175,7 @@ class SettingsController(BaseController):
                     self.sa.add(hgsettings4)
                     self.sa.commit()
                     
-                    h.flash(_('Updated application settings'),
+                    h.flash(_('Updated mercurial settings'),
                             category='success')
                                     
                 except:
@@ -253,7 +253,8 @@ class SettingsController(BaseController):
         try:
             form_result = _form.to_python(dict(request.POST))
             user_model.update_my_account(uid, form_result)
-            h.flash(_('Your account was updated succesfully'), category='success')
+            h.flash(_('Your account was updated succesfully'),
+                    category='success')
                            
         except formencode.Invalid as errors:
             #c.user = self.sa.query(User).get(c.hg_app_user.user_id)
