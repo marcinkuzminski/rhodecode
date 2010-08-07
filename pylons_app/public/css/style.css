@@ -1899,6 +1899,7 @@ div.form div.fields div.buttons input
     padding: 5px;
 	background: #ffffff;
     border-bottom: 1px solid #cdcdcd;
+    vertical-align:middle;
 }
 
 #content div.box table tr.selected td
@@ -3440,6 +3441,15 @@ table#permissions_manage td.private_repo_msg{
 table#permissions_manage tr#add_perm_input td{
     vertical-align:middle;
 
+}
+
+/* -----------------------------------------------------------
+    GRAVATARS
+----------------------------------------------------------- */
+.gravatar_box img{
+ 	float:left;
+ 	padding-right: 5px;
+ 	padding-top:3px;
 }
 
 

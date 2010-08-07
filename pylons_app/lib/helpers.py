@@ -277,8 +277,6 @@ flash = _Flash()
 #===============================================================================
 # MERCURIAL FILTERS available via h.
 #===============================================================================
-
-
 from mercurial import util
 from mercurial.templatefilters import age as _age, person as _person
 
@@ -302,4 +300,24 @@ time_ago = lambda x: util.datestr(_age(x), "%a, %d %b %Y %H:%M:%S %1%2")
 from pylons_app.lib.auth import HasPermissionAny, HasPermissionAll, \
 HasRepoPermissionAny, HasRepoPermissionAll
 
+#===============================================================================
+# GRAVATAR URL
+#===============================================================================
+import hashlib
+import urllib
 
+def gravatar_url(email):
+    ssl_enabled = 'https' == request.environ.get('HTTP_X_URL_SCHEME')
+    default = 'identicon'
+    size = 32
+    baseurl_nossl = "http://www.gravatar.com/avatar/"
+    baseurl_ssl = "https://secure.gravatar.com/avatar/"
+    
+    baseurl = baseurl_ssl if ssl_enabled else baseurl_nossl
+        
+    
+    # construct the url
+    gravatar_url = baseurl + hashlib.md5(email.lower()).hexdigest() + "?"
+    gravatar_url += urllib.urlencode({'d':default, 's':str(size)})
+
+    return gravatar_url
