@@ -1331,6 +1331,7 @@ div.options a:hover
     color: #000000;
 	font-family: Lucida Grande, Verdana, Lucida Sans Regular, Lucida Sans Unicode, Arial, sans-serif;
 	font-size: 11px;
+	float: left;
 }
 
 #content div.box-left div.form div.fields div.field div.input input,
@@ -1656,6 +1657,81 @@ div.options a:hover
 	display: block;
 	float: left;
 }
+/* -----------------------------------------------------------
+	content -> right -> forms -> button
+----------------------------------------------------------- */
+
+div.form div.fields div.field div.button
+{
+	margin: 0;
+	padding: 0 0 0 8px;
+	float: left;
+}
+
+div.form div.fields div.field div.button input
+{
+	margin: 0;
+	color: #000000;
+	font-family: Lucida Grande, Verdana, Lucida Sans Regular, Lucida Sans Unicode, Arial, sans-serif;
+	font-size: 11px;
+	font-weight: bold;
+}
+
+div.form div.fields div.field div.button .ui-state-default
+{
+	margin: 0;
+	padding: 6px 12px 6px 12px;
+	background: #e5e3e3 url("../images/button.png") repeat-x;
+	border-top: 1px solid #DDDDDD;
+	border-left: 1px solid #c6c6c6;
+	border-right: 1px solid #DDDDDD;
+	border-bottom: 1px solid #c6c6c6;
+	color: #515151;
+	outline: none;
+}
+
+div.form div.fields div.field div.button .ui-state-hover
+{
+	margin: 0;
+	padding: 6px 12px 6px 12px;
+	background: #b4b4b4 url("../images/button_selected.png") repeat-x;
+	border-top: 1px solid #cccccc;
+	border-left: 1px solid #bebebe;
+	border-right: 1px solid #b1b1b1;
+	border-bottom: 1px solid #afafaf;
+	color: #515151;
+	outline: none;
+}
+
+div.form div.fields div.field div.highlight
+{
+	display: inline;
+}
+
+div.form div.fields div.field div.highlight .ui-state-default
+{
+	margin: 0;
+	padding: 6px 12px 6px 12px;
+	background: #4e85bb url("../images/colors/blue/button_highlight.png") repeat-x;
+	border-top: 1px solid #5c91a4;
+	border-left: 1px solid #2a6f89;
+	border-right: 1px solid #2b7089;
+	border-bottom: 1px solid #1a6480;
+	color: #FFFFFF;
+}
+
+div.form div.fields div.field div.highlight .ui-state-hover
+{
+	margin: 0;
+	padding: 6px 12px 6px 12px;
+	background: #46a0c1 url("../images/colors/blue/button_highlight_selected.png") repeat-x;
+	border-top: 1px solid #78acbf;
+	border-left: 1px solid #34819e;
+	border-right: 1px solid #35829f;
+	border-bottom: 1px solid #257897;
+	color: #FFFFFF;
+}
+
 
 /* -----------------------------------------------------------
 	content -> right -> forms -> buttons
@@ -1674,6 +1750,30 @@ div.options a:hover
 }
 
 #content div.box div.form div.fields div.buttons input
+{
+	margin: 0;
+	color: #000000;
+	font-family: Lucida Grande, Verdana, Lucida Sans Regular, Lucida Sans Unicode, Arial, sans-serif;
+	font-size: 11px;
+	font-weight: bold;
+}
+/* -----------------------------------------------------------
+	content -> right -> forms -> buttons
+----------------------------------------------------------- */
+
+div.form div.fields div.buttons
+{
+	margin: 10px 0 0 200px;
+	padding: 0;
+}
+
+div.box-left div.form div.fields div.buttons,
+div.box-right div.form div.fields div.buttons
+{
+	margin: 10px 0 0 0;
+}
+
+div.form div.fields div.buttons input
 {
 	margin: 0;
 	color: #000000;

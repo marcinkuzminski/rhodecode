@@ -26,6 +26,17 @@ div.codeblock .code-body table{
     width: 0 !important;    
 }
 
+div.code-body pre .match{
+	background-color: #FAFFA6;
+}
+div.code-body pre .break{
+	background-color: #DDE7EF;
+	width: 100%;
+	color: #747474;
+	display: block;
+	
+}
+
 div.annotatediv{
 	margin-left:2px;
 	margin-right:4px;
