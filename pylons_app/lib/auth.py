@@ -27,7 +27,7 @@ from pylons import config, session, url, request
 from pylons.controllers.util import abort, redirect
 from pylons_app.lib.utils import get_repo_slug
 from pylons_app.model import meta
-from pylons_app.model.db import User, Repo2Perm, Repository, Permission
+from pylons_app.model.db import User, RepoToPerm, Repository, Permission
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 import crypt
@@ -134,10 +134,10 @@ def fill_perms(user):
     user.permissions['global'] = set()
     
     #first fetch default permissions
-    default_perms = sa.query(Repo2Perm, Repository, Permission)\
-        .join((Repository, Repo2Perm.repository_id == Repository.repo_id))\
-        .join((Permission, Repo2Perm.permission_id == Permission.permission_id))\
-        .filter(Repo2Perm.user_id == sa.query(User).filter(User.username == 
+    default_perms = sa.query(RepoToPerm, Repository, Permission)\
+        .join((Repository, RepoToPerm.repository_id == Repository.repo_id))\
+        .join((Permission, RepoToPerm.permission_id == Permission.permission_id))\
+        .filter(RepoToPerm.user_id == sa.query(User).filter(User.username == 
                                             'default').one().user_id).all()
 
     if user.is_admin:
@@ -145,7 +145,7 @@ def fill_perms(user):
         #admin have all rights set to admin
         for perm in default_perms:
             p = 'repository.admin'
-            user.permissions['repositories'][perm.Repo2Perm.repository.repo_name] = p
+            user.permissions['repositories'][perm.RepoToPerm.repository.repo_name] = p
     
     else:
         user.permissions['global'].add('repository.create')
@@ -159,13 +159,13 @@ def fill_perms(user):
             else:
                 p = perm.Permission.permission_name
                 
-            user.permissions['repositories'][perm.Repo2Perm.repository.repo_name] = p
+            user.permissions['repositories'][perm.RepoToPerm.repository.repo_name] = p
                                                 
         
-        user_perms = sa.query(Repo2Perm, Permission, Repository)\
-            .join((Repository, Repo2Perm.repository_id == Repository.repo_id))\
-            .join((Permission, Repo2Perm.permission_id == Permission.permission_id))\
-            .filter(Repo2Perm.user_id == user.user_id).all()
+        user_perms = sa.query(RepoToPerm, Permission, Repository)\
+            .join((Repository, RepoToPerm.repository_id == Repository.repo_id))\
+            .join((Permission, RepoToPerm.permission_id == Permission.permission_id))\
+            .filter(RepoToPerm.user_id == user.user_id).all()
         #overwrite userpermissions with defaults
         for perm in user_perms:
             #set write if owner
@@ -173,7 +173,7 @@ def fill_perms(user):
                 p = 'repository.write'
             else:
                 p = perm.Permission.permission_name
-            user.permissions['repositories'][perm.Repo2Perm.repository.repo_name] = p
+            user.permissions['repositories'][perm.RepoToPerm.repository.repo_name] = p
     meta.Session.remove()         
     return user
     

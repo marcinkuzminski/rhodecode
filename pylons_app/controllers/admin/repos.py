@@ -222,7 +222,7 @@ class ReposController(BaseController):
             
         c.users_array = repo_model.get_users_js()
         
-        for p in c.repo_info.repo2perm:
+        for p in c.repo_info.repo_to_perm:
             defaults.update({'perm_%s' % p.user.username: 
                              p.permission.permission_name})
             

@@ -24,7 +24,7 @@ model for handling repositories actions
 from datetime import datetime
 from pylons import app_globals as g
 from pylons_app.lib.utils import check_repo
-from pylons_app.model.db import Repository, Repo2Perm, User, Permission
+from pylons_app.model.db import Repository, RepoToPerm, User, Permission
 from pylons_app.model.meta import Session
 import logging
 import os
@@ -55,10 +55,10 @@ class RepoModel(object):
 
             #update permissions
             for username, perm in form_data['perms_updates']:
-                r2p = self.sa.query(Repo2Perm)\
-                        .filter(Repo2Perm.user == self.sa.query(User)\
+                r2p = self.sa.query(RepoToPerm)\
+                        .filter(RepoToPerm.user == self.sa.query(User)\
                                 .filter(User.username == username).one())\
-                        .filter(Repo2Perm.repository == self.get(repo_name))\
+                        .filter(RepoToPerm.repository == self.get(repo_name))\
                         .one()
                 
                 r2p.permission_id = self.sa.query(Permission).filter(
@@ -68,7 +68,7 @@ class RepoModel(object):
             
             #set new permissions
             for username, perm in form_data['perms_new']:
-                r2p = Repo2Perm()
+                r2p = RepoToPerm()
                 r2p.repository = self.get(repo_name)
                 r2p.user = self.sa.query(User)\
                                 .filter(User.username == username).one()
@@ -110,18 +110,18 @@ class RepoModel(object):
             self.sa.add(new_repo)
             
             #create default permission
-            repo2perm = Repo2Perm()
+            repo_to_perm = RepoToPerm()
             default_perm = 'repository.none' if form_data['private'] \
                                                         else 'repository.read'
-            repo2perm.permission_id = self.sa.query(Permission)\
+            repo_to_perm.permission_id = self.sa.query(Permission)\
                     .filter(Permission.permission_name == default_perm)\
                     .one().permission_id
                         
-            repo2perm.repository_id = new_repo.repo_id
-            repo2perm.user_id = self.sa.query(User)\
+            repo_to_perm.repository_id = new_repo.repo_id
+            repo_to_perm.user_id = self.sa.query(User)\
                     .filter(User.username == 'default').one().user_id 
             
-            self.sa.add(repo2perm)
+            self.sa.add(repo_to_perm)
             self.sa.commit()
             if not just_db:
                 self.__create_repo(repo_name)
@@ -142,9 +142,9 @@ class RepoModel(object):
         
     def delete_perm_user(self, form_data, repo_name):
         try:
-            self.sa.query(Repo2Perm)\
-                .filter(Repo2Perm.repository == self.get(repo_name))\
-                .filter(Repo2Perm.user_id == form_data['user_id']).delete()
+            self.sa.query(RepoToPerm)\
+                .filter(RepoToPerm.repository == self.get(repo_name))\
+                .filter(RepoToPerm.user_id == form_data['user_id']).delete()
             self.sa.commit()
         except:
             log.error(traceback.format_exc())

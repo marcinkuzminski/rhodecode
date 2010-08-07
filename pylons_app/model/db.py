@@ -64,7 +64,7 @@ class Repository(Base):
     description = Column("description", TEXT(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     
     user = relation('User')
-    repo2perm = relation('Repo2Perm', cascade='all')
+    repo_to_perm = relation('RepoToPerm', cascade='all')
     
 class Permission(Base):
     __tablename__ = 'permissions'
@@ -76,10 +76,10 @@ class Permission(Base):
     def __repr__(self):
         return "<Permission('%s:%s')>" % (self.permission_id, self.permission_name)
 
-class Repo2Perm(Base):
+class RepoToPerm(Base):
     __tablename__ = 'repo_to_perm'
     __table_args__ = (UniqueConstraint('user_id', 'repository_id'), {'useexisting':True})
-    repo2perm_id = Column("repo2perm_id", INTEGER(), nullable=False, unique=True, default=None, primary_key=True)
+    repo_to_perm_id = Column("repo_to_perm_id", INTEGER(), nullable=False, unique=True, default=None, primary_key=True)
     user_id = Column("user_id", INTEGER(), ForeignKey(u'users.user_id'), nullable=False, unique=None, default=None)
     permission_id = Column("permission_id", INTEGER(), ForeignKey(u'permissions.permission_id'), nullable=False, unique=None, default=None)
     repository_id = Column("repository_id", INTEGER(), ForeignKey(u'repositories.repo_id'), nullable=False, unique=None, default=None) 
@@ -87,3 +87,17 @@ class Repo2Perm(Base):
     user = relation('User')
     permission = relation('Permission')
     repository = relation('Repository')
+
+class UserToPerm(Base):
+    __tablename__ = 'user_to_perm'
+    __table_args__ = {'useexisting':True}
+    user_to_perm_id = Column("user_to_perm_id", INTEGER(), nullable=False, unique=True, default=None, primary_key=True)
+    user_id = Column("user_id", INTEGER(), ForeignKey(u'users.user_id'), nullable=False, unique=None, default=None)
+    permission_id = Column("permission_id", INTEGER(), ForeignKey(u'permissions.permission_id'), nullable=False, unique=None, default=None)
+    
+    user = relation('User')
+    permission = relation('Permission')
+
+
+
+
