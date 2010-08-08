@@ -2,7 +2,7 @@
 <%inherit file="/base/base.html"/>
 
 <%def name="title()">
-    ${_('User administration')}
+    ${c.hg_app_user.username} ${_('account')}
 </%def>
 
 <%def name="breadcrumbs_links()">
