@@ -213,8 +213,15 @@ div.options a:hover
 
 #header ul#logged-user li.first
 {
-	border-left: none;	
+	border-left: none;
+	margin:-6px;	
 }
+#header ul#logged-user li.first div.account
+{
+	padding-top: 4px;
+	float: left;
+}
+
 
 #header ul#logged-user li.last
 {

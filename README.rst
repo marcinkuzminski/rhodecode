@@ -14,23 +14,24 @@ Fully customizable, with authentication, permissions. Based on vcs library.
 - mercurial branch graph and yui-flot powered graphs
 - admin interface for performing user/permission managments as well as repository
   managment. 
-- Additionall settings for mercurial web, (hooks editable from admin
-  panel !) also paths,archive,remote messages  
+- Additional settings for mercurial web, (hooks editable from admin
+  panel !) also manage paths, archive, remote messages  
 - backup scripts can do backup of whole app and send it over scp to desired location
 - setup project descriptions and info inside built in db for easy, non 
   file-system operations
 - added cache with invalidation on push/repo managment for high performance and
   always upto date data. 
-- rss /atom feed customizable
+- rss / atom feeds, gravatar support
 - based on pylons 1.0 / sqlalchemy 0.6
 
 **Incoming**
 
 - code review based on hg-review (when it's stable)
 - git support (when vcs can handle it)
-- other cools stuff that i can figure out
-- full text search of source codes
+- full text search of source codes with indexing daemons using whoosh
+  (no external search servers required all in one application)
 - manage hg ui() per repo, add hooks settings, per repo, and not globally
+- other cools stuff that i can figure out
 
 .. note::
    This software is still in beta mode. 
@@ -56,5 +57,5 @@ Installation
   the app should be available at the 127.0.0.1:5000
 - use admin account you created to login.
 - default permissions on each repository is read, and owner is admin. So remember
-  to update those.
+  to update these.
      

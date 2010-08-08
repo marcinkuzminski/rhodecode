@@ -17,7 +17,13 @@
         <!-- user -->
         <ul id="logged-user">
             <li class="first">
-            ${h.link_to('%s %s (%s)'%(c.hg_app_user.name,c.hg_app_user.lastname,c.hg_app_user.username),h.url('admin_settings_my_account'))}
+	            <div class="gravatar">
+	            	<img alt="gravatar" src="${h.gravatar_url(c.hg_app_user.email,24)}" />
+	            </div>
+	            <div class="account">
+	            	${h.link_to('%s %s'%(c.hg_app_user.name,c.hg_app_user.lastname),h.url('admin_settings_my_account'))}<br/>
+	            	${h.link_to(c.hg_app_user.username,h.url('admin_settings_my_account'))}
+	            </div>	
             </li>
             <li class="last highlight">${h.link_to(u'Logout',h.url('logout_home'))}</li>
         </ul>
@@ -192,7 +198,16 @@
                     <span>${_('Home')}</span>                 
                     </a>        
                 </li>
-
+                
+                <li>
+                    <a title="${_('Search')}"  href="${h.url('search')}">
+                    <span class="icon">
+                        <img src="/images/icons/search_16.png" alt="${_('Search')}" />
+                    </span>
+                    <span>${_('Search')}</span>                 
+                    </a>        
+                </li>
+                
 				%if h.HasPermissionAll('hg.admin')('access admin main page'):
                 <li ${is_current('admin')}>
                    <a title="${_('Admin')}" href="${h.url('admin_home')}">
