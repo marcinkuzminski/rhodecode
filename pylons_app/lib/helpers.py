@@ -284,6 +284,7 @@ age = lambda  x:_age(x)
 capitalize = lambda x: x.capitalize()
 date = lambda x: util.datestr(x)
 email = util.email
+email_or_none = lambda x: util.email(x) if util.email(x) != x else None
 person = lambda x: _person(x)
 hgdate = lambda  x: "%d %d" % x
 isodate = lambda  x: util.datestr(x, '%Y-%m-%d %H:%M %1%2')
@@ -307,7 +308,7 @@ import hashlib
 import urllib
 from pylons import request
 
-def gravatar_url(email, size=30):
+def gravatar_url(email_address, size=30):
     ssl_enabled = 'https' == request.environ.get('HTTP_X_URL_SCHEME')
     default = 'identicon'
     baseurl_nossl = "http://www.gravatar.com/avatar/"
@@ -316,7 +317,7 @@ def gravatar_url(email, size=30):
         
     
     # construct the url
-    gravatar_url = baseurl + hashlib.md5(email.lower()).hexdigest() + "?"
+    gravatar_url = baseurl + hashlib.md5(email_address.lower()).hexdigest() + "?"
     gravatar_url += urllib.urlencode({'d':default, 's':str(size)})
 
     return gravatar_url

@@ -51,7 +51,13 @@
 										<span class="tagtag">${tag}</span>
 									%endfor
 								</span>					
-							<div class="author">${cs.author}</div>
+							<div class="author">
+								<div class="gravatar">
+									<img alt="gravatar" src="${h.gravatar_url(h.email(cs.author),20)}"/>
+								</div>
+								<span>${h.person(cs.author)}</span><br/>
+								<span><a href="mailto:${h.email_or_none(cs.author)}">${h.email_or_none(cs.author)}</a></span><br/>
+							</div>
 							<div class="message">
 								${h.link_to(h.wrap_paragraphs(cs.message),
 								h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id))}

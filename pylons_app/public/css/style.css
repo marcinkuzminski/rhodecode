@@ -2959,8 +2959,9 @@ div.form div.fields div.buttons input
 	border-bottom: 1px solid #CCCCCC;
 	border-left: 1px solid #CCCCCC;
 	border-right: 1px solid #CCCCCC;
-	min-height: 80px;
+	min-height: 90px;
 	overflow: hidden;
+	font-size:1.2em;	
 }
 
 #graph_content .container .left {
@@ -2985,6 +2986,7 @@ div.form div.fields div.buttons input
 
 #graph_content .container .left .message {
 	font-size: 100%;
+	padding-top: 3px;
 }
 
 .right div {
