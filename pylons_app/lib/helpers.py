@@ -305,14 +305,13 @@ HasRepoPermissionAny, HasRepoPermissionAll
 #===============================================================================
 import hashlib
 import urllib
+from pylons import request
 
-def gravatar_url(email):
+def gravatar_url(email, size=30):
     ssl_enabled = 'https' == request.environ.get('HTTP_X_URL_SCHEME')
     default = 'identicon'
-    size = 32
     baseurl_nossl = "http://www.gravatar.com/avatar/"
     baseurl_ssl = "https://secure.gravatar.com/avatar/"
-    
     baseurl = baseurl_ssl if ssl_enabled else baseurl_nossl
         
     

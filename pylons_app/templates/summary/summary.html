@@ -4,8 +4,6 @@
     ${_('Mercurial Repository Overview')}
 </%def>
 
-
-
 <%def name="breadcrumbs_links()">
     ${h.link_to(u'Home',h.url('/'))}
     &raquo; 
@@ -64,7 +62,12 @@ E.onDOMReady(function(e){
 			      <label>${_('Contact')}:</label>
 			  </div>
 			  <div class="input-short">
-			      ${c.repo_info.contact}
+			  	<div class="gravatar">
+			  		<img alt="gravatar" src="${h.gravatar_url(c.repo_info.dbrepo.user.email)}"/>
+			  	</div>
+			  		${_('Username')}: ${c.repo_info.dbrepo.user.username}<br/>
+			  		${_('Name')}: ${c.repo_info.dbrepo.user.name} ${c.repo_info.dbrepo.user.lastname}<br/>
+			  		${_('Email')}: <a href="mailto:${c.repo_info.dbrepo.user.email}">${c.repo_info.dbrepo.user.email}</a>
 			  </div>
 			 </div>
 			

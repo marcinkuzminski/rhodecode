@@ -3446,12 +3446,13 @@ table#permissions_manage tr#add_perm_input td{
 /* -----------------------------------------------------------
     GRAVATARS
 ----------------------------------------------------------- */
-.gravatar_box img{
- 	float:left;
- 	padding-right: 5px;
- 	padding-top:3px;
+div.gravatar{
+	background-color:white;
+	border:1px solid #D0D0D0;
+	float:left;
+	margin-right:0.7em;
+	padding: 2px 2px 0px;
 }
-
 
 /* -----------------------------------------------------------
 	jquery ui

@@ -40,7 +40,7 @@
             %for cnt,user in enumerate(c.users_list):
              %if user.name !='default':
                 <tr class="parity${cnt%2}">
-                	<td> <img alt="gravatar" src="${h.gravatar_url(user.email)}"> </td>
+                	<td><div class="gravatar"><img alt="gravatar" src="${h.gravatar_url(user.email)}"> </div></td>
                     <td>${h.link_to(user.username,h.url('edit_user', id=user.user_id))}</td>
                     <td>${user.name}</td>
                     <td>${user.lastname}</td>
