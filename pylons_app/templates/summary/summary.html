@@ -169,11 +169,11 @@ E.onDOMReady(function(e){
 			    			  points: { show: true, radius:0,fill:true },
 			    			  legend:{show:true, container:"legend_container"},
 			    	          selection: { mode: "xy" },
-			    	          yaxis:{tickSize:[1]},
+			    	          yaxis: {tickDecimals:0},
 				              xaxis: { mode: "time", timeformat: "%d",tickSize:[1, "day"],min:${c.ts_min},max:${c.ts_max} }, 
 				              grid: { hoverable: true, clickable: true,autoHighlight:true },
 					        });
-		        
+			        
 				    function showTooltip(x, y, contents) {
 				        var div=document.getElementById('tooltip');
 				        if(!div) {
