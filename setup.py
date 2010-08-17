@@ -7,7 +7,7 @@ except ImportError:
     from setuptools import setup, find_packages
 
 setup(
-    name='pylons_app',
+    name='hg_app',
     version=get_version(),
     description='Mercurial repository serving and browsing app',
     keywords='mercurial web hgwebdir replacement serving hgweb',
@@ -22,7 +22,8 @@ setup(
         "vcs>=0.1.4",
         "pygments>=1.3.0",
         "mercurial>=1.6",
-        "pysqlite"
+        "pysqlite",
+        "whoosh==1.0.0b5",
     ],
     setup_requires=["PasteScript>=1.6.3"],
     packages=find_packages(exclude=['ez_setup']),

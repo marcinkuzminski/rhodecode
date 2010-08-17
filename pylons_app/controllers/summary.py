@@ -113,7 +113,7 @@ class SummaryController(BaseController):
                           % (author.decode('utf8'),
                         [[x, aggregate[author][x]] for x in aggregate[author]]))
         if d == '':
-            d = '"%s":{label:"%s",data:[[0,0],]}' \
+            d = '"%s":{label:"%s",data:[[0,1],]}' \
                 % (author_key_cleaner(repo.contact),
                    author_key_cleaner(repo.contact))
         return d

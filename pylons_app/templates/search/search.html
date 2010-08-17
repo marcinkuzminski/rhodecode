@@ -1,0 +1,69 @@
+## -*- coding: utf-8 -*-
+<%inherit file="/base/base.html"/>
+<%def name="title()">
+   ${_('Search')}: ${c.cur_query}
+</%def>
+<%def name="breadcrumbs()">
+	${c.hg_app_name}
+</%def>
+<%def name="page_nav()">
+	${self.menu('home')}
+</%def>
+<%def name="main()">
+
+<div class="box">
+	<!-- box / title -->
+	<div class="title">
+		<h5>${_('Search')}</h5>
+	</div>
+	<!-- end box / title -->
+	${h.form('search',method='get')}
+	<div class="form">
+		<div class="fields">
+		
+			<div class="field ">
+				<div class="label">
+					<label for="q">${_('Search:')}</label>
+				</div>
+				<div class="input">
+					${h.text('q',c.cur_query,class_="small")}
+					<div class="button highlight">
+						<input type="submit" value="${_('Search')}" class="ui-button ui-widget ui-state-default ui-corner-all"/>
+					</div>		
+					<div style="font-weight: bold;clear:both;padding: 5px">${c.runtime}</div>			
+				</div>
+			</div>
+		</div>
+	</div>
+	${h.end_form()}
+	
+	%for cnt,sr in enumerate(c.formated_results):
+		%if h.HasRepoPermissionAny('repository.write','repository.read','repository.admin')(sr['repository'],'search results check'):
+		<div class="table">
+			<div id="body${cnt}" class="codeblock">
+				<div class="code-header">
+					<div class="revision">${h.link_to(h.literal('%s &raquo; %s' % (sr['repository'],sr['f_path'])),
+					h.url('files_home',repo_name=sr['repository'],revision='tip',f_path=sr['f_path']))}</div>
+				</div>
+				<div class="code-body">
+					<pre>${h.literal(sr['content_short'])}</pre>
+				</div>
+			</div>
+		</div>
+		%else:
+			%if cnt == 0:
+			<div class="table">
+				<div id="body${cnt}" class="codeblock">
+					<div class="error">${_('Permission denied')}</div>
+				</div>
+			</div>		
+			%endif
+			
+		%endif
+	%endfor
+
+	
+	
+</div>
+
+</%def>    

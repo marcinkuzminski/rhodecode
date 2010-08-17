@@ -108,6 +108,8 @@ def make_map(config):
         m.connect('admin_home', '', action='index')#main page
         m.connect('admin_add_repo', '/add_repo/{new_repo:[a-z0-9\. _-]*}',
                   action='add_repo')
+    #SEARCH
+    map.connect('search', '/_admin/search', controller='search')
     
     #LOGIN/LOGOUT
     map.connect('login_home', '/_admin/login', controller='login')
