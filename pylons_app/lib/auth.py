@@ -79,6 +79,7 @@ class  AuthUser(object):
         self.username = 'None'
         self.name = ''
         self.lastname = ''
+        self.email = ''
         self.user_id = None
         self.is_authenticated = False
         self.is_admin = False
@@ -118,6 +119,7 @@ def fill_data(user):
         user.is_admin = dbuser.admin
         user.name = dbuser.name
         user.lastname = dbuser.lastname
+        user.email = dbuser.email
     else:
         user.is_authenticated = False
     meta.Session.remove()
