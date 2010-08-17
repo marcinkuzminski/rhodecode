@@ -32,7 +32,7 @@ from os.path import dirname as dn
 from os.path import join as jn
 
 #to get the pylons_app import
-sys.path.append(dn(dn(dn(os.path.realpath(__file__)))))
+sys.path.append(dn(dn(dn(dn(os.path.realpath(__file__))))))
 
 from pylons_app.config.environment import load_environment
 from pylons_app.model.hg_model import HgModel
