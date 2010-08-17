@@ -2856,6 +2856,13 @@ div.form div.fields div.buttons input
     color: #515151;
 }
 
+/* -----------------------------------------------------------
+	SUMMARY
+----------------------------------------------------------- */
+
+#clone_url{
+	border: none;
+}
 
 /* -----------------------------------------------------------
 	CHANGESETS
@@ -2930,8 +2937,6 @@ div.form div.fields div.buttons input
 	margin-top: 7px;
 	text-align: left;
 }
-
-
 
 /* -----------------------------------------------------------
 	CHANGESETS - CANVAS
@@ -3109,6 +3114,14 @@ table.code-browser .browser-dir {
 	text-align: left;
 }
 
+/* -----------------------------------------------------------
+	ADMIN - SETTINGS
+----------------------------------------------------------- */
+#path_unlock{
+	color: red;
+	font-size: 1.2em;
+	padding-left: 4px;
+}
 
 /* -----------------------------------------------------------
     INFOBOX
