@@ -77,7 +77,8 @@ class SummaryController(BaseController):
         y = td.year
         m = td.month
         d = td.day
-        c.ts_min = mktime((y, (td - timedelta(days=calendar.mdays[m] - 1)).month, d, 0, 0, 0, 0, 0, 0,))
+        c.ts_min = mktime((y, (td - timedelta(days=calendar.mdays[m] - 1)).month,
+                            d, 0, 0, 0, 0, 0, 0,))
         c.ts_max = mktime((y, m, d, 0, 0, 0, 0, 0, 0,))
 
         
@@ -93,25 +94,44 @@ class SummaryController(BaseController):
             k = mktime(timetupple)
             if aggregate.has_key(author_key_cleaner(cs.author)):
                 if aggregate[author_key_cleaner(cs.author)].has_key(k):
-                    aggregate[author_key_cleaner(cs.author)][k] += 1
+                    aggregate[author_key_cleaner(cs.author)][k]["commits"] += 1
+                    aggregate[author_key_cleaner(cs.author)][k]["added"] += len(cs.added)
+                    aggregate[author_key_cleaner(cs.author)][k]["changed"] += len(cs.changed)
+                    aggregate[author_key_cleaner(cs.author)][k]["removed"] += len(cs.removed)
+                    
                 else:
                     #aggregate[author_key_cleaner(cs.author)].update(dates_range)
                     if k >= c.ts_min and k <= c.ts_max:
-                        aggregate[author_key_cleaner(cs.author)][k] = 1
+                        aggregate[author_key_cleaner(cs.author)][k] = {}
+                        aggregate[author_key_cleaner(cs.author)][k]["commits"] = 1
+                        aggregate[author_key_cleaner(cs.author)][k]["added"] = len(cs.added)
+                        aggregate[author_key_cleaner(cs.author)][k]["changed"] = len(cs.changed)
+                        aggregate[author_key_cleaner(cs.author)][k]["removed"] = len(cs.removed) 
+                                            
             else:
                 if k >= c.ts_min and k <= c.ts_max:
                     aggregate[author_key_cleaner(cs.author)] = OrderedDict()
                     #aggregate[author_key_cleaner(cs.author)].update(dates_range)
-                    aggregate[author_key_cleaner(cs.author)][k] = 1
+                    aggregate[author_key_cleaner(cs.author)][k] = {}
+                    aggregate[author_key_cleaner(cs.author)][k]["commits"] = 1
+                    aggregate[author_key_cleaner(cs.author)][k]["added"] = len(cs.added)
+                    aggregate[author_key_cleaner(cs.author)][k]["changed"] = len(cs.changed)
+                    aggregate[author_key_cleaner(cs.author)][k]["removed"] = len(cs.removed)                 
         
         d = ''
         tmpl0 = u""""%s":%s"""
-        tmpl1 = u"""{label:"%s",data:%s},"""
+        tmpl1 = u"""{label:"%s",data:%s,schema:["commits"]},"""
         for author in aggregate:
+            
             d += tmpl0 % (author.decode('utf8'),
                           tmpl1 \
                           % (author.decode('utf8'),
-                        [[x, aggregate[author][x]] for x in aggregate[author]]))
+                        [{"time":x,
+                          "commits":aggregate[author][x]['commits'],
+                          "added":aggregate[author][x]['added'],
+                          "changed":aggregate[author][x]['changed'],
+                          "removed":aggregate[author][x]['removed'],
+                          } for x in aggregate[author]]))
         if d == '':
             d = '"%s":{label:"%s",data:[[0,1],]}' \
                 % (author_key_cleaner(repo.contact),

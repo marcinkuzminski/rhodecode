@@ -118,14 +118,14 @@ E.onDOMReady(function(e){
 	</div>				
 </div>
         
-<div class="box box-right">
+<div class="box box-right"  style="min-height:455px">
     <!-- box / title -->
     <div class="title">
         <h5>${_('Last month commit activity')}</h5>
     </div>
     
     <div class="table">
-        <div id="commit_history" style="width:460px;height:370px;float:left"></div>
+        <div id="commit_history" style="width:560px;height:300px;float:left"></div>
     	<div id="legend_data">
 	    	<div id="legend_container"></div>
 	    	<div id="legend_choices">
@@ -142,11 +142,10 @@ E.onDOMReady(function(e){
 		    for(var key in datasets) {
 		        datasets[key].color = i;
 		        i++;
-		        choiceContainerTable.innerHTML += '<tr>'+
-		        									'<td>'+
-		        									'<input type="checkbox" name="' + key +'" checked="checked" />'+datasets[key].label+
-		        									'</td>'+
-		        								  '</tr>';
+		        choiceContainerTable.innerHTML += '<tr><td>'+
+		        '<input type="checkbox" name="' + key +'" checked="checked" />'
+		        +datasets[key].label+
+		        '</td></tr>';
 		    };
 		    
 
@@ -164,6 +163,7 @@ E.onDOMReady(function(e){
 		        };
 
 		        if (data.length > 0){
+
 				    var plot = YAHOO.widget.Flot("commit_history", data,
 					        { bars: { show: true, align:'center',lineWidth:4 },
 			    			  points: { show: true, radius:0,fill:true },
@@ -211,18 +211,36 @@ E.onDOMReady(function(e){
 		                        }
 		                        var x = item.datapoint.x.toFixed(2);
 		                        var y = item.datapoint.y.toFixed(2);
-
+								
 		                        if (!item.series.label){
 		                            item.series.label = 'commits';
 			                    }
 		                        var d = new Date(x*1000);
 		                        var fd = d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
 		                        var nr_commits = parseInt(y);
-		                        var suffix = '';
-		                        if(nr_commits > 1){
-									var suffix = 's';		
-				                }
-		                        showTooltip(item.pageX, item.pageY, item.series.label + " on " + fd + ": " + nr_commits+" commit" + suffix);
+		                        
+		                        var cur_data = datasets[item.series.label].data[item.dataIndex];
+				                var added = cur_data.added;
+				                var changed = cur_data.changed;
+				                var removed = cur_data.removed;
+				                
+		                        var nr_commits_suffix = " ${_('commits')} ";
+		                        var added_suffix = " ${_('files added')} ";
+			                    var changed_suffix = " ${_('files changed')} ";
+				                var removed_suffix = " ${_('files removed')} ";
+
+				                
+		                        if(nr_commits == 1){nr_commits_suffix = " ${_('commit')} ";}
+								if(added==1){added_suffix=" ${_('file added')} ";}
+								if(changed==1){changed_suffix=" ${_('file changed')} ";}
+								if(removed==1){removed_suffix=" ${_('file removed')} ";}
+												                
+		                        showTooltip(item.pageX, item.pageY, item.series.label + " on " + fd
+										 +'<br/>'+
+				                         nr_commits + nr_commits_suffix+'<br/>'+
+				                         added + added_suffix +'<br/>'+
+				                         changed + changed_suffix + '<br/>'+
+				                         removed + removed_suffix + '<br/>');
 		                    }
 		                }
 		                else {
@@ -253,6 +271,7 @@ E.onDOMReady(function(e){
     </div>    
     <div class="table">
         <%include file='../shortlog/shortlog_data.html'/>
+        ${h.link_to(_('show more'),h.url('changelog_home',repo_name=c.repo_name))}
     </div>
 </div>
 <div class="box">    
@@ -261,6 +280,7 @@ E.onDOMReady(function(e){
     </div>    
     <div class="table">
         <%include file='../tags/tags_data.html'/>
+        ${h.link_to(_('show more'),h.url('tags_home',repo_name=c.repo_name))}
     </div>
 </div>
 <div class="box">
@@ -269,6 +289,7 @@ E.onDOMReady(function(e){
     </div>    
     <div class="table">
         <%include file='../branches/branches_data.html'/>
+        ${h.link_to(_('show more'),h.url('branches_home',repo_name=c.repo_name))}
     </div>      
 </div> 
 

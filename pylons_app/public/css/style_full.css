@@ -2,7 +2,7 @@
 	GLOBAL WIDTH
 ----------------------------------------------------------- */
 #header,#content,#footer{
-	min-width: 1024px;
+	min-width: 1224px;
 }
 
 /* -----------------------------------------------------------
@@ -11,7 +11,7 @@
 
 #content 
 {
-	margin: 10px 60px 0 60px;
+	margin: 10px 30px 0 30px;
 	padding: 0;
     min-height: 100%;
 	clear: both;

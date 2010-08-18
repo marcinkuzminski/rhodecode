@@ -26,7 +26,8 @@
 			<h2>${_('Location')}: ${h.files_breadcrumbs(c.repo_name,c.cur_rev,c.file.path)}</h2>
 			<dl class="overview">
 				<dt>${_('Last revision')}</dt>
-				<dd>r${c.file.last_changeset.revision}:${c.file.last_changeset._short}</dd>
+				<dd>${h.link_to("r%s:%s" % (c.file.last_changeset.revision,c.file.last_changeset._short),
+						h.url('files_annotate_home',repo_name=c.repo_name,revision=c.file.last_changeset._short,f_path=c.f_path))} </dd>
 				<dt>${_('Size')}</dt>
 				<dd>${h.format_byte_size(c.file.size,binary=True)}</dd>
 				<dt>${_('Options')}</dt>

@@ -26,10 +26,11 @@ from pylons import request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
 from pylons_app.lib.auth import LoginRequired
 from pylons_app.lib.base import BaseController, render
-from pylons_app.lib.indexers import ANALYZER, IDX_LOCATION, SCHEMA
+from pylons_app.lib.indexers import ANALYZER, IDX_LOCATION, SCHEMA, IDX_NAME
 from webhelpers.html.builder import escape
 from whoosh.highlight import highlight, SimpleFragmenter, HtmlFormatter, \
     ContextFragmenter
+from pylons.i18n.translation import _
 from whoosh.index import open_dir, EmptyIndexError
 from whoosh.qparser import QueryParser, QueryParserError
 from whoosh.query import Phrase
@@ -56,7 +57,7 @@ class SearchController(BaseController):
         
         if c.cur_query:
             try:
-                idx = open_dir(IDX_LOCATION, indexname='HG_INDEX')
+                idx = open_dir(IDX_LOCATION, indexname=IDX_NAME)
                 searcher = idx.searcher()
             
                 qp = QueryParser("content", schema=SCHEMA)
@@ -99,12 +100,12 @@ class SearchController(BaseController):
                         c.formated_results.append(d)
                                                     
                 except QueryParserError:
-                    c.runtime = 'Invalid search query. Try quoting it.'
+                    c.runtime = _('Invalid search query. Try quoting it.')
 
             except (EmptyIndexError, IOError):
                 log.error(traceback.format_exc())
                 log.error('Empty Index data')
-                c.runtime = 'There is no index to search in. Please run whoosh indexer'
+                c.runtime = _('There is no index to search in. Please run whoosh indexer')
             
 
                 
