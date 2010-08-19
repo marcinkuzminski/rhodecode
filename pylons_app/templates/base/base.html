@@ -83,7 +83,7 @@
 		<% 
 		def is_current(selected):
 			if selected == current:
-				return "class='current'"
+				return h.literal('class="current"')
 		%>
 		%if current not in ['home','admin']:
            <script type="text/javascript">
