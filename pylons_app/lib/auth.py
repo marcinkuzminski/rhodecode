@@ -30,19 +30,18 @@ from pylons_app.model import meta
 from pylons_app.model.db import User, RepoToPerm, Repository, Permission
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
-import crypt
+import hashlib
 from decorator import decorator
 import logging
 
 log = logging.getLogger(__name__) 
 
 def get_crypt_password(password):
-    """
-    Cryptographic function used for password hashing
+    """Cryptographic function used for password hashing based on sha1
     @param password: password to hash
     """
-    return crypt.crypt(password, '6a')
-
+    hashed = hashlib.sha1(password).hexdigest()
+    return hashed[3:] + hashed[:3]
 
 @cache_region('super_short_term', 'cached_user')
 def get_user_cached(username):
@@ -151,6 +150,8 @@ def fill_perms(user):
     
     else:
         user.permissions['global'].add('repository.create')
+        user.permissions['global'].add('hg.register')
+        
         for perm in default_perms:
             if perm.Repository.private and not perm.Repository.user_id == user.user_id:
                 #disable defaults for private repos,
@@ -187,7 +188,7 @@ def get_user(session):
     user = session.get('hg_app_user', AuthUser())
     if user.is_authenticated:
         user = fill_data(user)
-        user = fill_perms(user)
+    user = fill_perms(user)
     session['hg_app_user'] = user
     session.save()
     return user
