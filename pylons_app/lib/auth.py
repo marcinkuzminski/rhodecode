@@ -30,7 +30,7 @@ from pylons_app.model import meta
 from pylons_app.model.db import User, RepoToPerm, Repository, Permission
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
-import hashlib
+import bcrypt
 from decorator import decorator
 import logging
 
@@ -39,9 +39,11 @@ log = logging.getLogger(__name__)
 def get_crypt_password(password):
     """Cryptographic function used for password hashing based on sha1
     @param password: password to hash
-    """
-    hashed = hashlib.sha1(password).hexdigest()
-    return hashed[3:] + hashed[:3]
+    """    
+    return bcrypt.hashpw(password, bcrypt.gensalt(10))
+
+def check_password(password, hashed):
+    return bcrypt.hashpw(password, hashed) == hashed
 
 @cache_region('super_short_term', 'cached_user')
 def get_user_cached(username):
@@ -53,7 +55,6 @@ def get_user_cached(username):
     return user
 
 def authfunc(environ, username, password):
-    password_crypt = get_crypt_password(password)
     try:
         user = get_user_cached(username)
     except (NoResultFound, MultipleResultsFound, OperationalError) as e:
@@ -62,7 +63,7 @@ def authfunc(environ, username, password):
         
     if user:
         if user.active:
-            if user.username == username and user.password == password_crypt:
+            if user.username == username and check_password(password, user.password):
                 log.info('user %s authenticated correctly', username)
                 return True
         else:

@@ -24,6 +24,7 @@ setup(
         "mercurial>=1.6",
         "pysqlite",
         "whoosh>=1.0.0b5",
+        "py-bcrypt",
     ],
     setup_requires=["PasteScript>=1.6.3"],
     packages=find_packages(exclude=['ez_setup']),

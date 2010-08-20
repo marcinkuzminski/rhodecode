@@ -24,7 +24,7 @@ from formencode.validators import UnicodeString, OneOf, Int, Number, Regex, \
     Email, Bool, StringBoolean
 from pylons import session
 from pylons.i18n.translation import _
-from pylons_app.lib.auth import get_crypt_password
+from pylons_app.lib.auth import check_password
 from pylons_app.model import meta
 from pylons_app.model.db import User, Repository
 from sqlalchemy.exc import OperationalError
@@ -94,7 +94,7 @@ class ValidAuth(formencode.validators.FancyValidator):
     
     def validate_python(self, value, state):
         sa = meta.Session
-        crypted_passwd = get_crypt_password(value['password'])
+        password = value['password']
         username = value['username']
         try:
             user = sa.query(User).filter(User.username == username).one()
@@ -106,7 +106,7 @@ class ValidAuth(formencode.validators.FancyValidator):
                                      error_dict=self.e_dict)            
         if user:
             if user.active:
-                if user.username == username and user.password == crypted_passwd:
+                if user.username == username and check_password(password, user.password):
                     from pylons_app.lib.auth import AuthUser
                     auth_user = AuthUser()
                     auth_user.username = username
