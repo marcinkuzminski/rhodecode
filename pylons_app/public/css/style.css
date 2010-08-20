@@ -2856,6 +2856,12 @@ div.form div.fields div.buttons input
     color: #515151;
 }
 
+#register div.form div.activation_msg {
+	padding-top:4px;
+	padding-bottom:4px;
+	
+}
+
 /* -----------------------------------------------------------
 	SUMMARY
 ----------------------------------------------------------- */

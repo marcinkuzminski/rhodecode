@@ -23,7 +23,7 @@ setup(
         "pygments>=1.3.0",
         "mercurial>=1.6",
         "pysqlite",
-        "whoosh>=1.0.0b5",
+        "whoosh==1.0.0b9",
         "py-bcrypt",
     ],
     setup_requires=["PasteScript>=1.6.3"],

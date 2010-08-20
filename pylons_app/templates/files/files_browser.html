@@ -56,7 +56,7 @@
 		             </td>
 		             <td>
 		             	%if node.is_file():
-		             		${node.last_changeset.date}
+		             		${h.age(node.last_changeset._ctx.date())} - ${node.last_changeset.date}
 		             	%endif
 		             </td>
 		             <td>

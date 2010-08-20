@@ -24,7 +24,7 @@ from formencode.validators import UnicodeString, OneOf, Int, Number, Regex, \
     Email, Bool, StringBoolean
 from pylons import session
 from pylons.i18n.translation import _
-from pylons_app.lib.auth import check_password
+from pylons_app.lib.auth import check_password, get_crypt_password
 from pylons_app.model import meta
 from pylons_app.model.db import User, Repository
 from sqlalchemy.exc import OperationalError
