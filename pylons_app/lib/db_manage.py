@@ -34,7 +34,8 @@ sys.path.append(ROOT)
 from pylons_app.lib.auth import get_crypt_password
 from pylons_app.lib.utils import ask_ok
 from pylons_app.model import init_model
-from pylons_app.model.db import User, Permission, HgAppUi, HgAppSettings
+from pylons_app.model.db import User, Permission, HgAppUi, HgAppSettings, \
+    UserToPerm
 from pylons_app.model import meta
 from sqlalchemy.engine import create_engine
 import logging
@@ -189,8 +190,12 @@ class DbManage(object):
                  ('repository.read', 'Repository read access'),
                  ('repository.write', 'Repository write access'),
                  ('repository.admin', 'Repository admin access'),
-                 ('repository.create', 'Repository create'),
                  ('hg.admin', 'Hg Administrator'),
+                 ('hg.create.repository', 'Repository create'),
+                 ('hg.create.none', 'Repository creation disabled'),
+                 ('hg.register.none', 'Register disabled'),
+                 ('hg.register.manual_activate', 'Register new user with hg-app without manual activation'),
+                 ('hg.register.auto_activate', 'Register new user with hg-app without auto activation'),
                 ]
         
         for p in perms:
@@ -203,3 +208,37 @@ class DbManage(object):
             except:
                 self.sa.rollback()
                 raise
+
+    def populate_default_permissions(self):
+        log.info('creating default user permissions')
+        
+        default_user = self.sa.query(User)\
+        .filter(User.username == 'default').scalar()
+        
+        reg_perm = UserToPerm()
+        reg_perm.user = default_user
+        reg_perm.permission = self.sa.query(Permission)\
+        .filter(Permission.permission_name == 'hg.register.manual_activate')\
+        .scalar() 
+        
+        create_repo_perm = UserToPerm()
+        create_repo_perm.user = default_user
+        create_repo_perm.permission = self.sa.query(Permission)\
+        .filter(Permission.permission_name == 'hg.create.repository')\
+        .scalar() 
+        
+        default_repo_perm = UserToPerm()
+        default_repo_perm.user = default_user
+        default_repo_perm.permission = self.sa.query(Permission)\
+        .filter(Permission.permission_name == 'repository.read')\
+        .scalar() 
+                
+        try:
+            self.sa.add(reg_perm)
+            self.sa.add(create_repo_perm)
+            self.sa.add(default_repo_perm)
+            self.sa.commit()
+        except:
+            self.sa.rollback()
+            raise        
+        

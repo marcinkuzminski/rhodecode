@@ -37,6 +37,9 @@ class UserModel(object):
     def __init__(self):
         self.sa = Session() 
     
+    def get_default(self):
+        return self.sa.query(User).filter(User.username == 'default').scalar()
+    
     def get_user(self, id):
         return self.sa.query(User).get(id)
     
@@ -57,9 +60,8 @@ class UserModel(object):
         try:
             new_user = User()
             for k, v in form_data.items():
-                if k != 'admin' or k != 'active':
+                if k != 'admin':
                     setattr(new_user, k, v)
-                setattr(new_user, 'active', True)
                 
             self.sa.add(new_user)
             self.sa.commit()

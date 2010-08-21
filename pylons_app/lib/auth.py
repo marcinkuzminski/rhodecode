@@ -27,7 +27,8 @@ from pylons import config, session, url, request
 from pylons.controllers.util import abort, redirect
 from pylons_app.lib.utils import get_repo_slug
 from pylons_app.model import meta
-from pylons_app.model.db import User, RepoToPerm, Repository, Permission
+from pylons_app.model.db import User, RepoToPerm, Repository, Permission, \
+    UserToPerm
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 import bcrypt
@@ -135,24 +136,39 @@ def fill_perms(user):
     user.permissions['repositories'] = {}
     user.permissions['global'] = set()
     
-    #first fetch default permissions
-    default_perms = sa.query(RepoToPerm, Repository, Permission)\
+    #===========================================================================
+    # fetch default permissions
+    #===========================================================================
+    default_perms = sa.query(RepoToPerm, UserToPerm, Repository, Permission)\
+        .outerjoin((UserToPerm, RepoToPerm.user_id == UserToPerm.user_id))\
         .join((Repository, RepoToPerm.repository_id == Repository.repo_id))\
         .join((Permission, RepoToPerm.permission_id == Permission.permission_id))\
         .filter(RepoToPerm.user_id == sa.query(User).filter(User.username == 
                                             'default').one().user_id).all()
-
+                                            
     if user.is_admin:
+        #=======================================================================
+        # #admin have all rights set to admin        
+        #=======================================================================
         user.permissions['global'].add('hg.admin')
-        #admin have all rights set to admin
+        
         for perm in default_perms:
             p = 'repository.admin'
             user.permissions['repositories'][perm.RepoToPerm.repository.repo_name] = p
     
     else:
-        user.permissions['global'].add('repository.create')
-        user.permissions['global'].add('hg.register')
+        #=======================================================================
+        # set default permissions
+        #=======================================================================
         
+        #default global
+        for perm in default_perms:
+            user.permissions['global'].add(perm.UserToPerm.permission.permission_name)
+            
+#        user.permissions['global'].add('hg.create.repository')
+#        user.permissions['global'].add('hg.register')
+        
+        #default repositories
         for perm in default_perms:
             if perm.Repository.private and not perm.Repository.user_id == user.user_id:
                 #disable defaults for private repos,
@@ -165,16 +181,18 @@ def fill_perms(user):
                 
             user.permissions['repositories'][perm.RepoToPerm.repository.repo_name] = p
                                                 
-        
-        user_perms = sa.query(RepoToPerm, Permission, Repository)\
+        #=======================================================================
+        # #overwrite default with user permissions if any
+        #=======================================================================
+        user_perms = sa.query(RepoToPerm, UserToPerm, Permission, Repository)\
+            .outerjoin((UserToPerm, RepoToPerm.user_id == UserToPerm.user_id))\
             .join((Repository, RepoToPerm.repository_id == Repository.repo_id))\
             .join((Permission, RepoToPerm.permission_id == Permission.permission_id))\
             .filter(RepoToPerm.user_id == user.user_id).all()
-        #overwrite userpermissions with defaults
+            
         for perm in user_perms:
-            #set write if owner
-            if perm.Repository.user_id == user.user_id:
-                p = 'repository.write'
+            if perm.Repository.user_id == user.user_id:#set admin if owner
+                p = 'repository.admin'
             else:
                 p = perm.Permission.permission_name
             user.permissions['repositories'][perm.RepoToPerm.repository.repo_name] = p

@@ -26,6 +26,7 @@ from pylons import app_globals as g
 from pylons_app.lib.utils import check_repo
 from pylons_app.model.db import Repository, RepoToPerm, User, Permission
 from pylons_app.model.meta import Session
+from pylons_app.model.user_model import UserModel
 import logging
 import os
 import shutil
@@ -111,8 +112,14 @@ class RepoModel(object):
             
             #create default permission
             repo_to_perm = RepoToPerm()
-            default_perm = 'repository.none' if form_data['private'] \
-                                                        else 'repository.read'
+            default = 'repository.read'
+            for p in UserModel().get_default().user_perms:
+                if p.permission.permission_name.startswith('repository.'):
+                    default = p.permission.permission_name
+                    break
+            
+            default_perm = 'repository.none' if form_data['private'] else default
+            
             repo_to_perm.permission_id = self.sa.query(Permission)\
                     .filter(Permission.permission_name == default_perm)\
                     .one().permission_id

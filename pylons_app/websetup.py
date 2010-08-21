@@ -19,5 +19,6 @@ def setup_app(command, conf, vars):
     dbmanage.config_prompt()
     dbmanage.admin_prompt()
     dbmanage.create_permissions()
+    dbmanage.populate_default_permissions()
     load_environment(conf.global_conf, conf.local_conf, initial=True)
 

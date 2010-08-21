@@ -34,13 +34,14 @@ class User(Base):
     last_login = Column("last_login", DATETIME(timezone=False), nullable=True, unique=None, default=None)
     
     user_log = relation('UserLog')
+    user_perms = relation('UserToPerm', primaryjoin="User.user_id==UserToPerm.user_id")
     
     @LazyProperty
     def full_contact(self):
         return '%s %s <%s>' % (self.name, self.lastname, self.email)
         
     def __repr__(self):
-        return "<User('%s:%s')>" % (self.user_id, self.username)
+        return "<User('id:%s:%s')>" % (self.user_id, self.username)
       
 class UserLog(Base): 
     __tablename__ = 'user_logs'
@@ -66,6 +67,9 @@ class Repository(Base):
     user = relation('User')
     repo_to_perm = relation('RepoToPerm', cascade='all')
     
+    def __repr__(self):
+        return "<Repository('id:%s:%s')>" % (self.repo_id, self.repo_name)
+        
 class Permission(Base):
     __tablename__ = 'permissions'
     __table_args__ = {'useexisting':True}

@@ -21,23 +21,40 @@
     <div class="title">
         ${self.breadcrumbs()}       
     </div>
-    <h3>${_('Repositories permissions')}</h3>
-    ${h.form(url('permission', id='default_perm'),method='put')}
+    <h3>${_('Default permissions')}</h3>
+    ${h.form(url('permission', id='default'),method='put')}
     <div class="form">
         <!-- fields -->
         <div class="fields">
         
 			<div class="field">
 				<div class="label">
-					<label for="default_perm">${_('default repository permission')}:</label>
+					<label for="default_perm">${_('Default repository permission')}:</label>
 				</div>
 				<div class="select">
-					${h.select('default_perm','repository.read',['repository.none','repository.read','repository.write','repository.admin'])}
+					${h.select('default_perm','',c.perms_choices)}
 				</div>
-			</div>           
+			</div>   
+			<div class="field">
+		        <div class="label">
+		            <label for="default_register">${_('Registration')}:</label>
+		        </div>
+				<div class="select">
+					${h.select('default_register','',c.register_choices)}
+				</div>
+			</div> 		
+             <div class="field">
+                <div class="label">
+                    <label for="default_create">${_('Allow repository creation')}:</label>
+                </div>
+				<div class="select">
+					${h.select('default_create','',c.create_choices)}
+				</div>
+             </div>	
+				        
 	        <div class="buttons">
 	        ${h.submit('set','set',class_="ui-button ui-widget ui-state-default ui-corner-all")}
-	        </div>                                                          
+	        </div>	                                                               
         </div>
     </div>  
     ${h.end_form()}

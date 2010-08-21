@@ -37,7 +37,6 @@ import formencode
 import logging
 import traceback
 
-
 log = logging.getLogger(__name__)
 
 class UsersController(BaseController):

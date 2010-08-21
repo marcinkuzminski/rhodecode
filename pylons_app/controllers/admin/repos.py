@@ -50,7 +50,7 @@ class ReposController(BaseController):
     #     map.resource('repo', 'repos')
     
     @LoginRequired()
-    @HasPermissionAnyDecorator('hg.admin', 'repository.create')
+    @HasPermissionAnyDecorator('hg.admin', 'hg.create.repository')
     def __before__(self):
         c.admin_user = session.get('admin_user')
         c.admin_username = session.get('admin_username')
@@ -64,7 +64,7 @@ class ReposController(BaseController):
         c.repos_list = sorted(cached_repo_list, key=itemgetter('name_sort'))
         return render('admin/repos/repos.html')
     
-    @HasPermissionAnyDecorator('hg.admin', 'repository.create')
+    @HasPermissionAnyDecorator('hg.admin', 'hg.create.repository')
     def create(self):
         """POST /repos: Create a new item"""
         # url('repos')

@@ -271,7 +271,7 @@ class SettingsController(BaseController):
                     
         return redirect(url('my_account'))
     
-    @HasPermissionAnyDecorator('repository.create', 'hg.admin')
+    @HasPermissionAnyDecorator('hg.admin', 'hg.create.repository')
     def create_repository(self):
         """GET /_admin/create_repository: Form to create a new item"""
         new_repo = request.GET.get('repo', '')

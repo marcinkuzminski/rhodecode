@@ -17,20 +17,21 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
-from formencode import htmlfill
-from pylons import request, response, session, tmpl_context as c, url
-from pylons.controllers.util import abort, redirect
-from pylons_app.lib.auth import AuthUser
-from pylons_app.lib.base import BaseController, render
-from pylons_app.model.forms import LoginForm, RegisterForm
-from pylons_app.model.user_model import UserModel
-import formencode
-import logging
+
 """
 Created on April 22, 2010
 login controller for pylons
 @author: marcink
 """
+from formencode import htmlfill
+from pylons import request, response, session, tmpl_context as c, url
+from pylons.controllers.util import abort, redirect
+from pylons_app.lib.auth import AuthUser, HasPermissionAnyDecorator
+from pylons_app.lib.base import BaseController, render
+from pylons_app.model.forms import LoginForm, RegisterForm
+from pylons_app.model.user_model import UserModel
+import formencode
+import logging
 
 log = logging.getLogger(__name__)
 
@@ -61,13 +62,21 @@ class LoginController(BaseController):
                         
         return render('/login.html')
     
-    
+    @HasPermissionAnyDecorator('hg.admin', 'hg.register.auto_activate', 'hg.register.manual_activate')
     def register(self):
+        user_model = UserModel()
+        c.auto_active = False
+        for perm in user_model.get_default().user_perms:
+            if perm.permission.permission_name == 'hg.register.auto_activate':
+                c.auto_active = False
+                break
+                        
         if request.POST:
-            user_model = UserModel()
+                
             register_form = RegisterForm()()
             try:
                 form_result = register_form.to_python(dict(request.POST))
+                form_result['active'] = c.auto_active
                 user_model.create_registration(form_result)
                 return redirect(url('login_home'))
                                

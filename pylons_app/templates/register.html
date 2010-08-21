@@ -76,6 +76,11 @@
 			            <div class="buttons">
 				            <div class="nohighlight">
 				              ${h.submit('sign_up','Sign Up',class_="ui-button ui-widget ui-state-default ui-corner-all")}
+				              %if c.auto_active:
+							  	<div class="activation_msg">${_('Your account will be activated right after registration')}</div>
+							  %else:
+							  	<div class="activation_msg">${_('Your account must wait for activation by administrator')}</div>
+							  %endif
 				            </div>
 			            </div>             
 			    	</div>

@@ -27,7 +27,7 @@
 	    <!-- box / title -->
 	    <div class="title">
 	        <h5>${_('Dashboard')}</h5>
-	        %if h.HasPermissionAny('repository.create','hg.admin')():
+	        %if h.HasPermissionAny('hg.admin','hg.create.repository')():
 	        <ul class="links">
 	          <li>
 	            <span>${h.link_to(u'ADD NEW REPOSITORY',h.url('admin_settings_create_repository'),class_="add_icon")}</span>
