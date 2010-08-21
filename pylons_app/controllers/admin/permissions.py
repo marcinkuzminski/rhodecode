@@ -97,6 +97,7 @@ class PermissionsController(BaseController):
         
         try:
             form_result = _form.to_python(dict(request.POST))
+            form_result.update({'perm_user_name':id})
             permission_model.update(form_result)
             h.flash(_('Default permissions updated succesfully'),
                     category='success')

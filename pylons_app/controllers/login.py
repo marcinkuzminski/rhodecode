@@ -67,8 +67,9 @@ class LoginController(BaseController):
         user_model = UserModel()
         c.auto_active = False
         for perm in user_model.get_default().user_perms:
+            print perm.permission.permission_name
             if perm.permission.permission_name == 'hg.register.auto_activate':
-                c.auto_active = False
+                c.auto_active = True
                 break
                         
         if request.POST:

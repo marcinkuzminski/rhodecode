@@ -124,6 +124,8 @@ def fill_data(user):
     else:
         user.is_authenticated = False
     meta.Session.remove()
+    from pprint import pprint
+    pprint(user.permissions)
     return user
             
 def fill_perms(user):
@@ -164,10 +166,7 @@ def fill_perms(user):
         #default global
         for perm in default_perms:
             user.permissions['global'].add(perm.UserToPerm.permission.permission_name)
-            
-#        user.permissions['global'].add('hg.create.repository')
-#        user.permissions['global'].add('hg.register')
-        
+                    
         #default repositories
         for perm in default_perms:
             if perm.Repository.private and not perm.Repository.user_id == user.user_id:

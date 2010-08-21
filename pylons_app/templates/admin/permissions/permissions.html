@@ -33,7 +33,13 @@
 				</div>
 				<div class="select">
 					${h.select('default_perm','',c.perms_choices)}
-				</div>
+				
+		                ${h.checkbox('overwrite_default','true')}
+		                <label for="overwrite_default">
+		                <span class="tooltip" 
+		                tooltip_title="${h.tooltip(_('All default permissions on each repository will be reset to choosen permission, note that all custom default permission on repositories will be lost'))}">
+		                ${_('overwrite existing settings')}</span> </label>
+				</div>		                
 			</div>   
 			<div class="field">
 		        <div class="label">
