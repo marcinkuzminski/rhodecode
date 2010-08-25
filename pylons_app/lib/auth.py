@@ -124,8 +124,6 @@ def fill_data(user):
     else:
         user.is_authenticated = False
     meta.Session.remove()
-    from pprint import pprint
-    pprint(user.permissions)
     return user
             
 def fill_perms(user):
