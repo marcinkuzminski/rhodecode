@@ -124,8 +124,6 @@ def fill_data(user):
     else:
         user.is_authenticated = False
     meta.Session.remove()
-    from pprint import pprint
-    pprint(user.permissions)
     return user
             
 def fill_perms(user):
@@ -141,16 +139,15 @@ def fill_perms(user):
     #===========================================================================
     # fetch default permissions
     #===========================================================================
-    default_perms = sa.query(RepoToPerm, UserToPerm, Repository, Permission)\
-        .outerjoin((UserToPerm, RepoToPerm.user_id == UserToPerm.user_id))\
+    default_perms = sa.query(RepoToPerm, Repository, Permission)\
         .join((Repository, RepoToPerm.repository_id == Repository.repo_id))\
         .join((Permission, RepoToPerm.permission_id == Permission.permission_id))\
-        .filter(RepoToPerm.user_id == sa.query(User).filter(User.username == 
-                                            'default').one().user_id).all()
+        .filter(RepoToPerm.user == sa.query(User).filter(User.username == 
+                                            'default').scalar()).all()
                                             
     if user.is_admin:
         #=======================================================================
-        # #admin have all rights set to admin        
+        # #admin have all default rights set to admin        
         #=======================================================================
         user.permissions['global'].add('hg.admin')
         
@@ -164,8 +161,12 @@ def fill_perms(user):
         #=======================================================================
         
         #default global
-        for perm in default_perms:
-            user.permissions['global'].add(perm.UserToPerm.permission.permission_name)
+        default_global_perms = sa.query(UserToPerm)\
+            .filter(UserToPerm.user == sa.query(User).filter(User.username == 
+            'default').one())
+        
+        for perm in default_global_perms:
+            user.permissions['global'].add(perm.permission.permission_name)
                     
         #default repositories
         for perm in default_perms:
@@ -183,8 +184,7 @@ def fill_perms(user):
         #=======================================================================
         # #overwrite default with user permissions if any
         #=======================================================================
-        user_perms = sa.query(RepoToPerm, UserToPerm, Permission, Repository)\
-            .outerjoin((UserToPerm, RepoToPerm.user_id == UserToPerm.user_id))\
+        user_perms = sa.query(RepoToPerm, Permission, Repository)\
             .join((Repository, RepoToPerm.repository_id == Repository.repo_id))\
             .join((Permission, RepoToPerm.permission_id == Permission.permission_id))\
             .filter(RepoToPerm.user_id == user.user_id).all()
