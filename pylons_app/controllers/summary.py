@@ -84,6 +84,7 @@ class SummaryController(BaseController):
         
         def author_key_cleaner(k):
             k = person(k)
+            k = k.replace('"', "'") #for js data compatibilty
             return k
                 
         for cs in repo:

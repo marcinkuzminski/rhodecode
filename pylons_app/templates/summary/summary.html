@@ -154,12 +154,17 @@ E.onDOMReady(function(e){
 
 		        var inputs = choiceContainer.getElementsByTagName("input");
 		        for(var i=0; i<inputs.length; i++) {
-		            if(!inputs[i].checked)
-		                continue;
-
 		            var key = inputs[i].name;
-		            if (key && datasets[key])
-		                data.push(datasets[key]);
+		            if (key && datasets[key]){
+			            if(!inputs[i].checked){
+				            data.push({label:key,data:[[0,1],]});	
+				        }
+			            else{
+			            	data.push(datasets[key]);
+			            }
+		                
+		            }
+		            
 		        };
 
 		        if (data.length > 0){
