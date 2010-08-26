@@ -87,7 +87,7 @@ class SummaryController(BaseController):
             k = k.replace('"', "'") #for js data compatibilty
             return k
                 
-        for cs in repo:
+        for cs in repo[:200]:#added limit 200 until fix #29 is made
             k = '%s-%s-%s' % (cs.date.timetuple()[0], cs.date.timetuple()[1],
                               cs.date.timetuple()[2])
             timetupple = [int(x) for x in k.split('-')]
