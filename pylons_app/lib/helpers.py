@@ -220,7 +220,8 @@ def pygmentize(filenode, **kwargs):
     pygmentize function using pygments
     @param filenode:
     """
-    return literal(code_highlight(filenode.content, filenode.lexer, HtmlFormatter(**kwargs)))
+    return literal(code_highlight(filenode.content, 
+                                  filenode.lexer, HtmlFormatter(**kwargs)))
 
 def pygmentize_annotation(filenode, **kwargs):
     """
@@ -241,7 +242,8 @@ def pygmentize_annotation(filenode, **kwargs):
         return "color: rgb(%s) ! important;" % (', '.join(col))
         
     def url_func(changeset):
-        tooltip_html = "<div style='font-size:0.8em'><b>Author:</b> %s<br/><b>Date:</b> %s</b><br/><b>Message:</b> %s<br/></div>" 
+        tooltip_html = "<div style='font-size:0.8em'><b>Author:</b>"+\
+        " %s<br/><b>Date:</b> %s</b><br/><b>Message:</b> %s<br/></div>" 
         
         tooltip_html = tooltip_html % (changeset.author,
                                                changeset.date,
@@ -250,7 +252,7 @@ def pygmentize_annotation(filenode, **kwargs):
                                  changeset.raw_id)
         uri = link_to(
                 lnk_format,
-                url('changeset_home', repo_name='test',
+                url('changeset_home', repo_name=changeset.repository.name,
                     revision=changeset.raw_id),
                 style=get_color_string(changeset.raw_id),
                 class_='tooltip',

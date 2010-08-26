@@ -124,9 +124,9 @@ class SummaryController(BaseController):
         tmpl1 = u"""{label:"%s",data:%s,schema:["commits"]},"""
         for author in aggregate:
             
-            d += tmpl0 % (author.decode('utf8'),
+            d += tmpl0 % (author,
                           tmpl1 \
-                          % (author.decode('utf8'),
+                          % (author,
                         [{"time":x,
                           "commits":aggregate[author][x]['commits'],
                           "added":aggregate[author][x]['added'],
