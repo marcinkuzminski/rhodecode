@@ -26,7 +26,6 @@ Mercurial repositories backup manager
 
 
 import logging
-from mercurial import config
 import tarfile
 import os
 import datetime
@@ -36,44 +35,32 @@ logging.basicConfig(level=logging.DEBUG,
                     format="%(asctime)s %(levelname)-5.5s %(message)s")
 
 class BackupManager(object):
-    def __init__(self, id_rsa_path, repo_conf):
-        self.repos_path = None
-        self.backup_file_name = None
-        self.id_rsa_path = id_rsa_path
-        self.check_id_rsa()
-        cur_dir = os.path.realpath(__file__)
-        dn = os.path.dirname
-        self.backup_file_path = os.path.join(dn(dn(dn(cur_dir))), 'data')
-        cfg = config.config()
-        try:
-            cfg.read(os.path.join(dn(dn(dn(cur_dir))), repo_conf))
-        except IOError:
-            logging.error('Could not read %s', repo_conf)
-            sys.exit()
-        self.set_repos_path(cfg.items('paths'))
+    def __init__(self, repos_location, rsa_key, backup_server):
+        today = datetime.datetime.now().weekday() + 1
+        self.backup_file_name = "mercurial_repos.%s.tar.gz" % today
+        
+        self.id_rsa_path = self.get_id_rsa(rsa_key)
+        self.repos_path = self.get_repos_path(repos_location)
+        self.backup_server = backup_server
+
+        self.backup_file_path = '/tmp'
+
         logging.info('starting backup for %s', self.repos_path)
         logging.info('backup target %s', self.backup_file_path)
 
-        if not os.path.isdir(self.repos_path):
-            raise Exception('Not a valid directory in %s' % self.repos_path)
 
-    def check_id_rsa(self):
-        if not os.path.isfile(self.id_rsa_path):
-            logging.error('Could not load id_rsa key file in %s',
-                          self.id_rsa_path)
+    def get_id_rsa(self, rsa_key):
+        if not os.path.isfile(rsa_key):
+            logging.error('Could not load id_rsa key file in %s', rsa_key)
             sys.exit()
 
-    def set_repos_path(self, paths):
-        repos_path = paths[0][1].split('/')
-        if repos_path[-1] in ['*', '**']:
-            repos_path = repos_path[:-1]
-        if repos_path[0] != '/':
-            repos_path[0] = '/'
-        self.repos_path = os.path.join(*repos_path)
+    def get_repos_path(self, path):
+        if not os.path.isdir(path):
+            logging.error('Wrong location for repositories in %s', path)
+            sys.exit()
+        return path
 
     def backup_repos(self):
-        today = datetime.datetime.now().weekday() + 1
-        self.backup_file_name = "mercurial_repos.%s.tar.gz" % today
         bckp_file = os.path.join(self.backup_file_path, self.backup_file_name)
         tar = tarfile.open(bckp_file, "w:gz")
 
@@ -88,12 +75,13 @@ class BackupManager(object):
     def transfer_files(self):
         params = {
                   'id_rsa_key': self.id_rsa_path,
-                  'backup_file_path':self.backup_file_path,
-                  'backup_file_name':self.backup_file_name,
+                  'backup_file':os.path.join(self.backup_file_path,
+                                             self.backup_file_name),
+                  'backup_server':self.backup_server
                   }
         cmd = ['scp', '-l', '40000', '-i', '%(id_rsa_key)s' % params,
-               '%(backup_file_path)s/%(backup_file_name)s' % params,
-               'root@192.168.2.102:/backups/mercurial' % params]
+               '%(backup_file)s' % params,
+               '%(backup_server)s' % params]
 
         subprocess.call(cmd)
         logging.info('Transfered file %s to %s', self.backup_file_name, cmd[4])
@@ -106,7 +94,12 @@ class BackupManager(object):
 
 
 if __name__ == "__main__":
-    B_MANAGER = BackupManager('/home/pylons/id_rsa', 'repositories.config')
+    
+    repo_location = '/home/repo_path'
+    backup_server = 'root@192.168.1.100:/backups/mercurial'
+    rsa_key = '/home/id_rsa'
+    
+    B_MANAGER = BackupManager(repo_location, rsa_key, backup_server)
     B_MANAGER.backup_repos()
     B_MANAGER.transfer_files()
     B_MANAGER.rm_file()
