@@ -39,13 +39,13 @@ case "$1" in
   start)
     echo "Starting $APP_NAME"
     start-stop-daemon -d $APP_PATH -e PYTHON_EGG_CACHE="/tmp" \
-        --start --quiet\
+        --start --quiet \
         --pidfile $PID_PATH \
         --user $RUN_AS \
         --exec $DAEMON -- $DAEMON_OPTS
     ;;
   stop)
-    ebegin "Stopping $APP_NAME"
+    echo "Stopping $APP_NAME"
     start-stop-daemon -d $APP_PATH \
         --stop --quiet \
         --pidfile $PID_PATH || echo "$APP_NAME - Not running!"
@@ -55,18 +55,21 @@ case "$1" in
     ;;
   restart)
     echo "Restarting $APP_NAME"
-    #stop
-    start-stop-daemon --stop --quiet \
+    ### stop ###
+    echo "Stopping $APP_NAME"
+    start-stop-daemon -d $APP_PATH \
+        --stop --quiet \
         --pidfile $PID_PATH || echo "$APP_NAME - Not running!"
     if [ -f $PID_PATH ]; then
         rm $PID_PATH
     fi
-    #start
-    start-stop-daemon --start --quiet\
+    ### start ###
+    echo "Starting $APP_NAME"
+    start-stop-daemon -d $APP_PATH -e PYTHON_EGG_CACHE="/tmp" \
+        --start --quiet \
         --pidfile $PID_PATH \
         --user $RUN_AS \
-        --exec $DAEMON -- $DAEMON_OPTS    
-    ;;
+        --exec $DAEMON -- $DAEMON_OPTS
   *)
     echo "Usage: $0 {start|stop|restart}"
     exit 1
