@@ -33,8 +33,8 @@ depend() {
 
 start() {
     ebegin "Starting $APP_NAME"
-    cd $APP_PATH
-    start-stop-daemon --start --quiet\
+    start-stop-daemon -d $APP_PATH -e PYTHON_EGG_CACHE="/tmp" \
+        --start --quiet\
         --pidfile $PID_PATH \
         --user $RUN_AS \
         --exec $DAEMON -- $DAEMON_OPTS
