@@ -70,6 +70,7 @@ case "$1" in
         --pidfile $PID_PATH \
         --user $RUN_AS \
         --exec $DAEMON -- $DAEMON_OPTS
+    ;;
   *)
     echo "Usage: $0 {start|stop|restart}"
     exit 1
