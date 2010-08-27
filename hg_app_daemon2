@@ -45,8 +45,9 @@ case "$1" in
         --exec $DAEMON -- $DAEMON_OPTS
     ;;
   stop)
-    echo "Stopping $APP_NAME"
-    start-stop-daemon --stop --quiet \
+    ebegin "Stopping $APP_NAME"
+    start-stop-daemon -d $APP_PATH \
+        --stop --quiet \
         --pidfile $PID_PATH || echo "$APP_NAME - Not running!"
     if [ -f $PID_PATH ]; then
         rm $PID_PATH
