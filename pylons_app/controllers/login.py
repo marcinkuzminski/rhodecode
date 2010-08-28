@@ -42,6 +42,8 @@ class LoginController(BaseController):
 
     def index(self):
         #redirect if already logged in
+        c.came_from = request.GET.get('came_from',None)
+        
         if c.hg_app_user.is_authenticated:
             return redirect(url('hg_home'))
         
@@ -50,7 +52,10 @@ class LoginController(BaseController):
             login_form = LoginForm()
             try:
                 c.form_result = login_form.to_python(dict(request.POST))
-                return redirect(url('hg_home'))
+                if c.came_from:
+                    return redirect(c.came_from)
+                else:
+                    return redirect(url('hg_home'))
                                
             except formencode.Invalid as errors:
                 return htmlfill.render(

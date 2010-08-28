@@ -228,8 +228,12 @@ class LoginRequired(object):
             return func(*fargs, **fkwargs)
         else:
             log.warn('user %s not authenticated', user.username)
-            log.debug('redirecting to login page')
-            return redirect(url('login_home'))
+
+            p = request.environ.get('PATH_INFO')
+            if request.environ.get('QUERY_STRING'):
+                p+='?'+request.environ.get('QUERY_STRING')
+            log.debug('redirecting to login page with %',p)                
+            return redirect(url('login_home',came_from=p))
 
 class PermsDecorator(object):
     """Base class for decorators"""
