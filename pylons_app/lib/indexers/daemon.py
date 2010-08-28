@@ -38,7 +38,7 @@ from pylons_app.config.environment import load_environment
 from pylons_app.model.hg_model import HgModel
 from whoosh.index import create_in, open_dir
 from shutil import rmtree
-from pylons_app.lib.indexers import ANALYZER, EXCLUDE_EXTENSIONS, IDX_LOCATION, \
+from pylons_app.lib.indexers import ANALYZER, INDEX_EXTENSIONS, IDX_LOCATION, \
 SCHEMA, IDX_NAME
 
 import logging
@@ -70,8 +70,10 @@ class WhooshIndexingDaemon(object):
     def add_doc(self, writer, path, repo):
         """Adding doc to writer"""
         
-        #we don't won't to read excluded file extensions just index them
-        if path.split('/')[-1].split('.')[-1].lower() not in EXCLUDE_EXTENSIONS:
+        ext = unicode(path.split('/')[-1].split('.')[-1].lower())
+        #we just index the content of choosen files
+        if ext in INDEX_EXTENSIONS:
+            log.debug('    >> %s [WITH CONTENT]' % path)
             fobj = open(path, 'rb')
             content = fobj.read()
             fobj.close()
@@ -81,15 +83,20 @@ class WhooshIndexingDaemon(object):
                 #incase we have a decode error just represent as byte string
                 u_content = unicode(str(content).encode('string_escape'))
         else:
-            u_content = u''    
+            log.debug('    >> %s' % path)
+            #just index file name without it's content
+            u_content = u''
+                
         writer.add_document(owner=unicode(repo.contact),
                             repository=u"%s" % repo.name,
                             path=u"%s" % path,
                             content=u_content,
-                            modtime=os.path.getmtime(path)) 
+                            modtime=os.path.getmtime(path),
+                            extension=ext) 
     
     def build_index(self):
         if os.path.exists(IDX_LOCATION):
+            log.debug('removing previos index')
             rmtree(IDX_LOCATION)
             
         if not os.path.exists(IDX_LOCATION):
@@ -102,7 +109,6 @@ class WhooshIndexingDaemon(object):
             log.debug('building index @ %s' % repo.path)
         
             for idx_path in self.get_paths(repo.path):
-                log.debug('    >> %s' % idx_path)
                 self.add_doc(writer, idx_path, repo)
         writer.commit(merge=True)
                 
@@ -170,11 +176,12 @@ class WhooshIndexingDaemon(object):
             self.update_index()
         
 if __name__ == "__main__":
-    repo_location = '/home/marcink/python_workspace_dirty/*'
-    
+    repo_location = '/home/marcink/hg_repos/*'
+    full_index = True # False means looking just for changes
     try:
         l = DaemonLock()
-        WhooshIndexingDaemon(repo_location=repo_location).run(full_index=True)
+        WhooshIndexingDaemon(repo_location=repo_location)\
+            .run(full_index=full_index)
         l.release()
     except LockHeld:
         sys.exit(1)

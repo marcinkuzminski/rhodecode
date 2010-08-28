@@ -19,18 +19,23 @@ from shutil import rmtree
 #LOCATION WE KEEP THE INDEX
 IDX_LOCATION = jn(dn(dn(dn(dn(os.path.abspath(__file__))))), 'data', 'index')
 
-#EXTENSION TO SKIP READING CONTENT ON
-EXCLUDE_EXTENSIONS = ['pyc', 'mo', 'png', 'jpg', 'jpeg', 'gif', 'swf',
-                       'dll', 'ttf', 'psd', 'svg', 'pdf', 'bmp', 'dll']
+#EXTENSIONS WE WANT TO INDEX CONTENT OFF
+INDEX_EXTENSIONS = ['action', 'adp', 'ashx', 'asmx', 'aspx', 'asx', 'axd', 'c', 
+                    'cfm', 'cpp', 'cs', 'css', 'diff', 'do', 'el', 'erl', 'h', 
+                    'htm', 'html', 'ini', 'java', 'js', 'jsp', 'jspx', 'lisp', 
+                    'lua', 'm', 'mako', 'ml', 'pas', 'patch', 'php', 'php3', 
+                    'php4', 'phtml', 'pm', 'py', 'rb', 'rst', 's', 'sh', 'sql', 
+                    'tpl', 'txt', 'vim', 'wss', 'xhtml', 'xml','xsl','xslt', 
+                    'yaws']
 
 #CUSTOM ANALYZER wordsplit + lowercase filter
-ANALYZER = RegexTokenizer() | LowercaseFilter()
+ANALYZER = RegexTokenizer(expression=r"\w+") | LowercaseFilter()
 
 #INDEX SCHEMA DEFINITION
 SCHEMA = Schema(owner=TEXT(),
                 repository=TEXT(stored=True),
                 path=ID(stored=True, unique=True),
                 content=TEXT(stored=True, analyzer=ANALYZER),
-                modtime=STORED())
+                modtime=STORED(),extension=TEXT(stored=True))
 
 IDX_NAME = 'HG_INDEX'
