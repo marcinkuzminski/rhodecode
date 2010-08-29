@@ -27,7 +27,7 @@ from pylons import request, response, session, tmpl_context as c, url
 from pylons.controllers.util import redirect
 from pylons_app.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from pylons_app.lib.base import BaseController, render
-from pylons_app.lib.utils import EmptyChangeset, get_repo_slug
+from pylons_app.lib.utils import EmptyChangeset
 from pylons_app.model.hg_model import HgModel
 from vcs.exceptions import RepositoryError, ChangesetError
 from vcs.nodes import FileNode

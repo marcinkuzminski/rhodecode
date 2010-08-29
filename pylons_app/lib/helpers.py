@@ -24,7 +24,6 @@ from webhelpers.text import chop_at, collapse, convert_accented_entities, \
     convert_misc_entities, lchop, plural, rchop, remove_formatting, \
     replace_whitespace, urlify, truncate, wrap_paragraphs
 
-
 #Custom helpers here :)
 class _Link(object):
     '''
@@ -229,17 +228,31 @@ def pygmentize_annotation(filenode, **kwargs):
     @param filenode:
     """
     
-    color_dict = g.changeset_annotation_colors
+    color_dict = {}
     def gen_color():
-        import random
-        return [str(random.randrange(10, 235)) for _ in xrange(3)]
+        """generator for getting 10k of evenly distibuted colors using hsv color
+        and golden ratio.
+        """        
+        import colorsys
+        n = 10000
+        golden_ratio = 0.618033988749895
+        h = 0.22717784590367374
+        #generate 10k nice web friendly colors in the same order
+        for c in xrange(n):
+            h +=golden_ratio
+            h %= 1
+            HSV_tuple = [h, 0.95, 0.95]
+            RGB_tuple = colorsys.hsv_to_rgb(*HSV_tuple)
+            yield map(lambda x:str(int(x*256)),RGB_tuple)           
+
+    cgenerator = gen_color()
+        
     def get_color_string(cs):
         if color_dict.has_key(cs):
             col = color_dict[cs]
         else:
-            color_dict[cs] = gen_color()
-            col = color_dict[cs]
-        return "color: rgb(%s) ! important;" % (', '.join(col))
+            col = color_dict[cs] = cgenerator.next()
+        return "color: rgb(%s)! important;" % (', '.join(col))
         
     def url_func(changeset):
         tooltip_html = "<div style='font-size:0.8em'><b>Author:</b>"+\
@@ -248,7 +261,7 @@ def pygmentize_annotation(filenode, **kwargs):
         tooltip_html = tooltip_html % (changeset.author,
                                                changeset.date,
                                                tooltip(changeset.message))
-        lnk_format = 'r%s:%s' % (changeset.revision,
+        lnk_format = 'r%-5s:%s' % (changeset.revision,
                                  changeset.raw_id)
         uri = link_to(
                 lnk_format,

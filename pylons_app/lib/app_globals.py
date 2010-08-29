@@ -17,9 +17,7 @@ class Globals(object):
 
         """
         self.cache = CacheManager(**parse_cache_config_options(config))
-        self.changeset_annotation_colors = {}
         self.available_permissions = None   # propagated after init_model
-        self.app_title = None               # propagated after init_model
         self.baseui = None                  # propagated after init_model        
         
     @LazyProperty
