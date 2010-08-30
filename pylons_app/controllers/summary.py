@@ -74,13 +74,10 @@ class SummaryController(BaseController):
         
         #graph range
         td = datetime.today() + timedelta(days=1) 
-        y = td.year
-        m = td.month
-        d = td.day
-        c.ts_min = mktime((y, (td - timedelta(days=calendar.mdays[m] - 1)).month,
+        y, m, d = td.year, td.month, td.day
+        c.ts_min = mktime((y, (td - timedelta(days=calendar.mdays[m])).month,
                             d, 0, 0, 0, 0, 0, 0,))
         c.ts_max = mktime((y, m, d, 0, 0, 0, 0, 0, 0,))
-
         
         def author_key_cleaner(k):
             k = person(k)
