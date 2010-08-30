@@ -53,7 +53,8 @@ class BackupManager(object):
         if not os.path.isfile(rsa_key):
             logging.error('Could not load id_rsa key file in %s', rsa_key)
             sys.exit()
-
+        return rsa_key
+    
     def get_repos_path(self, path):
         if not os.path.isdir(path):
             logging.error('Wrong location for repositories in %s', path)
