@@ -86,13 +86,24 @@ class WhooshIndexingDaemon(object):
             log.debug('    >> %s' % path)
             #just index file name without it's content
             u_content = u''
-                
-        writer.add_document(owner=unicode(repo.contact),
+        
+        
+        
+        try:
+            os.stat(path)
+            writer.add_document(owner=unicode(repo.contact),
                             repository=u"%s" % repo.name,
                             path=u"%s" % path,
                             content=u_content,
                             modtime=os.path.getmtime(path),
-                            extension=ext) 
+                            extension=ext)             
+        except OSError, e:
+            import errno
+            if e.errno == errno.ENOENT:
+                log.debug('path %s does not exist or is a broken symlink' % path)
+            else:
+                raise e                 
+
     
     def build_index(self):
         if os.path.exists(IDX_LOCATION):
