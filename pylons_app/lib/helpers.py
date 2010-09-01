@@ -336,3 +336,19 @@ def gravatar_url(email_address, size=30):
     gravatar_url += urllib.urlencode({'d':default, 's':str(size)})
 
     return gravatar_url
+
+def safe_unicode(str):
+    """safe unicode function. In case of UnicodeDecode error we try to return
+    unicode with errors replace, if this failes we return unicode with 
+    string_escape decoding """
+    
+    try:
+        u_str = unicode(str)
+    except UnicodeDecodeError:
+        try:
+            u_str = unicode(str, 'utf-8', 'replace')
+        except UnicodeDecodeError:
+            #incase we have a decode error just represent as byte string
+            u_str = unicode(str(str).encode('string_escape'))
+        
+    return u_str

@@ -36,6 +36,7 @@ from pidlock import LockHeld, DaemonLock
 import traceback
 from pylons_app.config.environment import load_environment
 from pylons_app.model.hg_model import HgModel
+from pylons_app.lib.helpers import safe_unicode
 from whoosh.index import create_in, open_dir
 from shutil import rmtree
 from pylons_app.lib.indexers import ANALYZER, INDEX_EXTENSIONS, IDX_LOCATION, \
@@ -77,11 +78,7 @@ class WhooshIndexingDaemon(object):
             fobj = open(path, 'rb')
             content = fobj.read()
             fobj.close()
-            try:
-                u_content = unicode(content)
-            except UnicodeDecodeError:
-                #incase we have a decode error just represent as byte string
-                u_content = unicode(str(content).encode('string_escape'))
+            u_content = safe_unicode(content)
         else:
             log.debug('    >> %s' % path)
             #just index file name without it's content
