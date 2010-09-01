@@ -232,7 +232,7 @@ class LoginRequired(object):
             p = request.environ.get('PATH_INFO')
             if request.environ.get('QUERY_STRING'):
                 p+='?'+request.environ.get('QUERY_STRING')
-            log.debug('redirecting to login page with %',p)                
+            log.debug('redirecting to login page with %s',p)                
             return redirect(url('login_home',came_from=p))
 
 class PermsDecorator(object):

@@ -26,11 +26,11 @@ from pylons import session
 from pylons.i18n.translation import _
 from pylons_app.lib.auth import check_password, get_crypt_password
 from pylons_app.model import meta
+from pylons_app.model.user_model import UserModel
 from pylons_app.model.db import User, Repository
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from webhelpers.pylonslib.secure_form import authentication_token
-import datetime
 import formencode
 import logging
 import os
@@ -93,11 +93,10 @@ class ValidAuth(formencode.validators.FancyValidator):
     e_dict_disable = {'username':messages['disabled_account']}
     
     def validate_python(self, value, state):
-        sa = meta.Session
         password = value['password']
         username = value['username']
         try:
-            user = sa.query(User).filter(User.username == username).one()
+            user = UserModel().get_user_by_name(username)
         except (NoResultFound, MultipleResultsFound, OperationalError) as e:
             log.error(e)
             user = None
@@ -106,27 +105,8 @@ class ValidAuth(formencode.validators.FancyValidator):
                                      error_dict=self.e_dict)            
         if user:
             if user.active:
-                if user.username == username and check_password(password, user.password):
-                    from pylons_app.lib.auth import AuthUser
-                    auth_user = AuthUser()
-                    auth_user.username = username
-                    auth_user.is_authenticated = True
-                    auth_user.is_admin = user.admin
-                    auth_user.user_id = user.user_id
-                    auth_user.name = user.name
-                    auth_user.lastname = user.lastname
-                    session['hg_app_user'] = auth_user
-                    session.save()
-                    log.info('user %s is now authenticated', username)
-                    
-                    try:
-                        user.last_login = datetime.datetime.now()
-                        sa.add(user)
-                        sa.commit()                        
-                    except (OperationalError) as e:
-                        log.error(e)
-                        sa.rollback()
-                    
+                if user.username == username and check_password(password, 
+                                                                user.password):
                     return value
                 else:
                     log.warning('user %s not authenticated', username)
@@ -139,22 +119,20 @@ class ValidAuth(formencode.validators.FancyValidator):
                                          state=State_obj),
                                          value, state,
                                          error_dict=self.e_dict_disable)
-            
-        meta.Session.remove()
-
                    
 class ValidRepoUser(formencode.validators.FancyValidator):
             
     def to_python(self, value, state):
-        sa = meta.Session
         try:
-            self.user_db = sa.query(User)\
+            self.user_db = meta.Session.query(User)\
                 .filter(User.active == True)\
                 .filter(User.username == value).one()
         except Exception:
             raise formencode.Invalid(_('This username is not valid'),
                                      value, state)
-        meta.Session.remove()            
+        finally:
+            meta.Session.remove()
+                        
         return self.user_db.user_id
 
 def ValidRepoName(edit, old_data):    

@@ -1,7 +1,11 @@
 from pylons_app.model.meta import Base
-from sqlalchemy.orm import relation, backref
 from sqlalchemy import *
+from sqlalchemy.orm import relation, backref
+from sqlalchemy.orm.session import Session
 from vcs.utils.lazy import LazyProperty
+import logging
+
+log = logging.getLogger(__name__)
 
 class HgAppSettings(Base):
     __tablename__ = 'hg_app_settings'
@@ -42,6 +46,20 @@ class User(Base):
         
     def __repr__(self):
         return "<User('id:%s:%s')>" % (self.user_id, self.username)
+    
+    def update_lastlogin(self):
+        """Update user lastlogin"""
+        import datetime
+        
+        try:
+            session = Session.object_session(self)
+            self.last_login = datetime.datetime.now()
+            session.add(self)
+            session.commit()
+            log.debug('updated user %s lastlogin',self)
+        except Exception:
+            session.rollback()        
+    
       
 class UserLog(Base): 
     __tablename__ = 'user_logs'

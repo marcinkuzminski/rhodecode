@@ -30,7 +30,9 @@ from pylons_app.lib.auth import AuthUser, HasPermissionAnyDecorator
 from pylons_app.lib.base import BaseController, render
 from pylons_app.model.forms import LoginForm, RegisterForm
 from pylons_app.model.user_model import UserModel
+from sqlalchemy.exc import OperationalError
 import formencode
+import datetime
 import logging
 
 log = logging.getLogger(__name__)
@@ -52,6 +54,21 @@ class LoginController(BaseController):
             login_form = LoginForm()
             try:
                 c.form_result = login_form.to_python(dict(request.POST))
+                username = c.form_result['username']
+                user = UserModel().get_user_by_name(username)
+                auth_user = AuthUser()
+                auth_user.username = user.username
+                auth_user.is_authenticated = True
+                auth_user.is_admin = user.admin
+                auth_user.user_id = user.user_id
+                auth_user.name = user.name
+                auth_user.lastname = user.lastname
+                session['hg_app_user'] = auth_user
+                session.save()
+                log.info('user %s is now authenticated', username)
+                
+                user.update_lastlogin()
+                                        
                 if c.came_from:
                     return redirect(c.came_from)
                 else:
@@ -67,7 +84,8 @@ class LoginController(BaseController):
                         
         return render('/login.html')
     
-    @HasPermissionAnyDecorator('hg.admin', 'hg.register.auto_activate', 'hg.register.manual_activate')
+    @HasPermissionAnyDecorator('hg.admin', 'hg.register.auto_activate', 
+                               'hg.register.manual_activate')
     def register(self):
         user_model = UserModel()
         c.auto_active = False

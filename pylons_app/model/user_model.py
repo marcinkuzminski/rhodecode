@@ -43,6 +43,9 @@ class UserModel(object):
     def get_user(self, id):
         return self.sa.query(User).get(id)
     
+    def get_user_by_name(self,name):
+        return self.sa.query(User).filter(User.username == name).scalar()
+    
     def create(self, form_data):
         try:
             new_user = User()
