@@ -75,8 +75,8 @@ class _ToolTip(object):
         @param tooltip_title:
         """
         
-        return literal(wrap_paragraphs(tooltip_title, trim_at)\
-                       .replace('\n', '<br/>')) 
+        return wrap_paragraphs(escape(tooltip_title), trim_at)\
+                       .replace('\n', '<br/>')
     
     def activate(self):
         """
