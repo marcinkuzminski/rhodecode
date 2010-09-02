@@ -225,6 +225,11 @@ class SettingsController(BaseController):
         """
         # url('admin_settings_my_account')
         c.user = self.sa.query(User).get(c.hg_app_user.user_id)
+        c.user_repos = []
+        for repo in c.cached_repo_list.values():
+            if repo.dbrepo.user.username == c.user.username:
+                c.user_repos.append(repo)
+                
         if c.user.username == 'default':
             h.flash(_("You can't edit this user since it's" 
               " crucial for entire application"), category='warning')
