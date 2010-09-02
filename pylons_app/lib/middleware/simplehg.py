@@ -72,6 +72,8 @@ class SimpleHg(object):
         
         try:
             repo_name = '/'.join(environ['PATH_INFO'].split('/')[1:])
+            if repo_name.endswith('/'):
+                repo_name = repo_name.rstrip('/')
         except:
             log.error(traceback.format_exc())
             return HTTPInternalServerError()(environ, start_response)
