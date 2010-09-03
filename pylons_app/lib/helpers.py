@@ -210,7 +210,7 @@ class _FilesBreadCrumbs(object):
                                             revision=rev,
                                             f_path='/'.join(paths_l[:cnt]))))
 
-        return literal(' / '.join(url_l))
+        return literal('/'.join(url_l))
 
 files_breadcrumbs = _FilesBreadCrumbs()
 

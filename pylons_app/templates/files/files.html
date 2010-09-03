@@ -28,7 +28,7 @@
     <div class="table">
 		<div id="files_data">
 			%if c.files_list:
-				<h2>${_('Location')}: ${h.files_breadcrumbs(c.repo_name,c.cur_rev,c.files_list.path)}</h2>
+				<h3 class="files_location">${_('Location')}: ${h.files_breadcrumbs(c.repo_name,c.cur_rev,c.files_list.path)}</h3>
 					%if c.files_list.is_dir():
 						<%include file='files_browser.html'/>
 					%else:
