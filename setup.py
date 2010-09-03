@@ -7,7 +7,7 @@ except ImportError:
     from setuptools import setup, find_packages
 
 setup(
-    name='hg_app',
+    name='hg-app',
     version=get_version(),
     description='Mercurial repository serving and browsing app',
     keywords='mercurial web hgwebdir replacement serving hgweb',
