@@ -85,30 +85,7 @@
 			if selected == current:
 				return h.literal('class="current"')
 		%>
-		%if current not in ['home','admin']:
-           <script type="text/javascript">
-            YAHOO.util.Event.onDOMReady(function(){
-                YAHOO.util.Event.addListener('repo_switcher','click',function(){
-                    if(YAHOO.util.Dom.hasClass('repo_switcher','selected')){
-                        YAHOO.util.Dom.setStyle('switch_repos','display','none');
-                        YAHOO.util.Dom.setStyle('repo_switcher','background','');
-                        YAHOO.util.Dom.removeClass('repo_switcher','selected');
-                        YAHOO.util.Dom.get('repo_switcher').removeAttribute('style');
-                    }
-                    else{
-                        YAHOO.util.Dom.setStyle('switch_repos','display','');
-                        YAHOO.util.Dom.addClass('repo_switcher','selected');
-                    }
-                    });
-                YAHOO.util.Event.addListener('repos_list','change',function(e){
-                    var wa = YAHOO.util.Dom.get('repos_list').value;
-                    
-                    var url = "${h.url('summary_home',repo_name='__REPO__')}".replace('__REPO__',wa);
-                    window.location = url;
-                })
-               });
-            </script>
-            		
+		%if current not in ['home','admin']:           		
 		   ##REGULAR MENU            
 	        <ul id="quick">
 				<!-- repo switcher -->
@@ -119,13 +96,11 @@
                     </span>
                     <span>&darr;</span>					
 					</a>
-					<div id="switch_repos" style="display:none;">
-						<select id="repos_list" size="10">
-						%for repo in c.repo_switcher_list:
-							<option value="${repo}">${repo}</option>
-						%endfor
-						</select>
-					</div>			
+					<ul class="repo_switcher">
+                        %for repo in c.repo_switcher_list:
+                            <li>${h.link_to(repo,h.url('summary_home',repo_name=repo))}</li>
+                        %endfor					
+					</ul>			
 				</li>
 				
 	            <li ${is_current('summary')}>

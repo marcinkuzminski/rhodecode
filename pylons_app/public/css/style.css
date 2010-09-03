@@ -424,6 +424,13 @@ div.options a:hover
     z-index: 100;
 }
 
+#header #header-inner #quick ul.repo_switcher{
+    max-height:275px;
+    overflow-x:hidden;
+    overflow-y:auto;
+    white-space:nowrap;
+}
+
 #header #header-inner #quick li ul li
 {
     border-bottom: 1px solid #dddddd;   
@@ -475,6 +482,10 @@ div.options a:hover
 #header #header-inner #quick li ul ul 
 {
     right: 200px;
+    max-height: 275px;
+    overflow: auto;
+    overflow-x: hidden;
+    white-space:nowrap;    
 }
 
 #header #header-inner #quick li:hover ul ul, 
@@ -3420,6 +3431,11 @@ table.code-browser .browser-dir {
 	position: absolute;
 	height: 25px;
 	z-index: 1;
+}
+#switch_repos select{
+    min-width:150px;
+    max-height: 250px;
+    z-index: 1;
 }
 /* -----------------------------------------------------------
     BREADCRUMBS
