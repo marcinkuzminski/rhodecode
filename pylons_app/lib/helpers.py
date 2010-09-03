@@ -219,7 +219,7 @@ def pygmentize(filenode, **kwargs):
     pygmentize function using pygments
     @param filenode:
     """
-    return literal(code_highlight(filenode.content, 
+    return literal(code_highlight(filenode.content,
                                   filenode.lexer, HtmlFormatter(**kwargs)))
 
 def pygmentize_annotation(filenode, **kwargs):
@@ -239,11 +239,11 @@ def pygmentize_annotation(filenode, **kwargs):
         h = 0.22717784590367374
         #generate 10k nice web friendly colors in the same order
         for c in xrange(n):
-            h +=golden_ratio
+            h += golden_ratio
             h %= 1
             HSV_tuple = [h, 0.95, 0.95]
             RGB_tuple = colorsys.hsv_to_rgb(*HSV_tuple)
-            yield map(lambda x:str(int(x*256)),RGB_tuple)           
+            yield map(lambda x:str(int(x * 256)), RGB_tuple)           
 
     cgenerator = gen_color()
         
@@ -255,7 +255,7 @@ def pygmentize_annotation(filenode, **kwargs):
         return "color: rgb(%s)! important;" % (', '.join(col))
         
     def url_func(changeset):
-        tooltip_html = "<div style='font-size:0.8em'><b>Author:</b>"+\
+        tooltip_html = "<div style='font-size:0.8em'><b>Author:</b>" + \
         " %s<br/><b>Date:</b> %s</b><br/><b>Message:</b> %s<br/></div>" 
         
         tooltip_html = tooltip_html % (changeset.author,
@@ -285,6 +285,21 @@ def repo_name_slug(value):
         slug = slug.replace(c, '-')
     slug = recursive_replace(slug, '-')
     return slug
+
+def get_changeset_safe(repo, rev):
+    from vcs.backends.base import BaseRepository
+    from vcs.exceptions import RepositoryError
+    if not isinstance(repo, BaseRepository):
+        raise Exception('You must pass an Repository '
+                        'object as first argument got %s', type(repo))
+        
+    try:
+        cs = repo.get_changeset(rev)
+    except RepositoryError:
+        from pylons_app.lib.utils import EmptyChangeset
+        cs = EmptyChangeset()
+    return cs
+
 
 flash = _Flash()
 

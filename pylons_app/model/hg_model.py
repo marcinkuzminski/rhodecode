@@ -29,7 +29,7 @@ from pylons.i18n.translation import _
 from pylons_app.lib.auth import HasRepoPermissionAny
 from pylons_app.model import meta
 from pylons_app.model.db import Repository, User
-from sqlalchemy.orm import joinedload
+from pylons_app.lib import helpers as h
 from vcs.exceptions import RepositoryError, VCSError
 import logging
 import os
@@ -151,11 +151,7 @@ class HgModel(object):
                 continue
             
             last_change = repo.last_change
-            try:
-                tip = repo.get_changeset('tip')
-            except RepositoryError:
-                from pylons_app.lib.utils import EmptyChangeset
-                tip = EmptyChangeset()
+            tip = h.get_changeset_safe(repo, 'tip')
                 
             tmp_d = {}
             tmp_d['name'] = repo.name

@@ -98,7 +98,7 @@
 	             %endif
 	                                             
 	            ${h.link_to(repo.name, h.url('summary_home',repo_name=repo.name))}</td> 
-	            <td>${_('revision')}: ${repo.revisions[-1]}</td>
+	            <td>${_('revision')}: ${h.get_changeset_safe(repo,'tip').revision}</td>
 	            <td>${_('last changed')}: ${h.age(repo.last_change)}</td>
 	            <td><img class="icon" alt="${_('private')}" src="/images/icons/application_form_edit.png"/> ${h.link_to(_('edit'),h.url('edit_repo',repo_name=repo.name))}</td>
 	        </tr>
