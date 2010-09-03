@@ -1235,11 +1235,14 @@ div.options a:hover
 #content div.box-left div.form div.fields div.field div.label,
 #content div.box-right div.form div.fields div.field div.label
 {
-	left: 0;
-	margin: 0;
-	padding: 0 0 8px 0;
-	width: auto;
-	position: relative;
+    left: 0;
+    margin: 0;
+    padding: 0 0 8px 0;
+    width: auto;
+    position: relative;
+    clear: both;
+    overflow: hidden;
+
 }
 
 /* -----------------------------------------------------------
@@ -1322,12 +1325,15 @@ div.options a:hover
 #content div.box-left div.form div.fields div.field div.input,
 #content div.box-right div.form div.fields div.field div.input
 {
-	margin: 0;
+    margin: 0;
     padding: 7px 7px 6px 7px;
+    clear: both;
+    overflow: hidden;
     border-top: 1px solid #b3b3b3;
     border-left: 1px solid #b3b3b3;
     border-right: 1px solid #eaeaea;
     border-bottom: 1px solid #eaeaea;
+
 }
 
 #content div.box div.form div.fields div.field div.input input
