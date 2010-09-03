@@ -184,8 +184,24 @@ class WhooshIndexingDaemon(object):
             self.update_index()
         
 if __name__ == "__main__":
-    repo_location = '/home/marcink/hg_repos/*'
-    full_index = True # False means looking just for changes
+    arg = sys.argv[1:]
+    if not arg:
+        sys.stdout.write('Please specify indexing type [full|incremental]' 
+                         ' as script arg \n')
+        sys.exit()
+    if arg[0] == 'full':
+        full_index = True
+    elif arg[0] == 'incremental':
+        # False means looking just for changes
+        full_index = False
+    else:
+        sys.stdout.write('Please use [full|incremental]' 
+                         ' as script arg \n')
+        sys.exit()
+    
+    
+    repo_location = '/home/hg_repos/*'
+    
     try:
         l = DaemonLock()
         WhooshIndexingDaemon(repo_location=repo_location)\
