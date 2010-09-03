@@ -12,16 +12,17 @@
 <%def name="main()">
 	<%def name="get_sort(name)">
 		<%name_slug = name.lower().replace(' ','_') %>
-		%if name_slug == c.cs_slug:
-			<span style="font-weight: bold;text-decoration: underline;">${name}</span>
+		
+		%if name_slug == c.sort_slug:
+		  %if c.sort_by.startswith('-'):
+		    <a href="?sort=${name_slug}">${name}&uarr;</a>
+		  %else:
+		    <a href="?sort=-${name_slug}">${name}&darr;</a>
+		  %endif:
 		%else:
-			<span style="font-weight: bold">${name}</span>
+		    <a href="?sort=${name_slug}">${name}</a>
 		%endif
-		<a href="?sort=${name_slug}">&darr;</a>
-		<a href="?sort=-${name_slug}">&uarr;</a>
 	</%def>
-	
-	
 	
     <div class="box">
 	    <!-- box / title -->
@@ -55,9 +56,9 @@
 					        <tr class="parity${cnt%2}">
 					            <td>
 					             %if repo['repo'].dbrepo.private:
-					                <img alt="${_('private')}" src="/images/icons/lock.png"/>
+					                <img class="icon" alt="${_('private')}" src="/images/icons/lock.png"/>
 					             %else:
-					                <img alt="${_('public')}" src="/images/icons/lock_open.png"/>
+					                <img class="icon" alt="${_('public')}" src="/images/icons/lock_open.png"/>
 					             %endif  
 					            ${h.link_to(repo['name'],
 					                h.url('summary_home',repo_name=repo['name']))}</td>

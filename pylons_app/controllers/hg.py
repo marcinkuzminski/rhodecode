@@ -37,19 +37,20 @@ class HgController(BaseController):
         super(HgController, self).__before__()
         
     def index(self):
-        c.current_sort = request.GET.get('sort', 'name')
-        sort_by = c.current_sort
         sortables = ['name', 'description', 'last_change', 'tip', 'contact']
+        current_sort = request.GET.get('sort', 'name')
+        current_sort_slug = current_sort.replace('-', '')
         
-        c.cs_slug = sort_by.replace('-', '')
-        
-        if c.cs_slug not in sortables:
-            sort_by = 'name'
-        
+        if current_sort_slug not in sortables:
+            c.sort_by = 'name'
+            current_sort_slug = c.sort_by
+        else:
+            c.sort_by = current_sort
+        c.sort_slug = current_sort_slug
         cached_repo_list = HgModel().get_repos()
         
-        sort_key = c.cs_slug + '_sort'
-        if sort_by.startswith('-'):
+        sort_key = current_sort_slug + '_sort'
+        if c.sort_by.startswith('-'):
             c.repos_list = sorted(cached_repo_list, key=itemgetter(sort_key), reverse=True)
         else:
             c.repos_list = sorted(cached_repo_list, key=itemgetter(sort_key), reverse=False)
