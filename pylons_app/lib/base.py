@@ -20,6 +20,11 @@ class BaseController(WSGIController):
         c.repo_name = get_repo_slug(request)
         c.cached_repo_list = _get_repos_cached()
         c.repo_switcher_list = _get_repos_switcher_cached(c.cached_repo_list)
+        
+        if c.repo_name:
+            c.repository_tags = c.cached_repo_list[c.repo_name].tags
+            c.repository_branches = c.cached_repo_list[c.repo_name].branches
+                    
         self.sa = meta.Session
     
     def __call__(self, environ, start_response):

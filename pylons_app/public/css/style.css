@@ -323,171 +323,165 @@ div.options a:hover
 /* -----------------------------------------------------------
 	header -> quick
 ----------------------------------------------------------- */ 
-
 #header #header-inner #quick,
 #header #header-inner #quick ul
 {
-	margin: 10px 5px 0 0;
-	padding: 0;
-	position: relative;
-	float: right;
-	list-style-type: none;
-	list-style-position: outside;
+    margin: 10px 5px 0 0;
+    padding: 0;
+    position: relative;
+    float: right;
+    list-style-type: none;
+    list-style-position: outside;
 }
 
 #header #header-inner #quick li
 {
-	margin: 0 4px 0 0;
-	padding: 0;
-	position: relative;
-	float: left;
+    margin: 0 5px 0 0;
+    padding: 0;
+    position: relative;
+    float: left;
 }
 
 #header #header-inner #quick li a
 {
-	top: 0;
-	left: 0;
-	padding: 0;
-	height: 1%;
-	display: block;
-	clear: both;
-	overflow: hidden;
-	background: #336699 url("../images/colors/blue/quick_l.png") no-repeat top left;
-	color: #FFFFFF;
-	font-weight: bold;
-	text-decoration: none;
+    top: 0;
+    left: 0;
+    padding: 0;
+    height: 1%;
+    display: block;
+    clear: both;
+    overflow: hidden;
+    background: #336699 url("../../resources/images/colors/blue/quick_l.png") no-repeat top left;
+    color: #FFFFFF;
+    font-weight: bold;
+    text-decoration: none;
 }
 
 #header #header-inner #quick li span
 {
-	top: 0;
-	right: 0;
-	margin: 0;
-	padding: 10px 12px 8px 10px;
-	height: 1%;
-	display: block;
-	float: left;
-	background: url("../images/colors/blue/quick_r.png") no-repeat top right;
-	border-left: 1px solid #3f6f9f;
+    top: 0;
+    right: 0;
+    margin: 0;
+    padding: 10px 12px 8px 10px;
+    height: 1%;
+    display: block;
+    float: left;
+    background: url("../../resources/images/colors/blue/quick_r.png") no-repeat top right;
+    border-left: 1px solid #3f6f9f;
+}
+
+#header #header-inner #quick li span.normal
+{
+    padding: 10px 12px 8px 12px;
+    border: none;   
 }
 
 #header #header-inner #quick li span.icon
 {
-	top: 0;
-	left: 0;
-	padding: 8px 8px 4px 8px;
-	background: url("../images/colors/blue/quick_l.png") no-repeat top left;
-	border-left: none;
-	border-right: 1px solid #2e5c89;
+    top: 0;
+    left: 0;
+    padding: 8px 8px 4px 8px;
+    background: url("../../resources/images/colors/blue/quick_l.png") no-repeat top left;
+    border-left: none;
+    border-right: 1px solid #2e5c89;
 }
 
 #header #header-inner #quick li a:hover
 {
-	background: #4e4e4e;
+    background: #4e4e4e url("../../resources/images/colors/blue/quick_l_selected.png") no-repeat top left;
 }
 
 #header #header-inner #quick li a:hover span
 {
-	background: url("../images/colors/blue/quick_r_selected.png") no-repeat top right;
-	border-left: 1px solid #545454;
+    background: url("../../resources/images/colors/blue/quick_r_selected.png") no-repeat top right;
+    border-left: 1px solid #545454;
+}
+
+#header #header-inner #quick li a:hover span.normal
+{
+    border: none;   
 }
 
 #header #header-inner #quick li a:hover span.icon
 {
-	background: url("../images/colors/blue/quick_l_selected.png") no-repeat top left;
-	border-left: none;
-	border-right: 1px solid #464646;
+    background: url("../../resources/images/colors/blue/quick_l_selected.png") no-repeat top left;
+    border-left: none;
+    border-right: 1px solid #464646;
 }
 
 #header #header-inner #quick ul
 {
-	top: 29px;
-	right: 0;
-	margin: 0;
-	padding: 0;
-	width: 200px;
-	display: none;
+    top: 29px;
+    right: 0;
+    margin: 0;
+    padding: 0;
+    width: 200px;
+    display: none;
     position: absolute;
-	background: #FFFFFF;
-	border: 1px solid #666;
+    background: #FFFFFF;
+    border: 1px solid #666;
     border-top: 1px solid #003367;
+    z-index: 100;
 }
 
 #header #header-inner #quick li ul li
 {
-	border-bottom: 1px solid #dddddd;	
+    border-bottom: 1px solid #dddddd;   
 }
 
 #header #header-inner #quick li ul li.last
 {
-	border: none;	
-}
-
-#header #header-inner #quick li ul li a.repos,#header #header-inner #quick li ul li a.repos:hover
-{
-	margin: 0;
-	padding: 12px 9px 7px 28px;
-	width: 167px;
-	background: #FFFFFF url("../images/icons/folder_edit.png") no-repeat 8px 9px;
-}
-#header #header-inner #quick li ul li a.users,#header #header-inner #quick li ul li a.users:hover
-{
-	margin: 0;
-	padding: 12px 9px 7px 28px;
-	width: 167px;
-	background: #FFFFFF url("../images/icons/user_edit.png") no-repeat 8px 9px;
-}
-#header #header-inner #quick li ul li a.settings,#header #header-inner #quick li ul li a.settings:hover
-{
-	margin: 0;
-	padding: 12px 9px 7px 28px;
-	width: 167px;
-	background: #FFFFFF url("../images/icons/cog.png") no-repeat 8px 9px;
-}
-
-#header #header-inner #quick li ul li a.permissions,#header #header-inner #quick li ul li a.permissions:hover
-{
-	margin: 0;
-	padding: 12px 9px 7px 28px;
-	width: 167px;
-	background: #FFFFFF url("../images/icons/key.png") no-repeat 8px 9px;
+    border: none;   
 }
 
 #header #header-inner #quick li ul li a
 {
-	margin: 0;
-	padding: 7px 9px 7px 9px;
-	height: 1%;
-	width: 182px;
-	height: auto;
-	display: block;
-	float: left;
-	background: #FFFFFF;
-	color: #0066CC;
-	font-weight: normal;
+    margin: 0;
+    padding: 7px 9px 7px 9px;
+    height: 1%;
+    width: 182px;
+    height: auto;
+    display: block;
+    float: left;
+    background: #FFFFFF;
+    color: #0066CC;
+    font-weight: normal;
+}
+
+#header #header-inner #quick li ul li a.childs
+{
+    margin: 0;
+    padding: 7px 9px 7px 24px;
+    width: 167px;
+    background: #FFFFFF url("../../resources/images/plus.png") no-repeat 8px 9px;
 }
 
 #header #header-inner #quick li ul li a:hover
 {
-	color: #000000;
-	background: #FFFFFF;
+    color: #000000;
+    background: #FFFFFF;
+}
+
+#header #header-inner #quick li ul li a.childs:hover
+{
+    background: #FFFFFF url("../../resources/images/minus.png") no-repeat 8px 9px;
 }
 
 #header #header-inner #quick ul ul 
 {
-	top: auto;
-}	
+    top: auto;
+}   
 
 #header #header-inner #quick li ul ul 
 {
-	right: 200px;
+    right: 200px;
 }
 
 #header #header-inner #quick li:hover ul ul, 
 #header #header-inner #quick li:hover ul ul ul, 
 #header #header-inner #quick li:hover ul ul ul ul 
 {
-	display: none;
+    display: none;
 }
 
 #header #header-inner #quick li:hover ul, 
@@ -495,9 +489,65 @@ div.options a:hover
 #header #header-inner #quick li li li:hover ul, 
 #header #header-inner #quick li li li li:hover ul
 {
-	display: block;
+    display: block;
 }
 
+
+/*ICONS*/
+
+#header #header-inner #quick li ul li a.repos,
+#header #header-inner #quick li ul li a.repos:hover
+{
+    background:url("../images/icons/folder_edit.png") no-repeat scroll 4px 9px #FFFFFF;
+    margin:0;
+    padding:12px 9px 7px 24px;
+    width:167px;
+
+}
+#header #header-inner #quick li ul li a.users,
+#header #header-inner #quick li ul li a.users:hover
+{
+    background: #FFFFFF url("../images/icons/user_edit.png") no-repeat 4px 9px;
+    margin:0;
+    padding:12px 9px 7px 24px;
+    width:167px;    
+}
+#header #header-inner #quick li ul li a.settings,
+#header #header-inner #quick li ul li a.settings:hover
+{
+    background: #FFFFFF url("../images/icons/cog.png") no-repeat 4px 9px;
+    margin:0;
+    padding:12px 9px 7px 24px;
+    width:167px;        
+}
+
+#header #header-inner #quick li ul li a.permissions,
+#header #header-inner #quick li ul li a.permissions:hover
+{
+
+    background: #FFFFFF url("../images/icons/key.png") no-repeat 4px 9px;
+    margin:0;
+    padding:12px 9px 7px 24px;
+    width:167px;        
+}
+
+#header #header-inner #quick li ul li a.branches,#header #header-inner #quick li ul li a.branches:hover
+{
+
+    background: #FFFFFF url("../images/icons/arrow_branch.png") no-repeat 4px 9px;
+    margin:0;
+    padding:12px 9px 7px 24px;
+    width:167px;        
+}
+
+#header #header-inner #quick li ul li a.tags,#header #header-inner #quick li ul li a.tags:hover
+{
+
+    background: #FFFFFF url("../images/icons/tag_blue.png") no-repeat 4px 9px;
+    margin:0;
+    padding:12px 9px 7px 24px;
+    width:167px;        
+}
 /* -----------------------------------------------------------
 	header corners
 ----------------------------------------------------------- */ 

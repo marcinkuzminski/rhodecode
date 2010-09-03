@@ -151,22 +151,33 @@
                    </span>
                    <span>${_('Changelog')}</span>                 
                    </a>             
-                </li>   	            
-                <li ${is_current('branches')}>
-                   <a title="${_('Branches')}" href="${h.url('branches_home',repo_name=c.repo_name)}">
+                </li>   	
+                
+                <li ${is_current('switch_to')}>
+                   <a title="${_('Switch to')}" href="#">
                    <span class="icon">
-                       <img src="/images/icons/arrow_branch.png" alt="${_('Branches')}" />
+                       <img src="/images/icons/arrow_switch.png" alt="${_('Switch to')}" />
                    </span>
-                   <span>${_('Branches')}</span>                 
-                   </a>             
-                </li> 	            
-                <li ${is_current('tags')}>
-                   <a title="${_('Tags')}" href="${h.url('tags_home',repo_name=c.repo_name)}">
-                   <span class="icon">
-                       <img src="/images/icons/tag_blue.png" alt="${_('Tags')}" />
-                   </span>
-                   <span>${_('Tags')}</span>                 
-                   </a>             
+                   <span>${_('Switch to')}</span>                 
+                   </a>    
+                    <ul>
+                        <li>
+                            ${h.link_to(_('branches'),h.url('branches_home',repo_name=c.repo_name),class_='branches childs')}
+                            <ul>
+						        %for cnt,branch in enumerate(c.repository_branches.items()):
+						            <li>${h.link_to('%s - %s' % (branch[0],branch[1]),h.url('files_home',repo_name=c.repo_name,revision=branch[1]))}</li>
+						        %endfor
+                            </ul>                        
+                        </li>
+                        <li>
+                            ${h.link_to(_('tags'),h.url('tags_home',repo_name=c.repo_name),class_='tags childs')}
+                            <ul>
+                                %for cnt,tag in enumerate(c.repository_tags.items()):
+                                 <li>${h.link_to('%s - %s' % (tag[0],tag[1]),h.url('files_home',repo_name=c.repo_name,revision=tag[1]))}</li>
+                                %endfor
+                            </ul>                        
+                        </li>                        
+                    </ul>
                 </li>
                 <li ${is_current('files')}>
                    <a title="${_('Files')}" href="${h.url('files_home',repo_name=c.repo_name)}">
@@ -220,7 +231,7 @@
 				        <li>${h.link_to(_('repositories'),h.url('repos'),class_='repos')}</li>
 				        <li>${h.link_to(_('users'),h.url('users'),class_='users')}</li>
 				        <li>${h.link_to(_('permissions'),h.url('edit_permission',id='default'),class_='permissions')}</li>
-				        <li>${h.link_to(_('settings'),h.url('admin_settings'),class_='settings')}</li>        
+				        <li class="last">${h.link_to(_('settings'),h.url('admin_settings'),class_='settings')}</li>        
 				    </ul>
                 </li>
 				%endif
