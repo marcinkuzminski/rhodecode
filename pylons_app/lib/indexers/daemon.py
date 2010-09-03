@@ -185,10 +185,12 @@ class WhooshIndexingDaemon(object):
         
 if __name__ == "__main__":
     arg = sys.argv[1:]
-    if not arg:
-        sys.stdout.write('Please specify indexing type [full|incremental]' 
-                         ' as script arg \n')
+    if len(arg) != 2:
+        sys.stderr.write('Please specify indexing type [full|incremental]' 
+                         'and path to repositories as script args \n')
         sys.exit()
+    
+    
     if arg[0] == 'full':
         full_index = True
     elif arg[0] == 'incremental':
@@ -196,11 +198,17 @@ if __name__ == "__main__":
         full_index = False
     else:
         sys.stdout.write('Please use [full|incremental]' 
-                         ' as script arg \n')
+                         ' as script first arg \n')
         sys.exit()
     
-    
-    repo_location = '/home/hg_repos/*'
+    if not os.path.isdir(arg[1]):
+        sys.stderr.write('%s is not a valid path \n' % arg[1])
+        sys.exit()
+    else:
+        if arg[1].endswith('/'):
+            repo_location = arg[1] + '*'
+        else:
+            repo_location = arg[1] + '/*'
     
     try:
         l = DaemonLock()
