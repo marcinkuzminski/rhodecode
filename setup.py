@@ -7,7 +7,7 @@ except ImportError:
     from setuptools import setup, find_packages
 
 setup(
-    name='hg-app',
+    name='HgApp-%s'%get_version(),
     version=get_version(),
     description='Mercurial repository serving and browsing app',
     keywords='mercurial web hgwebdir replacement serving hgweb',
@@ -18,12 +18,13 @@ setup(
     install_requires=[
         "Pylons>=1.0.0",
         "SQLAlchemy>=0.6",
+        "babel",
         "Mako>=0.3.2",
         "vcs>=0.1.4",
         "pygments>=1.3.0",
         "mercurial>=1.6",
         "pysqlite",
-        "whoosh==1.0.0b9",
+        "whoosh==1.0.0b10",
         "py-bcrypt",
     ],
     setup_requires=["PasteScript>=1.6.3"],

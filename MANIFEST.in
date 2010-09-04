@@ -1,3 +1,13 @@
 include pylons_app/config/deployment.ini_tmpl
-recursive-include pylons_app/public *
+
+include hg_app_daemon
+include hg_app_daemon2
+
+recursive-include pylons_app/public/css *
+recursive-include pylons_app/public/images *
+
+include pylons_app/public/js/yui2.js
+include pylons_app/public/js/excanvas.min.js
+include pylons_app/public/js/yui.flot.js
+
 recursive-include pylons_app/templates *
