@@ -71,18 +71,17 @@ def make_map(config):
     map.resource('user', 'users', controller='admin/users', path_prefix='/_admin')
     map.resource('permission', 'permissions', controller='admin/permissions', path_prefix='/_admin')
     
-    #map.resource('setting', 'settings', controller='admin/settings', path_prefix='/_admin', name_prefix='admin_')
     #REST SETTINGS MAP
     with map.submapper(path_prefix='/_admin', controller='admin/settings') as m:
         m.connect("admin_settings", "/settings",
              action="create", conditions=dict(method=["POST"]))
         m.connect("admin_settings", "/settings",
              action="index", conditions=dict(method=["GET"]))
-        m.connect("admin_formatted_settings", "/settings.{format}",
+        m.connect("formatted_admin_settings", "/settings.{format}",
              action="index", conditions=dict(method=["GET"]))
         m.connect("admin_new_setting", "/settings/new",
              action="new", conditions=dict(method=["GET"]))
-        m.connect("admin_formatted_new_setting", "/settings/new.{format}",
+        m.connect("formatted_admin_new_setting", "/settings/new.{format}",
              action="new", conditions=dict(method=["GET"]))
         m.connect("/settings/{setting_id}",
              action="update", conditions=dict(method=["PUT"]))
@@ -90,11 +89,11 @@ def make_map(config):
              action="delete", conditions=dict(method=["DELETE"]))
         m.connect("admin_edit_setting", "/settings/{setting_id}/edit",
              action="edit", conditions=dict(method=["GET"]))
-        m.connect("admin_formatted_edit_setting", "/settings/{setting_id}.{format}/edit",
+        m.connect("formatted_admin_edit_setting", "/settings/{setting_id}.{format}/edit",
              action="edit", conditions=dict(method=["GET"]))
         m.connect("admin_setting", "/settings/{setting_id}",
              action="show", conditions=dict(method=["GET"]))
-        m.connect("admin_formatted_setting", "/settings/{setting_id}.{format}",
+        m.connect("formatted_admin_setting", "/settings/{setting_id}.{format}",
              action="show", conditions=dict(method=["GET"]))
         m.connect("admin_settings_my_account", "/my_account",
              action="my_account", conditions=dict(method=["GET"]))

@@ -43,8 +43,9 @@ import logging
 log = logging.getLogger(__name__)
 
 class DbManage(object):
-    def __init__(self, log_sql):
-        self.dbname = 'hg_app.db'
+    def __init__(self, log_sql, dbname,tests=False):
+        self.dbname = dbname
+        self.tests = tests
         dburi = 'sqlite:////%s' % jn(ROOT, self.dbname)
         engine = create_engine(dburi, echo=log_sql) 
         init_model(engine)
@@ -66,7 +67,10 @@ class DbManage(object):
         self.check_for_db(override)
         if override:
             log.info("database exisist and it's going to be destroyed")
-            destroy = ask_ok('Are you sure to destroy old database ? [y/n]')
+            if self.tests:
+                destroy=True
+            else:
+                destroy = ask_ok('Are you sure to destroy old database ? [y/n]')
             if not destroy:
                 sys.exit()
             if self.db_exists and destroy:
@@ -76,19 +80,29 @@ class DbManage(object):
         log.info('Created tables for %s', self.dbname)
     
     def admin_prompt(self):
-        import getpass
-        username = raw_input('Specify admin username:')
-        password = getpass.getpass('Specify admin password:')
-        self.create_user(username, password, True)
+        if not self.tests:
+            import getpass
+            username = raw_input('Specify admin username:')
+            password = getpass.getpass('Specify admin password:')
+            self.create_user(username, password, True)
+        else:
+            log.info('creating admin and regular test users')
+            self.create_user('test_admin', 'test', True)
+            self.create_user('test_regular', 'test', False)
+            
+        
     
-    def config_prompt(self):
+    def config_prompt(self,test_repo_path=''):
         log.info('Setting up repositories config')
         
-        path = raw_input('Specify valid full path to your repositories'
+        if not self.tests and not test_repo_path:
+            path = raw_input('Specify valid full path to your repositories'
                         ' you can change this later in application settings:')
-        
+        else:
+            path = test_repo_path
+            
         if not os.path.isdir(path):
-            log.error('You entered wrong path')
+            log.error('You entered wrong path: %s',path)
             sys.exit()
         
         hooks1 = HgAppUi()
@@ -153,18 +167,6 @@ class DbManage(object):
         log.info('created ui config')
                     
     def create_user(self, username, password, admin=False):
-        
-        log.info('creating default user')
-        #create default user for handling default permissions.
-        def_user = User()
-        def_user.username = 'default'
-        def_user.password = get_crypt_password(str(uuid.uuid1())[:8])
-        def_user.name = 'default'
-        def_user.lastname = 'default'
-        def_user.email = 'default@default.com'
-        def_user.admin = False
-        def_user.active = False
-        
         log.info('creating administrator user %s', username)
         new_user = User()
         new_user.username = username
@@ -176,8 +178,25 @@ class DbManage(object):
         new_user.active = True
         
         try:
-            self.sa.add(def_user)
             self.sa.add(new_user)
+            self.sa.commit()
+        except:
+            self.sa.rollback()
+            raise
+
+    def create_default_user(self):
+        log.info('creating default user')
+        #create default user for handling default permissions.
+        def_user = User()
+        def_user.username = 'default'
+        def_user.password = get_crypt_password(str(uuid.uuid1())[:8])
+        def_user.name = 'default'
+        def_user.lastname = 'default'
+        def_user.email = 'default@default.com'
+        def_user.admin = False
+        def_user.active = False
+        try:
+            self.sa.add(def_user)
             self.sa.commit()
         except:
             self.sa.rollback()

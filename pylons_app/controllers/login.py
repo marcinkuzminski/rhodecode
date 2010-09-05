@@ -30,9 +30,7 @@ from pylons_app.lib.auth import AuthUser, HasPermissionAnyDecorator
 from pylons_app.lib.base import BaseController, render
 from pylons_app.model.forms import LoginForm, RegisterForm
 from pylons_app.model.user_model import UserModel
-from sqlalchemy.exc import OperationalError
 import formencode
-import datetime
 import logging
 
 log = logging.getLogger(__name__)

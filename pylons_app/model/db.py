@@ -26,7 +26,7 @@ class HgAppUi(Base):
     
 class User(Base): 
     __tablename__ = 'users'
-    __table_args__ = {'useexisting':True}
+    __table_args__ = (UniqueConstraint('username'), {'useexisting':True})
     user_id = Column("user_id", INTEGER(), nullable=False, unique=True, default=None, primary_key=True)
     username = Column("username", TEXT(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     password = Column("password", TEXT(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
