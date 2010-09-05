@@ -22,6 +22,7 @@ def format_sql(sql):
     sql = sql.replace('\n', '')
     sql = one_space_trim(sql)
     sql = sql\
+        .replace(',',',\n\t')\
         .replace('SELECT', '\n\tSELECT \n\t')\
         .replace('UPDATE', '\n\tUPDATE \n\t')\
         .replace('DELETE', '\n\tDELETE \n\t')\

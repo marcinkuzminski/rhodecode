@@ -12,13 +12,19 @@ class TestLoginController(TestController):
                                  {'username':'test_admin',
                                   'password':'test'})
         assert response.status == '302 Found','Wrong response code from login'
+        assert response.session['hg_app_user'].username =='test_admin','wrong logged in user'
+        response = response.follow()
+        assert 'auto description for vcs_test' in response.body
     
     def test_login_regular_ok(self):
         response = self.app.post(url(controller='login', action='index'),
-                                 {'username':'test_admin',
+                                 {'username':'test_regular',
                                   'password':'test'})
         assert response.status == '302 Found','Wrong response code from login'
-    
+        assert response.session['hg_app_user'].username =='test_regular','wrong logged in user'
+        response = response.follow()
+        assert 'auto description for vcs_test' in response.body
+        assert '<a title="Admin" href="/_admin">' not in response.body
     
     def test_login_ok_came_from(self):
         test_came_from = '/_admin/users'
