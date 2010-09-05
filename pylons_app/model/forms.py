@@ -95,11 +95,8 @@ class ValidAuth(formencode.validators.FancyValidator):
     def validate_python(self, value, state):
         password = value['password']
         username = value['username']
-        try:
-            user = UserModel().get_user_by_name(username)
-        except (NoResultFound, MultipleResultsFound, OperationalError) as e:
-            log.error(e)
-            user = None
+        user = UserModel().get_user_by_name(username)
+        if user is None:
             raise formencode.Invalid(self.message('invalid_password',
                                      state=State_obj), value, state,
                                      error_dict=self.e_dict)            
