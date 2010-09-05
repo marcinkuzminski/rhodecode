@@ -15,7 +15,7 @@ from pylons import config, url
 from routes.util import URLGenerator
 from webtest import TestApp
 import os
-
+from pylons_app.model import meta
 import pylons.test
 
 __all__ = ['environ', 'url', 'TestController']
@@ -32,5 +32,6 @@ class TestController(TestCase):
         config = wsgiapp.config
         self.app = TestApp(wsgiapp)
         url._push_object(URLGenerator(config['routes.map'], environ))
+        self.sa = meta.Session
         TestCase.__init__(self, *args, **kwargs)
 
