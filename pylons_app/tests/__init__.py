@@ -31,7 +31,16 @@ class TestController(TestCase):
         wsgiapp = pylons.test.pylonsapp
         config = wsgiapp.config
         self.app = TestApp(wsgiapp)
+        self.session = session
         url._push_object(URLGenerator(config['routes.map'], environ))
         self.sa = meta.Session
         TestCase.__init__(self, *args, **kwargs)
 
+    
+    def log_user(self):
+        response = self.app.post(url(controller='login', action='index'),
+                                 {'username':'test_admin',
+                                  'password':'test'})
+        assert response.status == '302 Found', 'Wrong response code from login got %s' % response.status
+        assert response.session['hg_app_user'].username == 'test_admin', 'wrong logged in user'
+        return response.follow()        
