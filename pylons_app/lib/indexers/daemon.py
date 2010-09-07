@@ -56,6 +56,12 @@ class WhooshIndexingDaemon(object):
     def __init__(self, indexname='HG_INDEX', repo_location=None):
         self.indexname = indexname
         self.repo_location = repo_location
+        self.initial = False
+        if not os.path.isdir(IDX_LOCATION):
+            os.mkdir(IDX_LOCATION)
+            log.info('Cannot run incremental index since it does not'
+                     ' yet exist running full build')
+            self.initial = True
     
     def get_paths(self, root_dir):
         """recursive walk in root dir and return a set of all path in that dir
@@ -178,7 +184,7 @@ class WhooshIndexingDaemon(object):
         
     def run(self, full_index=False):
         """Run daemon"""
-        if full_index:
+        if full_index or self.initial:
             self.build_index()
         else:
             self.update_index()
