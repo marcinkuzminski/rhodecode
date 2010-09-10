@@ -47,7 +47,32 @@
         </div>
     </div>  
     ${h.end_form()}
-     
+    
+    <h3>${_('Whoosh indexing')}</h3>
+    ${h.form(url('admin_setting', setting_id='whoosh'),method='put')}
+    <div class="form">
+        <!-- fields -->
+        
+        <div class="fields">
+            <div class="field">
+                <div class="label label-checkbox">
+                    <label for="destroy">${_('index build option')}:</label>
+                </div>
+                <div class="checkboxes">
+                    <div class="checkbox">
+                        ${h.checkbox('full_index',True)}
+                        <label for="checkbox-1">${_('build from scratch')}</label>
+                    </div>
+                </div>
+            </div>
+                            
+            <div class="buttons">
+            ${h.submit('reindex','reindex',class_="ui-button ui-widget ui-state-default ui-corner-all")}
+            </div>                                                          
+        </div>
+    </div>  
+    ${h.end_form()}
+         
     <h3>${_('Global application settings')}</h3> 
     ${h.form(url('admin_setting', setting_id='global'),method='put')}
     <div class="form">

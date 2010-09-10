@@ -38,6 +38,7 @@ from pylons_app.model.forms import UserForm, ApplicationSettingsForm, \
     ApplicationUiSettingsForm
 from pylons_app.model.hg_model import HgModel
 from pylons_app.model.user_model import UserModel
+from pylons_app.lib.celerylib import tasks,run_task
 import formencode
 import logging
 import traceback
@@ -102,6 +103,12 @@ class SettingsController(BaseController):
             invalidate_cache('cached_repo_list')
             h.flash(_('Repositories sucessfully rescanned'), category='success')            
         
+        if setting_id == 'whoosh':
+            repo_location = get_hg_ui_settings()['paths_root_path']
+            full_index = request.POST.get('full_index',False)
+            task = run_task(tasks.whoosh_index,True,repo_location,full_index)
+            
+            h.flash(_('Whoosh reindex task scheduled'), category='success')
         if setting_id == 'global':
             
             application_form = ApplicationSettingsForm()()
