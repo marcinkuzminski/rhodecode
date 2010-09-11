@@ -88,6 +88,7 @@ class ChangesetController(BaseController):
     def raw_changeset(self,revision):
         
         hg_model = HgModel()
+        method = request.GET.get('diff','show')
         try:
             c.changeset = hg_model.get_repo(c.repo_name).get_changeset(revision)
         except RepositoryError:
@@ -125,7 +126,8 @@ class ChangesetController(BaseController):
                 c.changes.append(('changed', node, diff, cs1, cs2))      
         
         response.content_type = 'text/plain'
-
+        if method == 'download':
+            response.content_disposition = 'attachment; filename=%s.patch' % revision 
         parent = True if len(c.changeset.parents) > 0 else False
         c.parent_tmpl = 'Parent  %s' % c.changeset.parents[0]._hex if parent else ''
     

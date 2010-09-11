@@ -8,7 +8,8 @@ from time import mktime
 import logging
 import os
 import sys
-import shutil
+import tarfile
+
 log = logging.getLogger(__name__)
 
 ROOT = dn(dn(os.path.realpath(__file__)))
@@ -28,8 +29,10 @@ def setup_app(command, conf, vars):
         
         if not os.path.isdir(REPO_TEST_PATH):
             os.mkdir(REPO_TEST_PATH)
-            from_ = '/home/marcink/workspace-python/vcs'
-            shutil.copytree(from_, os.path.join(REPO_TEST_PATH,'vcs_test'))
+            cur_dir = dn(os.path.abspath(__file__))
+            tar = tarfile.open(jn(cur_dir,'tests',"vcs_test.tar.gz"))
+            tar.extractall(REPO_TEST_PATH)
+            tar.close()
             
         tests = True    
     

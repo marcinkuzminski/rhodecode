@@ -1,4 +1,7 @@
 from pylons_app.tests import *
+from pylons_app.lib.indexers import IDX_LOCATION
+import os
+from nose.plugins.skip import SkipTest
 
 class TestSearchController(TestController):
 
@@ -10,6 +13,17 @@ class TestSearchController(TestController):
         # Test response...
 
     def test_empty_search(self):
+        
+        if os.path.isdir(IDX_LOCATION):
+            raise SkipTest('skipped due to existing index')
+        else:
+            self.log_user()
+            response = self.app.get(url(controller='search', action='index'),{'q':'vcs_test'})
+            assert 'There is no index to search in. Please run whoosh indexer' in response.body,'No error message about empty index'
+        
+    def test_normal_search(self):
         self.log_user()
-        response = self.app.get(url(controller='search', action='index'),{'q':'vcs_test'})
-        assert 'There is no index to search in. Please run whoosh indexer' in response.body,'No error message about empty index'
+        response = self.app.get(url(controller='search', action='index'),{'q':'def+repo'})
+        print response.body
+        assert '9 results' in response.body,'no message about proper search results'
+        

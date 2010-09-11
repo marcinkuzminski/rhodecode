@@ -31,7 +31,6 @@ class TestController(TestCase):
         wsgiapp = pylons.test.pylonsapp
         config = wsgiapp.config
         self.app = TestApp(wsgiapp)
-        self.session = session
         url._push_object(URLGenerator(config['routes.map'], environ))
         self.sa = meta.Session
         TestCase.__init__(self, *args, **kwargs)
