@@ -49,10 +49,10 @@ def load_environment(global_conf, app_conf, initial=False):
 
     #sets the c attribute access when don't existing attribute are accessed
     config['pylons.strict_tmpl_context'] = True
-    
+    test = os.path.split(config['__file__'])[-1] == 'tests.ini'
     #MULTIPLE DB configs
     # Setup the SQLAlchemy database engine
-    if config['debug'] and os.path.split(config['__file__'])[-1] != 'tests.ini':
+    if config['debug'] and not test:
         #use query time debugging.
         from pylons_app.lib.timerproxy import TimerProxy
         sa_engine_db1 = engine_from_config(config, 'sqlalchemy.db1.',
