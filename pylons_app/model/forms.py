@@ -209,6 +209,19 @@ class ValidPath(formencode.validators.FancyValidator):
         raise formencode.Invalid(msg, value, state,
                                      error_dict={'paths_root_path':msg})            
 
+class UniqSystemEmail(formencode.validators.FancyValidator):
+    def to_python(self, value, state):
+        sa = meta.Session
+        try:
+            user = sa.query(User).filter(User.email == value).scalar()
+            if user:
+                raise formencode.Invalid(_("That e-mail address is already taken") ,
+                                         value, state)
+        finally:
+            meta.Session.remove()
+            
+        return value 
+    
 class ValidSystemEmail(formencode.validators.FancyValidator):
     def to_python(self, value, state):
         sa = meta.Session
@@ -263,7 +276,7 @@ def UserForm(edit=False, old_data={}):
         active = StringBoolean(if_missing=False)
         name = UnicodeString(strip=True, min=3, not_empty=True)
         lastname = UnicodeString(strip=True, min=3, not_empty=True)
-        email = Email(not_empty=True)
+        email = All(Email(not_empty=True), UniqSystemEmail())
         
     return _UserForm
 
