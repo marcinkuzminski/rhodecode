@@ -16,12 +16,15 @@ from routes.util import URLGenerator
 from webtest import TestApp
 import os
 from pylons_app.model import meta
+import logging
+log = logging.getLogger(__name__) 
+
 import pylons.test
 
 __all__ = ['environ', 'url', 'TestController']
 
 # Invoke websetup with the current config file
-SetupCommand('setup-app').run([pylons.test.pylonsapp.config['__file__']])
+#SetupCommand('setup-app').run([pylons.test.pylonsapp.config['__file__']])
 
 environ = {}
 
@@ -42,4 +45,5 @@ class TestController(TestCase):
                                   'password':'test'})
         assert response.status == '302 Found', 'Wrong response code from login got %s' % response.status
         assert response.session['hg_app_user'].username == 'test_admin', 'wrong logged in user'
-        return response.follow()        
+        return response.follow()
+    

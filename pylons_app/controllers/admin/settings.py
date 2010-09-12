@@ -106,7 +106,7 @@ class SettingsController(BaseController):
         if setting_id == 'whoosh':
             repo_location = get_hg_ui_settings()['paths_root_path']
             full_index = request.POST.get('full_index',False)
-            task = run_task(tasks.whoosh_index,True,repo_location,full_index)
+            task = run_task(tasks.whoosh_index,repo_location,full_index)
             
             h.flash(_('Whoosh reindex task scheduled'), category='success')
         if setting_id == 'global':

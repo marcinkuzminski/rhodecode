@@ -82,9 +82,9 @@ class TestLoginController(TestController):
         
         
     def test_register_ok(self):
-        username = 'test_regular2'
+        username = 'test_regular4'
         password = 'qweqwe'
-        email = 'goodmail@mail.com'
+        email = 'marcin@somemail.com'
         name = 'testname'
         lastname = 'testlastname'
         
@@ -94,10 +94,11 @@ class TestLoginController(TestController):
                                              'email':email,
                                              'name':name,
                                              'lastname':lastname})
-        
+        print response.body
         assert response.status == '302 Found', 'Wrong response from register page got %s' % response.status        
+        assert 'You have successfully registered into hg-app' in response.session['flash'][0], 'No flash message about user registration'
         
-        ret = self.sa.query(User).filter(User.username == 'test_regular2').one()
+        ret = self.sa.query(User).filter(User.username == 'test_regular4').one()
         assert ret.username == username , 'field mismatch %s %s' % (ret.username, username)
         assert check_password(password,ret.password) == True , 'password mismatch'
         assert ret.email == email , 'field mismatch %s %s' % (ret.email, email)
@@ -105,7 +106,34 @@ class TestLoginController(TestController):
         assert ret.lastname == lastname , 'field mismatch %s %s' % (ret.lastname, lastname)
     
         
+    def test_forgot_password_wrong_mail(self):    
+        response = self.app.post(url(controller='login', action='password_reset'),
+                                            {'email':'marcin@wrongmail.org',})
         
+        assert "That e-mail address doesn't exist" in response.body,'Missing error message about wrong email'
+                
+    def test_forgot_password(self):
+        response = self.app.get(url(controller='login', action='password_reset'))
+        assert response.status == '200 OK', 'Wrong response from login page got %s' % response.status
+
+        username = 'test_password_reset_1'
+        password = 'qweqwe'
+        email = 'marcin@python-works.com'
+        name = 'passwd'
+        lastname = 'reset'
+                
+        response = self.app.post(url(controller='login', action='register'),
+                                            {'username':username,
+                                             'password':password,
+                                             'email':email,
+                                             'name':name,
+                                             'lastname':lastname})        
+        #register new user for email test
+        response = self.app.post(url(controller='login', action='password_reset'),
+                                            {'email':email,})
+        print response.session['flash']
+        assert 'You have successfully registered into hg-app' in response.session['flash'][0], 'No flash message about user registration'
+        assert 'Your new password was sent' in response.session['flash'][1], 'No flash message about password reset'
         
         
         

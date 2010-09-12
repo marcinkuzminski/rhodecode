@@ -1,14 +1,7 @@
 """The application's model objects"""
 import logging
-import sqlalchemy as sa
-from sqlalchemy import orm
 from pylons_app.model import meta
-from pylons_app.model.meta import Session
 log = logging.getLogger(__name__)
-
-# Add these two imports:
-import datetime
-from sqlalchemy import schema, types
 
 def init_model(engine):
     """Call me before using any of the tables or classes in the model"""

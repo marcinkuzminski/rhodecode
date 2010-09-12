@@ -102,7 +102,7 @@ class HgModel(object):
             if repos_path[0] != '/':
                 repos_path[0] = '/'
             if not os.path.isdir(os.path.join(*repos_path)):
-                raise RepositoryError('Not a valid repository in %s' % path[0][1])        
+                raise RepositoryError('Not a valid repository in %s' % path)        
         if not repos_path.endswith('*'):
             raise VCSError('You need to specify * or ** at the end of path '
                             'for recursive scanning')

@@ -61,7 +61,7 @@ class SummaryController(BaseController):
         for name, hash in c.repo_info.branches.items()[:10]:
             c.repo_branches[name] = c.repo_info.get_changeset(hash)
         
-        task = run_task(get_commits_stats,False,c.repo_info.name)
+        task = run_task(get_commits_stats,c.repo_info.name)
         c.ts_min = task.result[0]
         c.ts_max = task.result[1]
         c.commit_data = task.result[2]

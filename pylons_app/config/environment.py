@@ -49,7 +49,10 @@ def load_environment(global_conf, app_conf, initial=False):
 
     #sets the c attribute access when don't existing attribute are accessed
     config['pylons.strict_tmpl_context'] = True
-    test = os.path.split(config['__file__'])[-1] == 'tests.ini'
+    test = os.path.split(config['__file__'])[-1] == 'test.ini'
+    if test:
+        from pylons_app.lib.utils import make_test_env
+        make_test_env()
     #MULTIPLE DB configs
     # Setup the SQLAlchemy database engine
     if config['debug'] and not test:
