@@ -7,16 +7,21 @@
 
 [DEFAULT]
 debug = true
-############################################
-## Uncomment and replace with the address ##
-## which should receive any error reports ##
-############################################
+################################################################################
+## Uncomment and replace with the address which should receive                ## 
+## any error reports after application crash								  ##
+## Additionally those settings will be used by hg-app mailing system          ##
+################################################################################
 #email_to = admin@localhost
-#smtp_server = mail.server.com
 #error_email_from = paste_error@localhost
+#app_email_from = hg-app-noreply@localhost
+#error_message =
+
+#smtp_server = mail.server.com
 #smtp_username = 
 #smtp_password = 
-#error_message = 'hp-app crash !'
+#smtp_port = 
+#smtp_use_tls = false
 
 [server:main]
 ##nr of threads to spawn
