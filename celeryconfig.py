@@ -8,6 +8,7 @@ CELERY_IMPORTS = ("pylons_app.lib.celerylib.tasks", )
 CELERY_RESULT_BACKEND = "database"
 CELERY_RESULT_DBURI = "sqlite:///hg_app.db"
 
+BROKER_CONNECTION_MAX_RETRIES = 30
 
 ## Broker settings.
 BROKER_HOST = "localhost"

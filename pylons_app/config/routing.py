@@ -110,10 +110,11 @@ def make_map(config):
     #SEARCH
     map.connect('search', '/_admin/search', controller='search')
     
-    #LOGIN/LOGOUT
+    #LOGIN/LOGOUT/REGISTER/SIGN IN
     map.connect('login_home', '/_admin/login', controller='login')
     map.connect('logout_home', '/_admin/logout', controller='login', action='logout')
     map.connect('register', '/_admin/register', controller='login', action='register')
+    map.connect('reset_password', '/_admin/password_reset', controller='login', action='password_reset')
         
     #FEEDS
     map.connect('rss_feed_home', '/{repo_name:.*}/feed/rss',

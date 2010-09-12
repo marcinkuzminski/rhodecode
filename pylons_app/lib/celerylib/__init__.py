@@ -1,5 +1,8 @@
 from vcs.utils.lazy import LazyProperty
 import logging
+import os
+import sys
+import traceback
 
 log = logging.getLogger(__name__)
 
@@ -11,14 +14,13 @@ class ResultWrapper(object):
     def result(self):
         return self.task
 
-def run_task(task,async,*args,**kwargs):
+def run_task(task,*args,**kwargs):
     try:
         t = task.delay(*args,**kwargs)
         log.info('running task %s',t.task_id)
-        if not async:
-            t.wait()
         return t
     except:
+        log.error(traceback.format_exc())
         #pure sync version
         return ResultWrapper(task(*args,**kwargs))
     

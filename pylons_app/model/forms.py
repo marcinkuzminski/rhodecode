@@ -102,7 +102,7 @@ class ValidAuth(formencode.validators.FancyValidator):
                                      error_dict=self.e_dict)            
         if user:
             if user.active:
-                if user.username == username and check_password(password, 
+                if user.username == username and check_password(password,
                                                                 user.password):
                     return value
                 else:
@@ -208,7 +208,20 @@ class ValidPath(formencode.validators.FancyValidator):
         
         raise formencode.Invalid(msg, value, state,
                                      error_dict={'paths_root_path':msg})            
-                       
+
+class ValidSystemEmail(formencode.validators.FancyValidator):
+    def to_python(self, value, state):
+        sa = meta.Session
+        try:
+            user = sa.query(User).filter(User.email == value).scalar()
+            if  user is None:
+                raise formencode.Invalid(_("That e-mail address doesn't exist.") ,
+                                         value, state)
+        finally:
+            meta.Session.remove()
+            
+        return value     
+
 #===============================================================================
 # FORMS        
 #===============================================================================
@@ -255,8 +268,14 @@ def UserForm(edit=False, old_data={}):
     return _UserForm
 
 RegisterForm = UserForm
-    
-    
+
+def PasswordResetForm():
+    class _PasswordResetForm(formencode.Schema):
+        allow_extra_fields = True
+        filter_extra_fields = True
+        email = All(ValidSystemEmail(), Email(not_empty=True))             
+    return _PasswordResetForm
+
 def RepoForm(edit=False, old_data={}):
     class _RepoForm(formencode.Schema):
         allow_extra_fields = True
