@@ -173,7 +173,7 @@ class DbManage(object):
         new_user.password = get_crypt_password(password)
         new_user.name = 'Hg'
         new_user.lastname = 'Admin'
-        new_user.email = 'admin@localhost'
+        new_user.email = 'admin@localhost.com'
         new_user.admin = admin
         new_user.active = True
         
