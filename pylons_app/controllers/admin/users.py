@@ -148,6 +148,8 @@ class UsersController(BaseController):
         """GET /users/id/edit: Form to edit an existing item"""
         # url('edit_user', id=ID)
         c.user = self.sa.query(User).get(id)
+        if not c.user:
+            return redirect(url('users'))
         if c.user.username == 'default':
             h.flash(_("You can't edit this user since it's" 
               " crucial for entire application"), category='warning')

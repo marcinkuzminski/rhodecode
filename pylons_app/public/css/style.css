@@ -505,6 +505,15 @@ div.options a:hover
 
 
 /*ICONS*/
+#header #header-inner #quick li ul li a.journal,
+#header #header-inner #quick li ul li a.journal:hover
+{
+    background:url("../images/icons/book.png") no-repeat scroll 4px 9px #FFFFFF;
+    margin:0;
+    padding:12px 9px 7px 24px;
+    width:167px;
+
+}
 
 #header #header-inner #quick li ul li a.repos,
 #header #header-inner #quick li ul li a.repos:hover

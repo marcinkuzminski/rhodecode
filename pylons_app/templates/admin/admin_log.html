@@ -11,8 +11,8 @@
 
 	%for cnt,l in enumerate(c.users_log):
 	<tr class="parity${cnt%2}">
-		<td>${l.user.username}</td>
-		<td>${l.repository}</td>
+		<td>${h.link_to(l.user.username,h.url('edit_user', id=l.user.user_id))}</td>
+		<td>${h.link_to(l.repository,h.url('summary_home',repo_name=l.repository))}</td>
 		<td>${l.action}</td>
 		<td>${l.action_date}</td>
 		<td>${l.user_ip}</td>
