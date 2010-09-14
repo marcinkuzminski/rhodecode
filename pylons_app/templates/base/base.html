@@ -97,8 +97,12 @@
                     <span>&darr;</span>					
 					</a>
 					<ul class="repo_switcher">
-                        %for repo in c.repo_switcher_list:
-                            <li>${h.link_to(repo,h.url('summary_home',repo_name=repo))}</li>
+                        %for repo,private in c.repo_switcher_list:
+                          %if private:
+                             <li>${h.link_to(repo,h.url('summary_home',repo_name=repo),class_="private_repo")}</li>
+                          %else:
+                             <li>${h.link_to(repo,h.url('summary_home',repo_name=repo),class_="public_repo")}</li>
+                          %endif  
                         %endfor					
 					</ul>			
 				</li>

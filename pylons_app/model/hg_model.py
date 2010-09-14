@@ -61,9 +61,9 @@ def _get_repos_cached():
 @cache_region('super_short_term', 'cached_repos_switcher_list')
 def _get_repos_switcher_cached(cached_repo_list):
     repos_lst = []
-    for repo in sorted(x.name.lower() for x in cached_repo_list.values()):
-        if HasRepoPermissionAny('repository.write', 'repository.read', 'repository.admin')(repo, 'main page check'):
-            repos_lst.append(repo)
+    for repo in sorted(x for x in cached_repo_list.values()):
+        if HasRepoPermissionAny('repository.write', 'repository.read', 'repository.admin')(repo.name.lower(), 'main page check'):
+            repos_lst.append((repo.name.lower(), repo.dbrepo.private,))
     
     return repos_lst
 

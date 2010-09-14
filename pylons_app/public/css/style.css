@@ -514,6 +514,24 @@ div.options a:hover
     width:167px;
 
 }
+#header #header-inner #quick li ul li a.private_repo,
+#header #header-inner #quick li ul li a.private_repo:hover
+{
+    background:url("../images/icons/lock.png") no-repeat scroll 4px 9px #FFFFFF;
+    margin:0;
+    padding:12px 9px 7px 24px;
+    width:167px;
+
+}
+#header #header-inner #quick li ul li a.public_repo,
+#header #header-inner #quick li ul li a.public_repo:hover
+{
+    background:url("../images/icons/lock_open.png") no-repeat scroll 4px 9px #FFFFFF;
+    margin:0;
+    padding:12px 9px 7px 24px;
+    width:167px;
+
+}
 
 #header #header-inner #quick li ul li a.repos,
 #header #header-inner #quick li ul li a.repos:hover
