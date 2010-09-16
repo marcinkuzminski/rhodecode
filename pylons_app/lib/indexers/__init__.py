@@ -16,8 +16,6 @@ import os
 import sys
 import traceback
 
-
-
 #to get the pylons_app import
 sys.path.append(dn(dn(dn(os.path.realpath(__file__)))))
 
@@ -50,23 +48,21 @@ SCHEMA = Schema(owner=TEXT(),
 IDX_NAME = 'HG_INDEX'
 FORMATTER = HtmlFormatter('span', between='\n<span class="break">...</span>\n') 
 FRAGMENTER = SimpleFragmenter(200)
-                 
-                    
-
                             
 class ResultWrapper(object):
     def __init__(self, searcher, matcher, highlight_items):
         self.searcher = searcher
         self.matcher = matcher
         self.highlight_items = highlight_items
-        self.fragment_size = 150 * 2
+        self.fragment_size = 200 / 2
     
     @LazyProperty
     def doc_ids(self):
         docs_id = []
         while self.matcher.is_active():
             docnum = self.matcher.id()
-            docs_id.append(docnum)
+            chunks = [offsets for offsets in self.get_chunks()]
+            docs_id.append([docnum, chunks])
             self.matcher.next()
         return docs_id   
         
@@ -99,18 +95,22 @@ class ResultWrapper(object):
                             
 
     def get_full_content(self, docid):
-        res = self.searcher.stored_fields(docid)
+        res = self.searcher.stored_fields(docid[0])
         f_path = res['path'][res['path'].find(res['repository']) \
                              + len(res['repository']):].lstrip('/')
         
-        content_short = ''.join(self.get_short_content(res))
+        content_short = self.get_short_content(res, docid[1])
         res.update({'content_short':content_short,
                     'content_short_hl':self.highlight(content_short),
                     'f_path':f_path})
         
         return res        
-
-    def get_short_content(self, res):
+    
+    def get_short_content(self, res, chunks):
+        
+        return ''.join([res['content'][chunk[0]:chunk[1]] for chunk in chunks])
+    
+    def get_chunks(self):
         """
         Smart function that implements chunking the content
         but not overlap chunks so it doesn't highlight the same
@@ -124,11 +124,11 @@ class ResultWrapper(object):
             end = span.endchar or 0
             start_offseted = max(0, start - self.fragment_size)
             end_offseted = end + self.fragment_size
-            print start_offseted, end_offseted
+            
             if start_offseted < memory[-1][1]:
                 start_offseted = memory[-1][1]
             memory.append((start_offseted, end_offseted,))    
-            yield res["content"][start_offseted:end_offseted]  
+            yield (start_offseted, end_offseted,)  
         
     def highlight(self, content, top=5):
         hl = highlight(escape(content),
