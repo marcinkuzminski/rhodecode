@@ -277,13 +277,17 @@ def pygmentize_annotation(filenode, **kwargs):
     return literal(annotate_highlight(filenode, url_func, **kwargs))
       
 def repo_name_slug(value):
+    """Return slug of name of repository
+    This function is called on each creation/modification
+    of repository to prevent bad names in repo
     """
-    Return slug of name of repository
-    """
-    slug = urlify(value)
-    for c in """=[]\;'"<>,/~!@#$%^&*()+{}|:""":
+    slug = remove_formatting(value)
+    slug = strip_tags(slug)
+    
+    for c in """=[]\;'"<>,/~!@#$%^&*()+{}|: """:
         slug = slug.replace(c, '-')
     slug = recursive_replace(slug, '-')
+    slug = collapse(slug, '-')
     return slug
 
 def get_changeset_safe(repo, rev):
