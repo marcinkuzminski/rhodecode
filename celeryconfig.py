@@ -2,23 +2,20 @@
 import sys
 import os
 import ConfigParser
-
-PYLONS_CONFIG_NAME = 'test.ini'
-
 root = os.getcwd()
+
+PYLONS_CONFIG_NAME = 'development.ini'
+
+sys.path.append(root)
 config = ConfigParser.ConfigParser({'here':root})
 config.read('%s/%s' % (root, PYLONS_CONFIG_NAME))
 PYLONS_CONFIG = config
 
-
-print config.items('app:main')
-
-sys.path.append(os.getcwd())
 CELERY_IMPORTS = ("pylons_app.lib.celerylib.tasks",)
 
 ## Result store settings.
 CELERY_RESULT_BACKEND = "database"
-CELERY_RESULT_DBURI = "sqlite:///hg_app.db"
+CELERY_RESULT_DBURI = dict(config.items('app:main'))['sqlalchemy.db1.url']
 
 BROKER_CONNECTION_MAX_RETRIES = 30
 
