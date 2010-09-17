@@ -23,7 +23,7 @@
     </div>
     <div class="table">
 		<div id="files_data">
-			<h2>${_('Location')}: ${h.files_breadcrumbs(c.repo_name,c.cur_rev,c.file.path)}</h2>
+			<h3 class="files_location">${_('Location')}: ${h.files_breadcrumbs(c.repo_name,c.cur_rev,c.file.path)}</h3>
 			<dl class="overview">
 				<dt>${_('Last revision')}</dt>
 				<dd>${h.link_to("r%s:%s" % (c.file.last_changeset.revision,c.file.last_changeset._short),
@@ -33,8 +33,10 @@
 				<dt>${_('Options')}</dt>
 				<dd>${h.link_to(_('show source'),
 						h.url('files_home',repo_name=c.repo_name,revision=c.cur_rev,f_path=c.f_path))}  
-					/ ${h.link_to(_('download as raw'),
+					/ ${h.link_to(_('show as raw'),
 						h.url('files_raw_home',repo_name=c.repo_name,revision=c.cur_rev,f_path=c.f_path))}
+					/ ${h.link_to(_('download as raw'),
+						h.url('files_rawfile_home',repo_name=c.repo_name,revision=c.cur_rev,f_path=c.f_path))}
 				</dd>				
 			</dl>
 			<div id="body" class="codeblock">
@@ -43,7 +45,12 @@
 					<div class="commit">"${c.file_msg}"</div>
 				</div>
 				<div class="code-body">
-					${h.pygmentize_annotation(c.file,linenos=True,anchorlinenos=True,lineanchors='S',cssclass="code-highlight")}
+					% if c.file.size < c.file_size_limit:
+						${h.pygmentize_annotation(c.file,linenos=True,anchorlinenos=True,lineanchors='S',cssclass="code-highlight")}
+					%else:
+						${_('File is to big to display')} ${h.link_to(_('show as raw'),
+						h.url('files_raw_home',repo_name=c.repo_name,revision=c.cur_rev,f_path=c.f_path))}
+					%endif				
 				</div>
 			</div>
 		</div>    

@@ -8,9 +8,11 @@
 	<dd>${h.format_byte_size(c.files_list.size,binary=True)}</dd>
 	<dt>${_('Options')}</dt>
 	<dd>${h.link_to(_('show annotation'),
-			h.url('files_annotate_home',repo_name=c.repo_name,revision=c.cur_rev,f_path=c.f_path))}  
+			h.url('files_annotate_home',repo_name=c.repo_name,revision=c.cur_rev,f_path=c.f_path))}
+		 / ${h.link_to(_('show as raw'),
+			h.url('files_raw_home',repo_name=c.repo_name,revision=c.cur_rev,f_path=c.f_path))}			
 		 / ${h.link_to(_('download as raw'),
-			h.url('files_raw_home',repo_name=c.repo_name,revision=c.cur_rev,f_path=c.f_path))}
+			h.url('files_rawfile_home',repo_name=c.repo_name,revision=c.cur_rev,f_path=c.f_path))}
 	</dd>
 	<dt>${_('History')}</dt>
 	<dd>
@@ -32,7 +34,12 @@
 		<div class="commit">"${c.files_list.last_changeset.message}"</div>
 	</div>
 	<div class="code-body">
-		${h.pygmentize(c.files_list,linenos=True,anchorlinenos=True,lineanchors='S',cssclass="code-highlight")}
+		% if c.files_list.size < c.file_size_limit:
+			${h.pygmentize(c.files_list,linenos=True,anchorlinenos=True,lineanchors='S',cssclass="code-highlight")}
+		%else:
+			${_('File is to big to display')} ${h.link_to(_('show as raw'),
+			h.url('files_raw_home',repo_name=c.repo_name,revision=c.cur_rev,f_path=c.f_path))}
+		%endif
 	</div>
 </div>
 

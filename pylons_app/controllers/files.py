@@ -45,6 +45,7 @@ class FilesController(BaseController):
                                    'repository.admin')       
     def __before__(self):
         super(FilesController, self).__before__()
+        c.file_size_limit = 250 * 1024 #limit of file size to display
 
     def index(self, repo_name, revision, f_path):
         hg_model = HgModel()
@@ -76,7 +77,6 @@ class FilesController(BaseController):
                              revision=next_rev, f_path=f_path)   
                     
             c.changeset = repo.get_changeset(revision)
-
                         
             c.cur_rev = c.changeset.raw_id
             c.rev_nr = c.changeset.revision
@@ -95,6 +95,14 @@ class FilesController(BaseController):
         response.content_type = file_node.mimetype
         response.content_disposition = 'attachment; filename=%s' \
                                                     % f_path.split('/')[-1] 
+        return file_node.content
+
+    def raw(self, repo_name, revision, f_path):
+        hg_model = HgModel()
+        c.repo = hg_model.get_repo(c.repo_name)
+        file_node = c.repo.get_changeset(revision).get_node(f_path)
+        response.content_type = 'text/plain'
+        
         return file_node.content
     
     def annotate(self, repo_name, revision, f_path):
