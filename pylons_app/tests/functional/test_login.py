@@ -84,7 +84,7 @@ class TestLoginController(TestController):
     def test_register_ok(self):
         username = 'test_regular4'
         password = 'qweqwe'
-        email = 'marcin@somemail.com'
+        email = 'marcin@test.com'
         name = 'testname'
         lastname = 'testlastname'
         
@@ -100,7 +100,7 @@ class TestLoginController(TestController):
         
         ret = self.sa.query(User).filter(User.username == 'test_regular4').one()
         assert ret.username == username , 'field mismatch %s %s' % (ret.username, username)
-        assert check_password(password,ret.password) == True , 'password mismatch'
+        assert check_password(password, ret.password) == True , 'password mismatch'
         assert ret.email == email , 'field mismatch %s %s' % (ret.email, email)
         assert ret.name == name , 'field mismatch %s %s' % (ret.name, name)
         assert ret.lastname == lastname , 'field mismatch %s %s' % (ret.lastname, lastname)
@@ -108,9 +108,9 @@ class TestLoginController(TestController):
         
     def test_forgot_password_wrong_mail(self):    
         response = self.app.post(url(controller='login', action='password_reset'),
-                                            {'email':'marcin@wrongmail.org',})
+                                            {'email':'marcin@wrongmail.org', })
         
-        assert "That e-mail address doesn't exist" in response.body,'Missing error message about wrong email'
+        assert "That e-mail address doesn't exist" in response.body, 'Missing error message about wrong email'
                 
     def test_forgot_password(self):
         response = self.app.get(url(controller='login', action='password_reset'))
@@ -130,7 +130,7 @@ class TestLoginController(TestController):
                                              'lastname':lastname})        
         #register new user for email test
         response = self.app.post(url(controller='login', action='password_reset'),
-                                            {'email':email,})
+                                            {'email':email, })
         print response.session['flash']
         assert 'You have successfully registered into hg-app' in response.session['flash'][0], 'No flash message about user registration'
         assert 'Your new password was sent' in response.session['flash'][1], 'No flash message about password reset'

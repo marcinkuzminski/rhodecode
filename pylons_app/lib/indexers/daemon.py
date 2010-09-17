@@ -33,19 +33,30 @@ project_path = dn(dn(dn(dn(os.path.realpath(__file__)))))
 sys.path.append(project_path)
 
 from pidlock import LockHeld, DaemonLock
-import traceback
-from pylons_app.config.environment import load_environment
 from pylons_app.model.hg_model import HgModel
 from pylons_app.lib.helpers import safe_unicode
 from whoosh.index import create_in, open_dir
 from shutil import rmtree
-from pylons_app.lib.indexers import ANALYZER, INDEX_EXTENSIONS, IDX_LOCATION, \
-SCHEMA, IDX_NAME
+from pylons_app.lib.indexers import INDEX_EXTENSIONS, IDX_LOCATION, SCHEMA, IDX_NAME
 
 import logging
-import logging.config
-logging.config.fileConfig(jn(project_path, 'development.ini'))
+
 log = logging.getLogger('whooshIndexer')
+# create logger
+log.setLevel(logging.DEBUG)
+
+# create console handler and set level to debug
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+
+# create formatter
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+
+# add formatter to ch
+ch.setFormatter(formatter)
+
+# add ch to logger
+log.addHandler(ch)
 
 def scan_paths(root_location):
     return HgModel.repo_scan('/', root_location, None, True)
@@ -221,6 +232,7 @@ if __name__ == "__main__":
         WhooshIndexingDaemon(repo_location=repo_location)\
             .run(full_index=full_index)
         l.release()
+        reload(logging)
     except LockHeld:
         sys.exit(1)
 

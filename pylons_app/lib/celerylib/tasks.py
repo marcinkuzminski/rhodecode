@@ -1,7 +1,7 @@
 from celery.decorators import task
 from celery.task.sets import subtask
+from celeryconfig import PYLONS_CONFIG as config
 from datetime import datetime, timedelta
-from os.path import dirname as dn
 from pylons.i18n.translation import _
 from pylons_app.lib.celerylib import run_task
 from pylons_app.lib.helpers import person
@@ -9,15 +9,8 @@ from pylons_app.lib.smtp_mailer import SmtpMailer
 from pylons_app.lib.utils import OrderedDict
 from time import mktime
 from vcs.backends.hg import MercurialRepository
-import ConfigParser
 import calendar
-import os
 import traceback
-
-
-root = dn(dn(dn(dn(os.path.realpath(__file__)))))
-config = ConfigParser.ConfigParser({'here':root})
-config.read('%s/development.ini' % root)
 
 __all__ = ['whoosh_index', 'get_commits_stats',
            'reset_user_password', 'send_email']
@@ -91,7 +84,7 @@ def whoosh_index(repo_location, full_index):
 def get_commits_stats(repo):
     log = get_commits_stats.get_logger()
     aggregate = OrderedDict()
-    repos_path = get_hg_ui_settings()['paths_root_path'].replace('*','')
+    repos_path = get_hg_ui_settings()['paths_root_path'].replace('*', '')
     repo = MercurialRepository(repos_path + repo)
     #graph range
     td = datetime.today() + timedelta(days=1) 
@@ -205,7 +198,7 @@ def send_email(recipients, subject, body):
     ssl = False
     
     try:
-        m = SmtpMailer(mail_from, user, passwd, mail_server, 
+        m = SmtpMailer(mail_from, user, passwd, mail_server,
                        mail_port, ssl, tls)
         m.send(recipients, subject, body)  
     except:
