@@ -24,7 +24,7 @@ setup(
         "pygments>=1.3.0",
         "mercurial>=1.6",
         "pysqlite",
-        "whoosh==1.0.0b16",
+        "whoosh==1.0.0b17",
         "py-bcrypt",
         "celery",
     ],

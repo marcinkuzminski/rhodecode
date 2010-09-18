@@ -11,6 +11,7 @@ from time import mktime
 from vcs.backends.hg import MercurialRepository
 import calendar
 import traceback
+import json
 
 __all__ = ['whoosh_index', 'get_commits_stats',
            'reset_user_password', 'send_email']
@@ -84,21 +85,26 @@ def whoosh_index(repo_location, full_index):
 def get_commits_stats(repo):
     log = get_commits_stats.get_logger()
     aggregate = OrderedDict()
+    overview_aggregate = OrderedDict()
     repos_path = get_hg_ui_settings()['paths_root_path'].replace('*', '')
     repo = MercurialRepository(repos_path + repo)
     #graph range
     td = datetime.today() + timedelta(days=1) 
     y, m, d = td.year, td.month, td.day
-    ts_min = mktime((y, (td - timedelta(days=calendar.mdays[m])).month,
-                        d, 0, 0, 0, 0, 0, 0,))
-    ts_max = mktime((y, m, d, 0, 0, 0, 0, 0, 0,))
     
+    ts_min_y = mktime((y - 1, (td - timedelta(days=calendar.mdays[m])).month,
+                        d, 0, 0, 0, 0, 0, 0,))
+    ts_min_m = mktime((y, (td - timedelta(days=calendar.mdays[m])).month,
+                        d, 0, 0, 0, 0, 0, 0,))
+    
+    ts_max_y = mktime((y, m, d, 0, 0, 0, 0, 0, 0,))
+
     def author_key_cleaner(k):
         k = person(k)
-        k = k.replace('"', "'") #for js data compatibilty
+        k = k.replace('"', "") #for js data compatibilty
         return k
             
-    for cs in repo[:200]:#added limit 200 until fix #29 is made
+    for cs in repo[:1000]:#added limit 200 until fix #29 is made
         k = '%s-%s-%s' % (cs.date.timetuple()[0], cs.date.timetuple()[1],
                           cs.date.timetuple()[2])
         timetupple = [int(x) for x in k.split('-')]
@@ -113,7 +119,7 @@ def get_commits_stats(repo):
                 
             else:
                 #aggregate[author_key_cleaner(cs.author)].update(dates_range)
-                if k >= ts_min and k <= ts_max:
+                if k >= ts_min_y and k <= ts_max_y:
                     aggregate[author_key_cleaner(cs.author)][k] = {}
                     aggregate[author_key_cleaner(cs.author)][k]["commits"] = 1
                     aggregate[author_key_cleaner(cs.author)][k]["added"] = len(cs.added)
@@ -121,7 +127,7 @@ def get_commits_stats(repo):
                     aggregate[author_key_cleaner(cs.author)][k]["removed"] = len(cs.removed) 
                                         
         else:
-            if k >= ts_min and k <= ts_max:
+            if k >= ts_min_y and k <= ts_max_y:
                 aggregate[author_key_cleaner(cs.author)] = OrderedDict()
                 #aggregate[author_key_cleaner(cs.author)].update(dates_range)
                 aggregate[author_key_cleaner(cs.author)][k] = {}
@@ -130,25 +136,35 @@ def get_commits_stats(repo):
                 aggregate[author_key_cleaner(cs.author)][k]["changed"] = len(cs.changed)
                 aggregate[author_key_cleaner(cs.author)][k]["removed"] = len(cs.removed)                 
     
-    d = ''
-    tmpl0 = u""""%s":%s"""
-    tmpl1 = u"""{label:"%s",data:%s,schema:["commits"]},"""
-    for author in aggregate:
         
-        d += tmpl0 % (author,
-                      tmpl1 \
-                      % (author,
-                    [{"time":x,
-                      "commits":aggregate[author][x]['commits'],
-                      "added":aggregate[author][x]['added'],
-                      "changed":aggregate[author][x]['changed'],
-                      "removed":aggregate[author][x]['removed'],
-                      } for x in aggregate[author]]))
-    if d == '':
-        d = '"%s":{label:"%s",data:[[0,1],]}' \
-            % (author_key_cleaner(repo.contact),
-               author_key_cleaner(repo.contact))
-    return (ts_min, ts_max, d)    
+        if overview_aggregate.has_key(k):
+            overview_aggregate[k] += 1
+        else:
+            overview_aggregate[k] = 1
+    
+    overview_data = []
+    for k, v in overview_aggregate.items():
+        overview_data.append([k, v])
+    data = {}
+    for author in aggregate:
+        data[author] = {"label":author,
+                      "data":[{"time":x,
+                               "commits":aggregate[author][x]['commits'],
+                               "added":aggregate[author][x]['added'],
+                               "changed":aggregate[author][x]['changed'],
+                               "removed":aggregate[author][x]['removed'],
+                              } for x in aggregate[author]],
+                      "schema":["commits"]
+                      }
+        
+    if not data:
+        data[author_key_cleaner(repo.contact)] = {
+            "label":author_key_cleaner(repo.contact),
+            "data":[0, 1],
+            "schema":["commits"],
+        }
+                
+    return (ts_min_m, ts_max_y, json.dumps(data), json.dumps(overview_data))    
 
 @task
 def reset_user_password(user_email):
@@ -157,7 +173,6 @@ def reset_user_password(user_email):
     from pylons_app.model.db import User
     
     try:
-        
         try:
             sa = get_session()
             user = sa.query(User).filter(User.email == user_email).scalar()

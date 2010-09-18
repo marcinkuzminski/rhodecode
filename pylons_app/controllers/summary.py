@@ -22,7 +22,7 @@ Created on April 18, 2010
 summary controller for pylons
 @author: marcink
 """
-from pylons import tmpl_context as c, request,url
+from pylons import tmpl_context as c, request, url
 from pylons_app.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from pylons_app.lib.base import BaseController, render
 from pylons_app.lib.utils import OrderedDict
@@ -61,10 +61,11 @@ class SummaryController(BaseController):
         for name, hash in c.repo_info.branches.items()[:10]:
             c.repo_branches[name] = c.repo_info.get_changeset(hash)
         
-        task = run_task(get_commits_stats,c.repo_info.name)
+        task = run_task(get_commits_stats, c.repo_info.name)
         c.ts_min = task.result[0]
         c.ts_max = task.result[1]
         c.commit_data = task.result[2]
+        c.overview_data = task.result[3]
         
         return render('summary/summary.html')
 
