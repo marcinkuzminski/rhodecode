@@ -76,7 +76,9 @@ E.onDOMReady(function(e){
 			      <label>${_('Last change')}:</label>
 			  </div>
 			  <div class="input-short">
-			      ${h.age(c.repo_info.last_change)} - ${h.rfc822date(c.repo_info.last_change)}
+			      ${h.age(c.repo_info.last_change)} - ${h.rfc822date(c.repo_info.last_change)} 
+			      ${_('by')} ${c.repo_info.get_changeset('tip').author} 
+			      
 			  </div>
 			 </div>
 			
@@ -121,7 +123,7 @@ E.onDOMReady(function(e){
 <div class="box box-right"  style="min-height:455px">
     <!-- box / title -->
     <div class="title">
-        <h5>${_('Last month commit activity')}</h5>
+        <h5>${_('Commit activity')}</h5>
     </div>
     
     <div class="table">
@@ -136,191 +138,341 @@ E.onDOMReady(function(e){
 	    	</div>
     	</div>
 		<script type="text/javascript">
-		
-		(function () {
-			var datasets = ${c.commit_data|n};
-			var overview_data = ${c.overview_data|n};
-						
-			var i = 0;
+		/**
+		 * Plots summary graph
+		 *
+		 * @class SummaryPlot
+		 * @param {from} initial from for detailed graph
+		 * @param {to} initial to for detailed graph
+		 * @param {dataset}
+		 * @param {overview_dataset}
+		 */
+		function SummaryPlot(from,to,dataset,overview_dataset) {
+			var initial_ranges = {
+			    "xaxis":{
+				    "from":from,
+				   	"to":to,
+				},
+			};
+		    var dataset = dataset;
+		    var overview_dataset = [overview_dataset];
 		    var choiceContainer = YAHOO.util.Dom.get("legend_choices");
 		    var choiceContainerTable = YAHOO.util.Dom.get("legend_choices_tables");
-		    for(var key in datasets) {
-		        datasets[key].color = i;
-		        i++;
-		        choiceContainerTable.innerHTML += '<tr><td>'+
-		        '<input type="checkbox" name="' + key +'" checked="checked" />'
-		        +datasets[key].label+
-		        '</td></tr>';
+		    var plotContainer = YAHOO.util.Dom.get('commit_history');
+		    var overviewContainer = YAHOO.util.Dom.get('overview');
+		    
+		    var plot_options = {
+				bars: {show:true,align:'center',lineWidth:4},
+				legend: {show:true, container:"legend_container"},
+				points: {show:true,radius:0,fill:false},
+				yaxis: {tickDecimals:0,},
+				xaxis: {
+					mode: "time", 
+					timeformat: "%d/%m",
+				    min:from,
+				    max:to,	
+				}, 
+				grid: {
+					hoverable: true, 
+				    clickable: true,
+				    autoHighlight:true,
+				    color: "#999"
+				},
+				//selection: {mode: "x"}
 		    };
+		    var overview_options = {
+				legend:{show:false},
+			    bars: {show:true,barWidth: 2,},
+			    shadowSize: 0,
+			    xaxis: {mode: "time", timeformat: "%d/%m/%y",},
+			    yaxis: {ticks: 3, min: 0,},
+			    grid: {color: "#999",},
+			    selection: {mode: "x"}
+			};
+
+			/**
+			*get dummy data needed in few places
+			*/
+		    function getDummyData(label){
+		    	return {"label":label,
+               	 "data":[{"time":0,
+               		 "commits":0,
+	                     "added":0,
+	                     "changed":0,
+	                     "removed":0,
+                    }],
+                    "schema":["commits"],
+                    "color":'#ffffff',
+           		}
+			}
 			
-		    function plotAccordingToChoices() {
-		        var data = [];
-
-		        var inputs = choiceContainer.getElementsByTagName("input");
-		        for(var i=0; i<inputs.length; i++) {
-		            var key = inputs[i].name;
-		            if (key && datasets[key]){
-			            if(!inputs[i].checked){
-				            data.push({label:key,data:[[0,1],]});	
-				        }
-			            else{
-			            	data.push(datasets[key]);
-			            }
-		            }
-		        };
-
-		        if (data.length > 0){
-		            var options = { 
-				            bars: {show:true,align:'center',lineWidth:4},
-				            legend: {show:true, container:"legend_container"},
-			    			points: {show:true,radius:0,fill:false},
-			    	        yaxis: {tickDecimals:0,},
-				            xaxis: {mode: "time", 
-					            	timeformat: "%d/%m",
-					            	min:${c.ts_min},
-					            	max:${c.ts_max},
-					            	
-					        }, 
-				            grid: {hoverable: true, 
-					               clickable: true,
-					               autoHighlight:true,
-					               color: "#999"},
-				            selection: {mode: "x"}
-					};
-
-					//main plot
-				    var plot = YAHOO.widget.Flot("commit_history",data,options);
-
-					//overview
-				    var overview = YAHOO.widget.Flot("overview", [overview_data], {
-				    	legend:{show:false},
-				        bars: {show:true,
-					           barWidth: 2,
-					    },
-				        shadowSize: 0,
-			            xaxis: {mode: "time", 
-			            		timeformat: "%d/%m/%y",
-			            },
-				        yaxis: {ticks: 3, min: 0,},
-				        grid: {color: "#999",},
-				        selection: {mode: "x"}
-				    });
-
-					var ranges = {"xaxis":{"from":${c.ts_min},
-										   "to":${c.ts_max},},}
-					overview.setSelection(ranges);
-					
-				    function showTooltip(x, y, contents) {
-				        var div=document.getElementById('tooltip');
-				        if(!div) {
-				            div = document.createElement('div');
-				            div.id="tooltip";
-				            div.style.position="absolute";
-				            div.style.border='1px solid #fdd';
-				            div.style.padding='2px';
-				            div.style.backgroundColor='#fee';
-				            document.body.appendChild(div);
-				        }
-				        YAHOO.util.Dom.setStyle(div, 'opacity', 0);
-				        div.innerHTML = contents;
-				        div.style.top=(y + 5) + "px";
-				        div.style.left=(x + 5) + "px";
-		
-				        var anim = new YAHOO.util.Anim(div, {opacity: {to: 0.8}}, 0.2);
-				        anim.animate();
-				    }
-				    
-			        var previousPoint = null;
-
-					function plothover(o) {
-				        var pos = o.pos;
-				        var item = o.item;
-				        
-				        //YAHOO.util.Dom.get("x").innerHTML = pos.x.toFixed(2);
-				        //YAHOO.util.Dom.get("y").innerHTML = pos.y.toFixed(2);
-		                if (item) {
-		                    if (previousPoint != item.datapoint) {
-		                        previousPoint = item.datapoint;
-		                        
-		                        var tooltip = YAHOO.util.Dom.get("tooltip");
-		                        if(tooltip) {
-		                        	  tooltip.parentNode.removeChild(tooltip);
-		                        }
-		                        var x = item.datapoint.x.toFixed(2);
-		                        var y = item.datapoint.y.toFixed(2);
-								
-		                        if (!item.series.label){
-		                            item.series.label = 'commits';
-			                    }
-		                        var d = new Date(x*1000);
-		                        var fd = d.toDateString()
-		                        var nr_commits = parseInt(y);
-		                        
-		                        var cur_data = datasets[item.series.label].data[item.dataIndex];
-				                var added = cur_data.added;
-				                var changed = cur_data.changed;
-				                var removed = cur_data.removed;
-				                
-		                        var nr_commits_suffix = " ${_('commits')} ";
-		                        var added_suffix = " ${_('files added')} ";
-			                    var changed_suffix = " ${_('files changed')} ";
-				                var removed_suffix = " ${_('files removed')} ";
-
-				                
-		                        if(nr_commits == 1){nr_commits_suffix = " ${_('commit')} ";}
-								if(added==1){added_suffix=" ${_('file added')} ";}
-								if(changed==1){changed_suffix=" ${_('file changed')} ";}
-								if(removed==1){removed_suffix=" ${_('file removed')} ";}
-												                
-		                        showTooltip(item.pageX, item.pageY, item.series.label + " on " + fd
-										 +'<br/>'+
-				                         nr_commits + nr_commits_suffix+'<br/>'+
-				                         added + added_suffix +'<br/>'+
-				                         changed + changed_suffix + '<br/>'+
-				                         removed + removed_suffix + '<br/>');
-		                    }
-		                }
-		                else {
-		                	  var tooltip = YAHOO.util.Dom.get("tooltip");
-		                	  
-					          if(tooltip) {
-					                tooltip.parentNode.removeChild(tooltip);
-					          }
-		                    previousPoint = null;
-		                }
+		    /**
+		     * generate checkboxes accordindly to data
+		     * @param keys
+		     * @returns
+		     */
+		    function generateCheckboxes(data) {
+			    //append checkboxes
+			    var i = 0;
+			    choiceContainerTable.innerHTML = '';
+			    for(var pos in data) {
+			    	
+			    	data[pos].color = i;
+			        i++;
+			        if(data[pos].label != ''){
+				        choiceContainerTable.innerHTML += '<tr><td>'+
+				        '<input type="checkbox" name="' + data[pos].label +'" checked="checked" />'
+				        +data[pos].label+
+				        '</td></tr>';
 			        }
-			        
-			        plot.subscribe("plothover", plothover);
-			        
-				    function plotselected(ranges) {
-				        // do the zooming
-				        plot = YAHOO.widget.Flot("commit_history", data,
-				                      YAHOO.lang.merge(options, {
-				                          xaxis: { min: ranges.xaxis.from, 
-				                          		   max: ranges.xaxis.to,
-				                          		   mode:"time",
-				                          		   timeformat: "%d/%m",
-				                          		 }
-				                      }));
-				        plot.subscribe("plotselected", plotselected);
-				        plot.subscribe("plothover", plothover);
-
-				        // don't fire event on the overview to prevent eternal loop
-				        overview.setSelection(ranges, true);
-				    }
-				    plot.subscribe("plotselected", plotselected);
-				    
-				    overview.subscribe("plotselected", function (ranges) {
-				        plot.setSelection(ranges);
-				    });
-			    }
+			    }	
 		    }
+		    
+		    /**
+		     * ToolTip show
+		     */
+		    function showTooltip(x, y, contents) {
+		        var div=document.getElementById('tooltip');
+		        if(!div) {
+		            div = document.createElement('div');
+		            div.id="tooltip";
+		            div.style.position="absolute";
+		            div.style.border='1px solid #fdd';
+		            div.style.padding='2px';
+		            div.style.backgroundColor='#fee';
+		            document.body.appendChild(div);
+		        }
+		        YAHOO.util.Dom.setStyle(div, 'opacity', 0);
+		        div.innerHTML = contents;
+		        div.style.top=(y + 5) + "px";
+		        div.style.left=(x + 5) + "px";
 
-		    YAHOO.util.Event.on(choiceContainer.getElementsByTagName("input"), "click", plotAccordingToChoices);
+		        var anim = new YAHOO.util.Anim(div, {opacity: {to: 0.8}}, 0.2);
+		        anim.animate();
+		    }
+		    
+			/**
+			 * This function will detect if selected period has some changesets for this user
+			if it does this data is then pushed for displaying
+			Additionally it will only display users that are selected by the checkbox
+			*/
+		    function getDataAccordingToRanges(ranges) {
+		    	
+		        var data = [];
+		        var keys = [];
+				for(var key in dataset){
+					var push = false;
+					//method1 slow !!
+		            ///*
+		            for(var ds in dataset[key].data){
+			            commit_data = dataset[key].data[ds];
+			            //console.log(key);
+			            //console.log(new Date(commit_data.time*1000));
+			            //console.log(new Date(ranges.xaxis.from*1000));
+			            //console.log(new Date(ranges.xaxis.to*1000));
+			            if (commit_data.time >= ranges.xaxis.from && commit_data.time <= ranges.xaxis.to){
+			            	push = true;
+			            	break;
+					    }
+				    }
+				    //*/
+				    /*//method2 sorted commit data !!!
+				    var first_commit = dataset[key].data[0].time;
+				    var last_commit = dataset[key].data[dataset[key].data.length-1].time;
+				    
+				    console.log(first_commit);
+				    console.log(last_commit);
+				    
+				    if (first_commit >= ranges.xaxis.from && last_commit <= ranges.xaxis.to){
+						push = true;
+					}
+				    */
+				    if(push){			
+				    	data.push(dataset[key]);
+				    }
+				}
+				if(data.length >= 1){
+					return data;
+				} 
+				else{
+					//just return dummy data for graph to plot itself
+					return [getDummyData('')];	
+				}
+				
+		    }
+		    
+			/**
+			* redraw using new checkbox data
+			*/
+		    function plotchoiced(e,args){
+			    var cur_data = args[0];
+			    var cur_ranges = args[1];
+		    	
+				var new_data = [];
+		    	var inputs = choiceContainer.getElementsByTagName("input");
 
-		    plotAccordingToChoices();
-		    })();
-         </script>
+		    	//show only checked labels
+		        for(var i=0; i<inputs.length; i++) {
+		            var checkbox_key = inputs[i].name;
+		            
+	                if(inputs[i].checked){
+						for(var d in cur_data){
+							if(cur_data[d].label == checkbox_key){
+								new_data.push(cur_data[d]);
+							}
+						}			                
+	    	        }
+	                else{
+		                //push dummy data to not hide the label
+						new_data.push(getDummyData(checkbox_key));
+			        }
+		        }
+						        
+		    	var new_options = YAHOO.lang.merge(plot_options, {
+		            xaxis: { 
+		  	      		min: cur_ranges.xaxis.from, 
+		  	      		max: cur_ranges.xaxis.to,
+		  	      		mode:"time",
+		  	      		timeformat: "%d/%m",
+		        	}
+		    	});
+		    	if (!new_data){
+					new_data = [[0,1]];
+				}
+		    	// do the zooming
+		       plot = YAHOO.widget.Flot(plotContainer, new_data, new_options);
+		       
+		       plot.subscribe("plotselected", plotselected);
+	
+		       //resubscribe plothover
+		       plot.subscribe("plothover", plothover);
+		        
+		       // don't fire event on the overview to prevent eternal loop
+		       overview.setSelection(cur_ranges, true);
+	
+		    }
+		    
+			/**
+		     * plot only selected items from overview
+		     * @param ranges
+		     * @returns
+		     */
+		    function plotselected(ranges,cur_data) {
+			    //updates the data for new plot
+	    		data = getDataAccordingToRanges(ranges);
+	    		generateCheckboxes(data);
+	    		
+		    	var new_options = YAHOO.lang.merge(plot_options, {
+		            xaxis: { 
+		  	      		min: ranges.xaxis.from, 
+		  	      		max: ranges.xaxis.to,
+		  	      		mode:"time",
+		  	      		timeformat: "%d/%m",
+		        	}
+		    	});
+		    	// do the zooming
+		        plot = YAHOO.widget.Flot(plotContainer, data, new_options);
+
+		        plot.subscribe("plotselected", plotselected);
+
+		        //resubscribe plothover
+		        plot.subscribe("plothover", plothover);
+		        
+		        // don't fire event on the overview to prevent eternal loop
+		        overview.setSelection(ranges, true);
+
+		        //resubscribe choiced
+		        YAHOO.util.Event.on(choiceContainer.getElementsByTagName("input"), "click", plotchoiced, [data, ranges]);
+		    }
+		    
+		    var previousPoint = null;
+
+			function plothover(o) {
+		        var pos = o.pos;
+		        var item = o.item;
+		        
+		        //YAHOO.util.Dom.get("x").innerHTML = pos.x.toFixed(2);
+		        //YAHOO.util.Dom.get("y").innerHTML = pos.y.toFixed(2);
+		        if (item) {
+		            if (previousPoint != item.datapoint) {
+		                previousPoint = item.datapoint;
+		                
+		                var tooltip = YAHOO.util.Dom.get("tooltip");
+		                if(tooltip) {
+		                	  tooltip.parentNode.removeChild(tooltip);
+		                }
+		                var x = item.datapoint.x.toFixed(2);
+		                var y = item.datapoint.y.toFixed(2);
+						
+		                if (!item.series.label){
+		                    item.series.label = 'commits';
+		                }
+		                var d = new Date(x*1000);
+		                var fd = d.toDateString()
+		                var nr_commits = parseInt(y);
+		                
+		                var cur_data = dataset[item.series.label].data[item.dataIndex];
+		                var added = cur_data.added;
+		                var changed = cur_data.changed;
+		                var removed = cur_data.removed;
+		                
+		                var nr_commits_suffix = " ${_('commits')} ";
+		                var added_suffix = " ${_('files added')} ";
+		                var changed_suffix = " ${_('files changed')} ";
+		                var removed_suffix = " ${_('files removed')} ";
+
+		                
+		                if(nr_commits == 1){nr_commits_suffix = " ${_('commit')} ";}
+						if(added==1){added_suffix=" ${_('file added')} ";}
+						if(changed==1){changed_suffix=" ${_('file changed')} ";}
+						if(removed==1){removed_suffix=" ${_('file removed')} ";}
+										                
+		                showTooltip(item.pageX, item.pageY, item.series.label + " on " + fd
+								 +'<br/>'+
+		                         nr_commits + nr_commits_suffix+'<br/>'+
+		                         added + added_suffix +'<br/>'+
+		                         changed + changed_suffix + '<br/>'+
+		                         removed + removed_suffix + '<br/>');
+		            }
+		        }
+		        else {
+		        	  var tooltip = YAHOO.util.Dom.get("tooltip");
+		        	  
+			          if(tooltip) {
+			                tooltip.parentNode.removeChild(tooltip);
+			          }
+		            previousPoint = null;
+		        }
+		    }
+			
+		    /**
+		     * MAIN EXECUTION
+		     */
+			
+			var data = getDataAccordingToRanges(initial_ranges);
+			generateCheckboxes(data);
+			
+		    //main plot
+		    var plot = YAHOO.widget.Flot(plotContainer,data,plot_options);
+		    
+			//overview
+			var overview = YAHOO.widget.Flot(overviewContainer, overview_dataset, overview_options);
+			
+			//show initial selection on overview
+			overview.setSelection(initial_ranges);    
+			
+		    plot.subscribe("plotselected", plotselected);
+		    
+		    overview.subscribe("plotselected", function (ranges) {
+		        plot.setSelection(ranges);
+		    });		
+				
+		    plot.subscribe("plothover", plothover);
+
+		    YAHOO.util.Event.on(choiceContainer.getElementsByTagName("input"), "click", plotchoiced, [data, initial_ranges]);
+		}
+			SummaryPlot(${c.ts_min},${c.ts_max},${c.commit_data|n},${c.overview_data|n});		
+		</script>
 
     </div>
 </div>    

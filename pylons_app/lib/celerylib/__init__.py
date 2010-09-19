@@ -14,13 +14,16 @@ class ResultWrapper(object):
     def result(self):
         return self.task
 
-def run_task(task,*args,**kwargs):
+def run_task(task, *args, **kwargs):
     try:
-        t = task.delay(*args,**kwargs)
-        log.info('running task %s',t.task_id)
+        t = task.delay(*args, **kwargs)
+        log.info('running task %s', t.task_id)
         return t
-    except:
-        log.error(traceback.format_exc())
+    except Exception, e:
+        if e.errno == 111:
+            log.debug('Unnable to connect. Sync execution')
+        else:
+            log.error(traceback.format_exc())
         #pure sync version
-        return ResultWrapper(task(*args,**kwargs))
+        return ResultWrapper(task(*args, **kwargs))
     

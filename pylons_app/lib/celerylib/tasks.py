@@ -7,8 +7,9 @@ from pylons_app.lib.celerylib import run_task
 from pylons_app.lib.helpers import person
 from pylons_app.lib.smtp_mailer import SmtpMailer
 from pylons_app.lib.utils import OrderedDict
-from time import mktime
+from operator import itemgetter
 from vcs.backends.hg import MercurialRepository
+from time import mktime
 import calendar
 import traceback
 import json
@@ -98,13 +99,14 @@ def get_commits_stats(repo):
                         d, 0, 0, 0, 0, 0, 0,))
     
     ts_max_y = mktime((y, m, d, 0, 0, 0, 0, 0, 0,))
-
+    skip_date_limit = True
+    
     def author_key_cleaner(k):
         k = person(k)
         k = k.replace('"', "") #for js data compatibilty
         return k
             
-    for cs in repo[:1000]:#added limit 200 until fix #29 is made
+    for cs in repo[:200]:#added limit 200 until fix #29 is made
         k = '%s-%s-%s' % (cs.date.timetuple()[0], cs.date.timetuple()[1],
                           cs.date.timetuple()[2])
         timetupple = [int(x) for x in k.split('-')]
@@ -119,7 +121,7 @@ def get_commits_stats(repo):
                 
             else:
                 #aggregate[author_key_cleaner(cs.author)].update(dates_range)
-                if k >= ts_min_y and k <= ts_max_y:
+                if k >= ts_min_y and k <= ts_max_y or skip_date_limit:
                     aggregate[author_key_cleaner(cs.author)][k] = {}
                     aggregate[author_key_cleaner(cs.author)][k]["commits"] = 1
                     aggregate[author_key_cleaner(cs.author)][k]["added"] = len(cs.added)
@@ -127,7 +129,7 @@ def get_commits_stats(repo):
                     aggregate[author_key_cleaner(cs.author)][k]["removed"] = len(cs.removed) 
                                         
         else:
-            if k >= ts_min_y and k <= ts_max_y:
+            if k >= ts_min_y and k <= ts_max_y or skip_date_limit:
                 aggregate[author_key_cleaner(cs.author)] = OrderedDict()
                 #aggregate[author_key_cleaner(cs.author)].update(dates_range)
                 aggregate[author_key_cleaner(cs.author)][k] = {}
@@ -145,15 +147,19 @@ def get_commits_stats(repo):
     overview_data = []
     for k, v in overview_aggregate.items():
         overview_data.append([k, v])
+    overview_data = sorted(overview_data, key=itemgetter(0))
     data = {}
     for author in aggregate:
-        data[author] = {"label":author,
-                      "data":[{"time":x,
+        commit_data = sorted([{"time":x,
                                "commits":aggregate[author][x]['commits'],
                                "added":aggregate[author][x]['added'],
                                "changed":aggregate[author][x]['changed'],
                                "removed":aggregate[author][x]['removed'],
                               } for x in aggregate[author]],
+                              key=itemgetter('time'))
+        
+        data[author] = {"label":author,
+                      "data":commit_data,
                       "schema":["commits"]
                       }
         
