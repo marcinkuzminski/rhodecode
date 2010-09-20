@@ -16,9 +16,9 @@ from routes.util import URLGenerator
 from webtest import TestApp
 import os
 from pylons_app.model import meta
-from pylons_app.lib.indexers import IDX_LOCATION
 import logging
-import shutil
+
+
 log = logging.getLogger(__name__) 
 
 import pylons.test
@@ -26,24 +26,8 @@ import pylons.test
 __all__ = ['environ', 'url', 'TestController']
 
 # Invoke websetup with the current config file
-#SetupCommand('setup-app').run([pylons.test.pylonsapp.config['__file__']])
-def create_index(repo_location, full_index):
-    from pylons_app.lib.indexers import daemon
-    from pylons_app.lib.indexers.daemon import WhooshIndexingDaemon
-    from pylons_app.lib.indexers.pidlock import DaemonLock, LockHeld
-    
-    try:
-        l = DaemonLock()
-        WhooshIndexingDaemon(repo_location=repo_location)\
-            .run(full_index=full_index)
-        l.release()
-    except LockHeld:
-        pass    
-    
-if os.path.exists(IDX_LOCATION):
-    shutil.rmtree(IDX_LOCATION)
-    
-create_index('/tmp/*', True)    
+#SetupCommand('setup-app').run([config_file])
+
 
 environ = {}
 
@@ -57,14 +41,11 @@ class TestController(TestCase):
         self.sa = meta.Session
 
         TestCase.__init__(self, *args, **kwargs)
-
     
-    def log_user(self):
+    def log_user(self, username='test_admin', password='test'):
         response = self.app.post(url(controller='login', action='index'),
-                                 {'username':'test_admin',
-                                  'password':'test'})
+                                 {'username':username,
+                                  'password':password})
         assert response.status == '302 Found', 'Wrong response code from login got %s' % response.status
         assert response.session['hg_app_user'].username == 'test_admin', 'wrong logged in user'
         return response.follow()
-
- 

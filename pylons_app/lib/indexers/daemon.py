@@ -44,7 +44,7 @@ import logging
 log = logging.getLogger('whooshIndexer')
 # create logger
 log.setLevel(logging.DEBUG)
-
+log.propagate = False
 # create console handler and set level to debug
 ch = logging.StreamHandler()
 ch.setLevel(logging.DEBUG)

@@ -19,20 +19,7 @@ def setup_app(command, conf, vars):
     tests = False
     REPO_TEST_PATH = None
     
-    dbname = os.path.split(conf['sqlalchemy.db1.url'])[-1]
-#    filename = os.path.split(conf.filename)[-1]
-#    if filename == 'test.ini':
-#        uniq_suffix = str(int(mktime(datetime.datetime.now().timetuple())))
-#        REPO_TEST_PATH = '/tmp/hg_app_test_%s' % uniq_suffix
-#        
-#        if not os.path.isdir(REPO_TEST_PATH):
-#            os.mkdir(REPO_TEST_PATH)
-#            cur_dir = dn(os.path.abspath(__file__))
-#            tar = tarfile.open(jn(cur_dir,'tests',"vcs_test.tar.gz"))
-#            tar.extractall(REPO_TEST_PATH)
-#            tar.close()
-#            
-#        tests = True    
+    dbname = os.path.split(conf['sqlalchemy.db1.url'])[-1] 
     
     dbmanage = DbManage(log_sql, dbname, tests)
     dbmanage.create_tables(override=True)

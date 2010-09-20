@@ -16,7 +16,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
-import shutil
 
 """
 Created on April 18, 2010
@@ -32,8 +31,7 @@ from vcs.backends.base import BaseChangeset
 from vcs.utils.lazy import LazyProperty
 import logging
 import os
-from os.path import dirname as dn, join as jn
-import tarfile
+
 log = logging.getLogger(__name__)
 
 
@@ -367,67 +365,75 @@ class OrderedDict(dict, DictMixin):
     def __ne__(self, other):
         return not self == other
 
-def make_test_env():
-    """Makes a fresh database from base64+zlib dump and 
+
+#===============================================================================
+# TEST FUNCTIONS
+#===============================================================================
+def create_test_index(repo_location, full_index):
+    """Makes default test index
+    @param repo_location:
+    @param full_index:
+    """
+    from pylons_app.lib.indexers import daemon
+    from pylons_app.lib.indexers.daemon import WhooshIndexingDaemon
+    from pylons_app.lib.indexers.pidlock import DaemonLock, LockHeld
+    from pylons_app.lib.indexers import IDX_LOCATION
+    import shutil
+    
+    if os.path.exists(IDX_LOCATION):
+        shutil.rmtree(IDX_LOCATION)
+         
+    try:
+        l = DaemonLock()
+        WhooshIndexingDaemon(repo_location=repo_location)\
+            .run(full_index=full_index)
+        l.release()
+    except LockHeld:
+        pass    
+    
+def create_test_env(repos_test_path, config):
+    """Makes a fresh database and 
     install test repository into tmp dir
     """
-    new_db_dump = """
-eJztXN1vE8sVn9nxR+wAIXDpFiiXjSAXfEOc2ElwQkVLPjYf5NNOAklUydrYG3tv1t5ldx0nuUJV\noL
-cPrVr1X7jSfUJ96nMfK1Xty23VqlWlPlRIlahUXbXqFUL0pTNjx5614xAoKEDmJ3t2zpkzM2fO\neHe+
-zno+PqU5qrRmWDnFkXqAB0AIbkkSAKANf8+BKprwFzI0G28ECXQ+PufFEYT+Tehz6L/oaSnK\nwcFxGP
-igFQfHjuMg4CehH7UA9Af0Y2ShWdSPLmOSg+N9x7U9eKf9PiC2nIWm4mTtri4nZ3Z9DE/5\nfOD0+RZY
-VFdXFVstWHoXPOPFvDbKU3TdKCbNgp39GLZ5MPtKW5WtWKmstqFmtqVtzZRWt6NQRFjk\ngkhESJ6kbe
-trim6rcFTAdcfuwqxhrNuprJLPqBnLKJhhSzWNpK1tq+aWkzXyN8wt3cjbScU0w7q2\nGqbyVSHYAXE5
-kSv15RTMtOKo2YxUikjf+SgKg4Dc/38C6Dn6Gn2FnqDH6K+Y5ODgeGfhRRD6/ST0\n+Ujo9ZLQ4yEhQi
-QUBBJCeFy4BLywHaCfCEXM+AJHOWpx39sMrux4IbzQ3gMc1XaSlpop6IoVvRxV\nLke6L4/cmx7vjedG
-4qmVmXvTW5nl7PDaSmFEXR6ejC+YVrpnsNi1fn17fHldj06p6YH84tzaGKBF\n5ZWcSq66Uorn8Iih5W
-/ZBolqejhl5O57mkEPqf6sOFCq3lRsu2hYaayHrTplJeJD/Uu3p7u3Er19\nS4sb26PmemQiE54vLKfn
-I8Wx2/Nd+XurmbH4TOpupHdk25I/sYbmCgDQstK0oHLdpWGmc1U3MqR6\nbICF123RHb/QDNpIm1rFnk
-HaJiWd0/Llpgzq41lzIJMrjMXi2/JmdyGxMDKnjs1FR9WMcduMb3TZ\nfZuZTXVs1uiS53NxY9yan4Vw
-PDNICqEl3dKNlKJnDdshbYh2R7o7uwc6I1EpGr3RHbvREwn3D/T3\nd/fuBFAzaHdpUu7csi6Tw4ou94
-zOLt3JxTNZo7g8muvV1Lg6sNj/SX4dD7srqenpfCJ6d3g5vKRM\njq/Ob3VHIXgJXaKx8PWBvoHrvfdg
-MzhPVDl/vgek1TWloO927tbUdsqeNzfurK5Frq+v5NbHZ1bG\nCnZxdnxxbGStmOudnwub6+rQYNxZku
-Wh28Ph9Nos2C3EfblVvhJlyPjvRY+Z8f91dzUHB8fhYf/x\nv3T/PwL47v87+iX6I45ycHC8dWhFV6Br
-7ukVUQ/cYzroOYnaXZLoBGqD1TmW0IzOw/IUAJL9v6Dg\nA+jP6Ofo+yiBelFA+IvwC2EFMzmOCBJBD/
-huMZsJ41+MZjuqFVYKjpFUUo62oThqosyV8mpRKtg4\nUtScrJTNdCqmSeNGwZFIFqmcRTPydwIeMPwp
-W2ZOyRcU/SVLLWViym1v8oDOLrbcvJGvFpbWbGVV\nV9NhvweEZCyWslRcWVnINGzNMawtiXJxaRX5kM
-8D+rqq8lZFtjaX+i2vB1zoxKL0dhrPSHSmj6u3\nFCzV4cH6fbuavSTFFEJp3KCUatsdqEa4aGkOqyel
-y8IhwQM6BhhhrE2akSVkWfQKxKJ9jGhN8/NG\nWZCM/0H0q5r9P/Q79FvM5ODgeOtBZvLBIAkDARI2Nb
-3E/h/O7wdDAAzBj+Cy8IXwpfAc/eZlat9R\noF+8eBE+bHXIgzSbIQcTyYJWiQjDCXlwQZYWBoemZKnC
-lq4GAwUtqaWliZkFeUxOSDOzC9LM4tTU\nNYmm2GqKPqEX5KWFMmtd3WLJDUUvqCyDjhKqNDQ7OyUPzh
-DmXGJiejCxLE3Ky9JVWl2IsBdnJuKL\nMssZHpeHJymjXMjEjHS1+5oUCYWCoYjgE+WLEGj5tLpp39Px
-MzlJhjtKJytNSkYqUfRgHPlFUYQ/\nMKhZyPhm08DjMgdlUVPgSENj4DSyN1hp6u6Er8Kob3hplGEYrg
-J2dxsrDLrZ6EpO6kYGlzCCdV2Y\nmJbrjVlS2G1Ohlc2aJ012TSqozuJLYpoiK0f8vjEm2Ij61MLJiP0
-4g15XywapRffzpTPL166BB8k\naQeZqpXTbBv/4Gwm6nd1FpNAuqxKNuo4RsLdf1W+buQzrjSXkV1VuO
-zjTgmG+vw+ceJSo5Yzmicj\nDNFE7n8BfQnQ33DAwcHxLqMFLxHEs47mkIGYrKM+xAsBMYZXBnquvLDC
-D4Wsmne0FF3/kPm/gL6m\n8//DVp6Dg+PNo3b+7wOPAHgEH8F/CFfRT9GvD1u/vbFzv8kvdnTAhxF2nW
-GrjqPlM3YNGdxrzbGb\nSOZuLN1o9uaScc3RXCnuVYhr+lZTi2sCd+C08iz4ZsAnxjtesAapZIrUMJpv
-Bl8me7SGcfxBqtkv\ntrfDzwLU+pWdJU212fgJl93ZFGJ06qPWwNg0rWLkuuVPwxm2RfcS2YVOWrVTlm
-a61o6uXimr4bJ4\npfp67r6So7MJeWJshhRcWf1ICXlUTsgzw/L87vpuj4XRrubsOjN2zCdOtjfqJNac
-yQhLtcSOHzhj\nlKVOlsb/fwL0FAccHBzvLQJIhHRpIJAYXRPQ8R+i3wP84eDgeNfRCX3gAoRjGyk7Sc
-78BUDPZdlJ\n0ZphSbvJZPyH6D8Afzg4ON5/HEMX4O7tD0v3/3OAPxwcHEcG1f0/hJ4A9Az9C184ODje
-Q/gQ+WcP\nKPgEevX5IL0GyPiP0Fdl/7/D1pKDg+PNYe/3f+j4/wSP/88OWz8ODo43Ab+H3O0CKl19Qu
-kaoPN/\nD/gcgM+FD4W7ws8OW886PNg+UTp4jlX8aJOOQR0a2XhrnVftbkrFubZM7+dkewA/zgYS9a6x
-1erq\nXWRr0thDZLdfJ3uU7PI+rXcMfYWT6Bq33WtSrVNprGW/Y2VXUyIsdSp28sAZoyx1+kGulXqTfx
-aq\ndrduZOxK5Ex9RxN2pZcx8So9XEozKw4D1Vdn6v0RFLdfeolM0r/U2d9buqRbvekZ/iv0IpulqrYr
-\nl9sRo+rBEAyR+x8/ADg4OI4gyPyf3/8cHEcTJf+fpwB/ODg4jgSaoBfQ/QB+/s/BcSRR3f+H6Bng\n
-e/8cHEcHpf1/CI+jHwEP3AToLtx8e9/9e//w8Hun6bHGDz+tvE+3uwfOxsW69+nYYw2WfjPHGtX9\n5A
-MdfNQo9P+eS7youNdyVuJq4ot2zRsdnLgLCYYip/b7w5jKqUX51IREv4F/FJ7YBy96ja963sJS\n34yd
-OXDGKEud/R8efZUt\n
-"""    
-    newdb = open('test.db', 'wb')
-    newdb.write(new_db_dump.decode('base64').decode('zlib'))
-    newdb.close()
+    from pylons_app.lib.db_manage import DbManage
+    import tarfile
+    import shutil
+    from os.path import dirname as dn, join as jn, abspath
     
+    log = logging.getLogger('TestEnvCreator')
+    # create logger
+    log.setLevel(logging.DEBUG)
+    log.propagate = True
+    # create console handler and set level to debug
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.DEBUG)
+    
+    # create formatter
+    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    
+    # add formatter to ch
+    ch.setFormatter(formatter)
+    
+    # add ch to logger
+    log.addHandler(ch)
+    
+    #PART ONE create db
+    log.debug('making test db')
+    dbname = config['sqlalchemy.db1.url'].split('/')[-1]
+    dbmanage = DbManage(log_sql=True, dbname=dbname, tests=True)
+    dbmanage.create_tables(override=True)
+    dbmanage.config_prompt(repos_test_path)
+    dbmanage.create_default_user()
+    dbmanage.admin_prompt()
+    dbmanage.create_permissions()
+    dbmanage.populate_default_permissions()
     
     #PART TWO make test repo
+    log.debug('making test vcs repo')
     if os.path.isdir('/tmp/vcs_test'):
         shutil.rmtree('/tmp/vcs_test')
         
-    cur_dir = dn(dn(os.path.abspath(__file__)))
+    cur_dir = dn(dn(abspath(__file__)))
     tar = tarfile.open(jn(cur_dir, 'tests', "vcs_test.tar.gz"))
     tar.extractall('/tmp')
     tar.close()
-    
-    
-    
