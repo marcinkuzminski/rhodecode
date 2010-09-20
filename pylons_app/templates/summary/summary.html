@@ -77,7 +77,7 @@ E.onDOMReady(function(e){
 			  </div>
 			  <div class="input-short">
 			      ${h.age(c.repo_info.last_change)} - ${h.rfc822date(c.repo_info.last_change)} 
-			      ${_('by')} ${c.repo_info.get_changeset('tip').author} 
+			      ${_('by')} ${h.get_changeset_safe(c.repo_info,'tip').author} 
 			      
 			  </div>
 			 </div>

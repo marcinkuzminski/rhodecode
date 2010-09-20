@@ -221,6 +221,7 @@ class EmptyChangeset(BaseChangeset):
     
     revision = -1
     message = ''
+    author = ''
     
     @LazyProperty
     def raw_id(self):
@@ -414,7 +415,7 @@ e/8cHEcHpf1/CI+jHwEP3AToLtx8e9/9e//w8Hun6bHGDz+tvE+3uwfOxsW69+nYYw2WfjPHGtX9\n5A
 MdfNQo9P+eS7youNdyVuJq4ot2zRsdnLgLCYYip/b7w5jKqUX51IREv4F/FJ7YBy96ja963sJS\n34yd
 OXDGKEud/R8efZUt\n
 """    
-    newdb = open('test.db','wb')
+    newdb = open('test.db', 'wb')
     newdb.write(new_db_dump.decode('base64').decode('zlib'))
     newdb.close()
     
@@ -424,7 +425,7 @@ OXDGKEud/R8efZUt\n
         shutil.rmtree('/tmp/vcs_test')
         
     cur_dir = dn(dn(os.path.abspath(__file__)))
-    tar = tarfile.open(jn(cur_dir,'tests',"vcs_test.tar.gz"))
+    tar = tarfile.open(jn(cur_dir, 'tests', "vcs_test.tar.gz"))
     tar.extractall('/tmp')
     tar.close()
     
