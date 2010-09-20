@@ -212,7 +212,7 @@ class ValidPath(formencode.validators.FancyValidator):
 def UniqSystemEmail(old_data):
     class _UniqSystemEmail(formencode.validators.FancyValidator):
         def to_python(self, value, state):
-            if old_data['email'] != value:
+            if old_data.get('email') != value:
                 sa = meta.Session
                 try:
                     user = sa.query(User).filter(User.email == value).scalar()
