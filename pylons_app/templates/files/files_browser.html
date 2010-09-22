@@ -23,6 +23,7 @@
 		             <tr>
 		                 <th>${_('Name')}</th>
 		                 <th>${_('Size')}</th>
+		                 <th>${_('Mimetype')}</th>
 		                 <th>${_('Revision')}</th>
 		                 <th>${_('Last modified')}</th>
 		                 <th>${_('Last commiter')}</th>
@@ -48,6 +49,11 @@
 		                %if node.is_file():
 		             		${h.format_byte_size(node.size,binary=True)}
 		             	%endif
+		             </td>
+		             <td>
+		              %if node.is_file():
+		                  ${node.mimetype}
+		              %endif
 		             </td>
 		             <td>
 		             	%if node.is_file():
