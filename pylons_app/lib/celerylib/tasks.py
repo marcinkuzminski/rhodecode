@@ -2,7 +2,7 @@ from celery.decorators import task
 from celery.task.sets import subtask
 from celeryconfig import PYLONS_CONFIG as config
 from pylons.i18n.translation import _
-from pylons_app.lib.celerylib import run_task
+from pylons_app.lib.celerylib import run_task, LockTask
 from pylons_app.lib.helpers import person
 from pylons_app.lib.smtp_mailer import SmtpMailer
 from pylons_app.lib.utils import OrderedDict
@@ -68,7 +68,7 @@ def get_hg_ui_settings():
 @task
 def whoosh_index(repo_location, full_index):
     log = whoosh_index.get_logger()
-    from pylons_app.lib.indexers import DaemonLock
+    from pylons_app.lib.pidlock import DaemonLock
     from pylons_app.lib.indexers.daemon import WhooshIndexingDaemon, LockHeld
     try:
         l = DaemonLock()
@@ -80,7 +80,9 @@ def whoosh_index(repo_location, full_index):
         log.info('LockHeld')
         return 'LockHeld'    
 
+
 @task
+@LockTask('get_commits_stats')
 def get_commits_stats(repo_name, ts_min_y, ts_max_y):
     author_key_cleaner = lambda k: person(k).replace('"', "") #for js data compatibilty
         
@@ -92,7 +94,7 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
     repo = MercurialRepository(repos_path + repo_name)
 
     skip_date_limit = True
-    parse_limit = 500 #limit for single task changeset parsing
+    parse_limit = 350 #limit for single task changeset parsing
     last_rev = 0
     last_cs = None
     timegetter = itemgetter('time')
@@ -205,7 +207,9 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
         log.error(traceback.format_exc())
         sa.rollback()
         return False
-                        
+    
+    run_task(get_commits_stats, repo_name, ts_min_y, ts_max_y)
+                            
     return True
 
 @task

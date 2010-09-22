@@ -374,9 +374,8 @@ def create_test_index(repo_location, full_index):
     @param repo_location:
     @param full_index:
     """
-    from pylons_app.lib.indexers import daemon
     from pylons_app.lib.indexers.daemon import WhooshIndexingDaemon
-    from pylons_app.lib.indexers.pidlock import DaemonLock, LockHeld
+    from pylons_app.lib.pidlock import DaemonLock, LockHeld
     from pylons_app.lib.indexers import IDX_LOCATION
     import shutil
     

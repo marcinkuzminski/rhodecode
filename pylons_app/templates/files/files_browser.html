@@ -29,26 +29,27 @@
 		                 <th>${_('Last commiter')}</th>
 		             </tr>
 		         </thead>
-		         	<tr class="parity0">
-		          		<td>
-		          		% if c.files_list.parent:
-		          			${h.link_to('..',h.url('files_home',repo_name=c.repo_name,revision=c.cur_rev,f_path=c.files_list.parent.path),class_="browser-dir")}
-		          		%endif
-		          		</td>
-		          		<td></td>
-		          		<td></td>
-		          		<td></td>
-		          		<td></td>
-		         	</tr>
+
+          		% if c.files_list.parent:
+         		<tr class="parity0">
+	          		<td>		          		
+	          			${h.link_to('..',h.url('files_home',repo_name=c.repo_name,revision=c.cur_rev,f_path=c.files_list.parent.path),class_="browser-dir")}
+	          		</td>
+	          		<td></td>
+	          		<td></td>
+	          		<td></td>
+	          		<td></td>
+	          		<td></td>
+				</tr>	          		
+          		%endif
+		         	
 		    %for cnt,node in enumerate(c.files_list,1):
 				<tr class="parity${cnt%2}">
 		             <td>
 						${h.link_to(node.name,h.url('files_home',repo_name=c.repo_name,revision=c.cur_rev,f_path=node.path),class_=file_class(node))}
 		             </td>
 		             <td>
-		                %if node.is_file():
-		             		${h.format_byte_size(node.size,binary=True)}
-		             	%endif
+		             	${h.format_byte_size(node.size,binary=True)}
 		             </td>
 		             <td>
 		              %if node.is_file():

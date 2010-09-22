@@ -6,7 +6,7 @@ class LockHeld(Exception):pass
 
 
 class DaemonLock(object):
-    '''daemon locking
+    """daemon locking
     USAGE:
     try:
         l = lock()
@@ -14,7 +14,7 @@ class DaemonLock(object):
         l.release()
     except LockHeld:
         sys.exit(1)
-    '''
+    """
 
     def __init__(self, file=None, callbackfn=None,
                  desc='daemon lock', debug=False):
@@ -40,9 +40,9 @@ class DaemonLock(object):
 
 
     def lock(self):
-        '''
+        """
         locking function, if lock is present it will raise LockHeld exception
-        '''
+        """
         lockname = '%s' % (os.getpid())
 
         self.trylock()
@@ -75,9 +75,9 @@ class DaemonLock(object):
 
 
     def release(self):
-        '''
+        """
         releases the pid by removing the pidfile
-        '''
+        """
         if self.callbackfn:
             #execute callback function on release
             if self.debug:
@@ -94,11 +94,11 @@ class DaemonLock(object):
             pass
 
     def makelock(self, lockname, pidfile):
-        '''
+        """
         this function will make an actual lock
         @param lockname: acctual pid of file
         @param pidfile: the file to write the pid in
-        '''
+        """
         if self.debug:
             print 'creating a file %s and pid: %s' % (pidfile, lockname)
         pidfile = open(self.pidfile, "wb")

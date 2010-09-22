@@ -1,5 +1,4 @@
 from os.path import dirname as dn, join as jn
-from pidlock import LockHeld, DaemonLock
 from pylons_app.config.environment import load_environment
 from pylons_app.model.hg_model import HgModel
 from shutil import rmtree

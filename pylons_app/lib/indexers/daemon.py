@@ -32,7 +32,7 @@ from os.path import join as jn
 project_path = dn(dn(dn(dn(os.path.realpath(__file__)))))
 sys.path.append(project_path)
 
-from pidlock import LockHeld, DaemonLock
+from pylons_app.lib.pidlock import LockHeld, DaemonLock
 from pylons_app.model.hg_model import HgModel
 from pylons_app.lib.helpers import safe_unicode
 from whoosh.index import create_in, open_dir
