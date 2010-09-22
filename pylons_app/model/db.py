@@ -120,6 +120,15 @@ class UserToPerm(Base):
     user = relation('User')
     permission = relation('Permission')
 
-
-
+class Statistics(Base):
+    __tablename__ = 'statistics'
+    __table_args__ = (UniqueConstraint('repository_id'), {'useexisting':True})
+    stat_id = Column("stat_id", INTEGER(), nullable=False, unique=True, default=None, primary_key=True)
+    repository_id = Column("repository_id", INTEGER(), ForeignKey(u'repositories.repo_id'), nullable=False, unique=True, default=None)
+    stat_on_revision = Column("stat_on_revision", INTEGER(), nullable=False)
+    commit_activity = Column("commit_activity", BLOB(), nullable=False)#JSON data
+    commit_activity_combined = Column("commit_activity_combined", BLOB(), nullable=False)#JSON data
+    languages = Column("languages", BLOB(), nullable=False)#JSON data
+    
+    repository = relation('Repository')
 

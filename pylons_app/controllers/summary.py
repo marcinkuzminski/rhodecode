@@ -27,9 +27,13 @@ from pylons_app.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from pylons_app.lib.base import BaseController, render
 from pylons_app.lib.utils import OrderedDict
 from pylons_app.model.hg_model import HgModel
+from pylons_app.model.db import Statistics
 from webhelpers.paginate import Page
 from pylons_app.lib.celerylib import run_task
 from pylons_app.lib.celerylib.tasks import get_commits_stats
+from datetime import datetime, timedelta
+from time import mktime
+import calendar
 import logging
 
 log = logging.getLogger(__name__)
@@ -61,11 +65,32 @@ class SummaryController(BaseController):
         for name, hash in c.repo_info.branches.items()[:10]:
             c.repo_branches[name] = c.repo_info.get_changeset(hash)
         
-        task = run_task(get_commits_stats, c.repo_info.name)
-        c.ts_min = task.result[0]
-        c.ts_max = task.result[1]
-        c.commit_data = task.result[2]
-        c.overview_data = task.result[3]
+        td = datetime.today() + timedelta(days=1) 
+        y, m, d = td.year, td.month, td.day
+        
+        ts_min_y = mktime((y - 1, (td - timedelta(days=calendar.mdays[m])).month,
+                            d, 0, 0, 0, 0, 0, 0,))
+        ts_min_m = mktime((y, (td - timedelta(days=calendar.mdays[m])).month,
+                            d, 0, 0, 0, 0, 0, 0,))
+        
+        ts_max_y = mktime((y, m, d, 0, 0, 0, 0, 0, 0,))
+            
+        run_task(get_commits_stats, c.repo_info.name, ts_min_y, ts_max_y)
+        c.ts_min = ts_min_m
+        c.ts_max = ts_max_y
+        
+        
+        stats = self.sa.query(Statistics)\
+            .filter(Statistics.repository == c.repo_info.dbrepo)\
+            .scalar()
+
+        if stats:
+            c.commit_data = stats.commit_activity
+            c.overview_data = stats.commit_activity_combined
+        else:
+            import json
+            c.commit_data = json.dumps({})
+            c.overview_data = json.dumps([[ts_min_y, 0], [ts_max_y, 0] ])
         
         return render('summary/summary.html')
 
