@@ -31,6 +31,7 @@ from vcs.backends.base import BaseChangeset
 from vcs.utils.lazy import LazyProperty
 import logging
 import os
+
 log = logging.getLogger(__name__)
 
 
@@ -218,6 +219,7 @@ class EmptyChangeset(BaseChangeset):
     
     revision = -1
     message = ''
+    author = ''
     
     @LazyProperty
     def raw_id(self):
@@ -362,3 +364,75 @@ class OrderedDict(dict, DictMixin):
 
     def __ne__(self, other):
         return not self == other
+
+
+#===============================================================================
+# TEST FUNCTIONS
+#===============================================================================
+def create_test_index(repo_location, full_index):
+    """Makes default test index
+    @param repo_location:
+    @param full_index:
+    """
+    from pylons_app.lib.indexers.daemon import WhooshIndexingDaemon
+    from pylons_app.lib.pidlock import DaemonLock, LockHeld
+    from pylons_app.lib.indexers import IDX_LOCATION
+    import shutil
+    
+    if os.path.exists(IDX_LOCATION):
+        shutil.rmtree(IDX_LOCATION)
+         
+    try:
+        l = DaemonLock()
+        WhooshIndexingDaemon(repo_location=repo_location)\
+            .run(full_index=full_index)
+        l.release()
+    except LockHeld:
+        pass    
+    
+def create_test_env(repos_test_path, config):
+    """Makes a fresh database and 
+    install test repository into tmp dir
+    """
+    from pylons_app.lib.db_manage import DbManage
+    import tarfile
+    import shutil
+    from os.path import dirname as dn, join as jn, abspath
+    
+    log = logging.getLogger('TestEnvCreator')
+    # create logger
+    log.setLevel(logging.DEBUG)
+    log.propagate = True
+    # create console handler and set level to debug
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.DEBUG)
+    
+    # create formatter
+    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    
+    # add formatter to ch
+    ch.setFormatter(formatter)
+    
+    # add ch to logger
+    log.addHandler(ch)
+    
+    #PART ONE create db
+    log.debug('making test db')
+    dbname = config['sqlalchemy.db1.url'].split('/')[-1]
+    dbmanage = DbManage(log_sql=True, dbname=dbname, tests=True)
+    dbmanage.create_tables(override=True)
+    dbmanage.config_prompt(repos_test_path)
+    dbmanage.create_default_user()
+    dbmanage.admin_prompt()
+    dbmanage.create_permissions()
+    dbmanage.populate_default_permissions()
+    
+    #PART TWO make test repo
+    log.debug('making test vcs repo')
+    if os.path.isdir('/tmp/vcs_test'):
+        shutil.rmtree('/tmp/vcs_test')
+        
+    cur_dir = dn(dn(abspath(__file__)))
+    tar = tarfile.open(jn(cur_dir, 'tests', "vcs_test.tar.gz"))
+    tar.extractall('/tmp')
+    tar.close()

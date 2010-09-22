@@ -1,7 +1,6 @@
 from sqlalchemy.interfaces import ConnectionProxy
 import time
-import logging
-log = logging.getLogger('timerproxy')
+from sqlalchemy import log
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = xrange(30, 38)
 
 def color_sql(sql):
@@ -22,7 +21,7 @@ def format_sql(sql):
     sql = sql.replace('\n', '')
     sql = one_space_trim(sql)
     sql = sql\
-        .replace(',',',\n\t')\
+        .replace(',', ',\n\t')\
         .replace('SELECT', '\n\tSELECT \n\t')\
         .replace('UPDATE', '\n\tUPDATE \n\t')\
         .replace('DELETE', '\n\tDELETE \n\t')\
@@ -39,19 +38,22 @@ def format_sql(sql):
 
 
 class TimerProxy(ConnectionProxy):
+    
+    def __init__(self):
+        super(TimerProxy, self).__init__()
+        self.logging_name = 'timerProxy'
+        self.log = log.instance_logger(self, True)
+        
     def cursor_execute(self, execute, cursor, statement, parameters, context, executemany):
+        
         now = time.time()
         try:
-            log.info(">>>>> STARTING QUERY >>>>>")
+            self.log.info(">>>>> STARTING QUERY >>>>>")
             return execute(cursor, statement, parameters, context)
         finally:
             total = time.time() - now
             try:
-                log.info(format_sql("Query: %s" % statement % parameters))
+                self.log.info(format_sql("Query: %s" % statement % parameters))
             except TypeError:
-                log.info(format_sql("Query: %s %s" % (statement, parameters)))
-            log.info("<<<<< TOTAL TIME: %f <<<<<" % total)
-
-
-
-
+                self.log.info(format_sql("Query: %s %s" % (statement, parameters)))
+            self.log.info("<<<<< TOTAL TIME: %f <<<<<" % total)

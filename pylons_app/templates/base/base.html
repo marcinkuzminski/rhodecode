@@ -97,8 +97,12 @@
                     <span>&darr;</span>					
 					</a>
 					<ul class="repo_switcher">
-                        %for repo in c.repo_switcher_list:
-                            <li>${h.link_to(repo,h.url('summary_home',repo_name=repo))}</li>
+                        %for repo,private in c.repo_switcher_list:
+                          %if private:
+                             <li>${h.link_to(repo,h.url('summary_home',repo_name=repo),class_="private_repo")}</li>
+                          %else:
+                             <li>${h.link_to(repo,h.url('summary_home',repo_name=repo),class_="public_repo")}</li>
+                          %endif  
                         %endfor					
 					</ul>			
 				</li>
@@ -203,6 +207,7 @@
                    <span>${_('Admin')}</span>                 
                    </a>    
 				    <ul>
+				        <li>${h.link_to(_('journal'),h.url('admin_home'),class_='journal')}</li>
 				        <li>${h.link_to(_('repositories'),h.url('repos'),class_='repos')}</li>
 				        <li>${h.link_to(_('users'),h.url('users'),class_='users')}</li>
 				        <li>${h.link_to(_('permissions'),h.url('edit_permission',id='default'),class_='permissions')}</li>

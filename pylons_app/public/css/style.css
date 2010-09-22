@@ -505,6 +505,33 @@ div.options a:hover
 
 
 /*ICONS*/
+#header #header-inner #quick li ul li a.journal,
+#header #header-inner #quick li ul li a.journal:hover
+{
+    background:url("../images/icons/book.png") no-repeat scroll 4px 9px #FFFFFF;
+    margin:0;
+    padding:12px 9px 7px 24px;
+    width:167px;
+
+}
+#header #header-inner #quick li ul li a.private_repo,
+#header #header-inner #quick li ul li a.private_repo:hover
+{
+    background:url("../images/icons/lock.png") no-repeat scroll 4px 9px #FFFFFF;
+    margin:0;
+    padding:12px 9px 7px 24px;
+    width:167px;
+
+}
+#header #header-inner #quick li ul li a.public_repo,
+#header #header-inner #quick li ul li a.public_repo:hover
+{
+    background:url("../images/icons/lock_open.png") no-repeat scroll 4px 9px #FFFFFF;
+    margin:0;
+    padding:12px 9px 7px 24px;
+    width:167px;
+
+}
 
 #header #header-inner #quick li ul li a.repos,
 #header #header-inner #quick li ul li a.repos:hover
@@ -2877,7 +2904,7 @@ div.form div.fields div.buttons input
 #register div.form div.fields div.buttons
 {
 	margin: 0;
-	padding: 10px 0 0 97px;
+	padding: 10px 0 0 114px;
 	clear: both;
 	overflow: hidden;
 	border-top: 1px solid #DDDDDD;

@@ -26,10 +26,9 @@ from pylons import request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
 from pylons_app.lib.auth import LoginRequired
 from pylons_app.lib.base import BaseController, render
-from pylons_app.lib.indexers import ANALYZER, IDX_LOCATION, SCHEMA, IDX_NAME
-from webhelpers.html.builder import escape
-from whoosh.highlight import highlight, SimpleFragmenter, HtmlFormatter, \
-    ContextFragmenter
+from pylons_app.lib.indexers import IDX_LOCATION, SCHEMA, IDX_NAME, ResultWrapper
+from webhelpers.paginate import Page
+from webhelpers.util import update_params
 from pylons.i18n.translation import _
 from whoosh.index import open_dir, EmptyIndexError
 from whoosh.qparser import QueryParser, QueryParserError
@@ -45,69 +44,55 @@ class SearchController(BaseController):
     def __before__(self):
         super(SearchController, self).__before__()    
 
-
     def index(self):
         c.formated_results = []
         c.runtime = ''
-        search_items = set()
         c.cur_query = request.GET.get('q', None)
         if c.cur_query:
             cur_query = c.cur_query.lower()
         
-        
         if c.cur_query:
+            p = int(request.params.get('page', 1))
+            highlight_items = set()
             try:
                 idx = open_dir(IDX_LOCATION, indexname=IDX_NAME)
                 searcher = idx.searcher()
-            
+
                 qp = QueryParser("content", schema=SCHEMA)
                 try:
                     query = qp.parse(unicode(cur_query))
                     
                     if isinstance(query, Phrase):
-                        search_items.update(query.words)
+                        highlight_items.update(query.words)
                     else:
                         for i in query.all_terms():
-                            search_items.add(i[1])
-                        
-                    log.debug(query)
-                    log.debug(search_items)
-                    results = searcher.search(query)
-                    c.runtime = '%s results (%.3f seconds)' \
-                    % (len(results), results.runtime)
+                            if i[0] == 'content':
+                                highlight_items.add(i[1])
 
-                    analyzer = ANALYZER
-                    formatter = HtmlFormatter('span',
-                        between='\n<span class="break">...</span>\n') 
+                    matcher = query.matcher(searcher)
                     
-                    #how the parts are splitted within the same text part
-                    fragmenter = SimpleFragmenter(200)
-                    #fragmenter = ContextFragmenter(search_items)
+                    log.debug(query)
+                    log.debug(highlight_items)
+                    results = searcher.search(query)
+                    res_ln = len(results)
+                    c.runtime = '%s results (%.3f seconds)' \
+                    % (res_ln, results.runtime)
                     
-                    for res in results:
-                        d = {}
-                        d.update(res)
-                        hl = highlight(escape(res['content']), search_items,
-                                                         analyzer=analyzer,
-                                                         fragmenter=fragmenter,
-                                                         formatter=formatter,
-                                                         top=5)
-                        f_path = res['path'][res['path'].find(res['repository']) \
-                                             + len(res['repository']):].lstrip('/')
-                        d.update({'content_short':hl,
-                                  'f_path':f_path})
-                        #del d['content']
-                        c.formated_results.append(d)
-                                                    
+                    def url_generator(**kw):
+                        return update_params("?q=%s" % c.cur_query, **kw)
+
+                    c.formated_results = Page(
+                                ResultWrapper(searcher, matcher, highlight_items),
+                                page=p, item_count=res_ln,
+                                items_per_page=10, url=url_generator)
+                           
                 except QueryParserError:
                     c.runtime = _('Invalid search query. Try quoting it.')
-
+                searcher.close()
             except (EmptyIndexError, IOError):
                 log.error(traceback.format_exc())
                 log.error('Empty Index data')
                 c.runtime = _('There is no index to search in. Please run whoosh indexer')
-            
-
-                
+                        
         # Return a rendered template
         return render('/search/search.html')

@@ -98,7 +98,10 @@ class UsersController(BaseController):
         #           method='put')
         # url('user', id=ID)
         user_model = UserModel()
-        _form = UserForm(edit=True, old_data={'user_id':id})()
+        c.user = user_model.get_user(id)
+        
+        _form = UserForm(edit=True, old_data={'user_id':id,
+                                              'email':c.user.email})()
         form_result = {}
         try:
             form_result = _form.to_python(dict(request.POST))
@@ -106,7 +109,6 @@ class UsersController(BaseController):
             h.flash(_('User updated succesfully'), category='success')
                            
         except formencode.Invalid as errors:
-            c.user = user_model.get_user(id)
             return htmlfill.render(
                 render('admin/users/user_edit.html'),
                 defaults=errors.value,
@@ -148,6 +150,8 @@ class UsersController(BaseController):
         """GET /users/id/edit: Form to edit an existing item"""
         # url('edit_user', id=ID)
         c.user = self.sa.query(User).get(id)
+        if not c.user:
+            return redirect(url('users'))
         if c.user.username == 'default':
             h.flash(_("You can't edit this user since it's" 
               " crucial for entire application"), category='warning')

@@ -26,7 +26,7 @@ class HgAppUi(Base):
     
 class User(Base): 
     __tablename__ = 'users'
-    __table_args__ = (UniqueConstraint('username'), {'useexisting':True})
+    __table_args__ = (UniqueConstraint('username'), UniqueConstraint('email'), {'useexisting':True})
     user_id = Column("user_id", INTEGER(), nullable=False, unique=True, default=None, primary_key=True)
     username = Column("username", TEXT(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     password = Column("password", TEXT(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
@@ -56,7 +56,7 @@ class User(Base):
             self.last_login = datetime.datetime.now()
             session.add(self)
             session.commit()
-            log.debug('updated user %s lastlogin',self.username)
+            log.debug('updated user %s lastlogin', self.username)
         except Exception:
             session.rollback()        
     
@@ -120,6 +120,15 @@ class UserToPerm(Base):
     user = relation('User')
     permission = relation('Permission')
 
-
-
+class Statistics(Base):
+    __tablename__ = 'statistics'
+    __table_args__ = (UniqueConstraint('repository_id'), {'useexisting':True})
+    stat_id = Column("stat_id", INTEGER(), nullable=False, unique=True, default=None, primary_key=True)
+    repository_id = Column("repository_id", INTEGER(), ForeignKey(u'repositories.repo_id'), nullable=False, unique=True, default=None)
+    stat_on_revision = Column("stat_on_revision", INTEGER(), nullable=False)
+    commit_activity = Column("commit_activity", BLOB(), nullable=False)#JSON data
+    commit_activity_combined = Column("commit_activity_combined", BLOB(), nullable=False)#JSON data
+    languages = Column("languages", BLOB(), nullable=False)#JSON data
+    
+    repository = relation('Repository')
 

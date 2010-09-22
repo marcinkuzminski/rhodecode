@@ -34,9 +34,36 @@ from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 import bcrypt
 from decorator import decorator
 import logging
+import random
 
 log = logging.getLogger(__name__) 
 
+class PasswordGenerator(object):
+    """This is a simple class for generating password from
+        different sets of characters
+        usage:
+        passwd_gen = PasswordGenerator()
+        #print 8-letter password containing only big and small letters of alphabet
+        print passwd_gen.gen_password(8, passwd_gen.ALPHABETS_BIG_SMALL)        
+    """
+    ALPHABETS_NUM = r'''1234567890'''#[0]
+    ALPHABETS_SMALL = r'''qwertyuiopasdfghjklzxcvbnm'''#[1]
+    ALPHABETS_BIG = r'''QWERTYUIOPASDFGHJKLZXCVBNM'''#[2]
+    ALPHABETS_SPECIAL = r'''`-=[]\;',./~!@#$%^&*()_+{}|:"<>?'''    #[3]
+    ALPHABETS_FULL = ALPHABETS_BIG + ALPHABETS_SMALL + ALPHABETS_NUM + ALPHABETS_SPECIAL#[4]
+    ALPHABETS_ALPHANUM = ALPHABETS_BIG + ALPHABETS_SMALL + ALPHABETS_NUM#[5]
+    ALPHABETS_BIG_SMALL = ALPHABETS_BIG + ALPHABETS_SMALL
+    ALPHABETS_ALPHANUM_BIG = ALPHABETS_BIG + ALPHABETS_NUM#[6]
+    ALPHABETS_ALPHANUM_SMALL = ALPHABETS_SMALL + ALPHABETS_NUM#[7]
+            
+    def __init__(self, passwd=''):
+        self.passwd = passwd
+
+    def gen_password(self, len, type):
+        self.passwd = ''.join([random.choice(type) for _ in xrange(len)])
+        return self.passwd
+
+    
 def get_crypt_password(password):
     """Cryptographic function used for password hashing based on sha1
     @param password: password to hash
@@ -231,9 +258,9 @@ class LoginRequired(object):
 
             p = request.environ.get('PATH_INFO')
             if request.environ.get('QUERY_STRING'):
-                p+='?'+request.environ.get('QUERY_STRING')
-            log.debug('redirecting to login page with %s',p)                
-            return redirect(url('login_home',came_from=p))
+                p += '?' + request.environ.get('QUERY_STRING')
+            log.debug('redirecting to login page with %s', p)                
+            return redirect(url('login_home', came_from=p))
 
 class PermsDecorator(object):
     """Base class for decorators"""

@@ -43,7 +43,7 @@ import logging
 log = logging.getLogger(__name__)
 
 class DbManage(object):
-    def __init__(self, log_sql, dbname,tests=False):
+    def __init__(self, log_sql, dbname, tests=False):
         self.dbname = dbname
         self.tests = tests
         dburi = 'sqlite:////%s' % jn(ROOT, self.dbname)
@@ -68,7 +68,7 @@ class DbManage(object):
         if override:
             log.info("database exisist and it's going to be destroyed")
             if self.tests:
-                destroy=True
+                destroy = True
             else:
                 destroy = ask_ok('Are you sure to destroy old database ? [y/n]')
             if not destroy:
@@ -84,15 +84,17 @@ class DbManage(object):
             import getpass
             username = raw_input('Specify admin username:')
             password = getpass.getpass('Specify admin password:')
-            self.create_user(username, password, True)
+            email = raw_input('Specify admin email:')
+            self.create_user(username, password, email, True)
         else:
             log.info('creating admin and regular test users')
-            self.create_user('test_admin', 'test', True)
-            self.create_user('test_regular', 'test', False)
+            self.create_user('test_admin', 'test', 'test_admin@mail.com', True)
+            self.create_user('test_regular', 'test', 'test_regular@mail.com', False)
+            self.create_user('test_regular2', 'test', 'test_regular2@mail.com', False)
             
         
     
-    def config_prompt(self,test_repo_path=''):
+    def config_prompt(self, test_repo_path=''):
         log.info('Setting up repositories config')
         
         if not self.tests and not test_repo_path:
@@ -102,7 +104,7 @@ class DbManage(object):
             path = test_repo_path
             
         if not os.path.isdir(path):
-            log.error('You entered wrong path: %s',path)
+            log.error('You entered wrong path: %s', path)
             sys.exit()
         
         hooks1 = HgAppUi()
@@ -166,14 +168,14 @@ class DbManage(object):
             raise        
         log.info('created ui config')
                     
-    def create_user(self, username, password, admin=False):
+    def create_user(self, username, password, email='', admin=False):
         log.info('creating administrator user %s', username)
         new_user = User()
         new_user.username = username
         new_user.password = get_crypt_password(password)
         new_user.name = 'Hg'
         new_user.lastname = 'Admin'
-        new_user.email = 'admin@localhost'
+        new_user.email = email
         new_user.admin = admin
         new_user.active = True
         

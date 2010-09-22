@@ -28,7 +28,9 @@ from pylons import request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
 from pylons_app.lib.auth import AuthUser, HasPermissionAnyDecorator
 from pylons_app.lib.base import BaseController, render
-from pylons_app.model.forms import LoginForm, RegisterForm
+import pylons_app.lib.helpers as h 
+from pylons.i18n.translation import _
+from pylons_app.model.forms import LoginForm, RegisterForm, PasswordResetForm
 from pylons_app.model.user_model import UserModel
 import formencode
 import logging
@@ -42,7 +44,7 @@ class LoginController(BaseController):
 
     def index(self):
         #redirect if already logged in
-        c.came_from = request.GET.get('came_from',None)
+        c.came_from = request.GET.get('came_from', None)
         
         if c.hg_app_user.is_authenticated:
             return redirect(url('hg_home'))
@@ -82,7 +84,7 @@ class LoginController(BaseController):
                         
         return render('/login.html')
     
-    @HasPermissionAnyDecorator('hg.admin', 'hg.register.auto_activate', 
+    @HasPermissionAnyDecorator('hg.admin', 'hg.register.auto_activate',
                                'hg.register.manual_activate')
     def register(self):
         user_model = UserModel()
@@ -99,6 +101,8 @@ class LoginController(BaseController):
                 form_result = register_form.to_python(dict(request.POST))
                 form_result['active'] = c.auto_active
                 user_model.create_registration(form_result)
+                h.flash(_('You have successfully registered into hg-app'),
+                            category='success')                
                 return redirect(url('login_home'))
                                
             except formencode.Invalid as errors:
@@ -110,7 +114,29 @@ class LoginController(BaseController):
                     encoding="UTF-8")
         
         return render('/register.html')
-    
+
+    def password_reset(self):
+        user_model = UserModel()
+        if request.POST:
+                
+            password_reset_form = PasswordResetForm()()
+            try:
+                form_result = password_reset_form.to_python(dict(request.POST))
+                user_model.reset_password(form_result)
+                h.flash(_('Your new password was sent'),
+                            category='success')                 
+                return redirect(url('login_home'))
+                               
+            except formencode.Invalid as errors:
+                return htmlfill.render(
+                    render('/password_reset.html'),
+                    defaults=errors.value,
+                    errors=errors.error_dict or {},
+                    prefix_error=False,
+                    encoding="UTF-8")
+        
+        return render('/password_reset.html')
+        
     def logout(self):
         session['hg_app_user'] = AuthUser()
         session.save()

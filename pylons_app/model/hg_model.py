@@ -43,16 +43,14 @@ except ImportError:
     raise Exception('Unable to import vcs')
 
 def _get_repos_cached_initial(app_globals, initial):
-    """
-    return cached dict with repos
+    """return cached dict with repos
     """
     g = app_globals
     return HgModel.repo_scan(g.paths[0][0], g.paths[0][1], g.baseui, initial)
 
 @cache_region('long_term', 'cached_repo_list')
 def _get_repos_cached():
-    """
-    return cached dict with repos
+    """return cached dict with repos
     """
     log.info('getting all repositories list')
     from pylons import app_globals as g
@@ -61,11 +59,12 @@ def _get_repos_cached():
 @cache_region('super_short_term', 'cached_repos_switcher_list')
 def _get_repos_switcher_cached(cached_repo_list):
     repos_lst = []
-    for repo in sorted(x.name.lower() for x in cached_repo_list.values()):
-        if HasRepoPermissionAny('repository.write', 'repository.read', 'repository.admin')(repo, 'main page check'):
-            repos_lst.append(repo)
+    for repo in [x for x in cached_repo_list.values()]:
+        if HasRepoPermissionAny('repository.write', 'repository.read',
+                    'repository.admin')(repo.name.lower(), 'main page check'):
+            repos_lst.append((repo.name, repo.dbrepo.private,))
     
-    return repos_lst
+    return sorted(repos_lst, key=lambda k:k[0])
 
 @cache_region('long_term', 'full_changelog')
 def _full_changelog_cached(repo_name):
@@ -73,14 +72,11 @@ def _full_changelog_cached(repo_name):
     return list(reversed(list(HgModel().get_repo(repo_name))))
 
 class HgModel(object):
-    """
-    Mercurial Model
+    """Mercurial Model
     """
 
     def __init__(self):
-        """
-        Constructor
-        """
+        pass
     
     @staticmethod
     def repo_scan(repos_prefix, repos_path, baseui, initial=False):
@@ -92,8 +88,7 @@ class HgModel(object):
         """
         sa = meta.Session()
         def check_repo_dir(path):
-            """
-            Checks the repository
+            """Checks the repository
             :param path:
             """
             repos_path = path.split('/')
@@ -102,7 +97,7 @@ class HgModel(object):
             if repos_path[0] != '/':
                 repos_path[0] = '/'
             if not os.path.isdir(os.path.join(*repos_path)):
-                raise RepositoryError('Not a valid repository in %s' % path[0][1])        
+                raise RepositoryError('Not a valid repository in %s' % path)        
         if not repos_path.endswith('*'):
             raise VCSError('You need to specify * or ** at the end of path '
                             'for recursive scanning')

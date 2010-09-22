@@ -277,13 +277,17 @@ def pygmentize_annotation(filenode, **kwargs):
     return literal(annotate_highlight(filenode, url_func, **kwargs))
       
 def repo_name_slug(value):
+    """Return slug of name of repository
+    This function is called on each creation/modification
+    of repository to prevent bad names in repo
     """
-    Return slug of name of repository
-    """
-    slug = urlify(value)
-    for c in """=[]\;'"<>,/~!@#$%^&*()+{}|:""":
+    slug = remove_formatting(value)
+    slug = strip_tags(slug)
+    
+    for c in """=[]\;'"<>,/~!@#$%^&*()+{}|: """:
         slug = slug.replace(c, '-')
     slug = recursive_replace(slug, '-')
+    slug = collapse(slug, '-')
     return slug
 
 def get_changeset_safe(repo, rev):
@@ -321,6 +325,7 @@ isodate = lambda  x: util.datestr(x, '%Y-%m-%d %H:%M %1%2')
 isodatesec = lambda  x: util.datestr(x, '%Y-%m-%d %H:%M:%S %1%2')
 localdate = lambda  x: (x[0], util.makedate()[1])
 rfc822date = lambda  x: util.datestr(x, "%a, %d %b %Y %H:%M:%S %1%2")
+rfc822date_notz = lambda  x: util.datestr(x, "%a, %d %b %Y %H:%M:%S")
 rfc3339date = lambda  x: util.datestr(x, "%Y-%m-%dT%H:%M:%S%1:%2")
 time_ago = lambda x: util.datestr(_age(x), "%a, %d %b %Y %H:%M:%S %1%2")
 

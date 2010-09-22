@@ -110,10 +110,11 @@ def make_map(config):
     #SEARCH
     map.connect('search', '/_admin/search', controller='search')
     
-    #LOGIN/LOGOUT
+    #LOGIN/LOGOUT/REGISTER/SIGN IN
     map.connect('login_home', '/_admin/login', controller='login')
     map.connect('logout_home', '/_admin/logout', controller='login', action='logout')
     map.connect('register', '/_admin/register', controller='login', action='register')
+    map.connect('reset_password', '/_admin/password_reset', controller='login', action='password_reset')
         
     #FEEDS
     map.connect('rss_feed_home', '/{repo_name:.*}/feed/rss',
@@ -129,7 +130,7 @@ def make_map(config):
                 controller='changeset', revision='tip',
                 conditions=dict(function=check_repo))
     map.connect('raw_changeset_home', '/{repo_name:.*}/raw-changeset/{revision}',
-                controller='changeset',action='raw_changeset', revision='tip',
+                controller='changeset', action='raw_changeset', revision='tip',
                 conditions=dict(function=check_repo))
     map.connect('summary_home', '/{repo_name:.*}/summary',
                 controller='summary', conditions=dict(function=check_repo))
@@ -147,8 +148,11 @@ def make_map(config):
     map.connect('files_diff_home', '/{repo_name:.*}/diff/{f_path:.*}',
                 controller='files', action='diff', revision='tip', f_path='',
                 conditions=dict(function=check_repo))
-    map.connect('files_raw_home', '/{repo_name:.*}/rawfile/{revision}/{f_path:.*}',
+    map.connect('files_rawfile_home', '/{repo_name:.*}/rawfile/{revision}/{f_path:.*}',
                 controller='files', action='rawfile', revision='tip', f_path='',
+                conditions=dict(function=check_repo))
+    map.connect('files_raw_home', '/{repo_name:.*}/raw/{revision}/{f_path:.*}',
+                controller='files', action='raw', revision='tip', f_path='',
                 conditions=dict(function=check_repo))
     map.connect('files_annotate_home', '/{repo_name:.*}/annotate/{revision}/{f_path:.*}',
                 controller='files', action='annotate', revision='tip', f_path='',

@@ -2,7 +2,7 @@
 # encoding: utf-8
 # Model for users
 # Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
- 
+# 
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
@@ -23,10 +23,12 @@ Created on April 9, 2010
 Model for users
 @author: marcink
 """
-
+from pylons_app.lib import auth
+from pylons.i18n.translation import _
+from pylons_app.lib.celerylib import tasks, run_task
 from pylons_app.model.db import User
 from pylons_app.model.meta import Session
-from pylons.i18n.translation import _
+import traceback
 import logging
 log = logging.getLogger(__name__)
 
@@ -43,7 +45,7 @@ class UserModel(object):
     def get_user(self, id):
         return self.sa.query(User).get(id)
     
-    def get_user_by_name(self,name):
+    def get_user_by_name(self, name):
         return self.sa.query(User).filter(User.username == name).scalar()
     
     def create(self, form_data):
@@ -54,8 +56,8 @@ class UserModel(object):
                 
             self.sa.add(new_user)
             self.sa.commit()
-        except Exception as e:
-            log.error(e)
+        except:
+            log.error(traceback.format_exc())
             self.sa.rollback()
             raise      
     
@@ -68,8 +70,8 @@ class UserModel(object):
                 
             self.sa.add(new_user)
             self.sa.commit()
-        except Exception as e:
-            log.error(e)
+        except:
+            log.error(traceback.format_exc())
             self.sa.rollback()
             raise      
     
@@ -88,8 +90,8 @@ class UserModel(object):
                 
             self.sa.add(new_user)
             self.sa.commit()
-        except Exception as e:
-            log.error(e)
+        except:
+            log.error(traceback.format_exc())
             self.sa.rollback()
             raise      
         
@@ -109,13 +111,12 @@ class UserModel(object):
                 
             self.sa.add(new_user)
             self.sa.commit()
-        except Exception as e:
-            log.error(e)
+        except:
+            log.error(traceback.format_exc())
             self.sa.rollback()
             raise 
                 
     def delete(self, id):
-        
         try:
             
             user = self.sa.query(User).get(id)
@@ -125,7 +126,10 @@ class UserModel(object):
                                   " crucial for entire application"))
             self.sa.delete(user)
             self.sa.commit()            
-        except Exception as e:
-            log.error(e)
+        except:
+            log.error(traceback.format_exc())
             self.sa.rollback()
             raise        
+
+    def reset_password(self, data):
+        run_task(tasks.reset_user_password, data['email'])
