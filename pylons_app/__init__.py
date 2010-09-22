@@ -20,10 +20,11 @@
 """
 Created on April 9, 2010
 Hg app, a web based mercurial repository managment based on pylons
+versioning implementation: http://semver.org/
 @author: marcink
 """
 
-VERSION = (0, 8, 2, 'beta')
+VERSION = (0, 8, 3, 'beta')
 
 __version__ = '.'.join((str(each) for each in VERSION[:4]))
 
