@@ -31,21 +31,14 @@ def run_task(task, *args, **kwargs):
         return ResultWrapper(task(*args, **kwargs))
 
 
-class LockTask(object):
-    """LockTask decorator"""
-    
-    def __init__(self, func):
-        self.func = func
-        
-    def __call__(self, func):
-        return decorator(self.__wrapper, func)
-    
-    def __wrapper(self, func, *fargs, **fkwargs):
-        params = []
-        params.extend(fargs)
-        params.extend(fkwargs.values())
+def locked_task(func):
+    def __wrapper(func, *fargs, **fkwargs):
+        params = list(fargs)
+        params.extend(['%s-%s' % ar for ar in fkwargs.items()])
+            
         lockkey = 'task_%s' % \
-           md5(str(self.func) + '-' + '-'.join(map(str, params))).hexdigest()
+            md5(str(func.__name__) + '-' + \
+                '-'.join(map(str, params))).hexdigest()
         log.info('running task with lockkey %s', lockkey)
         try:
             l = DaemonLock(lockkey)
@@ -55,7 +48,7 @@ class LockTask(object):
             log.info('LockHeld')
             return 'Task with key %s already running' % lockkey   
 
-            
+    return decorator(__wrapper, func)      
             
 
         

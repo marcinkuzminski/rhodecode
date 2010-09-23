@@ -2,7 +2,7 @@ from celery.decorators import task
 from celery.task.sets import subtask
 from celeryconfig import PYLONS_CONFIG as config
 from pylons.i18n.translation import _
-from pylons_app.lib.celerylib import run_task, LockTask
+from pylons_app.lib.celerylib import run_task, locked_task
 from pylons_app.lib.helpers import person
 from pylons_app.lib.smtp_mailer import SmtpMailer
 from pylons_app.lib.utils import OrderedDict
@@ -82,7 +82,7 @@ def whoosh_index(repo_location, full_index):
 
 
 @task
-@LockTask('get_commits_stats')
+@locked_task
 def get_commits_stats(repo_name, ts_min_y, ts_max_y):
     author_key_cleaner = lambda k: person(k).replace('"', "") #for js data compatibilty
         
