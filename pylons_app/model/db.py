@@ -70,7 +70,7 @@ class UserLog(Base):
     repository = Column("repository", TEXT(length=None, convert_unicode=False, assert_unicode=None), ForeignKey(u'repositories.repo_name'), nullable=False, unique=None, default=None)
     action = Column("action", TEXT(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     action_date = Column("action_date", DATETIME(timezone=False), nullable=True, unique=None, default=None)
-    
+    revision = Column('revision', TEXT(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     user = relation('User')
     
 class Repository(Base):

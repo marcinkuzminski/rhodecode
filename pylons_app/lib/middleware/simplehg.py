@@ -121,7 +121,7 @@ class SimpleHg(object):
             return HTTPNotFound()(environ, start_response)
         try:
             app = wsgiapplication(self.__make_app)
-        except RepoError as e:
+        except RepoError, e:
             if str(e).find('not found') != -1:
                 return HTTPNotFound()(environ, start_response)
         except Exception:
@@ -195,7 +195,7 @@ class SimpleHg(object):
             sa.commit()
             log.info('Adding user %s, action %s on %s',
                                             user.username, action, repo)
-        except Exception as e:
+        except Exception, e:
             sa.rollback()
             log.error('could not log user action:%s', str(e))
         finally:

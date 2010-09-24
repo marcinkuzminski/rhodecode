@@ -13,7 +13,14 @@
 	<tr class="parity${cnt%2}">
 		<td>${h.link_to(l.user.username,h.url('edit_user', id=l.user.user_id))}</td>
 		<td>${h.link_to(l.repository,h.url('summary_home',repo_name=l.repository))}</td>
-		<td>${l.action}</td>
+		<td>
+		% if l.action == 'push' and l.revision:
+		  ${h.link_to('%s - %s' % (l.action,l.revision),
+		  h.url('changeset_home',repo_name=l.repository,revision=l.revision))}
+		%else:
+		  ${l.action}
+		%endif
+		</td>
 		<td>${l.action_date}</td>
 		<td>${l.user_ip}</td>
 	</tr>
