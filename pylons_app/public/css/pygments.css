@@ -22,10 +22,13 @@ div.codeblock .code-header .commit{
 	margin-left:25px;
 	font-weight: normal;
 }
+
 div.codeblock .code-body table{
     width: 0 !important;    
 }
-
+div.code-body {
+	background-color: #FFFFFF;
+}
 div.code-body pre .match{
 	background-color: #FAFFA6;
 }
@@ -36,13 +39,10 @@ div.code-body pre .break{
 	display: block;
 	
 }
-
 div.annotatediv{
 	margin-left:2px;
 	margin-right:4px;
 }
-
-
 .code-highlight {
     padding: 0px;
     margin-top: 5px;
@@ -54,7 +54,6 @@ div.annotatediv{
     margin: 0;
 }
 .linenos a { text-decoration: none; }
-
 
 .code { display: block; }
 .code-highlight .hll { background-color: #ffffcc }

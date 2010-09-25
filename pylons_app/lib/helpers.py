@@ -213,14 +213,23 @@ class _FilesBreadCrumbs(object):
         return literal('/'.join(url_l))
 
 files_breadcrumbs = _FilesBreadCrumbs()
+class CodeHtmlFormatter(HtmlFormatter):
 
+    def wrap(self, source, outfile):
+        return self._wrap_div(self._wrap_pre(self._wrap_code(source)))
+
+    def _wrap_code(self, source):
+        for cnt, it in enumerate(source, 1):
+            i, t = it
+            t = '<div id="#S-%s">%s</div>' % (cnt, t)
+            yield i, t
 def pygmentize(filenode, **kwargs):
     """
     pygmentize function using pygments
     @param filenode:
     """
     return literal(code_highlight(filenode.content,
-                                  filenode.lexer, HtmlFormatter(**kwargs)))
+                                  filenode.lexer, CodeHtmlFormatter(**kwargs)))
 
 def pygmentize_annotation(filenode, **kwargs):
     """
