@@ -9,7 +9,7 @@ class DaemonLock(object):
     """daemon locking
     USAGE:
     try:
-        l = lock()
+        l = DaemonLock(desc='test lock')
         main()
         l.release()
     except LockHeld:
@@ -40,8 +40,7 @@ class DaemonLock(object):
 
 
     def lock(self):
-        """
-        locking function, if lock is present it will raise LockHeld exception
+        """locking function, if lock is present it will raise LockHeld exception
         """
         lockname = '%s' % (os.getpid())
 
@@ -75,8 +74,7 @@ class DaemonLock(object):
 
 
     def release(self):
-        """
-        releases the pid by removing the pidfile
+        """releases the pid by removing the pidfile
         """
         if self.callbackfn:
             #execute callback function on release
@@ -105,23 +103,3 @@ class DaemonLock(object):
         pidfile.write(lockname)
         pidfile.close
         self.held = True
-
-
-def main():
-    print 'func is running'
-    cnt = 20
-    while 1:
-        print cnt
-        if cnt == 0:
-            break
-        time.sleep(1)
-        cnt -= 1
-
-
-if __name__ == "__main__":
-    try:
-        l = DaemonLock(desc='test lock')
-        main()
-        l.release()
-    except LockHeld:
-        sys.exit(1)

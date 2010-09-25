@@ -66,20 +66,11 @@ def get_hg_ui_settings():
     return settings   
 
 @task
+@locked_task
 def whoosh_index(repo_location, full_index):
     log = whoosh_index.get_logger()
-    from pylons_app.lib.pidlock import DaemonLock
-    from pylons_app.lib.indexers.daemon import WhooshIndexingDaemon, LockHeld
-    try:
-        l = DaemonLock()
-        WhooshIndexingDaemon(repo_location=repo_location)\
-            .run(full_index=full_index)
-        l.release()
-        return 'Done'
-    except LockHeld:
-        log.info('LockHeld')
-        return 'LockHeld'    
-
+    from pylons_app.lib.indexers.daemon import WhooshIndexingDaemon
+    WhooshIndexingDaemon(repo_location=repo_location).run(full_index=full_index)
 
 @task
 @locked_task
