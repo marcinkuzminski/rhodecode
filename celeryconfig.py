@@ -36,7 +36,7 @@ BROKER_PASSWORD = "qweqwe"
 CELERYD_CONCURRENCY = 2
 # CELERYD_LOG_FILE = "celeryd.log"
 CELERYD_LOG_LEVEL = "DEBUG"
-CELERYD_MAX_TASKS_PER_CHILD = 1
+CELERYD_MAX_TASKS_PER_CHILD = 3
 
 #Tasks will never be sent to the queue, but executed locally instead.
 CELERY_ALWAYS_EAGER = False

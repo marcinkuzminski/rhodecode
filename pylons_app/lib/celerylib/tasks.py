@@ -1,16 +1,16 @@
 from celery.decorators import task
 from celery.task.sets import subtask
 from celeryconfig import PYLONS_CONFIG as config
+from operator import itemgetter
 from pylons.i18n.translation import _
 from pylons_app.lib.celerylib import run_task, locked_task
 from pylons_app.lib.helpers import person
 from pylons_app.lib.smtp_mailer import SmtpMailer
 from pylons_app.lib.utils import OrderedDict
-from operator import itemgetter
-from vcs.backends.hg import MercurialRepository
 from time import mktime
-import traceback
+from vcs.backends.hg import MercurialRepository
 import json
+import traceback
 
 __all__ = ['whoosh_index', 'get_commits_stats',
            'reset_user_password', 'send_email']
@@ -75,10 +75,10 @@ def whoosh_index(repo_location, full_index):
 @task
 @locked_task
 def get_commits_stats(repo_name, ts_min_y, ts_max_y):
-    author_key_cleaner = lambda k: person(k).replace('"', "") #for js data compatibilty
-        
     from pylons_app.model.db import Statistics, Repository
     log = get_commits_stats.get_logger()
+    author_key_cleaner = lambda k: person(k).replace('"', "") #for js data compatibilty
+    
     commits_by_day_author_aggregate = {}
     commits_by_day_aggregate = {}
     repos_path = get_hg_ui_settings()['paths_root_path'].replace('*', '')
@@ -99,7 +99,7 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
     if cur_stats:
         last_rev = cur_stats.stat_on_revision
     
-    if last_rev == repo.revisions[-1]:
+    if last_rev == repo.revisions[-1] and len(repo.revisions) > 1:
         #pass silently without any work
         return True
     
@@ -109,6 +109,7 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
                                         cur_stats.commit_activity_combined))
         commits_by_day_author_aggregate = json.loads(cur_stats.commit_activity)
     
+    log.debug('starting parsing %s', parse_limit)
     for cnt, rev in enumerate(repo.revisions[last_rev:]):
         last_cs = cs = repo.get_changeset(rev)
         k = '%s-%s-%s' % (cs.date.timetuple()[0], cs.date.timetuple()[1],
@@ -187,9 +188,16 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
     stats = cur_stats if cur_stats else Statistics()
     stats.commit_activity = json.dumps(commits_by_day_author_aggregate)
     stats.commit_activity_combined = json.dumps(overview_data)
+
+    log.debug('last revison %s', last_rev)
+    leftovers = len(repo.revisions[last_rev:])
+    log.debug('revisions to parse %s', leftovers)
+    
+    if last_rev == 0 or leftovers < parse_limit:    
+        stats.languages = json.dumps(__get_codes_stats(repo_name))
+        
     stats.repository = dbrepo
     stats.stat_on_revision = last_cs.revision
-    stats.languages = json.dumps({'_TOTAL_':0, '':0})
     
     try:
         sa.add(stats)
@@ -198,8 +206,8 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
         log.error(traceback.format_exc())
         sa.rollback()
         return False
-    
-    run_task(get_commits_stats, repo_name, ts_min_y, ts_max_y)
+    if len(repo.revisions) > 1:
+        run_task(get_commits_stats, repo_name, ts_min_y, ts_max_y)
                             
     return True
 
@@ -259,3 +267,31 @@ def send_email(recipients, subject, body):
         log.error(traceback.format_exc())
         return False
     return True
+
+def __get_codes_stats(repo_name):
+    LANGUAGES_EXTENSIONS = ['action', 'adp', 'ashx', 'asmx', 'aspx', 'asx', 'axd', 'c',
+                    'cfg', 'cfm', 'cpp', 'cs', 'diff', 'do', 'el', 'erl',
+                    'h', 'java', 'js', 'jsp', 'jspx', 'lisp',
+                    'lua', 'm', 'mako', 'ml', 'pas', 'patch', 'php', 'php3',
+                    'php4', 'phtml', 'pm', 'py', 'rb', 'rst', 's', 'sh',
+                    'tpl', 'txt', 'vim', 'wss', 'xhtml', 'xml', 'xsl', 'xslt',
+                    'yaws']
+    repos_path = get_hg_ui_settings()['paths_root_path'].replace('*', '')
+    repo = MercurialRepository(repos_path + repo_name)
+
+    code_stats = {}
+    for topnode, dirs, files in repo.walk('/', 'tip'):
+        for f in files:
+            k = f.mimetype
+            if f.extension in LANGUAGES_EXTENSIONS:
+                if code_stats.has_key(k):
+                    code_stats[k] += 1
+                else:
+                    code_stats[k] = 1
+                    
+    return code_stats or {}
+
+
+            
+
+

@@ -35,7 +35,7 @@ from datetime import datetime, timedelta
 from time import mktime
 import calendar
 import logging
-
+import json
 log = logging.getLogger(__name__)
 
 class SummaryController(BaseController):
@@ -79,18 +79,25 @@ class SummaryController(BaseController):
         c.ts_min = ts_min_m
         c.ts_max = ts_max_y
         
-        
         stats = self.sa.query(Statistics)\
             .filter(Statistics.repository == c.repo_info.dbrepo)\
             .scalar()
-
-        if stats:
+        
+        
+        if stats and stats.languages:
+            lang_stats = json.loads(stats.languages)
             c.commit_data = stats.commit_activity
             c.overview_data = stats.commit_activity_combined
+            c.trending_languages = json.dumps(OrderedDict(
+                                       sorted(lang_stats.items(), reverse=True,
+                                            key=lambda k: k[1])[:2]
+                                        )
+                                    )
+            print c.trending_languages
         else:
-            import json
             c.commit_data = json.dumps({})
             c.overview_data = json.dumps([[ts_min_y, 0], [ts_max_y, 0] ])
+            c.trending_languages = json.dumps({})
         
         return render('summary/summary.html')
 

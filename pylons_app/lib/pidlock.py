@@ -1,6 +1,8 @@
 import os, time
 import sys
 from warnings import warn
+from multiprocessing.util import Finalize
+import errno
 
 class LockHeld(Exception):pass
 
@@ -27,55 +29,67 @@ class DaemonLock(object):
         self.held = False
         #run the lock automatically !
         self.lock()
+        self._finalize = Finalize(self, DaemonLock._on_finalize,
+                                    args=(self, debug), exitpriority=10)
 
-    def __del__(self):
-        if self.held:
-
-#            warn("use lock.release instead of del lock",
-#                    category = DeprecationWarning,
-#                    stacklevel = 2)
-
-            # ensure the lock will be removed
-            self.release()
+    @staticmethod
+    def _on_finalize(lock, debug):
+        if lock.held:
+            if debug:
+                print 'leck held finilazing and running lock.release()'
+            lock.release()
 
 
     def lock(self):
         """locking function, if lock is present it will raise LockHeld exception
         """
         lockname = '%s' % (os.getpid())
-
+        if self.debug:
+            print 'running lock'
         self.trylock()
         self.makelock(lockname, self.pidfile)
         return True
 
     def trylock(self):
         running_pid = False
+        if self.debug:
+            print 'checking for already running process'
         try:
             pidfile = open(self.pidfile, "r")
             pidfile.seek(0)
-            running_pid = pidfile.readline()
+            running_pid = int(pidfile.readline())
+            
+            pidfile.close()
+            
             if self.debug:
                 print 'lock file present running_pid: %s, checking for execution'\
                 % running_pid
             # Now we check the PID from lock file matches to the current
             # process PID
             if running_pid:
-                if os.path.exists("/proc/%s" % running_pid):
-                        print "You already have an instance of the program running"
-                        print "It is running as process %s" % running_pid
-                        raise LockHeld
-                else:
+                try:
+                    os.kill(running_pid, 0)
+                except OSError, exc:
+                    if exc.errno in (errno.ESRCH, errno.EPERM):
                         print "Lock File is there but the program is not running"
-                        print "Removing lock file for the: %s" % running_pid
+                        print "Removing lock file for the: %s" % running_pid                        
                         self.release()
+                    raise
+                else:
+                    print "You already have an instance of the program running"
+                    print "It is running as process %s" % running_pid                    
+                    raise LockHeld()
+                         
         except IOError, e:
             if e.errno != 2:
                 raise
 
-
     def release(self):
         """releases the pid by removing the pidfile
         """
+        if self.debug:
+            print 'trying to release the pidlock'
+            
         if self.callbackfn:
             #execute callback function on release
             if self.debug:

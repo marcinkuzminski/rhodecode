@@ -90,7 +90,62 @@ E.onDOMReady(function(e){
 			      <input type="text" id="clone_url" readonly="readonly" value="hg clone ${c.clone_repo_url}" size="70"/>
 			  </div>
 			 </div>
-			
+			 
+			 <div class="field">
+			  <div class="label">
+			      <label>${_('Trending languages')}:</label>
+			  </div>
+			  <div class="input-short">
+			    <div id="lang_stats">
+			    
+			    </div> 			  
+			  	<script type="text/javascript">
+			  		var data = ${c.trending_languages|n};
+			  		var total = 0;
+			  		var no_data = true;
+			  		for (k in data){
+			  		    total += data[k];
+			  		    no_data = false;
+			  		} 
+					var tbl = document.createElement('table');
+					tbl.setAttribute('class','trending_language_tbl');
+			  		for (k in data){
+				  		var tr = document.createElement('tr');
+				  		var percentage = Math.round((data[k]/total*100),2);
+						var value = data[k];
+				  		var td1 = document.createElement('td');
+				  		td1.width=150;
+				  		var trending_language_label = document.createElement('div');
+				  		trending_language_label.innerHTML = k;
+				  		td1.appendChild(trending_language_label);
+
+				  		var td2 = document.createElement('td');
+			  		    var trending_language = document.createElement('div');
+			  		    trending_language.title = k;
+			  		    trending_language.innerHTML = "<b>"+value+" ${_('files')} - "+percentage+" %</b>";
+			  		    trending_language.setAttribute("class", 'trending_language');
+			  		    trending_language.style.width=percentage+"%";
+						td2.appendChild(trending_language);
+						
+						tr.appendChild(td1);
+						tr.appendChild(td2);
+			  		    tbl.appendChild(tr);
+ 				  		//YAHOO.util.Dom.get('lang_stats').appendChild(trending_language_label);
+			  		    
+			  		}
+			  		if(no_data){
+			  			var tr = document.createElement('tr');
+			  			var td1 = document.createElement('td');
+			  			td1.innerHTML = "${_('No data loaded yet...')}";
+			  			tr.appendChild(td1);
+			  			tbl.appendChild(tr);
+					}
+			  		YAHOO.util.Dom.get('lang_stats').appendChild(tbl);
+			  	</script>
+ 
+			  </div>
+			 </div>
+			 			
 			 <div class="field">
 			  <div class="label">
 			      <label>${_('Download')}:</label>

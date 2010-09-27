@@ -2963,6 +2963,28 @@ div.form div.fields div.buttons input
 /* -----------------------------------------------------------
 	SUMMARY
 ----------------------------------------------------------- */
+.trending_language_tbl, .trending_language_tbl td {
+	margin:  0px !important;
+	padding: 0px !important;
+	border: 0 !important;
+
+}
+.trending_language{
+	-moz-border-radius-bottomright:4px;
+	-moz-border-radius-topright:4px;
+	border-bottom-right-radius: 4px 4px;
+	border-top-right-radius: 4px 4px;
+	background-color:#336699;
+	color:#FFFFFF;
+	display:block;
+	min-width:20px;
+	max-width:400px;
+	padding:3px;
+	text-decoration:none;
+	height: 10px;
+	margin-bottom: 4px;
+	margin-left: 5px;
+}
 
 #clone_url{
 	border: none;
