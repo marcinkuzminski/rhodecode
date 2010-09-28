@@ -61,10 +61,10 @@ def _get_repos_switcher_cached(cached_repo_list):
     repos_lst = []
     for repo in [x for x in cached_repo_list.values()]:
         if HasRepoPermissionAny('repository.write', 'repository.read',
-                    'repository.admin')(repo.name.lower(), 'main page check'):
+                    'repository.admin')(repo.name, 'main page check'):
             repos_lst.append((repo.name, repo.dbrepo.private,))
     
-    return sorted(repos_lst, key=lambda k:k[0])
+    return sorted(repos_lst, key=lambda k:k[0].lower())
 
 @cache_region('long_term', 'full_changelog')
 def _full_changelog_cached(repo_name):
