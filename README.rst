@@ -11,7 +11,7 @@ Fully customizable, with authentication, permissions. Based on vcs library.
 - full permissions per project read/write/admin access even on mercurial request
 - mako templates let's you cusmotize look and feel of application.
 - diffs annotations and source code all colored by pygments.
-- mercurial branch graph and yui-flot powered graphs with zooming
+- mercurial branch graph and yui-flot powered graphs with zooming and statistics
 - admin interface for performing user/permission managments as well as repository
   managment. 
 - full text search of source codes with indexing daemons using whoosh
@@ -44,26 +44,38 @@ Fully customizable, with authentication, permissions. Based on vcs library.
 -------------
 Installation
 -------------
-.. note::
-   I recomend to install tip version of vcs while the app is in beta mode.
-   
-   
-- create new virtualenv and activate it - highly recommend that you use separate
-  virtual-env for whole application
-- download hg app from default branch from bitbucket and run 
-  'python setup.py install' this will install all required dependencies needed
-- run paster setup-app production.ini it should create all needed tables 
+
+- I highly recommend to install new virtualenv for hg-app see 
+  http://pypi.python.org/pypi/virtualenv
+- Create new virtualenv using `virtualenv --no-site-packages /var/www/hgapp-venv`
+  this will install new virtual env into /var/www/hgapp-venv. 
+  Activate the virtualenv by running 
+  `source activate /var/www/hgapp-venv/bin/activate`   
+- Make a folder for hg-app somewhere on the filesystem for example /var/www/hgapp  
+- Download and extract http://bitbucket.org/marcinkuzminski/hg-app/get/tip.zip
+  into created directory.
+- Run `python setup.py install` in order to install the application and all
+  needed dependencies. Make sure that You're using activated virutalenv  
+- Run `paster setup-app production.ini` it should create all needed tables 
   and an admin account make sure You specify correct path to repositories. 
-- remember that the given path for mercurial repositories must be write 
+- Remember that the given path for mercurial repositories must be write 
   accessible for the application
-- run paster serve development.ini - or you can use manage-hg_app script.
+- Run paster serve development.ini - or you can use sample init.d scripts.
   the app should be available at the 127.0.0.1:5000
-- use admin account you created to login.
-- default permissions on each repository is read, and owner is admin. So remember
+- Use admin account you created to login.
+- Default permissions on each repository is read, and owner is admin. So remember
   to update these.
-- in order to use full power of async tasks, You must install message broker
-  preferrably rabbitmq and start celeryd daemon. The app should gain some speed 
-  than. For installation instructions 
-  You can visit: http://ask.github.com/celery/getting-started/index.html. All
-  needed configs are inside hg-app ie. celeryconfig.py
-     
+- In order to use full power of async tasks, You must install message broker
+  preferrably rabbitmq and start celeryd daemon together with hg-app. 
+  The app should gain a lot of speed and become much more responsible. 
+  For installation instructions You can visit: 
+  http://ask.github.com/celery/getting-started/index.html. 
+- All needed configs are inside hg-app ie. celeryconfig.py , production.ini
+  You can configure the email, ports, loggers, workers from there.
+- For full text search You can either put crontab entry for 
+  `python /var/www/hgapp/pylons_app/lib/indexers/daemon.py incremental <path_to_repos>`
+  or run indexer from admin panel. This will scann the repos given in the 
+  application setup or given path for daemon.py and each scann in incremental 
+  mode will scann only changed files, 
+  Hg Update hook must be activated to index the content it's enabled by default
+  after setup
