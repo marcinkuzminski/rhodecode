@@ -51,10 +51,12 @@ class SummaryController(BaseController):
         c.repo_info = hg_model.get_repo(c.repo_name)
         c.repo_changesets = Page(list(c.repo_info[:10]), page=1, items_per_page=20)
         e = request.environ
-        uri = u'%(protocol)s://%(user)s@%(host)s/%(repo_name)s' % {
+            
+        uri = u'%(protocol)s://%(user)s@%(host)s%(prefix)s/%(repo_name)s' % {
                                         'protocol': e.get('wsgi.url_scheme'),
                                         'user':str(c.hg_app_user.username),
                                         'host':e.get('HTTP_HOST'),
+                                        'prefix':e.get('SCRIPT_NAME'),
                                         'repo_name':c.repo_name, }
         c.clone_repo_url = uri
         c.repo_tags = OrderedDict()
