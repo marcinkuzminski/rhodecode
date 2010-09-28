@@ -1,8 +1,8 @@
 <dl>
 	<dt>${_('Last revision')}</dt>
 	<dd>
-		${h.link_to("r%s:%s" % (c.files_list.last_changeset.revision,c.files_list.last_changeset._short),
-						h.url('files_home',repo_name=c.repo_name,revision=c.files_list.last_changeset._short,f_path=c.f_path))} 
+		${h.link_to("r%s:%s" % (c.files_list.last_changeset.revision,c.files_list.last_changeset.short_id),
+						h.url('files_home',repo_name=c.repo_name,revision=c.files_list.last_changeset.short_id,f_path=c.f_path))} 
 	</dd>
 	<dt>${_('Size')}</dt>
 	<dd>${h.format_byte_size(c.files_list.size,binary=True)}</dd>
@@ -20,8 +20,8 @@
 	<dd>
 		<div>
 		${h.form(h.url('files_diff_home',repo_name=c.repo_name,f_path=c.f_path),method='get')}
-		${h.hidden('diff2',c.files_list.last_changeset._short)}
-		${h.select('diff1',c.files_list.last_changeset._short,c.file_history)}
+		${h.hidden('diff2',c.files_list.last_changeset.short_id)}
+		${h.select('diff1',c.files_list.last_changeset.short_id,c.file_history)}
 		${h.submit('diff','diff to revision',class_="ui-button ui-widget ui-state-default ui-corner-all")}
 		${h.submit('show_rev','show at revision',class_="ui-button ui-widget ui-state-default ui-corner-all")}
 		${h.end_form()}
@@ -32,7 +32,7 @@
 	
 <div id="body" class="codeblock">
 	<div class="code-header">
-		<div class="revision">${c.files_list.name}@r${c.files_list.last_changeset.revision}:${c.files_list.last_changeset._short}</div>
+		<div class="revision">${c.files_list.name}@r${c.files_list.last_changeset.revision}:${c.files_list.last_changeset.short_id}</div>
 		<div class="commit">"${c.files_list.last_changeset.message}"</div>
 	</div>
 	<div class="code-body">

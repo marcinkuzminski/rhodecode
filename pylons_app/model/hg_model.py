@@ -155,7 +155,7 @@ class HgModel(object):
             tmp_d['description_sort'] = tmp_d['description']
             tmp_d['last_change'] = last_change
             tmp_d['last_change_sort'] = last_change[1] - last_change[0]
-            tmp_d['tip'] = tip.raw_id
+            tmp_d['tip'] = tip.short_id
             tmp_d['tip_sort'] = tip.revision 
             tmp_d['rev'] = tip.revision
             tmp_d['contact'] = repo.contact

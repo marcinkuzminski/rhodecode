@@ -15,10 +15,10 @@
 	<tr class="parity${cnt%2}">
 		<td>${h.age(cs._ctx.date())} - ${h.rfc822date_notz(cs._ctx.date())} </td>
 		<td title="${cs.author}">${h.person(cs.author)}</td>
-		<td>r${cs.revision}:${cs.raw_id}</td>
+		<td>r${cs.revision}:${cs.short_id}</td>
 		<td>
 			${h.link_to(h.truncate(cs.message,60),
-			h.url('changeset_home',repo_name=c.repo_name,revision=cs._short),
+			h.url('changeset_home',repo_name=c.repo_name,revision=cs.short_id),
 			title=cs.message)}
 		</td>
 		<td>
@@ -34,9 +34,9 @@
 			</span>
 		</td>
 		<td class="nowrap">
-		${h.link_to(_('changeset'),h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id))}
+		${h.link_to(_('changeset'),h.url('changeset_home',repo_name=c.repo_name,revision=cs.short_id))}
 		|
-		${h.link_to(_('files'),h.url('files_home',repo_name=c.repo_name,revision=cs.raw_id))}
+		${h.link_to(_('files'),h.url('files_home',repo_name=c.repo_name,revision=cs.short_id))}
 		</td>
 	</tr>
 %endfor

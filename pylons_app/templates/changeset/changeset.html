@@ -9,7 +9,7 @@
     &raquo;
     ${h.link_to(c.repo_name,h.url('summary_home',repo_name=c.repo_name))}
     &raquo;
-    ${_('Changeset')} - r${c.changeset.revision}:${c.changeset.raw_id}
+    ${_('Changeset')} - r${c.changeset.revision}:${c.changeset.short_id}
 </%def>
 
 <%def name="page_nav()">
@@ -26,11 +26,11 @@
 		<div id="body" class="diffblock">
 			<div class="code-header">
 				<div>
-				${_('Changeset')} - r${c.changeset.revision}:${c.changeset.raw_id}
+				${_('Changeset')} - r${c.changeset.revision}:${c.changeset.short_id}
 				 &raquo; <span>${h.link_to(_('raw diff'),
-				h.url('raw_changeset_home',repo_name=c.repo_name,revision=c.changeset.raw_id,diff='show'))}</span>
+				h.url('raw_changeset_home',repo_name=c.repo_name,revision=c.changeset.short_id,diff='show'))}</span>
 				 &raquo; <span>${h.link_to(_('download diff'),
-				h.url('raw_changeset_home',repo_name=c.repo_name,revision=c.changeset.raw_id,diff='download'))}</span>
+				h.url('raw_changeset_home',repo_name=c.repo_name,revision=c.changeset.short_id,diff='download'))}</span>
 				</div>
 			</div>
 		</div>
@@ -56,8 +56,8 @@
 				</div>
 				%endif						
 				%for p_cs in reversed(c.changeset.parents):
-					<div class="parent">${_('Parent')} ${p_cs.revision}: ${h.link_to(p_cs.raw_id,
-						h.url('changeset_home',repo_name=c.repo_name,revision=p_cs.raw_id),title=p_cs.message)}
+					<div class="parent">${_('Parent')} ${p_cs.revision}: ${h.link_to(p_cs.short_id,
+						h.url('changeset_home',repo_name=c.repo_name,revision=p_cs.short_id),title=p_cs.message)}
 					</div>
 				%endfor								
 			</div>		
@@ -78,7 +78,7 @@
 				<div>
 					<span>
 						${h.link_to_if(change!='removed',filenode.path,h.url('files_home',repo_name=c.repo_name,
-						revision=filenode.changeset.raw_id,f_path=filenode.path))}
+						revision=filenode.changeset.short_id,f_path=filenode.path))}
 					</span>
 					%if 1:
 					&raquo; <span>${h.link_to(_('diff'),

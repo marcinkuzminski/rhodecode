@@ -20,7 +20,7 @@ setup(
         "SQLAlchemy>=0.6",
         "babel",
         "Mako>=0.3.2",
-        "vcs>=0.1.5",
+        "vcs>=0.1.6",
         "pygments>=1.3.0",
         "mercurial>=1.6",
         "pysqlite",

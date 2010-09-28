@@ -65,7 +65,7 @@ class ChangesetController(BaseController):
                     diff = differ.DiffProcessor(f_udiff).as_html()
 
                 cs1 = None
-                cs2 = node.last_changeset.raw_id                                        
+                cs2 = node.last_changeset.short_id                                        
                 c.changes.append(('added', node, diff, cs1, cs2))
                 
             for node in c.changeset.changed:
@@ -76,8 +76,8 @@ class ChangesetController(BaseController):
                     f_udiff = differ.get_udiff(filenode_old, node)
                     diff = differ.DiffProcessor(f_udiff).as_html()
 
-                cs1 = filenode_old.last_changeset.raw_id
-                cs2 = node.last_changeset.raw_id                    
+                cs1 = filenode_old.last_changeset.short_id
+                cs2 = node.last_changeset.short_id                    
                 c.changes.append(('changed', node, diff, cs1, cs2))
                 
             for node in c.changeset.removed:
@@ -110,7 +110,7 @@ class ChangesetController(BaseController):
                     diff = differ.DiffProcessor(f_udiff).raw_diff()
 
                 cs1 = None
-                cs2 = node.last_changeset.raw_id                                        
+                cs2 = node.last_changeset.short_id                                        
                 c.changes.append(('added', node, diff, cs1, cs2))
                 
             for node in c.changeset.changed:
@@ -121,8 +121,8 @@ class ChangesetController(BaseController):
                     f_udiff = differ.get_udiff(filenode_old, node)
                     diff = differ.DiffProcessor(f_udiff).raw_diff()
 
-                cs1 = filenode_old.last_changeset.raw_id
-                cs2 = node.last_changeset.raw_id                    
+                cs1 = filenode_old.last_changeset.short_id
+                cs2 = node.last_changeset.short_id                    
                 c.changes.append(('changed', node, diff, cs1, cs2))      
         
         response.content_type = 'text/plain'

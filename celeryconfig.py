@@ -4,7 +4,7 @@ import os
 import ConfigParser
 root = os.getcwd()
 
-PYLONS_CONFIG_NAME = 'development.ini'
+PYLONS_CONFIG_NAME = 'production.ini'
 
 sys.path.append(root)
 config = ConfigParser.ConfigParser({'here':root})

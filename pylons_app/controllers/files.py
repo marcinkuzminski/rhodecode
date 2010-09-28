@@ -68,8 +68,8 @@ class FilesController(BaseController):
         
         try:
             cur_rev = repo.get_changeset(revision).revision
-            prev_rev = repo.get_changeset(get_prev_rev(cur_rev)).raw_id
-            next_rev = repo.get_changeset(get_next_rev(cur_rev)).raw_id
+            prev_rev = repo.get_changeset(get_prev_rev(cur_rev)).short_id
+            next_rev = repo.get_changeset(get_next_rev(cur_rev)).short_id
                     
             c.url_prev = url('files_home', repo_name=c.repo_name,
                              revision=prev_rev, f_path=f_path) 
@@ -78,7 +78,7 @@ class FilesController(BaseController):
                     
             c.changeset = repo.get_changeset(revision)
                         
-            c.cur_rev = c.changeset.raw_id
+            c.cur_rev = c.changeset.short_id
             c.rev_nr = c.changeset.revision
             c.files_list = c.changeset.get_node(f_path)
             c.file_history = self._get_history(repo, c.files_list, f_path)
@@ -111,7 +111,7 @@ class FilesController(BaseController):
         cs = c.repo.get_changeset(revision)
         c.file = cs.get_node(f_path)
         c.file_msg = cs.get_file_message(f_path)
-        c.cur_rev = cs.raw_id
+        c.cur_rev = cs.short_id
         c.rev_nr = cs.revision        
         c.f_path = f_path
 
@@ -171,8 +171,8 @@ class FilesController(BaseController):
             return redirect(url('files_home',
                                 repo_name=c.repo_name, f_path=f_path))
 
-        c.diff1 = 'r%s:%s' % (c.changeset_1.revision, c.changeset_1.raw_id)
-        c.diff2 = 'r%s:%s' % (c.changeset_2.revision, c.changeset_2.raw_id)
+        c.diff1 = 'r%s:%s' % (c.changeset_1.revision, c.changeset_1.short_id)
+        c.diff2 = 'r%s:%s' % (c.changeset_2.revision, c.changeset_2.short_id)
         f_udiff = differ.get_udiff(node1, node2)
         
         diff = differ.DiffProcessor(f_udiff)
@@ -202,6 +202,6 @@ class FilesController(BaseController):
         changesets = node.history
         hist_l = []
         for chs in changesets:
-            n_desc = 'r%s:%s' % (chs.revision, chs._short)
-            hist_l.append((chs._short, n_desc,))
+            n_desc = 'r%s:%s' % (chs.revision, chs.short_id)
+            hist_l.append((chs.short_id, n_desc,))
         return hist_l

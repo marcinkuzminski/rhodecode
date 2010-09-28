@@ -46,7 +46,7 @@
 				%for cnt,cs in enumerate(c.pagination):
 					<div id="chg_${cnt+1}" class="container">
 						<div class="left">
-							<div class="date">${_('commit')} ${cs.revision}: ${cs.raw_id}@${cs.date}</div>
+							<div class="date">${_('commit')} ${cs.revision}: ${cs.short_id}@${cs.date}</div>
 								<span class="logtags">
 									<span class="branchtag">${cs.branch}</span>
 									%for tag in cs.tags:
@@ -62,7 +62,7 @@
 							</div>
 							<div class="message">
 								${h.link_to(h.wrap_paragraphs(cs.message),
-								h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id))}
+								h.url('changeset_home',repo_name=c.repo_name,revision=cs.short_id))}
 							</div>
 						</div>	
 						<div class="right">
@@ -77,8 +77,8 @@
 										</div>
 										%endif						
 									%for p_cs in reversed(cs.parents):
-										<div class="parent">${_('Parent')} ${p_cs.revision}: ${h.link_to(p_cs.raw_id,
-											h.url('changeset_home',repo_name=c.repo_name,revision=p_cs.raw_id),title=p_cs.message)}
+										<div class="parent">${_('Parent')} ${p_cs.revision}: ${h.link_to(p_cs.short_id,
+											h.url('changeset_home',repo_name=c.repo_name,revision=p_cs.short_id),title=p_cs.message)}
 										</div>
 									%endfor								
 						</div>				
