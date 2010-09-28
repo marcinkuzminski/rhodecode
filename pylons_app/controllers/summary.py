@@ -95,7 +95,6 @@ class SummaryController(BaseController):
                                             key=lambda k: k[1])[:2]
                                         )
                                     )
-            print c.trending_languages
         else:
             c.commit_data = json.dumps({})
             c.overview_data = json.dumps([[ts_min_y, 0], [ts_max_y, 0] ])

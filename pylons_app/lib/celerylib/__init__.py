@@ -42,8 +42,9 @@ def locked_task(func):
         log.info('running task with lockkey %s', lockkey)
         try:
             l = DaemonLock(lockkey)
-            func(*fargs, **fkwargs)
+            ret = func(*fargs, **fkwargs)
             l.release()
+            return ret
         except LockHeld:
             log.info('LockHeld')
             return 'Task with key %s already running' % lockkey   
