@@ -227,8 +227,10 @@ class EmptyChangeset(BaseChangeset):
         Returns raw string identifing this changeset, useful for web
         representation.
         """
-        return '0' * 12
-
+        return '0' * 40
+    
+    def short_id(self):
+        self.raw_id[:12]
 
 def repo2db_mapper(initial_repo_list, remove_obsolete=False):
     """
