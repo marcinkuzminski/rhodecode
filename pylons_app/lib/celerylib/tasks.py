@@ -85,7 +85,7 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
     repo = MercurialRepository(repos_path + repo_name)
 
     skip_date_limit = True
-    parse_limit = 350 #limit for single task changeset parsing
+    parse_limit = 350 #limit for single task changeset parsing optimal for
     last_rev = 0
     last_cs = None
     timegetter = itemgetter('time')
@@ -98,9 +98,12 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
         .filter(Statistics.repository == dbrepo).scalar()
     if cur_stats:
         last_rev = cur_stats.stat_on_revision
+    if not repo.revisions:
+        return True
     
     if last_rev == repo.revisions[-1] and len(repo.revisions) > 1:
-        #pass silently without any work
+        #pass silently without any work if we're not on first revision or current
+        #state of parsing revision(from db marker) is the last revision
         return True
     
     if cur_stats:

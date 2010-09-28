@@ -143,17 +143,25 @@
                         <li>
                             ${h.link_to(_('branches'),h.url('branches_home',repo_name=c.repo_name),class_='branches childs')}
                             <ul>
+                            %if c.repository_branches.values():
 						        %for cnt,branch in enumerate(c.repository_branches.items()):
 						            <li>${h.link_to('%s - %s' % (branch[0],branch[1]),h.url('files_home',repo_name=c.repo_name,revision=branch[1]))}</li>
 						        %endfor
+						    %else:
+						    	<li>${h.link_to(_('There are no branches yet'),'#')}</li>
+						    %endif
                             </ul>                        
                         </li>
                         <li>
                             ${h.link_to(_('tags'),h.url('tags_home',repo_name=c.repo_name),class_='tags childs')}
                             <ul>
+                            %if c.repository_tags.values():
                                 %for cnt,tag in enumerate(c.repository_tags.items()):
                                  <li>${h.link_to('%s - %s' % (tag[0],tag[1]),h.url('files_home',repo_name=c.repo_name,revision=tag[1]))}</li>
                                 %endfor
+                            %else:
+                            	<li>${h.link_to(_('There are no tags yet'),'#')}</li>
+                            %endif
                             </ul>                        
                         </li>                        
                     </ul>

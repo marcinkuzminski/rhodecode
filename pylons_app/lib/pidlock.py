@@ -74,7 +74,8 @@ class DaemonLock(object):
                         print "Lock File is there but the program is not running"
                         print "Removing lock file for the: %s" % running_pid                        
                         self.release()
-                    raise
+                    else:
+                        raise
                 else:
                     print "You already have an instance of the program running"
                     print "It is running as process %s" % running_pid                    

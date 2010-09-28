@@ -136,7 +136,7 @@ E.onDOMReady(function(e){
 			  		if(no_data){
 			  			var tr = document.createElement('tr');
 			  			var td1 = document.createElement('td');
-			  			td1.innerHTML = "${_('No data loaded yet...')}";
+			  			td1.innerHTML = "${_('No data loaded yet')}";
 			  			tr.appendChild(td1);
 			  			tbl.appendChild(tr);
 					}
@@ -538,7 +538,9 @@ E.onDOMReady(function(e){
     </div>    
     <div class="table">
         <%include file='../shortlog/shortlog_data.html'/>
-        ${h.link_to(_('show more'),h.url('changelog_home',repo_name=c.repo_name))}
+        %if c.repo_changesets:
+        	${h.link_to(_('show more'),h.url('changelog_home',repo_name=c.repo_name))}
+        %endif
     </div>
 </div>
 <div class="box">    
@@ -547,7 +549,9 @@ E.onDOMReady(function(e){
     </div>    
     <div class="table">
         <%include file='../tags/tags_data.html'/>
-        ${h.link_to(_('show more'),h.url('tags_home',repo_name=c.repo_name))}
+        %if c.repo_changesets:
+        	${h.link_to(_('show more'),h.url('tags_home',repo_name=c.repo_name))}
+        %endif
     </div>
 </div>
 <div class="box">
@@ -556,7 +560,9 @@ E.onDOMReady(function(e){
     </div>    
     <div class="table">
         <%include file='../branches/branches_data.html'/>
-        ${h.link_to(_('show more'),h.url('branches_home',repo_name=c.repo_name))}
+        %if c.repo_changesets:
+        	${h.link_to(_('show more'),h.url('branches_home',repo_name=c.repo_name))}
+        %endif
     </div>      
 </div> 
 
