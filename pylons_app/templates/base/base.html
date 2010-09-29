@@ -174,16 +174,30 @@
                    <span>${_('Files')}</span>                 
                    </a>             
                 </li>                            
-				%if h.HasRepoPermissionAll('repository.admin')(c.repo_name):
-                <li ${is_current('settings')}>
-                   <a title="${_('Settings')}" href="${h.url('repo_settings_home',repo_name=c.repo_name)}">
+				
+                <li ${is_current('options')}>
+                   <a title="${_('Options')}" href="#">
                    <span class="icon">
-                       <img src="/images/icons/cog_edit.png" alt="${_('Settings')}" />
+                       <img src="/images/icons/table_gear.png" alt="${_('Admin')}" />
                    </span>
-                   <span>${_('Settings')}</span>                 
-                   </a>             
-                </li>				
-				%endif					        
+                   <span>${_('Options')}</span>                 
+                   </a>
+                   <ul>
+                   %if h.HasRepoPermissionAll('repository.admin')(c.repo_name):
+                   	<li>${h.link_to(_('settings'),h.url('repo_settings_home',repo_name=c.repo_name),class_='settings')}</li>
+                   %endif	
+                   	<li>${h.link_to(_('fork'),h.url('repo_fork_home',repo_name=c.repo_name),class_='fork')}</li>
+                   	<li>${h.link_to(_('search'),h.url('search_repo',search_repo=c.repo_name),class_='search')}</li>
+                   %if h.HasRepoPermissionAll('repository.admin')(c.repo_name):
+                   	<li class="last">
+                   	${h.link_to(_('delete'),'#',class_='delete')}
+##	                  ${h.form(url('repo_settings_delete', repo_name=c.repo_name),method='delete')}
+##	                    ${h.submit('remove_%s' % c.repo_name,'delete',class_="delete_icon action_button",onclick="return confirm('Confirm to delete this repository');")}
+##	                  ${h.end_form()}
+                   	</li>
+                   	%endif
+                   </ul>             
+                </li>
 	        </ul>
 		%else:
 		    ##ROOT MENU

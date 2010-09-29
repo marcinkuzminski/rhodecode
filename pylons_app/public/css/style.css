@@ -569,18 +569,47 @@ div.options a:hover
     width:167px;        
 }
 
-#header #header-inner #quick li ul li a.branches,#header #header-inner #quick li ul li a.branches:hover
+
+#header #header-inner #quick li ul li a.fork,
+#header #header-inner #quick li ul li a.fork:hover
 {
 
+    background: #FFFFFF url("../images/icons/arrow_divide.png") no-repeat 4px 9px;
+    margin:0;
+    padding:12px 9px 7px 24px;
+    width:167px;        
+}
+
+#header #header-inner #quick li ul li a.search,
+#header #header-inner #quick li ul li a.search:hover
+{
+    background: #FFFFFF url("../images/icons/search_16.png") no-repeat 4px 9px;
+    margin:0;
+    padding:12px 9px 7px 24px;
+    width:167px;        
+}
+
+#header #header-inner #quick li ul li a.delete,
+#header #header-inner #quick li ul li a.delete:hover
+{
+    background: #FFFFFF url("../images/icons/delete.png") no-repeat 4px 9px;
+    margin:0;
+    padding:12px 9px 7px 24px;
+    width:167px;        
+}
+
+#header #header-inner #quick li ul li a.branches,
+#header #header-inner #quick li ul li a.branches:hover
+{
     background: #FFFFFF url("../images/icons/arrow_branch.png") no-repeat 4px 9px;
     margin:0;
     padding:12px 9px 7px 24px;
     width:167px;        
 }
 
-#header #header-inner #quick li ul li a.tags,#header #header-inner #quick li ul li a.tags:hover
+#header #header-inner #quick li ul li a.tags,
+#header #header-inner #quick li ul li a.tags:hover
 {
-
     background: #FFFFFF url("../images/icons/tag_blue.png") no-repeat 4px 9px;
     margin:0;
     padding:12px 9px 7px 24px;
@@ -3464,12 +3493,14 @@ table.code-browser .browser-dir {
 .action_button {
     border: 0px;
     display: block;
+    color:#0066CC;
 }
 
 .action_button:hover {
     border: 0px;
-    font-style: italic;
+    text-decoration:underline;
     cursor: pointer;
+    color:#0066CC;
 }
 
 /* -----------------------------------------------------------

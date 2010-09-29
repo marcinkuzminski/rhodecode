@@ -76,7 +76,7 @@ E.onDOMReady(function(e){
 			      <label>${_('Last change')}:</label>
 			  </div>
 			  <div class="input-short">
-			      ${h.age(c.repo_info.last_change)} - ${h.rfc822date(c.repo_info.last_change)} 
+			      ${h.age(c.repo_info.last_change)} - ${h.rfc822date_notz(c.repo_info.last_change)} 
 			      ${_('by')} ${h.get_changeset_safe(c.repo_info,'tip').author} 
 			      
 			  </div>
@@ -122,7 +122,7 @@ E.onDOMReady(function(e){
 				  		var td2 = document.createElement('td');
 			  		    var trending_language = document.createElement('div');
 			  		    trending_language.title = k;
-			  		    trending_language.innerHTML = "<b>"+value+" ${_('files')} - "+percentage+" %</b>";
+			  		    trending_language.innerHTML = "<b>"+percentage+"% "+value+" ${_('files')}</b>";
 			  		    trending_language.setAttribute("class", 'trending_language');
 			  		    trending_language.style.width=percentage+"%";
 						td2.appendChild(trending_language);
@@ -130,7 +130,6 @@ E.onDOMReady(function(e){
 						tr.appendChild(td1);
 						tr.appendChild(td2);
 			  		    tbl.appendChild(tr);
- 				  		//YAHOO.util.Dom.get('lang_stats').appendChild(trending_language_label);
 			  		    
 			  		}
 			  		if(no_data){

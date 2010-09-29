@@ -31,7 +31,7 @@
 	        %if h.HasPermissionAny('hg.admin','hg.create.repository')():
 	        <ul class="links">
 	          <li>
-	            <span>${h.link_to(u'ADD NEW REPOSITORY',h.url('admin_settings_create_repository'),class_="add_icon")}</span>
+	            <span>${h.link_to(_('ADD NEW REPOSITORY'),h.url('admin_settings_create_repository'),class_="add_icon")}</span>
 	          </li>          
 	        </ul>  	        
 	        %endif

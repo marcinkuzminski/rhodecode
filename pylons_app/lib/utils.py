@@ -229,8 +229,9 @@ class EmptyChangeset(BaseChangeset):
         """
         return '0' * 40
     
+    @LazyProperty
     def short_id(self):
-        self.raw_id[:12]
+        return self.raw_id[:12]
 
 def repo2db_mapper(initial_repo_list, remove_obsolete=False):
     """
