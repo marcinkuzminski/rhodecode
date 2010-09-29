@@ -55,7 +55,7 @@ class SettingsController(BaseController):
                       ' in order to rescan repositories') % repo_name,
                       category='error')
         
-            return redirect(url('repos'))        
+            return redirect(url('hg_home'))        
         defaults = c.repo_info.__dict__
         defaults.update({'user':c.repo_info.user.username})
         c.users_array = repo_model.get_users_js()
@@ -98,3 +98,47 @@ class SettingsController(BaseController):
                     % repo_name, category='error')
                     
         return redirect(url('repo_settings_home', repo_name=changed_name))
+
+
+
+    def delete(self, repo_name):    
+        """DELETE /repos/repo_name: Delete an existing item"""
+        # Forms posted to this method should contain a hidden field:
+        #    <input type="hidden" name="_method" value="DELETE" />
+        # Or using helpers:
+        #    h.form(url('repo_settings_delete', repo_name=ID),
+        #           method='delete')
+        # url('repo_settings_delete', repo_name=ID)
+        
+        repo_model = RepoModel()
+        repo = repo_model.get(repo_name)
+        if not repo:
+            h.flash(_('%s repository is not mapped to db perhaps' 
+                      ' it was moved or renamed  from the filesystem'
+                      ' please run the application again'
+                      ' in order to rescan repositories') % repo_name,
+                      category='error')
+        
+            return redirect(url('hg_home'))
+        try:
+            repo_model.delete(repo)            
+            invalidate_cache('cached_repo_list')
+            h.flash(_('deleted repository %s') % repo_name, category='success')
+        except Exception:
+            h.flash(_('An error occured during deletion of %s') % repo_name,
+                    category='error')
+        
+        return redirect(url('hg_home'))
+    
+    def fork(self, repo_name):
+        repo_model = RepoModel()
+        c.repo_info = repo = repo_model.get(repo_name)
+        if not repo:
+            h.flash(_('%s repository is not mapped to db perhaps' 
+                      ' it was created or renamed from the filesystem'
+                      ' please run the application again'
+                      ' in order to rescan repositories') % repo_name,
+                      category='error')
+        
+            return redirect(url('hg_home'))         
+        return render('settings/repo_fork.html')

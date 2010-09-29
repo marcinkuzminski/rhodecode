@@ -108,7 +108,8 @@ def make_map(config):
         m.connect('admin_add_repo', '/add_repo/{new_repo:[a-z0-9\. _-]*}',
                   action='add_repo')
     #SEARCH
-    map.connect('search', '/_admin/search', controller='search')
+    map.connect('search', '/_admin/search', controller='search',)
+    map.connect('search_repo', '/_admin/search/{search_repo:.*}', controller='search')
     
     #LOGIN/LOGOUT/REGISTER/SIGN IN
     map.connect('login_home', '/_admin/login', controller='login')
@@ -159,7 +160,10 @@ def make_map(config):
                 conditions=dict(function=check_repo))    
     map.connect('files_archive_home', '/{repo_name:.*}/archive/{revision}/{fileformat}',
                 controller='files', action='archivefile', revision='tip',
-                conditions=dict(function=check_repo))
+                conditions=dict(function=check_repo))   
+    map.connect('repo_settings_delete', '/{repo_name:.*}/settings',
+                controller='settings', action="delete",
+                conditions=dict(method=["DELETE"], function=check_repo))
     map.connect('repo_settings_update', '/{repo_name:.*}/settings',
                 controller='settings', action="update",
                 conditions=dict(method=["PUT"], function=check_repo))
@@ -167,5 +171,7 @@ def make_map(config):
                 controller='settings', action='index',
                 conditions=dict(function=check_repo))
 
-    
+    map.connect('repo_fork_home', '/{repo_name:.*}/fork',
+                controller='settings', action='fork',
+                conditions=dict(function=check_repo))    
     return map

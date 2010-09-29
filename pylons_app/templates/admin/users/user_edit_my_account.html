@@ -88,21 +88,33 @@
     <div class="table">
 	    <table>
 	     <tbody>
-	     %for repo in c.user_repos:
-	        <tr>
-	            <td>
-	             %if repo.dbrepo.private:
-	                <img class="icon" alt="${_('private')}" src="/images/icons/lock.png"/>
-	             %else:
-	                <img class="icon" alt="${_('public')}" src="/images/icons/lock_open.png"/>
-	             %endif
-	                                             
-	            ${h.link_to(repo.name, h.url('summary_home',repo_name=repo.name))}</td> 
-	            <td>${_('revision')}: ${h.get_changeset_safe(repo,'tip').revision}</td>
-	            <td>${_('last changed')}: ${h.age(repo.last_change)}</td>
-	            <td><img class="icon" alt="${_('private')}" src="/images/icons/application_form_edit.png"/> ${h.link_to(_('edit'),h.url('edit_repo',repo_name=repo.name))}</td>
-	        </tr>
-	     %endfor
+	     %if c.user_repos:
+		     %for repo in c.user_repos:
+		        <tr>
+		            <td>
+		             %if repo.dbrepo.private:
+		                <img class="icon" alt="${_('private')}" src="/images/icons/lock.png"/>
+		             %else:
+		                <img class="icon" alt="${_('public')}" src="/images/icons/lock_open.png"/>
+		             %endif
+		                                             
+		            ${h.link_to(repo.name, h.url('summary_home',repo_name=repo.name))}</td> 
+		            <td>${_('revision')}: ${h.get_changeset_safe(repo,'tip').revision}</td>
+		            <td>${_('last changed')}: ${h.age(repo.last_change)}</td>
+		            <td><img class="icon" alt="${_('private')}" src="/images/icons/application_form_edit.png"/> ${h.link_to(_('edit'),h.url('repo_settings_home',repo_name=repo.name))}</td>
+		            <td>
+	                  ${h.form(url('repo_settings_delete', repo_name=repo.name),method='delete')}
+	                    ${h.submit('remove_%s' % repo.name,'delete',class_="delete_icon action_button",onclick="return confirm('Confirm to delete this repository');")}
+	                  ${h.end_form()}	            
+		            </td>
+		        </tr>
+		     %endfor
+	     %else:
+	     	${_('No repositories yet')} 
+	     	%if h.HasPermissionAny('hg.admin','hg.create.repository')():
+	     		${h.link_to(_('create one now'),h.url('admin_settings_create_repository'))}
+	     	%endif
+	     %endif
 	     </tbody>
 	     </table>
     </div>

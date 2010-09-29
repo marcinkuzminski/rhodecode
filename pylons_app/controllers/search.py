@@ -44,7 +44,8 @@ class SearchController(BaseController):
     def __before__(self):
         super(SearchController, self).__before__()    
 
-    def index(self):
+    def index(self, search_repo=None):
+        c.repo_name = search_repo
         c.formated_results = []
         c.runtime = ''
         c.cur_query = request.GET.get('q', None)
@@ -59,6 +60,8 @@ class SearchController(BaseController):
                 searcher = idx.searcher()
 
                 qp = QueryParser("content", schema=SCHEMA)
+                if c.repo_name:
+                    cur_query = u'repository:%s %s' % (c.repo_name, cur_query)
                 try:
                     query = qp.parse(unicode(cur_query))
                     
