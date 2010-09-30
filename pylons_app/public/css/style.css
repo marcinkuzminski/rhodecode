@@ -3222,7 +3222,16 @@ h3.files_location{
 	font-family: monospace;
 }
 
-
+.right .logtags .branchtag{
+	background: #FFFFFF url("../images/icons/arrow_branch.png") no-repeat 130px 9px;
+    display:block;
+    padding:12px 2px 2px 24px;
+}
+.right .logtags .tagtag{
+    background: #FFFFFF url("../images/icons/tag_blue.png") no-repeat 130px 9px;
+    display:block;
+    padding:12px 2px 2px 24px;
+}
 
 /* -----------------------------------------------------------
 	FILE BROWSER

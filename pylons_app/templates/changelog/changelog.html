@@ -47,12 +47,6 @@
 					<div id="chg_${cnt+1}" class="container">
 						<div class="left">
 							<div class="date">${_('commit')} ${cs.revision}: ${cs.short_id}@${cs.date}</div>
-								<span class="logtags">
-									<span class="branchtag">${cs.branch}</span>
-									%for tag in cs.tags:
-										<span class="tagtag">${tag}</span>
-									%endfor
-								</span>					
 							<div class="author">
 								<div class="gravatar">
 									<img alt="gravatar" src="${h.gravatar_url(h.email(cs.author),20)}"/>
@@ -80,7 +74,13 @@
 										<div class="parent">${_('Parent')} ${p_cs.revision}: ${h.link_to(p_cs.short_id,
 											h.url('changeset_home',repo_name=c.repo_name,revision=p_cs.short_id),title=p_cs.message)}
 										</div>
-									%endfor								
+									%endfor
+								<span class="logtags">
+									<span class="branchtag">${cs.branch}</span>
+									%for tag in cs.tags:
+										<span class="tagtag">${tag}</span>
+									%endfor
+								</span>																	
 						</div>				
 					</div>
 					
