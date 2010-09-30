@@ -76,9 +76,11 @@
 										</div>
 									%endfor
 								<span class="logtags">
-									<span class="branchtag">${cs.branch}</span>
+									<span class="branchtag" title="${'%s %s' % (_('branch'),cs.branch)}">
+									${h.link_to(cs.branch,h.url('files_home',repo_name=c.repo_name,revision=cs.short_id))}</span>
 									%for tag in cs.tags:
-										<span class="tagtag">${tag}</span>
+										<span class="tagtag"  title="${'%s %s' % (_('tag'),tag)}">
+										${h.link_to(tag,h.url('files_home',repo_name=c.repo_name,revision=cs.short_id))}</span>
 									%endfor
 								</span>																	
 						</div>				

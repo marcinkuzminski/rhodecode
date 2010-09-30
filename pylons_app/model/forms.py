@@ -247,7 +247,7 @@ class LoginForm(formencode.Schema):
     filter_extra_fields = True
     username = UnicodeString(
                              strip=True,
-                             min=3,
+                             min=1,
                              not_empty=True,
                              messages={
                                        'empty':_('Please enter a login'),
@@ -256,7 +256,7 @@ class LoginForm(formencode.Schema):
 
     password = UnicodeString(
                             strip=True,
-                            min=3,
+                            min=8,
                             not_empty=True,
                             messages={
                                       'empty':_('Please enter a password'),
@@ -271,15 +271,15 @@ def UserForm(edit=False, old_data={}):
     class _UserForm(formencode.Schema):
         allow_extra_fields = True
         filter_extra_fields = True
-        username = All(UnicodeString(strip=True, min=3, not_empty=True), ValidUsername(edit, old_data))
+        username = All(UnicodeString(strip=True, min=1, not_empty=True), ValidUsername(edit, old_data))
         if edit:
-            new_password = All(UnicodeString(strip=True, min=3, not_empty=False), ValidPassword)
+            new_password = All(UnicodeString(strip=True, min=8, not_empty=False), ValidPassword)
             admin = StringBoolean(if_missing=False)
         else:
             password = All(UnicodeString(strip=True, min=8, not_empty=True), ValidPassword)
         active = StringBoolean(if_missing=False)
-        name = UnicodeString(strip=True, min=3, not_empty=True)
-        lastname = UnicodeString(strip=True, min=3, not_empty=True)
+        name = UnicodeString(strip=True, min=1, not_empty=True)
+        lastname = UnicodeString(strip=True, min=1, not_empty=True)
         email = All(Email(not_empty=True), UniqSystemEmail(old_data))
         
     return _UserForm
@@ -298,7 +298,7 @@ def RepoForm(edit=False, old_data={}):
         allow_extra_fields = True
         filter_extra_fields = False
         repo_name = All(UnicodeString(strip=True, min=1, not_empty=True), ValidRepoName(edit, old_data))
-        description = UnicodeString(strip=True, min=3, not_empty=True)
+        description = UnicodeString(strip=True, min=1, not_empty=True)
         private = StringBoolean(if_missing=False)
         
         if edit:
@@ -312,7 +312,7 @@ def RepoSettingsForm(edit=False, old_data={}):
         allow_extra_fields = True
         filter_extra_fields = False
         repo_name = All(UnicodeString(strip=True, min=1, not_empty=True), ValidRepoName(edit, old_data))
-        description = UnicodeString(strip=True, min=3, not_empty=True)
+        description = UnicodeString(strip=True, min=1, not_empty=True)
         private = StringBoolean(if_missing=False)
         
         chained_validators = [ValidPerms, ValidSettings]
@@ -323,8 +323,8 @@ def ApplicationSettingsForm():
     class _ApplicationSettingsForm(formencode.Schema):
         allow_extra_fields = True
         filter_extra_fields = False
-        hg_app_title = UnicodeString(strip=True, min=3, not_empty=True)
-        hg_app_realm = UnicodeString(strip=True, min=3, not_empty=True)
+        hg_app_title = UnicodeString(strip=True, min=1, not_empty=True)
+        hg_app_realm = UnicodeString(strip=True, min=1, not_empty=True)
         
     return _ApplicationSettingsForm
  
@@ -333,7 +333,7 @@ def ApplicationUiSettingsForm():
         allow_extra_fields = True
         filter_extra_fields = False
         web_push_ssl = OneOf(['true', 'false'], if_missing='false')
-        paths_root_path = All(ValidPath(), UnicodeString(strip=True, min=3, not_empty=True))
+        paths_root_path = All(ValidPath(), UnicodeString(strip=True, min=1, not_empty=True))
         hooks_changegroup_update = OneOf(['True', 'False'], if_missing=False)
         hooks_changegroup_repo_size = OneOf(['True', 'False'], if_missing=False)
         
