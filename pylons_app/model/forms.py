@@ -256,7 +256,7 @@ class LoginForm(formencode.Schema):
 
     password = UnicodeString(
                             strip=True,
-                            min=8,
+                            min=6,
                             not_empty=True,
                             messages={
                                       'empty':_('Please enter a password'),
@@ -273,10 +273,10 @@ def UserForm(edit=False, old_data={}):
         filter_extra_fields = True
         username = All(UnicodeString(strip=True, min=1, not_empty=True), ValidUsername(edit, old_data))
         if edit:
-            new_password = All(UnicodeString(strip=True, min=8, not_empty=False), ValidPassword)
+            new_password = All(UnicodeString(strip=True, min=6, not_empty=False), ValidPassword)
             admin = StringBoolean(if_missing=False)
         else:
-            password = All(UnicodeString(strip=True, min=8, not_empty=True), ValidPassword)
+            password = All(UnicodeString(strip=True, min=6, not_empty=True), ValidPassword)
         active = StringBoolean(if_missing=False)
         name = UnicodeString(strip=True, min=1, not_empty=True)
         lastname = UnicodeString(strip=True, min=1, not_empty=True)

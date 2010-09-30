@@ -1161,7 +1161,7 @@ div.options a:hover
 #content div.box div.message
 {
 	margin: 0 0 0px 0;
-    padding: 0 0 10px 0;
+    padding: 10px 0 10px 0;
 	clear: both;
 	overflow: hidden;
 }
@@ -3058,7 +3058,9 @@ h3.files_location{
 }
 
 #changeset_content .container {
-	height: 120px;
+	min-height: 120px;
+	font-size: 1.2em;
+	
 }
 
 #changeset_content .container .left {
@@ -3190,7 +3192,6 @@ h3.files_location{
 	border: 1px solid #DDDDDD;
 	display: block;
 	float: right;
-	font-size: 0.75em;
 	text-align: center;
 	min-width: 15px;
 }
