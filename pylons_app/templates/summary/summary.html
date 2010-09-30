@@ -42,7 +42,13 @@ E.onDOMReady(function(e){
 			      <label>${_('Name')}:</label>
 			  </div>
 			  <div class="input-short">
-			      <span style="font-size: 1.6em;font-weight: bold;">${c.repo_info.name}</span><br/>
+	             %if c.repo_info.dbrepo.private:
+	                <img style="margin-bottom:2px" class="icon" title="${_('private repository')}" alt="${_('private')}" src="/images/icons/lock.png"/>
+	             %else:
+	                <img style="margin-bottom:2px" class="icon" title="${_('public repository')}" alt="${_('public')}" src="/images/icons/lock_open.png"/>
+	             %endif
+			      <span style="font-size: 1.6em;font-weight: bold;vertical-align: baseline;">${c.repo_info.name}</span>
+			      <br/>
 		            %if c.repo_info.dbrepo.fork:
 		            	<span style="margin-top:5px">
 		            	<a href="${h.url('summary_home',repo_name=c.repo_info.dbrepo.fork.repo_name)}">
