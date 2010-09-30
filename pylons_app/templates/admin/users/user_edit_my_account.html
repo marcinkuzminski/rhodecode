@@ -98,7 +98,14 @@
 		                <img class="icon" alt="${_('public')}" src="/images/icons/lock_open.png"/>
 		             %endif
 		                                             
-		            ${h.link_to(repo.name, h.url('summary_home',repo_name=repo.name))}</td> 
+		            ${h.link_to(repo.name, h.url('summary_home',repo_name=repo.name))}
+		            %if repo.dbrepo.fork:
+		            	<a href="${h.url('summary_home',repo_name=repo.dbrepo.fork.repo_name)}">
+		            	<img class="icon" alt="${_('public')}"
+		            	title="${_('Fork of')} ${repo.dbrepo.fork.repo_name}" 
+		            	src="/images/icons/arrow_divide.png"/></a>
+		            %endif		            
+		            </td> 
 		            <td>${_('revision')}: ${h.get_changeset_safe(repo,'tip').revision}</td>
 		            <td>${_('last changed')}: ${h.age(repo.last_change)}</td>
 		            <td><img class="icon" alt="${_('private')}" src="/images/icons/application_form_edit.png"/> ${h.link_to(_('edit'),h.url('repo_settings_home',repo_name=repo.name))}</td>

@@ -31,6 +31,7 @@ from pylons_app.model import meta
 from pylons_app.model.db import Repository, User
 from pylons_app.lib import helpers as h
 from vcs.exceptions import RepositoryError, VCSError
+from sqlalchemy.orm import joinedload
 import logging
 import os
 import sys
@@ -123,7 +124,9 @@ class HgModel(object):
                     dbrepo = None
                     if not initial:
                         dbrepo = sa.query(Repository)\
-                            .filter(Repository.repo_name == name).scalar()
+                            .options(joinedload(Repository.fork))\
+                            .filter(Repository.repo_name == name)\
+                            .scalar()
                             
                     if dbrepo:
                         log.info('Adding db instance to cached list')

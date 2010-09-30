@@ -27,9 +27,11 @@
     <div class="table">
         <table class="table_disp">
         <tr class="header">
-            <th class="left">${_('name')}</th>
-            <th class="left">${_('owner')}</th>
-            <th class="left">${_('last revision')}</th>
+	        <th class="left">${_('Name')}</th>
+	        <th class="left">${_('Description')}</th>
+	        <th class="left">${_('Last change')}</th>
+	        <th class="left">${_('Tip')}</th>
+	        <th class="left">${_('Contact')}</th>
             <th class="left">${_('action')}</th>
         </tr>
             %for cnt,repo in enumerate(c.repos_list):
@@ -40,9 +42,28 @@
                  %else:
                     <img alt="${_('public')}" src="/images/icons/lock_open.png"/>
                  %endif         
-                ${h.link_to(repo['name'],h.url('edit_repo',repo_name=repo['name']))}</td>
-                <td>${repo['contact']}</td>
-                <td>r${repo['rev']}:${repo['tip']}</td>
+                ${h.link_to(repo['name'],h.url('edit_repo',repo_name=repo['name']))}
+                
+	            %if repo['repo'].dbrepo.fork:
+	            	<a href="${h.url('summary_home',repo_name=repo['repo'].dbrepo.fork.repo_name)}">
+	            	<img class="icon" alt="${_('public')}"
+	            	title="${_('Fork of')} ${repo['repo'].dbrepo.fork.repo_name}" 
+	            	src="/images/icons/arrow_divide.png"/></a>
+	            %endif                
+                </td>
+				<td title="${repo['description']}">${h.truncate(repo['description'],60)}</td>
+	            <td>${h.age(repo['last_change'])}</td>
+	            <td>
+	            	%if repo['rev']>=0:
+	            	${h.link_to('r%s:%s' % (repo['rev'],repo['tip']),
+	                h.url('changeset_home',repo_name=repo['name'],revision=repo['tip']),
+	                class_="tooltip",
+	                tooltip_title=h.tooltip(repo['last_msg']))}
+	            	%else:
+	            		${_('No changesets yet')}
+	            	%endif    
+	            </td>
+	            <td title="${repo['contact']}">${h.person(repo['contact'])}</td>
                 <td>
                   ${h.form(url('repo', repo_name=repo['name']),method='delete')}
                     ${h.submit('remove_%s' % repo['name'],'delete',class_="delete_icon action_button",onclick="return confirm('Confirm to delete this repository');")}
