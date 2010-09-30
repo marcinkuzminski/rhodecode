@@ -43,12 +43,6 @@
 				<div class="message">${h.wrap_paragraphs(c.changeset.message)}</div>
 			</div>	
 			<div class="right">
-				<span class="logtags">
-					<span class="branchtag">${c.changeset.branch}</span>
-					%for tag in c.changeset.tags:
-						<span class="tagtag">${tag}</span>
-					%endfor
-				</span>					
 				%if len(c.changeset.parents)>1:
 				<div class="merge">		
 				${_('merge')}
@@ -59,7 +53,15 @@
 					<div class="parent">${_('Parent')} ${p_cs.revision}: ${h.link_to(p_cs.short_id,
 						h.url('changeset_home',repo_name=c.repo_name,revision=p_cs.short_id),title=p_cs.message)}
 					</div>
-				%endfor								
+				%endfor
+                <span class="logtags">
+                    <span class="branchtag" title="${'%s %s' % (_('branch'),c.changeset.branch)}">
+                    ${h.link_to(c.changeset.branch,h.url('files_home',repo_name=c.repo_name,revision=c.changeset.short_id))}</span>
+                    %for tag in c.changeset.tags:
+                        <span class="tagtag"  title="${'%s %s' % (_('tag'),tag)}">
+                        ${h.link_to(tag,h.url('files_home',repo_name=c.repo_name,revision=c.changeset.short_id))}</span>
+                    %endfor
+                </span>                 									
 			</div>		
 		</div>
 		<span style="font-size:1.1em;font-weight: bold">${_('Files affected')}</span>

@@ -14,7 +14,7 @@ body
     height: 100%;
 	background: #d1d1d1 url("../images/background.png") repeat;
 	font-family: Lucida Grande, Verdana, Lucida Sans Regular, Lucida Sans Unicode, Arial, sans-serif;
-	font-size: 11px;
+	font-size: 12px;
 }
 
 /* -----------------------------------------------------------
@@ -3223,14 +3223,14 @@ h3.files_location{
 }
 
 .right .logtags .branchtag{
-	background: #FFFFFF url("../images/icons/arrow_branch.png") no-repeat right 9px;
+	background: #FFFFFF url("../images/icons/arrow_branch.png") no-repeat right 6px;
     display:block;
-    padding:12px 16px 0px 0px
+    padding:8px 16px 0px 0px
 }
 .right .logtags .tagtag{
-    background: #FFFFFF url("../images/icons/tag_blue.png") no-repeat right 9px;
+    background: #FFFFFF url("../images/icons/tag_blue.png") no-repeat right 6px;
     display:block;
-    padding:12px 18px 0px 0px
+    padding:6px 18px 0px 0px
 }
 
 /* -----------------------------------------------------------
