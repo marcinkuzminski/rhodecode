@@ -36,8 +36,11 @@ class DefaultUserException(Exception):pass
 
 class UserModel(object):
 
-    def __init__(self):
-        self.sa = Session() 
+    def __init__(self, sa=None):
+        if not sa:
+            self.sa = Session()
+        else:
+            self.sa = sa
     
     def get_default(self):
         return self.sa.query(User).filter(User.username == 'default').scalar()

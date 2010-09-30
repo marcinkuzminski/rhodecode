@@ -307,6 +307,16 @@ def RepoForm(edit=False, old_data={}):
         chained_validators = [ValidPerms]
     return _RepoForm
 
+def RepoForkForm(edit=False, old_data={}):
+    class _RepoForkForm(formencode.Schema):
+        allow_extra_fields = True
+        filter_extra_fields = False
+        fork_name = All(UnicodeString(strip=True, min=1, not_empty=True), ValidRepoName(edit, old_data))
+        description = UnicodeString(strip=True, min=1, not_empty=True)
+        private = StringBoolean(if_missing=False)
+        
+    return _RepoForkForm
+
 def RepoSettingsForm(edit=False, old_data={}):
     class _RepoForm(formencode.Schema):
         allow_extra_fields = True

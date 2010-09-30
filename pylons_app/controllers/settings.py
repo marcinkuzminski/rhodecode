@@ -29,7 +29,7 @@ from pylons.i18n.translation import _
 from pylons_app.lib.auth import LoginRequired, HasRepoPermissionAllDecorator
 from pylons_app.lib.base import BaseController, render
 from pylons_app.lib.utils import invalidate_cache
-from pylons_app.model.forms import RepoSettingsForm
+from pylons_app.model.forms import RepoSettingsForm, RepoForkForm
 from pylons_app.model.repo_model import RepoModel
 import formencode
 import logging
@@ -140,5 +140,33 @@ class SettingsController(BaseController):
                       ' in order to rescan repositories') % repo_name,
                       category='error')
         
-            return redirect(url('hg_home'))         
+            return redirect(url('hg_home'))
+        
         return render('settings/repo_fork.html')
+    
+    
+    
+    def fork_create(self, repo_name):
+        repo_model = RepoModel()
+        c.repo_info = repo_model.get(repo_name)
+        _form = RepoForkForm()()
+        form_result = {}
+        try:
+            form_result = _form.to_python(dict(request.POST))
+            form_result.update({'repo_name':repo_name})
+            repo_model.create_fork(form_result, c.hg_app_user)
+            h.flash(_('fork %s repository as %s task added') \
+                      % (repo_name, form_result['fork_name']),
+                    category='success')
+                                                             
+        except formencode.Invalid as errors:
+            c.new_repo = errors.value['fork_name']
+            r = render('settings/repo_fork.html')
+            
+            return htmlfill.render(
+                r,
+                defaults=errors.value,
+                errors=errors.error_dict or {},
+                prefix_error=False,
+                encoding="UTF-8")   
+        return redirect(url('hg_home'))

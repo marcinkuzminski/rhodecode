@@ -271,6 +271,24 @@ def send_email(recipients, subject, body):
         return False
     return True
 
+@task
+def create_repo_fork(form_data, cur_user):
+    import os
+    from pylons_app.lib.utils import invalidate_cache
+    from pylons_app.model.repo_model import RepoModel
+    sa = get_session()
+    rm = RepoModel(sa)
+    
+    rm.create(form_data, cur_user, just_db=True, fork=True)
+    
+    repos_path = get_hg_ui_settings()['paths_root_path'].replace('*', '')
+    repo_path = os.path.join(repos_path, form_data['repo_name'])
+    repo_fork_path = os.path.join(repos_path, form_data['fork_name'])
+    
+    MercurialRepository(str(repo_fork_path), True, clone_url=str(repo_path))
+    #invalidate_cache('cached_repo_list')
+
+    
 def __get_codes_stats(repo_name):
     LANGUAGES_EXTENSIONS = ['action', 'adp', 'ashx', 'asmx', 'aspx', 'asx', 'axd', 'c',
                     'cfg', 'cfm', 'cpp', 'cs', 'diff', 'do', 'el', 'erl',

@@ -20,7 +20,7 @@
     <div class="title">
         ${self.breadcrumbs()}      
     </div>
-    ${h.form(url('repos'))}
+    ${h.form(url('repo_fork_create_home',repo_name=c.repo_info.repo_name))}
     <div class="form">
         <!-- fields -->
         <div class="fields">
@@ -49,7 +49,7 @@
                 </div>
              </div>
 	        <div class="buttons">
-	          ${h.submit('fork','fork this repository',class_="ui-button ui-widget ui-state-default ui-corner-all")}
+	          ${h.submit('','fork this repository',class_="ui-button ui-widget ui-state-default ui-corner-all")}
 	        </div>                                                          
         </div>
     </div>    

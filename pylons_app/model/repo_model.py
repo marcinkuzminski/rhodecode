@@ -27,6 +27,7 @@ from pylons_app.lib.utils import check_repo
 from pylons_app.model.db import Repository, RepoToPerm, User, Permission
 from pylons_app.model.meta import Session
 from pylons_app.model.user_model import UserModel
+from pylons_app.lib.celerylib.tasks import create_repo_fork, run_task
 import logging
 import os
 import shutil
@@ -35,11 +36,15 @@ log = logging.getLogger(__name__)
 
 class RepoModel(object):
     
-    def __init__(self):
-        self.sa = Session()
+    def __init__(self, sa=None):
+        if not sa:
+            self.sa = Session()
+        else:
+            self.sa = sa
     
     def get(self, id):
-        return self.sa.query(Repository).filter(Repository.repo_name == id).scalar()
+        return self.sa.query(Repository)\
+            .filter(Repository.repo_name == id).scalar()
         
     def get_users_js(self):
         
@@ -100,20 +105,32 @@ class RepoModel(object):
             self.sa.rollback()
             raise    
     
-    def create(self, form_data, cur_user, just_db=False):
+    def create(self, form_data, cur_user, just_db=False, fork=False):
         try:
-            repo_name = form_data['repo_name']
+            if fork:
+                repo_name = str(form_data['fork_name'])
+                org_name = str(form_data['repo_name'])
+                
+            else:
+                org_name = repo_name = str(form_data['repo_name'])
             new_repo = Repository()
             for k, v in form_data.items():
+                if k == 'repo_name':
+                    v = repo_name
                 setattr(new_repo, k, v)
                 
+            if fork:
+                parent_repo = self.sa.query(Repository)\
+                        .filter(Repository.repo_name == org_name).scalar()
+                new_repo.fork = parent_repo
+                            
             new_repo.user_id = cur_user.user_id
             self.sa.add(new_repo)
             
             #create default permission
             repo_to_perm = RepoToPerm()
             default = 'repository.read'
-            for p in UserModel().get_default().user_perms:
+            for p in UserModel(self.sa).get_default().user_perms:
                 if p.permission.permission_name.startswith('repository.'):
                     default = p.permission.permission_name
                     break
@@ -136,7 +153,10 @@ class RepoModel(object):
             log.error(traceback.format_exc())
             self.sa.rollback()
             raise    
-                     
+    
+    def create_fork(self, form_data, cur_user):
+        run_task(create_repo_fork, form_data, cur_user)
+                         
     def delete(self, repo):
         try:
             self.sa.delete(repo)

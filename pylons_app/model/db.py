@@ -81,8 +81,10 @@ class Repository(Base):
     user_id = Column("user_id", INTEGER(), ForeignKey(u'users.user_id'), nullable=False, unique=False, default=None)
     private = Column("private", BOOLEAN(), nullable=True, unique=None, default=None)
     description = Column("description", TEXT(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    fork_id = Column("fork_id", INTEGER(), ForeignKey(u'repositories.repo_id'), nullable=True, unique=False, default=None)
     
     user = relation('User')
+    fork = relation('Repository', remote_side=repo_id)
     repo_to_perm = relation('RepoToPerm', cascade='all')
     
     def __repr__(self):

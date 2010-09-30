@@ -171,7 +171,11 @@ def make_map(config):
                 controller='settings', action='index',
                 conditions=dict(function=check_repo))
 
+    map.connect('repo_fork_create_home', '/{repo_name:.*}/fork',
+                controller='settings', action='fork_create',
+                conditions=dict(function=check_repo, method=["POST"]))
     map.connect('repo_fork_home', '/{repo_name:.*}/fork',
                 controller='settings', action='fork',
-                conditions=dict(function=check_repo))    
+                conditions=dict(function=check_repo))
+        
     return map
