@@ -22,8 +22,14 @@ class BaseController(WSGIController):
         c.repo_switcher_list = _get_repos_switcher_cached(c.cached_repo_list)
         
         if c.repo_name:
-            c.repository_tags = c.cached_repo_list[c.repo_name].tags
-            c.repository_branches = c.cached_repo_list[c.repo_name].branches
+            cached_repo = c.cached_repo_list.get(c.repo_name)
+            
+            if cached_repo:
+                c.repository_tags = cached_repo.tags
+                c.repository_branches = cached_repo.branches
+            else:
+                c.repository_tags = {}
+                c.repository_branches = {}
                     
         self.sa = meta.Session
     

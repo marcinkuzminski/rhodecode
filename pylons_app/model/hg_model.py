@@ -26,12 +26,13 @@ from beaker.cache import cache_region
 from mercurial import ui
 from mercurial.hgweb.hgwebdir_mod import findrepos
 from pylons.i18n.translation import _
+from pylons_app.lib import helpers as h
+from pylons_app.lib.utils import invalidate_cache
 from pylons_app.lib.auth import HasRepoPermissionAny
 from pylons_app.model import meta
 from pylons_app.model.db import Repository, User
-from pylons_app.lib import helpers as h
-from vcs.exceptions import RepositoryError, VCSError
 from sqlalchemy.orm import joinedload
+from vcs.exceptions import RepositoryError, VCSError
 import logging
 import os
 import sys
@@ -123,6 +124,8 @@ class HgModel(object):
                     
                     dbrepo = None
                     if not initial:
+                        #for initial scann on application first run we don't
+                        #have db repos yet.
                         dbrepo = sa.query(Repository)\
                             .options(joinedload(Repository.fork))\
                             .filter(Repository.repo_name == name)\
@@ -169,4 +172,15 @@ class HgModel(object):
             yield tmp_d
 
     def get_repo(self, repo_name):
-        return _get_repos_cached()[repo_name]
+        try:
+            repo = _get_repos_cached()[repo_name]
+            return repo
+        except KeyError:
+            #i we're here and we got key errors let's try to invalidate the
+            #cahce and try again
+            invalidate_cache('cached_repo_list')
+            repo = _get_repos_cached()[repo_name]
+            return repo
+            
+        
+        

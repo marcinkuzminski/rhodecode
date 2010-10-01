@@ -28,6 +28,8 @@ __all__ = ['environ', 'url', 'TestController']
 # Invoke websetup with the current config file
 #SetupCommand('setup-app').run([config_file])
 
+##RUNNING DESIRED TESTS
+#nosetests pylons_app.tests.functional.test_admin_settings:TestSettingsController.test_my_account
 
 environ = {}
 

@@ -274,7 +274,6 @@ def send_email(recipients, subject, body):
 @task
 def create_repo_fork(form_data, cur_user):
     import os
-    from pylons_app.lib.utils import invalidate_cache
     from pylons_app.model.repo_model import RepoModel
     sa = get_session()
     rm = RepoModel(sa)
@@ -286,7 +285,6 @@ def create_repo_fork(form_data, cur_user):
     repo_fork_path = os.path.join(repos_path, form_data['fork_name'])
     
     MercurialRepository(str(repo_fork_path), True, clone_url=str(repo_path))
-    #invalidate_cache('cached_repo_list')
 
     
 def __get_codes_stats(repo_name):

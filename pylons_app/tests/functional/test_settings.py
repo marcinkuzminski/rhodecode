@@ -42,5 +42,14 @@ class TestSettingsController(TestController):
         
         #test if fork is visible in the list ?
         response = response.follow()
+
+
+        #check if fork is marked as fork
+        response = self.app.get(url(controller='summary', action='index',
+                                    repo_name=fork_name))
+        
         
         print response
+        
+        assert 'Fork of %s' % repo_name in response.body, 'no message about that this repo is a fork'
+        
