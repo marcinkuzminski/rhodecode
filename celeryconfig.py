@@ -4,7 +4,7 @@ import os
 import ConfigParser
 root = os.getcwd()
 
-PYLONS_CONFIG_NAME = 'production.ini'
+PYLONS_CONFIG_NAME = 'test.ini'
 
 sys.path.append(root)
 config = ConfigParser.ConfigParser({'here':root})
@@ -40,6 +40,9 @@ CELERYD_MAX_TASKS_PER_CHILD = 3
 
 #Tasks will never be sent to the queue, but executed locally instead.
 CELERY_ALWAYS_EAGER = False
+if PYLONS_CONFIG_NAME == 'test.ini':
+    #auto eager for tests
+    CELERY_ALWAYS_EAGER = True
 
 #===============================================================================
 # EMAIL SETTINGS

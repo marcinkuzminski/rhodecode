@@ -78,7 +78,7 @@ class TestSettingsController(TestController):
         response = self.app.post(url('admin_settings_my_account_update'), params=dict(
                                                             _method='put',
                                                             username='test_admin',
-                                                            new_password='test',
+                                                            new_password='test12',
                                                             name='NewName',
                                                             lastname='NewLastname',
                                                             email=new_email,))
@@ -91,7 +91,7 @@ class TestSettingsController(TestController):
         response = self.app.post(url('admin_settings_my_account_update'), params=dict(
                                                             _method='put',
                                                             username='test_admin',
-                                                            new_password='test',
+                                                            new_password='test12',
                                                             name='NewName',
                                                             lastname='NewLastname',
                                                             email=new_email,))
@@ -101,13 +101,13 @@ class TestSettingsController(TestController):
         
         
     def test_my_account_update_err(self):
-        self.log_user()
+        self.log_user('test_regular2', 'test12')
                 
         new_email = 'newmail.pl'
         response = self.app.post(url('admin_settings_my_account_update'), params=dict(
                                                             _method='put',
-                                                            username='test_regular2',
-                                                            new_password='test',
+                                                            username='test_admin',
+                                                            new_password='test12',
                                                             name='NewName',
                                                             lastname='NewLastname',
                                                             email=new_email,))

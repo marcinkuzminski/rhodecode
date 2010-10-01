@@ -42,10 +42,10 @@ class TestController(TestCase):
 
         TestCase.__init__(self, *args, **kwargs)
     
-    def log_user(self, username='test_admin', password='test'):
+    def log_user(self, username='test_admin', password='test12'):
         response = self.app.post(url(controller='login', action='index'),
                                  {'username':username,
                                   'password':password})
         assert response.status == '302 Found', 'Wrong response code from login got %s' % response.status
-        assert response.session['hg_app_user'].username == 'test_admin', 'wrong logged in user'
+        assert response.session['hg_app_user'].username == username, 'wrong logged in user got %s expected %s' % (response.session['hg_app_user'].username, username)
         return response.follow()

@@ -23,6 +23,7 @@ class TestLoginController(TestController):
         response = self.app.post(url(controller='login', action='index'),
                                  {'username':'test_regular',
                                   'password':'test'})
+        print response
         assert response.status == '302 Found', 'Wrong response code from login got %s' % response.status
         assert response.session['hg_app_user'].username == 'test_regular', 'wrong logged in user'
         response = response.follow()
@@ -41,15 +42,23 @@ class TestLoginController(TestController):
         assert 'Users administration' in response.body, 'No proper title in response'
         
                 
-    def test_login_wrong(self):
+    def test_login_short_password(self):
         response = self.app.post(url(controller='login', action='index'),
                                  {'username':'error',
                                   'password':'test'})
         assert response.status == '200 OK', 'Wrong response from login page'
         
+        assert 'Enter a value 6 characters long or more' in response.body, 'No error password message in response'
+
+    def test_login_wrong_username_password(self):
+        response = self.app.post(url(controller='login', action='index'),
+                                 {'username':'error',
+                                  'password':'test12'})
+        assert response.status == '200 OK', 'Wrong response from login page'
+        
         assert 'invalid user name' in response.body, 'No error username message in response'
         assert 'invalid password' in response.body, 'No error password message in response'
-        
+                
         
     def test_register(self):
         response = self.app.get(url(controller='login', action='register'))
@@ -76,8 +85,7 @@ class TestLoginController(TestController):
         
         assert response.status == '200 OK', 'Wrong response from register page got %s' % response.status
         assert 'An email address must contain a single @' in response.body
-        assert 'Enter a value 3 characters long or more' in response.body
-        assert 'Please enter a value<' in response.body
+        assert 'Please enter a value' in response.body
         
         
         
