@@ -63,10 +63,10 @@ def user_action_mapper(ui, repo, hooktype=None, **kwargs):
         username = kwargs['url'].split(':')[-1]
         user_log = sa.query(UserLog)\
             .filter(UserLog.user == sa.query(User)\
-                                        .filter(User.username == username).one())\
+                                    .filter(User.username == username).one())\
             .order_by(UserLog.user_log_id.desc()).first()
-            
-        if not user_log.revision:
+        
+        if user_log and not user_log.revision:
             user_log.revision = str(repo['tip'])
             sa.add(user_log)
             sa.commit()

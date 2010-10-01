@@ -26,16 +26,17 @@ from beaker.cache import cache_region
 from mercurial import ui, config, hg
 from mercurial.error import RepoError
 from pylons_app.model import meta
-from pylons_app.model.db import Repository, User, HgAppUi, HgAppSettings
+from pylons_app.model.db import Repository, User, HgAppUi, HgAppSettings,UserLog
 from vcs.backends.base import BaseChangeset
 from vcs.utils.lazy import LazyProperty
 import logging
+import datetime
 import os
 
 log = logging.getLogger(__name__)
 
 
-def get_repo_slug(request):
+def get_repo_slug(request):    
     return request.environ['pylons.routes_dict'].get('repo_name')
 
 def is_mercurial(environ):
@@ -48,6 +49,40 @@ def is_mercurial(environ):
         return True
     return False
 
+def action_logger(user, action, repo, ipaddr, sa=None):
+    """
+    Action logger for various action made by users
+    """
+    
+    if not sa:
+        sa = meta.Session 
+        
+    
+    if hasattr(user, 'user_id'):
+        user_id = user.user_id
+    elif isinstance(user, basestring):
+        
+        user_id = sa.Query(User).filter(User.username == user).one()
+    else:
+        raise Exception('You have to provide user object or username')
+   
+    try:
+        user_log = UserLog()
+        user_log.user_id = user_id
+        user_log.action = action
+        user_log.repository = sa.query(Repository)\
+            .filter(Repository.repo_name==repo.lstrip('/')).one()
+        user_log.action_date = datetime.datetime.now()
+        user_log.user_ip = ipaddr
+        sa.add(user_log)
+        sa.commit()
+        log.info('Adding user %s, action %s on %s',
+                                        user.username, action, repo)
+    except Exception, e:
+        raise
+        sa.rollback()
+        log.error('could not log user action:%s', str(e))
+                
 def check_repo_dir(paths):
     repos_path = paths[0][1].split('/')
     if repos_path[-1] in ['*', '**']:

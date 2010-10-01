@@ -66,12 +66,14 @@ class UserLog(Base):
     __table_args__ = {'useexisting':True}
     user_log_id = Column("user_log_id", INTEGER(), nullable=False, unique=True, default=None, primary_key=True)
     user_id = Column("user_id", INTEGER(), ForeignKey(u'users.user_id'), nullable=False, unique=None, default=None)
+    repository_id = Column("repository", TEXT(length=None, convert_unicode=False, assert_unicode=None), ForeignKey(u'repositories.repo_id'), nullable=False, unique=None, default=None)
     user_ip = Column("user_ip", TEXT(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None) 
-    repository = Column("repository", TEXT(length=None, convert_unicode=False, assert_unicode=None), ForeignKey(u'repositories.repo_name'), nullable=False, unique=None, default=None)
     action = Column("action", TEXT(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     action_date = Column("action_date", DATETIME(timezone=False), nullable=True, unique=None, default=None)
     revision = Column('revision', TEXT(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    
     user = relation('User')
+    repository = relation('Repository')
     
 class Repository(Base):
     __tablename__ = 'repositories'
