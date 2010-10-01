@@ -57,7 +57,7 @@ class TestSettingsController(TestController):
         response = self.app.post(url('admin_settings_my_account_update'), params=dict(
                                                             _method='put',
                                                             username='test_admin',
-                                                            new_password='test',
+                                                            new_password='test12',
                                                             password='',
                                                             name='NewName',
                                                             lastname='NewLastname',

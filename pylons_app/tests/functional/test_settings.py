@@ -41,7 +41,6 @@ class TestSettingsController(TestController):
         
         
         #test if fork is visible in the list ?
-        response.follow()
+        response = response.follow()
         
         print response
-        assert False
