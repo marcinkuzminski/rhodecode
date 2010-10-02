@@ -40,7 +40,7 @@ class BaseController(WSGIController):
         # available in environ['pylons.routes_dict']
         try:
             #putting this here makes sure that we update permissions every time
-            c.hg_app_user = auth.get_user(session)
+            self.hg_app_user = c.hg_app_user = auth.get_user(session)
             return WSGIController.__call__(self, environ, start_response)
         finally:
             meta.Session.remove()

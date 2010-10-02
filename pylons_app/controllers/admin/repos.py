@@ -32,7 +32,7 @@ from pylons_app.lib import helpers as h
 from pylons_app.lib.auth import LoginRequired, HasPermissionAllDecorator, \
     HasPermissionAnyDecorator
 from pylons_app.lib.base import BaseController, render
-from pylons_app.lib.utils import invalidate_cache
+from pylons_app.lib.utils import invalidate_cache, action_logger
 from pylons_app.model.db import User
 from pylons_app.model.forms import RepoForm
 from pylons_app.model.hg_model import HgModel
@@ -77,13 +77,20 @@ class ReposController(BaseController):
             invalidate_cache('cached_repo_list')
             h.flash(_('created repository %s') % form_result['repo_name'],
                     category='success')
-                                                             
+
+            if request.POST.get('user_created'):
+                action_logger(self.hg_app_user, 'user_created_repo', 
+                              form_result['repo_name'], '', self.sa)
+            else:
+                action_logger(self.hg_app_user, 'admin_created_repo', 
+                              form_result['repo_name'], '', self.sa)                
+                                                                             
         except formencode.Invalid as errors:
             c.new_repo = errors.value['repo_name']
             
             if request.POST.get('user_created'):
                 r = render('admin/repos/repo_add_create_repository.html')
-            else:
+            else:              
                 r = render('admin/repos/repo_add.html')
             
             return htmlfill.render(
@@ -169,10 +176,14 @@ class ReposController(BaseController):
         
             return redirect(url('repos'))
         try:
+            action_logger(self.hg_app_user, 'admin_deleted_repo', 
+                              repo_name, '', self.sa)
             repo_model.delete(repo)            
             invalidate_cache('cached_repo_list')
             h.flash(_('deleted repository %s') % repo_name, category='success')
-        except Exception:
+           
+        except Exception, e:
+            log.error(traceback.format_exc())
             h.flash(_('An error occured during deletion of %s') % repo_name,
                     category='error')
         

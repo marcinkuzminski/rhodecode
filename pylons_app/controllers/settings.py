@@ -28,7 +28,7 @@ from pylons.controllers.util import redirect
 from pylons.i18n.translation import _
 from pylons_app.lib.auth import LoginRequired, HasRepoPermissionAllDecorator
 from pylons_app.lib.base import BaseController, render
-from pylons_app.lib.utils import invalidate_cache
+from pylons_app.lib.utils import invalidate_cache, action_logger
 from pylons_app.model.forms import RepoSettingsForm, RepoForkForm
 from pylons_app.model.repo_model import RepoModel
 import formencode
@@ -79,7 +79,7 @@ class SettingsController(BaseController):
             form_result = _form.to_python(dict(request.POST))
             repo_model.update(repo_name, form_result)
             invalidate_cache('cached_repo_list')
-            h.flash(_('Repository %s updated succesfully' % repo_name),
+            h.flash(_('Repository %s updated successfully' % repo_name),
                     category='success')
             changed_name = form_result['repo_name']               
         except formencode.Invalid as errors:
@@ -121,11 +121,13 @@ class SettingsController(BaseController):
         
             return redirect(url('hg_home'))
         try:
+            action_logger(self.hg_app_user, 'user_deleted_repo', 
+                              repo_name, '', self.sa)            
             repo_model.delete(repo)            
             invalidate_cache('cached_repo_list')
             h.flash(_('deleted repository %s') % repo_name, category='success')
         except Exception:
-            h.flash(_('An error occured during deletion of %s') % repo_name,
+            h.flash(_('An error occurred during deletion of %s') % repo_name,
                     category='error')
         
         return redirect(url('hg_home'))
@@ -158,7 +160,8 @@ class SettingsController(BaseController):
             h.flash(_('fork %s repository as %s task added') \
                       % (repo_name, form_result['fork_name']),
                     category='success')
-                                                             
+            action_logger(self.hg_app_user, 'user_forked_repo',
+                            repo_name, '', self.sa)                                                 
         except formencode.Invalid as errors:
             c.new_repo = errors.value['fork_name']
             r = render('settings/repo_fork.html')

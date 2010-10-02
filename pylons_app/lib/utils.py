@@ -26,7 +26,7 @@ from beaker.cache import cache_region
 from mercurial import ui, config, hg
 from mercurial.error import RepoError
 from pylons_app.model import meta
-from pylons_app.model.db import Repository, User, HgAppUi, HgAppSettings,UserLog
+from pylons_app.model.db import Repository, User, HgAppUi, HgAppSettings, UserLog
 from vcs.backends.base import BaseChangeset
 from vcs.utils.lazy import LazyProperty
 import logging
@@ -57,21 +57,21 @@ def action_logger(user, action, repo, ipaddr, sa=None):
     if not sa:
         sa = meta.Session 
         
-    
-    if hasattr(user, 'user_id'):
-        user_id = user.user_id
-    elif isinstance(user, basestring):
-        
-        user_id = sa.Query(User).filter(User.username == user).one()
-    else:
-        raise Exception('You have to provide user object or username')
-   
     try:
+        if hasattr(user, 'user_id'):
+            user_id = user.user_id
+        elif isinstance(user, basestring):
+            user_id = sa.query(User).filter(User.username == user).one()
+        else:
+            raise Exception('You have to provide user object or username')
+       
+        repo_name = repo.lstrip('/')
         user_log = UserLog()
         user_log.user_id = user_id
         user_log.action = action
+        user_log.repository_name = repo_name
         user_log.repository = sa.query(Repository)\
-            .filter(Repository.repo_name==repo.lstrip('/')).one()
+            .filter(Repository.repo_name == repo_name).one()
         user_log.action_date = datetime.datetime.now()
         user_log.user_ip = ipaddr
         sa.add(user_log)

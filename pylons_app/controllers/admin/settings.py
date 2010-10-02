@@ -101,7 +101,7 @@ class SettingsController(BaseController):
             initial = HgModel.repo_scan(g.paths[0][0], g.paths[0][1], g.baseui)
             repo2db_mapper(initial, rm_obsolete)
             invalidate_cache('cached_repo_list')
-            h.flash(_('Repositories sucessfully rescanned'), category='success')            
+            h.flash(_('Repositories successfully rescanned'), category='success')            
         
         if setting_id == 'whoosh':
             repo_location = get_hg_ui_settings()['paths_root_path']
@@ -134,7 +134,7 @@ class SettingsController(BaseController):
                                     
                 except:
                     log.error(traceback.format_exc())
-                    h.flash(_('error occured during updating application settings'),
+                    h.flash(_('error occurred during updating application settings'),
                             category='error')
                                 
                     self.sa.rollback()
@@ -187,7 +187,7 @@ class SettingsController(BaseController):
                                     
                 except:
                     log.error(traceback.format_exc())
-                    h.flash(_('error occured during updating application settings'),
+                    h.flash(_('error occurred during updating application settings'),
                             category='error')
                                 
                     self.sa.rollback()

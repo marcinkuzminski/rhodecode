@@ -17,6 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
+from pylons_app.lib.utils import action_logger
 """
 Created on April 4, 2010
 users controller for pylons
@@ -71,6 +72,7 @@ class UsersController(BaseController):
             user_model.create(form_result)
             h.flash(_('created user %s') % form_result['username'],
                     category='success')
+            #action_logger(self.hg_app_user, 'new_user', '', '', self.sa)
         except formencode.Invalid as errors:
             return htmlfill.render(
                 render('admin/users/user_add.html'),
