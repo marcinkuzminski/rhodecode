@@ -24,7 +24,7 @@ versioning implementation: http://semver.org/
 @author: marcink
 """
 
-VERSION = (0, 8, 4, 'beta')
+VERSION = (0, 8, 5, 'beta')
 
 __version__ = '.'.join((str(each) for each in VERSION[:4]))
 
