@@ -9,11 +9,11 @@ Fully customizable, with authentication, permissions. Based on vcs library.
 - has it's own middleware to handle mercurial protocol request each request can 
   be logged and authenticated + threaded performance unlikely to hgweb
 - full permissions per project read/write/admin access even on mercurial request
-- mako templates let's you cusmotize look and feel of application.
+- mako templates let's you customize look and feel of application.
 - diffs annotations and source code all colored by pygments.
 - mercurial branch graph and yui-flot powered graphs with zooming and statistics
-- admin interface for performing user/permission managments as well as repository
-  managment. 
+- admin interface for performing user/permission managements as well as repository
+  management. 
 - full text search of source codes with indexing daemons using whoosh
   (no external search servers required all in one application)
 - async tasks for speed and performance using celery (works without them too)  
@@ -22,8 +22,8 @@ Fully customizable, with authentication, permissions. Based on vcs library.
 - backup scripts can do backup of whole app and send it over scp to desired location
 - setup project descriptions and info inside built in db for easy, non 
   file-system operations
-- added cache with invalidation on push/repo managment for high performance and
-  always upto date data. 
+- added cache with invalidation on push/repo management for high performance and
+  always up to date data. 
 - rss / atom feeds, gravatar support
 - based on pylons 1.0 / sqlalchemy 0.6
 
@@ -66,7 +66,7 @@ Installation
 - Default permissions on each repository is read, and owner is admin. So remember
   to update these.
 - In order to use full power of async tasks, You must install message broker
-  preferrably rabbitmq and start celeryd daemon together with hg-app. 
+  preferably rabbitmq and start celeryd daemon together with hg-app. 
   The app should gain a lot of speed and become much more responsible. 
   For installation instructions You can visit: 
   http://ask.github.com/celery/getting-started/index.html. 
