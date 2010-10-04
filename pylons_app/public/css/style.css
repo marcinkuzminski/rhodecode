@@ -3060,7 +3060,7 @@ h3.files_location{
 #changeset_content .container {
 	min-height: 120px;
 	font-size: 1.2em;
-	
+	overflow: hidden;
 }
 
 #changeset_content .container .left {
@@ -3086,6 +3086,7 @@ h3.files_location{
 #changeset_content .container .left .message {
 	font-style: italic;
 	color: #556CB5;
+	white-space: pre-wrap;
 }
 
 .cs_files {
@@ -3167,8 +3168,9 @@ h3.files_location{
 
 #graph_content .container .right {
 	float: right;
-	width: 25%;
+	width: 28%;
 	text-align: right;
+	padding-bottom: 5px;
 }
 
 #graph_content .container .left .date {
@@ -3182,6 +3184,7 @@ h3.files_location{
 #graph_content .container .left .message {
 	font-size: 100%;
 	padding-top: 3px;
+	white-space: pre-wrap;
 }
 
 .right div {

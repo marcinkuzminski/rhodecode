@@ -54,10 +54,7 @@
 								<span>${h.person(cs.author)}</span><br/>
 								<span><a href="mailto:${h.email_or_none(cs.author)}">${h.email_or_none(cs.author)}</a></span><br/>
 							</div>
-							<div class="message">
-								${h.link_to(h.wrap_paragraphs(cs.message),
-								h.url('changeset_home',repo_name=c.repo_name,revision=cs.short_id))}
-							</div>
+							<div class="message">${h.link_to(h.wrap_paragraphs(cs.message),h.url('changeset_home',repo_name=c.repo_name,revision=cs.short_id))}</div>
 						</div>	
 						<div class="right">
 									<div class="changes">
