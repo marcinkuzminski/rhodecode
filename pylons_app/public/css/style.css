@@ -3175,6 +3175,7 @@ h3.files_location{
 
 #graph_content .container .left .date {
 	font-weight: bold;
+	padding-bottom:5px;
 }
 
 #graph_content .container .left .author {
@@ -3337,11 +3338,11 @@ table.code-browser .browser-dir {
     margin-right:3px;
 }
 .info_box input#at_rev {
-	padding:1px 3px 3px 2px;
+	padding:5px 3px 3px 2px;
 	text-align:center;
 }
 .info_box input#view {
-	padding:0px 3px 2px 2px;
+	padding:4px 3px 2px 2px;
 	text-align:center;
 }
 /* -----------------------------------------------------------
