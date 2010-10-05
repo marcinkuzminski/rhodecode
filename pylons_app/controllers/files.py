@@ -24,6 +24,7 @@ files controller for pylons
 """
 from mercurial import archival
 from pylons import request, response, session, tmpl_context as c, url
+from pylons.i18n.translation import _
 from pylons.controllers.util import redirect
 from pylons_app.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from pylons_app.lib.base import BaseController, render
@@ -155,26 +156,27 @@ class FilesController(BaseController):
         c.repo = hg_model.get_repo(c.repo_name)
 
         try:
-            if diff1 not in ['', None, 'None', '0' * 12]:
+            if diff1 not in ['', None, 'None', '0' * 12, '0' * 40]:
                 c.changeset_1 = c.repo.get_changeset(diff1)
                 node1 = c.changeset_1.get_node(f_path)
             else:
                 c.changeset_1 = EmptyChangeset()
-                node1 = FileNode('.', '')
-            if diff2 not in ['', None, 'None', '0' * 12]:
+                node1 = FileNode('.', '', changeset=c.changeset_1)
+                
+            if diff2 not in ['', None, 'None', '0' * 12, '0' * 40]:
                 c.changeset_2 = c.repo.get_changeset(diff2)
                 node2 = c.changeset_2.get_node(f_path)
             else:
                 c.changeset_2 = EmptyChangeset()
-                node2 = FileNode('.', '') 
+                node2 = FileNode('.', '', changeset=c.changeset_2)
         except RepositoryError:
             return redirect(url('files_home',
                                 repo_name=c.repo_name, f_path=f_path))
 
         c.diff1 = 'r%s:%s' % (c.changeset_1.revision, c.changeset_1.short_id)
         c.diff2 = 'r%s:%s' % (c.changeset_2.revision, c.changeset_2.short_id)
-        f_udiff = differ.get_udiff(node1, node2)
         
+        f_udiff = differ.get_udiff(node1, node2)
         diff = differ.DiffProcessor(f_udiff)
                                 
         if c.action == 'download':
@@ -187,10 +189,16 @@ class FilesController(BaseController):
         elif c.action == 'raw':
             c.cur_diff = '<pre class="raw">%s</pre>' % h.escape(diff.raw_diff())
         elif c.action == 'diff':
-            c.cur_diff = diff.as_html()
+            if node1.size > c.file_size_limit or node2.size > c.file_size_limit:
+                c.cur_diff = _('Diff is to big to display')
+            else:
+                c.cur_diff = diff.as_html()
         else:
             #default option
-            c.cur_diff = diff.as_html()
+            if node1.size > c.file_size_limit or node2.size > c.file_size_limit:
+                c.cur_diff = _('Diff is to big to display')
+            else:
+                c.cur_diff = diff.as_html()
         
         if not c.cur_diff: c.no_changes = True    
         return render('files/file_diff.html')

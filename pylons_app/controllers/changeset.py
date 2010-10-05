@@ -67,6 +67,10 @@ class ChangesetController(BaseController):
             except IndexError:
                 c.changeset_old = None
             c.changes = []
+            
+            #===================================================================
+            # ADDED FILES
+            #===================================================================
             c.sum_added = 0
             for node in c.changeset.added:
                 
@@ -74,17 +78,21 @@ class ChangesetController(BaseController):
                 if filenode_old.is_binary or node.is_binary:
                     diff = wrap_to_table(_('binary file'))
                 else:
-                    c.sum_added += len(node.content)
+                    c.sum_added += node.size
                     if c.sum_added < cut_off_limit:
                         f_udiff = differ.get_udiff(filenode_old, node)
                         diff = differ.DiffProcessor(f_udiff).as_html()
                     else:
-                        diff = wrap_to_table(_('Changeset is to big see raw changeset'))
+                        diff = wrap_to_table(_('Changeset is to big and was cut'
+                                            ' off, see raw changeset instead'))
                         
                 cs1 = None
                 cs2 = node.last_changeset.short_id                                        
                 c.changes.append(('added', node, diff, cs1, cs2))
             
+            #===================================================================
+            # CHANGED FILES
+            #===================================================================
             c.sum_removed = 0    
             for node in c.changeset.changed:
                 try:
@@ -95,17 +103,21 @@ class ChangesetController(BaseController):
                 if filenode_old.is_binary or node.is_binary:
                     diff = wrap_to_table(_('binary file'))
                 else:
-                    c.sum_removed += len(node.content)
+                    c.sum_removed += node.size
                     if c.sum_removed < cut_off_limit:
                         f_udiff = differ.get_udiff(filenode_old, node)
                         diff = differ.DiffProcessor(f_udiff).as_html()
                     else:
-                        diff = wrap_to_table(_('Changeset is to big see raw changeset'))
+                        diff = wrap_to_table(_('Changeset is to big and was cut'
+                                            ' off, see raw changeset instead'))
 
                 cs1 = filenode_old.last_changeset.short_id
                 cs2 = node.last_changeset.short_id                    
                 c.changes.append(('changed', node, diff, cs1, cs2))
                 
+            #===================================================================
+            # REMOVED FILES    
+            #===================================================================
             for node in c.changeset.removed:
                 c.changes.append(('removed', node, None, None, None))            
             

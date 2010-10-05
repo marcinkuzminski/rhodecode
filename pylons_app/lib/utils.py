@@ -251,11 +251,14 @@ def invalidate_cache(name, *args):
         region_invalidate(_full_changelog_cached, None, *args)
         
 class EmptyChangeset(BaseChangeset):
+    """
+    An dummy empty changeset.
+    """
     
     revision = -1
     message = ''
     author = ''
-    
+    date = ''
     @LazyProperty
     def raw_id(self):
         """
@@ -268,6 +271,15 @@ class EmptyChangeset(BaseChangeset):
     def short_id(self):
         return self.raw_id[:12]
 
+    def get_file_changeset(self, path):
+        return self
+    
+    def get_file_content(self, path):
+        return u''
+    
+    def get_file_size(self, path):
+        return 0
+    
 def repo2db_mapper(initial_repo_list, remove_obsolete=False):
     """
     maps all found repositories into db
