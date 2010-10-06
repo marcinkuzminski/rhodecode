@@ -1,6 +1,6 @@
--------------------------------------
-Pylons based replacement for hgwebdir
--------------------------------------
+--------------------------------------------------------------
+Pylons based repository management for mercurial (and soon git)
+--------------------------------------------------------------
 
 Fully customizable, with authentication, permissions. Based on vcs library.
 
@@ -13,7 +13,9 @@ Fully customizable, with authentication, permissions. Based on vcs library.
 - diffs annotations and source code all colored by pygments.
 - mercurial branch graph and yui-flot powered graphs with zooming and statistics
 - admin interface for performing user/permission managements as well as repository
-  management. 
+  management.
+- server side forks, it's possible to fork a project and hack it free without
+  breaking the main.   
 - full text search of source codes with indexing daemons using whoosh
   (no external search servers required all in one application)
 - async tasks for speed and performance using celery (works without them too)  
@@ -32,8 +34,7 @@ Fully customizable, with authentication, permissions. Based on vcs library.
 - code review based on hg-review (when it's stable)
 - git support (when vcs can handle it - almost there !)
 - commit based wikis
-- in server forks
-- clonning from remote repositories into hg-app 
+- clonning from remote repositories into rhodecode (git/mercurial)
 - other cools stuff that i can figure out (or You can help me figure out)
 
 .. note::
@@ -45,14 +46,14 @@ Fully customizable, with authentication, permissions. Based on vcs library.
 Installation
 -------------
 
-- I highly recommend to install new virtualenv for hg-app see 
+- I highly recommend to install new virtualenv for rhodecode see 
   http://pypi.python.org/pypi/virtualenv
-- Create new virtualenv using `virtualenv --no-site-packages /var/www/hgapp-venv`
-  this will install new virtual env into /var/www/hgapp-venv. 
+- Create new virtualenv using `virtualenv --no-site-packages /var/www/rhodecode-venv`
+  this will install new virtual env into /var/www/rhodecode-venv. 
   Activate the virtualenv by running 
-  `source activate /var/www/hgapp-venv/bin/activate`   
-- Make a folder for hg-app somewhere on the filesystem for example /var/www/hgapp  
-- Download and extract http://bitbucket.org/marcinkuzminski/hg-app/get/tip.zip
+  `source activate /var/www/rhodecode-venv/bin/activate`   
+- Make a folder for rhodecode somewhere on the filesystem for example /var/www/rhodecode  
+- Download and extract http://bitbucket.org/marcinkuzminski/rhodecode/get/tip.zip
   into created directory.
 - Run `python setup.py install` in order to install the application and all
   needed dependencies. Make sure that You're using activated virutalenv  
@@ -66,14 +67,14 @@ Installation
 - Default permissions on each repository is read, and owner is admin. So remember
   to update these.
 - In order to use full power of async tasks, You must install message broker
-  preferably rabbitmq and start celeryd daemon together with hg-app. 
+  preferably rabbitmq and start celeryd daemon together with rhodecode. 
   The app should gain a lot of speed and become much more responsible. 
   For installation instructions You can visit: 
   http://ask.github.com/celery/getting-started/index.html. 
-- All needed configs are inside hg-app ie. celeryconfig.py , production.ini
+- All needed configs are inside rhodecode ie. celeryconfig.py , production.ini
   You can configure the email, ports, loggers, workers from there.
 - For full text search You can either put crontab entry for 
-  `python /var/www/hgapp/rhodecode/lib/indexers/daemon.py incremental <path_to_repos>`
+  `python /var/www/rhodecode/rhodecode/lib/indexers/daemon.py incremental <path_to_repos>`
   or run indexer from admin panel. This will scann the repos given in the 
   application setup or given path for daemon.py and each scann in incremental 
   mode will scann only changed files, 

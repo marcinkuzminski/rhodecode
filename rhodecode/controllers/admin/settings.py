@@ -33,7 +33,7 @@ from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator, \
 from rhodecode.lib.base import BaseController, render
 from rhodecode.lib.utils import repo2db_mapper, invalidate_cache, \
     set_rhodecode_config, get_hg_settings, get_hg_ui_settings, make_ui
-from rhodecode.model.db import User, UserLog, HgAppSettings, HgAppUi
+from rhodecode.model.db import User, UserLog, RhodeCodeSettings, RhodeCodeUi
 from rhodecode.model.forms import UserForm, ApplicationSettingsForm, \
     ApplicationUiSettingsForm
 from rhodecode.model.hg_model import HgModel
@@ -116,12 +116,12 @@ class SettingsController(BaseController):
                 form_result = application_form.to_python(dict(request.POST))
             
                 try:
-                    hgsettings1 = self.sa.query(HgAppSettings)\
-                    .filter(HgAppSettings.app_settings_name == 'title').one()
+                    hgsettings1 = self.sa.query(RhodeCodeSettings)\
+                    .filter(RhodeCodeSettings.app_settings_name == 'title').one()
                     hgsettings1.app_settings_value = form_result['rhodecode_title'] 
                     
-                    hgsettings2 = self.sa.query(HgAppSettings)\
-                    .filter(HgAppSettings.app_settings_name == 'realm').one()
+                    hgsettings2 = self.sa.query(RhodeCodeSettings)\
+                    .filter(RhodeCodeSettings.app_settings_name == 'realm').one()
                     hgsettings2.app_settings_value = form_result['rhodecode_realm'] 
                     
                     
@@ -155,22 +155,22 @@ class SettingsController(BaseController):
             
                 try:
                     
-                    hgsettings1 = self.sa.query(HgAppUi)\
-                    .filter(HgAppUi.ui_key == 'push_ssl').one()
+                    hgsettings1 = self.sa.query(RhodeCodeUi)\
+                    .filter(RhodeCodeUi.ui_key == 'push_ssl').one()
                     hgsettings1.ui_value = form_result['web_push_ssl']
                     
-                    hgsettings2 = self.sa.query(HgAppUi)\
-                    .filter(HgAppUi.ui_key == '/').one()
+                    hgsettings2 = self.sa.query(RhodeCodeUi)\
+                    .filter(RhodeCodeUi.ui_key == '/').one()
                     hgsettings2.ui_value = form_result['paths_root_path']                    
                     
                     
                     #HOOKS
-                    hgsettings3 = self.sa.query(HgAppUi)\
-                    .filter(HgAppUi.ui_key == 'changegroup.update').one()
+                    hgsettings3 = self.sa.query(RhodeCodeUi)\
+                    .filter(RhodeCodeUi.ui_key == 'changegroup.update').one()
                     hgsettings3.ui_active = bool(form_result['hooks_changegroup_update'])  
                     
-                    hgsettings4 = self.sa.query(HgAppUi)\
-                    .filter(HgAppUi.ui_key == 'changegroup.repo_size').one()
+                    hgsettings4 = self.sa.query(RhodeCodeUi)\
+                    .filter(RhodeCodeUi.ui_key == 'changegroup.repo_size').one()
                     hgsettings4.ui_active = bool(form_result['hooks_changegroup_repo_size'])                                          
                     
                     

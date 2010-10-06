@@ -62,7 +62,7 @@ class TestLoginController(TestController):
         
     def test_register(self):
         response = self.app.get(url(controller='login', action='register'))
-        assert 'Sign Up to hg-app' in response.body, 'wrong page for user registration'
+        assert 'Sign Up to rhodecode' in response.body, 'wrong page for user registration'
         
     def test_register_err_same_username(self):
         response = self.app.post(url(controller='login', action='register'),
@@ -104,7 +104,7 @@ class TestLoginController(TestController):
                                              'lastname':lastname})
         print response.body
         assert response.status == '302 Found', 'Wrong response from register page got %s' % response.status        
-        assert 'You have successfully registered into hg-app' in response.session['flash'][0], 'No flash message about user registration'
+        assert 'You have successfully registered into rhodecode' in response.session['flash'][0], 'No flash message about user registration'
         
         ret = self.sa.query(User).filter(User.username == 'test_regular4').one()
         assert ret.username == username , 'field mismatch %s %s' % (ret.username, username)
@@ -140,7 +140,7 @@ class TestLoginController(TestController):
         response = self.app.post(url(controller='login', action='password_reset'),
                                             {'email':email, })
         print response.session['flash']
-        assert 'You have successfully registered into hg-app' in response.session['flash'][0], 'No flash message about user registration'
+        assert 'You have successfully registered into rhodecode' in response.session['flash'][0], 'No flash message about user registration'
         assert 'Your new password was sent' in response.session['flash'][1], 'No flash message about password reset'
         
         

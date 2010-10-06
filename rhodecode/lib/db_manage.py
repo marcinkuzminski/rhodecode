@@ -34,7 +34,7 @@ sys.path.append(ROOT)
 from rhodecode.lib.auth import get_crypt_password
 from rhodecode.lib.utils import ask_ok
 from rhodecode.model import init_model
-from rhodecode.model.db import User, Permission, HgAppUi, HgAppSettings, \
+from rhodecode.model.db import User, Permission, RhodeCodeUi, RhodeCodeSettings, \
     UserToPerm
 from rhodecode.model import meta
 from sqlalchemy.engine import create_engine
@@ -107,50 +107,50 @@ class DbManage(object):
             log.error('You entered wrong path: %s', path)
             sys.exit()
         
-        hooks1 = HgAppUi()
+        hooks1 = RhodeCodeUi()
         hooks1.ui_section = 'hooks'
         hooks1.ui_key = 'changegroup.update'
         hooks1.ui_value = 'hg update >&2'
         
-        hooks2 = HgAppUi()
+        hooks2 = RhodeCodeUi()
         hooks2.ui_section = 'hooks'
         hooks2.ui_key = 'changegroup.repo_size'
         hooks2.ui_value = 'python:rhodecode.lib.hooks.repo_size' 
                 
-        web1 = HgAppUi()
+        web1 = RhodeCodeUi()
         web1.ui_section = 'web'
         web1.ui_key = 'push_ssl'
         web1.ui_value = 'false'
                 
-        web2 = HgAppUi()
+        web2 = RhodeCodeUi()
         web2.ui_section = 'web'
         web2.ui_key = 'allow_archive'
         web2.ui_value = 'gz zip bz2'
                 
-        web3 = HgAppUi()
+        web3 = RhodeCodeUi()
         web3.ui_section = 'web'
         web3.ui_key = 'allow_push'
         web3.ui_value = '*'
         
-        web4 = HgAppUi()
+        web4 = RhodeCodeUi()
         web4.ui_section = 'web'
         web4.ui_key = 'baseurl'
         web4.ui_value = '/'                        
         
-        paths = HgAppUi()
+        paths = RhodeCodeUi()
         paths.ui_section = 'paths'
         paths.ui_key = '/'
         paths.ui_value = os.path.join(path, '*')
         
         
-        hgsettings1 = HgAppSettings()
+        hgsettings1 = RhodeCodeSettings()
         
         hgsettings1.app_settings_name = 'realm'
-        hgsettings1.app_settings_value = 'hg-app authentication'
+        hgsettings1.app_settings_value = 'rhodecode authentication'
         
-        hgsettings2 = HgAppSettings()
+        hgsettings2 = RhodeCodeSettings()
         hgsettings2.app_settings_name = 'title'
-        hgsettings2.app_settings_value = 'hg-app'      
+        hgsettings2.app_settings_value = 'rhodecode'      
         
         try:
             self.sa.add(hooks1)
@@ -215,8 +215,8 @@ class DbManage(object):
                  ('hg.create.repository', 'Repository create'),
                  ('hg.create.none', 'Repository creation disabled'),
                  ('hg.register.none', 'Register disabled'),
-                 ('hg.register.manual_activate', 'Register new user with hg-app without manual activation'),
-                 ('hg.register.auto_activate', 'Register new user with hg-app without auto activation'),
+                 ('hg.register.manual_activate', 'Register new user with rhodecode without manual activation'),
+                 ('hg.register.auto_activate', 'Register new user with rhodecode without auto activation'),
                 ]
         
         for p in perms:

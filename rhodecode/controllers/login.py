@@ -101,7 +101,7 @@ class LoginController(BaseController):
                 form_result = register_form.to_python(dict(request.POST))
                 form_result['active'] = c.auto_active
                 user_model.create_registration(form_result)
-                h.flash(_('You have successfully registered into hg-app'),
+                h.flash(_('You have successfully registered into rhodecode'),
                             category='success')                
                 return redirect(url('login_home'))
                                

@@ -23,10 +23,10 @@ def get_session():
     return sa
 
 def get_hg_settings():
-    from rhodecode.model.db import HgAppSettings
+    from rhodecode.model.db import RhodeCodeSettings
     try:
         sa = get_session()
-        ret = sa.query(HgAppSettings).all()
+        ret = sa.query(RhodeCodeSettings).all()
     finally:
         sa.remove()
         
@@ -39,10 +39,10 @@ def get_hg_settings():
     return settings
 
 def get_hg_ui_settings():
-    from rhodecode.model.db import HgAppUi
+    from rhodecode.model.db import RhodeCodeUi
     try:
         sa = get_session()
-        ret = sa.query(HgAppUi).all()
+        ret = sa.query(RhodeCodeUi).all()
     finally:
         sa.remove()
         
@@ -239,8 +239,8 @@ def reset_user_password(user_email):
             sa.rollback()
         
         run_task(send_email, user_email,
-                 "Your new hg-app password",
-                 'Your new hg-app password:%s' % (new_passwd))
+                 "Your new rhodecode password",
+                 'Your new rhodecode password:%s' % (new_passwd))
         log.info('send new password mail to %s', user_email)
         
         

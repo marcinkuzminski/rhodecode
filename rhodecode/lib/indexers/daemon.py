@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
-# whoosh indexer daemon for hg-app
+# whoosh indexer daemon for rhodecode
 # Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
 #
 # This program is free software; you can redistribute it and/or

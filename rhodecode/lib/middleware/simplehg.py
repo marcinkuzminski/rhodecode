@@ -129,7 +129,7 @@ class SimpleHg(object):
         if action == 'push':
             self.__invalidate_cache(repo_name)
             messages = []
-            messages.append('thank you for using hg-app')
+            messages.append('thank you for using rhodecode')
         
             return self.msg_wrapper(app, environ, start_response, messages)
         else:

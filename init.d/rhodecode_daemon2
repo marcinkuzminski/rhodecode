@@ -4,13 +4,13 @@
 ########################################
 
 ### BEGIN INIT INFO
-# Provides:          hg-app          
+# Provides:          rhodecode          
 # Required-Start:    $all
 # Required-Stop:     $all
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
-# Short-Description: starts instance of hg-app
-# Description:       starts instance of hg-app using start-stop-daemon
+# Short-Description: starts instance of rhodecode
+# Description:       starts instance of rhodecode using start-stop-daemon
 ### END INIT INFO
 
 APP_NAME="rhodecode"

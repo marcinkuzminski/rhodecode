@@ -7,14 +7,14 @@ import logging
 
 log = logging.getLogger(__name__)
 
-class HgAppSettings(Base):
+class RhodeCodeSettings(Base):
     __tablename__ = 'rhodecode_settings'
     __table_args__ = (UniqueConstraint('app_settings_name'), {'useexisting':True})
     app_settings_id = Column("app_settings_id", INTEGER(), nullable=False, unique=True, default=None, primary_key=True)
     app_settings_name = Column("app_settings_name", TEXT(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     app_settings_value = Column("app_settings_value", TEXT(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
 
-class HgAppUi(Base):
+class RhodeCodeUi(Base):
     __tablename__ = 'rhodecode_ui'
     __table_args__ = {'useexisting':True}
     ui_id = Column("ui_id", INTEGER(), nullable=False, unique=True, default=None, primary_key=True)

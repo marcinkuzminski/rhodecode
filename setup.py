@@ -7,10 +7,10 @@ except ImportError:
     from setuptools import setup, find_packages
 
 setup(
-    name='HgApp-%s' % get_version(),
+    name='RhodeCode-%s' % get_version(),
     version=get_version(),
     description='Mercurial repository serving and browsing app',
-    keywords='mercurial web hgwebdir replacement serving hgweb',
+    keywords='mercurial web hgwebdir replacement serving hgweb rhodecode',
     license='BSD',
     author='marcin kuzminski',
     author_email='marcin@python-works.com',

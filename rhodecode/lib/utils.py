@@ -26,7 +26,7 @@ from beaker.cache import cache_region
 from mercurial import ui, config, hg
 from mercurial.error import RepoError
 from rhodecode.model import meta
-from rhodecode.model.db import Repository, User, HgAppUi, HgAppSettings, UserLog
+from rhodecode.model.db import Repository, User, RhodeCodeUi, RhodeCodeSettings, UserLog
 from vcs.backends.base import BaseChangeset
 from vcs.utils.lazy import LazyProperty
 import logging
@@ -127,7 +127,7 @@ def ask_ok(prompt, retries=4, complaint='Yes or no, please!'):
 def get_hg_ui_cached():
     try:
         sa = meta.Session
-        ret = sa.query(HgAppUi).all()
+        ret = sa.query(RhodeCodeUi).all()
     finally:
         meta.Session.remove()
     return ret
@@ -136,7 +136,7 @@ def get_hg_ui_cached():
 def get_hg_settings():
     try:
         sa = meta.Session
-        ret = sa.query(HgAppSettings).all()
+        ret = sa.query(RhodeCodeSettings).all()
     finally:
         meta.Session.remove()
         
@@ -151,7 +151,7 @@ def get_hg_settings():
 def get_hg_ui_settings():
     try:
         sa = meta.Session
-        ret = sa.query(HgAppUi).all()
+        ret = sa.query(RhodeCodeUi).all()
     finally:
         meta.Session.remove()
         
