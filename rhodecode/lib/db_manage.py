@@ -150,11 +150,11 @@ class DbManage(object):
         hgsettings1 = RhodeCodeSettings()
         
         hgsettings1.app_settings_name = 'realm'
-        hgsettings1.app_settings_value = 'rhodecode authentication'
+        hgsettings1.app_settings_value = 'RhodeCode authentication'
         
         hgsettings2 = RhodeCodeSettings()
         hgsettings2.app_settings_name = 'title'
-        hgsettings2.app_settings_value = 'rhodecode'      
+        hgsettings2.app_settings_value = 'RhodeCode'      
         
         try:
             self.sa.add(hooks1)
@@ -177,7 +177,7 @@ class DbManage(object):
         new_user = User()
         new_user.username = username
         new_user.password = get_crypt_password(password)
-        new_user.name = 'Hg'
+        new_user.name = 'RhodeCode'
         new_user.lastname = 'Admin'
         new_user.email = email
         new_user.admin = admin

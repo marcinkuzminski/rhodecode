@@ -260,7 +260,7 @@ class LoginForm(formencode.Schema):
                             not_empty=True,
                             messages={
                                       'empty':_('Please enter a password'),
-                                      'tooShort':_('Enter a value %(min)i characters long or more')}
+                                      'tooShort':_('Enter %(min)i characters or more')}
                                 )
 
 

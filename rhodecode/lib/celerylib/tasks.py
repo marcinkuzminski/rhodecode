@@ -1,6 +1,5 @@
 from celery.decorators import task
-from celery.task.sets import subtask
-from celeryconfig import PYLONS_CONFIG as config
+
 from operator import itemgetter
 from pylons.i18n.translation import _
 from rhodecode.lib.celerylib import run_task, locked_task
@@ -11,6 +10,14 @@ from time import mktime
 from vcs.backends.hg import MercurialRepository
 import json
 import traceback
+
+try:
+    from celeryconfig import PYLONS_CONFIG as config
+except ImportError:
+    #if celeryconfig is not present let's just load our pylons
+    #config instead
+    from pylons import config
+
 
 __all__ = ['whoosh_index', 'get_commits_stats',
            'reset_user_password', 'send_email']
