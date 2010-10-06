@@ -73,16 +73,16 @@ class ReposController(BaseController):
         form_result = {}
         try:
             form_result = _form.to_python(dict(request.POST))
-            repo_model.create(form_result, c.hg_app_user)
+            repo_model.create(form_result, c.rhodecode_user)
             invalidate_cache('cached_repo_list')
             h.flash(_('created repository %s') % form_result['repo_name'],
                     category='success')
 
             if request.POST.get('user_created'):
-                action_logger(self.hg_app_user, 'user_created_repo', 
+                action_logger(self.rhodecode_user, 'user_created_repo', 
                               form_result['repo_name'], '', self.sa)
             else:
-                action_logger(self.hg_app_user, 'admin_created_repo', 
+                action_logger(self.rhodecode_user, 'admin_created_repo', 
                               form_result['repo_name'], '', self.sa)                
                                                                              
         except formencode.Invalid as errors:
@@ -176,7 +176,7 @@ class ReposController(BaseController):
         
             return redirect(url('repos'))
         try:
-            action_logger(self.hg_app_user, 'admin_deleted_repo', 
+            action_logger(self.rhodecode_user, 'admin_deleted_repo', 
                               repo_name, '', self.sa)
             repo_model.delete(repo)            
             invalidate_cache('cached_repo_list')

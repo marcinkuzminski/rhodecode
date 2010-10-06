@@ -18,11 +18,11 @@
         <ul id="logged-user">
             <li class="first">
 	            <div class="gravatar">
-	            	<img alt="gravatar" src="${h.gravatar_url(c.hg_app_user.email,24)}" />
+	            	<img alt="gravatar" src="${h.gravatar_url(c.rhodecode_user.email,24)}" />
 	            </div>
 	            <div class="account">
-	            	${h.link_to('%s %s'%(c.hg_app_user.name,c.hg_app_user.lastname),h.url('admin_settings_my_account'))}<br/>
-	            	${h.link_to(c.hg_app_user.username,h.url('admin_settings_my_account'))}
+	            	${h.link_to('%s %s'%(c.rhodecode_user.name,c.rhodecode_user.lastname),h.url('admin_settings_my_account'))}<br/>
+	            	${h.link_to(c.rhodecode_user.username,h.url('admin_settings_my_account'))}
 	            </div>	
             </li>
             <li class="last highlight">${h.link_to(u'Logout',h.url('logout_home'))}</li>
@@ -34,7 +34,7 @@
             </div>
             <!-- logo -->
             <div id="logo">
-                <h1><a href="${h.url('hg_home')}">${c.hg_app_name}</a></h1>
+                <h1><a href="${h.url('hg_home')}">${c.rhodecode_name}</a></h1>
             </div>
             <!-- end logo -->
             <!-- quick menu -->
@@ -66,7 +66,7 @@
 
 	<!-- footer -->
 	<div id="footer">
-	    <p>Hg App ${c.hg_app_version} &copy; 2010 by Marcin Kuzminski</p>
+	    <p>Hg App ${c.rhodecode_version} &copy; 2010 by Marcin Kuzminski</p>
         <script type="text/javascript">${h.tooltip.activate()}</script>	    
 	</div>
 	<!-- end footer -->

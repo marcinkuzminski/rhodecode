@@ -34,7 +34,7 @@ def get_hg_settings():
         raise Exception('Could not get application settings !')
     settings = {}
     for each in ret:
-        settings['hg_app_' + each.app_settings_name] = each.app_settings_value    
+        settings['rhodecode_' + each.app_settings_name] = each.app_settings_value    
     
     return settings
 

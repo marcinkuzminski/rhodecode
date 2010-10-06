@@ -15,7 +15,7 @@ class TestLoginController(TestController):
                                  {'username':'test_admin',
                                   'password':'test12'})
         assert response.status == '302 Found', 'Wrong response code from login got %s' % response.status
-        assert response.session['hg_app_user'].username == 'test_admin', 'wrong logged in user'
+        assert response.session['rhodecode_user'].username == 'test_admin', 'wrong logged in user'
         response = response.follow()
         assert 'auto description for vcs_test' in response.body
     
@@ -25,7 +25,7 @@ class TestLoginController(TestController):
                                   'password':'test12'})
         print response
         assert response.status == '302 Found', 'Wrong response code from login got %s' % response.status
-        assert response.session['hg_app_user'].username == 'test_regular', 'wrong logged in user'
+        assert response.session['rhodecode_user'].username == 'test_regular', 'wrong logged in user'
         response = response.follow()
         assert 'auto description for vcs_test' in response.body
         assert '<a title="Admin" href="/_admin">' not in response.body

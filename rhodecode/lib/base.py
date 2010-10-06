@@ -15,8 +15,8 @@ from rhodecode.model.hg_model import _get_repos_cached, \
 class BaseController(WSGIController):
     
     def __before__(self):
-        c.hg_app_version = __version__
-        c.hg_app_name = config['hg_app_title']
+        c.rhodecode_version = __version__
+        c.rhodecode_name = config['rhodecode_title']
         c.repo_name = get_repo_slug(request)
         c.cached_repo_list = _get_repos_cached()
         c.repo_switcher_list = _get_repos_switcher_cached(c.cached_repo_list)
@@ -40,7 +40,7 @@ class BaseController(WSGIController):
         # available in environ['pylons.routes_dict']
         try:
             #putting this here makes sure that we update permissions every time
-            self.hg_app_user = c.hg_app_user = auth.get_user(session)
+            self.rhodecode_user = c.rhodecode_user = auth.get_user(session)
             return WSGIController.__call__(self, environ, start_response)
         finally:
             meta.Session.remove()

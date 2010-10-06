@@ -8,7 +8,7 @@ syntax: regexp
 syntax: regexp
 ^\.pydevproject$
 syntax: regexp
-^hg_app\.db$
+^rhodecode\.db$
 syntax: regexp
 ^test\.db$
 syntax: regexp

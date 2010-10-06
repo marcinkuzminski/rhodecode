@@ -333,8 +333,8 @@ def ApplicationSettingsForm():
     class _ApplicationSettingsForm(formencode.Schema):
         allow_extra_fields = True
         filter_extra_fields = False
-        hg_app_title = UnicodeString(strip=True, min=1, not_empty=True)
-        hg_app_realm = UnicodeString(strip=True, min=1, not_empty=True)
+        rhodecode_title = UnicodeString(strip=True, min=1, not_empty=True)
+        rhodecode_realm = UnicodeString(strip=True, min=1, not_empty=True)
         
     return _ApplicationSettingsForm
  

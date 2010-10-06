@@ -2,8 +2,8 @@ include COPYING
 include README.rst
 include rhodecode/config/deployment.ini_tmpl
 
-include hg_app_daemon
-include hg_app_daemon2
+include rhodecode_daemon
+include rhodecode_daemon2
 
 recursive-include rhodecode/public/css *
 recursive-include rhodecode/public/images *

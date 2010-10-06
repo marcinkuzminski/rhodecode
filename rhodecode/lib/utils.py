@@ -144,7 +144,7 @@ def get_hg_settings():
         raise Exception('Could not get application settings !')
     settings = {}
     for each in ret:
-        settings['hg_app_' + each.app_settings_name] = each.app_settings_value    
+        settings['rhodecode_' + each.app_settings_name] = each.app_settings_value    
     
     return settings
 
@@ -223,7 +223,7 @@ def make_ui(read_from='file', path=None, checkpaths=True):
     return baseui
 
 
-def set_hg_app_config(config):
+def set_rhodecode_config(config):
     hgsettings = get_hg_settings()
     
     for k, v in hgsettings.items():

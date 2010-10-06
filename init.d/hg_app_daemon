@@ -3,7 +3,7 @@
 #### THIS IS AN GENTOO INIT.D SCRIPT####
 ########################################
 
-APP_NAME="hg_app"
+APP_NAME="rhodecode"
 APP_HOMEDIR="marcink/python_workspace"
 APP_PATH="/home/$APP_HOMEDIR/$APP_NAME"
 

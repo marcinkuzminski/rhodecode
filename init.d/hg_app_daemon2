@@ -13,7 +13,7 @@
 # Description:       starts instance of hg-app using start-stop-daemon
 ### END INIT INFO
 
-APP_NAME="hg_app"
+APP_NAME="rhodecode"
 APP_HOMEDIR="marcink/python_workspace"
 APP_PATH="/home/$APP_HOMEDIR/$APP_NAME"
 

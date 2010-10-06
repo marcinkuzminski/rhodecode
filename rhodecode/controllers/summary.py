@@ -54,7 +54,7 @@ class SummaryController(BaseController):
             
         uri = u'%(protocol)s://%(user)s@%(host)s%(prefix)s/%(repo_name)s' % {
                                         'protocol': e.get('wsgi.url_scheme'),
-                                        'user':str(c.hg_app_user.username),
+                                        'user':str(c.rhodecode_user.username),
                                         'host':e.get('HTTP_HOST'),
                                         'prefix':e.get('SCRIPT_NAME'),
                                         'repo_name':c.repo_name, }

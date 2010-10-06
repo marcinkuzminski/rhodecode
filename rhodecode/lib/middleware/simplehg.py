@@ -59,7 +59,7 @@ class SimpleHg(object):
         #===================================================================
         username = REMOTE_USER(environ)
         if not username:
-            self.authenticate.realm = self.config['hg_app_realm']
+            self.authenticate.realm = self.config['rhodecode_realm']
             result = self.authenticate(environ)
             if isinstance(result, str):
                 AUTH_TYPE.update(environ, 'basic')

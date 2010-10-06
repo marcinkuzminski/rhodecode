@@ -72,7 +72,7 @@ class UsersController(BaseController):
             user_model.create(form_result)
             h.flash(_('created user %s') % form_result['username'],
                     category='success')
-            #action_logger(self.hg_app_user, 'new_user', '', '', self.sa)
+            #action_logger(self.rhodecode_user, 'new_user', '', '', self.sa)
         except formencode.Invalid as errors:
             return htmlfill.render(
                 render('admin/users/user_add.html'),

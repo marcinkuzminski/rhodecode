@@ -4,7 +4,7 @@ from pylons.configuration import PylonsConfig
 from pylons.error import handle_mako_error
 from rhodecode.config.routing import make_map
 from rhodecode.lib.auth import set_available_permissions, set_base_path
-from rhodecode.lib.utils import repo2db_mapper, make_ui, set_hg_app_config
+from rhodecode.lib.utils import repo2db_mapper, make_ui, set_rhodecode_config
 from rhodecode.model import init_model
 from rhodecode.model.hg_model import _get_repos_cached_initial
 from sqlalchemy import engine_from_config
@@ -72,7 +72,7 @@ def load_environment(global_conf, app_conf, initial=False):
     repo2db_mapper(_get_repos_cached_initial(config['pylons.app_globals'], initial))
     set_available_permissions(config)
     set_base_path(config)
-    set_hg_app_config(config)
+    set_rhodecode_config(config)
     # CONFIGURATION OPTIONS HERE (note: all config options will override
     # any Pylons config options)
     

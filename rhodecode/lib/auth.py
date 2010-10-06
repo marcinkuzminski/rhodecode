@@ -230,11 +230,11 @@ def get_user(session):
     Gets user from session, and wraps permissions into user
     @param session:
     """
-    user = session.get('hg_app_user', AuthUser())
+    user = session.get('rhodecode_user', AuthUser())
     if user.is_authenticated:
         user = fill_data(user)
     user = fill_perms(user)
-    session['hg_app_user'] = user
+    session['rhodecode_user'] = user
     session.save()
     return user
         
@@ -248,7 +248,7 @@ class LoginRequired(object):
         return decorator(self.__wrapper, func)
     
     def __wrapper(self, func, *fargs, **fkwargs):
-        user = session.get('hg_app_user', AuthUser())
+        user = session.get('rhodecode_user', AuthUser())
         log.debug('Checking login required for user:%s', user.username)
         if user.is_authenticated:
             log.debug('user %s is authenticated', user.username)
@@ -287,7 +287,7 @@ class PermsDecorator(object):
 #        _wrapper.__dict__.update(func.__dict__)
 #        _wrapper.__doc__ = func.__doc__
 
-        self.user_perms = session.get('hg_app_user', AuthUser()).permissions
+        self.user_perms = session.get('rhodecode_user', AuthUser()).permissions
         log.debug('checking %s permissions %s for %s',
            self.__class__.__name__, self.required_perms, func.__name__)
         
@@ -378,7 +378,7 @@ class PermsFunction(object):
         self.repo_name = None
         
     def __call__(self, check_Location=''):
-        user = session.get('hg_app_user', False)
+        user = session.get('rhodecode_user', False)
         if not user:
             return False
         self.user_perms = user.permissions

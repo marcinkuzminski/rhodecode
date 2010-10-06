@@ -32,7 +32,7 @@ from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator, \
     HasPermissionAnyDecorator
 from rhodecode.lib.base import BaseController, render
 from rhodecode.lib.utils import repo2db_mapper, invalidate_cache, \
-    set_hg_app_config, get_hg_settings, get_hg_ui_settings, make_ui
+    set_rhodecode_config, get_hg_settings, get_hg_ui_settings, make_ui
 from rhodecode.model.db import User, UserLog, HgAppSettings, HgAppUi
 from rhodecode.model.forms import UserForm, ApplicationSettingsForm, \
     ApplicationUiSettingsForm
@@ -118,17 +118,17 @@ class SettingsController(BaseController):
                 try:
                     hgsettings1 = self.sa.query(HgAppSettings)\
                     .filter(HgAppSettings.app_settings_name == 'title').one()
-                    hgsettings1.app_settings_value = form_result['hg_app_title'] 
+                    hgsettings1.app_settings_value = form_result['rhodecode_title'] 
                     
                     hgsettings2 = self.sa.query(HgAppSettings)\
                     .filter(HgAppSettings.app_settings_name == 'realm').one()
-                    hgsettings2.app_settings_value = form_result['hg_app_realm'] 
+                    hgsettings2.app_settings_value = form_result['rhodecode_realm'] 
                     
                     
                     self.sa.add(hgsettings1)
                     self.sa.add(hgsettings2)
                     self.sa.commit()
-                    set_hg_app_config(config)
+                    set_rhodecode_config(config)
                     h.flash(_('Updated application settings'),
                             category='success')
                                     
@@ -231,7 +231,7 @@ class SettingsController(BaseController):
         GET /_admin/my_account Displays info about my account 
         """
         # url('admin_settings_my_account')
-        c.user = self.sa.query(User).get(c.hg_app_user.user_id)
+        c.user = self.sa.query(User).get(c.rhodecode_user.user_id)
         c.user_repos = []
         for repo in c.cached_repo_list.values():
             if repo.dbrepo.user.username == c.user.username:
@@ -259,9 +259,9 @@ class SettingsController(BaseController):
         #           method='put')
         # url('admin_settings_my_account_update', id=ID)
         user_model = UserModel()
-        uid = c.hg_app_user.user_id
+        uid = c.rhodecode_user.user_id
         _form = UserForm(edit=True, old_data={'user_id':uid,
-                                              'email':c.hg_app_user.email})()
+                                              'email':c.rhodecode_user.email})()
         form_result = {}
         try:
             form_result = _form.to_python(dict(request.POST))
@@ -270,7 +270,7 @@ class SettingsController(BaseController):
                     category='success')
                            
         except formencode.Invalid as errors:
-            c.user = self.sa.query(User).get(c.hg_app_user.user_id)
+            c.user = self.sa.query(User).get(c.rhodecode_user.user_id)
             c.user_repos = []
             for repo in c.cached_repo_list.values():
                 if repo.dbrepo.user.username == c.user.username:

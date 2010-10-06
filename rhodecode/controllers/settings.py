@@ -121,7 +121,7 @@ class SettingsController(BaseController):
         
             return redirect(url('hg_home'))
         try:
-            action_logger(self.hg_app_user, 'user_deleted_repo', 
+            action_logger(self.rhodecode_user, 'user_deleted_repo', 
                               repo_name, '', self.sa)            
             repo_model.delete(repo)            
             invalidate_cache('cached_repo_list')
@@ -156,11 +156,11 @@ class SettingsController(BaseController):
         try:
             form_result = _form.to_python(dict(request.POST))
             form_result.update({'repo_name':repo_name})
-            repo_model.create_fork(form_result, c.hg_app_user)
+            repo_model.create_fork(form_result, c.rhodecode_user)
             h.flash(_('fork %s repository as %s task added') \
                       % (repo_name, form_result['fork_name']),
                     category='success')
-            action_logger(self.hg_app_user, 'user_forked_repo',
+            action_logger(self.rhodecode_user, 'user_forked_repo',
                             repo_name, '', self.sa)                                                 
         except formencode.Invalid as errors:
             c.new_repo = errors.value['fork_name']

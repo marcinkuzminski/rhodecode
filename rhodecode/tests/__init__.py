@@ -54,5 +54,5 @@ class TestController(TestCase):
             assert False, 'could not login using %s %s' % (username, password)
         
         assert response.status == '302 Found', 'Wrong response code from login got %s' % response.status
-        assert response.session['hg_app_user'].username == username, 'wrong logged in user got %s expected %s' % (response.session['hg_app_user'].username, username)
+        assert response.session['rhodecode_user'].username == username, 'wrong logged in user got %s expected %s' % (response.session['rhodecode_user'].username, username)
         return response.follow()

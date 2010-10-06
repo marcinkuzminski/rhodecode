@@ -46,7 +46,7 @@ class LoginController(BaseController):
         #redirect if already logged in
         c.came_from = request.GET.get('came_from', None)
         
-        if c.hg_app_user.is_authenticated:
+        if c.rhodecode_user.is_authenticated:
             return redirect(url('hg_home'))
         
         if request.POST:
@@ -63,7 +63,7 @@ class LoginController(BaseController):
                 auth_user.user_id = user.user_id
                 auth_user.name = user.name
                 auth_user.lastname = user.lastname
-                session['hg_app_user'] = auth_user
+                session['rhodecode_user'] = auth_user
                 session.save()
                 log.info('user %s is now authenticated', username)
                 
@@ -138,7 +138,7 @@ class LoginController(BaseController):
         return render('/password_reset.html')
         
     def logout(self):
-        session['hg_app_user'] = AuthUser()
+        session['rhodecode_user'] = AuthUser()
         session.save()
         log.info('Logging out and setting user as Empty')
         redirect(url('hg_home'))
