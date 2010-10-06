@@ -1,6 +1,6 @@
 ################################################################################
 ################################################################################
-# rhodecode - Pylons environment configuration                                    #
+# rhodecode - Pylons environment configuration                                 #
 #                                                                              # 
 # The %(here)s variable will be replaced with the parent directory of this file#
 ################################################################################
@@ -9,8 +9,8 @@
 debug = true
 ################################################################################
 ## Uncomment and replace with the address which should receive                ## 
-## any error reports after application crash								  ##
-## Additionally those settings will be used by rhodecode mailing system          ##
+## any error reports after application crash                                  ##
+## Additionally those settings will be used by rhodecode mailing system       ##
 ################################################################################
 #email_to = admin@localhost
 #error_email_from = paste_error@localhost
@@ -35,12 +35,12 @@ use_threadpool = true
 
 use = egg:Paste#http
 host = 127.0.0.1
-port = 8001
+port = 5000
 
 [app:main]
 use = egg:rhodecode
 full_stack = true
-static_files = false
+static_files = true
 lang=en
 cache_dir = %(here)s/data
 app_instance_uuid = ${app_instance_uuid}

@@ -46,22 +46,34 @@ Fully customizable, with authentication, permissions. Based on vcs library.
 Installation
 -------------
 
+quick setup
+ 
+- pip install -E rhodecode-venv http://bitbucket.org/marcinkuzminski/rhodecode/get/tip.zip
+- activate virtualenv
+- run `paster make-config RhodeCode production.ini`
+- run `paster setup-app production.ini`
+- run `paster runserver production.ini`
+
+You're ready to go.
+
+
+MORE DETAILED INSTRUCTIONS
+
 - I highly recommend to install new virtualenv for rhodecode see 
-  http://pypi.python.org/pypi/virtualenv
+  http://pypi.python.org/pypi/virtualenv for more details.
 - Create new virtualenv using `virtualenv --no-site-packages /var/www/rhodecode-venv`
   this will install new virtual env into /var/www/rhodecode-venv. 
   Activate the virtualenv by running 
   `source activate /var/www/rhodecode-venv/bin/activate`   
 - Make a folder for rhodecode somewhere on the filesystem for example /var/www/rhodecode  
-- Download and extract http://bitbucket.org/marcinkuzminski/rhodecode/get/tip.zip
-  into created directory.
-- Run `python setup.py install` in order to install the application and all
-  needed dependencies. Make sure that You're using activated virutalenv  
+- Run easy_install http://bitbucket.org/marcinkuzminski/rhodecode/get/tip.zip.
+- Run `paster make-config RhodeCode production.inii` in order to install 
+  the application config. You can play with the app settings later 
 - Run `paster setup-app production.ini` it should create all needed tables 
   and an admin account make sure You specify correct path to repositories. 
 - Remember that the given path for mercurial repositories must be write 
   accessible for the application
-- Run paster serve development.ini - or you can use sample init.d scripts.
+- Run paster serve production.ini - or you can use sample init.d scripts.
   the app should be available at the 127.0.0.1:5000
 - Use admin account you created to login.
 - Default permissions on each repository is read, and owner is admin. So remember

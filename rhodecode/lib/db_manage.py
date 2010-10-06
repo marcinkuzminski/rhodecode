@@ -28,8 +28,6 @@ from os.path import dirname as dn, join as jn
 import os
 import sys
 import uuid
-ROOT = dn(dn(dn(os.path.realpath(__file__))))
-sys.path.append(ROOT)
 
 from rhodecode.lib.auth import get_crypt_password
 from rhodecode.lib.utils import ask_ok
@@ -43,20 +41,22 @@ import logging
 log = logging.getLogger(__name__)
 
 class DbManage(object):
-    def __init__(self, log_sql, dbname, tests=False):
+    def __init__(self, log_sql, dbname, root, tests=False):
         self.dbname = dbname
         self.tests = tests
-        dburi = 'sqlite:////%s' % jn(ROOT, self.dbname)
+        self.root = root
+        dburi = 'sqlite:////%s' % jn(self.root, self.dbname)
         engine = create_engine(dburi, echo=log_sql) 
         init_model(engine)
         self.sa = meta.Session
         self.db_exists = False
     
     def check_for_db(self, override):
-        log.info('checking for exisiting db')
-        if os.path.isfile(jn(ROOT, self.dbname)):
+        db_path = jn(self.root, self.dbname)
+        log.info('checking for existing db in %s', db_path)
+        if os.path.isfile(db_path):
             self.db_exists = True
-            log.info('database exisist')
+            log.info('database exist')
             if not override:
                 raise Exception('database already exists')
 
@@ -66,7 +66,7 @@ class DbManage(object):
         """
         self.check_for_db(override)
         if override:
-            log.info("database exisist and it's going to be destroyed")
+            log.info("database exist and it's going to be destroyed")
             if self.tests:
                 destroy = True
             else:
@@ -74,7 +74,7 @@ class DbManage(object):
             if not destroy:
                 sys.exit()
             if self.db_exists and destroy:
-                os.remove(jn(ROOT, self.dbname))
+                os.remove(jn(self.root, self.dbname))
         checkfirst = not override
         meta.Base.metadata.create_all(checkfirst=checkfirst)
         log.info('Created tables for %s', self.dbname)
@@ -84,6 +84,10 @@ class DbManage(object):
             import getpass
             username = raw_input('Specify admin username:')
             password = getpass.getpass('Specify admin password:')
+            confirm = getpass.getpass('Confirm password:')
+            if password != confirm:
+                log.error('passwords mismatch')
+                sys.exit()
             email = raw_input('Specify admin email:')
             self.create_user(username, password, email, True)
         else:

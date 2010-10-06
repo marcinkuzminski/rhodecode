@@ -467,9 +467,11 @@ def create_test_env(repos_test_path, config):
     log.addHandler(ch)
     
     #PART ONE create db
-    log.debug('making test db')
+    log.debug('making test db in %s', repos_test_path)
     dbname = config['sqlalchemy.db1.url'].split('/')[-1]
-    dbmanage = DbManage(log_sql=True, dbname=dbname, tests=True)
+    
+    dbmanage = DbManage(log_sql=True, dbname=dbname, root=config['here'],
+                        tests=True)
     dbmanage.create_tables(override=True)
     dbmanage.config_prompt(repos_test_path)
     dbmanage.create_default_user()

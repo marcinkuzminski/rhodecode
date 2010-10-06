@@ -1,15 +1,23 @@
+include MANIFEST.in
 include COPYING
-include README.rst
+include development.ini
+include production.ini
+
 include rhodecode/config/deployment.ini_tmpl
 
-include rhodecode_daemon
-include rhodecode_daemon2
+#init.d scripts
+include init.d/rhodecode-daemon
+include init.d/rhodecode-daemon2
 
+#celery config
+include celeryconfig.py
+
+#images
 recursive-include rhodecode/public/css *
 recursive-include rhodecode/public/images *
-
+#js
 include rhodecode/public/js/yui2.js
 include rhodecode/public/js/excanvas.min.js
 include rhodecode/public/js/yui.flot.js
-
+#templates
 recursive-include rhodecode/templates *

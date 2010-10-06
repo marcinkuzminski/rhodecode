@@ -1,21 +1,7 @@
 from rhodecode import get_version
-try:
-    from setuptools import setup, find_packages
-except ImportError:
-    from ez_setup import use_setuptools
-    use_setuptools()
-    from setuptools import setup, find_packages
 
-setup(
-    name='RhodeCode-%s' % get_version(),
-    version=get_version(),
-    description='Mercurial repository serving and browsing app',
-    keywords='mercurial web hgwebdir replacement serving hgweb rhodecode',
-    license='BSD',
-    author='marcin kuzminski',
-    author_email='marcin@python-works.com',
-    url='http://hg.python-works.com',
-    install_requires=[
+
+requirements = [
         "Pylons>=1.0.0",
         "SQLAlchemy>=0.6",
         "babel",
@@ -24,11 +10,42 @@ setup(
         "pygments>=1.3.0",
         "mercurial>=1.6",
         "pysqlite",
-        "whoosh==1.0.0b20",
+        "whoosh==1.0.0",
         "py-bcrypt",
         "celery",
-    ],
+    ]
+
+#additional files for project
+data_files = [
+              ('init.d', ['init.d/rhodecode-daemon',
+                          'init.d/rhodecode-daemon2',
+                          'init.d/celeryd']),
+              ('', ['celeryconfig.py', 'production.ini', 'development.ini']),
+              ]
+
+
+long_description = '\n' + open('README.rst').read()
+
+try:
+    from setuptools import setup, find_packages
+except ImportError:
+    from ez_setup import use_setuptools
+    use_setuptools()
+    from setuptools import setup, find_packages
+
+setup(
+    name='RhodeCode',
+    version=get_version(),
+    description='Mercurial repository serving and browsing app',
+    long_description=long_description,
+    keywords='mercurial web hgwebdir replacement serving hgweb rhodecode',
+    license='BSD',
+    author='Marcin Kuzminski',
+    author_email='marcin@python-works.com',
+    url='http://hg.python-works.com',
+    install_requires=requirements,
     setup_requires=["PasteScript>=1.6.3"],
+    data_files=data_files,
     packages=find_packages(exclude=['ez_setup']),
     include_package_data=True,
     test_suite='nose.collector',
