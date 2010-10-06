@@ -1,16 +1,4 @@
-include MANIFEST.in
-include COPYING
-include development.ini
-include production.ini
-
 include rhodecode/config/deployment.ini_tmpl
-
-#init.d scripts
-include init.d/rhodecode-daemon
-include init.d/rhodecode-daemon2
-
-#celery config
-include celeryconfig.py
 
 #images
 recursive-include rhodecode/public/css *
