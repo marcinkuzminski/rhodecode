@@ -3013,6 +3013,7 @@ div.form div.fields div.buttons input
 	height: 12px;
 	margin-bottom: 4px;
 	margin-left: 5px;
+	white-space: pre;
 }
 
 #clone_url{
