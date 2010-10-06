@@ -28,7 +28,12 @@ Base = declarative_base()
 #===============================================================================
 # CACHE OPTIONS
 #===============================================================================
-cache_dir = jn(dn(dn(dn(abspath(__file__)))), 'data', 'cache')
+cache_base = jn(dn(dn(dn(abspath(__file__)))), 'data')
+cache_dir = jn(cache_base, 'cache')
+
+if not os.path.isdir(cache_base):
+    os.mkdir(cache_base)
+
 if not os.path.isdir(cache_dir):
     os.mkdir(cache_dir)
 # set start_time to current time
