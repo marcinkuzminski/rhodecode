@@ -1,4 +1,4 @@
-from pylons_app import get_version
+from rhodecode import get_version
 try:
     from setuptools import setup, find_packages
 except ImportError:
@@ -32,8 +32,8 @@ setup(
     packages=find_packages(exclude=['ez_setup']),
     include_package_data=True,
     test_suite='nose.collector',
-    package_data={'pylons_app': ['i18n/*/LC_MESSAGES/*.mo']},
-    message_extractors={'pylons_app': [
+    package_data={'rhodecode': ['i18n/*/LC_MESSAGES/*.mo']},
+    message_extractors={'rhodecode': [
             ('**.py', 'python', None),
             ('templates/**.mako', 'mako', {'input_encoding': 'utf-8'}),
             ('public/**', 'ignore', None)]},
@@ -41,7 +41,7 @@ setup(
     paster_plugins=['PasteScript', 'Pylons'],
     entry_points="""
     [paste.app_factory]
-    main = pylons_app.config.middleware:make_app
+    main = rhodecode.config.middleware:make_app
 
     [paste.app_install]
     main = pylons.util:PylonsInstaller

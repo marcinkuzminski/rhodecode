@@ -1,15 +1,15 @@
 include COPYING
 include README.rst
-include pylons_app/config/deployment.ini_tmpl
+include rhodecode/config/deployment.ini_tmpl
 
 include hg_app_daemon
 include hg_app_daemon2
 
-recursive-include pylons_app/public/css *
-recursive-include pylons_app/public/images *
+recursive-include rhodecode/public/css *
+recursive-include rhodecode/public/images *
 
-include pylons_app/public/js/yui2.js
-include pylons_app/public/js/excanvas.min.js
-include pylons_app/public/js/yui.flot.js
+include rhodecode/public/js/yui2.js
+include rhodecode/public/js/excanvas.min.js
+include rhodecode/public/js/yui.flot.js
 
-recursive-include pylons_app/templates *
+recursive-include rhodecode/templates *

@@ -11,7 +11,7 @@ config = ConfigParser.ConfigParser({'here':root})
 config.read('%s/%s' % (root, PYLONS_CONFIG_NAME))
 PYLONS_CONFIG = config
 
-CELERY_IMPORTS = ("pylons_app.lib.celerylib.tasks",)
+CELERY_IMPORTS = ("rhodecode.lib.celerylib.tasks",)
 
 ## Result store settings.
 CELERY_RESULT_BACKEND = "database"

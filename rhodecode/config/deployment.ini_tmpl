@@ -35,14 +35,15 @@ use_threadpool = true
 
 use = egg:Paste#http
 host = 127.0.0.1
-port = 5000
+port = 8001
 
 [app:main]
 use = egg:rhodecode
 full_stack = true
-static_files = true
+static_files = false
 lang=en
 cache_dir = %(here)s/data
+app_instance_uuid = ${app_instance_uuid}
 
 ####################################
 ###         BEAKER CACHE        ####
@@ -61,13 +62,13 @@ beaker.cache.super_short_term.expire=10
 ###       BEAKER SESSION        ####
 ####################################
 ## Type of storage used for the session, current types are 
-## "dbm", "file", "memcached", "database", and "memory". 
+## dbm, file, memcached, database, and memory. 
 ## The storage uses the Container API 
 ##that is also used by the cache system.
 beaker.session.type = file
 
 beaker.session.key = hg-app
-beaker.session.secret = g654dcno0-9873jhgfreyu
+beaker.session.secret = ${app_instance_secret}
 beaker.session.timeout = 36000
 
 ##auto save the session to not to use .save()
@@ -82,7 +83,7 @@ beaker.session.auto = False
 ## Debug mode will enable the interactive debugging tool, allowing ANYONE to  ##
 ## execute malicious code after an exception is raised.                       ##
 ################################################################################
-#set debug = false
+set debug = false
 
 ##################################
 ###       LOGVIEW CONFIG       ###
@@ -94,7 +95,7 @@ logview.pylons.util = #eee
 #########################################################
 ### DB CONFIGS - EACH DB WILL HAVE IT'S OWN CONFIG    ###
 #########################################################
-sqlalchemy.db1.url = sqlite:///%(here)s/test.db
+sqlalchemy.db1.url = sqlite:///%(here)s/hg_app.db
 #sqlalchemy.db1.echo = False
 #sqlalchemy.db1.pool_recycle = 3600
 sqlalchemy.convert_unicode = true
@@ -115,17 +116,17 @@ keys = generic,color_formatter
 ## LOGGERS ##
 #############
 [logger_root]
-level = ERROR
+level = INFO
 handlers = console
 
 [logger_routes]
-level = ERROR
+level = INFO
 handlers = console
 qualname = routes.middleware
 # "level = DEBUG" logs the route matched and routing variables.
 
 [logger_rhodecode]
-level = ERROR
+level = DEBUG
 handlers = console
 qualname = rhodecode
 propagate = 0

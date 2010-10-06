@@ -1,4 +1,4 @@
-pylons_app
+rhodecode
 ++++++++++
 
 This is the main index page of your documentation. It should be written in

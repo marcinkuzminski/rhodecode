@@ -73,7 +73,7 @@ Installation
 - All needed configs are inside hg-app ie. celeryconfig.py , production.ini
   You can configure the email, ports, loggers, workers from there.
 - For full text search You can either put crontab entry for 
-  `python /var/www/hgapp/pylons_app/lib/indexers/daemon.py incremental <path_to_repos>`
+  `python /var/www/hgapp/rhodecode/lib/indexers/daemon.py incremental <path_to_repos>`
   or run indexer from admin panel. This will scann the repos given in the 
   application setup or given path for daemon.py and each scann in incremental 
   mode will scann only changed files, 
