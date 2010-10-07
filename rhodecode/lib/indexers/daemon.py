@@ -106,8 +106,8 @@ class WhooshIndexingDaemon(object):
         try:
             os.stat(path)
             writer.add_document(owner=unicode(repo.contact),
-                            repository=u"%s" % repo.name,
-                            path=u"%s" % path,
+                            repository=safe_unicode(repo.name),
+                            path=safe_unicode(path),
                             content=u_content,
                             modtime=os.path.getmtime(path),
                             extension=ext)             
