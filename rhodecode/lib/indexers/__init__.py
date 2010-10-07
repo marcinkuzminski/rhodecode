@@ -38,7 +38,7 @@ ANALYZER = RegexTokenizer(expression=r"\w+") | LowercaseFilter()
 #INDEX SCHEMA DEFINITION
 SCHEMA = Schema(owner=TEXT(),
                 repository=TEXT(stored=True),
-                path=ID(stored=True, unique=True),
+                path=TEXT(stored=True),
                 content=FieldType(format=Characters(ANALYZER),
                              scorable=True, stored=True),
                 modtime=STORED(), extension=TEXT(stored=True))
@@ -49,7 +49,8 @@ FORMATTER = HtmlFormatter('span', between='\n<span class="break">...</span>\n')
 FRAGMENTER = SimpleFragmenter(200)
                             
 class ResultWrapper(object):
-    def __init__(self, searcher, matcher, highlight_items):
+    def __init__(self, search_type, searcher, matcher, highlight_items):
+        self.search_type = search_type
         self.searcher = searcher
         self.matcher = matcher
         self.highlight_items = highlight_items
@@ -113,7 +114,7 @@ class ResultWrapper(object):
         """
         Smart function that implements chunking the content
         but not overlap chunks so it doesn't highlight the same
-        close occurences twice.
+        close occurrences twice.
         @param matcher:
         @param size:
         """
@@ -130,6 +131,8 @@ class ResultWrapper(object):
             yield (start_offseted, end_offseted,)  
         
     def highlight(self, content, top=5):
+        if self.search_type != 'content':
+            return ''
         hl = highlight(escape(content),
                  self.highlight_items,
                  analyzer=ANALYZER,

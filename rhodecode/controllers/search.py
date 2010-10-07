@@ -49,6 +49,14 @@ class SearchController(BaseController):
         c.formated_results = []
         c.runtime = ''
         c.cur_query = request.GET.get('q', None)
+        c.cur_type = request.GET.get('type', 'source')
+        c.cur_search = search_type = {'content':'content',
+                                      'commit':'content',
+                                      'path':'path',
+                                      'repository':'repository'}\
+                                      .get(c.cur_type, 'content')
+
+        
         if c.cur_query:
             cur_query = c.cur_query.lower()
         
@@ -59,7 +67,7 @@ class SearchController(BaseController):
                 idx = open_dir(IDX_LOCATION, indexname=IDX_NAME)
                 searcher = idx.searcher()
 
-                qp = QueryParser("content", schema=SCHEMA)
+                qp = QueryParser(search_type, schema=SCHEMA)
                 if c.repo_name:
                     cur_query = u'repository:%s %s' % (c.repo_name, cur_query)
                 try:
@@ -79,16 +87,19 @@ class SearchController(BaseController):
                     results = searcher.search(query)
                     res_ln = len(results)
                     c.runtime = '%s results (%.3f seconds)' \
-                    % (res_ln, results.runtime)
+                        % (res_ln, results.runtime)
                     
                     def url_generator(**kw):
-                        return update_params("?q=%s" % c.cur_query, **kw)
+                        return update_params("?q=%s&type=%s" \
+                                           % (c.cur_query, c.cur_search), **kw)
 
                     c.formated_results = Page(
-                                ResultWrapper(searcher, matcher, highlight_items),
+                                ResultWrapper(search_type, searcher, matcher,
+                                              highlight_items),
                                 page=p, item_count=res_ln,
                                 items_per_page=10, url=url_generator)
-                           
+                     
+                    
                 except QueryParserError:
                     c.runtime = _('Invalid search query. Try quoting it.')
                 searcher.close()

@@ -1,0 +1,27 @@
+##path search
+<div class="search">
+	%for cnt,sr in enumerate(c.formated_results):
+	    %if h.HasRepoPermissionAny('repository.write','repository.read','repository.admin')(sr['repository'],'search results check'):
+		    <div class="search_path">
+		        <div class="link">
+		            ${h.link_to(h.literal('%s &raquo; %s' % (sr['repository'],sr['f_path'])),
+		                h.url('files_home',repo_name=sr['repository'],revision='tip',f_path=sr['f_path']))}        
+		        </div>
+		    </div>
+	    %else:
+	        %if cnt == 0:
+			    <div class="error">
+			        <div class="link">
+			            ${_('Permission denied')}        
+			        </div>
+			    </div>        
+	        %endif
+	        
+	    %endif      
+	%endfor
+	%if c.cur_query and c.formated_results:
+	<div class="pagination-wh pagination-left">
+	    ${c.formated_results.pager('$link_previous ~2~ $link_next')}
+	</div>  
+	%endif
+</div>

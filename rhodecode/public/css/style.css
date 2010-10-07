@@ -1318,6 +1318,12 @@ div.options a:hover
 	padding: 0 0 10px 0; 
 }
 
+#content div.box div.form div.fields div.field-noborder
+{
+    border-bottom: 0px !important; 
+}
+
+
 #content div.box div.form div.fields div.field span.error-message
 {
 	margin: 8px 0 0 0;
@@ -3309,6 +3315,36 @@ table.code-browser .browser-dir {
 	padding-left: 20px;
 	text-align: left;
 }
+
+/* -----------------------------------------------------------
+    SEARCH
+----------------------------------------------------------- */
+
+.box .search {
+	clear:both;
+	margin:0;
+	overflow:hidden;
+	padding:0 20px 10px;
+}
+.box .search div.search_path{
+    background:none repeat scroll 0 0 #EEEEEE;
+    border:1px solid #CCCCCC;
+
+    color:blue;
+    padding:10px 0;
+    margin-bottom:10px;
+}
+.box .search div.search_path div.link{
+	font-weight:bold;
+	margin-left:25px;
+}
+.box .search div.search_path div.link a{
+	color:#0066CC;
+	cursor:pointer;
+	text-decoration:none;
+}
+
+
 
 /* -----------------------------------------------------------
 	ADMIN - SETTINGS
