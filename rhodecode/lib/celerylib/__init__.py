@@ -6,6 +6,7 @@ import os
 import sys
 import traceback
 from hashlib import md5
+import socket
 log = logging.getLogger(__name__)
 
 class ResultWrapper(object):
@@ -21,14 +22,17 @@ def run_task(task, *args, **kwargs):
         t = task.delay(*args, **kwargs)
         log.info('running task %s', t.task_id)
         return t
-    except Exception, e:
-        print e
-        if e.errno == 111:
-            log.debug('Unnable to connect. Sync execution')
+    except socket.error, e:
+        if  e.errno == 111:
+            log.debug('Unable to connect to celeryd. Sync execution')
         else:
-            log.error(traceback.format_exc())
-        #pure sync version
-        return ResultWrapper(task(*args, **kwargs))
+            log.error(traceback.format_exc())    
+    except KeyError, e:
+            log.debug('Unable to connect to celeryd. Sync execution')
+    except Exception, e:
+        log.error(traceback.format_exc())
+    
+    return ResultWrapper(task(*args, **kwargs))
 
 
 def locked_task(func):
