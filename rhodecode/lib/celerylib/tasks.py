@@ -13,29 +13,34 @@ import traceback
 
 try:
     from celeryconfig import PYLONS_CONFIG as config
+    celery_on = True
 except ImportError:
     #if celeryconfig is not present let's just load our pylons
     #config instead
     from pylons import config
+    celery_on = False
 
 
 __all__ = ['whoosh_index', 'get_commits_stats',
            'reset_user_password', 'send_email']
 
 def get_session():
-    from sqlalchemy import engine_from_config
-    from sqlalchemy.orm import sessionmaker, scoped_session
-    engine = engine_from_config(dict(config.items('app:main')), 'sqlalchemy.db1.')
-    sa = scoped_session(sessionmaker(bind=engine))
+    if celery_on:
+        from sqlalchemy import engine_from_config
+        from sqlalchemy.orm import sessionmaker, scoped_session
+        engine = engine_from_config(dict(config.items('app:main')), 'sqlalchemy.db1.')
+        sa = scoped_session(sessionmaker(bind=engine))
+    else:
+        #If we don't use celery reuse our current application Session
+        from rhodecode.model.meta import Session
+        sa = Session
+        
     return sa
 
 def get_hg_settings():
     from rhodecode.model.db import RhodeCodeSettings
-    try:
-        sa = get_session()
-        ret = sa.query(RhodeCodeSettings).all()
-    finally:
-        sa.remove()
+    sa = get_session()
+    ret = sa.query(RhodeCodeSettings).all()
         
     if not ret:
         raise Exception('Could not get application settings !')
@@ -47,11 +52,8 @@ def get_hg_settings():
 
 def get_hg_ui_settings():
     from rhodecode.model.db import RhodeCodeUi
-    try:
-        sa = get_session()
-        ret = sa.query(RhodeCodeUi).all()
-    finally:
-        sa.remove()
+    sa = get_session()
+    ret = sa.query(RhodeCodeUi).all()
         
     if not ret:
         raise Exception('Could not get application ui settings !')
