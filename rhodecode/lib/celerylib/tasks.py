@@ -146,10 +146,8 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
                 datadict["added"] += len(cs.added)
                 datadict["changed"] += len(cs.changed)
                 datadict["removed"] += len(cs.removed)
-                #print datadict
                 
             else:
-                #print 'ELSE !!!!'
                 if k >= ts_min_y and k <= ts_max_y or skip_date_limit:
                     
                     datadict = {"time":k,
@@ -162,7 +160,6 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
                         [author_key_cleaner(cs.author)]['data'].append(datadict)
                                         
         else:
-            #print k, 'nokey ADDING'
             if k >= ts_min_y and k <= ts_max_y or skip_date_limit:
                 commits_by_day_author_aggregate[author_key_cleaner(cs.author)] = {
                                     "label":author_key_cleaner(cs.author),
@@ -175,7 +172,7 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
                                     "schema":["commits"],
                                     }               
     
-#        #gather all data by day
+        #gather all data by day
         if commits_by_day_aggregate.has_key(k):
             commits_by_day_aggregate[k] += 1
         else:
