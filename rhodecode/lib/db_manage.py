@@ -115,6 +115,7 @@ class DbManage(object):
         hooks1.ui_section = 'hooks'
         hooks1.ui_key = 'changegroup.update'
         hooks1.ui_value = 'hg update >&2'
+        hooks1.ui_active = False
         
         hooks2 = RhodeCodeUi()
         hooks2.ui_section = 'hooks'

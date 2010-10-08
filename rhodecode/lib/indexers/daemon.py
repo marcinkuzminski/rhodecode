@@ -39,6 +39,9 @@ from whoosh.index import create_in, open_dir
 from shutil import rmtree
 from rhodecode.lib.indexers import INDEX_EXTENSIONS, IDX_LOCATION, SCHEMA, IDX_NAME
 
+from time import mktime
+from vcs.backends import hg
+
 import logging
 
 log = logging.getLogger('whooshIndexer')
@@ -62,7 +65,9 @@ def scan_paths(root_location):
     return HgModel.repo_scan('/', root_location, None, True)
 
 class WhooshIndexingDaemon(object):
-    """Deamon for atomic jobs"""
+    """
+    Deamon for atomic jobs
+    """
 
     def __init__(self, indexname='HG_INDEX', repo_location=None):
         self.indexname = indexname
@@ -73,55 +78,49 @@ class WhooshIndexingDaemon(object):
             log.info('Cannot run incremental index since it does not'
                      ' yet exist running full build')
             self.initial = True
-    
+        
     def get_paths(self, root_dir):
-        """recursive walk in root dir and return a set of all path in that dir
-        excluding files in .hg dir"""
+        """
+        recursive walk in root dir and return a set of all path in that dir
+        based on repository walk function
+        """
+        repo = hg.MercurialRepository(root_dir)
         index_paths_ = set()
-        for path, dirs, files in os.walk(root_dir):
-            if path.find('.hg') == -1:
+        for topnode, dirs, files in repo.walk('/', 'tip'):
+            for f in files:
+                index_paths_.add(jn(root_dir, f.path))
+            for dir in dirs:
                 for f in files:
-                    index_paths_.add(jn(path, f))
-    
-        return index_paths_
-    
+                    index_paths_.add(jn(root_dir, f.path))
+            
+        return index_paths_        
+
+
     def add_doc(self, writer, path, repo):
         """Adding doc to writer"""
-        
-        ext = unicode(path.split('/')[-1].split('.')[-1].lower())
-        #we just index the content of choosen files
-        if ext in INDEX_EXTENSIONS:
+        n_path = path[len(repo.path) + 1:]
+        node = repo.get_changeset().get_node(n_path)
+
+        #we just index the content of chosen files
+        if node.extension in INDEX_EXTENSIONS:
             log.debug('    >> %s [WITH CONTENT]' % path)
-            fobj = open(path, 'rb')
-            content = fobj.read()
-            fobj.close()
-            u_content = safe_unicode(content)
+            u_content = node.content
         else:
             log.debug('    >> %s' % path)
             #just index file name without it's content
             u_content = u''
         
-        
-        
-        try:
-            os.stat(path)
-            writer.add_document(owner=unicode(repo.contact),
-                            repository=safe_unicode(repo.name),
-                            path=safe_unicode(path),
-                            content=u_content,
-                            modtime=os.path.getmtime(path),
-                            extension=ext)             
-        except OSError, e:
-            import errno
-            if e.errno == errno.ENOENT:
-                log.debug('path %s does not exist or is a broken symlink' % path)
-            else:
-                raise e                 
+        writer.add_document(owner=unicode(repo.contact),
+                        repository=safe_unicode(repo.name),
+                        path=safe_unicode(path),
+                        content=u_content,
+                        modtime=mktime(node.last_changeset.date.timetuple()),
+                        extension=node.extension)             
 
     
     def build_index(self):
         if os.path.exists(IDX_LOCATION):
-            log.debug('removing previos index')
+            log.debug('removing previous index')
             rmtree(IDX_LOCATION)
             
         if not os.path.exists(IDX_LOCATION):
