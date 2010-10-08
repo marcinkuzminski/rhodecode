@@ -40,7 +40,7 @@ from shutil import rmtree
 from rhodecode.lib.indexers import INDEX_EXTENSIONS, IDX_LOCATION, SCHEMA, IDX_NAME
 
 from time import mktime
-from vcs.backends import hg
+from vcs.exceptions import ChangesetError
 
 import logging
 
@@ -72,6 +72,7 @@ class WhooshIndexingDaemon(object):
     def __init__(self, indexname='HG_INDEX', repo_location=None):
         self.indexname = indexname
         self.repo_location = repo_location
+        self.repo_paths = scan_paths(self.repo_location)
         self.initial = False
         if not os.path.isdir(IDX_LOCATION):
             os.mkdir(IDX_LOCATION)
@@ -79,27 +80,32 @@ class WhooshIndexingDaemon(object):
                      ' yet exist running full build')
             self.initial = True
         
-    def get_paths(self, root_dir):
+    def get_paths(self, repo):
         """
         recursive walk in root dir and return a set of all path in that dir
         based on repository walk function
         """
-        repo = hg.MercurialRepository(root_dir)
         index_paths_ = set()
         for topnode, dirs, files in repo.walk('/', 'tip'):
             for f in files:
-                index_paths_.add(jn(root_dir, f.path))
+                index_paths_.add(jn(repo.path, f.path))
             for dir in dirs:
                 for f in files:
-                    index_paths_.add(jn(root_dir, f.path))
+                    index_paths_.add(jn(repo.path, f.path))
             
         return index_paths_        
-
-
-    def add_doc(self, writer, path, repo):
-        """Adding doc to writer"""
+    
+    def get_node(self, repo, path):
         n_path = path[len(repo.path) + 1:]
         node = repo.get_changeset().get_node(n_path)
+        return node
+    
+    def get_node_mtime(self, node):
+        return mktime(node.last_changeset.date.timetuple())
+    
+    def add_doc(self, writer, path, repo):
+        """Adding doc to writer"""
+        node = self.get_node(repo, path)
 
         #we just index the content of chosen files
         if node.extension in INDEX_EXTENSIONS:
@@ -114,7 +120,7 @@ class WhooshIndexingDaemon(object):
                         repository=safe_unicode(repo.name),
                         path=safe_unicode(path),
                         content=u_content,
-                        modtime=mktime(node.last_changeset.date.timetuple()),
+                        modtime=self.get_node_mtime(node),
                         extension=node.extension)             
 
     
@@ -129,13 +135,14 @@ class WhooshIndexingDaemon(object):
         idx = create_in(IDX_LOCATION, SCHEMA, indexname=IDX_NAME)
         writer = idx.writer()
         
-        for cnt, repo in enumerate(scan_paths(self.repo_location).values()):
+        for cnt, repo in enumerate(self.repo_paths.values()):
             log.debug('building index @ %s' % repo.path)
         
-            for idx_path in self.get_paths(repo.path):
+            for idx_path in self.get_paths(repo):
                 self.add_doc(writer, idx_path, repo)
+        
+        log.debug('>> COMMITING CHANGES <<')
         writer.commit(merge=True)
-                
         log.debug('>>> FINISHED BUILDING INDEX <<<')
             
     
@@ -155,42 +162,41 @@ class WhooshIndexingDaemon(object):
         for fields in reader.all_stored_fields():
             indexed_path = fields['path']
             indexed_paths.add(indexed_path)
-    
-            if not os.path.exists(indexed_path):
+            
+            repo = self.repo_paths[fields['repository']]
+            
+            try:
+                node = self.get_node(repo, indexed_path)
+            except ChangesetError:
                 # This file was deleted since it was indexed
                 log.debug('removing from index %s' % indexed_path)
                 writer.delete_by_term('path', indexed_path)
     
             else:
-                # Check if this file was changed since it
-                # was indexed
+                # Check if this file was changed since it was indexed
                 indexed_time = fields['modtime']
-                
-                mtime = os.path.getmtime(indexed_path)
-    
+                mtime = self.get_node_mtime(node)
                 if mtime > indexed_time:
-    
                     # The file has changed, delete it and add it to the list of
                     # files to reindex
                     log.debug('adding to reindex list %s' % indexed_path)
                     writer.delete_by_term('path', indexed_path)
                     to_index.add(indexed_path)
-                    #writer.commit()
     
         # Loop over the files in the filesystem
         # Assume we have a function that gathers the filenames of the
         # documents to be indexed
-        for repo in scan_paths(self.repo_location).values():
-            for path in self.get_paths(repo.path):
+        for repo in self.repo_paths.values():
+            for path in self.get_paths(repo):
                 if path in to_index or path not in indexed_paths:
                     # This is either a file that's changed, or a new file
                     # that wasn't indexed before. So index it!
                     self.add_doc(writer, path, repo)
-                    log.debug('reindexing %s' % path)
-    
+                    log.debug('re indexing %s' % path)
+                    
+        log.debug('>> COMMITING CHANGES <<')
         writer.commit(merge=True)
-        #idx.optimize()
-        log.debug('>>> FINISHED <<<')
+        log.debug('>>> FINISHED REBUILDING INDEX <<<')
         
     def run(self, full_index=False):
         """Run daemon"""
