@@ -5,14 +5,14 @@ py_version = sys.version_info
 requirements = [
         "Pylons>=1.0.0",
         "SQLAlchemy>=0.6",
-        "babel",
         "Mako>=0.3.2",
-        "vcs>=0.1.7",
+        "vcs>=0.1.8",
         "pygments>=1.3.0",
         "mercurial>=1.6",
         "whoosh==1.0.0",
+        "celery>=2.0.0",
         "py-bcrypt",
-        "celery",
+        "babel",
     ]
 
 if sys.version_info < (2, 6):
@@ -26,6 +26,7 @@ data_files = []
 #additional files that goes into package itself
 package_data = {'rhodecode': ['i18n/*/LC_MESSAGES/*.mo', ], }
 
+description = 'Mercurial repository serving and browsing app'
 #long description
 try:
     readme_file = 'README.rst'
@@ -33,7 +34,7 @@ try:
 except IOError, err:
     sys.stderr.write("[ERROR] Cannot find file specified as "
         "long_description (%s)\n" % readme_file)
-    sys.exit(1)
+    long_description = description
 
 
 try:
@@ -48,7 +49,7 @@ packages = find_packages(exclude=['ez_setup'])
 setup(
     name='RhodeCode',
     version=get_version(),
-    description='Mercurial repository serving and browsing app',
+    description=description,
     long_description=long_description,
     keywords='mercurial web hgwebdir replacement serving hgweb rhodecode',
     license='BSD',
