@@ -37,7 +37,7 @@ class TestSettingsController(TestController):
         fork_repo = self.sa.query(Repository).filter(Repository.repo_name == fork_name).one()
         
         assert fork_repo.repo_name == fork_name, 'wrong name of repo name in new db fork repo'
-        assert fork_repo.fork.repo_name == repo_name, 'wron fork parrent'
+        assert fork_repo.fork.repo_name == repo_name, 'wrong fork parrent'
         
         
         #test if fork is visible in the list ?

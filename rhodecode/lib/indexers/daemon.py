@@ -40,7 +40,7 @@ from shutil import rmtree
 from rhodecode.lib.indexers import INDEX_EXTENSIONS, IDX_LOCATION, SCHEMA, IDX_NAME
 
 from time import mktime
-from vcs.exceptions import ChangesetError
+from vcs.exceptions import ChangesetError, RepositoryError
 
 import logging
 
@@ -86,13 +86,16 @@ class WhooshIndexingDaemon(object):
         based on repository walk function
         """
         index_paths_ = set()
-        for topnode, dirs, files in repo.walk('/', 'tip'):
-            for f in files:
-                index_paths_.add(jn(repo.path, f.path))
-            for dir in dirs:
+        try:
+            for topnode, dirs, files in repo.walk('/', 'tip'):
                 for f in files:
                     index_paths_.add(jn(repo.path, f.path))
-            
+                for dir in dirs:
+                    for f in files:
+                        index_paths_.add(jn(repo.path, f.path))
+                
+        except RepositoryError:
+            pass
         return index_paths_        
     
     def get_node(self, repo, path):

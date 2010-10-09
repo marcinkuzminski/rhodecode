@@ -467,8 +467,8 @@ def create_test_env(repos_test_path, config):
     log.addHandler(ch)
     
     #PART ONE create db
-    log.debug('making test db in %s', repos_test_path)
     dbname = config['sqlalchemy.db1.url'].split('/')[-1]
+    log.debug('making test db %s', dbname)
     
     dbmanage = DbManage(log_sql=True, dbname=dbname, root=config['here'],
                         tests=True)
