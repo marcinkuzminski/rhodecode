@@ -16,6 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
+from rhodecode.lib.utils import EmptyChangeset
 """
 Created on April 25, 2010
 changeset controller for pylons
@@ -45,7 +46,7 @@ class ChangesetController(BaseController):
         
     def index(self, revision):
         hg_model = HgModel()
-        cut_off_limit = 1024 * 100
+        cut_off_limit = 1024 * 250
         
         def wrap_to_table(str):
             
@@ -74,7 +75,7 @@ class ChangesetController(BaseController):
             c.sum_added = 0
             for node in c.changeset.added:
                 
-                filenode_old = FileNode(node.path, '')
+                filenode_old = FileNode(node.path, '', EmptyChangeset())
                 if filenode_old.is_binary or node.is_binary:
                     diff = wrap_to_table(_('binary file'))
                 else:
@@ -82,6 +83,7 @@ class ChangesetController(BaseController):
                     if c.sum_added < cut_off_limit:
                         f_udiff = differ.get_udiff(filenode_old, node)
                         diff = differ.DiffProcessor(f_udiff).as_html()
+                                                    
                     else:
                         diff = wrap_to_table(_('Changeset is to big and was cut'
                                             ' off, see raw changeset instead'))
@@ -98,19 +100,22 @@ class ChangesetController(BaseController):
                 try:
                     filenode_old = c.changeset_old.get_node(node.path)
                 except ChangesetError:
-                    filenode_old = FileNode(node.path, '')
+                    filenode_old = FileNode(node.path, '', EmptyChangeset())
                     
                 if filenode_old.is_binary or node.is_binary:
                     diff = wrap_to_table(_('binary file'))
                 else:
-                    c.sum_removed += node.size
+                    
                     if c.sum_removed < cut_off_limit:
                         f_udiff = differ.get_udiff(filenode_old, node)
                         diff = differ.DiffProcessor(f_udiff).as_html()
+                        if diff:
+                            c.sum_removed += len(diff)
                     else:
                         diff = wrap_to_table(_('Changeset is to big and was cut'
                                             ' off, see raw changeset instead'))
-
+                
+                
                 cs1 = filenode_old.last_changeset.short_id
                 cs2 = node.last_changeset.short_id                    
                 c.changes.append(('changed', node, diff, cs1, cs2))

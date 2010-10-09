@@ -66,12 +66,17 @@
 										<div class="merge">
 											${_('merge')}<img alt="merge" src="/images/icons/arrow_join.png"/>
 										</div>
-										%endif						
+										%endif
+								   %if cs.parents:							
 									%for p_cs in reversed(cs.parents):
 										<div class="parent">${_('Parent')} ${p_cs.revision}: ${h.link_to(p_cs.short_id,
 											h.url('changeset_home',repo_name=c.repo_name,revision=p_cs.short_id),title=p_cs.message)}
 										</div>
 									%endfor
+								   %else:	
+                                        <div class="parent">${_('No parents')}</div>   
+                                   %endif  
+                    									
 								<span class="logtags">
 									<span class="branchtag" title="${'%s %s' % (_('branch'),cs.branch)}">
 									${h.link_to(cs.branch,h.url('files_home',repo_name=c.repo_name,revision=cs.short_id))}</span>
