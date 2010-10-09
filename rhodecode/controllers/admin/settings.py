@@ -140,7 +140,7 @@ class SettingsController(BaseController):
                     self.sa.rollback()
                     
 
-            except formencode.Invalid as errors:
+            except formencode.Invalid, errors:
                 return htmlfill.render(
                      render('admin/settings/settings.html'),
                      defaults=errors.value,
@@ -193,7 +193,7 @@ class SettingsController(BaseController):
                     self.sa.rollback()
                     
 
-            except formencode.Invalid as errors:
+            except formencode.Invalid, errors:
                 return htmlfill.render(
                      render('admin/settings/settings.html'),
                      defaults=errors.value,
@@ -269,7 +269,7 @@ class SettingsController(BaseController):
             h.flash(_('Your account was updated succesfully'),
                     category='success')
                            
-        except formencode.Invalid as errors:
+        except formencode.Invalid, errors:
             c.user = self.sa.query(User).get(c.rhodecode_user.user_id)
             c.user_repos = []
             for repo in c.cached_repo_list.values():

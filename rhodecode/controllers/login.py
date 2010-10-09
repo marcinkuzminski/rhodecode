@@ -74,7 +74,7 @@ class LoginController(BaseController):
                 else:
                     return redirect(url('hg_home'))
                                
-            except formencode.Invalid as errors:
+            except formencode.Invalid, errors:
                 return htmlfill.render(
                     render('/login.html'),
                     defaults=errors.value,
@@ -105,7 +105,7 @@ class LoginController(BaseController):
                             category='success')                
                 return redirect(url('login_home'))
                                
-            except formencode.Invalid as errors:
+            except formencode.Invalid, errors:
                 return htmlfill.render(
                     render('/register.html'),
                     defaults=errors.value,
@@ -127,7 +127,7 @@ class LoginController(BaseController):
                             category='success')                 
                 return redirect(url('login_home'))
                                
-            except formencode.Invalid as errors:
+            except formencode.Invalid, errors:
                 return htmlfill.render(
                     render('/password_reset.html'),
                     defaults=errors.value,

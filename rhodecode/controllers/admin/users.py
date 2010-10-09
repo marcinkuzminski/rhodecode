@@ -73,7 +73,7 @@ class UsersController(BaseController):
             h.flash(_('created user %s') % form_result['username'],
                     category='success')
             #action_logger(self.rhodecode_user, 'new_user', '', '', self.sa)
-        except formencode.Invalid as errors:
+        except formencode.Invalid, errors:
             return htmlfill.render(
                 render('admin/users/user_add.html'),
                 defaults=errors.value,
@@ -110,7 +110,7 @@ class UsersController(BaseController):
             user_model.update(id, form_result)
             h.flash(_('User updated succesfully'), category='success')
                            
-        except formencode.Invalid as errors:
+        except formencode.Invalid, errors:
             return htmlfill.render(
                 render('admin/users/user_edit.html'),
                 defaults=errors.value,
@@ -136,7 +136,7 @@ class UsersController(BaseController):
         try:
             user_model.delete(id)
             h.flash(_('sucessfully deleted user'), category='success')
-        except DefaultUserException as e:
+        except DefaultUserException, e:
             h.flash(str(e), category='warning')
         except Exception:
             h.flash(_('An error occured during deletion of user'),

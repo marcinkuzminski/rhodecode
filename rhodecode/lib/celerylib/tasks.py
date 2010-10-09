@@ -8,8 +8,13 @@ from rhodecode.lib.smtp_mailer import SmtpMailer
 from rhodecode.lib.utils import OrderedDict
 from time import mktime
 from vcs.backends.hg import MercurialRepository
-import json
 import traceback
+
+try:
+    import json
+except ImportError:
+    #python 2.5 compatibility
+    import simplejson as json
 
 try:
     from celeryconfig import PYLONS_CONFIG as config

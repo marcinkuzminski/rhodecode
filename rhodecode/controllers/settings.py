@@ -82,7 +82,7 @@ class SettingsController(BaseController):
             h.flash(_('Repository %s updated successfully' % repo_name),
                     category='success')
             changed_name = form_result['repo_name']               
-        except formencode.Invalid as errors:
+        except formencode.Invalid, errors:
             c.repo_info = repo_model.get(repo_name)
             c.users_array = repo_model.get_users_js()
             errors.value.update({'user':c.repo_info.user.username})
@@ -121,7 +121,7 @@ class SettingsController(BaseController):
         
             return redirect(url('hg_home'))
         try:
-            action_logger(self.rhodecode_user, 'user_deleted_repo', 
+            action_logger(self.rhodecode_user, 'user_deleted_repo',
                               repo_name, '', self.sa)            
             repo_model.delete(repo)            
             invalidate_cache('cached_repo_list')
@@ -162,7 +162,7 @@ class SettingsController(BaseController):
                     category='success')
             action_logger(self.rhodecode_user, 'user_forked_repo',
                             repo_name, '', self.sa)                                                 
-        except formencode.Invalid as errors:
+        except formencode.Invalid, errors:
             c.new_repo = errors.value['fork_name']
             r = render('settings/repo_fork.html')
             

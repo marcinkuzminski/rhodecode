@@ -1,5 +1,6 @@
 from rhodecode import get_version
 import sys
+py_version = sys.version_info
 
 requirements = [
         "Pylons>=1.0.0",
@@ -9,11 +10,14 @@ requirements = [
         "vcs>=0.1.7",
         "pygments>=1.3.0",
         "mercurial>=1.6",
-        "pysqlite",
         "whoosh==1.0.0",
         "py-bcrypt",
         "celery",
     ]
+
+if sys.version_info < (2, 6):
+    requirements.append("simplejson")
+    requirements.append("pysqlite")
 
 #additional files from project that goes somewhere in the filesystem
 #relative to sys.prefix

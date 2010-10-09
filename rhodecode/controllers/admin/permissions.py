@@ -102,7 +102,7 @@ class PermissionsController(BaseController):
             h.flash(_('Default permissions updated succesfully'),
                     category='success')
                            
-        except formencode.Invalid as errors:
+        except formencode.Invalid, errors:
             c.perms_choices = self.perms_choices
             c.register_choices = self.register_choices
             c.create_choices = self.create_choices

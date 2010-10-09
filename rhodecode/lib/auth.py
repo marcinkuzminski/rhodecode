@@ -85,7 +85,7 @@ def get_user_cached(username):
 def authfunc(environ, username, password):
     try:
         user = get_user_cached(username)
-    except (NoResultFound, MultipleResultsFound, OperationalError) as e:
+    except (NoResultFound, MultipleResultsFound, OperationalError), e:
         log.error(e)
         user = None
         

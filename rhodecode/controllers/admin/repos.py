@@ -79,13 +79,13 @@ class ReposController(BaseController):
                     category='success')
 
             if request.POST.get('user_created'):
-                action_logger(self.rhodecode_user, 'user_created_repo', 
+                action_logger(self.rhodecode_user, 'user_created_repo',
                               form_result['repo_name'], '', self.sa)
             else:
-                action_logger(self.rhodecode_user, 'admin_created_repo', 
+                action_logger(self.rhodecode_user, 'admin_created_repo',
                               form_result['repo_name'], '', self.sa)                
                                                                              
-        except formencode.Invalid as errors:
+        except formencode.Invalid, errors:
             c.new_repo = errors.value['repo_name']
             
             if request.POST.get('user_created'):
@@ -137,7 +137,7 @@ class ReposController(BaseController):
             h.flash(_('Repository %s updated succesfully' % repo_name),
                     category='success')
             changed_name = form_result['repo_name']
-        except formencode.Invalid as errors:
+        except formencode.Invalid, errors:
             c.repo_info = repo_model.get(repo_name)
             c.users_array = repo_model.get_users_js()
             errors.value.update({'user':c.repo_info.user.username})
@@ -176,7 +176,7 @@ class ReposController(BaseController):
         
             return redirect(url('repos'))
         try:
-            action_logger(self.rhodecode_user, 'admin_deleted_repo', 
+            action_logger(self.rhodecode_user, 'admin_deleted_repo',
                               repo_name, '', self.sa)
             repo_model.delete(repo)            
             invalidate_cache('cached_repo_list')
@@ -199,7 +199,7 @@ class ReposController(BaseController):
         try:
             repo_model = RepoModel()
             repo_model.delete_perm_user(request.POST, repo_name)            
-        except Exception as e:
+        except Exception, e:
             h.flash(_('An error occured during deletion of repository user'),
                     category='error')
             raise HTTPInternalServerError()
