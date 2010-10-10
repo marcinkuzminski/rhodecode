@@ -34,7 +34,7 @@ http://hg.python-works.com/rhodecode/summary
 Instalation
 -----------
 
- Please visit http://packages.python.org/rhodecode/installation.html
+ Please visit http://packages.python.org/RhodeCode/installation.html
 
 
 Features
@@ -86,8 +86,18 @@ Documentation
 -------------
 
  Online documentation for current version is available at
- http://packages.python.org/rhodecode/.
+ http://packages.python.org/RhodeCode/.
  You may also build documentation for yourself - go into ``docs/`` and run::
 
    make html
 
+.. _virtualenv: http://pypi.python.org/pypi/virtualenv
+.. _python: http://www.python.org/
+.. _django: http://www.djangoproject.com/
+.. _mercurial: http://mercurial.selenic.com/
+.. _subversion: http://subversion.tigris.org/
+.. _git: http://git-scm.com/
+.. _celery: http://celeryproject.org/
+.. _Sphinx: http://sphinx.pocoo.org/
+.. _GPL: http://www.gnu.org/licenses/gpl.html
+.. _vcs: http://pypi.python.org/pypi/vcs
