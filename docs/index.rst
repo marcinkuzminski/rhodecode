@@ -8,6 +8,14 @@ It's similar to github or bitbucket, but focuses more on closed access restricti
 There's no default free access to RhodeCode You have to create an account in order
 to use the application. 
 
+**RhodeCode demo is available at**
+
+http://hg.python-works.com
+
+The default access is
+
+- username: demo
+- password: demo
 
 RhodeCode uses `Semantic Versioning <http://semver.org/>`_
 
