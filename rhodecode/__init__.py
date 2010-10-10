@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
-# Hg app, a web based mercurial repository managment based on pylons
+# RhodeCode, a web based repository management based on pylons
 # Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
 # 
 # This program is free software; you can redistribute it and/or
@@ -19,12 +19,12 @@
 # MA  02110-1301, USA.
 """
 Created on April 9, 2010
-Hg app, a web based mercurial repository managment based on pylons
+RhodeCode, a web based repository management based on pylons
 versioning implementation: http://semver.org/
 @author: marcink
 """
 
-VERSION = (0, 8, 5, 'beta')
+VERSION = (1, 0, 0, 'rc1')
 
 __version__ = '.'.join((str(each) for each in VERSION[:4]))
 

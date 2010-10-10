@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
-# database managment for hg app
+# database management for RhodeCode
 # Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
 #
 # This program is free software; you can redistribute it and/or
@@ -20,7 +20,7 @@
 
 """
 Created on April 10, 2010
-database managment and creation for hg app
+database management and creation for RhodeCode
 @author: marcink
 """
 

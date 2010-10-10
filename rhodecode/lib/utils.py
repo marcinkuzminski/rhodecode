@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
-# Utilities for hg app
+# Utilities for RhodeCode
 # Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -19,7 +19,7 @@
 
 """
 Created on April 18, 2010
-Utilities for hg app
+Utilities for RhodeCode
 @author: marcink
 """
 from beaker.cache import cache_region
