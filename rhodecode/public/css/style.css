@@ -59,6 +59,7 @@ body {
 	font-family: Lucida Grande, Verdana, Lucida Sans Regular,
 		Lucida Sans Unicode, Arial, sans-serif;
 	font-size: 12px;
+	color: #000000;
 }
 
 /*
@@ -76,13 +77,14 @@ img.icon {
 	anchors
 */
 a {
-	color: #0066CC;
+	color: #003367;
 	text-decoration: none;
 	cursor: pointer;
+	font-weight: bold;
 }
 
 a:hover {
-	color: #000000;
+	color: #316293;
 	text-decoration: underline;
 }
 
@@ -458,7 +460,7 @@ div.options a:hover {
 	display: block;
 	float: left;
 	background: #FFFFFF;
-	color: #0066CC;
+	color: #003367;
 	font-weight: normal;
 }
 
@@ -892,7 +894,7 @@ div.options a:hover {
 	padding: 0;
 	clear: both;
 	overflow: hidden;
-	background: #336699 url("../images/title.png") repeat-x;
+	background: #336699 url("../images/header_inner.png") repeat-x;
 }
 
 #content div.box div.title h5 {
@@ -923,7 +925,6 @@ div.options a:hover {
 	height: 1%;
 	display: block;
 	float: left;
-	background: url("../images/title_link.png") no-repeat top left;
 	border-left: 1px solid #316293;
 	color: #ffffff;
 	font-size: 11px;
@@ -932,7 +933,9 @@ div.options a:hover {
 }
 
 #content div.box div.title ul.links li a:hover {
-	color: #bfe3ff;
+    background: url("../../images/title_tab_selected.png") no-repeat bottom
+        center;
+    color: #bfe3ff;	
 }
 
 #content div.box div.title ul.links li.ui-tabs-selected a {
@@ -1060,7 +1063,9 @@ div.options a:hover {
 	clear: both;
 	overflow: hidden;
 }
-
+#content div.box div.message a{
+    font-weight: normal !important;
+}
 #content div.box div.message div.image {
 	margin: 9px 0 0 5px;
 	padding: 6px;
@@ -3024,7 +3029,7 @@ table.code-browser .browser-dir {
 }
 
 .box .search div.search_path div.link a {
-	color: #0066CC;
+	color: #003367;
 	cursor: pointer;
 	text-decoration: none;
 }
@@ -3085,7 +3090,7 @@ table.code-browser .browser-dir {
 	background-color: #FFFFFF;
 	font-family: arial, helvetica, verdana, sans-serif;
 	padding: 8px;
-	border: 2px solid #556CB5;
+	border: 2px solid #003367;
 	font: 100% sans-serif;
 	width: auto;
 	opacity: 1.0;
@@ -3230,14 +3235,12 @@ table.code-browser .browser-dir {
 .action_button {
 	border: 0px;
 	display: block;
-	color: #0066CC;
 }
 
 .action_button:hover {
 	border: 0px;
 	text-decoration: underline;
 	cursor: pointer;
-	color: #0066CC;
 }
 
 /*
@@ -3441,13 +3444,6 @@ div.gravatar {
 /*THEME*/
 
 /*
-    header
-*/
-#header #header-inner {
-	background: #b0b0b0 url("../../images/header_inner.png") repeat-x;
-}
-
-/*
     header / quick
 */
 #header #header-inner #quick li a {
@@ -3546,23 +3542,7 @@ div.gravatar {
 	border-bottom: 1px solid #326395;
 }
 
-/*
-    content / right / box / title
-*/
-#content div.box div.title {
-	background: #336699 url("../../images/title.png") repeat-x;
-}
 
-#content div.box div.title ul.links li a {
-	background: url("../../images/title_link.png") no-repeat top left;
-	border-left: 1px solid #316293;
-}
-
-#content div.box div.title ul.links li a:hover {
-	background: url("../../images/title_tab_selected.png") no-repeat bottom
-		center;
-	color: #bfe3ff;
-}
 
 #content div.box div.title ul.links li.ui-tabs-selected a {
 	background: url("../../images/title_tab_selected.png") no-repeat bottom

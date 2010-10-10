@@ -11,7 +11,6 @@ div.codeblock {
 div.codeblock .code-header{
 	border-bottom: 1px solid #CCCCCC;
 	background: #EEEEEE;
-	color:blue;
 	padding:10px 0 10px 0;
 }
 div.codeblock .code-header .revision{
