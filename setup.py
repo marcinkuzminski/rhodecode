@@ -15,6 +15,14 @@ requirements = [
         "babel",
     ]
 
+classifiers = ['Development Status :: 4 - Beta',
+                   'Environment :: Web Environment',
+                   'Framework :: Pylons',
+                   'Intended Audience :: Developers',
+                   'License :: OSI Approved :: BSD License',
+                   'Operating System :: OS Independent',
+                   'Programming Language :: Python', ]
+
 if sys.version_info < (2, 6):
     requirements.append("simplejson")
     requirements.append("pysqlite")
@@ -51,12 +59,13 @@ setup(
     version=get_version(),
     description=description,
     long_description=long_description,
-    keywords='mercurial web hgwebdir replacement serving hgweb rhodecode',
+    keywords='rhodiumcode mercurial web hgwebdir replacement serving hgweb rhodecode',
     license='BSD',
     author='Marcin Kuzminski',
     author_email='marcin@python-works.com',
     url='http://hg.python-works.com',
     install_requires=requirements,
+    classifiers=classifiers,
     setup_requires=["PasteScript>=1.6.3"],
     data_files=data_files,
     packages=packages,
