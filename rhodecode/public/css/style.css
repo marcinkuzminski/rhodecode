@@ -1622,7 +1622,6 @@ div.options a:hover {
 div.form div.fields div.field div.button {
 	margin: 0;
 	padding: 0 0 0 8px;
-	float: left;
 }
 
 div.form div.fields div.field div.button input {
