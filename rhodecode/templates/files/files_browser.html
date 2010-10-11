@@ -49,7 +49,9 @@
 						${h.link_to(node.name,h.url('files_home',repo_name=c.repo_name,revision=c.cur_rev,f_path=node.path),class_=file_class(node))}
 		             </td>
 		             <td>
+		             %if node.is_file():
 		             	${h.format_byte_size(node.size,binary=True)}
+		             %endif	
 		             </td>
 		             <td>
 		              %if node.is_file():

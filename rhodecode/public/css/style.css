@@ -55,7 +55,7 @@ body {
 	margin: 0;
 	padding: 0;
 	height: 100%;
-	background: #d1d1d1 url("../images/background.png") repeat;
+	background: url("../images/background.png") repeat scroll 0 0 #B0B0B0;
 	font-family: Lucida Grande, Verdana, Lucida Sans Regular,
 		Lucida Sans Unicode, Arial, sans-serif;
 	font-size: 12px;
@@ -230,7 +230,6 @@ div.options a:hover {
 #header {
 	margin: 0;
 	padding: 0 30px 0 30px;
-	background: #b0b0b0 url("../images/header_background.png") repeat;
 }
 
 /*
@@ -2193,7 +2192,6 @@ div.form div.fields div.buttons input {
 	padding: 0px 30px;
 	clear: both;
 	overflow: hidden;
-	background: url("../images/header_background.png") repeat scroll 0 0 #B0B0B0;
 	text-align: right;
 }
 
@@ -3414,7 +3412,6 @@ div.gravatar {
 	min-height: 100%;
 	clear: both;
 	overflow: hidden;
-	background: url("../images/header_background.png") repeat scroll 0 0 #B0B0B0
 }
 
 /*
