@@ -1,5 +1,8 @@
 include rhodecode/config/deployment.ini_tmpl
 
+include README.rst
+recursive-include rhodecode/i18n/ *
+
 #images
 recursive-include rhodecode/public/css *
 recursive-include rhodecode/public/images *

@@ -40,8 +40,8 @@ try:
     readme_file = 'README.rst'
     long_description = open(readme_file).read()
 except IOError, err:
-    sys.stderr.write("[ERROR] Cannot find file specified as "
-        "long_description (%s)\n" % readme_file)
+    sys.stderr.write("[WARNING] Cannot find file specified as "
+        "long_description (%s)\n skipping that file" % readme_file)
     long_description = description
 
 
