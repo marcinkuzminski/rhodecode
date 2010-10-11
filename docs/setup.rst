@@ -114,6 +114,17 @@ in production.ini file::
 To not have the statics served by the application.
 
 
+Other configuration files
+-------------------------
+
+Some extra configuration files and examples can be found here:
+http://hg.python-works.com/rhodecode/files/tip/init.d
+
+and also an celeryconfig file can be use from here:
+http://hg.python-works.com/rhodecode/files/tip/celeryconfig.py
+
+
+
 .. _virtualenv: http://pypi.python.org/pypi/virtualenv
 .. _python: http://www.python.org/
 .. _mercurial: http://mercurial.selenic.com/
