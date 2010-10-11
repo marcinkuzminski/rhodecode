@@ -98,6 +98,7 @@ Documentation
 
    installation
    setup
+   changelog
 
 Other topics
 ------------
