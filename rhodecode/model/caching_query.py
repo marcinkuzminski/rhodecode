@@ -109,11 +109,12 @@ def query_callable(manager):
     return query
 
 def get_cache_region(name, region):
-        if region not in beaker.cache.cache_regions:
-            raise BeakerException('Cache region not configured: %s' % region)
-        kw = beaker.cache.cache_regions[region]
-        return beaker.cache.Cache._get_cache(name, kw)
-        
+    if region not in beaker.cache.cache_regions:
+        raise BeakerException('Cache region not configured: %s'
+            'Check if proper cache settings are in the .ini files' % region)
+    kw = beaker.cache.cache_regions[region]
+    return beaker.cache.Cache._get_cache(name, kw)
+    
 def _get_cache_parameters(query):
     """For a query with cache_region and cache_namespace configured,
     return the correspoinding Cache instance and cache key, based
