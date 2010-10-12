@@ -28,36 +28,6 @@ Base = declarative_base()
 #===============================================================================
 # CACHE OPTIONS
 #===============================================================================
-cache_base = jn(dn(dn(dn(abspath(__file__)))), 'data')
-cache_dir = jn(cache_base, 'cache')
-
-if not os.path.isdir(cache_base):
-    os.mkdir(cache_base)
-
-if not os.path.isdir(cache_dir):
-    os.mkdir(cache_dir)
-# set start_time to current time
-# to re-cache everything
-# upon application startup
-start_time = time.time()
-# configure the "sqlalchemy" cache region.
-cache_manager.regions['sql_cache_short'] = {
-        'type':'memory',
-        'data_dir':cache_dir,
-        'expire':10,
-        'start_time':start_time
-    }
-cache_manager.regions['sql_cache_med'] = {
-        'type':'memory',
-        'data_dir':cache_dir,
-        'expire':360,
-        'start_time':start_time
-    }
-cache_manager.regions['sql_cache_long'] = {
-        'type':'file',
-        'data_dir':cache_dir,
-        'expire':3600,
-        'start_time':start_time
-    }
+#Configured globally in .ini files
 #to use cache use this in query
 #.options(FromCache("sqlalchemy_cache_type", "cachekey"))
