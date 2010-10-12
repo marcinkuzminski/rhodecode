@@ -35,7 +35,11 @@ from datetime import datetime, timedelta
 from time import mktime
 import calendar
 import logging
-import json
+try:
+    import json
+except ImportError:
+    #python 2.5 compatibility
+    import simplejson as json
 log = logging.getLogger(__name__)
 
 class SummaryController(BaseController):
