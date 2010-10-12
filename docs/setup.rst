@@ -17,7 +17,7 @@ Setting up the application
 
 ::
 
- paster setup-app production.ini` 
+ paster setup-app production.ini
 
 - This command will create all needed tables and an admin account. 
   When asked for a path You can either use a new location of one with already 

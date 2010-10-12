@@ -56,7 +56,6 @@ class DbManage(object):
         log.info('checking for existing db in %s', db_path)
         if os.path.isfile(db_path):
             self.db_exists = True
-            log.info('database exist')
             if not override:
                 raise Exception('database already exists')
 
@@ -65,7 +64,7 @@ class DbManage(object):
         Create a auth database
         """
         self.check_for_db(override)
-        if override:
+        if self.db_exists:
             log.info("database exist and it's going to be destroyed")
             if self.tests:
                 destroy = True
@@ -79,15 +78,33 @@ class DbManage(object):
         meta.Base.metadata.create_all(checkfirst=checkfirst)
         log.info('Created tables for %s', self.dbname)
     
-    def admin_prompt(self):
+    def admin_prompt(self, second=False):
         if not self.tests:
             import getpass
+            
+            
+            def get_password():
+                password = getpass.getpass('Specify admin password (min 6 chars):')
+                confirm = getpass.getpass('Confirm password:')
+            
+                if password != confirm:
+                    log.error('passwords mismatch')
+                    return False
+                if len(password) < 6:
+                    log.error('password is to short use at least 6 characters')
+                    return False
+                                
+                return password
+            
             username = raw_input('Specify admin username:')
-            password = getpass.getpass('Specify admin password:')
-            confirm = getpass.getpass('Confirm password:')
-            if password != confirm:
-                log.error('passwords mismatch')
-                sys.exit()
+            
+            password = get_password()
+            if not password:
+                #second try
+                password = get_password()
+                if not password:
+                    sys.exit()
+                
             email = raw_input('Specify admin email:')
             self.create_user(username, password, email, True)
         else:

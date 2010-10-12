@@ -8,6 +8,9 @@ Changelog
 - fixed python2.5 missing simplejson imports (thanks to Jens Bäckman)
 - removed cache_manager settings from sqlalchemy meta
 - added sqlalchemy cache settings to ini files
+- validated password length and added second try of failure on paster setup-app
+- fixed setup database destroy prompt even when there was no db
+
 
 1.0.0rc3 (**2010-10-11**)
 
