@@ -26,7 +26,7 @@ Setting up the application
 - Remember that the given path for mercurial_ repositories must be write 
   accessible for the application. It's very important since RhodeCode web interface
   will work even without such an access but, when trying to do a push it'll 
-  eventually faile with permission denied errors. 
+  eventually fail with permission denied errors. 
 - Run 
 
 ::
@@ -35,15 +35,12 @@ Setting up the application
  
 - This command runs the rhodecode server the app should be available at the 
   127.0.0.1:5000. This ip and port is configurable via the production.ini 
-  file  created in previos step
+  file  created in previous step
 - Use admin account you created to login.
 - Default permissions on each repository is read, and owner is admin. So 
-  remember to update these.
-
-- All needed configs are inside rhodecode sources ie. celeryconfig.py, 
-  development.ini, production.ini You can configure the email, ports, loggers, 
-  workers from there.
+  remember to update these if needed.
   
+    
 Setting up Whoosh
 -----------------
 
@@ -51,7 +48,7 @@ Setting up Whoosh
 
 ::
  
- python /var/www/rhodecode/rhodecode/lib/indexers/daemon.py incremental <put_here_path_to_repos>
+ python /var/www/rhodecode/<rhodecode_installation_path>/lib/indexers/daemon.py incremental <put_here_path_to_repos>
   
 When using incremental mode whoosh will check last modification date of each file
 and add it to reindex if newer file is available. Also indexing daemon checks
@@ -69,7 +66,7 @@ Sample config for nginx::
     listen          80;
     server_name     hg.myserver.com;
     access_log      /var/log/nginx/rhodecode.access.log;
-    error_log      /var/log/nginx/rhodecode.error.log;
+    error_log       /var/log/nginx/rhodecode.error.log;
     location / {
             root /var/www/rhodecode/rhodecode/public/;
             if (!-f $request_filename){
@@ -81,7 +78,7 @@ Sample config for nginx::
     }
  }  
   
-Here's the proxy.conf. It's tunned so it'll not timeout on long
+Here's the proxy.conf. It's tuned so it'll not timeout on long
 pushes and also on large pushes::
 
     proxy_redirect              off;
@@ -111,7 +108,7 @@ in production.ini file::
     lang=en
     cache_dir = %(here)s/data
 
-To not have the statics served by the application.
+To not have the statics served by the application. And improve speed.
 
 
 Other configuration files
