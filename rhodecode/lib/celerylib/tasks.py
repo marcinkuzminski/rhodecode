@@ -308,9 +308,10 @@ def __get_codes_stats(repo_name):
                     'yaws']
     repos_path = get_hg_ui_settings()['paths_root_path'].replace('*', '')
     repo = MercurialRepository(repos_path + repo_name)
-
+    tip = repo.get_changeset()
+    
     code_stats = {}
-    for topnode, dirs, files in repo.walk('/', 'tip'):
+    for topnode, dirs, files in tip.walk('/'):
         for f in files:
             k = f.mimetype
             if f.extension in LANGUAGES_EXTENSIONS:
