@@ -357,7 +357,6 @@ padding:0;
 max-height:275px;
 overflow-x:hidden;
 overflow-y:auto;
-white-space:nowrap;
 }
 
 #header #header-inner #quick li ul li {
@@ -1442,7 +1441,7 @@ padding:0 30px;
 }
 
 #footer p {
-background:none repeat scroll 0 0 #2F2F2F;
+background:url("../images/header_inner.png") repeat-x scroll 0 0 #003367;
 color:#FFF;
 font-weight:700;
 padding:15px 25px 15px 0;
@@ -2150,10 +2149,10 @@ min-width:1224px;
 }
 
 #content {
-min-height:100%;
+min-height:85%;
 clear:both;
 overflow:hidden;
-padding:10px 30px;
+padding:14px 30px;
 }
 
 #content div.box div.title div.search {

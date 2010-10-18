@@ -86,8 +86,8 @@ class SimpleHg(object):
             except:
                 log.error(traceback.format_exc())
                 return HTTPInternalServerError()(environ, start_response)
-            #check permissions for this repository
 
+            #check permissions for this repository
             if action == 'push':
                 if not HasPermissionAnyMiddleware('repository.write',
                                                   'repository.admin')\
@@ -95,6 +95,7 @@ class SimpleHg(object):
                     return HTTPForbidden()(environ, start_response)
 
             else:
+                #any other action need at least read permission
                 if not HasPermissionAnyMiddleware('repository.read',
                                                   'repository.write',
                                                   'repository.admin')\
