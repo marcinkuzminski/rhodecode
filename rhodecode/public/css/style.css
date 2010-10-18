@@ -1240,11 +1240,13 @@ clear:both;
 overflow:hidden;
 text-align:right;
 margin:0;
-padding:0 30px;
+padding:0 30px 4px;
+margin:-10px 0 0;
 }
 
 #footer div#footer-inner {
 background:url("../images/header_inner.png") repeat-x scroll 0 0 #003367;
+border-top:2px solid #FFFFFF;
 }
 
 #footer div#footer-inner p {
