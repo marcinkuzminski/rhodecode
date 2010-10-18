@@ -18,9 +18,11 @@ The rest of what's here are standard SQLAlchemy and
 Beaker constructs.
    
 """
+from beaker.exceptions import BeakerException
 from sqlalchemy.orm.interfaces import MapperOption
 from sqlalchemy.orm.query import Query
 from sqlalchemy.sql import visitors
+import beaker
 
 class CachingQuery(Query):
     """A Query subclass which optionally loads full results from a Beaker 
@@ -105,6 +107,13 @@ def query_callable(manager):
     def query(*arg, **kw):
         return CachingQuery(manager, *arg, **kw)
     return query
+
+def get_cache_region(name, region):
+    if region not in beaker.cache.cache_regions:
+        raise BeakerException('Cache region not configured: %s'
+            'Check if proper cache settings are in the .ini files' % region)
+    kw = beaker.cache.cache_regions[region]
+    return beaker.cache.Cache._get_cache(name, kw)
     
 def _get_cache_parameters(query):
     """For a query with cache_region and cache_namespace configured,
@@ -125,8 +134,8 @@ def _get_cache_parameters(query):
         cache_key = " ".join([str(x) for x in args])
 
     # get cache
-    cache = query.cache_manager.get_cache_region(namespace, region)
-
+    #cache = query.cache_manager.get_cache_region(namespace, region)
+    cache = get_cache_region(namespace, region)
     # optional - hash the cache_key too for consistent length
     # import uuid
     # cache_key= str(uuid.uuid5(uuid.NAMESPACE_DNS, cache_key))

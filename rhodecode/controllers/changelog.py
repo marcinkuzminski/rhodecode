@@ -23,6 +23,11 @@ changelog controller for pylons
 @author: marcink
 """
 
+try:
+    import json
+except ImportError:
+    #python 2.5 compatibility
+    import simplejson as json
 from mercurial.graphmod import colored, CHANGESET, revisions as graph_rev
 from pylons import request, session, tmpl_context as c
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
@@ -31,12 +36,6 @@ from rhodecode.model.hg_model import HgModel
 from webhelpers.paginate import Page
 import logging
 log = logging.getLogger(__name__)
-
-try:
-    import json
-except ImportError:
-    #python 2.5 compatibility
-    import simplejson as json
 
 class ChangelogController(BaseController):
     

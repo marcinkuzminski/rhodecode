@@ -27,6 +27,7 @@ from pylons import config, session, url, request
 from pylons.controllers.util import abort, redirect
 from rhodecode.lib.utils import get_repo_slug
 from rhodecode.model import meta
+from rhodecode.model.caching_query import FromCache
 from rhodecode.model.db import User, RepoToPerm, Repository, Permission, \
     UserToPerm
 from sqlalchemy.exc import OperationalError
@@ -141,7 +142,9 @@ def fill_data(user):
     :param user:
     """
     sa = meta.Session
-    dbuser = sa.query(User).get(user.user_id)
+    dbuser = sa.query(User).options(FromCache('sql_cache_short',
+                                              'getuser_%s' % user.user_id))\
+        .get(user.user_id)
     if dbuser:
         user.username = dbuser.username
         user.is_admin = dbuser.admin
@@ -166,11 +169,14 @@ def fill_perms(user):
     #===========================================================================
     # fetch default permissions
     #===========================================================================
+    default_user = sa.query(User)\
+        .options(FromCache('sql_cache_short','getuser_%s' % 'default'))\
+        .filter(User.username == 'default').scalar()
+                                            
     default_perms = sa.query(RepoToPerm, Repository, Permission)\
         .join((Repository, RepoToPerm.repository_id == Repository.repo_id))\
         .join((Permission, RepoToPerm.permission_id == Permission.permission_id))\
-        .filter(RepoToPerm.user == sa.query(User).filter(User.username == 
-                                            'default').scalar()).all()
+        .filter(RepoToPerm.user == default_user).all()
                                             
     if user.is_admin:
         #=======================================================================
