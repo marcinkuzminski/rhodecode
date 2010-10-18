@@ -3,7 +3,18 @@
 Changelog
 =========
 
+1.0.0 (**2010-10-xx**)
+----------------------
+
+- security bugfix simplehg wasn't checking for permissions on commands
+  other than pull or push.
+- fixed doubled messages after push or pull in admin journal
+- templating and css corrections, fixed repo switcher on chrome,updated titles
+- admin menu accessible from options menu on repository view
+- permissions cached queries
+
 1.0.0rc4  (**2010-10-12**)
+--------------------------
 
 - fixed python2.5 missing simplejson imports (thanks to Jens Bäckman)
 - removed cache_manager settings from sqlalchemy meta
@@ -13,10 +24,12 @@ Changelog
 
 
 1.0.0rc3 (**2010-10-11**)
+-------------------------
 
 - fixed i18n during installation.
 
 1.0.0rc2 (**2010-10-11**)
+-------------------------
 
 - Disabled dirsize in file browser, it's causing nasty bug when dir renames 
   occure. After vcs is fixed it'll be put back again.
