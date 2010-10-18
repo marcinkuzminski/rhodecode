@@ -88,10 +88,10 @@ def action_logger(user, action, repo, ipaddr, sa=None):
         user_log.user_ip = ipaddr
         sa.add(user_log)
         sa.commit()
+
         log.info('Adding user %s, action %s on %s',
                                         user.username, action, repo)
     except Exception, e:
-        raise
         sa.rollback()
         log.error('could not log user action:%s', str(e))
 
