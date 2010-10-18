@@ -8,20 +8,14 @@
         <meta name="robots" content="index, nofollow"/>
             
         <!-- stylesheets -->
-        <link rel="stylesheet" type="text/css" href="/css/reset.css" />
         <link rel="stylesheet" type="text/css" href="/css/style.css" media="screen" />
-        <link id="color" rel="stylesheet" type="text/css" href="/css/colors/blue.css" />
-
-        <!-- scripts -->
 
     </head>
     <body>
 <div id="login">
             <!-- login -->
-            <div class="title">
+            <div class="title top-left-rounded-corner top-right-rounded-corner">
                 <h5>${_('Sign In to rhodecode')}</h5>
-                <div class="corner tl"></div>
-                <div class="corner tr"></div>
             </div>
             <div class="inner">            
                 ${h.form(h.url.current(came_from=c.came_from))}

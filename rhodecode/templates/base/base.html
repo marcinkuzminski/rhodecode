@@ -28,17 +28,15 @@
             <li class="last highlight">${h.link_to(u'Logout',h.url('logout_home'))}</li>
         </ul>
         <!-- end user -->
-        <div id="header-inner">
+        <div id="header-inner" class="title top-left-rounded-corner top-right-rounded-corner">
             <!-- logo -->
             <div id="logo">
                 <h1><a href="${h.url('hg_home')}">${c.rhodecode_name}</a></h1>
             </div>
             <!-- end logo -->
-            <!-- quick menu -->
+            <!-- menu -->
             ${self.page_nav()}
-            <!-- end quick -->
-            <div class="corner tl"></div>
-            <div class="corner tr"></div>
+            <!-- quick -->
         </div>
     </div>     
     <!-- end header -->
@@ -63,8 +61,10 @@
 
 	<!-- footer -->
 	<div id="footer">
+	   <div id="footer-inner" class="title bottom-left-rounded-corner bottom-right-rounded-corner">
 	    <p>RhodeCode ${c.rhodecode_version} &copy; 2010 by Marcin Kuzminski</p>
-        <script type="text/javascript">${h.tooltip.activate()}</script>	    
+	   </div>
+        <script type="text/javascript">${h.tooltip.activate()}</script>
 	</div>
 	<!-- end footer -->
 </body>
