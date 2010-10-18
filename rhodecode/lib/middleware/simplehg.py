@@ -101,11 +101,12 @@ class SimpleHg(object):
                                                     (user, repo_name):
                     return HTTPForbidden()(environ, start_response)
 
-            #log action    
-            proxy_key = 'HTTP_X_REAL_IP'
-            def_key = 'REMOTE_ADDR'
-            ipaddr = environ.get(proxy_key, environ.get(def_key, '0.0.0.0'))
-            self.__log_user_action(user, action, repo_name, ipaddr)
+            #log action
+            if action in ('push', 'pull', 'clone'):
+                proxy_key = 'HTTP_X_REAL_IP'
+                def_key = 'REMOTE_ADDR'
+                ipaddr = environ.get(proxy_key, environ.get(def_key, '0.0.0.0'))
+                self.__log_user_action(user, action, repo_name, ipaddr)
 
         #===================================================================
         # MERCURIAL REQUEST HANDLING
@@ -165,14 +166,14 @@ class SimpleHg(object):
 
     def __get_action(self, environ):
         """
-        Maps mercurial request commands into a pull or push command.
-        This should return generally always something
+        Maps mercurial request commands into a clone,pull or push command.
+        This should always return a valid command string
         :param environ:
         """
         mapping = {'changegroup': 'pull',
                    'changegroupsubset': 'pull',
                    'stream_out': 'pull',
-                   'listkeys': 'pull',
+                   #'listkeys': 'pull',
                    'unbundle': 'push',
                    'pushkey': 'push', }
         for qry in environ['QUERY_STRING'].split('&'):
