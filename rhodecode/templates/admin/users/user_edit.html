@@ -2,7 +2,7 @@
 <%inherit file="/base/base.html"/>
 
 <%def name="title()">
-    ${_('User administration')}
+    ${_('Edit user')} ${c.user.username} - ${c.rhodecode_name}
 </%def>
 
 <%def name="breadcrumbs_links()">

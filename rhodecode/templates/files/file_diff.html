@@ -1,8 +1,9 @@
 <%inherit file="/base/base.html"/>
 
 <%def name="title()">
-    ${_('Repository management')}
+    ${c.repo_name} ${_('File diff')} - ${c.rhodecode_name}
 </%def>
+
 <%def name="breadcrumbs_links()">
     ${h.link_to(u'Home',h.url('/'))}
     &raquo;

@@ -2,7 +2,7 @@
 <%inherit file="/base/base.html"/>
 
 <%def name="title()">
-    ${c.rhodecode_user.username} ${_('account')}
+    ${_('My account')} ${c.rhodecode_user.username} - ${c.rhodecode_name}
 </%def>
 
 <%def name="breadcrumbs_links()">

@@ -1,7 +1,7 @@
 <%inherit file="/base/base.html"/>
 
 <%def name="title()">
-    ${_('Changeset')} - r${c.changeset.revision}:${c.changeset.short_id} - ${c.repo_name}
+    ${c.repo_name} ${_('Changeset')} - r${c.changeset.revision}:${c.changeset.short_id}  - ${c.rhodecode_name}
 </%def>
 
 <%def name="breadcrumbs_links()">

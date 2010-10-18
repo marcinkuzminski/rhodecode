@@ -2,7 +2,7 @@
 <%inherit file="/base/base.html"/>
 
 <%def name="title()">
-    ${_('Repositories administration')}
+    ${_('Edit repository')} ${c.repo_info.repo_name} - ${c.rhodecode_name}
 </%def>
 
 <%def name="breadcrumbs_links()">

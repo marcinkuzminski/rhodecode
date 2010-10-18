@@ -20,6 +20,7 @@ div.codeblock .code-header .revision{
 div.codeblock .code-header .commit{
 	margin-left:25px;
 	font-weight: normal;
+	white-space:pre;
 }
 
 div.codeblock .code-body table{

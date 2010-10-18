@@ -1,13 +1,14 @@
 ## -*- coding: utf-8 -*-
 <%inherit file="/base/base.html"/>
 <%def name="title()">
-   ${_('Search')} 
+   ${_('Search')}
+   ${'"%s"' % c.cur_query if c.cur_query else None} 
 	%if c.repo_name:
 		${_('in repository: ') + c.repo_name}
 	%else:
 		${_('in all repositories')}		
 	%endif
-	:${c.cur_query}
+	- ${c.rhodecode_name}
 </%def>
 <%def name="breadcrumbs()">
 	${c.rhodecode_name}

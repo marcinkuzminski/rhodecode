@@ -1,7 +1,7 @@
 <%inherit file="/base/base.html"/>
 
 <%def name="title()">
-    ${_('File annotate')}
+    ${c.repo_name} ${_('File annotate')} - ${c.rhodecode_name}
 </%def>
 
 <%def name="breadcrumbs_links()">

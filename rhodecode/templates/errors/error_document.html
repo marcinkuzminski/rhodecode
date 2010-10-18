@@ -21,12 +21,13 @@
 	       margin: auto;
 	       text-align: center;
 	       margin-top: 200px;
-	       font-size: 1.8em;
+	       font-size: 1.6em;
 	     }
 	     .error_message{
 	        text-align: center;
-	        color:red;
-	        font-size: 1.8em;
+	        color:#003367;
+	        font-size: 1.6em;
+	        margin:10px;
 	     }
 	    </style>
     
@@ -36,9 +37,11 @@
         <div id="login">
             <div class="table">            
 				<div id="main_div">
+				    <div style="font-size:2.0em;margin: 10px">RhodeCode</div>
 					<h1 class="error_message">${c.error_message}</h1>
 					
 					<p>${c.error_explanation}</p>
+					
 			        %if c.redirect_time:
 			            <p>${_('You will be redirected to %s in %s seconds') % (c.redirect_module,c.redirect_time)}</p>
 				    %endif		
