@@ -115,8 +115,8 @@ class ResultWrapper(object):
         Smart function that implements chunking the content
         but not overlap chunks so it doesn't highlight the same
         close occurrences twice.
-        @param matcher:
-        @param size:
+        :param matcher:
+        :param size:
         """
         memory = [(0, 0)]
         for span in self.matcher.spans():

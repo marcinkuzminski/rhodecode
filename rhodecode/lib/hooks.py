@@ -53,9 +53,9 @@ def repo_size(ui, repo, hooktype=None, **kwargs):
 def user_action_mapper(ui, repo, hooktype=None, **kwargs):
     """
     Maps user last push action to new changeset id, from mercurial
-    @param ui:
-    @param repo:
-    @param hooktype:
+    :param ui:
+    :param repo:
+    :param hooktype:
     """
     
     try:

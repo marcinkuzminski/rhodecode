@@ -36,7 +36,7 @@ import os
 log = logging.getLogger(__name__)
 
 
-def get_repo_slug(request):    
+def get_repo_slug(request):
     return request.environ['pylons.routes_dict'].get('repo_name')
 
 def is_mercurial(environ):
@@ -49,14 +49,26 @@ def is_mercurial(environ):
         return True
     return False
 
+def is_git(environ):
+    """
+    Returns True if request's target is git server. ``HTTP_USER_AGENT`` would
+    then have git client version given.
+    
+    :param environ:
+    """
+    http_user_agent = environ.get('HTTP_USER_AGENT')
+    if http_user_agent.startswith('git'):
+        return True
+    return False
+
 def action_logger(user, action, repo, ipaddr, sa=None):
     """
     Action logger for various action made by users
     """
-    
+
     if not sa:
-        sa = meta.Session 
-        
+        sa = meta.Session
+
     try:
         if hasattr(user, 'user_id'):
             user_id = user.user_id
@@ -64,7 +76,7 @@ def action_logger(user, action, repo, ipaddr, sa=None):
             user_id = sa.query(User).filter(User.username == user).one()
         else:
             raise Exception('You have to provide user object or username')
-       
+
         repo_name = repo.lstrip('/')
         user_log = UserLog()
         user_log.user_id = user_id
@@ -82,7 +94,7 @@ def action_logger(user, action, repo, ipaddr, sa=None):
         raise
         sa.rollback()
         log.error('could not log user action:%s', str(e))
-                
+
 def check_repo_dir(paths):
     repos_path = paths[0][1].split('/')
     if repos_path[-1] in ['*', '**']:
@@ -122,7 +134,7 @@ def ask_ok(prompt, retries=4, complaint='Yes or no, please!'):
         retries = retries - 1
         if retries < 0: raise IOError
         print complaint
-        
+
 @cache_region('super_short_term', 'cached_hg_ui')
 def get_hg_ui_cached():
     try:
@@ -139,13 +151,13 @@ def get_hg_settings():
         ret = sa.query(RhodeCodeSettings).all()
     finally:
         meta.Session.remove()
-        
+
     if not ret:
         raise Exception('Could not get application settings !')
     settings = {}
     for each in ret:
-        settings['rhodecode_' + each.app_settings_name] = each.app_settings_value    
-    
+        settings['rhodecode_' + each.app_settings_name] = each.app_settings_value
+
     return settings
 
 def get_hg_ui_settings():
@@ -154,7 +166,7 @@ def get_hg_ui_settings():
         ret = sa.query(RhodeCodeUi).all()
     finally:
         meta.Session.remove()
-        
+
     if not ret:
         raise Exception('Could not get application ui settings !')
     settings = {}
@@ -163,15 +175,15 @@ def get_hg_ui_settings():
         v = each.ui_value
         if k == '/':
             k = 'root_path'
-        
+
         if k.find('.') != -1:
             k = k.replace('.', '_')
-        
+
         if each.ui_section == 'hooks':
             v = each.ui_active
-        
-        settings[each.ui_section + '_' + k] = v  
-    
+
+        settings[each.ui_section + '_' + k] = v
+
     return settings
 
 #propagated from mercurial documentation
@@ -185,15 +197,15 @@ ui_sections = ['alias', 'auth',
                 'paths', 'profiling',
                 'server', 'trusted',
                 'ui', 'web', ]
-        
-def make_ui(read_from='file', path=None, checkpaths=True):        
+
+def make_ui(read_from='file', path=None, checkpaths=True):
     """
     A function that will read python rc files or database
     and make an mercurial ui object from read options
     
-    @param path: path to mercurial config file
-    @param checkpaths: check the path
-    @param read_from: read from 'file' or 'db'
+    :param path: path to mercurial config file
+    :param checkpaths: check the path
+    :param read_from: read from 'file' or 'db'
     """
 
     baseui = ui.ui()
@@ -209,52 +221,52 @@ def make_ui(read_from='file', path=None, checkpaths=True):
             for k, v in cfg.items(section):
                 baseui.setconfig(section, k, v)
                 log.debug('settings ui from file[%s]%s:%s', section, k, v)
-        if checkpaths:check_repo_dir(cfg.items('paths'))                
-              
-        
+        if checkpaths:check_repo_dir(cfg.items('paths'))
+
+
     elif read_from == 'db':
         hg_ui = get_hg_ui_cached()
         for ui_ in hg_ui:
             if ui_.ui_active:
                 log.debug('settings ui from db[%s]%s:%s', ui_.ui_section, ui_.ui_key, ui_.ui_value)
                 baseui.setconfig(ui_.ui_section, ui_.ui_key, ui_.ui_value)
-        
-    
+
+
     return baseui
 
 
 def set_rhodecode_config(config):
     hgsettings = get_hg_settings()
-    
+
     for k, v in hgsettings.items():
         config[k] = v
 
 def invalidate_cache(name, *args):
     """Invalidates given name cache"""
-    
+
     from beaker.cache import region_invalidate
     log.info('INVALIDATING CACHE FOR %s', name)
-    
+
     """propagate our arguments to make sure invalidation works. First
     argument has to be the name of cached func name give to cache decorator
     without that the invalidation would not work"""
     tmp = [name]
     tmp.extend(args)
     args = tuple(tmp)
-    
+
     if name == 'cached_repo_list':
         from rhodecode.model.hg_model import _get_repos_cached
         region_invalidate(_get_repos_cached, None, *args)
-        
+
     if name == 'full_changelog':
         from rhodecode.model.hg_model import _full_changelog_cached
         region_invalidate(_full_changelog_cached, None, *args)
-        
+
 class EmptyChangeset(BaseChangeset):
     """
     An dummy empty changeset.
     """
-    
+
     revision = -1
     message = ''
     author = ''
@@ -266,35 +278,35 @@ class EmptyChangeset(BaseChangeset):
         representation.
         """
         return '0' * 40
-    
+
     @LazyProperty
     def short_id(self):
         return self.raw_id[:12]
 
     def get_file_changeset(self, path):
         return self
-    
+
     def get_file_content(self, path):
         return u''
-    
+
     def get_file_size(self, path):
         return 0
-    
+
 def repo2db_mapper(initial_repo_list, remove_obsolete=False):
     """
     maps all found repositories into db
     """
     from rhodecode.model.repo_model import RepoModel
-    
+
     sa = meta.Session
     user = sa.query(User).filter(User.admin == True).first()
-    
+
     rm = RepoModel()
-    
+
     for name, repo in initial_repo_list.items():
         if not sa.query(Repository).filter(Repository.repo_name == name).scalar():
             log.info('repository %s not found creating default', name)
-                
+
             form_data = {
                          'repo_name':name,
                          'description':repo.description if repo.description != 'unknown' else \
@@ -311,7 +323,7 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False):
                 sa.delete(repo)
                 sa.commit()
 
-    
+
     meta.Session.remove()
 
 from UserDict import DictMixin
@@ -421,25 +433,25 @@ class OrderedDict(dict, DictMixin):
 #===============================================================================
 def create_test_index(repo_location, full_index):
     """Makes default test index
-    @param repo_location:
-    @param full_index:
+    :param repo_location:
+    :param full_index:
     """
     from rhodecode.lib.indexers.daemon import WhooshIndexingDaemon
     from rhodecode.lib.pidlock import DaemonLock, LockHeld
     from rhodecode.lib.indexers import IDX_LOCATION
     import shutil
-    
+
     if os.path.exists(IDX_LOCATION):
         shutil.rmtree(IDX_LOCATION)
-         
+
     try:
         l = DaemonLock()
         WhooshIndexingDaemon(repo_location=repo_location)\
             .run(full_index=full_index)
         l.release()
     except LockHeld:
-        pass    
-    
+        pass
+
 def create_test_env(repos_test_path, config):
     """Makes a fresh database and 
     install test repository into tmp dir
@@ -448,7 +460,7 @@ def create_test_env(repos_test_path, config):
     import tarfile
     import shutil
     from os.path import dirname as dn, join as jn, abspath
-    
+
     log = logging.getLogger('TestEnvCreator')
     # create logger
     log.setLevel(logging.DEBUG)
@@ -456,20 +468,20 @@ def create_test_env(repos_test_path, config):
     # create console handler and set level to debug
     ch = logging.StreamHandler()
     ch.setLevel(logging.DEBUG)
-    
+
     # create formatter
     formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-    
+
     # add formatter to ch
     ch.setFormatter(formatter)
-    
+
     # add ch to logger
     log.addHandler(ch)
-    
+
     #PART ONE create db
     dbname = config['sqlalchemy.db1.url'].split('/')[-1]
     log.debug('making test db %s', dbname)
-    
+
     dbmanage = DbManage(log_sql=True, dbname=dbname, root=config['here'],
                         tests=True)
     dbmanage.create_tables(override=True)
@@ -478,12 +490,12 @@ def create_test_env(repos_test_path, config):
     dbmanage.admin_prompt()
     dbmanage.create_permissions()
     dbmanage.populate_default_permissions()
-    
+
     #PART TWO make test repo
     log.debug('making test vcs repo')
     if os.path.isdir('/tmp/vcs_test'):
         shutil.rmtree('/tmp/vcs_test')
-        
+
     cur_dir = dn(dn(abspath(__file__)))
     tar = tarfile.open(jn(cur_dir, 'tests', "vcs_test.tar.gz"))
     tar.extractall('/tmp')

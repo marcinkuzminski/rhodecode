@@ -1,4 +1,5 @@
-"""Routes configuration
+"""
+Routes configuration
 
 The more specific and detailed routes should be defined first so they
 may take precedent over the more generic routes. For more information
@@ -15,24 +16,28 @@ def make_map(config):
     map.minimization = False
     map.explicit = False
 
+    def check_repo(environ, match_dict):
+        """
+        check for valid repository for proper 404 handling
+        :param environ:
+        :param match_dict:
+        """
+        repo_name = match_dict.get('repo_name')
+        return not cr(repo_name, config['base_path'])
+
     # The ErrorController route (handles 404/500 error pages); it should
     # likely stay at the top, ensuring it can always be resolved
     map.connect('/error/{action}', controller='error')
     map.connect('/error/{action}/{id}', controller='error')
 
+    #==========================================================================
     # CUSTOM ROUTES HERE
+    #==========================================================================
+
+    #MAIN PAGE
     map.connect('hg_home', '/', controller='hg', action='index')
-    
-    def check_repo(environ, match_dict):
-        """
-        check for valid repository for proper 404 handling
-        @param environ:
-        @param match_dict:
-        """
-        repo_name = match_dict.get('repo_name')
-        return not cr(repo_name, config['base_path'])
- 
-    #REST REPO MAP
+
+    #ADMIN REPOSITORY REST ROUTES
     with map.submapper(path_prefix='/_admin', controller='admin/repos') as m:
         m.connect("repos", "/repos",
              action="create", conditions=dict(method=["POST"]))
@@ -67,11 +72,14 @@ def make_map(config):
         m.connect('delete_repo_user', "/repos_delete_user/{repo_name:.*}",
              action="delete_perm_user", conditions=dict(method=["DELETE"],
                                                         function=check_repo))
-        
+
+    #ADMIN USER REST ROUTES
     map.resource('user', 'users', controller='admin/users', path_prefix='/_admin')
+
+    #ADMIN PERMISSIONS REST ROUTES
     map.resource('permission', 'permissions', controller='admin/permissions', path_prefix='/_admin')
-    
-    #REST SETTINGS MAP
+
+    #ADMIN SETTINGS REST ROUTES
     with map.submapper(path_prefix='/_admin', controller='admin/settings') as m:
         m.connect("admin_settings", "/settings",
              action="create", conditions=dict(method=["POST"]))
@@ -101,8 +109,8 @@ def make_map(config):
              action="my_account_update", conditions=dict(method=["PUT"]))
         m.connect("admin_settings_create_repository", "/create_repository",
              action="create_repository", conditions=dict(method=["GET"]))
-    
-    #ADMIN
+
+    #ADMIN MAIN PAGES
     with map.submapper(path_prefix='/_admin', controller='admin/admin') as m:
         m.connect('admin_home', '', action='index')#main page
         m.connect('admin_add_repo', '/add_repo/{new_repo:[a-z0-9\. _-]*}',
@@ -110,13 +118,13 @@ def make_map(config):
     #SEARCH
     map.connect('search', '/_admin/search', controller='search',)
     map.connect('search_repo', '/_admin/search/{search_repo:.*}', controller='search')
-    
+
     #LOGIN/LOGOUT/REGISTER/SIGN IN
     map.connect('login_home', '/_admin/login', controller='login')
     map.connect('logout_home', '/_admin/logout', controller='login', action='logout')
     map.connect('register', '/_admin/register', controller='login', action='register')
     map.connect('reset_password', '/_admin/password_reset', controller='login', action='password_reset')
-        
+
     #FEEDS
     map.connect('rss_feed_home', '/{repo_name:.*}/feed/rss',
                 controller='feed', action='rss',
@@ -124,9 +132,9 @@ def make_map(config):
     map.connect('atom_feed_home', '/{repo_name:.*}/feed/atom',
                 controller='feed', action='atom',
                 conditions=dict(function=check_repo))
-    
-    
-    #OTHERS
+
+
+    #REPOSITORY ROUTES
     map.connect('changeset_home', '/{repo_name:.*}/changeset/{revision}',
                 controller='changeset', revision='tip',
                 conditions=dict(function=check_repo))
@@ -142,7 +150,7 @@ def make_map(config):
     map.connect('tags_home', '/{repo_name:.*}/tags',
                 controller='tags', conditions=dict(function=check_repo))
     map.connect('changelog_home', '/{repo_name:.*}/changelog',
-                controller='changelog', conditions=dict(function=check_repo))    
+                controller='changelog', conditions=dict(function=check_repo))
     map.connect('files_home', '/{repo_name:.*}/files/{revision}/{f_path:.*}',
                 controller='files', revision='tip', f_path='',
                 conditions=dict(function=check_repo))
@@ -157,10 +165,10 @@ def make_map(config):
                 conditions=dict(function=check_repo))
     map.connect('files_annotate_home', '/{repo_name:.*}/annotate/{revision}/{f_path:.*}',
                 controller='files', action='annotate', revision='tip', f_path='',
-                conditions=dict(function=check_repo))    
+                conditions=dict(function=check_repo))
     map.connect('files_archive_home', '/{repo_name:.*}/archive/{revision}/{fileformat}',
                 controller='files', action='archivefile', revision='tip',
-                conditions=dict(function=check_repo))   
+                conditions=dict(function=check_repo))
     map.connect('repo_settings_delete', '/{repo_name:.*}/settings',
                 controller='settings', action="delete",
                 conditions=dict(method=["DELETE"], function=check_repo))
@@ -177,5 +185,5 @@ def make_map(config):
     map.connect('repo_fork_home', '/{repo_name:.*}/fork',
                 controller='settings', action='fork',
                 conditions=dict(function=check_repo))
-        
+
     return map

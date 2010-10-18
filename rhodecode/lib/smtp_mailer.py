@@ -108,7 +108,7 @@ class SmtpMailer(object):
         '''
         Get content based on type, if content is a string do open first
         else just read because it's a probably open file object
-        @param msg_file:
+        :param msg_file:
         '''
         if isinstance(msg_file, str):
             return open(msg_file, "rb").read()

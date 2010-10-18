@@ -28,8 +28,8 @@ from webhelpers.text import chop_at, collapse, convert_accented_entities, \
 class _Link(object):
     '''
     Make a url based on label and url with help of url_for
-    @param label:name of link    if not defined url is used
-    @param url: the url for link
+    :param label:name of link    if not defined url is used
+    :param url: the url for link
     '''
 
     def __call__(self, label='', *url_, **urlargs):
@@ -52,8 +52,8 @@ get_error = _GetError()
 def recursive_replace(str, replace=' '):
     """
     Recursive replace of given sign to just one instance
-    @param str: given string
-    @param replace:char to find and replace multiple instances
+    :param str: given string
+    :param replace:char to find and replace multiple instances
         
     Examples::
     >>> recursive_replace("Mighty---Mighty-Bo--sstones",'-')
@@ -72,7 +72,7 @@ class _ToolTip(object):
         """
         Special function just to wrap our text into nice formatted autowrapped
         text
-        @param tooltip_title:
+        :param tooltip_title:
         """
         
         return wrap_paragraphs(escape(tooltip_title), trim_at)\
@@ -226,7 +226,7 @@ class CodeHtmlFormatter(HtmlFormatter):
 def pygmentize(filenode, **kwargs):
     """
     pygmentize function using pygments
-    @param filenode:
+    :param filenode:
     """
     return literal(code_highlight(filenode.content,
                                   filenode.lexer, CodeHtmlFormatter(**kwargs)))
@@ -234,7 +234,7 @@ def pygmentize(filenode, **kwargs):
 def pygmentize_annotation(filenode, **kwargs):
     """
     pygmentize function for annotation
-    @param filenode:
+    :param filenode:
     """
     
     color_dict = {}

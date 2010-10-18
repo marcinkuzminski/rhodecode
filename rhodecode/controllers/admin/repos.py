@@ -193,7 +193,7 @@ class ReposController(BaseController):
     def delete_perm_user(self, repo_name):
         """
         DELETE an existing repository permission user
-        @param repo_name:
+        :param repo_name:
         """
         
         try:

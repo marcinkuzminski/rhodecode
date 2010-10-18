@@ -66,7 +66,7 @@ class PasswordGenerator(object):
     
 def get_crypt_password(password):
     """Cryptographic function used for password hashing based on sha1
-    @param password: password to hash
+    :param password: password to hash
     """    
     return bcrypt.hashpw(password, bcrypt.gensalt(10))
 
@@ -120,7 +120,7 @@ def set_available_permissions(config):
     permission given in db. We don't wannt to check each time from db for new 
     permissions since adding a new permission also requires application restart
     ie. to decorate new views with the newly created permission
-    @param config:
+    :param config:
     """
     log.info('getting information about all available permissions')
     try:
@@ -138,7 +138,7 @@ def fill_data(user):
     """
     Fills user data with those from database and log out user if not present
     in database
-    @param user:
+    :param user:
     """
     sa = meta.Session
     dbuser = sa.query(User).get(user.user_id)
@@ -156,7 +156,7 @@ def fill_data(user):
 def fill_perms(user):
     """
     Fills user permission attribute with permissions taken from database
-    @param user:
+    :param user:
     """
     
     sa = meta.Session
@@ -228,7 +228,7 @@ def fill_perms(user):
 def get_user(session):
     """
     Gets user from session, and wraps permissions into user
-    @param session:
+    :param session:
     """
     user = session.get('rhodecode_user', AuthUser())
     if user.is_authenticated:

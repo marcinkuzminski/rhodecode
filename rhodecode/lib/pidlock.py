@@ -109,8 +109,8 @@ class DaemonLock(object):
     def makelock(self, lockname, pidfile):
         """
         this function will make an actual lock
-        @param lockname: acctual pid of file
-        @param pidfile: the file to write the pid in
+        :param lockname: acctual pid of file
+        :param pidfile: the file to write the pid in
         """
         if self.debug:
             print 'creating a file %s and pid: %s' % (pidfile, lockname)
