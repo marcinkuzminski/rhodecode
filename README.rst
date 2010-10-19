@@ -40,9 +40,9 @@ Instalation
 Features
 --------
 
-- Has it's own middleware to handle mercurial_ protocol request. Each request can 
-  be logged and authenticated. Runs on threads unlikely to hgweb You can make
-  multiple pulls/pushes simultaneous
+- Has it's own middleware to handle mercurial_ protocol request. Each request 
+  can be logged and authenticated. Runs on threads unlikely to hgweb You can 
+  make multiple pulls/pushes simultaneous. Supports http/https
 - Full permissions and authentication per project private/read/write/admin. 
   One account for web interface and mercurial_ push/pull/clone.
 - Mako templates let's you customize look and feel of application.
@@ -70,9 +70,10 @@ Incoming
 --------
 
 - code review (probably based on hg-review)
-- git_ support (when vcs_ can handle it - it's almost there !)
+- full git_ support, with push/pull server
 - commit based build in wiki system
-- clone points and cloning from remote repositories into rhodecode (git_ and mercurial_)
+- clone points and cloning from remote repositories into rhodecode 
+  (git_ and mercurial_)
 - some cache optimizations
 - other cools stuff that i can figure out (or You can help me figure out)
 
