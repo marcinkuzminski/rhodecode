@@ -26,7 +26,7 @@ from pylons import tmpl_context as c, request, url
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseController, render
 from rhodecode.lib.utils import OrderedDict
-from rhodecode.model.hg_model import HgModel
+from rhodecode.model.hg import HgModel
 from rhodecode.model.db import Statistics
 from webhelpers.paginate import Page
 from rhodecode.lib.celerylib import run_task

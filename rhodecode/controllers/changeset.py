@@ -27,7 +27,7 @@ from pylons.i18n.translation import _
 from pylons.controllers.util import redirect
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseController, render
-from rhodecode.model.hg_model import HgModel
+from rhodecode.model.hg import HgModel
 from vcs.exceptions import RepositoryError, ChangesetError
 from vcs.nodes import FileNode
 from vcs.utils import diffs as differ

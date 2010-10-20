@@ -32,17 +32,17 @@ from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator, \
     HasPermissionAnyDecorator
 from rhodecode.lib.base import BaseController, render
 from rhodecode.lib.utils import repo2db_mapper, invalidate_cache, \
-    set_rhodecode_config, get_hg_settings, get_hg_ui_settings, make_ui
-from rhodecode.model.db import User, UserLog, RhodeCodeSettings, RhodeCodeUi
+    set_rhodecode_config, get_hg_settings, get_hg_ui_settings
+from rhodecode.model.db import RhodeCodeSettings, RhodeCodeUi
 from rhodecode.model.forms import UserForm, ApplicationSettingsForm, \
     ApplicationUiSettingsForm
-from rhodecode.model.hg_model import HgModel
-from rhodecode.model.user_model import UserModel
+from rhodecode.model.hg import HgModel
+from rhodecode.model.user import UserModel
 from rhodecode.lib.celerylib import tasks, run_task
 import formencode
 import logging
 import traceback
- 
+
 log = logging.getLogger(__name__)
 
 
@@ -59,9 +59,9 @@ class SettingsController(BaseController):
         c.admin_user = session.get('admin_user')
         c.admin_username = session.get('admin_username')
         super(SettingsController, self).__before__()
-    
-    
-    @HasPermissionAllDecorator('hg.admin')    
+
+
+    @HasPermissionAllDecorator('hg.admin')
     def index(self, format='html'):
         """GET /admin/settings: All items in the collection"""
         # url('admin_settings')
@@ -73,18 +73,18 @@ class SettingsController(BaseController):
             defaults=defaults,
             encoding="UTF-8",
             force_defaults=False
-        )  
-    
+        )
+
     @HasPermissionAllDecorator('hg.admin')
     def create(self):
         """POST /admin/settings: Create a new item"""
         # url('admin_settings')
-    
+
     @HasPermissionAllDecorator('hg.admin')
     def new(self, format='html'):
         """GET /admin/settings/new: Form to create a new item"""
         # url('admin_new_setting')
-        
+
     @HasPermissionAllDecorator('hg.admin')
     def update(self, setting_id):
         """PUT /admin/settings/setting_id: Update an existing item"""
@@ -101,44 +101,44 @@ class SettingsController(BaseController):
             initial = HgModel.repo_scan(g.paths[0][0], g.paths[0][1], g.baseui)
             repo2db_mapper(initial, rm_obsolete)
             invalidate_cache('cached_repo_list')
-            h.flash(_('Repositories successfully rescanned'), category='success')            
-        
+            h.flash(_('Repositories successfully rescanned'), category='success')
+
         if setting_id == 'whoosh':
             repo_location = get_hg_ui_settings()['paths_root_path']
             full_index = request.POST.get('full_index', False)
             task = run_task(tasks.whoosh_index, repo_location, full_index)
-            
+
             h.flash(_('Whoosh reindex task scheduled'), category='success')
         if setting_id == 'global':
-            
+
             application_form = ApplicationSettingsForm()()
             try:
                 form_result = application_form.to_python(dict(request.POST))
-            
+
                 try:
                     hgsettings1 = self.sa.query(RhodeCodeSettings)\
                     .filter(RhodeCodeSettings.app_settings_name == 'title').one()
-                    hgsettings1.app_settings_value = form_result['rhodecode_title'] 
-                    
+                    hgsettings1.app_settings_value = form_result['rhodecode_title']
+
                     hgsettings2 = self.sa.query(RhodeCodeSettings)\
                     .filter(RhodeCodeSettings.app_settings_name == 'realm').one()
-                    hgsettings2.app_settings_value = form_result['rhodecode_realm'] 
-                    
-                    
+                    hgsettings2.app_settings_value = form_result['rhodecode_realm']
+
+
                     self.sa.add(hgsettings1)
                     self.sa.add(hgsettings2)
                     self.sa.commit()
                     set_rhodecode_config(config)
                     h.flash(_('Updated application settings'),
                             category='success')
-                                    
+
                 except:
                     log.error(traceback.format_exc())
                     h.flash(_('error occurred during updating application settings'),
                             category='error')
-                                
+
                     self.sa.rollback()
-                    
+
 
             except formencode.Invalid, errors:
                 return htmlfill.render(
@@ -146,52 +146,52 @@ class SettingsController(BaseController):
                      defaults=errors.value,
                      errors=errors.error_dict or {},
                      prefix_error=False,
-                     encoding="UTF-8") 
-        
+                     encoding="UTF-8")
+
         if setting_id == 'mercurial':
             application_form = ApplicationUiSettingsForm()()
             try:
                 form_result = application_form.to_python(dict(request.POST))
-            
+
                 try:
-                    
+
                     hgsettings1 = self.sa.query(RhodeCodeUi)\
                     .filter(RhodeCodeUi.ui_key == 'push_ssl').one()
                     hgsettings1.ui_value = form_result['web_push_ssl']
-                    
+
                     hgsettings2 = self.sa.query(RhodeCodeUi)\
                     .filter(RhodeCodeUi.ui_key == '/').one()
-                    hgsettings2.ui_value = form_result['paths_root_path']                    
-                    
-                    
+                    hgsettings2.ui_value = form_result['paths_root_path']
+
+
                     #HOOKS
                     hgsettings3 = self.sa.query(RhodeCodeUi)\
                     .filter(RhodeCodeUi.ui_key == 'changegroup.update').one()
-                    hgsettings3.ui_active = bool(form_result['hooks_changegroup_update'])  
-                    
+                    hgsettings3.ui_active = bool(form_result['hooks_changegroup_update'])
+
                     hgsettings4 = self.sa.query(RhodeCodeUi)\
                     .filter(RhodeCodeUi.ui_key == 'changegroup.repo_size').one()
-                    hgsettings4.ui_active = bool(form_result['hooks_changegroup_repo_size'])                                          
-                    
-                    
-                    
-                    
+                    hgsettings4.ui_active = bool(form_result['hooks_changegroup_repo_size'])
+
+
+
+
                     self.sa.add(hgsettings1)
                     self.sa.add(hgsettings2)
                     self.sa.add(hgsettings3)
                     self.sa.add(hgsettings4)
                     self.sa.commit()
-                    
+
                     h.flash(_('Updated mercurial settings'),
                             category='success')
-                                    
+
                 except:
                     log.error(traceback.format_exc())
                     h.flash(_('error occurred during updating application settings'),
                             category='error')
-                                
+
                     self.sa.rollback()
-                    
+
 
             except formencode.Invalid, errors:
                 return htmlfill.render(
@@ -199,12 +199,12 @@ class SettingsController(BaseController):
                      defaults=errors.value,
                      errors=errors.error_dict or {},
                      prefix_error=False,
-                     encoding="UTF-8") 
-                
-                
-                        
+                     encoding="UTF-8")
+
+
+
         return redirect(url('admin_settings'))
-    
+
     @HasPermissionAllDecorator('hg.admin')
     def delete(self, setting_id):
         """DELETE /admin/settings/setting_id: Delete an existing item"""
@@ -214,13 +214,13 @@ class SettingsController(BaseController):
         #    h.form(url('admin_setting', setting_id=ID),
         #           method='delete')
         # url('admin_setting', setting_id=ID)
-    
+
     @HasPermissionAllDecorator('hg.admin')
     def show(self, setting_id, format='html'):
         """GET /admin/settings/setting_id: Show a specific item"""
         # url('admin_setting', setting_id=ID)
-    
-    @HasPermissionAllDecorator('hg.admin')         
+
+    @HasPermissionAllDecorator('hg.admin')
     def edit(self, setting_id, format='html'):
         """GET /admin/settings/setting_id/edit: Form to edit an existing item"""
         # url('admin_edit_setting', setting_id=ID)
@@ -231,24 +231,24 @@ class SettingsController(BaseController):
         GET /_admin/my_account Displays info about my account 
         """
         # url('admin_settings_my_account')
-        c.user = self.sa.query(User).get(c.rhodecode_user.user_id)
+        c.user = UserModel(self.sa).get(c.rhodecode_user.user_id, cache=False)
         c.user_repos = []
         for repo in c.cached_repo_list.values():
             if repo.dbrepo.user.username == c.user.username:
                 c.user_repos.append(repo)
-                
+
         if c.user.username == 'default':
-            h.flash(_("You can't edit this user since it's" 
+            h.flash(_("You can't edit this user since it's"
               " crucial for entire application"), category='warning')
             return redirect(url('users'))
-        
+
         defaults = c.user.__dict__
         return htmlfill.render(
             render('admin/users/user_edit_my_account.html'),
             defaults=defaults,
             encoding="UTF-8",
             force_defaults=False
-        ) 
+        )
 
     def my_account_update(self):
         """PUT /_admin/my_account_update: Update an existing item"""
@@ -268,13 +268,13 @@ class SettingsController(BaseController):
             user_model.update_my_account(uid, form_result)
             h.flash(_('Your account was updated succesfully'),
                     category='success')
-                           
+
         except formencode.Invalid, errors:
-            c.user = self.sa.query(User).get(c.rhodecode_user.user_id)
+            c.user = user_model.get(c.rhodecode_user.user_id, cache=False)
             c.user_repos = []
             for repo in c.cached_repo_list.values():
                 if repo.dbrepo.user.username == c.user.username:
-                    c.user_repos.append(repo)            
+                    c.user_repos.append(repo)
             return htmlfill.render(
                 render('admin/users/user_edit_my_account.html'),
                 defaults=errors.value,
@@ -285,9 +285,9 @@ class SettingsController(BaseController):
             log.error(traceback.format_exc())
             h.flash(_('error occured during update of user %s') \
                     % form_result.get('username'), category='error')
-                    
+
         return redirect(url('my_account'))
-    
+
     @HasPermissionAnyDecorator('hg.admin', 'hg.create.repository')
     def create_repository(self):
         """GET /_admin/create_repository: Form to create a new item"""
@@ -295,4 +295,4 @@ class SettingsController(BaseController):
         c.new_repo = h.repo_name_slug(new_repo)
 
         return render('admin/repos/repo_add_create_repository.html')
-        
+

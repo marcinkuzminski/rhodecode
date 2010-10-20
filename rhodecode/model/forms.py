@@ -26,22 +26,21 @@ from pylons import session
 from pylons.i18n.translation import _
 from rhodecode.lib.auth import check_password, get_crypt_password
 from rhodecode.model import meta
-from rhodecode.model.user_model import UserModel
-from rhodecode.model.db import User, Repository
-from sqlalchemy.exc import OperationalError
-from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
+from rhodecode.model.user import UserModel
+from rhodecode.model.repo import RepoModel
+from rhodecode.model.db import User
 from webhelpers.pylonslib.secure_form import authentication_token
 import formencode
 import logging
 import os
 import rhodecode.lib.helpers as h
-log = logging.getLogger(__name__)
 
+log = logging.getLogger(__name__)
 
 #this is needed to translate the messages using _() in validators
 class State_obj(object):
     _ = staticmethod(_)
-    
+
 #===============================================================================
 # VALIDATORS
 #===============================================================================
@@ -53,53 +52,51 @@ class ValidAuthToken(formencode.validators.FancyValidator):
         if value != authentication_token():
             raise formencode.Invalid(self.message('invalid_token', state,
                                             search_number=value), value, state)
-            
-def ValidUsername(edit, old_data):             
+
+def ValidUsername(edit, old_data):
     class _ValidUsername(formencode.validators.FancyValidator):
-    
+
         def validate_python(self, value, state):
             if value in ['default', 'new_user']:
                 raise formencode.Invalid(_('Invalid username'), value, state)
-            #check if user is uniq
-            sa = meta.Session
+            #check if user is unique
             old_un = None
             if edit:
-                old_un = sa.query(User).get(old_data.get('user_id')).username
-                
-            if old_un != value or not edit:    
-                if sa.query(User).filter(User.username == value).scalar():
+                old_un = UserModel().get(old_data.get('user_id')).username
+
+            if old_un != value or not edit:
+                if UserModel().get_by_username(value, cache=False):
                     raise formencode.Invalid(_('This username already exists') ,
                                              value, state)
-            meta.Session.remove()
-                            
-    return _ValidUsername   
-    
+
+    return _ValidUsername
+
 class ValidPassword(formencode.validators.FancyValidator):
-    
+
     def to_python(self, value, state):
         if value:
             return get_crypt_password(value)
-        
+
 class ValidAuth(formencode.validators.FancyValidator):
     messages = {
             'invalid_password':_('invalid password'),
             'invalid_login':_('invalid user name'),
             'disabled_account':_('Your acccount is disabled')
-            
+
             }
     #error mapping
     e_dict = {'username':messages['invalid_login'],
               'password':messages['invalid_password']}
     e_dict_disable = {'username':messages['disabled_account']}
-    
+
     def validate_python(self, value, state):
         password = value['password']
         username = value['username']
-        user = UserModel().get_user_by_name(username)
+        user = UserModel().get_by_username(username)
         if user is None:
             raise formencode.Invalid(self.message('invalid_password',
                                      state=State_obj), value, state,
-                                     error_dict=self.e_dict)            
+                                     error_dict=self.e_dict)
         if user:
             if user.active:
                 if user.username == username and check_password(password,
@@ -116,12 +113,13 @@ class ValidAuth(formencode.validators.FancyValidator):
                                          state=State_obj),
                                          value, state,
                                          error_dict=self.e_dict_disable)
-                   
+
 class ValidRepoUser(formencode.validators.FancyValidator):
-            
+
     def to_python(self, value, state):
+        sa = meta.Session()
         try:
-            self.user_db = meta.Session.query(User)\
+            self.user_db = sa.query(User)\
                 .filter(User.active == True)\
                 .filter(User.username == value).one()
         except Exception:
@@ -129,31 +127,29 @@ class ValidRepoUser(formencode.validators.FancyValidator):
                                      value, state)
         finally:
             meta.Session.remove()
-                        
+
         return self.user_db.user_id
 
-def ValidRepoName(edit, old_data):    
+def ValidRepoName(edit, old_data):
     class _ValidRepoName(formencode.validators.FancyValidator):
-            
+
         def to_python(self, value, state):
             slug = h.repo_name_slug(value)
             if slug in ['_admin']:
                 raise formencode.Invalid(_('This repository name is disallowed'),
                                          value, state)
-            if old_data.get('repo_name') != value or not edit:    
-                sa = meta.Session
-                if sa.query(Repository).filter(Repository.repo_name == slug).scalar():
+            if old_data.get('repo_name') != value or not edit:
+                if RepoModel().get(slug, cache=False):
                     raise formencode.Invalid(_('This repository already exists') ,
                                              value, state)
-                meta.Session.remove()
-            return slug 
-        
-        
+            return slug
+
+
     return _ValidRepoName
 
 class ValidPerms(formencode.validators.FancyValidator):
     messages = {'perm_new_user_name':_('This username is not valid')}
-    
+
     def to_python(self, value, state):
         perms_update = []
         perms_new = []
@@ -167,7 +163,7 @@ class ValidPerms(formencode.validators.FancyValidator):
                         if (new_user, new_perm) not in perms_new:
                             perms_new.append((new_user, new_perm))
                 else:
-                    usr = k[5:]                    
+                    usr = k[5:]
                     if usr == 'default':
                         if value['private']:
                             #set none for default when updating to private repo
@@ -184,36 +180,36 @@ class ValidPerms(formencode.validators.FancyValidator):
             except Exception:
                 msg = self.message('perm_new_user_name',
                                      state=State_obj)
-                raise formencode.Invalid(msg, value, state, error_dict={'perm_new_user_name':msg})            
+                raise formencode.Invalid(msg, value, state, error_dict={'perm_new_user_name':msg})
         return value
-    
+
 class ValidSettings(formencode.validators.FancyValidator):
-    
+
     def to_python(self, value, state):
         #settings  form can't edit user
         if value.has_key('user'):
             del['value']['user']
-        
+
         return value
-    
+
 class ValidPath(formencode.validators.FancyValidator):
     def to_python(self, value, state):
         isdir = os.path.isdir(value.replace('*', ''))
         if (value.endswith('/*') or value.endswith('/**')) and isdir:
             return value
         elif not isdir:
-            msg = _('This is not a valid path') 
+            msg = _('This is not a valid path')
         else:
             msg = _('You need to specify * or ** at the end of path (ie. /tmp/*)')
-        
+
         raise formencode.Invalid(msg, value, state,
-                                     error_dict={'paths_root_path':msg})            
+                                     error_dict={'paths_root_path':msg})
 
 def UniqSystemEmail(old_data):
     class _UniqSystemEmail(formencode.validators.FancyValidator):
         def to_python(self, value, state):
             if old_data.get('email') != value:
-                sa = meta.Session
+                sa = meta.Session()
                 try:
                     user = sa.query(User).filter(User.email == value).scalar()
                     if user:
@@ -221,11 +217,11 @@ def UniqSystemEmail(old_data):
                                                  value, state)
                 finally:
                     meta.Session.remove()
-                
+
             return value
-        
+
     return _UniqSystemEmail
-    
+
 class ValidSystemEmail(formencode.validators.FancyValidator):
     def to_python(self, value, state):
         sa = meta.Session
@@ -236,8 +232,8 @@ class ValidSystemEmail(formencode.validators.FancyValidator):
                                          value, state)
         finally:
             meta.Session.remove()
-            
-        return value     
+
+        return value
 
 #===============================================================================
 # FORMS        
@@ -266,7 +262,7 @@ class LoginForm(formencode.Schema):
 
     #chained validators have access to all data
     chained_validators = [ValidAuth]
-    
+
 def UserForm(edit=False, old_data={}):
     class _UserForm(formencode.Schema):
         allow_extra_fields = True
@@ -281,7 +277,7 @@ def UserForm(edit=False, old_data={}):
         name = UnicodeString(strip=True, min=1, not_empty=True)
         lastname = UnicodeString(strip=True, min=1, not_empty=True)
         email = All(Email(not_empty=True), UniqSystemEmail(old_data))
-        
+
     return _UserForm
 
 RegisterForm = UserForm
@@ -290,7 +286,7 @@ def PasswordResetForm():
     class _PasswordResetForm(formencode.Schema):
         allow_extra_fields = True
         filter_extra_fields = True
-        email = All(ValidSystemEmail(), Email(not_empty=True))             
+        email = All(ValidSystemEmail(), Email(not_empty=True))
     return _PasswordResetForm
 
 def RepoForm(edit=False, old_data={}):
@@ -300,10 +296,10 @@ def RepoForm(edit=False, old_data={}):
         repo_name = All(UnicodeString(strip=True, min=1, not_empty=True), ValidRepoName(edit, old_data))
         description = UnicodeString(strip=True, min=1, not_empty=True)
         private = StringBoolean(if_missing=False)
-        
+
         if edit:
             user = All(Int(not_empty=True), ValidRepoUser)
-        
+
         chained_validators = [ValidPerms]
     return _RepoForm
 
@@ -314,7 +310,7 @@ def RepoForkForm(edit=False, old_data={}):
         fork_name = All(UnicodeString(strip=True, min=1, not_empty=True), ValidRepoName(edit, old_data))
         description = UnicodeString(strip=True, min=1, not_empty=True)
         private = StringBoolean(if_missing=False)
-        
+
     return _RepoForkForm
 
 def RepoSettingsForm(edit=False, old_data={}):
@@ -324,7 +320,7 @@ def RepoSettingsForm(edit=False, old_data={}):
         repo_name = All(UnicodeString(strip=True, min=1, not_empty=True), ValidRepoName(edit, old_data))
         description = UnicodeString(strip=True, min=1, not_empty=True)
         private = StringBoolean(if_missing=False)
-        
+
         chained_validators = [ValidPerms, ValidSettings]
     return _RepoForm
 
@@ -335,9 +331,9 @@ def ApplicationSettingsForm():
         filter_extra_fields = False
         rhodecode_title = UnicodeString(strip=True, min=1, not_empty=True)
         rhodecode_realm = UnicodeString(strip=True, min=1, not_empty=True)
-        
+
     return _ApplicationSettingsForm
- 
+
 def ApplicationUiSettingsForm():
     class _ApplicationUiSettingsForm(formencode.Schema):
         allow_extra_fields = True
@@ -346,7 +342,7 @@ def ApplicationUiSettingsForm():
         paths_root_path = All(ValidPath(), UnicodeString(strip=True, min=1, not_empty=True))
         hooks_changegroup_update = OneOf(['True', 'False'], if_missing=False)
         hooks_changegroup_repo_size = OneOf(['True', 'False'], if_missing=False)
-        
+
     return _ApplicationUiSettingsForm
 
 def DefaultPermissionsForm(perms_choices, register_choices, create_choices):
@@ -357,5 +353,5 @@ def DefaultPermissionsForm(perms_choices, register_choices, create_choices):
         default_perm = OneOf(perms_choices)
         default_register = OneOf(register_choices)
         default_create = OneOf(create_choices)
-        
+
     return _DefaultPermissionsForm

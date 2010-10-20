@@ -22,10 +22,12 @@ Created on April 18, 2010
 Utilities for RhodeCode
 @author: marcink
 """
-from beaker.cache import cache_region
+from rhodecode.model.caching_query import FromCache
 from mercurial import ui, config, hg
 from mercurial.error import RepoError
 from rhodecode.model import meta
+from rhodecode.model.user import UserModel
+from rhodecode.model.repo import RepoModel
 from rhodecode.model.db import Repository, User, RhodeCodeUi, RhodeCodeSettings, UserLog
 from vcs.backends.base import BaseChangeset
 from vcs.utils.lazy import LazyProperty
@@ -67,13 +69,13 @@ def action_logger(user, action, repo, ipaddr, sa=None):
     """
 
     if not sa:
-        sa = meta.Session
+        sa = meta.Session()
 
     try:
         if hasattr(user, 'user_id'):
             user_id = user.user_id
         elif isinstance(user, basestring):
-            user_id = sa.query(User).filter(User.username == user).one()
+            user_id = UserModel(sa).get_by_username(user, cache=False).user_id
         else:
             raise Exception('You have to provide user object or username')
 
@@ -82,8 +84,7 @@ def action_logger(user, action, repo, ipaddr, sa=None):
         user_log.user_id = user_id
         user_log.action = action
         user_log.repository_name = repo_name
-        user_log.repository = sa.query(Repository)\
-            .filter(Repository.repo_name == repo_name).one()
+        user_log.repository = RepoModel(sa).get(repo_name, cache=False)
         user_log.action_date = datetime.datetime.now()
         user_log.user_ip = ipaddr
         sa.add(user_log)
@@ -135,11 +136,14 @@ def ask_ok(prompt, retries=4, complaint='Yes or no, please!'):
         if retries < 0: raise IOError
         print complaint
 
-@cache_region('super_short_term', 'cached_hg_ui')
 def get_hg_ui_cached():
     try:
         sa = meta.Session
-        ret = sa.query(RhodeCodeUi).all()
+        ret = sa.query(RhodeCodeUi)\
+        .options(FromCache("sql_cache_short", "get_hg_ui_settings"))\
+        .all()
+    except:
+        pass
     finally:
         meta.Session.remove()
     return ret
@@ -147,8 +151,12 @@ def get_hg_ui_cached():
 
 def get_hg_settings():
     try:
-        sa = meta.Session
-        ret = sa.query(RhodeCodeSettings).all()
+        sa = meta.Session()
+        ret = sa.query(RhodeCodeSettings)\
+        .options(FromCache("sql_cache_short", "get_hg_settings"))\
+        .all()
+    except:
+        pass
     finally:
         meta.Session.remove()
 
@@ -162,8 +170,10 @@ def get_hg_settings():
 
 def get_hg_ui_settings():
     try:
-        sa = meta.Session
+        sa = meta.Session()
         ret = sa.query(RhodeCodeUi).all()
+    except:
+        pass
     finally:
         meta.Session.remove()
 
@@ -255,11 +265,11 @@ def invalidate_cache(name, *args):
     args = tuple(tmp)
 
     if name == 'cached_repo_list':
-        from rhodecode.model.hg_model import _get_repos_cached
+        from rhodecode.model.hg import _get_repos_cached
         region_invalidate(_get_repos_cached, None, *args)
 
     if name == 'full_changelog':
-        from rhodecode.model.hg_model import _full_changelog_cached
+        from rhodecode.model.hg import _full_changelog_cached
         region_invalidate(_full_changelog_cached, None, *args)
 
 class EmptyChangeset(BaseChangeset):
@@ -296,15 +306,14 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False):
     """
     maps all found repositories into db
     """
-    from rhodecode.model.repo_model import RepoModel
 
-    sa = meta.Session
+    sa = meta.Session()
     user = sa.query(User).filter(User.admin == True).first()
 
     rm = RepoModel()
 
     for name, repo in initial_repo_list.items():
-        if not sa.query(Repository).filter(Repository.repo_name == name).scalar():
+        if not RepoModel(sa).get(name, cache=False):
             log.info('repository %s not found creating default', name)
 
             form_data = {
@@ -429,7 +438,7 @@ class OrderedDict(dict, DictMixin):
 
 
 #===============================================================================
-# TEST FUNCTIONS
+# TEST FUNCTIONS AND CREATORS
 #===============================================================================
 def create_test_index(repo_location, full_index):
     """Makes default test index

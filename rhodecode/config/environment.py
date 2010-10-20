@@ -6,7 +6,7 @@ from rhodecode.config.routing import make_map
 from rhodecode.lib.auth import set_available_permissions, set_base_path
 from rhodecode.lib.utils import repo2db_mapper, make_ui, set_rhodecode_config
 from rhodecode.model import init_model
-from rhodecode.model.hg_model import _get_repos_cached_initial
+from rhodecode.model.hg import _get_repos_cached_initial
 from sqlalchemy import engine_from_config
 import logging
 import os

@@ -30,7 +30,7 @@ from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAllDecorator
 from rhodecode.lib.base import BaseController, render
 from rhodecode.lib.utils import invalidate_cache, action_logger
 from rhodecode.model.forms import RepoSettingsForm, RepoForkForm
-from rhodecode.model.repo_model import RepoModel
+from rhodecode.model.repo import RepoModel
 import formencode
 import logging
 import rhodecode.lib.helpers as h

@@ -26,7 +26,7 @@ from operator import itemgetter
 from pylons import tmpl_context as c, request
 from rhodecode.lib.auth import LoginRequired
 from rhodecode.lib.base import BaseController, render
-from rhodecode.model.hg_model import HgModel
+from rhodecode.model.hg import HgModel
 import logging
 log = logging.getLogger(__name__)
 

@@ -2301,6 +2301,8 @@ padding-left:5px;
 
 #changeset_content .container .left .date,.ac .match {
 font-weight:700;
+padding-top: 5px;
+padding-bottom:5px;
 }
 
 div#legend_container table td,div#legend_choices table td {

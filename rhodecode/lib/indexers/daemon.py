@@ -33,7 +33,7 @@ project_path = dn(dn(dn(dn(os.path.realpath(__file__)))))
 sys.path.append(project_path)
 
 from rhodecode.lib.pidlock import LockHeld, DaemonLock
-from rhodecode.model.hg_model import HgModel
+from rhodecode.model.hg import HgModel
 from rhodecode.lib.helpers import safe_unicode
 from whoosh.index import create_in, open_dir
 from shutil import rmtree

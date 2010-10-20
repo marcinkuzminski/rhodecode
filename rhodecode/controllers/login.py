@@ -31,7 +31,7 @@ from rhodecode.lib.base import BaseController, render
 import rhodecode.lib.helpers as h 
 from pylons.i18n.translation import _
 from rhodecode.model.forms import LoginForm, RegisterForm, PasswordResetForm
-from rhodecode.model.user_model import UserModel
+from rhodecode.model.user import UserModel
 import formencode
 import logging
 
@@ -55,7 +55,7 @@ class LoginController(BaseController):
             try:
                 c.form_result = login_form.to_python(dict(request.POST))
                 username = c.form_result['username']
-                user = UserModel().get_user_by_name(username)
+                user = UserModel().get_by_username(username)
                 auth_user = AuthUser()
                 auth_user.username = user.username
                 auth_user.is_authenticated = True
@@ -89,7 +89,7 @@ class LoginController(BaseController):
     def register(self):
         user_model = UserModel()
         c.auto_active = False
-        for perm in user_model.get_default().user_perms:
+        for perm in user_model.get_by_username('default', cache=False).user_perms:
             if perm.permission.permission_name == 'hg.register.auto_activate':
                 c.auto_active = True
                 break

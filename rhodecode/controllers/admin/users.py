@@ -33,7 +33,7 @@ from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator
 from rhodecode.lib.base import BaseController, render
 from rhodecode.model.db import User, UserLog
 from rhodecode.model.forms import UserForm
-from rhodecode.model.user_model import UserModel, DefaultUserException
+from rhodecode.model.user import UserModel, DefaultUserException
 import formencode
 import logging
 import traceback
@@ -100,7 +100,7 @@ class UsersController(BaseController):
         #           method='put')
         # url('user', id=ID)
         user_model = UserModel()
-        c.user = user_model.get_user(id)
+        c.user = user_model.get(id)
         
         _form = UserForm(edit=True, old_data={'user_id':id,
                                               'email':c.user.email})()

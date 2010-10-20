@@ -24,7 +24,7 @@ feed controller for pylons
 """
 from pylons import tmpl_context as c, url, response
 from rhodecode.lib.base import BaseController, render
-from rhodecode.model.hg_model import HgModel
+from rhodecode.model.hg import HgModel
 from webhelpers.feedgenerator import Atom1Feed, Rss201rev2Feed
 import logging
 log = logging.getLogger(__name__)

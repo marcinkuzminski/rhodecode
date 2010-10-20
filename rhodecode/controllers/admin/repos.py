@@ -35,8 +35,8 @@ from rhodecode.lib.base import BaseController, render
 from rhodecode.lib.utils import invalidate_cache, action_logger
 from rhodecode.model.db import User
 from rhodecode.model.forms import RepoForm
-from rhodecode.model.hg_model import HgModel
-from rhodecode.model.repo_model import RepoModel
+from rhodecode.model.hg import HgModel
+from rhodecode.model.repo import RepoModel
 import formencode
 import logging
 import traceback

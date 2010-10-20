@@ -25,7 +25,6 @@ Model for RhodeCode
 from beaker.cache import cache_region
 from mercurial import ui
 from mercurial.hgweb.hgwebdir_mod import findrepos
-from pylons.i18n.translation import _
 from rhodecode.lib import helpers as h
 from rhodecode.lib.utils import invalidate_cache
 from rhodecode.lib.auth import HasRepoPermissionAny
@@ -65,7 +64,7 @@ def _get_repos_switcher_cached(cached_repo_list):
         if HasRepoPermissionAny('repository.write', 'repository.read',
                     'repository.admin')(repo.name, 'main page check'):
             repos_lst.append((repo.name, repo.dbrepo.private,))
-    
+
     return sorted(repos_lst, key=lambda k:k[0].lower())
 
 @cache_region('long_term', 'full_changelog')
@@ -79,7 +78,7 @@ class HgModel(object):
 
     def __init__(self):
         pass
-    
+
     @staticmethod
     def repo_scan(repos_prefix, repos_path, baseui, initial=False):
         """
@@ -99,17 +98,17 @@ class HgModel(object):
             if repos_path[0] != '/':
                 repos_path[0] = '/'
             if not os.path.isdir(os.path.join(*repos_path)):
-                raise RepositoryError('Not a valid repository in %s' % path)        
+                raise RepositoryError('Not a valid repository in %s' % path)
         if not repos_path.endswith('*'):
             raise VCSError('You need to specify * or ** at the end of path '
                             'for recursive scanning')
-            
+
         check_repo_dir(repos_path)
         log.info('scanning for repositories in %s', repos_path)
         repos = findrepos([(repos_prefix, repos_path)])
         if not isinstance(baseui, ui.ui):
             baseui = ui.ui()
-    
+
         repos_list = {}
         for name, path in repos:
             try:
@@ -118,10 +117,10 @@ class HgModel(object):
                     raise RepositoryError('Duplicate repository name %s found in'
                                     ' %s' % (name, path))
                 else:
-                    
+
                     repos_list[name] = MercurialRepository(path, baseui=baseui)
                     repos_list[name].name = name
-                    
+
                     dbrepo = None
                     if not initial:
                         #for initial scann on application first run we don't
@@ -130,7 +129,7 @@ class HgModel(object):
                             .options(joinedload(Repository.fork))\
                             .filter(Repository.repo_name == name)\
                             .scalar()
-                            
+
                     if dbrepo:
                         log.info('Adding db instance to cached list')
                         repos_list[name].dbrepo = dbrepo
@@ -144,16 +143,16 @@ class HgModel(object):
                 continue
         meta.Session.remove()
         return repos_list
-        
+
     def get_repos(self):
         for name, repo in _get_repos_cached().items():
             if repo._get_hidden():
                 #skip hidden web repository
                 continue
-            
+
             last_change = repo.last_change
             tip = h.get_changeset_safe(repo, 'tip')
-                
+
             tmp_d = {}
             tmp_d['name'] = repo.name
             tmp_d['name_sort'] = tmp_d['name'].lower()
@@ -162,7 +161,7 @@ class HgModel(object):
             tmp_d['last_change'] = last_change
             tmp_d['last_change_sort'] = last_change[1] - last_change[0]
             tmp_d['tip'] = tip.short_id
-            tmp_d['tip_sort'] = tip.revision 
+            tmp_d['tip_sort'] = tip.revision
             tmp_d['rev'] = tip.revision
             tmp_d['contact'] = repo.contact
             tmp_d['contact_sort'] = tmp_d['contact']
@@ -181,6 +180,6 @@ class HgModel(object):
             invalidate_cache('cached_repo_list')
             repo = _get_repos_cached()[repo_name]
             return repo
-            
-        
-        
+
+
+

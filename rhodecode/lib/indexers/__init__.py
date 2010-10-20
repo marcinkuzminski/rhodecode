@@ -1,6 +1,6 @@
 from os.path import dirname as dn, join as jn
 from rhodecode.config.environment import load_environment
-from rhodecode.model.hg_model import HgModel
+from rhodecode.model.hg import HgModel
 from shutil import rmtree
 from webhelpers.html.builder import escape
 from vcs.utils.lazy import LazyProperty

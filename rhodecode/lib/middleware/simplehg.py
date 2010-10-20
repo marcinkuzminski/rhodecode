@@ -30,10 +30,10 @@ from mercurial.hgweb import hgweb
 from mercurial.hgweb.request import wsgiapplication
 from paste.auth.basic import AuthBasicAuthenticator
 from paste.httpheaders import REMOTE_USER, AUTH_TYPE
-from rhodecode.lib.auth import authfunc, HasPermissionAnyMiddleware, \
-    get_user_cached
+from rhodecode.lib.auth import authfunc, HasPermissionAnyMiddleware
 from rhodecode.lib.utils import is_mercurial, make_ui, invalidate_cache, \
     check_repo_fast, ui_sections
+from rhodecode.model.user import UserModel
 from webob.exc import HTTPNotFound, HTTPForbidden, HTTPInternalServerError
 from rhodecode.lib.utils import action_logger
 import logging
@@ -163,7 +163,7 @@ class SimpleHg(object):
         return environ.get('REMOTE_USER')
 
     def __get_user(self, username):
-        return get_user_cached(username)
+        return UserModel().get_by_username(username, cache=True)
 
     def __get_action(self, environ):
         """

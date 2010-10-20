@@ -25,7 +25,7 @@ shortlog controller for pylons
 from pylons import tmpl_context as c, request
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseController, render
-from rhodecode.model.hg_model import HgModel
+from rhodecode.model.hg import HgModel
 from webhelpers.paginate import Page
 import logging
 log = logging.getLogger(__name__)

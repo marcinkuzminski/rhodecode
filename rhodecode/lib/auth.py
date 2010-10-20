@@ -22,16 +22,13 @@ Created on April 4, 2010
 
 @author: marcink
 """
-from beaker.cache import cache_region
 from pylons import config, session, url, request
 from pylons.controllers.util import abort, redirect
 from rhodecode.lib.utils import get_repo_slug
 from rhodecode.model import meta
 from rhodecode.model.caching_query import FromCache
 from rhodecode.model.db import User, RepoToPerm, Repository, Permission, \
-    UserToPerm
-from sqlalchemy.exc import OperationalError
-from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
+    UserToPerm    
 import bcrypt
 from decorator import decorator
 import logging
@@ -74,22 +71,10 @@ def get_crypt_password(password):
 def check_password(password, hashed):
     return bcrypt.hashpw(password, hashed) == hashed
 
-@cache_region('super_short_term', 'cached_user')
-def get_user_cached(username):
-    sa = meta.Session
-    try:
-        user = sa.query(User).filter(User.username == username).one()
-    finally:
-        meta.Session.remove()
-    return user
-
 def authfunc(environ, username, password):
-    try:
-        user = get_user_cached(username)
-    except (NoResultFound, MultipleResultsFound, OperationalError), e:
-        log.error(e)
-        user = None
-        
+    from rhodecode.model.user import UserModel
+    user = UserModel().get_by_username(username, cache=False)
+            
     if user:
         if user.active:
             if user.username == username and check_password(password, user.password):
@@ -125,8 +110,10 @@ def set_available_permissions(config):
     """
     log.info('getting information about all available permissions')
     try:
-        sa = meta.Session
+        sa = meta.Session()
         all_perms = sa.query(Permission).all()
+    except:
+        pass
     finally:
         meta.Session.remove()
     
@@ -141,10 +128,16 @@ def fill_data(user):
     in database
     :param user:
     """
-    sa = meta.Session
-    dbuser = sa.query(User).options(FromCache('sql_cache_short',
-                                              'getuser_%s' % user.user_id))\
+    sa = meta.Session()
+    try:
+        dbuser = sa.query(User)\
+        .options(FromCache('sql_cache_short', 'getuser_%s' % user.user_id))\
         .get(user.user_id)
+    except:
+        pass
+    finally:
+        meta.Session.remove()
+        
     if dbuser:
         user.username = dbuser.username
         user.is_admin = dbuser.admin
@@ -153,7 +146,8 @@ def fill_data(user):
         user.email = dbuser.email
     else:
         user.is_authenticated = False
-    meta.Session.remove()
+        
+    
     return user
             
 def fill_perms(user):
@@ -162,7 +156,7 @@ def fill_perms(user):
     :param user:
     """
     
-    sa = meta.Session
+    sa = meta.Session()
     user.permissions['repositories'] = {}
     user.permissions['global'] = set()
     
@@ -170,7 +164,7 @@ def fill_perms(user):
     # fetch default permissions
     #===========================================================================
     default_user = sa.query(User)\
-        .options(FromCache('sql_cache_short','getuser_%s' % 'default'))\
+        .options(FromCache('sql_cache_short', 'getuser_%s' % 'default'))\
         .filter(User.username == 'default').scalar()
                                             
     default_perms = sa.query(RepoToPerm, Repository, Permission)\

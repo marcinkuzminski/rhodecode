@@ -59,7 +59,7 @@ def user_action_mapper(ui, repo, hooktype=None, **kwargs):
     """
     
     try:
-        sa = meta.Session
+        sa = meta.Session()
         username = kwargs['url'].split(':')[-1]
         user_log = sa.query(UserLog)\
             .filter(UserLog.user == sa.query(User)\

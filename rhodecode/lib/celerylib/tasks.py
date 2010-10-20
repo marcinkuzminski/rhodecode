@@ -38,28 +38,28 @@ def get_session():
     else:
         #If we don't use celery reuse our current application Session
         from rhodecode.model.meta import Session
-        sa = Session
-        
+        sa = Session()
+
     return sa
 
 def get_hg_settings():
     from rhodecode.model.db import RhodeCodeSettings
     sa = get_session()
     ret = sa.query(RhodeCodeSettings).all()
-        
+
     if not ret:
         raise Exception('Could not get application settings !')
     settings = {}
     for each in ret:
-        settings['rhodecode_' + each.app_settings_name] = each.app_settings_value    
-    
+        settings['rhodecode_' + each.app_settings_name] = each.app_settings_value
+
     return settings
 
 def get_hg_ui_settings():
     from rhodecode.model.db import RhodeCodeUi
     sa = get_session()
     ret = sa.query(RhodeCodeUi).all()
-        
+
     if not ret:
         raise Exception('Could not get application ui settings !')
     settings = {}
@@ -68,16 +68,16 @@ def get_hg_ui_settings():
         v = each.ui_value
         if k == '/':
             k = 'root_path'
-        
+
         if k.find('.') != -1:
             k = k.replace('.', '_')
-        
+
         if each.ui_section == 'hooks':
             v = each.ui_active
-        
-        settings[each.ui_section + '_' + k] = v  
-    
-    return settings   
+
+        settings[each.ui_section + '_' + k] = v
+
+    return settings
 
 @task
 @locked_task
@@ -92,7 +92,7 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
     from rhodecode.model.db import Statistics, Repository
     log = get_commits_stats.get_logger()
     author_key_cleaner = lambda k: person(k).replace('"', "") #for js data compatibilty
-    
+
     commits_by_day_author_aggregate = {}
     commits_by_day_aggregate = {}
     repos_path = get_hg_ui_settings()['paths_root_path'].replace('*', '')
@@ -103,9 +103,9 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
     last_rev = 0
     last_cs = None
     timegetter = itemgetter('time')
-    
+
     sa = get_session()
-    
+
     dbrepo = sa.query(Repository)\
         .filter(Repository.repo_name == repo_name).scalar()
     cur_stats = sa.query(Statistics)\
@@ -114,18 +114,18 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
         last_rev = cur_stats.stat_on_revision
     if not repo.revisions:
         return True
-    
+
     if last_rev == repo.revisions[-1] and len(repo.revisions) > 1:
         #pass silently without any work if we're not on first revision or current
         #state of parsing revision(from db marker) is the last revision
         return True
-    
+
     if cur_stats:
         commits_by_day_aggregate = OrderedDict(
                                        json.loads(
                                         cur_stats.commit_activity_combined))
         commits_by_day_author_aggregate = json.loads(cur_stats.commit_activity)
-    
+
     log.debug('starting parsing %s', parse_limit)
     for cnt, rev in enumerate(repo.revisions[last_rev:]):
         last_cs = cs = repo.get_changeset(rev)
@@ -141,20 +141,20 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
                 time_pos = l.index(k)
             except ValueError:
                 time_pos = False
-                
+
             if time_pos >= 0 and time_pos is not False:
-                
+
                 datadict = commits_by_day_author_aggregate\
                     [author_key_cleaner(cs.author)]['data'][time_pos]
-                
+
                 datadict["commits"] += 1
                 datadict["added"] += len(cs.added)
                 datadict["changed"] += len(cs.changed)
                 datadict["removed"] += len(cs.removed)
-                
+
             else:
                 if k >= ts_min_y and k <= ts_max_y or skip_date_limit:
-                    
+
                     datadict = {"time":k,
                                 "commits":1,
                                 "added":len(cs.added),
@@ -163,7 +163,7 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
                                }
                     commits_by_day_author_aggregate\
                         [author_key_cleaner(cs.author)]['data'].append(datadict)
-                                        
+
         else:
             if k >= ts_min_y and k <= ts_max_y or skip_date_limit:
                 commits_by_day_author_aggregate[author_key_cleaner(cs.author)] = {
@@ -175,14 +175,14 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
                                              "removed":len(cs.removed),
                                              }],
                                     "schema":["commits"],
-                                    }               
-    
+                                    }
+
         #gather all data by day
         if commits_by_day_aggregate.has_key(k):
             commits_by_day_aggregate[k] += 1
         else:
             commits_by_day_aggregate[k] = 1
-        
+
         if cnt >= parse_limit:
             #don't fetch to much data since we can freeze application
             break
@@ -191,7 +191,7 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
     for k, v in commits_by_day_aggregate.items():
         overview_data.append([k, v])
     overview_data = sorted(overview_data, key=itemgetter(0))
-        
+
     if not commits_by_day_author_aggregate:
         commits_by_day_author_aggregate[author_key_cleaner(repo.contact)] = {
             "label":author_key_cleaner(repo.contact),
@@ -206,23 +206,23 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
     log.debug('last revison %s', last_rev)
     leftovers = len(repo.revisions[last_rev:])
     log.debug('revisions to parse %s', leftovers)
-    
-    if last_rev == 0 or leftovers < parse_limit:    
+
+    if last_rev == 0 or leftovers < parse_limit:
         stats.languages = json.dumps(__get_codes_stats(repo_name))
-        
+
     stats.repository = dbrepo
     stats.stat_on_revision = last_cs.revision
-    
+
     try:
         sa.add(stats)
-        sa.commit()    
+        sa.commit()
     except:
         log.error(traceback.format_exc())
         sa.rollback()
         return False
     if len(repo.revisions) > 1:
         run_task(get_commits_stats, repo_name, ts_min_y, ts_max_y)
-                            
+
     return True
 
 @task
@@ -230,7 +230,7 @@ def reset_user_password(user_email):
     log = reset_user_password.get_logger()
     from rhodecode.lib import auth
     from rhodecode.model.db import User
-    
+
     try:
         try:
             sa = get_session()
@@ -244,26 +244,26 @@ def reset_user_password(user_email):
                 log.info('change password for %s', user_email)
             if new_passwd is None:
                 raise Exception('unable to generate new password')
-            
+
         except:
             log.error(traceback.format_exc())
             sa.rollback()
-        
+
         run_task(send_email, user_email,
                  "Your new rhodecode password",
                  'Your new rhodecode password:%s' % (new_passwd))
         log.info('send new password mail to %s', user_email)
-        
-        
+
+
     except:
         log.error('Failed to update user password')
         log.error(traceback.format_exc())
     return True
 
-@task    
+@task
 def send_email(recipients, subject, body):
     log = send_email.get_logger()
-    email_config = dict(config.items('DEFAULT')) 
+    email_config = dict(config.items('DEFAULT'))
     mail_from = email_config.get('app_email_from')
     user = email_config.get('smtp_username')
     passwd = email_config.get('smtp_password')
@@ -271,11 +271,11 @@ def send_email(recipients, subject, body):
     mail_port = email_config.get('smtp_port')
     tls = email_config.get('smtp_use_tls')
     ssl = False
-    
+
     try:
         m = SmtpMailer(mail_from, user, passwd, mail_server,
                        mail_port, ssl, tls)
-        m.send(recipients, subject, body)  
+        m.send(recipients, subject, body)
     except:
         log.error('Mail sending failed')
         log.error(traceback.format_exc())
@@ -285,19 +285,19 @@ def send_email(recipients, subject, body):
 @task
 def create_repo_fork(form_data, cur_user):
     import os
-    from rhodecode.model.repo_model import RepoModel
+    from rhodecode.model.repo import RepoModel
     sa = get_session()
     rm = RepoModel(sa)
-    
+
     rm.create(form_data, cur_user, just_db=True, fork=True)
-    
+
     repos_path = get_hg_ui_settings()['paths_root_path'].replace('*', '')
     repo_path = os.path.join(repos_path, form_data['repo_name'])
     repo_fork_path = os.path.join(repos_path, form_data['fork_name'])
-    
+
     MercurialRepository(str(repo_fork_path), True, clone_url=str(repo_path))
 
-    
+
 def __get_codes_stats(repo_name):
     LANGUAGES_EXTENSIONS = ['action', 'adp', 'ashx', 'asmx', 'aspx', 'asx', 'axd', 'c',
                     'cfg', 'cfm', 'cpp', 'cs', 'diff', 'do', 'el', 'erl',
@@ -309,7 +309,7 @@ def __get_codes_stats(repo_name):
     repos_path = get_hg_ui_settings()['paths_root_path'].replace('*', '')
     repo = MercurialRepository(repos_path + repo_name)
     tip = repo.get_changeset()
-    
+
     code_stats = {}
     for topnode, dirs, files in tip.walk('/'):
         for f in files:
@@ -319,10 +319,10 @@ def __get_codes_stats(repo_name):
                     code_stats[k] += 1
                 else:
                     code_stats[k] = 1
-                    
+
     return code_stats or {}
 
 
-            
+
 
 

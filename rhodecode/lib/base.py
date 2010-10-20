@@ -9,7 +9,7 @@ from rhodecode import __version__
 from rhodecode.lib import auth
 from rhodecode.lib.utils import get_repo_slug
 from rhodecode.model import meta
-from rhodecode.model.hg_model import _get_repos_cached, \
+from rhodecode.model.hg import _get_repos_cached, \
     _get_repos_switcher_cached
 
 class BaseController(WSGIController):
@@ -31,7 +31,7 @@ class BaseController(WSGIController):
                 c.repository_tags = {}
                 c.repository_branches = {}
                     
-        self.sa = meta.Session
+        self.sa = meta.Session()
     
     def __call__(self, environ, start_response):
         """Invoke the Controller"""
