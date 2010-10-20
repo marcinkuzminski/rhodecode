@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
-# middleware to handle mercurial api calls
+# middleware to handle git api calls
 # Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
 #
 # This program is free software; you can redistribute it and/or
@@ -17,10 +17,41 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
+from dulwich import server as dulserver
+
+class SimpleGitUploadPackHandler(dulserver.UploadPackHandler):
+
+    def handle(self):
+        write = lambda x: self.proto.write_sideband(1, x)
+
+        graph_walker = dulserver.ProtocolGraphWalker(self, self.repo.object_store,
+            self.repo.get_peeled)
+        objects_iter = self.repo.fetch_objects(
+          graph_walker.determine_wants, graph_walker, self.progress,
+          get_tagged=self.get_tagged)
+
+        # Do they want any objects?
+        if len(objects_iter) == 0:
+            return
+
+        self.progress("counting objects: %d, done.\n" % len(objects_iter))
+        dulserver.write_pack_data(dulserver.ProtocolFile(None, write), objects_iter,
+                        len(objects_iter))
+        messages = []
+        messages.append('thank you for using rhodecode')
+
+        for msg in messages:
+            self.progress(msg + "\n")
+        # we are done
+        self.proto.write("0000")
+
+dulserver.DEFAULT_HANDLERS = {
+  'git-upload-pack': SimpleGitUploadPackHandler,
+  'git-receive-pack': dulserver.ReceivePackHandler,
+}
+
 from dulwich.repo import Repo
-from dulwich.server import DictBackend
 from dulwich.web import HTTPGitApplication
-from itertools import chain
 from paste.auth.basic import AuthBasicAuthenticator
 from paste.httpheaders import REMOTE_USER, AUTH_TYPE
 from rhodecode.lib.auth import authfunc, HasPermissionAnyMiddleware, \
@@ -35,10 +66,9 @@ import traceback
 Created on 2010-04-28
 
 @author: marcink
-SimpleHG middleware for handling mercurial protocol request (push/clone etc.)
+SimpleGit middleware for handling git protocol request (push/clone etc.)
 It's implemented with basic auth function
 """
-
 
 
 
@@ -49,7 +79,7 @@ class SimpleGit(object):
     def __init__(self, application, config):
         self.application = application
         self.config = config
-        #authenticate this mercurial request using 
+        #authenticate this git request using 
         self.authenticate = AuthBasicAuthenticator('', authfunc)
 
     def __call__(self, environ, start_response):
@@ -57,7 +87,7 @@ class SimpleGit(object):
             return self.application(environ, start_response)
 
         #===================================================================
-        # AUTHENTICATE THIS MERCURIAL REQUEST
+        # AUTHENTICATE THIS GIT REQUEST
         #===================================================================
         username = REMOTE_USER(environ)
         if not username:
@@ -131,30 +161,12 @@ class SimpleGit(object):
             messages = []
             messages.append('thank you for using rhodecode')
             return app(environ, start_response)
-            #TODO: check other alternatives for msg wrapping
-            #return self.msg_wrapper(app, environ, start_response, messages)
         else:
             return app(environ, start_response)
 
 
-    def msg_wrapper(self, app, environ, start_response, messages=[]):
-        """
-        Wrapper for custom messages that come out of mercurial respond messages
-        is a list of messages that the user will see at the end of response 
-        from merurial protocol actions that involves remote answers
-        :param app:
-        :param environ:
-        :param start_response:
-        """
-        def custom_messages(msg_list):
-            for msg in msg_list:
-                yield msg + '\n'
-        org_response = app(environ, start_response)
-        return chain(org_response, custom_messages(messages))
-
-
     def __make_app(self):
-        backend = DictBackend({'/' + self.repo_name: Repo(self.repo_path)})
+        backend = dulserver.DictBackend({'/' + self.repo_name: Repo(self.repo_path)})
         gitserve = HTTPGitApplication(backend)
 
         return gitserve
@@ -173,11 +185,13 @@ class SimpleGit(object):
         service = environ['QUERY_STRING'].split('=')
         if len(service) > 1:
             service_cmd = service[1]
-            mapping = {'git-receive-pack': 'pull',
-                       'git-upload-pack': 'push',
+            mapping = {'git-receive-pack': 'push',
+                       'git-upload-pack': 'pull',
                        }
 
-            return mapping.get(service_cmd, service_cmd)
+            return mapping.get(service_cmd, service_cmd if service_cmd else 'other')
+        else:
+            return 'other'
 
     def __log_user_action(self, user, action, repo, ipaddr):
         action_logger(user, action, repo, ipaddr)
