@@ -36,7 +36,8 @@ def make_map(config):
 
     #MAIN PAGE
     map.connect('hg_home', '/', controller='hg', action='index')
-
+    map.connect('bugtracker', "http://bitbucket.org/marcinkuzminski/rhodecode/issues", _static=True)
+    map.connect('gpl_license', "http://www.gnu.org/licenses/gpl.html", _static=True)
     #ADMIN REPOSITORY REST ROUTES
     with map.submapper(path_prefix='/_admin', controller='admin/repos') as m:
         m.connect("repos", "/repos",

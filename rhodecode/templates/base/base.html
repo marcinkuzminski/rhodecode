@@ -62,7 +62,11 @@
 	<!-- footer -->
 	<div id="footer">
 	   <div id="footer-inner" class="title bottom-left-rounded-corner bottom-right-rounded-corner">
-	    <p>RhodeCode ${c.rhodecode_version} &copy; 2010 by Marcin Kuzminski</p>
+	       <div>
+	           <p class="footer-link">${h.link_to(_('Submit a bug'),h.url('bugtracker'))}</p>
+		       <p class="footer-link">${h.link_to(_('GPL license'),h.url('gpl_license'))}</p>
+		       <p>RhodeCode ${c.rhodecode_version} &copy; 2010 by Marcin Kuzminski</p>
+	       </div>
 	   </div>
         <script type="text/javascript">${h.tooltip.activate()}</script>
 	</div>

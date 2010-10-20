@@ -1254,6 +1254,13 @@ padding:15px 25px 15px 0;
 color:#FFF;
 font-weight:700;
 }
+#footer div#footer-inner .footer-link {
+float:left;
+padding-left:10px;
+}
+#footer div#footer-inner .footer-link a {
+color:#FFF; 
+}
 
 #login div.title {
 width:420px;
