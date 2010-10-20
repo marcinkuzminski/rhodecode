@@ -86,8 +86,9 @@ class WhooshIndexingDaemon(object):
         based on repository walk function
         """
         index_paths_ = set()
-        tip = repo.get_changeset()
         try:
+            tip = repo.get_changeset()
+            
             for topnode, dirs, files in tip.walk('/'):
                 for f in files:
                     index_paths_.add(jn(repo.path, f.path))
