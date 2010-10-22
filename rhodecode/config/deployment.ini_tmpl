@@ -28,7 +28,7 @@ debug = true
 threadpool_workers = 5
 
 ##max request before thread respawn
-threadpool_max_requests = 2
+threadpool_max_requests = 10
 
 ##option to use threads of process
 use_threadpool = true

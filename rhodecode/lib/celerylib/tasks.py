@@ -99,7 +99,7 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
     repo = MercurialRepository(repos_path + repo_name)
 
     skip_date_limit = True
-    parse_limit = 350 #limit for single task changeset parsing optimal for
+    parse_limit = 250 #limit for single task changeset parsing optimal for
     last_rev = 0
     last_cs = None
     timegetter = itemgetter('time')
@@ -127,13 +127,15 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
         commits_by_day_author_aggregate = json.loads(cur_stats.commit_activity)
 
     log.debug('starting parsing %s', parse_limit)
+    lmktime = mktime
+
     for cnt, rev in enumerate(repo.revisions[last_rev:]):
         last_cs = cs = repo.get_changeset(rev)
         k = '%s-%s-%s' % (cs.date.timetuple()[0], cs.date.timetuple()[1],
                           cs.date.timetuple()[2])
         timetupple = [int(x) for x in k.split('-')]
         timetupple.extend([0 for _ in xrange(6)])
-        k = mktime(timetupple)
+        k = lmktime(timetupple)
         if commits_by_day_author_aggregate.has_key(author_key_cleaner(cs.author)):
             try:
                 l = [timegetter(x) for x in commits_by_day_author_aggregate\
@@ -186,12 +188,10 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
         if cnt >= parse_limit:
             #don't fetch to much data since we can freeze application
             break
-
     overview_data = []
     for k, v in commits_by_day_aggregate.items():
         overview_data.append([k, v])
     overview_data = sorted(overview_data, key=itemgetter(0))
-
     if not commits_by_day_author_aggregate:
         commits_by_day_author_aggregate[author_key_cleaner(repo.contact)] = {
             "label":author_key_cleaner(repo.contact),
@@ -286,10 +286,9 @@ def send_email(recipients, subject, body):
 def create_repo_fork(form_data, cur_user):
     import os
     from rhodecode.model.repo import RepoModel
-    sa = get_session()
-    rm = RepoModel(sa)
 
-    rm.create(form_data, cur_user, just_db=True, fork=True)
+    repo_model = RepoModel(get_session())
+    repo_model.create(form_data, cur_user, just_db=True, fork=True)
 
     repos_path = get_hg_ui_settings()['paths_root_path'].replace('*', '')
     repo_path = os.path.join(repos_path, form_data['repo_name'])
@@ -299,20 +298,21 @@ def create_repo_fork(form_data, cur_user):
 
 
 def __get_codes_stats(repo_name):
-    LANGUAGES_EXTENSIONS = ['action', 'adp', 'ashx', 'asmx', 'aspx', 'asx', 'axd', 'c',
-                    'cfg', 'cfm', 'cpp', 'cs', 'diff', 'do', 'el', 'erl',
-                    'h', 'java', 'js', 'jsp', 'jspx', 'lisp',
-                    'lua', 'm', 'mako', 'ml', 'pas', 'patch', 'php', 'php3',
-                    'php4', 'phtml', 'pm', 'py', 'rb', 'rst', 's', 'sh',
-                    'tpl', 'txt', 'vim', 'wss', 'xhtml', 'xml', 'xsl', 'xslt',
-                    'yaws']
+    LANGUAGES_EXTENSIONS = ['action', 'adp', 'ashx', 'asmx',
+    'aspx', 'asx', 'axd', 'c', 'cfg', 'cfm', 'cpp', 'cs', 'diff', 'do', 'el',
+    'erl', 'h', 'java', 'js', 'jsp', 'jspx', 'lisp', 'lua', 'm', 'mako', 'ml',
+    'pas', 'patch', 'php', 'php3', 'php4', 'phtml', 'pm', 'py', 'rb', 'rst',
+    's', 'sh', 'tpl', 'txt', 'vim', 'wss', 'xhtml', 'xml', 'xsl', 'xslt', 'yaws']
+
+
     repos_path = get_hg_ui_settings()['paths_root_path'].replace('*', '')
     repo = MercurialRepository(repos_path + repo_name)
     tip = repo.get_changeset()
 
     code_stats = {}
-    for topnode, dirs, files in tip.walk('/'):
-        for f in files:
+
+    def aggregate(cs):
+        for f in cs[2]:
             k = f.mimetype
             if f.extension in LANGUAGES_EXTENSIONS:
                 if code_stats.has_key(k):
@@ -320,8 +320,9 @@ def __get_codes_stats(repo_name):
                 else:
                     code_stats[k] = 1
 
-    return code_stats or {}
+    map(aggregate, tip.walk('/'))
 
+    return code_stats or {}
 
 
 
