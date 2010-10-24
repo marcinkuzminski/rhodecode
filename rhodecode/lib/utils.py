@@ -16,24 +16,28 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
+from UserDict import DictMixin
+from mercurial import ui, config, hg
+from mercurial.error import RepoError
+from rhodecode.model import meta
+from rhodecode.model.caching_query import FromCache
+from rhodecode.model.db import Repository, User, RhodeCodeUi, RhodeCodeSettings, \
+    UserLog
+from rhodecode.model.repo import RepoModel
+from rhodecode.model.user import UserModel
+from vcs.backends.base import BaseChangeset
+from vcs.backends.git import GitRepository
+from vcs.backends.hg import MercurialRepository
+from vcs.utils.lazy import LazyProperty
+import datetime
+import logging
+import os
 
 """
 Created on April 18, 2010
 Utilities for RhodeCode
 @author: marcink
 """
-from rhodecode.model.caching_query import FromCache
-from mercurial import ui, config, hg
-from mercurial.error import RepoError
-from rhodecode.model import meta
-from rhodecode.model.user import UserModel
-from rhodecode.model.repo import RepoModel
-from rhodecode.model.db import Repository, User, RhodeCodeUi, RhodeCodeSettings, UserLog
-from vcs.backends.base import BaseChangeset
-from vcs.utils.lazy import LazyProperty
-import logging
-import datetime
-import os
 
 log = logging.getLogger(__name__)
 
@@ -96,14 +100,30 @@ def action_logger(user, action, repo, ipaddr, sa=None):
         sa.rollback()
         log.error('could not log user action:%s', str(e))
 
-def check_repo_dir(paths):
-    repos_path = paths[0][1].split('/')
-    if repos_path[-1] in ['*', '**']:
-        repos_path = repos_path[:-1]
-    if repos_path[0] != '/':
-        repos_path[0] = '/'
-    if not os.path.isdir(os.path.join(*repos_path)):
-        raise Exception('Not a valid repository in %s' % paths[0][1])
+def get_repos(path, recursive=False, initial=False):
+    """
+    Scans given path for repos and return (name,(type,path)) tuple 
+    :param prefix:
+    :param path:
+    :param recursive:
+    :param initial:
+    """
+    from vcs.utils.helpers import get_scm
+    from vcs.exceptions import VCSError
+    scm = get_scm(path)
+    if scm:
+        raise Exception('The given path %s should not be a repository got %s',
+                        path, scm)
+
+    for dirpath in os.listdir(path):
+        try:
+            yield dirpath, get_scm(os.path.join(path, dirpath))
+        except VCSError:
+            pass
+
+if __name__ == '__main__':
+    get_repos('', '/home/marcink/workspace-python')
+
 
 def check_repo_fast(repo_name, base_path):
     if os.path.isdir(os.path.join(base_path, repo_name)):return False
@@ -231,8 +251,6 @@ def make_ui(read_from='file', path=None, checkpaths=True):
             for k, v in cfg.items(section):
                 baseui.setconfig(section, k, v)
                 log.debug('settings ui from file[%s]%s:%s', section, k, v)
-        if checkpaths:check_repo_dir(cfg.items('paths'))
-
 
     elif read_from == 'db':
         hg_ui = get_hg_ui_cached()
@@ -284,7 +302,7 @@ class EmptyChangeset(BaseChangeset):
     @LazyProperty
     def raw_id(self):
         """
-        Returns raw string identifing this changeset, useful for web
+        Returns raw string identifying this changeset, useful for web
         representation.
         """
         return '0' * 40
@@ -308,16 +326,21 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False):
     """
 
     sa = meta.Session()
+    rm = RepoModel(sa)
     user = sa.query(User).filter(User.admin == True).first()
 
-    rm = RepoModel()
-
     for name, repo in initial_repo_list.items():
-        if not RepoModel(sa).get(name, cache=False):
+        if not rm.get(name, cache=False):
             log.info('repository %s not found creating default', name)
+
+            if isinstance(repo, MercurialRepository):
+                repo_type = 'hg'
+            if isinstance(repo, GitRepository):
+                repo_type = 'git'
 
             form_data = {
                          'repo_name':name,
+                         'repo_type':repo_type,
                          'description':repo.description if repo.description != 'unknown' else \
                                         'auto description for %s' % name,
                          'private':False
@@ -335,7 +358,6 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False):
 
     meta.Session.remove()
 
-from UserDict import DictMixin
 
 class OrderedDict(dict, DictMixin):
 

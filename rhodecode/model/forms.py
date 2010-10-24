@@ -194,16 +194,12 @@ class ValidSettings(formencode.validators.FancyValidator):
 
 class ValidPath(formencode.validators.FancyValidator):
     def to_python(self, value, state):
-        isdir = os.path.isdir(value.replace('*', ''))
-        if (value.endswith('/*') or value.endswith('/**')) and isdir:
-            return value
-        elif not isdir:
-            msg = _('This is not a valid path')
-        else:
-            msg = _('You need to specify * or ** at the end of path (ie. /tmp/*)')
 
-        raise formencode.Invalid(msg, value, state,
+        if not os.path.isdir(value):
+            msg = _('This is not a valid path')
+            raise formencode.Invalid(msg, value, state,
                                      error_dict={'paths_root_path':msg})
+        return value
 
 def UniqSystemEmail(old_data):
     class _UniqSystemEmail(formencode.validators.FancyValidator):

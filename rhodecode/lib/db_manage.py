@@ -162,7 +162,7 @@ class DbManage(object):
         paths = RhodeCodeUi()
         paths.ui_section = 'paths'
         paths.ui_key = '/'
-        paths.ui_value = os.path.join(path, '*')
+        paths.ui_value = path
 
 
         hgsettings1 = RhodeCodeSettings()

@@ -3,6 +3,12 @@
 Changelog
 =========
 
+1.1.0 (**XXXX-XX-XX**)
+----------------------
+- git support
+- performance upgrade for cached repos list
+
+
 1.0.0 (**2010-10-xx**)
 ----------------------
 

@@ -24,7 +24,6 @@ Model for RhodeCode
 """
 from beaker.cache import cache_region
 from mercurial import ui
-from mercurial.hgweb.hgwebdir_mod import findrepos
 from rhodecode.lib import helpers as h
 from rhodecode.lib.utils import invalidate_cache
 from rhodecode.lib.auth import HasRepoPermissionAny
@@ -33,12 +32,12 @@ from rhodecode.model.db import Repository, User
 from sqlalchemy.orm import joinedload
 from vcs.exceptions import RepositoryError, VCSError
 import logging
-import os
 import sys
 log = logging.getLogger(__name__)
 
 try:
     from vcs.backends.hg import MercurialRepository
+    from vcs.backends.git import GitRepository
 except ImportError:
     sys.stderr.write('You have to import vcs module')
     raise Exception('Unable to import vcs')
@@ -47,7 +46,7 @@ def _get_repos_cached_initial(app_globals, initial):
     """return cached dict with repos
     """
     g = app_globals
-    return HgModel.repo_scan(g.paths[0][0], g.paths[0][1], g.baseui, initial)
+    return HgModel().repo_scan(g.paths[0][1], g.baseui, initial)
 
 @cache_region('long_term', 'cached_repo_list')
 def _get_repos_cached():
@@ -55,7 +54,7 @@ def _get_repos_cached():
     """
     log.info('getting all repositories list')
     from pylons import app_globals as g
-    return HgModel.repo_scan(g.paths[0][0], g.paths[0][1], g.baseui)
+    return HgModel().repo_scan(g.paths[0][1], g.baseui)
 
 @cache_region('super_short_term', 'cached_repos_switcher_list')
 def _get_repos_switcher_cached(cached_repo_list):
@@ -73,41 +72,33 @@ def _full_changelog_cached(repo_name):
     return list(reversed(list(HgModel().get_repo(repo_name))))
 
 class HgModel(object):
-    """Mercurial Model
+    """
+    Mercurial Model
     """
 
-    def __init__(self):
-        pass
+    def __init__(self, sa=None):
+        if not sa:
+            self.sa = meta.Session()
+        else:
+            self.sa = sa
 
-    @staticmethod
-    def repo_scan(repos_prefix, repos_path, baseui, initial=False):
+    def repo_scan(self, repos_path, baseui, initial=False):
         """
         Listing of repositories in given path. This path should not be a 
         repository itself. Return a dictionary of repository objects
-        :param repos_path: path to directory it could take syntax with 
-        * or ** for deep recursive displaying repositories
+        
+        :param repos_path: path to directory containing repositories
+        :param baseui
+        :param initial: initial scann
         """
-        sa = meta.Session()
-        def check_repo_dir(path):
-            """Checks the repository
-            :param path:
-            """
-            repos_path = path.split('/')
-            if repos_path[-1] in ['*', '**']:
-                repos_path = repos_path[:-1]
-            if repos_path[0] != '/':
-                repos_path[0] = '/'
-            if not os.path.isdir(os.path.join(*repos_path)):
-                raise RepositoryError('Not a valid repository in %s' % path)
-        if not repos_path.endswith('*'):
-            raise VCSError('You need to specify * or ** at the end of path '
-                            'for recursive scanning')
-
-        check_repo_dir(repos_path)
         log.info('scanning for repositories in %s', repos_path)
-        repos = findrepos([(repos_prefix, repos_path)])
+
         if not isinstance(baseui, ui.ui):
             baseui = ui.ui()
+
+        from rhodecode.lib.utils import get_repos
+        repos = get_repos(repos_path)
+
 
         repos_list = {}
         for name, path in repos:
@@ -117,15 +108,19 @@ class HgModel(object):
                     raise RepositoryError('Duplicate repository name %s found in'
                                     ' %s' % (name, path))
                 else:
+                    if path[0] == 'hg':
+                        repos_list[name] = MercurialRepository(path[1], baseui=baseui)
+                        repos_list[name].name = name
 
-                    repos_list[name] = MercurialRepository(path, baseui=baseui)
-                    repos_list[name].name = name
+                    if path[0] == 'git':
+                        repos_list[name] = GitRepository(path[1])
+                        repos_list[name].name = name
 
                     dbrepo = None
                     if not initial:
                         #for initial scann on application first run we don't
                         #have db repos yet.
-                        dbrepo = sa.query(Repository)\
+                        dbrepo = self.sa.query(Repository)\
                             .options(joinedload(Repository.fork))\
                             .filter(Repository.repo_name == name)\
                             .scalar()
@@ -137,16 +132,17 @@ class HgModel(object):
                         if dbrepo.user:
                             repos_list[name].contact = dbrepo.user.full_contact
                         else:
-                            repos_list[name].contact = sa.query(User)\
+                            repos_list[name].contact = self.sa.query(User)\
                             .filter(User.admin == True).first().full_contact
             except OSError:
                 continue
-        meta.Session.remove()
+
         return repos_list
 
     def get_repos(self):
         for name, repo in _get_repos_cached().items():
-            if repo._get_hidden():
+
+            if isinstance(repo, MercurialRepository) and repo._get_hidden():
                 #skip hidden web repository
                 continue
 

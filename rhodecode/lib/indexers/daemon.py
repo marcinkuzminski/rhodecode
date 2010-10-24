@@ -32,12 +32,12 @@ from os.path import join as jn
 project_path = dn(dn(dn(dn(os.path.realpath(__file__)))))
 sys.path.append(project_path)
 
-from rhodecode.lib.pidlock import LockHeld, DaemonLock
+
 from rhodecode.model.hg import HgModel
 from rhodecode.lib.helpers import safe_unicode
 from whoosh.index import create_in, open_dir
 from shutil import rmtree
-from rhodecode.lib.indexers import INDEX_EXTENSIONS, IDX_LOCATION, SCHEMA, IDX_NAME
+from rhodecode.lib.indexers import INDEX_EXTENSIONS, SCHEMA, IDX_NAME
 
 from time import mktime
 from vcs.exceptions import ChangesetError, RepositoryError
@@ -61,25 +61,37 @@ ch.setFormatter(formatter)
 # add ch to logger
 log.addHandler(ch)
 
-def scan_paths(root_location):
-    return HgModel.repo_scan('/', root_location, None, True)
+def get_repos_location():
+    return HgModel.get_repos_location()
+
 
 class WhooshIndexingDaemon(object):
     """
     Deamon for atomic jobs
     """
 
-    def __init__(self, indexname='HG_INDEX', repo_location=None):
+    def __init__(self, indexname='HG_INDEX', index_location=None,
+                 repo_location=None):
         self.indexname = indexname
+
+        self.index_location = index_location
+        if not index_location:
+            raise Exception('You have to provide index location')
+
         self.repo_location = repo_location
-        self.repo_paths = scan_paths(self.repo_location)
+        if not repo_location:
+            raise Exception('You have to provide repositories location')
+
+
+
+        self.repo_paths = HgModel.repo_scan('/', self.repo_location, None, True)
         self.initial = False
-        if not os.path.isdir(IDX_LOCATION):
-            os.mkdir(IDX_LOCATION)
+        if not os.path.isdir(self.index_location):
+            os.mkdir(self.index_location)
             log.info('Cannot run incremental index since it does not'
                      ' yet exist running full build')
             self.initial = True
-        
+
     def get_paths(self, repo):
         """
         recursive walk in root dir and return a set of all path in that dir
@@ -87,27 +99,25 @@ class WhooshIndexingDaemon(object):
         """
         index_paths_ = set()
         try:
-            tip = repo.get_changeset()
-            
-            for topnode, dirs, files in tip.walk('/'):
+            for topnode, dirs, files in repo.walk('/', 'tip'):
                 for f in files:
                     index_paths_.add(jn(repo.path, f.path))
                 for dir in dirs:
                     for f in files:
                         index_paths_.add(jn(repo.path, f.path))
-                
+
         except RepositoryError:
             pass
-        return index_paths_        
-    
+        return index_paths_
+
     def get_node(self, repo, path):
         n_path = path[len(repo.path) + 1:]
         node = repo.get_changeset().get_node(n_path)
         return node
-    
+
     def get_node_mtime(self, node):
         return mktime(node.last_changeset.date.timetuple())
-    
+
     def add_doc(self, writer, path, repo):
         """Adding doc to writer"""
         node = self.get_node(repo, path)
@@ -120,63 +130,63 @@ class WhooshIndexingDaemon(object):
             log.debug('    >> %s' % path)
             #just index file name without it's content
             u_content = u''
-        
+
         writer.add_document(owner=unicode(repo.contact),
                         repository=safe_unicode(repo.name),
                         path=safe_unicode(path),
                         content=u_content,
                         modtime=self.get_node_mtime(node),
-                        extension=node.extension)             
+                        extension=node.extension)
 
-    
+
     def build_index(self):
-        if os.path.exists(IDX_LOCATION):
+        if os.path.exists(self.index_location):
             log.debug('removing previous index')
-            rmtree(IDX_LOCATION)
-            
-        if not os.path.exists(IDX_LOCATION):
-            os.mkdir(IDX_LOCATION)
-        
-        idx = create_in(IDX_LOCATION, SCHEMA, indexname=IDX_NAME)
+            rmtree(self.index_location)
+
+        if not os.path.exists(self.index_location):
+            os.mkdir(self.index_location)
+
+        idx = create_in(self.index_location, SCHEMA, indexname=IDX_NAME)
         writer = idx.writer()
-        
+
         for cnt, repo in enumerate(self.repo_paths.values()):
             log.debug('building index @ %s' % repo.path)
-        
+
             for idx_path in self.get_paths(repo):
                 self.add_doc(writer, idx_path, repo)
-        
+
         log.debug('>> COMMITING CHANGES <<')
         writer.commit(merge=True)
         log.debug('>>> FINISHED BUILDING INDEX <<<')
-            
-    
+
+
     def update_index(self):
         log.debug('STARTING INCREMENTAL INDEXING UPDATE')
-            
-        idx = open_dir(IDX_LOCATION, indexname=self.indexname)
+
+        idx = open_dir(self.index_location, indexname=self.indexname)
         # The set of all paths in the index
         indexed_paths = set()
         # The set of all paths we need to re-index
         to_index = set()
-        
+
         reader = idx.reader()
         writer = idx.writer()
-    
+
         # Loop over the stored fields in the index
         for fields in reader.all_stored_fields():
             indexed_path = fields['path']
             indexed_paths.add(indexed_path)
-            
+
             repo = self.repo_paths[fields['repository']]
-            
+
             try:
                 node = self.get_node(repo, indexed_path)
             except ChangesetError:
                 # This file was deleted since it was indexed
                 log.debug('removing from index %s' % indexed_path)
                 writer.delete_by_term('path', indexed_path)
-    
+
             else:
                 # Check if this file was changed since it was indexed
                 indexed_time = fields['modtime']
@@ -187,7 +197,7 @@ class WhooshIndexingDaemon(object):
                     log.debug('adding to reindex list %s' % indexed_path)
                     writer.delete_by_term('path', indexed_path)
                     to_index.add(indexed_path)
-    
+
         # Loop over the files in the filesystem
         # Assume we have a function that gathers the filenames of the
         # documents to be indexed
@@ -198,51 +208,14 @@ class WhooshIndexingDaemon(object):
                     # that wasn't indexed before. So index it!
                     self.add_doc(writer, path, repo)
                     log.debug('re indexing %s' % path)
-                    
+
         log.debug('>> COMMITING CHANGES <<')
         writer.commit(merge=True)
         log.debug('>>> FINISHED REBUILDING INDEX <<<')
-        
+
     def run(self, full_index=False):
         """Run daemon"""
         if full_index or self.initial:
             self.build_index()
         else:
             self.update_index()
-        
-if __name__ == "__main__":
-    arg = sys.argv[1:]
-    if len(arg) != 2:
-        sys.stderr.write('Please specify indexing type [full|incremental]' 
-                         'and path to repositories as script args \n')
-        sys.exit()
-    
-    
-    if arg[0] == 'full':
-        full_index = True
-    elif arg[0] == 'incremental':
-        # False means looking just for changes
-        full_index = False
-    else:
-        sys.stdout.write('Please use [full|incremental]' 
-                         ' as script first arg \n')
-        sys.exit()
-    
-    if not os.path.isdir(arg[1]):
-        sys.stderr.write('%s is not a valid path \n' % arg[1])
-        sys.exit()
-    else:
-        if arg[1].endswith('/'):
-            repo_location = arg[1] + '*'
-        else:
-            repo_location = arg[1] + '/*'
-    
-    try:
-        l = DaemonLock()
-        WhooshIndexingDaemon(repo_location=repo_location)\
-            .run(full_index=full_index)
-        l.release()
-        reload(logging)
-    except LockHeld:
-        sys.exit(1)
-

@@ -1,4 +1,10 @@
+import os
+import sys
 from os.path import dirname as dn, join as jn
+
+#to get the rhodecode import
+sys.path.append(dn(dn(dn(os.path.realpath(__file__)))))
+
 from rhodecode.config.environment import load_environment
 from rhodecode.model.hg import HgModel
 from shutil import rmtree
@@ -9,14 +15,9 @@ from whoosh.analysis import RegexTokenizer, LowercaseFilter, StopFilter
 from whoosh.fields import TEXT, ID, STORED, Schema, FieldType
 from whoosh.index import create_in, open_dir
 from whoosh.formats import Characters
-from whoosh.highlight import highlight, SimpleFragmenter, HtmlFormatter   
+from whoosh.highlight import highlight, SimpleFragmenter, HtmlFormatter
 
-import os
-import sys
 import traceback
-
-#to get the rhodecode import
-sys.path.append(dn(dn(dn(os.path.realpath(__file__)))))
 
 
 #LOCATION WE KEEP THE INDEX
@@ -45,9 +46,62 @@ SCHEMA = Schema(owner=TEXT(),
 
 
 IDX_NAME = 'HG_INDEX'
-FORMATTER = HtmlFormatter('span', between='\n<span class="break">...</span>\n') 
+FORMATTER = HtmlFormatter('span', between='\n<span class="break">...</span>\n')
 FRAGMENTER = SimpleFragmenter(200)
-                            
+
+from paste.script import command
+import ConfigParser
+
+class MakeIndex(command.Command):
+
+    max_args = 1
+    min_args = 1
+
+    usage = "CONFIG_FILE"
+    summary = "Creates index for full text search given configuration file"
+    group_name = "Whoosh indexing"
+
+    parser = command.Command.standard_parser(verbose=True)
+#    parser.add_option('--repo-location',
+#                      action='store',
+#                      dest='repo_location',
+#                      help="Specifies repositories location to index",
+#                      )
+    parser.add_option('-f',
+                      action='store_true',
+                      dest='full_index',
+                      help="Specifies that index should be made full i.e"
+                            " destroy old and build from scratch",
+                      default=False)
+    def command(self):
+        config_name = self.args[0]
+
+        p = config_name.split('/')
+        if len(p) == 1:
+            root = '.'
+        else:
+            root = '/'.join(p[:-1])
+        print root
+        config = ConfigParser.ConfigParser({'here':root})
+        config.read(config_name)
+        print dict(config.items('app:main'))['index_dir']
+        index_location = dict(config.items('app:main'))['index_dir']
+        #return
+
+        #=======================================================================
+        # WHOOSH DAEMON
+        #=======================================================================
+        from rhodecode.lib.pidlock import LockHeld, DaemonLock
+        from rhodecode.lib.indexers.daemon import WhooshIndexingDaemon
+        try:
+            l = DaemonLock()
+            WhooshIndexingDaemon(index_location=index_location)\
+                .run(full_index=self.options.full_index)
+            l.release()
+        except LockHeld:
+            sys.exit(1)
+
+
 class ResultWrapper(object):
     def __init__(self, search_type, searcher, matcher, highlight_items):
         self.search_type = search_type
@@ -55,7 +109,7 @@ class ResultWrapper(object):
         self.matcher = matcher
         self.highlight_items = highlight_items
         self.fragment_size = 200 / 2
-    
+
     @LazyProperty
     def doc_ids(self):
         docs_id = []
@@ -64,8 +118,8 @@ class ResultWrapper(object):
             chunks = [offsets for offsets in self.get_chunks()]
             docs_id.append([docnum, chunks])
             self.matcher.next()
-        return docs_id   
-        
+        return docs_id
+
     def __str__(self):
         return '<%s at %s>' % (self.__class__.__name__, len(self.doc_ids))
 
@@ -91,32 +145,32 @@ class ResultWrapper(object):
         slice = []
         for docid in self.doc_ids[i:j]:
             slice.append(self.get_full_content(docid))
-        return slice   
-                            
+        return slice
+
 
     def get_full_content(self, docid):
         res = self.searcher.stored_fields(docid[0])
         f_path = res['path'][res['path'].find(res['repository']) \
                              + len(res['repository']):].lstrip('/')
-        
+
         content_short = self.get_short_content(res, docid[1])
         res.update({'content_short':content_short,
                     'content_short_hl':self.highlight(content_short),
                     'f_path':f_path})
-        
-        return res        
-    
+
+        return res
+
     def get_short_content(self, res, chunks):
-        
+
         return ''.join([res['content'][chunk[0]:chunk[1]] for chunk in chunks])
-    
+
     def get_chunks(self):
         """
         Smart function that implements chunking the content
         but not overlap chunks so it doesn't highlight the same
         close occurrences twice.
-        :param matcher:
-        :param size:
+        @param matcher:
+        @param size:
         """
         memory = [(0, 0)]
         for span in self.matcher.spans():
@@ -124,12 +178,12 @@ class ResultWrapper(object):
             end = span.endchar or 0
             start_offseted = max(0, start - self.fragment_size)
             end_offseted = end + self.fragment_size
-            
+
             if start_offseted < memory[-1][1]:
                 start_offseted = memory[-1][1]
-            memory.append((start_offseted, end_offseted,))    
-            yield (start_offseted, end_offseted,)  
-        
+            memory.append((start_offseted, end_offseted,))
+            yield (start_offseted, end_offseted,)
+
     def highlight(self, content, top=5):
         if self.search_type != 'content':
             return ''
@@ -139,4 +193,4 @@ class ResultWrapper(object):
                  fragmenter=FRAGMENTER,
                  formatter=FORMATTER,
                  top=top)
-        return hl 
+        return hl

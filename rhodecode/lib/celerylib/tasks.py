@@ -8,7 +8,11 @@ from rhodecode.lib.smtp_mailer import SmtpMailer
 from rhodecode.lib.utils import OrderedDict
 from time import mktime
 from vcs.backends.hg import MercurialRepository
+from vcs.backends.git import GitRepository
+import os
 import traceback
+from vcs.backends import get_repo
+from vcs.utils.helpers import get_scm
 
 try:
     import json
@@ -95,8 +99,9 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
 
     commits_by_day_author_aggregate = {}
     commits_by_day_aggregate = {}
-    repos_path = get_hg_ui_settings()['paths_root_path'].replace('*', '')
-    repo = MercurialRepository(repos_path + repo_name)
+    repos_path = get_hg_ui_settings()['paths_root_path']
+    p = os.path.join(repos_path, repo_name)
+    repo = get_repo(get_scm(p)[0], p)
 
     skip_date_limit = True
     parse_limit = 250 #limit for single task changeset parsing optimal for
@@ -305,8 +310,10 @@ def __get_codes_stats(repo_name):
     's', 'sh', 'tpl', 'txt', 'vim', 'wss', 'xhtml', 'xml', 'xsl', 'xslt', 'yaws']
 
 
-    repos_path = get_hg_ui_settings()['paths_root_path'].replace('*', '')
-    repo = MercurialRepository(repos_path + repo_name)
+    repos_path = get_hg_ui_settings()['paths_root_path']
+    p = os.path.join(repos_path, repo_name)
+    repo = get_repo(get_scm(p)[0], p)
+
     tip = repo.get_changeset()
 
     code_stats = {}

@@ -20,7 +20,7 @@ def load_environment(global_conf, app_conf, initial=False):
     object
     """
     config = PylonsConfig()
-    
+
     # Pylons paths
     root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     paths = dict(root=root,
@@ -34,11 +34,11 @@ def load_environment(global_conf, app_conf, initial=False):
     config['routes.map'] = make_map(config)
     config['pylons.app_globals'] = app_globals.Globals(config)
     config['pylons.h'] = rhodecode.lib.helpers
-    
+
     # Setup cache object as early as possible
     import pylons
     pylons.cache._push_object(config['pylons.app_globals'].cache)
-    
+
     # Create the Mako TemplateLookup, with the default auto-escaping
     config['pylons.app_globals'].mako_lookup = TemplateLookup(
         directories=paths['templates'],
@@ -53,8 +53,8 @@ def load_environment(global_conf, app_conf, initial=False):
     if test:
         from rhodecode.lib.utils import create_test_env, create_test_index
         create_test_env('/tmp', config)
-        create_test_index('/tmp/*', True)
-        
+        create_test_index('/tmp', True)
+
     #MULTIPLE DB configs
     # Setup the SQLAlchemy database engine
     if config['debug'] and not test:
@@ -68,12 +68,12 @@ def load_environment(global_conf, app_conf, initial=False):
     init_model(sa_engine_db1)
     #init baseui
     config['pylons.app_globals'].baseui = make_ui('db')
-    
+
     repo2db_mapper(_get_repos_cached_initial(config['pylons.app_globals'], initial))
     set_available_permissions(config)
     set_base_path(config)
     set_rhodecode_config(config)
     # CONFIGURATION OPTIONS HERE (note: all config options will override
     # any Pylons config options)
-    
+
     return config

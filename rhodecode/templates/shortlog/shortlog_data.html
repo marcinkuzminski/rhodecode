@@ -13,7 +13,7 @@
 	</tr>
 %for cnt,cs in enumerate(c.repo_changesets):
 	<tr class="parity${cnt%2}">
-		<td>${h.age(cs._ctx.date())} - ${h.rfc822date_notz(cs._ctx.date())} </td>
+		<td>${h.age(cs.date)} - ${h.rfc822date_notz(cs.date)} </td>
 		<td title="${cs.author}">${h.person(cs.author)}</td>
 		<td>r${cs.revision}:${cs.short_id}</td>
 		<td>
