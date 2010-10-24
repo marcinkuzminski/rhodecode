@@ -33,6 +33,8 @@ from sqlalchemy.orm import joinedload
 from vcs.exceptions import RepositoryError, VCSError
 import logging
 import sys
+import time
+
 log = logging.getLogger(__name__)
 
 try:
@@ -155,7 +157,7 @@ class HgModel(object):
             tmp_d['description'] = repo.description
             tmp_d['description_sort'] = tmp_d['description']
             tmp_d['last_change'] = last_change
-            tmp_d['last_change_sort'] = last_change[1] - last_change[0]
+            tmp_d['last_change_sort'] = time.mktime(last_change.timetuple())
             tmp_d['tip'] = tip.short_id
             tmp_d['tip_sort'] = tip.revision
             tmp_d['rev'] = tip.revision

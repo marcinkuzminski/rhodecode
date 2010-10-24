@@ -8,7 +8,7 @@
         </tr>
 		%for cnt,branch in enumerate(c.repo_branches.items()):
 		<tr class="parity${cnt%2}">
-			<td>${h.age(branch[1]._ctx.date())}</td>
+			<td>${h.age(branch[1].date)}</td>
 			<td>r${branch[1].revision}:${branch[1].short_id}</td>
 			<td>
 				<span class="logtags">

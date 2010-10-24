@@ -8,7 +8,7 @@
     	</tr>
 		%for cnt,tag in enumerate(c.repo_tags.items()):
 		<tr class="parity${cnt%2}">
-			<td>${h.age(tag[1]._ctx.date())}</td>
+			<td>${h.age(tag[1].date)}</td>
 			<td>r${tag[1].revision}:${tag[1].short_id}</td>
 			<td>
 				<span class="logtags">

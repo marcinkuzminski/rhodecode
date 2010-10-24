@@ -16,6 +16,12 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
+"""
+Created on April 18, 2010
+Utilities for RhodeCode
+@author: marcink
+"""
+
 from UserDict import DictMixin
 from mercurial import ui, config, hg
 from mercurial.error import RepoError
@@ -32,12 +38,6 @@ from vcs.utils.lazy import LazyProperty
 import datetime
 import logging
 import os
-
-"""
-Created on April 18, 2010
-Utilities for RhodeCode
-@author: marcink
-"""
 
 log = logging.getLogger(__name__)
 
@@ -110,8 +110,12 @@ def get_repos(path, recursive=False, initial=False):
     """
     from vcs.utils.helpers import get_scm
     from vcs.exceptions import VCSError
-    scm = get_scm(path)
-    if scm:
+
+    try:
+        scm = get_scm(path)
+    except:
+        pass
+    else:
         raise Exception('The given path %s should not be a repository got %s',
                         path, scm)
 

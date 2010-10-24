@@ -30,7 +30,7 @@
 		             </tr>
 		         </thead>
 
-          		% if c.files_list.parent:
+          		%if c.files_list.parent:
          		<tr class="parity0">
 	          		<td>		          		
 	          			${h.link_to('..',h.url('files_home',repo_name=c.repo_name,revision=c.cur_rev,f_path=c.files_list.parent.path),class_="browser-dir")}
@@ -40,7 +40,7 @@
 	          		<td></td>
 	          		<td></td>
 	          		<td></td>
-				</tr>	          		
+				</tr>
           		%endif
 		         	
 		    %for cnt,node in enumerate(c.files_list,1):
@@ -65,7 +65,7 @@
 		             </td>
 		             <td>
 		             	%if node.is_file():
-		             		${h.age(node.last_changeset._ctx.date())} - ${node.last_changeset.date}
+		             		${h.age(node.last_changeset.date)} - ${node.last_changeset.date}
 		             	%endif
 		             </td>
 		             <td>
