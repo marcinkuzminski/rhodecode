@@ -23,6 +23,7 @@ from webhelpers.pylonslib.secure_form import secure_form
 from webhelpers.text import chop_at, collapse, convert_accented_entities, \
     convert_misc_entities, lchop, plural, rchop, remove_formatting, \
     replace_whitespace, urlify, truncate, wrap_paragraphs
+from webhelpers.date import time_ago_in_words
 
 #Custom helpers here :)
 class _Link(object):
@@ -317,37 +318,50 @@ def get_changeset_safe(repo, rev):
 flash = _Flash()
 
 
-#===============================================================================
+#==============================================================================
 # MERCURIAL FILTERS available via h.
-#===============================================================================
+#==============================================================================
 from mercurial import util
-from mercurial.templatefilters import age as _age, person as _person
+from mercurial.templatefilters import person as _person
 
-age = lambda  x:x
+
+
+def _age(curdate):
+    """turns a datetime into an age string."""
+
+    from datetime import timedelta, datetime
+    agescales = [("year", 3600 * 24 * 365),
+             ("month", 3600 * 24 * 30),
+             #("week", 3600 * 24 * 7),
+             ("day", 3600 * 24),
+             ("hour", 3600),
+             ("minute", 60),
+             ("second", 1)]
+
+    age = datetime.now() - curdate
+    age_seconds = (age.days * agescales[2][1]) + age.seconds
+
+    pos = 1
+    for scale in agescales:
+        if scale[1] <= age_seconds:
+            return time_ago_in_words(curdate, agescales[pos][0])
+        pos += 1
+
+age = lambda  x:_age(x)
 capitalize = lambda x: x.capitalize()
-date = lambda x: util.datestr(x)
 email = util.email
 email_or_none = lambda x: util.email(x) if util.email(x) != x else None
 person = lambda x: _person(x)
-hgdate = lambda  x: "%d %d" % x
-isodate = lambda  x: util.datestr(x, '%Y-%m-%d %H:%M %1%2')
-isodatesec = lambda  x: util.datestr(x, '%Y-%m-%d %H:%M:%S %1%2')
-localdate = lambda  x: (x[0], util.makedate()[1])
-rfc822date = lambda  x: x#util.datestr(x, "%a, %d %b %Y %H:%M:%S %1%2")
-rfc822date_notz = lambda  x: x#util.datestr(x, "%a, %d %b %Y %H:%M:%S")
-rfc3339date = lambda  x: util.datestr(x, "%Y-%m-%dT%H:%M:%S%1:%2")
-time_ago = lambda x: util.datestr(_age(x), "%a, %d %b %Y %H:%M:%S %1%2")
 
-
-#===============================================================================
+#==============================================================================
 # PERMS
-#===============================================================================
+#==============================================================================
 from rhodecode.lib.auth import HasPermissionAny, HasPermissionAll, \
 HasRepoPermissionAny, HasRepoPermissionAll
 
-#===============================================================================
+#==============================================================================
 # GRAVATAR URL
-#===============================================================================
+#==============================================================================
 import hashlib
 import urllib
 from pylons import request

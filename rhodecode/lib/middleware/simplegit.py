@@ -17,6 +17,14 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
+"""
+Created on 2010-04-28
+
+@author: marcink
+SimpleGit middleware for handling git protocol request (push/clone etc.)
+It's implemented with basic auth function
+"""
+
 from dulwich import server as dulserver
 
 class SimpleGitUploadPackHandler(dulserver.UploadPackHandler):
@@ -54,22 +62,14 @@ from dulwich.repo import Repo
 from dulwich.web import HTTPGitApplication
 from paste.auth.basic import AuthBasicAuthenticator
 from paste.httpheaders import REMOTE_USER, AUTH_TYPE
-from rhodecode.lib.auth import authfunc, HasPermissionAnyMiddleware, \
-    get_user_cached
+from rhodecode.lib.auth import authfunc, HasPermissionAnyMiddleware
 from rhodecode.lib.utils import action_logger, is_git, invalidate_cache, \
     check_repo_fast
+from rhodecode.model.user import UserModel
 from webob.exc import HTTPNotFound, HTTPForbidden, HTTPInternalServerError
 import logging
 import os
 import traceback
-"""
-Created on 2010-04-28
-
-@author: marcink
-SimpleGit middleware for handling git protocol request (push/clone etc.)
-It's implemented with basic auth function
-"""
-
 
 
 log = logging.getLogger(__name__)
@@ -175,7 +175,7 @@ class SimpleGit(object):
         return environ.get('REMOTE_USER')
 
     def __get_user(self, username):
-        return get_user_cached(username)
+        return UserModel().get_by_username(username, cache=True)
 
     def __get_action(self, environ):
         """

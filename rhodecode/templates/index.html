@@ -55,6 +55,14 @@
 					        %if h.HasRepoPermissionAny('repository.write','repository.read','repository.admin')(repo['name'],'main page check'):
 					        <tr class="parity${cnt%2}">
 					            <td>
+					             %if repo['repo'].dbrepo.repo_type =='hg':
+					               <img class="icon" alt="${_('Mercurial repository')}" src="/images/icons/hgicon.png"/>
+					             %elif repo['repo'].dbrepo.repo_type =='git':
+					               <img class="icon" alt="${_('Git repository')}" src="/images/icons/giticon.png"/>
+					             %else:
+					               
+					             %endif 
+					            
 					             %if repo['repo'].dbrepo.private:
 					                <img class="icon" alt="${_('private')}" src="/images/icons/lock.png"/>
 					             %else:
@@ -70,7 +78,8 @@
 					            %endif
 					            </td>
 					            <td title="${repo['description']}">${h.truncate(repo['description'],60)}</td>
-					            <td>${h.age(repo['last_change'])}</td>
+					            <td><span class="tooltip" tooltip_title="${repo['last_change']}">
+					                ${h.age(repo['last_change'])} </span></td>
 					            <td>
 					            	%if repo['rev']>=0:
 					            	${h.link_to('r%s:%s' % (repo['rev'],repo['tip']),

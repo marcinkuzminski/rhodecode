@@ -92,7 +92,7 @@ E.onDOMReady(function(e){
 			      <label>${_('Last change')}:</label>
 			  </div>
 			  <div class="input-short">
-			      ${h.age(c.repo_info.last_change)} - ${h.rfc822date_notz(c.repo_info.last_change)} 
+			      ${h.age(c.repo_info.last_change)} - ${c.repo_info.last_change} 
 			      ${_('by')} ${h.get_changeset_safe(c.repo_info,'tip').author} 
 			      
 			  </div>

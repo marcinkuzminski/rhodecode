@@ -8,6 +8,7 @@ from pylons.middleware import ErrorHandler, StatusCodeRedirect
 from pylons.wsgiapp import PylonsApp
 from routes.middleware import RoutesMiddleware
 from rhodecode.lib.middleware.simplehg import SimpleHg
+from rhodecode.lib.middleware.simplegit import SimpleGit
 from rhodecode.lib.middleware.https_fixup import HttpsFixup
 from rhodecode.config.environment import load_environment
 
@@ -35,15 +36,16 @@ def make_app(global_conf, full_stack=True, static_files=True, **app_conf):
 
     # The Pylons WSGI app
     app = PylonsApp(config=config)
-    
+
     # Routing/Session/Cache Middleware
     app = RoutesMiddleware(app, config['routes.map'])
     app = SessionMiddleware(app, config)
-    
+
     # CUSTOM MIDDLEWARE HERE (filtered by error handling middlewares)
-    
+
     app = SimpleHg(app, config)
-    
+    app = SimpleGit(app, config)
+
     if asbool(full_stack):
         # Handle Python exceptions
         app = ErrorHandler(app, global_conf, **config['pylons.errorware'])
@@ -54,10 +56,10 @@ def make_app(global_conf, full_stack=True, static_files=True, **app_conf):
             app = StatusCodeRedirect(app)
         else:
             app = StatusCodeRedirect(app, [400, 401, 403, 404, 500])
-    
+
     #enable https redirets based on HTTP_X_URL_SCHEME set by proxy
     app = HttpsFixup(app)
-    
+
     # Establish the Registry for this application
     app = RegistryManager(app)
 
@@ -65,7 +67,7 @@ def make_app(global_conf, full_stack=True, static_files=True, **app_conf):
         # Serve static files
         static_app = StaticURLParser(config['pylons.paths']['static_files'])
         app = Cascade([static_app, app])
-    
+
     app.config = config
 
     return app

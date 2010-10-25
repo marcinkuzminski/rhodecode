@@ -101,7 +101,7 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
     commits_by_day_aggregate = {}
     repos_path = get_hg_ui_settings()['paths_root_path']
     p = os.path.join(repos_path, repo_name)
-    repo = get_repo(get_scm(p)[0], p)
+    repo = get_repo(p)
 
     skip_date_limit = True
     parse_limit = 250 #limit for single task changeset parsing optimal for
@@ -312,10 +312,8 @@ def __get_codes_stats(repo_name):
 
     repos_path = get_hg_ui_settings()['paths_root_path']
     p = os.path.join(repos_path, repo_name)
-    repo = get_repo(get_scm(p)[0], p)
-
+    repo = get_repo(p)
     tip = repo.get_changeset()
-
     code_stats = {}
 
     def aggregate(cs):
