@@ -9,7 +9,7 @@ requirements = [
         "vcs==0.1.10",
         "pygments>=1.3.0",
         "mercurial==1.6.4",
-        "whoosh==1.1.0",
+        "whoosh==1.1.1",
         "celery==2.1.1",
         "py-bcrypt",
         "babel",
