@@ -1701,6 +1701,7 @@ font:100% sans-serif;
 width:auto;
 opacity:1px;
 padding:8px;
+white-space: pre;
 }
 
 .ac {

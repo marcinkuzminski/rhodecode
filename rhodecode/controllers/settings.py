@@ -41,35 +41,35 @@ log = logging.getLogger(__name__)
 class SettingsController(BaseController):
 
     @LoginRequired()
-    @HasRepoPermissionAllDecorator('repository.admin')           
+    @HasRepoPermissionAllDecorator('repository.admin')
     def __before__(self):
         super(SettingsController, self).__before__()
-        
+
     def index(self, repo_name):
         repo_model = RepoModel()
         c.repo_info = repo = repo_model.get(repo_name)
         if not repo:
-            h.flash(_('%s repository is not mapped to db perhaps' 
+            h.flash(_('%s repository is not mapped to db perhaps'
                       ' it was created or renamed from the filesystem'
                       ' please run the application again'
                       ' in order to rescan repositories') % repo_name,
                       category='error')
-        
-            return redirect(url('hg_home'))        
+
+            return redirect(url('home'))
         defaults = c.repo_info.__dict__
         defaults.update({'user':c.repo_info.user.username})
         c.users_array = repo_model.get_users_js()
-        
+
         for p in c.repo_info.repo_to_perm:
-            defaults.update({'perm_%s' % p.user.username: 
+            defaults.update({'perm_%s' % p.user.username:
                              p.permission.permission_name})
-            
+
         return htmlfill.render(
             render('settings/repo_settings.html'),
             defaults=defaults,
             encoding="UTF-8",
             force_defaults=False
-        )  
+        )
 
     def update(self, repo_name):
         repo_model = RepoModel()
@@ -81,7 +81,7 @@ class SettingsController(BaseController):
             invalidate_cache('cached_repo_list')
             h.flash(_('Repository %s updated successfully' % repo_name),
                     category='success')
-            changed_name = form_result['repo_name']               
+            changed_name = form_result['repo_name']
         except formencode.Invalid, errors:
             c.repo_info = repo_model.get(repo_name)
             c.users_array = repo_model.get_users_js()
@@ -91,17 +91,17 @@ class SettingsController(BaseController):
                 defaults=errors.value,
                 errors=errors.error_dict or {},
                 prefix_error=False,
-                encoding="UTF-8") 
+                encoding="UTF-8")
         except Exception:
             log.error(traceback.format_exc())
             h.flash(_('error occured during update of repository %s') \
                     % repo_name, category='error')
-                    
+
         return redirect(url('repo_settings_home', repo_name=changed_name))
 
 
 
-    def delete(self, repo_name):    
+    def delete(self, repo_name):
         """DELETE /repos/repo_name: Delete an existing item"""
         # Forms posted to this method should contain a hidden field:
         #    <input type="hidden" name="_method" value="DELETE" />
@@ -109,45 +109,45 @@ class SettingsController(BaseController):
         #    h.form(url('repo_settings_delete', repo_name=ID),
         #           method='delete')
         # url('repo_settings_delete', repo_name=ID)
-        
+
         repo_model = RepoModel()
         repo = repo_model.get(repo_name)
         if not repo:
-            h.flash(_('%s repository is not mapped to db perhaps' 
+            h.flash(_('%s repository is not mapped to db perhaps'
                       ' it was moved or renamed  from the filesystem'
                       ' please run the application again'
                       ' in order to rescan repositories') % repo_name,
                       category='error')
-        
-            return redirect(url('hg_home'))
+
+            return redirect(url('home'))
         try:
             action_logger(self.rhodecode_user, 'user_deleted_repo',
-                              repo_name, '', self.sa)            
-            repo_model.delete(repo)            
+                              repo_name, '', self.sa)
+            repo_model.delete(repo)
             invalidate_cache('cached_repo_list')
             h.flash(_('deleted repository %s') % repo_name, category='success')
         except Exception:
             h.flash(_('An error occurred during deletion of %s') % repo_name,
                     category='error')
-        
-        return redirect(url('hg_home'))
-    
+
+        return redirect(url('home'))
+
     def fork(self, repo_name):
         repo_model = RepoModel()
         c.repo_info = repo = repo_model.get(repo_name)
         if not repo:
-            h.flash(_('%s repository is not mapped to db perhaps' 
+            h.flash(_('%s repository is not mapped to db perhaps'
                       ' it was created or renamed from the filesystem'
                       ' please run the application again'
                       ' in order to rescan repositories') % repo_name,
                       category='error')
-        
-            return redirect(url('hg_home'))
-        
+
+            return redirect(url('home'))
+
         return render('settings/repo_fork.html')
-    
-    
-    
+
+
+
     def fork_create(self, repo_name):
         repo_model = RepoModel()
         c.repo_info = repo_model.get(repo_name)
@@ -161,15 +161,15 @@ class SettingsController(BaseController):
                       % (repo_name, form_result['fork_name']),
                     category='success')
             action_logger(self.rhodecode_user, 'user_forked_repo',
-                            repo_name, '', self.sa)                                                 
+                            repo_name, '', self.sa)
         except formencode.Invalid, errors:
             c.new_repo = errors.value['fork_name']
             r = render('settings/repo_fork.html')
-            
+
             return htmlfill.render(
                 r,
                 defaults=errors.value,
                 errors=errors.error_dict or {},
                 prefix_error=False,
-                encoding="UTF-8")   
-        return redirect(url('hg_home'))
+                encoding="UTF-8")
+        return redirect(url('home'))

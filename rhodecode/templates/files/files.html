@@ -11,7 +11,7 @@
     &raquo;
     ${_('files')}
     %if c.files_list:
-        @ R${c.rev_nr}:${c.cur_rev}
+        @ R${c.rev_nr}:${h.short_id(c.cur_rev)}
     %endif        
 </%def>
 

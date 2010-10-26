@@ -303,6 +303,7 @@ class EmptyChangeset(BaseChangeset):
     message = ''
     author = ''
     date = ''
+
     @LazyProperty
     def raw_id(self):
         """

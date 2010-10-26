@@ -30,17 +30,17 @@ from rhodecode.model.hg import HgModel
 import logging
 log = logging.getLogger(__name__)
 
-class HgController(BaseController):
+class HomeController(BaseController):
 
     @LoginRequired()
     def __before__(self):
-        super(HgController, self).__before__()
-        
+        super(HomeController, self).__before__()
+
     def index(self):
         sortables = ['name', 'description', 'last_change', 'tip', 'contact']
         current_sort = request.GET.get('sort', 'name')
         current_sort_slug = current_sort.replace('-', '')
-        
+
         if current_sort_slug not in sortables:
             c.sort_by = 'name'
             current_sort_slug = c.sort_by
@@ -48,11 +48,11 @@ class HgController(BaseController):
             c.sort_by = current_sort
         c.sort_slug = current_sort_slug
         cached_repo_list = HgModel().get_repos()
-        
+
         sort_key = current_sort_slug + '_sort'
         if c.sort_by.startswith('-'):
             c.repos_list = sorted(cached_repo_list, key=itemgetter(sort_key), reverse=True)
         else:
             c.repos_list = sorted(cached_repo_list, key=itemgetter(sort_key), reverse=False)
-            
+
         return render('/index.html')

@@ -46,7 +46,7 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
 				%for cnt,cs in enumerate(c.pagination):
 					<div id="chg_${cnt+1}" class="container">
 						<div class="left">
-							<div class="date">${_('commit')} ${cs.revision}: ${cs.short_id}@${cs.date}</div>
+							<div class="date">${_('commit')} ${cs.revision}: ${cs.raw_id}@${cs.date}</div>
 							<div class="author">
 								<div class="gravatar">
 									<img alt="gravatar" src="${h.gravatar_url(h.email(cs.author),20)}"/>
@@ -54,7 +54,7 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
 								<span>${h.person(cs.author)}</span><br/>
 								<span><a href="mailto:${h.email_or_none(cs.author)}">${h.email_or_none(cs.author)}</a></span><br/>
 							</div>
-							<div class="message">${h.link_to(h.wrap_paragraphs(cs.message),h.url('changeset_home',repo_name=c.repo_name,revision=cs.short_id))}</div>
+							<div class="message">${h.link_to(h.wrap_paragraphs(cs.message),h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id))}</div>
 						</div>	
 						<div class="right">
 									<div class="changes">
@@ -69,8 +69,8 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
 										%endif
 								   %if cs.parents:							
 									%for p_cs in reversed(cs.parents):
-										<div class="parent">${_('Parent')} ${p_cs.revision}: ${h.link_to(p_cs.short_id,
-											h.url('changeset_home',repo_name=c.repo_name,revision=p_cs.short_id),title=p_cs.message)}
+										<div class="parent">${_('Parent')} ${p_cs.revision}: ${h.link_to(p_cs.raw_id,
+											h.url('changeset_home',repo_name=c.repo_name,revision=p_cs.raw_id),title=p_cs.message)}
 										</div>
 									%endfor
 								   %else:	
@@ -79,10 +79,10 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
                     									
 								<span class="logtags">
 									<span class="branchtag" title="${'%s %s' % (_('branch'),cs.branch)}">
-									${h.link_to(cs.branch,h.url('files_home',repo_name=c.repo_name,revision=cs.short_id))}</span>
+									${h.link_to(cs.branch,h.url('files_home',repo_name=c.repo_name,revision=cs.raw_id))}</span>
 									%for tag in cs.tags:
 										<span class="tagtag"  title="${'%s %s' % (_('tag'),tag)}">
-										${h.link_to(tag,h.url('files_home',repo_name=c.repo_name,revision=cs.short_id))}</span>
+										${h.link_to(tag,h.url('files_home',repo_name=c.repo_name,revision=cs.raw_id))}</span>
 									%endfor
 								</span>																	
 						</div>				

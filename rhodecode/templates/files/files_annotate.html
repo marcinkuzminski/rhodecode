@@ -26,8 +26,8 @@
 			<h3 class="files_location">${_('Location')}: ${h.files_breadcrumbs(c.repo_name,c.cur_rev,c.file.path)}</h3>
 			<dl class="overview">
 				<dt>${_('Last revision')}</dt>
-				<dd>${h.link_to("r%s:%s" % (c.file.last_changeset.revision,c.file.last_changeset.short_id),
-						h.url('files_annotate_home',repo_name=c.repo_name,revision=c.file.last_changeset.short_id,f_path=c.f_path))} </dd>
+				<dd>${h.link_to("r%s:%s" % (c.file.last_changeset.revision,c.file.last_changeset.raw_id),
+						h.url('files_annotate_home',repo_name=c.repo_name,revision=c.file.last_changeset.raw_id,f_path=c.f_path))} </dd>
 				<dt>${_('Size')}</dt>
 				<dd>${h.format_byte_size(c.file.size,binary=True)}</dd>
     			<dt>${_('Mimetype')}</dt>
@@ -43,7 +43,7 @@
 			</dl>
 			<div id="body" class="codeblock">
 				<div class="code-header">
-					<div class="revision">${c.file.name}@r${c.file.last_changeset.revision}:${c.file.last_changeset.short_id}</div>
+					<div class="revision">${c.file.name}@r${c.file.last_changeset.revision}:${c.file.last_changeset.raw_id}</div>
 					<div class="commit">"${c.file_msg}"</div>
 				</div>
 				<div class="code-body">

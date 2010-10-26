@@ -272,12 +272,12 @@ def pygmentize_annotation(filenode, **kwargs):
                                                changeset.date,
                                                tooltip(changeset.message))
         lnk_format = 'r%-5s:%s' % (changeset.revision,
-                                 changeset.short_id)
+                                 changeset.raw_id)
         uri = link_to(
                 lnk_format,
                 url('changeset_home', repo_name=changeset.repository.name,
-                    revision=changeset.short_id),
-                style=get_color_string(changeset.short_id),
+                    revision=changeset.raw_id),
+                style=get_color_string(changeset.raw_id),
                 class_='tooltip',
                 tooltip_title=tooltip_html
               )
@@ -352,6 +352,7 @@ capitalize = lambda x: x.capitalize()
 email = util.email
 email_or_none = lambda x: util.email(x) if util.email(x) != x else None
 person = lambda x: _person(x)
+short_id = lambda x: x[:12]
 
 #==============================================================================
 # PERMS

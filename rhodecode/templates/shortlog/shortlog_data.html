@@ -3,9 +3,9 @@
 <table>
 	<tr>
 		<th class="left">${_('date')}</th>
+		<th class="left">${_('commit message')}</th>
 		<th class="left">${_('author')}</th>
 		<th class="left">${_('revision')}</th>
-		<th class="left">${_('commit message')}</th>
 		<th class="left">${_('branch')}</th>
 		<th class="left">${_('tags')}</th>
 		<th class="left">${_('links')}</th>
@@ -13,14 +13,14 @@
 	</tr>
 %for cnt,cs in enumerate(c.repo_changesets):
 	<tr class="parity${cnt%2}">
-		<td>${h.age(cs.date)} - ${cs.date} </td>
+		<td>${cs.date} - ${h.age(cs.date)}</td>
+        <td>
+            ${h.link_to(h.truncate(cs.message,60),
+            h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id),
+            title=cs.message)}
+        </td>		
 		<td title="${cs.author}">${h.person(cs.author)}</td>
-		<td>r${cs.revision}:${cs.short_id}</td>
-		<td>
-			${h.link_to(h.truncate(cs.message,60),
-			h.url('changeset_home',repo_name=c.repo_name,revision=cs.short_id),
-			title=cs.message)}
-		</td>
+		<td>r${cs.revision}:${h.short_id(cs.raw_id)}</td>
 		<td>
 			<span class="logtags">
 				<span class="branchtag">${cs.branch}</span>
@@ -34,9 +34,9 @@
 			</span>
 		</td>
 		<td class="nowrap">
-		${h.link_to(_('changeset'),h.url('changeset_home',repo_name=c.repo_name,revision=cs.short_id))}
+		${h.link_to(_('changeset'),h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id))}
 		|
-		${h.link_to(_('files'),h.url('files_home',repo_name=c.repo_name,revision=cs.short_id))}
+		${h.link_to(_('files'),h.url('files_home',repo_name=c.repo_name,revision=cs.raw_id))}
 		</td>
 	</tr>
 %endfor

@@ -48,22 +48,22 @@ class ReposController(BaseController):
     # To properly map this controller, ensure your config/routing.py
     # file has a resource setup:
     #     map.resource('repo', 'repos')
-    
+
     @LoginRequired()
     @HasPermissionAnyDecorator('hg.admin', 'hg.create.repository')
     def __before__(self):
         c.admin_user = session.get('admin_user')
         c.admin_username = session.get('admin_username')
         super(ReposController, self).__before__()
-    
-    @HasPermissionAllDecorator('hg.admin')            
+
+    @HasPermissionAllDecorator('hg.admin')
     def index(self, format='html'):
         """GET /repos: All items in the collection"""
         # url('repos')
         cached_repo_list = HgModel().get_repos()
         c.repos_list = sorted(cached_repo_list, key=itemgetter('name_sort'))
         return render('admin/repos/repos.html')
-    
+
     @HasPermissionAnyDecorator('hg.admin', 'hg.create.repository')
     def create(self):
         """POST /repos: Create a new item"""
@@ -83,22 +83,22 @@ class ReposController(BaseController):
                               form_result['repo_name'], '', self.sa)
             else:
                 action_logger(self.rhodecode_user, 'admin_created_repo',
-                              form_result['repo_name'], '', self.sa)                
-                                                                             
+                              form_result['repo_name'], '', self.sa)
+
         except formencode.Invalid, errors:
             c.new_repo = errors.value['repo_name']
-            
+
             if request.POST.get('user_created'):
                 r = render('admin/repos/repo_add_create_repository.html')
-            else:              
+            else:
                 r = render('admin/repos/repo_add.html')
-            
+
             return htmlfill.render(
                 r,
                 defaults=errors.value,
                 errors=errors.error_dict or {},
                 prefix_error=False,
-                encoding="UTF-8")      
+                encoding="UTF-8")
 
         except Exception:
             log.error(traceback.format_exc())
@@ -106,9 +106,9 @@ class ReposController(BaseController):
                     % form_result.get('repo_name')
             h.flash(msg, category='error')
         if request.POST.get('user_created'):
-            return redirect(url('hg_home'))    
+            return redirect(url('home'))
         return redirect(url('repos'))
-    
+
     @HasPermissionAllDecorator('hg.admin')
     def new(self, format='html'):
         """GET /repos/new: Form to create a new item"""
@@ -116,7 +116,7 @@ class ReposController(BaseController):
         c.new_repo = h.repo_name_slug(new_repo)
 
         return render('admin/repos/repo_add.html')
-    
+
     @HasPermissionAllDecorator('hg.admin')
     def update(self, repo_name):
         """PUT /repos/repo_name: Update an existing item"""
@@ -129,7 +129,7 @@ class ReposController(BaseController):
         repo_model = RepoModel()
         changed_name = repo_name
         _form = RepoForm(edit=True, old_data={'repo_name':repo_name})()
-        
+
         try:
             form_result = _form.to_python(dict(request.POST))
             repo_model.update(repo_name, form_result)
@@ -147,14 +147,14 @@ class ReposController(BaseController):
                 errors=errors.error_dict or {},
                 prefix_error=False,
                 encoding="UTF-8")
- 
+
         except Exception:
             log.error(traceback.format_exc())
             h.flash(_('error occured during update of repository %s') \
                     % repo_name, category='error')
-            
+
         return redirect(url('edit_repo', repo_name=changed_name))
-    
+
     @HasPermissionAllDecorator('hg.admin')
     def delete(self, repo_name):
         """DELETE /repos/repo_name: Delete an existing item"""
@@ -164,65 +164,65 @@ class ReposController(BaseController):
         #    h.form(url('repo', repo_name=ID),
         #           method='delete')
         # url('repo', repo_name=ID)
-        
+
         repo_model = RepoModel()
         repo = repo_model.get(repo_name)
         if not repo:
-            h.flash(_('%s repository is not mapped to db perhaps' 
+            h.flash(_('%s repository is not mapped to db perhaps'
                       ' it was moved or renamed  from the filesystem'
                       ' please run the application again'
                       ' in order to rescan repositories') % repo_name,
                       category='error')
-        
+
             return redirect(url('repos'))
         try:
             action_logger(self.rhodecode_user, 'admin_deleted_repo',
                               repo_name, '', self.sa)
-            repo_model.delete(repo)            
+            repo_model.delete(repo)
             invalidate_cache('cached_repo_list')
             h.flash(_('deleted repository %s') % repo_name, category='success')
-           
+
         except Exception, e:
             log.error(traceback.format_exc())
             h.flash(_('An error occured during deletion of %s') % repo_name,
                     category='error')
-        
+
         return redirect(url('repos'))
-    
-    @HasPermissionAllDecorator('hg.admin')        
+
+    @HasPermissionAllDecorator('hg.admin')
     def delete_perm_user(self, repo_name):
         """
         DELETE an existing repository permission user
         :param repo_name:
         """
-        
+
         try:
             repo_model = RepoModel()
-            repo_model.delete_perm_user(request.POST, repo_name)            
+            repo_model.delete_perm_user(request.POST, repo_name)
         except Exception, e:
             h.flash(_('An error occured during deletion of repository user'),
                     category='error')
             raise HTTPInternalServerError()
-    
-    @HasPermissionAllDecorator('hg.admin')    
+
+    @HasPermissionAllDecorator('hg.admin')
     def show(self, repo_name, format='html'):
         """GET /repos/repo_name: Show a specific item"""
         # url('repo', repo_name=ID)
-    
-    @HasPermissionAllDecorator('hg.admin')    
+
+    @HasPermissionAllDecorator('hg.admin')
     def edit(self, repo_name, format='html'):
         """GET /repos/repo_name/edit: Form to edit an existing item"""
         # url('edit_repo', repo_name=ID)
         repo_model = RepoModel()
         c.repo_info = repo = repo_model.get(repo_name)
         if not repo:
-            h.flash(_('%s repository is not mapped to db perhaps' 
+            h.flash(_('%s repository is not mapped to db perhaps'
                       ' it was created or renamed from the filesystem'
                       ' please run the application again'
                       ' in order to rescan repositories') % repo_name,
                       category='error')
-        
-            return redirect(url('repos'))        
+
+            return redirect(url('repos'))
         defaults = c.repo_info.__dict__
         if c.repo_info.user:
             defaults.update({'user':c.repo_info.user.username})
@@ -230,16 +230,16 @@ class ReposController(BaseController):
             replacement_user = self.sa.query(User)\
             .filter(User.admin == True).first().username
             defaults.update({'user':replacement_user})
-            
+
         c.users_array = repo_model.get_users_js()
-        
+
         for p in c.repo_info.repo_to_perm:
-            defaults.update({'perm_%s' % p.user.username: 
+            defaults.update({'perm_%s' % p.user.username:
                              p.permission.permission_name})
-            
+
         return htmlfill.render(
             render('admin/repos/repo_edit.html'),
             defaults=defaults,
             encoding="UTF-8",
             force_defaults=False
-        )          
+        )

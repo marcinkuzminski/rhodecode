@@ -38,13 +38,13 @@ import logging
 log = logging.getLogger(__name__)
 
 class ChangelogController(BaseController):
-    
+
     @LoginRequired()
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
-                                   'repository.admin')    
+                                   'repository.admin')
     def __before__(self):
         super(ChangelogController, self).__before__()
-                
+
     def index(self):
         limit = 100
         default = 20
@@ -53,7 +53,7 @@ class ChangelogController(BaseController):
                 int_size = int(request.params.get('size'))
             except ValueError:
                 int_size = default
-            int_size = int_size if int_size <= limit else limit 
+            int_size = int_size if int_size <= limit else limit
             c.size = int_size
             session['changelog_size'] = c.size
             session.save()
@@ -61,35 +61,37 @@ class ChangelogController(BaseController):
             c.size = int(session.get('changelog_size', default))
 
         changesets = HgModel().get_repo(c.repo_name)
-            
+
         p = int(request.params.get('page', 1))
         c.total_cs = len(changesets)
         c.pagination = Page(changesets, page=p, item_count=c.total_cs,
                             items_per_page=c.size)
-            
+
         self._graph(changesets, c.size, p)
-        
+
         return render('changelog/changelog.html')
 
 
     def _graph(self, repo, size, p):
         revcount = size
         if not repo.revisions:return json.dumps([]), 0
-        
+
         max_rev = repo.revisions[-1]
+
         offset = 1 if p == 1 else  ((p - 1) * revcount + 1)
+
         rev_start = repo.revisions[(-1 * offset)]
-        
+
         revcount = min(max_rev, revcount)
         rev_end = max(0, rev_start - revcount)
         dag = graph_rev(repo.repo, rev_start, rev_end)
-        
+
         c.dag = tree = list(colored(dag))
         data = []
         for (id, type, ctx, vtx, edges) in tree:
             if type != CHANGESET:
                 continue
             data.append(('', vtx, edges))
-    
-        c.jsdata = json.dumps(data) 
+
+        c.jsdata = json.dumps(data)
 

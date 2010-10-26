@@ -56,33 +56,36 @@
 					        <tr class="parity${cnt%2}">
 					            <td>
 					             %if repo['repo'].dbrepo.repo_type =='hg':
-					               <img class="icon" alt="${_('Mercurial repository')}" src="/images/icons/hgicon.png"/>
+					               <img class="icon" title="${_('Mercurial repository')}" alt="${_('Mercurial repository')}" src="/images/icons/hgicon.png"/>
 					             %elif repo['repo'].dbrepo.repo_type =='git':
-					               <img class="icon" alt="${_('Git repository')}" src="/images/icons/giticon.png"/>
+					               <img class="icon" title="${_('Git repository')}" alt="${_('Git repository')}" src="/images/icons/giticon.png"/>
 					             %else:
 					               
 					             %endif 
 					            
 					             %if repo['repo'].dbrepo.private:
-					                <img class="icon" alt="${_('private')}" src="/images/icons/lock.png"/>
+					                <img class="icon" title="${_('private repository')}" alt="${_('private repository')}" src="/images/icons/lock.png"/>
 					             %else:
-					                <img class="icon" alt="${_('public')}" src="/images/icons/lock_open.png"/>
+					                <img class="icon" title="${_('public repository')}" alt="${_('public repository')}" src="/images/icons/lock_open.png"/>
 					             %endif  
 					            ${h.link_to(repo['name'],
 					                h.url('summary_home',repo_name=repo['name']))}
 					            %if repo['repo'].dbrepo.fork:
 					            	<a href="${h.url('summary_home',repo_name=repo['repo'].dbrepo.fork.repo_name)}">
-					            	<img class="icon" alt="${_('public')}"
+					            	<img class="icon" alt="${_('fork')}"
 					            	title="${_('Fork of')} ${repo['repo'].dbrepo.fork.repo_name}" 
 					            	src="/images/icons/arrow_divide.png"/></a>
 					            %endif
 					            </td>
-					            <td title="${repo['description']}">${h.truncate(repo['description'],60)}</td>
+					            <td><span class="tooltip" tooltip_title="${repo['description']}">
+					               ${h.truncate(repo['description'],60)}</span>
+					            </td>
 					            <td><span class="tooltip" tooltip_title="${repo['last_change']}">
-					                ${h.age(repo['last_change'])} </span></td>
+					                ${h.age(repo['last_change'])} </span>
+					            </td>
 					            <td>
 					            	%if repo['rev']>=0:
-					            	${h.link_to('r%s:%s' % (repo['rev'],repo['tip']),
+					            	${h.link_to('r%s:%s' % (repo['rev'],h.short_id(repo['tip'])),
 					                h.url('changeset_home',repo_name=repo['name'],revision=repo['tip']),
 					                class_="tooltip",
 					                tooltip_title=h.tooltip(repo['last_msg']))}

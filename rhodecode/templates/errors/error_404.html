@@ -6,7 +6,7 @@
 </%def>
 
 <%def name="breadcrumbs()">
-	${h.link_to(u'Home',h.url('hg_home'))}
+	${h.link_to(u'Home',h.url('home'))}
 	 / 
 	${h.link_to(u'Admin',h.url('admin_home'))}
 </%def>
@@ -26,7 +26,7 @@
     ${_('Create "%s" repository as %s' % (c.repo_name,c.repo_name_cleaned))}</a>
 
     </p>
-    <p class="normal">${h.link_to(_('Go back to the main repository list page'),h.url('hg_home'))}</p>
+    <p class="normal">${h.link_to(_('Go back to the main repository list page'),h.url('home'))}</p>
     <div class="page-footer">
     </div>
 </%def>

@@ -1,7 +1,7 @@
 <%inherit file="/base/base.html"/>
 
 <%def name="title()">
-    ${c.repo_name} ${_('Changeset')} - r${c.changeset.revision}:${c.changeset.short_id}  - ${c.rhodecode_name}
+    ${c.repo_name} ${_('Changeset')} - r${c.changeset.revision}:${h.short_id(c.changeset.raw_id)} - ${c.rhodecode_name}
 </%def>
 
 <%def name="breadcrumbs_links()">
@@ -9,7 +9,7 @@
     &raquo;
     ${h.link_to(c.repo_name,h.url('summary_home',repo_name=c.repo_name))}
     &raquo;
-    ${_('Changeset')} - r${c.changeset.revision}:${c.changeset.short_id}
+    ${_('Changeset')} - r${c.changeset.revision}:${h.short_id(c.changeset.raw_id)}
 </%def>
 
 <%def name="page_nav()">
@@ -26,18 +26,18 @@
 		<div id="body" class="diffblock">
 			<div class="code-header">
 				<div>
-				${_('Changeset')} - r${c.changeset.revision}:${c.changeset.short_id}
+				${_('Changeset')} - r${c.changeset.revision}:${h.short_id(c.changeset.raw_id)}
 				 &raquo; <span>${h.link_to(_('raw diff'),
-				h.url('raw_changeset_home',repo_name=c.repo_name,revision=c.changeset.short_id,diff='show'))}</span>
+				h.url('raw_changeset_home',repo_name=c.repo_name,revision=c.changeset.raw_id,diff='show'))}</span>
 				 &raquo; <span>${h.link_to(_('download diff'),
-				h.url('raw_changeset_home',repo_name=c.repo_name,revision=c.changeset.short_id,diff='download'))}</span>
+				h.url('raw_changeset_home',repo_name=c.repo_name,revision=c.changeset.raw_id,diff='download'))}</span>
 				</div>
 			</div>
 		</div>
 	    <div id="changeset_content">
 			<div class="container">
 	             <div class="left">
-	                 <div class="date">${_('commit')} ${c.changeset.revision}: ${c.changeset.short_id}@${c.changeset.date}</div>
+	                 <div class="date">${_('commit')} ${c.changeset.revision}: ${h.short_id(c.changeset.raw_id)}@${c.changeset.date}</div>
 	                 <div class="author">
 	                     <div class="gravatar">
 	                         <img alt="gravatar" src="${h.gravatar_url(h.email(c.changeset.author),20)}"/>
@@ -45,7 +45,7 @@
 	                     <span>${h.person(c.changeset.author)}</span><br/>
 	                     <span><a href="mailto:${h.email_or_none(c.changeset.author)}">${h.email_or_none(c.changeset.author)}</a></span><br/>
 	                 </div>
-	                 <div class="message">${h.link_to(h.wrap_paragraphs(c.changeset.message),h.url('changeset_home',repo_name=c.repo_name,revision=c.changeset.short_id))}</div>
+	                 <div class="message">${h.link_to(h.wrap_paragraphs(c.changeset.message),h.url('changeset_home',repo_name=c.repo_name,revision=c.changeset.raw_id))}</div>
 	             </div>
 	             <div class="right">
 		             <div class="changes">
@@ -61,8 +61,8 @@
 		                 
 		            %if c.changeset.parents:
 		             %for p_cs in reversed(c.changeset.parents):
-		                 <div class="parent">${_('Parent')} ${p_cs.revision}: ${h.link_to(p_cs.short_id,
-		                     h.url('changeset_home',repo_name=c.repo_name,revision=p_cs.short_id),title=p_cs.message)}
+		                 <div class="parent">${_('Parent')} ${p_cs.revision}: ${h.link_to(h.short_id(p_cs.raw_id),
+		                     h.url('changeset_home',repo_name=c.repo_name,revision=p_cs.raw_id),title=p_cs.message)}
 		                 </div>
 		             %endfor
                     %else: 
@@ -70,10 +70,10 @@
                     %endif		             
 		         <span class="logtags">
 		             <span class="branchtag" title="${'%s %s' % (_('branch'),c.changeset.branch)}">
-		             ${h.link_to(c.changeset.branch,h.url('files_home',repo_name=c.repo_name,revision=c.changeset.short_id))}</span>
+		             ${h.link_to(c.changeset.branch,h.url('files_home',repo_name=c.repo_name,revision=c.changeset.raw_id))}</span>
 		             %for tag in c.changeset.tags:
 		                 <span class="tagtag"  title="${'%s %s' % (_('tag'),tag)}">
-		                 ${h.link_to(tag,h.url('files_home',repo_name=c.repo_name,revision=c.changeset.short_id))}</span>
+		                 ${h.link_to(tag,h.url('files_home',repo_name=c.repo_name,revision=c.changeset.raw_id))}</span>
 		             %endfor
 		         </span>                                                                 
 	                </div>              
@@ -96,7 +96,7 @@
 				<div>
 					<span>
 						${h.link_to_if(change!='removed',filenode.path,h.url('files_home',repo_name=c.repo_name,
-						revision=filenode.changeset.short_id,f_path=filenode.path))}
+						revision=filenode.changeset.raw_id,f_path=filenode.path))}
 					</span>
 					%if 1:
 					&raquo; <span>${h.link_to(_('diff'),
