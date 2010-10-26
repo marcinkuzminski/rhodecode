@@ -116,14 +116,14 @@
 	               <span>${_('Summary')}</span>                 
 	               </a>	            
 	            </li>
-                <li ${is_current('shortlog')}>
-                   <a title="${_('Shortlog')}" href="${h.url('shortlog_home',repo_name=c.repo_name)}">
-                   <span class="icon">
-                       <img src="/images/icons/application_view_list.png" alt="${_('Shortlog')}" />
-                   </span>
-                   <span>${_('Shortlog')}</span>                 
-                   </a>             
-                </li>	            
+                ##<li ${is_current('shortlog')}>
+                ##   <a title="${_('Shortlog')}" href="${h.url('shortlog_home',repo_name=c.repo_name)}">
+                ##   <span class="icon">
+                ##       <img src="/images/icons/application_view_list.png" alt="${_('Shortlog')}" />
+                ##   </span>
+                ##   <span>${_('Shortlog')}</span>                 
+                ##   </a>             
+                ##</li>	            
                 <li ${is_current('changelog')}>
                    <a title="${_('Changelog')}" href="${h.url('changelog_home',repo_name=c.repo_name)}">
                    <span class="icon">
@@ -142,7 +142,7 @@
                    </a>    
                     <ul>
                         <li>
-                            ${h.link_to(_('branches'),h.url('branches_home',repo_name=c.repo_name),class_='branches childs')}
+                            ${h.link_to('%s (%s)' % (_('branches'),len(c.repository_branches.values()),),h.url('branches_home',repo_name=c.repo_name),class_='branches childs')}
                             <ul>
                             %if c.repository_branches.values():
 						        %for cnt,branch in enumerate(c.repository_branches.items()):
@@ -154,7 +154,7 @@
                             </ul>                        
                         </li>
                         <li>
-                            ${h.link_to(_('tags'),h.url('tags_home',repo_name=c.repo_name),class_='tags childs')}
+                            ${h.link_to('%s (%s)' % (_('tags'),len(c.repository_tags.values()),),h.url('tags_home',repo_name=c.repo_name),class_='tags childs')}
                             <ul>
                             %if c.repository_tags.values():
                                 %for cnt,tag in enumerate(c.repository_tags.items()):

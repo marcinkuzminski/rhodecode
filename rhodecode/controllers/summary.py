@@ -43,19 +43,24 @@ except ImportError:
 log = logging.getLogger(__name__)
 
 class SummaryController(BaseController):
-    
+
     @LoginRequired()
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
-                                   'repository.admin')           
+                                   'repository.admin')
     def __before__(self):
         super(SummaryController, self).__before__()
-                
+
     def index(self):
         hg_model = HgModel()
         c.repo_info = hg_model.get_repo(c.repo_name)
-        c.repo_changesets = Page(list(c.repo_info[:10]), page=1, items_per_page=20)
+        def url_generator(**kw):
+            return url('shortlog_home', repo_name=c.repo_name, **kw)
+
+        c.repo_changesets = Page(c.repo_info, page=1, items_per_page=10,
+                                 url=url_generator)
+
         e = request.environ
-            
+
         uri = u'%(protocol)s://%(user)s@%(host)s%(prefix)s/%(repo_name)s' % {
                                         'protocol': e.get('wsgi.url_scheme'),
                                         'user':str(c.rhodecode_user.username),
@@ -66,30 +71,30 @@ class SummaryController(BaseController):
         c.repo_tags = OrderedDict()
         for name, hash in c.repo_info.tags.items()[:10]:
             c.repo_tags[name] = c.repo_info.get_changeset(hash)
-        
+
         c.repo_branches = OrderedDict()
         for name, hash in c.repo_info.branches.items()[:10]:
             c.repo_branches[name] = c.repo_info.get_changeset(hash)
-        
-        td = datetime.today() + timedelta(days=1) 
+
+        td = datetime.today() + timedelta(days=1)
         y, m, d = td.year, td.month, td.day
-        
+
         ts_min_y = mktime((y - 1, (td - timedelta(days=calendar.mdays[m])).month,
                             d, 0, 0, 0, 0, 0, 0,))
         ts_min_m = mktime((y, (td - timedelta(days=calendar.mdays[m])).month,
                             d, 0, 0, 0, 0, 0, 0,))
-        
+
         ts_max_y = mktime((y, m, d, 0, 0, 0, 0, 0, 0,))
-            
+
         run_task(get_commits_stats, c.repo_info.name, ts_min_y, ts_max_y)
         c.ts_min = ts_min_m
         c.ts_max = ts_max_y
-        
+
         stats = self.sa.query(Statistics)\
             .filter(Statistics.repository == c.repo_info.dbrepo)\
             .scalar()
-        
-        
+
+
         if stats and stats.languages:
             lang_stats = json.loads(stats.languages)
             c.commit_data = stats.commit_activity
@@ -103,6 +108,6 @@ class SummaryController(BaseController):
             c.commit_data = json.dumps({})
             c.overview_data = json.dumps([[ts_min_y, 0], [ts_max_y, 0] ])
             c.trending_languages = json.dumps({})
-        
+
         return render('summary/summary.html')
 

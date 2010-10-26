@@ -42,14 +42,12 @@ E.onDOMReady(function(e){
 			      <label>${_('Name')}:</label>
 			  </div>
 			  <div class="input-short">
-			  
-		          %if c.repo_info.dbrepo.repo_type =='hg':
-		            <img style="margin-bottom:2px" class="icon" title="${_('Mercurial repository')}" alt="${_('Mercurial repository')}" src="/images/icons/hgicon.png"/>
-		          %elif c.repo_info.dbrepo.repo_type =='git':
-		            <img style="margin-bottom:2px" class="icon" title="${_('Git repository')}" alt="${_('Git repository')}" src="/images/icons/giticon.png"/>
-		          %else:
-		            
-		          %endif 
+		         %if c.repo_info.dbrepo.repo_type =='hg':
+		           <img style="margin-bottom:2px" class="icon" title="${_('Mercurial repository')}" alt="${_('Mercurial repository')}" src="/images/icons/hgicon.png"/>
+		         %endif
+		         %if c.repo_info.dbrepo.repo_type =='git':
+		           <img style="margin-bottom:2px" class="icon" title="${_('Git repository')}" alt="${_('Git repository')}" src="/images/icons/giticon.png"/>
+		         %endif 
                                  			  
 	             %if c.repo_info.dbrepo.private:
 	                <img style="margin-bottom:2px" class="icon" title="${_('private repository')}" alt="${_('private repository')}" src="/images/icons/lock.png"/>
@@ -561,10 +559,12 @@ E.onDOMReady(function(e){
         <div class="breadcrumbs">${h.link_to(_('Last ten changes'),h.url('changelog_home',repo_name=c.repo_name))}</div>
     </div>    
     <div class="table">
-        <%include file='../shortlog/shortlog_data.html'/>
-        %if c.repo_changesets:
-        	${h.link_to(_('show more'),h.url('changelog_home',repo_name=c.repo_name))}
-        %endif
+        <div id="shortlog_data">
+            <%include file='../shortlog/shortlog_data.html'/>
+        </div>
+        ##%if c.repo_changesets:
+        ##	${h.link_to(_('show more'),h.url('changelog_home',repo_name=c.repo_name))}
+        ##%endif
     </div>
 </div>
 <div class="box">    
