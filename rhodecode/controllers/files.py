@@ -68,24 +68,29 @@ class FilesController(BaseController):
 
 
         try:
-            cur_rev = repo.get_changeset(revision).revision
+            c.changeset = repo.get_changeset(revision)
+            cur_rev = c.changeset.revision
             prev_rev = repo.get_changeset(get_prev_rev(cur_rev)).raw_id
             next_rev = repo.get_changeset(get_next_rev(cur_rev)).raw_id
 
             c.url_prev = url('files_home', repo_name=c.repo_name,
                              revision=prev_rev, f_path=f_path)
             c.url_next = url('files_home', repo_name=c.repo_name,
-                             revision=next_rev, f_path=f_path)
+                         revision=next_rev, f_path=f_path)
 
-            c.changeset = repo.get_changeset(revision)
+            try:
+                c.files_list = c.changeset.get_node(f_path)
+                c.file_history = self._get_history(repo, c.files_list, f_path)
 
-            c.cur_rev = c.changeset.raw_id
-            c.rev_nr = c.changeset.revision
-            c.files_list = c.changeset.get_node(f_path)
-            c.file_history = self._get_history(repo, c.files_list, f_path)
+            except RepositoryError, e:
+                h.flash(str(e), category='warning')
+                redirect(h.url('files_home', repo_name=repo_name, revision=revision))
 
-        except (RepositoryError, ChangesetError):
-            c.files_list = None
+        except RepositoryError, e:
+            h.flash(str(e), category='warning')
+            redirect(h.url('files_home', repo_name=repo_name, revision='tip'))
+
+
 
         return render('files/files.html')
 

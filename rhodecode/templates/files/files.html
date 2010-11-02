@@ -11,7 +11,7 @@
     &raquo;
     ${_('files')}
     %if c.files_list:
-        @ R${c.rev_nr}:${h.short_id(c.cur_rev)}
+        @ r${c.changeset.revision}:${h.short_id(c.changeset.raw_id)}
     %endif        
 </%def>
 
@@ -23,12 +23,19 @@
 <div class="box">
     <!-- box / title -->
     <div class="title">
-        ${self.breadcrumbs()}     
+        ${self.breadcrumbs()}
+	    <ul class="links">
+		    <li>
+		      <span style="text-transform: uppercase;"><a href="#">${_('branch')}: ${c.changeset.branch}</a></span>
+	        </li>          
+	    </ul>             
     </div>
     <div class="table">
 		<div id="files_data">
 			%if c.files_list:
-				<h3 class="files_location">${_('Location')}: ${h.files_breadcrumbs(c.repo_name,c.cur_rev,c.files_list.path)}</h3>
+				<h3 class="files_location">
+				    ${_('Location')}: ${h.files_breadcrumbs(c.repo_name,c.changeset.raw_id,c.files_list.path)}
+				</h3>
 					%if c.files_list.is_dir():
 						<%include file='files_browser.html'/>
 					%else:

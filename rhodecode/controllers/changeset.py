@@ -27,6 +27,7 @@ from pylons.i18n.translation import _
 from pylons.controllers.util import redirect
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseController, render
+import rhodecode.lib.helpers as h
 from rhodecode.model.hg import HgModel
 from vcs.exceptions import RepositoryError, ChangesetError
 from vcs.nodes import FileNode
@@ -59,8 +60,9 @@ class ChangesetController(BaseController):
 
         try:
             c.changeset = hg_model.get_repo(c.repo_name).get_changeset(revision)
-        except RepositoryError:
+        except RepositoryError, e:
             log.error(traceback.format_exc())
+            h.flash(str(e), category='warning')
             return redirect(url('home'))
         else:
             try:
