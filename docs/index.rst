@@ -80,6 +80,8 @@ Incoming
 - commit based build in wiki system
 - clone points and cloning from remote repositories into rhodecode 
   (git_ and mercurial_)
+- more statistics and graph (global annotation + some more statistics)
+- user customized activity dashboards
 - some cache optimizations
 - other cools stuff that i can figure out (or You can help me figure out)
 
@@ -92,12 +94,11 @@ License
 Documentation
 -------------
 
-**Installation:**
-
 .. toctree::
    :maxdepth: 1
 
    installation
+   upgrade
    setup
    changelog
 

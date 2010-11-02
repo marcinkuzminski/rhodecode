@@ -3,13 +3,13 @@
 Changelog
 =========
 
-1.0.0 (**2010-10-xx**)
+1.0.0 (**2010-11-02**)
 ----------------------
 
 - security bugfix simplehg wasn't checking for permissions on commands
   other than pull or push.
 - fixed doubled messages after push or pull in admin journal
-- templating and css corrections, fixed repo switcher on chrome,updated titles
+- templating and css corrections, fixed repo switcher on chrome, updated titles
 - admin menu accessible from options menu on repository view
 - permissions cached queries
 
