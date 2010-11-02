@@ -270,7 +270,7 @@ text-decoration:none;
 }
 
 #header #header-inner #logo a:hover {
-color:#dabf29;
+color:#bfe3ff;
 }
 
 #header #header-inner #quick,#header #header-inner #quick ul {
@@ -2025,7 +2025,6 @@ display:block;
 }
 
 #content div.box div.title ul.links li a:hover,#content div.box div.title ul.links li.ui-tabs-selected a {
-background:url("../../images/title_tab_selected.png") no-repeat bottom center;
 color:#bfe3ff;
 }
 
