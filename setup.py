@@ -4,18 +4,18 @@ py_version = sys.version_info
 
 requirements = [
         "Pylons>=1.0.0",
-        "SQLAlchemy>=0.6",
+        "SQLAlchemy==0.6.4",
         "Mako>=0.3.2",
         "vcs==0.1.8",
         "pygments>=1.3.0",
-        "mercurial>=1.6",
-        "whoosh==1.0.0",
-        "celery>=2.0.0",
+        "mercurial==1.6.4",
+        "whoosh==1.2.5",
+        "celery==2.1.2",
         "py-bcrypt",
         "babel",
     ]
 
-classifiers = ['Development Status :: 4 - Beta',
+classifiers = ["Development Status :: 5 - Production/Stable",
                    'Environment :: Web Environment',
                    'Framework :: Pylons',
                    'Intended Audience :: Developers',
