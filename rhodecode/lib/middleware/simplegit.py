@@ -151,7 +151,7 @@ class SimpleGit(object):
             return HTTPNotFound()(environ, start_response)
         try:
             app = self.__make_app()
-        except Exception:
+        except:
             log.error(traceback.format_exc())
             return HTTPInternalServerError()(environ, start_response)
 

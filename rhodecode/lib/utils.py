@@ -296,13 +296,16 @@ def invalidate_cache(name, *args):
 
 class EmptyChangeset(BaseChangeset):
     """
-    An dummy empty changeset.
+    An dummy empty changeset. It's possible to pass hash when creating
+    an EmptyChangeset
     """
 
-    revision = -1
-    message = ''
-    author = ''
-    date = ''
+    def __init__(self, cs='0' * 40):
+        self._empty_cs = cs
+        self.revision = -1
+        self.message = ''
+        self.author = ''
+        self.date = ''
 
     @LazyProperty
     def raw_id(self):
@@ -310,7 +313,7 @@ class EmptyChangeset(BaseChangeset):
         Returns raw string identifying this changeset, useful for web
         representation.
         """
-        return '0' * 40
+        return self._empty_cs
 
     @LazyProperty
     def short_id(self):

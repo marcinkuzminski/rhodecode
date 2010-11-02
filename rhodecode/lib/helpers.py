@@ -328,8 +328,11 @@ from mercurial.templatefilters import person as _person
 
 def _age(curdate):
     """turns a datetime into an age string."""
+    if not curdate:
+        return ''
 
     from datetime import timedelta, datetime
+
     agescales = [("year", 3600 * 24 * 365),
              ("month", 3600 * 24 * 30),
              #("week", 3600 * 24 * 7),

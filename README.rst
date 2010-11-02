@@ -3,14 +3,13 @@ RhodeCode (RhodiumCode)
 =======================
 
 ``RhodeCode`` (formerly hg-app) is Pylons based repository management and 
-serving for mercurial_. It's similar to github or bitbucket, but it's suppose to run
-as standalone app, it's open source and focuses more on restricted access to repositories
-There's no default free access to RhodeCode You have to create an account in order
-to use the application. It's powered by vcs_ library that we created to handle
-many various version control systems.
+serving for mercurial_ and git_. It's similar to github or bitbucket, but 
+it's suppose to run as standalone app, it's open source and focuses more on 
+restricted access to repositories. There's no default free access to RhodeCode 
+You have to create an account in order to use the application. It's powered 
+by vcs_ library that we created to handle many various version control systems.
 
 RhodeCode uses `Semantic Versioning <http://semver.org/>`_
-
 
 RhodeCode demo
 --------------

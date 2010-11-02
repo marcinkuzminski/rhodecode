@@ -23,9 +23,10 @@ summary controller for pylons
 @author: marcink
 """
 from pylons import tmpl_context as c, request, url
+from vcs.exceptions import ChangesetError
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseController, render
-from rhodecode.lib.utils import OrderedDict
+from rhodecode.lib.utils import OrderedDict, EmptyChangeset
 from rhodecode.model.hg import HgModel
 from rhodecode.model.db import Statistics
 from webhelpers.paginate import Page
@@ -70,11 +71,17 @@ class SummaryController(BaseController):
         c.clone_repo_url = uri
         c.repo_tags = OrderedDict()
         for name, hash in c.repo_info.tags.items()[:10]:
-            c.repo_tags[name] = c.repo_info.get_changeset(hash)
+            try:
+                c.repo_tags[name] = c.repo_info.get_changeset(hash)
+            except ChangesetError:
+                c.repo_tags[name] = EmptyChangeset(hash)
 
         c.repo_branches = OrderedDict()
         for name, hash in c.repo_info.branches.items()[:10]:
-            c.repo_branches[name] = c.repo_info.get_changeset(hash)
+            try:
+                c.repo_branches[name] = c.repo_info.get_changeset(hash)
+            except ChangesetError:
+                c.repo_branches[name] = EmptyChangeset(hash)
 
         td = datetime.today() + timedelta(days=1)
         y, m, d = td.year, td.month, td.day
