@@ -4,14 +4,13 @@ Welcome to RhodeCode (RhodiumCode) documentation!
 =================================================
 
 ``RhodeCode`` (formerly hg-app) is Pylons based repository management and 
-serving for mercurial_. It's similar to github or bitbucket, but it's suppose to run
-as standalone app, it's open source and focuses more on restricted access to repositories
-There's no default free access to RhodeCode You have to create an account in order
-to use the application. It's powered by vcs_ library that we created to handle
-many various version control systems.
+serving for mercurial_ and git_. It's similar to github or bitbucket, but 
+it's suppose to run as standalone app, it's open source and focuses more on 
+restricted access to repositories. There's no default free access to RhodeCode 
+You have to create an account in order to use the application. It's powered 
+by vcs_ library that we created to handle many various version control systems.
 
 RhodeCode uses `Semantic Versioning <http://semver.org/>`_
-
 
 RhodeCode demo
 --------------
@@ -29,15 +28,16 @@ Source code
 Source code is along with issue tracker is available at
 http://bitbucket.org/marcinkuzminski/rhodecode
 
-Also a source codes can be obtained from demo rhodecode instance
+Also a source codes can be obtained from demo RhodeCode instance
 http://hg.python-works.com/rhodecode/summary
 
 Features
 --------
 
-- Has it's own middleware to handle mercurial_ protocol request. Each request 
-  can be logged and authenticated. Runs on threads unlikely to hgweb You can 
-  make multiple pulls/pushes simultaneous. Supports http/https
+- Has it's own middleware to handle mercurial_ and git_ protocol request. 
+  Each request can be logged and authenticated. Runs on threads unlikely to 
+  hgweb You can make multiple pulls/pushes simultaneous. Supports http/https
+  both on git_ and mercurial_
 - Full permissions and authentication per project private/read/write/admin. 
   One account for web interface and mercurial_ push/pull/clone.
 - Mako templates let's you customize look and feel of application.
@@ -80,6 +80,8 @@ Incoming
 - commit based build in wiki system
 - clone points and cloning from remote repositories into rhodecode 
   (git_ and mercurial_)
+- more statistics and graph (global annotation + some more statistics)
+- user customized activity dashboards
 - some cache optimizations
 - other cools stuff that i can figure out (or You can help me figure out)
 
@@ -98,6 +100,7 @@ Documentation
    :maxdepth: 1
 
    installation
+   upgrade
    setup
    changelog
 
