@@ -57,6 +57,7 @@
 		        %if h.HasRepoPermissionAny('repository.write','repository.read','repository.admin')(repo['name'],'main page check'):
 		        <tr class="parity${cnt%2}">
 		            <td>
+		             ## TYPE OF REPO
 		             %if repo['repo'].dbrepo.repo_type =='hg':
 		               <img class="icon" title="${_('Mercurial repository')}" alt="${_('Mercurial repository')}" src="/images/icons/hgicon.png"/>
 		             %elif repo['repo'].dbrepo.repo_type =='git':
@@ -65,11 +66,14 @@
 		               
 		             %endif 
 		            
+		             ##PRIVATE/PUBLIC
 		             %if repo['repo'].dbrepo.private:
 		                <img class="icon" title="${_('private repository')}" alt="${_('private repository')}" src="/images/icons/lock.png"/>
 		             %else:
 		                <img class="icon" title="${_('public repository')}" alt="${_('public repository')}" src="/images/icons/lock_open.png"/>
-		             %endif  
+		             %endif
+		            
+		            ##NAME   
 		            ${h.link_to(repo['name'],
 		                h.url('summary_home',repo_name=repo['name']),class_="repo_name")}
 		            %if repo['repo'].dbrepo.fork:
@@ -79,11 +83,13 @@
 		            	src="/images/icons/arrow_divide.png"/></a>
 		            %endif
 		            </td>
+		            ##DESCRIPTION
 		            <td><span class="tooltip" tooltip_title="${repo['description']}">
 		               ${h.truncate(repo['description'],60)}</span>
 		            </td>
-		            <td><span class="tooltip" tooltip_title="${repo['last_change']}">
-		                ${h.age(repo['last_change'])} </span>
+		            ##LAST CHANGE
+		            <td>
+		              <span>${repo['last_change']} - ${h.age(repo['last_change'])} </span>
 		            </td>
 		            <td>
 		            	%if repo['rev']>=0:

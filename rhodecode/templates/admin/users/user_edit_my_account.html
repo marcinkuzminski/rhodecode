@@ -82,7 +82,9 @@
 <div class="box box-right">
     <!-- box / title -->
     <div class="title">
-        <h5>${_('My repositories')}</h5>   
+        <h5>${_('My repositories')}
+        <input class="top-right-rounded-corner top-left-rounded-corner bottom-left-rounded-corner bottom-right-rounded-corner" id="q_filter" size="15" type="text" name="filter" value="${_('quick filter...')}"/>
+        </h5>   
     </div>
     <!-- end box / title -->
     <div class="table">
@@ -92,13 +94,20 @@
 		     %for repo in c.user_repos:
 		        <tr>
 		            <td>
+                     %if repo.dbrepo.repo_type =='hg':
+                       <img class="icon" title="${_('Mercurial repository')}" alt="${_('Mercurial repository')}" src="/images/icons/hgicon.png"/>
+                     %elif repo.dbrepo.repo_type =='git':
+                       <img class="icon" title="${_('Git repository')}" alt="${_('Git repository')}" src="/images/icons/giticon.png"/>
+                     %else:
+                       
+                     %endif 		            
 		             %if repo.dbrepo.private:
 		                <img class="icon" alt="${_('private')}" src="/images/icons/lock.png"/>
 		             %else:
 		                <img class="icon" alt="${_('public')}" src="/images/icons/lock_open.png"/>
 		             %endif
 		                                             
-		            ${h.link_to(repo.name, h.url('summary_home',repo_name=repo.name))}
+		            ${h.link_to(repo.name, h.url('summary_home',repo_name=repo.name),class_="repo_name")}
 		            %if repo.dbrepo.fork:
 		            	<a href="${h.url('summary_home',repo_name=repo.dbrepo.fork.repo_name)}">
 		            	<img class="icon" alt="${_('public')}"
@@ -107,7 +116,7 @@
 		            %endif		            
 		            </td> 
 		            <td>${_('revision')}: ${h.get_changeset_safe(repo,'tip').revision}</td>
-		            <td>${_('last changed')}: ${h.age(repo.last_change)}</td>
+		            <td><span class="tooltip" tooltip_title="${repo.last_change}">${_('last changed')}: ${h.age(repo.last_change)}</span></td>
 		            <td><img class="icon" alt="${_('private')}" src="/images/icons/application_form_edit.png"/> ${h.link_to(_('edit'),h.url('repo_settings_home',repo_name=repo.name))}</td>
 		            <td>
 	                  ${h.form(url('repo_settings_delete', repo_name=repo.name),method='delete')}
@@ -127,4 +136,48 @@
     </div>
     
 </div>
+    <script type="text/javascript">
+     var D = YAHOO.util.Dom;
+     var E = YAHOO.util.Event;
+     var S = YAHOO.util.Selector;
+     
+     var q_filter = D.get('q_filter');
+     var F = YAHOO.namespace('q_filter'); 
+     
+     E.on(q_filter,'click',function(){
+        q_filter.value = '';
+     });
+
+     F.filterTimeout = null;
+     
+     F.updateFilter  = function() { 
+        // Reset timeout 
+        F.filterTimeout = null;
+        
+        var obsolete = [];
+        var nodes = S.query('div.table tr td a.repo_name');
+        var req = D.get('q_filter').value;
+        for (n in nodes){
+            D.setStyle(nodes[n].parentNode.parentNode,'display','')
+        }
+        if (req){
+            for (n in nodes){
+                if (nodes[n].innerHTML.toLowerCase().indexOf(req) == -1) {
+                    obsolete.push(nodes[n]); 
+                }
+            }
+            if(obsolete){
+                for (n in obsolete){
+                    D.setStyle(obsolete[n].parentNode.parentNode,'display','none');
+                }
+            }
+        }
+     }
+     
+     E.on(q_filter,'keyup',function(e){
+         clearTimeout(F.filterTimeout); 
+         setTimeout(F.updateFilter,600); 
+     });
+     
+    </script>
 </%def>  
