@@ -2310,3 +2310,10 @@ border:none !important;
 height:20px !important;
 padding:0 !important;
 }
+
+#q_filter{
+border: 0px;
+color:#CDCDCD;
+padding-left:3px
+}
+
