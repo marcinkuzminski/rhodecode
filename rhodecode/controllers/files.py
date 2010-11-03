@@ -189,7 +189,9 @@ class FilesController(BaseController):
             return diff.raw_diff()
 
         elif c.action == 'raw':
-            c.cur_diff = '<pre class="raw">%s</pre>' % h.escape(diff.raw_diff())
+            response.content_type = 'text/plain'
+            return diff.raw_diff()
+            
         elif c.action == 'diff':
             if node1.size > c.file_size_limit or node2.size > c.file_size_limit:
                 c.cur_diff = _('Diff is to big to display')

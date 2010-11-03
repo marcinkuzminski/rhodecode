@@ -16,7 +16,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
-from rhodecode.lib.utils import EmptyChangeset
 """
 Created on April 25, 2010
 changeset controller for pylons
@@ -27,6 +26,7 @@ from pylons.i18n.translation import _
 from pylons.controllers.util import redirect
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseController, render
+from rhodecode.lib.utils import EmptyChangeset
 import rhodecode.lib.helpers as h
 from rhodecode.model.hg import HgModel
 from vcs.exceptions import RepositoryError, ChangesetError
@@ -181,5 +181,5 @@ class ChangesetController(BaseController):
         c.diffs = ''
         for x in c.changes:
             c.diffs += x[2]
-
+        
         return render('changeset/raw_changeset.html')
