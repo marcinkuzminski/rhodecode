@@ -135,7 +135,9 @@ class ChangesetController(BaseController):
         hg_model = HgModel()
         method = request.GET.get('diff', 'show')
         try:
-            c.changeset = hg_model.get_repo(c.repo_name).get_changeset(revision)
+            r = hg_model.get_repo(c.repo_name)
+            c.scm_type = r.alias
+            c.changeset = r.get_changeset(revision)
         except RepositoryError:
             log.error(traceback.format_exc())
             return redirect(url('home'))
