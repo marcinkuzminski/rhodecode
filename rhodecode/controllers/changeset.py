@@ -151,7 +151,7 @@ class ChangesetController(BaseController):
             for node in c.changeset.added:
                 filenode_old = FileNode(node.path, '')
                 if filenode_old.is_binary or node.is_binary:
-                    diff = _('binary file')
+                    diff = _('binary file') +'\n'
                 else:
                     f_udiff = differ.get_udiff(filenode_old, node)
                     diff = differ.DiffProcessor(f_udiff).raw_diff()
@@ -173,8 +173,10 @@ class ChangesetController(BaseController):
                 c.changes.append(('changed', node, diff, cs1, cs2))
 
         response.content_type = 'text/plain'
+        
         if method == 'download':
             response.content_disposition = 'attachment; filename=%s.patch' % revision
+            
         parent = True if len(c.changeset.parents) > 0 else False
         c.parent_tmpl = 'Parent  %s' % c.changeset.parents[0].raw_id if parent else ''
 
