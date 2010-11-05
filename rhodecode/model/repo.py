@@ -21,7 +21,7 @@ Created on Jun 5, 2010
 model for handling repositories actions
 :author: marcink
 """
-
+from vcs.backends import get_repo, get_backend
 from datetime import datetime
 from pylons import app_globals as g
 from rhodecode.model.db import Repository, RepoToPerm, User, Permission
@@ -151,7 +151,7 @@ class RepoModel(object):
             self.sa.add(repo_to_perm)
             self.sa.commit()
             if not just_db:
-                self.__create_repo(repo_name)
+                self.__create_repo(repo_name, form_data['repo_type'])
         except:
             log.error(traceback.format_exc())
             self.sa.rollback()
@@ -182,13 +182,13 @@ class RepoModel(object):
             self.sa.rollback()
             raise
 
-    def __create_repo(self, repo_name):
+    def __create_repo(self, repo_name, alias):
         from rhodecode.lib.utils import check_repo
         repo_path = os.path.join(g.base_path, repo_name)
         if check_repo(repo_name, g.base_path):
             log.info('creating repo %s in %s', repo_name, repo_path)
-            from vcs.backends.hg import MercurialRepository
-            MercurialRepository(repo_path, create=True)
+            backend = get_backend(alias)
+            backend(repo_path, create=True)
 
     def __rename_repo(self, old, new):
         log.info('renaming repo from %s to %s', old, new)

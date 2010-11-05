@@ -151,7 +151,7 @@ class SettingsController(BaseController):
     def fork_create(self, repo_name):
         repo_model = RepoModel()
         c.repo_info = repo_model.get(repo_name)
-        _form = RepoForkForm()()
+        _form = RepoForkForm(old_data={'repo_type':c.repo_info.repo_type})()
         form_result = {}
         try:
             form_result = _form.to_python(dict(request.POST))

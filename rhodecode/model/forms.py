@@ -30,6 +30,7 @@ from rhodecode.model.user import UserModel
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.db import User
 from webhelpers.pylonslib.secure_form import authentication_token
+from vcs import BACKENDS
 import formencode
 import logging
 import os
@@ -146,6 +147,15 @@ def ValidRepoName(edit, old_data):
 
 
     return _ValidRepoName
+
+def ValidForkType(old_data):
+    class _ValidForkType(formencode.validators.FancyValidator):
+
+        def to_python(self, value, state):
+            if old_data['repo_type'] != value:
+                raise formencode.Invalid(_('Fork have to be the same type as original'), value, state)
+            return value
+    return _ValidForkType
 
 class ValidPerms(formencode.validators.FancyValidator):
     messages = {'perm_new_user_name':_('This username is not valid')}
@@ -292,7 +302,7 @@ def RepoForm(edit=False, old_data={}):
         repo_name = All(UnicodeString(strip=True, min=1, not_empty=True), ValidRepoName(edit, old_data))
         description = UnicodeString(strip=True, min=1, not_empty=True)
         private = StringBoolean(if_missing=False)
-
+        repo_type = OneOf(BACKENDS.keys())
         if edit:
             user = All(Int(not_empty=True), ValidRepoUser)
 
@@ -306,7 +316,7 @@ def RepoForkForm(edit=False, old_data={}):
         fork_name = All(UnicodeString(strip=True, min=1, not_empty=True), ValidRepoName(edit, old_data))
         description = UnicodeString(strip=True, min=1, not_empty=True)
         private = StringBoolean(if_missing=False)
-
+        repo_type = All(ValidForkType(old_data), OneOf(BACKENDS.keys()))
     return _RepoForkForm
 
 def RepoSettingsForm(edit=False, old_data={}):

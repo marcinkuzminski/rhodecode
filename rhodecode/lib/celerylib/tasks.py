@@ -289,18 +289,20 @@ def send_email(recipients, subject, body):
 
 @task
 def create_repo_fork(form_data, cur_user):
-    import os
     from rhodecode.model.repo import RepoModel
-
+    from vcs import get_backend
+    log = create_repo_fork.get_logger()
     repo_model = RepoModel(get_session())
     repo_model.create(form_data, cur_user, just_db=True, fork=True)
-
-    repos_path = get_hg_ui_settings()['paths_root_path'].replace('*', '')
-    repo_path = os.path.join(repos_path, form_data['repo_name'])
+    repo_name = form_data['repo_name']
+    repos_path = get_hg_ui_settings()['paths_root_path']
+    repo_path = os.path.join(repos_path, repo_name)
     repo_fork_path = os.path.join(repos_path, form_data['fork_name'])
+    alias = form_data['repo_type']
 
-    MercurialRepository(str(repo_fork_path), True, clone_url=str(repo_path))
-
+    log.info('creating repo fork %s as %s', repo_name, repo_path)
+    backend = get_backend(alias)
+    backend(str(repo_fork_path), create=True, src_url=str(repo_path))
 
 def __get_codes_stats(repo_name):
     LANGUAGES_EXTENSIONS = ['action', 'adp', 'ashx', 'asmx',

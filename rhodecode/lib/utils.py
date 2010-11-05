@@ -345,8 +345,9 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False):
             form_data = {
                          'repo_name':name,
                          'repo_type':repo.alias,
-                         'description':repo.description if repo.description != 'unknown' else \
-                                        'auto description for %s' % name,
+                         'description':repo.description \
+                            if repo.description != 'unknown' else \
+                                        '%s repository' % name,
                          'private':False
                          }
             rm.create(form_data, user, just_db=True)
