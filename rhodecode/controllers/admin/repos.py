@@ -137,6 +137,9 @@ class ReposController(BaseController):
             h.flash(_('Repository %s updated succesfully' % repo_name),
                     category='success')
             changed_name = form_result['repo_name']
+            action_logger(self.rhodecode_user, 'admin_updated_repo',
+                              changed_name, '', self.sa)
+
         except formencode.Invalid, errors:
             c.repo_info = repo_model.get(repo_name)
             c.users_array = repo_model.get_users_js()

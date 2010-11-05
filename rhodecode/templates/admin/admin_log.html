@@ -3,8 +3,8 @@
 <table>
 	<tr>
 		<th class="left">${_('Username')}</th>
-		<th class="left">${_('Repository')}</th>
 		<th class="left">${_('Action')}</th>
+		<th class="left">${_('Repository')}</th>
 		<th class="left">${_('Date')}</th>
 		<th class="left">${_('From IP')}</th>
 	</tr>
@@ -12,6 +12,7 @@
 	%for cnt,l in enumerate(c.users_log):
 	<tr class="parity${cnt%2}">
 		<td>${h.link_to(l.user.username,h.url('edit_user', id=l.user.user_id))}</td>
+		<td>${h.action_parser(l)}</td>
 		<td>
 		%if l.repository:
 		  ${h.link_to(l.repository.repo_name,h.url('summary_home',repo_name=l.repository.repo_name))}
@@ -19,14 +20,7 @@
 		  ${l.repository_name}
 		%endif
 		</td>
-		<td>
-		% if l.action == 'push' and l.revision:
-		  ${h.link_to('%s - %s' % (l.action,l.revision),
-		  h.url('changeset_home',repo_name=l.repository.repo_name,revision=l.revision))}
-		%else:
-		  ${l.action}
-		%endif
-		</td>
+		
 		<td>${l.action_date}</td>
 		<td>${l.user_ip}</td>
 	</tr>
