@@ -138,6 +138,17 @@ class DbManage(object):
         hooks2.ui_section = 'hooks'
         hooks2.ui_key = 'changegroup.repo_size'
         hooks2.ui_value = 'python:rhodecode.lib.hooks.repo_size'
+        
+        hooks3 = RhodeCodeUi()
+        hooks3.ui_section = 'hooks'
+        hooks3.ui_key = 'pretxnchangegroup.push_logger'
+        hooks3.ui_value = 'python:rhodecode.lib.hooks.log_push_action'
+        
+        hooks4 = RhodeCodeUi()
+        hooks4.ui_section = 'hooks'
+        hooks4.ui_key = 'preoutgoing.pull_logger'
+        hooks4.ui_value = 'python:rhodecode.lib.hooks.log_pull_action'
+        
 
         web1 = RhodeCodeUi()
         web1.ui_section = 'web'
@@ -177,6 +188,8 @@ class DbManage(object):
         try:
             self.sa.add(hooks1)
             self.sa.add(hooks2)
+            self.sa.add(hooks3)
+            self.sa.add(hooks4)
             self.sa.add(web1)
             self.sa.add(web2)
             self.sa.add(web3)

@@ -1,9 +1,6 @@
-from rhodecode.model.meta import Base
-from sqlalchemy import *
-from sqlalchemy.orm import relation, backref
-from sqlalchemy.orm.session import Session
-from vcs.utils.lazy import LazyProperty
-import logging
+from rhodecode.model.meta import Base from sqlalchemy import * from
+sqlalchemy.orm import relation, backref from sqlalchemy.orm.session import
+Session from vcs.utils.lazy import LazyProperty import logging
 
 log = logging.getLogger(__name__)
 
@@ -71,7 +68,6 @@ class UserLog(Base):
     user_ip = Column("user_ip", TEXT(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     action = Column("action", TEXT(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     action_date = Column("action_date", DATETIME(timezone=False), nullable=True, unique=None, default=None)
-    revision = Column('revision', TEXT(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
 
     user = relation('User')
     repository = relation('Repository')
