@@ -1,7 +1,9 @@
-from rhodecode.model.meta import Base from sqlalchemy import * from
-sqlalchemy.orm import relation, backref from sqlalchemy.orm.session import
-Session from vcs.utils.lazy import LazyProperty import logging
-
+from rhodecode.model.meta import Base
+from sqlalchemy import *
+from sqlalchemy.orm import relation, backref
+from sqlalchemy.orm.session import Session
+from vcs.utils.lazy import LazyProperty
+import logging
 log = logging.getLogger(__name__)
 
 class RhodeCodeSettings(Base):
