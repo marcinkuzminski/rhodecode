@@ -63,14 +63,12 @@ from dulwich.web import HTTPGitApplication
 from paste.auth.basic import AuthBasicAuthenticator
 from paste.httpheaders import REMOTE_USER, AUTH_TYPE
 from rhodecode.lib.auth import authfunc, HasPermissionAnyMiddleware
-from rhodecode.lib.utils import action_logger, is_git, invalidate_cache, \
-    check_repo_fast
+from rhodecode.lib.utils import is_git, invalidate_cache, check_repo_fast
 from rhodecode.model.user import UserModel
 from webob.exc import HTTPNotFound, HTTPForbidden, HTTPInternalServerError
 import logging
 import os
 import traceback
-
 
 log = logging.getLogger(__name__)
 
@@ -81,11 +79,19 @@ class SimpleGit(object):
         self.config = config
         #authenticate this git request using 
         self.authenticate = AuthBasicAuthenticator('', authfunc)
-
+        self.ipaddr = '0.0.0.0'
+        self.repository = None
+        self.username = None
+        self.action = None
+        
     def __call__(self, environ, start_response):
         if not is_git(environ):
             return self.application(environ, start_response)
-
+        
+        proxy_key = 'HTTP_X_REAL_IP'
+        def_key = 'REMOTE_ADDR'
+        self.ipaddr = environ.get(proxy_key, environ.get(def_key, '0.0.0.0'))
+        
         #===================================================================
         # AUTHENTICATE THIS GIT REQUEST
         #===================================================================
@@ -98,11 +104,15 @@ class SimpleGit(object):
                 REMOTE_USER.update(environ, result)
             else:
                 return result.wsgi_application(environ, start_response)
-
+            
+        #=======================================================================
+        # GET REPOSITORY
+        #=======================================================================
         try:
-            self.repo_name = environ['PATH_INFO'].split('/')[1]
-            if self.repo_name.endswith('/'):
-                self.repo_name = self.repo_name.rstrip('/')
+            repo_name = '/'.join(environ['PATH_INFO'].split('/')[1:])
+            if repo_name.endswith('/'):
+                repo_name = repo_name.rstrip('/')
+            self.repository = repo_name
         except:
             log.error(traceback.format_exc())
             return HTTPInternalServerError()(environ, start_response)
@@ -110,20 +120,21 @@ class SimpleGit(object):
         #===================================================================
         # CHECK PERMISSIONS FOR THIS REQUEST
         #===================================================================
-        action = self.__get_action(environ)
-        if action:
+        self.action = self.__get_action(environ)
+        if self.action:
             username = self.__get_environ_user(environ)
             try:
                 user = self.__get_user(username)
+                self.username = user.username
             except:
                 log.error(traceback.format_exc())
                 return HTTPInternalServerError()(environ, start_response)
 
             #check permissions for this repository
-            if action == 'push':
+            if self.action == 'push':
                 if not HasPermissionAnyMiddleware('repository.write',
                                                   'repository.admin')\
-                                                    (user, self.repo_name):
+                                                    (user, repo_name):
                     return HTTPForbidden()(environ, start_response)
 
             else:
@@ -131,15 +142,13 @@ class SimpleGit(object):
                 if not HasPermissionAnyMiddleware('repository.read',
                                                   'repository.write',
                                                   'repository.admin')\
-                                                    (user, self.repo_name):
+                                                    (user, repo_name):
                     return HTTPForbidden()(environ, start_response)
 
-            #log action
-            if action in ('push', 'pull', 'clone'):
-                proxy_key = 'HTTP_X_REAL_IP'
-                def_key = 'REMOTE_ADDR'
-                ipaddr = environ.get(proxy_key, environ.get(def_key, '0.0.0.0'))
-                self.__log_user_action(user, action, self.repo_name, ipaddr)
+        self.extras = {'ip':self.ipaddr,
+                       'username':self.username,
+                       'action':self.action,
+                       'repository':self.repository}
 
         #===================================================================
         # GIT REQUEST HANDLING
@@ -156,7 +165,7 @@ class SimpleGit(object):
             return HTTPInternalServerError()(environ, start_response)
 
         #invalidate cache on push
-        if action == 'push':
+        if self.action == 'push':
             self.__invalidate_cache(self.repo_name)
             messages = []
             messages.append('thank you for using rhodecode')
@@ -192,9 +201,6 @@ class SimpleGit(object):
             return mapping.get(service_cmd, service_cmd if service_cmd else 'other')
         else:
             return 'other'
-
-    def __log_user_action(self, user, action, repo, ipaddr):
-        action_logger(user, action, repo, ipaddr)
 
     def __invalidate_cache(self, repo_name):
         """we know that some change was made to repositories and we should

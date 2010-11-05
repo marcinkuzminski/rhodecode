@@ -35,7 +35,6 @@ from rhodecode.lib.utils import is_mercurial, make_ui, invalidate_cache, \
     check_repo_fast, ui_sections
 from rhodecode.model.user import UserModel
 from webob.exc import HTTPNotFound, HTTPForbidden, HTTPInternalServerError
-from rhodecode.lib.utils import action_logger
 import logging
 import os
 import traceback
@@ -120,7 +119,7 @@ class SimpleHg(object):
                        'username':self.username,
                        'action':self.action,
                        'repository':self.repository}
-        print self.extras
+
         #===================================================================
         # MERCURIAL REQUEST HANDLING
         #===================================================================
