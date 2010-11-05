@@ -328,25 +328,25 @@ from mercurial.templatefilters import person as _person
 
 def _age(curdate):
     """turns a datetime into an age string."""
+    
     if not curdate:
         return ''
 
     from datetime import timedelta, datetime
 
     agescales = [("year", 3600 * 24 * 365),
-             ("month", 3600 * 24 * 30),
-             #("week", 3600 * 24 * 7),
-             ("day", 3600 * 24),
-             ("hour", 3600),
-             ("minute", 60),
-             ("second", 1)]
+                 ("month", 3600 * 24 * 30),
+                 ("day", 3600 * 24),
+                 ("hour", 3600),
+                 ("minute", 60),
+                 ("second", 1), ]
 
     age = datetime.now() - curdate
     age_seconds = (age.days * agescales[2][1]) + age.seconds
-
     pos = 1
     for scale in agescales:
         if scale[1] <= age_seconds:
+            if pos == 6:pos = 5
             return time_ago_in_words(curdate, agescales[pos][0])
         pos += 1
 
