@@ -348,6 +348,8 @@ def ApplicationUiSettingsForm():
         paths_root_path = All(ValidPath(), UnicodeString(strip=True, min=1, not_empty=True))
         hooks_changegroup_update = OneOf(['True', 'False'], if_missing=False)
         hooks_changegroup_repo_size = OneOf(['True', 'False'], if_missing=False)
+        hooks_pretxnchangegroup_push_logger = OneOf(['True', 'False'], if_missing=False)
+        hooks_preoutgoing_pull_logger = OneOf(['True', 'False'], if_missing=False)
 
     return _ApplicationUiSettingsForm
 

@@ -10,6 +10,8 @@ Changelog
 - performance upgrade for cached repos list
 - gui optimizations
 - main page quick filter for filtering repositories
+- more detailed action logger (based on hooks) with pushed changesets lists
+- a lot of fixes for file browser
 
 1.0.0 (**2010-11-02**)
 ----------------------

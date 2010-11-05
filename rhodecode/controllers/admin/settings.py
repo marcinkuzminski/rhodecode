@@ -173,13 +173,21 @@ class SettingsController(BaseController):
                     .filter(RhodeCodeUi.ui_key == 'changegroup.repo_size').one()
                     hgsettings4.ui_active = bool(form_result['hooks_changegroup_repo_size'])
 
+                    hgsettings5 = self.sa.query(RhodeCodeUi)\
+                    .filter(RhodeCodeUi.ui_key == 'pretxnchangegroup.push_logger').one()
+                    hgsettings5.ui_active = bool(form_result['hooks_pretxnchangegroup_push_logger'])
 
+                    hgsettings6 = self.sa.query(RhodeCodeUi)\
+                    .filter(RhodeCodeUi.ui_key == 'preoutgoing.pull_logger').one()
+                    hgsettings6.ui_active = bool(form_result['hooks_preoutgoing_pull_logger'])
 
 
                     self.sa.add(hgsettings1)
                     self.sa.add(hgsettings2)
                     self.sa.add(hgsettings3)
                     self.sa.add(hgsettings4)
+                    self.sa.add(hgsettings5)
+                    self.sa.add(hgsettings6)
                     self.sa.commit()
 
                     h.flash(_('Updated mercurial settings'),

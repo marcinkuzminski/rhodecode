@@ -24,6 +24,9 @@ Then make sure You run from the installation directory
 This will display any changes made from new version of RhodeCode To your
 current config. And tries to do an automerge.
 
+It's also good to rebuild the whoosh index since after upgrading the whoosh 
+versionthere could be introduced incompatible index changes
+
 
 .. _virtualenv: http://pypi.python.org/pypi/virtualenv  
 .. _python: http://www.python.org/
