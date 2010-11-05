@@ -22,12 +22,12 @@ Created on Aug 6, 2010
 
 @author: marcink
 """
-
-import sys
-import os
+from mercurial.cmdutil import revrange
+from mercurial.node import nullrev
 from rhodecode.lib import helpers as h
-from rhodecode.model import meta
-from rhodecode.model.db import UserLog, User
+from rhodecode.lib.utils import action_logger
+import os
+import sys
 
 def repo_size(ui, repo, hooktype=None, **kwargs):
 
@@ -48,31 +48,52 @@ def repo_size(ui, repo, hooktype=None, **kwargs):
     sys.stdout.write('Repository size .hg:%s repo:%s total:%s\n' \
                      % (size_hg_f, size_root_f, size_total_f))
     
-    user_action_mapper(ui, repo, hooktype, **kwargs)
+def log_pull_action(ui, repo, **kwargs):
+    """
+    Logs user last pull action
+    :param ui:
+    :param repo:
+    """
+        
+    extra_params = dict(repo.ui.configitems('rhodecode_extras'))
+    username = extra_params['username']
+    repository = extra_params['repository']
+    action = 'pull'
+       
+    action_logger(username, action, repository, extra_params['ip'])
+    
+    return 0
 
-def user_action_mapper(ui, repo, hooktype=None, **kwargs):
+def log_push_action(ui, repo, **kwargs):
     """
     Maps user last push action to new changeset id, from mercurial
     :param ui:
     :param repo:
-    :param hooktype:
     """
     
-    try:
-        sa = meta.Session()
-        username = kwargs['url'].split(':')[-1]
-        user_log = sa.query(UserLog)\
-            .filter(UserLog.user == sa.query(User)\
-                                    .filter(User.username == username).one())\
-            .order_by(UserLog.user_log_id.desc()).first()
+    extra_params = dict(repo.ui.configitems('rhodecode_extras'))
+    username = extra_params['username']
+    repository = extra_params['repository']
+    action = 'push:%s'
+    node = kwargs['node']
+    
+    def get_revs(repo, rev_opt):
+        if rev_opt:
+            revs = revrange(repo, rev_opt)
+            
+            if len(revs) == 0:
+                return (nullrev, nullrev)
+            return (max(revs), min(revs))
+        else:
+            return (len(repo) - 1, 0)
+    
+    stop, start = get_revs(repo, [node + ':'])
+    
+    revs = (str(repo[r]) for r in xrange(start, stop + 1))
+    
+    action = action % ','.join(revs)
         
-        if user_log and not user_log.revision:
-            user_log.revision = str(repo['tip'])
-            sa.add(user_log)
-            sa.commit()
-        
-    except Exception, e:
-        sa.rollback()
-        raise
-    finally:
-        meta.Session.remove()    
+    action_logger(username, action, repository, extra_params['ip'])
+    
+    return 0
+  

@@ -49,15 +49,24 @@ class SimpleHg(object):
         self.config = config
         #authenticate this mercurial request using 
         self.authenticate = AuthBasicAuthenticator('', authfunc)
-
+        self.ipaddr = '0.0.0.0'
+        self.repository = None
+        self.username = None
+        self.action = None
+        
     def __call__(self, environ, start_response):
         if not is_mercurial(environ):
             return self.application(environ, start_response)
-
+        
+        proxy_key = 'HTTP_X_REAL_IP'
+        def_key = 'REMOTE_ADDR'
+        self.ipaddr = environ.get(proxy_key, environ.get(def_key, '0.0.0.0'))
+        
         #===================================================================
         # AUTHENTICATE THIS MERCURIAL REQUEST
         #===================================================================
         username = REMOTE_USER(environ)
+        
         if not username:
             self.authenticate.realm = self.config['rhodecode_realm']
             result = self.authenticate(environ)
@@ -66,11 +75,15 @@ class SimpleHg(object):
                 REMOTE_USER.update(environ, result)
             else:
                 return result.wsgi_application(environ, start_response)
-
+            
+        #=======================================================================
+        # GET REPOSITORY
+        #=======================================================================
         try:
             repo_name = '/'.join(environ['PATH_INFO'].split('/')[1:])
             if repo_name.endswith('/'):
                 repo_name = repo_name.rstrip('/')
+            self.repository = repo_name
         except:
             log.error(traceback.format_exc())
             return HTTPInternalServerError()(environ, start_response)
@@ -78,17 +91,18 @@ class SimpleHg(object):
         #===================================================================
         # CHECK PERMISSIONS FOR THIS REQUEST
         #===================================================================
-        action = self.__get_action(environ)
-        if action:
+        self.action = self.__get_action(environ)
+        if self.action:
             username = self.__get_environ_user(environ)
             try:
                 user = self.__get_user(username)
+                self.username = user.username
             except:
                 log.error(traceback.format_exc())
                 return HTTPInternalServerError()(environ, start_response)
 
             #check permissions for this repository
-            if action == 'push':
+            if self.action == 'push':
                 if not HasPermissionAnyMiddleware('repository.write',
                                                   'repository.admin')\
                                                     (user, repo_name):
@@ -101,14 +115,12 @@ class SimpleHg(object):
                                                   'repository.admin')\
                                                     (user, repo_name):
                     return HTTPForbidden()(environ, start_response)
-
-            #log action
-            if action in ('push', 'pull', 'clone'):
-                proxy_key = 'HTTP_X_REAL_IP'
-                def_key = 'REMOTE_ADDR'
-                ipaddr = environ.get(proxy_key, environ.get(def_key, '0.0.0.0'))
-                self.__log_user_action(user, action, repo_name, ipaddr)
-
+                
+        self.extras = {'ip':self.ipaddr,
+                       'username':self.username,
+                       'action':self.action,
+                       'repository':self.repository}
+        print self.extras
         #===================================================================
         # MERCURIAL REQUEST HANDLING
         #===================================================================
@@ -130,7 +142,7 @@ class SimpleHg(object):
             return HTTPInternalServerError()(environ, start_response)
 
         #invalidate cache on push
-        if action == 'push':
+        if self.action == 'push':
             self.__invalidate_cache(repo_name)
             messages = []
             messages.append('thank you for using rhodecode')
@@ -157,7 +169,7 @@ class SimpleHg(object):
 
     def __make_app(self):
         hgserve = hgweb(str(self.repo_path), baseui=self.baseui)
-        return  self.__load_web_settings(hgserve)
+        return  self.__load_web_settings(hgserve, self.extras)
 
     def __get_environ_user(self, environ):
         return environ.get('REMOTE_USER')
@@ -174,7 +186,7 @@ class SimpleHg(object):
         mapping = {'changegroup': 'pull',
                    'changegroupsubset': 'pull',
                    'stream_out': 'pull',
-                   #'listkeys': 'pull',
+                   'listkeys': 'pull',
                    'unbundle': 'push',
                    'pushkey': 'push', }
         for qry in environ['QUERY_STRING'].split('&'):
@@ -185,9 +197,6 @@ class SimpleHg(object):
                 else:
                     return cmd
 
-    def __log_user_action(self, user, action, repo, ipaddr):
-        action_logger(user, action, repo, ipaddr)
-
     def __invalidate_cache(self, repo_name):
         """we know that some change was made to repositories and we should
         invalidate the cache to see the changes right away but only for
@@ -196,20 +205,25 @@ class SimpleHg(object):
         invalidate_cache('full_changelog', repo_name)
 
 
-    def __load_web_settings(self, hgserve):
+    def __load_web_settings(self, hgserve, extras={}):
         #set the global ui for hgserve instance passed
         hgserve.repo.ui = self.baseui
 
         hgrc = os.path.join(self.repo_path, '.hg', 'hgrc')
+    
+        #inject some additional parameters that will be available in ui
+        #for hooks
+        for k, v in extras.items():
+            hgserve.repo.ui.setconfig('rhodecode_extras', k, v)
+        
         repoui = make_ui('file', hgrc, False)
-
 
         if repoui:
             #overwrite our ui instance with the section from hgrc file
             for section in ui_sections:
                 for k, v in repoui.configitems(section):
                     hgserve.repo.ui.setconfig(section, k, v)
-
+            
         return hgserve
 
 

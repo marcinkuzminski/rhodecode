@@ -35,6 +35,7 @@ from vcs.backends.base import BaseChangeset
 from vcs.backends.git import GitRepository
 from vcs.backends.hg import MercurialRepository
 from vcs.utils.lazy import LazyProperty
+import traceback
 import datetime
 import logging
 import os
@@ -77,15 +78,15 @@ def action_logger(user, action, repo, ipaddr, sa=None):
 
     try:
         if hasattr(user, 'user_id'):
-            user_id = user.user_id
+            user_obj = user
         elif isinstance(user, basestring):
-            user_id = UserModel(sa).get_by_username(user, cache=False).user_id
+            user_obj = UserModel(sa).get_by_username(user, cache=False)
         else:
             raise Exception('You have to provide user object or username')
 
         repo_name = repo.lstrip('/')
         user_log = UserLog()
-        user_log.user_id = user_id
+        user_log.user_id = user_obj.user_id
         user_log.action = action
         user_log.repository_name = repo_name
         user_log.repository = RepoModel(sa).get(repo_name, cache=False)
@@ -95,10 +96,10 @@ def action_logger(user, action, repo, ipaddr, sa=None):
         sa.commit()
 
         log.info('Adding user %s, action %s on %s',
-                                        user.username, action, repo)
-    except Exception, e:
+                                        user_obj.username, action, repo)
+    except:
+        log.error(traceback.format_exc())
         sa.rollback()
-        log.error('could not log user action:%s', str(e))
 
 def get_repos(path, recursive=False, initial=False):
     """
