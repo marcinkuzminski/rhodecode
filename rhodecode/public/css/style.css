@@ -1542,7 +1542,7 @@ background:#F88;
 
 .right .merge {
 vertical-align:top;
-font-size:60%;
+font-size:0.75em;
 font-weight:700;
 }
 
@@ -1554,13 +1554,15 @@ font-family:monospace;
 .right .logtags .branchtag {
 background:#FFF url("../images/icons/arrow_branch.png") no-repeat right 6px;
 display:block;
-padding:8px 16px 0 0;
+font-size:0.8em;
+padding:11px 16px 0 0;
 }
 
 .right .logtags .tagtag {
 background:#FFF url("../images/icons/tag_blue.png") no-repeat right 6px;
 display:block;
-padding:6px 18px 0 0;
+font-size:0.8em;
+padding:11px 16px 0 0;
 }
 
 div.browserblock {

@@ -111,6 +111,7 @@ class RepoModel(object):
     def create(self, form_data, cur_user, just_db=False, fork=False):
         try:
             if fork:
+                #force str since hg doesn't go with unicode
                 repo_name = str(form_data['fork_name'])
                 org_name = str(form_data['repo_name'])
 

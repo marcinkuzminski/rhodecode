@@ -342,14 +342,9 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False):
         if not rm.get(name, cache=False):
             log.info('repository %s not found creating default', name)
 
-            if isinstance(repo, MercurialRepository):
-                repo_type = 'hg'
-            if isinstance(repo, GitRepository):
-                repo_type = 'git'
-
             form_data = {
                          'repo_name':name,
-                         'repo_type':repo_type,
+                         'repo_type':repo.alias,
                          'description':repo.description if repo.description != 'unknown' else \
                                         'auto description for %s' % name,
                          'private':False

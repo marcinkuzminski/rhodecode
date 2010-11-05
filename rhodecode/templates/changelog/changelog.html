@@ -58,9 +58,12 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
 						</div>	
 						<div class="right">
 									<div class="changes">
-										<span class="removed" title="${_('removed')}">${len(cs.removed)}</span>
-										<span class="changed" title="${_('changed')}">${len(cs.changed)}</span>
-										<span class="added" title="${_('added')}">${len(cs.added)}</span>
+										<span class="removed" title="${_('removed')}: ${' | '.join([x.name for x in cs.removed])}">
+										${len(cs.removed)}</span>
+										<span class="changed" title="${_('changed')}: ${' | '.join([x.name for x in cs.changed])}">
+										${len(cs.changed)}</span>
+										<span class="added" title="${_('added')}: ${' | '.join([x.name for x in cs.added])}">
+										${len(cs.added)}</span>
 									</div>					
 										%if len(cs.parents)>1:
 										<div class="merge">
