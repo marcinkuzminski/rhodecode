@@ -9,7 +9,7 @@
     &raquo;
     ${h.link_to(c.repo_name,h.url('summary_home',repo_name=c.repo_name))}
     &raquo;
-    ${_('annotate')} @ R${c.rev_nr}:${c.cur_rev}
+    ${_('annotate')} @ R${c.cs.revision}:${h.short_id(c.cs.raw_id)}
 </%def>
 
 <%def name="page_nav()">
@@ -20,13 +20,18 @@
     <!-- box / title -->
     <div class="title">
         ${self.breadcrumbs()}
+        <ul class="links">
+            <li>
+              <span style="text-transform: uppercase;"><a href="#">${_('branch')}: ${c.cs.branch}</a></span>
+            </li>          
+        </ul>          
     </div>
     <div class="table">
 		<div id="files_data">
-			<h3 class="files_location">${_('Location')}: ${h.files_breadcrumbs(c.repo_name,c.cur_rev,c.file.path)}</h3>
+			<h3 class="files_location">${_('Location')}: ${h.files_breadcrumbs(c.repo_name,c.cs.revision,c.file.path)}</h3>
 			<dl class="overview">
 				<dt>${_('Last revision')}</dt>
-				<dd>${h.link_to("r%s:%s" % (c.file.last_changeset.revision,c.file.last_changeset.raw_id),
+				<dd>${h.link_to("r%s:%s" % (c.file.last_changeset.revision,h.short_id(c.file.last_changeset.raw_id)),
 						h.url('files_annotate_home',repo_name=c.repo_name,revision=c.file.last_changeset.raw_id,f_path=c.f_path))} </dd>
 				<dt>${_('Size')}</dt>
 				<dd>${h.format_byte_size(c.file.size,binary=True)}</dd>
@@ -34,24 +39,35 @@
 				<dd>${c.file.mimetype}</dd>				
 				<dt>${_('Options')}</dt>
 				<dd>${h.link_to(_('show source'),
-						h.url('files_home',repo_name=c.repo_name,revision=c.cur_rev,f_path=c.f_path))}  
+						h.url('files_home',repo_name=c.repo_name,revision=c.cs.revision,f_path=c.f_path))}  
 					/ ${h.link_to(_('show as raw'),
-						h.url('files_raw_home',repo_name=c.repo_name,revision=c.cur_rev,f_path=c.f_path))}
+						h.url('files_raw_home',repo_name=c.repo_name,revision=c.cs.revision,f_path=c.f_path))}
 					/ ${h.link_to(_('download as raw'),
-						h.url('files_rawfile_home',repo_name=c.repo_name,revision=c.cur_rev,f_path=c.f_path))}
-				</dd>				
+						h.url('files_rawfile_home',repo_name=c.repo_name,revision=c.cs.revision,f_path=c.f_path))}
+				</dd>
+			    <dt>${_('History')}</dt>
+			    <dd>
+			        <div>
+			        ${h.form(h.url('files_diff_home',repo_name=c.repo_name,f_path=c.f_path),method='get')}
+			        ${h.hidden('diff2',c.file.last_changeset.raw_id)}
+			        ${h.select('diff1',c.file.last_changeset.raw_id,c.file_history)}
+			        ${h.submit('diff','diff to revision',class_="ui-button ui-widget ui-state-default ui-corner-all")}
+			        ${h.submit('show_rev','show at revision',class_="ui-button ui-widget ui-state-default ui-corner-all")}
+			        ${h.end_form()}
+			        </div>
+			    </dd>					
 			</dl>
 			<div id="body" class="codeblock">
 				<div class="code-header">
-					<div class="revision">${c.file.name}@r${c.file.last_changeset.revision}:${c.file.last_changeset.raw_id}</div>
-					<div class="commit">"${c.file_msg}"</div>
+					<div class="revision">${c.file.name}@r${c.file.last_changeset.revision}:${h.short_id(c.file.last_changeset.raw_id)}</div>
+					<div class="commit">"${c.file.message}"</div>
 				</div>
 				<div class="code-body">
 					% if c.file.size < c.file_size_limit:
 						${h.pygmentize_annotation(c.file,linenos=True,anchorlinenos=True,lineanchors='S',cssclass="code-highlight")}
 					%else:
 						${_('File is to big to display')} ${h.link_to(_('show as raw'),
-						h.url('files_raw_home',repo_name=c.repo_name,revision=c.cur_rev,f_path=c.f_path))}
+						h.url('files_raw_home',repo_name=c.repo_name,revision=c.cs.revision,f_path=c.f_path))}
 					%endif				
 				</div>
 			</div>
