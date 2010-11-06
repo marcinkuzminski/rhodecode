@@ -88,7 +88,9 @@ def get_hg_ui_settings():
 def whoosh_index(repo_location, full_index):
     log = whoosh_index.get_logger()
     from rhodecode.lib.indexers.daemon import WhooshIndexingDaemon
-    WhooshIndexingDaemon(repo_location=repo_location).run(full_index=full_index)
+    index_location = ''
+    WhooshIndexingDaemon(index_location=index_location,
+                         repo_location=repo_location).run(full_index=full_index)
 
 @task
 @locked_task

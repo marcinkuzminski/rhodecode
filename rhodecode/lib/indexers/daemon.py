@@ -61,10 +61,6 @@ ch.setFormatter(formatter)
 # add ch to logger
 log.addHandler(ch)
 
-def get_repos_location():
-    return HgModel.get_repos_location()
-
-
 class WhooshIndexingDaemon(object):
     """
     Deamon for atomic jobs

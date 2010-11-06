@@ -50,7 +50,7 @@ class FilesController(BaseController):
 
     def index(self, repo_name, revision, f_path):
         hg_model = HgModel()
-        c.repo = repo = hg_model.get_repo(c.repo_name)
+        c.repo = hg_model.get_repo(c.repo_name)
         revision = request.POST.get('at_rev', None) or revision
 
         def get_next_rev(cur):
@@ -68,10 +68,10 @@ class FilesController(BaseController):
 
 
         try:
-            c.changeset = repo.get_changeset(revision)
+            c.changeset = c.repo.get_changeset(revision)
             cur_rev = c.changeset.revision
-            prev_rev = repo.get_changeset(get_prev_rev(cur_rev)).raw_id
-            next_rev = repo.get_changeset(get_next_rev(cur_rev)).raw_id
+            prev_rev = c.repo.get_changeset(get_prev_rev(cur_rev)).raw_id
+            next_rev = c.repo.get_changeset(get_next_rev(cur_rev)).raw_id
 
             c.url_prev = url('files_home', repo_name=c.repo_name,
                              revision=prev_rev, f_path=f_path)
@@ -80,7 +80,7 @@ class FilesController(BaseController):
 
             try:
                 c.files_list = c.changeset.get_node(f_path)
-                c.file_history = self._get_history(repo, c.files_list, f_path)
+                c.file_history = self._get_history(c.repo, c.files_list, f_path)
 
             except RepositoryError, e:
                 h.flash(str(e), category='warning')
@@ -114,11 +114,10 @@ class FilesController(BaseController):
     def annotate(self, repo_name, revision, f_path):
         hg_model = HgModel()
         c.repo = hg_model.get_repo(c.repo_name)
-        cs = c.repo.get_changeset(revision)
-        c.file = cs.get_node(f_path)
-        c.file_msg = cs.get_file_message(f_path)
-        c.cur_rev = cs.raw_id
-        c.rev_nr = cs.revision
+        c.cs = c.repo.get_changeset(revision)
+        c.file = c.cs.get_node(f_path)
+        c.file_history = self._get_history(c.repo, c.file, f_path)
+
         c.f_path = f_path
 
         return render('files/files_annotate.html')
@@ -191,7 +190,7 @@ class FilesController(BaseController):
         elif c.action == 'raw':
             response.content_type = 'text/plain'
             return diff.raw_diff()
-            
+
         elif c.action == 'diff':
             if node1.size > c.file_size_limit or node2.size > c.file_size_limit:
                 c.cur_diff = _('Diff is to big to display')
