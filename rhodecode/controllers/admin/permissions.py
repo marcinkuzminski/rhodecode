@@ -143,7 +143,7 @@ class PermissionsController(BaseController):
 
         if id == 'default':
             defaults = {'_method':'put'}
-            for p in UserModel().get_default().user_perms:
+            for p in UserModel().get_by_username('default').user_perms:
                 if p.permission.permission_name.startswith('repository.'):
                     defaults['default_perm'] = p.permission.permission_name
 
