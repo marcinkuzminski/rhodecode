@@ -94,7 +94,7 @@ class _ToolTip(object):
                 var tts = YAHOO.util.Dom.getElementsByClassName('tooltip');
                 
                 for (var i = 0; i < tts.length; i++) {
-                    //if element doesn not have and id autgenerate one for tooltip
+                    //if element doesn't not have and id autgenerate one for tooltip
                     
                     if (!tts[i].id){
                         tts[i].id='tt'+i*100;
@@ -112,7 +112,7 @@ class _ToolTip(object):
                 showdelay:20,
             });
             
-            //Mouse Over event disabled for new repositories since they dont
+            //Mouse Over event disabled for new repositories since they don't
             //have last commit message
             myToolTips.contextMouseOverEvent.subscribe(
                 function(type, args) {
@@ -347,8 +347,10 @@ def _age(curdate):
     for scale in agescales:
         if scale[1] <= age_seconds:
             if pos == 6:pos = 5
-            return time_ago_in_words(curdate, agescales[pos][0])
+            return time_ago_in_words(curdate, agescales[pos][0]) + ' ' + _('ago')
         pos += 1
+
+    return _('just now')
 
 age = lambda  x:_age(x)
 capitalize = lambda x: x.capitalize()

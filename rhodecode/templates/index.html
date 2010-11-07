@@ -54,9 +54,9 @@
             </thead>
             <tbody>
 		    %for cnt,repo in enumerate(c.repos_list):
-		        %if h.HasRepoPermissionAny('repository.write','repository.read','repository.admin')(repo['name'],'main page check'):
 		        <tr class="parity${cnt%2}">
 		            <td>
+		            <div style="white-space: nowrap">
 		             ## TYPE OF REPO
 		             %if repo['repo'].dbrepo.repo_type =='hg':
 		               <img class="icon" title="${_('Mercurial repository')}" alt="${_('Mercurial repository')}" src="/images/icons/hgicon.png"/>
@@ -82,6 +82,7 @@
 		            	title="${_('Fork of')} ${repo['repo'].dbrepo.fork.repo_name}" 
 		            	src="/images/icons/arrow_divide.png"/></a>
 		            %endif
+		            </div>
 		            </td>
 		            ##DESCRIPTION
 		            <td><span class="tooltip" tooltip_title="${repo['description']}">
@@ -89,7 +90,8 @@
 		            </td>
 		            ##LAST CHANGE
 		            <td>
-		              <span>${repo['last_change']} - ${h.age(repo['last_change'])} </span>
+		              <span class="tooltip" tooltip_title="${h.age(repo['last_change'])}">
+		              ${repo['last_change']}</span>
 		            </td>
 		            <td>
 		            	%if repo['rev']>=0:
@@ -109,7 +111,6 @@
 		                <a title="${_('Subscribe to %s atom feed')%repo['name']}"  class="atom_icon" href="${h.url('atom_feed_home',repo_name=repo['name'])}"></a>
 		            </td>
 		        </tr>
-		        %endif
 		    %endfor
             </tbody>
             </table>
@@ -136,10 +137,10 @@
         F.filterTimeout = null;
     	
         var obsolete = [];
-        var nodes = S.query('div.table tr td a.repo_name');
+        var nodes = S.query('div.table tr td div a.repo_name');
         var req = D.get('q_filter').value;
         for (n in nodes){
-            D.setStyle(nodes[n].parentNode.parentNode,'display','')
+            D.setStyle(nodes[n].parentNode.parentNode.parentNode,'display','')
         }
         if (req){
 	        for (n in nodes){
@@ -149,7 +150,7 @@
 	    	}
 	        if(obsolete){
 		        for (n in obsolete){
-		        	D.setStyle(obsolete[n].parentNode.parentNode,'display','none');
+		        	D.setStyle(obsolete[n].parentNode.parentNode.parentNode,'display','none');
 		        }
 	        }
         }

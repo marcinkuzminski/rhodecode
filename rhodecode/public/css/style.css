@@ -259,7 +259,6 @@ background-position:0 -40px;
 #header #header-inner #logo h1 {
 color:#FFF;
 font-size:14px;
-text-transform:uppercase;
 margin:13px 0 0 13px;
 padding:0;
 }
@@ -419,7 +418,7 @@ padding:12px 9px 7px 24px;
 }
 
 #header #header-inner #quick li ul li a.repos,#header #header-inner #quick li ul li a.repos:hover {
-background:url("../images/icons/folder_edit.png") no-repeat scroll 4px 9px #FFF;
+background:url("../images/icons/database_edit.png") no-repeat scroll 4px 9px #FFF;
 width:167px;
 margin:0;
 padding:12px 9px 7px 24px;
@@ -1393,7 +1392,6 @@ background-color:#003367;
 color:#FFF;
 display:block;
 min-width:20px;
-max-width:400px;
 text-decoration:none;
 height:12px;
 margin-bottom:4px;

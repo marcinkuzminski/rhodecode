@@ -164,8 +164,8 @@ class RepoModel(object):
     def delete(self, repo):
         try:
             self.sa.delete(repo)
+            self.__delete_repo(repo)
             self.sa.commit()
-            self.__delete_repo(repo.repo_name)
         except:
             log.error(traceback.format_exc())
             self.sa.rollback()
@@ -200,11 +200,13 @@ class RepoModel(object):
                             new_path)
         shutil.move(old_path, new_path)
 
-    def __delete_repo(self, name):
-        rm_path = os.path.join(g.base_path, name)
+    def __delete_repo(self, repo):
+        rm_path = os.path.join(g.base_path, repo.repo_name)
         log.info("Removing %s", rm_path)
-        #disable hg 
-        shutil.move(os.path.join(rm_path, '.hg'), os.path.join(rm_path, 'rm__.hg'))
+        #disable hg/git
+        alias = repo.repo_type
+        shutil.move(os.path.join(rm_path, '.%s' % alias),
+                    os.path.join(rm_path, 'rm__.%s' % alias))
         #disable repo
         shutil.move(rm_path, os.path.join(g.base_path, 'rm__%s__%s' \
-                                          % (datetime.today(), name)))
+                                          % (datetime.today(), repo.repo_name)))
