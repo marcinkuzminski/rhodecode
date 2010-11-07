@@ -5,13 +5,16 @@ Changelog
 
 1.1.0 (**2010-XX-XX**)
 ----------------------
-- git support
+- git support with push/pull via RhodeCode web interface
 - rewrite of internals for vcs >=0.1.9
-- performance upgrade for cached repos list
-- gui optimizations
+- performance upgrade for cached repos list - each repository has it's own 
+  cache that's invalidated when needed.
 - main page quick filter for filtering repositories
 - more detailed action logger (based on hooks) with pushed changesets lists
-- a lot of fixes for file browser
+  and options to disable those hooks from admin panel
+- a lot of fixes and tweaks for file browser
+- introduced new enhanced changelog for merges that shows more accurate results
+- gui optimizations, fixed application width to 1024px
 
 1.0.0 (**2010-11-02**)
 ----------------------

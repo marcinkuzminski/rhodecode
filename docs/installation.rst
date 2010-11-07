@@ -30,10 +30,12 @@ It's very nice tutorial how to start celery_ with rabbitmq_
 
 Install from Cheese Shop
 ------------------------
+Rhodecode requires python 2.5 or 2.6 and will not run on older or newer
+versions of python. Python 2.7 is untested and thus not supported.
 
 Easiest way to install ``rhodecode`` is to run::
 
-   easy_install rhodecode
+ easy_install rhodecode
 
 Or::
 
