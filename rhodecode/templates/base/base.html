@@ -98,11 +98,12 @@
                     <span>&darr;</span>					
 					</a>
 					<ul class="repo_switcher">
-                        %for repo,private in c.repo_switcher_list:
-                          %if private:
-                             <li>${h.link_to(repo,h.url('summary_home',repo_name=repo),class_="private_repo")}</li>
+                        %for repo in c.cached_repo_list:
+                        
+                          %if repo['repo'].dbrepo.private:
+                             <li>${h.link_to(repo['repo'].name,h.url('summary_home',repo_name=repo['repo'].name),class_="private_repo %s" % repo['repo'].dbrepo.repo_type)}</li>
                           %else:
-                             <li>${h.link_to(repo,h.url('summary_home',repo_name=repo),class_="public_repo")}</li>
+                             <li>${h.link_to(repo['repo'].name,h.url('summary_home',repo_name=repo['repo'].name),class_="public_repo %s" % repo['repo'].dbrepo.repo_type)}</li>
                           %endif  
                         %endfor					
 					</ul>			

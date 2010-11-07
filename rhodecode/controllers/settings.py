@@ -78,7 +78,7 @@ class SettingsController(BaseController):
         try:
             form_result = _form.to_python(dict(request.POST))
             repo_model.update(repo_name, form_result)
-            invalidate_cache('cached_repo_list')
+            invalidate_cache('get_repo_cached_%s' % repo_name)
             h.flash(_('Repository %s updated successfully' % repo_name),
                     category='success')
             changed_name = form_result['repo_name']
@@ -96,7 +96,7 @@ class SettingsController(BaseController):
                 encoding="UTF-8")
         except Exception:
             log.error(traceback.format_exc())
-            h.flash(_('error occured during update of repository %s') \
+            h.flash(_('error occurred during update of repository %s') \
                     % repo_name, category='error')
 
         return redirect(url('repo_settings_home', repo_name=changed_name))
@@ -126,7 +126,7 @@ class SettingsController(BaseController):
             action_logger(self.rhodecode_user, 'user_deleted_repo',
                               repo_name, '', self.sa)
             repo_model.delete(repo)
-            invalidate_cache('cached_repo_list')
+            invalidate_cache('get_repo_cached_%s' % repo_name)
             h.flash(_('deleted repository %s') % repo_name, category='success')
         except Exception:
             h.flash(_('An error occurred during deletion of %s') % repo_name,

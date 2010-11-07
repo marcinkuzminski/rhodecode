@@ -74,7 +74,6 @@ class ReposController(BaseController):
         try:
             form_result = _form.to_python(dict(request.POST))
             repo_model.create(form_result, c.rhodecode_user)
-            invalidate_cache('cached_repo_list')
             h.flash(_('created repository %s') % form_result['repo_name'],
                     category='success')
 
@@ -133,7 +132,7 @@ class ReposController(BaseController):
         try:
             form_result = _form.to_python(dict(request.POST))
             repo_model.update(repo_name, form_result)
-            invalidate_cache('cached_repo_list')
+            invalidate_cache('get_repo_cached_%s' % repo_name)
             h.flash(_('Repository %s updated succesfully' % repo_name),
                     category='success')
             changed_name = form_result['repo_name']
@@ -182,7 +181,7 @@ class ReposController(BaseController):
             action_logger(self.rhodecode_user, 'admin_deleted_repo',
                               repo_name, '', self.sa)
             repo_model.delete(repo)
-            invalidate_cache('cached_repo_list')
+            invalidate_cache('get_repo_cached_%s' % repo_name)
             h.flash(_('deleted repository %s') % repo_name, category='success')
 
         except Exception, e:

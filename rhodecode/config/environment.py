@@ -6,7 +6,7 @@ from rhodecode.config.routing import make_map
 from rhodecode.lib.auth import set_available_permissions, set_base_path
 from rhodecode.lib.utils import repo2db_mapper, make_ui, set_rhodecode_config
 from rhodecode.model import init_model
-from rhodecode.model.hg import _get_repos_cached_initial
+from rhodecode.model.hg import HgModel
 from sqlalchemy import engine_from_config
 import logging
 import os
@@ -69,7 +69,8 @@ def load_environment(global_conf, app_conf, initial=False):
     #init baseui
     config['pylons.app_globals'].baseui = make_ui('db')
 
-    repo2db_mapper(_get_repos_cached_initial(config['pylons.app_globals'], initial))
+    g = config['pylons.app_globals']
+    repo2db_mapper(HgModel().repo_scan(g.paths[0][1], g.baseui, initial))
     set_available_permissions(config)
     set_base_path(config)
     set_rhodecode_config(config)

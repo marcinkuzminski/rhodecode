@@ -83,15 +83,15 @@ class SimpleGit(object):
         self.repository = None
         self.username = None
         self.action = None
-        
+
     def __call__(self, environ, start_response):
         if not is_git(environ):
             return self.application(environ, start_response)
-        
+
         proxy_key = 'HTTP_X_REAL_IP'
         def_key = 'REMOTE_ADDR'
         self.ipaddr = environ.get(proxy_key, environ.get(def_key, '0.0.0.0'))
-        
+
         #===================================================================
         # AUTHENTICATE THIS GIT REQUEST
         #===================================================================
@@ -104,7 +104,7 @@ class SimpleGit(object):
                 REMOTE_USER.update(environ, result)
             else:
                 return result.wsgi_application(environ, start_response)
-            
+
         #=======================================================================
         # GET REPOSITORY
         #=======================================================================
@@ -206,5 +206,4 @@ class SimpleGit(object):
         """we know that some change was made to repositories and we should
         invalidate the cache to see the changes right away but only for
         push requests"""
-        invalidate_cache('cached_repo_list')
-        invalidate_cache('full_changelog', repo_name)
+        invalidate_cache('get_repo_cached_%s' % repo_name)

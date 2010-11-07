@@ -52,20 +52,20 @@ class SimpleHg(object):
         self.repository = None
         self.username = None
         self.action = None
-        
+
     def __call__(self, environ, start_response):
         if not is_mercurial(environ):
             return self.application(environ, start_response)
-        
+
         proxy_key = 'HTTP_X_REAL_IP'
         def_key = 'REMOTE_ADDR'
         self.ipaddr = environ.get(proxy_key, environ.get(def_key, '0.0.0.0'))
-        
+
         #===================================================================
         # AUTHENTICATE THIS MERCURIAL REQUEST
         #===================================================================
         username = REMOTE_USER(environ)
-        
+
         if not username:
             self.authenticate.realm = self.config['rhodecode_realm']
             result = self.authenticate(environ)
@@ -74,7 +74,7 @@ class SimpleHg(object):
                 REMOTE_USER.update(environ, result)
             else:
                 return result.wsgi_application(environ, start_response)
-            
+
         #=======================================================================
         # GET REPOSITORY
         #=======================================================================
@@ -114,7 +114,7 @@ class SimpleHg(object):
                                                   'repository.admin')\
                                                     (user, repo_name):
                     return HTTPForbidden()(environ, start_response)
-                
+
         self.extras = {'ip':self.ipaddr,
                        'username':self.username,
                        'action':self.action,
@@ -200,8 +200,7 @@ class SimpleHg(object):
         """we know that some change was made to repositories and we should
         invalidate the cache to see the changes right away but only for
         push requests"""
-        invalidate_cache('cached_repo_list')
-        invalidate_cache('full_changelog', repo_name)
+        invalidate_cache('get_repo_cached_%s' % repo_name)
 
 
     def __load_web_settings(self, hgserve, extras={}):
@@ -209,12 +208,12 @@ class SimpleHg(object):
         hgserve.repo.ui = self.baseui
 
         hgrc = os.path.join(self.repo_path, '.hg', 'hgrc')
-    
+
         #inject some additional parameters that will be available in ui
         #for hooks
         for k, v in extras.items():
             hgserve.repo.ui.setconfig('rhodecode_extras', k, v)
-        
+
         repoui = make_ui('file', hgrc, False)
 
         if repoui:
@@ -222,7 +221,7 @@ class SimpleHg(object):
             for section in ui_sections:
                 for k, v in repoui.configitems(section):
                     hgserve.repo.ui.setconfig(section, k, v)
-            
+
         return hgserve
 
 

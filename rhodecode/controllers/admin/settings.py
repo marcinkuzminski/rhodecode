@@ -33,12 +33,13 @@ from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator, \
 from rhodecode.lib.base import BaseController, render
 from rhodecode.lib.utils import repo2db_mapper, invalidate_cache, \
     set_rhodecode_config, get_hg_settings, get_hg_ui_settings
-from rhodecode.model.db import RhodeCodeSettings, RhodeCodeUi
+from rhodecode.model.db import RhodeCodeSettings, RhodeCodeUi, Repository
 from rhodecode.model.forms import UserForm, ApplicationSettingsForm, \
     ApplicationUiSettingsForm
 from rhodecode.model.hg import HgModel
 from rhodecode.model.user import UserModel
 from rhodecode.lib.celerylib import tasks, run_task
+from sqlalchemy import func
 import formencode
 import logging
 import traceback
@@ -98,9 +99,12 @@ class SettingsController(BaseController):
             rm_obsolete = request.POST.get('destroy', False)
             log.debug('Rescanning directories with destroy=%s', rm_obsolete)
 
-            initial = HgModel.repo_scan(g.paths[0][0], g.paths[0][1], g.baseui)
+            initial = HgModel().repo_scan(g.paths[0][1], g.baseui)
+            for repo_name in initial.keys():
+                invalidate_cache('get_repo_cached_%s' % repo_name)
+
             repo2db_mapper(initial, rm_obsolete)
-            invalidate_cache('cached_repo_list')
+
             h.flash(_('Repositories successfully rescanned'), category='success')
 
         if setting_id == 'whoosh':
@@ -238,12 +242,14 @@ class SettingsController(BaseController):
         """
         GET /_admin/my_account Displays info about my account 
         """
+
         # url('admin_settings_my_account')
         c.user = UserModel(self.sa).get(c.rhodecode_user.user_id, cache=False)
-        c.user_repos = []
-        for repo in c.cached_repo_list.values():
-            if repo.dbrepo.user.username == c.user.username:
-                c.user_repos.append(repo)
+        all_repos = self.sa.query(Repository)\
+            .filter(Repository.user_id == c.user.user_id)\
+            .order_by(func.lower(Repository.repo_name))\
+            .all()
+        c.user_repos = HgModel().get_repos(all_repos)
 
         if c.user.username == 'default':
             h.flash(_("You can't edit this user since it's"

@@ -275,25 +275,11 @@ def set_rhodecode_config(config):
         config[k] = v
 
 def invalidate_cache(name, *args):
-    """Invalidates given name cache"""
-
-    from beaker.cache import region_invalidate
-    log.info('INVALIDATING CACHE FOR %s', name)
-
-    """propagate our arguments to make sure invalidation works. First
-    argument has to be the name of cached func name give to cache decorator
-    without that the invalidation would not work"""
-    tmp = [name]
-    tmp.extend(args)
-    args = tuple(tmp)
-
-    if name == 'cached_repo_list':
-        from rhodecode.model.hg import _get_repos_cached
-        region_invalidate(_get_repos_cached, None, *args)
-
-    if name == 'full_changelog':
-        from rhodecode.model.hg import _full_changelog_cached
-        region_invalidate(_full_changelog_cached, None, *args)
+    """
+    Puts cache invalidation task into db for 
+    further global cache invalidation
+    """
+    pass
 
 class EmptyChangeset(BaseChangeset):
     """
@@ -352,17 +338,12 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False):
                          }
             rm.create(form_data, user, just_db=True)
 
-
     if remove_obsolete:
         #remove from database those repositories that are not in the filesystem
         for repo in sa.query(Repository).all():
             if repo.repo_name not in initial_repo_list.keys():
                 sa.delete(repo)
                 sa.commit()
-
-
-    meta.Session.remove()
-
 
 class OrderedDict(dict, DictMixin):
 
