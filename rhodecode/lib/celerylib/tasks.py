@@ -7,13 +7,10 @@ from rhodecode.lib.helpers import person
 from rhodecode.lib.smtp_mailer import SmtpMailer
 from rhodecode.lib.utils import OrderedDict
 from time import mktime
-from vcs.backends.hg import MercurialRepository
-from vcs.backends.git import GitRepository
 import os
 import traceback
 from vcs.backends import get_repo
-from vcs.utils.helpers import get_scm
-
+from rhodecode.model.hg import HgModel
 try:
     import json
 except ImportError:
@@ -46,43 +43,6 @@ def get_session():
 
     return sa
 
-def get_hg_settings():
-    from rhodecode.model.db import RhodeCodeSettings
-    sa = get_session()
-    ret = sa.query(RhodeCodeSettings).all()
-
-    if not ret:
-        raise Exception('Could not get application settings !')
-    settings = {}
-    for each in ret:
-        settings['rhodecode_' + each.app_settings_name] = each.app_settings_value
-
-    return settings
-
-def get_hg_ui_settings():
-    from rhodecode.model.db import RhodeCodeUi
-    sa = get_session()
-    ret = sa.query(RhodeCodeUi).all()
-
-    if not ret:
-        raise Exception('Could not get application ui settings !')
-    settings = {}
-    for each in ret:
-        k = each.ui_key
-        v = each.ui_value
-        if k == '/':
-            k = 'root_path'
-
-        if k.find('.') != -1:
-            k = k.replace('.', '_')
-
-        if each.ui_section == 'hooks':
-            v = each.ui_active
-
-        settings[each.ui_section + '_' + k] = v
-
-    return settings
-
 @task
 @locked_task
 def whoosh_index(repo_location, full_index):
@@ -101,7 +61,7 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
 
     commits_by_day_author_aggregate = {}
     commits_by_day_aggregate = {}
-    repos_path = get_hg_ui_settings()['paths_root_path']
+    repos_path = HgModel().repos_path
     p = os.path.join(repos_path, repo_name)
     repo = get_repo(p)
 
@@ -297,7 +257,7 @@ def create_repo_fork(form_data, cur_user):
     repo_model = RepoModel(get_session())
     repo_model.create(form_data, cur_user, just_db=True, fork=True)
     repo_name = form_data['repo_name']
-    repos_path = get_hg_ui_settings()['paths_root_path']
+    repos_path = HgModel().repos_path
     repo_path = os.path.join(repos_path, repo_name)
     repo_fork_path = os.path.join(repos_path, form_data['fork_name'])
     alias = form_data['repo_type']
@@ -314,7 +274,7 @@ def __get_codes_stats(repo_name):
     's', 'sh', 'tpl', 'txt', 'vim', 'wss', 'xhtml', 'xml', 'xsl', 'xslt', 'yaws']
 
 
-    repos_path = get_hg_ui_settings()['paths_root_path']
+    repos_path = HgModel().repos_path
     p = os.path.join(repos_path, repo_name)
     repo = get_repo(p)
     tip = repo.get_changeset()
