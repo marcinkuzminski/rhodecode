@@ -88,6 +88,8 @@ class Repository(Base):
     user = relation('User')
     fork = relation('Repository', remote_side=repo_id)
     repo_to_perm = relation('RepoToPerm', cascade='all')
+    stats = relation('Statistics', cascade='all')
+
 
     def __repr__(self):
         return "<Repository('id:%s:%s')>" % (self.repo_id, self.repo_name)
@@ -134,5 +136,5 @@ class Statistics(Base):
     commit_activity_combined = Column("commit_activity_combined", BLOB(), nullable=False)#JSON data
     languages = Column("languages", BLOB(), nullable=False)#JSON data
 
-    repository = relation('Repository')
+    repository = relation('Repository', single_parent=True)
 
