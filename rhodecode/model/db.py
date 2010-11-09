@@ -138,3 +138,12 @@ class Statistics(Base):
 
     repository = relation('Repository', single_parent=True)
 
+class CacheInvalidation(Base):
+    __tablename__ = 'cache_invalidation'
+    __table_args__ = {'useexisting':True}
+    cache_id = Column("cache_id", INTEGER(), nullable=False, unique=True, default=None, primary_key=True)
+    cache_key = Column("cache_key", TEXT(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    cache_args = Column("cache_args", TEXT(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    cache_active = Column("cache_active", BOOLEAN(), nullable=True, unique=None, default=None)
+
+
