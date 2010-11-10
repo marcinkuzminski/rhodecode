@@ -43,8 +43,8 @@
 				</tr>	          		
           		%endif
 		         	
-		    %for cnt,node in enumerate(c.files_list,1):
-				<tr class="parity${cnt%2}">
+		    %for cnt,node in enumerate(c.files_list):
+				<tr class="parity${(cnt+1)%2}">
 		             <td>
 						${h.link_to(node.name,h.url('files_home',repo_name=c.repo_name,revision=c.cur_rev,f_path=node.path),class_=file_class(node))}
 		             </td>
@@ -59,19 +59,19 @@
 		              %endif
 		             </td>
 		             <td>
-		             	%if node.is_file():
-		             		${node.last_changeset.revision}
-		             	%endif
+	             	  %if node.is_file():
+	             		  ${node.last_changeset.revision}
+	             	  %endif
 		             </td>
 		             <td>
-		             	%if node.is_file():
-		             		${h.age(node.last_changeset._ctx.date())} - ${node.last_changeset.date}
-		             	%endif
+		              %if node.is_file():
+		                  ${h.age(node.last_changeset._ctx.date())} - ${node.last_changeset.date}
+		              %endif
 		             </td>
 		             <td>
-		             	%if node.is_file():
-		             		${node.last_changeset.author}
-		             	%endif                    
+		              %if node.is_file():
+		                  ${node.last_changeset.author}
+		              %endif                    
 		             </td>
 				</tr>
 			%endfor

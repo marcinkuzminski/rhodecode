@@ -5,12 +5,12 @@ Installation
 
 ``RhodeCode`` is written entirely in Python, but in order to use it's full
 potential there are some third-party requirements. When RhodeCode is used 
-together with celery You have to install some kind of message broker,
+together with celery_ You have to install some kind of message broker,
 recommended one is rabbitmq_ to make the async tasks work.
 
 Of course RhodeCode works in sync mode also, then You don't have to install
 any third party apps. Celery_ will give You large speed improvement when using
-many big repositories. If You plan to use it for 2 or 3 small repositories, it
+many big repositories. If You plan to use it for 5 or 10 small repositories, it
 will work just fine without celery running.
    
 After You decide to Run it with celery make sure You run celeryd and
@@ -33,7 +33,7 @@ Install from Cheese Shop
 
 Easiest way to install ``rhodecode`` is to run::
 
-   easy_install rhodecode
+ easy_install rhodecode
 
 Or::
 
@@ -42,15 +42,16 @@ Or::
 If you prefer to install manually simply grab latest release from
 http://pypi.python.org/pypi/rhodecode, decompres archive and run::
 
-   python setup.py install
+ python setup.py install
 
 
 Step by step installation example
 ---------------------------------
 
 
-- Assuming You have installed virtualenv_ create one using. The `--no-site-packages`
-  will make sure non of Your system libs are linked with this virtualenv_  
+- Assuming You have installed virtualenv_ create one using. 
+  The `--no-site-packages` will make sure non of Your system libs are linked 
+  with this virtualenv_  
 
 ::
 

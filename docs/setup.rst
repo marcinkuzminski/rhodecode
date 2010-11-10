@@ -40,6 +40,18 @@ Setting up the application
 - Default permissions on each repository is read, and owner is admin. So 
   remember to update these if needed.
   
+Note
+----
+
+RhodeCode when running without the celery it's running all it's task in sync
+mode, for first few times when visiting summary page You can notice few
+slow downs, this is due the statistics building it's cache. After all changesets
+are parsed it'll take the stats from cache and run much faster. Each summary
+page display parse at most 250 changesets in order to not stress the cpu, so
+the full stats are going to be loaded after total_number_of_changesets/250
+summary page visits.
+
+
     
 Setting up Whoosh
 -----------------
@@ -53,9 +65,9 @@ Setting up Whoosh
 When using incremental mode whoosh will check last modification date of each file
 and add it to reindex if newer file is available. Also indexing daemon checks
 for removed files and removes them from index. Sometime You might want to rebuild
-index from scrach, in admin pannel You can check `build from scratch` flag
+index from scratch, in admin panel You can check `build from scratch` flag
 and in standalone daemon You can pass `full` instead on incremental to build
-remove previos index and build new one.
+remove previous index and build new one.
 
 Nginx virtual host example
 --------------------------

@@ -131,11 +131,13 @@ E.onDOMReady(function(e){
 						var value = data[k];
 				  		var td1 = document.createElement('td');
 				  		td1.width=150;
+                        
 				  		var trending_language_label = document.createElement('div');
 				  		trending_language_label.innerHTML = k;
 				  		td1.appendChild(trending_language_label);
 
 				  		var td2 = document.createElement('td');
+				  		td2.setAttribute('style','padding-right: 12px ! important;');
 			  		    var trending_language = document.createElement('div');
 			  		    trending_language.title = k;
 			  		    trending_language.innerHTML = "<b>"+percentage+"% "+value+" ${_('files')}</b>";

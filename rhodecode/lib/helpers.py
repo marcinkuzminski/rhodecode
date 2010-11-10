@@ -64,20 +64,20 @@ def recursive_replace(str, replace=' '):
         return str
     else:
         str = str.replace(replace * 2, replace)
-        return recursive_replace(str, replace)  
+        return recursive_replace(str, replace)
 
 class _ToolTip(object):
-    
+
     def __call__(self, tooltip_title, trim_at=50):
         """
         Special function just to wrap our text into nice formatted autowrapped
         text
         :param tooltip_title:
         """
-        
+
         return wrap_paragraphs(escape(tooltip_title), trim_at)\
                        .replace('\n', '<br/>')
-    
+
     def activate(self):
         """
         Adds tooltip mechanism to the given Html all tooltips have to have 
@@ -85,7 +85,7 @@ class _ToolTip(object):
         Then a tooltip will be generated based on that
         All with yui js tooltip
         """
-        
+
         js = '''
         YAHOO.util.Event.onDOMReady(function(){
             function toolTipsId(){
@@ -190,25 +190,25 @@ class _ToolTip(object):
                     
                 });
         });
-        '''         
+        '''
         return literal(js)
 
 tooltip = _ToolTip()
 
 class _FilesBreadCrumbs(object):
-    
+
     def __call__(self, repo_name, rev, paths):
         url_l = [link_to(repo_name, url('files_home',
                                         repo_name=repo_name,
                                         revision=rev, f_path=''))]
         paths_l = paths.split('/')
-        
-        for cnt, p in enumerate(paths_l, 1):
+
+        for cnt, p in enumerate(paths_l):
             if p != '':
                 url_l.append(link_to(p, url('files_home',
                                             repo_name=repo_name,
                                             revision=rev,
-                                            f_path='/'.join(paths_l[:cnt]))))
+                                            f_path='/'.join(paths_l[:cnt + 1]))))
 
         return literal('/'.join(url_l))
 
@@ -219,9 +219,9 @@ class CodeHtmlFormatter(HtmlFormatter):
         return self._wrap_div(self._wrap_pre(self._wrap_code(source)))
 
     def _wrap_code(self, source):
-        for cnt, it in enumerate(source, 1):
+        for cnt, it in enumerate(source):
             i, t = it
-            t = '<div id="#S-%s">%s</div>' % (cnt, t)
+            t = '<div id="#S-%s">%s</div>' % (cnt + 1, t)
             yield i, t
 def pygmentize(filenode, **kwargs):
     """
@@ -236,12 +236,12 @@ def pygmentize_annotation(filenode, **kwargs):
     pygmentize function for annotation
     :param filenode:
     """
-    
+
     color_dict = {}
     def gen_color():
         """generator for getting 10k of evenly distibuted colors using hsv color
         and golden ratio.
-        """        
+        """
         import colorsys
         n = 10000
         golden_ratio = 0.618033988749895
@@ -252,21 +252,21 @@ def pygmentize_annotation(filenode, **kwargs):
             h %= 1
             HSV_tuple = [h, 0.95, 0.95]
             RGB_tuple = colorsys.hsv_to_rgb(*HSV_tuple)
-            yield map(lambda x:str(int(x * 256)), RGB_tuple)           
+            yield map(lambda x:str(int(x * 256)), RGB_tuple)
 
     cgenerator = gen_color()
-        
+
     def get_color_string(cs):
         if color_dict.has_key(cs):
             col = color_dict[cs]
         else:
             col = color_dict[cs] = cgenerator.next()
         return "color: rgb(%s)! important;" % (', '.join(col))
-        
+
     def url_func(changeset):
         tooltip_html = "<div style='font-size:0.8em'><b>Author:</b>" + \
-        " %s<br/><b>Date:</b> %s</b><br/><b>Message:</b> %s<br/></div>" 
-        
+        " %s<br/><b>Date:</b> %s</b><br/><b>Message:</b> %s<br/></div>"
+
         tooltip_html = tooltip_html % (changeset.author,
                                                changeset.date,
                                                tooltip(changeset.message))
@@ -280,11 +280,11 @@ def pygmentize_annotation(filenode, **kwargs):
                 class_='tooltip',
                 tooltip_title=tooltip_html
               )
-        
+
         uri += '\n'
-        return uri   
+        return uri
     return literal(annotate_highlight(filenode, url_func, **kwargs))
-      
+
 def repo_name_slug(value):
     """Return slug of name of repository
     This function is called on each creation/modification
@@ -292,7 +292,7 @@ def repo_name_slug(value):
     """
     slug = remove_formatting(value)
     slug = strip_tags(slug)
-    
+
     for c in """=[]\;'"<>,/~!@#$%^&*()+{}|: """:
         slug = slug.replace(c, '-')
     slug = recursive_replace(slug, '-')
@@ -305,7 +305,7 @@ def get_changeset_safe(repo, rev):
     if not isinstance(repo, BaseRepository):
         raise Exception('You must pass an Repository '
                         'object as first argument got %s', type(repo))
-        
+
     try:
         cs = repo.get_changeset(rev)
     except RepositoryError:
@@ -358,8 +358,8 @@ def gravatar_url(email_address, size=30):
     baseurl_nossl = "http://www.gravatar.com/avatar/"
     baseurl_ssl = "https://secure.gravatar.com/avatar/"
     baseurl = baseurl_ssl if ssl_enabled else baseurl_nossl
-        
-    
+
+
     # construct the url
     gravatar_url = baseurl + hashlib.md5(email_address.lower()).hexdigest() + "?"
     gravatar_url += urllib.urlencode({'d':default, 's':str(size)})
@@ -370,7 +370,7 @@ def safe_unicode(str):
     """safe unicode function. In case of UnicodeDecode error we try to return
     unicode with errors replace, if this failes we return unicode with 
     string_escape decoding """
-    
+
     try:
         u_str = unicode(str)
     except UnicodeDecodeError:
@@ -379,5 +379,5 @@ def safe_unicode(str):
         except UnicodeDecodeError:
             #incase we have a decode error just represent as byte string
             u_str = unicode(str(str).encode('string_escape'))
-        
+
     return u_str

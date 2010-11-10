@@ -221,6 +221,11 @@ def make_ui(read_from='file', path=None, checkpaths=True):
             for k, v in cfg.items(section):
                 baseui.setconfig(section, k, v)
                 log.debug('settings ui from file[%s]%s:%s', section, k, v)
+
+        for k, v in baseui.configitems('extensions'):
+            baseui.setconfig('extensions', k, '0')
+        #just enable mq
+        baseui.setconfig('extensions', 'mq', '1')
         if checkpaths:check_repo_dir(cfg.items('paths'))
 
 

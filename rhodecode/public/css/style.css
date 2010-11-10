@@ -270,7 +270,7 @@ text-decoration:none;
 }
 
 #header #header-inner #logo a:hover {
-color:#dabf29;
+color:#bfe3ff;
 }
 
 #header #header-inner #quick,#header #header-inner #quick ul {
@@ -419,7 +419,7 @@ padding:12px 9px 7px 24px;
 }
 
 #header #header-inner #quick li ul li a.repos,#header #header-inner #quick li ul li a.repos:hover {
-background:url("../images/icons/folder_edit.png") no-repeat scroll 4px 9px #FFF;
+background:url("../images/icons/database_edit.png") no-repeat scroll 4px 9px #FFF;
 width:167px;
 margin:0;
 padding:12px 9px 7px 24px;
@@ -1010,7 +1010,7 @@ padding:0;
 #content div.box table th {
 background:#eee;
 border-bottom:1px solid #ddd;
-padding:10px;
+padding:5px 0px 5px 5px;
 }
 
 #content div.box table th.left {
@@ -1393,7 +1393,6 @@ background-color:#003367;
 color:#FFF;
 display:block;
 min-width:20px;
-max-width:400px;
 text-decoration:none;
 height:12px;
 margin-bottom:4px;
@@ -1542,7 +1541,7 @@ background:#F88;
 
 .right .merge {
 vertical-align:top;
-font-size:60%;
+font-size:0.75em;
 font-weight:700;
 }
 
@@ -1554,13 +1553,15 @@ font-family:monospace;
 .right .logtags .branchtag {
 background:#FFF url("../images/icons/arrow_branch.png") no-repeat right 6px;
 display:block;
-padding:8px 16px 0 0;
+font-size:0.8em;
+padding:11px 16px 0 0;
 }
 
 .right .logtags .tagtag {
 background:#FFF url("../images/icons/tag_blue.png") no-repeat right 6px;
 display:block;
-padding:6px 18px 0 0;
+font-size:0.8em;
+padding:11px 16px 0 0;
 }
 
 div.browserblock {
@@ -1701,6 +1702,7 @@ font:100% sans-serif;
 width:auto;
 opacity:1px;
 padding:8px;
+white-space: pre;
 }
 
 .ac {
@@ -2024,7 +2026,6 @@ display:block;
 }
 
 #content div.box div.title ul.links li a:hover,#content div.box div.title ul.links li.ui-tabs-selected a {
-background:url("../../images/title_tab_selected.png") no-repeat bottom center;
 color:#bfe3ff;
 }
 
