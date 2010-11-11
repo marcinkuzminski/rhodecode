@@ -77,7 +77,12 @@ def authfunc(environ, username, password):
 
     if user:
         if user.active:
-            if user.username == username and check_password(password, user.password):
+
+            if user.username == 'default' and user.active:
+                log.info('user %s authenticated correctly', username)
+                return True
+
+            elif user.username == username and check_password(password, user.password):
                 log.info('user %s authenticated correctly', username)
                 return True
         else:

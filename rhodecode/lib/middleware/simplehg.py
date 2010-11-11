@@ -46,7 +46,7 @@ class SimpleHg(object):
     def __init__(self, application, config):
         self.application = application
         self.config = config
-        #authenticate this mercurial request using 
+        #authenticate this mercurial request using authfunc
         self.authenticate = AuthBasicAuthenticator('', authfunc)
         self.ipaddr = '0.0.0.0'
         self.repository = None
