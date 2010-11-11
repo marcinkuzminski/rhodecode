@@ -34,6 +34,7 @@ environ = {}
 TEST_DIR = '/tmp'
 REPO_PATH = os.path.join(TEST_DIR, 'vcs_test')
 NEW_REPO_PATH = os.path.join(TEST_DIR, 'vcs_test_new')
+FORK_REPO_PATH = os.path.join(TEST_DIR, 'vcs_test_fork')
 
 class TestController(TestCase):
 

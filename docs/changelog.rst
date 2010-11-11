@@ -3,6 +3,14 @@
 Changelog
 =========
 
+1.0.2 (**2010-11-XX**)
+----------------------
+
+- fixed #59 missing graph.js
+- fixed repo_size crash when repository had broken symlinks
+- fixed python2.5 crashes.
+- tested under python2.7
+- bumped sqlalcehmy and celery versions
 
 1.0.1 (**2010-11-10**)
 ----------------------

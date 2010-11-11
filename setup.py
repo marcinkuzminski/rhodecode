@@ -4,13 +4,13 @@ py_version = sys.version_info
 
 requirements = [
         "Pylons>=1.0.0",
-        "SQLAlchemy==0.6.4",
+        "SQLAlchemy==0.6.5",
         "Mako>=0.3.2",
         "vcs==0.1.8",
         "pygments>=1.3.0",
         "mercurial==1.6.4",
         "whoosh==1.2.5",
-        "celery==2.1.2",
+        "celery==2.1.3",
         "py-bcrypt",
         "babel",
     ]

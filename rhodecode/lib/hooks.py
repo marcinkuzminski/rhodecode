@@ -37,11 +37,17 @@ def repo_size(ui, repo, hooktype=None, **kwargs):
     for path, dirs, files in os.walk(repo.root):
         if path.find('.hg') != -1:
             for f in files:
-                size_hg += os.path.getsize(os.path.join(path, f))
+                try:
+                    size_hg += os.path.getsize(os.path.join(path, f))
+                except OSError:
+                    pass
         else:
             for f in files:
-                size_root += os.path.getsize(os.path.join(path, f))
-                
+                try:
+                    size_root += os.path.getsize(os.path.join(path, f))
+                except OSError:
+                    pass
+
     size_hg_f = h.format_byte_size(size_hg)
     size_root_f = h.format_byte_size(size_root)
     size_total_f = h.format_byte_size(size_root + size_hg)

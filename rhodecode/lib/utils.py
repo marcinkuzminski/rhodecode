@@ -465,7 +465,7 @@ def create_test_env(repos_test_path, config):
     import tarfile
     import shutil
     from os.path import dirname as dn, join as jn, abspath
-    from rhodecode.tests import REPO_PATH, NEW_REPO_PATH
+    from rhodecode.tests import REPO_PATH, NEW_REPO_PATH, FORK_REPO_PATH
 
     log = logging.getLogger('TestEnvCreator')
     # create logger
@@ -505,6 +505,9 @@ def create_test_env(repos_test_path, config):
     if os.path.isdir(NEW_REPO_PATH):
         log.debug('REMOVING %s', NEW_REPO_PATH)
         shutil.rmtree(NEW_REPO_PATH)
+    if os.path.isdir(FORK_REPO_PATH):
+        log.debug('REMOVING %s', FORK_REPO_PATH)
+        shutil.rmtree(FORK_REPO_PATH)
 
     cur_dir = dn(dn(abspath(__file__)))
     tar = tarfile.open(jn(cur_dir, 'tests', "vcs_test.tar.gz"))
