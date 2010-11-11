@@ -37,31 +37,37 @@ def repo_size(ui, repo, hooktype=None, **kwargs):
     for path, dirs, files in os.walk(repo.root):
         if path.find('.hg') != -1:
             for f in files:
-                size_hg += os.path.getsize(os.path.join(path, f))
+                try:
+                    size_hg += os.path.getsize(os.path.join(path, f))
+                except OSError:
+                    pass
         else:
             for f in files:
-                size_root += os.path.getsize(os.path.join(path, f))
-                
+                try:
+                    size_root += os.path.getsize(os.path.join(path, f))
+                except OSError:
+                    pass
+
     size_hg_f = h.format_byte_size(size_hg)
     size_root_f = h.format_byte_size(size_root)
     size_total_f = h.format_byte_size(size_root + size_hg)
     sys.stdout.write('Repository size .hg:%s repo:%s total:%s\n' \
                      % (size_hg_f, size_root_f, size_total_f))
-    
+
 def log_pull_action(ui, repo, **kwargs):
     """
     Logs user last pull action
     :param ui:
     :param repo:
     """
-        
+
     extra_params = dict(repo.ui.configitems('rhodecode_extras'))
     username = extra_params['username']
     repository = extra_params['repository']
     action = 'pull'
-       
+
     action_logger(username, action, repository, extra_params['ip'])
-    
+
     return 0
 
 def log_push_action(ui, repo, **kwargs):
@@ -70,30 +76,30 @@ def log_push_action(ui, repo, **kwargs):
     :param ui:
     :param repo:
     """
-    
+
     extra_params = dict(repo.ui.configitems('rhodecode_extras'))
     username = extra_params['username']
     repository = extra_params['repository']
     action = 'push:%s'
     node = kwargs['node']
-    
+
     def get_revs(repo, rev_opt):
         if rev_opt:
             revs = revrange(repo, rev_opt)
-            
+
             if len(revs) == 0:
                 return (nullrev, nullrev)
             return (max(revs), min(revs))
         else:
             return (len(repo) - 1, 0)
-    
+
     stop, start = get_revs(repo, [node + ':'])
-    
+
     revs = (str(repo[r]) for r in xrange(start, stop + 1))
-    
+
     action = action % ','.join(revs)
-        
+
     action_logger(username, action, repository, extra_params['ip'])
-    
+
     return 0
-  
+
