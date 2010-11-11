@@ -18,6 +18,23 @@ Changelog
 - gui optimizations, fixed application width to 1024px
 - numerous small bugfixes
 
+1.0.2 (**2010-11-XX**)
+----------------------
+
+- fixed #59 missing graph.js
+- fixed repo_size crash when repository had broken symlinks
+- fixed python2.5 crashes.
+- tested under python2.7
+- bumped sqlalchemy and celery versions
+
+1.0.1 (**2010-11-10**)
+----------------------
+
+- fixed #53 python2.5 incompatible enumerate calls
+- fixed #52 disable mercurial extension for web
+- fixed #51 deleting repositories don't delete it's dependent objects
+- small css updated
+
 1.0.0 (**2010-11-02**)
 ----------------------
 

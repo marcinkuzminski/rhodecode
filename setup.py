@@ -34,7 +34,8 @@ data_files = []
 #additional files that goes into package itself
 package_data = {'rhodecode': ['i18n/*/LC_MESSAGES/*.mo', ], }
 
-description = 'Mercurial repository serving and browsing app'
+description = ('Mercurial and Git repository browser/management with '
+               'build in push/pull server and full text search')
 #long description
 try:
     readme_file = 'README.rst'
@@ -59,7 +60,7 @@ setup(
     version=get_version(),
     description=description,
     long_description=long_description,
-    keywords='rhodiumcode mercurial web hgwebdir replacement serving hgweb rhodecode',
+    keywords='rhodiumcode mercurial web hgwebdir gitweb git replacement serving hgweb rhodecode',
     license='BSD',
     author='Marcin Kuzminski',
     author_email='marcin@python-works.com',
