@@ -2096,7 +2096,7 @@ border:1px solid #666;
 clear:both;
 overflow:hidden;
 margin:0;
-padding:2px 0;
+padding:2px 2px;
 }
 
 #content div.box div.form div.fields div.field div.checkboxes div.checkbox input,#content div.box div.form div.fields div.field div.radios div.radio input {

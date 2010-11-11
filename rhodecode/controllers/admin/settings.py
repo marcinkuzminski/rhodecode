@@ -121,11 +121,15 @@ class SettingsController(BaseController):
 
                 try:
                     hgsettings1 = self.sa.query(RhodeCodeSettings)\
-                    .filter(RhodeCodeSettings.app_settings_name == 'title').one()
+                        .filter(RhodeCodeSettings.app_settings_name \
+                                == 'title').one()
+
                     hgsettings1.app_settings_value = form_result['rhodecode_title']
 
                     hgsettings2 = self.sa.query(RhodeCodeSettings)\
-                    .filter(RhodeCodeSettings.app_settings_name == 'realm').one()
+                        .filter(RhodeCodeSettings.app_settings_name \
+                                == 'realm').one()
+
                     hgsettings2.app_settings_value = form_result['rhodecode_realm']
 
 

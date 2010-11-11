@@ -143,3 +143,24 @@ class UserModel(object):
     def reset_password(self, data):
         from rhodecode.lib.celerylib import tasks, run_task
         run_task(tasks.reset_user_password, data['email'])
+
+
+    def fill_data(self, user):
+        """
+        Fills user data with those from database and log out user if not 
+        present in database
+        :param user:
+        """
+        log.debug('filling auth user data')
+        try:
+            dbuser = self.get(user.user_id)
+            user.username = dbuser.username
+            user.is_admin = dbuser.admin
+            user.name = dbuser.name
+            user.lastname = dbuser.lastname
+            user.email = dbuser.email
+        except:
+            log.error(traceback.format_exc())
+            user.is_authenticated = False
+
+        return user

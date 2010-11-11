@@ -45,26 +45,26 @@ class UsersController(BaseController):
     # To properly map this controller, ensure your config/routing.py
     # file has a resource setup:
     #     map.resource('user', 'users')
-    
+
     @LoginRequired()
     @HasPermissionAllDecorator('hg.admin')
     def __before__(self):
         c.admin_user = session.get('admin_user')
         c.admin_username = session.get('admin_username')
         super(UsersController, self).__before__()
-    
+
 
     def index(self, format='html'):
         """GET /users: All items in the collection"""
         # url('users')
-        
-        c.users_list = self.sa.query(User).all()     
+
+        c.users_list = self.sa.query(User).all()
         return render('admin/users/users.html')
-    
+
     def create(self):
         """POST /users: Create a new item"""
         # url('users')
-        
+
         user_model = UserModel()
         login_form = UserForm()()
         try:
@@ -79,13 +79,13 @@ class UsersController(BaseController):
                 defaults=errors.value,
                 errors=errors.error_dict or {},
                 prefix_error=False,
-                encoding="UTF-8") 
+                encoding="UTF-8")
         except Exception:
             log.error(traceback.format_exc())
             h.flash(_('error occured during creation of user %s') \
-                    % request.POST.get('username'), category='error')            
+                    % request.POST.get('username'), category='error')
         return redirect(url('users'))
-    
+
     def new(self, format='html'):
         """GET /users/new: Form to create a new item"""
         # url('new_user')
@@ -101,7 +101,7 @@ class UsersController(BaseController):
         # url('user', id=ID)
         user_model = UserModel()
         c.user = user_model.get(id)
-        
+
         _form = UserForm(edit=True, old_data={'user_id':id,
                                               'email':c.user.email})()
         form_result = {}
@@ -109,21 +109,21 @@ class UsersController(BaseController):
             form_result = _form.to_python(dict(request.POST))
             user_model.update(id, form_result)
             h.flash(_('User updated succesfully'), category='success')
-                           
+
         except formencode.Invalid, errors:
             return htmlfill.render(
                 render('admin/users/user_edit.html'),
                 defaults=errors.value,
                 errors=errors.error_dict or {},
                 prefix_error=False,
-                encoding="UTF-8") 
+                encoding="UTF-8")
         except Exception:
             log.error(traceback.format_exc())
             h.flash(_('error occured during update of user %s') \
                     % form_result.get('username'), category='error')
-            
+
         return redirect(url('users'))
-    
+
     def delete(self, id):
         """DELETE /users/id: Delete an existing item"""
         # Forms posted to this method should contain a hidden field:
@@ -140,14 +140,14 @@ class UsersController(BaseController):
             h.flash(str(e), category='warning')
         except Exception:
             h.flash(_('An error occured during deletion of user'),
-                    category='error')            
+                    category='error')
         return redirect(url('users'))
-        
+
     def show(self, id, format='html'):
         """GET /users/id: Show a specific item"""
         # url('user', id=ID)
-    
-    
+
+
     def edit(self, id, format='html'):
         """GET /users/id/edit: Form to edit an existing item"""
         # url('edit_user', id=ID)
@@ -155,14 +155,13 @@ class UsersController(BaseController):
         if not c.user:
             return redirect(url('users'))
         if c.user.username == 'default':
-            h.flash(_("You can't edit this user since it's" 
-              " crucial for entire application"), category='warning')
+            h.flash(_("You can't edit this user"), category='warning')
             return redirect(url('users'))
-        
+
         defaults = c.user.__dict__
         return htmlfill.render(
             render('admin/users/user_edit.html'),
             defaults=defaults,
             encoding="UTF-8",
             force_defaults=False
-        )    
+        )

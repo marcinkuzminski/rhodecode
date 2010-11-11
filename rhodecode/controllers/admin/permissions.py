@@ -57,11 +57,12 @@ class PermissionsController(BaseController):
                               ('repository.write', _('Write'),),
                               ('repository.admin', _('Admin'),)]
         self.register_choices = [
-            ('hg.register.none', 'disabled'),
+            ('hg.register.none',
+                _('disabled')),
             ('hg.register.manual_activate',
-                            _('allowed with manual account activation')),
+                _('allowed with manual account activation')),
             ('hg.register.auto_activate',
-                            _('allowed with automatic account activation')), ]
+                _('allowed with automatic account activation')), ]
 
         self.create_choices = [('hg.create.none', _('Disabled')),
                                ('hg.create.repository', _('Enabled'))]
@@ -142,8 +143,10 @@ class PermissionsController(BaseController):
         c.create_choices = self.create_choices
 
         if id == 'default':
-            defaults = {'_method':'put'}
-            for p in UserModel().get_by_username('default').user_perms:
+            default_user = UserModel().get_by_username('default')
+            defaults = {'_method':'put',
+                        'anonymous':default_user.active}
+            for p in default_user.user_perms:
                 if p.permission.permission_name.startswith('repository.'):
                     defaults['default_perm'] = p.permission.permission_name
 

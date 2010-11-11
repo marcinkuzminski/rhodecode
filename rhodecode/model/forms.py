@@ -358,6 +358,7 @@ def DefaultPermissionsForm(perms_choices, register_choices, create_choices):
         allow_extra_fields = True
         filter_extra_fields = True
         overwrite_default = OneOf(['true', 'false'], if_missing='false')
+        anonymous = OneOf(['True', 'False'], if_missing=False)
         default_perm = OneOf(perms_choices)
         default_register = OneOf(register_choices)
         default_create = OneOf(create_choices)

@@ -138,17 +138,17 @@ class DbManage(object):
         hooks2.ui_section = 'hooks'
         hooks2.ui_key = 'changegroup.repo_size'
         hooks2.ui_value = 'python:rhodecode.lib.hooks.repo_size'
-        
+
         hooks3 = RhodeCodeUi()
         hooks3.ui_section = 'hooks'
         hooks3.ui_key = 'pretxnchangegroup.push_logger'
         hooks3.ui_value = 'python:rhodecode.lib.hooks.log_push_action'
-        
+
         hooks4 = RhodeCodeUi()
         hooks4.ui_section = 'hooks'
         hooks4.ui_key = 'preoutgoing.pull_logger'
         hooks4.ui_value = 'python:rhodecode.lib.hooks.log_pull_action'
-        
+
 
         web1 = RhodeCodeUi()
         web1.ui_section = 'web'
@@ -227,9 +227,9 @@ class DbManage(object):
         def_user = User()
         def_user.username = 'default'
         def_user.password = get_crypt_password(str(uuid.uuid1())[:8])
-        def_user.name = 'default'
-        def_user.lastname = 'default'
-        def_user.email = 'default@default.com'
+        def_user.name = 'Anonymous'
+        def_user.lastname = 'User'
+        def_user.email = 'anonymous@rhodecode.org'
         def_user.admin = False
         def_user.active = False
         try:

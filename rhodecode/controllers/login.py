@@ -46,7 +46,9 @@ class LoginController(BaseController):
         #redirect if already logged in
         c.came_from = request.GET.get('came_from', None)
 
-        if c.rhodecode_user.is_authenticated:
+        if c.rhodecode_user.is_authenticated \
+                            and c.rhodecode_user.username != 'default':
+
             return redirect(url('home'))
 
         if request.POST:
