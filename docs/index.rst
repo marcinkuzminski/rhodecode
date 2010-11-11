@@ -72,11 +72,14 @@ Features
    Summary page
 
 
-Incoming
---------
+Incoming / Plans
+----------------
 
 - code review (probably based on hg-review)
 - full git_ support, with push/pull server
+- project grouping
+- anonymous access
+- 
 - commit based build in wiki system
 - clone points and cloning from remote repositories into rhodecode 
   (git_ and mercurial_)
@@ -89,6 +92,12 @@ License
 -------
 
 ``rhodecode`` is released under GPL_ license.
+
+
+Mailing group Q&A
+-----------------
+
+http://groups.google.com/group/rhodecode
 
 
 Documentation

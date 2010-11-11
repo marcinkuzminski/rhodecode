@@ -27,7 +27,7 @@ Source code
 Source code is along with issue tracker is available at
 http://bitbucket.org/marcinkuzminski/rhodecode
 
-Also a source codes can be obtained from demo rhodecode instance
+Also a source codes can be obtained from demo RhodeCode instance
 http://hg.python-works.com/rhodecode/summary
 
 Instalation
@@ -39,9 +39,10 @@ Instalation
 Features
 --------
 
-- Has it's own middleware to handle mercurial_ protocol request. Each request 
-  can be logged and authenticated. Runs on threads unlikely to hgweb You can 
-  make multiple pulls/pushes simultaneous. Supports http/https
+- Has it's own middleware to handle mercurial_ and git_ protocol request. 
+  Each request can be logged and authenticated. Runs on threads unlikely to 
+  hgweb You can make multiple pulls/pushes simultaneous. Supports http/https
+  both on git_ and mercurial_
 - Full permissions and authentication per project private/read/write/admin. 
   One account for web interface and mercurial_ push/pull/clone.
 - Mako templates let's you customize look and feel of application.
@@ -65,14 +66,19 @@ Features
 - Based on pylons 1.0 / sqlalchemy 0.6 / sqlite
 
 
-Incoming
---------
+Incoming / Plans
+----------------
 
 - code review (probably based on hg-review)
 - full git_ support, with push/pull server
+- project grouping
+- anonymous access
+- 
 - commit based build in wiki system
 - clone points and cloning from remote repositories into rhodecode 
   (git_ and mercurial_)
+- more statistics and graph (global annotation + some more statistics)
+- user customized activity dashboards
 - some cache optimizations
 - other cools stuff that i can figure out (or You can help me figure out)
 
@@ -80,6 +86,12 @@ License
 -------
 
 ``rhodecode`` is released under GPL_ license.
+
+
+Mailing group Q&A
+-----------------
+
+http://groups.google.com/group/rhodecode
 
 
 Documentation

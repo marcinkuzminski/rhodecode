@@ -7,6 +7,7 @@ Changelog
 ----------------------
 - git support with push/pull via RhodeCode web interface
 - rewrite of internals for vcs >=0.1.9
+- anonymous access
 - performance upgrade for cached repos list - each repository has it's own 
   cache that's invalidated when needed.
 - main page quick filter for filtering repositories
@@ -15,6 +16,7 @@ Changelog
 - a lot of fixes and tweaks for file browser
 - introduced new enhanced changelog for merges that shows more accurate results
 - gui optimizations, fixed application width to 1024px
+- numerous small bugfixes
 
 1.0.0 (**2010-11-02**)
 ----------------------
