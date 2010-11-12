@@ -18,7 +18,7 @@ Changelog
 - gui optimizations, fixed application width to 1024px
 - numerous small bugfixes
 
-1.0.2 (**2010-11-XX**)
+1.0.2 (**2010-11-12**)
 ----------------------
 
 - fixed #59 missing graph.js

@@ -39,10 +39,14 @@ description = ('Mercurial and Git repository browser/management with '
 #long description
 try:
     readme_file = 'README.rst'
-    long_description = open(readme_file).read()
+    changelog_file = 'docs/changelog.rst'
+    long_description = open(readme_file).read() + '/n/n' + \
+        open(changelog_file).read()
+
 except IOError, err:
     sys.stderr.write("[WARNING] Cannot find file specified as "
-        "long_description (%s)\n skipping that file" % readme_file)
+        "long_description (%s)\n or changelog (%s) skipping that file" \
+            % (readme_file, changelog_file))
     long_description = description
 
 

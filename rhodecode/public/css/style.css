@@ -393,7 +393,7 @@ right:200px;
 max-height:275px;
 overflow:auto;
 overflow-x:hidden;
-white-space:nowrap;
+white-space:normal;
 }
 
 #header #header-inner #quick li ul li a.journal,#header #header-inner #quick li ul li a.journal:hover {
@@ -412,6 +412,20 @@ padding:12px 9px 7px 24px;
 
 #header #header-inner #quick li ul li a.public_repo,#header #header-inner #quick li ul li a.public_repo:hover {
 background:url("../images/icons/lock_open.png") no-repeat scroll 4px 9px #FFF;
+min-width:167px;
+margin:0;
+padding:12px 9px 7px 24px;
+}
+
+#header #header-inner #quick li ul li a.hg,#header #header-inner #quick li ul li a.hg:hover {
+background:url("../images/icons/hgicon.png") no-repeat scroll 4px 9px #FFF;
+min-width:167px;
+margin:0;
+padding:12px 9px 7px 24px;
+}
+
+#header #header-inner #quick li ul li a.git,#header #header-inner #quick li ul li a.git:hover {
+background:url("../images/icons/giticon.png") no-repeat scroll 4px 9px #FFF;
 min-width:167px;
 margin:0;
 padding:12px 9px 7px 24px;
