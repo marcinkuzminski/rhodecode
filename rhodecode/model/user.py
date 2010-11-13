@@ -151,6 +151,11 @@ class UserModel(object):
         present in database
         :param user:
         """
+
+        if not hasattr(user, 'user_id') or user.user_id is None:
+            raise Exception('passed in user has to have the user_id attribute')
+
+
         log.debug('filling auth user data')
         try:
             dbuser = self.get(user.user_id)

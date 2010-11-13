@@ -209,8 +209,6 @@ def get_user(session):
     :param session:
     """
     user = session.get('rhodecode_user', AuthUser())
-
-
     #if the user is not logged in we check for anonymous access
     #if user is logged and it's a default user check if we still have anonymous
     #access enabled
@@ -219,6 +217,7 @@ def get_user(session):
         if anonymous_user.active is True:
             #then we set this user is logged in
             user.is_authenticated = True
+            user.user_id = anonymous_user.user_id
         else:
             user.is_authenticated = False
 
