@@ -32,8 +32,8 @@ from rhodecode.model.db import Repository, User, RhodeCodeUi, RhodeCodeSettings,
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.user import UserModel
 from vcs.backends.base import BaseChangeset
-from vcs.backends.git import GitRepository
-from vcs.backends.hg import MercurialRepository
+from paste.script import command
+import ConfigParser
 from vcs.utils.lazy import LazyProperty
 import traceback
 import datetime
@@ -517,3 +517,28 @@ def create_test_env(repos_test_path, config):
     tar = tarfile.open(jn(cur_dir, 'tests', "vcs_test.tar.gz"))
     tar.extractall('/tmp')
     tar.close()
+
+class UpgradeDb(command.Command):
+    """Command used for paster to upgrade our database to newer version
+    """
+
+    max_args = 1
+    min_args = 1
+
+    usage = "CONFIG_FILE"
+    summary = "Upgrades current db to newer version given configuration file"
+    group_name = "RhodeCode"
+
+    parser = command.Command.standard_parser(verbose=True)
+
+    parser.add_option('--sql',
+                      action='store_true',
+                      dest='just_sql',
+                      help="Prints upgrade sql for further investigation",
+                      default=False)
+    def command(self):
+        config_name = self.args[0]
+        p = config_name.split('/')
+        root = '.' if len(p) == 1 else '/'.join(p[:-1])
+        config = ConfigParser.ConfigParser({'here':root})
+        config.read(config_name)
