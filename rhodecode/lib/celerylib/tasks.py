@@ -34,7 +34,8 @@ def get_session():
     if celery_on:
         from sqlalchemy import engine_from_config
         from sqlalchemy.orm import sessionmaker, scoped_session
-        engine = engine_from_config(dict(config.items('app:main')), 'sqlalchemy.db1.')
+        engine = engine_from_config(dict(config.items('app:main')),
+                                    'sqlalchemy.db1.')
         sa = scoped_session(sessionmaker(bind=engine))
     else:
         #If we don't use celery reuse our current application Session
@@ -48,7 +49,7 @@ def get_session():
 def whoosh_index(repo_location, full_index):
     log = whoosh_index.get_logger()
     from rhodecode.lib.indexers.daemon import WhooshIndexingDaemon
-    index_location = ''
+    index_location = dict(config.items('app:main'))['index_dir']
     WhooshIndexingDaemon(index_location=index_location,
                          repo_location=repo_location).run(full_index=full_index)
 
