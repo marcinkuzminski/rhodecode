@@ -59,14 +59,14 @@ class MakeIndex(command.Command):
 
     usage = "CONFIG_FILE"
     summary = "Creates index for full text search given configuration file"
-    group_name = "Whoosh indexing"
-
+    group_name = "RhodeCode"
+    takes_config_file = -1
     parser = command.Command.standard_parser(verbose=True)
-#    parser.add_option('--repo-location',
-#                      action='store',
-#                      dest='repo_location',
-#                      help="Specifies repositories location to index",
-#                      )
+    parser.add_option('--repo-location',
+                      action='store',
+                      dest='repo_location',
+                      help="Specifies repositories location to index REQUIRED",
+                      )
     parser.add_option('-f',
                       action='store_true',
                       dest='full_index',
@@ -75,27 +75,23 @@ class MakeIndex(command.Command):
                       default=False)
     def command(self):
         config_name = self.args[0]
-
         p = config_name.split('/')
-        if len(p) == 1:
-            root = '.'
-        else:
-            root = '/'.join(p[:-1])
-        print root
+        root = '.' if len(p) == 1 else '/'.join(p[:-1])
         config = ConfigParser.ConfigParser({'here':root})
         config.read(config_name)
-        print dict(config.items('app:main'))['index_dir']
-        index_location = dict(config.items('app:main'))['index_dir']
-        #return
 
-        #=======================================================================
+        index_location = dict(config.items('app:main'))['index_dir']
+        repo_location = self.options.repo_location
+
+        #======================================================================
         # WHOOSH DAEMON
-        #=======================================================================
+        #======================================================================
         from rhodecode.lib.pidlock import LockHeld, DaemonLock
         from rhodecode.lib.indexers.daemon import WhooshIndexingDaemon
         try:
             l = DaemonLock()
-            WhooshIndexingDaemon(index_location=index_location)\
+            WhooshIndexingDaemon(index_location=index_location,
+                                 repo_location=repo_location)\
                 .run(full_index=self.options.full_index)
             l.release()
         except LockHeld:

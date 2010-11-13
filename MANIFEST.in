@@ -7,7 +7,7 @@ recursive-include rhodecode/i18n/ *
 recursive-include rhodecode/public/css *
 recursive-include rhodecode/public/images *
 #js
-include rhodecode/public/js/yui2.js
+include rhodecode/public/js/yui2a.js
 include rhodecode/public/js/excanvas.min.js
 include rhodecode/public/js/yui.flot.js
 include rhodecode/public/js/graph.js

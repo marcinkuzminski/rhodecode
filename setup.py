@@ -89,5 +89,10 @@ setup(
 
     [paste.app_install]
     main = pylons.util:PylonsInstaller
+
+    [paste.global_paster_command]
+    make-index = rhodecode.lib.indexers:MakeIndex
+    upgrade-db = rhodecode.lib.utils:UpgradeDb
+        
     """,
 )

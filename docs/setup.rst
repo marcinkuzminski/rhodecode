@@ -41,21 +41,40 @@ Setting up the application
   remember to update these if needed.
   
     
-Setting up Whoosh
------------------
+Setting up Whoosh full text search
+----------------------------------
+
+Index for whoosh can be build starting from version 1.1 using paster command
+passing repo locations to index, as well as Your config file that stores
+whoosh index files locations. There is possible to pass `-f` to the options
+to enable full index rebuild. Without that indexing will run always in in
+incremental mode.
+
+::
+ paster make-index --repo-location=<location for repos> production.ini  
+
+for full index rebuild You can use
+
+::
+ paster make-index -f --repo-location=<location for repos> production.ini
 
 - For full text search You can either put crontab entry for
 
+This command can be run even from crontab in order to do periodical 
+index builds and keep Your index always up to date. An example entry might 
+look like this
+
 ::
  
- python /var/www/rhodecode/<rhodecode_installation_path>/lib/indexers/daemon.py incremental <put_here_path_to_repos>
+ /path/to/python/bin/paster --repo-location=<location for repos> /path/to/rhodecode/production.ini
   
-When using incremental mode whoosh will check last modification date of each file
-and add it to reindex if newer file is available. Also indexing daemon checks
-for removed files and removes them from index. Sometime You might want to rebuild
-index from scrach, in admin pannel You can check `build from scratch` flag
-and in standalone daemon You can pass `full` instead on incremental to build
-remove previos index and build new one.
+When using incremental(default) mode whoosh will check last modification date 
+of each file and add it to reindex if newer file is available. Also indexing 
+daemon checks for removed files and removes them from index. 
+
+Sometime You might want to rebuild index from scratch. You can do that using 
+the `-f` flag passed to paster command or, in admin panel You can check 
+`build from scratch` flag.
 
 Nginx virtual host example
 --------------------------

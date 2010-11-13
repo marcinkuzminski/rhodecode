@@ -78,9 +78,7 @@ class WhooshIndexingDaemon(object):
         if not repo_location:
             raise Exception('You have to provide repositories location')
 
-
-
-        self.repo_paths = HgModel.repo_scan('/', self.repo_location, None, True)
+        self.repo_paths = HgModel().repo_scan(self.repo_location, None, True)
         self.initial = False
         if not os.path.isdir(self.index_location):
             os.mkdir(self.index_location)
@@ -89,8 +87,7 @@ class WhooshIndexingDaemon(object):
             self.initial = True
 
     def get_paths(self, repo):
-        """
-        recursive walk in root dir and return a set of all path in that dir
+        """recursive walk in root dir and return a set of all path in that dir
         based on repository walk function
         """
         index_paths_ = set()
@@ -115,7 +112,8 @@ class WhooshIndexingDaemon(object):
         return mktime(node.last_changeset.date.timetuple())
 
     def add_doc(self, writer, path, repo):
-        """Adding doc to writer"""
+        """Adding doc to writer this function itself fetches data from
+        the instance of vcs backend"""
         node = self.get_node(repo, path)
 
         #we just index the content of chosen files

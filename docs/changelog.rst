@@ -17,6 +17,7 @@ Changelog
 - introduced new enhanced changelog for merges that shows more accurate results
 - gui optimizations, fixed application width to 1024px
 - numerous small bugfixes
+- whoosh index moved to paster command
 
 1.0.2 (**2010-11-12**)
 ----------------------
