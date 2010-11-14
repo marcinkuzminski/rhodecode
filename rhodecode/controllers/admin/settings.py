@@ -289,10 +289,13 @@ class SettingsController(BaseController):
 
         except formencode.Invalid, errors:
             c.user = user_model.get(c.rhodecode_user.user_id, cache=False)
-            c.user_repos = []
-            for repo in c.cached_repo_list.values():
-                if repo.dbrepo.user.username == c.user.username:
-                    c.user_repos.append(repo)
+            c.user = UserModel(self.sa).get(c.rhodecode_user.user_id, cache=False)
+            all_repos = self.sa.query(Repository)\
+                .filter(Repository.user_id == c.user.user_id)\
+                .order_by(func.lower(Repository.repo_name))\
+                .all()
+            c.user_repos = HgModel().get_repos(all_repos)
+
             return htmlfill.render(
                 render('admin/users/user_edit_my_account.html'),
                 defaults=errors.value,

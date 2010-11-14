@@ -19,10 +19,6 @@ from whoosh.highlight import highlight, SimpleFragmenter, HtmlFormatter
 
 import traceback
 
-
-#LOCATION WE KEEP THE INDEX
-IDX_LOCATION = jn(dn(dn(dn(dn(os.path.abspath(__file__))))), 'data', 'index')
-
 #EXTENSIONS WE WANT TO INDEX CONTENT OFF
 INDEX_EXTENSIONS = ['action', 'adp', 'ashx', 'asmx', 'aspx', 'asx', 'axd', 'c',
                     'cfg', 'cfm', 'cpp', 'cs', 'css', 'diff', 'do', 'el', 'erl',
