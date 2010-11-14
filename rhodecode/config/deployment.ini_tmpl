@@ -22,6 +22,7 @@ debug = true
 #smtp_password = 
 #smtp_port = 
 #smtp_use_tls = false
+#smtp_use_ssl = true
 
 [server:main]
 ##nr of threads to spawn

@@ -68,9 +68,18 @@ def is_git(environ):
         return True
     return False
 
-def action_logger(user, action, repo, ipaddr, sa=None):
+def action_logger(user, action, repo, ipaddr='', sa=None):
     """
     Action logger for various action made by users
+    
+    :param user: user that made this action, can be a string unique username or
+        object containing user_id attribute
+    :param action: action to log, should be on of predefined unique actions for
+        easy translations
+    :param repo: repository that action was made on
+    :param ipaddr: optional ip address from what the action was made
+    :param sa: optional sqlalchemy session
+    
     """
 
     if not sa:
@@ -84,12 +93,22 @@ def action_logger(user, action, repo, ipaddr, sa=None):
         else:
             raise Exception('You have to provide user object or username')
 
-        repo_name = repo.lstrip('/')
+
+        if repo:
+            repo_name = repo.lstrip('/')
+
+            repository = RepoModel(sa).get(repo_name, cache=False)
+            if not repository:
+                raise Exception('You have to provide valid repository')
+        else:
+            raise Exception('You have to provide repository to action logger')
+
+
         user_log = UserLog()
         user_log.user_id = user_obj.user_id
         user_log.action = action
         user_log.repository_name = repo_name
-        user_log.repository = RepoModel(sa).get(repo_name, cache=False)
+        user_log.repository = repository
         user_log.action_date = datetime.datetime.now()
         user_log.user_ip = ipaddr
         sa.add(user_log)

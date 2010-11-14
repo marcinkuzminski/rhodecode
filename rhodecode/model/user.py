@@ -72,6 +72,7 @@ class UserModel(object):
             raise
 
     def create_registration(self, form_data):
+        from rhodecode.lib.celerylib import tasks, run_task
         try:
             new_user = User()
             for k, v in form_data.items():
@@ -80,6 +81,14 @@ class UserModel(object):
 
             self.sa.add(new_user)
             self.sa.commit()
+            body = ('New user registration\n'
+                    'username: %s\n'
+                    'email: %s\n')
+            body = body % (form_data['username'], form_data['email'])
+
+            run_task(tasks.send_email, None,
+                     _('[RhodeCode] New User registration'),
+                     body)
         except:
             log.error(traceback.format_exc())
             self.sa.rollback()

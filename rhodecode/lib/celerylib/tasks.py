@@ -230,15 +230,31 @@ def reset_user_password(user_email):
 
 @task
 def send_email(recipients, subject, body):
+    """
+    Sends an email with defined parameters from the .ini files.
+    
+    
+    :param recipients: list of recipients, it this is empty the defined email
+        address from field 'email_to' is used instead
+    :param subject: subject of the mail
+    :param body: body of the mail
+    """
     log = send_email.get_logger()
     email_config = dict(config.items('DEFAULT'))
+
+    if not recipients:
+        recipients = [email_config.get('email_to')]
+
+    def str2bool(v):
+        return v.lower() in ["yes", "true", "t", "1"]
+
     mail_from = email_config.get('app_email_from')
     user = email_config.get('smtp_username')
     passwd = email_config.get('smtp_password')
     mail_server = email_config.get('smtp_server')
     mail_port = email_config.get('smtp_port')
-    tls = email_config.get('smtp_use_tls')
-    ssl = False
+    tls = str2bool(email_config.get('smtp_use_tls'))
+    ssl = str2bool(email_config.get('smtp_use_ssl'))
 
     try:
         m = SmtpMailer(mail_from, user, passwd, mail_server,
