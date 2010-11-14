@@ -28,11 +28,10 @@ from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import HasRepoPermissionAny
 from rhodecode.lib.utils import get_repos
 from rhodecode.model import meta
-from rhodecode.model.caching_query import FromCache
 from rhodecode.model.db import Repository, User, RhodeCodeUi
 from sqlalchemy.orm import joinedload
-from vcs import get_repo as vcs_get_repo, get_backend
-from vcs.backends.hg import MercurialRepository
+from vcs import get_backend
+from vcs.utils.helpers import get_scm
 from vcs.exceptions import RepositoryError, VCSError
 from vcs.utils.lazy import LazyProperty
 import logging
@@ -76,6 +75,7 @@ class HgModel(object):
         if not isinstance(baseui, ui.ui):
             baseui = ui.ui()
         repos_list = {}
+
         for name, path in get_repos(repos_path):
             try:
                 if repos_list.has_key(name):
@@ -97,8 +97,10 @@ class HgModel(object):
 
     def get_repos(self, all_repos=None):
         """
-        Get all repos from db and for each such repo make backend and 
-        fetch dependent data from db
+        Get all repos from db and for each repo create it's backend instance.
+        and fill that backed with information from database
+        
+        :param all_repos: give specific repositories list, good for filtering
         """
         if not all_repos:
             all_repos = self.sa.query(Repository).all()
@@ -144,12 +146,19 @@ class HgModel(object):
         @cache_region('long_term', 'get_repo_cached_%s' % repo_name)
         def _get_repo(repo_name):
 
-            repo = vcs_get_repo(os.path.join(self.repos_path, repo_name),
-                                alias=None, create=False)
+            repo_path = os.path.join(self.repos_path, repo_name)
+            alias = get_scm(repo_path)[0]
 
-            #skip hidden web repository
-            if isinstance(repo, MercurialRepository) and repo._get_hidden():
-                return
+            log.debug('Creating instance of %s repository', alias)
+            backend = get_backend(alias)
+
+            if alias == 'hg':
+                repo = backend(repo_path, create=False, baseui=None)
+                #skip hidden web repository
+                if repo._get_hidden():
+                    return
+            else:
+                repo = backend(repo_path, create=False)
 
             dbrepo = self.sa.query(Repository)\
                 .options(joinedload(Repository.fork))\
