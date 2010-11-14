@@ -52,8 +52,9 @@ def load_environment(global_conf, app_conf, initial=False):
     test = os.path.split(config['__file__'])[-1] == 'test.ini'
     if test:
         from rhodecode.lib.utils import create_test_env, create_test_index
-        create_test_env('/tmp', config)
-        create_test_index('/tmp', True)
+        from rhodecode.tests import  TESTS_TMP_PATH
+        create_test_env(TESTS_TMP_PATH, config)
+        create_test_index(TESTS_TMP_PATH, True)
 
     #MULTIPLE DB configs
     # Setup the SQLAlchemy database engine

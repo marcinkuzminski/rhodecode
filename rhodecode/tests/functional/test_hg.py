@@ -4,8 +4,8 @@ class TestAdminController(TestController):
 
     def test_index(self):
         self.log_user()
-        response = self.app.get(url(controller='hg', action='index'))
+        response = self.app.get(url(controller='home', action='index'))
         #if global permission is set
         assert 'ADD NEW REPOSITORY' in response.body, 'Wrong main page'
-        assert 'href="/vcs_test/summary"' in response.body, ' mising repository in list'
+        assert 'href="/%s/summary"' % HG_REPO in response.body, ' mising repository in list'
         # Test response...

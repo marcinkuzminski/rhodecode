@@ -10,7 +10,13 @@ class TestUsersController(TestController):
         response = self.app.get(url('formatted_users', format='xml'))
 
     def test_create(self):
-        response = self.app.post(url('users'))
+        self.log_user()
+#        user_name = 'new_user'
+#        response = self.app.post(url('users'),{'repo_name':user_name,
+#                                                'repo_type':'hg',
+#                                               'description':description,
+#                                               'private':private})
+
 
     def test_new(self):
         response = self.app.get(url('new_user'))

@@ -64,7 +64,7 @@ def is_git(environ):
     :param environ:
     """
     http_user_agent = environ.get('HTTP_USER_AGENT')
-    if http_user_agent.startswith('git'):
+    if http_user_agent and http_user_agent.startswith('git'):
         return True
     return False
 
@@ -455,15 +455,16 @@ def create_test_index(repo_location, full_index):
     """
     from rhodecode.lib.indexers.daemon import WhooshIndexingDaemon
     from rhodecode.lib.pidlock import DaemonLock, LockHeld
-    from rhodecode.lib.indexers import IDX_LOCATION
     import shutil
 
-    if os.path.exists(IDX_LOCATION):
-        shutil.rmtree(IDX_LOCATION)
+    index_location = os.path.join(repo_location, 'index')
+    if os.path.exists(index_location):
+        shutil.rmtree(index_location)
 
     try:
         l = DaemonLock()
-        WhooshIndexingDaemon(repo_location=repo_location)\
+        WhooshIndexingDaemon(index_location=index_location,
+                             repo_location=repo_location)\
             .run(full_index=full_index)
         l.release()
     except LockHeld:
@@ -474,6 +475,8 @@ def create_test_env(repos_test_path, config):
     install test repository into tmp dir
     """
     from rhodecode.lib.db_manage import DbManage
+    from rhodecode.tests import HG_REPO, GIT_REPO, NEW_HG_REPO, NEW_GIT_REPO, \
+        HG_FORK, GIT_FORK, TESTS_TMP_PATH
     import tarfile
     import shutil
     from os.path import dirname as dn, join as jn, abspath
@@ -509,13 +512,19 @@ def create_test_env(repos_test_path, config):
     dbmanage.populate_default_permissions()
 
     #PART TWO make test repo
-    log.debug('making test vcs repo')
-    if os.path.isdir('/tmp/vcs_test'):
-        shutil.rmtree('/tmp/vcs_test')
+    log.debug('making test vcs repositories')
 
+    #remove old one from previos tests
+    for r in [HG_REPO, GIT_REPO, NEW_HG_REPO, NEW_GIT_REPO, HG_FORK, GIT_FORK]:
+
+        if os.path.isdir(jn(TESTS_TMP_PATH, r)):
+            log.debug('removing %s', r)
+            shutil.rmtree(jn(TESTS_TMP_PATH, r))
+
+    #CREATE DEFAULT HG REPOSITORY
     cur_dir = dn(dn(abspath(__file__)))
-    tar = tarfile.open(jn(cur_dir, 'tests', "vcs_test.tar.gz"))
-    tar.extractall('/tmp')
+    tar = tarfile.open(jn(cur_dir, 'tests', "vcs_test_hg.tar.gz"))
+    tar.extractall(jn(TESTS_TMP_PATH, HG_REPO))
     tar.close()
 
 class UpgradeDb(command.Command):

@@ -17,7 +17,7 @@ class TestLoginController(TestController):
         assert response.status == '302 Found', 'Wrong response code from login got %s' % response.status
         assert response.session['rhodecode_user'].username == 'test_admin', 'wrong logged in user'
         response = response.follow()
-        assert 'vcs_test repository' in response.body
+        assert '%s repository' % HG_REPO in response.body
 
     def test_login_regular_ok(self):
         response = self.app.post(url(controller='login', action='index'),
@@ -27,7 +27,7 @@ class TestLoginController(TestController):
         assert response.status == '302 Found', 'Wrong response code from login got %s' % response.status
         assert response.session['rhodecode_user'].username == 'test_regular', 'wrong logged in user'
         response = response.follow()
-        assert 'vcs_test repository' in response.body
+        assert '%s repository' % HG_REPO in response.body
         assert '<a title="Admin" href="/_admin">' not in response.body
 
     def test_login_ok_came_from(self):
