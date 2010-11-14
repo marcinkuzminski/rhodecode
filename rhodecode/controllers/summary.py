@@ -27,7 +27,7 @@ from vcs.exceptions import ChangesetError
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseController, render
 from rhodecode.lib.utils import OrderedDict, EmptyChangeset
-from rhodecode.model.hg import HgModel
+from rhodecode.model.scm import ScmModel
 from rhodecode.model.db import Statistics
 from webhelpers.paginate import Page
 from rhodecode.lib.celerylib import run_task
@@ -52,7 +52,7 @@ class SummaryController(BaseController):
         super(SummaryController, self).__before__()
 
     def index(self):
-        hg_model = HgModel()
+        hg_model = ScmModel()
         c.repo_info = hg_model.get_repo(c.repo_name)
         def url_generator(**kw):
             return url('shortlog_home', repo_name=c.repo_name, **kw)

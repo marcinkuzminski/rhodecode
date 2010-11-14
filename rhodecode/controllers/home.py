@@ -26,7 +26,7 @@ from operator import itemgetter
 from pylons import tmpl_context as c, request
 from rhodecode.lib.auth import LoginRequired
 from rhodecode.lib.base import BaseController, render
-from rhodecode.model.hg import HgModel
+from rhodecode.model.scm import ScmModel
 import logging
 log = logging.getLogger(__name__)
 
@@ -47,7 +47,7 @@ class HomeController(BaseController):
         else:
             c.sort_by = current_sort
         c.sort_slug = current_sort_slug
-        cached_repo_list = HgModel().get_repos()
+        cached_repo_list = ScmModel().get_repos()
 
         sort_key = current_sort_slug + '_sort'
         if c.sort_by.startswith('-'):

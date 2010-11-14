@@ -35,7 +35,7 @@ from rhodecode.lib.base import BaseController, render
 from rhodecode.lib.utils import invalidate_cache, action_logger
 from rhodecode.model.db import User
 from rhodecode.model.forms import RepoForm
-from rhodecode.model.hg import HgModel
+from rhodecode.model.scm import ScmModel
 from rhodecode.model.repo import RepoModel
 import formencode
 import logging
@@ -60,7 +60,7 @@ class ReposController(BaseController):
     def index(self, format='html'):
         """GET /repos: All items in the collection"""
         # url('repos')
-        cached_repo_list = HgModel().get_repos()
+        cached_repo_list = ScmModel().get_repos()
         c.repos_list = sorted(cached_repo_list, key=itemgetter('name_sort'))
         return render('admin/repos/repos.html')
 

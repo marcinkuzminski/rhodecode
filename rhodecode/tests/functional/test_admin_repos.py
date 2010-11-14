@@ -1,7 +1,7 @@
 from rhodecode.model.db import Repository
 from rhodecode.tests import *
 
-class TestReposController(TestController):
+class TestAdminReposController(TestController):
 
     def test_index(self):
         self.log_user()
@@ -21,11 +21,8 @@ class TestReposController(TestController):
                                                 'description':description,
                                                 'private':private})
 
-        print response
 
         #test if we have a message for that repository
-        print '-' * 100
-        print response.session
         assert '''created repository %s''' % (repo_name) in response.session['flash'][0], 'No flash message about new repo'
 
         #test if the fork was created in the database
@@ -49,11 +46,8 @@ class TestReposController(TestController):
                                                 'description':description,
                                                 'private':private})
 
-        print response
 
         #test if we have a message for that repository
-        print '-' * 100
-        print response.session
         assert '''created repository %s''' % (repo_name) in response.session['flash'][0], 'No flash message about new repo'
 
         #test if the fork was created in the database
@@ -91,11 +85,8 @@ class TestReposController(TestController):
                                                'description':description,
                                                'private':private})
 
-        print response
 
         #test if we have a message for that repository
-        print '-' * 100
-        print response.session
         assert '''created repository %s''' % (repo_name) in response.session['flash'][0], 'No flash message about new repo'
 
         #test if the repo was created in the database
@@ -112,8 +103,6 @@ class TestReposController(TestController):
 
         response = self.app.delete(url('repo', repo_name=repo_name))
 
-        print '-' * 100
-        print response.session
         assert '''deleted repository %s''' % (repo_name) in response.session['flash'][0], 'No flash message about delete repo'
 
         response.follow()

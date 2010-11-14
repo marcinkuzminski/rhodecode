@@ -1,6 +1,6 @@
 from rhodecode.tests import *
 
-class TestAdminController(TestController):
+class TestHomeController(TestController):
 
     def test_index(self):
         self.log_user()

@@ -33,7 +33,7 @@ project_path = dn(dn(dn(dn(os.path.realpath(__file__)))))
 sys.path.append(project_path)
 
 
-from rhodecode.model.hg import HgModel
+from rhodecode.model.scm import ScmModel
 from rhodecode.lib.helpers import safe_unicode
 from whoosh.index import create_in, open_dir
 from shutil import rmtree
@@ -78,7 +78,7 @@ class WhooshIndexingDaemon(object):
         if not repo_location:
             raise Exception('You have to provide repositories location')
 
-        self.repo_paths = HgModel().repo_scan(self.repo_location, None, True)
+        self.repo_paths = ScmModel().repo_scan(self.repo_location, None, True)
         self.initial = False
         if not os.path.isdir(self.index_location):
             os.mkdir(self.index_location)

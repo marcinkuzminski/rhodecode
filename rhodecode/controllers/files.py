@@ -29,7 +29,7 @@ from pylons.controllers.util import redirect
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseController, render
 from rhodecode.lib.utils import EmptyChangeset
-from rhodecode.model.hg import HgModel
+from rhodecode.model.scm import ScmModel
 from vcs.exceptions import RepositoryError, ChangesetError
 from vcs.nodes import FileNode
 from vcs.utils import diffs as differ
@@ -49,7 +49,7 @@ class FilesController(BaseController):
         c.file_size_limit = 250 * 1024 #limit of file size to display
 
     def index(self, repo_name, revision, f_path):
-        hg_model = HgModel()
+        hg_model = ScmModel()
         c.repo = hg_model.get_repo(c.repo_name)
         revision = request.POST.get('at_rev', None) or revision
 
@@ -95,7 +95,7 @@ class FilesController(BaseController):
         return render('files/files.html')
 
     def rawfile(self, repo_name, revision, f_path):
-        hg_model = HgModel()
+        hg_model = ScmModel()
         c.repo = hg_model.get_repo(c.repo_name)
         file_node = c.repo.get_changeset(revision).get_node(f_path)
         response.content_type = file_node.mimetype
@@ -104,7 +104,7 @@ class FilesController(BaseController):
         return file_node.content
 
     def raw(self, repo_name, revision, f_path):
-        hg_model = HgModel()
+        hg_model = ScmModel()
         c.repo = hg_model.get_repo(c.repo_name)
         file_node = c.repo.get_changeset(revision).get_node(f_path)
         response.content_type = 'text/plain'
@@ -112,7 +112,7 @@ class FilesController(BaseController):
         return file_node.content
 
     def annotate(self, repo_name, revision, f_path):
-        hg_model = HgModel()
+        hg_model = ScmModel()
         c.repo = hg_model.get_repo(c.repo_name)
         c.cs = c.repo.get_changeset(revision)
         c.file = c.cs.get_node(f_path)
@@ -141,7 +141,7 @@ class FilesController(BaseController):
                 yield data
 
         archive = tempfile.TemporaryFile()
-        repo = HgModel().get_repo(repo_name).repo
+        repo = ScmModel().get_repo(repo_name).repo
         fname = '%s-%s%s' % (repo_name, revision, fileformat)
         archival.archive(repo, archive, revision, archive_specs[fileformat][1],
                          prefix='%s-%s' % (repo_name, revision))
@@ -151,7 +151,7 @@ class FilesController(BaseController):
         return read_in_chunks(archive)
 
     def diff(self, repo_name, f_path):
-        hg_model = HgModel()
+        hg_model = ScmModel()
         diff1 = request.GET.get('diff1')
         diff2 = request.GET.get('diff2')
         c.action = request.GET.get('diff')

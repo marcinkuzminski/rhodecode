@@ -28,7 +28,7 @@ from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseController, render
 from rhodecode.lib.utils import EmptyChangeset
 import rhodecode.lib.helpers as h
-from rhodecode.model.hg import HgModel
+from rhodecode.model.scm import ScmModel
 from vcs.exceptions import RepositoryError, ChangesetError
 from vcs.nodes import FileNode
 from vcs.utils import diffs as differ
@@ -46,7 +46,7 @@ class ChangesetController(BaseController):
         super(ChangesetController, self).__before__()
 
     def index(self, revision):
-        hg_model = HgModel()
+        hg_model = ScmModel()
         cut_off_limit = 1024 * 250
 
         def wrap_to_table(str):
@@ -132,7 +132,7 @@ class ChangesetController(BaseController):
 
     def raw_changeset(self, revision):
 
-        hg_model = HgModel()
+        hg_model = ScmModel()
         method = request.GET.get('diff', 'show')
         try:
             r = hg_model.get_repo(c.repo_name)

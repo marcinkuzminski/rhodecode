@@ -102,7 +102,6 @@ class TestLoginController(TestController):
                                              'email':email,
                                              'name':name,
                                              'lastname':lastname})
-        print response.body
         assert response.status == '302 Found', 'Wrong response from register page got %s' % response.status
         assert 'You have successfully registered into rhodecode' in response.session['flash'][0], 'No flash message about user registration'
 

@@ -1,6 +1,6 @@
 from rhodecode.tests import *
 
-class TestPermissionsController(TestController):
+class TestAdminPermissionsController(TestController):
 
     def test_index(self):
         response = self.app.get(url('permissions'))

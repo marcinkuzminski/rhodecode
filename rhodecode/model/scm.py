@@ -40,7 +40,7 @@ import time
 
 log = logging.getLogger(__name__)
 
-class HgModel(object):
+class ScmModel(object):
     """
     Mercurial Model
     """

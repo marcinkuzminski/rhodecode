@@ -9,7 +9,7 @@ from rhodecode import __version__
 from rhodecode.lib import auth
 from rhodecode.lib.utils import get_repo_slug
 from rhodecode.model import meta
-from rhodecode.model.hg import HgModel
+from rhodecode.model.scm import ScmModel
 from vcs import BACKENDS
 
 class BaseController(WSGIController):
@@ -18,11 +18,11 @@ class BaseController(WSGIController):
         c.rhodecode_version = __version__
         c.rhodecode_name = config['rhodecode_title']
         c.repo_name = get_repo_slug(request)
-        c.cached_repo_list = HgModel().get_repos()
+        c.cached_repo_list = ScmModel().get_repos()
         c.backends = BACKENDS.keys()
 
         if c.repo_name:
-            cached_repo = HgModel().get(c.repo_name)
+            cached_repo = ScmModel().get(c.repo_name)
 
             if cached_repo:
                 c.repository_tags = cached_repo.tags

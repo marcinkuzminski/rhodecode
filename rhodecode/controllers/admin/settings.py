@@ -36,7 +36,7 @@ from rhodecode.lib.utils import repo2db_mapper, invalidate_cache, \
 from rhodecode.model.db import RhodeCodeSettings, RhodeCodeUi, Repository
 from rhodecode.model.forms import UserForm, ApplicationSettingsForm, \
     ApplicationUiSettingsForm
-from rhodecode.model.hg import HgModel
+from rhodecode.model.scm import ScmModel
 from rhodecode.model.user import UserModel
 from rhodecode.lib.celerylib import tasks, run_task
 from sqlalchemy import func
@@ -99,7 +99,7 @@ class SettingsController(BaseController):
             rm_obsolete = request.POST.get('destroy', False)
             log.debug('Rescanning directories with destroy=%s', rm_obsolete)
 
-            initial = HgModel().repo_scan(g.paths[0][1], g.baseui)
+            initial = ScmModel().repo_scan(g.paths[0][1], g.baseui)
             for repo_name in initial.keys():
                 invalidate_cache('get_repo_cached_%s' % repo_name)
 
@@ -253,7 +253,7 @@ class SettingsController(BaseController):
             .filter(Repository.user_id == c.user.user_id)\
             .order_by(func.lower(Repository.repo_name))\
             .all()
-        c.user_repos = HgModel().get_repos(all_repos)
+        c.user_repos = ScmModel().get_repos(all_repos)
 
         if c.user.username == 'default':
             h.flash(_("You can't edit this user since it's"
@@ -294,7 +294,7 @@ class SettingsController(BaseController):
                 .filter(Repository.user_id == c.user.user_id)\
                 .order_by(func.lower(Repository.repo_name))\
                 .all()
-            c.user_repos = HgModel().get_repos(all_repos)
+            c.user_repos = ScmModel().get_repos(all_repos)
 
             return htmlfill.render(
                 render('admin/users/user_edit_my_account.html'),

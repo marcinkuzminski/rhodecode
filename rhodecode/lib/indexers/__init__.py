@@ -6,7 +6,7 @@ from os.path import dirname as dn, join as jn
 sys.path.append(dn(dn(dn(os.path.realpath(__file__)))))
 
 from rhodecode.config.environment import load_environment
-from rhodecode.model.hg import HgModel
+from rhodecode.model.scm import ScmModel
 from shutil import rmtree
 from webhelpers.html.builder import escape
 from vcs.utils.lazy import LazyProperty
