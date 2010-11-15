@@ -363,6 +363,12 @@ overflow-x:hidden;
 overflow-y:auto;
 }
 
+#header #header-inner #quick .repo_switcher_type{
+position:absolute;
+left:0;
+top:9px; 
+
+}
 #header #header-inner #quick li ul li {
 border-bottom:1px solid #ddd;
 }
@@ -420,14 +426,14 @@ padding:12px 9px 7px 24px;
 #header #header-inner #quick li ul li a.hg,#header #header-inner #quick li ul li a.hg:hover {
 background:url("../images/icons/hgicon.png") no-repeat scroll 4px 9px #FFF;
 min-width:167px;
-margin:0;
+margin:0 0 0 14px;
 padding:12px 9px 7px 24px;
 }
 
 #header #header-inner #quick li ul li a.git,#header #header-inner #quick li ul li a.git:hover {
 background:url("../images/icons/giticon.png") no-repeat scroll 4px 9px #FFF;
 min-width:167px;
-margin:0;
+margin:0 0 0 14px;
 padding:12px 9px 7px 24px;
 }
 
