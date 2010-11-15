@@ -102,7 +102,8 @@ class ScmModel(object):
         :param all_repos: give specific repositories list, good for filtering
         """
         if not all_repos:
-            all_repos = self.sa.query(Repository).all()
+            all_repos = self.sa.query(Repository)\
+                .order_by(Repository.repo_name).all()
 
         for r in all_repos:
 
