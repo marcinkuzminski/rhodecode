@@ -39,11 +39,11 @@
 				<dd>${c.file.mimetype}</dd>				
 				<dt>${_('Options')}</dt>
 				<dd>${h.link_to(_('show source'),
-						h.url('files_home',repo_name=c.repo_name,revision=c.cs.revision,f_path=c.f_path))}  
+						h.url('files_home',repo_name=c.repo_name,revision=c.cs.raw_id,f_path=c.f_path))}  
 					/ ${h.link_to(_('show as raw'),
-						h.url('files_raw_home',repo_name=c.repo_name,revision=c.cs.revision,f_path=c.f_path))}
+						h.url('files_raw_home',repo_name=c.repo_name,revision=c.cs.raw_id,f_path=c.f_path))}
 					/ ${h.link_to(_('download as raw'),
-						h.url('files_rawfile_home',repo_name=c.repo_name,revision=c.cs.revision,f_path=c.f_path))}
+						h.url('files_rawfile_home',repo_name=c.repo_name,revision=c.cs.raw_id,f_path=c.f_path))}
 				</dd>
 			    <dt>${_('History')}</dt>
 			    <dd>
@@ -71,6 +71,16 @@
 					%endif				
 				</div>
 			</div>
+			<script type="text/javascript">
+			YAHOO.util.Event.onDOMReady(function(){
+			    YAHOO.util.Event.addListener('show_rev','click',function(e){
+			        YAHOO.util.Event.preventDefault(e);
+			        var cs = YAHOO.util.Dom.get('diff1').value;
+			        var url = "${h.url('files_annotate_home',repo_name=c.repo_name,revision='__CS__',f_path=c.f_path)}".replace('__CS__',cs);
+			        window.location = url;
+			        });
+			   });
+			</script>			
 		</div>    
     </div>
 </div>    
