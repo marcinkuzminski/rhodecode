@@ -25,6 +25,17 @@ from webhelpers.text import chop_at, collapse, convert_accented_entities, \
     replace_whitespace, urlify, truncate, wrap_paragraphs
 from webhelpers.date import time_ago_in_words
 
+from webhelpers.html.tags import _set_input_attrs, _set_id_attr, \
+    convert_boolean_attrs, NotGiven
+
+def _reset(name, value=None, id=NotGiven, type="reset", **attrs):
+    _set_input_attrs(attrs, type, name, value)
+    _set_id_attr(attrs, id, name)
+    convert_boolean_attrs(attrs, ["disabled"])
+    return HTML.input(**attrs)
+
+reset = _reset
+
 #Custom helpers here :)
 class _Link(object):
     '''
