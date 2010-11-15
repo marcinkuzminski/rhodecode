@@ -33,11 +33,8 @@ log = logging.getLogger(__name__)
 
 class PermissionModel(object):
 
-    def __init__(self, sa=None):
-        if not sa:
-            self.sa = Session()
-        else:
-            self.sa = sa
+    def __init__(self):
+        self.sa = Session()
 
     def get_permission(self, permission_id, cache=False):
         perm = self.sa.query(Permission)

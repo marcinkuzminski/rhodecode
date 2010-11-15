@@ -36,11 +36,8 @@ class DefaultUserException(Exception):pass
 
 class UserModel(object):
 
-    def __init__(self, sa=None):
-        if not sa:
-            self.sa = Session()
-        else:
-            self.sa = sa
+    def __init__(self):
+        self.sa = Session()
 
     def get(self, user_id, cache=False):
         user = self.sa.query(User)

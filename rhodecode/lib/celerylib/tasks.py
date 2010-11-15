@@ -1,16 +1,18 @@
 from celery.decorators import task
 
+import os
+import traceback
+from time import mktime
+
 from operator import itemgetter
 from pylons.i18n.translation import _
 from rhodecode.lib.celerylib import run_task, locked_task
 from rhodecode.lib.helpers import person
 from rhodecode.lib.smtp_mailer import SmtpMailer
 from rhodecode.lib.utils import OrderedDict
-from time import mktime
-import os
-import traceback
 from vcs.backends import get_repo
-from rhodecode.model.scm import ScmModel
+from rhodecode.model.db import RhodeCodeUi
+
 try:
     import json
 except ImportError:
@@ -44,6 +46,11 @@ def get_session():
 
     return sa
 
+def get_repos_path():
+    sa = get_session()
+    q = sa.query(RhodeCodeUi).filter(RhodeCodeUi.ui_key == '/').one()
+    return q.ui_value
+
 @task
 @locked_task
 def whoosh_index(repo_location, full_index):
@@ -62,7 +69,7 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
 
     commits_by_day_author_aggregate = {}
     commits_by_day_aggregate = {}
-    repos_path = ScmModel().repos_path
+    repos_path = get_repos_path()
     p = os.path.join(repos_path, repo_name)
     repo = get_repo(p)
 
@@ -271,10 +278,10 @@ def create_repo_fork(form_data, cur_user):
     from rhodecode.model.repo import RepoModel
     from vcs import get_backend
     log = create_repo_fork.get_logger()
-    repo_model = RepoModel(get_session())
+    repo_model = RepoModel()
     repo_model.create(form_data, cur_user, just_db=True, fork=True)
     repo_name = form_data['repo_name']
-    repos_path = ScmModel().repos_path
+    repos_path = get_repos_path()
     repo_path = os.path.join(repos_path, repo_name)
     repo_fork_path = os.path.join(repos_path, form_data['fork_name'])
     alias = form_data['repo_type']
@@ -291,7 +298,7 @@ def __get_codes_stats(repo_name):
     's', 'sh', 'tpl', 'txt', 'vim', 'wss', 'xhtml', 'xml', 'xsl', 'xslt', 'yaws']
 
 
-    repos_path = ScmModel().repos_path
+    repos_path = get_repos_path()
     p = os.path.join(repos_path, repo_name)
     repo = get_repo(p)
     tip = repo.get_changeset()

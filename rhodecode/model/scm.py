@@ -28,12 +28,15 @@ from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import HasRepoPermissionAny
 from rhodecode.lib.utils import get_repos
 from rhodecode.model import meta
-from rhodecode.model.db import Repository, User, RhodeCodeUi
+from rhodecode.model.db import Repository, User, RhodeCodeUi, CacheInvalidation
+from rhodecode.model.caching_query import FromCache
 from sqlalchemy.orm import joinedload
+from sqlalchemy.orm.session import make_transient
 from vcs import get_backend
 from vcs.utils.helpers import get_scm
 from vcs.exceptions import RepositoryError, VCSError
 from vcs.utils.lazy import LazyProperty
+import traceback
 import logging
 import os
 import time
@@ -45,12 +48,8 @@ class ScmModel(object):
     Mercurial Model
     """
 
-    def __init__(self, sa=None):
-        if not sa:
-            self.sa = meta.Session()
-        else:
-            self.sa = sa
-
+    def __init__(self):
+        self.sa = meta.Session()
 
     @LazyProperty
     def repos_path(self):
@@ -143,7 +142,7 @@ class ScmModel(object):
                             'repository.admin')(repo_name, 'get repo check'):
             return
 
-        @cache_region('long_term', 'get_repo_cached_%s' % repo_name)
+        @cache_region('long_term')
         def _get_repo(repo_name):
 
             repo_path = os.path.join(self.repos_path, repo_name)
@@ -165,13 +164,76 @@ class ScmModel(object):
                 .options(joinedload(Repository.user))\
                 .filter(Repository.repo_name == repo_name)\
                 .scalar()
+            make_transient(dbrepo)
             repo.dbrepo = dbrepo
             return repo
 
-        invalidate = False
+        invalidate = self._should_invalidate(repo_name)
         if invalidate:
-            log.info('INVALIDATING CACHE FOR %s', repo_name)
+            log.info('invalidating cache for repository %s', repo_name)
             region_invalidate(_get_repo, None, repo_name)
+            self._mark_invalidated(invalidate)
 
         return _get_repo(repo_name)
+
+
+
+    def mark_for_invalidation(self, repo_name):
+        """
+        Puts cache invalidation task into db for 
+        further global cache invalidation
+        
+        :param repo_name: this repo that should invalidation take place
+        """
+        log.debug('marking %s for invalidation', repo_name)
+        cache = self.sa.query(CacheInvalidation)\
+            .filter(CacheInvalidation.cache_key == repo_name).scalar()
+
+        if cache:
+            #mark this cache as inactive
+            cache.cache_active = False
+        else:
+            log.debug('cache key not found in invalidation db -> creating one')
+            cache = CacheInvalidation(repo_name)
+
+        try:
+            self.sa.add(cache)
+            self.sa.commit()
+        except:
+            log.error(traceback.format_exc())
+            self.sa.rollback()
+
+
+
+
+
+    def _should_invalidate(self, repo_name):
+        """
+        Looks up database for invalidation signals for this repo_name
+        :param repo_name:
+        """
+
+        ret = self.sa.query(CacheInvalidation)\
+            .options(FromCache('sql_cache_short',
+                           'get_invalidation_%s' % repo_name))\
+            .filter(CacheInvalidation.cache_key == repo_name)\
+            .filter(CacheInvalidation.cache_active == False)\
+            .scalar()
+
+        return ret
+
+    def _mark_invalidated(self, cache_key):
+        """
+        Marks all occurences of cache to invaldation as already invalidated
+        @param repo_name:
+        """
+        if cache_key:
+            log.debug('marking %s as already invalidated', cache_key)
+        try:
+            cache_key.cache_active = True
+            self.sa.add(cache_key)
+            self.sa.commit()
+        except:
+            log.error(traceback.format_exc())
+            self.sa.rollback()
 

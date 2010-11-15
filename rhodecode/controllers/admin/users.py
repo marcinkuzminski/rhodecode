@@ -17,7 +17,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
-from rhodecode.lib.utils import action_logger
 """
 Created on April 4, 2010
 users controller for pylons

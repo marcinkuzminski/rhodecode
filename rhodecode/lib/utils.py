@@ -89,7 +89,7 @@ def action_logger(user, action, repo, ipaddr='', sa=None):
         if hasattr(user, 'user_id'):
             user_obj = user
         elif isinstance(user, basestring):
-            user_obj = UserModel(sa).get_by_username(user, cache=False)
+            user_obj = UserModel().get_by_username(user, cache=False)
         else:
             raise Exception('You have to provide user object or username')
 
@@ -97,7 +97,7 @@ def action_logger(user, action, repo, ipaddr='', sa=None):
         if repo:
             repo_name = repo.lstrip('/')
 
-            repository = RepoModel(sa).get(repo_name, cache=False)
+            repository = RepoModel().get(repo_name, cache=False)
             if not repository:
                 raise Exception('You have to provide valid repository')
         else:
@@ -293,12 +293,16 @@ def set_rhodecode_config(config):
     for k, v in hgsettings.items():
         config[k] = v
 
-def invalidate_cache(name, *args):
+def invalidate_cache(cache_key, *args):
     """
     Puts cache invalidation task into db for 
     further global cache invalidation
     """
-    pass
+    from rhodecode.model.scm import ScmModel
+
+    if cache_key.startswith('get_repo_cached_'):
+        name = cache_key.split('get_repo_cached_')[-1]
+        ScmModel().mark_for_invalidation(name)
 
 class EmptyChangeset(BaseChangeset):
     """
@@ -340,7 +344,7 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False):
     """
 
     sa = meta.Session()
-    rm = RepoModel(sa)
+    rm = RepoModel()
     user = sa.query(User).filter(User.admin == True).first()
 
     for name, repo in initial_repo_list.items():

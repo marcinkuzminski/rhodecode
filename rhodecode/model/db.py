@@ -90,9 +90,8 @@ class Repository(Base):
     repo_to_perm = relation('RepoToPerm', cascade='all')
     stats = relation('Statistics', cascade='all')
 
-
     def __repr__(self):
-        return "<Repository('id:%s:%s')>" % (self.repo_id, self.repo_name)
+        return "<Repository('%s:%s')>" % (self.repo_id, self.repo_name)
 
 class Permission(Base):
     __tablename__ = 'permissions'
@@ -140,10 +139,17 @@ class Statistics(Base):
 
 class CacheInvalidation(Base):
     __tablename__ = 'cache_invalidation'
-    __table_args__ = {'useexisting':True}
+    __table_args__ = (UniqueConstraint('cache_key'), {'useexisting':True})
     cache_id = Column("cache_id", INTEGER(), nullable=False, unique=True, default=None, primary_key=True)
     cache_key = Column("cache_key", TEXT(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     cache_args = Column("cache_args", TEXT(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
-    cache_active = Column("cache_active", BOOLEAN(), nullable=True, unique=None, default=None)
+    cache_active = Column("cache_active", BOOLEAN(), nullable=True, unique=None, default=False)
 
 
+    def __init__(self, cache_key, cache_args=''):
+        self.cache_key = cache_key
+        self.cache_args = cache_args
+        self.cache_active = False
+
+    def __repr__(self):
+        return "<CacheInvaidation('%s:%s')>" % (self.cache_id, self.cache_key)

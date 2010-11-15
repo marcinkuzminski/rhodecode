@@ -143,7 +143,7 @@ def fill_perms(user):
     #===========================================================================
     # fetch default permissions
     #===========================================================================
-    default_user = UserModel(sa).get_by_username('default', cache=True)
+    default_user = UserModel().get_by_username('default', cache=True)
 
     default_perms = sa.query(RepoToPerm, Repository, Permission)\
         .join((Repository, RepoToPerm.repository_id == Repository.repo_id))\

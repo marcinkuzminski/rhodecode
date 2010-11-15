@@ -31,7 +31,7 @@ from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator
 from rhodecode.lib.base import BaseController, render
 from rhodecode.model.forms import UserForm, DefaultPermissionsForm
-from rhodecode.model.permission_model import PermissionModel
+from rhodecode.model.permission import PermissionModel
 from rhodecode.model.user import UserModel
 import formencode
 import logging

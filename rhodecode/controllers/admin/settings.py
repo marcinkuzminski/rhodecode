@@ -248,7 +248,7 @@ class SettingsController(BaseController):
         """
 
         # url('admin_settings_my_account')
-        c.user = UserModel(self.sa).get(c.rhodecode_user.user_id, cache=False)
+        c.user = UserModel().get(c.rhodecode_user.user_id, cache=False)
         all_repos = self.sa.query(Repository)\
             .filter(Repository.user_id == c.user.user_id)\
             .order_by(func.lower(Repository.repo_name))\
@@ -289,7 +289,7 @@ class SettingsController(BaseController):
 
         except formencode.Invalid, errors:
             c.user = user_model.get(c.rhodecode_user.user_id, cache=False)
-            c.user = UserModel(self.sa).get(c.rhodecode_user.user_id, cache=False)
+            c.user = UserModel().get(c.rhodecode_user.user_id, cache=False)
             all_repos = self.sa.query(Repository)\
                 .filter(Repository.user_id == c.user.user_id)\
                 .order_by(func.lower(Repository.repo_name))\
