@@ -73,6 +73,15 @@ def check_password(password, hashed):
     return bcrypt.hashpw(password, hashed) == hashed
 
 def authfunc(environ, username, password):
+    """
+    Authentication function used in Mercurial/Git/ and access controll,
+    firstly checks for db authentication then if ldap is enabled for ldap
+    authentication
+    :param environ: needed only for using in Basic auth, can be None
+    :param username: username
+    :param password: password
+    """
+
     user = UserModel().get_by_username(username, cache=False)
 
     if user:

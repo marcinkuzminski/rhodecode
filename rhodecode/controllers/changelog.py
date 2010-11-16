@@ -74,7 +74,9 @@ class ChangelogController(BaseController):
 
     def _graph(self, repo, size, p):
         revcount = size
-        if not repo.revisions:return json.dumps([]), 0
+        if not repo.revisions or repo.alias == 'git':
+            c.jsdata = json.dumps([])
+            return
 
         max_rev = repo.revisions[-1]
 

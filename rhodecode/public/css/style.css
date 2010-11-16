@@ -825,16 +825,8 @@ font-weight:700;
 #content div.box div.form div.fields div.field div.input {
 margin:0 0 0 200px;
 }
-
 #content div.box-left div.form div.fields div.field div.input,#content div.box-right div.form div.fields div.field div.input {
-clear:both;
-overflow:hidden;
-border-top:1px solid #b3b3b3;
-border-left:1px solid #b3b3b3;
-border-right:1px solid #eaeaea;
-border-bottom:1px solid #eaeaea;
-margin:0;
-padding:7px 7px 6px;
+margin:0 0 0 0px;
 }
 
 #content div.box div.form div.fields div.field div.input input {
@@ -850,11 +842,7 @@ margin:0;
 padding:7px 7px 6px;
 }
 
-#content div.box-left div.form div.fields div.field div.input input,#content div.box-right div.form div.fields div.field div.input input {
-width:100%;
-border:none;
-padding:0;
-}
+
 
 #content div.box div.form div.fields div.field div.input input.small {
 width:30%;
@@ -2066,10 +2054,6 @@ margin:0;
 padding:0;
 }
 
-#content div.box div.form div.fields div.field div.label-checkbox,#content div.box div.form div.fields div.field div.label-radio,#content div.box div.form div.fields div.field div.label-textarea {
-padding:0 0 0 5px !important;
-}
-
 #content div.box div.form div.fields div.field div.label span,#login div.form div.fields div.field div.label span,#register div.form div.fields div.field div.label span {
 height:1%;
 display:block;
@@ -2098,10 +2082,16 @@ border-bottom:1px solid #c6d880;
 margin:0;
 }
 
+#content div.box-left div.form div.fields div.field div.select,#content div.box-left div.form div.fields div.field div.checkboxes,#content div.box-left div.form div.fields div.field div.radios,#content div.box-right div.form div.fields div.field div.select,#content div.box-right div.form div.fields div.field div.checkboxes,#content div.box-right div.form div.fields div.field div.radios{
+margin:0 0 0 0px !important;
+padding:0;
+}
+
 #content div.box div.form div.fields div.field div.select,#content div.box div.form div.fields div.field div.checkboxes,#content div.box div.form div.fields div.field div.radios {
 margin:0 0 0 200px;
 padding:0;
 }
+
 
 #content div.box div.form div.fields div.field div.select a:hover,#content div.box div.form div.fields div.field div.select a.ui-selectmenu:hover,#content div.box div.action a:hover {
 color:#000;

@@ -65,7 +65,9 @@ def whoosh_index(repo_location, full_index):
 def get_commits_stats(repo_name, ts_min_y, ts_max_y):
     from rhodecode.model.db import Statistics, Repository
     log = get_commits_stats.get_logger()
-    author_key_cleaner = lambda k: person(k).replace('"', "") #for js data compatibilty
+
+    #for js data compatibilty
+    author_key_cleaner = lambda k: person(k).replace('"', "")
 
     commits_by_day_author_aggregate = {}
     commits_by_day_aggregate = {}
@@ -91,8 +93,8 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
         return True
 
     if last_rev == repo.revisions[-1] and len(repo.revisions) > 1:
-        #pass silently without any work if we're not on first revision or current
-        #state of parsing revision(from db marker) is the last revision
+        #pass silently without any work if we're not on first revision or 
+        #current state of parsing revision(from db marker) is the last revision
         return True
 
     if cur_stats:

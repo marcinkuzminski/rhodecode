@@ -18,7 +18,7 @@
 </%def>
 
 <%def name="main()">
-<div class="box">
+<div class="box box-left">
     <!-- box / title -->
     <div class="title">
         ${self.breadcrumbs()}      
@@ -32,7 +32,7 @@
                     <label for="repo_name">${_('Name')}:</label>
                 </div>
                 <div class="input input-medium">
-                    ${h.text('repo_name',class_="small")}
+                    ${h.text('repo_name',class_="medium")}
                 </div>
              </div>
             <div class="field">
@@ -40,7 +40,7 @@
                     <label for="repo_type">${_('Type')}:</label>
                 </div>
                 <div class="input">
-                    ${h.select('repo_type','hg',c.backends,class_="small")}
+                    ${h.select('repo_type','hg',c.backends,class_="medium")}
                 </div>
              </div>             
             <div class="field">
@@ -280,4 +280,23 @@
         </script>      
 
 </div>
+
+<div class="box box-right">
+    <div class="title">
+        <h5>${_('Administration')}</h5>    
+    </div>
+    
+    <div class="form">
+    
+        <h3>${_('Reset statistics')}</h3>
+        <h3>${_('Reset cache')}</h3>
+        <h3>${_('Delete')}</h3>
+        
+        
+    
+    </div>
+    
+</div>
+
+
 </%def> 

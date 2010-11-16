@@ -24,7 +24,7 @@ from formencode.validators import UnicodeString, OneOf, Int, Number, Regex, \
     Email, Bool, StringBoolean
 from pylons import session
 from pylons.i18n.translation import _
-from rhodecode.lib.auth import check_password, get_crypt_password
+from rhodecode.lib.auth import authfunc, get_crypt_password
 from rhodecode.model import meta
 from rhodecode.model.user import UserModel
 from rhodecode.model.repo import RepoModel
@@ -94,26 +94,21 @@ class ValidAuth(formencode.validators.FancyValidator):
         password = value['password']
         username = value['username']
         user = UserModel().get_by_username(username)
-        if user is None:
-            raise formencode.Invalid(self.message('invalid_password',
-                                     state=State_obj), value, state,
-                                     error_dict=self.e_dict)
-        if user:
-            if user.active:
-                if user.username == username and check_password(password,
-                                                                user.password):
-                    return value
-                else:
-                    log.warning('user %s not authenticated', username)
-                    raise formencode.Invalid(self.message('invalid_password',
-                                             state=State_obj), value, state,
-                                             error_dict=self.e_dict)
-            else:
+
+        if authfunc(None, username, password):
+            return value
+        else:
+            if user and user.active is False:
                 log.warning('user %s is disabled', username)
                 raise formencode.Invalid(self.message('disabled_account',
                                          state=State_obj),
                                          value, state,
                                          error_dict=self.e_dict_disable)
+            else:
+                log.warning('user %s not authenticated', username)
+                raise formencode.Invalid(self.message('invalid_password',
+                                         state=State_obj), value, state,
+                                         error_dict=self.e_dict)
 
 class ValidRepoUser(formencode.validators.FancyValidator):
 
