@@ -11,6 +11,7 @@ from rhodecode.lib.middleware.simplehg import SimpleHg
 from rhodecode.lib.middleware.simplegit import SimpleGit
 from rhodecode.lib.middleware.https_fixup import HttpsFixup
 from rhodecode.config.environment import load_environment
+from paste.gzipper import make_gzip_middleware
 
 def make_app(global_conf, full_stack=True, static_files=True, **app_conf):
     """Create a Pylons WSGI application and return it
@@ -67,6 +68,7 @@ def make_app(global_conf, full_stack=True, static_files=True, **app_conf):
         # Serve static files
         static_app = StaticURLParser(config['pylons.paths']['static_files'])
         app = Cascade([static_app, app])
+        app = make_gzip_middleware(app, global_conf, compress_level=1)
 
     app.config = config
 
