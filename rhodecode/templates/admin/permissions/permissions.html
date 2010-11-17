@@ -37,7 +37,7 @@
                 </div>
             </div>        
 			<div class="field">
-				<div class="label">
+				<div class="label label-select">
 					<label for="default_perm">${_('Repository permission')}:</label>
 				</div>
 				<div class="select">
@@ -73,5 +73,53 @@
         </div>
     </div>  
     ${h.end_form()}
+    ##LDAP
+    <h3>${_('LDAP settings')}</h3>
+    ${h.form(url('permissions_ldap',id_iser='default'),method='put')}
+    <div class="form">
+        <div class="fields">
+
+            <div class="field">
+                <div class="label label-checkbox"><label for="ldap_active">${_('Enable ldap')}</label></div>
+	            <div class="checkboxes"><div class="checkbox">${h.checkbox('ldap_active',True,class_='small')}</div></div>
+            </div>
+            <div class="field">
+                <div class="label"><label for="ldap_host">${_('Host')}</label></div>
+                <div class="input">${h.text('ldap_host',class_='small')}</div>
+            </div>
+            <div class="field">
+                <div class="label"><label for="ldap_port">${_('Port')}</label></div>
+                <div class="input">${h.text('ldap_port',class_='small')}</div>
+            </div>
+            <div class="field">
+                <div class="label label-checkbox"><label for="ldap_ldaps">${_('LDAPS')}</label></div>
+                <div class="checkboxes"><div class="checkbox">${h.checkbox('ldap_ldaps',True,class_='small')}</div></div>
+            </div>
+            <div class="field">
+                <div class="label"><label for="ldap_dn_user">${_('Account')}</label></div>
+                <div class="input">${h.text('ldap_dn_user',class_='small')}</div>
+            </div>
+            <div class="field">
+                <div class="label"><label for="ldap_dn_pass">${_('Password')}</label></div>
+                <div class="input">${h.password('ldap_dn_pass',class_='small')}</div>
+            </div>
+            <div class="field">
+                <div class="label"><label for="ldap_base_dn">${_('Base DN')}</label></div>
+                <div class="input">${h.text('ldap_base_dn',class_='small')}</div>
+            </div>
+            
+            <div class="buttons">
+            ${h.submit('save','Save',class_="ui-button ui-widget ui-state-default ui-corner-all")}
+            </div>              
+        </div>
+    </div>     
+    ${h.end_form()}
 </div>
 </%def>    
+
+
+
+
+
+
+   
