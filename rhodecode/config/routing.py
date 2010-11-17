@@ -79,6 +79,8 @@ def make_map(config):
 
     #ADMIN PERMISSIONS REST ROUTES
     map.resource('permission', 'permissions', controller='admin/permissions', path_prefix='/_admin')
+    map.connect('permissions_ldap', '/_admin/permissions_ldap', controller='admin/permissions', action='ldap')
+
 
     #ADMIN SETTINGS REST ROUTES
     with map.submapper(path_prefix='/_admin', controller='admin/settings') as m:

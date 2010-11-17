@@ -96,8 +96,3 @@ class PermissionModel(object):
             log.error(traceback.format_exc())
             self.sa.rollback()
             raise
-
-
-
-
-

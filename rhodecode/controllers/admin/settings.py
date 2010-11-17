@@ -31,14 +31,15 @@ from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator, \
     HasPermissionAnyDecorator
 from rhodecode.lib.base import BaseController, render
+from rhodecode.lib.celerylib import tasks, run_task
 from rhodecode.lib.utils import repo2db_mapper, invalidate_cache, \
     set_rhodecode_config, get_hg_settings, get_hg_ui_settings
-from rhodecode.model.db import RhodeCodeSettings, RhodeCodeUi, Repository
+from rhodecode.model.db import RhodeCodeUi, Repository
 from rhodecode.model.forms import UserForm, ApplicationSettingsForm, \
     ApplicationUiSettingsForm
 from rhodecode.model.scm import ScmModel
+from rhodecode.model.settings import SettingsModel
 from rhodecode.model.user import UserModel
-from rhodecode.lib.celerylib import tasks, run_task
 from sqlalchemy import func
 import formencode
 import logging
@@ -118,18 +119,12 @@ class SettingsController(BaseController):
             application_form = ApplicationSettingsForm()()
             try:
                 form_result = application_form.to_python(dict(request.POST))
-
+                settings_model = SettingsModel()
                 try:
-                    hgsettings1 = self.sa.query(RhodeCodeSettings)\
-                        .filter(RhodeCodeSettings.app_settings_name \
-                                == 'title').one()
-
+                    hgsettings1 = settings_model.get('title')
                     hgsettings1.app_settings_value = form_result['rhodecode_title']
 
-                    hgsettings2 = self.sa.query(RhodeCodeSettings)\
-                        .filter(RhodeCodeSettings.app_settings_name \
-                                == 'realm').one()
-
+                    hgsettings2 = settings_model('realm')
                     hgsettings2.app_settings_value = form_result['rhodecode_realm']
 
 

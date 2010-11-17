@@ -51,6 +51,17 @@ class SettingsModel(object):
 
 
     def get_ldap_settings(self):
+        """
+        Returns ldap settings from database
+        :returns:
+        ldap_active
+        ldap_host
+        ldap_port 
+        ldap_ldaps
+        ldap_dn_user 
+        ldap_dn_pass 
+        ldap_base_dn
+        """
 
         r = self.sa.query(RhodeCodeSettings)\
                 .filter(RhodeCodeSettings.app_settings_name\

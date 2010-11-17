@@ -1,7 +1,3 @@
-import logging
-logging.basicConfig(level=logging.DEBUG)
-log = logging.getLogger('ldap')
-
 #==============================================================================
 # LDAP
 #Name     = Just a description for the auth modes page
@@ -11,76 +7,87 @@ log = logging.getLogger('ldap')
 #Account  = DepartmentName\UserName (or UserName@MyDomain depending on AD server)
 #Password = <password>
 #Base DN  = DC=DepartmentName,DC=OrganizationName,DC=local
-#
-#On-the-fly user creation = yes
-#Attributes
-#  Login     = sAMAccountName
-#  Firstname = givenName
-#  Lastname  = sN
-#  Email     = mail
 
 #==============================================================================
-class UsernameError(Exception):pass
-class PasswordError(Exception):pass
 
-LDAP_USE_LDAPS = False
-ldap_server_type = 'ldap'
-LDAP_SERVER_ADDRESS = 'myldap.com'
-LDAP_SERVER_PORT = '389'
+from rhodecode.lib.exceptions import LdapImportError, UsernameError, \
+    PasswordError, ConnectionError
+import logging
 
-#USE FOR READ ONLY BIND TO LDAP SERVER
-LDAP_BIND_DN = ''
-LDAP_BIND_PASS = ''
+log = logging.getLogger(__name__)
 
-if LDAP_USE_LDAPS:ldap_server_type = ldap_server_type + 's'
-LDAP_SERVER = "%s://%s:%s" % (ldap_server_type,
-                                       LDAP_SERVER_ADDRESS,
-                                       LDAP_SERVER_PORT)
+try:
+    import ldap
+except ImportError:
+    pass
 
-BASE_DN = "ou=people,dc=server,dc=com"
-AUTH_DN = "uid=%s,%s"
+class AuthLdap(object):
 
-def authenticate_ldap(username, password):
-    """Authenticate a user via LDAP and return his/her LDAP properties.
+    def __init__(self, server, base_dn, port=389, bind_dn='', bind_pass='',
+                 use_ldaps=False, ldap_version=3):
+        self.ldap_version = ldap_version
+        if use_ldaps:
+            port = port or 689
+        self.LDAP_USE_LDAPS = use_ldaps
+        self.LDAP_SERVER_ADDRESS = server
+        self.LDAP_SERVER_PORT = port
 
-    Raises AuthenticationError if the credentials are rejected, or
-    EnvironmentError if the LDAP server can't be reached.
-    """
-    try:
-        import ldap
-    except ImportError:
-        raise Exception('Could not import ldap make sure You install python-ldap')
+        #USE FOR READ ONLY BIND TO LDAP SERVER
+        self.LDAP_BIND_DN = bind_dn
+        self.LDAP_BIND_PASS = bind_pass
 
-    from rhodecode.lib.helpers import chop_at
+        ldap_server_type = 'ldap'
+        if self.LDAP_USE_LDAPS:ldap_server_type = ldap_server_type + 's'
+        self.LDAP_SERVER = "%s://%s:%s" % (ldap_server_type,
+                                               self.LDAP_SERVER_ADDRESS,
+                                               self.LDAP_SERVER_PORT)
 
-    uid = chop_at(username, "@%s" % LDAP_SERVER_ADDRESS)
-    dn = AUTH_DN % (uid, BASE_DN)
-    log.debug("Authenticating %r at %s", dn, LDAP_SERVER)
-    if "," in username:
-        raise UsernameError("invalid character in username: ,")
-    try:
-        #ldap.set_option(ldap.OPT_X_TLS_CACERTFILE, '/etc/openldap/cacerts')
-        server = ldap.initialize(LDAP_SERVER)
-        server.protocol = ldap.VERSION3
+        self.BASE_DN = base_dn
+        self.AUTH_DN = "uid=%s,%s"
+
+    def authenticate_ldap(self, username, password):
+        """Authenticate a user via LDAP and return his/her LDAP properties.
+    
+        Raises AuthenticationError if the credentials are rejected, or
+        EnvironmentError if the LDAP server can't be reached.
         
-        if LDAP_BIND_DN and LDAP_BIND_PASS:
-            server.simple_bind_s(AUTH_DN % (LDAP_BIND_DN,
-                                            LDAP_BIND_PASS),
-                                            password)
-        
-        server.simple_bind_s(dn, password)
-        properties = server.search_s(dn, ldap.SCOPE_SUBTREE)
-        if not properties:
-            raise ldap.NO_SUCH_OBJECT()
-    except ldap.NO_SUCH_OBJECT, e:
-        log.debug("LDAP says no such user '%s' (%s)", uid, username)
-        raise UsernameError()
-    except ldap.INVALID_CREDENTIALS, e:
-        log.debug("LDAP rejected password for user '%s' (%s)", uid, username)
-        raise PasswordError()
-    except ldap.SERVER_DOWN, e:
-        raise EnvironmentError("can't access authentication server")
-    return properties
+        :param username: username
+        :param password: password
+        """
 
+        from rhodecode.lib.helpers import chop_at
 
-print authenticate_ldap('test', 'test')
+        uid = chop_at(username, "@%s" % self.LDAP_SERVER_ADDRESS)
+        dn = self.AUTH_DN % (uid, self.BASE_DN)
+        log.debug("Authenticating %r at %s", dn, self.LDAP_SERVER)
+        if "," in username:
+            raise UsernameError("invalid character in username: ,")
+        try:
+            ldap.set_option(ldap.OPT_X_TLS_CACERTFILE, '/etc/openldap/cacerts')
+            ldap.set_option(ldap.OPT_NETWORK_TIMEOUT, 10)
+            server = ldap.initialize(self.LDAP_SERVER)
+            if self.ldap_version == 2:
+                server.protocol = ldap.VERSION2
+            else:
+                server.protocol = ldap.VERSION3
+
+            if self.LDAP_BIND_DN and self.LDAP_BIND_PASS:
+                server.simple_bind_s(self.AUTH_DN % (self.LDAP_BIND_DN,
+                                                self.BASE_DN),
+                                                self.LDAP_BIND_PASS)
+
+            server.simple_bind_s(dn, password)
+            properties = server.search_s(dn, ldap.SCOPE_SUBTREE)
+            if not properties:
+                raise ldap.NO_SUCH_OBJECT()
+        except ldap.NO_SUCH_OBJECT, e:
+            log.debug("LDAP says no such user '%s' (%s)", uid, username)
+            raise UsernameError()
+        except ldap.INVALID_CREDENTIALS, e:
+            log.debug("LDAP rejected password for user '%s' (%s)", uid, username)
+            raise PasswordError()
+        except ldap.SERVER_DOWN, e:
+            raise ConnectionError("LDAP can't access authentication server")
+
+        return properties[0]
+

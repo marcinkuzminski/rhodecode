@@ -29,9 +29,11 @@ from pylons.controllers.util import abort, redirect
 from pylons.i18n.translation import _
 from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator
+from rhodecode.lib.auth_ldap import LdapImportError
 from rhodecode.lib.base import BaseController, render
-from rhodecode.model.forms import UserForm, DefaultPermissionsForm
+from rhodecode.model.forms import LdapSettingsForm, DefaultPermissionsForm
 from rhodecode.model.permission import PermissionModel
+from rhodecode.model.settings import SettingsModel
 from rhodecode.model.user import UserModel
 import formencode
 import logging
@@ -99,17 +101,19 @@ class PermissionsController(BaseController):
             form_result = _form.to_python(dict(request.POST))
             form_result.update({'perm_user_name':id})
             permission_model.update(form_result)
-            h.flash(_('Default permissions updated succesfully'),
+            h.flash(_('Default permissions updated successfully'),
                     category='success')
 
         except formencode.Invalid, errors:
             c.perms_choices = self.perms_choices
             c.register_choices = self.register_choices
             c.create_choices = self.create_choices
+            defaults = errors.value
+            defaults.update(SettingsModel().get_ldap_settings())
 
             return htmlfill.render(
                 render('admin/permissions/permissions.html'),
-                defaults=errors.value,
+                defaults=defaults,
                 errors=errors.error_dict or {},
                 prefix_error=False,
                 encoding="UTF-8")
@@ -146,6 +150,7 @@ class PermissionsController(BaseController):
             default_user = UserModel().get_by_username('default')
             defaults = {'_method':'put',
                         'anonymous':default_user.active}
+            defaults.update(SettingsModel().get_ldap_settings())
             for p in default_user.user_perms:
                 if p.permission.permission_name.startswith('repository.'):
                     defaults['default_perm'] = p.permission.permission_name
@@ -163,3 +168,50 @@ class PermissionsController(BaseController):
                         force_defaults=True,)
         else:
             return redirect(url('admin_home'))
+
+
+    def ldap(self, id_user='default'):
+        """
+        POST ldap create and store ldap settings
+        """
+
+        settings_model = SettingsModel()
+        _form = LdapSettingsForm()()
+
+        try:
+            form_result = _form.to_python(dict(request.POST))
+            try:
+
+                for k, v in form_result.items():
+                    if k.startswith('ldap_'):
+                        setting = settings_model.get(k)
+                        setting.app_settings_value = v
+                        self.sa.add(setting)
+
+                self.sa.commit()
+                h.flash(_('Ldap settings updated successfully'),
+                    category='success')
+            except:
+                raise
+        except LdapImportError:
+            h.flash(_('Unable to activate ldap. The "ldap-python" library '
+                      'is missing.'),
+                    category='warning')
+
+        except formencode.Invalid, errors:
+            c.perms_choices = self.perms_choices
+            c.register_choices = self.register_choices
+            c.create_choices = self.create_choices
+
+            return htmlfill.render(
+                render('admin/permissions/permissions.html'),
+                defaults=errors.value,
+                errors=errors.error_dict or {},
+                prefix_error=False,
+                encoding="UTF-8")
+        except Exception:
+            log.error(traceback.format_exc())
+            h.flash(_('error occured during update of ldap settings'),
+                    category='error')
+
+        return redirect(url('edit_permission', id=id_user))

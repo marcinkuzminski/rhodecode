@@ -25,6 +25,7 @@ Created on April 4, 2010
 from pylons import config, session, url, request
 from pylons.controllers.util import abort, redirect
 from rhodecode.lib.utils import get_repo_slug
+from rhodecode.lib.auth_ldap import AuthLdap, UsernameError, PasswordError
 from rhodecode.model import meta
 from rhodecode.model.user import UserModel
 from rhodecode.model.caching_query import FromCache
@@ -34,6 +35,7 @@ import bcrypt
 from decorator import decorator
 import logging
 import random
+import traceback
 
 log = logging.getLogger(__name__)
 
@@ -74,17 +76,18 @@ def check_password(password, hashed):
 
 def authfunc(environ, username, password):
     """
-    Authentication function used in Mercurial/Git/ and access controll,
+    Authentication function used in Mercurial/Git/ and access control,
     firstly checks for db authentication then if ldap is enabled for ldap
-    authentication
+    authentication, also creates ldap user if not in database
+    
     :param environ: needed only for using in Basic auth, can be None
     :param username: username
     :param password: password
     """
+    user_model = UserModel()
+    user = user_model.get_by_username(username, cache=False)
 
-    user = UserModel().get_by_username(username, cache=False)
-
-    if user:
+    if user is not None and user.is_ldap is False:
         if user.active:
 
             if user.username == 'default' and user.active:
@@ -97,6 +100,40 @@ def authfunc(environ, username, password):
         else:
             log.error('user %s is disabled', username)
 
+
+    else:
+        from rhodecode.model.settings import SettingsModel
+        ldap_settings = SettingsModel().get_ldap_settings()
+
+        #======================================================================
+        # FALLBACK TO LDAP AUTH IN ENABLE                
+        #======================================================================
+        if ldap_settings.get('ldap_active', False):
+            kwargs = {
+                  'server':ldap_settings.get('ldap_host', ''),
+                  'base_dn':ldap_settings.get('ldap_base_dn', ''),
+                  'port':ldap_settings.get('ldap_port'),
+                  'bind_dn':ldap_settings.get('ldap_dn_user'),
+                  'bind_pass':ldap_settings.get('ldap_dn_pass'),
+                  'use_ldaps':ldap_settings.get('ldap_ldaps'),
+                  'ldap_version':3,
+                  }
+            log.debug('Checking for ldap authentication')
+            try:
+                aldap = AuthLdap(**kwargs)
+                res = aldap.authenticate_ldap(username, password)
+
+                authenticated = res[1]['uid'][0] == username
+
+                if authenticated and user_model.create_ldap(username, password):
+                    log.info('created new ldap user')
+
+                return authenticated
+            except (UsernameError, PasswordError):
+                return False
+            except:
+                log.error(traceback.format_exc())
+                return False
     return False
 
 class  AuthUser(object):

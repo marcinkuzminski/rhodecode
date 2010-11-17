@@ -68,6 +68,36 @@ class UserModel(object):
             self.sa.rollback()
             raise
 
+    def create_ldap(self, username, password):
+        """
+        Checks if user is in database, if not creates this user marked
+        as ldap user
+        :param username:
+        :param password:
+        """
+
+        if self.get_by_username(username) is None:
+            try:
+                new_user = User()
+                new_user.username = username
+                new_user.password = password
+                new_user.email = '%s@ldap.server' % username
+                new_user.active = True
+                new_user.is_ldap = True
+                new_user.name = '%s@ldap' % username
+                new_user.lastname = ''
+
+
+                self.sa.add(new_user)
+                self.sa.commit()
+                return True
+            except:
+                log.error(traceback.format_exc())
+                self.sa.rollback()
+                raise
+
+        return False
+
     def create_registration(self, form_data):
         from rhodecode.lib.celerylib import tasks, run_task
         try:

@@ -25,6 +25,7 @@ from formencode.validators import UnicodeString, OneOf, Int, Number, Regex, \
 from pylons import session
 from pylons.i18n.translation import _
 from rhodecode.lib.auth import authfunc, get_crypt_password
+from rhodecode.lib.exceptions import LdapImportError
 from rhodecode.model import meta
 from rhodecode.model.user import UserModel
 from rhodecode.model.repo import RepoModel
@@ -82,7 +83,7 @@ class ValidAuth(formencode.validators.FancyValidator):
     messages = {
             'invalid_password':_('invalid password'),
             'invalid_login':_('invalid user name'),
-            'disabled_account':_('Your acccount is disabled')
+            'disabled_account':_('Your account is disabled')
 
             }
     #error mapping
@@ -236,6 +237,16 @@ class ValidSystemEmail(formencode.validators.FancyValidator):
 
         return value
 
+class LdapLibValidator(formencode.validators.FancyValidator):
+
+    def to_python(self, value, state):
+
+        try:
+            import ldap
+        except ImportError:
+            raise LdapImportError
+        return value
+
 #===============================================================================
 # FORMS        
 #===============================================================================
@@ -352,10 +363,26 @@ def DefaultPermissionsForm(perms_choices, register_choices, create_choices):
     class _DefaultPermissionsForm(formencode.Schema):
         allow_extra_fields = True
         filter_extra_fields = True
-        overwrite_default = OneOf(['true', 'false'], if_missing='false')
+        overwrite_default = StringBoolean(if_missing=False)
         anonymous = OneOf(['True', 'False'], if_missing=False)
         default_perm = OneOf(perms_choices)
         default_register = OneOf(register_choices)
         default_create = OneOf(create_choices)
 
     return _DefaultPermissionsForm
+
+
+def LdapSettingsForm():
+    class _LdapSettingsForm(formencode.Schema):
+        allow_extra_fields = True
+        filter_extra_fields = True
+        pre_validators = [LdapLibValidator]
+        ldap_active = StringBoolean(if_missing=False)
+        ldap_host = UnicodeString(strip=True,)
+        ldap_port = Number(strip=True,)
+        ldap_ldaps = StringBoolean(if_missing=False)
+        ldap_dn_user = UnicodeString(strip=True,)
+        ldap_dn_pass = UnicodeString(strip=True,)
+        ldap_base_dn = UnicodeString(strip=True,)
+
+    return _LdapSettingsForm
