@@ -806,7 +806,7 @@ padding:0 0 8px;
 }
 
 #content div.box div.form div.fields div.field div.label-select {
-padding:2px 0 0 5px;
+padding:5px 0 0 5px;
 }
 
 #content div.box-left div.form div.fields div.field div.label-select,#content div.box-right div.form div.fields div.field div.label-select {
@@ -2106,7 +2106,7 @@ border:1px solid #666;
 clear:both;
 overflow:hidden;
 margin:0;
-padding:2px 2px;
+padding:8px 0 2px;
 }
 
 #content div.box div.form div.fields div.field div.checkboxes div.checkbox input,#content div.box div.form div.fields div.field div.radios div.radio input {
@@ -2118,7 +2118,7 @@ margin:0;
 height:1%;
 display:block;
 float:left;
-margin:3px 0 0 4px;
+margin:2px 0 0 4px;
 }
 
 div.form div.fields div.field div.button input,#content div.box div.form div.fields div.buttons input,div.form div.fields div.buttons input,#content div.box div.action div.button input {
