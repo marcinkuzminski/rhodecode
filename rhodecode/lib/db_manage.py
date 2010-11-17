@@ -176,16 +176,13 @@ class DbManage(object):
         paths.ui_value = path
 
 
-        hgsettings1 = RhodeCodeSettings()
+        hgsettings1 = RhodeCodeSettings('realm', 'RhodeCode authentication')
+        hgsettings2 = RhodeCodeSettings('title', 'RhodeCode')
 
-        hgsettings1.app_settings_name = 'realm'
-        hgsettings1.app_settings_value = 'RhodeCode authentication'
-
-        hgsettings2 = RhodeCodeSettings()
-        hgsettings2.app_settings_name = 'title'
-        hgsettings2.app_settings_value = 'RhodeCode'
 
         try:
+
+
             self.sa.add(hooks1)
             self.sa.add(hooks2)
             self.sa.add(hooks3)
@@ -197,6 +194,12 @@ class DbManage(object):
             self.sa.add(paths)
             self.sa.add(hgsettings1)
             self.sa.add(hgsettings2)
+            for k in ['ldap_active', 'ldap_host', 'ldap_port', 'ldap_ldaps',
+                      'ldap_dn_user', 'ldap_dn_pass', 'ldap_base_dn']:
+
+                setting = RhodeCodeSettings(k, '')
+                self.sa.add(setting)
+
             self.sa.commit()
         except:
             self.sa.rollback()

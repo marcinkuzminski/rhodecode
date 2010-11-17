@@ -13,6 +13,14 @@ class RhodeCodeSettings(Base):
     app_settings_name = Column("app_settings_name", TEXT(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     app_settings_value = Column("app_settings_value", TEXT(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
 
+    def __init__(self, k, v):
+        self.app_settings_name = k
+        self.app_settings_value = v
+
+    def __repr__(self):
+        return "<RhodeCodeSetting('%s:%s')>" % (self.app_settings_name,
+                                                self.app_settings_value)
+
 class RhodeCodeUi(Base):
     __tablename__ = 'rhodecode_ui'
     __table_args__ = {'useexisting':True}
@@ -35,9 +43,10 @@ class User(Base):
     lastname = Column("lastname", TEXT(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     email = Column("email", TEXT(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     last_login = Column("last_login", DATETIME(timezone=False), nullable=True, unique=None, default=None)
+    is_ldap = Column("is_ldap", BOOLEAN(), nullable=False, unique=None, default=False)
 
-    user_log = relation('UserLog')
-    user_perms = relation('UserToPerm', primaryjoin="User.user_id==UserToPerm.user_id")
+    user_log = relation('UserLog', cascade='all')
+    user_perms = relation('UserToPerm', primaryjoin="User.user_id==UserToPerm.user_id", cascade='all')
 
     @LazyProperty
     def full_contact(self):
