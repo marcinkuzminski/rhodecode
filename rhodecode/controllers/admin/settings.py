@@ -124,7 +124,7 @@ class SettingsController(BaseController):
                     hgsettings1 = settings_model.get('title')
                     hgsettings1.app_settings_value = form_result['rhodecode_title']
 
-                    hgsettings2 = settings_model('realm')
+                    hgsettings2 = settings_model.get('realm')
                     hgsettings2.app_settings_value = form_result['rhodecode_realm']
 
 
