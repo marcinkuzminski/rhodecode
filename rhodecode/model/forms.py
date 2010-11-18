@@ -76,8 +76,34 @@ def ValidUsername(edit, old_data):
 class ValidPassword(formencode.validators.FancyValidator):
 
     def to_python(self, value, state):
+
         if value:
-            return get_crypt_password(value)
+
+            if value.get('password'):
+                try:
+                    value['password'] = get_crypt_password(value['password'])
+                except UnicodeEncodeError:
+                    e_dict = {'password':_('Invalid characters in password')}
+                    raise formencode.Invalid('', value, state, error_dict=e_dict)
+
+            if value.get('password_confirmation'):
+                try:
+                    value['password_confirmation'] = \
+                        get_crypt_password(value['password_confirmation'])
+                except UnicodeEncodeError:
+                    e_dict = {'password_confirmation':_('Invalid characters in password')}
+                    raise formencode.Invalid('', value, state, error_dict=e_dict)
+
+            return value
+
+class ValidPasswordsMatch(formencode.validators.FancyValidator):
+
+    def validate_python(self, value, state):
+
+        if value['password'] != value['password_confirmation']:
+            e_dict = {'password_confirmation':
+                   _('Password do not match')}
+            raise formencode.Invalid('', value, state, error_dict=e_dict)
 
 class ValidAuth(formencode.validators.FancyValidator):
     messages = {
@@ -281,18 +307,34 @@ def UserForm(edit=False, old_data={}):
         filter_extra_fields = True
         username = All(UnicodeString(strip=True, min=1, not_empty=True), ValidUsername(edit, old_data))
         if edit:
-            new_password = All(UnicodeString(strip=True, min=6, not_empty=False), ValidPassword)
+            new_password = All(UnicodeString(strip=True, min=6, not_empty=False))
             admin = StringBoolean(if_missing=False)
         else:
-            password = All(UnicodeString(strip=True, min=6, not_empty=True), ValidPassword)
+            password = All(UnicodeString(strip=True, min=6, not_empty=True))
         active = StringBoolean(if_missing=False)
         name = UnicodeString(strip=True, min=1, not_empty=True)
         lastname = UnicodeString(strip=True, min=1, not_empty=True)
         email = All(Email(not_empty=True), UniqSystemEmail(old_data))
 
+        chained_validators = [ValidPassword]
+
     return _UserForm
 
-RegisterForm = UserForm
+def RegisterForm(edit=False, old_data={}):
+    class _RegisterForm(formencode.Schema):
+        allow_extra_fields = True
+        filter_extra_fields = True
+        username = All(ValidUsername(edit, old_data), UnicodeString(strip=True, min=1, not_empty=True))
+        password = All(UnicodeString(strip=True, min=6, not_empty=True))
+        password_confirmation = All(UnicodeString(strip=True, min=6, not_empty=True))
+        active = StringBoolean(if_missing=False)
+        name = UnicodeString(strip=True, min=1, not_empty=True)
+        lastname = UnicodeString(strip=True, min=1, not_empty=True)
+        email = All(Email(not_empty=True), UniqSystemEmail(old_data))
+
+        chained_validators = [ValidPasswordsMatch, ValidPassword]
+
+    return _RegisterForm
 
 def PasswordResetForm():
     class _PasswordResetForm(formencode.Schema):

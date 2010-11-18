@@ -255,7 +255,7 @@ def send_email(recipients, subject, body):
         recipients = [email_config.get('email_to')]
 
     def str2bool(v):
-        return v.lower() in ["yes", "true", "t", "1"]
+        return v.lower() in ["yes", "true", "t", "1"] if v else None
 
     mail_from = email_config.get('app_email_from')
     user = email_config.get('smtp_username')

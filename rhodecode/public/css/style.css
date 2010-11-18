@@ -1327,7 +1327,6 @@ padding:0 0 2px;
 }
 
 #register div.title {
-width:420px;
 clear:both;
 overflow:hidden;
 position:relative;
@@ -1337,7 +1336,6 @@ padding:0;
 }
 
 #register div.inner {
-width:380px;
 background:#FFF;
 border-top:none;
 border-bottom:none;
@@ -1346,7 +1344,7 @@ padding:20px;
 }
 
 #register div.form div.fields div.field div.label {
-width:100px;
+width:135px;
 float:left;
 text-align:right;
 margin:2px 10px 0 0;
@@ -1354,7 +1352,7 @@ padding:5px 0 0 5px;
 }
 
 #register div.form div.fields div.field div.input input {
-width:245px;
+width:300px;
 background:#FFF;
 border-top:1px solid #b3b3b3;
 border-left:1px solid #b3b3b3;
@@ -2235,7 +2233,7 @@ padding:6px;
 }
 
 #login,#register {
-width:420px;
+width:520px;
 margin:10% auto 0;
 padding:0;
 }
