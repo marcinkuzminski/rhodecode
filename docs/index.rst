@@ -3,12 +3,12 @@
 Welcome to RhodeCode (RhodiumCode) documentation!
 =================================================
 
-``RhodeCode`` (formerly hg-app) is Pylons based repository management and 
-serving for mercurial_ and git_. It's similar to github or bitbucket, but 
-it's suppose to run as standalone app, it's open source and focuses more on 
-restricted access to repositories. There's no default free access to RhodeCode 
-You have to create an account in order to use the application. It's powered 
-by vcs_ library that we created to handle many various version control systems.
+``RhodeCode`` (formerly hg-app) is Pylons based Mercurial repository 
+browser/management with build in push/pull server and full text search. It's 
+similar to github or bitbucket, but it's suppose to run as standalone hosted 
+application, it's open source and focuses more on restricted access to 
+repositories. It's powered by vcs_ library that we created to handle many 
+various version control systems.
 
 RhodeCode uses `Semantic Versioning <http://semver.org/>`_
 
@@ -78,14 +78,12 @@ Incoming / Plans
 - code review (probably based on hg-review)
 - full git_ support, with push/pull server
 - project grouping
-- anonymous access
-- 
+- redmine integration
 - commit based build in wiki system
 - clone points and cloning from remote repositories into rhodecode 
   (git_ and mercurial_)
 - more statistics and graph (global annotation + some more statistics)
 - user customized activity dashboards
-- some cache optimizations
 - other cools stuff that i can figure out (or You can help me figure out)
 
 License

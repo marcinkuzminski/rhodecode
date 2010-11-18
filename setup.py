@@ -34,7 +34,7 @@ data_files = []
 #additional files that goes into package itself
 package_data = {'rhodecode': ['i18n/*/LC_MESSAGES/*.mo', ], }
 
-description = ('Mercurial and Git repository browser/management with '
+description = ('Mercurial repository browser/management with '
                'build in push/pull server and full text search')
 #long description
 try:
