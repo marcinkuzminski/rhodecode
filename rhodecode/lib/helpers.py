@@ -379,10 +379,10 @@ def bool2icon(value):
     """
 
     if value is True:
-        return HTML.tag('img', src="/images/icons/accept.png")
+        return HTML.tag('img', src="/images/icons/accept.png", alt=_('True'))
 
     if value is False:
-        return HTML.tag('img', src="/images/icons/cancel.png")
+        return HTML.tag('img', src="/images/icons/cancel.png", alt=_('False'))
 
     return value
 
