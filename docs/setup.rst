@@ -12,7 +12,7 @@ Setting up the application
  paster make-config RhodeCode production.ini
 
 - This will create `production.ini` config inside the directory
-  this config contains various settings for rhodecode, e.g proxy port, 
+  this config contains various settings for RhodeCode, e.g proxy port, 
   email settings,static files, cache and logging.
 
 ::
@@ -33,7 +33,7 @@ Setting up the application
  
  paster serve production.ini
  
-- This command runs the rhodecode server the app should be available at the 
+- This command runs the RhodeCode server the app should be available at the 
   127.0.0.1:5000. This ip and port is configurable via the production.ini 
   file  created in previous step
 - Use admin account you created to login.
@@ -117,14 +117,14 @@ authentication so those are credentials to access Your ldap, if it doesn't
 support anonymous search/user lookups.
 
 If all data are entered correctly, and `ldap-python` is properly installed
-Users should be granted to access rhodecode wit theire ldap accounts. When 
-logging at the first time an special ldap account is created inside rhodecode, 
+Users should be granted to access RhodeCode wit theire ldap accounts. When 
+logging at the first time an special ldap account is created inside RhodeCode, 
 so You can control over permissions even on ldap users. If such user exists 
-already in rhodecode database ldap user with the same username would be not 
-able to access rhodecode.
+already in RhodeCode database ldap user with the same username would be not 
+able to access RhodeCode.
 
 If You have problems with ldap access and believe You entered correct 
-information check out the rhodecode logs,any error messages sent from 
+information check out the RhodeCode logs,any error messages sent from 
 ldap will be saved there.
 
 
@@ -215,7 +215,7 @@ Troubleshooting
 - long lasting push timeouts ?
 
  - make sure You set a longer timeouts in Your proxy/fcgi settings, timeouts
-   are caused by https server and not rhodecode
+   are caused by https server and not RhodeCode
 
 - large pushes timeouts ?
  

@@ -155,7 +155,8 @@ class ScmModel(object):
 
             #TODO: get the baseui from somewhere for this
             if alias == 'hg':
-                repo = backend(repo_path, create=False, baseui=None)
+                from pylons import app_globals as g
+                repo = backend(repo_path, create=False, baseui=g.baseui)
                 #skip hidden web repository
                 if repo._get_hidden():
                     return
