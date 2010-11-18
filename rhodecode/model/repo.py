@@ -24,7 +24,8 @@ model for handling repositories actions
 from vcs.backends import get_repo, get_backend
 from datetime import datetime
 from pylons import app_globals as g
-from rhodecode.model.db import Repository, RepoToPerm, User, Permission
+from rhodecode.model.db import Repository, RepoToPerm, User, Permission, \
+    Statistics
 from rhodecode.model.meta import Session
 from rhodecode.model.user import UserModel
 from rhodecode.model.caching_query import FromCache
@@ -178,6 +179,17 @@ class RepoModel(object):
             log.error(traceback.format_exc())
             self.sa.rollback()
             raise
+
+    def delete_stats(self, repo_name):
+        try:
+            self.sa.query(Statistics)\
+                .filter(Statistics.repository == self.get(repo_name)).delete()
+            self.sa.commit()
+        except:
+            log.error(traceback.format_exc())
+            self.sa.rollback()
+            raise
+
 
     def __create_repo(self, repo_name, alias):
         from rhodecode.lib.utils import check_repo

@@ -97,7 +97,7 @@ class Repository(Base):
     user = relation('User')
     fork = relation('Repository', remote_side=repo_id)
     repo_to_perm = relation('RepoToPerm', cascade='all')
-    stats = relation('Statistics', cascade='all')
+    stats = relation('Statistics', cascade='all', uselist=False)
 
     def __repr__(self):
         return "<Repository('%s:%s')>" % (self.repo_id, self.repo_name)

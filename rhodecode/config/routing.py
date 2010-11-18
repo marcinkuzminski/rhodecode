@@ -73,7 +73,13 @@ def make_map(config):
         m.connect('delete_repo_user', "/repos_delete_user/{repo_name:.*}",
              action="delete_perm_user", conditions=dict(method=["DELETE"],
                                                         function=check_repo))
-
+        #settings actions
+        m.connect('repo_stats', "/repos_stats/{repo_name:.*}",
+             action="repo_stats", conditions=dict(method=["DELETE"],
+                                                        function=check_repo))
+        m.connect('repo_cache', "/repos_cache/{repo_name:.*}",
+             action="repo_cache", conditions=dict(method=["DELETE"],
+                                                        function=check_repo))
     #ADMIN USER REST ROUTES
     map.resource('user', 'users', controller='admin/users', path_prefix='/_admin')
 

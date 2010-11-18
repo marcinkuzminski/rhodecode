@@ -286,15 +286,42 @@
         <h5>${_('Administration')}</h5>    
     </div>
     
-    <div class="form">
-    
-        <h3>${_('Reset statistics')}</h3>
-        <h3>${_('Reset cache')}</h3>
+        <h3>${_('Statistics')}</h3>
+        
+        ${h.form(url('repo_stats', repo_name=c.repo_info.repo_name),method='delete')}
+        <div class="form">
+           <div class="fields">
+               ${h.submit('reset_stats_%s' % c.repo_info.repo_name,_('Reset current statistics'),class_="refresh_icon action_button",onclick="return confirm('Confirm to remove current statistics');")}
+               
+               <div class="field">
+               <ul>
+                    <li>${_('Fetched to rev')}: ${c.stats_revision}/${c.repo_last_rev}</li>
+                    <li>${_('Percentage of stats gathered')}: ${c.stats_percentage} %</li>
+               </ul>
+               </div>
+               
+           </div>
+        </div>                    
+        ${h.end_form()}
+        
+        <h3>${_('Cache')}</h3>
+        ${h.form(url('repo_cache', repo_name=c.repo_info.repo_name),method='delete')}
+        <div class="form">
+           <div class="fields">
+               ${h.submit('reset_cache_%s' % c.repo_info.repo_name,_('Invalidate repository cache'),class_="refresh_icon action_button",onclick="return confirm('Confirm to invalidate repository cache');")}
+           </div>
+        </div>                    
+        ${h.end_form()}
+        
+        
         <h3>${_('Delete')}</h3>
-        
-        
-    
-    </div>
+        ${h.form(url('repo', repo_name=c.repo_info.repo_name),method='delete')}
+        <div class="form">
+           <div class="fields">
+               ${h.submit('remove_%s' % c.repo_info.repo_name,_('Remove this repository'),class_="delete_icon action_button",onclick="return confirm('Confirm to delete this repository');")}
+           </div>
+        </div>                    
+        ${h.end_form()}
     
 </div>
 

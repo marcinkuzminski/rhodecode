@@ -207,6 +207,35 @@ class ReposController(BaseController):
             raise HTTPInternalServerError()
 
     @HasPermissionAllDecorator('hg.admin')
+    def repo_stats(self, repo_name):
+        """
+        DELETE an existing repository statistics
+        :param repo_name:
+        """
+
+        try:
+            repo_model = RepoModel()
+            repo_model.delete_stats(repo_name)
+        except Exception, e:
+            h.flash(_('An error occured during deletion of repository stats'),
+                    category='error')
+        return redirect(url('edit_repo', repo_name=repo_name))
+
+    @HasPermissionAllDecorator('hg.admin')
+    def repo_cache(self, repo_name):
+        """
+        INVALIDATE exisitings repository cache
+        :param repo_name:
+        """
+
+        try:
+            ScmModel().mark_for_invalidation(repo_name)
+        except Exception, e:
+            h.flash(_('An error occured during cache invalidation'),
+                    category='error')
+        return redirect(url('edit_repo', repo_name=repo_name))
+
+    @HasPermissionAllDecorator('hg.admin')
     def show(self, repo_name, format='html'):
         """GET /repos/repo_name: Show a specific item"""
         # url('repo', repo_name=ID)
@@ -217,6 +246,18 @@ class ReposController(BaseController):
         # url('edit_repo', repo_name=ID)
         repo_model = RepoModel()
         c.repo_info = repo = repo_model.get(repo_name)
+        if repo.stats:
+            last_rev = repo.stats.stat_on_revision
+        else:
+            last_rev = 0
+        c.stats_revision = last_rev
+        c.repo_last_rev = ScmModel().get(repo_name).revisions[-1]
+        if last_rev == 0:
+            c.stats_percentage = 0
+        else:
+            c.stats_percentage = '%.2f' % ((float((last_rev)) / c.repo_last_rev) * 100)
+
+
         if not repo:
             h.flash(_('%s repository is not mapped to db perhaps'
                       ' it was created or renamed from the filesystem'

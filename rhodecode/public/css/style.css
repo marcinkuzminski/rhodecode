@@ -1802,6 +1802,14 @@ padding-top:1px;
 text-align:left;
 }
 
+.refresh_icon {
+background:url("../images/icons/arrow_refresh.png") no-repeat scroll 3px;
+height:16px;
+padding-left:20px;
+padding-top:1px;
+text-align:left;
+}
+
 .rss_icon {
 background:url("../images/icons/rss_16.png") no-repeat scroll 3px;
 height:16px;
