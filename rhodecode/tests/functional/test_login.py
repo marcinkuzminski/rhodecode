@@ -59,7 +59,9 @@ class TestLoginController(TestController):
         assert 'invalid user name' in response.body, 'No error username message in response'
         assert 'invalid password' in response.body, 'No error password message in response'
 
-
+    #==========================================================================
+    # REGISTRATIONS
+    #==========================================================================
     def test_register(self):
         response = self.app.get(url(controller='login', action='register'))
         assert 'Sign Up to rhodecode' in response.body, 'wrong page for user registration'
@@ -67,7 +69,8 @@ class TestLoginController(TestController):
     def test_register_err_same_username(self):
         response = self.app.post(url(controller='login', action='register'),
                                             {'username':'test_admin',
-                                             'password':'test',
+                                             'password':'test12',
+                                             'password_confirmation':'test12',
                                              'email':'goodmail@domain.com',
                                              'name':'test',
                                              'lastname':'test'})
@@ -78,7 +81,8 @@ class TestLoginController(TestController):
     def test_register_err_wrong_data(self):
         response = self.app.post(url(controller='login', action='register'),
                                             {'username':'xs',
-                                             'password':'',
+                                             'password':'test',
+                                             'password_confirmation':'test',
                                              'email':'goodmailm',
                                              'name':'test',
                                              'lastname':'test'})
@@ -88,6 +92,30 @@ class TestLoginController(TestController):
         assert 'Please enter a value' in response.body
 
 
+    def test_register_special_chars(self):
+        response = self.app.post(url(controller='login', action='register'),
+                                            {'username':'xxxaxn',
+                                             'password':'ąćźżąśśśś',
+                                             'password_confirmation':'ąćźżąśśśś',
+                                             'email':'goodmailm',
+                                             'name':'test',
+                                             'lastname':'test@test.plx'})
+
+        assert response.status == '200 OK', 'Wrong response from register page got %s' % response.status
+        assert 'Invalid characters in password' in response.body
+
+
+    def test_register_password_mismatch(self):
+        response = self.app.post(url(controller='login', action='register'),
+                                            {'username':'xs',
+                                             'password':'123qwe',
+                                             'password_confirmation':'qwe123',
+                                             'email':'goodmailm',
+                                             'name':'test',
+                                             'lastname':'test@test.plxa'})
+
+        assert response.status == '200 OK', 'Wrong response from register page got %s' % response.status
+        assert 'Password do not match' in response.body
 
     def test_register_ok(self):
         username = 'test_regular4'
@@ -99,6 +127,7 @@ class TestLoginController(TestController):
         response = self.app.post(url(controller='login', action='register'),
                                             {'username':username,
                                              'password':password,
+                                             'password_confirmation':password,
                                              'email':email,
                                              'name':name,
                                              'lastname':lastname})
