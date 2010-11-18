@@ -10,7 +10,7 @@ from rhodecode.lib import auth
 from rhodecode.lib.utils import get_repo_slug
 from rhodecode.model import meta
 from rhodecode.model.scm import ScmModel
-from vcs import BACKENDS
+from rhodecode import BACKENDS
 
 class BaseController(WSGIController):
 

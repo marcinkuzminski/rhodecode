@@ -24,6 +24,7 @@ Model for RhodeCode
 """
 from beaker.cache import cache_region, region_invalidate
 from mercurial import ui
+from rhodecode import BACKENDS
 from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import HasRepoPermissionAny
 from rhodecode.lib.utils import get_repos
@@ -84,10 +85,10 @@ class ScmModel(object):
 
                     klass = get_backend(path[0])
 
-                    if path[0] == 'hg':
+                    if path[0] == 'hg' and path[0] in BACKENDS.keys():
                         repos_list[name] = klass(path[1], baseui=baseui)
 
-                    if path[0] == 'git':
+                    if path[0] == 'git' and path[0] in BACKENDS.keys():
                         repos_list[name] = klass(path[1])
             except OSError:
                 continue
@@ -152,6 +153,7 @@ class ScmModel(object):
             log.debug('Creating instance of %s repository', alias)
             backend = get_backend(alias)
 
+            #TODO: get the baseui from somewhere for this
             if alias == 'hg':
                 repo = backend(repo_path, create=False, baseui=None)
                 #skip hidden web repository

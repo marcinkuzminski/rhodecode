@@ -31,7 +31,7 @@ from rhodecode.model.user import UserModel
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.db import User
 from webhelpers.pylonslib.secure_form import authentication_token
-from vcs import BACKENDS
+from rhodecode import BACKENDS
 import formencode
 import logging
 import os
@@ -301,28 +301,28 @@ def PasswordResetForm():
         email = All(ValidSystemEmail(), Email(not_empty=True))
     return _PasswordResetForm
 
-def RepoForm(edit=False, old_data={}):
+def RepoForm(edit=False, old_data={}, supported_backends=BACKENDS.keys()):
     class _RepoForm(formencode.Schema):
         allow_extra_fields = True
         filter_extra_fields = False
         repo_name = All(UnicodeString(strip=True, min=1, not_empty=True), ValidRepoName(edit, old_data))
         description = UnicodeString(strip=True, min=1, not_empty=True)
         private = StringBoolean(if_missing=False)
-        repo_type = OneOf(BACKENDS.keys())
+        repo_type = OneOf(supported_backends)
         if edit:
             user = All(Int(not_empty=True), ValidRepoUser)
 
         chained_validators = [ValidPerms]
     return _RepoForm
 
-def RepoForkForm(edit=False, old_data={}):
+def RepoForkForm(edit=False, old_data={}, supported_backends=BACKENDS.keys()):
     class _RepoForkForm(formencode.Schema):
         allow_extra_fields = True
         filter_extra_fields = False
         fork_name = All(UnicodeString(strip=True, min=1, not_empty=True), ValidRepoName(edit, old_data))
         description = UnicodeString(strip=True, min=1, not_empty=True)
         private = StringBoolean(if_missing=False)
-        repo_type = All(ValidForkType(old_data), OneOf(BACKENDS.keys()))
+        repo_type = All(ValidForkType(old_data), OneOf(supported_backends))
     return _RepoForkForm
 
 def RepoSettingsForm(edit=False, old_data={}):
