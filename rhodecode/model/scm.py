@@ -27,7 +27,7 @@ from mercurial import ui
 from rhodecode import BACKENDS
 from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import HasRepoPermissionAny
-from rhodecode.lib.utils import get_repos
+from rhodecode.lib.utils import get_repos, make_ui
 from rhodecode.model import meta
 from rhodecode.model.db import Repository, User, RhodeCodeUi, CacheInvalidation
 from rhodecode.model.caching_query import FromCache
@@ -73,7 +73,7 @@ class ScmModel(object):
         log.info('scanning for repositories in %s', repos_path)
 
         if not isinstance(baseui, ui.ui):
-            baseui = ui.ui()
+            baseui = make_ui('db')
         repos_list = {}
 
         for name, path in get_repos(repos_path):

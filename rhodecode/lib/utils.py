@@ -264,6 +264,11 @@ def make_ui(read_from='file', path=None, checkpaths=True):
 
     baseui = ui.ui()
 
+    #clean the baseui object
+    baseui._ocfg = config.config()
+    baseui._ucfg = config.config()
+    baseui._tcfg = config.config()
+
     if read_from == 'file':
         if not os.path.isfile(path):
             log.warning('Unable to read config file %s' % path)
@@ -273,8 +278,9 @@ def make_ui(read_from='file', path=None, checkpaths=True):
         cfg.read(path)
         for section in ui_sections:
             for k, v in cfg.items(section):
-                baseui.setconfig(section, k, v)
                 log.debug('settings ui from file[%s]%s:%s', section, k, v)
+                baseui.setconfig(section, k, v)
+
 
     elif read_from == 'db':
         hg_ui = get_hg_ui_cached()
@@ -282,8 +288,6 @@ def make_ui(read_from='file', path=None, checkpaths=True):
             if ui_.ui_active:
                 log.debug('settings ui from db[%s]%s:%s', ui_.ui_section, ui_.ui_key, ui_.ui_value)
                 baseui.setconfig(ui_.ui_section, ui_.ui_key, ui_.ui_value)
-
-
     return baseui
 
 
