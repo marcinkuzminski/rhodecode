@@ -143,28 +143,9 @@ class SimpleHg(object):
         #invalidate cache on push
         if self.action == 'push':
             self.__invalidate_cache(repo_name)
-            messages = []
-            messages.append('thank you for using rhodecode')
+        
+        return app(environ, start_response)
 
-            return self.msg_wrapper(app, environ, start_response, messages)
-        else:
-            return app(environ, start_response)
-
-
-    def msg_wrapper(self, app, environ, start_response, messages=[]):
-        """
-        Wrapper for custom messages that come out of mercurial respond messages
-        is a list of messages that the user will see at the end of response 
-        from merurial protocol actions that involves remote answers
-        :param app:
-        :param environ:
-        :param start_response:
-        """
-        def custom_messages(msg_list):
-            for msg in msg_list:
-                yield msg + '\n'
-        org_response = app(environ, start_response)
-        return chain(org_response, custom_messages(messages))
 
     def __make_app(self):
         hgserve = hgweb(str(self.repo_path), baseui=self.baseui)
