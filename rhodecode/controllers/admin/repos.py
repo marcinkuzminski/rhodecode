@@ -231,7 +231,7 @@ class ReposController(BaseController):
         try:
             ScmModel().mark_for_invalidation(repo_name)
         except Exception, e:
-            h.flash(_('An error occured during cache invalidation'),
+            h.flash(_('An error occurred during cache invalidation'),
                     category='error')
         return redirect(url('edit_repo', repo_name=repo_name))
 
@@ -251,7 +251,9 @@ class ReposController(BaseController):
         else:
             last_rev = 0
         c.stats_revision = last_rev
-        c.repo_last_rev = ScmModel().get(repo_name).revisions[-1]
+        r = ScmModel().get(repo_name)
+        c.repo_last_rev = r.revisions[-1] if r.revisions else 0
+
         if last_rev == 0:
             c.stats_percentage = 0
         else:
