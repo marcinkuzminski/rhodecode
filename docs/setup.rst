@@ -12,8 +12,8 @@ Setting up the application
  paster make-config RhodeCode production.ini
 
 - This will create `production.ini` config inside the directory
-  this config contain various settings for rhodecode, e.g port, email settings
-  static files, cache and logging.
+  this config contains various settings for rhodecode, e.g proxy port, 
+  email settings,static files, cache and logging.
 
 ::
 
@@ -51,11 +51,13 @@ to enable full index rebuild. Without that indexing will run always in in
 incremental mode.
 
 ::
+
  paster make-index --repo-location=<location for repos> production.ini  
 
 for full index rebuild You can use
 
 ::
+
  paster make-index -f --repo-location=<location for repos> production.ini
 
 - For full text search You can either put crontab entry for
@@ -76,10 +78,60 @@ Sometime You might want to rebuild index from scratch. You can do that using
 the `-f` flag passed to paster command or, in admin panel You can check 
 `build from scratch` flag.
 
+
+Setting up LDAP support
+-----------------------
+
+
+RhodeCode starting from version 1.1 supports ldap authentication. In order
+to use ldap, You have to install ldap-python package. This package is available
+via pypi, so You can install it by running
+
+::
+
+ easy_install ldap-python
+ 
+::
+
+ pip install ldap-python
+
+
+ldap-python requires some certain libs on Your system, so before installing it 
+check that You have at least `openldap`, and `sasl` libraries.
+
+ldap settings are located in admin->permissions section,
+
+Here's a typical ldap setup::
+
+ Enable ldap  = checked                 #controlls if ldap access is enabled
+ Host         = host.domain.org         #acctuall ldap server to connect
+ Port         = 389 or 689 for ldaps    #ldap server ports
+ Enable LDAPS = unchecked               #enable disable ldaps
+ Account      = <account>               #access for ldap server(if required)
+ Password     = <password>              #password for ldap server(if required)
+ Base DN      = CN=users,DC=host,DC=domain,DC=org
+ 
+
+`Account` and `Password` are optional, and used for two-phase ldap 
+authentication so those are credentials to access Your ldap, if it doesn't 
+support anonymous search/user lookups.
+
+If all data are entered correctly, and `ldap-python` is properly installed
+Users should be granted to access rhodecode wit theire ldap accounts. When 
+logging at the first time an special ldap account is created inside rhodecode, 
+so You can control over permissions even on ldap users. If such user exists 
+already in rhodecode database ldap user with the same username would be not 
+able to access rhodecode.
+
+If You have problems with ldap access and believe You entered correct 
+information check out the rhodecode logs,any error messages sent from 
+ldap will be saved there.
+
+
 Nginx virtual host example
 --------------------------
 
-Sample config for nginx::
+Sample config for nginx using proxy::
 
  server {
     listen          80;
@@ -130,6 +182,12 @@ in production.ini file::
 To not have the statics served by the application. And improve speed.
 
 
+
+Apache's example FCGI config
+----------------------------
+
+TODO !
+
 Other configuration files
 -------------------------
 
@@ -138,6 +196,30 @@ http://hg.python-works.com/rhodecode/files/tip/init.d
 
 and also an celeryconfig file can be use from here:
 http://hg.python-works.com/rhodecode/files/tip/celeryconfig.py
+
+Troubleshooting
+---------------
+
+- missing static files ?
+
+ - make sure either to set the `static_files = true` in the .ini file or
+   double check the root path for Your http setup. It should point to 
+   for example:
+   /home/my-virtual-python/lib/python2.6/site-packages/rhodecode/public
+   
+- can't install celery/rabbitmq
+
+ - don't worry RhodeCode works without them too. No extra setup required
+
+
+- long lasting push timeouts ?
+
+ - make sure You set a longer timeouts in Your proxy/fcgi settings, timeouts
+   are caused by https server and not rhodecode
+
+- large pushes timeouts ?
+ 
+ - make sure You set a proper max_body_size for the http server
 
 
 

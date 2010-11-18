@@ -5,12 +5,12 @@ Changelog
 
 1.1.0 (**2010-XX-XX**)
 ----------------------
-- git support with push/pull via RhodeCode web interface
 - rewrite of internals for vcs >=0.1.9
-- anonymous access
+- anonymous access,authentication via ldap
 - performance upgrade for cached repos list - each repository has it's own 
   cache that's invalidated when needed.
 - main page quick filter for filtering repositories
+- sends email to admin on new user registration
 - more detailed action logger (based on hooks) with pushed changesets lists
   and options to disable those hooks from admin panel
 - a lot of fixes and tweaks for file browser
