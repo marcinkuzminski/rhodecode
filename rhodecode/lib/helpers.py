@@ -371,6 +371,22 @@ person = lambda x: _person(x)
 short_id = lambda x: x[:12]
 
 
+def bool2icon(value):
+    """
+    Returns True/False values represented as small html image of true/false
+    icons
+    :param value: bool value
+    """
+
+    if value is True:
+        return HTML.tag('img', src="/images/icons/accept.png")
+
+    if value is False:
+        return HTML.tag('img', src="/images/icons/cancel.png")
+
+    return value
+
+
 def action_parser(user_log):
     """
     This helper will map the specified string action into translated
