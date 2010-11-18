@@ -396,37 +396,51 @@ def action_parser(user_log):
     """
     action = user_log.action
     action_params = None
-    cs_links = ''
 
     x = action.split(':')
 
     if len(x) > 1:
         action, action_params = x
 
-    if action == 'push':
-        revs_limit = 5
-        revs = action_params.split(',')
-        cs_links = " " + ', '.join ([link(rev,
-                url('changeset_home',
-                repo_name=user_log.repository.repo_name,
-                revision=rev)) for rev in revs[:revs_limit] ])
-        if len(revs) > revs_limit:
-            html_tmpl = '<span title="%s"> %s </span>'
-            cs_links += html_tmpl % (', '.join(r for r in revs[revs_limit:]),
-                                     _('and %s more revisions') % (len(revs) - revs_limit))
-
+    def get_cs_links():
+        if action == 'push':
+            revs_limit = 5
+            revs = action_params.split(',')
+            cs_links = " " + ', '.join ([link(rev,
+                    url('changeset_home',
+                    repo_name=user_log.repository.repo_name,
+                    revision=rev)) for rev in revs[:revs_limit] ])
+            if len(revs) > revs_limit:
+                html_tmpl = '<span title="%s"> %s </span>'
+                cs_links += html_tmpl % (', '.join(r for r in revs[revs_limit:]),
+                                         _('and %s more revisions') \
+                                            % (len(revs) - revs_limit))
+                
+            return literal(cs_links)
+        return ''
+    
+    def get_fork_name():
+        if action == 'user_forked_repo':
+            from rhodecode.model.scm import ScmModel
+            repo_name = action_params
+            repo = ScmModel().get(repo_name)
+            if repo is None:
+                return repo_name
+            return link_to(action_params, url('summary_home',
+                                              repo_name=repo.name,),
+                                              title=repo.dbrepo.description)
+        return ''
     map = {'user_deleted_repo':_('User deleted repository'),
            'user_created_repo':_('User created repository'),
-           'user_forked_repo':_('User forked repository'),
+           'user_forked_repo':_('User forked repository as: ') + get_fork_name(),
            'user_updated_repo':_('User updated repository'),
            'admin_deleted_repo':_('Admin delete repository'),
            'admin_created_repo':_('Admin created repository'),
            'admin_forked_repo':_('Admin forked repository'),
            'admin_updated_repo':_('Admin updated repository'),
-           'push':_('Pushed') + literal(cs_links),
+           'push':_('Pushed') + get_cs_links(),
            'pull':_('Pulled'), }
 
-    print action, action_params
     return map.get(action, action)
 
 

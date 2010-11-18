@@ -159,11 +159,12 @@ class SettingsController(BaseController):
             form_result = _form.to_python(dict(request.POST))
             form_result.update({'repo_name':repo_name})
             repo_model.create_fork(form_result, c.rhodecode_user)
-            h.flash(_('fork %s repository as %s task added') \
+            h.flash(_('forked %s repository as %s') \
                       % (repo_name, form_result['fork_name']),
                     category='success')
-            action_logger(self.rhodecode_user, 'user_forked_repo',
-                            repo_name, '', self.sa)
+            action_logger(self.rhodecode_user,
+                          'user_forked_repo:%s' % form_result['fork_name'],
+                           repo_name, '', self.sa)
         except formencode.Invalid, errors:
             c.new_repo = errors.value['fork_name']
             r = render('settings/repo_fork.html')
