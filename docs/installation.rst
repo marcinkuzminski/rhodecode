@@ -62,7 +62,7 @@ Step by step installation example
 
 ::
 
-  source activate /var/www/rhodecode-venv/bin/activate
+  source /var/www/rhodecode-venv/bin/activate
      
 - Make a folder for rhodecode somewhere on the filesystem for example 
 
