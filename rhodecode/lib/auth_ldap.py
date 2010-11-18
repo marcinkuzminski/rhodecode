@@ -1,17 +1,29 @@
-#==============================================================================
-# LDAP
-#Name     = Just a description for the auth modes page
-#Host     = DepartmentName.OrganizationName.local/ IP
-#Port     = 389 default for ldap
-#LDAPS    = no set True if You need to use ldaps
-#Account  = DepartmentName\UserName (or UserName@MyDomain depending on AD server)
-#Password = <password>
-#Base DN  = DC=DepartmentName,DC=OrganizationName,DC=local
+#!/usr/bin/env python
+# encoding: utf-8
+# ldap authentication lib
+# Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; version 2
+# of the License or (at your opinion) any later version of the license.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+# MA  02110-1301, USA.
+"""
+Created on Nov 17, 2010
 
-#==============================================================================
+@author: marcink
+"""
 
-from rhodecode.lib.exceptions import LdapImportError, UsernameError, \
-    PasswordError, ConnectionError
+from rhodecode.lib.exceptions import *
 import logging
 
 log = logging.getLogger(__name__)
@@ -61,7 +73,7 @@ class AuthLdap(object):
         dn = self.AUTH_DN % (uid, self.BASE_DN)
         log.debug("Authenticating %r at %s", dn, self.LDAP_SERVER)
         if "," in username:
-            raise UsernameError("invalid character in username: ,")
+            raise LdapUsernameError("invalid character in username: ,")
         try:
             ldap.set_option(ldap.OPT_X_TLS_CACERTFILE, '/etc/openldap/cacerts')
             ldap.set_option(ldap.OPT_NETWORK_TIMEOUT, 10)
@@ -82,12 +94,12 @@ class AuthLdap(object):
                 raise ldap.NO_SUCH_OBJECT()
         except ldap.NO_SUCH_OBJECT, e:
             log.debug("LDAP says no such user '%s' (%s)", uid, username)
-            raise UsernameError()
+            raise LdapUsernameError()
         except ldap.INVALID_CREDENTIALS, e:
             log.debug("LDAP rejected password for user '%s' (%s)", uid, username)
-            raise PasswordError()
+            raise LdapPasswordError()
         except ldap.SERVER_DOWN, e:
-            raise ConnectionError("LDAP can't access authentication server")
+            raise LdapConnectionError("LDAP can't access authentication server")
 
         return properties[0]
 

@@ -27,12 +27,13 @@ from pylons.i18n.translation import _
 from rhodecode.model.caching_query import FromCache
 from rhodecode.model.db import User
 from rhodecode.model.meta import Session
+from rhodecode.lib.exceptions import *
 import logging
 import traceback
 
 log = logging.getLogger(__name__)
 
-class DefaultUserException(Exception):pass
+
 
 class UserModel(object):
 
@@ -128,6 +129,7 @@ class UserModel(object):
                 raise DefaultUserException(
                                 _("You can't Edit this user since it's"
                                   " crucial for entire application"))
+
             for k, v in form_data.items():
                 if k == 'new_password' and v != '':
                     new_user.password = v
@@ -169,6 +171,12 @@ class UserModel(object):
                 raise DefaultUserException(
                                 _("You can't remove this user since it's"
                                   " crucial for entire application"))
+            if user.repositories:
+                raise UserOwnsReposException(_('This user still owns %s '
+                                               'repositories and cannot be '
+                                               'removed. Switch owners or '
+                                               'remove those repositories') \
+                                               % user.repositories)
             self.sa.delete(user)
             self.sa.commit()
         except:

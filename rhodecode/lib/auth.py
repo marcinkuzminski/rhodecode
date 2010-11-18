@@ -24,8 +24,9 @@ Created on April 4, 2010
 """
 from pylons import config, session, url, request
 from pylons.controllers.util import abort, redirect
+from rhodecode.lib.exceptions import *
 from rhodecode.lib.utils import get_repo_slug
-from rhodecode.lib.auth_ldap import AuthLdap, UsernameError, PasswordError
+from rhodecode.lib.auth_ldap import AuthLdap
 from rhodecode.model import meta
 from rhodecode.model.user import UserModel
 from rhodecode.model.caching_query import FromCache
@@ -129,7 +130,7 @@ def authfunc(environ, username, password):
                     log.info('created new ldap user')
 
                 return authenticated
-            except (UsernameError, PasswordError):
+            except (LdapUsernameError, LdapPasswordError):
                 return False
             except:
                 log.error(traceback.format_exc())

@@ -27,12 +27,13 @@ from formencode import htmlfill
 from pylons import request, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
 from pylons.i18n.translation import _
+from rhodecode.lib.exceptions import *
 from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator
 from rhodecode.lib.base import BaseController, render
-from rhodecode.model.db import User, UserLog
+from rhodecode.model.db import User
 from rhodecode.model.forms import UserForm
-from rhodecode.model.user import UserModel, DefaultUserException
+from rhodecode.model.user import UserModel
 import formencode
 import logging
 import traceback
@@ -135,7 +136,7 @@ class UsersController(BaseController):
         try:
             user_model.delete(id)
             h.flash(_('sucessfully deleted user'), category='success')
-        except DefaultUserException, e:
+        except (UserOwnsReposException, DefaultUserException), e:
             h.flash(str(e), category='warning')
         except Exception:
             h.flash(_('An error occured during deletion of user'),

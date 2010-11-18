@@ -48,6 +48,8 @@ class User(Base):
     user_log = relation('UserLog', cascade='all')
     user_perms = relation('UserToPerm', primaryjoin="User.user_id==UserToPerm.user_id", cascade='all')
 
+    repositories = relation('Repository')
+
     @LazyProperty
     def full_contact(self):
         return '%s %s <%s>' % (self.name, self.lastname, self.email)

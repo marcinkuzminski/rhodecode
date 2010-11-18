@@ -23,7 +23,10 @@ Custom Exceptions modules
 @author: marcink
 """
 
-class UsernameError(Exception):pass
-class PasswordError(Exception):pass
-class ConnectionError(Exception):pass
+class LdapUsernameError(Exception):pass
+class LdapPasswordError(Exception):pass
+class LdapConnectionError(Exception):pass
 class LdapImportError(Exception):pass
+
+class DefaultUserException(Exception):pass
+class UserOwnsReposException(Exception):pass
