@@ -330,9 +330,9 @@ E.onDOMReady(function(e){
 		    }
 		    
 			/**
-			 * This function will detect if selected period has some changesets for this user
-			if it does this data is then pushed for displaying
-			Additionally it will only display users that are selected by the checkbox
+			 * This function will detect if selected period has some changesets 
+			   for this user if it does this data is then pushed for displaying
+			   Additionally it will only display users that are selected by the checkbox
 			*/
 		    function getDataAccordingToRanges(ranges) {
 		    	
@@ -340,31 +340,28 @@ E.onDOMReady(function(e){
 		        var keys = [];
 				for(var key in dataset){
 					var push = false;
+					
 					//method1 slow !!
-		            ///*
+		            //*
 		            for(var ds in dataset[key].data){
 			            commit_data = dataset[key].data[ds];
-			            //console.log(key);
-			            //console.log(new Date(commit_data.time*1000));
-			            //console.log(new Date(ranges.xaxis.from*1000));
-			            //console.log(new Date(ranges.xaxis.to*1000));
 			            if (commit_data.time >= ranges.xaxis.from && commit_data.time <= ranges.xaxis.to){
 			            	push = true;
 			            	break;
 					    }
 				    }
-				    //*/
+					//*/
+				    
 				    /*//method2 sorted commit data !!!
+				    
 				    var first_commit = dataset[key].data[0].time;
 				    var last_commit = dataset[key].data[dataset[key].data.length-1].time;
-				    
-				    console.log(first_commit);
-				    console.log(last_commit);
 				    
 				    if (first_commit >= ranges.xaxis.from && last_commit <= ranges.xaxis.to){
 						push = true;
 					}
-				    */
+				    //*/
+				    
 				    if(push){			
 				    	data.push(dataset[key]);
 				    }
@@ -405,14 +402,14 @@ E.onDOMReady(function(e){
 						new_data.push(getDummyData(checkbox_key));
 			        }
 		        }
-						        
+					        
 		    	var new_options = YAHOO.lang.merge(plot_options, {
 		            xaxis: { 
 		  	      		min: cur_ranges.xaxis.from, 
 		  	      		max: cur_ranges.xaxis.to,
 		  	      		mode:"time",
 		  	      		timeformat: "%d/%m",
-		        	}
+		        	},
 		    	});
 		    	if (!new_data){
 					new_data = [[0,1]];
@@ -440,13 +437,20 @@ E.onDOMReady(function(e){
 	    		data = getDataAccordingToRanges(ranges);
 	    		generateCheckboxes(data);
 	    		
+	    		
+	    		console.log(data);
 		    	var new_options = YAHOO.lang.merge(plot_options, {
 		            xaxis: { 
 		  	      		min: ranges.xaxis.from, 
 		  	      		max: ranges.xaxis.to,
 		  	      		mode:"time",
 		  	      		timeformat: "%d/%m",
-		        	}
+		        	},
+		        	yaxis: { 
+                        min: ranges.yaxis.from, 
+                        max: ranges.yaxis.to,
+                    },
+                    		        	
 		    	});
 		    	// do the zooming
 		        plot = YAHOO.widget.Flot(plotContainer, data, new_options);
