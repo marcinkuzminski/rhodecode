@@ -106,9 +106,14 @@ class ScmModel(object):
             all_repos = self.sa.query(Repository)\
                 .order_by(Repository.repo_name).all()
 
+        invalidation_list = [str(x.cache_key) for x in \
+                             self.sa.query(CacheInvalidation.cache_key)\
+                             .filter(CacheInvalidation.cache_active == False)\
+                             .all()]
+
         for r in all_repos:
 
-            repo = self.get(r.repo_name)
+            repo = self.get(r.repo_name, invalidation_list)
 
             if repo is not None:
                 last_change = repo.last_change
@@ -134,7 +139,7 @@ class ScmModel(object):
     def get_repo(self, repo_name):
         return self.get(repo_name)
 
-    def get(self, repo_name):
+    def get(self, repo_name, invalidation_list=None):
         """
         Get's repository from given name, creates BackendInstance and
         propagates it's data from database with all additional information
@@ -172,11 +177,17 @@ class ScmModel(object):
             repo.dbrepo = dbrepo
             return repo
 
-        invalidate = self._should_invalidate(repo_name)
-        if invalidate:
-            log.info('invalidating cache for repository %s', repo_name)
-            region_invalidate(_get_repo, None, repo_name)
-            self._mark_invalidated(invalidate)
+        pre_invalidate = True
+        if invalidation_list:
+            pre_invalidate = repo_name in invalidation_list
+
+        if pre_invalidate:
+            invalidate = self._should_invalidate(repo_name)
+
+            if invalidate:
+                log.info('invalidating cache for repository %s', repo_name)
+                region_invalidate(_get_repo, None, repo_name)
+                self._mark_invalidated(invalidate)
 
         return _get_repo(repo_name)
 
