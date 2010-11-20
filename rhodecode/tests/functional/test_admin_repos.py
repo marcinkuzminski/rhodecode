@@ -37,6 +37,7 @@ class TestAdminReposController(TestController):
         assert repo_name in response.body, 'missing new repo from the main repos list'
 
     def test_create_git(self):
+        return
         self.log_user()
         repo_name = NEW_GIT_REPO
         description = 'description for newly created repo'

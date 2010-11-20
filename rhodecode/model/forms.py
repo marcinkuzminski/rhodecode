@@ -94,6 +94,14 @@ class ValidPassword(formencode.validators.FancyValidator):
                     e_dict = {'password_confirmation':_('Invalid characters in password')}
                     raise formencode.Invalid('', value, state, error_dict=e_dict)
 
+            if value.get('new_password'):
+                try:
+                    value['new_password'] = \
+                        get_crypt_password(value['new_password'])
+                except UnicodeEncodeError:
+                    e_dict = {'new_password':_('Invalid characters in password')}
+                    raise formencode.Invalid('', value, state, error_dict=e_dict)
+
             return value
 
 class ValidPasswordsMatch(formencode.validators.FancyValidator):

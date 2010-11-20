@@ -28,7 +28,7 @@ class TestSettingsController(TestController):
                                      'private':'False'})
 
         #test if we have a message that fork is ok
-        assert 'fork %s repository as %s task added' \
+        assert 'forked %s repository as %s' \
                       % (repo_name, fork_name) in response.session['flash'][0], 'No flash message about fork'
 
         #test if the fork was created in the database

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from rhodecode.tests import *
 from rhodecode.model.db import User
 from rhodecode.lib.auth import check_password
@@ -64,7 +65,7 @@ class TestLoginController(TestController):
     #==========================================================================
     def test_register(self):
         response = self.app.get(url(controller='login', action='register'))
-        assert 'Sign Up to rhodecode' in response.body, 'wrong page for user registration'
+        assert 'Sign Up to RhodeCode' in response.body, 'wrong page for user registration'
 
     def test_register_err_same_username(self):
         response = self.app.post(url(controller='login', action='register'),
@@ -86,10 +87,9 @@ class TestLoginController(TestController):
                                              'email':'goodmailm',
                                              'name':'test',
                                              'lastname':'test'})
-
         assert response.status == '200 OK', 'Wrong response from register page got %s' % response.status
         assert 'An email address must contain a single @' in response.body
-        assert 'Please enter a value' in response.body
+        assert 'Enter a value 6 characters long or more' in response.body
 
 
     def test_register_special_chars(self):
@@ -97,10 +97,11 @@ class TestLoginController(TestController):
                                             {'username':'xxxaxn',
                                              'password':'ąćźżąśśśś',
                                              'password_confirmation':'ąćźżąśśśś',
-                                             'email':'goodmailm',
+                                             'email':'goodmailm@test.plx',
                                              'name':'test',
-                                             'lastname':'test@test.plx'})
+                                             'lastname':'test'})
 
+        print response.body
         assert response.status == '200 OK', 'Wrong response from register page got %s' % response.status
         assert 'Invalid characters in password' in response.body
 
@@ -110,11 +111,12 @@ class TestLoginController(TestController):
                                             {'username':'xs',
                                              'password':'123qwe',
                                              'password_confirmation':'qwe123',
-                                             'email':'goodmailm',
+                                             'email':'goodmailm@test.plxa',
                                              'name':'test',
-                                             'lastname':'test@test.plxa'})
+                                             'lastname':'test'})
 
         assert response.status == '200 OK', 'Wrong response from register page got %s' % response.status
+        print response.body
         assert 'Password do not match' in response.body
 
     def test_register_ok(self):
@@ -161,6 +163,7 @@ class TestLoginController(TestController):
         response = self.app.post(url(controller='login', action='register'),
                                             {'username':username,
                                              'password':password,
+                                             'password_confirmation':password,
                                              'email':email,
                                              'name':name,
                                              'lastname':lastname})
