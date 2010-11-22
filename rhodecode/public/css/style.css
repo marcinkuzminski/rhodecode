@@ -1796,6 +1796,15 @@ float: right;
 margin-top: 2px;
 }
 
+.currently_following{
+
+	padding-left: 10px;
+	padding-bottom:5px;
+
+}
+
+
+
 .add_icon {
 background:url("../images/icons/add.png") no-repeat scroll 3px;
 height:16px;
