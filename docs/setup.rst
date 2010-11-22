@@ -84,19 +84,19 @@ Setting up LDAP support
 
 
 RhodeCode starting from version 1.1 supports ldap authentication. In order
-to use ldap, You have to install ldap-python package. This package is available
+to use ldap, You have to install python-ldap package. This package is available
 via pypi, so You can install it by running
 
 ::
 
- easy_install ldap-python
+ easy_install python-ldap
  
 ::
 
- pip install ldap-python
+ pip install python-ldap
 
 
-ldap-python requires some certain libs on Your system, so before installing it 
+python-ldap requires some certain libs on Your system, so before installing it 
 check that You have at least `openldap`, and `sasl` libraries.
 
 ldap settings are located in admin->permissions section,
@@ -116,7 +116,7 @@ Here's a typical ldap setup::
 authentication so those are credentials to access Your ldap, if it doesn't 
 support anonymous search/user lookups.
 
-If all data are entered correctly, and `ldap-python` is properly installed
+If all data are entered correctly, and `python-ldap` is properly installed
 Users should be granted to access RhodeCode wit theire ldap accounts. When 
 logging at the first time an special ldap account is created inside RhodeCode, 
 so You can control over permissions even on ldap users. If such user exists 
