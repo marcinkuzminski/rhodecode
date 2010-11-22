@@ -31,6 +31,7 @@ from rhodecode.lib.helpers import get_token
 from rhodecode.lib.utils import action_logger
 from rhodecode.model.db import UserLog, UserFollowing
 from rhodecode.model.scm import ScmModel
+from sqlalchemy import or_
 import logging
 from paste.httpexceptions import HTTPInternalServerError, HTTPNotFound
 
@@ -48,9 +49,17 @@ class JournalController(BaseController):
 
         c.following = self.sa.query(UserFollowing)\
             .filter(UserFollowing.user_id == c.rhodecode_user.user_id).all()
-
-
+        
+        repo_ids = [x.follows_repository.repo_id for x in c.following 
+                    if x.follows_repository is not None]
+        user_ids = [x.follows_user.user_id for x in c.following 
+                    if x.follows_user is not None]
+        
         c.journal = self.sa.query(UserLog)\
+            .filter(or_(
+                        UserLog.repository_id.in_(repo_ids),
+                        UserLog.user_id.in_(user_ids),
+                        ))\
             .order_by(UserLog.action_date.desc())\
             .all()
         return render('/journal.html')
