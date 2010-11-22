@@ -73,10 +73,6 @@ class TestFilesController(TestController):
                                     revision='27cd5cce30c96924232dffcd24178a07ffeb5dfc',
                                     f_path='vcs/nodes.py'))
 
-
-
-        #tests...
-
         #test or history
         assert """<select id="diff1" name="diff1">
 <option selected="selected" value="8911406ad776fdd3d0b9932a2e89677e57405a48">r167:8911406ad776</option>
@@ -130,12 +126,6 @@ removed extra unicode conversion in diff."</div>""" in response.body
                                     revision='27cd5cce30c96924232dffcd24178a07ffeb5dfc',
                                     f_path='vcs/nodes.py'))
 
-
-
-
-
-
-        print response.body
 
         assert """<option selected="selected" value="8911406ad776fdd3d0b9932a2e89677e57405a48">r167:8911406ad776</option>
 <option value="aa957ed78c35a1541f508d2ec90e501b0a9e3167">r165:aa957ed78c35</option>

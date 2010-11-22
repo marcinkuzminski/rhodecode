@@ -124,6 +124,14 @@ def make_map(config):
         m.connect('admin_home', '', action='index')#main page
         m.connect('admin_add_repo', '/add_repo/{new_repo:[a-z0-9\. _-]*}',
                   action='add_repo')
+
+
+    #USER JOURNAL
+    map.connect('journal', '/_admin/journal', controller='journal',)
+    map.connect('toggle_following', '/_admin/toggle_following', controller='journal',
+                action='toggle_following', conditions=dict(method=["POST"]))
+
+
     #SEARCH
     map.connect('search', '/_admin/search', controller='search',)
     map.connect('search_repo', '/_admin/search/{search_repo:.*}', controller='search')

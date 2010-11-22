@@ -1,0 +1,80 @@
+## -*- coding: utf-8 -*-
+<%inherit file="base/base.html"/>
+<%def name="title()">
+    ${_('Journal')} - ${c.rhodecode_name}
+</%def>
+<%def name="breadcrumbs()">
+	${c.rhodecode_name}
+</%def>
+<%def name="page_nav()">
+	${self.menu('home')}
+</%def>
+<%def name="main()">
+	
+    <div class="box box-left">
+	    <!-- box / title -->
+	    <div class="title">
+	        <h5>${_('Journal')}</h5>
+	    </div>
+	    <div>
+	    %if c.journal:
+            %for entry in c.journal:
+            <div style="padding:10px">
+                <div class="gravatar">
+                    <img alt="gravatar" src="${h.gravatar_url(entry.user.email)}"/>
+                </div>
+                <div>${entry.user.name} ${entry.user.lastname}</div>
+                <div style="padding-left: 45px;">${h.action_parser(entry)} <br/>
+                <b>
+		        %if entry.repository:
+		          ${h.link_to(entry.repository.repo_name,
+		                      h.url('summary_home',repo_name=entry.repository.repo_name))}
+		        %else:
+		          ${entry.repository_name}
+		        %endif             
+                </b> - <span title="${entry.action_date}">${h.age(entry.action_date)}</span>
+                </div>
+            </div>
+            <div style="clear:both;border-bottom:1px dashed #DDD;padding:3px 3px;margin:0px 10px 0px 10px"></div>
+            %endfor
+        %else:
+            ${_('No entries yet')}
+        %endif   
+	    </div>
+    </div>
+    
+    <div class="box box-right">
+        <!-- box / title -->
+        <div class="title">
+            <h5>${_('Following')}</h5>
+        </div>
+        <div>
+        %if c.following:
+            %for entry in c.following:
+                <div>
+                    %if entry.follows_user_id:
+                      <img alt="" src="/images/icons/user.png"/>
+                      
+                      ${entry.follows_user.username}
+                    %endif
+                    
+                    %if entry.follows_repo_id:
+                    
+                      %if entry.follows_repository.private:
+                        <img alt="" src="/images/icons/lock_closed.png"/>
+                      %else:
+                        <img alt="" src="/images/icons/lock_open.png"/>
+                      %endif
+                      
+                      ${h.link_to(entry.follows_repository.repo_name,h.url('summary_home',
+                        repo_name=entry.follows_repository.repo_name))}
+                      
+                    %endif
+                </div>
+            %endfor
+        %else:
+            ${_('You are not following any users or repositories')}
+        %endif               
+        </div>
+    </div>
+</%def>    

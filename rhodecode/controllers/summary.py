@@ -52,8 +52,10 @@ class SummaryController(BaseController):
         super(SummaryController, self).__before__()
 
     def index(self):
-        hg_model = ScmModel()
-        c.repo_info = hg_model.get_repo(c.repo_name)
+        scm_model = ScmModel()
+        c.repo_info = scm_model.get_repo(c.repo_name)
+        c.following = scm_model.is_following_repo(c.repo_name,
+                                             c.rhodecode_user.user_id)
         def url_generator(**kw):
             return url('shortlog_home', repo_name=c.repo_name, **kw)
 

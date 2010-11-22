@@ -49,6 +49,7 @@ class User(Base):
     user_perms = relation('UserToPerm', primaryjoin="User.user_id==UserToPerm.user_id", cascade='all')
 
     repositories = relation('Repository')
+    user_followers = relation('UserFollowing', primaryjoin='UserFollowing.follows_user_id==User.user_id', cascade='all')
 
     @LazyProperty
     def full_contact(self):
@@ -101,6 +102,9 @@ class Repository(Base):
     repo_to_perm = relation('RepoToPerm', cascade='all')
     stats = relation('Statistics', cascade='all', uselist=False)
 
+    repo_followers = relation('UserFollowing', primaryjoin='UserFollowing.follows_repo_id==Repository.repo_id', cascade='all')
+
+
     def __repr__(self):
         return "<Repository('%s:%s')>" % (self.repo_id, self.repo_name)
 
@@ -148,6 +152,23 @@ class Statistics(Base):
 
     repository = relation('Repository', single_parent=True)
 
+class UserFollowing(Base):
+    __tablename__ = 'user_followings'
+    __table_args__ = (UniqueConstraint('user_id', 'follows_repository_id'),
+                      UniqueConstraint('user_id', 'follows_user_id')
+                      , {'useexisting':True})
+
+    user_following_id = Column("user_following_id", INTEGER(), nullable=False, unique=True, default=None, primary_key=True)
+    user_id = Column("user_id", INTEGER(), ForeignKey(u'users.user_id'), nullable=False, unique=None, default=None)
+    follows_repo_id = Column("follows_repository_id", INTEGER(), ForeignKey(u'repositories.repo_id'), nullable=True, unique=None, default=None)
+    follows_user_id = Column("follows_user_id", INTEGER(), ForeignKey(u'users.user_id'), nullable=True, unique=None, default=None)
+
+    user = relation('User', primaryjoin='User.user_id==UserFollowing.user_id')
+
+    follows_user = relation('User', primaryjoin='User.user_id==UserFollowing.follows_user_id')
+    follows_repository = relation('Repository')
+
+
 class CacheInvalidation(Base):
     __tablename__ = 'cache_invalidation'
     __table_args__ = (UniqueConstraint('cache_key'), {'useexisting':True})
@@ -163,4 +184,4 @@ class CacheInvalidation(Base):
         self.cache_active = False
 
     def __repr__(self):
-        return "<CacheInvaidation('%s:%s')>" % (self.cache_id, self.cache_key)
+        return "<CacheInvalidation('%s:%s')>" % (self.cache_id, self.cache_key)

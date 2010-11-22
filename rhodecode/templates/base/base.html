@@ -239,6 +239,15 @@
                 </li>
                 
                 <li>
+                    <a title="${_('Journal')}"  href="${h.url('journal')}">
+                    <span class="icon">
+                        <img src="/images/icons/book.png" alt="${_('Journal')}" />
+                    </span>
+                    <span>${_('Journal')}</span>                 
+                    </a>        
+                </li>
+                                
+                <li>
                     <a title="${_('Search')}"  href="${h.url('search')}">
                     <span class="icon">
                         <img src="/images/icons/search_16.png" alt="${_('Search')}" />
@@ -286,6 +295,50 @@
 <script type="text/javascript" src="/js/yui2a.js"></script>
 <!--[if IE]><script language="javascript" type="text/javascript" src="/js/excanvas.min.js"></script><![endif]-->
 <script type="text/javascript" src="/js/yui.flot.js"></script>
+
+<script type="text/javascript">
+var base_url  ='/_admin/toggle_following';
+var YUC = YAHOO.util.Connect;
+var YUD = YAHOO.util.Dom;
+
+
+function onSuccess(){
+	
+	var f = YUD.get('follow_toggle');
+    if(f.getAttribute('class')=='follow'){
+        f.setAttribute('class','following');
+        f.setAttribute('title',"${_('Stop following this repository')}");
+        
+    }
+    else{
+        f.setAttribute('class','follow');
+        f.setAttribute('title',"${_('Start following this repository')}");
+    }
+}
+
+function toggleFollowingUser(fallows_user_id,token){
+    args = 'follows_user_id='+fallows_user_id;
+    args+= '&auth_token='+token;
+    YUC.asyncRequest('POST',base_url,{
+        success:function(o){
+        	onSuccess();
+        }
+    },args); return false;
+}
+
+
+function toggleFollowingRepo(fallows_repo_id,token){
+    args = 'follows_repo_id='+fallows_repo_id;
+    args+= '&auth_token='+token;
+    YUC.asyncRequest('POST',base_url,{
+        success:function(o){
+        	onSuccess();
+        }
+    },args); return false;
+}    
+</script>
+
+
 </%def>
 
 <%def name="breadcrumbs()">

@@ -3,6 +3,8 @@
 Consists of functions to typically be used within templates, but also
 available to Controllers. This module is available to both as 'h'.
 """
+import random
+import hashlib
 from pygments.formatters import HtmlFormatter
 from pygments import highlight as code_highlight
 from pylons import url, app_globals as g
@@ -35,6 +37,24 @@ def _reset(name, value=None, id=NotGiven, type="reset", **attrs):
     return HTML.input(**attrs)
 
 reset = _reset
+
+
+def get_token():
+    """Return the current authentication token, creating one if one doesn't
+    already exist.
+    """
+    token_key = "_authentication_token"
+    from pylons import session
+    if not token_key in session:
+        try:
+            token = hashlib.sha1(str(random.getrandbits(128))).hexdigest()
+        except AttributeError: # Python < 2.4
+            token = hashlib.sha1(str(random.randrange(2 ** 128))).hexdigest()
+        session[token_key] = token
+        if hasattr(session, 'save'):
+            session.save()
+    return session[token_key]
+
 
 #Custom helpers here :)
 class _Link(object):
@@ -415,10 +435,10 @@ def action_parser(user_log):
                 cs_links += html_tmpl % (', '.join(r for r in revs[revs_limit:]),
                                          _('and %s more revisions') \
                                             % (len(revs) - revs_limit))
-                
+
             return literal(cs_links)
         return ''
-    
+
     def get_fork_name():
         if action == 'user_forked_repo':
             from rhodecode.model.scm import ScmModel

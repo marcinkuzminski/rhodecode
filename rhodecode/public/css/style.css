@@ -1776,6 +1776,26 @@ background:#556CB5;
 color:#FFF;
 }
 
+.follow{
+background:url("../images/icons/heart_add.png") no-repeat scroll 3px;
+height: 16px;
+width: 20px;
+cursor: pointer;
+display: block;
+float: right;
+margin-top: 2px;
+}
+
+.following{
+background:url("../images/icons/heart_delete.png") no-repeat scroll 3px;
+height: 16px;
+width: 20px;
+cursor: pointer;
+display: block;
+float: right;
+margin-top: 2px;
+}
+
 .add_icon {
 background:url("../images/icons/add.png") no-repeat scroll 3px;
 height:16px;

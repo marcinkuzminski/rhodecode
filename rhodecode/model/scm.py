@@ -29,7 +29,8 @@ from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import HasRepoPermissionAny
 from rhodecode.lib.utils import get_repos, make_ui
 from rhodecode.model import meta
-from rhodecode.model.db import Repository, User, RhodeCodeUi, CacheInvalidation
+from rhodecode.model.db import Repository, User, RhodeCodeUi, CacheInvalidation, \
+    UserFollowing
 from rhodecode.model.caching_query import FromCache
 from sqlalchemy.orm import joinedload
 from sqlalchemy.orm.session import make_transient
@@ -219,7 +220,79 @@ class ScmModel(object):
             self.sa.rollback()
 
 
+    def toggle_following_repo(self, follow_repo_id, user_id):
 
+        f = self.sa.query(UserFollowing)\
+            .filter(UserFollowing.follows_repo_id == follow_repo_id)\
+            .filter(UserFollowing.user_id == user_id).scalar()
+
+        if f is not None:
+            try:
+                self.sa.delete(f)
+                self.sa.commit()
+                return
+            except:
+                log.error(traceback.format_exc())
+                self.sa.rollback()
+                raise
+
+
+        try:
+            f = UserFollowing()
+            f.user_id = user_id
+            f.follows_repo_id = follow_repo_id
+            self.sa.add(f)
+            self.sa.commit()
+        except:
+            log.error(traceback.format_exc())
+            self.sa.rollback()
+            raise
+
+    def toggle_following_user(self, follow_user_id , user_id):
+        f = self.sa.query(UserFollowing)\
+            .filter(UserFollowing.follows_user_id == follow_user_id)\
+            .filter(UserFollowing.user_id == user_id).scalar()
+
+        if f is not None:
+            try:
+                self.sa.delete(f)
+                self.sa.commit()
+                return
+            except:
+                log.error(traceback.format_exc())
+                self.sa.rollback()
+                raise
+
+        try:
+            f = UserFollowing()
+            f.user_id = user_id
+            f.follows_user_id = follow_user_id
+            self.sa.add(f)
+            self.sa.commit()
+        except:
+            log.error(traceback.format_exc())
+            self.sa.rollback()
+            raise
+
+    def is_following_repo(self, repo_name, user_id):
+        r = self.sa.query(Repository)\
+            .filter(Repository.repo_name == repo_name).scalar()
+
+        f = self.sa.query(UserFollowing)\
+            .filter(UserFollowing.follows_repository == r)\
+            .filter(UserFollowing.user_id == user_id).scalar()
+
+        return f is not None
+
+    def is_following_user(self, username, user_id):
+        u = self.sa.query(User)\
+            .filter(User.username == username).scalar()
+
+        f = self.sa.query(UserFollowing)\
+            .filter(UserFollowing.follows_user == u)\
+            .filter(UserFollowing.user_id == user_id).scalar()
+
+        return f is not None
 
 
     def _should_invalidate(self, repo_name):
