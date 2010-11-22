@@ -61,6 +61,7 @@ class JournalController(BaseController):
                         UserLog.user_id.in_(user_ids),
                         ))\
             .order_by(UserLog.action_date.desc())\
+            .limit(20)\
             .all()
         return render('/journal.html')
 
