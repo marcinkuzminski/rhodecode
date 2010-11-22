@@ -70,13 +70,14 @@ def is_git(environ):
 
 def action_logger(user, action, repo, ipaddr='', sa=None):
     """
-    Action logger for various action made by users
+    Action logger for various actions made by users
     
-    :param user: user that made this action, can be a string unique username or
+    :param user: user that made this action, can be a unique username string or
         object containing user_id attribute
     :param action: action to log, should be on of predefined unique actions for
         easy translations
-    :param repo: repository that action was made on
+    :param repo: string name of repository or object containing repo_id,
+        that action was made on
     :param ipaddr: optional ip address from what the action was made
     :param sa: optional sqlalchemy session
     
@@ -86,20 +87,22 @@ def action_logger(user, action, repo, ipaddr='', sa=None):
         sa = meta.Session()
 
     try:
+        um = UserModel()
         if hasattr(user, 'user_id'):
             user_obj = user
         elif isinstance(user, basestring):
-            user_obj = UserModel().get_by_username(user, cache=False)
+            user_obj = um.get_by_username(user, cache=False)
         else:
             raise Exception('You have to provide user object or username')
 
 
-        if repo:
+        rm = RepoModel()
+        if hasattr(repo, 'repo_id'):
+            repo_obj = rm.get(repo.repo_id, cache=False)
+            repo_name = repo_obj.repo_name
+        elif  isinstance(repo, basestring):
             repo_name = repo.lstrip('/')
-
-            repository = RepoModel().get(repo_name, cache=False)
-            if not repository:
-                raise Exception('You have to provide valid repository')
+            repo_obj = rm.get_by_repo_name(repo_name, cache=False)
         else:
             raise Exception('You have to provide repository to action logger')
 
@@ -107,8 +110,10 @@ def action_logger(user, action, repo, ipaddr='', sa=None):
         user_log = UserLog()
         user_log.user_id = user_obj.user_id
         user_log.action = action
+        
+        user_log.repository_id = repo_obj.repo_id
         user_log.repository_name = repo_name
-        user_log.repository = repository
+        
         user_log.action_date = datetime.datetime.now()
         user_log.user_ip = ipaddr
         sa.add(user_log)
@@ -352,7 +357,7 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False):
     user = sa.query(User).filter(User.admin == True).first()
 
     for name, repo in initial_repo_list.items():
-        if not rm.get(name, cache=False):
+        if not rm.get_by_repo_name(name, cache=False):
             log.info('repository %s not found creating default', name)
 
             form_data = {

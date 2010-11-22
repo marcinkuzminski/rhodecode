@@ -27,7 +27,7 @@ from mercurial import ui
 from rhodecode import BACKENDS
 from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import HasRepoPermissionAny
-from rhodecode.lib.utils import get_repos, make_ui
+from rhodecode.lib.utils import get_repos, make_ui, action_logger
 from rhodecode.model import meta
 from rhodecode.model.db import Repository, User, RhodeCodeUi, CacheInvalidation, \
     UserFollowing
@@ -45,6 +45,15 @@ import time
 
 log = logging.getLogger(__name__)
 
+class UserTemp(object):
+    def __init__(self, user_id):
+        self.user_id = user_id
+
+class RepoTemp(object):
+    def __init__(self, repo_id):
+        self.repo_id = repo_id
+        
+           
 class ScmModel(object):
     """
     Mercurial Model
@@ -227,9 +236,13 @@ class ScmModel(object):
             .filter(UserFollowing.user_id == user_id).scalar()
 
         if f is not None:
+                    
             try:
                 self.sa.delete(f)
                 self.sa.commit()
+                action_logger(UserTemp(user_id),
+                              'stopped_following_repo',
+                              RepoTemp(follow_repo_id))                
                 return
             except:
                 log.error(traceback.format_exc())
@@ -243,6 +256,9 @@ class ScmModel(object):
             f.follows_repo_id = follow_repo_id
             self.sa.add(f)
             self.sa.commit()
+            action_logger(UserTemp(user_id),
+                          'started_following_repo',
+                          RepoTemp(follow_repo_id))             
         except:
             log.error(traceback.format_exc())
             self.sa.rollback()

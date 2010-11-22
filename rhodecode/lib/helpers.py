@@ -459,7 +459,10 @@ def action_parser(user_log):
            'admin_forked_repo':_('Admin forked repository'),
            'admin_updated_repo':_('Admin updated repository'),
            'push':_('Pushed') + get_cs_links(),
-           'pull':_('Pulled'), }
+           'pull':_('Pulled'),
+           'started_following_repo':_('User started following repository'),
+           'stopped_following_repo':_('User stopped following repository'),
+            }
 
     return map.get(action, action)
 

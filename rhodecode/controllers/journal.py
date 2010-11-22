@@ -28,6 +28,7 @@ from pylons.controllers.util import abort, redirect
 from rhodecode.lib.auth import LoginRequired
 from rhodecode.lib.base import BaseController, render
 from rhodecode.lib.helpers import get_token
+from rhodecode.lib.utils import action_logger
 from rhodecode.model.db import UserLog, UserFollowing
 from rhodecode.model.scm import ScmModel
 import logging
@@ -56,7 +57,6 @@ class JournalController(BaseController):
 
 
     def toggle_following(self):
-        print c.rhodecode_user
 
         if request.POST.get('auth_token') == get_token():
             scm_model = ScmModel()

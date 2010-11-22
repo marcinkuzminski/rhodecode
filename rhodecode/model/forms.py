@@ -170,7 +170,7 @@ def ValidRepoName(edit, old_data):
                 raise formencode.Invalid(_('This repository name is disallowed'),
                                          value, state)
             if old_data.get('repo_name') != value or not edit:
-                if RepoModel().get(slug, cache=False):
+                if RepoModel().get_by_repo_name(slug, cache=False):
                     raise formencode.Invalid(_('This repository already exists') ,
                                              value, state)
             return slug

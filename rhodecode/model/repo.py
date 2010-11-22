@@ -42,12 +42,22 @@ class RepoModel(object):
 
     def get(self, repo_id, cache=False):
         repo = self.sa.query(Repository)\
-            .filter(Repository.repo_name == repo_id)
+            .filter(Repository.repo_id == repo_id)
 
         if cache:
             repo = repo.options(FromCache("sql_cache_short",
-                                          "get_repo_%s" % repo))
+                                          "get_repo_%s" % repo_id))
         return repo.scalar()
+
+
+    def get_by_repo_name(self, repo_name, cache=False):
+        repo = self.sa.query(Repository)\
+            .filter(Repository.repo_name == repo_name)
+
+        if cache:
+            repo = repo.options(FromCache("sql_cache_short",
+                                          "get_repo_%s" % repo_name))
+        return repo.scalar()        
 
     def get_users_js(self):
 
@@ -65,19 +75,21 @@ class RepoModel(object):
             #update permissions
             for username, perm in form_data['perms_updates']:
                 r2p = self.sa.query(RepoToPerm)\
-                        .filter(RepoToPerm.user == UserModel().get_by_username(username, cache=False))\
-                        .filter(RepoToPerm.repository == self.get(repo_name))\
+                        .filter(RepoToPerm.user == UserModel()\
+                                .get_by_username(username, cache=False))\
+                        .filter(RepoToPerm.repository == \
+                                self.get_by_repo_name(repo_name))\
                         .one()
 
                 r2p.permission_id = self.sa.query(Permission).filter(
-                                                Permission.permission_name ==
+                                                Permission.permission_name == 
                                                 perm).one().permission_id
                 self.sa.add(r2p)
 
             #set new permissions
             for username, perm in form_data['perms_new']:
                 r2p = RepoToPerm()
-                r2p.repository = self.get(repo_name)
+                r2p.repository = self.get_by_repo_name(repo_name)
                 r2p.user = UserModel().get_by_username(username, cache=False)
 
                 r2p.permission_id = self.sa.query(Permission).filter(
@@ -86,7 +98,7 @@ class RepoModel(object):
                 self.sa.add(r2p)
 
             #update current repo
-            cur_repo = self.get(repo_name, cache=False)
+            cur_repo = self.get_by_repo_name(repo_name, cache=False)
 
             for k, v in form_data.items():
                 if k == 'user':
@@ -172,7 +184,8 @@ class RepoModel(object):
     def delete_perm_user(self, form_data, repo_name):
         try:
             self.sa.query(RepoToPerm)\
-                .filter(RepoToPerm.repository == self.get(repo_name))\
+                .filter(RepoToPerm.repository \
+                        == self.get_by_repo_name(repo_name))\
                 .filter(RepoToPerm.user_id == form_data['user_id']).delete()
             self.sa.commit()
         except:
@@ -183,7 +196,8 @@ class RepoModel(object):
     def delete_stats(self, repo_name):
         try:
             self.sa.query(Statistics)\
-                .filter(Statistics.repository == self.get(repo_name)).delete()
+                .filter(Statistics.repository == \
+                        self.get_by_repo_name(repo_name)).delete()
             self.sa.commit()
         except:
             log.error(traceback.format_exc())

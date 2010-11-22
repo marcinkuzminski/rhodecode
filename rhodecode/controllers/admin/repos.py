@@ -140,7 +140,7 @@ class ReposController(BaseController):
                               changed_name, '', self.sa)
 
         except formencode.Invalid, errors:
-            c.repo_info = repo_model.get(repo_name)
+            c.repo_info = repo_model.get_by_repo_name(repo_name)
             c.users_array = repo_model.get_users_js()
             errors.value.update({'user':c.repo_info.user.username})
             return htmlfill.render(
@@ -168,7 +168,7 @@ class ReposController(BaseController):
         # url('repo', repo_name=ID)
 
         repo_model = RepoModel()
-        repo = repo_model.get(repo_name)
+        repo = repo_model.get_by_repo_name(repo_name)
         if not repo:
             h.flash(_('%s repository is not mapped to db perhaps'
                       ' it was moved or renamed  from the filesystem'
@@ -245,7 +245,7 @@ class ReposController(BaseController):
         """GET /repos/repo_name/edit: Form to edit an existing item"""
         # url('edit_repo', repo_name=ID)
         repo_model = RepoModel()
-        c.repo_info = repo = repo_model.get(repo_name)
+        c.repo_info = repo = repo_model.get_by_repo_name(repo_name)
         if repo.stats:
             last_rev = repo.stats.stat_on_revision
         else:

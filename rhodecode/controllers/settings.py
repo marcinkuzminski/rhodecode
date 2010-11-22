@@ -47,7 +47,7 @@ class SettingsController(BaseController):
 
     def index(self, repo_name):
         repo_model = RepoModel()
-        c.repo_info = repo = repo_model.get(repo_name)
+        c.repo_info = repo = repo_model.get_by_repo_name(repo_name)
         if not repo:
             h.flash(_('%s repository is not mapped to db perhaps'
                       ' it was created or renamed from the filesystem'
@@ -85,7 +85,7 @@ class SettingsController(BaseController):
             action_logger(self.rhodecode_user, 'user_updated_repo',
                               changed_name, '', self.sa)
         except formencode.Invalid, errors:
-            c.repo_info = repo_model.get(repo_name)
+            c.repo_info = repo_model.get_by_repo_name(repo_name)
             c.users_array = repo_model.get_users_js()
             errors.value.update({'user':c.repo_info.user.username})
             return htmlfill.render(
@@ -113,7 +113,7 @@ class SettingsController(BaseController):
         # url('repo_settings_delete', repo_name=ID)
 
         repo_model = RepoModel()
-        repo = repo_model.get(repo_name)
+        repo = repo_model.get_by_repo_name(repo_name)
         if not repo:
             h.flash(_('%s repository is not mapped to db perhaps'
                       ' it was moved or renamed  from the filesystem'
@@ -136,7 +136,7 @@ class SettingsController(BaseController):
 
     def fork(self, repo_name):
         repo_model = RepoModel()
-        c.repo_info = repo = repo_model.get(repo_name)
+        c.repo_info = repo = repo_model.get_by_repo_name(repo_name)
         if not repo:
             h.flash(_('%s repository is not mapped to db perhaps'
                       ' it was created or renamed from the filesystem'
@@ -152,7 +152,7 @@ class SettingsController(BaseController):
 
     def fork_create(self, repo_name):
         repo_model = RepoModel()
-        c.repo_info = repo_model.get(repo_name)
+        c.repo_info = repo_model.get_by_repo_name(repo_name)
         _form = RepoForkForm(old_data={'repo_type':c.repo_info.repo_type})()
         form_result = {}
         try:
