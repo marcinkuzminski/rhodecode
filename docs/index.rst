@@ -62,16 +62,18 @@ Features
 
 
 .. figure::  images/screenshot1_main_page.png
-   :align:   left
 
    Main page of RhodeCode
 
 .. figure::  images/screenshot2_summary_page.png
-   :align:   left
 
    Summary page
+   
+.. figure::  images/screenshot3_changelog_page.png
 
-
+   Changelog with DAG graph
+    
+    
 Incoming / Plans
 ----------------
 
@@ -107,8 +109,8 @@ Documentation
    :maxdepth: 1
 
    installation
-   upgrade
    setup
+   upgrade
    changelog
 
 Other topics

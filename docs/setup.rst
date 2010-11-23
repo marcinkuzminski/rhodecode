@@ -181,6 +181,10 @@ in production.ini file::
 
 To not have the statics served by the application. And improve speed.
 
+Apache reverse proxy
+--------------------
+Tutorial can be found here
+http://wiki.pylonshq.com/display/pylonscookbook/Apache+as+a+reverse+proxy+for+Pylons
 
 
 Apache's example FCGI config
