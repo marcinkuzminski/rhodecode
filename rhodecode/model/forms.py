@@ -67,7 +67,7 @@ def ValidUsername(edit, old_data):
                 old_un = UserModel().get(old_data.get('user_id')).username
 
             if old_un != value or not edit:
-                if UserModel().get_by_username(value, cache=False):
+                if UserModel().get_by_username(value.lower(), cache=False):
                     raise formencode.Invalid(_('This username already exists') ,
                                              value, state)
 
@@ -244,6 +244,8 @@ class ValidPath(formencode.validators.FancyValidator):
 def UniqSystemEmail(old_data):
     class _UniqSystemEmail(formencode.validators.FancyValidator):
         def to_python(self, value, state):
+            value = value.lower()
+            #TODO:write test for MixedCase scenarios
             if old_data.get('email') != value:
                 sa = meta.Session()
                 try:
@@ -260,6 +262,7 @@ def UniqSystemEmail(old_data):
 
 class ValidSystemEmail(formencode.validators.FancyValidator):
     def to_python(self, value, state):
+        value = value.lower()
         sa = meta.Session
         try:
             user = sa.query(User).filter(User.email == value).scalar()

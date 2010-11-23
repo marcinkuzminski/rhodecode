@@ -103,6 +103,13 @@ def authfunc(environ, username, password):
 
 
     else:
+
+        #since ldap is searching in case insensitive check if this user is still
+        #not in our system
+        username = username.lower()
+        if user_model.get_by_username(username, cache=False) is not None:
+            return False 
+        
         from rhodecode.model.settings import SettingsModel
         ldap_settings = SettingsModel().get_ldap_settings()
 
@@ -110,6 +117,7 @@ def authfunc(environ, username, password):
         # FALLBACK TO LDAP AUTH IN ENABLE                
         #======================================================================
         if ldap_settings.get('ldap_active', False):
+            
             kwargs = {
                   'server':ldap_settings.get('ldap_host', ''),
                   'base_dn':ldap_settings.get('ldap_base_dn', ''),
@@ -214,8 +222,8 @@ def fill_perms(user):
 
         #default global
         default_global_perms = sa.query(UserToPerm)\
-            .filter(UserToPerm.user == sa.query(User).filter(User.username ==
-            'default').one())
+            .filter(UserToPerm.user == sa.query(User)\
+                   .filter(User.username == 'default').one())
 
         for perm in default_global_perms:
             user.permissions['global'].add(perm.permission.permission_name)
