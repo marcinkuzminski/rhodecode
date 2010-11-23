@@ -212,19 +212,30 @@
                             <li class="last">${h.link_to(_('settings'),h.url('admin_settings'),class_='settings')}</li>        
                         </ul>
                     </li>
-                    %endif                    
+                    %endif
 
-                
-##                   %if h.HasRepoPermissionAll('repository.admin')(c.repo_name):
-##                   	<li class="last">
-##                   	${h.link_to(_('delete'),'#',class_='delete')}
-##	                  ${h.form(url('repo_settings_delete', repo_name=c.repo_name),method='delete')}
-##	                    ${h.submit('remove_%s' % c.repo_name,'delete',class_="delete_icon action_button",onclick="return confirm('Confirm to delete this repository');")}
-##	                  ${h.end_form()}
-##                   	</li>
-##                   	%endif
                    </ul>             
                 </li>
+                
+                <li>
+                    <a title="${_('Followers')}" href="#">
+                    <span class="icon_short">
+                        <img src="/images/icons/heart.png" alt="${_('Followers')}" />
+                    </span>
+                    <span class="short">${c.repository_followers}</span>
+                    </a>
+                </li>
+                <li>
+                    <a title="${_('Forks')}" href="#">
+                    <span class="icon_short">
+                        <img src="/images/icons/arrow_divide.png" alt="${_('Forks')}" />
+                    </span>
+                    <span class="short">${c.repository_forks}</span>
+                    </a>
+                </li>                
+                
+                
+                
 	        </ul>
 		%else:
 		    ##ROOT MENU

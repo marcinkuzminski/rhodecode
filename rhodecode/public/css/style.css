@@ -302,6 +302,10 @@ background:#369 url("../../images/quick_l.png") no-repeat top left;
 padding:0;
 }
 
+#header #header-inner #quick li span.short {
+padding:9px 6px 8px 6px;
+}
+
 #header #header-inner #quick li span {
 top:0;
 right:0;
@@ -328,6 +332,15 @@ border-right:1px solid #2e5c89;
 padding:8px 8px 4px;
 }
 
+#header #header-inner #quick li span.icon_short {
+top:0;
+left:0;
+border-left:none;
+background:url("../../images/quick_l.png") no-repeat top left;
+border-right:1px solid #2e5c89;
+padding:9px 4px 4px;
+}
+
 #header #header-inner #quick li a:hover {
 background:#4e4e4e url("../../images/quick_l_selected.png") no-repeat top left;
 }
@@ -337,11 +350,12 @@ border-left:1px solid #545454;
 background:url("../../images/quick_r_selected.png") no-repeat top right;
 }
 
-#header #header-inner #quick li a:hover span.icon {
+#header #header-inner #quick li a:hover span.icon,#header #header-inner #quick li a:hover span.icon_short {
 border-left:none;
 border-right:1px solid #464646;
 background:url("../../images/quick_l_selected.png") no-repeat top left;
 }
+
 
 #header #header-inner #quick ul {
 top:29px;

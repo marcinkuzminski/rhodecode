@@ -22,14 +22,19 @@ class BaseController(WSGIController):
         c.backends = BACKENDS.keys()
 
         if c.repo_name:
-            cached_repo = ScmModel().get(c.repo_name)
+            scm_model = ScmModel()
+            cached_repo = scm_model.get(c.repo_name)
 
             if cached_repo:
                 c.repository_tags = cached_repo.tags
                 c.repository_branches = cached_repo.branches
+                c.repository_followers = scm_model.get_followers(cached_repo.dbrepo.repo_id)
+                c.repository_forks = scm_model.get_forks(cached_repo.dbrepo.repo_id)
             else:
                 c.repository_tags = {}
                 c.repository_branches = {}
+                c.repository_followers = 0
+                c.repository_forks = 0
 
         self.sa = meta.Session()
 

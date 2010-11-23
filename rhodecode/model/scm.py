@@ -52,8 +52,8 @@ class UserTemp(object):
 class RepoTemp(object):
     def __init__(self, repo_id):
         self.repo_id = repo_id
-        
-           
+
+
 class ScmModel(object):
     """
     Mercurial Model
@@ -236,13 +236,13 @@ class ScmModel(object):
             .filter(UserFollowing.user_id == user_id).scalar()
 
         if f is not None:
-                    
+
             try:
                 self.sa.delete(f)
                 self.sa.commit()
                 action_logger(UserTemp(user_id),
                               'stopped_following_repo',
-                              RepoTemp(follow_repo_id))                
+                              RepoTemp(follow_repo_id))
                 return
             except:
                 log.error(traceback.format_exc())
@@ -258,7 +258,7 @@ class ScmModel(object):
             self.sa.commit()
             action_logger(UserTemp(user_id),
                           'started_following_repo',
-                          RepoTemp(follow_repo_id))             
+                          RepoTemp(follow_repo_id))
         except:
             log.error(traceback.format_exc())
             self.sa.rollback()
@@ -310,6 +310,13 @@ class ScmModel(object):
 
         return f is not None
 
+    def get_followers(self, repo_id):
+        return self.sa.query(UserFollowing)\
+                .filter(UserFollowing.follows_repo_id == repo_id).count()
+
+    def get_forks(self, repo_id):
+        return self.sa.query(Repository)\
+                .filter(Repository.fork_id == repo_id).count()
 
     def _should_invalidate(self, repo_name):
         """
