@@ -72,16 +72,17 @@ def ValidUsername(edit, old_data):
                                                case_insensitive=True):
                     raise formencode.Invalid(_('This username already exists') ,
                                              value, state)
-            
-            
-            if re.match(r'^[a-zA-Z0-9]{1}[a-zA-Z0-9\-]+$', value) is None:
+
+
+            if re.match(r'^[a-zA-Z0-9]{1}[a-zA-Z0-9\-\_]+$', value) is None:
                 raise formencode.Invalid(_('Username may only contain '
-                                      'alphanumeric characters '
-                                      'or dashes and cannot begin with a dash'),
+                                           'alphanumeric characters underscores '
+                                           'or dashes and must begin with '
+                                           'alphanumeric character'),
                                       value, state)
-            
-            
-            
+
+
+
     return _ValidUsername
 
 class ValidPassword(formencode.validators.FancyValidator):
@@ -258,7 +259,6 @@ def UniqSystemEmail(old_data):
     class _UniqSystemEmail(formencode.validators.FancyValidator):
         def to_python(self, value, state):
             value = value.lower()
-            #TODO:write test for MixedCase scenarios
             if old_data.get('email') != value:
                 sa = meta.Session()
                 try:

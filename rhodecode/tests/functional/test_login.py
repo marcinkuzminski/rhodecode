@@ -79,6 +79,29 @@ class TestLoginController(TestController):
         assert response.status == '200 OK', 'Wrong response from register page got %s' % response.status
         assert 'This username already exists' in response.body
 
+    def test_register_err_same_email(self):
+        response = self.app.post(url(controller='login', action='register'),
+                                            {'username':'test_admin_0',
+                                             'password':'test12',
+                                             'password_confirmation':'test12',
+                                             'email':'test_admin@mail.com',
+                                             'name':'test',
+                                             'lastname':'test'})
+
+        assert response.status == '200 OK', 'Wrong response from register page got %s' % response.status
+        assert 'That e-mail address is already taken' in response.body
+
+    def test_register_err_same_email_case_sensitive(self):
+        response = self.app.post(url(controller='login', action='register'),
+                                            {'username':'test_admin_1',
+                                             'password':'test12',
+                                             'password_confirmation':'test12',
+                                             'email':'TesT_Admin@mail.COM',
+                                             'name':'test',
+                                             'lastname':'test'})
+        assert response.status == '200 OK', 'Wrong response from register page got %s' % response.status
+        assert 'That e-mail address is already taken' in response.body
+
     def test_register_err_wrong_data(self):
         response = self.app.post(url(controller='login', action='register'),
                                             {'username':'xs',
@@ -90,6 +113,35 @@ class TestLoginController(TestController):
         assert response.status == '200 OK', 'Wrong response from register page got %s' % response.status
         assert 'An email address must contain a single @' in response.body
         assert 'Enter a value 6 characters long or more' in response.body
+
+
+    def test_register_err_username(self):
+        response = self.app.post(url(controller='login', action='register'),
+                                            {'username':'error user',
+                                             'password':'test12',
+                                             'password_confirmation':'test12',
+                                             'email':'goodmailm',
+                                             'name':'test',
+                                             'lastname':'test'})
+
+        print response.body
+        assert response.status == '200 OK', 'Wrong response from register page got %s' % response.status
+        assert 'An email address must contain a single @' in response.body
+        assert 'Username may only contain alphanumeric characters underscores or dashes and must begin with alphanumeric character' in response.body
+
+    def test_register_err_case_sensitive(self):
+        response = self.app.post(url(controller='login', action='register'),
+                                            {'username':'Test_Admin',
+                                             'password':'test12',
+                                             'password_confirmation':'test12',
+                                             'email':'goodmailm',
+                                             'name':'test',
+                                             'lastname':'test'})
+
+        assert response.status == '200 OK', 'Wrong response from register page got %s' % response.status
+        assert 'An email address must contain a single @' in response.body
+        assert 'This username already exists' in response.body
+
 
 
     def test_register_special_chars(self):
