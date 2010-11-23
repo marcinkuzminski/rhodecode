@@ -235,12 +235,12 @@ class _FilesBreadCrumbs(object):
                                         revision=rev, f_path=''))]
         paths_l = paths.split('/')
 
-        for cnt, p in enumerate(paths_l, 1):
+        for cnt, p in enumerate(paths_l):
             if p != '':
                 url_l.append(link_to(p, url('files_home',
                                             repo_name=repo_name,
                                             revision=rev,
-                                            f_path='/'.join(paths_l[:cnt]))))
+                                            f_path='/'.join(paths_l[:cnt + 1]))))
 
         return literal('/'.join(url_l))
 
@@ -251,9 +251,9 @@ class CodeHtmlFormatter(HtmlFormatter):
         return self._wrap_div(self._wrap_pre(self._wrap_code(source)))
 
     def _wrap_code(self, source):
-        for cnt, it in enumerate(source, 1):
+        for cnt, it in enumerate(source):
             i, t = it
-            t = '<div id="#S-%s">%s</div>' % (cnt, t)
+            t = '<div id="#S-%s">%s</div>' % (cnt + 1, t)
             yield i, t
 def pygmentize(filenode, **kwargs):
     """
