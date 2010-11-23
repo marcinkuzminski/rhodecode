@@ -50,7 +50,8 @@
                     <td>${h.bool2icon(user.is_ldap)}</td>
                     <td>
                         ${h.form(url('user', id=user.user_id),method='delete')}
-                            ${h.submit('remove','delete',id="remove_user_%s" % user.user_id,class_="delete_icon action_button")}
+                            ${h.submit('remove_','delete',id="remove_user_%s" % user.user_id,
+                            class_="delete_icon action_button",onclick="return confirm('Confirm to delete this user');")}
                         ${h.end_form()}
                     </td>
                 </tr>

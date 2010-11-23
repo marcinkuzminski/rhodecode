@@ -75,7 +75,7 @@ class AuthLdap(object):
         if "," in username:
             raise LdapUsernameError("invalid character in username: ,")
         try:
-            ldap.set_option(ldap.OPT_X_TLS_CACERTFILE, '/etc/openldap/cacerts')
+            ldap.set_option(ldap.OPT_X_TLS_CACERTDIR, '/etc/openldap/cacerts')
             ldap.set_option(ldap.OPT_NETWORK_TIMEOUT, 10)
             server = ldap.initialize(self.LDAP_SERVER)
             if self.ldap_version == 2:
