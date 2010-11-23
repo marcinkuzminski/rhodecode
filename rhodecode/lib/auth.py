@@ -107,7 +107,9 @@ def authfunc(environ, username, password):
         #since ldap is searching in case insensitive check if this user is still
         #not in our system
         username = username.lower()
-        if user_model.get_by_username(username, cache=False) is not None:
+        user_obj = user_model.get_by_username(username, cache=False,
+                                            case_insensitive=True)
+        if user_obj is not None:
             return False 
         
         from rhodecode.model.settings import SettingsModel

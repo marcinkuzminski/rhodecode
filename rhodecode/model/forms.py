@@ -67,7 +67,8 @@ def ValidUsername(edit, old_data):
                 old_un = UserModel().get(old_data.get('user_id')).username
 
             if old_un != value or not edit:
-                if UserModel().get_by_username(value.lower(), cache=False):
+                if UserModel().get_by_username(value, cache=False,
+                                               case_insensitive=True):
                     raise formencode.Invalid(_('This username already exists') ,
                                              value, state)
 
@@ -183,7 +184,8 @@ def ValidForkType(old_data):
 
         def to_python(self, value, state):
             if old_data['repo_type'] != value:
-                raise formencode.Invalid(_('Fork have to be the same type as original'), value, state)
+                raise formencode.Invalid(_('Fork have to be the same type as original'),
+                                         value, state)
             return value
     return _ValidForkType
 
@@ -220,7 +222,8 @@ class ValidPerms(formencode.validators.FancyValidator):
             except Exception:
                 msg = self.message('perm_new_user_name',
                                      state=State_obj)
-                raise formencode.Invalid(msg, value, state, error_dict={'perm_new_user_name':msg})
+                raise formencode.Invalid(msg, value, state,
+                                         error_dict={'perm_new_user_name':msg})
         return value
 
 class ValidSettings(formencode.validators.FancyValidator):
@@ -316,7 +319,8 @@ def UserForm(edit=False, old_data={}):
     class _UserForm(formencode.Schema):
         allow_extra_fields = True
         filter_extra_fields = True
-        username = All(UnicodeString(strip=True, min=1, not_empty=True), ValidUsername(edit, old_data))
+        username = All(UnicodeString(strip=True, min=1, not_empty=True),
+                       ValidUsername(edit, old_data))
         if edit:
             new_password = All(UnicodeString(strip=True, min=6, not_empty=False))
             admin = StringBoolean(if_missing=False)
@@ -335,7 +339,8 @@ def RegisterForm(edit=False, old_data={}):
     class _RegisterForm(formencode.Schema):
         allow_extra_fields = True
         filter_extra_fields = True
-        username = All(ValidUsername(edit, old_data), UnicodeString(strip=True, min=1, not_empty=True))
+        username = All(ValidUsername(edit, old_data),
+                       UnicodeString(strip=True, min=1, not_empty=True))
         password = All(UnicodeString(strip=True, min=6, not_empty=True))
         password_confirmation = All(UnicodeString(strip=True, min=6, not_empty=True))
         active = StringBoolean(if_missing=False)
@@ -358,7 +363,8 @@ def RepoForm(edit=False, old_data={}, supported_backends=BACKENDS.keys()):
     class _RepoForm(formencode.Schema):
         allow_extra_fields = True
         filter_extra_fields = False
-        repo_name = All(UnicodeString(strip=True, min=1, not_empty=True), ValidRepoName(edit, old_data))
+        repo_name = All(UnicodeString(strip=True, min=1, not_empty=True),
+                        ValidRepoName(edit, old_data))
         description = UnicodeString(strip=True, min=1, not_empty=True)
         private = StringBoolean(if_missing=False)
         repo_type = OneOf(supported_backends)
@@ -372,7 +378,8 @@ def RepoForkForm(edit=False, old_data={}, supported_backends=BACKENDS.keys()):
     class _RepoForkForm(formencode.Schema):
         allow_extra_fields = True
         filter_extra_fields = False
-        fork_name = All(UnicodeString(strip=True, min=1, not_empty=True), ValidRepoName(edit, old_data))
+        fork_name = All(UnicodeString(strip=True, min=1, not_empty=True),
+                        ValidRepoName(edit, old_data))
         description = UnicodeString(strip=True, min=1, not_empty=True)
         private = StringBoolean(if_missing=False)
         repo_type = All(ValidForkType(old_data), OneOf(supported_backends))
@@ -382,7 +389,8 @@ def RepoSettingsForm(edit=False, old_data={}):
     class _RepoForm(formencode.Schema):
         allow_extra_fields = True
         filter_extra_fields = False
-        repo_name = All(UnicodeString(strip=True, min=1, not_empty=True), ValidRepoName(edit, old_data))
+        repo_name = All(UnicodeString(strip=True, min=1, not_empty=True),
+                        ValidRepoName(edit, old_data))
         description = UnicodeString(strip=True, min=1, not_empty=True)
         private = StringBoolean(if_missing=False)
 

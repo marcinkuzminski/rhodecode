@@ -48,9 +48,13 @@ class UserModel(object):
         return user.get(user_id)
 
 
-    def get_by_username(self, username, cache=False):
-        user = self.sa.query(User)\
-            .filter(User.username == username)
+    def get_by_username(self, username, cache=False, case_insensitive=False):
+        
+        if case_insensitive:
+            user = self.sa.query(User).filter(User.username.ilike(username))
+        else:
+            user = self.sa.query(User)\
+                .filter(User.username == username)
         if cache:
             user = user.options(FromCache("sql_cache_short",
                                           "get_user_%s" % username))
