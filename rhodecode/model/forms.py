@@ -264,7 +264,7 @@ def UniqSystemEmail(old_data):
                 try:
                     user = sa.query(User).filter(User.email == value).scalar()
                     if user:
-                        raise formencode.Invalid(_("That e-mail address is already taken") ,
+                        raise formencode.Invalid(_("This e-mail address is already taken") ,
                                                  value, state)
                 finally:
                     meta.Session.remove()
@@ -280,7 +280,7 @@ class ValidSystemEmail(formencode.validators.FancyValidator):
         try:
             user = sa.query(User).filter(User.email == value).scalar()
             if  user is None:
-                raise formencode.Invalid(_("That e-mail address doesn't exist.") ,
+                raise formencode.Invalid(_("This e-mail address doesn't exist.") ,
                                          value, state)
         finally:
             meta.Session.remove()

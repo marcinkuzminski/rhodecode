@@ -97,7 +97,7 @@ class TestAdminSettingsController(TestController):
                                                             email=new_email,))
         print response
 
-        assert 'That e-mail address is already taken' in response.body, 'Missing error message about existing email'
+        assert 'This e-mail address is already taken' in response.body, 'Missing error message about existing email'
 
 
     def test_my_account_update_err(self):

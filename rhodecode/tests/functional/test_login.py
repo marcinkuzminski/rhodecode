@@ -89,7 +89,7 @@ class TestLoginController(TestController):
                                              'lastname':'test'})
 
         assert response.status == '200 OK', 'Wrong response from register page got %s' % response.status
-        assert 'That e-mail address is already taken' in response.body
+        assert 'This e-mail address is already taken' in response.body
 
     def test_register_err_same_email_case_sensitive(self):
         response = self.app.post(url(controller='login', action='register'),
@@ -100,7 +100,7 @@ class TestLoginController(TestController):
                                              'name':'test',
                                              'lastname':'test'})
         assert response.status == '200 OK', 'Wrong response from register page got %s' % response.status
-        assert 'That e-mail address is already taken' in response.body
+        assert 'This e-mail address is already taken' in response.body
 
     def test_register_err_wrong_data(self):
         response = self.app.post(url(controller='login', action='register'),
@@ -200,7 +200,7 @@ class TestLoginController(TestController):
         response = self.app.post(url(controller='login', action='password_reset'),
                                             {'email':'marcin@wrongmail.org', })
 
-        assert "That e-mail address doesn't exist" in response.body, 'Missing error message about wrong email'
+        assert "This e-mail address doesn't exist" in response.body, 'Missing error message about wrong email'
 
     def test_forgot_password(self):
         response = self.app.get(url(controller='login', action='password_reset'))
