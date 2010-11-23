@@ -35,6 +35,7 @@ from rhodecode import BACKENDS
 import formencode
 import logging
 import os
+import re
 import rhodecode.lib.helpers as h
 
 log = logging.getLogger(__name__)
@@ -71,7 +72,16 @@ def ValidUsername(edit, old_data):
                                                case_insensitive=True):
                     raise formencode.Invalid(_('This username already exists') ,
                                              value, state)
-
+            
+            
+            if re.match(r'^[a-zA-Z0-9]{1}[a-zA-Z0-9\-]+$', value) is None:
+                raise formencode.Invalid(_('Username may only contain '
+                                      'alphanumeric characters '
+                                      'or dashes and cannot begin with a dash'),
+                                      value, state)
+            
+            
+            
     return _ValidUsername
 
 class ValidPassword(formencode.validators.FancyValidator):
