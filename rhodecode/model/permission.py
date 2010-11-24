@@ -77,8 +77,9 @@ class PermissionModel(object):
                     p.permission = self.get_permission_by_name(
                                         form_result['default_create'])
                     self.sa.add(p)
+
             #stage 2 update all default permissions for repos if checked
-            if form_result['overwrite_default'] == 'true':
+            if form_result['overwrite_default'] == True:
                 for r2p in self.sa.query(RepoToPerm)\
                                .filter(RepoToPerm.user == perm_user).all():
                     r2p.permission = self.get_permission_by_name(
