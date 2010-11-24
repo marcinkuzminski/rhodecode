@@ -20,21 +20,18 @@
 """
 Created on Aug 20, 2010
 Model for permissions
-@author: marcink
+:author: marcink
 """
 
+from rhodecode.model import BaseModel
 from rhodecode.model.db import User, Permission, UserToPerm, RepoToPerm
 from rhodecode.model.caching_query import FromCache
-from rhodecode.model.meta import Session
 import logging
 import traceback
 log = logging.getLogger(__name__)
 
 
-class PermissionModel(object):
-
-    def __init__(self):
-        self.sa = Session()
+class PermissionModel(BaseModel):
 
     def get_permission(self, permission_id, cache=False):
         perm = self.sa.query(Permission)

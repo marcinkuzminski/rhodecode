@@ -21,3 +21,12 @@ def init_model(engine):
 #engine = engine_from_config(config, 'sqlalchemy.')
 #init_model(engine)
 # DO SOMETHING
+
+
+class BaseModel(object):
+
+    def __init__(self, sa=None):
+        if sa is not None:
+            self.sa = sa
+        else:
+            self.sa = meta.Session()

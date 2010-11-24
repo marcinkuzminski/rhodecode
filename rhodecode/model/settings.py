@@ -20,10 +20,11 @@
 """
 Created on Nov 17, 2010
 Model for RhodeCode
-@author: marcink
+:author: marcink
 """
+
 from rhodecode.lib import helpers as h
-from rhodecode.model import meta
+from rhodecode.model import BaseModel
 from rhodecode.model.caching_query import FromCache
 from rhodecode.model.db import  RhodeCodeSettings
 from sqlalchemy.orm import joinedload
@@ -32,14 +33,10 @@ import logging
 
 log = logging.getLogger(__name__)
 
-class SettingsModel(object):
+class SettingsModel(BaseModel):
     """
     Settings model
     """
-
-    def __init__(self):
-        self.sa = meta.Session()
-
 
     def get(self, settings_key, cache=False):
         r = self.sa.query(RhodeCodeSettings)\

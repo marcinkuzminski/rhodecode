@@ -24,9 +24,9 @@ Model for users
 """
 
 from pylons.i18n.translation import _
+from rhodecode.model import BaseModel
 from rhodecode.model.caching_query import FromCache
 from rhodecode.model.db import User
-from rhodecode.model.meta import Session
 from rhodecode.lib.exceptions import *
 
 import logging
@@ -36,10 +36,7 @@ log = logging.getLogger(__name__)
 
 
 
-class UserModel(object):
-
-    def __init__(self):
-        self.sa = Session()
+class UserModel(BaseModel):
 
     def get(self, user_id, cache=False):
         user = self.sa.query(User)

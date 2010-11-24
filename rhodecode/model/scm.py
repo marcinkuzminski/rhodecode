@@ -28,7 +28,7 @@ from rhodecode import BACKENDS
 from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import HasRepoPermissionAny
 from rhodecode.lib.utils import get_repos, make_ui, action_logger
-from rhodecode.model import meta
+from rhodecode.model import BaseModel
 from rhodecode.model.db import Repository, User, RhodeCodeUi, CacheInvalidation, \
     UserFollowing
 from rhodecode.model.caching_query import FromCache
@@ -54,13 +54,10 @@ class RepoTemp(object):
         self.repo_id = repo_id
 
 
-class ScmModel(object):
+class ScmModel(BaseModel):
     """
     Mercurial Model
     """
-
-    def __init__(self):
-        self.sa = meta.Session()
 
     @LazyProperty
     def repos_path(self):

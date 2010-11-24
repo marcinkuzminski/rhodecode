@@ -14,8 +14,10 @@ PYLONS_CONFIG = config
 CELERY_IMPORTS = ("rhodecode.lib.celerylib.tasks",)
 
 ## Result store settings.
-CELERY_RESULT_BACKEND = "database"
-CELERY_RESULT_DBURI = dict(config.items('app:main'))['sqlalchemy.db1.url']
+CELERY_RESULT_BACKEND = "amqp"
+CELERY_AMQP_TASK_RESULT_EXPIRES = 18000  # 5 hours.
+
+#CELERY_RESULT_DBURI = dict(config.items('app:main'))['sqlalchemy.db1.url']
 CELERY_RESULT_SERIALIZER = 'json'
 
 

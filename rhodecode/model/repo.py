@@ -21,12 +21,12 @@ Created on Jun 5, 2010
 model for handling repositories actions
 :author: marcink
 """
-from vcs.backends import get_repo, get_backend
+from vcs.backends import get_backend
 from datetime import datetime
 from pylons import app_globals as g
 from rhodecode.model.db import Repository, RepoToPerm, User, Permission, \
     Statistics
-from rhodecode.model.meta import Session
+from rhodecode.model import BaseModel
 from rhodecode.model.user import UserModel
 from rhodecode.model.caching_query import FromCache
 import logging
@@ -35,10 +35,7 @@ import shutil
 import traceback
 log = logging.getLogger(__name__)
 
-class RepoModel(object):
-
-    def __init__(self):
-        self.sa = Session()
+class RepoModel(BaseModel):
 
     def get(self, repo_id, cache=False):
         repo = self.sa.query(Repository)\
@@ -57,7 +54,7 @@ class RepoModel(object):
         if cache:
             repo = repo.options(FromCache("sql_cache_short",
                                           "get_repo_%s" % repo_name))
-        return repo.scalar()        
+        return repo.scalar()
 
     def get_users_js(self):
 
@@ -75,14 +72,14 @@ class RepoModel(object):
             #update permissions
             for username, perm in form_data['perms_updates']:
                 r2p = self.sa.query(RepoToPerm)\
-                        .filter(RepoToPerm.user == UserModel()\
+                        .filter(RepoToPerm.user == UserModel(self.sa)\
                                 .get_by_username(username, cache=False))\
                         .filter(RepoToPerm.repository == \
                                 self.get_by_repo_name(repo_name))\
                         .one()
 
                 r2p.permission_id = self.sa.query(Permission).filter(
-                                                Permission.permission_name == 
+                                                Permission.permission_name ==
                                                 perm).one().permission_id
                 self.sa.add(r2p)
 
@@ -90,7 +87,7 @@ class RepoModel(object):
             for username, perm in form_data['perms_new']:
                 r2p = RepoToPerm()
                 r2p.repository = self.get_by_repo_name(repo_name)
-                r2p.user = UserModel().get_by_username(username, cache=False)
+                r2p.user = UserModel(self.sa).get_by_username(username, cache=False)
 
                 r2p.permission_id = self.sa.query(Permission).filter(
                                         Permission.permission_name == perm)\
@@ -144,7 +141,7 @@ class RepoModel(object):
             #create default permission
             repo_to_perm = RepoToPerm()
             default = 'repository.read'
-            for p in UserModel().get_by_username('default', cache=False).user_perms:
+            for p in UserModel(self.sa).get_by_username('default', cache=False).user_perms:
                 if p.permission.permission_name.startswith('repository.'):
                     default = p.permission.permission_name
                     break
@@ -156,7 +153,8 @@ class RepoModel(object):
                     .one().permission_id
 
             repo_to_perm.repository_id = new_repo.repo_id
-            repo_to_perm.user_id = UserModel().get_by_username('default', cache=False).user_id
+            repo_to_perm.user_id = UserModel(self.sa)\
+                .get_by_username('default', cache=False).user_id
 
             self.sa.add(repo_to_perm)
             self.sa.commit()

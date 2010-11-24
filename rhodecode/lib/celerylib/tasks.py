@@ -280,7 +280,7 @@ def create_repo_fork(form_data, cur_user):
     from rhodecode.model.repo import RepoModel
     from vcs import get_backend
     log = create_repo_fork.get_logger()
-    repo_model = RepoModel()
+    repo_model = RepoModel(get_session())
     repo_model.create(form_data, cur_user, just_db=True, fork=True)
     repo_name = form_data['repo_name']
     repos_path = get_repos_path()
