@@ -110,6 +110,7 @@ def authfunc(environ, username, password):
         user_obj = user_model.get_by_username(username, cache=False,
                                             case_insensitive=True)
         if user_obj is not None and user_obj.is_ldap is False:
+            log.debug('this user already exists as non ldap')
             return False
 
         from rhodecode.model.settings import SettingsModel
