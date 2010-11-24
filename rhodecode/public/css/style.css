@@ -2317,7 +2317,7 @@ display:block;
 color:red;
 margin:8px 0 0;
 padding:0;
-width: 320px;
+max-width: 320px;
 }
 
 #login div.form div.fields div.field div.label label,#register div.form div.fields div.field div.label label {

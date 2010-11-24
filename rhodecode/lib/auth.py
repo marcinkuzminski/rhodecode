@@ -109,9 +109,9 @@ def authfunc(environ, username, password):
         username = username.lower()
         user_obj = user_model.get_by_username(username, cache=False,
                                             case_insensitive=True)
-        if user_obj is not None:
-            return False 
-        
+        if user_obj is not None and user_obj.is_ldap is False:
+            return False
+
         from rhodecode.model.settings import SettingsModel
         ldap_settings = SettingsModel().get_ldap_settings()
 
@@ -119,7 +119,7 @@ def authfunc(environ, username, password):
         # FALLBACK TO LDAP AUTH IN ENABLE                
         #======================================================================
         if ldap_settings.get('ldap_active', False):
-            
+
             kwargs = {
                   'server':ldap_settings.get('ldap_host', ''),
                   'base_dn':ldap_settings.get('ldap_base_dn', ''),
