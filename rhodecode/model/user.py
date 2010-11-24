@@ -28,6 +28,7 @@ from rhodecode.model.caching_query import FromCache
 from rhodecode.model.db import User
 from rhodecode.model.meta import Session
 from rhodecode.lib.exceptions import *
+
 import logging
 import traceback
 
@@ -49,7 +50,7 @@ class UserModel(object):
 
 
     def get_by_username(self, username, cache=False, case_insensitive=False):
-        
+
         if case_insensitive:
             user = self.sa.query(User).filter(User.username.ilike(username))
         else:
@@ -80,12 +81,12 @@ class UserModel(object):
         :param username:
         :param password:
         """
-
+        from rhodecode.lib.auth import get_crypt_password
         if self.get_by_username(username) is None:
             try:
                 new_user = User()
                 new_user.username = username
-                new_user.password = password
+                new_user.password = get_crypt_password(password)
                 new_user.email = '%s@ldap.server' % username
                 new_user.active = True
                 new_user.is_ldap = True
