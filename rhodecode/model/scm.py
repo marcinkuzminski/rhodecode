@@ -180,7 +180,9 @@ class ScmModel(BaseModel):
                 .options(joinedload(Repository.user))\
                 .filter(Repository.repo_name == repo_name)\
                 .scalar()
-            make_transient(dbrepo)
+
+            self.sa.expunge(dbrepo)
+
             repo.dbrepo = dbrepo
             return repo
 
