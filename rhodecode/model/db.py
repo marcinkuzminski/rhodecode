@@ -1,9 +1,38 @@
-from rhodecode.model.meta import Base
+# -*- coding: utf-8 -*-
+"""
+    package.rhodecode.model.db
+    ~~~~~~~~~~~~~~
+    
+    Database Models for RhodeCode    
+    :created_on: Apr 08, 2010
+    :author: marcink
+    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
+    :license: GPLv3, see COPYING for more details.
+"""
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; version 2
+# of the License or (at your opinion) any later version of the license.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+# MA  02110-1301, USA.
+import logging
+import datetime
+
 from sqlalchemy import *
+from sqlalchemy.exc import DatabaseError
 from sqlalchemy.orm import relation, backref
 from sqlalchemy.orm.session import Session
-from vcs.utils.lazy import LazyProperty
-import logging
+
+from rhodecode.model.meta import Base
+
 log = logging.getLogger(__name__)
 
 class RhodeCodeSettings(Base):
@@ -51,7 +80,7 @@ class User(Base):
     repositories = relation('Repository')
     user_followers = relation('UserFollowing', primaryjoin='UserFollowing.follows_user_id==User.user_id', cascade='all')
 
-    @LazyProperty
+    @property
     def full_contact(self):
         return '%s %s <%s>' % (self.name, self.lastname, self.email)
 
@@ -60,7 +89,6 @@ class User(Base):
 
     def update_lastlogin(self):
         """Update user lastlogin"""
-        import datetime
 
         try:
             session = Session.object_session(self)
@@ -68,7 +96,7 @@ class User(Base):
             session.add(self)
             session.commit()
             log.debug('updated user %s lastlogin', self.username)
-        except Exception:
+        except (DatabaseError,):
             session.rollback()
 
 

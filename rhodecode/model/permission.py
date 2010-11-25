@@ -1,8 +1,14 @@
-#!/usr/bin/env python
-# encoding: utf-8
-# Model for permissions
-# Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
+# -*- coding: utf-8 -*-
+"""
+    package.rhodecode.model.permission
+    ~~~~~~~~~~~~~~
 
+    permissions model for RhodeCode
+    :created_on: Aug 20, 2010
+    :author: marcink
+    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
+    :license: GPLv3, see COPYING for more details.
+"""
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
@@ -17,17 +23,16 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
-"""
-Created on Aug 20, 2010
-Model for permissions
-:author: marcink
-"""
+
+import logging
+import traceback
+
+from sqlalchemy.exc import DatabaseError
 
 from rhodecode.model import BaseModel
 from rhodecode.model.db import User, Permission, UserToPerm, RepoToPerm
 from rhodecode.model.caching_query import FromCache
-import logging
-import traceback
+
 log = logging.getLogger(__name__)
 
 
@@ -90,7 +95,7 @@ class PermissionModel(BaseModel):
 
 
             self.sa.commit()
-        except:
+        except (DatabaseError,):
             log.error(traceback.format_exc())
             self.sa.rollback()
             raise
