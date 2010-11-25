@@ -1,8 +1,14 @@
-#!/usr/bin/env python
-# encoding: utf-8
-# Model for RhodeCode
-# Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
-# 
+# -*- coding: utf-8 -*-
+"""
+    package.rhodecode.model.scm
+    ~~~~~~~~~~~~~~
+
+    scm model for RhodeCode 
+    :created_on: Apr 9, 2010
+    :author: marcink
+    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
+    :license: GPLv3, see COPYING for more details.
+"""
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
@@ -17,13 +23,21 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
-"""
-Created on April 9, 2010
-Model for RhodeCode
-@author: marcink
-"""
-from beaker.cache import cache_region, region_invalidate
+
+import os
+import time
+import traceback
+import logging
+
+from vcs import get_backend
+from vcs.utils.helpers import get_scm
+from vcs.exceptions import RepositoryError, VCSError
+from vcs.utils.lazy import LazyProperty
+
 from mercurial import ui
+
+from beaker.cache import cache_region, region_invalidate
+
 from rhodecode import BACKENDS
 from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import HasRepoPermissionAny
@@ -32,27 +46,19 @@ from rhodecode.model import BaseModel
 from rhodecode.model.db import Repository, User, RhodeCodeUi, CacheInvalidation, \
     UserFollowing
 from rhodecode.model.caching_query import FromCache
+
 from sqlalchemy.orm import joinedload
 from sqlalchemy.orm.session import make_transient
-from vcs import get_backend
-from vcs.utils.helpers import get_scm
-from vcs.exceptions import RepositoryError, VCSError
-from vcs.utils.lazy import LazyProperty
-import traceback
-import logging
-import os
-import time
 
 log = logging.getLogger(__name__)
+
 
 class UserTemp(object):
     def __init__(self, user_id):
         self.user_id = user_id
-
 class RepoTemp(object):
     def __init__(self, repo_id):
         self.repo_id = repo_id
-
 
 class ScmModel(BaseModel):
     """
@@ -68,14 +74,13 @@ class ScmModel(BaseModel):
 
         return q.ui_value
 
-    def repo_scan(self, repos_path, baseui, initial=False):
+    def repo_scan(self, repos_path, baseui):
         """
         Listing of repositories in given path. This path should not be a 
         repository itself. Return a dictionary of repository objects
         
         :param repos_path: path to directory containing repositories
         :param baseui
-        :param initial: initial scan
         """
         log.info('scanning for repositories in %s', repos_path)
 
@@ -156,14 +161,20 @@ class ScmModel(BaseModel):
                             'repository.admin')(repo_name, 'get repo check'):
             return
 
+
         @cache_region('long_term')
         def _get_repo(repo_name):
 
             repo_path = os.path.join(self.repos_path, repo_name)
-            alias = get_scm(repo_path)[0]
 
-            log.debug('Creating instance of %s repository', alias)
-            backend = get_backend(alias)
+            try:
+                alias = get_scm(repo_path)[0]
+
+                log.debug('Creating instance of %s repository', alias)
+                backend = get_backend(alias)
+            except VCSError:
+                log.error(traceback.format_exc())
+                return
 
             #TODO: get the baseui from somewhere for this
             if alias == 'hg':
@@ -181,7 +192,11 @@ class ScmModel(BaseModel):
                 .filter(Repository.repo_name == repo_name)\
                 .scalar()
 
-            self.sa.expunge(dbrepo)
+            make_transient(dbrepo)
+            if dbrepo.user:
+                make_transient(dbrepo.user)
+            if dbrepo.fork:
+                make_transient(dbrepo.fork)
 
             repo.dbrepo = dbrepo
             return repo
