@@ -43,12 +43,15 @@ from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import HasRepoPermissionAny
 from rhodecode.lib.utils import get_repos, make_ui, action_logger
 from rhodecode.model import BaseModel
-from rhodecode.model.db import Repository, User, RhodeCodeUi, CacheInvalidation, \
+from rhodecode.model.user import UserModel
+
+from rhodecode.model.db import Repository, RhodeCodeUi, CacheInvalidation, \
     UserFollowing
 from rhodecode.model.caching_query import FromCache
 
 from sqlalchemy.orm import joinedload
 from sqlalchemy.orm.session import make_transient
+from sqlalchemy.exc import DatabaseError
 
 log = logging.getLogger(__name__)
 
@@ -176,7 +179,6 @@ class ScmModel(BaseModel):
                 log.error(traceback.format_exc())
                 return
 
-            #TODO: get the baseui from somewhere for this
             if alias == 'hg':
                 from pylons import app_globals as g
                 repo = backend(repo_path, create=False, baseui=g.baseui)
@@ -238,7 +240,7 @@ class ScmModel(BaseModel):
         try:
             self.sa.add(cache)
             self.sa.commit()
-        except:
+        except (DatabaseError,):
             log.error(traceback.format_exc())
             self.sa.rollback()
 
@@ -315,8 +317,7 @@ class ScmModel(BaseModel):
         return f is not None
 
     def is_following_user(self, username, user_id):
-        u = self.sa.query(User)\
-            .filter(User.username == username).scalar()
+        u = UserModel(self.sa).get_by_username(username)
 
         f = self.sa.query(UserFollowing)\
             .filter(UserFollowing.follows_user == u)\
@@ -350,7 +351,7 @@ class ScmModel(BaseModel):
     def _mark_invalidated(self, cache_key):
         """
         Marks all occurences of cache to invaldation as already invalidated
-        @param repo_name:
+        :param repo_name:
         """
         if cache_key:
             log.debug('marking %s as already invalidated', cache_key)
@@ -358,7 +359,7 @@ class ScmModel(BaseModel):
             cache_key.cache_active = True
             self.sa.add(cache_key)
             self.sa.commit()
-        except:
+        except (DatabaseError,):
             log.error(traceback.format_exc())
             self.sa.rollback()
 
