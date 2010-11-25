@@ -28,7 +28,6 @@ from rhodecode.model import BaseModel
 from rhodecode.model.caching_query import FromCache
 from rhodecode.model.db import  RhodeCodeSettings
 from sqlalchemy.orm import joinedload
-from sqlalchemy.orm.session import make_transient
 import logging
 
 log = logging.getLogger(__name__)
@@ -46,6 +45,18 @@ class SettingsModel(BaseModel):
                                           "get_setting_%s" % settings_key))
         return r
 
+    def get_app_settings(self):
+        ret = self.sa.query(RhodeCodeSettings)\
+            .options(FromCache("sql_cache_short",
+                           "get_hg_settings")).all()
+
+        if not ret:
+            raise Exception('Could not get application settings !')
+        settings = {}
+        for each in ret:
+            settings['rhodecode_' + each.app_settings_name] = each.app_settings_value
+
+        return settings
 
     def get_ldap_settings(self):
         """

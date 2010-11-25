@@ -24,14 +24,13 @@ Created on 2010-04-28
 SimpleHG middleware for handling mercurial protocol request (push/clone etc.)
 It's implemented with basic auth function
 """
-from itertools import chain
 from mercurial.error import RepoError
 from mercurial.hgweb import hgweb
 from mercurial.hgweb.request import wsgiapplication
 from paste.auth.basic import AuthBasicAuthenticator
 from paste.httpheaders import REMOTE_USER, AUTH_TYPE
 from rhodecode.lib.auth import authfunc, HasPermissionAnyMiddleware
-from rhodecode.lib.utils import is_mercurial, make_ui, invalidate_cache, \
+from rhodecode.lib.utils import make_ui, invalidate_cache, \
     check_repo_fast, ui_sections
 from rhodecode.model.user import UserModel
 from webob.exc import HTTPNotFound, HTTPForbidden, HTTPInternalServerError
@@ -40,6 +39,16 @@ import os
 import traceback
 
 log = logging.getLogger(__name__)
+
+def is_mercurial(environ):
+    """
+    Returns True if request's target is mercurial server - header
+    ``HTTP_ACCEPT`` of such request would start with ``application/mercurial``.
+    """
+    http_accept = environ.get('HTTP_ACCEPT')
+    if http_accept and http_accept.startswith('application/mercurial'):
+        return True
+    return False
 
 class SimpleHg(object):
 
@@ -143,7 +152,7 @@ class SimpleHg(object):
         #invalidate cache on push
         if self.action == 'push':
             self.__invalidate_cache(repo_name)
-        
+
         return app(environ, start_response)
 
 

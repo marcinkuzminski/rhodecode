@@ -33,7 +33,7 @@ from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator, \
 from rhodecode.lib.base import BaseController, render
 from rhodecode.lib.celerylib import tasks, run_task
 from rhodecode.lib.utils import repo2db_mapper, invalidate_cache, \
-    set_rhodecode_config, get_hg_settings, get_hg_ui_settings
+    set_rhodecode_config
 from rhodecode.model.db import RhodeCodeUi, Repository
 from rhodecode.model.forms import UserForm, ApplicationSettingsForm, \
     ApplicationUiSettingsForm
@@ -68,8 +68,8 @@ class SettingsController(BaseController):
         """GET /admin/settings: All items in the collection"""
         # url('admin_settings')
 
-        defaults = get_hg_settings()
-        defaults.update(get_hg_ui_settings())
+        defaults = SettingsModel().get_app_settings()
+        defaults.update(self.get_hg_ui_settings())
         return htmlfill.render(
             render('admin/settings/settings.html'),
             defaults=defaults,
@@ -109,7 +109,7 @@ class SettingsController(BaseController):
             h.flash(_('Repositories successfully rescanned'), category='success')
 
         if setting_id == 'whoosh':
-            repo_location = get_hg_ui_settings()['paths_root_path']
+            repo_location = self.get_hg_ui_settings()['paths_root_path']
             full_index = request.POST.get('full_index', False)
             task = run_task(tasks.whoosh_index, repo_location, full_index)
 
@@ -312,3 +312,24 @@ class SettingsController(BaseController):
 
         return render('admin/repos/repo_add_create_repository.html')
 
+    def get_hg_ui_settings(self):
+        ret = self.sa.query(RhodeCodeUi).all()
+
+        if not ret:
+            raise Exception('Could not get application ui settings !')
+        settings = {}
+        for each in ret:
+            k = each.ui_key
+            v = each.ui_value
+            if k == '/':
+                k = 'root_path'
+
+            if k.find('.') != -1:
+                k = k.replace('.', '_')
+
+            if each.ui_section == 'hooks':
+                v = each.ui_active
+
+            settings[each.ui_section + '_' + k] = v
+
+        return settings

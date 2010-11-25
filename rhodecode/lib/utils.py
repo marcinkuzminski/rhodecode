@@ -27,10 +27,10 @@ from mercurial import ui, config, hg
 from mercurial.error import RepoError
 from rhodecode.model import meta
 from rhodecode.model.caching_query import FromCache
-from rhodecode.model.db import Repository, User, RhodeCodeUi, RhodeCodeSettings, \
-    UserLog
+from rhodecode.model.db import Repository, User, RhodeCodeUi, UserLog
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.user import UserModel
+
 from vcs.backends.base import BaseChangeset
 from paste.script import command
 import ConfigParser
@@ -45,28 +45,6 @@ log = logging.getLogger(__name__)
 
 def get_repo_slug(request):
     return request.environ['pylons.routes_dict'].get('repo_name')
-
-def is_mercurial(environ):
-    """
-    Returns True if request's target is mercurial server - header
-    ``HTTP_ACCEPT`` of such request would start with ``application/mercurial``.
-    """
-    http_accept = environ.get('HTTP_ACCEPT')
-    if http_accept and http_accept.startswith('application/mercurial'):
-        return True
-    return False
-
-def is_git(environ):
-    """
-    Returns True if request's target is git server. ``HTTP_USER_AGENT`` would
-    then have git client version given.
-    
-    :param environ:
-    """
-    http_user_agent = environ.get('HTTP_USER_AGENT')
-    if http_user_agent and http_user_agent.startswith('git'):
-        return True
-    return False
 
 def action_logger(user, action, repo, ipaddr='', sa=None):
     """
@@ -110,17 +88,16 @@ def action_logger(user, action, repo, ipaddr='', sa=None):
         user_log = UserLog()
         user_log.user_id = user_obj.user_id
         user_log.action = action
-        
+
         user_log.repository_id = repo_obj.repo_id
         user_log.repository_name = repo_name
-        
+
         user_log.action_date = datetime.datetime.now()
         user_log.user_ip = ipaddr
         sa.add(user_log)
         sa.commit()
 
-        log.info('Adding user %s, action %s on %s',
-                                        user_obj.username, action, repo)
+        log.info('Adding user %s, action %s on %s', user_obj, action, repo)
     except:
         log.error(traceback.format_exc())
         sa.rollback()
@@ -149,10 +126,6 @@ def get_repos(path, recursive=False, initial=False):
             yield dirpath, get_scm(os.path.join(path, dirpath))
         except VCSError:
             pass
-
-if __name__ == '__main__':
-    get_repos('', '/home/marcink/workspace-python')
-
 
 def check_repo_fast(repo_name, base_path):
     if os.path.isdir(os.path.join(base_path, repo_name)):return False
@@ -184,66 +157,6 @@ def ask_ok(prompt, retries=4, complaint='Yes or no, please!'):
         retries = retries - 1
         if retries < 0: raise IOError
         print complaint
-
-def get_hg_ui_cached():
-    try:
-        sa = meta.Session
-        ret = sa.query(RhodeCodeUi)\
-        .options(FromCache("sql_cache_short", "get_hg_ui_settings"))\
-        .all()
-    except:
-        pass
-    finally:
-        meta.Session.remove()
-    return ret
-
-
-def get_hg_settings():
-    try:
-        sa = meta.Session()
-        ret = sa.query(RhodeCodeSettings)\
-        .options(FromCache("sql_cache_short", "get_hg_settings"))\
-        .all()
-    except:
-        pass
-    finally:
-        meta.Session.remove()
-
-    if not ret:
-        raise Exception('Could not get application settings !')
-    settings = {}
-    for each in ret:
-        settings['rhodecode_' + each.app_settings_name] = each.app_settings_value
-
-    return settings
-
-def get_hg_ui_settings():
-    try:
-        sa = meta.Session()
-        ret = sa.query(RhodeCodeUi).all()
-    except:
-        pass
-    finally:
-        meta.Session.remove()
-
-    if not ret:
-        raise Exception('Could not get application ui settings !')
-    settings = {}
-    for each in ret:
-        k = each.ui_key
-        v = each.ui_value
-        if k == '/':
-            k = 'root_path'
-
-        if k.find('.') != -1:
-            k = k.replace('.', '_')
-
-        if each.ui_section == 'hooks':
-            v = each.ui_active
-
-        settings[each.ui_section + '_' + k] = v
-
-    return settings
 
 #propagated from mercurial documentation
 ui_sections = ['alias', 'auth',
@@ -288,7 +201,12 @@ def make_ui(read_from='file', path=None, checkpaths=True):
 
 
     elif read_from == 'db':
-        hg_ui = get_hg_ui_cached()
+        sa = meta.Session()
+        ret = sa.query(RhodeCodeUi)\
+            .options(FromCache("sql_cache_short",
+                               "get_hg_ui_settings")).all()
+        meta.Session.remove()
+        hg_ui = ret
         for ui_ in hg_ui:
             if ui_.ui_active:
                 log.debug('settings ui from db[%s]%s:%s', ui_.ui_section, ui_.ui_key, ui_.ui_value)
@@ -297,7 +215,12 @@ def make_ui(read_from='file', path=None, checkpaths=True):
 
 
 def set_rhodecode_config(config):
-    hgsettings = get_hg_settings()
+    """
+    Updates pylons config with new settings from database
+    :param config:
+    """
+    from rhodecode.model.settings import SettingsModel
+    hgsettings = SettingsModel().get_app_settings()
 
     for k, v in hgsettings.items():
         config[k] = v

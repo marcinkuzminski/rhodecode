@@ -63,7 +63,7 @@ from dulwich.web import HTTPGitApplication
 from paste.auth.basic import AuthBasicAuthenticator
 from paste.httpheaders import REMOTE_USER, AUTH_TYPE
 from rhodecode.lib.auth import authfunc, HasPermissionAnyMiddleware
-from rhodecode.lib.utils import is_git, invalidate_cache, check_repo_fast
+from rhodecode.lib.utils import invalidate_cache, check_repo_fast
 from rhodecode.model.user import UserModel
 from webob.exc import HTTPNotFound, HTTPForbidden, HTTPInternalServerError
 import logging
@@ -71,6 +71,18 @@ import os
 import traceback
 
 log = logging.getLogger(__name__)
+
+def is_git(environ):
+    """
+    Returns True if request's target is git server. ``HTTP_USER_AGENT`` would
+    then have git client version given.
+    
+    :param environ:
+    """
+    http_user_agent = environ.get('HTTP_USER_AGENT')
+    if http_user_agent and http_user_agent.startswith('git'):
+        return True
+    return False
 
 class SimpleGit(object):
 
