@@ -77,38 +77,45 @@ def check_password(password, hashed):
 
 def authfunc(environ, username, password):
     """
-    Authentication function used in Mercurial/Git/ and access control,
+    Dummy authentication function used in Mercurial/Git/ and access control,
+    
+    :param environ: needed only for using in Basic auth
+    """
+    return authenticate(username, password)
+
+
+def authenticate(username, password):
+    """
+    Authentication function used for access control,
     firstly checks for db authentication then if ldap is enabled for ldap
     authentication, also creates ldap user if not in database
     
-    :param environ: needed only for using in Basic auth, can be None
     :param username: username
     :param password: password
     """
     user_model = UserModel()
     user = user_model.get_by_username(username, cache=False)
 
+    log.debug('Authenticating user using RhodeCode account')
     if user is not None and user.is_ldap is False:
         if user.active:
 
             if user.username == 'default' and user.active:
-                log.info('user %s authenticated correctly', username)
+                log.info('user %s authenticated correctly as anonymous user',
+                         username)
                 return True
 
             elif user.username == username and check_password(password, user.password):
                 log.info('user %s authenticated correctly', username)
                 return True
         else:
-            log.error('user %s is disabled', username)
-
+            log.warning('user %s is disabled', username)
 
     else:
-
-        #since ldap is searching in case insensitive check if this user is still
-        #not in our system
-        username = username.lower()
+        log.debug('Regular authentication failed')
         user_obj = user_model.get_by_username(username, cache=False,
                                             case_insensitive=True)
+
         if user_obj is not None and user_obj.is_ldap is False:
             log.debug('this user already exists as non ldap')
             return False
@@ -120,7 +127,7 @@ def authfunc(environ, username, password):
         # FALLBACK TO LDAP AUTH IN ENABLE                
         #======================================================================
         if ldap_settings.get('ldap_active', False):
-
+            log.debug("Authenticating user using ldap")
             kwargs = {
                   'server':ldap_settings.get('ldap_host', ''),
                   'base_dn':ldap_settings.get('ldap_base_dn', ''),
@@ -134,18 +141,17 @@ def authfunc(environ, username, password):
             try:
                 aldap = AuthLdap(**kwargs)
                 res = aldap.authenticate_ldap(username, password)
+                log.debug('Got ldap response %s', res)
 
-                authenticated = res[1]['uid'][0] == username
-
-                if authenticated and user_model.create_ldap(username, password):
+                if user_model.create_ldap(username, password):
                     log.info('created new ldap user')
 
-                return authenticated
-            except (LdapUsernameError, LdapPasswordError):
-                return False
-            except:
+                return True
+            except (LdapUsernameError, LdapPasswordError,):
+                pass
+            except (Exception,):
                 log.error(traceback.format_exc())
-                return False
+                pass
     return False
 
 class  AuthUser(object):

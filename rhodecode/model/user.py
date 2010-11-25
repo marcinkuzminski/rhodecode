@@ -1,8 +1,14 @@
-#!/usr/bin/env python
-# encoding: utf-8
-# Model for users
-# Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
-# 
+# -*- coding: utf-8 -*-
+"""
+    package.rhodecode.model.user
+    ~~~~~~~~~~~~~~
+
+    users model for RhodeCode
+    :created_on: Apr 9, 2010
+    :author: marcink
+    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
+    :license: GPLv3, see COPYING for more details.
+"""
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
@@ -17,24 +23,21 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
-"""
-Created on April 9, 2010
-Model for users
-:author: marcink
-"""
-
-from pylons.i18n.translation import _
-from rhodecode.model import BaseModel
-from rhodecode.model.caching_query import FromCache
-from rhodecode.model.db import User
-from rhodecode.lib.exceptions import *
 
 import logging
 import traceback
 
+from pylons.i18n.translation import _
+
+from rhodecode.model import BaseModel
+from rhodecode.model.caching_query import FromCache
+from rhodecode.model.db import User
+
+from rhodecode.lib.exceptions import DefaultUserException, UserOwnsReposException
+
+from sqlalchemy.exc import DatabaseError
+
 log = logging.getLogger(__name__)
-
-
 
 class UserModel(BaseModel):
 
@@ -79,10 +82,11 @@ class UserModel(BaseModel):
         :param password:
         """
         from rhodecode.lib.auth import get_crypt_password
-        if self.get_by_username(username) is None:
+        log.debug('Checking for such ldap account in RhodeCode database')
+        if self.get_by_username(username, case_insensitive=True) is None:
             try:
                 new_user = User()
-                new_user.username = username
+                new_user.username = username.lower()#add ldap account always lowercase
                 new_user.password = get_crypt_password(password)
                 new_user.email = '%s@ldap.server' % username
                 new_user.active = True
@@ -94,11 +98,12 @@ class UserModel(BaseModel):
                 self.sa.add(new_user)
                 self.sa.commit()
                 return True
-            except:
+            except (DatabaseError,):
                 log.error(traceback.format_exc())
                 self.sa.rollback()
                 raise
-
+        log.debug('this %s user exists skipping creation of ldap account',
+                  username)
         return False
 
     def create_registration(self, form_data):

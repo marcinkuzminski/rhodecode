@@ -19,24 +19,27 @@ list=[1,2,3,4,5]
 for SELECT use formencode.All(OneOf(list), Int())
     
 """
+import os
+import re
+import logging
+
+import formencode
 from formencode import All
 from formencode.validators import UnicodeString, OneOf, Int, Number, Regex, \
     Email, Bool, StringBoolean
-from pylons import session
+
 from pylons.i18n.translation import _
-from rhodecode.lib.auth import authfunc, get_crypt_password
+
+import rhodecode.lib.helpers as h
+from rhodecode.lib.auth import authenticate, get_crypt_password
 from rhodecode.lib.exceptions import LdapImportError
 from rhodecode.model import meta
 from rhodecode.model.user import UserModel
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.db import User
-from webhelpers.pylonslib.secure_form import authentication_token
 from rhodecode import BACKENDS
-import formencode
-import logging
-import os
-import re
-import rhodecode.lib.helpers as h
+
+from webhelpers.pylonslib.secure_form import authentication_token
 
 log = logging.getLogger(__name__)
 
@@ -142,7 +145,7 @@ class ValidAuth(formencode.validators.FancyValidator):
         username = value['username']
         user = UserModel().get_by_username(username)
 
-        if authfunc(None, username, password):
+        if authenticate(username, password):
             return value
         else:
             if user and user.active is False:

@@ -57,7 +57,7 @@ class LoginController(BaseController):
             try:
                 c.form_result = login_form.to_python(dict(request.POST))
                 username = c.form_result['username']
-                user = UserModel().get_by_username(username)
+                user = UserModel().get_by_username(username, case_insensitive=True)
                 auth_user = AuthUser()
                 auth_user.username = user.username
                 auth_user.is_authenticated = True

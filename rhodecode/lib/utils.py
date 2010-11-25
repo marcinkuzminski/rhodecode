@@ -128,6 +128,13 @@ def get_repos(path, recursive=False, initial=False):
             pass
 
 def check_repo_fast(repo_name, base_path):
+    """
+    Check given path for existance of directory
+    :param repo_name:
+    :param base_path:
+    
+    :return False: if this directory is present
+    """
     if os.path.isdir(os.path.join(base_path, repo_name)):return False
     return True
 
