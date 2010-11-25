@@ -1,5 +1,6 @@
-from rhodecode.tests import *
+from rhodecode.lib.auth import get_crypt_password, check_password
 from rhodecode.model.db import User
+from rhodecode.tests import *
 
 class TestAdminSettingsController(TestController):
 
@@ -53,36 +54,55 @@ class TestAdminSettingsController(TestController):
 
     def test_my_account_update(self):
         self.log_user()
+
         new_email = 'new@mail.pl'
+        new_name = 'NewName'
+        new_lastname = 'NewLastname'
+        new_password = 'test123'
+
+
         response = self.app.post(url('admin_settings_my_account_update'), params=dict(
                                                             _method='put',
                                                             username='test_admin',
-                                                            new_password='test12',
+                                                            new_password=new_password,
                                                             password='',
-                                                            name='NewName',
-                                                            lastname='NewLastname',
+                                                            name=new_name,
+                                                            lastname=new_lastname,
                                                             email=new_email,))
         response.follow()
-        print response
 
-        print 'x' * 100
-        print response.session
         assert 'Your account was updated succesfully' in response.session['flash'][0][1], 'no flash message about success of change'
         user = self.sa.query(User).filter(User.username == 'test_admin').one()
         assert user.email == new_email , 'incorrect user email after update got %s vs %s' % (user.email, new_email)
+        assert user.name == new_name, 'updated field mismatch %s vs %s' % (user.name, new_name)
+        assert user.lastname == new_lastname, 'updated field mismatch %s vs %s' % (user.lastname, new_lastname)
+        assert check_password(new_password, user.password) is True, 'password field mismatch %s vs %s' % (user.password, new_password)
 
-    def test_my_account_update_own_email_ok(self):
-        self.log_user()
+        #bring back the admin settings
+        old_email = 'test_admin@mail.com'
+        old_name = 'RhodeCode'
+        old_lastname = 'Admin'
+        old_password = 'test12'
 
-        new_email = 'new@mail.pl'
         response = self.app.post(url('admin_settings_my_account_update'), params=dict(
                                                             _method='put',
                                                             username='test_admin',
-                                                            new_password='test12',
-                                                            name='NewName',
-                                                            lastname='NewLastname',
-                                                            email=new_email,))
-        print response
+                                                            new_password=old_password,
+                                                            password='',
+                                                            name=old_name,
+                                                            lastname=old_lastname,
+                                                            email=old_email,))
+
+        response.follow()
+        assert 'Your account was updated succesfully' in response.session['flash'][0][1], 'no flash message about success of change'
+        user = self.sa.query(User).filter(User.username == 'test_admin').one()
+        assert user.email == old_email , 'incorrect user email after update got %s vs %s' % (user.email, old_email)
+
+        assert user.email == old_email , 'incorrect user email after update got %s vs %s' % (user.email, old_email)
+        assert user.name == old_name, 'updated field mismatch %s vs %s' % (user.name, old_name)
+        assert user.lastname == old_lastname, 'updated field mismatch %s vs %s' % (user.lastname, old_lastname)
+        assert check_password(old_password, user.password) is True , 'password updated field mismatch %s vs %s' % (user.password, old_password)
+
 
     def test_my_account_update_err_email_exists(self):
         self.log_user()
