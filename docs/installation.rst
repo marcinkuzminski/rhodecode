@@ -19,6 +19,11 @@ message broker together with the application.
 Requirements for Celery
 -----------------------
 
+.. note::
+   Installing message broker and using celery is optional, RhodeCode will
+   work without them perfectly fine.
+
+
 **Message Broker** 
 
 - preferred is `RabbitMq <http://www.rabbitmq.com/>`_

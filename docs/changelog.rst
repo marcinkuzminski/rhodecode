@@ -5,36 +5,74 @@ Changelog
 
 1.1.0 (**2010-XX-XX**)
 ----------------------
-- rewrite of internals for vcs >=0.1.9
-- anonymous access,authentication via ldap
+
+:status: in-progress
+:branch: beta
+
+news
+++++
+
+- rewrite of internals for vcs >=0.1.10
+- anonymous access, authentication via ldap
 - performance upgrade for cached repos list - each repository has it's own 
   cache that's invalidated when needed.
 - main page quick filter for filtering repositories
+- user dashboards with ability to follow chosen repositories actions
 - sends email to admin on new user registration
+- added cache/statistics reset options into repository settings
 - more detailed action logger (based on hooks) with pushed changesets lists
   and options to disable those hooks from admin panel
-- a lot of fixes and tweaks for file browser
 - introduced new enhanced changelog for merges that shows more accurate results
 - gui optimizations, fixed application width to 1024px
+- whoosh,celeryd,upgrade moved to paster command
+
+fixes
++++++
+
+- fixes #61 forked repo was showing only after cache expired
+- fixes #76 no confirmation on user deletes
+- fixes #66 Name field misspelled
+- fixes #72 block user removal when he owns repositories
+- fixes #69 added password confirmation fields
 - numerous small bugfixes
-- whoosh index moved to paster command
+- a lot of fixes and tweaks for file browser
+- fixed detached session issues
+
+(special thanks for TkSoh for detailed feedback)
+
 
 1.0.2 (**2010-11-12**)
 ----------------------
 
+news
+++++
+
+- tested under python2.7
+- bumped sqlalchemy and celery versions
+
+fixes
++++++
+
 - fixed #59 missing graph.js
 - fixed repo_size crash when repository had broken symlinks
 - fixed python2.5 crashes.
-- tested under python2.7
-- bumped sqlalchemy and celery versions
+
 
 1.0.1 (**2010-11-10**)
 ----------------------
 
+news
+++++
+
+- small css updated
+
+fixes
++++++
+
 - fixed #53 python2.5 incompatible enumerate calls
 - fixed #52 disable mercurial extension for web
 - fixed #51 deleting repositories don't delete it's dependent objects
-- small css updated
+
 
 1.0.0 (**2010-11-02**)
 ----------------------
@@ -67,3 +105,4 @@ Changelog
 - Disabled dirsize in file browser, it's causing nasty bug when dir renames 
   occure. After vcs is fixed it'll be put back again.
 - templating/css rewrites, optimized css.
+

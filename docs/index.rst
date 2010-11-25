@@ -1,11 +1,13 @@
 .. _index:
 
+=================================================
 Welcome to RhodeCode (RhodiumCode) documentation!
 =================================================
 
-``RhodeCode`` (formerly hg-app) is Pylons based Mercurial repository 
-browser/management with build in push/pull server and full text search. It's 
-similar to github or bitbucket, but it's suppose to run as standalone hosted 
+``RhodeCode`` (formerly hg-app) is Pylons framework based Mercurial repository 
+browser/management with build in push/pull server and full text search.
+It works on http/https, has build in permission/authentication(+ldap) features 
+It's similar to github or bitbucket, but it's suppose to run as standalone hosted 
 application, it's open source and focuses more on restricted access to 
 repositories. It's powered by vcs_ library that we created to handle many 
 various version control systems.
@@ -97,7 +99,9 @@ License
 Mailing group Q&A
 -----------------
 
-http://groups.google.com/group/rhodecode
+join the `Google group <http://groups.google.com/group/rhodecode>`_
+
+open an issue at `issue tracker <http://bitbucket.org/marcinkuzminski/rhodecode/issues>`_
 
 
 Documentation
