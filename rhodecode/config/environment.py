@@ -71,7 +71,7 @@ def load_environment(global_conf, app_conf, initial=False):
     config['pylons.app_globals'].baseui = make_ui('db')
 
     g = config['pylons.app_globals']
-    repo2db_mapper(ScmModel().repo_scan(g.paths[0][1], g.baseui, initial))
+    repo2db_mapper(ScmModel().repo_scan(g.paths[0][1], g.baseui))
     set_available_permissions(config)
     set_base_path(config)
     set_rhodecode_config(config)

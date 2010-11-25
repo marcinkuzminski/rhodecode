@@ -1,8 +1,14 @@
-#!/usr/bin/env python
-# encoding: utf-8
-# permissions controller for pylons
-# Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
-#
+# -*- coding: utf-8 -*-
+"""
+    package.rhodecode.controllers.admin.permissions
+    ~~~~~~~~~~~~~~
+    permissions controller for Rhodecode
+    
+    :created_on: Apr 27, 2010
+    :author: marcink
+    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
+    :license: GPLv3, see COPYING for more details.
+"""
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
@@ -17,11 +23,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
-"""
-Created on April 27, 2010
-permissions controller for pylons
-@author: marcink
-"""
 
 from formencode import htmlfill
 from pylons import request, session, tmpl_context as c, url
