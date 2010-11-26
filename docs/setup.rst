@@ -82,7 +82,6 @@ the `-f` flag passed to paster command or, in admin panel You can check
 Setting up LDAP support
 -----------------------
 
-
 RhodeCode starting from version 1.1 supports ldap authentication. In order
 to use ldap, You have to install python-ldap package. This package is available
 via pypi, so You can install it by running
@@ -95,21 +94,21 @@ via pypi, so You can install it by running
 
  pip install python-ldap
 
+.. note::
+   python-ldap requires some certain libs on Your system, so before installing 
+   it check that You have at least `openldap`, and `sasl` libraries.
 
-python-ldap requires some certain libs on Your system, so before installing it 
-check that You have at least `openldap`, and `sasl` libraries.
-
-ldap settings are located in admin->permissions section,
+ldap settings are located in admin->ldap section,
 
 Here's a typical ldap setup::
 
- Enable ldap  = checked                 #controlls if ldap access is enabled
- Host         = host.domain.org         #acctuall ldap server to connect
+ Enable ldap  = checked                 #controls if ldap access is enabled
+ Host         = host.domain.org         #actual ldap server to connect
  Port         = 389 or 689 for ldaps    #ldap server ports
  Enable LDAPS = unchecked               #enable disable ldaps
  Account      = <account>               #access for ldap server(if required)
  Password     = <password>              #password for ldap server(if required)
- Base DN      = CN=users,DC=host,DC=domain,DC=org
+ Base DN      = uid=%(user)s,CN=users,DC=host,DC=domain,DC=org
  
 
 `Account` and `Password` are optional, and used for two-phase ldap 
@@ -117,7 +116,7 @@ authentication so those are credentials to access Your ldap, if it doesn't
 support anonymous search/user lookups.
 
 If all data are entered correctly, and `python-ldap` is properly installed
-Users should be granted to access RhodeCode wit theire ldap accounts. When 
+Users should be granted to access RhodeCode wit ldap accounts. When 
 logging at the first time an special ldap account is created inside RhodeCode, 
 so You can control over permissions even on ldap users. If such user exists 
 already in RhodeCode database ldap user with the same username would be not 
