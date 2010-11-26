@@ -24,7 +24,7 @@
                     <img alt="gravatar" src="${h.gravatar_url(entry.user.email)}"/>
                 </div>
                 <div>${entry.user.name} ${entry.user.lastname}</div>
-                <div style="padding-left: 45px;">${h.action_parser(entry)} <br/>
+                <div style="padding-left: 45px;padding-top:5px">${h.action_parser(entry)} <br/>
                 <b>
 		        %if entry.repository:
 		          ${h.link_to(entry.repository.repo_name,

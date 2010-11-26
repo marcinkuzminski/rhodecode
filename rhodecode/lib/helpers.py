@@ -450,21 +450,22 @@ def action_parser(user_log):
                                               repo_name=repo.name,),
                                               title=repo.dbrepo.description)
         return ''
-    map = {'user_deleted_repo':_('User deleted repository'),
-           'user_created_repo':_('User created repository'),
-           'user_forked_repo':_('User forked repository as: ') + get_fork_name(),
-           'user_updated_repo':_('User updated repository'),
-           'admin_deleted_repo':_('Admin delete repository'),
-           'admin_created_repo':_('Admin created repository'),
-           'admin_forked_repo':_('Admin forked repository'),
-           'admin_updated_repo':_('Admin updated repository'),
+    map = {'user_deleted_repo':_('User [deleted] repository'),
+           'user_created_repo':_('User [created] repository'),
+           'user_forked_repo':_('User [forked] repository as: ') + get_fork_name(),
+           'user_updated_repo':_('User [updated] repository'),
+           'admin_deleted_repo':_('Admin [delete] repository'),
+           'admin_created_repo':_('Admin [created] repository'),
+           'admin_forked_repo':_('Admin [forked] repository'),
+           'admin_updated_repo':_('Admin [updated] repository'),
            'push':_('Pushed') + get_cs_links(),
            'pull':_('Pulled'),
-           'started_following_repo':_('User started following repository'),
-           'stopped_following_repo':_('User stopped following repository'),
+           'started_following_repo':_('User [started following] repository'),
+           'stopped_following_repo':_('User [stopped following] repository'),
             }
 
-    return map.get(action, action)
+    action_str = map.get(action, action)
+    return literal(action_str.replace('[', '<b>').replace(']', '</b>'))
 
 
 #==============================================================================
