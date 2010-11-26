@@ -103,6 +103,8 @@ join the `Google group <http://groups.google.com/group/rhodecode>`_
 
 open an issue at `issue tracker <http://bitbucket.org/marcinkuzminski/rhodecode/issues>`_
 
+join #rhodecode on FreeNode (irc.freenode.net)
+or use http://webchat.freenode.net/?channels=rhodecode for web access to irc.
 
 Documentation
 -------------
