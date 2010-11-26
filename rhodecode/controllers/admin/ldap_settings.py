@@ -87,7 +87,7 @@ class LdapSettingsController(BaseController):
             except (DatabaseError,):
                 raise
         except LdapImportError:
-            h.flash(_('Unable to activate ldap. The "ldap-python" library '
+            h.flash(_('Unable to activate ldap. The "python-ldap" library '
                       'is missing.'), category='warning')
 
         except formencode.Invalid, errors:
