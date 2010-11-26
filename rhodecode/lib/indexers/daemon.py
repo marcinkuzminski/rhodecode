@@ -78,10 +78,10 @@ class WhooshIndexingDaemon(object):
         if not repo_location:
             raise Exception('You have to provide repositories location')
 
-        self.repo_paths = ScmModel().repo_scan(self.repo_location, None, True)
+        self.repo_paths = ScmModel().repo_scan(self.repo_location, None)
         self.initial = False
         if not os.path.isdir(self.index_location):
-            os.mkdir(self.index_location)
+            os.makedirs(self.index_location)
             log.info('Cannot run incremental index since it does not'
                      ' yet exist running full build')
             self.initial = True

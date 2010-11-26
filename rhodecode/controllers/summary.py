@@ -1,8 +1,14 @@
-#!/usr/bin/env python
-# encoding: utf-8
-# summary controller for pylons
-# Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
-# 
+# -*- coding: utf-8 -*-
+"""
+    package.rhodecode.controllers.summary
+    ~~~~~~~~~~~~~~
+
+    Summary controller for Rhodecode
+    :created_on: Apr 18, 2010
+    :author: marcink
+    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
+    :license: GPLv3, see COPYING for more details.
+"""
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
@@ -17,11 +23,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
-"""
-Created on April 18, 2010
-summary controller for pylons
-@author: marcink
-"""
+
 from pylons import tmpl_context as c, request, url
 from vcs.exceptions import ChangesetError
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
@@ -116,7 +118,7 @@ class SummaryController(BaseController):
             c.overview_data = stats.commit_activity_combined
             c.trending_languages = json.dumps(OrderedDict(
                                        sorted(lang_stats.items(), reverse=True,
-                                            key=lambda k: k[1])[:2]
+                                            key=lambda k: k[1])[:10]
                                         )
                                     )
         else:

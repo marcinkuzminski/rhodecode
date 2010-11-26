@@ -17,17 +17,6 @@
 </%def>
 
 <%def name="main()">
-<script type="text/javascript">
-var E = YAHOO.util.Event;
-var D = YAHOO.util.Dom;
-
-E.onDOMReady(function(e){
-    id = 'clone_url';
-    E.addListener(id,'click',function(e){
-        D.get('clone_url').select();
-    })
-})
-</script>
 <div class="box box-left">
     <!-- box / title -->
     <div class="title">
@@ -126,13 +115,19 @@ E.onDOMReady(function(e){
 			 
 			 <div class="field">
 			  <div class="label">
-			      <label>${_('Trending languages')}:</label>
+			      <label>${_('Trending source files')}:</label>
 			  </div>
 			  <div class="input-short">
 			    <div id="lang_stats">
 			    
 			    </div> 			  
 			  	<script type="text/javascript">
+				  	YUE.onDOMReady(function(e){
+				  	    id = 'clone_url';
+				  	    YUE.on(id,'click',function(e){
+				  	        YUD.get('clone_url').select();
+				  	    })
+				  	})
 			  		var data = ${c.trending_languages|n};
 			  		var total = 0;
 			  		var no_data = true;
@@ -142,8 +137,15 @@ E.onDOMReady(function(e){
 			  		} 
 					var tbl = document.createElement('table');
 					tbl.setAttribute('class','trending_language_tbl');
+					var cnt =0;
 			  		for (k in data){
+			  			cnt+=1;
+			  			var hide = cnt>2;
 				  		var tr = document.createElement('tr');
+				  		if (hide){
+				  			tr.setAttribute('style','display:none');
+				  			tr.setAttribute('class','stats_hidden');
+				  		}
 				  		var percentage = Math.round((data[k]/total*100),2);
 						var value = data[k];
 				  		var td1 = document.createElement('td');
@@ -155,8 +157,17 @@ E.onDOMReady(function(e){
 				  		var td2 = document.createElement('td');
 				  		td2.setAttribute('style','padding-right:14px !important');
 			  		    var trending_language = document.createElement('div');
-			  		    trending_language.title = k;
-			  		    trending_language.innerHTML = "<b>"+percentage+"% "+value+" ${_('files')}</b>";
+			  		    var nr_files = value+" ${_('files')}";
+			  		    
+			  		    trending_language.title = k+" "+nr_files;
+			  		    
+			  		    if (percentage>20){
+			  		    	trending_language.innerHTML = "<b style='font-size:0.8em'>"+percentage+"% "+nr_files+ "</b>";	
+			  		    }
+			  		    else{
+			  		    	trending_language.innerHTML = "<b style='font-size:0.8em'>"+percentage+"%</b>";
+			  		    }
+			  		    
 			  		    trending_language.setAttribute("class", 'trending_language top-right-rounded-corner bottom-right-rounded-corner');
 			  		    trending_language.style.width=percentage+"%";
 						td2.appendChild(trending_language);
@@ -164,6 +175,18 @@ E.onDOMReady(function(e){
 						tr.appendChild(td1);
 						tr.appendChild(td2);
 			  		    tbl.appendChild(tr);
+			  		    if(cnt == 2){
+			  		    	var show_more = document.createElement('tr');
+			  		    	var td=document.createElement('td');
+			  		    	lnk = document.createElement('a');
+			  		    	lnk.href='#';
+			  		    	lnk.innerHTML = "${_("show more")}";
+			  		    	lnk.id='code_stats_show_more';
+			  		        td.appendChild(lnk);
+			  		    	show_more.appendChild(td);
+			  		    	show_more.appendChild(document.createElement('td'));
+			  		    	tbl.appendChild(show_more);
+			  		    }
 			  		    
 			  		}
 			  		if(no_data){
@@ -173,7 +196,16 @@ E.onDOMReady(function(e){
 			  			tr.appendChild(td1);
 			  			tbl.appendChild(tr);
 					}
-			  		YAHOO.util.Dom.get('lang_stats').appendChild(tbl);
+			  		YUD.get('lang_stats').appendChild(tbl);
+			  		YUE.on('code_stats_show_more','click',function(){
+			  			l = YUD.getElementsByClassName('stats_hidden')
+			  			for (e in l){
+			  			    YUD.setStyle(l[e],'display','');
+			  			};
+			  			YUD.setStyle(YUD.get('code_stats_show_more'),
+			  					'display','none');
+			  		})
+			  		
 			  	</script>
  
 			  </div>
@@ -244,10 +276,10 @@ E.onDOMReady(function(e){
 			};
 		    var dataset = dataset;
 		    var overview_dataset = [overview_dataset];
-		    var choiceContainer = YAHOO.util.Dom.get("legend_choices");
-		    var choiceContainerTable = YAHOO.util.Dom.get("legend_choices_tables");
-		    var plotContainer = YAHOO.util.Dom.get('commit_history');
-		    var overviewContainer = YAHOO.util.Dom.get('overview');
+		    var choiceContainer = YUD.get("legend_choices");
+		    var choiceContainerTable = YUD.get("legend_choices_tables");
+		    var plotContainer = YUD.get('commit_history');
+		    var overviewContainer = YUD.get('overview');
 		    
 		    var plot_options = {
 				bars: {show:true,align:'center',lineWidth:4},
@@ -330,7 +362,7 @@ E.onDOMReady(function(e){
 		            div.style.backgroundColor='#fee';
 		            document.body.appendChild(div);
 		        }
-		        YAHOO.util.Dom.setStyle(div, 'opacity', 0);
+		        YUD.setStyle(div, 'opacity', 0);
 		        div.innerHTML = contents;
 		        div.style.top=(y + 5) + "px";
 		        div.style.left=(x + 5) + "px";
@@ -472,7 +504,7 @@ E.onDOMReady(function(e){
 		        overview.setSelection(ranges, true);
 
 		        //resubscribe choiced
-		        YAHOO.util.Event.on(choiceContainer.getElementsByTagName("input"), "click", plotchoiced, [data, ranges]);
+		        YUE.on(choiceContainer.getElementsByTagName("input"), "click", plotchoiced, [data, ranges]);
 		    }
 		    
 		    var previousPoint = null;
@@ -481,13 +513,13 @@ E.onDOMReady(function(e){
 		        var pos = o.pos;
 		        var item = o.item;
 		        
-		        //YAHOO.util.Dom.get("x").innerHTML = pos.x.toFixed(2);
-		        //YAHOO.util.Dom.get("y").innerHTML = pos.y.toFixed(2);
+		        //YUD.get("x").innerHTML = pos.x.toFixed(2);
+		        //YUD.get("y").innerHTML = pos.y.toFixed(2);
 		        if (item) {
 		            if (previousPoint != item.datapoint) {
 		                previousPoint = item.datapoint;
 		                
-		                var tooltip = YAHOO.util.Dom.get("tooltip");
+		                var tooltip = YUD.get("tooltip");
 		                if(tooltip) {
 		                	  tooltip.parentNode.removeChild(tooltip);
 		                }
@@ -526,7 +558,7 @@ E.onDOMReady(function(e){
 		            }
 		        }
 		        else {
-		        	  var tooltip = YAHOO.util.Dom.get("tooltip");
+		        	  var tooltip = YUD.get("tooltip");
 		        	  
 			          if(tooltip) {
 			                tooltip.parentNode.removeChild(tooltip);
@@ -559,7 +591,7 @@ E.onDOMReady(function(e){
 				
 		    plot.subscribe("plothover", plothover);
 
-		    YAHOO.util.Event.on(choiceContainer.getElementsByTagName("input"), "click", plotchoiced, [data, initial_ranges]);
+		    YUE.on(choiceContainer.getElementsByTagName("input"), "click", plotchoiced, [data, initial_ranges]);
 		}
 			SummaryPlot(${c.ts_min},${c.ts_max},${c.commit_data|n},${c.overview_data|n});		
 		</script>

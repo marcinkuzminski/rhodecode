@@ -311,7 +311,7 @@
 var base_url  ='/_admin/toggle_following';
 var YUC = YAHOO.util.Connect;
 var YUD = YAHOO.util.Dom;
-
+var YUE = YAHOO.util.Event;
 
 function onSuccess(){
 	
@@ -319,7 +319,6 @@ function onSuccess(){
     if(f.getAttribute('class')=='follow'){
         f.setAttribute('class','following');
         f.setAttribute('title',"${_('Stop following this repository')}");
-        
     }
     else{
         f.setAttribute('class','follow');
@@ -337,7 +336,6 @@ function toggleFollowingUser(fallows_user_id,token){
     },args); return false;
 }
 
-
 function toggleFollowingRepo(fallows_repo_id,token){
     args = 'follows_repo_id='+fallows_repo_id;
     args+= '&auth_token='+token;
@@ -348,7 +346,6 @@ function toggleFollowingRepo(fallows_repo_id,token){
     },args); return false;
 }    
 </script>
-
 
 </%def>
 
