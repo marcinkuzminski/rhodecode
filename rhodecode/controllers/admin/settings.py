@@ -248,6 +248,7 @@ class SettingsController(BaseController):
             .filter(Repository.user_id == c.user.user_id)\
             .order_by(func.lower(Repository.repo_name))\
             .all()
+
         c.user_repos = ScmModel().get_repos(all_repos)
 
         if c.user.username == 'default':
