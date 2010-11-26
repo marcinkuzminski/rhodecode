@@ -212,12 +212,15 @@ def make_ui(read_from='file', path=None, checkpaths=True):
         ret = sa.query(RhodeCodeUi)\
             .options(FromCache("sql_cache_short",
                                "get_hg_ui_settings")).all()
-        meta.Session.remove()
+
         hg_ui = ret
         for ui_ in hg_ui:
             if ui_.ui_active:
-                log.debug('settings ui from db[%s]%s:%s', ui_.ui_section, ui_.ui_key, ui_.ui_value)
+                log.debug('settings ui from db[%s]%s:%s', ui_.ui_section,
+                          ui_.ui_key, ui_.ui_value)
                 baseui.setconfig(ui_.ui_section, ui_.ui_key, ui_.ui_value)
+
+        meta.Session.remove()
     return baseui
 
 

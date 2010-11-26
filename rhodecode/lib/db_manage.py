@@ -149,6 +149,13 @@ class DbManage(object):
         hooks4.ui_key = 'preoutgoing.pull_logger'
         hooks4.ui_value = 'python:rhodecode.lib.hooks.log_pull_action'
 
+        #for mercurial 1.7 set backward comapatibility with format
+
+        dotencode_disable = RhodeCodeUi()
+        dotencode_disable.ui_section = 'format'
+        dotencode_disable.ui_key = 'dotencode'
+        dotencode_disable.ui_section = 'false'
+
 
         web1 = RhodeCodeUi()
         web1.ui_section = 'web'
@@ -181,8 +188,6 @@ class DbManage(object):
 
 
         try:
-
-
             self.sa.add(hooks1)
             self.sa.add(hooks2)
             self.sa.add(hooks3)
@@ -194,6 +199,7 @@ class DbManage(object):
             self.sa.add(paths)
             self.sa.add(hgsettings1)
             self.sa.add(hgsettings2)
+            self.sa.add(dotencode_disable)
             for k in ['ldap_active', 'ldap_host', 'ldap_port', 'ldap_ldaps',
                       'ldap_dn_user', 'ldap_dn_pass', 'ldap_base_dn']:
 

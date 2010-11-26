@@ -8,7 +8,7 @@ requirements = [
         "Mako>=0.3.6",
         "vcs>=0.1.10",
         "pygments>=1.3.0",
-        "mercurial>=1.6.4",
+        "mercurial>=1.7.1",
         "whoosh>=1.3.1",
         "celery>=2.1.3",
         "py-bcrypt",
