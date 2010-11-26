@@ -81,7 +81,6 @@ class FilesController(BaseController):
             try:
                 c.files_list = c.changeset.get_node(f_path)
                 c.file_history = self._get_history(c.repo, c.files_list, f_path)
-
             except RepositoryError, e:
                 h.flash(str(e), category='warning')
                 redirect(h.url('files_home', repo_name=repo_name, revision=revision))
@@ -114,8 +113,14 @@ class FilesController(BaseController):
     def annotate(self, repo_name, revision, f_path):
         hg_model = ScmModel()
         c.repo = hg_model.get_repo(c.repo_name)
-        c.cs = c.repo.get_changeset(revision)
-        c.file = c.cs.get_node(f_path)
+
+        try:
+            c.cs = c.repo.get_changeset(revision)
+            c.file = c.cs.get_node(f_path)
+        except RepositoryError, e:
+            h.flash(str(e), category='warning')
+            redirect(h.url('files_home', repo_name=repo_name, revision=revision))
+
         c.file_history = self._get_history(c.repo, c.file, f_path)
 
         c.f_path = f_path
@@ -212,7 +217,31 @@ class FilesController(BaseController):
             return []
         changesets = node.history
         hist_l = []
+
+        changesets_group = ([], _("Changesets"))
+        branches_group = ([], _("Branches"))
+        tags_group = ([], _("Tags"))
+
         for chs in changesets:
             n_desc = 'r%s:%s' % (chs.revision, chs.short_id)
-            hist_l.append((chs.raw_id, n_desc,))
+            changesets_group[0].append((chs.raw_id, n_desc,))
+
+        hist_l.append(changesets_group)
+
+        for name, chs in c.repository_branches.items():
+            #chs = chs.split(':')[-1]
+            branches_group[0].append((chs, name),)
+        hist_l.append(branches_group)
+
+        for name, chs in c.repository_tags.items():
+            #chs = chs.split(':')[-1]
+            tags_group[0].append((chs, name),)
+        hist_l.append(tags_group)
+
         return hist_l
+
+#                [
+#                 ([("u1", "User1"), ("u2", "User2")], "Users"),
+#                 ([("g1", "Group1"), ("g2", "Group2")], "Groups")
+#                 ]
+
