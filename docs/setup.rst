@@ -113,7 +113,11 @@ Here's a typical ldap setup::
 
 `Account` and `Password` are optional, and used for two-phase ldap 
 authentication so those are credentials to access Your ldap, if it doesn't 
-support anonymous search/user lookups.
+support anonymous search/user lookups. 
+
+Base DN must have %(user)s template inside, it's a placer where Your uid used
+to login would go, it allows admins to specify not standard schema for uid 
+variable
 
 If all data are entered correctly, and `python-ldap` is properly installed
 Users should be granted to access RhodeCode wit ldap accounts. When 

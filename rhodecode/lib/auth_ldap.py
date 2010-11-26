@@ -55,7 +55,6 @@ class AuthLdap(object):
                                                self.LDAP_SERVER_PORT)
 
         self.BASE_DN = base_dn
-        self.AUTH_DN = "uid=%s,%s"
 
     def authenticate_ldap(self, username, password):
         """Authenticate a user via LDAP and return his/her LDAP properties.
@@ -70,8 +69,7 @@ class AuthLdap(object):
         from rhodecode.lib.helpers import chop_at
 
         uid = chop_at(username, "@%s" % self.LDAP_SERVER_ADDRESS)
-        dn = self.AUTH_DN % (uid, self.BASE_DN)
-        log.debug("Authenticating %r at %s", dn, self.LDAP_SERVER)
+
         if "," in username:
             raise LdapUsernameError("invalid character in username: ,")
         try:
@@ -84,11 +82,13 @@ class AuthLdap(object):
                 server.protocol = ldap.VERSION3
 
             if self.LDAP_BIND_DN and self.LDAP_BIND_PASS:
-                server.simple_bind_s(self.AUTH_DN % (self.LDAP_BIND_DN,
-                                                self.BASE_DN),
-                                                self.LDAP_BIND_PASS)
+                login_dn = self.BASE_DN % {'user':uid}
+                server.simple_bind_s(login_dn, self.LDAP_BIND_PASS)
 
+            dn = self.BASE_DN % {'user':uid}
+            log.debug("Authenticating %r at %s", dn, self.LDAP_SERVER)
             server.simple_bind_s(dn, password)
+
             properties = server.search_s(dn, ldap.SCOPE_SUBTREE)
             if not properties:
                 raise ldap.NO_SUCH_OBJECT()
