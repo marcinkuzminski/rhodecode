@@ -1,0 +1,73 @@
+## -*- coding: utf-8 -*-
+<%inherit file="/base/base.html"/>
+
+<%def name="title()">
+    ${_('LDAP administration')} - ${c.rhodecode_name}
+</%def>
+
+<%def name="breadcrumbs_links()">
+    ${h.link_to(_('Admin'),h.url('admin_home'))} 
+    &raquo;
+    ${_('Ldap')}    
+</%def>
+
+<%def name="page_nav()">
+    ${self.menu('admin')}
+</%def>
+
+<%def name="main()">
+<div class="box">
+    <!-- box / title -->
+    <div class="title">
+        ${self.breadcrumbs()}       
+    </div>
+    <h3>${_('LDAP administration')}</h3>
+    ${h.form(url('ldap_settings'))}
+    <div class="form">
+        <div class="fields">
+
+            <div class="field">
+                <div class="label label-checkbox"><label for="ldap_active">${_('Enable ldap')}</label></div>
+                <div class="checkboxes"><div class="checkbox">${h.checkbox('ldap_active',True,class_='small')}</div></div>
+            </div>
+            <div class="field">
+                <div class="label"><label for="ldap_host">${_('Host')}</label></div>
+                <div class="input">${h.text('ldap_host',class_='small')}</div>
+            </div>
+            <div class="field">
+                <div class="label"><label for="ldap_port">${_('Port')}</label></div>
+                <div class="input">${h.text('ldap_port',class_='small')}</div>
+            </div>
+            <div class="field">
+                <div class="label label-checkbox"><label for="ldap_ldaps">${_('Enable LDAPS')}</label></div>
+                <div class="checkboxes"><div class="checkbox">${h.checkbox('ldap_ldaps',True,class_='small')}</div></div>
+            </div>
+            <div class="field">
+                <div class="label"><label for="ldap_dn_user">${_('Account')}</label></div>
+                <div class="input">${h.text('ldap_dn_user',class_='small')}</div>
+            </div>
+            <div class="field">
+                <div class="label"><label for="ldap_dn_pass">${_('Password')}</label></div>
+                <div class="input">${h.password('ldap_dn_pass',class_='small')}</div>
+            </div>
+            <div class="field">
+                <div class="label"><label for="ldap_base_dn">${_('Base DN')}</label></div>
+                <div class="input">${h.text('ldap_base_dn',class_='small')}</div>
+            </div>
+            
+            <div class="buttons">
+            ${h.submit('save','Save',class_="ui-button ui-widget ui-state-default ui-corner-all")}
+            </div>              
+        </div>
+    </div>     
+    ${h.end_form()}    
+</div>
+</%def>    
+
+
+
+
+
+
+   
+

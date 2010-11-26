@@ -479,6 +479,13 @@ margin:0;
 padding:12px 9px 7px 24px;
 }
 
+#header #header-inner #quick li ul li a.ldap,#header #header-inner #quick li ul li a.ldap:hover {
+background:#FFF url("../images/icons/server_key.png") no-repeat 4px 9px;
+width:167px;
+margin:0;
+padding:12px 9px 7px 24px;
+}
+
 #header #header-inner #quick li ul li a.fork,#header #header-inner #quick li ul li a.fork:hover {
 background:#FFF url("../images/icons/arrow_divide.png") no-repeat 4px 9px;
 width:167px;
