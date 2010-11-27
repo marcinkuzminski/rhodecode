@@ -41,23 +41,25 @@ import logging
 log = logging.getLogger(__name__)
 
 class DbManage(object):
-    def __init__(self, log_sql, dbname, root, tests=False):
-        self.dbname = dbname
+    def __init__(self, log_sql, dbconf, root, tests=False):
+        self.dbname = dbconf.split('/')[-1]
         self.tests = tests
         self.root = root
-        dburi = 'sqlite:////%s' % jn(self.root, self.dbname)
-        engine = create_engine(dburi, echo=log_sql)
+        self.dburi = dbconf
+        engine = create_engine(self.dburi, echo=log_sql)
         init_model(engine)
         self.sa = meta.Session()
         self.db_exists = False
 
     def check_for_db(self, override):
         db_path = jn(self.root, self.dbname)
-        log.info('checking for existing db in %s', db_path)
-        if os.path.isfile(db_path):
-            self.db_exists = True
-            if not override:
-                raise Exception('database already exists')
+        if self.dburi.startswith('sqlite'):
+            log.info('checking for existing db in %s', db_path)
+            if os.path.isfile(db_path):
+
+                self.db_exists = True
+                if not override:
+                    raise Exception('database already exists')
 
     def create_tables(self, override=False):
         """
