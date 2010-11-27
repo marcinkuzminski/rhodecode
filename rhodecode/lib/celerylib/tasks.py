@@ -2,16 +2,24 @@ from celery.decorators import task
 
 import os
 import traceback
+import beaker
 from time import mktime
-
 from operator import itemgetter
+
+from pylons import config
 from pylons.i18n.translation import _
-from rhodecode.lib.celerylib import run_task, locked_task
+
+from rhodecode.lib.celerylib import run_task, locked_task, str2bool
 from rhodecode.lib.helpers import person
 from rhodecode.lib.smtp_mailer import SmtpMailer
 from rhodecode.lib.utils import OrderedDict
-from vcs.backends import get_repo
+from rhodecode.model import init_model
+from rhodecode.model import meta
 from rhodecode.model.db import RhodeCodeUi
+
+from vcs.backends import get_repo
+
+from sqlalchemy import engine_from_config
 
 try:
     import json
@@ -19,31 +27,16 @@ except ImportError:
     #python 2.5 compatibility
     import simplejson as json
 
-try:
-    from celeryconfig import PYLONS_CONFIG as config
-    celery_on = True
-except ImportError:
-    #if celeryconfig is not present let's just load our pylons
-    #config instead
-    from pylons import config
-    celery_on = False
-
-
 __all__ = ['whoosh_index', 'get_commits_stats',
            'reset_user_password', 'send_email']
 
-def get_session():
-    if celery_on:
-        from sqlalchemy import engine_from_config
-        from sqlalchemy.orm import sessionmaker, scoped_session
-        engine = engine_from_config(dict(config.items('app:main')),
-                                    'sqlalchemy.db1.')
-        sa = scoped_session(sessionmaker(bind=engine))
-    else:
-        #If we don't use celery reuse our current application Session
-        from rhodecode.model.meta import Session
-        sa = Session()
+CELERY_ON = str2bool(config['app_conf'].get('use_celery'))
 
+def get_session():
+    if CELERY_ON:
+        engine = engine_from_config(config, 'sqlalchemy.db1.')
+        init_model(engine)
+    sa = meta.Session()
     return sa
 
 def get_repos_path():
@@ -56,7 +49,7 @@ def get_repos_path():
 def whoosh_index(repo_location, full_index):
     log = whoosh_index.get_logger()
     from rhodecode.lib.indexers.daemon import WhooshIndexingDaemon
-    index_location = dict(config.items('app:main'))['index_dir']
+    index_location = config['index_dir']
     WhooshIndexingDaemon(index_location=index_location,
                          repo_location=repo_location).run(full_index=full_index)
 
@@ -235,6 +228,7 @@ def reset_user_password(user_email):
     except:
         log.error('Failed to update user password')
         log.error(traceback.format_exc())
+
     return True
 
 @task
@@ -249,13 +243,10 @@ def send_email(recipients, subject, body):
     :param body: body of the mail
     """
     log = send_email.get_logger()
-    email_config = dict(config.items('DEFAULT'))
+    email_config = config
 
     if not recipients:
         recipients = [email_config.get('email_to')]
-
-    def str2bool(v):
-        return v.lower() in ["yes", "true", "t", "1"] if v else None
 
     mail_from = email_config.get('app_email_from')
     user = email_config.get('smtp_username')
@@ -293,12 +284,58 @@ def create_repo_fork(form_data, cur_user):
     backend(str(repo_fork_path), create=True, src_url=str(repo_path))
 
 def __get_codes_stats(repo_name):
-    LANGUAGES_EXTENSIONS = ['action', 'adp', 'ashx', 'asmx',
-    'aspx', 'asx', 'axd', 'c', 'cfg', 'cfm', 'cpp', 'cs', 'diff', 'do', 'el',
-    'erl', 'h', 'java', 'js', 'jsp', 'jspx', 'lisp', 'lua', 'm', 'mako', 'ml',
-    'pas', 'patch', 'php', 'php3', 'php4', 'phtml', 'pm', 'py', 'rb', 'rst',
-    's', 'sh', 'tpl', 'txt', 'vim', 'wss', 'xhtml', 'xml', 'xsl', 'xslt', 'yaws']
-
+    LANGUAGES_EXTENSIONS_MAP = {'scm': 'Scheme', 'asmx': 'VbNetAspx', 'Rout':
+    'RConsole', 'rest': 'Rst', 'abap': 'ABAP', 'go': 'Go', 'phtml': 'HtmlPhp',
+    'ns2': 'Newspeak', 'xml': 'EvoqueXml', 'sh-session': 'BashSession', 'ads':
+    'Ada', 'clj': 'Clojure', 'll': 'Llvm', 'ebuild': 'Bash', 'adb': 'Ada',
+    'ada': 'Ada', 'c++-objdump': 'CppObjdump', 'aspx':
+    'VbNetAspx', 'ksh': 'Bash', 'coffee': 'CoffeeScript', 'vert': 'GLShader',
+    'Makefile.*': 'Makefile', 'di': 'D', 'dpatch': 'DarcsPatch', 'rake':
+    'Ruby', 'moo': 'MOOCode', 'erl-sh': 'ErlangShell', 'geo': 'GLShader',
+    'pov': 'Povray', 'bas': 'VbNet', 'bat': 'Batch', 'd': 'D', 'lisp':
+    'CommonLisp', 'h': 'C', 'rbx': 'Ruby', 'tcl': 'Tcl', 'c++': 'Cpp', 'md':
+    'MiniD', '.vimrc': 'Vim', 'xsd': 'Xml', 'ml': 'Ocaml', 'el': 'CommonLisp',
+    'befunge': 'Befunge', 'xsl': 'Xslt', 'pyx': 'Cython', 'cfm':
+    'ColdfusionHtml', 'evoque': 'Evoque', 'cfg': 'Ini', 'htm': 'Html',
+    'Makefile': 'Makefile', 'cfc': 'ColdfusionHtml', 'tex': 'Tex', 'cs':
+    'CSharp', 'mxml': 'Mxml', 'patch': 'Diff', 'apache.conf': 'ApacheConf',
+    'scala': 'Scala', 'applescript': 'AppleScript', 'GNUmakefile': 'Makefile',
+    'c-objdump': 'CObjdump', 'lua': 'Lua', 'apache2.conf': 'ApacheConf', 'rb':
+    'Ruby', 'gemspec': 'Ruby', 'rl': 'RagelObjectiveC', 'vala': 'Vala', 'tmpl':
+    'Cheetah', 'bf': 'Brainfuck', 'plt': 'Gnuplot', 'G': 'AntlrRuby', 'xslt':
+    'Xslt', 'flxh': 'Felix', 'asax': 'VbNetAspx', 'Rakefile': 'Ruby', 'S': 'S',
+    'wsdl': 'Xml', 'js': 'Javascript', 'autodelegate': 'Myghty', 'properties':
+    'Ini', 'bash': 'Bash', 'c': 'C', 'g': 'AntlrRuby', 'r3': 'Rebol', 's':
+    'Gas', 'ashx': 'VbNetAspx', 'cxx': 'Cpp', 'boo': 'Boo', 'prolog': 'Prolog',
+    'sqlite3-console': 'SqliteConsole', 'cl': 'CommonLisp', 'cc': 'Cpp', 'pot':
+    'Gettext', 'vim': 'Vim', 'pxi': 'Cython', 'yaml': 'Yaml', 'SConstruct':
+    'Python', 'diff': 'Diff', 'txt': 'Text', 'cw': 'Redcode', 'pxd': 'Cython',
+    'plot': 'Gnuplot', 'java': 'Java', 'hrl': 'Erlang', 'py': 'Python',
+    'makefile': 'Makefile', 'squid.conf': 'SquidConf', 'asm': 'Nasm', 'toc':
+    'Tex', 'kid': 'Genshi', 'rhtml': 'Rhtml', 'po': 'Gettext', 'pl': 'Prolog',
+    'pm': 'Perl', 'hx': 'Haxe', 'ascx': 'VbNetAspx', 'ooc': 'Ooc', 'asy':
+    'Asymptote', 'hs': 'Haskell', 'SConscript': 'Python', 'pytb':
+    'PythonTraceback', 'myt': 'Myghty', 'hh': 'Cpp', 'R': 'S', 'aux': 'Tex',
+    'rst': 'Rst', 'cpp-objdump': 'CppObjdump', 'lgt': 'Logtalk', 'rss': 'Xml',
+    'flx': 'Felix', 'b': 'Brainfuck', 'f': 'Fortran', 'rbw': 'Ruby',
+    '.htaccess': 'ApacheConf', 'cxx-objdump': 'CppObjdump', 'j': 'ObjectiveJ',
+    'mll': 'Ocaml', 'yml': 'Yaml', 'mu': 'MuPAD', 'r': 'Rebol', 'ASM': 'Nasm',
+    'erl': 'Erlang', 'mly': 'Ocaml', 'mo': 'Modelica', 'def': 'Modula2', 'ini':
+    'Ini', 'control': 'DebianControl', 'vb': 'VbNet', 'vapi': 'Vala', 'pro':
+    'Prolog', 'spt': 'Cheetah', 'mli': 'Ocaml', 'as': 'ActionScript3', 'cmd':
+    'Batch', 'cpp': 'Cpp', 'io': 'Io', 'tac': 'Python', 'haml': 'Haml', 'rkt':
+    'Racket', 'st':'Smalltalk', 'inc': 'Povray', 'pas': 'Delphi', 'cmake':
+    'CMake', 'csh':'Tcsh', 'hpp': 'Cpp', 'feature': 'Gherkin', 'html': 'Html',
+    'php':'Php', 'php3':'Php', 'php4':'Php', 'php5':'Php', 'xhtml': 'Html',
+    'hxx': 'Cpp', 'eclass': 'Bash', 'css': 'Css',
+    'frag': 'GLShader', 'd-objdump': 'DObjdump', 'weechatlog': 'IrcLogs',
+    'tcsh': 'Tcsh', 'objdump': 'Objdump', 'pyw': 'Python', 'h++': 'Cpp',
+    'py3tb': 'Python3Traceback', 'jsp': 'Jsp', 'sql': 'Sql', 'mak': 'Makefile',
+    'php': 'Php', 'mao': 'Mako', 'man': 'Groff', 'dylan': 'Dylan', 'sass':
+    'Sass', 'cfml': 'ColdfusionHtml', 'darcspatch': 'DarcsPatch', 'tpl':
+    'Smarty', 'm': 'ObjectiveC', 'f90': 'Fortran', 'mod': 'Modula2', 'sh':
+    'Bash', 'lhs': 'LiterateHaskell', 'sources.list': 'SourcesList', 'axd':
+    'VbNetAspx', 'sc': 'Python'}
 
     repos_path = get_repos_path()
     p = os.path.join(repos_path, repo_name)
@@ -308,12 +345,14 @@ def __get_codes_stats(repo_name):
 
     def aggregate(cs):
         for f in cs[2]:
-            k = f.mimetype
-            if f.extension in LANGUAGES_EXTENSIONS:
-                if code_stats.has_key(k):
-                    code_stats[k] += 1
+            ext = f.extension
+            key = LANGUAGES_EXTENSIONS_MAP.get(ext, ext)
+            key = key or ext
+            if ext in LANGUAGES_EXTENSIONS_MAP.keys():
+                if code_stats.has_key(key):
+                    code_stats[key] += 1
                 else:
-                    code_stats[k] = 1
+                    code_stats[key] = 1
 
     map(aggregate, tip.walk('/'))
 
