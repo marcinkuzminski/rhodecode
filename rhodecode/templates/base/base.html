@@ -16,25 +16,25 @@
     <div id="header">
         <!-- user -->
         <ul id="logged-user">
-            <li class="first">
-	            <div class="gravatar">
-	            	<img alt="gravatar" src="${h.gravatar_url(c.rhodecode_user.email,24)}" />
-	            </div>
-	        %if c.rhodecode_user.username == 'default':
-                <div class="account">
-                    ${h.link_to('%s %s'%(c.rhodecode_user.name,c.rhodecode_user.lastname),h.url('#'))}<br/>
-                    ${h.link_to(c.rhodecode_user.username,h.url('#'))}
-                </div>  
-            </li>
-            <li class="last highlight">${h.link_to(u'Login',h.url('login_home'))}</li>	        
+            %if c.rhodecode_user.username == 'default':
+	            <li class="first">
+	                <div class="account">
+	                  ##  ${h.link_to('%s %s'%(c.rhodecode_user.name,c.rhodecode_user.lastname),h.url('#'))}<br/>
+	                  ##  ${h.link_to(c.rhodecode_user.username,h.url('#'))}
+	                </div>  
+	            </li>
+            <li class="last highlight">${h.link_to(u'Login',h.url('login_home'))}</li>
 	        %else:
-	            
-	            <div class="account">
-	            	${h.link_to('%s %s'%(c.rhodecode_user.name,c.rhodecode_user.lastname),h.url('admin_settings_my_account'))}<br/>
-	            	${h.link_to(c.rhodecode_user.username,h.url('admin_settings_my_account'))}
-	            </div>	
-            </li>
-            <li class="last highlight">${h.link_to(u'Logout',h.url('logout_home'))}</li>
+	            <li class="first">
+	                <div class="gravatar">
+	                    <img alt="gravatar" src="${h.gravatar_url(c.rhodecode_user.email,24)}" />
+	                </div>
+		            <div class="account">
+		            	${h.link_to('%s %s'%(c.rhodecode_user.name,c.rhodecode_user.lastname),h.url('admin_settings_my_account'))}<br/>
+		            	${h.link_to(c.rhodecode_user.username,h.url('admin_settings_my_account'))}
+		            </div>	
+	            </li>
+	            <li class="last highlight">${h.link_to(u'Logout',h.url('logout_home'))}</li>
             %endif
         </ul>
         <!-- end user -->
