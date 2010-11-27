@@ -30,7 +30,7 @@ __all__ = ['environ', 'url', 'TestController', 'TESTS_TMP_PATH', 'HG_REPO',
 #SetupCommand('setup-app').run([config_file])
 
 ##RUNNING DESIRED TESTS
-#nosetests rhodecode.tests.functional.test_admin_settings:TestSettingsController.test_my_account
+#nosetests -x rhodecode.tests.functional.test_admin_settings:TestSettingsController.test_my_account
 
 environ = {}
 

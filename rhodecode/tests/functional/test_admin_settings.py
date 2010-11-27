@@ -71,7 +71,7 @@ class TestAdminSettingsController(TestController):
                                                             email=new_email,))
         response.follow()
 
-        assert 'Your account was updated succesfully' in response.session['flash'][0][1], 'no flash message about success of change'
+        assert 'Your account was updated successfully' in response.session['flash'][0][1], 'no flash message about success of change'
         user = self.sa.query(User).filter(User.username == 'test_admin').one()
         assert user.email == new_email , 'incorrect user email after update got %s vs %s' % (user.email, new_email)
         assert user.name == new_name, 'updated field mismatch %s vs %s' % (user.name, new_name)
@@ -94,7 +94,7 @@ class TestAdminSettingsController(TestController):
                                                             email=old_email,))
 
         response.follow()
-        assert 'Your account was updated succesfully' in response.session['flash'][0][1], 'no flash message about success of change'
+        assert 'Your account was updated successfully' in response.session['flash'][0][1], 'no flash message about success of change'
         user = self.sa.query(User).filter(User.username == 'test_admin').one()
         assert user.email == old_email , 'incorrect user email after update got %s vs %s' % (user.email, old_email)
 
