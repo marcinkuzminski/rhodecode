@@ -1,7 +1,15 @@
-#!/usr/bin/env python
-# encoding: utf-8
-# Utilities for RhodeCode
-# Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
+# -*- coding: utf-8 -*-
+"""
+    package.rhodecode.lib.utils
+    ~~~~~~~~~~~~~~
+
+    Utilities library for RhodeCode
+    
+    :created_on: Apr 18, 2010
+    :author: marcink
+    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
+    :license: GPLv3, see COPYING for more details.
+"""
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
@@ -16,29 +24,27 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
-"""
-Created on April 18, 2010
-Utilities for RhodeCode
-@author: marcink
-"""
+
+import os
+import logging
+import datetime
+import traceback
+import ConfigParser
 
 from UserDict import DictMixin
+
 from mercurial import ui, config, hg
 from mercurial.error import RepoError
+
+from paste.script import command
+from vcs.backends.base import BaseChangeset
+from vcs.utils.lazy import LazyProperty
+
 from rhodecode.model import meta
 from rhodecode.model.caching_query import FromCache
 from rhodecode.model.db import Repository, User, RhodeCodeUi, UserLog
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.user import UserModel
-
-from vcs.backends.base import BaseChangeset
-from paste.script import command
-import ConfigParser
-from vcs.utils.lazy import LazyProperty
-import traceback
-import datetime
-import logging
-import os
 
 log = logging.getLogger(__name__)
 
@@ -464,10 +470,10 @@ def create_test_env(repos_test_path, config):
     log.addHandler(ch)
 
     #PART ONE create db
-    dbname = config['sqlalchemy.db1.url'].split('/')[-1]
-    log.debug('making test db %s', dbname)
+    dbconf = config['sqlalchemy.db1.url']
+    log.debug('making test db %s', dbconf)
 
-    dbmanage = DbManage(log_sql=True, dbname=dbname, root=config['here'],
+    dbmanage = DbManage(log_sql=True, dbconf=dbconf, root=config['here'],
                         tests=True)
     dbmanage.create_tables(override=True)
     dbmanage.config_prompt(repos_test_path)
