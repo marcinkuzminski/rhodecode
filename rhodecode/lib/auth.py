@@ -297,7 +297,8 @@ def get_user(session):
 # CHECK DECORATORS
 #===============================================================================
 class LoginRequired(object):
-    """Must be logged in to execute this function else redirect to login page"""
+    """Must be logged in to execute this function else 
+    redirect to login page"""
 
     def __call__(self, func):
         return decorator(self.__wrapper, func)
@@ -321,6 +322,31 @@ class LoginRequired(object):
 
             log.debug('redirecting to login page with %s', p)
             return redirect(url('login_home', came_from=p))
+
+class NotAnonymous(object):
+    """Must be logged in to execute this function else 
+    redirect to login page"""
+
+    def __call__(self, func):
+        return decorator(self.__wrapper, func)
+
+    def __wrapper(self, func, *fargs, **fkwargs):
+        user = session.get('rhodecode_user', AuthUser())
+        log.debug('Checking if user is not anonymous')
+
+        anonymous = user.username == 'default'
+
+        if anonymous:
+            p = ''
+            if request.environ.get('SCRIPT_NAME') != '/':
+                p += request.environ.get('SCRIPT_NAME')
+
+            p += request.environ.get('PATH_INFO')
+            if request.environ.get('QUERY_STRING'):
+                p += '?' + request.environ.get('QUERY_STRING')
+            return redirect(url('login_home', came_from=p))
+        else:
+            return func(*fargs, **fkwargs)
 
 class PermsDecorator(object):
     """Base class for decorators"""

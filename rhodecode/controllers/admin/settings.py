@@ -1,8 +1,14 @@
-#!/usr/bin/env python
-# encoding: utf-8
-# settings controller for pylons
-# Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
-#
+# -*- coding: utf-8 -*-
+"""
+    package.rhodecode.controllers.admin.settings
+    ~~~~~~~~~~~~~~
+    settings controller for rhodecode admin
+        
+    :created_on: Jul 14, 2010
+    :author: marcink
+    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
+    :license: GPLv3, see COPYING for more details.
+"""
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
@@ -17,11 +23,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
-"""
-Created on July 14, 2010
-settings controller for pylons
-@author: marcink
-"""
+
 from formencode import htmlfill
 from pylons import request, session, tmpl_context as c, url, app_globals as g, \
     config
@@ -29,7 +31,7 @@ from pylons.controllers.util import abort, redirect
 from pylons.i18n.translation import _
 from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator, \
-    HasPermissionAnyDecorator
+    HasPermissionAnyDecorator, NotAnonymous
 from rhodecode.lib.base import BaseController, render
 from rhodecode.lib.celerylib import tasks, run_task
 from rhodecode.lib.utils import repo2db_mapper, invalidate_cache, \
@@ -236,13 +238,13 @@ class SettingsController(BaseController):
         """GET /admin/settings/setting_id/edit: Form to edit an existing item"""
         # url('admin_edit_setting', setting_id=ID)
 
-
+    @NotAnonymous()
     def my_account(self):
         """
         GET /_admin/my_account Displays info about my account 
         """
-
         # url('admin_settings_my_account')
+
         c.user = UserModel().get(c.rhodecode_user.user_id, cache=False)
         all_repos = self.sa.query(Repository)\
             .filter(Repository.user_id == c.user.user_id)\
@@ -280,7 +282,7 @@ class SettingsController(BaseController):
         try:
             form_result = _form.to_python(dict(request.POST))
             user_model.update_my_account(uid, form_result)
-            h.flash(_('Your account was updated succesfully'),
+            h.flash(_('Your account was updated successfully'),
                     category='success')
 
         except formencode.Invalid, errors:
@@ -300,11 +302,12 @@ class SettingsController(BaseController):
                 encoding="UTF-8")
         except Exception:
             log.error(traceback.format_exc())
-            h.flash(_('error occured during update of user %s') \
+            h.flash(_('error occurred during update of user %s') \
                     % form_result.get('username'), category='error')
 
         return redirect(url('my_account'))
 
+    @NotAnonymous()
     @HasPermissionAnyDecorator('hg.admin', 'hg.create.repository')
     def create_repository(self):
         """GET /_admin/create_repository: Form to create a new item"""
