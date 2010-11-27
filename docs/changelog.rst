@@ -24,7 +24,7 @@ news
   and options to disable those hooks from admin panel
 - introduced new enhanced changelog for merges that shows more accurate results
 - gui optimizations, fixed application width to 1024px
-- whoosh,celeryd,upgrade moved to paster command
+- whoosh, celeryd, upgrade moved to paster command
 
 fixes
 +++++

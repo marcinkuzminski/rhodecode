@@ -21,6 +21,31 @@ from vcs.backends import get_repo
 
 from sqlalchemy import engine_from_config
 
+#set cache regions for beaker so celery can utilise it
+def add_cache(settings):
+    cache_settings = {'regions':None}
+    for key in settings.keys():
+        for prefix in ['beaker.cache.', 'cache.']:
+            if key.startswith(prefix):
+                name = key.split(prefix)[1].strip()
+                cache_settings[name] = settings[key].strip()
+    if cache_settings['regions']:
+        for region in cache_settings['regions'].split(','):
+            region = region.strip()
+            region_settings = {}
+            for key, value in cache_settings.items():
+                if key.startswith(region):
+                    region_settings[key.split('.')[1]] = value
+            region_settings['expire'] = int(region_settings.get('expire',
+                                                                60))
+            region_settings.setdefault('lock_dir',
+                                       cache_settings.get('lock_dir'))
+            if 'type' not in region_settings:
+                region_settings['type'] = cache_settings.get('type',
+                                                             'memory')
+            beaker.cache.cache_regions[region] = region_settings
+add_cache(config)
+
 try:
     import json
 except ImportError:
@@ -51,7 +76,8 @@ def whoosh_index(repo_location, full_index):
     from rhodecode.lib.indexers.daemon import WhooshIndexingDaemon
     index_location = config['index_dir']
     WhooshIndexingDaemon(index_location=index_location,
-                         repo_location=repo_location).run(full_index=full_index)
+                         repo_location=repo_location, sa=get_session())\
+                         .run(full_index=full_index)
 
 @task
 @locked_task

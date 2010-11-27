@@ -67,7 +67,7 @@ class WhooshIndexingDaemon(object):
     """
 
     def __init__(self, indexname='HG_INDEX', index_location=None,
-                 repo_location=None):
+                 repo_location=None, sa=None):
         self.indexname = indexname
 
         self.index_location = index_location
@@ -78,7 +78,7 @@ class WhooshIndexingDaemon(object):
         if not repo_location:
             raise Exception('You have to provide repositories location')
 
-        self.repo_paths = ScmModel().repo_scan(self.repo_location, None)
+        self.repo_paths = ScmModel(sa).repo_scan(self.repo_location, None)
         self.initial = False
         if not os.path.isdir(self.index_location):
             os.makedirs(self.index_location)

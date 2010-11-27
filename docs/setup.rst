@@ -131,6 +131,22 @@ information check out the RhodeCode logs,any error messages sent from
 ldap will be saved there.
 
 
+
+Setting Up Celery
+-----------------
+
+Since version 1.1 celery is configured by the rhodecode ini configuration files
+simply set use_celery=true in the ini file then add / change the configuration 
+variables inside the ini file.
+
+Remember that the ini files uses format with '.' not with '_' like celery
+so for example setting `BROKER_HOST` in celery means setting `broker.host` in
+the config file.
+
+In order to make start using celery run::
+ paster celeryd <configfile.ini>
+
+
 Nginx virtual host example
 --------------------------
 
