@@ -2,7 +2,6 @@ from celery.decorators import task
 
 import os
 import traceback
-import beaker
 from time import mktime
 from operator import itemgetter
 
@@ -12,7 +11,7 @@ from pylons.i18n.translation import _
 from rhodecode.lib.celerylib import run_task, locked_task, str2bool
 from rhodecode.lib.helpers import person
 from rhodecode.lib.smtp_mailer import SmtpMailer
-from rhodecode.lib.utils import OrderedDict
+from rhodecode.lib.utils import OrderedDict, add_cache
 from rhodecode.model import init_model
 from rhodecode.model import meta
 from rhodecode.model.db import RhodeCodeUi
@@ -21,29 +20,6 @@ from vcs.backends import get_repo
 
 from sqlalchemy import engine_from_config
 
-#set cache regions for beaker so celery can utilise it
-def add_cache(settings):
-    cache_settings = {'regions':None}
-    for key in settings.keys():
-        for prefix in ['beaker.cache.', 'cache.']:
-            if key.startswith(prefix):
-                name = key.split(prefix)[1].strip()
-                cache_settings[name] = settings[key].strip()
-    if cache_settings['regions']:
-        for region in cache_settings['regions'].split(','):
-            region = region.strip()
-            region_settings = {}
-            for key, value in cache_settings.items():
-                if key.startswith(region):
-                    region_settings[key.split('.')[1]] = value
-            region_settings['expire'] = int(region_settings.get('expire',
-                                                                60))
-            region_settings.setdefault('lock_dir',
-                                       cache_settings.get('lock_dir'))
-            if 'type' not in region_settings:
-                region_settings['type'] = cache_settings.get('type',
-                                                             'memory')
-            beaker.cache.cache_regions[region] = region_settings
 add_cache(config)
 
 try:

@@ -36,7 +36,10 @@ from UserDict import DictMixin
 from mercurial import ui, config, hg
 from mercurial.error import RepoError
 
-from paste.script import command
+import paste
+import beaker
+from paste.script.command import Command, BadCommand
+
 from vcs.backends.base import BaseChangeset
 from vcs.utils.lazy import LazyProperty
 
@@ -416,6 +419,31 @@ class OrderedDict(dict, DictMixin):
         return not self == other
 
 
+#set cache regions for beaker so celery can utilise it
+def add_cache(settings):
+    cache_settings = {'regions':None}
+    for key in settings.keys():
+        for prefix in ['beaker.cache.', 'cache.']:
+            if key.startswith(prefix):
+                name = key.split(prefix)[1].strip()
+                cache_settings[name] = settings[key].strip()
+    if cache_settings['regions']:
+        for region in cache_settings['regions'].split(','):
+            region = region.strip()
+            region_settings = {}
+            for key, value in cache_settings.items():
+                if key.startswith(region):
+                    region_settings[key.split('.')[1]] = value
+            region_settings['expire'] = int(region_settings.get('expire',
+                                                                60))
+            region_settings.setdefault('lock_dir',
+                                       cache_settings.get('lock_dir'))
+            if 'type' not in region_settings:
+                region_settings['type'] = cache_settings.get('type',
+                                                             'memory')
+            beaker.cache.cache_regions[region] = region_settings
+
+
 #===============================================================================
 # TEST FUNCTIONS AND CREATORS
 #===============================================================================
@@ -498,7 +526,66 @@ def create_test_env(repos_test_path, config):
     tar.extractall(jn(TESTS_TMP_PATH, HG_REPO))
     tar.close()
 
-class UpgradeDb(command.Command):
+
+#==============================================================================
+# PASTER COMMANDS
+#==============================================================================
+
+class BasePasterCommand(Command):
+    """
+    Abstract Base Class for paster commands.
+
+    The celery commands are somewhat aggressive about loading
+    celery.conf, and since our module sets the `CELERY_LOADER`
+    environment variable to our loader, we have to bootstrap a bit and
+    make sure we've had a chance to load the pylons config off of the
+    command line, otherwise everything fails.
+    """
+    min_args = 1
+    min_args_error = "Please provide a paster config file as an argument."
+    takes_config_file = 1
+    requires_config_file = True
+
+    def run(self, args):
+        """
+        Overrides Command.run
+        
+        Checks for a config file argument and loads it.
+        """
+        if len(args) < self.min_args:
+            raise BadCommand(
+                self.min_args_error % {'min_args': self.min_args,
+                                       'actual_args': len(args)})
+
+        # Decrement because we're going to lob off the first argument.
+        # @@ This is hacky
+        self.min_args -= 1
+        self.bootstrap_config(args[0])
+        self.update_parser()
+        return super(BasePasterCommand, self).run(args[1:])
+
+    def update_parser(self):
+        """
+        Abstract method.  Allows for the class's parser to be updated
+        before the superclass's `run` method is called.  Necessary to
+        allow options/arguments to be passed through to the underlying
+        celery command.
+        """
+        raise NotImplementedError("Abstract Method.")
+
+    def bootstrap_config(self, conf):
+        """
+        Loads the pylons configuration.
+        """
+        from pylons import config as pylonsconfig
+
+        path_to_ini_file = os.path.realpath(conf)
+        conf = paste.deploy.appconfig('config:' + path_to_ini_file)
+        pylonsconfig.init_app(conf.global_conf, conf.local_conf)
+
+
+
+class UpgradeDb(BasePasterCommand):
     """Command used for paster to upgrade our database to newer version
     """
 
@@ -509,16 +596,16 @@ class UpgradeDb(command.Command):
     summary = "Upgrades current db to newer version given configuration file"
     group_name = "RhodeCode"
 
-    parser = command.Command.standard_parser(verbose=True)
+    parser = Command.standard_parser(verbose=True)
 
-    parser.add_option('--sql',
+    def command(self):
+        from pylons import config
+        raise NotImplementedError('Not implemented yet')
+
+
+    def update_parser(self):
+        self.parser.add_option('--sql',
                       action='store_true',
                       dest='just_sql',
                       help="Prints upgrade sql for further investigation",
                       default=False)
-    def command(self):
-        config_name = self.args[0]
-        p = config_name.split('/')
-        root = '.' if len(p) == 1 else '/'.join(p[:-1])
-        config = ConfigParser.ConfigParser({'here':root})
-        config.read(config_name)

@@ -1,15 +1,21 @@
 import os
 import sys
+import traceback
 from os.path import dirname as dn, join as jn
 
 #to get the rhodecode import
 sys.path.append(dn(dn(dn(os.path.realpath(__file__)))))
 
-from rhodecode.config.environment import load_environment
+from rhodecode.model import init_model
 from rhodecode.model.scm import ScmModel
+from rhodecode.config.environment import load_environment
+from rhodecode.lib.utils import BasePasterCommand, Command, add_cache
+
 from shutil import rmtree
 from webhelpers.html.builder import escape
 from vcs.utils.lazy import LazyProperty
+
+from sqlalchemy import engine_from_config
 
 from whoosh.analysis import RegexTokenizer, LowercaseFilter, StopFilter
 from whoosh.fields import TEXT, ID, STORED, Schema, FieldType
@@ -17,7 +23,6 @@ from whoosh.index import create_in, open_dir
 from whoosh.formats import Characters
 from whoosh.highlight import highlight, SimpleFragmenter, HtmlFormatter
 
-import traceback
 
 #EXTENSIONS WE WANT TO INDEX CONTENT OFF
 INDEX_EXTENSIONS = ['action', 'adp', 'ashx', 'asmx', 'aspx', 'asx', 'axd', 'c',
@@ -45,10 +50,8 @@ IDX_NAME = 'HG_INDEX'
 FORMATTER = HtmlFormatter('span', between='\n<span class="break">...</span>\n')
 FRAGMENTER = SimpleFragmenter(200)
 
-from paste.script import command
-import ConfigParser
 
-class MakeIndex(command.Command):
+class MakeIndex(BasePasterCommand):
 
     max_args = 1
     min_args = 1
@@ -57,26 +60,16 @@ class MakeIndex(command.Command):
     summary = "Creates index for full text search given configuration file"
     group_name = "RhodeCode"
     takes_config_file = -1
-    parser = command.Command.standard_parser(verbose=True)
-    parser.add_option('--repo-location',
-                      action='store',
-                      dest='repo_location',
-                      help="Specifies repositories location to index REQUIRED",
-                      )
-    parser.add_option('-f',
-                      action='store_true',
-                      dest='full_index',
-                      help="Specifies that index should be made full i.e"
-                            " destroy old and build from scratch",
-                      default=False)
-    def command(self):
-        config_name = self.args[0]
-        p = config_name.split('/')
-        root = '.' if len(p) == 1 else '/'.join(p[:-1])
-        config = ConfigParser.ConfigParser({'here':root})
-        config.read(config_name)
+    parser = Command.standard_parser(verbose=True)
 
-        index_location = dict(config.items('app:main'))['index_dir']
+    def command(self):
+
+        from pylons import config
+        add_cache(config)
+        engine = engine_from_config(config, 'sqlalchemy.db1.')
+        init_model(engine)
+
+        index_location = config['index_dir']
         repo_location = self.options.repo_location
 
         #======================================================================
@@ -93,6 +86,18 @@ class MakeIndex(command.Command):
         except LockHeld:
             sys.exit(1)
 
+    def update_parser(self):
+        self.parser.add_option('--repo-location',
+                          action='store',
+                          dest='repo_location',
+                          help="Specifies repositories location to index REQUIRED",
+                          )
+        self.parser.add_option('-f',
+                          action='store_true',
+                          dest='full_index',
+                          help="Specifies that index should be made full i.e"
+                                " destroy old and build from scratch",
+                          default=False)
 
 class ResultWrapper(object):
     def __init__(self, search_type, searcher, matcher, highlight_items):
