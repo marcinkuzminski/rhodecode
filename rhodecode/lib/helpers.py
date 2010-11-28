@@ -458,14 +458,14 @@ def action_parser(user_log):
            'admin_created_repo':_('Admin [created] repository'),
            'admin_forked_repo':_('Admin [forked] repository'),
            'admin_updated_repo':_('Admin [updated] repository'),
-           'push':_('Pushed') + get_cs_links(),
-           'pull':_('Pulled'),
+           'push':_('[Pushed]') + get_cs_links(),
+           'pull':_('[Pulled]'),
            'started_following_repo':_('User [started following] repository'),
            'stopped_following_repo':_('User [stopped following] repository'),
             }
 
     action_str = map.get(action, action)
-    return literal(action_str.replace('[', '<b>').replace(']', '</b>'))
+    return literal(action_str.replace('[', '<span class="journal_highlight">').replace(']', '</span>'))
 
 
 #==============================================================================
