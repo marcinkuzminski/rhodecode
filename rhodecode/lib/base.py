@@ -21,10 +21,12 @@ class BaseController(WSGIController):
         c.cached_repo_list = ScmModel().get_repos()
         c.backends = BACKENDS.keys()
 
-        if c.repo_name:
-            scm_model = ScmModel()
-            cached_repo = scm_model.get(c.repo_name)
+        self.sa = meta.Session()
+        scm_model = ScmModel(self.sa)
+        #c.unread_journal = scm_model.get_unread_journal()
 
+        if c.repo_name:
+            cached_repo = scm_model.get(c.repo_name)
             if cached_repo:
                 c.repository_tags = cached_repo.tags
                 c.repository_branches = cached_repo.branches
@@ -36,7 +38,6 @@ class BaseController(WSGIController):
                 c.repository_followers = 0
                 c.repository_forks = 0
 
-        self.sa = meta.Session()
 
     def __call__(self, environ, start_response):
         """Invoke the Controller"""

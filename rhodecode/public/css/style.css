@@ -190,18 +190,32 @@ margin:0;
 padding:0 30px;
 }
 
+
+#header ul#logged-user{
+margin-bottom:5px !important;
+-webkit-border-radius: 0px 0px 8px 8px;
+-khtml-border-radius: 0px 0px 8px 8px; 
+-moz-border-radius: 0px 0px 8px 8px;
+border-radius: 0px 0px 8px 8px;
+height:37px;
+background:url("../images/header_inner.png") repeat-x scroll 0 0 #003367
+}
+
 #header ul#logged-user li {
 list-style:none;
 float:left;
-border-left:1px solid #bbb;
-border-right:1px solid #a5a5a5;
-margin:-2px 0 0;
-padding:10px 12px;
+margin:8px 0 0;
+padding:4px 12px;
+border-left: 1px solid #316293;
 }
 
 #header ul#logged-user li.first {
 border-left:none;
-margin:-6px;
+margin:4px;
+}
+
+#header ul#logged-user li.first div.gravatar {
+margin-top:-2px;
 }
 
 #header ul#logged-user li.first div.account {
@@ -214,13 +228,12 @@ border-right:none;
 }
 
 #header ul#logged-user li a {
-color:#4e4e4e;
+color:#fff;
 font-weight:700;
 text-decoration:none;
 }
 
 #header ul#logged-user li a:hover {
-color:#376ea6;
 text-decoration:underline;
 }
 
@@ -229,7 +242,7 @@ color:#fff;
 }
 
 #header ul#logged-user li.highlight a:hover {
-color:#376ea6;
+color:#FFF;
 }
 
 #header #header-inner {

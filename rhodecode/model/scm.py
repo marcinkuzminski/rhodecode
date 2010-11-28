@@ -46,7 +46,7 @@ from rhodecode.model import BaseModel
 from rhodecode.model.user import UserModel
 
 from rhodecode.model.db import Repository, RhodeCodeUi, CacheInvalidation, \
-    UserFollowing
+    UserFollowing, UserLog
 from rhodecode.model.caching_query import FromCache
 
 from sqlalchemy.orm import joinedload
@@ -332,6 +332,11 @@ class ScmModel(BaseModel):
     def get_forks(self, repo_id):
         return self.sa.query(Repository)\
                 .filter(Repository.fork_id == repo_id).count()
+
+
+    def get_unread_journal(self):
+        return self.sa.query(UserLog).count()
+
 
     def _should_invalidate(self, repo_name):
         """

@@ -55,11 +55,11 @@ class CachingQuery(Query):
     the "public" method of configuring this state upon the CachingQuery.
     
     """
-    
+
     def __init__(self, manager, *args, **kw):
         self.cache_manager = manager
         Query.__init__(self, *args, **kw)
-        
+
     def __iter__(self):
         """override __iter__ to pull results from Beaker
            if particular attributes have been configured.
@@ -101,7 +101,7 @@ class CachingQuery(Query):
         """Set the value in the cache for this query."""
 
         cache, cache_key = _get_cache_parameters(self)
-        cache.put(cache_key, value)        
+        cache.put(cache_key, value)
 
 def query_callable(manager):
     def query(*arg, **kw):
@@ -110,11 +110,11 @@ def query_callable(manager):
 
 def get_cache_region(name, region):
     if region not in beaker.cache.cache_regions:
-        raise BeakerException('Cache region not configured: %s'
+        raise BeakerException('Cache region `%s` not configured '
             'Check if proper cache settings are in the .ini files' % region)
     kw = beaker.cache.cache_regions[region]
     return beaker.cache.Cache._get_cache(name, kw)
-    
+
 def _get_cache_parameters(query):
     """For a query with cache_region and cache_namespace configured,
     return the correspoinding Cache instance and cache key, based
@@ -125,7 +125,7 @@ def _get_cache_parameters(query):
         raise ValueError("This Query does not have caching parameters configured.")
 
     region, namespace, cache_key = query._cache_parameters
-    
+
     namespace = _namespace_from_query(namespace, query)
 
     if cache_key is None:
@@ -153,15 +153,15 @@ def _namespace_from_query(namespace, query):
     return namespace
 
 def _set_cache_parameters(query, region, namespace, cache_key):
-    
+
     if hasattr(query, '_cache_parameters'):
         region, namespace, cache_key = query._cache_parameters
         raise ValueError("This query is already configured "
-                        "for region %r namespace %r" % 
+                        "for region %r namespace %r" %
                         (region, namespace)
                     )
     query._cache_parameters = region, namespace, cache_key
-    
+
 class FromCache(MapperOption):
     """Specifies that a Query should load results from a cache."""
 
@@ -187,10 +187,10 @@ class FromCache(MapperOption):
         self.region = region
         self.namespace = namespace
         self.cache_key = cache_key
-    
+
     def process_query(self, query):
         """Process a Query during normal loading operation."""
-        
+
         _set_cache_parameters(query, self.region, self.namespace, self.cache_key)
 
 class RelationshipCache(MapperOption):
@@ -263,13 +263,13 @@ def _params_from_query(query):
     v = []
     def visit_bindparam(bind):
         value = query._params.get(bind.key, bind.value)
-        
+
         # lazyloader may dig a callable in here, intended
         # to late-evaluate params after autoflush is called.
         # convert to a scalar value.
         if callable(value):
             value = value()
-            
+
         v.append(value)
     if query._criterion is not None:
         visitors.traverse(query._criterion, {}, {'bindparam':visit_bindparam})
