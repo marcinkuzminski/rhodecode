@@ -218,6 +218,11 @@ class RepoModel(BaseModel):
 
 
     def __create_repo(self, repo_name, alias):
+        """
+        makes repository on filesystem
+        :param repo_name:
+        :param alias:
+        """
         from rhodecode.lib.utils import check_repo
         repo_path = os.path.join(g.base_path, repo_name)
         if check_repo(repo_name, g.base_path):
@@ -226,6 +231,11 @@ class RepoModel(BaseModel):
             backend(repo_path, create=True)
 
     def __rename_repo(self, old, new):
+        """
+        renames repository on filesystem
+        :param old: old name
+        :param new: new name
+        """
         log.info('renaming repo from %s to %s', old, new)
 
         old_path = os.path.join(g.base_path, old)
@@ -236,6 +246,13 @@ class RepoModel(BaseModel):
         shutil.move(old_path, new_path)
 
     def __delete_repo(self, repo):
+        """
+        removes repo from filesystem, the removal is acctually made by
+        added rm__ prefix into dir, and rename internat .hg/.git dirs so this
+        repository is no longer valid for rhodecode, can be undeleted later on
+        by reverting the renames on this repository
+        :param repo: repo object
+        """
         rm_path = os.path.join(g.base_path, repo.repo_name)
         log.info("Removing %s", rm_path)
         #disable hg/git
