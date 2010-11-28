@@ -1,7 +1,15 @@
-#!/usr/bin/env python
-# encoding: utf-8
-# model for handling repositories actions
-# Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
+# -*- coding: utf-8 -*-
+"""
+    package.rhodecode.model.repo
+    ~~~~~~~~~~~~~~
+
+    Repository model for rhodecode
+    
+    :created_on: Jun 5, 2010
+    :author: marcink
+    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
+    :license: GPLv3, see COPYING for more details.
+"""
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
@@ -16,23 +24,22 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
-"""
-Created on Jun 5, 2010
-model for handling repositories actions
-:author: marcink
-"""
-from vcs.backends import get_backend
-from datetime import datetime
-from pylons import app_globals as g
-from rhodecode.model.db import Repository, RepoToPerm, User, Permission, \
-    Statistics
-from rhodecode.model import BaseModel
-from rhodecode.model.user import UserModel
-from rhodecode.model.caching_query import FromCache
-import logging
 import os
 import shutil
+import logging
 import traceback
+from datetime import datetime
+
+from pylons import app_globals as g
+
+from rhodecode.model import BaseModel
+from rhodecode.model.caching_query import FromCache
+from rhodecode.model.db import Repository, RepoToPerm, User, Permission, \
+    Statistics
+from rhodecode.model.user import UserModel
+
+from vcs.backends import get_backend
+
 log = logging.getLogger(__name__)
 
 class RepoModel(BaseModel):
@@ -158,6 +165,13 @@ class RepoModel(BaseModel):
 
             self.sa.add(repo_to_perm)
             self.sa.commit()
+
+
+            #now automatically start following this repository as owner
+            from rhodecode.model.scm import ScmModel
+            ScmModel(self.sa).toggle_following_repo(new_repo.repo_id,
+                                             cur_user.user_id)
+
             if not just_db:
                 self.__create_repo(repo_name, form_data['repo_type'])
         except:

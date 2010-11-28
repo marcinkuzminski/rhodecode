@@ -22,11 +22,9 @@
 	                </div>
 		            <div class="account">
 		            %if c.rhodecode_user.username == 'default':
-                        ##${h.link_to('%s %s'%(c.rhodecode_user.name,c.rhodecode_user.lastname),h.url('register'))}<br/>
-                        ${h.link_to('anonymous',h.url('register'))}
+                        ${h.link_to('anonymous',h.url('register'),title='%s %s'%(c.rhodecode_user.name,c.rhodecode_user.lastname))}
                     %else:                        		            
-		            	##${h.link_to('%s %s'%(c.rhodecode_user.name,c.rhodecode_user.lastname),h.url('admin_settings_my_account'))}<br/>
-		            	${h.link_to(c.rhodecode_user.username,h.url('admin_settings_my_account'))}
+		            	${h.link_to(c.rhodecode_user.username,h.url('admin_settings_my_account'),title='%s %s'%(c.rhodecode_user.name,c.rhodecode_user.lastname))}
 		            %endif
 		            </div>	
 	            </li>
@@ -36,14 +34,12 @@
                 <li>
                    <a href="${h.url('journal')}">${_('Journal')}</a> 
                    ##(${c.unread_journal})</a>
-                </li>	         
+                </li>
                 %if c.rhodecode_user.username == 'default':
                     <li class="last highlight">${h.link_to(u'Login',h.url('login_home'))}</li>
-                %else:                                          
+                %else:
                     <li class="last highlight">${h.link_to(u'Log Out',h.url('logout_home'))}</li>
-                %endif                   
-	            
-	            
+                %endif
         </ul>
         <!-- end user -->
         <div id="header-inner" class="title top-left-rounded-corner top-right-rounded-corner">
