@@ -121,6 +121,7 @@ class ScmModel(BaseModel):
             all_repos = self.sa.query(Repository)\
                 .order_by(Repository.repo_name).all()
 
+        #get the repositories that should be invalidated
         invalidation_list = [str(x.cache_key) for x in \
                              self.sa.query(CacheInvalidation.cache_key)\
                              .filter(CacheInvalidation.cache_active == False)\
@@ -158,13 +159,33 @@ class ScmModel(BaseModel):
         """
         Get's repository from given name, creates BackendInstance and
         propagates it's data from database with all additional information
+        
         :param repo_name:
+        :param invalidation_list: if a invalidation list is given the get
+            method should not manually check if this repository needs 
+            invalidation and just invalidate the repositories in list
+            
         """
         if not HasRepoPermissionAny('repository.read', 'repository.write',
                             'repository.admin')(repo_name, 'get repo check'):
             return
 
+        pre_invalidate = True
+        if invalidation_list is not None:
+            pre_invalidate = repo_name in invalidation_list
 
+        if pre_invalidate:
+            invalidate = self._should_invalidate(repo_name)
+
+            if invalidate:
+                log.info('invalidating cache for repository %s', repo_name)
+                region_invalidate(_get_repo, None, repo_name)
+                self._mark_invalidated(invalidate)
+
+
+        #======================================================================
+        # CACHE FUNCTION
+        #======================================================================
         @cache_region('long_term')
         def _get_repo(repo_name):
 
@@ -202,18 +223,6 @@ class ScmModel(BaseModel):
 
             repo.dbrepo = dbrepo
             return repo
-
-        pre_invalidate = True
-        if invalidation_list:
-            pre_invalidate = repo_name in invalidation_list
-
-        if pre_invalidate:
-            invalidate = self._should_invalidate(repo_name)
-
-            if invalidate:
-                log.info('invalidating cache for repository %s', repo_name)
-                region_invalidate(_get_repo, None, repo_name)
-                self._mark_invalidated(invalidate)
 
         return _get_repo(repo_name)
 
