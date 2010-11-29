@@ -13,6 +13,8 @@ news
 ++++
 
 - rewrite of internals for vcs >=0.1.10
+- uses mercurial 1.7 with dotencode disabled for maintaining compatibility 
+  with older clients
 - anonymous access, authentication via ldap
 - performance upgrade for cached repos list - each repository has it's own 
   cache that's invalidated when needed.
@@ -23,8 +25,11 @@ news
 - more detailed action logger (based on hooks) with pushed changesets lists
   and options to disable those hooks from admin panel
 - introduced new enhanced changelog for merges that shows more accurate results
+- new improved and faster code stats (based on pygments lexers mapping tables, 
+  showing up to 10 trending sources for each repository
 - gui optimizations, fixed application width to 1024px
 - whoosh, celeryd, upgrade moved to paster command
+- other than sqlite database backends can be used
 
 fixes
 +++++
@@ -34,10 +39,13 @@ fixes
 - fixes #66 Name field misspelled
 - fixes #72 block user removal when he owns repositories
 - fixes #69 added password confirmation fields
-- numerous small bugfixes
 - a lot of fixes and tweaks for file browser
 - fixed detached session issues
-
+- fixed when user had no repos he would see all repos listed in my account
+- fixed ui() instance bug when global hgrc settings was loaded for server 
+  instance and all hgrc options were merged with our db ui() object
+- numerous small bugfixes
+ 
 (special thanks for TkSoh for detailed feedback)
 
 

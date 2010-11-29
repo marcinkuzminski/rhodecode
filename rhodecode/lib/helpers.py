@@ -436,7 +436,7 @@ def action_parser(user_log):
                                          _('and %s more revisions') \
                                             % (len(revs) - revs_limit))
 
-            return literal(cs_links)
+            return cs_links
         return ''
 
     def get_fork_name():
@@ -452,13 +452,13 @@ def action_parser(user_log):
         return ''
     map = {'user_deleted_repo':_('User [deleted] repository'),
            'user_created_repo':_('User [created] repository'),
-           'user_forked_repo':_('User [forked] repository as: ') + get_fork_name(),
+           'user_forked_repo':_('User [forked] repository as: %s') % get_fork_name(),
            'user_updated_repo':_('User [updated] repository'),
            'admin_deleted_repo':_('Admin [delete] repository'),
            'admin_created_repo':_('Admin [created] repository'),
            'admin_forked_repo':_('Admin [forked] repository'),
            'admin_updated_repo':_('Admin [updated] repository'),
-           'push':_('[Pushed]') + get_cs_links(),
+           'push':_('[Pushed] %s') % get_cs_links(),
            'pull':_('[Pulled]'),
            'started_following_repo':_('User [started following] repository'),
            'stopped_following_repo':_('User [stopped following] repository'),
