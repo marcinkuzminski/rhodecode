@@ -170,19 +170,6 @@ class ScmModel(BaseModel):
                             'repository.admin')(repo_name, 'get repo check'):
             return
 
-        pre_invalidate = True
-        if invalidation_list is not None:
-            pre_invalidate = repo_name in invalidation_list
-
-        if pre_invalidate:
-            invalidate = self._should_invalidate(repo_name)
-
-            if invalidate:
-                log.info('invalidating cache for repository %s', repo_name)
-                region_invalidate(_get_repo, None, repo_name)
-                self._mark_invalidated(invalidate)
-
-
         #======================================================================
         # CACHE FUNCTION
         #======================================================================
@@ -223,6 +210,18 @@ class ScmModel(BaseModel):
 
             repo.dbrepo = dbrepo
             return repo
+
+        pre_invalidate = True
+        if invalidation_list is not None:
+            pre_invalidate = repo_name in invalidation_list
+
+        if pre_invalidate:
+            invalidate = self._should_invalidate(repo_name)
+
+            if invalidate:
+                log.info('invalidating cache for repository %s', repo_name)
+                region_invalidate(_get_repo, None, repo_name)
+                self._mark_invalidated(invalidate)
 
         return _get_repo(repo_name)
 
