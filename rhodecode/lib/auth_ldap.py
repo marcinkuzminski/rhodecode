@@ -82,8 +82,7 @@ class AuthLdap(object):
                 server.protocol = ldap.VERSION3
 
             if self.LDAP_BIND_DN and self.LDAP_BIND_PASS:
-                login_dn = self.BASE_DN % {'user':uid}
-                server.simple_bind_s(login_dn, self.LDAP_BIND_PASS)
+                server.simple_bind_s(self.LDAP_BIND_DN, self.LDAP_BIND_PASS)
 
             dn = self.BASE_DN % {'user':uid}
             log.debug("Authenticating %r at %s", dn, self.LDAP_SERVER)
