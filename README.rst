@@ -1,10 +1,12 @@
 
-RhodeCode (RhodiumCode)
-=======================
+=================================================
+Welcome to RhodeCode (RhodiumCode) documentation!
+=================================================
 
-``RhodeCode`` (formerly hg-app) is Pylons based Mercurial repository 
-browser/management with build in push/pull server and full text search. It's 
-similar to github or bitbucket, but it's suppose to run as standalone hosted 
+``RhodeCode`` (formerly hg-app) is Pylons framework based Mercurial repository 
+browser/management with build in push/pull server and full text search.
+It works on http/https, has build in permission/authentication(+ldap) features 
+It's similar to github or bitbucket, but it's suppose to run as standalone hosted 
 application, it's open source and focuses more on restricted access to 
 repositories. It's powered by vcs_ library that we created to handle many 
 various version control systems.
@@ -30,8 +32,8 @@ http://bitbucket.org/marcinkuzminski/rhodecode
 Also a source codes can be obtained from demo RhodeCode instance
 http://hg.python-works.com/rhodecode/summary
 
-Instalation
------------
+Installation
+------------
 
  Please visit http://packages.python.org/RhodeCode/installation.html
 
@@ -66,18 +68,20 @@ Features
 - Based on pylons 1.0 / sqlalchemy 0.6 / sqlite
 
 
+.. include:: ./docs/screenshots.rst
+    
+    
 Incoming / Plans
 ----------------
 
 - code review (probably based on hg-review)
-- full git_ support, with push/pull server
+- full git_ support, with push/pull server (currently in beta tests)
 - project grouping
 - redmine integration
 - commit based build in wiki system
 - clone points and cloning from remote repositories into rhodecode 
   (git_ and mercurial_)
 - more statistics and graph (global annotation + some more statistics)
-- user customized activity dashboards
 - other cools stuff that i can figure out (or You can help me figure out)
 
 License
@@ -89,11 +93,15 @@ License
 Mailing group Q&A
 -----------------
 
-http://groups.google.com/group/rhodecode
+join the `Google group <http://groups.google.com/group/rhodecode>`_
 
+open an issue at `issue tracker <http://bitbucket.org/marcinkuzminski/rhodecode/issues>`_
 
-Documentation
--------------
+join #rhodecode on FreeNode (irc.freenode.net)
+or use http://webchat.freenode.net/?channels=rhodecode for web access to irc.
+
+Online documentation
+--------------------
 
  Online documentation for current version is available at
  http://packages.python.org/RhodeCode/.
@@ -101,13 +109,3 @@ Documentation
 
    make html
 
-.. _virtualenv: http://pypi.python.org/pypi/virtualenv
-.. _python: http://www.python.org/
-.. _django: http://www.djangoproject.com/
-.. _mercurial: http://mercurial.selenic.com/
-.. _subversion: http://subversion.tigris.org/
-.. _git: http://git-scm.com/
-.. _celery: http://celeryproject.org/
-.. _Sphinx: http://sphinx.pocoo.org/
-.. _GPL: http://www.gnu.org/licenses/gpl.html
-.. _vcs: http://pypi.python.org/pypi/vcs
