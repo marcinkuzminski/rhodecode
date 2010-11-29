@@ -25,10 +25,9 @@ journal controller for pylons
 
 from pylons import request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
-from rhodecode.lib.auth import LoginRequired
+from rhodecode.lib.auth import LoginRequired, NotAnonymous
 from rhodecode.lib.base import BaseController, render
 from rhodecode.lib.helpers import get_token
-from rhodecode.lib.utils import action_logger
 from rhodecode.model.db import UserLog, UserFollowing
 from rhodecode.model.scm import ScmModel
 from sqlalchemy import or_
@@ -41,6 +40,7 @@ class JournalController(BaseController):
 
 
     @LoginRequired()
+    @NotAnonymous()
     def __before__(self):
         super(JournalController, self).__before__()
 
@@ -49,12 +49,12 @@ class JournalController(BaseController):
 
         c.following = self.sa.query(UserFollowing)\
             .filter(UserFollowing.user_id == c.rhodecode_user.user_id).all()
-        
-        repo_ids = [x.follows_repository.repo_id for x in c.following 
+
+        repo_ids = [x.follows_repository.repo_id for x in c.following
                     if x.follows_repository is not None]
-        user_ids = [x.follows_user.user_id for x in c.following 
+        user_ids = [x.follows_user.user_id for x in c.following
                     if x.follows_user is not None]
-        
+
         c.journal = self.sa.query(UserLog)\
             .filter(or_(
                         UserLog.repository_id.in_(repo_ids),
@@ -64,7 +64,6 @@ class JournalController(BaseController):
             .limit(20)\
             .all()
         return render('/journal.html')
-
 
     def toggle_following(self):
 
