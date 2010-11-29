@@ -350,7 +350,7 @@ def __get_codes_stats(repo_name):
             ext = f.extension
             key = LANGUAGES_EXTENSIONS_MAP.get(ext, ext)
             key = key or ext
-            if ext in LANGUAGES_EXTENSIONS_MAP.keys():
+            if ext in LANGUAGES_EXTENSIONS_MAP.keys() and not f.is_binary:
                 if code_stats.has_key(key):
                     code_stats[key] += 1
                 else:
