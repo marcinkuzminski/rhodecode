@@ -22,7 +22,12 @@
 	                </div>
 		            <div class="account">
 		            %if c.rhodecode_user.username == 'default':
-                        ${h.link_to('anonymous',h.url('register'),title='%s %s'%(c.rhodecode_user.name,c.rhodecode_user.lastname))}
+                        %if h.HasPermissionAny('hg.admin', 'hg.register.auto_activate', 'hg.register.manual_activate')(): 
+                            ${h.link_to('anonymous',h.url('register'),title='%s %s'%(c.rhodecode_user.name,c.rhodecode_user.lastname))}
+                        %else:
+                            ${h.link_to('anonymous',h.url('#'),title='%s %s'%(c.rhodecode_user.name,c.rhodecode_user.lastname))}
+                        %endif		            
+                        
                     %else:                        		            
 		            	${h.link_to(c.rhodecode_user.username,h.url('admin_settings_my_account'),title='%s %s'%(c.rhodecode_user.name,c.rhodecode_user.lastname))}
 		            %endif
@@ -31,10 +36,12 @@
 	            <li>
 	               <a href="${h.url('home')}">${_('Home')}</a>
 	            </li>
+	            %if c.rhodecode_user.username != 'default':
                 <li>
                    <a href="${h.url('journal')}">${_('Journal')}</a> 
                    ##(${c.unread_journal})</a>
                 </li>
+                %endif
                 %if c.rhodecode_user.username == 'default':
                     <li class="last highlight">${h.link_to(u'Login',h.url('login_home'))}</li>
                 %else:
@@ -257,7 +264,7 @@
                     <span>${_('Home')}</span>                 
                     </a>        
                 </li>
-                
+                %if c.rhodecode_user.username != 'default':
                 <li>
                     <a title="${_('Journal')}"  href="${h.url('journal')}">
                     <span class="icon">
@@ -266,7 +273,7 @@
                     <span>${_('Journal')}</span>                 
                     </a>        
                 </li>
-                                
+                %endif          
                 <li>
                     <a title="${_('Search')}"  href="${h.url('search')}">
                     <span class="icon">
