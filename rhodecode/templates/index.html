@@ -30,13 +30,15 @@
 	        <h5>${_('Dashboard')}
 	        <input class="top-right-rounded-corner top-left-rounded-corner bottom-left-rounded-corner bottom-right-rounded-corner" id="q_filter" size="15" type="text" name="filter" value="${_('quick filter...')}"/>
 	        </h5>
-	        %if h.HasPermissionAny('hg.admin','hg.create.repository')():
-	        <ul class="links">
-	          <li>
-	            <span>${h.link_to(_('ADD NEW REPOSITORY'),h.url('admin_settings_create_repository'))}</span>
-	          </li>          
-	        </ul>  	        
-	        %endif
+	        %if c.rhodecode_user.username != 'default':
+		        %if h.HasPermissionAny('hg.admin','hg.create.repository')():
+		        <ul class="links">
+		          <li>
+		            <span>${h.link_to(_('ADD NEW REPOSITORY'),h.url('admin_settings_create_repository'))}</span>
+		          </li>          
+		        </ul>  	        
+		        %endif
+		    %endif
 	    </div>
 	    <!-- end box / title -->
         <div class="table">
