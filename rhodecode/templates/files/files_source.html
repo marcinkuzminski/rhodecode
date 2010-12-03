@@ -1,8 +1,8 @@
 <dl>
-	<dt>${_('Last revision')}</dt>
+	<dt>${_('Revision')}</dt>
 	<dd>
 		${h.link_to("r%s:%s" % (c.files_list.last_changeset.revision,h.short_id(c.files_list.last_changeset.raw_id)),
-						h.url('files_home',repo_name=c.repo_name,revision=c.files_list.last_changeset.raw_id,f_path=c.f_path))} 
+						h.url('changeset_home',repo_name=c.repo_name,revision=c.files_list.last_changeset.raw_id))} 
 	</dd>
 	<dt>${_('Size')}</dt>
 	<dd>${h.format_byte_size(c.files_list.size,binary=True)}</dd>
