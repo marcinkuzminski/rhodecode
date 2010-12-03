@@ -92,8 +92,8 @@
 		            </td>
 		            ##LAST CHANGE
 		            <td>
-		              <span class="tooltip" tooltip_title="${h.age(repo['last_change'])}">
-		              ${repo['last_change']}</span>
+		              <span class="tooltip" tooltip_title="${repo['last_change']}">
+		              ${h.age(repo['last_change'])}</span>
 		            </td>
 		            <td>
 		            	%if repo['rev']>=0:

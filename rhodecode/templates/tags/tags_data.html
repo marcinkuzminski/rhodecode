@@ -9,7 +9,9 @@
     	</tr>
 		%for cnt,tag in enumerate(c.repo_tags.items()):
 		<tr class="parity${cnt%2}">		
-	        <td>${tag[1].date} - ${h.age(tag[1].date)}</td>
+	        <td><span class="tooltip" tooltip_title="${h.age(tag[1].date)}">
+                      ${tag[1].date}</span>
+            </td>
             <td>
                 <span class="logtags">
                     <span class="tagtag">${h.link_to(tag[0],
