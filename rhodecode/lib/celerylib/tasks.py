@@ -104,11 +104,9 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
     last_rev = last_rev + 1 if last_rev > 0 else last_rev
     for rev in repo.revisions[last_rev:last_rev + parse_limit]:
         last_cs = cs = repo.get_changeset(rev)
-        k = '%s-%s-%s' % (cs.date.timetuple()[0], cs.date.timetuple()[1],
-                          cs.date.timetuple()[2])
-        timetupple = [int(x) for x in k.split('-')]
-        timetupple.extend([0 for _ in xrange(6)])
-        k = lmktime(timetupple)
+        k = lmktime([cs.date.timetuple()[0], cs.date.timetuple()[1],
+                      cs.date.timetuple()[2], 0, 0, 0, 0, 0, 0])
+
         if commits_by_day_author_aggregate.has_key(author_key_cleaner(cs.author)):
             try:
                 l = [timegetter(x) for x in commits_by_day_author_aggregate\
@@ -158,10 +156,7 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
         else:
             commits_by_day_aggregate[k] = 1
 
-    overview_data = []
-    for k, v in commits_by_day_aggregate.items():
-        overview_data.append([k, v])
-    overview_data = sorted(overview_data, key=itemgetter(0))
+    overview_data = sorted(commits_by_day_aggregate.items(), key=itemgetter(0))
     if not commits_by_day_author_aggregate:
         commits_by_day_author_aggregate[author_key_cleaner(repo.contact)] = {
             "label":author_key_cleaner(repo.contact),
