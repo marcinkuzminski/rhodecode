@@ -101,7 +101,8 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
     log.debug('starting parsing %s', parse_limit)
     lmktime = mktime
 
-    for cnt, rev in enumerate(repo.revisions[last_rev:]):
+    last_rev = last_rev + 1 if last_rev > 0 else last_rev
+    for rev in repo.revisions[last_rev:last_rev + parse_limit]:
         last_cs = cs = repo.get_changeset(rev)
         k = '%s-%s-%s' % (cs.date.timetuple()[0], cs.date.timetuple()[1],
                           cs.date.timetuple()[2])
@@ -157,9 +158,6 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
         else:
             commits_by_day_aggregate[k] = 1
 
-        if cnt >= parse_limit:
-            #don't fetch to much data since we can freeze application
-            break
     overview_data = []
     for k, v in commits_by_day_aggregate.items():
         overview_data.append([k, v])
