@@ -113,6 +113,7 @@ class SummaryController(BaseController):
 
 
         if stats and stats.languages:
+            c.no_data = False
             lang_stats = json.loads(stats.languages)
             c.commit_data = stats.commit_activity
             c.overview_data = stats.commit_activity_combined
@@ -123,8 +124,9 @@ class SummaryController(BaseController):
                                     )
         else:
             c.commit_data = json.dumps({})
-            c.overview_data = json.dumps([[ts_min_y, 0], [ts_max_y, 0] ])
+            c.overview_data = json.dumps([[ts_min_y, 0], [ts_max_y, 10] ])
             c.trending_languages = json.dumps({})
+            c.no_data = True
 
         return render('summary/summary.html')
 
