@@ -1564,6 +1564,7 @@ display:block;
 float:right;
 text-align:center;
 min-width:15px;
+cursor: help;
 }
 
 .right .changes .added {
