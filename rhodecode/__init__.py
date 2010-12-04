@@ -1,8 +1,16 @@
-#!/usr/bin/env python
-# encoding: utf-8
-# RhodeCode, a web based repository management based on pylons
-# Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
-# 
+# -*- coding: utf-8 -*-
+"""
+    package.rhodecode.__init__
+    ~~~~~~~~~~~~~~
+
+    RhodeCode, a web based repository management based on pylons
+    versioning implementation: http://semver.org/
+
+    :created_on: Apr 9, 2010
+    :author: marcink
+    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
+    :license: GPLv3, see COPYING for more details.
+"""
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
@@ -17,16 +25,16 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
-"""
-Created on April 9, 2010
-RhodeCode, a web based repository management based on pylons
-versioning implementation: http://semver.org/
-@author: marcink
-"""
+
 
 VERSION = (1, 1, 0, 'beta')
-
 __version__ = '.'.join((str(each) for each in VERSION[:4]))
+
+
+from rhodecode.lib.utils import get_current_revision
+_rev = get_current_revision()
+if 'beta' in VERSION and _rev:
+    __version__ += ' [rev:%s]' % _rev[0]
 
 def get_version():
     """
