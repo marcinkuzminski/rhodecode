@@ -13,3 +13,12 @@ echo 'some' >> $repo/setup.py && hg ci -m 'ci3' && \
 echo 'some' >> $repo/setup.py && hg ci -m 'ci4' && \
 hg push
 
+echo 'new file' >> $repo/new_file.py
+hg add $repo/new_file.py
+
+for i in {1..15}
+do
+   echo "line $i" >> $repo/new_file.py && hg ci -m "autocommit $i"
+done
+
+hg push
