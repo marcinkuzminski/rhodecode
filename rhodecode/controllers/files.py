@@ -1,8 +1,15 @@
-#!/usr/bin/env python
-# encoding: utf-8
-# files controller for pylons
-# Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
+# -*- coding: utf-8 -*-
+"""
+    rhodecode.controllers.files
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+    Files controller for RhodeCode
+    
+    :created_on: Apr 21, 2010
+    :author: marcink
+    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
+    :license: GPLv3, see COPYING for more details.
+"""
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
@@ -17,25 +24,24 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
-"""
-Created on April 21, 2010
-files controller for pylons
-@author: marcink
-"""
+import tempfile
+import logging
+import rhodecode.lib.helpers as h
+
 from mercurial import archival
+
 from pylons import request, response, session, tmpl_context as c, url
 from pylons.i18n.translation import _
 from pylons.controllers.util import redirect
+
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseController, render
 from rhodecode.lib.utils import EmptyChangeset
 from rhodecode.model.scm import ScmModel
+
 from vcs.exceptions import RepositoryError, ChangesetError
 from vcs.nodes import FileNode
 from vcs.utils import diffs as differ
-import logging
-import rhodecode.lib.helpers as h
-import tempfile
 
 log = logging.getLogger(__name__)
 
@@ -46,7 +52,6 @@ class FilesController(BaseController):
                                    'repository.admin')
     def __before__(self):
         super(FilesController, self).__before__()
-        c.file_size_limit = 250 * 1024 #limit of file size to display
 
     def index(self, repo_name, revision, f_path):
         hg_model = ScmModel()
@@ -197,13 +202,13 @@ class FilesController(BaseController):
             return diff.raw_diff()
 
         elif c.action == 'diff':
-            if node1.size > c.file_size_limit or node2.size > c.file_size_limit:
+            if node1.size > self.cut_off_limit or node2.size > self.cut_off_limit:
                 c.cur_diff = _('Diff is to big to display')
             else:
                 c.cur_diff = diff.as_html()
         else:
             #default option
-            if node1.size > c.file_size_limit or node2.size > c.file_size_limit:
+            if node1.size > self.cut_off_limit or node2.size > self.cut_off_limit:
                 c.cur_diff = _('Diff is to big to display')
             else:
                 c.cur_diff = diff.as_html()

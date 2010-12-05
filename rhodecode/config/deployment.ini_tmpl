@@ -46,6 +46,7 @@ lang=en
 cache_dir = %(here)s/data
 index_dir = %(here)s/data/index
 app_instance_uuid = ${app_instance_uuid}
+cut_off_limit = 256000
 
 ####################################
 ###        CELERY CONFIG        ####

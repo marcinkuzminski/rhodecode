@@ -20,7 +20,7 @@ class BaseController(WSGIController):
         c.repo_name = get_repo_slug(request)
         c.cached_repo_list = ScmModel().get_repos()
         c.backends = BACKENDS.keys()
-
+        self.cut_off_limit = int(config['cut_off_limit'])
         self.sa = meta.Session()
         scm_model = ScmModel(self.sa)
         #c.unread_journal = scm_model.get_unread_journal()
