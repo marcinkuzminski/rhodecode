@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-    package.rhodecode.model.repo
-    ~~~~~~~~~~~~~~
+    rhodecode.model.repo
+    ~~~~~~~~~~~~~~~~~~~~
 
     Repository model for rhodecode
     

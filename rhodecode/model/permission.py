@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-    package.rhodecode.model.permission
-    ~~~~~~~~~~~~~~
+    rhodecode.model.permission
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     permissions model for RhodeCode
+    
     :created_on: Aug 20, 2010
     :author: marcink
     :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
@@ -37,8 +38,15 @@ log = logging.getLogger(__name__)
 
 
 class PermissionModel(BaseModel):
+    """Permissions model for RhodeCode
+    """
 
     def get_permission(self, permission_id, cache=False):
+        """Get's permissions by id
+        
+        :param permission_id: id of permission to get from database
+        :param cache: use Cache for this query
+        """
         perm = self.sa.query(Permission)
         if cache:
             perm = perm.options(FromCache("sql_cache_short",
@@ -46,6 +54,11 @@ class PermissionModel(BaseModel):
         return perm.get(permission_id)
 
     def get_permission_by_name(self, name, cache=False):
+        """Get's permissions by given name
+        
+        :param name: name to fetch
+        :param cache: Use cache for this query
+        """
         perm = self.sa.query(Permission)\
             .filter(Permission.permission_name == name)
         if cache:

@@ -13,7 +13,30 @@ Documentation
    installation
    setup
    upgrade
+   
+**Usage**
+
+.. toctree::
+   :maxdepth: 1
+
+   enable_git
+   statistics
+   
+**Develop**
+
+.. toctree::
+   :maxdepth: 1
+   
+   contributing
    changelog
+
+**API**
+
+.. toctree::
+   :maxdepth: 2
+
+   api/index
+   
 
 Other topics
 ------------

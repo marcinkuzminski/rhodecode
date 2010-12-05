@@ -18,6 +18,7 @@ news
 - anonymous access, authentication via ldap
 - performance upgrade for cached repos list - each repository has it's own 
   cache that's invalidated when needed.
+- performance upgrades on repositories with large amount of commits (20K+)
 - main page quick filter for filtering repositories
 - user dashboards with ability to follow chosen repositories actions
 - sends email to admin on new user registration

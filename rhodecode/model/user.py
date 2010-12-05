@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """
     package.rhodecode.model.user
-    ~~~~~~~~~~~~~~
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     users model for RhodeCode
+    
     :created_on: Apr 9, 2010
     :author: marcink
     :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    

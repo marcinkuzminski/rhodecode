@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-    package.rhodecode.model.scm
-    ~~~~~~~~~~~~~~
+    rhodecode.model.scm
+    ~~~~~~~~~~~~~~~~~~~
 
-    scm model for RhodeCode 
+    Scm model for RhodeCode
+
     :created_on: Apr 9, 2010
     :author: marcink
     :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
@@ -23,7 +24,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
-
 import os
 import time
 import traceback
@@ -64,27 +64,26 @@ class RepoTemp(object):
         self.repo_id = repo_id
 
 class ScmModel(BaseModel):
-    """
-    Mercurial Model
+    """Generic Scm Model
     """
 
     @LazyProperty
     def repos_path(self):
+        """Get's the repositories root path from database
         """
-        Get's the repositories root path from database
-        """
+
         q = self.sa.query(RhodeCodeUi).filter(RhodeCodeUi.ui_key == '/').one()
 
         return q.ui_value
 
     def repo_scan(self, repos_path, baseui):
-        """
-        Listing of repositories in given path. This path should not be a 
+        """Listing of repositories in given path. This path should not be a 
         repository itself. Return a dictionary of repository objects
         
         :param repos_path: path to directory containing repositories
         :param baseui
         """
+
         log.info('scanning for repositories in %s', repos_path)
 
         if not isinstance(baseui, ui.ui):
@@ -111,12 +110,12 @@ class ScmModel(BaseModel):
         return repos_list
 
     def get_repos(self, all_repos=None):
-        """
-        Get all repos from db and for each repo create it's backend instance.
+        """Get all repos from db and for each repo create it's backend instance.
         and fill that backed with information from database
         
         :param all_repos: give specific repositories list, good for filtering
         """
+
         if all_repos is None:
             all_repos = self.sa.query(Repository)\
                 .order_by(Repository.repo_name).all()
@@ -156,8 +155,7 @@ class ScmModel(BaseModel):
         return self.get(repo_name)
 
     def get(self, repo_name, invalidation_list=None):
-        """
-        Get's repository from given name, creates BackendInstance and
+        """Get's repository from given name, creates BackendInstance and
         propagates it's data from database with all additional information
         
         :param repo_name:
@@ -228,12 +226,12 @@ class ScmModel(BaseModel):
 
 
     def mark_for_invalidation(self, repo_name):
-        """
-        Puts cache invalidation task into db for 
+        """Puts cache invalidation task into db for 
         further global cache invalidation
         
         :param repo_name: this repo that should invalidation take place
         """
+
         log.debug('marking %s for invalidation', repo_name)
         cache = self.sa.query(CacheInvalidation)\
             .filter(CacheInvalidation.cache_key == repo_name).scalar()
@@ -347,8 +345,8 @@ class ScmModel(BaseModel):
 
 
     def _should_invalidate(self, repo_name):
-        """
-        Looks up database for invalidation signals for this repo_name
+        """Looks up database for invalidation signals for this repo_name
+        
         :param repo_name:
         """
 
@@ -362,10 +360,11 @@ class ScmModel(BaseModel):
         return ret
 
     def _mark_invalidated(self, cache_key):
+        """ Marks all occurences of cache to invaldation as already invalidated
+        
+        :param cache_key:
         """
-        Marks all occurences of cache to invaldation as already invalidated
-        :param repo_name:
-        """
+
         if cache_key:
             log.debug('marking %s as already invalidated', cache_key)
         try:
