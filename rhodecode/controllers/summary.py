@@ -24,20 +24,28 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
 
-from pylons import tmpl_context as c, request, url
+import calendar
+import logging
+from time import mktime
+from datetime import datetime, timedelta
+
 from vcs.exceptions import ChangesetError
+
+from pylons import tmpl_context as c, request, url
+from pylons.i18n.translation import _
+
+from rhodecode.model.scm import ScmModel
+from rhodecode.model.db import Statistics
+
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseController, render
 from rhodecode.lib.utils import OrderedDict, EmptyChangeset
-from rhodecode.model.scm import ScmModel
-from rhodecode.model.db import Statistics
-from webhelpers.paginate import Page
+
 from rhodecode.lib.celerylib import run_task
 from rhodecode.lib.celerylib.tasks import get_commits_stats
-from datetime import datetime, timedelta
-from time import mktime
-import calendar
-import logging
+
+from webhelpers.paginate import Page
+
 try:
     import json
 except ImportError:
@@ -102,8 +110,11 @@ class SummaryController(BaseController):
                             d, 0, 0, 0, 0, 0, 0,))
 
         ts_max_y = mktime((y, m, d, 0, 0, 0, 0, 0, 0,))
-
-        run_task(get_commits_stats, c.repo_info.name, ts_min_y, ts_max_y)
+        if c.repo_info.dbrepo.enable_statistics:
+            c.no_data_msg = _('No data loaded yet')
+            run_task(get_commits_stats, c.repo_info.name, ts_min_y, ts_max_y)
+        else:
+            c.no_data_msg = _('Statistics are disabled for this repository')
         c.ts_min = ts_min_m
         c.ts_max = ts_max_y
 

@@ -193,7 +193,7 @@
 			  		if(no_data){
 			  			var tr = document.createElement('tr');
 			  			var td1 = document.createElement('td');
-			  			td1.innerHTML = "${_('No data loaded yet')}";
+			  			td1.innerHTML = "${c.no_data_msg}";
 			  			tr.appendChild(td1);
 			  			tbl.appendChild(tr);
 					}
@@ -250,7 +250,7 @@
     <div class="table">
         
          %if c.no_data:
-           <div style="padding:0 10px 10px 15px;font-size: 1.2em;">${_('No data loaded yet')}</div>
+           <div style="padding:0 10px 10px 15px;font-size: 1.2em;">${c.no_data_msg}</div>
         %endif:  
         <div id="commit_history" style="width:460px;height:300px;float:left"></div>
         <div style="clear: both;height: 10px"></div>
