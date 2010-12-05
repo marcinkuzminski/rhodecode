@@ -431,10 +431,19 @@ def action_parser(user_log):
                     repo_name=user_log.repository.repo_name,
                     revision=rev)) for rev in revs[:revs_limit] ])
             if len(revs) > revs_limit:
-                html_tmpl = '<span title="%s"> %s </span>'
-                cs_links += html_tmpl % (', '.join(r for r in revs[revs_limit:]),
-                                         _('and %s more revisions') \
-                                            % (len(revs) - revs_limit))
+                uniq_id = revs[0]
+                html_tmpl = ('<span> %s '
+                '<a class="show_more" id="_%s" href="#">%s</a> '
+                '%s</span>')
+                cs_links += html_tmpl % (_('and'), uniq_id, _('%s more') \
+                                            % (len(revs) - revs_limit),
+                                            _('revisions'))
+
+                html_tmpl = '<span id="%s" style="display:none"> %s </span>'
+                cs_links += html_tmpl % (uniq_id, ', '.join([link(rev,
+                    url('changeset_home',
+                    repo_name=user_log.repository.repo_name,
+                    revision=rev)) for rev in revs[:revs_limit] ]))
 
             return cs_links
         return ''
@@ -465,7 +474,32 @@ def action_parser(user_log):
             }
 
     action_str = map.get(action, action)
-    return literal(action_str.replace('[', '<span class="journal_highlight">').replace(']', '</span>'))
+    return literal(action_str.replace('[', '<span class="journal_highlight">')\
+                   .replace(']', '</span>'))
+
+def action_parser_icon(user_log):
+    action = user_log.action
+    action_params = None
+    x = action.split(':')
+
+    if len(x) > 1:
+        action, action_params = x
+
+    tmpl = """<img src="/images/icons/%s">"""
+    map = {'user_deleted_repo':'database_delete.png',
+           'user_created_repo':'database_add.png',
+           'user_forked_repo':'arrow_divide.png',
+           'user_updated_repo':'database_edit.png',
+           'admin_deleted_repo':'database_delete.png',
+           'admin_created_repo':'database_ddd.png',
+           'admin_forked_repo':'arrow_divide.png',
+           'admin_updated_repo':'database_edit.png',
+           'push':'script_add.png',
+           'pull':'down_16.png',
+           'started_following_repo':'heart_add.png',
+           'stopped_following_repo':'heart_delete.png',
+            }
+    return literal(tmpl % map.get(action, action))
 
 
 #==============================================================================
