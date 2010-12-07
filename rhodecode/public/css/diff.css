@@ -62,13 +62,18 @@ table.code-difftable td {
 
 .code-difftable .lineno{
 	background:none repeat scroll 0 0 #EEEEEE !important;
-	border-right:1px solid #DDDDDD;
 	padding-left:2px;
 	padding-right:2px;
 	text-align:right;
 	width:30px;
 	-moz-user-select:none;
 	-webkit-user-select: none;
+}
+.code-difftable .new {
+	border-right: 1px solid #CCC !important;
+}
+.code-difftable .old {
+    border-right: 1px solid #CCC !important;
 }
 .code-difftable .lineno pre{
 	color:#747474 !important;
@@ -78,7 +83,8 @@ table.code-difftable td {
 	width:20px;
 }
 .code-difftable .lineno a{
-	color:#0000CC !important;
+font-weight: 700;
+cursor: pointer;
 }
 .code-difftable .code td{
 	margin:0;
