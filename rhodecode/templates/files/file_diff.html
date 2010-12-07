@@ -24,8 +24,8 @@
     <div class="table">
 		<div id="body" class="diffblock">
 			<div class="code-header">
-				<div>
-				<span>${h.link_to(c.f_path,h.url('files_home',repo_name=c.repo_name,
+                <div class="changeset_header">
+                <span class="changeset_file">${h.link_to(c.f_path,h.url('files_home',repo_name=c.repo_name,
 				revision=c.changeset_2.raw_id,f_path=c.f_path))}</span>
 				 &raquo; <span>${h.link_to(_('diff'),
 				h.url.current(diff2=c.changeset_2.raw_id,diff1=c.changeset_1.raw_id,diff='diff'))}</span>

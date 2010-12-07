@@ -1658,6 +1658,17 @@ height:16px;
 padding-left:20px;
 text-align:left;
 }
+.diffblock .changeset_file{
+background:url("../images/icons/file.png") no-repeat scroll 3px;
+height:16px;
+padding-left:22px;
+text-align:left;
+font-size: 14px;
+}
+
+.diffblock .changeset_header{
+margin-left: 6px !important;
+}
 
 table.code-browser .browser-dir {
 background:url("../images/icons/folder_16.png") no-repeat scroll 3px;
