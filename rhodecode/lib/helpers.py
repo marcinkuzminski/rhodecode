@@ -485,7 +485,7 @@ def action_parser_icon(user_log):
     if len(x) > 1:
         action, action_params = x
 
-    tmpl = """<img src="/images/icons/%s">"""
+    tmpl = """<img src="/images/icons/%s" alt="%s"/>"""
     map = {'user_deleted_repo':'database_delete.png',
            'user_created_repo':'database_add.png',
            'user_forked_repo':'arrow_divide.png',
@@ -499,7 +499,7 @@ def action_parser_icon(user_log):
            'started_following_repo':'heart_add.png',
            'stopped_following_repo':'heart_delete.png',
             }
-    return literal(tmpl % map.get(action, action))
+    return literal(tmpl % (map.get(action, action), action))
 
 
 #==============================================================================
