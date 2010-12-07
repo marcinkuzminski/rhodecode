@@ -63,7 +63,7 @@
 					<div class="commit">"${c.file.message}"</div>
 				</div>
 				<div class="code-body">
-					% if c.file.size < c.file_size_limit:
+					% if c.file.size < c.cut_off_limit:
 						${h.pygmentize_annotation(c.file,linenos=True,anchorlinenos=True,lineanchors='S',cssclass="code-highlight")}
 					%else:
 						${_('File is to big to display')} ${h.link_to(_('show as raw'),

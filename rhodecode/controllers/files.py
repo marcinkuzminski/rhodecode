@@ -52,6 +52,7 @@ class FilesController(BaseController):
                                    'repository.admin')
     def __before__(self):
         super(FilesController, self).__before__()
+        c.cut_off_limit = self.cut_off_limit
 
     def index(self, repo_name, revision, f_path):
         hg_model = ScmModel()
