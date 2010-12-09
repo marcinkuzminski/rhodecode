@@ -14,7 +14,7 @@
 %for cnt,cs in enumerate(c.repo_changesets):
 	<tr class="parity${cnt%2}">
         <td>
-            ${h.link_to(h.truncate(cs.message,60),
+            ${h.link_to(h.truncate(cs.message,50),
             h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id),
             title=cs.message)}
         </td>
