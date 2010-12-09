@@ -1,8 +1,15 @@
-#!/usr/bin/env python
-# encoding: utf-8
-# repos controller for pylons
-# Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
-#
+# -*- coding: utf-8 -*-
+"""
+    rhodecode.controllers.admin.repos
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    
+    Admin controller for RhodeCode
+    
+    :created_on: Apr 7, 2010
+    :author: marcink
+    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
+    :license: GPLv3, see COPYING for more details.
+"""
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
@@ -17,17 +24,18 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
-"""
-Created on April 7, 2010
-admin controller for pylons
-@author: marcink
-"""
-from formencode import htmlfill
+
+import logging
+import traceback
+import formencode
 from operator import itemgetter
+from formencode import htmlfill
+
 from paste.httpexceptions import HTTPInternalServerError
 from pylons import request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
 from pylons.i18n.translation import _
+
 from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator, \
     HasPermissionAnyDecorator
@@ -37,9 +45,7 @@ from rhodecode.model.db import User
 from rhodecode.model.forms import RepoForm
 from rhodecode.model.scm import ScmModel
 from rhodecode.model.repo import RepoModel
-import formencode
-import logging
-import traceback
+
 
 log = logging.getLogger(__name__)
 
@@ -283,6 +289,7 @@ class ReposController(BaseController):
                       category='error')
 
             return redirect(url('repos'))
+
         defaults = c.repo_info.__dict__
         if c.repo_info.user:
             defaults.update({'user':c.repo_info.user.username})
