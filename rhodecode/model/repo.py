@@ -75,38 +75,36 @@ class RepoModel(BaseModel):
 
     def update(self, repo_name, form_data):
         try:
+            cur_repo = self.get_by_repo_name(repo_name, cache=False)
+            user_model = UserModel(self.sa)
 
             #update permissions
             for username, perm in form_data['perms_updates']:
                 r2p = self.sa.query(RepoToPerm)\
-                        .filter(RepoToPerm.user == UserModel(self.sa)\
-                                .get_by_username(username, cache=False))\
-                        .filter(RepoToPerm.repository == \
-                                self.get_by_repo_name(repo_name))\
+                        .filter(RepoToPerm.user == user_model.get_by_username(username))\
+                        .filter(RepoToPerm.repository == cur_repo)\
                         .one()
 
-                r2p.permission_id = self.sa.query(Permission).filter(
-                                                Permission.permission_name ==
-                                                perm).one().permission_id
+                r2p.permission = self.sa.query(Permission)\
+                                    .filter(Permission.permission_name == perm)\
+                                    .scalar()
                 self.sa.add(r2p)
 
             #set new permissions
             for username, perm in form_data['perms_new']:
                 r2p = RepoToPerm()
-                r2p.repository = self.get_by_repo_name(repo_name)
-                r2p.user = UserModel(self.sa).get_by_username(username, cache=False)
+                r2p.repository = cur_repo
+                r2p.user = user_model.get_by_username(username, cache=False)
 
-                r2p.permission_id = self.sa.query(Permission).filter(
-                                        Permission.permission_name == perm)\
-                                        .one().permission_id
+                r2p.permission = self.sa.query(Permission)\
+                                    .filter(Permission.permission_name == perm)\
+                                    .scalar()
                 self.sa.add(r2p)
 
             #update current repo
-            cur_repo = self.get_by_repo_name(repo_name, cache=False)
-
             for k, v in form_data.items():
                 if k == 'user':
-                    cur_repo.user_id = v
+                    cur_repo.user = user_model.get(v)
                 else:
                     setattr(cur_repo, k, v)
 
