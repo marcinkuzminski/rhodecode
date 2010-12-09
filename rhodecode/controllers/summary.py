@@ -4,6 +4,7 @@
     ~~~~~~~~~~~~~~
 
     Summary controller for Rhodecode
+    
     :created_on: Apr 18, 2010
     :author: marcink
     :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
@@ -114,7 +115,7 @@ class SummaryController(BaseController):
             c.no_data_msg = _('No data loaded yet')
             run_task(get_commits_stats, c.repo_info.name, ts_min_y, ts_max_y)
         else:
-            c.no_data_msg = _('Statistics are disabled for this repository')
+            c.no_data_msg = _('Statistics update are disabled for this repository')
         c.ts_min = ts_min_m
         c.ts_max = ts_max_y
 
@@ -124,7 +125,7 @@ class SummaryController(BaseController):
 
 
         if stats and stats.languages:
-            c.no_data = False
+            c.no_data = False is c.repo_info.dbrepo.enable_statistics
             lang_stats = json.loads(stats.languages)
             c.commit_data = stats.commit_activity
             c.overview_data = stats.commit_activity_combined

@@ -619,7 +619,7 @@
 </div>
 <div class="box">    
     <div class="title">
-        <div class="breadcrumbs">${h.link_to(_('Last ten tags'),h.url('tags_home',repo_name=c.repo_name))}</div>
+        <div class="breadcrumbs">${h.link_to(_('Tags'),h.url('tags_home',repo_name=c.repo_name))}</div>
     </div>    
     <div class="table">
         <%include file='../tags/tags_data.html'/>
@@ -630,7 +630,7 @@
 </div>
 <div class="box">
     <div class="title">
-        <div class="breadcrumbs">${h.link_to(_('Last ten branches'),h.url('branches_home',repo_name=c.repo_name))}</div>
+        <div class="breadcrumbs">${h.link_to(_('Branches'),h.url('branches_home',repo_name=c.repo_name))}</div>
     </div>    
     <div class="table">
         <%include file='../branches/branches_data.html'/>
