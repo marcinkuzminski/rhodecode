@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-    package.rhodecode.__init__
-    ~~~~~~~~~~~~~~
+    rhodecode.__init__
+    ~~~~~~~~~~~~~~~~~~
 
     RhodeCode, a web based repository management based on pylons
     versioning implementation: http://semver.org/
@@ -30,16 +30,15 @@
 VERSION = (1, 1, 0, 'beta')
 __version__ = '.'.join((str(each) for each in VERSION[:4]))
 
-
 from rhodecode.lib.utils import get_current_revision
 _rev = get_current_revision()
-if 'beta' in VERSION and _rev:
+
+if len(VERSION) > 3 and _rev:
     __version__ += ' [rev:%s]' % _rev[0]
 
 def get_version():
-    """
-    Returns shorter version (digit parts only) as string.
-    """
+    """Returns shorter version (digit parts only) as string."""
+
     return '.'.join((str(each) for each in VERSION[:3]))
 
 BACKENDS = {
