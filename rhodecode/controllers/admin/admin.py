@@ -3,7 +3,8 @@
     package.rhodecode.controllers.admin.admin
     ~~~~~~~~~~~~~~
 
-    Controller for Admin pannel of Rhodecode
+    Controller for Admin panel of Rhodecode
+    
     :created_on: Apr 7, 2010
     :author: marcink
     :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
