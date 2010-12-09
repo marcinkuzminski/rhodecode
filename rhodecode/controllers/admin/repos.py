@@ -141,6 +141,20 @@ class ReposController(BaseController):
 
         except formencode.Invalid, errors:
             c.repo_info = repo_model.get_by_repo_name(repo_name)
+            if c.repo_info.stats:
+                last_rev = c.repo_info.stats.stat_on_revision
+            else:
+                last_rev = 0
+            c.stats_revision = last_rev
+            r = ScmModel().get(repo_name)
+            c.repo_last_rev = r.revisions[-1] if r.revisions else 0
+
+            if last_rev == 0:
+                c.stats_percentage = 0
+            else:
+                c.stats_percentage = '%.2f' % ((float((last_rev)) /
+                                                c.repo_last_rev) * 100)
+
             c.users_array = repo_model.get_users_js()
             errors.value.update({'user':c.repo_info.user.username})
             return htmlfill.render(
@@ -245,9 +259,9 @@ class ReposController(BaseController):
         """GET /repos/repo_name/edit: Form to edit an existing item"""
         # url('edit_repo', repo_name=ID)
         repo_model = RepoModel()
-        c.repo_info = repo = repo_model.get_by_repo_name(repo_name)
-        if repo.stats:
-            last_rev = repo.stats.stat_on_revision
+        c.repo_info = repo_model.get_by_repo_name(repo_name)
+        if c.repo_info.stats:
+            last_rev = c.repo_info.stats.stat_on_revision
         else:
             last_rev = 0
         c.stats_revision = last_rev
@@ -257,10 +271,11 @@ class ReposController(BaseController):
         if last_rev == 0:
             c.stats_percentage = 0
         else:
-            c.stats_percentage = '%.2f' % ((float((last_rev)) / c.repo_last_rev) * 100)
+            c.stats_percentage = '%.2f' % ((float((last_rev)) /
+                                            c.repo_last_rev) * 100)
 
 
-        if not repo:
+        if not c.repo_info:
             h.flash(_('%s repository is not mapped to db perhaps'
                       ' it was created or renamed from the filesystem'
                       ' please run the application again'
