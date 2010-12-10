@@ -158,7 +158,7 @@ class UsersController(BaseController):
             h.flash(_("You can't edit this user"), category='warning')
             return redirect(url('users'))
 
-        defaults = c.user.__dict__
+        defaults = c.user.__dict__.copy()
         return htmlfill.render(
             render('admin/users/user_edit.html'),
             defaults=defaults,
