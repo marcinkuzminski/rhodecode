@@ -291,7 +291,7 @@ class ReposController(BaseController):
             c.stats_percentage = '%.2f' % ((float((last_rev)) /
                                             c.repo_last_rev) * 100)
 
-        defaults = c.repo_info.__dict__.copy()
+        defaults = c.repo_info.get_dict()
         if c.repo_info.user:
             defaults.update({'user':c.repo_info.user.username})
         else:

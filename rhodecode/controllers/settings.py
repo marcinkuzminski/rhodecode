@@ -56,7 +56,7 @@ class SettingsController(BaseController):
                       category='error')
 
             return redirect(url('home'))
-        defaults = c.repo_info.__dict__.copy()
+        defaults = c.repo_info.get_dict()
         defaults.update({'user':c.repo_info.user.username})
         c.users_array = repo_model.get_users_js()
 

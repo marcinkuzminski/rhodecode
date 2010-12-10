@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-    package.rhodecode.model.db
-    ~~~~~~~~~~~~~~
+    rhodecode.model.db
+    ~~~~~~~~~~~~~~~~~~
     
     Database Models for RhodeCode    
     :created_on: Apr 08, 2010
@@ -28,14 +28,46 @@ import datetime
 
 from sqlalchemy import *
 from sqlalchemy.exc import DatabaseError
-from sqlalchemy.orm import relation, backref
+from sqlalchemy.orm import relation, backref, class_mapper
 from sqlalchemy.orm.session import Session
 
 from rhodecode.model.meta import Base
 
 log = logging.getLogger(__name__)
 
-class RhodeCodeSettings(Base):
+class BaseModel(object):
+
+    @classmethod
+    def _get_keys(cls):
+        """return column names for this model """
+        return class_mapper(cls).c.keys()
+
+    def get_dict(self):
+        """return dict with keys and values corresponding 
+        to this model data """
+
+        d = {}
+        for k in self._get_keys():
+            d[k] = getattr(self, k)
+        return d
+
+    def get_appstruct(self):
+        """return list with keys and values tupples corresponding 
+        to this model data """
+
+        l = []
+        for k in self._get_keys():
+            l.append((k, getattr(self, k),))
+        return l
+
+    def populate_obj(self, populate_dict):
+        """populate model with data from given populate_dict"""
+
+        for k in self._get_keys():
+            if k in populate_dict:
+                setattr(self, k, populate_dict[k])
+
+class RhodeCodeSettings(Base, BaseModel):
     __tablename__ = 'rhodecode_settings'
     __table_args__ = (UniqueConstraint('app_settings_name'), {'useexisting':True})
     app_settings_id = Column("app_settings_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -50,7 +82,7 @@ class RhodeCodeSettings(Base):
         return "<RhodeCodeSetting('%s:%s')>" % (self.app_settings_name,
                                                 self.app_settings_value)
 
-class RhodeCodeUi(Base):
+class RhodeCodeUi(Base, BaseModel):
     __tablename__ = 'rhodecode_ui'
     __table_args__ = {'useexisting':True}
     ui_id = Column("ui_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -60,7 +92,7 @@ class RhodeCodeUi(Base):
     ui_active = Column("ui_active", Boolean(), nullable=True, unique=None, default=True)
 
 
-class User(Base):
+class User(Base, BaseModel):
     __tablename__ = 'users'
     __table_args__ = (UniqueConstraint('username'), UniqueConstraint('email'), {'useexisting':True})
     user_id = Column("user_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -100,7 +132,7 @@ class User(Base):
             session.rollback()
 
 
-class UserLog(Base):
+class UserLog(Base, BaseModel):
     __tablename__ = 'user_logs'
     __table_args__ = {'useexisting':True}
     user_log_id = Column("user_log_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -114,7 +146,7 @@ class UserLog(Base):
     user = relation('User')
     repository = relation('Repository')
 
-class Repository(Base):
+class Repository(Base, BaseModel):
     __tablename__ = 'repositories'
     __table_args__ = (UniqueConstraint('repo_name'), {'useexisting':True},)
     repo_id = Column("repo_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -137,7 +169,7 @@ class Repository(Base):
     def __repr__(self):
         return "<Repository('%s:%s')>" % (self.repo_id, self.repo_name)
 
-class Permission(Base):
+class Permission(Base, BaseModel):
     __tablename__ = 'permissions'
     __table_args__ = {'useexisting':True}
     permission_id = Column("permission_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -147,7 +179,7 @@ class Permission(Base):
     def __repr__(self):
         return "<Permission('%s:%s')>" % (self.permission_id, self.permission_name)
 
-class RepoToPerm(Base):
+class RepoToPerm(Base, BaseModel):
     __tablename__ = 'repo_to_perm'
     __table_args__ = (UniqueConstraint('user_id', 'repository_id'), {'useexisting':True})
     repo_to_perm_id = Column("repo_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -159,7 +191,7 @@ class RepoToPerm(Base):
     permission = relation('Permission')
     repository = relation('Repository')
 
-class UserToPerm(Base):
+class UserToPerm(Base, BaseModel):
     __tablename__ = 'user_to_perm'
     __table_args__ = (UniqueConstraint('user_id', 'permission_id'), {'useexisting':True})
     user_to_perm_id = Column("user_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -169,7 +201,7 @@ class UserToPerm(Base):
     user = relation('User')
     permission = relation('Permission')
 
-class Statistics(Base):
+class Statistics(Base, BaseModel):
     __tablename__ = 'statistics'
     __table_args__ = (UniqueConstraint('repository_id'), {'useexisting':True})
     stat_id = Column("stat_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -181,7 +213,7 @@ class Statistics(Base):
 
     repository = relation('Repository', single_parent=True)
 
-class UserFollowing(Base):
+class UserFollowing(Base, BaseModel):
     __tablename__ = 'user_followings'
     __table_args__ = (UniqueConstraint('user_id', 'follows_repository_id'),
                       UniqueConstraint('user_id', 'follows_user_id')
@@ -198,7 +230,7 @@ class UserFollowing(Base):
     follows_repository = relation('Repository')
 
 
-class CacheInvalidation(Base):
+class CacheInvalidation(Base, BaseModel):
     __tablename__ = 'cache_invalidation'
     __table_args__ = (UniqueConstraint('cache_key'), {'useexisting':True})
     cache_id = Column("cache_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)

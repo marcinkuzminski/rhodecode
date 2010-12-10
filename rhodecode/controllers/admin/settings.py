@@ -258,7 +258,7 @@ class SettingsController(BaseController):
               " crucial for entire application"), category='warning')
             return redirect(url('users'))
 
-        defaults = c.user.__dict__.copy()
+        defaults = c.user.get_dict()
         return htmlfill.render(
             render('admin/users/user_edit_my_account.html'),
             defaults=defaults,
