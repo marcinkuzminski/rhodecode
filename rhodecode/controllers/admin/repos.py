@@ -265,8 +265,17 @@ class ReposController(BaseController):
         """GET /repos/repo_name/edit: Form to edit an existing item"""
         # url('edit_repo', repo_name=ID)
         repo_model = RepoModel()
-        c.repo_info = repo_model.get_by_repo_name(repo_name)
         r = ScmModel().get(repo_name)
+        c.repo_info = repo_model.get_by_repo_name(repo_name)
+
+        if c.repo_info is None:
+            h.flash(_('%s repository is not mapped to db perhaps'
+                      ' it was created or renamed from the filesystem'
+                      ' please run the application again'
+                      ' in order to rescan repositories') % repo_name,
+                      category='error')
+
+            return redirect(url('repos'))
 
         if c.repo_info.stats:
             last_rev = c.repo_info.stats.stat_on_revision
@@ -281,15 +290,6 @@ class ReposController(BaseController):
         else:
             c.stats_percentage = '%.2f' % ((float((last_rev)) /
                                             c.repo_last_rev) * 100)
-
-        if not c.repo_info:
-            h.flash(_('%s repository is not mapped to db perhaps'
-                      ' it was created or renamed from the filesystem'
-                      ' please run the application again'
-                      ' in order to rescan repositories') % repo_name,
-                      category='error')
-
-            return redirect(url('repos'))
 
         defaults = c.repo_info.__dict__.copy()
         if c.repo_info.user:
