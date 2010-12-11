@@ -3,7 +3,8 @@
     rhodecode.model.db
     ~~~~~~~~~~~~~~~~~~
     
-    Database Models for RhodeCode    
+    Database Models for RhodeCode
+    
     :created_on: Apr 08, 2010
     :author: marcink
     :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
@@ -246,3 +247,11 @@ class CacheInvalidation(Base, BaseModel):
 
     def __repr__(self):
         return "<CacheInvalidation('%s:%s')>" % (self.cache_id, self.cache_key)
+
+class DbMigrateVersion(Base, BaseModel):
+    __tablename__ = 'db_migrate_version'
+    __table_args__ = {'useexisting':True}
+    repository_id = Column('repository_id', String(250), primary_key=True)
+    repository_path = Column('repository_path', Text)
+    version = Column('version', Integer)
+

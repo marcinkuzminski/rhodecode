@@ -80,6 +80,23 @@ class DbManage(object):
         meta.Base.metadata.create_all(checkfirst=checkfirst)
         log.info('Created tables for %s', self.dbname)
 
+
+
+    def set_db_version(self):
+        from rhodecode import __dbversion__
+        from rhodecode.model.db import DbMigrateVersion
+        try:
+            ver = DbMigrateVersion()
+            ver.version = __dbversion__
+            ver.repository_id = 'rhodecode_db_migrations'
+            ver.repository_path = 'versions'
+            self.sa.add(ver)
+            self.sa.commit()
+        except:
+            self.sa.rollback()
+            raise
+        log.info('db version set to: %s', __dbversion__)
+
     def admin_prompt(self, second=False):
         if not self.tests:
             import getpass
