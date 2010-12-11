@@ -16,8 +16,8 @@ from sqlalchemy.schema import (ForeignKeyConstraint,
                                UniqueConstraint,
                                Index)
 
-from migrate import exceptions
-from migrate.changeset import constraint, SQLA_06
+from rhodecode.lib.dbmigrate.migrate import exceptions
+from rhodecode.lib.dbmigrate.migrate.changeset import constraint, SQLA_06
 
 if not SQLA_06:
     from sqlalchemy.sql.compiler import SchemaGenerator, SchemaDropper

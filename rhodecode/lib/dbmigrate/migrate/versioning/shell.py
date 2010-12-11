@@ -8,10 +8,10 @@ import inspect
 import logging
 from optparse import OptionParser, BadOptionError
 
-from migrate import exceptions
-from migrate.versioning import api
-from migrate.versioning.config import *
-from migrate.versioning.util import asbool
+from rhodecode.lib.dbmigrate.migrate import exceptions
+from rhodecode.lib.dbmigrate.migrate.versioning import api
+from rhodecode.lib.dbmigrate.migrate.versioning.config import *
+from rhodecode.lib.dbmigrate.migrate.versioning.util import asbool
 
 
 alias = dict(

@@ -25,10 +25,14 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
 
-from rhodecode.lib.utils import BasePasterCommand
+import logging
+from sqlalchemy import engine_from_config
+
+from rhodecode.lib.dbmigrate.migrate.exceptions import \
+    DatabaseNotControlledError
 from rhodecode.lib.utils import BasePasterCommand, Command, add_cache
 
-from sqlalchemy import engine_from_config
+log = logging.getLogger(__name__)
 
 class UpgradeDb(BasePasterCommand):
     """Command used for paster to upgrade our database to newer version
@@ -46,10 +50,24 @@ class UpgradeDb(BasePasterCommand):
     def command(self):
         from pylons import config
         add_cache(config)
-        engine = engine_from_config(config, 'sqlalchemy.db1.')
-        print engine
-        raise NotImplementedError('Not implemented yet')
+        #engine = engine_from_config(config, 'sqlalchemy.db1.')
+        #rint engine
 
+        from rhodecode.lib.dbmigrate.migrate.versioning import api
+        path = 'rhodecode/lib/dbmigrate'
+
+
+        try:
+            curr_version = api.db_version(config['sqlalchemy.db1.url'], path)
+            msg = ('Found current database under version'
+                 ' control with version %s' % curr_version)
+
+        except (RuntimeError, DatabaseNotControlledError), e:
+            curr_version = 0
+            msg = ('Current database is not under version control setting'
+                   ' as version %s' % curr_version)
+
+        print msg
 
     def update_parser(self):
         self.parser.add_option('--sql',

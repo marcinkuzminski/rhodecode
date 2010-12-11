@@ -18,8 +18,8 @@ SQLA_06 = _sa_version >= (0, 6)
 del re
 del _sa_version
 
-from migrate.changeset.schema import *
-from migrate.changeset.constraint import *
+from rhodecode.lib.dbmigrate.migrate.changeset.schema import *
+from rhodecode.lib.dbmigrate.migrate.changeset.constraint import *
 
 sqlalchemy.schema.Table.__bases__ += (ChangesetTable, )
 sqlalchemy.schema.Column.__bases__ += (ChangesetColumn, )

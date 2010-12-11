@@ -6,8 +6,8 @@ import re
 import shutil
 import logging
 
-from migrate import exceptions
-from migrate.versioning import pathed, script
+from rhodecode.lib.dbmigrate.migrate import exceptions
+from rhodecode.lib.dbmigrate.migrate.versioning import pathed, script
 
 
 log = logging.getLogger(__name__)

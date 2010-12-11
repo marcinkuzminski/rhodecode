@@ -4,8 +4,8 @@
 
 from ConfigParser import ConfigParser
 
-from migrate.versioning.config import *
-from migrate.versioning import pathed
+from rhodecode.lib.dbmigrate.migrate.versioning.config import *
+from rhodecode.lib.dbmigrate.migrate.versioning import pathed
 
 
 class Parser(ConfigParser):

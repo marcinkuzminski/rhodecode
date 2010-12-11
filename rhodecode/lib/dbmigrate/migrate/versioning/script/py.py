@@ -6,13 +6,13 @@ import warnings
 import logging
 from StringIO import StringIO
 
-import migrate
-from migrate.versioning import genmodel, schemadiff
-from migrate.versioning.config import operations
-from migrate.versioning.template import Template
-from migrate.versioning.script import base
-from migrate.versioning.util import import_path, load_model, with_engine
-from migrate.exceptions import MigrateDeprecationWarning, InvalidScriptError, ScriptError
+from rhodecode.lib.dbmigrate import migrate
+from rhodecode.lib.dbmigrate.migrate.versioning import genmodel, schemadiff
+from rhodecode.lib.dbmigrate.migrate.versioning.config import operations
+from rhodecode.lib.dbmigrate.migrate.versioning.template import Template
+from rhodecode.lib.dbmigrate.migrate.versioning.script import base
+from rhodecode.lib.dbmigrate.migrate.versioning.util import import_path, load_model, with_engine
+from rhodecode.lib.dbmigrate.migrate.exceptions import MigrateDeprecationWarning, InvalidScriptError, ScriptError
 
 log = logging.getLogger(__name__)
 __all__ = ['PythonScript']
@@ -49,10 +49,10 @@ class PythonScript(base.BaseScript):
         :returns: Upgrade / Downgrade script
         :rtype: string
         """
-        
+
         if isinstance(repository, basestring):
             # oh dear, an import cycle!
-            from migrate.versioning.repository import Repository
+            from rhodecode.lib.dbmigrate.migrate.versioning.repository import Repository
             repository = Repository(repository)
 
         oldmodel = load_model(oldmodel)
@@ -65,7 +65,7 @@ class PythonScript(base.BaseScript):
             excludeTables=[repository.version_table])
         # TODO: diff can be False (there is no difference?)
         decls, upgradeCommands, downgradeCommands = \
-            genmodel.ModelGenerator(diff,engine).toUpgradeDowngradePython()
+            genmodel.ModelGenerator(diff, engine).toUpgradeDowngradePython()
 
         # Store differences into file.
         src = Template(opts.pop('templates_path', None)).get_script(opts.pop('templates_theme', None))

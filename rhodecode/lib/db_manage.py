@@ -1,8 +1,15 @@
-#!/usr/bin/env python
-# encoding: utf-8
-# database management for RhodeCode
-# Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
-#
+# -*- coding: utf-8 -*-
+"""
+    rhodecode.lib.db_manage
+    ~~~~~~~~~~~~~~~~~~~~~~~
+
+    Database creation, and setup module for RhodeCode
+    
+    :created_on: Apr 10, 2010
+    :author: marcink
+    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
+    :license: GPLv3, see COPYING for more details.
+"""
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
@@ -18,25 +25,24 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
 
-"""
-Created on April 10, 2010
-database management and creation for RhodeCode
-@author: marcink
-"""
-
-from os.path import dirname as dn, join as jn
 import os
 import sys
 import uuid
+import logging
+from os.path import dirname as dn, join as jn
+
+from rhodecode import __dbversion__
+from rhodecode.model.db import
+from rhodecode.model import meta
 
 from rhodecode.lib.auth import get_crypt_password
 from rhodecode.lib.utils import ask_ok
 from rhodecode.model import init_model
 from rhodecode.model.db import User, Permission, RhodeCodeUi, RhodeCodeSettings, \
-    UserToPerm
-from rhodecode.model import meta
+    UserToPerm, DbMigrateVersion
+
 from sqlalchemy.engine import create_engine
-import logging
+
 
 log = logging.getLogger(__name__)
 
@@ -83,8 +89,6 @@ class DbManage(object):
 
 
     def set_db_version(self):
-        from rhodecode import __dbversion__
-        from rhodecode.model.db import DbMigrateVersion
         try:
             ver = DbMigrateVersion()
             ver.version = __dbversion__

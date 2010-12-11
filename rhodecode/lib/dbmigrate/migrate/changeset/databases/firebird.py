@@ -3,8 +3,8 @@
 """
 from sqlalchemy.databases import firebird as sa_base
 
-from migrate import exceptions
-from migrate.changeset import ansisql, SQLA_06
+from rhodecode.lib.dbmigrate.migrate import exceptions
+from rhodecode.lib.dbmigrate.migrate.changeset import ansisql, SQLA_06
 
 
 if SQLA_06:

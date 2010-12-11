@@ -3,7 +3,7 @@
 
    .. _`PostgreSQL`: http://www.postgresql.org/
 """
-from migrate.changeset import ansisql, SQLA_06
+from rhodecode.lib.dbmigrate.migrate.changeset import ansisql, SQLA_06
 
 if not SQLA_06:
     from sqlalchemy.databases import postgres as sa_base

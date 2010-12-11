@@ -7,8 +7,8 @@ import sys
 
 from pkg_resources import resource_filename
 
-from migrate.versioning.config import *
-from migrate.versioning import pathed
+from rhodecode.lib.dbmigrate.migrate.versioning.config import *
+from rhodecode.lib.dbmigrate.migrate.versioning import pathed
 
 
 class Collection(pathed.Pathed):
@@ -34,7 +34,7 @@ class SQLScriptCollection(Collection):
 class Template(pathed.Pathed):
     """Finds the paths/packages of various Migrate templates.
     
-    :param path: Templates are loaded from migrate package
+    :param path: Templates are loaded from rhodecode.lib.dbmigrate.migrate package
     if `path` is not provided.
     """
     pkg = 'migrate.versioning.templates'

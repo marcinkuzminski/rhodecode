@@ -5,5 +5,5 @@
    using Python.
 """
 
-from migrate.versioning import *
-from migrate.changeset import *
+from rhodecode.lib.dbmigrate.migrate.versioning import *
+from rhodecode.lib.dbmigrate.migrate.changeset import *

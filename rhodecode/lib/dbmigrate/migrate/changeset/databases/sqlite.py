@@ -8,8 +8,8 @@ from copy import copy
 
 from sqlalchemy.databases import sqlite as sa_base
 
-from migrate import exceptions
-from migrate.changeset import ansisql, SQLA_06
+from rhodecode.lib.dbmigrate.migrate import exceptions
+from rhodecode.lib.dbmigrate.migrate.changeset import ansisql, SQLA_06
 
 
 if not SQLA_06:

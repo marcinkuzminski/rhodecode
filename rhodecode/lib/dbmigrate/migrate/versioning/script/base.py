@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 import logging
 
-from migrate import exceptions
-from migrate.versioning.config import operations
-from migrate.versioning import pathed
+from rhodecode.lib.dbmigrate.migrate import exceptions
+from rhodecode.lib.dbmigrate.migrate.versioning.config import operations
+from rhodecode.lib.dbmigrate.migrate.versioning import pathed
 
 
 log = logging.getLogger(__name__)

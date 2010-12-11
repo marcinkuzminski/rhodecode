@@ -3,8 +3,8 @@
 import logging
 import shutil
 
-from migrate.versioning.script import base
-from migrate.versioning.template import Template
+from rhodecode.lib.dbmigrate.migrate.versioning.script import base
+from rhodecode.lib.dbmigrate.migrate.versioning.template import Template
 
 
 log = logging.getLogger(__name__)

@@ -3,8 +3,8 @@
 """
 import sqlalchemy as sa
 
-from migrate.changeset import ansisql
-from migrate.changeset.databases import (sqlite,
+from rhodecode.lib.dbmigrate.migrate.changeset import ansisql
+from rhodecode.lib.dbmigrate.migrate.changeset.databases import (sqlite,
                                          postgres,
                                          mysql,
                                          oracle,

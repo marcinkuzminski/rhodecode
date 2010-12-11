@@ -6,9 +6,9 @@ import os
 import shutil
 import logging
 
-from migrate import exceptions
-from migrate.versioning.config import *
-from migrate.versioning.util import KeyedInstance
+from rhodecode.lib.dbmigrate.migrate import exceptions
+from rhodecode.lib.dbmigrate.migrate.versioning.config import *
+from rhodecode.lib.dbmigrate.migrate.versioning.util import KeyedInstance
 
 
 log = logging.getLogger(__name__)

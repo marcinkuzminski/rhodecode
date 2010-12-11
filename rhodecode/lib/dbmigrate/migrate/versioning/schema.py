@@ -10,11 +10,11 @@ from sqlalchemy.sql import and_
 from sqlalchemy import exceptions as sa_exceptions
 from sqlalchemy.sql import bindparam
 
-from migrate import exceptions
-from migrate.versioning import genmodel, schemadiff
-from migrate.versioning.repository import Repository
-from migrate.versioning.util import load_model
-from migrate.versioning.version import VerNum
+from rhodecode.lib.dbmigrate.migrate import exceptions
+from rhodecode.lib.dbmigrate.migrate.versioning import genmodel, schemadiff
+from rhodecode.lib.dbmigrate.migrate.versioning.repository import Repository
+from rhodecode.lib.dbmigrate.migrate.versioning.util import load_model
+from rhodecode.lib.dbmigrate.migrate.versioning.version import VerNum
 
 
 log = logging.getLogger(__name__)

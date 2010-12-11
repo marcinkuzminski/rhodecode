@@ -11,9 +11,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 from sqlalchemy.pool import StaticPool
 
-from migrate import exceptions
-from migrate.versioning.util.keyedinstance import KeyedInstance
-from migrate.versioning.util.importpath import import_path
+from rhodecode.lib.dbmigrate.migrate import exceptions
+from rhodecode.lib.dbmigrate.migrate.versioning.util.keyedinstance import KeyedInstance
+from rhodecode.lib.dbmigrate.migrate.versioning.util.importpath import import_path
 
 
 log = logging.getLogger(__name__)
