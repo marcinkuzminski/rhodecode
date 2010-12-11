@@ -81,13 +81,16 @@ class UpgradeDb(BasePasterCommand):
         self.notify_msg('Schema upgrade completed')
 
         #we need to make now some extra operations into database
-        self.notify_msg('Prociding with database updates')
+        self.notify_msg('Propagating database updates')
 
         dbmanage = DbManage(log_sql=True, dbconf=db_uri,
                             root=config['here'], tests=False)
 
-        self.notify_msg('Patching repo paths for newer version of rhodecode')
+        self.notify_msg('Patching repo paths for newer version of RhodeCode')
         dbmanage.fix_repo_paths()
+
+        self.notify_msg('Patching default user of RhodeCode')
+        dbmanage.fix_default_user()
 
         self.notify_msg('Changing ui settings')
         dbmanage.create_ui_settings()

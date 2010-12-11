@@ -3,7 +3,8 @@
     rhodecode.lib.db_manage
     ~~~~~~~~~~~~~~~~~~~~~~~
 
-    Database creation, and setup module for RhodeCode
+    Database creation, and setup module for RhodeCode. Used for creation
+    of database as well as for migration operations
     
     :created_on: Apr 10, 2010
     :author: marcink
@@ -112,6 +113,25 @@ class DbManage(object):
 
         try:
             self.sa.add(paths)
+            self.sa.commit()
+        except:
+            self.sa.rollback()
+            raise
+
+    def fix_default_user(self):
+        """Fixes a old default user with some 'nicer' default values,
+        used mostly for anonymous access
+        """
+        def_user = self.sa.query(User)\
+                .filter(User.username == 'default')\
+                .one()
+
+        def_user.name = 'Anonymous'
+        def_user.lastname = 'User'
+        def_user.email = 'anonymous@rhodecode.org'
+
+        try:
+            self.sa.add(def_user)
             self.sa.commit()
         except:
             self.sa.rollback()
