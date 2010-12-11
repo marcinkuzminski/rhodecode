@@ -43,10 +43,6 @@ from rhodecode.model.db import User, Permission, RhodeCodeUi, RhodeCodeSettings,
 
 from sqlalchemy.engine import create_engine
 
-from rhodecode.lib.dbmigrate.migrate.versioning import api
-from rhodecode.lib.dbmigrate.migrate.exceptions import \
-    DatabaseNotControlledError
-
 log = logging.getLogger(__name__)
 
 class DbManage(object):
@@ -111,6 +107,11 @@ class DbManage(object):
         
         :param revision: revision to upgrade to
         """
+
+        from rhodecode.lib.dbmigrate.migrate.versioning import api
+        from rhodecode.lib.dbmigrate.migrate.exceptions import \
+            DatabaseNotControlledError
+
         upgrade = ask_ok('You are about to perform database upgrade, make '
                          'sure You backed up your database before. '
                          'Continue ? [y/n]')
