@@ -18,7 +18,6 @@ class SqlScript(base.BaseScript):
         
         :returns: :class:`SqlScript instance <migrate.versioning.script.sql.SqlScript>`"""
         cls.require_notfound(path)
-
         src = Template(opts.pop('templates_path', None)).get_sql_script(theme=opts.pop('templates_theme', None))
         shutil.copy(src, path)
         return cls(path)

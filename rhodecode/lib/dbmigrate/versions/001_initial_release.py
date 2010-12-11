@@ -1,5 +1,3 @@
-from migrate import *
-
 #==============================================================================
 # DB INITIAL MODEL
 #==============================================================================
@@ -10,8 +8,9 @@ from sqlalchemy import *
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy.orm import relation, backref, class_mapper
 from sqlalchemy.orm.session import Session
-
 from rhodecode.model.meta import Base
+
+from rhodecode.lib.dbmigrate.migrate import *
 
 log = logging.getLogger(__name__)
 

@@ -30,8 +30,8 @@ import inspect
 import logging
 
 from rhodecode.lib.dbmigrate.migrate import exceptions
-from rhodecode.lib.dbmigrate.migrate.versioning import (repository, schema, version,
-    script as script_) # command name conflict
+from rhodecode.lib.dbmigrate.migrate.versioning import repository, schema, version, \
+    script as script_ # command name conflict
 from rhodecode.lib.dbmigrate.migrate.versioning.util import catch_known_errors, with_engine
 
 

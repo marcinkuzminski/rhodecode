@@ -28,6 +28,8 @@
 import logging
 from sqlalchemy import engine_from_config
 
+from rhodecode import __dbversion__
+from rhodecode.lib.dbmigrate.migrate.versioning import api
 from rhodecode.lib.dbmigrate.migrate.exceptions import \
     DatabaseNotControlledError
 from rhodecode.lib.utils import BasePasterCommand, Command, add_cache
@@ -49,25 +51,32 @@ class UpgradeDb(BasePasterCommand):
 
     def command(self):
         from pylons import config
+
         add_cache(config)
+
         #engine = engine_from_config(config, 'sqlalchemy.db1.')
-        #rint engine
 
-        from rhodecode.lib.dbmigrate.migrate.versioning import api
-        path = 'rhodecode/lib/dbmigrate'
-
+        repository_path = 'rhodecode/lib/dbmigrate'
+        db_uri = config['sqlalchemy.db1.url']
 
         try:
-            curr_version = api.db_version(config['sqlalchemy.db1.url'], path)
+            curr_version = api.db_version(db_uri, repository_path)
             msg = ('Found current database under version'
                  ' control with version %s' % curr_version)
 
         except (RuntimeError, DatabaseNotControlledError), e:
-            curr_version = 0
+            curr_version = 1
             msg = ('Current database is not under version control setting'
                    ' as version %s' % curr_version)
+            api.version_control(db_uri, repository_path, curr_version)
+
 
         print msg
+        #now we have our dbversion we can do upgrade
+
+        msg = 'attempting to do database upgrade to version %s' % __dbversion__
+        print msg
+        api.upgrade(db_uri, repository_path, __dbversion__)
 
     def update_parser(self):
         self.parser.add_option('--sql',

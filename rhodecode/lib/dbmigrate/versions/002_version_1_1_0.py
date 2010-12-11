@@ -1,9 +1,16 @@
-from sqlalchemy import *
-from sqlalchemy.orm import relation
+import logging
+import datetime
 
-from migrate import *
-from migrate.changeset import *
-from rhodecode.model.meta import Base, BaseModel
+from sqlalchemy import *
+from sqlalchemy.exc import DatabaseError
+from sqlalchemy.orm import relation, backref, class_mapper
+from sqlalchemy.orm.session import Session
+from rhodecode.model.meta import Base
+from rhodecode.model.db import BaseModel
+
+from rhodecode.lib.dbmigrate.migrate import *
+
+log = logging.getLogger(__name__)
 
 def upgrade(migrate_engine):
     """ Upgrade operations go here. 
@@ -18,10 +25,10 @@ def upgrade(migrate_engine):
                     autoload_with=migrate_engine)
 
     #ADD is_ldap column
-    is_ldap = Column("is_ldap", Boolean(), nullable=False,
+    is_ldap = Column("is_ldap", Boolean(), nullable=True,
                      unique=None, default=False)
-    is_ldap.create(tbl)
-
+    is_ldap.create(tbl, populate_default=True)
+    is_ldap.alter(nullable=False)
 
     #==========================================================================
     # Upgrade of `user_logs` table
@@ -49,9 +56,10 @@ def upgrade(migrate_engine):
     #ADD repo_type column
     repo_type = Column("repo_type", String(length=None, convert_unicode=False,
                                            assert_unicode=None),
-                       nullable=False, unique=False, default=None)
-    repo_type.create(tbl)
+                       nullable=True, unique=False, default='hg')
 
+    repo_type.create(tbl, populate_default=True)
+    repo_type.alter(nullable=False)
 
     #ADD statistics column
     enable_statistics = Column("statistics", Boolean(), nullable=True,
@@ -64,6 +72,7 @@ def upgrade(migrate_engine):
     # Add table `user_followings`
     #==========================================================================
     tblname = 'user_followings'
+
     class UserFollowing(Base, BaseModel):
         __tablename__ = 'user_followings'
         __table_args__ = (UniqueConstraint('user_id', 'follows_repository_id'),
@@ -85,6 +94,8 @@ def upgrade(migrate_engine):
     #==========================================================================
     # Add table `cache_invalidation`
     #==========================================================================
+    tblname = 'cache_invalidation'
+
     class CacheInvalidation(Base, BaseModel):
         __tablename__ = 'cache_invalidation'
         __table_args__ = (UniqueConstraint('cache_key'), {'useexisting':True})

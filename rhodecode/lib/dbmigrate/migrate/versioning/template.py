@@ -37,7 +37,7 @@ class Template(pathed.Pathed):
     :param path: Templates are loaded from rhodecode.lib.dbmigrate.migrate package
     if `path` is not provided.
     """
-    pkg = 'migrate.versioning.templates'
+    pkg = 'rhodecode.lib.dbmigrate.migrate.versioning.templates'
     _manage = 'manage.py_tmpl'
 
     def __new__(cls, path=None):
@@ -80,7 +80,7 @@ class Template(pathed.Pathed):
     def get_repository(self, *a, **kw):
         """Calls self._get_item('repository', *a, **kw)"""
         return self._get_item('repository', *a, **kw)
-    
+
     def get_script(self, *a, **kw):
         """Calls self._get_item('script', *a, **kw)"""
         return self._get_item('script', *a, **kw)

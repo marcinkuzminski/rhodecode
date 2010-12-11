@@ -119,7 +119,7 @@ def alter_column(*p, **k):
 
     
     """
-    
+
     k.setdefault('alter_metadata', DEFAULT_ALTER_METADATA)
 
     if 'table' not in k and isinstance(p[0], sqlalchemy.Column):
@@ -367,7 +367,7 @@ class ColumnDelta(DictMixin, sqlalchemy.schema.SchemaItem):
                                             for_update=True))
         if toinit:
             column._init_items(*toinit)
-            
+
         if not SQLA_06:
             column.args = []
 
@@ -573,12 +573,12 @@ populated with defaults
 
     def _col_name_in_constraint(self, cons, name):
         return False
-    
+
     def remove_from_table(self, table, unset_table=True):
         # TODO: remove primary keys, constraints, etc
         if unset_table:
             self.table = None
-            
+
         to_drop = set()
         for index in table.indexes:
             columns = []
@@ -590,7 +590,7 @@ populated with defaults
             else:
                 to_drop.add(index)
         table.indexes = table.indexes - to_drop
-        
+
         to_drop = set()
         for cons in table.constraints:
             # TODO: deal with other types of constraint
@@ -602,7 +602,7 @@ populated with defaults
                     if self.name == col_name:
                         to_drop.add(cons)
         table.constraints = table.constraints - to_drop
-        
+
         if table.c.contains_column(self):
             table.c.remove(self)
 
