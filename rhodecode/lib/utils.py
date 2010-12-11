@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-    package.rhodecode.lib.utils
-    ~~~~~~~~~~~~~~
+    rhodecode.lib.utils
+    ~~~~~~~~~~~~~~~~~~~
 
     Utilities library for RhodeCode
     
@@ -599,30 +599,3 @@ class BasePasterCommand(Command):
         path_to_ini_file = os.path.realpath(conf)
         conf = paste.deploy.appconfig('config:' + path_to_ini_file)
         pylonsconfig.init_app(conf.global_conf, conf.local_conf)
-
-
-
-class UpgradeDb(BasePasterCommand):
-    """Command used for paster to upgrade our database to newer version
-    """
-
-    max_args = 1
-    min_args = 1
-
-    usage = "CONFIG_FILE"
-    summary = "Upgrades current db to newer version given configuration file"
-    group_name = "RhodeCode"
-
-    parser = Command.standard_parser(verbose=True)
-
-    def command(self):
-        from pylons import config
-        raise NotImplementedError('Not implemented yet')
-
-
-    def update_parser(self):
-        self.parser.add_option('--sql',
-                      action='store_true',
-                      dest='just_sql',
-                      help="Prints upgrade sql for further investigation",
-                      default=False)

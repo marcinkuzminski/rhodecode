@@ -93,7 +93,7 @@ setup(
 
     [paste.global_paster_command]
     make-index = rhodecode.lib.indexers:MakeIndex
-    upgrade-db = rhodecode.lib.utils:UpgradeDb
+    upgrade-db = rhodecode.lib.dbmigrate:UpgradeDb
     celeryd=rhodecode.lib.celerypylons.commands:CeleryDaemonCommand
     celerybeat=rhodecode.lib.celerypylons.commands:CeleryBeatCommand
     camqadm=rhodecode.lib.celerypylons.commands:CAMQPAdminCommand
