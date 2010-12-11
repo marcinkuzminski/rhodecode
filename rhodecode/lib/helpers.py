@@ -415,7 +415,7 @@ def action_parser(user_log):
     @param action:
     """
     action = user_log.action
-    action_params = None
+    action_params = ' '
 
     x = action.split(':')
 
