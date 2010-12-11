@@ -49,24 +49,22 @@ def upgrade(migrate_engine):
     #==========================================================================
     # Upgrade of `repositories` table
     #==========================================================================    
-    tblname = 'users'
+    tblname = 'repositories'
     tbl = Table(tblname, MetaData(bind=migrate_engine), autoload=True,
                     autoload_with=migrate_engine)
 
-    #ADD repo_type column
+    #ADD repo_type column#
     repo_type = Column("repo_type", String(length=None, convert_unicode=False,
                                            assert_unicode=None),
                        nullable=True, unique=False, default='hg')
 
     repo_type.create(tbl, populate_default=True)
-    repo_type.alter(nullable=False)
+    #repo_type.alter(nullable=False)
 
-    #ADD statistics column
+    #ADD statistics column#
     enable_statistics = Column("statistics", Boolean(), nullable=True,
                                unique=None, default=True)
     enable_statistics.create(tbl)
-
-
 
     #==========================================================================
     # Add table `user_followings`

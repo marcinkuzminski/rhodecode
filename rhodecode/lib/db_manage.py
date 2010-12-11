@@ -32,7 +32,6 @@ import logging
 from os.path import dirname as dn, join as jn
 
 from rhodecode import __dbversion__
-from rhodecode.model.db import
 from rhodecode.model import meta
 
 from rhodecode.lib.auth import get_crypt_password
@@ -68,9 +67,9 @@ class DbManage(object):
                     raise Exception('database already exists')
 
     def create_tables(self, override=False):
+        """Create a auth database
         """
-        Create a auth database
-        """
+
         self.check_for_db(override)
         if self.db_exists:
             log.info("database exist and it's going to be destroyed")
@@ -100,6 +99,25 @@ class DbManage(object):
             self.sa.rollback()
             raise
         log.info('db version set to: %s', __dbversion__)
+
+    def fix_repo_paths(self):
+        """Fixes a old rhodecode version path into new one without a '*'
+        """
+
+        paths = self.sa.query(RhodeCodeUi)\
+                .filter(RhodeCodeUi.ui_key == '/')\
+                .scalar()
+
+        paths.ui_value = paths.ui_value.replace('*', '')
+
+        try:
+            self.sa.add(paths)
+            self.sa.commit()
+        except:
+            self.sa.rollback()
+            raise
+
+
 
     def admin_prompt(self, second=False):
         if not self.tests:
@@ -136,7 +154,72 @@ class DbManage(object):
             self.create_user('test_regular', 'test12', 'test_regular@mail.com', False)
             self.create_user('test_regular2', 'test12', 'test_regular2@mail.com', False)
 
+    def create_ui_settings(self):
+        """Creates ui settings, fills out hooks
+        and disables dotencode
+        
+        """
+        #HOOKS
+        hooks1_key = 'changegroup.update'
+        hooks1_ = self.sa.query(RhodeCodeUi)\
+            .filter(RhodeCodeUi.ui_key == hooks1_key).scalar()
 
+        hooks1 = RhodeCodeUi() if hooks1_ is None else hooks1_
+        hooks1.ui_section = 'hooks'
+        hooks1.ui_key = hooks1_key
+        hooks1.ui_value = 'hg update >&2'
+        hooks1.ui_active = False
+
+        hooks2_key = 'changegroup.repo_size'
+        hooks2_ = self.sa.query(RhodeCodeUi)\
+            .filter(RhodeCodeUi.ui_key == hooks2_key).scalar()
+
+        hooks2 = RhodeCodeUi() if hooks2_ is None else hooks2_
+        hooks2.ui_section = 'hooks'
+        hooks2.ui_key = hooks2_key
+        hooks2.ui_value = 'python:rhodecode.lib.hooks.repo_size'
+
+        hooks3 = RhodeCodeUi()
+        hooks3.ui_section = 'hooks'
+        hooks3.ui_key = 'pretxnchangegroup.push_logger'
+        hooks3.ui_value = 'python:rhodecode.lib.hooks.log_push_action'
+
+        hooks4 = RhodeCodeUi()
+        hooks4.ui_section = 'hooks'
+        hooks4.ui_key = 'preoutgoing.pull_logger'
+        hooks4.ui_value = 'python:rhodecode.lib.hooks.log_pull_action'
+
+        #For mercurial 1.7 set backward comapatibility with format
+        dotencode_disable = RhodeCodeUi()
+        dotencode_disable.ui_section = 'format'
+        dotencode_disable.ui_key = 'dotencode'
+        dotencode_disable.ui_value = 'false'
+
+        try:
+            self.sa.add(hooks1)
+            self.sa.add(hooks2)
+            self.sa.add(hooks3)
+            self.sa.add(hooks4)
+            self.sa.add(dotencode_disable)
+            self.sa.commit()
+        except:
+            self.sa.rollback()
+            raise
+
+
+    def create_ldap_options(self):
+        """Creates ldap settings"""
+
+        try:
+            for k in ['ldap_active', 'ldap_host', 'ldap_port', 'ldap_ldaps',
+                      'ldap_dn_user', 'ldap_dn_pass', 'ldap_base_dn']:
+
+                setting = RhodeCodeSettings(k, '')
+                self.sa.add(setting)
+            self.sa.commit()
+        except:
+            self.sa.rollback()
+            raise
 
     def config_prompt(self, test_repo_path=''):
         log.info('Setting up repositories config')
@@ -151,35 +234,9 @@ class DbManage(object):
             log.error('You entered wrong path: %s', path)
             sys.exit()
 
-        hooks1 = RhodeCodeUi()
-        hooks1.ui_section = 'hooks'
-        hooks1.ui_key = 'changegroup.update'
-        hooks1.ui_value = 'hg update >&2'
-        hooks1.ui_active = False
+        self.create_ui_settings()
 
-        hooks2 = RhodeCodeUi()
-        hooks2.ui_section = 'hooks'
-        hooks2.ui_key = 'changegroup.repo_size'
-        hooks2.ui_value = 'python:rhodecode.lib.hooks.repo_size'
-
-        hooks3 = RhodeCodeUi()
-        hooks3.ui_section = 'hooks'
-        hooks3.ui_key = 'pretxnchangegroup.push_logger'
-        hooks3.ui_value = 'python:rhodecode.lib.hooks.log_push_action'
-
-        hooks4 = RhodeCodeUi()
-        hooks4.ui_section = 'hooks'
-        hooks4.ui_key = 'preoutgoing.pull_logger'
-        hooks4.ui_value = 'python:rhodecode.lib.hooks.log_pull_action'
-
-        #for mercurial 1.7 set backward comapatibility with format
-
-        dotencode_disable = RhodeCodeUi()
-        dotencode_disable.ui_section = 'format'
-        dotencode_disable.ui_key = 'dotencode'
-        dotencode_disable.ui_section = 'false'
-
-
+        #HG UI OPTIONS
         web1 = RhodeCodeUi()
         web1.ui_section = 'web'
         web1.ui_key = 'push_ssl'
@@ -211,10 +268,6 @@ class DbManage(object):
 
 
         try:
-            self.sa.add(hooks1)
-            self.sa.add(hooks2)
-            self.sa.add(hooks3)
-            self.sa.add(hooks4)
             self.sa.add(web1)
             self.sa.add(web2)
             self.sa.add(web3)
@@ -222,17 +275,14 @@ class DbManage(object):
             self.sa.add(paths)
             self.sa.add(hgsettings1)
             self.sa.add(hgsettings2)
-            self.sa.add(dotencode_disable)
-            for k in ['ldap_active', 'ldap_host', 'ldap_port', 'ldap_ldaps',
-                      'ldap_dn_user', 'ldap_dn_pass', 'ldap_base_dn']:
-
-                setting = RhodeCodeSettings(k, '')
-                self.sa.add(setting)
 
             self.sa.commit()
         except:
             self.sa.rollback()
             raise
+
+        self.create_ldap_options()
+
         log.info('created ui config')
 
     def create_user(self, username, password, email='', admin=False):

@@ -563,6 +563,19 @@ class BasePasterCommand(Command):
     takes_config_file = 1
     requires_config_file = True
 
+    def notify_msg(self, msg, log=False):
+        """Make a notification to user, additionally if logger is passed
+        it logs this action using given logger
+        
+        :param msg: message that will be printed to user
+        :param log: logging instance, to use to additionally log this message
+        
+        """
+        print msg
+        if log and isinstance(log, logging):
+            log(msg)
+
+
     def run(self, args):
         """
         Overrides Command.run
