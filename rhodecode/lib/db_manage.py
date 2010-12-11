@@ -43,6 +43,9 @@ from rhodecode.model.db import User, Permission, RhodeCodeUi, RhodeCodeSettings,
 
 from sqlalchemy.engine import create_engine
 
+from rhodecode.lib.dbmigrate.migrate.versioning import api
+from rhodecode.lib.dbmigrate.migrate.exceptions import \
+    DatabaseNotControlledError
 
 log = logging.getLogger(__name__)
 
@@ -100,6 +103,76 @@ class DbManage(object):
             self.sa.rollback()
             raise
         log.info('db version set to: %s', __dbversion__)
+
+
+    def upgrade(self):
+        """Upgrades given database schema to given revision following 
+        all needed steps,  
+        
+        :param revision: revision to upgrade to
+        """
+        upgrade = ask_ok('You are about to perform database upgrade, make '
+                         'sure You backed up your database before. '
+                         'Continue ? [y/n]')
+        if not upgrade:
+            sys.exit('Nothing done')
+
+        repository_path = 'rhodecode/lib/dbmigrate'
+        db_uri = self.dburi
+
+        try:
+            curr_version = api.db_version(db_uri, repository_path)
+            msg = ('Found current database under version'
+                 ' control with version %s' % curr_version)
+
+        except (RuntimeError, DatabaseNotControlledError), e:
+            curr_version = 1
+            msg = ('Current database is not under version control. Setting'
+                   ' as version %s' % curr_version)
+            api.version_control(db_uri, repository_path, curr_version)
+
+        print (msg)
+
+        if curr_version == __dbversion__:
+            sys.exit('This database is already at the newest version')
+
+        #======================================================================
+        # UPGRADE STEPS
+        #======================================================================
+        class UpgradeSteps(object):
+
+            def __init__(self, klass):
+                self.klass = klass
+
+            def step_0(self):
+                #step 0 is the schema upgrade, and than follow proper upgrades
+                print ('attempting to do database upgrade to version %s' \
+                                % __dbversion__)
+                api.upgrade(db_uri, repository_path, __dbversion__)
+                print ('Schema upgrade completed')
+
+            def step_1(self):
+                pass
+
+            def step_2(self):
+                print ('Patching repo paths for newer version of RhodeCode')
+                self.klass.fix_repo_paths()
+
+                print ('Patching default user of RhodeCode')
+                self.klass.fix_default_user()
+
+                log.info('Changing ui settings')
+                self.klass.create_ui_settings()
+
+
+        upgrade_steps = [0] + range(curr_version + 1, __dbversion__ + 1)
+
+        #CALL THE PROPER ORDER OF STEPS TO PERFORM FULL UPGRADE
+        for step in upgrade_steps:
+            print ('performing upgrade step %s' % step)
+            callable = getattr(UpgradeSteps(self), 'step_%s' % step)()
+
+
 
     def fix_repo_paths(self):
         """Fixes a old rhodecode version path into new one without a '*'

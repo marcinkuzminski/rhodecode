@@ -28,10 +28,7 @@
 import logging
 from sqlalchemy import engine_from_config
 
-from rhodecode import __dbversion__
-from rhodecode.lib.dbmigrate.migrate.versioning import api
-from rhodecode.lib.dbmigrate.migrate.exceptions import \
-    DatabaseNotControlledError
+
 from rhodecode.lib.utils import BasePasterCommand, Command, add_cache
 from rhodecode.lib.db_manage import DbManage
 
@@ -55,45 +52,13 @@ class UpgradeDb(BasePasterCommand):
 
         add_cache(config)
 
-
-
-        repository_path = 'rhodecode/lib/dbmigrate'
         db_uri = config['sqlalchemy.db1.url']
-
-        try:
-            curr_version = api.db_version(db_uri, repository_path)
-            msg = ('Found current database under version'
-                 ' control with version %s' % curr_version)
-
-        except (RuntimeError, DatabaseNotControlledError), e:
-            curr_version = 1
-            msg = ('Current database is not under version control setting'
-                   ' as version %s' % curr_version)
-            api.version_control(db_uri, repository_path, curr_version)
-
-        self.notify_msg(msg)
-
-        #now we have our dbversion we can do upgrade
-        self.notify_msg('attempting to do database upgrade to version %s' \
-                        % __dbversion__)
-
-        api.upgrade(db_uri, repository_path, __dbversion__)
-        self.notify_msg('Schema upgrade completed')
-
-        #we need to make now some extra operations into database
-        self.notify_msg('Propagating database updates')
 
         dbmanage = DbManage(log_sql=True, dbconf=db_uri,
                             root=config['here'], tests=False)
 
-        self.notify_msg('Patching repo paths for newer version of RhodeCode')
-        dbmanage.fix_repo_paths()
+        dbmanage.upgrade()
 
-        self.notify_msg('Patching default user of RhodeCode')
-        dbmanage.fix_default_user()
-
-        self.notify_msg('Changing ui settings')
-        dbmanage.create_ui_settings()
 
 
     def update_parser(self):
