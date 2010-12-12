@@ -118,7 +118,8 @@ class DbManage(object):
         if not upgrade:
             sys.exit('Nothing done')
 
-        repository_path = 'rhodecode/lib/dbmigrate'
+        repository_path = jn(dn(dn(dn(os.path.realpath(__file__)))),
+                             'rhodecode/lib/dbmigrate')
         db_uri = self.dburi
 
         try:
