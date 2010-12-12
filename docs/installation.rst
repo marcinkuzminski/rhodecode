@@ -10,11 +10,11 @@ recommended one is rabbitmq_ to make the async tasks work.
 
 Of course RhodeCode works in sync mode also, then You don't have to install
 any third party apps. Celery_ will give You large speed improvement when using
-many big repositories. If You plan to use it for 2 or 3 small repositories, it
+many big repositories. If You plan to use it for 7 or 10 small repositories, it
 will work just fine without celery running.
    
-After You decide to Run it with celery make sure You run celeryd and
-message broker together with the application.   
+After You decide to Run it with celery make sure You run celeryd using paster
+and message broker together with the application.   
 
 Requirements for Celery
 -----------------------
@@ -35,8 +35,7 @@ It's very nice tutorial how to start celery_ with rabbitmq_
 
 Install from Cheese Shop
 ------------------------
-Rhodecode requires python 2.5 or 2.6 and will not run on older or newer
-versions of python. Python 2.7 is untested and thus not supported.
+Rhodecode requires python 2.x greater than version 2.5
 
 Easiest way to install ``rhodecode`` is to run::
 
@@ -56,8 +55,9 @@ Step by step installation example
 ---------------------------------
 
 
-- Assuming You have installed virtualenv_ create one using. The `--no-site-packages`
-  will make sure non of Your system libs are linked with this virtualenv_  
+- Assuming You have installed virtualenv_ create one using. 
+  The `--no-site-packages` will make sure non of Your system libs are linked 
+  with this virtualenv_  
 
 ::
 

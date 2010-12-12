@@ -17,5 +17,5 @@ uncomment git line in rhodecode/__init__.py file
 
 .. note::
    Please note that it's not fully stable and it might crash (that's why it 
-   was disabled), so be carefull about enabling git support. Don't use it in 
+   was disabled), so be careful about enabling git support. Don't use it in 
    production !

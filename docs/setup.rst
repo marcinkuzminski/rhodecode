@@ -7,13 +7,20 @@ Setup
 Setting up the application
 --------------------------
 
+First You'll ned to create RhodeCode config file. Run the following command 
+to do this
+
 ::
  
  paster make-config RhodeCode production.ini
 
 - This will create `production.ini` config inside the directory
   this config contains various settings for RhodeCode, e.g proxy port, 
-  email settings,static files, cache and logging.
+  email settings, usage of static files, cache, celery settings and logging.
+
+
+
+Next we need to create the database.
 
 ::
 
@@ -24,10 +31,11 @@ Setting up the application
   existing ones. RhodeCode will simply add all new found repositories to 
   it's database. Also make sure You specify correct path to repositories.
 - Remember that the given path for mercurial_ repositories must be write 
-  accessible for the application. It's very important since RhodeCode web interface
-  will work even without such an access but, when trying to do a push it'll 
-  eventually fail with permission denied errors. 
-- Run 
+  accessible for the application. It's very important since RhodeCode web 
+  interface will work even without such an access but, when trying to do a 
+  push it'll eventually fail with permission denied errors. 
+
+You are ready to use rhodecode, to run it simply execute
 
 ::
  
@@ -35,10 +43,12 @@ Setting up the application
  
 - This command runs the RhodeCode server the app should be available at the 
   127.0.0.1:5000. This ip and port is configurable via the production.ini 
-  file  created in previous step
+  file created in previous step
 - Use admin account you created to login.
 - Default permissions on each repository is read, and owner is admin. So 
-  remember to update these if needed.
+  remember to update these if needed. In the admin panel You can toggle ldap,
+  anonymous, permissions settings. As well as edit more advanced options on 
+  users and repositories
   
     
 Setting up Whoosh full text search
@@ -52,13 +62,13 @@ incremental mode.
 
 ::
 
- paster make-index --repo-location=<location for repos> production.ini  
+ paster make-index production.ini --repo-location=<location for repos> 
 
 for full index rebuild You can use
 
 ::
 
- paster make-index -f --repo-location=<location for repos> production.ini
+ paster make-index production.ini -f --repo-location=<location for repos>
 
 - For full text search You can either put crontab entry for
 
@@ -68,7 +78,7 @@ look like this
 
 ::
  
- /path/to/python/bin/paster --repo-location=<location for repos> /path/to/rhodecode/production.ini
+ /path/to/python/bin/paster /path/to/rhodecode/production.ini --repo-location=<location for repos> 
   
 When using incremental(default) mode whoosh will check last modification date 
 of each file and add it to reindex if newer file is available. Also indexing 
@@ -233,7 +243,6 @@ Troubleshooting
 - can't install celery/rabbitmq
 
  - don't worry RhodeCode works without them too. No extra setup required
-
 
 - long lasting push timeouts ?
 

@@ -27,8 +27,10 @@ news
   and options to disable those hooks from admin panel
 - introduced new enhanced changelog for merges that shows more accurate results
 - new improved and faster code stats (based on pygments lexers mapping tables, 
-  showing up to 10 trending sources for each repository
+  showing up to 10 trending sources for each repository. Additionally stats
+  can be disabled in repository settings.
 - gui optimizations, fixed application width to 1024px
+- added cut off (for large files/changesets) limit into config files
 - whoosh, celeryd, upgrade moved to paster command
 - other than sqlite database backends can be used
 
@@ -40,6 +42,8 @@ fixes
 - fixes #66 Name field misspelled
 - fixes #72 block user removal when he owns repositories
 - fixes #69 added password confirmation fields
+- fixes #87 RhodeCode crashes occasionally on updating repository owner
+- fixes #82 broken annotations on files with more than 1 blank line at the end
 - a lot of fixes and tweaks for file browser
 - fixed detached session issues
 - fixed when user had no repos he would see all repos listed in my account
