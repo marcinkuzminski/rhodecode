@@ -1,4 +1,4 @@
-.. _models::
+.. _models:
 
 The :mod:`models` Module
 ========================
