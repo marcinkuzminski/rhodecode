@@ -1,5 +1,11 @@
+syntax: glob
+*.pyc
+*.swp
 
 syntax: regexp
+^build
+^docs/build/
+^docs/_build/
 ^data$
 ^\.settings$
 ^\.project$
