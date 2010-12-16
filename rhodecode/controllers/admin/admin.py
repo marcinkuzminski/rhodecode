@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-    package.rhodecode.controllers.admin.admin
-    ~~~~~~~~~~~~~~
+    rhodecode.controllers.admin.admin
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Controller for Admin panel of Rhodecode
     

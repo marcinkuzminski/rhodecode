@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-    package.rhodecode.controllers.admin.permissions
-    ~~~~~~~~~~~~~~
+    rhodecode.controllers.admin.permissions
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    
     permissions controller for Rhodecode
     
     :created_on: Apr 27, 2010

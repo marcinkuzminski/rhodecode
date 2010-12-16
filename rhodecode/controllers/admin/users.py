@@ -1,8 +1,15 @@
-#!/usr/bin/env python
-# encoding: utf-8
-# users controller for pylons
-# Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
-# 
+# -*- coding: utf-8 -*-
+"""
+    rhodecode.controllers.admin.users
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Users crud controller for pylons
+    
+    :created_on: Apr 4, 2010
+    :author: marcink
+    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
+    :license: GPLv3, see COPYING for more details.
+"""
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
@@ -17,26 +24,24 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
-"""
-Created on April 4, 2010
-users controller for pylons
-@author: marcink
-"""
+
+import logging
+import traceback
+import formencode
 
 from formencode import htmlfill
 from pylons import request, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
 from pylons.i18n.translation import _
+
 from rhodecode.lib.exceptions import *
 from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator
 from rhodecode.lib.base import BaseController, render
+
 from rhodecode.model.db import User
 from rhodecode.model.forms import UserForm
 from rhodecode.model.user import UserModel
-import formencode
-import logging
-import traceback
 
 log = logging.getLogger(__name__)
 
@@ -119,7 +124,7 @@ class UsersController(BaseController):
                 encoding="UTF-8")
         except Exception:
             log.error(traceback.format_exc())
-            h.flash(_('error occured during update of user %s') \
+            h.flash(_('error occurred during update of user %s') \
                     % form_result.get('username'), category='error')
 
         return redirect(url('users'))
