@@ -81,7 +81,7 @@ class ScmModel(BaseModel):
         repository itself. Return a dictionary of repository objects
         
         :param repos_path: path to directory containing repositories
-        :param baseui
+        :param baseui: baseui instance to instantiate MercurialRepostitory with
         """
 
         log.info('scanning for repositories in %s', repos_path)
