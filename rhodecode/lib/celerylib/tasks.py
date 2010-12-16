@@ -173,6 +173,7 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
     log.debug('revisions to parse %s', leftovers)
 
     if last_rev == 0 or leftovers < parse_limit:
+        log.debug('getting code trending stats')
         stats.languages = json.dumps(__get_codes_stats(repo_name))
 
     stats.repository = dbrepo
