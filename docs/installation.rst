@@ -16,23 +16,6 @@ will work just fine without celery running.
 After You decide to Run it with celery make sure You run celeryd using paster
 and message broker together with the application.   
 
-Requirements for Celery
------------------------
-
-.. note::
-   Installing message broker and using celery is optional, RhodeCode will
-   work without them perfectly fine.
-
-
-**Message Broker** 
-
-- preferred is `RabbitMq <http://www.rabbitmq.com/>`_
-- possible other is `Redis <http://code.google.com/p/redis/>`_
-
-For installation instructions You can visit: 
-http://ask.github.com/celery/getting-started/index.html
-It's very nice tutorial how to start celery_ with rabbitmq_
-
 Install from Cheese Shop
 ------------------------
 Rhodecode requires python 2.x greater than version 2.5
@@ -86,8 +69,28 @@ Step by step installation example
 - this will install rhodecode together with pylons
   and all other required python libraries
 
+Requirements for Celery (optional)
+----------------------------------
+
+.. note::
+   Installing message broker and using celery is optional, RhodeCode will
+   work without them perfectly fine.
+
+
+**Message Broker** 
+
+- preferred is `RabbitMq <http://www.rabbitmq.com/>`_
+- possible other is `Redis <http://code.google.com/p/redis/>`_
+
+For installation instructions You can visit: 
+http://ask.github.com/celery/getting-started/index.html
+It's very nice tutorial how to start celery_ with rabbitmq_
+
 
 You can now proceed to :ref:`setup`
+-----------------------------------
+
+
 
 .. _virtualenv: http://pypi.python.org/pypi/virtualenv  
 .. _python: http://www.python.org/
