@@ -31,8 +31,12 @@ VERSION = (1, 1, 0, 'beta')
 __version__ = '.'.join((str(each) for each in VERSION[:4]))
 __dbversion__ = 2 #defines current db version for migrations
 
-from rhodecode.lib.utils import get_current_revision
-_rev = get_current_revision()
+try:
+    from rhodecode.lib.utils import get_current_revision
+    _rev = get_current_revision()
+except ImportError:
+    #this is needed when doing some setup.py operations
+    _rev = False
 
 if len(VERSION) > 3 and _rev:
     __version__ += ' [rev:%s]' % _rev[0]

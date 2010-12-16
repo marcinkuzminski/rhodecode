@@ -17,12 +17,12 @@ requirements = [
     ]
 
 classifiers = ['Development Status :: 4 - Beta',
-                   'Environment :: Web Environment',
-                   'Framework :: Pylons',
-                   'Intended Audience :: Developers',
-                   'License :: OSI Approved :: BSD License',
-                   'Operating System :: OS Independent',
-                   'Programming Language :: Python', ]
+               'Environment :: Web Environment',
+               'Framework :: Pylons',
+               'Intended Audience :: Developers',
+               'License :: OSI Approved :: BSD License',
+               'Operating System :: OS Independent',
+               'Programming Language :: Python', ]
 
 if sys.version_info < (2, 6):
     requirements.append("simplejson")
