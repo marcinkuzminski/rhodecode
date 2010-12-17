@@ -8,7 +8,7 @@ browser/management with build in push/pull server and full text search.
 It works on http/https, has build in permission/authentication(+ldap) features 
 It's similar to github or bitbucket, but it's suppose to run as standalone 
 hosted application, it's open source and focuses more on restricted access to 
-repositories. It's powered by vcs_ library that me na Lukasz Balcerzak created 
+repositories. It's powered by vcs_ library that me and Lukasz Balcerzak created 
 to handle many various version control systems.
 
 RhodeCode uses `Semantic Versioning <http://semver.org/>`_
