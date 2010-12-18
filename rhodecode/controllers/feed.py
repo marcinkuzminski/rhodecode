@@ -25,19 +25,23 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
 
-
 import logging
 
 from pylons import url, response
+
+from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseController
 from rhodecode.model.scm import ScmModel
+
 from webhelpers.feedgenerator import Atom1Feed, Rss201rev2Feed
 
 log = logging.getLogger(__name__)
 
 class FeedController(BaseController):
 
-    #secure it or not ?
+    @LoginRequired()
+    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
+                                   'repository.admin')
     def __before__(self):
         super(FeedController, self).__before__()
         #common values for feeds
