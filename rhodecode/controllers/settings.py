@@ -1,8 +1,15 @@
-#!/usr/bin/env python
-# encoding: utf-8
-# settings controller for pylons
-# Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
-# 
+# -*- coding: utf-8 -*-
+"""
+    rhodecode.controllers.settings
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Settings controller for rhodecode
+    
+    :created_on: Jun 30, 2010
+    :author: marcink
+    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
+    :license: GPLv3, see COPYING for more details.
+"""
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
@@ -17,24 +24,23 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
-"""
-Created on June 30, 2010
-settings controller for pylons
-@author: marcink
-"""
+
+import logging
+import traceback
+
+import formencode
 from formencode import htmlfill
+
 from pylons import tmpl_context as c, request, url
 from pylons.controllers.util import redirect
 from pylons.i18n.translation import _
+
+import rhodecode.lib.helpers as h
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAllDecorator
 from rhodecode.lib.base import BaseController, render
 from rhodecode.lib.utils import invalidate_cache, action_logger
 from rhodecode.model.forms import RepoSettingsForm, RepoForkForm
 from rhodecode.model.repo import RepoModel
-import formencode
-import logging
-import rhodecode.lib.helpers as h
-import traceback
 
 log = logging.getLogger(__name__)
 

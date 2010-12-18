@@ -1,8 +1,15 @@
-#!/usr/bin/env python
-# encoding: utf-8
-# shortlog controller for pylons
-# Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
- 
+# -*- coding: utf-8 -*-
+"""
+    rhodecode.controllers.shortlog
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Shortlog controller for rhodecode
+    
+    :created_on: Apr 18, 2010
+    :author: marcink
+    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
+    :license: GPLv3, see COPYING for more details.
+"""
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
@@ -17,27 +24,27 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
-"""
-Created on April 18, 2010
-shortlog controller for pylons
-@author: marcink
-"""
+
+import logging
+
 from pylons import tmpl_context as c, request
+
+from webhelpers.paginate import Page
+
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseController, render
 from rhodecode.model.scm import ScmModel
-from webhelpers.paginate import Page
-import logging
+
 log = logging.getLogger(__name__)
 
 class ShortlogController(BaseController):
-    
+
     @LoginRequired()
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
-                                   'repository.admin')       
+                                   'repository.admin')
     def __before__(self):
         super(ShortlogController, self).__before__()
-        
+
     def index(self):
         p = int(request.params.get('page', 1))
         repo = ScmModel().get_repo(c.repo_name)

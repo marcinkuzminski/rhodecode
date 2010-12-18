@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-    package.rhodecode.controllers.admin.ldap_settings
-    ~~~~~~~~~~~~~~
+    rhodecode.controllers.admin.ldap_settings
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     ldap controller for RhodeCode
+    
     :created_on: Nov 26, 2010
     :author: marcink
     :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
