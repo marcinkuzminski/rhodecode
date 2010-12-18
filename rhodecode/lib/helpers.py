@@ -424,7 +424,7 @@ def action_parser(user_log):
 
     def get_cs_links():
         if action == 'push':
-            revs_limit = 5
+            revs_limit = 1000
             revs = action_params.split(',')
             cs_links = " " + ', '.join ([link(rev,
                     url('changeset_home',
