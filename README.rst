@@ -60,7 +60,7 @@ Features
   (no external search servers required all in one application)
 - Setup project descriptions and info inside built in db for easy, non 
   file-system operations
-- Inteligent cache with invalidation after push or project change, provides high 
+- Intelligent cache with invalidation after push or project change, provides high 
   performance and always up to date data.    
 - Rss / atom feeds, gravatar support, download sources as zip/tar/gz
 - Async tasks for speed and performance using celery_ (works without them too)  
