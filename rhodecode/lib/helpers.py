@@ -424,7 +424,7 @@ def action_parser(user_log):
 
     def get_cs_links():
         if action == 'push':
-            revs_limit = 1000
+            revs_limit = 5
             revs = action_params.split(',')
             cs_links = " " + ', '.join ([link(rev,
                     url('changeset_home',
@@ -443,7 +443,7 @@ def action_parser(user_log):
                 cs_links += html_tmpl % (uniq_id, ', '.join([link(rev,
                     url('changeset_home',
                     repo_name=user_log.repository.repo_name,
-                    revision=rev)) for rev in revs[:revs_limit] ]))
+                    revision=rev)) for rev in revs[revs_limit:] ]))
 
             return cs_links
         return ''
