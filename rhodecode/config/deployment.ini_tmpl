@@ -1,6 +1,6 @@
 ################################################################################
 ################################################################################
-# rhodecode - Pylons environment configuration                                 #
+# RhodeCode - Pylons environment configuration                                 #
 #                                                                              # 
 # The %(here)s variable will be replaced with the parent directory of this file#
 ################################################################################
@@ -10,7 +10,7 @@ debug = true
 ################################################################################
 ## Uncomment and replace with the address which should receive                ## 
 ## any error reports after application crash                                  ##
-## Additionally those settings will be used by rhodecode mailing system       ##
+## Additionally those settings will be used by RhodeCode mailing system       ##
 ################################################################################
 #email_to = admin@localhost
 #error_email_from = paste_error@localhost
@@ -22,13 +22,14 @@ debug = true
 #smtp_password = 
 #smtp_port = 
 #smtp_use_tls = false
+#smtp_use_ssl = true
 
 [server:main]
 ##nr of threads to spawn
 threadpool_workers = 5
 
 ##max request before thread respawn
-threadpool_max_requests = 2
+threadpool_max_requests = 10
 
 ##option to use threads of process
 use_threadpool = true
@@ -43,7 +44,36 @@ full_stack = true
 static_files = true
 lang=en
 cache_dir = %(here)s/data
+index_dir = %(here)s/data/index
 app_instance_uuid = ${app_instance_uuid}
+cut_off_limit = 256000
+
+####################################
+###        CELERY CONFIG        ####
+####################################
+use_celery = false
+broker.host = localhost
+broker.vhost = rabbitmqhost
+broker.port = 5672
+broker.user = rabbitmq
+broker.password = qweqwe
+
+celery.imports = rhodecode.lib.celerylib.tasks
+
+celery.result.backend = amqp
+celery.result.dburi = amqp://
+celery.result.serialier = json
+
+#celery.send.task.error.emails = true
+#celery.amqp.task.result.expires = 18000
+
+celeryd.concurrency = 2
+#celeryd.log.file = celeryd.log
+celeryd.log.level = debug
+celeryd.max.tasks.per.child = 3
+
+#tasks will never be sent to the queue, but executed locally instead.
+celery.always.eager = false
 
 ####################################
 ###         BEAKER CACHE        ####
@@ -62,7 +92,7 @@ beaker.cache.long_term.type=memory
 beaker.cache.long_term.expire=36000
 
 beaker.cache.sql_cache_short.type=memory
-beaker.cache.sql_cache_short.expire=5
+beaker.cache.sql_cache_short.expire=10
 
 beaker.cache.sql_cache_med.type=memory
 beaker.cache.sql_cache_med.expire=360
@@ -136,6 +166,7 @@ level = INFO
 handlers = console
 qualname = routes.middleware
 # "level = DEBUG" logs the route matched and routing variables.
+propagate = 0
 
 [logger_rhodecode]
 level = DEBUG

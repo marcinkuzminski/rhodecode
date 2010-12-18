@@ -35,7 +35,7 @@ def make_map(config):
     #==========================================================================
 
     #MAIN PAGE
-    map.connect('hg_home', '/', controller='hg', action='index')
+    map.connect('home', '/', controller='home', action='index')
     map.connect('bugtracker', "http://bitbucket.org/marcinkuzminski/rhodecode/issues", _static=True)
     map.connect('gpl_license', "http://www.gnu.org/licenses/gpl.html", _static=True)
     #ADMIN REPOSITORY REST ROUTES
@@ -73,12 +73,26 @@ def make_map(config):
         m.connect('delete_repo_user', "/repos_delete_user/{repo_name:.*}",
              action="delete_perm_user", conditions=dict(method=["DELETE"],
                                                         function=check_repo))
-
+        #settings actions
+        m.connect('repo_stats', "/repos_stats/{repo_name:.*}",
+             action="repo_stats", conditions=dict(method=["DELETE"],
+                                                        function=check_repo))
+        m.connect('repo_cache', "/repos_cache/{repo_name:.*}",
+             action="repo_cache", conditions=dict(method=["DELETE"],
+                                                        function=check_repo))
     #ADMIN USER REST ROUTES
     map.resource('user', 'users', controller='admin/users', path_prefix='/_admin')
 
     #ADMIN PERMISSIONS REST ROUTES
     map.resource('permission', 'permissions', controller='admin/permissions', path_prefix='/_admin')
+
+
+    ##ADMIN LDAP SETTINGS
+    map.connect('ldap_settings', '/_admin/ldap', controller='admin/ldap_settings',
+                action='ldap_settings', conditions=dict(method=["POST"]))
+    map.connect('ldap_home', '/_admin/ldap', controller='admin/ldap_settings',)
+
+
 
     #ADMIN SETTINGS REST ROUTES
     with map.submapper(path_prefix='/_admin', controller='admin/settings') as m:
@@ -116,6 +130,14 @@ def make_map(config):
         m.connect('admin_home', '', action='index')#main page
         m.connect('admin_add_repo', '/add_repo/{new_repo:[a-z0-9\. _-]*}',
                   action='add_repo')
+
+
+    #USER JOURNAL
+    map.connect('journal', '/_admin/journal', controller='journal',)
+    map.connect('toggle_following', '/_admin/toggle_following', controller='journal',
+                action='toggle_following', conditions=dict(method=["POST"]))
+
+
     #SEARCH
     map.connect('search', '/_admin/search', controller='search',)
     map.connect('search_repo', '/_admin/search/{search_repo:.*}', controller='search')

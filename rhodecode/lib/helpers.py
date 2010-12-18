@@ -3,6 +3,8 @@
 Consists of functions to typically be used within templates, but also
 available to Controllers. This module is available to both as 'h'.
 """
+import random
+import hashlib
 from pygments.formatters import HtmlFormatter
 from pygments import highlight as code_highlight
 from pylons import url, app_globals as g
@@ -23,6 +25,36 @@ from webhelpers.pylonslib.secure_form import secure_form
 from webhelpers.text import chop_at, collapse, convert_accented_entities, \
     convert_misc_entities, lchop, plural, rchop, remove_formatting, \
     replace_whitespace, urlify, truncate, wrap_paragraphs
+from webhelpers.date import time_ago_in_words
+
+from webhelpers.html.tags import _set_input_attrs, _set_id_attr, \
+    convert_boolean_attrs, NotGiven
+
+def _reset(name, value=None, id=NotGiven, type="reset", **attrs):
+    _set_input_attrs(attrs, type, name, value)
+    _set_id_attr(attrs, id, name)
+    convert_boolean_attrs(attrs, ["disabled"])
+    return HTML.input(**attrs)
+
+reset = _reset
+
+
+def get_token():
+    """Return the current authentication token, creating one if one doesn't
+    already exist.
+    """
+    token_key = "_authentication_token"
+    from pylons import session
+    if not token_key in session:
+        try:
+            token = hashlib.sha1(str(random.getrandbits(128))).hexdigest()
+        except AttributeError: # Python < 2.4
+            token = hashlib.sha1(str(random.randrange(2 ** 128))).hexdigest()
+        session[token_key] = token
+        if hasattr(session, 'save'):
+            session.save()
+    return session[token_key]
+
 
 #Custom helpers here :)
 class _Link(object):
@@ -93,7 +125,7 @@ class _ToolTip(object):
                 var tts = YAHOO.util.Dom.getElementsByClassName('tooltip');
                 
                 for (var i = 0; i < tts.length; i++) {
-                    //if element doesn not have and id autgenerate one for tooltip
+                    //if element doesn't not have and id autgenerate one for tooltip
                     
                     if (!tts[i].id){
                         tts[i].id='tt'+i*100;
@@ -111,7 +143,7 @@ class _ToolTip(object):
                 showdelay:20,
             });
             
-            //Mouse Over event disabled for new repositories since they dont
+            //Mouse Over event disabled for new repositories since they don't
             //have last commit message
             myToolTips.contextMouseOverEvent.subscribe(
                 function(type, args) {
@@ -270,13 +302,13 @@ def pygmentize_annotation(filenode, **kwargs):
         tooltip_html = tooltip_html % (changeset.author,
                                                changeset.date,
                                                tooltip(changeset.message))
-        lnk_format = 'r%-5s:%s' % (changeset.revision,
-                                 changeset.short_id)
+        lnk_format = '%5s:%s' % ('r%s' % changeset.revision,
+                                 short_id(changeset.raw_id))
         uri = link_to(
                 lnk_format,
                 url('changeset_home', repo_name=changeset.repository.name,
-                    revision=changeset.short_id),
-                style=get_color_string(changeset.short_id),
+                    revision=changeset.raw_id),
+                style=get_color_string(changeset.raw_id),
                 class_='tooltip',
                 tooltip_title=tooltip_html
               )
@@ -317,37 +349,168 @@ def get_changeset_safe(repo, rev):
 flash = _Flash()
 
 
-#===============================================================================
+#==============================================================================
 # MERCURIAL FILTERS available via h.
-#===============================================================================
+#==============================================================================
 from mercurial import util
-from mercurial.templatefilters import age as _age, person as _person
+from mercurial.templatefilters import person as _person
+
+
+
+def _age(curdate):
+    """turns a datetime into an age string."""
+
+    if not curdate:
+        return ''
+
+    from datetime import timedelta, datetime
+
+    agescales = [("year", 3600 * 24 * 365),
+                 ("month", 3600 * 24 * 30),
+                 ("day", 3600 * 24),
+                 ("hour", 3600),
+                 ("minute", 60),
+                 ("second", 1), ]
+
+    age = datetime.now() - curdate
+    age_seconds = (age.days * agescales[2][1]) + age.seconds
+    pos = 1
+    for scale in agescales:
+        if scale[1] <= age_seconds:
+            if pos == 6:pos = 5
+            return time_ago_in_words(curdate, agescales[pos][0]) + ' ' + _('ago')
+        pos += 1
+
+    return _('just now')
 
 age = lambda  x:_age(x)
 capitalize = lambda x: x.capitalize()
-date = lambda x: util.datestr(x)
 email = util.email
 email_or_none = lambda x: util.email(x) if util.email(x) != x else None
 person = lambda x: _person(x)
-hgdate = lambda  x: "%d %d" % x
-isodate = lambda  x: util.datestr(x, '%Y-%m-%d %H:%M %1%2')
-isodatesec = lambda  x: util.datestr(x, '%Y-%m-%d %H:%M:%S %1%2')
-localdate = lambda  x: (x[0], util.makedate()[1])
-rfc822date = lambda  x: util.datestr(x, "%a, %d %b %Y %H:%M:%S %1%2")
-rfc822date_notz = lambda  x: util.datestr(x, "%a, %d %b %Y %H:%M:%S")
-rfc3339date = lambda  x: util.datestr(x, "%Y-%m-%dT%H:%M:%S%1:%2")
-time_ago = lambda x: util.datestr(_age(x), "%a, %d %b %Y %H:%M:%S %1%2")
+short_id = lambda x: x[:12]
 
 
-#===============================================================================
+def bool2icon(value):
+    """
+    Returns True/False values represented as small html image of true/false
+    icons
+    :param value: bool value
+    """
+
+    if value is True:
+        return HTML.tag('img', src="/images/icons/accept.png", alt=_('True'))
+
+    if value is False:
+        return HTML.tag('img', src="/images/icons/cancel.png", alt=_('False'))
+
+    return value
+
+
+def action_parser(user_log):
+    """
+    This helper will map the specified string action into translated
+    fancy names with icons and links
+    
+    @param action:
+    """
+    action = user_log.action
+    action_params = ' '
+
+    x = action.split(':')
+
+    if len(x) > 1:
+        action, action_params = x
+
+    def get_cs_links():
+        if action == 'push':
+            revs_limit = 5
+            revs = action_params.split(',')
+            cs_links = " " + ', '.join ([link(rev,
+                    url('changeset_home',
+                    repo_name=user_log.repository.repo_name,
+                    revision=rev)) for rev in revs[:revs_limit] ])
+            if len(revs) > revs_limit:
+                uniq_id = revs[0]
+                html_tmpl = ('<span> %s '
+                '<a class="show_more" id="_%s" href="#">%s</a> '
+                '%s</span>')
+                cs_links += html_tmpl % (_('and'), uniq_id, _('%s more') \
+                                            % (len(revs) - revs_limit),
+                                            _('revisions'))
+
+                html_tmpl = '<span id="%s" style="display:none"> %s </span>'
+                cs_links += html_tmpl % (uniq_id, ', '.join([link(rev,
+                    url('changeset_home',
+                    repo_name=user_log.repository.repo_name,
+                    revision=rev)) for rev in revs[:revs_limit] ]))
+
+            return cs_links
+        return ''
+
+    def get_fork_name():
+        if action == 'user_forked_repo':
+            from rhodecode.model.scm import ScmModel
+            repo_name = action_params
+            repo = ScmModel().get(repo_name)
+            if repo is None:
+                return repo_name
+            return link_to(action_params, url('summary_home',
+                                              repo_name=repo.name,),
+                                              title=repo.dbrepo.description)
+        return ''
+    map = {'user_deleted_repo':_('User [deleted] repository'),
+           'user_created_repo':_('User [created] repository'),
+           'user_forked_repo':_('User [forked] repository as: %s') % get_fork_name(),
+           'user_updated_repo':_('User [updated] repository'),
+           'admin_deleted_repo':_('Admin [delete] repository'),
+           'admin_created_repo':_('Admin [created] repository'),
+           'admin_forked_repo':_('Admin [forked] repository'),
+           'admin_updated_repo':_('Admin [updated] repository'),
+           'push':_('[Pushed] %s') % get_cs_links(),
+           'pull':_('[Pulled]'),
+           'started_following_repo':_('User [started following] repository'),
+           'stopped_following_repo':_('User [stopped following] repository'),
+            }
+
+    action_str = map.get(action, action)
+    return literal(action_str.replace('[', '<span class="journal_highlight">')\
+                   .replace(']', '</span>'))
+
+def action_parser_icon(user_log):
+    action = user_log.action
+    action_params = None
+    x = action.split(':')
+
+    if len(x) > 1:
+        action, action_params = x
+
+    tmpl = """<img src="/images/icons/%s" alt="%s"/>"""
+    map = {'user_deleted_repo':'database_delete.png',
+           'user_created_repo':'database_add.png',
+           'user_forked_repo':'arrow_divide.png',
+           'user_updated_repo':'database_edit.png',
+           'admin_deleted_repo':'database_delete.png',
+           'admin_created_repo':'database_ddd.png',
+           'admin_forked_repo':'arrow_divide.png',
+           'admin_updated_repo':'database_edit.png',
+           'push':'script_add.png',
+           'pull':'down_16.png',
+           'started_following_repo':'heart_add.png',
+           'stopped_following_repo':'heart_delete.png',
+            }
+    return literal(tmpl % (map.get(action, action), action))
+
+
+#==============================================================================
 # PERMS
-#===============================================================================
+#==============================================================================
 from rhodecode.lib.auth import HasPermissionAny, HasPermissionAll, \
 HasRepoPermissionAny, HasRepoPermissionAll
 
-#===============================================================================
+#==============================================================================
 # GRAVATAR URL
-#===============================================================================
+#==============================================================================
 import hashlib
 import urllib
 from pylons import request

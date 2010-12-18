@@ -15,7 +15,7 @@
 		<div id="register">
 			
 			<div class="title top-left-rounded-corner top-right-rounded-corner">
-				<h5>${_('Sign Up to rhodecode')}</h5>
+				<h5>${_('Sign Up to RhodeCode')}</h5>
 			</div>
 			<div class="inner">
 			    ${h.form(url('register'))}
@@ -27,25 +27,34 @@
 			                    <label for="username">${_('Username')}:</label>
 			                </div>
 			                <div class="input">
-			                    ${h.text('username')}
+			                    ${h.text('username',class_="medium")}
 			                </div>
 			             </div>
 			            
 			             <div class="field">
 			                <div class="label">
-			                    <label for="password">${_('New Password')}:</label>
+			                    <label for="password">${_('Password')}:</label>
 			                </div>
 			                <div class="input">
-			                    ${h.password('password')}
+			                    ${h.password('password',class_="medium")}
 			                </div>
 			             </div>
-			            
+                         
+                         <div class="field">
+                            <div class="label">
+                                <label for="password">${_('Re-enter password')}:</label>
+                            </div>
+                            <div class="input">
+                                ${h.password('password_confirmation',class_="medium")}
+                            </div>
+                         </div>
+                         			            
 			             <div class="field">
 			                <div class="label">
 			                    <label for="name">${_('First Name')}:</label>
 			                </div>
 			                <div class="input">
-			                    ${h.text('name')}
+			                    ${h.text('name',class_="medium")}
 			                </div>
 			             </div>
 			            
@@ -54,7 +63,7 @@
 			                    <label for="lastname">${_('Last Name')}:</label>
 			                </div>
 			                <div class="input">
-			                    ${h.text('lastname')}
+			                    ${h.text('lastname',class_="medium")}
 			                </div>
 			             </div>
 			            
@@ -63,7 +72,7 @@
 			                    <label for="email">${_('Email')}:</label>
 			                </div>
 			                <div class="input">
-			                    ${h.text('email')}
+			                    ${h.text('email',class_="medium")}
 			                </div>
 			             </div>
 			                        

@@ -3,22 +3,88 @@
 Changelog
 =========
 
-1.0.2 (**2010-11-XX**)
+1.1.0 (**2010-12-18**)
 ----------------------
+
+:status: in-progress
+:branch: beta
+
+news
+++++
+
+- rewrite of internals for vcs >=0.1.10
+- uses mercurial 1.7 with dotencode disabled for maintaining compatibility 
+  with older clients
+- anonymous access, authentication via ldap
+- performance upgrade for cached repos list - each repository has it's own 
+  cache that's invalidated when needed.
+- performance upgrades on repositories with large amount of commits (20K+)
+- main page quick filter for filtering repositories
+- user dashboards with ability to follow chosen repositories actions
+- sends email to admin on new user registration
+- added cache/statistics reset options into repository settings
+- more detailed action logger (based on hooks) with pushed changesets lists
+  and options to disable those hooks from admin panel
+- introduced new enhanced changelog for merges that shows more accurate results
+- new improved and faster code stats (based on pygments lexers mapping tables, 
+  showing up to 10 trending sources for each repository. Additionally stats
+  can be disabled in repository settings.
+- gui optimizations, fixed application width to 1024px
+- added cut off (for large files/changesets) limit into config files
+- whoosh, celeryd, upgrade moved to paster command
+- other than sqlite database backends can be used
+
+fixes
++++++
+
+- fixes #61 forked repo was showing only after cache expired
+- fixes #76 no confirmation on user deletes
+- fixes #66 Name field misspelled
+- fixes #72 block user removal when he owns repositories
+- fixes #69 added password confirmation fields
+- fixes #87 RhodeCode crashes occasionally on updating repository owner
+- fixes #82 broken annotations on files with more than 1 blank line at the end
+- a lot of fixes and tweaks for file browser
+- fixed detached session issues
+- fixed when user had no repos he would see all repos listed in my account
+- fixed ui() instance bug when global hgrc settings was loaded for server 
+  instance and all hgrc options were merged with our db ui() object
+- numerous small bugfixes
+ 
+(special thanks for TkSoh for detailed feedback)
+
+
+1.0.2 (**2010-11-12**)
+----------------------
+
+news
+++++
+
+- tested under python2.7
+- bumped sqlalchemy and celery versions
+
+fixes
++++++
 
 - fixed #59 missing graph.js
 - fixed repo_size crash when repository had broken symlinks
 - fixed python2.5 crashes.
-- tested under python2.7
-- bumped sqlalcehmy and celery versions
+
 
 1.0.1 (**2010-11-10**)
 ----------------------
 
+news
+++++
+
+- small css updated
+
+fixes
++++++
+
 - fixed #53 python2.5 incompatible enumerate calls
 - fixed #52 disable mercurial extension for web
 - fixed #51 deleting repositories don't delete it's dependent objects
-- small css updated
 
 
 1.0.0 (**2010-11-02**)
@@ -52,3 +118,4 @@ Changelog
 - Disabled dirsize in file browser, it's causing nasty bug when dir renames 
   occure. After vcs is fixed it'll be put back again.
 - templating/css rewrites, optimized css.
+

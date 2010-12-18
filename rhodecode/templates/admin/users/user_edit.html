@@ -58,7 +58,7 @@
             
              <div class="field">
                 <div class="label">
-                    <label for="name">${_('Name')}:</label>
+                    <label for="name">${_('First Name')}:</label>
                 </div>
                 <div class="input">
                     ${h.text('name',class_='small')}
@@ -67,7 +67,7 @@
             
              <div class="field">
                 <div class="label">
-                    <label for="lastname">${_('Lastname')}:</label>
+                    <label for="lastname">${_('Last Name')}:</label>
                 </div>
                 <div class="input">
                     ${h.text('lastname',class_='small')}
@@ -101,7 +101,8 @@
                 </div>
              </div>             
             <div class="buttons">
-              ${h.submit('save','save',class_="ui-button ui-widget ui-state-default ui-corner-all")}
+              ${h.submit('save','Save',class_="ui-button ui-widget ui-state-default ui-corner-all")}
+              ${h.reset('reset','Reset',class_="ui-button ui-widget ui-state-default ui-corner-all")}
             </div>             
     	</div>    
     </div>

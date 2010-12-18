@@ -190,18 +190,32 @@ margin:0;
 padding:0 30px;
 }
 
+
+#header ul#logged-user{
+margin-bottom:5px !important;
+-webkit-border-radius: 0px 0px 8px 8px;
+-khtml-border-radius: 0px 0px 8px 8px; 
+-moz-border-radius: 0px 0px 8px 8px;
+border-radius: 0px 0px 8px 8px;
+height:37px;
+background:url("../images/header_inner.png") repeat-x scroll 0 0 #003367
+}
+
 #header ul#logged-user li {
 list-style:none;
 float:left;
-border-left:1px solid #bbb;
-border-right:1px solid #a5a5a5;
-margin:-2px 0 0;
-padding:10px 12px;
+margin:8px 0 0;
+padding:4px 12px;
+border-left: 1px solid #316293;
 }
 
 #header ul#logged-user li.first {
 border-left:none;
-margin:-6px;
+margin:4px;
+}
+
+#header ul#logged-user li.first div.gravatar {
+margin-top:-2px;
 }
 
 #header ul#logged-user li.first div.account {
@@ -214,13 +228,12 @@ border-right:none;
 }
 
 #header ul#logged-user li a {
-color:#4e4e4e;
+color:#fff;
 font-weight:700;
 text-decoration:none;
 }
 
 #header ul#logged-user li a:hover {
-color:#376ea6;
 text-decoration:underline;
 }
 
@@ -229,7 +242,7 @@ color:#fff;
 }
 
 #header ul#logged-user li.highlight a:hover {
-color:#376ea6;
+color:#FFF;
 }
 
 #header #header-inner {
@@ -258,9 +271,8 @@ background-position:0 -40px;
 
 #header #header-inner #logo h1 {
 color:#FFF;
-font-size:14px;
-text-transform:uppercase;
-margin:13px 0 0 13px;
+font-size:18px;
+margin:10px 0 0 13px;
 padding:0;
 }
 
@@ -303,6 +315,10 @@ background:#369 url("../../images/quick_l.png") no-repeat top left;
 padding:0;
 }
 
+#header #header-inner #quick li span.short {
+padding:9px 6px 8px 6px;
+}
+
 #header #header-inner #quick li span {
 top:0;
 right:0;
@@ -329,6 +345,15 @@ border-right:1px solid #2e5c89;
 padding:8px 8px 4px;
 }
 
+#header #header-inner #quick li span.icon_short {
+top:0;
+left:0;
+border-left:none;
+background:url("../../images/quick_l.png") no-repeat top left;
+border-right:1px solid #2e5c89;
+padding:9px 4px 4px;
+}
+
 #header #header-inner #quick li a:hover {
 background:#4e4e4e url("../../images/quick_l_selected.png") no-repeat top left;
 }
@@ -338,11 +363,12 @@ border-left:1px solid #545454;
 background:url("../../images/quick_r_selected.png") no-repeat top right;
 }
 
-#header #header-inner #quick li a:hover span.icon {
+#header #header-inner #quick li a:hover span.icon,#header #header-inner #quick li a:hover span.icon_short {
 border-left:none;
 border-right:1px solid #464646;
 background:url("../../images/quick_l_selected.png") no-repeat top left;
 }
+
 
 #header #header-inner #quick ul {
 top:29px;
@@ -364,6 +390,12 @@ overflow-x:hidden;
 overflow-y:auto;
 }
 
+#header #header-inner #quick .repo_switcher_type{
+position:absolute;
+left:0;
+top:9px; 
+
+}
 #header #header-inner #quick li ul li {
 border-bottom:1px solid #ddd;
 }
@@ -394,7 +426,7 @@ right:200px;
 max-height:275px;
 overflow:auto;
 overflow-x:hidden;
-white-space:nowrap;
+white-space:normal;
 }
 
 #header #header-inner #quick li ul li a.journal,#header #header-inner #quick li ul li a.journal:hover {
@@ -415,6 +447,20 @@ padding:12px 9px 7px 24px;
 background:url("../images/icons/lock_open.png") no-repeat scroll 4px 9px #FFF;
 min-width:167px;
 margin:0;
+padding:12px 9px 7px 24px;
+}
+
+#header #header-inner #quick li ul li a.hg,#header #header-inner #quick li ul li a.hg:hover {
+background:url("../images/icons/hgicon.png") no-repeat scroll 4px 9px #FFF;
+min-width:167px;
+margin:0 0 0 14px;
+padding:12px 9px 7px 24px;
+}
+
+#header #header-inner #quick li ul li a.git,#header #header-inner #quick li ul li a.git:hover {
+background:url("../images/icons/giticon.png") no-repeat scroll 4px 9px #FFF;
+min-width:167px;
+margin:0 0 0 14px;
 padding:12px 9px 7px 24px;
 }
 
@@ -441,6 +487,13 @@ padding:12px 9px 7px 24px;
 
 #header #header-inner #quick li ul li a.permissions,#header #header-inner #quick li ul li a.permissions:hover {
 background:#FFF url("../images/icons/key.png") no-repeat 4px 9px;
+width:167px;
+margin:0;
+padding:12px 9px 7px 24px;
+}
+
+#header #header-inner #quick li ul li a.ldap,#header #header-inner #quick li ul li a.ldap:hover {
+background:#FFF url("../images/icons/server_key.png") no-repeat 4px 9px;
 width:167px;
 margin:0;
 padding:12px 9px 7px 24px;
@@ -787,7 +840,7 @@ padding:0 0 8px;
 }
 
 #content div.box div.form div.fields div.field div.label-select {
-padding:2px 0 0 5px;
+padding:5px 0 0 5px;
 }
 
 #content div.box-left div.form div.fields div.field div.label-select,#content div.box-right div.form div.fields div.field div.label-select {
@@ -806,16 +859,8 @@ font-weight:700;
 #content div.box div.form div.fields div.field div.input {
 margin:0 0 0 200px;
 }
-
 #content div.box-left div.form div.fields div.field div.input,#content div.box-right div.form div.fields div.field div.input {
-clear:both;
-overflow:hidden;
-border-top:1px solid #b3b3b3;
-border-left:1px solid #b3b3b3;
-border-right:1px solid #eaeaea;
-border-bottom:1px solid #eaeaea;
-margin:0;
-padding:7px 7px 6px;
+margin:0 0 0 0px;
 }
 
 #content div.box div.form div.fields div.field div.input input {
@@ -831,11 +876,7 @@ margin:0;
 padding:7px 7px 6px;
 }
 
-#content div.box-left div.form div.fields div.field div.input input,#content div.box-right div.form div.fields div.field div.input input {
-width:100%;
-border:none;
-padding:0;
-}
+
 
 #content div.box div.form div.fields div.field div.input input.small {
 width:30%;
@@ -1320,7 +1361,6 @@ padding:0 0 2px;
 }
 
 #register div.title {
-width:420px;
 clear:both;
 overflow:hidden;
 position:relative;
@@ -1330,7 +1370,6 @@ padding:0;
 }
 
 #register div.inner {
-width:380px;
 background:#FFF;
 border-top:none;
 border-bottom:none;
@@ -1339,7 +1378,7 @@ padding:20px;
 }
 
 #register div.form div.fields div.field div.label {
-width:100px;
+width:135px;
 float:left;
 text-align:right;
 margin:2px 10px 0 0;
@@ -1347,7 +1386,7 @@ padding:5px 0 0 5px;
 }
 
 #register div.form div.fields div.field div.input input {
-width:245px;
+width:300px;
 background:#FFF;
 border-top:1px solid #b3b3b3;
 border-left:1px solid #b3b3b3;
@@ -1366,7 +1405,7 @@ overflow:hidden;
 border-top:1px solid #DDD;
 text-align:left;
 margin:0;
-padding:10px 0 0 114px;
+padding:10px 0 0 150px;
 }
 
 #register div.form div.fields div.buttons div.highlight input.ui-state-default {
@@ -1525,6 +1564,7 @@ display:block;
 float:right;
 text-align:center;
 min-width:15px;
+cursor: help;
 }
 
 .right .changes .added {
@@ -1617,6 +1657,17 @@ background:url("../images/icons/document_16.png") no-repeat scroll 3px;
 height:16px;
 padding-left:20px;
 text-align:left;
+}
+.diffblock .changeset_file{
+background:url("../images/icons/file.png") no-repeat scroll 3px;
+height:16px;
+padding-left:22px;
+text-align:left;
+font-size: 14px;
+}
+
+.diffblock .changeset_header{
+margin-left: 6px !important;
 }
 
 table.code-browser .browser-dir {
@@ -1771,6 +1822,36 @@ background:#556CB5;
 color:#FFF;
 }
 
+.follow{
+background:url("../images/icons/heart_add.png") no-repeat scroll 3px;
+height: 16px;
+width: 20px;
+cursor: pointer;
+display: block;
+float: right;
+margin-top: 2px;
+}
+
+.following{
+background:url("../images/icons/heart_delete.png") no-repeat scroll 3px;
+height: 16px;
+width: 20px;
+cursor: pointer;
+display: block;
+float: right;
+margin-top: 2px;
+}
+
+.currently_following{
+padding-left: 10px;
+padding-bottom:5px;
+}
+
+.journal_highlight{
+font-weight: bold;
+text-decoration: underline;
+}
+
 .add_icon {
 background:url("../images/icons/add.png") no-repeat scroll 3px;
 height:16px;
@@ -1789,6 +1870,14 @@ text-align:left;
 
 .delete_icon {
 background:url("../images/icons/delete.png") no-repeat scroll 3px;
+height:16px;
+padding-left:20px;
+padding-top:1px;
+text-align:left;
+}
+
+.refresh_icon {
+background:url("../images/icons/arrow_refresh.png") no-repeat scroll 3px;
 height:16px;
 padding-left:20px;
 padding-top:1px;
@@ -1944,7 +2033,7 @@ padding:2px 2px 0;
 }
 
 #header,#content,#footer {
-min-width:1224px;
+min-width:1024px;
 }
 
 #content {
@@ -2047,10 +2136,6 @@ margin:0;
 padding:0;
 }
 
-#content div.box div.form div.fields div.field div.label-checkbox,#content div.box div.form div.fields div.field div.label-radio,#content div.box div.form div.fields div.field div.label-textarea {
-padding:0 0 0 5px !important;
-}
-
 #content div.box div.form div.fields div.field div.label span,#login div.form div.fields div.field div.label span,#register div.form div.fields div.field div.label span {
 height:1%;
 display:block;
@@ -2079,10 +2164,16 @@ border-bottom:1px solid #c6d880;
 margin:0;
 }
 
+#content div.box-left div.form div.fields div.field div.select,#content div.box-left div.form div.fields div.field div.checkboxes,#content div.box-left div.form div.fields div.field div.radios,#content div.box-right div.form div.fields div.field div.select,#content div.box-right div.form div.fields div.field div.checkboxes,#content div.box-right div.form div.fields div.field div.radios{
+margin:0 0 0 0px !important;
+padding:0;
+}
+
 #content div.box div.form div.fields div.field div.select,#content div.box div.form div.fields div.field div.checkboxes,#content div.box div.form div.fields div.field div.radios {
 margin:0 0 0 200px;
 padding:0;
 }
+
 
 #content div.box div.form div.fields div.field div.select a:hover,#content div.box div.form div.fields div.field div.select a.ui-selectmenu:hover,#content div.box div.action a:hover {
 color:#000;
@@ -2097,7 +2188,7 @@ border:1px solid #666;
 clear:both;
 overflow:hidden;
 margin:0;
-padding:2px 0;
+padding:8px 0 2px;
 }
 
 #content div.box div.form div.fields div.field div.checkboxes div.checkbox input,#content div.box div.form div.fields div.field div.radios div.radio input {
@@ -2109,7 +2200,7 @@ margin:0;
 height:1%;
 display:block;
 float:left;
-margin:3px 0 0 4px;
+margin:2px 0 0 4px;
 }
 
 div.form div.fields div.field div.button input,#content div.box div.form div.fields div.buttons input,div.form div.fields div.buttons input,#content div.box div.action div.button input {
@@ -2218,7 +2309,7 @@ padding:6px;
 }
 
 #login,#register {
-width:420px;
+width:520px;
 margin:10% auto 0;
 padding:0;
 }
@@ -2259,6 +2350,7 @@ display:block;
 color:red;
 margin:8px 0 0;
 padding:0;
+max-width: 320px;
 }
 
 #login div.form div.fields div.field div.label label,#register div.form div.fields div.field div.label label {
@@ -2311,3 +2403,12 @@ border:none !important;
 height:20px !important;
 padding:0 !important;
 }
+
+#q_filter{
+border:0 none;
+color:#AAAAAA;
+margin-bottom:-4px;
+margin-top:-4px;
+padding-left:3px;
+}
+

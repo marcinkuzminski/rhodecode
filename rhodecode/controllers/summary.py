@@ -1,8 +1,15 @@
-#!/usr/bin/env python
-# encoding: utf-8
-# summary controller for pylons
-# Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
-# 
+# -*- coding: utf-8 -*-
+"""
+    package.rhodecode.controllers.summary
+    ~~~~~~~~~~~~~~
+
+    Summary controller for Rhodecode
+    
+    :created_on: Apr 18, 2010
+    :author: marcink
+    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
+    :license: GPLv3, see COPYING for more details.
+"""
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
@@ -17,24 +24,29 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
-"""
-Created on April 18, 2010
-summary controller for pylons
-@author: marcink
-"""
-from pylons import tmpl_context as c, request, url
-from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
-from rhodecode.lib.base import BaseController, render
-from rhodecode.lib.utils import OrderedDict
-from rhodecode.model.hg_model import HgModel
-from rhodecode.model.db import Statistics
-from webhelpers.paginate import Page
-from rhodecode.lib.celerylib import run_task
-from rhodecode.lib.celerylib.tasks import get_commits_stats
-from datetime import datetime, timedelta
-from time import mktime
+
 import calendar
 import logging
+from time import mktime
+from datetime import datetime, timedelta
+
+from vcs.exceptions import ChangesetError
+
+from pylons import tmpl_context as c, request, url
+from pylons.i18n.translation import _
+
+from rhodecode.model.scm import ScmModel
+from rhodecode.model.db import Statistics
+
+from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
+from rhodecode.lib.base import BaseController, render
+from rhodecode.lib.utils import OrderedDict, EmptyChangeset
+
+from rhodecode.lib.celerylib import run_task
+from rhodecode.lib.celerylib.tasks import get_commits_stats
+
+from webhelpers.paginate import Page
+
 try:
     import json
 except ImportError:
@@ -43,66 +55,90 @@ except ImportError:
 log = logging.getLogger(__name__)
 
 class SummaryController(BaseController):
-    
+
     @LoginRequired()
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
-                                   'repository.admin')           
+                                   'repository.admin')
     def __before__(self):
         super(SummaryController, self).__before__()
-                
+
     def index(self):
-        hg_model = HgModel()
-        c.repo_info = hg_model.get_repo(c.repo_name)
-        c.repo_changesets = Page(list(c.repo_info[:10]), page=1, items_per_page=20)
+        scm_model = ScmModel()
+        c.repo_info = scm_model.get_repo(c.repo_name)
+        c.following = scm_model.is_following_repo(c.repo_name,
+                                             c.rhodecode_user.user_id)
+        def url_generator(**kw):
+            return url('shortlog_home', repo_name=c.repo_name, **kw)
+
+        c.repo_changesets = Page(c.repo_info, page=1, items_per_page=10,
+                                 url=url_generator)
+
         e = request.environ
-            
-        uri = u'%(protocol)s://%(user)s@%(host)s%(prefix)s/%(repo_name)s' % {
+
+        if self.rhodecode_user.username == 'default':
+            password = ':default'
+        else:
+            password = ''
+
+        uri = u'%(protocol)s://%(user)s%(password)s@%(host)s%(prefix)s/%(repo_name)s' % {
                                         'protocol': e.get('wsgi.url_scheme'),
                                         'user':str(c.rhodecode_user.username),
+                                        'password':password,
                                         'host':e.get('HTTP_HOST'),
                                         'prefix':e.get('SCRIPT_NAME'),
                                         'repo_name':c.repo_name, }
         c.clone_repo_url = uri
         c.repo_tags = OrderedDict()
         for name, hash in c.repo_info.tags.items()[:10]:
-            c.repo_tags[name] = c.repo_info.get_changeset(hash)
-        
+            try:
+                c.repo_tags[name] = c.repo_info.get_changeset(hash)
+            except ChangesetError:
+                c.repo_tags[name] = EmptyChangeset(hash)
+
         c.repo_branches = OrderedDict()
         for name, hash in c.repo_info.branches.items()[:10]:
-            c.repo_branches[name] = c.repo_info.get_changeset(hash)
-        
-        td = datetime.today() + timedelta(days=1) 
+            try:
+                c.repo_branches[name] = c.repo_info.get_changeset(hash)
+            except ChangesetError:
+                c.repo_branches[name] = EmptyChangeset(hash)
+
+        td = datetime.today() + timedelta(days=1)
         y, m, d = td.year, td.month, td.day
-        
+
         ts_min_y = mktime((y - 1, (td - timedelta(days=calendar.mdays[m])).month,
                             d, 0, 0, 0, 0, 0, 0,))
         ts_min_m = mktime((y, (td - timedelta(days=calendar.mdays[m])).month,
                             d, 0, 0, 0, 0, 0, 0,))
-        
+
         ts_max_y = mktime((y, m, d, 0, 0, 0, 0, 0, 0,))
-            
-        run_task(get_commits_stats, c.repo_info.name, ts_min_y, ts_max_y)
+        if c.repo_info.dbrepo.enable_statistics:
+            c.no_data_msg = _('No data loaded yet')
+            run_task(get_commits_stats, c.repo_info.name, ts_min_y, ts_max_y)
+        else:
+            c.no_data_msg = _('Statistics update are disabled for this repository')
         c.ts_min = ts_min_m
         c.ts_max = ts_max_y
-        
+
         stats = self.sa.query(Statistics)\
             .filter(Statistics.repository == c.repo_info.dbrepo)\
             .scalar()
-        
-        
+
+
         if stats and stats.languages:
+            c.no_data = False is c.repo_info.dbrepo.enable_statistics
             lang_stats = json.loads(stats.languages)
             c.commit_data = stats.commit_activity
             c.overview_data = stats.commit_activity_combined
             c.trending_languages = json.dumps(OrderedDict(
                                        sorted(lang_stats.items(), reverse=True,
-                                            key=lambda k: k[1])[:2]
+                                            key=lambda k: k[1])[:10]
                                         )
                                     )
         else:
             c.commit_data = json.dumps({})
-            c.overview_data = json.dumps([[ts_min_y, 0], [ts_max_y, 0] ])
+            c.overview_data = json.dumps([[ts_min_y, 0], [ts_max_y, 10] ])
             c.trending_languages = json.dumps({})
-        
+            c.no_data = True
+
         return render('summary/summary.html')
 

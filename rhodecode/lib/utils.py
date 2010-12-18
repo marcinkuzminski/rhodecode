@@ -1,7 +1,15 @@
-#!/usr/bin/env python
-# encoding: utf-8
-# Utilities for RhodeCode
-# Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
+# -*- coding: utf-8 -*-
+"""
+    rhodecode.lib.utils
+    ~~~~~~~~~~~~~~~~~~~
+
+    Utilities library for RhodeCode
+    
+    :created_on: Apr 18, 2010
+    :author: marcink
+    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
+    :license: GPLv3, see COPYING for more details.
+"""
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
@@ -17,21 +25,28 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
 
-"""
-Created on April 18, 2010
-Utilities for RhodeCode
-@author: marcink
-"""
-from beaker.cache import cache_region
-from mercurial import ui, config, hg
-from mercurial.error import RepoError
-from rhodecode.model import meta
-from rhodecode.model.db import Repository, User, RhodeCodeUi, RhodeCodeSettings, UserLog
-from vcs.backends.base import BaseChangeset
-from vcs.utils.lazy import LazyProperty
+import os
 import logging
 import datetime
-import os
+import traceback
+
+from UserDict import DictMixin
+
+from mercurial import ui, config, hg
+from mercurial.error import RepoError
+
+import paste
+import beaker
+from paste.script.command import Command, BadCommand
+
+from vcs.backends.base import BaseChangeset
+from vcs.utils.lazy import LazyProperty
+
+from rhodecode.model import meta
+from rhodecode.model.caching_query import FromCache
+from rhodecode.model.db import Repository, User, RhodeCodeUi, UserLog
+from rhodecode.model.repo import RepoModel
+from rhodecode.model.user import UserModel
 
 log = logging.getLogger(__name__)
 
@@ -39,72 +54,95 @@ log = logging.getLogger(__name__)
 def get_repo_slug(request):
     return request.environ['pylons.routes_dict'].get('repo_name')
 
-def is_mercurial(environ):
+def action_logger(user, action, repo, ipaddr='', sa=None):
     """
-    Returns True if request's target is mercurial server - header
-    ``HTTP_ACCEPT`` of such request would start with ``application/mercurial``.
-    """
-    http_accept = environ.get('HTTP_ACCEPT')
-    if http_accept and http_accept.startswith('application/mercurial'):
-        return True
-    return False
-
-def is_git(environ):
-    """
-    Returns True if request's target is git server. ``HTTP_USER_AGENT`` would
-    then have git client version given.
+    Action logger for various actions made by users
     
-    :param environ:
-    """
-    http_user_agent = environ.get('HTTP_USER_AGENT')
-    if http_user_agent.startswith('git'):
-        return True
-    return False
-
-def action_logger(user, action, repo, ipaddr, sa=None):
-    """
-    Action logger for various action made by users
+    :param user: user that made this action, can be a unique username string or
+        object containing user_id attribute
+    :param action: action to log, should be on of predefined unique actions for
+        easy translations
+    :param repo: string name of repository or object containing repo_id,
+        that action was made on
+    :param ipaddr: optional ip address from what the action was made
+    :param sa: optional sqlalchemy session
+    
     """
 
     if not sa:
-        sa = meta.Session
+        sa = meta.Session()
 
     try:
+        um = UserModel()
         if hasattr(user, 'user_id'):
-            user_id = user.user_id
+            user_obj = user
         elif isinstance(user, basestring):
-            user_id = sa.query(User).filter(User.username == user).one()
+            user_obj = um.get_by_username(user, cache=False)
         else:
             raise Exception('You have to provide user object or username')
 
-        repo_name = repo.lstrip('/')
+
+        rm = RepoModel()
+        if hasattr(repo, 'repo_id'):
+            repo_obj = rm.get(repo.repo_id, cache=False)
+            repo_name = repo_obj.repo_name
+        elif  isinstance(repo, basestring):
+            repo_name = repo.lstrip('/')
+            repo_obj = rm.get_by_repo_name(repo_name, cache=False)
+        else:
+            raise Exception('You have to provide repository to action logger')
+
+
         user_log = UserLog()
-        user_log.user_id = user_id
+        user_log.user_id = user_obj.user_id
         user_log.action = action
+
+        user_log.repository_id = repo_obj.repo_id
         user_log.repository_name = repo_name
-        user_log.repository = sa.query(Repository)\
-            .filter(Repository.repo_name == repo_name).one()
+
         user_log.action_date = datetime.datetime.now()
         user_log.user_ip = ipaddr
         sa.add(user_log)
         sa.commit()
 
-        log.info('Adding user %s, action %s on %s',
-                                        user.username, action, repo)
-    except Exception, e:
+        log.info('Adding user %s, action %s on %s', user_obj, action, repo)
+    except:
+        log.error(traceback.format_exc())
         sa.rollback()
-        log.error('could not log user action:%s', str(e))
 
-def check_repo_dir(paths):
-    repos_path = paths[0][1].split('/')
-    if repos_path[-1] in ['*', '**']:
-        repos_path = repos_path[:-1]
-    if repos_path[0] != '/':
-        repos_path[0] = '/'
-    if not os.path.isdir(os.path.join(*repos_path)):
-        raise Exception('Not a valid repository in %s' % paths[0][1])
+def get_repos(path, recursive=False, initial=False):
+    """
+    Scans given path for repos and return (name,(type,path)) tuple 
+    :param prefix:
+    :param path:
+    :param recursive:
+    :param initial:
+    """
+    from vcs.utils.helpers import get_scm
+    from vcs.exceptions import VCSError
+
+    try:
+        scm = get_scm(path)
+    except:
+        pass
+    else:
+        raise Exception('The given path %s should not be a repository got %s',
+                        path, scm)
+
+    for dirpath in os.listdir(path):
+        try:
+            yield dirpath, get_scm(os.path.join(path, dirpath))
+        except VCSError:
+            pass
 
 def check_repo_fast(repo_name, base_path):
+    """
+    Check given path for existance of directory
+    :param repo_name:
+    :param base_path:
+    
+    :return False: if this directory is present
+    """
     if os.path.isdir(os.path.join(base_path, repo_name)):return False
     return True
 
@@ -135,57 +173,6 @@ def ask_ok(prompt, retries=4, complaint='Yes or no, please!'):
         if retries < 0: raise IOError
         print complaint
 
-@cache_region('super_short_term', 'cached_hg_ui')
-def get_hg_ui_cached():
-    try:
-        sa = meta.Session
-        ret = sa.query(RhodeCodeUi).all()
-    finally:
-        meta.Session.remove()
-    return ret
-
-
-def get_hg_settings():
-    try:
-        sa = meta.Session
-        ret = sa.query(RhodeCodeSettings).all()
-    finally:
-        meta.Session.remove()
-
-    if not ret:
-        raise Exception('Could not get application settings !')
-    settings = {}
-    for each in ret:
-        settings['rhodecode_' + each.app_settings_name] = each.app_settings_value
-
-    return settings
-
-def get_hg_ui_settings():
-    try:
-        sa = meta.Session
-        ret = sa.query(RhodeCodeUi).all()
-    finally:
-        meta.Session.remove()
-
-    if not ret:
-        raise Exception('Could not get application ui settings !')
-    settings = {}
-    for each in ret:
-        k = each.ui_key
-        v = each.ui_value
-        if k == '/':
-            k = 'root_path'
-
-        if k.find('.') != -1:
-            k = k.replace('.', '_')
-
-        if each.ui_section == 'hooks':
-            v = each.ui_active
-
-        settings[each.ui_section + '_' + k] = v
-
-    return settings
-
 #propagated from mercurial documentation
 ui_sections = ['alias', 'auth',
                 'decode/encode', 'defaults',
@@ -210,6 +197,11 @@ def make_ui(read_from='file', path=None, checkpaths=True):
 
     baseui = ui.ui()
 
+    #clean the baseui object
+    baseui._ocfg = config.config()
+    baseui._ucfg = config.config()
+    baseui._tcfg = config.config()
+
     if read_from == 'file':
         if not os.path.isfile(path):
             log.warning('Unable to read config file %s' % path)
@@ -219,70 +211,69 @@ def make_ui(read_from='file', path=None, checkpaths=True):
         cfg.read(path)
         for section in ui_sections:
             for k, v in cfg.items(section):
-                baseui.setconfig(section, k, v)
                 log.debug('settings ui from file[%s]%s:%s', section, k, v)
-
-        for k, v in baseui.configitems('extensions'):
-            baseui.setconfig('extensions', k, '0')
-        #just enable mq
-        baseui.setconfig('extensions', 'mq', '1')
-        if checkpaths:check_repo_dir(cfg.items('paths'))
+                baseui.setconfig(section, k, v)
 
 
     elif read_from == 'db':
-        hg_ui = get_hg_ui_cached()
+        sa = meta.Session()
+        ret = sa.query(RhodeCodeUi)\
+            .options(FromCache("sql_cache_short",
+                               "get_hg_ui_settings")).all()
+
+        hg_ui = ret
         for ui_ in hg_ui:
             if ui_.ui_active:
-                log.debug('settings ui from db[%s]%s:%s', ui_.ui_section, ui_.ui_key, ui_.ui_value)
+                log.debug('settings ui from db[%s]%s:%s', ui_.ui_section,
+                          ui_.ui_key, ui_.ui_value)
                 baseui.setconfig(ui_.ui_section, ui_.ui_key, ui_.ui_value)
 
-
+        meta.Session.remove()
     return baseui
 
 
 def set_rhodecode_config(config):
-    hgsettings = get_hg_settings()
+    """
+    Updates pylons config with new settings from database
+    :param config:
+    """
+    from rhodecode.model.settings import SettingsModel
+    hgsettings = SettingsModel().get_app_settings()
 
     for k, v in hgsettings.items():
         config[k] = v
 
-def invalidate_cache(name, *args):
-    """Invalidates given name cache"""
+def invalidate_cache(cache_key, *args):
+    """
+    Puts cache invalidation task into db for 
+    further global cache invalidation
+    """
+    from rhodecode.model.scm import ScmModel
 
-    from beaker.cache import region_invalidate
-    log.info('INVALIDATING CACHE FOR %s', name)
-
-    """propagate our arguments to make sure invalidation works. First
-    argument has to be the name of cached func name give to cache decorator
-    without that the invalidation would not work"""
-    tmp = [name]
-    tmp.extend(args)
-    args = tuple(tmp)
-
-    if name == 'cached_repo_list':
-        from rhodecode.model.hg_model import _get_repos_cached
-        region_invalidate(_get_repos_cached, None, *args)
-
-    if name == 'full_changelog':
-        from rhodecode.model.hg_model import _full_changelog_cached
-        region_invalidate(_full_changelog_cached, None, *args)
+    if cache_key.startswith('get_repo_cached_'):
+        name = cache_key.split('get_repo_cached_')[-1]
+        ScmModel().mark_for_invalidation(name)
 
 class EmptyChangeset(BaseChangeset):
     """
-    An dummy empty changeset.
+    An dummy empty changeset. It's possible to pass hash when creating
+    an EmptyChangeset
     """
 
-    revision = -1
-    message = ''
-    author = ''
-    date = ''
+    def __init__(self, cs='0' * 40):
+        self._empty_cs = cs
+        self.revision = -1
+        self.message = ''
+        self.author = ''
+        self.date = ''
+
     @LazyProperty
     def raw_id(self):
         """
-        Returns raw string identifing this changeset, useful for web
+        Returns raw string identifying this changeset, useful for web
         representation.
         """
-        return '0' * 40
+        return self._empty_cs
 
     @LazyProperty
     def short_id(self):
@@ -301,25 +292,24 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False):
     """
     maps all found repositories into db
     """
-    from rhodecode.model.repo_model import RepoModel
 
-    sa = meta.Session
+    sa = meta.Session()
+    rm = RepoModel()
     user = sa.query(User).filter(User.admin == True).first()
 
-    rm = RepoModel()
-
     for name, repo in initial_repo_list.items():
-        if not sa.query(Repository).filter(Repository.repo_name == name).scalar():
+        if not rm.get_by_repo_name(name, cache=False):
             log.info('repository %s not found creating default', name)
 
             form_data = {
                          'repo_name':name,
-                         'description':repo.description if repo.description != 'unknown' else \
-                                        'auto description for %s' % name,
+                         'repo_type':repo.alias,
+                         'description':repo.description \
+                            if repo.description != 'unknown' else \
+                                        '%s repository' % name,
                          'private':False
                          }
             rm.create(form_data, user, just_db=True)
-
 
     if remove_obsolete:
         #remove from database those repositories that are not in the filesystem
@@ -327,11 +317,6 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False):
             if repo.repo_name not in initial_repo_list.keys():
                 sa.delete(repo)
                 sa.commit()
-
-
-    meta.Session.remove()
-
-from UserDict import DictMixin
 
 class OrderedDict(dict, DictMixin):
 
@@ -433,8 +418,51 @@ class OrderedDict(dict, DictMixin):
         return not self == other
 
 
+#set cache regions for beaker so celery can utilise it
+def add_cache(settings):
+    cache_settings = {'regions':None}
+    for key in settings.keys():
+        for prefix in ['beaker.cache.', 'cache.']:
+            if key.startswith(prefix):
+                name = key.split(prefix)[1].strip()
+                cache_settings[name] = settings[key].strip()
+    if cache_settings['regions']:
+        for region in cache_settings['regions'].split(','):
+            region = region.strip()
+            region_settings = {}
+            for key, value in cache_settings.items():
+                if key.startswith(region):
+                    region_settings[key.split('.')[1]] = value
+            region_settings['expire'] = int(region_settings.get('expire',
+                                                                60))
+            region_settings.setdefault('lock_dir',
+                                       cache_settings.get('lock_dir'))
+            if 'type' not in region_settings:
+                region_settings['type'] = cache_settings.get('type',
+                                                             'memory')
+            beaker.cache.cache_regions[region] = region_settings
+
+def get_current_revision():
+    """
+    Returns tuple of (number, id) from repository containing this package
+    or None if repository could not be found.
+    """
+    try:
+        from vcs import get_repo
+        from vcs.utils.helpers import get_scm
+        from vcs.exceptions import RepositoryError, VCSError
+        repopath = os.path.join(os.path.dirname(__file__), '..', '..')
+        scm = get_scm(repopath)[0]
+        repo = get_repo(path=repopath, alias=scm)
+        tip = repo.get_changeset()
+        return (tip.revision, tip.short_id)
+    except (ImportError, RepositoryError, VCSError), err:
+        logging.debug("Cannot retrieve rhodecode's revision. Original error "
+                      "was: %s" % err)
+        return None
+
 #===============================================================================
-# TEST FUNCTIONS
+# TEST FUNCTIONS AND CREATORS
 #===============================================================================
 def create_test_index(repo_location, full_index):
     """Makes default test index
@@ -443,15 +471,16 @@ def create_test_index(repo_location, full_index):
     """
     from rhodecode.lib.indexers.daemon import WhooshIndexingDaemon
     from rhodecode.lib.pidlock import DaemonLock, LockHeld
-    from rhodecode.lib.indexers import IDX_LOCATION
     import shutil
 
-    if os.path.exists(IDX_LOCATION):
-        shutil.rmtree(IDX_LOCATION)
+    index_location = os.path.join(repo_location, 'index')
+    if os.path.exists(index_location):
+        shutil.rmtree(index_location)
 
     try:
         l = DaemonLock()
-        WhooshIndexingDaemon(repo_location=repo_location)\
+        WhooshIndexingDaemon(index_location=index_location,
+                             repo_location=repo_location)\
             .run(full_index=full_index)
         l.release()
     except LockHeld:
@@ -462,10 +491,11 @@ def create_test_env(repos_test_path, config):
     install test repository into tmp dir
     """
     from rhodecode.lib.db_manage import DbManage
+    from rhodecode.tests import HG_REPO, GIT_REPO, NEW_HG_REPO, NEW_GIT_REPO, \
+        HG_FORK, GIT_FORK, TESTS_TMP_PATH
     import tarfile
     import shutil
     from os.path import dirname as dn, join as jn, abspath
-    from rhodecode.tests import REPO_PATH, NEW_REPO_PATH, FORK_REPO_PATH
 
     log = logging.getLogger('TestEnvCreator')
     # create logger
@@ -485,10 +515,10 @@ def create_test_env(repos_test_path, config):
     log.addHandler(ch)
 
     #PART ONE create db
-    dbname = config['sqlalchemy.db1.url'].split('/')[-1]
-    log.debug('making test db %s', dbname)
+    dbconf = config['sqlalchemy.db1.url']
+    log.debug('making test db %s', dbconf)
 
-    dbmanage = DbManage(log_sql=True, dbname=dbname, root=config['here'],
+    dbmanage = DbManage(log_sql=True, dbconf=dbconf, root=config['here'],
                         tests=True)
     dbmanage.create_tables(override=True)
     dbmanage.config_prompt(repos_test_path)
@@ -498,18 +528,87 @@ def create_test_env(repos_test_path, config):
     dbmanage.populate_default_permissions()
 
     #PART TWO make test repo
-    log.debug('making test vcs repo')
-    if os.path.isdir(REPO_PATH):
-        log.debug('REMOVING %s', REPO_PATH)
-        shutil.rmtree(REPO_PATH)
-    if os.path.isdir(NEW_REPO_PATH):
-        log.debug('REMOVING %s', NEW_REPO_PATH)
-        shutil.rmtree(NEW_REPO_PATH)
-    if os.path.isdir(FORK_REPO_PATH):
-        log.debug('REMOVING %s', FORK_REPO_PATH)
-        shutil.rmtree(FORK_REPO_PATH)
+    log.debug('making test vcs repositories')
 
+    #remove old one from previos tests
+    for r in [HG_REPO, GIT_REPO, NEW_HG_REPO, NEW_GIT_REPO, HG_FORK, GIT_FORK]:
+
+        if os.path.isdir(jn(TESTS_TMP_PATH, r)):
+            log.debug('removing %s', r)
+            shutil.rmtree(jn(TESTS_TMP_PATH, r))
+
+    #CREATE DEFAULT HG REPOSITORY
     cur_dir = dn(dn(abspath(__file__)))
-    tar = tarfile.open(jn(cur_dir, 'tests', "vcs_test.tar.gz"))
-    tar.extractall('/tmp')
+    tar = tarfile.open(jn(cur_dir, 'tests', "vcs_test_hg.tar.gz"))
+    tar.extractall(jn(TESTS_TMP_PATH, HG_REPO))
     tar.close()
+
+
+#==============================================================================
+# PASTER COMMANDS
+#==============================================================================
+
+class BasePasterCommand(Command):
+    """
+    Abstract Base Class for paster commands.
+
+    The celery commands are somewhat aggressive about loading
+    celery.conf, and since our module sets the `CELERY_LOADER`
+    environment variable to our loader, we have to bootstrap a bit and
+    make sure we've had a chance to load the pylons config off of the
+    command line, otherwise everything fails.
+    """
+    min_args = 1
+    min_args_error = "Please provide a paster config file as an argument."
+    takes_config_file = 1
+    requires_config_file = True
+
+    def notify_msg(self, msg, log=False):
+        """Make a notification to user, additionally if logger is passed
+        it logs this action using given logger
+        
+        :param msg: message that will be printed to user
+        :param log: logging instance, to use to additionally log this message
+        
+        """
+        print msg
+        if log and isinstance(log, logging):
+            log(msg)
+
+
+    def run(self, args):
+        """
+        Overrides Command.run
+        
+        Checks for a config file argument and loads it.
+        """
+        if len(args) < self.min_args:
+            raise BadCommand(
+                self.min_args_error % {'min_args': self.min_args,
+                                       'actual_args': len(args)})
+
+        # Decrement because we're going to lob off the first argument.
+        # @@ This is hacky
+        self.min_args -= 1
+        self.bootstrap_config(args[0])
+        self.update_parser()
+        return super(BasePasterCommand, self).run(args[1:])
+
+    def update_parser(self):
+        """
+        Abstract method.  Allows for the class's parser to be updated
+        before the superclass's `run` method is called.  Necessary to
+        allow options/arguments to be passed through to the underlying
+        celery command.
+        """
+        raise NotImplementedError("Abstract Method.")
+
+    def bootstrap_config(self, conf):
+        """
+        Loads the pylons configuration.
+        """
+        from pylons import config as pylonsconfig
+
+        path_to_ini_file = os.path.realpath(conf)
+        conf = paste.deploy.appconfig('config:' + path_to_ini_file)
+        pylonsconfig.init_app(conf.global_conf, conf.local_conf)

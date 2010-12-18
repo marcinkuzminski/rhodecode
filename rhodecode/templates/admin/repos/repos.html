@@ -37,6 +37,16 @@
             %for cnt,repo in enumerate(c.repos_list):
             <tr class="parity${cnt%2}">
                  <td>
+                 ## TYPE OF REPO
+                 %if repo['repo'].dbrepo.repo_type =='hg':
+                   <img class="icon" title="${_('Mercurial repository')}" alt="${_('Mercurial repository')}" src="/images/icons/hgicon.png"/>
+                 %elif repo['repo'].dbrepo.repo_type =='git':
+                   <img class="icon" title="${_('Git repository')}" alt="${_('Git repository')}" src="/images/icons/giticon.png"/>
+                 %else:
+                   
+                 %endif
+                 
+                 ## PRIVATE/PUBLIC REPO                  
                  %if repo['repo'].dbrepo.private:
                     <img alt="${_('private')}" src="/images/icons/lock.png"/>
                  %else:
@@ -55,7 +65,7 @@
 	            <td>${h.age(repo['last_change'])}</td>
 	            <td>
 	            	%if repo['rev']>=0:
-	            	${h.link_to('r%s:%s' % (repo['rev'],repo['tip']),
+	            	${h.link_to('r%s:%s' % (repo['rev'],h.short_id(repo['tip'])),
 	                h.url('changeset_home',repo_name=repo['name'],revision=repo['tip']),
 	                class_="tooltip",
 	                tooltip_title=h.tooltip(repo['last_msg']))}

@@ -24,40 +24,57 @@ Created on 2010-04-28
 SimpleHG middleware for handling mercurial protocol request (push/clone etc.)
 It's implemented with basic auth function
 """
-from itertools import chain
 from mercurial.error import RepoError
 from mercurial.hgweb import hgweb
 from mercurial.hgweb.request import wsgiapplication
 from paste.auth.basic import AuthBasicAuthenticator
 from paste.httpheaders import REMOTE_USER, AUTH_TYPE
-from rhodecode.lib.auth import authfunc, HasPermissionAnyMiddleware, \
-    get_user_cached
-from rhodecode.lib.utils import is_mercurial, make_ui, invalidate_cache, \
+from rhodecode.lib.auth import authfunc, HasPermissionAnyMiddleware
+from rhodecode.lib.utils import make_ui, invalidate_cache, \
     check_repo_fast, ui_sections
+from rhodecode.model.user import UserModel
 from webob.exc import HTTPNotFound, HTTPForbidden, HTTPInternalServerError
-from rhodecode.lib.utils import action_logger
 import logging
 import os
 import traceback
 
 log = logging.getLogger(__name__)
 
+def is_mercurial(environ):
+    """
+    Returns True if request's target is mercurial server - header
+    ``HTTP_ACCEPT`` of such request would start with ``application/mercurial``.
+    """
+    http_accept = environ.get('HTTP_ACCEPT')
+    if http_accept and http_accept.startswith('application/mercurial'):
+        return True
+    return False
+
 class SimpleHg(object):
 
     def __init__(self, application, config):
         self.application = application
         self.config = config
-        #authenticate this mercurial request using 
+        #authenticate this mercurial request using authfunc
         self.authenticate = AuthBasicAuthenticator('', authfunc)
+        self.ipaddr = '0.0.0.0'
+        self.repository = None
+        self.username = None
+        self.action = None
 
     def __call__(self, environ, start_response):
         if not is_mercurial(environ):
             return self.application(environ, start_response)
 
+        proxy_key = 'HTTP_X_REAL_IP'
+        def_key = 'REMOTE_ADDR'
+        self.ipaddr = environ.get(proxy_key, environ.get(def_key, '0.0.0.0'))
+
         #===================================================================
         # AUTHENTICATE THIS MERCURIAL REQUEST
         #===================================================================
         username = REMOTE_USER(environ)
+
         if not username:
             self.authenticate.realm = self.config['rhodecode_realm']
             result = self.authenticate(environ)
@@ -67,10 +84,14 @@ class SimpleHg(object):
             else:
                 return result.wsgi_application(environ, start_response)
 
+        #=======================================================================
+        # GET REPOSITORY
+        #=======================================================================
         try:
             repo_name = '/'.join(environ['PATH_INFO'].split('/')[1:])
             if repo_name.endswith('/'):
                 repo_name = repo_name.rstrip('/')
+            self.repository = repo_name
         except:
             log.error(traceback.format_exc())
             return HTTPInternalServerError()(environ, start_response)
@@ -78,17 +99,18 @@ class SimpleHg(object):
         #===================================================================
         # CHECK PERMISSIONS FOR THIS REQUEST
         #===================================================================
-        action = self.__get_action(environ)
-        if action:
+        self.action = self.__get_action(environ)
+        if self.action:
             username = self.__get_environ_user(environ)
             try:
                 user = self.__get_user(username)
+                self.username = user.username
             except:
                 log.error(traceback.format_exc())
                 return HTTPInternalServerError()(environ, start_response)
 
             #check permissions for this repository
-            if action == 'push':
+            if self.action == 'push':
                 if not HasPermissionAnyMiddleware('repository.write',
                                                   'repository.admin')\
                                                     (user, repo_name):
@@ -102,12 +124,10 @@ class SimpleHg(object):
                                                     (user, repo_name):
                     return HTTPForbidden()(environ, start_response)
 
-            #log action
-            if action in ('push', 'pull', 'clone'):
-                proxy_key = 'HTTP_X_REAL_IP'
-                def_key = 'REMOTE_ADDR'
-                ipaddr = environ.get(proxy_key, environ.get(def_key, '0.0.0.0'))
-                self.__log_user_action(user, action, repo_name, ipaddr)
+        self.extras = {'ip':self.ipaddr,
+                       'username':self.username,
+                       'action':self.action,
+                       'repository':self.repository}
 
         #===================================================================
         # MERCURIAL REQUEST HANDLING
@@ -130,40 +150,21 @@ class SimpleHg(object):
             return HTTPInternalServerError()(environ, start_response)
 
         #invalidate cache on push
-        if action == 'push':
+        if self.action == 'push':
             self.__invalidate_cache(repo_name)
-            messages = []
-            messages.append('thank you for using rhodecode')
 
-            return self.msg_wrapper(app, environ, start_response, messages)
-        else:
-            return app(environ, start_response)
+        return app(environ, start_response)
 
-
-    def msg_wrapper(self, app, environ, start_response, messages=[]):
-        """
-        Wrapper for custom messages that come out of mercurial respond messages
-        is a list of messages that the user will see at the end of response 
-        from merurial protocol actions that involves remote answers
-        :param app:
-        :param environ:
-        :param start_response:
-        """
-        def custom_messages(msg_list):
-            for msg in msg_list:
-                yield msg + '\n'
-        org_response = app(environ, start_response)
-        return chain(org_response, custom_messages(messages))
 
     def __make_app(self):
         hgserve = hgweb(str(self.repo_path), baseui=self.baseui)
-        return  self.__load_web_settings(hgserve)
+        return  self.__load_web_settings(hgserve, self.extras)
 
     def __get_environ_user(self, environ):
         return environ.get('REMOTE_USER')
 
     def __get_user(self, username):
-        return get_user_cached(username)
+        return UserModel().get_by_username(username, cache=True)
 
     def __get_action(self, environ):
         """
@@ -174,7 +175,7 @@ class SimpleHg(object):
         mapping = {'changegroup': 'pull',
                    'changegroupsubset': 'pull',
                    'stream_out': 'pull',
-                   #'listkeys': 'pull',
+                   'listkeys': 'pull',
                    'unbundle': 'push',
                    'pushkey': 'push', }
         for qry in environ['QUERY_STRING'].split('&'):
@@ -185,24 +186,25 @@ class SimpleHg(object):
                 else:
                     return cmd
 
-    def __log_user_action(self, user, action, repo, ipaddr):
-        action_logger(user, action, repo, ipaddr)
-
     def __invalidate_cache(self, repo_name):
         """we know that some change was made to repositories and we should
         invalidate the cache to see the changes right away but only for
         push requests"""
-        invalidate_cache('cached_repo_list')
-        invalidate_cache('full_changelog', repo_name)
+        invalidate_cache('get_repo_cached_%s' % repo_name)
 
 
-    def __load_web_settings(self, hgserve):
+    def __load_web_settings(self, hgserve, extras={}):
         #set the global ui for hgserve instance passed
         hgserve.repo.ui = self.baseui
 
         hgrc = os.path.join(self.repo_path, '.hg', 'hgrc')
-        repoui = make_ui('file', hgrc, False)
 
+        #inject some additional parameters that will be available in ui
+        #for hooks
+        for k, v in extras.items():
+            hgserve.repo.ui.setconfig('rhodecode_extras', k, v)
+
+        repoui = make_ui('file', hgrc, False)
 
         if repoui:
             #overwrite our ui instance with the section from hgrc file

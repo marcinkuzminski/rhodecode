@@ -26,9 +26,18 @@
     <div class="form">
         <!-- fields -->
         <div class="fields">
-        
+            <div class="field">
+                <div class="label label-checkbox">
+                    <label for="anonymous">${_('Anonymous access')}:</label>
+                </div>
+                <div class="checkboxes">
+                    <div class="checkbox">
+                        ${h.checkbox('anonymous',True)}
+                    </div>
+                </div>
+            </div>        
 			<div class="field">
-				<div class="label">
+				<div class="label label-select">
 					<label for="default_perm">${_('Repository permission')}:</label>
 				</div>
 				<div class="select">
@@ -66,3 +75,10 @@
     ${h.end_form()}
 </div>
 </%def>    
+
+
+
+
+
+
+   

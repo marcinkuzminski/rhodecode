@@ -22,7 +22,7 @@ class SmtpMailer(object):
 
     def __init__(self, mail_from, user, passwd, mail_server,
                     mail_port=None, ssl=False, tls=False):
-        
+
         self.mail_from = mail_from
         self.mail_server = mail_server
         self.mail_port = mail_port
@@ -31,7 +31,7 @@ class SmtpMailer(object):
         self.ssl = ssl
         self.tls = tls
         self.debug = False
-        
+
     def send(self, recipients=[], subject='', body='', attachment_files={}):
 
         if isinstance(recipients, basestring):
@@ -43,11 +43,11 @@ class SmtpMailer(object):
 
         if self.tls:
             smtp_serv.starttls()
-         
-        if self.debug:    
+
+        if self.debug:
             smtp_serv.set_debuglevel(1)
 
-        smtp_serv.ehlo("mailer")
+        smtp_serv.ehlo("rhodecode mailer")
 
         #if server requires authorization you must provide login and password
         smtp_serv.login(self.user, self.passwd)
@@ -82,13 +82,13 @@ class SmtpMailer(object):
                 maintype, subtype = ctype.split('/', 1)
                 if maintype == 'text':
                     # Note: we should handle calculating the charset
-                    file_part = MIMEText(self.get_content(msg_file), 
+                    file_part = MIMEText(self.get_content(msg_file),
                                          _subtype=subtype)
                 elif maintype == 'image':
-                    file_part = MIMEImage(self.get_content(msg_file), 
+                    file_part = MIMEImage(self.get_content(msg_file),
                                           _subtype=subtype)
                 elif maintype == 'audio':
-                    file_part = MIMEAudio(self.get_content(msg_file), 
+                    file_part = MIMEAudio(self.get_content(msg_file),
                                           _subtype=subtype)
                 else:
                     file_part = MIMEBase(maintype, subtype)
@@ -96,13 +96,13 @@ class SmtpMailer(object):
                     # Encode the payload using Base64
                     encoders.encode_base64(msg)
                 # Set the filename parameter
-                file_part.add_header('Content-Disposition', 'attachment', 
+                file_part.add_header('Content-Disposition', 'attachment',
                                      filename=f_name)
                 file_part.add_header('Content-Type', ctype, name=f_name)
                 msg.attach(file_part)
         else:
-            raise Exception('Attachment files should be' 
-                            'a dict in format {"filename":"filepath"}')    
+            raise Exception('Attachment files should be'
+                            'a dict in format {"filename":"filepath"}')
 
     def get_content(self, msg_file):
         '''

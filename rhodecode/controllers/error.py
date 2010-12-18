@@ -1,33 +1,58 @@
-import logging
-import cgi
+# -*- coding: utf-8 -*-
+"""
+    package.rhodecode.controllers.error
+    ~~~~~~~~~~~~~~
+
+    RhodeCode error controller
+    
+    :created_on: Dec 8, 2010
+    :author: marcink
+    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
+    :license: GPLv3, see COPYING for more details.
+"""
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; version 2
+# of the License or (at your opinion) any later version of the license.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+# MA  02110-1301, USA.
 import os
+import cgi
+import logging
 import paste.fileapp
-from pylons import tmpl_context as c, app_globals as g, request, config
-from pylons.controllers.util import forward
+
+from pylons import tmpl_context as c, request
 from pylons.i18n.translation import _
-from rhodecode.lib.base import BaseController, render
 from pylons.middleware import  media_path
-from rhodecode.lib.utils import check_repo
-import rhodecode.lib.helpers as h
-from rhodecode import __version__
+
+from rhodecode.lib.base import BaseController, render
+
 log = logging.getLogger(__name__)
 
 class ErrorController(BaseController):
-    """
-    Generates error documents as and when they are required.
+    """Generates error documents as and when they are required.
 
     The ErrorDocuments middleware forwards to ErrorController when error
     related status codes are returned from the application.
 
-    This behaviour can be altered by changing the parameters to the
+    This behavior can be altered by changing the parameters to the
     ErrorDocuments middleware in your config/middleware.py file.
     """
+
     def __before__(self):
         pass#disable all base actions since we don't need them here
-        
+
     def document(self):
         resp = request.environ.get('pylons.original_response')
-        
+
         log.debug('### %s ###', resp.status)
 
         e = request.environ
@@ -36,7 +61,7 @@ class ErrorController(BaseController):
                                                 'host':e.get('HTTP_HOST'),
                                                 }
 
-                
+
         c.error_message = cgi.escape(request.GET.get('code', str(resp.status)))
         c.error_explanation = self.get_error_explanation(resp.status_int)
 
@@ -74,7 +99,7 @@ class ErrorController(BaseController):
         if code == 400:
             return _('The request could not be understood by the server due to malformed syntax.')
         if code == 401:
-            return _('Unathorized access to resource')
+            return _('Unauthorized access to resource')
         if code == 403:
             return _("You don't have permission to view this page")
         if code == 404:

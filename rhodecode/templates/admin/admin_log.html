@@ -3,8 +3,8 @@
 <table>
 	<tr>
 		<th class="left">${_('Username')}</th>
-		<th class="left">${_('Repository')}</th>
 		<th class="left">${_('Action')}</th>
+		<th class="left">${_('Repository')}</th>
 		<th class="left">${_('Date')}</th>
 		<th class="left">${_('From IP')}</th>
 	</tr>
@@ -12,6 +12,7 @@
 	%for cnt,l in enumerate(c.users_log):
 	<tr class="parity${cnt%2}">
 		<td>${h.link_to(l.user.username,h.url('edit_user', id=l.user.user_id))}</td>
+		<td>${h.action_parser(l)}</td>
 		<td>
 		%if l.repository:
 		  ${h.link_to(l.repository.repo_name,h.url('summary_home',repo_name=l.repository.repo_name))}
@@ -19,14 +20,7 @@
 		  ${l.repository_name}
 		%endif
 		</td>
-		<td>
-		% if l.action == 'push' and l.revision:
-		  ${h.link_to('%s - %s' % (l.action,l.revision),
-		  h.url('changeset_home',repo_name=l.repository.repo_name,revision=l.revision))}
-		%else:
-		  ${l.action}
-		%endif
-		</td>
+		
 		<td>${l.action_date}</td>
 		<td>${l.user_ip}</td>
 	</tr>
@@ -35,19 +29,34 @@
 
 <script type="text/javascript">
   var data_div = 'user_log';
-  YAHOO.util.Event.onDOMReady(function(){
-	YAHOO.util.Event.addListener(YAHOO.util.Dom.getElementsByClassName('pager_link'),"click",function(){
-			YAHOO.util.Dom.setStyle('shortlog_data','opacity','0.3');});});
+  YUE.onDOMReady(function(){
+	YUE.on(YUD.getElementsByClassName('pager_link'),"click",function(){
+			YUD.setStyle(data_div,'opacity','0.3');});
+	YUE.on(YUD.getElementsByClassName('show_more'),'click',function(e){
+	      var el = e.target;
+	      YUD.setStyle(YUD.get(el.id.substring(1)),'display','');
+	      YUD.setStyle(el.parentNode,'display','none');
+	  });
+  });
 </script>
 		
 		
 <div class="pagination-wh pagination-left">
 ${c.users_log.pager('$link_previous ~2~ $link_next',
 onclick="""YAHOO.util.Connect.asyncRequest('GET','$partial_url',{
-success:function(o){YAHOO.util.Dom.get(data_div).innerHTML=o.responseText;
-YAHOO.util.Event.addListener(YAHOO.util.Dom.getElementsByClassName('pager_link'),"click",function(){
-		YAHOO.util.Dom.setStyle(data_div,'opacity','0.3');});		
-YAHOO.util.Dom.setStyle(data_div,'opacity','1');}},null); return false;""")}
+success:function(o){
+    YUD.get(data_div).innerHTML=o.responseText;
+    YUE.on(YUD.getElementsByClassName('pager_link'),"click",function(){
+        YUD.setStyle(data_div,'opacity','0.3');
+    });		
+    YUE.on(YUD.getElementsByClassName('show_more'),'click',function(e){
+      var el = e.target;
+      YUD.setStyle(YUD.get(el.id.substring(1)),'display','');
+      YUD.setStyle(el.parentNode,'display','none');
+    });
+    YUD.setStyle(data_div,'opacity','1');}    
+
+},null); return false;""")}
 </div>
 %else: 
 	${_('No actions yet')} 

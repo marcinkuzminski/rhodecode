@@ -1,8 +1,15 @@
-#!/usr/bin/env python
-# encoding: utf-8
-# permissions controller for pylons
-# Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
-#
+# -*- coding: utf-8 -*-
+"""
+    rhodecode.controllers.admin.permissions
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    
+    permissions controller for Rhodecode
+    
+    :created_on: Apr 27, 2010
+    :author: marcink
+    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
+    :license: GPLv3, see COPYING for more details.
+"""
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
@@ -17,11 +24,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
-"""
-Created on April 27, 2010
-permissions controller for pylons
-@author: marcink
-"""
 
 from formencode import htmlfill
 from pylons import request, session, tmpl_context as c, url
@@ -29,11 +31,12 @@ from pylons.controllers.util import abort, redirect
 from pylons.i18n.translation import _
 from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator
+from rhodecode.lib.auth_ldap import LdapImportError
 from rhodecode.lib.base import BaseController, render
-from rhodecode.model.db import User, UserLog
-from rhodecode.model.forms import UserForm, DefaultPermissionsForm
-from rhodecode.model.permission_model import PermissionModel
-from rhodecode.model.user_model import UserModel
+from rhodecode.model.forms import LdapSettingsForm, DefaultPermissionsForm
+from rhodecode.model.permission import PermissionModel
+from rhodecode.model.settings import SettingsModel
+from rhodecode.model.user import UserModel
 import formencode
 import logging
 import traceback
@@ -45,29 +48,30 @@ class PermissionsController(BaseController):
     # To properly map this controller, ensure your config/routing.py
     # file has a resource setup:
     #     map.resource('permission', 'permissions')
-    
+
     @LoginRequired()
     @HasPermissionAllDecorator('hg.admin')
     def __before__(self):
         c.admin_user = session.get('admin_user')
         c.admin_username = session.get('admin_username')
         super(PermissionsController, self).__before__()
-        
+
         self.perms_choices = [('repository.none', _('None'),),
                               ('repository.read', _('Read'),),
                               ('repository.write', _('Write'),),
                               ('repository.admin', _('Admin'),)]
         self.register_choices = [
-            ('hg.register.none', 'disabled'),
+            ('hg.register.none',
+                _('disabled')),
             ('hg.register.manual_activate',
-                            _('allowed with manual account activation')),
+                _('allowed with manual account activation')),
             ('hg.register.auto_activate',
-                            _('allowed with automatic account activation')), ]
-        
-        self.create_choices = [('hg.create.none', _('Disabled')),
-                               ('hg.create.repository', _('Enabled'))]     
+                _('allowed with automatic account activation')), ]
 
-        
+        self.create_choices = [('hg.create.none', _('Disabled')),
+                               ('hg.create.repository', _('Enabled'))]
+
+
     def index(self, format='html'):
         """GET /permissions: All items in the collection"""
         # url('permissions')
@@ -88,38 +92,39 @@ class PermissionsController(BaseController):
         #    h.form(url('permission', id=ID),
         #           method='put')
         # url('permission', id=ID)
-                
+
         permission_model = PermissionModel()
-        
+
         _form = DefaultPermissionsForm([x[0] for x in self.perms_choices],
                                        [x[0] for x in self.register_choices],
                                        [x[0] for x in self.create_choices])()
-        
+
         try:
             form_result = _form.to_python(dict(request.POST))
             form_result.update({'perm_user_name':id})
             permission_model.update(form_result)
-            h.flash(_('Default permissions updated succesfully'),
+            h.flash(_('Default permissions updated successfully'),
                     category='success')
-                           
+
         except formencode.Invalid, errors:
             c.perms_choices = self.perms_choices
             c.register_choices = self.register_choices
             c.create_choices = self.create_choices
-                    
+            defaults = errors.value
+
             return htmlfill.render(
                 render('admin/permissions/permissions.html'),
-                defaults=errors.value,
+                defaults=defaults,
                 errors=errors.error_dict or {},
                 prefix_error=False,
-                encoding="UTF-8") 
+                encoding="UTF-8")
         except Exception:
             log.error(traceback.format_exc())
             h.flash(_('error occured during update of permissions'),
                     category='error')
-            
+
         return redirect(url('edit_permission', id=id))
-            
+
 
 
     def delete(self, id):
@@ -141,23 +146,26 @@ class PermissionsController(BaseController):
         c.perms_choices = self.perms_choices
         c.register_choices = self.register_choices
         c.create_choices = self.create_choices
-        
+
         if id == 'default':
-            defaults = {'_method':'put'}
-            for p in UserModel().get_default().user_perms:
+            default_user = UserModel().get_by_username('default')
+            defaults = {'_method':'put',
+                        'anonymous':default_user.active}
+
+            for p in default_user.user_perms:
                 if p.permission.permission_name.startswith('repository.'):
-                    defaults['default_perm'] = p.permission.permission_name 
-                
+                    defaults['default_perm'] = p.permission.permission_name
+
                 if p.permission.permission_name.startswith('hg.register.'):
                     defaults['default_register'] = p.permission.permission_name
-                    
+
                 if p.permission.permission_name.startswith('hg.create.'):
                     defaults['default_create'] = p.permission.permission_name
-                             
+
             return htmlfill.render(
                         render('admin/permissions/permissions.html'),
                         defaults=defaults,
                         encoding="UTF-8",
-                        force_defaults=True,)        
+                        force_defaults=True,)
         else:
             return redirect(url('admin_home'))

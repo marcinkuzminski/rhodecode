@@ -24,7 +24,7 @@ feed controller for pylons
 """
 from pylons import tmpl_context as c, url, response
 from rhodecode.lib.base import BaseController, render
-from rhodecode.model.hg_model import HgModel
+from rhodecode.model.scm import ScmModel
 from webhelpers.feedgenerator import Atom1Feed, Rss201rev2Feed
 import logging
 log = logging.getLogger(__name__)
@@ -49,12 +49,12 @@ class FeedController(BaseController):
                          language=self.language,
                          ttl=self.ttl)
         
-        changesets = HgModel().get_repo(repo_name)
+        changesets = ScmModel().get_repo(repo_name)
 
         for cs in changesets[:self.feed_nr]:
             feed.add_item(title=cs.message,
                           link=url('changeset_home', repo_name=repo_name,
-                                   revision=cs.short_id, qualified=True),
+                                   revision=cs.raw_id, qualified=True),
                                    description=str(cs.date))
         
         response.content_type = feed.mime_type
@@ -69,11 +69,11 @@ class FeedController(BaseController):
                          language=self.language,
                          ttl=self.ttl)
         
-        changesets = HgModel().get_repo(repo_name)
+        changesets = ScmModel().get_repo(repo_name)
         for cs in changesets[:self.feed_nr]:
             feed.add_item(title=cs.message,
                           link=url('changeset_home', repo_name=repo_name,
-                                   revision=cs.short_id, qualified=True),
+                                   revision=cs.raw_id, qualified=True),
                           description=str(cs.date))
             
         response.content_type = feed.mime_type

@@ -19,13 +19,13 @@ class Globals(object):
         self.cache = CacheManager(**parse_cache_config_options(config))
         self.available_permissions = None   # propagated after init_model
         self.baseui = None                  # propagated after init_model        
-        
+
     @LazyProperty
     def paths(self):
         if self.baseui:
             return self.baseui.configitems('paths')
-    
+
     @LazyProperty
     def base_path(self):
         if self.baseui:
-            return self.paths[0][1].replace('*', '')            
+            return self.paths[0][1]

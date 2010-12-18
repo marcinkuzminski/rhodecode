@@ -17,17 +17,6 @@
 </%def>
 
 <%def name="main()">
-<script type="text/javascript">
-var E = YAHOO.util.Event;
-var D = YAHOO.util.Dom;
-
-E.onDOMReady(function(e){
-    id = 'clone_url';
-    E.addListener(id,'click',function(e){
-        D.get('clone_url').select();
-    })
-})
-</script>
 <div class="box box-left">
     <!-- box / title -->
     <div class="title">
@@ -42,12 +31,30 @@ E.onDOMReady(function(e){
 			      <label>${_('Name')}:</label>
 			  </div>
 			  <div class="input-short">
+		         %if c.repo_info.dbrepo.repo_type =='hg':
+		           <img style="margin-bottom:2px" class="icon" title="${_('Mercurial repository')}" alt="${_('Mercurial repository')}" src="/images/icons/hgicon.png"/>
+		         %endif
+		         %if c.repo_info.dbrepo.repo_type =='git':
+		           <img style="margin-bottom:2px" class="icon" title="${_('Git repository')}" alt="${_('Git repository')}" src="/images/icons/giticon.png"/>
+		         %endif 
+                                 			  
 	             %if c.repo_info.dbrepo.private:
-	                <img style="margin-bottom:2px" class="icon" title="${_('private repository')}" alt="${_('private')}" src="/images/icons/lock.png"/>
+	                <img style="margin-bottom:2px" class="icon" title="${_('private repository')}" alt="${_('private repository')}" src="/images/icons/lock.png"/>
 	             %else:
-	                <img style="margin-bottom:2px" class="icon" title="${_('public repository')}" alt="${_('public')}" src="/images/icons/lock_open.png"/>
+	                <img style="margin-bottom:2px" class="icon" title="${_('public repository')}" alt="${_('public repository')}" src="/images/icons/lock_open.png"/>
 	             %endif
 			      <span style="font-size: 1.6em;font-weight: bold;vertical-align: baseline;">${c.repo_info.name}</span>
+			      %if c.rhodecode_user.username != 'default':
+				      %if c.following:
+	                  <span id="follow_toggle" class="following" title="${_('Stop following this repository')}"
+	                        onclick="javascript:toggleFollowingRepo(${c.repo_info.dbrepo.repo_id},'${str(h.get_token())}')">
+	                  </span>			      
+				      %else:
+				      <span id="follow_toggle" class="follow" title="${_('Start following this repository')}"
+				            onclick="javascript:toggleFollowingRepo(${c.repo_info.dbrepo.repo_id},'${str(h.get_token())}')">
+				      </span>
+				      %endif
+				  %endif:
 			      <br/>
 		            %if c.repo_info.dbrepo.fork:
 		            	<span style="margin-top:5px">
@@ -68,7 +75,7 @@ E.onDOMReady(function(e){
 			      <label>${_('Description')}:</label>
 			  </div>
 			  <div class="input-short">
-			      ${c.repo_info.description}
+			      ${c.repo_info.dbrepo.description}
 			  </div>
 			 </div>
 			
@@ -92,7 +99,7 @@ E.onDOMReady(function(e){
 			      <label>${_('Last change')}:</label>
 			  </div>
 			  <div class="input-short">
-			      ${h.age(c.repo_info.last_change)} - ${h.rfc822date_notz(c.repo_info.last_change)} 
+			      ${h.age(c.repo_info.last_change)} - ${c.repo_info.last_change} 
 			      ${_('by')} ${h.get_changeset_safe(c.repo_info,'tip').author} 
 			      
 			  </div>
@@ -109,13 +116,19 @@ E.onDOMReady(function(e){
 			 
 			 <div class="field">
 			  <div class="label">
-			      <label>${_('Trending languages')}:</label>
+			      <label>${_('Trending source files')}:</label>
 			  </div>
 			  <div class="input-short">
 			    <div id="lang_stats">
 			    
 			    </div> 			  
 			  	<script type="text/javascript">
+				  	YUE.onDOMReady(function(e){
+				  	    id = 'clone_url';
+				  	    YUE.on(id,'click',function(e){
+				  	        YUD.get('clone_url').select();
+				  	    })
+				  	})
 			  		var data = ${c.trending_languages|n};
 			  		var total = 0;
 			  		var no_data = true;
@@ -125,22 +138,37 @@ E.onDOMReady(function(e){
 			  		} 
 					var tbl = document.createElement('table');
 					tbl.setAttribute('class','trending_language_tbl');
+					var cnt =0;
 			  		for (k in data){
+			  			cnt+=1;
+			  			var hide = cnt>2;
 				  		var tr = document.createElement('tr');
+				  		if (hide){
+				  			tr.setAttribute('style','display:none');
+				  			tr.setAttribute('class','stats_hidden');
+				  		}
 				  		var percentage = Math.round((data[k]/total*100),2);
 						var value = data[k];
 				  		var td1 = document.createElement('td');
 				  		td1.width=150;
-                        
 				  		var trending_language_label = document.createElement('div');
 				  		trending_language_label.innerHTML = k;
 				  		td1.appendChild(trending_language_label);
 
 				  		var td2 = document.createElement('td');
-				  		td2.setAttribute('style','padding-right: 12px ! important;');
+				  		td2.setAttribute('style','padding-right:14px !important');
 			  		    var trending_language = document.createElement('div');
-			  		    trending_language.title = k;
-			  		    trending_language.innerHTML = "<b>"+percentage+"% "+value+" ${_('files')}</b>";
+			  		    var nr_files = value+" ${_('files')}";
+			  		    
+			  		    trending_language.title = k+" "+nr_files;
+			  		    
+			  		    if (percentage>20){
+			  		    	trending_language.innerHTML = "<b style='font-size:0.8em'>"+percentage+"% "+nr_files+ "</b>";	
+			  		    }
+			  		    else{
+			  		    	trending_language.innerHTML = "<b style='font-size:0.8em'>"+percentage+"%</b>";
+			  		    }
+			  		    
 			  		    trending_language.setAttribute("class", 'trending_language top-right-rounded-corner bottom-right-rounded-corner');
 			  		    trending_language.style.width=percentage+"%";
 						td2.appendChild(trending_language);
@@ -148,16 +176,37 @@ E.onDOMReady(function(e){
 						tr.appendChild(td1);
 						tr.appendChild(td2);
 			  		    tbl.appendChild(tr);
+			  		    if(cnt == 2){
+			  		    	var show_more = document.createElement('tr');
+			  		    	var td=document.createElement('td');
+			  		    	lnk = document.createElement('a');
+			  		    	lnk.href='#';
+			  		    	lnk.innerHTML = "${_("show more")}";
+			  		    	lnk.id='code_stats_show_more';
+			  		        td.appendChild(lnk);
+			  		    	show_more.appendChild(td);
+			  		    	show_more.appendChild(document.createElement('td'));
+			  		    	tbl.appendChild(show_more);
+			  		    }
 			  		    
 			  		}
 			  		if(no_data){
 			  			var tr = document.createElement('tr');
 			  			var td1 = document.createElement('td');
-			  			td1.innerHTML = "${_('No data loaded yet')}";
+			  			td1.innerHTML = "${c.no_data_msg}";
 			  			tr.appendChild(td1);
 			  			tbl.appendChild(tr);
 					}
-			  		YAHOO.util.Dom.get('lang_stats').appendChild(tbl);
+			  		YUD.get('lang_stats').appendChild(tbl);
+			  		YUE.on('code_stats_show_more','click',function(){
+			  			l = YUD.getElementsByClassName('stats_hidden')
+			  			for (e in l){
+			  			    YUD.setStyle(l[e],'display','');
+			  			};
+			  			YUD.setStyle(YUD.get('code_stats_show_more'),
+			  					'display','none');
+			  		})
+			  		
 			  	</script>
  
 			  </div>
@@ -199,9 +248,13 @@ E.onDOMReady(function(e){
     </div>
     
     <div class="table">
-        <div id="commit_history" style="width:560px;height:300px;float:left"></div>
+        
+         %if c.no_data:
+           <div style="padding:0 10px 10px 15px;font-size: 1.2em;">${c.no_data_msg}</div>
+        %endif:  
+        <div id="commit_history" style="width:460px;height:300px;float:left"></div>
         <div style="clear: both;height: 10px"></div>
-        <div id="overview" style="width:560px;height:100px;float:left"></div>
+        <div id="overview" style="width:460px;height:100px;float:left"></div>
         
     	<div id="legend_data" style="clear:both;margin-top:10px;">
 	    	<div id="legend_container"></div>
@@ -228,10 +281,10 @@ E.onDOMReady(function(e){
 			};
 		    var dataset = dataset;
 		    var overview_dataset = [overview_dataset];
-		    var choiceContainer = YAHOO.util.Dom.get("legend_choices");
-		    var choiceContainerTable = YAHOO.util.Dom.get("legend_choices_tables");
-		    var plotContainer = YAHOO.util.Dom.get('commit_history');
-		    var overviewContainer = YAHOO.util.Dom.get('overview');
+		    var choiceContainer = YUD.get("legend_choices");
+		    var choiceContainerTable = YUD.get("legend_choices_tables");
+		    var plotContainer = YUD.get('commit_history');
+		    var overviewContainer = YUD.get('overview');
 		    
 		    var plot_options = {
 				bars: {show:true,align:'center',lineWidth:4},
@@ -257,7 +310,7 @@ E.onDOMReady(function(e){
 			    bars: {show:true,barWidth: 2,},
 			    shadowSize: 0,
 			    xaxis: {mode: "time", timeformat: "%d/%m/%y",},
-			    yaxis: {ticks: 3, min: 0,},
+			    yaxis: {ticks: 3, min: 0,tickDecimals:0,},
 			    grid: {color: "#999",},
 			    selection: {mode: "x"}
 			};
@@ -314,7 +367,7 @@ E.onDOMReady(function(e){
 		            div.style.backgroundColor='#fee';
 		            document.body.appendChild(div);
 		        }
-		        YAHOO.util.Dom.setStyle(div, 'opacity', 0);
+		        YUD.setStyle(div, 'opacity', 0);
 		        div.innerHTML = contents;
 		        div.style.top=(y + 5) + "px";
 		        div.style.left=(x + 5) + "px";
@@ -324,9 +377,9 @@ E.onDOMReady(function(e){
 		    }
 		    
 			/**
-			 * This function will detect if selected period has some changesets for this user
-			if it does this data is then pushed for displaying
-			Additionally it will only display users that are selected by the checkbox
+			 * This function will detect if selected period has some changesets 
+			   for this user if it does this data is then pushed for displaying
+			   Additionally it will only display users that are selected by the checkbox
 			*/
 		    function getDataAccordingToRanges(ranges) {
 		    	
@@ -334,31 +387,28 @@ E.onDOMReady(function(e){
 		        var keys = [];
 				for(var key in dataset){
 					var push = false;
+					
 					//method1 slow !!
-		            ///*
+		            //*
 		            for(var ds in dataset[key].data){
 			            commit_data = dataset[key].data[ds];
-			            //console.log(key);
-			            //console.log(new Date(commit_data.time*1000));
-			            //console.log(new Date(ranges.xaxis.from*1000));
-			            //console.log(new Date(ranges.xaxis.to*1000));
 			            if (commit_data.time >= ranges.xaxis.from && commit_data.time <= ranges.xaxis.to){
 			            	push = true;
 			            	break;
 					    }
 				    }
-				    //*/
+					//*/
+				    
 				    /*//method2 sorted commit data !!!
+				    
 				    var first_commit = dataset[key].data[0].time;
 				    var last_commit = dataset[key].data[dataset[key].data.length-1].time;
-				    
-				    console.log(first_commit);
-				    console.log(last_commit);
 				    
 				    if (first_commit >= ranges.xaxis.from && last_commit <= ranges.xaxis.to){
 						push = true;
 					}
-				    */
+				    //*/
+				    
 				    if(push){			
 				    	data.push(dataset[key]);
 				    }
@@ -399,14 +449,14 @@ E.onDOMReady(function(e){
 						new_data.push(getDummyData(checkbox_key));
 			        }
 		        }
-						        
+					        
 		    	var new_options = YAHOO.lang.merge(plot_options, {
 		            xaxis: { 
 		  	      		min: cur_ranges.xaxis.from, 
 		  	      		max: cur_ranges.xaxis.to,
 		  	      		mode:"time",
 		  	      		timeformat: "%d/%m",
-		        	}
+		        	},
 		    	});
 		    	if (!new_data){
 					new_data = [[0,1]];
@@ -440,7 +490,12 @@ E.onDOMReady(function(e){
 		  	      		max: ranges.xaxis.to,
 		  	      		mode:"time",
 		  	      		timeformat: "%d/%m",
-		        	}
+		        	},
+		        	yaxis: { 
+                        min: ranges.yaxis.from, 
+                        max: ranges.yaxis.to,
+                    },
+                    		        	
 		    	});
 		    	// do the zooming
 		        plot = YAHOO.widget.Flot(plotContainer, data, new_options);
@@ -454,7 +509,7 @@ E.onDOMReady(function(e){
 		        overview.setSelection(ranges, true);
 
 		        //resubscribe choiced
-		        YAHOO.util.Event.on(choiceContainer.getElementsByTagName("input"), "click", plotchoiced, [data, ranges]);
+		        YUE.on(choiceContainer.getElementsByTagName("input"), "click", plotchoiced, [data, ranges]);
 		    }
 		    
 		    var previousPoint = null;
@@ -463,13 +518,13 @@ E.onDOMReady(function(e){
 		        var pos = o.pos;
 		        var item = o.item;
 		        
-		        //YAHOO.util.Dom.get("x").innerHTML = pos.x.toFixed(2);
-		        //YAHOO.util.Dom.get("y").innerHTML = pos.y.toFixed(2);
+		        //YUD.get("x").innerHTML = pos.x.toFixed(2);
+		        //YUD.get("y").innerHTML = pos.y.toFixed(2);
 		        if (item) {
 		            if (previousPoint != item.datapoint) {
 		                previousPoint = item.datapoint;
 		                
-		                var tooltip = YAHOO.util.Dom.get("tooltip");
+		                var tooltip = YUD.get("tooltip");
 		                if(tooltip) {
 		                	  tooltip.parentNode.removeChild(tooltip);
 		                }
@@ -508,7 +563,7 @@ E.onDOMReady(function(e){
 		            }
 		        }
 		        else {
-		        	  var tooltip = YAHOO.util.Dom.get("tooltip");
+		        	  var tooltip = YUD.get("tooltip");
 		        	  
 			          if(tooltip) {
 			                tooltip.parentNode.removeChild(tooltip);
@@ -541,7 +596,7 @@ E.onDOMReady(function(e){
 				
 		    plot.subscribe("plothover", plothover);
 
-		    YAHOO.util.Event.on(choiceContainer.getElementsByTagName("input"), "click", plotchoiced, [data, initial_ranges]);
+		    YUE.on(choiceContainer.getElementsByTagName("input"), "click", plotchoiced, [data, initial_ranges]);
 		}
 			SummaryPlot(${c.ts_min},${c.ts_max},${c.commit_data|n},${c.overview_data|n});		
 		</script>
@@ -551,18 +606,20 @@ E.onDOMReady(function(e){
 
 <div class="box">    
     <div class="title">
-        <div class="breadcrumbs">${h.link_to(_('Last ten changes'),h.url('changelog_home',repo_name=c.repo_name))}</div>
+        <div class="breadcrumbs">${h.link_to(_('Shortlog'),h.url('shortlog_home',repo_name=c.repo_name))}</div>
     </div>    
     <div class="table">
-        <%include file='../shortlog/shortlog_data.html'/>
-        %if c.repo_changesets:
-        	${h.link_to(_('show more'),h.url('changelog_home',repo_name=c.repo_name))}
-        %endif
+        <div id="shortlog_data">
+            <%include file='../shortlog/shortlog_data.html'/>
+        </div>
+        ##%if c.repo_changesets:
+        ##	${h.link_to(_('show more'),h.url('changelog_home',repo_name=c.repo_name))}
+        ##%endif
     </div>
 </div>
 <div class="box">    
     <div class="title">
-        <div class="breadcrumbs">${h.link_to(_('Last ten tags'),h.url('tags_home',repo_name=c.repo_name))}</div>
+        <div class="breadcrumbs">${h.link_to(_('Tags'),h.url('tags_home',repo_name=c.repo_name))}</div>
     </div>    
     <div class="table">
         <%include file='../tags/tags_data.html'/>
@@ -573,7 +630,7 @@ E.onDOMReady(function(e){
 </div>
 <div class="box">
     <div class="title">
-        <div class="breadcrumbs">${h.link_to(_('Last ten branches'),h.url('branches_home',repo_name=c.repo_name))}</div>
+        <div class="breadcrumbs">${h.link_to(_('Branches'),h.url('branches_home',repo_name=c.repo_name))}</div>
     </div>    
     <div class="table">
         <%include file='../branches/branches_data.html'/>
