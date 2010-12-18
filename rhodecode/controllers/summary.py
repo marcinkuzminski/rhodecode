@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-    package.rhodecode.controllers.summary
-    ~~~~~~~~~~~~~~
+    rhodecode.controllers.summary
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Summary controller for Rhodecode
     

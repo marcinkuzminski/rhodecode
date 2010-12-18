@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-    package.rhodecode.controllers.error
-    ~~~~~~~~~~~~~~
+    rhodecode.controllers.error
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     RhodeCode error controller
     

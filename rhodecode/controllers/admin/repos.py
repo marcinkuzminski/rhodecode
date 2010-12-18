@@ -107,7 +107,7 @@ class ReposController(BaseController):
 
         except Exception:
             log.error(traceback.format_exc())
-            msg = _('error occured during creation of repository %s') \
+            msg = _('error occurred during creation of repository %s') \
                     % form_result.get('repo_name')
             h.flash(msg, category='error')
         if request.POST.get('user_created'):
@@ -206,7 +206,7 @@ class ReposController(BaseController):
 
         except Exception, e:
             log.error(traceback.format_exc())
-            h.flash(_('An error occured during deletion of %s') % repo_name,
+            h.flash(_('An error occurred during deletion of %s') % repo_name,
                     category='error')
 
         return redirect(url('repos'))
@@ -222,7 +222,7 @@ class ReposController(BaseController):
             repo_model = RepoModel()
             repo_model.delete_perm_user(request.POST, repo_name)
         except Exception, e:
-            h.flash(_('An error occured during deletion of repository user'),
+            h.flash(_('An error occurred during deletion of repository user'),
                     category='error')
             raise HTTPInternalServerError()
 
@@ -237,14 +237,14 @@ class ReposController(BaseController):
             repo_model = RepoModel()
             repo_model.delete_stats(repo_name)
         except Exception, e:
-            h.flash(_('An error occured during deletion of repository stats'),
+            h.flash(_('An error occurred during deletion of repository stats'),
                     category='error')
         return redirect(url('edit_repo', repo_name=repo_name))
 
     @HasPermissionAllDecorator('hg.admin')
     def repo_cache(self, repo_name):
         """
-        INVALIDATE exisitings repository cache
+        INVALIDATE existing repository cache
         :param repo_name:
         """
 

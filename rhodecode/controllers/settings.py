@@ -50,7 +50,7 @@ class SettingsController(BaseController):
         c.repo_info = repo = repo_model.get_by_repo_name(repo_name)
         if not repo:
             h.flash(_('%s repository is not mapped to db perhaps'
-                      ' it was created or renamed from the filesystem'
+                      ' it was created or renamed from the file system'
                       ' please run the application again'
                       ' in order to rescan repositories') % repo_name,
                       category='error')
@@ -139,7 +139,7 @@ class SettingsController(BaseController):
         c.repo_info = repo = repo_model.get_by_repo_name(repo_name)
         if not repo:
             h.flash(_('%s repository is not mapped to db perhaps'
-                      ' it was created or renamed from the filesystem'
+                      ' it was created or renamed from the file system'
                       ' please run the application again'
                       ' in order to rescan repositories') % repo_name,
                       category='error')
