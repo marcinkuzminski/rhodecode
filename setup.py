@@ -41,7 +41,7 @@ description = ('Mercurial repository browser/management with '
 try:
     readme_file = 'README.rst'
     changelog_file = 'docs/changelog.rst'
-    long_description = open(readme_file).read() + '/n/n' + \
+    long_description = open(readme_file).read() + '\n\n' + \
         open(changelog_file).read()
 
 except IOError, err:
