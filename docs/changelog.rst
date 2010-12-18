@@ -6,9 +6,6 @@ Changelog
 1.1.0 (**2010-12-18**)
 ----------------------
 
-:status: in-progress
-:branch: beta
-
 news
 ++++
 
