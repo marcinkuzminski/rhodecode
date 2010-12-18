@@ -1,8 +1,15 @@
-#!/usr/bin/env python
-# encoding: utf-8
-# journal controller for pylons
-# Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
-# 
+# -*- coding: utf-8 -*-
+"""
+    rhodecode.controllers.journal
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Journal controller for pylons
+    
+    :created_on: Nov 21, 2010
+    :author: marcink
+    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
+    :license: GPLv3, see COPYING for more details.
+"""
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
@@ -17,22 +24,19 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
-"""
-Created on November 21, 2010
-journal controller for pylons
-@author: marcink
-"""
+
+import logging
+from sqlalchemy import or_
 
 from pylons import request, response, session, tmpl_context as c, url
-from pylons.controllers.util import abort, redirect
+
 from rhodecode.lib.auth import LoginRequired, NotAnonymous
 from rhodecode.lib.base import BaseController, render
 from rhodecode.lib.helpers import get_token
 from rhodecode.model.db import UserLog, UserFollowing
 from rhodecode.model.scm import ScmModel
-from sqlalchemy import or_
-import logging
-from paste.httpexceptions import HTTPInternalServerError, HTTPNotFound
+
+from paste.httpexceptions import HTTPInternalServerError
 
 log = logging.getLogger(__name__)
 

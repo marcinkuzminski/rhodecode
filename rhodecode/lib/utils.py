@@ -113,6 +113,7 @@ def action_logger(user, action, repo, ipaddr='', sa=None):
 def get_repos(path, recursive=False, initial=False):
     """
     Scans given path for repos and return (name,(type,path)) tuple 
+    
     :param prefix:
     :param path:
     :param recursive:
@@ -137,7 +138,7 @@ def get_repos(path, recursive=False, initial=False):
 
 def check_repo_fast(repo_name, base_path):
     """
-    Check given path for existance of directory
+    Check given path for existence of directory
     :param repo_name:
     :param base_path:
     
@@ -233,8 +234,8 @@ def make_ui(read_from='file', path=None, checkpaths=True):
 
 
 def set_rhodecode_config(config):
-    """
-    Updates pylons config with new settings from database
+    """Updates pylons config with new settings from database
+    
     :param config:
     """
     from rhodecode.model.settings import SettingsModel
@@ -244,10 +245,10 @@ def set_rhodecode_config(config):
         config[k] = v
 
 def invalidate_cache(cache_key, *args):
-    """
-    Puts cache invalidation task into db for 
+    """Puts cache invalidation task into db for 
     further global cache invalidation
     """
+
     from rhodecode.model.scm import ScmModel
 
     if cache_key.startswith('get_repo_cached_'):
@@ -269,10 +270,10 @@ class EmptyChangeset(BaseChangeset):
 
     @LazyProperty
     def raw_id(self):
-        """
-        Returns raw string identifying this changeset, useful for web
+        """Returns raw string identifying this changeset, useful for web
         representation.
         """
+
         return self._empty_cs
 
     @LazyProperty
@@ -289,8 +290,7 @@ class EmptyChangeset(BaseChangeset):
         return 0
 
 def repo2db_mapper(initial_repo_list, remove_obsolete=False):
-    """
-    maps all found repositories into db
+    """maps all found repositories into db
     """
 
     sa = meta.Session()
@@ -443,10 +443,10 @@ def add_cache(settings):
             beaker.cache.cache_regions[region] = region_settings
 
 def get_current_revision():
-    """
-    Returns tuple of (number, id) from repository containing this package
+    """Returns tuple of (number, id) from repository containing this package
     or None if repository could not be found.
     """
+
     try:
         from vcs import get_repo
         from vcs.utils.helpers import get_scm

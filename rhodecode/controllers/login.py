@@ -1,8 +1,15 @@
-#!/usr/bin/env python
-# encoding: utf-8
-# login controller for pylons
-# Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
-# 
+# -*- coding: utf-8 -*-
+"""
+    rhodecode.controllers.login
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Login controller for rhodeocode
+    
+    :created_on: Apr 22, 2010
+    :author: marcink
+    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
+    :license: GPLv3, see COPYING for more details.
+"""
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
@@ -18,22 +25,21 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
 
-"""
-Created on April 22, 2010
-login controller for pylons
-@author: marcink
-"""
+import logging
+import formencode
+
 from formencode import htmlfill
-from pylons import request, response, session, tmpl_context as c, url
+
+from pylons.i18n.translation import _
 from pylons.controllers.util import abort, redirect
+from pylons import request, response, session, tmpl_context as c, url
+
+import rhodecode.lib.helpers as h
 from rhodecode.lib.auth import AuthUser, HasPermissionAnyDecorator
 from rhodecode.lib.base import BaseController, render
-import rhodecode.lib.helpers as h
-from pylons.i18n.translation import _
 from rhodecode.model.forms import LoginForm, RegisterForm, PasswordResetForm
 from rhodecode.model.user import UserModel
-import formencode
-import logging
+
 
 log = logging.getLogger(__name__)
 

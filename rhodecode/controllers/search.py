@@ -1,8 +1,15 @@
-#!/usr/bin/env python
-# encoding: utf-8
-# search controller for pylons
-# Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
-# 
+# -*- coding: utf-8 -*-
+"""
+    rhodecode.controllers.search
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Search controller for rhodecode
+    
+    :created_on: Aug 7, 2010
+    :author: marcink
+    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
+    :license: GPLv3, see COPYING for more details.
+"""
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
@@ -17,24 +24,23 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
-"""
-Created on Aug 7, 2010
-search controller for pylons
-@author: marcink
-"""
+import logging
+import traceback
+
+from pylons.i18n.translation import _
 from pylons import request, response, config, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
+
 from rhodecode.lib.auth import LoginRequired
 from rhodecode.lib.base import BaseController, render
 from rhodecode.lib.indexers import SCHEMA, IDX_NAME, ResultWrapper
+
 from webhelpers.paginate import Page
 from webhelpers.util import update_params
-from pylons.i18n.translation import _
+
 from whoosh.index import open_dir, EmptyIndexError
 from whoosh.qparser import QueryParser, QueryParserError
 from whoosh.query import Phrase
-import logging
-import traceback
 
 log = logging.getLogger(__name__)
 
@@ -107,7 +113,8 @@ class SearchController(BaseController):
             except (EmptyIndexError, IOError):
                 log.error(traceback.format_exc())
                 log.error('Empty Index data')
-                c.runtime = _('There is no index to search in. Please run whoosh indexer')
+                c.runtime = _('There is no index to search in. '
+                              'Please run whoosh indexer')
 
         # Return a rendered template
         return render('/search/search.html')

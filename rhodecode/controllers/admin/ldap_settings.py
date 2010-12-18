@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-    package.rhodecode.controllers.admin.ldap_settings
-    ~~~~~~~~~~~~~~
+    rhodecode.controllers.admin.ldap_settings
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     ldap controller for RhodeCode
+    
     :created_on: Nov 26, 2010
     :author: marcink
     :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
@@ -64,9 +65,7 @@ class LdapSettingsController(BaseController):
                     force_defaults=True,)
 
     def ldap_settings(self):
-        """
-        POST ldap create and store ldap settings
-        """
+        """POST ldap create and store ldap settings"""
 
         settings_model = SettingsModel()
         _form = LdapSettingsForm()()
@@ -100,7 +99,7 @@ class LdapSettingsController(BaseController):
                 encoding="UTF-8")
         except Exception:
             log.error(traceback.format_exc())
-            h.flash(_('error occured during update of ldap settings'),
+            h.flash(_('error occurred during update of ldap settings'),
                     category='error')
 
         return redirect(url('ldap_home'))

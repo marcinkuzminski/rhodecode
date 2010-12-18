@@ -1,8 +1,15 @@
-#!/usr/bin/env python
-# encoding: utf-8
-# hg controller for pylons
-# Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
-# 
+# -*- coding: utf-8 -*-
+"""
+    rhodecode.controllers.home
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Home controller for Rhodecode
+    
+    :created_on: Feb 18, 2010
+    :author: marcink
+    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
+    :license: GPLv3, see COPYING for more details.
+"""
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
@@ -17,17 +24,16 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
-"""
-Created on February 18, 2010
-hg controller for pylons
-@author: marcink
-"""
+
+import logging
 from operator import itemgetter
+
 from pylons import tmpl_context as c, request
+
 from rhodecode.lib.auth import LoginRequired
 from rhodecode.lib.base import BaseController, render
 from rhodecode.model.scm import ScmModel
-import logging
+
 log = logging.getLogger(__name__)
 
 class HomeController(BaseController):
@@ -51,8 +57,10 @@ class HomeController(BaseController):
 
         sort_key = current_sort_slug + '_sort'
         if c.sort_by.startswith('-'):
-            c.repos_list = sorted(cached_repo_list, key=itemgetter(sort_key), reverse=True)
+            c.repos_list = sorted(cached_repo_list, key=itemgetter(sort_key),
+                                  reverse=True)
         else:
-            c.repos_list = sorted(cached_repo_list, key=itemgetter(sort_key), reverse=False)
+            c.repos_list = sorted(cached_repo_list, key=itemgetter(sort_key),
+                                  reverse=False)
 
         return render('/index.html')

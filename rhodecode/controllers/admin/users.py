@@ -87,7 +87,7 @@ class UsersController(BaseController):
                 encoding="UTF-8")
         except Exception:
             log.error(traceback.format_exc())
-            h.flash(_('error occured during creation of user %s') \
+            h.flash(_('error occurred during creation of user %s') \
                     % request.POST.get('username'), category='error')
         return redirect(url('users'))
 
@@ -144,7 +144,7 @@ class UsersController(BaseController):
         except (UserOwnsReposException, DefaultUserException), e:
             h.flash(str(e), category='warning')
         except Exception:
-            h.flash(_('An error occured during deletion of user'),
+            h.flash(_('An error occurred during deletion of user'),
                     category='error')
         return redirect(url('users'))
 

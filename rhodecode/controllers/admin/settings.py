@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-    package.rhodecode.controllers.admin.settings
-    ~~~~~~~~~~~~~~
+    rhodecode.controllers.admin.settings
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    
     settings controller for rhodecode admin
         
     :created_on: Jul 14, 2010
