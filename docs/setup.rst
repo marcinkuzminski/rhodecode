@@ -157,6 +157,12 @@ In order to make start using celery run::
  paster celeryd <configfile.ini>
 
 
+
+.. note::
+   Make sure You run this command from same virtualenv, and with the same user
+   that rhodecode runs.
+
+
 Nginx virtual host example
 --------------------------
 
