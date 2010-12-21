@@ -70,8 +70,9 @@ class JournalController(BaseController):
         return render('/journal.html')
 
     def toggle_following(self):
-
-        if request.POST.get('auth_token') == get_token():
+        cur_token = request.POST.get('auth_token')
+        token = get_token()
+        if cur_token == token:
             scm_model = ScmModel()
 
             user_id = request.POST.get('follows_user_id')
@@ -93,5 +94,5 @@ class JournalController(BaseController):
                     raise HTTPInternalServerError()
 
 
-
+        log.debug('token mismatch %s vs %s', cur_token, token)
         raise HTTPInternalServerError()
