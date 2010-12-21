@@ -189,8 +189,8 @@ def make_map(config):
     map.connect('files_annotate_home', '/{repo_name:.*}/annotate/{revision}/{f_path:.*}',
                 controller='files', action='annotate', revision='tip', f_path='',
                 conditions=dict(function=check_repo))
-    map.connect('files_archive_home', '/{repo_name:.*}/archive/{revision}/{fileformat}',
-                controller='files', action='archivefile', revision='tip',
+    map.connect('files_archive_home', '/{repo_name:.*}/archive/{fname}',
+                controller='files', action='archivefile',
                 conditions=dict(function=check_repo))
     map.connect('repo_settings_delete', '/{repo_name:.*}/settings',
                 controller='settings', action="delete",

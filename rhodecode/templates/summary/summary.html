@@ -223,7 +223,7 @@
 		             %endif
 		             ${h.link_to(c.repo_info.name+'.'+archive['type'],
 		                h.url('files_archive_home',repo_name=c.repo_info.name,
-		                revision='tip',fileformat=archive['extension']),class_="archive_icon")}
+		                fname='tip'+archive['extension']),class_="archive_icon")}
 		        %endfor
 			  </div>
 			 </div>

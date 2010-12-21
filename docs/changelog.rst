@@ -3,11 +3,23 @@
 Changelog
 =========
 
-1.1.0 (**2010-XX-XX**)
+1.2.0 (**2010-12-18**)
 ----------------------
 
 :status: in-progress
 :branch: beta
+
+news
+++++
+
+- implemented #91 added nicer looking archive urls
+
+fixes
+++++
+
+
+1.1.0 (**2010-12-18**)
+----------------------
 
 news
 ++++
@@ -118,4 +130,3 @@ fixes
 - Disabled dirsize in file browser, it's causing nasty bug when dir renames 
   occure. After vcs is fixed it'll be put back again.
 - templating/css rewrites, optimized css.
-
