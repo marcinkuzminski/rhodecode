@@ -1,5 +1,11 @@
 from rhodecode.tests import *
 
+ARCHIVE_SPECS = {
+    '.tar.bz2': ('application/x-tar', 'tbz2', ''),
+    '.tar.gz': ('application/x-tar', 'tgz', ''),
+    '.zip': ('application/zip', 'zip', ''),
+}
+
 class TestFilesController(TestController):
 
     def test_index(self):
@@ -188,3 +194,48 @@ removed extra unicode conversion in diff."</div>""" in response.body
 </optgroup>""" in response.body, 'missing or wrong history in annotation'
 
         assert """<span style="text-transform: uppercase;"><a href="#">branch: default</a></span>""" in response.body, 'missing or wrong branch info'
+
+
+
+    def test_archival(self):
+        self.log_user()
+
+        for arch_ext, info in ARCHIVE_SPECS.items():
+            fname = '27cd5cce30c96924232dffcd24178a07ffeb5dfc%s' % arch_ext
+            filename = '%s-%s' % (HG_REPO, fname)
+
+            response = self.app.get(url(controller='files', action='archivefile',
+                                        repo_name=HG_REPO,
+                                        fname=fname))
+
+            assert response.status == '200 OK', 'wrong response code'
+            assert response.response._headers.items() == [('Pragma', 'no-cache'),
+                                                  ('Cache-Control', 'no-cache'),
+                                                  ('Content-Type', '%s; charset=utf-8' % info[0]),
+                                                  ('Content-Disposition', 'attachment; filename=%s' % filename), ], 'wrong headers'
+
+    def test_archival_wrong_ext(self):
+        self.log_user()
+
+        for arch_ext in ['tar', 'rar', 'x', '..ax', '.zipz']:
+            fname = '27cd5cce30c96924232dffcd24178a07ffeb5dfc%s' % arch_ext
+
+            response = self.app.get(url(controller='files', action='archivefile',
+                                        repo_name=HG_REPO,
+                                        fname=fname))
+            assert 'Unknown archive type' in response.body
+
+
+    def test_archival_wrong_revision(self):
+        self.log_user()
+
+        for rev in ['00x000000', 'tar', 'wrong', '@##$@$424213232', '232dffcd']:
+            fname = '%s.zip' % rev
+
+            response = self.app.get(url(controller='files', action='archivefile',
+                                        repo_name=HG_REPO,
+                                        fname=fname))
+            assert 'Unknown revision' in response.body
+
+
+

@@ -6,7 +6,6 @@ class TestChangelogController(TestController):
         self.log_user()
         response = self.app.get(url(controller='changelog', action='index', repo_name=HG_REPO))
 
-        print response.body
         assert """<div id="chg_20" class="container">""" in response.body, 'wrong info about number of changes'
         assert """<div class="date">commit 154: 5e204e7583b9@2010-08-10 01:18:46</div>""" in response.body , 'no info on this commit'
         assert """Small update at simplevcs app""" in response.body, 'missing info about commit message'
@@ -24,7 +23,6 @@ class TestChangelogController(TestController):
         response = self.app.get(url(controller='changelog', action='index', repo_name=HG_REPO), {'page':6})
 
         # Test response after pagination...
-        print response.body
         assert """<div class="date">commit 64: 46ad32a4f974@2010-04-20 00:33:21</div>"""in response.body, 'wrong info about commit 64'
         assert """<span class="removed tooltip" tooltip_title="removed: docs/api.rst">1</span>"""in response.body, 'wrong info about number of removed'
         assert """<span class="changed tooltip" tooltip_title="changed: .hgignore<br/> README.rst<br/> docs/conf.py<br/> docs/index.rst<br/> setup.py<br/> tests/test_hg.py<br/> tests/test_nodes.py<br/> vcs/__init__.py<br/> vcs/backends/__init__.py<br/> vcs/backends/base.py<br/> vcs/backends/hg.py<br/> vcs/nodes.py<br/> vcs/utils/__init__.py">13</span>"""in response.body, 'wrong info about number of changes'
