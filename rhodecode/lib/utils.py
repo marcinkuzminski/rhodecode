@@ -110,31 +110,38 @@ def action_logger(user, action, repo, ipaddr='', sa=None):
         log.error(traceback.format_exc())
         sa.rollback()
 
-def get_repos(path, recursive=False, initial=False):
+def get_repos(path, recursive=False):
     """
     Scans given path for repos and return (name,(type,path)) tuple 
     
-    :param prefix:
-    :param path:
-    :param recursive:
-    :param initial:
+    :param path: path to scann for repositories
+    :param recursive: recursive search and return names with subdirs in front 
     """
     from vcs.utils.helpers import get_scm
     from vcs.exceptions import VCSError
 
-    try:
-        scm = get_scm(path)
-    except:
-        pass
-    else:
-        raise Exception('The given path %s should not be a repository got %s',
-                        path, scm)
+    if path.endswith('/'):
+        #add ending slash for better results
+        path = path[:-1]
 
-    for dirpath in os.listdir(path):
-        try:
-            yield dirpath, get_scm(os.path.join(path, dirpath))
-        except VCSError:
-            pass
+    def _get_repos(p):
+        for dirpath in os.listdir(p):
+            if os.path.isfile(os.path.join(p, dirpath)):
+                continue
+            cur_path = os.path.join(p, dirpath)
+            try:
+                scm_info = get_scm(cur_path)
+                yield scm_info[1].split(path)[-1].lstrip('/'), scm_info
+            except VCSError:
+                if not recursive:
+                    continue
+                #check if this dir containts other repos for recursive scan
+                rec_path = os.path.join(p, dirpath)
+                if os.path.isdir(rec_path):
+                    for inner_scm in _get_repos(rec_path):
+                        yield inner_scm
+
+    return _get_repos(path)
 
 def check_repo_fast(repo_name, base_path):
     """

@@ -41,7 +41,7 @@ from beaker.cache import cache_region, region_invalidate
 from rhodecode import BACKENDS
 from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import HasRepoPermissionAny
-from rhodecode.lib.utils import get_repos, make_ui, action_logger
+from rhodecode.lib.utils import get_repos as get_filesystem_repos, make_ui, action_logger
 from rhodecode.model import BaseModel
 from rhodecode.model.user import UserModel
 
@@ -90,7 +90,7 @@ class ScmModel(BaseModel):
             baseui = make_ui('db')
         repos_list = {}
 
-        for name, path in get_repos(repos_path):
+        for name, path in get_filesystem_repos(repos_path, recursive=True):
             try:
                 if repos_list.has_key(name):
                     raise RepositoryError('Duplicate repository name %s '
