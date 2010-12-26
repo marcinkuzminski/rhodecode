@@ -138,8 +138,8 @@ class UserLog(Base, BaseModel):
     __tablename__ = 'user_logs'
     __table_args__ = {'useexisting':True}
     user_log_id = Column("user_log_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
-    user_id = Column("user_id", Integer(), ForeignKey(u'users.user_id'), nullable=False, unique=None, default=None)
-    repository_id = Column("repository_id", Integer(length=None, convert_unicode=False, assert_unicode=None), ForeignKey(u'repositories.repo_id'), nullable=False, unique=None, default=None)
+    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None, default=None)
+    repository_id = Column("repository_id", Integer(length=None, convert_unicode=False, assert_unicode=None), ForeignKey('repositories.repo_id'), nullable=False, unique=None, default=None)
     repository_name = Column("repository_name", String(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     user_ip = Column("user_ip", String(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     action = Column("action", String(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
@@ -154,12 +154,12 @@ class Repository(Base, BaseModel):
     repo_id = Column("repo_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     repo_name = Column("repo_name", String(length=None, convert_unicode=False, assert_unicode=None), nullable=False, unique=True, default=None)
     repo_type = Column("repo_type", String(length=None, convert_unicode=False, assert_unicode=None), nullable=False, unique=False, default='hg')
-    user_id = Column("user_id", Integer(), ForeignKey(u'users.user_id'), nullable=False, unique=False, default=None)
+    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=False, default=None)
     private = Column("private", Boolean(), nullable=True, unique=None, default=None)
     enable_statistics = Column("statistics", Boolean(), nullable=True, unique=None, default=True)
     description = Column("description", String(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
-    fork_id = Column("fork_id", Integer(), ForeignKey(u'repositories.repo_id'), nullable=True, unique=False, default=None)
-    group_id = Column("group_id", Integer(), ForeignKey(u'groups.group_id'), nullable=True, unique=False, default=None)
+    fork_id = Column("fork_id", Integer(), ForeignKey('repositories.repo_id'), nullable=True, unique=False, default=None)
+    group_id = Column("group_id", Integer(), ForeignKey('groups.group_id'), nullable=True, unique=False, default=None)
 
     user = relation('User')
     fork = relation('Repository', remote_side=repo_id)
@@ -169,10 +169,9 @@ class Repository(Base, BaseModel):
 
     repo_followers = relation('UserFollowing', primaryjoin='UserFollowing.follows_repo_id==Repository.repo_id', cascade='all')
 
-
     def __repr__(self):
         return "<%s('%s:%s')>" % (self.__class__.__name__,
-                                          self.repo_id, self.repo_name)
+                                  self.repo_id, self.repo_name)
 
 class Group(Base, BaseModel):
     __tablename__ = 'groups'
@@ -180,7 +179,7 @@ class Group(Base, BaseModel):
 
     group_id = Column("group_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     group_name = Column("group_name", String(length=None, convert_unicode=False, assert_unicode=None), nullable=False, unique=True, default=None)
-    group_parent_id = Column("group_parent_id", Integer(), ForeignKey(u'groups.group_id'), nullable=True, unique=None, default=None)
+    group_parent_id = Column("group_parent_id", Integer(), ForeignKey('groups.group_id'), nullable=True, unique=None, default=None)
 
     parent_group = relation('Group', remote_side=group_id)
 
@@ -202,15 +201,15 @@ class Permission(Base, BaseModel):
 
     def __repr__(self):
         return "<%s('%s:%s')>" % (self.__class__.__name__,
-                                          self.permission_id, self.permission_name)
+                                  self.permission_id, self.permission_name)
 
 class RepoToPerm(Base, BaseModel):
     __tablename__ = 'repo_to_perm'
     __table_args__ = (UniqueConstraint('user_id', 'repository_id'), {'useexisting':True})
     repo_to_perm_id = Column("repo_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
-    user_id = Column("user_id", Integer(), ForeignKey(u'users.user_id'), nullable=False, unique=None, default=None)
-    permission_id = Column("permission_id", Integer(), ForeignKey(u'permissions.permission_id'), nullable=False, unique=None, default=None)
-    repository_id = Column("repository_id", Integer(), ForeignKey(u'repositories.repo_id'), nullable=False, unique=None, default=None)
+    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None, default=None)
+    permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable=False, unique=None, default=None)
+    repository_id = Column("repository_id", Integer(), ForeignKey('repositories.repo_id'), nullable=False, unique=None, default=None)
 
     user = relation('User')
     permission = relation('Permission')
@@ -220,8 +219,8 @@ class UserToPerm(Base, BaseModel):
     __tablename__ = 'user_to_perm'
     __table_args__ = (UniqueConstraint('user_id', 'permission_id'), {'useexisting':True})
     user_to_perm_id = Column("user_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
-    user_id = Column("user_id", Integer(), ForeignKey(u'users.user_id'), nullable=False, unique=None, default=None)
-    permission_id = Column("permission_id", Integer(), ForeignKey(u'permissions.permission_id'), nullable=False, unique=None, default=None)
+    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None, default=None)
+    permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable=False, unique=None, default=None)
 
     user = relation('User')
     permission = relation('Permission')
@@ -231,24 +230,19 @@ class GroupToPerm(Base, BaseModel):
     __table_args__ = (UniqueConstraint('group_id', 'permission_id'), {'useexisting':True})
 
     group_to_perm_id = Column("group_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
-    user_id = Column("user_id", Integer(), ForeignKey(u'users.user_id'), nullable=False, unique=None, default=None)
-    permission_id = Column("permission_id", Integer(), ForeignKey(u'permissions.permission_id'), nullable=False, unique=None, default=None)
-    group_id = Column("group_id", Integer(), ForeignKey(u'groups.group_id'), nullable=False, unique=None, default=None)
+    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None, default=None)
+    permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable=False, unique=None, default=None)
+    group_id = Column("group_id", Integer(), ForeignKey('groups.group_id'), nullable=False, unique=None, default=None)
 
     user = relation('User')
     permission = relation('Permission')
     group = relation('Group')
 
-
-
-
-
-
 class Statistics(Base, BaseModel):
     __tablename__ = 'statistics'
     __table_args__ = (UniqueConstraint('repository_id'), {'useexisting':True})
     stat_id = Column("stat_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
-    repository_id = Column("repository_id", Integer(), ForeignKey(u'repositories.repo_id'), nullable=False, unique=True, default=None)
+    repository_id = Column("repository_id", Integer(), ForeignKey('repositories.repo_id'), nullable=False, unique=True, default=None)
     stat_on_revision = Column("stat_on_revision", Integer(), nullable=False)
     commit_activity = Column("commit_activity", LargeBinary(), nullable=False)#JSON data
     commit_activity_combined = Column("commit_activity_combined", LargeBinary(), nullable=False)#JSON data
@@ -263,15 +257,14 @@ class UserFollowing(Base, BaseModel):
                       , {'useexisting':True})
 
     user_following_id = Column("user_following_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
-    user_id = Column("user_id", Integer(), ForeignKey(u'users.user_id'), nullable=False, unique=None, default=None)
-    follows_repo_id = Column("follows_repository_id", Integer(), ForeignKey(u'repositories.repo_id'), nullable=True, unique=None, default=None)
-    follows_user_id = Column("follows_user_id", Integer(), ForeignKey(u'users.user_id'), nullable=True, unique=None, default=None)
+    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None, default=None)
+    follows_repo_id = Column("follows_repository_id", Integer(), ForeignKey('repositories.repo_id'), nullable=True, unique=None, default=None)
+    follows_user_id = Column("follows_user_id", Integer(), ForeignKey('users.user_id'), nullable=True, unique=None, default=None)
 
     user = relation('User', primaryjoin='User.user_id==UserFollowing.user_id')
 
     follows_user = relation('User', primaryjoin='User.user_id==UserFollowing.follows_user_id')
     follows_repository = relation('Repository')
-
 
 class CacheInvalidation(Base, BaseModel):
     __tablename__ = 'cache_invalidation'
