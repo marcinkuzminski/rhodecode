@@ -80,8 +80,8 @@ class RhodeCodeSettings(Base, BaseModel):
         self.app_settings_value = v
 
     def __repr__(self):
-        return "<RhodeCodeSetting('%s:%s')>" % (self.app_settings_name,
-                                                self.app_settings_value)
+        return "<%s('%s:%s')>" % (self.__class__.__name__,
+                                  self.app_settings_name, self.app_settings_value)
 
 class RhodeCodeUi(Base, BaseModel):
     __tablename__ = 'rhodecode_ui'
@@ -118,7 +118,8 @@ class User(Base, BaseModel):
         return '%s %s <%s>' % (self.name, self.lastname, self.email)
 
     def __repr__(self):
-        return "<User('id:%s:%s')>" % (self.user_id, self.username)
+        return "<%s('id:%s:%s')>" % (self.__class__.__name__,
+                                     self.user_id, self.username)
 
     def update_lastlogin(self):
         """Update user lastlogin"""
@@ -158,9 +159,11 @@ class Repository(Base, BaseModel):
     enable_statistics = Column("statistics", Boolean(), nullable=True, unique=None, default=True)
     description = Column("description", String(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     fork_id = Column("fork_id", Integer(), ForeignKey(u'repositories.repo_id'), nullable=True, unique=False, default=None)
+    group_id = Column("group_id", Integer(), ForeignKey(u'groups.group_id'), nullable=True, unique=False, default=None)
 
     user = relation('User')
     fork = relation('Repository', remote_side=repo_id)
+    group = relation('Group')
     repo_to_perm = relation('RepoToPerm', cascade='all')
     stats = relation('Statistics', cascade='all', uselist=False)
 
@@ -168,7 +171,27 @@ class Repository(Base, BaseModel):
 
 
     def __repr__(self):
-        return "<Repository('%s:%s')>" % (self.repo_id, self.repo_name)
+        return "<%s('%s:%s')>" % (self.__class__.__name__,
+                                          self.repo_id, self.repo_name)
+
+class Group(Base, BaseModel):
+    __tablename__ = 'groups'
+    __table_args__ = (UniqueConstraint('group_name'), {'useexisting':True},)
+
+    group_id = Column("group_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
+    group_name = Column("group_name", String(length=None, convert_unicode=False, assert_unicode=None), nullable=False, unique=True, default=None)
+    group_parent_id = Column("group_parent_id", Integer(), ForeignKey(u'groups.group_id'), nullable=True, unique=None, default=None)
+
+    parent_group = relation('Group', remote_side=group_id)
+
+
+    def __init__(self, group_name='', parent_group=None):
+        self.group_name = group_name
+        self.parent_group = parent_group
+
+    def __repr__(self):
+        return "<%s('%s:%s')>" % (self.__class__.__name__, self.group_id,
+                                  self.group_name)
 
 class Permission(Base, BaseModel):
     __tablename__ = 'permissions'
@@ -178,7 +201,8 @@ class Permission(Base, BaseModel):
     permission_longname = Column("permission_longname", String(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
 
     def __repr__(self):
-        return "<Permission('%s:%s')>" % (self.permission_id, self.permission_name)
+        return "<%s('%s:%s')>" % (self.__class__.__name__,
+                                          self.permission_id, self.permission_name)
 
 class RepoToPerm(Base, BaseModel):
     __tablename__ = 'repo_to_perm'
@@ -246,7 +270,8 @@ class CacheInvalidation(Base, BaseModel):
         self.cache_active = False
 
     def __repr__(self):
-        return "<CacheInvalidation('%s:%s')>" % (self.cache_id, self.cache_key)
+        return "<%s('%s:%s')>" % (self.__class__.__name__,
+                                  self.cache_id, self.cache_key)
 
 class DbMigrateVersion(Base, BaseModel):
     __tablename__ = 'db_migrate_version'

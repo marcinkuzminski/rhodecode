@@ -44,7 +44,7 @@ from vcs.utils.lazy import LazyProperty
 
 from rhodecode.model import meta
 from rhodecode.model.caching_query import FromCache
-from rhodecode.model.db import Repository, User, RhodeCodeUi, UserLog
+from rhodecode.model.db import Repository, User, RhodeCodeUi, UserLog, Group
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.user import UserModel
 
@@ -296,8 +296,35 @@ class EmptyChangeset(BaseChangeset):
     def get_file_size(self, path):
         return 0
 
+def map_groups(groups):
+    """Checks for groups existence, and creates groups structures.
+    It returns last group in structure
+    
+    :param groups: list of groups structure
+    """
+    sa = meta.Session()
+
+    parent = None
+    group = None
+    for lvl, group_name in enumerate(groups[:-1]):
+        group = sa.query(Group).filter(Group.group_name == group_name).scalar()
+
+        if group is None:
+            group = Group(group_name, parent)
+            sa.add(group)
+            sa.commit()
+
+        parent = group
+
+    return group
+
 def repo2db_mapper(initial_repo_list, remove_obsolete=False):
-    """maps all found repositories into db
+    """maps all repos given in initial_repo_list, non existing repositories
+    are created, if remove_obsolete is True it also check for db entries
+    that are not in initial_repo_list and removes them.
+    
+    :param initial_repo_list: list of repositories found by scanning methods
+    :param remove_obsolete: check for obsolete entries in database
     """
 
     sa = meta.Session()
@@ -305,6 +332,7 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False):
     user = sa.query(User).filter(User.admin == True).first()
 
     for name, repo in initial_repo_list.items():
+        group = map_groups(name.split('/'))
         if not rm.get_by_repo_name(name, cache=False):
             log.info('repository %s not found creating default', name)
 
@@ -314,7 +342,8 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False):
                          'description':repo.description \
                             if repo.description != 'unknown' else \
                                         '%s repository' % name,
-                         'private':False
+                         'private':False,
+                         'group_id':getattr(group, 'group_id', None)
                          }
             rm.create(form_data, user, just_db=True)
 

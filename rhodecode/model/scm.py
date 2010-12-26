@@ -135,7 +135,7 @@ class ScmModel(BaseModel):
                 tip = h.get_changeset_safe(repo, 'tip')
 
                 tmp_d = {}
-                tmp_d['name'] = repo.name
+                tmp_d['name'] = r.repo_name
                 tmp_d['name_sort'] = tmp_d['name'].lower()
                 tmp_d['description'] = repo.dbrepo.description
                 tmp_d['description_sort'] = tmp_d['description']
