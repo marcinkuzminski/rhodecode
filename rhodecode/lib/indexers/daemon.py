@@ -1,8 +1,15 @@
-#!/usr/bin/env python
-# encoding: utf-8
-# whoosh indexer daemon for rhodecode
-# Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
-#
+# -*- coding: utf-8 -*-
+"""
+    rhodecode.lib.indexers.daemon
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    A deamon will read from task table and run tasks
+    
+    :created_on: Jan 26, 2010
+    :author: marcink
+    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
+    :license: GPLv3, see COPYING for more details.
+"""
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
@@ -17,14 +24,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
-"""
-Created on Jan 26, 2010
 
-@author: marcink
-A deamon will read from task table and run tasks
-"""
 import sys
 import os
+import traceback
 from os.path import dirname as dn
 from os.path import join as jn
 
@@ -99,7 +102,8 @@ class WhooshIndexingDaemon(object):
                     for f in files:
                         index_paths_.add(jn(repo.path, f.path))
 
-        except RepositoryError:
+        except RepositoryError, e:
+            log.debug(traceback.format_exc())
             pass
         return index_paths_
 
@@ -118,8 +122,15 @@ class WhooshIndexingDaemon(object):
 
         #we just index the content of chosen files
         if node.extension in INDEX_EXTENSIONS:
-            log.debug('    >> %s [WITH CONTENT]' % path)
+
             u_content = node.content
+            if not isinstance(u_content, unicode):
+                log.warning('  >> %s Could not get this content as unicode '
+                          'replacing with empty content', path)
+                u_content = u''
+            else:
+                log.debug('    >> %s [WITH CONTENT]' % path)
+
         else:
             log.debug('    >> %s' % path)
             #just index file name without it's content
@@ -143,7 +154,7 @@ class WhooshIndexingDaemon(object):
 
         idx = create_in(self.index_location, SCHEMA, indexname=IDX_NAME)
         writer = idx.writer()
-
+        print self.repo_paths.values()
         for cnt, repo in enumerate(self.repo_paths.values()):
             log.debug('building index @ %s' % repo.path)
 

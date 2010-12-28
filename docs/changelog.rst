@@ -13,10 +13,14 @@ news
 ++++
 
 - implemented #91 added nicer looking archive urls
+- implemented #44 into file browsing, and added follow branch option
 
 fixes
 ++++
 
+- fixed file browser bug, when switching into given form revision the url was 
+  not changing
+- fixed #92
 
 1.1.0 (**2010-12-18**)
 ----------------------
