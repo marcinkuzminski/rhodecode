@@ -57,28 +57,43 @@ class FilesController(BaseController):
     def index(self, repo_name, revision, f_path):
         hg_model = ScmModel()
         c.repo = hg_model.get_repo(c.repo_name)
-        revision = request.POST.get('at_rev', None) or revision
-
-        c.f_path = f_path
 
         try:
+            #reditect to given revision from form
+            post_revision = request.POST.get('at_rev', None)
+            if post_revision:
+                post_revision = c.repo.get_changeset(post_revision).raw_id
+                redirect(url('files_home', repo_name=c.repo_name,
+                             revision=post_revision, f_path=f_path))
+
+            c.branch = request.GET.get('branch', None)
+
+            c.f_path = f_path
+
             c.changeset = c.repo.get_changeset(revision)
             cur_rev = c.changeset.revision
 
+            #prev link
             try:
-                prev_rev = c.repo.get_changeset(cur_rev).prev().raw_id
+                prev_rev = c.repo.get_changeset(cur_rev).prev(c.branch).raw_id
                 c.url_prev = url('files_home', repo_name=c.repo_name,
                              revision=prev_rev, f_path=f_path)
+                if c.branch:
+                    c.url_prev += '?branch=%s' % c.branch
             except ChangesetDoesNotExistError:
                 c.url_prev = '#'
 
+            #next link
             try:
-                next_rev = c.repo.get_changeset(cur_rev).next().raw_id
+                next_rev = c.repo.get_changeset(cur_rev).next(c.branch).raw_id
                 c.url_next = url('files_home', repo_name=c.repo_name,
                          revision=next_rev, f_path=f_path)
+                if c.branch:
+                    c.url_next += '?branch=%s' % c.branch
             except ChangesetDoesNotExistError:
                 c.url_next = '#'
 
+            #files
             try:
                 c.files_list = c.changeset.get_node(f_path)
                 c.file_history = self._get_history(c.repo, c.files_list, f_path)

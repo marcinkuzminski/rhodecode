@@ -1614,10 +1614,18 @@ padding:0;
 }
 
 div.browserblock .browser-header {
-border-bottom:1px solid #CCC;
 background:#FFF;
-color:blue;
 padding:10px 0;
+float:left;
+}
+
+div.browserblock .browser-branch {
+background:#FFF;
+padding:20px 0 0 0;
+float:left;
+}
+div.browserblock .browser-branch label {
+color:#4A4A4A;	
 }
 
 div.browserblock .browser-header span {
@@ -1627,6 +1635,7 @@ font-weight:700;
 
 div.browserblock .browser-body {
 background:#EEE;
+border-top:1px solid #CCC;
 }
 
 table.code-browser {

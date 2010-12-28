@@ -17,6 +17,24 @@
 	    </div>           
 		${h.end_form()}
 	</div>
+    <div class="browser-branch">
+       ${h.checkbox('stay_at_branch',c.changeset.branch,c.changeset.branch==c.branch)}
+       <label>${_('follow current branch')}</label>
+       <script type="text/javascript">
+        YUE.on('stay_at_branch','click',function(e){
+        	if(e.target.checked){
+        		var uri = "${h.url.current(branch='__BRANCH__')}"
+        		uri = uri.replace('__BRANCH__',e.target.value);
+        		window.location = uri;
+        	}
+        	else{
+        		window.location = "${h.url.current()}";
+        	}
+        	
+        })
+       </script>
+    </div>
+    <div style="clear:both"></div>
 	<div class="browser-body">
 		<table class="code-browser">
 		         <thead>
