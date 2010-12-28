@@ -59,30 +59,25 @@ class FilesController(BaseController):
         c.repo = hg_model.get_repo(c.repo_name)
         revision = request.POST.get('at_rev', None) or revision
 
-        def get_next_rev(cur):
-            max_rev = len(c.repo.revisions) - 1
-            r = cur + 1
-            if r > max_rev:
-                r = max_rev
-            return r
-
-        def get_prev_rev(cur):
-            r = cur - 1
-            return r
-
         c.f_path = f_path
-
 
         try:
             c.changeset = c.repo.get_changeset(revision)
             cur_rev = c.changeset.revision
-            prev_rev = c.repo.get_changeset(get_prev_rev(cur_rev)).raw_id
-            next_rev = c.repo.get_changeset(get_next_rev(cur_rev)).raw_id
 
-            c.url_prev = url('files_home', repo_name=c.repo_name,
+            try:
+                prev_rev = c.repo.get_changeset(cur_rev).prev().raw_id
+                c.url_prev = url('files_home', repo_name=c.repo_name,
                              revision=prev_rev, f_path=f_path)
-            c.url_next = url('files_home', repo_name=c.repo_name,
+            except ChangesetDoesNotExistError:
+                c.url_prev = '#'
+
+            try:
+                next_rev = c.repo.get_changeset(cur_rev).next().raw_id
+                c.url_next = url('files_home', repo_name=c.repo_name,
                          revision=next_rev, f_path=f_path)
+            except ChangesetDoesNotExistError:
+                c.url_next = '#'
 
             try:
                 c.files_list = c.changeset.get_node(f_path)
