@@ -45,15 +45,16 @@ class SettingsModel(BaseModel):
                                           "get_setting_%s" % settings_key))
         return r
 
-    def get_app_settings(self):
+    def get_app_settings(self, cache=False):
         """Get's config from database, each config key is prefixed with 
         'rhodecode_' prefix, than global pylons config is updated with such 
         keys
         """
 
-        ret = self.sa.query(RhodeCodeSettings)\
-            .options(FromCache("sql_cache_short",
-                           "get_hg_settings")).all()
+        ret = self.sa.query(RhodeCodeSettings)
+
+        if cache:
+            ret = ret.options(FromCache("sql_cache_short", "get_hg_settings"))
 
         if not ret:
             raise Exception('Could not get application settings !')
