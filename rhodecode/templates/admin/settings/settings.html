@@ -97,7 +97,16 @@
                     ${h.text('rhodecode_realm',size=30)}
                 </div>
             </div>
-                                     
+            
+            <div class="field">
+                <div class="label">
+                    <label for="ga_code">${_('Google analytics code')}:</label>
+                </div>
+                <div class="input">
+                    ${h.text('ga_code',size=30)}
+                </div>
+            </div>
+                                                 
             <div class="buttons">
                 ${h.submit('save','Save settings',class_="ui-button")}
                 ${h.reset('reset','Reset',class_="ui-button")}

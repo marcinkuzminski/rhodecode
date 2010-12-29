@@ -166,6 +166,9 @@ class DbManage(object):
                 log.info('Changing ui settings')
                 self.klass.create_ui_settings()
 
+            def step_3(self):
+                print ('Adding additional settings into RhodeCode db')
+                self.klass.fix_settings()
 
         upgrade_steps = [0] + range(curr_version + 1, __dbversion__ + 1)
 
@@ -212,7 +215,17 @@ class DbManage(object):
             self.sa.rollback()
             raise
 
+    def fix_settings(self):
+        """Fixes rhodecode settings adds ga_code key for google analytics
+        """
 
+        hgsettings3 = RhodeCodeSettings('ga_code', '')
+        try:
+            self.sa.add(hgsettings3)
+            self.sa.commit()
+        except:
+            self.sa.rollback()
+            raise
 
     def admin_prompt(self, second=False):
         if not self.tests:
@@ -360,6 +373,7 @@ class DbManage(object):
 
         hgsettings1 = RhodeCodeSettings('realm', 'RhodeCode authentication')
         hgsettings2 = RhodeCodeSettings('title', 'RhodeCode')
+        hgsettings3 = RhodeCodeSettings('ga_code', '')
 
 
         try:
@@ -370,6 +384,7 @@ class DbManage(object):
             self.sa.add(paths)
             self.sa.add(hgsettings1)
             self.sa.add(hgsettings2)
+            self.sa.add(hgsettings3)
 
             self.sa.commit()
         except:

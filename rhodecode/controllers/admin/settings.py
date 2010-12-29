@@ -25,11 +25,17 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
 
+import logging
+import traceback
+import formencode
+
+from operator import itemgetter
 from formencode import htmlfill
 from pylons import request, session, tmpl_context as c, url, app_globals as g, \
     config
 from pylons.controllers.util import abort, redirect
 from pylons.i18n.translation import _
+
 from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator, \
     HasPermissionAnyDecorator, NotAnonymous
@@ -43,10 +49,9 @@ from rhodecode.model.forms import UserForm, ApplicationSettingsForm, \
 from rhodecode.model.scm import ScmModel
 from rhodecode.model.settings import SettingsModel
 from rhodecode.model.user import UserModel
+
 from sqlalchemy import func
-import formencode
-import logging
-import traceback
+
 
 log = logging.getLogger(__name__)
 
@@ -123,6 +128,7 @@ class SettingsController(BaseController):
             try:
                 form_result = application_form.to_python(dict(request.POST))
                 settings_model = SettingsModel()
+
                 try:
                     hgsettings1 = settings_model.get('title')
                     hgsettings1.app_settings_value = form_result['rhodecode_title']
@@ -130,9 +136,14 @@ class SettingsController(BaseController):
                     hgsettings2 = settings_model.get('realm')
                     hgsettings2.app_settings_value = form_result['rhodecode_realm']
 
+                    hgsettings3 = settings_model.get('ga_code')
+                    hgsettings3.app_settings_value = form_result['ga_code']
+
+
 
                     self.sa.add(hgsettings1)
                     self.sa.add(hgsettings2)
+                    self.sa.add(hgsettings3)
                     self.sa.commit()
                     set_rhodecode_config(config)
                     h.flash(_('Updated application settings'),

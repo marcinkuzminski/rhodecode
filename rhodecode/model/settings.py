@@ -46,6 +46,11 @@ class SettingsModel(BaseModel):
         return r
 
     def get_app_settings(self):
+        """Get's config from database, each config key is prefixed with 
+        'rhodecode_' prefix, than global pylons config is updated with such 
+        keys
+        """
+
         ret = self.sa.query(RhodeCodeSettings)\
             .options(FromCache("sql_cache_short",
                            "get_hg_settings")).all()
