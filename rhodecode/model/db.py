@@ -117,6 +117,11 @@ class User(Base, BaseModel):
     def full_contact(self):
         return '%s %s <%s>' % (self.name, self.lastname, self.email)
 
+
+    @property
+    def is_admin(self):
+        return self.admin
+
     def __repr__(self):
         return "<%s('id:%s:%s')>" % (self.__class__.__name__,
                                      self.user_id, self.username)

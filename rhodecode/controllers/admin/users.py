@@ -30,13 +30,14 @@ import traceback
 import formencode
 
 from formencode import htmlfill
-from pylons import request, session, tmpl_context as c, url
+from pylons import request, session, tmpl_context as c, url, config
 from pylons.controllers.util import abort, redirect
 from pylons.i18n.translation import _
 
-from rhodecode.lib.exceptions import *
+from rhodecode.lib.exceptions import DefaultUserException, UserOwnsReposException
 from rhodecode.lib import helpers as h
-from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator
+from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator, \
+    fill_perms
 from rhodecode.lib.base import BaseController, render
 
 from rhodecode.model.db import User
@@ -57,7 +58,7 @@ class UsersController(BaseController):
         c.admin_user = session.get('admin_user')
         c.admin_username = session.get('admin_username')
         super(UsersController, self).__before__()
-
+        c.available_permissions = config['available_permissions']
 
     def index(self, format='html'):
         """GET /users: All items in the collection"""
@@ -140,7 +141,7 @@ class UsersController(BaseController):
         user_model = UserModel()
         try:
             user_model.delete(id)
-            h.flash(_('sucessfully deleted user'), category='success')
+            h.flash(_('successfully deleted user'), category='success')
         except (UserOwnsReposException, DefaultUserException), e:
             h.flash(str(e), category='warning')
         except Exception:
@@ -162,8 +163,11 @@ class UsersController(BaseController):
         if c.user.username == 'default':
             h.flash(_("You can't edit this user"), category='warning')
             return redirect(url('users'))
+        c.user.permissions = {}
+        c.granted_permissions = fill_perms(c.user).permissions['global']
 
         defaults = c.user.get_dict()
+
         return htmlfill.render(
             render('admin/users/user_edit.html'),
             defaults=defaults,

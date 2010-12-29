@@ -1,8 +1,14 @@
-#!/usr/bin/env python
-# encoding: utf-8
-# authentication and permission libraries
-# Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
-#
+# -*- coding: utf-8 -*-
+"""
+    rhodecode.lib.auth
+    ~~~~~~~~~~~~~~~~~~
+    
+    authentication and permission libraries
+    
+    :created_on: Apr 4, 2010
+    :copyright: (c) 2010 by marcink.
+    :license: LICENSE_NAME, see LICENSE_FILE for more details.
+"""
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
@@ -17,26 +23,26 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
-"""
-Created on April 4, 2010
 
-@author: marcink
-"""
+import bcrypt
+import random
+import logging
+import traceback
+
+from decorator import decorator
+
 from pylons import config, session, url, request
 from pylons.controllers.util import abort, redirect
-from rhodecode.lib.exceptions import *
+
+from rhodecode.lib.exceptions import LdapPasswordError, LdapUsernameError
 from rhodecode.lib.utils import get_repo_slug
 from rhodecode.lib.auth_ldap import AuthLdap
+
 from rhodecode.model import meta
 from rhodecode.model.user import UserModel
-from rhodecode.model.caching_query import FromCache
 from rhodecode.model.db import User, RepoToPerm, Repository, Permission, \
     UserToPerm
-import bcrypt
-from decorator import decorator
-import logging
-import random
-import traceback
+
 
 log = logging.getLogger(__name__)
 
@@ -172,12 +178,13 @@ class  AuthUser(object):
         return "<AuthUser('id:%s:%s')>" % (self.user_id, self.username)
 
 def set_available_permissions(config):
-    """
-    This function will propagate pylons globals with all available defined
+    """This function will propagate pylons globals with all available defined
     permission given in db. We don't wannt to check each time from db for new 
     permissions since adding a new permission also requires application restart
     ie. to decorate new views with the newly created permission
-    :param config:
+    
+    :param config: current pylons config instance
+    
     """
     log.info('getting information about all available permissions')
     try:
@@ -195,9 +202,10 @@ def set_base_path(config):
 
 
 def fill_perms(user):
-    """
-    Fills user permission attribute with permissions taken from database
+    """Fills user permission attribute with permissions taken from database
+    
     :param user:
+    
     """
 
     sa = meta.Session()
