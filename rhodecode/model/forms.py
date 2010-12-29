@@ -438,7 +438,7 @@ def ApplicationSettingsForm():
         filter_extra_fields = False
         rhodecode_title = UnicodeString(strip=True, min=1, not_empty=True)
         rhodecode_realm = UnicodeString(strip=True, min=1, not_empty=True)
-        ga_code = UnicodeString(strip=True, min=1, not_empty=False)
+        rhodecode_ga_code = UnicodeString(strip=True, min=1, not_empty=False)
 
     return _ApplicationSettingsForm
 

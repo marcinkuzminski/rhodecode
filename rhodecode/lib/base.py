@@ -17,7 +17,7 @@ class BaseController(WSGIController):
     def __before__(self):
         c.rhodecode_version = __version__
         c.rhodecode_name = config.get('rhodecode_title')
-        c.ga_code = config.get('rhodeocode_ga_code')
+        c.ga_code = config.get('rhodecode_ga_code')
         c.repo_name = get_repo_slug(request)
         c.cached_repo_list = ScmModel().get_repos()
         c.backends = BACKENDS.keys()
