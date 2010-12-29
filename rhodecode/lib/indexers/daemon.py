@@ -70,7 +70,7 @@ class WhooshIndexingDaemon(object):
     """
 
     def __init__(self, indexname='HG_INDEX', index_location=None,
-                 repo_location=None, sa=None):
+                 repo_location=None, sa=None, repo_list=None):
         self.indexname = indexname
 
         self.index_location = index_location
@@ -82,6 +82,16 @@ class WhooshIndexingDaemon(object):
             raise Exception('You have to provide repositories location')
 
         self.repo_paths = ScmModel(sa).repo_scan(self.repo_location, None)
+
+        if repo_list:
+            filtered_repo_paths = {}
+            for repo_name, repo in self.repo_paths.items():
+                if repo_name in repo_list:
+                    filtered_repo_paths[repo.name] = repo
+
+            self.repo_paths = filtered_repo_paths
+
+
         self.initial = False
         if not os.path.isdir(self.index_location):
             os.makedirs(self.index_location)
@@ -154,8 +164,8 @@ class WhooshIndexingDaemon(object):
 
         idx = create_in(self.index_location, SCHEMA, indexname=IDX_NAME)
         writer = idx.writer()
-        print self.repo_paths.values()
-        for cnt, repo in enumerate(self.repo_paths.values()):
+
+        for repo in self.repo_paths.values():
             log.debug('building index @ %s' % repo.path)
 
             for idx_path in self.get_paths(repo):

@@ -54,33 +54,42 @@ You are ready to use rhodecode, to run it simply execute
 Setting up Whoosh full text search
 ----------------------------------
 
-Index for whoosh can be build starting from version 1.1 using paster command
-passing repo locations to index, as well as Your config file that stores
-whoosh index files locations. There is possible to pass `-f` to the options
+Starting from version 1.1 whoosh index can be build using paster command.
+You have to specify the config file that stores location of index, and
+location of repositories (`--repo-location`). Starting from version 1.2 it is 
+also possible to specify a comma separated list of repositories (`--index-only`)
+to build index only on chooses repositories skipping any other found in repos
+location
+
+There is possible also to pass `-f` to the options
 to enable full index rebuild. Without that indexing will run always in in
 incremental mode.
 
-::
+incremental mode::
 
  paster make-index production.ini --repo-location=<location for repos> 
 
-for full index rebuild You can use
 
-::
+
+for full index rebuild You can use::
 
  paster make-index production.ini -f --repo-location=<location for repos>
 
-- For full text search You can either put crontab entry for
 
-This command can be run even from crontab in order to do periodical 
-index builds and keep Your index always up to date. An example entry might 
-look like this
+building index just for chosen repositories is possible with such command::
+ 
+ paster make-index production.ini --repo-location=<location for repos> --index-only=vcs,rhodecode
+
+
+In order to do periodical index builds and keep Your index always up to date.
+It's recommended to do a crontab entry for incremental indexing. 
+An example entry might look like this
 
 ::
  
  /path/to/python/bin/paster /path/to/rhodecode/production.ini --repo-location=<location for repos> 
   
-When using incremental(default) mode whoosh will check last modification date 
+When using incremental (default) mode whoosh will check last modification date 
 of each file and add it to reindex if newer file is available. Also indexing 
 daemon checks for removed files and removes them from index. 
 

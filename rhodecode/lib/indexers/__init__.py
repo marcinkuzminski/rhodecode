@@ -6,6 +6,8 @@ from os.path import dirname as dn, join as jn
 #to get the rhodecode import
 sys.path.append(dn(dn(dn(os.path.realpath(__file__)))))
 
+from string import strip
+
 from rhodecode.model import init_model
 from rhodecode.model.scm import ScmModel
 from rhodecode.config.environment import load_environment
@@ -71,6 +73,7 @@ class MakeIndex(BasePasterCommand):
 
         index_location = config['index_dir']
         repo_location = self.options.repo_location
+        repo_list = map(strip, self.options.repo_list.split(','))
 
         #======================================================================
         # WHOOSH DAEMON
@@ -80,7 +83,8 @@ class MakeIndex(BasePasterCommand):
         try:
             l = DaemonLock()
             WhooshIndexingDaemon(index_location=index_location,
-                                 repo_location=repo_location)\
+                                 repo_location=repo_location,
+                                 repo_list=repo_list)\
                 .run(full_index=self.options.full_index)
             l.release()
         except LockHeld:
@@ -91,6 +95,12 @@ class MakeIndex(BasePasterCommand):
                           action='store',
                           dest='repo_location',
                           help="Specifies repositories location to index REQUIRED",
+                          )
+        self.parser.add_option('--index-only',
+                          action='store',
+                          dest='repo_list',
+                          help="Specifies a comma separated list of repositores "
+                                "to build index on OPTIONAL",
                           )
         self.parser.add_option('-f',
                           action='store_true',
