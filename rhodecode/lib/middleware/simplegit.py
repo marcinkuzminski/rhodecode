@@ -103,7 +103,8 @@ class SimpleGit(object):
         proxy_key = 'HTTP_X_REAL_IP'
         def_key = 'REMOTE_ADDR'
         self.ipaddr = environ.get(proxy_key, environ.get(def_key, '0.0.0.0'))
-
+        # skip passing error to error controller
+        environ['pylons.status_code_redirect'] = True
         #===================================================================
         # AUTHENTICATE THIS GIT REQUEST
         #===================================================================
