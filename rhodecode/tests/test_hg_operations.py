@@ -79,7 +79,7 @@ def test_push_new_file():
 
     __execute_cmd('touch %s' % added_file)
 
-    __execute_cmd('hg addremove %s' % added_file)
+    __execute_cmd('hg add %s' % added_file)
 
     for i in xrange(15):
         cmd = """echo 'added_line%s' >> %s""" % (i, added_file)
@@ -109,10 +109,30 @@ def test_push_wrong_credentials():
 
     __execute_cmd('hg push %s' % clone_url)
 
+def test_push_wrong_path():
+    added_file = jn(TESTS_TMP_PATH, HG_REPO, 'somefile.py')
 
+    try:
+        os.makedirs(jn(TESTS_TMP_PATH, HG_REPO))
+    except OSError:
+        pass
+
+    __execute_cmd("""echo '' > %s""" % added_file)
+
+    __execute_cmd("""hg add %s""" % added_file)
+
+    for i in xrange(2):
+        cmd = """echo 'added_line%s' >> %s""" % (i, added_file)
+        __execute_cmd(cmd)
+
+        cmd = """hg ci -m 'commited new %s' %s """ % (i, added_file)
+        __execute_cmd(cmd)
+
+    __execute_cmd('hg push %s' % jn(TESTS_TMP_PATH, HG_REPO + '_error'))
 
 if __name__ == '__main__':
+    test_clone()
+    test_push_wrong_path()
     test_push_wrong_credentials()
-    #test_clone()
-    #test_push_new_file()
+    test_push_new_file()
 
