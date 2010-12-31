@@ -103,9 +103,8 @@ class DbManage(object):
 
     def upgrade(self):
         """Upgrades given database schema to given revision following 
-        all needed steps,  
+        all needed steps, to perform the upgrade
         
-        :param revision: revision to upgrade to
         """
 
         from rhodecode.lib.dbmigrate.migrate.versioning import api
@@ -142,6 +141,9 @@ class DbManage(object):
         # UPGRADE STEPS
         #======================================================================
         class UpgradeSteps(object):
+            """Those steps follow schema versions so for example schema 
+            for example schema with seq 002 == step_2 and so on.
+            """
 
             def __init__(self, klass):
                 self.klass = klass
