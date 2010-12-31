@@ -59,9 +59,16 @@ log = logging.getLogger(__name__)
 class UserTemp(object):
     def __init__(self, user_id):
         self.user_id = user_id
+
+    def __repr__(self):
+        return "<%s('id:%s')>" % (self.__class__.__name__, self.user_id)
+
 class RepoTemp(object):
     def __init__(self, repo_id):
         self.repo_id = repo_id
+
+    def __repr__(self):
+        return "<%s('id:%s')>" % (self.__class__.__name__, self.repo_id)
 
 class ScmModel(BaseModel):
     """Generic Scm Model
