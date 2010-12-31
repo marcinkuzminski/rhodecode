@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 # mercurial repository backup manager
-# Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
+# Copyright (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
  
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
