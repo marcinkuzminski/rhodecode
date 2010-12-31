@@ -1,8 +1,16 @@
-#!/usr/bin/env python
-# encoding: utf-8
-# middleware to handle mercurial api calls
-# Copyright (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
-#
+# -*- coding: utf-8 -*-
+"""
+    rhodecode.lib.middleware.simplehg
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    SimpleHG middleware for handling mercurial protocol request 
+    (push/clone etc.). It's implemented with basic auth function
+    
+    :created_on: Apr 28, 2010
+    :author: marcink
+    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
+    :license: GPLv3, see COPYING for more details.
+"""
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
@@ -17,13 +25,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
-"""
-Created on 2010-04-28
 
-@author: marcink
-SimpleHG middleware for handling mercurial protocol request (push/clone etc.)
-It's implemented with basic auth function
-"""
 from mercurial.error import RepoError
 from mercurial.hgweb import hgweb
 from mercurial.hgweb.request import wsgiapplication
@@ -41,8 +43,7 @@ import traceback
 log = logging.getLogger(__name__)
 
 def is_mercurial(environ):
-    """
-    Returns True if request's target is mercurial server - header
+    """Returns True if request's target is mercurial server - header
     ``HTTP_ACCEPT`` of such request would start with ``application/mercurial``.
     """
     http_accept = environ.get('HTTP_ACCEPT')
@@ -168,8 +169,7 @@ class SimpleHg(object):
         return UserModel().get_by_username(username, cache=True)
 
     def __get_action(self, environ):
-        """
-        Maps mercurial request commands into a clone,pull or push command.
+        """Maps mercurial request commands into a clone,pull or push command.
         This should always return a valid command string
         :param environ:
         """
@@ -214,17 +214,3 @@ class SimpleHg(object):
                     hgserve.repo.ui.setconfig(section, k, v)
 
         return hgserve
-
-
-
-
-
-
-
-
-
-
-
-
-
-

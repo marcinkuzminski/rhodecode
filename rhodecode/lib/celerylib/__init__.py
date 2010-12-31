@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-    package.rhodecode.lib.celerylib.__init__
-    ~~~~~~~~~~~~~~
+    rhodecode.lib.celerylib.__init__
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     celery libs for RhodeCode
     

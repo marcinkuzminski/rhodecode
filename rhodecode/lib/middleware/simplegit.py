@@ -1,8 +1,16 @@
-#!/usr/bin/env python
-# encoding: utf-8
-# middleware to handle git api calls
-# Copyright (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
-#
+# -*- coding: utf-8 -*-
+"""
+    rhodecode.lib.middleware.simplegit
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    SimpleGit middleware for handling git protocol request (push/clone etc.)
+    It's implemented with basic auth function    
+    
+    :created_on: Apr 28, 2010
+    :author: marcink
+    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
+    :license: GPLv3, see COPYING for more details.
+"""
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
@@ -17,13 +25,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
-"""
-Created on 2010-04-28
 
-@author: marcink
-SimpleGit middleware for handling git protocol request (push/clone etc.)
-It's implemented with basic auth function
-"""
+import os
+import logging
+import traceback
 
 from dulwich import server as dulserver
 
@@ -60,21 +65,20 @@ dulserver.DEFAULT_HANDLERS = {
 
 from dulwich.repo import Repo
 from dulwich.web import HTTPGitApplication
+
 from paste.auth.basic import AuthBasicAuthenticator
 from paste.httpheaders import REMOTE_USER, AUTH_TYPE
+
 from rhodecode.lib.auth import authfunc, HasPermissionAnyMiddleware
 from rhodecode.lib.utils import invalidate_cache, check_repo_fast
 from rhodecode.model.user import UserModel
+
 from webob.exc import HTTPNotFound, HTTPForbidden, HTTPInternalServerError
-import logging
-import os
-import traceback
 
 log = logging.getLogger(__name__)
 
 def is_git(environ):
-    """
-    Returns True if request's target is git server. ``HTTP_USER_AGENT`` would
+    """Returns True if request's target is git server. ``HTTP_USER_AGENT`` would
     then have git client version given.
     
     :param environ:
@@ -200,8 +204,8 @@ class SimpleGit(object):
         return UserModel().get_by_username(username, cache=True)
 
     def __get_action(self, environ):
-        """
-        Maps git request commands into a pull or push command.
+        """Maps git request commands into a pull or push command.
+        
         :param environ:
         """
         service = environ['QUERY_STRING'].split('=')

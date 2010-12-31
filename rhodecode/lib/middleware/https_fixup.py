@@ -1,8 +1,15 @@
-#!/usr/bin/env python
-# encoding: utf-8
-# middleware to handle https correctly
-# Copyright (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
- 
+# -*- coding: utf-8 -*-
+"""
+    rhodecode.lib.middleware.https_fixup
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    middleware to handle https correctly
+    
+    :created_on: May 23, 2010
+    :author: marcink
+    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>    
+    :license: GPLv3, see COPYING for more details.
+"""
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
@@ -18,28 +25,22 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
 
-"""
-Created on May 23, 2010
-
-@author: marcink
-"""
-
 class HttpsFixup(object):
     def __init__(self, app):
         self.application = app
-    
+
     def __call__(self, environ, start_response):
         self.__fixup(environ)
         return self.application(environ, start_response)
-    
-    
+
+
     def __fixup(self, environ):
         """Function to fixup the environ as needed. In order to use this
         middleware you should set this header inside your 
         proxy ie. nginx, apache etc.
         """
         proto = environ.get('HTTP_X_URL_SCHEME')
-            
+
         if proto == 'https':
             environ['wsgi.url_scheme'] = proto
         else:
