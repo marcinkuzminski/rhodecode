@@ -266,8 +266,3 @@ class FilesController(BaseController):
 
         return hist_l
 
-#                [
-#                 ([("u1", "User1"), ("u2", "User2")], "Users"),
-#                 ([("g1", "Group1"), ("g2", "Group2")], "Groups")
-#                 ]
-

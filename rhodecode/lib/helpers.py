@@ -31,6 +31,8 @@ from webhelpers.html.tags import _set_input_attrs, _set_id_attr, \
     convert_boolean_attrs, NotGiven
 
 def _reset(name, value=None, id=NotGiven, type="reset", **attrs):
+    """Reset button
+    """
     _set_input_attrs(attrs, type, name, value)
     _set_id_attr(attrs, id, name)
     convert_boolean_attrs(attrs, ["disabled"])
@@ -55,24 +57,13 @@ def get_token():
             session.save()
     return session[token_key]
 
-
-#Custom helpers here :)
-class _Link(object):
-    '''
-    Make a url based on label and url with help of url_for
-    :param label:name of link    if not defined url is used
-    :param url: the url for link
-    '''
-
-    def __call__(self, label='', *url_, **urlargs):
-        if label is None or '':
-            label = url
-        link_fn = link_to(label, url(*url_, **urlargs))
-        return link_fn
-
-link = _Link()
-
 class _GetError(object):
+    """Get error from form_errors, and represent it as span wrapped error
+    message
+    
+    :param field_name: field to fetch errors for
+    :param form_errors: form errors dict
+    """
 
     def __call__(self, field_name, form_errors):
         tmpl = """<span class="error_msg">%s</span>"""
@@ -82,10 +73,10 @@ class _GetError(object):
 get_error = _GetError()
 
 def recursive_replace(str, replace=' '):
-    """
-    Recursive replace of given sign to just one instance
+    """Recursive replace of given sign to just one instance
+    
     :param str: given string
-    :param replace:char to find and replace multiple instances
+    :param replace: char to find and replace multiple instances
         
     Examples::
     >>> recursive_replace("Mighty---Mighty-Bo--sstones",'-')
@@ -245,6 +236,7 @@ class _FilesBreadCrumbs(object):
         return literal('/'.join(url_l))
 
 files_breadcrumbs = _FilesBreadCrumbs()
+
 class CodeHtmlFormatter(HtmlFormatter):
 
     def wrap(self, source, outfile):
@@ -256,16 +248,17 @@ class CodeHtmlFormatter(HtmlFormatter):
             t = '<div id="#S-%s">%s</div>' % (cnt + 1, t)
             yield i, t
 def pygmentize(filenode, **kwargs):
-    """
-    pygmentize function using pygments
+    """pygmentize function using pygments
+    
     :param filenode:
     """
+
     return literal(code_highlight(filenode.content,
                                   filenode.lexer, CodeHtmlFormatter(**kwargs)))
 
 def pygmentize_annotation(filenode, **kwargs):
-    """
-    pygmentize function for annotation
+    """pygmentize function for annotation
+    
     :param filenode:
     """
 
@@ -322,6 +315,7 @@ def repo_name_slug(value):
     This function is called on each creation/modification
     of repository to prevent bad names in repo
     """
+
     slug = remove_formatting(value)
     slug = strip_tags(slug)
 
@@ -354,8 +348,6 @@ flash = _Flash()
 #==============================================================================
 from mercurial import util
 from mercurial.templatefilters import person as _person
-
-
 
 def _age(curdate):
     """turns a datetime into an age string."""
@@ -392,9 +384,9 @@ short_id = lambda x: x[:12]
 
 
 def bool2icon(value):
-    """
-    Returns True/False values represented as small html image of true/false
+    """Returns True/False values represented as small html image of true/false
     icons
+    
     :param value: bool value
     """
 
@@ -408,12 +400,12 @@ def bool2icon(value):
 
 
 def action_parser(user_log):
-    """
-    This helper will map the specified string action into translated
+    """This helper will map the specified string action into translated
     fancy names with icons and links
     
-    @param action:
+    :param user_log: user log instance
     """
+
     action = user_log.action
     action_params = ' '
 
@@ -424,12 +416,20 @@ def action_parser(user_log):
 
     def get_cs_links():
         if action == 'push':
-            revs_limit = 5
+            revs_limit = 5 #display this amount always
+            revs_top_limit = 50 #show upto this amount of changesets hidden
             revs = action_params.split(',')
-            cs_links = " " + ', '.join ([link(rev,
+            repo_name = user_log.repository.repo_name
+            from rhodecode.model.scm import ScmModel
+
+            message = lambda rev: get_changeset_safe(ScmModel().get(repo_name),
+                                                     rev).message
+
+            cs_links = " " + ', '.join ([link_to(rev,
                     url('changeset_home',
-                    repo_name=user_log.repository.repo_name,
-                    revision=rev)) for rev in revs[:revs_limit] ])
+                    repo_name=repo_name,
+                    revision=rev), tooltip_title=message(rev),
+                    class_='tooltip') for rev in revs[:revs_limit] ])
             if len(revs) > revs_limit:
                 uniq_id = revs[0]
                 html_tmpl = ('<span> %s '
@@ -440,10 +440,11 @@ def action_parser(user_log):
                                             _('revisions'))
 
                 html_tmpl = '<span id="%s" style="display:none"> %s </span>'
-                cs_links += html_tmpl % (uniq_id, ', '.join([link(rev,
+                cs_links += html_tmpl % (uniq_id, ', '.join([link_to(rev,
                     url('changeset_home',
-                    repo_name=user_log.repository.repo_name,
-                    revision=rev)) for rev in revs[revs_limit:] ]))
+                    repo_name=repo_name, revision=rev),
+                    tooltip_title=message(rev), class_='tooltip')
+                    for rev in revs[revs_limit:revs_top_limit]]))
 
             return cs_links
         return ''
@@ -491,7 +492,7 @@ def action_parser_icon(user_log):
            'user_forked_repo':'arrow_divide.png',
            'user_updated_repo':'database_edit.png',
            'admin_deleted_repo':'database_delete.png',
-           'admin_created_repo':'database_ddd.png',
+           'admin_created_repo':'database_add.png',
            'admin_forked_repo':'arrow_divide.png',
            'admin_updated_repo':'database_edit.png',
            'push':'script_add.png',
