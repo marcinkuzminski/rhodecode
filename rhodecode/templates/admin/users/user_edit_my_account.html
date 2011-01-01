@@ -140,7 +140,7 @@
 		            	src="/images/icons/arrow_divide.png"/></a>
 		            %endif		            
 		            </td> 
-		            <td><span class="tooltip" tooltip_title="${repo['repo'].last_change}">${("r%s:%s") % (h.get_changeset_safe(repo['repo'],'tip').revision,h.short_id(h.get_changeset_safe(repo['repo'],'tip').raw_id))}</span></td>
+		            <td><span class="tooltip" title="${repo['repo'].last_change}">${("r%s:%s") % (h.get_changeset_safe(repo['repo'],'tip').revision,h.short_id(h.get_changeset_safe(repo['repo'],'tip').raw_id))}</span></td>
 		            <td><a href="${h.url('repo_settings_home',repo_name=repo['repo'].name)}" title="${_('edit')}"><img class="icon" alt="${_('private')}" src="/images/icons/application_form_edit.png"/></a></td>
 		            <td>
 	                  ${h.form(url('repo_settings_delete', repo_name=repo['repo'].name),method='delete')}

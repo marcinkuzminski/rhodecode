@@ -71,9 +71,9 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
                                                    return ': '+_('No Files')
                                        %>
 									
-										<span class="removed tooltip" tooltip_title="${_('removed')}${h.literal(changed_tooltip(cs.removed))}">${len(cs.removed)}</span>
-										<span class="changed tooltip" tooltip_title="${_('changed')}${h.literal(changed_tooltip(cs.changed))}">${len(cs.changed)}</span>
-										<span class="added tooltip" tooltip_title="${_('added')}${h.literal(changed_tooltip(cs.added))}">${len(cs.added)}</span>
+										<span class="removed tooltip" title="${_('removed')}${h.literal(changed_tooltip(cs.removed))}">${len(cs.removed)}</span>
+										<span class="changed tooltip" title="${_('changed')}${h.literal(changed_tooltip(cs.changed))}">${len(cs.changed)}</span>
+										<span class="added tooltip" title="${_('added')}${h.literal(changed_tooltip(cs.added))}">${len(cs.added)}</span>
 									</div>					
 										%if len(cs.parents)>1:
 										<div class="merge">

@@ -12,4 +12,4 @@ class TestHomeController(TestController):
 
         assert """<img class="icon" title="Mercurial repository" alt="Mercurial repository" src="/images/icons/hgicon.png"/>""" in response.body, 'wrong info about type of repositry'
         assert """<img class="icon" title="public repository" alt="public repository" src="/images/icons/lock_open.png"/>""" in response.body, 'wrong info about repository availabilty'
-        assert """<a class="tooltip" href="/vcs_test_hg/changeset/27cd5cce30c96924232dffcd24178a07ffeb5dfc" tooltip_title="merge">r173:27cd5cce30c9</a>""" in response.body, 'no info about tooltip'
+        assert """<a class="tooltip" href="/vcs_test_hg/changeset/27cd5cce30c96924232dffcd24178a07ffeb5dfc" title="merge">r173:27cd5cce30c9</a>""" in response.body, 'no info about tooltip'

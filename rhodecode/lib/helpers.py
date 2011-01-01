@@ -102,11 +102,9 @@ class _ToolTip(object):
                        .replace('\n', '<br/>')
 
     def activate(self):
-        """
-        Adds tooltip mechanism to the given Html all tooltips have to have 
-        set class tooltip and set attribute tooltip_title.
-        Then a tooltip will be generated based on that
-        All with yui js tooltip
+        """Adds tooltip mechanism to the given Html all tooltips have to have 
+        set class `tooltip` and set attribute `tooltip_title`.
+        Then a tooltip will be generated based on that. All with yui js tooltip
         """
 
         js = '''
@@ -116,7 +114,7 @@ class _ToolTip(object):
                 var tts = YAHOO.util.Dom.getElementsByClassName('tooltip');
                 
                 for (var i = 0; i < tts.length; i++) {
-                    //if element doesn't not have and id autgenerate one for tooltip
+                    //if element doesn't not have and id autogenerate one for tooltip
                     
                     if (!tts[i].id){
                         tts[i].id='tt'+i*100;
@@ -134,35 +132,15 @@ class _ToolTip(object):
                 showdelay:20,
             });
             
-            //Mouse Over event disabled for new repositories since they don't
-            //have last commit message
-            myToolTips.contextMouseOverEvent.subscribe(
-                function(type, args) {
-                    var context = args[0];
-                    var txt = context.getAttribute('tooltip_title');
-                    if(txt){                                       
-                        return true;
-                    }
-                    else{
-                        return false;
-                    }
-                });
-            
-                            
             // Set the text for the tooltip just before we display it. Lazy method
             myToolTips.contextTriggerEvent.subscribe( 
                  function(type, args) { 
 
-                 
                         var context = args[0]; 
                         
-                        var txt = context.getAttribute('tooltip_title');
-                        this.cfg.setProperty("text", txt);
-                        
-                        
-                        // positioning of tooltip
-                        var tt_w = this.element.clientWidth;
-                        var tt_h = this.element.clientHeight;
+                        //positioning of tooltip
+                        var tt_w = this.element.clientWidth;//tooltip width
+                        var tt_h = this.element.clientHeight;//tooltip height
                         
                         var context_w = context.offsetWidth;
                         var context_h = context.offsetHeight;
@@ -170,13 +148,13 @@ class _ToolTip(object):
                         var pos_x = YAHOO.util.Dom.getX(context);
                         var pos_y = YAHOO.util.Dom.getY(context);
 
-                        var display_strategy = 'top';
+                        var display_strategy = 'right';
                         var xy_pos = [0,0];
                         switch (display_strategy){
                         
                             case 'top':
                                 var cur_x = (pos_x+context_w/2)-(tt_w/2);
-                                var cur_y = pos_y-tt_h-4;
+                                var cur_y = (pos_y-tt_h-4);
                                 xy_pos = [cur_x,cur_y];                                
                                 break;
                             case 'bottom':
@@ -303,7 +281,7 @@ def pygmentize_annotation(filenode, **kwargs):
                     revision=changeset.raw_id),
                 style=get_color_string(changeset.raw_id),
                 class_='tooltip',
-                tooltip_title=tooltip_html
+                title=tooltip_html
               )
 
         uri += '\n'
@@ -428,7 +406,7 @@ def action_parser(user_log):
             cs_links = " " + ', '.join ([link_to(rev,
                     url('changeset_home',
                     repo_name=repo_name,
-                    revision=rev), tooltip_title=message(rev),
+                    revision=rev), title=message(rev),
                     class_='tooltip') for rev in revs[:revs_limit] ])
             if len(revs) > revs_limit:
                 uniq_id = revs[0]
@@ -443,7 +421,7 @@ def action_parser(user_log):
                 cs_links += html_tmpl % (uniq_id, ', '.join([link_to(rev,
                     url('changeset_home',
                     repo_name=repo_name, revision=rev),
-                    tooltip_title=message(rev), class_='tooltip')
+                    title=message(rev), class_='tooltip')
                     for rev in revs[revs_limit:revs_top_limit]]))
 
             return cs_links

@@ -9,7 +9,7 @@
         </tr>
 		%for cnt,branch in enumerate(c.repo_branches.items()):
 		<tr class="parity${cnt%2}">
-            <td><span class="tooltip" tooltip_title="${h.age(branch[1].date)}">
+            <td><span class="tooltip" title="${h.age(branch[1].date)}">
                       ${branch[1].date}</span>
             </td>
             <td>
