@@ -353,7 +353,7 @@ function onSuccess(){
 
 function toggleFollowingUser(fallows_user_id,token){
     args = 'follows_user_id='+fallows_user_id;
-    args+= '&auth_token='+token;
+    args+= '&amp;auth_token='+token;
     YUC.asyncRequest('POST',base_url,{
         success:function(o){
         	onSuccess();
@@ -363,7 +363,7 @@ function toggleFollowingUser(fallows_user_id,token){
 
 function toggleFollowingRepo(fallows_repo_id,token){
     args = 'follows_repo_id='+fallows_repo_id;
-    args+= '&auth_token='+token;
+    args+= '&amp;auth_token='+token;
     YUC.asyncRequest('POST',base_url,{
         success:function(o){
         	onSuccess();

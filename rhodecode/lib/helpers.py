@@ -92,9 +92,9 @@ def recursive_replace(str, replace=' '):
 class _ToolTip(object):
 
     def __call__(self, tooltip_title, trim_at=50):
-        """
-        Special function just to wrap our text into nice formatted autowrapped
-        text
+        """Special function just to wrap our text into nice formatted 
+        autowrapped text
+        
         :param tooltip_title:
         """
 
