@@ -76,13 +76,16 @@ class SummaryController(BaseController):
         e = request.environ
 
         if self.rhodecode_user.username == 'default':
-            password = ':default'
+            #for default(anonymous) user we don't need to pass credentials
+            username = ''
+            password = ''
         else:
+            username = str(c.rhodecode_user.username)
             password = ''
 
         uri = u'%(protocol)s://%(user)s%(password)s@%(host)s%(prefix)s/%(repo_name)s' % {
                                         'protocol': e.get('wsgi.url_scheme'),
-                                        'user':str(c.rhodecode_user.username),
+                                        'user':username,
                                         'password':password,
                                         'host':e.get('HTTP_HOST'),
                                         'prefix':e.get('SCRIPT_NAME'),

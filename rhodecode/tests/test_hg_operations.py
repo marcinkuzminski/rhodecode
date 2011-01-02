@@ -23,7 +23,7 @@ from rhodecode.tests import TESTS_TMP_PATH, NEW_HG_REPO, HG_REPO
 USER = 'test_admin'
 PASS = 'test12'
 HOST = '127.0.0.1:5000'
-
+DEBUG = True
 log = logging.getLogger(__name__)
 
 
@@ -38,16 +38,18 @@ class Command(object):
 
         command = cmd + ' ' + ' '.join(args)
         log.debug('Executing %s' % command)
-        print command
+        if DEBUG:
+            print command
         p = Popen(command, shell=True, stdout=PIPE, stderr=PIPE, cwd=self.cwd)
         stdout, stderr = p.communicate()
-        print stdout, stderr
+        if DEBUG:
+            print stdout, stderr
         return stdout, stderr
 
 
-#===============================================================================
+#==============================================================================
 # TESTS
-#===============================================================================
+#==============================================================================
 def test_clone():
     cwd = path = jn(TESTS_TMP_PATH, HG_REPO)
 
@@ -215,9 +217,10 @@ def test_push_wrong_path():
 
 if __name__ == '__main__':
     test_clone()
-    test_clone_wrong_credentials()
-    ##test_clone_anonymous_ok()
 
+    #test_clone_wrong_credentials()
+    ##test_clone_anonymous_ok()
+    test_pull()
     #test_push_new_file()
     #test_push_wrong_path()
     #test_push_wrong_credentials()
