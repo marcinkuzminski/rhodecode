@@ -75,7 +75,7 @@ class RhodeCodeSettings(Base, BaseModel):
     app_settings_name = Column("app_settings_name", String(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     app_settings_value = Column("app_settings_value", String(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
 
-    def __init__(self, k, v):
+    def __init__(self, k='', v=''):
         self.app_settings_name = k
         self.app_settings_value = v
 

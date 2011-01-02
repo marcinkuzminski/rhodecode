@@ -51,10 +51,14 @@ class DbManage(object):
         self.tests = tests
         self.root = root
         self.dburi = dbconf
-        engine = create_engine(self.dburi, echo=log_sql)
+        self.log_sql = log_sql
+        self.db_exists = False
+        self.init_db()
+
+    def init_db(self):
+        engine = create_engine(self.dburi, echo=self.log_sql)
         init_model(engine)
         self.sa = meta.Session()
-        self.db_exists = False
 
     def check_for_db(self, override):
         db_path = jn(self.root, self.dbname)
@@ -222,6 +226,7 @@ class DbManage(object):
         """
 
         hgsettings3 = RhodeCodeSettings('ga_code', '')
+
         try:
             self.sa.add(hgsettings3)
             self.sa.commit()
