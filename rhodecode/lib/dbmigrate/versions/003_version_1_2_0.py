@@ -6,7 +6,6 @@ from sqlalchemy.exc import DatabaseError
 from sqlalchemy.orm import relation, backref, class_mapper
 from sqlalchemy.orm.session import Session
 
-
 from rhodecode.lib.dbmigrate.migrate import *
 from rhodecode.lib.dbmigrate.migrate.changeset import *
 
@@ -35,20 +34,14 @@ def upgrade(migrate_engine):
     #==========================================================================
     # Upgrade of `repositories` table
     #==========================================================================    
-    tblname = 'repositories'
-    tbl = Table(tblname, MetaData(bind=migrate_engine), autoload=True,
-                    autoload_with=migrate_engine)
+    from rhodecode.model.db import Repository
 
     #ADD group_id column#
-    group_id = Column("group_id", Integer(), #ForeignKey('groups.group_id'),
+    group_id = Column("group_id", Integer(), ForeignKey('groups.group_id'),
                   nullable=True, unique=False, default=None)
 
-    group_id.create(tbl)
+    group_id.create(Repository().__table__)
 
-# TODO: fix this somehow ?!
-#    cons = ForeignKeyConstraint([tbl.c.group_id], ['groups.group_id'], table=tbl)
-#
-#    cons.create()
     return
 
 
