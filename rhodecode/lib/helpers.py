@@ -406,7 +406,7 @@ def action_parser(user_log):
             cs_links = " " + ', '.join ([link_to(rev,
                     url('changeset_home',
                     repo_name=repo_name,
-                    revision=rev), title=message(rev),
+                    revision=rev), title=tooltip(message(rev)),
                     class_='tooltip') for rev in revs[:revs_limit] ])
             if len(revs) > revs_limit:
                 uniq_id = revs[0]
