@@ -1,8 +1,15 @@
-#!/usr/bin/env python
-# encoding: utf-8
-# custom hooks for application
-# Copyright (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
-#
+# -*- coding: utf-8 -*-
+"""
+    rhodecode.lib.hooks
+    ~~~~~~~~~~~~~~~~~~~
+
+    Hooks runned by rhodecode
+    
+    :created_on: Aug 6, 2010
+    :author: marcink
+    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>    
+    :license: GPLv3, see COPYING for more details.
+"""
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
@@ -17,19 +24,23 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
-"""
-Created on Aug 6, 2010
-
-@author: marcink
-"""
-from mercurial.cmdutil import revrange
-from mercurial.node import nullrev
-from rhodecode.lib import helpers as h
-from rhodecode.lib.utils import action_logger
 import os
 import sys
+import getpass
+
+from mercurial.cmdutil import revrange
+from mercurial.node import nullrev
+
+from rhodecode.lib import helpers as h
+from rhodecode.lib.utils import action_logger
 
 def repo_size(ui, repo, hooktype=None, **kwargs):
+    """Presents size of repository after push
+    
+    :param ui:
+    :param repo:
+    :param hooktype:
+    """
 
     if hooktype != 'changegroup':
         return False
@@ -55,8 +66,8 @@ def repo_size(ui, repo, hooktype=None, **kwargs):
                      % (size_hg_f, size_root_f, size_total_f))
 
 def log_pull_action(ui, repo, **kwargs):
-    """
-    Logs user last pull action
+    """Logs user last pull action
+    
     :param ui:
     :param repo:
     """
@@ -71,8 +82,8 @@ def log_pull_action(ui, repo, **kwargs):
     return 0
 
 def log_push_action(ui, repo, **kwargs):
-    """
-    Maps user last push action to new changeset id, from mercurial
+    """Maps user last push action to new changeset id, from mercurial
+    
     :param ui:
     :param repo:
     """
