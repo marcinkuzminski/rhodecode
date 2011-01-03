@@ -12,15 +12,23 @@ Changelog
 news
 ++++
 
+- implemented #89 Can setup google analytics code from settings menu
 - implemented #91 added nicer looking archive urls
 - implemented #44 into file browsing, and added follow branch option
+- anonymous repository can be cloned without having to pass default:default
+  into clone url
+- fixed #90 whoosh indexer can index chooses repositories passed in command 
+  line
 
 fixes
 ++++
 
 - fixed file browser bug, when switching into given form revision the url was 
   not changing
-- fixed #92
+- fixed #92 whoosh indexer is more error proof
+- fixed large tooltips problems
+- fixed propagation to error controller on simplehg and simplegit middlewares
+ 
 
 1.1.0 (**2010-12-18**)
 ----------------------

@@ -50,6 +50,31 @@ You are ready to use rhodecode, to run it simply execute
   anonymous, permissions settings. As well as edit more advanced options on 
   users and repositories
   
+Using RhodeCode with SSH
+------------------------
+
+RhodeCode repository structures are kept in directories with the same name 
+as the project, when using repository groups, each group is a a subdirectory.
+This will allow You to use ssh for accessing repositories quite easy. There
+are some exceptions when using ssh for accessing repositories.
+
+You have to make sure that the webserver as well as the ssh users have unix
+permission for directories. Secondly when using ssh rhodecode will not 
+authenticate those requests and permissions set by the web interface will not
+work on the repositories accessed via ssh. There is a solution to this to use 
+auth hooks, that connects to rhodecode db, and runs check functions for
+permissions.
+
+TODO: post more info on this !
+
+if Your main directory (the same as set in RhodeCode settings) is set to
+for example `\home\hg` and repository You are using is `rhodecode`
+
+The command runned should look like this::
+ hg clone ssh://user@server.com/home/hg/rhodecode
+ 
+Using external tools such as mercurial server or using ssh key based auth is
+fully supported.
     
 Setting up Whoosh full text search
 ----------------------------------
