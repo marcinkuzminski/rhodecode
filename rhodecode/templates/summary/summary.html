@@ -250,7 +250,11 @@
     <div class="table">
         
          %if c.no_data:
-           <div style="padding:0 10px 10px 15px;font-size: 1.2em;">${c.no_data_msg}</div>
+           <div style="padding:0 10px 10px 15px;font-size: 1.2em;">${c.no_data_msg}
+           %if h.HasPermissionAll('hg.admin')('enable stats on from summary'):
+                [${h.link_to(_('enable'),h.url('edit_repo',repo_name=c.repo_name))}]
+           %endif
+           </div>
         %endif:  
         <div id="commit_history" style="width:460px;height:300px;float:left"></div>
         <div style="clear: both;height: 10px"></div>
