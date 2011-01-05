@@ -25,9 +25,12 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
 
+from rhodecode.lib import str2bool
+
 class HttpsFixup(object):
-    def __init__(self, app):
+    def __init__(self, app, config):
         self.application = app
+        self.config = config
 
     def __call__(self, environ, start_response):
         self.__fixup(environ)
@@ -40,6 +43,9 @@ class HttpsFixup(object):
         proxy ie. nginx, apache etc.
         """
         proto = environ.get('HTTP_X_URL_SCHEME')
+
+        if str2bool(self.config.get('force_https')):
+            proto = 'https'
 
         if proto == 'https':
             environ['wsgi.url_scheme'] = proto

@@ -35,14 +35,12 @@ from hashlib import md5
 from decorator import decorator
 from vcs.utils.lazy import LazyProperty
 
+from rhodecode.lib import str2bool
 from rhodecode.lib.pidlock import DaemonLock, LockHeld
 
 from pylons import  config
 
 log = logging.getLogger(__name__)
-
-def str2bool(v):
-    return v.lower() in ["yes", "true", "t", "1"] if v else None
 
 try:
     CELERY_ON = str2bool(config['app_conf'].get('use_celery'))

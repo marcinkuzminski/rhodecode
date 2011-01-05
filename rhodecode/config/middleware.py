@@ -59,7 +59,7 @@ def make_app(global_conf, full_stack=True, static_files=True, **app_conf):
             app = StatusCodeRedirect(app, [400, 401, 403, 404, 500])
 
     #enable https redirets based on HTTP_X_URL_SCHEME set by proxy
-    app = HttpsFixup(app)
+    app = HttpsFixup(app, config)
 
     # Establish the Registry for this application
     app = RegistryManager(app)
