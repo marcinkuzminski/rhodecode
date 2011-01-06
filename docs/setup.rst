@@ -256,27 +256,27 @@ Apache virtual host example
 
 Sample config for apache using proxy::
 
-<VirtualHost *:80>
-        ServerName hg.myserver.com
-        ServerAlias hg.myserver.com
-
-        <Proxy *>
-          Order allow,deny
-          Allow from all
-        </Proxy>
-
-        #important !
-        #Directive to properly generate url (clone url) for pylons
-        ProxyPreserveHost On
-
-        #rhodecode instance
-        ProxyPass / http://127.0.0.1:5000/
-        ProxyPassReverse / http://127.0.0.1:5000/
-        
-        #to enable https use line below
-        #SetEnvIf X-Url-Scheme https HTTPS=1
-        
-</VirtualHost> 
+    <VirtualHost *:80>
+            ServerName hg.myserver.com
+            ServerAlias hg.myserver.com
+    
+            <Proxy *>
+              Order allow,deny
+              Allow from all
+            </Proxy>
+    
+            #important !
+            #Directive to properly generate url (clone url) for pylons
+            ProxyPreserveHost On
+    
+            #rhodecode instance
+            ProxyPass / http://127.0.0.1:5000/
+            ProxyPassReverse / http://127.0.0.1:5000/
+            
+            #to enable https use line below
+            #SetEnvIf X-Url-Scheme https HTTPS=1
+            
+    </VirtualHost> 
 
 
 Additional tutorial
