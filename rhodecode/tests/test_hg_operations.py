@@ -13,12 +13,28 @@
 import os
 import shutil
 import logging
-
-from subprocess import Popen, PIPE
-
 from os.path import join as jn
 
+from tempfile import _RandomNameSequence
+from subprocess import Popen, PIPE
+
+from paste.deploy import appconfig
+from pylons import config
+from sqlalchemy import engine_from_config
+
+from rhodecode.lib.utils import add_cache
+from rhodecode.model import init_model
+from rhodecode.model import meta
+from rhodecode.model.db import User
+from rhodecode.lib.auth import get_crypt_password
+
 from rhodecode.tests import TESTS_TMP_PATH, NEW_HG_REPO, HG_REPO
+from rhodecode.config.environment import load_environment
+
+conf = appconfig('config:development.ini', relative_to='./../../')
+load_environment(conf.global_conf, conf.local_conf)
+
+add_cache(conf)
 
 USER = 'test_admin'
 PASS = 'test12'
@@ -45,6 +61,32 @@ class Command(object):
         if DEBUG:
             print stdout, stderr
         return stdout, stderr
+
+def get_session():
+    engine = engine_from_config(conf, 'sqlalchemy.db1.')
+    init_model(engine)
+    sa = meta.Session()
+    return sa
+
+
+def create_test_user(force=True):
+    sa = get_session()
+
+    user = sa.query(User).filter(User.username == USER).scalar()
+    if force:
+        sa.delete(user)
+        sa.commit()
+
+    if user is None or force:
+        new_usr = User()
+        new_usr.username = USER
+        new_usr.password = get_crypt_password(PASS)
+        new_usr.active = True
+
+        sa.add(new_usr)
+        sa.commit()
+
+
 
 
 #==============================================================================
@@ -136,18 +178,18 @@ def test_push():
 
     Command(cwd).execute('hg push %s' % jn(TESTS_TMP_PATH, HG_REPO))
 
-def test_push_new_file():
+def test_push_new_file(commits=15):
 
     test_clone()
 
     cwd = path = jn(TESTS_TMP_PATH, HG_REPO)
-    added_file = jn(path, 'setup.py')
+    added_file = jn(path, '%ssetup.py' % _RandomNameSequence().next())
 
     Command(cwd).execute('touch %s' % added_file)
 
     Command(cwd).execute('hg add %s' % added_file)
 
-    for i in xrange(15):
+    for i in xrange(commits):
         cmd = """echo 'added_line%s' >> %s""" % (i, added_file)
         Command(cwd).execute(cmd)
 
@@ -161,7 +203,7 @@ def test_push_new_file():
                    'cloned_repo':HG_REPO,
                    'dest':jn(TESTS_TMP_PATH, HG_REPO)}
 
-    Command(cwd).execute('hg push %s' % push_url)
+    Command(cwd).execute('hg push --verbose --debug %s' % push_url)
 
 def test_push_wrong_credentials():
 
@@ -216,12 +258,13 @@ def test_push_wrong_path():
 
 
 if __name__ == '__main__':
-    test_clone()
+    create_test_user()
+    #test_clone()
 
     #test_clone_wrong_credentials()
     ##test_clone_anonymous_ok()
-    test_pull()
-    #test_push_new_file()
+    #test_pull()
+    test_push_new_file(3)
     #test_push_wrong_path()
     #test_push_wrong_credentials()
 
