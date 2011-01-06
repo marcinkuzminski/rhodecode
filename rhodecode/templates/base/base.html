@@ -207,7 +207,11 @@
                    </a>
                    <ul>
                    %if h.HasRepoPermissionAll('repository.admin')(c.repo_name):
-                   	<li>${h.link_to(_('settings'),h.url('repo_settings_home',repo_name=c.repo_name),class_='settings')}</li>
+                     %if h.HasPermissionAll('hg.admin')('access settings on repository'):
+                         <li>${h.link_to(_('settings'),h.url('edit_repo',repo_name=c.repo_name),class_='settings')}</li>
+                     %else:
+                         <li>${h.link_to(_('settings'),h.url('repo_settings_home',repo_name=c.repo_name),class_='settings')}</li>
+                     %endif
                    	<li>${h.link_to(_('fork'),h.url('repo_fork_home',repo_name=c.repo_name),class_='fork')}</li>
                    %endif  
                    	<li>${h.link_to(_('search'),h.url('search_repo',search_repo=c.repo_name),class_='search')}</li>
@@ -337,7 +341,7 @@ function onSuccess(){
 
 function toggleFollowingUser(fallows_user_id,token){
     args = 'follows_user_id='+fallows_user_id;
-    args+= '&auth_token='+token;
+    args+= '&amp;auth_token='+token;
     YUC.asyncRequest('POST',base_url,{
         success:function(o){
         	onSuccess();
@@ -347,7 +351,7 @@ function toggleFollowingUser(fallows_user_id,token){
 
 function toggleFollowingRepo(fallows_repo_id,token){
     args = 'follows_repo_id='+fallows_repo_id;
-    args+= '&auth_token='+token;
+    args+= '&amp;auth_token='+token;
     YUC.asyncRequest('POST',base_url,{
         success:function(o){
         	onSuccess();
