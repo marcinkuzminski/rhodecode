@@ -28,7 +28,23 @@ fixes
 - fixed #92 whoosh indexer is more error proof
 - fixed large tooltips problems
 - fixed propagation to error controller on simplehg and simplegit middlewares
+
+1.1.1 (**2011-01-xx**)
+----------------------
  
+news
+++++
+
+- added force https option into ini files for easier https usage (no need to
+  set server headers with this options)
+
+fixes
+++++
+
+- fixed #96 redirect loop on files view on repositories without changesets
+- fixed #97 unicode string passed into server header in special cases (mod_wsgi)
+  and server crashed with errors
+
 
 1.1.0 (**2010-12-18**)
 ----------------------
