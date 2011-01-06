@@ -3,7 +3,7 @@
 Changelog
 =========
 
-1.2.0 (**2010-12-18**)
+1.2.0 (**2011-XX-XX**)
 ----------------------
 
 :status: in-progress
@@ -25,9 +25,8 @@ fixes
 
 - fixed file browser bug, when switching into given form revision the url was 
   not changing
-- fixed #92 whoosh indexer is more error proof
-- fixed large tooltips problems
 - fixed propagation to error controller on simplehg and simplegit middlewares
+
 
 1.1.1 (**2011-01-xx**)
 ----------------------
@@ -44,6 +43,9 @@ fixes
 - fixed #96 redirect loop on files view on repositories without changesets
 - fixed #97 unicode string passed into server header in special cases (mod_wsgi)
   and server crashed with errors
+- fixed large tooltips problems
+- fixed #92 whoosh indexer is more error proof
+
 
 
 1.1.0 (**2010-12-18**)
