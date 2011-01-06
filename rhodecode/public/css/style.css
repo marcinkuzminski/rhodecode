@@ -1594,6 +1594,7 @@ div.browserblock .browser-header {
 background:#FFF;
 padding:10px 0;
 float:left;
+width: 100%;
 }
 
 div.browserblock .browser-branch {
