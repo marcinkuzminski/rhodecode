@@ -69,6 +69,8 @@ class SimpleHg(object):
         proxy_key = 'HTTP_X_REAL_IP'
         def_key = 'REMOTE_ADDR'
         self.ipaddr = environ.get(proxy_key, environ.get(def_key, '0.0.0.0'))
+        # skip passing error to error controller
+        environ['pylons.status_code_redirect'] = True
 
         #===================================================================
         # AUTHENTICATE THIS MERCURIAL REQUEST
@@ -76,7 +78,7 @@ class SimpleHg(object):
         username = REMOTE_USER(environ)
 
         if not username:
-            self.authenticate.realm = self.config['rhodecode_realm']
+            self.authenticate.realm = str(self.config['rhodecode_realm'])
             result = self.authenticate(environ)
             if isinstance(result, str):
                 AUTH_TYPE.update(environ, 'basic')

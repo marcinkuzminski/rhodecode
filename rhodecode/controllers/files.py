@@ -39,7 +39,8 @@ from rhodecode.lib.base import BaseController, render
 from rhodecode.lib.utils import EmptyChangeset
 from rhodecode.model.scm import ScmModel
 
-from vcs.exceptions import RepositoryError, ChangesetError
+from vcs.exceptions import RepositoryError, ChangesetError, \
+    ChangesetDoesNotExistError, EmptyRepositoryError
 from vcs.nodes import FileNode
 from vcs.utils import diffs as differ
 
@@ -90,6 +91,10 @@ class FilesController(BaseController):
             except RepositoryError, e:
                 h.flash(str(e), category='warning')
                 redirect(h.url('files_home', repo_name=repo_name, revision=revision))
+
+        except EmptyRepositoryError, e:
+            h.flash(_('There are no files yet'), category='warning')
+            redirect(h.url('summary_home', repo_name=repo_name))
 
         except RepositoryError, e:
             h.flash(str(e), category='warning')

@@ -116,10 +116,17 @@ class WhooshIndexingDaemon(object):
         the instance of vcs backend"""
         node = self.get_node(repo, path)
 
-        #we just index the content of chosen files
-        if node.extension in INDEX_EXTENSIONS:
-            log.debug('    >> %s [WITH CONTENT]' % path)
+        #we just index the content of chosen files, and skip binary files
+        if node.extension in INDEX_EXTENSIONS and not node.is_binary:
+            
             u_content = node.content
+            if not isinstance(u_content, unicode):
+                log.warning('  >> %s Could not get this content as unicode '
+                          'replacing with empty content', path)
+                u_content = u''
+            else:
+                log.debug('    >> %s [WITH CONTENT]' % path)
+                
         else:
             log.debug('    >> %s' % path)
             #just index file name without it's content

@@ -905,20 +905,6 @@ margin:0;
 padding:4px 8px;
 }
 
-#content div.box div.form div.fields div.field div.input a.ui-input-file {
-width:28px;
-height:28px;
-display:inline;
-position:absolute;
-overflow:hidden;
-cursor:pointer;
-background:#e5e3e3 url("../images/button_browse.png") no-repeat;
-border:none;
-text-decoration:none;
-margin:0 0 0 6px;
-padding:0;
-}
-
 #content div.box div.form div.fields div.field div.textarea {
 border-top:1px solid #b3b3b3;
 border-left:1px solid #b3b3b3;
@@ -978,15 +964,6 @@ font-size:11px;
 padding:5px 5px 5px 0;
 }
 
-#content div.box div.form div.fields div.field div.textarea table td table td a.mceButtonActive {
-background:#b1b1b1;
-}
-
-#content div.box div.form div.fields div.field div.select a.ui-selectmenu {
-color:#565656;
-text-decoration:none;
-}
-
 #content div.box div.form div.fields div.field input[type=text]:focus,#content div.box div.form div.fields div.field input[type=password]:focus,#content div.box div.form div.fields div.field input[type=file]:focus,#content div.box div.form div.fields div.field textarea:focus,#content div.box div.form div.fields div.field select:focus {
 background:#f6f6f6;
 border-color:#666;
@@ -997,7 +974,7 @@ margin:0;
 padding:0 0 0 8px;
 }
 
-div.form div.fields div.field div.highlight .ui-state-default {
+div.form div.fields div.field div.highlight .ui-button {
 background:#4e85bb url("../images/button_highlight.png") repeat-x;
 border-top:1px solid #5c91a4;
 border-left:1px solid #2a6f89;
@@ -1019,7 +996,7 @@ margin:0;
 padding:6px 12px;
 }
 
-#content div.box div.form div.fields div.buttons div.highlight input.ui-state-default {
+#content div.box div.form div.fields div.buttons div.highlight input.ui-button {
 background:#4e85bb url("../../images/button_highlight.png") repeat-x;
 border-top:1px solid #5c91a4;
 border-left:1px solid #2a6f89;
@@ -1408,7 +1385,7 @@ margin:0;
 padding:10px 0 0 150px;
 }
 
-#register div.form div.fields div.buttons div.highlight input.ui-state-default {
+#register div.form div.fields div.buttons div.highlight input.ui-button {
 background:url("../images/button_highlight.png") repeat-x scroll 0 0 #4E85BB;
 color:#FFF;
 border-color:#5C91A4 #2B7089 #1A6480 #2A6F89;
@@ -1614,10 +1591,18 @@ padding:0;
 }
 
 div.browserblock .browser-header {
-border-bottom:1px solid #CCC;
 background:#FFF;
-color:blue;
 padding:10px 0;
+float:left;
+}
+
+div.browserblock .browser-branch {
+background:#FFF;
+padding:20px 0 0 0;
+float:left;
+}
+div.browserblock .browser-branch label {
+color:#4A4A4A;	
 }
 
 div.browserblock .browser-header span {
@@ -1627,6 +1612,7 @@ font-weight:700;
 
 div.browserblock .browser-body {
 background:#EEE;
+border-top:1px solid #CCC;
 }
 
 table.code-browser {
@@ -1754,6 +1740,10 @@ width:auto;
 opacity:1px;
 padding:8px;
 white-space: pre;
+-webkit-border-radius: 8px 8px 8px 8px;
+-khtml-border-radius: 8px 8px 8px 8px; 
+-moz-border-radius: 8px 8px 8px 8px;
+border-radius: 8px 8px 8px 8px;
 }
 
 .ac {
@@ -2052,7 +2042,7 @@ border-left:1px solid #316293;
 border:1px solid #316293;
 }
 
-#content div.box div.title div.search div.button input.ui-state-default {
+#content div.box div.title div.search div.button input.ui-button {
 background:#4e85bb url("../../images/button_highlight.png") repeat-x;
 border:1px solid #316293;
 border-left:none;
@@ -2066,7 +2056,7 @@ border-left:none;
 color:#FFF;
 }
 
-#content div.box div.form div.fields div.field div.highlight .ui-state-default {
+#content div.box div.form div.fields div.field div.highlight .ui-button {
 background:#4e85bb url("../../images/button_highlight.png") repeat-x;
 border-top:1px solid #5c91a4;
 border-left:1px solid #2a6f89;
@@ -2211,7 +2201,7 @@ font-weight:700;
 margin:0;
 }
 
-div.form div.fields div.field div.button .ui-state-default,#content div.box div.form div.fields div.buttons input.ui-state-default {
+div.form div.fields div.field div.button .ui-button,#content div.box div.form div.fields div.buttons input.ui-button {
 background:#e5e3e3 url("../images/button.png") repeat-x;
 border-top:1px solid #DDD;
 border-left:1px solid #c6c6c6;
@@ -2259,7 +2249,7 @@ margin:6px 0 0;
 padding:0;
 }
 
-#content div.box div.action div.button input.ui-state-default,#login div.form div.fields div.buttons input.ui-state-default,#register div.form div.fields div.buttons input.ui-state-default {
+#content div.box div.action div.button input.ui-button,#login div.form div.fields div.buttons input.ui-button,#register div.form div.fields div.buttons input.ui-button {
 background:#e5e3e3 url("../images/button.png") repeat-x;
 border-top:1px solid #DDD;
 border-left:1px solid #c6c6c6;

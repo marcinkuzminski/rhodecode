@@ -157,6 +157,16 @@ In order to make start using celery run::
  paster celeryd <configfile.ini>
 
 
+HTTPS support
+-------------
+
+There are two ways to enable https, first is to set HTTP_X_URL_SCHEME in
+Your http server headers, than rhodecode will recognise this headers and make
+proper https redirections, another way is to set `force_https = true` 
+in the ini cofiguration to force using https, no headers are needed than to
+enable https
+
+
 Nginx virtual host example
 --------------------------
 
@@ -210,9 +220,36 @@ in production.ini file::
 
 To not have the statics served by the application. And improve speed.
 
-Apache reverse proxy
---------------------
-Tutorial can be found here
+
+Apache virtual host example
+---------------------------
+
+Sample config for apache using proxy::
+
+<VirtualHost *:80>
+        ServerName hg.myserver.com
+        ServerAlias hg.myserver.com
+
+        <Proxy *>
+          Order allow,deny
+          Allow from all
+        </Proxy>
+
+        #important !
+        #Directive to properly generate url (clone url) for pylons
+        ProxyPreserveHost On
+
+        #rhodecode instance
+        ProxyPass / http://127.0.0.1:5000/
+        ProxyPassReverse / http://127.0.0.1:5000/
+        
+        #to enable https use line below
+        #SetEnvIf X-Url-Scheme https HTTPS=1
+        
+</VirtualHost> 
+
+
+Additional tutorial
 http://wiki.pylonshq.com/display/pylonscookbook/Apache+as+a+reverse+proxy+for+Pylons
 
 
