@@ -105,13 +105,13 @@ class SimpleHg(object):
                 if anonymous_user.active is False:
                     log.debug('Anonymous access is disabled, running '
                               'authentication')
-                #==================================================================
-                # DEFAULT PERM FAILED OR ANONYMOUS ACCESS IS DISABLED SO WE NEED 
-                # TO AUTHENTICATE AND ASK FOR AUTHENTICATED USER PERMISSIONS
-                #==================================================================
+                #==============================================================
+                # DEFAULT PERM FAILED OR ANONYMOUS ACCESS IS DISABLED SO WE 
+                # NEED TO AUTHENTICATE AND ASK FOR AUTH USER PERMISSIONS
+                #==============================================================
 
                 if not REMOTE_USER(environ):
-                    self.authenticate.realm = self.config['rhodecode_realm']
+                    self.authenticate.realm = str(self.config['rhodecode_realm'])
                     result = self.authenticate(environ)
                     if isinstance(result, str):
                         AUTH_TYPE.update(environ, 'basic')
@@ -120,10 +120,10 @@ class SimpleHg(object):
                         return result.wsgi_application(environ, start_response)
 
 
-                #==================================================================
+                #==============================================================
                 # CHECK PERMISSIONS FOR THIS REQUEST USING GIVEN USERNAME FROM
                 # BASIC AUTH
-                #==================================================================
+                #==============================================================
 
                 if self.action in ['pull', 'push']:
                     username = self.__get_environ_user(environ)

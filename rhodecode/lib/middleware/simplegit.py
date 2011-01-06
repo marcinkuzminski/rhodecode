@@ -78,8 +78,8 @@ from webob.exc import HTTPNotFound, HTTPForbidden, HTTPInternalServerError
 log = logging.getLogger(__name__)
 
 def is_git(environ):
-    """Returns True if request's target is git server. ``HTTP_USER_AGENT`` would
-    then have git client version given.
+    """Returns True if request's target is git server. 
+    ``HTTP_USER_AGENT`` would then have git client version given.
     
     :param environ:
     """
@@ -109,63 +109,74 @@ class SimpleGit(object):
         self.ipaddr = environ.get(proxy_key, environ.get(def_key, '0.0.0.0'))
         # skip passing error to error controller
         environ['pylons.status_code_redirect'] = True
-        #===================================================================
-        # AUTHENTICATE THIS GIT REQUEST
-        #===================================================================
-        username = REMOTE_USER(environ)
-        if not username:
-            self.authenticate.realm = self.config['rhodecode_realm']
-            result = self.authenticate(environ)
-            if isinstance(result, str):
-                AUTH_TYPE.update(environ, 'basic')
-                REMOTE_USER.update(environ, result)
-            else:
-                return result.wsgi_application(environ, start_response)
 
-        #=======================================================================
-        # GET REPOSITORY
-        #=======================================================================
+        #======================================================================
+        # GET ACTION PULL or PUSH
+        #======================================================================
+        self.action = self.__get_action(environ)
         try:
-            repo_name = '/'.join(environ['PATH_INFO'].split('/')[1:])
-            if repo_name.endswith('/'):
-                repo_name = repo_name.rstrip('/')
-            self.repository = repo_name
+            #==================================================================
+            # GET REPOSITORY NAME
+            #==================================================================            
+            self.repo_name = self.__get_repository(environ)
         except:
-            log.error(traceback.format_exc())
             return HTTPInternalServerError()(environ, start_response)
 
-        #===================================================================
-        # CHECK PERMISSIONS FOR THIS REQUEST
-        #===================================================================
-        self.action = self.__get_action(environ)
-        if self.action:
-            username = self.__get_environ_user(environ)
-            try:
-                user = self.__get_user(username)
-                self.username = user.username
-            except:
-                log.error(traceback.format_exc())
-                return HTTPInternalServerError()(environ, start_response)
+        #======================================================================
+        # CHECK ANONYMOUS PERMISSION
+        #======================================================================
+        if self.action in ['pull', 'push'] or self.action:
+            anonymous_user = self.__get_user('default')
+            self.username = anonymous_user.username
+            anonymous_perm = self.__check_permission(self.action, anonymous_user ,
+                                           self.repo_name)
 
-            #check permissions for this repository
-            if self.action == 'push':
-                if not HasPermissionAnyMiddleware('repository.write',
-                                                  'repository.admin')\
-                                                    (user, repo_name):
-                    return HTTPForbidden()(environ, start_response)
+            if anonymous_perm is not True or anonymous_user.active is False:
+                if anonymous_perm is not True:
+                    log.debug('Not enough credentials to access this repository'
+                              'as anonymous user')
+                if anonymous_user.active is False:
+                    log.debug('Anonymous access is disabled, running '
+                              'authentication')
+                #==============================================================
+                # DEFAULT PERM FAILED OR ANONYMOUS ACCESS IS DISABLED SO WE 
+                # NEED TO AUTHENTICATE AND ASK FOR AUTH USER PERMISSIONS
+                #==============================================================
 
-            else:
-                #any other action need at least read permission
-                if not HasPermissionAnyMiddleware('repository.read',
-                                                  'repository.write',
-                                                  'repository.admin')\
-                                                    (user, repo_name):
-                    return HTTPForbidden()(environ, start_response)
+                if not REMOTE_USER(environ):
+                    self.authenticate.realm = str(self.config['rhodecode_realm'])
+                    result = self.authenticate(environ)
+                    if isinstance(result, str):
+                        AUTH_TYPE.update(environ, 'basic')
+                        REMOTE_USER.update(environ, result)
+                    else:
+                        return result.wsgi_application(environ, start_response)
+
+
+                #==============================================================
+                # CHECK PERMISSIONS FOR THIS REQUEST USING GIVEN USERNAME FROM
+                # BASIC AUTH
+                #==============================================================
+
+                if self.action in ['pull', 'push']  or self.action:
+                    username = self.__get_environ_user(environ)
+                    try:
+                        user = self.__get_user(username)
+                        self.username = user.username
+                    except:
+                        log.error(traceback.format_exc())
+                        return HTTPInternalServerError()(environ, start_response)
+
+                    #check permissions for this repository
+                    perm = self.__check_permission(self.action, user, self.repo_name)
+                    if perm is not True:
+                        print 'not allowed'
+                        return HTTPForbidden()(environ, start_response)
 
         self.extras = {'ip':self.ipaddr,
                        'username':self.username,
                        'action':self.action,
-                       'repository':self.repository}
+                       'repository':self.repo_name}
 
         #===================================================================
         # GIT REQUEST HANDLING
@@ -196,6 +207,46 @@ class SimpleGit(object):
         gitserve = HTTPGitApplication(backend)
 
         return gitserve
+
+    def __check_permission(self, action, user, repo_name):
+        """Checks permissions using action (push/pull) user and repository
+        name
+        
+        :param action: push or pull action
+        :param user: user instance
+        :param repo_name: repository name
+        """
+        if action == 'push':
+            if not HasPermissionAnyMiddleware('repository.write',
+                                              'repository.admin')\
+                                                (user, repo_name):
+                return False
+
+        else:
+            #any other action need at least read permission
+            if not HasPermissionAnyMiddleware('repository.read',
+                                              'repository.write',
+                                              'repository.admin')\
+                                                (user, repo_name):
+                return False
+
+        return True
+
+
+    def __get_repository(self, environ):
+        """Get's repository name out of PATH_INFO header
+        
+        :param environ: environ where PATH_INFO is stored
+        """
+        try:
+            repo_name = '/'.join(environ['PATH_INFO'].split('/')[1:])
+            if repo_name.endswith('/'):
+                repo_name = repo_name.rstrip('/')
+        except:
+            log.error(traceback.format_exc())
+            raise
+        repo_name = repo_name.split('/')[0]
+        return repo_name
 
     def __get_environ_user(self, environ):
         return environ.get('REMOTE_USER')
