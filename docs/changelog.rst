@@ -4,17 +4,17 @@ Changelog
 =========
 
 1.1.1 (**2011-01-06**)
-----------------------
+======================
  
 news
-++++
+----
 
 - added force https option into ini files for easier https usage (no need to
   set server headers with this options)
 - small css updates
 
 fixes
-++++
+-----
 
 - fixed #96 redirect loop on files view on repositories without changesets
 - fixed #97 unicode string passed into server header in special cases (mod_wsgi)
@@ -23,10 +23,10 @@ fixes
 - fixed #92 whoosh indexer is more error proof
 
 1.1.0 (**2010-12-18**)
-----------------------
+======================
 
 news
-++++
+----
 
 - rewrite of internals for vcs >=0.1.10
 - uses mercurial 1.7 with dotencode disabled for maintaining compatibility 
@@ -51,7 +51,7 @@ news
 - other than sqlite database backends can be used
 
 fixes
-+++++
+-----
 
 - fixes #61 forked repo was showing only after cache expired
 - fixes #76 no confirmation on user deletes
@@ -71,16 +71,16 @@ fixes
 
 
 1.0.2 (**2010-11-12**)
-----------------------
+======================
 
 news
-++++
+----
 
 - tested under python2.7
 - bumped sqlalchemy and celery versions
 
 fixes
-+++++
+-----
 
 - fixed #59 missing graph.js
 - fixed repo_size crash when repository had broken symlinks
@@ -88,15 +88,15 @@ fixes
 
 
 1.0.1 (**2010-11-10**)
-----------------------
+======================
 
 news
-++++
+----
 
 - small css updated
 
 fixes
-+++++
+-----
 
 - fixed #53 python2.5 incompatible enumerate calls
 - fixed #52 disable mercurial extension for web
@@ -104,7 +104,7 @@ fixes
 
 
 1.0.0 (**2010-11-02**)
-----------------------
+======================
 
 - security bugfix simplehg wasn't checking for permissions on commands
   other than pull or push.
@@ -114,7 +114,7 @@ fixes
 - permissions cached queries
 
 1.0.0rc4  (**2010-10-12**)
---------------------------
+==========================
 
 - fixed python2.5 missing simplejson imports (thanks to Jens Bäckman)
 - removed cache_manager settings from sqlalchemy meta
@@ -124,14 +124,13 @@ fixes
 
 
 1.0.0rc3 (**2010-10-11**)
--------------------------
+=========================
 
 - fixed i18n during installation.
 
 1.0.0rc2 (**2010-10-11**)
--------------------------
+=========================
 
 - Disabled dirsize in file browser, it's causing nasty bug when dir renames 
   occure. After vcs is fixed it'll be put back again.
 - templating/css rewrites, optimized css.
-
