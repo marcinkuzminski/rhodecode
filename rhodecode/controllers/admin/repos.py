@@ -285,7 +285,7 @@ class ReposController(BaseController):
 
         c.repo_last_rev = r.revisions[-1] if r.revisions else 0
 
-        if last_rev == 0:
+        if last_rev == 0 or c.repo_last_rev == 0:
             c.stats_percentage = 0
         else:
             c.stats_percentage = '%.2f' % ((float((last_rev)) /
