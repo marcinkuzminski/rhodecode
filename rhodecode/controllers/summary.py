@@ -81,9 +81,9 @@ class SummaryController(BaseController):
             password = ''
         else:
             username = str(c.rhodecode_user.username)
-            password = ''
+            password = '@'
 
-        uri = u'%(protocol)s://%(user)s%(password)s@%(host)s%(prefix)s/%(repo_name)s' % {
+        uri = u'%(protocol)s://%(user)s%(password)s%(host)s%(prefix)s/%(repo_name)s' % {
                                         'protocol': e.get('wsgi.url_scheme'),
                                         'user':username,
                                         'password':password,
