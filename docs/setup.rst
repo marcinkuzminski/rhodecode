@@ -154,9 +154,13 @@ so for example setting `BROKER_HOST` in celery means setting `broker.host` in
 the config file.
 
 In order to make start using celery run::
+
  paster celeryd <configfile.ini>
 
-
+.. note::
+   Make sure You run this command from same virtualenv, and with the same user
+   that rhodecode runs.
+   
 HTTPS support
 -------------
 
@@ -182,7 +186,7 @@ Sample config for nginx using proxy::
             if (!-f $request_filename){
                 proxy_pass      http://127.0.0.1:5000;
             }
-            #this is important for https !!!
+            #this is important if You want to use https !!!
             proxy_set_header X-Url-Scheme $scheme;
             include         /etc/nginx/proxy.conf;  
     }
@@ -261,11 +265,10 @@ TODO !
 Other configuration files
 -------------------------
 
-Some extra configuration files and examples can be found here:
-http://hg.python-works.com/rhodecode/files/tip/init.d
+Some example init.d script can be found here, for debian and gentoo:
 
-and also an celeryconfig file can be use from here:
-http://hg.python-works.com/rhodecode/files/tip/celeryconfig.py
+https://rhodeocode.org/rhodecode/files/tip/init.d
+
 
 Troubleshooting
 ---------------

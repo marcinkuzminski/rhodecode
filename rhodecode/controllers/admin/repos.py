@@ -7,7 +7,7 @@
     
     :created_on: Apr 7, 2010
     :author: marcink
-    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
+    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>    
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software; you can redistribute it and/or
@@ -285,7 +285,7 @@ class ReposController(BaseController):
 
         c.repo_last_rev = r.revisions[-1] if r.revisions else 0
 
-        if last_rev == 0:
+        if last_rev == 0 or c.repo_last_rev == 0:
             c.stats_percentage = 0
         else:
             c.stats_percentage = '%.2f' % ((float((last_rev)) /

@@ -22,6 +22,21 @@ fixes
 - fixed large tooltips problems on main page
 - fixed #92 whoosh indexer is more error proof
 
+1.1.2 (**2011-01-12**)
+======================
+
+news
+----
+
+
+fixes
+-----
+
+- fixes #98 protection against float division of percentage stats
+- fixed graph bug
+- forced webhelpers version since it was making troubles during installation 
+
+
 1.1.0 (**2010-12-18**)
 ======================
 

@@ -7,7 +7,7 @@
     
     :created_on: Apr 18, 2010
     :author: marcink
-    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
+    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>    
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software; you can redistribute it and/or
@@ -28,7 +28,7 @@
 import calendar
 import logging
 from time import mktime
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 
 from vcs.exceptions import ChangesetError
 
@@ -102,15 +102,14 @@ class SummaryController(BaseController):
             except ChangesetError:
                 c.repo_branches[name] = EmptyChangeset(hash)
 
-        td = datetime.today() + timedelta(days=1)
-        y, m, d = td.year, td.month, td.day
+        td = date.today() + timedelta(days=1)
+        td_1m = td - timedelta(days=calendar.mdays[td.month])
+        td_1y = td - timedelta(days=365)
 
-        ts_min_y = mktime((y - 1, (td - timedelta(days=calendar.mdays[m])).month,
-                            d, 0, 0, 0, 0, 0, 0,))
-        ts_min_m = mktime((y, (td - timedelta(days=calendar.mdays[m])).month,
-                            d, 0, 0, 0, 0, 0, 0,))
+        ts_min_m = mktime(td_1m.timetuple())
+        ts_min_y = mktime(td_1y.timetuple())
+        ts_max_y = mktime(td.timetuple())
 
-        ts_max_y = mktime((y, m, d, 0, 0, 0, 0, 0, 0,))
         if c.repo_info.dbrepo.enable_statistics:
             c.no_data_msg = _('No data loaded yet')
             run_task(get_commits_stats, c.repo_info.name, ts_min_y, ts_max_y)
