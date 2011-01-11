@@ -8,7 +8,7 @@
 
     :created_on: Apr 9, 2010
     :author: marcink
-    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
+    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>    
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software; you can redistribute it and/or
@@ -27,7 +27,7 @@
 # MA  02110-1301, USA.
 
 
-VERSION = (1, 1, 1)
+VERSION = (1, 1, 2)
 __version__ = '.'.join((str(each) for each in VERSION[:4]))
 __dbversion__ = 2 #defines current db version for migrations
 

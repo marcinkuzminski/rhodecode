@@ -5,7 +5,7 @@ from rhodecode import get_version
 
 requirements = [
         "Pylons==1.0.0",
-        "WebHelpers>=1.2",
+        "WebHelpers==1.2",
         "SQLAlchemy==0.6.5",
         "Mako==0.3.6",
         "vcs==0.1.10",
