@@ -28,6 +28,22 @@ fixes
 - fixed propagation to error controller on simplehg and simplegit middlewares
 
 
+
+1.1.2 (**2011-01-12**)
+======================
+
+news
+----
+
+
+fixes
+-----
+
+- fixes #98 protection against float division of percentage stats
+- fixed graph bug
+- forced webhelpers version since it was making troubles during installation 
+
+
 1.1.1 (**2011-01-06**)
 ======================
  

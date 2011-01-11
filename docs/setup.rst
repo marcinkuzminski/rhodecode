@@ -188,6 +188,7 @@ so for example setting `BROKER_HOST` in celery means setting `broker.host` in
 the config file.
 
 In order to make start using celery run::
+
  paster celeryd <configfile.ini>
 
 
