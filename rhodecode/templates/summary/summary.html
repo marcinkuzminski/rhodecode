@@ -119,9 +119,40 @@
 			      <label>${_('Trending source files')}:</label>
 			  </div>
 			  <div class="input-short">
-			    <div id="lang_stats">
-			    
-			    </div> 			  
+			    <div id="lang_stats"></div> 			   
+			  </div>
+			 </div>
+			 			
+			 <div class="field">
+			  <div class="label">
+			      <label>${_('Download')}:</label>
+			  </div>
+			  <div class="input-short">
+		        
+		        ${h.select('download_options','tip',c.download_options)}
+
+		        %for cnt,archive in enumerate(c.repo_info._get_archives()):
+		             %if cnt >=1:
+		             |
+		             %endif
+		             ${h.link_to(archive['type'],
+		                h.url('files_archive_home',repo_name=c.repo_info.name,
+		                fname='tip'+archive['extension']),class_="archive_icon")}
+		        %endfor
+			  </div>
+			 </div>
+			 
+			 <div class="field">
+			  <div class="label">
+			      <label>${_('Feeds')}:</label>
+			  </div>
+			  <div class="input-short">
+	            ${h.link_to(_('RSS'),h.url('rss_feed_home',repo_name=c.repo_info.name),class_='rss_icon')}
+	            ${h.link_to(_('Atom'),h.url('atom_feed_home',repo_name=c.repo_info.name),class_='atom_icon')}
+			  </div>
+			 </div>				 			 			 
+	  </div>		 
+	</div>
 			  	<script type="text/javascript">
 				  	YUE.onDOMReady(function(e){
 				  	    id = 'clone_url';
@@ -206,39 +237,13 @@
 			  			YUD.setStyle(YUD.get('code_stats_show_more'),
 			  					'display','none');
 			  		})
-			  		
-			  	</script>
- 
-			  </div>
-			 </div>
-			 			
-			 <div class="field">
-			  <div class="label">
-			      <label>${_('Download')}:</label>
-			  </div>
-			  <div class="input-short">
-		        %for cnt,archive in enumerate(c.repo_info._get_archives()):
-		             %if cnt >=1:
-		             |
-		             %endif
-		             ${h.link_to(c.repo_info.name+'.'+archive['type'],
-		                h.url('files_archive_home',repo_name=c.repo_info.name,
-		                fname='tip'+archive['extension']),class_="archive_icon")}
-		        %endfor
-			  </div>
-			 </div>
-			 
-			 <div class="field">
-			  <div class="label">
-			      <label>${_('Feeds')}:</label>
-			  </div>
-			  <div class="input-short">
-	            ${h.link_to(_('RSS'),h.url('rss_feed_home',repo_name=c.repo_info.name),class_='rss_icon')}
-	            ${h.link_to(_('Atom'),h.url('atom_feed_home',repo_name=c.repo_info.name),class_='atom_icon')}
-			  </div>
-			 </div>				 			 			 
-	  </div>		 
-	</div>				
+			  	
+                
+                YUE.on('download_options','change',function(e){
+                    var new_cs = e.target.options[e.target.selectedIndex].value;
+                })
+                	
+			  	</script>    				
 </div>
         
 <div class="box box-right"  style="min-height:455px">

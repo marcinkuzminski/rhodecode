@@ -149,15 +149,23 @@ class FilesController(BaseController):
         return render('files/files_annotate.html')
 
     def archivefile(self, repo_name, fname):
-        info = fname.split('.')
-        revision, fileformat = info[0], '.' + '.'.join(info[1:])
         archive_specs = {
           '.tar.bz2': ('application/x-tar', 'tbz2'),
           '.tar.gz': ('application/x-tar', 'tgz'),
           '.zip': ('application/zip', 'zip'),
         }
+        
+        fileformat = None
+        revision = None
+        
+        for ext in archive_specs.keys():
+            archive_spec = fname.split(ext)
+            if len(archive_spec) == 2:
+                fileformat = archive_spec[1] or ext
+                revision = archive_spec[0]
+        
         if not archive_specs.has_key(fileformat):
-            return _('Unknown archive type %s') % fileformat
+            return _('Unknown archive type')
 
         repo = ScmModel().get_repo(repo_name)
 

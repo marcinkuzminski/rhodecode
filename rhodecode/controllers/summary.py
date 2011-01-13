@@ -142,5 +142,27 @@ class SummaryController(BaseController):
             c.trending_languages = json.dumps({})
             c.no_data = True
 
+        c.download_options = self._get_download_links(c.repo_info)
+
         return render('summary/summary.html')
 
+
+
+    def _get_download_links(self, repo):
+
+        download_l = []
+
+        branches_group = ([], _("Branches"))
+        tags_group = ([], _("Tags"))
+
+        for name, chs in c.repository_branches.items():
+            #chs = chs.split(':')[-1]
+            branches_group[0].append((chs, name),)
+        download_l.append(branches_group)
+
+        for name, chs in c.repository_tags.items():
+            #chs = chs.split(':')[-1]
+            tags_group[0].append((chs, name),)
+        download_l.append(tags_group)
+
+        return download_l
