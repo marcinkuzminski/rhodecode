@@ -129,7 +129,7 @@
 			  </div>
 			  <div class="input-short">
 		        
-		        ${h.select('download_options','tip',c.download_options)}
+		        ${h.select('download_options',c.repo_info.get_changeset().raw_id,c.download_options)}
 		        %for cnt,archive in enumerate(c.repo_info._get_archives()):
 		             %if cnt >=1:
 		             |
