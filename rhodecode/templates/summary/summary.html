@@ -130,14 +130,14 @@
 			  <div class="input-short">
 		        
 		        ${h.select('download_options','tip',c.download_options)}
-
 		        %for cnt,archive in enumerate(c.repo_info._get_archives()):
 		             %if cnt >=1:
 		             |
 		             %endif
-		             ${h.link_to(archive['type'],
+		             <span class="tooltip" title="${_('Download %s as %s') %('tip',archive['type'])}" 
+		                  id="${archive['type']+'_link'}">${h.link_to(archive['type'],
 		                h.url('files_archive_home',repo_name=c.repo_info.name,
-		                fname='tip'+archive['extension']),class_="archive_icon")}
+		                fname='tip'+archive['extension']),class_="archive_icon")}</span>
 		        %endfor
 			  </div>
 			 </div>
@@ -153,97 +153,112 @@
 			 </div>				 			 			 
 	  </div>		 
 	</div>
-			  	<script type="text/javascript">
-				  	YUE.onDOMReady(function(e){
-				  	    id = 'clone_url';
-				  	    YUE.on(id,'click',function(e){
-				  	        YUD.get('clone_url').select();
-				  	    })
-				  	})
-			  		var data = ${c.trending_languages|n};
-			  		var total = 0;
-			  		var no_data = true;
-			  		for (k in data){
-			  		    total += data[k];
-			  		    no_data = false;
-			  		} 
-					var tbl = document.createElement('table');
-					tbl.setAttribute('class','trending_language_tbl');
-					var cnt =0;
-			  		for (k in data){
-			  			cnt+=1;
-			  			var hide = cnt>2;
-				  		var tr = document.createElement('tr');
-				  		if (hide){
-				  			tr.setAttribute('style','display:none');
-				  			tr.setAttribute('class','stats_hidden');
-				  		}
-				  		var percentage = Math.round((data[k]/total*100),2);
-						var value = data[k];
-				  		var td1 = document.createElement('td');
-				  		td1.width=150;
-				  		var trending_language_label = document.createElement('div');
-				  		trending_language_label.innerHTML = k;
-				  		td1.appendChild(trending_language_label);
+  	<script type="text/javascript">
+	  	YUE.onDOMReady(function(e){
+	  	    id = 'clone_url';
+	  	    YUE.on(id,'click',function(e){
+	  	        YUD.get('clone_url').select();
+	  	    })
+	  	})
+  		var data = ${c.trending_languages|n};
+  		var total = 0;
+  		var no_data = true;
+  		for (k in data){
+  		    total += data[k];
+  		    no_data = false;
+  		} 
+		var tbl = document.createElement('table');
+		tbl.setAttribute('class','trending_language_tbl');
+		var cnt =0;
+  		for (k in data){
+  			cnt+=1;
+  			var hide = cnt>2;
+	  		var tr = document.createElement('tr');
+	  		if (hide){
+	  			tr.setAttribute('style','display:none');
+	  			tr.setAttribute('class','stats_hidden');
+	  		}
+	  		var percentage = Math.round((data[k]/total*100),2);
+			var value = data[k];
+	  		var td1 = document.createElement('td');
+	  		td1.width=150;
+	  		var trending_language_label = document.createElement('div');
+	  		trending_language_label.innerHTML = k;
+	  		td1.appendChild(trending_language_label);
 
-				  		var td2 = document.createElement('td');
-				  		td2.setAttribute('style','padding-right:14px !important');
-			  		    var trending_language = document.createElement('div');
-			  		    var nr_files = value+" ${_('files')}";
-			  		    
-			  		    trending_language.title = k+" "+nr_files;
-			  		    
-			  		    if (percentage>20){
-			  		    	trending_language.innerHTML = "<b style='font-size:0.8em'>"+percentage+"% "+nr_files+ "</b>";	
-			  		    }
-			  		    else{
-			  		    	trending_language.innerHTML = "<b style='font-size:0.8em'>"+percentage+"%</b>";
-			  		    }
-			  		    
-			  		    trending_language.setAttribute("class", 'trending_language top-right-rounded-corner bottom-right-rounded-corner');
-			  		    trending_language.style.width=percentage+"%";
-						td2.appendChild(trending_language);
-						
-						tr.appendChild(td1);
-						tr.appendChild(td2);
-			  		    tbl.appendChild(tr);
-			  		    if(cnt == 2){
-			  		    	var show_more = document.createElement('tr');
-			  		    	var td=document.createElement('td');
-			  		    	lnk = document.createElement('a');
-			  		    	lnk.href='#';
-			  		    	lnk.innerHTML = "${_("show more")}";
-			  		    	lnk.id='code_stats_show_more';
-			  		        td.appendChild(lnk);
-			  		    	show_more.appendChild(td);
-			  		    	show_more.appendChild(document.createElement('td'));
-			  		    	tbl.appendChild(show_more);
-			  		    }
-			  		    
-			  		}
-			  		if(no_data){
-			  			var tr = document.createElement('tr');
-			  			var td1 = document.createElement('td');
-			  			td1.innerHTML = "${c.no_data_msg}";
-			  			tr.appendChild(td1);
-			  			tbl.appendChild(tr);
-					}
-			  		YUD.get('lang_stats').appendChild(tbl);
-			  		YUE.on('code_stats_show_more','click',function(){
-			  			l = YUD.getElementsByClassName('stats_hidden')
-			  			for (e in l){
-			  			    YUD.setStyle(l[e],'display','');
-			  			};
-			  			YUD.setStyle(YUD.get('code_stats_show_more'),
-			  					'display','none');
-			  		})
-			  	
+	  		var td2 = document.createElement('td');
+	  		td2.setAttribute('style','padding-right:14px !important');
+  		    var trending_language = document.createElement('div');
+  		    var nr_files = value+" ${_('files')}";
+  		    
+  		    trending_language.title = k+" "+nr_files;
+  		    
+  		    if (percentage>20){
+  		    	trending_language.innerHTML = "<b style='font-size:0.8em'>"+percentage+"% "+nr_files+ "</b>";	
+  		    }
+  		    else{
+  		    	trending_language.innerHTML = "<b style='font-size:0.8em'>"+percentage+"%</b>";
+  		    }
+  		    
+  		    trending_language.setAttribute("class", 'trending_language top-right-rounded-corner bottom-right-rounded-corner');
+  		    trending_language.style.width=percentage+"%";
+			td2.appendChild(trending_language);
+			
+			tr.appendChild(td1);
+			tr.appendChild(td2);
+  		    tbl.appendChild(tr);
+  		    if(cnt == 2){
+  		    	var show_more = document.createElement('tr');
+  		    	var td=document.createElement('td');
+  		    	lnk = document.createElement('a');
+  		    	lnk.href='#';
+  		    	lnk.innerHTML = "${_("show more")}";
+  		    	lnk.id='code_stats_show_more';
+  		        td.appendChild(lnk);
+  		    	show_more.appendChild(td);
+  		    	show_more.appendChild(document.createElement('td'));
+  		    	tbl.appendChild(show_more);
+  		    }
+  		    
+  		}
+  		if(no_data){
+  			var tr = document.createElement('tr');
+  			var td1 = document.createElement('td');
+  			td1.innerHTML = "${c.no_data_msg}";
+  			tr.appendChild(td1);
+  			tbl.appendChild(tr);
+		}
+  		YUD.get('lang_stats').appendChild(tbl);
+  		YUE.on('code_stats_show_more','click',function(){
+  			l = YUD.getElementsByClassName('stats_hidden')
+  			for (e in l){
+  			    YUD.setStyle(l[e],'display','');
+  			};
+  			YUD.setStyle(YUD.get('code_stats_show_more'),
+  					'display','none');
+  		})
+  	
+             
+             YUE.on('download_options','change',function(e){
+                 var new_cs = e.target.options[e.target.selectedIndex];
+                 var tmpl_links = {}
+                 %for cnt,archive in enumerate(c.repo_info._get_archives()):
+                	 tmpl_links['${archive['type']}'] = '${h.link_to(archive['type'],
+                        h.url('files_archive_home',repo_name=c.repo_info.name,
+                        fname='__CS__'+archive['extension']),class_="archive_icon")}';
+                 %endfor
                 
-                YUE.on('download_options','change',function(e){
-                    var new_cs = e.target.options[e.target.selectedIndex].value;
-                })
-                	
-			  	</script>    				
+                 
+                 for(k in tmpl_links){
+                	 var s = YUD.get(k+'_link')
+                	 title_tmpl = "${_('Download %s as %s') % ('__CS_NAME__',archive['type'])}";
+                	 s.title = title_tmpl.replace('__CS_NAME__',new_cs.text)
+                	 s.innerHTML = tmpl_links[k].replace('__CS__',new_cs.value);
+                 }
+                 
+             })
+             	
+  	</script>    				
 </div>
         
 <div class="box box-right"  style="min-height:455px">

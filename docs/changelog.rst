@@ -19,6 +19,7 @@ news
   into clone url
 - fixed #90 whoosh indexer can index chooses repositories passed in command 
   line
+- added dynamic download links in summary. With quick branch/tag selection
 
 fixes
 -----
