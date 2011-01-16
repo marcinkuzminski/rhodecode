@@ -495,7 +495,7 @@ import urllib
 from pylons import request
 
 def gravatar_url(email_address, size=30):
-    ssl_enabled = 'https' == request.environ.get('HTTP_X_URL_SCHEME')
+    ssl_enabled = 'https' == request.environ.get('wsgi.url_scheme')
     default = 'identicon'
     baseurl_nossl = "http://www.gravatar.com/avatar/"
     baseurl_ssl = "https://secure.gravatar.com/avatar/"
