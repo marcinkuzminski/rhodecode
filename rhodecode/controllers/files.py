@@ -154,16 +154,16 @@ class FilesController(BaseController):
           '.tar.gz': ('application/x-tar', 'tgz'),
           '.zip': ('application/zip', 'zip'),
         }
-        
+
         fileformat = None
         revision = None
-        
+
         for ext in archive_specs.keys():
             archive_spec = fname.split(ext)
             if len(archive_spec) == 2:
                 fileformat = archive_spec[1] or ext
                 revision = archive_spec[0]
-        
+
         if not archive_specs.has_key(fileformat):
             return _('Unknown archive type')
 
@@ -173,6 +173,8 @@ class FilesController(BaseController):
             repo.get_changeset(revision)
         except ChangesetDoesNotExistError:
             return _('Unknown revision %s') % revision
+        except EmptyRepositoryError:
+            return _('Empty repository')
 
         archive = tempfile.TemporaryFile()
         localrepo = repo.repo

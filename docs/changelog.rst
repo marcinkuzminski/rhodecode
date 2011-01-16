@@ -27,7 +27,7 @@ fixes
 - fixed file browser bug, when switching into given form revision the url was 
   not changing
 - fixed propagation to error controller on simplehg and simplegit middlewares
-
+- fixed error when trying to make a download on empty repository
 
 
 1.1.2 (**2011-01-12**)
