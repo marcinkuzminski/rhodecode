@@ -241,15 +241,16 @@ def pygmentize_annotation(filenode, **kwargs):
     """
 
     color_dict = {}
-    def gen_color():
-        """generator for getting 10k of evenly distibuted colors using hsv color
-        and golden ratio.
+    def gen_color(n=10000):
+        """generator for getting n of evenly distributed colors using 
+        hsv color and golden ratio. It always return same order of colors
+        
+        :returns: RGB tuple
         """
         import colorsys
-        n = 10000
         golden_ratio = 0.618033988749895
         h = 0.22717784590367374
-        #generate 10k nice web friendly colors in the same order
+
         for c in xrange(n):
             h += golden_ratio
             h %= 1

@@ -4,22 +4,22 @@
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     A deamon will read from task table and run tasks
-    
+
     :created_on: Jan 26, 2010
     :author: marcink
-    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>    
+    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
 # of the License or (at your opinion) any later version of the license.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
@@ -105,7 +105,8 @@ class WhooshIndexingDaemon(object):
         """
         index_paths_ = set()
         try:
-            for topnode, dirs, files in repo.walk('/', 'tip'):
+            tip = repo.get_changeset('tip')
+            for topnode, dirs, files in tip.walk('/'):
                 for f in files:
                     index_paths_.add(jn(repo.path, f.path))
                 for dir in dirs:
