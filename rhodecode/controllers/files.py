@@ -39,8 +39,9 @@ from rhodecode.lib.base import BaseController, render
 from rhodecode.lib.utils import EmptyChangeset
 from rhodecode.model.scm import ScmModel
 
+from vcs.backends import ARCHIVE_SPECS
 from vcs.exceptions import RepositoryError, ChangesetError, \
-    ChangesetDoesNotExistError, EmptyRepositoryError
+    ChangesetDoesNotExistError, EmptyRepositoryError, InproperArchiveTypeError
 from vcs.nodes import FileNode
 from vcs.utils import diffs as differ
 
@@ -149,52 +150,35 @@ class FilesController(BaseController):
         return render('files/files_annotate.html')
 
     def archivefile(self, repo_name, fname):
-        archive_specs = {
-          '.tar.bz2': ('application/x-tar', 'tbz2'),
-          '.tar.gz': ('application/x-tar', 'tgz'),
-          '.zip': ('application/zip', 'zip'),
-        }
 
         fileformat = None
         revision = None
+        ext = None
 
-        for ext in archive_specs.keys():
-            archive_spec = fname.split(ext)
-            if len(archive_spec) == 2:
-                fileformat = archive_spec[1] or ext
+        for a_type, ext_data in ARCHIVE_SPECS.items():
+            archive_spec = fname.split(ext_data[1])
+            if len(archive_spec) == 2 and archive_spec[1] == '':
+                fileformat = a_type or ext_data[1]
                 revision = archive_spec[0]
-
-        if not archive_specs.has_key(fileformat):
-            return _('Unknown archive type')
-
-        repo = ScmModel().get_repo(repo_name)
+                ext = ext_data[1]
 
         try:
-            repo.get_changeset(revision)
+            repo = ScmModel().get_repo(repo_name)
+            cs = repo.get_changeset(revision)
         except ChangesetDoesNotExistError:
             return _('Unknown revision %s') % revision
         except EmptyRepositoryError:
             return _('Empty repository')
+        except InproperArchiveTypeError:
+            return _('Unknown archive type')
 
-        archive = tempfile.TemporaryFile()
-        localrepo = repo.repo
-        fname = '%s-%s%s' % (repo_name, revision, fileformat)
-        archival.archive(localrepo, archive, revision, archive_specs[fileformat][1],
-                         prefix='%s-%s' % (repo_name, revision))
-        response.content_type = archive_specs[fileformat][0]
+        fname = '%s-%s%s' % (repo_name, revision, ext)
+
+        response.content_type = ARCHIVE_SPECS[fileformat][0]
         response.content_disposition = 'attachment; filename=%s' % fname
-        archive.seek(0)
 
-        def read_in_chunks(file_object, chunk_size=1024 * 40):
-            """Lazy function (generator) to read a file piece by piece.
-            Default chunk size: 40k."""
-            while True:
-                data = file_object.read(chunk_size)
-                if not data:
-                    break
-                yield data
+        return cs.get_chunked_archive(kind=fileformat)
 
-        return read_in_chunks(archive)
 
     def diff(self, repo_name, f_path):
         hg_model = ScmModel()
