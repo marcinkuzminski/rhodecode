@@ -1,8 +1,8 @@
 from rhodecode.tests import *
 
 ARCHIVE_SPECS = {
-    '.tar.bz2': ('application/x-tar', 'tbz2', ''),
-    '.tar.gz': ('application/x-tar', 'tgz', ''),
+    '.tar.bz2': ('application/x-bzip2', 'tbz2', ''),
+    '.tar.gz': ('application/x-gzip', 'tgz', ''),
     '.zip': ('application/zip', 'zip', ''),
 }
 

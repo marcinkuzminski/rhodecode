@@ -93,7 +93,7 @@ class ChangelogController(BaseController):
 
         revcount = min(max_rev, revcount)
         rev_end = max(0, rev_start - revcount)
-        dag = graph_rev(repo.repo, rev_start, rev_end)
+        dag = graph_rev(repo._repo, rev_start, rev_end)
 
         c.dag = tree = list(colored(dag))
         data = []
