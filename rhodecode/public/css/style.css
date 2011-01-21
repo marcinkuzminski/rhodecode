@@ -1592,18 +1592,20 @@ padding:0;
 
 div.browserblock .browser-header {
 background:#FFF;
-padding:10px 0;
-float:left;
+padding:10px 0px 35px 0px;
 width: 100%;
+}
+div.browserblock .browser-nav {
+float:left
 }
 
 div.browserblock .browser-branch {
-background:#FFF;
-padding:20px 0 0 0;
+padding:10px 0 0 0;
 float:left;
 }
 div.browserblock .browser-branch label {
-color:#4A4A4A;	
+color:#4A4A4A;
+vertical-align:text-top;
 }
 
 div.browserblock .browser-header span {

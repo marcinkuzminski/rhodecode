@@ -6,35 +6,37 @@
 	%endif
 </%def>
 <div id="body" class="browserblock">
-	<div class="browser-header">
-		${h.form(h.url.current())}
-		<div class="info_box">
-          <span >${_('view')}@rev</span> 
-          <a href="${c.url_prev}" title="${_('previous revision')}">&laquo;</a>
-          ${h.text('at_rev',value=c.changeset.revision,size=3)}
-          <a href="${c.url_next}" title="${_('next revision')}">&raquo;</a>
-          ${h.submit('view','view')}
-	    </div>           
-		${h.end_form()}
-	</div>
-    <div class="browser-branch">
-       ${h.checkbox('stay_at_branch',c.changeset.branch,c.changeset.branch==c.branch)}
-       <label>${_('follow current branch')}</label>
-       <script type="text/javascript">
-        YUE.on('stay_at_branch','click',function(e){
-        	if(e.target.checked){
-        		var uri = "${h.url.current(branch='__BRANCH__')}"
-        		uri = uri.replace('__BRANCH__',e.target.value);
-        		window.location = uri;
-        	}
-        	else{
-        		window.location = "${h.url.current()}";
-        	}
-        	
-        })
-       </script>
+    <div class="browser-header">
+		<div class="browser-nav">
+			${h.form(h.url.current())}
+			<div class="info_box">
+	          <span >${_('view')}@rev</span> 
+	          <a href="${c.url_prev}" title="${_('previous revision')}">&laquo;</a>
+	          ${h.text('at_rev',value=c.changeset.revision,size=3)}
+	          <a href="${c.url_next}" title="${_('next revision')}">&raquo;</a>
+	          ${h.submit('view','view')}
+		    </div>           
+			${h.end_form()}
+		</div>
+	    <div class="browser-branch">
+	       ${h.checkbox('stay_at_branch',c.changeset.branch,c.changeset.branch==c.branch)}
+	       <label>${_('follow current branch')}</label>
+	       <script type="text/javascript">
+	        YUE.on('stay_at_branch','click',function(e){
+	        	if(e.target.checked){
+	        		var uri = "${h.url.current(branch='__BRANCH__')}"
+	        		uri = uri.replace('__BRANCH__',e.target.value);
+	        		window.location = uri;
+	        	}
+	        	else{
+	        		window.location = "${h.url.current()}";
+	        	}
+	        	
+	        })
+	       </script>
+	    </div>
     </div>
-    <div style="clear:both"></div>
+    
 	<div class="browser-body">
 		<table class="code-browser">
 		         <thead>
