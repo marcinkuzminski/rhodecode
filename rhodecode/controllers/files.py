@@ -165,17 +165,17 @@ class FilesController(BaseController):
         try:
             repo = ScmModel().get_repo(repo_name)
             cs = repo.get_changeset(revision)
+            content_type = ARCHIVE_SPECS[fileformat][0]
         except ChangesetDoesNotExistError:
             return _('Unknown revision %s') % revision
         except EmptyRepositoryError:
             return _('Empty repository')
-        except InproperArchiveTypeError:
+        except (InproperArchiveTypeError, KeyError):
             return _('Unknown archive type')
 
-        fname = '%s-%s%s' % (repo_name, revision, ext)
-
-        response.content_type = ARCHIVE_SPECS[fileformat][0]
-        response.content_disposition = 'attachment; filename=%s' % fname
+        response.content_type = content_type
+        response.content_disposition = 'attachment; filename=%s-%s%s' \
+            % (repo_name, revision, ext)
 
         return cs.get_chunked_archive(kind=fileformat)
 
