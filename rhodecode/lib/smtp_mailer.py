@@ -47,7 +47,7 @@ class SmtpMailer(object):
         if self.debug:
             smtp_serv.set_debuglevel(1)
 
-        smtp_serv.ehlo("rhodecode mailer")
+        smtp_serv.ehlo()
 
         #if server requires authorization you must provide login and password
         smtp_serv.login(self.user, self.passwd)
