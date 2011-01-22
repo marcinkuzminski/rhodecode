@@ -394,68 +394,69 @@ def action_parser(user_log):
         action, action_params = x
 
     def get_cs_links():
-        if action == 'push':
-            revs_limit = 5 #display this amount always
-            revs_top_limit = 50 #show upto this amount of changesets hidden
-            revs = action_params.split(',')
-            repo_name = user_log.repository.repo_name
-            from rhodecode.model.scm import ScmModel
+        revs_limit = 5 #display this amount always
+        revs_top_limit = 50 #show upto this amount of changesets hidden
+        revs = action_params.split(',')
+        repo_name = user_log.repository.repo_name
+        from rhodecode.model.scm import ScmModel
 
-            message = lambda rev: get_changeset_safe(ScmModel().get(repo_name),
-                                                     rev).message
+        message = lambda rev: get_changeset_safe(ScmModel().get(repo_name),
+                                                 rev).message
 
-            cs_links = " " + ', '.join ([link_to(rev,
-                    url('changeset_home',
-                    repo_name=repo_name,
-                    revision=rev), title=tooltip(message(rev)),
-                    class_='tooltip') for rev in revs[:revs_limit] ])
-            if len(revs) > revs_limit:
-                uniq_id = revs[0]
-                html_tmpl = ('<span> %s '
-                '<a class="show_more" id="_%s" href="#">%s</a> '
-                '%s</span>')
-                cs_links += html_tmpl % (_('and'), uniq_id, _('%s more') \
-                                            % (len(revs) - revs_limit),
-                                            _('revisions'))
+        cs_links = " " + ', '.join ([link_to(rev,
+                url('changeset_home',
+                repo_name=repo_name,
+                revision=rev), title=tooltip(message(rev)),
+                class_='tooltip') for rev in revs[:revs_limit] ])
+        if len(revs) > revs_limit:
+            uniq_id = revs[0]
+            html_tmpl = ('<span> %s '
+            '<a class="show_more" id="_%s" href="#">%s</a> '
+            '%s</span>')
+            cs_links += html_tmpl % (_('and'), uniq_id, _('%s more') \
+                                        % (len(revs) - revs_limit),
+                                        _('revisions'))
 
-                html_tmpl = '<span id="%s" style="display:none"> %s </span>'
-                cs_links += html_tmpl % (uniq_id, ', '.join([link_to(rev,
-                    url('changeset_home',
-                    repo_name=repo_name, revision=rev),
-                    title=message(rev), class_='tooltip')
-                    for rev in revs[revs_limit:revs_top_limit]]))
+            html_tmpl = '<span id="%s" style="display:none"> %s </span>'
+            cs_links += html_tmpl % (uniq_id, ', '.join([link_to(rev,
+                url('changeset_home',
+                repo_name=repo_name, revision=rev),
+                title=message(rev), class_='tooltip')
+                for rev in revs[revs_limit:revs_top_limit]]))
 
-            return cs_links
-        return ''
+        return cs_links
 
     def get_fork_name():
-        if action == 'user_forked_repo':
-            from rhodecode.model.scm import ScmModel
-            repo_name = action_params
-            repo = ScmModel().get(repo_name)
-            if repo is None:
-                return repo_name
-            return link_to(action_params, url('summary_home',
-                                              repo_name=repo.name,),
-                                              title=repo.dbrepo.description)
-        return ''
-    map = {'user_deleted_repo':_('User [deleted] repository'),
-           'user_created_repo':_('User [created] repository'),
-           'user_forked_repo':_('User [forked] repository as: %s') % get_fork_name(),
-           'user_updated_repo':_('User [updated] repository'),
-           'admin_deleted_repo':_('Admin [delete] repository'),
-           'admin_created_repo':_('Admin [created] repository'),
-           'admin_forked_repo':_('Admin [forked] repository'),
-           'admin_updated_repo':_('Admin [updated] repository'),
-           'push':_('[Pushed] %s') % get_cs_links(),
-           'pull':_('[Pulled]'),
-           'started_following_repo':_('User [started following] repository'),
-           'stopped_following_repo':_('User [stopped following] repository'),
+        from rhodecode.model.scm import ScmModel
+        repo_name = action_params
+        repo = ScmModel().get(repo_name)
+        if repo is None:
+            return repo_name
+        return link_to(action_params, url('summary_home',
+                                          repo_name=repo.name,),
+                                          title=repo.dbrepo.description)
+
+    map = {'user_deleted_repo':(_('User [deleted] repository'), None),
+           'user_created_repo':(_('User [created] repository'), None),
+           'user_forked_repo':(_('User [forked] repository as:'), get_fork_name),
+           'user_updated_repo':(_('User [updated] repository'), None),
+           'admin_deleted_repo':(_('Admin [delete] repository'), None),
+           'admin_created_repo':(_('Admin [created] repository'), None),
+           'admin_forked_repo':(_('Admin [forked] repository'), None),
+           'admin_updated_repo':(_('Admin [updated] repository'), None),
+           'push':(_('[Pushed]'), get_cs_links),
+           'pull':(_('[Pulled]'), None),
+           'started_following_repo':(_('User [started following] repository'), None),
+           'stopped_following_repo':(_('User [stopped following] repository'), None),
             }
 
     action_str = map.get(action, action)
-    return literal(action_str.replace('[', '<span class="journal_highlight">')\
-                   .replace(']', '</span>'))
+    action = action_str[0].replace('[', '<span class="journal_highlight">')\
+                   .replace(']', '</span>')
+    if action_str[1] is not None:
+        action = action + " " + action_str[1]()
+
+    return literal(action)
 
 def action_parser_icon(user_log):
     action = user_log.action

@@ -41,7 +41,7 @@ from rhodecode.model.scm import ScmModel
 
 from vcs.backends import ARCHIVE_SPECS
 from vcs.exceptions import RepositoryError, ChangesetError, \
-    ChangesetDoesNotExistError, EmptyRepositoryError, InproperArchiveTypeError
+    ChangesetDoesNotExistError, EmptyRepositoryError, ImproperArchiveTypeError
 from vcs.nodes import FileNode
 from vcs.utils import diffs as differ
 
