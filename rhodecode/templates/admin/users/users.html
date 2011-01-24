@@ -33,6 +33,7 @@
             <th class="left">${_('username')}</th>
             <th class="left">${_('name')}</th>
             <th class="left">${_('lastname')}</th>
+            <th class="left">${_('last login')}</th>
             <th class="left">${_('active')}</th>
             <th class="left">${_('admin')}</th>
             <th class="left">${_('ldap')}</th>
@@ -45,6 +46,7 @@
                     <td>${h.link_to(user.username,h.url('edit_user', id=user.user_id))}</td>
                     <td>${user.name}</td>
                     <td>${user.lastname}</td>
+                    <td>${user.last_login}</td>
                     <td>${h.bool2icon(user.active)}</td>
                     <td>${h.bool2icon(user.admin)}</td>
                     <td>${h.bool2icon(user.is_ldap)}</td>
