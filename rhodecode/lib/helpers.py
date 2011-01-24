@@ -199,11 +199,12 @@ tooltip = _ToolTip()
 class _FilesBreadCrumbs(object):
 
     def __call__(self, repo_name, rev, paths):
+        if isinstance(paths, str):
+            paths = paths.decode('utf-8')
         url_l = [link_to(repo_name, url('files_home',
                                         repo_name=repo_name,
                                         revision=rev, f_path=''))]
         paths_l = paths.split('/')
-
         for cnt, p in enumerate(paths_l):
             if p != '':
                 url_l.append(link_to(p, url('files_home',
