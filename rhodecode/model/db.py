@@ -253,6 +253,16 @@ class UserToPerm(Base, BaseModel):
     user = relation('User')
     permission = relation('Permission')
 
+class UsersGroupToPerm(Base, BaseModel):
+    __tablename__ = 'users_group_to_perm'
+    __table_args__ = (UniqueConstraint('users_group_id', 'permission_id'), {'useexisting':True})
+    users_group_to_perm_id = Column("users_group_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
+    users_group_id = Column("users_group_id", Integer(), ForeignKey('users_groups.users_groups_id'), nullable=False, unique=None, default=None)
+    permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable=False, unique=None, default=None)
+
+    users_group = relation('UsersGroup')
+    permission = relation('Permission')
+
 class GroupToPerm(Base, BaseModel):
     __tablename__ = 'group_to_perm'
     __table_args__ = (UniqueConstraint('group_id', 'permission_id'), {'useexisting':True})
