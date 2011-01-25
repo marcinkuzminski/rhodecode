@@ -478,6 +478,13 @@ margin:0;
 padding:12px 9px 7px 24px;
 }
 
+#header #header-inner #quick li ul li a.groups,#header #header-inner #quick li ul li a.groups:hover {
+background:#FFF url("../images/icons/group_edit.png") no-repeat 4px 9px;
+width:167px;
+margin:0;
+padding:12px 9px 7px 24px;
+}
+
 #header #header-inner #quick li ul li a.settings,#header #header-inner #quick li ul li a.settings:hover {
 background:#FFF url("../images/icons/cog.png") no-repeat 4px 9px;
 width:167px;

@@ -153,6 +153,29 @@ class UserLog(Base, BaseModel):
     user = relation('User')
     repository = relation('Repository')
 
+
+class UsersGroup(Base, BaseModel):
+    __tablename__ = 'users_groups'
+    __table_args__ = {'useexisting':True}
+
+    user_group_id = Column("users_groups_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
+    user_group_name = Column("user_group_name", String(length=None, convert_unicode=False, assert_unicode=None), nullable=False, unique=True, default=None)
+
+
+    members = relation('UsersGroupMember')
+
+
+class UsersGroupMember(Base, BaseModel):
+    __tablename__ = 'users_groups_members'
+    __table_args__ = {'useexisting':True}
+
+    user_groups_members_id = Column("user_groups_members_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
+    user_group_id = Column("user_group_id", Integer(), ForeignKey('users_groups.users_groups_id'), nullable=False, unique=None, default=None)
+    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None, default=None)
+
+    user = relation('User')
+    users_group = relation('UsersGroup')
+
 class Repository(Base, BaseModel):
     __tablename__ = 'repositories'
     __table_args__ = (UniqueConstraint('repo_name'), {'useexisting':True},)

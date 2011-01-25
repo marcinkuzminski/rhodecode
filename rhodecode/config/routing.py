@@ -81,17 +81,18 @@ def make_map(config):
              action="repo_cache", conditions=dict(method=["DELETE"],
                                                         function=check_repo))
     #ADMIN USER REST ROUTES
-    map.resource('user', 'users', controller='admin/users', path_prefix='/_admin')
+    map.resource('users_group', 'users_groups', controller='admin/users_groups', path_prefix='/_admin')
+
+    #ADMIN GROUP REST ROUTES
+    map.resource('group', 'groups', controller='admin/groups', path_prefix='/_admin')
 
     #ADMIN PERMISSIONS REST ROUTES
     map.resource('permission', 'permissions', controller='admin/permissions', path_prefix='/_admin')
-
 
     ##ADMIN LDAP SETTINGS
     map.connect('ldap_settings', '/_admin/ldap', controller='admin/ldap_settings',
                 action='ldap_settings', conditions=dict(method=["POST"]))
     map.connect('ldap_home', '/_admin/ldap', controller='admin/ldap_settings',)
-
 
 
     #ADMIN SETTINGS REST ROUTES

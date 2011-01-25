@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-    package.rhodecode.model.user
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    rhodecode.model.user
+    ~~~~~~~~~~~~~~~~~~~~
 
     users model for RhodeCode
     
