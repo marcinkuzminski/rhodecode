@@ -170,7 +170,7 @@ class FilesController(BaseController):
             return _('Unknown revision %s') % revision
         except EmptyRepositoryError:
             return _('Empty repository')
-        except (InproperArchiveTypeError, KeyError):
+        except (ImproperArchiveTypeError, KeyError):
             return _('Unknown archive type')
 
         response.content_type = content_type
