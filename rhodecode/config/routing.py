@@ -80,6 +80,10 @@ def make_map(config):
         m.connect('repo_cache', "/repos_cache/{repo_name:.*}",
              action="repo_cache", conditions=dict(method=["DELETE"],
                                                         function=check_repo))
+
+    #ADMIN USER REST ROUTES
+    map.resource('user', 'users', controller='admin/users', path_prefix='/_admin')
+
     #ADMIN USER REST ROUTES
     map.resource('users_group', 'users_groups', controller='admin/users_groups', path_prefix='/_admin')
 

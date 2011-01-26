@@ -29,7 +29,6 @@
     <div class="table">
         <table class="table_disp">
         <tr class="header">
-            <th></th>
             <th class="left">${_('group name')}</th>
             <th class="left">${_('members')}</th>
             <th class="left">${_('active')}</th>
@@ -37,13 +36,13 @@
         </tr>
             %for cnt,u_group in enumerate(c.users_groups_list):
                 <tr class="parity${cnt%2}">
-                    <td>${h.link_to(u_group.groupname,h.url('edit_user_group', id=u_group.group_id))}</td>
-                    <td>${u_group.members}</td>
-                    <td>${h.bool2icon(u_group.active)}</td>
+                    <td>${h.link_to(u_group.users_group_name,h.url('edit_users_group', id=u_group.users_group_id))}</td>
+                    <td>${len(u_group.members)}</td>
+                    <td>${h.bool2icon(u_group.users_group_active)}</td>
                     <td>
-                        ${h.form(url('users_group', id=group.group_id),method='delete')}
-                            ${h.submit('remove_','delete',id="remove_group_%s" % group.group_id,
-                            class_="delete_icon action_button",onclick="return confirm('Confirm to delete this user group');")}
+                        ${h.form(url('users_group', id=u_group.users_group_id),method='delete')}
+                            ${h.submit('remove_','delete',id="remove_group_%s" % u_group.users_group_id,
+                            class_="delete_icon action_button",onclick="return confirm('Confirm to delete this users group');")}
                         ${h.end_form()}
                     </td>
                 </tr>

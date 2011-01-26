@@ -158,19 +158,18 @@ class UsersGroup(Base, BaseModel):
     __tablename__ = 'users_groups'
     __table_args__ = {'useexisting':True}
 
-    user_group_id = Column("users_groups_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
-    user_group_name = Column("user_group_name", String(length=None, convert_unicode=False, assert_unicode=None), nullable=False, unique=True, default=None)
-
+    users_group_id = Column("users_group_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
+    users_group_name = Column("users_group_name", String(length=None, convert_unicode=False, assert_unicode=None), nullable=False, unique=True, default=None)
+    users_group_active = Column("users_group_active", Boolean(), nullable=True, unique=None, default=None)
 
     members = relation('UsersGroupMember')
-
 
 class UsersGroupMember(Base, BaseModel):
     __tablename__ = 'users_groups_members'
     __table_args__ = {'useexisting':True}
 
-    user_groups_members_id = Column("user_groups_members_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
-    user_group_id = Column("user_group_id", Integer(), ForeignKey('users_groups.users_groups_id'), nullable=False, unique=None, default=None)
+    users_group_member_id = Column("users_group_member_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
+    users_group_id = Column("users_group_id", Integer(), ForeignKey('users_groups.users_group_id'), nullable=False, unique=None, default=None)
     user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None, default=None)
 
     user = relation('User')
@@ -257,7 +256,7 @@ class UsersGroupToPerm(Base, BaseModel):
     __tablename__ = 'users_group_to_perm'
     __table_args__ = (UniqueConstraint('users_group_id', 'permission_id'), {'useexisting':True})
     users_group_to_perm_id = Column("users_group_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
-    users_group_id = Column("users_group_id", Integer(), ForeignKey('users_groups.users_groups_id'), nullable=False, unique=None, default=None)
+    users_group_id = Column("users_group_id", Integer(), ForeignKey('users_groups.users_group_id'), nullable=False, unique=None, default=None)
     permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable=False, unique=None, default=None)
 
     users_group = relation('UsersGroup')

@@ -41,8 +41,9 @@ from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator, \
 from rhodecode.lib.base import BaseController, render
 
 from rhodecode.model.db import User, UsersGroup
-from rhodecode.model.forms import UserForm
+from rhodecode.model.forms import UserForm, UsersGroupForm
 from rhodecode.model.user import UserModel
+from rhodecode.model.users_group import UsersGroupModel
 
 log = logging.getLogger(__name__)
 
@@ -63,16 +64,38 @@ class UsersGroupsController(BaseController):
     def index(self, format='html'):
         """GET /users_groups: All items in the collection"""
         # url('users_groups')
-        c.users_groups_list = []
+        c.users_groups_list = self.sa.query(UsersGroup).all()
         return render('admin/users_groups/users_groups.html')
 
     def create(self):
         """POST /users_groups: Create a new item"""
         # url('users_groups')
+        users_group_model = UsersGroupModel()
+        users_group_form = UsersGroupForm()()
+        try:
+            form_result = users_group_form.to_python(dict(request.POST))
+            users_group_model.create(form_result)
+            h.flash(_('created users group %s') % form_result['users_group_name'],
+                    category='success')
+            #action_logger(self.rhodecode_user, 'new_user', '', '', self.sa)
+        except formencode.Invalid, errors:
+            return htmlfill.render(
+                render('admin/users_groups/users_group_add.html'),
+                defaults=errors.value,
+                errors=errors.error_dict or {},
+                prefix_error=False,
+                encoding="UTF-8")
+        except Exception:
+            log.error(traceback.format_exc())
+            h.flash(_('error occurred during creation of users group %s') \
+                    % request.POST.get('users_group_name'), category='error')
+
+        return redirect(url('users_groups'))
 
     def new(self, format='html'):
         """GET /users_groups/new: Form to create a new item"""
         # url('new_users_group')
+        return render('admin/users_groups/users_group_add.html')
 
     def update(self, id):
         """PUT /users_groups/id: Update an existing item"""

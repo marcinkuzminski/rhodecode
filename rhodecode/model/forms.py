@@ -36,6 +36,7 @@ from rhodecode.lib.exceptions import LdapImportError
 from rhodecode.model import meta
 from rhodecode.model.user import UserModel
 from rhodecode.model.repo import RepoModel
+from rhodecode.model.users_group import UsersGroupModel
 from rhodecode.model.db import User
 from rhodecode import BACKENDS
 
@@ -87,6 +88,38 @@ def ValidUsername(edit, old_data):
 
 
     return _ValidUsername
+
+
+
+def ValidUsersGroup(edit, old_data):
+
+    class _ValidUsersGroup(formencode.validators.FancyValidator):
+
+        def validate_python(self, value, state):
+            if value in ['default']:
+                raise formencode.Invalid(_('Invalid group name'), value, state)
+            #check if group is unique
+            old_un = None
+            if edit:
+                old_un = UserModel().get(old_data.get('users_group_id')).username
+
+            if old_un != value or not edit:
+                if UsersGroupModel().get_by_groupname(value, cache=False,
+                                               case_insensitive=True):
+                    raise formencode.Invalid(_('This users group already exists') ,
+                                             value, state)
+
+
+            if re.match(r'^[a-zA-Z0-9]{1}[a-zA-Z0-9\-\_\.]+$', value) is None:
+                raise formencode.Invalid(_('Group name may only contain '
+                                           'alphanumeric characters underscores, '
+                                           'periods or dashes and must begin with '
+                                           'alphanumeric character'),
+                                      value, state)
+
+    return _ValidUsersGroup
+
+
 
 class ValidPassword(formencode.validators.FancyValidator):
 
@@ -367,6 +400,19 @@ def UserForm(edit=False, old_data={}):
         chained_validators = [ValidPassword]
 
     return _UserForm
+
+
+def UsersGroupForm(edit=False, old_data={}):
+    class _UsersGroupForm(formencode.Schema):
+        allow_extra_fields = True
+        filter_extra_fields = True
+
+        users_group_name = All(UnicodeString(strip=True, min=1, not_empty=True),
+                       ValidUsersGroup(edit, old_data))
+
+        users_group_active = StringBoolean(if_missing=False)
+
+    return _UsersGroupForm
 
 def RegisterForm(edit=False, old_data={}):
     class _RegisterForm(formencode.Schema):
