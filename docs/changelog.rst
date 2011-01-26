@@ -13,8 +13,11 @@ news
 ----
 
 - implemented #89 Can setup google analytics code from settings menu
-- implemented #91 added nicer looking archive urls
+- implemented #91 added nicer looking archive urls with more download options
+  like tags, branches
 - implemented #44 into file browsing, and added follow branch option
+- implemented #102 allowing '.' in username
+- implemented #84 downloads can be enabled/disabled for each repository 
 - anonymous repository can be cloned without having to pass default:default
   into clone url
 - fixed #90 whoosh indexer can index chooses repositories passed in command 
@@ -28,7 +31,9 @@ fixes
   not changing
 - fixed propagation to error controller on simplehg and simplegit middlewares
 - fixed error when trying to make a download on empty repository
-
+- fixed ehlo command on mailserver. Was not working on some hosting setups
+- fixed problem with '[' chars in commit messages in journal
+- fixed #99 Unicode errors, on file node paths with non utf-8 characters
 
 1.1.2 (**2011-01-12**)
 ======================
