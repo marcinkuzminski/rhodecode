@@ -447,6 +447,7 @@ def RepoForm(edit=False, old_data={}, supported_backends=BACKENDS.keys()):
         description = UnicodeString(strip=True, min=1, not_empty=True)
         private = StringBoolean(if_missing=False)
         enable_statistics = StringBoolean(if_missing=False)
+        enable_downloads = StringBoolean(if_missing=False)
         repo_type = OneOf(supported_backends)
         if edit:
             user = All(Int(not_empty=True), ValidRepoUser)

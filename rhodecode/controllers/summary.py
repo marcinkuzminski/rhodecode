@@ -142,7 +142,9 @@ class SummaryController(BaseController):
             c.trending_languages = json.dumps({})
             c.no_data = True
 
-        c.download_options = self._get_download_links(c.repo_info)
+        c.enable_downloads = c.repo_info.dbrepo.enable_downloads
+        if c.enable_downloads:
+            c.download_options = self._get_download_links(c.repo_info)
 
         return render('summary/summary.html')
 

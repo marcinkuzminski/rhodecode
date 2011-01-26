@@ -164,6 +164,10 @@ class FilesController(BaseController):
 
         try:
             repo = ScmModel().get_repo(repo_name)
+
+            if repo.dbrepo.enable_downloads is False:
+                return _('downloads disabled')
+
             cs = repo.get_changeset(revision)
             content_type = ARCHIVE_SPECS[fileformat][0]
         except ChangesetDoesNotExistError:

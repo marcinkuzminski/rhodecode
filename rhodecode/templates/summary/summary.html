@@ -130,6 +130,11 @@
 			  <div class="input-short">
 		        %if len(c.repo_info.revisions) == 0:
 		          ${_('There are no downloads yet')}
+		        %elif c.enable_downloads is False:
+		          ${_('Downloads are disabled for this repository')}
+                    %if h.HasPermissionAll('hg.admin')('enable stats on from summary'):
+                        [${h.link_to(_('enable'),h.url('edit_repo',repo_name=c.repo_name))}]
+                    %endif  		          
 		        %else:
 			        ${h.select('download_options',c.repo_info.get_changeset().raw_id,c.download_options)}
 			        %for cnt,archive in enumerate(c.repo_info._get_archives()):
