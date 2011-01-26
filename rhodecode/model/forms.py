@@ -78,10 +78,10 @@ def ValidUsername(edit, old_data):
                                              value, state)
 
 
-            if re.match(r'^[a-zA-Z0-9]{1}[a-zA-Z0-9\-\_]+$', value) is None:
+            if re.match(r'^[a-zA-Z0-9]{1}[a-zA-Z0-9\-\_\.]+$', value) is None:
                 raise formencode.Invalid(_('Username may only contain '
-                                           'alphanumeric characters underscores '
-                                           'or dashes and must begin with '
+                                           'alphanumeric characters underscores, '
+                                           'periods or dashes and must begin with '
                                            'alphanumeric character'),
                                       value, state)
 
