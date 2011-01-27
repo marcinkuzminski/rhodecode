@@ -224,7 +224,7 @@ class CodeHtmlFormatter(HtmlFormatter):
     def _wrap_code(self, source):
         for cnt, it in enumerate(source):
             i, t = it
-            t = '<div id="#S-%s">%s</div>' % (cnt + 1, t)
+            t = '<div id="L-%s">%s</div>' % (cnt + 1, t)
             yield i, t
 def pygmentize(filenode, **kwargs):
     """pygmentize function using pygments
