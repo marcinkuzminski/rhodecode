@@ -173,7 +173,6 @@ class UsersGroupsController(BaseController):
         c.users_group.permissions = {}
         c.group_members = [(x.user_id, x.user.username) for x in
                            c.users_group.members]
-        print c.group_members, 'x' * 100
         c.available_members = [(x.user_id, x.username) for x in
                                self.sa.query(User).all()]
         defaults = c.users_group.get_dict()

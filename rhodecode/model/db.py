@@ -162,7 +162,7 @@ class UsersGroup(Base, BaseModel):
     users_group_name = Column("users_group_name", String(length=None, convert_unicode=False, assert_unicode=None), nullable=False, unique=True, default=None)
     users_group_active = Column("users_group_active", Boolean(), nullable=True, unique=None, default=None)
 
-    members = relationship('UsersGroupMember', cascade="all, delete, delete-orphan")
+    members = relationship('UsersGroupMember', cascade="all, delete, delete-orphan", lazy="joined")
 
 class UsersGroupMember(Base, BaseModel):
     __tablename__ = 'users_groups_members'
@@ -172,7 +172,7 @@ class UsersGroupMember(Base, BaseModel):
     users_group_id = Column("users_group_id", Integer(), ForeignKey('users_groups.users_group_id'), nullable=False, unique=None, default=None)
     user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None, default=None)
 
-    user = relationship('User')
+    user = relationship('User', lazy='joined')
     users_group = relationship('UsersGroup')
 
     def __init__(self, gr_id, u_id):
