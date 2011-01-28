@@ -197,6 +197,8 @@ class Repository(Base, BaseModel):
 
     repo_followers = relation('UserFollowing', primaryjoin='UserFollowing.follows_repo_id==Repository.repo_id', cascade='all')
 
+    logs = relation('UserLog', cascade='all')
+
     def __repr__(self):
         return "<%s('%s:%s')>" % (self.__class__.__name__,
                                   self.repo_id, self.repo_name)

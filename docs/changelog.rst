@@ -28,7 +28,7 @@ fixes
   not changing
 - fixed propagation to error controller on simplehg and simplegit middlewares
 - fixed error when trying to make a download on empty repository
-
+- fixed #106 relation issues on databases different than sqlite
 
 1.1.2 (**2011-01-12**)
 ======================
