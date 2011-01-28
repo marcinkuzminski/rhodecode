@@ -53,6 +53,10 @@ div.annotatediv{
 	padding: 5px;
     margin: 0;
 }
+.code-highlight pre div:target { 
+    background-color: #FFFFBE !important;
+}
+    
 .linenos a { text-decoration: none; }
 
 .code { display: block; }

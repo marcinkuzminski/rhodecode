@@ -69,12 +69,17 @@ class DbManage(object):
                 self.db_exists = True
                 if not override:
                     raise Exception('database already exists')
+            return 'sqlite'
+        if self.dburi.startswith('postgresql'):
+            self.db_exists = True
+            return 'postgresql'
+
 
     def create_tables(self, override=False):
         """Create a auth database
         """
 
-        self.check_for_db(override)
+        db_type = self.check_for_db(override)
         if self.db_exists:
             log.info("database exist and it's going to be destroyed")
             if self.tests:
@@ -84,7 +89,11 @@ class DbManage(object):
             if not destroy:
                 sys.exit()
             if self.db_exists and destroy:
-                os.remove(jn(self.root, self.dbname))
+                if db_type == 'sqlite':
+                    os.remove(jn(self.root, self.dbname))
+                if db_type == 'postgresql':
+                    meta.Base.metadata.drop_all()
+
         checkfirst = not override
         meta.Base.metadata.create_all(checkfirst=checkfirst)
         log.info('Created tables for %s', self.dbname)
