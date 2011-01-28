@@ -26,7 +26,7 @@ import logging
 import formencode
 from formencode import All
 from formencode.validators import UnicodeString, OneOf, Int, Number, Regex, \
-    Email, Bool, StringBoolean
+    Email, Bool, StringBoolean, Set
 
 from pylons.i18n.translation import _
 
@@ -99,11 +99,12 @@ def ValidUsersGroup(edit, old_data):
             if value in ['default']:
                 raise formencode.Invalid(_('Invalid group name'), value, state)
             #check if group is unique
-            old_un = None
+            old_ugname = None
             if edit:
-                old_un = UserModel().get(old_data.get('users_group_id')).username
+                old_ugname = UsersGroupModel()\
+                    .get(old_data.get('users_group_id')).users_group_name
 
-            if old_un != value or not edit:
+            if old_ugname != value or not edit:
                 if UsersGroupModel().get_by_groupname(value, cache=False,
                                                case_insensitive=True):
                     raise formencode.Invalid(_('This users group already exists') ,
@@ -402,7 +403,7 @@ def UserForm(edit=False, old_data={}):
     return _UserForm
 
 
-def UsersGroupForm(edit=False, old_data={}):
+def UsersGroupForm(edit=False, old_data={}, available_members=[]):
     class _UsersGroupForm(formencode.Schema):
         allow_extra_fields = True
         filter_extra_fields = True
@@ -411,6 +412,11 @@ def UsersGroupForm(edit=False, old_data={}):
                        ValidUsersGroup(edit, old_data))
 
         users_group_active = StringBoolean(if_missing=False)
+
+        if edit:
+            users_group_members = OneOf(available_members, hideList=False,
+                                        testValueList=True,
+                                        if_missing=None, not_empty=False)
 
     return _UsersGroupForm
 

@@ -234,8 +234,8 @@ pushes and also on large pushes::
     proxy_connect_timeout       3600;
     proxy_send_timeout          3600;
     proxy_read_timeout          3600;
-    proxy_buffer_size           8k;
-    proxy_buffers               8 32k;
+    proxy_buffer_size           16k;
+    proxy_buffers               4 16k;
     proxy_busy_buffers_size     64k;
     proxy_temp_file_write_size  64k;
  
