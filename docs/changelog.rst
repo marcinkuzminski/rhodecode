@@ -23,6 +23,7 @@ news
 - fixed #90 whoosh indexer can index chooses repositories passed in command 
   line
 - added dynamic download links in summary. With quick branch/tag selection
+- implemented #107 customizable code highlights on code sources
 
 fixes
 -----
