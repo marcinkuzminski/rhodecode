@@ -149,6 +149,14 @@ class UsersGroupsController(BaseController):
         #    h.form(url('users_group', id=ID),
         #           method='delete')
         # url('users_group', id=ID)
+        users_group_model = UsersGroupModel()
+        try:
+            users_group_model.delete(id)
+            h.flash(_('successfully deleted users group'), category='success')
+        except Exception:
+            h.flash(_('An error occurred during deletion of users group'),
+                    category='error')
+        return redirect(url('users_groups'))
 
     def show(self, id, format='html'):
         """GET /users_groups/id: Show a specific item"""

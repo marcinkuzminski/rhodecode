@@ -99,3 +99,13 @@ class UsersGroupModel(BaseModel):
             log.error(traceback.format_exc())
             self.sa.rollback()
             raise
+
+    def delete(self, users_group_id):
+        try:
+            users_group = self.get(users_group_id, cache=False)
+            self.sa.delete(users_group)
+            self.sa.commit()
+        except:
+            log.error(traceback.format_exc())
+            self.sa.rollback()
+            raise
