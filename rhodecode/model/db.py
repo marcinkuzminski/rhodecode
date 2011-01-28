@@ -29,7 +29,7 @@ import datetime
 
 from sqlalchemy import *
 from sqlalchemy.exc import DatabaseError
-from sqlalchemy.orm import relation, backref, class_mapper
+from sqlalchemy.orm import relationship, backref, class_mapper
 from sqlalchemy.orm.session import Session
 
 from rhodecode.model.meta import Base
@@ -107,11 +107,11 @@ class User(Base, BaseModel):
     last_login = Column("last_login", DateTime(timezone=False), nullable=True, unique=None, default=None)
     is_ldap = Column("is_ldap", Boolean(), nullable=False, unique=None, default=False)
 
-    user_log = relation('UserLog', cascade='all')
-    user_perms = relation('UserToPerm', primaryjoin="User.user_id==UserToPerm.user_id", cascade='all')
+    user_log = relationship('UserLog', cascade='all')
+    user_perms = relationship('UserToPerm', primaryjoin="User.user_id==UserToPerm.user_id", cascade='all')
 
-    repositories = relation('Repository')
-    user_followers = relation('UserFollowing', primaryjoin='UserFollowing.follows_user_id==User.user_id', cascade='all')
+    repositories = relationship('Repository')
+    user_followers = relationship('UserFollowing', primaryjoin='UserFollowing.follows_user_id==User.user_id', cascade='all')
 
     @property
     def full_contact(self):
@@ -150,8 +150,8 @@ class UserLog(Base, BaseModel):
     action = Column("action", String(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     action_date = Column("action_date", DateTime(timezone=False), nullable=True, unique=None, default=None)
 
-    user = relation('User')
-    repository = relation('Repository')
+    user = relationship('User')
+    repository = relationship('Repository')
 
 
 class UsersGroup(Base, BaseModel):
@@ -162,7 +162,7 @@ class UsersGroup(Base, BaseModel):
     users_group_name = Column("users_group_name", String(length=None, convert_unicode=False, assert_unicode=None), nullable=False, unique=True, default=None)
     users_group_active = Column("users_group_active", Boolean(), nullable=True, unique=None, default=None)
 
-    members = relation('UsersGroupMember')
+    members = relationship('UsersGroupMember', cascade="all, delete, delete-orphan")
 
 class UsersGroupMember(Base, BaseModel):
     __tablename__ = 'users_groups_members'
@@ -172,8 +172,12 @@ class UsersGroupMember(Base, BaseModel):
     users_group_id = Column("users_group_id", Integer(), ForeignKey('users_groups.users_group_id'), nullable=False, unique=None, default=None)
     user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None, default=None)
 
-    user = relation('User')
-    users_group = relation('UsersGroup')
+    user = relationship('User')
+    users_group = relationship('UsersGroup')
+
+    def __init__(self, gr_id, u_id):
+        self.users_group_id = gr_id
+        self.user_id = u_id
 
 class Repository(Base, BaseModel):
     __tablename__ = 'repositories'
@@ -189,13 +193,13 @@ class Repository(Base, BaseModel):
     fork_id = Column("fork_id", Integer(), ForeignKey('repositories.repo_id'), nullable=True, unique=False, default=None)
     group_id = Column("group_id", Integer(), ForeignKey('groups.group_id'), nullable=True, unique=False, default=None)
 
-    user = relation('User')
-    fork = relation('Repository', remote_side=repo_id)
-    group = relation('Group')
-    repo_to_perm = relation('RepoToPerm', cascade='all')
-    stats = relation('Statistics', cascade='all', uselist=False)
+    user = relationship('User')
+    fork = relationship('Repository', remote_side=repo_id)
+    group = relationship('Group')
+    repo_to_perm = relationship('RepoToPerm', cascade='all')
+    stats = relationship('Statistics', cascade='all', uselist=False)
 
-    repo_followers = relation('UserFollowing', primaryjoin='UserFollowing.follows_repo_id==Repository.repo_id', cascade='all')
+    repo_followers = relationship('UserFollowing', primaryjoin='UserFollowing.follows_repo_id==Repository.repo_id', cascade='all')
 
     def __repr__(self):
         return "<%s('%s:%s')>" % (self.__class__.__name__,
@@ -209,7 +213,7 @@ class Group(Base, BaseModel):
     group_name = Column("group_name", String(length=None, convert_unicode=False, assert_unicode=None), nullable=False, unique=True, default=None)
     group_parent_id = Column("group_parent_id", Integer(), ForeignKey('groups.group_id'), nullable=True, unique=None, default=None)
 
-    parent_group = relation('Group', remote_side=group_id)
+    parent_group = relationship('Group', remote_side=group_id)
 
 
     def __init__(self, group_name='', parent_group=None):
@@ -239,9 +243,9 @@ class RepoToPerm(Base, BaseModel):
     permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable=False, unique=None, default=None)
     repository_id = Column("repository_id", Integer(), ForeignKey('repositories.repo_id'), nullable=False, unique=None, default=None)
 
-    user = relation('User')
-    permission = relation('Permission')
-    repository = relation('Repository')
+    user = relationship('User')
+    permission = relationship('Permission')
+    repository = relationship('Repository')
 
 class UserToPerm(Base, BaseModel):
     __tablename__ = 'user_to_perm'
@@ -250,8 +254,8 @@ class UserToPerm(Base, BaseModel):
     user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None, default=None)
     permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable=False, unique=None, default=None)
 
-    user = relation('User')
-    permission = relation('Permission')
+    user = relationship('User')
+    permission = relationship('Permission')
 
 class UsersGroupToPerm(Base, BaseModel):
     __tablename__ = 'users_group_to_perm'
@@ -260,8 +264,8 @@ class UsersGroupToPerm(Base, BaseModel):
     users_group_id = Column("users_group_id", Integer(), ForeignKey('users_groups.users_group_id'), nullable=False, unique=None, default=None)
     permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable=False, unique=None, default=None)
 
-    users_group = relation('UsersGroup')
-    permission = relation('Permission')
+    users_group = relationship('UsersGroup')
+    permission = relationship('Permission')
 
 class GroupToPerm(Base, BaseModel):
     __tablename__ = 'group_to_perm'
@@ -272,9 +276,9 @@ class GroupToPerm(Base, BaseModel):
     permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable=False, unique=None, default=None)
     group_id = Column("group_id", Integer(), ForeignKey('groups.group_id'), nullable=False, unique=None, default=None)
 
-    user = relation('User')
-    permission = relation('Permission')
-    group = relation('Group')
+    user = relationship('User')
+    permission = relationship('Permission')
+    group = relationship('Group')
 
 class Statistics(Base, BaseModel):
     __tablename__ = 'statistics'
@@ -286,7 +290,7 @@ class Statistics(Base, BaseModel):
     commit_activity_combined = Column("commit_activity_combined", LargeBinary(), nullable=False)#JSON data
     languages = Column("languages", LargeBinary(), nullable=False)#JSON data
 
-    repository = relation('Repository', single_parent=True)
+    repository = relationship('Repository', single_parent=True)
 
 class UserFollowing(Base, BaseModel):
     __tablename__ = 'user_followings'
@@ -299,10 +303,10 @@ class UserFollowing(Base, BaseModel):
     follows_repo_id = Column("follows_repository_id", Integer(), ForeignKey('repositories.repo_id'), nullable=True, unique=None, default=None)
     follows_user_id = Column("follows_user_id", Integer(), ForeignKey('users.user_id'), nullable=True, unique=None, default=None)
 
-    user = relation('User', primaryjoin='User.user_id==UserFollowing.user_id')
+    user = relationship('User', primaryjoin='User.user_id==UserFollowing.user_id')
 
-    follows_user = relation('User', primaryjoin='User.user_id==UserFollowing.follows_user_id')
-    follows_repository = relation('Repository')
+    follows_user = relationship('User', primaryjoin='User.user_id==UserFollowing.follows_user_id')
+    follows_repository = relationship('Repository')
 
 class CacheInvalidation(Base, BaseModel):
     __tablename__ = 'cache_invalidation'

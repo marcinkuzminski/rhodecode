@@ -1,0 +1,166 @@
+## -*- coding: utf-8 -*-
+<%inherit file="/base/base.html"/>
+
+<%def name="title()">
+    ${_('Edit users group')} ${c.users_group.users_group_name} - ${c.rhodecode_name}
+</%def>
+
+<%def name="breadcrumbs_links()">
+    ${h.link_to(_('Admin'),h.url('admin_home'))} 
+    &raquo; 
+    ${h.link_to(_('UsersGroups'),h.url('users_groups'))} 
+    &raquo;
+    ${_('edit')} "${c.users_group.users_group_name}"
+</%def>
+
+<%def name="page_nav()">
+    ${self.menu('admin')}
+</%def>
+
+<%def name="main()">
+<div class="box">
+    <!-- box / title -->
+    <div class="title">
+        ${self.breadcrumbs()}       
+    </div>
+    <!-- end box / title -->
+    ${h.form(url('users_group', id=c.users_group.users_group_id),method='put', id='edit_users_group')}
+    <div class="form">
+        <!-- fields -->
+	        <div class="fields">
+	             <div class="field">
+	                <div class="label">
+	                    <label for="users_group_name">${_('Group name')}:</label>
+	                </div>
+	                <div class="input">
+	                    ${h.text('users_group_name',class_='small')}
+	                </div>
+	             </div>
+	            
+	             <div class="field">
+	                <div class="label label-checkbox">
+	                    <label for="users_group_active">${_('Active')}:</label>
+	                </div>
+	                <div class="checkboxes">
+	                    ${h.checkbox('users_group_active',value=True)}
+	                </div>
+	             </div>
+	            <div class="field">
+                    <div class="label label-checkbox">
+                        <label for="users_group_active">${_('Members')}:</label>
+                    </div>
+                    <div class="checkboxes">
+	                    <table> 
+	                            <tr>
+	                                <td>
+	                                    <div>
+	                                        <div style="float:left">
+	                                        <div class="text">${_('Group members')}</div>
+	                                            ${h.select('users_group_members',[x[0] for x in c.group_members],c.group_members,multiple=True,size=8,style="min-width:210px")}
+	                                        </div>
+	                                        <div style="float:left;width:20px;padding-top:50px">
+	                                            <img alt="add" id="add_element" 
+	                                                style="padding:2px;cursor:pointer" 
+	                                                src="/images/icons/arrow_left.png">
+	                                            <br />
+	                                            <img alt="remove" id="remove_element" 
+	                                                style="padding:2px;cursor:pointer" 
+	                                                src="/images/icons/arrow_right.png">
+	                                        </div>
+	                                        <div style="float:left">
+	                                            <div class="text">${_('Available members')}</div>
+	                                             ${h.select('available_members',[],c.available_members,multiple=True,size=8,style="min-width:210px")}
+	                                        </div>
+	                                    </div>
+	                                </td>           
+	                            </tr>       
+	                    </table>                    
+                    </div>	            
+
+                </div>			        
+                <div class="buttons">
+                  ${h.submit('save','save',class_="ui-button")}
+                </div>             
+            </div>          
+    </div>        
+${h.end_form()}        
+</div>
+    
+<script type="text/javascript">
+    YAHOO.util.Event.onDOMReady(function(){
+            var D = YAHOO.util.Dom;
+            var E = YAHOO.util.Event;
+            
+            //definition of containers ID's
+            var available_container = 'available_members';
+            var selected_container = 'users_group_members';
+            //form containing containers id
+            var form_id = 'edit_users_group';
+            
+            //temp container for storage.
+            var cache = new Array();
+            var c =  D.get(selected_container);
+            
+            //get only selected options for further fullfilment
+            for(var i = 0;node =c.options[i];i++){
+                if(node.selected){
+                    //push selected to my temp storage left overs :)
+                    cache.push(node);
+                }   
+            }
+            
+            //clear 'selected' select
+            c.options.length = 0;
+
+            //fill it with remembered options
+            for(var i = 0;node = cache[i];i++){
+                c.options[i]=new Option(node.text, node.value, false, false);
+            }
+            
+            function prompts_action_callback(e){
+                
+                var choosen = D.get(selected_container);  
+                var availible = D.get(available_container);
+        
+                if (this.id=='add_element'){
+                    for(var i=0; node = availible.options[i];i++){
+                        if(node.selected){
+                            choosen.appendChild(new Option(node.text, node.value, false, false));
+                        }
+                    }
+                }
+                else if (this.id=='remove_element'){
+
+                    //temp container for storage.
+                    cache = new Array();
+                    
+                    for(var i = 0;node = choosen.options[i];i++){
+                        if(!node.selected){
+                            //push left overs :)
+                            cache.push(node);
+                        }   
+                    }
+                    //clear select
+                    choosen.options.length = 0;
+                    for(var i = 0;node = cache[i];i++){
+                        choosen.options[i]=new Option(node.text, node.value, false, false);
+                    }               
+                }                   
+                else{
+                    
+                }
+            }
+            
+    
+            E.addListener(['add_element','remove_element'],'click',prompts_action_callback)
+
+            E.addListener(form_id,'submit',function(){
+                var choosen = D.get(selected_container);
+                for (var i = 0; i < choosen.options.length; i++) {
+                    choosen.options[i].selected = 'selected';
+                }
+            })  
+        });
+</script>    
+
+</%def>  

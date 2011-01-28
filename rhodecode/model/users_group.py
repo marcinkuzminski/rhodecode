@@ -32,9 +32,7 @@ from pylons.i18n.translation import _
 
 from rhodecode.model import BaseModel
 from rhodecode.model.caching_query import FromCache
-from rhodecode.model.db import UsersGroup
-
-from rhodecode.lib.exceptions import DefaultUserException, UserOwnsReposException
+from rhodecode.model.db import UsersGroup, UsersGroupMember
 
 from sqlalchemy.exc import DatabaseError
 
@@ -51,7 +49,8 @@ class UsersGroupModel(BaseModel):
         return users_group.get(users_group_id)
 
 
-    def get_by_groupname(self, users_group_name, cache=False, case_insensitive=False):
+    def get_by_groupname(self, users_group_name, cache=False,
+                         case_insensitive=False):
 
         if case_insensitive:
             user = self.sa.query(UsersGroup)\
@@ -77,3 +76,26 @@ class UsersGroupModel(BaseModel):
             self.sa.rollback()
             raise
 
+    def update(self, users_group_id, form_data):
+
+        try:
+            users_group = self.get(users_group_id, cache=False)
+
+            for k, v in form_data.items():
+                if k == 'users_group_members':
+                    users_group.members = []
+                    self.sa.flush()
+                    members_list = []
+                    if v:
+                        for u_id in set(v):
+                            members_list.append(UsersGroupMember(users_group_id,
+                                                             u_id))
+                    setattr(users_group, 'members', members_list)
+                setattr(users_group, k, v)
+
+            self.sa.add(users_group)
+            self.sa.commit()
+        except:
+            log.error(traceback.format_exc())
+            self.sa.rollback()
+            raise

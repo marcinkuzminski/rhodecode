@@ -106,6 +106,41 @@ class UsersGroupsController(BaseController):
         #           method='put')
         # url('users_group', id=ID)
 
+
+        users_group_model = UsersGroupModel()
+        c.users_group = users_group_model.get(id)
+        c.group_members = [(x.user_id, x.user.username) for x in
+                           c.users_group.members]
+
+        c.available_members = [(x.user_id, x.username) for x in
+                               self.sa.query(User).all()]
+        users_group_form = UsersGroupForm(edit=True,
+                                          old_data=c.users_group.get_dict(),
+                                          available_members=[str(x[0]) for x
+                                                in c.available_members])()
+
+        try:
+            form_result = users_group_form.to_python(request.POST)
+            users_group_model.update(id, form_result)
+            h.flash(_('updated users group %s') % form_result['users_group_name'],
+                    category='success')
+            #action_logger(self.rhodecode_user, 'new_user', '', '', self.sa)
+        except formencode.Invalid, errors:
+            return htmlfill.render(
+                render('admin/users_groups/users_group_edit.html'),
+                defaults=errors.value,
+                errors=errors.error_dict or {},
+                prefix_error=False,
+                encoding="UTF-8")
+        except Exception:
+            log.error(traceback.format_exc())
+            h.flash(_('error occurred during update of users group %s') \
+                    % request.POST.get('users_group_name'), category='error')
+
+        return redirect(url('users_groups'))
+
+
+
     def delete(self, id):
         """DELETE /users_groups/id: Delete an existing item"""
         # Forms posted to this method should contain a hidden field:
@@ -122,3 +157,22 @@ class UsersGroupsController(BaseController):
     def edit(self, id, format='html'):
         """GET /users_groups/id/edit: Form to edit an existing item"""
         # url('edit_users_group', id=ID)
+
+        c.users_group = self.sa.query(UsersGroup).get(id)
+        if not c.users_group:
+            return redirect(url('users_groups'))
+
+        c.users_group.permissions = {}
+        c.group_members = [(x.user_id, x.user.username) for x in
+                           c.users_group.members]
+        print c.group_members, 'x' * 100
+        c.available_members = [(x.user_id, x.username) for x in
+                               self.sa.query(User).all()]
+        defaults = c.users_group.get_dict()
+
+        return htmlfill.render(
+            render('admin/users_groups/users_group_edit.html'),
+            defaults=defaults,
+            encoding="UTF-8",
+            force_defaults=False
+        )
