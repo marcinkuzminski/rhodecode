@@ -38,7 +38,8 @@ from rhodecode.lib.base import BaseController, render
 from rhodecode.lib.utils import EmptyChangeset
 from rhodecode.model.scm import ScmModel
 
-from vcs.exceptions import RepositoryError, ChangesetError
+from vcs.exceptions import RepositoryError, ChangesetError, \
+ChangesetDoesNotExistError
 from vcs.nodes import FileNode
 from vcs.utils import diffs as differ
 from vcs.utils.ordered_dict import OrderedDict
@@ -77,7 +78,7 @@ class ChangesetController(BaseController):
             end_cs = repo.get_changeset(rev_end)
 
             if start_cs.revision >= end_cs.revision:
-                raise Exception('Start cannot be after End')
+                raise Exception('Start revision cannot be after End')
 
             yield start_cs
 
@@ -100,10 +101,11 @@ class ChangesetController(BaseController):
                 rev_start = rev_range[0]
                 rev_end = rev_range[1]
                 rev_ranges = get_cs_range(repo, rev_start, rev_end)
+                c.cs_ranges = list(rev_ranges)
 
             else:
                 rev_ranges = [repo.get_changeset(revision)]
-        except RepositoryError, e:
+        except (RepositoryError, ChangesetDoesNotExistError, Exception), e:
             log.error(traceback.format_exc())
             h.flash(str(e), category='warning')
             return redirect(url('home'))
@@ -112,7 +114,6 @@ class ChangesetController(BaseController):
         c.sum_added = 0
         c.sum_removed = 0
 
-        c.cs_ranges = list(rev_ranges)
 
         for changeset in c.cs_ranges:
             c.changes[changeset.raw_id] = []
