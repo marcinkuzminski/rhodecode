@@ -1510,7 +1510,9 @@ float:left;
 border:1px solid #CCC;
 padding:10px;
 }
-
+#graph_content #rev_range_container{
+padding:10px 0px;
+}
 #graph_content .container {
 border-bottom:1px solid #CCC;
 border-left:1px solid #CCC;
@@ -1530,6 +1532,9 @@ padding-bottom:5px;
 #graph_content .container .left .date {
 font-weight:700;
 padding-bottom:5px;
+}
+#graph_content .container .left .date span{
+vertical-align: text-top;    
 }
 
 #graph_content .container .left .message {

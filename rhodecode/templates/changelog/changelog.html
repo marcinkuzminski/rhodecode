@@ -32,21 +32,25 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
 				</div>
 				<div id="graph_content">
 					<div class="container_header">
-						
-        ${h.form(h.url.current(),method='get')}
-        <div class="info_box">
-          <span>${_('Show')}:</span>
-          ${h.text('size',size=1,value=c.size)}
-          <span>${_('revisions')}</span>
-          ${h.submit('set',_('set'))}
-        </div>
-        ${h.end_form()}
-						
+				        ${h.form(h.url.current(),method='get')}
+				        <div class="info_box">
+				          <span>${_('Show')}:</span>
+				          ${h.text('size',size=1,value=c.size)}
+				          <span>${_('revisions')}</span>
+				          ${h.submit('set',_('set'))}
+				          
+				        </div>
+				        ${h.end_form()}
+					<div id="rev_range_container" style="display:none"></div>
 					</div>
+					
 				%for cnt,cs in enumerate(c.pagination):
 					<div id="chg_${cnt+1}" class="container">
 						<div class="left">
-							<div class="date">${_('commit')} ${cs.revision}: ${h.short_id(cs.raw_id)}@${cs.date}</div>
+							<div class="date">
+							${h.checkbox(cs.short_id,class_="changeset_range")}
+							<span>${_('commit')} ${cs.revision}: ${h.short_id(cs.raw_id)}@${cs.date}</span>
+							</div>
 							<div class="author">
 								<div class="gravatar">
 									<img alt="gravatar" src="${h.gravatar_url(h.email(cs.author),20)}"/>
@@ -113,6 +117,37 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
 			<script type="text/javascript" src="/js/graph.js"></script>
 			<script type="text/javascript">
 				YAHOO.util.Event.onDOMReady(function(){
+					
+                    //Monitor range checkboxes and build a link to changesets
+                    //ranges
+                    var checkboxes = YUD.getElementsByClassName('changeset_range');
+                    var url_tmpl = "${h.url('changeset_home',repo_name=c.repo_name,revision='__REVRANGE__')}";
+                    YUE.on(checkboxes,'click',function(e){      
+                        var checked_checkboxes = [];
+                        for (pos in checkboxes){
+                            if(checkboxes[pos].checked){
+                                checked_checkboxes.push(checkboxes[pos]);
+                            }
+                        }
+                        if(checked_checkboxes.length>1){
+                        	var rev_end = checked_checkboxes[0].name;
+                        	var rev_start = checked_checkboxes[checked_checkboxes.length-1].name;
+                        	
+                            var url = url_tmpl.replace('__REVRANGE__',
+                            		rev_start+'...'+rev_end);
+                            
+                        var link = "<a href="+url+">${_('Show selected changes __S -> __E')}</a>"
+                        link = link.replace('__S',rev_start);
+                        link = link.replace('__E',rev_end);
+                        YUD.get('rev_range_container').innerHTML = link;
+                        YUD.setStyle('rev_range_container','display','');
+                        }
+                        else{
+                        	YUD.setStyle('rev_range_container','display','none');
+                        	
+                        }
+                    });					
+					
 					function set_canvas() {
 						var c = document.getElementById('graph_nodes');
 						var t = document.getElementById('graph_content');
@@ -125,7 +160,10 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
 					set_canvas();
 					var jsdata = ${c.jsdata|n};
 					var r = new BranchRenderer();
-					r.render(jsdata); 
+					r.render(jsdata);
+					
+
+					
 				});
 			</script>
 		%else:

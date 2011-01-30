@@ -23,7 +23,7 @@
         ${self.breadcrumbs()}
     </div>
     <div class="table">
-		<div id="body" class="diffblock">
+		<div class="diffblock">
 			<div class="code-header">
 				<div>
 				${_('Changeset')} - r${c.changeset.revision}:${h.short_id(c.changeset.raw_id)}
@@ -81,7 +81,7 @@
 	        <span style="font-size:1.1em;font-weight: bold">${_('Files affected')}</span>
 	        <div class="cs_files">
 	                %for change,filenode,diff,cs1,cs2 in c.changes:
-	                    <div class="cs_${change}">${h.link_to(filenode.path,h.url.current(anchor='CHANGE-%s'%filenode.path))}</div>
+	                    <div class="cs_${change}">${h.link_to(filenode.path,h.url.current(anchor=h.repo_name_slug('C%s' % filenode.path)))}</div>
 	                %endfor
 	        </div>         
 	    </div>
@@ -91,8 +91,8 @@
 	%for change,filenode,diff,cs1,cs2 in c.changes:
 		%if change !='removed':
 		<div style="clear:both;height:10px"></div>
-		<div id="body" class="diffblock">
-			<div id="${'CHANGE-%s'%filenode.path}" class="code-header">
+		<div class="diffblock">
+			<div id="${h.repo_name_slug('C%s' % filenode.path)}" class="code-header">
 				<div class="changeset_header">
 					<span class="changeset_file">
 						${h.link_to_if(change!='removed',filenode.path,h.url('files_home',repo_name=c.repo_name,
@@ -118,7 +118,5 @@
 		</div>
 		%endif
 	%endfor 
-    </div>
-</div>    
-	
+    </div>	
 </%def>

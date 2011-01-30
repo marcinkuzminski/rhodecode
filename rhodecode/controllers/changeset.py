@@ -3,7 +3,8 @@
     rhodecode.controllers.changeset
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    changeset controller for pylons
+    changeset controller for pylons showoing changes beetween 
+    revisions
     
     :created_on: Apr 25, 2010
     :author: marcink
@@ -40,6 +41,7 @@ from rhodecode.model.scm import ScmModel
 from vcs.exceptions import RepositoryError, ChangesetError
 from vcs.nodes import FileNode
 from vcs.utils import diffs as differ
+from vcs.utils.ordered_dict import OrderedDict
 
 log = logging.getLogger(__name__)
 
@@ -63,25 +65,67 @@ class ChangesetController(BaseController):
                         </tr>
                       </table>''' % str
 
+        def get_cs_range(repo, rev_start, rev_end):
+            """
+            Temp fix function until VCS will handle that
+            see issue #48
+            :param rev_start:
+            :param rev_end:
+            """
+
+            start_cs = repo.get_changeset(rev_start)
+            end_cs = repo.get_changeset(rev_end)
+
+            if start_cs.revision >= end_cs.revision:
+                raise Exception('Start cannot be after End')
+
+            yield start_cs
+
+            while 1:
+                next = start_cs.next()
+                yield next
+                start_cs = next
+                if next == end_cs:
+                    break
+
+        #======================================================================
+        # REAL CODE BELOW
+        #======================================================================
+        #get ranges of revisions if preset
+        rev_range = revision.split('...')[:2]
+
         try:
-            c.changeset = hg_model.get_repo(c.repo_name).get_changeset(revision)
+            repo = hg_model.get_repo(c.repo_name)
+            if len(rev_range) == 2:
+                rev_start = rev_range[0]
+                rev_end = rev_range[1]
+                rev_ranges = get_cs_range(repo, rev_start, rev_end)
+
+            else:
+                rev_ranges = [repo.get_changeset(revision)]
         except RepositoryError, e:
             log.error(traceback.format_exc())
             h.flash(str(e), category='warning')
             return redirect(url('home'))
-        else:
+
+        c.changes = OrderedDict()
+        c.sum_added = 0
+        c.sum_removed = 0
+
+        c.cs_ranges = list(rev_ranges)
+
+        for changeset in c.cs_ranges:
+            c.changes[changeset.raw_id] = []
             try:
-                c.changeset_old = c.changeset.parents[0]
+                changeset_parent = changeset.parents[0]
             except IndexError:
-                c.changeset_old = None
-            c.changes = []
+                changeset_parent = None
 
-            #===================================================================
+
+            #==================================================================
             # ADDED FILES
-            #===================================================================
-            c.sum_added = 0
-            for node in c.changeset.added:
-
+            #==================================================================
+            for node in changeset.added:
                 filenode_old = FileNode(node.path, '', EmptyChangeset())
                 if filenode_old.is_binary or node.is_binary:
                     diff = wrap_to_table(_('binary file'))
@@ -97,15 +141,14 @@ class ChangesetController(BaseController):
 
                 cs1 = None
                 cs2 = node.last_changeset.raw_id
-                c.changes.append(('added', node, diff, cs1, cs2))
+                c.changes[changeset.raw_id].append(('added', node, diff, cs1, cs2))
 
-            #===================================================================
+            #==================================================================
             # CHANGED FILES
-            #===================================================================
-            c.sum_removed = 0
-            for node in c.changeset.changed:
+            #==================================================================
+            for node in changeset.changed:
                 try:
-                    filenode_old = c.changeset_old.get_node(node.path)
+                    filenode_old = changeset_parent.get_node(node.path)
                 except ChangesetError:
                     filenode_old = FileNode(node.path, '', EmptyChangeset())
 
@@ -125,15 +168,21 @@ class ChangesetController(BaseController):
 
                 cs1 = filenode_old.last_changeset.raw_id
                 cs2 = node.last_changeset.raw_id
-                c.changes.append(('changed', node, diff, cs1, cs2))
+                c.changes[changeset.raw_id].append(('changed', node, diff, cs1, cs2))
 
-            #===================================================================
+            #==================================================================
             # REMOVED FILES    
-            #===================================================================
-            for node in c.changeset.removed:
-                c.changes.append(('removed', node, None, None, None))
+            #==================================================================
+            for node in changeset.removed:
+                c.changes[changeset.raw_id].append(('removed', node, None, None, None))
 
-        return render('changeset/changeset.html')
+        if len(c.cs_ranges) == 1:
+            c.changeset = c.cs_ranges[0]
+            c.changes = c.changes[c.changeset.raw_id]
+
+            return render('changeset/changeset.html')
+        else:
+            return render('changeset/changeset_range.html')
 
     def raw_changeset(self, revision):
 
@@ -148,9 +197,9 @@ class ChangesetController(BaseController):
             return redirect(url('home'))
         else:
             try:
-                c.changeset_old = c.changeset.parents[0]
+                c.changeset_parent = c.changeset.parents[0]
             except IndexError:
-                c.changeset_old = None
+                c.changeset_parent = None
             c.changes = []
 
             for node in c.changeset.added:
@@ -166,7 +215,7 @@ class ChangesetController(BaseController):
                 c.changes.append(('added', node, diff, cs1, cs2))
 
             for node in c.changeset.changed:
-                filenode_old = c.changeset_old.get_node(node.path)
+                filenode_old = c.changeset_parent.get_node(node.path)
                 if filenode_old.is_binary or node.is_binary:
                     diff = _('binary file')
                 else:
