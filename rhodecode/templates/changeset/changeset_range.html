@@ -41,7 +41,7 @@
 	        <span style="font-size:1.1em;font-weight: bold">${_('Files affected')}</span>
 	        <div class="cs_files">
 	               %for cs in c.cs_ranges:
-	                   ${cs}
+	                   <div class="cur_cs">r${cs}</div>
 	                %for change,filenode,diff,cs1,cs2 in c.changes[cs.raw_id]:
 	                    <div class="cs_${change}">${h.link_to(filenode.path,h.url.current(anchor=h.repo_name_slug('C%s-%s' % (cs.short_id,filenode.path))))}</div>
 	                %endfor

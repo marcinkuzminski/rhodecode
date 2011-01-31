@@ -1466,6 +1466,11 @@ color:#556CB5;
 white-space:pre-wrap;
 }
 
+.cs_files .cur_cs{
+margin:10px 2px;
+font-weight: bold;
+}
+
 .cs_files .cs_added {
 background:url("../images/icons/page_white_add.png") no-repeat scroll 3px;
 height:16px;
