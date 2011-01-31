@@ -101,10 +101,11 @@ class ChangesetController(BaseController):
                 rev_start = rev_range[0]
                 rev_end = rev_range[1]
                 rev_ranges = get_cs_range(repo, rev_start, rev_end)
-                c.cs_ranges = list(rev_ranges)
-
             else:
                 rev_ranges = [repo.get_changeset(revision)]
+
+            c.cs_ranges = list(rev_ranges)
+
         except (RepositoryError, ChangesetDoesNotExistError, Exception), e:
             log.error(traceback.format_exc())
             h.flash(str(e), category='warning')
