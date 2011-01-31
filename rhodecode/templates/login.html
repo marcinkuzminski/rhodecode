@@ -15,7 +15,7 @@
 <div id="login">
             <!-- login -->
             <div class="title top-left-rounded-corner top-right-rounded-corner">
-                <h5>${_('Sign In to rhodecode')}</h5>
+                <h5>${_('Sign In to')} ${c.rhodecode_name}</h5>
             </div>
             <div class="inner">            
                 ${h.form(h.url.current(came_from=c.came_from))}
