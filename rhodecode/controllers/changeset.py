@@ -66,7 +66,7 @@ class ChangesetController(BaseController):
                         </tr>
                       </table>''' % str
 
-        def get_cs_range(repo, rev_start, rev_end):
+        def get_cs_range(repo, rev_start, rev_end, limit=None):
             """
             Temp fix function until VCS will handle that
             see issue #48
@@ -82,25 +82,29 @@ class ChangesetController(BaseController):
 
             yield start_cs
 
+            cnt = 0
             while 1:
+
                 next = start_cs.next()
                 yield next
                 start_cs = next
+                cnt += 1
                 if next == end_cs:
                     break
-
+                if limit and cnt > limit:
+                    break
         #======================================================================
         # REAL CODE BELOW
         #======================================================================
         #get ranges of revisions if preset
         rev_range = revision.split('...')[:2]
-
+        range_limit = 50
         try:
             repo = hg_model.get_repo(c.repo_name)
             if len(rev_range) == 2:
                 rev_start = rev_range[0]
                 rev_end = rev_range[1]
-                rev_ranges = get_cs_range(repo, rev_start, rev_end)
+                rev_ranges = get_cs_range(repo, rev_start, rev_end, range_limit)
             else:
                 rev_ranges = [repo.get_changeset(revision)]
 

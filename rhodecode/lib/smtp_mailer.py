@@ -5,7 +5,7 @@
     
     Simple smtp mailer used in RhodeCode
     
-    :created_on: Sep 13, 2011
+    :created_on: Sep 13, 2010
     :copyright: (c) 2011 by marcink.
     :license: LICENSE_NAME, see LICENSE_FILE for more details.
 """
