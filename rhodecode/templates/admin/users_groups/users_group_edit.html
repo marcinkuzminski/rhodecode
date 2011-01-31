@@ -46,17 +46,21 @@
 	                </div>
 	             </div>
 	            <div class="field">
-                    <div class="label label-checkbox">
+                    <div class="label">
                         <label for="users_group_active">${_('Members')}:</label>
                     </div>
-                    <div class="checkboxes">
+                    <div class="select">
 	                    <table> 
 	                            <tr>
 	                                <td>
 	                                    <div>
 	                                        <div style="float:left">
-	                                        <div class="text">${_('Group members')}</div>
+	                                            <div class="text" style="padding: 0px 0px 6px;">${_('Choosen group members')}</div>
 	                                            ${h.select('users_group_members',[x[0] for x in c.group_members],c.group_members,multiple=True,size=8,style="min-width:210px")}
+	                                           <div  id="remove_all_elements" style="cursor:pointer;text-align:center">
+	                                               ${_('Remove all elements')}
+	                                               <img alt="remove" src="/images/icons/arrow_right.png">
+	                                           </div>
 	                                        </div>
 	                                        <div style="float:left;width:20px;padding-top:50px">
 	                                            <img alt="add" id="add_element" 
@@ -68,8 +72,12 @@
 	                                                src="/images/icons/arrow_right.png">
 	                                        </div>
 	                                        <div style="float:left">
-	                                            <div class="text">${_('Available members')}</div>
+	                                             <div class="text" style="padding: 0px 0px 6px;">${_('Available members')}</div>
 	                                             ${h.select('available_members',[],c.available_members,multiple=True,size=8,style="min-width:210px")}
+	                                             <div id="add_all_elements" style="cursor:pointer;text-align:center">
+	                                                   <img alt="add" src="/images/icons/arrow_left.png">
+	                                                    ${_('Add all elements')}
+	                                             </div>	                                        
 	                                        </div>
 	                                    </div>
 	                                </td>           
@@ -97,7 +105,7 @@ ${h.end_form()}
             //form containing containers id
             var form_id = 'edit_users_group';
             
-            //temp container for storage.
+            //temp container for selected storage.
             var cache = new Array();
             var c =  D.get(selected_container);
             
@@ -120,39 +128,80 @@ ${h.end_form()}
             function prompts_action_callback(e){
                 
                 var choosen = D.get(selected_container);  
-                var availible = D.get(available_container);
-        
-                if (this.id=='add_element'){
-                    for(var i=0; node = availible.options[i];i++){
-                        if(node.selected){
-                            choosen.appendChild(new Option(node.text, node.value, false, false));
-                        }
-                    }
-                }
-                else if (this.id=='remove_element'){
-
+                var available = D.get(available_container);
+                
+                //get checked and unchecked options from field
+                function get_checked(from_field){
                     //temp container for storage.
-                    cache = new Array();
+                    var sel_cache = new Array();
+                    var oth_cache = new Array();
                     
-                    for(var i = 0;node = choosen.options[i];i++){
-                        if(!node.selected){
-                            //push left overs :)
-                            cache.push(node);
-                        }   
-                    }
-                    //clear select
-                    choosen.options.length = 0;
-                    for(var i = 0;node = cache[i];i++){
-                        choosen.options[i]=new Option(node.text, node.value, false, false);
-                    }               
-                }                   
-                else{
+                    for(var i = 0;node = from_field.options[i];i++){
+                        if(node.selected){
+                            //push selected fields :)
+                            sel_cache.push(node);
+                        }
+                        else{
+                        	oth_cache.push(node)
+                        }
+                    }                    
                     
+                    return [sel_cache,oth_cache]
                 }
+                
+                //fill the field with given options
+                function fill_with(field,options){
+                	//clear firtst
+                	field.options.length=0;
+                    for(var i = 0;node = options[i];i++){
+                            field.options[i]=new Option(node.text, node.value, 
+                                    false, false);
+                    }
+                	
+                }
+                //adds to current field
+                function add_to(field,options){
+                    for(var i = 0;node = options[i];i++){
+                            field.appendChild(new Option(node.text, node.value, 
+                                    false, false));
+                    }
+                }
+                
+                // add action
+                if (this.id=='add_element'){
+                    var c = get_checked(available);
+                    add_to(choosen,c[0]);
+                    fill_with(available,c[1]);
+                }
+                // remove action
+                if (this.id=='remove_element'){
+                    var c = get_checked(choosen);
+                    add_to(available,c[0]);
+                    fill_with(choosen,c[1]);             
+                }                   
+                // add all elements
+                if(this.id=='add_all_elements'){
+                    for(var i=0; node = available.options[i];i++){
+                            choosen.appendChild(new Option(node.text, 
+                                    node.value, false, false));
+                    }
+                    available.options.length = 0;
+                }
+                //remove all elements
+                if(this.id=='remove_all_elements'){
+                    for(var i=0; node = choosen.options[i];i++){
+                        available.appendChild(new Option(node.text, 
+                                node.value, false, false));
+                    }
+                    choosen.options.length = 0;                	
+                }
+                
             }
             
     
-            E.addListener(['add_element','remove_element'],'click',prompts_action_callback)
+            E.addListener(['add_element','remove_element',
+                           'add_all_elements','remove_all_elements'],'click',
+                           prompts_action_callback)
 
             E.addListener(form_id,'submit',function(){
                 var choosen = D.get(selected_container);
