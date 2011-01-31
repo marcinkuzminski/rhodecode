@@ -11,9 +11,7 @@
         <meta name="robots" content="index, nofollow"/>
             
         <!-- stylesheets -->
-        <link rel="stylesheet" type="text/css" href="/css/reset.css" />
         <link rel="stylesheet" type="text/css" href="/css/style.css" media="screen" />
-        <link id="color" rel="stylesheet" type="text/css" href="/css/colors/blue.css" />
 	    <style type="text/css">
 	     #main_div{
 	       border: 0px solid #000;
@@ -37,7 +35,7 @@
         <div id="login">
             <div class="table">            
 				<div id="main_div">
-				    <div style="font-size:2.0em;margin: 10px">RhodeCode</div>
+				    <div style="font-size:2.0em;margin: 10px">${c.rhodecode_name}</div>
 					<h1 class="error_message">${c.error_message}</h1>
 					
 					<p>${c.error_explanation}</p>

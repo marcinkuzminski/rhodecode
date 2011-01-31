@@ -29,7 +29,7 @@ import cgi
 import logging
 import paste.fileapp
 
-from pylons import tmpl_context as c, request
+from pylons import tmpl_context as c, request, config
 from pylons.i18n.translation import _
 from pylons.middleware import  media_path
 
@@ -52,6 +52,7 @@ class ErrorController(BaseController):
 
     def document(self):
         resp = request.environ.get('pylons.original_response')
+        c.rhodecode_name = config.get('rhodecode_title')
 
         log.debug('### %s ###', resp.status)
 
