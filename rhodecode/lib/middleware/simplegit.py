@@ -159,7 +159,7 @@ class SimpleGit(object):
                 #==============================================================
 
                 if self.action in ['pull', 'push']  or self.action:
-                    username = self.__get_environ_user(environ)
+                    username = REMOTE_USER(environ)
                     try:
                         user = self.__get_user(username)
                         self.username = user.username
@@ -248,8 +248,6 @@ class SimpleGit(object):
         repo_name = repo_name.split('/')[0]
         return repo_name
 
-    def __get_environ_user(self, environ):
-        return environ.get('REMOTE_USER')
 
     def __get_user(self, username):
         return UserModel().get_by_username(username, cache=True)
