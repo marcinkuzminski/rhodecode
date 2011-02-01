@@ -593,3 +593,13 @@ def safe_unicode(str):
             u_str = unicode(str(str).encode('string_escape'))
 
     return u_str
+
+def changed_tooltip(nodes):
+    if nodes:
+        pref = ': <br/> '
+        suf = ''
+        if len(nodes) > 30:
+            suf = '<br/>' + _(' and %s more') % (len(nodes) - 30)
+        return literal(pref + '<br/> '.join([x.path for x in nodes[:30]]) + suf)
+    else:
+        return ': ' + _('No Files')

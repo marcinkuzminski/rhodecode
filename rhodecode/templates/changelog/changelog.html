@@ -61,23 +61,10 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
 							<div class="message">${h.link_to(h.wrap_paragraphs(cs.message),h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id))}</div>
 						</div>	
 						<div class="right">
-									<div class="changes">
-									
-									   <%
-									       def changed_tooltip(cs):
-                                               if cs:
-                                                   pref = ': '
-                                                   suf = '' 
-                                                   if len(cs) > 30:
-                                                      suf='<br/>'+_(' and %s more') % (len(cs) - 30)
-                                                   return pref+'<br/> '.join([x.path for x in cs[:30]]) + suf
-                                               else:
-                                                   return ': '+_('No Files')
-                                       %>
-									
-										<span class="removed tooltip" title="${_('removed')}${h.literal(changed_tooltip(cs.removed))}">${len(cs.removed)}</span>
-										<span class="changed tooltip" title="${_('changed')}${h.literal(changed_tooltip(cs.changed))}">${len(cs.changed)}</span>
-										<span class="added tooltip" title="${_('added')}${h.literal(changed_tooltip(cs.added))}">${len(cs.added)}</span>
+									<div class="changes">									
+										<span class="removed tooltip" title="<b>${_('removed')}</b>${h.changed_tooltip(cs.removed)}">${len(cs.removed)}</span>
+										<span class="changed tooltip" title="<b>${_('changed')}</b>${h.changed_tooltip(cs.changed)}">${len(cs.changed)}</span>
+										<span class="added tooltip" title="<b>${_('added')}</b>${h.changed_tooltip(cs.added)}">${len(cs.added)}</span>
 									</div>					
 										%if len(cs.parents)>1:
 										<div class="merge">
