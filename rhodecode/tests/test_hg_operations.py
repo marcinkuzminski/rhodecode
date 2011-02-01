@@ -73,7 +73,8 @@ def create_test_user(force=True):
     sa = get_session()
 
     user = sa.query(User).filter(User.username == USER).scalar()
-    if force:
+
+    if force and user:
         sa.delete(user)
         sa.commit()
 
@@ -81,6 +82,9 @@ def create_test_user(force=True):
         new_usr = User()
         new_usr.username = USER
         new_usr.password = get_crypt_password(PASS)
+        new_usr.email = 'mail@mail.com'
+        new_usr.name = 'test'
+        new_usr.lastname = 'lasttestname'
         new_usr.active = True
 
         sa.add(new_usr)
@@ -258,13 +262,14 @@ def test_push_wrong_path():
 
 
 if __name__ == '__main__':
-    create_test_user()
-    #test_clone()
+    #create_test_user()
+    test_clone()
+    test_clone_anonymous_ok()
 
     #test_clone_wrong_credentials()
-    ##test_clone_anonymous_ok()
+
     #test_pull()
-    test_push_new_file(3)
+    #test_push_new_file(3)
     #test_push_wrong_path()
     #test_push_wrong_credentials()
 
