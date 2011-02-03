@@ -48,15 +48,33 @@ log = logging.getLogger(__name__)
 
 class LdapSettingsController(BaseController):
 
+    search_scope_choices = [('BASE',     _('BASE'),),
+                            ('ONELEVEL', _('ONELEVEL'),),
+                            ('SUBTREE',  _('SUBTREE'),),
+                            ]
+    search_scope_default = 'SUBTREE'
+
+    tls_reqcert_choices = [('NEVER',  _('NEVER'),),
+                           ('ALLOW',  _('ALLOW'),),
+                           ('TRY',    _('TRY'),),
+                           ('DEMAND', _('DEMAND'),),
+                           ('HARD',   _('HARD'),),
+                           ]
+    tls_reqcert_default = 'DEMAND'
+
     @LoginRequired()
     @HasPermissionAllDecorator('hg.admin')
     def __before__(self):
         c.admin_user = session.get('admin_user')
         c.admin_username = session.get('admin_username')
+        c.search_scope_choices = self.search_scope_choices
+        c.tls_reqcert_choices  = self.tls_reqcert_choices
         super(LdapSettingsController, self).__before__()
 
     def index(self):
         defaults = SettingsModel().get_ldap_settings()
+        c.search_scope_cur = defaults.get('ldap_search_scope')
+        c.tls_reqcert_cur  = defaults.get('ldap_tls_reqcert')
 
         return htmlfill.render(
                     render('admin/ldap/ldap.html'),
@@ -68,7 +86,8 @@ class LdapSettingsController(BaseController):
         """POST ldap create and store ldap settings"""
 
         settings_model = SettingsModel()
-        _form = LdapSettingsForm()()
+        _form = LdapSettingsForm([x[0] for x in self.tls_reqcert_choices],
+                                 [x[0] for x in self.search_scope_choices])()
 
         try:
             form_result = _form.to_python(dict(request.POST))
@@ -90,6 +109,9 @@ class LdapSettingsController(BaseController):
                       'is missing.'), category='warning')
 
         except formencode.Invalid, errors:
+
+            c.search_scope_cur = self.search_scope_default
+            c.tls_reqcert_cur  = self.search_scope_default
 
             return htmlfill.render(
                 render('admin/ldap/ldap.html'),
