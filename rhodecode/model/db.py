@@ -26,6 +26,7 @@
 # MA  02110-1301, USA.
 import logging
 import datetime
+from datetime import date
 
 from sqlalchemy import *
 from sqlalchemy.exc import DatabaseError
@@ -149,6 +150,10 @@ class UserLog(Base, BaseModel):
     user_ip = Column("user_ip", String(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     action = Column("action", String(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     action_date = Column("action_date", DateTime(timezone=False), nullable=True, unique=None, default=None)
+
+    @property
+    def action_as_day(self):
+        return date(*self.action_date.timetuple()[:3])
 
     user = relationship('User')
     repository = relationship('Repository')

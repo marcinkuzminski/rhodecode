@@ -33,6 +33,7 @@ from pylons import request, response, session, tmpl_context as c, url
 from rhodecode.lib.auth import LoginRequired, NotAnonymous
 from rhodecode.lib.base import BaseController, render
 from rhodecode.lib.helpers import get_token
+from rhodecode.lib.utils import OrderedDict
 from rhodecode.model.db import UserLog, UserFollowing
 from rhodecode.model.scm import ScmModel
 
@@ -59,15 +60,28 @@ class JournalController(BaseController):
         user_ids = [x.follows_user.user_id for x in c.following
                     if x.follows_user is not None]
 
-        c.journal = self.sa.query(UserLog)\
+        journal = self.sa.query(UserLog)\
             .filter(or_(
                         UserLog.repository_id.in_(repo_ids),
                         UserLog.user_id.in_(user_ids),
                         ))\
             .order_by(UserLog.action_date.desc())\
-            .limit(20)\
+            .limit(30)\
             .all()
+
+        c.journal_day_aggreagate = self._get_daily_aggregate(journal)
+
         return render('/journal.html')
+
+
+    def _get_daily_aggregate(self, journal):
+        from itertools import groupby
+        groups = []
+        for k, g in groupby(journal, lambda x:x.action_as_day):
+            groups.append((k, list(g),))      # Store group iterator as a list
+
+        return groups
+
 
     def toggle_following(self):
         cur_token = request.POST.get('auth_token')
