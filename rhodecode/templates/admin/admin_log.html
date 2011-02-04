@@ -45,19 +45,19 @@
 ${c.users_log.pager('$link_previous ~2~ $link_next',
 onclick="""YAHOO.util.Connect.asyncRequest('GET','$partial_url',{
 success:function(o){
-    YUD.get(data_div).innerHTML=o.responseText;
-    YUE.on(YUD.getElementsByClassName('pager_link'),"click",function(){
-        YUD.setStyle(data_div,'opacity','0.3');
-    });		
-    YUE.on(YUD.getElementsByClassName('show_more'),'click',function(e){
-      var el = e.target;
-      YUD.setStyle(YUD.get(el.id.substring(1)),'display','');
-      YUD.setStyle(el.parentNode,'display','none');
-    });
-    YUD.setStyle(data_div,'opacity','1');}    
-
+YUD.get(data_div).innerHTML=o.responseText;
+show_more_event();
+tooltip_activate();    
+YUE.on(YUD.getElementsByClassName('pager_link'),"click",function(){
+      YUD.setStyle(data_div,'opacity','0.3');
+});		
+YUD.setStyle(data_div,'opacity','1');}
 },null); return false;""")}
 </div>
 %else: 
 	${_('No actions yet')} 
 %endif
+
+<script type="text/javascript">
+show_more_event();
+</script>

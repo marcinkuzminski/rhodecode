@@ -20,6 +20,15 @@
 	</div>
 	<!-- end box / title -->
 	<div class="table">
+        <script type="text/javascript">
+        function show_more_event(){
+	        YUE.on(YUD.getElementsByClassName('show_more'),'click',function(e){
+	            var el = e.target;
+	            YUD.setStyle(YUD.get(el.id.substring(1)),'display','');
+	            YUD.setStyle(el.parentNode,'display','none');
+	        });
+        }
+        </script>	
 	    <div id="user_log">
 	        ${c.log_data}
 	    </div>
