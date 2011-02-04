@@ -22,9 +22,9 @@ news
   into clone url
 - fixed #90 whoosh indexer can index chooses repositories passed in command 
   line
-- added dynamic download links in summary. With quick branch/tag selection
+- extended journal with day aggregates and paging
 - implemented #107 customizable code highlights on code sources
-
+- implemented #108 extended and more powerfull LDAP configuration
 fixes
 -----
 

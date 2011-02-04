@@ -49,14 +49,15 @@
   var data_div = 'shortlog_data';
   YAHOO.util.Event.onDOMReady(function(){
     YAHOO.util.Event.addListener(YAHOO.util.Dom.getElementsByClassName('pager_link'),"click",function(){
-            YAHOO.util.Dom.setStyle('shortlog_data','opacity','0.3');});});
+            YAHOO.util.Dom.setStyle(data_div,'opacity','0.3');});});
 </script>
 
 <div class="pagination-wh pagination-left">
 ${c.repo_changesets.pager('$link_previous ~2~ $link_next',     
 onclick="""YAHOO.util.Connect.asyncRequest('GET','$partial_url',{
 success:function(o){YAHOO.util.Dom.get(data_div).innerHTML=o.responseText;
-YAHOO.util.Event.addListener(YAHOO.util.Dom.getElementsByClassName('pager_link'),"click",function(){
+tooltip_activate();
+YUE.on(YAHOO.util.Dom.getElementsByClassName('pager_link'),"click",function(){
         YAHOO.util.Dom.setStyle(data_div,'opacity','0.3');});       
 YAHOO.util.Dom.setStyle(data_div,'opacity','1');}},null); return false;""")}
 </div>

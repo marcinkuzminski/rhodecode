@@ -479,7 +479,7 @@ def action_parser(user_log):
         if len(revs) > revs_limit:
             uniq_id = revs[0]
             html_tmpl = ('<span> %s '
-            '<a class="show_more" id="_%s" href="#">%s</a> '
+            '<a class="show_more" id="_%s" href="#more">%s</a> '
             '%s</span>')
             cs_links += html_tmpl % (_('and'), uniq_id, _('%s more') \
                                         % (len(revs) - revs_limit),

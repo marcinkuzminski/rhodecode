@@ -105,7 +105,12 @@
 		       <p>RhodeCode ${c.rhodecode_version} &copy; 2010 by Marcin Kuzminski</p>
 	       </div>
 	   </div>
-        <script type="text/javascript">${h.tooltip.activate()}</script>
+        <script type="text/javascript">
+        function tooltip_activate(){
+        ${h.tooltip.activate()}
+        }
+        tooltip_activate();
+        </script>
 	</div>
 	<!-- end footer -->
 </body>
