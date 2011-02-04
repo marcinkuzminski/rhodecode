@@ -103,7 +103,7 @@ def authenticate(username, password):
     user = user_model.get_by_username(username, cache=False)
 
     log.debug('Authenticating user using RhodeCode account')
-    if user is not None and user.is_ldap is False:
+    if user is not None and not user.ldap_dn:
         if user.active:
 
             if user.username == 'default' and user.active:
@@ -122,7 +122,7 @@ def authenticate(username, password):
         user_obj = user_model.get_by_username(username, cache=False,
                                             case_insensitive=True)
 
-        if user_obj is not None and user_obj.is_ldap is False:
+        if user_obj is not None and not user_obj.ldap_dn:
             log.debug('this user already exists as non ldap')
             return False
 
@@ -141,15 +141,25 @@ def authenticate(username, password):
                   'bind_dn':ldap_settings.get('ldap_dn_user'),
                   'bind_pass':ldap_settings.get('ldap_dn_pass'),
                   'use_ldaps':ldap_settings.get('ldap_ldaps'),
+                  'tls_reqcert':ldap_settings.get('ldap_tls_reqcert'),
+                  'ldap_filter':ldap_settings.get('ldap_filter'),
+                  'search_scope':ldap_settings.get('ldap_search_scope'),
+                  'attr_login':ldap_settings.get('ldap_attr_login'),
                   'ldap_version':3,
                   }
             log.debug('Checking for ldap authentication')
             try:
                 aldap = AuthLdap(**kwargs)
-                res = aldap.authenticate_ldap(username, password)
-                log.debug('Got ldap response %s', res)
+                (user_dn, ldap_attrs) = aldap.authenticate_ldap(username, password)
+                log.debug('Got ldap DN response %s', user_dn)
 
-                if user_model.create_ldap(username, password):
+                user_attrs = {
+                    'name'     : ldap_attrs[ldap_settings.get('ldap_attr_firstname')][0],
+                    'lastname' : ldap_attrs[ldap_settings.get('ldap_attr_lastname')][0],
+                    'email'    : ldap_attrs[ldap_settings.get('ldap_attr_email')][0],
+                    }
+
+                if user_model.create_ldap(username, password, user_dn, user_attrs):
                     log.info('created new ldap user')
 
                 return True

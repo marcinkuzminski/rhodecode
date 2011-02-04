@@ -36,11 +36,15 @@ except ImportError:
 class AuthLdap(object):
 
     def __init__(self, server, base_dn, port=389, bind_dn='', bind_pass='',
-                 use_ldaps=False, ldap_version=3):
+                 use_ldaps=False, tls_reqcert='DEMAND', ldap_version=3,
+                 ldap_filter='(&(objectClass=user)(!(objectClass=computer)))',
+                 search_scope='SUBTREE',
+                 attr_login='uid'):
         self.ldap_version = ldap_version
         if use_ldaps:
             port = port or 689
         self.LDAP_USE_LDAPS = use_ldaps
+        self.TLS_REQCERT = ldap.__dict__['OPT_X_TLS_' + tls_reqcert]
         self.LDAP_SERVER_ADDRESS = server
         self.LDAP_SERVER_PORT = port
 
@@ -55,6 +59,10 @@ class AuthLdap(object):
                                                self.LDAP_SERVER_PORT)
 
         self.BASE_DN = base_dn
+        self.LDAP_FILTER = ldap_filter
+        self.SEARCH_SCOPE = ldap.__dict__['SCOPE_' + search_scope]
+        self.attr_login = attr_login
+
 
     def authenticate_ldap(self, username, password):
         """Authenticate a user via LDAP and return his/her LDAP properties.
@@ -74,7 +82,13 @@ class AuthLdap(object):
             raise LdapUsernameError("invalid character in username: ,")
         try:
             ldap.set_option(ldap.OPT_X_TLS_CACERTDIR, '/etc/openldap/cacerts')
+            ldap.set_option(ldap.OPT_REFERRALS, ldap.OPT_OFF)
+            ldap.set_option(ldap.OPT_RESTART, ldap.OPT_ON)
+            ldap.set_option(ldap.OPT_TIMEOUT, 20)
             ldap.set_option(ldap.OPT_NETWORK_TIMEOUT, 10)
+            ldap.set_option(ldap.OPT_TIMELIMIT, 15)
+            if self.LDAP_USE_LDAPS:
+                ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, self.TLS_REQCERT)
             server = ldap.initialize(self.LDAP_SERVER)
             if self.ldap_version == 2:
                 server.protocol = ldap.VERSION2
@@ -84,21 +98,29 @@ class AuthLdap(object):
             if self.LDAP_BIND_DN and self.LDAP_BIND_PASS:
                 server.simple_bind_s(self.LDAP_BIND_DN, self.LDAP_BIND_PASS)
 
-            dn = self.BASE_DN % {'user':uid}
-            log.debug("Authenticating %r at %s", dn, self.LDAP_SERVER)
-            server.simple_bind_s(dn, password)
+            filt = '(&%s(%s=%s))' % (self.LDAP_FILTER, self.attr_login, username)
+            log.debug("Authenticating %r filt %s at %s", self.BASE_DN, filt, self.LDAP_SERVER)
+            lobjects = server.search_ext_s(self.BASE_DN, self.SEARCH_SCOPE, filt)
 
-            properties = server.search_s(dn, ldap.SCOPE_SUBTREE)
-            if not properties:
+            if not lobjects:
                 raise ldap.NO_SUCH_OBJECT()
+
+            for (dn, attrs) in lobjects:
+                try:
+                    server.simple_bind_s(dn, password)
+                    break
+
+                except ldap.INVALID_CREDENTIALS, e:
+                    log.debug("LDAP rejected password for user '%s' (%s): %s", uid, username, dn)
+
+                else:
+                    log.debug("No matching LDAP objecs for authentication of '%s' (%s)", uid, username)
+                    raise LdapPasswordError()
+
         except ldap.NO_SUCH_OBJECT, e:
             log.debug("LDAP says no such user '%s' (%s)", uid, username)
             raise LdapUsernameError()
-        except ldap.INVALID_CREDENTIALS, e:
-            log.debug("LDAP rejected password for user '%s' (%s)", uid, username)
-            raise LdapPasswordError()
         except ldap.SERVER_DOWN, e:
             raise LdapConnectionError("LDAP can't access authentication server")
 
-        return properties[0]
-
+        return (dn, attrs)

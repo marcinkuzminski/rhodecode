@@ -75,25 +75,27 @@ class UserModel(BaseModel):
             self.sa.rollback()
             raise
 
-    def create_ldap(self, username, password):
+    def create_ldap(self, username, password, user_dn, attrs):
         """
         Checks if user is in database, if not creates this user marked
         as ldap user
         :param username:
         :param password:
+        :param user_dn:
+        :param attrs:
         """
         from rhodecode.lib.auth import get_crypt_password
         log.debug('Checking for such ldap account in RhodeCode database')
         if self.get_by_username(username, case_insensitive=True) is None:
             try:
                 new_user = User()
-                new_user.username = username.lower()#add ldap account always lowercase
+                new_user.username = username.lower() # add ldap account always lowercase
                 new_user.password = get_crypt_password(password)
-                new_user.email = '%s@ldap.server' % username
+                new_user.email = attrs['email']
                 new_user.active = True
-                new_user.is_ldap = True
-                new_user.name = '%s@ldap' % username
-                new_user.lastname = ''
+                new_user.ldap_dn = user_dn
+                new_user.name = attrs['name']
+                new_user.lastname = attrs['lastname']
 
 
                 self.sa.add(new_user)

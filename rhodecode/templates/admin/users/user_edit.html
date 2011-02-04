@@ -49,6 +49,15 @@
             
              <div class="field">
                 <div class="label">
+                    <label for="ldap_dn">${_('LDAP DN')}:</label>
+                </div>
+                <div class="input">
+                    ${h.text('ldap_dn',class_='small')}
+                </div>
+             </div>
+            
+             <div class="field">
+                <div class="label">
                     <label for="new_password">${_('New password')}:</label>
                 </div>
                 <div class="input">
@@ -231,4 +240,4 @@
         });
 </script>    
 </div>
-</%def>  
+</%def>

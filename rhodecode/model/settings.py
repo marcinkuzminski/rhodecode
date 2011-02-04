@@ -72,10 +72,18 @@ class SettingsModel(BaseModel):
         ldap_host
         ldap_port 
         ldap_ldaps
+        ldap_tls_reqcert
         ldap_dn_user 
         ldap_dn_pass 
         ldap_base_dn
+        ldap_filter
+        ldap_search_scope
+        ldap_attr_login
+        ldap_attr_firstname
+        ldap_attr_lastname
+        ldap_attr_email
         """
+        # ldap_search_scope
 
         r = self.sa.query(RhodeCodeSettings)\
                 .filter(RhodeCodeSettings.app_settings_name\

@@ -127,7 +127,7 @@ Setting up LDAP support
 -----------------------
 
 RhodeCode starting from version 1.1 supports ldap authentication. In order
-to use ldap, You have to install python-ldap package. This package is available
+to use LDAP, You have to install python-ldap_ package. This package is available
 via pypi, so You can install it by running
 
 ::
@@ -142,39 +142,181 @@ via pypi, so You can install it by running
    python-ldap requires some certain libs on Your system, so before installing 
    it check that You have at least `openldap`, and `sasl` libraries.
 
-ldap settings are located in admin->ldap section,
+LDAP settings are located in admin->ldap section,
 
-Here's a typical ldap setup::
+This is a typical LDAP setup::
 
- Enable ldap  = checked                 #controls if ldap access is enabled
- Host         = host.domain.org         #actual ldap server to connect
- Port         = 389 or 689 for ldaps    #ldap server ports
- Enable LDAPS = unchecked               #enable disable ldaps
- Account      = <account>               #access for ldap server(if required)
- Password     = <password>              #password for ldap server(if required)
- Base DN      = uid=%(user)s,CN=users,DC=host,DC=domain,DC=org
- 
+ Connection settings
+ Enable LDAP          = checked
+ Host                 = host.example.org
+ Port                 = 389
+ Account              = <account>
+ Password             = <password>
+ Enable LDAPS         = checked
+ Certificate Checks   = DEMAND
 
-`Account` and `Password` are optional, and used for two-phase ldap 
-authentication so those are credentials to access Your ldap, if it doesn't 
-support anonymous search/user lookups. 
+ Search settings
+ Base DN              = CN=users,DC=host,DC=example,DC=org
+ LDAP Filter          = (&(objectClass=user)(!(objectClass=computer)))
+ LDAP Search Scope    = SUBTREE
 
-Base DN must have %(user)s template inside, it's a placer where Your uid used
-to login would go, it allows admins to specify not standard schema for uid 
-variable
+ Attribute mappings
+ Login Attribute      = uid
+ First Name Attribute = firstName
+ Last Name Attribute  = lastName
+ E-mail Attribute     = mail
 
-If all data are entered correctly, and `python-ldap` is properly installed
-Users should be granted to access RhodeCode wit ldap accounts. When 
-logging at the first time an special ldap account is created inside RhodeCode, 
-so You can control over permissions even on ldap users. If such user exists 
-already in RhodeCode database ldap user with the same username would be not 
-able to access RhodeCode.
+.. _enable_ldap:
 
-If You have problems with ldap access and believe You entered correct 
-information check out the RhodeCode logs,any error messages sent from 
-ldap will be saved there.
+Enable LDAP : required
+    Whether to use LDAP for authenticating users.
 
+.. _ldap_host:
 
+Host : required
+    LDAP server hostname or IP address.
+
+.. _Port:
+
+Port : required
+    389 for un-encrypted LDAP, 636 for SSL-encrypted LDAP.
+
+.. _ldap_account:
+
+Account : optional
+    Only required if the LDAP server does not allow anonymous browsing of
+    records.  This should be a special account for record browsing.  This
+    will require `LDAP Password`_ below.
+
+.. _LDAP Password:
+
+Password : optional
+    Only required if the LDAP server does not allow anonymous browsing of
+    records.
+
+.. _Enable LDAPS:
+
+Enable LDAPS : optional
+    Check this if SSL encryption is necessary for communication with the
+    LDAP server - it will likely require `Port`_ to be set to a different
+    value (standard LDAPS port is 636).  When LDAPS is enabled then
+    `Certificate Checks`_ is required.
+
+.. _Certificate Checks:
+
+Certificate Checks : optional
+    How SSL certificates verification is handled - this is only useful when
+    `Enable LDAPS`_ is enabled.  Only DEMAND or HARD offer full SSL security while
+    the other options are susceptible to man-in-the-middle attacks.  SSL
+    certificates can be installed to /etc/openldap/cacerts so that the
+    DEMAND or HARD options can be used with self-signed certificates or
+    certificates that do not have traceable certificates of authority.
+
+    NEVER
+        A serve certificate will never be requested or checked.
+
+    ALLOW
+        A server certificate is requested.  Failure to provide a
+        certificate or providing a bad certificate will not terminate the
+        session.
+
+    TRY
+        A server certificate is requested.  Failure to provide a
+        certificate does not halt the session; providing a bad certificate
+        halts the session.
+
+    DEMAND
+        A server certificate is requested and must be provided and
+        authenticated for the session to proceed.
+
+    HARD
+        The same as DEMAND.
+
+.. _Base DN:
+
+Base DN : required
+    The Distinguished Name (DN) where searches for users will be performed.
+    Searches can be controlled by `LDAP Filter`_ and `LDAP Search Scope`_.
+
+.. _LDAP Filter:
+
+LDAP Filter : optional
+    A LDAP filter defined by RFC 2254.  This is more useful when `LDAP
+    Search Scope`_ is set to SUBTREE.  The filter is useful for limiting
+    which LDAP objects are identified as representing Users for
+    authentication.  The filter is augmented by `Login Attribute`_ below.
+    This can commonly be left blank.
+
+.. _LDAP Search Scope:
+
+LDAP Search Scope : required
+    This limits how far LDAP will search for a matching object.
+
+    BASE
+        Only allows searching of `Base DN`_ and is usually not what you
+        want.
+
+    ONELEVEL
+        Searches all entries under `Base DN`_, but not Base DN itself.
+
+    SUBTREE
+        Searches all entries below `Base DN`_, but not Base DN itself.
+        When using SUBTREE `LDAP Filter`_ is useful to limit object
+        location.
+
+.. _Login Attribute:
+
+Login Attribute : required        
+    The LDAP record attribute that will be matched as the USERNAME or
+    ACCOUNT used to connect to RhodeCode.  This will be added to `LDAP
+    Filter`_ for locating the User object.  If `LDAP Filter`_ is specified as
+    "LDAPFILTER", `Login Attribute`_ is specified as "uid" and the user has
+    connected as "jsmith" then the `LDAP Filter`_ will be augmented as below
+    ::
+
+        (&(LDAPFILTER)(uid=jsmith))
+
+.. _ldap_attr_firstname:
+
+First Name Attribute : required
+    The LDAP record attribute which represents the user's first name.
+
+.. _ldap_attr_lastname:
+
+Last Name Attribute : required
+    The LDAP record attribute which represents the user's last name.
+
+.. _ldap_attr_email:
+
+Email Attribute : required
+    The LDAP record attribute which represents the user's email address.
+
+If all data are entered correctly, and python-ldap_ is properly installed
+users should be granted access to RhodeCode with ldap accounts.  At this
+time user information is copied from LDAP into the RhodeCode user database.
+This means that updates of an LDAP user object may not be reflected as a
+user update in RhodeCode.
+
+If You have problems with LDAP access and believe You entered correct
+information check out the RhodeCode logs, any error messages sent from LDAP
+will be saved there.
+
+Active Directory
+''''''''''''''''
+
+RhodeCode can use Microsoft Active Directory for user authentication.  This
+is done through an LDAP or LDAPS connection to Active Directory.  The
+following LDAP configuration settings are typical for using Active
+Directory ::
+
+ Base DN              = OU=SBSUsers,OU=Users,OU=MyBusiness,DC=v3sys,DC=local
+ Login Attribute      = sAMAccountName
+ First Name Attribute = givenName
+ Last Name Attribute  = sn
+ E-mail Attribute     = mail
+
+All other LDAP settings will likely be site-specific and should be
+appropriately configured.
 
 Setting Up Celery
 -----------------
@@ -327,3 +469,4 @@ Troubleshooting
 .. _mercurial: http://mercurial.selenic.com/
 .. _celery: http://celeryproject.org/
 .. _rabbitmq: http://www.rabbitmq.com/
+.. _python-ldap: http://www.python-ldap.org/

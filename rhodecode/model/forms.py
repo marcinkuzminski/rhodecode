@@ -334,23 +334,14 @@ class LdapLibValidator(formencode.validators.FancyValidator):
             raise LdapImportError
         return value
 
-class BaseDnValidator(formencode.validators.FancyValidator):
+class AttrLoginValidator(formencode.validators.FancyValidator):
 
     def to_python(self, value, state):
 
-        try:
-            value % {'user':'valid'}
-
-            if value.find('%(user)s') == -1:
-                raise formencode.Invalid(_("You need to specify %(user)s in "
-                                           "template for example uid=%(user)s "
-                                           ",dc=company...") ,
-                                         value, state)
-
-        except KeyError:
-            raise formencode.Invalid(_("Wrong template used, only %(user)s "
-                                       "is an valid entry") ,
-                                         value, state)
+        if not value or not isinstance(value, (str, unicode)):
+            raise formencode.Invalid(_("The LDAP Login attribute of the CN must be specified "
+                                       "- this is the name of the attribute that is equivalent to 'username'"),
+                                     value, state)
 
         return value
 
@@ -521,7 +512,7 @@ def DefaultPermissionsForm(perms_choices, register_choices, create_choices):
     return _DefaultPermissionsForm
 
 
-def LdapSettingsForm():
+def LdapSettingsForm(tls_reqcert_choices, search_scope_choices):
     class _LdapSettingsForm(formencode.Schema):
         allow_extra_fields = True
         filter_extra_fields = True
@@ -530,8 +521,15 @@ def LdapSettingsForm():
         ldap_host = UnicodeString(strip=True,)
         ldap_port = Number(strip=True,)
         ldap_ldaps = StringBoolean(if_missing=False)
+        ldap_tls_reqcert = OneOf(tls_reqcert_choices)
         ldap_dn_user = UnicodeString(strip=True,)
         ldap_dn_pass = UnicodeString(strip=True,)
-        ldap_base_dn = All(BaseDnValidator, UnicodeString(strip=True,))
+        ldap_base_dn = UnicodeString(strip=True,)
+        ldap_filter = UnicodeString(strip=True,)
+        ldap_search_scope = OneOf(search_scope_choices)
+        ldap_attr_login = All(AttrLoginValidator, UnicodeString(strip=True,))
+        ldap_attr_firstname = UnicodeString(strip=True,)
+        ldap_attr_lastname = UnicodeString(strip=True,)
+        ldap_attr_email = UnicodeString(strip=True,)
 
     return _LdapSettingsForm
