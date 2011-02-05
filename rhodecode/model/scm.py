@@ -319,7 +319,7 @@ class ScmModel(BaseModel):
             self.sa.rollback()
             raise
 
-    def is_following_repo(self, repo_name, user_id):
+    def is_following_repo(self, repo_name, user_id, cache=False):
         r = self.sa.query(Repository)\
             .filter(Repository.repo_name == repo_name).scalar()
 
@@ -329,7 +329,7 @@ class ScmModel(BaseModel):
 
         return f is not None
 
-    def is_following_user(self, username, user_id):
+    def is_following_user(self, username, user_id, cache=False):
         u = UserModel(self.sa).get_by_username(username)
 
         f = self.sa.query(UserFollowing)\

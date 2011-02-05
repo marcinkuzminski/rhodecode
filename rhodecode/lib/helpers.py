@@ -387,6 +387,10 @@ def get_changeset_safe(repo, rev):
     return cs
 
 
+def is_following_repo(repo_name, user_id):
+    from rhodecode.model.scm import ScmModel
+    return ScmModel().is_following_repo(repo_name, user_id)
+
 flash = _Flash()
 
 

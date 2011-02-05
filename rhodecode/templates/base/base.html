@@ -348,9 +348,9 @@ var YUC = YAHOO.util.Connect;
 var YUD = YAHOO.util.Dom;
 var YUE = YAHOO.util.Event;
 
-function onSuccess(){
+function onSuccess(target){
 	
-	var f = YUD.get('follow_toggle');
+	var f = YUD.get(target.id);
     if(f.getAttribute('class')=='follow'){
         f.setAttribute('class','following');
         f.setAttribute('title',"${_('Stop following this repository')}");
@@ -371,12 +371,13 @@ function toggleFollowingUser(fallows_user_id,token){
     },args); return false;
 }
 
-function toggleFollowingRepo(fallows_repo_id,token){
+function toggleFollowingRepo(target,fallows_repo_id,token){
+
     args = 'follows_repo_id='+fallows_repo_id;
     args+= '&amp;auth_token='+token;
     YUC.asyncRequest('POST',base_url,{
         success:function(o){
-        	onSuccess();
+        	onSuccess(target);
         }
     },args); return false;
 }    

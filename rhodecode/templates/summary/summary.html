@@ -47,11 +47,11 @@
 			      %if c.rhodecode_user.username != 'default':
 				      %if c.following:
 	                  <span id="follow_toggle" class="following" title="${_('Stop following this repository')}"
-	                        onclick="javascript:toggleFollowingRepo(${c.repo_info.dbrepo.repo_id},'${str(h.get_token())}')">
+	                        onclick="javascript:toggleFollowingRepo(this,${c.repo_info.dbrepo.repo_id},'${str(h.get_token())}')">
 	                  </span>			      
 				      %else:
 				      <span id="follow_toggle" class="follow" title="${_('Start following this repository')}"
-				            onclick="javascript:toggleFollowingRepo(${c.repo_info.dbrepo.repo_id},'${str(h.get_token())}')">
+				            onclick="javascript:toggleFollowingRepo(this,${c.repo_info.dbrepo.repo_id},'${str(h.get_token())}')">
 				      </span>
 				      %endif
 				  %endif:
