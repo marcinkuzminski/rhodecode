@@ -43,7 +43,12 @@
 		            %endif
 		            
 		            %if entry.follows_repo_id:
-		            
+		              
+		              <div style="float:left;padding-right:5px">
+                      <span id="follow_toggle_${entry.follows_repository.repo_id}" class="following" title="${_('Stop following this repository')}"
+                            onclick="javascript:toggleFollowingRepo(this,${entry.follows_repository.repo_id},'${str(h.get_token())}')">
+                      </span>		            
+		              </div>
 		              %if entry.follows_repository.private:
 		                <img class="icon" title="${_('private repository')}" alt="${_('private repository')}" src="/images/icons/lock.png"/>
 		              %else:

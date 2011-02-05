@@ -313,7 +313,7 @@ class UserFollowing(Base, BaseModel):
     user = relationship('User', primaryjoin='User.user_id==UserFollowing.user_id')
 
     follows_user = relationship('User', primaryjoin='User.user_id==UserFollowing.follows_user_id')
-    follows_repository = relationship('Repository')
+    follows_repository = relationship('Repository', order_by='Repository.repo_name')
 
 class CacheInvalidation(Base, BaseModel):
     __tablename__ = 'cache_invalidation'

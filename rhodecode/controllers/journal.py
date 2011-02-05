@@ -39,6 +39,7 @@ from rhodecode.model.db import UserLog, UserFollowing
 from rhodecode.model.scm import ScmModel
 
 from paste.httpexceptions import HTTPInternalServerError
+from sqlalchemy.orm import joinedload
 
 log = logging.getLogger(__name__)
 
@@ -54,7 +55,9 @@ class JournalController(BaseController):
         # Return a rendered template
 
         c.following = self.sa.query(UserFollowing)\
-            .filter(UserFollowing.user_id == c.rhodecode_user.user_id).all()
+            .filter(UserFollowing.user_id == c.rhodecode_user.user_id)\
+            .options(joinedload(UserFollowing.follows_repository))\
+            .all()
 
         repo_ids = [x.follows_repository.repo_id for x in c.following
                     if x.follows_repository is not None]
