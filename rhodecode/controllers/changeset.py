@@ -66,36 +66,6 @@ class ChangesetController(BaseController):
                         </tr>
                       </table>''' % str
 
-        def get_cs_range(repo, rev_start, rev_end, limit=None):
-            """
-            Temp fix function until VCS will handle that
-            see issue #48
-            :param rev_start:
-            :param rev_end:
-            """
-
-            start_cs = repo.get_changeset(rev_start)
-            end_cs = repo.get_changeset(rev_end)
-
-            if start_cs.revision >= end_cs.revision:
-                raise Exception('Start revision cannot be after End')
-
-            yield start_cs
-
-            cnt = 0
-            while 1:
-
-                next = start_cs.next()
-                yield next
-                start_cs = next
-                cnt += 1
-                if next == end_cs:
-                    break
-                if limit and cnt > limit:
-                    break
-        #======================================================================
-        # REAL CODE BELOW
-        #======================================================================
         #get ranges of revisions if preset
         rev_range = revision.split('...')[:2]
         range_limit = 50
@@ -104,7 +74,8 @@ class ChangesetController(BaseController):
             if len(rev_range) == 2:
                 rev_start = rev_range[0]
                 rev_end = rev_range[1]
-                rev_ranges = get_cs_range(repo, rev_start, rev_end, range_limit)
+                rev_ranges = repo.get_changeset_ranges(rev_start, rev_end,
+                                                       range_limit)
             else:
                 rev_ranges = [repo.get_changeset(revision)]
 
