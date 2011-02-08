@@ -40,7 +40,6 @@ from rhodecode.lib.pidlock import DaemonLock, LockHeld
 
 from celery.messaging import establish_connection
 from pylons import  config
-from rhodecode.lib import celerypylons
 
 log = logging.getLogger(__name__)
 
