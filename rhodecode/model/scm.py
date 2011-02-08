@@ -153,6 +153,7 @@ class ScmModel(BaseModel):
                 tmp_d['rev'] = tip.revision
                 tmp_d['contact'] = repo.dbrepo.user.full_contact
                 tmp_d['contact_sort'] = tmp_d['contact']
+                tmp_d['owner_sort'] = tmp_d['contact']
                 tmp_d['repo_archives'] = list(repo._get_archives())
                 tmp_d['last_msg'] = tip.message
                 tmp_d['repo'] = repo

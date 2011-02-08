@@ -43,7 +43,7 @@ class HomeController(BaseController):
         super(HomeController, self).__before__()
 
     def index(self):
-        sortables = ['name', 'description', 'last_change', 'tip', 'contact']
+        sortables = ['name', 'description', 'last_change', 'tip', 'owner']
         current_sort = request.GET.get('sort', 'name')
         current_sort_slug = current_sort.replace('-', '')
 
