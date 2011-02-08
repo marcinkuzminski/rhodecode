@@ -606,7 +606,6 @@ class BasePasterCommand(Command):
         :param log: logging instance, to use to additionally log this message
         
         """
-        print msg
         if log and isinstance(log, logging):
             log(msg)
 
