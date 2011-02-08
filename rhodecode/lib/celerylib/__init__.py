@@ -40,6 +40,7 @@ from rhodecode.lib.pidlock import DaemonLock, LockHeld
 
 from celery.messaging import establish_connection
 from pylons import  config
+from rhodecode.lib import celerypylons
 
 log = logging.getLogger(__name__)
 
@@ -59,17 +60,7 @@ class ResultWrapper(object):
 def run_task(task, *args, **kwargs):
     if CELERY_ON:
         try:
-            kw = {
-                'hostname':config['app_conf'].get('broker.host'),
-                'userid':config['app_conf'].get('broker.user'),
-                'password':config['app_conf'].get('broker.password'),
-                'virtual_host':config['app_conf'].get('broker.vhost'),
-                'port':config['app_conf'].get('broker.port'),
-            }
-            conn = establish_connection(**kw)
-            publisher = task.get_publisher(connection=conn)
-            t = task.apply_async(args=args, kwargs=kwargs, publisher=publisher)
-
+            t = task.apply_async(args=args, kwargs=kwargs)
             log.info('running task %s:%s', t.task_id, task)
             return t
         except socket.error, e:
