@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
     rhodecode.lib.celerylib.tasks
-    ~~~~~~~~~~~~~~
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     RhodeCode task modules, containing all task that suppose to be run
     by celery daemon
@@ -29,6 +29,8 @@ from celery.decorators import task
 
 import os
 import traceback
+import logging
+
 from time import mktime
 from operator import itemgetter
 
@@ -72,21 +74,25 @@ def get_repos_path():
     q = sa.query(RhodeCodeUi).filter(RhodeCodeUi.ui_key == '/').one()
     return q.ui_value
 
-@task
+@task(ignore_result=True)
 @locked_task
 def whoosh_index(repo_location, full_index):
-    log = whoosh_index.get_logger()
+    #log = whoosh_index.get_logger()
     from rhodecode.lib.indexers.daemon import WhooshIndexingDaemon
     index_location = config['index_dir']
     WhooshIndexingDaemon(index_location=index_location,
                          repo_location=repo_location, sa=get_session())\
                          .run(full_index=full_index)
 
-@task
+@task(ignore_result=True)
 @locked_task
 def get_commits_stats(repo_name, ts_min_y, ts_max_y):
+    try:
+        log = get_commits_stats.get_logger()
+    except:
+        log = logging.getLogger(__name__)
+
     from rhodecode.model.db import Statistics, Repository
-    log = get_commits_stats.get_logger()
 
     #for js data compatibilty
     author_key_cleaner = lambda k: person(k).replace('"', "")
@@ -218,9 +224,13 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
 
     return True
 
-@task
+@task(ignore_result=True)
 def reset_user_password(user_email):
-    log = reset_user_password.get_logger()
+    try:
+        log = reset_user_password.get_logger()
+    except:
+        log = logging.getLogger(__name__)
+
     from rhodecode.lib import auth
     from rhodecode.model.db import User
 
@@ -254,7 +264,7 @@ def reset_user_password(user_email):
 
     return True
 
-@task
+@task(ignore_result=True)
 def send_email(recipients, subject, body):
     """
     Sends an email with defined parameters from the .ini files.
@@ -265,7 +275,11 @@ def send_email(recipients, subject, body):
     :param subject: subject of the mail
     :param body: body of the mail
     """
-    log = send_email.get_logger()
+    try:
+        log = send_email.get_logger()
+    except:
+        log = logging.getLogger(__name__)
+
     email_config = config
 
     if not recipients:
@@ -289,11 +303,16 @@ def send_email(recipients, subject, body):
         return False
     return True
 
-@task
+@task(ignore_result=True)
 def create_repo_fork(form_data, cur_user):
+    try:
+        log = create_repo_fork.get_logger()
+    except:
+        log = logging.getLogger(__name__)
+
     from rhodecode.model.repo import RepoModel
     from vcs import get_backend
-    log = create_repo_fork.get_logger()
+
     repo_model = RepoModel(get_session())
     repo_model.create(form_data, cur_user, just_db=True, fork=True)
     repo_name = form_data['repo_name']

@@ -12,7 +12,7 @@ requirements = [
         "pygments>=1.4",
         "mercurial>=1.7.3",
         "whoosh>=1.3.4",
-        "celery>=2.1.4",
+        "celery>=2.2.2",
         "py-bcrypt",
         "babel",
     ]
