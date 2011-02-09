@@ -41,6 +41,7 @@ from rhodecode.lib.base import BaseController, render
 from rhodecode.lib.utils import invalidate_cache, action_logger
 from rhodecode.model.forms import RepoSettingsForm, RepoForkForm
 from rhodecode.model.repo import RepoModel
+from rhodecode.model.db import User
 
 log = logging.getLogger(__name__)
 
@@ -62,12 +63,28 @@ class SettingsController(BaseController):
                       category='error')
 
             return redirect(url('home'))
-        defaults = c.repo_info.get_dict()
-        defaults.update({'user':c.repo_info.user.username})
-        c.users_array = repo_model.get_users_js()
 
+        c.users_array = repo_model.get_users_js()
+        c.users_groups_array = repo_model.get_users_groups_js()
+
+        defaults = c.repo_info.get_dict()
+
+        #fill owner
+        if c.repo_info.user:
+            defaults.update({'user':c.repo_info.user.username})
+        else:
+            replacement_user = self.sa.query(User)\
+            .filter(User.admin == True).first().username
+            defaults.update({'user':replacement_user})
+
+        #fill repository users
         for p in c.repo_info.repo_to_perm:
-            defaults.update({'perm_%s' % p.user.username:
+            defaults.update({'u_perm_%s' % p.user.username:
+                             p.permission.permission_name})
+
+        #fill repository groups
+        for p in c.repo_info.users_group_to_perm:
+            defaults.update({'g_perm_%s' % p.users_group.users_group_name:
                              p.permission.permission_name})
 
         return htmlfill.render(

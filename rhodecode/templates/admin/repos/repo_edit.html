@@ -93,76 +93,8 @@
                     <label for="input">${_('Permissions')}:</label>
                 </div>
                 <div class="input">
-                    <table id="permissions_manage">
-                        <tr>
-                            <td>${_('none')}</td>
-                            <td>${_('read')}</td>
-                            <td>${_('write')}</td>
-                            <td>${_('admin')}</td>
-                            <td>${_('member')}</td>
-                            <td></td>
-                        </tr>
-                        
-                        %for r2p in c.repo_info.repo_to_perm:
-                            %if r2p.user.username =='default' and c.repo_info.private:
-                                <tr>
-                                    <td colspan="4">
-                                        <span class="private_repo_msg">
-                                        ${_('private repository')}
-                                        </span>
-                                    </td>
-                                    <td class="private_repo_msg">${r2p.user.username}</td>
-                                </tr>
-                            %else:
-                            <tr id="id${id(r2p.user.username)}">
-                                <td>${h.radio('perm_%s' % r2p.user.username,'repository.none')}</td>
-                                <td>${h.radio('perm_%s' % r2p.user.username,'repository.read')}</td>
-                                <td>${h.radio('perm_%s' % r2p.user.username,'repository.write')}</td>
-                                <td>${h.radio('perm_%s' % r2p.user.username,'repository.admin')}</td>
-                                <td>${r2p.user.username}</td>
-                                <td>
-                                  %if r2p.user.username !='default':
-                                    <span class="delete_icon action_button" onclick="ajaxAction(${r2p.user.user_id},'${'id%s'%id(r2p.user.username)}')">
-                                        <script type="text/javascript">
-                                            function ajaxAction(user_id,field_id){
-                                                var sUrl = "${h.url('delete_repo_user',repo_name=c.repo_name)}";
-                                                var callback = { success:function(o){
-                                                var tr = YAHOO.util.Dom.get(String(field_id));
-                                                tr.parentNode.removeChild(tr);},failure:function(o){
-                                                    alert("${_('Failed to remove user')}");},};
-                                                var postData = '_method=delete&user_id='+user_id; 
-                                                var request = YAHOO.util.Connect.asyncRequest('POST', sUrl, callback, postData);};
-                                        </script>           
-                                    </span>
-                                  %endif                    
-                                </td>
-                            </tr>
-                            %endif
-                        %endfor
-
-                        <tr id="add_perm_input">
-                            <td>${h.radio('perm_new_member','repository.none')}</td>
-                            <td>${h.radio('perm_new_member','repository.read')}</td>
-                            <td>${h.radio('perm_new_member','repository.write')}</td>
-                            <td>${h.radio('perm_new_member','repository.admin')}</td>
-                            <td class='ac'>
-                                <div class="perm_ac" id="perm_ac">
-                                    ${h.text('perm_new_member_name',class_='yui-ac-input')}
-                                    ${h.hidden('perm_new_member_type')}
-                                    <div id="perm_container"></div>
-                                </div>
-                            </td>
-                            <td></td>
-                        </tr>
-                        <tr>
-                            <td colspan="6">
-                                <span id="add_perm" class="add_icon" style="cursor: pointer;">
-                                ${_('Add another member')}
-                                </span>
-                            </td>
-                        </tr>
-                    </table>             
-             </div>
+                    <%include file="repo_edit_perms.html"/>
+                </div>
              
             <div class="buttons">
               ${h.submit('save','Save',class_="ui-button")}

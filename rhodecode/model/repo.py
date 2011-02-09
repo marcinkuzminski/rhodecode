@@ -255,6 +255,19 @@ class RepoModel(BaseModel):
             self.sa.rollback()
             raise
 
+    def delete_perm_users_group(self, form_data, repo_name):
+        try:
+            self.sa.query(UsersGroupToPerm)\
+                .filter(UsersGroupToPerm.repository \
+                        == self.get_by_repo_name(repo_name))\
+                .filter(UsersGroupToPerm.users_group_id \
+                        == form_data['users_group_id']).delete()
+            self.sa.commit()
+        except:
+            log.error(traceback.format_exc())
+            self.sa.rollback()
+            raise
+
     def delete_stats(self, repo_name):
         try:
             self.sa.query(Statistics)\

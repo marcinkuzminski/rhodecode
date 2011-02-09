@@ -73,6 +73,11 @@ def make_map(config):
         m.connect('delete_repo_user', "/repos_delete_user/{repo_name:.*}",
              action="delete_perm_user", conditions=dict(method=["DELETE"],
                                                         function=check_repo))
+        #ajax delete repo perm users_group
+        m.connect('delete_repo_users_group', "/repos_delete_users_group/{repo_name:.*}",
+             action="delete_perm_users_group", conditions=dict(method=["DELETE"],
+                                                        function=check_repo))
+
         #settings actions
         m.connect('repo_stats', "/repos_stats/{repo_name:.*}",
              action="repo_stats", conditions=dict(method=["DELETE"],

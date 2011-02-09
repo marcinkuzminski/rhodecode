@@ -215,8 +215,8 @@ class ReposController(BaseController):
 
     @HasPermissionAllDecorator('hg.admin')
     def delete_perm_user(self, repo_name):
-        """
-        DELETE an existing repository permission user
+        """DELETE an existing repository permission user
+        
         :param repo_name:
         """
 
@@ -229,9 +229,24 @@ class ReposController(BaseController):
             raise HTTPInternalServerError()
 
     @HasPermissionAllDecorator('hg.admin')
-    def repo_stats(self, repo_name):
+    def delete_perm_users_group(self, repo_name):
+        """DELETE an existing repository permission users group
+        
+        :param repo_name:
         """
-        DELETE an existing repository statistics
+        try:
+            repo_model = RepoModel()
+            repo_model.delete_perm_users_group(request.POST, repo_name)
+        except Exception, e:
+            h.flash(_('An error occurred during deletion of repository'
+                      ' users groups'),
+                    category='error')
+            raise HTTPInternalServerError()
+
+    @HasPermissionAllDecorator('hg.admin')
+    def repo_stats(self, repo_name):
+        """DELETE an existing repository statistics
+        
         :param repo_name:
         """
 
@@ -245,8 +260,8 @@ class ReposController(BaseController):
 
     @HasPermissionAllDecorator('hg.admin')
     def repo_cache(self, repo_name):
-        """
-        INVALIDATE existing repository cache
+        """INVALIDATE existing repository cache
+        
         :param repo_name:
         """
 
@@ -267,8 +282,9 @@ class ReposController(BaseController):
         """GET /repos/repo_name/edit: Form to edit an existing item"""
         # url('edit_repo', repo_name=ID)
         repo_model = RepoModel()
-        r = ScmModel().get(repo_name)
         c.repo_info = repo_model.get_by_repo_name(repo_name)
+
+        r = ScmModel().get(repo_name)
 
         if c.repo_info is None:
             h.flash(_('%s repository is not mapped to db perhaps'
@@ -293,7 +309,12 @@ class ReposController(BaseController):
             c.stats_percentage = '%.2f' % ((float((last_rev)) /
                                             c.repo_last_rev) * 100)
 
+        c.users_array = repo_model.get_users_js()
+        c.users_groups_array = repo_model.get_users_groups_js()
+
         defaults = c.repo_info.get_dict()
+
+        #fill owner
         if c.repo_info.user:
             defaults.update({'user':c.repo_info.user.username})
         else:
@@ -301,11 +322,15 @@ class ReposController(BaseController):
             .filter(User.admin == True).first().username
             defaults.update({'user':replacement_user})
 
-        c.users_array = repo_model.get_users_js()
-        c.users_groups_array = repo_model.get_users_groups_js()
 
+        #fill repository users
         for p in c.repo_info.repo_to_perm:
-            defaults.update({'perm_%s' % p.user.username:
+            defaults.update({'u_perm_%s' % p.user.username:
+                             p.permission.permission_name})
+
+        #fill repository groups
+        for p in c.repo_info.users_group_to_perm:
+            defaults.update({'g_perm_%s' % p.users_group.users_group_name:
                              p.permission.permission_name})
 
         return htmlfill.render(

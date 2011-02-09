@@ -246,24 +246,25 @@ class ValidPerms(formencode.validators.FancyValidator):
         perms_new = []
         #build a list of permission to update and new permission to create
         for k, v in value.items():
-            if k.startswith('perm_'):
-                if k.startswith('perm_new_member'):
-                    #means new added member to permissions
-                    new_perm = value.get('perm_new_member', False)
-                    new_member = value.get('perm_new_member_name', False)
-                    new_type = value.get('perm_new_member_type')
+            #means new added member to permissions
+            if k.startswith('perm_new_member'):
+                new_perm = value.get('perm_new_member', False)
+                new_member = value.get('perm_new_member_name', False)
+                new_type = value.get('perm_new_member_type')
 
-                    if new_member and new_perm:
-                        if (new_member, new_perm, new_type) not in perms_new:
-                            perms_new.append((new_member, new_perm, new_type))
-                else:
-                    usr = k[5:]
-                    t = 'user'
-                    if usr == 'default':
-                        if value['private']:
-                            #set none for default when updating to private repo
-                            v = 'repository.none'
-                    perms_update.append((usr, v, t))
+                if new_member and new_perm:
+                    if (new_member, new_perm, new_type) not in perms_new:
+                        perms_new.append((new_member, new_perm, new_type))
+            elif k.startswith('u_perm_') or k.startswith('g_perm_'):
+                member = k[7:]
+                t = {'u':'user',
+                     'g':'users_group'}[k[0]]
+                if member == 'default':
+                    if value['private']:
+                        #set none for default when updating to private repo
+                        v = 'repository.none'
+                perms_update.append((member, v, t))
+
         value['perms_updates'] = perms_update
         value['perms_new'] = perms_new
 
@@ -352,8 +353,10 @@ class AttrLoginValidator(formencode.validators.FancyValidator):
     def to_python(self, value, state):
 
         if not value or not isinstance(value, (str, unicode)):
-            raise formencode.Invalid(_("The LDAP Login attribute of the CN must be specified "
-                                       "- this is the name of the attribute that is equivalent to 'username'"),
+            raise formencode.Invalid(_("The LDAP Login attribute of the CN "
+                                       "must be specified - this is the name "
+                                       "of the attribute that is equivalent "
+                                       "to 'username'"),
                                      value, state)
 
         return value
