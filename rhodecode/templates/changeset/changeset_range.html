@@ -27,6 +27,7 @@
 			<div class="code-header">
 				<div>
 				${_('Changesets')} - r${c.cs_ranges[0].revision}:${h.short_id(c.cs_ranges[0].raw_id)} -> r${c.cs_ranges[-1].revision}:${h.short_id(c.cs_ranges[-1].raw_id)}
+				<h3>${_('Compare View')}</h3>
 				 ##&raquo; <span>${h.link_to(_('raw diff'),
 				##h.url('raw_changeset_home',repo_name=c.repo_name,revision=c.changeset.raw_id,diff='show'))}</span>
 				 ##&raquo; <span>${h.link_to(_('download diff'),
@@ -34,11 +35,21 @@
 				</div>
 			</div>
 		</div>
-	    <div id="changeset_content">
+	    <div id="changeset_compare_view_content">
 			<div class="container">
-            
+			<table class="compare_view_commits">
+            %for cs in c.cs_ranges:
+                <tr>
+                <td><div class="gravatar"><img alt="gravatar" src="${h.gravatar_url(h.email(cs.author),14)}"/></div></td>
+                <td>${h.link_to('r%s:%s' % (cs.revision,h.short_id(cs.raw_id)),h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id))}</td>
+                <td><div class="author">${h.person(cs.author)}</div></td>
+                <td><span class="tooltip" title="${h.age(cs.date)}">${cs.date}</span></td>
+                <td><div class="message">${h.link_to(h.wrap_paragraphs(cs.message),h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id))}</div></td>
+                </tr>
+            %endfor
+            </table>
 	        </div>
-	        <span style="font-size:1.1em;font-weight: bold">${_('Files affected')}</span>
+	        <div style="font-size:1.1em;font-weight: bold;clear:both;padding-top:10px">${_('Files affected')}</div>
 	        <div class="cs_files">
 	               %for cs in c.cs_ranges:
 	                   <div class="cur_cs">r${cs}</div>

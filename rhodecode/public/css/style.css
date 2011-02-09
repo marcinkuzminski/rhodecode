@@ -1479,11 +1479,23 @@ padding:5px !important;
 border:1px solid #CCC;
 padding:5px;
 }
+#changeset_compare_view_content{
+border:1px solid #CCC;
+padding:5px;
+}
 
 #changeset_content .container {
 min-height:120px;
 font-size:1.2em;
 overflow:hidden;
+}
+
+#changeset_compare_view_content .compare_view_commits{
+width: auto !important;
+}
+
+#changeset_compare_view_content .compare_view_commits td{
+padding:0px 0px 0px 12px !important;
 }
 
 #changeset_content .container .right {
