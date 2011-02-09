@@ -33,8 +33,9 @@ from datetime import datetime
 from rhodecode.model import BaseModel
 from rhodecode.model.caching_query import FromCache
 from rhodecode.model.db import Repository, RepoToPerm, User, Permission, \
-    Statistics, UsersGroup
+    Statistics, UsersGroup, UsersGroupToPerm
 from rhodecode.model.user import UserModel
+from rhodecode.model.users_group import UsersGroupMember, UsersGroupModel
 
 from vcs.backends import get_backend
 
@@ -105,29 +106,51 @@ class RepoModel(BaseModel):
         try:
             cur_repo = self.get_by_repo_name(repo_name, cache=False)
             user_model = UserModel(self.sa)
+            users_group_model = UsersGroupModel(self.sa)
 
             #update permissions
-            for username, perm, member_type in form_data['perms_updates']:
-                r2p = self.sa.query(RepoToPerm)\
-                        .filter(RepoToPerm.user == user_model.get_by_username(username))\
-                        .filter(RepoToPerm.repository == cur_repo)\
-                        .one()
+            for member, perm, member_type in form_data['perms_updates']:
+                if member_type == 'user':
+                    r2p = self.sa.query(RepoToPerm)\
+                            .filter(RepoToPerm.user == user_model.get_by_username(member))\
+                            .filter(RepoToPerm.repository == cur_repo)\
+                            .one()
 
-                r2p.permission = self.sa.query(Permission)\
-                                    .filter(Permission.permission_name == perm)\
-                                    .scalar()
-                self.sa.add(r2p)
+                    r2p.permission = self.sa.query(Permission)\
+                                        .filter(Permission.permission_name == perm)\
+                                        .scalar()
+                    self.sa.add(r2p)
+                else:
+                    g2p = self.sa.query(UsersGroupToPerm)\
+                            .filter(UsersGroupToPerm.users_group == users_group_model.get_by_groupname(member))\
+                            .filter(UsersGroupToPerm.repository == cur_repo)\
+                            .one()
+
+                    g2p.permission = self.sa.query(Permission)\
+                                        .filter(Permission.permission_name == perm)\
+                                        .scalar()
+                    self.sa.add(g2p)
 
             #set new permissions
-            for username, perm, member_type in form_data['perms_new']:
-                r2p = RepoToPerm()
-                r2p.repository = cur_repo
-                r2p.user = user_model.get_by_username(username, cache=False)
+            for member, perm, member_type in form_data['perms_new']:
+                if member_type == 'user':
+                    r2p = RepoToPerm()
+                    r2p.repository = cur_repo
+                    r2p.user = user_model.get_by_username(member)
 
-                r2p.permission = self.sa.query(Permission)\
-                                    .filter(Permission.permission_name == perm)\
-                                    .scalar()
-                self.sa.add(r2p)
+                    r2p.permission = self.sa.query(Permission)\
+                                        .filter(Permission.permission_name == perm)\
+                                        .scalar()
+                    self.sa.add(r2p)
+                else:
+                    g2p = UsersGroupToPerm()
+                    g2p.repository = cur_repo
+                    g2p.users_group = users_group_model.get_by_groupname(member)
+
+                    g2p.permission = self.sa.query(Permission)\
+                                        .filter(Permission.permission_name == perm)\
+                                        .scalar()
+                    self.sa.add(g2p)
 
             #update current repo
             for k, v in form_data.items():

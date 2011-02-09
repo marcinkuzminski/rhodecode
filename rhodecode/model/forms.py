@@ -254,7 +254,7 @@ class ValidPerms(formencode.validators.FancyValidator):
                     new_type = value.get('perm_new_member_type')
 
                     if new_member and new_perm:
-                        if (new_member, new_perm) not in perms_new:
+                        if (new_member, new_perm, new_type) not in perms_new:
                             perms_new.append((new_member, new_perm, new_type))
                 else:
                     usr = k[5:]
@@ -266,6 +266,8 @@ class ValidPerms(formencode.validators.FancyValidator):
                     perms_update.append((usr, v, t))
         value['perms_updates'] = perms_update
         value['perms_new'] = perms_new
+
+        #update permissions
         sa = meta.Session
         for k, v, t in perms_new:
             try:
@@ -458,6 +460,7 @@ def RepoForm(edit=False, old_data={}, supported_backends=BACKENDS.keys()):
         enable_downloads = StringBoolean(if_missing=False)
         repo_type = OneOf(supported_backends)
         if edit:
+            #this is repo owner
             user = All(Int(not_empty=True), ValidRepoUser)
 
         chained_validators = [ValidPerms]
