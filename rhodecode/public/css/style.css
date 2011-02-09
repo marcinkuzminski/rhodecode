@@ -1433,7 +1433,10 @@ padding-top: 5px;
 font-weight: bold;
 font-size: 1.1em;
 }
-
+#journal .compare_view{
+padding: 5px 0px 5px 38px;
+width: 95px;
+}
 .trending_language_tbl,.trending_language_tbl td {
 border:0 !important;
 margin:0 !important;

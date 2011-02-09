@@ -480,6 +480,17 @@ def action_parser(user_log):
                 repo_name=repo_name,
                 revision=rev), title=tooltip(message(rev)),
                 class_='tooltip') for rev in revs[:revs_limit] ])
+
+        compare_view = (' <div class="compare_view tooltip" title="%s">'
+                        '<a href="%s">%s</a> '
+                        '</div>' % (_('Show all combined changesets %s->%s' \
+                                      % (revs[0], revs[-1])),
+                                    url('changeset_home', repo_name=repo_name,
+                                        revision='%s...%s' % (revs[0], revs[-1])
+                                    ),
+                                    _('compare view'))
+                        )
+
         if len(revs) > revs_limit:
             uniq_id = revs[0]
             html_tmpl = ('<span> %s '
@@ -495,7 +506,7 @@ def action_parser(user_log):
                 repo_name=repo_name, revision=rev),
                 title=message(rev), class_='tooltip')
                 for rev in revs[revs_limit:revs_top_limit]]))
-
+        cs_links += compare_view
         return cs_links
 
     def get_fork_name():

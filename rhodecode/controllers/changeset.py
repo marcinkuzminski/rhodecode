@@ -74,7 +74,7 @@ class ChangesetController(BaseController):
             if len(rev_range) == 2:
                 rev_start = rev_range[0]
                 rev_end = rev_range[1]
-                rev_ranges = repo.get_changeset_ranges(rev_start, rev_end,
+                rev_ranges = repo.get_changesets_ranges(rev_start, rev_end,
                                                        range_limit)
             else:
                 rev_ranges = [repo.get_changeset(revision)]
