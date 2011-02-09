@@ -41,10 +41,17 @@ from rhodecode.lib.auth_ldap import AuthLdap
 from rhodecode.model import meta
 from rhodecode.model.user import UserModel
 from rhodecode.model.db import User, RepoToPerm, Repository, Permission, \
-    UserToPerm
+    UserToPerm, UsersGroupToPerm, UsersGroupMember
 
 
 log = logging.getLogger(__name__)
+
+
+PERM_WEIGHTS = {'repository.none':0,
+                'repository.read':1,
+                'repository.write':3,
+                'repository.admin':3}
+
 
 class PasswordGenerator(object):
     """This is a simple class for generating password from
@@ -73,7 +80,8 @@ class PasswordGenerator(object):
 
 
 def get_crypt_password(password):
-    """Cryptographic function used for password hashing based on sha1
+    """Cryptographic function used for password hashing based on pybcrypt
+    
     :param password: password to hash
     """
     return bcrypt.hashpw(password, bcrypt.gensalt(10))
@@ -82,8 +90,7 @@ def check_password(password, hashed):
     return bcrypt.hashpw(password, hashed) == hashed
 
 def authfunc(environ, username, password):
-    """
-    Dummy authentication function used in Mercurial/Git/ and access control,
+    """Dummy authentication function used in Mercurial/Git/ and access control,
     
     :param environ: needed only for using in Basic auth
     """
@@ -91,8 +98,7 @@ def authfunc(environ, username, password):
 
 
 def authenticate(username, password):
-    """
-    Authentication function used for access control,
+    """Authentication function used for access control,
     firstly checks for db authentication then if ldap is enabled for ldap
     authentication, also creates ldap user if not in database
     
@@ -130,7 +136,7 @@ def authenticate(username, password):
         ldap_settings = SettingsModel().get_ldap_settings()
 
         #======================================================================
-        # FALLBACK TO LDAP AUTH IN ENABLE                
+        # FALLBACK TO LDAP AUTH IF ENABLE                
         #======================================================================
         if ldap_settings.get('ldap_active', False):
             log.debug("Authenticating user using ldap")
@@ -160,7 +166,7 @@ def authenticate(username, password):
                     }
 
                 if user_model.create_ldap(username, password, user_dn, user_attrs):
-                    log.info('created new ldap user')
+                    log.info('created new ldap user %s', username)
 
                 return True
             except (LdapUsernameError, LdapPasswordError,):
@@ -171,9 +177,9 @@ def authenticate(username, password):
     return False
 
 class  AuthUser(object):
+    """A simple object that handles a mercurial username for authentication
     """
-    A simple object that handles a mercurial username for authentication
-    """
+
     def __init__(self):
         self.username = 'None'
         self.name = ''
@@ -189,7 +195,7 @@ class  AuthUser(object):
 
 def set_available_permissions(config):
     """This function will propagate pylons globals with all available defined
-    permission given in db. We don't wannt to check each time from db for new 
+    permission given in db. We don't want to check each time from db for new 
     permissions since adding a new permission also requires application restart
     ie. to decorate new views with the newly created permission
     
@@ -213,9 +219,10 @@ def set_base_path(config):
 
 def fill_perms(user):
     """Fills user permission attribute with permissions taken from database
+    works for permissions given for repositories, and for permissions that
+    as part of beeing group member
     
-    :param user:
-    
+    :param user: user instance to fill his perms
     """
 
     sa = meta.Session()
@@ -255,7 +262,7 @@ def fill_perms(user):
         for perm in default_global_perms:
             user.permissions['global'].add(perm.permission.permission_name)
 
-        #default repositories
+        #default for repositories
         for perm in default_perms:
             if perm.Repository.private and not perm.Repository.user_id == user.user_id:
                 #disable defaults for private repos,
@@ -269,7 +276,7 @@ def fill_perms(user):
             user.permissions['repositories'][perm.RepoToPerm.repository.repo_name] = p
 
         #=======================================================================
-        # #overwrite default with user permissions if any
+        # overwrite default with user permissions if any
         #=======================================================================
         user_perms = sa.query(RepoToPerm, Permission, Repository)\
             .join((Repository, RepoToPerm.repository_id == Repository.repo_id))\
@@ -282,12 +289,31 @@ def fill_perms(user):
             else:
                 p = perm.Permission.permission_name
             user.permissions['repositories'][perm.RepoToPerm.repository.repo_name] = p
+
+
+        #=======================================================================
+        # check if user is part of groups for this repository and fill in 
+        # (or replace with higher) permissions
+        #=======================================================================
+        user_perms_from_users_groups = sa.query(UsersGroupToPerm, Permission, Repository,)\
+            .join((Repository, UsersGroupToPerm.repository_id == Repository.repo_id))\
+            .join((Permission, UsersGroupToPerm.permission_id == Permission.permission_id))\
+            .join((UsersGroupMember, UsersGroupToPerm.users_group_id == UsersGroupMember.users_group_id))\
+            .filter(UsersGroupMember.user_id == user.user_id).all()
+
+        for perm in user_perms_from_users_groups:
+            p = perm.Permission.permission_name
+            cur_perm = user.permissions['repositories'][perm.UsersGroupToPerm.repository.repo_name]
+            #overwrite permission only if it's greater than permission given from other sources
+            if PERM_WEIGHTS[p] > PERM_WEIGHTS[cur_perm]:
+                user.permissions['repositories'][perm.UsersGroupToPerm.repository.repo_name] = p
+
     meta.Session.remove()
     return user
 
 def get_user(session):
-    """
-    Gets user from session, and wraps permissions into user
+    """Gets user from session, and wraps permissions into user
+    
     :param session:
     """
     user = session.get('rhodecode_user', AuthUser())
