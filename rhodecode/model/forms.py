@@ -37,7 +37,7 @@ from rhodecode.model import meta
 from rhodecode.model.user import UserModel
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.users_group import UsersGroupModel
-from rhodecode.model.db import User
+from rhodecode.model.db import User, UsersGroup
 from rhodecode import BACKENDS
 
 from webhelpers.pylonslib.secure_form import authentication_token
@@ -238,7 +238,8 @@ def ValidForkType(old_data):
     return _ValidForkType
 
 class ValidPerms(formencode.validators.FancyValidator):
-    messages = {'perm_new_user_name':_('This username is not valid')}
+    messages = {'perm_new_member_name':_('This username or users group name'
+                                         ' is not valid')}
 
     def to_python(self, value, state):
         perms_update = []
@@ -246,32 +247,42 @@ class ValidPerms(formencode.validators.FancyValidator):
         #build a list of permission to update and new permission to create
         for k, v in value.items():
             if k.startswith('perm_'):
-                if  k.startswith('perm_new_user'):
-                    new_perm = value.get('perm_new_user', False)
-                    new_user = value.get('perm_new_user_name', False)
-                    if new_user and new_perm:
-                        if (new_user, new_perm) not in perms_new:
-                            perms_new.append((new_user, new_perm))
+                if k.startswith('perm_new_member'):
+                    #means new added member to permissions
+                    new_perm = value.get('perm_new_member', False)
+                    new_member = value.get('perm_new_member_name', False)
+                    new_type = value.get('perm_new_member_type')
+
+                    if new_member and new_perm:
+                        if (new_member, new_perm) not in perms_new:
+                            perms_new.append((new_member, new_perm, new_type))
                 else:
                     usr = k[5:]
+                    t = 'user'
                     if usr == 'default':
                         if value['private']:
                             #set none for default when updating to private repo
                             v = 'repository.none'
-                    perms_update.append((usr, v))
+                    perms_update.append((usr, v, t))
         value['perms_updates'] = perms_update
         value['perms_new'] = perms_new
         sa = meta.Session
-        for k, v in perms_new:
+        for k, v, t in perms_new:
             try:
-                self.user_db = sa.query(User)\
-                    .filter(User.active == True)\
-                    .filter(User.username == k).one()
+                if t is 'user':
+                    self.user_db = sa.query(User)\
+                        .filter(User.active == True)\
+                        .filter(User.username == k).one()
+                if t is 'users_group':
+                    self.user_db = sa.query(UsersGroup)\
+                        .filter(UsersGroup.users_group_active == True)\
+                        .filter(UsersGroup.users_group_name == k).one()
+
             except Exception:
-                msg = self.message('perm_new_user_name',
+                msg = self.message('perm_new_member_name',
                                      state=State_obj)
                 raise formencode.Invalid(msg, value, state,
-                                         error_dict={'perm_new_user_name':msg})
+                                         error_dict={'perm_new_member_name':msg})
         return value
 
 class ValidSettings(formencode.validators.FancyValidator):

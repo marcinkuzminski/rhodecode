@@ -30,12 +30,10 @@ import logging
 import traceback
 from datetime import datetime
 
-from pylons import app_globals as g
-
 from rhodecode.model import BaseModel
 from rhodecode.model.caching_query import FromCache
 from rhodecode.model.db import Repository, RepoToPerm, User, Permission, \
-    Statistics
+    Statistics, UsersGroup
 from rhodecode.model.user import UserModel
 
 from vcs.backends import get_backend
@@ -43,6 +41,24 @@ from vcs.backends import get_backend
 log = logging.getLogger(__name__)
 
 class RepoModel(BaseModel):
+
+    def __init__(self, sa=None):
+        try:
+            from pylons import app_globals
+            self._base_path = app_globals.base_path
+        except:
+            self._base_path = None
+
+        @property
+        def base_path():
+            if self._base_path is None:
+                raise Exception('Base Path is empty, try set this after'
+                                'class initialization when not having '
+                                'app_globals available')
+            return self._base_path
+
+        super(RepoModel, self).__init__()
+
 
     def get(self, repo_id, cache=False):
         repo = self.sa.query(Repository)\
@@ -67,11 +83,23 @@ class RepoModel(BaseModel):
 
         users = self.sa.query(User).filter(User.active == True).all()
         u_tmpl = '''{id:%s, fname:"%s", lname:"%s", nname:"%s"},'''
-        users_array = '[%s];' % '\n'.join([u_tmpl % (u.user_id, u.name,
+        users_array = '[%s]' % '\n'.join([u_tmpl % (u.user_id, u.name,
                                                     u.lastname, u.username)
                                         for u in users])
         return users_array
 
+
+    def get_users_groups_js(self):
+        users_groups = self.sa.query(UsersGroup)\
+            .filter(UsersGroup.users_group_active == True).all()
+
+        g_tmpl = '''{id:%s, grname:"%s",grmembers:"%s"},'''
+
+        users_groups_array = '[%s]' % '\n'.join([g_tmpl % \
+                                    (gr.users_group_id, gr.users_group_name,
+                                     len(gr.members))
+                                        for gr in users_groups])
+        return users_groups_array
 
     def update(self, repo_name, form_data):
         try:
@@ -79,7 +107,7 @@ class RepoModel(BaseModel):
             user_model = UserModel(self.sa)
 
             #update permissions
-            for username, perm in form_data['perms_updates']:
+            for username, perm, member_type in form_data['perms_updates']:
                 r2p = self.sa.query(RepoToPerm)\
                         .filter(RepoToPerm.user == user_model.get_by_username(username))\
                         .filter(RepoToPerm.repository == cur_repo)\
@@ -91,7 +119,7 @@ class RepoModel(BaseModel):
                 self.sa.add(r2p)
 
             #set new permissions
-            for username, perm in form_data['perms_new']:
+            for username, perm, member_type in form_data['perms_new']:
                 r2p = RepoToPerm()
                 r2p.repository = cur_repo
                 r2p.user = user_model.get_by_username(username, cache=False)
@@ -223,8 +251,8 @@ class RepoModel(BaseModel):
         :param alias:
         """
         from rhodecode.lib.utils import check_repo
-        repo_path = os.path.join(g.base_path, repo_name)
-        if check_repo(repo_name, g.base_path):
+        repo_path = os.path.join(self.base_path, repo_name)
+        if check_repo(repo_name, self.base_path):
             log.info('creating repo %s in %s', repo_name, repo_path)
             backend = get_backend(alias)
             backend(repo_path, create=True)
@@ -237,8 +265,8 @@ class RepoModel(BaseModel):
         """
         log.info('renaming repo from %s to %s', old, new)
 
-        old_path = os.path.join(g.base_path, old)
-        new_path = os.path.join(g.base_path, new)
+        old_path = os.path.join(self.base_path, old)
+        new_path = os.path.join(self.base_path, new)
         if os.path.isdir(new_path):
             raise Exception('Was trying to rename to already existing dir %s',
                             new_path)
@@ -252,12 +280,12 @@ class RepoModel(BaseModel):
         by reverting the renames on this repository
         :param repo: repo object
         """
-        rm_path = os.path.join(g.base_path, repo.repo_name)
+        rm_path = os.path.join(self.base_path, repo.repo_name)
         log.info("Removing %s", rm_path)
         #disable hg/git
         alias = repo.repo_type
         shutil.move(os.path.join(rm_path, '.%s' % alias),
                     os.path.join(rm_path, 'rm__.%s' % alias))
         #disable repo
-        shutil.move(rm_path, os.path.join(g.base_path, 'rm__%s__%s' \
+        shutil.move(rm_path, os.path.join(self.base_path, 'rm__%s__%s' \
                                           % (datetime.today(), repo.repo_name)))
