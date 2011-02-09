@@ -162,6 +162,8 @@ class ReposController(BaseController):
                                                 c.repo_last_rev) * 100)
 
             c.users_array = repo_model.get_users_js()
+            c.users_groups_array = repo_model.get_users_groups_js()
+
             errors.value.update({'user':c.repo_info.user.username})
             return htmlfill.render(
                 render('admin/repos/repo_edit.html'),
@@ -300,6 +302,7 @@ class ReposController(BaseController):
             defaults.update({'user':replacement_user})
 
         c.users_array = repo_model.get_users_js()
+        c.users_groups_array = repo_model.get_users_groups_js()
 
         for p in c.repo_info.repo_to_perm:
             defaults.update({'perm_%s' % p.user.username:

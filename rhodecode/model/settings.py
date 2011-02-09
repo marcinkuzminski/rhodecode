@@ -1,8 +1,15 @@
-#!/usr/bin/env python
-# encoding: utf-8
-# Model for RhodeCode settings
-# Copyright (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
-# 
+# -*- coding: utf-8 -*-
+"""
+    rhodecode.model.settings
+    ~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Settings model for RhodeCode
+
+    :created on Nov 17, 2010
+    :author: marcink
+    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>    
+    :license: GPLv3, see COPYING for more details.
+"""
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
@@ -17,18 +24,12 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
-"""
-Created on Nov 17, 2010
-Model for RhodeCode
-:author: marcink
-"""
 
-from rhodecode.lib import helpers as h
+import logging
+
 from rhodecode.model import BaseModel
 from rhodecode.model.caching_query import FromCache
 from rhodecode.model.db import  RhodeCodeSettings
-from sqlalchemy.orm import joinedload
-import logging
 
 log = logging.getLogger(__name__)
 
