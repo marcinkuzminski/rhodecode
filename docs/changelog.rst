@@ -24,7 +24,10 @@ news
   line
 - extended journal with day aggregates and paging
 - implemented #107 customizable code highlights on code sources
+- implemented #93 customizable changelog on combined revision ranges - 
+  equivalent of githubs compare view 
 - implemented #108 extended and more powerfull LDAP configuration
+
 fixes
 -----
 
@@ -32,10 +35,15 @@ fixes
   not changing
 - fixed propagation to error controller on simplehg and simplegit middlewares
 - fixed error when trying to make a download on empty repository
-- fixed ehlo command on mailserver. Was not working on some hosting setups
+- fixed ehlo command and non auth mail servers on smtp_lib. Thanks to 
+  apollo13 and Johan Walles
 - fixed problem with '[' chars in commit messages in journal
 - fixed #99 Unicode errors, on file node paths with non utf-8 characters
 - fixed #106 relation issues on databases different than sqlite
+- registration,password reset and login boxes share the same title as main 
+  application now
+- fixed problems with getting setting for celery from .ini files
+
 
 1.1.2 (**2011-01-12**)
 ======================
