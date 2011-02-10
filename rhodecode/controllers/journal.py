@@ -64,13 +64,22 @@ class JournalController(BaseController):
         user_ids = [x.follows_user.user_id for x in c.following
                     if x.follows_user is not None]
 
-        journal = self.sa.query(UserLog)\
-            .filter(or_(
-                        UserLog.repository_id.in_(repo_ids),
-                        UserLog.user_id.in_(user_ids),
-                        ))\
-            .order_by(UserLog.action_date.desc())
+        filtering_criterion = None
 
+        if repo_ids and user_ids:
+            filtering_criterion = or_(UserLog.repository_id.in_(repo_ids),
+                        UserLog.user_id.in_(user_ids))
+        if repo_ids and not user_ids:
+            filtering_criterion = UserLog.repository_id.in_(repo_ids)
+        if not repo_ids and user_ids:
+            filtering_criterion = UserLog.user_id.in_(user_ids)
+
+        if filtering_criterion is not None:
+            journal = self.sa.query(UserLog)\
+                .filter(filtering_criterion)\
+                .order_by(UserLog.action_date.desc())
+        else:
+            journal = []
 
         p = int(request.params.get('page', 1))
         c.journal_pager = Page(journal, page=p, items_per_page=10)
