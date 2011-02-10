@@ -8,9 +8,11 @@ import hashlib
 import StringIO
 from pygments.formatters import HtmlFormatter
 from pygments import highlight as code_highlight
-from pylons import url, app_globals as g
+from pylons import url
 from pylons.i18n.translation import _, ungettext
 from vcs.utils.annotate import annotate_highlight
+from rhodecode.lib.utils import repo_name_slug
+
 from webhelpers.html import literal, HTML, escape
 from webhelpers.html.tools import *
 from webhelpers.html.builder import make_tag
@@ -72,23 +74,6 @@ class _GetError(object):
             return literal(tmpl % form_errors.get(field_name))
 
 get_error = _GetError()
-
-def recursive_replace(str, replace=' '):
-    """Recursive replace of given sign to just one instance
-    
-    :param str: given string
-    :param replace: char to find and replace multiple instances
-        
-    Examples::
-    >>> recursive_replace("Mighty---Mighty-Bo--sstones",'-')
-    'Mighty-Mighty-Bo-sstones'
-    """
-
-    if str.find(replace * 2) == -1:
-        return str
-    else:
-        str = str.replace(replace * 2, replace)
-        return recursive_replace(str, replace)
 
 class _ToolTip(object):
 
@@ -356,21 +341,6 @@ def pygmentize_annotation(filenode, **kwargs):
         uri += '\n'
         return uri
     return literal(annotate_highlight(filenode, url_func, **kwargs))
-
-def repo_name_slug(value):
-    """Return slug of name of repository
-    This function is called on each creation/modification
-    of repository to prevent bad names in repo
-    """
-
-    slug = remove_formatting(value)
-    slug = strip_tags(slug)
-
-    for c in """=[]\;'"<>,/~!@#$%^&*()+{}|: """:
-        slug = slug.replace(c, '-')
-    slug = recursive_replace(slug, '-')
-    slug = collapse(slug, '-')
-    return slug
 
 def get_changeset_safe(repo, rev):
     from vcs.backends.base import BaseRepository

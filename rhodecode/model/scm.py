@@ -29,14 +29,18 @@ import time
 import traceback
 import logging
 
+from mercurial import ui
+
+from sqlalchemy.orm import joinedload
+from sqlalchemy.orm.session import make_transient
+from sqlalchemy.exc import DatabaseError
+
+from beaker.cache import cache_region, region_invalidate
+
 from vcs import get_backend
 from vcs.utils.helpers import get_scm
 from vcs.exceptions import RepositoryError, VCSError
 from vcs.utils.lazy import LazyProperty
-
-from mercurial import ui
-
-from beaker.cache import cache_region, region_invalidate
 
 from rhodecode import BACKENDS
 from rhodecode.lib import helpers as h
@@ -44,14 +48,9 @@ from rhodecode.lib.auth import HasRepoPermissionAny
 from rhodecode.lib.utils import get_repos as get_filesystem_repos, make_ui, action_logger
 from rhodecode.model import BaseModel
 from rhodecode.model.user import UserModel
-
 from rhodecode.model.db import Repository, RhodeCodeUi, CacheInvalidation, \
     UserFollowing, UserLog
 from rhodecode.model.caching_query import FromCache
-
-from sqlalchemy.orm import joinedload
-from sqlalchemy.orm.session import make_transient
-from sqlalchemy.exc import DatabaseError
 
 log = logging.getLogger(__name__)
 

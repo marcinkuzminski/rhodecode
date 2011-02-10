@@ -40,7 +40,7 @@ from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator, \
     HasPermissionAnyDecorator
 from rhodecode.lib.base import BaseController, render
-from rhodecode.lib.utils import invalidate_cache, action_logger
+from rhodecode.lib.utils import invalidate_cache, action_logger, repo_name_slug
 from rhodecode.model.db import User
 from rhodecode.model.forms import RepoForm
 from rhodecode.model.scm import ScmModel
@@ -118,7 +118,7 @@ class ReposController(BaseController):
     def new(self, format='html'):
         """GET /repos/new: Form to create a new item"""
         new_repo = request.GET.get('repo', '')
-        c.new_repo = h.repo_name_slug(new_repo)
+        c.new_repo = repo_name_slug(new_repo)
 
         return render('admin/repos/repo_add.html')
 

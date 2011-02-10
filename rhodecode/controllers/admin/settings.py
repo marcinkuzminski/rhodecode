@@ -29,7 +29,7 @@ import logging
 import traceback
 import formencode
 
-from operator import itemgetter
+from sqlalchemy import func
 from formencode import htmlfill
 from pylons import request, session, tmpl_context as c, url, app_globals as g, \
     config
@@ -49,8 +49,6 @@ from rhodecode.model.forms import UserForm, ApplicationSettingsForm, \
 from rhodecode.model.scm import ScmModel
 from rhodecode.model.settings import SettingsModel
 from rhodecode.model.user import UserModel
-
-from sqlalchemy import func
 
 
 log = logging.getLogger(__name__)
@@ -324,7 +322,7 @@ class SettingsController(BaseController):
     def create_repository(self):
         """GET /_admin/create_repository: Form to create a new item"""
         new_repo = request.GET.get('repo', '')
-        c.new_repo = h.repo_name_slug(new_repo)
+        c.new_repo = repo_name_slug(new_repo)
 
         return render('admin/repos/repo_add_create_repository.html')
 

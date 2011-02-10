@@ -29,8 +29,9 @@ from formencode.validators import UnicodeString, OneOf, Int, Number, Regex, \
     Email, Bool, StringBoolean, Set
 
 from pylons.i18n.translation import _
+from webhelpers.pylonslib.secure_form import authentication_token
 
-import rhodecode.lib.helpers as h
+from rhodecode.lib.utils import repo_name_slug
 from rhodecode.lib.auth import authenticate, get_crypt_password
 from rhodecode.lib.exceptions import LdapImportError
 from rhodecode.model import meta
@@ -39,8 +40,6 @@ from rhodecode.model.repo import RepoModel
 from rhodecode.model.users_group import UsersGroupModel
 from rhodecode.model.db import User, UsersGroup
 from rhodecode import BACKENDS
-
-from webhelpers.pylonslib.secure_form import authentication_token
 
 log = logging.getLogger(__name__)
 
@@ -214,7 +213,7 @@ def ValidRepoName(edit, old_data):
     class _ValidRepoName(formencode.validators.FancyValidator):
 
         def to_python(self, value, state):
-            slug = h.repo_name_slug(value)
+            slug = repo_name_slug(value)
             if slug in ['_admin']:
                 raise formencode.Invalid(_('This repository name is disallowed'),
                                          value, state)
