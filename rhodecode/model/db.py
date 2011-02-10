@@ -180,7 +180,7 @@ class UsersGroupMember(Base, BaseModel):
     user = relationship('User', lazy='joined')
     users_group = relationship('UsersGroup')
 
-    def __init__(self, gr_id, u_id):
+    def __init__(self, gr_id='', u_id=''):
         self.users_group_id = gr_id
         self.user_id = u_id
 
