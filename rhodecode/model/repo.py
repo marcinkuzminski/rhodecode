@@ -50,13 +50,15 @@ class RepoModel(BaseModel):
         except:
             self._base_path = None
 
-        @property
-        def base_path():
-            if self._base_path is None:
-                raise Exception('Base Path is empty, try set this after'
-                                'class initialization when not having '
-                                'app_globals available')
-            return self._base_path
+        super(RepoModel, self).__init__(sa)
+
+    @property
+    def base_path(self):
+        if self._base_path is None:
+            raise Exception('Base Path is empty, try set this after'
+                            'class initialization when not having '
+                            'app_globals available')
+        return self._base_path
 
         super(RepoModel, self).__init__()
 
