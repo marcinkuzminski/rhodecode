@@ -326,4 +326,5 @@ class RepoModel(BaseModel):
                     os.path.join(rm_path, 'rm__.%s' % alias))
         #disable repo
         shutil.move(rm_path, os.path.join(self.base_path, 'rm__%s__%s' \
-                                          % (datetime.today(), repo.repo_name)))
+                                          % (datetime.today().isoformat(),
+                                             repo.repo_name)))
