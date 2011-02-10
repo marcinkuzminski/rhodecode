@@ -1,17 +1,20 @@
 """Pylons middleware initialization"""
+
 from beaker.middleware import SessionMiddleware
+from routes.middleware import RoutesMiddleware
 from paste.cascade import Cascade
 from paste.registry import RegistryManager
 from paste.urlparser import StaticURLParser
 from paste.deploy.converters import asbool
+from paste.gzipper import make_gzip_middleware
+
 from pylons.middleware import ErrorHandler, StatusCodeRedirect
 from pylons.wsgiapp import PylonsApp
-from routes.middleware import RoutesMiddleware
+
 from rhodecode.lib.middleware.simplehg import SimpleHg
 from rhodecode.lib.middleware.simplegit import SimpleGit
 from rhodecode.lib.middleware.https_fixup import HttpsFixup
 from rhodecode.config.environment import load_environment
-from paste.gzipper import make_gzip_middleware
 
 def make_app(global_conf, full_stack=True, static_files=True, **app_conf):
     """Create a Pylons WSGI application and return it
