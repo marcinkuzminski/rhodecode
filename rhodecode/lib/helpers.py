@@ -476,7 +476,8 @@ def action_parser(user_log):
                 repo_name=repo_name, revision=rev),
                 title=message(rev), class_='tooltip')
                 for rev in revs[revs_limit:revs_top_limit]]))
-        cs_links += compare_view
+        if len(revs) > 1:
+            cs_links += compare_view
         return cs_links
 
     def get_fork_name():
