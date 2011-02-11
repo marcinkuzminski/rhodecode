@@ -22,20 +22,20 @@ def upgrade(migrate_engine):
     #==========================================================================
     # Add table `groups``
     #==========================================================================
-#    from rhodecode.model.db import Group
-#    Group().__table__.create()
+    from rhodecode.model.db import Group
+    Group().__table__.create()
 
     #==========================================================================
     # Add table `group_to_perm`
     #==========================================================================
-#    from rhodecode.model.db import GroupToPerm
-#    GroupToPerm().__table__.create()
+    from rhodecode.model.db import GroupToPerm
+    GroupToPerm().__table__.create()
 
     #==========================================================================
     # Add table `users_groups`
     #==========================================================================
-#    from rhodecode.model.db import UsersGroup
-#    UsersGroup().__table__.create()
+    from rhodecode.model.db import UsersGroup
+    UsersGroup().__table__.create()
 
     #==========================================================================
     # Add table `users_groups_members`

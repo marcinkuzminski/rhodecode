@@ -18,7 +18,7 @@ Follow current branch in file view
 ++++++++++++++++++++++++++++++++++
 
 In file view when this checkbox is checked the << and >> arrows will jump
-to changesets withing the same branch currently viewing. So for example
+to changesets within the same branch currently viewing. So for example
 if someone is viewing files at 'beta' branch and marks `follow current branch`
 checkbox the << and >> buttons will only show him revisions for 'beta' branch
 
