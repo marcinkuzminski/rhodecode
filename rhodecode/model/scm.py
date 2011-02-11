@@ -185,11 +185,13 @@ class ScmModel(BaseModel):
 
             try:
                 alias = get_scm(repo_path)[0]
-
                 log.debug('Creating instance of %s repository', alias)
                 backend = get_backend(alias)
             except VCSError:
                 log.error(traceback.format_exc())
+                log.error('Perhaps this repository is in db and not in filesystem'
+                          'run rescan repositories with "destroy old data "'
+                          'option from admin panel')
                 return
 
             if alias == 'hg':

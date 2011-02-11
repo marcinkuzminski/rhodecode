@@ -211,21 +211,22 @@ class RepoModel(BaseModel):
                     .filter(Permission.permission_name == default_perm)\
                     .one().permission_id
 
-            repo_to_perm.repository_id = new_repo.repo_id
+            repo_to_perm.repository = new_repo
             repo_to_perm.user_id = UserModel(self.sa)\
                 .get_by_username('default', cache=False).user_id
 
             self.sa.add(repo_to_perm)
-            self.sa.commit()
 
+            if not just_db:
+                self.__create_repo(repo_name, form_data['repo_type'])
+
+            self.sa.commit()
 
             #now automatically start following this repository as owner
             from rhodecode.model.scm import ScmModel
             ScmModel(self.sa).toggle_following_repo(new_repo.repo_id,
                                              cur_user.user_id)
 
-            if not just_db:
-                self.__create_repo(repo_name, form_data['repo_type'])
         except:
             log.error(traceback.format_exc())
             self.sa.rollback()
