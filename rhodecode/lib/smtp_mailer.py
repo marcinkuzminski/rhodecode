@@ -47,7 +47,7 @@ class SmtpMailer(object):
         self.tls = tls
         self.debug = False
 
-    def send(self, recipients=[], subject='', body='', attachment_files={}):
+    def send(self, recipients=[], subject='', body='', attachment_files=None):
 
         if isinstance(recipients, basestring):
             recipients = [recipients]
@@ -130,11 +130,11 @@ class SmtpMailer(object):
                             'a dict in format {"filename":"filepath"}')
 
     def get_content(self, msg_file):
-        '''
-        Get content based on type, if content is a string do open first
+        """Get content based on type, if content is a string do open first
         else just read because it's a probably open file object
+        
         :param msg_file:
-        '''
+        """
         if isinstance(msg_file, str):
             return open(msg_file, "rb").read()
         else:
