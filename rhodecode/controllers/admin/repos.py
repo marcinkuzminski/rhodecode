@@ -147,6 +147,7 @@ class ReposController(BaseController):
 
         except formencode.Invalid, errors:
             c.repo_info = repo_model.get_by_repo_name(repo_name)
+
             if c.repo_info.stats:
                 last_rev = c.repo_info.stats.stat_on_revision
             else:
@@ -281,8 +282,9 @@ class ReposController(BaseController):
     def edit(self, repo_name, format='html'):
         """GET /repos/repo_name/edit: Form to edit an existing item"""
         # url('edit_repo', repo_name=ID)
+        r = ScmModel().get(repo_name)[0]
+
         repo_model = RepoModel()
-        r = ScmModel().get(repo_name)
         c.repo_info = repo_model.get_by_repo_name(repo_name)
 
         if c.repo_info is None:

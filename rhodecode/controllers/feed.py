@@ -28,6 +28,7 @@
 import logging
 
 from pylons import url, response
+from pylons.i18n.translation import _
 
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseController
@@ -45,7 +46,7 @@ class FeedController(BaseController):
     def __before__(self):
         super(FeedController, self).__before__()
         #common values for feeds
-        self.description = 'Changes on %s repository'
+        self.description = _('Changes on %s repository')
         self.title = "%s feed"
         self.language = 'en-us'
         self.ttl = "5"
@@ -59,9 +60,9 @@ class FeedController(BaseController):
                          language=self.language,
                          ttl=self.ttl)
 
-        changesets = ScmModel().get_repo(repo_name)
+        repo, dbrepo = ScmModel().get(repo_name, retval='repo')
 
-        for cs in changesets[:self.feed_nr]:
+        for cs in repo[:self.feed_nr]:
             feed.add_item(title=cs.message,
                           link=url('changeset_home', repo_name=repo_name,
                                    revision=cs.raw_id, qualified=True),
@@ -79,8 +80,8 @@ class FeedController(BaseController):
                          language=self.language,
                          ttl=self.ttl)
 
-        changesets = ScmModel().get_repo(repo_name)
-        for cs in changesets[:self.feed_nr]:
+        repo, dbrepo = ScmModel().get(repo_name, retval='repo')
+        for cs in repo[:self.feed_nr]:
             feed.add_item(title=cs.message,
                           link=url('changeset_home', repo_name=repo_name,
                                    revision=cs.raw_id, qualified=True),

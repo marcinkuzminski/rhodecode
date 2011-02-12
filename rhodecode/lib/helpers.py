@@ -483,12 +483,12 @@ def action_parser(user_log):
     def get_fork_name():
         from rhodecode.model.scm import ScmModel
         repo_name = action_params
-        repo = ScmModel().get(repo_name)
+        repo, dbrepo = ScmModel().get(repo_name)
         if repo is None:
             return repo_name
         return link_to(action_params, url('summary_home',
                                           repo_name=repo.name,),
-                                          title=repo.dbrepo.description)
+                                          title=dbrepo.description)
 
     map = {'user_deleted_repo':(_('User [deleted] repository'), None),
            'user_created_repo':(_('User [created] repository'), None),

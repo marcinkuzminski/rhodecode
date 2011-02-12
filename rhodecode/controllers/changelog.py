@@ -67,14 +67,14 @@ class ChangelogController(BaseController):
         else:
             c.size = int(session.get('changelog_size', default))
 
-        changesets = ScmModel().get_repo(c.repo_name)
+        repo, dbrepo = ScmModel().get(c.repo_name, retval='repo')
 
         p = int(request.params.get('page', 1))
-        c.total_cs = len(changesets)
-        c.pagination = Page(changesets, page=p, item_count=c.total_cs,
+        c.total_cs = len(repo)
+        c.pagination = Page(repo, page=p, item_count=c.total_cs,
                             items_per_page=c.size)
 
-        self._graph(changesets, c.size, p)
+        self._graph(repo, c.size, p)
 
         return render('changelog/changelog.html')
 

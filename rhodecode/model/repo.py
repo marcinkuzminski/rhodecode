@@ -87,7 +87,7 @@ class RepoModel(BaseModel):
         if cache:
             repo = repo.options(FromCache("sql_cache_long",
                                           "get_repo_full_%s" % repo_name))
-        if invalidate:
+        if invalidate and cache:
             repo.invalidate()
 
         return repo.scalar()

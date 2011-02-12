@@ -64,13 +64,14 @@ class SummaryController(BaseController):
 
     def index(self):
         scm_model = ScmModel()
-        c.repo_info = scm_model.get_repo(c.repo_name)
+        c.repo, dbrepo = scm_model.get(c.repo_name)
+        c.dbrepo = dbrepo
         c.following = scm_model.is_following_repo(c.repo_name,
                                              c.rhodecode_user.user_id)
         def url_generator(**kw):
             return url('shortlog_home', repo_name=c.repo_name, **kw)
 
-        c.repo_changesets = Page(c.repo_info, page=1, items_per_page=10,
+        c.repo_changesets = Page(c.repo, page=1, items_per_page=10,
                                  url=url_generator)
 
         e = request.environ
@@ -92,16 +93,16 @@ class SummaryController(BaseController):
                                         'repo_name':c.repo_name, }
         c.clone_repo_url = uri
         c.repo_tags = OrderedDict()
-        for name, hash in c.repo_info.tags.items()[:10]:
+        for name, hash in c.repo.tags.items()[:10]:
             try:
-                c.repo_tags[name] = c.repo_info.get_changeset(hash)
+                c.repo_tags[name] = c.repo.get_changeset(hash)
             except ChangesetError:
                 c.repo_tags[name] = EmptyChangeset(hash)
 
         c.repo_branches = OrderedDict()
-        for name, hash in c.repo_info.branches.items()[:10]:
+        for name, hash in c.repo.branches.items()[:10]:
             try:
-                c.repo_branches[name] = c.repo_info.get_changeset(hash)
+                c.repo_branches[name] = c.repo.get_changeset(hash)
             except ChangesetError:
                 c.repo_branches[name] = EmptyChangeset(hash)
 
@@ -113,21 +114,21 @@ class SummaryController(BaseController):
         ts_min_y = mktime(td_1y.timetuple())
         ts_max_y = mktime(td.timetuple())
 
-        if c.repo_info.dbrepo.enable_statistics:
+        if dbrepo.enable_statistics:
             c.no_data_msg = _('No data loaded yet')
-            run_task(get_commits_stats, c.repo_info.name, ts_min_y, ts_max_y)
+            run_task(get_commits_stats, c.repo.name, ts_min_y, ts_max_y)
         else:
             c.no_data_msg = _('Statistics update are disabled for this repository')
         c.ts_min = ts_min_m
         c.ts_max = ts_max_y
 
         stats = self.sa.query(Statistics)\
-            .filter(Statistics.repository == c.repo_info.dbrepo)\
+            .filter(Statistics.repository == dbrepo)\
             .scalar()
 
 
         if stats and stats.languages:
-            c.no_data = False is c.repo_info.dbrepo.enable_statistics
+            c.no_data = False is dbrepo.enable_statistics
             lang_stats = json.loads(stats.languages)
             c.commit_data = stats.commit_activity
             c.overview_data = stats.commit_activity_combined
@@ -142,9 +143,9 @@ class SummaryController(BaseController):
             c.trending_languages = json.dumps({})
             c.no_data = True
 
-        c.enable_downloads = c.repo_info.dbrepo.enable_downloads
+        c.enable_downloads = dbrepo.enable_downloads
         if c.enable_downloads:
-            c.download_options = self._get_download_links(c.repo_info)
+            c.download_options = self._get_download_links(c.repo)
 
         return render('summary/summary.html')
 

@@ -142,10 +142,10 @@
 					<ul class="repo_switcher">
                         %for repo in c.cached_repo_list:
                         
-                          %if repo['repo'].dbrepo.private:
-                             <li><img src="/images/icons/lock.png" alt="${_('Private repository')}" class="repo_switcher_type"/>${h.link_to(repo['repo'].name,h.url('summary_home',repo_name=repo['repo'].name),class_="%s" % repo['repo'].dbrepo.repo_type)}</li>
+                          %if repo['dbrepo'].private:
+                             <li><img src="/images/icons/lock.png" alt="${_('Private repository')}" class="repo_switcher_type"/>${h.link_to(repo['repo'].name,h.url('summary_home',repo_name=repo['repo'].name),class_="%s" % repo['dbrepo'].repo_type)}</li>
                           %else:
-                             <li><img src="/images/icons/lock_open.png" alt="${_('Public repository')}" class="repo_switcher_type" />${h.link_to(repo['repo'].name,h.url('summary_home',repo_name=repo['repo'].name),class_="%s" % repo['repo'].dbrepo.repo_type)}</li>
+                             <li><img src="/images/icons/lock_open.png" alt="${_('Public repository')}" class="repo_switcher_type" />${h.link_to(repo['repo'].name,h.url('summary_home',repo_name=repo['repo'].name),class_="%s" % repo['dbrepo'].repo_type)}</li>
                           %endif  
                         %endfor					
 					</ul>			

@@ -57,8 +57,8 @@ class FilesController(BaseController):
         c.cut_off_limit = self.cut_off_limit
 
     def index(self, repo_name, revision, f_path):
-        hg_model = ScmModel()
-        c.repo = hg_model.get_repo(c.repo_name)
+        c.repo, dbrepo = ScmModel().get(c.repo_name, retval='repo')
+
 
         try:
             #reditect to given revision from form
@@ -116,8 +116,7 @@ class FilesController(BaseController):
         return render('files/files.html')
 
     def rawfile(self, repo_name, revision, f_path):
-        hg_model = ScmModel()
-        c.repo = hg_model.get_repo(c.repo_name)
+        c.repo, dbrepo = ScmModel().get(c.repo_name, retval='repo')
         file_node = c.repo.get_changeset(revision).get_node(f_path)
         response.content_type = file_node.mimetype
         response.content_disposition = 'attachment; filename=%s' \
@@ -125,16 +124,14 @@ class FilesController(BaseController):
         return file_node.content
 
     def raw(self, repo_name, revision, f_path):
-        hg_model = ScmModel()
-        c.repo = hg_model.get_repo(c.repo_name)
+        c.repo, dbrepo = ScmModel().get(c.repo_name, retval='repo')
         file_node = c.repo.get_changeset(revision).get_node(f_path)
         response.content_type = 'text/plain'
 
         return file_node.content
 
     def annotate(self, repo_name, revision, f_path):
-        hg_model = ScmModel()
-        c.repo = hg_model.get_repo(c.repo_name)
+        c.repo, dbrepo = ScmModel().get(c.repo_name, retval='repo')
 
         try:
             c.cs = c.repo.get_changeset(revision)
@@ -163,9 +160,9 @@ class FilesController(BaseController):
                 ext = ext_data[1]
 
         try:
-            repo = ScmModel().get_repo(repo_name)
+            repo, dbrepo = ScmModel().get(repo_name)
 
-            if repo.dbrepo.enable_downloads is False:
+            if dbrepo.enable_downloads is False:
                 return _('downloads disabled')
 
             cs = repo.get_changeset(revision)
@@ -185,13 +182,12 @@ class FilesController(BaseController):
 
 
     def diff(self, repo_name, f_path):
-        hg_model = ScmModel()
         diff1 = request.GET.get('diff1')
         diff2 = request.GET.get('diff2')
         c.action = request.GET.get('diff')
         c.no_changes = diff1 == diff2
         c.f_path = f_path
-        c.repo = hg_model.get_repo(c.repo_name)
+        c.repo, dbrepo = ScmModel().get(c.repo_name, retval='repo')
 
         try:
             if diff1 not in ['', None, 'None', '0' * 12, '0' * 40]:

@@ -31,38 +31,38 @@
 			      <label>${_('Name')}:</label>
 			  </div>
 			  <div class="input-short">
-		         %if c.repo_info.dbrepo.repo_type =='hg':
+		         %if c.dbrepo.repo_type =='hg':
 		           <img style="margin-bottom:2px" class="icon" title="${_('Mercurial repository')}" alt="${_('Mercurial repository')}" src="/images/icons/hgicon.png"/>
 		         %endif
-		         %if c.repo_info.dbrepo.repo_type =='git':
+		         %if c.dbrepo.repo_type =='git':
 		           <img style="margin-bottom:2px" class="icon" title="${_('Git repository')}" alt="${_('Git repository')}" src="/images/icons/giticon.png"/>
 		         %endif 
                                  			  
-	             %if c.repo_info.dbrepo.private:
+	             %if c.dbrepo.private:
 	                <img style="margin-bottom:2px" class="icon" title="${_('private repository')}" alt="${_('private repository')}" src="/images/icons/lock.png"/>
 	             %else:
 	                <img style="margin-bottom:2px" class="icon" title="${_('public repository')}" alt="${_('public repository')}" src="/images/icons/lock_open.png"/>
 	             %endif
-			      <span style="font-size: 1.6em;font-weight: bold;vertical-align: baseline;">${c.repo_info.name}</span>
+			      <span style="font-size: 1.6em;font-weight: bold;vertical-align: baseline;">${c.repo.name}</span>
 			      %if c.rhodecode_user.username != 'default':
 				      %if c.following:
 	                  <span id="follow_toggle" class="following" title="${_('Stop following this repository')}"
-	                        onclick="javascript:toggleFollowingRepo(this,${c.repo_info.dbrepo.repo_id},'${str(h.get_token())}')">
+	                        onclick="javascript:toggleFollowingRepo(this,${c.dbrepo.repo_id},'${str(h.get_token())}')">
 	                  </span>			      
 				      %else:
 				      <span id="follow_toggle" class="follow" title="${_('Start following this repository')}"
-				            onclick="javascript:toggleFollowingRepo(this,${c.repo_info.dbrepo.repo_id},'${str(h.get_token())}')">
+				            onclick="javascript:toggleFollowingRepo(this,${c.dbrepo.repo_id},'${str(h.get_token())}')">
 				      </span>
 				      %endif
 				  %endif:
 			      <br/>
-		            %if c.repo_info.dbrepo.fork:
+		            %if c.dbrepo.fork:
 		            	<span style="margin-top:5px">
-		            	<a href="${h.url('summary_home',repo_name=c.repo_info.dbrepo.fork.repo_name)}">
+		            	<a href="${h.url('summary_home',repo_name=c.dbrepo.fork.repo_name)}">
 		            	<img class="icon" alt="${_('public')}"
-		            	title="${_('Fork of')} ${c.repo_info.dbrepo.fork.repo_name}" 
+		            	title="${_('Fork of')} ${c.dbrepo.fork.repo_name}" 
 		            	src="/images/icons/arrow_divide.png"/>
-		            	${_('Fork of')} ${c.repo_info.dbrepo.fork.repo_name}
+		            	${_('Fork of')} ${c.dbrepo.fork.repo_name}
 		            	</a>
 		            	</span>
 		            %endif			      
@@ -75,7 +75,7 @@
 			      <label>${_('Description')}:</label>
 			  </div>
 			  <div class="input-short">
-			      ${c.repo_info.dbrepo.description}
+			      ${c.dbrepo.description}
 			  </div>
 			 </div>
 			
@@ -86,11 +86,11 @@
 			  </div>
 			  <div class="input-short">
 			  	<div class="gravatar">
-			  		<img alt="gravatar" src="${h.gravatar_url(c.repo_info.dbrepo.user.email)}"/>
+			  		<img alt="gravatar" src="${h.gravatar_url(c.dbrepo.user.email)}"/>
 			  	</div>
-			  		${_('Username')}: ${c.repo_info.dbrepo.user.username}<br/>
-			  		${_('Name')}: ${c.repo_info.dbrepo.user.name} ${c.repo_info.dbrepo.user.lastname}<br/>
-			  		${_('Email')}: <a href="mailto:${c.repo_info.dbrepo.user.email}">${c.repo_info.dbrepo.user.email}</a>
+			  		${_('Username')}: ${c.dbrepo.user.username}<br/>
+			  		${_('Name')}: ${c.dbrepo.user.name} ${c.dbrepo.user.lastname}<br/>
+			  		${_('Email')}: <a href="mailto:${c.dbrepo.user.email}">${c.dbrepo.user.email}</a>
 			  </div>
 			 </div>
 			
@@ -99,8 +99,8 @@
 			      <label>${_('Last change')}:</label>
 			  </div>
 			  <div class="input-short">
-			      ${h.age(c.repo_info.last_change)} - ${c.repo_info.last_change} 
-			      ${_('by')} ${h.get_changeset_safe(c.repo_info,'tip').author} 
+			      ${h.age(c.repo.last_change)} - ${c.repo.last_change} 
+			      ${_('by')} ${h.get_changeset_safe(c.repo,'tip').author} 
 			      
 			  </div>
 			 </div>
@@ -128,7 +128,7 @@
 			      <label>${_('Download')}:</label>
 			  </div>
 			  <div class="input-short">
-		        %if len(c.repo_info.revisions) == 0:
+		        %if len(c.repo.revisions) == 0:
 		          ${_('There are no downloads yet')}
 		        %elif c.enable_downloads is False:
 		          ${_('Downloads are disabled for this repository')}
@@ -136,14 +136,14 @@
                         [${h.link_to(_('enable'),h.url('edit_repo',repo_name=c.repo_name))}]
                     %endif  		          
 		        %else:
-			        ${h.select('download_options',c.repo_info.get_changeset().raw_id,c.download_options)}
-			        %for cnt,archive in enumerate(c.repo_info._get_archives()):
+			        ${h.select('download_options',c.repo.get_changeset().raw_id,c.download_options)}
+			        %for cnt,archive in enumerate(c.repo._get_archives()):
 			             %if cnt >=1:
 			             |
 			             %endif
 			             <span class="tooltip" title="${_('Download %s as %s') %('tip',archive['type'])}" 
 			                  id="${archive['type']+'_link'}">${h.link_to(archive['type'],
-			                h.url('files_archive_home',repo_name=c.repo_info.name,
+			                h.url('files_archive_home',repo_name=c.repo.name,
 			                fname='tip'+archive['extension']),class_="archive_icon")}</span>
 			        %endfor
 			    %endif
@@ -155,8 +155,8 @@
 			      <label>${_('Feeds')}:</label>
 			  </div>
 			  <div class="input-short">
-	            ${h.link_to(_('RSS'),h.url('rss_feed_home',repo_name=c.repo_info.name),class_='rss_icon')}
-	            ${h.link_to(_('Atom'),h.url('atom_feed_home',repo_name=c.repo_info.name),class_='atom_icon')}
+	            ${h.link_to(_('RSS'),h.url('rss_feed_home',repo_name=c.repo.name),class_='rss_icon')}
+	            ${h.link_to(_('Atom'),h.url('atom_feed_home',repo_name=c.repo.name),class_='atom_icon')}
 			  </div>
 			 </div>				 			 			 
 	  </div>		 
@@ -250,9 +250,9 @@
              YUE.on('download_options','change',function(e){
                  var new_cs = e.target.options[e.target.selectedIndex];
                  var tmpl_links = {}
-                 %for cnt,archive in enumerate(c.repo_info._get_archives()):
+                 %for cnt,archive in enumerate(c.repo._get_archives()):
                 	 tmpl_links['${archive['type']}'] = '${h.link_to(archive['type'],
-                        h.url('files_archive_home',repo_name=c.repo_info.name,
+                        h.url('files_archive_home',repo_name=c.repo.name,
                         fname='__CS__'+archive['extension']),class_="archive_icon")}';
                  %endfor
                 

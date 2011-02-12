@@ -38,26 +38,26 @@
             <tr class="parity${cnt%2}">
                  <td>
                  ## TYPE OF REPO
-                 %if repo['repo'].dbrepo.repo_type =='hg':
+                 %if repo['dbrepo'].repo_type =='hg':
                    <img class="icon" title="${_('Mercurial repository')}" alt="${_('Mercurial repository')}" src="/images/icons/hgicon.png"/>
-                 %elif repo['repo'].dbrepo.repo_type =='git':
+                 %elif repo['dbrepo'].repo_type =='git':
                    <img class="icon" title="${_('Git repository')}" alt="${_('Git repository')}" src="/images/icons/giticon.png"/>
                  %else:
                    
                  %endif
                  
                  ## PRIVATE/PUBLIC REPO                  
-                 %if repo['repo'].dbrepo.private:
+                 %if repo['dbrepo'].private:
                     <img alt="${_('private')}" src="/images/icons/lock.png"/>
                  %else:
                     <img alt="${_('public')}" src="/images/icons/lock_open.png"/>
                  %endif         
                 ${h.link_to(repo['name'],h.url('edit_repo',repo_name=repo['name']))}
                 
-	            %if repo['repo'].dbrepo.fork:
-	            	<a href="${h.url('summary_home',repo_name=repo['repo'].dbrepo.fork.repo_name)}">
+	            %if repo['dbrepo'].fork:
+	            	<a href="${h.url('summary_home',repo_name=repo['dbrepo'].fork.repo_name)}">
 	            	<img class="icon" alt="${_('public')}"
-	            	title="${_('Fork of')} ${repo['repo'].dbrepo.fork.repo_name}" 
+	            	title="${_('Fork of')} ${repo['dbrepo'].fork.repo_name}" 
 	            	src="/images/icons/arrow_divide.png"/></a>
 	            %endif                
                 </td>

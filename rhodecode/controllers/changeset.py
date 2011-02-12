@@ -55,7 +55,6 @@ class ChangesetController(BaseController):
         super(ChangesetController, self).__before__()
 
     def index(self, revision):
-        hg_model = ScmModel()
 
         def wrap_to_table(str):
 
@@ -70,7 +69,7 @@ class ChangesetController(BaseController):
         rev_range = revision.split('...')[:2]
         range_limit = 50
         try:
-            repo = hg_model.get_repo(c.repo_name)
+            repo, dbrepo = ScmModel().get(c.repo_name, retval='repo')
             if len(rev_range) == 2:
                 rev_start = rev_range[0]
                 rev_end = rev_range[1]
@@ -163,12 +162,11 @@ class ChangesetController(BaseController):
 
     def raw_changeset(self, revision):
 
-        hg_model = ScmModel()
         method = request.GET.get('diff', 'show')
         try:
-            r = hg_model.get_repo(c.repo_name)
-            c.scm_type = r.alias
-            c.changeset = r.get_changeset(revision)
+            repo, dbrepo = ScmModel().get(c.repo_name, retval='repo')
+            c.scm_type = repo.alias
+            c.changeset = repo.get_changeset(revision)
         except RepositoryError:
             log.error(traceback.format_exc())
             return redirect(url('home'))

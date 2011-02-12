@@ -47,7 +47,7 @@ class ShortlogController(BaseController):
 
     def index(self):
         p = int(request.params.get('page', 1))
-        repo = ScmModel().get_repo(c.repo_name)
+        repo, dbrepo = ScmModel().get(c.repo_name, 'repo')
         c.repo_changesets = Page(repo, page=p, items_per_page=20)
         c.shortlog_data = render('shortlog/shortlog_data.html')
         if request.params.get('partial'):

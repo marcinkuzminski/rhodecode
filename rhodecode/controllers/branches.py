@@ -45,8 +45,7 @@ class BranchesController(BaseController):
         super(BranchesController, self).__before__()
 
     def index(self):
-        hg_model = ScmModel()
-        c.repo_info = hg_model.get_repo(c.repo_name)
+        c.repo_info, dbrepo = ScmModel().get(c.repo_name, retval='repo')
         c.repo_branches = OrderedDict()
         for name, hash_ in c.repo_info.branches.items():
             c.repo_branches[name] = c.repo_info.get_changeset(hash_)

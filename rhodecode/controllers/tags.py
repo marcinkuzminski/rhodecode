@@ -44,8 +44,7 @@ class TagsController(BaseController):
         super(TagsController, self).__before__()
 
     def index(self):
-        hg_model = ScmModel()
-        c.repo_info = hg_model.get_repo(c.repo_name)
+        c.repo_info, dbrepo = ScmModel().get(c.repo_name, retval='repo')
         c.repo_tags = OrderedDict()
         for name, hash_ in c.repo_info.tags.items():
             c.repo_tags[name] = c.repo_info.get_changeset(hash_)

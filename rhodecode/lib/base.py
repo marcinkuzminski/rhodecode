@@ -28,12 +28,12 @@ class BaseController(WSGIController):
         #c.unread_journal = scm_model.get_unread_journal()
 
         if c.repo_name:
-            cached_repo = scm_model.get(c.repo_name)
-            if cached_repo:
-                c.repository_tags = cached_repo.tags
-                c.repository_branches = cached_repo.branches
-                c.repository_followers = scm_model.get_followers(cached_repo.dbrepo.repo_id)
-                c.repository_forks = scm_model.get_forks(cached_repo.dbrepo.repo_id)
+            repo, dbrepo = scm_model.get(c.repo_name)
+            if repo:
+                c.repository_tags = repo.tags
+                c.repository_branches = repo.branches
+                c.repository_followers = scm_model.get_followers(dbrepo.repo_id)
+                c.repository_forks = scm_model.get_forks(dbrepo.repo_id)
             else:
                 c.repository_tags = {}
                 c.repository_branches = {}

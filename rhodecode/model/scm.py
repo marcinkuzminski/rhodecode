@@ -31,8 +31,6 @@ import logging
 
 from mercurial import ui
 
-from sqlalchemy.orm import joinedload
-from sqlalchemy.orm.session import make_transient
 from sqlalchemy.exc import DatabaseError
 
 from beaker.cache import cache_region, region_invalidate
@@ -45,9 +43,11 @@ from vcs.utils.lazy import LazyProperty
 from rhodecode import BACKENDS
 from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import HasRepoPermissionAny
-from rhodecode.lib.utils import get_repos as get_filesystem_repos, make_ui, action_logger
+from rhodecode.lib.utils import get_repos as get_filesystem_repos, make_ui, \
+    action_logger
 from rhodecode.model import BaseModel
 from rhodecode.model.user import UserModel
+from rhodecode.model.repo import RepoModel
 from rhodecode.model.db import Repository, RhodeCodeUi, CacheInvalidation, \
     UserFollowing, UserLog
 from rhodecode.model.caching_query import FromCache
@@ -82,18 +82,19 @@ class ScmModel(BaseModel):
 
         return q.ui_value
 
-    def repo_scan(self, repos_path, baseui):
+    def repo_scan(self, repos_path=None):
         """Listing of repositories in given path. This path should not be a 
         repository itself. Return a dictionary of repository objects
         
         :param repos_path: path to directory containing repositories
-        :param baseui: baseui instance to instantiate MercurialRepostitory with
         """
 
         log.info('scanning for repositories in %s', repos_path)
 
-        if not isinstance(baseui, ui.ui):
-            baseui = make_ui('db')
+        if repos_path is None:
+            repos_path = self.repos_path
+
+        baseui = make_ui('db')
         repos_list = {}
 
         for name, path in get_filesystem_repos(repos_path, recursive=True):
@@ -134,7 +135,7 @@ class ScmModel(BaseModel):
 
         for r in all_repos:
 
-            repo = self.get(r.repo_name, invalidation_list)
+            repo, dbrepo = self.get(r.repo_name, invalidation_list)
 
             if repo is not None:
                 last_change = repo.last_change
@@ -143,33 +144,34 @@ class ScmModel(BaseModel):
                 tmp_d = {}
                 tmp_d['name'] = r.repo_name
                 tmp_d['name_sort'] = tmp_d['name'].lower()
-                tmp_d['description'] = repo.dbrepo.description
+                tmp_d['description'] = dbrepo.description
                 tmp_d['description_sort'] = tmp_d['description']
                 tmp_d['last_change'] = last_change
                 tmp_d['last_change_sort'] = time.mktime(last_change.timetuple())
                 tmp_d['tip'] = tip.raw_id
                 tmp_d['tip_sort'] = tip.revision
                 tmp_d['rev'] = tip.revision
-                tmp_d['contact'] = repo.dbrepo.user.full_contact
+                tmp_d['contact'] = dbrepo.user.full_contact
                 tmp_d['contact_sort'] = tmp_d['contact']
                 tmp_d['owner_sort'] = tmp_d['contact']
                 tmp_d['repo_archives'] = list(repo._get_archives())
                 tmp_d['last_msg'] = tip.message
                 tmp_d['repo'] = repo
+                tmp_d['dbrepo'] = dbrepo
                 yield tmp_d
 
-    def get_repo(self, repo_name):
-        return self.get(repo_name)
-
-    def get(self, repo_name, invalidation_list=None):
-        """Get's repository from given name, creates BackendInstance and
+    def get(self, repo_name, invalidation_list=None, retval='all'):
+        """Returns a tuple of Repository,DbRepository,
+        Get's repository from given name, creates BackendInstance and
         propagates it's data from database with all additional information
         
         :param repo_name:
         :param invalidation_list: if a invalidation list is given the get
             method should not manually check if this repository needs 
             invalidation and just invalidate the repositories in list
-            
+        :param retval: string specifing what to return one of 'repo','dbrepo',
+            'all'if repo or dbrepo is given it'll just lazy load chosen type
+            and return None as the second
         """
         if not HasRepoPermissionAny('repository.read', 'repository.write',
                             'repository.admin')(repo_name, 'get repo check'):
@@ -189,58 +191,45 @@ class ScmModel(BaseModel):
                 backend = get_backend(alias)
             except VCSError:
                 log.error(traceback.format_exc())
-                log.error('Perhaps this repository is in db and not in filesystem'
-                          'run rescan repositories with "destroy old data "'
-                          'option from admin panel')
+                log.error('Perhaps this repository is in db and not in '
+                          'filesystem run rescan repositories with '
+                          '"destroy old data " option from admin panel')
                 return
 
             if alias == 'hg':
-                from pylons import app_globals as g
-                repo = backend(repo_path, create=False, baseui=g.baseui)
+                repo = backend(repo_path, create=False, baseui=make_ui('db'))
                 #skip hidden web repository
                 if repo._get_hidden():
                     return
             else:
                 repo = backend(repo_path, create=False)
 
-            dbrepo = self.sa.query(Repository)\
-                .options(joinedload(Repository.fork))\
-                .options(joinedload(Repository.user))\
-                .filter(Repository.repo_name == repo_name)\
-                .scalar()
-
-            self.sa.expunge_all()
-            log.debug('making transient %s', dbrepo)
-            make_transient(dbrepo)
-
-            for attr in ['user', 'forks', 'followers', 'group', 'repo_to_perm',
-                         'users_group_to_perm', 'stats', 'logs']:
-                attr = getattr(dbrepo, attr, False)
-                if attr:
-                    if isinstance(attr, list):
-                        for a in attr:
-                            log.debug('making transient %s', a)
-                            make_transient(a)
-                    else:
-                        log.debug('making transient %s', attr)
-                        make_transient(attr)
-
-            repo.dbrepo = dbrepo
             return repo
 
         pre_invalidate = True
+        dbinvalidate = False
+
         if invalidation_list is not None:
             pre_invalidate = repo_name in invalidation_list
 
         if pre_invalidate:
+            #this returns object to invalidate
             invalidate = self._should_invalidate(repo_name)
-
             if invalidate:
                 log.info('invalidating cache for repository %s', repo_name)
-                region_invalidate(_get_repo, None, repo_name)
+                #region_invalidate(_get_repo, None, repo_name)
                 self._mark_invalidated(invalidate)
+                dbinvalidate = True
 
-        return _get_repo(repo_name)
+        r, dbr = None, None
+        if retval == 'repo' or 'all':
+            r = _get_repo(repo_name)
+        if retval == 'dbrepo' or 'all':
+            dbr = RepoModel(self.sa).get_full(repo_name, cache=True,
+                                          invalidate=dbinvalidate)
+
+
+        return r, dbr
 
 
 
@@ -370,8 +359,6 @@ class ScmModel(BaseModel):
         """
 
         ret = self.sa.query(CacheInvalidation)\
-            .options(FromCache('sql_cache_short',
-                           'get_invalidation_%s' % repo_name))\
             .filter(CacheInvalidation.cache_key == repo_name)\
             .filter(CacheInvalidation.cache_active == False)\
             .scalar()
@@ -379,7 +366,8 @@ class ScmModel(BaseModel):
         return ret
 
     def _mark_invalidated(self, cache_key):
-        """ Marks all occurences of cache to invaldation as already invalidated
+        """ Marks all occurrences of cache to invalidation as already 
+        invalidated
         
         :param cache_key:
         """
