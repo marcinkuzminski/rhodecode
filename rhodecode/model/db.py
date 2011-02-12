@@ -205,7 +205,7 @@ class Repository(Base, BaseModel):
     users_group_to_perm = relationship('UsersGroupToPerm', cascade='all')
     stats = relationship('Statistics', cascade='all', uselist=False)
 
-    repo_followers = relationship('UserFollowing', primaryjoin='UserFollowing.follows_repo_id==Repository.repo_id', cascade='all')
+    followers = relationship('UserFollowing', primaryjoin='UserFollowing.follows_repo_id==Repository.repo_id', cascade='all')
 
     logs = relationship('UserLog', cascade='all')
 

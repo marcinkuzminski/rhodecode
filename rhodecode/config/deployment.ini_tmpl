@@ -79,8 +79,9 @@ celery.always.eager = false
 ####################################
 ###         BEAKER CACHE        ####
 ####################################
-beaker.cache.data_dir=/%(here)s/data/cache/data
-beaker.cache.lock_dir=/%(here)s/data/cache/lock
+beaker.cache.data_dir=%(here)s/data/cache/data
+beaker.cache.lock_dir=%(here)s/data/cache/lock
+
 beaker.cache.regions=super_short_term,short_term,long_term,sql_cache_short,sql_cache_med,sql_cache_long
 
 beaker.cache.super_short_term.type=memory
@@ -147,7 +148,7 @@ sqlalchemy.convert_unicode = true
 ### LOGGING CONFIGURATION   ####
 ################################
 [loggers]
-keys = root, routes, rhodecode, sqlalchemy
+keys = root, routes, rhodecode, sqlalchemy,beaker,templates
 
 [handlers]
 keys = console
@@ -167,6 +168,18 @@ level = INFO
 handlers = console
 qualname = routes.middleware
 # "level = DEBUG" logs the route matched and routing variables.
+propagate = 0
+
+[logger_beaker]
+level = ERROR
+handlers = console
+qualname = beaker.container
+propagate = 0
+
+[logger_templates]
+level = INFO
+handlers = console
+qualname = pylons.templating
 propagate = 0
 
 [logger_rhodecode]
