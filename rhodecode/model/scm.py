@@ -209,11 +209,21 @@ class ScmModel(BaseModel):
                 .filter(Repository.repo_name == repo_name)\
                 .scalar()
 
+            self.sa.expunge_all()
+            log.debug('making transient %s', dbrepo)
             make_transient(dbrepo)
-            if dbrepo.user:
-                make_transient(dbrepo.user)
-            if dbrepo.fork:
-                make_transient(dbrepo.fork)
+
+            for attr in ['user', 'forks', 'followers', 'group', 'repo_to_perm',
+                         'users_group_to_perm', 'stats', 'logs']:
+                attr = getattr(dbrepo, attr, False)
+                if attr:
+                    if isinstance(attr, list):
+                        for a in attr:
+                            log.debug('making transient %s', a)
+                            make_transient(a)
+                    else:
+                        log.debug('making transient %s', attr)
+                        make_transient(attr)
 
             repo.dbrepo = dbrepo
             return repo

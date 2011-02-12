@@ -201,7 +201,7 @@ class Repository(Base, BaseModel):
     user = relationship('User')
     fork = relationship('Repository', remote_side=repo_id)
     group = relationship('Group')
-    repo_to_perm = relationship('RepoToPerm', cascade='all')
+    repo_to_perm = relationship('RepoToPerm', cascade='all', order_by='RepoToPerm.repo_to_perm_id')
     users_group_to_perm = relationship('UsersGroupToPerm', cascade='all')
     stats = relationship('Statistics', cascade='all', uselist=False)
 
