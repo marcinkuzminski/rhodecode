@@ -213,10 +213,6 @@ def set_available_permissions(config):
 
     config['available_permissions'] = [x.permission_name for x in all_perms]
 
-def set_base_path(config):
-    config['base_path'] = config['pylons.app_globals'].base_path
-
-
 def fill_perms(user):
     """Fills user permission attribute with permissions taken from database
     works for permissions given for repositories, and for permissions that

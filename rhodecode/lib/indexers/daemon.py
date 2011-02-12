@@ -81,7 +81,7 @@ class WhooshIndexingDaemon(object):
         if not repo_location:
             raise Exception('You have to provide repositories location')
 
-        self.repo_paths = ScmModel(sa).repo_scan(self.repo_location, None)
+        self.repo_paths = ScmModel(sa).repo_scan(self.repo_location)
 
         if repo_list:
             filtered_repo_paths = {}

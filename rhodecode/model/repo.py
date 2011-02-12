@@ -30,38 +30,30 @@ import logging
 import traceback
 from datetime import datetime
 
+from sqlalchemy.orm import joinedload
+
+from vcs.utils.lazy import LazyProperty
+from vcs.backends import get_backend
+
 from rhodecode.model import BaseModel
 from rhodecode.model.caching_query import FromCache
 from rhodecode.model.db import Repository, RepoToPerm, User, Permission, \
-    Statistics, UsersGroup, UsersGroupToPerm
+    Statistics, UsersGroup, UsersGroupToPerm, RhodeCodeUi
 from rhodecode.model.user import UserModel
 from rhodecode.model.users_group import UsersGroupMember, UsersGroupModel
 
-from vcs.backends import get_backend
 
 log = logging.getLogger(__name__)
 
 class RepoModel(BaseModel):
 
-    def __init__(self, sa=None):
-        try:
-            from pylons import app_globals
-            self._base_path = app_globals.base_path
-        except:
-            self._base_path = None
+    @LazyProperty
+    def repos_path(self):
+        """Get's the repositories root path from database
+        """
 
-        super(RepoModel, self).__init__(sa)
-
-    @property
-    def base_path(self):
-        if self._base_path is None:
-            raise Exception('Base Path is empty, try set this after'
-                            'class initialization when not having '
-                            'app_globals available')
-        return self._base_path
-
-        super(RepoModel, self).__init__()
-
+        q = self.sa.query(RhodeCodeUi).filter(RhodeCodeUi.ui_key == '/').one()
+        return q.ui_value
 
     def get(self, repo_id, cache=False):
         repo = self.sa.query(Repository)\
@@ -81,6 +73,25 @@ class RepoModel(BaseModel):
             repo = repo.options(FromCache("sql_cache_short",
                                           "get_repo_%s" % repo_name))
         return repo.scalar()
+
+
+    def get_full(self, repo_name, cache=False, invalidate=False):
+        repo = self.sa.query(Repository)\
+            .options(joinedload(Repository.fork))\
+            .options(joinedload(Repository.user))\
+            .options(joinedload(Repository.followers))\
+            .options(joinedload(Repository.repo_to_perm))\
+            .options(joinedload(Repository.users_group_to_perm))\
+            .filter(Repository.repo_name == repo_name)\
+
+        if cache:
+            repo = repo.options(FromCache("sql_cache_long",
+                                          "get_repo_full_%s" % repo_name))
+        if invalidate:
+            repo.invalidate()
+
+        return repo.scalar()
+
 
     def get_users_js(self):
 
@@ -290,8 +301,8 @@ class RepoModel(BaseModel):
         :param alias:
         """
         from rhodecode.lib.utils import check_repo
-        repo_path = os.path.join(self.base_path, repo_name)
-        if check_repo(repo_name, self.base_path):
+        repo_path = os.path.join(self.repos_path, repo_name)
+        if check_repo(repo_name, self.repos_path):
             log.info('creating repo %s in %s', repo_name, repo_path)
             backend = get_backend(alias)
             backend(repo_path, create=True)
@@ -304,8 +315,8 @@ class RepoModel(BaseModel):
         """
         log.info('renaming repo from %s to %s', old, new)
 
-        old_path = os.path.join(self.base_path, old)
-        new_path = os.path.join(self.base_path, new)
+        old_path = os.path.join(self.repos_path, old)
+        new_path = os.path.join(self.repos_path, new)
         if os.path.isdir(new_path):
             raise Exception('Was trying to rename to already existing dir %s',
                             new_path)
@@ -319,13 +330,13 @@ class RepoModel(BaseModel):
         by reverting the renames on this repository
         :param repo: repo object
         """
-        rm_path = os.path.join(self.base_path, repo.repo_name)
+        rm_path = os.path.join(self.repos_path, repo.repo_name)
         log.info("Removing %s", rm_path)
         #disable hg/git
         alias = repo.repo_type
         shutil.move(os.path.join(rm_path, '.%s' % alias),
                     os.path.join(rm_path, 'rm__.%s' % alias))
         #disable repo
-        shutil.move(rm_path, os.path.join(self.base_path, 'rm__%s__%s' \
+        shutil.move(rm_path, os.path.join(self.repos_path, 'rm__%s__%s' \
                                           % (datetime.today().isoformat(),
                                              repo.repo_name)))

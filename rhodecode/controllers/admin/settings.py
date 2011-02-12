@@ -31,8 +31,7 @@ import formencode
 
 from sqlalchemy import func
 from formencode import htmlfill
-from pylons import request, session, tmpl_context as c, url, app_globals as g, \
-    config
+from pylons import request, session, tmpl_context as c, url, config
 from pylons.controllers.util import abort, redirect
 from pylons.i18n.translation import _
 
@@ -49,7 +48,7 @@ from rhodecode.model.forms import UserForm, ApplicationSettingsForm, \
 from rhodecode.model.scm import ScmModel
 from rhodecode.model.settings import SettingsModel
 from rhodecode.model.user import UserModel
-
+from rhodecode.model.repo import RepoModel
 
 log = logging.getLogger(__name__)
 
@@ -105,8 +104,7 @@ class SettingsController(BaseController):
         if setting_id == 'mapping':
             rm_obsolete = request.POST.get('destroy', False)
             log.debug('Rescanning directories with destroy=%s', rm_obsolete)
-
-            initial = ScmModel().repo_scan(g.paths[0][1], g.baseui)
+            initial = ScmModel().repo_scan()
             for repo_name in initial.keys():
                 invalidate_cache('get_repo_cached_%s' % repo_name)
 
