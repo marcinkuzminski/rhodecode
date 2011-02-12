@@ -506,6 +506,9 @@ def add_cache(settings):
                                                                 60))
             region_settings.setdefault('lock_dir',
                                        cache_settings.get('lock_dir'))
+            region_settings.setdefault('data_dir',
+                                       cache_settings.get('data_dir'))
+
             if 'type' not in region_settings:
                 region_settings['type'] = cache_settings.get('type',
                                                              'memory')
