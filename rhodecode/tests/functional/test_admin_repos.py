@@ -1,3 +1,6 @@
+import os
+import vcs
+
 from rhodecode.model.db import Repository
 from rhodecode.tests import *
 
@@ -36,6 +39,14 @@ class TestAdminReposController(TestController):
 
         assert repo_name in response.body, 'missing new repo from the main repos list'
 
+
+        #test if repository was created on filesystem
+        try:
+            vcs.get_repo(os.path.join(TESTS_TMP_PATH, repo_name))
+        except:
+            assert False , 'no repo in filesystem'
+
+
     def test_create_git(self):
         return
         self.log_user()
@@ -62,6 +73,11 @@ class TestAdminReposController(TestController):
 
         assert repo_name in response.body, 'missing new repo from the main repos list'
 
+        #test if repository was created on filesystem
+        try:
+            vcs.get_repo(os.path.join(TESTS_TMP_PATH, repo_name))
+        except:
+            assert False , 'no repo in filesystem'
 
     def test_new(self):
         self.log_user()
