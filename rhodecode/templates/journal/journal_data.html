@@ -3,14 +3,15 @@
 %if c.journal_day_aggreagate:
     %for day,items in c.journal_day_aggreagate:
     <div class="journal_day">${day}</div>
-        % for entry in items:
+        % for user,entries in items:
         <div style="padding:10px">
             <div class="gravatar">
-                <img alt="gravatar" src="${h.gravatar_url(entry.user.email,24)}"/>
+                <img alt="gravatar" src="${h.gravatar_url(user.email,24)}"/>
             </div>
-            <div>${entry.user.name} ${entry.user.lastname}</div>
+            <div class="journal_user">${user.name} ${user.lastname}</div>
+            % for entry in entries:
+            <div class="journal_icon"> ${h.action_parser_icon(entry)}</div>
             <div class="journal_action">${h.action_parser(entry)}</div>
-            <div class="journal_icon">${h.action_parser_icon(entry)}</div>
             <div class="journal_repo">
                 <span class="journal_repo_name">
                 %if entry.repository:
@@ -21,6 +22,7 @@
                 %endif             
                 </span> - <span title="${entry.action_date}">${h.age(entry.action_date)}</span>
             </div>
+            %endfor
         </div>
         <div style="clear:both;border-bottom:1px dashed #DDD;padding:3px 3px;margin:0px 10px 0px 10px"></div>
         %endfor

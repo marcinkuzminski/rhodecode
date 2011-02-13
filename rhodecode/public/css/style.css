@@ -1413,20 +1413,28 @@ margin-left:10px;
 margin-right:10px;
 }
 
-#journal .journal_action{
-padding-top:4px;
-min-height:15px;
+#journal .journal_user{
+color: #747474;
+font-size: 14px;
+font-weight: bold;
+height: 30px;
 }
-
 #journal .journal_icon{
 float: left;
 padding-top: 4px;
 padding-left:12px;
+padding-right: 4px;
+clear: both;
 }
-
+#journal .journal_action{
+padding-top:4px;
+min-height:2px;
+float:left
+}
 #journal .journal_repo{
-margin-left: 38px;
-padding-top: 5px;
+float: left;
+margin-left: 6px;
+padding-top: 3px;
 }
 
 #journal .journal_repo .journal_repo_name{
@@ -1434,8 +1442,13 @@ font-weight: bold;
 font-size: 1.1em;
 }
 #journal .compare_view{
-padding: 5px 0px 5px 38px;
+padding: 5px 0px 5px 3px;
 width: 95px;
+}
+.journal_highlight{
+font-weight: bold;
+padding: 0 2px;
+vertical-align: bottom;
 }
 .trending_language_tbl,.trending_language_tbl td {
 border:0 !important;
@@ -1899,11 +1912,6 @@ margin-top: 2px;
 .currently_following{
 padding-left: 10px;
 padding-bottom:5px;
-}
-
-.journal_highlight{
-font-weight: bold;
-text-decoration: underline;
 }
 
 .add_icon {

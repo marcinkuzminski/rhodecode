@@ -24,22 +24,20 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
-
 import logging
+
 from sqlalchemy import or_
-
-from pylons import request, response, session, tmpl_context as c, url
-
+from sqlalchemy.orm import joinedload, make_transient
 from webhelpers.paginate import Page
+
+from paste.httpexceptions import HTTPInternalServerError
+from pylons import request, response, session, tmpl_context as c, url
 
 from rhodecode.lib.auth import LoginRequired, NotAnonymous
 from rhodecode.lib.base import BaseController, render
 from rhodecode.lib.helpers import get_token
 from rhodecode.model.db import UserLog, UserFollowing
 from rhodecode.model.scm import ScmModel
-
-from paste.httpexceptions import HTTPInternalServerError
-from sqlalchemy.orm import joinedload
 
 log = logging.getLogger(__name__)
 
@@ -53,11 +51,11 @@ class JournalController(BaseController):
 
     def index(self):
         # Return a rendered template
-
         c.following = self.sa.query(UserFollowing)\
             .filter(UserFollowing.user_id == c.rhodecode_user.user_id)\
             .options(joinedload(UserFollowing.follows_repository))\
             .all()
+
 
         repo_ids = [x.follows_repository.repo_id for x in c.following
                     if x.follows_repository is not None]
@@ -76,6 +74,8 @@ class JournalController(BaseController):
 
         if filtering_criterion is not None:
             journal = self.sa.query(UserLog)\
+                .options(joinedload(UserLog.user))\
+                .options(joinedload(UserLog.repository))\
                 .filter(filtering_criterion)\
                 .order_by(UserLog.action_date.desc())
         else:
@@ -95,7 +95,12 @@ class JournalController(BaseController):
         from itertools import groupby
         groups = []
         for k, g in groupby(journal, lambda x:x.action_as_day):
-            groups.append((k, list(g),))      # Store group iterator as a list
+            user_group = []
+            for k2, g2 in groupby(list(g), lambda x:x.user.email):
+                l = list(g2)
+                user_group.append((l[0].user, l))
+
+            groups.append((k, user_group,))
 
         return groups
 

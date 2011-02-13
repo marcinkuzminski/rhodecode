@@ -475,6 +475,7 @@ def action_parser(user_log):
                 repo_name=repo_name, revision=rev),
                 title=message(rev), class_='tooltip')
                 for rev in revs[revs_limit:revs_top_limit]]))
+        cs_links += _(' into')
         if len(revs) > 1:
             cs_links += compare_view
         return cs_links
@@ -489,18 +490,18 @@ def action_parser(user_log):
                                           repo_name=repo.name,),
                                           title=dbrepo.description)
 
-    map = {'user_deleted_repo':(_('User [deleted] repository'), None),
-           'user_created_repo':(_('User [created] repository'), None),
-           'user_forked_repo':(_('User [forked] repository as:'), get_fork_name),
-           'user_updated_repo':(_('User [updated] repository'), None),
-           'admin_deleted_repo':(_('Admin [delete] repository'), None),
-           'admin_created_repo':(_('Admin [created] repository'), None),
-           'admin_forked_repo':(_('Admin [forked] repository'), None),
-           'admin_updated_repo':(_('Admin [updated] repository'), None),
-           'push':(_('[Pushed]'), get_cs_links),
-           'pull':(_('[Pulled]'), None),
-           'started_following_repo':(_('User [started following] repository'), None),
-           'stopped_following_repo':(_('User [stopped following] repository'), None),
+    map = {'user_deleted_repo':(_('[deleted] repository'), None),
+           'user_created_repo':(_('[created] repository'), None),
+           'user_forked_repo':(_('[forked] repository as:'), get_fork_name),
+           'user_updated_repo':(_('[updated] repository'), None),
+           'admin_deleted_repo':(_('[delete] repository'), None),
+           'admin_created_repo':(_('[created] repository'), None),
+           'admin_forked_repo':(_('[forked] repository'), None),
+           'admin_updated_repo':(_('[updated] repository'), None),
+           'push':(_('[pushed]'), get_cs_links),
+           'pull':(_('[pulled]'), None),
+           'started_following_repo':(_('[started following] repository'), None),
+           'stopped_following_repo':(_('[stopped following] repository'), None),
             }
 
     action_str = map.get(action, action)
