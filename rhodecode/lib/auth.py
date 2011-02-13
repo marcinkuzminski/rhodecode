@@ -600,7 +600,7 @@ class HasPermissionAnyMiddleware(object):
 
     def check_permissions(self):
         log.debug('checking mercurial protocol '
-                  'permissions for user:%s repository:%s',
+                  'permissions %s for user:%s repository:%s', self.user_perms,
                                                 self.username, self.repo_name)
         if self.required_perms.intersection(self.user_perms):
             log.debug('permission granted')

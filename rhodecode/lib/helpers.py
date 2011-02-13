@@ -441,9 +441,8 @@ def action_parser(user_log):
         revs = action_params.split(',')
         repo_name = user_log.repository.repo_name
         from rhodecode.model.scm import ScmModel
-
-        message = lambda rev: get_changeset_safe(ScmModel().get(repo_name),
-                                                 rev).message
+        repo, dbrepo = ScmModel().get(repo_name, retval='repo')
+        message = lambda rev: get_changeset_safe(repo, rev).message
 
         cs_links = " " + ', '.join ([link_to(rev,
                 url('changeset_home',
