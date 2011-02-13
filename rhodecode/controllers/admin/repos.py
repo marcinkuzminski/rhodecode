@@ -153,8 +153,8 @@ class ReposController(BaseController):
             else:
                 last_rev = 0
             c.stats_revision = last_rev
-            r = ScmModel().get(repo_name)
-            c.repo_last_rev = r.revisions[-1] if r.revisions else 0
+            repo, dbrepo = ScmModel().get(repo_name, retval='repo')
+            c.repo_last_rev = repo.revisions[-1] if repo.revisions else 0
 
             if last_rev == 0:
                 c.stats_percentage = 0
@@ -282,7 +282,7 @@ class ReposController(BaseController):
     def edit(self, repo_name, format='html'):
         """GET /repos/repo_name/edit: Form to edit an existing item"""
         # url('edit_repo', repo_name=ID)
-        r = ScmModel().get(repo_name)[0]
+        repo, dbrepo = ScmModel().get(repo_name, retval='repo')
 
         repo_model = RepoModel()
         c.repo_info = repo_model.get_by_repo_name(repo_name)
@@ -302,7 +302,7 @@ class ReposController(BaseController):
             last_rev = 0
         c.stats_revision = last_rev
 
-        c.repo_last_rev = r.revisions[-1] if r.revisions else 0
+        c.repo_last_rev = repo.revisions[-1] if repo.revisions else 0
 
         if last_rev == 0 or c.repo_last_rev == 0:
             c.stats_percentage = 0

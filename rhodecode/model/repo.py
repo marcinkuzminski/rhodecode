@@ -90,7 +90,9 @@ class RepoModel(BaseModel):
         if invalidate and cache:
             repo.invalidate()
 
-        return repo.scalar()
+        ret = repo.scalar()
+        self.sa.expunge_all()
+        return ret
 
 
     def get_users_js(self):

@@ -114,6 +114,7 @@ class User(Base, BaseModel):
     repositories = relationship('Repository')
     user_followers = relationship('UserFollowing', primaryjoin='UserFollowing.follows_user_id==User.user_id', cascade='all')
 
+    group_member = relationship('UsersGroupMember', cascade='all')
     @property
     def full_contact(self):
         return '%s %s <%s>' % (self.name, self.lastname, self.email)

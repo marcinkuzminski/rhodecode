@@ -217,7 +217,7 @@ class ScmModel(BaseModel):
             invalidate = self._should_invalidate(repo_name)
             if invalidate:
                 log.info('invalidating cache for repository %s', repo_name)
-                #region_invalidate(_get_repo, None, repo_name)
+                region_invalidate(_get_repo, None, repo_name)
                 self._mark_invalidated(invalidate)
                 dbinvalidate = True
 

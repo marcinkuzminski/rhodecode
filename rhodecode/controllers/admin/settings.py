@@ -105,12 +105,15 @@ class SettingsController(BaseController):
             rm_obsolete = request.POST.get('destroy', False)
             log.debug('Rescanning directories with destroy=%s', rm_obsolete)
             initial = ScmModel().repo_scan()
+            log.debug('invalidating all repositories')
             for repo_name in initial.keys():
                 invalidate_cache('get_repo_cached_%s' % repo_name)
 
-            repo2db_mapper(initial, rm_obsolete)
+            added, removed = repo2db_mapper(initial, rm_obsolete)
 
-            h.flash(_('Repositories successfully rescanned'), category='success')
+            h.flash(_('Repositories successfully'
+                      ' rescanned added: %s,removed: %s') % (added, removed)
+                      , category='success')
 
         if setting_id == 'whoosh':
             repo_location = self.get_hg_ui_settings()['paths_root_path']

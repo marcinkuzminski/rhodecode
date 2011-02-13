@@ -363,12 +363,12 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False):
     sa = meta.Session()
     rm = RepoModel()
     user = sa.query(User).filter(User.admin == True).first()
-
+    added = []
     for name, repo in initial_repo_list.items():
         group = map_groups(name.split('/'))
         if not rm.get_by_repo_name(name, cache=False):
             log.info('repository %s not found creating default', name)
-
+            added.append(name)
             form_data = {
                          'repo_name':name,
                          'repo_type':repo.alias,
@@ -380,13 +380,16 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False):
                          }
             rm.create(form_data, user, just_db=True)
 
+    removed = []
     if remove_obsolete:
         #remove from database those repositories that are not in the filesystem
         for repo in sa.query(Repository).all():
             if repo.repo_name not in initial_repo_list.keys():
+                removed.append(repo.repo_name)
                 sa.delete(repo)
                 sa.commit()
 
+    return added, removed
 class OrderedDict(dict, DictMixin):
 
     def __init__(self, *args, **kwds):
