@@ -63,24 +63,28 @@
 					<div class="commit">"${c.file.message}"</div>
 				</div>
 				<div class="code-body">
+			       %if c.file.is_binary:
+			           ${_('Binary file')}
+			       %else:				
 					% if c.file.size < c.cut_off_limit:
 						${h.pygmentize_annotation(c.file,linenos=True,anchorlinenos=True,lineanchors='S',cssclass="code-highlight")}
 					%else:
 						${_('File is to big to display')} ${h.link_to(_('show as raw'),
 						h.url('files_raw_home',repo_name=c.repo_name,revision=c.cs.revision,f_path=c.f_path))}
-					%endif				
+					%endif
+		            <script type="text/javascript">
+		            YAHOO.util.Event.onDOMReady(function(){
+		                YAHOO.util.Event.addListener('show_rev','click',function(e){
+		                    YAHOO.util.Event.preventDefault(e);
+		                    var cs = YAHOO.util.Dom.get('diff1').value;
+		                    var url = "${h.url('files_annotate_home',repo_name=c.repo_name,revision='__CS__',f_path=c.f_path)}".replace('__CS__',cs);
+		                    window.location = url;
+		                    });
+		               });
+		            </script>				
+				   %endif				
 				</div>
 			</div>
-			<script type="text/javascript">
-			YAHOO.util.Event.onDOMReady(function(){
-			    YAHOO.util.Event.addListener('show_rev','click',function(e){
-			        YAHOO.util.Event.preventDefault(e);
-			        var cs = YAHOO.util.Dom.get('diff1').value;
-			        var url = "${h.url('files_annotate_home',repo_name=c.repo_name,revision='__CS__',f_path=c.f_path)}".replace('__CS__',cs);
-			        window.location = url;
-			        });
-			   });
-			</script>			
 		</div>    
     </div>
 </div>    

@@ -224,12 +224,16 @@ class FilesController(BaseController):
         elif c.action == 'diff':
             if node1.size > self.cut_off_limit or node2.size > self.cut_off_limit:
                 c.cur_diff = _('Diff is to big to display')
+            elif node1.is_binary or node2.is_binary:
+                c.cur_diff = _('Binary file')
             else:
                 c.cur_diff = diff.as_html()
         else:
             #default option
             if node1.size > self.cut_off_limit or node2.size > self.cut_off_limit:
                 c.cur_diff = _('Diff is to big to display')
+            elif node1.is_binary or node2.is_binary:
+                c.cur_diff = _('Binary file')
             else:
                 c.cur_diff = diff.as_html()
 
