@@ -207,10 +207,10 @@ class FilesController(BaseController):
             return redirect(url('files_home',
                                 repo_name=c.repo_name, f_path=f_path))
 
-        f_udiff = differ.get_udiff(node1, node2)
-        diff = differ.DiffProcessor(f_udiff)
 
         if c.action == 'download':
+            diff = differ.DiffProcessor(differ.get_gitdiff(node1, node2))
+
             diff_name = '%s_vs_%s.diff' % (diff1, diff2)
             response.content_type = 'text/plain'
             response.content_disposition = 'attachment; filename=%s' \
@@ -218,10 +218,13 @@ class FilesController(BaseController):
             return diff.raw_diff()
 
         elif c.action == 'raw':
+            diff = differ.DiffProcessor(differ.get_gitdiff(node1, node2))
             response.content_type = 'text/plain'
             return diff.raw_diff()
 
         elif c.action == 'diff':
+            diff = differ.DiffProcessor(differ.get_udiff(node1, node2))
+
             if node1.size > self.cut_off_limit or node2.size > self.cut_off_limit:
                 c.cur_diff = _('Diff is to big to display')
             elif node1.is_binary or node2.is_binary:
@@ -229,6 +232,7 @@ class FilesController(BaseController):
             else:
                 c.cur_diff = diff.as_html()
         else:
+            diff = differ.DiffProcessor(differ.get_udiff(node1, node2))
             #default option
             if node1.size > self.cut_off_limit or node2.size > self.cut_off_limit:
                 c.cur_diff = _('Diff is to big to display')
