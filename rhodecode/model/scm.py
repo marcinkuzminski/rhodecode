@@ -135,9 +135,10 @@ class ScmModel(BaseModel):
 
         for r in all_repos:
 
-            repo, dbrepo = self.get(r.repo_name, invalidation_list)
+            r_dbr = self.get(r.repo_name, invalidation_list)
 
-            if repo is not None:
+            if r_dbr is not None:
+                repo, dbrepo = r_dbr
                 last_change = repo.last_change
                 tip = h.get_changeset_safe(repo, 'tip')
 
