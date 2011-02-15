@@ -233,8 +233,8 @@
                      %else:
                          <li>${h.link_to(_('settings'),h.url('repo_settings_home',repo_name=c.repo_name),class_='settings')}</li>
                      %endif
+                   %endif
                    	<li>${h.link_to(_('fork'),h.url('repo_fork_home',repo_name=c.repo_name),class_='fork')}</li>
-                   %endif  
                    	<li>${h.link_to(_('search'),h.url('search_repo',search_repo=c.repo_name),class_='search')}</li>
                     
                     %if h.HasPermissionAll('hg.admin')('access admin main page'):

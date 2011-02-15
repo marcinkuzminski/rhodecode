@@ -47,10 +47,10 @@ log = logging.getLogger(__name__)
 class SettingsController(BaseRepoController):
 
     @LoginRequired()
-    @HasRepoPermissionAllDecorator('repository.admin')
     def __before__(self):
         super(SettingsController, self).__before__()
 
+    @HasRepoPermissionAllDecorator('repository.admin')
     def index(self, repo_name):
         repo_model = RepoModel()
         c.repo_info = repo = repo_model.get_by_repo_name(repo_name)
@@ -93,6 +93,7 @@ class SettingsController(BaseRepoController):
             force_defaults=False
         )
 
+    @HasRepoPermissionAllDecorator('repository.admin')
     def update(self, repo_name):
         repo_model = RepoModel()
         changed_name = repo_name
@@ -124,7 +125,7 @@ class SettingsController(BaseRepoController):
         return redirect(url('repo_settings_home', repo_name=changed_name))
 
 
-
+    @HasRepoPermissionAllDecorator('repository.admin')
     def delete(self, repo_name):
         """DELETE /repos/repo_name: Delete an existing item"""
         # Forms posted to this method should contain a hidden field:
@@ -156,6 +157,7 @@ class SettingsController(BaseRepoController):
 
         return redirect(url('home'))
 
+    @HasRepoPermissionAllDecorator('repository.read')
     def fork(self, repo_name):
         repo_model = RepoModel()
         c.repo_info = repo = repo_model.get_by_repo_name(repo_name)
@@ -171,7 +173,7 @@ class SettingsController(BaseRepoController):
         return render('settings/repo_fork.html')
 
 
-
+    @HasRepoPermissionAllDecorator('repository.read')
     def fork_create(self, repo_name):
         repo_model = RepoModel()
         c.repo_info = repo_model.get_by_repo_name(repo_name)
