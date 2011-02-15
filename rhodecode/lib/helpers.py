@@ -480,7 +480,6 @@ def action_parser(user_log):
                 repo_name=repo_name, revision=rev),
                 title=message(rev), class_='tooltip')
                 for rev in revs[revs_limit:revs_top_limit]]))
-        cs_links += _(' into')
         if len(revs) > 1:
             cs_links += compare_view
         return cs_links
@@ -498,8 +497,8 @@ def action_parser(user_log):
            'admin_created_repo':(_('[created] repository'), None),
            'admin_forked_repo':(_('[forked] repository'), None),
            'admin_updated_repo':(_('[updated] repository'), None),
-           'push':(_('[pushed]'), get_cs_links),
-           'pull':(_('[pulled]'), None),
+           'push':(_('[pushed] into'), get_cs_links),
+           'pull':(_('[pulled] into'), None),
            'started_following_repo':(_('[started following] repository'), None),
            'stopped_following_repo':(_('[stopped following] repository'), None),
             }
@@ -507,10 +506,12 @@ def action_parser(user_log):
     action_str = map.get(action, action)
     action = action_str[0].replace('[', '<span class="journal_highlight">')\
                    .replace(']', '</span>')
-    if action_str[1] is not None:
-        action = action + " " + action_str[1]()
+    action_params_func = lambda :""
 
-    return literal(action)
+    if action_str[1] is not None:
+        action_params_func = action_str[1]
+
+    return [literal(action), action_params_func]
 
 def action_parser_icon(user_log):
     action = user_log.action

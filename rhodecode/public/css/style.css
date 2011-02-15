@@ -1413,6 +1413,16 @@ margin-left:10px;
 margin-right:10px;
 }
 
+#journal .journal_container{
+padding:5px;
+clear:both;
+margin:0px 5px 0px 10px;
+}
+
+#journal .journal_action_container{
+padding-left:38px;
+}
+
 #journal .journal_user{
 color: #747474;
 font-size: 14px;
@@ -1422,7 +1432,6 @@ height: 30px;
 #journal .journal_icon{
 clear: both;
 float: left;
-padding-left: 36px;
 padding-right: 4px;
 padding-top: 3px;
 }
@@ -1430,6 +1439,10 @@ padding-top: 3px;
 padding-top:4px;
 min-height:2px;
 float:left
+}
+#journal .journal_action_params{
+clear: left;
+padding-left: 22px;
 }
 #journal .journal_repo{
 float: left;
@@ -1440,14 +1453,14 @@ padding-top: 3px;
 clear: both;
 color: #777777;
 font-size: 11px;
-padding-left: 56px;
+padding-left: 22px;
 }
 #journal .journal_repo .journal_repo_name{
 font-weight: bold;
 font-size: 1.1em;
 }
 #journal .compare_view{
-padding: 5px 0px 5px 3px;
+padding: 5px 0px 5px 0px;
 width: 95px;
 }
 .journal_highlight{
