@@ -1420,11 +1420,11 @@ font-weight: bold;
 height: 30px;
 }
 #journal .journal_icon{
-float: left;
-padding-top: 4px;
-padding-left:12px;
-padding-right: 4px;
 clear: both;
+float: left;
+padding-left: 36px;
+padding-right: 4px;
+padding-top: 3px;
 }
 #journal .journal_action{
 padding-top:4px;
@@ -1436,7 +1436,12 @@ float: left;
 margin-left: 6px;
 padding-top: 3px;
 }
-
+#journal .date{
+clear: both;
+color: #777777;
+font-size: 11px;
+padding-left: 56px;
+}
 #journal .journal_repo .journal_repo_name{
 font-weight: bold;
 font-size: 1.1em;

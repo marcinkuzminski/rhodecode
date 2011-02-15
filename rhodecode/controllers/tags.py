@@ -29,13 +29,12 @@ import logging
 from pylons import tmpl_context as c
 
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
-from rhodecode.lib.base import BaseController, render
+from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.utils import OrderedDict
-from rhodecode.model.scm import ScmModel
 
 log = logging.getLogger(__name__)
 
-class TagsController(BaseController):
+class TagsController(BaseRepoController):
 
     @LoginRequired()
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
@@ -44,9 +43,8 @@ class TagsController(BaseController):
         super(TagsController, self).__before__()
 
     def index(self):
-        c.repo_info, dbrepo = ScmModel().get(c.repo_name, retval='repo')
         c.repo_tags = OrderedDict()
-        for name, hash_ in c.repo_info.tags.items():
-            c.repo_tags[name] = c.repo_info.get_changeset(hash_)
+        for name, hash_ in c.rhodecode_repo.tags.items():
+            c.repo_tags[name] = c.rhodecode_repo.get_changeset(hash_)
 
         return render('tags/tags.html')

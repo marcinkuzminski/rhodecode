@@ -27,18 +27,17 @@
 
 import logging
 
-from pylons import url, response
+from pylons import url, response, tmpl_context as c
 from pylons.i18n.translation import _
 
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
-from rhodecode.lib.base import BaseController
-from rhodecode.model.scm import ScmModel
+from rhodecode.lib.base import BaseRepoController
 
 from webhelpers.feedgenerator import Atom1Feed, Rss201rev2Feed
 
 log = logging.getLogger(__name__)
 
-class FeedController(BaseController):
+class FeedController(BaseRepoController):
 
     @LoginRequired()
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
@@ -60,9 +59,7 @@ class FeedController(BaseController):
                          language=self.language,
                          ttl=self.ttl)
 
-        repo, dbrepo = ScmModel().get(repo_name, retval='repo')
-
-        for cs in repo[:self.feed_nr]:
+        for cs in c.rhodecode_repo[:self.feed_nr]:
             feed.add_item(title=cs.message,
                           link=url('changeset_home', repo_name=repo_name,
                                    revision=cs.raw_id, qualified=True),
@@ -80,8 +77,7 @@ class FeedController(BaseController):
                          language=self.language,
                          ttl=self.ttl)
 
-        repo, dbrepo = ScmModel().get(repo_name, retval='repo')
-        for cs in repo[:self.feed_nr]:
+        for cs in c.rhodecode_repo[:self.feed_nr]:
             feed.add_item(title=cs.message,
                           link=url('changeset_home', repo_name=repo_name,
                                    revision=cs.raw_id, qualified=True),

@@ -142,10 +142,10 @@
 					<ul class="repo_switcher">
                         %for repo in c.cached_repo_list:
                         
-                          %if repo['dbrepo'].private:
-                             <li><img src="/images/icons/lock.png" alt="${_('Private repository')}" class="repo_switcher_type"/>${h.link_to(repo['repo'].name,h.url('summary_home',repo_name=repo['repo'].name),class_="%s" % repo['dbrepo'].repo_type)}</li>
+                          %if repo['dbrepo']['private']:
+                             <li><img src="/images/icons/lock.png" alt="${_('Private repository')}" class="repo_switcher_type"/>${h.link_to(repo['repo'].name,h.url('summary_home',repo_name=repo['repo'].name),class_="%s" % repo['dbrepo']['repo_type'])}</li>
                           %else:
-                             <li><img src="/images/icons/lock_open.png" alt="${_('Public repository')}" class="repo_switcher_type" />${h.link_to(repo['repo'].name,h.url('summary_home',repo_name=repo['repo'].name),class_="%s" % repo['dbrepo'].repo_type)}</li>
+                             <li><img src="/images/icons/lock_open.png" alt="${_('Public repository')}" class="repo_switcher_type" />${h.link_to(repo['repo'].name,h.url('summary_home',repo_name=repo['repo'].name),class_="%s" % repo['dbrepo']['repo_type'])}</li>
                           %endif  
                         %endfor					
 					</ul>			
@@ -185,10 +185,10 @@
                    </a>    
                     <ul>
                         <li>
-                            ${h.link_to('%s (%s)' % (_('branches'),len(c.repository_branches.values()),),h.url('branches_home',repo_name=c.repo_name),class_='branches childs')}
+                            ${h.link_to('%s (%s)' % (_('branches'),len(c.rhodecode_repo.branches.values()),),h.url('branches_home',repo_name=c.repo_name),class_='branches childs')}
                             <ul>
-                            %if c.repository_branches.values():
-						        %for cnt,branch in enumerate(c.repository_branches.items()):
+                            %if c.rhodecode_repo.branches.values():
+						        %for cnt,branch in enumerate(c.rhodecode_repo.branches.items()):
 						            <li>${h.link_to('%s - %s' % (branch[0],h.short_id(branch[1])),h.url('files_home',repo_name=c.repo_name,revision=branch[1]))}</li>
 						        %endfor
 						    %else:
@@ -197,10 +197,10 @@
                             </ul>                        
                         </li>
                         <li>
-                            ${h.link_to('%s (%s)' % (_('tags'),len(c.repository_tags.values()),),h.url('tags_home',repo_name=c.repo_name),class_='tags childs')}
+                            ${h.link_to('%s (%s)' % (_('tags'),len(c.rhodecode_repo.tags.values()),),h.url('tags_home',repo_name=c.repo_name),class_='tags childs')}
                             <ul>
-                            %if c.repository_tags.values():
-                                %for cnt,tag in enumerate(c.repository_tags.items()):
+                            %if c.rhodecode_repo.tags.values():
+                                %for cnt,tag in enumerate(c.rhodecode_repo.tags.items()):
                                  <li>${h.link_to('%s - %s' % (tag[0],h.short_id(tag[1])),h.url('files_home',repo_name=c.repo_name,revision=tag[1]))}</li>
                                 %endfor
                             %else:

@@ -28,8 +28,7 @@ import logging
 import traceback
 
 from pylons.i18n.translation import _
-from pylons import request, response, config, session, tmpl_context as c, url
-from pylons.controllers.util import abort, redirect
+from pylons import request, config, session, tmpl_context as c
 
 from rhodecode.lib.auth import LoginRequired
 from rhodecode.lib.base import BaseController, render

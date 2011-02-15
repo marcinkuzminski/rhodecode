@@ -32,12 +32,11 @@ from pylons import tmpl_context as c, request
 from webhelpers.paginate import Page
 
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
-from rhodecode.lib.base import BaseController, render
-from rhodecode.model.scm import ScmModel
+from rhodecode.lib.base import BaseRepoController, render
 
 log = logging.getLogger(__name__)
 
-class ShortlogController(BaseController):
+class ShortlogController(BaseRepoController):
 
     @LoginRequired()
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
@@ -47,8 +46,7 @@ class ShortlogController(BaseController):
 
     def index(self):
         p = int(request.params.get('page', 1))
-        repo, dbrepo = ScmModel().get(c.repo_name, 'repo')
-        c.repo_changesets = Page(repo, page=p, items_per_page=20)
+        c.repo_changesets = Page(c.rhodecode_repo, page=p, items_per_page=20)
         c.shortlog_data = render('shortlog/shortlog_data.html')
         if request.params.get('partial'):
             return c.shortlog_data

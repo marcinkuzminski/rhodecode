@@ -35,11 +35,10 @@ from vcs.exceptions import ChangesetError
 from pylons import tmpl_context as c, request, url
 from pylons.i18n.translation import _
 
-from rhodecode.model.scm import ScmModel
 from rhodecode.model.db import Statistics
 
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
-from rhodecode.lib.base import BaseController, render
+from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.utils import OrderedDict, EmptyChangeset
 
 from rhodecode.lib.celerylib import run_task
@@ -54,7 +53,7 @@ except ImportError:
     import simplejson as json
 log = logging.getLogger(__name__)
 
-class SummaryController(BaseController):
+class SummaryController(BaseRepoController):
 
     @LoginRequired()
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
@@ -63,10 +62,10 @@ class SummaryController(BaseController):
         super(SummaryController, self).__before__()
 
     def index(self):
-        scm_model = ScmModel()
-        c.repo, dbrepo = scm_model.get(c.repo_name)
+        c.repo, dbrepo = self.scm_model.get(c.repo_name)
         c.dbrepo = dbrepo
-        c.following = scm_model.is_following_repo(c.repo_name,
+
+        c.following = self.scm_model.is_following_repo(c.repo_name,
                                              c.rhodecode_user.user_id)
         def url_generator(**kw):
             return url('shortlog_home', repo_name=c.repo_name, **kw)
@@ -158,12 +157,12 @@ class SummaryController(BaseController):
         branches_group = ([], _("Branches"))
         tags_group = ([], _("Tags"))
 
-        for name, chs in c.repository_branches.items():
+        for name, chs in c.rhodecode_repo.branches.items():
             #chs = chs.split(':')[-1]
             branches_group[0].append((chs, name),)
         download_l.append(branches_group)
 
-        for name, chs in c.repository_tags.items():
+        for name, chs in c.rhodecode_repo.tags.items():
             #chs = chs.split(':')[-1]
             tags_group[0].append((chs, name),)
         download_l.append(tags_group)

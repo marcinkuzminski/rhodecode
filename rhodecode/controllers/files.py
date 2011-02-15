@@ -24,30 +24,28 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
-import tempfile
 import logging
 import rhodecode.lib.helpers as h
-
-from mercurial import archival
 
 from pylons import request, response, session, tmpl_context as c, url
 from pylons.i18n.translation import _
 from pylons.controllers.util import redirect
 
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
-from rhodecode.lib.base import BaseController, render
+from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.utils import EmptyChangeset
-from rhodecode.model.scm import ScmModel
+from rhodecode.model.repo import RepoModel
 
 from vcs.backends import ARCHIVE_SPECS
 from vcs.exceptions import RepositoryError, ChangesetError, \
-    ChangesetDoesNotExistError, EmptyRepositoryError, ImproperArchiveTypeError
-from vcs.nodes import FileNode
+    ChangesetDoesNotExistError, EmptyRepositoryError, ImproperArchiveTypeError, \
+    VCSError
+from vcs.nodes import FileNode, NodeKind
 from vcs.utils import diffs as differ
 
 log = logging.getLogger(__name__)
 
-class FilesController(BaseController):
+class FilesController(BaseRepoController):
 
     @LoginRequired()
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
@@ -56,15 +54,30 @@ class FilesController(BaseController):
         super(FilesController, self).__before__()
         c.cut_off_limit = self.cut_off_limit
 
-    def index(self, repo_name, revision, f_path):
-        c.repo, dbrepo = ScmModel().get(c.repo_name, retval='repo')
+    def __get_cs(self, rev, repo_name):
+        """
+        Safe way to get changeset if error ucure it redirects to given
+        :param rev: revision to fetch
+        :param repo_name: repo name to redirect after
+        """
 
+        try:
+            return c.rhodecode_repo.get_changeset(rev)
+        except EmptyRepositoryError, e:
+            h.flash(_('There are no files yet'), category='warning')
+            redirect(h.url('summary_home', repo_name=repo_name))
+
+        except RepositoryError, e:
+            h.flash(str(e), category='warning')
+            redirect(h.url('files_home', repo_name=repo_name, revision='tip'))
+
+    def index(self, repo_name, revision, f_path):
 
         try:
             #reditect to given revision from form
             post_revision = request.POST.get('at_rev', None)
             if post_revision:
-                post_revision = c.repo.get_changeset(post_revision).raw_id
+                post_revision = c.rhodecode_repo.get_changeset(post_revision).raw_id
                 redirect(url('files_home', repo_name=c.repo_name,
                              revision=post_revision, f_path=f_path))
 
@@ -72,33 +85,33 @@ class FilesController(BaseController):
 
             c.f_path = f_path
 
-            c.changeset = c.repo.get_changeset(revision)
+            c.changeset = c.rhodecode_repo.get_changeset(revision)
             cur_rev = c.changeset.revision
 
             #prev link
             try:
-                prev_rev = c.repo.get_changeset(cur_rev).prev(c.branch).raw_id
+                prev_rev = c.rhodecode_repo.get_changeset(cur_rev).prev(c.branch).raw_id
                 c.url_prev = url('files_home', repo_name=c.repo_name,
                              revision=prev_rev, f_path=f_path)
                 if c.branch:
                     c.url_prev += '?branch=%s' % c.branch
-            except ChangesetDoesNotExistError:
+            except (ChangesetDoesNotExistError, VCSError):
                 c.url_prev = '#'
 
             #next link
             try:
-                next_rev = c.repo.get_changeset(cur_rev).next(c.branch).raw_id
+                next_rev = c.rhodecode_repo.get_changeset(cur_rev).next(c.branch).raw_id
                 c.url_next = url('files_home', repo_name=c.repo_name,
                          revision=next_rev, f_path=f_path)
                 if c.branch:
                     c.url_next += '?branch=%s' % c.branch
-            except ChangesetDoesNotExistError:
+            except (ChangesetDoesNotExistError, VCSError):
                 c.url_next = '#'
 
             #files
             try:
                 c.files_list = c.changeset.get_node(f_path)
-                c.file_history = self._get_history(c.repo, c.files_list, f_path)
+                c.file_history = self._get_history(c.rhodecode_repo, c.files_list, f_path)
             except RepositoryError, e:
                 h.flash(str(e), category='warning')
                 redirect(h.url('files_home', repo_name=repo_name, revision=revision))
@@ -116,32 +129,40 @@ class FilesController(BaseController):
         return render('files/files.html')
 
     def rawfile(self, repo_name, revision, f_path):
-        c.repo, dbrepo = ScmModel().get(c.repo_name, retval='repo')
-        file_node = c.repo.get_changeset(revision).get_node(f_path)
+        cs = self.__get_cs(revision, repo_name)
+        try:
+            file_node = cs.get_node(f_path)
+        except RepositoryError, e:
+            h.flash(str(e), category='warning')
+            redirect(h.url('files_home', repo_name=repo_name, revision=cs.raw_id))
+
         response.content_type = file_node.mimetype
         response.content_disposition = 'attachment; filename=%s' \
                                                     % f_path.split('/')[-1]
         return file_node.content
 
     def raw(self, repo_name, revision, f_path):
-        c.repo, dbrepo = ScmModel().get(c.repo_name, retval='repo')
-        file_node = c.repo.get_changeset(revision).get_node(f_path)
+        cs = self.__get_cs(revision, repo_name)
+        try:
+            file_node = cs.get_node(f_path)
+        except RepositoryError, e:
+            h.flash(str(e), category='warning')
+            redirect(h.url('files_home', repo_name=repo_name, revision=cs.raw_id))
+
         response.content_type = 'text/plain'
 
         return file_node.content
 
     def annotate(self, repo_name, revision, f_path):
-        c.repo, dbrepo = ScmModel().get(c.repo_name, retval='repo')
-
+        cs = self.__get_cs(revision, repo_name)
         try:
-            c.cs = c.repo.get_changeset(revision)
-            c.file = c.cs.get_node(f_path)
+            c.file = cs.get_node(f_path)
         except RepositoryError, e:
             h.flash(str(e), category='warning')
-            redirect(h.url('files_home', repo_name=repo_name, revision=revision))
+            redirect(h.url('files_home', repo_name=repo_name, revision=cs.raw_id))
 
-        c.file_history = self._get_history(c.repo, c.file, f_path)
-
+        c.file_history = self._get_history(c.rhodecode_repo, c.file, f_path)
+        c.cs = cs
         c.f_path = f_path
 
         return render('files/files_annotate.html')
@@ -160,12 +181,11 @@ class FilesController(BaseController):
                 ext = ext_data[1]
 
         try:
-            repo, dbrepo = ScmModel().get(repo_name)
-
+            dbrepo = RepoModel().get_by_repo_name(repo_name)
             if dbrepo.enable_downloads is False:
                 return _('downloads disabled')
 
-            cs = repo.get_changeset(revision)
+            cs = c.rhodecode_repo.get_changeset(revision)
             content_type = ARCHIVE_SPECS[fileformat][0]
         except ChangesetDoesNotExistError:
             return _('Unknown revision %s') % revision
@@ -187,18 +207,17 @@ class FilesController(BaseController):
         c.action = request.GET.get('diff')
         c.no_changes = diff1 == diff2
         c.f_path = f_path
-        c.repo, dbrepo = ScmModel().get(c.repo_name, retval='repo')
 
         try:
             if diff1 not in ['', None, 'None', '0' * 12, '0' * 40]:
-                c.changeset_1 = c.repo.get_changeset(diff1)
+                c.changeset_1 = c.rhodecode_repo.get_changeset(diff1)
                 node1 = c.changeset_1.get_node(f_path)
             else:
                 c.changeset_1 = EmptyChangeset()
                 node1 = FileNode('.', '', changeset=c.changeset_1)
 
             if diff2 not in ['', None, 'None', '0' * 12, '0' * 40]:
-                c.changeset_2 = c.repo.get_changeset(diff2)
+                c.changeset_2 = c.rhodecode_repo.get_changeset(diff2)
                 node2 = c.changeset_2.get_node(f_path)
             else:
                 c.changeset_2 = EmptyChangeset()
@@ -245,7 +264,6 @@ class FilesController(BaseController):
         return render('files/file_diff.html')
 
     def _get_history(self, repo, node, f_path):
-        from vcs.nodes import NodeKind
         if not node.kind is NodeKind.FILE:
             return []
         changesets = node.history
@@ -261,12 +279,12 @@ class FilesController(BaseController):
 
         hist_l.append(changesets_group)
 
-        for name, chs in c.repository_branches.items():
+        for name, chs in c.rhodecode_repo.branches.items():
             #chs = chs.split(':')[-1]
             branches_group[0].append((chs, name),)
         hist_l.append(branches_group)
 
-        for name, chs in c.repository_tags.items():
+        for name, chs in c.rhodecode_repo.tags.items():
             #chs = chs.split(':')[-1]
             tags_group[0].append((chs, name),)
         hist_l.append(tags_group)

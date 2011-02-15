@@ -23,23 +23,9 @@ class BaseController(WSGIController):
         self.cut_off_limit = int(config.get('cut_off_limit'))
 
         self.sa = meta.Session()
-        scm_model = ScmModel(self.sa)
-        c.cached_repo_list = scm_model.get_repos()
+        self.scm_model = ScmModel(self.sa)
+        c.cached_repo_list = self.scm_model.get_repos()
         #c.unread_journal = scm_model.get_unread_journal()
-
-        if c.repo_name:
-            repo, dbrepo = scm_model.get(c.repo_name)
-            if repo:
-                c.repository_tags = repo.tags
-                c.repository_branches = repo.branches
-                c.repository_followers = scm_model.get_followers(dbrepo.repo_id)
-                c.repository_forks = scm_model.get_forks(dbrepo.repo_id)
-            else:
-                c.repository_tags = {}
-                c.repository_branches = {}
-                c.repository_followers = 0
-                c.repository_forks = 0
-
 
     def __call__(self, environ, start_response):
         """Invoke the Controller"""
@@ -52,3 +38,26 @@ class BaseController(WSGIController):
             return WSGIController.__call__(self, environ, start_response)
         finally:
             meta.Session.remove()
+
+
+class BaseRepoController(BaseController):
+    """
+    Base class for controllers responsible for loading all needed data
+    for those controllers, loaded items are
+    
+    c.rhodecode_repo: instance of scm repository (taken from cache)
+     
+    """
+
+    def __before__(self):
+        super(BaseRepoController, self).__before__()
+        if c.repo_name:
+
+            c.rhodecode_repo, dbrepo = self.scm_model.get(c.repo_name,
+                                                          retval='repo')
+            if c.rhodecode_repo:
+                c.repository_followers = self.scm_model.get_followers(c.repo_name)
+                c.repository_forks = self.scm_model.get_forks(c.repo_name)
+            else:
+                c.repository_followers = 0
+                c.repository_forks = 0

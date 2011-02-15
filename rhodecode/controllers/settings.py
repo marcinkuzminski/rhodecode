@@ -29,7 +29,6 @@ import logging
 import traceback
 
 import formencode
-from formencode import htmlfill
 
 from pylons import tmpl_context as c, request, url
 from pylons.controllers.util import redirect
@@ -37,7 +36,7 @@ from pylons.i18n.translation import _
 
 import rhodecode.lib.helpers as h
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAllDecorator
-from rhodecode.lib.base import BaseController, render
+from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.utils import invalidate_cache, action_logger
 from rhodecode.model.forms import RepoSettingsForm, RepoForkForm
 from rhodecode.model.repo import RepoModel
@@ -45,7 +44,7 @@ from rhodecode.model.db import User
 
 log = logging.getLogger(__name__)
 
-class SettingsController(BaseController):
+class SettingsController(BaseRepoController):
 
     @LoginRequired()
     @HasRepoPermissionAllDecorator('repository.admin')
@@ -87,7 +86,7 @@ class SettingsController(BaseController):
             defaults.update({'g_perm_%s' % p.users_group.users_group_name:
                              p.permission.permission_name})
 
-        return htmlfill.render(
+        return formencode.htmlfill.render(
             render('settings/repo_settings.html'),
             defaults=defaults,
             encoding="UTF-8",
@@ -111,7 +110,7 @@ class SettingsController(BaseController):
             c.repo_info = repo_model.get_by_repo_name(repo_name)
             c.users_array = repo_model.get_users_js()
             errors.value.update({'user':c.repo_info.user.username})
-            return htmlfill.render(
+            return formencode.htmlfill.render(
                 render('settings/repo_settings.html'),
                 defaults=errors.value,
                 errors=errors.error_dict or {},
@@ -192,7 +191,7 @@ class SettingsController(BaseController):
             c.new_repo = errors.value['fork_name']
             r = render('settings/repo_fork.html')
 
-            return htmlfill.render(
+            return formencode.htmlfill.render(
                 r,
                 defaults=errors.value,
                 errors=errors.error_dict or {},

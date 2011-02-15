@@ -29,15 +29,15 @@ import logging
 from sqlalchemy import or_
 from sqlalchemy.orm import joinedload, make_transient
 from webhelpers.paginate import Page
+from itertools import groupby
 
 from paste.httpexceptions import HTTPInternalServerError
-from pylons import request, response, session, tmpl_context as c, url
+from pylons import request, tmpl_context as c
 
 from rhodecode.lib.auth import LoginRequired, NotAnonymous
 from rhodecode.lib.base import BaseController, render
 from rhodecode.lib.helpers import get_token
 from rhodecode.model.db import UserLog, UserFollowing
-from rhodecode.model.scm import ScmModel
 
 log = logging.getLogger(__name__)
 
@@ -51,6 +51,7 @@ class JournalController(BaseController):
 
     def index(self):
         # Return a rendered template
+
         c.following = self.sa.query(UserFollowing)\
             .filter(UserFollowing.user_id == c.rhodecode_user.user_id)\
             .options(joinedload(UserFollowing.follows_repository))\
@@ -71,7 +72,6 @@ class JournalController(BaseController):
             filtering_criterion = UserLog.repository_id.in_(repo_ids)
         if not repo_ids and user_ids:
             filtering_criterion = UserLog.user_id.in_(user_ids)
-
         if filtering_criterion is not None:
             journal = self.sa.query(UserLog)\
                 .options(joinedload(UserLog.user))\
@@ -80,19 +80,19 @@ class JournalController(BaseController):
                 .order_by(UserLog.action_date.desc())
         else:
             journal = []
-
         p = int(request.params.get('page', 1))
-        c.journal_pager = Page(journal, page=p, items_per_page=10)
+
+        c.journal_pager = Page(journal, page=p, items_per_page=20)
+
         c.journal_day_aggreagate = self._get_daily_aggregate(c.journal_pager)
+
         c.journal_data = render('journal/journal_data.html')
         if request.params.get('partial'):
             return c.journal_data
-
         return render('journal/journal.html')
 
 
     def _get_daily_aggregate(self, journal):
-        from itertools import groupby
         groups = []
         for k, g in groupby(journal, lambda x:x.action_as_day):
             user_group = []
@@ -109,12 +109,11 @@ class JournalController(BaseController):
         cur_token = request.POST.get('auth_token')
         token = get_token()
         if cur_token == token:
-            scm_model = ScmModel()
 
             user_id = request.POST.get('follows_user_id')
             if user_id:
                 try:
-                    scm_model.toggle_following_user(user_id,
+                    self.scm_model.toggle_following_user(user_id,
                                                     c.rhodecode_user.user_id)
                     return 'ok'
                 except:
@@ -123,7 +122,7 @@ class JournalController(BaseController):
             repo_id = request.POST.get('follows_repo_id')
             if repo_id:
                 try:
-                    scm_model.toggle_following_repo(repo_id,
+                    self.scm_model.toggle_following_repo(repo_id,
                                                     c.rhodecode_user.user_id)
                     return 'ok'
                 except:

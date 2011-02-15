@@ -14,14 +14,15 @@
             <div class="journal_action">${h.action_parser(entry)}</div>
             <div class="journal_repo">
                 <span class="journal_repo_name">
-                %if entry.repository:
+                %if entry.repository is not None:
                   ${h.link_to(entry.repository.repo_name,
                               h.url('summary_home',repo_name=entry.repository.repo_name))}
                 %else:
                   ${entry.repository_name}
                 %endif             
-                </span> - <span title="${entry.action_date}">${h.age(entry.action_date)}</span>
+                </span>
             </div>
+            <div class="date"><span class="tooltip" title="${entry.action_date}">${h.age(entry.action_date)}</span></div>
             %endfor
         </div>
         <div style="clear:both;border-bottom:1px dashed #DDD;padding:3px 3px;margin:0px 10px 0px 10px"></div>

@@ -34,9 +34,8 @@ from pylons.controllers.util import redirect
 
 import rhodecode.lib.helpers as h
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
-from rhodecode.lib.base import BaseController, render
+from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.utils import EmptyChangeset
-from rhodecode.model.scm import ScmModel
 
 from vcs.exceptions import RepositoryError, ChangesetError, \
 ChangesetDoesNotExistError
@@ -46,7 +45,7 @@ from vcs.utils.ordered_dict import OrderedDict
 
 log = logging.getLogger(__name__)
 
-class ChangesetController(BaseController):
+class ChangesetController(BaseRepoController):
 
     @LoginRequired()
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
@@ -69,14 +68,13 @@ class ChangesetController(BaseController):
         rev_range = revision.split('...')[:2]
         range_limit = 50
         try:
-            repo, dbrepo = ScmModel().get(c.repo_name, retval='repo')
             if len(rev_range) == 2:
                 rev_start = rev_range[0]
                 rev_end = rev_range[1]
-                rev_ranges = repo.get_changesets_ranges(rev_start, rev_end,
+                rev_ranges = c.rhodecode_repo.get_changesets_ranges(rev_start, rev_end,
                                                        range_limit)
             else:
-                rev_ranges = [repo.get_changeset(revision)]
+                rev_ranges = [c.rhodecode_repo.get_changeset(revision)]
 
             c.cs_ranges = list(rev_ranges)
 
@@ -164,9 +162,8 @@ class ChangesetController(BaseController):
 
         method = request.GET.get('diff', 'show')
         try:
-            repo, dbrepo = ScmModel().get(c.repo_name, retval='repo')
-            c.scm_type = repo.alias
-            c.changeset = repo.get_changeset(revision)
+            c.scm_type = c.rhodecode_repo.alias
+            c.changeset = c.rhodecode_repo.get_changeset(revision)
         except RepositoryError:
             log.error(traceback.format_exc())
             return redirect(url('home'))
@@ -182,7 +179,7 @@ class ChangesetController(BaseController):
                 if filenode_old.is_binary or node.is_binary:
                     diff = _('binary file') + '\n'
                 else:
-                    f_udiff = differ.get_udiff(filenode_old, node)
+                    f_udiff = differ.get_gitdiff(filenode_old, node)
                     diff = differ.DiffProcessor(f_udiff).raw_diff()
 
                 cs1 = None
@@ -194,7 +191,7 @@ class ChangesetController(BaseController):
                 if filenode_old.is_binary or node.is_binary:
                     diff = _('binary file')
                 else:
-                    f_udiff = differ.get_udiff(filenode_old, node)
+                    f_udiff = differ.get_gitdiff(filenode_old, node)
                     diff = differ.DiffProcessor(f_udiff).raw_diff()
 
                 cs1 = filenode_old.last_changeset.raw_id

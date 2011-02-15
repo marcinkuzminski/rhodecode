@@ -32,6 +32,7 @@ import logging
 from mercurial import ui
 
 from sqlalchemy.exc import DatabaseError
+from sqlalchemy.orm import make_transient
 
 from beaker.cache import cache_region, region_invalidate
 
@@ -121,29 +122,27 @@ class ScmModel(BaseModel):
         and fill that backed with information from database
         
         :param all_repos: give specific repositories list, good for filtering
+            this have to be a list of  just the repository names
         """
-
         if all_repos is None:
-            all_repos = self.sa.query(Repository)\
-                .order_by(Repository.repo_name).all()
+            all_repos = [r.repo_name for r in self.sa.query(Repository)\
+                .order_by(Repository.repo_name).all()]
 
         #get the repositories that should be invalidated
         invalidation_list = [str(x.cache_key) for x in \
                              self.sa.query(CacheInvalidation.cache_key)\
                              .filter(CacheInvalidation.cache_active == False)\
                              .all()]
-
-        for r in all_repos:
-
-            r_dbr = self.get(r.repo_name, invalidation_list)
-
+        for r_name in all_repos:
+            r_dbr = self.get(r_name, invalidation_list)
             if r_dbr is not None:
                 repo, dbrepo = r_dbr
+
                 last_change = repo.last_change
                 tip = h.get_changeset_safe(repo, 'tip')
 
                 tmp_d = {}
-                tmp_d['name'] = r.repo_name
+                tmp_d['name'] = dbrepo.repo_name
                 tmp_d['name_sort'] = tmp_d['name'].lower()
                 tmp_d['description'] = dbrepo.description
                 tmp_d['description_sort'] = tmp_d['description']
@@ -158,7 +157,8 @@ class ScmModel(BaseModel):
                 tmp_d['repo_archives'] = list(repo._get_archives())
                 tmp_d['last_msg'] = tip.message
                 tmp_d['repo'] = repo
-                tmp_d['dbrepo'] = dbrepo
+                tmp_d['dbrepo'] = dbrepo.get_dict()
+                tmp_d['dbrepo_fork'] = dbrepo.fork.get_dict() if dbrepo.fork else {}
                 yield tmp_d
 
     def get(self, repo_name, invalidation_list=None, retval='all'):
@@ -226,7 +226,7 @@ class ScmModel(BaseModel):
         if retval == 'repo' or 'all':
             r = _get_repo(repo_name)
         if retval == 'dbrepo' or 'all':
-            dbr = RepoModel(self.sa).get_full(repo_name, cache=True,
+            dbr = RepoModel().get_full(repo_name, cache=True,
                                           invalidate=dbinvalidate)
 
 
@@ -341,12 +341,22 @@ class ScmModel(BaseModel):
         return f is not None
 
     def get_followers(self, repo_id):
-        return self.sa.query(UserFollowing)\
-                .filter(UserFollowing.follows_repo_id == repo_id).count()
+        if isinstance(repo_id, int):
+            return self.sa.query(UserFollowing)\
+                    .filter(UserFollowing.follows_repo_id == repo_id).count()
+        else:
+            return self.sa.query(UserFollowing)\
+                    .filter(UserFollowing.follows_repository \
+                            == RepoModel().get_by_repo_name(repo_id)).count()
 
     def get_forks(self, repo_id):
-        return self.sa.query(Repository)\
+        if isinstance(repo_id, int):
+            return self.sa.query(Repository)\
                 .filter(Repository.fork_id == repo_id).count()
+        else:
+            return self.sa.query(Repository)\
+                .filter(Repository.fork \
+                        == RepoModel().get_by_repo_name(repo_id)).count()
 
 
     def get_unread_journal(self):

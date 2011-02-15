@@ -37,14 +37,13 @@ from mercurial.graphmod import colored, CHANGESET, revisions as graph_rev
 from pylons import request, session, tmpl_context as c
 
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
-from rhodecode.lib.base import BaseController, render
-from rhodecode.model.scm import ScmModel
+from rhodecode.lib.base import BaseRepoController, render
 
 from webhelpers.paginate import Page
 
 log = logging.getLogger(__name__)
 
-class ChangelogController(BaseController):
+class ChangelogController(BaseRepoController):
 
     @LoginRequired()
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
@@ -67,14 +66,12 @@ class ChangelogController(BaseController):
         else:
             c.size = int(session.get('changelog_size', default))
 
-        repo, dbrepo = ScmModel().get(c.repo_name, retval='repo')
-
         p = int(request.params.get('page', 1))
-        c.total_cs = len(repo)
-        c.pagination = Page(repo, page=p, item_count=c.total_cs,
+        c.total_cs = len(c.rhodecode_repo)
+        c.pagination = Page(c.rhodecode_repo, page=p, item_count=c.total_cs,
                             items_per_page=c.size)
 
-        self._graph(repo, c.size, p)
+        self._graph(c.rhodecode_repo, c.size, p)
 
         return render('changelog/changelog.html')
 

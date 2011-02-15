@@ -440,8 +440,11 @@ def action_parser(user_log):
         revs_top_limit = 50 #show upto this amount of changesets hidden
         revs = action_params.split(',')
         repo_name = user_log.repository.repo_name
+
         from rhodecode.model.scm import ScmModel
-        repo, dbrepo = ScmModel().get(repo_name, retval='repo')
+        repo, dbrepo = ScmModel().get(repo_name, retval='repo',
+                                      invalidation_list=[])
+
         message = lambda rev: get_changeset_safe(repo, rev).message
 
         cs_links = " " + ', '.join ([link_to(rev,
@@ -481,14 +484,9 @@ def action_parser(user_log):
         return cs_links
 
     def get_fork_name():
-        from rhodecode.model.scm import ScmModel
         repo_name = action_params
-        repo, dbrepo = ScmModel().get(repo_name)
-        if repo is None:
-            return repo_name
-        return link_to(action_params, url('summary_home',
-                                          repo_name=repo.name,),
-                                          title=dbrepo.description)
+        return str(link_to(action_params, url('summary_home',
+                                          repo_name=repo_name,)))
 
     map = {'user_deleted_repo':(_('[deleted] repository'), None),
            'user_created_repo':(_('[created] repository'), None),

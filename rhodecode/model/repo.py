@@ -30,7 +30,7 @@ import logging
 import traceback
 from datetime import datetime
 
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, make_transient
 
 from vcs.utils.lazy import LazyProperty
 from vcs.backends import get_backend
@@ -79,9 +79,6 @@ class RepoModel(BaseModel):
         repo = self.sa.query(Repository)\
             .options(joinedload(Repository.fork))\
             .options(joinedload(Repository.user))\
-            .options(joinedload(Repository.followers))\
-            .options(joinedload(Repository.repo_to_perm))\
-            .options(joinedload(Repository.users_group_to_perm))\
             .filter(Repository.repo_name == repo_name)\
 
         if cache:
@@ -91,7 +88,13 @@ class RepoModel(BaseModel):
             repo.invalidate()
 
         ret = repo.scalar()
-        self.sa.expunge_all()
+
+        #make transient for sake of errors
+        make_transient(ret)
+        for k in ['fork', 'user']:
+            attr = getattr(ret, k, False)
+            if attr:
+                make_transient(attr)
         return ret
 
 
