@@ -53,7 +53,7 @@ class CachingQuery(Query):
 
     The FromCache and RelationshipCache mapper options below represent
     the "public" method of configuring this state upon the CachingQuery.
-    
+
     """
 
     def __init__(self, manager, *args, **kw):
