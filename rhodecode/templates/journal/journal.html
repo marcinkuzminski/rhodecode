@@ -38,7 +38,7 @@
 		    %for entry in c.following:
 		        <div class="currently_following">
 		            %if entry.follows_user_id:
-		              <img title="${_('following user')}" alt="${_('user')}" src="/images/icons/user.png"/>
+		              <img title="${_('following user')}" alt="${_('user')}" src="${h.url("/images/icons/user.png")}"/>
 		              ${entry.follows_user.full_contact}
 		            %endif
 		            
@@ -50,9 +50,9 @@
                       </span>		            
 		              </div>
 		              %if entry.follows_repository.private:
-		                <img class="icon" title="${_('private repository')}" alt="${_('private repository')}" src="/images/icons/lock.png"/>
+		                <img class="icon" title="${_('private repository')}" alt="${_('private repository')}" src="${h.url("/images/icons/lock.png")}"/>
 		              %else:
-		                <img class="icon" title="${_('public repository')}" alt="${_('public repository')}" src="/images/icons/lock_open.png"/>
+		                <img class="icon" title="${_('public repository')}" alt="${_('public repository')}" src="${h.url("/images/icons/lock_open.png")}"/>
 		              %endif
 		              
 		              ${h.link_to(entry.follows_repository.repo_name,h.url('summary_home',

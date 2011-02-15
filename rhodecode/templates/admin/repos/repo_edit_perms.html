@@ -27,7 +27,7 @@
                     ${_('private repository')}
                     </span>
                 </td>
-                <td class="private_repo_msg"><img style="vertical-align:bottom" src="/images/icons/user.png"/>${r2p.user.username}</td>
+                <td class="private_repo_msg"><img style="vertical-align:bottom" src="${h.url("/images/icons/user.png")}"/>${r2p.user.username}</td>
             </tr>
         %else:
         <tr id="id${id(r2p.user.username)}">
@@ -35,7 +35,7 @@
             <td>${h.radio('u_perm_%s' % r2p.user.username,'repository.read')}</td>
             <td>${h.radio('u_perm_%s' % r2p.user.username,'repository.write')}</td>
             <td>${h.radio('u_perm_%s' % r2p.user.username,'repository.admin')}</td>
-            <td style="white-space: nowrap;"><img style="vertical-align:bottom" src="/images/icons/user.png"/>${r2p.user.username}</td>
+            <td style="white-space: nowrap;"><img style="vertical-align:bottom" src="${h.url("/images/icons/user.png")}"/>${r2p.user.username}</td>
             <td>
               %if r2p.user.username !='default':
                 <span class="delete_icon action_button" onclick="ajaxActionUser(${r2p.user.user_id},'${'id%s'%id(r2p.user.username)}')">
@@ -64,7 +64,7 @@
             <td>${h.radio('g_perm_%s' % g2p.users_group.users_group_name,'repository.read')}</td>
             <td>${h.radio('g_perm_%s' % g2p.users_group.users_group_name,'repository.write')}</td>
             <td>${h.radio('g_perm_%s' % g2p.users_group.users_group_name,'repository.admin')}</td>
-            <td><img  style="vertical-align:bottom" src="/images/icons/group.png"/>${g2p.users_group.users_group_name}</td>
+            <td><img  style="vertical-align:bottom" src="${h.url("/images/icons/group.png")}"/>${g2p.users_group.users_group_name}</td>
             <td>
                 <span class="delete_icon action_button" onclick="ajaxActionUsersGroup(${g2p.users_group.users_group_id},'${'id%s'%id(g2p.users_group.users_group_name)}')">
                 </span>
