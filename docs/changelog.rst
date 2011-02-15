@@ -27,6 +27,9 @@ news
 - implemented #93 customizable changelog on combined revision ranges - 
   equivalent of githubs compare view 
 - implemented #108 extended and more powerfull LDAP configuration
+- implemented #56 users groups
+- major code rewrites optimized codes for speed and memory usage
+- raw and diff downloads are now in git format
 
 fixes
 -----
@@ -43,8 +46,12 @@ fixes
 - registration,password reset and login boxes share the same title as main 
   application now
 - fixed problems with getting setting for celery from .ini files
-
-
+- journal fork fixes
+- fixed #113: to high permissions to fork repository
+- fixed static files paths links to use of url() method
+- db transaction fixes when filesystem repositry creation failed
+- removed issue with space inside renamed repository after deletion
+ 
 1.1.2 (**2011-01-12**)
 ======================
 

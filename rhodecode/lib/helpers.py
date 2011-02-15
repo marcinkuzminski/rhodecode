@@ -486,12 +486,12 @@ def action_parser(user_log):
 
     def get_fork_name():
         repo_name = action_params
-        return str(link_to(action_params, url('summary_home',
+        return _('fork name ') + str(link_to(action_params, url('summary_home',
                                           repo_name=repo_name,)))
 
     map = {'user_deleted_repo':(_('[deleted] repository'), None),
            'user_created_repo':(_('[created] repository'), None),
-           'user_forked_repo':(_('[forked] repository as:'), get_fork_name),
+           'user_forked_repo':(_('[forked] repository'), get_fork_name),
            'user_updated_repo':(_('[updated] repository'), None),
            'admin_deleted_repo':(_('[delete] repository'), None),
            'admin_created_repo':(_('[created] repository'), None),
