@@ -498,7 +498,7 @@ def action_parser(user_log):
            'admin_forked_repo':(_('[forked] repository'), None),
            'admin_updated_repo':(_('[updated] repository'), None),
            'push':(_('[pushed] into'), get_cs_links),
-           'pull':(_('[pulled] into'), None),
+           'pull':(_('[pulled] from'), None),
            'started_following_repo':(_('[started following] repository'), None),
            'stopped_following_repo':(_('[stopped following] repository'), None),
             }
