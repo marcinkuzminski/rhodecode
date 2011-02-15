@@ -62,7 +62,6 @@ class TestController(TestCase):
         response = self.app.post(url(controller='login', action='index'),
                                  {'username':username,
                                   'password':password})
-        print response
 
         if 'invalid user name' in response.body:
             assert False, 'could not login using %s %s' % (username, password)

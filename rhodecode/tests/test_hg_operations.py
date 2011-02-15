@@ -77,6 +77,8 @@ def create_test_user(force=True):
 
     if force and user is not None:
         print 'removing current user'
+        for repo in sa.query(Repository).filter(Repository.user == user).all():
+            sa.delete(repo)
         sa.delete(user)
         sa.commit()
 
@@ -116,6 +118,19 @@ def create_test_repo(force=True):
         rm = RepoModel(sa)
         rm.base_path = '/home/hg'
         rm.create(form_data, user)
+
+
+def set_anonymous_access(enable=True):
+    sa = get_session()
+    user = sa.query(User).filter(User.username == 'default').one()
+    user.active = enable
+    sa.add(user)
+    sa.commit()
+
+def get_anonymous_access():
+    sa = get_session()
+    return sa.query(User).filter(User.username == 'default').one().active
+
 
 #==============================================================================
 # TESTS
@@ -157,6 +172,12 @@ def test_clone_anonymous_ok():
         raise
 
 
+    print 'checking if anonymous access is enabled'
+    anonymous_access = get_anonymous_access()
+    if not anonymous_access:
+        print 'not enabled, enabling it '
+        set_anonymous_access(enable=True)
+
     clone_url = 'http://%(host)s/%(cloned_repo)s %(dest)s' % \
                   {'user':USER,
                    'pass':PASS,
@@ -166,8 +187,16 @@ def test_clone_anonymous_ok():
 
     stdout, stderr = Command(cwd).execute('hg clone', clone_url)
     print stdout, stderr
+
+
     assert """adding file changes""" in stdout, 'no messages about cloning'
     assert """abort""" not in stderr , 'got error from clone'
+
+    #disable if it was enabled
+    if not anonymous_access:
+        print 'disabling anonymous access'
+        set_anonymous_access(enable=False)
+
 
 def test_clone_wrong_credentials():
     cwd = path = jn(TESTS_TMP_PATH, HG_REPO)
@@ -296,7 +325,7 @@ if __name__ == '__main__':
     #test_clone_wrong_credentials()
 
     #test_pull()
-    test_push_new_file(commits=3)
+    test_push_new_file(commits=2)
     #test_push_wrong_path()
     #test_push_wrong_credentials()
 
