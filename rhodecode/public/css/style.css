@@ -311,7 +311,7 @@ overflow:hidden;
 color:#FFF;
 font-weight:700;
 text-decoration:none;
-background:#369 url("../../images/quick_l.png") no-repeat top left;
+background:#369 url("../images/quick_l.png") no-repeat top left;
 padding:0;
 }
 
@@ -325,7 +325,7 @@ right:0;
 height:1%;
 display:block;
 float:left;
-background:url("../../images/quick_r.png") no-repeat top right;
+background:url("../images/quick_r.png") no-repeat top right;
 border-left:1px solid #3f6f9f;
 margin:0;
 padding:10px 12px 8px 10px;
@@ -340,7 +340,7 @@ padding:10px 12px 8px;
 top:0;
 left:0;
 border-left:none;
-background:url("../../images/quick_l.png") no-repeat top left;
+background:url("../images/quick_l.png") no-repeat top left;
 border-right:1px solid #2e5c89;
 padding:8px 8px 4px;
 }
@@ -349,24 +349,24 @@ padding:8px 8px 4px;
 top:0;
 left:0;
 border-left:none;
-background:url("../../images/quick_l.png") no-repeat top left;
+background:url("../images/quick_l.png") no-repeat top left;
 border-right:1px solid #2e5c89;
 padding:9px 4px 4px;
 }
 
 #header #header-inner #quick li a:hover {
-background:#4e4e4e url("../../images/quick_l_selected.png") no-repeat top left;
+background:#4e4e4e url("../images/quick_l_selected.png") no-repeat top left;
 }
 
 #header #header-inner #quick li a:hover span {
 border-left:1px solid #545454;
-background:url("../../images/quick_r_selected.png") no-repeat top right;
+background:url("../images/quick_r_selected.png") no-repeat top right;
 }
 
 #header #header-inner #quick li a:hover span.icon,#header #header-inner #quick li a:hover span.icon_short {
 border-left:none;
 border-right:1px solid #464646;
-background:url("../../images/quick_l_selected.png") no-repeat top left;
+background:url("../images/quick_l_selected.png") no-repeat top left;
 }
 
 
@@ -1004,7 +1004,7 @@ padding:6px 12px;
 }
 
 #content div.box div.form div.fields div.buttons div.highlight input.ui-button {
-background:#4e85bb url("../../images/button_highlight.png") repeat-x;
+background:#4e85bb url("../images/button_highlight.png") repeat-x;
 border-top:1px solid #5c91a4;
 border-left:1px solid #2a6f89;
 border-right:1px solid #2b7089;
@@ -1015,7 +1015,7 @@ padding:6px 12px;
 }
 
 #content div.box div.form div.fields div.buttons div.highlight input.ui-state-hover {
-background:#46a0c1 url("../../images/button_highlight_selected.png") repeat-x;
+background:#46a0c1 url("../images/button_highlight_selected.png") repeat-x;
 border-top:1px solid #78acbf;
 border-left:1px solid #34819e;
 border-right:1px solid #35829f;
@@ -1292,7 +1292,7 @@ width:420px;
 clear:both;
 overflow:hidden;
 position:relative;
-background:#003367 url("../../images/header_inner.png") repeat-x;
+background:#003367 url("../images/header_inner.png") repeat-x;
 margin:0 auto;
 padding:0;
 }
@@ -1778,7 +1778,7 @@ padding-left:4px;
 }
 
 .info_box * {
-background:url("../../images/pager.png") repeat-x scroll 0 0 #EBEBEB;
+background:url("../images/pager.png") repeat-x scroll 0 0 #EBEBEB;
 color:#4A4A4A;
 font-weight:700;
 height:1%;
@@ -2020,28 +2020,28 @@ padding:0 0 10px;
 
 .error_msg {
 background-color:#FFCFCF;
-background-image:url("../../images/icons/error_msg.png");
+background-image:url("../images/icons/error_msg.png");
 border:1px solid #FF9595;
 color:#C30;
 }
 
 .warning_msg {
 background-color:#FFFBCC;
-background-image:url("../../images/icons/warning_msg.png");
+background-image:url("../images/icons/warning_msg.png");
 border:1px solid #FFF35E;
 color:#C69E00;
 }
 
 .success_msg {
 background-color:#D5FFCF;
-background-image:url("../../images/icons/success_msg.png");
+background-image:url("../images/icons/success_msg.png");
 border:1px solid #97FF88;
 color:#090;
 }
 
 .notice_msg {
 background-color:#DCE3FF;
-background-image:url("../../images/icons/notice_msg.png");
+background-image:url("../images/icons/notice_msg.png");
 border:1px solid #93A8FF;
 color:#556CB5;
 }
@@ -2061,7 +2061,7 @@ padding:6px 10px 6px 40px;
 }
 
 #msg_close {
-background:transparent url("../../icons/cross_grey_small.png") no-repeat scroll 0 0;
+background:transparent url("../icons/cross_grey_small.png") no-repeat scroll 0 0;
 cursor:pointer;
 height:16px;
 position:absolute;
@@ -2111,7 +2111,7 @@ padding:14px 30px;
 }
 
 #content div.box div.title div.search {
-background:url("../../images/title_link.png") no-repeat top left;
+background:url("../images/title_link.png") no-repeat top left;
 border-left:1px solid #316293;
 }
 
@@ -2120,21 +2120,21 @@ border:1px solid #316293;
 }
 
 #content div.box div.title div.search div.button input.ui-button {
-background:#4e85bb url("../../images/button_highlight.png") repeat-x;
+background:#4e85bb url("../images/button_highlight.png") repeat-x;
 border:1px solid #316293;
 border-left:none;
 color:#FFF;
 }
 
 #content div.box div.title div.search div.button input.ui-state-hover {
-background:#46a0c1 url("../../images/button_highlight_selected.png") repeat-x;
+background:#46a0c1 url("../images/button_highlight_selected.png") repeat-x;
 border:1px solid #316293;
 border-left:none;
 color:#FFF;
 }
 
 #content div.box div.form div.fields div.field div.highlight .ui-button {
-background:#4e85bb url("../../images/button_highlight.png") repeat-x;
+background:#4e85bb url("../images/button_highlight.png") repeat-x;
 border-top:1px solid #5c91a4;
 border-left:1px solid #2a6f89;
 border-right:1px solid #2b7089;
@@ -2143,7 +2143,7 @@ color:#fff;
 }
 
 #content div.box div.form div.fields div.field div.highlight .ui-state-hover {
-background:#46a0c1 url("../../images/button_highlight_selected.png") repeat-x;
+background:#46a0c1 url("../images/button_highlight_selected.png") repeat-x;
 border-top:1px solid #78acbf;
 border-left:1px solid #34819e;
 border-right:1px solid #35829f;

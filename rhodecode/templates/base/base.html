@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" id="mainhtml">
 <head>
     <title>${next.title()}</title>
-    <link rel="icon" href="${h.url('/images/icons/database_gear.png',_static=True)}" type="image/png" />
+    <link rel="icon" href="${h.url('/images/icons/database_gear.png')}" type="image/png" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
     <meta name="robots" content="index, nofollow"/>
     <!-- stylesheets -->
@@ -326,21 +326,21 @@
 
 
 <%def name="css()">
-<link rel="stylesheet" type="text/css" href="${h.url('/css/style.css',_static=True)}" media="screen" />
-<link rel="stylesheet" type="text/css" href="${h.url('/css/pygments.css',_static=True)}"  />
-<link rel="stylesheet" type="text/css" href="${h.url('/css/diff.css',_static=True)}"  />
+<link rel="stylesheet" type="text/css" href="${h.url('/css/style.css')}" media="screen" />
+<link rel="stylesheet" type="text/css" href="${h.url('/css/pygments.css')}"  />
+<link rel="stylesheet" type="text/css" href="${h.url('/css/diff.css')}"  />
 </%def>
 
 <%def name="js()">
-##<script type="text/javascript" src="${h.url('/js/yui/utilities/utilities.js',_static=True)}"></script>
-##<script type="text/javascript" src="${h.url('/js/yui/container/container.js',_static=True)}"></script>
-##<script type="text/javascript" src="${h.url('/js/yui/datasource/datasource.js',_static=True)}"></script>
-##<script type="text/javascript" src="${h.url('/js/yui/autocomplete/autocomplete.js',_static=True)}"></script>
-##<script type="text/javascript" src="${h.url('/js/yui/selector/selector-min.js',_static=True)}"></script>
+##<script type="text/javascript" src="${h.url('/js/yui/utilities/utilities.js')}"></script>
+##<script type="text/javascript" src="${h.url('/js/yui/container/container.js')}"></script>
+##<script type="text/javascript" src="${h.url('/js/yui/datasource/datasource.js')}"></script>
+##<script type="text/javascript" src="${h.url('/js/yui/autocomplete/autocomplete.js')}"></script>
+##<script type="text/javascript" src="${h.url('/js/yui/selector/selector-min.js')}"></script>
 
-<script type="text/javascript" src="${h.url('/js/yui2a.js',_static=True)}"></script>
-<!--[if IE]><script language="javascript" type="text/javascript" src="${h.url('/js/excanvas.min.js',_static=True)}"></script><![endif]-->
-<script type="text/javascript" src="${h.url('/js/yui.flot.js',_static=True)}"></script>
+<script type="text/javascript" src="${h.url('/js/yui2a.js')}"></script>
+<!--[if IE]><script language="javascript" type="text/javascript" src="${h.url('/js/excanvas.min.js')}"></script><![endif]-->
+<script type="text/javascript" src="${h.url('/js/yui.flot.js')}"></script>
 
 <script type="text/javascript">
 var base_url  = "${h.url('toggle_following')}";
