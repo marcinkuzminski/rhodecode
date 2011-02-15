@@ -12,7 +12,17 @@
 
     </head>
     <body>
-<div id="login">
+        <div id="login">
+        <div class="flash_msg">
+            <% messages = h.flash.pop_messages() %>
+            % if messages:
+            <ul id="flash-messages">
+                % for message in messages:
+                <li class="${message.category}_msg">${message}</li>
+                % endfor
+            </ul>
+            % endif
+        </div>          
             <!-- login -->
             <div class="title top-left-rounded-corner top-right-rounded-corner">
                 <h5>${_('Sign In to')} ${c.rhodecode_name}</h5>

@@ -33,6 +33,7 @@ from decorator import decorator
 
 from pylons import config, session, url, request
 from pylons.controllers.util import abort, redirect
+from pylons.i18n.translation import _
 
 from rhodecode.lib.exceptions import LdapPasswordError, LdapUsernameError
 from rhodecode.lib.utils import get_repo_slug
@@ -384,6 +385,10 @@ class NotAnonymous(object):
             p += request.environ.get('PATH_INFO')
             if request.environ.get('QUERY_STRING'):
                 p += '?' + request.environ.get('QUERY_STRING')
+
+            import rhodecode.lib.helpers as h
+            h.flash(_('You need to be a registered user to perform this action'),
+                    category='warning')
             return redirect(url('login_home', came_from=p))
         else:
             return func(*fargs, **fkwargs)
