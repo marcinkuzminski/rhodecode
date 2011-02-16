@@ -1,8 +1,15 @@
-#!/usr/bin/env python
-# encoding: utf-8
-# Model for RhodeCode settings
-# Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
-# 
+# -*- coding: utf-8 -*-
+"""
+    rhodecode.model.settings
+    ~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Settings model for RhodeCode
+
+    :created on Nov 17, 2010
+    :author: marcink
+    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>    
+    :license: GPLv3, see COPYING for more details.
+"""
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
@@ -17,18 +24,12 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
-"""
-Created on Nov 17, 2010
-Model for RhodeCode
-:author: marcink
-"""
 
-from rhodecode.lib import helpers as h
+import logging
+
 from rhodecode.model import BaseModel
 from rhodecode.model.caching_query import FromCache
 from rhodecode.model.db import  RhodeCodeSettings
-from sqlalchemy.orm import joinedload
-import logging
 
 log = logging.getLogger(__name__)
 
@@ -45,10 +46,16 @@ class SettingsModel(BaseModel):
                                           "get_setting_%s" % settings_key))
         return r
 
-    def get_app_settings(self):
-        ret = self.sa.query(RhodeCodeSettings)\
-            .options(FromCache("sql_cache_short",
-                           "get_hg_settings")).all()
+    def get_app_settings(self, cache=False):
+        """Get's config from database, each config key is prefixed with 
+        'rhodecode_' prefix, than global pylons config is updated with such 
+        keys
+        """
+
+        ret = self.sa.query(RhodeCodeSettings)
+
+        if cache:
+            ret = ret.options(FromCache("sql_cache_short", "get_hg_settings"))
 
         if not ret:
             raise Exception('Could not get application settings !')
@@ -66,10 +73,18 @@ class SettingsModel(BaseModel):
         ldap_host
         ldap_port 
         ldap_ldaps
+        ldap_tls_reqcert
         ldap_dn_user 
         ldap_dn_pass 
         ldap_base_dn
+        ldap_filter
+        ldap_search_scope
+        ldap_attr_login
+        ldap_attr_firstname
+        ldap_attr_lastname
+        ldap_attr_email
         """
+        # ldap_search_scope
 
         r = self.sa.query(RhodeCodeSettings)\
                 .filter(RhodeCodeSettings.app_settings_name\

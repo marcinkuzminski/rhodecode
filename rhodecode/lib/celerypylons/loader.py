@@ -17,15 +17,29 @@ class PylonsSettingsProxy(object):
         pylons_key = to_pylons(key)
         try:
             value = config[pylons_key]
-            if key in LIST_PARAMS: return value.split()
+            if key in LIST_PARAMS:return value.split()
             return self.type_converter(value)
         except KeyError:
             raise AttributeError(pylons_key)
+
+    def get(self, key):
+        try:
+            return self.__getattr__(key)
+        except AttributeError:
+            return None
+
+    def __getitem__(self, key):
+        try:
+            return self.__getattr__(key)
+        except AttributeError:
+            raise KeyError()
 
     def __setattr__(self, key, value):
         pylons_key = to_pylons(key)
         config[pylons_key] = value
 
+    def __setitem__(self, key, value):
+        self.__setattr__(key, value)
 
     def type_converter(self, value):
         #cast to int
@@ -35,7 +49,6 @@ class PylonsSettingsProxy(object):
         #cast to bool
         if value.lower() in ['true', 'false']:
             return value.lower() == 'true'
-
         return value
 
 class PylonsLoader(BaseLoader):

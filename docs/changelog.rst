@@ -3,6 +3,35 @@
 Changelog
 =========
 
+1.1.3 (**2011-02-15**)
+======================
+
+news
+----
+
+- implemented #102 allowing '.' in username
+- added option to access repository just by entering http://server/<repo_name>
+- celery task ignores result for better performance
+
+fixes
+-----
+
+- fixed ehlo command and non auth mail servers on smtp_lib. Thanks to 
+  apollo13 and Johan Walles
+- small fixes in journal
+- fixed problems with getting setting for celery from .ini files
+- registration, password reset and login boxes share the same title as main 
+  application now
+- fixed #113: to high permissions to fork repository
+- fixed problem with '[' chars in commit messages in journal
+- removed issue with space inside renamed repository after deletion
+- db transaction fixes when filesystem repository creation failed
+- fixed #106 relation issues on databases different than sqlite
+
+- fixed static files paths links to use of url() method
+
+
+
 1.1.2 (**2011-01-12**)
 ======================
 
@@ -35,7 +64,6 @@ fixes
   and server crashed with errors
 - fixed large tooltips problems on main page
 - fixed #92 whoosh indexer is more error proof
-
 
 1.1.0 (**2010-12-18**)
 ======================

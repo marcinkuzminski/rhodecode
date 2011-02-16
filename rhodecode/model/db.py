@@ -7,7 +7,7 @@
     
     :created_on: Apr 08, 2010
     :author: marcink
-    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
+    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>    
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software; you can redistribute it and/or
@@ -26,10 +26,11 @@
 # MA  02110-1301, USA.
 import logging
 import datetime
+from datetime import date
 
 from sqlalchemy import *
 from sqlalchemy.exc import DatabaseError
-from sqlalchemy.orm import relation, backref, class_mapper
+from sqlalchemy.orm import relationship, backref, class_mapper
 from sqlalchemy.orm.session import Session
 
 from rhodecode.model.meta import Base
@@ -75,13 +76,13 @@ class RhodeCodeSettings(Base, BaseModel):
     app_settings_name = Column("app_settings_name", String(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     app_settings_value = Column("app_settings_value", String(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
 
-    def __init__(self, k, v):
+    def __init__(self, k='', v=''):
         self.app_settings_name = k
         self.app_settings_value = v
 
     def __repr__(self):
-        return "<RhodeCodeSetting('%s:%s')>" % (self.app_settings_name,
-                                                self.app_settings_value)
+        return "<%s('%s:%s')>" % (self.__class__.__name__,
+                                  self.app_settings_name, self.app_settings_value)
 
 class RhodeCodeUi(Base, BaseModel):
     __tablename__ = 'rhodecode_ui'
@@ -107,18 +108,24 @@ class User(Base, BaseModel):
     last_login = Column("last_login", DateTime(timezone=False), nullable=True, unique=None, default=None)
     is_ldap = Column("is_ldap", Boolean(), nullable=False, unique=None, default=False)
 
-    user_log = relation('UserLog', cascade='all')
-    user_perms = relation('UserToPerm', primaryjoin="User.user_id==UserToPerm.user_id", cascade='all')
+    user_log = relationship('UserLog', cascade='all')
+    user_perms = relationship('UserToPerm', primaryjoin="User.user_id==UserToPerm.user_id", cascade='all')
 
-    repositories = relation('Repository')
-    user_followers = relation('UserFollowing', primaryjoin='UserFollowing.follows_user_id==User.user_id', cascade='all')
+    repositories = relationship('Repository')
+    user_followers = relationship('UserFollowing', primaryjoin='UserFollowing.follows_user_id==User.user_id', cascade='all')
 
     @property
     def full_contact(self):
         return '%s %s <%s>' % (self.name, self.lastname, self.email)
 
+
+    @property
+    def is_admin(self):
+        return self.admin
+
     def __repr__(self):
-        return "<User('id:%s:%s')>" % (self.user_id, self.username)
+        return "<%s('id:%s:%s')>" % (self.__class__.__name__,
+                                     self.user_id, self.username)
 
     def update_lastlogin(self):
         """Update user lastlogin"""
@@ -137,15 +144,19 @@ class UserLog(Base, BaseModel):
     __tablename__ = 'user_logs'
     __table_args__ = {'useexisting':True}
     user_log_id = Column("user_log_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
-    user_id = Column("user_id", Integer(), ForeignKey(u'users.user_id'), nullable=False, unique=None, default=None)
-    repository_id = Column("repository_id", Integer(length=None, convert_unicode=False, assert_unicode=None), ForeignKey(u'repositories.repo_id'), nullable=False, unique=None, default=None)
+    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None, default=None)
+    repository_id = Column("repository_id", Integer(length=None, convert_unicode=False, assert_unicode=None), ForeignKey('repositories.repo_id'), nullable=False, unique=None, default=None)
     repository_name = Column("repository_name", String(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     user_ip = Column("user_ip", String(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     action = Column("action", String(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     action_date = Column("action_date", DateTime(timezone=False), nullable=True, unique=None, default=None)
 
-    user = relation('User')
-    repository = relation('Repository')
+    @property
+    def action_as_day(self):
+        return date(*self.action_date.timetuple()[:3])
+
+    user = relationship('User')
+    repository = relationship('Repository')
 
 class Repository(Base, BaseModel):
     __tablename__ = 'repositories'
@@ -153,22 +164,24 @@ class Repository(Base, BaseModel):
     repo_id = Column("repo_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     repo_name = Column("repo_name", String(length=None, convert_unicode=False, assert_unicode=None), nullable=False, unique=True, default=None)
     repo_type = Column("repo_type", String(length=None, convert_unicode=False, assert_unicode=None), nullable=False, unique=False, default='hg')
-    user_id = Column("user_id", Integer(), ForeignKey(u'users.user_id'), nullable=False, unique=False, default=None)
+    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=False, default=None)
     private = Column("private", Boolean(), nullable=True, unique=None, default=None)
     enable_statistics = Column("statistics", Boolean(), nullable=True, unique=None, default=True)
     description = Column("description", String(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
-    fork_id = Column("fork_id", Integer(), ForeignKey(u'repositories.repo_id'), nullable=True, unique=False, default=None)
+    fork_id = Column("fork_id", Integer(), ForeignKey('repositories.repo_id'), nullable=True, unique=False, default=None)
 
-    user = relation('User')
-    fork = relation('Repository', remote_side=repo_id)
-    repo_to_perm = relation('RepoToPerm', cascade='all')
-    stats = relation('Statistics', cascade='all', uselist=False)
+    user = relationship('User')
+    fork = relationship('Repository', remote_side=repo_id)
+    repo_to_perm = relationship('RepoToPerm', cascade='all')
+    stats = relationship('Statistics', cascade='all', uselist=False)
 
-    repo_followers = relation('UserFollowing', primaryjoin='UserFollowing.follows_repo_id==Repository.repo_id', cascade='all')
+    repo_followers = relationship('UserFollowing', primaryjoin='UserFollowing.follows_repo_id==Repository.repo_id', cascade='all')
 
-
+    logs = relationship('UserLog', cascade='all')
+    
     def __repr__(self):
-        return "<Repository('%s:%s')>" % (self.repo_id, self.repo_name)
+        return "<%s('%s:%s')>" % (self.__class__.__name__,
+                                  self.repo_id, self.repo_name)
 
 class Permission(Base, BaseModel):
     __tablename__ = 'permissions'
@@ -178,29 +191,30 @@ class Permission(Base, BaseModel):
     permission_longname = Column("permission_longname", String(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
 
     def __repr__(self):
-        return "<Permission('%s:%s')>" % (self.permission_id, self.permission_name)
+        return "<%s('%s:%s')>" % (self.__class__.__name__,
+                                  self.permission_id, self.permission_name)
 
 class RepoToPerm(Base, BaseModel):
     __tablename__ = 'repo_to_perm'
     __table_args__ = (UniqueConstraint('user_id', 'repository_id'), {'useexisting':True})
     repo_to_perm_id = Column("repo_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
-    user_id = Column("user_id", Integer(), ForeignKey(u'users.user_id'), nullable=False, unique=None, default=None)
-    permission_id = Column("permission_id", Integer(), ForeignKey(u'permissions.permission_id'), nullable=False, unique=None, default=None)
-    repository_id = Column("repository_id", Integer(), ForeignKey(u'repositories.repo_id'), nullable=False, unique=None, default=None)
+    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None, default=None)
+    permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable=False, unique=None, default=None)
+    repository_id = Column("repository_id", Integer(), ForeignKey('repositories.repo_id'), nullable=False, unique=None, default=None)
 
-    user = relation('User')
-    permission = relation('Permission')
-    repository = relation('Repository')
+    user = relationship('User')
+    permission = relationship('Permission')
+    repository = relationship('Repository')
 
 class UserToPerm(Base, BaseModel):
     __tablename__ = 'user_to_perm'
     __table_args__ = (UniqueConstraint('user_id', 'permission_id'), {'useexisting':True})
     user_to_perm_id = Column("user_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
-    user_id = Column("user_id", Integer(), ForeignKey(u'users.user_id'), nullable=False, unique=None, default=None)
-    permission_id = Column("permission_id", Integer(), ForeignKey(u'permissions.permission_id'), nullable=False, unique=None, default=None)
+    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None, default=None)
+    permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable=False, unique=None, default=None)
 
-    user = relation('User')
-    permission = relation('Permission')
+    user = relationship('User')
+    permission = relationship('Permission')
 
 class Statistics(Base, BaseModel):
     __tablename__ = 'statistics'
@@ -212,7 +226,7 @@ class Statistics(Base, BaseModel):
     commit_activity_combined = Column("commit_activity_combined", LargeBinary(), nullable=False)#JSON data
     languages = Column("languages", LargeBinary(), nullable=False)#JSON data
 
-    repository = relation('Repository', single_parent=True)
+    repository = relationship('Repository', single_parent=True)
 
 class UserFollowing(Base, BaseModel):
     __tablename__ = 'user_followings'
@@ -221,15 +235,14 @@ class UserFollowing(Base, BaseModel):
                       , {'useexisting':True})
 
     user_following_id = Column("user_following_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
-    user_id = Column("user_id", Integer(), ForeignKey(u'users.user_id'), nullable=False, unique=None, default=None)
-    follows_repo_id = Column("follows_repository_id", Integer(), ForeignKey(u'repositories.repo_id'), nullable=True, unique=None, default=None)
-    follows_user_id = Column("follows_user_id", Integer(), ForeignKey(u'users.user_id'), nullable=True, unique=None, default=None)
+    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None, default=None)
+    follows_repo_id = Column("follows_repository_id", Integer(), ForeignKey('repositories.repo_id'), nullable=True, unique=None, default=None)
+    follows_user_id = Column("follows_user_id", Integer(), ForeignKey('users.user_id'), nullable=True, unique=None, default=None)
 
-    user = relation('User', primaryjoin='User.user_id==UserFollowing.user_id')
+    user = relationship('User', primaryjoin='User.user_id==UserFollowing.user_id')
 
-    follows_user = relation('User', primaryjoin='User.user_id==UserFollowing.follows_user_id')
-    follows_repository = relation('Repository')
-
+    follows_user = relationship('User', primaryjoin='User.user_id==UserFollowing.follows_user_id')
+    follows_repository = relationship('Repository', order_by='Repository.repo_name')
 
 class CacheInvalidation(Base, BaseModel):
     __tablename__ = 'cache_invalidation'
@@ -246,7 +259,8 @@ class CacheInvalidation(Base, BaseModel):
         self.cache_active = False
 
     def __repr__(self):
-        return "<CacheInvalidation('%s:%s')>" % (self.cache_id, self.cache_key)
+        return "<%s('%s:%s')>" % (self.__class__.__name__,
+                                  self.cache_id, self.cache_key)
 
 class DbMigrateVersion(Base, BaseModel):
     __tablename__ = 'db_migrate_version'

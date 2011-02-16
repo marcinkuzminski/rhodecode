@@ -125,7 +125,7 @@ class _ToolTip(object):
                 var tts = YAHOO.util.Dom.getElementsByClassName('tooltip');
                 
                 for (var i = 0; i < tts.length; i++) {
-                    //if element doesn't not have and id autgenerate one for tooltip
+                    //if element doesn't not have and id autogenerate one for tooltip
                     
                     if (!tts[i].id){
                         tts[i].id='tt'+i*100;
@@ -185,7 +185,7 @@ class _ToolTip(object):
                         
                             case 'top':
                                 var cur_x = (pos_x+context_w/2)-(tt_w/2);
-                                var cur_y = pos_y-tt_h-4;
+                                var cur_y = (pos_y-tt_h-4);
                                 xy_pos = [cur_x,cur_y];                                
                                 break;
                             case 'bottom':
@@ -449,33 +449,33 @@ def action_parser(user_log):
         return ''
 
     def get_fork_name():
-        if action == 'user_forked_repo':
-            from rhodecode.model.scm import ScmModel
-            repo_name = action_params
-            repo = ScmModel().get(repo_name)
-            if repo is None:
-                return repo_name
-            return link_to(action_params, url('summary_home',
-                                              repo_name=repo.name,),
-                                              title=repo.dbrepo.description)
-        return ''
-    map = {'user_deleted_repo':_('User [deleted] repository'),
-           'user_created_repo':_('User [created] repository'),
-           'user_forked_repo':_('User [forked] repository as: %s') % get_fork_name(),
-           'user_updated_repo':_('User [updated] repository'),
-           'admin_deleted_repo':_('Admin [delete] repository'),
-           'admin_created_repo':_('Admin [created] repository'),
-           'admin_forked_repo':_('Admin [forked] repository'),
-           'admin_updated_repo':_('Admin [updated] repository'),
-           'push':_('[Pushed] %s') % get_cs_links(),
-           'pull':_('[Pulled]'),
-           'started_following_repo':_('User [started following] repository'),
-           'stopped_following_repo':_('User [stopped following] repository'),
+        repo_name = action_params
+        return str(link_to(action_params, url('summary_home',
+                                          repo_name=repo_name,)))
+        
+    map = {'user_deleted_repo':(_('[deleted] repository'), None),
+           'user_created_repo':(_('[created] repository'), None),
+           'user_forked_repo':(_('[forked] repository'), get_fork_name),
+           'user_updated_repo':(_('[updated] repository'), None),
+           'admin_deleted_repo':(_('[delete] repository'), None),
+           'admin_created_repo':(_('[created] repository'), None),
+           'admin_forked_repo':(_('[forked] repository'), None),
+           'admin_updated_repo':(_('[updated] repository'), None),
+           'push':(_('[pushed] into'), get_cs_links),
+           'pull':(_('[pulled] from'), None),
+           'started_following_repo':(_('[started following] repository'), None),
+           'stopped_following_repo':(_('[stopped following] repository'), None),
             }
 
     action_str = map.get(action, action)
-    return literal(action_str.replace('[', '<span class="journal_highlight">')\
-                   .replace(']', '</span>'))
+    action = action_str[0].replace('[', '<span class="journal_highlight">')\
+                   .replace(']', '</span>')
+    action_params_func = lambda :""
+
+    if action_str[1] is not None:
+        action_params_func = action_str[1]
+
+    return literal(action +" "+ action_params_func())
 
 def action_parser_icon(user_log):
     action = user_log.action
@@ -485,13 +485,13 @@ def action_parser_icon(user_log):
     if len(x) > 1:
         action, action_params = x
 
-    tmpl = """<img src="/images/icons/%s" alt="%s"/>"""
+    tmpl = """<img src="%s/%s" alt="%s"/>"""
     map = {'user_deleted_repo':'database_delete.png',
            'user_created_repo':'database_add.png',
            'user_forked_repo':'arrow_divide.png',
            'user_updated_repo':'database_edit.png',
            'admin_deleted_repo':'database_delete.png',
-           'admin_created_repo':'database_ddd.png',
+           'admin_created_repo':'database_add.png',
            'admin_forked_repo':'arrow_divide.png',
            'admin_updated_repo':'database_edit.png',
            'push':'script_add.png',
@@ -499,7 +499,8 @@ def action_parser_icon(user_log):
            'started_following_repo':'heart_add.png',
            'stopped_following_repo':'heart_delete.png',
             }
-    return literal(tmpl % (map.get(action, action), action))
+    return literal(tmpl % ((url('/images/icons/')),
+                           map.get(action, action), action))
 
 
 #==============================================================================
@@ -516,7 +517,7 @@ import urllib
 from pylons import request
 
 def gravatar_url(email_address, size=30):
-    ssl_enabled = 'https' == request.environ.get('HTTP_X_URL_SCHEME')
+    ssl_enabled = 'https' == request.environ.get('wsgi.url_scheme')
     default = 'identicon'
     baseurl_nossl = "http://www.gravatar.com/avatar/"
     baseurl_ssl = "https://secure.gravatar.com/avatar/"
@@ -544,3 +545,13 @@ def safe_unicode(str):
             u_str = unicode(str(str).encode('string_escape'))
 
     return u_str
+
+def changed_tooltip(nodes):
+    if nodes:
+        pref = ': <br/> '
+        suf = ''
+        if len(nodes) > 30:
+            suf = '<br/>' + _(' and %s more') % (len(nodes) - 30)
+        return literal(pref + '<br/> '.join([x.path for x in nodes[:30]]) + suf)
+    else:
+        return ': ' + _('No Files')

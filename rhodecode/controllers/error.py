@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-    rhodecode.controllers.error
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    package.rhodecode.controllers.error
+    ~~~~~~~~~~~~~~
 
     RhodeCode error controller
     
@@ -29,7 +29,7 @@ import cgi
 import logging
 import paste.fileapp
 
-from pylons import tmpl_context as c, request
+from pylons import tmpl_context as c, request, config
 from pylons.i18n.translation import _
 from pylons.middleware import  media_path
 
@@ -48,7 +48,7 @@ class ErrorController(BaseController):
     """
 
     def __before__(self):
-        pass#disable all base actions since we don't need them here
+        c.rhodecode_name = config.get('rhodecode_title')
 
     def document(self):
         resp = request.environ.get('pylons.original_response')

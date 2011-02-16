@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-    package.rhodecode.model.user
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    rhodecode.model.user
+    ~~~~~~~~~~~~~~~~~~~~
 
     users model for RhodeCode
     
     :created_on: Apr 9, 2010
     :author: marcink
-    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
+    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>    
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software; you can redistribute it and/or

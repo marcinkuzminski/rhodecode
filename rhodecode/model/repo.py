@@ -7,7 +7,7 @@
     
     :created_on: Jun 5, 2010
     :author: marcink
-    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
+    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>    
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software; you can redistribute it and/or
@@ -30,19 +30,28 @@ import logging
 import traceback
 from datetime import datetime
 
-from pylons import app_globals as g
+from sqlalchemy.orm import joinedload, make_transient
+
+from vcs.utils.lazy import LazyProperty
+from vcs.backends import get_backend
 
 from rhodecode.model import BaseModel
 from rhodecode.model.caching_query import FromCache
 from rhodecode.model.db import Repository, RepoToPerm, User, Permission, \
-    Statistics
+    Statistics, RhodeCodeUi
 from rhodecode.model.user import UserModel
-
-from vcs.backends import get_backend
 
 log = logging.getLogger(__name__)
 
 class RepoModel(BaseModel):
+
+    @LazyProperty
+    def repos_path(self):
+        """Get's the repositories root path from database
+        """
+
+        q = self.sa.query(RhodeCodeUi).filter(RhodeCodeUi.ui_key == '/').one()
+        return q.ui_value
 
     def get(self, repo_id, cache=False):
         repo = self.sa.query(Repository)\
@@ -158,21 +167,22 @@ class RepoModel(BaseModel):
                     .filter(Permission.permission_name == default_perm)\
                     .one().permission_id
 
-            repo_to_perm.repository_id = new_repo.repo_id
+            repo_to_perm.repository = new_repo
             repo_to_perm.user_id = UserModel(self.sa)\
                 .get_by_username('default', cache=False).user_id
 
             self.sa.add(repo_to_perm)
-            self.sa.commit()
 
+            if not just_db:
+                self.__create_repo(repo_name, form_data['repo_type'])
+
+            self.sa.commit()
 
             #now automatically start following this repository as owner
             from rhodecode.model.scm import ScmModel
             ScmModel(self.sa).toggle_following_repo(new_repo.repo_id,
                                              cur_user.user_id)
 
-            if not just_db:
-                self.__create_repo(repo_name, form_data['repo_type'])
         except:
             log.error(traceback.format_exc())
             self.sa.rollback()
@@ -223,8 +233,8 @@ class RepoModel(BaseModel):
         :param alias:
         """
         from rhodecode.lib.utils import check_repo
-        repo_path = os.path.join(g.base_path, repo_name)
-        if check_repo(repo_name, g.base_path):
+        repo_path = os.path.join(self.repos_path, repo_name)
+        if check_repo(repo_name, self.repos_path):
             log.info('creating repo %s in %s', repo_name, repo_path)
             backend = get_backend(alias)
             backend(repo_path, create=True)
@@ -237,8 +247,8 @@ class RepoModel(BaseModel):
         """
         log.info('renaming repo from %s to %s', old, new)
 
-        old_path = os.path.join(g.base_path, old)
-        new_path = os.path.join(g.base_path, new)
+        old_path = os.path.join(self.repos_path, old)
+        new_path = os.path.join(self.repos_path, new)
         if os.path.isdir(new_path):
             raise Exception('Was trying to rename to already existing dir %s',
                             new_path)
@@ -252,12 +262,13 @@ class RepoModel(BaseModel):
         by reverting the renames on this repository
         :param repo: repo object
         """
-        rm_path = os.path.join(g.base_path, repo.repo_name)
+        rm_path = os.path.join(self.repos_path, repo.repo_name)
         log.info("Removing %s", rm_path)
         #disable hg/git
         alias = repo.repo_type
         shutil.move(os.path.join(rm_path, '.%s' % alias),
                     os.path.join(rm_path, 'rm__.%s' % alias))
         #disable repo
-        shutil.move(rm_path, os.path.join(g.base_path, 'rm__%s__%s' \
-                                          % (datetime.today(), repo.repo_name)))
+        shutil.move(rm_path, os.path.join(self.repos_path, 'rm__%s__%s' \
+                                          % (datetime.today().isoformat(),
+                                             repo.repo_name)))

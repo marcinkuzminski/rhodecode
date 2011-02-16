@@ -1,17 +1,23 @@
 """Pylons environment configuration"""
+
+import os
+import logging
+
 from mako.lookup import TemplateLookup
 from pylons.configuration import PylonsConfig
 from pylons.error import handle_mako_error
+from sqlalchemy import engine_from_config
+
+import rhodecode.lib.app_globals as app_globals
+import rhodecode.lib.helpers
+
 from rhodecode.config.routing import make_map
+from rhodecode.lib import celerypylons
 from rhodecode.lib.auth import set_available_permissions, set_base_path
 from rhodecode.lib.utils import repo2db_mapper, make_ui, set_rhodecode_config
 from rhodecode.model import init_model
 from rhodecode.model.scm import ScmModel
-from sqlalchemy import engine_from_config
-import logging
-import os
-import rhodecode.lib.app_globals as app_globals
-import rhodecode.lib.helpers
+from rhodecode.lib.timerproxy import TimerProxy
 
 log = logging.getLogger(__name__)
 
@@ -60,7 +66,6 @@ def load_environment(global_conf, app_conf, initial=False):
     # Setup the SQLAlchemy database engine
     if config['debug'] and not test:
         #use query time debugging.
-        from rhodecode.lib.timerproxy import TimerProxy
         sa_engine_db1 = engine_from_config(config, 'sqlalchemy.db1.',
                                                             proxy=TimerProxy())
     else:

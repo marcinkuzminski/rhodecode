@@ -127,7 +127,10 @@ class TestLoginController(TestController):
         print response.body
         assert response.status == '200 OK', 'Wrong response from register page got %s' % response.status
         assert 'An email address must contain a single @' in response.body
-        assert 'Username may only contain alphanumeric characters underscores or dashes and must begin with alphanumeric character' in response.body
+        assert ('Username may only contain '
+                'alphanumeric characters underscores, '
+                'periods or dashes and must begin with '
+                'alphanumeric character') in response.body
 
     def test_register_err_case_sensitive(self):
         response = self.app.post(url(controller='login', action='register'),

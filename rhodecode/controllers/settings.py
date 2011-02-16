@@ -7,7 +7,7 @@
     
     :created_on: Jun 30, 2010
     :author: marcink
-    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
+    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>    
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software; you can redistribute it and/or
@@ -29,14 +29,14 @@ import logging
 import traceback
 
 import formencode
-from formencode import htmlfill
 
 from pylons import tmpl_context as c, request, url
 from pylons.controllers.util import redirect
 from pylons.i18n.translation import _
 
 import rhodecode.lib.helpers as h
-from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAllDecorator
+from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAllDecorator, \
+    HasRepoPermissionAnyDecorator, NotAnonymous
 from rhodecode.lib.base import BaseController, render
 from rhodecode.lib.utils import invalidate_cache, action_logger
 from rhodecode.model.forms import RepoSettingsForm, RepoForkForm
@@ -47,10 +47,10 @@ log = logging.getLogger(__name__)
 class SettingsController(BaseController):
 
     @LoginRequired()
-    @HasRepoPermissionAllDecorator('repository.admin')
     def __before__(self):
         super(SettingsController, self).__before__()
 
+    @HasRepoPermissionAllDecorator('repository.admin')
     def index(self, repo_name):
         repo_model = RepoModel()
         c.repo_info = repo = repo_model.get_by_repo_name(repo_name)
@@ -70,13 +70,14 @@ class SettingsController(BaseController):
             defaults.update({'perm_%s' % p.user.username:
                              p.permission.permission_name})
 
-        return htmlfill.render(
+        return formencode.htmlfill.render(
             render('settings/repo_settings.html'),
             defaults=defaults,
             encoding="UTF-8",
             force_defaults=False
         )
 
+    @HasRepoPermissionAllDecorator('repository.admin')
     def update(self, repo_name):
         repo_model = RepoModel()
         changed_name = repo_name
@@ -94,7 +95,7 @@ class SettingsController(BaseController):
             c.repo_info = repo_model.get_by_repo_name(repo_name)
             c.users_array = repo_model.get_users_js()
             errors.value.update({'user':c.repo_info.user.username})
-            return htmlfill.render(
+            return formencode.htmlfill.render(
                 render('settings/repo_settings.html'),
                 defaults=errors.value,
                 errors=errors.error_dict or {},
@@ -108,7 +109,7 @@ class SettingsController(BaseController):
         return redirect(url('repo_settings_home', repo_name=changed_name))
 
 
-
+    @HasRepoPermissionAllDecorator('repository.admin')
     def delete(self, repo_name):
         """DELETE /repos/repo_name: Delete an existing item"""
         # Forms posted to this method should contain a hidden field:
@@ -140,6 +141,9 @@ class SettingsController(BaseController):
 
         return redirect(url('home'))
 
+    @NotAnonymous()
+    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
+                                   'repository.admin')
     def fork(self, repo_name):
         repo_model = RepoModel()
         c.repo_info = repo = repo_model.get_by_repo_name(repo_name)
@@ -154,8 +158,9 @@ class SettingsController(BaseController):
 
         return render('settings/repo_fork.html')
 
-
-
+    @NotAnonymous()
+    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
+                                   'repository.admin')
     def fork_create(self, repo_name):
         repo_model = RepoModel()
         c.repo_info = repo_model.get_by_repo_name(repo_name)
@@ -175,7 +180,7 @@ class SettingsController(BaseController):
             c.new_repo = errors.value['fork_name']
             r = render('settings/repo_fork.html')
 
-            return htmlfill.render(
+            return formencode.htmlfill.render(
                 r,
                 defaults=errors.value,
                 errors=errors.error_dict or {},

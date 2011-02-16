@@ -8,7 +8,7 @@
     
     :created_on: Apr 10, 2010
     :author: marcink
-    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
+    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>    
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software; you can redistribute it and/or
@@ -51,10 +51,14 @@ class DbManage(object):
         self.tests = tests
         self.root = root
         self.dburi = dbconf
-        engine = create_engine(self.dburi, echo=log_sql)
+        self.log_sql = log_sql
+        self.db_exists = False
+        self.init_db()
+
+    def init_db(self):
+        engine = create_engine(self.dburi, echo=self.log_sql)
         init_model(engine)
         self.sa = meta.Session()
-        self.db_exists = False
 
     def check_for_db(self, override):
         db_path = jn(self.root, self.dbname)
@@ -65,12 +69,17 @@ class DbManage(object):
                 self.db_exists = True
                 if not override:
                     raise Exception('database already exists')
+            return 'sqlite'
+        if self.dburi.startswith('postgresql'):
+            self.db_exists = True
+            return 'postgresql'
+
 
     def create_tables(self, override=False):
         """Create a auth database
         """
 
-        self.check_for_db(override)
+        db_type = self.check_for_db(override)
         if self.db_exists:
             log.info("database exist and it's going to be destroyed")
             if self.tests:
@@ -80,7 +89,11 @@ class DbManage(object):
             if not destroy:
                 sys.exit()
             if self.db_exists and destroy:
-                os.remove(jn(self.root, self.dbname))
+                if db_type == 'sqlite':
+                    os.remove(jn(self.root, self.dbname))
+                if db_type == 'postgresql':
+                    meta.Base.metadata.drop_all()
+
         checkfirst = not override
         meta.Base.metadata.create_all(checkfirst=checkfirst)
         log.info('Created tables for %s', self.dbname)
@@ -103,7 +116,7 @@ class DbManage(object):
 
     def upgrade(self):
         """Upgrades given database schema to given revision following 
-        all needed steps,  
+        all needed steps, to perform the upgrade
         
         :param revision: revision to upgrade to
         """
@@ -142,6 +155,9 @@ class DbManage(object):
         # UPGRADE STEPS
         #======================================================================
         class UpgradeSteps(object):
+            """Those steps follow schema versions so for example schema 
+            for example schema with seq 002 == step_2 and so on.
+            """
 
             def __init__(self, klass):
                 self.klass = klass

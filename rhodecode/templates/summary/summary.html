@@ -47,11 +47,11 @@
 			      %if c.rhodecode_user.username != 'default':
 				      %if c.following:
 	                  <span id="follow_toggle" class="following" title="${_('Stop following this repository')}"
-	                        onclick="javascript:toggleFollowingRepo(${c.repo_info.dbrepo.repo_id},'${str(h.get_token())}')">
+	                        onclick="javascript:toggleFollowingRepo(this,${c.repo_info.dbrepo.repo_id},'${str(h.get_token())}')">
 	                  </span>			      
 				      %else:
 				      <span id="follow_toggle" class="follow" title="${_('Start following this repository')}"
-				            onclick="javascript:toggleFollowingRepo(${c.repo_info.dbrepo.repo_id},'${str(h.get_token())}')">
+				            onclick="javascript:toggleFollowingRepo(this,${c.repo_info.dbrepo.repo_id},'${str(h.get_token())}')">
 				      </span>
 				      %endif
 				  %endif:
@@ -61,7 +61,7 @@
 		            	<a href="${h.url('summary_home',repo_name=c.repo_info.dbrepo.fork.repo_name)}">
 		            	<img class="icon" alt="${_('public')}"
 		            	title="${_('Fork of')} ${c.repo_info.dbrepo.fork.repo_name}" 
-		            	src="/images/icons/arrow_divide.png"/>
+		            	src="${h.url("/images/icons/arrow_divide.png")}"/>
 		            	${_('Fork of')} ${c.repo_info.dbrepo.fork.repo_name}
 		            	</a>
 		            	</span>

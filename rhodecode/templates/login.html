@@ -4,18 +4,28 @@
     <head>
         <title>${_('Sign In')} - ${c.rhodecode_name}</title>
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
-        <link rel="icon" href="/images/icons/database_gear.png" type="image/png" />
+        <link rel="icon" href="${h.url("/images/icons/database_gear.png")}" type="image/png" />
         <meta name="robots" content="index, nofollow"/>
             
         <!-- stylesheets -->
-        <link rel="stylesheet" type="text/css" href="/css/style.css" media="screen" />
+        <link rel="stylesheet" type="text/css" href="${h.url('/css/style.css')}" media="screen" />
 
     </head>
     <body>
-<div id="login">
+        <div id="login">
+        <div class="flash_msg">
+            <% messages = h.flash.pop_messages() %>
+            % if messages:
+            <ul id="flash-messages">
+                % for message in messages:
+                <li class="${message.category}_msg">${message}</li>
+                % endfor
+            </ul>
+            % endif
+        </div>          
             <!-- login -->
             <div class="title top-left-rounded-corner top-right-rounded-corner">
-                <h5>${_('Sign In to rhodecode')}</h5>
+                <h5>${_('Sign In to')} ${c.rhodecode_name}</h5>
             </div>
             <div class="inner">            
                 ${h.form(h.url.current(came_from=c.came_from))}
@@ -48,7 +58,7 @@
                         ##    </div>
                         ##</div>
                         <div class="buttons">
-                            ${h.submit('sign_in','Sign In',class_="ui-button ui-widget ui-state-default ui-corner-all")}
+                            ${h.submit('sign_in','Sign In',class_="ui-button")}
                         </div>
                     </div>
                     <!-- end fields -->
