@@ -3,13 +3,13 @@
 Changelog
 =========
 
-1.1.3 (**2011-02-15**)
+1.1.3 (**2011-02-16**)
 ======================
 
 news
 ----
 
-- implemented #102 allowing '.' in username
+- implemented #102 allowing the '.' character in username
 - added option to access repository just by entering http://server/<repo_name>
 - celery task ignores result for better performance
 
@@ -27,9 +27,7 @@ fixes
 - removed issue with space inside renamed repository after deletion
 - db transaction fixes when filesystem repository creation failed
 - fixed #106 relation issues on databases different than sqlite
-
 - fixed static files paths links to use of url() method
-
 
 
 1.1.2 (**2011-01-12**)

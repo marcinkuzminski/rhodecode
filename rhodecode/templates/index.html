@@ -61,18 +61,18 @@
 		            <div style="white-space: nowrap">
 		             ## TYPE OF REPO
 		             %if repo['repo'].dbrepo.repo_type =='hg':
-		               <img class="icon" title="${_('Mercurial repository')}" alt="${_('Mercurial repository')}" src="/images/icons/hgicon.png"/>
+		               <img class="icon" title="${_('Mercurial repository')}" alt="${_('Mercurial repository')}" src="${h.url("/images/icons/hgicon.png")}"/>
 		             %elif repo['repo'].dbrepo.repo_type =='git':
-		               <img class="icon" title="${_('Git repository')}" alt="${_('Git repository')}" src="/images/icons/giticon.png"/>
+		               <img class="icon" title="${_('Git repository')}" alt="${_('Git repository')}" src="${h.url("/images/icons/giticon.png")}"/>
 		             %else:
 		               
 		             %endif 
 		            
 		             ##PRIVATE/PUBLIC
 		             %if repo['repo'].dbrepo.private:
-		                <img class="icon" title="${_('private repository')}" alt="${_('private repository')}" src="/images/icons/lock.png"/>
+		                <img class="icon" title="${_('private repository')}" alt="${_('private repository')}" src="${h.url("/images/icons/lock.png")}"/>
 		             %else:
-		                <img class="icon" title="${_('public repository')}" alt="${_('public repository')}" src="/images/icons/lock_open.png"/>
+		                <img class="icon" title="${_('public repository')}" alt="${_('public repository')}" src="${h.url("/images/icons/lock_open.png")}"/>
 		             %endif
 		            
 		            ##NAME   
@@ -82,7 +82,7 @@
 		            	<a href="${h.url('summary_home',repo_name=repo['repo'].dbrepo.fork.repo_name)}">
 		            	<img class="icon" alt="${_('fork')}"
 		            	title="${_('Fork of')} ${repo['repo'].dbrepo.fork.repo_name}" 
-		            	src="/images/icons/arrow_divide.png"/></a>
+		            	src="${h.url("/images/icons/arrow_divide.png")}"/></a>
 		            %endif
 		            </div>
 		            </td>

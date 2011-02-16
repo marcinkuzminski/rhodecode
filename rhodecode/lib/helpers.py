@@ -399,10 +399,10 @@ def bool2icon(value):
     """
 
     if value is True:
-        return HTML.tag('img', src="/images/icons/accept.png", alt=_('True'))
+        return HTML.tag('img', src=url("/images/icons/accept.png"), alt=_('True'))
 
     if value is False:
-        return HTML.tag('img', src="/images/icons/cancel.png", alt=_('False'))
+        return HTML.tag('img', src=url("/images/icons/cancel.png"), alt=_('False'))
 
     return value
 
@@ -452,7 +452,7 @@ def action_parser(user_log):
         repo_name = action_params
         return str(link_to(action_params, url('summary_home',
                                           repo_name=repo_name,)))
-        
+
     map = {'user_deleted_repo':(_('[deleted] repository'), None),
            'user_created_repo':(_('[created] repository'), None),
            'user_forked_repo':(_('[forked] repository'), get_fork_name),
@@ -475,7 +475,7 @@ def action_parser(user_log):
     if action_str[1] is not None:
         action_params_func = action_str[1]
 
-    return literal(action +" "+ action_params_func())
+    return literal(action + " " + action_params_func())
 
 def action_parser_icon(user_log):
     action = user_log.action

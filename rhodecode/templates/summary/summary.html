@@ -32,16 +32,16 @@
 			  </div>
 			  <div class="input-short">
 		         %if c.repo_info.dbrepo.repo_type =='hg':
-		           <img style="margin-bottom:2px" class="icon" title="${_('Mercurial repository')}" alt="${_('Mercurial repository')}" src="/images/icons/hgicon.png"/>
+		           <img style="margin-bottom:2px" class="icon" title="${_('Mercurial repository')}" alt="${_('Mercurial repository')}" src="${h.url("/images/icons/hgicon.png")}"/>
 		         %endif
 		         %if c.repo_info.dbrepo.repo_type =='git':
-		           <img style="margin-bottom:2px" class="icon" title="${_('Git repository')}" alt="${_('Git repository')}" src="/images/icons/giticon.png"/>
+		           <img style="margin-bottom:2px" class="icon" title="${_('Git repository')}" alt="${_('Git repository')}" src="${h.url("/images/icons/giticon.png")}"/>
 		         %endif 
                                  			  
 	             %if c.repo_info.dbrepo.private:
-	                <img style="margin-bottom:2px" class="icon" title="${_('private repository')}" alt="${_('private repository')}" src="/images/icons/lock.png"/>
+	                <img style="margin-bottom:2px" class="icon" title="${_('private repository')}" alt="${_('private repository')}" src="${h.url("/images/icons/lock.png")}"/>
 	             %else:
-	                <img style="margin-bottom:2px" class="icon" title="${_('public repository')}" alt="${_('public repository')}" src="/images/icons/lock_open.png"/>
+	                <img style="margin-bottom:2px" class="icon" title="${_('public repository')}" alt="${_('public repository')}" src="${h.url("/images/icons/lock_open.png")}"/>
 	             %endif
 			      <span style="font-size: 1.6em;font-weight: bold;vertical-align: baseline;">${c.repo_info.name}</span>
 			      %if c.rhodecode_user.username != 'default':
