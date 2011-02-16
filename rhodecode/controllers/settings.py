@@ -37,7 +37,7 @@ from pylons.i18n.translation import _
 import rhodecode.lib.helpers as h
 
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAllDecorator, \
-    NotAnonymous
+    HasRepoPermissionAnyDecorator, NotAnonymous
 from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.utils import invalidate_cache, action_logger
 
@@ -161,7 +161,8 @@ class SettingsController(BaseRepoController):
         return redirect(url('home'))
 
     @NotAnonymous()
-    @HasRepoPermissionAllDecorator('repository.read')
+    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
+                                   'repository.admin')
     def fork(self, repo_name):
         repo_model = RepoModel()
         c.repo_info = repo = repo_model.get_by_repo_name(repo_name)
@@ -177,7 +178,8 @@ class SettingsController(BaseRepoController):
         return render('settings/repo_fork.html')
 
     @NotAnonymous()
-    @HasRepoPermissionAllDecorator('repository.read')
+    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
+                                   'repository.admin')
     def fork_create(self, repo_name):
         repo_model = RepoModel()
         c.repo_info = repo_model.get_by_repo_name(repo_name)
