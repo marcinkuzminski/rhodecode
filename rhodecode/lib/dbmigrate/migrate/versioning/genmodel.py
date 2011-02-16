@@ -111,12 +111,12 @@ class ModelGenerator(object):
             out.append(")")
         return out
 
-    def _get_tables(self, missingA=False, missingB=False, modified=False):
+    def _get_tables(self,missingA=False,missingB=False,modified=False):
         to_process = []
-        for bool_, names, metadata in (
-            (missingA, self.diff.tables_missing_from_A, self.diff.metadataB),
-            (missingB, self.diff.tables_missing_from_B, self.diff.metadataA),
-            (modified, self.diff.tables_different, self.diff.metadataA),
+        for bool_,names,metadata in (
+            (missingA,self.diff.tables_missing_from_A,self.diff.metadataB),
+            (missingB,self.diff.tables_missing_from_B,self.diff.metadataA),
+            (modified,self.diff.tables_different,self.diff.metadataA),
                 ):
             if bool_:
                 for name in names:
@@ -140,7 +140,7 @@ class ModelGenerator(object):
         decls = ['from rhodecode.lib.dbmigrate.migrate.changeset import schema',
                  'meta = MetaData()']
         for table in self._get_tables(
-            missingA=True, missingB=True, modified=True
+            missingA=True,missingB=True,modified=True
             ):
             decls.extend(self.getTableDefn(table))
 
@@ -169,11 +169,11 @@ class ModelGenerator(object):
                         modelTable, col.name))
             for modelCol, databaseCol, modelDecl, databaseDecl in diffDecl:
                 upgradeCommands.append(
-                    'assert False, "Can\'t alter columns: %s:%s=>%s"',
-                    modelTable, modelCol.name, databaseCol.name)
+                    'assert False, "Can\'t alter columns: %s:%s=>%s"' % (
+                    modelTable, modelCol.name, databaseCol.name))
                 downgradeCommands.append(
-                    'assert False, "Can\'t alter columns: %s:%s=>%s"',
-                    modelTable, modelCol.name, databaseCol.name)
+                    'assert False, "Can\'t alter columns: %s:%s=>%s"' % (
+                    modelTable, modelCol.name, databaseCol.name))
         pre_command = '    meta.bind = migrate_engine'
 
         return (
@@ -181,7 +181,7 @@ class ModelGenerator(object):
             '\n'.join([pre_command] + ['%s%s' % (indent, line) for line in upgradeCommands]),
             '\n'.join([pre_command] + ['%s%s' % (indent, line) for line in downgradeCommands]))
 
-    def _db_can_handle_this_change(self, td):
+    def _db_can_handle_this_change(self,td):
         if (td.columns_missing_from_B
             and not td.columns_missing_from_A
             and not td.columns_different):
@@ -207,9 +207,9 @@ class ModelGenerator(object):
             dbTable = self.diff.metadataB.tables[tableName]
 
             td = self.diff.tables_different[tableName]
-
+            
             if self._db_can_handle_this_change(td):
-
+                
                 for col in td.columns_missing_from_B:
                     modelTable.columns[col].create()
                 for col in td.columns_missing_from_A:

@@ -4,6 +4,7 @@
 import shutil
 import warnings
 import logging
+import inspect
 from StringIO import StringIO
 
 from rhodecode.lib.dbmigrate import migrate
@@ -49,7 +50,7 @@ class PythonScript(base.BaseScript):
         :returns: Upgrade / Downgrade script
         :rtype: string
         """
-
+        
         if isinstance(repository, basestring):
             # oh dear, an import cycle!
             from rhodecode.lib.dbmigrate.migrate.versioning.repository import Repository
@@ -65,7 +66,7 @@ class PythonScript(base.BaseScript):
             excludeTables=[repository.version_table])
         # TODO: diff can be False (there is no difference?)
         decls, upgradeCommands, downgradeCommands = \
-            genmodel.ModelGenerator(diff, engine).toUpgradeDowngradePython()
+            genmodel.ModelGenerator(diff,engine).toUpgradeDowngradePython()
 
         # Store differences into file.
         src = Template(opts.pop('templates_path', None)).get_script(opts.pop('templates_theme', None))
@@ -136,12 +137,12 @@ class PythonScript(base.BaseScript):
         funcname = base.operations[op]
         script_func = self._func(funcname)
 
-        try:
-            script_func(engine)
-        except TypeError:
-            warnings.warn("upgrade/downgrade functions must accept engine"
-                " parameter (since version > 0.5.4)", MigrateDeprecationWarning)
-            raise
+        # check for old way of using engine
+        if not inspect.getargspec(script_func)[0]:
+            raise TypeError("upgrade/downgrade functions must accept engine"
+                " parameter (since version 0.5.4)")
+
+        script_func(engine)
 
     @property
     def module(self):
