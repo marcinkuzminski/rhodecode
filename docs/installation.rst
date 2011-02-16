@@ -22,16 +22,16 @@ Rhodecode requires python 2.x greater than version 2.5
 
 Easiest way to install ``rhodecode`` is to run::
 
- easy_install rhodecode
+    easy_install rhodecode
 
 Or::
 
- pip install rhodecode
+    pip install rhodecode
 
 If you prefer to install manually simply grab latest release from
 http://pypi.python.org/pypi/rhodecode, decompres archive and run::
 
-   python setup.py install
+    python setup.py install
 
 
 Step by step installation example
@@ -44,27 +44,27 @@ Step by step installation example
 
 ::
 
- virtualenv --no-site-packages /var/www/rhodecode-venv
+    virtualenv --no-site-packages /var/www/rhodecode-venv
 
 - this will install new virtualenv_ into `/var/www/rhodecode-venv`. 
 - Activate the virtualenv_ by running 
 
 ::
 
-  source /var/www/rhodecode-venv/bin/activate
+    source /var/www/rhodecode-venv/bin/activate
      
 - Make a folder for rhodecode somewhere on the filesystem for example 
 
 ::
 
-  mkdir /var/www/rhodecode
+    mkdir /var/www/rhodecode
   
     
 - Run this command to install rhodecode
 
 ::
 
-  easy_install rhodecode 
+    easy_install rhodecode 
 
 - this will install rhodecode together with pylons
   and all other required python libraries

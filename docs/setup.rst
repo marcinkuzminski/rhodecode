@@ -7,7 +7,7 @@ Setup
 Setting up the application
 --------------------------
 
-First You'll ned to create RhodeCode config file. Run the following command 
+First You'll need to create RhodeCode config file. Run the following command 
 to do this
 
 ::
@@ -19,8 +19,10 @@ to do this
   email settings, usage of static files, cache, celery settings and logging.
 
 
+Next we need to create the database. I'll recommend to use sqlite (default) 
+or postgresql. Make sure You properly adjust the db url in the .ini file to use
+other than the default sqlite database
 
-Next we need to create the database.
 
 ::
 
@@ -35,7 +37,7 @@ Next we need to create the database.
   interface will work even without such an access but, when trying to do a 
   push it'll eventually fail with permission denied errors. 
 
-You are ready to use rhodecode, to run it simply execute
+You are ready to use RhodeCode, to run it simply execute
 
 ::
  
@@ -92,13 +94,13 @@ incremental mode.
 
 incremental mode::
 
- paster make-index production.ini --repo-location=<location for repos> 
+	paster make-index production.ini --repo-location=<location for repos> 
 
 
 
 for full index rebuild You can use::
 
- paster make-index production.ini -f --repo-location=<location for repos>
+	paster make-index production.ini -f --repo-location=<location for repos>
 
 
 building index just for chosen repositories is possible with such command::
@@ -334,10 +336,18 @@ In order to make start using celery run::
  paster celeryd <configfile.ini>
 
 
-
 .. note::
    Make sure You run this command from same virtualenv, and with the same user
    that rhodecode runs.
+   
+HTTPS support
+-------------
+
+There are two ways to enable https, first is to set HTTP_X_URL_SCHEME in
+Your http server headers, than rhodecode will recognise this headers and make
+proper https redirections, another way is to set `force_https = true` 
+in the ini cofiguration to force using https, no headers are needed than to
+enable https
 
 
 Nginx virtual host example
@@ -426,6 +436,29 @@ Additional tutorial
 http://wiki.pylonshq.com/display/pylonscookbook/Apache+as+a+reverse+proxy+for+Pylons
 
 
+Apache as subdirectory
+----------------------
+
+
+Apache subdirectory part::
+
+    <Location /rhodecode>
+      ProxyPass http://127.0.0.1:59542/rhodecode
+      ProxyPassReverse http://127.0.0.1:59542/rhodecode
+      SetEnvIf X-Url-Scheme https HTTPS=1
+    </Location> 
+
+Besides the regular apache setup You'll need to add such part to .ini file::
+
+    filter-with = proxy-prefix
+
+Add the following at the end of the .ini file::
+
+    [filter:proxy-prefix]
+    use = egg:PasteDeploy#prefix
+    prefix = /<someprefix> 
+
+
 Apache's example FCGI config
 ----------------------------
 
@@ -462,7 +495,9 @@ Troubleshooting
  
  - make sure You set a proper max_body_size for the http server
 
+- Apache doesn't pass basicAuth on pull/push ?
 
+ - Make sure You added `WSGIPassAuthorization true` 
 
 .. _virtualenv: http://pypi.python.org/pypi/virtualenv
 .. _python: http://www.python.org/
