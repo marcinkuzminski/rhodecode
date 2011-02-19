@@ -7,7 +7,7 @@ Setup
 Setting up the application
 --------------------------
 
-First You'll ned to create RhodeCode config file. Run the following command 
+First You'll need to create RhodeCode config file. Run the following command 
 to do this
 
 ::
@@ -19,8 +19,10 @@ to do this
   email settings, usage of static files, cache, celery settings and logging.
 
 
+Next we need to create the database. I'll recommend to use sqlite (default) 
+or postgresql. Make sure You properly adjust the db url in the .ini file to use
+other than the default sqlite database
 
-Next we need to create the database.
 
 ::
 
@@ -35,7 +37,7 @@ Next we need to create the database.
   interface will work even without such an access but, when trying to do a 
   push it'll eventually fail with permission denied errors. 
 
-You are ready to use rhodecode, to run it simply execute
+You are ready to use RhodeCode, to run it simply execute
 
 ::
  
@@ -50,37 +52,64 @@ You are ready to use rhodecode, to run it simply execute
   anonymous, permissions settings. As well as edit more advanced options on 
   users and repositories
   
+Using RhodeCode with SSH
+------------------------
+
+RhodeCode repository structures are kept in directories with the same name 
+as the project, when using repository groups, each group is a a subdirectory.
+This will allow You to use ssh for accessing repositories quite easy. There
+are some exceptions when using ssh for accessing repositories.
+
+You have to make sure that the webserver as well as the ssh users have unix
+permission for directories. Secondly when using ssh rhodecode will not 
+authenticate those requests and permissions set by the web interface will not
+work on the repositories accessed via ssh. There is a solution to this to use 
+auth hooks, that connects to rhodecode db, and runs check functions for
+permissions.
+
+
+if Your main directory (the same as set in RhodeCode settings) is for example 
+set for to **/home/hg** and repository You are using is `rhodecode`
+
+The command runned should look like this::
+
+    hg clone ssh://user@server.com/home/hg/rhodecode
+  
+Using external tools such as mercurial server or using ssh key based auth is
+fully supported.
     
 Setting up Whoosh full text search
 ----------------------------------
 
-Index for whoosh can be build starting from version 1.1 using paster command
-passing repo locations to index, as well as Your config file that stores
-whoosh index files locations. There is possible to pass `-f` to the options
+Starting from version 1.1 whoosh index can be build using paster command.
+You have to specify the config file that stores location of index, and
+location of repositories (`--repo-location`).
+
+There is possible also to pass `-f` to the options
 to enable full index rebuild. Without that indexing will run always in in
 incremental mode.
 
-::
+incremental mode::
 
- paster make-index production.ini --repo-location=<location for repos> 
+	paster make-index production.ini --repo-location=<location for repos> 
 
-for full index rebuild You can use
 
-::
 
- paster make-index production.ini -f --repo-location=<location for repos>
+for full index rebuild You can use::
+
+	paster make-index production.ini -f --repo-location=<location for repos>
 
 - For full text search You can either put crontab entry for
 
-This command can be run even from crontab in order to do periodical 
-index builds and keep Your index always up to date. An example entry might 
-look like this
+In order to do periodical index builds and keep Your index always up to date.
+It's recommended to do a crontab entry for incremental indexing. 
+An example entry might look like this
 
 ::
  
  /path/to/python/bin/paster /path/to/rhodecode/production.ini --repo-location=<location for repos> 
   
-When using incremental(default) mode whoosh will check last modification date 
+When using incremental (default) mode whoosh will check last modification date 
 of each file and add it to reindex if newer file is available. Also indexing 
 daemon checks for removed files and removes them from index. 
 
@@ -93,7 +122,7 @@ Setting up LDAP support
 -----------------------
 
 RhodeCode starting from version 1.1 supports ldap authentication. In order
-to use ldap, You have to install python-ldap package. This package is available
+to use LDAP, You have to install python-ldap_ package. This package is available
 via pypi, so You can install it by running
 
 ::
@@ -157,6 +186,7 @@ In order to make start using celery run::
 
  paster celeryd <configfile.ini>
 
+
 .. note::
    Make sure You run this command from same virtualenv, and with the same user
    that rhodecode runs.
@@ -176,21 +206,21 @@ Nginx virtual host example
 
 Sample config for nginx using proxy::
 
- server {
-    listen          80;
-    server_name     hg.myserver.com;
-    access_log      /var/log/nginx/rhodecode.access.log;
-    error_log       /var/log/nginx/rhodecode.error.log;
-    location / {
-            root /var/www/rhodecode/rhodecode/public/;
-            if (!-f $request_filename){
-                proxy_pass      http://127.0.0.1:5000;
-            }
-            #this is important if You want to use https !!!
-            proxy_set_header X-Url-Scheme $scheme;
-            include         /etc/nginx/proxy.conf;  
-    }
- }  
+    server {
+       listen          80;
+       server_name     hg.myserver.com;
+       access_log      /var/log/nginx/rhodecode.access.log;
+       error_log       /var/log/nginx/rhodecode.error.log;
+       location / {
+               root /var/www/rhodecode/rhodecode/public/;
+               if (!-f $request_filename){
+                   proxy_pass      http://127.0.0.1:5000;
+               }
+               #this is important if You want to use https !!!
+               proxy_set_header X-Url-Scheme $scheme;
+               include         /etc/nginx/proxy.conf;  
+       }
+    }  
   
 Here's the proxy.conf. It's tuned so it'll not timeout on long
 pushes and also on large pushes::
@@ -207,20 +237,20 @@ pushes and also on large pushes::
     proxy_connect_timeout       3600;
     proxy_send_timeout          3600;
     proxy_read_timeout          3600;
-    proxy_buffer_size           8k;
-    proxy_buffers               8 32k;
+    proxy_buffer_size           16k;
+    proxy_buffers               4 16k;
     proxy_busy_buffers_size     64k;
     proxy_temp_file_write_size  64k;
  
 Also when using root path with nginx You might set the static files to false
 in production.ini file::
 
-  [app:main]
-    use = egg:rhodecode
-    full_stack = true
-    static_files = false
-    lang=en
-    cache_dir = %(here)s/data
+    [app:main]
+      use = egg:rhodecode
+      full_stack = true
+      static_files = false
+      lang=en
+      cache_dir = %(here)s/data
 
 To not have the statics served by the application. And improve speed.
 
@@ -255,6 +285,29 @@ Sample config for apache using proxy::
 
 Additional tutorial
 http://wiki.pylonshq.com/display/pylonscookbook/Apache+as+a+reverse+proxy+for+Pylons
+
+
+Apache as subdirectory
+----------------------
+
+
+Apache subdirectory part::
+
+    <Location /rhodecode>
+      ProxyPass http://127.0.0.1:59542/rhodecode
+      ProxyPassReverse http://127.0.0.1:59542/rhodecode
+      SetEnvIf X-Url-Scheme https HTTPS=1
+    </Location> 
+
+Besides the regular apache setup You'll need to add such part to .ini file::
+
+    filter-with = proxy-prefix
+
+Add the following at the end of the .ini file::
+
+    [filter:proxy-prefix]
+    use = egg:PasteDeploy#prefix
+    prefix = /<someprefix> 
 
 
 Apache's example FCGI config
@@ -293,10 +346,13 @@ Troubleshooting
  
  - make sure You set a proper max_body_size for the http server
 
+- Apache doesn't pass basicAuth on pull/push ?
 
+ - Make sure You added `WSGIPassAuthorization true` 
 
 .. _virtualenv: http://pypi.python.org/pypi/virtualenv
 .. _python: http://www.python.org/
 .. _mercurial: http://mercurial.selenic.com/
 .. _celery: http://celeryproject.org/
 .. _rabbitmq: http://www.rabbitmq.com/
+.. _python-ldap: http://www.python-ldap.org/

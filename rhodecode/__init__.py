@@ -27,7 +27,7 @@
 # MA  02110-1301, USA.
 
 
-VERSION = (1, 1, 3)
+VERSION = (1, 1, 4)
 __version__ = '.'.join((str(each) for each in VERSION[:4]))
 __dbversion__ = 2 #defines current db version for migrations
 

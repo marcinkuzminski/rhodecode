@@ -27,8 +27,9 @@
 
 import logging
 import traceback
-
 import formencode
+
+from formencode import htmlfill
 
 from pylons import tmpl_context as c, request, url
 from pylons.controllers.util import redirect
@@ -70,7 +71,7 @@ class SettingsController(BaseController):
             defaults.update({'perm_%s' % p.user.username:
                              p.permission.permission_name})
 
-        return formencode.htmlfill.render(
+        return htmlfill.render(
             render('settings/repo_settings.html'),
             defaults=defaults,
             encoding="UTF-8",
@@ -95,7 +96,7 @@ class SettingsController(BaseController):
             c.repo_info = repo_model.get_by_repo_name(repo_name)
             c.users_array = repo_model.get_users_js()
             errors.value.update({'user':c.repo_info.user.username})
-            return formencode.htmlfill.render(
+            return htmlfill.render(
                 render('settings/repo_settings.html'),
                 defaults=errors.value,
                 errors=errors.error_dict or {},
@@ -180,7 +181,7 @@ class SettingsController(BaseController):
             c.new_repo = errors.value['fork_name']
             r = render('settings/repo_fork.html')
 
-            return formencode.htmlfill.render(
+            return htmlfill.render(
                 r,
                 defaults=errors.value,
                 errors=errors.error_dict or {},

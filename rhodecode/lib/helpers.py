@@ -423,30 +423,28 @@ def action_parser(user_log):
         action, action_params = x
 
     def get_cs_links():
-        if action == 'push':
-            revs_limit = 5
-            revs = action_params.split(',')
-            cs_links = " " + ', '.join ([link(rev,
-                    url('changeset_home',
-                    repo_name=user_log.repository.repo_name,
-                    revision=rev)) for rev in revs[:revs_limit] ])
-            if len(revs) > revs_limit:
-                uniq_id = revs[0]
-                html_tmpl = ('<span> %s '
-                '<a class="show_more" id="_%s" href="#">%s</a> '
-                '%s</span>')
-                cs_links += html_tmpl % (_('and'), uniq_id, _('%s more') \
-                                            % (len(revs) - revs_limit),
-                                            _('revisions'))
+        revs_limit = 5
+        revs = action_params.split(',')
+        cs_links = " " + ', '.join ([link(rev,
+                url('changeset_home',
+                repo_name=user_log.repository.repo_name,
+                revision=rev)) for rev in revs[:revs_limit] ])
+        if len(revs) > revs_limit:
+            uniq_id = revs[0]
+            html_tmpl = ('<span> %s '
+            '<a class="show_more" id="_%s" href="#">%s</a> '
+            '%s</span>')
+            cs_links += html_tmpl % (_('and'), uniq_id, _('%s more') \
+                                        % (len(revs) - revs_limit),
+                                        _('revisions'))
 
-                html_tmpl = '<span id="%s" style="display:none"> %s </span>'
-                cs_links += html_tmpl % (uniq_id, ', '.join([link(rev,
-                    url('changeset_home',
-                    repo_name=user_log.repository.repo_name,
-                    revision=rev)) for rev in revs[revs_limit:] ]))
+            html_tmpl = '<span id="%s" style="display:none"> %s </span>'
+            cs_links += html_tmpl % (uniq_id, ', '.join([link(rev,
+                url('changeset_home',
+                repo_name=user_log.repository.repo_name,
+                revision=rev)) for rev in revs[revs_limit:] ]))
 
-            return cs_links
-        return ''
+        return cs_links
 
     def get_fork_name():
         repo_name = action_params
@@ -455,14 +453,14 @@ def action_parser(user_log):
 
     map = {'user_deleted_repo':(_('[deleted] repository'), None),
            'user_created_repo':(_('[created] repository'), None),
-           'user_forked_repo':(_('[forked] repository'), get_fork_name),
+           'user_forked_repo':(_('[forked] repository as'), get_fork_name),
            'user_updated_repo':(_('[updated] repository'), None),
            'admin_deleted_repo':(_('[delete] repository'), None),
            'admin_created_repo':(_('[created] repository'), None),
            'admin_forked_repo':(_('[forked] repository'), None),
            'admin_updated_repo':(_('[updated] repository'), None),
-           'push':(_('[pushed] into'), get_cs_links),
-           'pull':(_('[pulled] from'), None),
+           'push':(_('[pushed] '), get_cs_links),
+           'pull':(_('[pulled] '), None),
            'started_following_repo':(_('[started following] repository'), None),
            'stopped_following_repo':(_('[stopped following] repository'), None),
             }

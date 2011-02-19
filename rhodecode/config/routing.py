@@ -164,6 +164,8 @@ def make_map(config):
     map.connect('raw_changeset_home', '/{repo_name:.*}/raw-changeset/{revision}',
                 controller='changeset', action='raw_changeset', revision='tip',
                 conditions=dict(function=check_repo))
+    map.connect('summary_home_', '/{repo_name:.*}',
+                controller='summary', conditions=dict(function=check_repo))
     map.connect('summary_home', '/{repo_name:.*}/summary',
                 controller='summary', conditions=dict(function=check_repo))
     map.connect('shortlog_home', '/{repo_name:.*}/shortlog',

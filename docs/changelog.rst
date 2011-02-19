@@ -3,6 +3,21 @@
 Changelog
 =========
 
+1.1.4 (**2011-02-19**)
+======================
+
+news
+----
+
+fixes
+-----
+
+- fixed formencode import problem on settings page, that caused server crash
+  when that page was accessed as first after server start
+- journal fixes
+- fixed option to access repository just by entering http://server/<repo_name> 
+
+
 1.1.3 (**2011-02-16**)
 ======================
 
@@ -28,7 +43,6 @@ fixes
 - db transaction fixes when filesystem repository creation failed
 - fixed #106 relation issues on databases different than sqlite
 - fixed static files paths links to use of url() method
-
 
 1.1.2 (**2011-01-12**)
 ======================

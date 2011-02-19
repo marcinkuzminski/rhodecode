@@ -22,16 +22,16 @@ Rhodecode requires python 2.x greater than version 2.5
 
 Easiest way to install ``rhodecode`` is to run::
 
- easy_install rhodecode
+    easy_install rhodecode
 
 Or::
 
- pip install rhodecode
+    pip install rhodecode
 
 If you prefer to install manually simply grab latest release from
-http://pypi.python.org/pypi/RhodeCode, decompres archive and run::
+http://pypi.python.org/pypi/rhodecode, decompress archive and run::
 
-   python setup.py install
+    python setup.py install
 
 
 Step by step installation example
@@ -39,32 +39,45 @@ Step by step installation example
 
 
 - Assuming You have installed virtualenv_ create one using. 
-  The `--no-site-packages` will make sure non of Your system libs are linked 
-  with this virtualenv_  
 
 ::
 
- virtualenv --no-site-packages /var/www/rhodecode-venv
+    virtualenv --no-site-packages /var/www/rhodecode-venv
+
+
+.. note:: Using ``--no-site-packages`` when generating your
+   virtualenv is *very important*. This flag provides the necessary
+   isolation for running the set of packages required by
+   RhodeCode.  If you do not specify ``--no-site-packages``,
+   it's possible that RhodeCode will not install properly into
+   the virtualenv, or, even if it does, may not run properly,
+   depending on the packages you've already got installed into your
+   Python's "main" site-packages dir.
+
 
 - this will install new virtualenv_ into `/var/www/rhodecode-venv`. 
 - Activate the virtualenv_ by running 
 
 ::
 
-  source /var/www/rhodecode-venv/bin/activate
+    source /var/www/rhodecode-venv/bin/activate
+
+.. note:: If you're on UNIX, *do not* use ``sudo`` to run the
+   ``virtualenv`` script.  It's perfectly acceptable (and desirable)
+   to create a virtualenv as a normal user.
      
 - Make a folder for rhodecode somewhere on the filesystem for example 
 
 ::
 
-  mkdir /var/www/rhodecode
+    mkdir /var/www/rhodecode
   
     
 - Run this command to install rhodecode
 
 ::
 
-  easy_install rhodecode 
+    easy_install rhodecode 
 
 - this will install rhodecode together with pylons
   and all other required python libraries
