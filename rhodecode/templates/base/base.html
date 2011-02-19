@@ -264,7 +264,7 @@
                     <span class="icon_short">
                         <img src="${h.url("/images/icons/heart.png")}" alt="${_('Followers')}" />
                     </span>
-                    <span class="short">${c.repository_followers}</span>
+                    <span id="current_followers_count" class="short">${c.repository_followers}</span>
                     </a>
                 </li>
                 <li>
@@ -351,13 +351,25 @@ var YUE = YAHOO.util.Event;
 function onSuccess(target){
 	
 	var f = YUD.get(target.id);
+	var f_cnt = YUD.get('current_followers_count');
+	
     if(f.getAttribute('class')=='follow'){
         f.setAttribute('class','following');
         f.setAttribute('title',"${_('Stop following this repository')}");
+        
+        if(f_cnt){
+            var cnt = Number(f_cnt.innerHTML)+1;
+            f_cnt.innerHTML = cnt;
+        }
+        
     }
     else{
         f.setAttribute('class','follow');
         f.setAttribute('title',"${_('Start following this repository')}");
+        if(f_cnt){
+            var cnt = Number(f_cnt.innerHTML)+1;
+            f_cnt.innerHTML = cnt;
+        }      
     }
 }
 
