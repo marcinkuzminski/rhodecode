@@ -38,20 +38,39 @@ fixes
   not changing
 - fixed propagation to error controller on simplehg and simplegit middlewares
 - fixed error when trying to make a download on empty repository
-- fixed ehlo command and non auth mail servers on smtp_lib. Thanks to 
-  apollo13 and Johan Walles
 - fixed problem with '[' chars in commit messages in journal
 - fixed #99 Unicode errors, on file node paths with non utf-8 characters
-- fixed #106 relation issues on databases different than sqlite
-- registration,password reset and login boxes share the same title as main 
-  application now
-- fixed problems with getting setting for celery from .ini files
 - journal fork fixes
-- fixed #113: to high permissions to fork repository
-- fixed static files paths links to use of url() method
-- db transaction fixes when filesystem repositry creation failed
 - removed issue with space inside renamed repository after deletion
- 
+- fixed strange issue on formencode imports
+
+
+1.1.3 (**2011-02-16**)
+======================
+
+news
+----
+
+- implemented #102 allowing the '.' character in username
+- added option to access repository just by entering http://server/<repo_name>
+- celery task ignores result for better performance
+
+fixes
+-----
+
+- fixed ehlo command and non auth mail servers on smtp_lib. Thanks to 
+  apollo13 and Johan Walles
+- small fixes in journal
+- fixed problems with getting setting for celery from .ini files
+- registration, password reset and login boxes share the same title as main 
+  application now
+- fixed #113: to high permissions to fork repository
+- fixed problem with '[' chars in commit messages in journal
+- removed issue with space inside renamed repository after deletion
+- db transaction fixes when filesystem repository creation failed
+- fixed #106 relation issues on databases different than sqlite
+- fixed static files paths links to use of url() method
+
 1.1.2 (**2011-01-12**)
 ======================
 
@@ -65,7 +84,6 @@ fixes
 - fixes #98 protection against float division of percentage stats
 - fixed graph bug
 - forced webhelpers version since it was making troubles during installation 
-
 
 1.1.1 (**2011-01-06**)
 ======================
