@@ -10,9 +10,9 @@ requirements = [
         "Mako==0.3.6",
         "vcs>=0.1.10",
         "pygments>=1.4",
-        "mercurial>=1.7.3",
+        "mercurial>=1.7.5",
         "whoosh>=1.3.4",
-        "celery>=2.2.2",
+        "celery>=2.2.4",
         "py-bcrypt",
         "babel",
     ]
