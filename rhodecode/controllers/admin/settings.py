@@ -48,7 +48,6 @@ from rhodecode.model.forms import UserForm, ApplicationSettingsForm, \
 from rhodecode.model.scm import ScmModel
 from rhodecode.model.settings import SettingsModel
 from rhodecode.model.user import UserModel
-from rhodecode.model.repo import RepoModel
 
 log = logging.getLogger(__name__)
 
