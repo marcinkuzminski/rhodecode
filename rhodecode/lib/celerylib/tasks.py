@@ -104,7 +104,7 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
     repo = get_repo(p)
 
     skip_date_limit = True
-    parse_limit = 250 #limit for single task changeset parsing optimal for
+    parse_limit = int(config['app_conf'].get('commit_parse_limit'))
     last_rev = 0
     last_cs = None
     timegetter = itemgetter('time')
@@ -135,8 +135,9 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
     lmktime = mktime
 
     last_rev = last_rev + 1 if last_rev > 0 else last_rev
-    for rev in repo.revisions[last_rev:last_rev + parse_limit]:
-        last_cs = cs = repo.get_changeset(rev)
+
+    for cs in repo[last_rev:last_rev + parse_limit]:
+        last_cs = cs #remember last parsed changeset
         k = lmktime([cs.date.timetuple()[0], cs.date.timetuple()[1],
                       cs.date.timetuple()[2], 0, 0, 0, 0, 0, 0])
 
@@ -209,10 +210,9 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
         log.debug('getting code trending stats')
         stats.languages = json.dumps(__get_codes_stats(repo_name))
 
-    stats.repository = dbrepo
-    stats.stat_on_revision = last_cs.revision
-
     try:
+        stats.repository = dbrepo
+        stats.stat_on_revision = last_cs.revision if last_cs else 0
         sa.add(stats)
         sa.commit()
     except:

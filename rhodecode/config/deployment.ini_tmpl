@@ -48,6 +48,7 @@ index_dir = %(here)s/data/index
 app_instance_uuid = ${app_instance_uuid}
 cut_off_limit = 256000
 force_https = false 
+commit_parse_limit = 50
 
 ####################################
 ###        CELERY CONFIG        ####
@@ -71,7 +72,7 @@ celery.result.serialier = json
 celeryd.concurrency = 2
 #celeryd.log.file = celeryd.log
 celeryd.log.level = debug
-celeryd.max.tasks.per.child = 3
+celeryd.max.tasks.per.child = 1
 
 #tasks will never be sent to the queue, but executed locally instead.
 celery.always.eager = false
