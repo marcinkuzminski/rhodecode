@@ -4,6 +4,9 @@ include rhodecode/lib/dbmigrate/migrate.cfg
 include README.rst
 recursive-include rhodecode/i18n *
 
+#docs
+recursive-include docs *
+
 #images
 recursive-include rhodecode/public/css *
 recursive-include rhodecode/public/images *

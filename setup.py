@@ -1,14 +1,14 @@
 import sys
-py_version = sys.version_info
-
 from rhodecode import get_version
+
+py_version = sys.version_info
 
 requirements = [
         "Pylons==1.0.0",
         "WebHelpers>=1.2",
         "SQLAlchemy>=0.6.6",
         "Mako==0.3.6",
-        "vcs>=0.1.10",
+        "vcs>=0.2.0",
         "pygments>=1.4",
         "mercurial>=1.7.5",
         "whoosh>=1.3.4",
@@ -25,7 +25,7 @@ classifiers = ['Development Status :: 4 - Beta',
                'Operating System :: OS Independent',
                'Programming Language :: Python', ]
 
-if sys.version_info < (2, 6):
+if py_version < (2, 6):
     requirements.append("simplejson")
     requirements.append("pysqlite")
 
@@ -38,6 +38,10 @@ package_data = {'rhodecode': ['i18n/*/LC_MESSAGES/*.mo', ], }
 
 description = ('Mercurial repository browser/management with '
                'build in push/pull server and full text search')
+keywords = ' '.join (['rhodecode', 'rhodiumcode', 'mercurial', 'git',
+                      'repository management', 'hgweb replacement'
+                      'hgwebdir', 'gitweb replacement', 'serving hgweb',
+                     ])
 #long description
 try:
     readme_file = 'README.rst'
@@ -66,7 +70,7 @@ setup(
     version=get_version(),
     description=description,
     long_description=long_description,
-    keywords='rhodiumcode mercurial web hgwebdir gitweb git replacement serving hgweb rhodecode',
+    keywords=keywords,
     license='BSD',
     author='Marcin Kuzminski',
     author_email='marcin@python-works.com',
