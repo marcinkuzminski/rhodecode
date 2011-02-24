@@ -199,7 +199,7 @@ class RepoModel(BaseModel):
             else:
                 org_name = repo_name = str(form_data['repo_name'])
             new_repo = Repository()
-            new_repo.enable_statistics = True
+            new_repo.enable_statistics = False
             for k, v in form_data.items():
                 if k == 'repo_name':
                     v = repo_name
