@@ -31,11 +31,20 @@ from datetime import date
 from sqlalchemy import *
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy.orm import relationship, backref
-from sqlalchemy.orm.session import Session
+from sqlalchemy.orm.interfaces import MapperExtension
 
-from rhodecode.model.meta import Base
+from rhodecode.model.meta import Base, Session
 
 log = logging.getLogger(__name__)
+
+#==============================================================================
+# MAPPER EXTENSIONS
+#==============================================================================
+
+class RepositoryMapper(MapperExtension):
+    def after_update(self, mapper, connection, instance):
+        pass
+
 
 class RhodeCodeSettings(Base):
     __tablename__ = 'rhodecode_settings'
@@ -161,6 +170,8 @@ class UsersGroupMember(Base):
 class Repository(Base):
     __tablename__ = 'repositories'
     __table_args__ = (UniqueConstraint('repo_name'), {'useexisting':True},)
+    __mapper_args__ = {'extension':RepositoryMapper()}
+
     repo_id = Column("repo_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     repo_name = Column("repo_name", String(length=None, convert_unicode=False, assert_unicode=None), nullable=False, unique=True, default=None)
     repo_type = Column("repo_type", String(length=None, convert_unicode=False, assert_unicode=None), nullable=False, unique=False, default='hg')
