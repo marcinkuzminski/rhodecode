@@ -117,7 +117,7 @@ class SummaryController(BaseRepoController):
             c.no_data_msg = _('No data loaded yet')
             run_task(get_commits_stats, c.repo.name, ts_min_y, ts_max_y)
         else:
-            c.no_data_msg = _('Statistics update are disabled for this repository')
+            c.no_data_msg = _('Statistics are disabled for this repository')
         c.ts_min = ts_min_m
         c.ts_max = ts_max_y
 

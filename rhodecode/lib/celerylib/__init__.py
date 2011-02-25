@@ -33,13 +33,15 @@ import logging
 
 from hashlib import md5
 from decorator import decorator
+from pylons import  config
+
 from vcs.utils.lazy import LazyProperty
 
 from rhodecode.lib import str2bool
 from rhodecode.lib.pidlock import DaemonLock, LockHeld
 
 from celery.messaging import establish_connection
-from pylons import  config
+
 
 log = logging.getLogger(__name__)
 
