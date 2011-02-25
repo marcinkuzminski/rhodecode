@@ -6,6 +6,8 @@
 </%def>
 
 <%def name="breadcrumbs_links()">
+    ${h.link_to(u'Home',h.url('/'))}
+    &raquo;
     ${h.link_to(c.repo_info.repo_name,h.url('summary_home',repo_name=c.repo_info.repo_name))} 
     &raquo; 
     ${_('Settings')} 
