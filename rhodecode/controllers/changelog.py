@@ -77,21 +77,23 @@ class ChangelogController(BaseRepoController):
 
 
     def _graph(self, repo, size, p):
-        revcount = size
+        """
+        Generates a DAG graph for mercurial
+        
+        :param repo: repo instance
+        :param size: number of commits to show
+        :param p: page number
+        """
         if not repo.revisions or repo.alias == 'git':
             c.jsdata = json.dumps([])
             return
 
-        max_rev = repo.revisions[-1]
-
+        revcount = min(repo.size, size)
         offset = 1 if p == 1 else  ((p - 1) * revcount + 1)
-
-        rev_start = repo.revisions[(-1 * offset)]
-
-        revcount = min(max_rev, revcount)
+        rev_start = repo.revisions.index(repo.revisions[(-1 * offset)])
         rev_end = max(0, rev_start - revcount)
-        dag = graph_rev(repo._repo, rev_start, rev_end)
 
+        dag = graph_rev(repo._repo, rev_start, rev_end)
         c.dag = tree = list(colored(dag))
         data = []
         for (id, type, ctx, vtx, edges) in tree:
