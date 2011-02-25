@@ -45,42 +45,20 @@ class JournalController(BaseController):
 
 
     @LoginRequired()
-    @NotAnonymous()
     def __before__(self):
         super(JournalController, self).__before__()
 
+    @NotAnonymous()
     def index(self):
         # Return a rendered template
+        p = int(request.params.get('page', 1))
 
         c.following = self.sa.query(UserFollowing)\
             .filter(UserFollowing.user_id == c.rhodecode_user.user_id)\
             .options(joinedload(UserFollowing.follows_repository))\
             .all()
 
-
-        repo_ids = [x.follows_repository.repo_id for x in c.following
-                    if x.follows_repository is not None]
-        user_ids = [x.follows_user.user_id for x in c.following
-                    if x.follows_user is not None]
-
-        filtering_criterion = None
-
-        if repo_ids and user_ids:
-            filtering_criterion = or_(UserLog.repository_id.in_(repo_ids),
-                        UserLog.user_id.in_(user_ids))
-        if repo_ids and not user_ids:
-            filtering_criterion = UserLog.repository_id.in_(repo_ids)
-        if not repo_ids and user_ids:
-            filtering_criterion = UserLog.user_id.in_(user_ids)
-        if filtering_criterion is not None:
-            journal = self.sa.query(UserLog)\
-                .options(joinedload(UserLog.user))\
-                .options(joinedload(UserLog.repository))\
-                .filter(filtering_criterion)\
-                .order_by(UserLog.action_date.desc())
-        else:
-            journal = []
-        p = int(request.params.get('page', 1))
+        journal = self._get_journal_data(c.following)
 
         c.journal_pager = Page(journal, page=p, items_per_page=20)
 
@@ -105,6 +83,34 @@ class JournalController(BaseController):
         return groups
 
 
+    def _get_journal_data(self, following_repos):
+        repo_ids = [x.follows_repository.repo_id for x in following_repos
+                    if x.follows_repository is not None]
+        user_ids = [x.follows_user.user_id for x in following_repos
+                    if x.follows_user is not None]
+
+        filtering_criterion = None
+
+        if repo_ids and user_ids:
+            filtering_criterion = or_(UserLog.repository_id.in_(repo_ids),
+                        UserLog.user_id.in_(user_ids))
+        if repo_ids and not user_ids:
+            filtering_criterion = UserLog.repository_id.in_(repo_ids)
+        if not repo_ids and user_ids:
+            filtering_criterion = UserLog.user_id.in_(user_ids)
+        if filtering_criterion is not None:
+            journal = self.sa.query(UserLog)\
+                .options(joinedload(UserLog.user))\
+                .options(joinedload(UserLog.repository))\
+                .filter(filtering_criterion)\
+                .order_by(UserLog.action_date.desc())
+        else:
+            journal = []
+
+
+        return journal
+
+    @NotAnonymous()
     def toggle_following(self):
         cur_token = request.POST.get('auth_token')
         token = get_token()
@@ -131,3 +137,26 @@ class JournalController(BaseController):
 
         log.debug('token mismatch %s vs %s', cur_token, token)
         raise HTTPInternalServerError()
+
+
+
+
+    def public_journal(self):
+        # Return a rendered template
+        p = int(request.params.get('page', 1))
+
+        c.following = self.sa.query(UserFollowing)\
+            .filter(UserFollowing.user_id == c.rhodecode_user.user_id)\
+            .options(joinedload(UserFollowing.follows_repository))\
+            .all()
+
+        journal = self._get_journal_data(c.following)
+
+        c.journal_pager = Page(journal, page=p, items_per_page=20)
+
+        c.journal_day_aggreagate = self._get_daily_aggregate(c.journal_pager)
+
+        c.journal_data = render('journal/journal_data.html')
+        if request.params.get('partial'):
+            return c.journal_data
+        return render('journal/public_journal.html')

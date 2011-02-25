@@ -302,7 +302,6 @@
         <div class="form">
            <div class="fields">
                ${h.submit('reset_stats_%s' % c.repo_info.repo_name,_('Reset current statistics'),class_="refresh_icon action_button",onclick="return confirm('Confirm to remove current statistics');")}
-               
                <div class="field">
                <ul>
                     <li>${_('Fetched to rev')}: ${c.stats_revision}/${c.repo_last_rev}</li>
@@ -323,6 +322,19 @@
         </div>                    
         ${h.end_form()}
         
+        <h3>${_('Public journal')}</h3>
+        ${h.form(url('repo_public_journal', repo_name=c.repo_info.repo_name),method='put')}
+        <div class="form">
+            <div class="fields">
+                ${h.hidden('auth_token',str(h.get_token()))}
+                %if c.in_public_journal:
+                    ${h.submit('set_public_%s' % c.repo_info.repo_name,_('Remove from public journal'),class_="stop_following_icon action_button")}
+                %else:
+		            ${h.submit('set_public_%s' % c.repo_info.repo_name,_('Add to public journal'),class_="start_following_icon action_button")}
+		        %endif
+	         </div>        
+        </div>
+        ${h.end_form()}
         
         <h3>${_('Delete')}</h3>
         ${h.form(url('repo', repo_name=c.repo_info.repo_name),method='delete')}

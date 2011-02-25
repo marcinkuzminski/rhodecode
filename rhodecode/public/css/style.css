@@ -1987,6 +1987,20 @@ padding-left:20px;
 text-align:left;
 padding-top:1px;
 }
+.start_following_icon {
+background:url("../images/icons/heart_add.png") no-repeat scroll 3px;
+height:16px;
+padding-left:20px;
+text-align:left;
+padding-top:1px;
+}
+.stop_following_icon {
+background:url("../images/icons/heart_delete.png") no-repeat scroll 3px;
+height:16px;
+padding-left:20px;
+text-align:left;
+padding-top:1px;
+}
 
 .action_button {
 border:0;

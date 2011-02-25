@@ -38,12 +38,7 @@
 	                </div>
 		            <div class="account">
 		            %if c.rhodecode_user.username == 'default':
-                        %if h.HasPermissionAny('hg.admin', 'hg.register.auto_activate', 'hg.register.manual_activate')(): 
-                            ${h.link_to('anonymous',h.url('register'),title='%s %s'%(c.rhodecode_user.name,c.rhodecode_user.lastname))}
-                        %else:
-                            ${h.link_to('anonymous',h.url('#'),title='%s %s'%(c.rhodecode_user.name,c.rhodecode_user.lastname))}
-                        %endif		            
-                        
+		                <a href="${h.url('public_journal')}">${_('Public journal')}</a>   
                     %else:                        		            
 		            	${h.link_to(c.rhodecode_user.username,h.url('admin_settings_my_account'),title='%s %s'%(c.rhodecode_user.name,c.rhodecode_user.lastname))}
 		            %endif
@@ -373,20 +368,26 @@ function onSuccess(target){
     }
 }
 
-function toggleFollowingUser(fallows_user_id,token){
+function toggleFollowingUser(target,fallows_user_id,token,user_id){
     args = 'follows_user_id='+fallows_user_id;
     args+= '&amp;auth_token='+token;
+    if(user_id != undefined){
+    	args+="&amp;user_id="+user_id;
+    }
     YUC.asyncRequest('POST',base_url,{
         success:function(o){
-        	onSuccess();
+        	onSuccess(target);
         }
     },args); return false;
 }
 
-function toggleFollowingRepo(target,fallows_repo_id,token){
+function toggleFollowingRepo(target,fallows_repo_id,token,user_id){
 
     args = 'follows_repo_id='+fallows_repo_id;
     args+= '&amp;auth_token='+token;
+    if(user_id != undefined){
+        args+="&amp;user_id="+user_id;
+    }    
     YUC.asyncRequest('POST',base_url,{
         success:function(o){
         	onSuccess(target);

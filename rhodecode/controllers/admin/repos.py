@@ -41,7 +41,8 @@ from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator, \
     HasPermissionAnyDecorator
 from rhodecode.lib.base import BaseController, render
 from rhodecode.lib.utils import invalidate_cache, action_logger, repo_name_slug
-from rhodecode.model.db import User
+from rhodecode.lib.helpers import get_token
+from rhodecode.model.db import User, Repository, UserFollowing
 from rhodecode.model.forms import RepoForm
 from rhodecode.model.scm import ScmModel
 from rhodecode.model.repo import RepoModel
@@ -50,7 +51,8 @@ from rhodecode.model.repo import RepoModel
 log = logging.getLogger(__name__)
 
 class ReposController(BaseController):
-    """REST Controller styled on the Atom Publishing Protocol"""
+    """
+    REST Controller styled on the Atom Publishing Protocol"""
     # To properly map this controller, ensure your config/routing.py
     # file has a resource setup:
     #     map.resource('repo', 'repos')
@@ -72,7 +74,8 @@ class ReposController(BaseController):
 
     @HasPermissionAnyDecorator('hg.admin', 'hg.create.repository')
     def create(self):
-        """POST /repos: Create a new item"""
+        """
+        POST /repos: Create a new item"""
         # url('repos')
         repo_model = RepoModel()
         _form = RepoForm()()
@@ -124,7 +127,8 @@ class ReposController(BaseController):
 
     @HasPermissionAllDecorator('hg.admin')
     def update(self, repo_name):
-        """PUT /repos/repo_name: Update an existing item"""
+        """
+        PUT /repos/repo_name: Update an existing item"""
         # Forms posted to this method should contain a hidden field:
         #    <input type="hidden" name="_method" value="PUT" />
         # Or using helpers:
@@ -156,6 +160,11 @@ class ReposController(BaseController):
             repo, dbrepo = ScmModel().get(repo_name, retval='repo')
             c.repo_last_rev = repo.count() if repo.revisions else 0
 
+            c.default_user_id = User.by_username('default').user_id
+            c.in_public_journal = self.sa.query(UserFollowing)\
+                .filter(UserFollowing.user_id == c.default_user_id)\
+                .filter(UserFollowing.follows_repository == c.repo_info).scalar()
+
             if last_rev == 0:
                 c.stats_percentage = 0
             else:
@@ -182,7 +191,8 @@ class ReposController(BaseController):
 
     @HasPermissionAllDecorator('hg.admin')
     def delete(self, repo_name):
-        """DELETE /repos/repo_name: Delete an existing item"""
+        """
+        DELETE /repos/repo_name: Delete an existing item"""
         # Forms posted to this method should contain a hidden field:
         #    <input type="hidden" name="_method" value="DELETE" />
         # Or using helpers:
@@ -216,7 +226,8 @@ class ReposController(BaseController):
 
     @HasPermissionAllDecorator('hg.admin')
     def delete_perm_user(self, repo_name):
-        """DELETE an existing repository permission user
+        """
+        DELETE an existing repository permission user
         
         :param repo_name:
         """
@@ -231,7 +242,8 @@ class ReposController(BaseController):
 
     @HasPermissionAllDecorator('hg.admin')
     def delete_perm_users_group(self, repo_name):
-        """DELETE an existing repository permission users group
+        """
+        DELETE an existing repository permission users group
         
         :param repo_name:
         """
@@ -246,7 +258,8 @@ class ReposController(BaseController):
 
     @HasPermissionAllDecorator('hg.admin')
     def repo_stats(self, repo_name):
-        """DELETE an existing repository statistics
+        """
+        DELETE an existing repository statistics
         
         :param repo_name:
         """
@@ -261,7 +274,8 @@ class ReposController(BaseController):
 
     @HasPermissionAllDecorator('hg.admin')
     def repo_cache(self, repo_name):
-        """INVALIDATE existing repository cache
+        """
+        INVALIDATE existing repository cache
         
         :param repo_name:
         """
@@ -272,6 +286,35 @@ class ReposController(BaseController):
             h.flash(_('An error occurred during cache invalidation'),
                     category='error')
         return redirect(url('edit_repo', repo_name=repo_name))
+
+    @HasPermissionAllDecorator('hg.admin')
+    def repo_public_journal(self, repo_name):
+        """
+        Set's this repository to be visible in public journal,
+        in other words assing default user to follow this repo
+        
+        :param repo_name:
+        """
+
+        cur_token = request.POST.get('auth_token')
+        token = get_token()
+        if cur_token == token:
+            try:
+                repo_id = Repository.by_repo_name(repo_name).repo_id
+                user_id = User.by_username('default').user_id
+                self.scm_model.toggle_following_repo(repo_id, user_id)
+                h.flash(_('Updated repository visibility in public journal'),
+                        category='success')
+            except:
+                h.flash(_('An error occurred during setting this'
+                          ' repository in public journal'),
+                        category='error')
+
+        else:
+            h.flash(_('Token mismatch'), category='error')
+        return redirect(url('edit_repo', repo_name=repo_name))
+
+
 
     @HasPermissionAllDecorator('hg.admin')
     def show(self, repo_name, format='html'):
@@ -295,6 +338,11 @@ class ReposController(BaseController):
                       category='error')
 
             return redirect(url('repos'))
+
+        c.default_user_id = User.by_username('default').user_id
+        c.in_public_journal = self.sa.query(UserFollowing)\
+            .filter(UserFollowing.user_id == c.default_user_id)\
+            .filter(UserFollowing.follows_repository == c.repo_info).scalar()
 
         if c.repo_info.stats:
             last_rev = c.repo_info.stats.stat_on_revision
