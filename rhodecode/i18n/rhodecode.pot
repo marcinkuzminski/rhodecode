@@ -1,53 +1,601 @@
-# Translations template for rhodecode.
-# Copyright (C) 2010 ORGANIZATION
-# This file is distributed under the same license as the rhodecode project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2010.
+# Translations template for RhodeCode.
+# Copyright (C) 2011 ORGANIZATION
+# This file is distributed under the same license as the RhodeCode project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2011.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: rhodecode 0.1\n"
+"Project-Id-Version: RhodeCode 1.2.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2010-02-06 22:54+0100\n"
+"POT-Creation-Date: 2011-02-25 19:12+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 0.9.4\n"
+"Generated-By: Babel 0.9.5\n"
 
-#: rhodecode/controllers/error.py:34
+#: rhodecode/controllers/changeset.py:104 rhodecode/controllers/changeset.py:129
+#: rhodecode/controllers/changeset.py:179 rhodecode/controllers/changeset.py:191
+msgid "binary file"
+msgstr ""
+
+#: rhodecode/controllers/changeset.py:112 rhodecode/controllers/changeset.py:138
+msgid "Changeset is to big and was cut off, see raw changeset instead"
+msgstr ""
+
+#: rhodecode/controllers/error.py:71
 msgid "Home page"
 msgstr ""
 
-#: rhodecode/controllers/error.py:55
+#: rhodecode/controllers/error.py:101
 msgid "The request could not be understood by the server due to malformed syntax."
 msgstr ""
 
-#: rhodecode/controllers/error.py:57
-msgid "Unathorized access to resource"
+#: rhodecode/controllers/error.py:103
+msgid "Unauthorized access to resource"
 msgstr ""
 
-#: rhodecode/controllers/error.py:59
+#: rhodecode/controllers/error.py:105
 msgid "You don't have permission to view this page"
 msgstr ""
 
-#: rhodecode/controllers/error.py:61
+#: rhodecode/controllers/error.py:107
 msgid "The resource could not be found"
 msgstr ""
 
-#: rhodecode/controllers/error.py:63
+#: rhodecode/controllers/error.py:109
 msgid ""
 "The server encountered an unexpected condition which prevented it from "
 "fulfilling the request."
 msgstr ""
 
-#: rhodecode/model/forms.py:29
+#: rhodecode/controllers/feed.py:48
+#, python-format
+msgid "Changes on %s repository"
+msgstr ""
+
+#: rhodecode/controllers/files.py:67 rhodecode/controllers/files.py:120
+msgid "There are no files yet"
+msgstr ""
+
+#: rhodecode/controllers/files.py:186
+msgid "downloads disabled"
+msgstr ""
+
+#: rhodecode/controllers/files.py:191
+#, python-format
+msgid "Unknown revision %s"
+msgstr ""
+
+#: rhodecode/controllers/files.py:193
+msgid "Empty repository"
+msgstr ""
+
+#: rhodecode/controllers/files.py:195
+msgid "Unknown archive type"
+msgstr ""
+
+#: rhodecode/controllers/files.py:248 rhodecode/controllers/files.py:257
+msgid "Diff is to big to display"
+msgstr ""
+
+#: rhodecode/controllers/files.py:250 rhodecode/controllers/files.py:259
+msgid "Binary file"
+msgstr ""
+
+#: rhodecode/controllers/files.py:272
+msgid "Changesets"
+msgstr ""
+
+#: rhodecode/controllers/files.py:273 rhodecode/controllers/summary.py:157
+msgid "Branches"
+msgstr ""
+
+#: rhodecode/controllers/files.py:274 rhodecode/controllers/summary.py:158
+msgid "Tags"
+msgstr ""
+
+#: rhodecode/controllers/login.py:112
+msgid "You have successfully registered into rhodecode"
+msgstr ""
+
+#: rhodecode/controllers/login.py:134
+msgid "Your new password was sent"
+msgstr ""
+
+#: rhodecode/controllers/search.py:110
+msgid "Invalid search query. Try quoting it."
+msgstr ""
+
+#: rhodecode/controllers/search.py:115
+msgid "There is no index to search in. Please run whoosh indexer"
+msgstr ""
+
+#: rhodecode/controllers/settings.py:62 rhodecode/controllers/settings.py:171
+#, python-format
+msgid ""
+"%s repository is not mapped to db perhaps it was created or renamed from the "
+"file system please run the application again in order to rescan repositories"
+msgstr ""
+
+#: rhodecode/controllers/settings.py:109 rhodecode/controllers/admin/repos.py:146
+#, python-format
+msgid "Repository %s updated successfully"
+msgstr ""
+
+#: rhodecode/controllers/settings.py:126 rhodecode/controllers/admin/repos.py:187
+#, python-format
+msgid "error occurred during update of repository %s"
+msgstr ""
+
+#: rhodecode/controllers/settings.py:145 rhodecode/controllers/admin/repos.py:206
+#, python-format
+msgid ""
+"%s repository is not mapped to db perhaps it was moved or renamed  from the "
+"filesystem please run the application again in order to rescan repositories"
+msgstr ""
+
+#: rhodecode/controllers/settings.py:157 rhodecode/controllers/admin/repos.py:218
+#, python-format
+msgid "deleted repository %s"
+msgstr ""
+
+#: rhodecode/controllers/settings.py:159 rhodecode/controllers/admin/repos.py:222
+#, python-format
+msgid "An error occurred during deletion of %s"
+msgstr ""
+
+#: rhodecode/controllers/settings.py:193
+#, python-format
+msgid "forked %s repository as %s"
+msgstr ""
+
+#: rhodecode/controllers/summary.py:117
+msgid "No data loaded yet"
+msgstr ""
+
+#: rhodecode/controllers/summary.py:120
+msgid "Statistics are disabled for this repository"
+msgstr ""
+
+#: rhodecode/controllers/admin/ldap_settings.py:51
+msgid "BASE"
+msgstr ""
+
+#: rhodecode/controllers/admin/ldap_settings.py:52
+msgid "ONELEVEL"
+msgstr ""
+
+#: rhodecode/controllers/admin/ldap_settings.py:53
+msgid "SUBTREE"
+msgstr ""
+
+#: rhodecode/controllers/admin/ldap_settings.py:57
+msgid "NEVER"
+msgstr ""
+
+#: rhodecode/controllers/admin/ldap_settings.py:58
+msgid "ALLOW"
+msgstr ""
+
+#: rhodecode/controllers/admin/ldap_settings.py:59
+msgid "TRY"
+msgstr ""
+
+#: rhodecode/controllers/admin/ldap_settings.py:60
+msgid "DEMAND"
+msgstr ""
+
+#: rhodecode/controllers/admin/ldap_settings.py:61
+msgid "HARD"
+msgstr ""
+
+#: rhodecode/controllers/admin/ldap_settings.py:103
+msgid "Ldap settings updated successfully"
+msgstr ""
+
+#: rhodecode/controllers/admin/ldap_settings.py:108
+msgid "Unable to activate ldap. The \"python-ldap\" library is missing."
+msgstr ""
+
+#: rhodecode/controllers/admin/ldap_settings.py:124
+msgid "error occurred during update of ldap settings"
+msgstr ""
+
+#: rhodecode/controllers/admin/permissions.py:59
+msgid "None"
+msgstr ""
+
+#: rhodecode/controllers/admin/permissions.py:60
+msgid "Read"
+msgstr ""
+
+#: rhodecode/controllers/admin/permissions.py:61
+msgid "Write"
+msgstr ""
+
+#: rhodecode/controllers/admin/permissions.py:62
+msgid "Admin"
+msgstr ""
+
+#: rhodecode/controllers/admin/permissions.py:65
+msgid "disabled"
+msgstr ""
+
+#: rhodecode/controllers/admin/permissions.py:67
+msgid "allowed with manual account activation"
+msgstr ""
+
+#: rhodecode/controllers/admin/permissions.py:69
+msgid "allowed with automatic account activation"
+msgstr ""
+
+#: rhodecode/controllers/admin/permissions.py:71
+msgid "Disabled"
+msgstr ""
+
+#: rhodecode/controllers/admin/permissions.py:72
+msgid "Enabled"
+msgstr ""
+
+#: rhodecode/controllers/admin/permissions.py:106
+msgid "Default permissions updated successfully"
+msgstr ""
+
+#: rhodecode/controllers/admin/permissions.py:123
+msgid "error occurred during update of permissions"
+msgstr ""
+
+#: rhodecode/controllers/admin/repos.py:86
+#, python-format
+msgid "created repository %s"
+msgstr ""
+
+#: rhodecode/controllers/admin/repos.py:113
+#, python-format
+msgid "error occurred during creation of repository %s"
+msgstr ""
+
+#: rhodecode/controllers/admin/repos.py:239
+msgid "An error occurred during deletion of repository user"
+msgstr ""
+
+#: rhodecode/controllers/admin/repos.py:254
+msgid "An error occurred during deletion of repository users groups"
+msgstr ""
+
+#: rhodecode/controllers/admin/repos.py:271
+msgid "An error occurred during deletion of repository stats"
+msgstr ""
+
+#: rhodecode/controllers/admin/repos.py:286
+msgid "An error occurred during cache invalidation"
+msgstr ""
+
+#: rhodecode/controllers/admin/repos.py:306
+msgid "Updated repository visibility in public journal"
+msgstr ""
+
+#: rhodecode/controllers/admin/repos.py:309
+msgid "An error occurred during setting this repository in public journal"
+msgstr ""
+
+#: rhodecode/controllers/admin/repos.py:314 rhodecode/model/forms.py:54
 msgid "Token mismatch"
 msgstr ""
 
-#: rhodecode/model/forms.py:52
-msgid "Account number is invalid, it must be 26 digits"
+#: rhodecode/controllers/admin/repos.py:334
+#, python-format
+msgid ""
+"%s repository is not mapped to db perhaps it was created or renamed from the "
+"filesystem please run the application again in order to rescan repositories"
+msgstr ""
+
+#: rhodecode/controllers/admin/settings.py:113
+#, python-format
+msgid "Repositories successfully rescanned added: %s,removed: %s"
+msgstr ""
+
+#: rhodecode/controllers/admin/settings.py:122
+msgid "Whoosh reindex task scheduled"
+msgstr ""
+
+#: rhodecode/controllers/admin/settings.py:147
+msgid "Updated application settings"
+msgstr ""
+
+#: rhodecode/controllers/admin/settings.py:152
+#: rhodecode/controllers/admin/settings.py:213
+msgid "error occurred during updating application settings"
+msgstr ""
+
+#: rhodecode/controllers/admin/settings.py:208
+msgid "Updated mercurial settings"
+msgstr ""
+
+#: rhodecode/controllers/admin/settings.py:265
+msgid "You can't edit this user since it's crucial for entire application"
+msgstr ""
+
+#: rhodecode/controllers/admin/settings.py:293
+msgid "Your account was updated successfully"
+msgstr ""
+
+#: rhodecode/controllers/admin/settings.py:313
+#: rhodecode/controllers/admin/users.py:128
+#, python-format
+msgid "error occurred during update of user %s"
+msgstr ""
+
+#: rhodecode/controllers/admin/users.py:79
+#, python-format
+msgid "created user %s"
+msgstr ""
+
+#: rhodecode/controllers/admin/users.py:91
+#, python-format
+msgid "error occurred during creation of user %s"
+msgstr ""
+
+#: rhodecode/controllers/admin/users.py:117
+msgid "User updated succesfully"
+msgstr ""
+
+#: rhodecode/controllers/admin/users.py:144
+msgid "successfully deleted user"
+msgstr ""
+
+#: rhodecode/controllers/admin/users.py:148
+msgid "An error occurred during deletion of user"
+msgstr ""
+
+#: rhodecode/controllers/admin/users.py:164
+msgid "You can't edit this user"
+msgstr ""
+
+#: rhodecode/controllers/admin/users_groups.py:78
+#, python-format
+msgid "created users group %s"
+msgstr ""
+
+#: rhodecode/controllers/admin/users_groups.py:90
+#, python-format
+msgid "error occurred during creation of users group %s"
+msgstr ""
+
+#: rhodecode/controllers/admin/users_groups.py:125
+#, python-format
+msgid "updated users group %s"
+msgstr ""
+
+#: rhodecode/controllers/admin/users_groups.py:137
+#, python-format
+msgid "error occurred during update of users group %s"
+msgstr ""
+
+#: rhodecode/controllers/admin/users_groups.py:155
+msgid "successfully deleted users group"
+msgstr ""
+
+#: rhodecode/controllers/admin/users_groups.py:157
+msgid "An error occurred during deletion of users group"
+msgstr ""
+
+#: rhodecode/lib/auth.py:390
+msgid "You need to be a registered user to perform this action"
+msgstr ""
+
+#: rhodecode/lib/helpers.py:394
+msgid "ago"
+msgstr ""
+
+#: rhodecode/lib/helpers.py:397
+msgid "just now"
+msgstr ""
+
+#: rhodecode/lib/helpers.py:416
+msgid "True"
+msgstr ""
+
+#: rhodecode/lib/helpers.py:420
+msgid "False"
+msgstr ""
+
+#: rhodecode/lib/helpers.py:461
+#, python-format
+msgid "Show all combined changesets %s->%s"
+msgstr ""
+
+#: rhodecode/lib/helpers.py:465
+msgid "compare view"
+msgstr ""
+
+#: rhodecode/lib/helpers.py:473
+msgid "and"
+msgstr ""
+
+#: rhodecode/lib/helpers.py:473
+#, python-format
+msgid "%s more"
+msgstr ""
+
+#: rhodecode/lib/helpers.py:475
+msgid "revisions"
+msgstr ""
+
+#: rhodecode/lib/helpers.py:489
+msgid "fork name "
+msgstr ""
+
+#: rhodecode/lib/helpers.py:492
+msgid "[deleted] repository"
+msgstr ""
+
+#: rhodecode/lib/helpers.py:493 rhodecode/lib/helpers.py:497
+msgid "[created] repository"
+msgstr ""
+
+#: rhodecode/lib/helpers.py:494 rhodecode/lib/helpers.py:498
+msgid "[forked] repository"
+msgstr ""
+
+#: rhodecode/lib/helpers.py:495 rhodecode/lib/helpers.py:499
+msgid "[updated] repository"
+msgstr ""
+
+#: rhodecode/lib/helpers.py:496
+msgid "[delete] repository"
+msgstr ""
+
+#: rhodecode/lib/helpers.py:500
+msgid "[pushed] into"
+msgstr ""
+
+#: rhodecode/lib/helpers.py:501
+msgid "[pulled] from"
+msgstr ""
+
+#: rhodecode/lib/helpers.py:502
+msgid "[started following] repository"
+msgstr ""
+
+#: rhodecode/lib/helpers.py:503
+msgid "[stopped following] repository"
+msgstr ""
+
+#: rhodecode/lib/helpers.py:590
+#, python-format
+msgid " and %s more"
+msgstr ""
+
+#: rhodecode/lib/helpers.py:593
+msgid "No Files"
+msgstr ""
+
+#: rhodecode/model/forms.py:67
+msgid "Invalid username"
+msgstr ""
+
+#: rhodecode/model/forms.py:76
+msgid "This username already exists"
+msgstr ""
+
+#: rhodecode/model/forms.py:81
+msgid ""
+"Username may only contain alphanumeric characters underscores, periods or "
+"dashes and must begin with alphanumeric character"
+msgstr ""
+
+#: rhodecode/model/forms.py:99
+msgid "Invalid group name"
+msgstr ""
+
+#: rhodecode/model/forms.py:109
+msgid "This users group already exists"
+msgstr ""
+
+#: rhodecode/model/forms.py:114
+msgid ""
+"Group name may only contain alphanumeric characters underscores, periods or "
+"dashes and must begin with alphanumeric character"
+msgstr ""
+
+#: rhodecode/model/forms.py:134 rhodecode/model/forms.py:142
+#: rhodecode/model/forms.py:150
+msgid "Invalid characters in password"
+msgstr ""
+
+#: rhodecode/model/forms.py:161
+msgid "Password do not match"
+msgstr ""
+
+#: rhodecode/model/forms.py:166
+msgid "invalid password"
+msgstr ""
+
+#: rhodecode/model/forms.py:167
+msgid "invalid user name"
+msgstr ""
+
+#: rhodecode/model/forms.py:168
+msgid "Your account is disabled"
+msgstr ""
+
+#: rhodecode/model/forms.py:205
+msgid "This username is not valid"
+msgstr ""
+
+#: rhodecode/model/forms.py:218
+msgid "This repository name is disallowed"
+msgstr ""
+
+#: rhodecode/model/forms.py:222
+msgid "This repository already exists"
+msgstr ""
+
+#: rhodecode/model/forms.py:234
+msgid "Fork have to be the same type as original"
+msgstr ""
+
+#: rhodecode/model/forms.py:240
+msgid "This username or users group name is not valid"
+msgstr ""
+
+#: rhodecode/model/forms.py:303
+msgid "This is not a valid path"
+msgstr ""
+
+#: rhodecode/model/forms.py:317
+msgid "This e-mail address is already taken"
+msgstr ""
+
+#: rhodecode/model/forms.py:333
+msgid "This e-mail address doesn't exist."
+msgstr ""
+
+#: rhodecode/model/forms.py:355
+msgid ""
+"The LDAP Login attribute of the CN must be specified - this is the name of "
+"the attribute that is equivalent to 'username'"
+msgstr ""
+
+#: rhodecode/model/forms.py:374
+msgid "Please enter a login"
+msgstr ""
+
+#: rhodecode/model/forms.py:375
+#, python-format
+msgid "Enter a value %(min)i characters long or more"
+msgstr ""
+
+#: rhodecode/model/forms.py:383
+msgid "Please enter a password"
+msgstr ""
+
+#: rhodecode/model/forms.py:384
+#, python-format
+msgid "Enter %(min)i characters or more"
+msgstr ""
+
+#: rhodecode/model/user.py:128
+msgid "[RhodeCode] New User registration"
+msgstr ""
+
+#: rhodecode/model/user.py:140 rhodecode/model/user.py:161
+msgid "You can't Edit this user since it's crucial for entire application"
+msgstr ""
+
+#: rhodecode/model/user.py:182
+msgid "You can't remove this user since it's crucial for entire application"
+msgstr ""
+
+#: rhodecode/model/user.py:185
+#, python-format
+msgid ""
+"This user still owns %s repositories and cannot be removed. Switch owners or "
+"remove those repositories"
 msgstr ""
 
