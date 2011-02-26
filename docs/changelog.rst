@@ -30,6 +30,7 @@ news
 - implemented #56 users groups
 - major code rewrites optimized codes for speed and memory usage
 - raw and diff downloads are now in git format
+- setup command checks for write access to given path
 
 fixes
 -----
