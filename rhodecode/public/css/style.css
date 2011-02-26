@@ -605,16 +605,16 @@ padding:0;
 }
 
 #content div.box div.title ul.links li a {
-height:1%;
-display:block;
-float:left;
-border-left:1px solid #316293;
-color:#fff;
-font-size:11px;
-font-weight:700;
-text-decoration:none;
-margin:0;
-padding:13px 16px 12px;
+    border-left: 1px solid #316293;
+    color: #FFFFFF;
+    display: block;
+    float: left;
+    font-size: 13px;
+    font-weight: 700;
+    height: 1%;
+    margin: 0;
+    padding: 11px 22px 12px;
+    text-decoration: none;
 }
 
 #content div.box h1,#content div.box h2,#content div.box h3,#content div.box h4,#content div.box h5,#content div.box h6 {

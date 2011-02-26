@@ -32,11 +32,13 @@ from webhelpers.paginate import Page
 from itertools import groupby
 
 from paste.httpexceptions import HTTPInternalServerError
-from pylons import request, tmpl_context as c
+from pylons import request, tmpl_context as c, response, url
+from pylons.i18n.translation import _
+from webhelpers.feedgenerator import Atom1Feed, Rss201rev2Feed
 
+import rhodecode.lib.helpers as h
 from rhodecode.lib.auth import LoginRequired, NotAnonymous
 from rhodecode.lib.base import BaseController, render
-from rhodecode.lib.helpers import get_token
 from rhodecode.model.db import UserLog, UserFollowing
 
 log = logging.getLogger(__name__)
@@ -47,6 +49,10 @@ class JournalController(BaseController):
     @LoginRequired()
     def __before__(self):
         super(JournalController, self).__before__()
+        self.title = _('%s public journal %s feed') % (c.rhodecode_name, '%s')
+        self.language = 'en-us'
+        self.ttl = "5"
+        self.feed_nr = 20
 
     @NotAnonymous()
     def index(self):
@@ -113,7 +119,7 @@ class JournalController(BaseController):
     @NotAnonymous()
     def toggle_following(self):
         cur_token = request.POST.get('auth_token')
-        token = get_token()
+        token = h.get_token()
         if cur_token == token:
 
             user_id = request.POST.get('follows_user_id')
@@ -160,3 +166,79 @@ class JournalController(BaseController):
         if request.params.get('partial'):
             return c.journal_data
         return render('journal/public_journal.html')
+
+
+
+    def public_journal_atom(self):
+        """
+        Produce an atom-1.0 feed via feedgenerator module
+        """
+        c.following = self.sa.query(UserFollowing)\
+            .filter(UserFollowing.user_id == c.rhodecode_user.user_id)\
+            .options(joinedload(UserFollowing.follows_repository))\
+            .all()
+
+        journal = self._get_journal_data(c.following)
+
+        feed = Atom1Feed(title=self.title % 'atom',
+                         link=url('public_journal_atom', qualified=True),
+                         description=_('Public journal'),
+                         language=self.language,
+                         ttl=self.ttl)
+
+        for entry in journal[:self.feed_nr]:
+            #tmpl = h.action_parser(entry)[0]
+            action, action_extra = h.action_parser(entry, feed=True)
+            title = "%s - %s %s" % (entry.user.short_contact, action,
+                                 entry.repository.repo_name)
+            desc = action_extra()
+            feed.add_item(title=title,
+                          pubdate=entry.action_date,
+                          link=url('', qualified=True),
+                          author_email=entry.user.email,
+                          author_name=entry.user.full_contact,
+                          description=desc)
+
+        response.content_type = feed.mime_type
+        return feed.writeString('utf-8')
+
+    def public_journal_rss(self):
+        """
+        Produce an rss2 feed via feedgenerator module
+        """
+        c.following = self.sa.query(UserFollowing)\
+            .filter(UserFollowing.user_id == c.rhodecode_user.user_id)\
+            .options(joinedload(UserFollowing.follows_repository))\
+            .all()
+
+        journal = self._get_journal_data(c.following)
+
+        feed = Rss201rev2Feed(title=self.title % 'rss',
+                         link=url('public_journal_rss', qualified=True),
+                         description=_('Public journal'),
+                         language=self.language,
+                         ttl=self.ttl)
+
+        for entry in journal[:self.feed_nr]:
+            #tmpl = h.action_parser(entry)[0]
+            action, action_extra = h.action_parser(entry, feed=True)
+            title = "%s - %s %s" % (entry.user.short_contact, action,
+                                 entry.repository.repo_name)
+            desc = action_extra()
+            feed.add_item(title=title,
+                          pubdate=entry.action_date,
+                          link=url('', qualified=True),
+                          author_email=entry.user.email,
+                          author_name=entry.user.full_contact,
+                          description=desc)
+
+        response.content_type = feed.mime_type
+        return feed.writeString('utf-8')
+
+
+
+
+
+
+
+

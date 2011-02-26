@@ -148,8 +148,10 @@ def make_map(config):
 
     #USER JOURNAL
     routes_map.connect('journal', '/_admin/journal', controller='journal',)
-    routes_map.connect('public_journal', '/_admin/public_journal', controller='journal',
-                       action="public_journal")
+    routes_map.connect('public_journal', '/_admin/public_journal', controller='journal', action="public_journal")
+    routes_map.connect('public_journal_rss', '/_admin/public_journal_rss', controller='journal', action="public_journal_rss")
+    routes_map.connect('public_journal_atom', '/_admin/public_journal_atom', controller='journal', action="public_journal_atom")
+
     routes_map.connect('toggle_following', '/_admin/toggle_following', controller='journal',
                 action='toggle_following', conditions=dict(method=["POST"]))
 

@@ -98,6 +98,11 @@ class User(Base):
         return '%s %s <%s>' % (self.name, self.lastname, self.email)
 
     @property
+    def short_contact(self):
+        return '%s %s' % (self.name, self.lastname)
+
+
+    @property
     def is_admin(self):
         return self.admin
 

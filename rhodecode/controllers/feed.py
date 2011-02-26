@@ -46,7 +46,7 @@ class FeedController(BaseRepoController):
         super(FeedController, self).__before__()
         #common values for feeds
         self.description = _('Changes on %s repository')
-        self.title = "%s feed"
+        self.title = self.title = _('%s %s feed') % (c.rhodecode_name, '%s')
         self.language = 'en-us'
         self.ttl = "5"
         self.feed_nr = 10
