@@ -15,6 +15,16 @@
 	    <!-- box / title -->
 	    <div class="title">
 	        <h5>${_('Public Journal')}</h5>
+                <ul class="links">
+                  <li>
+                    <span>${h.link_to(_('RSS'),h.url('public_journal_rss'),class_='rss_icon')}</span>
+                  </li>
+                  <li>
+                    <span>${h.link_to(_('Atom'),h.url('public_journal_atom'),class_='atom_icon')}</span>
+                  </li>                  
+                  
+                </ul>  	        
+	        
 	    </div>
 		<script type="text/javascript">
 		function show_more_event(){

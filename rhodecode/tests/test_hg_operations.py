@@ -241,7 +241,7 @@ def test_push_new_file(commits=15):
     test_clone(no_errors=True)
 
     cwd = path = jn(TESTS_TMP_PATH, HG_REPO)
-    added_file = jn(path, '%ssetup.py' % _RandomNameSequence().next())
+    added_file = jn(path, '%ssetupążźć.py' % _RandomNameSequence().next())
 
     Command(cwd).execute('touch %s' % added_file)
 
@@ -325,7 +325,7 @@ if __name__ == '__main__':
     #test_clone_wrong_credentials()
 
     #test_pull()
-    test_push_new_file(commits=2)
+    test_push_new_file(commits=15)
     #test_push_wrong_path()
     #test_push_wrong_credentials()
 

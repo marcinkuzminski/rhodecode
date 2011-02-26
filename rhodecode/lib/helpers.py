@@ -422,11 +422,12 @@ def bool2icon(value):
     return value
 
 
-def action_parser(user_log):
-    """This helper will map the specified string action into translated
+def action_parser(user_log, feed=False):
+    """This helper will action_map the specified string action into translated
     fancy names with icons and links
     
     :param user_log: user log instance
+    :param feed: use output for feeds (no html and fancy icons)
     """
 
     action = user_log.action
@@ -470,11 +471,16 @@ def action_parser(user_log):
             html_tmpl = ('<span> %s '
             '<a class="show_more" id="_%s" href="#more">%s</a> '
             '%s</span>')
-            cs_links += html_tmpl % (_('and'), uniq_id, _('%s more') \
+            if not feed:
+                cs_links += html_tmpl % (_('and'), uniq_id, _('%s more') \
                                         % (len(revs) - revs_limit),
                                         _('revisions'))
 
-            html_tmpl = '<span id="%s" style="display:none"> %s </span>'
+            if not feed:
+                html_tmpl = '<span id="%s" style="display:none"> %s </span>'
+            else:
+                html_tmpl = '<span id="%s"> %s </span>'
+
             cs_links += html_tmpl % (uniq_id, ', '.join([link_to(rev,
                 url('changeset_home',
                 repo_name=repo_name, revision=rev),
@@ -489,7 +495,7 @@ def action_parser(user_log):
         return _('fork name ') + str(link_to(action_params, url('summary_home',
                                           repo_name=repo_name,)))
 
-    map = {'user_deleted_repo':(_('[deleted] repository'), None),
+    action_map = {'user_deleted_repo':(_('[deleted] repository'), None),
            'user_created_repo':(_('[created] repository'), None),
            'user_forked_repo':(_('[forked] repository'), get_fork_name),
            'user_updated_repo':(_('[updated] repository'), None),
@@ -503,8 +509,11 @@ def action_parser(user_log):
            'stopped_following_repo':(_('[stopped following] repository'), None),
             }
 
-    action_str = map.get(action, action)
-    action = action_str[0].replace('[', '<span class="journal_highlight">')\
+    action_str = action_map.get(action, action)
+    if feed:
+        action = action_str[0].replace('[', '').replace(']', '')
+    else:
+        action = action_str[0].replace('[', '<span class="journal_highlight">')\
                    .replace(']', '</span>')
     action_params_func = lambda :""
 
@@ -588,6 +597,6 @@ def changed_tooltip(nodes):
         suf = ''
         if len(nodes) > 30:
             suf = '<br/>' + _(' and %s more') % (len(nodes) - 30)
-        return literal(pref + '<br/> '.join([x.path for x in nodes[:30]]) + suf)
+        return literal(pref + '<br/> '.join([x.path.decode('utf-8') for x in nodes[:30]]) + suf)
     else:
         return ': ' + _('No Files')
