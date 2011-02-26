@@ -17,7 +17,8 @@ If you make the decision to run RhodeCode with celery make sure you run celeryd 
 and message broker together with the application.   
 
 Installing RhodeCode from Cheese Shop
-------------------------
+-------------------------------------
+
 Rhodecode requires python version 2.5 or higher.
 
 The easiest way to install ``rhodecode`` is to run::

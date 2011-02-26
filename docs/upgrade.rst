@@ -4,7 +4,7 @@ Upgrade
 =======
 
 Upgrading from Cheese Shop
-------------------------
+--------------------------
 
 .. note::
    Firstly, it is recommended that you **always** perform a database backup before doing an upgrade.
