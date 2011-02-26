@@ -31,7 +31,7 @@ entering this "root" path ``setup-app`` will also prompt you for a username and 
 for the initial admin account which ``setup-app`` sets up for you.
 
 - The ``setup-app`` command will create all of the needed tables and an admin
-  account. When choosing a root path You can either use a new empty location, or a
+  account. When choosing a root path you can either use a new empty location, or a
   location which already contains existing repositories. If you choose a location
   which contains existing repositories RhodeCode will simply add all of the
   repositories at the chosen location to it's database. (Note: make sure you
@@ -51,7 +51,7 @@ You are now ready to use RhodeCode, to run it simply execute::
 - Use the admin account you created above when running ``setup-app`` to login to the web app.
 - The default permissions on each repository is read, and the owner is admin. 
   Remember to update these if needed.
-- In the admin panel You can toggle ldap, anonymous, permissions settings. As
+- In the admin panel you can toggle ldap, anonymous, permissions settings. As
   well as edit more advanced options on users and repositories
 
 Try copying your own mercurial repository into the "root" directory you are
@@ -102,7 +102,7 @@ Setting up Whoosh full text search
 ----------------------------------
 
 Starting from version 1.1 the whoosh index can be build by using the paster
-command ``make-index``. To use ``make-index`` You must specify the configuration
+command ``make-index``. To use ``make-index`` you must specify the configuration
 file that stores the location of the index, and the location of the repositories
 (`--repo-location`).
 

@@ -3,14 +3,16 @@
 Welcome to RhodeCode (RhodiumCode) documentation!
 =================================================
 
-``RhodeCode`` (formerly hg-app) is Pylons framework based Mercurial repository 
-browser/management tool with build in push/pull server and full text search.
-It works on http/https, has build in permission/authentication system with 
-ability to auth via LDAP. It's similar in some parts to github or bitbucket, 
-but it's suppose to run as standalone hosted application, it's open source 
-and donation ware and focuses more on providing customized, self administered 
-interface for Mercurial(and soon GIT) repositories. It's powered by vcs_ 
-library that me and Lukasz Balcerzak created to handle many various version 
+``RhodeCode`` (formerly hg-app) is a Pylons framework based Mercurial repository 
+browser/management tool with a built in push/pull server and full text search.
+It works on http/https and has a built in permission/authentication system with 
+the ability to authenticate via LDAP.
+
+RhodeCode is similar in some respects to github or bitbucket, 
+however RhodeCode can be run as standalone hosted application on your own server.  It is open source 
+and donation ware and focuses more on providing a customized, self administered 
+interface for Mercurial(and soon GIT) repositories. RhodeCode is powered by a vcs_ 
+library that Lukasz Balcerzak and I created to handle multiple different version 
 control systems.
 
 RhodeCode uses `Semantic Versioning <http://semver.org/>`_
@@ -20,8 +22,8 @@ RhodeCode demo
 
 http://hg.python-works.com
 
-The default access is anonymous but You can login to administrative account
-using those credentials
+The default access is anonymous but you can login to an administrative account
+using the following credentials:
 
 - username: demo
 - password: demo
@@ -29,7 +31,7 @@ using those credentials
 Source code
 -----------
 
-The most up to date sources can be obtained from my own RhodeCode instance
+The latest source for RhodeCode can be obtained from my own RhodeCode instance
 https://rhodecode.org 
 
 Rarely updated source code and issue tracker is available at bitbcuket
@@ -38,32 +40,32 @@ http://bitbucket.org/marcinkuzminski/rhodecode
 Installation
 ------------
 
- Please visit http://packages.python.org/RhodeCode/installation.html
+Please visit http://packages.python.org/RhodeCode/installation.html
 
 
-Features
---------
+RhodeCode Features
+------------------
 
-- Has it's own middleware to handle mercurial_ protocol request. 
-  Each request can be logged and authenticated. Runs on threads unlikely to 
-  hgweb. You can make multiple pulls/pushes simultaneous. Supports http/https 
+- Has it's own middleware to handle mercurial_ protocol requests. 
+  Each request can be logged and authenticated.
+- Runs on threads unlike hgweb. You can make multiple pulls/pushes simultaneous. Supports http/https 
   and LDAP
 - Full permissions (private/read/write/admin) and authentication per project. 
   One account for web interface and mercurial_ push/pull/clone operations.
-- Mako templates let's you customize look and feel of application.
-- Beautiful diffs, annotations and source codes all colored by pygments.
+- Mako templates let's you customize the look and feel of the application.
+- Beautiful diffs, annotations and source code browsing all colored by pygments.
 - Mercurial_ branch graph and yui-flot powered graphs with zooming and statistics
 - Admin interface with user/permission management. Admin activity journal, logs
   pulls, pushes, forks, registrations and other actions made by all users.
-- Server side forks, it's possible to fork a project and hack it free without
+- Server side forks. It is possible to fork a project and modify it freely without
   breaking the main repository.
-- Full text search powered by Whoosh on source codes, and file names.
+- Full text search powered by Whoosh on the source files, and file names.
   Build in indexing daemons, with optional incremental index build
   (no external search servers required all in one application)
 - Setup project descriptions and info inside built in db for easy, non 
   file-system operations
 - Intelligent cache with invalidation after push or project change, provides high 
-  performance and always up to date data.    
+  performance and always up to date data.
 - Rss / atom feeds, gravatar support, download sources as zip/tar/gz
 - Async tasks for speed and performance using celery_ (works without them too)  
 - Backup scripts can do backup of whole app and send it over scp to desired 
@@ -77,43 +79,46 @@ Features
 Incoming / Plans
 ----------------
 
-- project grouping
+- Project grouping
 - User groups/teams
-- ssh based authentication with server side key management
-- code review (probably based on hg-review)
-- full git_ support, with push/pull server (currently in beta tests)
-- redmine integration
-- public accessible activity feeds
-- commit based build in wiki system
-- clone points and cloning from remote repositories into RhodeCode
-- more statistics and graph (global annotation + some more statistics)
-- other cools stuff that i can figure out (or You can help me figure out)
+- SSH based authentication with server side key management
+- Code review (probably based on hg-review)
+- Full git_ support, with push/pull server (currently in beta tests)
+- Redmine integration
+- Public accessible activity feeds
+- Commit based built in wiki system
+- Clone points and cloning from remote repositories into RhodeCode
+- More statistics and graph (global annotation + some more statistics)
+- Other advancements as development continues (or you can of course make additions and or requests)
 
 License
 -------
 
-``RhodeCode`` is released under GPL_ license.
+``RhodeCode`` is released under the GPL_ license.
 
 
 Mailing group Q&A
 -----------------
 
-join the `Google group <http://groups.google.com/group/rhodecode>`_
+Join the `Google group <http://groups.google.com/group/rhodecode>`_
 
-open an issue at `issue tracker <http://bitbucket.org/marcinkuzminski/rhodecode/issues>`_
+Open an issue at `issue tracker <http://bitbucket.org/marcinkuzminski/rhodecode/issues>`_
 
-join #rhodecode on FreeNode (irc.freenode.net)
+Join #rhodecode on FreeNode (irc.freenode.net)
 or use http://webchat.freenode.net/?channels=rhodecode for web access to irc.
 
 Online documentation
 --------------------
 
- Online documentation for current version is available at
- http://packages.python.org/RhodeCode/.
- You may also build documentation for yourself - go into ``docs/`` and run::
+Online documentation for the current version of RhodeCode is available at
+http://packages.python.org/RhodeCode/.
+You may also build the documentation for yourself - go into ``docs/`` and run::
 
    make html
 
+(You need to have sphinx installed to build the documentation. If you don't
+have sphinx installed you can install it via the command: ``easy_install sphinx``)
+ 
 .. _virtualenv: http://pypi.python.org/pypi/virtualenv
 .. _python: http://www.python.org/
 .. _django: http://www.djangoproject.com/

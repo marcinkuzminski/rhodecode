@@ -3,24 +3,24 @@
 Installation
 ============
 
-``RhodeCode`` is written entirely in Python, but in order to use it's full
-potential there are some third-party requirements. When RhodeCode is used 
-together with celery You have to install some kind of message broker,
+``RhodeCode`` is written entirely in Python. In order to gain maximum performance
+there are some third-party you must install. When RhodeCode is used 
+together with celery you have to install some kind of message broker,
 recommended one is rabbitmq_ to make the async tasks work.
 
-Of course RhodeCode works in sync mode also, then You don't have to install
-any third party apps. Celery_ will give You large speed improvement when using
-many big repositories. If You plan to use it for 7 or 10 small repositories, it
-will work just fine without celery running.
+Of course RhodeCode works in sync mode also and then you do not have to install
+any third party applications. However, using Celery_ will give you a large speed improvement when using
+many big repositories. If you plan to use RhodeCode for say 7 to 10 small repositories, RhodeCode
+will perform perfectly well without celery running.
    
-After You decide to Run it with celery make sure You run celeryd using paster
+If you make the decision to run RhodeCode with celery make sure you run celeryd using paster
 and message broker together with the application.   
 
-Install from Cheese Shop
+Installing RhodeCode from Cheese Shop
 ------------------------
-Rhodecode requires python 2.x greater than version 2.5
+Rhodecode requires python version 2.5 or higher.
 
-Easiest way to install ``rhodecode`` is to run::
+The easiest way to install ``rhodecode`` is to run::
 
     easy_install rhodecode
 
@@ -28,8 +28,8 @@ Or::
 
     pip install rhodecode
 
-If you prefer to install manually simply grab latest release from
-http://pypi.python.org/pypi/rhodecode, decompress archive and run::
+If you prefer to install RhodeCode manually simply grab latest release from
+http://pypi.python.org/pypi/rhodecode, decompress the archive and run::
 
     python setup.py install
 
@@ -38,15 +38,13 @@ Step by step installation example
 ---------------------------------
 
 
-- Assuming You have installed virtualenv_ create one using. 
-
-::
+- Assuming you have installed virtualenv_ create a new virtual environment using virtualenv:: 
 
     virtualenv --no-site-packages /var/www/rhodecode-venv
 
 
 .. note:: Using ``--no-site-packages`` when generating your
-   virtualenv is *very important*. This flag provides the necessary
+   virtualenv is **very important**. This flag provides the necessary
    isolation for running the set of packages required by
    RhodeCode.  If you do not specify ``--no-site-packages``,
    it's possible that RhodeCode will not install properly into
@@ -56,48 +54,42 @@ Step by step installation example
 
 
 - this will install new virtualenv_ into `/var/www/rhodecode-venv`. 
-- Activate the virtualenv_ by running 
-
-::
+- Activate the virtualenv_ by running::
 
     source /var/www/rhodecode-venv/bin/activate
 
-.. note:: If you're on UNIX, *do not* use ``sudo`` to run the
+.. note:: If you're using UNIX, *do not* use ``sudo`` to run the
    ``virtualenv`` script.  It's perfectly acceptable (and desirable)
    to create a virtualenv as a normal user.
      
-- Make a folder for rhodecode somewhere on the filesystem for example 
-
-::
+- Make a folder for rhodecode somewhere on the filesystem for example::
 
     mkdir /var/www/rhodecode
   
     
-- Run this command to install rhodecode
-
-::
+- Run this command to install rhodecode::
 
     easy_install rhodecode 
 
-- this will install rhodecode together with pylons
-  and all other required python libraries
+- This will install rhodecode together with pylons and all other required python
+  libraries
 
 Requirements for Celery (optional)
 ----------------------------------
 
 .. note::
    Installing message broker and using celery is optional, RhodeCode will
-   work without them perfectly fine.
+   work perfectly fine without them.
 
 
 **Message Broker** 
 
 - preferred is `RabbitMq <http://www.rabbitmq.com/>`_
-- possible other is `Redis <http://code.google.com/p/redis/>`_
+- A possible alternative is `Redis <http://code.google.com/p/redis/>`_
 
-For installation instructions You can visit: 
-http://ask.github.com/celery/getting-started/index.html
-It's very nice tutorial how to start celery_ with rabbitmq_
+For installation instructions you can visit: 
+http://ask.github.com/celery/getting-started/index.html.
+This is a very nice tutorial on how to start using celery_ with rabbitmq_
 
 
 You can now proceed to :ref:`setup`
