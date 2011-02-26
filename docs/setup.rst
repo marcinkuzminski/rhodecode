@@ -57,7 +57,7 @@ You are now ready to use RhodeCode, to run it simply execute::
 Try copying your own mercurial repository into the "root" directory you are
 using, then from within the RhodeCode web application choose Admin >
 repositories. Then choose Add New Repository. Add the repository you copied into
-the root. Test that you can browse your repository from within RhodCode and then
+the root. Test that you can browse your repository from within RhodeCode and then
 try cloning your repository from RhodeCode with::
 
   hg clone http://127.0.0.1:5000/<repository name>
@@ -67,27 +67,36 @@ where *repository name* is replaced by the name of your repository.
 Using RhodeCode with SSH
 ------------------------
 
+RhodeCode currently only hosts repositories using http and https. (The addition of
+ssh hosting is a planned future feature.) However you can easily use ssh in
+parallel with RhodeCode. (Repository access via ssh is a standard "out of
+the box" feature of mercurial_ and you can use this to access any of the
+repositories that RhodeCode is hosting. See PublishingRepositories_)
+
 RhodeCode repository structures are kept in directories with the same name 
-as the project, when using repository groups, each group is a subdirectory.
-This will allow you to use ssh for accessing repositories quite easily. There
-are some exceptions when using ssh for accessing repositories.
+as the project. When using repository groups, each group is a subdirectory.
+This allows you to easily use ssh for accessing repositories.
 
-You have to make sure that the web-server as well as the ssh users have unix
-permission for the appropriate directories. Secondly, when using ssh rhodecode
-will not authenticate those requests and permissions set by the web interface
-will not work on the repositories accessed via ssh. There is a solution to this
-to use auth hooks, that connects to rhodecode db, and runs check functions for
-permissions.
-
+In order to use ssh you need to make sure that your web-server and the users login
+accounts have the correct permissions set on the appropriate directories. (Note
+that these permissions are independent of any permissions you have set up using
+the RhodeCode web interface.)
 
 If your main directory (the same as set in RhodeCode settings) is for example
 set to **/home/hg** and the repository you are using is named `rhodecode`, then
 to clone via ssh you should run::
 
     hg clone ssh://user@server.com/home/hg/rhodecode
-  
-Using external tools such as mercurial server or using ssh key based
+
+Using other external tools such as mercurial-server_ or using ssh key based
 authentication is fully supported.
+
+Note: In an advanced setup, in order for your ssh access to use the same
+permissions as set up via the RhodeCode web interface, you can create an
+authentication hook to connect to the rhodecode db and runs check functions for
+permissions against that.
+
+
     
 Setting up Whoosh full text search
 ----------------------------------
@@ -103,7 +112,6 @@ the `-f` option, indexing will run always in "incremental" mode.
 For an incremental index build use::
 
 	paster make-index production.ini --repo-location=<location for repos> 
-
 
 For a full index rebuild use::
 
@@ -130,7 +138,7 @@ Setting up LDAP support
 -----------------------
 
 RhodeCode starting from version 1.1 supports ldap authentication. In order
-to use LDAP, you have to install python-ldap_ package. This package is available
+to use LDAP, you have to install the python-ldap_ package. This package is available
 via pypi, so you can install it by running
 
 ::
@@ -162,51 +170,52 @@ Here's a typical ldap setup::
 authentication so those are credentials to access your ldap, if it doesn't 
 support anonymous search/user lookups. 
 
-Base DN must have %(user)s template inside, it's a placer where your uid used
-to login would go, it allows admins to specify not standard schema for uid 
-variable
+Base DN must have the %(user)s template inside, it's a place holder where your uid
+used to login would go. It allows admins to specify non-standard schema for the
+uid variable.
 
-If all data are entered correctly, and `python-ldap` is properly installed
-Users should be granted to access RhodeCode wit ldap accounts. When 
-logging at the first time an special ldap account is created inside RhodeCode, 
-so you can control over permissions even on ldap users. If such user exists 
-already in RhodeCode database ldap user with the same username would be not 
-able to access RhodeCode.
+If all of the data is correctly entered, and `python-ldap` is properly
+installed, then users should be granted access to RhodeCode with ldap accounts.
+When logging in the first time a special ldap account is created inside
+RhodeCode, so you can control the permissions even on ldap users. If such users
+already exist in the RhodeCode database, then the ldap user with the same
+username would be not be able to access RhodeCode.
 
-If you have problems with ldap access and believe you entered correct 
-information check out the RhodeCode logs,any error messages sent from 
-ldap will be saved there.
+If you have problems with ldap access and believe you have correctly entered the
+required information then proceed by investigating the RhodeCode logs. Any
+error messages sent from ldap will be saved there.
 
 
 
 Setting Up Celery
 -----------------
 
-Since version 1.1 celery is configured by the rhodecode ini configuration files
-simply set use_celery=true in the ini file then add / change the configuration 
+Since version 1.1 celery is configured by the rhodecode ini configuration files.
+Simply set use_celery=true in the ini file then add / change the configuration 
 variables inside the ini file.
 
-Remember that the ini files uses format with '.' not with '_' like celery
-so for example setting `BROKER_HOST` in celery means setting `broker.host` in
+Remember that the ini files use the format with '.' not with '_' like celery.
+So for example setting `BROKER_HOST` in celery means setting `broker.host` in
 the config file.
 
-In order to make start using celery run::
+In order to start using celery run::
 
  paster celeryd <configfile.ini>
 
 
 .. note::
-   Make sure you run this command from same virtualenv, and with the same user
+   Make sure you run this command from the same virtualenv, and with the same user
    that rhodecode runs.
    
 HTTPS support
 -------------
 
-There are two ways to enable https, first is to set HTTP_X_URL_SCHEME in
-your http server headers, than rhodecode will recognise this headers and make
-proper https redirections, another way is to set `force_https = true` 
-in the ini cofiguration to force using https, no headers are needed than to
-enable https
+There are two ways to enable https:
+
+- Set HTTP_X_URL_SCHEME in your http server headers, than rhodecode will
+  recognize this headers and make proper https redirections
+- Alternatively, set `force_https = true` in the ini configuration to force using
+  https, no headers are needed than to enable https
 
 
 Nginx virtual host example
@@ -230,8 +239,8 @@ Sample config for nginx using proxy::
        }
     }  
   
-Here's the proxy.conf. It's tuned so it'll not timeout on long
-pushes and also on large pushes::
+Here's the proxy.conf. It's tuned so it will not timeout on long
+pushes or large pushes::
 
     proxy_redirect              off;
     proxy_set_header            Host $host;
@@ -250,8 +259,8 @@ pushes and also on large pushes::
     proxy_busy_buffers_size     64k;
     proxy_temp_file_write_size  64k;
  
-Also when using root path with nginx you might set the static files to false
-in production.ini file::
+Also, when using root path with nginx you might set the static files to false
+in the production.ini file::
 
     [app:main]
       use = egg:rhodecode
@@ -260,13 +269,13 @@ in production.ini file::
       lang=en
       cache_dir = %(here)s/data
 
-To not have the statics served by the application. And improve speed.
+In order to not have the statics served by the application. This improves speed.
 
 
 Apache virtual host example
 ---------------------------
 
-Sample config for apache using proxy::
+Here is a sample configuration file for apache using proxy::
 
     <VirtualHost *:80>
             ServerName hg.myserver.com
@@ -307,7 +316,7 @@ Apache subdirectory part::
       SetEnvIf X-Url-Scheme https HTTPS=1
     </Location> 
 
-Besides the regular apache setup you will need to add such part to .ini file::
+Besides the regular apache setup you will need to add the following to your .ini file::
 
     filter-with = proxy-prefix
 
@@ -326,7 +335,7 @@ TODO !
 Other configuration files
 -------------------------
 
-Some example init.d script can be found here, for debian and gentoo:
+Some example init.d scripts can be found here, for debian and gentoo:
 
 https://rhodeocode.org/rhodecode/files/tip/init.d
 
@@ -334,29 +343,30 @@ https://rhodeocode.org/rhodecode/files/tip/init.d
 Troubleshooting
 ---------------
 
-- missing static files ?
-
- - make sure either to set the `static_files = true` in the .ini file or
+:Q: **Missing static files?**
+:A: Make sure either to set the `static_files = true` in the .ini file or
    double check the root path for your http setup. It should point to 
    for example:
    /home/my-virtual-python/lib/python2.6/site-packages/rhodecode/public
-   
-- can't install celery/rabbitmq
 
- - don't worry RhodeCode works without them too. No extra setup required
+|
+:Q: **Can't install celery/rabbitmq**
+:A: Don't worry RhodeCode works without them too. No extra setup is required.
 
-- long lasting push timeouts ?
+|
+:Q: **Long lasting push timeouts?**
+:A: Make sure you set a longer timeouts in your proxy/fcgi settings, timeouts
+   are caused by https server and not RhodeCode.
 
- - make sure you set a longer timeouts in your proxy/fcgi settings, timeouts
-   are caused by https server and not RhodeCode
+|
+:Q: **Large pushes timeouts?**
+:A: Make sure you set a proper max_body_size for the http server.
 
-- large pushes timeouts ?
- 
- - make sure you set a proper max_body_size for the http server
+|
+:Q: **Apache doesn't pass basicAuth on pull/push?**
+:A: Make sure you added `WSGIPassAuthorization true`.
 
-- Apache doesn't pass basicAuth on pull/push ?
-
- - Make sure you added `WSGIPassAuthorization true` 
+For further questions search the `Issues tracker`_, or post a message in the `google group rhodecode`_
 
 .. _virtualenv: http://pypi.python.org/pypi/virtualenv
 .. _python: http://www.python.org/
@@ -364,3 +374,7 @@ Troubleshooting
 .. _celery: http://celeryproject.org/
 .. _rabbitmq: http://www.rabbitmq.com/
 .. _python-ldap: http://www.python-ldap.org/
+.. _mercurial-server: http://www.lshift.net/mercurial-server.html
+.. _PublishingRepositories: http://mercurial.selenic.com/wiki/PublishingRepositories
+.. _Issues tracker: https://bitbucket.org/marcinkuzminski/rhodecode/issues
+.. _google group rhodecode: http://groups.google.com/group/rhodecode
