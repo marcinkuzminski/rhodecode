@@ -348,18 +348,41 @@ class DbManage(object):
             self.sa.rollback()
             raise
 
-    def config_prompt(self, test_repo_path=''):
-        log.info('Setting up repositories config')
+    def config_prompt(self, test_repo_path='', retries=3):
+        if retries == 3:
+            log.info('Setting up repositories config')
 
         if not self.tests and not test_repo_path:
             path = raw_input('Specify valid full path to your repositories'
                         ' you can change this later in application settings:')
         else:
             path = test_repo_path
+        path_ok = True
 
+        #check proper dir
         if not os.path.isdir(path):
-            log.error('You entered wrong path: %s', path)
+            path_ok = False
+            log.error('Entered path is not a valid directory: %s [%s/3]',
+                      path, retries)
+
+        #check write access
+        if not os.access(path, os.W_OK):
+            path_ok = False
+
+            log.error('No write permission to given path: %s [%s/3]',
+                      path, retries)
+
+
+        if retries == 0:
             sys.exit()
+        if path_ok is False:
+            retries -= 1
+            return self.config_prompt(test_repo_path, retries)
+
+
+        return path
+
+    def create_settings(self, path):
 
         self.create_ui_settings()
 
