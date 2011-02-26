@@ -45,6 +45,19 @@ fixes
 - removed issue with space inside renamed repository after deletion
 - fixed strange issue on formencode imports
 
+1.1.4 (**2011-02-19**)
+======================
+
+news
+----
+
+fixes
+-----
+
+- fixed formencode import problem on settings page, that caused server crash
+  when that page was accessed as first after server start
+- journal fixes
+- fixed option to access repository just by entering http://server/<repo_name> 
 
 1.1.3 (**2011-02-16**)
 ======================
