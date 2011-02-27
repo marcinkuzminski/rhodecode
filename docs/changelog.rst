@@ -31,6 +31,8 @@ news
 - major code rewrites optimized codes for speed and memory usage
 - raw and diff downloads are now in git format
 - setup command checks for write access to given path
+- fixed many issues with international characters and unicode. It uses utf8
+  decode with replace to provide less errors even with non utf8 encoded strings
 
 fixes
 -----

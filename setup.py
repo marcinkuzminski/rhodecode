@@ -7,7 +7,7 @@ requirements = [
         "Pylons==1.0.0",
         "WebHelpers>=1.2",
         "SQLAlchemy>=0.6.6",
-        "Mako==0.3.6",
+        "Mako>=0.4.0",
         "vcs>=0.2.0",
         "pygments>=1.4",
         "mercurial>=1.7.5",
