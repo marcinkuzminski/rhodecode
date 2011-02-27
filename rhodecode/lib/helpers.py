@@ -6,12 +6,12 @@ available to Controllers. This module is available to both as 'h'.
 import random
 import hashlib
 import StringIO
+import urllib
+
 from pygments.formatters import HtmlFormatter
 from pygments import highlight as code_highlight
-from pylons import url
+from pylons import url, request
 from pylons.i18n.translation import _, ungettext
-from vcs.utils.annotate import annotate_highlight
-from rhodecode.lib.utils import repo_name_slug
 
 from webhelpers.html import literal, HTML, escape
 from webhelpers.html.tools import *
@@ -32,6 +32,9 @@ from webhelpers.date import time_ago_in_words
 from webhelpers.paginate import Page
 from webhelpers.html.tags import _set_input_attrs, _set_id_attr, \
     convert_boolean_attrs, NotGiven
+
+from vcs.utils.annotate import annotate_highlight
+from rhodecode.lib.utils import repo_name_slug
 
 def _reset(name, value=None, id=NotGiven, type="reset", **attrs):
     """Reset button
@@ -557,9 +560,6 @@ HasRepoPermissionAny, HasRepoPermissionAll
 #==============================================================================
 # GRAVATAR URL
 #==============================================================================
-import hashlib
-import urllib
-from pylons import request
 
 def gravatar_url(email_address, size=30):
     ssl_enabled = 'https' == request.environ.get('wsgi.url_scheme')
@@ -568,7 +568,9 @@ def gravatar_url(email_address, size=30):
     baseurl_ssl = "https://secure.gravatar.com/avatar/"
     baseurl = baseurl_ssl if ssl_enabled else baseurl_nossl
 
-
+    if isinstance(email_address, unicode):
+        #hashlib crashes on unicode items
+        email_address = email_address.encode('utf8', 'replace')
     # construct the url
     gravatar_url = baseurl + hashlib.md5(email_address.lower()).hexdigest() + "?"
     gravatar_url += urllib.urlencode({'d':default, 's':str(size)})
