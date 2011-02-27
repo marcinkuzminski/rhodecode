@@ -81,7 +81,7 @@
 	        <span style="font-size:1.1em;font-weight: bold">${_('Files affected')}</span>
 	        <div class="cs_files">
 	                %for change,filenode,diff,cs1,cs2 in c.changes:
-	                    <div class="cs_${change}">${h.link_to(filenode.path.decode('utf-8'),h.url.current(anchor=h.repo_name_slug('C%s' % filenode.path.decode('utf-8'))))}</div>
+	                    <div class="cs_${change}">${h.link_to(filenode.path.decode('utf-8','replace'),h.url.current(anchor=h.repo_name_slug('C%s' % filenode.path.decode('utf-8','replace'))))}</div>
 	                %endfor
 	        </div>         
 	    </div>
@@ -92,19 +92,19 @@
 		%if change !='removed':
 		<div style="clear:both;height:10px"></div>
 		<div class="diffblock">
-			<div id="${h.repo_name_slug('C%s' % filenode.path.decode('utf-8'))}" class="code-header">
+			<div id="${h.repo_name_slug('C%s' % filenode.path.decode('utf-8','replace'))}" class="code-header">
 				<div class="changeset_header">
 					<span class="changeset_file">
-						${h.link_to_if(change!='removed',filenode.path.decode('utf-8'),h.url('files_home',repo_name=c.repo_name,
-						revision=filenode.changeset.raw_id,f_path=filenode.path.decode('utf-8')))}
+						${h.link_to_if(change!='removed',filenode.path.decode('utf-8','replace'),h.url('files_home',repo_name=c.repo_name,
+						revision=filenode.changeset.raw_id,f_path=filenode.path.decode('utf-8','replace')))}
 					</span>
 					%if 1:
 					&raquo; <span>${h.link_to(_('diff'),
-					h.url('files_diff_home',repo_name=c.repo_name,f_path=filenode.path.decode('utf-8'),diff2=cs2,diff1=cs1,diff='diff'))}</span>
+					h.url('files_diff_home',repo_name=c.repo_name,f_path=filenode.path.decode('utf-8','replace'),diff2=cs2,diff1=cs1,diff='diff'))}</span>
 					&raquo; <span>${h.link_to(_('raw diff'),
-					h.url('files_diff_home',repo_name=c.repo_name,f_path=filenode.path.decode('utf-8'),diff2=cs2,diff1=cs1,diff='raw'))}</span>
+					h.url('files_diff_home',repo_name=c.repo_name,f_path=filenode.path.decode('utf-8','replace'),diff2=cs2,diff1=cs1,diff='raw'))}</span>
 					&raquo; <span>${h.link_to(_('download diff'),
-					h.url('files_diff_home',repo_name=c.repo_name,f_path=filenode.path.decode('utf-8'),diff2=cs2,diff1=cs1,diff='download'))}</span>
+					h.url('files_diff_home',repo_name=c.repo_name,f_path=filenode.path.decode('utf-8','replace'),diff2=cs2,diff1=cs1,diff='download'))}</span>
 					%endif
 				</div>
 			</div>

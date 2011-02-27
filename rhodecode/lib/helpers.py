@@ -186,7 +186,7 @@ class _FilesBreadCrumbs(object):
 
     def __call__(self, repo_name, rev, paths):
         if isinstance(paths, str):
-            paths = paths.decode('utf-8')
+            paths = paths.decode('utf-8', 'replace')
         url_l = [link_to(repo_name, url('files_home',
                                         repo_name=repo_name,
                                         revision=rev, f_path=''))]
@@ -683,6 +683,6 @@ def changed_tooltip(nodes):
         suf = ''
         if len(nodes) > 30:
             suf = '<br/>' + _(' and %s more') % (len(nodes) - 30)
-        return literal(pref + '<br/> '.join([x.path.decode('utf-8') for x in nodes[:30]]) + suf)
+        return literal(pref + '<br/> '.join([x.path.decode('utf-8', 'replace') for x in nodes[:30]]) + suf)
     else:
         return ': ' + _('No Files')
