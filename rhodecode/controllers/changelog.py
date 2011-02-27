@@ -38,8 +38,7 @@ from pylons import request, session, tmpl_context as c
 
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseRepoController, render
-
-from webhelpers.paginate import Page
+from rhodecode.lib.helpers import RepoPage
 
 log = logging.getLogger(__name__)
 
@@ -68,7 +67,7 @@ class ChangelogController(BaseRepoController):
 
         p = int(request.params.get('page', 1))
         c.total_cs = len(c.rhodecode_repo)
-        c.pagination = Page(c.rhodecode_repo, page=p, item_count=c.total_cs,
+        c.pagination = RepoPage(c.rhodecode_repo, page=p, item_count=c.total_cs,
                             items_per_page=c.size)
 
         self._graph(c.rhodecode_repo, c.size, p)

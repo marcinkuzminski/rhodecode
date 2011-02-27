@@ -29,7 +29,7 @@ from webhelpers.text import chop_at, collapse, convert_accented_entities, \
     convert_misc_entities, lchop, plural, rchop, remove_formatting, \
     replace_whitespace, urlify, truncate, wrap_paragraphs
 from webhelpers.date import time_ago_in_words
-
+from webhelpers.paginate import Page
 from webhelpers.html.tags import _set_input_attrs, _set_id_attr, \
     convert_boolean_attrs, NotGiven
 
@@ -574,6 +574,92 @@ def gravatar_url(email_address, size=30):
     gravatar_url += urllib.urlencode({'d':default, 's':str(size)})
 
     return gravatar_url
+
+
+#==============================================================================
+# REPO PAGER
+#==============================================================================
+class RepoPage(Page):
+
+    def __init__(self, collection, page=1, items_per_page=20,
+        item_count=None, url=None, **kwargs):
+
+        """Create a "RepoPage" instance. special pager for paging
+        repository
+        """
+        self._url_generator = url
+
+        # Safe the kwargs class-wide so they can be used in the pager() method
+        self.kwargs = kwargs
+
+        # Save a reference to the collection
+        self.original_collection = collection
+
+        self.collection = collection
+
+        # The self.page is the number of the current page.
+        # The first page has the number 1!
+        try:
+            self.page = int(page) # make it int() if we get it as a string
+        except (ValueError, TypeError):
+            self.page = 1
+
+        self.items_per_page = items_per_page
+
+        # Unless the user tells us how many items the collections has
+        # we calculate that ourselves.
+        if item_count is not None:
+            self.item_count = item_count
+        else:
+            self.item_count = len(self.collection)
+
+        # Compute the number of the first and last available page
+        if self.item_count > 0:
+            self.first_page = 1
+            self.page_count = ((self.item_count - 1) / self.items_per_page) + 1
+            self.last_page = self.first_page + self.page_count - 1
+
+            # Make sure that the requested page number is the range of valid pages
+            if self.page > self.last_page:
+                self.page = self.last_page
+            elif self.page < self.first_page:
+                self.page = self.first_page
+
+            # Note: the number of items on this page can be less than
+            #       items_per_page if the last page is not full
+            self.first_item = max(0, (self.item_count) - (self.page * items_per_page))
+            self.last_item = ((self.item_count - 1) - items_per_page * (self.page - 1)) + 1
+
+            iterator = self.collection.get_changesets(start=self.first_item,
+                                                      end=self.last_item,
+                                                      reverse=True)
+            self.items = list(iterator)
+
+            # Links to previous and next page
+            if self.page > self.first_page:
+                self.previous_page = self.page - 1
+            else:
+                self.previous_page = None
+
+            if self.page < self.last_page:
+                self.next_page = self.page + 1
+            else:
+                self.next_page = None
+
+        # No items available
+        else:
+            self.first_page = None
+            self.page_count = 0
+            self.last_page = None
+            self.first_item = None
+            self.last_item = None
+            self.previous_page = None
+            self.next_page = None
+            self.items = []
+
+        # This is a subclass of the 'list' type. Initialise the list now.
+        list.__init__(self, self.items)
+
 
 def safe_unicode(str):
     """safe unicode function. In case of UnicodeDecode error we try to return

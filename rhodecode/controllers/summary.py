@@ -43,8 +43,7 @@ from rhodecode.lib.utils import OrderedDict, EmptyChangeset
 
 from rhodecode.lib.celerylib import run_task
 from rhodecode.lib.celerylib.tasks import get_commits_stats
-
-from webhelpers.paginate import Page
+from rhodecode.lib.helpers import RepoPage
 
 try:
     import json
@@ -70,7 +69,7 @@ class SummaryController(BaseRepoController):
         def url_generator(**kw):
             return url('shortlog_home', repo_name=c.repo_name, **kw)
 
-        c.repo_changesets = Page(c.repo, page=1, items_per_page=10,
+        c.repo_changesets = RepoPage(c.repo, page=1, items_per_page=10,
                                  url=url_generator)
 
         e = request.environ
