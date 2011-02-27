@@ -596,7 +596,7 @@ def create_test_env(repos_test_path, config):
     dbmanage = DbManage(log_sql=True, dbconf=dbconf, root=config['here'],
                         tests=True)
     dbmanage.create_tables(override=True)
-    dbmanage.config_prompt(repos_test_path)
+    dbmanage.create_settings(dbmanage.config_prompt(repos_test_path))
     dbmanage.create_default_user()
     dbmanage.admin_prompt()
     dbmanage.create_permissions()
