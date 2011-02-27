@@ -136,9 +136,9 @@ class FilesController(BaseRepoController):
             h.flash(str(e), category='warning')
             redirect(h.url('files_home', repo_name=repo_name, revision=cs.raw_id))
 
+        fname = f_path.split('/')[-1].encode('utf8', 'replace')
         response.content_type = file_node.mimetype
-        response.content_disposition = 'attachment; filename=%s' \
-                                                    % f_path.split('/')[-1]
+        response.content_disposition = 'attachment; filename=%s' % fname
         return file_node.content
 
     def raw(self, repo_name, revision, f_path):
