@@ -22,6 +22,7 @@ Documentation
    usage/general
    usage/enable_git
    usage/statistics
+   usage/backup
    
 **Develop**
 
