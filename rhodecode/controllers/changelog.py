@@ -71,12 +71,12 @@ class ChangelogController(BaseRepoController):
         c.pagination = RepoPage(c.rhodecode_repo, page=p, item_count=c.total_cs,
                             items_per_page=c.size, branch_name=branch_name)
 
-        self._graph(c.rhodecode_repo, c.size, p)
+        self._graph(c.rhodecode_repo, c.total_cs, c.size, p)
 
         return render('changelog/changelog.html')
 
 
-    def _graph(self, repo, size, p):
+    def _graph(self, repo, repo_size, size, p):
         """
         Generates a DAG graph for mercurial
         
@@ -88,7 +88,7 @@ class ChangelogController(BaseRepoController):
             c.jsdata = json.dumps([])
             return
 
-        revcount = min(repo.size, size)
+        revcount = min(repo_size, size)
         offset = 1 if p == 1 else  ((p - 1) * revcount + 1)
         rev_start = repo.revisions.index(repo.revisions[(-1 * offset)])
         rev_end = max(0, rev_start - revcount)
