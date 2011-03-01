@@ -66,9 +66,10 @@ class ChangelogController(BaseRepoController):
             c.size = int(session.get('changelog_size', default))
 
         p = int(request.params.get('page', 1))
+        branch_name = request.params.get('branch', None)
         c.total_cs = len(c.rhodecode_repo)
         c.pagination = RepoPage(c.rhodecode_repo, page=p, item_count=c.total_cs,
-                            items_per_page=c.size)
+                            items_per_page=c.size, branch_name=branch_name)
 
         self._graph(c.rhodecode_repo, c.size, p)
 
