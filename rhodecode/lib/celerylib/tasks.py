@@ -115,12 +115,15 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
         .filter(Repository.repo_name == repo_name).scalar()
     cur_stats = sa.query(Statistics)\
         .filter(Statistics.repository == dbrepo).scalar()
-    if cur_stats:
+
+    if cur_stats is not None:
         last_rev = cur_stats.stat_on_revision
+
+    #return if repo is empty
     if not repo.revisions:
         return True
 
-    if last_rev == repo.revisions[-1] and len(repo.revisions) > 1:
+    if last_rev == repo.get_changeset().revision and len(repo.revisions) > 1:
         #pass silently without any work if we're not on first revision or 
         #current state of parsing revision(from db marker) is the last revision
         return True

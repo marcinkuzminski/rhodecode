@@ -584,7 +584,7 @@ def gravatar_url(email_address, size=30):
 class RepoPage(Page):
 
     def __init__(self, collection, page=1, items_per_page=20,
-        item_count=None, url=None, **kwargs):
+        item_count=None, url=None, branch_name=None, **kwargs):
 
         """Create a "RepoPage" instance. special pager for paging
         repository
@@ -630,11 +630,12 @@ class RepoPage(Page):
             # Note: the number of items on this page can be less than
             #       items_per_page if the last page is not full
             self.first_item = max(0, (self.item_count) - (self.page * items_per_page))
-            self.last_item = ((self.item_count - 1) - items_per_page * (self.page - 1)) + 1
+            self.last_item = ((self.item_count - 1) - items_per_page * (self.page - 1))
 
             iterator = self.collection.get_changesets(start=self.first_item,
                                                       end=self.last_item,
-                                                      reverse=True)
+                                                      reverse=True,
+                                                      branch_name=branch_name)
             self.items = list(iterator)
 
             # Links to previous and next page
