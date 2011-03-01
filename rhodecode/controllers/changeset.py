@@ -71,9 +71,10 @@ class ChangesetController(BaseRepoController):
             if len(rev_range) == 2:
                 rev_start = rev_range[0]
                 rev_end = rev_range[1]
-                rev_ranges = list(c.rhodecode_repo[rev_start:rev_end])
+                rev_ranges = c.rhodecode_repo.get_changesets(start=rev_start,
+                                                            end=rev_end)
             else:
-                rev_ranges = [c.rhodecode_repo.get_changeset(revision)]
+                rev_ranges = c.rhodecode_repo.get_changeset(revision)
 
             c.cs_ranges = list(rev_ranges)
 
