@@ -10,7 +10,7 @@ import urllib
 
 from pygments.formatters import HtmlFormatter
 from pygments import highlight as code_highlight
-from pylons import url, request
+from pylons import url, request, config
 from pylons.i18n.translation import _, ungettext
 
 from webhelpers.html import literal, HTML, escape
@@ -35,6 +35,7 @@ from webhelpers.html.tags import _set_input_attrs, _set_id_attr, \
 
 from vcs.utils.annotate import annotate_highlight
 from rhodecode.lib.utils import repo_name_slug
+from rhodecode.lib import str2bool
 
 def _reset(name, value=None, id=NotGiven, type="reset", **attrs):
     """Reset button
@@ -562,6 +563,9 @@ HasRepoPermissionAny, HasRepoPermissionAll
 #==============================================================================
 
 def gravatar_url(email_address, size=30):
+    if not str2bool(config['app_conf'].get('use_gravatar')):
+        return "/images/user%s.png" % size
+
     ssl_enabled = 'https' == request.environ.get('wsgi.url_scheme')
     default = 'identicon'
     baseurl_nossl = "http://www.gravatar.com/avatar/"

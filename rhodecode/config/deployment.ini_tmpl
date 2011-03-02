@@ -49,6 +49,7 @@ app_instance_uuid = ${app_instance_uuid}
 cut_off_limit = 256000
 force_https = false 
 commit_parse_limit = 50
+use_gravatar = true
 
 ####################################
 ###        CELERY CONFIG        ####
