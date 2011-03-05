@@ -91,7 +91,7 @@ def log_push_action(ui, repo, **kwargs):
     extra_params = dict(repo.ui.configitems('rhodecode_extras'))
     username = extra_params['username']
     repository = extra_params['repository']
-    action = 'push:%s'
+    action = extra_params['action'] + ':%s'
     node = kwargs['node']
 
     def get_revs(repo, rev_opt):

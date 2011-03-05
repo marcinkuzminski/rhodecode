@@ -507,6 +507,7 @@ def action_parser(user_log, feed=False):
            'admin_forked_repo':(_('[forked] repository'), None),
            'admin_updated_repo':(_('[updated] repository'), None),
            'push':(_('[pushed] into'), get_cs_links),
+           'push_remote':(_('[pulled from remote] into'), get_cs_links),
            'pull':(_('[pulled] from'), None),
            'started_following_repo':(_('[started following] repository'), None),
            'stopped_following_repo':(_('[stopped following] repository'), None),
@@ -518,9 +519,10 @@ def action_parser(user_log, feed=False):
     else:
         action = action_str[0].replace('[', '<span class="journal_highlight">')\
                    .replace(']', '</span>')
+
     action_params_func = lambda :""
 
-    if action_str[1] is not None:
+    if callable(action_str[1]):
         action_params_func = action_str[1]
 
     return [literal(action), action_params_func]
@@ -533,7 +535,7 @@ def action_parser_icon(user_log):
     if len(x) > 1:
         action, action_params = x
 
-    tmpl = """<img src="%s/%s" alt="%s"/>"""
+    tmpl = """<img src="%s%s" alt="%s"/>"""
     map = {'user_deleted_repo':'database_delete.png',
            'user_created_repo':'database_add.png',
            'user_forked_repo':'arrow_divide.png',
@@ -543,6 +545,7 @@ def action_parser_icon(user_log):
            'admin_forked_repo':'arrow_divide.png',
            'admin_updated_repo':'database_edit.png',
            'push':'script_add.png',
+           'push_remote':'connect.png',
            'pull':'down_16.png',
            'started_following_repo':'heart_add.png',
            'stopped_following_repo':'heart_delete.png',

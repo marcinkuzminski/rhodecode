@@ -374,7 +374,22 @@ class ReposController(BaseController):
             h.flash(_('Token mismatch'), category='error')
         return redirect(url('edit_repo', repo_name=repo_name))
 
+    @HasPermissionAllDecorator('hg.admin')
+    def repo_pull(self, repo_name):
+        """
+        Runs task to update given repository with remote changes,
+        ie. make pull on remote location
+        
+        :param repo_name:
+        """
+        try:
+            ScmModel().pull_changes(repo_name, c.rhodecode_user.username)
+            h.flash(_('Pulled from remote location'), category='success')
+        except Exception, e:
+            h.flash(_('An error occurred during pull from remote location'),
+                    category='error')
 
+        return redirect(url('edit_repo', repo_name=repo_name))
 
     @HasPermissionAllDecorator('hg.admin')
     def show(self, repo_name, format='html'):

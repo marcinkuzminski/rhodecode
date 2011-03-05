@@ -89,6 +89,10 @@ def make_map(config):
         m.connect('repo_public_journal', "/repos_public_journal/{repo_name:.*}",
              action="repo_public_journal", conditions=dict(method=["PUT"],
                                                         function=check_repo))
+        m.connect('repo_pull', "/repo_pull/{repo_name:.*}",
+             action="repo_pull", conditions=dict(method=["PUT"],
+                                                        function=check_repo))
+
 
     #ADMIN USER REST ROUTES
     routes_map.resource('user', 'users', controller='admin/users', path_prefix='/_admin')

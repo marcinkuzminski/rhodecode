@@ -1964,6 +1964,14 @@ padding-top:1px;
 text-align:left;
 }
 
+.pull_icon {
+background:url("../images/icons/connect.png") no-repeat scroll 3px;
+height:16px;
+padding-left:20px;
+padding-top:1px;
+text-align:left;
+}
+
 .rss_icon {
 background:url("../images/icons/rss_16.png") no-repeat scroll 3px;
 height:16px;

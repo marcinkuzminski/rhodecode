@@ -232,8 +232,6 @@ class ScmModel(BaseModel):
 
         return r, dbr
 
-
-
     def mark_for_invalidation(self, repo_name):
         """Puts cache invalidation task into db for 
         further global cache invalidation
@@ -358,6 +356,25 @@ class ScmModel(BaseModel):
                 .filter(Repository.fork \
                         == RepoModel().get_by_repo_name(repo_id)).count()
 
+
+    def pull_changes(self, repo_name, username):
+        repo, dbrepo = self.get(repo_name, retval='all')
+
+        try:
+            extras = {'ip':'',
+                      'username':username,
+                      'action':'push_remote',
+                      'repository':repo_name}
+
+            #inject ui extra param to log this action via push logger        
+            for k, v in extras.items():
+                repo._repo.ui.setconfig('rhodecode_extras', k, v)
+
+            repo.pull(dbrepo.clone_uri)
+            self.mark_for_invalidation(repo_name)
+        except:
+            log.error(traceback.format_exc())
+            raise
 
     def get_unread_journal(self):
         return self.sa.query(UserLog).count()
