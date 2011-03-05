@@ -26,18 +26,22 @@
     <!-- end box / title -->
     ${h.form(url('user', id=c.user.user_id),method='put')}
     <div class="form">
-        <!-- fields -->
+        <div class="field">
+           <div class="gravatar_box">
+               <div class="gravatar"><img alt="gravatar" src="${h.gravatar_url(c.user.email)}"/></div>
+               <p>
+               <strong>Change your avatar at <a href="http://gravatar.com">gravatar.com</a></strong><br/> 
+               ${_('Using')} ${c.user.email}
+               </p>
+           </div>
+        </div>
+        <div class="field">
+            <div class="label">
+                <label>${_('API key')}</label> ${c.user.api_key}
+            </div>
+        </div>
+                 
         <div class="fields">
-             <div class="field">
-                <div class="gravatar_box">
-              		<div class="gravatar"><img alt="gravatar" src="${h.gravatar_url(c.user.email)}"/></div>
-              		<p>
-              		<strong>Change your avatar at <a href="http://gravatar.com">gravatar.com</a></strong><br/> 
-              		${_('Using')} ${c.user.email}
-              		</p>
-            	</div>
-             </div>        
-        
              <div class="field">
                 <div class="label">
                     <label for="username">${_('Username')}:</label>
@@ -52,7 +56,7 @@
                     <label for="ldap_dn">${_('LDAP DN')}:</label>
                 </div>
                 <div class="input">
-                    ${h.text('ldap_dn',class_='small')}
+                    ${h.text('ldap_dn',class_='medium')}
                 </div>
              </div>
             
@@ -122,122 +126,24 @@
     <div class="title">
         <h5>${_('Permissions')}</h5>       
     </div>
-	<form id="map_form" method="post" action="{%url update_permissions %}">
-	<div class="form">
-	  <div class="fields">
-	  
-	  
-	  
-		<table> 
-		        <tr>
-		            <td class="label">${_('Permissions')}:</td>
-		            <td>
-		                <div>
-		                    <div style="float:left">
-		                    <div class="text">${_('Granted permissions')}</div>
-		                        ${h.select('granted_permissions',[],c.granted_permissions,multiple=True,size=8,style="min-width:210px")}
-		                    </div>
-		                    <div style="float:left;width:20px;padding-top:50px">
-		                        <img alt="add" id="add_element" 
-		                            style="padding:2px;cursor:pointer" 
-		                            src="${h.url("/images/icons/arrow_left.png")}">
-		                        <br />
-		                        <img alt="remove" id="remove_element" 
-		                            style="padding:2px;cursor:pointer" 
-		                            src="${h.url("/images/icons/arrow_right.png")}">
-		                    </div>
-		                    <div style="float:left">
-		                        <div class="text">${_('Available permissions')}</div>
-		                         ${h.select('available_permissions',[],c.available_permissions,multiple=True,size=8,style="min-width:210px")}
-		                    </div>
-		                </div>
-		            </td>           
-		        </tr>       
-
-		</table>
-        <div class="buttons">
-         ${h.submit('Save','Save',class_="ui-button")}    
-        </div>
-	  </div>
-	</div>
-	</form>
-    
-    
-<script type="text/javascript">
-    YAHOO.util.Event.onDOMReady(function(){
-     
-            var D = YAHOO.util.Dom;
-            var E = YAHOO.util.Event;
-        
-            //temp container for storage.
-            var cache = new Array();
-            var c =  D.get('id_granted_permissions');
-            
-            //get only selected options for further fullfilment
-            for(var i = 0;node =c.options[i];i++){
-                if(node.selected){
-                    //push selected to my temp storage left overs :)
-                    cache.push(node);
-                }   
-            }
-            
-            //clear select
-            c.options.length = 0;
-
-            //fill it with remembered options
-            for(var i = 0;node = cache[i];i++){
-                c.options[i]=new Option(node.text, node.value, false, false);
-            }
-            
-            function target_callback(e){
-                window.location='/admin/t4?g='+e.target.value;
-            }
-
-            function prompts_action_callback(e){
-                
-                var choosen = D.get('id_granted_permissions');  
-                var availible = D.get('id_available_permissions');
-        
-                if (this.id=='add_element'){
-                    for(var i=0; node = availible.options[i];i++){
-                        if(node.selected){
-                            choosen.appendChild(new Option(node.text, node.value, false, false));
-                        }
-                    }
-                }
-                else if (this.id=='remove_element'){
-
-                    //temp container for storage.
-                    cache = new Array();
-                    
-                    for(var i = 0;node = choosen.options[i];i++){
-                        if(!node.selected){
-                            //push left overs :)
-                            cache.push(node);
-                        }   
-                    }
-                    //clear select
-                    choosen.options.length = 0;
-                    for(var i = 0;node = cache[i];i++){
-                        choosen.options[i]=new Option(node.text, node.value, false, false);
-                    }               
-                }                   
-                else{
-                    
-                }
-            }
-            
-            E.addListener('id_groups','change',target_callback);
-    
-            E.addListener(['add_element','remove_element'],'click',prompts_action_callback)
-
-            E.addListener('map_form','submit',function(){
-                var choosen = D.get('id_granted_permissions');
-                for (var i = 0; i < choosen.options.length; i++) {
-                    choosen.options[i].selected = 'selected';
-                }
-            })  
-        });
-</script>    
+    ${h.form(url('user', id=c.user.user_id),method='put')}
+    <div class="form">
+        <!-- fields -->
+        <div class="fields">
+             <div class="field">
+                <div class="label label-checkbox">
+                    <label for="">${_('Create repositories')}:</label>
+                </div>
+                <div class="checkboxes">
+                    ${h.checkbox('create',value=True)}
+                </div>
+             </div>
+            <div class="buttons">
+              ${h.submit('save','Save',class_="ui-button")}
+              ${h.reset('reset','Reset',class_="ui-button")}
+            </div>             
+        </div>    
+    </div>
+    ${h.end_form()}    
 </div>
 </%def>

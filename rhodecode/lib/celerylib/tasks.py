@@ -245,6 +245,7 @@ def reset_user_password(user_email):
                              auth.PasswordGenerator.ALPHABETS_BIG_SMALL)
             if user:
                 user.password = auth.get_crypt_password(new_passwd)
+                user.api_key = auth.generate_api_key(user.username)
                 sa.add(user)
                 sa.commit()
                 log.info('change password for %s', user_email)

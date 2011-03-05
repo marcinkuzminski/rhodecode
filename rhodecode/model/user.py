@@ -37,6 +37,7 @@ from rhodecode.model.db import User
 from rhodecode.lib.exceptions import DefaultUserException, UserOwnsReposException
 
 from sqlalchemy.exc import DatabaseError
+from rhodecode.lib import generate_api_key
 
 log = logging.getLogger(__name__)
 
@@ -68,6 +69,7 @@ class UserModel(BaseModel):
             for k, v in form_data.items():
                 setattr(new_user, k, v)
 
+            new_user.api_key = generate_api_key(form_data['username'])
             self.sa.add(new_user)
             self.sa.commit()
         except:
@@ -91,6 +93,7 @@ class UserModel(BaseModel):
                 new_user = User()
                 new_user.username = username.lower() # add ldap account always lowercase
                 new_user.password = get_crypt_password(password)
+                new_user.api_key = generate_api_key(username)
                 new_user.email = attrs['email']
                 new_user.active = True
                 new_user.ldap_dn = user_dn
@@ -134,19 +137,20 @@ class UserModel(BaseModel):
 
     def update(self, user_id, form_data):
         try:
-            new_user = self.get(user_id, cache=False)
-            if new_user.username == 'default':
+            user = self.get(user_id, cache=False)
+            if user.username == 'default':
                 raise DefaultUserException(
                                 _("You can't Edit this user since it's"
                                   " crucial for entire application"))
 
             for k, v in form_data.items():
                 if k == 'new_password' and v != '':
-                    new_user.password = v
+                    user.password = v
+                    user.api_key = generate_api_key(user.username)
                 else:
-                    setattr(new_user, k, v)
+                    setattr(user, k, v)
 
-            self.sa.add(new_user)
+            self.sa.add(user)
             self.sa.commit()
         except:
             log.error(traceback.format_exc())
@@ -155,19 +159,20 @@ class UserModel(BaseModel):
 
     def update_my_account(self, user_id, form_data):
         try:
-            new_user = self.get(user_id, cache=False)
-            if new_user.username == 'default':
+            user = self.get(user_id, cache=False)
+            if user.username == 'default':
                 raise DefaultUserException(
                                 _("You can't Edit this user since it's"
                                   " crucial for entire application"))
             for k, v in form_data.items():
                 if k == 'new_password' and v != '':
-                    new_user.password = v
+                    user.password = v
+                    user.api_key = generate_api_key(user.username)
                 else:
                     if k not in ['admin', 'active']:
-                        setattr(new_user, k, v)
+                        setattr(user, k, v)
 
-            self.sa.add(new_user)
+            self.sa.add(user)
             self.sa.commit()
         except:
             log.error(traceback.format_exc())

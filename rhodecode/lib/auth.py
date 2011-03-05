@@ -28,7 +28,8 @@ import bcrypt
 import random
 import logging
 import traceback
-
+import hashlib
+from tempfile import _RandomNameSequence
 from decorator import decorator
 
 from pylons import config, session, url, request
@@ -86,6 +87,12 @@ def get_crypt_password(password):
     :param password: password to hash
     """
     return bcrypt.hashpw(password, bcrypt.gensalt(10))
+
+def generate_api_key(username, salt=None):
+    if salt is None:
+        salt = _RandomNameSequence().next()
+
+    return hashlib.sha1(username + salt).hexdigest()
 
 def check_password(password, hashed):
     return bcrypt.hashpw(password, hashed) == hashed

@@ -27,3 +27,12 @@
 
 def str2bool(v):
     return v.lower() in ["yes", "true", "t", "1"] if v else None
+
+def generate_api_key(username, salt=None):
+    from tempfile import _RandomNameSequence
+    import hashlib
+
+    if salt is None:
+        salt = _RandomNameSequence().next()
+
+    return hashlib.sha1(username + salt).hexdigest()

@@ -35,7 +35,7 @@ from os.path import dirname as dn, join as jn
 from rhodecode import __dbversion__
 from rhodecode.model import meta
 
-from rhodecode.lib.auth import get_crypt_password
+from rhodecode.lib.auth import get_crypt_password, generate_api_key
 from rhodecode.lib.utils import ask_ok
 from rhodecode.model import init_model
 from rhodecode.model.db import User, Permission, RhodeCodeUi, RhodeCodeSettings, \
@@ -442,6 +442,7 @@ class DbManage(object):
         new_user = User()
         new_user.username = username
         new_user.password = get_crypt_password(password)
+        new_user.api_key = generate_api_key(username)
         new_user.name = 'RhodeCode'
         new_user.lastname = 'Admin'
         new_user.email = email
@@ -461,6 +462,7 @@ class DbManage(object):
         def_user = User()
         def_user.username = 'default'
         def_user.password = get_crypt_password(str(uuid.uuid1())[:8])
+        def_user.api_key = generate_api_key('default')
         def_user.name = 'Anonymous'
         def_user.lastname = 'User'
         def_user.email = 'anonymous@rhodecode.org'
@@ -484,8 +486,8 @@ class DbManage(object):
                  ('hg.create.repository', 'Repository create'),
                  ('hg.create.none', 'Repository creation disabled'),
                  ('hg.register.none', 'Register disabled'),
-                 ('hg.register.manual_activate', 'Register new user with rhodecode without manual activation'),
-                 ('hg.register.auto_activate', 'Register new user with rhodecode without auto activation'),
+                 ('hg.register.manual_activate', 'Register new user with RhodeCode without manual activation'),
+                 ('hg.register.auto_activate', 'Register new user with RhodeCode without auto activation'),
                 ]
 
         for p in perms:

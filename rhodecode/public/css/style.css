@@ -858,7 +858,7 @@ padding:0 0 8px;
 padding:0 0 8px !important;
 }
 
-#content div.box div.form div.fields div.field div.label label {
+#content div.box div.form div.fields div.field div.label label, div.label label{
 color:#393939;
 font-weight:700;
 }
