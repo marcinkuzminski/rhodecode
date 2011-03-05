@@ -234,7 +234,8 @@ class RepoModel(BaseModel):
             self.sa.add(repo_to_perm)
 
             if not just_db:
-                self.__create_repo(repo_name, form_data['repo_type'])
+                self.__create_repo(repo_name, form_data['repo_type'],
+                                   form_data['clone_uri'])
 
             self.sa.commit()
 
@@ -299,7 +300,7 @@ class RepoModel(BaseModel):
             raise
 
 
-    def __create_repo(self, repo_name, alias):
+    def __create_repo(self, repo_name, alias, clone_uri=False):
         """
         makes repository on filesystem
         :param repo_name:
@@ -308,9 +309,10 @@ class RepoModel(BaseModel):
         from rhodecode.lib.utils import check_repo
         repo_path = os.path.join(self.repos_path, repo_name)
         if check_repo(repo_name, self.repos_path):
-            log.info('creating repo %s in %s', repo_name, repo_path)
+            log.info('creating repo %s in %s @ %s', repo_name, repo_path,
+                    clone_uri)
             backend = get_backend(alias)
-            backend(repo_path, create=True)
+            backend(repo_path, create=True, src_url=clone_uri)
 
     def __rename_repo(self, old, new):
         """

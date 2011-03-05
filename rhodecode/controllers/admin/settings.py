@@ -42,7 +42,7 @@ from rhodecode.lib.base import BaseController, render
 from rhodecode.lib.celerylib import tasks, run_task
 from rhodecode.lib.utils import repo2db_mapper, invalidate_cache, \
     set_rhodecode_config, repo_name_slug
-from rhodecode.model.db import RhodeCodeUi, Repository
+from rhodecode.model.db import RhodeCodeUi, Repository, Group
 from rhodecode.model.forms import UserForm, ApplicationSettingsForm, \
     ApplicationUiSettingsForm
 from rhodecode.model.scm import ScmModel
@@ -321,7 +321,8 @@ class SettingsController(BaseController):
         """GET /_admin/create_repository: Form to create a new item"""
         new_repo = request.GET.get('repo', '')
         c.new_repo = repo_name_slug(new_repo)
-
+        c.repo_groups = [('', '')]
+        c.repo_groups.extend([(x.group_id, x.group_name) for x in self.sa.query(Group).all()])
         return render('admin/repos/repo_add_create_repository.html')
 
     def get_hg_ui_settings(self):

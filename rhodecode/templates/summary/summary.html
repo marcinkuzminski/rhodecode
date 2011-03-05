@@ -65,7 +65,17 @@
 		            	${_('Fork of')} ${c.dbrepo.fork.repo_name}
 		            	</a>
 		            	</span>
-		            %endif			      
+		            %endif
+					%if c.dbrepo.clone_uri:
+                        <span style="margin-top:5px">
+                        <a href="${h.url(str(c.dbrepo.clone_uri))}">
+                        <img class="icon" alt="${_('remote clone')}"
+                        title="${_('Clone from')} ${c.dbrepo.clone_uri}" 
+                        src="${h.url("/images/icons/connect.png")}"/>
+                        ${_('Clone from')} ${c.dbrepo.clone_uri}
+                        </a>
+                        </span>					
+					%endif		            		      
 			  </div>
 			 </div>
 			

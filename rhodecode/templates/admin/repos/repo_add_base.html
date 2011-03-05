@@ -14,12 +14,21 @@ ${h.form(url('repos'))}
          </div>
         <div class="field">
             <div class="label">
-                <label for="repo_name">${_('Clone from')}:</label>
+                <label for="clone_uri">${_('Clone from')}:</label>
             </div>
             <div class="input">
-                ${h.text('clone_uri',c.new_repo,class_="small")}
+                ${h.text('clone_uri',class_="small")}
             </div>
          </div>             
+         <div class="field">
+             <div class="label">
+                 <label for="repo_group">${_('Repository group')}:</label>
+             </div>
+             <div class="input">
+                 ${h.select('repo_group','',c.repo_groups,class_="medium")}
+             <span>${h.link_to(_('add new group'),h.url(''))}</span>
+             </div>
+         </div>         
         <div class="field">
             <div class="label">
                 <label for="repo_type">${_('Type')}:</label>

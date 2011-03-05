@@ -42,11 +42,10 @@ from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator, \
 from rhodecode.lib.base import BaseController, render
 from rhodecode.lib.utils import invalidate_cache, action_logger, repo_name_slug
 from rhodecode.lib.helpers import get_token
-from rhodecode.model.db import User, Repository, UserFollowing
+from rhodecode.model.db import User, Repository, UserFollowing, Group
 from rhodecode.model.forms import RepoForm
 from rhodecode.model.scm import ScmModel
 from rhodecode.model.repo import RepoModel
-
 
 log = logging.getLogger(__name__)
 
@@ -64,6 +63,82 @@ class ReposController(BaseController):
         c.admin_username = session.get('admin_username')
         super(ReposController, self).__before__()
 
+
+
+    def __load_data(self, repo_name):
+        """
+        Load defaults settings for edit, and update
+        
+        :param repo_name:
+        """
+        repo, dbrepo = ScmModel().get(repo_name, retval='repo')
+
+        repo_model = RepoModel()
+        c.repo_info = repo_model.get_by_repo_name(repo_name)
+
+        if c.repo_info is None:
+            h.flash(_('%s repository is not mapped to db perhaps'
+                      ' it was created or renamed from the filesystem'
+                      ' please run the application again'
+                      ' in order to rescan repositories') % repo_name,
+                      category='error')
+
+            return redirect(url('repos'))
+
+
+
+        c.repo_groups = [('', '')]
+        c.repo_groups.extend([(x.group_id, x.group_name) for x in self.sa.query(Group).all()])
+
+        c.default_user_id = User.by_username('default').user_id
+        c.in_public_journal = self.sa.query(UserFollowing)\
+            .filter(UserFollowing.user_id == c.default_user_id)\
+            .filter(UserFollowing.follows_repository == c.repo_info).scalar()
+
+        if c.repo_info.stats:
+            last_rev = c.repo_info.stats.stat_on_revision
+        else:
+            last_rev = 0
+        c.stats_revision = last_rev
+
+        c.repo_last_rev = repo.count() - 1 if repo.revisions else 0
+
+        if last_rev == 0 or c.repo_last_rev == 0:
+            c.stats_percentage = 0
+        else:
+            c.stats_percentage = '%.2f' % ((float((last_rev)) /
+                                            c.repo_last_rev) * 100)
+
+        c.users_array = repo_model.get_users_js()
+        c.users_groups_array = repo_model.get_users_groups_js()
+
+        defaults = c.repo_info.get_dict()
+        group, repo_name = c.repo_info.groups_and_repo
+        defaults['repo_name'] = repo_name
+        defaults['repo_group'] = getattr(group, 'group_id', None)
+        #fill owner
+        if c.repo_info.user:
+            defaults.update({'user':c.repo_info.user.username})
+        else:
+            replacement_user = self.sa.query(User)\
+            .filter(User.admin == True).first().username
+            defaults.update({'user':replacement_user})
+
+
+        #fill repository users
+        for p in c.repo_info.repo_to_perm:
+            defaults.update({'u_perm_%s' % p.user.username:
+                             p.permission.permission_name})
+
+        #fill repository groups
+        for p in c.repo_info.users_group_to_perm:
+            defaults.update({'g_perm_%s' % p.users_group.users_group_name:
+                             p.permission.permission_name})
+
+
+        return defaults
+
+
     @HasPermissionAllDecorator('hg.admin')
     def index(self, format='html'):
         """GET /repos: All items in the collection"""
@@ -78,12 +153,18 @@ class ReposController(BaseController):
         POST /repos: Create a new item"""
         # url('repos')
         repo_model = RepoModel()
-        _form = RepoForm()()
+        c.repo_groups = [('', '')]
+        c.repo_groups.extend([(x.group_id, x.group_name) for x in self.sa.query(Group).all()])
         form_result = {}
         try:
-            form_result = _form.to_python(dict(request.POST))
+            form_result = RepoForm()(repo_groups=c.repo_groups).to_python(dict(request.POST))
             repo_model.create(form_result, c.rhodecode_user)
-            h.flash(_('created repository %s') % form_result['repo_name'],
+            if form_result['clone_uri']:
+                h.flash(_('created repository %s from %s') \
+                    % (form_result['repo_name'], form_result['clone_uri']),
+                    category='success')
+            else:
+                h.flash(_('created repository %s') % form_result['repo_name'],
                     category='success')
 
             if request.POST.get('user_created'):
@@ -94,7 +175,10 @@ class ReposController(BaseController):
                               form_result['repo_name'], '', self.sa)
 
         except formencode.Invalid, errors:
+
             c.new_repo = errors.value['repo_name']
+            c.repo_groups = [('', '')]
+            c.repo_groups.extend([(x.group_id, x.group_name) for x in self.sa.query(Group).all()])
 
             if request.POST.get('user_created'):
                 r = render('admin/repos/repo_add_create_repository.html')
@@ -122,7 +206,8 @@ class ReposController(BaseController):
         """GET /repos/new: Form to create a new item"""
         new_repo = request.GET.get('repo', '')
         c.new_repo = repo_name_slug(new_repo)
-
+        c.repo_groups = [('', '')]
+        c.repo_groups.extend([(x.group_id, x.group_name) for x in self.sa.query(Group).all()])
         return render('admin/repos/repo_add.html')
 
     @HasPermissionAllDecorator('hg.admin')
@@ -138,7 +223,6 @@ class ReposController(BaseController):
         repo_model = RepoModel()
         changed_name = repo_name
         _form = RepoForm(edit=True, old_data={'repo_name':repo_name})()
-
         try:
             form_result = _form.to_python(dict(request.POST))
             repo_model.update(repo_name, form_result)
@@ -150,34 +234,11 @@ class ReposController(BaseController):
                               changed_name, '', self.sa)
 
         except formencode.Invalid, errors:
-            c.repo_info = repo_model.get_by_repo_name(repo_name)
-
-            if c.repo_info.stats:
-                last_rev = c.repo_info.stats.stat_on_revision
-            else:
-                last_rev = 0
-            c.stats_revision = last_rev
-            repo, dbrepo = ScmModel().get(repo_name, retval='repo')
-            c.repo_last_rev = repo.count() - 1 if repo.revisions else 0
-
-            c.default_user_id = User.by_username('default').user_id
-            c.in_public_journal = self.sa.query(UserFollowing)\
-                .filter(UserFollowing.user_id == c.default_user_id)\
-                .filter(UserFollowing.follows_repository == c.repo_info).scalar()
-
-            if last_rev == 0:
-                c.stats_percentage = 0
-            else:
-                c.stats_percentage = '%.2f' % ((float((last_rev)) /
-                                                c.repo_last_rev) * 100)
-
-            c.users_array = repo_model.get_users_js()
-            c.users_groups_array = repo_model.get_users_groups_js()
-
-            errors.value.update({'user':c.repo_info.user.username})
+            defaults = self.__load_data(repo_name)
+            defaults.update(errors.value)
             return htmlfill.render(
                 render('admin/repos/repo_edit.html'),
-                defaults=errors.value,
+                defaults=defaults,
                 errors=errors.error_dict or {},
                 prefix_error=False,
                 encoding="UTF-8")
@@ -186,7 +247,6 @@ class ReposController(BaseController):
             log.error(traceback.format_exc())
             h.flash(_('error occurred during update of repository %s') \
                     % repo_name, category='error')
-
         return redirect(url('edit_repo', repo_name=changed_name))
 
     @HasPermissionAllDecorator('hg.admin')
@@ -325,62 +385,7 @@ class ReposController(BaseController):
     def edit(self, repo_name, format='html'):
         """GET /repos/repo_name/edit: Form to edit an existing item"""
         # url('edit_repo', repo_name=ID)
-        repo, dbrepo = ScmModel().get(repo_name, retval='repo')
-
-        repo_model = RepoModel()
-        c.repo_info = repo_model.get_by_repo_name(repo_name)
-
-        if c.repo_info is None:
-            h.flash(_('%s repository is not mapped to db perhaps'
-                      ' it was created or renamed from the filesystem'
-                      ' please run the application again'
-                      ' in order to rescan repositories') % repo_name,
-                      category='error')
-
-            return redirect(url('repos'))
-
-        c.default_user_id = User.by_username('default').user_id
-        c.in_public_journal = self.sa.query(UserFollowing)\
-            .filter(UserFollowing.user_id == c.default_user_id)\
-            .filter(UserFollowing.follows_repository == c.repo_info).scalar()
-
-        if c.repo_info.stats:
-            last_rev = c.repo_info.stats.stat_on_revision
-        else:
-            last_rev = 0
-        c.stats_revision = last_rev
-
-        c.repo_last_rev = repo.count() - 1 if repo.revisions else 0
-
-        if last_rev == 0 or c.repo_last_rev == 0:
-            c.stats_percentage = 0
-        else:
-            c.stats_percentage = '%.2f' % ((float((last_rev)) /
-                                            c.repo_last_rev) * 100)
-
-        c.users_array = repo_model.get_users_js()
-        c.users_groups_array = repo_model.get_users_groups_js()
-
-        defaults = c.repo_info.get_dict()
-
-        #fill owner
-        if c.repo_info.user:
-            defaults.update({'user':c.repo_info.user.username})
-        else:
-            replacement_user = self.sa.query(User)\
-            .filter(User.admin == True).first().username
-            defaults.update({'user':replacement_user})
-
-
-        #fill repository users
-        for p in c.repo_info.repo_to_perm:
-            defaults.update({'u_perm_%s' % p.user.username:
-                             p.permission.permission_name})
-
-        #fill repository groups
-        for p in c.repo_info.users_group_to_perm:
-            defaults.update({'g_perm_%s' % p.users_group.users_group_name:
-                             p.permission.permission_name})
+        defaults = self.__load_data(repo_name)
 
         return htmlfill.render(
             render('admin/repos/repo_edit.html'),

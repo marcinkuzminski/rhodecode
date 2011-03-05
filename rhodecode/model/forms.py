@@ -450,17 +450,21 @@ def PasswordResetForm():
         email = All(ValidSystemEmail(), Email(not_empty=True))
     return _PasswordResetForm
 
-def RepoForm(edit=False, old_data={}, supported_backends=BACKENDS.keys()):
+def RepoForm(edit=False, old_data={}, supported_backends=BACKENDS.keys(),
+             repo_groups=[]):
     class _RepoForm(formencode.Schema):
         allow_extra_fields = True
         filter_extra_fields = False
         repo_name = All(UnicodeString(strip=True, min=1, not_empty=True),
                         ValidRepoName(edit, old_data))
+        clone_uri = UnicodeString(strip=True, min=1, not_empty=False)
+        repo_group = OneOf(repo_groups)
+        repo_type = OneOf(supported_backends)
         description = UnicodeString(strip=True, min=1, not_empty=True)
         private = StringBoolean(if_missing=False)
         enable_statistics = StringBoolean(if_missing=False)
         enable_downloads = StringBoolean(if_missing=False)
-        repo_type = OneOf(supported_backends)
+
         if edit:
             #this is repo owner
             user = All(Int(not_empty=True), ValidRepoUser)
