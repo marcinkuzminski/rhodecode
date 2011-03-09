@@ -216,7 +216,8 @@ class RepoModel(BaseModel):
             #create default permission
             repo_to_perm = RepoToPerm()
             default = 'repository.read'
-            for p in UserModel(self.sa).get_by_username('default', cache=False).user_perms:
+            for p in UserModel(self.sa).get_by_username('default',
+                                                    cache=False).user_perms:
                 if p.permission.permission_name.startswith('repository.'):
                     default = p.permission.permission_name
                     break
@@ -303,6 +304,7 @@ class RepoModel(BaseModel):
     def __create_repo(self, repo_name, alias, clone_uri=False):
         """
         makes repository on filesystem
+        
         :param repo_name:
         :param alias:
         """
@@ -317,6 +319,7 @@ class RepoModel(BaseModel):
     def __rename_repo(self, old, new):
         """
         renames repository on filesystem
+        
         :param old: old name
         :param new: new name
         """
@@ -335,6 +338,7 @@ class RepoModel(BaseModel):
         added rm__ prefix into dir, and rename internat .hg/.git dirs so this
         repository is no longer valid for rhodecode, can be undeleted later on
         by reverting the renames on this repository
+        
         :param repo: repo object
         """
         rm_path = os.path.join(self.repos_path, repo.repo_name)
@@ -345,5 +349,6 @@ class RepoModel(BaseModel):
                     os.path.join(rm_path, 'rm__.%s' % alias))
         #disable repo
         shutil.move(rm_path, os.path.join(self.repos_path, 'rm__%s__%s' \
-                                          % (datetime.today().isoformat(),
-                                             repo.repo_name)))
+                                          % (datetime.today()\
+                                             .strftime('%Y%m%d_%H%M%S_%f'),
+                                            repo.repo_name)))
