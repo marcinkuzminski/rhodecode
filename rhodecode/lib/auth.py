@@ -24,17 +24,25 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
 
-import bcrypt
 import random
 import logging
 import traceback
 import hashlib
+
 from tempfile import _RandomNameSequence
 from decorator import decorator
 
 from pylons import config, session, url, request
 from pylons.controllers.util import abort, redirect
 from pylons.i18n.translation import _
+
+from rhodecode import __platform__
+
+if __platform__ == 'Windows':
+    from hashlib import sha256
+if __platform__ in ('Linux', 'Darwin'):
+    import bcrypt
+
 
 from rhodecode.lib.exceptions import LdapPasswordError, LdapUsernameError
 from rhodecode.lib.utils import get_repo_slug
@@ -72,22 +80,55 @@ class PasswordGenerator(object):
         self.passwd = ''.join([random.choice(type) for _ in xrange(len)])
         return self.passwd
 
+class RhodeCodeCrypto(object):
+
+    @classmethod
+    def hash_string(cls, str_):
+        """
+        Cryptographic function used for password hashing based on pybcrypt
+        or pycrypto in windows
+        
+        :param password: password to hash
+        """
+        if __platform__ == 'Windows':
+            return sha256(str_).hexdigest()
+        elif __platform__ in ('Linux', 'Darwin'):
+            return bcrypt.hashpw(str_, bcrypt.gensalt(10))
+        else:
+            raise Exception('Unknown or unsupoprted platform %s' % __platform__)
+
+    @classmethod
+    def hash_check(cls, password, hashed):
+        """
+        Checks matching password with it's hashed value, runs different
+        implementation based on platform it runs on
+        
+        :param password: password
+        :param hashed: password in hashed form
+        """
+
+        if __platform__ == 'Windows':
+            return sha256(password).hexdigest() == hashed
+        elif __platform__ in ('Linux', 'Darwin'):
+            return bcrypt.hashpw(password, hashed) == hashed
+        else:
+            raise Exception('Unknown or unsupoprted platform %s' % __platform__)
+
+
+
+
 
 def get_crypt_password(password):
-    """Cryptographic function used for password hashing based on pybcrypt
-    
-    :param password: password to hash
-    """
-    return bcrypt.hashpw(password, bcrypt.gensalt(10))
+    return RhodeCodeCrypto.hash_string(password)
+
+def check_password(password, hashed):
+    return RhodeCodeCrypto.hash_check(password, hashed)
 
 def generate_api_key(username, salt=None):
     if salt is None:
         salt = _RandomNameSequence().next()
 
     return hashlib.sha1(username + salt).hexdigest()
-
-def check_password(password, hashed):
-    return bcrypt.hashpw(password, hashed) == hashed
 
 def authfunc(environ, username, password):
     """Dummy authentication function used in Mercurial/Git/ and access control,

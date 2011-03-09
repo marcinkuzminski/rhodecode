@@ -1,5 +1,6 @@
 import sys
 from rhodecode import get_version
+from rhodecode import __platform__
 
 py_version = sys.version_info
 
@@ -13,7 +14,6 @@ requirements = [
         "mercurial>=1.7.5",
         "whoosh>=1.3.4",
         "celery>=2.2.4",
-        "py-bcrypt",
         "babel",
     ]
 
@@ -28,6 +28,10 @@ classifiers = ['Development Status :: 4 - Beta',
 if py_version < (2, 6):
     requirements.append("simplejson")
     requirements.append("pysqlite")
+
+if __platform__ in ('Linux', 'Darwin'):
+    requirements.append("py-bcrypt")
+
 
 #additional files from project that goes somewhere in the filesystem
 #relative to sys.prefix

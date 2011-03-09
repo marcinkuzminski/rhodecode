@@ -25,11 +25,12 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
-
+import platform
 
 VERSION = (1, 2, 0, 'beta')
 __version__ = '.'.join((str(each) for each in VERSION[:4]))
 __dbversion__ = 3 #defines current db version for migrations
+__platform__ = platform.system()
 
 try:
     from rhodecode.lib.utils import get_current_revision
@@ -48,5 +49,5 @@ def get_version():
 
 BACKENDS = {
     'hg': 'Mercurial repository',
-   #'git': 'Git repository',
+    #'git': 'Git repository',
 }
