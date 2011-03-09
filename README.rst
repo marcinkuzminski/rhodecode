@@ -8,7 +8,7 @@ browser/management tool with a built in push/pull server and full text search.
 It works on http/https and has a built in permission/authentication system with 
 the ability to authenticate via LDAP.
 
-RhodeCode is similar in some respects to github or bitbucket, 
+RhodeCode is similar in some respects to github or bitbucket_, 
 however RhodeCode can be run as standalone hosted application on your own server.  
 It is open source and donation ware and focuses more on providing a customized, 
 self administered interface for Mercurial(and soon GIT) repositories. 
@@ -57,7 +57,7 @@ RhodeCode Features
   combined changeset for all changeset made within single push.
 - Mako templates let's you customize the look and feel of the application.
 - Beautiful diffs, annotations and source code browsing all colored by pygments. Raw
-  diffs are made in git-diff format, including git binary-patches
+  diffs are made in git-diff format, including git_ binary-patches
 - Mercurial_ branch graph and yui-flot powered graphs with zooming and statistics
 - Admin interface with user/permission management. Admin activity journal, logs
   pulls, pushes, forks, registrations and other actions made by all users.
@@ -127,6 +127,7 @@ have sphinx installed you can install it via the command: ``easy_install sphinx`
 .. _python: http://www.python.org/
 .. _django: http://www.djangoproject.com/
 .. _mercurial: http://mercurial.selenic.com/
+.. _bitbucket: http://bitbucket.org/
 .. _subversion: http://subversion.tigris.org/
 .. _git: http://git-scm.com/
 .. _celery: http://celeryproject.org/

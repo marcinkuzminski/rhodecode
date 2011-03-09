@@ -10,7 +10,7 @@ Setting up RhodeCode
 First, you will need to create a RhodeCode configuration file. Run the following
 command to do this::
  
- paster make-config RhodeCode production.ini
+    paster make-config RhodeCode production.ini
 
 - This will create the file `production.ini` in the current directory. This
   configuration file contains the various settings for RhodeCode, e.g proxy port,
@@ -23,7 +23,7 @@ default ensure you properly adjust the db url in your production.ini
 configuration file to use this other database. Create the databases by running
 the following command::
 
- paster setup-app production.ini
+    paster setup-app production.ini
 
 This will prompt you for a "root" path. This "root" path is the location where
 RhodeCode will store all of its repositories on the current machine. After
@@ -43,7 +43,7 @@ for the initial admin account which ``setup-app`` sets up for you.
 
 You are now ready to use RhodeCode, to run it simply execute::
  
- paster serve production.ini
+    paster serve production.ini
  
 - This command runs the RhodeCode server. The web app should be available at the 
   127.0.0.1:5000. This ip and port is configurable via the production.ini 
@@ -60,7 +60,7 @@ repositories. Then choose Add New Repository. Add the repository you copied into
 the root. Test that you can browse your repository from within RhodeCode and then
 try cloning your repository from RhodeCode with::
 
-  hg clone http://127.0.0.1:5000/<repository name>
+    hg clone http://127.0.0.1:5000/<repository name>
 
 where *repository name* is replaced by the name of your repository.
 
@@ -128,7 +128,7 @@ In order to do periodical index builds and keep your index always up to date.
 It's recommended to do a crontab entry for incremental indexing. 
 An example entry might look like this::
  
- /path/to/python/bin/paster /path/to/rhodecode/production.ini --repo-location=<location for repos> 
+    /path/to/python/bin/paster /path/to/rhodecode/production.ini --repo-location=<location for repos> 
   
 When using incremental mode (the default) whoosh will check the last
 modification date of each file and add it to be reindexed if a newer file is
@@ -148,11 +148,11 @@ via pypi, so you can install it by running
 
 ::
 
- easy_install python-ldap
+    easy_install python-ldap
  
 ::
 
- pip install python-ldap
+    pip install python-ldap
 
 .. note::
    python-ldap requires some certain libs on your system, so before installing 

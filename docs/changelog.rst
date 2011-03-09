@@ -16,7 +16,6 @@ news
 - implemented #91 added nicer looking archive urls with more download options
   like tags, branches
 - implemented #44 into file browsing, and added follow branch option
-- implemented #102 allowing '.' in username
 - implemented #84 downloads can be enabled/disabled for each repository 
 - anonymous repository can be cloned without having to pass default:default
   into clone url
@@ -26,13 +25,16 @@ news
 - implemented #107 customizable code highlights on code sources
 - implemented #93 customizable changelog on combined revision ranges - 
   equivalent of githubs compare view 
-- implemented #108 extended and more powerfull LDAP configuration
+- implemented #108 extended and more powerful LDAP configuration
 - implemented #56 users groups
 - major code rewrites optimized codes for speed and memory usage
 - raw and diff downloads are now in git format
 - setup command checks for write access to given path
 - fixed many issues with international characters and unicode. It uses utf8
   decode with replace to provide less errors even with non utf8 encoded strings
+- #125 added API KEY access to feeds
+- #109 Repository can be created from external Mercurial link, and manually
+  updated (via pull) from admin panel
 
 fixes
 -----
@@ -46,6 +48,7 @@ fixes
 - journal fork fixes
 - removed issue with space inside renamed repository after deletion
 - fixed strange issue on formencode imports
+- fixed #126 Deleting repository on Windows, rename used incompatible chars. 
 
 1.1.4 (**2011-02-19**)
 ======================

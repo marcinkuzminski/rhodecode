@@ -10,7 +10,7 @@ cached inside db and are gathered incrementally, this is how RhodeCode does
 this:
 
 With Celery disabled
-++++++++++++++++++++
+--------------------
 
 - On each first visit to the summary page a set of 250 commits are parsed and
   updates statistics cache.
@@ -21,7 +21,7 @@ With Celery disabled
 
 
 With Celery enabled
-+++++++++++++++++++
+-------------------
 
 - On the first visit to the summary page RhodeCode will create tasks that will
   execute on celery workers. This task will gather all of the stats until all

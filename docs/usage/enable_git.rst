@@ -4,9 +4,10 @@ Enabling GIT support (beta)
 ===========================
 
 
-Git support in RhodeCode 1.1 was disabled due to current instability issues. However,
-if you would like to test git support please feel free to re-enable it. To re-enable GIT support just
-uncomment the git line in the file rhodecode/__init__.py
+Git support in RhodeCode 1.1 was disabled due to current instability issues. 
+However,if you would like to test git support please feel free to re-enable it. 
+To re-enable GIT support just uncomment the git line in the 
+file **rhodecode/__init__.py**
 
 .. code-block:: python
  
