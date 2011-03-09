@@ -36,8 +36,7 @@ from pylons.i18n.translation import _
 
 from rhodecode.lib.exceptions import DefaultUserException, UserOwnsReposException
 from rhodecode.lib import helpers as h
-from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator, \
-    fill_perms
+from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator
 from rhodecode.lib.base import BaseController, render
 
 from rhodecode.model.db import User
@@ -157,14 +156,15 @@ class UsersController(BaseController):
     def edit(self, id, format='html'):
         """GET /users/id/edit: Form to edit an existing item"""
         # url('edit_user', id=ID)
-        c.user = self.sa.query(User).get(id)
+        user_model = UserModel()
+        c.user = user_model.get(id)
         if not c.user:
             return redirect(url('users'))
         if c.user.username == 'default':
             h.flash(_("You can't edit this user"), category='warning')
             return redirect(url('users'))
         c.user.permissions = {}
-        c.granted_permissions = fill_perms(c.user).permissions['global']
+        c.granted_permissions = user_model.fill_perms(c.user).permissions['global']
 
         defaults = c.user.get_dict()
 

@@ -49,6 +49,7 @@ class JournalController(BaseController):
     @LoginRequired()
     def __before__(self):
         super(JournalController, self).__before__()
+        c.rhodecode_user = self.rhodecode_user
         self.title = _('%s public journal %s feed') % (c.rhodecode_name, '%s')
         self.language = 'en-us'
         self.ttl = "5"
@@ -60,7 +61,7 @@ class JournalController(BaseController):
         p = int(request.params.get('page', 1))
 
         c.following = self.sa.query(UserFollowing)\
-            .filter(UserFollowing.user_id == c.rhodecode_user.user_id)\
+            .filter(UserFollowing.user_id == self.rhodecode_user.user_id)\
             .options(joinedload(UserFollowing.follows_repository))\
             .all()
 
@@ -126,7 +127,7 @@ class JournalController(BaseController):
             if user_id:
                 try:
                     self.scm_model.toggle_following_user(user_id,
-                                                    c.rhodecode_user.user_id)
+                                                    self.rhodecode_user.user_id)
                     return 'ok'
                 except:
                     raise HTTPInternalServerError()
@@ -135,7 +136,7 @@ class JournalController(BaseController):
             if repo_id:
                 try:
                     self.scm_model.toggle_following_repo(repo_id,
-                                                    c.rhodecode_user.user_id)
+                                                    self.rhodecode_user.user_id)
                     return 'ok'
                 except:
                     raise HTTPInternalServerError()
@@ -152,7 +153,7 @@ class JournalController(BaseController):
         p = int(request.params.get('page', 1))
 
         c.following = self.sa.query(UserFollowing)\
-            .filter(UserFollowing.user_id == c.rhodecode_user.user_id)\
+            .filter(UserFollowing.user_id == self.rhodecode_user.user_id)\
             .options(joinedload(UserFollowing.follows_repository))\
             .all()
 
@@ -174,7 +175,7 @@ class JournalController(BaseController):
         Produce an atom-1.0 feed via feedgenerator module
         """
         c.following = self.sa.query(UserFollowing)\
-            .filter(UserFollowing.user_id == c.rhodecode_user.user_id)\
+            .filter(UserFollowing.user_id == self.rhodecode_user.user_id)\
             .options(joinedload(UserFollowing.follows_repository))\
             .all()
 
@@ -207,7 +208,7 @@ class JournalController(BaseController):
         Produce an rss2 feed via feedgenerator module
         """
         c.following = self.sa.query(UserFollowing)\
-            .filter(UserFollowing.user_id == c.rhodecode_user.user_id)\
+            .filter(UserFollowing.user_id == self.rhodecode_user.user_id)\
             .options(joinedload(UserFollowing.follows_repository))\
             .all()
 

@@ -36,8 +36,7 @@ from pylons.i18n.translation import _
 
 from rhodecode.lib.exceptions import DefaultUserException, UserOwnsReposException
 from rhodecode.lib import helpers as h
-from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator, \
-    fill_perms
+from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator
 from rhodecode.lib.base import BaseController, render
 
 from rhodecode.model.db import User, UsersGroup

@@ -6,7 +6,7 @@ from pylons import config, tmpl_context as c, request, session
 from pylons.controllers import WSGIController
 from pylons.templating import render_mako as render
 from rhodecode import __version__
-from rhodecode.lib import auth
+from rhodecode.lib.auth import AuthUser
 from rhodecode.lib.utils import get_repo_slug
 from rhodecode.model import meta
 from rhodecode.model.scm import ScmModel
@@ -34,7 +34,14 @@ class BaseController(WSGIController):
         # available in environ['pylons.routes_dict']
         try:
             #putting this here makes sure that we update permissions every time
-            self.rhodecode_user = c.rhodecode_user = auth.get_user(session)
+            api_key = request.GET.get('api_key')
+            user_id = getattr(session.get('rhodecode_user'), 'user_id', None)
+            self.rhodecode_user = c.rhodecode_user = AuthUser(user_id, api_key)
+            self.rhodecode_user.set_authenticated(
+                                        getattr(session.get('rhodecode_user'),
+                                       'is_authenticated', False))
+            session['rhodecode_user'] = self.rhodecode_user
+            session.save()
             return WSGIController.__call__(self, environ, start_response)
         finally:
             meta.Session.remove()

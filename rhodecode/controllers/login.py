@@ -62,19 +62,17 @@ class LoginController(BaseController):
             login_form = LoginForm()
             try:
                 c.form_result = login_form.to_python(dict(request.POST))
+                #form checks for username/password, now we're authenticated
                 username = c.form_result['username']
-                user = UserModel().get_by_username(username, case_insensitive=True)
-                auth_user = AuthUser()
-                auth_user.username = user.username
-                auth_user.is_authenticated = True
-                auth_user.is_admin = user.admin
-                auth_user.user_id = user.user_id
-                auth_user.name = user.name
-                auth_user.lastname = user.lastname
+                user = UserModel().get_by_username(username,
+                                                   case_insensitive=True)
+                auth_user = AuthUser(user.user_id)
+                auth_user.set_authenticated()
                 session['rhodecode_user'] = auth_user
                 session.save()
-                log.info('user %s is now authenticated', username)
 
+                log.info('user %s is now authenticated and stored in session',
+                         username)
                 user.update_lastlogin()
 
                 if c.came_from:
@@ -146,7 +144,7 @@ class LoginController(BaseController):
         return render('/password_reset.html')
 
     def logout(self):
-        session['rhodecode_user'] = AuthUser()
+        del session['rhodecode_user']
         session.save()
         log.info('Logging out and setting user as Empty')
         redirect(url('home'))

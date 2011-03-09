@@ -32,14 +32,19 @@ from pylons.i18n.translation import _
 
 from rhodecode.model import BaseModel
 from rhodecode.model.caching_query import FromCache
-from rhodecode.model.db import User
-
+from rhodecode.model.db import User, RepoToPerm, Repository, Permission, \
+    UserToPerm, UsersGroupToPerm, UsersGroupMember
 from rhodecode.lib.exceptions import DefaultUserException, UserOwnsReposException
 
 from sqlalchemy.exc import DatabaseError
 from rhodecode.lib import generate_api_key
 
 log = logging.getLogger(__name__)
+
+PERM_WEIGHTS = {'repository.none':0,
+                'repository.read':1,
+                'repository.write':3,
+                'repository.admin':3}
 
 class UserModel(BaseModel):
 
@@ -61,6 +66,16 @@ class UserModel(BaseModel):
         if cache:
             user = user.options(FromCache("sql_cache_short",
                                           "get_user_%s" % username))
+        return user.scalar()
+
+
+    def get_by_api_key(self, api_key, cache=False):
+
+        user = self.sa.query(User)\
+                .filter(User.api_key == api_key)
+        if cache:
+            user = user.options(FromCache("sql_cache_short",
+                                          "get_user_%s" % api_key))
         return user.scalar()
 
     def create(self, form_data):
@@ -204,27 +219,125 @@ class UserModel(BaseModel):
         run_task(tasks.reset_user_password, data['email'])
 
 
-    def fill_data(self, user):
+    def fill_data(self, auth_user, user_id=None, api_key=None):
         """
-        Fills user data with those from database and log out user if not 
+        Fetches auth_user by user_id,or api_key if present.
+        Fills auth_user attributes with those taken from database.
+        Additionally set's is_authenitated if lookup fails 
         present in database
-        :param user:
+        
+        :param auth_user: instance of user to set attributes
+        :param user_id: user id to fetch by
+        :param api_key: api key to fetch by
         """
+        if not user_id and not not api_key:
+            raise Exception('You need to pass user_id or api_key')
 
-        if not hasattr(user, 'user_id') or user.user_id is None:
-            raise Exception('passed in user has to have the user_id attribute')
-
-
-        log.debug('filling auth user data')
         try:
-            dbuser = self.get(user.user_id)
-            user.username = dbuser.username
-            user.is_admin = dbuser.admin
-            user.name = dbuser.name
-            user.lastname = dbuser.lastname
-            user.email = dbuser.email
+            if api_key:
+                dbuser = self.get_by_api_key(api_key)
+            else:
+                dbuser = self.get(user_id)
+
+            log.debug('filling %s data', dbuser)
+            for k, v in dbuser.get_dict().items():
+                setattr(auth_user, k, v)
+
         except:
             log.error(traceback.format_exc())
-            user.is_authenticated = False
+            auth_user.is_authenticated = False
+
+        return auth_user
+
+
+    def fill_perms(self, user):
+        """Fills user permission attribute with permissions taken from database
+        works for permissions given for repositories, and for permissions that
+        as part of beeing group member
+        
+        :param user: user instance to fill his perms
+        """
+
+        user.permissions['repositories'] = {}
+        user.permissions['global'] = set()
+
+        #===========================================================================
+        # fetch default permissions
+        #===========================================================================
+        default_user = self.get_by_username('default', cache=True)
+
+        default_perms = self.sa.query(RepoToPerm, Repository, Permission)\
+            .join((Repository, RepoToPerm.repository_id == Repository.repo_id))\
+            .join((Permission, RepoToPerm.permission_id == Permission.permission_id))\
+            .filter(RepoToPerm.user == default_user).all()
+
+        if user.is_admin:
+            #=======================================================================
+            # #admin have all default rights set to admin        
+            #=======================================================================
+            user.permissions['global'].add('hg.admin')
+
+            for perm in default_perms:
+                p = 'repository.admin'
+                user.permissions['repositories'][perm.RepoToPerm.repository.repo_name] = p
+
+        else:
+            #=======================================================================
+            # set default permissions
+            #=======================================================================
+
+            #default global
+            default_global_perms = self.sa.query(UserToPerm)\
+                .filter(UserToPerm.user == self.sa.query(User)\
+                       .filter(User.username == 'default').one())
+
+            for perm in default_global_perms:
+                user.permissions['global'].add(perm.permission.permission_name)
+
+            #default for repositories
+            for perm in default_perms:
+                if perm.Repository.private and not perm.Repository.user_id == user.user_id:
+                    #diself.sable defaults for private repos,
+                    p = 'repository.none'
+                elif perm.Repository.user_id == user.user_id:
+                    #set admin if owner
+                    p = 'repository.admin'
+                else:
+                    p = perm.Permission.permission_name
+
+                user.permissions['repositories'][perm.RepoToPerm.repository.repo_name] = p
+
+            #=======================================================================
+            # overwrite default with user permissions if any
+            #=======================================================================
+            user_perms = self.sa.query(RepoToPerm, Permission, Repository)\
+                .join((Repository, RepoToPerm.repository_id == Repository.repo_id))\
+                .join((Permission, RepoToPerm.permission_id == Permission.permission_id))\
+                .filter(RepoToPerm.user_id == user.user_id).all()
+
+            for perm in user_perms:
+                if perm.Repository.user_id == user.user_id:#set admin if owner
+                    p = 'repository.admin'
+                else:
+                    p = perm.Permission.permission_name
+                user.permissions['repositories'][perm.RepoToPerm.repository.repo_name] = p
+
+
+            #=======================================================================
+            # check if user is part of groups for this repository and fill in 
+            # (or replace with higher) permissions
+            #=======================================================================
+            user_perms_from_users_groups = self.sa.query(UsersGroupToPerm, Permission, Repository,)\
+                .join((Repository, UsersGroupToPerm.repository_id == Repository.repo_id))\
+                .join((Permission, UsersGroupToPerm.permission_id == Permission.permission_id))\
+                .join((UsersGroupMember, UsersGroupToPerm.users_group_id == UsersGroupMember.users_group_id))\
+                .filter(UsersGroupMember.user_id == user.user_id).all()
+
+            for perm in user_perms_from_users_groups:
+                p = perm.Permission.permission_name
+                cur_perm = user.permissions['repositories'][perm.UsersGroupToPerm.repository.repo_name]
+                #overwrite permission only if it's greater than permission given from other sources
+                if PERM_WEIGHTS[p] > PERM_WEIGHTS[cur_perm]:
+                    user.permissions['repositories'][perm.UsersGroupToPerm.repository.repo_name] = p
 
         return user
