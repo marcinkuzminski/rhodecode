@@ -39,7 +39,7 @@ log = logging.getLogger(__name__)
 
 class FeedController(BaseRepoController):
 
-    @LoginRequired()
+    @LoginRequired(api_access=True)
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
                                    'repository.admin')
     def __before__(self):

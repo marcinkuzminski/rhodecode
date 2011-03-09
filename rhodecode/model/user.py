@@ -230,7 +230,7 @@ class UserModel(BaseModel):
         :param user_id: user id to fetch by
         :param api_key: api key to fetch by
         """
-        if not user_id and not not api_key:
+        if user_id is None and api_key is None:
             raise Exception('You need to pass user_id or api_key')
 
         try:
@@ -239,9 +239,10 @@ class UserModel(BaseModel):
             else:
                 dbuser = self.get(user_id)
 
-            log.debug('filling %s data', dbuser)
-            for k, v in dbuser.get_dict().items():
-                setattr(auth_user, k, v)
+            if dbuser is not None:
+                log.debug('filling %s data', dbuser)
+                for k, v in dbuser.get_dict().items():
+                    setattr(auth_user, k, v)
 
         except:
             log.error(traceback.format_exc())

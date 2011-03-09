@@ -46,7 +46,7 @@ log = logging.getLogger(__name__)
 class JournalController(BaseController):
 
 
-    @LoginRequired()
+
     def __before__(self):
         super(JournalController, self).__before__()
         c.rhodecode_user = self.rhodecode_user
@@ -55,6 +55,7 @@ class JournalController(BaseController):
         self.ttl = "5"
         self.feed_nr = 20
 
+    @LoginRequired()
     @NotAnonymous()
     def index(self):
         # Return a rendered template
@@ -117,6 +118,7 @@ class JournalController(BaseController):
 
         return journal
 
+    @LoginRequired()
     @NotAnonymous()
     def toggle_following(self):
         cur_token = request.POST.get('auth_token')
@@ -147,7 +149,7 @@ class JournalController(BaseController):
 
 
 
-
+    @LoginRequired()
     def public_journal(self):
         # Return a rendered template
         p = int(request.params.get('page', 1))
@@ -169,7 +171,7 @@ class JournalController(BaseController):
         return render('journal/public_journal.html')
 
 
-
+    @LoginRequired(api_access=True)
     def public_journal_atom(self):
         """
         Produce an atom-1.0 feed via feedgenerator module
@@ -203,6 +205,7 @@ class JournalController(BaseController):
         response.content_type = feed.mime_type
         return feed.writeString('utf-8')
 
+    @LoginRequired(api_access=True)
     def public_journal_rss(self):
         """
         Produce an rss2 feed via feedgenerator module

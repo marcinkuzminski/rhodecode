@@ -230,7 +230,7 @@ class  AuthUser(object):
     def __init__(self, user_id=None, api_key=None):
 
         self.user_id = user_id
-        self.api_key = api_key
+        self.api_key = None
 
         self.username = 'None'
         self.name = ''
@@ -239,19 +239,19 @@ class  AuthUser(object):
         self.is_authenticated = False
         self.admin = False
         self.permissions = {}
+        self._api_key = api_key
         self.propagate_data()
 
 
     def propagate_data(self):
         user_model = UserModel()
-        if self.api_key:
+        self.anonymous_user = user_model.get_by_username('default', cache=True)
+        if self._api_key:
             #try go get user by api key
-            log.debug('Auth User lookup by API KEY %s', self.api_key)
-            user_model.fill_data(self, api_key=self.api_key)
+            log.debug('Auth User lookup by API KEY %s', self._api_key)
+            user_model.fill_data(self, api_key=self._api_key)
         else:
             log.debug('Auth User lookup by USER ID %s', self.user_id)
-            self.anonymous_user = user_model.get_by_username('default', cache=True)
-
             if self.user_id is not None and self.user_id != self.anonymous_user.user_id:
                 user_model.fill_data(self, user_id=self.user_id)
             else:
