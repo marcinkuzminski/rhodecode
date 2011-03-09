@@ -107,10 +107,18 @@
 		            </td>
 		            <td title="${repo['contact']}">${h.person(repo['contact'])}</td>
 		            <td>
-		                <a title="${_('Subscribe to %s rss feed')%repo['name']}" class="rss_icon"  href="${h.url('rss_feed_home',repo_name=repo['name'])}"></a>
+		              %if c.rhodecode_user.username != 'default':
+		                <a title="${_('Subscribe to %s rss feed')%repo['name']}" class="rss_icon"  href="${h.url('rss_feed_home',repo_name=repo['name'],api_key=c.rhodecode_user.api_key)}"></a>
+                      %else:
+                        <a title="${_('Subscribe to %s rss feed')%repo['name']}" class="rss_icon"  href="${h.url('rss_feed_home',repo_name=repo['name'])}"></a>
+                      %endif:		                
 		            </td>        
 		            <td>
+		              %if c.rhodecode_user.username != 'default':
+		                <a title="${_('Subscribe to %s atom feed')%repo['name']}"  class="atom_icon" href="${h.url('atom_feed_home',repo_name=repo['name'],api_key=c.rhodecode_user.api_key)}"></a>
+		              %else:
 		                <a title="${_('Subscribe to %s atom feed')%repo['name']}"  class="atom_icon" href="${h.url('atom_feed_home',repo_name=repo['name'])}"></a>
+		              %endif:
 		            </td>
 		        </tr>
 		    %endfor

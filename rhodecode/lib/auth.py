@@ -246,7 +246,7 @@ class  AuthUser(object):
     def propagate_data(self):
         user_model = UserModel()
         self.anonymous_user = user_model.get_by_username('default', cache=True)
-        if self._api_key:
+        if self._api_key and self._api_key != self.anonymous_user.api_key:
             #try go get user by api key
             log.debug('Auth User lookup by API KEY %s', self._api_key)
             user_model.fill_data(self, api_key=self._api_key)
