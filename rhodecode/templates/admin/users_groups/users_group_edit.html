@@ -18,7 +18,7 @@
 </%def>
 
 <%def name="main()">
-<div class="box">
+<div class="box box-left">
     <!-- box / title -->
     <div class="title">
         ${self.breadcrumbs()}       
@@ -242,5 +242,29 @@ ${h.end_form()}
             })  
         });
 </script>    
-
+<div class="box box-right">
+    <!-- box / title -->
+    <div class="title">
+        <h5>${_('Permissions')}</h5>       
+    </div>
+    ${h.form(url('user', id=''),method='put')}
+    <div class="form">
+        <!-- fields -->
+        <div class="fields">
+             <div class="field">
+                <div class="label label-checkbox">
+                    <label for="">${_('Create repositories')}:</label>
+                </div>
+                <div class="checkboxes">
+                    ${h.checkbox('create',value=True)}
+                </div>
+             </div>
+            <div class="buttons">
+              ${h.submit('save','Save',class_="ui-button")}
+              ${h.reset('reset','Reset',class_="ui-button")}
+            </div>             
+        </div>    
+    </div>
+    ${h.end_form()}    
+</div>
 </%def>  

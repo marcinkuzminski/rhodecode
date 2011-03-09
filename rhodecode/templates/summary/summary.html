@@ -169,7 +169,7 @@
 	            ${h.link_to(_('RSS'),h.url('rss_feed_home',repo_name=c.repo.name,api_key=c.rhodecode_user.api_key),class_='rss_icon')}
 	            ${h.link_to(_('Atom'),h.url('atom_feed_home',repo_name=c.repo.name,api_key=c.rhodecode_user.api_key),class_='atom_icon')}
 	           %else:
-                ${h.link_to(_('RSS'),h.url('rss_feed_home',repo_name=c.repo.name,class_='rss_icon')}
+                ${h.link_to(_('RSS'),h.url('rss_feed_home',repo_name=c.repo.name),class_='rss_icon')}
                 ${h.link_to(_('Atom'),h.url('atom_feed_home',repo_name=c.repo.name),class_='atom_icon')}	           
 	           %endif 
 			  </div>
