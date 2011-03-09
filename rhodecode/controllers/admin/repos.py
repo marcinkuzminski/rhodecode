@@ -158,7 +158,7 @@ class ReposController(BaseController):
         form_result = {}
         try:
             form_result = RepoForm()(repo_groups=c.repo_groups).to_python(dict(request.POST))
-            repo_model.create(form_result, c.rhodecode_user)
+            repo_model.create(form_result, self.rhodecode_user)
             if form_result['clone_uri']:
                 h.flash(_('created repository %s from %s') \
                     % (form_result['repo_name'], form_result['clone_uri']),
@@ -383,7 +383,7 @@ class ReposController(BaseController):
         :param repo_name:
         """
         try:
-            ScmModel().pull_changes(repo_name, c.rhodecode_user.username)
+            ScmModel().pull_changes(repo_name, self.rhodecode_user.username)
             h.flash(_('Pulled from remote location'), category='success')
         except Exception, e:
             h.flash(_('An error occurred during pull from remote location'),

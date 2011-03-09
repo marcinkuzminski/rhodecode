@@ -255,7 +255,7 @@ class SettingsController(BaseController):
         """
         # url('admin_settings_my_account')
 
-        c.user = UserModel().get(c.rhodecode_user.user_id, cache=False)
+        c.user = UserModel().get(self.rhodecode_user.user_id, cache=False)
         all_repos = [r.repo_name for r in self.sa.query(Repository)\
                      .filter(Repository.user_id == c.user.user_id)\
                      .order_by(func.lower(Repository.repo_name)).all()]
@@ -283,9 +283,9 @@ class SettingsController(BaseController):
         #           method='put')
         # url('admin_settings_my_account_update', id=ID)
         user_model = UserModel()
-        uid = c.rhodecode_user.user_id
+        uid = self.rhodecode_user.user_id
         _form = UserForm(edit=True, old_data={'user_id':uid,
-                                              'email':c.rhodecode_user.email})()
+                                              'email':self.rhodecode_user.email})()
         form_result = {}
         try:
             form_result = _form.to_python(dict(request.POST))
@@ -294,8 +294,8 @@ class SettingsController(BaseController):
                     category='success')
 
         except formencode.Invalid, errors:
-            c.user = user_model.get(c.rhodecode_user.user_id, cache=False)
-            c.user = UserModel().get(c.rhodecode_user.user_id, cache=False)
+            c.user = user_model.get(self.rhodecode_user.user_id, cache=False)
+            c.user = UserModel().get(self.rhodecode_user.user_id, cache=False)
             all_repos = self.sa.query(Repository)\
                 .filter(Repository.user_id == c.user.user_id)\
                 .order_by(func.lower(Repository.repo_name))\

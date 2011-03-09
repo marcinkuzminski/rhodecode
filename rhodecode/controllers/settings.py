@@ -189,7 +189,7 @@ class SettingsController(BaseRepoController):
         try:
             form_result = _form.to_python(dict(request.POST))
             form_result.update({'repo_name':repo_name})
-            repo_model.create_fork(form_result, c.rhodecode_user)
+            repo_model.create_fork(form_result, self.rhodecode_user)
             h.flash(_('forked %s repository as %s') \
                       % (repo_name, form_result['fork_name']),
                     category='success')

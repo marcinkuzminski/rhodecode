@@ -49,7 +49,7 @@ class JournalController(BaseController):
 
     def __before__(self):
         super(JournalController, self).__before__()
-        c.rhodecode_user = self.rhodecode_user
+        self.rhodecode_user = self.rhodecode_user
         self.title = _('%s public journal %s feed') % (c.rhodecode_name, '%s')
         self.language = 'en-us'
         self.ttl = "5"

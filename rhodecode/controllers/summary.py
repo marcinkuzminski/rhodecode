@@ -65,7 +65,7 @@ class SummaryController(BaseRepoController):
         c.dbrepo = dbrepo
 
         c.following = self.scm_model.is_following_repo(c.repo_name,
-                                             c.rhodecode_user.user_id)
+                                             self.rhodecode_user.user_id)
         def url_generator(**kw):
             return url('shortlog_home', repo_name=c.repo_name, **kw)
 
@@ -79,7 +79,7 @@ class SummaryController(BaseRepoController):
             username = ''
             password = ''
         else:
-            username = str(c.rhodecode_user.username)
+            username = str(self.rhodecode_user.username)
             password = '@'
 
         uri = u'%(protocol)s://%(user)s%(password)s%(host)s%(prefix)s/%(repo_name)s' % {
