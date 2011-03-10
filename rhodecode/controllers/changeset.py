@@ -106,8 +106,8 @@ class ChangesetController(BaseRepoController):
                 else:
                     c.sum_added += node.size
                     if c.sum_added < self.cut_off_limit:
-                        f_udiff = differ.get_udiff(filenode_old, node)
-                        diff = differ.DiffProcessor(f_udiff).as_html()
+                        f_gitdiff = differ.get_gitdiff(filenode_old, node)
+                        diff = differ.DiffProcessor(f_gitdiff, format='gitdiff').as_html()
 
                     else:
                         diff = wrap_to_table(_('Changeset is to big and was cut'
@@ -131,8 +131,8 @@ class ChangesetController(BaseRepoController):
                 else:
 
                     if c.sum_removed < self.cut_off_limit:
-                        f_udiff = differ.get_udiff(filenode_old, node)
-                        diff = differ.DiffProcessor(f_udiff).as_html()
+                        f_gitdiff = differ.get_gitdiff(filenode_old, node)
+                        diff = differ.DiffProcessor(f_gitdiff, format='gitdiff').as_html()
                         if diff:
                             c.sum_removed += len(diff)
                     else:
@@ -179,8 +179,8 @@ class ChangesetController(BaseRepoController):
                 if filenode_old.is_binary or node.is_binary:
                     diff = _('binary file') + '\n'
                 else:
-                    f_udiff = differ.get_gitdiff(filenode_old, node)
-                    diff = differ.DiffProcessor(f_udiff).raw_diff()
+                    f_gitdiff = differ.get_gitdiff(filenode_old, node)
+                    diff = differ.DiffProcessor(f_gitdiff).raw_diff()
 
                 cs1 = None
                 cs2 = node.last_changeset.raw_id
@@ -191,8 +191,8 @@ class ChangesetController(BaseRepoController):
                 if filenode_old.is_binary or node.is_binary:
                     diff = _('binary file')
                 else:
-                    f_udiff = differ.get_gitdiff(filenode_old, node)
-                    diff = differ.DiffProcessor(f_udiff).raw_diff()
+                    f_gitdiff = differ.get_gitdiff(filenode_old, node)
+                    diff = differ.DiffProcessor(f_gitdiff).raw_diff()
 
                 cs1 = filenode_old.last_changeset.raw_id
                 cs2 = node.last_changeset.raw_id
