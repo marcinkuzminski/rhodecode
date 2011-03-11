@@ -66,7 +66,7 @@ class ChangesetController(BaseRepoController):
 
         #get ranges of revisions if preset
         rev_range = revision.split('...')[:2]
-        range_limit = 50
+
         try:
             if len(rev_range) == 2:
                 rev_start = rev_range[0]
