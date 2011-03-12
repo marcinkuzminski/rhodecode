@@ -20,7 +20,7 @@ RhodeCode uses `Semantic Versioning <http://semver.org/>`_
 RhodeCode demo
 --------------
 
-http://hg.python-works.com
+http://demo.rhodecode.org
 
 The default access is anonymous but you can login to an administrative account
 using the following credentials:
@@ -31,8 +31,8 @@ using the following credentials:
 Source code
 -----------
 
-The latest source for RhodeCode can be obtained from my own RhodeCode instance
-https://rhodecode.org 
+The latest source for RhodeCode can be obtained from official RhodeCode instance
+https://hg.rhodecode.org 
 
 Rarely updated source code and issue tracker is available at bitbcuket
 http://bitbucket.org/marcinkuzminski/rhodecode
@@ -85,13 +85,14 @@ Incoming / Plans
 ----------------
 
 - Project grouping
+- Server side tagging
+- Server side code edit
+- Finer granular permissions (per branch or subrepo)
 - SSH based authentication with server side key management
 - Code review (probably based on hg-review)
 - Full git_ support, with push/pull server (currently in beta tests)
 - Redmine integration
-- Public accessible activity feeds
 - Commit based built in wiki system
-- Clone points and cloning from remote repositories into RhodeCode
 - More statistics and graph (global annotation + some more statistics)
 - Other advancements as development continues (or you can of course make additions and or requests)
 
