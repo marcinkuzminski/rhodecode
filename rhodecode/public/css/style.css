@@ -1635,6 +1635,15 @@ text-align:center;
 min-width:15px;
 cursor: help;
 }
+.right .changes .large {
+border:1px solid #DDD;
+display:block;
+float:right;
+text-align:center;
+min-width:45px;
+cursor: help;
+background: #54A9F7;
+}
 
 .right .changes .added {
 background:#BFB;

@@ -61,10 +61,14 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
 							<div class="message">${h.link_to(h.wrap_paragraphs(cs.message),h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id))}</div>
 						</div>	
 						<div class="right">
-									<div class="changes">									
+									<div class="changes">
+									   % if len(cs.affected_files) <= 30:								
 										<span class="removed tooltip" title="<b>${_('removed')}</b>${h.changed_tooltip(cs.removed)}">${len(cs.removed)}</span>
 										<span class="changed tooltip" title="<b>${_('changed')}</b>${h.changed_tooltip(cs.changed)}">${len(cs.changed)}</span>
 										<span class="added tooltip" title="<b>${_('added')}</b>${h.changed_tooltip(cs.added)}">${len(cs.added)}</span>
+									   % else:
+									     <span class="large tooltip" title="${_('affected %s files') % len(cs.affected_files)}">${len(cs.affected_files)}</span>
+									   % endif
 									</div>					
 										%if len(cs.parents)>1:
 										<div class="merge">
