@@ -59,6 +59,8 @@ def upgrade(migrate_engine):
     ldap_dn = Column("ldap_dn", String(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     ldap_dn.create(User().__table__)
 
+    api_key = Column("api_key", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    api_key.create(User().__table__)
 
     #remove old column
     is_ldap = Column("is_ldap", Boolean(), nullable=False, unique=None, default=False)
@@ -80,6 +82,14 @@ def upgrade(migrate_engine):
 
     group_id.create(Repository().__table__)
 
+
+    #ADD clone_uri column#
+
+    clone_uri = Column("clone_uri", String(length=255, convert_unicode=False,
+                                           assert_unicode=None),
+                        nullable=True, unique=False, default=None)
+
+    clone_uri.create(Repository().__table__)
     return
 
 
