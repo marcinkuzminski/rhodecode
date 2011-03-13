@@ -241,7 +241,7 @@ class SimpleHg(object):
                 if mapping.has_key(cmd):
                     return mapping[cmd]
                 else:
-                    return cmd
+                    return 'pull'
 
     def __invalidate_cache(self, repo_name):
         """we know that some change was made to repositories and we should
