@@ -52,6 +52,7 @@ class ChangesetController(BaseRepoController):
                                    'repository.admin')
     def __before__(self):
         super(ChangesetController, self).__before__()
+        c.affected_files_cut_off = 60
 
     def index(self, revision):
 
@@ -66,7 +67,7 @@ class ChangesetController(BaseRepoController):
 
         #get ranges of revisions if preset
         rev_range = revision.split('...')[:2]
-        range_limit = 50
+
         try:
             if len(rev_range) == 2:
                 rev_start = rev_range[0]
@@ -86,7 +87,7 @@ class ChangesetController(BaseRepoController):
         c.changes = OrderedDict()
         c.sum_added = 0
         c.sum_removed = 0
-
+        c.cut_off = False
 
         for changeset in c.cs_ranges:
             c.changes[changeset.raw_id] = []
@@ -112,6 +113,8 @@ class ChangesetController(BaseRepoController):
                     else:
                         diff = wrap_to_table(_('Changeset is to big and was cut'
                                             ' off, see raw changeset instead'))
+                        c.cut_off = True
+                        break
 
                 cs1 = None
                 cs2 = node.last_changeset.raw_id
@@ -120,35 +123,38 @@ class ChangesetController(BaseRepoController):
             #==================================================================
             # CHANGED FILES
             #==================================================================
-            for node in changeset.changed:
-                try:
-                    filenode_old = changeset_parent.get_node(node.path)
-                except ChangesetError:
-                    filenode_old = FileNode(node.path, '', EmptyChangeset())
+            if not c.cut_off:
+                for node in changeset.changed:
+                    try:
+                        filenode_old = changeset_parent.get_node(node.path)
+                    except ChangesetError:
+                        filenode_old = FileNode(node.path, '', EmptyChangeset())
 
-                if filenode_old.is_binary or node.is_binary:
-                    diff = wrap_to_table(_('binary file'))
-                else:
-
-                    if c.sum_removed < self.cut_off_limit:
-                        f_gitdiff = differ.get_gitdiff(filenode_old, node)
-                        diff = differ.DiffProcessor(f_gitdiff, format='gitdiff').as_html()
-                        if diff:
-                            c.sum_removed += len(diff)
+                    if filenode_old.is_binary or node.is_binary:
+                        diff = wrap_to_table(_('binary file'))
                     else:
-                        diff = wrap_to_table(_('Changeset is to big and was cut'
-                                            ' off, see raw changeset instead'))
 
+                        if c.sum_removed < self.cut_off_limit:
+                            f_gitdiff = differ.get_gitdiff(filenode_old, node)
+                            diff = differ.DiffProcessor(f_gitdiff, format='gitdiff').as_html()
+                            if diff:
+                                c.sum_removed += len(diff)
+                        else:
+                            diff = wrap_to_table(_('Changeset is to big and was cut'
+                                                ' off, see raw changeset instead'))
+                            c.cut_off = True
+                            break
 
-                cs1 = filenode_old.last_changeset.raw_id
-                cs2 = node.last_changeset.raw_id
-                c.changes[changeset.raw_id].append(('changed', node, diff, cs1, cs2))
+                    cs1 = filenode_old.last_changeset.raw_id
+                    cs2 = node.last_changeset.raw_id
+                    c.changes[changeset.raw_id].append(('changed', node, diff, cs1, cs2))
 
             #==================================================================
             # REMOVED FILES    
             #==================================================================
-            for node in changeset.removed:
-                c.changes[changeset.raw_id].append(('removed', node, None, None, None))
+            if not c.cut_off:
+                for node in changeset.removed:
+                    c.changes[changeset.raw_id].append(('removed', node, None, None, None))
 
         if len(c.cs_ranges) == 1:
             c.changeset = c.cs_ranges[0]
@@ -180,7 +186,7 @@ class ChangesetController(BaseRepoController):
                     diff = _('binary file') + '\n'
                 else:
                     f_gitdiff = differ.get_gitdiff(filenode_old, node)
-                    diff = differ.DiffProcessor(f_gitdiff).raw_diff()
+                    diff = differ.DiffProcessor(f_gitdiff, format='gitdiff').raw_diff()
 
                 cs1 = None
                 cs2 = node.last_changeset.raw_id
@@ -192,7 +198,7 @@ class ChangesetController(BaseRepoController):
                     diff = _('binary file')
                 else:
                     f_gitdiff = differ.get_gitdiff(filenode_old, node)
-                    diff = differ.DiffProcessor(f_gitdiff).raw_diff()
+                    diff = differ.DiffProcessor(f_gitdiff, format='gitdiff').raw_diff()
 
                 cs1 = filenode_old.last_changeset.raw_id
                 cs2 = node.last_changeset.raw_id

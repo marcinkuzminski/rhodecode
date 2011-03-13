@@ -1,3 +1,5 @@
+## -*- coding: utf-8 -*-
+
 <%inherit file="/base/base.html"/>
 
 <%def name="title()">
@@ -49,9 +51,15 @@
 	             </div>
 	             <div class="right">
 		             <div class="changes">
+                        % if len(c.changeset.affected_files) <= c.affected_files_cut_off:	             
 		                 <span class="removed" title="${_('removed')}">${len(c.changeset.removed)}</span>
 		                 <span class="changed" title="${_('changed')}">${len(c.changeset.changed)}</span>
 		                 <span class="added" title="${_('added')}">${len(c.changeset.added)}</span>
+	                    % else:
+                         <span class="removed" title="${_('affected %s files') % len(c.changeset.affected_files)}">!</span>
+                         <span class="changed" title="${_('affected %s files') % len(c.changeset.affected_files)}">!</span>
+                         <span class="added"   title="${_('affected %s files') % len(c.changeset.affected_files)}">!</span>	                    
+	                    % endif		                 
 		             </div>                  
 		                 %if len(c.changeset.parents)>1:
 		                 <div class="merge">
@@ -78,11 +86,14 @@
 		         </span>                                                                 
 	                </div>              
 	        </div>
-	        <span style="font-size:1.1em;font-weight: bold">${_('Files affected')}</span>
+	        <span style="font-size:1.1em;font-weight: bold">${_('Files affected (%s)' % len(c.changeset.affected_files))}</span>
 	        <div class="cs_files">
 	                %for change,filenode,diff,cs1,cs2 in c.changes:
 	                    <div class="cs_${change}">${h.link_to(filenode.path.decode('utf-8','replace'),h.url.current(anchor=h.repo_name_slug('C%s' % filenode.path.decode('utf-8','replace'))))}</div>
 	                %endfor
+	                % if c.cut_off:
+	                  ${_('Changeset was to big and was cut off...')}
+	                % endif
 	        </div>         
 	    </div>
 	    

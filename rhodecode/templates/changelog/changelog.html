@@ -62,12 +62,14 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
 						</div>	
 						<div class="right">
 									<div class="changes">
-									   % if len(cs.affected_files) <= 30:								
+									   % if len(cs.affected_files) <= c.affected_files_cut_off:						
 										<span class="removed tooltip" title="<b>${_('removed')}</b>${h.changed_tooltip(cs.removed)}">${len(cs.removed)}</span>
 										<span class="changed tooltip" title="<b>${_('changed')}</b>${h.changed_tooltip(cs.changed)}">${len(cs.changed)}</span>
 										<span class="added tooltip" title="<b>${_('added')}</b>${h.changed_tooltip(cs.added)}">${len(cs.added)}</span>
 									   % else:
-									     <span class="large tooltip" title="${_('affected %s files') % len(cs.affected_files)}">${len(cs.affected_files)}</span>
+				                         <span class="removed tooltip" title="${_('affected %s files') % len(cs.affected_files)}">!</span>
+				                         <span class="changed tooltip" title="${_('affected %s files') % len(cs.affected_files)}">!</span>
+				                         <span class="added tooltip"   title="${_('affected %s files') % len(cs.affected_files)}">!</span>  									   
 									   % endif
 									</div>					
 										%if len(cs.parents)>1:

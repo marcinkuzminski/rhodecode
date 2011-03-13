@@ -4,7 +4,7 @@
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     changelog controller for rhodecode
-    
+
     :created_on: Apr 21, 2010
     :author: marcink
     :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>    
@@ -49,6 +49,7 @@ class ChangelogController(BaseRepoController):
                                    'repository.admin')
     def __before__(self):
         super(ChangelogController, self).__before__()
+        c.affected_files_cut_off = 60
 
     def index(self):
         limit = 100
