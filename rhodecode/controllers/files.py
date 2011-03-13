@@ -228,7 +228,8 @@ class FilesController(BaseRepoController):
 
 
         if c.action == 'download':
-            diff = differ.DiffProcessor(differ.get_gitdiff(node1, node2))
+            diff = differ.DiffProcessor(differ.get_gitdiff(node1, node2),
+                                        format='gitdiff')
 
             diff_name = '%s_vs_%s.diff' % (diff1, diff2)
             response.content_type = 'text/plain'
@@ -237,12 +238,14 @@ class FilesController(BaseRepoController):
             return diff.raw_diff()
 
         elif c.action == 'raw':
-            diff = differ.DiffProcessor(differ.get_gitdiff(node1, node2))
+            diff = differ.DiffProcessor(differ.get_gitdiff(node1, node2),
+                                        format='gitdiff')
             response.content_type = 'text/plain'
             return diff.raw_diff()
 
         elif c.action == 'diff':
-            diff = differ.DiffProcessor(differ.get_gitdiff(node1, node2))
+            diff = differ.DiffProcessor(differ.get_gitdiff(node1, node2),
+                                        format='gitdiff')
 
             if node1.size > self.cut_off_limit or node2.size > self.cut_off_limit:
                 c.cur_diff = _('Diff is to big to display')
@@ -251,7 +254,8 @@ class FilesController(BaseRepoController):
             else:
                 c.cur_diff = diff.as_html()
         else:
-            diff = differ.DiffProcessor(differ.get_gitdiff(node1, node2))
+            diff = differ.DiffProcessor(differ.get_gitdiff(node1, node2),
+                                        format='gitdiff')
             #default option
             if node1.size > self.cut_off_limit or node2.size > self.cut_off_limit:
                 c.cur_diff = _('Diff is to big to display')
