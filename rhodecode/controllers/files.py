@@ -24,7 +24,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
+
 import logging
+import tempfile
 import rhodecode.lib.helpers as h
 
 from pylons import request, response, session, tmpl_context as c, url
@@ -37,13 +39,13 @@ from rhodecode.lib.utils import EmptyChangeset
 from rhodecode.model.repo import RepoModel
 
 from vcs.backends import ARCHIVE_SPECS
-from vcs.exceptions import RepositoryError, ChangesetError, \
-    ChangesetDoesNotExistError, EmptyRepositoryError, ImproperArchiveTypeError, \
-    VCSError
+from vcs.exceptions import RepositoryError, ChangesetDoesNotExistError, \
+    EmptyRepositoryError, ImproperArchiveTypeError, VCSError
 from vcs.nodes import FileNode, NodeKind
 from vcs.utils import diffs as differ
 
 log = logging.getLogger(__name__)
+
 
 class FilesController(BaseRepoController):
 
@@ -198,7 +200,8 @@ class FilesController(BaseRepoController):
         response.content_disposition = 'attachment; filename=%s-%s%s' \
             % (repo_name, revision, ext)
 
-        return cs.get_chunked_archive(kind=fileformat)
+        return cs.get_chunked_archive(stream=tempfile.TemporaryFile(),
+                                      kind=fileformat)
 
 
     def diff(self, repo_name, f_path):
