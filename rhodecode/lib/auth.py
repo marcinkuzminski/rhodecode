@@ -43,7 +43,7 @@ if __platform__ == 'Windows':
 if __platform__ in ('Linux', 'Darwin'):
     import bcrypt
 
-
+from rhodecode.lib import str2bool
 from rhodecode.lib.exceptions import LdapPasswordError, LdapUsernameError
 from rhodecode.lib.utils import get_repo_slug
 from rhodecode.lib.auth_ldap import AuthLdap
@@ -179,7 +179,7 @@ def authenticate(username, password):
         #======================================================================
         # FALLBACK TO LDAP AUTH IF ENABLE                
         #======================================================================
-        if ldap_settings.get('ldap_active', False):
+        if str2bool(ldap_settings.get('ldap_active')):
             log.debug("Authenticating user using ldap")
             kwargs = {
                   'server':ldap_settings.get('ldap_host', ''),
@@ -187,7 +187,7 @@ def authenticate(username, password):
                   'port':ldap_settings.get('ldap_port'),
                   'bind_dn':ldap_settings.get('ldap_dn_user'),
                   'bind_pass':ldap_settings.get('ldap_dn_pass'),
-                  'use_ldaps':ldap_settings.get('ldap_ldaps'),
+                  'use_ldaps':str2bool(ldap_settings.get('ldap_ldaps')),
                   'tls_reqcert':ldap_settings.get('ldap_tls_reqcert'),
                   'ldap_filter':ldap_settings.get('ldap_filter'),
                   'search_scope':ldap_settings.get('ldap_search_scope'),
