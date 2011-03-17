@@ -56,9 +56,11 @@ class FilesController(BaseRepoController):
         super(FilesController, self).__before__()
         c.cut_off_limit = self.cut_off_limit
 
-    def __get_cs(self, rev, repo_name):
+    def __get_cs_or_redirect(self, rev, repo_name):
         """
-        Safe way to get changeset if error ucure it redirects to given
+        Safe way to get changeset if error occur it redirects to tip with
+        proper message
+        
         :param rev: revision to fetch
         :param repo_name: repo name to redirect after
         """
@@ -74,69 +76,61 @@ class FilesController(BaseRepoController):
             redirect(h.url('files_home', repo_name=repo_name, revision='tip'))
 
     def index(self, repo_name, revision, f_path):
+        #reditect to given revision from form if given
+        post_revision = request.POST.get('at_rev', None)
+        if post_revision:
+            cs = self.__get_cs_or_redirect(revision, repo_name)
+            redirect(url('files_home', repo_name=c.repo_name,
+                         revision=cs.raw_id, f_path=f_path))
 
+
+        c.changeset = self.__get_cs_or_redirect(revision, repo_name)
+        c.branch = request.GET.get('branch', None)
+        c.f_path = f_path
+
+        cur_rev = c.changeset.revision
+
+        #prev link
         try:
-            #reditect to given revision from form
-            post_revision = request.POST.get('at_rev', None)
-            if post_revision:
-                post_revision = c.rhodecode_repo.get_changeset(post_revision).raw_id
-                redirect(url('files_home', repo_name=c.repo_name,
-                             revision=post_revision, f_path=f_path))
+            prev_rev = c.rhodecode_repo.get_changeset(cur_rev).prev(c.branch)
+            c.url_prev = url('files_home', repo_name=c.repo_name,
+                         revision=prev_rev.raw_id, f_path=f_path)
+            if c.branch:
+                c.url_prev += '?branch=%s' % c.branch
+        except (ChangesetDoesNotExistError, VCSError):
+            c.url_prev = '#'
 
-            c.branch = request.GET.get('branch', None)
+        #next link
+        try:
+            next_rev = c.rhodecode_repo.get_changeset(cur_rev).next(c.branch)
+            c.url_next = url('files_home', repo_name=c.repo_name,
+                     revision=next_rev.raw_id, f_path=f_path)
+            if c.branch:
+                c.url_next += '?branch=%s' % c.branch
+        except (ChangesetDoesNotExistError, VCSError):
+            c.url_next = '#'
 
-            c.f_path = f_path
-
-            c.changeset = c.rhodecode_repo.get_changeset(revision)
-            cur_rev = c.changeset.revision
-
-            #prev link
-            try:
-                prev_rev = c.rhodecode_repo.get_changeset(cur_rev).prev(c.branch).raw_id
-                c.url_prev = url('files_home', repo_name=c.repo_name,
-                             revision=prev_rev, f_path=f_path)
-                if c.branch:
-                    c.url_prev += '?branch=%s' % c.branch
-            except (ChangesetDoesNotExistError, VCSError):
-                c.url_prev = '#'
-
-            #next link
-            try:
-                next_rev = c.rhodecode_repo.get_changeset(cur_rev).next(c.branch).raw_id
-                c.url_next = url('files_home', repo_name=c.repo_name,
-                         revision=next_rev, f_path=f_path)
-                if c.branch:
-                    c.url_next += '?branch=%s' % c.branch
-            except (ChangesetDoesNotExistError, VCSError):
-                c.url_next = '#'
-
-            #files
-            try:
-                c.files_list = c.changeset.get_node(f_path)
-                c.file_history = self._get_history(c.rhodecode_repo, c.files_list, f_path)
-            except RepositoryError, e:
-                h.flash(str(e), category='warning')
-                redirect(h.url('files_home', repo_name=repo_name, revision=revision))
-
-        except EmptyRepositoryError, e:
-            h.flash(_('There are no files yet'), category='warning')
-            redirect(h.url('summary_home', repo_name=repo_name))
-
+        #files
+        try:
+            c.files_list = c.changeset.get_node(f_path)
+            c.file_history = self._get_history(c.rhodecode_repo,
+                                               c.files_list, f_path)
         except RepositoryError, e:
             h.flash(str(e), category='warning')
-            redirect(h.url('files_home', repo_name=repo_name, revision='tip'))
-
+            redirect(h.url('files_home', repo_name=repo_name,
+                           revision=revision))
 
 
         return render('files/files.html')
 
     def rawfile(self, repo_name, revision, f_path):
-        cs = self.__get_cs(revision, repo_name)
+        cs = self.__get_cs_or_redirect(revision, repo_name)
         try:
             file_node = cs.get_node(f_path)
         except RepositoryError, e:
             h.flash(str(e), category='warning')
-            redirect(h.url('files_home', repo_name=repo_name, revision=cs.raw_id))
+            redirect(h.url('files_home', repo_name=repo_name,
+                           revision=cs.raw_id))
 
         fname = f_path.split('/')[-1].encode('utf8', 'replace')
         response.content_type = file_node.mimetype
@@ -144,26 +138,29 @@ class FilesController(BaseRepoController):
         return file_node.content
 
     def raw(self, repo_name, revision, f_path):
-        cs = self.__get_cs(revision, repo_name)
+        cs = self.__get_cs_or_redirect(revision, repo_name)
         try:
             file_node = cs.get_node(f_path)
         except RepositoryError, e:
             h.flash(str(e), category='warning')
-            redirect(h.url('files_home', repo_name=repo_name, revision=cs.raw_id))
+            redirect(h.url('files_home', repo_name=repo_name,
+                           revision=cs.raw_id))
 
         response.content_type = 'text/plain'
 
         return file_node.content
 
     def annotate(self, repo_name, revision, f_path):
-        cs = self.__get_cs(revision, repo_name)
+        cs = self.__get_cs_or_redirect(revision, repo_name)
         try:
             c.file = cs.get_node(f_path)
         except RepositoryError, e:
             h.flash(str(e), category='warning')
-            redirect(h.url('files_home', repo_name=repo_name, revision=cs.raw_id))
+            redirect(h.url('files_home', repo_name=repo_name,
+                           revision=cs.raw_id))
 
-        c.file_history = self._get_history(c.rhodecode_repo, c.file, f_path)
+        c.file_history = self._get_history(c.rhodecode_repo,
+                                           c.file, f_path)
         c.cs = cs
         c.f_path = f_path
 
