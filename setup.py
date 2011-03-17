@@ -78,7 +78,7 @@ setup(
     license='BSD',
     author='Marcin Kuzminski',
     author_email='marcin@python-works.com',
-    url='http://hg.python-works.com',
+    url='http://rhodecode.org',
     install_requires=requirements,
     classifiers=classifiers,
     setup_requires=["PasteScript>=1.6.3"],

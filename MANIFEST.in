@@ -2,7 +2,13 @@ include rhodecode/config/deployment.ini_tmpl
 include rhodecode/lib/dbmigrate/migrate.cfg
 
 include README.rst
-recursive-include rhodecode/i18n/ *
+recursive-include rhodecode/i18n *
+
+#docs
+recursive-include docs *
+
+#init.d
+recursive-include init.d *
 
 #images
 recursive-include rhodecode/public/css *
