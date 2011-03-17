@@ -38,6 +38,8 @@ def make_map(config):
     map.connect('home', '/', controller='home', action='index')
     map.connect('bugtracker', "http://bitbucket.org/marcinkuzminski/rhodecode/issues", _static=True)
     map.connect('gpl_license', "http://www.gnu.org/licenses/gpl.html", _static=True)
+    map.connect('rhodecode_official', "http://rhodecode.org", _static=True)
+
     #ADMIN REPOSITORY REST ROUTES
     with map.submapper(path_prefix='/_admin', controller='admin/repos') as m:
         m.connect("repos", "/repos",
