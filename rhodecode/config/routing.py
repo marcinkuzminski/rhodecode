@@ -36,10 +36,10 @@ def make_map(config):
     #==========================================================================
 
     #MAIN PAGE
-    map.connect('home', '/', controller='home', action='index')
-    map.connect('bugtracker', "http://bitbucket.org/marcinkuzminski/rhodecode/issues", _static=True)
-    map.connect('gpl_license', "http://www.gnu.org/licenses/gpl.html", _static=True)
-    map.connect('rhodecode_official', "http://rhodecode.org", _static=True)
+    routes_map.connect('home', '/', controller='home', action='index')
+    routes_map.connect('bugtracker', "http://bitbucket.org/marcinkuzminski/rhodecode/issues", _static=True)
+    routes_map.connect('gpl_license', "http://www.gnu.org/licenses/gpl.html", _static=True)
+    routes_map.connect('rhodecode_official', "http://rhodecode.org", _static=True)
 
     #ADMIN REPOSITORY REST ROUTES
     with routes_map.submapper(path_prefix='/_admin', controller='admin/repos') as m:
