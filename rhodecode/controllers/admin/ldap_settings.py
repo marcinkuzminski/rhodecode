@@ -68,10 +68,11 @@ class LdapSettingsController(BaseController):
         """POST ldap create and store ldap settings"""
 
         settings_model = SettingsModel()
-        _form = LdapSettingsForm()()
+        post_data = dict(request.POST)
+        _form = LdapSettingsForm(post_data.get('ldap_active'))()
 
         try:
-            form_result = _form.to_python(dict(request.POST))
+            form_result = _form.to_python(post_data)
             try:
 
                 for k, v in form_result.items():

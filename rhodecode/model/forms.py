@@ -300,26 +300,29 @@ class LdapLibValidator(formencode.validators.FancyValidator):
             raise LdapImportError
         return value
 
-class BaseDnValidator(formencode.validators.FancyValidator):
+def BaseDnValidator(ldap_enable):
+    class _BaseDnValidator(formencode.validators.FancyValidator):
 
-    def to_python(self, value, state):
+        def to_python(self, value, state):
 
-        try:
-            value % {'user':'valid'}
+            if not ldap_enable:
+                return ''
+            try:
+                value % {'user':'valid'}
 
-            if value.find('%(user)s') == -1:
-                raise formencode.Invalid(_("You need to specify %(user)s in "
-                                           "template for example uid=%(user)s "
-                                           ",dc=company...") ,
-                                         value, state)
+                if value.find('%(user)s') == -1:
+                    raise formencode.Invalid(_("You need to specify %(user)s in "
+                                               "template for example uid=%(user)s "
+                                               ",dc=company...") ,
+                                             value, state)
 
-        except KeyError:
-            raise formencode.Invalid(_("Wrong template used, only %(user)s "
-                                       "is an valid entry") ,
-                                         value, state)
+            except KeyError:
+                raise formencode.Invalid(_("Wrong template used, only %(user)s "
+                                           "is an valid entry") ,
+                                             value, state)
 
-        return value
-
+            return value
+    return _BaseDnValidator
 #===============================================================================
 # FORMS        
 #===============================================================================
@@ -467,7 +470,7 @@ def DefaultPermissionsForm(perms_choices, register_choices, create_choices):
     return _DefaultPermissionsForm
 
 
-def LdapSettingsForm():
+def LdapSettingsForm(ldap_enable):
     class _LdapSettingsForm(formencode.Schema):
         allow_extra_fields = True
         filter_extra_fields = True
@@ -478,6 +481,6 @@ def LdapSettingsForm():
         ldap_ldaps = StringBoolean(if_missing=False)
         ldap_dn_user = UnicodeString(strip=True,)
         ldap_dn_pass = UnicodeString(strip=True,)
-        ldap_base_dn = All(BaseDnValidator, UnicodeString(strip=True,))
+        ldap_base_dn = All(BaseDnValidator(ldap_enable), UnicodeString(strip=True,))
 
     return _LdapSettingsForm
