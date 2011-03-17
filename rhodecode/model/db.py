@@ -30,51 +30,20 @@ from datetime import date
 
 from sqlalchemy import *
 from sqlalchemy.exc import DatabaseError
-from sqlalchemy.orm import relationship, backref, class_mapper
-from sqlalchemy.orm.session import Session
+from sqlalchemy.orm import relationship, backref
+from sqlalchemy.orm.interfaces import MapperExtension
 
-from rhodecode.model.meta import Base
+from rhodecode.model.meta import Base, Session
 
 log = logging.getLogger(__name__)
 
-class BaseModel(object):
 
-    @classmethod
-    def _get_keys(cls):
-        """return column names for this model """
-        return class_mapper(cls).c.keys()
-
-    def get_dict(self):
-        """return dict with keys and values corresponding 
-        to this model data """
-
-        d = {}
-        for k in self._get_keys():
-            d[k] = getattr(self, k)
-        return d
-
-    def get_appstruct(self):
-        """return list with keys and values tupples corresponding 
-        to this model data """
-
-        l = []
-        for k in self._get_keys():
-            l.append((k, getattr(self, k),))
-        return l
-
-    def populate_obj(self, populate_dict):
-        """populate model with data from given populate_dict"""
-
-        for k in self._get_keys():
-            if k in populate_dict:
-                setattr(self, k, populate_dict[k])
-
-class RhodeCodeSettings(Base, BaseModel):
+class RhodeCodeSettings(Base):
     __tablename__ = 'rhodecode_settings'
     __table_args__ = (UniqueConstraint('app_settings_name'), {'useexisting':True})
     app_settings_id = Column("app_settings_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
-    app_settings_name = Column("app_settings_name", String(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
-    app_settings_value = Column("app_settings_value", String(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    app_settings_name = Column("app_settings_name", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    app_settings_value = Column("app_settings_value", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
 
     def __init__(self, k='', v=''):
         self.app_settings_name = k
@@ -84,27 +53,27 @@ class RhodeCodeSettings(Base, BaseModel):
         return "<%s('%s:%s')>" % (self.__class__.__name__,
                                   self.app_settings_name, self.app_settings_value)
 
-class RhodeCodeUi(Base, BaseModel):
+class RhodeCodeUi(Base):
     __tablename__ = 'rhodecode_ui'
     __table_args__ = {'useexisting':True}
     ui_id = Column("ui_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
-    ui_section = Column("ui_section", String(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
-    ui_key = Column("ui_key", String(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
-    ui_value = Column("ui_value", String(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    ui_section = Column("ui_section", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    ui_key = Column("ui_key", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    ui_value = Column("ui_value", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     ui_active = Column("ui_active", Boolean(), nullable=True, unique=None, default=True)
 
 
-class User(Base, BaseModel):
+class User(Base):
     __tablename__ = 'users'
     __table_args__ = (UniqueConstraint('username'), UniqueConstraint('email'), {'useexisting':True})
     user_id = Column("user_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
-    username = Column("username", String(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
-    password = Column("password", String(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    username = Column("username", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    password = Column("password", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     active = Column("active", Boolean(), nullable=True, unique=None, default=None)
     admin = Column("admin", Boolean(), nullable=True, unique=None, default=False)
-    name = Column("name", String(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
-    lastname = Column("lastname", String(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
-    email = Column("email", String(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    name = Column("name", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    lastname = Column("lastname", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    email = Column("email", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     last_login = Column("last_login", DateTime(timezone=False), nullable=True, unique=None, default=None)
     is_ldap = Column("is_ldap", Boolean(), nullable=False, unique=None, default=False)
 
@@ -118,6 +87,10 @@ class User(Base, BaseModel):
     def full_contact(self):
         return '%s %s <%s>' % (self.name, self.lastname, self.email)
 
+    @property
+    def short_contact(self):
+        return '%s %s' % (self.name, self.lastname)
+
 
     @property
     def is_admin(self):
@@ -126,6 +99,11 @@ class User(Base, BaseModel):
     def __repr__(self):
         return "<%s('id:%s:%s')>" % (self.__class__.__name__,
                                      self.user_id, self.username)
+
+    @classmethod
+    def by_username(cls, username):
+        return Session.query(cls).filter(cls.username == username).one()
+
 
     def update_lastlogin(self):
         """Update user lastlogin"""
@@ -140,15 +118,15 @@ class User(Base, BaseModel):
             session.rollback()
 
 
-class UserLog(Base, BaseModel):
+class UserLog(Base):
     __tablename__ = 'user_logs'
     __table_args__ = {'useexisting':True}
     user_log_id = Column("user_log_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None, default=None)
     repository_id = Column("repository_id", Integer(length=None, convert_unicode=False, assert_unicode=None), ForeignKey('repositories.repo_id'), nullable=False, unique=None, default=None)
-    repository_name = Column("repository_name", String(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
-    user_ip = Column("user_ip", String(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
-    action = Column("action", String(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    repository_name = Column("repository_name", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    user_ip = Column("user_ip", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    action = Column("action", UnicodeText(length=1200000, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     action_date = Column("action_date", DateTime(timezone=False), nullable=True, unique=None, default=None)
 
     @property
@@ -158,16 +136,16 @@ class UserLog(Base, BaseModel):
     user = relationship('User')
     repository = relationship('Repository')
 
-class Repository(Base, BaseModel):
+class Repository(Base):
     __tablename__ = 'repositories'
     __table_args__ = (UniqueConstraint('repo_name'), {'useexisting':True},)
     repo_id = Column("repo_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
-    repo_name = Column("repo_name", String(length=None, convert_unicode=False, assert_unicode=None), nullable=False, unique=True, default=None)
-    repo_type = Column("repo_type", String(length=None, convert_unicode=False, assert_unicode=None), nullable=False, unique=False, default='hg')
+    repo_name = Column("repo_name", String(length=255, convert_unicode=False, assert_unicode=None), nullable=False, unique=True, default=None)
+    repo_type = Column("repo_type", String(length=255, convert_unicode=False, assert_unicode=None), nullable=False, unique=False, default='hg')
     user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=False, default=None)
     private = Column("private", Boolean(), nullable=True, unique=None, default=None)
     enable_statistics = Column("statistics", Boolean(), nullable=True, unique=None, default=True)
-    description = Column("description", String(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    description = Column("description", String(length=10000, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     fork_id = Column("fork_id", Integer(), ForeignKey('repositories.repo_id'), nullable=True, unique=False, default=None)
 
     user = relationship('User')
@@ -178,23 +156,23 @@ class Repository(Base, BaseModel):
     repo_followers = relationship('UserFollowing', primaryjoin='UserFollowing.follows_repo_id==Repository.repo_id', cascade='all')
 
     logs = relationship('UserLog', cascade='all')
-    
+
     def __repr__(self):
         return "<%s('%s:%s')>" % (self.__class__.__name__,
                                   self.repo_id, self.repo_name)
 
-class Permission(Base, BaseModel):
+class Permission(Base):
     __tablename__ = 'permissions'
     __table_args__ = {'useexisting':True}
     permission_id = Column("permission_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
-    permission_name = Column("permission_name", String(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
-    permission_longname = Column("permission_longname", String(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    permission_name = Column("permission_name", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    permission_longname = Column("permission_longname", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
 
     def __repr__(self):
         return "<%s('%s:%s')>" % (self.__class__.__name__,
                                   self.permission_id, self.permission_name)
 
-class RepoToPerm(Base, BaseModel):
+class RepoToPerm(Base):
     __tablename__ = 'repo_to_perm'
     __table_args__ = (UniqueConstraint('user_id', 'repository_id'), {'useexisting':True})
     repo_to_perm_id = Column("repo_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -206,7 +184,7 @@ class RepoToPerm(Base, BaseModel):
     permission = relationship('Permission')
     repository = relationship('Repository')
 
-class UserToPerm(Base, BaseModel):
+class UserToPerm(Base):
     __tablename__ = 'user_to_perm'
     __table_args__ = (UniqueConstraint('user_id', 'permission_id'), {'useexisting':True})
     user_to_perm_id = Column("user_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -216,19 +194,19 @@ class UserToPerm(Base, BaseModel):
     user = relationship('User')
     permission = relationship('Permission')
 
-class Statistics(Base, BaseModel):
+class Statistics(Base):
     __tablename__ = 'statistics'
     __table_args__ = (UniqueConstraint('repository_id'), {'useexisting':True})
     stat_id = Column("stat_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
-    repository_id = Column("repository_id", Integer(), ForeignKey(u'repositories.repo_id'), nullable=False, unique=True, default=None)
+    repository_id = Column("repository_id", Integer(), ForeignKey('repositories.repo_id'), nullable=False, unique=True, default=None)
     stat_on_revision = Column("stat_on_revision", Integer(), nullable=False)
-    commit_activity = Column("commit_activity", LargeBinary(), nullable=False)#JSON data
+    commit_activity = Column("commit_activity", LargeBinary(1000000), nullable=False)#JSON data
     commit_activity_combined = Column("commit_activity_combined", LargeBinary(), nullable=False)#JSON data
-    languages = Column("languages", LargeBinary(), nullable=False)#JSON data
+    languages = Column("languages", LargeBinary(1000000), nullable=False)#JSON data
 
     repository = relationship('Repository', single_parent=True)
 
-class UserFollowing(Base, BaseModel):
+class UserFollowing(Base):
     __tablename__ = 'user_followings'
     __table_args__ = (UniqueConstraint('user_id', 'follows_repository_id'),
                       UniqueConstraint('user_id', 'follows_user_id')
@@ -244,12 +222,12 @@ class UserFollowing(Base, BaseModel):
     follows_user = relationship('User', primaryjoin='User.user_id==UserFollowing.follows_user_id')
     follows_repository = relationship('Repository', order_by='Repository.repo_name')
 
-class CacheInvalidation(Base, BaseModel):
+class CacheInvalidation(Base):
     __tablename__ = 'cache_invalidation'
     __table_args__ = (UniqueConstraint('cache_key'), {'useexisting':True})
     cache_id = Column("cache_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
-    cache_key = Column("cache_key", String(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
-    cache_args = Column("cache_args", String(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    cache_key = Column("cache_key", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    cache_args = Column("cache_args", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     cache_active = Column("cache_active", Boolean(), nullable=True, unique=None, default=False)
 
 
@@ -262,10 +240,10 @@ class CacheInvalidation(Base, BaseModel):
         return "<%s('%s:%s')>" % (self.__class__.__name__,
                                   self.cache_id, self.cache_key)
 
-class DbMigrateVersion(Base, BaseModel):
+class DbMigrateVersion(Base):
     __tablename__ = 'db_migrate_version'
     __table_args__ = {'useexisting':True}
-    repository_id = Column('repository_id', String(250), primary_key=True)
+    repository_id = Column('repository_id', String(255), primary_key=True)
     repository_path = Column('repository_path', Text)
     version = Column('version', Integer)
 

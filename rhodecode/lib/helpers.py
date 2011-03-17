@@ -230,6 +230,8 @@ tooltip = _ToolTip()
 class _FilesBreadCrumbs(object):
 
     def __call__(self, repo_name, rev, paths):
+        if isinstance(paths, str):
+            paths = paths.decode('utf-8', 'replace')
         url_l = [link_to(repo_name, url('files_home',
                                         repo_name=repo_name,
                                         revision=rev, f_path=''))]
@@ -483,7 +485,7 @@ def action_parser_icon(user_log):
     if len(x) > 1:
         action, action_params = x
 
-    tmpl = """<img src="%s/%s" alt="%s"/>"""
+    tmpl = """<img src="%s%s" alt="%s"/>"""
     map = {'user_deleted_repo':'database_delete.png',
            'user_created_repo':'database_add.png',
            'user_forked_repo':'arrow_divide.png',
@@ -550,6 +552,6 @@ def changed_tooltip(nodes):
         suf = ''
         if len(nodes) > 30:
             suf = '<br/>' + _(' and %s more') % (len(nodes) - 30)
-        return literal(pref + '<br/> '.join([x.path for x in nodes[:30]]) + suf)
+        return literal(pref + '<br/> '.join([x.path.decode('utf-8', 'replace') for x in nodes[:30]]) + suf)
     else:
         return ': ' + _('No Files')

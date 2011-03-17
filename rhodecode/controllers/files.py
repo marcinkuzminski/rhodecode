@@ -7,7 +7,7 @@
     
     :created_on: Apr 21, 2010
     :author: marcink
-    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
+    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>    
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software; you can redistribute it and/or
@@ -55,9 +55,30 @@ class FilesController(BaseController):
         super(FilesController, self).__before__()
         c.cut_off_limit = self.cut_off_limit
 
+    def __get_cs_or_redirect(self, rev, repo_name):
+        """
+        Safe way to get changeset if error occur it redirects to tip with
+        proper message
+        
+        :param rev: revision to fetch
+        :param repo_name: repo name to redirect after
+        """
+
+        _repo = ScmModel().get_repo(c.repo_name)
+        try:
+            return _repo.get_changeset(rev)
+        except EmptyRepositoryError, e:
+            h.flash(_('There are no files yet'), category='warning')
+            redirect(h.url('summary_home', repo_name=repo_name))
+
+        except RepositoryError, e:
+            h.flash(str(e), category='warning')
+            redirect(h.url('files_home', repo_name=repo_name, revision='tip'))
+
     def index(self, repo_name, revision, f_path):
-        hg_model = ScmModel()
-        c.repo = hg_model.get_repo(c.repo_name)
+        cs = self.__get_cs_or_redirect(revision, repo_name)
+        c.repo = ScmModel().get_repo(c.repo_name)
+
         revision = request.POST.get('at_rev', None) or revision
 
         def get_next_rev(cur):
@@ -72,68 +93,64 @@ class FilesController(BaseController):
             return r
 
         c.f_path = f_path
+        c.changeset = cs
+        cur_rev = c.changeset.revision
+        prev_rev = c.repo.get_changeset(get_prev_rev(cur_rev)).raw_id
+        next_rev = c.repo.get_changeset(get_next_rev(cur_rev)).raw_id
 
+        c.url_prev = url('files_home', repo_name=c.repo_name,
+                         revision=prev_rev, f_path=f_path)
+        c.url_next = url('files_home', repo_name=c.repo_name,
+                     revision=next_rev, f_path=f_path)
 
         try:
-            c.changeset = c.repo.get_changeset(revision)
-            cur_rev = c.changeset.revision
-            prev_rev = c.repo.get_changeset(get_prev_rev(cur_rev)).raw_id
-            next_rev = c.repo.get_changeset(get_next_rev(cur_rev)).raw_id
-
-            c.url_prev = url('files_home', repo_name=c.repo_name,
-                             revision=prev_rev, f_path=f_path)
-            c.url_next = url('files_home', repo_name=c.repo_name,
-                         revision=next_rev, f_path=f_path)
-
-            try:
-                c.files_list = c.changeset.get_node(f_path)
-                c.file_history = self._get_history(c.repo, c.files_list, f_path)
-            except RepositoryError, e:
-                h.flash(str(e), category='warning')
-                redirect(h.url('files_home', repo_name=repo_name, revision=revision))
-
-        except EmptyRepositoryError, e:
-            h.flash(_('There are no files yet'), category='warning')
-            redirect(h.url('summary_home', repo_name=repo_name))
-
+            c.files_list = c.changeset.get_node(f_path)
+            c.file_history = self._get_history(c.repo, c.files_list, f_path)
         except RepositoryError, e:
             h.flash(str(e), category='warning')
-            redirect(h.url('files_home', repo_name=repo_name, revision='tip'))
-
+            redirect(h.url('files_home', repo_name=repo_name,
+                           revision=revision))
 
 
         return render('files/files.html')
 
     def rawfile(self, repo_name, revision, f_path):
-        hg_model = ScmModel()
-        c.repo = hg_model.get_repo(c.repo_name)
-        file_node = c.repo.get_changeset(revision).get_node(f_path)
+        cs = self.__get_cs_or_redirect(revision, repo_name)
+        try:
+            file_node = cs.get_node(f_path)
+        except RepositoryError, e:
+            h.flash(str(e), category='warning')
+            redirect(h.url('files_home', repo_name=repo_name,
+                           revision=cs.raw_id))
+
+        fname = f_path.split('/')[-1].encode('utf8', 'replace')
+
+        response.content_disposition = 'attachment; filename=%s' % fname
         response.content_type = file_node.mimetype
-        response.content_disposition = 'attachment; filename=%s' \
-                                                    % f_path.split('/')[-1]
         return file_node.content
 
     def raw(self, repo_name, revision, f_path):
-        hg_model = ScmModel()
-        c.repo = hg_model.get_repo(c.repo_name)
-        file_node = c.repo.get_changeset(revision).get_node(f_path)
-        response.content_type = 'text/plain'
+        cs = self.__get_cs_or_redirect(revision, repo_name)
+        try:
+            file_node = cs.get_node(f_path)
+        except RepositoryError, e:
+            h.flash(str(e), category='warning')
+            redirect(h.url('files_home', repo_name=repo_name,
+                           revision=cs.raw_id))
 
+        response.content_type = 'text/plain'
         return file_node.content
 
     def annotate(self, repo_name, revision, f_path):
-        hg_model = ScmModel()
-        c.repo = hg_model.get_repo(c.repo_name)
-
+        cs = self.__get_cs_or_redirect(revision, repo_name)
         try:
-            c.cs = c.repo.get_changeset(revision)
-            c.file = c.cs.get_node(f_path)
+            c.file = cs.get_node(f_path)
         except RepositoryError, e:
             h.flash(str(e), category='warning')
-            redirect(h.url('files_home', repo_name=repo_name, revision=revision))
+            redirect(h.url('files_home', repo_name=repo_name, revision=cs.raw_id))
 
-        c.file_history = self._get_history(c.repo, c.file, f_path)
-
+        c.file_history = self._get_history(ScmModel().get_repo(c.repo_name), c.file, f_path)
+        c.cs = cs
         c.f_path = f_path
 
         return render('files/files_annotate.html')
@@ -201,25 +218,34 @@ class FilesController(BaseController):
             response.content_type = 'text/plain'
             response.content_disposition = 'attachment; filename=%s' \
                                                     % diff_name
+            if node1.is_binary or node2.is_binary:
+                return _('binary file changed')
             return diff.raw_diff()
 
         elif c.action == 'raw':
             response.content_type = 'text/plain'
+            if node1.is_binary or node2.is_binary:
+                return _('binary file changed')
             return diff.raw_diff()
 
         elif c.action == 'diff':
             if node1.size > self.cut_off_limit or node2.size > self.cut_off_limit:
                 c.cur_diff = _('Diff is to big to display')
+            elif node1.is_binary or node2.is_binary:
+                c.cur_diff = _('Binary file')
             else:
                 c.cur_diff = diff.as_html()
         else:
             #default option
             if node1.size > self.cut_off_limit or node2.size > self.cut_off_limit:
                 c.cur_diff = _('Diff is to big to display')
+            elif node1.is_binary or node2.is_binary:
+                c.cur_diff = _('Binary file')
             else:
                 c.cur_diff = diff.as_html()
 
-        if not c.cur_diff: c.no_changes = True
+        if not c.cur_diff:
+            c.no_changes = True
         return render('files/file_diff.html')
 
     def _get_history(self, repo, node, f_path):
@@ -250,9 +276,3 @@ class FilesController(BaseController):
         hist_l.append(tags_group)
 
         return hist_l
-
-#                [
-#                 ([("u1", "User1"), ("u2", "User2")], "Users"),
-#                 ([("g1", "Group1"), ("g2", "Group2")], "Groups")
-#                 ]
-

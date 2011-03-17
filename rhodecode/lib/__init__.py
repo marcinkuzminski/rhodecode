@@ -26,4 +26,21 @@
 # MA  02110-1301, USA.
 
 def str2bool(v):
-    return v.lower() in ["yes", "true", "t", "1"] if v else None
+    if isinstance(v, (str, unicode)):
+        obj = v.strip().lower()
+        if obj in ['true', 'yes', 'on', 'y', 't', '1']:
+            return True
+        elif obj in ['false', 'no', 'off', 'n', 'f', '0']:
+            return False
+        else:
+            raise ValueError("String is not true/false: %r" % obj)
+    return bool(obj)
+
+def generate_api_key(username, salt=None):
+    from tempfile import _RandomNameSequence
+    import hashlib
+
+    if salt is None:
+        salt = _RandomNameSequence().next()
+
+    return hashlib.sha1(username + salt).hexdigest()

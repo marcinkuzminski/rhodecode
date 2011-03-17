@@ -48,6 +48,7 @@ Other topics
 .. _python: http://www.python.org/
 .. _django: http://www.djangoproject.com/
 .. _mercurial: http://mercurial.selenic.com/
+.. _bitbucket: http://bitbucket.org/
 .. _subversion: http://subversion.tigris.org/
 .. _git: http://git-scm.com/
 .. _celery: http://celeryproject.org/

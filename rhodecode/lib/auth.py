@@ -1,8 +1,14 @@
-#!/usr/bin/env python
-# encoding: utf-8
-# authentication and permission libraries
-# Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
-#
+# -*- coding: utf-8 -*-
+"""
+    rhodecode.lib.auth
+    ~~~~~~~~~~~~~~~~~~
+    
+    authentication and permission libraries
+    
+    :created_on: Apr 4, 2010
+    :copyright: (c) 2010 by marcink.
+    :license: LICENSE_NAME, see LICENSE_FILE for more details.
+"""
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
@@ -17,26 +23,34 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
-"""
-Created on April 4, 2010
 
-@author: marcink
-"""
+import random
+import logging
+import traceback
+
+from decorator import decorator
+
 from pylons import config, session, url, request
 from pylons.controllers.util import abort, redirect
-from rhodecode.lib.exceptions import *
+from pylons.i18n.translation import _
+
+from rhodecode import __platform__
+
+if __platform__ == 'Windows':
+    from hashlib import sha256
+if __platform__ in ('Linux', 'Darwin'):
+    import bcrypt
+
+from rhodecode.lib import str2bool
+from rhodecode.lib.exceptions import LdapPasswordError, LdapUsernameError
 from rhodecode.lib.utils import get_repo_slug
 from rhodecode.lib.auth_ldap import AuthLdap
+
 from rhodecode.model import meta
 from rhodecode.model.user import UserModel
-from rhodecode.model.caching_query import FromCache
-from rhodecode.model.db import User, RepoToPerm, Repository, Permission, \
-    UserToPerm
-import bcrypt
-from decorator import decorator
-import logging
-import random
-import traceback
+from rhodecode.model.db import Permission, RepoToPerm, Repository, \
+    User, UserToPerm
+
 
 log = logging.getLogger(__name__)
 
@@ -65,15 +79,46 @@ class PasswordGenerator(object):
         self.passwd = ''.join([random.choice(type) for _ in xrange(len)])
         return self.passwd
 
+class RhodeCodeCrypto(object):
+
+    @classmethod
+    def hash_string(cls, str_):
+        """
+        Cryptographic function used for password hashing based on pybcrypt
+        or pycrypto in windows
+        
+        :param password: password to hash
+        """
+        if __platform__ == 'Windows':
+            return sha256(str_).hexdigest()
+        elif __platform__ in ('Linux', 'Darwin'):
+            return bcrypt.hashpw(str_, bcrypt.gensalt(10))
+        else:
+            raise Exception('Unknown or unsupported platform %s' % __platform__)
+
+    @classmethod
+    def hash_check(cls, password, hashed):
+        """
+        Checks matching password with it's hashed value, runs different
+        implementation based on platform it runs on
+        
+        :param password: password
+        :param hashed: password in hashed form
+        """
+
+        if __platform__ == 'Windows':
+            return sha256(password).hexdigest() == hashed
+        elif __platform__ in ('Linux', 'Darwin'):
+            return bcrypt.hashpw(password, hashed) == hashed
+        else:
+            raise Exception('Unknown or unsupported platform %s' % __platform__)
+
 
 def get_crypt_password(password):
-    """Cryptographic function used for password hashing based on sha1
-    :param password: password to hash
-    """
-    return bcrypt.hashpw(password, bcrypt.gensalt(10))
+    return RhodeCodeCrypto.hash_string(password)
 
 def check_password(password, hashed):
-    return bcrypt.hashpw(password, hashed) == hashed
+    return RhodeCodeCrypto.hash_check(password, hashed)
 
 def authfunc(environ, username, password):
     """
@@ -126,7 +171,7 @@ def authenticate(username, password):
         #======================================================================
         # FALLBACK TO LDAP AUTH IN ENABLE                
         #======================================================================
-        if ldap_settings.get('ldap_active', False):
+        if str2bool(ldap_settings.get('ldap_active')):
             log.debug("Authenticating user using ldap")
             kwargs = {
                   'server':ldap_settings.get('ldap_host', ''),
@@ -134,7 +179,7 @@ def authenticate(username, password):
                   'port':ldap_settings.get('ldap_port'),
                   'bind_dn':ldap_settings.get('ldap_dn_user'),
                   'bind_pass':ldap_settings.get('ldap_dn_pass'),
-                  'use_ldaps':ldap_settings.get('ldap_ldaps'),
+                  'use_ldaps':str2bool(ldap_settings.get('ldap_ldaps')),
                   'ldap_version':3,
                   }
             log.debug('Checking for ldap authentication')

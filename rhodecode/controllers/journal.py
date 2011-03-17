@@ -26,17 +26,18 @@
 # MA  02110-1301, USA.
 
 import logging
-from sqlalchemy import or_
+import traceback
 
 from pylons import request, response, session, tmpl_context as c, url
+from paste.httpexceptions import HTTPInternalServerError, HTTPBadRequest
+
+from sqlalchemy import or_
 
 from rhodecode.lib.auth import LoginRequired, NotAnonymous
 from rhodecode.lib.base import BaseController, render
 from rhodecode.lib.helpers import get_token
 from rhodecode.model.db import UserLog, UserFollowing
 from rhodecode.model.scm import ScmModel
-
-from paste.httpexceptions import HTTPInternalServerError
 
 log = logging.getLogger(__name__)
 
@@ -81,6 +82,7 @@ class JournalController(BaseController):
                                                     c.rhodecode_user.user_id)
                     return 'ok'
                 except:
+                    log.error(traceback.format_exc())
                     raise HTTPInternalServerError()
 
             repo_id = request.POST.get('follows_repo_id')
@@ -90,8 +92,9 @@ class JournalController(BaseController):
                                                     c.rhodecode_user.user_id)
                     return 'ok'
                 except:
+                    log.error(traceback.format_exc())
                     raise HTTPInternalServerError()
 
 
 
-        raise HTTPInternalServerError()
+        raise HTTPBadRequest()

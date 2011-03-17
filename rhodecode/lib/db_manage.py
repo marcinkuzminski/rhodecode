@@ -60,39 +60,19 @@ class DbManage(object):
         init_model(engine)
         self.sa = meta.Session()
 
-    def check_for_db(self, override):
-        db_path = jn(self.root, self.dbname)
-        if self.dburi.startswith('sqlite'):
-            log.info('checking for existing db in %s', db_path)
-            if os.path.isfile(db_path):
-
-                self.db_exists = True
-                if not override:
-                    raise Exception('database already exists')
-            return 'sqlite'
-        if self.dburi.startswith('postgresql'):
-            self.db_exists = True
-            return 'postgresql'
-
-
     def create_tables(self, override=False):
         """Create a auth database
         """
 
-        db_type = self.check_for_db(override)
-        if self.db_exists:
-            log.info("database exist and it's going to be destroyed")
-            if self.tests:
-                destroy = True
-            else:
-                destroy = ask_ok('Are you sure to destroy old database ? [y/n]')
-            if not destroy:
-                sys.exit()
-            if self.db_exists and destroy:
-                if db_type == 'sqlite':
-                    os.remove(jn(self.root, self.dbname))
-                if db_type == 'postgresql':
-                    meta.Base.metadata.drop_all()
+        log.info("Any existing database is going to be destroyed")
+        if self.tests:
+            destroy = True
+        else:
+            destroy = ask_ok('Are you sure to destroy old database ? [y/n]')
+        if not destroy:
+            sys.exit()
+        if destroy:
+            meta.Base.metadata.drop_all()
 
         checkfirst = not override
         meta.Base.metadata.create_all(checkfirst=checkfirst)
@@ -322,10 +302,14 @@ class DbManage(object):
         """Creates ldap settings"""
 
         try:
-            for k in ['ldap_active', 'ldap_host', 'ldap_port', 'ldap_ldaps',
-                      'ldap_dn_user', 'ldap_dn_pass', 'ldap_base_dn']:
+            for k, v in [('ldap_active', 'false'),
+                        ('ldap_host', ''),
+                        ('ldap_port', '389'),
+                        ('ldap_ldaps', 'false'),
+                        ('ldap_dn_user', ''), ('ldap_dn_pass', ''),
+                        ('ldap_base_dn', '')]:
 
-                setting = RhodeCodeSettings(k, '')
+                setting = RhodeCodeSettings(k, v)
                 self.sa.add(setting)
             self.sa.commit()
         except:

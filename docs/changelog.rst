@@ -3,6 +3,28 @@
 Changelog
 =========
 
+
+1.1.5 (**2011-03-1X**)
+======================
+
+news
+----
+
+- basic windows support, by exchanging pybcrypt into sha256 for windows only
+  highly inspired by idea of mantis406
+
+fixes
+-----
+
+- fixed sorting by author in main page
+- fixed crashes with diffs on binary files
+- fixed #131 problem with boolean values for LDAP
+- fixed #122 mysql problems thanks to striker69 
+- fixed problem with errors on calling raw/raw_files/annotate functions 
+  with unknown revisions
+- fixed returned rawfiles attachment names with international character
+- cleaned out docs, big thanks to Jason Harris
+
 1.1.4 (**2011-02-19**)
 ======================
 

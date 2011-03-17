@@ -25,11 +25,12 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
+import platform
 
-
-VERSION = (1, 1, 4)
+VERSION = (1, 1, 5)
 __version__ = '.'.join((str(each) for each in VERSION[:4]))
 __dbversion__ = 2 #defines current db version for migrations
+__platform__ = platform.system()
 
 try:
     from rhodecode.lib.utils import get_current_revision

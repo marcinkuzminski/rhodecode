@@ -140,8 +140,8 @@ class SettingsController(BaseController):
 
                 except:
                     log.error(traceback.format_exc())
-                    h.flash(_('error occurred during updating application settings'),
-                            category='error')
+                    h.flash(_('error occurred during updating'
+                              ' application settings'), category='error')
 
                     self.sa.rollback()
 

@@ -8,19 +8,19 @@ browser/management tool with a built in push/pull server and full text search.
 It works on http/https and has a built in permission/authentication system with 
 the ability to authenticate via LDAP.
 
-RhodeCode is similar in some respects to github or bitbucket, 
-however RhodeCode can be run as standalone hosted application on your own server.  It is open source 
-and donation ware and focuses more on providing a customized, self administered 
-interface for Mercurial(and soon GIT) repositories. RhodeCode is powered by a vcs_ 
-library that Lukasz Balcerzak and I created to handle multiple different version 
-control systems.
+RhodeCode is similar in some respects to github or bitbucket_, 
+however RhodeCode can be run as standalone hosted application on your own server.  
+It is open source and donation ware and focuses more on providing a customized, 
+self administered interface for Mercurial(and soon GIT) repositories. 
+RhodeCode is powered by a vcs_ library that Lukasz Balcerzak and I created to 
+handle multiple different version control systems.
 
 RhodeCode uses `Semantic Versioning <http://semver.org/>`_
 
 RhodeCode demo
 --------------
 
-http://hg.python-works.com
+http://demo.rhodecode.org
 
 The default access is anonymous but you can login to an administrative account
 using the following credentials:
@@ -31,8 +31,8 @@ using the following credentials:
 Source code
 -----------
 
-The latest source for RhodeCode can be obtained from my own RhodeCode instance
-https://rhodecode.org 
+The latest source for RhodeCode can be obtained from official RhodeCode instance
+https://hg.rhodecode.org 
 
 Rarely updated source code and issue tracker is available at bitbcuket
 http://bitbucket.org/marcinkuzminski/rhodecode
@@ -123,6 +123,7 @@ have sphinx installed you can install it via the command: ``easy_install sphinx`
 .. _python: http://www.python.org/
 .. _django: http://www.djangoproject.com/
 .. _mercurial: http://mercurial.selenic.com/
+.. _bitbucket: http://bitbucket.org/
 .. _subversion: http://subversion.tigris.org/
 .. _git: http://git-scm.com/
 .. _celery: http://celeryproject.org/

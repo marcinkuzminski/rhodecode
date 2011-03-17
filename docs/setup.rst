@@ -348,19 +348,19 @@ Troubleshooting
    double check the root path for your http setup. It should point to 
    for example:
    /home/my-virtual-python/lib/python2.6/site-packages/rhodecode/public
-
-|
+   
+| 
 
 :Q: **Can't install celery/rabbitmq**
 :A: Don't worry RhodeCode works without them too. No extra setup is required.
 
 |
-
+ 
 :Q: **Long lasting push timeouts?**
 :A: Make sure you set a longer timeouts in your proxy/fcgi settings, timeouts
     are caused by https server and not RhodeCode.
-
-|
+    
+| 
 
 :Q: **Large pushes timeouts?**
 :A: Make sure you set a proper max_body_size for the http server.

@@ -9,12 +9,13 @@ together with celery you have to install some kind of message broker,
 recommended one is rabbitmq_ to make the async tasks work.
 
 Of course RhodeCode works in sync mode also and then you do not have to install
-any third party applications. However, using Celery_ will give you a large speed improvement when using
-many big repositories. If you plan to use RhodeCode for say 7 to 10 small repositories, RhodeCode
-will perform perfectly well without celery running.
+any third party applications. However, using Celery_ will give you a large 
+speed improvement when using many big repositories. If you plan to use 
+RhodeCode for say 7 to 10 small repositories, RhodeCode will perform perfectly 
+well without celery running.
    
-If you make the decision to run RhodeCode with celery make sure you run celeryd using paster
-and message broker together with the application.   
+If you make the decision to run RhodeCode with celery make sure you run 
+celeryd using paster and message broker together with the application.   
 
 Installing RhodeCode from Cheese Shop
 -------------------------------------
