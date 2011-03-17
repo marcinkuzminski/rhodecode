@@ -95,8 +95,11 @@ class SettingsModel(BaseModel):
 
         for row in r:
             v = row.app_settings_value
-            if v in ['0', '1']:
-                v = v == '1'
+            if v in ['true', 'yes', 'on', 'y', 't', '1']:
+                v = True
+            elif v in ['false', 'no', 'off', 'n', 'f', '0']:
+                v = False
+
             fd.update({row.app_settings_name:v})
 
         return fd
