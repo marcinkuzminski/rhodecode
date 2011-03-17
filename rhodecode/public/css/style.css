@@ -1283,7 +1283,7 @@ font-weight:700;
 float:left;
 padding-left:10px;
 }
-#footer div#footer-inner .footer-link a {
+#footer div#footer-inner .footer-link a,#footer div#footer-inner .footer-link-right a {
 color:#FFF; 
 }
 

@@ -7,6 +7,9 @@ recursive-include rhodecode/i18n *
 #docs
 recursive-include docs *
 
+#init.d
+recursive-include init.d *
+
 #images
 recursive-include rhodecode/public/css *
 recursive-include rhodecode/public/images *

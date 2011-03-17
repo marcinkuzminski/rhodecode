@@ -78,7 +78,7 @@ setup(
     license='BSD',
     author='Marcin Kuzminski',
     author_email='marcin@python-works.com',
-    url='http://hg.python-works.com',
+    url='http://rhodecode.org',
     install_requires=requirements,
     classifiers=classifiers,
     setup_requires=["PasteScript>=1.6.3"],
@@ -90,6 +90,7 @@ setup(
     message_extractors={'rhodecode': [
             ('**.py', 'python', None),
             ('templates/**.mako', 'mako', {'input_encoding': 'utf-8'}),
+            ('templates/**.html', 'mako', {'input_encoding': 'utf-8'}),
             ('public/**', 'ignore', None)]},
     zip_safe=False,
     paster_plugins=['PasteScript', 'Pylons'],
