@@ -90,6 +90,7 @@ setup(
     message_extractors={'rhodecode': [
             ('**.py', 'python', None),
             ('templates/**.mako', 'mako', {'input_encoding': 'utf-8'}),
+            ('templates/**.html', 'mako', {'input_encoding': 'utf-8'}),
             ('public/**', 'ignore', None)]},
     zip_safe=False,
     paster_plugins=['PasteScript', 'Pylons'],
