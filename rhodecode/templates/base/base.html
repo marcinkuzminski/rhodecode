@@ -1,118 +1,104 @@
 ## -*- coding: utf-8 -*-
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-    <title>${next.title()}</title>
-    <link rel="icon" href="${h.url('/images/icons/database_gear.png')}" type="image/png" />
-    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
-    <meta name="robots" content="index, nofollow"/>
-    <!-- stylesheets -->
-    ${self.css()}
-    <!-- scripts -->
-    ${self.js()}
-	%if c.ga_code:
-	<script type="text/javascript">
-	  var _gaq = _gaq || [];
-	  _gaq.push(['_setAccount', '${c.ga_code}']);
-	  _gaq.push(['_trackPageview']);
-	
-	  (function() {
-	    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-	    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-	    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-	  })();
-	</script>
-	%endif
-</head>
-<body>
-    <!-- header -->
-    <div id="header">
-        <!-- user -->
-        <ul id="logged-user">
-	            <li class="first">
-	                <div class="gravatar">
-	                    <img alt="gravatar" src="${h.gravatar_url(c.rhodecode_user.email,20)}" />
-	                </div>
-		            <div class="account">
-		            %if c.rhodecode_user.username == 'default':
-		                <a href="${h.url('public_journal')}">${_('Public journal')}</a>   
-                    %else:                        		            
-		            	${h.link_to(c.rhodecode_user.username,h.url('admin_settings_my_account'),title='%s %s'%(c.rhodecode_user.name,c.rhodecode_user.lastname))}
-		            %endif
-		            </div>	
-	            </li>
-	            <li>
-	               <a href="${h.url('home')}">${_('Home')}</a>
-	            </li>
-	            %if c.rhodecode_user.username != 'default':
-                <li>
-                   <a href="${h.url('journal')}">${_('Journal')}</a> 
-                   ##(${c.unread_journal})</a>
-                </li>
-                %endif
-                %if c.rhodecode_user.username == 'default':
-                    <li class="last highlight">${h.link_to(u'Login',h.url('login_home'))}</li>
-                %else:
-                    <li class="last highlight">${h.link_to(u'Log Out',h.url('logout_home'))}</li>
-                %endif
-        </ul>
-        <!-- end user -->
-        <div id="header-inner" class="title top-left-rounded-corner top-right-rounded-corner">
-            <!-- logo -->
-            <div id="logo">
-                <h1><a href="${h.url('home')}">${c.rhodecode_name}</a></h1>
-            </div>
-            <!-- end logo -->
-            <!-- menu -->
-            ${self.page_nav()}
-            <!-- quick -->
+<%inherit file="root.html"/>
+
+<!-- HEADER -->
+<div id="header">
+    <!-- user -->
+    <ul id="logged-user">
+         <li class="first">
+             <div class="gravatar">
+                 <img alt="gravatar" src="${h.gravatar_url(c.rhodecode_user.email,20)}" />
+             </div>
+          <div class="account">
+          %if c.rhodecode_user.username == 'default':
+              <a href="${h.url('public_journal')}">${_('Public journal')}</a>   
+          %else:                        		            
+          	${h.link_to(c.rhodecode_user.username,h.url('admin_settings_my_account'),title='%s %s'%(c.rhodecode_user.name,c.rhodecode_user.lastname))}
+          %endif
+          </div>	
+         </li>
+         <li>
+            <a href="${h.url('home')}">${_('Home')}</a>
+         </li>
+         %if c.rhodecode_user.username != 'default':
+            <li>
+               <a href="${h.url('journal')}">${_('Journal')}</a> 
+               ##(${c.unread_journal}
+            </li>
+            %endif
+            %if c.rhodecode_user.username == 'default':
+                <li class="last highlight">${h.link_to(u'Login',h.url('login_home'))}</li>
+            %else:
+                <li class="last highlight">${h.link_to(u'Log Out',h.url('logout_home'))}</li>
+            %endif
+    </ul>
+    <!-- end user -->
+    <div id="header-inner" class="title top-left-rounded-corner top-right-rounded-corner">
+        <div id="logo">
+            <h1><a href="${h.url('home')}">${c.rhodecode_name}</a></h1>
         </div>
-    </div>     
-    <!-- end header -->
+        <!-- MENU -->
+        ${self.page_nav()}
+        <!-- END MENU -->
+        ${self.body()}
+    </div>
+</div>     
+<!-- END HEADER -->
     
-	<!-- CONTENT -->
-	<div id="content"> 
-        <div class="flash_msg">
-            <% messages = h.flash.pop_messages() %>
-            % if messages:
-            <ul id="flash-messages">
-                % for message in messages:
-                <li class="${message.category}_msg">${message}</li>
-                % endfor
-            </ul>
-            % endif
-        </div>	    
-	    <div id="main"> 
-	        ${next.main()}
-	    </div>
-	</div> 
-    <!-- END CONTENT -->
+<!-- CONTENT -->
+<div id="content"> 
+    <div class="flash_msg">
+        <% messages = h.flash.pop_messages() %>
+        % if messages:
+        <ul id="flash-messages">
+            % for message in messages:
+            <li class="${message.category}_msg">${message}</li>
+            % endfor
+        </ul>
+        % endif
+    </div>	    
+    <div id="main"> 
+        ${next.main()}
+    </div>
+</div> 
+<!-- END CONTENT -->
 
-	<!-- footer -->
-	<div id="footer">
-	   <div id="footer-inner" class="title bottom-left-rounded-corner bottom-right-rounded-corner">
-	       <div>
-	           <p class="footer-link">${h.link_to(_('Submit a bug'),h.url('bugtracker'))}</p>
-		       <p class="footer-link">${h.link_to(_('GPL license'),h.url('gpl_license'))}</p>
-		       <p class="footer-link-right"><a href="${h.url('rhodecode_official')}">RhodeCode</a> ${c.rhodecode_version} &copy; 2010-2011 by Marcin Kuzminski</p>
-	       </div>
-	   </div>
-        <script type="text/javascript">
-        function tooltip_activate(){
-        ${h.tooltip.activate()}
-        }
-        tooltip_activate();
-        </script>
-	</div>
-	<!-- end footer -->
-</body>
+<!-- FOOTER -->
+<div id="footer">
+   <div id="footer-inner" class="title bottom-left-rounded-corner bottom-right-rounded-corner">
+       <div>
+           <p class="footer-link">
+                <a href="${h.url('bugtracker')}">${_('Submit a bug')}</a>
+           </p>
+	       <p class="footer-link">
+	           <a href="${h.url('gpl_license')}">${_('GPL license')}</a>
+	       </p>
+	       <p class="footer-link-right">
+	           <a href="${h.url('rhodecode_official')}">RhodeCode</a> 
+	           ${c.rhodecode_version} &copy; 2010-${h.datetime.today().year} by Marcin Kuzminski
+	       </p>
+       </div>
+   </div>
+   <script type="text/javascript">
+   function tooltip_activate(){
+	    ${h.tooltip.activate()}
+   }
+   tooltip_activate();
+   </script>
+</div>
+<!-- END FOOTER -->
 
-</html>
-
-### MAKO DEFS ### 
+### MAKO DEFS ###
 <%def name="page_nav()">
-	${self.menu()}
+    ${self.menu()}
 </%def>
+
+<%def name="breadcrumbs()">
+    <div class="breadcrumbs">
+    ${self.breadcrumbs_links()}
+    </div>
+</%def>
+
 
 <%def name="menu(current=None)">
 		<% 
@@ -314,89 +300,4 @@
 				%endif
 			</ul>
 		%endif    
-</%def>
-
-
-<%def name="css()">
-<link rel="stylesheet" type="text/css" href="${h.url('/css/style.css')}" media="screen" />
-<link rel="stylesheet" type="text/css" href="${h.url('/css/pygments.css')}"  />
-<link rel="stylesheet" type="text/css" href="${h.url('/css/diff.css')}"  />
-</%def>
-
-<%def name="js()">
-##<script type="text/javascript" src="${h.url('/js/yui/utilities/utilities.js')}"></script>
-##<script type="text/javascript" src="${h.url('/js/yui/container/container.js')}"></script>
-##<script type="text/javascript" src="${h.url('/js/yui/datasource/datasource.js')}"></script>
-##<script type="text/javascript" src="${h.url('/js/yui/autocomplete/autocomplete.js')}"></script>
-##<script type="text/javascript" src="${h.url('/js/yui/selector/selector-min.js')}"></script>
-
-<script type="text/javascript" src="${h.url('/js/yui2a.js')}"></script>
-<!--[if IE]><script language="javascript" type="text/javascript" src="${h.url('/js/excanvas.min.js')}"></script><![endif]-->
-<script type="text/javascript" src="${h.url('/js/yui.flot.js')}"></script>
-
-<script type="text/javascript">
-var base_url  = "${h.url('toggle_following')}";
-var YUC = YAHOO.util.Connect;
-var YUD = YAHOO.util.Dom;
-var YUE = YAHOO.util.Event;
-
-function onSuccess(target){
-	
-	var f = YUD.get(target.id);
-	var f_cnt = YUD.get('current_followers_count');
-	
-    if(f.getAttribute('class')=='follow'){
-        f.setAttribute('class','following');
-        f.setAttribute('title',"${_('Stop following this repository')}");
-        
-        if(f_cnt){
-            var cnt = Number(f_cnt.innerHTML)+1;
-            f_cnt.innerHTML = cnt;
-        }
-        
-    }
-    else{
-        f.setAttribute('class','follow');
-        f.setAttribute('title',"${_('Start following this repository')}");
-        if(f_cnt){
-            var cnt = Number(f_cnt.innerHTML)+1;
-            f_cnt.innerHTML = cnt;
-        }      
-    }
-}
-
-function toggleFollowingUser(target,fallows_user_id,token,user_id){
-    args = 'follows_user_id='+fallows_user_id;
-    args+= '&amp;auth_token='+token;
-    if(user_id != undefined){
-    	args+="&amp;user_id="+user_id;
-    }
-    YUC.asyncRequest('POST',base_url,{
-        success:function(o){
-        	onSuccess(target);
-        }
-    },args); return false;
-}
-
-function toggleFollowingRepo(target,fallows_repo_id,token,user_id){
-
-    args = 'follows_repo_id='+fallows_repo_id;
-    args+= '&amp;auth_token='+token;
-    if(user_id != undefined){
-        args+="&amp;user_id="+user_id;
-    }    
-    YUC.asyncRequest('POST',base_url,{
-        success:function(o){
-        	onSuccess(target);
-        }
-    },args); return false;
-}    
-</script>
-
-</%def>
-
-<%def name="breadcrumbs()">
-    <div class="breadcrumbs">
-    ${self.breadcrumbs_links()}
-    </div>
 </%def>
