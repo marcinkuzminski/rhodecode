@@ -44,7 +44,9 @@
 # MA  02110-1301, USA.
 
 import logging
+
 from rhodecode.model import meta
+
 log = logging.getLogger(__name__)
 
 def init_model(engine):
@@ -54,7 +56,7 @@ def init_model(engine):
     
     :param engine: engine to bind to
     """
-    log.info("initializing db models for %s", engine)
+    log.info("initializing db for %s", engine)
     meta.Base.metadata.bind = engine
 
 class BaseModel(object):

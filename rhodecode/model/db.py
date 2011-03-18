@@ -211,10 +211,29 @@ class Repository(Base):
         return Session.query(cls).filter(cls.repo_name == repo_name).one()
 
     @property
-    def groups_and_repo(self):
-        just_name = self.repo_name.split('/')[-1]
+    def just_name(self):
+        return self.repo_name.split('/')[-1]
 
-        return self.group, just_name
+    @property
+    def groups_with_parents(self):
+        groups = []
+        if self.group is None:
+            return groups
+
+        cur_gr = self.group
+        groups.insert(0, cur_gr)
+        while 1:
+            gr = getattr(cur_gr, 'parent_group', None)
+            cur_gr = cur_gr.parent_group
+            if gr is None:
+                break
+            groups.insert(0, gr)
+
+        return groups
+
+    @property
+    def groups_and_repo(self):
+        return self.groups_with_parents, self.just_name
 
 
 class Group(Base):
