@@ -244,27 +244,29 @@ class FilesController(BaseRepoController):
             return diff.raw_diff()
 
         elif c.action == 'diff':
-            diff = differ.DiffProcessor(differ.get_gitdiff(node1, node2),
-                                        format='gitdiff')
 
-            if node1.size > self.cut_off_limit or node2.size > self.cut_off_limit:
-                c.cur_diff = _('Diff is to big to display')
-            elif node1.is_binary or node2.is_binary:
+            if node1.is_binary or node2.is_binary:
                 c.cur_diff = _('Binary file')
+            elif node1.size > self.cut_off_limit or node2.size > self.cut_off_limit:
+                c.cur_diff = _('Diff is too big to display')
             else:
+                diff = differ.DiffProcessor(differ.get_gitdiff(node1, node2),
+                                        format='gitdiff')
                 c.cur_diff = diff.as_html()
         else:
-            diff = differ.DiffProcessor(differ.get_gitdiff(node1, node2),
-                                        format='gitdiff')
+
             #default option
-            if node1.size > self.cut_off_limit or node2.size > self.cut_off_limit:
-                c.cur_diff = _('Diff is to big to display')
-            elif node1.is_binary or node2.is_binary:
+            if node1.is_binary or node2.is_binary:
                 c.cur_diff = _('Binary file')
+            elif node1.size > self.cut_off_limit or node2.size > self.cut_off_limit:
+                c.cur_diff = _('Diff is too big to display')
             else:
+                diff = differ.DiffProcessor(differ.get_gitdiff(node1, node2),
+                                        format='gitdiff')
                 c.cur_diff = diff.as_html()
 
-        if not c.cur_diff: c.no_changes = True
+        if not c.cur_diff:
+            c.no_changes = True
         return render('files/file_diff.html')
 
     def _get_history(self, repo, node, f_path):
