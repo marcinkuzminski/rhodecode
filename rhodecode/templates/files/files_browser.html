@@ -81,7 +81,7 @@
 		             <td>
 		             	%if node.is_file():
 		             		<span class="tooltip" title="${node.last_changeset.raw_id}">
-		             		${node.last_changeset.revision}</span>
+		             		${'r%s:%s' % (node.last_changeset.revision,node.last_changeset.short_id)}</span>
 		             	%endif
 		             </td>
 		             <td>
