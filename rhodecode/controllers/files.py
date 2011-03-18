@@ -26,7 +26,6 @@
 # MA  02110-1301, USA.
 
 import logging
-import tempfile
 import rhodecode.lib.helpers as h
 
 from pylons import request, response, session, tmpl_context as c, url
@@ -197,8 +196,7 @@ class FilesController(BaseRepoController):
         response.content_disposition = 'attachment; filename=%s-%s%s' \
             % (repo_name, revision, ext)
 
-        return cs.get_chunked_archive(stream=tempfile.TemporaryFile(),
-                                      kind=fileformat)
+        return cs.get_chunked_archive(stream=None, kind=fileformat)
 
 
     def diff(self, repo_name, f_path):
