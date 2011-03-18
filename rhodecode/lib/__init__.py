@@ -25,19 +25,21 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
 
-def str2bool(v):
-    if isinstance(v, (str, unicode)):
-        obj = v.strip().lower()
-        if obj in ['true', 'yes', 'on', 'y', 't', '1']:
-            return True
-        elif obj in ['false', 'no', 'off', 'n', 'f', '0']:
-            return False
-        else:
-            if not safe:
-                raise ValueError("String is not true/false: %r" % obj)
-    return bool(obj)
+def str2bool(s):
+    if s is None:
+        return False
+    if s in (True, False):
+        return s
+    s = str(s).strip().lower()
+    return s in ('t', 'true', 'y', 'yes', 'on', '1')
 
 def generate_api_key(username, salt=None):
+    """
+    Generates uniq API key for given username
+    
+    :param username: username as string
+    :param salt: salt to hash generate KEY
+    """
     from tempfile import _RandomNameSequence
     import hashlib
 
@@ -45,3 +47,21 @@ def generate_api_key(username, salt=None):
         salt = _RandomNameSequence().next()
 
     return hashlib.sha1(username + salt).hexdigest()
+
+def safe_unicode(str):
+    """
+    safe unicode function. In case of UnicodeDecode error we try to return
+    unicode with errors replace, if this fails we return unicode with 
+    string_escape decoding 
+    """
+
+    try:
+        u_str = unicode(str)
+    except UnicodeDecodeError:
+        try:
+            u_str = unicode(str, 'utf-8', 'replace')
+        except UnicodeDecodeError:
+            #incase we have a decode error just represent as byte string
+            u_str = unicode(str(str).encode('string_escape'))
+
+    return u_str

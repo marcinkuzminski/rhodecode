@@ -8,6 +8,7 @@ import hashlib
 import StringIO
 import urllib
 
+from datetime import datetime
 from pygments.formatters import HtmlFormatter
 from pygments import highlight as code_highlight
 from pylons import url, request, config
@@ -38,7 +39,8 @@ from rhodecode.lib.utils import repo_name_slug
 from rhodecode.lib import str2bool
 
 def _reset(name, value=None, id=NotGiven, type="reset", **attrs):
-    """Reset button
+    """
+    Reset button
     """
     _set_input_attrs(attrs, type, name, value)
     _set_id_attr(attrs, id, name)
@@ -380,8 +382,6 @@ def _age(curdate):
     if not curdate:
         return ''
 
-    from datetime import timedelta, datetime
-
     agescales = [("year", 3600 * 24 * 365),
                  ("month", 3600 * 24 * 30),
                  ("day", 3600 * 24),
@@ -670,22 +670,6 @@ class RepoPage(Page):
         # This is a subclass of the 'list' type. Initialise the list now.
         list.__init__(self, self.items)
 
-
-def safe_unicode(str):
-    """safe unicode function. In case of UnicodeDecode error we try to return
-    unicode with errors replace, if this failes we return unicode with 
-    string_escape decoding """
-
-    try:
-        u_str = unicode(str)
-    except UnicodeDecodeError:
-        try:
-            u_str = unicode(str, 'utf-8', 'replace')
-        except UnicodeDecodeError:
-            #incase we have a decode error just represent as byte string
-            u_str = unicode(str(str).encode('string_escape'))
-
-    return u_str
 
 def changed_tooltip(nodes):
     if nodes:

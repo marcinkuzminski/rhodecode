@@ -25,9 +25,14 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
 
-import sys
 import os
+import sys
+import logging
 import traceback
+
+from shutil import rmtree
+from time import mktime
+
 from os.path import dirname as dn
 from os.path import join as jn
 
@@ -37,15 +42,14 @@ sys.path.append(project_path)
 
 
 from rhodecode.model.scm import ScmModel
-from rhodecode.lib.helpers import safe_unicode
-from whoosh.index import create_in, open_dir
-from shutil import rmtree
+from rhodecode.lib import safe_unicode
 from rhodecode.lib.indexers import INDEX_EXTENSIONS, SCHEMA, IDX_NAME
 
-from time import mktime
 from vcs.exceptions import ChangesetError, RepositoryError
 
-import logging
+from whoosh.index import create_in, open_dir
+
+
 
 log = logging.getLogger('whooshIndexer')
 # create logger
