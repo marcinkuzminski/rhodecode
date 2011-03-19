@@ -319,10 +319,21 @@ class SettingsController(BaseController):
     @HasPermissionAnyDecorator('hg.admin', 'hg.create.repository')
     def create_repository(self):
         """GET /_admin/create_repository: Form to create a new item"""
+
+        c.repo_groups = [('', '')]
+        parents_link = lambda k:h.literal('&raquo;'.join(
+                                    map(lambda k:k.group_name,
+                                        k.parents + [k])
+                                    )
+                                )
+
+        c.repo_groups.extend([(x.group_id, parents_link(x)) for \
+                                            x in self.sa.query(Group).all()])
+        c.repo_groups_choices = map(lambda k: unicode(k[0]), c.repo_groups)
+
         new_repo = request.GET.get('repo', '')
         c.new_repo = repo_name_slug(new_repo)
-        c.repo_groups = [('', '')]
-        c.repo_groups.extend([(x.group_id, x.group_name) for x in self.sa.query(Group).all()])
+
         return render('admin/repos/repo_add_create_repository.html')
 
     def get_hg_ui_settings(self):
