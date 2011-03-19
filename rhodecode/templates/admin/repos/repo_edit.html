@@ -10,7 +10,7 @@
     &raquo; 
     ${h.link_to(_('Repositories'),h.url('repos'))} 
     &raquo;
-    ${_('edit')} &raquo; ${h.link_to(c.repo_name,h.url('summary_home',repo_name=c.repo_name))}
+    ${_('edit')} &raquo; ${h.link_to(c.repo_info.just_name,h.url('summary_home',repo_name=c.repo_name))}
 </%def>
 
 <%def name="page_nav()">
@@ -40,7 +40,7 @@
 	               <label for="clone_uri">${_('Clone uri')}:</label>
 	           </div>
 	           <div class="input">
-	               ${h.text('clone_uri',class_="small")}
+	               ${h.text('clone_uri',class_="medium")}
 	           </div>
 	        </div>             
 	        <div class="field">

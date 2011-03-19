@@ -255,6 +255,21 @@ class Group(Base):
         return "<%s('%s:%s')>" % (self.__class__.__name__, self.group_id,
                                   self.group_name)
 
+    @property
+    def parents(self):
+        groups = []
+        if self.parent_group is None:
+            return groups
+        cur_gr = self.parent_group
+        groups.insert(0, cur_gr)
+        while 1:
+            gr = getattr(cur_gr, 'parent_group', None)
+            cur_gr = cur_gr.parent_group
+            if gr is None:
+                break
+            groups.insert(0, gr)
+        return groups
+
 class Permission(Base):
     __tablename__ = 'permissions'
     __table_args__ = {'useexisting':True}

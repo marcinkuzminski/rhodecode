@@ -63,18 +63,35 @@ class ReposController(BaseController):
         c.admin_username = session.get('admin_username')
         super(ReposController, self).__before__()
 
+    def __load_defaults(self):
+        repo_model = RepoModel()
 
+        c.repo_groups = [('', '')]
+        parents_link = lambda k:h.literal('&raquo;'.join(
+                                    map(lambda k:k.group_name,
+                                        k.parents + [k])
+                                    )
+                                )
 
-    def __load_data(self, repo_name):
+        c.repo_groups.extend([(x.group_id, parents_link(x)) for \
+                                            x in self.sa.query(Group).all()])
+        c.repo_groups_choices = map(lambda k: unicode(k[0]), c.repo_groups)
+        c.users_array = repo_model.get_users_js()
+        c.users_groups_array = repo_model.get_users_groups_js()
+
+    def __load_data(self, repo_name=None):
         """
         Load defaults settings for edit, and update
         
         :param repo_name:
         """
+        self.__load_defaults()
+
         repo, dbrepo = ScmModel().get(repo_name, retval='repo')
 
         repo_model = RepoModel()
         c.repo_info = repo_model.get_by_repo_name(repo_name)
+
 
         if c.repo_info is None:
             h.flash(_('%s repository is not mapped to db perhaps'
@@ -85,10 +102,6 @@ class ReposController(BaseController):
 
             return redirect(url('repos'))
 
-
-
-        c.repo_groups = [('', '')]
-        c.repo_groups.extend([(x.group_id, x.group_name) for x in self.sa.query(Group).all()])
 
         c.default_user_id = User.by_username('default').user_id
         c.in_public_journal = self.sa.query(UserFollowing)\
@@ -109,13 +122,13 @@ class ReposController(BaseController):
             c.stats_percentage = '%.2f' % ((float((last_rev)) /
                                             c.repo_last_rev) * 100)
 
-        c.users_array = repo_model.get_users_js()
-        c.users_groups_array = repo_model.get_users_groups_js()
+
 
         defaults = c.repo_info.get_dict()
         group, repo_name = c.repo_info.groups_and_repo
         defaults['repo_name'] = repo_name
-        defaults['repo_group'] = getattr(group, 'group_id', None)
+        defaults['repo_group'] = getattr(group[-1], 'group_id', None)
+
         #fill owner
         if c.repo_info.user:
             defaults.update({'user':c.repo_info.user.username})
@@ -153,11 +166,11 @@ class ReposController(BaseController):
         POST /repos: Create a new item"""
         # url('repos')
         repo_model = RepoModel()
-        c.repo_groups = [('', '')]
-        c.repo_groups.extend([(x.group_id, x.group_name) for x in self.sa.query(Group).all()])
+        self.__load_defaults()
         form_result = {}
         try:
-            form_result = RepoForm()(repo_groups=c.repo_groups).to_python(dict(request.POST))
+            form_result = RepoForm(repo_groups=c.repo_groups_choices)()\
+                            .to_python(dict(request.POST))
             repo_model.create(form_result, self.rhodecode_user)
             if form_result['clone_uri']:
                 h.flash(_('created repository %s from %s') \
@@ -177,8 +190,6 @@ class ReposController(BaseController):
         except formencode.Invalid, errors:
 
             c.new_repo = errors.value['repo_name']
-            c.repo_groups = [('', '')]
-            c.repo_groups.extend([(x.group_id, x.group_name) for x in self.sa.query(Group).all()])
 
             if request.POST.get('user_created'):
                 r = render('admin/repos/repo_add_create_repository.html')
@@ -206,8 +217,7 @@ class ReposController(BaseController):
         """GET /repos/new: Form to create a new item"""
         new_repo = request.GET.get('repo', '')
         c.new_repo = repo_name_slug(new_repo)
-        c.repo_groups = [('', '')]
-        c.repo_groups.extend([(x.group_id, x.group_name) for x in self.sa.query(Group).all()])
+        self.__load_defaults()
         return render('admin/repos/repo_add.html')
 
     @HasPermissionAllDecorator('hg.admin')
@@ -220,9 +230,11 @@ class ReposController(BaseController):
         #    h.form(url('repo', repo_name=ID),
         #           method='put')
         # url('repo', repo_name=ID)
+        self.__load_defaults()
         repo_model = RepoModel()
         changed_name = repo_name
-        _form = RepoForm(edit=True, old_data={'repo_name':repo_name})()
+        _form = RepoForm(edit=True, old_data={'repo_name':repo_name},
+                         repo_groups=c.repo_groups_choices)()
         try:
             form_result = _form.to_python(dict(request.POST))
             repo_model.update(repo_name, form_result)

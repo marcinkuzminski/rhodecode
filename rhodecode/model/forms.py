@@ -458,7 +458,7 @@ def RepoForm(edit=False, old_data={}, supported_backends=BACKENDS.keys(),
         repo_name = All(UnicodeString(strip=True, min=1, not_empty=True),
                         ValidRepoName(edit, old_data))
         clone_uri = UnicodeString(strip=True, min=1, not_empty=False)
-        repo_group = OneOf(repo_groups)
+        repo_group = OneOf(repo_groups, hideList=True)
         repo_type = OneOf(supported_backends)
         description = UnicodeString(strip=True, min=1, not_empty=True)
         private = StringBoolean(if_missing=False)

@@ -680,3 +680,18 @@ def changed_tooltip(nodes):
         return literal(pref + '<br/> '.join([x.path.decode('utf-8', 'replace') for x in nodes[:30]]) + suf)
     else:
         return ': ' + _('No Files')
+
+
+
+def repo_link(groups_and_repos):
+    groups, repo_name = groups_and_repos
+
+    if not groups:
+        return repo_name
+    else:
+        def make_link(group):
+            return link_to(group.group_name, url('/', group.group_id))
+        return literal(' &raquo; '.join(map(make_link, groups)) + \
+                       " &raquo; " + repo_name)
+
+
