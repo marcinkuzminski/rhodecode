@@ -1,0 +1,15 @@
+## -*- coding: utf-8 -*-    
+%for repo in c.repos_list:
+     
+      %if repo['dbrepo']['private']:
+         <li>
+             <img src="${h.url("/images/icons/lock.png")}" alt="${_('Private repository')}" class="repo_switcher_type"/>
+             ${h.link_to(repo['name'].name,h.url('summary_home',repo_name=repo['name']),class_="%s" % repo['dbrepo']['repo_type'])}
+          </li>
+      %else:
+         <li>
+             <img src="${h.url("/images/icons/lock_open.png")}" alt="${_('Public repository')}" class="repo_switcher_type" />
+             ${h.link_to(repo['name'],h.url('summary_home',repo_name=repo['name']),class_="%s" % repo['dbrepo']['repo_type'])}
+         </li>
+      %endif  
+%endfor

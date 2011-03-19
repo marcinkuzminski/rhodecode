@@ -117,16 +117,28 @@
                     </span>
                     <span>&darr;</span>					
 					</a>
-					<ul class="repo_switcher">
-                        %for repo in c.cached_repo_list:
-                        
-                          %if repo['dbrepo']['private']:
-                             <li><img src="${h.url("/images/icons/lock.png")}" alt="${_('Private repository')}" class="repo_switcher_type"/>${h.link_to(repo['repo'].name,h.url('summary_home',repo_name=repo['repo'].name),class_="%s" % repo['dbrepo']['repo_type'])}</li>
-                          %else:
-                             <li><img src="${h.url("/images/icons/lock_open.png")}" alt="${_('Public repository')}" class="repo_switcher_type" />${h.link_to(repo['repo'].name,h.url('summary_home',repo_name=repo['repo'].name),class_="%s" % repo['dbrepo']['repo_type'])}</li>
-                          %endif  
-                        %endfor					
-					</ul>			
+					<ul id="repo_switcher_list" class="repo_switcher">
+                        <li>
+                            <a href="#">${_('loading...')}</a>
+                        </li>
+					</ul>
+					<script type="text/javascript">
+					   YUE.on('repo_switcher','mouseover',function(){
+						   var loaded = YUD.hasClass('repo_switcher','loaded');
+						   if(!loaded){
+							   YUD.addClass('repo_switcher','loaded');
+							   YAHOO.util.Connect.asyncRequest('GET',"${h.url('repo_switcher')}",{
+								   success:function(o){
+								      YUD.get('repo_switcher_list').innerHTML = o.responseText;
+								   },
+								   failure:function(o){
+									   YUD.removeClass('repo_switcher','loaded');   
+								   }
+							   },null);
+						   }
+						   return false;
+					   });
+					</script>	
 				</li>
 				
 	            <li ${is_current('summary')}>

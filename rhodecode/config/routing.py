@@ -37,6 +37,7 @@ def make_map(config):
 
     #MAIN PAGE
     routes_map.connect('home', '/', controller='home', action='index')
+    routes_map.connect('repo_switcher', '/repos', controller='home', action='repo_switcher')
     routes_map.connect('bugtracker', "http://bitbucket.org/marcinkuzminski/rhodecode/issues", _static=True)
     routes_map.connect('gpl_license', "http://www.gnu.org/licenses/gpl.html", _static=True)
     routes_map.connect('rhodecode_official', "http://rhodecode.org", _static=True)

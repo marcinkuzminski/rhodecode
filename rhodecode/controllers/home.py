@@ -29,9 +29,11 @@ import logging
 from operator import itemgetter
 
 from pylons import tmpl_context as c, request
+from paste.httpexceptions import HTTPBadRequest
 
 from rhodecode.lib.auth import LoginRequired
 from rhodecode.lib.base import BaseController, render
+
 
 log = logging.getLogger(__name__)
 
@@ -63,3 +65,11 @@ class HomeController(BaseController):
                                   reverse=False)
 
         return render('/index.html')
+
+    def repo_switcher(self):
+        if request.is_xhr:
+            c.repos_list = sorted(c.cached_repo_list,
+                                  key=itemgetter('name_sort'), reverse=False)
+            return render('/repo_switcher_list.html')
+        else:
+            return HTTPBadRequest()
