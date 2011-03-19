@@ -127,7 +127,7 @@ class ReposController(BaseController):
         defaults = c.repo_info.get_dict()
         group, repo_name = c.repo_info.groups_and_repo
         defaults['repo_name'] = repo_name
-        defaults['repo_group'] = getattr(group[-1], 'group_id', None)
+        defaults['repo_group'] = getattr(group[-1] if group else None, 'group_id', None)
 
         #fill owner
         if c.repo_info.user:
