@@ -51,6 +51,25 @@ class FeedController(BaseRepoController):
         self.ttl = "5"
         self.feed_nr = 10
 
+    def __changes(self, cs):
+        changes = ''
+
+        a = [n.path for n in cs.added]
+        if a:
+            changes += '\nA ' + '\nA '.join(a)
+
+        m = [n.path for n in cs.changed]
+        if m:
+            changes += '\nM ' + '\nM '.join(m)
+
+        d = [n.path for n in cs.removed]
+        if d:
+            changes += '\nD ' + '\nD '.join(d)
+
+        changes += '</pre>'
+
+        return changes
+
     def atom(self, repo_name):
         """Produce an atom-1.0 feed via feedgenerator module"""
         feed = Atom1Feed(title=self.title % repo_name,
@@ -59,11 +78,15 @@ class FeedController(BaseRepoController):
                          language=self.language,
                          ttl=self.ttl)
 
-        for cs in c.rhodecode_repo[:self.feed_nr]:
+        for cs in reversed(list(c.rhodecode_repo[-self.feed_nr:])):
+            desc = '%s - %s<br/><pre>' % (cs.author, cs.date)
+            desc += self.__changes(cs)
+
             feed.add_item(title=cs.message,
                           link=url('changeset_home', repo_name=repo_name,
                                    revision=cs.raw_id, qualified=True),
-                                   description=str(cs.date))
+                          author_name=cs.author,
+                          description=desc)
 
         response.content_type = feed.mime_type
         return feed.writeString('utf-8')
@@ -77,11 +100,16 @@ class FeedController(BaseRepoController):
                          language=self.language,
                          ttl=self.ttl)
 
-        for cs in c.rhodecode_repo[:self.feed_nr]:
+        for cs in reversed(list(c.rhodecode_repo[-self.feed_nr:])):
+            desc = '%s - %s<br/><pre>' % (cs.author, cs.date)
+            desc += self.__changes(cs)
+
             feed.add_item(title=cs.message,
                           link=url('changeset_home', repo_name=repo_name,
                                    revision=cs.raw_id, qualified=True),
-                          description=str(cs.date))
+                          author_name=cs.author,
+                          description=desc,
+                         )
 
         response.content_type = feed.mime_type
         return feed.writeString('utf-8')
