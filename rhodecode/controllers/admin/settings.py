@@ -117,7 +117,7 @@ class SettingsController(BaseController):
         if setting_id == 'whoosh':
             repo_location = self.get_hg_ui_settings()['paths_root_path']
             full_index = request.POST.get('full_index', False)
-            task = run_task(tasks.whoosh_index, repo_location, full_index)
+            run_task(tasks.whoosh_index, repo_location, full_index)
 
             h.flash(_('Whoosh reindex task scheduled'), category='success')
         if setting_id == 'global':
@@ -147,7 +147,7 @@ class SettingsController(BaseController):
                     h.flash(_('Updated application settings'),
                             category='success')
 
-                except:
+                except Exception:
                     log.error(traceback.format_exc())
                     h.flash(_('error occurred during updating application settings'),
                             category='error')
