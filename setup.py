@@ -78,7 +78,7 @@ setup(
     description=description,
     long_description=long_description,
     keywords=keywords,
-    license='BSD',
+    license='GPLv3',
     author='Marcin Kuzminski',
     author_email='marcin@python-works.com',
     url='http://rhodecode.org',

@@ -31,11 +31,19 @@ using the following credentials:
 Source code
 -----------
 
-The latest source for RhodeCode can be obtained from official RhodeCode instance
+The latest sources can be obtained from official RhodeCode instance
 https://hg.rhodecode.org 
 
-Rarely updated source code and issue tracker is available at bitbcuket
+
+MIRRORS:
+
+Issue tracker and sources at bitbucket_
+
 http://bitbucket.org/marcinkuzminski/rhodecode
+
+Sources at github_
+
+https://github.com/marcinkuzminski/rhodecode
 
 Installation
 ------------
@@ -48,29 +56,29 @@ RhodeCode Features
 
 - Has it's own middleware to handle mercurial_ protocol requests. 
   Each request can be logged and authenticated.
-- Runs on threads unlike hgweb. You can make multiple pulls/pushes simultaneous. Supports http/https 
-  and LDAP
+- Runs on threads unlike hgweb. You can make multiple pulls/pushes simultaneous.
+  Supports http/https and LDAP
 - Full permissions (private/read/write/admin) and authentication per project. 
   One account for web interface and mercurial_ push/pull/clone operations.
 - Have built in users groups for easier permission management
 - Users can fork other users repo. RhodeCode have also compare view to see
   combined changeset for all changeset made within single push.
 - Mako templates let's you customize the look and feel of the application.
-- Beautiful diffs, annotations and source code browsing all colored by pygments. Raw
-  diffs are made in git-diff format, including git_ binary-patches
+- Beautiful diffs, annotations and source code browsing all colored by pygments. 
+  Raw diffs are made in git-diff format, including git_ binary-patches
 - Mercurial_ branch graph and yui-flot powered graphs with zooming and statistics
 - Admin interface with user/permission management. Admin activity journal, logs
   pulls, pushes, forks, registrations and other actions made by all users.
-- Server side forks. It is possible to fork a project and modify it freely without
-  breaking the main repository. You can even write Your own hooks and install 
-  them
+- Server side forks. It is possible to fork a project and modify it freely 
+  without breaking the main repository. You can even write Your own hooks 
+  and install them
 - Full text search powered by Whoosh on the source files, and file names.
   Build in indexing daemons, with optional incremental index build
   (no external search servers required all in one application)
 - Setup project descriptions and info inside built in db for easy, non 
   file-system operations
-- Intelligent cache with invalidation after push or project change, provides high 
-  performance and always up to date data.
+- Intelligent cache with invalidation after push or project change, provides 
+  high performance and always up to date data.
 - Rss / atom feeds, gravatar support, download sources as zip/tar/gz
 - Async tasks for speed and performance using celery_ (works without them too)  
 - Backup scripts can do backup of whole app and send it over scp to desired 
@@ -94,7 +102,8 @@ Incoming / Plans
 - Redmine integration
 - Commit based built in wiki system
 - More statistics and graph (global annotation + some more statistics)
-- Other advancements as development continues (or you can of course make additions and or requests)
+- Other advancements as development continues (or you can of course make 
+  additions and or requests)
 
 License
 -------
@@ -121,14 +130,16 @@ You may also build the documentation for yourself - go into ``docs/`` and run::
 
    make html
 
-(You need to have sphinx installed to build the documentation. If you don't
-have sphinx installed you can install it via the command: ``easy_install sphinx``)
+(You need to have sphinx_ installed to build the documentation. If you don't
+have sphinx_ installed you can install it via the command: 
+``easy_install sphinx``)
  
 .. _virtualenv: http://pypi.python.org/pypi/virtualenv
 .. _python: http://www.python.org/
-.. _django: http://www.djangoproject.com/
+.. _sphinx: http://sphinx.pocoo.org/
 .. _mercurial: http://mercurial.selenic.com/
 .. _bitbucket: http://bitbucket.org/
+.. _github: http://github.com/
 .. _subversion: http://subversion.tigris.org/
 .. _git: http://git-scm.com/
 .. _celery: http://celeryproject.org/
