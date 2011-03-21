@@ -27,10 +27,13 @@
 # MA  02110-1301, USA.
 import platform
 
-VERSION = (1, 1, 5)
+VERSION = (1, 1, 6)
 __version__ = '.'.join((str(each) for each in VERSION[:4]))
 __dbversion__ = 2 #defines current db version for migrations
 __platform__ = platform.system()
+
+PLATFORM_WIN = ('Windows',)
+PLATFORM_OTHERS = ('Linux', 'Darwin', 'FreeBSD',)
 
 try:
     from rhodecode.lib.utils import get_current_revision

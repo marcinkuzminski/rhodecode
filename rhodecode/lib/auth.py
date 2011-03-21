@@ -34,11 +34,11 @@ from pylons import config, session, url, request
 from pylons.controllers.util import abort, redirect
 from pylons.i18n.translation import _
 
-from rhodecode import __platform__
+from rhodecode import __platform__, PLATFORM_WIN, PLATFORM_OTHERS
 
-if __platform__ == 'Windows':
+if __platform__ in PLATFORM_WIN:
     from hashlib import sha256
-if __platform__ in ('Linux', 'Darwin'):
+if __platform__ in PLATFORM_OTHERS:
     import bcrypt
 
 from rhodecode.lib import str2bool
@@ -89,9 +89,9 @@ class RhodeCodeCrypto(object):
         
         :param password: password to hash
         """
-        if __platform__ == 'Windows':
+        if __platform__ in PLATFORM_WIN:
             return sha256(str_).hexdigest()
-        elif __platform__ in ('Linux', 'Darwin'):
+        elif __platform__ in PLATFORM_OTHERS:
             return bcrypt.hashpw(str_, bcrypt.gensalt(10))
         else:
             raise Exception('Unknown or unsupported platform %s' % __platform__)

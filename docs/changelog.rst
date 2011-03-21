@@ -4,6 +4,18 @@ Changelog
 =========
 
 
+1.1.6 (**2011-03-21**)
+======================
+
+news
+----
+
+fixes
+-----
+
+- fixed #136 installation support for FreeBSD
+- RhodeCode will check for python version during installation
+
 1.1.5 (**2011-03-17**)
 ======================
 

@@ -4,6 +4,9 @@ from rhodecode import __platform__
 
 py_version = sys.version_info
 
+if py_version < (2, 5):
+    raise Exception('RhodeCode requires python 2.5 or later')
+
 requirements = [
         "Pylons==1.0.0",
         "WebHelpers==1.2",
@@ -75,7 +78,7 @@ setup(
     description=description,
     long_description=long_description,
     keywords=keywords,
-    license='BSD',
+    license='GPLv3',
     author='Marcin Kuzminski',
     author_email='marcin@python-works.com',
     url='http://rhodecode.org',
