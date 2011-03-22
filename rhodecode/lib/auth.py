@@ -106,9 +106,9 @@ class RhodeCodeCrypto(object):
         :param hashed: password in hashed form
         """
 
-        if __platform__ == 'Windows':
+        if __platform__ in PLATFORM_WIN:
             return sha256(password).hexdigest() == hashed
-        elif __platform__ in ('Linux', 'Darwin'):
+        elif __platform__ in PLATFORM_OTHERS:
             return bcrypt.hashpw(password, hashed) == hashed
         else:
             raise Exception('Unknown or unsupported platform %s' % __platform__)
