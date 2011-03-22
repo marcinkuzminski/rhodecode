@@ -296,10 +296,11 @@ def send_email(recipients, subject, body):
     mail_port = email_config.get('smtp_port')
     tls = str2bool(email_config.get('smtp_use_tls'))
     ssl = str2bool(email_config.get('smtp_use_ssl'))
+    debug = str2bool(config.get('debug'))
 
     try:
         m = SmtpMailer(mail_from, user, passwd, mail_server,
-                       mail_port, ssl, tls)
+                       mail_port, ssl, tls, debug=debug)
         m.send(recipients, subject, body)
     except:
         log.error('Mail sending failed')

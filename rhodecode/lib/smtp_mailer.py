@@ -36,7 +36,7 @@ class SmtpMailer(object):
     """
 
     def __init__(self, mail_from, user, passwd, mail_server,
-                    mail_port=None, ssl=False, tls=False):
+                    mail_port=None, ssl=False, tls=False, debug=False):
 
         self.mail_from = mail_from
         self.mail_server = mail_server
@@ -45,7 +45,7 @@ class SmtpMailer(object):
         self.passwd = passwd
         self.ssl = ssl
         self.tls = tls
-        self.debug = False
+        self.debug = debug
 
     def send(self, recipients=[], subject='', body='', attachment_files=None):
 
