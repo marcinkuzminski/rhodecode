@@ -99,8 +99,10 @@ class AuthLdap(object):
                 server.simple_bind_s(self.LDAP_BIND_DN, self.LDAP_BIND_PASS)
 
             filt = '(&%s(%s=%s))' % (self.LDAP_FILTER, self.attr_login, username)
-            log.debug("Authenticating %r filt %s at %s", self.BASE_DN, filt, self.LDAP_SERVER)
-            lobjects = server.search_ext_s(self.BASE_DN, self.SEARCH_SCOPE, filt)
+            log.debug("Authenticating %r filt %s at %s", self.BASE_DN,
+                      filt, self.LDAP_SERVER)
+            lobjects = server.search_ext_s(self.BASE_DN, self.SEARCH_SCOPE,
+                                           filt)
 
             if not lobjects:
                 raise ldap.NO_SUCH_OBJECT()
@@ -111,10 +113,12 @@ class AuthLdap(object):
                     break
 
                 except ldap.INVALID_CREDENTIALS, e:
-                    log.debug("LDAP rejected password for user '%s' (%s): %s", uid, username, dn)
+                    log.debug("LDAP rejected password for user '%s' (%s): %s",
+                              uid, username, dn)
 
                 else:
-                    log.debug("No matching LDAP objecs for authentication of '%s' (%s)", uid, username)
+                    log.debug("No matching LDAP objects for authentication "
+                              "of '%s' (%s)", uid, username)
                     raise LdapPasswordError()
 
         except ldap.NO_SUCH_OBJECT, e:
