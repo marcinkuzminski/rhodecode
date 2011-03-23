@@ -35,7 +35,8 @@ from vcs.exceptions import ChangesetError
 from pylons import tmpl_context as c, request, url
 from pylons.i18n.translation import _
 
-from rhodecode.model.db import Statistics
+from rhodecode.model.db import Statistics, Repository
+from rhodecode.model.repo import RepoModel
 
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseRepoController, render
@@ -60,19 +61,20 @@ class SummaryController(BaseRepoController):
     def __before__(self):
         super(SummaryController, self).__before__()
 
-    def index(self):
-        c.repo, dbrepo = self.scm_model.get(c.repo_name)
-        c.dbrepo = dbrepo
-
-        c.following = self.scm_model.is_following_repo(c.repo_name,
-                                             self.rhodecode_user.user_id)
-        def url_generator(**kw):
-            return url('shortlog_home', repo_name=c.repo_name, **kw)
-
-        c.repo_changesets = RepoPage(c.repo, page=1, items_per_page=10,
-                                 url=url_generator)
+    def index(self, repo_name):
 
         e = request.environ
+        c.dbrepo = dbrepo = Repository.by_repo_name(repo_name)
+
+        c.following = self.scm_model.is_following_repo(repo_name,
+                                                       self.rhodecode_user.user_id)
+        def url_generator(**kw):
+            return url('shortlog_home', repo_name=repo_name, **kw)
+
+        c.repo_changesets = RepoPage(c.rhodecode_repo, page=1, items_per_page=10,
+                                 url=url_generator)
+
+
 
         if self.rhodecode_user.username == 'default':
             #for default(anonymous) user we don't need to pass credentials
@@ -88,19 +90,19 @@ class SummaryController(BaseRepoController):
                                         'password':password,
                                         'host':e.get('HTTP_HOST'),
                                         'prefix':e.get('SCRIPT_NAME'),
-                                        'repo_name':c.repo_name, }
+                                        'repo_name':repo_name, }
         c.clone_repo_url = uri
         c.repo_tags = OrderedDict()
-        for name, hash in c.repo.tags.items()[:10]:
+        for name, hash in c.rhodecode_repo.tags.items()[:10]:
             try:
-                c.repo_tags[name] = c.repo.get_changeset(hash)
+                c.repo_tags[name] = c.rhodecode_repo.get_changeset(hash)
             except ChangesetError:
                 c.repo_tags[name] = EmptyChangeset(hash)
 
         c.repo_branches = OrderedDict()
-        for name, hash in c.repo.branches.items()[:10]:
+        for name, hash in c.rhodecode_repo.branches.items()[:10]:
             try:
-                c.repo_branches[name] = c.repo.get_changeset(hash)
+                c.repo_branches[name] = c.rhodecode_repo.get_changeset(hash)
             except ChangesetError:
                 c.repo_branches[name] = EmptyChangeset(hash)
 
@@ -114,7 +116,7 @@ class SummaryController(BaseRepoController):
 
         if dbrepo.enable_statistics:
             c.no_data_msg = _('No data loaded yet')
-            run_task(get_commits_stats, c.repo.name, ts_min_y, ts_max_y)
+            run_task(get_commits_stats, c.dbrepo.repo_name, ts_min_y, ts_max_y)
         else:
             c.no_data_msg = _('Statistics are disabled for this repository')
         c.ts_min = ts_min_m
@@ -143,7 +145,7 @@ class SummaryController(BaseRepoController):
 
         c.enable_downloads = dbrepo.enable_downloads
         if c.enable_downloads:
-            c.download_options = self._get_download_links(c.repo)
+            c.download_options = self._get_download_links(c.rhodecode_repo)
 
         return render('summary/summary.html')
 

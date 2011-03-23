@@ -293,7 +293,7 @@ def pygmentize(filenode, **kwargs):
     return literal(code_highlight(filenode.content,
                                   filenode.lexer, CodeHtmlFormatter(**kwargs)))
 
-def pygmentize_annotation(filenode, **kwargs):
+def pygmentize_annotation(repo_name, filenode, **kwargs):
     """pygmentize function for annotation
     
     :param filenode:
@@ -326,27 +326,30 @@ def pygmentize_annotation(filenode, **kwargs):
             col = color_dict[cs] = cgenerator.next()
         return "color: rgb(%s)! important;" % (', '.join(col))
 
-    def url_func(changeset):
-        tooltip_html = "<div style='font-size:0.8em'><b>Author:</b>" + \
-        " %s<br/><b>Date:</b> %s</b><br/><b>Message:</b> %s<br/></div>"
+    def url_func(repo_name):
+        def _url_func(changeset):
+            tooltip_html = "<div style='font-size:0.8em'><b>Author:</b>" + \
+            " %s<br/><b>Date:</b> %s</b><br/><b>Message:</b> %s<br/></div>"
 
-        tooltip_html = tooltip_html % (changeset.author,
-                                               changeset.date,
-                                               tooltip(changeset.message))
-        lnk_format = '%5s:%s' % ('r%s' % changeset.revision,
-                                 short_id(changeset.raw_id))
-        uri = link_to(
-                lnk_format,
-                url('changeset_home', repo_name=changeset.repository.name,
-                    revision=changeset.raw_id),
-                style=get_color_string(changeset.raw_id),
-                class_='tooltip',
-                title=tooltip_html
-              )
+            tooltip_html = tooltip_html % (changeset.author,
+                                                   changeset.date,
+                                                   tooltip(changeset.message))
+            lnk_format = '%5s:%s' % ('r%s' % changeset.revision,
+                                     short_id(changeset.raw_id))
+            uri = link_to(
+                    lnk_format,
+                    url('changeset_home', repo_name=repo_name,
+                        revision=changeset.raw_id),
+                    style=get_color_string(changeset.raw_id),
+                    class_='tooltip',
+                    title=tooltip_html
+                  )
 
-        uri += '\n'
-        return uri
-    return literal(annotate_highlight(filenode, url_func, **kwargs))
+            uri += '\n'
+            return uri
+        return _url_func
+
+    return literal(annotate_highlight(filenode, url_func(repo_name), **kwargs))
 
 def get_changeset_safe(repo, rev):
     from vcs.backends.base import BaseRepository
@@ -690,7 +693,7 @@ def repo_link(groups_and_repos):
         return repo_name
     else:
         def make_link(group):
-            return link_to(group.group_name, url('/', group.group_id))
+            return link_to(group.group_name, url('repos_group', id=group.group_id))
         return literal(' &raquo; '.join(map(make_link, groups)) + \
                        " &raquo; " + repo_name)
 

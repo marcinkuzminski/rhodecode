@@ -91,7 +91,7 @@ class WhooshIndexingDaemon(object):
             filtered_repo_paths = {}
             for repo_name, repo in self.repo_paths.items():
                 if repo_name in repo_list:
-                    filtered_repo_paths[repo.name] = repo
+                    filtered_repo_paths[repo_name] = repo
 
             self.repo_paths = filtered_repo_paths
 
@@ -130,7 +130,7 @@ class WhooshIndexingDaemon(object):
     def get_node_mtime(self, node):
         return mktime(node.last_changeset.date.timetuple())
 
-    def add_doc(self, writer, path, repo):
+    def add_doc(self, writer, path, repo, repo_name):
         """Adding doc to writer this function itself fetches data from
         the instance of vcs backend"""
         node = self.get_node(repo, path)
@@ -152,7 +152,7 @@ class WhooshIndexingDaemon(object):
             u_content = u''
 
         writer.add_document(owner=unicode(repo.contact),
-                        repository=safe_unicode(repo.name),
+                        repository=safe_unicode(repo_name),
                         path=safe_unicode(path),
                         content=u_content,
                         modtime=self.get_node_mtime(node),
@@ -170,11 +170,11 @@ class WhooshIndexingDaemon(object):
         idx = create_in(self.index_location, SCHEMA, indexname=IDX_NAME)
         writer = idx.writer()
 
-        for repo in self.repo_paths.values():
+        for repo_name, repo in self.repo_paths.items():
             log.debug('building index @ %s' % repo.path)
 
             for idx_path in self.get_paths(repo):
-                self.add_doc(writer, idx_path, repo)
+                self.add_doc(writer, idx_path, repo, repo_name)
 
         log.debug('>> COMMITING CHANGES <<')
         writer.commit(merge=True)
@@ -221,12 +221,12 @@ class WhooshIndexingDaemon(object):
         # Loop over the files in the filesystem
         # Assume we have a function that gathers the filenames of the
         # documents to be indexed
-        for repo in self.repo_paths.values():
+        for repo_name, repo in self.repo_paths.items():
             for path in self.get_paths(repo):
                 if path in to_index or path not in indexed_paths:
                     # This is either a file that's changed, or a new file
                     # that wasn't indexed before. So index it!
-                    self.add_doc(writer, path, repo)
+                    self.add_doc(writer, path, repo, repo_name)
                     log.debug('re indexing %s' % path)
 
         log.debug('>> COMMITING CHANGES <<')

@@ -7,7 +7,7 @@
 <%def name="breadcrumbs_links()">
     ${h.link_to(u'Home',h.url('/'))}
     &raquo; 
-    ${h.link_to(c.repo_name,h.url('summary_home',repo_name=c.repo_name))}
+    ${h.link_to(c.dbrepo.just_name,h.url('summary_home',repo_name=c.repo_name))}
     &raquo;
     ${_('summary')}
 </%def>
@@ -31,6 +31,17 @@
 			      <label>${_('Name')}:</label>
 			  </div>
 			  <div class="input-short">
+                  %if c.rhodecode_user.username != 'default':
+                      %if c.following:
+                      <span id="follow_toggle" class="following" title="${_('Stop following this repository')}"
+                            onclick="javascript:toggleFollowingRepo(this,${c.dbrepo.repo_id},'${str(h.get_token())}')">
+                      </span>                 
+                      %else:
+                      <span id="follow_toggle" class="follow" title="${_('Start following this repository')}"
+                            onclick="javascript:toggleFollowingRepo(this,${c.dbrepo.repo_id},'${str(h.get_token())}')">
+                      </span>
+                      %endif
+                  %endif:			  
 		         %if c.dbrepo.repo_type =='hg':
 		           <img style="margin-bottom:2px" class="icon" title="${_('Mercurial repository')}" alt="${_('Mercurial repository')}" src="${h.url("/images/icons/hgicon.png")}"/>
 		         %endif
@@ -43,19 +54,8 @@
 	             %else:
 	                <img style="margin-bottom:2px" class="icon" title="${_('public repository')}" alt="${_('public repository')}" src="${h.url("/images/icons/lock_open.png")}"/>
 	             %endif
-			      <span style="font-size: 1.6em;font-weight: bold;vertical-align: baseline;">${c.repo.name}</span>
-			      %if c.rhodecode_user.username != 'default':
-				      %if c.following:
-	                  <span id="follow_toggle" class="following" title="${_('Stop following this repository')}"
-	                        onclick="javascript:toggleFollowingRepo(this,${c.dbrepo.repo_id},'${str(h.get_token())}')">
-	                  </span>			      
-				      %else:
-				      <span id="follow_toggle" class="follow" title="${_('Start following this repository')}"
-				            onclick="javascript:toggleFollowingRepo(this,${c.dbrepo.repo_id},'${str(h.get_token())}')">
-				      </span>
-				      %endif
-				  %endif:
-			      <br/>
+			      <span style="font-size: 1.6em;font-weight: bold;vertical-align: baseline;">${h.repo_link(c.dbrepo.groups_and_repo)}</span>
+
 		            %if c.dbrepo.fork:
 		            	<span style="margin-top:5px">
 		            	<a href="${h.url('summary_home',repo_name=c.dbrepo.fork.repo_name)}">
@@ -109,8 +109,11 @@
 			      <label>${_('Last change')}:</label>
 			  </div>
 			  <div class="input-short">
-			      ${h.age(c.repo.last_change)} - ${c.repo.last_change} 
-			      ${_('by')} ${h.get_changeset_safe(c.repo,'tip').author} 
+                  <b>${'r%s:%s' % (h.get_changeset_safe(c.rhodecode_repo,'tip').revision,
+                            h.get_changeset_safe(c.rhodecode_repo,'tip').short_id)}</b> - 
+			      <span class="tooltip" title="${c.rhodecode_repo.last_change}">
+			      ${h.age(c.rhodecode_repo.last_change)}</span><br/>
+			      ${_('by')} ${h.get_changeset_safe(c.rhodecode_repo,'tip').author} 
 			      
 			  </div>
 			 </div>
@@ -138,7 +141,7 @@
 			      <label>${_('Download')}:</label>
 			  </div>
 			  <div class="input-short">
-		        %if len(c.repo.revisions) == 0:
+		        %if len(c.rhodecode_repo.revisions) == 0:
 		          ${_('There are no downloads yet')}
 		        %elif c.enable_downloads is False:
 		          ${_('Downloads are disabled for this repository')}
@@ -146,14 +149,14 @@
                         [${h.link_to(_('enable'),h.url('edit_repo',repo_name=c.repo_name))}]
                     %endif  		          
 		        %else:
-			        ${h.select('download_options',c.repo.get_changeset().raw_id,c.download_options)}
-			        %for cnt,archive in enumerate(c.repo._get_archives()):
+			        ${h.select('download_options',c.rhodecode_repo.get_changeset().raw_id,c.download_options)}
+			        %for cnt,archive in enumerate(c.rhodecode_repo._get_archives()):
 			             %if cnt >=1:
 			             |
 			             %endif
 			             <span class="tooltip" title="${_('Download %s as %s') %('tip',archive['type'])}" 
 			                  id="${archive['type']+'_link'}">${h.link_to(archive['type'],
-			                h.url('files_archive_home',repo_name=c.repo.name,
+			                h.url('files_archive_home',repo_name=c.dbrepo.repo_name,
 			                fname='tip'+archive['extension']),class_="archive_icon")}</span>
 			        %endfor
 			    %endif
@@ -166,11 +169,11 @@
 			  </div>
 			  <div class="input-short">
 			   %if c.rhodecode_user.username != 'default':
-	            ${h.link_to(_('RSS'),h.url('rss_feed_home',repo_name=c.repo.name,api_key=c.rhodecode_user.api_key),class_='rss_icon')}
-	            ${h.link_to(_('Atom'),h.url('atom_feed_home',repo_name=c.repo.name,api_key=c.rhodecode_user.api_key),class_='atom_icon')}
+	            ${h.link_to(_('RSS'),h.url('rss_feed_home',repo_name=c.dbrepo.repo_name,api_key=c.rhodecode_user.api_key),class_='rss_icon')}
+	            ${h.link_to(_('Atom'),h.url('atom_feed_home',repo_name=c.dbrepo.repo_name,api_key=c.rhodecode_user.api_key),class_='atom_icon')}
 	           %else:
-                ${h.link_to(_('RSS'),h.url('rss_feed_home',repo_name=c.repo.name),class_='rss_icon')}
-                ${h.link_to(_('Atom'),h.url('atom_feed_home',repo_name=c.repo.name),class_='atom_icon')}	           
+                ${h.link_to(_('RSS'),h.url('rss_feed_home',repo_name=c.dbrepo.repo_name),class_='rss_icon')}
+                ${h.link_to(_('Atom'),h.url('atom_feed_home',repo_name=c.dbrepo.repo_name),class_='atom_icon')}	           
 	           %endif 
 			  </div>
 			 </div>				 			 			 
@@ -265,9 +268,9 @@
              YUE.on('download_options','change',function(e){
                  var new_cs = e.target.options[e.target.selectedIndex];
                  var tmpl_links = {}
-                 %for cnt,archive in enumerate(c.repo._get_archives()):
+                 %for cnt,archive in enumerate(c.rhodecode_repo._get_archives()):
                 	 tmpl_links['${archive['type']}'] = '${h.link_to(archive['type'],
-                        h.url('files_archive_home',repo_name=c.repo.name,
+                        h.url('files_archive_home',repo_name=c.dbrepo.repo_name,
                         fname='__CS__'+archive['extension']),class_="archive_icon")}';
                  %endfor
                 

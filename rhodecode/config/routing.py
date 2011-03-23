@@ -96,11 +96,13 @@ def make_map(config):
              action="repo_pull", conditions=dict(method=["PUT"],
                                                         function=check_repo))
 
+    #ADMIN REPOS GROUP REST ROUTES
+    routes_map.resource('repos_group', 'repos_groups', controller='admin/repos_groups', path_prefix='/_admin')
 
     #ADMIN USER REST ROUTES
     routes_map.resource('user', 'users', controller='admin/users', path_prefix='/_admin')
 
-    #ADMIN USER REST ROUTES
+    #ADMIN USERS REST ROUTES
     routes_map.resource('users_group', 'users_groups', controller='admin/users_groups', path_prefix='/_admin')
 
     #ADMIN GROUP REST ROUTES
