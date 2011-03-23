@@ -50,6 +50,51 @@ fixes
 - fixed strange issue on formencode imports
 - fixed #126 Deleting repository on Windows, rename used incompatible chars. 
 
+1.1.7 (**2011-03-23**)
+======================
+
+news
+----
+
+fixes
+-----
+
+- fixed (again) #136 installation support for FreeBSD
+
+
+1.1.6 (**2011-03-21**)
+======================
+
+news
+----
+
+fixes
+-----
+
+- fixed #136 installation support for FreeBSD
+- RhodeCode will check for python version during installation
+
+1.1.5 (**2011-03-17**)
+======================
+
+news
+----
+
+- basic windows support, by exchanging pybcrypt into sha256 for windows only
+  highly inspired by idea of mantis406
+
+fixes
+-----
+
+- fixed sorting by author in main page
+- fixed crashes with diffs on binary files
+- fixed #131 problem with boolean values for LDAP
+- fixed #122 mysql problems thanks to striker69 
+- fixed problem with errors on calling raw/raw_files/annotate functions 
+  with unknown revisions
+- fixed returned rawfiles attachment names with international character
+- cleaned out docs, big thanks to Jason Harris
+
 1.1.4 (**2011-02-19**)
 ======================
 
