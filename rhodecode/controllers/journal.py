@@ -31,7 +31,7 @@ from sqlalchemy.orm import joinedload, make_transient
 from webhelpers.paginate import Page
 from itertools import groupby
 
-from paste.httpexceptions import HTTPInternalServerError
+from paste.httpexceptions import HTTPBadRequest
 from pylons import request, tmpl_context as c, response, url
 from pylons.i18n.translation import _
 from webhelpers.feedgenerator import Atom1Feed, Rss201rev2Feed
@@ -132,7 +132,7 @@ class JournalController(BaseController):
                                                     self.rhodecode_user.user_id)
                     return 'ok'
                 except:
-                    raise HTTPInternalServerError()
+                    raise HTTPBadRequest()
 
             repo_id = request.POST.get('follows_repo_id')
             if repo_id:
@@ -141,11 +141,11 @@ class JournalController(BaseController):
                                                     self.rhodecode_user.user_id)
                     return 'ok'
                 except:
-                    raise HTTPInternalServerError()
+                    raise HTTPBadRequest()
 
 
         log.debug('token mismatch %s vs %s', cur_token, token)
-        raise HTTPInternalServerError()
+        raise HTTPBadRequest()
 
 
 
