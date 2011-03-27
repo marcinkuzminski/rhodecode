@@ -14,10 +14,11 @@ requirements = [
         "Mako>=0.4.0",
         "vcs>=0.2.0",
         "pygments>=1.4",
-        "mercurial>=1.7.5",
-        "whoosh>=1.3.4",
+        "mercurial>=1.8.1",
+        "whoosh>=1.8.0",
         "celery>=2.2.4",
         "babel",
+        "python-dateutil<=2.0",
     ]
 
 classifiers = ['Development Status :: 4 - Beta',
