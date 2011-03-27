@@ -36,7 +36,7 @@ from webhelpers.html.tags import _set_input_attrs, _set_id_attr, \
 
 from vcs.utils.annotate import annotate_highlight
 from rhodecode.lib.utils import repo_name_slug
-from rhodecode.lib import str2bool
+from rhodecode.lib import str2bool, safe_unicode
 
 def _reset(name, value=None, id=NotGiven, type="reset", **attrs):
     """
@@ -192,7 +192,7 @@ class _FilesBreadCrumbs(object):
 
     def __call__(self, repo_name, rev, paths):
         if isinstance(paths, str):
-            paths = paths.decode('utf-8', 'replace')
+            paths = safe_unicode(paths)
         url_l = [link_to(repo_name, url('files_home',
                                         repo_name=repo_name,
                                         revision=rev, f_path=''))]
@@ -680,7 +680,7 @@ def changed_tooltip(nodes):
         suf = ''
         if len(nodes) > 30:
             suf = '<br/>' + _(' and %s more') % (len(nodes) - 30)
-        return literal(pref + '<br/> '.join([x.path.decode('utf-8', 'replace') for x in nodes[:30]]) + suf)
+        return literal(pref + '<br/> '.join([safe_unicode(x.path) for x in nodes[:30]]) + suf)
     else:
         return ': ' + _('No Files')
 
