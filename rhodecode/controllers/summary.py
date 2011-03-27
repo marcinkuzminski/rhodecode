@@ -126,6 +126,7 @@ class SummaryController(BaseRepoController):
             .filter(Statistics.repository == dbrepo)\
             .scalar()
 
+        c.stats_percentage = 0
 
         if stats and stats.languages:
             c.no_data = False is dbrepo.enable_statistics
@@ -137,6 +138,14 @@ class SummaryController(BaseRepoController):
                                             key=lambda k: k[1])[:10]
                                         )
                                     )
+            last_rev = stats.stat_on_revision
+            c.repo_last_rev = c.rhodecode_repo.count() - 1 \
+                if c.rhodecode_repo.revisions else 0
+            if last_rev == 0 or c.repo_last_rev == 0:
+                pass
+            else:
+                c.stats_percentage = '%.2f' % ((float((last_rev)) /
+                                                c.repo_last_rev) * 100)
         else:
             c.commit_data = json.dumps({})
             c.overview_data = json.dumps([[ts_min_y, 0], [ts_max_y, 10] ])
