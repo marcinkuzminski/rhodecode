@@ -142,57 +142,57 @@ logview.pylons.util = #eee
 ### DB CONFIGS - EACH DB WILL HAVE IT'S OWN CONFIG    ###
 #########################################################
 sqlalchemy.db1.url = sqlite:///%(here)s/rhodecode.db
-#sqlalchemy.db1.echo = False
-#sqlalchemy.db1.pool_recycle = 3600
+sqlalchemy.db1.echo = True
+sqlalchemy.db1.pool_recycle = 3600
 sqlalchemy.convert_unicode = true
 
 ################################
 ### LOGGING CONFIGURATION   ####
 ################################
 [loggers]
-keys = root, routes, rhodecode, sqlalchemy,beaker,templates
+keys = root, routes, rhodecode, sqlalchemy, beaker, templates
 
 [handlers]
-keys = console
+keys = console, console_sql
 
 [formatters]
-keys = generic,color_formatter
+keys = generic, color_formatter, color_formatter_sql
 
 #############
 ## LOGGERS ##
 #############
 [logger_root]
-level = INFO
+level = NOTSET
 handlers = console
 
 [logger_routes]
-level = INFO
-handlers = console
+level = DEBUG
+handlers = 
 qualname = routes.middleware
 # "level = DEBUG" logs the route matched and routing variables.
-propagate = 0
+propagate = 1
 
 [logger_beaker]
-level = ERROR
-handlers = console
+level = DEBUG
+handlers = 
 qualname = beaker.container
-propagate = 0
+propagate = 1
 
 [logger_templates]
 level = INFO
-handlers = console
+handlers = 
 qualname = pylons.templating
-propagate = 0
+propagate = 1
 
 [logger_rhodecode]
 level = DEBUG
-handlers = console
+handlers = 
 qualname = rhodecode
-propagate = 0
+propagate = 1
 
 [logger_sqlalchemy]
-level = ERROR
-handlers = console
+level = INFO
+handlers = console_sql
 qualname = sqlalchemy.engine
 propagate = 0
 
@@ -203,8 +203,14 @@ propagate = 0
 [handler_console]
 class = StreamHandler
 args = (sys.stderr,)
-level = NOTSET
+level = INFO
 formatter = color_formatter
+
+[handler_console_sql]
+class = StreamHandler
+args = (sys.stderr,)
+level = WARN
+formatter = color_formatter_sql
 
 ################
 ## FORMATTERS ##
@@ -216,5 +222,10 @@ datefmt = %Y-%m-%d %H:%M:%S
 
 [formatter_color_formatter]
 class=rhodecode.lib.colored_formatter.ColorFormatter
+format= %(asctime)s.%(msecs)03d %(levelname)-5.5s [%(name)s] %(message)s
+datefmt = %Y-%m-%d %H:%M:%S
+
+[formatter_color_formatter_sql]
+class=rhodecode.lib.colored_formatter.ColorFormatterSql
 format= %(asctime)s.%(msecs)03d %(levelname)-5.5s [%(name)s] %(message)s
 datefmt = %Y-%m-%d %H:%M:%S
