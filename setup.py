@@ -16,9 +16,9 @@ requirements = [
         "pygments>=1.4",
         "mercurial>=1.8.1",
         "whoosh>=1.8.0",
-        "celery>=2.2.4",
+        "celery>=2.2.5",
         "babel",
-        "python-dateutil<=2.0",
+        "python-dateutil>=1.5.0,<2.0.0",
     ]
 
 classifiers = ['Development Status :: 4 - Beta',
@@ -27,7 +27,10 @@ classifiers = ['Development Status :: 4 - Beta',
                'Intended Audience :: Developers',
                'License :: OSI Approved :: BSD License',
                'Operating System :: OS Independent',
-               'Programming Language :: Python', ]
+               'Programming Language :: Python',
+               'Programming Language :: Python :: 2.5',
+               'Programming Language :: Python :: 2.6',
+               'Programming Language :: Python :: 2.7', ]
 
 if py_version < (2, 6):
     requirements.append("simplejson")
