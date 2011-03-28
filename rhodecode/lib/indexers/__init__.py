@@ -99,7 +99,8 @@ class MakeIndex(BasePasterCommand):
 
         index_location = config['index_dir']
         repo_location = self.options.repo_location
-        repo_list = map(strip, self.options.repo_list.split(','))
+        repo_list = map(strip, self.options.repo_list.split(',')) \
+            if self.options.repo_list else None
 
         #======================================================================
         # WHOOSH DAEMON
