@@ -69,7 +69,7 @@
 			<div id="${h.repo_name_slug('C%s-%s' % (cs.short_id,h.safe_unicode(filenode.path)))}" class="code-header">
 				<div class="changeset_header">
 					<span class="changeset_file">
-						${h.link_to_if(change!='removed',h.safe_unicode(filenode.path,h.url('files_home',repo_name=c.repo_name,
+						${h.link_to_if(change!='removed',h.safe_unicode(filenode.path),h.url('files_home',repo_name=c.repo_name,
 						revision=filenode.changeset.raw_id,f_path=h.safe_unicode(filenode.path)))}
 					</span>
 					%if 1:
