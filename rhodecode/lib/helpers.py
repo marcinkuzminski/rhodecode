@@ -116,7 +116,7 @@ class _ToolTip(object):
                 return ids        
             };
             var myToolTips = new YAHOO.widget.Tooltip("tooltip", { 
-                context: toolTipsId(),
+                context: [[toolTipsId()],"tl","bl",null,[0,5]],
                 monitorresize:false,
                 xyoffset :[0,0],
                 autodismissdelay:300000,
@@ -124,64 +124,6 @@ class _ToolTip(object):
                 showdelay:20,
             });
             
-            // Set the text for the tooltip just before we display it. Lazy method
-            myToolTips.contextTriggerEvent.subscribe( 
-                 function(type, args) { 
-
-                        var context = args[0]; 
-                        
-                        //positioning of tooltip
-                        var tt_w = this.element.clientWidth;//tooltip width
-                        var tt_h = this.element.clientHeight;//tooltip height
-                        
-                        var context_w = context.offsetWidth;
-                        var context_h = context.offsetHeight;
-                        
-                        var pos_x = YAHOO.util.Dom.getX(context);
-                        var pos_y = YAHOO.util.Dom.getY(context);
-
-                        var display_strategy = 'right';
-                        var xy_pos = [0,0];
-                        switch (display_strategy){
-                        
-                            case 'top':
-                                var cur_x = (pos_x+context_w/2)-(tt_w/2);
-                                var cur_y = (pos_y-tt_h-4);
-                                xy_pos = [cur_x,cur_y];                                
-                                break;
-                            case 'bottom':
-                                var cur_x = (pos_x+context_w/2)-(tt_w/2);
-                                var cur_y = pos_y+context_h+4;
-                                xy_pos = [cur_x,cur_y];                                
-                                break;
-                            case 'left':
-                                var cur_x = (pos_x-tt_w-4);
-                                var cur_y = pos_y-((tt_h/2)-context_h/2);
-                                xy_pos = [cur_x,cur_y];                                
-                                break;
-                            case 'right':
-                                var cur_x = (pos_x+context_w+4);
-                                var cur_y = pos_y-((tt_h/2)-context_h/2);
-                                xy_pos = [cur_x,cur_y];                                
-                                break;
-                             default:
-                                var cur_x = (pos_x+context_w/2)-(tt_w/2);
-                                var cur_y = pos_y-tt_h-4;
-                                xy_pos = [cur_x,cur_y];                                
-                                break;                             
-                                 
-                        }
-
-                        this.cfg.setProperty("xy",xy_pos);
-
-                  });
-                  
-            //Mouse out 
-            myToolTips.contextMouseOutEvent.subscribe(
-                function(type, args) {
-                    var context = args[0];
-                    
-                });
         });
         '''
         return literal(js)
