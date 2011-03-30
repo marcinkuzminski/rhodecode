@@ -74,6 +74,29 @@ class FilesController(BaseRepoController):
             h.flash(str(e), category='warning')
             redirect(h.url('files_home', repo_name=repo_name, revision='tip'))
 
+
+    def __get_filenode_or_redirect(self, repo_name, cs, path):
+        """
+        Returns file_node, if error occurs or given path is directory,
+        it'll redirect to top level path
+        
+        :param repo_name: repo_name
+        :param cs: given changeset
+        :param path: path to lookup
+        """
+
+
+        try:
+            file_node = cs.get_node(path)
+            if file_node.is_dir():
+                raise RepositoryError('given path is a directory')
+        except RepositoryError, e:
+            h.flash(str(e), category='warning')
+            redirect(h.url('files_home', repo_name=repo_name,
+                           revision=cs.raw_id))
+
+        return file_node
+
     def index(self, repo_name, revision, f_path):
         #reditect to given revision from form if given
         post_revision = request.POST.get('at_rev', None)
@@ -109,7 +132,7 @@ class FilesController(BaseRepoController):
         except (ChangesetDoesNotExistError, VCSError):
             c.url_next = '#'
 
-        #files
+        #files or dirs
         try:
             c.files_list = c.changeset.get_node(f_path)
             c.file_history = self._get_history(c.rhodecode_repo,
@@ -124,39 +147,24 @@ class FilesController(BaseRepoController):
 
     def rawfile(self, repo_name, revision, f_path):
         cs = self.__get_cs_or_redirect(revision, repo_name)
-        try:
-            file_node = cs.get_node(f_path)
-        except RepositoryError, e:
-            h.flash(str(e), category='warning')
-            redirect(h.url('files_home', repo_name=repo_name,
-                           revision=cs.raw_id))
+        file_node = self.__get_filenode_or_redirect(repo_name, cs, f_path)
 
-        fname = f_path.split('/')[-1].encode('utf8', 'replace')
+        response.content_disposition = 'attachment; filename=%s' % \
+            f_path.split('/')[-1].encode('utf8', 'replace')
+
         response.content_type = file_node.mimetype
-        response.content_disposition = 'attachment; filename=%s' % fname
         return file_node.content
 
     def raw(self, repo_name, revision, f_path):
         cs = self.__get_cs_or_redirect(revision, repo_name)
-        try:
-            file_node = cs.get_node(f_path)
-        except RepositoryError, e:
-            h.flash(str(e), category='warning')
-            redirect(h.url('files_home', repo_name=repo_name,
-                           revision=cs.raw_id))
+        file_node = self.__get_filenode_or_redirect(repo_name, cs, f_path)
 
         response.content_type = 'text/plain'
-
         return file_node.content
 
     def annotate(self, repo_name, revision, f_path):
         cs = self.__get_cs_or_redirect(revision, repo_name)
-        try:
-            c.file = cs.get_node(f_path)
-        except RepositoryError, e:
-            h.flash(str(e), category='warning')
-            redirect(h.url('files_home', repo_name=repo_name,
-                           revision=cs.raw_id))
+        c.file = self.__get_filenode_or_redirect(repo_name, cs, f_path)
 
         c.file_history = self._get_history(c.rhodecode_repo,
                                            c.file, f_path)
@@ -268,7 +276,7 @@ class FilesController(BaseRepoController):
         return render('files/file_diff.html')
 
     def _get_history(self, repo, node, f_path):
-        if not node.kind is NodeKind.FILE:
+        if not node.is_file():
             return []
         changesets = node.history
         hist_l = []
