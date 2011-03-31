@@ -135,8 +135,11 @@ class FilesController(BaseRepoController):
         #files or dirs
         try:
             c.files_list = c.changeset.get_node(f_path)
-            c.file_history = self._get_history(c.rhodecode_repo,
-                                               c.files_list, f_path)
+
+            if c.files_list.is_file():
+                c.file_history = self._get_node_history(c.changeset, f_path)
+            else:
+                c.file_history = []
         except RepositoryError, e:
             h.flash(str(e), category='warning')
             redirect(h.url('files_home', repo_name=repo_name,
@@ -163,14 +166,11 @@ class FilesController(BaseRepoController):
         return file_node.content
 
     def annotate(self, repo_name, revision, f_path):
-        cs = self.__get_cs_or_redirect(revision, repo_name)
-        c.file = self.__get_filenode_or_redirect(repo_name, cs, f_path)
+        c.cs = self.__get_cs_or_redirect(revision, repo_name)
+        c.file = self.__get_filenode_or_redirect(repo_name, c.cs, f_path)
 
-        c.file_history = self._get_history(c.rhodecode_repo,
-                                           c.file, f_path)
-        c.cs = cs
+        c.file_history = self._get_node_history(c.cs, f_path)
         c.f_path = f_path
-
         return render('files/files_annotate.html')
 
     def archivefile(self, repo_name, fname):
@@ -275,10 +275,8 @@ class FilesController(BaseRepoController):
             c.no_changes = True
         return render('files/file_diff.html')
 
-    def _get_history(self, repo, node, f_path):
-        if not node.is_file():
-            return []
-        changesets = node.history
+    def _get_node_history(self, cs, f_path):
+        changesets = cs.get_file_history(f_path)
         hist_l = []
 
         changesets_group = ([], _("Changesets"))
