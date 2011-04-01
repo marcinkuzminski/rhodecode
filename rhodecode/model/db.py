@@ -270,6 +270,10 @@ class Group(Base):
             groups.insert(0, gr)
         return groups
 
+    @property
+    def repositories(self):
+        return Session.query(Repository).filter(Repository.group == self).all()
+
 class Permission(Base):
     __tablename__ = 'permissions'
     __table_args__ = {'useexisting':True}

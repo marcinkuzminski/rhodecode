@@ -125,8 +125,9 @@ class ScmModel(BaseModel):
             this have to be a list of  just the repository names
         """
         if all_repos is None:
-            all_repos = [r.repo_name for r in self.sa.query(Repository)\
-                .order_by(Repository.repo_name).all()]
+            repos = self.sa.query(Repository)\
+                        .order_by(Repository.repo_name).all()
+            all_repos = [r.repo_name for r in repos]
 
         #get the repositories that should be invalidated
         invalidation_list = [str(x.cache_key) for x in \
