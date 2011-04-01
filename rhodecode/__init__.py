@@ -32,6 +32,9 @@ __version__ = '.'.join((str(each) for each in VERSION[:4]))
 __dbversion__ = 3 #defines current db version for migrations
 __platform__ = platform.system()
 
+PLATFORM_WIN = ('Windows',)
+PLATFORM_OTHERS = ('Linux', 'Darwin', 'FreeBSD',)
+
 try:
     from rhodecode.lib.utils import get_current_revision
     _rev = get_current_revision()
