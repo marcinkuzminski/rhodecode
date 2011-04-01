@@ -64,6 +64,7 @@ class HomeController(BaseController):
             c.repos_list = sorted(c.cached_repo_list, key=itemgetter(sort_key),
                                   reverse=False)
 
+        c.repo_cnt = len(c.repos_list)
         return render('/index.html')
 
     def repo_switcher(self):

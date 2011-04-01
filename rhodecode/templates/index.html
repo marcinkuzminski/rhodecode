@@ -27,8 +27,12 @@
     <div class="box">
 	    <!-- box / title -->
 	    <div class="title">
-	        <h5>${_('Dashboard')}
-	        <input class="top-right-rounded-corner top-left-rounded-corner bottom-left-rounded-corner bottom-right-rounded-corner" id="q_filter" size="15" type="text" name="filter" value="${_('quick filter...')}"/>
+	        <h5><input class="top-right-rounded-corner top-left-rounded-corner 
+	                           bottom-left-rounded-corner bottom-right-rounded-corner" 
+	                    id="q_filter" size="15" type="text" name="filter" 
+	                    value="${_('quick filter...')}"/>
+	        
+	        ${_('Dashboard  - %s repositories' % c.repo_cnt)} 
 	        </h5>
 	        %if c.rhodecode_user.username != 'default':
 		        %if h.HasPermissionAny('hg.admin','hg.create.repository')():
