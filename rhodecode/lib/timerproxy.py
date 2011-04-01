@@ -1,6 +1,8 @@
 from sqlalchemy.interfaces import ConnectionProxy
 import time
-from sqlalchemy import log
+import logging
+log = logging.getLogger('timerproxy')
+
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = xrange(30, 38)
 
 def color_sql(sql):
@@ -13,16 +15,14 @@ class TimerProxy(ConnectionProxy):
 
     def __init__(self):
         super(TimerProxy, self).__init__()
-        self.logging_name = 'timerProxy'
-        self.log = log.instance_logger(self, True)
 
     def cursor_execute(self, execute, cursor, statement, parameters,
                        context, executemany):
 
         now = time.time()
         try:
-            self.log.info(color_sql(">>>>> STARTING QUERY >>>>>"))
+            log.info(color_sql(">>>>> STARTING QUERY >>>>>"))
             return execute(cursor, statement, parameters, context)
         finally:
             total = time.time() - now
-            self.log.info(color_sql("<<<<< TOTAL TIME: %f <<<<<" % total))
+            log.info(color_sql("<<<<< TOTAL TIME: %f <<<<<" % total))
