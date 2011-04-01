@@ -165,7 +165,7 @@ def get_repos(path, recursive=False):
             cur_path = os.path.join(p, dirpath)
             try:
                 scm_info = get_scm(cur_path)
-                yield scm_info[1].split(path)[-1].lstrip('/'), scm_info
+                yield scm_info[1].split(path)[-1].lstrip(os.sep), scm_info
             except VCSError:
                 if not recursive:
                     continue
