@@ -24,6 +24,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
+
+import os
 import logging
 import datetime
 from datetime import date
@@ -212,7 +214,7 @@ class Repository(Base):
 
     @property
     def just_name(self):
-        return self.repo_name.split('/')[-1]
+        return self.repo_name.split(os.sep)[-1]
 
     @property
     def groups_with_parents(self):
