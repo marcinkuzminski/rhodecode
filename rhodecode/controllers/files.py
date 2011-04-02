@@ -25,6 +25,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
 
+import os
 import logging
 import rhodecode.lib.helpers as h
 
@@ -153,7 +154,7 @@ class FilesController(BaseRepoController):
         file_node = self.__get_filenode_or_redirect(repo_name, cs, f_path)
 
         response.content_disposition = 'attachment; filename=%s' % \
-            f_path.split('/')[-1].encode('utf8', 'replace')
+            f_path.split(os.sep)[-1].encode('utf8', 'replace')
 
         response.content_type = file_node.mimetype
         return file_node.content

@@ -22,7 +22,7 @@ news
 - fixed #90 whoosh indexer can index chooses repositories passed in command 
   line
 - extended journal with day aggregates and paging
-- implemented #107 customizable code highlights on code sources
+- implemented #107 source code lines highlight ranges
 - implemented #93 customizable changelog on combined revision ranges - 
   equivalent of githubs compare view 
 - implemented #108 extended and more powerful LDAP configuration
@@ -33,8 +33,8 @@ news
 - fixed many issues with international characters and unicode. It uses utf8
   decode with replace to provide less errors even with non utf8 encoded strings
 - #125 added API KEY access to feeds
-- #109 Repository can be created from external Mercurial link, and manually
-  updated (via pull) from admin panel
+- #109 Repository can be created from external Mercurial link (aka. remote 
+  repository, and manually updated (via pull) from admin panel
 
 fixes
 -----
@@ -49,6 +49,7 @@ fixes
 - removed issue with space inside renamed repository after deletion
 - fixed strange issue on formencode imports
 - fixed #126 Deleting repository on Windows, rename used incompatible chars. 
+- windows fixes for os.kill and path spliting, issues #148 and #133
 
 1.1.7 (**2011-03-23**)
 ======================
