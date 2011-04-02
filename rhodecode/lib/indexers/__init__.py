@@ -172,10 +172,12 @@ class ResultWrapper(object):
         for docid in self.doc_ids:
             yield self.get_full_content(docid)
 
-    def __getslice__(self, i, j):
+    def __getitem__(self, key):
         """
         Slicing of resultWrapper
         """
+        i, j = key.start, key.stop
+
         slice = []
         for docid in self.doc_ids[i:j]:
             slice.append(self.get_full_content(docid))
