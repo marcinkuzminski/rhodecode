@@ -49,10 +49,9 @@ package_data = {'rhodecode': ['i18n/*/LC_MESSAGES/*.mo', ], }
 
 description = ('Mercurial repository browser/management with '
                'build in push/pull server and full text search')
-keywords = ' '.join (['rhodecode', 'rhodiumcode', 'mercurial', 'git',
+keywords = ' '.join(['rhodecode', 'rhodiumcode', 'mercurial', 'git',
                       'repository management', 'hgweb replacement'
-                      'hgwebdir', 'gitweb replacement', 'serving hgweb',
-                     ])
+                      'hgwebdir', 'gitweb replacement', 'serving hgweb', ])
 #long description
 try:
     readme_file = 'README.rst'
