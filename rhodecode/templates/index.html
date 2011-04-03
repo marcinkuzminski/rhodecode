@@ -32,7 +32,7 @@
 	                    id="q_filter" size="15" type="text" name="filter" 
 	                    value="${_('quick filter...')}"/>
 	        
-	        ${_('Dashboard  - %s repositories' % c.repo_cnt)} 
+	        ${_('Dashboard')}  - <span id="repo_count">${c.repo_cnt}</span> ${_('repositories')} 
 	        </h5>
 	        %if c.rhodecode_user.username != 'default':
 		        %if h.HasPermissionAny('hg.admin','hg.create.repository')():
@@ -168,6 +168,8 @@
 		        }
 	        }
         }
+        // set new count into dashboard
+        YUD.get('repo_count').innerHTML = nodes.length - obsolete.length;        
      }
      
      E.on(q_filter,'keyup',function(e){
