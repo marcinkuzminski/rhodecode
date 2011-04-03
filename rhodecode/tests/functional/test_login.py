@@ -228,6 +228,3 @@ class TestLoginController(TestController):
         print response.session['flash']
         assert 'You have successfully registered into rhodecode' in response.session['flash'][0], 'No flash message about user registration'
         assert 'Your new password was sent' in response.session['flash'][1], 'No flash message about password reset'
-
-
-

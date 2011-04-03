@@ -3,7 +3,7 @@ import logging
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = xrange(30, 38)
 
-# Sequences 
+# Sequences
 RESET_SEQ = "\033[0m"
 COLOR_SEQ = "\033[1;%dm"
 BOLD_SEQ = "\033[1m"
@@ -80,4 +80,3 @@ class ColorFormatterSql(logging.Formatter):
 
         colored_record = start + def_record + end
         return colored_record
-

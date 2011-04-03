@@ -2,24 +2,24 @@
 """
     rhodecode.controllers.admin.repos
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    
+
     Admin controller for RhodeCode
-    
+
     :created_on: Apr 7, 2010
     :author: marcink
-    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>    
+    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
 # of the License or (at your opinion) any later version of the license.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
@@ -82,7 +82,7 @@ class ReposController(BaseController):
     def __load_data(self, repo_name=None):
         """
         Load defaults settings for edit, and update
-        
+
         :param repo_name:
         """
         self.__load_defaults()
@@ -301,7 +301,7 @@ class ReposController(BaseController):
     def delete_perm_user(self, repo_name):
         """
         DELETE an existing repository permission user
-        
+
         :param repo_name:
         """
 
@@ -317,7 +317,7 @@ class ReposController(BaseController):
     def delete_perm_users_group(self, repo_name):
         """
         DELETE an existing repository permission users group
-        
+
         :param repo_name:
         """
         try:
@@ -333,7 +333,7 @@ class ReposController(BaseController):
     def repo_stats(self, repo_name):
         """
         DELETE an existing repository statistics
-        
+
         :param repo_name:
         """
 
@@ -349,7 +349,7 @@ class ReposController(BaseController):
     def repo_cache(self, repo_name):
         """
         INVALIDATE existing repository cache
-        
+
         :param repo_name:
         """
 
@@ -365,7 +365,7 @@ class ReposController(BaseController):
         """
         Set's this repository to be visible in public journal,
         in other words assing default user to follow this repo
-        
+
         :param repo_name:
         """
 
@@ -392,7 +392,7 @@ class ReposController(BaseController):
         """
         Runs task to update given repository with remote changes,
         ie. make pull on remote location
-        
+
         :param repo_name:
         """
         try:

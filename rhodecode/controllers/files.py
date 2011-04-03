@@ -4,22 +4,22 @@
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Files controller for RhodeCode
-    
+
     :created_on: Apr 21, 2010
     :author: marcink
-    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>    
+    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
 # of the License or (at your opinion) any later version of the license.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
@@ -60,7 +60,7 @@ class FilesController(BaseRepoController):
         """
         Safe way to get changeset if error occur it redirects to tip with
         proper message
-        
+
         :param rev: revision to fetch
         :param repo_name: repo name to redirect after
         """
@@ -80,7 +80,7 @@ class FilesController(BaseRepoController):
         """
         Returns file_node, if error occurs or given path is directory,
         it'll redirect to top level path
-        
+
         :param repo_name: repo_name
         :param cs: given changeset
         :param path: path to lookup
@@ -301,4 +301,3 @@ class FilesController(BaseRepoController):
         hist_l.append(tags_group)
 
         return hist_l
-

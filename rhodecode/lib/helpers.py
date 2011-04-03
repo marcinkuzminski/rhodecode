@@ -69,7 +69,7 @@ def get_token():
 class _GetError(object):
     """Get error from form_errors, and represent it as span wrapped error
     message
-    
+
     :param field_name: field to fetch errors for
     :param form_errors: form errors dict
     """
@@ -84,9 +84,9 @@ get_error = _GetError()
 class _ToolTip(object):
 
     def __call__(self, tooltip_title, trim_at=50):
-        """Special function just to wrap our text into nice formatted 
+        """Special function just to wrap our text into nice formatted
         autowrapped text
-        
+
         :param tooltip_title:
         """
 
@@ -94,7 +94,7 @@ class _ToolTip(object):
                        .replace('\n', '<br/>')
 
     def activate(self):
-        """Adds tooltip mechanism to the given Html all tooltips have to have 
+        """Adds tooltip mechanism to the given Html all tooltips have to have
         set class `tooltip` and set attribute `tooltip_title`.
         Then a tooltip will be generated based on that. All with yui js tooltip
         """
@@ -104,18 +104,18 @@ class _ToolTip(object):
             function toolTipsId(){
                 var ids = [];
                 var tts = YAHOO.util.Dom.getElementsByClassName('tooltip');
-                
+
                 for (var i = 0; i < tts.length; i++) {
                     //if element doesn't not have and id autogenerate one for tooltip
-                    
+
                     if (!tts[i].id){
                         tts[i].id='tt'+i*100;
                     }
                     ids.push(tts[i].id);
                 }
-                return ids        
+                return ids
             };
-            var myToolTips = new YAHOO.widget.Tooltip("tooltip", { 
+            var myToolTips = new YAHOO.widget.Tooltip("tooltip", {
                 context: [[toolTipsId()],"tl","bl",null,[0,5]],
                 monitorresize:false,
                 xyoffset :[0,0],
@@ -123,7 +123,7 @@ class _ToolTip(object):
                 hidedelay:5,
                 showdelay:20,
             });
-            
+
         });
         '''
         return literal(js)
@@ -228,7 +228,7 @@ class CodeHtmlFormatter(HtmlFormatter):
 
 def pygmentize(filenode, **kwargs):
     """pygmentize function using pygments
-    
+
     :param filenode:
     """
 
@@ -237,15 +237,15 @@ def pygmentize(filenode, **kwargs):
 
 def pygmentize_annotation(repo_name, filenode, **kwargs):
     """pygmentize function for annotation
-    
+
     :param filenode:
     """
 
     color_dict = {}
     def gen_color(n=10000):
-        """generator for getting n of evenly distributed colors using 
+        """generator for getting n of evenly distributed colors using
         hsv color and golden ratio. It always return same order of colors
-        
+
         :returns: RGB tuple
         """
         import colorsys
@@ -356,7 +356,7 @@ short_id = lambda x: x[:12]
 def bool2icon(value):
     """Returns True/False values represented as small html image of true/false
     icons
-    
+
     :param value: bool value
     """
 
@@ -374,7 +374,7 @@ def bool2icon(value):
 def action_parser(user_log, feed=False):
     """This helper will action_map the specified string action into translated
     fancy names with icons and links
-    
+
     :param user_log: user log instance
     :param feed: use output for feeds (no html and fancy icons)
     """
@@ -638,5 +638,3 @@ def repo_link(groups_and_repos):
             return link_to(group.group_name, url('repos_group', id=group.group_id))
         return literal(' &raquo; '.join(map(make_link, groups)) + \
                        " &raquo; " + repo_name)
-
-

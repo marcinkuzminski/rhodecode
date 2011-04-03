@@ -4,22 +4,22 @@
     ~~~~~~~~~~~~~~~~~~~~
 
     users model for RhodeCode
-    
+
     :created_on: Apr 9, 2010
     :author: marcink
-    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>    
+    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
 # of the License or (at your opinion) any later version of the license.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
@@ -223,9 +223,9 @@ class UserModel(BaseModel):
         """
         Fetches auth_user by user_id,or api_key if present.
         Fills auth_user attributes with those taken from database.
-        Additionally set's is_authenitated if lookup fails 
+        Additionally set's is_authenitated if lookup fails
         present in database
-        
+
         :param auth_user: instance of user to set attributes
         :param user_id: user id to fetch by
         :param api_key: api key to fetch by
@@ -255,7 +255,7 @@ class UserModel(BaseModel):
         """Fills user permission attribute with permissions taken from database
         works for permissions given for repositories, and for permissions that
         as part of beeing group member
-        
+
         :param user: user instance to fill his perms
         """
 
@@ -274,7 +274,7 @@ class UserModel(BaseModel):
 
         if user.is_admin:
             #=======================================================================
-            # #admin have all default rights set to admin        
+            # #admin have all default rights set to admin
             #=======================================================================
             user.permissions['global'].add('hg.admin')
 
@@ -325,7 +325,7 @@ class UserModel(BaseModel):
 
 
             #=======================================================================
-            # check if user is part of groups for this repository and fill in 
+            # check if user is part of groups for this repository and fill in
             # (or replace with higher) permissions
             #=======================================================================
             user_perms_from_users_groups = self.sa.query(UsersGroupToPerm, Permission, Repository,)\

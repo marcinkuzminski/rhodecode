@@ -311,4 +311,3 @@ removed extra unicode conversion in diff."</div>""" in response.body
                                     f_path=f_path))
 
         assert "There is no file nor directory at the given path: %r at revision %r" % (f_path, rev[:12]) in response.session['flash'][0][1], 'No flash message'
-

@@ -4,22 +4,22 @@
     ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     permissions model for RhodeCode
-    
+
     :created_on: Aug 20, 2010
     :author: marcink
-    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>    
+    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
 # of the License or (at your opinion) any later version of the license.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
@@ -43,7 +43,7 @@ class PermissionModel(BaseModel):
 
     def get_permission(self, permission_id, cache=False):
         """Get's permissions by id
-        
+
         :param permission_id: id of permission to get from database
         :param cache: use Cache for this query
         """
@@ -55,7 +55,7 @@ class PermissionModel(BaseModel):
 
     def get_permission_by_name(self, name, cache=False):
         """Get's permissions by given name
-        
+
         :param name: name to fetch
         :param cache: Use cache for this query
         """
@@ -76,7 +76,7 @@ class PermissionModel(BaseModel):
                             ' your database' % len(u2p))
 
         try:
-            #stage 1 change defaults    
+            #stage 1 change defaults
             for p in u2p:
                 if p.permission.permission_name.startswith('repository.'):
                     p.permission = self.get_permission_by_name(

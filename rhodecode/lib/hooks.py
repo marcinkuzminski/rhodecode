@@ -4,22 +4,22 @@
     ~~~~~~~~~~~~~~~~~~~
 
     Hooks runned by rhodecode
-    
+
     :created_on: Aug 6, 2010
     :author: marcink
-    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>    
+    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
 # of the License or (at your opinion) any later version of the license.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
@@ -36,7 +36,7 @@ from rhodecode.lib.utils import action_logger
 
 def repo_size(ui, repo, hooktype=None, **kwargs):
     """Presents size of repository after push
-    
+
     :param ui:
     :param repo:
     :param hooktype:
@@ -67,7 +67,7 @@ def repo_size(ui, repo, hooktype=None, **kwargs):
 
 def log_pull_action(ui, repo, **kwargs):
     """Logs user last pull action
-    
+
     :param ui:
     :param repo:
     """
@@ -83,7 +83,7 @@ def log_pull_action(ui, repo, **kwargs):
 
 def log_push_action(ui, repo, **kwargs):
     """Maps user last push action to new changeset id, from mercurial
-    
+
     :param ui:
     :param repo:
     """
@@ -113,4 +113,3 @@ def log_push_action(ui, repo, **kwargs):
     action_logger(username, action, repository, extra_params['ip'])
 
     return 0
-

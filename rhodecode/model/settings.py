@@ -7,19 +7,19 @@
 
     :created on Nov 17, 2010
     :author: marcink
-    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>    
+    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
 # of the License or (at your opinion) any later version of the license.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
@@ -47,8 +47,8 @@ class SettingsModel(BaseModel):
         return r
 
     def get_app_settings(self, cache=False):
-        """Get's config from database, each config key is prefixed with 
-        'rhodecode_' prefix, than global pylons config is updated with such 
+        """Get's config from database, each config key is prefixed with
+        'rhodecode_' prefix, than global pylons config is updated with such
         keys
         """
 
@@ -71,11 +71,11 @@ class SettingsModel(BaseModel):
         :returns:
         ldap_active
         ldap_host
-        ldap_port 
+        ldap_port
         ldap_ldaps
         ldap_tls_reqcert
-        ldap_dn_user 
-        ldap_dn_pass 
+        ldap_dn_user
+        ldap_dn_pass
         ldap_base_dn
         ldap_filter
         ldap_search_scope

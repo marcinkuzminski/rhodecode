@@ -59,7 +59,7 @@ class Collection(pathed.Pathed):
         and store them in self.versions
         """
         super(Collection, self).__init__(path)
-        
+
         # Create temporary list of files, allowing skipped version numbers.
         files = os.listdir(path)
         if '1' in files:
@@ -104,7 +104,7 @@ class Collection(pathed.Pathed):
 
         script.PythonScript.create(filepath, **k)
         self.versions[ver] = Version(ver, self.path, [filename])
-        
+
     def create_new_sql_version(self, database, **k):
         """Create SQL files for new version"""
         ver = self.latest + 1
@@ -116,7 +116,7 @@ class Collection(pathed.Pathed):
             filepath = self._version_path(filename)
             script.SqlScript.create(filepath, **k)
             self.versions[ver].add_script(filepath)
-        
+
     def version(self, vernum=None):
         """Returns latest Version if vernum is not given.
         Otherwise, returns wanted version"""
@@ -135,7 +135,7 @@ class Collection(pathed.Pathed):
 
 class Version(object):
     """A single version in a collection
-    :param vernum: Version Number 
+    :param vernum: Version Number
     :param path: Path to script files
     :param filelist: List of scripts
     :type vernum: int, VerNum
@@ -152,7 +152,7 @@ class Version(object):
 
         for script in filelist:
             self.add_script(os.path.join(path, script))
-    
+
     def script(self, database=None, operation=None):
         """Returns SQL or Python Script"""
         for db in (database, 'default'):

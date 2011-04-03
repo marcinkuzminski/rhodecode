@@ -5,22 +5,22 @@
 
     RhodeCode task modules, containing all task that suppose to be run
     by celery daemon
-    
+
     :created_on: Oct 6, 2010
     :author: marcink
-    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>    
+    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
 # of the License or (at your opinion) any later version of the license.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
@@ -124,7 +124,7 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
         return True
 
     if last_rev == repo.get_changeset().revision and len(repo.revisions) > 1:
-        #pass silently without any work if we're not on first revision or 
+        #pass silently without any work if we're not on first revision or
         #current state of parsing revision(from db marker) is the last revision
         return True
 
@@ -272,8 +272,8 @@ def reset_user_password(user_email):
 def send_email(recipients, subject, body):
     """
     Sends an email with defined parameters from the .ini files.
-    
-    
+
+
     :param recipients: list of recipients, it this is empty the defined email
         address from field 'email_to' is used instead
     :param subject: subject of the mail
@@ -404,7 +404,3 @@ def __get_codes_stats(repo_name):
     map(aggregate, tip.walk('/'))
 
     return code_stats or {}
-
-
-
-

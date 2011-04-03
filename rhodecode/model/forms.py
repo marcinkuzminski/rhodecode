@@ -10,14 +10,14 @@ chained_validators      []     These validators will be applied after the schema
 allow_extra_fields      False     If True, then it is not an error when keys that aren't associated with a validator are present
 filter_extra_fields     False     If True, then keys that aren't associated with a validator are removed
 if_key_missing          NoDefault If this is given, then any keys that aren't available but are expected will be replaced with this value (and then validated). This does not override a present .if_missing attribute on validators. NoDefault is a special FormEncode class to mean that no default values has been specified and therefore missing keys shouldn't take a default value.
-ignore_key_missing      False     If True, then missing keys will be missing in the result, if the validator doesn't have .if_missing on it already    
-  
-  
+ignore_key_missing      False     If True, then missing keys will be missing in the result, if the validator doesn't have .if_missing on it already
+
+
 <name> = formencode.validators.<name of validator>
 <name> must equal form name
 list=[1,2,3,4,5]
 for SELECT use formencode.All(OneOf(list), Int())
-    
+
 """
 import os
 import re
@@ -361,7 +361,7 @@ class AttrLoginValidator(formencode.validators.FancyValidator):
         return value
 
 #===============================================================================
-# FORMS        
+# FORMS
 #===============================================================================
 class LoginForm(formencode.Schema):
     allow_extra_fields = True

@@ -4,22 +4,22 @@
     ~~~~~~~~~~~~~~~~~~~
 
     Utilities library for RhodeCode
-    
+
     :created_on: Apr 18, 2010
     :author: marcink
-    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>    
+    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
 # of the License or (at your opinion) any later version of the license.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
@@ -55,10 +55,10 @@ log = logging.getLogger(__name__)
 
 def recursive_replace(str, replace=' '):
     """Recursive replace of given sign to just one instance
-    
+
     :param str: given string
     :param replace: char to find and replace multiple instances
-        
+
     Examples::
     >>> recursive_replace("Mighty---Mighty-Bo--sstones",'-')
     'Mighty-Mighty-Bo-sstones'
@@ -91,7 +91,7 @@ def get_repo_slug(request):
 def action_logger(user, action, repo, ipaddr='', sa=None):
     """
     Action logger for various actions made by users
-    
+
     :param user: user that made this action, can be a unique username string or
         object containing user_id attribute
     :param action: action to log, should be on of predefined unique actions for
@@ -100,7 +100,7 @@ def action_logger(user, action, repo, ipaddr='', sa=None):
         that action was made on
     :param ipaddr: optional ip address from what the action was made
     :param sa: optional sqlalchemy session
-    
+
     """
 
     if not sa:
@@ -146,10 +146,10 @@ def action_logger(user, action, repo, ipaddr='', sa=None):
 
 def get_repos(path, recursive=False):
     """
-    Scans given path for repos and return (name,(type,path)) tuple 
-    
+    Scans given path for repos and return (name,(type,path)) tuple
+
     :param path: path to scann for repositories
-    :param recursive: recursive search and return names with subdirs in front 
+    :param recursive: recursive search and return names with subdirs in front
     """
     from vcs.utils.helpers import get_scm
     from vcs.exceptions import VCSError
@@ -182,7 +182,7 @@ def check_repo_fast(repo_name, base_path):
     Check given path for existence of directory
     :param repo_name:
     :param base_path:
-    
+
     :return False: if this directory is present
     """
     if os.path.isdir(os.path.join(base_path, repo_name)):return False
@@ -230,7 +230,7 @@ ui_sections = ['alias', 'auth',
 def make_ui(read_from='file', path=None, checkpaths=True):
     """A function that will read python rc files or database
     and make an mercurial ui object from read options
-    
+
     :param path: path to mercurial config file
     :param checkpaths: check the path
     :param read_from: read from 'file' or 'db'
@@ -275,7 +275,7 @@ def make_ui(read_from='file', path=None, checkpaths=True):
 
 def set_rhodecode_config(config):
     """Updates pylons config with new settings from database
-    
+
     :param config:
     """
     from rhodecode.model.settings import SettingsModel
@@ -285,7 +285,7 @@ def set_rhodecode_config(config):
         config[k] = v
 
 def invalidate_cache(cache_key, *args):
-    """Puts cache invalidation task into db for 
+    """Puts cache invalidation task into db for
     further global cache invalidation
     """
 
@@ -332,7 +332,7 @@ class EmptyChangeset(BaseChangeset):
 def map_groups(groups):
     """Checks for groups existence, and creates groups structures.
     It returns last group in structure
-    
+
     :param groups: list of groups structure
     """
     sa = meta.Session()
@@ -355,7 +355,7 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False):
     """maps all repos given in initial_repo_list, non existing repositories
     are created, if remove_obsolete is True it also check for db entries
     that are not in initial_repo_list and removes them.
-    
+
     :param initial_repo_list: list of repositories found by scanning methods
     :param remove_obsolete: check for obsolete entries in database
     """
@@ -562,7 +562,7 @@ def create_test_index(repo_location, full_index):
         pass
 
 def create_test_env(repos_test_path, config):
-    """Makes a fresh database and 
+    """Makes a fresh database and
     install test repository into tmp dir
     """
     from rhodecode.lib.db_manage import DbManage
@@ -641,10 +641,10 @@ class BasePasterCommand(Command):
     def notify_msg(self, msg, log=False):
         """Make a notification to user, additionally if logger is passed
         it logs this action using given logger
-        
+
         :param msg: message that will be printed to user
         :param log: logging instance, to use to additionally log this message
-        
+
         """
         if log and isinstance(log, logging):
             log(msg)
@@ -653,7 +653,7 @@ class BasePasterCommand(Command):
     def run(self, args):
         """
         Overrides Command.run
-        
+
         Checks for a config file argument and loads it.
         """
         if len(args) < self.min_args:

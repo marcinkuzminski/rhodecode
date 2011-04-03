@@ -115,6 +115,6 @@ setup(
     celerybeat=rhodecode.lib.celerypylons.commands:CeleryBeatCommand
     camqadm=rhodecode.lib.celerypylons.commands:CAMQPAdminCommand
     celeryev=rhodecode.lib.celerypylons.commands:CeleryEventCommand
-              
+
     """,
 )

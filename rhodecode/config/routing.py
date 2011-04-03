@@ -19,7 +19,7 @@ def make_map(config):
     def check_repo(environ, match_dict):
         """
         check for valid repository for proper 404 handling
-        
+
         :param environ:
         :param match_dict:
         """

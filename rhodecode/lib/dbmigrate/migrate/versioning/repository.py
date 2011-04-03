@@ -218,7 +218,7 @@ class Repository(pathed.Pathed):
     @classmethod
     def create_manage_file(cls, file_, **opts):
         """Create a project management script (manage.py)
-        
+
         :param file_: Destination file to be written
         :param opts: Options that are passed to :func:`migrate.versioning.shell.main`
         """

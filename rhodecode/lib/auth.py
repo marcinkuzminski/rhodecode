@@ -2,9 +2,9 @@
 """
     rhodecode.lib.auth
     ~~~~~~~~~~~~~~~~~~
-    
+
     authentication and permission libraries
-    
+
     :created_on: Apr 4, 2010
     :copyright: (c) 2010 by marcink.
     :license: LICENSE_NAME, see LICENSE_FILE for more details.
@@ -13,12 +13,12 @@
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
 # of the License or (at your opinion) any later version of the license.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
@@ -61,7 +61,7 @@ class PasswordGenerator(object):
         usage:
         passwd_gen = PasswordGenerator()
         #print 8-letter password containing only big and small letters of alphabet
-        print passwd_gen.gen_password(8, passwd_gen.ALPHABETS_BIG_SMALL)        
+        print passwd_gen.gen_password(8, passwd_gen.ALPHABETS_BIG_SMALL)
     """
     ALPHABETS_NUM = r'''1234567890'''#[0]
     ALPHABETS_SMALL = r'''qwertyuiopasdfghjklzxcvbnm'''#[1]
@@ -87,7 +87,7 @@ class RhodeCodeCrypto(object):
         """
         Cryptographic function used for password hashing based on pybcrypt
         or pycrypto in windows
-        
+
         :param password: password to hash
         """
         if __platform__ in PLATFORM_WIN:
@@ -102,7 +102,7 @@ class RhodeCodeCrypto(object):
         """
         Checks matching password with it's hashed value, runs different
         implementation based on platform it runs on
-        
+
         :param password: password
         :param hashed: password in hashed form
         """
@@ -129,7 +129,7 @@ def generate_api_key(username, salt=None):
 
 def authfunc(environ, username, password):
     """Dummy authentication function used in Mercurial/Git/ and access control,
-    
+
     :param environ: needed only for using in Basic auth
     """
     return authenticate(username, password)
@@ -139,7 +139,7 @@ def authenticate(username, password):
     """Authentication function used for access control,
     firstly checks for db authentication then if ldap is enabled for ldap
     authentication, also creates ldap user if not in database
-    
+
     :param username: username
     :param password: password
     """
@@ -174,7 +174,7 @@ def authenticate(username, password):
         ldap_settings = SettingsModel().get_ldap_settings()
 
         #======================================================================
-        # FALLBACK TO LDAP AUTH IF ENABLE                
+        # FALLBACK TO LDAP AUTH IF ENABLE
         #======================================================================
         if str2bool(ldap_settings.get('ldap_active')):
             log.debug("Authenticating user using ldap")
@@ -217,9 +217,9 @@ def authenticate(username, password):
 class  AuthUser(object):
     """
     A simple object that handles all attributes of user in RhodeCode
-    
+
     It does lookup based on API key,given user, or user present in session
-    Then it fills all required information for such user. It also checks if 
+    Then it fills all required information for such user. It also checks if
     anonymous access is enabled and if so, it returns default user as logged
     in
     """
@@ -278,12 +278,12 @@ class  AuthUser(object):
 
 def set_available_permissions(config):
     """This function will propagate pylons globals with all available defined
-    permission given in db. We don't want to check each time from db for new 
+    permission given in db. We don't want to check each time from db for new
     permissions since adding a new permission also requires application restart
     ie. to decorate new views with the newly created permission
-    
+
     :param config: current pylons config instance
-    
+
     """
     log.info('getting information about all available permissions')
     try:
@@ -301,9 +301,9 @@ def set_available_permissions(config):
 #===============================================================================
 class LoginRequired(object):
     """
-    Must be logged in to execute this function else 
+    Must be logged in to execute this function else
     redirect to login page
-    
+
     :param api_access: if enabled this checks only for valid auth token
         and grants access based on valid token
     """
@@ -345,7 +345,7 @@ class LoginRequired(object):
             return redirect(url('login_home', came_from=p))
 
 class NotAnonymous(object):
-    """Must be logged in to execute this function else 
+    """Must be logged in to execute this function else
     redirect to login page"""
 
     def __call__(self, func):
@@ -414,7 +414,7 @@ class PermsDecorator(object):
         raise Exception('You have to write this function in child class')
 
 class HasPermissionAllDecorator(PermsDecorator):
-    """Checks for access permission for all given predicates. All of them 
+    """Checks for access permission for all given predicates. All of them
     have to be meet in order to fulfill the request
     """
 
@@ -425,7 +425,7 @@ class HasPermissionAllDecorator(PermsDecorator):
 
 
 class HasPermissionAnyDecorator(PermsDecorator):
-    """Checks for access permission for any of given predicates. In order to 
+    """Checks for access permission for any of given predicates. In order to
     fulfill the request any of predicates must be meet
     """
 
@@ -435,7 +435,7 @@ class HasPermissionAnyDecorator(PermsDecorator):
         return False
 
 class HasRepoPermissionAllDecorator(PermsDecorator):
-    """Checks for access permission for all given predicates for specific 
+    """Checks for access permission for all given predicates for specific
     repository. All of them have to be meet in order to fulfill the request
     """
 
@@ -451,7 +451,7 @@ class HasRepoPermissionAllDecorator(PermsDecorator):
 
 
 class HasRepoPermissionAnyDecorator(PermsDecorator):
-    """Checks for access permission for any of given predicates for specific 
+    """Checks for access permission for any of given predicates for specific
     repository. In order to fulfill the request any of predicates must be meet
     """
 

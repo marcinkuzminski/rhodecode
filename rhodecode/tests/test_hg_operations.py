@@ -4,7 +4,7 @@
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Test suite for making push/pull operations
-    
+
     :created_on: Dec 30, 2010
     :copyright: (c) 2010 by marcink.
     :license: LICENSE_NAME, see LICENSE_FILE for more details.
@@ -328,5 +328,3 @@ if __name__ == '__main__':
     test_push_new_file(commits=15)
     #test_push_wrong_path()
     #test_push_wrong_credentials()
-
-

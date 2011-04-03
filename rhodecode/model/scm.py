@@ -7,19 +7,19 @@
 
     :created_on: Apr 9, 2010
     :author: marcink
-    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>    
+    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
 # of the License or (at your opinion) any later version of the license.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
@@ -84,9 +84,9 @@ class ScmModel(BaseModel):
         return q.ui_value
 
     def repo_scan(self, repos_path=None):
-        """Listing of repositories in given path. This path should not be a 
+        """Listing of repositories in given path. This path should not be a
         repository itself. Return a dictionary of repository objects
-        
+
         :param repos_path: path to directory containing repositories
         """
 
@@ -120,7 +120,7 @@ class ScmModel(BaseModel):
     def get_repos(self, all_repos=None):
         """Get all repos from db and for each repo create it's backend instance.
         and fill that backed with information from database
-        
+
         :param all_repos: give specific repositories list, good for filtering
             this have to be a list of  just the repository names
         """
@@ -166,10 +166,10 @@ class ScmModel(BaseModel):
         """Returns a tuple of Repository,DbRepository,
         Get's repository from given name, creates BackendInstance and
         propagates it's data from database with all additional information
-        
+
         :param repo_name:
         :param invalidation_list: if a invalidation list is given the get
-            method should not manually check if this repository needs 
+            method should not manually check if this repository needs
             invalidation and just invalidate the repositories in list
         :param retval: string specifing what to return one of 'repo','dbrepo',
             'all'if repo or dbrepo is given it'll just lazy load chosen type
@@ -234,9 +234,9 @@ class ScmModel(BaseModel):
         return r, dbr
 
     def mark_for_invalidation(self, repo_name):
-        """Puts cache invalidation task into db for 
+        """Puts cache invalidation task into db for
         further global cache invalidation
-        
+
         :param repo_name: this repo that should invalidation take place
         """
 
@@ -367,7 +367,7 @@ class ScmModel(BaseModel):
                       'action':'push_remote',
                       'repository':repo_name}
 
-            #inject ui extra param to log this action via push logger        
+            #inject ui extra param to log this action via push logger
             for k, v in extras.items():
                 repo._repo.ui.setconfig('rhodecode_extras', k, v)
 
@@ -383,7 +383,7 @@ class ScmModel(BaseModel):
 
     def _should_invalidate(self, repo_name):
         """Looks up database for invalidation signals for this repo_name
-        
+
         :param repo_name:
         """
 
@@ -395,9 +395,9 @@ class ScmModel(BaseModel):
         return ret
 
     def _mark_invalidated(self, cache_key):
-        """ Marks all occurrences of cache to invalidation as already 
+        """ Marks all occurrences of cache to invalidation as already
         invalidated
-        
+
         :param cache_key:
         """
 
@@ -410,4 +410,3 @@ class ScmModel(BaseModel):
         except (DatabaseError,):
             log.error(traceback.format_exc())
             self.sa.rollback()
-

@@ -51,9 +51,9 @@ class BaseRepoController(BaseController):
     """
     Base class for controllers responsible for loading all needed data
     for those controllers, loaded items are
-    
+
     c.rhodecode_repo: instance of scm repository (taken from cache)
-     
+
     """
 
     def __before__(self):

@@ -15,7 +15,7 @@ from rhodecode.model.db import BaseModel
 log = logging.getLogger(__name__)
 
 def upgrade(migrate_engine):
-    """ Upgrade operations go here. 
+    """ Upgrade operations go here.
     Don't create your own engine; bind migrate_engine to your metadata
     """
 
@@ -69,7 +69,7 @@ def upgrade(migrate_engine):
 
     #==========================================================================
     # Upgrade of `repositories` table
-    #==========================================================================    
+    #==========================================================================
     from rhodecode.model.db import Repository
 
     #ADD downloads column#
@@ -96,5 +96,3 @@ def upgrade(migrate_engine):
 def downgrade(migrate_engine):
     meta = MetaData()
     meta.bind = migrate_engine
-
-

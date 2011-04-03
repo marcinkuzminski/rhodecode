@@ -59,7 +59,7 @@ class AlterTableVisitor(SchemaVisitor):
             # adapt to 0.6 which uses a string-returning
             # object
             self.append(" %s" % ret)
-            
+
     def _to_table(self, param):
         """Returns the table object for the given param object."""
         if isinstance(param, (sa.Column, sa.Index, sa.schema.Constraint)):
@@ -297,10 +297,10 @@ else:
 
         def get_constraint_specification(self, cons, **kwargs):
             """Constaint SQL generators.
-        
+
             We cannot use SA visitors because they append comma.
             """
-        
+
             if isinstance(cons, PrimaryKeyConstraint):
                 if cons.name is not None:
                     self.append("CONSTRAINT %s " % self.preparer.format_constraint(cons))
@@ -327,13 +327,13 @@ else:
                 raise exceptions.InvalidConstraintError(cons)
 
         def _visit_constraint(self, constraint):
-        
+
             table = self.start_alter_table(constraint)
             constraint.name = self.get_constraint_name(constraint)
             self.append("ADD ")
             self.get_constraint_specification(constraint)
             self.execute()
-    
+
 
     class ANSIConstraintDropper(ANSIConstraintCommon, SchemaDropper):
 

@@ -33,4 +33,3 @@ class TestSearchController(TestController):
         print response.body
         assert '4 results' in response.body, 'no message about proper search results'
         assert 'Permission denied' not in response.body, 'Wrong permissions settings for that repo and user'
-

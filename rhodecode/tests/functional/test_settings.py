@@ -47,4 +47,3 @@ class TestSettingsController(TestController):
                                     repo_name=fork_name))
 
         assert 'Fork of %s' % repo_name in response.body, 'no message about that this repo is a fork'
-

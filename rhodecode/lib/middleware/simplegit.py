@@ -4,23 +4,23 @@
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     SimpleGit middleware for handling git protocol request (push/clone etc.)
-    It's implemented with basic auth function    
-    
+    It's implemented with basic auth function
+
     :created_on: Apr 28, 2010
     :author: marcink
-    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
+    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
 # of the License or (at your opinion) any later version of the license.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
@@ -78,9 +78,9 @@ from webob.exc import HTTPNotFound, HTTPForbidden, HTTPInternalServerError
 log = logging.getLogger(__name__)
 
 def is_git(environ):
-    """Returns True if request's target is git server. 
+    """Returns True if request's target is git server.
     ``HTTP_USER_AGENT`` would then have git client version given.
-    
+
     :param environ:
     """
     http_user_agent = environ.get('HTTP_USER_AGENT')
@@ -93,7 +93,7 @@ class SimpleGit(object):
     def __init__(self, application, config):
         self.application = application
         self.config = config
-        #authenticate this git request using 
+        #authenticate this git request using
         self.authenticate = AuthBasicAuthenticator('', authfunc)
         self.ipaddr = '0.0.0.0'
         self.repository = None
@@ -117,7 +117,7 @@ class SimpleGit(object):
         try:
             #==================================================================
             # GET REPOSITORY NAME
-            #==================================================================            
+            #==================================================================
             self.repo_name = self.__get_repository(environ)
         except:
             return HTTPInternalServerError()(environ, start_response)
@@ -139,7 +139,7 @@ class SimpleGit(object):
                     log.debug('Anonymous access is disabled, running '
                               'authentication')
                 #==============================================================
-                # DEFAULT PERM FAILED OR ANONYMOUS ACCESS IS DISABLED SO WE 
+                # DEFAULT PERM FAILED OR ANONYMOUS ACCESS IS DISABLED SO WE
                 # NEED TO AUTHENTICATE AND ASK FOR AUTH USER PERMISSIONS
                 #==============================================================
 
@@ -211,7 +211,7 @@ class SimpleGit(object):
     def __check_permission(self, action, user, repo_name):
         """Checks permissions using action (push/pull) user and repository
         name
-        
+
         :param action: push or pull action
         :param user: user instance
         :param repo_name: repository name
@@ -235,7 +235,7 @@ class SimpleGit(object):
 
     def __get_repository(self, environ):
         """Get's repository name out of PATH_INFO header
-        
+
         :param environ: environ where PATH_INFO is stored
         """
         try:
@@ -254,7 +254,7 @@ class SimpleGit(object):
 
     def __get_action(self, environ):
         """Maps git request commands into a pull or push command.
-        
+
         :param environ:
         """
         service = environ['QUERY_STRING'].split('=')

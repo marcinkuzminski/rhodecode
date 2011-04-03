@@ -13,7 +13,7 @@ from rhodecode.lib.dbmigrate.migrate.changeset import *
 log = logging.getLogger(__name__)
 
 def upgrade(migrate_engine):
-    """ Upgrade operations go here. 
+    """ Upgrade operations go here.
     Don't create your own engine; bind migrate_engine to your metadata
     """
 
@@ -32,7 +32,7 @@ def upgrade(migrate_engine):
 
     #==========================================================================
     # Upgrade of `user_logs` table
-    #==========================================================================    
+    #==========================================================================
 
     tblname = 'users'
     tbl = Table(tblname, MetaData(bind=migrate_engine), autoload=True,
@@ -48,7 +48,7 @@ def upgrade(migrate_engine):
 
     #==========================================================================
     # Upgrade of `repositories` table
-    #==========================================================================    
+    #==========================================================================
     tblname = 'repositories'
     tbl = Table(tblname, MetaData(bind=migrate_engine), autoload=True,
                     autoload_with=migrate_engine)
@@ -84,7 +84,7 @@ def upgrade(migrate_engine):
 
         follows_user = relation('User', primaryjoin='User.user_id==UserFollowing.follows_user_id')
         follows_repository = relation('Repository')
-        
+
     UserFollowing().__table__.create()
 
     #==========================================================================
@@ -113,5 +113,3 @@ def upgrade(migrate_engine):
 def downgrade(migrate_engine):
     meta = MetaData()
     meta.bind = migrate_engine
-
-

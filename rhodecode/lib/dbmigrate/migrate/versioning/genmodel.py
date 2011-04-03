@@ -207,9 +207,9 @@ class ModelGenerator(object):
             dbTable = self.diff.metadataB.tables[tableName]
 
             td = self.diff.tables_different[tableName]
-            
+
             if self._db_can_handle_this_change(td):
-                
+
                 for col in td.columns_missing_from_B:
                     modelTable.columns[col].create()
                 for col in td.columns_missing_from_A:

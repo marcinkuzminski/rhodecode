@@ -21,7 +21,7 @@ Session = scoped_session(
 
 class BaseModel(object):
     """Base Model for all classess
-    
+
     """
 
     @classmethod
@@ -30,7 +30,7 @@ class BaseModel(object):
         return class_mapper(cls).c.keys()
 
     def get_dict(self):
-        """return dict with keys and values corresponding 
+        """return dict with keys and values corresponding
         to this model data """
 
         d = {}
@@ -39,7 +39,7 @@ class BaseModel(object):
         return d
 
     def get_appstruct(self):
-        """return list with keys and values tupples corresponding 
+        """return list with keys and values tupples corresponding
         to this model data """
 
         l = []

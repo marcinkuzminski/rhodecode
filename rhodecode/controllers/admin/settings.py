@@ -2,24 +2,24 @@
 """
     rhodecode.controllers.admin.settings
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    
+
     settings controller for rhodecode admin
-        
+
     :created_on: Jul 14, 2010
     :author: marcink
-    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>    
+    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
 # of the License or (at your opinion) any later version of the license.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
@@ -56,7 +56,7 @@ class SettingsController(BaseController):
     """REST Controller styled on the Atom Publishing Protocol"""
     # To properly map this controller, ensure your config/routing.py
     # file has a resource setup:
-    #     map.resource('setting', 'settings', controller='admin/settings', 
+    #     map.resource('setting', 'settings', controller='admin/settings',
     #         path_prefix='/admin', name_prefix='admin_')
 
 
@@ -251,7 +251,7 @@ class SettingsController(BaseController):
     @NotAnonymous()
     def my_account(self):
         """
-        GET /_admin/my_account Displays info about my account 
+        GET /_admin/my_account Displays info about my account
         """
         # url('admin_settings_my_account')
 

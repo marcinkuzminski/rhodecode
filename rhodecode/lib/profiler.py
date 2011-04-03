@@ -12,8 +12,8 @@ class ProfilingMiddleware(object):
     def __init__(self, app):
         self.lock = threading.Lock()
         self.app = app
-    
-    
+
+
     def __call__(self, environ, start_response):
         with self.lock:
             profiler = cProfile.Profile()
@@ -41,13 +41,11 @@ class ProfilingMiddleware(object):
                 ##  Browsers don't mind this.
                 resp += '<pre style="text-align:left; border-top: 4px dashed red; padding: 1em;">'
                 resp += cgi.escape(out.getvalue(), True)
-                
+
                 output = StringIO()
                 pprint.pprint(environ, output, depth=3)
-                
+
                 resp += cgi.escape(output.getvalue(), True)
                 resp += '</pre>'
-                
-            return resp
-    
 
+            return resp

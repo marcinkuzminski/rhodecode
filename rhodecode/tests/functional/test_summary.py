@@ -29,4 +29,3 @@ class TestSummaryController(TestController):
         r.enable_statistics = True
         self.sa.add(r)
         self.sa.commit()
-

@@ -4,22 +4,22 @@
     ~~~~~~~~~~~~~~~~~~~~
 
     Repository model for rhodecode
-    
+
     :created_on: Jun 5, 2010
     :author: marcink
-    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>    
+    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
 # of the License or (at your opinion) any later version of the license.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
@@ -304,7 +304,7 @@ class RepoModel(BaseModel):
     def __create_repo(self, repo_name, alias, clone_uri=False):
         """
         makes repository on filesystem
-        
+
         :param repo_name:
         :param alias:
         """
@@ -319,7 +319,7 @@ class RepoModel(BaseModel):
     def __rename_repo(self, old, new):
         """
         renames repository on filesystem
-        
+
         :param old: old name
         :param new: new name
         """
@@ -338,7 +338,7 @@ class RepoModel(BaseModel):
         added rm__ prefix into dir, and rename internat .hg/.git dirs so this
         repository is no longer valid for rhodecode, can be undeleted later on
         by reverting the renames on this repository
-        
+
         :param repo: repo object
         """
         rm_path = os.path.join(self.repos_path, repo.repo_name)
