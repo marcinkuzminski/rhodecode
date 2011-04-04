@@ -108,7 +108,7 @@ Incoming / Plans
 License
 -------
 
-``RhodeCode`` is released under the GPL_ license.
+``RhodeCode`` is released under the GPLv3 license.
 
 
 Mailing group Q&A
@@ -144,5 +144,4 @@ have sphinx_ installed you can install it via the command:
 .. _git: http://git-scm.com/
 .. _celery: http://celeryproject.org/
 .. _Sphinx: http://sphinx.pocoo.org/
-.. _GPL: http://www.gnu.org/licenses/gpl.html
 .. _vcs: http://pypi.python.org/pypi/vcs
