@@ -31,9 +31,10 @@ VERSION = (1, 2, 0, 'beta')
 __version__ = '.'.join((str(each) for each in VERSION[:4]))
 __dbversion__ = 3 #defines current db version for migrations
 __platform__ = platform.system()
+__license__ = 'GPLv3'
 
-PLATFORM_WIN = ('Windows',)
-PLATFORM_OTHERS = ('Linux', 'Darwin', 'FreeBSD',)
+PLATFORM_WIN = ('Windows')
+PLATFORM_OTHERS = ('Linux', 'Darwin', 'FreeBSD')
 
 try:
     from rhodecode.lib.utils import get_current_revision
@@ -44,6 +45,7 @@ except ImportError:
 
 if len(VERSION) > 3 and _rev:
     __version__ += ' [rev:%s]' % _rev[0]
+
 
 def get_version():
     """Returns shorter version (digit parts only) as string."""

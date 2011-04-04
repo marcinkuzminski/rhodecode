@@ -34,10 +34,12 @@ from rhodecode.lib.db_manage import DbManage
 
 log = logging.getLogger(__name__)
 
+
 def setup_app(command, conf, vars):
     """Place any commands to setup rhodecode here"""
     dbconf = conf['sqlalchemy.db1.url']
-    dbmanage = DbManage(log_sql=True, dbconf=dbconf, root=conf['here'], tests=False)
+    dbmanage = DbManage(log_sql=True, dbconf=dbconf, root=conf['here'],
+                        tests=False)
     dbmanage.create_tables(override=True)
     dbmanage.set_db_version()
     dbmanage.create_settings(dbmanage.config_prompt(None))

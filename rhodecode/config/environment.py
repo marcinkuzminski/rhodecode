@@ -21,6 +21,7 @@ from rhodecode.lib.timerproxy import TimerProxy
 
 log = logging.getLogger(__name__)
 
+
 def load_environment(global_conf, app_conf, initial=False):
     """Configure the Pylons environment via the ``pylons.config``
     object
@@ -67,7 +68,7 @@ def load_environment(global_conf, app_conf, initial=False):
     if config['debug'] and not test:
         #use query time debugging.
         sa_engine_db1 = engine_from_config(config, 'sqlalchemy.db1.',
-                                                            proxy=TimerProxy())
+                                           proxy=TimerProxy())
     else:
         sa_engine_db1 = engine_from_config(config, 'sqlalchemy.db1.')
 

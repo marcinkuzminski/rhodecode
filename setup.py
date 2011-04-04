@@ -1,6 +1,7 @@
 import sys
 from rhodecode import get_version
 from rhodecode import __platform__
+from rhodecode import __license__
 
 py_version = sys.version_info
 
@@ -25,7 +26,6 @@ classifiers = ['Development Status :: 4 - Beta',
                'Environment :: Web Environment',
                'Framework :: Pylons',
                'Intended Audience :: Developers',
-               'License :: OSI Approved :: BSD License',
                'Operating System :: OS Independent',
                'Programming Language :: Python',
                'Programming Language :: Python :: 2.5',
@@ -81,7 +81,7 @@ setup(
     description=description,
     long_description=long_description,
     keywords=keywords,
-    license='GPLv3',
+    license=__license__,
     author='Marcin Kuzminski',
     author_email='marcin@python-works.com',
     url='http://rhodecode.org',

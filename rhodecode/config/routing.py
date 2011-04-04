@@ -9,6 +9,7 @@ from __future__ import with_statement
 from routes import Mapper
 from rhodecode.lib.utils import check_repo_fast as cr
 
+
 def make_map(config):
     """Create, configure and return the routes Mapper"""
     routes_map = Mapper(directory=config['pylons.paths']['controllers'],
@@ -39,7 +40,6 @@ def make_map(config):
     routes_map.connect('home', '/', controller='home', action='index')
     routes_map.connect('repo_switcher', '/repos', controller='home', action='repo_switcher')
     routes_map.connect('bugtracker', "http://bitbucket.org/marcinkuzminski/rhodecode/issues", _static=True)
-    routes_map.connect('gpl_license', "http://www.gnu.org/licenses/gpl.html", _static=True)
     routes_map.connect('rhodecode_official', "http://rhodecode.org", _static=True)
 
     #ADMIN REPOSITORY REST ROUTES
@@ -114,7 +114,7 @@ def make_map(config):
     ##ADMIN LDAP SETTINGS
     routes_map.connect('ldap_settings', '/_admin/ldap', controller='admin/ldap_settings',
                 action='ldap_settings', conditions=dict(method=["POST"]))
-    routes_map.connect('ldap_home', '/_admin/ldap', controller='admin/ldap_settings',)
+    routes_map.connect('ldap_home', '/_admin/ldap', controller='admin/ldap_settings')
 
 
     #ADMIN SETTINGS REST ROUTES
@@ -156,7 +156,7 @@ def make_map(config):
 
 
     #USER JOURNAL
-    routes_map.connect('journal', '/_admin/journal', controller='journal',)
+    routes_map.connect('journal', '/_admin/journal', controller='journal')
     routes_map.connect('public_journal', '/_admin/public_journal', controller='journal', action="public_journal")
     routes_map.connect('public_journal_rss', '/_admin/public_journal_rss', controller='journal', action="public_journal_rss")
     routes_map.connect('public_journal_atom', '/_admin/public_journal_atom', controller='journal', action="public_journal_atom")
@@ -166,7 +166,7 @@ def make_map(config):
 
 
     #SEARCH
-    routes_map.connect('search', '/_admin/search', controller='search',)
+    routes_map.connect('search', '/_admin/search', controller='search')
     routes_map.connect('search_repo', '/_admin/search/{search_repo:.*}', controller='search')
 
     #LOGIN/LOGOUT/REGISTER/SIGN IN
