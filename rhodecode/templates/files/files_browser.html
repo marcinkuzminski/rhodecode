@@ -63,13 +63,13 @@
 		             </td>
 		             <td>
 		             	%if node.is_file():
-		             		<span class="tooltip" tooltip_title="${node.last_changeset.raw_id}">
+		             		<span class="tooltip" title="${node.last_changeset.raw_id}">
 		             		${node.last_changeset.revision}</span>
 		             	%endif
 		             </td>
 		             <td>
 		             	%if node.is_file():
-		             		<span class="tooltip" tooltip_title="${node.last_changeset.date}">
+		             		<span class="tooltip" title="${node.last_changeset.date}">
                             ${h.age(node.last_changeset.date)}</span>
 		             	%endif
 		             </td>

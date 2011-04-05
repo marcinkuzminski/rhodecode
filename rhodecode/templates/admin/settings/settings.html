@@ -35,7 +35,7 @@
 		            <div class="checkbox">
 		                ${h.checkbox('destroy',True)}
 		                <label for="checkbox-1">
-		                <span class="tooltip" tooltip_title="${h.tooltip(_('In case a repository was deleted from filesystem and there are leftovers in the database check this option to scan obsolete data in database and remove it.'))}">
+		                <span class="tooltip" title="${h.tooltip(_('In case a repository was deleted from filesystem and there are leftovers in the database check this option to scan obsolete data in database and remove it.'))}">
 		                ${_('destroy old data')}</span> </label>
 		            </div>
 		        </div>
@@ -156,7 +156,7 @@
                 <div class="input">
                     ${h.text('paths_root_path',size=30,readonly="readonly")}			                    
 					<span id="path_unlock" class="tooltip" 
-						tooltip_title="${h.tooltip(_('This a crucial application setting. If You really sure you need to change this, you must restart application in order to make this settings take effect. Click this label to unlock.'))}">
+						title="${h.tooltip(_('This a crucial application setting. If You really sure you need to change this, you must restart application in order to make this settings take effect. Click this label to unlock.'))}">
 		                ${_('unlock')}</span>
                 </div>
             </div>

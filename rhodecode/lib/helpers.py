@@ -5,11 +5,15 @@ available to Controllers. This module is available to both as 'h'.
 """
 import random
 import hashlib
+import StringIO
+import urllib
+
+from datetime import datetime
 from pygments.formatters import HtmlFormatter
 from pygments import highlight as code_highlight
 from pylons import url, app_globals as g
 from pylons.i18n.translation import _, ungettext
-from vcs.utils.annotate import annotate_highlight
+
 from webhelpers.html import literal, HTML, escape
 from webhelpers.html.tools import *
 from webhelpers.html.builder import make_tag
@@ -26,11 +30,18 @@ from webhelpers.text import chop_at, collapse, convert_accented_entities, \
     convert_misc_entities, lchop, plural, rchop, remove_formatting, \
     replace_whitespace, urlify, truncate, wrap_paragraphs
 from webhelpers.date import time_ago_in_words
-
+from webhelpers.paginate import Page
 from webhelpers.html.tags import _set_input_attrs, _set_id_attr, \
     convert_boolean_attrs, NotGiven
 
+from vcs.utils.annotate import annotate_highlight
+from rhodecode.lib.utils import repo_name_slug
+from rhodecode.lib import str2bool, safe_unicode
+
 def _reset(name, value=None, id=NotGiven, type="reset", **attrs):
+    """
+    Reset button
+    """
     _set_input_attrs(attrs, type, name, value)
     _set_id_attr(attrs, id, name)
     convert_boolean_attrs(attrs, ["disabled"])
@@ -55,24 +66,13 @@ def get_token():
             session.save()
     return session[token_key]
 
-
-#Custom helpers here :)
-class _Link(object):
-    '''
-    Make a url based on label and url with help of url_for
-    :param label:name of link    if not defined url is used
-    :param url: the url for link
-    '''
-
-    def __call__(self, label='', *url_, **urlargs):
-        if label is None or '':
-            label = url
-        link_fn = link_to(label, url(*url_, **urlargs))
-        return link_fn
-
-link = _Link()
-
 class _GetError(object):
+    """Get error from form_errors, and represent it as span wrapped error
+    message
+
+    :param field_name: field to fetch errors for
+    :param form_errors: form errors dict
+    """
 
     def __call__(self, field_name, form_errors):
         tmpl = """<span class="error_msg">%s</span>"""
@@ -81,29 +81,12 @@ class _GetError(object):
 
 get_error = _GetError()
 
-def recursive_replace(str, replace=' '):
-    """
-    Recursive replace of given sign to just one instance
-    :param str: given string
-    :param replace:char to find and replace multiple instances
-        
-    Examples::
-    >>> recursive_replace("Mighty---Mighty-Bo--sstones",'-')
-    'Mighty-Mighty-Bo-sstones'
-    """
-
-    if str.find(replace * 2) == -1:
-        return str
-    else:
-        str = str.replace(replace * 2, replace)
-        return recursive_replace(str, replace)
-
 class _ToolTip(object):
 
     def __call__(self, tooltip_title, trim_at=50):
-        """
-        Special function just to wrap our text into nice formatted autowrapped
-        text
+        """Special function just to wrap our text into nice formatted
+        autowrapped text
+
         :param tooltip_title:
         """
 
@@ -111,11 +94,9 @@ class _ToolTip(object):
                        .replace('\n', '<br/>')
 
     def activate(self):
-        """
-        Adds tooltip mechanism to the given Html all tooltips have to have 
-        set class tooltip and set attribute tooltip_title.
-        Then a tooltip will be generated based on that
-        All with yui js tooltip
+        """Adds tooltip mechanism to the given Html all tooltips have to have
+        set class `tooltip` and set attribute `tooltip_title`.
+        Then a tooltip will be generated based on that. All with yui js tooltip
         """
 
         js = '''
@@ -123,104 +104,26 @@ class _ToolTip(object):
             function toolTipsId(){
                 var ids = [];
                 var tts = YAHOO.util.Dom.getElementsByClassName('tooltip');
-                
+
                 for (var i = 0; i < tts.length; i++) {
                     //if element doesn't not have and id autogenerate one for tooltip
-                    
+
                     if (!tts[i].id){
                         tts[i].id='tt'+i*100;
                     }
                     ids.push(tts[i].id);
                 }
-                return ids        
+                return ids
             };
-            var myToolTips = new YAHOO.widget.Tooltip("tooltip", { 
-                context: toolTipsId(),
+            var myToolTips = new YAHOO.widget.Tooltip("tooltip", {
+                context: [[toolTipsId()],"tl","bl",null,[0,5]],
                 monitorresize:false,
                 xyoffset :[0,0],
                 autodismissdelay:300000,
                 hidedelay:5,
                 showdelay:20,
             });
-            
-            //Mouse Over event disabled for new repositories since they don't
-            //have last commit message
-            myToolTips.contextMouseOverEvent.subscribe(
-                function(type, args) {
-                    var context = args[0];
-                    var txt = context.getAttribute('tooltip_title');
-                    if(txt){                                       
-                        return true;
-                    }
-                    else{
-                        return false;
-                    }
-                });
-            
-                            
-            // Set the text for the tooltip just before we display it. Lazy method
-            myToolTips.contextTriggerEvent.subscribe( 
-                 function(type, args) { 
 
-                 
-                        var context = args[0]; 
-                        
-                        var txt = context.getAttribute('tooltip_title');
-                        this.cfg.setProperty("text", txt);
-                        
-                        
-                        // positioning of tooltip
-                        var tt_w = this.element.clientWidth;
-                        var tt_h = this.element.clientHeight;
-                        
-                        var context_w = context.offsetWidth;
-                        var context_h = context.offsetHeight;
-                        
-                        var pos_x = YAHOO.util.Dom.getX(context);
-                        var pos_y = YAHOO.util.Dom.getY(context);
-
-                        var display_strategy = 'top';
-                        var xy_pos = [0,0];
-                        switch (display_strategy){
-                        
-                            case 'top':
-                                var cur_x = (pos_x+context_w/2)-(tt_w/2);
-                                var cur_y = (pos_y-tt_h-4);
-                                xy_pos = [cur_x,cur_y];                                
-                                break;
-                            case 'bottom':
-                                var cur_x = (pos_x+context_w/2)-(tt_w/2);
-                                var cur_y = pos_y+context_h+4;
-                                xy_pos = [cur_x,cur_y];                                
-                                break;
-                            case 'left':
-                                var cur_x = (pos_x-tt_w-4);
-                                var cur_y = pos_y-((tt_h/2)-context_h/2);
-                                xy_pos = [cur_x,cur_y];                                
-                                break;
-                            case 'right':
-                                var cur_x = (pos_x+context_w+4);
-                                var cur_y = pos_y-((tt_h/2)-context_h/2);
-                                xy_pos = [cur_x,cur_y];                                
-                                break;
-                             default:
-                                var cur_x = (pos_x+context_w/2)-(tt_w/2);
-                                var cur_y = pos_y-tt_h-4;
-                                xy_pos = [cur_x,cur_y];                                
-                                break;                             
-                                 
-                        }
-
-                        this.cfg.setProperty("xy",xy_pos);
-
-                  });
-                  
-            //Mouse out 
-            myToolTips.contextMouseOutEvent.subscribe(
-                function(type, args) {
-                    var context = args[0];
-                    
-                });
         });
         '''
         return literal(js)
@@ -231,12 +134,11 @@ class _FilesBreadCrumbs(object):
 
     def __call__(self, repo_name, rev, paths):
         if isinstance(paths, str):
-            paths = paths.decode('utf-8', 'replace')
+            paths = safe_unicode(paths)
         url_l = [link_to(repo_name, url('files_home',
                                         repo_name=repo_name,
                                         revision=rev, f_path=''))]
         paths_l = paths.split('/')
-
         for cnt, p in enumerate(paths_l):
             if p != '':
                 url_l.append(link_to(p, url('files_home',
@@ -247,7 +149,10 @@ class _FilesBreadCrumbs(object):
         return literal('/'.join(url_l))
 
 files_breadcrumbs = _FilesBreadCrumbs()
+
 class CodeHtmlFormatter(HtmlFormatter):
+    """My code Html Formatter for source codes
+    """
 
     def wrap(self, source, outfile):
         return self._wrap_div(self._wrap_pre(self._wrap_code(source)))
@@ -272,15 +177,16 @@ def pygmentize_annotation(filenode, **kwargs):
     """
 
     color_dict = {}
-    def gen_color():
-        """generator for getting 10k of evenly distibuted colors using hsv color
-        and golden ratio.
+    def gen_color(n=10000):
+        """generator for getting n of evenly distributed colors using
+        hsv color and golden ratio. It always return same order of colors
+
+        :returns: RGB tuple
         """
         import colorsys
-        n = 10000
         golden_ratio = 0.618033988749895
         h = 0.22717784590367374
-        #generate 10k nice web friendly colors in the same order
+
         for c in xrange(n):
             h += golden_ratio
             h %= 1
@@ -312,26 +218,12 @@ def pygmentize_annotation(filenode, **kwargs):
                     revision=changeset.raw_id),
                 style=get_color_string(changeset.raw_id),
                 class_='tooltip',
-                tooltip_title=tooltip_html
+                title=tooltip_html
               )
 
         uri += '\n'
         return uri
     return literal(annotate_highlight(filenode, url_func, **kwargs))
-
-def repo_name_slug(value):
-    """Return slug of name of repository
-    This function is called on each creation/modification
-    of repository to prevent bad names in repo
-    """
-    slug = remove_formatting(value)
-    slug = strip_tags(slug)
-
-    for c in """=[]\;'"<>,/~!@#$%^&*()+{}|: """:
-        slug = slug.replace(c, '-')
-    slug = recursive_replace(slug, '-')
-    slug = collapse(slug, '-')
-    return slug
 
 def get_changeset_safe(repo, rev):
     from vcs.backends.base import BaseRepository
@@ -357,15 +249,11 @@ flash = _Flash()
 from mercurial import util
 from mercurial.templatefilters import person as _person
 
-
-
 def _age(curdate):
     """turns a datetime into an age string."""
 
     if not curdate:
         return ''
-
-    from datetime import timedelta, datetime
 
     agescales = [("year", 3600 * 24 * 365),
                  ("month", 3600 * 24 * 30),
@@ -394,17 +282,19 @@ short_id = lambda x: x[:12]
 
 
 def bool2icon(value):
-    """
-    Returns True/False values represented as small html image of true/false
+    """Returns True/False values represented as small html image of true/false
     icons
+
     :param value: bool value
     """
 
     if value is True:
-        return HTML.tag('img', src=url("/images/icons/accept.png"), alt=_('True'))
+        return HTML.tag('img', src=url("/images/icons/accept.png"),
+                        alt=_('True'))
 
     if value is False:
-        return HTML.tag('img', src=url("/images/icons/cancel.png"), alt=_('False'))
+        return HTML.tag('img', src=url("/images/icons/cancel.png"),
+                        alt=_('False'))
 
     return value
 
@@ -427,10 +317,9 @@ def action_parser(user_log):
     def get_cs_links():
         revs_limit = 5
         revs = action_params.split(',')
-        cs_links = " " + ', '.join ([link(rev,
-                url('changeset_home',
-                repo_name=user_log.repository.repo_name,
-                revision=rev)) for rev in revs[:revs_limit] ])
+        cs_links = " " + ', '.join ([link_to(rev, url('changeset_home',
+                                repo_name=user_log.repository.repo_name,
+                                revision=rev)) for rev in revs[:revs_limit]])
         if len(revs) > revs_limit:
             uniq_id = revs[0]
             html_tmpl = ('<span> %s '
@@ -441,7 +330,7 @@ def action_parser(user_log):
                                         _('revisions'))
 
             html_tmpl = '<span id="%s" style="display:none"> %s </span>'
-            cs_links += html_tmpl % (uniq_id, ', '.join([link(rev,
+            cs_links += html_tmpl % (uniq_id, ', '.join([link_to(rev,
                 url('changeset_home',
                 repo_name=user_log.repository.repo_name,
                 revision=rev)) for rev in revs[revs_limit:] ]))
@@ -495,6 +384,7 @@ def action_parser_icon(user_log):
            'admin_forked_repo':'arrow_divide.png',
            'admin_updated_repo':'database_edit.png',
            'push':'script_add.png',
+           'push_remote':'connect.png',
            'pull':'down_16.png',
            'started_following_repo':'heart_add.png',
            'stopped_following_repo':'heart_delete.png',
@@ -523,28 +413,14 @@ def gravatar_url(email_address, size=30):
     baseurl_ssl = "https://secure.gravatar.com/avatar/"
     baseurl = baseurl_ssl if ssl_enabled else baseurl_nossl
 
-
+    if isinstance(email_address, unicode):
+        #hashlib crashes on unicode items
+        email_address = email_address.encode('utf8', 'replace')
     # construct the url
     gravatar_url = baseurl + hashlib.md5(email_address.lower()).hexdigest() + "?"
     gravatar_url += urllib.urlencode({'d':default, 's':str(size)})
 
     return gravatar_url
-
-def safe_unicode(str):
-    """safe unicode function. In case of UnicodeDecode error we try to return
-    unicode with errors replace, if this failes we return unicode with 
-    string_escape decoding """
-
-    try:
-        u_str = unicode(str)
-    except UnicodeDecodeError:
-        try:
-            u_str = unicode(str, 'utf-8', 'replace')
-        except UnicodeDecodeError:
-            #incase we have a decode error just represent as byte string
-            u_str = unicode(str(str).encode('string_escape'))
-
-    return u_str
 
 def changed_tooltip(nodes):
     if nodes:
@@ -552,6 +428,6 @@ def changed_tooltip(nodes):
         suf = ''
         if len(nodes) > 30:
             suf = '<br/>' + _(' and %s more') % (len(nodes) - 30)
-        return literal(pref + '<br/> '.join([x.path.decode('utf-8', 'replace') for x in nodes[:30]]) + suf)
+        return literal(pref + '<br/> '.join([safe_unicode(x.path) for x in nodes[:30]]) + suf)
     else:
         return ': ' + _('No Files')

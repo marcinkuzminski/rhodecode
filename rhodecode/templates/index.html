@@ -87,12 +87,12 @@
 		            </div>
 		            </td>
 		            ##DESCRIPTION
-		            <td><span class="tooltip" tooltip_title="${h.tooltip(repo['description'])}">
+		            <td><span class="tooltip" title="${h.tooltip(repo['description'])}">
 		               ${h.truncate(repo['description'],60)}</span>
 		            </td>
 		            ##LAST CHANGE
 		            <td>
-		              <span class="tooltip" tooltip_title="${repo['last_change']}">
+		              <span class="tooltip" title="${repo['last_change']}">
 		              ${h.age(repo['last_change'])}</span>
 		            </td>
 		            <td>
@@ -100,7 +100,7 @@
 		            	${h.link_to('r%s:%s' % (repo['rev'],h.short_id(repo['tip'])),
 		                h.url('changeset_home',repo_name=repo['name'],revision=repo['tip']),
 		                class_="tooltip",
-		                tooltip_title=h.tooltip(repo['last_msg']))}
+		                title=h.tooltip(repo['last_msg']))}
 		            	%else:
 		            		${_('No changesets yet')}
 		            	%endif    

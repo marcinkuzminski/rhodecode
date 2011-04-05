@@ -4,7 +4,7 @@
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Files controller for RhodeCode
-    
+
     :created_on: Apr 21, 2010
     :author: marcink
     :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>    
@@ -22,6 +22,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+import os
 import tempfile
 import logging
 import rhodecode.lib.helpers as h
@@ -121,7 +122,7 @@ class FilesController(BaseController):
             redirect(h.url('files_home', repo_name=repo_name,
                            revision=cs.raw_id))
 
-        fname = f_path.split('/')[-1].encode('utf8', 'replace')
+        fname = f_path.split(os.sep)[-1].encode('utf8', 'replace')
 
         response.content_disposition = 'attachment; filename=%s' % fname
         response.content_type = file_node.mimetype

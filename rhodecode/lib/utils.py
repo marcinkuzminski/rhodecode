@@ -4,10 +4,10 @@
     ~~~~~~~~~~~~~~~~~~~
 
     Utilities library for RhodeCode
-    
+
     :created_on: Apr 18, 2010
     :author: marcink
-    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
+    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software: you can redistribute it and/or modify
@@ -27,15 +27,17 @@ import os
 import logging
 import datetime
 import traceback
+import paste
+import beaker
+
+from paste.script.command import Command, BadCommand
 
 from UserDict import DictMixin
 
 from mercurial import ui, config, hg
 from mercurial.error import RepoError
 
-import paste
-import beaker
-from paste.script.command import Command, BadCommand
+from webhelpers.text import collapse, remove_formatting, strip_tags
 
 from vcs.backends.base import BaseChangeset
 from vcs.utils.lazy import LazyProperty
@@ -47,6 +49,38 @@ from rhodecode.model.repo import RepoModel
 from rhodecode.model.user import UserModel
 
 log = logging.getLogger(__name__)
+
+def recursive_replace(str, replace=' '):
+    """Recursive replace of given sign to just one instance
+
+    :param str: given string
+    :param replace: char to find and replace multiple instances
+
+    Examples::
+    >>> recursive_replace("Mighty---Mighty-Bo--sstones",'-')
+    'Mighty-Mighty-Bo-sstones'
+    """
+
+    if str.find(replace * 2) == -1:
+        return str
+    else:
+        str = str.replace(replace * 2, replace)
+        return recursive_replace(str, replace)
+
+def repo_name_slug(value):
+    """Return slug of name of repository
+    This function is called on each creation/modification
+    of repository to prevent bad names in repo
+    """
+
+    slug = remove_formatting(value)
+    slug = strip_tags(slug)
+
+    for c in """=[]\;'"<>,/~!@#$%^&*()+{}|: """:
+        slug = slug.replace(c, '-')
+    slug = recursive_replace(slug, '-')
+    slug = collapse(slug, '-')
+    return slug
 
 
 def get_repo_slug(request):
@@ -233,7 +267,7 @@ def make_ui(read_from='file', path=None, checkpaths=True):
 
 def set_rhodecode_config(config):
     """Updates pylons config with new settings from database
-    
+
     :param config:
     """
     from rhodecode.model.settings import SettingsModel
@@ -243,7 +277,7 @@ def set_rhodecode_config(config):
         config[k] = v
 
 def invalidate_cache(cache_key, *args):
-    """Puts cache invalidation task into db for 
+    """Puts cache invalidation task into db for
     further global cache invalidation
     """
 
@@ -435,6 +469,9 @@ def add_cache(settings):
                                                                 60))
             region_settings.setdefault('lock_dir',
                                        cache_settings.get('lock_dir'))
+            region_settings.setdefault('data_dir',
+                                       cache_settings.get('data_dir'))
+
             if 'type' not in region_settings:
                 region_settings['type'] = cache_settings.get('type',
                                                              'memory')
@@ -485,7 +522,7 @@ def create_test_index(repo_location, full_index):
         pass
 
 def create_test_env(repos_test_path, config):
-    """Makes a fresh database and 
+    """Makes a fresh database and
     install test repository into tmp dir
     """
     from rhodecode.lib.db_manage import DbManage
@@ -519,7 +556,7 @@ def create_test_env(repos_test_path, config):
     dbmanage = DbManage(log_sql=True, dbconf=dbconf, root=config['here'],
                         tests=True)
     dbmanage.create_tables(override=True)
-    dbmanage.config_prompt(repos_test_path)
+    dbmanage.create_settings(dbmanage.config_prompt(repos_test_path))
     dbmanage.create_default_user()
     dbmanage.admin_prompt()
     dbmanage.create_permissions()
@@ -564,12 +601,11 @@ class BasePasterCommand(Command):
     def notify_msg(self, msg, log=False):
         """Make a notification to user, additionally if logger is passed
         it logs this action using given logger
-        
+
         :param msg: message that will be printed to user
         :param log: logging instance, to use to additionally log this message
-        
+
         """
-        print msg
         if log and isinstance(log, logging):
             log(msg)
 
@@ -577,7 +613,7 @@ class BasePasterCommand(Command):
     def run(self, args):
         """
         Overrides Command.run
-        
+
         Checks for a config file argument and loads it.
         """
         if len(args) < self.min_args:

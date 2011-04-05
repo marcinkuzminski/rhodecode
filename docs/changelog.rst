@@ -16,7 +16,10 @@ fixes
 - fixed #140 freeze of python dateutil library, since new version is python2.x
   incompatible
 - setup-app will check for write permission in given path
-
+- cleaned up license info issue #149
+- fixes for issues #137 and #116
+- fixes crashes on gravatar, when passed in email as unicode
+- fixed tooltip flickering problems
 
 1.1.7 (**2011-03-23**)
 ======================
