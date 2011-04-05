@@ -4,7 +4,7 @@ Changelog
 =========
 
 
-1.1.7 (**2011-03-23**)
+1.1.8 (**2011-04-XX**)
 ======================
 
 news
@@ -15,6 +15,8 @@ fixes
 
 - fixed #140 freeze of python dateutil library, since new version is python2.x
   incompatible
+- setup-app will check for write permission in given path
+
 
 1.1.7 (**2011-03-23**)
 ======================

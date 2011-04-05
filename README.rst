@@ -31,11 +31,19 @@ using the following credentials:
 Source code
 -----------
 
-The latest source for RhodeCode can be obtained from official RhodeCode instance
+The latest sources can be obtained from official RhodeCode instance
 https://hg.rhodecode.org 
 
-Rarely updated source code and issue tracker is available at bitbucket
+
+MIRRORS:
+
+Issue tracker and sources at bitbucket_
+
 http://bitbucket.org/marcinkuzminski/rhodecode
+
+Sources at github_
+
+https://github.com/marcinkuzminski/rhodecode
 
 Installation
 ------------
@@ -48,7 +56,7 @@ RhodeCode Features
 
 - Has it's own middleware to handle mercurial_ protocol requests. 
   Each request can be logged and authenticated.
-- Runs on threads unlike hgweb. You can make multiple pulls/pushes simultaneous. 
+- Runs on threads unlike hgweb. You can make multiple pulls/pushes simultaneous.
   Supports http/https and LDAP
 - Full permissions (private/read/write/admin) and authentication per project. 
   One account for web interface and mercurial_ push/pull/clone operations.
@@ -94,7 +102,7 @@ Incoming / Plans
 License
 -------
 
-``RhodeCode`` is released under the GPL_ license.
+``RhodeCode`` is released under the GPLv3 license.
 
 
 Mailing group Q&A
@@ -117,16 +125,17 @@ You may also build the documentation for yourself - go into ``docs/`` and run::
    make html
 
 (You need to have sphinx_ installed to build the documentation. If you don't
-have sphinx_ installed you can install it via the command: ``easy_install sphinx``)
+have sphinx_ installed you can install it via the command: 
+``easy_install sphinx``)
  
 .. _virtualenv: http://pypi.python.org/pypi/virtualenv
 .. _python: http://www.python.org/
 .. _sphinx: http://sphinx.pocoo.org/
 .. _mercurial: http://mercurial.selenic.com/
 .. _bitbucket: http://bitbucket.org/
+.. _github: http://github.com/
 .. _subversion: http://subversion.tigris.org/
 .. _git: http://git-scm.com/
 .. _celery: http://celeryproject.org/
 .. _Sphinx: http://sphinx.pocoo.org/
-.. _GPL: http://www.gnu.org/licenses/gpl.html
 .. _vcs: http://pypi.python.org/pypi/vcs

@@ -5,26 +5,24 @@
 
     Database creation, and setup module for RhodeCode. Used for creation
     of database as well as for migration operations
-    
+
     :created_on: Apr 10, 2010
     :author: marcink
-    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>    
+    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
-# This program is free software; you can redistribute it and/or
-# modify it under the terms of the GNU General Public License
-# as published by the Free Software Foundation; version 2
-# of the License or (at your opinion) any later version of the license.
-# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-# MA  02110-1301, USA.
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
 import sys
@@ -38,12 +36,13 @@ from rhodecode.model import meta
 from rhodecode.lib.auth import get_crypt_password
 from rhodecode.lib.utils import ask_ok
 from rhodecode.model import init_model
-from rhodecode.model.db import User, Permission, RhodeCodeUi, RhodeCodeSettings, \
-    UserToPerm, DbMigrateVersion
+from rhodecode.model.db import User, Permission, RhodeCodeUi, \
+    RhodeCodeSettings, UserToPerm, DbMigrateVersion
 
 from sqlalchemy.engine import create_engine
 
 log = logging.getLogger(__name__)
+
 
 class DbManage(object):
     def __init__(self, log_sql, dbconf, root, tests=False):
@@ -78,8 +77,6 @@ class DbManage(object):
         meta.Base.metadata.create_all(checkfirst=checkfirst)
         log.info('Created tables for %s', self.dbname)
 
-
-
     def set_db_version(self):
         try:
             ver = DbMigrateVersion()
@@ -93,12 +90,10 @@ class DbManage(object):
             raise
         log.info('db version set to: %s', __dbversion__)
 
-
     def upgrade(self):
-        """Upgrades given database schema to given revision following 
+        """Upgrades given database schema to given revision following
         all needed steps, to perform the upgrade
-        
-        :param revision: revision to upgrade to
+
         """
 
         from rhodecode.lib.dbmigrate.migrate.versioning import api
@@ -135,7 +130,7 @@ class DbManage(object):
         # UPGRADE STEPS
         #======================================================================
         class UpgradeSteps(object):
-            """Those steps follow schema versions so for example schema 
+            """Those steps follow schema versions so for example schema
             for example schema with seq 002 == step_2 and so on.
             """
 
@@ -162,15 +157,12 @@ class DbManage(object):
                 log.info('Changing ui settings')
                 self.klass.create_ui_settings()
 
-
         upgrade_steps = [0] + range(curr_version + 1, __dbversion__ + 1)
 
         #CALL THE PROPER ORDER OF STEPS TO PERFORM FULL UPGRADE
         for step in upgrade_steps:
             print ('performing upgrade step %s' % step)
             callable = getattr(UpgradeSteps(self), 'step_%s' % step)()
-
-
 
     def fix_repo_paths(self):
         """Fixes a old rhodecode version path into new one without a '*'
@@ -208,15 +200,13 @@ class DbManage(object):
             self.sa.rollback()
             raise
 
-
-
     def admin_prompt(self, second=False):
         if not self.tests:
             import getpass
 
-
             def get_password():
-                password = getpass.getpass('Specify admin password (min 6 chars):')
+                password = getpass.getpass('Specify admin password '
+                                           '(min 6 chars):')
                 confirm = getpass.getpass('Confirm password:')
 
                 if password != confirm:
@@ -241,14 +231,17 @@ class DbManage(object):
             self.create_user(username, password, email, True)
         else:
             log.info('creating admin and regular test users')
-            self.create_user('test_admin', 'test12', 'test_admin@mail.com', True)
-            self.create_user('test_regular', 'test12', 'test_regular@mail.com', False)
-            self.create_user('test_regular2', 'test12', 'test_regular2@mail.com', False)
+            self.create_user('test_admin', 'test12',
+                             'test_admin@mail.com', True)
+            self.create_user('test_regular', 'test12',
+                             'test_regular@mail.com', False)
+            self.create_user('test_regular2', 'test12',
+                             'test_regular2@mail.com', False)
 
     def create_ui_settings(self):
         """Creates ui settings, fills out hooks
         and disables dotencode
-        
+
         """
         #HOOKS
         hooks1_key = 'changegroup.update'
@@ -297,7 +290,6 @@ class DbManage(object):
             self.sa.rollback()
             raise
 
-
     def create_ldap_options(self):
         """Creates ldap settings"""
 
@@ -316,18 +308,39 @@ class DbManage(object):
             self.sa.rollback()
             raise
 
-    def config_prompt(self, test_repo_path=''):
-        log.info('Setting up repositories config')
+    def config_prompt(self, test_repo_path='', retries=3):
+        if retries == 3:
+            log.info('Setting up repositories config')
 
         if not self.tests and not test_repo_path:
             path = raw_input('Specify valid full path to your repositories'
                         ' you can change this later in application settings:')
         else:
             path = test_repo_path
+        path_ok = True
 
+        #check proper dir
         if not os.path.isdir(path):
-            log.error('You entered wrong path: %s', path)
+            path_ok = False
+            log.error('Entered path is not a valid directory: %s [%s/3]',
+                      path, retries)
+
+        #check write access
+        if not os.access(path, os.W_OK):
+            path_ok = False
+
+            log.error('No write permission to given path: %s [%s/3]',
+                      path, retries)
+
+        if retries == 0:
             sys.exit()
+        if path_ok is False:
+            retries -= 1
+            return self.config_prompt(test_repo_path, retries)
+
+        return path
+
+    def create_settings(self, path):
 
         self.create_ui_settings()
 
@@ -357,10 +370,8 @@ class DbManage(object):
         paths.ui_key = '/'
         paths.ui_value = path
 
-
         hgsettings1 = RhodeCodeSettings('realm', 'RhodeCode authentication')
         hgsettings2 = RhodeCodeSettings('title', 'RhodeCode')
-
 
         try:
             self.sa.add(web1)
@@ -427,8 +438,12 @@ class DbManage(object):
                  ('hg.create.repository', 'Repository create'),
                  ('hg.create.none', 'Repository creation disabled'),
                  ('hg.register.none', 'Register disabled'),
-                 ('hg.register.manual_activate', 'Register new user with rhodecode without manual activation'),
-                 ('hg.register.auto_activate', 'Register new user with rhodecode without auto activation'),
+                 ('hg.register.manual_activate', ('Register new user with '
+                                                  'RhodeCode without '
+                                                  'manual activation')),
+                 ('hg.register.auto_activate', ('Register new user with '
+                                                'RhodeCode without auto '
+                                                'activation')),
                 ]
 
         for p in perms:
@@ -474,4 +489,3 @@ class DbManage(object):
         except:
             self.sa.rollback()
             raise
-

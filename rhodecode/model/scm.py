@@ -7,23 +7,21 @@
 
     :created_on: Apr 9, 2010
     :author: marcink
-    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
+    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
-# This program is free software; you can redistribute it and/or
-# modify it under the terms of the GNU General Public License
-# as published by the Free Software Foundation; version 2
-# of the License or (at your opinion) any later version of the license.
-# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-# MA  02110-1301, USA.
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import os
 import time
 import traceback
@@ -59,9 +57,18 @@ log = logging.getLogger(__name__)
 class UserTemp(object):
     def __init__(self, user_id):
         self.user_id = user_id
+
+    def __repr__(self):
+        return "<%s('id:%s')>" % (self.__class__.__name__, self.user_id)
+
+
 class RepoTemp(object):
     def __init__(self, repo_id):
         self.repo_id = repo_id
+
+    def __repr__(self):
+        return "<%s('id:%s')>" % (self.__class__.__name__, self.repo_id)
+
 
 class ScmModel(BaseModel):
     """Generic Scm Model
@@ -77,9 +84,9 @@ class ScmModel(BaseModel):
         return q.ui_value
 
     def repo_scan(self, repos_path, baseui):
-        """Listing of repositories in given path. This path should not be a 
+        """Listing of repositories in given path. This path should not be a
         repository itself. Return a dictionary of repository objects
-        
+
         :param repos_path: path to directory containing repositories
         :param baseui: baseui instance to instantiate MercurialRepostitory with
         """
@@ -92,7 +99,7 @@ class ScmModel(BaseModel):
 
         for name, path in get_repos(repos_path):
             try:
-                if repos_list.has_key(name):
+                if name in repos_list:
                     raise RepositoryError('Duplicate repository name %s '
                                     'found in %s' % (name, path))
                 else:
@@ -110,9 +117,9 @@ class ScmModel(BaseModel):
         return repos_list
 
     def get_repos(self, all_repos=None):
-        """Get all repos from db and for each repo create it's backend instance.
-        and fill that backed with information from database
-        
+        """Get all repos from db and for each repo create it's
+        backend instance.and fill that backed with information from database
+
         :param all_repos: give specific repositories list, good for filtering
         """
 
@@ -140,7 +147,8 @@ class ScmModel(BaseModel):
                 tmp_d['description'] = repo.dbrepo.description
                 tmp_d['description_sort'] = tmp_d['description']
                 tmp_d['last_change'] = last_change
-                tmp_d['last_change_sort'] = time.mktime(last_change.timetuple())
+                tmp_d['last_change_sort'] = time.mktime(last_change \
+                                                        .timetuple())
                 tmp_d['tip'] = tip.raw_id
                 tmp_d['tip_sort'] = tip.revision
                 tmp_d['rev'] = tip.revision
@@ -158,12 +166,12 @@ class ScmModel(BaseModel):
     def get(self, repo_name, invalidation_list=None):
         """Get's repository from given name, creates BackendInstance and
         propagates it's data from database with all additional information
-        
+
         :param repo_name:
         :param invalidation_list: if a invalidation list is given the get
-            method should not manually check if this repository needs 
+            method should not manually check if this repository needs
             invalidation and just invalidate the repositories in list
-            
+
         """
         if not HasRepoPermissionAny('repository.read', 'repository.write',
                             'repository.admin')(repo_name, 'get repo check'):
@@ -224,12 +232,10 @@ class ScmModel(BaseModel):
 
         return _get_repo(repo_name)
 
-
-
     def mark_for_invalidation(self, repo_name):
-        """Puts cache invalidation task into db for 
+        """Puts cache invalidation task into db for
         further global cache invalidation
-        
+
         :param repo_name: this repo that should invalidation take place
         """
 
@@ -251,7 +257,6 @@ class ScmModel(BaseModel):
             log.error(traceback.format_exc())
             self.sa.rollback()
 
-
     def toggle_following_repo(self, follow_repo_id, user_id):
 
         f = self.sa.query(UserFollowing)\
@@ -272,7 +277,6 @@ class ScmModel(BaseModel):
                 self.sa.rollback()
                 raise
 
-
         try:
             f = UserFollowing()
             f.user_id = user_id
@@ -287,7 +291,7 @@ class ScmModel(BaseModel):
             self.sa.rollback()
             raise
 
-    def toggle_following_user(self, follow_user_id , user_id):
+    def toggle_following_user(self, follow_user_id, user_id):
         f = self.sa.query(UserFollowing)\
             .filter(UserFollowing.follows_user_id == follow_user_id)\
             .filter(UserFollowing.user_id == user_id).scalar()
@@ -340,14 +344,12 @@ class ScmModel(BaseModel):
         return self.sa.query(Repository)\
                 .filter(Repository.fork_id == repo_id).count()
 
-
     def get_unread_journal(self):
         return self.sa.query(UserLog).count()
 
-
     def _should_invalidate(self, repo_name):
         """Looks up database for invalidation signals for this repo_name
-        
+
         :param repo_name:
         """
 
@@ -361,8 +363,9 @@ class ScmModel(BaseModel):
         return ret
 
     def _mark_invalidated(self, cache_key):
-        """ Marks all occurences of cache to invaldation as already invalidated
-        
+        """ Marks all occurences of cache to invaldation as
+        already invalidated
+
         :param cache_key:
         """
 
@@ -375,4 +378,3 @@ class ScmModel(BaseModel):
         except (DatabaseError,):
             log.error(traceback.format_exc())
             self.sa.rollback()
-
