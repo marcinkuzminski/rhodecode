@@ -111,9 +111,5 @@ setup(
     make-index = rhodecode.lib.indexers:MakeIndex
     upgrade-db = rhodecode.lib.dbmigrate:UpgradeDb
     celeryd=rhodecode.lib.celerypylons.commands:CeleryDaemonCommand
-    celerybeat=rhodecode.lib.celerypylons.commands:CeleryBeatCommand
-    camqadm=rhodecode.lib.celerypylons.commands:CAMQPAdminCommand
-    celeryev=rhodecode.lib.celerypylons.commands:CeleryEventCommand
-
     """,
 )
