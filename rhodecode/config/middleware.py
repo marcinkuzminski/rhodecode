@@ -16,6 +16,7 @@ from rhodecode.lib.middleware.simplegit import SimpleGit
 from rhodecode.lib.middleware.https_fixup import HttpsFixup
 from rhodecode.config.environment import load_environment
 
+
 def make_app(global_conf, full_stack=True, static_files=True, **app_conf):
     """Create a Pylons WSGI application and return it
 
@@ -76,4 +77,3 @@ def make_app(global_conf, full_stack=True, static_files=True, **app_conf):
     app.config = config
 
     return app
-
