@@ -16,7 +16,7 @@ news
 - implemented #91 added nicer looking archive urls with more download options
   like tags, branches
 - implemented #44 into file browsing, and added follow branch option
-- implemented #84 downloads can be enabled/disabled for each repository 
+- implemented #84 downloads can be enabled/disabled for each repository
 - anonymous repository can be cloned without having to pass default:default
   into clone url
 - fixed #90 whoosh indexer can index chooses repositories passed in command 
@@ -50,6 +50,7 @@ fixes
 - fixed strange issue on formencode imports
 - fixed #126 Deleting repository on Windows, rename used incompatible chars. 
 - windows fixes for os.kill and path spliting, issues #148 and #133
+- #150 fixes for errors on repositories mapped in db but corrupted in filesystem
 
 1.1.7 (**2011-03-23**)
 ======================

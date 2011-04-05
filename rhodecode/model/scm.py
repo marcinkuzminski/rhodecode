@@ -61,12 +61,14 @@ class UserTemp(object):
     def __repr__(self):
         return "<%s('id:%s')>" % (self.__class__.__name__, self.user_id)
 
+
 class RepoTemp(object):
     def __init__(self, repo_id):
         self.repo_id = repo_id
 
     def __repr__(self):
         return "<%s('id:%s')>" % (self.__class__.__name__, self.repo_id)
+
 
 class ScmModel(BaseModel):
     """Generic Scm Model
@@ -98,7 +100,7 @@ class ScmModel(BaseModel):
 
         for name, path in get_filesystem_repos(repos_path, recursive=True):
             try:
-                if repos_list.has_key(name):
+                if name in repos_list:
                     raise RepositoryError('Duplicate repository name %s '
                                     'found in %s' % (name, path))
                 else:
@@ -116,8 +118,8 @@ class ScmModel(BaseModel):
         return repos_list
 
     def get_repos(self, all_repos=None):
-        """Get all repos from db and for each repo create it's backend instance.
-        and fill that backed with information from database
+        """Get all repos from db and for each repo create it's
+        backend instance and fill that backed with information from database
 
         :param all_repos: give specific repositories list, good for filtering
             this have to be a list of  just the repository names
@@ -137,6 +139,9 @@ class ScmModel(BaseModel):
             if r_dbr is not None:
                 repo, dbrepo = r_dbr
 
+                if not repo and dbrepo:
+                    log.error('Repository %s looks somehow corrupted', r_name)
+                    continue
                 last_change = repo.last_change
                 tip = h.get_changeset_safe(repo, 'tip')
 
@@ -146,7 +151,8 @@ class ScmModel(BaseModel):
                 tmp_d['description'] = dbrepo.description
                 tmp_d['description_sort'] = tmp_d['description']
                 tmp_d['last_change'] = last_change
-                tmp_d['last_change_sort'] = time.mktime(last_change.timetuple())
+                tmp_d['last_change_sort'] = time.mktime(last_change \
+                                                        .timetuple())
                 tmp_d['tip'] = tip.raw_id
                 tmp_d['tip_sort'] = tip.revision
                 tmp_d['rev'] = tip.revision
@@ -157,7 +163,8 @@ class ScmModel(BaseModel):
                 tmp_d['last_msg'] = tip.message
                 tmp_d['repo'] = repo
                 tmp_d['dbrepo'] = dbrepo.get_dict()
-                tmp_d['dbrepo_fork'] = dbrepo.fork.get_dict() if dbrepo.fork else {}
+                tmp_d['dbrepo_fork'] = dbrepo.fork.get_dict() if dbrepo.fork \
+                                                                        else {}
                 yield tmp_d
 
     def get(self, repo_name, invalidation_list=None, retval='all'):
@@ -228,7 +235,6 @@ class ScmModel(BaseModel):
             dbr = RepoModel().get_full(repo_name, cache=True,
                                           invalidate=dbinvalidate)
 
-
         return r, dbr
 
     def mark_for_invalidation(self, repo_name):
@@ -256,7 +262,6 @@ class ScmModel(BaseModel):
             log.error(traceback.format_exc())
             self.sa.rollback()
 
-
     def toggle_following_repo(self, follow_repo_id, user_id):
 
         f = self.sa.query(UserFollowing)\
@@ -277,7 +282,6 @@ class ScmModel(BaseModel):
                 self.sa.rollback()
                 raise
 
-
         try:
             f = UserFollowing()
             f.user_id = user_id
@@ -292,7 +296,7 @@ class ScmModel(BaseModel):
             self.sa.rollback()
             raise
 
-    def toggle_following_user(self, follow_user_id , user_id):
+    def toggle_following_user(self, follow_user_id, user_id):
         f = self.sa.query(UserFollowing)\
             .filter(UserFollowing.follows_user_id == follow_user_id)\
             .filter(UserFollowing.user_id == user_id).scalar()
@@ -355,15 +359,14 @@ class ScmModel(BaseModel):
                 .filter(Repository.fork \
                         == RepoModel().get_by_repo_name(repo_id)).count()
 
-
     def pull_changes(self, repo_name, username):
         repo, dbrepo = self.get(repo_name, retval='all')
 
         try:
-            extras = {'ip':'',
-                      'username':username,
-                      'action':'push_remote',
-                      'repository':repo_name}
+            extras = {'ip': '',
+                      'username': username,
+                      'action': 'push_remote',
+                      'repository': repo_name}
 
             #inject ui extra param to log this action via push logger
             for k, v in extras.items():
@@ -377,7 +380,6 @@ class ScmModel(BaseModel):
 
     def get_unread_journal(self):
         return self.sa.query(UserLog).count()
-
 
     def _should_invalidate(self, repo_name):
         """Looks up database for invalidation signals for this repo_name
