@@ -37,6 +37,8 @@ def make_map(config):
 
     #MAIN PAGE
     rmap.connect('home', '/', controller='home', action='index')
+    rmap.connect('repo_switcher', '/repos', controller='home',
+                 action='repo_switcher')
     rmap.connect('bugtracker',
                  "http://bitbucket.org/marcinkuzminski/rhodecode/issues",
                  _static=True)
