@@ -73,7 +73,6 @@ class FilesController(BaseRepoController):
             h.flash(str(e), category='warning')
             redirect(h.url('files_home', repo_name=repo_name, revision='tip'))
 
-
     def __get_filenode_or_redirect(self, repo_name, cs, path):
         """
         Returns file_node, if error occurs or given path is directory,
@@ -83,7 +82,6 @@ class FilesController(BaseRepoController):
         :param cs: given changeset
         :param path: path to lookup
         """
-
 
         try:
             file_node = cs.get_node(path)
@@ -103,7 +101,6 @@ class FilesController(BaseRepoController):
             cs = self.__get_cs_or_redirect(revision, repo_name)
             redirect(url('files_home', repo_name=c.repo_name,
                          revision=cs.raw_id, f_path=f_path))
-
 
         c.changeset = self.__get_cs_or_redirect(revision, repo_name)
         c.branch = request.GET.get('branch', None)
@@ -143,7 +140,6 @@ class FilesController(BaseRepoController):
             h.flash(str(e), category='warning')
             redirect(h.url('files_home', repo_name=repo_name,
                            revision=revision))
-
 
         return render('files/files.html')
 
@@ -205,7 +201,6 @@ class FilesController(BaseRepoController):
 
         return cs.get_chunked_archive(stream=None, kind=fileformat)
 
-
     def diff(self, repo_name, f_path):
         diff1 = request.GET.get('diff1')
         diff2 = request.GET.get('diff2')
@@ -231,7 +226,6 @@ class FilesController(BaseRepoController):
             return redirect(url('files_home',
                                 repo_name=c.repo_name, f_path=f_path))
 
-
         if c.action == 'download':
             diff = differ.DiffProcessor(differ.get_gitdiff(node1, node2),
                                         format='gitdiff')
@@ -252,7 +246,8 @@ class FilesController(BaseRepoController):
 
             if node1.is_binary or node2.is_binary:
                 c.cur_diff = _('Binary file')
-            elif node1.size > self.cut_off_limit or node2.size > self.cut_off_limit:
+            elif node1.size > self.cut_off_limit or \
+                    node2.size > self.cut_off_limit:
                 c.cur_diff = _('Diff is too big to display')
             else:
                 diff = differ.DiffProcessor(differ.get_gitdiff(node1, node2),
@@ -263,7 +258,8 @@ class FilesController(BaseRepoController):
             #default option
             if node1.is_binary or node2.is_binary:
                 c.cur_diff = _('Binary file')
-            elif node1.size > self.cut_off_limit or node2.size > self.cut_off_limit:
+            elif node1.size > self.cut_off_limit or \
+                    node2.size > self.cut_off_limit:
                 c.cur_diff = _('Diff is too big to display')
             else:
                 diff = differ.DiffProcessor(differ.get_gitdiff(node1, node2),

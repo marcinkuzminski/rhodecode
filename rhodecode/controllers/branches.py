@@ -33,6 +33,7 @@ from rhodecode.lib.utils import OrderedDict
 
 log = logging.getLogger(__name__)
 
+
 class BranchesController(BaseRepoController):
 
     @LoginRequired()

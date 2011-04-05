@@ -41,9 +41,8 @@ from rhodecode.model.db import UserLog, UserFollowing
 
 log = logging.getLogger(__name__)
 
+
 class JournalController(BaseController):
-
-
 
     def __before__(self):
         super(JournalController, self).__before__()
@@ -75,19 +74,17 @@ class JournalController(BaseController):
             return c.journal_data
         return render('journal/journal.html')
 
-
     def _get_daily_aggregate(self, journal):
         groups = []
-        for k, g in groupby(journal, lambda x:x.action_as_day):
+        for k, g in groupby(journal, lambda x: x.action_as_day):
             user_group = []
-            for k2, g2 in groupby(list(g), lambda x:x.user.email):
+            for k2, g2 in groupby(list(g), lambda x: x.user.email):
                 l = list(g2)
                 user_group.append((l[0].user, l))
 
             groups.append((k, user_group,))
 
         return groups
-
 
     def _get_journal_data(self, following_repos):
         repo_ids = [x.follows_repository.repo_id for x in following_repos
@@ -113,7 +110,6 @@ class JournalController(BaseController):
         else:
             journal = []
 
-
         return journal
 
     @LoginRequired()
@@ -127,7 +123,7 @@ class JournalController(BaseController):
             if user_id:
                 try:
                     self.scm_model.toggle_following_user(user_id,
-                                                    self.rhodecode_user.user_id)
+                                                self.rhodecode_user.user_id)
                     return 'ok'
                 except:
                     raise HTTPBadRequest()
@@ -136,16 +132,13 @@ class JournalController(BaseController):
             if repo_id:
                 try:
                     self.scm_model.toggle_following_repo(repo_id,
-                                                    self.rhodecode_user.user_id)
+                                                self.rhodecode_user.user_id)
                     return 'ok'
                 except:
                     raise HTTPBadRequest()
 
-
         log.debug('token mismatch %s vs %s', cur_token, token)
         raise HTTPBadRequest()
-
-
 
     @LoginRequired()
     def public_journal(self):
@@ -167,7 +160,6 @@ class JournalController(BaseController):
         if request.params.get('partial'):
             return c.journal_data
         return render('journal/public_journal.html')
-
 
     @LoginRequired(api_access=True)
     def public_journal_atom(self):

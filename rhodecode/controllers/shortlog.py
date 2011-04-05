@@ -34,8 +34,6 @@ from rhodecode.lib.helpers import RepoPage
 log = logging.getLogger(__name__)
 
 
-
-
 class ShortlogController(BaseRepoController):
 
     @LoginRequired()
@@ -46,7 +44,8 @@ class ShortlogController(BaseRepoController):
 
     def index(self):
         p = int(request.params.get('page', 1))
-        c.repo_changesets = RepoPage(c.rhodecode_repo, page=p, items_per_page=20)
+        c.repo_changesets = RepoPage(c.rhodecode_repo, page=p,
+                                     items_per_page=20)
         c.shortlog_data = render('shortlog/shortlog_data.html')
         if request.params.get('partial'):
             return c.shortlog_data

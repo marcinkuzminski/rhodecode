@@ -46,6 +46,7 @@ from rhodecode.model.db import User
 
 log = logging.getLogger(__name__)
 
+
 class SettingsController(BaseRepoController):
 
     @LoginRequired()
@@ -72,11 +73,11 @@ class SettingsController(BaseRepoController):
 
         #fill owner
         if c.repo_info.user:
-            defaults.update({'user':c.repo_info.user.username})
+            defaults.update({'user': c.repo_info.user.username})
         else:
             replacement_user = self.sa.query(User)\
             .filter(User.admin == True).first().username
-            defaults.update({'user':replacement_user})
+            defaults.update({'user': replacement_user})
 
         #fill repository users
         for p in c.repo_info.repo_to_perm:
@@ -99,7 +100,8 @@ class SettingsController(BaseRepoController):
     def update(self, repo_name):
         repo_model = RepoModel()
         changed_name = repo_name
-        _form = RepoSettingsForm(edit=True, old_data={'repo_name':repo_name})()
+        _form = RepoSettingsForm(edit=True,
+                                 old_data={'repo_name': repo_name})()
         try:
             form_result = _form.to_python(dict(request.POST))
             repo_model.update(repo_name, form_result)
@@ -112,7 +114,7 @@ class SettingsController(BaseRepoController):
         except formencode.Invalid, errors:
             c.repo_info = repo_model.get_by_repo_name(repo_name)
             c.users_array = repo_model.get_users_js()
-            errors.value.update({'user':c.repo_info.user.username})
+            errors.value.update({'user': c.repo_info.user.username})
             return htmlfill.render(
                 render('settings/repo_settings.html'),
                 defaults=errors.value,
@@ -125,7 +127,6 @@ class SettingsController(BaseRepoController):
                     % repo_name, category='error')
 
         return redirect(url('repo_settings_home', repo_name=changed_name))
-
 
     @HasRepoPermissionAllDecorator('repository.admin')
     def delete(self, repo_name):
@@ -182,11 +183,11 @@ class SettingsController(BaseRepoController):
     def fork_create(self, repo_name):
         repo_model = RepoModel()
         c.repo_info = repo_model.get_by_repo_name(repo_name)
-        _form = RepoForkForm(old_data={'repo_type':c.repo_info.repo_type})()
+        _form = RepoForkForm(old_data={'repo_type': c.repo_info.repo_type})()
         form_result = {}
         try:
             form_result = _form.to_python(dict(request.POST))
-            form_result.update({'repo_name':repo_name})
+            form_result.update({'repo_name': repo_name})
             repo_model.create_fork(form_result, self.rhodecode_user)
             h.flash(_('forked %s repository as %s') \
                       % (repo_name, form_result['fork_name']),

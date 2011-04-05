@@ -40,6 +40,7 @@ from rhodecode.lib.helpers import RepoPage
 
 log = logging.getLogger(__name__)
 
+
 class ChangelogController(BaseRepoController):
 
     @LoginRequired()
@@ -67,13 +68,13 @@ class ChangelogController(BaseRepoController):
         p = int(request.params.get('page', 1))
         branch_name = request.params.get('branch', None)
         c.total_cs = len(c.rhodecode_repo)
-        c.pagination = RepoPage(c.rhodecode_repo, page=p, item_count=c.total_cs,
-                            items_per_page=c.size, branch_name=branch_name)
+        c.pagination = RepoPage(c.rhodecode_repo, page=p,
+                                item_count=c.total_cs, items_per_page=c.size,
+                                branch_name=branch_name)
 
         self._graph(c.rhodecode_repo, c.total_cs, c.size, p)
 
         return render('changelog/changelog.html')
-
 
     def _graph(self, repo, repo_size, size, p):
         """

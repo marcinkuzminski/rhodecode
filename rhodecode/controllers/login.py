@@ -41,6 +41,7 @@ from rhodecode.model.user import UserModel
 
 log = logging.getLogger(__name__)
 
+
 class LoginController(BaseController):
 
     def __before__(self):
@@ -93,7 +94,8 @@ class LoginController(BaseController):
     def register(self):
         user_model = UserModel()
         c.auto_active = False
-        for perm in user_model.get_by_username('default', cache=False).user_perms:
+        for perm in user_model.get_by_username('default',
+                                               cache=False).user_perms:
             if perm.permission.permission_name == 'hg.register.auto_activate':
                 c.auto_active = True
                 break

@@ -41,6 +41,7 @@ from whoosh.query import Phrase
 
 log = logging.getLogger(__name__)
 
+
 class SearchController(BaseController):
 
     @LoginRequired()
@@ -53,12 +54,11 @@ class SearchController(BaseController):
         c.runtime = ''
         c.cur_query = request.GET.get('q', None)
         c.cur_type = request.GET.get('type', 'source')
-        c.cur_search = search_type = {'content':'content',
-                                      'commit':'content',
-                                      'path':'path',
-                                      'repository':'repository'}\
+        c.cur_search = search_type = {'content': 'content',
+                                      'commit': 'content',
+                                      'path': 'path',
+                                      'repository': 'repository'}\
                                       .get(c.cur_type, 'content')
-
 
         if c.cur_query:
             cur_query = c.cur_query.lower()
@@ -67,8 +67,8 @@ class SearchController(BaseController):
             p = int(request.params.get('page', 1))
             highlight_items = set()
             try:
-                idx = open_dir(config['app_conf']['index_dir']
-                               , indexname=IDX_NAME)
+                idx = open_dir(config['app_conf']['index_dir'],
+                               indexname=IDX_NAME)
                 searcher = idx.searcher()
 
                 qp = QueryParser(search_type, schema=SCHEMA)
@@ -102,7 +102,6 @@ class SearchController(BaseController):
                                               highlight_items),
                                 page=p, item_count=res_ln,
                                 items_per_page=10, url=url_generator)
-
 
                 except QueryParserError:
                     c.runtime = _('Invalid search query. Try quoting it.')

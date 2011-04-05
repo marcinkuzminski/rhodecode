@@ -27,13 +27,14 @@ import cgi
 import logging
 import paste.fileapp
 
-from pylons import tmpl_context as c, request, config
+from pylons import tmpl_context as c, request, config, url
 from pylons.i18n.translation import _
 from pylons.middleware import  media_path
 
 from rhodecode.lib.base import BaseController, render
 
 log = logging.getLogger(__name__)
+
 
 class ErrorController(BaseController):
     """Generates error documents as and when they are required.
@@ -46,7 +47,8 @@ class ErrorController(BaseController):
     """
 
     def __before__(self):
-        pass#disable all base actions since we don't need them here
+        #disable all base actions since we don't need them here
+        pass
 
     def document(self):
         resp = request.environ.get('pylons.original_response')
@@ -55,22 +57,19 @@ class ErrorController(BaseController):
         log.debug('### %s ###', resp.status)
 
         e = request.environ
-        c.serv_p = r'%(protocol)s://%(host)s/' % {
-                                                'protocol': e.get('wsgi.url_scheme'),
-                                                'host':e.get('HTTP_HOST'),
-                                                }
-
+        c.serv_p = r'%(protocol)s://%(host)s/' \
+                                    % {'protocol': e.get('wsgi.url_scheme'),
+                                       'host': e.get('HTTP_HOST'), }
 
         c.error_message = cgi.escape(request.GET.get('code', str(resp.status)))
         c.error_explanation = self.get_error_explanation(resp.status_int)
 
-        #redirect to when error with given seconds
+        #  redirect to when error with given seconds
         c.redirect_time = 0
-        c.redirect_module = _('Home page')# name to what your going to be redirected
+        c.redirect_module = _('Home page')
         c.url_redirect = "/"
 
         return render('/errors/error_document.html')
-
 
     def img(self, id):
         """Serve Pylons' stock images"""
@@ -96,7 +95,8 @@ class ErrorController(BaseController):
             code = 500
 
         if code == 400:
-            return _('The request could not be understood by the server due to malformed syntax.')
+            return _('The request could not be understood by the server'
+                     ' due to malformed syntax.')
         if code == 401:
             return _('Unauthorized access to resource')
         if code == 403:
@@ -104,4 +104,5 @@ class ErrorController(BaseController):
         if code == 404:
             return _('The resource could not be found')
         if code == 500:
-            return _('The server encountered an unexpected condition which prevented it from fulfilling the request.')
+            return _('The server encountered an unexpected condition'
+                     ' which prevented it from fulfilling the request.')

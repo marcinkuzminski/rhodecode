@@ -32,6 +32,7 @@ from rhodecode.lib.utils import OrderedDict
 
 log = logging.getLogger(__name__)
 
+
 class TagsController(BaseRepoController):
 
     @LoginRequired()
@@ -45,7 +46,7 @@ class TagsController(BaseRepoController):
 
         tags = [(name, c.rhodecode_repo.get_changeset(hash_)) for \
                  name, hash_ in c.rhodecode_repo.tags.items()]
-        ordered_tags = sorted(tags, key=lambda x:x[1].date, reverse=True)
+        ordered_tags = sorted(tags, key=lambda x: x[1].date, reverse=True)
         for name, cs_tag in ordered_tags:
             c.repo_tags[name] = cs_tag
 

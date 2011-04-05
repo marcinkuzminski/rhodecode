@@ -35,6 +35,7 @@ from webhelpers.feedgenerator import Atom1Feed, Rss201rev2Feed
 
 log = logging.getLogger(__name__)
 
+
 class FeedController(BaseRepoController):
 
     @LoginRequired(api_access=True)
@@ -71,7 +72,8 @@ class FeedController(BaseRepoController):
     def atom(self, repo_name):
         """Produce an atom-1.0 feed via feedgenerator module"""
         feed = Atom1Feed(title=self.title % repo_name,
-                         link=url('summary_home', repo_name=repo_name, qualified=True),
+                         link=url('summary_home', repo_name=repo_name,
+                                  qualified=True),
                          description=self.description % repo_name,
                          language=self.language,
                          ttl=self.ttl)
@@ -89,11 +91,11 @@ class FeedController(BaseRepoController):
         response.content_type = feed.mime_type
         return feed.writeString('utf-8')
 
-
     def rss(self, repo_name):
         """Produce an rss2 feed via feedgenerator module"""
         feed = Rss201rev2Feed(title=self.title % repo_name,
-                         link=url('summary_home', repo_name=repo_name, qualified=True),
+                         link=url('summary_home', repo_name=repo_name,
+                                  qualified=True),
                          description=self.description % repo_name,
                          language=self.language,
                          ttl=self.ttl)

@@ -43,6 +43,7 @@ from vcs.utils.ordered_dict import OrderedDict
 
 log = logging.getLogger(__name__)
 
+
 class ChangesetController(BaseRepoController):
 
     @LoginRequired()
@@ -94,7 +95,6 @@ class ChangesetController(BaseRepoController):
             except IndexError:
                 changeset_parent = None
 
-
             #==================================================================
             # ADDED FILES
             #==================================================================
@@ -106,17 +106,20 @@ class ChangesetController(BaseRepoController):
                     c.sum_added += node.size
                     if c.sum_added < self.cut_off_limit:
                         f_gitdiff = differ.get_gitdiff(filenode_old, node)
-                        diff = differ.DiffProcessor(f_gitdiff, format='gitdiff').as_html()
+                        diff = differ.DiffProcessor(f_gitdiff,
+                                                    format='gitdiff').as_html()
 
                     else:
-                        diff = wrap_to_table(_('Changeset is to big and was cut'
-                                            ' off, see raw changeset instead'))
+                        diff = wrap_to_table(_('Changeset is to big and '
+                                               'was cut off, see raw '
+                                               'changeset instead'))
                         c.cut_off = True
                         break
 
                 cs1 = None
                 cs2 = node.last_changeset.raw_id
-                c.changes[changeset.raw_id].append(('added', node, diff, cs1, cs2))
+                c.changes[changeset.raw_id].append(('added', node,
+                                                    diff, cs1, cs2))
 
             #==================================================================
             # CHANGED FILES
@@ -126,7 +129,8 @@ class ChangesetController(BaseRepoController):
                     try:
                         filenode_old = changeset_parent.get_node(node.path)
                     except ChangesetError:
-                        filenode_old = FileNode(node.path, '', EmptyChangeset())
+                        filenode_old = FileNode(node.path, '',
+                                                EmptyChangeset())
 
                     if filenode_old.is_binary or node.is_binary:
                         diff = wrap_to_table(_('binary file'))
@@ -134,25 +138,30 @@ class ChangesetController(BaseRepoController):
 
                         if c.sum_removed < self.cut_off_limit:
                             f_gitdiff = differ.get_gitdiff(filenode_old, node)
-                            diff = differ.DiffProcessor(f_gitdiff, format='gitdiff').as_html()
+                            diff = differ.DiffProcessor(f_gitdiff,
+                                                        format='gitdiff')\
+                                                        .as_html()
                             if diff:
                                 c.sum_removed += len(diff)
                         else:
-                            diff = wrap_to_table(_('Changeset is to big and was cut'
-                                                ' off, see raw changeset instead'))
+                            diff = wrap_to_table(_('Changeset is to big and '
+                                                   'was cut off, see raw '
+                                                   'changeset instead'))
                             c.cut_off = True
                             break
 
                     cs1 = filenode_old.last_changeset.raw_id
                     cs2 = node.last_changeset.raw_id
-                    c.changes[changeset.raw_id].append(('changed', node, diff, cs1, cs2))
+                    c.changes[changeset.raw_id].append(('changed', node,
+                                                        diff, cs1, cs2))
 
             #==================================================================
             # REMOVED FILES
             #==================================================================
             if not c.cut_off:
                 for node in changeset.removed:
-                    c.changes[changeset.raw_id].append(('removed', node, None, None, None))
+                    c.changes[changeset.raw_id].append(('removed', node, None,
+                                                        None, None))
 
         if len(c.cs_ranges) == 1:
             c.changeset = c.cs_ranges[0]
@@ -184,7 +193,8 @@ class ChangesetController(BaseRepoController):
                     diff = _('binary file') + '\n'
                 else:
                     f_gitdiff = differ.get_gitdiff(filenode_old, node)
-                    diff = differ.DiffProcessor(f_gitdiff, format='gitdiff').raw_diff()
+                    diff = differ.DiffProcessor(f_gitdiff,
+                                                format='gitdiff').raw_diff()
 
                 cs1 = None
                 cs2 = node.last_changeset.raw_id
@@ -196,7 +206,8 @@ class ChangesetController(BaseRepoController):
                     diff = _('binary file')
                 else:
                     f_gitdiff = differ.get_gitdiff(filenode_old, node)
-                    diff = differ.DiffProcessor(f_gitdiff, format='gitdiff').raw_diff()
+                    diff = differ.DiffProcessor(f_gitdiff,
+                                                format='gitdiff').raw_diff()
 
                 cs1 = filenode_old.last_changeset.raw_id
                 cs2 = node.last_changeset.raw_id
@@ -205,10 +216,12 @@ class ChangesetController(BaseRepoController):
         response.content_type = 'text/plain'
 
         if method == 'download':
-            response.content_disposition = 'attachment; filename=%s.patch' % revision
+            response.content_disposition = 'attachment; filename=%s.patch' \
+                                            % revision
 
         parent = True if len(c.changeset.parents) > 0 else False
-        c.parent_tmpl = 'Parent  %s' % c.changeset.parents[0].raw_id if parent else ''
+        c.parent_tmpl = 'Parent  %s' \
+                        % c.changeset.parents[0].raw_id if parent else ''
 
         c.diffs = ''
         for x in c.changes:

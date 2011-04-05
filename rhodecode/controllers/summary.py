@@ -51,6 +51,7 @@ except ImportError:
     import simplejson as json
 log = logging.getLogger(__name__)
 
+
 class SummaryController(BaseRepoController):
 
     @LoginRequired()
@@ -65,14 +66,13 @@ class SummaryController(BaseRepoController):
         c.dbrepo = dbrepo = Repository.by_repo_name(repo_name)
 
         c.following = self.scm_model.is_following_repo(repo_name,
-                                                       self.rhodecode_user.user_id)
+                                                self.rhodecode_user.user_id)
+
         def url_generator(**kw):
             return url('shortlog_home', repo_name=repo_name, **kw)
 
-        c.repo_changesets = RepoPage(c.rhodecode_repo, page=1, items_per_page=10,
-                                 url=url_generator)
-
-
+        c.repo_changesets = RepoPage(c.rhodecode_repo, page=1,
+                                     items_per_page=10, url=url_generator)
 
         if self.rhodecode_user.username == 'default':
             #for default(anonymous) user we don't need to pass credentials
@@ -82,13 +82,13 @@ class SummaryController(BaseRepoController):
             username = str(self.rhodecode_user.username)
             password = '@'
 
-        uri = u'%(protocol)s://%(user)s%(password)s%(host)s%(prefix)s/%(repo_name)s' % {
-                                        'protocol': e.get('wsgi.url_scheme'),
-                                        'user':username,
-                                        'password':password,
-                                        'host':e.get('HTTP_HOST'),
-                                        'prefix':e.get('SCRIPT_NAME'),
-                                        'repo_name':repo_name, }
+        uri = u'%(proto)s://%(user)s%(pass)s%(host)s%(prefix)s/%(repo_name)s' \
+                                    % {'proto': e.get('wsgi.url_scheme'),
+                                       'user': username,
+                                       'pass': password,
+                                       'host': e.get('HTTP_HOST'),
+                                       'prefix': e.get('SCRIPT_NAME'),
+                                       'repo_name': repo_name, }
         c.clone_repo_url = uri
         c.repo_tags = OrderedDict()
         for name, hash in c.rhodecode_repo.tags.items()[:10]:
@@ -146,7 +146,7 @@ class SummaryController(BaseRepoController):
                                                 c.repo_last_rev) * 100)
         else:
             c.commit_data = json.dumps({})
-            c.overview_data = json.dumps([[ts_min_y, 0], [ts_max_y, 10] ])
+            c.overview_data = json.dumps([[ts_min_y, 0], [ts_max_y, 10]])
             c.trending_languages = json.dumps({})
             c.no_data = True
 
@@ -155,8 +155,6 @@ class SummaryController(BaseRepoController):
             c.download_options = self._get_download_links(c.rhodecode_repo)
 
         return render('summary/summary.html')
-
-
 
     def _get_download_links(self, repo):
 
