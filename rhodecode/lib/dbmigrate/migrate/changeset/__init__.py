@@ -12,7 +12,8 @@ from sqlalchemy import __version__ as _sa_version
 
 warnings.simplefilter('always', DeprecationWarning)
 
-_sa_version = tuple(int(re.match("\d+", x).group(0)) for x in _sa_version.split("."))
+_sa_version = tuple(int(re.match("\d+", x).group(0))
+                    for x in _sa_version.split("."))
 SQLA_06 = _sa_version >= (0, 6)
 
 del re
@@ -21,8 +22,8 @@ del _sa_version
 from rhodecode.lib.dbmigrate.migrate.changeset.schema import *
 from rhodecode.lib.dbmigrate.migrate.changeset.constraint import *
 
-sqlalchemy.schema.Table.__bases__ += (ChangesetTable, )
-sqlalchemy.schema.Column.__bases__ += (ChangesetColumn, )
-sqlalchemy.schema.Index.__bases__ += (ChangesetIndex, )
+sqlalchemy.schema.Table.__bases__ += (ChangesetTable,)
+sqlalchemy.schema.Column.__bases__ += (ChangesetColumn,)
+sqlalchemy.schema.Index.__bases__ += (ChangesetIndex,)
 
-sqlalchemy.schema.DefaultClause.__bases__ += (ChangesetDefaultClause, )
+sqlalchemy.schema.DefaultClause.__bases__ += (ChangesetDefaultClause,)
