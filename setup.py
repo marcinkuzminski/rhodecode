@@ -1,6 +1,7 @@
 import sys
 from rhodecode import get_version
 from rhodecode import __platform__
+from rhodecode import __license__
 
 py_version = sys.version_info
 
@@ -16,17 +17,20 @@ requirements = [
         "pygments==1.4.0",
         "mercurial==1.7.5",
         "whoosh==1.3.4",
-        "celery==2.2.4",
+        "celery==2.2.5",
         "babel",
+        "python-dateutil>=1.5.0,<2.0.0",
     ]
 
 classifiers = ['Development Status :: 5 - Production/Stable',
                'Environment :: Web Environment',
                'Framework :: Pylons',
                'Intended Audience :: Developers',
-               'License :: OSI Approved :: BSD License',
                'Operating System :: OS Independent',
-               'Programming Language :: Python', ]
+               'Programming Language :: Python',
+               'Programming Language :: Python :: 2.5',
+               'Programming Language :: Python :: 2.6',
+               'Programming Language :: Python :: 2.7', ]
 
 if py_version < (2, 6):
     requirements.append("simplejson")
@@ -45,10 +49,9 @@ package_data = {'rhodecode': ['i18n/*/LC_MESSAGES/*.mo', ], }
 
 description = ('Mercurial repository browser/management with '
                'build in push/pull server and full text search')
-keywords = ' '.join (['rhodecode', 'rhodiumcode', 'mercurial', 'git',
+keywords = ' '.join(['rhodecode', 'rhodiumcode', 'mercurial', 'git',
                       'repository management', 'hgweb replacement'
-                      'hgwebdir', 'gitweb replacement', 'serving hgweb',
-                     ])
+                      'hgwebdir', 'gitweb replacement', 'serving hgweb', ])
 #long description
 try:
     readme_file = 'README.rst'
@@ -78,7 +81,7 @@ setup(
     description=description,
     long_description=long_description,
     keywords=keywords,
-    license='GPLv3',
+    license=__license__,
     author='Marcin Kuzminski',
     author_email='marcin@python-works.com',
     url='http://rhodecode.org',
@@ -108,9 +111,5 @@ setup(
     make-index = rhodecode.lib.indexers:MakeIndex
     upgrade-db = rhodecode.lib.dbmigrate:UpgradeDb
     celeryd=rhodecode.lib.celerypylons.commands:CeleryDaemonCommand
-    celerybeat=rhodecode.lib.celerypylons.commands:CeleryBeatCommand
-    camqadm=rhodecode.lib.celerypylons.commands:CAMQPAdminCommand
-    celeryev=rhodecode.lib.celerypylons.commands:CeleryEventCommand
-              
     """,
 )

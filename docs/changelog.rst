@@ -3,6 +3,19 @@
 Changelog
 =========
 
+
+1.1.7 (**2011-03-23**)
+======================
+
+news
+----
+
+fixes
+-----
+
+- fixed #140 freeze of python dateutil library, since new version is python2.x
+  incompatible
+
 1.1.7 (**2011-03-23**)
 ======================
 
