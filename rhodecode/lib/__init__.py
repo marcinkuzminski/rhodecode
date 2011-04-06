@@ -46,23 +46,22 @@ def generate_api_key(username, salt=None):
 
     return hashlib.sha1(username + salt).hexdigest()
 
-def safe_unicode(_str):
+def safe_unicode(_str, from_encoding='utf8'):
     """
     safe unicode function. In case of UnicodeDecode error we try to return
-    unicode with errors replace, if this fails we return unicode with
-    string_escape decoding
+    unicode with errors replace
+    
+    :param _str: string to decode
+    :rtype: unicode
+    :returns: unicode object
     """
 
     if isinstance(_str, unicode):
         return _str
 
     try:
-        u_str = unicode(_str)
+        u_str = unicode(_str, from_encoding)
     except UnicodeDecodeError:
-        try:
-            u_str = _str.decode('utf-8', 'replace')
-        except UnicodeDecodeError:
-            #incase we have a decode error just represent as byte string
-            u_str = unicode(_str.encode('string_escape'))
+        u_str = unicode(_str, from_encoding, 'replace')
 
     return u_str
