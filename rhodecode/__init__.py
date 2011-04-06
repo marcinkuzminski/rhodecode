@@ -32,7 +32,7 @@ __platform__ = platform.system()
 __license__ = 'GPLv3'
 
 PLATFORM_WIN = ('Windows')
-PLATFORM_OTHERS = ('Linux', 'Darwin', 'FreeBSD')
+PLATFORM_OTHERS = ('Linux', 'Darwin', 'FreeBSD', 'OpenBSD')
 
 try:
     from rhodecode.lib.utils import get_current_revision
