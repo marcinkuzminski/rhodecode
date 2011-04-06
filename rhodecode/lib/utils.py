@@ -152,12 +152,15 @@ def get_repos(path, recursive=False):
     from vcs.utils.helpers import get_scm
     from vcs.exceptions import VCSError
 
-    if path.endswith('/'):
-        #add ending slash for better results
+    if path.endswith(os.sep):
+        #remove ending slash for better results
         path = path[:-1]
 
     def _get_repos(p):
+        if not os.access(p, os.W_OK):
+            return
         for dirpath in os.listdir(p):
+            print dirpath
             if os.path.isfile(os.path.join(p, dirpath)):
                 continue
             cur_path = os.path.join(p, dirpath)
@@ -615,7 +618,6 @@ def create_test_env(repos_test_path, config):
     tar = tarfile.open(jn(cur_dir, 'tests', "vcs_test_hg.tar.gz"))
     tar.extractall(jn(TESTS_TMP_PATH, HG_REPO))
     tar.close()
-
 
 #==============================================================================
 # PASTER COMMANDS
