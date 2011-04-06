@@ -2,6 +2,7 @@ import sys
 from rhodecode import get_version
 from rhodecode import __platform__
 from rhodecode import __license__
+from rhodecode import PLATFORM_OTHERS
 
 py_version = sys.version_info
 
@@ -36,7 +37,7 @@ if py_version < (2, 6):
     requirements.append("simplejson")
     requirements.append("pysqlite")
 
-if __platform__ in ('Linux', 'Darwin'):
+if __platform__ in PLATFORM_OTHERS:
     requirements.append("py-bcrypt")
 
 
