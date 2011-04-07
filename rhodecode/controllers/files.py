@@ -98,7 +98,7 @@ class FilesController(BaseRepoController):
         #reditect to given revision from form if given
         post_revision = request.POST.get('at_rev', None)
         if post_revision:
-            cs = self.__get_cs_or_redirect(revision, repo_name)
+            cs = self.__get_cs_or_redirect(post_revision, repo_name)
             redirect(url('files_home', repo_name=c.repo_name,
                          revision=cs.raw_id, f_path=f_path))
 
@@ -213,14 +213,14 @@ class FilesController(BaseRepoController):
                 c.changeset_1 = c.rhodecode_repo.get_changeset(diff1)
                 node1 = c.changeset_1.get_node(f_path)
             else:
-                c.changeset_1 = EmptyChangeset()
+                c.changeset_1 = EmptyChangeset(repo=c.rhodecode_repo)
                 node1 = FileNode('.', '', changeset=c.changeset_1)
 
             if diff2 not in ['', None, 'None', '0' * 12, '0' * 40]:
                 c.changeset_2 = c.rhodecode_repo.get_changeset(diff2)
                 node2 = c.changeset_2.get_node(f_path)
             else:
-                c.changeset_2 = EmptyChangeset()
+                c.changeset_2 = EmptyChangeset(repo=c.rhodecode_repo)
                 node2 = FileNode('.', '', changeset=c.changeset_2)
         except RepositoryError:
             return redirect(url('files_home',

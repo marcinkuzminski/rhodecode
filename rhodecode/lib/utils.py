@@ -68,6 +68,7 @@ def recursive_replace(str, replace=' '):
         str = str.replace(replace * 2, replace)
         return recursive_replace(str, replace)
 
+
 def repo_name_slug(value):
     """Return slug of name of repository
     This function is called on each creation/modification
@@ -83,8 +84,10 @@ def repo_name_slug(value):
     slug = collapse(slug, '-')
     return slug
 
+
 def get_repo_slug(request):
     return request.environ['pylons.routes_dict'].get('repo_name')
+
 
 def action_logger(user, action, repo, ipaddr='', sa=None):
     """
@@ -113,7 +116,6 @@ def action_logger(user, action, repo, ipaddr='', sa=None):
         else:
             raise Exception('You have to provide user object or username')
 
-
         rm = RepoModel()
         if hasattr(repo, 'repo_id'):
             repo_obj = rm.get(repo.repo_id, cache=False)
@@ -123,7 +125,6 @@ def action_logger(user, action, repo, ipaddr='', sa=None):
             repo_obj = rm.get_by_repo_name(repo_name, cache=False)
         else:
             raise Exception('You have to provide repository to action logger')
-
 
         user_log = UserLog()
         user_log.user_id = user_obj.user_id
@@ -141,6 +142,7 @@ def action_logger(user, action, repo, ipaddr='', sa=None):
     except:
         log.error(traceback.format_exc())
         sa.rollback()
+
 
 def get_repos(path, recursive=False):
     """
@@ -178,6 +180,7 @@ def get_repos(path, recursive=False):
 
     return _get_repos(path)
 
+
 def check_repo_fast(repo_name, base_path):
     """
     Check given path for existence of directory
@@ -186,8 +189,10 @@ def check_repo_fast(repo_name, base_path):
 
     :return False: if this directory is present
     """
-    if os.path.isdir(os.path.join(base_path, repo_name)):return False
+    if os.path.isdir(os.path.join(base_path, repo_name)):
+        return False
     return True
+
 
 def check_repo(repo_name, base_path, verify=True):
 
@@ -207,13 +212,17 @@ def check_repo(repo_name, base_path, verify=True):
         log.info('%s repo is free for creation', repo_name)
         return True
 
+
 def ask_ok(prompt, retries=4, complaint='Yes or no, please!'):
     while True:
         ok = raw_input(prompt)
-        if ok in ('y', 'ye', 'yes'): return True
-        if ok in ('n', 'no', 'nop', 'nope'): return False
+        if ok in ('y', 'ye', 'yes'):
+            return True
+        if ok in ('n', 'no', 'nop', 'nope'):
+            return False
         retries = retries - 1
-        if retries < 0: raise IOError
+        if retries < 0:
+            raise IOError
         print complaint
 
 #propagated from mercurial documentation
@@ -227,6 +236,7 @@ ui_sections = ['alias', 'auth',
                 'paths', 'profiling',
                 'server', 'trusted',
                 'ui', 'web', ]
+
 
 def make_ui(read_from='file', path=None, checkpaths=True):
     """A function that will read python rc files or database
@@ -256,7 +266,6 @@ def make_ui(read_from='file', path=None, checkpaths=True):
                 log.debug('settings ui from file[%s]%s:%s', section, k, v)
                 baseui.setconfig(section, k, v)
 
-
     elif read_from == 'db':
         sa = meta.Session()
         ret = sa.query(RhodeCodeUi)\
@@ -285,6 +294,7 @@ def set_rhodecode_config(config):
     for k, v in hgsettings.items():
         config[k] = v
 
+
 def invalidate_cache(cache_key, *args):
     """Puts cache invalidation task into db for
     further global cache invalidation
@@ -296,18 +306,20 @@ def invalidate_cache(cache_key, *args):
         name = cache_key.split('get_repo_cached_')[-1]
         ScmModel().mark_for_invalidation(name)
 
+
 class EmptyChangeset(BaseChangeset):
     """
     An dummy empty changeset. It's possible to pass hash when creating
     an EmptyChangeset
     """
 
-    def __init__(self, cs='0' * 40):
+    def __init__(self, cs='0' * 40, repo=None):
         self._empty_cs = cs
         self.revision = -1
         self.message = ''
         self.author = ''
         self.date = ''
+        self.repository = repo
 
     @LazyProperty
     def raw_id(self):
@@ -329,6 +341,7 @@ class EmptyChangeset(BaseChangeset):
 
     def get_file_size(self, path):
         return 0
+
 
 def map_groups(groups):
     """Checks for groups existence, and creates groups structures.
@@ -352,6 +365,7 @@ def map_groups(groups):
 
     return group
 
+
 def repo2db_mapper(initial_repo_list, remove_obsolete=False):
     """maps all repos given in initial_repo_list, non existing repositories
     are created, if remove_obsolete is True it also check for db entries
@@ -371,13 +385,13 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False):
             log.info('repository %s not found creating default', name)
             added.append(name)
             form_data = {
-                         'repo_name':name,
-                         'repo_type':repo.alias,
-                         'description':repo.description \
+                         'repo_name': name,
+                         'repo_type': repo.alias,
+                         'description': repo.description \
                             if repo.description != 'unknown' else \
                                         '%s repository' % name,
-                         'private':False,
-                         'group_id':getattr(group, 'group_id', None)
+                         'private': False,
+                         'group_id': getattr(group, 'group_id', None)
                          }
             rm.create(form_data, user, just_db=True)
 
@@ -391,6 +405,8 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False):
                 sa.commit()
 
     return added, removed
+
+
 class OrderedDict(dict, DictMixin):
 
     def __init__(self, *args, **kwds):
@@ -493,7 +509,7 @@ class OrderedDict(dict, DictMixin):
 
 #set cache regions for beaker so celery can utilise it
 def add_cache(settings):
-    cache_settings = {'regions':None}
+    cache_settings = {'regions': None}
     for key in settings.keys():
         for prefix in ['beaker.cache.', 'cache.']:
             if key.startswith(prefix):
@@ -518,6 +534,7 @@ def add_cache(settings):
                                                              'memory')
             beaker.cache.cache_regions[region] = region_settings
 
+
 def get_current_revision():
     """Returns tuple of (number, id) from repository containing this package
     or None if repository could not be found.
@@ -537,9 +554,10 @@ def get_current_revision():
                       "was: %s" % err)
         return None
 
-#===============================================================================
+
+#==============================================================================
 # TEST FUNCTIONS AND CREATORS
-#===============================================================================
+#==============================================================================
 def create_test_index(repo_location, full_index):
     """Makes default test index
     :param repo_location:
@@ -562,6 +580,7 @@ def create_test_index(repo_location, full_index):
     except LockHeld:
         pass
 
+
 def create_test_env(repos_test_path, config):
     """Makes a fresh database and
     install test repository into tmp dir
@@ -582,7 +601,8 @@ def create_test_env(repos_test_path, config):
     ch.setLevel(logging.DEBUG)
 
     # create formatter
-    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    formatter = logging.Formatter("%(asctime)s - %(name)s -"
+                                  " %(levelname)s - %(message)s")
 
     # add formatter to ch
     ch.setFormatter(formatter)
@@ -619,10 +639,10 @@ def create_test_env(repos_test_path, config):
     tar.extractall(jn(TESTS_TMP_PATH, HG_REPO))
     tar.close()
 
+
 #==============================================================================
 # PASTER COMMANDS
 #==============================================================================
-
 class BasePasterCommand(Command):
     """
     Abstract Base Class for paster commands.
@@ -648,7 +668,6 @@ class BasePasterCommand(Command):
         """
         if log and isinstance(log, logging):
             log(msg)
-
 
     def run(self, args):
         """
