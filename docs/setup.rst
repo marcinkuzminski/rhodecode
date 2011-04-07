@@ -10,7 +10,7 @@ Setting up RhodeCode
 First, you will need to create a RhodeCode configuration file. Run the following
 command to do this::
  
- paster make-config RhodeCode production.ini
+    paster make-config RhodeCode production.ini
 
 - This will create the file `production.ini` in the current directory. This
   configuration file contains the various settings for RhodeCode, e.g proxy port,
@@ -23,7 +23,7 @@ default ensure you properly adjust the db url in your production.ini
 configuration file to use this other database. Create the databases by running
 the following command::
 
- paster setup-app production.ini
+    paster setup-app production.ini
 
 This will prompt you for a "root" path. This "root" path is the location where
 RhodeCode will store all of its repositories on the current machine. After
@@ -43,7 +43,7 @@ for the initial admin account which ``setup-app`` sets up for you.
 
 You are now ready to use RhodeCode, to run it simply execute::
  
- paster serve production.ini
+    paster serve production.ini
  
 - This command runs the RhodeCode server. The web app should be available at the 
   127.0.0.1:5000. This ip and port is configurable via the production.ini 
@@ -60,7 +60,7 @@ repositories. Then choose Add New Repository. Add the repository you copied into
 the root. Test that you can browse your repository from within RhodeCode and then
 try cloning your repository from RhodeCode with::
 
-  hg clone http://127.0.0.1:5000/<repository name>
+    hg clone http://127.0.0.1:5000/<repository name>
 
 where *repository name* is replaced by the name of your repository.
 
@@ -307,12 +307,11 @@ http://wiki.pylonshq.com/display/pylonscookbook/Apache+as+a+reverse+proxy+for+Py
 Apache as subdirectory
 ----------------------
 
-
 Apache subdirectory part::
 
-    <Location /rhodecode>
-      ProxyPass http://127.0.0.1:59542/rhodecode
-      ProxyPassReverse http://127.0.0.1:59542/rhodecode
+    <Location /<someprefix> >
+      ProxyPass http://127.0.0.1:5000/<someprefix>
+      ProxyPassReverse http://127.0.0.1:5000/<someprefix>
       SetEnvIf X-Url-Scheme https HTTPS=1
     </Location> 
 
@@ -326,6 +325,8 @@ Add the following at the end of the .ini file::
     use = egg:PasteDeploy#prefix
     prefix = /<someprefix> 
 
+
+then change <someprefix> into your choosen prefix
 
 Apache's example FCGI config
 ----------------------------

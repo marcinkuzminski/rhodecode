@@ -53,5 +53,4 @@ Other topics
 .. _git: http://git-scm.com/
 .. _celery: http://celeryproject.org/
 .. _Sphinx: http://sphinx.pocoo.org/
-.. _GPL: http://www.gnu.org/licenses/gpl.html
 .. _vcs: http://pypi.python.org/pypi/vcs
