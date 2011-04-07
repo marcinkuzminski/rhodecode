@@ -454,12 +454,11 @@ http://wiki.pylonshq.com/display/pylonscookbook/Apache+as+a+reverse+proxy+for+Py
 Apache as subdirectory
 ----------------------
 
-
 Apache subdirectory part::
 
-    <Location /rhodecode>
-      ProxyPass http://127.0.0.1:59542/rhodecode
-      ProxyPassReverse http://127.0.0.1:59542/rhodecode
+    <Location /<someprefix> >
+      ProxyPass http://127.0.0.1:5000/<someprefix>
+      ProxyPassReverse http://127.0.0.1:5000/<someprefix>
       SetEnvIf X-Url-Scheme https HTTPS=1
     </Location> 
 
@@ -473,6 +472,8 @@ Add the following at the end of the .ini file::
     use = egg:PasteDeploy#prefix
     prefix = /<someprefix> 
 
+
+then change <someprefix> into your choosen prefix
 
 Apache's example FCGI config
 ----------------------------
