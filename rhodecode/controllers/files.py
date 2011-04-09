@@ -7,7 +7,7 @@
 
     :created_on: Apr 21, 2010
     :author: marcink
-    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>    
+    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software: you can redistribute it and/or modify
@@ -45,6 +45,7 @@ from vcs.utils import diffs as differ
 
 log = logging.getLogger(__name__)
 
+
 class FilesController(BaseController):
 
     @LoginRequired()
@@ -58,7 +59,7 @@ class FilesController(BaseController):
         """
         Safe way to get changeset if error occur it redirects to tip with
         proper message
-        
+
         :param rev: revision to fetch
         :param repo_name: repo name to redirect after
         """
@@ -228,10 +229,11 @@ class FilesController(BaseController):
             return diff.raw_diff()
 
         elif c.action == 'diff':
-            if node1.size > self.cut_off_limit or node2.size > self.cut_off_limit:
-                c.cur_diff = _('Diff is to big to display')
-            elif node1.is_binary or node2.is_binary:
+            if  node1.is_binary or node2.is_binary:
                 c.cur_diff = _('Binary file')
+            elif node1.size > self.cut_off_limit or \
+                    node2.size > self.cut_off_limit:
+                c.cur_diff = _('Diff is too big to display')
             else:
                 c.cur_diff = diff.as_html()
         else:

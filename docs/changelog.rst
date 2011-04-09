@@ -26,7 +26,7 @@ fixes
 - windows fixes for os.kill #133
 - fixes path splitting for windows issues #148
 - fixed issue #143 wrong import on migration to 1.1.X
-
+- fixed problems with displaying binary files, thanks to Thomas Waldmann
  
 1.1.7 (**2011-03-23**)
 ======================
