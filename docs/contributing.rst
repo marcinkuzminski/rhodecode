@@ -17,6 +17,14 @@ please send me a pull request.
 To run RhodeCode in a development version you always need to install the tip
 version of RhodeCode and the VCS library.
 
+after downloading RhodeCode make sure you run::
+
+    python setup.py develop
+
+command to install all required packages, and prepare development enviroment
+
+
+
 | Thank you for any contributions!
 |  Marcin
 
