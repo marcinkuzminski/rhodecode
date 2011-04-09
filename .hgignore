@@ -1,6 +1,8 @@
 syntax: glob
 *.pyc
 *.swp
+*.egg-info
+*.egg
 
 syntax: regexp
 ^build
@@ -13,4 +15,3 @@ syntax: regexp
 ^rhodecode\.db$
 ^test\.db$
 ^repositories\.config$
-^RhodeCode\.egg-info$
