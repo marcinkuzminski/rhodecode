@@ -20,6 +20,9 @@ fixes
 - fixes for issues #137 and #116
 - fixes crashes on gravatar, when passed in email as unicode
 - fixed tooltip flickering problems
+- fixed came_from redirection on windows
+- fixed logging modules,and sql formatters
+- windows fixes for os.kill and path spliting, issues #148 and #133
 
 1.1.7 (**2011-03-23**)
 ======================

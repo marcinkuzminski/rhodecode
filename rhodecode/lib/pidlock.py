@@ -4,6 +4,19 @@ from warnings import warn
 from multiprocessing.util import Finalize
 import errno
 
+from rhodecode import __platform__, PLATFORM_WIN
+
+if __platform__ in PLATFORM_WIN:
+    import ctypes
+    def kill(pid):
+        """kill function for Win32"""
+        kernel32 = ctypes.windll.kernel32
+        handle = kernel32.OpenProcess(1, 0, pid)
+        return (0 != kernel32.TerminateProcess(handle, 0))
+
+else:
+    kill = os.kill
+
 class LockHeld(Exception):pass
 
 
@@ -58,9 +71,9 @@ class DaemonLock(object):
             pidfile = open(self.pidfile, "r")
             pidfile.seek(0)
             running_pid = int(pidfile.readline())
-            
+
             pidfile.close()
-            
+
             if self.debug:
                 print 'lock file present running_pid: %s, checking for execution'\
                 % running_pid
@@ -68,19 +81,19 @@ class DaemonLock(object):
             # process PID
             if running_pid:
                 try:
-                    os.kill(running_pid, 0)
+                    kill(running_pid, 0)
                 except OSError, exc:
                     if exc.errno in (errno.ESRCH, errno.EPERM):
                         print "Lock File is there but the program is not running"
-                        print "Removing lock file for the: %s" % running_pid                        
+                        print "Removing lock file for the: %s" % running_pid
                         self.release()
                     else:
                         raise
                 else:
                     print "You already have an instance of the program running"
-                    print "It is running as process %s" % running_pid                    
+                    print "It is running as process %s" % running_pid
                     raise LockHeld()
-                         
+
         except IOError, e:
             if e.errno != 2:
                 raise
@@ -90,7 +103,7 @@ class DaemonLock(object):
         """
         if self.debug:
             print 'trying to release the pidlock'
-            
+
         if self.callbackfn:
             #execute callback function on release
             if self.debug:

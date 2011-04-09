@@ -31,8 +31,8 @@ __dbversion__ = 2  # defines current db version for migrations
 __platform__ = platform.system()
 __license__ = 'GPLv3'
 
-PLATFORM_WIN = ('Windows',)
-PLATFORM_OTHERS = ('Linux', 'Darwin', 'FreeBSD',)
+PLATFORM_WIN = ('Windows')
+PLATFORM_OTHERS = ('Linux', 'Darwin', 'FreeBSD', 'OpenBSD')
 
 try:
     from rhodecode.lib.utils import get_current_revision
@@ -52,5 +52,5 @@ def get_version():
 
 BACKENDS = {
     'hg': 'Mercurial repository',
-   #'git': 'Git repository',
+    #'git': 'Git repository',
 }
