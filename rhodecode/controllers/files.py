@@ -157,8 +157,8 @@ class FilesController(BaseController):
 
     def archivefile(self, repo_name, revision, fileformat):
         archive_specs = {
-          '.tar.bz2': ('application/x-tar', 'tbz2'),
-          '.tar.gz': ('application/x-tar', 'tgz'),
+          '.tar.bz2': ('application/x-bzip2', 'tbz2'),
+          '.tar.gz': ('application/x-gzip', 'tgz'),
           '.zip': ('application/zip', 'zip'),
         }
         if not archive_specs.has_key(fileformat):
