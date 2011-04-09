@@ -28,7 +28,8 @@ fixes
 - fixed issue #143 wrong import on migration to 1.1.X
 - fixed problems with displaying binary files, thanks to Thomas Waldmann
 - removed name from archive files since it's breaking ui for long names
- 
+- fixed issue witg archive headers sent to browser, thanks to Thomas Waldmann
+
 1.1.7 (**2011-03-23**)
 ======================
 
