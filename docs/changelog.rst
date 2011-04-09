@@ -17,13 +17,17 @@ fixes
   incompatible
 - setup-app will check for write permission in given path
 - cleaned up license info issue #149
-- fixes for issues #137 and #116
+- fixes for issues #137,#116 and #116, problems with unicode and 
+  accented characters.
 - fixes crashes on gravatar, when passed in email as unicode
 - fixed tooltip flickering problems
 - fixed came_from redirection on windows
 - fixed logging modules,and sql formatters
-- windows fixes for os.kill and path spliting, issues #148 and #133
+- windows fixes for os.kill #133
+- fixes path splitting for windows issues #148
+- fixed issue #143 wrong import on migration to 1.1.X
 
+ 
 1.1.7 (**2011-03-23**)
 ======================
 

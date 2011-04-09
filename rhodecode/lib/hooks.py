@@ -4,10 +4,10 @@
     ~~~~~~~~~~~~~~~~~~~
 
     Hooks runned by rhodecode
-    
+
     :created_on: Aug 6, 2010
     :author: marcink
-    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>    
+    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software: you can redistribute it and/or modify
@@ -34,7 +34,7 @@ from rhodecode.lib.utils import action_logger
 
 def repo_size(ui, repo, hooktype=None, **kwargs):
     """Presents size of repository after push
-    
+
     :param ui:
     :param repo:
     :param hooktype:
@@ -65,7 +65,7 @@ def repo_size(ui, repo, hooktype=None, **kwargs):
 
 def log_pull_action(ui, repo, **kwargs):
     """Logs user last pull action
-    
+
     :param ui:
     :param repo:
     """
@@ -81,7 +81,7 @@ def log_pull_action(ui, repo, **kwargs):
 
 def log_push_action(ui, repo, **kwargs):
     """Maps user last push action to new changeset id, from mercurial
-    
+
     :param ui:
     :param repo:
     """
@@ -111,4 +111,3 @@ def log_push_action(ui, repo, **kwargs):
     action_logger(username, action, repository, extra_params['ip'])
 
     return 0
-

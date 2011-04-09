@@ -402,8 +402,6 @@ HasRepoPermissionAny, HasRepoPermissionAll
 #==============================================================================
 # GRAVATAR URL
 #==============================================================================
-import hashlib
-import urllib
 from pylons import request
 
 def gravatar_url(email_address, size=30):

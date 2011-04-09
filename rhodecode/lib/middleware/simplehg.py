@@ -1,8 +1,16 @@
-#!/usr/bin/env python
-# encoding: utf-8
-# middleware to handle mercurial api calls
-# Copyright (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
-#
+# -*- coding: utf-8 -*-
+"""
+    rhodecode.lib.middleware.simplehg
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    SimpleHG middleware for handling mercurial protocol request
+    (push/clone etc.). It's implemented with basic auth function
+
+    :created_on: Apr 28, 2010
+    :author: marcink
+    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
+    :license: GPLv3, see COPYING for more details.
+"""
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -15,13 +23,11 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-"""
-Created on 2010-04-28
 
-@author: marcink
-SimpleHG middleware for handling mercurial protocol request (push/clone etc.)
-It's implemented with basic auth function
-"""
+import os
+import logging
+import traceback
+
 from mercurial.error import RepoError
 from mercurial.hgweb import hgweb
 from mercurial.hgweb.request import wsgiapplication

@@ -50,6 +50,7 @@ from rhodecode.model.user import UserModel
 
 log = logging.getLogger(__name__)
 
+
 def recursive_replace(str, replace=' '):
     """Recursive replace of given sign to just one instance
 
@@ -66,6 +67,7 @@ def recursive_replace(str, replace=' '):
     else:
         str = str.replace(replace * 2, replace)
         return recursive_replace(str, replace)
+
 
 def repo_name_slug(value):
     """Return slug of name of repository
@@ -86,10 +88,11 @@ def repo_name_slug(value):
 def get_repo_slug(request):
     return request.environ['pylons.routes_dict'].get('repo_name')
 
+
 def action_logger(user, action, repo, ipaddr='', sa=None):
     """
     Action logger for various actions made by users
-    
+
     :param user: user that made this action, can be a unique username string or
         object containing user_id attribute
     :param action: action to log, should be on of predefined unique actions for
@@ -98,7 +101,7 @@ def action_logger(user, action, repo, ipaddr='', sa=None):
         that action was made on
     :param ipaddr: optional ip address from what the action was made
     :param sa: optional sqlalchemy session
-    
+
     """
 
     if not sa:
@@ -113,7 +116,6 @@ def action_logger(user, action, repo, ipaddr='', sa=None):
         else:
             raise Exception('You have to provide user object or username')
 
-
         rm = RepoModel()
         if hasattr(repo, 'repo_id'):
             repo_obj = rm.get(repo.repo_id, cache=False)
@@ -123,7 +125,6 @@ def action_logger(user, action, repo, ipaddr='', sa=None):
             repo_obj = rm.get_by_repo_name(repo_name, cache=False)
         else:
             raise Exception('You have to provide repository to action logger')
-
 
         user_log = UserLog()
         user_log.user_id = user_obj.user_id
@@ -141,6 +142,7 @@ def action_logger(user, action, repo, ipaddr='', sa=None):
     except:
         log.error(traceback.format_exc())
         sa.rollback()
+
 
 def get_repos(path, recursive=False, initial=False):
     """
@@ -173,11 +175,13 @@ def check_repo_fast(repo_name, base_path):
     Check given path for existence of directory
     :param repo_name:
     :param base_path:
-    
+
     :return False: if this directory is present
     """
-    if os.path.isdir(os.path.join(base_path, repo_name)):return False
+    if os.path.isdir(os.path.join(base_path, repo_name)):
+        return False
     return True
+
 
 def check_repo(repo_name, base_path, verify=True):
 
@@ -197,13 +201,17 @@ def check_repo(repo_name, base_path, verify=True):
         log.info('%s repo is free for creation', repo_name)
         return True
 
+
 def ask_ok(prompt, retries=4, complaint='Yes or no, please!'):
     while True:
         ok = raw_input(prompt)
-        if ok in ('y', 'ye', 'yes'): return True
-        if ok in ('n', 'no', 'nop', 'nope'): return False
+        if ok in ('y', 'ye', 'yes'):
+            return True
+        if ok in ('n', 'no', 'nop', 'nope'):
+            return False
         retries = retries - 1
-        if retries < 0: raise IOError
+        if retries < 0:
+            raise IOError
         print complaint
 
 #propagated from mercurial documentation
@@ -218,11 +226,11 @@ ui_sections = ['alias', 'auth',
                 'server', 'trusted',
                 'ui', 'web', ]
 
+
 def make_ui(read_from='file', path=None, checkpaths=True):
-    """
-    A function that will read python rc files or database
+    """A function that will read python rc files or database
     and make an mercurial ui object from read options
-    
+
     :param path: path to mercurial config file
     :param checkpaths: check the path
     :param read_from: read from 'file' or 'db'
@@ -246,7 +254,6 @@ def make_ui(read_from='file', path=None, checkpaths=True):
             for k, v in cfg.items(section):
                 log.debug('settings ui from file[%s]%s:%s', section, k, v)
                 baseui.setconfig(section, k, v)
-
 
     elif read_from == 'db':
         sa = meta.Session()
@@ -276,6 +283,7 @@ def set_rhodecode_config(config):
     for k, v in hgsettings.items():
         config[k] = v
 
+
 def invalidate_cache(cache_key, *args):
     """Puts cache invalidation task into db for
     further global cache invalidation
@@ -287,18 +295,20 @@ def invalidate_cache(cache_key, *args):
         name = cache_key.split('get_repo_cached_')[-1]
         ScmModel().mark_for_invalidation(name)
 
+
 class EmptyChangeset(BaseChangeset):
     """
     An dummy empty changeset. It's possible to pass hash when creating
     an EmptyChangeset
     """
 
-    def __init__(self, cs='0' * 40):
+    def __init__(self, cs='0' * 40, repo=None):
         self._empty_cs = cs
         self.revision = -1
         self.message = ''
         self.author = ''
         self.date = ''
+        self.repository = repo
 
     @LazyProperty
     def raw_id(self):
@@ -349,6 +359,7 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False):
             if repo.repo_name not in initial_repo_list.keys():
                 sa.delete(repo)
                 sa.commit()
+
 
 class OrderedDict(dict, DictMixin):
 
@@ -452,7 +463,7 @@ class OrderedDict(dict, DictMixin):
 
 #set cache regions for beaker so celery can utilise it
 def add_cache(settings):
-    cache_settings = {'regions':None}
+    cache_settings = {'regions': None}
     for key in settings.keys():
         for prefix in ['beaker.cache.', 'cache.']:
             if key.startswith(prefix):
@@ -477,6 +488,7 @@ def add_cache(settings):
                                                              'memory')
             beaker.cache.cache_regions[region] = region_settings
 
+
 def get_current_revision():
     """Returns tuple of (number, id) from repository containing this package
     or None if repository could not be found.
@@ -496,9 +508,10 @@ def get_current_revision():
                       "was: %s" % err)
         return None
 
-#===============================================================================
+
+#==============================================================================
 # TEST FUNCTIONS AND CREATORS
-#===============================================================================
+#==============================================================================
 def create_test_index(repo_location, full_index):
     """Makes default test index
     :param repo_location:
@@ -521,6 +534,7 @@ def create_test_index(repo_location, full_index):
     except LockHeld:
         pass
 
+
 def create_test_env(repos_test_path, config):
     """Makes a fresh database and
     install test repository into tmp dir
@@ -541,7 +555,8 @@ def create_test_env(repos_test_path, config):
     ch.setLevel(logging.DEBUG)
 
     # create formatter
-    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    formatter = logging.Formatter("%(asctime)s - %(name)s -"
+                                  " %(levelname)s - %(message)s")
 
     # add formatter to ch
     ch.setFormatter(formatter)
@@ -582,7 +597,6 @@ def create_test_env(repos_test_path, config):
 #==============================================================================
 # PASTER COMMANDS
 #==============================================================================
-
 class BasePasterCommand(Command):
     """
     Abstract Base Class for paster commands.
@@ -608,7 +622,6 @@ class BasePasterCommand(Command):
         """
         if log and isinstance(log, logging):
             log(msg)
-
 
     def run(self, args):
         """
