@@ -284,8 +284,9 @@
                  
                  for(k in tmpl_links){
                 	 var s = YUD.get(k+'_link')
-                	 title_tmpl = "${_('Download %s as %s') % ('__CS_NAME__',archive['type'])}";
-                	 s.title = title_tmpl.replace('__CS_NAME__',new_cs.text)
+                	 title_tmpl = "${_('Download %s as %s') % ('__CS_NAME__','__CS_EXT__')}";
+                	 s.title = title_tmpl.replace('__CS_NAME__',new_cs.text);
+                	 s.title = s.title.replace('__CS_EXT__',k);
                 	 s.innerHTML = tmpl_links[k].replace('__CS__',new_cs.value);
                  }
                  
