@@ -162,7 +162,6 @@ def get_repos(path, recursive=False):
         if not os.access(p, os.W_OK):
             return
         for dirpath in os.listdir(p):
-            print dirpath
             if os.path.isfile(os.path.join(p, dirpath)):
                 continue
             cur_path = os.path.join(p, dirpath)
