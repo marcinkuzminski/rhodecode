@@ -37,7 +37,7 @@
 	</div>
 	<div class="code-body">
 	   %if c.files_list.is_binary:
-	       ${_('Binary file')}
+	       ${_('Binary file (%s)') % c.files_list.mimetype}
 	   %else:
 		% if c.files_list.size < c.cut_off_limit:
 			${h.pygmentize(c.files_list,linenos=True,anchorlinenos=True,lineanchors='L',cssclass="code-highlight")}

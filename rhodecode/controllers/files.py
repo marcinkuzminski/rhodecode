@@ -25,6 +25,7 @@
 
 import os
 import logging
+import mimetypes
 import rhodecode.lib.helpers as h
 
 from pylons import request, response, session, tmpl_context as c, url
@@ -157,7 +158,43 @@ class FilesController(BaseRepoController):
         cs = self.__get_cs_or_redirect(revision, repo_name)
         file_node = self.__get_filenode_or_redirect(repo_name, cs, f_path)
 
-        response.content_type = 'text/plain'
+        raw_mimetype_mapping = {
+            # map original mimetype to a mimetype used for "show as raw"
+            # you can also provide a content-disposition to override the
+            # default "attachment" disposition.
+            # orig_type: (new_type, new_dispo)
+
+            # show images inline:
+            'image/x-icon': ('image/x-icon', 'inline'),
+            'image/png': ('image/png', 'inline'),
+            'image/gif': ('image/gif', 'inline'),
+            'image/jpeg': ('image/jpeg', 'inline'),
+            'image/svg+xml': ('image/svg+xml', 'inline'),
+        }
+
+        mimetype = file_node.mimetype
+        try:
+            mimetype, dispo = raw_mimetype_mapping[mimetype]
+        except KeyError:
+            # we don't know anything special about this, handle it safely
+            if file_node.is_binary:
+                # do same as download raw for binary files
+                mimetype, dispo = 'application/octet-stream', 'attachment'
+            else:
+                # do not just use the original mimetype, but force text/plain,
+                # otherwise it would serve text/html and that might be unsafe.
+                # Note: underlying vcs library fakes text/plain mimetype if the
+                # mimetype can not be determined and it thinks it is not binary.
+                # This might lead to erroneous text display in some cases, but
+                # helps in other cases, like with text files without extension.
+                mimetype, dispo = 'text/plain', 'inline'
+
+        if dispo == 'attachment':
+            dispo = 'attachment; filename=%s' % \
+                        f_path.split(os.sep)[-1].encode('utf8', 'replace')
+
+        response.content_disposition = dispo
+        response.content_type = mimetype
         return file_node.content
 
     def annotate(self, repo_name, revision, f_path):

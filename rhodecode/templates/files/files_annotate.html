@@ -64,7 +64,7 @@
 				</div>
 				<div class="code-body">
 			       %if c.file.is_binary:
-			           ${_('Binary file')}
+			           ${_('Binary file (%s)') % c.file.mimetype}
 			       %else:				
 					% if c.file.size < c.cut_off_limit:
 						${h.pygmentize_annotation(c.repo_name,c.file,linenos=True,anchorlinenos=True,lineanchors='S',cssclass="code-highlight")}
