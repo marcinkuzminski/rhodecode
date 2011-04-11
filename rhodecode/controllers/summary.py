@@ -41,7 +41,8 @@ from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.utils import OrderedDict, EmptyChangeset
 
 from rhodecode.lib.celerylib import run_task
-from rhodecode.lib.celerylib.tasks import get_commits_stats
+from rhodecode.lib.celerylib.tasks import get_commits_stats, \
+    LANGUAGES_EXTENSIONS_MAP
 from rhodecode.lib.helpers import RepoPage
 
 try:
@@ -131,8 +132,14 @@ class SummaryController(BaseRepoController):
             lang_stats = json.loads(stats.languages)
             c.commit_data = stats.commit_activity
             c.overview_data = stats.commit_activity_combined
+
+            lang_stats = [(x, {"count":y,
+                               "desc":LANGUAGES_EXTENSIONS_MAP.get(x)})
+                          for x, y in lang_stats.items()]
+            print lang_stats
+
             c.trending_languages = json.dumps(OrderedDict(
-                                       sorted(lang_stats.items(), reverse=True,
+                                       sorted(lang_stats, reverse=True,
                                             key=lambda k: k[1])[:10]
                                         )
                                     )

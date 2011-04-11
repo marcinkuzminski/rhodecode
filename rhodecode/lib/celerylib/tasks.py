@@ -31,6 +31,8 @@ import logging
 
 from time import mktime
 from operator import itemgetter
+from pygments import lexers
+from string import lower
 
 from pylons import config
 from pylons.i18n.translation import _
@@ -60,6 +62,43 @@ __all__ = ['whoosh_index', 'get_commits_stats',
 
 CELERY_ON = str2bool(config['app_conf'].get('use_celery'))
 
+LANGUAGES_EXTENSIONS_MAP = {}
+
+
+def __clean(s):
+
+    s = s.lstrip('*')
+    s = s.lstrip('.')
+
+    if s.find('[') != -1:
+        exts = []
+        start, stop = s.find('['), s.find(']')
+
+        for suffix in s[start + 1:stop]:
+            exts.append(s[:s.find('[')] + suffix)
+        return map(lower, exts)
+    else:
+        return map(lower, [s])
+
+for lx, t in sorted(lexers.LEXERS.items()):
+    m = map(__clean, t[-2])
+    if m:
+        m = reduce(lambda x, y: x + y, m)
+        for ext in m:
+            desc = lx.replace('Lexer', '')
+            if ext in LANGUAGES_EXTENSIONS_MAP:
+                if desc not in LANGUAGES_EXTENSIONS_MAP[ext]:
+                    LANGUAGES_EXTENSIONS_MAP[ext].append(desc)
+            else:
+                LANGUAGES_EXTENSIONS_MAP[ext] = [desc]
+
+#Additional mappings that are not present in the pygments lexers
+# NOTE: that this will overide any mappings in LANGUAGES_EXTENSIONS_MAP
+ADDITIONAL_MAPPINGS = {'xaml': 'XAML'}
+
+LANGUAGES_EXTENSIONS_MAP.update(ADDITIONAL_MAPPINGS)
+
+
 def get_session():
     if CELERY_ON:
         engine = engine_from_config(config, 'sqlalchemy.db1.')
@@ -67,10 +106,12 @@ def get_session():
     sa = meta.Session()
     return sa
 
+
 def get_repos_path():
     sa = get_session()
     q = sa.query(RhodeCodeUi).filter(RhodeCodeUi.ui_key == '/').one()
     return q.ui_value
+
 
 @task(ignore_result=True)
 @locked_task
@@ -81,6 +122,7 @@ def whoosh_index(repo_location, full_index):
     WhooshIndexingDaemon(index_location=index_location,
                          repo_location=repo_location, sa=get_session())\
                          .run(full_index=full_index)
+
 
 @task(ignore_result=True)
 @locked_task
@@ -93,9 +135,9 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
     from rhodecode.model.db import Statistics, Repository
 
     #for js data compatibilty
-    author_key_cleaner = lambda k: person(k).replace('"', "")
+    akc = lambda k: person(k).replace('"', "")
 
-    commits_by_day_author_aggregate = {}
+    co_day_auth_aggr = {}
     commits_by_day_aggregate = {}
     repos_path = get_repos_path()
     p = os.path.join(repos_path, repo_name)
@@ -130,7 +172,7 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
         commits_by_day_aggregate = OrderedDict(
                                        json.loads(
                                         cur_stats.commit_activity_combined))
-        commits_by_day_author_aggregate = json.loads(cur_stats.commit_activity)
+        co_day_auth_aggr = json.loads(cur_stats.commit_activity)
 
     log.debug('starting parsing %s', parse_limit)
     lmktime = mktime
@@ -138,22 +180,21 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
     last_rev = last_rev + 1 if last_rev > 0 else last_rev
 
     for cs in repo[last_rev:last_rev + parse_limit]:
-        last_cs = cs #remember last parsed changeset
+        last_cs = cs  # remember last parsed changeset
         k = lmktime([cs.date.timetuple()[0], cs.date.timetuple()[1],
                       cs.date.timetuple()[2], 0, 0, 0, 0, 0, 0])
 
-        if commits_by_day_author_aggregate.has_key(author_key_cleaner(cs.author)):
+        if akc(cs.author) in co_day_auth_aggr:
             try:
-                l = [timegetter(x) for x in commits_by_day_author_aggregate\
-                        [author_key_cleaner(cs.author)]['data']]
+                l = [timegetter(x) for x in
+                     co_day_auth_aggr[akc(cs.author)]['data']]
                 time_pos = l.index(k)
             except ValueError:
                 time_pos = False
 
             if time_pos >= 0 and time_pos is not False:
 
-                datadict = commits_by_day_author_aggregate\
-                    [author_key_cleaner(cs.author)]['data'][time_pos]
+                datadict = co_day_auth_aggr[akc(cs.author)]['data'][time_pos]
 
                 datadict["commits"] += 1
                 datadict["added"] += len(cs.added)
@@ -163,44 +204,44 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
             else:
                 if k >= ts_min_y and k <= ts_max_y or skip_date_limit:
 
-                    datadict = {"time":k,
-                                "commits":1,
-                                "added":len(cs.added),
-                                "changed":len(cs.changed),
-                                "removed":len(cs.removed),
+                    datadict = {"time": k,
+                                "commits": 1,
+                                "added": len(cs.added),
+                                "changed": len(cs.changed),
+                                "removed": len(cs.removed),
                                }
-                    commits_by_day_author_aggregate\
-                        [author_key_cleaner(cs.author)]['data'].append(datadict)
+                    co_day_auth_aggr[akc(cs.author)]['data']\
+                        .append(datadict)
 
         else:
             if k >= ts_min_y and k <= ts_max_y or skip_date_limit:
-                commits_by_day_author_aggregate[author_key_cleaner(cs.author)] = {
-                                    "label":author_key_cleaner(cs.author),
-                                    "data":[{"time":k,
+                co_day_auth_aggr[akc(cs.author)] = {
+                                    "label": akc(cs.author),
+                                    "data": [{"time":k,
                                              "commits":1,
                                              "added":len(cs.added),
                                              "changed":len(cs.changed),
                                              "removed":len(cs.removed),
                                              }],
-                                    "schema":["commits"],
+                                    "schema": ["commits"],
                                     }
 
         #gather all data by day
-        if commits_by_day_aggregate.has_key(k):
+        if k in commits_by_day_aggregate:
             commits_by_day_aggregate[k] += 1
         else:
             commits_by_day_aggregate[k] = 1
 
     overview_data = sorted(commits_by_day_aggregate.items(), key=itemgetter(0))
-    if not commits_by_day_author_aggregate:
-        commits_by_day_author_aggregate[author_key_cleaner(repo.contact)] = {
-            "label":author_key_cleaner(repo.contact),
-            "data":[0, 1],
-            "schema":["commits"],
+    if not co_day_auth_aggr:
+        co_day_auth_aggr[akc(repo.contact)] = {
+            "label": akc(repo.contact),
+            "data": [0, 1],
+            "schema": ["commits"],
         }
 
     stats = cur_stats if cur_stats else Statistics()
-    stats.commit_activity = json.dumps(commits_by_day_author_aggregate)
+    stats.commit_activity = json.dumps(co_day_auth_aggr)
     stats.commit_activity_combined = json.dumps(overview_data)
 
     log.debug('last revison %s', last_rev)
@@ -224,6 +265,7 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
         run_task(get_commits_stats, repo_name, ts_min_y, ts_max_y)
 
     return True
+
 
 @task(ignore_result=True)
 def reset_user_password(user_email):
@@ -259,12 +301,12 @@ def reset_user_password(user_email):
                  'Your new rhodecode password:%s' % (new_passwd))
         log.info('send new password mail to %s', user_email)
 
-
     except:
         log.error('Failed to update user password')
         log.error(traceback.format_exc())
 
     return True
+
 
 @task(ignore_result=True)
 def send_email(recipients, subject, body):
@@ -306,6 +348,7 @@ def send_email(recipients, subject, body):
         return False
     return True
 
+
 @task(ignore_result=True)
 def create_repo_fork(form_data, cur_user):
     try:
@@ -328,60 +371,8 @@ def create_repo_fork(form_data, cur_user):
     backend = get_backend(alias)
     backend(str(repo_fork_path), create=True, src_url=str(repo_path))
 
-def __get_codes_stats(repo_name):
-    LANGUAGES_EXTENSIONS_MAP = {'scm': 'Scheme', 'asmx': 'VbNetAspx', 'Rout':
-    'RConsole', 'rest': 'Rst', 'abap': 'ABAP', 'go': 'Go', 'phtml': 'HtmlPhp',
-    'ns2': 'Newspeak', 'xml': 'EvoqueXml', 'sh-session': 'BashSession', 'ads':
-    'Ada', 'clj': 'Clojure', 'll': 'Llvm', 'ebuild': 'Bash', 'adb': 'Ada',
-    'ada': 'Ada', 'c++-objdump': 'CppObjdump', 'aspx':
-    'VbNetAspx', 'ksh': 'Bash', 'coffee': 'CoffeeScript', 'vert': 'GLShader',
-    'Makefile.*': 'Makefile', 'di': 'D', 'dpatch': 'DarcsPatch', 'rake':
-    'Ruby', 'moo': 'MOOCode', 'erl-sh': 'ErlangShell', 'geo': 'GLShader',
-    'pov': 'Povray', 'bas': 'VbNet', 'bat': 'Batch', 'd': 'D', 'lisp':
-    'CommonLisp', 'h': 'C', 'rbx': 'Ruby', 'tcl': 'Tcl', 'c++': 'Cpp', 'md':
-    'MiniD', '.vimrc': 'Vim', 'xsd': 'Xml', 'ml': 'Ocaml', 'el': 'CommonLisp',
-    'befunge': 'Befunge', 'xsl': 'Xslt', 'pyx': 'Cython', 'cfm':
-    'ColdfusionHtml', 'evoque': 'Evoque', 'cfg': 'Ini', 'htm': 'Html',
-    'Makefile': 'Makefile', 'cfc': 'ColdfusionHtml', 'tex': 'Tex', 'cs':
-    'CSharp', 'mxml': 'Mxml', 'patch': 'Diff', 'apache.conf': 'ApacheConf',
-    'scala': 'Scala', 'applescript': 'AppleScript', 'GNUmakefile': 'Makefile',
-    'c-objdump': 'CObjdump', 'lua': 'Lua', 'apache2.conf': 'ApacheConf', 'rb':
-    'Ruby', 'gemspec': 'Ruby', 'rl': 'RagelObjectiveC', 'vala': 'Vala', 'tmpl':
-    'Cheetah', 'bf': 'Brainfuck', 'plt': 'Gnuplot', 'G': 'AntlrRuby', 'xslt':
-    'Xslt', 'flxh': 'Felix', 'asax': 'VbNetAspx', 'Rakefile': 'Ruby', 'S': 'S',
-    'wsdl': 'Xml', 'js': 'Javascript', 'autodelegate': 'Myghty', 'properties':
-    'Ini', 'bash': 'Bash', 'c': 'C', 'g': 'AntlrRuby', 'r3': 'Rebol', 's':
-    'Gas', 'ashx': 'VbNetAspx', 'cxx': 'Cpp', 'boo': 'Boo', 'prolog': 'Prolog',
-    'sqlite3-console': 'SqliteConsole', 'cl': 'CommonLisp', 'cc': 'Cpp', 'pot':
-    'Gettext', 'vim': 'Vim', 'pxi': 'Cython', 'yaml': 'Yaml', 'SConstruct':
-    'Python', 'diff': 'Diff', 'txt': 'Text', 'cw': 'Redcode', 'pxd': 'Cython',
-    'plot': 'Gnuplot', 'java': 'Java', 'hrl': 'Erlang', 'py': 'Python',
-    'makefile': 'Makefile', 'squid.conf': 'SquidConf', 'asm': 'Nasm', 'toc':
-    'Tex', 'kid': 'Genshi', 'rhtml': 'Rhtml', 'po': 'Gettext', 'pl': 'Prolog',
-    'pm': 'Perl', 'hx': 'Haxe', 'ascx': 'VbNetAspx', 'ooc': 'Ooc', 'asy':
-    'Asymptote', 'hs': 'Haskell', 'SConscript': 'Python', 'pytb':
-    'PythonTraceback', 'myt': 'Myghty', 'hh': 'Cpp', 'R': 'S', 'aux': 'Tex',
-    'rst': 'Rst', 'cpp-objdump': 'CppObjdump', 'lgt': 'Logtalk', 'rss': 'Xml',
-    'flx': 'Felix', 'b': 'Brainfuck', 'f': 'Fortran', 'rbw': 'Ruby',
-    '.htaccess': 'ApacheConf', 'cxx-objdump': 'CppObjdump', 'j': 'ObjectiveJ',
-    'mll': 'Ocaml', 'yml': 'Yaml', 'mu': 'MuPAD', 'r': 'Rebol', 'ASM': 'Nasm',
-    'erl': 'Erlang', 'mly': 'Ocaml', 'mo': 'Modelica', 'def': 'Modula2', 'ini':
-    'Ini', 'control': 'DebianControl', 'vb': 'VbNet', 'vapi': 'Vala', 'pro':
-    'Prolog', 'spt': 'Cheetah', 'mli': 'Ocaml', 'as': 'ActionScript3', 'cmd':
-    'Batch', 'cpp': 'Cpp', 'io': 'Io', 'tac': 'Python', 'haml': 'Haml', 'rkt':
-    'Racket', 'st':'Smalltalk', 'inc': 'Povray', 'pas': 'Delphi', 'cmake':
-    'CMake', 'csh':'Tcsh', 'hpp': 'Cpp', 'feature': 'Gherkin', 'html': 'Html',
-    'php':'Php', 'php3':'Php', 'php4':'Php', 'php5':'Php', 'xhtml': 'Html',
-    'hxx': 'Cpp', 'eclass': 'Bash', 'css': 'Css',
-    'frag': 'GLShader', 'd-objdump': 'DObjdump', 'weechatlog': 'IrcLogs',
-    'tcsh': 'Tcsh', 'objdump': 'Objdump', 'pyw': 'Python', 'h++': 'Cpp',
-    'py3tb': 'Python3Traceback', 'jsp': 'Jsp', 'sql': 'Sql', 'mak': 'Makefile',
-    'php': 'Php', 'mao': 'Mako', 'man': 'Groff', 'dylan': 'Dylan', 'sass':
-    'Sass', 'cfml': 'ColdfusionHtml', 'darcspatch': 'DarcsPatch', 'tpl':
-    'Smarty', 'm': 'ObjectiveC', 'f90': 'Fortran', 'mod': 'Modula2', 'sh':
-    'Bash', 'lhs': 'LiterateHaskell', 'sources.list': 'SourcesList', 'axd':
-    'VbNetAspx', 'sc': 'Python'}
 
+def __get_codes_stats(repo_name):
     repos_path = get_repos_path()
     p = os.path.join(repos_path, repo_name)
     repo = get_repo(p)
@@ -390,14 +381,12 @@ def __get_codes_stats(repo_name):
 
     def aggregate(cs):
         for f in cs[2]:
-            ext = f.extension
-            key = LANGUAGES_EXTENSIONS_MAP.get(ext, ext)
-            key = key or ext
+            ext = lower(f.extension)
             if ext in LANGUAGES_EXTENSIONS_MAP.keys() and not f.is_binary:
-                if code_stats.has_key(key):
-                    code_stats[key] += 1
+                if ext in code_stats:
+                    code_stats[ext] += 1
                 else:
-                    code_stats[key] = 1
+                    code_stats[ext] = 1
 
     map(aggregate, tip.walk('/'))
 
