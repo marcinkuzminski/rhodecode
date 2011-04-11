@@ -9,6 +9,7 @@ from rhodecode.model.db import Group
 
 log = logging.getLogger(__name__)
 
+
 class ReposGroupsController(BaseController):
     """REST Controller styled on the Atom Publishing Protocol"""
     # To properly map this controller, ensure your config/routing.py
@@ -68,7 +69,6 @@ class ReposGroupsController(BaseController):
 
         sort_key = current_sort_slug + '_sort'
 
-
         #overwrite our cached list with current filter
         gr_filter = [r.repo_name for r in c.group_repos]
         c.cached_repo_list = self.scm_model.get_repos(all_repos=gr_filter)
@@ -82,9 +82,7 @@ class ReposGroupsController(BaseController):
 
         c.repo_cnt = len(c.repos_list)
 
-
         return render('admin/repos_groups/repos_groups.html')
-
 
     def edit(self, id, format='html'):
         """GET /repos_groups/id/edit: Form to edit an existing item"""

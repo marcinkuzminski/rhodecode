@@ -41,6 +41,7 @@ import traceback
 
 log = logging.getLogger(__name__)
 
+
 class PermissionsController(BaseController):
     """REST Controller styled on the Atom Publishing Protocol"""
     # To properly map this controller, ensure your config/routing.py
@@ -68,7 +69,6 @@ class PermissionsController(BaseController):
 
         self.create_choices = [('hg.create.none', _('Disabled')),
                                ('hg.create.repository', _('Enabled'))]
-
 
     def index(self, format='html'):
         """GET /permissions: All items in the collection"""
@@ -99,7 +99,7 @@ class PermissionsController(BaseController):
 
         try:
             form_result = _form.to_python(dict(request.POST))
-            form_result.update({'perm_user_name':id})
+            form_result.update({'perm_user_name': id})
             permission_model.update(form_result)
             h.flash(_('Default permissions updated successfully'),
                     category='success')
@@ -123,8 +123,6 @@ class PermissionsController(BaseController):
 
         return redirect(url('edit_permission', id=id))
 
-
-
     def delete(self, id):
         """DELETE /permissions/id: Delete an existing item"""
         # Forms posted to this method should contain a hidden field:
@@ -147,8 +145,8 @@ class PermissionsController(BaseController):
 
         if id == 'default':
             default_user = UserModel().get_by_username('default')
-            defaults = {'_method':'put',
-                        'anonymous':default_user.active}
+            defaults = {'_method': 'put',
+                        'anonymous': default_user.active}
 
             for p in default_user.user_perms:
                 if p.permission.permission_name.startswith('repository.'):

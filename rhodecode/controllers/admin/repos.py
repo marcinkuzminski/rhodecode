@@ -47,6 +47,7 @@ from rhodecode.model.repo import RepoModel
 
 log = logging.getLogger(__name__)
 
+
 class ReposController(BaseController):
     """
     REST Controller styled on the Atom Publishing Protocol"""
@@ -65,8 +66,8 @@ class ReposController(BaseController):
         repo_model = RepoModel()
 
         c.repo_groups = [('', '')]
-        parents_link = lambda k:h.literal('&raquo;'.join(
-                                    map(lambda k:k.group_name,
+        parents_link = lambda k: h.literal('&raquo;'.join(
+                                    map(lambda k: k.group_name,
                                         k.parents + [k])
                                     )
                                 )
@@ -90,7 +91,6 @@ class ReposController(BaseController):
         repo_model = RepoModel()
         c.repo_info = repo_model.get_by_repo_name(repo_name)
 
-
         if c.repo_info is None:
             h.flash(_('%s repository is not mapped to db perhaps'
                       ' it was created or renamed from the filesystem'
@@ -99,7 +99,6 @@ class ReposController(BaseController):
                       category='error')
 
             return redirect(url('repos'))
-
 
         c.default_user_id = User.by_username('default').user_id
         c.in_public_journal = self.sa.query(UserFollowing)\
@@ -120,8 +119,6 @@ class ReposController(BaseController):
             c.stats_percentage = '%.2f' % ((float((last_rev)) /
                                             c.repo_last_rev) * 100)
 
-
-
         defaults = c.repo_info.get_dict()
         group, repo_name = c.repo_info.groups_and_repo
         defaults['repo_name'] = repo_name
@@ -130,12 +127,11 @@ class ReposController(BaseController):
 
         #fill owner
         if c.repo_info.user:
-            defaults.update({'user':c.repo_info.user.username})
+            defaults.update({'user': c.repo_info.user.username})
         else:
             replacement_user = self.sa.query(User)\
             .filter(User.admin == True).first().username
-            defaults.update({'user':replacement_user})
-
+            defaults.update({'user': replacement_user})
 
         #fill repository users
         for p in c.repo_info.repo_to_perm:
@@ -147,9 +143,7 @@ class ReposController(BaseController):
             defaults.update({'g_perm_%s' % p.users_group.users_group_name:
                              p.permission.permission_name})
 
-
         return defaults
-
 
     @HasPermissionAllDecorator('hg.admin')
     def index(self, format='html'):
@@ -232,7 +226,7 @@ class ReposController(BaseController):
         self.__load_defaults()
         repo_model = RepoModel()
         changed_name = repo_name
-        _form = RepoForm(edit=True, old_data={'repo_name':repo_name},
+        _form = RepoForm(edit=True, old_data={'repo_name': repo_name},
                          repo_groups=c.repo_groups_choices)()
         try:
             form_result = _form.to_python(dict(request.POST))

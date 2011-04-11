@@ -184,9 +184,10 @@ class FilesController(BaseRepoController):
                 # do not just use the original mimetype, but force text/plain,
                 # otherwise it would serve text/html and that might be unsafe.
                 # Note: underlying vcs library fakes text/plain mimetype if the
-                # mimetype can not be determined and it thinks it is not binary.
-                # This might lead to erroneous text display in some cases, but
-                # helps in other cases, like with text files without extension.
+                # mimetype can not be determined and it thinks it is not
+                # binary.This might lead to erroneous text display in some
+                # cases, but helps in other cases, like with text files
+                # without extension.
                 mimetype, dispo = 'text/plain', 'inline'
 
         if dispo == 'attachment':

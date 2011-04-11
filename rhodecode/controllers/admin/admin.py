@@ -35,6 +35,7 @@ from rhodecode.model.db import UserLog
 
 log = logging.getLogger(__name__)
 
+
 class AdminController(BaseController):
 
     @LoginRequired()

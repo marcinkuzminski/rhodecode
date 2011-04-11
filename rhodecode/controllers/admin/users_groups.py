@@ -32,7 +32,6 @@ from pylons import request, session, tmpl_context as c, url, config
 from pylons.controllers.util import abort, redirect
 from pylons.i18n.translation import _
 
-from rhodecode.lib.exceptions import DefaultUserException, UserOwnsReposException
 from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator
 from rhodecode.lib.base import BaseController, render
@@ -43,6 +42,7 @@ from rhodecode.model.user import UserModel
 from rhodecode.model.users_group import UsersGroupModel
 
 log = logging.getLogger(__name__)
+
 
 class UsersGroupsController(BaseController):
     """REST Controller styled on the Atom Publishing Protocol"""
@@ -72,8 +72,8 @@ class UsersGroupsController(BaseController):
         try:
             form_result = users_group_form.to_python(dict(request.POST))
             users_group_model.create(form_result)
-            h.flash(_('created users group %s') % form_result['users_group_name'],
-                    category='success')
+            h.flash(_('created users group %s') \
+                    % form_result['users_group_name'], category='success')
             #action_logger(self.rhodecode_user, 'new_user', '', '', self.sa)
         except formencode.Invalid, errors:
             return htmlfill.render(
@@ -103,7 +103,6 @@ class UsersGroupsController(BaseController):
         #           method='put')
         # url('users_group', id=ID)
 
-
         users_group_model = UsersGroupModel()
         c.users_group = users_group_model.get(id)
         c.group_members = [(x.user_id, x.user.username) for x in
@@ -119,7 +118,8 @@ class UsersGroupsController(BaseController):
         try:
             form_result = users_group_form.to_python(request.POST)
             users_group_model.update(id, form_result)
-            h.flash(_('updated users group %s') % form_result['users_group_name'],
+            h.flash(_('updated users group %s') \
+                        % form_result['users_group_name'],
                     category='success')
             #action_logger(self.rhodecode_user, 'new_user', '', '', self.sa)
         except formencode.Invalid, errors:
@@ -135,8 +135,6 @@ class UsersGroupsController(BaseController):
                     % request.POST.get('users_group_name'), category='error')
 
         return redirect(url('users_groups'))
-
-
 
     def delete(self, id):
         """DELETE /users_groups/id: Delete an existing item"""

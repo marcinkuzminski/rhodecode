@@ -57,13 +57,11 @@ class SettingsController(BaseController):
     #     map.resource('setting', 'settings', controller='admin/settings',
     #         path_prefix='/admin', name_prefix='admin_')
 
-
     @LoginRequired()
     def __before__(self):
         c.admin_user = session.get('admin_user')
         c.admin_username = session.get('admin_username')
         super(SettingsController, self).__before__()
-
 
     @HasPermissionAllDecorator('hg.admin')
     def index(self, format='html'):
@@ -109,8 +107,8 @@ class SettingsController(BaseController):
             added, removed = repo2db_mapper(initial, rm_obsolete)
 
             h.flash(_('Repositories successfully'
-                      ' rescanned added: %s,removed: %s') % (added, removed)
-                      , category='success')
+                      ' rescanned added: %s,removed: %s') % (added, removed),
+                    category='success')
 
         if setting_id == 'whoosh':
             repo_location = self.get_hg_ui_settings()['paths_root_path']
@@ -127,15 +125,16 @@ class SettingsController(BaseController):
 
                 try:
                     hgsettings1 = settings_model.get('title')
-                    hgsettings1.app_settings_value = form_result['rhodecode_title']
+                    hgsettings1.app_settings_value = \
+                        form_result['rhodecode_title']
 
                     hgsettings2 = settings_model.get('realm')
-                    hgsettings2.app_settings_value = form_result['rhodecode_realm']
+                    hgsettings2.app_settings_value = \
+                        form_result['rhodecode_realm']
 
                     hgsettings3 = settings_model.get('ga_code')
-                    hgsettings3.app_settings_value = form_result['rhodecode_ga_code']
-
-
+                    hgsettings3.app_settings_value = \
+                        form_result['rhodecode_ga_code']
 
                     self.sa.add(hgsettings1)
                     self.sa.add(hgsettings2)
@@ -147,11 +146,11 @@ class SettingsController(BaseController):
 
                 except Exception:
                     log.error(traceback.format_exc())
-                    h.flash(_('error occurred during updating application settings'),
+                    h.flash(_('error occurred during updating '
+                              'application settings'),
                             category='error')
 
                     self.sa.rollback()
-
 
             except formencode.Invalid, errors:
                 return htmlfill.render(
@@ -176,24 +175,30 @@ class SettingsController(BaseController):
                     .filter(RhodeCodeUi.ui_key == '/').one()
                     hgsettings2.ui_value = form_result['paths_root_path']
 
-
                     #HOOKS
                     hgsettings3 = self.sa.query(RhodeCodeUi)\
                     .filter(RhodeCodeUi.ui_key == 'changegroup.update').one()
-                    hgsettings3.ui_active = bool(form_result['hooks_changegroup_update'])
+                    hgsettings3.ui_active = \
+                        bool(form_result['hooks_changegroup_update'])
 
                     hgsettings4 = self.sa.query(RhodeCodeUi)\
-                    .filter(RhodeCodeUi.ui_key == 'changegroup.repo_size').one()
-                    hgsettings4.ui_active = bool(form_result['hooks_changegroup_repo_size'])
+                    .filter(RhodeCodeUi.ui_key ==
+                            'changegroup.repo_size').one()
+                    hgsettings4.ui_active = \
+                        bool(form_result['hooks_changegroup_repo_size'])
 
                     hgsettings5 = self.sa.query(RhodeCodeUi)\
-                    .filter(RhodeCodeUi.ui_key == 'pretxnchangegroup.push_logger').one()
-                    hgsettings5.ui_active = bool(form_result['hooks_pretxnchangegroup_push_logger'])
+                    .filter(RhodeCodeUi.ui_key ==
+                            'pretxnchangegroup.push_logger').one()
+                    hgsettings5.ui_active = \
+                        bool(form_result['hooks_pretxnchangegroup'
+                                         '_push_logger'])
 
                     hgsettings6 = self.sa.query(RhodeCodeUi)\
-                    .filter(RhodeCodeUi.ui_key == 'preoutgoing.pull_logger').one()
-                    hgsettings6.ui_active = bool(form_result['hooks_preoutgoing_pull_logger'])
-
+                    .filter(RhodeCodeUi.ui_key ==
+                            'preoutgoing.pull_logger').one()
+                    hgsettings6.ui_active = \
+                        bool(form_result['hooks_preoutgoing_pull_logger'])
 
                     self.sa.add(hgsettings1)
                     self.sa.add(hgsettings2)
@@ -208,11 +213,10 @@ class SettingsController(BaseController):
 
                 except:
                     log.error(traceback.format_exc())
-                    h.flash(_('error occurred during updating application settings'),
-                            category='error')
+                    h.flash(_('error occurred during updating '
+                              'application settings'), category='error')
 
                     self.sa.rollback()
-
 
             except formencode.Invalid, errors:
                 return htmlfill.render(
@@ -221,8 +225,6 @@ class SettingsController(BaseController):
                      errors=errors.error_dict or {},
                      prefix_error=False,
                      encoding="UTF-8")
-
-
 
         return redirect(url('admin_settings'))
 
@@ -238,12 +240,15 @@ class SettingsController(BaseController):
 
     @HasPermissionAllDecorator('hg.admin')
     def show(self, setting_id, format='html'):
-        """GET /admin/settings/setting_id: Show a specific item"""
+        """
+        GET /admin/settings/setting_id: Show a specific item"""
         # url('admin_setting', setting_id=ID)
 
     @HasPermissionAllDecorator('hg.admin')
     def edit(self, setting_id, format='html'):
-        """GET /admin/settings/setting_id/edit: Form to edit an existing item"""
+        """
+        GET /admin/settings/setting_id/edit: Form to
+        edit an existing item"""
         # url('admin_edit_setting', setting_id=ID)
 
     @NotAnonymous()
@@ -282,8 +287,9 @@ class SettingsController(BaseController):
         # url('admin_settings_my_account_update', id=ID)
         user_model = UserModel()
         uid = self.rhodecode_user.user_id
-        _form = UserForm(edit=True, old_data={'user_id':uid,
-                                              'email':self.rhodecode_user.email})()
+        _form = UserForm(edit=True,
+                         old_data={'user_id': uid,
+                                   'email': self.rhodecode_user.email})()
         form_result = {}
         try:
             form_result = _form.to_python(dict(request.POST))
@@ -319,8 +325,8 @@ class SettingsController(BaseController):
         """GET /_admin/create_repository: Form to create a new item"""
 
         c.repo_groups = [('', '')]
-        parents_link = lambda k:h.literal('&raquo;'.join(
-                                    map(lambda k:k.group_name,
+        parents_link = lambda k: h.literal('&raquo;'.join(
+                                    map(lambda k: k.group_name,
                                         k.parents + [k])
                                     )
                                 )

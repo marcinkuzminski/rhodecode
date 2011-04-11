@@ -43,20 +43,19 @@ from sqlalchemy.exc import DatabaseError
 log = logging.getLogger(__name__)
 
 
-
 class LdapSettingsController(BaseController):
 
-    search_scope_choices = [('BASE',     _('BASE'),),
+    search_scope_choices = [('BASE', _('BASE'),),
                             ('ONELEVEL', _('ONELEVEL'),),
-                            ('SUBTREE',  _('SUBTREE'),),
+                            ('SUBTREE', _('SUBTREE'),),
                             ]
     search_scope_default = 'SUBTREE'
 
-    tls_reqcert_choices = [('NEVER',  _('NEVER'),),
-                           ('ALLOW',  _('ALLOW'),),
-                           ('TRY',    _('TRY'),),
+    tls_reqcert_choices = [('NEVER', _('NEVER'),),
+                           ('ALLOW', _('ALLOW'),),
+                           ('TRY', _('TRY'),),
                            ('DEMAND', _('DEMAND'),),
-                           ('HARD',   _('HARD'),),
+                           ('HARD', _('HARD'),),
                            ]
     tls_reqcert_default = 'DEMAND'
 
@@ -66,13 +65,13 @@ class LdapSettingsController(BaseController):
         c.admin_user = session.get('admin_user')
         c.admin_username = session.get('admin_username')
         c.search_scope_choices = self.search_scope_choices
-        c.tls_reqcert_choices  = self.tls_reqcert_choices
+        c.tls_reqcert_choices = self.tls_reqcert_choices
         super(LdapSettingsController, self).__before__()
 
     def index(self):
         defaults = SettingsModel().get_ldap_settings()
         c.search_scope_cur = defaults.get('ldap_search_scope')
-        c.tls_reqcert_cur  = defaults.get('ldap_tls_reqcert')
+        c.tls_reqcert_cur = defaults.get('ldap_tls_reqcert')
 
         return htmlfill.render(
                     render('admin/ldap/ldap.html'),
@@ -109,7 +108,7 @@ class LdapSettingsController(BaseController):
         except formencode.Invalid, errors:
 
             c.search_scope_cur = self.search_scope_default
-            c.tls_reqcert_cur  = self.search_scope_default
+            c.tls_reqcert_cur = self.search_scope_default
 
             return htmlfill.render(
                 render('admin/ldap/ldap.html'),
