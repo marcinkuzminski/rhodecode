@@ -187,7 +187,7 @@ border-bottom-right-radius: 8px;
 
 #header {
 margin:0;
-padding:0 30px;
+padding:0 10px;
 }
 
 
@@ -1265,7 +1265,7 @@ clear:both;
 overflow:hidden;
 text-align:right;
 margin:0;
-padding:0 30px 4px;
+padding:0 10px 4px;
 margin:-10px 0 0;
 }
 
@@ -2144,14 +2144,14 @@ padding:2px 2px 0;
 }
 
 #header,#content,#footer {
-min-width:1024px;
+min-width:978px;
 }
 
 #content {
 min-height:100%;
 clear:both;
 overflow:hidden;
-padding:14px 30px;
+padding:14px 10px;
 }
 
 #content div.box div.title div.search {
@@ -2223,6 +2223,10 @@ display:none;
 
 #header #header-inner #quick li:hover ul,#header #header-inner #quick li li:hover ul,#header #header-inner #quick li li li:hover ul,#header #header-inner #quick li li li li:hover ul,#content #left #menu ul.opened,#content #left #menu li ul.expanded {
 display:block;
+}
+
+#content div.graph{
+padding:0 10px 10px;
 }
 
 #content div.box div.title ul.links li a:hover,#content div.box div.title ul.links li.ui-tabs-selected a {
