@@ -139,7 +139,7 @@ class ScmModel(BaseModel):
             if r_dbr is not None:
                 repo, dbrepo = r_dbr
 
-                if repo is None and dbrepo is None:
+                if repo is None or dbrepo is None:
                     log.error('Repository %s looks somehow corrupted', r_name)
                     continue
                 last_change = repo.last_change
