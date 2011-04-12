@@ -70,7 +70,7 @@ class SummaryController(BaseRepoController):
                                                 self.rhodecode_user.user_id)
 
         def url_generator(**kw):
-            return url('shortlog_home', repo_name=repo_name, **kw)
+            return url('shortlog_home', repo_name=repo_name, size=10, **kw)
 
         c.repo_changesets = RepoPage(c.rhodecode_repo, page=1,
                                      items_per_page=10, url=url_generator)
@@ -83,13 +83,18 @@ class SummaryController(BaseRepoController):
             username = str(self.rhodecode_user.username)
             password = '@'
 
-        uri = u'%(proto)s://%(user)s%(pass)s%(host)s%(prefix)s/%(repo_name)s' \
-                                    % {'proto': e.get('wsgi.url_scheme'),
-                                       'user': username,
-                                       'pass': password,
-                                       'host': e.get('HTTP_HOST'),
-                                       'prefix': e.get('SCRIPT_NAME'),
-                                       'repo_name': repo_name, }
+        if e.get('wsgi.url_scheme') == 'https':
+            split_s = 'https://'
+        else:
+            split_s = 'http://'
+
+        qualified_uri = [split_s] + [url.current(qualified=True)\
+                                     .split(split_s)[-1]]
+        uri = u'%(proto)s%(user)s%(pass)s%(rest)s' \
+                % {'user': username,
+                     'pass': password,
+                     'proto': qualified_uri[0],
+                     'rest': qualified_uri[1]}
         c.clone_repo_url = uri
         c.repo_tags = OrderedDict()
         for name, hash in c.rhodecode_repo.tags.items()[:10]:
@@ -133,8 +138,8 @@ class SummaryController(BaseRepoController):
             c.commit_data = stats.commit_activity
             c.overview_data = stats.commit_activity_combined
 
-            lang_stats = [(x, {"count":y,
-                               "desc":LANGUAGES_EXTENSIONS_MAP.get(x)})
+            lang_stats = [(x, {"count": y,
+                               "desc": LANGUAGES_EXTENSIONS_MAP.get(x)})
                           for x, y in lang_stats.items()]
             print lang_stats
 

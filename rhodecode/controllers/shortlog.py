@@ -25,7 +25,7 @@
 
 import logging
 
-from pylons import tmpl_context as c, request
+from pylons import tmpl_context as c, request, url
 
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseRepoController, render
@@ -42,10 +42,16 @@ class ShortlogController(BaseRepoController):
     def __before__(self):
         super(ShortlogController, self).__before__()
 
-    def index(self):
+    def index(self, repo_name):
         p = int(request.params.get('page', 1))
+        size = int(request.params.get('size', 20))
+
+        def url_generator(**kw):
+            return url('shortlog_home', repo_name=repo_name, size=size, **kw)
+
         c.repo_changesets = RepoPage(c.rhodecode_repo, page=p,
-                                     items_per_page=20)
+                                                       items_per_page=size,
+                                                       url=url_generator)
         c.shortlog_data = render('shortlog/shortlog_data.html')
         if request.params.get('partial'):
             return c.shortlog_data
