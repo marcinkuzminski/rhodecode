@@ -141,7 +141,6 @@ class SummaryController(BaseRepoController):
             lang_stats = [(x, {"count": y,
                                "desc": LANGUAGES_EXTENSIONS_MAP.get(x)})
                           for x, y in lang_stats.items()]
-            print lang_stats
 
             c.trending_languages = json.dumps(OrderedDict(
                                        sorted(lang_stats, reverse=True,
