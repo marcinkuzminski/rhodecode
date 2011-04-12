@@ -4,7 +4,7 @@
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Summary controller for Rhodecode
-    
+
     :created_on: Apr 18, 2010
     :author: marcink
     :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>    
@@ -60,16 +60,16 @@ class SummaryController(BaseController):
     def __before__(self):
         super(SummaryController, self).__before__()
 
-    def index(self):
+    def index(self, repo_name):
         scm_model = ScmModel()
         c.repo_info = scm_model.get_repo(c.repo_name)
         c.following = scm_model.is_following_repo(c.repo_name,
                                              c.rhodecode_user.user_id)
         def url_generator(**kw):
-            return url('shortlog_home', repo_name=c.repo_name, **kw)
+            return url('shortlog_home', repo_name=repo_name, size=10, **kw)
 
-        c.repo_changesets = Page(c.repo_info, page=1, items_per_page=10,
-                                 url=url_generator)
+        c.repo_changesets = Page(c.repo_info, page=1,
+                                                items_per_page=10, url=url_generator)
 
         e = request.environ
 

@@ -29,6 +29,9 @@ fixes
 - fixed problems with displaying binary files, thanks to Thomas Waldmann
 - removed name from archive files since it's breaking ui for long names
 - fixed issue witg archive headers sent to browser, thanks to Thomas Waldmann
+- fixed compatibility for 1024px displays, and larger dpi settings, thanks to 
+  Thomas Waldmann
+- fixed issue #166 summary pager was skipping 10 revisions on second page
 
 1.1.7 (**2011-03-23**)
 ======================

@@ -208,7 +208,7 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
         stats.languages = json.dumps(__get_codes_stats(repo_name))
 
     stats.repository = dbrepo
-    stats.stat_on_revision = last_cs.revision
+    stats.stat_on_revision = last_cs.revision if last_cs else 0
 
     try:
         sa.add(stats)

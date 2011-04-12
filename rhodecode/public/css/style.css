@@ -187,7 +187,7 @@ border-bottom-right-radius: 8px;
 
 #header {
 margin:0;
-padding:0 30px;
+padding:0 10px;
 }
 
 
@@ -1265,7 +1265,7 @@ clear:both;
 overflow:hidden;
 text-align:right;
 margin:0;
-padding:0 30px 4px;
+padding:0 10px 4px;
 margin:-10px 0 0;
 }
 
@@ -1916,6 +1916,7 @@ background:#556CB5;
 color:#FFF;
 }
 
+
 .follow{
 background:url("../images/icons/heart_add.png") no-repeat scroll 3px;
 height: 16px;
@@ -1943,80 +1944,72 @@ padding-bottom:5px;
 
 .add_icon {
 background:url("../images/icons/add.png") no-repeat scroll 3px;
-height:16px;
 padding-left:20px;
-padding-top:1px;
+padding-top:0px;
 text-align:left;
 }
 
 .edit_icon {
 background:url("../images/icons/folder_edit.png") no-repeat scroll 3px;
-height:16px;
 padding-left:20px;
-padding-top:1px;
+padding-top:0px;
 text-align:left;
 }
 
 .delete_icon {
 background:url("../images/icons/delete.png") no-repeat scroll 3px;
-height:16px;
 padding-left:20px;
-padding-top:1px;
+padding-top:0px;
 text-align:left;
 }
 
 .refresh_icon {
 background:url("../images/icons/arrow_refresh.png") no-repeat scroll 3px;
-height:16px;
 padding-left:20px;
-padding-top:1px;
+padding-top:0px;
 text-align:left;
 }
 
 .pull_icon {
 background:url("../images/icons/connect.png") no-repeat scroll 3px;
-height:16px;
 padding-left:20px;
-padding-top:1px;
+padding-top:0px;
 text-align:left;
 }
 
 .rss_icon {
 background:url("../images/icons/rss_16.png") no-repeat scroll 3px;
-height:16px;
 padding-left:20px;
-padding-top:1px;
+padding-top:0px;
 text-align:left;
 }
 
 .atom_icon {
 background:url("../images/icons/atom.png") no-repeat scroll 3px;
-height:16px;
 padding-left:20px;
-padding-top:1px;
+padding-top:0px;
 text-align:left;
 }
 
 .archive_icon {
 background:url("../images/icons/compress.png") no-repeat scroll 3px;
-height:16px;
 padding-left:20px;
 text-align:left;
 padding-top:1px;
 }
+
 .start_following_icon {
 background:url("../images/icons/heart_add.png") no-repeat scroll 3px;
-height:16px;
 padding-left:20px;
 text-align:left;
-padding-top:1px;
+padding-top:0px;
 }
+
 .stop_following_icon {
 background:url("../images/icons/heart_delete.png") no-repeat scroll 3px;
-height:16px;
 padding-left:20px;
 text-align:left;
-padding-top:1px;
+padding-top:0px;
 }
 
 .action_button {
@@ -2144,14 +2137,14 @@ padding:2px 2px 0;
 }
 
 #header,#content,#footer {
-min-width:1024px;
+min-width:978px;
 }
 
 #content {
 min-height:100%;
 clear:both;
 overflow:hidden;
-padding:14px 30px;
+padding:14px 10px;
 }
 
 #content div.box div.title div.search {
@@ -2223,6 +2216,10 @@ display:none;
 
 #header #header-inner #quick li:hover ul,#header #header-inner #quick li li:hover ul,#header #header-inner #quick li li li:hover ul,#header #header-inner #quick li li li li:hover ul,#content #left #menu ul.opened,#content #left #menu li ul.expanded {
 display:block;
+}
+
+#content div.graph{
+padding:0 10px 10px;
 }
 
 #content div.box div.title ul.links li a:hover,#content div.box div.title ul.links li.ui-tabs-selected a {
