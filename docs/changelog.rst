@@ -4,11 +4,13 @@ Changelog
 =========
 
 
-1.1.8 (**2011-04-XX**)
+1.1.8 (**2011-04-12**)
 ======================
 
 news
 ----
+
+- improved windows support
 
 fixes
 -----
@@ -17,18 +19,17 @@ fixes
   incompatible
 - setup-app will check for write permission in given path
 - cleaned up license info issue #149
-- fixes for issues #137,#116 and #116, problems with unicode and 
-  accented characters.
+- fixes for issues #137,#116 and problems with unicode and accented characters.
 - fixes crashes on gravatar, when passed in email as unicode
 - fixed tooltip flickering problems
 - fixed came_from redirection on windows
-- fixed logging modules,and sql formatters
-- windows fixes for os.kill #133
+- fixed logging modules, and sql formatters
+- windows fixes for os.kill issue #133
 - fixes path splitting for windows issues #148
 - fixed issue #143 wrong import on migration to 1.1.X
 - fixed problems with displaying binary files, thanks to Thomas Waldmann
-- removed name from archive files since it's breaking ui for long names
-- fixed issue witg archive headers sent to browser, thanks to Thomas Waldmann
+- removed name from archive files since it's breaking ui for long repo names
+- fixed issue with archive headers sent to browser, thanks to Thomas Waldmann
 - fixed compatibility for 1024px displays, and larger dpi settings, thanks to 
   Thomas Waldmann
 - fixed issue #166 summary pager was skipping 10 revisions on second page

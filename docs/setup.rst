@@ -328,10 +328,60 @@ Add the following at the end of the .ini file::
 
 then change <someprefix> into your choosen prefix
 
-Apache's example FCGI config
-----------------------------
+Apache's example WSGI+SSL config
+--------------------------------
 
-TODO !
+virtual host example::
+
+    <VirtualHost *:443>
+        ServerName hg.domain.eu:443
+        DocumentRoot /var/www
+    
+        SSLEngine on
+        SSLCertificateFile /etc/apache2/ssl/hg.domain.eu.cert
+        SSLCertificateKeyFile /etc/apache2/ssl/hg.domain.eu.key
+        SSLCertificateChainFile /etc/apache2/ssl/ca.cert
+        SetEnv HTTP_X_URL_SCHEME https
+    
+        Alias /css /home/web/virtualenvs/hg/lib/python2.6/site-packages/rhodecode/public/css
+        Alias /images /home/web/virtualenvs/hg/lib/python2.6/site-packages/rhodecode/public/images
+        Alias /js /home/web/virtualenvs/hg/lib/python2.6/site-packages/rhodecode/public/js
+    
+        WSGIDaemonProcess hg user=web group=web processes=1 threads=10 display-name=%{GROUP} python-path=/home/web/virtualenvs/hg/lib/python2.6/site-packages
+    
+        WSGIPassAuthorization On
+        WSGIProcessGroup hg
+        WSGIApplicationGroup hg
+        WSGIScriptAlias / /home/web/apache/conf/hg.wsgi
+    
+        <Directory /home/web/apache/conf>
+            Order deny,allow
+            Allow from all
+        </Directory>
+        <Directory /var/www>
+            Order deny,allow
+            Allow from all
+        </Directory>
+    
+    </VirtualHost>
+
+    <VirtualHost *:80>
+        ServerName hg.domain.eu
+        Redirect permanent / https://hg.domain.eu/
+    </VirtualHost>
+
+
+HG.WSGI::
+
+    import os
+    os.environ["HGENCODING"] = "UTF-8"
+    
+    from paste.deploy import loadapp
+    from paste.script.util.logging_config import fileConfig
+    
+    fileConfig('/home/web/virtualenvs/hg/config/production.ini')
+    application = loadapp('config:/home/web/virtualenvs/hg/config/production.ini'
+
 
 Other configuration files
 -------------------------
