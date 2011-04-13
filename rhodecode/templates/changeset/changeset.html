@@ -86,10 +86,16 @@
 		         </span>                                                                 
 	                </div>              
 	        </div>
-	        <span style="font-size:1.1em;font-weight: bold">${_('Files affected (%s)' % len(c.changeset.affected_files))}</span>
+	        <span style="font-size:1.1em;font-weight: bold">
+	        ${_('%s files affected with %s additions and %s deletions.') % (len(c.changeset.affected_files),c.lines_added,c.lines_deleted)}
+	        </span>
 	        <div class="cs_files">
-	                %for change,filenode,diff,cs1,cs2 in c.changes:
-	                    <div class="cs_${change}">${h.link_to(h.safe_unicode(filenode.path),h.url.current(anchor=h.repo_name_slug('C%s' % h.safe_unicode(filenode.path))))}</div>
+	                %for change,filenode,diff,cs1,cs2,stat in c.changes:
+	                    <div class="cs_${change}">
+		                    <div class="node">${h.link_to(h.safe_unicode(filenode.path),
+		                                        h.url.current(anchor=h.repo_name_slug('C%s' % h.safe_unicode(filenode.path))))}</div>
+		                    <div class="changes">${h.fancy_file_stats(stat)}</div>
+	                    </div>
 	                %endfor
 	                % if c.cut_off:
 	                  ${_('Changeset was to big and was cut off...')}
@@ -99,7 +105,7 @@
 	    
     </div>
     	
-	%for change,filenode,diff,cs1,cs2 in c.changes:
+	%for change,filenode,diff,cs1,cs2,stat in c.changes:
 		%if change !='removed':
 		<div style="clear:both;height:10px"></div>
 		<div class="diffblock">

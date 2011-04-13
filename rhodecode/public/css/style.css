@@ -1546,6 +1546,24 @@ margin:10px 2px;
 font-weight: bold;
 }
 
+.cs_files .node{
+float: left;
+}
+.cs_files .changes{
+float: right;
+}
+.cs_files .changes .added{
+background-color: #BBFFBB;
+float: left;
+text-align: center;
+font-size: 90%; 
+}
+.cs_files .changes .deleted{
+background-color: #FF8888;
+float: left;
+text-align: center;
+font-size: 90%;
+}
 .cs_files .cs_added {
 background:url("../images/icons/page_white_add.png") no-repeat scroll 3px;
 height:16px;

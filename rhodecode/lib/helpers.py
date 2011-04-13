@@ -622,7 +622,8 @@ def changed_tooltip(nodes):
         suf = ''
         if len(nodes) > 30:
             suf = '<br/>' + _(' and %s more') % (len(nodes) - 30)
-        return literal(pref + '<br/> '.join([safe_unicode(x.path) for x in nodes[:30]]) + suf)
+        return literal(pref + '<br/> '.join([safe_unicode(x.path)
+                                             for x in nodes[:30]]) + suf)
     else:
         return ': ' + _('No Files')
 
@@ -635,6 +636,56 @@ def repo_link(groups_and_repos):
         return repo_name
     else:
         def make_link(group):
-            return link_to(group.group_name, url('repos_group', id=group.group_id))
+            return link_to(group.group_name, url('repos_group',
+                                                 id=group.group_id))
         return literal(' &raquo; '.join(map(make_link, groups)) + \
                        " &raquo; " + repo_name)
+
+
+def fancy_file_stats(stats):
+    a, d, t = stats[0], stats[1], stats[0] + stats[1]
+    width = 100
+    unit = float(width) / t
+
+    a_p = max(9, unit * a) if a > 0 else 0# needs > 9% to be visible
+    d_p = max(9, unit * d) if d > 0 else 0 # needs > 9% to be visible
+    p_sum = a_p + d_p
+
+    if p_sum > width:
+        #adjust the percentage to be == 100% since we adjusted to 9
+        if a_p > d_p:
+            a_p = a_p - (p_sum - width)
+        else:
+            d_p = d_p - (p_sum - width)
+
+    a_v = a if a > 0 else ''
+    d_v = d if d > 0 else ''
+
+
+    def cgen(l_type):
+        mapping = {'tr':'top-right-rounded-corner',
+                   'tl':'top-left-rounded-corner',
+                   'br':'bottom-right-rounded-corner',
+                   'bl':'bottom-left-rounded-corner'}
+        map_getter = lambda x:mapping[x]
+
+        if l_type == 'a' and d_v:
+            #case when added and deleted are present
+            return ' '.join(map(map_getter, ['tl', 'bl']))
+
+        if l_type == 'a' and not d_v:
+            return ' '.join(map(map_getter, ['tr', 'br', 'tl', 'bl']))
+
+        if l_type == 'd' and a_v:
+            return ' '.join(map(map_getter, ['tr', 'br']))
+
+        if l_type == 'd' and not a_v:
+            return ' '.join(map(map_getter, ['tr', 'br', 'tl', 'bl']))
+
+
+
+    d_a = '<div class="added %s" style="width:%s%%">%s</div>' % (cgen('a'),
+                                                                 a_p, a_v)
+    d_d = '<div class="deleted %s" style="width:%s%%">%s</div>' % (cgen('d'),
+                                                                   d_p, d_v)
+    return literal('<div style="width:%spx">%s%s</div>' % (width, d_a, d_d))

@@ -86,6 +86,8 @@ class ChangesetController(BaseRepoController):
         c.changes = OrderedDict()
         c.sum_added = 0
         c.sum_removed = 0
+        c.lines_added = 0
+        c.lines_deleted = 0
         c.cut_off = False
 
         for changeset in c.cs_ranges:
@@ -106,9 +108,8 @@ class ChangesetController(BaseRepoController):
                     c.sum_added += node.size
                     if c.sum_added < self.cut_off_limit:
                         f_gitdiff = differ.get_gitdiff(filenode_old, node)
-                        diff = differ.DiffProcessor(f_gitdiff,
-                                                    format='gitdiff').as_html()
-
+                        d = differ.DiffProcessor(f_gitdiff, format='gitdiff')
+                        diff = d.as_html()
                     else:
                         diff = wrap_to_table(_('Changeset is to big and '
                                                'was cut off, see raw '
@@ -118,8 +119,11 @@ class ChangesetController(BaseRepoController):
 
                 cs1 = None
                 cs2 = node.last_changeset.raw_id
-                c.changes[changeset.raw_id].append(('added', node,
-                                                    diff, cs1, cs2))
+                st = d.stat()
+                c.lines_added += st[0]
+                c.lines_deleted += st[1]
+                c.changes[changeset.raw_id].append(('added', node, diff,
+                                                    cs1, cs2, st))
 
             #==================================================================
             # CHANGED FILES
@@ -138,9 +142,10 @@ class ChangesetController(BaseRepoController):
 
                         if c.sum_removed < self.cut_off_limit:
                             f_gitdiff = differ.get_gitdiff(filenode_old, node)
-                            diff = differ.DiffProcessor(f_gitdiff,
-                                                        format='gitdiff')\
-                                                        .as_html()
+                            d = differ.DiffProcessor(f_gitdiff,
+                                                     format='gitdiff')
+                            diff = d.as_html()
+
                             if diff:
                                 c.sum_removed += len(diff)
                         else:
@@ -152,8 +157,11 @@ class ChangesetController(BaseRepoController):
 
                     cs1 = filenode_old.last_changeset.raw_id
                     cs2 = node.last_changeset.raw_id
-                    c.changes[changeset.raw_id].append(('changed', node,
-                                                        diff, cs1, cs2))
+                    st = d.stat()
+                    c.lines_added += st[0]
+                    c.lines_deleted += st[1]
+                    c.changes[changeset.raw_id].append(('changed', node, diff,
+                                                        cs1, cs2, st))
 
             #==================================================================
             # REMOVED FILES
@@ -161,7 +169,7 @@ class ChangesetController(BaseRepoController):
             if not c.cut_off:
                 for node in changeset.removed:
                     c.changes[changeset.raw_id].append(('removed', node, None,
-                                                        None, None))
+                                                        None, None, None))
 
         if len(c.cs_ranges) == 1:
             c.changeset = c.cs_ranges[0]
