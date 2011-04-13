@@ -644,8 +644,9 @@ def repo_link(groups_and_repos):
 
 def fancy_file_stats(stats):
     a, d, t = stats[0], stats[1], stats[0] + stats[1]
+    print stats
     width = 100
-    unit = float(width) / t
+    unit = float(width) / (t or 1)
 
     a_p = max(9, unit * a) if a > 0 else 0# needs > 9% to be visible
     d_p = max(9, unit * d) if d > 0 else 0 # needs > 9% to be visible

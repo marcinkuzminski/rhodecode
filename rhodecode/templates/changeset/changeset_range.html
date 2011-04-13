@@ -53,7 +53,7 @@
 	        <div class="cs_files">
 	               %for cs in c.cs_ranges:
 	                   <div class="cur_cs">r${cs}</div>
-	                %for change,filenode,diff,cs1,cs2 in c.changes[cs.raw_id]:
+	                %for change,filenode,diff,cs1,cs2,st in c.changes[cs.raw_id]:
 	                    <div class="cs_${change}">${h.link_to(h.safe_unicode(filenode.path),h.url.current(anchor=h.repo_name_slug('C%s-%s' % (cs.short_id,h.safe_unicode(filenode.path)))))}</div>
 	                %endfor
 	               %endfor 
@@ -62,7 +62,7 @@
 	    
     </div>
    %for cs in c.cs_ranges:    	
-	%for change,filenode,diff,cs1,cs2 in c.changes[cs.raw_id]:
+	%for change,filenode,diff,cs1,cs2,st in c.changes[cs.raw_id]:
 		%if change !='removed':
 		<div style="clear:both;height:10px"></div>
 		<div class="diffblock">
