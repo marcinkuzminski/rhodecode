@@ -10,7 +10,6 @@ from rhodecode.lib.dbmigrate.migrate import *
 from rhodecode.lib.dbmigrate.migrate.changeset import *
 
 from rhodecode.model.meta import Base
-from rhodecode.model.db import BaseModel
 
 log = logging.getLogger(__name__)
 
