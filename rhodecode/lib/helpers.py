@@ -644,7 +644,6 @@ def repo_link(groups_and_repos):
 
 def fancy_file_stats(stats):
     a, d, t = stats[0], stats[1], stats[0] + stats[1]
-    print stats
     width = 100
     unit = float(width) / (t or 1)
 

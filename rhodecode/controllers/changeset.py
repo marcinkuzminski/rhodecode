@@ -104,12 +104,14 @@ class ChangesetController(BaseRepoController):
                 filenode_old = FileNode(node.path, '', EmptyChangeset())
                 if filenode_old.is_binary or node.is_binary:
                     diff = wrap_to_table(_('binary file'))
+                    st = (0, 0)
                 else:
                     c.sum_added += node.size
                     if c.sum_added < self.cut_off_limit:
                         f_gitdiff = differ.get_gitdiff(filenode_old, node)
                         d = differ.DiffProcessor(f_gitdiff, format='gitdiff')
                         diff = d.as_html()
+                        st = d.stat()
                     else:
                         diff = wrap_to_table(_('Changeset is to big and '
                                                'was cut off, see raw '
@@ -119,7 +121,6 @@ class ChangesetController(BaseRepoController):
 
                 cs1 = None
                 cs2 = node.last_changeset.raw_id
-                st = d.stat()
                 c.lines_added += st[0]
                 c.lines_deleted += st[1]
                 c.changes[changeset.raw_id].append(('added', node, diff,
@@ -138,6 +139,7 @@ class ChangesetController(BaseRepoController):
 
                     if filenode_old.is_binary or node.is_binary:
                         diff = wrap_to_table(_('binary file'))
+                        st = (0, 0)
                     else:
 
                         if c.sum_removed < self.cut_off_limit:
@@ -145,7 +147,7 @@ class ChangesetController(BaseRepoController):
                             d = differ.DiffProcessor(f_gitdiff,
                                                      format='gitdiff')
                             diff = d.as_html()
-
+                            st = d.stat()
                             if diff:
                                 c.sum_removed += len(diff)
                         else:
@@ -157,7 +159,6 @@ class ChangesetController(BaseRepoController):
 
                     cs1 = filenode_old.last_changeset.raw_id
                     cs2 = node.last_changeset.raw_id
-                    st = d.stat()
                     c.lines_added += st[0]
                     c.lines_deleted += st[1]
                     c.changes[changeset.raw_id].append(('changed', node, diff,
@@ -169,7 +170,7 @@ class ChangesetController(BaseRepoController):
             if not c.cut_off:
                 for node in changeset.removed:
                     c.changes[changeset.raw_id].append(('removed', node, None,
-                                                        None, None, None))
+                                                        None, None, (0, 0)))
 
         if len(c.cs_ranges) == 1:
             c.changeset = c.cs_ranges[0]
