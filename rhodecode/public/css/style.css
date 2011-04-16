@@ -389,6 +389,12 @@ max-height:275px;
 overflow-x:hidden;
 overflow-y:auto;
 }
+#header #header-inner #quick ul.repo_switcher li.qfilter_rs {
+float:none;
+margin:0;
+border-bottom:2px solid #003367;
+}
+
 
 #header #header-inner #quick .repo_switcher_type{
 position:absolute;
