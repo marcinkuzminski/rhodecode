@@ -226,13 +226,40 @@ def ValidRepoName(edit, old_data):
 
     return _ValidRepoName
 
+def ValidCloneUri():
+    from mercurial.httprepo import httprepository, httpsrepository
+    from rhodecode.lib.utils import make_ui
+
+    class _ValidCloneUri(formencode.validators.FancyValidator):
+        def to_python(self, value, state):
+            if not value:
+                pass
+            elif value.startswith('https'):
+                try:
+                    httpsrepository(make_ui('db'), value).capabilities()
+                except:
+                    raise formencode.Invalid(_('invalid clone url'), value,
+                                             state)
+            elif value.startswith('http'):
+                try:
+                    httprepository(make_ui('db'), value).capabilities()
+                except:
+                    raise formencode.Invalid(_('invalid clone url'), value,
+                                             state)
+            else:
+                raise formencode.Invalid(_('Invalid clone url, provide a '
+                                           'valid clone http\s url'), value,
+                                         state)
+
+    return _ValidCloneUri
+
 def ValidForkType(old_data):
     class _ValidForkType(formencode.validators.FancyValidator):
 
         def to_python(self, value, state):
             if old_data['repo_type'] != value:
-                raise formencode.Invalid(_('Fork have to be the same type as original'),
-                                         value, state)
+                raise formencode.Invalid(_('Fork have to be the same '
+                                           'type as original'), value, state)
             return value
     return _ValidForkType
 
@@ -457,7 +484,8 @@ def RepoForm(edit=False, old_data={}, supported_backends=BACKENDS.keys(),
         filter_extra_fields = False
         repo_name = All(UnicodeString(strip=True, min=1, not_empty=True),
                         ValidRepoName(edit, old_data))
-        clone_uri = UnicodeString(strip=True, min=1, not_empty=False)
+        clone_uri = All(UnicodeString(strip=True, min=1, not_empty=False),
+                        ValidCloneUri()())
         repo_group = OneOf(repo_groups, hideList=True)
         repo_type = OneOf(supported_backends)
         description = UnicodeString(strip=True, min=1, not_empty=True)
