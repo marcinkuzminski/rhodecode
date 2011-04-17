@@ -140,7 +140,9 @@ class ScmModel(BaseModel):
                 repo, dbrepo = r_dbr
 
                 if repo is None or dbrepo is None:
-                    log.error('Repository %s looks somehow corrupted', r_name)
+                    log.error('Repository "%s" looks somehow corrupted '
+                              'fs-repo:%s,db-repo:%s both values should be '
+                              'present', r_name, repo, dbrepo)
                     continue
                 last_change = repo.last_change
                 tip = h.get_changeset_safe(repo, 'tip')
