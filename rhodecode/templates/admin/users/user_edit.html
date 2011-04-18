@@ -24,7 +24,7 @@
         ${self.breadcrumbs()}       
     </div>
     <!-- end box / title -->
-    ${h.form(url('user', id=c.user.user_id),method='put')}
+    ${h.form(url('update_user', id=c.user.user_id),method='put')}
     <div class="form">
         <div class="field">
            <div class="gravatar_box">
@@ -126,7 +126,7 @@
     <div class="title">
         <h5>${_('Permissions')}</h5>       
     </div>
-    ${h.form(url('user', id=c.user.user_id),method='put')}
+    ${h.form(url('user_perm', id=c.user.user_id),method='put')}
     <div class="form">
         <!-- fields -->
         <div class="fields">
@@ -135,7 +135,7 @@
                     <label for="">${_('Create repositories')}:</label>
                 </div>
                 <div class="checkboxes">
-                    ${h.checkbox('create',value=True)}
+                    ${h.checkbox('create_repo_perm',value=True)}
                 </div>
              </div>
             <div class="buttons">

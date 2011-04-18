@@ -33,7 +33,6 @@ from rhodecode.lib.auth_ldap import LdapImportError
 from rhodecode.lib.base import BaseController, render
 from rhodecode.model.forms import LdapSettingsForm, DefaultPermissionsForm
 from rhodecode.model.permission import PermissionModel
-from rhodecode.model.settings import SettingsModel
 from rhodecode.model.user import UserModel
 import formencode
 import logging

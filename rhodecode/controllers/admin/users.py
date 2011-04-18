@@ -38,7 +38,7 @@ from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator
 from rhodecode.lib.base import BaseController, render
 
-from rhodecode.model.db import User
+from rhodecode.model.db import User, RepoToPerm, UserToPerm, Permission
 from rhodecode.model.forms import UserForm
 from rhodecode.model.user import UserModel
 
@@ -101,7 +101,7 @@ class UsersController(BaseController):
         # Forms posted to this method should contain a hidden field:
         #    <input type="hidden" name="_method" value="PUT" />
         # Or using helpers:
-        #    h.form(url('user', id=ID),
+        #    h.form(url('update_user', id=ID),
         #           method='put')
         # url('user', id=ID)
         user_model = UserModel()
@@ -113,13 +113,16 @@ class UsersController(BaseController):
         try:
             form_result = _form.to_python(dict(request.POST))
             user_model.update(id, form_result)
-            h.flash(_('User updated succesfully'), category='success')
+            h.flash(_('User updated successfully'), category='success')
 
         except formencode.Invalid, errors:
+            e = errors.error_dict or {}
+            perm = Permission.get_by_key('hg.create.repository')
+            e.update({'create_repo_perm': UserToPerm.has_perm(id, perm)})
             return htmlfill.render(
                 render('admin/users/user_edit.html'),
                 defaults=errors.value,
-                errors=errors.error_dict or {},
+                errors=e,
                 prefix_error=False,
                 encoding="UTF-8")
         except Exception:
@@ -134,7 +137,7 @@ class UsersController(BaseController):
         # Forms posted to this method should contain a hidden field:
         #    <input type="hidden" name="_method" value="DELETE" />
         # Or using helpers:
-        #    h.form(url('user', id=ID),
+        #    h.form(url('delete_user', id=ID),
         #           method='delete')
         # url('user', id=ID)
         user_model = UserModel()
@@ -167,6 +170,8 @@ class UsersController(BaseController):
             .permissions['global']
 
         defaults = c.user.get_dict()
+        perm = Permission.get_by_key('hg.create.repository')
+        defaults.update({'create_repo_perm': UserToPerm.has_perm(id, perm)})
 
         return htmlfill.render(
             render('admin/users/user_edit.html'),
@@ -174,3 +179,29 @@ class UsersController(BaseController):
             encoding="UTF-8",
             force_defaults=False
         )
+
+    def update_perm(self, id):
+        """PUT /users_perm/id: Update an existing item"""
+        # url('user_perm', id=ID, method='put')
+
+        grant_perm = request.POST.get('create_repo_perm', False)
+
+        if grant_perm:
+            perm = Permission.get_by_key('hg.create.none')
+            UserToPerm.revoke_perm(id, perm)
+
+            perm = Permission.get_by_key('hg.create.repository')
+            UserToPerm.grant_perm(id, perm)
+            h.flash(_("Granted 'repository create' permission to user"),
+                    category='success')
+
+        else:
+            perm = Permission.get_by_key('hg.create.repository')
+            UserToPerm.revoke_perm(id, perm)
+
+            perm = Permission.get_by_key('hg.create.none')
+            UserToPerm.grant_perm(id, perm)
+            h.flash(_("Revoked 'repository create' permission to user"),
+                    category='success')
+
+        return redirect(url('edit_user', id=id))

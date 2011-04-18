@@ -36,12 +36,13 @@ from rhodecode.model import meta
 from rhodecode.lib.auth import get_crypt_password, generate_api_key
 from rhodecode.lib.utils import ask_ok
 from rhodecode.model import init_model
-from rhodecode.model.db import User, Permission, RhodeCodeUi, RhodeCodeSettings, \
-    UserToPerm, DbMigrateVersion
+from rhodecode.model.db import User, Permission, RhodeCodeUi, \
+    RhodeCodeSettings, UserToPerm, DbMigrateVersion
 
 from sqlalchemy.engine import create_engine
 
 log = logging.getLogger(__name__)
+
 
 class DbManage(object):
     def __init__(self, log_sql, dbconf, root, tests=False):
@@ -76,8 +77,6 @@ class DbManage(object):
         meta.Base.metadata.create_all(checkfirst=checkfirst)
         log.info('Created tables for %s', self.dbname)
 
-
-
     def set_db_version(self):
         try:
             ver = DbMigrateVersion()
@@ -90,7 +89,6 @@ class DbManage(object):
             self.sa.rollback()
             raise
         log.info('db version set to: %s', __dbversion__)
-
 
     def upgrade(self):
         """Upgrades given database schema to given revision following
@@ -170,8 +168,6 @@ class DbManage(object):
             print ('performing upgrade step %s' % step)
             callable = getattr(UpgradeSteps(self), 'step_%s' % step)()
 
-
-
     def fix_repo_paths(self):
         """Fixes a old rhodecode version path into new one without a '*'
         """
@@ -225,9 +221,9 @@ class DbManage(object):
         if not self.tests:
             import getpass
 
-
             def get_password():
-                password = getpass.getpass('Specify admin password (min 6 chars):')
+                password = getpass.getpass('Specify admin password '
+                                           '(min 6 chars):')
                 confirm = getpass.getpass('Confirm password:')
 
                 if password != confirm:
@@ -252,9 +248,12 @@ class DbManage(object):
             self.create_user(username, password, email, True)
         else:
             log.info('creating admin and regular test users')
-            self.create_user('test_admin', 'test12', 'test_admin@mail.com', True)
-            self.create_user('test_regular', 'test12', 'test_regular@mail.com', False)
-            self.create_user('test_regular2', 'test12', 'test_regular2@mail.com', False)
+            self.create_user('test_admin', 'test12',
+                             'test_admin@mail.com', True)
+            self.create_user('test_regular', 'test12',
+                             'test_regular@mail.com', False)
+            self.create_user('test_regular2', 'test12',
+                             'test_regular2@mail.com', False)
 
     def create_ui_settings(self):
         """Creates ui settings, fills out hooks
@@ -308,7 +307,6 @@ class DbManage(object):
             self.sa.rollback()
             raise
 
-
     def create_ldap_options(self):
         """Creates ldap settings"""
 
@@ -320,7 +318,6 @@ class DbManage(object):
                         ('ldap_filter', ''), ('ldap_search_scope', ''),
                         ('ldap_attr_login', ''), ('ldap_attr_firstname', ''),
                         ('ldap_attr_lastname', ''), ('ldap_attr_email', '')]:
-
 
                 setting = RhodeCodeSettings(k, v)
                 self.sa.add(setting)
@@ -353,13 +350,11 @@ class DbManage(object):
             log.error('No write permission to given path: %s [%s/3]',
                       path, retries)
 
-
         if retries == 0:
             sys.exit()
         if path_ok is False:
             retries -= 1
             return self.config_prompt(test_repo_path, retries)
-
 
         return path
 
@@ -393,11 +388,9 @@ class DbManage(object):
         paths.ui_key = '/'
         paths.ui_value = path
 
-
         hgsettings1 = RhodeCodeSettings('realm', 'RhodeCode authentication')
         hgsettings2 = RhodeCodeSettings('title', 'RhodeCode')
         hgsettings3 = RhodeCodeSettings('ga_code', '')
-
 
         try:
             self.sa.add(web1)
@@ -467,8 +460,13 @@ class DbManage(object):
                  ('hg.create.repository', 'Repository create'),
                  ('hg.create.none', 'Repository creation disabled'),
                  ('hg.register.none', 'Register disabled'),
-                 ('hg.register.manual_activate', 'Register new user with RhodeCode without manual activation'),
-                 ('hg.register.auto_activate', 'Register new user with RhodeCode without auto activation'),
+                 ('hg.register.manual_activate', 'Register new user with '
+                                                 'RhodeCode without manual'
+                                                 'activation'),
+
+                 ('hg.register.auto_activate', 'Register new user with '
+                                               'RhodeCode without auto '
+                                               'activation'),
                 ]
 
         for p in perms:

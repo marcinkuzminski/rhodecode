@@ -33,7 +33,9 @@ from sqlalchemy.exc import DatabaseError
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.orm.interfaces import MapperExtension
 
+from rhodecode.lib import str2bool
 from rhodecode.model.meta import Base, Session
+from rhodecode.model.caching_query import FromCache
 
 log = logging.getLogger(__name__)
 
@@ -60,6 +62,35 @@ class RhodeCodeSettings(Base):
     def __repr__(self):
         return "<%s('%s:%s')>" % (self.__class__.__name__,
                                   self.app_settings_name, self.app_settings_value)
+
+
+    @classmethod
+    def get_app_settings(cls, cache=False):
+
+        ret = Session.query(cls)
+
+        if cache:
+            ret = ret.options(FromCache("sql_cache_short", "get_hg_settings"))
+
+        if not ret:
+            raise Exception('Could not get application settings !')
+        settings = {}
+        for each in ret:
+            settings['rhodecode_' + each.app_settings_name] = \
+                each.app_settings_value
+
+        return settings
+
+    @classmethod
+    def get_ldap_settings(cls, cache=False):
+        ret = Session.query(cls)\
+                .filter(cls.app_settings_name.startswith('ldap_'))\
+                .all()
+        fd = {}
+        for row in ret:
+            fd.update({row.app_settings_name:str2bool(row.app_settings_value)})
+        return fd
+
 
 class RhodeCodeUi(Base):
     __tablename__ = 'rhodecode_ui'
@@ -285,6 +316,10 @@ class Permission(Base):
         return "<%s('%s:%s')>" % (self.__class__.__name__,
                                   self.permission_id, self.permission_name)
 
+    @classmethod
+    def get_by_key(cls, key):
+        return Session.query(cls).filter(cls.permission_name == key).scalar()
+
 class RepoToPerm(Base):
     __tablename__ = 'repo_to_perm'
     __table_args__ = (UniqueConstraint('user_id', 'repository_id'), {'useexisting':True})
@@ -307,6 +342,40 @@ class UserToPerm(Base):
     user = relationship('User')
     permission = relationship('Permission')
 
+    @classmethod
+    def has_perm(cls, user_id, perm):
+        if not isinstance(perm, Permission):
+            raise Exception('perm needs to be an instance of Permission class')
+
+        return Session.query(cls).filter(cls.user_id == user_id)\
+            .filter(cls.permission == perm).scalar() is not None
+
+    @classmethod
+    def grant_perm(cls, user_id, perm):
+        if not isinstance(perm, Permission):
+            raise Exception('perm needs to be an instance of Permission class')
+
+        new = cls()
+        new.user_id = user_id
+        new.permission = perm
+        try:
+            Session.add(new)
+            Session.commit()
+        except:
+            Session.rollback()
+
+
+    @classmethod
+    def revoke_perm(cls, user_id, perm):
+        if not isinstance(perm, Permission):
+            raise Exception('perm needs to be an instance of Permission class')
+
+        try:
+            Session.query(cls).filter(cls.user_id == user_id)\
+                .filter(cls.permission == perm).delete()
+            Session.commit()
+        except:
+            Session.rollback()
 
 class UsersGroupToPerm(Base):
     __tablename__ = 'users_group_to_perm'

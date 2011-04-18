@@ -105,16 +105,42 @@ def make_map(config):
                   controller='admin/repos_groups', path_prefix='/_admin')
 
     #ADMIN USER REST ROUTES
-    rmap.resource('user', 'users', controller='admin/users',
-                  path_prefix='/_admin')
+    with rmap.submapper(path_prefix='/_admin', controller='admin/users') as m:
+        m.connect("users", "/users",
+                  action="create", conditions=dict(method=["POST"]))
+        m.connect("users", "/users",
+                  action="index", conditions=dict(method=["GET"]))
+        m.connect("formatted_users", "/users.{format}",
+                  action="index", conditions=dict(method=["GET"]))
+        m.connect("new_user", "/users/new",
+                  action="new", conditions=dict(method=["GET"]))
+        m.connect("formatted_new_user", "/users/new.{format}",
+                  action="new", conditions=dict(method=["GET"]))
+        m.connect("update_user", "/users/{id}",
+                  action="update", conditions=dict(method=["PUT"]))
+        m.connect("delete_user", "/users/{id}",
+                  action="delete", conditions=dict(method=["DELETE"]))
+        m.connect("edit_user", "/users/{id}/edit",
+                  action="edit", conditions=dict(method=["GET"]))
+        m.connect("formatted_edit_user",
+                  "/users/{id}.{format}/edit",
+                  action="edit", conditions=dict(method=["GET"]))
+        m.connect("user", "/users/{id}",
+                  action="show", conditions=dict(method=["GET"]))
+        m.connect("formatted_user", "/users/{id}.{format}",
+                  action="show", conditions=dict(method=["GET"]))
+
+        #EXTRAS USER ROUTES
+        m.connect("user_perm", "/users_perm/{id}",
+                  action="update_perm", conditions=dict(method=["PUT"]))
 
     #ADMIN USERS REST ROUTES
     rmap.resource('users_group', 'users_groups',
                   controller='admin/users_groups', path_prefix='/_admin')
 
     #ADMIN GROUP REST ROUTES
-    rmap.resource('group', 'groups', controller='admin/groups',
-                  path_prefix='/_admin')
+    rmap.resource('group', 'groups',
+                  controller='admin/groups', path_prefix='/_admin')
 
     #ADMIN PERMISSIONS REST ROUTES
     rmap.resource('permission', 'permissions',
@@ -124,6 +150,7 @@ def make_map(config):
     rmap.connect('ldap_settings', '/_admin/ldap',
                  controller='admin/ldap_settings', action='ldap_settings',
                  conditions=dict(method=["POST"]))
+
     rmap.connect('ldap_home', '/_admin/ldap',
                  controller='admin/ldap_settings')
 
