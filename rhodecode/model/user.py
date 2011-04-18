@@ -39,10 +39,14 @@ from rhodecode.lib import generate_api_key
 
 log = logging.getLogger(__name__)
 
+
+PERM_ = ''
+
 PERM_WEIGHTS = {'repository.none':0,
                 'repository.read':1,
                 'repository.write':3,
                 'repository.admin':3}
+
 
 class UserModel(BaseModel):
 
@@ -260,9 +264,9 @@ class UserModel(BaseModel):
         user.permissions['repositories'] = {}
         user.permissions['global'] = set()
 
-        #===========================================================================
+        #======================================================================
         # fetch default permissions
-        #===========================================================================
+        #======================================================================
         default_user = self.get_by_username('default', cache=True)
 
         default_perms = self.sa.query(RepoToPerm, Repository, Permission)\
@@ -271,9 +275,9 @@ class UserModel(BaseModel):
             .filter(RepoToPerm.user == default_user).all()
 
         if user.is_admin:
-            #=======================================================================
+            #==================================================================
             # #admin have all default rights set to admin
-            #=======================================================================
+            #==================================================================
             user.permissions['global'].add('hg.admin')
 
             for perm in default_perms:
@@ -281,14 +285,13 @@ class UserModel(BaseModel):
                 user.permissions['repositories'][perm.RepoToPerm.repository.repo_name] = p
 
         else:
-            #=======================================================================
+            #==================================================================
             # set default permissions
-            #=======================================================================
+            #==================================================================
 
             #default global
             default_global_perms = self.sa.query(UserToPerm)\
-                .filter(UserToPerm.user == self.sa.query(User)\
-                       .filter(User.username == 'default').one())
+                .filter(UserToPerm.user == User.by_username('default'))
 
             for perm in default_global_perms:
                 user.permissions['global'].add(perm.permission.permission_name)
@@ -306,15 +309,23 @@ class UserModel(BaseModel):
 
                 user.permissions['repositories'][perm.RepoToPerm.repository.repo_name] = p
 
-            #=======================================================================
+            #==================================================================
             # overwrite default with user permissions if any
-            #=======================================================================
-            user_perms = self.sa.query(RepoToPerm, Permission, Repository)\
+            #==================================================================
+
+            user_perms = self.sa.query(UserToPerm)\
+                        .filter(UserToPerm.user ==
+                                User.get(user.user_id)).all()
+
+            for perm in user_perms:
+                user.permissions['global'].add(perm.permission.permission_name)
+
+            user_repo_perms = self.sa.query(RepoToPerm, Permission, Repository)\
                 .join((Repository, RepoToPerm.repository_id == Repository.repo_id))\
                 .join((Permission, RepoToPerm.permission_id == Permission.permission_id))\
                 .filter(RepoToPerm.user_id == user.user_id).all()
 
-            for perm in user_perms:
+            for perm in user_repo_perms:
                 if perm.Repository.user_id == user.user_id:#set admin if owner
                     p = 'repository.admin'
                 else:
