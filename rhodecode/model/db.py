@@ -189,6 +189,20 @@ class UsersGroup(Base):
 
     members = relationship('UsersGroupMember', cascade="all, delete, delete-orphan", lazy="joined")
 
+
+    @classmethod
+    def get_by_group_name(cls, group_name, cache=False, case_insensitive=False):
+        if case_insensitive:
+            gr = Session.query(cls)\
+            .filter(cls.users_group_name.ilike(group_name))
+        else:
+            gr = Session.query(UsersGroup)\
+                .filter(UsersGroup.users_group_name == group_name)
+        if cache:
+            gr = gr.options(FromCache("sql_cache_short",
+                                          "get_user_%s" % group_name))
+        return gr.scalar()
+
 class UsersGroupMember(Base):
     __tablename__ = 'users_groups_members'
     __table_args__ = {'useexisting':True}
@@ -226,7 +240,7 @@ class Repository(Base):
     fork = relationship('Repository', remote_side=repo_id)
     group = relationship('Group')
     repo_to_perm = relationship('RepoToPerm', cascade='all', order_by='RepoToPerm.repo_to_perm_id')
-    users_group_to_perm = relationship('UsersGroupToPerm', cascade='all')
+    users_group_to_perm = relationship('UsersGroupRepoToPerm', cascade='all')
     stats = relationship('Statistics', cascade='all', uselist=False)
 
     followers = relationship('UserFollowing', primaryjoin='UserFollowing.follows_repo_id==Repository.repo_id', cascade='all')
@@ -377,8 +391,8 @@ class UserToPerm(Base):
         except:
             Session.rollback()
 
-class UsersGroupToPerm(Base):
-    __tablename__ = 'users_group_to_perm'
+class UsersGroupRepoToPerm(Base):
+    __tablename__ = 'users_group_repo_to_perm'
     __table_args__ = (UniqueConstraint('users_group_id', 'permission_id'), {'useexisting':True})
     users_group_to_perm_id = Column("users_group_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     users_group_id = Column("users_group_id", Integer(), ForeignKey('users_groups.users_group_id'), nullable=False, unique=None, default=None)
@@ -388,6 +402,55 @@ class UsersGroupToPerm(Base):
     users_group = relationship('UsersGroup')
     permission = relationship('Permission')
     repository = relationship('Repository')
+
+
+class UsersGroupToPerm(Base):
+    __tablename__ = 'users_group_to_perm'
+    users_group_to_perm_id = Column("users_group_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
+    users_group_id = Column("users_group_id", Integer(), ForeignKey('users_groups.users_group_id'), nullable=False, unique=None, default=None)
+    permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable=False, unique=None, default=None)
+
+    users_group = relationship('UsersGroup')
+    permission = relationship('Permission')
+
+
+    @classmethod
+    def has_perm(cls, users_group_id, perm):
+        if not isinstance(perm, Permission):
+            raise Exception('perm needs to be an instance of Permission class')
+
+        return Session.query(cls).filter(cls.users_group_id ==
+                                         users_group_id)\
+                                         .filter(cls.permission == perm)\
+                                         .scalar() is not None
+
+    @classmethod
+    def grant_perm(cls, users_group_id, perm):
+        if not isinstance(perm, Permission):
+            raise Exception('perm needs to be an instance of Permission class')
+
+        new = cls()
+        new.users_group_id = users_group_id
+        new.permission = perm
+        try:
+            Session.add(new)
+            Session.commit()
+        except:
+            Session.rollback()
+
+
+    @classmethod
+    def revoke_perm(cls, users_group_id, perm):
+        if not isinstance(perm, Permission):
+            raise Exception('perm needs to be an instance of Permission class')
+
+        try:
+            Session.query(cls).filter(cls.users_group_id == users_group_id)\
+                .filter(cls.permission == perm).delete()
+            Session.commit()
+        except:
+            Session.rollback()
+
 
 class GroupToPerm(Base):
     __tablename__ = 'group_to_perm'

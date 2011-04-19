@@ -66,8 +66,10 @@ class PermissionModel(BaseModel):
 
     def update(self, form_result):
         perm_user = self.sa.query(User)\
-                .filter(User.username == form_result['perm_user_name']).scalar()
-        u2p = self.sa.query(UserToPerm).filter(UserToPerm.user == perm_user).all()
+                .filter(User.username ==
+                        form_result['perm_user_name']).scalar()
+        u2p = self.sa.query(UserToPerm).filter(UserToPerm.user ==
+                                               perm_user).all()
         if len(u2p) != 3:
             raise Exception('Defined: %s should be 3  permissions for default'
                             ' user. This should not happen please verify'
@@ -103,7 +105,6 @@ class PermissionModel(BaseModel):
             if perm_user.username == 'default':
                 perm_user.active = bool(form_result['anonymous'])
                 self.sa.add(perm_user)
-
 
             self.sa.commit()
         except (DatabaseError,):

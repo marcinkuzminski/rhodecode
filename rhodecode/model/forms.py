@@ -37,7 +37,6 @@ from rhodecode.lib.exceptions import LdapImportError
 from rhodecode.model import meta
 from rhodecode.model.user import UserModel
 from rhodecode.model.repo import RepoModel
-from rhodecode.model.users_group import UsersGroupModel
 from rhodecode.model.db import User, UsersGroup
 from rhodecode import BACKENDS
 
@@ -47,9 +46,9 @@ log = logging.getLogger(__name__)
 class State_obj(object):
     _ = staticmethod(_)
 
-#===============================================================================
+#==============================================================================
 # VALIDATORS
-#===============================================================================
+#==============================================================================
 class ValidAuthToken(formencode.validators.FancyValidator):
     messages = {'invalid_token':_('Token mismatch')}
 
@@ -73,21 +72,17 @@ def ValidUsername(edit, old_data):
             if old_un != value or not edit:
                 if UserModel().get_by_username(value, cache=False,
                                                case_insensitive=True):
-                    raise formencode.Invalid(_('This username already exists') ,
-                                             value, state)
-
+                    raise formencode.Invalid(_('This username already '
+                                               'exists') , value, state)
 
             if re.match(r'^[a-zA-Z0-9]{1}[a-zA-Z0-9\-\_\.]+$', value) is None:
                 raise formencode.Invalid(_('Username may only contain '
-                                           'alphanumeric characters underscores, '
-                                           'periods or dashes and must begin with '
-                                           'alphanumeric character'),
-                                      value, state)
-
-
+                                           'alphanumeric characters '
+                                           'underscores, periods or dashes '
+                                           'and must begin with alphanumeric '
+                                           'character'), value, state)
 
     return _ValidUsername
-
 
 
 def ValidUsersGroup(edit, old_data):
@@ -100,22 +95,23 @@ def ValidUsersGroup(edit, old_data):
             #check if group is unique
             old_ugname = None
             if edit:
-                old_ugname = UsersGroupModel()\
-                    .get(old_data.get('users_group_id')).users_group_name
+                old_ugname = UsersGroup.get(
+                            old_data.get('users_group_id')).users_group_name
 
             if old_ugname != value or not edit:
-                if UsersGroupModel().get_by_groupname(value, cache=False,
+                if UsersGroup.get_by_group_name(value, cache=False,
                                                case_insensitive=True):
-                    raise formencode.Invalid(_('This users group already exists') ,
-                                             value, state)
+                    raise formencode.Invalid(_('This users group '
+                                               'already exists') , value,
+                                             state)
 
 
             if re.match(r'^[a-zA-Z0-9]{1}[a-zA-Z0-9\-\_\.]+$', value) is None:
                 raise formencode.Invalid(_('Group name may only contain '
-                                           'alphanumeric characters underscores, '
-                                           'periods or dashes and must begin with '
-                                           'alphanumeric character'),
-                                      value, state)
+                                           'alphanumeric characters '
+                                           'underscores, periods or dashes '
+                                           'and must begin with alphanumeric '
+                                           'character'), value, state)
 
     return _ValidUsersGroup
 

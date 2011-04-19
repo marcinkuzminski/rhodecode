@@ -19,6 +19,7 @@ Session = scoped_session(
                 )
           )
 
+
 class BaseModel(object):
     """Base Model for all classess
 

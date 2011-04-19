@@ -135,8 +135,35 @@ def make_map(config):
                   action="update_perm", conditions=dict(method=["PUT"]))
 
     #ADMIN USERS REST ROUTES
-    rmap.resource('users_group', 'users_groups',
-                  controller='admin/users_groups', path_prefix='/_admin')
+    with rmap.submapper(path_prefix='/_admin',
+                        controller='admin/users_groups') as m:
+        m.connect("users_groups", "/users_groups",
+                  action="create", conditions=dict(method=["POST"]))
+        m.connect("users_groups", "/users_groups",
+                  action="index", conditions=dict(method=["GET"]))
+        m.connect("formatted_users_groups", "/users_groups.{format}",
+                  action="index", conditions=dict(method=["GET"]))
+        m.connect("new_users_group", "/users_groups/new",
+                  action="new", conditions=dict(method=["GET"]))
+        m.connect("formatted_new_users_group", "/users_groups/new.{format}",
+                  action="new", conditions=dict(method=["GET"]))
+        m.connect("update_users_group", "/users_groups/{id}",
+                  action="update", conditions=dict(method=["PUT"]))
+        m.connect("delete_users_group", "/users_groups/{id}",
+                  action="delete", conditions=dict(method=["DELETE"]))
+        m.connect("edit_users_group", "/users_groups/{id}/edit",
+                  action="edit", conditions=dict(method=["GET"]))
+        m.connect("formatted_edit_users_group",
+                  "/users_groups/{id}.{format}/edit",
+                  action="edit", conditions=dict(method=["GET"]))
+        m.connect("users_group", "/users_groups/{id}",
+                  action="show", conditions=dict(method=["GET"]))
+        m.connect("formatted_users_group", "/users_groups/{id}.{format}",
+                  action="show", conditions=dict(method=["GET"]))
+
+        #EXTRAS USER ROUTES
+        m.connect("users_group_perm", "/users_groups_perm/{id}",
+                  action="update_perm", conditions=dict(method=["PUT"]))
 
     #ADMIN GROUP REST ROUTES
     rmap.resource('group', 'groups',

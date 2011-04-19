@@ -47,15 +47,18 @@ from rhodecode.model import meta
 
 log = logging.getLogger(__name__)
 
+
 def init_model(engine):
-    """Initializes db session, bind the engine with the metadata,
-    Call this before using any of the tables or classes in the model, preferably
-    once in application start
+    """
+    Initializes db session, bind the engine with the metadata,
+    Call this before using any of the tables or classes in the model,
+    preferably once in application start
 
     :param engine: engine to bind to
     """
     log.info("initializing db for %s", engine)
     meta.Base.metadata.bind = engine
+
 
 class BaseModel(object):
     """Base Model for all RhodeCode models, it adds sql alchemy session

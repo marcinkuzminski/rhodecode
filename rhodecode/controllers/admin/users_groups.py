@@ -36,9 +36,8 @@ from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator
 from rhodecode.lib.base import BaseController, render
 
-from rhodecode.model.db import User, UsersGroup
+from rhodecode.model.db import User, UsersGroup, Permission, UsersGroupToPerm
 from rhodecode.model.forms import UserForm, UsersGroupForm
-from rhodecode.model.user import UserModel
 from rhodecode.model.users_group import UsersGroupModel
 
 log = logging.getLogger(__name__)
@@ -123,10 +122,16 @@ class UsersGroupsController(BaseController):
                     category='success')
             #action_logger(self.rhodecode_user, 'new_user', '', '', self.sa)
         except formencode.Invalid, errors:
+            e = errors.error_dict or {}
+
+            perm = Permission.get_by_key('hg.create.repository')
+            e.update({'create_repo_perm':
+                         UsersGroupToPerm.has_perm(id, perm)})
+
             return htmlfill.render(
                 render('admin/users_groups/users_group_edit.html'),
                 defaults=errors.value,
-                errors=errors.error_dict or {},
+                errors=e,
                 prefix_error=False,
                 encoding="UTF-8")
         except Exception:
@@ -171,10 +176,38 @@ class UsersGroupsController(BaseController):
         c.available_members = [(x.user_id, x.username) for x in
                                self.sa.query(User).all()]
         defaults = c.users_group.get_dict()
-
+        perm = Permission.get_by_key('hg.create.repository')
+        defaults.update({'create_repo_perm':
+                         UsersGroupToPerm.has_perm(id, perm)})
         return htmlfill.render(
             render('admin/users_groups/users_group_edit.html'),
             defaults=defaults,
             encoding="UTF-8",
             force_defaults=False
         )
+
+    def update_perm(self, id):
+        """PUT /users_perm/id: Update an existing item"""
+        # url('users_group_perm', id=ID, method='put')
+
+        grant_perm = request.POST.get('create_repo_perm', False)
+
+        if grant_perm:
+            perm = Permission.get_by_key('hg.create.none')
+            UsersGroupToPerm.revoke_perm(id, perm)
+
+            perm = Permission.get_by_key('hg.create.repository')
+            UsersGroupToPerm.grant_perm(id, perm)
+            h.flash(_("Granted 'repository create' permission to user"),
+                    category='success')
+
+        else:
+            perm = Permission.get_by_key('hg.create.repository')
+            UsersGroupToPerm.revoke_perm(id, perm)
+
+            perm = Permission.get_by_key('hg.create.none')
+            UsersGroupToPerm.grant_perm(id, perm)
+            h.flash(_("Revoked 'repository create' permission to user"),
+                    category='success')
+
+        return redirect(url('edit_users_group', id=id))

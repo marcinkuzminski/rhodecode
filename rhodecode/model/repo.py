@@ -36,12 +36,11 @@ from vcs.backends import get_backend
 from rhodecode.model import BaseModel
 from rhodecode.model.caching_query import FromCache
 from rhodecode.model.db import Repository, RepoToPerm, User, Permission, \
-    Statistics, UsersGroup, UsersGroupToPerm, RhodeCodeUi
+    Statistics, UsersGroup, UsersGroupRepoToPerm, RhodeCodeUi
 from rhodecode.model.user import UserModel
-from rhodecode.model.users_group import UsersGroupMember, UsersGroupModel
-
 
 log = logging.getLogger(__name__)
+
 
 class RepoModel(BaseModel):
 
@@ -62,7 +61,6 @@ class RepoModel(BaseModel):
                                           "get_repo_%s" % repo_id))
         return repo.scalar()
 
-
     def get_by_repo_name(self, repo_name, cache=False):
         repo = self.sa.query(Repository)\
             .filter(Repository.repo_name == repo_name)
@@ -71,7 +69,6 @@ class RepoModel(BaseModel):
             repo = repo.options(FromCache("sql_cache_short",
                                           "get_repo_%s" % repo_name))
         return repo.scalar()
-
 
     def get_full(self, repo_name, cache=False, invalidate=False):
         repo = self.sa.query(Repository)\
@@ -95,7 +92,6 @@ class RepoModel(BaseModel):
                 make_transient(attr)
         return ret
 
-
     def get_users_js(self):
 
         users = self.sa.query(User).filter(User.active == True).all()
@@ -104,7 +100,6 @@ class RepoModel(BaseModel):
                                                     u.lastname, u.username)
                                         for u in users])
         return users_array
-
 
     def get_users_groups_js(self):
         users_groups = self.sa.query(UsersGroup)\
@@ -122,29 +117,30 @@ class RepoModel(BaseModel):
         try:
             cur_repo = self.get_by_repo_name(repo_name, cache=False)
             user_model = UserModel(self.sa)
-            users_group_model = UsersGroupModel(self.sa)
 
             #update permissions
             for member, perm, member_type in form_data['perms_updates']:
                 if member_type == 'user':
                     r2p = self.sa.query(RepoToPerm)\
-                            .filter(RepoToPerm.user == user_model.get_by_username(member))\
+                            .filter(RepoToPerm.user == user_model.
+                                    get_by_username(member))\
                             .filter(RepoToPerm.repository == cur_repo)\
                             .one()
 
                     r2p.permission = self.sa.query(Permission)\
-                                        .filter(Permission.permission_name == perm)\
-                                        .scalar()
+                                        .filter(Permission.permission_name ==
+                                                perm).scalar()
                     self.sa.add(r2p)
                 else:
-                    g2p = self.sa.query(UsersGroupToPerm)\
-                            .filter(UsersGroupToPerm.users_group == users_group_model.get_by_groupname(member))\
-                            .filter(UsersGroupToPerm.repository == cur_repo)\
-                            .one()
+                    g2p = self.sa.query(UsersGroupRepoToPerm)\
+                            .filter(UsersGroupRepoToPerm.users_group ==
+                                    UsersGroup.get_by_group_name(member))\
+                            .filter(UsersGroupRepoToPerm.repository ==
+                                    cur_repo).one()
 
                     g2p.permission = self.sa.query(Permission)\
-                                        .filter(Permission.permission_name == perm)\
-                                        .scalar()
+                                        .filter(Permission.permission_name ==
+                                                perm).scalar()
                     self.sa.add(g2p)
 
             #set new permissions
@@ -155,17 +151,19 @@ class RepoModel(BaseModel):
                     r2p.user = user_model.get_by_username(member)
 
                     r2p.permission = self.sa.query(Permission)\
-                                        .filter(Permission.permission_name == perm)\
-                                        .scalar()
+                                        .filter(Permission.
+                                                permission_name == perm)\
+                                                .scalar()
                     self.sa.add(r2p)
                 else:
-                    g2p = UsersGroupToPerm()
+                    g2p = UsersGroupRepoToPerm()
                     g2p.repository = cur_repo
-                    g2p.users_group = users_group_model.get_by_groupname(member)
+                    g2p.users_group = UsersGroup.get_by_group_name(member)
 
                     g2p.permission = self.sa.query(Permission)\
-                                        .filter(Permission.permission_name == perm)\
-                                        .scalar()
+                                        .filter(Permission.
+                                                permission_name == perm)\
+                                                .scalar()
                     self.sa.add(g2p)
 
             #update current repo
@@ -276,10 +274,10 @@ class RepoModel(BaseModel):
 
     def delete_perm_users_group(self, form_data, repo_name):
         try:
-            self.sa.query(UsersGroupToPerm)\
-                .filter(UsersGroupToPerm.repository \
+            self.sa.query(UsersGroupRepoToPerm)\
+                .filter(UsersGroupRepoToPerm.repository \
                         == self.get_by_repo_name(repo_name))\
-                .filter(UsersGroupToPerm.users_group_id \
+                .filter(UsersGroupRepoToPerm.users_group_id \
                         == form_data['users_group_id']).delete()
             self.sa.commit()
         except:
@@ -297,7 +295,6 @@ class RepoModel(BaseModel):
             log.error(traceback.format_exc())
             self.sa.rollback()
             raise
-
 
     def __create_repo(self, repo_name, alias, clone_uri=False):
         """

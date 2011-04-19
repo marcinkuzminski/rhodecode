@@ -43,11 +43,16 @@ def upgrade(migrate_engine):
     UsersGroupMember().__table__.create()
 
     #==========================================================================
+    # Add table `users_group_repo_to_perm`
+    #==========================================================================
+    from rhodecode.model.db import UsersGroupRepoToPerm
+    UsersGroupRepoToPerm().__table__.create()
+
+    #==========================================================================
     # Add table `users_group_to_perm`
     #==========================================================================
     from rhodecode.model.db import UsersGroupToPerm
     UsersGroupToPerm().__table__.create()
-
 
     #==========================================================================
     # Upgrade of `users` table

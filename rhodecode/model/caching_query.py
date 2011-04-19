@@ -18,11 +18,13 @@ The rest of what's here are standard SQLAlchemy and
 Beaker constructs.
 
 """
+import beaker
 from beaker.exceptions import BeakerException
+
 from sqlalchemy.orm.interfaces import MapperOption
 from sqlalchemy.orm.query import Query
 from sqlalchemy.sql import visitors
-import beaker
+
 
 class CachingQuery(Query):
     """A Query subclass which optionally loads full results from a Beaker
@@ -74,7 +76,8 @@ class CachingQuery(Query):
 
         """
         if hasattr(self, '_cache_parameters'):
-            return self.get_value(createfunc=lambda: list(Query.__iter__(self)))
+            return self.get_value(createfunc=lambda:
+                                  list(Query.__iter__(self)))
         else:
             return Query.__iter__(self)
 
@@ -103,10 +106,12 @@ class CachingQuery(Query):
         cache, cache_key = _get_cache_parameters(self)
         cache.put(cache_key, value)
 
+
 def query_callable(manager):
     def query(*arg, **kw):
         return CachingQuery(manager, *arg, **kw)
     return query
+
 
 def get_cache_region(name, region):
     if region not in beaker.cache.cache_regions:
@@ -115,6 +120,7 @@ def get_cache_region(name, region):
     kw = beaker.cache.cache_regions[region]
     return beaker.cache.Cache._get_cache(name, kw)
 
+
 def _get_cache_parameters(query):
     """For a query with cache_region and cache_namespace configured,
     return the correspoinding Cache instance and cache key, based
@@ -122,7 +128,8 @@ def _get_cache_parameters(query):
 
     """
     if not hasattr(query, '_cache_parameters'):
-        raise ValueError("This Query does not have caching parameters configured.")
+        raise ValueError("This Query does not have caching "
+                         "parameters configured.")
 
     region, namespace, cache_key = query._cache_parameters
 
@@ -142,6 +149,7 @@ def _get_cache_parameters(query):
 
     return cache, cache_key
 
+
 def _namespace_from_query(namespace, query):
     # cache namespace - the token handed in by the
     # option + class we're querying against
@@ -152,6 +160,7 @@ def _namespace_from_query(namespace, query):
 
     return namespace
 
+
 def _set_cache_parameters(query, region, namespace, cache_key):
 
     if hasattr(query, '_cache_parameters'):
@@ -161,6 +170,7 @@ def _set_cache_parameters(query, region, namespace, cache_key):
                         (region, namespace)
                     )
     query._cache_parameters = region, namespace, cache_key
+
 
 class FromCache(MapperOption):
     """Specifies that a Query should load results from a cache."""
@@ -191,7 +201,9 @@ class FromCache(MapperOption):
     def process_query(self, query):
         """Process a Query during normal loading operation."""
 
-        _set_cache_parameters(query, self.region, self.namespace, self.cache_key)
+        _set_cache_parameters(query, self.region, self.namespace,
+                              self.cache_key)
+
 
 class RelationshipCache(MapperOption):
     """Specifies that a Query as called within a "lazy load"
@@ -217,7 +229,7 @@ class RelationshipCache(MapperOption):
         self.region = region
         self.namespace = namespace
         self._relationship_options = {
-            (attribute.property.parent.class_, attribute.property.key) : self
+            (attribute.property.parent.class_, attribute.property.key): self
         }
 
     def process_query_conditionally(self, query):
@@ -232,7 +244,8 @@ class RelationshipCache(MapperOption):
 
             for cls in mapper.class_.__mro__:
                 if (cls, key) in self._relationship_options:
-                    relationship_option = self._relationship_options[(cls, key)]
+                    relationship_option = \
+                        self._relationship_options[(cls, key)]
                     _set_cache_parameters(
                             query,
                             relationship_option.region,
@@ -261,6 +274,7 @@ def _params_from_query(query):
 
     """
     v = []
+
     def visit_bindparam(bind):
         value = query._params.get(bind.key, bind.value)
 
@@ -272,5 +286,5 @@ def _params_from_query(query):
 
         v.append(value)
     if query._criterion is not None:
-        visitors.traverse(query._criterion, {}, {'bindparam':visit_bindparam})
+        visitors.traverse(query._criterion, {}, {'bindparam': visit_bindparam})
     return v

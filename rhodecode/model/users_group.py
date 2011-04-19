@@ -32,8 +32,6 @@ from rhodecode.model import BaseModel
 from rhodecode.model.caching_query import FromCache
 from rhodecode.model.db import UsersGroup, UsersGroupMember
 
-from sqlalchemy.exc import DatabaseError
-
 log = logging.getLogger(__name__)
 
 
@@ -43,23 +41,8 @@ class UsersGroupModel(BaseModel):
         users_group = self.sa.query(UsersGroup)
         if cache:
             users_group = users_group.options(FromCache("sql_cache_short",
-                                          "get_users_group_%s" % users_group_id))
+                                    "get_users_group_%s" % users_group_id))
         return users_group.get(users_group_id)
-
-
-    def get_by_groupname(self, users_group_name, cache=False,
-                         case_insensitive=False):
-
-        if case_insensitive:
-            user = self.sa.query(UsersGroup)\
-            .filter(UsersGroup.users_group_name.ilike(users_group_name))
-        else:
-            user = self.sa.query(UsersGroup)\
-                .filter(UsersGroup.users_group_name == users_group_name)
-        if cache:
-            user = user.options(FromCache("sql_cache_short",
-                                          "get_user_%s" % users_group_name))
-        return user.scalar()
 
     def create(self, form_data):
         try:
@@ -86,8 +69,9 @@ class UsersGroupModel(BaseModel):
                     members_list = []
                     if v:
                         for u_id in set(v):
-                            members_list.append(UsersGroupMember(users_group_id,
-                                                             u_id))
+                            members_list.append(UsersGroupMember(
+                                                            users_group_id,
+                                                            u_id))
                     setattr(users_group, 'members', members_list)
                 setattr(users_group, k, v)
 
