@@ -31,21 +31,20 @@ from pylons.i18n.translation import _
 from rhodecode.model import BaseModel
 from rhodecode.model.caching_query import FromCache
 from rhodecode.model.db import User, RepoToPerm, Repository, Permission, \
-    UserToPerm, UsersGroupToPerm, UsersGroupMember
-from rhodecode.lib.exceptions import DefaultUserException, UserOwnsReposException
+    UserToPerm, UsersGroupRepoToPerm, UsersGroupToPerm, UsersGroupMember
+from rhodecode.lib.exceptions import DefaultUserException, \
+    UserOwnsReposException
 
 from sqlalchemy.exc import DatabaseError
 from rhodecode.lib import generate_api_key
+from sqlalchemy.orm import joinedload
 
 log = logging.getLogger(__name__)
 
-
-PERM_ = ''
-
-PERM_WEIGHTS = {'repository.none':0,
-                'repository.read':1,
-                'repository.write':3,
-                'repository.admin':3}
+PERM_WEIGHTS = {'repository.none': 0,
+                'repository.read': 1,
+                'repository.write': 3,
+                'repository.admin': 3}
 
 
 class UserModel(BaseModel):
@@ -56,7 +55,6 @@ class UserModel(BaseModel):
             user = user.options(FromCache("sql_cache_short",
                                           "get_user_%s" % user_id))
         return user.get(user_id)
-
 
     def get_by_username(self, username, cache=False, case_insensitive=False):
 
@@ -69,7 +67,6 @@ class UserModel(BaseModel):
             user = user.options(FromCache("sql_cache_short",
                                           "get_user_%s" % username))
         return user.scalar()
-
 
     def get_by_api_key(self, api_key, cache=False):
 
@@ -108,7 +105,8 @@ class UserModel(BaseModel):
         if self.get_by_username(username, case_insensitive=True) is None:
             try:
                 new_user = User()
-                new_user.username = username.lower() # add ldap account always lowercase
+                # add ldap account always lowercase
+                new_user.username = username.lower()
                 new_user.password = get_crypt_password(password)
                 new_user.api_key = generate_api_key(username)
                 new_user.email = attrs['email']
@@ -116,7 +114,6 @@ class UserModel(BaseModel):
                 new_user.ldap_dn = user_dn
                 new_user.name = attrs['name']
                 new_user.lastname = attrs['lastname']
-
 
                 self.sa.add(new_user)
                 self.sa.commit()
@@ -220,7 +217,6 @@ class UserModel(BaseModel):
         from rhodecode.lib.celerylib import tasks, run_task
         run_task(tasks.reset_user_password, data['email'])
 
-
     def fill_data(self, auth_user, user_id=None, api_key=None):
         """
         Fetches auth_user by user_id,or api_key if present.
@@ -252,11 +248,11 @@ class UserModel(BaseModel):
 
         return auth_user
 
-
     def fill_perms(self, user):
-        """Fills user permission attribute with permissions taken from database
+        """
+        Fills user permission attribute with permissions taken from database
         works for permissions given for repositories, and for permissions that
-        as part of beeing group member
+        are granted to groups
 
         :param user: user instance to fill his perms
         """
@@ -270,8 +266,10 @@ class UserModel(BaseModel):
         default_user = self.get_by_username('default', cache=True)
 
         default_perms = self.sa.query(RepoToPerm, Repository, Permission)\
-            .join((Repository, RepoToPerm.repository_id == Repository.repo_id))\
-            .join((Permission, RepoToPerm.permission_id == Permission.permission_id))\
+            .join((Repository, RepoToPerm.repository_id ==
+                   Repository.repo_id))\
+            .join((Permission, RepoToPerm.permission_id ==
+                   Permission.permission_id))\
             .filter(RepoToPerm.user == default_user).all()
 
         if user.is_admin:
@@ -282,12 +280,14 @@ class UserModel(BaseModel):
 
             for perm in default_perms:
                 p = 'repository.admin'
-                user.permissions['repositories'][perm.RepoToPerm.repository.repo_name] = p
+                user.permissions['repositories'][perm.RepoToPerm.
+                                                 repository.repo_name] = p
 
         else:
             #==================================================================
             # set default permissions
             #==================================================================
+            uid = user.user_id
 
             #default global
             default_global_perms = self.sa.query(UserToPerm)\
@@ -298,56 +298,86 @@ class UserModel(BaseModel):
 
             #default for repositories
             for perm in default_perms:
-                if perm.Repository.private and not perm.Repository.user_id == user.user_id:
+                if perm.Repository.private and not (perm.Repository.user_id ==
+                                                    uid):
                     #diself.sable defaults for private repos,
                     p = 'repository.none'
-                elif perm.Repository.user_id == user.user_id:
+                elif perm.Repository.user_id == uid:
                     #set admin if owner
                     p = 'repository.admin'
                 else:
                     p = perm.Permission.permission_name
 
-                user.permissions['repositories'][perm.RepoToPerm.repository.repo_name] = p
+                user.permissions['repositories'][perm.RepoToPerm.
+                                                 repository.repo_name] = p
 
             #==================================================================
             # overwrite default with user permissions if any
             #==================================================================
 
+            #user global
             user_perms = self.sa.query(UserToPerm)\
-                        .filter(UserToPerm.user ==
-                                User.get(user.user_id)).all()
+                    .options(joinedload(UserToPerm.permission))\
+                    .filter(UserToPerm.user_id == uid).all()
 
             for perm in user_perms:
-                user.permissions['global'].add(perm.permission.permission_name)
+                user.permissions['global'].add(perm.permission.
+                                               permission_name)
 
-            user_repo_perms = self.sa.query(RepoToPerm, Permission, Repository)\
-                .join((Repository, RepoToPerm.repository_id == Repository.repo_id))\
-                .join((Permission, RepoToPerm.permission_id == Permission.permission_id))\
-                .filter(RepoToPerm.user_id == user.user_id).all()
+            #user repositories
+            user_repo_perms = self.sa.query(RepoToPerm, Permission,
+                                            Repository)\
+                .join((Repository, RepoToPerm.repository_id ==
+                       Repository.repo_id))\
+                .join((Permission, RepoToPerm.permission_id ==
+                       Permission.permission_id))\
+                .filter(RepoToPerm.user_id == uid).all()
 
             for perm in user_repo_perms:
-                if perm.Repository.user_id == user.user_id:#set admin if owner
+                # set admin if owner
+                if perm.Repository.user_id == uid:
                     p = 'repository.admin'
                 else:
                     p = perm.Permission.permission_name
-                user.permissions['repositories'][perm.RepoToPerm.repository.repo_name] = p
+                user.permissions['repositories'][perm.RepoToPerm.
+                                                 repository.repo_name] = p
 
-
-            #=======================================================================
+            #==================================================================
             # check if user is part of groups for this repository and fill in
             # (or replace with higher) permissions
-            #=======================================================================
-            user_perms_from_users_groups = self.sa.query(UsersGroupToPerm, Permission, Repository,)\
-                .join((Repository, UsersGroupToPerm.repository_id == Repository.repo_id))\
-                .join((Permission, UsersGroupToPerm.permission_id == Permission.permission_id))\
-                .join((UsersGroupMember, UsersGroupToPerm.users_group_id == UsersGroupMember.users_group_id))\
-                .filter(UsersGroupMember.user_id == user.user_id).all()
+            #==================================================================
+
+            #users group global
+            user_perms_from_users_groups = self.sa.query(UsersGroupToPerm)\
+                .options(joinedload(UsersGroupToPerm.permission))\
+                .join((UsersGroupMember, UsersGroupToPerm.users_group_id ==
+                       UsersGroupMember.users_group_id))\
+                .filter(UsersGroupMember.user_id == uid).all()
 
             for perm in user_perms_from_users_groups:
+                user.permissions['global'].add(perm.permission.permission_name)
+
+            #users group repositories
+            user_repo_perms_from_users_groups = self.sa.query(
+                                                UsersGroupRepoToPerm,
+                                                Permission, Repository,)\
+                .join((Repository, UsersGroupRepoToPerm.repository_id ==
+                       Repository.repo_id))\
+                .join((Permission, UsersGroupRepoToPerm.permission_id ==
+                       Permission.permission_id))\
+                .join((UsersGroupMember, UsersGroupRepoToPerm.users_group_id ==
+                       UsersGroupMember.users_group_id))\
+                .filter(UsersGroupMember.user_id == uid).all()
+
+            for perm in user_repo_perms_from_users_groups:
                 p = perm.Permission.permission_name
-                cur_perm = user.permissions['repositories'][perm.UsersGroupToPerm.repository.repo_name]
-                #overwrite permission only if it's greater than permission given from other sources
+                cur_perm = user.permissions['repositories'][perm.
+                                                    UsersGroupRepoToPerm.
+                                                    repository.repo_name]
+                #overwrite permission only if it's greater than permission
+                # given from other sources
                 if PERM_WEIGHTS[p] > PERM_WEIGHTS[cur_perm]:
-                    user.permissions['repositories'][perm.UsersGroupToPerm.repository.repo_name] = p
+                    user.permissions['repositories'][perm.UsersGroupRepoToPerm.
+                                                     repository.repo_name] = p
 
         return user
