@@ -291,7 +291,7 @@ class UserModel(BaseModel):
 
             #default global
             default_global_perms = self.sa.query(UserToPerm)\
-                .filter(UserToPerm.user == User.by_username('default'))
+                .filter(UserToPerm.user == default_user)
 
             for perm in default_global_perms:
                 user.permissions['global'].add(perm.permission.permission_name)
