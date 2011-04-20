@@ -21,7 +21,7 @@ requirements = [
         "celery>=2.2.5",
         "babel",
         "python-dateutil>=1.5.0,<2.0.0",
-        "dulwich>=0.7.0"
+        "dulwich>=0.7.1"
     ]
 
 classifiers = ['Development Status :: 4 - Beta',
