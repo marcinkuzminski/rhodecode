@@ -88,7 +88,7 @@ class ChangesetController(BaseRepoController):
         c.sum_removed = 0
         c.lines_added = 0
         c.lines_deleted = 0
-        c.cut_off = False # defines if cut off limit is reached
+        c.cut_off = False  # defines if cut off limit is reached
 
         # Iterate over ranges (default changeset view is always one changeset)
         for changeset in c.cs_ranges:
@@ -161,7 +161,6 @@ class ChangesetController(BaseRepoController):
                                                        'raw diff instead'))
                             else:
                                 diff = d.as_html()
-
 
                             if diff:
                                 c.sum_removed += len(diff)
