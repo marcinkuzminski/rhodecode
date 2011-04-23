@@ -88,8 +88,9 @@ class ChangesetController(BaseRepoController):
         c.sum_removed = 0
         c.lines_added = 0
         c.lines_deleted = 0
-        c.cut_off = False
+        c.cut_off = False # defines if cut off limit is reached
 
+        # Iterate over ranges (default changeset view is always one changeset)
         for changeset in c.cs_ranges:
             c.changes[changeset.raw_id] = []
             try:
@@ -101,17 +102,23 @@ class ChangesetController(BaseRepoController):
             # ADDED FILES
             #==================================================================
             for node in changeset.added:
+
                 filenode_old = FileNode(node.path, '', EmptyChangeset())
                 if filenode_old.is_binary or node.is_binary:
                     diff = wrap_to_table(_('binary file'))
                     st = (0, 0)
                 else:
+                    # in this case node.size is good parameter since those are
+                    # added nodes and their size defines how many changes were
+                    # made
                     c.sum_added += node.size
                     if c.sum_added < self.cut_off_limit:
                         f_gitdiff = differ.get_gitdiff(filenode_old, node)
                         d = differ.DiffProcessor(f_gitdiff, format='gitdiff')
-                        diff = d.as_html()
+
                         st = d.stat()
+                        diff = d.as_html()
+
                     else:
                         diff = wrap_to_table(_('Changeset is to big and '
                                                'was cut off, see raw '
@@ -134,6 +141,7 @@ class ChangesetController(BaseRepoController):
                     try:
                         filenode_old = changeset_parent.get_node(node.path)
                     except ChangesetError:
+                        log.warning('Unable to fetch parent node for diff')
                         filenode_old = FileNode(node.path, '',
                                                 EmptyChangeset())
 
@@ -146,8 +154,15 @@ class ChangesetController(BaseRepoController):
                             f_gitdiff = differ.get_gitdiff(filenode_old, node)
                             d = differ.DiffProcessor(f_gitdiff,
                                                      format='gitdiff')
-                            diff = d.as_html()
                             st = d.stat()
+                            if (st[0] + st[1]) * 256 > self.cut_off_limit:
+                                diff = wrap_to_table(_('Diff is to big '
+                                                       'and was cut off, see '
+                                                       'raw diff instead'))
+                            else:
+                                diff = d.as_html()
+
+
                             if diff:
                                 c.sum_removed += len(diff)
                         else:
