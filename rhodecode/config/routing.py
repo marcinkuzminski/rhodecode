@@ -261,7 +261,9 @@ def make_map(config):
                 controller='feed', action='atom',
                 conditions=dict(function=check_repo))
 
-    #REPOSITORY ROUTES
+    #==========================================================================
+    # REPOSITORY ROUTES
+    #==========================================================================
     rmap.connect('changeset_home', '/{repo_name:.*}/changeset/{revision}',
                 controller='changeset', revision='tip',
                 conditions=dict(function=check_repo))
@@ -336,4 +338,7 @@ def make_map(config):
                 controller='settings', action='fork',
                 conditions=dict(function=check_repo))
 
+    rmap.connect('repo_followers_home', '/{repo_name:.*}/followers',
+                 controller='followers', action='followers',
+                 conditions=dict(function=check_repo))
     return rmap

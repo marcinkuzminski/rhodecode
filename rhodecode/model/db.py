@@ -487,11 +487,18 @@ class UserFollowing(Base):
     user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None, default=None)
     follows_repo_id = Column("follows_repository_id", Integer(), ForeignKey('repositories.repo_id'), nullable=True, unique=None, default=None)
     follows_user_id = Column("follows_user_id", Integer(), ForeignKey('users.user_id'), nullable=True, unique=None, default=None)
+    follows_from = Column('follows_from', DateTime(timezone=False), nullable=True, unique=None, default=datetime.datetime.now)
 
     user = relationship('User', primaryjoin='User.user_id==UserFollowing.user_id')
 
     follows_user = relationship('User', primaryjoin='User.user_id==UserFollowing.follows_user_id')
     follows_repository = relationship('Repository', order_by='Repository.repo_name')
+
+
+
+    @classmethod
+    def get_repo_followers(cls, repo_id):
+        return Session.query(cls).filter(cls.follows_repo_id == repo_id)
 
 class CacheInvalidation(Base):
     __tablename__ = 'cache_invalidation'
