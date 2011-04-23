@@ -30,13 +30,15 @@ import traceback
 
 from dulwich import server as dulserver
 
+
 class SimpleGitUploadPackHandler(dulserver.UploadPackHandler):
 
     def handle(self):
         write = lambda x: self.proto.write_sideband(1, x)
 
-        graph_walker = dulserver.ProtocolGraphWalker(self, self.repo.object_store,
-            self.repo.get_peeled)
+        graph_walker = dulserver.ProtocolGraphWalker(self,
+                                                     self.repo.object_store,
+                                                     self.repo.get_peeled)
         objects_iter = self.repo.fetch_objects(
           graph_walker.determine_wants, graph_walker, self.progress,
           get_tagged=self.get_tagged)
@@ -46,8 +48,8 @@ class SimpleGitUploadPackHandler(dulserver.UploadPackHandler):
             return
 
         self.progress("counting objects: %d, done.\n" % len(objects_iter))
-        dulserver.write_pack_data(dulserver.ProtocolFile(None, write), objects_iter,
-                        len(objects_iter))
+        dulserver.write_pack_data(dulserver.ProtocolFile(None, write),
+                                  objects_iter, len(objects_iter))
         messages = []
         messages.append('thank you for using rhodecode')
 
@@ -75,6 +77,7 @@ from webob.exc import HTTPNotFound, HTTPForbidden, HTTPInternalServerError
 
 log = logging.getLogger(__name__)
 
+
 def is_git(environ):
     """Returns True if request's target is git server.
     ``HTTP_USER_AGENT`` would then have git client version given.
@@ -85,6 +88,7 @@ def is_git(environ):
     if http_user_agent and http_user_agent.startswith('git'):
         return True
     return False
+
 
 class SimpleGit(object):
 
@@ -126,13 +130,14 @@ class SimpleGit(object):
         if self.action in ['pull', 'push'] or self.action:
             anonymous_user = self.__get_user('default')
             self.username = anonymous_user.username
-            anonymous_perm = self.__check_permission(self.action, anonymous_user ,
-                                           self.repo_name)
+            anonymous_perm = self.__check_permission(self.action,
+                                                     anonymous_user,
+                                                     self.repo_name)
 
             if anonymous_perm is not True or anonymous_user.active is False:
                 if anonymous_perm is not True:
-                    log.debug('Not enough credentials to access this repository'
-                              'as anonymous user')
+                    log.debug('Not enough credentials to access this '
+                              'repository as anonymous user')
                 if anonymous_user.active is False:
                     log.debug('Anonymous access is disabled, running '
                               'authentication')
@@ -142,14 +147,14 @@ class SimpleGit(object):
                 #==============================================================
 
                 if not REMOTE_USER(environ):
-                    self.authenticate.realm = str(self.config['rhodecode_realm'])
+                    self.authenticate.realm = str(
+                                                self.config['rhodecode_realm'])
                     result = self.authenticate(environ)
                     if isinstance(result, str):
                         AUTH_TYPE.update(environ, 'basic')
                         REMOTE_USER.update(environ, result)
                     else:
                         return result.wsgi_application(environ, start_response)
-
 
                 #==============================================================
                 # CHECK PERMISSIONS FOR THIS REQUEST USING GIVEN USERNAME FROM
@@ -163,18 +168,20 @@ class SimpleGit(object):
                         self.username = user.username
                     except:
                         log.error(traceback.format_exc())
-                        return HTTPInternalServerError()(environ, start_response)
+                        return HTTPInternalServerError()(environ,
+                                                         start_response)
 
                     #check permissions for this repository
-                    perm = self.__check_permission(self.action, user, self.repo_name)
+                    perm = self.__check_permission(self.action, user,
+                                                   self.repo_name)
                     if perm is not True:
                         print 'not allowed'
                         return HTTPForbidden()(environ, start_response)
 
-        self.extras = {'ip':self.ipaddr,
-                       'username':self.username,
-                       'action':self.action,
-                       'repository':self.repo_name}
+        self.extras = {'ip': self.ipaddr,
+                       'username': self.username,
+                       'action': self.action,
+                       'repository': self.repo_name}
 
         #===================================================================
         # GIT REQUEST HANDLING
@@ -199,9 +206,9 @@ class SimpleGit(object):
         else:
             return app(environ, start_response)
 
-
     def __make_app(self):
-        backend = dulserver.DictBackend({'/' + self.repo_name: Repo(self.repo_path)})
+        _d = {'/' + self.repo_name: Repo(self.repo_path)}
+        backend = dulserver.DictBackend(_d)
         gitserve = HTTPGitApplication(backend)
 
         return gitserve
@@ -216,20 +223,19 @@ class SimpleGit(object):
         """
         if action == 'push':
             if not HasPermissionAnyMiddleware('repository.write',
-                                              'repository.admin')\
-                                                (user, repo_name):
+                                              'repository.admin')(user,
+                                                                  repo_name):
                 return False
 
         else:
             #any other action need at least read permission
             if not HasPermissionAnyMiddleware('repository.read',
                                               'repository.write',
-                                              'repository.admin')\
-                                                (user, repo_name):
+                                              'repository.admin')(user,
+                                                                  repo_name):
                 return False
 
         return True
-
 
     def __get_repository(self, environ):
         """Get's repository name out of PATH_INFO header
@@ -246,7 +252,6 @@ class SimpleGit(object):
         repo_name = repo_name.split('/')[0]
         return repo_name
 
-
     def __get_user(self, username):
         return UserModel().get_by_username(username, cache=True)
 
@@ -262,7 +267,8 @@ class SimpleGit(object):
                        'git-upload-pack': 'pull',
                        }
 
-            return mapping.get(service_cmd, service_cmd if service_cmd else 'other')
+            return mapping.get(service_cmd,
+                               service_cmd if service_cmd else 'other')
         else:
             return 'other'
 

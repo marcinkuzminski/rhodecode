@@ -44,6 +44,7 @@ from webob.exc import HTTPNotFound, HTTPForbidden, HTTPInternalServerError
 
 log = logging.getLogger(__name__)
 
+
 def is_mercurial(environ):
     """Returns True if request's target is mercurial server - header
     ``HTTP_ACCEPT`` of such request would start with ``application/mercurial``.
@@ -52,6 +53,7 @@ def is_mercurial(environ):
     if http_accept and http_accept.startswith('application/mercurial'):
         return True
     return False
+
 
 class SimpleHg(object):
 
@@ -93,13 +95,14 @@ class SimpleHg(object):
         if self.action in ['pull', 'push']:
             anonymous_user = self.__get_user('default')
             self.username = anonymous_user.username
-            anonymous_perm = self.__check_permission(self.action, anonymous_user ,
-                                           self.repo_name)
+            anonymous_perm = self.__check_permission(self.action,
+                                                     anonymous_user,
+                                                     self.repo_name)
 
             if anonymous_perm is not True or anonymous_user.active is False:
                 if anonymous_perm is not True:
-                    log.debug('Not enough credentials to access this repository'
-                              'as anonymous user')
+                    log.debug('Not enough credentials to access this '
+                              'repository as anonymous user')
                 if anonymous_user.active is False:
                     log.debug('Anonymous access is disabled, running '
                               'authentication')
@@ -109,14 +112,14 @@ class SimpleHg(object):
                 #==============================================================
 
                 if not REMOTE_USER(environ):
-                    self.authenticate.realm = str(self.config['rhodecode_realm'])
+                    self.authenticate.realm = str(
+                                                self.config['rhodecode_realm'])
                     result = self.authenticate(environ)
                     if isinstance(result, str):
                         AUTH_TYPE.update(environ, 'basic')
                         REMOTE_USER.update(environ, result)
                     else:
                         return result.wsgi_application(environ, start_response)
-
 
                 #==============================================================
                 # CHECK PERMISSIONS FOR THIS REQUEST USING GIVEN USERNAME FROM
@@ -130,22 +133,24 @@ class SimpleHg(object):
                         self.username = user.username
                     except:
                         log.error(traceback.format_exc())
-                        return HTTPInternalServerError()(environ, start_response)
+                        return HTTPInternalServerError()(environ,
+                                                         start_response)
 
                     #check permissions for this repository
-                    perm = self.__check_permission(self.action, user, self.repo_name)
+                    perm = self.__check_permission(self.action, user,
+                                                   self.repo_name)
                     if perm is not True:
                         return HTTPForbidden()(environ, start_response)
 
-        self.extras = {'ip':self.ipaddr,
-                       'username':self.username,
-                       'action':self.action,
-                       'repository':self.repo_name}
+        self.extras = {'ip': self.ipaddr,
+                       'username': self.username,
+                       'action': self.action,
+                       'repository': self.repo_name}
 
-        #===================================================================
+        #======================================================================
         # MERCURIAL REQUEST HANDLING
-        #===================================================================
-        environ['PATH_INFO'] = '/'#since we wrap into hgweb, reset the path
+        #======================================================================
+        environ['PATH_INFO'] = '/'  # since we wrap into hgweb, reset the path
         self.baseui = make_ui('db')
         self.basepath = self.config['base_path']
         self.repo_path = os.path.join(self.basepath, self.repo_name)
@@ -168,7 +173,6 @@ class SimpleHg(object):
 
         return app(environ, start_response)
 
-
     def __make_app(self):
         """Make an wsgi application using hgweb, and my generated baseui
         instance
@@ -176,7 +180,6 @@ class SimpleHg(object):
 
         hgserve = hgweb(str(self.repo_path), baseui=self.baseui)
         return  self.__load_web_settings(hgserve, self.extras)
-
 
     def __check_permission(self, action, user, repo_name):
         """Checks permissions using action (push/pull) user and repository
@@ -188,20 +191,19 @@ class SimpleHg(object):
         """
         if action == 'push':
             if not HasPermissionAnyMiddleware('repository.write',
-                                              'repository.admin')\
-                                                (user, repo_name):
+                                              'repository.admin')(user,
+                                                                  repo_name):
                 return False
 
         else:
             #any other action need at least read permission
             if not HasPermissionAnyMiddleware('repository.read',
                                               'repository.write',
-                                              'repository.admin')\
-                                                (user, repo_name):
+                                              'repository.admin')(user,
+                                                                  repo_name):
                 return False
 
         return True
-
 
     def __get_repository(self, environ):
         """Get's repository name out of PATH_INFO header
@@ -236,7 +238,7 @@ class SimpleHg(object):
         for qry in environ['QUERY_STRING'].split('&'):
             if qry.startswith('cmd'):
                 cmd = qry.split('=')[-1]
-                if mapping.has_key(cmd):
+                if cmd in mapping:
                     return mapping[cmd]
                 else:
                     return 'pull'
@@ -246,7 +248,6 @@ class SimpleHg(object):
         invalidate the cache to see the changes right away but only for
         push requests"""
         invalidate_cache('get_repo_cached_%s' % repo_name)
-
 
     def __load_web_settings(self, hgserve, extras={}):
         #set the global ui for hgserve instance passed

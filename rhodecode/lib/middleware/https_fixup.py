@@ -25,7 +25,9 @@
 
 from rhodecode.lib import str2bool
 
+
 class HttpsFixup(object):
+
     def __init__(self, app, config):
         self.application = app
         self.config = config
@@ -34,9 +36,9 @@ class HttpsFixup(object):
         self.__fixup(environ)
         return self.application(environ, start_response)
 
-
     def __fixup(self, environ):
-        """Function to fixup the environ as needed. In order to use this
+        """
+        Function to fixup the environ as needed. In order to use this
         middleware you should set this header inside your
         proxy ie. nginx, apache etc.
         """
