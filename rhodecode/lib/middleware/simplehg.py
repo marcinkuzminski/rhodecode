@@ -174,15 +174,17 @@ class SimpleHg(object):
         return app(environ, start_response)
 
     def __make_app(self):
-        """Make an wsgi application using hgweb, and my generated baseui
-        instance
         """
+        Make an wsgi application using hgweb, and inject generated baseui
+        instance, additionally inject some extras into ui object
+        """
+        self.__inject_extras(self.baseui, self.extras)
+        return hgweb(str(self.repo_path), baseui=self.baseui)
 
-        hgserve = hgweb(str(self.repo_path), baseui=self.baseui)
-        return  self.__load_web_settings(hgserve, self.extras)
 
     def __check_permission(self, action, user, repo_name):
-        """Checks permissions using action (push/pull) user and repository
+        """
+        Checks permissions using action (push/pull) user and repository
         name
 
         :param action: push or pull action
@@ -206,7 +208,8 @@ class SimpleHg(object):
         return True
 
     def __get_repository(self, environ):
-        """Get's repository name out of PATH_INFO header
+        """
+        Get's repository name out of PATH_INFO header
 
         :param environ: environ where PATH_INFO is stored
         """
@@ -224,7 +227,8 @@ class SimpleHg(object):
         return UserModel().get_by_username(username, cache=True)
 
     def __get_action(self, environ):
-        """Maps mercurial request commands into a clone,pull or push command.
+        """
+        Maps mercurial request commands into a clone,pull or push command.
         This should always return a valid command string
 
         :param environ:
@@ -249,16 +253,14 @@ class SimpleHg(object):
         push requests"""
         invalidate_cache('get_repo_cached_%s' % repo_name)
 
-    def __load_web_settings(self, hgserve, extras={}):
-        #set the global ui for hgserve instance passed
-        hgserve.repo.ui = self.baseui
+    def __inject_extras(self, baseui, extras={}):
 
         hgrc = os.path.join(self.repo_path, '.hg', 'hgrc')
 
         #inject some additional parameters that will be available in ui
         #for hooks
         for k, v in extras.items():
-            hgserve.repo.ui.setconfig('rhodecode_extras', k, v)
+            baseui.setconfig('rhodecode_extras', k, v)
 
         repoui = make_ui('file', hgrc, False)
 
@@ -266,6 +268,4 @@ class SimpleHg(object):
             #overwrite our ui instance with the section from hgrc file
             for section in ui_sections:
                 for k, v in repoui.configitems(section):
-                    hgserve.repo.ui.setconfig(section, k, v)
-
-        return hgserve
+                    baseui.repo.ui.setconfig(section, k, v)
