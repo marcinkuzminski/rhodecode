@@ -245,6 +245,7 @@ class FilesController(BaseRepoController):
         c.action = request.GET.get('diff')
         c.no_changes = diff1 == diff2
         c.f_path = f_path
+        c.big_diff = False
 
         try:
             if diff1 not in ['', None, 'None', '0' * 12, '0' * 40]:
@@ -286,7 +287,8 @@ class FilesController(BaseRepoController):
                 c.cur_diff = _('Binary file')
             elif node1.size > self.cut_off_limit or \
                     node2.size > self.cut_off_limit:
-                c.cur_diff = _('Diff is too big to display')
+                c.cur_diff = ''
+                c.big_diff = True
             else:
                 diff = differ.DiffProcessor(differ.get_gitdiff(node1, node2),
                                         format='gitdiff')
@@ -298,13 +300,15 @@ class FilesController(BaseRepoController):
                 c.cur_diff = _('Binary file')
             elif node1.size > self.cut_off_limit or \
                     node2.size > self.cut_off_limit:
-                c.cur_diff = _('Diff is too big to display')
+                c.cur_diff = ''
+                c.big_diff = True
+
             else:
                 diff = differ.DiffProcessor(differ.get_gitdiff(node1, node2),
                                         format='gitdiff')
                 c.cur_diff = diff.as_html()
 
-        if not c.cur_diff:
+        if not c.cur_diff and not c.big_diff:
             c.no_changes = True
         return render('files/file_diff.html')
 

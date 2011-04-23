@@ -38,6 +38,9 @@
 			<div class="code-body">
 		 			%if c.no_changes:
 		            	${_('No changes')}
+		            %elif c.big_diff:
+		                ${_('Diff is to big to display')} ${h.link_to(_('raw diff'),
+                           h.url.current(diff2=c.changeset_2.raw_id,diff1=c.changeset_1.raw_id,diff='raw'))}
 		            %else:        
 						${c.cur_diff|n}
 		            %endif
