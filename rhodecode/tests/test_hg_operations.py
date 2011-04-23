@@ -14,6 +14,7 @@ import os
 import shutil
 import logging
 from os.path import join as jn
+from os.path import dirname as dn
 
 from tempfile import _RandomNameSequence
 from subprocess import Popen, PIPE
@@ -31,7 +32,8 @@ from rhodecode.lib.auth import get_crypt_password
 from rhodecode.tests import TESTS_TMP_PATH, NEW_HG_REPO, HG_REPO
 from rhodecode.config.environment import load_environment
 
-conf = appconfig('config:development.ini', relative_to='./../../')
+rel_path = dn(dn(dn(os.path.abspath(__file__))))
+conf = appconfig('config:development.ini', relative_to=rel_path)
 load_environment(conf.global_conf, conf.local_conf)
 
 add_cache(conf)
