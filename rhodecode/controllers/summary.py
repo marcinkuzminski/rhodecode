@@ -134,13 +134,13 @@ class SummaryController(BaseRepoController):
 
         if stats and stats.languages:
             c.no_data = False is dbrepo.enable_statistics
-            lang_stats = json.loads(stats.languages)
+            lang_stats_d = json.loads(stats.languages)
             c.commit_data = stats.commit_activity
             c.overview_data = stats.commit_activity_combined
 
             lang_stats = [(x, {"count": y,
                                "desc": LANGUAGES_EXTENSIONS_MAP.get(x)})
-                          for x, y in lang_stats.items()]
+                          for x, y in lang_stats_d.items()]
 
             c.trending_languages = json.dumps(OrderedDict(
                                        sorted(lang_stats, reverse=True,

@@ -84,7 +84,7 @@ class ChangelogController(BaseRepoController):
         :param size: number of commits to show
         :param p: page number
         """
-        if not repo.revisions or repo.alias == 'git':
+        if not repo.revisions:
             c.jsdata = json.dumps([])
             return
 
@@ -93,12 +93,19 @@ class ChangelogController(BaseRepoController):
         rev_start = repo.revisions.index(repo.revisions[(-1 * offset)])
         rev_end = max(0, rev_start - revcount)
 
-        dag = graph_rev(repo._repo, rev_start, rev_end)
-        c.dag = tree = list(colored(dag))
         data = []
-        for (id, type, ctx, vtx, edges) in tree:
-            if type != CHANGESET:
-                continue
-            data.append(('', vtx, edges))
+        if repo.alias == 'git':
+            for _ in xrange(rev_end, rev_start):
+                vtx = [0, 1]
+                edges = [[0, 0, 1]]
+                data.append(['', vtx, edges])
+
+        elif repo.alias == 'hg':
+            dag = graph_rev(repo._repo, rev_start, rev_end)
+            c.dag = tree = list(colored(dag))
+            for (id, type, ctx, vtx, edges) in tree:
+                if type != CHANGESET:
+                    continue
+                data.append(['', vtx, edges])
 
         c.jsdata = json.dumps(data)

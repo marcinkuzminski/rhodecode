@@ -130,7 +130,7 @@
 			      <label>${_('Clone url')}:</label>
 			  </div>
 			  <div class="input-short">
-			      <input type="text" id="clone_url" readonly="readonly" value="hg clone ${c.clone_repo_url}" size="70"/>
+			      <input type="text" id="clone_url" readonly="readonly" value="${c.rhodecode_repo.alias} clone ${c.clone_repo_url}" size="70"/>
 			  </div>
 			 </div>
 			 
