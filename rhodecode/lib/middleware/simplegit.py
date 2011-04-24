@@ -127,7 +127,7 @@ class SimpleGit(object):
         #======================================================================
         # CHECK ANONYMOUS PERMISSION
         #======================================================================
-        if self.action in ['pull', 'push'] or self.action:
+        if self.action in ['pull', 'push']:
             anonymous_user = self.__get_user('default')
             self.username = anonymous_user.username
             anonymous_perm = self.__check_permission(self.action,
@@ -161,7 +161,7 @@ class SimpleGit(object):
                 # BASIC AUTH
                 #==============================================================
 
-                if self.action in ['pull', 'push']  or self.action:
+                if self.action in ['pull', 'push']:
                     username = REMOTE_USER(environ)
                     try:
                         user = self.__get_user(username)
@@ -175,7 +175,6 @@ class SimpleGit(object):
                     perm = self.__check_permission(self.action, user,
                                                    self.repo_name)
                     if perm is not True:
-                        print 'not allowed'
                         return HTTPForbidden()(environ, start_response)
 
         self.extras = {'ip': self.ipaddr,
@@ -200,11 +199,8 @@ class SimpleGit(object):
         #invalidate cache on push
         if self.action == 'push':
             self.__invalidate_cache(self.repo_name)
-            messages = []
-            messages.append('thank you for using rhodecode')
-            return app(environ, start_response)
-        else:
-            return app(environ, start_response)
+
+        return app(environ, start_response)
 
     def __make_app(self):
         _d = {'/' + self.repo_name: Repo(self.repo_path)}
