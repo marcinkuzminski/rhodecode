@@ -344,22 +344,18 @@ class ScmModel(BaseModel):
         return f is not None
 
     def get_followers(self, repo_id):
-        if isinstance(repo_id, int):
-            return self.sa.query(UserFollowing)\
-                    .filter(UserFollowing.follows_repo_id == repo_id).count()
-        else:
-            return self.sa.query(UserFollowing)\
-                    .filter(UserFollowing.follows_repository \
-                            == RepoModel().get_by_repo_name(repo_id)).count()
+        if not isinstance(repo_id, int):
+            repo_id = getattr(Repository.by_repo_name(repo_id), 'repo_id')
+
+        return self.sa.query(UserFollowing)\
+                .filter(UserFollowing.follows_repo_id == repo_id).count()
 
     def get_forks(self, repo_id):
-        if isinstance(repo_id, int):
-            return self.sa.query(Repository)\
+        if not isinstance(repo_id, int):
+            repo_id = getattr(Repository.by_repo_name(repo_id), 'repo_id')
+
+        return self.sa.query(Repository)\
                 .filter(Repository.fork_id == repo_id).count()
-        else:
-            return self.sa.query(Repository)\
-                .filter(Repository.fork \
-                        == RepoModel().get_by_repo_name(repo_id)).count()
 
     def pull_changes(self, repo_name, username):
         repo, dbrepo = self.get(repo_name, retval='all')

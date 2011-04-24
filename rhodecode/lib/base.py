@@ -62,7 +62,8 @@ class BaseRepoController(BaseController):
 
             c.rhodecode_repo, dbrepo = self.scm_model.get(c.repo_name,
                                                           retval='repo')
-            if c.rhodecode_repo:
+
+            if c.rhodecode_repo is not None:
                 c.repository_followers = self.scm_model.get_followers(c.repo_name)
                 c.repository_forks = self.scm_model.get_forks(c.repo_name)
             else:
