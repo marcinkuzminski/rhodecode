@@ -205,12 +205,12 @@ def authenticate(username, password):
                 log.debug('Got ldap DN response %s', user_dn)
 
                 user_attrs = {
-                    'name': ldap_attrs[ldap_settings\
-                                       .get('ldap_attr_firstname')][0],
-                    'lastname': ldap_attrs[ldap_settings\
-                                           .get('ldap_attr_lastname')][0],
-                    'email': ldap_attrs[ldap_settings\
-                                        .get('ldap_attr_email')][0],
+                    'name': ldap_attrs.get(ldap_settings\
+                                       .get('ldap_attr_firstname'), [''])[0],
+                    'lastname': ldap_attrs.get(ldap_settings\
+                                           .get('ldap_attr_lastname'),[''])[0],
+                    'email': ldap_attrs.get(ldap_settings\
+                                        .get('ldap_attr_email'), [''])[0],
                     }
 
                 if user_model.create_ldap(username, password, user_dn,
