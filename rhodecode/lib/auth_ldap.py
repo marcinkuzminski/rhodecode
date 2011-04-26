@@ -105,9 +105,10 @@ class AuthLdap(object):
             if not lobjects:
                 raise ldap.NO_SUCH_OBJECT()
 
-            for (dn, attrs) in lobjects:
+            for (dn, _attrs) in lobjects:
                 try:
                     server.simple_bind_s(dn, password)
+                    attrs = server.search_ext_s(dn, ldap.SCOPE_BASE, '(objectClass=*)')[0][1]
                     break
 
                 except ldap.INVALID_CREDENTIALS, e:
