@@ -190,7 +190,7 @@ def authenticate(username, password):
                   'port': ldap_settings.get('ldap_port'),
                   'bind_dn': ldap_settings.get('ldap_dn_user'),
                   'bind_pass': ldap_settings.get('ldap_dn_pass'),
-                  'use_ldaps': str2bool(ldap_settings.get('ldap_ldaps')),
+                  'tls_kind': ldap_settings.get('ldap_tls_kind'),
                   'tls_reqcert': ldap_settings.get('ldap_tls_reqcert'),
                   'ldap_filter': ldap_settings.get('ldap_filter'),
                   'search_scope': ldap_settings.get('ldap_search_scope'),
@@ -205,12 +205,12 @@ def authenticate(username, password):
                 log.debug('Got ldap DN response %s', user_dn)
 
                 user_attrs = {
-                    'name': ldap_attrs[ldap_settings\
-                                       .get('ldap_attr_firstname')][0],
-                    'lastname': ldap_attrs[ldap_settings\
-                                           .get('ldap_attr_lastname')][0],
-                    'email': ldap_attrs[ldap_settings\
-                                        .get('ldap_attr_email')][0],
+                    'name': ldap_attrs.get(ldap_settings\
+                                       .get('ldap_attr_firstname'), [''])[0],
+                    'lastname': ldap_attrs.get(ldap_settings\
+                                           .get('ldap_attr_lastname'),[''])[0],
+                    'email': ldap_attrs.get(ldap_settings\
+                                        .get('ldap_attr_email'), [''])[0],
                     }
 
                 if user_model.create_ldap(username, password, user_dn,

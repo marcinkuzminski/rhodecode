@@ -556,7 +556,7 @@ def DefaultPermissionsForm(perms_choices, register_choices, create_choices):
     return _DefaultPermissionsForm
 
 
-def LdapSettingsForm(tls_reqcert_choices, search_scope_choices):
+def LdapSettingsForm(tls_reqcert_choices, search_scope_choices, tls_kind_choices):
     class _LdapSettingsForm(formencode.Schema):
         allow_extra_fields = True
         filter_extra_fields = True
@@ -564,7 +564,7 @@ def LdapSettingsForm(tls_reqcert_choices, search_scope_choices):
         ldap_active = StringBoolean(if_missing=False)
         ldap_host = UnicodeString(strip=True,)
         ldap_port = Number(strip=True,)
-        ldap_ldaps = StringBoolean(if_missing=False)
+        ldap_tls_kind = OneOf(tls_kind_choices)
         ldap_tls_reqcert = OneOf(tls_reqcert_choices)
         ldap_dn_user = UnicodeString(strip=True,)
         ldap_dn_pass = UnicodeString(strip=True,)
