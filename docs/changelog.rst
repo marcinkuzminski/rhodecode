@@ -35,6 +35,8 @@ news
 - #125 added API KEY access to feeds
 - #109 Repository can be created from external Mercurial link (aka. remote 
   repository, and manually updated (via pull) from admin panel
+- beta git support - push/pull server + basic view for git repos
+- added followers page
 
 fixes
 -----
@@ -49,8 +51,9 @@ fixes
 - removed issue with space inside renamed repository after deletion
 - fixed strange issue on formencode imports
 - fixed #126 Deleting repository on Windows, rename used incompatible chars. 
-- #150 fixes for errors on repositories mapped in db but corrupted in filesystem
-
+- #150 fixes for errors on repositories mapped in db but corrupted in 
+  filesystem
+  
 
 1.1.8 (**2011-04-12**)
 ======================
