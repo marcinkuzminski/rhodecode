@@ -47,8 +47,8 @@
                 <div class="input">${h.password('ldap_dn_pass',class_='small')}</div>
             </div>
             <div class="field">
-                <div class="label label-checkbox"><label for="ldap_ldaps">${_('Enable LDAPS')}</label></div>
-                <div class="checkboxes"><div class="checkbox">${h.checkbox('ldap_ldaps',True,class_='small')}</div></div>
+                <div class="label"><label for="ldap_tls_kind">${_('Connection security')}</label></div>
+                <div class="select">${h.select('ldap_tls_kind',c.tls_kind_cur,c.tls_kind_choices,class_='small')}</div>
             </div>
             <div class="field">
                 <div class="label"><label for="ldap_tls_reqcert">${_('Certificate Checks')}</label></div>

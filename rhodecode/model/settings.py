@@ -70,7 +70,7 @@ class SettingsModel(BaseModel):
         ldap_active
         ldap_host
         ldap_port
-        ldap_ldaps
+        ldap_tls_kind
         ldap_tls_reqcert
         ldap_dn_user
         ldap_dn_pass

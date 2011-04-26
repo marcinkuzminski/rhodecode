@@ -190,7 +190,7 @@ def authenticate(username, password):
                   'port': ldap_settings.get('ldap_port'),
                   'bind_dn': ldap_settings.get('ldap_dn_user'),
                   'bind_pass': ldap_settings.get('ldap_dn_pass'),
-                  'use_ldaps': str2bool(ldap_settings.get('ldap_ldaps')),
+                  'tls_kind': ldap_settings.get('ldap_tls_kind'),
                   'tls_reqcert': ldap_settings.get('ldap_tls_reqcert'),
                   'ldap_filter': ldap_settings.get('ldap_filter'),
                   'search_scope': ldap_settings.get('ldap_search_scope'),

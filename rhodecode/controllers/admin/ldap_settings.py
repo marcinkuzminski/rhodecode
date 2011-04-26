@@ -59,6 +59,13 @@ class LdapSettingsController(BaseController):
                            ]
     tls_reqcert_default = 'DEMAND'
 
+    tls_kind_choices = [('PLAIN', _('No encryption'),),
+                        ('LDAPS', _('LDAPS connection'),),
+                        ('START_TLS', _('START_TLS on LDAP connection'),)
+                        ]
+
+    tls_kind_default = 'PLAIN'
+
     @LoginRequired()
     @HasPermissionAllDecorator('hg.admin')
     def __before__(self):
@@ -66,12 +73,14 @@ class LdapSettingsController(BaseController):
         c.admin_username = session.get('admin_username')
         c.search_scope_choices = self.search_scope_choices
         c.tls_reqcert_choices = self.tls_reqcert_choices
+        c.tls_kind_choices = self.tls_kind_choices
         super(LdapSettingsController, self).__before__()
 
     def index(self):
         defaults = SettingsModel().get_ldap_settings()
         c.search_scope_cur = defaults.get('ldap_search_scope')
         c.tls_reqcert_cur = defaults.get('ldap_tls_reqcert')
+        c.tls_kind_cur = defaults.get('ldap_tls_kind')
 
         return htmlfill.render(
                     render('admin/ldap/ldap.html'),
@@ -84,7 +93,8 @@ class LdapSettingsController(BaseController):
 
         settings_model = SettingsModel()
         _form = LdapSettingsForm([x[0] for x in self.tls_reqcert_choices],
-                                 [x[0] for x in self.search_scope_choices])()
+                                 [x[0] for x in self.search_scope_choices],
+                                 [x[0] for x in self.tls_kind_choices])()
 
         try:
             form_result = _form.to_python(dict(request.POST))

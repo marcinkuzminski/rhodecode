@@ -34,14 +34,19 @@ except ImportError:
 class AuthLdap(object):
 
     def __init__(self, server, base_dn, port=389, bind_dn='', bind_pass='',
-                 use_ldaps=False, tls_reqcert='DEMAND', ldap_version=3,
+                 tls_kind = 'PLAIN', tls_reqcert='DEMAND', ldap_version=3,
                  ldap_filter='(&(objectClass=user)(!(objectClass=computer)))',
                  search_scope='SUBTREE',
                  attr_login='uid'):
         self.ldap_version = ldap_version
-        if use_ldaps:
+        ldap_server_type = 'ldap'
+
+        self.TLS_KIND = tls_kind
+
+        if self.TLS_KIND == 'LDAPS':
             port = port or 689
-        self.LDAP_USE_LDAPS = use_ldaps
+            ldap_server_type = ldap_server_type + 's'
+
         self.TLS_REQCERT = ldap.__dict__['OPT_X_TLS_' + tls_reqcert]
         self.LDAP_SERVER_ADDRESS = server
         self.LDAP_SERVER_PORT = port
@@ -50,8 +55,6 @@ class AuthLdap(object):
         self.LDAP_BIND_DN = bind_dn
         self.LDAP_BIND_PASS = bind_pass
 
-        ldap_server_type = 'ldap'
-        if self.LDAP_USE_LDAPS:ldap_server_type = ldap_server_type + 's'
         self.LDAP_SERVER = "%s://%s:%s" % (ldap_server_type,
                                                self.LDAP_SERVER_ADDRESS,
                                                self.LDAP_SERVER_PORT)
@@ -85,13 +88,16 @@ class AuthLdap(object):
             ldap.set_option(ldap.OPT_TIMEOUT, 20)
             ldap.set_option(ldap.OPT_NETWORK_TIMEOUT, 10)
             ldap.set_option(ldap.OPT_TIMELIMIT, 15)
-            if self.LDAP_USE_LDAPS:
+            if self.TLS_KIND != 'PLAIN':
                 ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, self.TLS_REQCERT)
             server = ldap.initialize(self.LDAP_SERVER)
             if self.ldap_version == 2:
                 server.protocol = ldap.VERSION2
             else:
                 server.protocol = ldap.VERSION3
+
+            if self.TLS_KIND == 'START_TLS':
+                server.start_tls_s()
 
             if self.LDAP_BIND_DN and self.LDAP_BIND_PASS:
                 server.simple_bind_s(self.LDAP_BIND_DN, self.LDAP_BIND_PASS)

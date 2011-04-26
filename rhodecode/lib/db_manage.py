@@ -312,7 +312,7 @@ class DbManage(object):
 
         try:
             for k, v in [('ldap_active', 'false'), ('ldap_host', ''),
-                        ('ldap_port', '389'), ('ldap_ldaps', 'false'),
+                        ('ldap_port', '389'), ('ldap_tls_kind', 'PLAIN'),
                         ('ldap_tls_reqcert', ''), ('ldap_dn_user', ''),
                         ('ldap_dn_pass', ''), ('ldap_base_dn', ''),
                         ('ldap_filter', ''), ('ldap_search_scope', ''),
