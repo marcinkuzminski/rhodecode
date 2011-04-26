@@ -1,7 +1,6 @@
 from rhodecode.lib.auth import get_crypt_password, check_password
-from rhodecode.model.db import User
+from rhodecode.model.db import User, RhodeCodeSettings
 from rhodecode.tests import *
-from rhodecode.model.settings import SettingsModel
 
 class TestAdminSettingsController(TestController):
 
@@ -60,7 +59,7 @@ class TestAdminSettingsController(TestController):
                                                  ))
 
         assert 'Updated application settings' in response.session['flash'][0][1], 'no flash message about success of change'
-        assert SettingsModel(self.sa).get_app_settings()['rhodecode_ga_code'] == new_ga_code, 'change not in database'
+        assert RhodeCodeSettings.get_app_settings()['rhodecode_ga_code'] == new_ga_code, 'change not in database'
 
         response = response.follow()
         assert """_gaq.push(['_setAccount', '%s']);""" % new_ga_code in response.body
@@ -79,7 +78,7 @@ class TestAdminSettingsController(TestController):
                                                  ))
 
         assert 'Updated application settings' in response.session['flash'][0][1], 'no flash message about success of change'
-        assert SettingsModel(self.sa).get_app_settings()['rhodecode_ga_code'] == new_ga_code, 'change not in database'
+        assert RhodeCodeSettings.get_app_settings()['rhodecode_ga_code'] == new_ga_code, 'change not in database'
 
         response = response.follow()
         assert """_gaq.push(['_setAccount', '%s']);""" % new_ga_code not in response.body
@@ -100,7 +99,7 @@ class TestAdminSettingsController(TestController):
 
 
         assert 'Updated application settings' in response.session['flash'][0][1], 'no flash message about success of change'
-        assert SettingsModel(self.sa).get_app_settings()['rhodecode_title'] == new_title, 'change not in database'
+        assert RhodeCodeSettings.get_app_settings()['rhodecode_title'] == new_title, 'change not in database'
 
         response = response.follow()
         assert """<h1><a href="/">%s</a></h1>""" % new_title in response.body

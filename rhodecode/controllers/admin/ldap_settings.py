@@ -32,13 +32,14 @@ from pylons import request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
 from pylons.i18n.translation import _
 
+from sqlalchemy.exc import DatabaseError
+
 from rhodecode.lib.base import BaseController, render
 from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator
-from rhodecode.lib.auth_ldap import LdapImportError
-from rhodecode.model.settings import SettingsModel
+from rhodecode.lib.exceptions import LdapImportError
 from rhodecode.model.forms import LdapSettingsForm
-from sqlalchemy.exc import DatabaseError
+from rhodecode.model.db import RhodeCodeSettings
 
 log = logging.getLogger(__name__)
 
@@ -74,10 +75,15 @@ class LdapSettingsController(BaseController):
         c.search_scope_choices = self.search_scope_choices
         c.tls_reqcert_choices = self.tls_reqcert_choices
         c.tls_kind_choices = self.tls_kind_choices
+
+        c.search_scope_cur = self.search_scope_default
+        c.tls_reqcert_cur = self.tls_reqcert_default
+        c.tls_kind_cur = self.tls_kind_default
+
         super(LdapSettingsController, self).__before__()
 
     def index(self):
-        defaults = SettingsModel().get_ldap_settings()
+        defaults = RhodeCodeSettings.get_ldap_settings()
         c.search_scope_cur = defaults.get('ldap_search_scope')
         c.tls_reqcert_cur = defaults.get('ldap_tls_reqcert')
         c.tls_kind_cur = defaults.get('ldap_tls_kind')
@@ -91,7 +97,6 @@ class LdapSettingsController(BaseController):
     def ldap_settings(self):
         """POST ldap create and store ldap settings"""
 
-        settings_model = SettingsModel()
         _form = LdapSettingsForm([x[0] for x in self.tls_reqcert_choices],
                                  [x[0] for x in self.search_scope_choices],
                                  [x[0] for x in self.tls_kind_choices])()
@@ -102,7 +107,7 @@ class LdapSettingsController(BaseController):
 
                 for k, v in form_result.items():
                     if k.startswith('ldap_'):
-                        setting = settings_model.get(k)
+                        setting = RhodeCodeSettings.get_by_name(k)
                         setting.app_settings_value = v
                         self.sa.add(setting)
 
@@ -116,14 +121,13 @@ class LdapSettingsController(BaseController):
                       'is missing.'), category='warning')
 
         except formencode.Invalid, errors:
+            e = errors.error_dict or {}
 
-            c.search_scope_cur = self.search_scope_default
-            c.tls_reqcert_cur = self.search_scope_default
 
             return htmlfill.render(
                 render('admin/ldap/ldap.html'),
                 defaults=errors.value,
-                errors=errors.error_dict or {},
+                errors=e,
                 prefix_error=False,
                 encoding="UTF-8")
         except Exception:

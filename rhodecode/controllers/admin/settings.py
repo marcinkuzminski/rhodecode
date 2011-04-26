@@ -40,11 +40,11 @@ from rhodecode.lib.base import BaseController, render
 from rhodecode.lib.celerylib import tasks, run_task
 from rhodecode.lib.utils import repo2db_mapper, invalidate_cache, \
     set_rhodecode_config, repo_name_slug
-from rhodecode.model.db import RhodeCodeUi, Repository, Group
+from rhodecode.model.db import RhodeCodeUi, Repository, Group, \
+    RhodeCodeSettings
 from rhodecode.model.forms import UserForm, ApplicationSettingsForm, \
     ApplicationUiSettingsForm
 from rhodecode.model.scm import ScmModel
-from rhodecode.model.settings import SettingsModel
 from rhodecode.model.user import UserModel
 
 log = logging.getLogger(__name__)
@@ -68,7 +68,7 @@ class SettingsController(BaseController):
         """GET /admin/settings: All items in the collection"""
         # url('admin_settings')
 
-        defaults = SettingsModel().get_app_settings()
+        defaults = RhodeCodeSettings.get_app_settings()
         defaults.update(self.get_hg_ui_settings())
         return htmlfill.render(
             render('admin/settings/settings.html'),
@@ -121,18 +121,17 @@ class SettingsController(BaseController):
             application_form = ApplicationSettingsForm()()
             try:
                 form_result = application_form.to_python(dict(request.POST))
-                settings_model = SettingsModel()
 
                 try:
-                    hgsettings1 = settings_model.get('title')
+                    hgsettings1 = RhodeCodeSettings.get_by_name('title')
                     hgsettings1.app_settings_value = \
                         form_result['rhodecode_title']
 
-                    hgsettings2 = settings_model.get('realm')
+                    hgsettings2 = RhodeCodeSettings.get_by_name('realm')
                     hgsettings2.app_settings_value = \
                         form_result['rhodecode_realm']
 
-                    hgsettings3 = settings_model.get('ga_code')
+                    hgsettings3 = RhodeCodeSettings.get_by_name('ga_code')
                     hgsettings3.app_settings_value = \
                         form_result['rhodecode_ga_code']
 

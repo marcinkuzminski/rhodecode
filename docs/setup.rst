@@ -143,14 +143,14 @@ Setting up LDAP support
 -----------------------
 
 RhodeCode starting from version 1.1 supports ldap authentication. In order
-to use LDAP, you have to install the python-ldap_ package. This package is available
-via pypi, so you can install it by running
+to use LDAP, you have to install the python-ldap_ package. This package is 
+available via pypi, so you can install it by running
 
-::
+using easy_install::
 
     easy_install python-ldap
  
-::
+using pip::
 
     pip install python-ldap
 
@@ -168,7 +168,7 @@ Here's a typical ldap setup::
  Port                 = 389
  Account              = <account>
  Password             = <password>
- Enable LDAPS         = checked
+ Connection Security  = LDAPS connection
  Certificate Checks   = DEMAND
 
  Search settings
@@ -212,11 +212,19 @@ Password : optional
 
 .. _Enable LDAPS:
 
-Enable LDAPS : optional
-    Check this if SSL encryption is necessary for communication with the
-    LDAP server - it will likely require `Port`_ to be set to a different
-    value (standard LDAPS port is 636).  When LDAPS is enabled then
-    `Certificate Checks`_ is required.
+Connection Security : required
+    Defines the connection to LDAP server
+
+    No encryption
+        Plain non encrypted connection
+        
+    LDAPS connection
+        Enable ldaps connection. It will likely require `Port`_ to be set to 
+        a different value (standard LDAPS port is 636). When LDAPS is enabled 
+        then `Certificate Checks`_ is required.
+        
+    START_TLS on LDAP connection
+        START TLS connection
 
 .. _Certificate Checks:
 

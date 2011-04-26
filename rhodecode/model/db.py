@@ -65,6 +65,11 @@ class RhodeCodeSettings(Base):
 
 
     @classmethod
+    def get_by_name(cls, ldap_key):
+        return Session.query(cls)\
+            .filter(cls.app_settings_name == ldap_key).scalar()
+
+    @classmethod
     def get_app_settings(cls, cache=False):
 
         ret = Session.query(cls)
@@ -88,7 +93,7 @@ class RhodeCodeSettings(Base):
                 .all()
         fd = {}
         for row in ret:
-            fd.update({row.app_settings_name:str2bool(row.app_settings_value)})
+            fd.update({row.app_settings_name:row.app_settings_value})
         return fd
 
 

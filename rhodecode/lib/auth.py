@@ -48,7 +48,7 @@ from rhodecode.lib.auth_ldap import AuthLdap
 
 from rhodecode.model import meta
 from rhodecode.model.user import UserModel
-from rhodecode.model.db import Permission
+from rhodecode.model.db import Permission, RhodeCodeSettings
 
 log = logging.getLogger(__name__)
 
@@ -149,6 +149,7 @@ def authenticate(username, password):
     :param username: username
     :param password: password
     """
+
     user_model = UserModel()
     user = user_model.get_by_username(username, cache=False)
 
@@ -176,9 +177,7 @@ def authenticate(username, password):
             log.debug('this user already exists as non ldap')
             return False
 
-        from rhodecode.model.settings import SettingsModel
-        ldap_settings = SettingsModel().get_ldap_settings()
-
+        ldap_settings = RhodeCodeSettings.get_ldap_settings()
         #======================================================================
         # FALLBACK TO LDAP AUTH IF ENABLE
         #======================================================================
@@ -204,13 +203,13 @@ def authenticate(username, password):
                                                                 password)
                 log.debug('Got ldap DN response %s', user_dn)
 
+                get_ldap_attr = lambda k:ldap_attrs.get(ldap_settings\
+                                                           .get(k), [''])[0]
+
                 user_attrs = {
-                    'name': ldap_attrs.get(ldap_settings\
-                                       .get('ldap_attr_firstname'), [''])[0],
-                    'lastname': ldap_attrs.get(ldap_settings\
-                                           .get('ldap_attr_lastname'),[''])[0],
-                    'email': ldap_attrs.get(ldap_settings\
-                                        .get('ldap_attr_email'), [''])[0],
+                    'name': get_ldap_attr('ldap_attr_firstname'),
+                    'lastname': get_ldap_attr('ldap_attr_lastname'),
+                    'email': get_ldap_attr('ldap_attr_email'),
                     }
 
                 if user_model.create_ldap(username, password, user_dn,

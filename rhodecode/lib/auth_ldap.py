@@ -1,8 +1,15 @@
-#!/usr/bin/env python
-# encoding: utf-8
-# ldap authentication lib
-# Copyright (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
-#
+# -*- coding: utf-8 -*-
+"""
+    rhodecode.controllers.changelog
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    RhodeCode authentication library for LDAP
+
+    :created_on: Created on Nov 17, 2010
+    :author: marcink
+    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
+    :license: GPLv3, see COPYING for more details.
+"""
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -15,26 +22,26 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-"""
-Created on Nov 17, 2010
 
-@author: marcink
-"""
-
-from rhodecode.lib.exceptions import *
 import logging
 
+from rhodecode.lib.exceptions import LdapConnectionError, LdapUsernameError, \
+    LdapPasswordError
+
 log = logging.getLogger(__name__)
+
 
 try:
     import ldap
 except ImportError:
+    # means that python-ldap is not installed
     pass
+
 
 class AuthLdap(object):
 
     def __init__(self, server, base_dn, port=389, bind_dn='', bind_pass='',
-                 tls_kind = 'PLAIN', tls_reqcert='DEMAND', ldap_version=3,
+                 tls_kind='PLAIN', tls_reqcert='DEMAND', ldap_version=3,
                  ldap_filter='(&(objectClass=user)(!(objectClass=computer)))',
                  search_scope='SUBTREE',
                  attr_login='uid'):
@@ -63,7 +70,6 @@ class AuthLdap(object):
         self.LDAP_FILTER = ldap_filter
         self.SEARCH_SCOPE = ldap.__dict__['SCOPE_' + search_scope]
         self.attr_login = attr_login
-
 
     def authenticate_ldap(self, username, password):
         """Authenticate a user via LDAP and return his/her LDAP properties.
@@ -102,7 +108,8 @@ class AuthLdap(object):
             if self.LDAP_BIND_DN and self.LDAP_BIND_PASS:
                 server.simple_bind_s(self.LDAP_BIND_DN, self.LDAP_BIND_PASS)
 
-            filt = '(&%s(%s=%s))' % (self.LDAP_FILTER, self.attr_login, username)
+            filt = '(&%s(%s=%s))' % (self.LDAP_FILTER, self.attr_login,
+                                     username)
             log.debug("Authenticating %r filt %s at %s", self.BASE_DN,
                       filt, self.LDAP_SERVER)
             lobjects = server.search_ext_s(self.BASE_DN, self.SEARCH_SCOPE,
@@ -114,7 +121,8 @@ class AuthLdap(object):
             for (dn, _attrs) in lobjects:
                 try:
                     server.simple_bind_s(dn, password)
-                    attrs = server.search_ext_s(dn, ldap.SCOPE_BASE, '(objectClass=*)')[0][1]
+                    attrs = server.search_ext_s(dn, ldap.SCOPE_BASE,
+                                                '(objectClass=*)')[0][1]
                     break
 
                 except ldap.INVALID_CREDENTIALS, e:
@@ -130,6 +138,7 @@ class AuthLdap(object):
             log.debug("LDAP says no such user '%s' (%s)", uid, username)
             raise LdapUsernameError()
         except ldap.SERVER_DOWN, e:
-            raise LdapConnectionError("LDAP can't access authentication server")
+            raise LdapConnectionError("LDAP can't access "
+                                      "authentication server")
 
         return (dn, attrs)

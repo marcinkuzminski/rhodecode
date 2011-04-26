@@ -44,7 +44,8 @@ from vcs.utils.lazy import LazyProperty
 
 from rhodecode.model import meta
 from rhodecode.model.caching_query import FromCache
-from rhodecode.model.db import Repository, User, RhodeCodeUi, UserLog, Group
+from rhodecode.model.db import Repository, User, RhodeCodeUi, UserLog, Group, \
+    RhodeCodeSettings
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.user import UserModel
 
@@ -287,8 +288,7 @@ def set_rhodecode_config(config):
 
     :param config:
     """
-    from rhodecode.model.settings import SettingsModel
-    hgsettings = SettingsModel().get_app_settings()
+    hgsettings = RhodeCodeSettings.get_app_settings()
 
     for k, v in hgsettings.items():
         config[k] = v
