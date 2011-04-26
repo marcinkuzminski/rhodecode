@@ -112,8 +112,8 @@ class SimpleHg(object):
                 #==============================================================
 
                 if not REMOTE_USER(environ):
-                    self.authenticate.realm = str(
-                                                self.config['rhodecode_realm'])
+                    self.authenticate.realm = self.config['rhodecode_realm'].\
+                        encode('utf8', 'replace')
                     result = self.authenticate(environ)
                     if isinstance(result, str):
                         AUTH_TYPE.update(environ, 'basic')

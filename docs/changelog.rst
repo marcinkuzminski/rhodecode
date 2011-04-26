@@ -53,7 +53,7 @@ fixes
 - fixed #126 Deleting repository on Windows, rename used incompatible chars. 
 - #150 fixes for errors on repositories mapped in db but corrupted in 
   filesystem
-  
+- fixed problem with ascendant characters in realm #181
 
 1.1.8 (**2011-04-12**)
 ======================
