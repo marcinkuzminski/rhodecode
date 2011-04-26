@@ -485,7 +485,7 @@ Other configuration files
 
 Some example init.d scripts can be found here, for debian and gentoo:
 
-https://rhodeocode.org/rhodecode/files/tip/init.d
+https://rhodecode.org/rhodecode/files/tip/init.d
 
 
 Troubleshooting
