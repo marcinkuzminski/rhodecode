@@ -116,7 +116,8 @@ def create_test_repo(force=True):
 
         form_data = {'repo_name':HG_REPO,
                      'repo_type':'hg',
-                     'private':False, }
+                     'private':False,
+                     'clone_uri':'' }
         rm = RepoModel(sa)
         rm.base_path = '/home/hg'
         rm.create(form_data, user)
@@ -238,9 +239,10 @@ def test_push_modify_file(f_name='setup.py'):
 
     Command(cwd).execute('hg push %s' % jn(TESTS_TMP_PATH, HG_REPO))
 
-def test_push_new_file(commits=15):
+def test_push_new_file(commits=15, with_clone=True):
 
-    test_clone(no_errors=True)
+    if with_clone:
+        test_clone(no_errors=True)
 
     cwd = path = jn(TESTS_TMP_PATH, HG_REPO)
     added_file = jn(path, '%ssetupążźć.py' % _RandomNameSequence().next())
@@ -253,7 +255,9 @@ def test_push_new_file(commits=15):
         cmd = """echo 'added_line%s' >> %s""" % (i, added_file)
         Command(cwd).execute(cmd)
 
-        cmd = """hg ci -m 'commited new %s' %s """ % (i, added_file)
+        cmd = """hg ci -m 'commited new %s' -u '%s' %s """ % (i,
+                                'Marcin Kuźminski <marcin@python-blog.com>',
+                                added_file)
         Command(cwd).execute(cmd)
 
     push_url = 'http://%(user)s:%(pass)s@%(host)s/%(cloned_repo)s' % \
@@ -326,7 +330,8 @@ if __name__ == '__main__':
 
     #test_clone_wrong_credentials()
 
-    #test_pull()
-    test_push_new_file(commits=15)
+    test_pull()
+    test_push_new_file(commits=2, with_clone=True)
+
     #test_push_wrong_path()
     #test_push_wrong_credentials()
