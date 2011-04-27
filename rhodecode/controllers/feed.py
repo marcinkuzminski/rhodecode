@@ -28,6 +28,7 @@ import logging
 from pylons import url, response, tmpl_context as c
 from pylons.i18n.translation import _
 
+from rhodecode.lib import safe_unicode
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseRepoController
 
@@ -53,15 +54,15 @@ class FeedController(BaseRepoController):
     def __changes(self, cs):
         changes = ''
 
-        a = [n.path for n in cs.added]
+        a = [safe_unicode(n.path) for n in cs.added]
         if a:
             changes += '\nA ' + '\nA '.join(a)
 
-        m = [n.path for n in cs.changed]
+        m = [safe_unicode(n.path) for n in cs.changed]
         if m:
             changes += '\nM ' + '\nM '.join(m)
 
-        d = [n.path for n in cs.removed]
+        d = [safe_unicode(n.path) for n in cs.removed]
         if d:
             changes += '\nD ' + '\nD '.join(d)
 
