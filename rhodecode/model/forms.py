@@ -22,6 +22,7 @@ for SELECT use formencode.All(OneOf(list), Int())
 import os
 import re
 import logging
+import traceback
 
 import formencode
 from formencode import All
@@ -227,25 +228,29 @@ def ValidCloneUri():
     from rhodecode.lib.utils import make_ui
 
     class _ValidCloneUri(formencode.validators.FancyValidator):
+
         def to_python(self, value, state):
             if not value:
                 pass
             elif value.startswith('https'):
                 try:
-                    httpsrepository(make_ui('db'), value).capabilities()
-                except:
+                    httpsrepository(make_ui('db'), value).capabilities
+                except Exception, e:
+                    log.error(traceback.format_exc())
                     raise formencode.Invalid(_('invalid clone url'), value,
                                              state)
             elif value.startswith('http'):
                 try:
-                    httprepository(make_ui('db'), value).capabilities()
-                except:
+                    httprepository(make_ui('db'), value).capabilities
+                except Exception, e:
+                    log.error(traceback.format_exc())
                     raise formencode.Invalid(_('invalid clone url'), value,
                                              state)
             else:
                 raise formencode.Invalid(_('Invalid clone url, provide a '
                                            'valid clone http\s url'), value,
                                          state)
+            return value
 
     return _ValidCloneUri
 
