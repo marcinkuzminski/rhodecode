@@ -152,7 +152,7 @@
     	
         var obsolete = [];
         var nodes = S.query('div.table tr td div a.repo_name');
-        var req = D.get('q_filter').value;
+        var req = q_filter.value.toLowerCase();
         for (n in nodes){
             D.setStyle(nodes[n].parentNode.parentNode.parentNode,'display','')
         }
