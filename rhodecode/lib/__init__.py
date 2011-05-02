@@ -79,3 +79,22 @@ def safe_unicode(_str, from_encoding='utf8'):
         u_str = unicode(_str, from_encoding, 'replace')
 
     return u_str
+
+
+def engine_from_config(configuration, prefix='sqlalchemy.', **kwargs):
+    """
+    Custom engine_from_config functions that makes sure we use NullPool for
+    file based sqlite databases. This prevents errors on sqlite.
+    
+    """
+    from sqlalchemy import engine_from_config as efc
+    from sqlalchemy.pool import NullPool
+
+    url = configuration[prefix + 'url']
+
+    if url.startswith('sqlite'):
+        kwargs.update({'poolclass':NullPool})
+
+    return efc(configuration, prefix, **kwargs)
+
+

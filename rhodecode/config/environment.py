@@ -6,18 +6,18 @@ import logging
 from mako.lookup import TemplateLookup
 from pylons.configuration import PylonsConfig
 from pylons.error import handle_mako_error
-from sqlalchemy import engine_from_config
 
 import rhodecode.lib.app_globals as app_globals
 import rhodecode.lib.helpers
 
 from rhodecode.config.routing import make_map
 from rhodecode.lib import celerypylons
+from rhodecode.lib import engine_from_config
+from rhodecode.lib.timerproxy import TimerProxy
 from rhodecode.lib.auth import set_available_permissions
 from rhodecode.lib.utils import repo2db_mapper, make_ui, set_rhodecode_config
 from rhodecode.model import init_model
 from rhodecode.model.scm import ScmModel
-from rhodecode.lib.timerproxy import TimerProxy
 
 log = logging.getLogger(__name__)
 
