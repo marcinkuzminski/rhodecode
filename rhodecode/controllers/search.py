@@ -37,7 +37,7 @@ from webhelpers.util import update_params
 
 from whoosh.index import open_dir, EmptyIndexError
 from whoosh.qparser import QueryParser, QueryParserError
-from whoosh.query import Phrase
+from whoosh.query import Phrase, Wildcard, Term, Prefix
 
 log = logging.getLogger(__name__)
 
@@ -79,6 +79,8 @@ class SearchController(BaseController):
 
                     if isinstance(query, Phrase):
                         highlight_items.update(query.words)
+                    elif isinstance(query, Prefix):
+                        highlight_items.add(query.text)
                     else:
                         for i in query.all_terms():
                             if i[0] == 'content':
@@ -111,6 +113,9 @@ class SearchController(BaseController):
                 log.error('Empty Index data')
                 c.runtime = _('There is no index to search in. '
                               'Please run whoosh indexer')
+            except (Exception):
+                log.error(traceback.format_exc())
+                c.runtime = _('An error occurred during this search operation')
 
         # Return a rendered template
         return render('/search/search.html')
