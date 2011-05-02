@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-    rhodecode.controllers.followers
+    rhodecode.controllers.forks
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    Followers controller for rhodecode
+    forks controller for rhodecode
 
     :created_on: Apr 23, 2011
     :author: marcink
@@ -34,24 +34,23 @@ from rhodecode.model.db import Repository, User, UserFollowing
 log = logging.getLogger(__name__)
 
 
-class FollowersController(BaseRepoController):
+class ForksController(BaseRepoController):
 
     @LoginRequired()
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
                                    'repository.admin')
     def __before__(self):
-        super(FollowersController, self).__before__()
+        super(ForksController, self).__before__()
 
-    def followers(self, repo_name):
+    def forks(self, repo_name):
         p = int(request.params.get('page', 1))
         repo_id = Repository.by_repo_name(repo_name).repo_id
-        d = UserFollowing.get_repo_followers(repo_id)\
-            .order_by(UserFollowing.follows_from)
-        c.followers_pager = Page(d, page=p, items_per_page=20)
+        d = Repository.get_repo_forks(repo_id)
+        c.forks_pager = Page(d, page=p, items_per_page=20)
 
-        c.followers_data = render('/followers/followers_data.html')
+        c.forks_data = render('/forks/forks_data.html')
 
         if request.params.get('partial'):
-            return c.followers_data
+            return c.forks_data
 
-        return render('/followers/followers.html')
+        return render('/forks/forks.html')

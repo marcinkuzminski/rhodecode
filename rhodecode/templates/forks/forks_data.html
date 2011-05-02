@@ -1,0 +1,40 @@
+## -*- coding: utf-8 -*-
+
+% for f in c.forks_pager:
+    <div>
+        <div class="fork_user">
+            <div class="gravatar">
+                <img alt="gravatar" src="${h.gravatar_url(f.user.email,24)}"/>
+            </div>
+            <span style="font-size: 20px">
+             <b>${f.user.username}</b> (${f.user.name} ${f.user.lastname}) / 
+              ${h.link_to(f.repo_name,h.url('summary_home',repo_name=f.repo_name))}
+             </span>
+             <div style="padding:5px 3px 3px 42px;">${f.description}</div>
+        </div>
+        <div style="clear:both;padding-top: 10px"></div>
+        <div class="follower_date">${_('forked')} - 
+        <span class="tooltip" title="${f.created_on}"> ${h.age(f.created_on)}</span></div>
+        <div style="border-bottom: 1px solid #DDD;margin:10px 0px 10px 0px"></div>            
+    </div>                
+% endfor 
+
+<div class="pagination-wh pagination-left">
+<script type="text/javascript">
+  var data_div = 'forks';
+  YAHOO.util.Event.onDOMReady(function(){
+    YAHOO.util.Event.addListener(
+    		YUD.getElementsByClassName('pager_link'),"click",
+    		function(){
+            YAHOO.util.Dom.setStyle(data_div,'opacity','0.3');
+            });
+    });
+</script>
+
+${c.forks_pager.pager('$link_previous ~2~ $link_next',     
+onclick="""YAHOO.util.Connect.asyncRequest('GET','$partial_url',{
+success:function(o){YAHOO.util.Dom.get(data_div).innerHTML=o.responseText;
+YUE.on(YAHOO.util.Dom.getElementsByClassName('pager_link'),"click",function(){
+        YAHOO.util.Dom.setStyle(data_div,'opacity','0.3');});       
+YAHOO.util.Dom.setStyle(data_div,'opacity','1');}},null); return false;""")}
+</div>

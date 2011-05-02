@@ -237,6 +237,8 @@ class Repository(Base):
     enable_statistics = Column("statistics", Boolean(), nullable=True, unique=None, default=True)
     enable_downloads = Column("downloads", Boolean(), nullable=True, unique=None, default=True)
     description = Column("description", String(length=10000, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    created_on = Column('created_on', DateTime(timezone=False), nullable=True, unique=None, default=datetime.datetime.now)
+
     fork_id = Column("fork_id", Integer(), ForeignKey('repositories.repo_id'), nullable=True, unique=False, default=None)
     group_id = Column("group_id", Integer(), ForeignKey('groups.group_id'), nullable=True, unique=False, default=None)
 
@@ -259,6 +261,11 @@ class Repository(Base):
     @classmethod
     def by_repo_name(cls, repo_name):
         return Session.query(cls).filter(cls.repo_name == repo_name).one()
+
+
+    @classmethod
+    def get_repo_forks(cls, repo_id):
+        return Session.query(cls).filter(Repository.fork_id == repo_id)
 
     @property
     def just_name(self):
