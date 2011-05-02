@@ -36,7 +36,7 @@ news
 - #109 Repository can be created from external Mercurial link (aka. remote 
   repository, and manually updated (via pull) from admin panel
 - beta git support - push/pull server + basic view for git repos
-- added followers page
+- added followers page and forks page
 
 fixes
 -----
@@ -54,6 +54,8 @@ fixes
 - #150 fixes for errors on repositories mapped in db but corrupted in 
   filesystem
 - fixed problem with ascendant characters in realm #181
+- fixed problem with sqlite file based database connection pool
+- whoosh indexer and code stats share the same dynamic extensions map
 
 1.1.8 (**2011-04-12**)
 ======================

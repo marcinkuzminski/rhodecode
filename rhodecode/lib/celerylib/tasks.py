@@ -31,12 +31,12 @@ import logging
 
 from time import mktime
 from operator import itemgetter
-from pygments import lexers
 from string import lower
 
 from pylons import config
 from pylons.i18n.translation import _
 
+from rhodecode.lib import LANGUAGES_EXTENSIONS_MAP
 from rhodecode.lib.celerylib import run_task, locked_task, str2bool, \
     __get_lockkey, LockHeld, DaemonLock
 from rhodecode.lib.helpers import person
@@ -63,41 +63,6 @@ __all__ = ['whoosh_index', 'get_commits_stats',
 
 CELERY_ON = str2bool(config['app_conf'].get('use_celery'))
 
-LANGUAGES_EXTENSIONS_MAP = {}
-
-
-def __clean(s):
-
-    s = s.lstrip('*')
-    s = s.lstrip('.')
-
-    if s.find('[') != -1:
-        exts = []
-        start, stop = s.find('['), s.find(']')
-
-        for suffix in s[start + 1:stop]:
-            exts.append(s[:s.find('[')] + suffix)
-        return map(lower, exts)
-    else:
-        return map(lower, [s])
-
-for lx, t in sorted(lexers.LEXERS.items()):
-    m = map(__clean, t[-2])
-    if m:
-        m = reduce(lambda x, y: x + y, m)
-        for ext in m:
-            desc = lx.replace('Lexer', '')
-            if ext in LANGUAGES_EXTENSIONS_MAP:
-                if desc not in LANGUAGES_EXTENSIONS_MAP[ext]:
-                    LANGUAGES_EXTENSIONS_MAP[ext].append(desc)
-            else:
-                LANGUAGES_EXTENSIONS_MAP[ext] = [desc]
-
-#Additional mappings that are not present in the pygments lexers
-# NOTE: that this will overide any mappings in LANGUAGES_EXTENSIONS_MAP
-ADDITIONAL_MAPPINGS = {'xaml': 'XAML'}
-
-LANGUAGES_EXTENSIONS_MAP.update(ADDITIONAL_MAPPINGS)
 
 
 def get_session():

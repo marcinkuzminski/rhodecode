@@ -24,6 +24,48 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+
+def __get_lem():
+    from pygments import lexers
+    from string import lower
+    from collections import defaultdict
+
+    d = defaultdict(lambda: [])
+
+    def __clean(s):
+        s = s.lstrip('*')
+        s = s.lstrip('.')
+
+        if s.find('[') != -1:
+            exts = []
+            start, stop = s.find('['), s.find(']')
+
+            for suffix in s[start + 1:stop]:
+                exts.append(s[:s.find('[')] + suffix)
+            return map(lower, exts)
+        else:
+            return map(lower, [s])
+
+    for lx, t in sorted(lexers.LEXERS.items()):
+        m = map(__clean, t[-2])
+        if m:
+            m = reduce(lambda x, y: x + y, m)
+            for ext in m:
+                desc = lx.replace('Lexer', '')
+                d[ext].append(desc)
+
+    return dict(d)
+
+# language map is also used by whoosh indexer, which for those specified
+# extensions will index it's content
+LANGUAGES_EXTENSIONS_MAP = __get_lem()
+
+#Additional mappings that are not present in the pygments lexers
+# NOTE: that this will overide any mappings in LANGUAGES_EXTENSIONS_MAP
+ADDITIONAL_MAPPINGS = {'xaml': 'XAML'}
+
+LANGUAGES_EXTENSIONS_MAP.update(ADDITIONAL_MAPPINGS)
+
 def str2bool(_str):
     """
     returs True/False value from given string, it tries to translate the
