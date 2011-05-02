@@ -2,9 +2,12 @@
 
 Provides the BaseController class for subclassing.
 """
+import copy
+
 from pylons import config, tmpl_context as c, request, session
 from pylons.controllers import WSGIController
 from pylons.templating import render_mako as render
+
 from rhodecode import __version__
 from rhodecode.lib.auth import AuthUser
 from rhodecode.lib.utils import get_repo_slug
@@ -60,12 +63,17 @@ class BaseRepoController(BaseController):
         super(BaseRepoController, self).__before__()
         if c.repo_name:
 
-            c.rhodecode_repo, dbrepo = self.scm_model.get(c.repo_name,
-                                                          retval='repo')
+            r, dbrepo = self.scm_model.get(c.repo_name, retval='repo')
 
-            if c.rhodecode_repo is not None:
+            if r is not None:
                 c.repository_followers = self.scm_model.get_followers(c.repo_name)
                 c.repository_forks = self.scm_model.get_forks(c.repo_name)
             else:
                 c.repository_followers = 0
                 c.repository_forks = 0
+
+            # Since RhodeCode uses heavy memory caching we make a deepcopy
+            # of object taken from cache. This way we lose reference to cached
+            # instance in memory and keep it relatively small even for 
+            # very large number of changesets
+            c.rhodecode_repo = copy.copy(r)

@@ -10,11 +10,11 @@
 		<div class="browser-nav">
 			${h.form(h.url.current())}
 			<div class="info_box">
-	          <span >${_('view')}@rev</span> 
-	          <a href="${c.url_prev}" title="${_('previous revision')}">&laquo;</a>
+	          <span class="rev">${_('view')}@rev</span> 
+	          <a class="rev" href="${c.url_prev}" title="${_('previous revision')}">&laquo;</a>
 	          ${h.text('at_rev',value=c.changeset.revision,size=3)}
-	          <a href="${c.url_next}" title="${_('next revision')}">&raquo;</a>
-	          ${h.submit('view','view')}
+	          <a class="rev" href="${c.url_next}" title="${_('next revision')}">&raquo;</a>
+	          ## ${h.submit('view',_('view'),class_="ui-button-small")}
 		    </div>           
 			${h.end_form()}
 		</div>
