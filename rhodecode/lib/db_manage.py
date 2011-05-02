@@ -115,7 +115,7 @@ class DbManage(object):
             msg = ('Found current database under version'
                  ' control with version %s' % curr_version)
 
-        except (RuntimeError, DatabaseNotControlledError), e:
+        except (RuntimeError, DatabaseNotControlledError):
             curr_version = 1
             msg = ('Current database is not under version control. Setting'
                    ' as version %s' % curr_version)
@@ -340,15 +340,12 @@ class DbManage(object):
         #check proper dir
         if not os.path.isdir(path):
             path_ok = False
-            log.error('Entered path is not a valid directory: %s [%s/3]',
-                      path, retries)
+            log.error('Given path %s is not a valid directory', path)
 
         #check write access
-        if not os.access(path, os.W_OK):
+        if not os.access(path, os.W_OK) and path_ok:
             path_ok = False
-
-            log.error('No write permission to given path: %s [%s/3]',
-                      path, retries)
+            log.error('No write permission to given path %s', path)
 
         if retries == 0:
             sys.exit()
