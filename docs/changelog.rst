@@ -37,6 +37,7 @@ news
   repository, and manually updated (via pull) from admin panel
 - beta git support - push/pull server + basic view for git repos
 - added followers page and forks page
+- server side file repository files edition with commits
 
 fixes
 -----

@@ -7,14 +7,15 @@ Setup
 Setting up RhodeCode
 --------------------------
 
-First, you will need to create a RhodeCode configuration file. Run the following
-command to do this::
+First, you will need to create a RhodeCode configuration file. Run the 
+following command to do this::
  
     paster make-config RhodeCode production.ini
 
 - This will create the file `production.ini` in the current directory. This
-  configuration file contains the various settings for RhodeCode, e.g proxy port,
-  email settings, usage of static files, cache, celery settings and logging.
+  configuration file contains the various settings for RhodeCode, e.g proxy 
+  port, email settings, usage of static files, cache, celery settings and 
+  logging.
 
 
 Next, you need to create the databases used by RhodeCode. I recommend that you
@@ -27,19 +28,19 @@ the following command::
 
 This will prompt you for a "root" path. This "root" path is the location where
 RhodeCode will store all of its repositories on the current machine. After
-entering this "root" path ``setup-app`` will also prompt you for a username and password
-for the initial admin account which ``setup-app`` sets up for you.
+entering this "root" path ``setup-app`` will also prompt you for a username 
+and password for the initial admin account which ``setup-app`` sets up for you.
 
 - The ``setup-app`` command will create all of the needed tables and an admin
-  account. When choosing a root path you can either use a new empty location, or a
-  location which already contains existing repositories. If you choose a location
-  which contains existing repositories RhodeCode will simply add all of the
-  repositories at the chosen location to it's database. (Note: make sure you
-  specify the correct path to the root).
+  account. When choosing a root path you can either use a new empty location, 
+  or a location which already contains existing repositories. If you choose a 
+  location which contains existing repositories RhodeCode will simply add all 
+  of the repositories at the chosen location to it's database. (Note: make 
+  sure you specify the correct path to the root).
 - Note: the given path for mercurial_ repositories **must** be write accessible
-  for the application. It's very important since the RhodeCode web interface will
-  work without write access, but when trying to do a push it will eventually fail
-  with permission denied errors unless it has write access.
+  for the application. It's very important since the RhodeCode web interface 
+  will work without write access, but when trying to do a push it will 
+  eventually fail with permission denied errors unless it has write access.
 
 You are now ready to use RhodeCode, to run it simply execute::
  
@@ -48,7 +49,8 @@ You are now ready to use RhodeCode, to run it simply execute::
 - This command runs the RhodeCode server. The web app should be available at the 
   127.0.0.1:5000. This ip and port is configurable via the production.ini 
   file created in previous step
-- Use the admin account you created above when running ``setup-app`` to login to the web app.
+- Use the admin account you created above when running ``setup-app`` to login 
+  to the web app.
 - The default permissions on each repository is read, and the owner is admin. 
   Remember to update these if needed.
 - In the admin panel you can toggle ldap, anonymous, permissions settings. As
@@ -56,9 +58,9 @@ You are now ready to use RhodeCode, to run it simply execute::
 
 Try copying your own mercurial repository into the "root" directory you are
 using, then from within the RhodeCode web application choose Admin >
-repositories. Then choose Add New Repository. Add the repository you copied into
-the root. Test that you can browse your repository from within RhodeCode and then
-try cloning your repository from RhodeCode with::
+repositories. Then choose Add New Repository. Add the repository you copied 
+into the root. Test that you can browse your repository from within RhodeCode 
+and then try cloning your repository from RhodeCode with::
 
     hg clone http://127.0.0.1:5000/<repository name>
 
@@ -67,8 +69,8 @@ where *repository name* is replaced by the name of your repository.
 Using RhodeCode with SSH
 ------------------------
 
-RhodeCode currently only hosts repositories using http and https. (The addition of
-ssh hosting is a planned future feature.) However you can easily use ssh in
+RhodeCode currently only hosts repositories using http and https. (The addition
+of ssh hosting is a planned future feature.) However you can easily use ssh in
 parallel with RhodeCode. (Repository access via ssh is a standard "out of
 the box" feature of mercurial_ and you can use this to access any of the
 repositories that RhodeCode is hosting. See PublishingRepositories_)
@@ -77,10 +79,10 @@ RhodeCode repository structures are kept in directories with the same name
 as the project. When using repository groups, each group is a subdirectory.
 This allows you to easily use ssh for accessing repositories.
 
-In order to use ssh you need to make sure that your web-server and the users login
-accounts have the correct permissions set on the appropriate directories. (Note
-that these permissions are independent of any permissions you have set up using
-the RhodeCode web interface.)
+In order to use ssh you need to make sure that your web-server and the users 
+login accounts have the correct permissions set on the appropriate directories.
+(Note that these permissions are independent of any permissions you have set up
+using the RhodeCode web interface.)
 
 If your main directory (the same as set in RhodeCode settings) is for example
 set to **/home/hg** and the repository you are using is named `rhodecode`, then
@@ -230,8 +232,8 @@ Connection Security : required
 
 Certificate Checks : optional
     How SSL certificates verification is handled - this is only useful when
-    `Enable LDAPS`_ is enabled.  Only DEMAND or HARD offer full SSL security while
-    the other options are susceptible to man-in-the-middle attacks.  SSL
+    `Enable LDAPS`_ is enabled.  Only DEMAND or HARD offer full SSL security 
+    while the other options are susceptible to man-in-the-middle attacks.  SSL
     certificates can be installed to /etc/openldap/cacerts so that the
     DEMAND or HARD options can be used with self-signed certificates or
     certificates that do not have traceable certificates of authority.
@@ -359,8 +361,8 @@ In order to start using celery run::
 
 
 .. note::
-   Make sure you run this command from the same virtualenv, and with the same user
-   that rhodecode runs.
+   Make sure you run this command from the same virtualenv, and with the same 
+   user that rhodecode runs.
    
 HTTPS support
 -------------
@@ -369,8 +371,8 @@ There are two ways to enable https:
 
 - Set HTTP_X_URL_SCHEME in your http server headers, than rhodecode will
   recognize this headers and make proper https redirections
-- Alternatively, set `force_https = true` in the ini configuration to force using
-  https, no headers are needed than to enable https
+- Alternatively, set `force_https = true` in the ini configuration to force 
+  using https, no headers are needed than to enable https
 
 
 Nginx virtual host example
@@ -526,7 +528,8 @@ Troubleshooting
 :Q: **Apache doesn't pass basicAuth on pull/push?**
 :A: Make sure you added `WSGIPassAuthorization true`.
 
-For further questions search the `Issues tracker`_, or post a message in the `google group rhodecode`_
+For further questions search the `Issues tracker`_, or post a message in the 
+`google group rhodecode`_
 
 .. _virtualenv: http://pypi.python.org/pypi/virtualenv
 .. _python: http://www.python.org/
