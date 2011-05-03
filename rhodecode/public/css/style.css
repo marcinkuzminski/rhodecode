@@ -2204,6 +2204,15 @@ outline:none;
 margin:0;
 }
 
+#content div.box input.ui-button-small-blue {
+background:#4e85bb url("../images/button_highlight.png") repeat-x;
+border-top:1px solid #5c91a4;
+border-left:1px solid #2a6f89;
+border-right:1px solid #2b7089;
+border-bottom:1px solid #1a6480;
+color:#fff;
+}
+
 #content div.box input.ui-button-small submit,button{
 cursor: pointer;
 }

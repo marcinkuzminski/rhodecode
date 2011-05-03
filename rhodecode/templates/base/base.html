@@ -267,8 +267,8 @@
                    	<li>${h.link_to(_('fork'),h.url('repo_fork_home',repo_name=c.repo_name),class_='fork')}</li>
                    	<li>${h.link_to(_('search'),h.url('search_repo',search_repo=c.repo_name),class_='search')}</li>
                     
-                    %if h.HasPermissionAll('hg.admin')('access admin main page'):
-                    <li>
+                    % if h.HasPermissionAll('hg.admin')('access admin main page'):
+                     <li>
                        ${h.link_to(_('admin'),h.url('admin_home'),class_='admin')}  
                         <%def name="admin_menu()">
                         <ul>
@@ -283,9 +283,8 @@
                         </%def>
                         
                         ${admin_menu()}
-                    </li>
-                    %endif
-
+                     </li>
+                    % endif
                    </ul>             
                 </li>
                 
@@ -306,8 +305,6 @@
                     </a>
                 </li>                
                 
-                
-                
 	        </ul>
 		%else:
 		    ##ROOT MENU
@@ -320,16 +317,16 @@
                     <span>${_('Home')}</span>                 
                     </a>        
                 </li>
-                %if c.rhodecode_user.username != 'default':
-                <li>
+                % if c.rhodecode_user.username != 'default':
+                 <li>
                     <a title="${_('Journal')}"  href="${h.url('journal')}">
                     <span class="icon">
                         <img src="${h.url("/images/icons/book.png")}" alt="${_('Journal')}" />
                     </span>
                     <span>${_('Journal')}</span>                 
                     </a>        
-                </li>
-                %endif          
+                 </li>
+                % endif
                 <li>
                     <a title="${_('Search')}"  href="${h.url('search')}">
                     <span class="icon">

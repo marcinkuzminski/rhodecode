@@ -82,6 +82,30 @@ def str2bool(_str):
     _str = str(_str).strip().lower()
     return _str in ('t', 'true', 'y', 'yes', 'on', '1')
 
+def convert_line_endings(temp, mode):
+    from string import replace
+    #modes:  0 - Unix, 1 - Mac, 2 - DOS
+    if mode == 0:
+            temp = replace(temp, '\r\n', '\n')
+            temp = replace(temp, '\r', '\n')
+    elif mode == 1:
+            temp = replace(temp, '\r\n', '\r')
+            temp = replace(temp, '\n', '\r')
+    elif mode == 2:
+            import re
+            temp = re.sub("\r(?!\n)|(?<!\r)\n", "\r\n", temp)
+    return temp
+
+
+def detect_mode(line, default):
+    if line.endswith('\r\n'):
+        return 2
+    elif line.endswith('\n'):
+        return 0
+    elif line.endswith('\r'):
+        return 1
+    else:
+        return default
 
 def generate_api_key(username, salt=None):
     """

@@ -26,16 +26,11 @@
 import os
 import logging
 import mimetypes
-import rhodecode.lib.helpers as h
+import traceback
 
 from pylons import request, response, session, tmpl_context as c, url
 from pylons.i18n.translation import _
 from pylons.controllers.util import redirect
-
-from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
-from rhodecode.lib.base import BaseRepoController, render
-from rhodecode.lib.utils import EmptyChangeset
-from rhodecode.model.repo import RepoModel
 
 from vcs.backends import ARCHIVE_SPECS
 from vcs.exceptions import RepositoryError, ChangesetDoesNotExistError, \
@@ -43,14 +38,19 @@ from vcs.exceptions import RepositoryError, ChangesetDoesNotExistError, \
 from vcs.nodes import FileNode, NodeKind
 from vcs.utils import diffs as differ
 
+from rhodecode.lib import convert_line_endings, detect_mode
+from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
+from rhodecode.lib.base import BaseRepoController, render
+from rhodecode.lib.utils import EmptyChangeset
+import rhodecode.lib.helpers as h
+from rhodecode.model.repo import RepoModel
+
 log = logging.getLogger(__name__)
 
 
 class FilesController(BaseRepoController):
 
     @LoginRequired()
-    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
-                                   'repository.admin')
     def __before__(self):
         super(FilesController, self).__before__()
         c.cut_off_limit = self.cut_off_limit
@@ -95,6 +95,8 @@ class FilesController(BaseRepoController):
 
         return file_node
 
+    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
+                                   'repository.admin')
     def index(self, repo_name, revision, f_path):
         #reditect to given revision from form if given
         post_revision = request.POST.get('at_rev', None)
@@ -144,6 +146,8 @@ class FilesController(BaseRepoController):
 
         return render('files/files.html')
 
+    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
+                                   'repository.admin')
     def rawfile(self, repo_name, revision, f_path):
         cs = self.__get_cs_or_redirect(revision, repo_name)
         file_node = self.__get_filenode_or_redirect(repo_name, cs, f_path)
@@ -154,6 +158,8 @@ class FilesController(BaseRepoController):
         response.content_type = file_node.mimetype
         return file_node.content
 
+    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
+                                   'repository.admin')
     def raw(self, repo_name, revision, f_path):
         cs = self.__get_cs_or_redirect(revision, repo_name)
         file_node = self.__get_filenode_or_redirect(repo_name, cs, f_path)
@@ -198,6 +204,8 @@ class FilesController(BaseRepoController):
         response.content_type = mimetype
         return file_node.content
 
+    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
+                                   'repository.admin')
     def annotate(self, repo_name, revision, f_path):
         c.cs = self.__get_cs_or_redirect(revision, repo_name)
         c.file = self.__get_filenode_or_redirect(repo_name, c.cs, f_path)
@@ -206,6 +214,54 @@ class FilesController(BaseRepoController):
         c.f_path = f_path
         return render('files/files_annotate.html')
 
+    @HasRepoPermissionAnyDecorator('repository.write', 'repository.admin')
+    def edit(self, repo_name, revision, f_path):
+        r_post = request.POST
+
+        if c.rhodecode_repo.alias == 'hg':
+            from vcs.backends.hg import MercurialInMemoryChangeset as IMC
+        elif c.rhodecode_repo.alias == 'git':
+            from vcs.backends.git import GitInMemoryChangeset as IMC
+
+        c.cs = self.__get_cs_or_redirect(revision, repo_name)
+        c.file = self.__get_filenode_or_redirect(repo_name, c.cs, f_path)
+
+        c.file_history = self._get_node_history(c.cs, f_path)
+        c.f_path = f_path
+
+        if r_post:
+
+            old_content = c.file.content
+            # modes:  0 - Unix, 1 - Mac, 2 - DOS
+            mode = detect_mode(old_content.splitlines(1)[0], 0)
+            content = convert_line_endings(r_post.get('content'), mode)
+            message = r_post.get('message') or (_('Edited %s via RhodeCode')
+                                                % (f_path))
+
+            if content == old_content:
+                h.flash(_('No changes'),
+                    category='warning')
+                return redirect(url('changeset_home',
+                                    repo_name=c.repo_name, revision='tip'))
+            try:
+                new_node = FileNode(f_path, content)
+                m = IMC(c.rhodecode_repo)
+                m.change(new_node)
+                m.commit(message=message,
+                         author=self.rhodecode_user.full_contact,
+                         parents=[c.cs], branch=c.cs.branch)
+                h.flash(_('Successfully committed to %s' % f_path),
+                        category='success')
+            except Exception, e:
+                log.error(traceback.format_exc())
+                h.flash(_('Error occurred during commit'), category='error')
+            return redirect(url('changeset_home',
+                                repo_name=c.repo_name, revision='tip'))
+
+        return render('files/files_edit.html')
+
+    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
+                                   'repository.admin')
     def archivefile(self, repo_name, fname):
 
         fileformat = None
@@ -239,6 +295,8 @@ class FilesController(BaseRepoController):
 
         return cs.get_chunked_archive(stream=None, kind=fileformat)
 
+    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
+                                   'repository.admin')
     def diff(self, repo_name, f_path):
         diff1 = request.GET.get('diff1')
         diff2 = request.GET.get('diff2')
@@ -282,7 +340,6 @@ class FilesController(BaseRepoController):
             return diff.raw_diff()
 
         elif c.action == 'diff':
-
             if node1.is_binary or node2.is_binary:
                 c.cur_diff = _('Binary file')
             elif node1.size > self.cut_off_limit or \

@@ -278,6 +278,10 @@ class  AuthUser(object):
     def is_admin(self):
         return self.admin
 
+    @property
+    def full_contact(self):
+        return '%s %s <%s>' % (self.name, self.lastname, self.email)
+
     def __repr__(self):
         return "<AuthUser('id:%s:%s|%s')>" % (self.user_id, self.username,
                                               self.is_authenticated)
