@@ -232,29 +232,38 @@ class FilesController(BaseRepoController):
         if r_post:
 
             old_content = c.file.content
+            sl = old_content.splitlines(1)
+            first_line = sl[0] if sl else ''
             # modes:  0 - Unix, 1 - Mac, 2 - DOS
-            mode = detect_mode(old_content.splitlines(1)[0], 0)
+            mode = detect_mode(first_line, 0)
             content = convert_line_endings(r_post.get('content'), mode)
+
             message = r_post.get('message') or (_('Edited %s via RhodeCode')
                                                 % (f_path))
 
             if content == old_content:
                 h.flash(_('No changes'),
                     category='warning')
-                return redirect(url('changeset_home',
-                                    repo_name=c.repo_name, revision='tip'))
+                return redirect(url('changeset_home', repo_name=c.repo_name,
+                                    revision='tip'))
+
             try:
-                new_node = FileNode(f_path, content)
+                content = content.encode('utf8')
+                message = message.encode('utf8')
+                path = f_path.encode('utf8')
+                author = self.rhodecode_user.full_contact.encode('utf8')
                 m = IMC(c.rhodecode_repo)
-                m.change(new_node)
+                m.change(FileNode(path, content))
                 m.commit(message=message,
-                         author=self.rhodecode_user.full_contact,
+                         author=author,
                          parents=[c.cs], branch=c.cs.branch)
                 h.flash(_('Successfully committed to %s' % f_path),
                         category='success')
+
             except Exception, e:
                 log.error(traceback.format_exc())
                 h.flash(_('Error occurred during commit'), category='error')
+                raise
             return redirect(url('changeset_home',
                                 repo_name=c.repo_name, revision='tip'))
 
