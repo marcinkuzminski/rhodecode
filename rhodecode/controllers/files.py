@@ -248,6 +248,8 @@ class FilesController(BaseRepoController):
                                     revision='tip'))
 
             try:
+                # decoding here will force that we have proper encoded values
+                # in any other case this will throw exceptions and deny commit
                 content = content.encode('utf8')
                 message = message.encode('utf8')
                 path = f_path.encode('utf8')
@@ -263,7 +265,6 @@ class FilesController(BaseRepoController):
             except Exception, e:
                 log.error(traceback.format_exc())
                 h.flash(_('Error occurred during commit'), category='error')
-                raise
             return redirect(url('changeset_home',
                                 repo_name=c.repo_name, revision='tip'))
 

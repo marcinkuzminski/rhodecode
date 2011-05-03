@@ -1,8 +1,14 @@
-#!/usr/bin/env python
-# encoding: utf-8
-# Custom Exceptions modules
-# Copyright (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
-#
+# -*- coding: utf-8 -*-
+"""
+    rhodecode.lib.exceptions
+    ~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Set of custom exceptions used in RhodeCode
+
+    :created_on: Nov 17, 2010
+    :copyright: (c) 2010 by marcink.
+    :license: LICENSE_NAME, see LICENSE_FILE for more details.
+"""
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -15,16 +21,27 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-"""
-Created on Nov 17, 2010
-Custom Exceptions modules
-@author: marcink
-"""
 
-class LdapUsernameError(Exception):pass
-class LdapPasswordError(Exception):pass
-class LdapConnectionError(Exception):pass
-class LdapImportError(Exception):pass
 
-class DefaultUserException(Exception):pass
-class UserOwnsReposException(Exception):pass
+class LdapUsernameError(Exception):
+    pass
+
+
+class LdapPasswordError(Exception):
+    pass
+
+
+class LdapConnectionError(Exception):
+    pass
+
+
+class LdapImportError(Exception):
+    pass
+
+
+class DefaultUserException(Exception):
+    pass
+
+
+class UserOwnsReposException(Exception):
+    pass

@@ -15,6 +15,7 @@ from rhodecode.model import meta
 from rhodecode.model.scm import ScmModel
 from rhodecode import BACKENDS
 
+
 class BaseController(WSGIController):
 
     def __before__(self):
@@ -36,7 +37,7 @@ class BaseController(WSGIController):
         # the request is routed to. This routing information is
         # available in environ['pylons.routes_dict']
         try:
-            #putting this here makes sure that we update permissions every time
+            # putting this here makes sure that we update permissions each time
             api_key = request.GET.get('api_key')
             user_id = getattr(session.get('rhodecode_user'), 'user_id', None)
             self.rhodecode_user = c.rhodecode_user = AuthUser(user_id, api_key)
@@ -66,7 +67,8 @@ class BaseRepoController(BaseController):
             r, dbrepo = self.scm_model.get(c.repo_name, retval='repo')
 
             if r is not None:
-                c.repository_followers = self.scm_model.get_followers(c.repo_name)
+                c.repository_followers = \
+                    self.scm_model.get_followers(c.repo_name)
                 c.repository_forks = self.scm_model.get_forks(c.repo_name)
             else:
                 c.repository_followers = 0
@@ -74,6 +76,6 @@ class BaseRepoController(BaseController):
 
             # Since RhodeCode uses heavy memory caching we make a deepcopy
             # of object taken from cache. This way we lose reference to cached
-            # instance in memory and keep it relatively small even for 
+            # instance in memory and keep it relatively small even for
             # very large number of changesets
             c.rhodecode_repo = copy.copy(r)

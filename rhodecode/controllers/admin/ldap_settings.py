@@ -123,7 +123,6 @@ class LdapSettingsController(BaseController):
         except formencode.Invalid, errors:
             e = errors.error_dict or {}
 
-
             return htmlfill.render(
                 render('admin/ldap/ldap.html'),
                 defaults=errors.value,

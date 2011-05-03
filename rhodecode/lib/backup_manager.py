@@ -1,8 +1,15 @@
-#!/usr/bin/env python
-# encoding: utf-8
-# mercurial repository backup manager
-# Copyright (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
+# -*- coding: utf-8 -*-
+"""
+    rhodecode.lib.backup_manager
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+    Mercurial repositories backup manager, it allows to backups all 
+    repositories and send it to backup server using RSA key via ssh.
+
+    :created_on: Feb 28, 2010
+    :copyright: (c) 2010 by marcink.
+    :license: LICENSE_NAME, see LICENSE_FILE for more details.
+"""
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -16,21 +23,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""
-Created on Feb 28, 2010
-Mercurial repositories backup manager
-@author: marcink
-"""
-
+import os
+import sys
 
 import logging
 import tarfile
-import os
 import datetime
-import sys
 import subprocess
+
 logging.basicConfig(level=logging.DEBUG,
                     format="%(asctime)s %(levelname)-5.5s %(message)s")
+
 
 class BackupManager(object):
     def __init__(self, repos_location, rsa_key, backup_server):
@@ -45,7 +48,6 @@ class BackupManager(object):
 
         logging.info('starting backup for %s', self.repos_path)
         logging.info('backup target %s', self.backup_file_path)
-
 
     def get_id_rsa(self, rsa_key):
         if not os.path.isfile(rsa_key):
@@ -69,14 +71,12 @@ class BackupManager(object):
         tar.close()
         logging.info('finished backup of mercurial repositories')
 
-
-
     def transfer_files(self):
         params = {
                   'id_rsa_key': self.id_rsa_path,
-                  'backup_file':os.path.join(self.backup_file_path,
+                  'backup_file': os.path.join(self.backup_file_path,
                                              self.backup_file_name),
-                  'backup_server':self.backup_server
+                  'backup_server': self.backup_server
                   }
         cmd = ['scp', '-l', '40000', '-i', '%(id_rsa_key)s' % params,
                '%(backup_file)s' % params,
@@ -85,12 +85,9 @@ class BackupManager(object):
         subprocess.call(cmd)
         logging.info('Transfered file %s to %s', self.backup_file_name, cmd[4])
 
-
     def rm_file(self):
         logging.info('Removing file %s', self.backup_file_name)
         os.remove(os.path.join(self.backup_file_path, self.backup_file_name))
-
-
 
 if __name__ == "__main__":
 

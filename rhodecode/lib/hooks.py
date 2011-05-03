@@ -32,6 +32,7 @@ from mercurial.node import nullrev
 from rhodecode.lib import helpers as h
 from rhodecode.lib.utils import action_logger
 
+
 def repo_size(ui, repo, hooktype=None, **kwargs):
     """Presents size of repository after push
 
@@ -63,6 +64,7 @@ def repo_size(ui, repo, hooktype=None, **kwargs):
     sys.stdout.write('Repository size .hg:%s repo:%s total:%s\n' \
                      % (size_hg_f, size_root_f, size_total_f))
 
+
 def log_pull_action(ui, repo, **kwargs):
     """Logs user last pull action
 
@@ -78,6 +80,7 @@ def log_pull_action(ui, repo, **kwargs):
     action_logger(username, action, repository, extra_params['ip'])
 
     return 0
+
 
 def log_push_action(ui, repo, **kwargs):
     """Maps user last push action to new changeset id, from mercurial

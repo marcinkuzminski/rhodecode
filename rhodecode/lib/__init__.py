@@ -24,7 +24,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
 def __get_lem():
     from pygments import lexers
     from string import lower
@@ -60,11 +59,12 @@ def __get_lem():
 # extensions will index it's content
 LANGUAGES_EXTENSIONS_MAP = __get_lem()
 
-#Additional mappings that are not present in the pygments lexers
+# Additional mappings that are not present in the pygments lexers
 # NOTE: that this will overide any mappings in LANGUAGES_EXTENSIONS_MAP
 ADDITIONAL_MAPPINGS = {'xaml': 'XAML'}
 
 LANGUAGES_EXTENSIONS_MAP.update(ADDITIONAL_MAPPINGS)
+
 
 def str2bool(_str):
     """
@@ -82,6 +82,7 @@ def str2bool(_str):
     _str = str(_str).strip().lower()
     return _str in ('t', 'true', 'y', 'yes', 'on', '1')
 
+
 def convert_line_endings(temp, mode):
     from string import replace
     #modes:  0 - Unix, 1 - Mac, 2 - DOS
@@ -98,6 +99,15 @@ def convert_line_endings(temp, mode):
 
 
 def detect_mode(line, default):
+    """
+    Detects line break for given line, if line break couldn't be found
+    given default value is returned
+
+    :param line: str line
+    :param default: default
+    :rtype: int
+    :return: value of line end on of 0 - Unix, 1 - Mac, 2 - DOS
+    """
     if line.endswith('\r\n'):
         return 2
     elif line.endswith('\n'):
@@ -106,6 +116,7 @@ def detect_mode(line, default):
         return 1
     else:
         return default
+
 
 def generate_api_key(username, salt=None):
     """
@@ -151,7 +162,7 @@ def engine_from_config(configuration, prefix='sqlalchemy.', **kwargs):
     """
     Custom engine_from_config functions that makes sure we use NullPool for
     file based sqlite databases. This prevents errors on sqlite.
-    
+
     """
     from sqlalchemy import engine_from_config as efc
     from sqlalchemy.pool import NullPool
@@ -159,8 +170,6 @@ def engine_from_config(configuration, prefix='sqlalchemy.', **kwargs):
     url = configuration[prefix + 'url']
 
     if url.startswith('sqlite'):
-        kwargs.update({'poolclass':NullPool})
+        kwargs.update({'poolclass': NullPool})
 
     return efc(configuration, prefix, **kwargs)
-
-

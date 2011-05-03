@@ -203,7 +203,7 @@ def authenticate(username, password):
                                                                 password)
                 log.debug('Got ldap DN response %s', user_dn)
 
-                get_ldap_attr = lambda k:ldap_attrs.get(ldap_settings\
+                get_ldap_attr = lambda k: ldap_attrs.get(ldap_settings\
                                                            .get(k), [''])[0]
 
                 user_attrs = {
