@@ -303,7 +303,21 @@ class FilesController(BaseRepoController):
         response.content_disposition = 'attachment; filename=%s-%s%s' \
             % (repo_name, revision, ext)
 
-        return cs.get_chunked_archive(stream=None, kind=fileformat)
+        import tempfile
+        archive = tempfile.mkstemp()[1]
+        t = open(archive, 'wb')
+        cs.fill_archive(stream=t, kind=fileformat)
+
+        def get_chunked_archive(archive):
+            stream = open(archive, 'rb')
+            while True:
+                data = stream.read(4096)
+                if not data:
+                    os.remove(archive)
+                    break
+                yield data
+
+        return get_chunked_archive(archive)
 
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
                                    'repository.admin')
