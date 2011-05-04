@@ -221,6 +221,10 @@ class FilesController(BaseRepoController):
         c.cs = self.__get_cs_or_redirect(revision, repo_name)
         c.file = self.__get_filenode_or_redirect(repo_name, c.cs, f_path)
 
+        if c.file.is_binary:
+            return redirect(url('files_home', repo_name=c.repo_name,
+                         revision=c.cs.raw_id, f_path=f_path))
+
         c.file_history = self._get_node_history(c.cs, f_path)
         c.f_path = f_path
 
