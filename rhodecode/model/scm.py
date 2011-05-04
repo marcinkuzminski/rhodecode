@@ -378,7 +378,7 @@ class ScmModel(BaseModel):
             raise
 
 
-    def commit_change(self, repo, repo_name, cs, author, message, content,
+    def commit_change(self, repo, repo_name, cs, user, author, message, content,
                       f_path):
 
         if repo.alias == 'hg':
@@ -394,9 +394,14 @@ class ScmModel(BaseModel):
         author = author.encode('utf8')
         m = IMC(repo)
         m.change(FileNode(path, content))
-        m.commit(message=message,
+        tip = m.commit(message=message,
                  author=author,
                  parents=[cs], branch=cs.branch)
+
+        new_cs = tip.short_id
+        action = 'push_local:%s' % new_cs
+
+        action_logger(user, action, repo_name)
 
         self.mark_for_invalidation(repo_name)
 

@@ -246,6 +246,7 @@ class FilesController(BaseRepoController):
             try:
                 self.scm_model.commit_change(repo=c.rhodecode_repo,
                                              repo_name=repo_name, cs=c.cs,
+                                             user=self.rhodecode_user,
                                              author=author, message=message,
                                              content=content, f_path=f_path)
                 h.flash(_('Successfully committed to %s' % f_path),
