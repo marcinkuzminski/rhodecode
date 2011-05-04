@@ -24,7 +24,7 @@
     </div>
     <!-- end box / title -->
 	<div class="form">
-	  <div class="fields">
+	  <div id="summary" class="fields">
 		 
 			 <div class="field">
 			  <div class="label">
@@ -59,7 +59,7 @@
 	             %endif
 	             
 	              ##REPO NAME
-			      <span style="font-size: 1.6em;font-weight: bold;vertical-align: baseline;clear:right">${h.repo_link(c.dbrepo.groups_and_repo)}</span>
+			      <span class="repo_name">${h.repo_link(c.dbrepo.groups_and_repo)}</span>
                   
                   ##FORK
 		          %if c.dbrepo.fork:
@@ -91,9 +91,7 @@
 			  <div class="label">
 			      <label>${_('Description')}:</label>
 			  </div>
-			  <div class="input-short">
-			      ${c.dbrepo.description}
-			  </div>
+			  <div class="input-short desc">${c.dbrepo.description}</div>
 			 </div>
 			
 			

@@ -1266,6 +1266,23 @@ padding:2px 3px 3px;
 padding:0 3px 2px;
 }
 
+#summary{
+
+}
+
+#summary .desc{
+white-space: pre;
+width: 100%;
+}
+
+#summary .repo_name{
+font-size: 1.6em;
+font-weight: bold;
+vertical-align: baseline;
+clear:right
+}
+
+
 #footer {
 clear:both;
 overflow:hidden;
