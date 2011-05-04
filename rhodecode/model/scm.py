@@ -38,6 +38,7 @@ from vcs import get_backend
 from vcs.utils.helpers import get_scm
 from vcs.exceptions import RepositoryError, VCSError
 from vcs.utils.lazy import LazyProperty
+from vcs.nodes import FileNode
 
 from rhodecode import BACKENDS
 from rhodecode.lib import helpers as h
@@ -375,6 +376,30 @@ class ScmModel(BaseModel):
         except:
             log.error(traceback.format_exc())
             raise
+
+
+    def commit_change(self, repo, repo_name, cs, author, message, content,
+                      f_path):
+
+        if repo.alias == 'hg':
+            from vcs.backends.hg import MercurialInMemoryChangeset as IMC
+        elif repo.alias == 'git':
+            from vcs.backends.git import GitInMemoryChangeset as IMC
+
+        # decoding here will force that we have proper encoded values
+        # in any other case this will throw exceptions and deny commit
+        content = content.encode('utf8')
+        message = message.encode('utf8')
+        path = f_path.encode('utf8')
+        author = author.encode('utf8')
+        m = IMC(repo)
+        m.change(FileNode(path, content))
+        m.commit(message=message,
+                 author=author,
+                 parents=[cs], branch=cs.branch)
+
+        self.mark_for_invalidation(repo_name)
+
 
     def get_unread_journal(self):
         return self.sa.query(UserLog).count()

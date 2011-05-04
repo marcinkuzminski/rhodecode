@@ -218,11 +218,6 @@ class FilesController(BaseRepoController):
     def edit(self, repo_name, revision, f_path):
         r_post = request.POST
 
-        if c.rhodecode_repo.alias == 'hg':
-            from vcs.backends.hg import MercurialInMemoryChangeset as IMC
-        elif c.rhodecode_repo.alias == 'git':
-            from vcs.backends.git import GitInMemoryChangeset as IMC
-
         c.cs = self.__get_cs_or_redirect(revision, repo_name)
         c.file = self.__get_filenode_or_redirect(repo_name, c.cs, f_path)
 
@@ -240,6 +235,7 @@ class FilesController(BaseRepoController):
 
             message = r_post.get('message') or (_('Edited %s via RhodeCode')
                                                 % (f_path))
+            author = self.rhodecode_user.full_contact
 
             if content == old_content:
                 h.flash(_('No changes'),
@@ -248,21 +244,14 @@ class FilesController(BaseRepoController):
                                     revision='tip'))
 
             try:
-                # decoding here will force that we have proper encoded values
-                # in any other case this will throw exceptions and deny commit
-                content = content.encode('utf8')
-                message = message.encode('utf8')
-                path = f_path.encode('utf8')
-                author = self.rhodecode_user.full_contact.encode('utf8')
-                m = IMC(c.rhodecode_repo)
-                m.change(FileNode(path, content))
-                m.commit(message=message,
-                         author=author,
-                         parents=[c.cs], branch=c.cs.branch)
+                self.scm_model.commit_change(repo=c.rhodecode_repo,
+                                             repo_name=repo_name, cs=c.cs,
+                                             author=author, message=message,
+                                             content=content, f_path=f_path)
                 h.flash(_('Successfully committed to %s' % f_path),
                         category='success')
 
-            except Exception, e:
+            except Exception:
                 log.error(traceback.format_exc())
                 h.flash(_('Error occurred during commit'), category='error')
             return redirect(url('changeset_home',
