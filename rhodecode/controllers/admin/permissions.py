@@ -29,7 +29,6 @@ from pylons.controllers.util import abort, redirect
 from pylons.i18n.translation import _
 from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator
-from rhodecode.lib.auth_ldap import LdapImportError
 from rhodecode.lib.base import BaseController, render
 from rhodecode.model.forms import LdapSettingsForm, DefaultPermissionsForm
 from rhodecode.model.permission import PermissionModel
