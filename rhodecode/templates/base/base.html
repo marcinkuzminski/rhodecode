@@ -6,6 +6,37 @@
     <!-- user -->
     <ul id="logged-user">
          <li class="first">
+         
+			<div id="quick_login" style="display:none">
+			${h.form(h.url('login_home',came_from=h.url.current()))}
+			<div class="form">
+			    <div class="fields">
+			        <div class="field">
+			            <div class="label">
+			                <label for="username">${_('Username')}:</label>
+			            </div>
+			            <div class="input">
+			                ${h.text('username',class_='focus',size=40)}
+			            </div>
+			            
+			        </div>                     
+			        <div class="field">
+			            <div class="label">
+			                <label for="password">${_('Password')}:</label>
+			            </div>
+			            <div class="input">
+			                ${h.password('password',class_='focus',size=40)}
+			            </div>
+			            
+			        </div>
+			        <div class="buttons">
+			            ${h.submit('sign_in','Sign In',class_="ui-button")}
+			        </div>
+			    </div>
+			</div>
+			${h.end_form()}
+			</div>         
+         
              <div class="gravatar">
                  <img alt="gravatar" src="${h.gravatar_url(c.rhodecode_user.email,20)}" />
              </div>
@@ -110,7 +141,7 @@
 				<li>
 					<a id="repo_switcher" title="${_('Switch repository')}" href="#">
                     <span class="icon">
-                        <img src="${h.url("/images/icons/database.png")}" alt="${_('Products')}" />
+                        <img src="${h.url('/images/icons/database.png')}" alt="${_('Products')}" />
                     </span>
                     <span>&darr;</span>					
 					</a>
