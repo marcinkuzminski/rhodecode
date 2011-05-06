@@ -1367,6 +1367,71 @@ margin:10px 0 0;
 padding:0 0 2px;
 }
 
+#quick_login{
+top: 31px;
+background-color: rgb(0, 51, 103);
+z-index: 999; 
+height: 150px;
+position: absolute;
+margin-left: -16px;
+width: 281px;
+border-radius: 0 0 8px 8px;
+}
+
+#quick_login div.form div.fields{
+padding-top: 2px;
+padding-left:10px;
+}
+
+#quick_login div.form div.fields div.field{
+ padding: 5px;
+}
+
+#quick_login div.form div.fields div.field div.label label{
+color:#fff;
+padding-bottom: 3px;
+}
+
+#quick_login div.form div.fields div.field div.input input {
+width:236px;
+background:#FFF;
+border-top:1px solid #b3b3b3;
+border-left:1px solid #b3b3b3;
+border-right:1px solid #eaeaea;
+border-bottom:1px solid #eaeaea;
+color:#000;
+font-family:Lucida Grande, Verdana, Lucida Sans Regular, Lucida Sans Unicode, Arial, sans-serif;
+font-size:11px;
+margin:0;
+padding:5px 7px 4px;
+}
+
+#quick_login div.form div.fields div.buttons {
+clear:both;
+overflow:hidden;
+text-align:right;
+margin:0;
+padding:10px 14px 0;
+}
+
+#quick_login div.form div.fields div.buttons input.ui-button{
+background:#e5e3e3 url("../images/button.png") repeat-x;
+border-top:1px solid #DDD;
+border-left:1px solid #c6c6c6;
+border-right:1px solid #DDD;
+border-bottom:1px solid #c6c6c6;
+color:#515151;
+margin:0;
+padding:4px 10px;
+}
+
+#quick_login div.form div.links {
+clear:both;
+overflow:hidden;
+margin:10px 0 0;
+padding:0 0 2px;
+}
+
 #register div.title {
 clear:both;
 overflow:hidden;
