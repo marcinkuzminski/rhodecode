@@ -35,6 +35,22 @@
 			    </div>
 			</div>
 			${h.end_form()}
+			<script type="text/javascript">
+			YUE.on('quick_login_link','click',function(e){
+				
+				if(YUD.hasClass('quick_login_link','enabled')){
+					YUD.setStyle('quick_login','display','none');
+					YUD.removeClass('quick_login_link','enabled');
+				}
+				else{
+	                YUD.setStyle('quick_login','display','');
+	                YUD.addClass('quick_login_link','enabled');
+				}
+			    //make sure we don't redirect
+				YUE.preventDefault(e);
+			});
+			
+			</script>			
 			</div>         
          
              <div class="gravatar">
@@ -58,7 +74,7 @@
             </li>
             %endif
             %if c.rhodecode_user.username == 'default':
-                <li class="last highlight">${h.link_to(u'Login',h.url('login_home'))}</li>
+                <li class="last highlight">${h.link_to(u'Login',h.url('login_home'),id='quick_login_link')}</li>
             %else:
                 <li class="last highlight">${h.link_to(u'Log Out',h.url('logout_home'))}</li>
             %endif
@@ -215,7 +231,7 @@
 	            <li ${is_current('summary')}>
 	               <a title="${_('Summary')}" href="${h.url('summary_home',repo_name=c.repo_name)}">
 	               <span class="icon">
-	                   <img src="${h.url("/images/icons/clipboard_16.png")}" alt="${_('Summary')}" />
+	                   <img src="${h.url('/images/icons/clipboard_16.png')}" alt="${_('Summary')}" />
 	               </span>
 	               <span>${_('Summary')}</span>                 
 	               </a>	            
@@ -231,7 +247,7 @@
                 <li ${is_current('changelog')}>
                    <a title="${_('Changelog')}" href="${h.url('changelog_home',repo_name=c.repo_name)}">
                    <span class="icon">
-                       <img src="${h.url("/images/icons/time.png")}" alt="${_('Changelog')}" />
+                       <img src="${h.url('/images/icons/time.png')}" alt="${_('Changelog')}" />
                    </span>
                    <span>${_('Changelog')}</span>                 
                    </a>             
@@ -240,7 +256,7 @@
                 <li ${is_current('switch_to')}>
                    <a title="${_('Switch to')}" href="#">
                    <span class="icon">
-                       <img src="${h.url("/images/icons/arrow_switch.png")}" alt="${_('Switch to')}" />
+                       <img src="${h.url('/images/icons/arrow_switch.png')}" alt="${_('Switch to')}" />
                    </span>
                    <span>${_('Switch to')}</span>                 
                    </a>    
@@ -274,7 +290,7 @@
                 <li ${is_current('files')}>
                    <a title="${_('Files')}" href="${h.url('files_home',repo_name=c.repo_name)}">
                    <span class="icon">
-                       <img src="${h.url("/images/icons/file.png")}" alt="${_('Files')}" />
+                       <img src="${h.url('/images/icons/file.png')}" alt="${_('Files')}" />
                    </span>
                    <span>${_('Files')}</span>                 
                    </a>             
@@ -283,7 +299,7 @@
                 <li ${is_current('options')}>
                    <a title="${_('Options')}" href="#">
                    <span class="icon">
-                       <img src="${h.url("/images/icons/table_gear.png")}" alt="${_('Admin')}" />
+                       <img src="${h.url('/images/icons/table_gear.png')}" alt="${_('Admin')}" />
                    </span>
                    <span>${_('Options')}</span>                 
                    </a>
@@ -322,7 +338,7 @@
                 <li>
                     <a title="${_('Followers')}" href="${h.url('repo_followers_home',repo_name=c.repo_name)}">
                     <span class="icon_short">
-                        <img src="${h.url("/images/icons/heart.png")}" alt="${_('Followers')}" />
+                        <img src="${h.url('/images/icons/heart.png')}" alt="${_('Followers')}" />
                     </span>
                     <span id="current_followers_count" class="short">${c.repository_followers}</span>
                     </a>
@@ -330,7 +346,7 @@
                 <li>
                     <a title="${_('Forks')}" href="${h.url('repo_forks_home',repo_name=c.repo_name)}">
                     <span class="icon_short">
-                        <img src="${h.url("/images/icons/arrow_divide.png")}" alt="${_('Forks')}" />
+                        <img src="${h.url('/images/icons/arrow_divide.png')}" alt="${_('Forks')}" />
                     </span>
                     <span class="short">${c.repository_forks}</span>
                     </a>
@@ -343,7 +359,7 @@
                 <li>
                     <a title="${_('Home')}"  href="${h.url('home')}">
                     <span class="icon">
-                        <img src="${h.url("/images/icons/home_16.png")}" alt="${_('Home')}" />
+                        <img src="${h.url('/images/icons/home_16.png')}" alt="${_('Home')}" />
                     </span>
                     <span>${_('Home')}</span>                 
                     </a>        
@@ -352,7 +368,7 @@
                  <li>
                     <a title="${_('Journal')}"  href="${h.url('journal')}">
                     <span class="icon">
-                        <img src="${h.url("/images/icons/book.png")}" alt="${_('Journal')}" />
+                        <img src="${h.url('/images/icons/book.png')}" alt="${_('Journal')}" />
                     </span>
                     <span>${_('Journal')}</span>                 
                     </a>        
@@ -361,7 +377,7 @@
                 <li>
                     <a title="${_('Search')}"  href="${h.url('search')}">
                     <span class="icon">
-                        <img src="${h.url("/images/icons/search_16.png")}" alt="${_('Search')}" />
+                        <img src="${h.url('/images/icons/search_16.png')}" alt="${_('Search')}" />
                     </span>
                     <span>${_('Search')}</span>                 
                     </a>        
@@ -371,7 +387,7 @@
                 <li ${is_current('admin')}>
                    <a title="${_('Admin')}" href="${h.url('admin_home')}">
                    <span class="icon">
-                       <img src="${h.url("/images/icons/cog_edit.png")}" alt="${_('Admin')}" />
+                       <img src="${h.url('/images/icons/cog_edit.png')}" alt="${_('Admin')}" />
                    </span>
                    <span>${_('Admin')}</span>                 
                    </a>
