@@ -132,13 +132,14 @@ YUE.onDOMReady(function(){
             if (f_int > t_int){
             	//highlight from bottom 
             	offset = -35;
+            	ranges = [t_int,f_int];
+            	
             }
             else{
             	//highligth from top 
             	offset = 35;
+            	ranges = [f_int,t_int];
             }
-            
-            ranges = [f_int,t_int].sort();
             
             if (ranges[0] != ranges[1]){
 	            if(YUD.get('linktt') == null){
