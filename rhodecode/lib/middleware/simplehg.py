@@ -254,6 +254,14 @@ class SimpleHg(object):
         invalidate_cache('get_repo_cached_%s' % repo_name)
 
     def __inject_extras(self, baseui, extras={}):
+        """
+        Injects some extra params into baseui instance
+        
+        also overwrites global settings with those takes from local hgrc file
+        
+        :param baseui: baseui instance
+        :param extras: dict with extra params to put into baseui
+        """
 
         hgrc = os.path.join(self.repo_path, '.hg', 'hgrc')
 
@@ -268,4 +276,4 @@ class SimpleHg(object):
             #overwrite our ui instance with the section from hgrc file
             for section in ui_sections:
                 for k, v in repoui.configitems(section):
-                    baseui.repo.ui.setconfig(section, k, v)
+                    baseui.setconfig(section, k, v)
