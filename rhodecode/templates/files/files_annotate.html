@@ -73,24 +73,63 @@
 			           ${_('Binary file (%s)') % c.file.mimetype}
 			       %else:				
 					% if c.file.size < c.cut_off_limit:
-						${h.pygmentize_annotation(c.repo_name,c.file,linenos=True,anchorlinenos=True,lineanchors='S',cssclass="code-highlight")}
+						${h.pygmentize_annotation(c.repo_name,c.file,linenos=True,anchorlinenos=True,lineanchors='L',cssclass="code-highlight")}
 					%else:
 						${_('File is to big to display')} ${h.link_to(_('show as raw'),
 						h.url('files_raw_home',repo_name=c.repo_name,revision=c.cs.revision,f_path=c.f_path))}
 					%endif
-		            <script type="text/javascript">
-		            YAHOO.util.Event.onDOMReady(function(){
-		                YAHOO.util.Event.addListener('show_rev','click',function(e){
-		                    YAHOO.util.Event.preventDefault(e);
-		                    var cs = YAHOO.util.Dom.get('diff1').value;
-		                    var url = "${h.url('files_annotate_home',repo_name=c.repo_name,revision='__CS__',f_path=c.f_path)}".replace('__CS__',cs);
-		                    window.location = url;
-		                    });
-		               });
-		            </script>				
+			       <script type="text/javascript">
+			           function highlight_lines(lines){
+			               for(pos in lines){
+			                 YUD.setStyle('L'+lines[pos],'background-color','#FFFFBE');                       
+			               }
+			           }       
+			           page_highlights = location.href.substring(location.href.indexOf('#')+1).split('L');
+			           if (page_highlights.length == 2){
+			              highlight_ranges  = page_highlights[1].split(",");
+			
+			              var h_lines = [];
+			              for (pos in highlight_ranges){
+			                   var _range = highlight_ranges[pos].split('-');
+			                   if(_range.length == 2){
+			                       var start = parseInt(_range[0]);
+			                       var end = parseInt(_range[1]);
+			                       if (start < end){
+			                           for(var i=start;i<=end;i++){
+			                               h_lines.push(i);
+			                           }
+			                       } 
+			                   }
+			                   else{
+			                       h_lines.push(parseInt(highlight_ranges[pos]));
+			                   }
+			             }
+			           highlight_lines(h_lines);
+			           
+			           //remember original location 
+			           var old_hash  = location.href.substring(location.href.indexOf('#'));
+			           
+			           // this makes a jump to anchor moved by 3 posstions for padding 
+			           window.location.hash = '#L'+Math.max(parseInt(h_lines[0])-3,1);
+			           
+			           //sets old anchor 
+			           window.location.hash = old_hash;
+			           
+			           }
+			       </script>					
 				   %endif				
 				</div>
 			</div>
+            <script type="text/javascript">
+            YAHOO.util.Event.onDOMReady(function(){
+                YUE.on('show_rev','click',function(e){
+                    YAHOO.util.Event.preventDefault(e);
+                    var cs = YAHOO.util.Dom.get('diff1').value;
+                    var url = "${h.url('files_annotate_home',repo_name=c.repo_name,revision='__CS__',f_path=c.f_path)}".replace('__CS__',cs);
+                    window.location = url;
+                    });
+               });
+            </script>			
 		</div>    
     </div>
 </div>    

@@ -217,11 +217,11 @@ class CodeHtmlFormatter(HtmlFormatter):
                       '<tr><td><div class="linenodiv" '
                       'style="background-color: #f0f0f0; padding-right: 10px">'
                       '<pre style="line-height: 125%">' +
-                      ls + '</pre></div></td><td class="code">')
+                      ls + '</pre></div></td><td id="hlcode" class="code">')
         else:
             yield 0, ('<table class="%stable">' % self.cssclass +
                       '<tr><td class="linenos"><div class="linenodiv"><pre>' +
-                      ls + '</pre></div></td><td class="code">')
+                      ls + '</pre></div></td><td id="hlcode" class="code">')
         yield 0, dummyoutfile.getvalue()
         yield 0, '</td></tr></table>'
 
@@ -252,7 +252,7 @@ def pygmentize_annotation(repo_name, filenode, **kwargs):
         golden_ratio = 0.618033988749895
         h = 0.22717784590367374
 
-        for c in xrange(n):
+        for _ in xrange(n):
             h += golden_ratio
             h %= 1
             HSV_tuple = [h, 0.95, 0.95]
