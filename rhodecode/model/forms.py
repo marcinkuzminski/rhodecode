@@ -217,14 +217,21 @@ def ValidRepoName(edit, old_data):
                 e_dict = {'repo_name': _('This repository name is disallowed')}
                 raise formencode.Invalid('', value, state, error_dict=e_dict)
 
-            gr = Group.get(value.get('repo_group'))
 
-            # value needs to be aware of group name
-            repo_name_full = gr.full_path + '/' + repo_name
+            if value.get('repo_group'):
+                gr = Group.get(value.get('repo_group'))
+                group_path = gr.full_path
+                # value needs to be aware of group name
+                repo_name_full = group_path + '/' + repo_name
+            else:
+                group_path = ''
+                repo_name_full = repo_name
+
+
             value['repo_name_full'] = repo_name_full
             if old_data.get('repo_name') != repo_name_full or not edit:
 
-                if gr.full_path != '':
+                if group_path != '':
                     if RepoModel().get_by_repo_name(repo_name_full,):
                         e_dict = {'repo_name':_('This repository already '
                                                 'exists in group "%s"') %
@@ -234,7 +241,8 @@ def ValidRepoName(edit, old_data):
 
                 else:
                     if RepoModel().get_by_repo_name(repo_name_full):
-                        e_dict = {'repo_name':_('This repository already exists')}
+                        e_dict = {'repo_name':_('This repository '
+                                                'already exists')}
                         raise formencode.Invalid('', value, state,
                                                  error_dict=e_dict)
             return value
