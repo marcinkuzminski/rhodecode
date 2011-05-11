@@ -234,7 +234,7 @@ class ReposController(BaseController):
             invalidate_cache('get_repo_cached_%s' % repo_name)
             h.flash(_('Repository %s updated successfully' % repo_name),
                     category='success')
-            changed_name = form_result['repo_name']
+            changed_name = form_result['repo_name_full']
             action_logger(self.rhodecode_user, 'admin_updated_repo',
                               changed_name, '', self.sa)
 

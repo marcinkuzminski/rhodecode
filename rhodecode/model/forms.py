@@ -38,7 +38,7 @@ from rhodecode.lib.exceptions import LdapImportError
 from rhodecode.model import meta
 from rhodecode.model.user import UserModel
 from rhodecode.model.repo import RepoModel
-from rhodecode.model.db import User, UsersGroup
+from rhodecode.model.db import User, UsersGroup, Group
 from rhodecode import BACKENDS
 
 log = logging.getLogger(__name__)
@@ -204,24 +204,51 @@ class ValidRepoUser(formencode.validators.FancyValidator):
         finally:
             meta.Session.remove()
 
-        return self.user_db.user_id
+        return value
 
 def ValidRepoName(edit, old_data):
     class _ValidRepoName(formencode.validators.FancyValidator):
-
         def to_python(self, value, state):
-            slug = repo_name_slug(value)
-            if slug in ['_admin']:
-                raise formencode.Invalid(_('This repository name is disallowed'),
-                                         value, state)
-            if old_data.get('repo_name') != value or not edit:
-                if RepoModel().get_by_repo_name(slug, cache=False):
-                    raise formencode.Invalid(_('This repository already exists') ,
-                                             value, state)
-            return slug
+
+            repo_name = value.get('repo_name')
+
+            slug = repo_name_slug(repo_name)
+            if slug in ['_admin', '']:
+                e_dict = {'repo_name': _('This repository name is disallowed')}
+                raise formencode.Invalid('', value, state, error_dict=e_dict)
+
+            gr = Group.get(value.get('repo_group'))
+
+            # value needs to be aware of group name
+            repo_name_full = gr.full_path + '/' + repo_name
+            value['repo_name_full'] = repo_name_full
+            if old_data.get('repo_name') != repo_name_full or not edit:
+
+                if gr.full_path != '':
+                    if RepoModel().get_by_repo_name(repo_name_full,):
+                        e_dict = {'repo_name':_('This repository already '
+                                                'exists in group "%s"') %
+                                  gr.group_name}
+                        raise formencode.Invalid('', value, state,
+                                                 error_dict=e_dict)
+
+                else:
+                    if RepoModel().get_by_repo_name(repo_name_full):
+                        e_dict = {'repo_name':_('This repository already exists')}
+                        raise formencode.Invalid('', value, state,
+                                                 error_dict=e_dict)
+            return value
 
 
     return _ValidRepoName
+
+def SlugifyRepo():
+    class _SlugifyRepo(formencode.validators.FancyValidator):
+
+        def to_python(self, value, state):
+            return repo_name_slug(value)
+
+    return _SlugifyRepo
 
 def ValidCloneUri():
     from mercurial.httprepo import httprepository, httpsrepository
@@ -484,7 +511,7 @@ def RepoForm(edit=False, old_data={}, supported_backends=BACKENDS.keys(),
         allow_extra_fields = True
         filter_extra_fields = False
         repo_name = All(UnicodeString(strip=True, min=1, not_empty=True),
-                        ValidRepoName(edit, old_data))
+                        SlugifyRepo())
         clone_uri = All(UnicodeString(strip=True, min=1, not_empty=False),
                         ValidCloneUri()())
         repo_group = OneOf(repo_groups, hideList=True)
@@ -496,9 +523,9 @@ def RepoForm(edit=False, old_data={}, supported_backends=BACKENDS.keys(),
 
         if edit:
             #this is repo owner
-            user = All(Int(not_empty=True), ValidRepoUser)
+            user = All(UnicodeString(not_empty=True), ValidRepoUser)
 
-        chained_validators = [ValidPerms]
+        chained_validators = [ValidRepoName(edit, old_data), ValidPerms]
     return _RepoForm
 
 def RepoForkForm(edit=False, old_data={}, supported_backends=BACKENDS.keys()):
@@ -506,7 +533,7 @@ def RepoForkForm(edit=False, old_data={}, supported_backends=BACKENDS.keys()):
         allow_extra_fields = True
         filter_extra_fields = False
         fork_name = All(UnicodeString(strip=True, min=1, not_empty=True),
-                        ValidRepoName(edit, old_data))
+                        SlugifyRepo())
         description = UnicodeString(strip=True, min=1, not_empty=True)
         private = StringBoolean(if_missing=False)
         repo_type = All(ValidForkType(old_data), OneOf(supported_backends))
@@ -517,11 +544,11 @@ def RepoSettingsForm(edit=False, old_data={}):
         allow_extra_fields = True
         filter_extra_fields = False
         repo_name = All(UnicodeString(strip=True, min=1, not_empty=True),
-                        ValidRepoName(edit, old_data))
+                        SlugifyRepo())
         description = UnicodeString(strip=True, min=1, not_empty=True)
         private = StringBoolean(if_missing=False)
 
-        chained_validators = [ValidPerms, ValidSettings]
+        chained_validators = [ValidRepoName(edit, old_data), ValidPerms, ValidSettings]
     return _RepoForm
 
 

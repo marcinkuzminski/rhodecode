@@ -36,7 +36,7 @@ from vcs.backends import get_backend
 from rhodecode.model import BaseModel
 from rhodecode.model.caching_query import FromCache
 from rhodecode.model.db import Repository, RepoToPerm, User, Permission, \
-    Statistics, UsersGroup, UsersGroupRepoToPerm, RhodeCodeUi
+    Statistics, UsersGroup, UsersGroupRepoToPerm, RhodeCodeUi, Group
 from rhodecode.model.user import UserModel
 
 log = logging.getLogger(__name__)
@@ -169,15 +169,21 @@ class RepoModel(BaseModel):
             #update current repo
             for k, v in form_data.items():
                 if k == 'user':
-                    cur_repo.user = user_model.get(v)
+                    cur_repo.user = user_model.get_by_username(v)
+                elif k == 'repo_name':
+                    cur_repo.repo_name = form_data['repo_name_full']
+                elif k == 'repo_group' and v:
+                    cur_repo.group_id = v
+
                 else:
                     setattr(cur_repo, k, v)
 
             self.sa.add(cur_repo)
 
-            if repo_name != form_data['repo_name']:
-                #rename our data
-                self.__rename_repo(repo_name, form_data['repo_name'])
+            if repo_name != form_data['repo_name_full']:
+                # rename repository
+                self.__rename_repo(old=repo_name,
+                                   new=form_data['repo_name_full'])
 
             self.sa.commit()
         except:

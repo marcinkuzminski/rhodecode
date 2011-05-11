@@ -327,6 +327,12 @@ class Group(Base):
             groups.insert(0, gr)
         return groups
 
+
+    @property
+    def full_path(self):
+        return '/'.join([g.group_name for g in self.parents] +
+                        [self.group_name])
+
     @property
     def repositories(self):
         return Session.query(Repository).filter(Repository.group == self).all()
