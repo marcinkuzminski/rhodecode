@@ -127,6 +127,7 @@ class User(Base):
 
     repositories = relationship('Repository')
     user_followers = relationship('UserFollowing', primaryjoin='UserFollowing.follows_user_id==User.user_id', cascade='all')
+    repo_to_perm = relationship('RepoToPerm', primaryjoin='RepoToPerm.user_id==User.user_id', cascade='all')
 
     group_member = relationship('UsersGroupMember', cascade='all')
 
