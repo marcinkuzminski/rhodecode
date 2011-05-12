@@ -2,12 +2,12 @@
 """
     rhodecode.model.db
     ~~~~~~~~~~~~~~~~~~
-    
+
     Database Models for RhodeCode
     
     :created_on: Apr 08, 2010
     :author: marcink
-    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>    
+    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software: you can redistribute it and/or modify
@@ -80,6 +80,7 @@ class User(Base):
 
     repositories = relationship('Repository')
     user_followers = relationship('UserFollowing', primaryjoin='UserFollowing.follows_user_id==User.user_id', cascade='all')
+    repo_to_perm = relationship('RepoToPerm', primaryjoin='RepoToPerm.user_id==User.user_id', cascade='all')
 
     @property
     def full_contact(self):

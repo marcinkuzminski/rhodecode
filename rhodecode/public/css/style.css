@@ -2014,7 +2014,7 @@ padding-top:0px;
 
 .action_button {
 border:0;
-display:block;
+display:inline;
 }
 
 .action_button:hover {
