@@ -238,14 +238,16 @@
 			tr.appendChild(td1);
 			tr.appendChild(td2);
   		    tbl.appendChild(tr);
-  		    if(cnt == 2){
+  		    if(cnt == 3){
   		    	var show_more = document.createElement('tr');
-  		    	var td=document.createElement('td');
+  		    	var td = document.createElement('td');
   		    	lnk = document.createElement('a');
+  		    	
   		    	lnk.href='#';
   		    	lnk.innerHTML = "${_('show more')}";
   		    	lnk.id='code_stats_show_more';
   		        td.appendChild(lnk);
+  		        
   		    	show_more.appendChild(td);
   		    	show_more.appendChild(document.createElement('td'));
   		    	tbl.appendChild(show_more);
