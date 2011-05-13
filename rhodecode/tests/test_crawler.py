@@ -5,7 +5,7 @@
 
     Test for crawling a project for memory usage
     
-    watch -n 1 "ps aux |grep paster"
+    watch -n1 ./rhodecode/tests/mem_watch
 
     :created_on: Apr 21, 2010
     :author: marcink
@@ -32,8 +32,12 @@ import urllib2
 import vcs
 import time
 
+from os.path import join as jn
+
+
 BASE_URI = 'http://127.0.0.1:5000/%s'
-PROJECT = 'rhodecode'
+PROJECT = 'CPython'
+PROJECT_PATH = jn('/', 'home', 'marcink', 'hg_repos')
 
 
 cj = cookielib.FileCookieJar('/tmp/rc_test_cookie.txt')
@@ -67,11 +71,11 @@ def test_changelog_walk(pages=100):
 
 
 def test_changeset_walk():
-
-    # test against self
-    repo = vcs.get_repo('../../../rhodecode')
-
+    print jn(PROJECT_PATH, PROJECT)
     total_time = 0
+
+    repo = vcs.get_repo(jn(PROJECT_PATH, PROJECT))
+
     for i in repo:
 
         raw_cs = '/'.join((PROJECT, 'changeset', i.raw_id))
@@ -88,9 +92,39 @@ def test_changeset_walk():
     print 'average on req', total_time / float(len(repo))
 
 def test_files_walk():
-    pass
+    print jn(PROJECT_PATH, PROJECT)
+    total_time = 0
+
+    repo = vcs.get_repo(jn(PROJECT_PATH, PROJECT))
+
+    paths_ = set()
+    try:
+        tip = repo.get_changeset('tip')
+        for topnode, dirs, files in tip.walk('/'):
+            for f in files:
+                paths_.add(f.path)
+            for dir in dirs:
+                for f in files:
+                    paths_.add(f.path)
+
+    except vcs.exception.RepositoryError, e:
+        pass
+
+    for f in paths_:
+        file_path = '/'.join((PROJECT, 'files', 'tip', f))
+
+        full_uri = (BASE_URI % file_path)
+        s = time.time()
+        f = o.open(full_uri)
+        size = len(f.read())
+        e = time.time() - s
+        total_time += e
+        print 'visited %s size:%s req:%s ms' % (full_uri, size, e)
+
+    print 'total_time', total_time
+    print 'average on req', total_time / float(len(repo))
 
 
-
-test_changelog_walk()
+#test_changelog_walk()
 #test_changeset_walk()
+test_files_walk()
