@@ -9,6 +9,9 @@ from __future__ import with_statement
 from routes import Mapper
 from rhodecode.lib.utils import check_repo_fast as cr
 
+# prefix for non repository related links needs to be prefixed with `/`
+ADMIN_PREFIX = '/_admin'
+
 
 def make_map(config):
     """Create, configure and return the routes Mapper"""
@@ -45,7 +48,8 @@ def make_map(config):
     rmap.connect('rhodecode_official', "http://rhodecode.org", _static=True)
 
     #ADMIN REPOSITORY REST ROUTES
-    with rmap.submapper(path_prefix='/_admin', controller='admin/repos') as m:
+    with rmap.submapper(path_prefix=ADMIN_PREFIX,
+                        controller='admin/repos') as m:
         m.connect("repos", "/repos",
              action="create", conditions=dict(method=["POST"]))
         m.connect("repos", "/repos",
@@ -102,10 +106,11 @@ def make_map(config):
 
     #ADMIN REPOS GROUP REST ROUTES
     rmap.resource('repos_group', 'repos_groups',
-                  controller='admin/repos_groups', path_prefix='/_admin')
+                  controller='admin/repos_groups', path_prefix=ADMIN_PREFIX)
 
     #ADMIN USER REST ROUTES
-    with rmap.submapper(path_prefix='/_admin', controller='admin/users') as m:
+    with rmap.submapper(path_prefix=ADMIN_PREFIX,
+                        controller='admin/users') as m:
         m.connect("users", "/users",
                   action="create", conditions=dict(method=["POST"]))
         m.connect("users", "/users",
@@ -135,7 +140,7 @@ def make_map(config):
                   action="update_perm", conditions=dict(method=["PUT"]))
 
     #ADMIN USERS REST ROUTES
-    with rmap.submapper(path_prefix='/_admin',
+    with rmap.submapper(path_prefix=ADMIN_PREFIX,
                         controller='admin/users_groups') as m:
         m.connect("users_groups", "/users_groups",
                   action="create", conditions=dict(method=["POST"]))
@@ -167,22 +172,22 @@ def make_map(config):
 
     #ADMIN GROUP REST ROUTES
     rmap.resource('group', 'groups',
-                  controller='admin/groups', path_prefix='/_admin')
+                  controller='admin/groups', path_prefix=ADMIN_PREFIX)
 
     #ADMIN PERMISSIONS REST ROUTES
     rmap.resource('permission', 'permissions',
-                  controller='admin/permissions', path_prefix='/_admin')
+                  controller='admin/permissions', path_prefix=ADMIN_PREFIX)
 
     ##ADMIN LDAP SETTINGS
-    rmap.connect('ldap_settings', '/_admin/ldap',
+    rmap.connect('ldap_settings', '%s/ldap' % ADMIN_PREFIX,
                  controller='admin/ldap_settings', action='ldap_settings',
                  conditions=dict(method=["POST"]))
 
-    rmap.connect('ldap_home', '/_admin/ldap',
+    rmap.connect('ldap_home', '%s/ldap' % ADMIN_PREFIX,
                  controller='admin/ldap_settings')
 
     #ADMIN SETTINGS REST ROUTES
-    with rmap.submapper(path_prefix='/_admin',
+    with rmap.submapper(path_prefix=ADMIN_PREFIX,
                         controller='admin/settings') as m:
         m.connect("admin_settings", "/settings",
                   action="create", conditions=dict(method=["POST"]))
@@ -215,41 +220,43 @@ def make_map(config):
                   action="create_repository", conditions=dict(method=["GET"]))
 
     #ADMIN MAIN PAGES
-    with rmap.submapper(path_prefix='/_admin', controller='admin/admin') as m:
+    with rmap.submapper(path_prefix=ADMIN_PREFIX,
+                        controller='admin/admin') as m:
         m.connect('admin_home', '', action='index')
         m.connect('admin_add_repo', '/add_repo/{new_repo:[a-z0-9\. _-]*}',
                   action='add_repo')
 
     #USER JOURNAL
-    rmap.connect('journal', '/_admin/journal', controller='journal')
+    rmap.connect('journal', '%s/journal' % ADMIN_PREFIX, controller='journal')
 
-    rmap.connect('public_journal', '/_admin/public_journal',
+    rmap.connect('public_journal', '%s/public_journal' % ADMIN_PREFIX,
                  controller='journal', action="public_journal")
 
-    rmap.connect('public_journal_rss', '/_admin/public_journal_rss',
+    rmap.connect('public_journal_rss', '%s/public_journal_rss' % ADMIN_PREFIX,
                  controller='journal', action="public_journal_rss")
 
-    rmap.connect('public_journal_atom', '/_admin/public_journal_atom',
-                 controller='journal', action="public_journal_atom")
+    rmap.connect('public_journal_atom',
+                 '%s/public_journal_atom' % ADMIN_PREFIX, controller='journal',
+                 action="public_journal_atom")
 
-    rmap.connect('toggle_following', '/_admin/toggle_following',
+    rmap.connect('toggle_following', '%s/toggle_following' % ADMIN_PREFIX,
                  controller='journal', action='toggle_following',
                  conditions=dict(method=["POST"]))
 
     #SEARCH
-    rmap.connect('search', '/_admin/search', controller='search',)
-    rmap.connect('search_repo', '/_admin/search/{search_repo:.*}',
+    rmap.connect('search', '%s/search' % ADMIN_PREFIX, controller='search',)
+    rmap.connect('search_repo', '%s/search/{search_repo:.*}' % ADMIN_PREFIX,
                   controller='search')
 
     #LOGIN/LOGOUT/REGISTER/SIGN IN
-    rmap.connect('login_home', '/_admin/login', controller='login')
-    rmap.connect('logout_home', '/_admin/logout', controller='login',
+    rmap.connect('login_home', '%s/login' % ADMIN_PREFIX, controller='login')
+    rmap.connect('logout_home', '%s/logout' % ADMIN_PREFIX, controller='login',
                  action='logout')
 
-    rmap.connect('register', '/_admin/register', controller='login',
+    rmap.connect('register', '%s/register' % ADMIN_PREFIX, controller='login',
                  action='register')
 
-    rmap.connect('reset_password', '/_admin/password_reset',
+    rmap.connect('reset_password', '%s/password_reset' % ADMIN_PREFIX,
                  controller='login', action='password_reset')
 
     #FEEDS
