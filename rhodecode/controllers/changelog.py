@@ -90,8 +90,12 @@ class ChangelogController(BaseRepoController):
 
         revcount = min(repo_size, size)
         offset = 1 if p == 1 else  ((p - 1) * revcount + 1)
-        rev_start = repo.revisions.index(repo.revisions[(-1 * offset)])
+        try:
+            rev_start = repo.revisions.index(repo.revisions[(-1 * offset)])
+        except IndexError:
+            rev_start = repo.revisions.index(repo.revisions[-1])
         rev_end = max(0, rev_start - revcount)
+
 
         data = []
         if repo.alias == 'git':
