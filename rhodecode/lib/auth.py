@@ -371,13 +371,7 @@ class NotAnonymous(object):
         anonymous = self.user.username == 'default'
 
         if anonymous:
-            p = ''
-            if request.environ.get('SCRIPT_NAME') != '/':
-                p += request.environ.get('SCRIPT_NAME')
-
-            p += request.environ.get('PATH_INFO')
-            if request.environ.get('QUERY_STRING'):
-                p += '?' + request.environ.get('QUERY_STRING')
+            p = url.current()
 
             import rhodecode.lib.helpers as h
             h.flash(_('You need to be a registered user to '
