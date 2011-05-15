@@ -70,15 +70,17 @@ def test_changelog_walk(pages=100):
     print 'average on req', total_time / float(pages)
 
 
-def test_changeset_walk():
-    print jn(PROJECT_PATH, PROJECT)
+def test_changeset_walk(limit=None):
+    print 'processing', jn(PROJECT_PATH, PROJECT)
     total_time = 0
 
     repo = vcs.get_repo(jn(PROJECT_PATH, PROJECT))
-
+    cnt = 0
     for i in repo:
-
+        cnt += 1
         raw_cs = '/'.join((PROJECT, 'changeset', i.raw_id))
+        if limit and limit == cnt:
+            break
 
         full_uri = (BASE_URI % raw_cs)
         s = time.time()
@@ -89,23 +91,29 @@ def test_changeset_walk():
         print 'visited %s\%s size:%s req:%s ms' % (full_uri, i, size, e)
 
     print 'total_time', total_time
-    print 'average on req', total_time / float(len(repo))
+    print 'average on req', total_time / float(cnt)
+
 
 def test_files_walk():
-    print jn(PROJECT_PATH, PROJECT)
+    print 'processing', jn(PROJECT_PATH, PROJECT)
     total_time = 0
 
     repo = vcs.get_repo(jn(PROJECT_PATH, PROJECT))
 
-    paths_ = set()
+    from rhodecode.lib.oset import OrderedSet
+
+    paths_ = OrderedSet([''])
     try:
         tip = repo.get_changeset('tip')
         for topnode, dirs, files in tip.walk('/'):
+
+            for dir in dirs:
+                paths_.add(dir.path)
+                for f in dir:
+                    paths_.add(f.path)
+
             for f in files:
                 paths_.add(f.path)
-            for dir in dirs:
-                for f in files:
-                    paths_.add(f.path)
 
     except vcs.exception.RepositoryError, e:
         pass
@@ -125,6 +133,7 @@ def test_files_walk():
     print 'average on req', total_time / float(len(repo))
 
 
-#test_changelog_walk()
-#test_changeset_walk()
 test_files_walk()
+test_changelog_walk(40)
+test_changeset_walk(limit=100)
+
