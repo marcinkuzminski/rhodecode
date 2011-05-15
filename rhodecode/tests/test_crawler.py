@@ -88,13 +88,13 @@ def test_changeset_walk(limit=None):
         size = len(f.read())
         e = time.time() - s
         total_time += e
-        print 'visited %s\%s size:%s req:%s ms' % (full_uri, i, size, e)
+        print '%s visited %s\%s size:%s req:%s ms' % (cnt, full_uri, i, size, e)
 
     print 'total_time', total_time
     print 'average on req', total_time / float(cnt)
 
 
-def test_files_walk():
+def test_files_walk(limit=100):
     print 'processing', jn(PROJECT_PATH, PROJECT)
     total_time = 0
 
@@ -118,7 +118,12 @@ def test_files_walk():
     except vcs.exception.RepositoryError, e:
         pass
 
+    cnt = 0
     for f in paths_:
+        cnt += 1
+        if limit and limit == cnt:
+            break
+
         file_path = '/'.join((PROJECT, 'files', 'tip', f))
 
         full_uri = (BASE_URI % file_path)
@@ -127,13 +132,15 @@ def test_files_walk():
         size = len(f.read())
         e = time.time() - s
         total_time += e
-        print 'visited %s size:%s req:%s ms' % (full_uri, size, e)
+        print '%s visited %s size:%s req:%s ms' % (cnt, full_uri, size, e)
 
     print 'total_time', total_time
-    print 'average on req', total_time / float(len(repo))
+    print 'average on req', total_time / float(cnt)
 
 
-test_files_walk()
+
 test_changelog_walk(40)
+time.sleep(2)
 test_changeset_walk(limit=100)
-
+time.sleep(2)
+test_files_walk(100)
