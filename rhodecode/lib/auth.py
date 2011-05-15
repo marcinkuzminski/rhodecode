@@ -410,8 +410,22 @@ class PermsDecorator(object):
 
         else:
             log.warning('Permission denied for %s %s', cls, self.user)
-            #redirect with forbidden ret code
-            return abort(403)
+
+
+            anonymous = self.user.username == 'default'
+
+            if anonymous:
+                p = url.current()
+
+                import rhodecode.lib.helpers as h
+                h.flash(_('You need to be a signed in to '
+                          'view this page'),
+                        category='warning')
+                return redirect(url('login_home', came_from=p))
+
+            else:
+                #redirect with forbidden ret code
+                return abort(403)
 
     def check_permissions(self):
         """Dummy function for overriding"""
