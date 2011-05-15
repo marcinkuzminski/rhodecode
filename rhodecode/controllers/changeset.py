@@ -34,12 +34,12 @@ import rhodecode.lib.helpers as h
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.utils import EmptyChangeset
+from rhodecode.lib.odict import OrderedDict
 
 from vcs.exceptions import RepositoryError, ChangesetError, \
 ChangesetDoesNotExistError
 from vcs.nodes import FileNode
 from vcs.utils import diffs as differ
-from vcs.utils.ordered_dict import OrderedDict
 
 log = logging.getLogger(__name__)
 

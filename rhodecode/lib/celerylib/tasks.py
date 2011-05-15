@@ -41,7 +41,8 @@ from rhodecode.lib.celerylib import run_task, locked_task, str2bool, \
     __get_lockkey, LockHeld, DaemonLock
 from rhodecode.lib.helpers import person
 from rhodecode.lib.smtp_mailer import SmtpMailer
-from rhodecode.lib.utils import OrderedDict, add_cache
+from rhodecode.lib.utils import add_cache
+from rhodecode.lib.odict import OrderedDict
 from rhodecode.model import init_model
 from rhodecode.model import meta
 from rhodecode.model.db import RhodeCodeUi, Statistics, Repository

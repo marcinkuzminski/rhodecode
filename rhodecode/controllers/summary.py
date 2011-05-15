@@ -38,7 +38,8 @@ from rhodecode.model.repo import RepoModel
 
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseRepoController, render
-from rhodecode.lib.utils import OrderedDict, EmptyChangeset
+from rhodecode.lib.utils import EmptyChangeset
+from rhodecode.lib.odict import OrderedDict
 
 from rhodecode.lib.celerylib import run_task
 from rhodecode.lib.celerylib.tasks import get_commits_stats, \
