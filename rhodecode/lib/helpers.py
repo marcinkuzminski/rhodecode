@@ -320,30 +320,9 @@ flash = _Flash()
 #==============================================================================
 from mercurial import util
 from mercurial.templatefilters import person as _person
+from rhodecode.lib import credentials_hidder, age as _age
 
-def _age(curdate):
-    """turns a datetime into an age string."""
 
-    if not curdate:
-        return ''
-
-    agescales = [("year", 3600 * 24 * 365),
-                 ("month", 3600 * 24 * 30),
-                 ("day", 3600 * 24),
-                 ("hour", 3600),
-                 ("minute", 60),
-                 ("second", 1), ]
-
-    age = datetime.now() - curdate
-    age_seconds = (age.days * agescales[2][1]) + age.seconds
-    pos = 1
-    for scale in agescales:
-        if scale[1] <= age_seconds:
-            if pos == 6:pos = 5
-            return time_ago_in_words(curdate, agescales[pos][0]) + ' ' + _('ago')
-        pos += 1
-
-    return _('just now')
 
 age = lambda  x:_age(x)
 capitalize = lambda x: x.capitalize()
@@ -351,7 +330,7 @@ email = util.email
 email_or_none = lambda x: util.email(x) if util.email(x) != x else None
 person = lambda x: _person(x)
 short_id = lambda x: x[:12]
-
+hide_credentials = lambda x: ''.join(credentials_hidder(x))
 
 def bool2icon(value):
     """Returns True/False values represented as small html image of true/false
@@ -534,7 +513,7 @@ def gravatar_url(email_address, size=30):
 
 
 #==============================================================================
-# REPO PAGER
+# REPO PAGER, PAGER FOR REPOSITORY
 #==============================================================================
 class RepoPage(Page):
 
@@ -620,6 +599,12 @@ class RepoPage(Page):
 
 
 def changed_tooltip(nodes):
+    """
+    Generates a html string for changed nodes in changeset page.
+    It limits the output to 30 entries
+    
+    :param nodes: LazyNodesGenerator
+    """
     if nodes:
         pref = ': <br/> '
         suf = ''
@@ -633,6 +618,15 @@ def changed_tooltip(nodes):
 
 
 def repo_link(groups_and_repos):
+    """
+    Makes a breadcrumbs link to repo within a group
+    joins &raquo; on each group to create a fancy link
+    
+    ex::
+        group >> subgroup >> repo
+    
+    :param groups_and_repos:
+    """
     groups, repo_name = groups_and_repos
 
     if not groups:
@@ -646,12 +640,20 @@ def repo_link(groups_and_repos):
 
 
 def fancy_file_stats(stats):
+    """
+    Displays a fancy two colored bar for number of added/deleted
+    lines of code on file
+    
+    :param stats: two element list of added/deleted lines of code
+    """
+
     a, d, t = stats[0], stats[1], stats[0] + stats[1]
     width = 100
     unit = float(width) / (t or 1)
 
-    a_p = max(9, unit * a) if a > 0 else 0# needs > 9% to be visible
-    d_p = max(9, unit * d) if d > 0 else 0 # needs > 9% to be visible
+    # needs > 9% of width to be visible or 0 to be hidden
+    a_p = max(9, unit * a) if a > 0 else 0
+    d_p = max(9, unit * d) if d > 0 else 0
     p_sum = a_p + d_p
 
     if p_sum > width:

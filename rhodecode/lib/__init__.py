@@ -173,3 +173,72 @@ def engine_from_config(configuration, prefix='sqlalchemy.', **kwargs):
         kwargs.update({'poolclass': NullPool})
 
     return efc(configuration, prefix, **kwargs)
+
+
+def age(curdate):
+    """
+    turns a datetime into an age string.
+    
+    :param curdate: datetime object
+    :rtype: unicode
+    :returns: unicode words describing age
+    """
+
+    from datetime import datetime
+    from webhelpers.date import time_ago_in_words
+
+    _ = lambda s:s
+
+    if not curdate:
+        return ''
+
+    agescales = [(_(u"year"), 3600 * 24 * 365),
+                 (_(u"month"), 3600 * 24 * 30),
+                 (_(u"day"), 3600 * 24),
+                 (_(u"hour"), 3600),
+                 (_(u"minute"), 60),
+                 (_(u"second"), 1), ]
+
+    age = datetime.now() - curdate
+    age_seconds = (age.days * agescales[2][1]) + age.seconds
+    pos = 1
+    for scale in agescales:
+        if scale[1] <= age_seconds:
+            if pos == 6:pos = 5
+            return '%s %s' % (time_ago_in_words(curdate,
+                                                agescales[pos][0]), _('ago'))
+        pos += 1
+
+    return _(u'just now')
+
+
+def credentials_hidder(uri):
+    """
+    Removes user:password from given url string
+    
+    :param uri:
+    :rtype: unicode
+    :returns: filtered list of strings    
+    """
+    if not uri:
+        return ''
+
+    proto = ''
+
+    for pat in ('https://', 'http://'):
+        if uri.startswith(pat):
+            uri = uri[len(pat):]
+            proto = pat
+            break
+
+    # remove passwords and username
+    uri = uri[uri.find('@') + 1:]
+
+    # get the port
+    cred_pos = uri.find(':')
+    if cred_pos == -1:
+        host, port = uri, None
+    else:
+        host, port = uri[:cred_pos], uri[cred_pos + 1:]
+
+    return filter(None, [proto, host, port])

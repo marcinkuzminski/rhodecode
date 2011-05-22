@@ -75,11 +75,11 @@
 		          ##REMOTE
 				  %if c.dbrepo.clone_uri:
                     <div style="margin-top:5px;clear:both">
-                    <a href="${h.url(str(c.dbrepo.clone_uri))}">
+                    <a href="${h.url(str(h.hide_credentials(c.dbrepo.clone_uri)))}">
                     <img class="icon" alt="${_('remote clone')}"
-                    title="${_('Clone from')} ${c.dbrepo.clone_uri}" 
+                    title="${_('Clone from')} ${h.hide_credentials(c.dbrepo.clone_uri)}" 
                     src="${h.url("/images/icons/connect.png")}"/>
-                    ${_('Clone from')} ${c.dbrepo.clone_uri}
+                    ${_('Clone from')} ${h.hide_credentials(c.dbrepo.clone_uri)}
                     </a>
                     </div>					
 				  %endif		            		      
