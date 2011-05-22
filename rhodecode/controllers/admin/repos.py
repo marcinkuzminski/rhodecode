@@ -149,7 +149,10 @@ class ReposController(BaseController):
     def index(self, format='html'):
         """GET /repos: All items in the collection"""
         # url('repos')
-        cached_repo_list = ScmModel().get_repos()
+
+        all_repos = [r.repo_name for r in Repository.query().all()]
+
+        cached_repo_list = ScmModel().get_repos(all_repos)
         c.repos_list = sorted(cached_repo_list, key=itemgetter('name_sort'))
         return render('admin/repos/repos.html')
 
