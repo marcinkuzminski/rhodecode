@@ -119,14 +119,16 @@ class ScmModel(BaseModel):
         return repos_list
 
     def get_repos(self, all_repos=None):
-        """Get all repos from db and for each repo create it's
+        """
+        Get all repos from db and for each repo create it's
         backend instance and fill that backed with information from database
 
-        :param all_repos: give specific repositories list, good for filtering
-            this have to be a list of  just the repository names
+        :param all_repos: list of repository names as strings
+            give specific repositories list, good for filtering
         """
         if all_repos is None:
             repos = self.sa.query(Repository)\
+                        .filter(Repository.group_id == None)\
                         .order_by(Repository.repo_name).all()
             all_repos = [r.repo_name for r in repos]
 

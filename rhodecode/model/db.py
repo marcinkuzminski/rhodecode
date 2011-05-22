@@ -297,10 +297,12 @@ class Repository(Base):
 class Group(Base):
     __tablename__ = 'groups'
     __table_args__ = (UniqueConstraint('group_name'), {'useexisting':True},)
+    __mapper_args__ = {'order_by':'group_name'}
 
     group_id = Column("group_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     group_name = Column("group_name", String(length=255, convert_unicode=False, assert_unicode=None), nullable=False, unique=True, default=None)
     group_parent_id = Column("group_parent_id", Integer(), ForeignKey('groups.group_id'), nullable=True, unique=None, default=None)
+    group_description = Column("group_description", String(length=10000, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
 
     parent_group = relationship('Group', remote_side=group_id)
 
@@ -336,7 +338,7 @@ class Group(Base):
 
     @property
     def repositories(self):
-        return Session.query(Repository).filter(Repository.group == self).all()
+        return Session.query(Repository).filter(Repository.group == self)
 
 class Permission(Base):
     __tablename__ = 'permissions'

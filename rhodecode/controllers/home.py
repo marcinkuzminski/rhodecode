@@ -31,7 +31,7 @@ from paste.httpexceptions import HTTPBadRequest
 
 from rhodecode.lib.auth import LoginRequired
 from rhodecode.lib.base import BaseController, render
-
+from rhodecode.model.db import Group
 
 log = logging.getLogger(__name__)
 
@@ -64,6 +64,12 @@ class HomeController(BaseController):
                                   reverse=False)
 
         c.repo_cnt = len(c.repos_list)
+
+
+        c.groups = self.sa.query(Group)\
+            .filter(Group.group_parent_id == None).all()
+
+
         return render('/index.html')
 
     def repo_switcher(self):

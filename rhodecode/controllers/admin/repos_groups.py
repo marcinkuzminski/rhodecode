@@ -52,7 +52,7 @@ class ReposGroupsController(BaseController):
 
         c.group = Group.get(id)
         if c.group:
-            c.group_repos = c.group.repositories
+            c.group_repos = c.group.repositories.all()
         else:
             return redirect(url('repos_group'))
 
@@ -81,6 +81,10 @@ class ReposGroupsController(BaseController):
                                   reverse=False)
 
         c.repo_cnt = len(c.repos_list)
+
+
+        c.groups = self.sa.query(Group).order_by(Group.group_name)\
+            .filter(Group.group_parent_id == id).all()
 
         return render('admin/repos_groups/repos_groups.html')
 
