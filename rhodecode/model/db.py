@@ -320,6 +320,11 @@ class Group(Base):
         return "<%s('%s:%s')>" % (self.__class__.__name__, self.group_id,
                                   self.group_name)
 
+
+    @classmethod
+    def url_sep(cls):
+        return '/'
+
     @property
     def parents(self):
         groups = []
@@ -338,7 +343,7 @@ class Group(Base):
 
     @property
     def full_path(self):
-        return '/'.join([g.group_name for g in self.parents] +
+        return Group.url_sep().join([g.group_name for g in self.parents] +
                         [self.group_name])
 
     @property

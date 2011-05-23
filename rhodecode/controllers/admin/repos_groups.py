@@ -112,6 +112,27 @@ class ReposGroupsController(BaseController):
         #           method='delete')
         # url('repos_group', id=ID)
 
+        repos_group_model = ReposGroupModel()
+        gr = Group.get(id)
+        repos = gr.repositories.all()
+        if repos:
+            h.flash(_('This group contains %s repositores and cannot be '
+                      'deleted' % len(repos)),
+                    category='error')
+            return redirect(url('repos_groups'))
+
+
+        try:
+            repos_group_model.delete(id)
+            h.flash(_('removed repos group %s' % gr.group_name), category='success')
+            #TODO: in futureaction_logger(, '', '', '', self.sa)
+        except Exception:
+            log.error(traceback.format_exc())
+            h.flash(_('error occurred during deletion of repos group %s' % gr.group_name),
+                    category='error')
+
+        return redirect(url('repos_groups'))
+
     def show(self, id, format='html'):
         """GET /repos_groups/id: Show a specific item"""
         # url('repos_group', id=ID)

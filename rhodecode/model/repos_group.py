@@ -58,12 +58,12 @@ class ReposGroupModel(BaseModel):
         """
 
         if parent_id:
-            parent_group_name = Group.get(parent_id).group_name
+            paths = Group.get(parent_id).full_path.split(Group.url_sep())
+            parent_path = os.sep.join(paths)
         else:
-            parent_group_name = ''
+            parent_path = ''
 
-        create_path = os.path.join(self.repos_path, parent_group_name,
-                                   group_name)
+        create_path = os.path.join(self.repos_path, parent_path, group_name)
         log.debug('creating new group in %s', create_path)
 
         if os.path.isdir(create_path):
@@ -81,13 +81,17 @@ class ReposGroupModel(BaseModel):
         """
         pass
 
-    def __delete_group(self, group_name):
+    def __delete_group(self, group):
         """
         Deletes a group from a filesystem
         
-        :param group_name:
+        :param group: instance of group from database
         """
-        pass
+        paths = group.full_path.split(Group.url_sep())
+        paths = os.sep.join(paths)
+
+        rm_path = os.path.join(self.repos_path, paths)
+        os.rmdir(rm_path)
 
     def create(self, form_data):
         try:
@@ -124,8 +128,9 @@ class ReposGroupModel(BaseModel):
 
     def delete(self, users_group_id):
         try:
-            users_group = self.get(users_group_id, cache=False)
+            users_group = Group.get(users_group_id)
             self.sa.delete(users_group)
+            self.__delete_group(users_group)
             self.sa.commit()
         except:
             log.error(traceback.format_exc())

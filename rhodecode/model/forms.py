@@ -237,9 +237,9 @@ def ValidRepoName(edit, old_data):
             if value.get('repo_group'):
                 gr = Group.get(value.get('repo_group'))
                 group_path = gr.full_path
-                # value needs to be aware of group name
-                # it has to use '/'
-                repo_name_full = group_path + '/' + repo_name
+                # value needs to be aware of group name in order to check
+                # db key
+                repo_name_full = group_path + Group.url_sep() + repo_name
             else:
                 group_path = ''
                 repo_name_full = repo_name
