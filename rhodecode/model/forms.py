@@ -35,7 +35,6 @@ from webhelpers.pylonslib.secure_form import authentication_token
 from rhodecode.lib.utils import repo_name_slug
 from rhodecode.lib.auth import authenticate, get_crypt_password
 from rhodecode.lib.exceptions import LdapImportError
-from rhodecode.model import meta
 from rhodecode.model.user import UserModel
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.db import User, UsersGroup, Group
@@ -117,6 +116,27 @@ def ValidUsersGroup(edit, old_data):
     return _ValidUsersGroup
 
 
+def ValidReposGroup(edit, old_data):
+
+    class _ValidReposGroup(formencode.validators.FancyValidator):
+
+        def validate_python(self, value, state):
+            #TODO WRITE VALIDATIONS
+            group_name = value.get('repos_group_name')
+            parent_id = value.get('repos_group_parent')
+
+            # slugify repo group just in case :)
+            slug = repo_name_slug(group_name)
+
+            # check filesystem
+            gr = Group.query().filter(Group.group_name == slug)\
+                .filter(Group.group_parent_id == parent_id).scalar()
+
+            if gr:
+                e_dict = {'repos_group_name':_('This group already exists')}
+                raise formencode.Invalid('', value, state,
+                                         error_dict=e_dict)
+    return _ValidReposGroup
 
 class ValidPassword(formencode.validators.FancyValidator):
 
@@ -193,17 +213,13 @@ class ValidAuth(formencode.validators.FancyValidator):
 class ValidRepoUser(formencode.validators.FancyValidator):
 
     def to_python(self, value, state):
-        sa = meta.Session()
         try:
-            self.user_db = sa.query(User)\
+            self.user_db = User.query()\
                 .filter(User.active == True)\
                 .filter(User.username == value).one()
         except Exception:
             raise formencode.Invalid(_('This username is not valid'),
                                      value, state)
-        finally:
-            meta.Session.remove()
-
         return value
 
 def ValidRepoName(edit, old_data):
@@ -222,6 +238,7 @@ def ValidRepoName(edit, old_data):
                 gr = Group.get(value.get('repo_group'))
                 group_path = gr.full_path
                 # value needs to be aware of group name
+                # it has to use '/'
                 repo_name_full = group_path + '/' + repo_name
             else:
                 group_path = ''
@@ -250,13 +267,13 @@ def ValidRepoName(edit, old_data):
 
     return _ValidRepoName
 
-def SlugifyRepo():
-    class _SlugifyRepo(formencode.validators.FancyValidator):
+def SlugifyName():
+    class _SlugifyName(formencode.validators.FancyValidator):
 
         def to_python(self, value, state):
             return repo_name_slug(value)
 
-    return _SlugifyRepo
+    return _SlugifyName
 
 def ValidCloneUri():
     from mercurial.httprepo import httprepository, httpsrepository
@@ -331,15 +348,14 @@ class ValidPerms(formencode.validators.FancyValidator):
         value['perms_new'] = perms_new
 
         #update permissions
-        sa = meta.Session
         for k, v, t in perms_new:
             try:
                 if t is 'user':
-                    self.user_db = sa.query(User)\
+                    self.user_db = User.query()\
                         .filter(User.active == True)\
                         .filter(User.username == k).one()
                 if t is 'users_group':
-                    self.user_db = sa.query(UsersGroup)\
+                    self.user_db = UsersGroup.query()\
                         .filter(UsersGroup.users_group_active == True)\
                         .filter(UsersGroup.users_group_name == k).one()
 
@@ -373,15 +389,11 @@ def UniqSystemEmail(old_data):
         def to_python(self, value, state):
             value = value.lower()
             if old_data.get('email') != value:
-                sa = meta.Session()
-                try:
-                    user = sa.query(User).filter(User.email == value).scalar()
-                    if user:
-                        raise formencode.Invalid(_("This e-mail address is already taken") ,
-                                                 value, state)
-                finally:
-                    meta.Session.remove()
-
+                user = User.query().filter(User.email == value).scalar()
+                if user:
+                    raise formencode.Invalid(
+                                    _("This e-mail address is already taken"),
+                                    value, state)
             return value
 
     return _UniqSystemEmail
@@ -389,14 +401,10 @@ def UniqSystemEmail(old_data):
 class ValidSystemEmail(formencode.validators.FancyValidator):
     def to_python(self, value, state):
         value = value.lower()
-        sa = meta.Session
-        try:
-            user = sa.query(User).filter(User.email == value).scalar()
-            if  user is None:
-                raise formencode.Invalid(_("This e-mail address doesn't exist.") ,
-                                         value, state)
-        finally:
-            meta.Session.remove()
+        user = User.query().filter(User.email == value).scalar()
+        if  user is None:
+            raise formencode.Invalid(_("This e-mail address doesn't exist.") ,
+                                     value, state)
 
         return value
 
@@ -489,6 +497,23 @@ def UsersGroupForm(edit=False, old_data={}, available_members=[]):
 
     return _UsersGroupForm
 
+def ReposGroupForm(edit=False, old_data={}, available_groups=[]):
+    class _ReposGroupForm(formencode.Schema):
+        allow_extra_fields = True
+        filter_extra_fields = True
+
+        repos_group_name = All(UnicodeString(strip=True, min=1, not_empty=True),
+                               SlugifyName())
+        repos_group_description = UnicodeString(strip=True, min=1,
+                                                not_empty=True)
+        repos_group_parent = OneOf(available_groups, hideList=False,
+                                        testValueList=True,
+                                        if_missing=None, not_empty=False)
+
+        chained_validators = [ValidReposGroup(edit, old_data)]
+
+    return _ReposGroupForm
+
 def RegisterForm(edit=False, old_data={}):
     class _RegisterForm(formencode.Schema):
         allow_extra_fields = True
@@ -519,7 +544,7 @@ def RepoForm(edit=False, old_data={}, supported_backends=BACKENDS.keys(),
         allow_extra_fields = True
         filter_extra_fields = False
         repo_name = All(UnicodeString(strip=True, min=1, not_empty=True),
-                        SlugifyRepo())
+                        SlugifyName())
         clone_uri = All(UnicodeString(strip=True, min=1, not_empty=False),
                         ValidCloneUri()())
         repo_group = OneOf(repo_groups, hideList=True)
@@ -541,7 +566,7 @@ def RepoForkForm(edit=False, old_data={}, supported_backends=BACKENDS.keys()):
         allow_extra_fields = True
         filter_extra_fields = False
         fork_name = All(UnicodeString(strip=True, min=1, not_empty=True),
-                        SlugifyRepo())
+                        SlugifyName())
         description = UnicodeString(strip=True, min=1, not_empty=True)
         private = StringBoolean(if_missing=False)
         repo_type = All(ValidForkType(old_data), OneOf(supported_backends))
@@ -552,7 +577,7 @@ def RepoSettingsForm(edit=False, old_data={}):
         allow_extra_fields = True
         filter_extra_fields = False
         repo_name = All(UnicodeString(strip=True, min=1, not_empty=True),
-                        SlugifyRepo())
+                        SlugifyName())
         description = UnicodeString(strip=True, min=1, not_empty=True)
         private = StringBoolean(if_missing=False)
 

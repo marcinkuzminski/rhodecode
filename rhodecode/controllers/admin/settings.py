@@ -332,6 +332,8 @@ class SettingsController(BaseController):
 
         c.repo_groups.extend([(x.group_id, parents_link(x)) for \
                                             x in self.sa.query(Group).all()])
+        c.repo_groups = sorted(c.repo_groups,
+                               key=lambda t: t[1].split('&raquo;')[0])
         c.repo_groups_choices = map(lambda k: unicode(k[0]), c.repo_groups)
 
         new_repo = request.GET.get('repo', '')

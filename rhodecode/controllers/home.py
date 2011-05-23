@@ -66,8 +66,7 @@ class HomeController(BaseController):
         c.repo_cnt = len(c.repos_list)
 
 
-        c.groups = self.sa.query(Group)\
-            .filter(Group.group_parent_id == None).all()
+        c.groups = Group.query().filter(Group.group_parent_id == None).all()
 
 
         return render('/index.html')

@@ -477,6 +477,13 @@ margin:0;
 padding:12px 9px 7px 24px;
 }
 
+#header #header-inner #quick li ul li a.repos_groups,#header #header-inner #quick li ul li a.repos_groups:hover {
+background:url("../images/icons/database_link.png") no-repeat scroll 4px 9px #FFF;
+width:167px;
+margin:0;
+padding:12px 9px 7px 24px;
+}
+
 #header #header-inner #quick li ul li a.users,#header #header-inner #quick li ul li a.users:hover {
 background:#FFF url("../images/icons/user_edit.png") no-repeat 4px 9px;
 width:167px;

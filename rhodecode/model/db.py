@@ -107,6 +107,11 @@ class RhodeCodeUi(Base):
     ui_active = Column("ui_active", Boolean(), nullable=True, unique=None, default=True)
 
 
+    @classmethod
+    def get_by_key(cls, key):
+        return Session.query(cls).filter(cls.ui_key == key)
+
+
 class User(Base):
     __tablename__ = 'users'
     __table_args__ = (UniqueConstraint('username'), UniqueConstraint('email'), {'useexisting':True})
@@ -296,7 +301,7 @@ class Repository(Base):
 
 class Group(Base):
     __tablename__ = 'groups'
-    __table_args__ = (UniqueConstraint('group_name'), {'useexisting':True},)
+    __table_args__ = (UniqueConstraint('group_name', 'group_parent_id'), {'useexisting':True},)
     __mapper_args__ = {'order_by':'group_name'}
 
     group_id = Column("group_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
