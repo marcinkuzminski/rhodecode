@@ -205,6 +205,9 @@ class RepoModel(BaseModel):
             for k, v in form_data.items():
                 if k == 'repo_name':
                     v = repo_name
+                if k == 'repo_group':
+                    k = 'group_id'
+
                 setattr(new_repo, k, v)
 
             if fork:
@@ -238,6 +241,7 @@ class RepoModel(BaseModel):
 
             if not just_db:
                 self.__create_repo(repo_name, form_data['repo_type'],
+                                   form_data['repo_group'],
                                    form_data['clone_uri'])
 
             self.sa.commit()
@@ -302,15 +306,26 @@ class RepoModel(BaseModel):
             self.sa.rollback()
             raise
 
-    def __create_repo(self, repo_name, alias, clone_uri=False):
+    def __create_repo(self, repo_name, alias, new_parent_id, clone_uri=False):
         """
-        makes repository on filesystem
+        makes repository on filesystem it's group aware
 
         :param repo_name:
         :param alias:
+        :param parent_id:
+        :param clone_uri:
         """
         from rhodecode.lib.utils import check_repo
-        repo_path = os.path.join(self.repos_path, repo_name)
+
+
+        if new_parent_id:
+            paths = Group.get(new_parent_id).full_path.split(Group.url_sep())
+            new_parent_path = os.sep.join(paths)
+        else:
+            new_parent_path = ''
+
+        repo_path = os.path.join(self.repos_path, new_parent_path, repo_name)
+
         if check_repo(repo_name, self.repos_path):
             log.info('creating repo %s in %s @ %s', repo_name, repo_path,
                     clone_uri)
