@@ -29,6 +29,13 @@ def make_map(config):
         repo_name = match_dict.get('repo_name')
         return not cr(repo_name, config['base_path'])
 
+
+    def check_int(environ, match_dict):
+        return match_dict.get('id').isdigit()
+
+
+
+
     # The ErrorController route (handles 404/500 error pages); it should
     # likely stay at the top, ensuring it can always be resolved
     rmap.connect('/error/{action}', controller='error')
@@ -104,9 +111,37 @@ def make_map(config):
              action="repo_pull", conditions=dict(method=["PUT"],
                                                         function=check_repo))
 
-    #ADMIN REPOS GROUP REST ROUTES
-    rmap.resource('repos_group', 'repos_groups',
-                  controller='admin/repos_groups', path_prefix=ADMIN_PREFIX)
+    with rmap.submapper(path_prefix=ADMIN_PREFIX,
+                        controller='admin/repos_groups') as m:
+        m.connect("repos_groups", "/repos_groups",
+                  action="create", conditions=dict(method=["POST"]))
+        m.connect("repos_groups", "/repos_groups",
+                  action="index", conditions=dict(method=["GET"]))
+        m.connect("formatted_repos_groups", "/repos_groups.{format}",
+                  action="index", conditions=dict(method=["GET"]))
+        m.connect("new_repos_group", "/repos_groups/new",
+                  action="new", conditions=dict(method=["GET"]))
+        m.connect("formatted_new_repos_group", "/repos_groups/new.{format}",
+                  action="new", conditions=dict(method=["GET"]))
+        m.connect("update_repos_group", "/repos_groups/{id}",
+                  action="update", conditions=dict(method=["PUT"],
+                                                   function=check_int))
+        m.connect("delete_repos_group", "/repos_groups/{id}",
+                  action="delete", conditions=dict(method=["DELETE"],
+                                                   function=check_int))
+        m.connect("edit_repos_group", "/repos_groups/{id}/edit",
+                  action="edit", conditions=dict(method=["GET"],
+                                                 function=check_int))
+        m.connect("formatted_edit_repos_group",
+                  "/repos_groups/{id}.{format}/edit",
+                  action="edit", conditions=dict(method=["GET"],
+                                                 function=check_int))
+        m.connect("repos_group", "/repos_groups/{id}",
+                  action="show", conditions=dict(method=["GET"],
+                                                 function=check_int))
+        m.connect("formatted_repos_group", "/repos_groups/{id}.{format}",
+                  action="show", conditions=dict(method=["GET"],
+                                                 function=check_int))
 
     #ADMIN USER REST ROUTES
     with rmap.submapper(path_prefix=ADMIN_PREFIX,
