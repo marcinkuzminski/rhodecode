@@ -117,25 +117,31 @@ def ValidUsersGroup(edit, old_data):
 
 
 def ValidReposGroup(edit, old_data):
-
     class _ValidReposGroup(formencode.validators.FancyValidator):
 
         def validate_python(self, value, state):
             #TODO WRITE VALIDATIONS
-            group_name = value.get('repos_group_name')
-            parent_id = value.get('repos_group_parent')
+            group_name = value.get('group_name')
+            group_parent_id = value.get('group_parent_id')
 
             # slugify repo group just in case :)
             slug = repo_name_slug(group_name)
 
-            # check filesystem
-            gr = Group.query().filter(Group.group_name == slug)\
-                .filter(Group.group_parent_id == parent_id).scalar()
+            old_gname = None
+            if edit:
+                old_gname = Group.get(
+                            old_data.get('group_id')).group_name
 
-            if gr:
-                e_dict = {'repos_group_name':_('This group already exists')}
-                raise formencode.Invalid('', value, state,
-                                         error_dict=e_dict)
+            if old_gname != group_name or not edit:
+                # check filesystem
+                gr = Group.query().filter(Group.group_name == slug)\
+                    .filter(Group.group_parent_id == group_parent_id).scalar()
+
+                if gr:
+                    e_dict = {'group_name':_('This group already exists')}
+                    raise formencode.Invalid('', value, state,
+                                             error_dict=e_dict)
+
     return _ValidReposGroup
 
 class ValidPassword(formencode.validators.FancyValidator):
@@ -502,11 +508,11 @@ def ReposGroupForm(edit=False, old_data={}, available_groups=[]):
         allow_extra_fields = True
         filter_extra_fields = True
 
-        repos_group_name = All(UnicodeString(strip=True, min=1, not_empty=True),
+        group_name = All(UnicodeString(strip=True, min=1, not_empty=True),
                                SlugifyName())
-        repos_group_description = UnicodeString(strip=True, min=1,
+        group_description = UnicodeString(strip=True, min=1,
                                                 not_empty=True)
-        repos_group_parent = OneOf(available_groups, hideList=False,
+        group_parent_id = OneOf(available_groups, hideList=False,
                                         testValueList=True,
                                         if_missing=None, not_empty=False)
 

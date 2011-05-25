@@ -26,6 +26,7 @@
 import os
 import logging
 import traceback
+import shutil
 
 from pylons.i18n.translation import _
 
@@ -73,13 +74,21 @@ class ReposGroupModel(BaseModel):
         os.makedirs(create_path)
 
 
-    def __rename_group(self, group_name):
+    def __rename_group(self, old, new):
         """
         Renames a group on filesystem
         
         :param group_name:
         """
-        pass
+        log.info('renaming repos group from %s to %s', old,
+                 old)
+
+        old_path = os.path.join(self.repos_path, old)
+        new_path = os.path.join(self.repos_path, new)
+        if os.path.isdir(new_path):
+            raise Exception('Was trying to rename to already existing dir %s',
+                            new_path)
+        shutil.move(old_path, new_path)
 
     def __delete_group(self, group):
         """
@@ -96,15 +105,15 @@ class ReposGroupModel(BaseModel):
     def create(self, form_data):
         try:
             new_repos_group = Group()
-            new_repos_group.group_name = form_data['repos_group_name']
+            new_repos_group.group_name = form_data['group_name']
             new_repos_group.group_description = \
-                form_data['repos_group_description']
-            new_repos_group.group_parent_id = form_data['repos_group_parent']
+                form_data['group_description']
+            new_repos_group.group_parent_id = form_data['group_parent_id']
 
             self.sa.add(new_repos_group)
 
-            self.__create_group(form_data['repos_group_name'],
-                                form_data['repos_group_parent'])
+            self.__create_group(form_data['group_name'],
+                                form_data['group_parent_id'])
 
             self.sa.commit()
         except:
@@ -116,10 +125,18 @@ class ReposGroupModel(BaseModel):
 
         try:
             repos_group = Group.get(repos_group_id)
+            old_name = repos_group.group_name
 
-
+            repos_group.group_name = form_data['group_name']
+            repos_group.group_description = \
+                form_data['group_description']
+            repos_group.group_parent_id = form_data['group_parent_id']
 
             self.sa.add(repos_group)
+
+            if old_name != form_data['group_name']:
+                self.__rename_group(old=old_name, new=form_data['group_name'])
+
             self.sa.commit()
         except:
             log.error(traceback.format_exc())

@@ -26,6 +26,10 @@ class ReposGroupsController(BaseController):
     # file has a resource setup:
     #     map.resource('repos_group', 'repos_groups')
 
+    @LoginRequired()
+    def __before__(self):
+        super(ReposGroupsController, self).__before__()
+
     def __load_defaults(self):
 
         c.repo_groups = [('', '')]
@@ -42,9 +46,19 @@ class ReposGroupsController(BaseController):
                                key=lambda t: t[1].split('&raquo;')[0])
         c.repo_groups_choices = map(lambda k: unicode(k[0]), c.repo_groups)
 
-    @LoginRequired()
-    def __before__(self):
-        super(ReposGroupsController, self).__before__()
+    def __load_data(self, group_id):
+        """
+        Load defaults settings for edit, and update
+
+        :param group_id:
+        """
+        self.__load_defaults()
+
+        repo_group = Group.get(group_id)
+
+        defaults = repo_group.get_dict()
+
+        return defaults
 
     @HasPermissionAnyDecorator('hg.admin')
     def index(self, format='html'):
@@ -67,7 +81,7 @@ class ReposGroupsController(BaseController):
             form_result = repos_group_form.to_python(dict(request.POST))
             repos_group_model.create(form_result)
             h.flash(_('created repos group %s') \
-                    % form_result['repos_group_name'], category='success')
+                    % form_result['group_name'], category='success')
             #TODO: in futureaction_logger(, '', '', '', self.sa)
         except formencode.Invalid, errors:
 
@@ -80,7 +94,7 @@ class ReposGroupsController(BaseController):
         except Exception:
             log.error(traceback.format_exc())
             h.flash(_('error occurred during creation of repos group %s') \
-                    % request.POST.get('repos_group_name'), category='error')
+                    % request.POST.get('group_name'), category='error')
 
         return redirect(url('repos_groups'))
 
@@ -101,6 +115,36 @@ class ReposGroupsController(BaseController):
         #    h.form(url('repos_group', id=ID),
         #           method='put')
         # url('repos_group', id=ID)
+
+        self.__load_defaults()
+        c.repos_group = Group.get(id)
+
+        repos_group_model = ReposGroupModel()
+        repos_group_form = ReposGroupForm(edit=True,
+                                          old_data=c.repos_group.get_dict(),
+                                          available_groups=
+                                            c.repo_groups_choices)()
+        try:
+            form_result = repos_group_form.to_python(dict(request.POST))
+            repos_group_model.update(id, form_result)
+            h.flash(_('updated repos group %s') \
+                    % form_result['group_name'], category='success')
+            #TODO: in futureaction_logger(, '', '', '', self.sa)
+        except formencode.Invalid, errors:
+
+            return htmlfill.render(
+                render('admin/repos_groups/repos_groups_edit.html'),
+                defaults=errors.value,
+                errors=errors.error_dict or {},
+                prefix_error=False,
+                encoding="UTF-8")
+        except Exception:
+            log.error(traceback.format_exc())
+            h.flash(_('error occurred during creation of repos group %s') \
+                    % request.POST.get('group_name'), category='error')
+
+        return redirect(url('repos_groups'))
+
 
     @HasPermissionAnyDecorator('hg.admin')
     def delete(self, id):
@@ -179,3 +223,14 @@ class ReposGroupsController(BaseController):
     def edit(self, id, format='html'):
         """GET /repos_groups/id/edit: Form to edit an existing item"""
         # url('edit_repos_group', id=ID)
+        c.repos_group = Group.get(id)
+        defaults = self.__load_data(id)
+
+        return htmlfill.render(
+            render('admin/repos_groups/repos_groups_edit.html'),
+            defaults=defaults,
+            encoding="UTF-8",
+            force_defaults=False
+        )
+
+
