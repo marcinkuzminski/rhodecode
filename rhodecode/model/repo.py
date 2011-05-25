@@ -74,6 +74,7 @@ class RepoModel(BaseModel):
         repo = self.sa.query(Repository)\
             .options(joinedload(Repository.fork))\
             .options(joinedload(Repository.user))\
+            .options(joinedload(Repository.group))\
             .filter(Repository.repo_name == repo_name)\
 
         if cache:
@@ -86,7 +87,7 @@ class RepoModel(BaseModel):
 
         #make transient for sake of errors
         make_transient(ret)
-        for k in ['fork', 'user']:
+        for k in ['fork', 'user', 'group']:
             attr = getattr(ret, k, False)
             if attr:
                 make_transient(attr)

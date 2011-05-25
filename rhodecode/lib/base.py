@@ -62,7 +62,8 @@ class BaseRepoController(BaseController):
         super(BaseRepoController, self).__before__()
         if c.repo_name:
 
-            c.rhodecode_repo, dbrepo = self.scm_model.get(c.repo_name, retval='repo')
+            c.rhodecode_repo, dbrepo = self.scm_model.get(c.repo_name,
+                                                          retval='repo')
 
             if c.rhodecode_repo is not None:
                 c.repository_followers = \
