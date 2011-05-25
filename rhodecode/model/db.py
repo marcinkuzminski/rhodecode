@@ -301,7 +301,8 @@ class Repository(Base):
 
 class Group(Base):
     __tablename__ = 'groups'
-    __table_args__ = (UniqueConstraint('group_name', 'group_parent_id'), {'useexisting':True},)
+    __table_args__ = (UniqueConstraint('group_name', 'group_parent_id'),
+                      CheckConstraint('group_id != group_parent_id'), {'useexisting':True},)
     __mapper_args__ = {'order_by':'group_name'}
 
     group_id = Column("group_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -320,23 +321,31 @@ class Group(Base):
         return "<%s('%s:%s')>" % (self.__class__.__name__, self.group_id,
                                   self.group_name)
 
-
     @classmethod
     def url_sep(cls):
         return '/'
 
     @property
     def parents(self):
+        parents_limit = 5
         groups = []
         if self.parent_group is None:
             return groups
         cur_gr = self.parent_group
         groups.insert(0, cur_gr)
+        cnt = 0
         while 1:
+            cnt += 1
             gr = getattr(cur_gr, 'parent_group', None)
             cur_gr = cur_gr.parent_group
             if gr is None:
                 break
+            if cnt == parents_limit:
+                # this will prevent accidental infinit loops
+                log.error('group nested more than %s' %
+                                parents_limit)
+                break
+
             groups.insert(0, gr)
         return groups
 

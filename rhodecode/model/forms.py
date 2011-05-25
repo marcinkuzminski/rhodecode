@@ -122,10 +122,17 @@ def ValidReposGroup(edit, old_data):
         def validate_python(self, value, state):
             #TODO WRITE VALIDATIONS
             group_name = value.get('group_name')
-            group_parent_id = value.get('group_parent_id')
+            group_parent_id = int(value.get('group_parent_id') or - 1)
 
             # slugify repo group just in case :)
             slug = repo_name_slug(group_name)
+
+            # check for parent of self
+            if old_data['group_id'] == group_parent_id:
+                    e_dict = {'group_parent_id':_('Cannot assign this group '
+                                                  'as parent')}
+                    raise formencode.Invalid('', value, state,
+                                             error_dict=e_dict)
 
             old_gname = None
             if edit:

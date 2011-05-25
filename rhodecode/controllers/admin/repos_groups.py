@@ -56,9 +56,9 @@ class ReposGroupsController(BaseController):
 
         repo_group = Group.get(group_id)
 
-        defaults = repo_group.get_dict()
+        data = repo_group.get_dict()
 
-        return defaults
+        return data
 
     @HasPermissionAnyDecorator('hg.admin')
     def index(self, format='html'):
@@ -140,7 +140,7 @@ class ReposGroupsController(BaseController):
                 encoding="UTF-8")
         except Exception:
             log.error(traceback.format_exc())
-            h.flash(_('error occurred during creation of repos group %s') \
+            h.flash(_('error occurred during update of repos group %s') \
                     % request.POST.get('group_name'), category='error')
 
         return redirect(url('repos_groups'))
@@ -223,8 +223,14 @@ class ReposGroupsController(BaseController):
     def edit(self, id, format='html'):
         """GET /repos_groups/id/edit: Form to edit an existing item"""
         # url('edit_repos_group', id=ID)
+
+        id = int(id)
+
         c.repos_group = Group.get(id)
         defaults = self.__load_data(id)
+
+        # we need to exclude this group from the group list for editing
+        c.repo_groups = filter(lambda x:x[0] != id, c.repo_groups)
 
         return htmlfill.render(
             render('admin/repos_groups/repos_groups_edit.html'),

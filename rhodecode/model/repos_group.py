@@ -74,20 +74,34 @@ class ReposGroupModel(BaseModel):
         os.makedirs(create_path)
 
 
-    def __rename_group(self, old, new):
+    def __rename_group(self, old, old_parent_id, new, new_parent_id):
         """
         Renames a group on filesystem
         
         :param group_name:
         """
-        log.info('renaming repos group from %s to %s', old,
-                 old)
+        log.debug('renaming repos group from %s to %s', old, new)
 
-        old_path = os.path.join(self.repos_path, old)
-        new_path = os.path.join(self.repos_path, new)
+        if new_parent_id:
+            paths = Group.get(new_parent_id).full_path.split(Group.url_sep())
+            new_parent_path = os.sep.join(paths)
+        else:
+            new_parent_path = ''
+
+        if old_parent_id:
+            paths = Group.get(old_parent_id).full_path.split(Group.url_sep())
+            old_parent_path = os.sep.join(paths)
+        else:
+            old_parent_path = ''
+
+        old_path = os.path.join(self.repos_path, old_parent_path, old)
+        new_path = os.path.join(self.repos_path, new_parent_path, new)
+
+        log.debug('renaming repos paths from %s to %s', old_path, new_path)
+
         if os.path.isdir(new_path):
-            raise Exception('Was trying to rename to already existing dir %s',
-                            new_path)
+            raise Exception('Was trying to rename to already '
+                            'existing dir %s' % new_path)
         shutil.move(old_path, new_path)
 
     def __delete_group(self, group):
@@ -126,6 +140,7 @@ class ReposGroupModel(BaseModel):
         try:
             repos_group = Group.get(repos_group_id)
             old_name = repos_group.group_name
+            old_parent_id = repos_group.group_parent_id
 
             repos_group.group_name = form_data['group_name']
             repos_group.group_description = \
@@ -134,8 +149,11 @@ class ReposGroupModel(BaseModel):
 
             self.sa.add(repos_group)
 
-            if old_name != form_data['group_name']:
-                self.__rename_group(old=old_name, new=form_data['group_name'])
+            if old_name != form_data['group_name'] or (old_parent_id !=
+                                                form_data['group_parent_id']):
+                self.__rename_group(old=old_name, old_parent_id=old_parent_id,
+                                    new=form_data['group_name'],
+                                    new_parent_id=form_data['group_parent_id'])
 
             self.sa.commit()
         except:
