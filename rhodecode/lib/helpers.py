@@ -90,8 +90,7 @@ class _ToolTip(object):
         :param tooltip_title:
         """
 
-        return wrap_paragraphs(escape(tooltip_title), trim_at)\
-                       .replace('\n', '<br/>')
+        return escape(tooltip_title)
 
     def activate(self):
         """Adds tooltip mechanism to the given Html all tooltips have to have
@@ -269,13 +268,17 @@ def pygmentize_annotation(repo_name, filenode, **kwargs):
         return "color: rgb(%s)! important;" % (', '.join(col))
 
     def url_func(repo_name):
-        def _url_func(changeset):
-            tooltip_html = "<div style='font-size:0.8em'><b>Author:</b>" + \
-            " %s<br/><b>Date:</b> %s</b><br/><b>Message:</b> %s<br/></div>"
 
-            tooltip_html = tooltip_html % (changeset.author,
-                                                   changeset.date,
-                                                   tooltip(changeset.message))
+        def _url_func(changeset):
+            author = changeset.author
+            date = changeset.date
+            message = tooltip(changeset.message)
+
+            tooltip_html = ("<div style='font-size:0.8em'><b>Author:</b>"
+                            " %s<br/><b>Date:</b> %s</b><br/><b>Message:"
+                            "</b> %s<br/></div>")
+
+            tooltip_html = tooltip_html % (author, date, message)
             lnk_format = '%5s:%s' % ('r%s' % changeset.revision,
                                      short_id(changeset.raw_id))
             uri = link_to(
