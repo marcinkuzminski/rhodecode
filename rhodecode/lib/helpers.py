@@ -376,12 +376,12 @@ def action_parser(user_log, feed=False):
                                       invalidation_list=[])
 
         message = lambda rev: get_changeset_safe(repo, rev).message
-
-        cs_links = " " + ', '.join ([link_to(rev,
+        cs_links = []
+        cs_links.append(" " + ', '.join ([link_to(rev,
                 url('changeset_home',
                 repo_name=repo_name,
                 revision=rev), title=tooltip(message(rev)),
-                class_='tooltip') for rev in revs[:revs_limit] ])
+                class_='tooltip') for rev in revs[:revs_limit] ]))
 
         compare_view = (' <div class="compare_view tooltip" title="%s">'
                         '<a href="%s">%s</a> '
@@ -399,23 +399,23 @@ def action_parser(user_log, feed=False):
             '<a class="show_more" id="_%s" href="#more">%s</a> '
             '%s</span>')
             if not feed:
-                cs_links += html_tmpl % (_('and'), uniq_id, _('%s more') \
+                cs_links.append(html_tmpl % (_('and'), uniq_id, _('%s more') \
                                         % (len(revs) - revs_limit),
-                                        _('revisions'))
+                                        _('revisions')))
 
             if not feed:
                 html_tmpl = '<span id="%s" style="display:none"> %s </span>'
             else:
                 html_tmpl = '<span id="%s"> %s </span>'
 
-            cs_links += html_tmpl % (uniq_id, ', '.join([link_to(rev,
+            cs_links.append(html_tmpl % (uniq_id, ', '.join([link_to(rev,
                 url('changeset_home',
                 repo_name=repo_name, revision=rev),
                 title=message(rev), class_='tooltip')
-                for rev in revs[revs_limit:revs_top_limit]]))
+                for rev in revs[revs_limit:revs_top_limit]])))
         if len(revs) > 1:
-            cs_links += compare_view
-        return cs_links
+            cs_links.append(compare_view)
+        return ''.join(cs_links)
 
     def get_fork_name():
         repo_name = action_params

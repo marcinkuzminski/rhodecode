@@ -52,23 +52,23 @@ class FeedController(BaseRepoController):
         self.feed_nr = 10
 
     def __changes(self, cs):
-        changes = ''
+        changes = []
 
         a = [safe_unicode(n.path) for n in cs.added]
         if a:
-            changes += '\nA ' + '\nA '.join(a)
+            changes.append('\nA ' + '\nA '.join(a))
 
         m = [safe_unicode(n.path) for n in cs.changed]
         if m:
-            changes += '\nM ' + '\nM '.join(m)
+            changes.append('\nM ' + '\nM '.join(m))
 
         d = [safe_unicode(n.path) for n in cs.removed]
         if d:
-            changes += '\nD ' + '\nD '.join(d)
+            changes.append('\nD ' + '\nD '.join(d))
 
-        changes += '</pre>'
+        changes.append('</pre>')
 
-        return changes
+        return ''.join(changes)
 
     def atom(self, repo_name):
         """Produce an atom-1.0 feed via feedgenerator module"""
@@ -78,16 +78,16 @@ class FeedController(BaseRepoController):
                          description=self.description % repo_name,
                          language=self.language,
                          ttl=self.ttl)
-
+        desc_msg = []
         for cs in reversed(list(c.rhodecode_repo[-self.feed_nr:])):
-            desc = '%s - %s<br/><pre>' % (cs.author, cs.date)
-            desc += self.__changes(cs)
+            desc_msg.append('%s - %s<br/><pre>' % (cs.author, cs.date))
+            desc_msg.append(self.__changes(cs))
 
             feed.add_item(title=cs.message,
                           link=url('changeset_home', repo_name=repo_name,
                                    revision=cs.raw_id, qualified=True),
                           author_name=cs.author,
-                          description=desc)
+                          description=''.join(desc_msg))
 
         response.content_type = feed.mime_type
         return feed.writeString('utf-8')
@@ -100,16 +100,16 @@ class FeedController(BaseRepoController):
                          description=self.description % repo_name,
                          language=self.language,
                          ttl=self.ttl)
-
+        desc_msg = []
         for cs in reversed(list(c.rhodecode_repo[-self.feed_nr:])):
-            desc = '%s - %s<br/><pre>' % (cs.author, cs.date)
-            desc += self.__changes(cs)
+            desc_msg.append('%s - %s<br/><pre>' % (cs.author, cs.date))
+            desc_msg.append(self.__changes(cs))
 
             feed.add_item(title=cs.message,
                           link=url('changeset_home', repo_name=repo_name,
                                    revision=cs.raw_id, qualified=True),
                           author_name=cs.author,
-                          description=desc,
+                          description=''.join(desc_msg),
                          )
 
         response.content_type = feed.mime_type
