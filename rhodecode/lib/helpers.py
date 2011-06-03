@@ -317,21 +317,17 @@ def is_following_repo(repo_name, user_id):
 
 flash = _Flash()
 
-
 #==============================================================================
-# MERCURIAL FILTERS available via h.
+# SCM FILTERS available via h.
 #==============================================================================
-from mercurial import util
-from mercurial.templatefilters import person as _person
+from vcs.utils import author_name, author_email
 from rhodecode.lib import credentials_hidder, age as _age
-
-
 
 age = lambda  x:_age(x)
 capitalize = lambda x: x.capitalize()
-email = util.email
-email_or_none = lambda x: util.email(x) if util.email(x) != x else None
-person = lambda x: _person(x)
+email = author_email
+email_or_none = lambda x: email(x) if email(x) != x else None
+person = lambda x: author_name(x)
 short_id = lambda x: x[:12]
 hide_credentials = lambda x: ''.join(credentials_hidder(x))
 
