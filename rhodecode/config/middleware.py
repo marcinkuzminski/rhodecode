@@ -47,6 +47,9 @@ def make_app(global_conf, full_stack=True, static_files=True, **app_conf):
     app = SessionMiddleware(app, config)
 
     # CUSTOM MIDDLEWARE HERE (filtered by error handling middlewares)
+    if asbool(config['pdebug']):
+        from rhodecode.lib.profiler import ProfilingMiddleware
+        app = ProfilingMiddleware(app)
 
     app = SimpleHg(app, config)
     app = SimpleGit(app, config)
