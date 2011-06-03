@@ -28,6 +28,7 @@ import sys
 import socket
 import traceback
 import logging
+from os.path import dirname as dn, join as jn
 
 from hashlib import md5
 from decorator import decorator
@@ -85,7 +86,7 @@ def __get_lockkey(func, *fargs, **fkwargs):
 
     func_name = str(func.__name__) if hasattr(func, '__name__') else str(func)
 
-    lockkey = 'task_%s' % \
+    lockkey = 'task_%s.lock' % \
         md5(func_name + '-' + '-'.join(map(str, params))).hexdigest()
     return lockkey
 
@@ -93,9 +94,11 @@ def __get_lockkey(func, *fargs, **fkwargs):
 def locked_task(func):
     def __wrapper(func, *fargs, **fkwargs):
         lockkey = __get_lockkey(func, *fargs, **fkwargs)
+        lockkey_path = dn(dn(dn(os.path.abspath(__file__))))
+
         log.info('running task with lockkey %s', lockkey)
         try:
-            l = DaemonLock(lockkey)
+            l = DaemonLock(jn(lockkey_path, lockkey))
             ret = func(*fargs, **fkwargs)
             l.release()
             return ret

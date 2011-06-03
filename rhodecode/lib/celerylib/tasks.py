@@ -28,6 +28,7 @@ from celery.decorators import task
 import os
 import traceback
 import logging
+from os.path import dirname as dn, join as jn
 
 from time import mktime
 from operator import itemgetter
@@ -100,9 +101,11 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
 
     lockkey = __get_lockkey('get_commits_stats', repo_name, ts_min_y,
                             ts_max_y)
+    lockkey_path = dn(dn(dn(dn(os.path.abspath(__file__)))))
+    print jn(lockkey_path, lockkey)
     log.info('running task with lockkey %s', lockkey)
     try:
-        lock = DaemonLock(lockkey)
+        lock = l = DaemonLock(jn(lockkey_path, lockkey))
 
         #for js data compatibilty cleans the key for person from '
         akc = lambda k: person(k).replace('"', "")

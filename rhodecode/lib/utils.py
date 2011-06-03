@@ -29,6 +29,7 @@ import datetime
 import traceback
 import paste
 import beaker
+from os.path import dirname as dn, join as jn
 
 from paste.script.command import Command, BadCommand
 
@@ -470,7 +471,7 @@ def create_test_index(repo_location, full_index):
         shutil.rmtree(index_location)
 
     try:
-        l = DaemonLock()
+        l = DaemonLock(file=jn(dn(dn(index_location)), 'make_index.lock'))
         WhooshIndexingDaemon(index_location=index_location,
                              repo_location=repo_location)\
             .run(full_index=full_index)
