@@ -455,17 +455,17 @@ class LoginForm(formencode.Schema):
                              min=1,
                              not_empty=True,
                              messages={
-                                       'empty':_('Please enter a login'),
-                                       'tooShort':_('Enter a value %(min)i characters long or more')}
+                                'empty':_('Please enter a login'),
+                                'tooShort':_('Enter a value %(min)i characters long or more')}
                             )
 
     password = UnicodeString(
                             strip=True,
-                            min=6,
+                            min=3,
                             not_empty=True,
                             messages={
-                                      'empty':_('Please enter a password'),
-                                      'tooShort':_('Enter %(min)i characters or more')}
+                                'empty':_('Please enter a password'),
+                                'tooShort':_('Enter %(min)i characters or more')}
                                 )
 
 
