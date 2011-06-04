@@ -386,6 +386,7 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False):
             added.append(name)
             form_data = {
                          'repo_name': name,
+                         'repo_name_full': name,
                          'repo_type': repo.alias,
                          'description': repo.description \
                             if repo.description != 'unknown' else \

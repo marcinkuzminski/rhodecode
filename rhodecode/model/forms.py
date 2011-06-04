@@ -227,8 +227,7 @@ class ValidRepoUser(formencode.validators.FancyValidator):
 
     def to_python(self, value, state):
         try:
-            self.user_db = User.query()\
-                .filter(User.active == True)\
+            User.query().filter(User.active == True)\
                 .filter(User.username == value).one()
         except Exception:
             raise formencode.Invalid(_('This username is not valid'),
@@ -251,7 +250,8 @@ def ValidRepoName(edit, old_data):
                 gr = Group.get(value.get('repo_group'))
                 group_path = gr.full_path
                 # value needs to be aware of group name in order to check
-                # db key
+                # db key This is an actuall just the name to store in the
+                # database
                 repo_name_full = group_path + Group.url_sep() + repo_name
             else:
                 group_path = ''

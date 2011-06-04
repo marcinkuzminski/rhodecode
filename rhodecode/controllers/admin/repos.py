@@ -44,6 +44,7 @@ from rhodecode.model.db import User, Repository, UserFollowing, Group
 from rhodecode.model.forms import RepoForm
 from rhodecode.model.scm import ScmModel
 from rhodecode.model.repo import RepoModel
+from sqlalchemy.exc import IntegrityError
 
 log = logging.getLogger(__name__)
 
@@ -179,11 +180,12 @@ class ReposController(BaseController):
                     category='success')
 
             if request.POST.get('user_created'):
+                #created by regular non admin user
                 action_logger(self.rhodecode_user, 'user_created_repo',
-                              form_result['repo_name'], '', self.sa)
+                              form_result['repo_name_full'], '', self.sa)
             else:
                 action_logger(self.rhodecode_user, 'admin_created_repo',
-                              form_result['repo_name'], '', self.sa)
+                              form_result['repo_name_full'], '', self.sa)
 
         except formencode.Invalid, errors:
 
@@ -286,6 +288,18 @@ class ReposController(BaseController):
             repo_model.delete(repo)
             invalidate_cache('get_repo_cached_%s' % repo_name)
             h.flash(_('deleted repository %s') % repo_name, category='success')
+
+        except IntegrityError, e:
+            if e.message.find('repositories_fork_id_fkey'):
+                log.error(traceback.format_exc())
+                h.flash(_('Cannot delete %s it still contains attached '
+                          'forks') % repo_name,
+                        category='warning')
+            else:
+                log.error(traceback.format_exc())
+                h.flash(_('An error occurred during '
+                          'deletion of %s') % repo_name,
+                        category='error')
 
         except Exception, e:
             log.error(traceback.format_exc())

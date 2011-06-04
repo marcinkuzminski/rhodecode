@@ -198,14 +198,17 @@ class RepoModel(BaseModel):
                 #force str since hg doesn't go with unicode
                 repo_name = str(form_data['fork_name'])
                 org_name = str(form_data['repo_name'])
+                org_full_name = str(form_data['repo_name_full'])
 
             else:
                 org_name = repo_name = str(form_data['repo_name'])
+                repo_name_full = form_data['repo_name_full']
+
             new_repo = Repository()
             new_repo.enable_statistics = False
             for k, v in form_data.items():
                 if k == 'repo_name':
-                    v = repo_name
+                    v = repo_name_full
                 if k == 'repo_group':
                     k = 'group_id'
 
@@ -213,7 +216,7 @@ class RepoModel(BaseModel):
 
             if fork:
                 parent_repo = self.sa.query(Repository)\
-                        .filter(Repository.repo_name == org_name).scalar()
+                        .filter(Repository.repo_name == org_full_name).scalar()
                 new_repo.fork = parent_repo
 
             new_repo.user_id = cur_user.user_id
@@ -309,7 +312,9 @@ class RepoModel(BaseModel):
 
     def __create_repo(self, repo_name, alias, new_parent_id, clone_uri=False):
         """
-        makes repository on filesystem it's group aware
+        makes repository on filesystem. It's group aware means it'll create
+        a repository within a group, and alter the paths accordingly of
+        group location
 
         :param repo_name:
         :param alias:
