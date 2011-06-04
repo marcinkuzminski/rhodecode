@@ -185,7 +185,7 @@ def engine_from_config(configuration, prefix='sqlalchemy.', **kwargs):
         from sqlalchemy import event
         from sqlalchemy.engine import Engine
 
-        log = logging.getLogger('timerproxy')
+        log = logging.getLogger('sqlalchemy.engine')
         BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = xrange(30, 38)
         engine = efc(configuration, prefix, **kwargs)
 
