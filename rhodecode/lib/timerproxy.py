@@ -10,7 +10,7 @@ def color_sql(sql):
     COLOR_SEQ = "\033[1;%dm"
     COLOR_SQL = YELLOW
     normal = '\x1b[0m'
-    return COLOR_SEQ % COLOR_SQL + sql + normal
+    return ''.join([COLOR_SEQ % COLOR_SQL, sql, normal])
 
 
 class TimerProxy(ConnectionProxy):

@@ -161,18 +161,60 @@ def safe_unicode(_str, from_encoding='utf8'):
 def engine_from_config(configuration, prefix='sqlalchemy.', **kwargs):
     """
     Custom engine_from_config functions that makes sure we use NullPool for
-    file based sqlite databases. This prevents errors on sqlite.
+    file based sqlite databases. This prevents errors on sqlite. This only 
+    applies to sqlalchemy versions < 0.7.0
 
     """
+    import sqlalchemy
     from sqlalchemy import engine_from_config as efc
-    from sqlalchemy.pool import NullPool
+    import logging
 
-    url = configuration[prefix + 'url']
+    if int(sqlalchemy.__version__.split('.')[1]) < 7:
 
-    if url.startswith('sqlite'):
-        kwargs.update({'poolclass': NullPool})
+        # This solution should work for sqlalchemy < 0.7.0, and should use
+        # proxy=TimerProxy() for execution time profiling
 
-    return efc(configuration, prefix, **kwargs)
+        from sqlalchemy.pool import NullPool
+        url = configuration[prefix + 'url']
+
+        if url.startswith('sqlite'):
+            kwargs.update({'poolclass': NullPool})
+        return efc(configuration, prefix, **kwargs)
+    else:
+        import time
+        from sqlalchemy import event
+        from sqlalchemy.engine import Engine
+
+        log = logging.getLogger('timerproxy')
+        BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = xrange(30, 38)
+        engine = efc(configuration, prefix, **kwargs)
+
+        def color_sql(sql):
+            COLOR_SEQ = "\033[1;%dm"
+            COLOR_SQL = YELLOW
+            normal = '\x1b[0m'
+            return ''.join([COLOR_SEQ % COLOR_SQL, sql, normal])
+
+        if configuration['debug']:
+            #attach events only for debug configuration
+
+            def before_cursor_execute(conn, cursor, statement,
+                                    parameters, context, executemany):
+                context._query_start_time = time.time()
+                log.info(color_sql(">>>>> STARTING QUERY >>>>>"))
+
+
+            def after_cursor_execute(conn, cursor, statement,
+                                    parameters, context, executemany):
+                total = time.time() - context._query_start_time
+                log.info(color_sql("<<<<< TOTAL TIME: %f <<<<<" % total))
+
+            event.listen(engine, "before_cursor_execute",
+                         before_cursor_execute)
+            event.listen(engine, "after_cursor_execute",
+                         after_cursor_execute)
+
+    return engine
 
 
 def age(curdate):

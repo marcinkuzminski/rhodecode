@@ -50,7 +50,7 @@ class RepositoryMapper(MapperExtension):
 
 class RhodeCodeSettings(Base):
     __tablename__ = 'rhodecode_settings'
-    __table_args__ = (UniqueConstraint('app_settings_name'), {'useexisting':True})
+    __table_args__ = (UniqueConstraint('app_settings_name'), {'extend_existing':True})
     app_settings_id = Column("app_settings_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     app_settings_name = Column("app_settings_name", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     app_settings_value = Column("app_settings_value", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
@@ -99,7 +99,7 @@ class RhodeCodeSettings(Base):
 
 class RhodeCodeUi(Base):
     __tablename__ = 'rhodecode_ui'
-    __table_args__ = {'useexisting':True}
+    __table_args__ = {'extend_existing':True}
     ui_id = Column("ui_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     ui_section = Column("ui_section", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     ui_key = Column("ui_key", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
@@ -114,7 +114,7 @@ class RhodeCodeUi(Base):
 
 class User(Base):
     __tablename__ = 'users'
-    __table_args__ = (UniqueConstraint('username'), UniqueConstraint('email'), {'useexisting':True})
+    __table_args__ = (UniqueConstraint('username'), UniqueConstraint('email'), {'extend_existing':True})
     user_id = Column("user_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     username = Column("username", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     password = Column("password", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
@@ -173,10 +173,10 @@ class User(Base):
 
 class UserLog(Base):
     __tablename__ = 'user_logs'
-    __table_args__ = {'useexisting':True}
+    __table_args__ = {'extend_existing':True}
     user_log_id = Column("user_log_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None, default=None)
-    repository_id = Column("repository_id", Integer(length=None, convert_unicode=False, assert_unicode=None), ForeignKey('repositories.repo_id'), nullable=False, unique=None, default=None)
+    repository_id = Column("repository_id", Integer(), ForeignKey('repositories.repo_id'), nullable=False, unique=None, default=None)
     repository_name = Column("repository_name", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     user_ip = Column("user_ip", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     action = Column("action", UnicodeText(length=1200000, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
@@ -192,7 +192,7 @@ class UserLog(Base):
 
 class UsersGroup(Base):
     __tablename__ = 'users_groups'
-    __table_args__ = {'useexisting':True}
+    __table_args__ = {'extend_existing':True}
 
     users_group_id = Column("users_group_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     users_group_name = Column("users_group_name", String(length=255, convert_unicode=False, assert_unicode=None), nullable=False, unique=True, default=None)
@@ -216,7 +216,7 @@ class UsersGroup(Base):
 
 class UsersGroupMember(Base):
     __tablename__ = 'users_groups_members'
-    __table_args__ = {'useexisting':True}
+    __table_args__ = {'extend_existing':True}
 
     users_group_member_id = Column("users_group_member_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     users_group_id = Column("users_group_id", Integer(), ForeignKey('users_groups.users_group_id'), nullable=False, unique=None, default=None)
@@ -231,7 +231,7 @@ class UsersGroupMember(Base):
 
 class Repository(Base):
     __tablename__ = 'repositories'
-    __table_args__ = (UniqueConstraint('repo_name'), {'useexisting':True},)
+    __table_args__ = (UniqueConstraint('repo_name'), {'extend_existing':True},)
     __mapper_args__ = {'extension':RepositoryMapper()}
 
     repo_id = Column("repo_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -302,7 +302,7 @@ class Repository(Base):
 class Group(Base):
     __tablename__ = 'groups'
     __table_args__ = (UniqueConstraint('group_name', 'group_parent_id'),
-                      CheckConstraint('group_id != group_parent_id'), {'useexisting':True},)
+                      CheckConstraint('group_id != group_parent_id'), {'extend_existing':True},)
     __mapper_args__ = {'order_by':'group_name'}
 
     group_id = Column("group_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -361,7 +361,7 @@ class Group(Base):
 
 class Permission(Base):
     __tablename__ = 'permissions'
-    __table_args__ = {'useexisting':True}
+    __table_args__ = {'extend_existing':True}
     permission_id = Column("permission_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     permission_name = Column("permission_name", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     permission_longname = Column("permission_longname", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
@@ -376,7 +376,7 @@ class Permission(Base):
 
 class RepoToPerm(Base):
     __tablename__ = 'repo_to_perm'
-    __table_args__ = (UniqueConstraint('user_id', 'repository_id'), {'useexisting':True})
+    __table_args__ = (UniqueConstraint('user_id', 'repository_id'), {'extend_existing':True})
     repo_to_perm_id = Column("repo_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None, default=None)
     permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable=False, unique=None, default=None)
@@ -388,7 +388,7 @@ class RepoToPerm(Base):
 
 class UserToPerm(Base):
     __tablename__ = 'user_to_perm'
-    __table_args__ = (UniqueConstraint('user_id', 'permission_id'), {'useexisting':True})
+    __table_args__ = (UniqueConstraint('user_id', 'permission_id'), {'extend_existing':True})
     user_to_perm_id = Column("user_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None, default=None)
     permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable=False, unique=None, default=None)
@@ -433,7 +433,7 @@ class UserToPerm(Base):
 
 class UsersGroupRepoToPerm(Base):
     __tablename__ = 'users_group_repo_to_perm'
-    __table_args__ = (UniqueConstraint('users_group_id', 'permission_id'), {'useexisting':True})
+    __table_args__ = (UniqueConstraint('users_group_id', 'permission_id'), {'extend_existing':True})
     users_group_to_perm_id = Column("users_group_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     users_group_id = Column("users_group_id", Integer(), ForeignKey('users_groups.users_group_id'), nullable=False, unique=None, default=None)
     permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable=False, unique=None, default=None)
@@ -494,7 +494,7 @@ class UsersGroupToPerm(Base):
 
 class GroupToPerm(Base):
     __tablename__ = 'group_to_perm'
-    __table_args__ = (UniqueConstraint('group_id', 'permission_id'), {'useexisting':True})
+    __table_args__ = (UniqueConstraint('group_id', 'permission_id'), {'extend_existing':True})
 
     group_to_perm_id = Column("group_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None, default=None)
@@ -507,7 +507,7 @@ class GroupToPerm(Base):
 
 class Statistics(Base):
     __tablename__ = 'statistics'
-    __table_args__ = (UniqueConstraint('repository_id'), {'useexisting':True})
+    __table_args__ = (UniqueConstraint('repository_id'), {'extend_existing':True})
     stat_id = Column("stat_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     repository_id = Column("repository_id", Integer(), ForeignKey('repositories.repo_id'), nullable=False, unique=True, default=None)
     stat_on_revision = Column("stat_on_revision", Integer(), nullable=False)
@@ -521,7 +521,7 @@ class UserFollowing(Base):
     __tablename__ = 'user_followings'
     __table_args__ = (UniqueConstraint('user_id', 'follows_repository_id'),
                       UniqueConstraint('user_id', 'follows_user_id')
-                      , {'useexisting':True})
+                      , {'extend_existing':True})
 
     user_following_id = Column("user_following_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None, default=None)
@@ -542,7 +542,7 @@ class UserFollowing(Base):
 
 class CacheInvalidation(Base):
     __tablename__ = 'cache_invalidation'
-    __table_args__ = (UniqueConstraint('cache_key'), {'useexisting':True})
+    __table_args__ = (UniqueConstraint('cache_key'), {'extend_existing':True})
     cache_id = Column("cache_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     cache_key = Column("cache_key", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     cache_args = Column("cache_args", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
@@ -560,7 +560,7 @@ class CacheInvalidation(Base):
 
 class DbMigrateVersion(Base):
     __tablename__ = 'db_migrate_version'
-    __table_args__ = {'useexisting':True}
+    __table_args__ = {'extend_existing':True}
     repository_id = Column('repository_id', String(250), primary_key=True)
     repository_path = Column('repository_path', Text)
     version = Column('version', Integer)

@@ -62,7 +62,7 @@ class ColorFormatter(logging.Formatter):
         def_record = logging.Formatter.format(self, record)
         end = RESET_SEQ
 
-        colored_record = start + def_record + end
+        colored_record = ''.join([start, def_record, end])
         return colored_record
 
 
@@ -81,5 +81,5 @@ class ColorFormatterSql(logging.Formatter):
         def_record = format_sql(logging.Formatter.format(self, record))
         end = RESET_SEQ
 
-        colored_record = start + def_record + end
+        colored_record = ''.join([start, def_record, end])
         return colored_record

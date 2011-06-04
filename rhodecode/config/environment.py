@@ -65,12 +65,7 @@ def load_environment(global_conf, app_conf, initial=False):
 
     #MULTIPLE DB configs
     # Setup the SQLAlchemy database engine
-    if config['debug'] and not test:
-        #use query time debugging.
-        sa_engine_db1 = engine_from_config(config, 'sqlalchemy.db1.',
-                                           proxy=TimerProxy())
-    else:
-        sa_engine_db1 = engine_from_config(config, 'sqlalchemy.db1.')
+    sa_engine_db1 = engine_from_config(config, 'sqlalchemy.db1.')
 
     init_model(sa_engine_db1)
 
