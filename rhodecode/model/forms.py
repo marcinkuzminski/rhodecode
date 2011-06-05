@@ -127,8 +127,9 @@ def ValidReposGroup(edit, old_data):
             # slugify repo group just in case :)
             slug = repo_name_slug(group_name)
 
+            print old_data
             # check for parent of self
-            if old_data['group_id'] == group_parent_id:
+            if edit and old_data['group_id'] == group_parent_id:
                     e_dict = {'group_parent_id':_('Cannot assign this group '
                                                   'as parent')}
                     raise formencode.Invalid('', value, state,
