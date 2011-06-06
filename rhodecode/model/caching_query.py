@@ -276,6 +276,7 @@ def _params_from_query(query):
     v = []
     def visit_bindparam(bind):
         value = query._params.get(bind.key, bind.value)
+
         # lazyloader may dig a callable in here, intended
         # to late-evaluate params after autoflush is called.
         # convert to a scalar value.
@@ -285,6 +286,4 @@ def _params_from_query(query):
         v.append(value)
     if query._criterion is not None:
         visitors.traverse(query._criterion, {}, {'bindparam':visit_bindparam})
-    for f in query._from_obj:
-        visitors.traverse(f, {}, {'bindparam':visit_bindparam})
     return v
