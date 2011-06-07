@@ -331,8 +331,8 @@ class ScmModel(BaseModel):
                 .filter(Repository.fork_id == repo_id).count()
 
     def pull_changes(self, repo_name, username):
-        repo, dbrepo = self.get(repo_name, retval='all')
-
+        dbrepo = Repository.by_repo_name(repo_name)
+        repo = dbrepo.scm_instance
         try:
             extras = {'ip': '',
                       'username': username,
