@@ -45,11 +45,11 @@ class TestLoginController(TestController):
 
     def test_login_short_password(self):
         response = self.app.post(url(controller='login', action='index'),
-                                 {'username':'error',
-                                  'password':'test'})
-        assert response.status == '200 OK', 'Wrong response from login page'
+                                 {'username':'test_admin',
+                                  'password':'as'})
+        self.assertEqual(response.status, '200 OK')
         print response.body
-        assert 'Enter 6 characters or more' in response.body, 'No error password message in response'
+        self.assertTrue('Enter 3 characters or more' in response.body)
 
     def test_login_wrong_username_password(self):
         response = self.app.post(url(controller='login', action='index'),

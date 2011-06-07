@@ -12,6 +12,7 @@ from rhodecode.lib.utils import get_repo_slug
 from rhodecode.model import meta
 from rhodecode.model.scm import ScmModel
 from rhodecode import BACKENDS
+from rhodecode.model.db import Repository
 
 
 class BaseController(WSGIController):
@@ -26,7 +27,7 @@ class BaseController(WSGIController):
 
         self.sa = meta.Session()
         self.scm_model = ScmModel(self.sa)
-        c.cached_repo_list = self.scm_model.get_repos()
+
         #c.unread_journal = scm_model.get_unread_journal()
 
     def __call__(self, environ, start_response):
@@ -62,8 +63,7 @@ class BaseRepoController(BaseController):
         super(BaseRepoController, self).__before__()
         if c.repo_name:
 
-            c.rhodecode_repo, dbrepo = self.scm_model.get(c.repo_name,
-                                                          retval='repo')
+            c.rhodecode_repo = Repository.by_repo_name(c.repo_name).scm_instance
 
             if c.rhodecode_repo is not None:
                 c.repository_followers = \

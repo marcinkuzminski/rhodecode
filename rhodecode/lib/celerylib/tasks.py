@@ -102,7 +102,6 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
     lockkey = __get_lockkey('get_commits_stats', repo_name, ts_min_y,
                             ts_max_y)
     lockkey_path = dn(dn(dn(dn(os.path.abspath(__file__)))))
-    print jn(lockkey_path, lockkey)
     log.info('running task with lockkey %s', lockkey)
     try:
         lock = l = DaemonLock(jn(lockkey_path, lockkey))

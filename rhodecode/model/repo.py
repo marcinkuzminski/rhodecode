@@ -70,28 +70,6 @@ class RepoModel(BaseModel):
                                           "get_repo_%s" % repo_name))
         return repo.scalar()
 
-    def get_full(self, repo_name, cache=False, invalidate=False):
-        repo = self.sa.query(Repository)\
-            .options(joinedload(Repository.fork))\
-            .options(joinedload(Repository.user))\
-            .options(joinedload(Repository.group))\
-            .filter(Repository.repo_name == repo_name)\
-
-        if cache:
-            repo = repo.options(FromCache("sql_cache_long",
-                                          "get_repo_full_%s" % repo_name))
-        if invalidate and cache:
-            repo.invalidate()
-
-        ret = repo.scalar()
-
-        #make transient for sake of errors
-        make_transient(ret)
-        for k in ['fork', 'user', 'group']:
-            attr = getattr(ret, k, False)
-            if attr:
-                make_transient(attr)
-        return ret
 
     def get_users_js(self):
 
@@ -193,12 +171,13 @@ class RepoModel(BaseModel):
             raise
 
     def create(self, form_data, cur_user, just_db=False, fork=False):
+
         try:
             if fork:
                 #force str since hg doesn't go with unicode
                 repo_name = str(form_data['fork_name'])
                 org_name = str(form_data['repo_name'])
-                org_full_name = str(form_data['repo_name_full'])
+                org_full_name = org_name#str(form_data['fork_name_full'])
 
             else:
                 org_name = repo_name = str(form_data['repo_name'])
@@ -208,7 +187,10 @@ class RepoModel(BaseModel):
             new_repo.enable_statistics = False
             for k, v in form_data.items():
                 if k == 'repo_name':
-                    v = repo_name_full
+                    if fork:
+                        v = repo_name
+                    else:
+                        v = repo_name_full
                 if k == 'repo_group':
                     k = 'group_id'
 
@@ -216,7 +198,7 @@ class RepoModel(BaseModel):
 
             if fork:
                 parent_repo = self.sa.query(Repository)\
-                        .filter(Repository.repo_name == org_full_name).scalar()
+                        .filter(Repository.repo_name == org_full_name).one()
                 new_repo.fork = parent_repo
 
             new_repo.user_id = cur_user.user_id

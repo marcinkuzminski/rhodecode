@@ -280,6 +280,13 @@ def ValidRepoName(edit, old_data):
 
     return _ValidRepoName
 
+def ValidForkName():
+    class _ValidForkName(formencode.validators.FancyValidator):
+        def to_python(self, value, state):
+            return value
+    return _ValidForkName
+
+
 def SlugifyName():
     class _SlugifyName(formencode.validators.FancyValidator):
 
@@ -326,6 +333,7 @@ def ValidForkType(old_data):
             if old_data['repo_type'] != value:
                 raise formencode.Invalid(_('Fork have to be the same '
                                            'type as original'), value, state)
+
             return value
     return _ValidForkType
 
@@ -583,6 +591,9 @@ def RepoForkForm(edit=False, old_data={}, supported_backends=BACKENDS.keys()):
         description = UnicodeString(strip=True, min=1, not_empty=True)
         private = StringBoolean(if_missing=False)
         repo_type = All(ValidForkType(old_data), OneOf(supported_backends))
+
+        chained_validators = [ValidForkName()]
+
     return _RepoForkForm
 
 def RepoSettingsForm(edit=False, old_data={}):

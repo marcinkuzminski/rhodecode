@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from rhodecode.lib.auth import get_crypt_password, check_password
 from rhodecode.model.db import User, RhodeCodeSettings
 from rhodecode.tests import *
@@ -42,7 +44,8 @@ class TestAdminSettingsController(TestController):
         response = self.app.get(url('admin_edit_setting', setting_id=1))
 
     def test_edit_as_xml(self):
-        response = self.app.get(url('formatted_admin_edit_setting', setting_id=1, format='xml'))
+        response = self.app.get(url('formatted_admin_edit_setting',
+                                    setting_id=1, format='xml'))
 
 
     def test_ga_code_active(self):
@@ -58,11 +61,14 @@ class TestAdminSettingsController(TestController):
                                                  rhodecode_ga_code=new_ga_code
                                                  ))
 
-        assert 'Updated application settings' in response.session['flash'][0][1], 'no flash message about success of change'
-        assert RhodeCodeSettings.get_app_settings()['rhodecode_ga_code'] == new_ga_code, 'change not in database'
+        self.assertTrue('Updated application settings' in
+                        response.session['flash'][0][1])
+        self.assertEqual(RhodeCodeSettings
+                         .get_app_settings()['rhodecode_ga_code'], new_ga_code)
 
         response = response.follow()
-        assert """_gaq.push(['_setAccount', '%s']);""" % new_ga_code in response.body
+        self.assertTrue("""_gaq.push(['_setAccount', '%s']);""" % new_ga_code
+                        in response.body)
 
     def test_ga_code_inactive(self):
         self.log_user()
@@ -77,11 +83,14 @@ class TestAdminSettingsController(TestController):
                                                  rhodecode_ga_code=new_ga_code
                                                  ))
 
-        assert 'Updated application settings' in response.session['flash'][0][1], 'no flash message about success of change'
-        assert RhodeCodeSettings.get_app_settings()['rhodecode_ga_code'] == new_ga_code, 'change not in database'
+        self.assertTrue('Updated application settings' in
+                        response.session['flash'][0][1])
+        self.assertEqual(RhodeCodeSettings
+                        .get_app_settings()['rhodecode_ga_code'], new_ga_code)
 
         response = response.follow()
-        assert """_gaq.push(['_setAccount', '%s']);""" % new_ga_code not in response.body
+        self.assertTrue("""_gaq.push(['_setAccount', '%s']);""" % new_ga_code
+                        not in response.body)
 
 
     def test_title_change(self):
@@ -89,27 +98,33 @@ class TestAdminSettingsController(TestController):
         old_title = 'RhodeCode'
         new_title = old_title + '_changed'
         old_realm = 'RhodeCode authentication'
-        response = self.app.post(url('admin_setting', setting_id='global'),
-                                     params=dict(
-                                                 _method='put',
-                                                 rhodecode_title=new_title,
-                                                 rhodecode_realm=old_realm,
-                                                 rhodecode_ga_code=''
-                                                 ))
+
+        for new_title in ['Changed', 'Żółwik', old_title]:
+            response = self.app.post(url('admin_setting', setting_id='global'),
+                                         params=dict(
+                                                     _method='put',
+                                                     rhodecode_title=new_title,
+                                                     rhodecode_realm=old_realm,
+                                                     rhodecode_ga_code=''
+                                                     ))
 
 
-        assert 'Updated application settings' in response.session['flash'][0][1], 'no flash message about success of change'
-        assert RhodeCodeSettings.get_app_settings()['rhodecode_title'] == new_title, 'change not in database'
+            self.assertTrue('Updated application settings' in
+                            response.session['flash'][0][1])
+            self.assertEqual(RhodeCodeSettings
+                             .get_app_settings()['rhodecode_title'],
+                             new_title.decode('utf-8'))
 
-        response = response.follow()
-        assert """<h1><a href="/">%s</a></h1>""" % new_title in response.body
+            response = response.follow()
+            self.assertTrue("""<h1><a href="/">%s</a></h1>""" % new_title
+                        in response.body)
 
 
     def test_my_account(self):
         self.log_user()
         response = self.app.get(url('admin_settings_my_account'))
-        print response
-        assert 'value="test_admin' in response.body
+
+        self.assertTrue('value="test_admin' in response.body)
 
     def test_my_account_update(self):
         self.log_user()
@@ -120,14 +135,14 @@ class TestAdminSettingsController(TestController):
         new_password = 'test123'
 
 
-        response = self.app.post(url('admin_settings_my_account_update'), params=dict(
-                                                            _method='put',
-                                                            username='test_admin',
-                                                            new_password=new_password,
-                                                            password='',
-                                                            name=new_name,
-                                                            lastname=new_lastname,
-                                                            email=new_email,))
+        response = self.app.post(url('admin_settings_my_account_update'),
+                                 params=dict(_method='put',
+                                             username='test_admin',
+                                             new_password=new_password,
+                                             password='',
+                                             name=new_name,
+                                             lastname=new_lastname,
+                                             email=new_email,))
         response.follow()
 
         assert 'Your account was updated successfully' in response.session['flash'][0][1], 'no flash message about success of change'

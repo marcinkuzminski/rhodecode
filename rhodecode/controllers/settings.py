@@ -155,6 +155,7 @@ class SettingsController(BaseRepoController):
             invalidate_cache('get_repo_cached_%s' % repo_name)
             h.flash(_('deleted repository %s') % repo_name, category='success')
         except Exception:
+            log.error(traceback.format_exc())
             h.flash(_('An error occurred during deletion of %s') % repo_name,
                     category='error')
 
@@ -205,4 +206,9 @@ class SettingsController(BaseRepoController):
                 errors=errors.error_dict or {},
                 prefix_error=False,
                 encoding="UTF-8")
+        except Exception:
+            log.error(traceback.format_exc())
+            h.flash(_('An error occurred during repository forking %s') %
+                    repo_name, category='error')
+
         return redirect(url('home'))

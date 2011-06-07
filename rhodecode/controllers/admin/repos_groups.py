@@ -181,11 +181,13 @@ class ReposGroupsController(BaseController):
         """GET /repos_groups/id: Show a specific item"""
         # url('repos_group', id=ID)
 
-        c.group = Group.get(id)
+        gr = c.group = Group.get(id)
+
         if c.group:
             c.group_repos = c.group.repositories.all()
         else:
             return redirect(url('repos_group'))
+
 
         sortables = ['name', 'description', 'last_change', 'tip', 'owner']
         current_sort = request.GET.get('sort', 'name')
@@ -201,18 +203,12 @@ class ReposGroupsController(BaseController):
         sort_key = current_sort_slug + '_sort'
 
         #overwrite our cached list with current filter
-        gr_filter = [r.repo_name for r in c.group_repos]
+        gr_filter = c.group_repos
         c.cached_repo_list = self.scm_model.get_repos(all_repos=gr_filter)
 
-        if c.sort_by.startswith('-'):
-            c.repos_list = sorted(c.cached_repo_list, key=itemgetter(sort_key),
-                                  reverse=True)
-        else:
-            c.repos_list = sorted(c.cached_repo_list, key=itemgetter(sort_key),
-                                  reverse=False)
+        c.repos_list = c.cached_repo_list
 
-        c.repo_cnt = len(c.repos_list)
-
+        c.repo_cnt = 0
 
         c.groups = self.sa.query(Group).order_by(Group.group_name)\
             .filter(Group.group_parent_id == id).all()

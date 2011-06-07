@@ -70,6 +70,75 @@ class RepoTemp(object):
     def __repr__(self):
         return "<%s('id:%s')>" % (self.__class__.__name__, self.repo_id)
 
+class CachedRepoList(object):
+
+    def __init__(self, db_repo_list, invalidation_list, repos_path,
+                 order_by=None):
+        self.db_repo_list = db_repo_list
+        self.invalidation_list = invalidation_list
+        self.repos_path = repos_path
+        self.order_by = order_by
+        self.reversed = (order_by or '').startswith('-')
+
+    def __len__(self):
+        return len(self.db_repo_list)
+
+    def __repr__(self):
+        return '<%s (%s)>' % (self.__class__.__name__, self.__len__())
+
+    def __iter__(self):
+        for db_repo in self.db_repo_list:
+            dbr = db_repo
+
+            # invalidate the repo cache if needed before getting the 
+            # scm instance
+
+            scm_invalidate = False
+            if self.invalidation_list is not None:
+                scm_invalidate = dbr.repo_name in self.invalidation_list
+
+            if scm_invalidate:
+                log.info('invalidating cache for repository %s',
+                         dbr.repo_name)
+                db_repo.set_invalidate
+
+            scmr = db_repo.scm_instance_cached
+
+            #check permission at this level
+            if not HasRepoPermissionAny('repository.read',
+                                        'repository.write',
+                                        'repository.admin')(dbr.repo_name,
+                                                            'get repo check'):
+                continue
+
+
+
+
+
+            last_change = scmr.last_change
+            tip = h.get_changeset_safe(scmr, 'tip')
+
+            tmp_d = {}
+            tmp_d['name'] = dbr.repo_name
+            tmp_d['name_sort'] = tmp_d['name'].lower()
+            tmp_d['description'] = dbr.description
+            tmp_d['description_sort'] = tmp_d['description']
+            tmp_d['last_change'] = last_change
+            tmp_d['last_change_sort'] = time.mktime(last_change \
+                                                    .timetuple())
+            tmp_d['tip'] = tip.raw_id
+            tmp_d['tip_sort'] = tip.revision
+            tmp_d['rev'] = tip.revision
+            tmp_d['contact'] = dbr.user.full_contact
+            tmp_d['contact_sort'] = tmp_d['contact']
+            tmp_d['owner_sort'] = tmp_d['contact']
+            tmp_d['repo_archives'] = list(scmr._get_archives())
+            tmp_d['last_msg'] = tip.message
+            tmp_d['repo'] = scmr
+            tmp_d['dbrepo'] = dbr.get_dict()
+            tmp_d['dbrepo_fork'] = dbr.fork.get_dict() if dbr.fork \
+                                                                    else {}
+            yield tmp_d
 
 class ScmModel(BaseModel):
     """Generic Scm Model
@@ -118,7 +187,7 @@ class ScmModel(BaseModel):
 
         return repos_list
 
-    def get_repos(self, all_repos=None):
+    def get_repos(self, all_repos=None, sort_key=None):
         """
         Get all repos from db and for each repo create it's
         backend instance and fill that backed with information from database
@@ -127,120 +196,21 @@ class ScmModel(BaseModel):
             give specific repositories list, good for filtering
         """
         if all_repos is None:
-            repos = self.sa.query(Repository)\
+            all_repos = self.sa.query(Repository)\
                         .filter(Repository.group_id == None)\
                         .order_by(Repository.repo_name).all()
-            all_repos = [r.repo_name for r in repos]
 
         #get the repositories that should be invalidated
         invalidation_list = [str(x.cache_key) for x in \
                              self.sa.query(CacheInvalidation.cache_key)\
                              .filter(CacheInvalidation.cache_active == False)\
                              .all()]
-        for r_name in all_repos:
-            r_dbr = self.get(r_name, invalidation_list)
-            if r_dbr is not None:
-                repo, dbrepo = r_dbr
 
-                if repo is None or dbrepo is None:
-                    log.error('Repository "%s" looks somehow corrupted '
-                              'fs-repo:%s,db-repo:%s both values should be '
-                              'present', r_name, repo, dbrepo)
-                    continue
-                last_change = repo.last_change
-                tip = h.get_changeset_safe(repo, 'tip')
+        repo_iter = CachedRepoList(all_repos, invalidation_list,
+                                   repos_path=self.repos_path,
+                                   order_by=sort_key)
 
-                tmp_d = {}
-                tmp_d['name'] = dbrepo.repo_name
-                tmp_d['name_sort'] = tmp_d['name'].lower()
-                tmp_d['description'] = dbrepo.description
-                tmp_d['description_sort'] = tmp_d['description']
-                tmp_d['last_change'] = last_change
-                tmp_d['last_change_sort'] = time.mktime(last_change \
-                                                        .timetuple())
-                tmp_d['tip'] = tip.raw_id
-                tmp_d['tip_sort'] = tip.revision
-                tmp_d['rev'] = tip.revision
-                tmp_d['contact'] = dbrepo.user.full_contact
-                tmp_d['contact_sort'] = tmp_d['contact']
-                tmp_d['owner_sort'] = tmp_d['contact']
-                tmp_d['repo_archives'] = list(repo._get_archives())
-                tmp_d['last_msg'] = tip.message
-                tmp_d['repo'] = repo
-                tmp_d['dbrepo'] = dbrepo.get_dict()
-                tmp_d['dbrepo_fork'] = dbrepo.fork.get_dict() if dbrepo.fork \
-                                                                        else {}
-                yield tmp_d
-
-    def get(self, repo_name, invalidation_list=None, retval='all'):
-        """Returns a tuple of Repository,DbRepository,
-        Get's repository from given name, creates BackendInstance and
-        propagates it's data from database with all additional information
-
-        :param repo_name:
-        :param invalidation_list: if a invalidation list is given the get
-            method should not manually check if this repository needs
-            invalidation and just invalidate the repositories in list
-        :param retval: string specifing what to return one of 'repo','dbrepo',
-            'all'if repo or dbrepo is given it'll just lazy load chosen type
-            and return None as the second
-        """
-        if not HasRepoPermissionAny('repository.read', 'repository.write',
-                            'repository.admin')(repo_name, 'get repo check'):
-            return
-
-        #======================================================================
-        # CACHE FUNCTION
-        #======================================================================
-        @cache_region('long_term')
-        def _get_repo(repo_name):
-
-            repo_path = os.path.join(self.repos_path, repo_name)
-
-            try:
-                alias = get_scm(repo_path)[0]
-                log.debug('Creating instance of %s repository', alias)
-                backend = get_backend(alias)
-            except VCSError:
-                log.error(traceback.format_exc())
-                log.error('Perhaps this repository is in db and not in '
-                          'filesystem run rescan repositories with '
-                          '"destroy old data " option from admin panel')
-                return
-
-            if alias == 'hg':
-                repo = backend(repo_path, create=False, baseui=make_ui('db'))
-                #skip hidden web repository
-                if repo._get_hidden():
-                    return
-            else:
-                repo = backend(repo_path, create=False)
-
-            return repo
-
-        pre_invalidate = True
-        dbinvalidate = False
-
-        if invalidation_list is not None:
-            pre_invalidate = repo_name in invalidation_list
-
-        if pre_invalidate:
-            #this returns object to invalidate
-            invalidate = self._should_invalidate(repo_name)
-            if invalidate:
-                log.info('invalidating cache for repository %s', repo_name)
-                region_invalidate(_get_repo, None, repo_name)
-                self._mark_invalidated(invalidate)
-                dbinvalidate = True
-
-        r, dbr = None, None
-        if retval == 'repo' or 'all':
-            r = _get_repo(repo_name)
-        if retval == 'dbrepo' or 'all':
-            dbr = RepoModel().get_full(repo_name, cache=True,
-                                          invalidate=dbinvalidate)
-
-        return r, dbr
+        return repo_iter
 
     def mark_for_invalidation(self, repo_name):
         """Puts cache invalidation task into db for

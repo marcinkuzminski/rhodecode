@@ -26,12 +26,22 @@
 import os
 import logging
 import datetime
+import traceback
 from datetime import date
 
 from sqlalchemy import *
 from sqlalchemy.exc import DatabaseError
-from sqlalchemy.orm import relationship, backref
+from sqlalchemy.orm import relationship, backref, joinedload
 from sqlalchemy.orm.interfaces import MapperExtension
+
+from beaker.cache import cache_region, region_invalidate
+
+
+from vcs import get_backend
+from vcs.utils.helpers import get_scm
+from vcs.exceptions import RepositoryError, VCSError
+from vcs.utils.lazy import LazyProperty
+from vcs.nodes import FileNode
 
 from rhodecode.lib import str2bool
 from rhodecode.model.meta import Base, Session
@@ -150,6 +160,7 @@ class User(Base):
         return self.admin
 
     def __repr__(self):
+        return 'ahmmm'
         return "<%s('id:%s:%s')>" % (self.__class__.__name__,
                                      self.user_id, self.username)
 
@@ -266,8 +277,13 @@ class Repository(Base):
 
     @classmethod
     def by_repo_name(cls, repo_name):
-        return Session.query(cls).filter(cls.repo_name == repo_name).one()
+        q = Session.query(cls).filter(cls.repo_name == repo_name)
 
+        q = q.options(joinedload(Repository.fork))\
+            .options(joinedload(Repository.user))\
+            .options(joinedload(Repository.group))\
+
+        return q.one()
 
     @classmethod
     def get_repo_forks(cls, repo_id):
@@ -297,6 +313,127 @@ class Repository(Base):
     @property
     def groups_and_repo(self):
         return self.groups_with_parents, self.just_name
+
+    @LazyProperty
+    def repo_path(self):
+        """
+        Returns base full path for that repository means where it actually
+        exists on a filesystem
+        """
+
+        q = Session.query(RhodeCodeUi).filter(RhodeCodeUi.ui_key == '/').one()
+        return q.ui_value
+
+    @property
+    def repo_full_path(self):
+        p = [self.repo_path]
+        # we need to split the name by / since this is how we store the
+        # names in the database, but that eventually needs to be converted
+        # into a valid system path
+        p += self.repo_name.split('/')
+        return os.path.join(*p)
+
+    @property
+    def _ui(self):
+        """
+        Creates an db based ui object for this repository
+        """
+        from mercurial import ui
+        from mercurial import config
+        baseui = ui.ui()
+
+        #clean the baseui object
+        baseui._ocfg = config.config()
+        baseui._ucfg = config.config()
+        baseui._tcfg = config.config()
+
+
+        ret = Session.query(RhodeCodeUi)\
+            .options(FromCache("sql_cache_short",
+                               "repository_repo_ui")).all()
+
+        hg_ui = ret
+        for ui_ in hg_ui:
+            if ui_.ui_active:
+                log.debug('settings ui from db[%s]%s:%s', ui_.ui_section,
+                          ui_.ui_key, ui_.ui_value)
+                baseui.setconfig(ui_.ui_section, ui_.ui_key, ui_.ui_value)
+
+        return baseui
+
+    #==========================================================================
+    # SCM CACHE INSTANCE
+    #==========================================================================
+
+    @property
+    def invalidate(self):
+        """
+        Returns Invalidation object if this repo should be invalidated
+        None otherwise. `cache_active = False` means that this cache
+        state is not valid and needs to be invalidated
+        """
+        return Session.query(CacheInvalidation)\
+            .filter(CacheInvalidation.cache_key == self.repo_name)\
+            .filter(CacheInvalidation.cache_active == False)\
+            .scalar()
+
+    @property
+    def set_invalidate(self):
+        """
+        set a cache for invalidation for this instance
+        """
+        inv = Session.query(CacheInvalidation)\
+            .filter(CacheInvalidation.cache_key == self.repo_name)\
+            .scalar()
+
+        if inv is None:
+            inv = CacheInvalidation(self.repo_name)
+        inv.cache_active = True
+        Session.add(inv)
+        Session.commit()
+
+    @property
+    def scm_instance(self):
+        return self.__get_instance(self.repo_name)
+
+    @property
+    def scm_instance_cached(self):
+        @cache_region('long_term')
+        def _c(repo_name):
+            return self.__get_instance(repo_name)
+
+        inv = self.invalidate
+        if inv:
+            region_invalidate(_c, None, self.repo_name)
+            #update our cache
+            inv.cache_key.cache_active = True
+            Session.add(inv)
+            Session.commit()
+
+        return _c(self.repo_name)
+
+    def __get_instance(self, repo_name):
+        try:
+            alias = get_scm(self.repo_full_path)[0]
+            log.debug('Creating instance of %s repository', alias)
+            backend = get_backend(alias)
+        except VCSError:
+            log.error(traceback.format_exc())
+            log.error('Perhaps this repository is in db and not in '
+                      'filesystem run rescan repositories with '
+                      '"destroy old data " option from admin panel')
+            return
+
+        if alias == 'hg':
+            repo = backend(self.repo_full_path, create=False,
+                           baseui=self._ui)
+            #skip hidden web repository
+            if repo._get_hidden():
+                return
+        else:
+            repo = backend(self.repo_full_path, create=False)
+
+        return repo
 
 
 class Group(Base):

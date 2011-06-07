@@ -89,10 +89,8 @@ class ReposController(BaseController):
         """
         self.__load_defaults()
 
-        repo, dbrepo = ScmModel().get(repo_name, retval='repo')
-
-        repo_model = RepoModel()
-        c.repo_info = repo_model.get_by_repo_name(repo_name)
+        c.repo_info = db_repo = Repository.by_repo_name(repo_name)
+        repo = scm_repo = db_repo.scm_instance
 
         if c.repo_info is None:
             h.flash(_('%s repository is not mapped to db perhaps'
@@ -153,10 +151,9 @@ class ReposController(BaseController):
         """GET /repos: All items in the collection"""
         # url('repos')
 
-        all_repos = [r.repo_name for r in Repository.query().all()]
-
-        cached_repo_list = ScmModel().get_repos(all_repos)
-        c.repos_list = sorted(cached_repo_list, key=itemgetter('name_sort'))
+        c.repos_list = ScmModel().get_repos(Repository.query()
+                                            .order_by(Repository.repo_name)
+                                            .all(), sort_key='name_sort')
         return render('admin/repos/repos.html')
 
     @HasPermissionAnyDecorator('hg.admin', 'hg.create.repository')

@@ -7,6 +7,9 @@ command.
 This module initializes the application via ``websetup`` (`paster
 setup-app`) and provides the base testing objects.
 """
+import os
+from os.path import join as jn
+
 from unittest import TestCase
 
 from paste.deploy import loadapp
@@ -14,7 +17,7 @@ from paste.script.appinstall import SetupCommand
 from pylons import config, url
 from routes.util import URLGenerator
 from webtest import TestApp
-import os
+
 from rhodecode.model import meta
 import logging
 
@@ -35,7 +38,7 @@ __all__ = ['environ', 'url', 'TestController', 'TESTS_TMP_PATH', 'HG_REPO',
 environ = {}
 
 #SOME GLOBALS FOR TESTS
-TESTS_TMP_PATH = '/tmp'
+TESTS_TMP_PATH = jn('/', 'tmp')
 
 HG_REPO = 'vcs_test_hg'
 GIT_REPO = 'vcs_test_git'
@@ -64,8 +67,8 @@ class TestController(TestCase):
                                   'password':password})
 
         if 'invalid user name' in response.body:
-            assert False, 'could not login using %s %s' % (username, password)
+            self.fail('could not login using %s %s' % (username, password))
 
-        assert response.status == '302 Found', 'Wrong response code from login got %s' % response.status
-        assert response.session['rhodecode_user'].username == username, 'wrong logged in user got %s expected %s' % (response.session['rhodecode_user'].username, username)
+        self.assertEqual(response.status, '302 Found')
+        self.assertEqual(response.session['rhodecode_user'].username, username)
         return response.follow()

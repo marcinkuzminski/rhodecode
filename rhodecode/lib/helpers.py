@@ -372,8 +372,7 @@ def action_parser(user_log, feed=False):
         repo_name = user_log.repository.repo_name
 
         from rhodecode.model.scm import ScmModel
-        repo, dbrepo = ScmModel().get(repo_name, retval='repo',
-                                      invalidation_list=[])
+        repo = user_log.repository.scm_instance
 
         message = lambda rev: get_changeset_safe(repo, rev).message
         cs_links = []

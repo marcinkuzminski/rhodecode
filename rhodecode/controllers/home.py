@@ -31,7 +31,7 @@ from paste.httpexceptions import HTTPBadRequest
 
 from rhodecode.lib.auth import LoginRequired
 from rhodecode.lib.base import BaseController, render
-from rhodecode.model.db import Group
+from rhodecode.model.db import Group, Repository
 
 log = logging.getLogger(__name__)
 
@@ -56,15 +56,10 @@ class HomeController(BaseController):
 
         sort_key = current_sort_slug + '_sort'
 
-        if c.sort_by.startswith('-'):
-            c.repos_list = sorted(c.cached_repo_list, key=itemgetter(sort_key),
-                                  reverse=True)
-        else:
-            c.repos_list = sorted(c.cached_repo_list, key=itemgetter(sort_key),
-                                  reverse=False)
+
+        c.repos_list = self.scm_model.get_repos(sort_key=sort_key)
 
         c.repo_cnt = len(c.repos_list)
-
 
         c.groups = Group.query().filter(Group.group_parent_id == None).all()
 
@@ -73,8 +68,9 @@ class HomeController(BaseController):
 
     def repo_switcher(self):
         if request.is_xhr:
-            c.repos_list = sorted(c.cached_repo_list,
-                                  key=itemgetter('name_sort'), reverse=False)
+            all_repos = Repository.query().order_by(Repository.repo_name).all()
+            c.repos_list = self.scm_model.get_repos(all_repos,
+                                                    sort_key='name_sort')
             return render('/repo_switcher_list.html')
         else:
             return HTTPBadRequest()
