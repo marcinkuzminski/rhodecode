@@ -36,7 +36,6 @@ from sqlalchemy.orm.interfaces import MapperExtension
 
 from beaker.cache import cache_region, region_invalidate
 
-
 from vcs import get_backend
 from vcs.utils.helpers import get_scm
 from vcs.exceptions import RepositoryError, VCSError
@@ -320,9 +319,9 @@ class Repository(Base):
         Returns base full path for that repository means where it actually
         exists on a filesystem
         """
-
-        q = Session.query(RhodeCodeUi).filter(RhodeCodeUi.ui_key == '/').one()
-        return q.ui_value
+        q = Session.query(RhodeCodeUi).filter(RhodeCodeUi.ui_key == '/')
+        q.options(FromCache("sql_cache_short", "repository_repo_path"))
+        return q.one().ui_value
 
     @property
     def repo_full_path(self):
@@ -413,8 +412,11 @@ class Repository(Base):
         return _c(self.repo_name)
 
     def __get_instance(self, repo_name):
+
+        repo_full_path = self.repo_full_path
+
         try:
-            alias = get_scm(self.repo_full_path)[0]
+            alias = get_scm(repo_full_path)[0]
             log.debug('Creating instance of %s repository', alias)
             backend = get_backend(alias)
         except VCSError:
@@ -425,13 +427,13 @@ class Repository(Base):
             return
 
         if alias == 'hg':
-            repo = backend(self.repo_full_path, create=False,
+            repo = backend(repo_full_path, create=False,
                            baseui=self._ui)
             #skip hidden web repository
             if repo._get_hidden():
                 return
         else:
-            repo = backend(self.repo_full_path, create=False)
+            repo = backend(repo_full_path, create=False)
 
         return repo
 
