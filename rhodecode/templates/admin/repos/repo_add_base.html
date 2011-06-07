@@ -10,6 +10,9 @@ ${h.form(url('repos'))}
             </div>
             <div class="input">
                 ${h.text('repo_name',c.new_repo,class_="small")}
+                %if not h.HasPermissionAll('hg.admin')('repo create form'):
+                    ${h.hidden('user_created',True)}
+                %endif
             </div>
          </div>
         <div class="field">
