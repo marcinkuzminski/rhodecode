@@ -159,7 +159,6 @@ class User(Base):
         return self.admin
 
     def __repr__(self):
-        return 'ahmmm'
         return "<%s('id:%s:%s')>" % (self.__class__.__name__,
                                      self.user_id, self.username)
 
