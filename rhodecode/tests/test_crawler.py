@@ -4,6 +4,8 @@
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Test for crawling a project for memory usage
+    This should be runned just as regular script together
+    with a watch script that will show memory usage.
     
     watch -n1 ./rhodecode/tests/mem_watch
 
