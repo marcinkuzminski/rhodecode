@@ -112,7 +112,11 @@ class CachedRepoList(object):
                 continue
 
 
-
+            if not scmr:
+                log.error('%s this repository is present in database but it '
+                          'cannot be created as an scm instance',
+                          dbr.repo_name)
+                continue
 
 
             last_change = scmr.last_change

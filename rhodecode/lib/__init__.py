@@ -83,19 +83,32 @@ def str2bool(_str):
     return _str in ('t', 'true', 'y', 'yes', 'on', '1')
 
 
-def convert_line_endings(temp, mode):
+def convert_line_endings(line, mode):
+    """
+    Converts a given line  "line end" accordingly to given mode
+    
+    Available modes are::
+        0 - Unix
+        1 - Mac
+        2 - DOS
+    
+    :param line: given line to convert
+    :param mode: mode to convert to
+    :rtype: str
+    :return: converted line according to mode
+    """
     from string import replace
-    #modes:  0 - Unix, 1 - Mac, 2 - DOS
+
     if mode == 0:
-            temp = replace(temp, '\r\n', '\n')
-            temp = replace(temp, '\r', '\n')
+            line = replace(line, '\r\n', '\n')
+            line = replace(line, '\r', '\n')
     elif mode == 1:
-            temp = replace(temp, '\r\n', '\r')
-            temp = replace(temp, '\n', '\r')
+            line = replace(line, '\r\n', '\r')
+            line = replace(line, '\n', '\r')
     elif mode == 2:
             import re
-            temp = re.sub("\r(?!\n)|(?<!\r)\n", "\r\n", temp)
-    return temp
+            line = re.sub("\r(?!\n)|(?<!\r)\n", "\r\n", line)
+    return line
 
 
 def detect_mode(line, default):
@@ -254,13 +267,13 @@ def age(curdate):
     return _(u'just now')
 
 
-def credentials_hidder(uri):
+def uri_filter(uri):
     """
     Removes user:password from given url string
     
     :param uri:
     :rtype: unicode
-    :returns: filtered list of strings    
+    :returns: filtered list of strings  
     """
     if not uri:
         return ''
@@ -284,3 +297,19 @@ def credentials_hidder(uri):
         host, port = uri[:cred_pos], uri[cred_pos + 1:]
 
     return filter(None, [proto, host, port])
+
+
+def credentials_filter(uri):
+    """
+    Returns a url with removed credentials
+    
+    :param uri:
+    """
+
+    uri = uri_filter(uri)
+    #check if we have port
+    if len(uri) > 2 and uri[2]:
+        uri[2] = ':' + uri[2]
+
+    return ''.join(uri)
+

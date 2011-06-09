@@ -2,8 +2,11 @@
 
 Provides the BaseController class for subclassing.
 """
-from pylons import config, tmpl_context as c, request, session
+import logging
+
+from pylons import config, tmpl_context as c, request, session, url
 from pylons.controllers import WSGIController
+from pylons.controllers.util import redirect
 from pylons.templating import render_mako as render
 
 from rhodecode import __version__
@@ -14,6 +17,7 @@ from rhodecode.model.scm import ScmModel
 from rhodecode import BACKENDS
 from rhodecode.model.db import Repository
 
+log = logging.getLogger(__name__)
 
 class BaseController(WSGIController):
 
@@ -63,13 +67,16 @@ class BaseRepoController(BaseController):
         super(BaseRepoController, self).__before__()
         if c.repo_name:
 
-            c.rhodecode_repo = Repository.by_repo_name(c.repo_name).scm_instance
+            c.rhodecode_db_repo = Repository.by_repo_name(c.repo_name)
+            c.rhodecode_repo = c.rhodecode_db_repo.scm_instance
 
-            if c.rhodecode_repo is not None:
-                c.repository_followers = \
-                    self.scm_model.get_followers(c.repo_name)
-                c.repository_forks = self.scm_model.get_forks(c.repo_name)
-            else:
-                c.repository_followers = 0
-                c.repository_forks = 0
+            if c.rhodecode_repo is None:
+                log.error('%s this repository is present in database but it '
+                          'cannot be created as an scm instance', c.repo_name)
+
+                redirect(url('home'))
+
+            c.repository_followers = \
+                self.scm_model.get_followers(c.repo_name)
+            c.repository_forks = self.scm_model.get_forks(c.repo_name)
 

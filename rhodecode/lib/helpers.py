@@ -321,7 +321,7 @@ flash = _Flash()
 # SCM FILTERS available via h.
 #==============================================================================
 from vcs.utils import author_name, author_email
-from rhodecode.lib import credentials_hidder, age as _age
+from rhodecode.lib import credentials_filter, age as _age
 
 age = lambda  x:_age(x)
 capitalize = lambda x: x.capitalize()
@@ -329,7 +329,7 @@ email = author_email
 email_or_none = lambda x: email(x) if email(x) != x else None
 person = lambda x: author_name(x)
 short_id = lambda x: x[:12]
-hide_credentials = lambda x: ''.join(credentials_hidder(x))
+hide_credentials = lambda x: ''.join(credentials_filter(x))
 
 def bool2icon(value):
     """Returns True/False values represented as small html image of true/false
