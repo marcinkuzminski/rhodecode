@@ -571,7 +571,7 @@ class UserToPerm(Base):
 
 class UsersGroupRepoToPerm(Base):
     __tablename__ = 'users_group_repo_to_perm'
-    __table_args__ = (UniqueConstraint('users_group_id', 'permission_id'), {'extend_existing':True})
+    __table_args__ = (UniqueConstraint('repository_id', 'users_group_id', 'permission_id'), {'extend_existing':True})
     users_group_to_perm_id = Column("users_group_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     users_group_id = Column("users_group_id", Integer(), ForeignKey('users_groups.users_group_id'), nullable=False, unique=None, default=None)
     permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable=False, unique=None, default=None)
