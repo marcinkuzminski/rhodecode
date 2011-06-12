@@ -3,7 +3,7 @@
     rhodecode.lib.indexers.daemon
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    A deamon will read from task table and run tasks
+    A daemon will read from task table and run tasks
 
     :created_on: Jan 26, 2010
     :author: marcink
@@ -69,7 +69,7 @@ log.addHandler(ch)
 
 class WhooshIndexingDaemon(object):
     """
-    Deamon for atomic jobs
+    Daemon for atomic jobs
     """
 
     def __init__(self, indexname='HG_INDEX', index_location=None,
