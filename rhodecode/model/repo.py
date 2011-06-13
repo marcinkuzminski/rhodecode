@@ -151,7 +151,7 @@ class RepoModel(BaseModel):
                     cur_repo.user = user_model.get_by_username(v)
                 elif k == 'repo_name':
                     cur_repo.repo_name = form_data['repo_name_full']
-                elif k == 'repo_group' and v:
+                elif k == 'repo_group':
                     cur_repo.group_id = v
 
                 else:
