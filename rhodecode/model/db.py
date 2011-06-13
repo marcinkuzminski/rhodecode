@@ -103,6 +103,9 @@ class RhodeCodeSettings(Base):
         fd = {}
         for row in ret:
             fd.update({row.app_settings_name:row.app_settings_value})
+
+        fd.update({'ldap_active':str2bool(fd.get('ldap_active'))})
+
         return fd
 
 
