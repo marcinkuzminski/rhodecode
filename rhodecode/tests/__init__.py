@@ -27,7 +27,8 @@ log = logging.getLogger(__name__)
 import pylons.test
 
 __all__ = ['environ', 'url', 'TestController', 'TESTS_TMP_PATH', 'HG_REPO',
-           'GIT_REPO', 'NEW_HG_REPO', 'NEW_GIT_REPO', 'HG_FORK', 'GIT_FORK', ]
+           'GIT_REPO', 'NEW_HG_REPO', 'NEW_GIT_REPO', 'HG_FORK', 'GIT_FORK',
+           'checkSessionFlash' ]
 
 # Invoke websetup with the current config file
 #SetupCommand('setup-app').run([config_file])
@@ -72,3 +73,10 @@ class TestController(TestCase):
         self.assertEqual(response.status, '302 Found')
         self.assertEqual(response.session['rhodecode_user'].username, username)
         return response.follow()
+
+
+
+    def checkSessionFlash(self, response, msg):
+        self.assertTrue('flash' in response.session)
+        self.assertTrue(msg in response.session['flash'][0][1])
+

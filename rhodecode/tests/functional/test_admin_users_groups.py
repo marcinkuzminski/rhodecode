@@ -1,6 +1,8 @@
 from rhodecode.tests import *
 
-class TestUsersGroupsController(TestController):
+TEST_USERS_GROUP = 'admins_test'
+
+class TestAdminUsersGroupsController(TestController):
 
     def test_index(self):
         response = self.app.get(url('users_groups'))
@@ -10,7 +12,18 @@ class TestUsersGroupsController(TestController):
         response = self.app.get(url('formatted_users_groups', format='xml'))
 
     def test_create(self):
-        response = self.app.post(url('users_groups'))
+        users_group_name = TEST_USERS_GROUP
+        response = self.app.post(url('users_groups'),
+                                 {'users_group_name':users_group_name,
+                                  'active':True})
+        response.follow()
+
+        self.checkSessionFlash(response,
+                               'created users group %s' % TEST_USERS_GROUP)
+
+
+
+
 
     def test_new(self):
         response = self.app.get(url('new_users_group'))
@@ -41,3 +54,16 @@ class TestUsersGroupsController(TestController):
 
     def test_edit_as_xml(self):
         response = self.app.get(url('formatted_edit_users_group', id=1, format='xml'))
+
+    def test_assign_members(self):
+        pass
+
+    def test_add_create_permission(self):
+        pass
+
+    def test_revoke_members(self):
+        pass
+
+
+
+
