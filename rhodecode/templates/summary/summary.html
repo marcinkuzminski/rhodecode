@@ -188,7 +188,14 @@
 	  	YUE.onDOMReady(function(e){
 	  	    id = 'clone_url';
 	  	    YUE.on(id,'click',function(e){
-	  	        YUD.get('clone_url').select();
+	  	    	if(YUD.hasClass(id,'selected')){
+	  	    		return
+	  	    	}
+	  	    	else{
+	                YUD.addClass(id,'selected');
+	                YUD.get(id).select();	  	    		
+	  	    	}
+
 	  	    })
 	  	})
   		var data = ${c.trending_languages|n};
