@@ -468,7 +468,7 @@ class Group(Base):
 
     @property
     def parents(self):
-        parents_limit = 5
+        parents_recursion_limit = 5
         groups = []
         if self.parent_group is None:
             return groups
@@ -481,15 +481,18 @@ class Group(Base):
             cur_gr = cur_gr.parent_group
             if gr is None:
                 break
-            if cnt == parents_limit:
+            if cnt == parents_recursion_limit:
                 # this will prevent accidental infinit loops
                 log.error('group nested more than %s' %
-                                parents_limit)
+                          parents_recursion_limit)
                 break
 
             groups.insert(0, gr)
         return groups
 
+    @property
+    def children(self):
+        return Session.query(Group).filter(Group.parent_group == self)
 
     @property
     def full_path(self):
@@ -499,6 +502,19 @@ class Group(Base):
     @property
     def repositories(self):
         return Session.query(Repository).filter(Repository.group == self)
+
+    @property
+    def repositories_recursive_count(self):
+        cnt = self.repositories.count()
+
+        def children_count(group):
+            cnt = 0
+            for child in group.children:
+                cnt += child.repositories.count()
+                cnt += children_count(child)
+            return cnt
+
+        return cnt + children_count(self)
 
 class Permission(Base):
     __tablename__ = 'permissions'
