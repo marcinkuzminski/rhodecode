@@ -371,7 +371,7 @@ There are two ways to enable https:
 
 - Set HTTP_X_URL_SCHEME in your http server headers, than rhodecode will
   recognize this headers and make proper https redirections
-- Alternatively, set `force_https = true` in the ini configuration to force 
+- Alternatively, set the `force_https = true` in the ini configuration to force 
   using https, no headers are needed than to enable https
 
 
@@ -472,7 +472,8 @@ Apache subdirectory part::
       SetEnvIf X-Url-Scheme https HTTPS=1
     </Location> 
 
-Besides the regular apache setup you will need to add the following to your .ini file::
+Besides the regular apache setup you will need to add the following line
+into [app:main] section of your .ini file::
 
     filter-with = proxy-prefix
 
