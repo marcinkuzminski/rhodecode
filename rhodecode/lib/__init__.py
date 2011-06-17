@@ -24,6 +24,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+try:
+    import json
+except ImportError:
+    #python 2.5 compatibility
+    import simplejson as json
+
+
 def __get_lem():
     from pygments import lexers
     from string import lower
