@@ -31,7 +31,7 @@ from datetime import date
 
 from sqlalchemy import *
 from sqlalchemy.exc import DatabaseError
-from sqlalchemy.orm import relationship, backref, joinedload
+from sqlalchemy.orm import relationship, backref, joinedload, class_mapper
 from sqlalchemy.orm.interfaces import MapperExtension
 
 from beaker.cache import cache_region, region_invalidate
@@ -42,22 +42,91 @@ from vcs.exceptions import RepositoryError, VCSError
 from vcs.utils.lazy import LazyProperty
 from vcs.nodes import FileNode
 
-from rhodecode.lib import str2bool
+from rhodecode.lib import str2bool, json
 from rhodecode.model.meta import Base, Session
 from rhodecode.model.caching_query import FromCache
 
 log = logging.getLogger(__name__)
 
 #==============================================================================
-# MAPPER EXTENSIONS
+# BASE CLASSES
 #==============================================================================
 
-class RepositoryMapper(MapperExtension):
-    def after_update(self, mapper, connection, instance):
-        pass
+class ModelSerializer(json.JSONEncoder):
+    """
+    Simple Serializer for JSON,
+    
+    usage::
+        
+        to make object customized for serialization implement a __json__
+        method that will return a dict for serialization into json
+        
+    example::
+        
+        class Task(object):
+        
+            def __init__(self, name, value):
+                self.name = name
+                self.value = value
+        
+            def __json__(self):
+                return dict(name=self.name,
+                            value=self.value)     
+        
+    """
+
+    def default(self, obj):
+
+        if hasattr(obj, '__json__'):
+            return obj.__json__()
+        else:
+            return json.JSONEncoder.default(self, obj)
+
+class BaseModel(object):
+    """Base Model for all classess
+
+    """
+
+    @classmethod
+    def _get_keys(cls):
+        """return column names for this model """
+        return class_mapper(cls).c.keys()
+
+    def get_dict(self):
+        """return dict with keys and values corresponding
+        to this model data """
+
+        d = {}
+        for k in self._get_keys():
+            d[k] = getattr(self, k)
+        return d
+
+    def get_appstruct(self):
+        """return list with keys and values tupples corresponding
+        to this model data """
+
+        l = []
+        for k in self._get_keys():
+            l.append((k, getattr(self, k),))
+        return l
+
+    def populate_obj(self, populate_dict):
+        """populate model with data from given populate_dict"""
+
+        for k in self._get_keys():
+            if k in populate_dict:
+                setattr(self, k, populate_dict[k])
+
+    @classmethod
+    def query(cls):
+        return Session.query(cls)
+
+    @classmethod
+    def get(cls, id_):
+        return Session.query(cls).get(id_)
 
 
-class RhodeCodeSettings(Base):
+class RhodeCodeSettings(Base, BaseModel):
     __tablename__ = 'rhodecode_settings'
     __table_args__ = (UniqueConstraint('app_settings_name'), {'extend_existing':True})
     app_settings_id = Column("app_settings_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -109,7 +178,7 @@ class RhodeCodeSettings(Base):
         return fd
 
 
-class RhodeCodeUi(Base):
+class RhodeCodeUi(Base, BaseModel):
     __tablename__ = 'rhodecode_ui'
     __table_args__ = {'extend_existing':True}
     ui_id = Column("ui_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -124,7 +193,7 @@ class RhodeCodeUi(Base):
         return Session.query(cls).filter(cls.ui_key == key)
 
 
-class User(Base):
+class User(Base, BaseModel):
     __tablename__ = 'users'
     __table_args__ = (UniqueConstraint('username'), UniqueConstraint('email'), {'extend_existing':True})
     user_id = Column("user_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -183,7 +252,7 @@ class User(Base):
             session.rollback()
 
 
-class UserLog(Base):
+class UserLog(Base, BaseModel):
     __tablename__ = 'user_logs'
     __table_args__ = {'extend_existing':True}
     user_log_id = Column("user_log_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -202,7 +271,7 @@ class UserLog(Base):
     repository = relationship('Repository')
 
 
-class UsersGroup(Base):
+class UsersGroup(Base, BaseModel):
     __tablename__ = 'users_groups'
     __table_args__ = {'extend_existing':True}
 
@@ -226,7 +295,7 @@ class UsersGroup(Base):
                                           "get_user_%s" % group_name))
         return gr.scalar()
 
-class UsersGroupMember(Base):
+class UsersGroupMember(Base, BaseModel):
     __tablename__ = 'users_groups_members'
     __table_args__ = {'extend_existing':True}
 
@@ -241,10 +310,9 @@ class UsersGroupMember(Base):
         self.users_group_id = gr_id
         self.user_id = u_id
 
-class Repository(Base):
+class Repository(Base, BaseModel):
     __tablename__ = 'repositories'
     __table_args__ = (UniqueConstraint('repo_name'), {'extend_existing':True},)
-    __mapper_args__ = {'extension':RepositoryMapper()}
 
     repo_id = Column("repo_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     repo_name = Column("repo_name", String(length=255, convert_unicode=False, assert_unicode=None), nullable=False, unique=True, default=None)
@@ -440,7 +508,7 @@ class Repository(Base):
         return repo
 
 
-class Group(Base):
+class Group(Base, BaseModel):
     __tablename__ = 'groups'
     __table_args__ = (UniqueConstraint('group_name', 'group_parent_id'),
                       CheckConstraint('group_id != group_parent_id'), {'extend_existing':True},)
@@ -516,7 +584,7 @@ class Group(Base):
 
         return cnt + children_count(self)
 
-class Permission(Base):
+class Permission(Base, BaseModel):
     __tablename__ = 'permissions'
     __table_args__ = {'extend_existing':True}
     permission_id = Column("permission_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -531,7 +599,7 @@ class Permission(Base):
     def get_by_key(cls, key):
         return Session.query(cls).filter(cls.permission_name == key).scalar()
 
-class RepoToPerm(Base):
+class RepoToPerm(Base, BaseModel):
     __tablename__ = 'repo_to_perm'
     __table_args__ = (UniqueConstraint('user_id', 'repository_id'), {'extend_existing':True})
     repo_to_perm_id = Column("repo_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -543,7 +611,7 @@ class RepoToPerm(Base):
     permission = relationship('Permission')
     repository = relationship('Repository')
 
-class UserToPerm(Base):
+class UserToPerm(Base, BaseModel):
     __tablename__ = 'user_to_perm'
     __table_args__ = (UniqueConstraint('user_id', 'permission_id'), {'extend_existing':True})
     user_to_perm_id = Column("user_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -588,7 +656,7 @@ class UserToPerm(Base):
         except:
             Session.rollback()
 
-class UsersGroupRepoToPerm(Base):
+class UsersGroupRepoToPerm(Base, BaseModel):
     __tablename__ = 'users_group_repo_to_perm'
     __table_args__ = (UniqueConstraint('repository_id', 'users_group_id', 'permission_id'), {'extend_existing':True})
     users_group_to_perm_id = Column("users_group_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -601,7 +669,7 @@ class UsersGroupRepoToPerm(Base):
     repository = relationship('Repository')
 
 
-class UsersGroupToPerm(Base):
+class UsersGroupToPerm(Base, BaseModel):
     __tablename__ = 'users_group_to_perm'
     users_group_to_perm_id = Column("users_group_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     users_group_id = Column("users_group_id", Integer(), ForeignKey('users_groups.users_group_id'), nullable=False, unique=None, default=None)
@@ -649,7 +717,7 @@ class UsersGroupToPerm(Base):
             Session.rollback()
 
 
-class GroupToPerm(Base):
+class GroupToPerm(Base, BaseModel):
     __tablename__ = 'group_to_perm'
     __table_args__ = (UniqueConstraint('group_id', 'permission_id'), {'extend_existing':True})
 
@@ -662,7 +730,7 @@ class GroupToPerm(Base):
     permission = relationship('Permission')
     group = relationship('Group')
 
-class Statistics(Base):
+class Statistics(Base, BaseModel):
     __tablename__ = 'statistics'
     __table_args__ = (UniqueConstraint('repository_id'), {'extend_existing':True})
     stat_id = Column("stat_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -674,7 +742,7 @@ class Statistics(Base):
 
     repository = relationship('Repository', single_parent=True)
 
-class UserFollowing(Base):
+class UserFollowing(Base, BaseModel):
     __tablename__ = 'user_followings'
     __table_args__ = (UniqueConstraint('user_id', 'follows_repository_id'),
                       UniqueConstraint('user_id', 'follows_user_id')
@@ -692,12 +760,11 @@ class UserFollowing(Base):
     follows_repository = relationship('Repository', order_by='Repository.repo_name')
 
 
-
     @classmethod
     def get_repo_followers(cls, repo_id):
         return Session.query(cls).filter(cls.follows_repo_id == repo_id)
 
-class CacheInvalidation(Base):
+class CacheInvalidation(Base, BaseModel):
     __tablename__ = 'cache_invalidation'
     __table_args__ = (UniqueConstraint('cache_key'), {'extend_existing':True})
     cache_id = Column("cache_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -715,7 +782,7 @@ class CacheInvalidation(Base):
         return "<%s('%s:%s')>" % (self.__class__.__name__,
                                   self.cache_id, self.cache_key)
 
-class DbMigrateVersion(Base):
+class DbMigrateVersion(Base, BaseModel):
     __tablename__ = 'db_migrate_version'
     __table_args__ = {'extend_existing':True}
     repository_id = Column('repository_id', String(250), primary_key=True)
