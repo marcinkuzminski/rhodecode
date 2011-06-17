@@ -485,10 +485,25 @@ Add the following at the end of the .ini file::
 
 then change <someprefix> into your choosen prefix
 
-Apache's example FCGI config
-----------------------------
+Apache's WSGI config
+--------------------
 
-TODO !
+
+Example wsgi dispatch script::
+
+    import os
+    os.environ["HGENCODING"] = "UTF-8"
+    os.environ['PYTHON_EGG_CACHE'] = '/home/web/rhodecode/.egg-cache'
+    
+    # sometimes it's needed to set the curent dir
+    os.chdir('/home/web/rhodecode/') 
+    
+    from paste.deploy import loadapp
+    from paste.script.util.logging_config import fileConfig
+
+    fileConfig('/home/web/rhodecode/production.ini')
+    application = loadapp('config:/home/web/rhodecode/production.ini')
+
 
 Other configuration files
 -------------------------
