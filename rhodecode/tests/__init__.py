@@ -27,8 +27,7 @@ log = logging.getLogger(__name__)
 import pylons.test
 
 __all__ = ['environ', 'url', 'TestController', 'TESTS_TMP_PATH', 'HG_REPO',
-           'GIT_REPO', 'NEW_HG_REPO', 'NEW_GIT_REPO', 'HG_FORK', 'GIT_FORK',
-           'checkSessionFlash' ]
+           'GIT_REPO', 'NEW_HG_REPO', 'NEW_GIT_REPO', 'HG_FORK', 'GIT_FORK', ]
 
 # Invoke websetup with the current config file
 #SetupCommand('setup-app').run([config_file])
