@@ -95,14 +95,12 @@ class RepoModel(BaseModel):
     def update(self, repo_name, form_data):
         try:
             cur_repo = self.get_by_repo_name(repo_name, cache=False)
-            user_model = UserModel(self.sa)
 
             #update permissions
             for member, perm, member_type in form_data['perms_updates']:
                 if member_type == 'user':
                     r2p = self.sa.query(RepoToPerm)\
-                            .filter(RepoToPerm.user == user_model.
-                                    get_by_username(member))\
+                            .filter(RepoToPerm.user == User.by_username(member))\
                             .filter(RepoToPerm.repository == cur_repo)\
                             .one()
 
@@ -127,7 +125,7 @@ class RepoModel(BaseModel):
                 if member_type == 'user':
                     r2p = RepoToPerm()
                     r2p.repository = cur_repo
-                    r2p.user = user_model.get_by_username(member)
+                    r2p.user = User.by_username(member)
 
                     r2p.permission = self.sa.query(Permission)\
                                         .filter(Permission.
@@ -138,7 +136,6 @@ class RepoModel(BaseModel):
                     g2p = UsersGroupRepoToPerm()
                     g2p.repository = cur_repo
                     g2p.users_group = UsersGroup.get_by_group_name(member)
-
                     g2p.permission = self.sa.query(Permission)\
                                         .filter(Permission.
                                                 permission_name == perm)\
@@ -148,7 +145,7 @@ class RepoModel(BaseModel):
             #update current repo
             for k, v in form_data.items():
                 if k == 'user':
-                    cur_repo.user = user_model.get_by_username(v)
+                    cur_repo.user = User.by_username(v)
                 elif k == 'repo_name':
                     cur_repo.repo_name = form_data['repo_name_full']
                 elif k == 'repo_group':
