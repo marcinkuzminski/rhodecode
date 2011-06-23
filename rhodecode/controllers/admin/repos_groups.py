@@ -186,7 +186,7 @@ class ReposGroupsController(BaseController):
         if c.group:
             c.group_repos = c.group.repositories.all()
         else:
-            return redirect(url('repos_group'))
+            return redirect(url('home'))
 
 
         sortables = ['name', 'description', 'last_change', 'tip', 'owner']
