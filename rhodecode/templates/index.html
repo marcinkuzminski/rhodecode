@@ -32,7 +32,7 @@
 	                    id="q_filter" size="15" type="text" name="filter" 
 	                    value="${_('quick filter...')}"/>
 	        
-	        ${_('Dashboard')}  - <span id="repo_count">${c.repo_cnt}</span> ${_('repositories')} 
+	        ${_('Dashboard')}  - <span id="repo_count"></span> ${_('repositories')} 
 	        </h5>
 	        %if c.rhodecode_user.username != 'default':
 		        %if h.HasPermissionAny('hg.admin','hg.create.repository')():
@@ -70,7 +70,7 @@
                       <td>${gr.group_description}</td>
                       <td><b>${gr.repositories.count()}</b></td>
                   </tr>
-                % endfor            
+                % endfor
                 
             </table>
             <div style="height: 20px"></div>
@@ -176,12 +176,15 @@
 
      F.filterTimeout = null;
      
+     //set initial count for repos
+     var nodes = S.query('div.table tr td div a.repo_name');
+     YUD.get('repo_count').innerHTML = nodes.length;
      F.updateFilter  = function() { 
     	// Reset timeout 
         F.filterTimeout = null;
     	
         var obsolete = [];
-        var nodes = S.query('div.table tr td div a.repo_name');
+        nodes = S.query('div.table tr td div a.repo_name');
         var req = q_filter.value.toLowerCase();
         for (n in nodes){
             D.setStyle(nodes[n].parentNode.parentNode.parentNode,'display','')
@@ -199,7 +202,7 @@
 	        }
         }
         // set new count into dashboard
-        YUD.get('repo_count').innerHTML = nodes.length - obsolete.length;        
+        YUD.get('repo_count').innerHTML = nodes.length - obsolete.length;      
      }
      
      E.on(q_filter,'keyup',function(e){

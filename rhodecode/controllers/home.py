@@ -56,13 +56,9 @@ class HomeController(BaseController):
 
         sort_key = current_sort_slug + '_sort'
 
-
         c.repos_list = self.scm_model.get_repos(sort_key=sort_key)
 
-        c.repo_cnt = len(c.repos_list)
-
         c.groups = Group.query().filter(Group.group_parent_id == None).all()
-
 
         return render('/index.html')
 
