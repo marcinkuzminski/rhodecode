@@ -225,31 +225,31 @@ class User(Base, BaseModel):
     def short_contact(self):
         return '%s %s' % (self.name, self.lastname)
 
-
     @property
     def is_admin(self):
         return self.admin
 
     def __repr__(self):
-        return "<%s('id:%s:%s')>" % (self.__class__.__name__,
-                                     self.user_id, self.username)
+        try:
+            return "<%s('id:%s:%s')>" % (self.__class__.__name__,
+                                             self.user_id, self.username)
+        except:
+            return self.__class__.__name__
 
     @classmethod
-    def by_username(cls, username):
-        return Session.query(cls).filter(cls.username == username).one()
-
+    def by_username(cls, username, case_insensitive=False):
+        if case_insensitive:
+            return Session.query(cls).filter(cls.username.like(username)).one()
+        else:
+            return Session.query(cls).filter(cls.username == username).one()
 
     def update_lastlogin(self):
         """Update user lastlogin"""
 
-        try:
-            session = Session.object_session(self)
-            self.last_login = datetime.datetime.now()
-            session.add(self)
-            session.commit()
-            log.debug('updated user %s lastlogin', self.username)
-        except (DatabaseError,):
-            session.rollback()
+        self.last_login = datetime.datetime.now()
+        Session.add(self)
+        Session.commit()
+        log.debug('updated user %s lastlogin', self.username)
 
 
 class UserLog(Base, BaseModel):
@@ -463,13 +463,13 @@ class Repository(Base, BaseModel):
 
     @property
     def scm_instance(self):
-        return self.__get_instance(self.repo_name)
+        return self.__get_instance()
 
     @property
     def scm_instance_cached(self):
         @cache_region('long_term')
         def _c(repo_name):
-            return self.__get_instance(repo_name)
+            return self.__get_instance()
 
         inv = self.invalidate
         if inv:
@@ -481,7 +481,7 @@ class Repository(Base, BaseModel):
 
         return _c(self.repo_name)
 
-    def __get_instance(self, repo_name):
+    def __get_instance(self):
 
         repo_full_path = self.repo_full_path
 

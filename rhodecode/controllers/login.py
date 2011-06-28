@@ -35,6 +35,7 @@ from pylons import request, response, session, tmpl_context as c, url
 import rhodecode.lib.helpers as h
 from rhodecode.lib.auth import AuthUser, HasPermissionAnyDecorator
 from rhodecode.lib.base import BaseController, render
+from rhodecode.model.db import User
 from rhodecode.model.forms import LoginForm, RegisterForm, PasswordResetForm
 from rhodecode.model.user import UserModel
 
@@ -63,7 +64,7 @@ class LoginController(BaseController):
                 c.form_result = login_form.to_python(dict(request.POST))
                 #form checks for username/password, now we're authenticated
                 username = c.form_result['username']
-                user = UserModel().get_by_username(username,
+                user = User.by_username(username,
                                                    case_insensitive=True)
                 auth_user = AuthUser(user.user_id)
                 auth_user.set_authenticated()
