@@ -347,8 +347,9 @@ class DbManage(object):
             path_ok = False
             log.error('No write permission to given path %s', path)
 
+
         if retries == 0:
-            sys.exit()
+            sys.exit('max retries reached')
         if path_ok is False:
             retries -= 1
             return self.config_prompt(test_repo_path, retries)
