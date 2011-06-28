@@ -514,6 +514,11 @@ def create_test_env(repos_test_path, config):
     dbconf = config['sqlalchemy.db1.url']
     log.debug('making test db %s', dbconf)
 
+    # create test dir if it doesn't exist
+    if not os.path.isdir(repos_test_path):
+        log.debug('Creating testdir %s' % repos_test_path)
+        os.makedirs(repos_test_path)
+
     dbmanage = DbManage(log_sql=True, dbconf=dbconf, root=config['here'],
                         tests=True)
     dbmanage.create_tables(override=True)

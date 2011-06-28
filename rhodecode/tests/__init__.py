@@ -38,8 +38,8 @@ __all__ = ['environ', 'url', 'TestController', 'TESTS_TMP_PATH', 'HG_REPO',
 environ = {}
 
 #SOME GLOBALS FOR TESTS
-TESTS_TMP_PATH = jn('/', 'tmp')
-
+from tempfile import _RandomNameSequence
+TESTS_TMP_PATH = jn('/', 'tmp', 'rc_test_%s' % _RandomNameSequence().next())
 HG_REPO = 'vcs_test_hg'
 GIT_REPO = 'vcs_test_git'
 
