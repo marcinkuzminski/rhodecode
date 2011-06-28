@@ -12,6 +12,7 @@ class TestAdminUsersGroupsController(TestController):
         response = self.app.get(url('formatted_users_groups', format='xml'))
 
     def test_create(self):
+        self.log_user()
         users_group_name = TEST_USERS_GROUP
         response = self.app.post(url('users_groups'),
                                  {'users_group_name':users_group_name,

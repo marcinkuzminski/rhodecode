@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import os
 import vcs
 
@@ -30,11 +32,8 @@ class TestAdminReposController(TestController):
                                                 'repo_group':'',
                                                 'description':description,
                                                 'private':private})
-        self.assertTrue('flash' in response.session)
 
-        #test if we have a message for that repository
-        self.assertTrue('''created repository %s''' % (repo_name) in
-                        response.session['flash'][0])
+        self.checkSessionFlash(response, 'created repository %s' % (repo_name))
 
         #test if the repo was created in the database
         new_repo = self.sa.query(Repository).filter(Repository.repo_name ==
@@ -48,6 +47,42 @@ class TestAdminReposController(TestController):
 
         self.assertTrue(repo_name in response.body)
 
+
+        #test if repository was created on filesystem
+        try:
+            vcs.get_repo(os.path.join(TESTS_TMP_PATH, repo_name))
+        except:
+            self.fail('no repo in filesystem')
+
+
+    def test_create_hg_non_ascii(self):
+        self.log_user()
+        non_ascii = "ąęł"
+        repo_name = "%s%s" % (NEW_HG_REPO, non_ascii)
+        repo_name_unicode = repo_name.decode('utf8')
+        description = 'description for newly created repo' + non_ascii
+        description_unicode = description.decode('utf8')
+        private = False
+        response = self.app.post(url('repos'), {'repo_name':repo_name,
+                                                'repo_type':'hg',
+                                                'clone_uri':'',
+                                                'repo_group':'',
+                                                'description':description,
+                                                'private':private})
+        self.checkSessionFlash(response,
+                               'created repository %s' % (repo_name_unicode))
+
+        #test if the repo was created in the database
+        new_repo = self.sa.query(Repository).filter(Repository.repo_name ==
+                                                repo_name_unicode).one()
+
+        self.assertEqual(new_repo.repo_name, repo_name_unicode)
+        self.assertEqual(new_repo.description, description_unicode)
+
+        #test if repository is visible in the list ?
+        response = response.follow()
+
+        self.assertTrue(repo_name in response.body)
 
         #test if repository was created on filesystem
         try:
