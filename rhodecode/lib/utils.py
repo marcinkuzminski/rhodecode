@@ -533,6 +533,18 @@ def create_test_env(repos_test_path, config):
             log.debug('removing %s', r)
             shutil.rmtree(jn(TESTS_TMP_PATH, r))
 
+    idx_path = config['app_conf']['index_dir']
+    data_path = config['app_conf']['cache_dir']
+
+    #clean index and data
+    if idx_path and os.path.exists(idx_path):
+        log.debug('remove %s' % idx_path)
+        shutil.rmtree(idx_path)
+
+    if data_path and os.path.exists(data_path):
+        log.debug('remove %s' % data_path)
+        shutil.rmtree(data_path)
+
     #CREATE DEFAULT HG REPOSITORY
     cur_dir = dn(dn(abspath(__file__)))
     tar = tarfile.open(jn(cur_dir, 'tests', "vcs_test_hg.tar.gz"))
