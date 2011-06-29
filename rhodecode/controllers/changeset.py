@@ -242,9 +242,8 @@ class ChangesetController(BaseRepoController):
             response.content_disposition = 'attachment; filename=%s.patch' \
                                             % revision
 
-        parent = True if len(c.changeset.parents) > 0 else False
-        c.parent_tmpl = 'Parent  %s' \
-                        % c.changeset.parents[0].raw_id if parent else ''
+        c.parent_tmpl = ''.join(['# Parent  %s\n' % x.raw_id for x in
+                                                 c.changeset.parents])
 
         c.diffs = ''
         for x in c.changes:
