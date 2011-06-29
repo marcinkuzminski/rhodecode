@@ -42,7 +42,7 @@ from vcs.exceptions import RepositoryError, VCSError
 from vcs.utils.lazy import LazyProperty
 from vcs.nodes import FileNode
 
-from rhodecode.lib import str2bool, json
+from rhodecode.lib import str2bool, json, safe_str
 from rhodecode.model.meta import Base, Session
 from rhodecode.model.caching_query import FromCache
 
@@ -479,7 +479,11 @@ class Repository(Base, BaseModel):
             Session.add(inv)
             Session.commit()
 
-        return _c(self.repo_name)
+        # TODO: remove this trick when beaker 1.6 is released
+        # and have fixed this issue
+        rn = safe_str(self.repo_name)
+
+        return _c(rn)
 
     def __get_instance(self):
 
@@ -497,7 +501,8 @@ class Repository(Base, BaseModel):
             return
 
         if alias == 'hg':
-            repo = backend(repo_full_path, create=False,
+
+            repo = backend(safe_str(repo_full_path), create=False,
                            baseui=self._ui)
             #skip hidden web repository
             if repo._get_hidden():

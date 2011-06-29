@@ -27,12 +27,7 @@ import time
 import traceback
 import logging
 
-from mercurial import ui
-
 from sqlalchemy.exc import DatabaseError
-from sqlalchemy.orm import make_transient
-
-from beaker.cache import cache_region, region_invalidate
 
 from vcs import get_backend
 from vcs.utils.helpers import get_scm
@@ -42,15 +37,14 @@ from vcs.nodes import FileNode
 
 from rhodecode import BACKENDS
 from rhodecode.lib import helpers as h
+from rhodecode.lib import safe_str
 from rhodecode.lib.auth import HasRepoPermissionAny
 from rhodecode.lib.utils import get_repos as get_filesystem_repos, make_ui, \
     action_logger
 from rhodecode.model import BaseModel
 from rhodecode.model.user import UserModel
-from rhodecode.model.repo import RepoModel
 from rhodecode.model.db import Repository, RhodeCodeUi, CacheInvalidation, \
     UserFollowing, UserLog
-from rhodecode.model.caching_query import FromCache
 
 log = logging.getLogger(__name__)
 
@@ -182,7 +176,10 @@ class ScmModel(BaseModel):
                     klass = get_backend(path[0])
 
                     if path[0] == 'hg' and path[0] in BACKENDS.keys():
-                        repos_list[name] = klass(path[1], baseui=baseui)
+
+                        # for mercurial we need to have an str path
+                        repos_list[name] = klass(safe_str(path[1]),
+                                                 baseui=baseui)
 
                     if path[0] == 'git' and path[0] in BACKENDS.keys():
                         repos_list[name] = klass(path[1])
@@ -364,10 +361,10 @@ class ScmModel(BaseModel):
 
         # decoding here will force that we have proper encoded values
         # in any other case this will throw exceptions and deny commit
-        content = content.encode('utf8')
-        message = message.encode('utf8')
-        path = f_path.encode('utf8')
-        author = author.encode('utf8')
+        content = safe_str(content)
+        message = safe_str(message)
+        path = safe_str(f_path)
+        author = safe_str(author)
         m = IMC(repo)
         m.change(FileNode(path, content))
         tip = m.commit(message=message,

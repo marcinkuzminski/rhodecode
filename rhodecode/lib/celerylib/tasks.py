@@ -37,7 +37,7 @@ from string import lower
 from pylons import config
 from pylons.i18n.translation import _
 
-from rhodecode.lib import LANGUAGES_EXTENSIONS_MAP
+from rhodecode.lib import LANGUAGES_EXTENSIONS_MAP, safe_str
 from rhodecode.lib.celerylib import run_task, locked_task, str2bool, \
     __get_lockkey, LockHeld, DaemonLock
 from rhodecode.lib.helpers import person
@@ -64,7 +64,6 @@ __all__ = ['whoosh_index', 'get_commits_stats',
            'reset_user_password', 'send_email']
 
 CELERY_ON = str2bool(config['app_conf'].get('use_celery'))
-
 
 
 def get_session():
@@ -112,8 +111,7 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
         co_day_auth_aggr = {}
         commits_by_day_aggregate = {}
         repos_path = get_repos_path()
-        p = os.path.join(repos_path, repo_name)
-        repo = get_repo(p)
+        repo = get_repo(safe_str(os.path.join(repos_path, repo_name)))
         repo_size = len(repo.revisions)
         #return if repo have no revisions
         if repo_size < 1:
@@ -358,8 +356,7 @@ def create_repo_fork(form_data, cur_user):
 
 def __get_codes_stats(repo_name):
     repos_path = get_repos_path()
-    p = os.path.join(repos_path, repo_name)
-    repo = get_repo(p)
+    repo = get_repo(safe_str(os.path.join(repos_path, repo_name)))
     tip = repo.get_changeset()
     code_stats = {}
 

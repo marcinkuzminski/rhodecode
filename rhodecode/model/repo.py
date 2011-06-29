@@ -33,6 +33,8 @@ from sqlalchemy.orm import joinedload, make_transient
 from vcs.utils.lazy import LazyProperty
 from vcs.backends import get_backend
 
+from rhodecode.lib import safe_str
+
 from rhodecode.model import BaseModel
 from rhodecode.model.caching_query import FromCache
 from rhodecode.model.db import Repository, RepoToPerm, User, Permission, \
@@ -171,13 +173,12 @@ class RepoModel(BaseModel):
 
         try:
             if fork:
-                #force str since hg doesn't go with unicode
-                repo_name = str(form_data['fork_name'])
-                org_name = str(form_data['repo_name'])
-                org_full_name = org_name#str(form_data['fork_name_full'])
+                repo_name = form_data['fork_name']
+                org_name = form_data['repo_name']
+                org_full_name = org_name
 
             else:
-                org_name = repo_name = str(form_data['repo_name'])
+                org_name = repo_name = form_data['repo_name']
                 repo_name_full = form_data['repo_name_full']
 
             new_repo = Repository()
@@ -302,20 +303,22 @@ class RepoModel(BaseModel):
         """
         from rhodecode.lib.utils import check_repo
 
-
         if new_parent_id:
             paths = Group.get(new_parent_id).full_path.split(Group.url_sep())
             new_parent_path = os.sep.join(paths)
         else:
             new_parent_path = ''
 
-        repo_path = os.path.join(self.repos_path, new_parent_path, repo_name)
+        repo_path = os.path.join(*map(lambda x:safe_str(x),
+                                [self.repos_path, new_parent_path, repo_name]))
 
-        if check_repo(repo_name, self.repos_path):
+        if check_repo(repo_path, self.repos_path):
             log.info('creating repo %s in %s @ %s', repo_name, repo_path,
-                    clone_uri)
+                     clone_uri)
             backend = get_backend(alias)
+
             backend(repo_path, create=True, src_url=clone_uri)
+
 
     def __rename_repo(self, old, new):
         """

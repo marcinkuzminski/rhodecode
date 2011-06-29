@@ -38,7 +38,7 @@ from vcs.exceptions import RepositoryError, ChangesetDoesNotExistError, \
 from vcs.nodes import FileNode, NodeKind
 from vcs.utils import diffs as differ
 
-from rhodecode.lib import convert_line_endings, detect_mode
+from rhodecode.lib import convert_line_endings, detect_mode, safe_str
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.utils import EmptyChangeset
@@ -153,7 +153,7 @@ class FilesController(BaseRepoController):
         file_node = self.__get_filenode_or_redirect(repo_name, cs, f_path)
 
         response.content_disposition = 'attachment; filename=%s' % \
-            f_path.split(os.sep)[-1].encode('utf8', 'replace')
+            safe_str(f_path.split(os.sep)[-1])
 
         response.content_type = file_node.mimetype
         return file_node.content
@@ -198,7 +198,7 @@ class FilesController(BaseRepoController):
 
         if dispo == 'attachment':
             dispo = 'attachment; filename=%s' % \
-                        f_path.split(os.sep)[-1].encode('utf8', 'replace')
+                        safe_str(f_path.split(os.sep)[-1])
 
         response.content_disposition = dispo
         response.content_type = mimetype

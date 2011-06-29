@@ -35,6 +35,7 @@ from mercurial.hgweb.request import wsgiapplication
 from paste.auth.basic import AuthBasicAuthenticator
 from paste.httpheaders import REMOTE_USER, AUTH_TYPE
 
+from rhodecode.lib import safe_str
 from rhodecode.lib.auth import authfunc, HasPermissionAnyMiddleware
 from rhodecode.lib.utils import make_ui, invalidate_cache, \
     check_repo_fast, ui_sections
@@ -112,8 +113,8 @@ class SimpleHg(object):
                 #==============================================================
 
                 if not REMOTE_USER(environ):
-                    self.authenticate.realm = self.config['rhodecode_realm'].\
-                        encode('utf8', 'replace')
+                    self.authenticate.realm = \
+                        safe_str(self.config['rhodecode_realm'])
                     result = self.authenticate(environ)
                     if isinstance(result, str):
                         AUTH_TYPE.update(environ, 'basic')

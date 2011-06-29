@@ -160,7 +160,7 @@ def generate_api_key(username, salt=None):
 def safe_unicode(_str, from_encoding='utf8'):
     """
     safe unicode function. In case of UnicodeDecode error we try to return
-    unicode with errors replace
+    unicode with errors replaceed
 
     :param _str: string to decode
     :rtype: unicode
@@ -176,6 +176,28 @@ def safe_unicode(_str, from_encoding='utf8'):
         u_str = unicode(_str, from_encoding, 'replace')
 
     return u_str
+
+
+def safe_str(_unicode, to_encoding='utf8'):
+    """
+    safe str function. In case of UnicodeEncode error we try to return
+    str with errors replaceed
+
+    :param _unicode: unicode to encode
+    :rtype: str
+    :returns: str object
+    """
+
+    if isinstance(_unicode, str):
+        return _unicode
+
+    try:
+        safe_str = str(_unicode)
+    except UnicodeEncodeError:
+        safe_str = _unicode.encode(to_encoding, 'replace')
+
+    return safe_str
+
 
 
 def engine_from_config(configuration, prefix='sqlalchemy.', **kwargs):

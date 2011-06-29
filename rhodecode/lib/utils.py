@@ -458,18 +458,22 @@ def get_current_revision():
 #==============================================================================
 # TEST FUNCTIONS AND CREATORS
 #==============================================================================
-def create_test_index(repo_location, full_index):
-    """Makes default test index
-    :param repo_location:
+def create_test_index(repo_location, config, full_index):
+    """
+    Makes default test index
+    
+    :param config: test config
     :param full_index:
     """
+
     from rhodecode.lib.indexers.daemon import WhooshIndexingDaemon
     from rhodecode.lib.pidlock import DaemonLock, LockHeld
-    import shutil
 
-    index_location = os.path.join(repo_location, 'index')
-    if os.path.exists(index_location):
-        shutil.rmtree(index_location)
+    repo_location = repo_location
+
+    index_location = os.path.join(config['app_conf']['index_dir'], 'index')
+    if not os.path.exists(index_location):
+        os.makedirs(index_location)
 
     try:
         l = DaemonLock(file=jn(dn(index_location), 'make_index.lock'))

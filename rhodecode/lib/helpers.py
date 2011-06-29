@@ -36,7 +36,7 @@ from webhelpers.html.tags import _set_input_attrs, _set_id_attr, \
 
 from vcs.utils.annotate import annotate_highlight
 from rhodecode.lib.utils import repo_name_slug
-from rhodecode.lib import str2bool, safe_unicode
+from rhodecode.lib import str2bool, safe_unicode, safe_str
 
 def _reset(name, value=None, id=NotGiven, type="reset", **attrs):
     """
@@ -502,7 +502,7 @@ def gravatar_url(email_address, size=30):
 
     if isinstance(email_address, unicode):
         #hashlib crashes on unicode items
-        email_address = email_address.encode('utf8', 'replace')
+        email_address = safe_str(email_address)
     # construct the url
     gravatar_url = baseurl + hashlib.md5(email_address.lower()).hexdigest() + "?"
     gravatar_url += urllib.urlencode({'d':default, 's':str(size)})
