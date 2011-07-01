@@ -45,6 +45,7 @@ from vcs.utils.lazy import LazyProperty
 
 from rhodecode.model import init_model
 from rhodecode.model.scm import ScmModel
+from rhodecode.model.repo import RepoModel
 from rhodecode.config.environment import load_environment
 from rhodecode.lib import LANGUAGES_EXTENSIONS_MAP
 from rhodecode.lib.utils import BasePasterCommand, Command, add_cache
@@ -89,7 +90,7 @@ class MakeIndex(BasePasterCommand):
         init_model(engine)
 
         index_location = config['index_dir']
-        repo_location = self.options.repo_location
+        repo_location = self.options.repo_location if self.options.repo_location else RepoModel().repos_path
         repo_list = map(strip, self.options.repo_list.split(',')) \
             if self.options.repo_list else None
 
