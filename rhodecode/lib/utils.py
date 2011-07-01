@@ -380,7 +380,7 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False):
     user = sa.query(User).filter(User.admin == True).first()
     added = []
     for name, repo in initial_repo_list.items():
-        group = map_groups(name.split('/'))
+        group = map_groups(name.split(os.sep))
         if not rm.get_by_repo_name(name, cache=False):
             log.info('repository %s not found creating default', name)
             added.append(name)
