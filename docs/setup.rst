@@ -103,34 +103,35 @@ Setting up Whoosh full text search
 
 Starting from version 1.1 the whoosh index can be build by using the paster
 command ``make-index``. To use ``make-index`` you must specify the configuration
-file that stores the location of the index, and the location of the repositories
-(`--repo-location`).Starting from version 1.2 it is 
-also possible to specify a comma separated list of repositories (`--index-only`)
-to build index only on chooses repositories skipping any other found in repos
-location
+file that stores the location of the index. You may specify the location of the 
+repositories (`--repo-location`).  If not specified, this value is retrieved 
+from the RhodeCode database.  This was required prior to 1.2.  Starting from 
+version 1.2 it is also possible to specify a comma separated list of 
+repositories (`--index-only`) to build index only on chooses repositories 
+skipping any other found in repos location
 
 You may optionally pass the option `-f` to enable a full index rebuild. Without
 the `-f` option, indexing will run always in "incremental" mode.
 
 For an incremental index build use::
 
-	paster make-index production.ini --repo-location=<location for repos> 
+	paster make-index production.ini 
 
 For a full index rebuild use::
 
-	paster make-index production.ini -f --repo-location=<location for repos>
+	paster make-index production.ini -f 
 
 
 building index just for chosen repositories is possible with such command::
  
- paster make-index production.ini --repo-location=<location for repos> --index-only=vcs,rhodecode
+ paster make-index production.ini --index-only=vcs,rhodecode
 
 
 In order to do periodical index builds and keep your index always up to date.
 It's recommended to do a crontab entry for incremental indexing. 
 An example entry might look like this::
  
-    /path/to/python/bin/paster /path/to/rhodecode/production.ini --repo-location=<location for repos> 
+    /path/to/python/bin/paster make-index /path/to/rhodecode/production.ini 
   
 When using incremental mode (the default) whoosh will check the last
 modification date of each file and add it to be reindexed if a newer file is

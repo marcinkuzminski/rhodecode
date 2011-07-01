@@ -113,7 +113,7 @@ class MakeIndex(BasePasterCommand):
         self.parser.add_option('--repo-location',
                           action='store',
                           dest='repo_location',
-                          help="Specifies repositories location to index REQUIRED",
+                          help="Specifies repositories location to index OPTIONAL",
                           )
         self.parser.add_option('--index-only',
                           action='store',
