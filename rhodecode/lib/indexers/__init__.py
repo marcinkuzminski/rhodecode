@@ -90,7 +90,8 @@ class MakeIndex(BasePasterCommand):
         init_model(engine)
 
         index_location = config['index_dir']
-        repo_location = self.options.repo_location if self.options.repo_location else RepoModel().repos_path
+        repo_location = self.options.repo_location \
+            if self.options.repo_location else RepoModel().repos_path
         repo_list = map(strip, self.options.repo_list.split(',')) \
             if self.options.repo_list else None
 
