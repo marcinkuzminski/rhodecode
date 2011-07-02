@@ -31,7 +31,7 @@ except ImportError:
     #python 2.5 compatibility
     import simplejson as json
 
-from mercurial.graphmod import colored, CHANGESET, revisions as graph_rev
+from mercurial import graphmod
 from pylons import request, session, tmpl_context as c
 
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
@@ -91,24 +91,23 @@ class ChangelogController(BaseRepoController):
         revcount = min(repo_size, size)
         offset = 1 if p == 1 else  ((p - 1) * revcount + 1)
         try:
-            rev_start = repo.revisions.index(repo.revisions[(-1 * offset)])
+            rev_end = repo.revisions.index(repo.revisions[(-1 * offset)])
         except IndexError:
-            rev_start = repo.revisions.index(repo.revisions[-1])
-        rev_end = max(0, rev_start - revcount)
-
+            rev_end = repo.revisions.index(repo.revisions[-1])
+        rev_start = max(0, rev_end - revcount)
 
         data = []
         if repo.alias == 'git':
-            for _ in xrange(rev_end, rev_start):
+            for _ in xrange(rev_start, rev_end):
                 vtx = [0, 1]
                 edges = [[0, 0, 1]]
                 data.append(['', vtx, edges])
 
         elif repo.alias == 'hg':
-            dag = graph_rev(repo._repo, rev_start, rev_end)
-            c.dag = tree = list(colored(dag))
-            for (id, type, ctx, vtx, edges) in tree:
-                if type != CHANGESET:
+            revs = list(reversed(xrange(rev_start, rev_end)))
+            c.dag = graphmod.colored(graphmod.dagwalker(repo._repo, revs))
+            for (id, type, ctx, vtx, edges) in c.dag:
+                if type != graphmod.CHANGESET:
                     continue
                 data.append(['', vtx, edges])
 
