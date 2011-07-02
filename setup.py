@@ -16,7 +16,7 @@ requirements = [
         "Mako>=0.4.0",
         "vcs>=0.2.1",
         "pygments>=1.4",
-        "mercurial>=1.8.1",
+        "mercurial>=1.8.1,<1.9",
         "whoosh>=1.8.4",
         "celery>=2.2.5",
         "babel",
