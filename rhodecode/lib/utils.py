@@ -494,27 +494,9 @@ def create_test_env(repos_test_path, config):
         HG_FORK, GIT_FORK, TESTS_TMP_PATH
     import tarfile
     import shutil
-    from os.path import dirname as dn, join as jn, abspath
+    from os.path import abspath
 
-    log = logging.getLogger('TestEnvCreator')
-    # create logger
-    log.setLevel(logging.DEBUG)
-    log.propagate = True
-    # create console handler and set level to debug
-    ch = logging.StreamHandler()
-    ch.setLevel(logging.DEBUG)
-
-    # create formatter
-    formatter = logging.Formatter("%(asctime)s - %(name)s -"
-                                  " %(levelname)s - %(message)s")
-
-    # add formatter to ch
-    ch.setFormatter(formatter)
-
-    # add ch to logger
-    log.addHandler(ch)
-
-    #PART ONE create db
+    # PART ONE create db
     dbconf = config['sqlalchemy.db1.url']
     log.debug('making test db %s', dbconf)
 
@@ -532,15 +514,8 @@ def create_test_env(repos_test_path, config):
     dbmanage.create_permissions()
     dbmanage.populate_default_permissions()
 
-    #PART TWO make test repo
+    # PART TWO make test repo
     log.debug('making test vcs repositories')
-
-    #remove old one from previos tests
-    for r in [HG_REPO, GIT_REPO, NEW_HG_REPO, NEW_GIT_REPO, HG_FORK, GIT_FORK]:
-
-        if os.path.isdir(jn(TESTS_TMP_PATH, r)):
-            log.debug('removing %s', r)
-            shutil.rmtree(jn(TESTS_TMP_PATH, r))
 
     idx_path = config['app_conf']['index_dir']
     data_path = config['app_conf']['cache_dir']

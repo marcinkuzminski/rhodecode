@@ -4,7 +4,7 @@
     ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-    Package for testing varios lib/helper functions in rhodecode
+    Package for testing various lib/helper functions in rhodecode
     
     :created_on: Jun 9, 2011
     :copyright: (c) 2011 by marcink.
@@ -15,7 +15,6 @@
 
 import unittest
 from rhodecode.tests import *
-
 
 proto = 'http'
 TEST_URLS = [

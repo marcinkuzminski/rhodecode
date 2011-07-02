@@ -27,19 +27,22 @@ log = logging.getLogger(__name__)
 import pylons.test
 
 __all__ = ['environ', 'url', 'TestController', 'TESTS_TMP_PATH', 'HG_REPO',
-           'GIT_REPO', 'NEW_HG_REPO', 'NEW_GIT_REPO', 'HG_FORK', 'GIT_FORK', ]
+           'GIT_REPO', 'NEW_HG_REPO', 'NEW_GIT_REPO', 'HG_FORK', 'GIT_FORK',
+           'TEST_USER_ADMIN_LOGIN', 'TEST_USER_ADMIN_PASS' ]
 
 # Invoke websetup with the current config file
 #SetupCommand('setup-app').run([config_file])
 
 ##RUNNING DESIRED TESTS
-#nosetests -x rhodecode.tests.functional.test_admin_settings:TestSettingsController.test_my_account
-
+# nosetests -x rhodecode.tests.functional.test_admin_settings:TestSettingsController.test_my_account
+# nosetests --pdb --pdb-failures 
 environ = {}
 
 #SOME GLOBALS FOR TESTS
 from tempfile import _RandomNameSequence
 TESTS_TMP_PATH = jn('/', 'tmp', 'rc_test_%s' % _RandomNameSequence().next())
+TEST_USER_ADMIN_LOGIN = 'test_admin'
+TEST_USER_ADMIN_PASS = 'test12'
 HG_REPO = 'vcs_test_hg'
 GIT_REPO = 'vcs_test_git'
 
@@ -61,7 +64,8 @@ class TestController(TestCase):
         self.index_location = config['app_conf']['index_dir']
         TestCase.__init__(self, *args, **kwargs)
 
-    def log_user(self, username='test_admin', password='test12'):
+    def log_user(self, username=TEST_USER_ADMIN_LOGIN,
+                 password=TEST_USER_ADMIN_PASS):
         response = self.app.post(url(controller='login', action='index'),
                                  {'username':username,
                                   'password':password})
