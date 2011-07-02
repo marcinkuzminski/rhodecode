@@ -26,7 +26,7 @@ import os
 import sys
 import getpass
 
-from mercurial.cmdutil import revrange
+from mercurial.scmutil import revrange
 from mercurial.node import nullrev
 
 from rhodecode.lib import helpers as h
