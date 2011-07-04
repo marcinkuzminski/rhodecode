@@ -198,7 +198,8 @@ margin-bottom:5px !important;
 -moz-border-radius: 0px 0px 8px 8px;
 border-radius: 0px 0px 8px 8px;
 height:37px;
-background:url("../images/header_inner.png") repeat-x scroll 0 0 #003367
+background:url("../images/header_inner.png") repeat-x scroll 0 0 #003367;
+box-shadow: 0 2px 2px rgba(0, 0, 0, 0.6);
 }
 
 #header ul#logged-user li {
@@ -1383,6 +1384,13 @@ position: absolute;
 margin-left: -16px;
 width: 281px;
 border-radius: 0 0 8px 8px;
+box-shadow: 0 2px 2px rgba(0, 0, 0, 0.6);
+}
+
+#quick_login .password_forgoten{
+padding-right:10px;
+padding-top:10px;
+float:left;
 }
 
 #quick_login div.form div.fields{

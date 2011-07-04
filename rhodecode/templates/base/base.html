@@ -30,7 +30,7 @@
 			            
 			        </div>
 			        <div class="buttons">
-			            ${h.submit('sign_in','Sign In',class_="ui-button")}
+			            <div class="password_forgoten">${h.link_to(_('Forgot password ?'),h.url('reset_password'))}</div>${h.submit('sign_in','Sign In',class_="ui-button")}
 			        </div>
 			    </div>
 			</div>

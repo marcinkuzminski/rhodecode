@@ -243,6 +243,11 @@ class User(Base, BaseModel):
         else:
             return Session.query(cls).filter(cls.username == username).one()
 
+    @classmethod
+    def get_by_api_key(cls, api_key):
+        return Session.query(cls).filter(cls.api_key == api_key).one()
+
+
     def update_lastlogin(self):
         """Update user lastlogin"""
 

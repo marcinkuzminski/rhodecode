@@ -294,6 +294,10 @@ def make_map(config):
     rmap.connect('reset_password', '%s/password_reset' % ADMIN_PREFIX,
                  controller='login', action='password_reset')
 
+    rmap.connect('reset_password_confirmation',
+                 '%s/password_reset_confirmation' % ADMIN_PREFIX,
+                 controller='login', action='password_reset_confirmation')
+
     #FEEDS
     rmap.connect('rss_feed_home', '/{repo_name:.*}/feed/rss',
                 controller='feed', action='rss',

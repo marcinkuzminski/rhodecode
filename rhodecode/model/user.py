@@ -213,6 +213,10 @@ class UserModel(BaseModel):
             self.sa.rollback()
             raise
 
+    def reset_password_link(self, data):
+        from rhodecode.lib.celerylib import tasks, run_task
+        run_task(tasks.send_password_link, data['email'])
+
     def reset_password(self, data):
         from rhodecode.lib.celerylib import tasks, run_task
         run_task(tasks.reset_user_password, data['email'])
