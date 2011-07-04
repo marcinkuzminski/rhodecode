@@ -34,7 +34,7 @@ from time import mktime
 from operator import itemgetter
 from string import lower
 
-from pylons import config
+from pylons import config, url
 from pylons.i18n.translation import _
 
 from rhodecode.lib import LANGUAGES_EXTENSIONS_MAP, safe_str
@@ -249,6 +249,45 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
         log.info('LockHeld')
         return 'Task with key %s already running' % lockkey
 
+@task(ignore_result=True)
+def send_password_link(user_email):
+    try:
+        log = reset_user_password.get_logger()
+    except:
+        log = logging.getLogger(__name__)
+
+    from rhodecode.lib import auth
+    from rhodecode.model.db import User
+
+    try:
+        sa = get_session()
+        user = sa.query(User).filter(User.email == user_email).scalar()
+
+        if user:
+            link = url('reset_password_confirmation', key=user.api_key,
+                       qualified=True)
+            tmpl = """
+Hello %s
+
+We received a request to create a new password for your account.
+
+You can generate it by clicking following URL:
+
+%s
+
+If you didn't request new password please ignore this email.
+            """
+            run_task(send_email, user_email,
+                     "RhodeCode password reset link",
+                     tmpl % (user.short_contact, link))
+            log.info('send new password mail to %s', user_email)
+
+    except:
+        log.error('Failed to update user password')
+        log.error(traceback.format_exc())
+        return False
+
+    return True
 
 @task(ignore_result=True)
 def reset_user_password(user_email):
@@ -280,8 +319,8 @@ def reset_user_password(user_email):
             sa.rollback()
 
         run_task(send_email, user_email,
-                 "Your new rhodecode password",
-                 'Your new rhodecode password:%s' % (new_passwd))
+                 "Your new RhodeCode password",
+                 'Your new RhodeCode password:%s' % (new_passwd))
         log.info('send new password mail to %s', user_email)
 
     except:

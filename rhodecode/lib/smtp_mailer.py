@@ -74,13 +74,19 @@ class SmtpMailer(object):
 
         date_ = formatdate(localtime=True)
         msg = MIMEMultipart()
+        msg.set_type('multipart/alternative')
+        msg.preamble = 'You will not see this in a MIME-aware mail reader.\n'
+
+        text_msg = MIMEText(body)
+        text_msg.set_type('text/plain')
+        text_msg.set_param('charset', 'UTF-8')
+
         msg['From'] = self.mail_from
         msg['To'] = ','.join(recipients)
         msg['Date'] = date_
         msg['Subject'] = subject
-        msg.preamble = 'You will not see this in a MIME-aware mail reader.\n'
 
-        msg.attach(MIMEText(body))
+        msg.attach(text_msg)
 
         if attachment_files:
             self.__atach_files(msg, attachment_files)

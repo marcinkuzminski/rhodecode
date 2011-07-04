@@ -129,8 +129,8 @@ class LoginController(BaseController):
             password_reset_form = PasswordResetForm()()
             try:
                 form_result = password_reset_form.to_python(dict(request.POST))
-                user_model.reset_password(form_result)
-                h.flash(_('Your new password was sent'),
+                user_model.reset_password_link(form_result)
+                h.flash(_('Your password reset link was sent'),
                             category='success')
                 return redirect(url('login_home'))
 
@@ -143,6 +143,23 @@ class LoginController(BaseController):
                     encoding="UTF-8")
 
         return render('/password_reset.html')
+
+    def password_reset_confirmation(self):
+
+        if request.GET and request.GET.get('key'):
+            try:
+                user_model = UserModel()
+                user = User.get_by_api_key(request.GET.get('key'))
+                data = dict(email=user.email)
+                user_model.reset_password(data)
+                h.flash(_('Your password reset was successful, '
+                          'new password has been sent to your email'),
+                            category='success')
+            except Exception, e:
+                log.error(e)
+                return redirect(url('reset_password'))
+
+        return redirect(url('login_home'))
 
     def logout(self):
         del session['rhodecode_user']
