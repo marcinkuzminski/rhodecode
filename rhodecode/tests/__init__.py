@@ -27,7 +27,8 @@ log = logging.getLogger(__name__)
 import pylons.test
 
 __all__ = ['environ', 'url', 'TestController', 'TESTS_TMP_PATH', 'HG_REPO',
-           'GIT_REPO', 'NEW_HG_REPO', 'NEW_GIT_REPO', 'HG_FORK', 'GIT_FORK', ]
+           'GIT_REPO', 'NEW_HG_REPO', 'NEW_GIT_REPO', 'HG_FORK', 'GIT_FORK',
+           'TEST_ADMIN_USER', 'TEST_ADMIN_PASS' ]
 
 # Invoke websetup with the current config file
 #SetupCommand('setup-app').run([config_file])
@@ -49,6 +50,9 @@ NEW_GIT_REPO = 'vcs_test_git_new'
 HG_FORK = 'vcs_test_hg_fork'
 GIT_FORK = 'vcs_test_git_fork'
 
+TEST_ADMIN_USER = 'test_admin'
+TEST_ADMIN_PASS = 'test12'
+
 class TestController(TestCase):
 
     def __init__(self, *args, **kwargs):
@@ -61,7 +65,7 @@ class TestController(TestCase):
         self.index_location = config['app_conf']['index_dir']
         TestCase.__init__(self, *args, **kwargs)
 
-    def log_user(self, username='test_admin', password='test12'):
+    def log_user(self, username=TEST_ADMIN_USER, password=TEST_ADMIN_PASS):
         response = self.app.post(url(controller='login', action='index'),
                                  {'username':username,
                                   'password':password})
@@ -76,6 +80,7 @@ class TestController(TestCase):
 
 
     def checkSessionFlash(self, response, msg):
+        print response
         self.assertTrue('flash' in response.session)
         self.assertTrue(msg in response.session['flash'][0][1])
 
