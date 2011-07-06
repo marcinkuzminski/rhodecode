@@ -409,13 +409,10 @@ pushes or large pushes::
     client_max_body_size        400m;
     client_body_buffer_size     128k;
     proxy_buffering             off;
-    proxy_connect_timeout       3600;
-    proxy_send_timeout          3600;
-    proxy_read_timeout          3600;
-    proxy_buffer_size           16k;
-    proxy_buffers               4 16k;
-    proxy_busy_buffers_size     64k;
-    proxy_temp_file_write_size  64k;
+    proxy_connect_timeout       7200;
+    proxy_send_timeout          7200;
+    proxy_read_timeout          7200;
+    proxy_buffers               8 32k;
  
 Also, when using root path with nginx you might set the static files to false
 in the production.ini file::
