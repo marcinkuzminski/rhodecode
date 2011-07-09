@@ -7,6 +7,7 @@ import random
 import hashlib
 import StringIO
 import urllib
+import math
 
 from datetime import datetime
 from pygments.formatters import HtmlFormatter
@@ -513,7 +514,8 @@ class RepoPage(Page):
         # Compute the number of the first and last available page
         if self.item_count > 0:
             self.first_page = 1
-            self.page_count = ((self.item_count - 1) / self.items_per_page) + 1
+            self.page_count = int(math.ceil(float(self.item_count) /
+                                            self.items_per_page))
             self.last_page = self.first_page + self.page_count - 1
 
             # Make sure that the requested page number is the range of valid pages
@@ -524,8 +526,10 @@ class RepoPage(Page):
 
             # Note: the number of items on this page can be less than
             #       items_per_page if the last page is not full
-            self.first_item = max(0, (self.item_count) - (self.page * items_per_page))
-            self.last_item = ((self.item_count - 1) - items_per_page * (self.page - 1))
+            self.first_item = max(0, (self.item_count) - (self.page *
+                                                          items_per_page))
+            self.last_item = ((self.item_count - 1) - items_per_page *
+                              (self.page - 1))
 
             iterator = self.collection.get_changesets(start=self.first_item,
                                                       end=self.last_item,
