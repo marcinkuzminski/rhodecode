@@ -50,7 +50,7 @@ class ForksController(BaseRepoController):
 
         c.forks_data = render('/forks/forks_data.html')
 
-        if request.params.get('partial'):
+        if request.environ.get('HTTP_X_PARTIAL_XHR'):
             return c.forks_data
 
         return render('/forks/forks.html')

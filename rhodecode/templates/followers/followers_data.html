@@ -17,20 +17,12 @@
 
 <div class="pagination-wh pagination-left">
 <script type="text/javascript">
-  var data_div = 'followers';
-  YAHOO.util.Event.onDOMReady(function(){
-    YAHOO.util.Event.addListener(
-    		YUD.getElementsByClassName('pager_link'),"click",
-    		function(){
-            YAHOO.util.Dom.setStyle(data_div,'opacity','0.3');
-            });
-    });
+YUE.onDOMReady(function(){
+    YUE.delegate("followers","click",function(e, matchedEl, container){
+        ypjax(e.target.href,"followers",function(){show_more_event();tooltip_activate();});
+        YUE.preventDefault(e);
+    },'.pager_link');
+});
 </script>
-
-${c.followers_pager.pager('$link_previous ~2~ $link_next',     
-onclick="""YAHOO.util.Connect.asyncRequest('GET','$partial_url',{
-success:function(o){YAHOO.util.Dom.get(data_div).innerHTML=o.responseText;
-YUE.on(YAHOO.util.Dom.getElementsByClassName('pager_link'),"click",function(){
-        YAHOO.util.Dom.setStyle(data_div,'opacity','0.3');});       
-YAHOO.util.Dom.setStyle(data_div,'opacity','1');}},null); return false;""")}
+${c.followers_pager.pager('$link_previous ~2~ $link_next')}
 </div>

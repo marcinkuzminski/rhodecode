@@ -31,36 +31,23 @@
 </table>
 
 <script type="text/javascript">
-  var data_div = 'user_log';
   YUE.onDOMReady(function(){
-	YUE.on(YUD.getElementsByClassName('pager_link'),"click",function(){
-			YUD.setStyle(data_div,'opacity','0.3');});
-	YUE.on(YUD.getElementsByClassName('show_more'),'click',function(e){
+	YUE.delegate("user_log","click",function(e, matchedEl, container){
+		ypjax(e.target.href,"user_log",function(){show_more_event();tooltip_activate();});
+		YUE.preventDefault(e);
+	},'.pager_link');
+	
+	YUE.delegate("user_log","click",function(e,matchedEl,container){
 	      var el = e.target;
 	      YUD.setStyle(YUD.get(el.id.substring(1)),'display','');
 	      YUD.setStyle(el.parentNode,'display','none');
-	  });
+	  },'.show_more');
   });
 </script>
-		
-		
+
 <div class="pagination-wh pagination-left">
-${c.users_log.pager('$link_previous ~2~ $link_next',
-onclick="""YAHOO.util.Connect.asyncRequest('GET','$partial_url',{
-success:function(o){
-YUD.get(data_div).innerHTML=o.responseText;
-show_more_event();
-tooltip_activate();    
-YUE.on(YUD.getElementsByClassName('pager_link'),"click",function(){
-      YUD.setStyle(data_div,'opacity','0.3');
-});		
-YUD.setStyle(data_div,'opacity','1');}
-},null); return false;""")}
+${c.users_log.pager('$link_previous ~2~ $link_next')}
 </div>
 %else: 
 	${_('No actions yet')} 
 %endif
-
-<script type="text/javascript">
-show_more_event();
-</script>

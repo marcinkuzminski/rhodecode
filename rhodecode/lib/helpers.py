@@ -89,44 +89,7 @@ class _ToolTip(object):
 
         :param tooltip_title:
         """
-
         return escape(tooltip_title)
-
-    def activate(self):
-        """Adds tooltip mechanism to the given Html all tooltips have to have
-        set class `tooltip` and set attribute `tooltip_title`.
-        Then a tooltip will be generated based on that. All with yui js tooltip
-        """
-
-        js = '''
-        YAHOO.util.Event.onDOMReady(function(){
-            function toolTipsId(){
-                var ids = [];
-                var tts = YAHOO.util.Dom.getElementsByClassName('tooltip');
-
-                for (var i = 0; i < tts.length; i++) {
-                    //if element doesn't not have and id autogenerate one for tooltip
-
-                    if (!tts[i].id){
-                        tts[i].id='tt'+i*100;
-                    }
-                    ids.push(tts[i].id);
-                }
-                return ids
-            };
-            var myToolTips = new YAHOO.widget.Tooltip("tooltip", {
-                context: [[toolTipsId()],"tl","bl",null,[0,5]],
-                monitorresize:false,
-                xyoffset :[0,0],
-                autodismissdelay:300000,
-                hidedelay:5,
-                showdelay:20,
-            });
-
-        });
-        '''
-        return literal(js)
-
 tooltip = _ToolTip()
 
 class _FilesBreadCrumbs(object):
@@ -366,7 +329,7 @@ def action_parser(user_log, feed=False):
         action, action_params = x
 
     def get_cs_links():
-        revs_limit = 5 #display this amount always
+        revs_limit = 3 #display this amount always
         revs_top_limit = 50 #show upto this amount of changesets hidden
         revs = action_params.split(',')
         repo_name = user_log.repository.repo_name

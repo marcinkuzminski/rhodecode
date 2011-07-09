@@ -53,7 +53,7 @@ class ShortlogController(BaseRepoController):
                                                        items_per_page=size,
                                                        url=url_generator)
         c.shortlog_data = render('shortlog/shortlog_data.html')
-        if request.params.get('partial'):
+        if request.environ.get('HTTP_X_PARTIAL_XHR'):
             return c.shortlog_data
         r = render('shortlog/shortlog.html')
         return r

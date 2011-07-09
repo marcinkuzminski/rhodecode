@@ -53,6 +53,7 @@ class AdminController(BaseController):
         p = int(request.params.get('page', 1))
         c.users_log = Page(users_log, page=p, items_per_page=10)
         c.log_data = render('admin/admin_log.html')
-        if request.params.get('partial'):
+
+        if request.environ.get('HTTP_X_PARTIAL_XHR'):
             return c.log_data
         return render('admin/admin.html')

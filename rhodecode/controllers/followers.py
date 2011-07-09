@@ -51,7 +51,7 @@ class FollowersController(BaseRepoController):
 
         c.followers_data = render('/followers/followers_data.html')
 
-        if request.params.get('partial'):
+        if request.environ.get('HTTP_X_PARTIAL_XHR'):
             return c.followers_data
 
         return render('/followers/followers.html')

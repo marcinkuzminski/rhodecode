@@ -6,7 +6,6 @@
     <!-- user -->
     <ul id="logged-user">
          <li class="first">
-         
 			<div id="quick_login" style="display:none">
 			${h.form(h.url('login_home',came_from=h.url.current()))}
 			<div class="form">
@@ -35,23 +34,6 @@
 			    </div>
 			</div>
 			${h.end_form()}
-			<script type="text/javascript">
-			YUE.on('quick_login_link','click',function(e){
-				
-				if(YUD.hasClass('quick_login_link','enabled')){
-					YUD.setStyle('quick_login','display','none');
-					YUD.removeClass('quick_login_link','enabled');
-				}
-				else{
-	                YUD.setStyle('quick_login','display','');
-	                YUD.addClass('quick_login_link','enabled');
-	                YUD.get('username').focus();
-				}
-			    //make sure we don't redirect
-				YUE.preventDefault(e);
-			});
-			
-			</script>			
 			</div>         
          
              <div class="gravatar">
@@ -124,12 +106,6 @@
 	       </p>
        </div>
    </div>
-   <script type="text/javascript">
-   function tooltip_activate(){
-	    ${h.tooltip.activate()}
-   }
-   tooltip_activate();
-   </script>
 </div>
 <!-- END FOOTER -->
 
@@ -214,15 +190,10 @@
 						   var loaded = YUD.hasClass('repo_switcher','loaded');
 						   if(!loaded){
 							   YUD.addClass('repo_switcher','loaded');
-							   YAHOO.util.Connect.asyncRequest('GET',"${h.url('repo_switcher')}",{
-								   success:function(o){
-								      YUD.get('repo_switcher_list').innerHTML = o.responseText;
-								      qfilter();
-								   },
-								   failure:function(o){
-									   YUD.removeClass('repo_switcher','loaded');   
-								   }
-							   },null);
+							   ypjax("${h.url('repo_switcher')}",'repo_switcher_list',
+								   function(o){qfilter();},
+								   function(o){YUD.removeClass('repo_switcher','loaded');}
+								   ,null);
 						   }
 						   return false;
 					   });
@@ -240,7 +211,7 @@
                 ##<li ${is_current('shortlog')}>
                 ##   <a title="${_('Shortlog')}" href="${h.url('shortlog_home',repo_name=c.repo_name)}">
                 ##   <span class="icon">
-                ##       <img src="${h.url("/images/icons/application_view_list.png")}" alt="${_('Shortlog')}" />
+                ##       <img src="${h.url('/images/icons/application_view_list.png')}" alt="${_('Shortlog')}" />
                 ##   </span>
                 ##   <span>${_('Shortlog')}</span>                 
                 ##   </a>             

@@ -5,9 +5,19 @@
         <title>${self.title()}</title>
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
         <meta name="robots" content="index, nofollow"/>
-        <link rel="icon" href="${h.url("/images/icons/database_gear.png")}" type="image/png" />
-            
-        <!-- stylesheets -->
+        <link rel="icon" href="${h.url('/images/icons/database_gear.png')}" type="image/png" />
+
+        ## CSS ###
+        <%def name="css()">
+            <link rel="stylesheet" type="text/css" href="${h.url('/css/style.css')}" media="screen"/>
+            <link rel="stylesheet" type="text/css" href="${h.url('/css/pygments.css')}"/>
+            <link rel="stylesheet" type="text/css" href="${h.url('/css/diff.css')}"/>
+            ## EXTRA FOR CSS
+            ${self.css_extra()}
+        </%def>
+        <%def name="css_extra()">
+        </%def>
+                    
         ${self.css()}
         
         %if c.ga_code:
@@ -25,106 +35,97 @@
 	     </script>
 	    %endif
         
-        <!-- scripts -->
+        ## JAVASCRIPT ##
+        <%def name="js()">
+            <script type="text/javascript" src="${h.url('/js/yui.2.9.js')}"></script>
+            <!--[if IE]>
+               <script language="javascript" type="text/javascript" src="${h.url('/js/excanvas.min.js')}"></script>
+            <![endif]-->
+            <script type="text/javascript" src="${h.url('/js/yui.flot.js')}"></script>
+            <script type="text/javascript" src="${h.url('/js/rhodecode.js')}"></script>
+           ## EXTRA FOR JS
+           ${self.js_extra()}
+        
+            <script type="text/javascript">
+            var base_url  = "${h.url('toggle_following')}";
+            function onSuccess(target){
+                var f = YUD.get(target.id);
+                var f_cnt = YUD.get('current_followers_count');
+                
+                if(f.getAttribute('class')=='follow'){
+                    f.setAttribute('class','following');
+                    f.setAttribute('title',"${_('Stop following this repository')}");
+                    
+                    if(f_cnt){
+                        var cnt = Number(f_cnt.innerHTML)+1;
+                        f_cnt.innerHTML = cnt;
+                    }
+                }
+                else{
+                    f.setAttribute('class','follow');
+                    f.setAttribute('title',"${_('Start following this repository')}");
+                    if(f_cnt){
+                        var cnt = Number(f_cnt.innerHTML)+1;
+                        f_cnt.innerHTML = cnt;
+                    }      
+                }
+            }
+            
+            function toggleFollowingUser(target,fallows_user_id,token,user_id){
+                args = 'follows_user_id='+fallows_user_id;
+                args+= '&amp;auth_token='+token;
+                if(user_id != undefined){
+                    args+="&amp;user_id="+user_id;
+                }
+                YUC.asyncRequest('POST',base_url,{
+                    success:function(o){
+                        onSuccess(target);
+                    }
+                },args);
+                return false;
+            }
+            
+            function toggleFollowingRepo(target,fallows_repo_id,token,user_id){
+            
+                args = 'follows_repo_id='+fallows_repo_id;
+                args+= '&amp;auth_token='+token;
+                if(user_id != undefined){
+                    args+="&amp;user_id="+user_id;
+                }    
+                YUC.asyncRequest('POST',base_url,{
+                    success:function(o){
+                        onSuccess(target);
+                    }
+                },args); 
+                return false;
+            }
+           YUE.onDOMReady(function(){
+               
+             YUE.on('quick_login_link','click',function(e){
+                 
+                 if(YUD.hasClass('quick_login_link','enabled')){
+                     YUD.setStyle('quick_login','display','none');
+                     YUD.removeClass('quick_login_link','enabled');
+                 }
+                 else{
+                     YUD.setStyle('quick_login','display','');
+                     YUD.addClass('quick_login_link','enabled');
+                     YUD.get('username').focus();
+                 }
+                 //make sure we don't redirect 
+                 YUE.preventDefault(e);
+             });
+               
+            tooltip_activate()
+           })   
+            </script>
+        
+        </%def>
+        <%def name="js_extra()">
+        </%def>      
         ${self.js()}
-
     </head>
-    
     <body id="body">
         ${next.body()}
     </body>
-    
 </html>
-
-<%def name="css()">
-    <link rel="stylesheet" type="text/css" href="${h.url('/css/style.css')}" media="screen"/>
-	<link rel="stylesheet" type="text/css" href="${h.url('/css/pygments.css')}"/>
-    <link rel="stylesheet" type="text/css" href="${h.url('/css/diff.css')}"/>
-    ${self.css_extra()}
-</%def>
-<%def name="css_extra()">
-</%def>
-<%def name="js()">
-	<script type="text/javascript">
-	  if (typeof console == "undefined" || typeof console.log == "undefined")
-	    console = { log: function() {} }
-	</script>
-    
- % if False:
-	<script type="text/javascript" src="${h.url('/js/yui/utilities/utilities.js')}"></script>
-	<script type="text/javascript" src="${h.url('/js/yui/container/container.js')}"></script>
-	<script type="text/javascript" src="${h.url('/js/yui/datasource/datasource.js')}"></script>
-	<script type="text/javascript" src="${h.url('/js/yui/autocomplete/autocomplete.js')}"></script>
-    <script type="text/javascript" src="${h.url('/js/yui/selector/selector-min.js')}"></script>
- % else:
-	<script type="text/javascript" src="${h.url('/js/yui2a.js')}"></script>
-	<!--[if IE]>
-	<script language="javascript" type="text/javascript" src="${h.url('/js/excanvas.min.js')}"></script>
-	<![endif]-->
-	<script type="text/javascript" src="${h.url('/js/yui.flot.js')}"></script>
- % endif
-   ${self.js_extra()}
-	<script type="text/javascript">
-		var YUC = YAHOO.util.Connect;
-		var YUD = YAHOO.util.Dom;
-		var YUE = YAHOO.util.Event;
-	</script>
-
-	<script type="text/javascript">
-	var base_url  = "${h.url('toggle_following')}";
-	function onSuccess(target){
-	    
-	    var f = YUD.get(target.id);
-	    var f_cnt = YUD.get('current_followers_count');
-	    
-	    if(f.getAttribute('class')=='follow'){
-	        f.setAttribute('class','following');
-	        f.setAttribute('title',"${_('Stop following this repository')}");
-	        
-	        if(f_cnt){
-	            var cnt = Number(f_cnt.innerHTML)+1;
-	            f_cnt.innerHTML = cnt;
-	        }
-	        
-	    }
-	    else{
-	        f.setAttribute('class','follow');
-	        f.setAttribute('title',"${_('Start following this repository')}");
-	        if(f_cnt){
-	            var cnt = Number(f_cnt.innerHTML)+1;
-	            f_cnt.innerHTML = cnt;
-	        }      
-	    }
-	}
-	
-	function toggleFollowingUser(target,fallows_user_id,token,user_id){
-	    args = 'follows_user_id='+fallows_user_id;
-	    args+= '&amp;auth_token='+token;
-	    if(user_id != undefined){
-	        args+="&amp;user_id="+user_id;
-	    }
-	    YUC.asyncRequest('POST',base_url,{
-	        success:function(o){
-	            onSuccess(target);
-	        }
-	    },args); return false;
-	}
-	
-	function toggleFollowingRepo(target,fallows_repo_id,token,user_id){
-	
-	    args = 'follows_repo_id='+fallows_repo_id;
-	    args+= '&amp;auth_token='+token;
-	    if(user_id != undefined){
-	        args+="&amp;user_id="+user_id;
-	    }    
-	    YUC.asyncRequest('POST',base_url,{
-	        success:function(o){
-	            onSuccess(target);
-	        }
-	    },args); return false;
-	}    
-	</script>
-
-</%def>
-<%def name="js_extra()">
-</%def>
