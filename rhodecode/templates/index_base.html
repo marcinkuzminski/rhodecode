@@ -79,7 +79,7 @@
             <tbody>
             %for cnt,repo in enumerate(c.repos_list):
                 <tr class="parity${cnt%2}">
-                    <td class="quick_repo_menu inactive">
+                    <td class="quick_repo_menu">
                     <ul class="menu_items hidden">
                       <li>
                          <a title="${_('Summary')}" href="${h.url('summary_home',repo_name=repo['name'])}">
