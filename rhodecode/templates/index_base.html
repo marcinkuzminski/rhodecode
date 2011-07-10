@@ -66,6 +66,7 @@
             <table>
             <thead>
                 <tr>
+                    <th class="left"></th>
                     <th class="left">${get_sort(_('Name'))}</th>
                     <th class="left">${get_sort(_('Description'))}</th>
                     <th class="left">${get_sort(_('Last change'))}</th>
@@ -78,22 +79,48 @@
             <tbody>
             %for cnt,repo in enumerate(c.repos_list):
                 <tr class="parity${cnt%2}">
+                    <td class="quick_repo_menu inactive">
+                    <ul class="menu_items hidden">
+                      <li>
+                         <a title="${_('Summary')}" href="${h.url('summary_home',repo_name=repo['name'])}">
+                         <span class="icon">
+                             <img src="${h.url('/images/icons/clipboard_16.png')}" alt="${_('Summary')}" />
+                         </span>
+                         <span>${_('Summary')}</span>                 
+                         </a>             
+                      </li>
+                      <li>
+                         <a title="${_('Changelog')}" href="${h.url('changelog_home',repo_name=repo['name'])}">
+                         <span class="icon">
+                             <img src="${h.url('/images/icons/time.png')}" alt="${_('Changelog')}" />
+                         </span>
+                         <span>${_('Changelog')}</span>                 
+                         </a>             
+                      </li>
+                      <li>
+                         <a title="${_('Files')}" href="${h.url('files_home',repo_name=repo['name'])}">
+                         <span class="icon">
+                             <img src="${h.url('/images/icons/file.png')}" alt="${_('Files')}" />
+                         </span>
+                         <span>${_('Files')}</span>                 
+                         </a>             
+                      </li>                                    
+                    </ul>
+                    </td>
                     <td>
+                    ## TYPE OF REPO
                     <div style="white-space: nowrap">
-                     ## TYPE OF REPO
                      %if repo['dbrepo']['repo_type'] =='hg':
-                       <img class="icon" title="${_('Mercurial repository')}" alt="${_('Mercurial repository')}" src="${h.url("/images/icons/hgicon.png")}"/>
+                       <img class="icon" title="${_('Mercurial repository')}" alt="${_('Mercurial repository')}" src="${h.url('/images/icons/hgicon.png')}"/>
                      %elif repo['dbrepo']['repo_type'] =='git':
-                       <img class="icon" title="${_('Git repository')}" alt="${_('Git repository')}" src="${h.url("/images/icons/giticon.png")}"/>
-                     %else:
-                       
+                       <img class="icon" title="${_('Git repository')}" alt="${_('Git repository')}" src="${h.url('/images/icons/giticon.png')}"/>
                      %endif 
                     
                      ##PRIVATE/PUBLIC
                      %if repo['dbrepo']['private']:
-                        <img class="icon" title="${_('private repository')}" alt="${_('private repository')}" src="${h.url("/images/icons/lock.png")}"/>
+                        <img class="icon" title="${_('private repository')}" alt="${_('private repository')}" src="${h.url('/images/icons/lock.png')}"/>
                      %else:
-                        <img class="icon" title="${_('public repository')}" alt="${_('public repository')}" src="${h.url("/images/icons/lock_open.png")}"/>
+                        <img class="icon" title="${_('public repository')}" alt="${_('public repository')}" src="${h.url('/images/icons/lock_open.png')}"/>
                      %endif
                     
                     ##NAME   
@@ -103,7 +130,7 @@
                         <a href="${h.url('summary_home',repo_name=repo['dbrepo_fork']['repo_name'])}">
                         <img class="icon" alt="${_('fork')}"
                         title="${_('Fork of')} ${repo['dbrepo_fork']['repo_name']}" 
-                        src="${h.url("/images/icons/arrow_divide.png")}"/></a>
+                        src="${h.url('/images/icons/arrow_divide.png')}"/></a>
                     %endif
                     </div>
                     </td>

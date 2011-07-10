@@ -116,7 +116,19 @@
                  YUE.preventDefault(e);
              });
                
-            tooltip_activate()
+            tooltip_activate();
+            
+            YUE.on(YUQ('.quick_repo_menu'),'click',function(e){
+            	var menu = e.currentTarget.firstElementChild;
+            	if(YUD.hasClass(menu,'hidden')){
+            		YUD.addClass(e.currentTarget,'active');
+            		YUD.removeClass(menu,'hidden');
+            	}else{
+            		YUD.removeClass(e.currentTarget,'active');
+            		YUD.addClass(menu,'hidden');
+            	}
+            })
+            
            })   
             </script>
         

@@ -370,7 +370,6 @@ border-right:1px solid #464646;
 background:url("../images/quick_l_selected.png") no-repeat top left;
 }
 
-
 #header #header-inner #quick ul {
 top:29px;
 right:0;
@@ -560,6 +559,33 @@ background:#FFF url("../images/icons/cog_edit.png") no-repeat 4px 9px;
 width:167px;
 margin:0;
 padding:12px 9px 7px 24px;
+}
+
+
+.quick_repo_menu{
+	background: #FFF url("../images/vertical-indicator.png") 6px 9px no-repeat !important;
+	cursor: pointer;
+}
+.quick_repo_menu.active{
+    background: #FFF url("../images/horizontal-indicator.png") 4px 9px no-repeat !important;
+    cursor: pointer;
+}
+.quick_repo_menu .menu_items{
+	margin-top:6px;
+	position: absolute;
+	background-color:#FFF;
+	padding: 4px;
+    background: none repeat scroll 0 0 #FFFFFF;
+    border-color: #003367 #666666 #666666;
+    border-right: 1px solid #666666;
+    border-style: solid;
+    border-width: 1px;
+}
+.quick_repo_menu .menu_items .icon img{
+	margin-bottom:-2px;
+}
+.quick_repo_menu .menu_items.hidden{
+	display: none;
 }
 
 #content #left {
