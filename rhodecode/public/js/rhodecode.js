@@ -136,3 +136,15 @@ function tooltip_activate(){
         showdelay:20,
     });
 }
+
+/**
+ * show more
+ */
+function show_more_event(){
+    YUE.on(YUD.getElementsByClassName('show_more'),'click',function(e){
+        var el = e.target;
+        YUD.setStyle(YUD.get(el.id.substring(1)),'display','');
+        YUD.setStyle(el.parentNode,'display','none');
+    });
+}
+

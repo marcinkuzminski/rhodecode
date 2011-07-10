@@ -563,23 +563,37 @@ padding:12px 9px 7px 24px;
 
 
 .quick_repo_menu{
-	background: #FFF url("../images/vertical-indicator.png") 6px 9px no-repeat !important;
+	background: #FFF url("../images/vertical-indicator.png") 8px 50% no-repeat !important;
 	cursor: pointer;
+	width: 8px;
 }
 .quick_repo_menu.active{
-    background: #FFF url("../images/horizontal-indicator.png") 4px 9px no-repeat !important;
+    background: #FFF url("../images/horizontal-indicator.png") 4px 50% no-repeat !important;
     cursor: pointer;
 }
 .quick_repo_menu .menu_items{
 	margin-top:6px;
+	width:150px;
 	position: absolute;
 	background-color:#FFF;
-	padding: 4px;
     background: none repeat scroll 0 0 #FFFFFF;
     border-color: #003367 #666666 #666666;
     border-right: 1px solid #666666;
     border-style: solid;
     border-width: 1px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+.quick_repo_menu .menu_items li{
+    padding:0 !important;
+}
+.quick_repo_menu .menu_items a{
+	display: block;
+	padding: 4px 12px 4px 8px;
+}
+.quick_repo_menu .menu_items a:hover{
+    background-color: #EEE;
+    text-decoration: none;
+    
 }
 .quick_repo_menu .menu_items .icon img{
 	margin-bottom:-2px;
