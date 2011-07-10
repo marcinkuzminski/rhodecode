@@ -41,7 +41,7 @@ if __platform__ in PLATFORM_WIN:
 if __platform__ in PLATFORM_OTHERS:
     import bcrypt
 
-from rhodecode.lib import str2bool
+from rhodecode.lib import str2bool, safe_unicode
 from rhodecode.lib.exceptions import LdapPasswordError, LdapUsernameError
 from rhodecode.lib.utils import get_repo_slug
 from rhodecode.lib.auth_ldap import AuthLdap
@@ -207,10 +207,10 @@ def authenticate(username, password):
                                                            .get(k), [''])[0]
 
                 user_attrs = {
-                    'name': get_ldap_attr('ldap_attr_firstname'),
-                    'lastname': get_ldap_attr('ldap_attr_lastname'),
-                    'email': get_ldap_attr('ldap_attr_email'),
-                    }
+                 'name': safe_unicode(get_ldap_attr('ldap_attr_firstname')),
+                 'lastname': safe_unicode(get_ldap_attr('ldap_attr_lastname')),
+                 'email': get_ldap_attr('ldap_attr_email'),
+                }
 
                 if user_model.create_ldap(username, password, user_dn,
                                           user_attrs):
