@@ -477,10 +477,10 @@ class Repository(Base, BaseModel):
             return self.__get_instance()
 
         inv = self.invalidate
-        if inv:
+        if inv is not None:
             region_invalidate(_c, None, self.repo_name)
             #update our cache
-            inv.cache_key.cache_active = True
+            inv.cache_active = True
             Session.add(inv)
             Session.commit()
 
