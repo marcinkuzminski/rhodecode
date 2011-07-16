@@ -76,6 +76,11 @@ class ChangelogController(BaseRepoController):
 
         return render('changelog/changelog.html')
 
+    def changelog_details(self, cs):
+        if request.environ.get('HTTP_X_PARTIAL_XHR'):
+            c.cs = c.rhodecode_repo.get_changeset(cs)
+            return render('changelog/changelog_details.html')
+
     def _graph(self, repo, repo_size, size, p):
         """
         Generates a DAG graph for mercurial

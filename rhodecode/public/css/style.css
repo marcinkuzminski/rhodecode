@@ -1787,6 +1787,16 @@ white-space:pre-wrap;
 clear:both;
 }
 
+.right .changes .changed_total{
+border:1px solid #DDD;
+display:block;
+float:right;
+text-align:center;
+min-width:45px;
+cursor: pointer;
+background:#FD8;
+font-weight: bold;
+}
 .right .changes .added,.changed,.removed {
 border:1px solid #DDD;
 display:block;

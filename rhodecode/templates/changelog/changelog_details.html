@@ -1,0 +1,9 @@
+% if len(c.cs.affected_files) <= c.affected_files_cut_off:                     
+<span class="removed tooltip" title="<b>${_('removed')}</b>${h.changed_tooltip(c.cs.removed)}">${len(c.cs.removed)}</span>
+<span class="changed tooltip" title="<b>${_('changed')}</b>${h.changed_tooltip(c.cs.changed)}">${len(c.cs.changed)}</span>
+<span class="added tooltip" title="<b>${_('added')}</b>${h.changed_tooltip(c.cs.added)}">${len(c.cs.added)}</span>
+% else:
+ <span class="removed tooltip" title="${_('affected %s files') % len(c.cs.affected_files)}">!</span>
+ <span class="changed tooltip" title="${_('affected %s files') % len(c.cs.affected_files)}">!</span>
+ <span class="added tooltip"   title="${_('affected %s files') % len(c.cs.affected_files)}">!</span>                                         
+% endif

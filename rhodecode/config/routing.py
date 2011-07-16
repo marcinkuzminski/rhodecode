@@ -337,6 +337,10 @@ def make_map(config):
     rmap.connect('changelog_home', '/{repo_name:.*}/changelog',
                 controller='changelog', conditions=dict(function=check_repo))
 
+    rmap.connect('changelog_details', '/{repo_name:.*}/changelog_details/{cs}',
+                controller='changelog', action='changelog_details',
+                conditions=dict(function=check_repo))
+
     rmap.connect('files_home', '/{repo_name:.*}/files/{revision}/{f_path:.*}',
                 controller='files', revision='tip', f_path='',
                 conditions=dict(function=check_repo))

@@ -59,20 +59,15 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
 							<div class="message">${h.link_to(h.wrap_paragraphs(cs.message),h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id))}</div>
 						</div>	
 						<div class="right">
-									<div class="changes">
-									   % if len(cs.affected_files) <= c.affected_files_cut_off:						
-										<span class="removed tooltip" title="<b>${_('removed')}</b>${h.changed_tooltip(cs.removed)}">${len(cs.removed)}</span>
-										<span class="changed tooltip" title="<b>${_('changed')}</b>${h.changed_tooltip(cs.changed)}">${len(cs.changed)}</span>
-										<span class="added tooltip" title="<b>${_('added')}</b>${h.changed_tooltip(cs.added)}">${len(cs.added)}</span>
-									   % else:
-				                         <span class="removed tooltip" title="${_('affected %s files') % len(cs.affected_files)}">!</span>
-				                         <span class="changed tooltip" title="${_('affected %s files') % len(cs.affected_files)}">!</span>
-				                         <span class="added tooltip"   title="${_('affected %s files') % len(cs.affected_files)}">!</span>  									   
-									   % endif
+									<div id="${cs.raw_id}_changes_info" class="changes">
+                                        <span id="${cs.raw_id}" class="changed_total tooltip" 
+                                        title="${_('Affected number of files, click to show more details')}">
+                                        ${len(cs.affected_files)}
+                                        </span>
 									</div>					
 										%if len(cs.parents)>1:
 										<div class="merge">
-											${_('merge')}<img alt="merge" src="${h.url("/images/icons/arrow_join.png")}"/>
+											${_('merge')}<img alt="merge" src="${h.url('/images/icons/arrow_join.png')}"/>
 										</div>
 										%endif
 								   %if cs.parents:							
@@ -110,7 +105,7 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
 				YAHOO.util.Event.onDOMReady(function(){
 					
                     //Monitor range checkboxes and build a link to changesets
-                    //ranges
+                    //ranges 
                     var checkboxes = YUD.getElementsByClassName('changeset_range');
                     var url_tmpl = "${h.url('changeset_home',repo_name=c.repo_name,revision='__REVRANGE__')}";
                     YUE.on(checkboxes,'click',function(e){      
@@ -139,6 +134,15 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
                         }
                     });					
 					
+                    //Fetch changeset details 
+                    YUE.on(YUD.getElementsByClassName('changed_total'),'click',function(e){
+                    	var id = e.currentTarget.id
+                    	var url = "${h.url('changelog_details',repo_name=c.repo_name,cs='__CS__')}"
+                    	var url = url.replace('__CS__',id);
+                    	ypjax(url,id+'_changes_info',function(){tooltip_activate()});
+                    });
+                    
+                    
 					function set_canvas(heads) {
 						var c = document.getElementById('graph_nodes');
 						var t = document.getElementById('graph_content');
