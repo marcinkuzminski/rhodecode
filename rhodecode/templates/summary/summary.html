@@ -452,43 +452,33 @@
 		    function getDataAccordingToRanges(ranges) {
 		    	
 		        var data = [];
+		        var new_dataset = {};
 		        var keys = [];
+		        var max_commits = 0;
 				for(var key in dataset){
-					var push = false;
 					
-					//method1 slow !!
-		            //*
 		            for(var ds in dataset[key].data){
 			            commit_data = dataset[key].data[ds];
 			            if (commit_data.time >= ranges.xaxis.from && commit_data.time <= ranges.xaxis.to){
-			            	push = true;
-			            	break;
+
+			            	if(new_dataset[key] === undefined){
+			            		new_dataset[key] = {data:[],schema:["commits"],label:key};	
+			            	}
+			            	new_dataset[key].data.push(commit_data);
 					    }
 				    }
-					//*/
-				    
-				    /*//method2 sorted commit data !!!
-				    
-				    var first_commit = dataset[key].data[0].time;
-				    var last_commit = dataset[key].data[dataset[key].data.length-1].time;
-				    
-				    if (first_commit >= ranges.xaxis.from && last_commit <= ranges.xaxis.to){
-						push = true;
-					}
-				    //*/
-				    
-				    if(push){			
-				    	data.push(dataset[key]);
-				    }
+		            if (new_dataset[key] !== undefined){
+		            	data.push(new_dataset[key]);	
+		            }
 				}
-				if(data.length >= 1){
-					return data;
-				} 
+
+				if (data.length > 0){
+					return data;	
+				}
 				else{
 					//just return dummy data for graph to plot itself
 					return [getDummyData('')];	
 				}
-				
 		    }
 		    
 			/**
@@ -537,7 +527,7 @@
 		       //resubscribe plothover
 		       plot.subscribe("plothover", plothover);
 		        
-		       // don't fire event on the overview to prevent eternal loop
+		       // don't fire event on the overview to prevent eternal loop 
 		       overview.setSelection(cur_ranges, true);
 	
 		    }
@@ -549,7 +539,7 @@
 		     */
 		    function plotselected(ranges,cur_data) {
 			    //updates the data for new plot
-	    		data = getDataAccordingToRanges(ranges);
+	    		var data = getDataAccordingToRanges(ranges);
 	    		generateCheckboxes(data);
 	    		
 		    	var new_options = YAHOO.lang.merge(plot_options, {
@@ -559,13 +549,8 @@
 		  	      		mode:"time",
 		  	      		timeformat: "%d/%m",
 		        	},
-		        	yaxis: { 
-                        min: ranges.yaxis.from, 
-                        max: ranges.yaxis.to,
-                    },
-                    		        	
 		    	});
-		    	// do the zooming
+		    	// do the zooming 
 		        plot = YAHOO.widget.Flot(plotContainer, data, new_options);
 
 		        plot.subscribe("plotselected", plotselected);
@@ -576,7 +561,7 @@
 		        // don't fire event on the overview to prevent eternal loop
 		        overview.setSelection(ranges, true);
 
-		        //resubscribe choiced
+		        //resubscribe choiced 
 		        YUE.on(choiceContainer.getElementsByTagName("input"), "click", plotchoiced, [data, ranges]);
 		    }
 		    
@@ -644,25 +629,25 @@
 		     * MAIN EXECUTION
 		     */
 			
-			var data = getDataAccordingToRanges(initial_ranges);
+			var data = getDataAccordingToRanges(initial_ranges);    
 			generateCheckboxes(data);
 			
-		    //main plot
+		    //main plot 
 		    var plot = YAHOO.widget.Flot(plotContainer,data,plot_options);
 		    
-			//overview
-			var overview = YAHOO.widget.Flot(overviewContainer, overview_dataset, overview_options);
+			//overview 
+			var overview = YAHOO.widget.Flot(overviewContainer, 
+					overview_dataset, overview_options);
 			
-			//show initial selection on overview
+			//show initial selection on overview 
 			overview.setSelection(initial_ranges);    
 			
 		    plot.subscribe("plotselected", plotselected);
+		    plot.subscribe("plothover", plothover)
 		    
 		    overview.subscribe("plotselected", function (ranges) {
 		        plot.setSelection(ranges);
 		    });		
-				
-		    plot.subscribe("plothover", plothover);
 
 		    YUE.on(choiceContainer.getElementsByTagName("input"), "click", plotchoiced, [data, initial_ranges]);
 		}
