@@ -1736,15 +1736,14 @@ overflow:hidden;
 }
 
 #graph_nodes {
-width:160px;
 float:left;
-margin-left:-50px;
 margin-top:5px;
 }
 
 #graph_content {
 width:800px;
 float:left;
+
 }
 
 #graph_content .container_header {

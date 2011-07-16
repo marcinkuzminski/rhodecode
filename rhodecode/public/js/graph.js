@@ -58,10 +58,10 @@ function BranchRenderer() {
 		this.ctx.fillStyle = s;
 	}
 
-	this.render = function(data) {
+	this.render = function(data,pad) {
 		var idx = 1;
 		var rela = document.getElementById('graph');
-		var pad = 160;
+		var pad = pad;
 		var scale = 22;
 		
 		for (var i in data) {
