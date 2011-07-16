@@ -451,7 +451,6 @@ class Repository(Base, BaseModel):
             .filter(CacheInvalidation.cache_active == False)\
             .scalar()
 
-    @property
     def set_invalidate(self):
         """
         set a cache for invalidation for this instance
@@ -476,17 +475,17 @@ class Repository(Base, BaseModel):
         def _c(repo_name):
             return self.__get_instance()
 
+        # TODO: remove this trick when beaker 1.6 is released
+        # and have fixed this issue with not supporting unicode keys
+        rn = safe_str(self.repo_name)
+
         inv = self.invalidate
         if inv is not None:
-            region_invalidate(_c, None, self.repo_name)
-            #update our cache
+            region_invalidate(_c, None, rn)
+            # update our cache
             inv.cache_active = True
             Session.add(inv)
             Session.commit()
-
-        # TODO: remove this trick when beaker 1.6 is released
-        # and have fixed this issue
-        rn = safe_str(self.repo_name)
 
         return _c(rn)
 

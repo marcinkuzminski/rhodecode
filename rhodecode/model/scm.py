@@ -66,10 +66,8 @@ class RepoTemp(object):
 
 class CachedRepoList(object):
 
-    def __init__(self, db_repo_list, invalidation_list, repos_path,
-                 order_by=None):
+    def __init__(self, db_repo_list, repos_path, order_by=None):
         self.db_repo_list = db_repo_list
-        self.invalidation_list = invalidation_list
         self.repos_path = repos_path
         self.order_by = order_by
         self.reversed = (order_by or '').startswith('-')
@@ -81,22 +79,9 @@ class CachedRepoList(object):
         return '<%s (%s)>' % (self.__class__.__name__, self.__len__())
 
     def __iter__(self):
-        for db_repo in self.db_repo_list:
-            dbr = db_repo
+        for dbr in self.db_repo_list:
 
-            # invalidate the repo cache if needed before getting the 
-            # scm instance
-
-            scm_invalidate = False
-            if self.invalidation_list is not None:
-                scm_invalidate = dbr.repo_name in self.invalidation_list
-
-            if scm_invalidate:
-                log.info('invalidating cache for repository %s',
-                         dbr.repo_name)
-                db_repo.set_invalidate
-
-            scmr = db_repo.scm_instance_cached
+            scmr = dbr.scm_instance_cached
 
             #check permission at this level
             if not HasRepoPermissionAny('repository.read',
@@ -201,14 +186,7 @@ class ScmModel(BaseModel):
                         .filter(Repository.group_id == None)\
                         .order_by(Repository.repo_name).all()
 
-        #get the repositories that should be invalidated
-        invalidation_list = [str(x.cache_key) for x in \
-                             self.sa.query(CacheInvalidation.cache_key)\
-                             .filter(CacheInvalidation.cache_active == False)\
-                             .all()]
-
-        repo_iter = CachedRepoList(all_repos, invalidation_list,
-                                   repos_path=self.repos_path,
+        repo_iter = CachedRepoList(all_repos, repos_path=self.repos_path,
                                    order_by=sort_key)
 
         return repo_iter
@@ -225,7 +203,7 @@ class ScmModel(BaseModel):
             .filter(CacheInvalidation.cache_key == repo_name).scalar()
 
         if cache:
-            #mark this cache as inactive
+            # mark this cache as inactive
             cache.cache_active = False
         else:
             log.debug('cache key not found in invalidation db -> creating one')
@@ -394,20 +372,3 @@ class ScmModel(BaseModel):
             .scalar()
 
         return ret
-
-    def _mark_invalidated(self, cache_key):
-        """ Marks all occurrences of cache to invalidation as already
-        invalidated
-
-        :param cache_key:
-        """
-
-        if cache_key:
-            log.debug('marking %s as already invalidated', cache_key)
-        try:
-            cache_key.cache_active = True
-            self.sa.add(cache_key)
-            self.sa.commit()
-        except (DatabaseError,):
-            log.error(traceback.format_exc())
-            self.sa.rollback()
