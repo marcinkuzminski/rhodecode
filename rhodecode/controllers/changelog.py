@@ -102,6 +102,8 @@ class ChangelogController(BaseRepoController):
         rev_start = max(0, rev_end - revcount)
 
         data = []
+        rev_end += 1
+
         if repo.alias == 'git':
             for _ in xrange(rev_start, rev_end):
                 vtx = [0, 1]
