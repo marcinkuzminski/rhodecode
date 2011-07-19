@@ -4,35 +4,55 @@ class TestChangelogController(TestController):
 
     def test_index_hg(self):
         self.log_user()
-        response = self.app.get(url(controller='changelog', action='index', repo_name=HG_REPO))
+        response = self.app.get(url(controller='changelog', action='index',
+                                    repo_name=HG_REPO))
 
-        assert """<div id="chg_20" class="container">""" in response.body, 'wrong info about number of changes'
-        assert """<input class="changeset_range" id="5e204e7583b9" name="5e204e7583b9" type="checkbox" value="1" />""" in response.body, 'no checkbox for this commit'
-        assert """<span>commit 154: 5e204e7583b9@2010-08-10 01:18:46</span>""" in response.body , 'no info on this commit'
-        assert """Small update at simplevcs app""" in response.body, 'missing info about commit message'
+        self.assertTrue("""<div id="chg_20" class="container">"""
+                        in response.body)
+        self.assertTrue("""<input class="changeset_range" id="5e204e7583b9" """
+                        """name="5e204e7583b9" type="checkbox" value="1" />"""
+                        in response.body)
+        self.assertTrue("""<span>commit 154: 5e204e7583b9@2010-08-10 """
+                        """01:18:46</span>""" in response.body)
+        self.assertTrue("""Small update at simplevcs app""" in response.body)
 
-        assert """<span class="removed tooltip" title="<b>removed</b>: No Files">0</span>""" in response.body, 'wrong info about removed nodes'
-        assert """<span class="changed tooltip" title="<b>changed</b>: <br/> vcs/backends/hg.py<br/> vcs/web/simplevcs/models.py">2</span>""" in response.body, 'wrong info about changed nodes'
-        assert """<span class="added tooltip" title="<b>added</b>: <br/> vcs/web/simplevcs/managers.py">1</span>""" in response.body, 'wrong info about added nodes'
+
+        self.assertTrue("""<span id="5e204e7583b9c8e7b93a020bd036564b1e"""
+                        """731dae" class="changed_total tooltip" """
+                        """title="Affected number of files, click to """
+                        """show more details">3</span>""" in response.body)
 
         #pagination
 
-        response = self.app.get(url(controller='changelog', action='index', repo_name=HG_REPO), {'page':1})
-        response = self.app.get(url(controller='changelog', action='index', repo_name=HG_REPO), {'page':2})
-        response = self.app.get(url(controller='changelog', action='index', repo_name=HG_REPO), {'page':3})
-        response = self.app.get(url(controller='changelog', action='index', repo_name=HG_REPO), {'page':4})
-        response = self.app.get(url(controller='changelog', action='index', repo_name=HG_REPO), {'page':5})
-        response = self.app.get(url(controller='changelog', action='index', repo_name=HG_REPO), {'page':6})
+        response = self.app.get(url(controller='changelog', action='index',
+                                    repo_name=HG_REPO), {'page':1})
+        response = self.app.get(url(controller='changelog', action='index',
+                                    repo_name=HG_REPO), {'page':2})
+        response = self.app.get(url(controller='changelog', action='index',
+                                    repo_name=HG_REPO), {'page':3})
+        response = self.app.get(url(controller='changelog', action='index',
+                                    repo_name=HG_REPO), {'page':4})
+        response = self.app.get(url(controller='changelog', action='index',
+                                    repo_name=HG_REPO), {'page':5})
+        response = self.app.get(url(controller='changelog', action='index',
+                                    repo_name=HG_REPO), {'page':6})
 
 
         # Test response after pagination...
-        print response.body
-        assert """<input class="changeset_range" id="46ad32a4f974" name="46ad32a4f974" type="checkbox" value="1" />""" in response.body, 'no checkbox for this commit'
-        assert """<span>commit 64: 46ad32a4f974@2010-04-20 00:33:21</span>"""in response.body, 'wrong info about commit 64'
-        assert """<span class="removed tooltip" title="<b>removed</b>: <br/> docs/api.rst">1</span>"""in response.body, 'wrong info about number of removed'
-        assert """<span class="changed tooltip" title="<b>changed</b>: <br/> .hgignore<br/> README.rst<br/> docs/conf.py<br/> docs/index.rst<br/> setup.py<br/> tests/test_hg.py<br/> tests/test_nodes.py<br/> vcs/__init__.py<br/> vcs/backends/__init__.py<br/> vcs/backends/base.py<br/> vcs/backends/hg.py<br/> vcs/nodes.py<br/> vcs/utils/__init__.py">13</span>"""in response.body, 'wrong info about number of changes'
-        assert """<span class="added tooltip" title="<b>added</b>: <br/> docs/api/backends/hg.rst<br/> docs/api/backends/index.rst<br/> docs/api/index.rst<br/> docs/api/nodes.rst<br/> docs/api/web/index.rst<br/> docs/api/web/simplevcs.rst<br/> docs/installation.rst<br/> docs/quickstart.rst<br/> setup.cfg<br/> vcs/utils/baseui_config.py<br/> vcs/utils/web.py<br/> vcs/web/__init__.py<br/> vcs/web/exceptions.py<br/> vcs/web/simplevcs/__init__.py<br/> vcs/web/simplevcs/exceptions.py<br/> vcs/web/simplevcs/middleware.py<br/> vcs/web/simplevcs/models.py<br/> vcs/web/simplevcs/settings.py<br/> vcs/web/simplevcs/utils.py<br/> vcs/web/simplevcs/views.py">20</span>"""in response.body, 'wrong info about number of added'
-        assert """<div class="message"><a href="/%s/changeset/46ad32a4f974e45472a898c6b0acb600320579b1">Merge with 2e6a2bf9356ca56df08807f4ad86d480da72a8f4</a></div>""" % HG_REPO in response.body, 'wrong info about commit 64 is a merge'
+        self.assertTrue("""<input class="changeset_range" id="46ad32a4f974" """
+                        """name="46ad32a4f974" type="checkbox" value="1" />"""
+                        in response.body)
+        self.assertTrue("""<span>commit 64: 46ad32a4f974@2010-04-20"""
+                        """ 00:33:21</span>"""in response.body)
+
+        self.assertTrue("""<span id="46ad32a4f974e45472a898c6b0acb600320"""
+                        """579b1" class="changed_total tooltip" """
+                        """title="Affected number of files, click to """
+                        """show more details">21</span>"""in response.body)
+        self.assertTrue("""<div class="message"><a href="/%s/changeset/"""
+                        """46ad32a4f974e45472a898c6b0acb600320579b1">"""
+                        """Merge with 2e6a2bf9356ca56df08807f4ad86d48"""
+                        """0da72a8f4</a></div>""" % HG_REPO in response.body)
 
 
 

@@ -60,10 +60,7 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
 						</div>	
 						<div class="right">
 									<div id="${cs.raw_id}_changes_info" class="changes">
-                                        <span id="${cs.raw_id}" class="changed_total tooltip" 
-                                        title="${_('Affected number of files, click to show more details')}">
-                                        ${len(cs.affected_files)}
-                                        </span>
+                                        <span id="${cs.raw_id}" class="changed_total tooltip" title="${_('Affected number of files, click to show more details')}">${len(cs.affected_files)}</span>
 									</div>					
 										%if len(cs.parents)>1:
 										<div class="merge">

@@ -42,6 +42,7 @@ from vcs.exceptions import RepositoryError, VCSError
 from vcs.utils.lazy import LazyProperty
 from vcs.nodes import FileNode
 
+from rhodecode.lib.exceptions import UsersGroupsAssignedException
 from rhodecode.lib import str2bool, json, safe_str
 from rhodecode.model.meta import Base, Session
 from rhodecode.model.caching_query import FromCache
@@ -301,6 +302,77 @@ class UsersGroup(Base, BaseModel):
             gr = gr.options(FromCache("sql_cache_short",
                                           "get_user_%s" % group_name))
         return gr.scalar()
+
+
+    @classmethod
+    def get(cls, users_group_id, cache=False):
+        users_group = Session.query(cls)
+        if cache:
+            users_group = users_group.options(FromCache("sql_cache_short",
+                                    "get_users_group_%s" % users_group_id))
+        return users_group.get(users_group_id)
+
+    @classmethod
+    def create(cls, form_data):
+        try:
+            new_users_group = cls()
+            for k, v in form_data.items():
+                setattr(new_users_group, k, v)
+
+            Session.add(new_users_group)
+            Session.commit()
+        except:
+            log.error(traceback.format_exc())
+            Session.rollback()
+            raise
+
+    @classmethod
+    def update(cls, users_group_id, form_data):
+
+        try:
+            users_group = cls.get(users_group_id, cache=False)
+
+            for k, v in form_data.items():
+                if k == 'users_group_members':
+                    users_group.members = []
+                    Session.flush()
+                    members_list = []
+                    if v:
+                        for u_id in set(v):
+                            members_list.append(UsersGroupMember(
+                                                            users_group_id,
+                                                            u_id))
+                    setattr(users_group, 'members', members_list)
+                setattr(users_group, k, v)
+
+            Session.add(users_group)
+            Session.commit()
+        except:
+            log.error(traceback.format_exc())
+            Session.rollback()
+            raise
+
+    @classmethod
+    def delete(cls, users_group_id):
+        try:
+
+            # check if this group is not assigned to repo
+            assigned_groups = UsersGroupRepoToPerm.query()\
+                .filter(UsersGroupRepoToPerm.users_group_id ==
+                        users_group_id).all()
+
+            if assigned_groups:
+                raise UsersGroupsAssignedException('Group assigned to %s' %
+                                                   assigned_groups)
+
+            users_group = cls.get(users_group_id, cache=False)
+            Session.delete(users_group)
+            Session.commit()
+        except:
+            log.error(traceback.format_exc())
+            Session.rollback()
+            raise
+
 
 class UsersGroupMember(Base, BaseModel):
     __tablename__ = 'users_groups_members'

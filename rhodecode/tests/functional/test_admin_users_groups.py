@@ -1,4 +1,5 @@
 from rhodecode.tests import *
+from rhodecode.model.db import UsersGroup
 
 TEST_USERS_GROUP = 'admins_test'
 
@@ -36,13 +37,37 @@ class TestAdminUsersGroupsController(TestController):
         response = self.app.put(url('users_group', id=1))
 
     def test_update_browser_fakeout(self):
-        response = self.app.post(url('users_group', id=1), params=dict(_method='put'))
+        response = self.app.post(url('users_group', id=1),
+                                 params=dict(_method='put'))
 
     def test_delete(self):
-        response = self.app.delete(url('users_group', id=1))
+        self.log_user()
+        users_group_name = TEST_USERS_GROUP + 'another'
+        response = self.app.post(url('users_groups'),
+                                 {'users_group_name':users_group_name,
+                                  'active':True})
+        response.follow()
+
+        self.checkSessionFlash(response,
+                               'created users group %s' % users_group_name)
+
+
+        gr = self.sa.query(UsersGroup)\
+                           .filter(UsersGroup.users_group_name ==
+                                   users_group_name).one()
+
+        response = self.app.delete(url('users_group', id=gr.users_group_id))
+
+        gr = self.sa.query(UsersGroup)\
+                           .filter(UsersGroup.users_group_name ==
+                                   users_group_name).scalar()
+
+        self.assertEqual(gr, None)
+
 
     def test_delete_browser_fakeout(self):
-        response = self.app.post(url('users_group', id=1), params=dict(_method='delete'))
+        response = self.app.post(url('users_group', id=1),
+                                 params=dict(_method='delete'))
 
     def test_show(self):
         response = self.app.get(url('users_group', id=1))

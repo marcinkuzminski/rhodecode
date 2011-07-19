@@ -39,7 +39,6 @@ from rhodecode.lib.base import BaseController, render
 
 from rhodecode.model.db import User, UsersGroup, Permission, UsersGroupToPerm
 from rhodecode.model.forms import UserForm, UsersGroupForm
-from rhodecode.model.users_group import UsersGroupModel
 
 log = logging.getLogger(__name__)
 
@@ -67,11 +66,11 @@ class UsersGroupsController(BaseController):
     def create(self):
         """POST /users_groups: Create a new item"""
         # url('users_groups')
-        users_group_model = UsersGroupModel()
+
         users_group_form = UsersGroupForm()()
         try:
             form_result = users_group_form.to_python(dict(request.POST))
-            users_group_model.create(form_result)
+            UsersGroup.create(form_result)
             h.flash(_('created users group %s') \
                     % form_result['users_group_name'], category='success')
             #action_logger(self.rhodecode_user, 'new_user', '', '', self.sa)
@@ -103,8 +102,7 @@ class UsersGroupsController(BaseController):
         #           method='put')
         # url('users_group', id=ID)
 
-        users_group_model = UsersGroupModel()
-        c.users_group = users_group_model.get(id)
+        c.users_group = UsersGroup.get(id)
         c.group_members = [(x.user_id, x.user.username) for x in
                            c.users_group.members]
 
@@ -117,7 +115,7 @@ class UsersGroupsController(BaseController):
 
         try:
             form_result = users_group_form.to_python(request.POST)
-            users_group_model.update(id, form_result)
+            UsersGroup.update(id, form_result)
             h.flash(_('updated users group %s') \
                         % form_result['users_group_name'],
                     category='success')
@@ -150,9 +148,9 @@ class UsersGroupsController(BaseController):
         #    h.form(url('users_group', id=ID),
         #           method='delete')
         # url('users_group', id=ID)
-        users_group_model = UsersGroupModel()
+
         try:
-            users_group_model.delete(id)
+            UsersGroup.delete(id)
             h.flash(_('successfully deleted users group'), category='success')
         except UsersGroupsAssignedException, e:
             h.flash(e, category='error')
