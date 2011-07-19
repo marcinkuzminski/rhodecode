@@ -286,6 +286,8 @@ class UsersGroup(Base, BaseModel):
 
     members = relationship('UsersGroupMember', cascade="all, delete, delete-orphan", lazy="joined")
 
+    def __repr__(self):
+        return '<userGroup(%s)>' % (self.users_group_name)
 
     @classmethod
     def get_by_group_name(cls, group_name, cache=False, case_insensitive=False):
@@ -677,6 +679,8 @@ class UsersGroupRepoToPerm(Base, BaseModel):
     permission = relationship('Permission')
     repository = relationship('Repository')
 
+    def __repr__(self):
+        return '<userGroup:%s => %s >' % (self.users_group, self.repository)
 
 class UsersGroupToPerm(Base, BaseModel):
     __tablename__ = 'users_group_to_perm'

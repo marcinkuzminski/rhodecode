@@ -28,9 +28,11 @@ import traceback
 
 from pylons.i18n.translation import _
 
+from rhodecode.lib.exceptions import UsersGroupsAssignedException
 from rhodecode.model import BaseModel
 from rhodecode.model.caching_query import FromCache
-from rhodecode.model.db import UsersGroup, UsersGroupMember
+from rhodecode.model.db import UsersGroup, UsersGroupMember, \
+    UsersGroupRepoToPerm
 
 log = logging.getLogger(__name__)
 
@@ -84,6 +86,16 @@ class UsersGroupModel(BaseModel):
 
     def delete(self, users_group_id):
         try:
+
+            # check if this group is not assigned to repo
+            assigned_groups = UsersGroupRepoToPerm.query()\
+                .filter(UsersGroupRepoToPerm.users_group_id ==
+                        users_group_id).all()
+
+            if assigned_groups:
+                raise UsersGroupsAssignedException('Group assigned to %s' %
+                                                   assigned_groups)
+
             users_group = self.get(users_group_id, cache=False)
             self.sa.delete(users_group)
             self.sa.commit()

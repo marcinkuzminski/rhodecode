@@ -32,6 +32,7 @@ from pylons import request, session, tmpl_context as c, url, config
 from pylons.controllers.util import abort, redirect
 from pylons.i18n.translation import _
 
+from rhodecode.lib.exceptions import UsersGroupsAssignedException
 from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator
 from rhodecode.lib.base import BaseController, render
@@ -153,6 +154,8 @@ class UsersGroupsController(BaseController):
         try:
             users_group_model.delete(id)
             h.flash(_('successfully deleted users group'), category='success')
+        except UsersGroupsAssignedException, e:
+            h.flash(e, category='error')
         except Exception:
             h.flash(_('An error occurred during deletion of users group'),
                     category='error')

@@ -45,3 +45,6 @@ class DefaultUserException(Exception):
 
 class UserOwnsReposException(Exception):
     pass
+
+class UsersGroupsAssignedException(Exception):
+    pass
