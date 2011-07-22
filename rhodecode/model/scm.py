@@ -30,8 +30,7 @@ import logging
 from sqlalchemy.exc import DatabaseError
 
 from vcs import get_backend
-from vcs.utils.helpers import get_scm
-from vcs.exceptions import RepositoryError, VCSError
+from vcs.exceptions import RepositoryError
 from vcs.utils.lazy import LazyProperty
 from vcs.nodes import FileNode
 
@@ -83,20 +82,17 @@ class CachedRepoList(object):
 
             scmr = dbr.scm_instance_cached
 
-            #check permission at this level
-            if not HasRepoPermissionAny('repository.read',
-                                        'repository.write',
+            # check permission at this level
+            if not HasRepoPermissionAny('repository.read', 'repository.write',
                                         'repository.admin')(dbr.repo_name,
                                                             'get repo check'):
                 continue
-
 
             if scmr is None:
                 log.error('%s this repository is present in database but it '
                           'cannot be created as an scm instance',
                           dbr.repo_name)
                 continue
-
 
             last_change = scmr.last_change
             tip = h.get_changeset_safe(scmr, 'tip')

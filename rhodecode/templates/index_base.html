@@ -40,7 +40,7 @@
                     <tr>
                         <th class="left"><a href="#">${_('Group name')}</a></th>
                         <th class="left"><a href="#">${_('Description')}</a></th>
-                        <th class="left"><a href="#">${_('Number of repositories')}</a></th>
+                        ##<th class="left"><a href="#">${_('Number of repositories')}</a></th>
                     </tr>
                 </thead>
                 
@@ -55,14 +55,17 @@
                           </div>
                       </td>
                       <td>${gr.group_description}</td>
-                      <td><b>${gr.repositories.count()}</b></td>
+                      ##<td><b>${gr.repositories.count()}</b></td>
                   </tr>
                 % endfor
                 
             </table>
             <div style="height: 20px"></div>
             % endif
-            <table>
+            <div id="welcome" style="display:none;text-align:center">
+                <h1><a href="${h.url('home')}">${c.rhodecode_name} ${c.rhodecode_version}</a></h1>
+            </div>
+            <table id="repos_list">
             <thead>
                 <tr>
                     <th class="left"></th>
@@ -190,9 +193,25 @@
 
      F.filterTimeout = null;
      
+     function set_count(count){
+    
+    	 if(count == 0){
+    		 YUD.setStyle('repos_list','display','none');
+    		 YUD.setStyle('welcome','display','');
+    	 }
+    	 else{
+    		 YUD.setStyle('repos_list','display','');
+    		 YUD.setStyle('welcome','display','none');
+    	 }
+    	 YUD.get('repo_count').innerHTML = count;
+    	 
+     }
+     
+     
      //set initial count for repos
      var nodes = S.query('div.table tr td div a.repo_name');
-     YUD.get('repo_count').innerHTML = nodes.length;
+     
+     set_count(nodes.length)
      F.updateFilter  = function() { 
         // Reset timeout 
         F.filterTimeout = null;
@@ -216,7 +235,7 @@
             }
         }
         // set new count into dashboard
-        YUD.get('repo_count').innerHTML = nodes.length - obsolete.length;      
+        set_count(nodes.length - obsolete.length)
      }
      
      E.on(q_filter,'keyup',function(e){
