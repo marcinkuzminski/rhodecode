@@ -5,7 +5,9 @@ Installation
 
 ``RhodeCode`` is written entirely in Python. Before posting any issues make 
 sure, your not missing any system libraries and using right version of 
-libraries required by RhodeCode.
+libraries required by RhodeCode. There's also restriction in terms of mercurial
+clients. Minimal version of hg client known working fine with RhodeCode is
+**1.6**. If you're using older client, please upgrade.
 
 
 Installing RhodeCode from Cheese Shop
