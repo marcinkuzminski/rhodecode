@@ -659,3 +659,15 @@ def fancy_file_stats(stats):
     d_d = '<div class="deleted %s" style="width:%s%%">%s</div>' % (cgen('d'),
                                                                    d_p, d_v)
     return literal('<div style="width:%spx">%s%s</div>' % (width, d_a, d_d))
+
+
+def urlify_text(text):
+    import re
+
+    url_pat = re.compile(r'(http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+)')
+
+    def url_func(match_obj):
+        url_full = match_obj.groups()[0]
+        return '<a href="%(url)s">%(url)s</a>' % ({'url':url_full})
+
+    return literal(url_pat.sub(url_func, text))
