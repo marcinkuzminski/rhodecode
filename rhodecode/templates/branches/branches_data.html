@@ -9,8 +9,7 @@
         </tr>
 		%for cnt,branch in enumerate(c.repo_branches.items()):
 		<tr class="parity${cnt%2}">
-            <td><span class="tooltip" title="${h.age(branch[1].date)}">
-                      ${branch[1].date}</span>
+            <td><span class="tooltip" title="${h.age(branch[1].date)}">${branch[1].date}</span>
             </td>
             <td>
                 <span class="logtags">
@@ -27,8 +26,28 @@
 			</td>
 		</tr>	
 		%endfor
+        % if hasattr(c,'repo_closed_branches') and c.repo_closed_branches:
+          %for cnt,branch in enumerate(c.repo_closed_branches.items()):
+          <tr class="parity${cnt%2}">
+              <td><span class="tooltip" title="${h.age(branch[1].date)}">${branch[1].date}</span>
+              </td>
+              <td>
+                  <span class="logtags">
+                      <span class="branchtag">${h.link_to(branch[0]+' [closed]',
+                      h.url('changeset_home',repo_name=c.repo_name,revision=branch[1].raw_id))}</span>
+                  </span>         
+              </td>       
+              <td title="${branch[1].author}">${h.person(branch[1].author)}</td>
+              <td>r${branch[1].revision}:${h.short_id(branch[1].raw_id)}</td>
+              <td class="nowrap">
+              ${h.link_to(_('changeset'),h.url('changeset_home',repo_name=c.repo_name,revision=branch[1].raw_id))}
+              |
+              ${h.link_to(_('files'),h.url('files_home',repo_name=c.repo_name,revision=branch[1].raw_id))}
+              </td>
+          </tr>   
+          %endfor
+        %endif  
     </table>
 %else:
-	${_('There are no branches yet')}
+    ${_('There are no branches yet')}
 %endif
-
