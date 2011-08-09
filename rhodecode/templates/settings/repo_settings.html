@@ -71,7 +71,7 @@
         <script type="text/javascript">
             YAHOO.util.Event.onDOMReady(function(){
                 var D = YAHOO.util.Dom;
-                if(!D.hasClass('perm_new_user_name','error')){
+                if(!D.hasClass('perm_new_member_name','error')){
                     D.setStyle('add_perm_input','display','none');
                 }
                 YAHOO.util.Event.addListener('add_perm','click',function(){
@@ -114,7 +114,7 @@
             }
         
             // Instantiate AutoComplete for perms
-            var oAC_perms = new YAHOO.widget.AutoComplete("perm_new_user_name", "perm_container", oDS);
+            var oAC_perms = new YAHOO.widget.AutoComplete("perm_new_member_name", "perm_container", oDS);
             oAC_perms.useShadow = false;
             oAC_perms.resultTypeList = false;
             
