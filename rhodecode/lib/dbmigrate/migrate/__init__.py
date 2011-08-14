@@ -7,3 +7,5 @@
 
 from rhodecode.lib.dbmigrate.migrate.versioning import *
 from rhodecode.lib.dbmigrate.migrate.changeset import *
+
+__version__ = '0.7.2.dev'

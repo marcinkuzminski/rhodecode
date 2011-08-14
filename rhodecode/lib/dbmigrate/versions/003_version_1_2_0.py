@@ -80,6 +80,11 @@ def upgrade(migrate_engine):
     enable_downloads = Column("downloads", Boolean(), nullable=True, unique=None, default=True)
     enable_downloads.create(Repository().__table__)
 
+    #ADD column created_on
+    created_on = Column('created_on', DateTime(timezone=False), nullable=True,
+                        unique=None, default=datetime.datetime.now)
+    created_on.create(Repository().__table__)
+
     #ADD group_id column#
     group_id = Column("group_id", Integer(), ForeignKey('groups.group_id'),
                   nullable=True, unique=False, default=None)
@@ -94,6 +99,15 @@ def upgrade(migrate_engine):
                         nullable=True, unique=False, default=None)
 
     clone_uri.create(Repository().__table__)
+
+
+    #==========================================================================
+    # Upgrade of `user_followings` table
+    #==========================================================================
+
+    follows_from = Column('follows_from', DateTime(timezone=False), nullable=True, unique=None, default=datetime.datetime.now)
+    follows_from.create(Repository().__table__)
+
     return
 
 

@@ -11,9 +11,9 @@ from sqlalchemy.schema import ForeignKeyConstraint
 from sqlalchemy.schema import UniqueConstraint
 
 from rhodecode.lib.dbmigrate.migrate.exceptions import *
-from rhodecode.lib.dbmigrate.migrate.changeset import SQLA_06
+from rhodecode.lib.dbmigrate.migrate.changeset import SQLA_06, SQLA_07
 from rhodecode.lib.dbmigrate.migrate.changeset.databases.visitor import (get_engine_visitor,
-                                                 run_single_visitor)
+                                                                         run_single_visitor)
 
 
 __all__ = [
@@ -555,7 +555,10 @@ populated with defaults
 
     def add_to_table(self, table):
         if table is not None  and self.table is None:
-            self._set_parent(table)
+            if SQLA_07:
+                table.append_column(self)
+            else:
+                self._set_parent(table)
 
     def _col_name_in_constraint(self,cons,name):
         return False
@@ -590,7 +593,10 @@ populated with defaults
         table.constraints = table.constraints - to_drop
 
         if table.c.contains_column(self):
-            table.c.remove(self)
+            if SQLA_07:
+                table._columns.remove(self)
+            else:
+                table.c.remove(self)
 
     # TODO: this is fixed in 0.6
     def copy_fixed(self, **kw):
