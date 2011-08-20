@@ -45,8 +45,9 @@ API METHODS
 pull
 ----
 
-Pulls given repo from remote location. Can be used to autmatically keep 
-remote repos upto date
+Pulls given repo from remote location. Can be used to automatically keep 
+remote repos upto date. This command can be executed only using admin users
+api_key
 
 ::
     
