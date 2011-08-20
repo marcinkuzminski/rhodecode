@@ -5,7 +5,7 @@ Setup
 
 
 Setting up RhodeCode
---------------------------
+--------------------
 
 First, you will need to create a RhodeCode configuration file. Run the 
 following command to do this::
@@ -372,8 +372,8 @@ There are two ways to enable https:
 
 - Set HTTP_X_URL_SCHEME in your http server headers, than rhodecode will
   recognize this headers and make proper https redirections
-- Alternatively, set the `force_https = true` in the ini configuration to force 
-  using https, no headers are needed than to enable https
+- Alternatively, change the `force_https = true` flag in the ini configuration 
+  to force using https, no headers are needed than to enable https
 
 
 Nginx virtual host example
