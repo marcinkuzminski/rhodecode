@@ -254,12 +254,21 @@ def make_map(config):
         m.connect("admin_settings_create_repository", "/create_repository",
                   action="create_repository", conditions=dict(method=["GET"]))
 
+
     #ADMIN MAIN PAGES
     with rmap.submapper(path_prefix=ADMIN_PREFIX,
                         controller='admin/admin') as m:
         m.connect('admin_home', '', action='index')
         m.connect('admin_add_repo', '/add_repo/{new_repo:[a-z0-9\. _-]*}',
                   action='add_repo')
+
+    #==========================================================================
+    # API V1
+    #==========================================================================
+    with rmap.submapper(path_prefix=ADMIN_PREFIX,
+                        controller='api/api') as m:
+        m.connect('api', '/api')
+
 
     #USER JOURNAL
     rmap.connect('journal', '%s/journal' % ADMIN_PREFIX, controller='journal')
@@ -400,4 +409,5 @@ def make_map(config):
     rmap.connect('repo_forks_home', '/{repo_name:.*}/forks',
                  controller='forks', action='forks',
                  conditions=dict(function=check_repo))
+
     return rmap
