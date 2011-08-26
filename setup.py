@@ -17,7 +17,7 @@ requirements = [
         "vcs>=0.2.1",
         "pygments>=1.4",
         "mercurial>=1.9,<2.0",
-        "whoosh",
+        "whoosh<1.8",
         "celery>=2.2.5,<2.3",
         "babel",
         "python-dateutil>=1.5.0,<2.0.0",
