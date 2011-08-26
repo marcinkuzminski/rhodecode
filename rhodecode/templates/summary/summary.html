@@ -164,6 +164,9 @@
 			                h.url('files_archive_home',repo_name=c.dbrepo.repo_name,
 			                fname='tip'+archive['extension']),class_="archive_icon")}</span>
 			        %endfor
+                    <span style="vertical-align: bottom">
+                        <input id="archive_subrepos" type="checkbox" name="subrepos"/> <span class="tooltip" title="${_('Check this to download archive with subrepos')}" >${_('with subrepos')}</span>
+                    </span>
 			    %endif
 			  </div>
 			 </div>
@@ -278,27 +281,28 @@
   					'display','none');
   		})
   	
-             
-             YUE.on('download_options','change',function(e){
-                 var new_cs = e.target.options[e.target.selectedIndex];
-                 var tmpl_links = {}
-                 %for cnt,archive in enumerate(c.rhodecode_repo._get_archives()):
-                	 tmpl_links['${archive['type']}'] = '${h.link_to(archive['type'],
-                        h.url('files_archive_home',repo_name=c.dbrepo.repo_name,
-                        fname='__CS__'+archive['extension']),class_="archive_icon")}';
-                 %endfor
-                
+             var tmpl_links = {}
+              %for cnt,archive in enumerate(c.rhodecode_repo._get_archives()):
+                tmpl_links['${archive['type']}'] = '${h.link_to(archive['type'],
+                     h.url('files_archive_home',repo_name=c.dbrepo.repo_name,
+                     fname='__CS__'+archive['extension'],subrepos='__SUB__'),class_="archive_icon")}';
+              %endfor
+              
+             YUE.on(['download_options','archive_subrepos'],'change',function(e){
+            	 var sm = YUD.get('download_options');
+                 var new_cs = sm.options[sm.selectedIndex];
                  
                  for(k in tmpl_links){
-                	 var s = YUD.get(k+'_link')
+                	 var s = YUD.get(k+'_link');
                 	 title_tmpl = "${_('Download %s as %s') % ('__CS_NAME__','__CS_EXT__')}";
                 	 s.title = title_tmpl.replace('__CS_NAME__',new_cs.text);
                 	 s.title = s.title.replace('__CS_EXT__',k);
-                	 s.innerHTML = tmpl_links[k].replace('__CS__',new_cs.value);
+                	 var url = tmpl_links[k].replace('__CS__',new_cs.value);
+                	 var subrepos = YUD.get('archive_subrepos').checked
+                	 url = url.replace('__SUB__',subrepos);
+                	 s.innerHTML = url 
                  }
-                 
-             })
-             	
+             });
   	</script>    				
 </div>
         

@@ -271,6 +271,7 @@ class FilesController(BaseRepoController):
         fileformat = None
         revision = None
         ext = None
+        subrepos = request.GET.get('subrepos') == 'true'
 
         for a_type, ext_data in ARCHIVE_SPECS.items():
             archive_spec = fname.split(ext_data[1])
@@ -300,7 +301,7 @@ class FilesController(BaseRepoController):
         import tempfile
         archive = tempfile.mkstemp()[1]
         t = open(archive, 'wb')
-        cs.fill_archive(stream=t, kind=fileformat)
+        cs.fill_archive(stream=t, kind=fileformat, subrepos=subrepos)
 
         def get_chunked_archive(archive):
             stream = open(archive, 'rb')
