@@ -12,7 +12,7 @@
 			<div class="info_box">
 	          <span class="rev">${_('view')}@rev</span> 
 	          <a class="rev" href="${c.url_prev}" title="${_('previous revision')}">&laquo;</a>
-	          ${h.text('at_rev',value=c.changeset.revision,size=3)}
+	          ${h.text('at_rev',value=c.changeset.revision,size=5)}
 	          <a class="rev" href="${c.url_next}" title="${_('next revision')}">&raquo;</a>
 	          ## ${h.submit('view',_('view'),class_="ui-button-small")}
 		    </div>           
@@ -21,20 +21,133 @@
 	    <div class="browser-branch">
 	       ${h.checkbox('stay_at_branch',c.changeset.branch,c.changeset.branch==c.branch)}
 	       <label>${_('follow current branch')}</label>
-	       <script type="text/javascript">
-	        YUE.on('stay_at_branch','click',function(e){
-	        	if(e.target.checked){
-	        		var uri = "${h.url.current(branch='__BRANCH__')}"
-	        		uri = uri.replace('__BRANCH__',e.target.value);
-	        		window.location = uri;
-	        	}
-	        	else{
-	        		window.location = "${h.url.current()}";
-	        	}
-	        	
-	        })
-	       </script>
 	    </div>
+        <div class="browser-search">
+            <div class="search_activate">
+                <a id="filter_activate" href="#">${_('search file list')}</a>
+            </div>
+        
+            
+        <div>
+            <div id="node_filter_box_loading" style="display:none">${_('Loading file list...')}</div>
+            <div id="node_filter_box" style="display:none">
+            ${h.files_breadcrumbs(c.repo_name,c.changeset.raw_id,c.files_list.path)}/<input type="text" value="type to search..." name="filter" size="25" id="node_filter" autocomplete="off">
+            
+            <script type="text/javascript">
+            
+            YUE.on('stay_at_branch','click',function(e){
+                if(e.target.checked){
+                    var uri = "${h.url.current(branch='__BRANCH__')}"
+                    uri = uri.replace('__BRANCH__',e.target.value);
+                    window.location = uri;
+                }
+                else{
+                    window.location = "${h.url.current()}";
+                }
+                
+            })            
+            
+            var n_filter = YUD.get('node_filter');
+            var F = YAHOO.namespace('node_filter');
+            
+            var url = '${h.url("files_nodelist_home",repo_name="__REPO__",revision="__REVISION__",f_path="__FPATH__")}';
+            var node_url = '${h.url("files_home",repo_name="__REPO__",revision="__REVISION__",f_path="__FPATH__")}';
+            
+            url  = url.replace('__REPO__','${c.repo_name}');
+            url  = url.replace('__REVISION__','${c.changeset.raw_id}');
+            url  = url.replace('__FPATH__','${c.files_list.path}');
+
+            node_url  = node_url.replace('__REPO__','${c.repo_name}');
+            node_url  = node_url.replace('__REVISION__','${c.changeset.raw_id}');
+            
+            
+            F.filterTimeout = null;
+            var nodes = null;
+            
+            
+            F.initFilter = function(){
+              YUD.setStyle('node_filter_box_loading','display','');
+              YUD.setStyle('filter_activate','display','none');
+              YUC.initHeader('X-PARTIAL-XHR',true);
+              YUC.asyncRequest('GET',url,{
+                  success:function(o){
+                  	nodes = JSON.parse(o.responseText);
+                  	YUD.setStyle('node_filter_box_loading','display','none');
+                  	YUD.setStyle('node_filter_box','display','');
+                  },
+                  failure:function(o){
+                      console.log('failed to load');
+                  }
+              },null);            
+            }
+            
+            F.updateFilter  = function(e) {
+            	
+            	return function(){
+                    // Reset timeout 
+                    F.filterTimeout = null;
+                    var query = e.target.value;
+                    var match = [];
+                    var matches = 0;
+                    var matches_max = 20;
+                    if (query != ""){
+                        for(var i=0;i<nodes.length;i++){
+                            var pos = nodes[i].toLowerCase().indexOf(query)
+                            if(query && pos != -1){
+                                
+                                matches++
+                                //show only certain amount to not kill browser 
+                                if (matches > matches_max){
+                                    break;
+                                }
+                                
+                                var n = nodes[i];
+                                var n_hl = n.substring(0,pos)
+                                  +"<b>{0}</b>".format(n.substring(pos,pos+query.length))
+                                  +n.substring(pos+query.length)                    
+                                match.push('<tr><td><a class="browser-file" href="{0}">{1}</a></td><td colspan="5"></td></tr>'.format(node_url.replace('__FPATH__',n),n_hl));
+                            }
+                            if(match.length >= matches_max){
+                                match.push('<tr><td>{0}</td><td colspan="5"></td></tr>'.format("${_('search truncated')}"));
+                            }
+                            
+                        }                    	
+                    }
+                    
+                    if(query != ""){
+                        YUD.setStyle('tbody','display','none');
+                        YUD.setStyle('tbody_filtered','display','');
+                        
+                        if (match.length==0){
+                          match.push('<tr><td>{0}</td><td colspan="5"></td></tr>'.format("${_('no matching files')}"));
+                        }                        	
+                        
+                    	YUD.get('tbody_filtered').innerHTML = match.join("");	
+                    }
+                    else{
+                    	YUD.setStyle('tbody','display','');
+                    	YUD.setStyle('tbody_filtered','display','none');
+                    }
+                    
+            	}
+            }
+            
+            
+            YUE.on(YUD.get('filter_activate'),'click',function(){
+                F.initFilter();
+            })
+            YUE.on(n_filter,'click',function(){
+                n_filter.value = '';
+             });
+            YUE.on(n_filter,'keyup',function(e){
+                clearTimeout(F.filterTimeout); 
+                F.filterTimeout = setTimeout(F.updateFilter(e),600);
+            });            
+            </script>
+            
+            </div>        
+        </div>
+        </div>      
     </div>
     
 	<div class="browser-body">
@@ -49,7 +162,8 @@
 		                 <th>${_('Last commiter')}</th>
 		             </tr>
 		         </thead>
-
+                
+                <tbody id="tbody">
           		%if c.files_list.parent:
          		<tr class="parity0">
 	          		<td>		          		
@@ -97,6 +211,9 @@
 		             </td>
 				</tr>
 			%endfor
+                </tbody>
+                <tbody id="tbody_filtered" style="display:none">
+                </tbody>                
 		</table>
 	</div>
 </div>

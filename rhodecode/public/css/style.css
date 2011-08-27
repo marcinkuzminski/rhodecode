@@ -52,7 +52,6 @@ a {
 color:#003367;
 text-decoration:none;
 cursor:pointer;
-font-weight:700;
 }
 
 a:hover {
@@ -1863,7 +1862,7 @@ padding:0;
 
 div.browserblock .browser-header {
 background:#FFF;
-padding:10px 0px 25px 0px;
+padding:10px 0px 15px 0px;
 width: 100%;
 }
 div.browserblock .browser-nav {
@@ -1882,6 +1881,25 @@ vertical-align:text-top;
 div.browserblock .browser-header span {
 margin-left:5px;
 font-weight:700;
+}
+
+div.browserblock .browser-search{
+	clear:both;
+	padding:8px 8px 0px 5px;
+}
+
+div.browserblock .search_activate #filter_activate{
+	vertical-align: sub;
+	border: 1px solid;
+	padding:2px;
+	border-radius: 4px 4px 4px 4px;
+	background: url("../images/button.png") repeat-x scroll 0 0 #E5E3E3;
+	border-color: #DDDDDD #DDDDDD #C6C6C6 #C6C6C6;
+	color: #515151;
+}
+
+div.browserblock .search_activate a:hover{
+    text-decoration: none !important;    
 }
 
 div.browserblock .browser-body {
@@ -2719,3 +2737,8 @@ margin-top:-4px;
 padding-left:3px;
 }
 
+#node_filter{
+border:0px solid #545454;
+color:#AAAAAA;
+padding-left:3px;
+}

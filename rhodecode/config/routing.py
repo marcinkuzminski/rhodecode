@@ -382,6 +382,11 @@ def make_map(config):
                 controller='files', action='archivefile',
                 conditions=dict(function=check_repo))
 
+    rmap.connect('files_nodelist_home',
+                 '/{repo_name:.*}/nodelist/{revision}/{f_path:.*}',
+                controller='files', action='nodelist',
+                conditions=dict(function=check_repo))
+
     rmap.connect('repo_settings_delete', '/{repo_name:.*}/settings',
                 controller='settings', action="delete",
                 conditions=dict(method=["DELETE"], function=check_repo))

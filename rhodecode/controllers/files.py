@@ -25,12 +25,14 @@
 
 import os
 import logging
-import mimetypes
 import traceback
+
+from os.path import join as jn
 
 from pylons import request, response, session, tmpl_context as c, url
 from pylons.i18n.translation import _
 from pylons.controllers.util import redirect
+from pylons.decorators import jsonify
 
 from vcs.backends import ARCHIVE_SPECS
 from vcs.exceptions import RepositoryError, ChangesetDoesNotExistError, \
@@ -94,6 +96,26 @@ class FilesController(BaseRepoController):
                            revision=cs.raw_id))
 
         return file_node
+
+
+    def __get_paths(self, changeset, starting_path):
+        """recursive walk in root dir and return a set of all path in that dir
+        based on repository walk function
+        """
+        _files = list()
+        _dirs = list()
+
+        try:
+            tip = changeset
+            for topnode, dirs, files in tip.walk(starting_path):
+                for f in files:
+                    _files.append(f.path)
+                for d in dirs:
+                    _dirs.append(d.path)
+        except RepositoryError, e:
+            log.debug(traceback.format_exc())
+            pass
+        return _dirs, _files
 
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
                                    'repository.admin')
@@ -413,3 +435,13 @@ class FilesController(BaseRepoController):
         hist_l.append(tags_group)
 
         return hist_l
+
+    @jsonify
+    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
+                                   'repository.admin')
+    def nodelist(self, repo_name, revision, f_path):
+        if request.environ.get('HTTP_X_PARTIAL_XHR'):
+            cs = self.__get_cs_or_redirect(revision, repo_name)
+            _d, _f = self.__get_paths(cs, f_path)
+            return _d + _f
+
