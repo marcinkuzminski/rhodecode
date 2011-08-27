@@ -240,7 +240,7 @@
      
      E.on(q_filter,'keyup',function(e){
          clearTimeout(F.filterTimeout); 
-         setTimeout(F.updateFilter,600); 
+         F.filterTimeout = setTimeout(F.updateFilter,600); 
      });
      
     </script>
