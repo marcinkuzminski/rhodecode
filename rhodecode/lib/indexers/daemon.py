@@ -112,9 +112,6 @@ class WhooshIndexingDaemon(object):
             for topnode, dirs, files in tip.walk('/'):
                 for f in files:
                     index_paths_.add(jn(repo.path, f.path))
-                for dir in dirs:
-                    for f in files:
-                        index_paths_.add(jn(repo.path, f.path))
 
         except RepositoryError, e:
             log.debug(traceback.format_exc())
