@@ -12,6 +12,7 @@ Changelog
 news
 ----
 
+- implemented #47 repository groups
 - implemented #89 Can setup google analytics code from settings menu
 - implemented #91 added nicer looking archive urls with more download options
   like tags, branches
@@ -37,7 +38,14 @@ news
   repository, and manually updated (via pull) from admin panel
 - beta git support - push/pull server + basic view for git repos
 - added followers page and forks page
-- server side file repository files edition with commits
+- server side file edition with commits powered by codemirror
+- #111 file browser file finder, quick lookup files on whole file tree 
+- added quick login sliding menu into main page
+- changelog uses lazy loading of affected files details, in some scenarios 
+  this can improve speed of changelog page dramatically especially for 
+  larger repositories.
+- implements #214 added support for downloading subrepos in download menu.
+- Added basic API for direct operations on rhodecode via JSON
 
 fixes
 -----
@@ -57,7 +65,17 @@ fixes
 - fixed problem with ascendant characters in realm #181
 - fixed problem with sqlite file based database connection pool
 - whoosh indexer and code stats share the same dynamic extensions map
-
+- fixes #188 - relationship delete of repo_to_perm entry on user removal
+- fixes issue #189 Trending source files shows "show more" when no more exist
+- fixes issue #197 Relative paths for pidlocks
+- fixes issue #198 password will require only 3 chars now for login form
+- fixes issue #199 wrong redirection for non admin users after creating a repository
+- fixes issues #202, bad db constraint made impossible to attach same group 
+  more than one time. Affects only mysql/postgres
+- fixes #218 os.kill patch for windows was missing sig param
+- improved rendering of dag (they are not trimmed anymore when number of 
+  heads exceeds 5)
+    
 1.1.8 (**2011-04-12**)
 ======================
 
