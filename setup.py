@@ -10,10 +10,9 @@ if py_version < (2, 5):
     raise Exception('RhodeCode requires python 2.5 or later')
 
 requirements = [
-        "vcs>=0.2.1.dev",
         "Pylons==1.0.0",
         "WebHelpers>=1.2",
-        "SQLAlchemy>=0.7.2",
+        "SQLAlchemy>=0.7.2,<0.8",
         "Mako>=0.4.2",
         "pygments>=1.4",
         "mercurial>=1.9,<2.0",
@@ -21,7 +20,8 @@ requirements = [
         "celery>=2.2.5,<2.3",
         "babel",
         "python-dateutil>=1.5.0,<2.0.0",
-        "dulwich>=0.7.2"
+        "dulwich>=0.8.0",
+        "vcs>=0.2.1.dev",        
     ]
 
 dependency_links = [
