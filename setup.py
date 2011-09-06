@@ -10,19 +10,24 @@ if py_version < (2, 5):
     raise Exception('RhodeCode requires python 2.5 or later')
 
 requirements = [
+        "vcs>=0.2.1.dev",
         "Pylons==1.0.0",
         "WebHelpers>=1.2",
-        "SQLAlchemy>=0.7.1",
-        "Mako>=0.4.0",
-        "vcs>=0.2.1",
+        "SQLAlchemy>=0.7.2",
+        "Mako>=0.4.2",
         "pygments>=1.4",
         "mercurial>=1.9,<2.0",
         "whoosh<1.8",
         "celery>=2.2.5,<2.3",
         "babel",
         "python-dateutil>=1.5.0,<2.0.0",
-        "dulwich>=0.7.1"
+        "dulwich>=0.7.2"
     ]
+
+dependency_links = [
+    "https://hg.rhodecode.org/vcs/archive/default.zip#egg=vcs-0.2.1.dev",
+    "https://bitbucket.org/marcinkuzminski/vcs/get/default.zip#egg=vcs-0.2.1.dev",
+]
 
 classifiers = ['Development Status :: 4 - Beta',
                'Environment :: Web Environment',
@@ -86,7 +91,7 @@ setup(
     license=__license__,
     author='Marcin Kuzminski',
     author_email='marcin@python-works.com',
-    dependency_links=['https://hg.rhodecode.org/vcs/archive/tip.zip'],
+    dependency_links=dependency_links,
     url='http://rhodecode.org',
     install_requires=requirements,
     classifiers=classifiers,
