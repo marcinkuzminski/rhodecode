@@ -42,7 +42,7 @@ String.prototype.format = function() {
 	  // Replace the prototype property
 	  return format;
 
-	}();
+}();
 
 /**
  * GLOBAL YUI Shortcuts
@@ -113,7 +113,7 @@ function ypjax(url,container,s_call,f_call,args){
 /**
  * tooltip activate
  */
-function tooltip_activate(){
+var tooltip_activate = function(){
     function toolTipsId(){
         var ids = [];
         var tts = YUQ('.tooltip');
@@ -140,7 +140,7 @@ function tooltip_activate(){
 /**
  * show more
  */
-function show_more_event(){
+var show_more_event = function(){
     YUE.on(YUD.getElementsByClassName('show_more'),'click',function(e){
         var el = e.target;
         YUD.setStyle(YUD.get(el.id.substring(1)),'display','');

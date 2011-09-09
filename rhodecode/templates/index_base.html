@@ -150,7 +150,7 @@
                         ${h.link_to('r%s:%s' % (repo['rev'],h.short_id(repo['tip'])),
                         h.url('changeset_home',repo_name=repo['name'],revision=repo['tip']),
                         class_="tooltip",
-                        title=h.tooltip(repo['last_msg']))}
+                        title=h.tooltip('%s\n%s' % (repo['author'],repo['last_msg'])))}
                         %else:
                             ${_('No changesets yet')}
                         %endif    
