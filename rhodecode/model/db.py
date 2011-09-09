@@ -125,7 +125,13 @@ class BaseModel(object):
     @classmethod
     def get(cls, id_):
         return Session.query(cls).get(id_)
-
+    
+    @classmethod
+    def delete(cls, id_):
+        obj = Session.query(cls).get(id_)
+        Session.delete(obj)
+        Session.commit()
+        
 
 class RhodeCodeSettings(Base, BaseModel):
     __tablename__ = 'rhodecode_settings'
@@ -181,7 +187,13 @@ class RhodeCodeSettings(Base, BaseModel):
 
 class RhodeCodeUi(Base, BaseModel):
     __tablename__ = 'rhodecode_ui'
-    __table_args__ = {'extend_existing':True}
+    __table_args__ = (UniqueConstraint('ui_key'), {'extend_existing':True})
+
+    HOOK_UPDATE = 'changegroup.update'
+    HOOK_REPO_SIZE = 'changegroup.repo_size'
+    HOOK_PUSH = 'pretxnchangegroup.push_logger'
+    HOOK_PULL = 'preoutgoing.pull_logger'
+
     ui_id = Column("ui_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     ui_section = Column("ui_section", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     ui_key = Column("ui_key", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
@@ -192,6 +204,35 @@ class RhodeCodeUi(Base, BaseModel):
     @classmethod
     def get_by_key(cls, key):
         return Session.query(cls).filter(cls.ui_key == key)
+
+
+    @classmethod
+    def get_builtin_hooks(cls):
+        q = cls.query()
+        q = q.filter(cls.ui_key.in_([cls.HOOK_UPDATE,
+                                    cls.HOOK_REPO_SIZE,
+                                    cls.HOOK_PUSH, cls.HOOK_PULL]))
+        return q.all()
+
+    @classmethod
+    def get_custom_hooks(cls):
+        q = cls.query()
+        q = q.filter(~cls.ui_key.in_([cls.HOOK_UPDATE,
+                                    cls.HOOK_REPO_SIZE,
+                                    cls.HOOK_PUSH, cls.HOOK_PULL]))
+        q = q.filter(cls.ui_section == 'hooks')
+        return q.all()
+
+    @classmethod
+    def create_or_update_hook(cls, key, val):
+        new_ui = cls.get_by_key(key).scalar() or cls()
+        new_ui.ui_section = 'hooks'
+        new_ui.ui_active = True
+        new_ui.ui_key = key
+        new_ui.ui_value = val
+
+        Session.add(new_ui)
+        Session.commit()
 
 
 class User(Base, BaseModel):

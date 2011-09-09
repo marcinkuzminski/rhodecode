@@ -138,6 +138,9 @@
                 <div class="label label-checkbox">
                     <label for="web_push_ssl">${_('Hooks')}:</label>
                 </div>
+                <div class="input">
+                    ${h.link_to('advanced setup',url('admin_edit_setting',setting_id='hooks'))}
+                </div>                
                 <div class="checkboxes">
 					<div class="checkbox">
 						${h.checkbox('hooks_changegroup_update','True')}

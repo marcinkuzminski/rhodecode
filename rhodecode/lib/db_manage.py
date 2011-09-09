@@ -261,7 +261,7 @@ class DbManage(object):
 
         """
         #HOOKS
-        hooks1_key = 'changegroup.update'
+        hooks1_key = RhodeCodeUi.HOOK_UPDATE
         hooks1_ = self.sa.query(RhodeCodeUi)\
             .filter(RhodeCodeUi.ui_key == hooks1_key).scalar()
 
@@ -271,7 +271,7 @@ class DbManage(object):
         hooks1.ui_value = 'hg update >&2'
         hooks1.ui_active = False
 
-        hooks2_key = 'changegroup.repo_size'
+        hooks2_key = RhodeCodeUi.HOOK_REPO_SIZE
         hooks2_ = self.sa.query(RhodeCodeUi)\
             .filter(RhodeCodeUi.ui_key == hooks2_key).scalar()
 
@@ -282,12 +282,12 @@ class DbManage(object):
 
         hooks3 = RhodeCodeUi()
         hooks3.ui_section = 'hooks'
-        hooks3.ui_key = 'pretxnchangegroup.push_logger'
+        hooks3.ui_key = RhodeCodeUi.HOOK_PUSH
         hooks3.ui_value = 'python:rhodecode.lib.hooks.log_push_action'
 
         hooks4 = RhodeCodeUi()
         hooks4.ui_section = 'hooks'
-        hooks4.ui_key = 'preoutgoing.pull_logger'
+        hooks4.ui_key = RhodeCodeUi.HOOK_PULL
         hooks4.ui_value = 'python:rhodecode.lib.hooks.log_pull_action'
 
         #For mercurial 1.7 set backward comapatibility with format

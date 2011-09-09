@@ -225,6 +225,34 @@ class SettingsController(BaseController):
                      prefix_error=False,
                      encoding="UTF-8")
 
+
+        if setting_id == 'hooks':
+            ui_key = request.POST.get('new_hook_ui_key')
+            ui_value = request.POST.get('new_hook_ui_value')
+            try:
+                
+                if ui_value and ui_key:
+                    RhodeCodeUi.create_or_update_hook(ui_key, ui_value)
+                    h.flash(_('Added new hook'),
+                            category='success')
+
+                # check for edits
+                update = False
+                _d = request.POST.dict_of_lists()
+                for k, v in zip(_d.get('hook_ui_key',[]), _d.get('hook_ui_value_new',[])):
+                    RhodeCodeUi.create_or_update_hook(k, v)
+                    update = True
+
+                if update:
+                    h.flash(_('Updated hooks'), category='success')
+
+            except:
+                log.error(traceback.format_exc())
+                h.flash(_('error occurred during hook creation'),
+                        category='error')
+
+            return redirect(url('admin_edit_setting', setting_id='hooks'))
+
         return redirect(url('admin_settings'))
 
     @HasPermissionAllDecorator('hg.admin')
@@ -236,7 +264,11 @@ class SettingsController(BaseController):
         #    h.form(url('admin_setting', setting_id=ID),
         #           method='delete')
         # url('admin_setting', setting_id=ID)
-
+        if setting_id == 'hooks':
+            hook_id = request.POST.get('hook_id')
+            RhodeCodeUi.delete(hook_id)
+            
+            
     @HasPermissionAllDecorator('hg.admin')
     def show(self, setting_id, format='html'):
         """
@@ -249,6 +281,16 @@ class SettingsController(BaseController):
         GET /admin/settings/setting_id/edit: Form to
         edit an existing item"""
         # url('admin_edit_setting', setting_id=ID)
+
+        c.hooks = RhodeCodeUi.get_builtin_hooks()
+        c.custom_hooks = RhodeCodeUi.get_custom_hooks()
+
+        return htmlfill.render(
+            render('admin/settings/hooks.html'),
+            defaults={},
+            encoding="UTF-8",
+            force_defaults=False
+        )
 
     @NotAnonymous()
     def my_account(self):
