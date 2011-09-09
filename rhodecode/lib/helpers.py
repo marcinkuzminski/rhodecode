@@ -211,7 +211,22 @@ def pygmentize_annotation(repo_name, filenode, **kwargs):
 
         :returns: RGB tuple
         """
-        import colorsys
+
+        def hsv_to_rgb(h, s, v):
+            if s == 0.0: return v, v, v
+            i = int(h * 6.0) # XXX assume int() truncates!
+            f = (h * 6.0) - i
+            p = v * (1.0 - s)
+            q = v * (1.0 - s * f)
+            t = v * (1.0 - s * (1.0 - f))
+            i = i % 6
+            if i == 0: return v, t, p
+            if i == 1: return q, v, p
+            if i == 2: return p, v, t
+            if i == 3: return p, q, v
+            if i == 4: return t, p, v
+            if i == 5: return v, p, q
+
         golden_ratio = 0.618033988749895
         h = 0.22717784590367374
 
@@ -219,7 +234,7 @@ def pygmentize_annotation(repo_name, filenode, **kwargs):
             h += golden_ratio
             h %= 1
             HSV_tuple = [h, 0.95, 0.95]
-            RGB_tuple = colorsys.hsv_to_rgb(*HSV_tuple)
+            RGB_tuple = hsv_to_rgb(*HSV_tuple)
             yield map(lambda x:str(int(x * 256)), RGB_tuple)
 
     cgenerator = gen_color()
