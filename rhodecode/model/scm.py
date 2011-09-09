@@ -113,7 +113,7 @@ class CachedRepoList(object):
             tmp_d['owner_sort'] = tmp_d['contact']
             tmp_d['repo_archives'] = list(scmr._get_archives())
             tmp_d['last_msg'] = tip.message
-            tmp_d['repo'] = scmr
+            tmp_d['author'] = tip.author
             tmp_d['dbrepo'] = dbr.get_dict()
             tmp_d['dbrepo_fork'] = dbr.fork.get_dict() if dbr.fork \
                                                                     else {}
