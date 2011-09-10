@@ -25,7 +25,7 @@ requirements = [
     ]
 
 dependency_links = [
-    "https://hg.rhodecode.org/vcs/archive/default.zip#egg=vcs-0.2.1.dev",
+    "https://secure.rhodecode.org/vcs/archive/default.zip#egg=vcs-0.2.1.dev",
     "https://bitbucket.org/marcinkuzminski/vcs/get/default.zip#egg=vcs-0.2.1.dev",
 ]
 
