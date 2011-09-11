@@ -140,7 +140,7 @@ def detect_mode(line, default):
 
 def generate_api_key(username, salt=None):
     """
-    Generates unique API key for given username,if salt is not given
+    Generates unique API key for given username, if salt is not given
     it'll be generated from some random string
 
     :param username: username as string
@@ -342,3 +342,23 @@ def credentials_filter(uri):
 
     return ''.join(uri)
 
+def get_changeset_safe(repo, rev):
+    """
+    Safe version of get_changeset if this changeset doesn't exists for a 
+    repo it returns a Dummy one instead
+    
+    :param repo:
+    :param rev:
+    """
+    from vcs.backends.base import BaseRepository
+    from vcs.exceptions import RepositoryError
+    if not isinstance(repo, BaseRepository):
+        raise Exception('You must pass an Repository '
+                        'object as first argument got %s', type(repo))
+
+    try:
+        cs = repo.get_changeset(rev)
+    except RepositoryError:
+        from rhodecode.lib.utils import EmptyChangeset
+        cs = EmptyChangeset(requested_revision=rev)
+    return cs

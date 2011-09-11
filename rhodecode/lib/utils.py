@@ -313,14 +313,15 @@ class EmptyChangeset(BaseChangeset):
     an EmptyChangeset
     """
 
-    def __init__(self, cs='0' * 40, repo=None):
+    def __init__(self, cs='0' * 40, repo=None,requested_revision=None):
         self._empty_cs = cs
         self.revision = -1
         self.message = ''
         self.author = ''
         self.date = ''
         self.repository = repo
-
+        self.requested_revision = requested_revision
+        
     @LazyProperty
     def raw_id(self):
         """Returns raw string identifying this changeset, useful for web

@@ -37,7 +37,7 @@ from webhelpers.html.tags import _set_input_attrs, _set_id_attr, \
 
 from vcs.utils.annotate import annotate_highlight
 from rhodecode.lib.utils import repo_name_slug
-from rhodecode.lib import str2bool, safe_unicode, safe_str
+from rhodecode.lib import str2bool, safe_unicode, safe_str,get_changeset_safe
 
 def _reset(name, value=None, id=NotGiven, type="reset", **attrs):
     """
@@ -274,21 +274,6 @@ def pygmentize_annotation(repo_name, filenode, **kwargs):
         return _url_func
 
     return literal(annotate_highlight(filenode, url_func(repo_name), **kwargs))
-
-def get_changeset_safe(repo, rev):
-    from vcs.backends.base import BaseRepository
-    from vcs.exceptions import RepositoryError
-    if not isinstance(repo, BaseRepository):
-        raise Exception('You must pass an Repository '
-                        'object as first argument got %s', type(repo))
-
-    try:
-        cs = repo.get_changeset(rev)
-    except RepositoryError:
-        from rhodecode.lib.utils import EmptyChangeset
-        cs = EmptyChangeset()
-    return cs
-
 
 def is_following_repo(repo_name, user_id):
     from rhodecode.model.scm import ScmModel

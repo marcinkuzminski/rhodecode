@@ -43,7 +43,7 @@ from vcs.utils.lazy import LazyProperty
 from vcs.nodes import FileNode
 
 from rhodecode.lib.exceptions import UsersGroupsAssignedException
-from rhodecode.lib import str2bool, json, safe_str
+from rhodecode.lib import str2bool, json, safe_str, get_changeset_safe
 from rhodecode.model.meta import Base, Session
 from rhodecode.model.caching_query import FromCache
 
@@ -125,13 +125,13 @@ class BaseModel(object):
     @classmethod
     def get(cls, id_):
         return Session.query(cls).get(id_)
-    
+
     @classmethod
     def delete(cls, id_):
         obj = Session.query(cls).get(id_)
         Session.delete(obj)
         Session.commit()
-        
+
 
 class RhodeCodeSettings(Base, BaseModel):
     __tablename__ = 'rhodecode_settings'
@@ -538,8 +538,7 @@ class Repository(Base, BaseModel):
 
 
         ret = Session.query(RhodeCodeUi)\
-            .options(FromCache("sql_cache_short",
-                               "repository_repo_ui")).all()
+            .options(FromCache("sql_cache_short", "repository_repo_ui")).all()
 
         hg_ui = ret
         for ui_ in hg_ui:
@@ -549,6 +548,25 @@ class Repository(Base, BaseModel):
                 baseui.setconfig(ui_.ui_section, ui_.ui_key, ui_.ui_value)
 
         return baseui
+
+    #==========================================================================
+    # SCM PROPERTIES
+    #==========================================================================
+
+    def get_changeset(self, rev):
+        return get_changeset_safe(self.scm_instance, rev)
+
+    @property
+    def tip(self):
+        return self.get_changeset('tip')
+
+    @property
+    def author(self):
+        return self.tip.author
+
+    @property
+    def last_change(self):
+        return self.scm_instance.last_change
 
     #==========================================================================
     # SCM CACHE INSTANCE
@@ -580,7 +598,7 @@ class Repository(Base, BaseModel):
         Session.add(inv)
         Session.commit()
 
-    @property
+    @LazyProperty
     def scm_instance(self):
         return self.__get_instance()
 
