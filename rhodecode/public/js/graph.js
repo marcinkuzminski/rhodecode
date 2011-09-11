@@ -75,7 +75,6 @@ function BranchRenderer() {
 			//	extra = next.outerHeight();
 			//}
 						
-			
 			this.cell[1] += row.clientWidth;
 			this.bg[1] += this.bg_height;
 			
@@ -101,15 +100,14 @@ function BranchRenderer() {
 				
 				this.setColor(color, 0.0, 0.65);
 				
-				
 				y = row.offsetTop-rela.offsetTop+4;
 				x = pad-((this.cell[0] + this.box_size * start - 1) + this.bg_height-2);
+				
 				this.ctx.lineWidth=this.line_width;
 				this.ctx.beginPath();
 				this.ctx.moveTo(x, y);
-				
-				//i don't know why it's +1 just fixes some drawing graph.
-				y += row.clientHeight+1;
+
+				y += row.offsetHeight;
 				x = pad-((1 + this.box_size * end) + this.bg_height-2);
 				this.ctx.lineTo(x,y+extra,3);
 				this.ctx.stroke();
