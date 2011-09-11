@@ -1735,8 +1735,9 @@ overflow:hidden;
 }
 
 #graph_nodes {
-float:left;
-margin-top:5px;
+float: left;
+margin-right: -6px;
+margin-top: -4px;
 }
 
 #graph_content {
@@ -1756,7 +1757,7 @@ padding:10px 0px;
 border-bottom:1px solid #CCC;
 border-left:1px solid #CCC;
 border-right:1px solid #CCC;
-min-height:80px;
+min-height:70px;
 overflow:hidden;
 font-size:1.2em;
 }
@@ -1774,6 +1775,17 @@ padding-bottom:5px;
 }
 #graph_content .container .left .date span{
 vertical-align: text-top;    
+}
+
+#graph_content .container .left .author{
+    height: 22px;
+}
+#graph_content .container .left .author .user{
+color: #444444;
+float: left;
+font-size: 12px;
+margin-left: -4px;
+margin-top: 4px;
 }
 
 #graph_content .container .left .message {
@@ -2327,6 +2339,19 @@ border:1px solid #D0D0D0;
 float:left;
 margin-right:0.7em;
 padding:2px 2px 0;
+
+-webkit-border-radius: 6px;
+-khtml-border-radius: 6px; 
+-moz-border-radius: 6px;
+borderradius: 6px;  
+
+}
+
+div.gravatar img {
+-webkit-border-radius: 4px;
+-khtml-border-radius: 4px; 
+-moz-border-radius: 4px;
+borderradius: 4px;	
 }
 
 #header,#content,#footer {
