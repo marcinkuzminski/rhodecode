@@ -131,7 +131,7 @@
         ${h.form(url('repo_stats', repo_name=c.repo_info.repo_name),method='delete')}
         <div class="form">
            <div class="fields">
-               ${h.submit('reset_stats_%s' % c.repo_info.repo_name,_('Reset current statistics'),class_="refresh_icon action_button",onclick="return confirm('Confirm to remove current statistics');")}
+               ${h.submit('reset_stats_%s' % c.repo_info.repo_name,_('Reset current statistics'),class_="refresh_icon action_button",onclick="return confirm('"+_('Confirm to remove current statistics')+"');")}
                <div class="field" style="border:none">
                <ul>
                     <li>${_('Fetched to rev')}: ${c.stats_revision}/${c.repo_last_rev}</li>
@@ -148,7 +148,7 @@
         ${h.form(url('repo_pull', repo_name=c.repo_info.repo_name),method='put')}
         <div class="form">
            <div class="fields">
-               ${h.submit('remote_pull_%s' % c.repo_info.repo_name,_('Pull changes from remote location'),class_="pull_icon action_button",onclick="return confirm('Confirm to pull changes from remote side');")}
+               ${h.submit('remote_pull_%s' % c.repo_info.repo_name,_('Pull changes from remote location'),class_="pull_icon action_button",onclick="return confirm('"+_('Confirm to pull changes from remote side')+"');")}
                <div class="field" style="border:none">
                <ul>
                     <li><a href="${c.repo_info.clone_uri}">${c.repo_info.clone_uri}</a></li>
@@ -163,7 +163,7 @@
         ${h.form(url('repo_cache', repo_name=c.repo_info.repo_name),method='delete')}
         <div class="form">
            <div class="fields">
-               ${h.submit('reset_cache_%s' % c.repo_info.repo_name,_('Invalidate repository cache'),class_="refresh_icon action_button",onclick="return confirm('Confirm to invalidate repository cache');")}
+               ${h.submit('reset_cache_%s' % c.repo_info.repo_name,_('Invalidate repository cache'),class_="refresh_icon action_button",onclick="return confirm('"+_('Confirm to invalidate repository cache')+"');")}
            </div>
         </div>                    
         ${h.end_form()}
@@ -186,7 +186,7 @@
         ${h.form(url('repo', repo_name=c.repo_info.repo_name),method='delete')}
         <div class="form">
            <div class="fields">
-               ${h.submit('remove_%s' % c.repo_info.repo_name,_('Remove this repository'),class_="delete_icon action_button",onclick="return confirm('Confirm to delete this repository');")}
+               ${h.submit('remove_%s' % c.repo_info.repo_name,_('Remove this repository'),class_="delete_icon action_button",onclick="return confirm('"+_('Confirm to delete this repository')+"');")}
            </div>
         </div>                    
         ${h.end_form()}

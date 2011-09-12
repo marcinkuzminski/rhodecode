@@ -19,7 +19,7 @@
         ${self.breadcrumbs()}
         <ul class="links">
           <li>
-            <span>${h.link_to(u'ADD NEW REPOSITORY',h.url('new_repo'))}</span>
+            <span>${h.link_to(_(u'ADD NEW REPOSITORY'),h.url('new_repo'))}</span>
           </li>          
         </ul>        
     </div>
@@ -76,7 +76,7 @@
 	            <td title="${repo['contact']}">${h.person(repo['contact'])}</td>
                 <td>
                   ${h.form(url('repo', repo_name=repo['name']),method='delete')}
-                    ${h.submit('remove_%s' % repo['name'],'delete',class_="delete_icon action_button",onclick="return confirm('Confirm to delete this repository');")}
+                    ${h.submit('remove_%s' % repo['name'],_('delete'),class_="delete_icon action_button",onclick="return confirm('"+_('Confirm to delete this repository')+"');")}
                   ${h.end_form()}
                 </td>
             </tr>

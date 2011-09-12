@@ -188,7 +188,7 @@ class ValidPasswordsMatch(formencode.validators.FancyValidator):
 
         if value['password'] != value['password_confirmation']:
             e_dict = {'password_confirmation':
-                   _('Password do not match')}
+                   _('Passwords do not match')}
             raise formencode.Invalid('', value, state, error_dict=e_dict)
 
 class ValidAuth(formencode.validators.FancyValidator):

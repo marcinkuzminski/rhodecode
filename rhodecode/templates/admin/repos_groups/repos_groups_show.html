@@ -19,7 +19,7 @@
         ${self.breadcrumbs()}
         <ul class="links">
           <li>
-            <span>${h.link_to(u'ADD NEW GROUP',h.url('new_repos_group'))}</span>
+            <span>${h.link_to(_(u'ADD NEW GROUP'),h.url('new_repos_group'))}</span>
           </li>          
         </ul>        
     </div>
@@ -51,7 +51,7 @@
                       <td><b>${gr.repositories.count()}</b></td>
 		               <td>
 		                 ${h.form(url('repos_group', id=gr.group_id),method='delete')}
-		                   ${h.submit('remove_%s' % gr.group_name,'delete',class_="delete_icon action_button",onclick="return confirm('Confirm to delete this group');")}
+		                   ${h.submit('remove_%s' % gr.group_name,'delete',class_="delete_icon action_button",onclick="return confirm('"+_('Confirm to delete this group')+"');")}
 		                 ${h.end_form()}
 		               </td>                      
                   </tr>

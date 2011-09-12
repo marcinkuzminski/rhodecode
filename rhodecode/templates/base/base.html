@@ -57,9 +57,9 @@
             </li>
             %endif
             %if c.rhodecode_user.username == 'default':
-                <li class="last highlight">${h.link_to(u'Login',h.url('login_home'),id='quick_login_link')}</li>
+                <li class="last highlight">${h.link_to(_(u'Login'),h.url('login_home'),id='quick_login_link')}</li>
             %else:
-                <li class="last highlight">${h.link_to(u'Log Out',h.url('logout_home'))}</li>
+                <li class="last highlight">${h.link_to(_(u'Log Out'),h.url('logout_home'))}</li>
             %endif
     </ul>
     <!-- end user -->

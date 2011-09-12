@@ -20,7 +20,7 @@
         ${self.breadcrumbs()}
         <ul class="links">
           <li>
-            <span>${h.link_to(u'ADD NEW USER',h.url('new_user'))}</span>
+            <span>${h.link_to(_(u'ADD NEW USER'),h.url('new_user'))}</span>
           </li>
           
         </ul>        
@@ -52,8 +52,8 @@
                     <td>${h.bool2icon(bool(user.ldap_dn))}</td>
                     <td>
                         ${h.form(url('delete_user', id=user.user_id),method='delete')}
-                            ${h.submit('remove_','delete',id="remove_user_%s" % user.user_id,
-                            class_="delete_icon action_button",onclick="return confirm('Confirm to delete this user');")}
+                            ${h.submit('remove_',_('delete'),id="remove_user_%s" % user.user_id,
+                            class_="delete_icon action_button",onclick="return confirm('"+_('Confirm to delete this user')+"');")}
                         ${h.end_form()}
                     </td>
                 </tr>

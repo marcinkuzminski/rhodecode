@@ -883,7 +883,7 @@ padding:0;
 
 #content div.box div.form div.fields div.field div.label {
 left:70px;
-width:auto;
+width:155px;
 position:absolute;
 margin:0;
 padding:8px 0 0 5px;
@@ -2447,6 +2447,7 @@ float:right;
 margin:0;
 padding:0;
 }
+
 
 #header #header-inner #home,#header #header-inner #logo,#content div.box ul.left,#content div.box ol.left,#content div.box div.pagination-left,div#commit_history,div#legend_data,div#legend_container,div#legend_choices {
 float:left;

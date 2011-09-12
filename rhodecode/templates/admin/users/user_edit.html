@@ -30,7 +30,7 @@
            <div class="gravatar_box">
                <div class="gravatar"><img alt="gravatar" src="${h.gravatar_url(c.user.email)}"/></div>
                <p>
-               <strong>Change your avatar at <a href="http://gravatar.com">gravatar.com</a></strong><br/> 
+               <strong>${_('Change your avatar at')} <a href="http://gravatar.com">gravatar.com</a></strong><br/> 
                ${_('Using')} ${c.user.email}
                </p>
            </div>
@@ -114,8 +114,8 @@
                 </div>
              </div>             
             <div class="buttons">
-              ${h.submit('save','Save',class_="ui-button")}
-              ${h.reset('reset','Reset',class_="ui-button")}
+              ${h.submit('save',_('Save'),class_="ui-button")}
+              ${h.reset('reset',_('Reset'),class_="ui-button")}
             </div>             
     	</div>    
     </div>
@@ -139,8 +139,8 @@
                 </div>
              </div>
             <div class="buttons">
-              ${h.submit('save','Save',class_="ui-button")}
-              ${h.reset('reset','Reset',class_="ui-button")}
+              ${h.submit('save',_('Save'),class_="ui-button")}
+              ${h.reset('reset',_('Reset'),class_="ui-button")}
             </div>             
         </div>    
     </div>

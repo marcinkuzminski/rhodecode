@@ -75,7 +75,7 @@
 					% if c.file.size < c.cut_off_limit:
 						${h.pygmentize_annotation(c.repo_name,c.file,linenos=True,anchorlinenos=True,lineanchors='L',cssclass="code-highlight")}
 					%else:
-						${_('File is to big to display')} ${h.link_to(_('show as raw'),
+						${_('File is too big to display')} ${h.link_to(_('show as raw'),
 						h.url('files_raw_home',repo_name=c.repo_name,revision=c.cs.revision,f_path=c.f_path))}
 					%endif
 			       <script type="text/javascript">

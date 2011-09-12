@@ -42,7 +42,7 @@
 			</div>
                             
             <div class="buttons">
-            ${h.submit('rescan','Rescan repositories',class_="ui-button")}
+            ${h.submit('rescan',_('Rescan repositories'),class_="ui-button")}
             </div>                                                          
         </div>
     </div>  
@@ -67,7 +67,7 @@
             </div>
                             
             <div class="buttons">
-            ${h.submit('reindex','Reindex',class_="ui-button")}
+            ${h.submit('reindex',_('Reindex'),class_="ui-button")}
             </div>                                                          
         </div>
     </div>  
@@ -108,8 +108,8 @@
             </div>
                                                  
             <div class="buttons">
-                ${h.submit('save','Save settings',class_="ui-button")}
-                ${h.reset('reset','Reset',class_="ui-button")}
+                ${h.submit('save',_('Save settings'),class_="ui-button")}
+                ${h.reset('reset',_('Reset'),class_="ui-button")}
            </div>                                                          
         </div>
     </div>      
@@ -139,7 +139,7 @@
                     <label for="web_push_ssl">${_('Hooks')}:</label>
                 </div>
                 <div class="input">
-                    ${h.link_to('advanced setup',url('admin_edit_setting',setting_id='hooks'))}
+                    ${h.link_to(_('advanced setup'),url('admin_edit_setting',setting_id='hooks'))}
                 </div>                
                 <div class="checkboxes">
 					<div class="checkbox">
@@ -168,14 +168,14 @@
                 <div class="input">
                     ${h.text('paths_root_path',size=30,readonly="readonly")}			                    
 					<span id="path_unlock" class="tooltip" 
-						title="${h.tooltip(_('This a crucial application setting. If You really sure you need to change this, you must restart application in order to make this settings take effect. Click this label to unlock.'))}">
+						title="${h.tooltip(_('This a crucial application setting. If you are really sure you need to change this, you must restart application in order to make this setting take effect. Click this label to unlock.'))}">
 		                ${_('unlock')}</span>
                 </div>
             </div>
                                      
             <div class="buttons">
-                ${h.submit('save','Save settings',class_="ui-button")}
-                ${h.reset('reset','Reset',class_="ui-button")}
+                ${h.submit('save',_('Save settings'),class_="ui-button")}
+                ${h.reset('reset',_('Reset'),class_="ui-button")}
            </div>                                                          
         </div>
     </div>      
