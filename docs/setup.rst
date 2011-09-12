@@ -345,6 +345,22 @@ Directory ::
 All other LDAP settings will likely be site-specific and should be
 appropriately configured.
 
+
+
+Hook management
+---------------
+
+Hooks can be managed in similar way to this used in .hgrc files.
+To access hooks setting click `advanced setup` on Hooks section of Mercurial
+Settings in Admin. 
+
+There are 4 built in hooks that cannot be changed (only enable/disable by
+checkboxes on previos section).
+To add another custom hook simply fill in first section with 
+<name>.<hook_type> and the second one with hook path. Example hooks
+can be found at *rhodecode.lib.hooks*. 
+
+
 Setting Up Celery
 -----------------
 

@@ -46,6 +46,7 @@ news
   larger repositories.
 - implements #214 added support for downloading subrepos in download menu.
 - Added basic API for direct operations on rhodecode via JSON
+- Implemented advanced hook management
 
 fixes
 -----
