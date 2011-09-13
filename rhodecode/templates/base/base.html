@@ -29,7 +29,13 @@
 			            
 			        </div>
 			        <div class="buttons">
-			            <div class="password_forgoten">${h.link_to(_('Forgot password ?'),h.url('reset_password'))}</div>${h.submit('sign_in','Sign In',class_="ui-button")}
+			            <div class="password_forgoten">${h.link_to(_('Forgot password ?'),h.url('reset_password'))}</div>
+                        <div class="register">
+                        %if h.HasPermissionAny('hg.admin', 'hg.register.auto_activate', 'hg.register.manual_activate')():
+                         ${h.link_to(_("Don't have an account ?"),h.url('register'))}
+                        %endif                        
+                        </div>
+                            ${h.submit('sign_in','Sign In',class_="ui-button")}
 			        </div>
 			    </div>
 			</div>

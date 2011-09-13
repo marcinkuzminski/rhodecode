@@ -1428,10 +1428,22 @@ box-shadow: 0 2px 2px rgba(0, 0, 0, 0.6);
 
 #quick_login .password_forgoten{
 padding-right:10px;
-padding-top:10px;
+padding-top:0px;
+float:left;
+}
+#quick_login .password_forgoten a{
+	font-size: 10px
+}
+
+#quick_login .register{
+padding-right:10px;
+padding-top:5px;
 float:left;
 }
 
+#quick_login .register a{
+	font-size: 10px
+}
 #quick_login div.form div.fields{
 padding-top: 2px;
 padding-left:10px;
@@ -1465,7 +1477,7 @@ clear:both;
 overflow:hidden;
 text-align:right;
 margin:0;
-padding:10px 14px 0;
+padding:10px 14px 3px 5px;
 }
 
 #quick_login div.form div.fields div.buttons input.ui-button{
