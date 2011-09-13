@@ -1044,49 +1044,6 @@ margin:0;
 padding:0 0 0 8px;
 }
 
-div.form div.fields div.field div.highlight .ui-button {
-background:#4e85bb url("../images/button_highlight.png") repeat-x;
-border-top:1px solid #5c91a4;
-border-left:1px solid #2a6f89;
-border-right:1px solid #2b7089;
-border-bottom:1px solid #1a6480;
-color:#FFF;
-margin:0;
-padding:6px 12px;
-}
-
-div.form div.fields div.field div.highlight .ui-state-hover {
-background:#46a0c1 url("../images/button_highlight_selected.png") repeat-x;
-border-top:1px solid #78acbf;
-border-left:1px solid #34819e;
-border-right:1px solid #35829f;
-border-bottom:1px solid #257897;
-color:#FFF;
-margin:0;
-padding:6px 12px;
-}
-
-#content div.box div.form div.fields div.buttons div.highlight input.ui-button {
-background:#4e85bb url("../images/button_highlight.png") repeat-x;
-border-top:1px solid #5c91a4;
-border-left:1px solid #2a6f89;
-border-right:1px solid #2b7089;
-border-bottom:1px solid #1a6480;
-color:#fff;
-margin:0;
-padding:6px 12px;
-}
-
-#content div.box div.form div.fields div.buttons div.highlight input.ui-state-hover {
-background:#46a0c1 url("../images/button_highlight_selected.png") repeat-x;
-border-top:1px solid #78acbf;
-border-left:1px solid #34819e;
-border-right:1px solid #35829f;
-border-bottom:1px solid #257897;
-color:#fff;
-margin:0;
-padding:6px 12px;
-}
 
 #content div.box table {
 width:100%;
@@ -1499,17 +1456,6 @@ margin:0;
 padding:10px 14px 3px 5px;
 }
 
-#quick_login div.form div.fields div.buttons input.ui-button{
-background:#e5e3e3 url("../images/button.png") repeat-x;
-border-top:1px solid #DDD;
-border-left:1px solid #c6c6c6;
-border-right:1px solid #DDD;
-border-bottom:1px solid #c6c6c6;
-color:#515151;
-margin:0;
-padding:4px 10px;
-}
-
 #quick_login div.form div.links {
 clear:both;
 overflow:hidden;
@@ -1565,13 +1511,6 @@ margin:0;
 padding:10px 0 0 150px;
 }
 
-#register div.form div.fields div.buttons div.highlight input.ui-button {
-background:url("../images/button_highlight.png") repeat-x scroll 0 0 #4E85BB;
-color:#FFF;
-border-color:#5C91A4 #2B7089 #1A6480 #2A6F89;
-border-style:solid;
-border-width:1px;
-}
 
 #register div.form div.activation_msg {
 padding-top:4px;
@@ -2407,14 +2346,8 @@ border-left:1px solid #316293;
 border:1px solid #316293;
 }
 
-#content div.box div.title div.search div.button input.ui-button {
-background:#4e85bb url("../images/button_highlight.png") repeat-x;
-border:1px solid #316293;
-border-left:none;
-color:#FFF;
-}
 
-#content div.box input.ui-button-small {
+input.ui-button-small {
 background:#e5e3e3 url("../images/button.png") repeat-x;
 border-top:1px solid #DDD;
 border-left:1px solid #c6c6c6;
@@ -2430,7 +2363,8 @@ border-radius: 4px 4px 4px 4px;
 box-shadow: 0 1px 0 #ececec;
 cursor: pointer;
 }
-#content div.box input.ui-button-small:hover {
+
+input.ui-button-small:hover {
 background:#b4b4b4 url("../images/button_selected.png") repeat-x;
 border-top:1px solid #ccc;
 border-left:1px solid #bebebe;
@@ -2438,7 +2372,7 @@ border-right:1px solid #b1b1b1;
 border-bottom:1px solid #afafaf;	
 }
 
-#content div.box input.ui-button-small-blue {
+input.ui-button-small-blue {
 background:#4e85bb url("../images/button_highlight.png") repeat-x;
 border-top:1px solid #5c91a4;
 border-left:1px solid #2a6f89;
@@ -2453,38 +2387,10 @@ box-shadow: 0 1px 0 #ececec;
 cursor: pointer;
 }
 
-#content div.box input.ui-button-small-blue:hover {
+input.ui-button-small-blue:hover {
 	
 }
 
-#content div.box input.ui-button-small submit,button{
-cursor: pointer;
-}
-
-#content div.box div.title div.search div.button input.ui-state-hover {
-background:#46a0c1 url("../images/button_highlight_selected.png") repeat-x;
-border:1px solid #316293;
-border-left:none;
-color:#FFF;
-}
-
-#content div.box div.form div.fields div.field div.highlight .ui-button {
-background:#4e85bb url("../images/button_highlight.png") repeat-x;
-border-top:1px solid #5c91a4;
-border-left:1px solid #2a6f89;
-border-right:1px solid #2b7089;
-border-bottom:1px solid #1a6480;
-color:#fff;
-}
-
-#content div.box div.form div.fields div.field div.highlight .ui-state-hover {
-background:#46a0c1 url("../images/button_highlight_selected.png") repeat-x;
-border-top:1px solid #78acbf;
-border-left:1px solid #34819e;
-border-right:1px solid #35829f;
-border-bottom:1px solid #257897;
-color:#fff;
-}
 
 ins,div.options a:hover {
 text-decoration:none;
@@ -2617,7 +2523,7 @@ font-weight:700;
 margin:0;
 }
 
-div.form div.fields div.field div.button .ui-button,#content div.box div.form div.fields div.buttons input.ui-button {
+input.ui-button {
 background:#e5e3e3 url("../images/button.png") repeat-x;
 border-top:1px solid #DDD;
 border-left:1px solid #c6c6c6;
@@ -2635,15 +2541,7 @@ box-shadow: 0 1px 0 #ececec;
 cursor: pointer;
 }
 
-div.form div.fields div.field div.button .ui-button,#content div.box div.form div.fields div.buttons input.ui-button:hover {
-background:#b4b4b4 url("../images/button_selected.png") repeat-x;
-border-top:1px solid #ccc;
-border-left:1px solid #bebebe;
-border-right:1px solid #b1b1b1;
-border-bottom:1px solid #afafaf;
-}
-
-div.form div.fields div.field div.button .ui-state-hover,#content div.box div.form div.fields div.buttons input.ui-state-hover {
+input.ui-button:hover {
 background:#b4b4b4 url("../images/button_selected.png") repeat-x;
 border-top:1px solid #ccc;
 border-left:1px solid #bebebe;
@@ -2675,16 +2573,6 @@ margin:6px 0 0;
 padding:0;
 }
 
-#content div.box div.action div.button input.ui-button,#login div.form div.fields div.buttons input.ui-button,#register div.form div.fields div.buttons input.ui-button {
-background:#e5e3e3 url("../images/button.png") repeat-x;
-border-top:1px solid #DDD;
-border-left:1px solid #c6c6c6;
-border-right:1px solid #DDD;
-border-bottom:1px solid #c6c6c6;
-color:#515151;
-margin:0;
-padding:6px 12px;
-}
 
 #content div.box div.action div.button input.ui-state-hover,#login div.form div.fields div.buttons input.ui-state-hover,#register div.form div.fields div.buttons input.ui-state-hover {
 background:#b4b4b4 url("../images/button_selected.png") repeat-x;
