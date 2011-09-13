@@ -250,9 +250,13 @@ height:40px;
 clear:both;
 position:relative;
 background:#003367 url("../images/header_inner.png") repeat-x;
-border-bottom:2px solid #fff;
 margin:0;
 padding:0;
+box-shadow: 0 2px 2px rgba(0, 0, 0, 0.6);
+-webkit-border-radius: 4px 4px 4px 4px;
+-khtml-border-radius: 4px 4px 4px 4px; 
+-moz-border-radius: 4px 4px 4px 4px;
+border-radius: 4px 4px 4px 4px;
 }
 
 #header #header-inner #home a {
@@ -290,7 +294,7 @@ position:relative;
 float:right;
 list-style-type:none;
 list-style-position:outside;
-margin:10px 5px 0 0;
+margin:6px 5px 0 0;
 padding:0;
 }
 
@@ -311,8 +315,12 @@ overflow:hidden;
 color:#FFF;
 font-weight:700;
 text-decoration:none;
-background:#369 url("../images/quick_l.png") no-repeat top left;
+background:#369;
 padding:0;
+-webkit-border-radius: 4px 4px 4px 4px;
+-khtml-border-radius: 4px 4px 4px 4px; 
+-moz-border-radius: 4px 4px 4px 4px;
+border-radius: 4px 4px 4px 4px;
 }
 
 #header #header-inner #quick li span.short {
@@ -325,7 +333,6 @@ right:0;
 height:1%;
 display:block;
 float:left;
-background:url("../images/quick_r.png") no-repeat top right;
 border-left:1px solid #3f6f9f;
 margin:0;
 padding:10px 12px 8px 10px;
@@ -340,7 +347,6 @@ padding:10px 12px 8px;
 top:0;
 left:0;
 border-left:none;
-background:url("../images/quick_l.png") no-repeat top left;
 border-right:1px solid #2e5c89;
 padding:8px 8px 4px;
 }
@@ -355,18 +361,16 @@ padding:9px 4px 4px;
 }
 
 #header #header-inner #quick li a:hover {
-background:#4e4e4e url("../images/quick_l_selected.png") no-repeat top left;
+background:#4e4e4e  no-repeat top left;
 }
 
 #header #header-inner #quick li a:hover span {
 border-left:1px solid #545454;
-background:url("../images/quick_r_selected.png") no-repeat top right;
 }
 
 #header #header-inner #quick li a:hover span.icon,#header #header-inner #quick li a:hover span.icon_short {
 border-left:none;
 border-right:1px solid #464646;
-background:url("../images/quick_l_selected.png") no-repeat top left;
 }
 
 #header #header-inner #quick ul {
@@ -617,6 +621,12 @@ overflow:hidden;
 background:#fff;
 margin:0 0 10px;
 padding:0 0 10px;
+-webkit-border-radius: 4px 4px 4px 4px;
+-khtml-border-radius: 4px 4px 4px 4px; 
+-moz-border-radius: 4px 4px 4px 4px;
+border-radius: 4px 4px 4px 4px;
+box-shadow: 0 2px 2px rgba(0, 0, 0, 0.6);
+
 }
 
 #content div.box-left {
@@ -1083,6 +1093,7 @@ width:100%;
 border-collapse:collapse;
 margin:0;
 padding:0;
+border: 1px solid #eee;
 }
 
 #content div.box table th {
@@ -1341,7 +1352,11 @@ margin:-10px 0 0;
 
 #footer div#footer-inner {
 background:url("../images/header_inner.png") repeat-x scroll 0 0 #003367;
-border-top:2px solid #FFFFFF;
+box-shadow: 0 2px 2px rgba(0, 0, 0, 0.6);
+-webkit-border-radius: 4px 4px 4px 4px;
+-khtml-border-radius: 4px 4px 4px 4px; 
+-moz-border-radius: 4px 4px 4px 4px;
+border-radius: 4px 4px 4px 4px;
 }
 
 #footer div#footer-inner p {
@@ -1422,7 +1437,11 @@ height: 150px;
 position: absolute;
 margin-left: -16px;
 width: 281px;
-border-radius: 0 0 8px 8px;
+-webkit-border-radius: 0px 0px 4px 4px;
+-khtml-border-radius: 0px 0px 4px 4px; 
+-moz-border-radius: 0px 0px 4px 4px;
+border-radius: 0px 0px 4px 4px;
+
 box-shadow: 0 2px 2px rgba(0, 0, 0, 0.6);
 }
 
@@ -1916,6 +1935,9 @@ div.browserblock .search_activate #filter_activate{
 	vertical-align: sub;
 	border: 1px solid;
 	padding:2px;
+	-webkit-border-radius: 4px 4px 4px 4px;
+	-khtml-border-radius: 4px 4px 4px 4px; 
+	-moz-border-radius: 4px 4px 4px 4px;
 	border-radius: 4px 4px 4px 4px;
 	background: url("../images/button.png") repeat-x scroll 0 0 #E5E3E3;
 	border-color: #DDDDDD #DDDDDD #C6C6C6 #C6C6C6;
@@ -2355,7 +2377,7 @@ padding:2px 2px 0;
 -webkit-border-radius: 6px;
 -khtml-border-radius: 6px; 
 -moz-border-radius: 6px;
-borderradius: 6px;  
+border-radius: 6px;
 
 }
 
@@ -2363,7 +2385,7 @@ div.gravatar img {
 -webkit-border-radius: 4px;
 -khtml-border-radius: 4px; 
 -moz-border-radius: 4px;
-borderradius: 4px;	
+border-radius: 4px;	
 }
 
 #header,#content,#footer {
@@ -2371,7 +2393,6 @@ min-width:978px;
 }
 
 #content {
-min-height:100%;
 clear:both;
 overflow:hidden;
 padding:14px 10px;
@@ -2402,6 +2423,19 @@ border-bottom:1px solid #c6c6c6;
 color:#515151;
 outline:none;
 margin:0;
+-webkit-border-radius: 4px 4px 4px 4px;
+-khtml-border-radius: 4px 4px 4px 4px; 
+-moz-border-radius: 4px 4px 4px 4px;
+border-radius: 4px 4px 4px 4px;
+box-shadow: 0 1px 0 #ececec;
+cursor: pointer;
+}
+#content div.box input.ui-button-small:hover {
+background:#b4b4b4 url("../images/button_selected.png") repeat-x;
+border-top:1px solid #ccc;
+border-left:1px solid #bebebe;
+border-right:1px solid #b1b1b1;
+border-bottom:1px solid #afafaf;	
 }
 
 #content div.box input.ui-button-small-blue {
@@ -2411,6 +2445,16 @@ border-left:1px solid #2a6f89;
 border-right:1px solid #2b7089;
 border-bottom:1px solid #1a6480;
 color:#fff;
+-webkit-border-radius: 4px 4px 4px 4px;
+-khtml-border-radius: 4px 4px 4px 4px; 
+-moz-border-radius: 4px 4px 4px 4px;
+border-radius: 4px 4px 4px 4px;
+box-shadow: 0 1px 0 #ececec;
+cursor: pointer;
+}
+
+#content div.box input.ui-button-small-blue:hover {
+	
 }
 
 #content div.box input.ui-button-small submit,button{
@@ -2583,6 +2627,20 @@ color:#515151;
 outline:none;
 margin:0;
 padding:6px 12px;
+-webkit-border-radius: 4px 4px 4px 4px;
+-khtml-border-radius: 4px 4px 4px 4px; 
+-moz-border-radius: 4px 4px 4px 4px;
+border-radius: 4px 4px 4px 4px;
+box-shadow: 0 1px 0 #ececec;
+cursor: pointer;
+}
+
+div.form div.fields div.field div.button .ui-button,#content div.box div.form div.fields div.buttons input.ui-button:hover {
+background:#b4b4b4 url("../images/button_selected.png") repeat-x;
+border-top:1px solid #ccc;
+border-left:1px solid #bebebe;
+border-right:1px solid #b1b1b1;
+border-bottom:1px solid #afafaf;
 }
 
 div.form div.fields div.field div.button .ui-state-hover,#content div.box div.form div.fields div.buttons input.ui-state-hover {
@@ -2591,10 +2649,6 @@ border-top:1px solid #ccc;
 border-left:1px solid #bebebe;
 border-right:1px solid #b1b1b1;
 border-bottom:1px solid #afafaf;
-color:#515151;
-outline:none;
-margin:0;
-padding:6px 12px;
 }
 
 div.form div.fields div.field div.highlight,#content div.box div.form div.fields div.buttons div.highlight {
