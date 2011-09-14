@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: RhodeCode 1.2.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2011-09-12 00:47-0300\n"
+"POT-Creation-Date: 2011-09-14 15:50-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -135,7 +135,7 @@ msgstr ""
 
 #: rhodecode/controllers/journal.py:178 rhodecode/controllers/journal.py:212
 #: rhodecode/templates/admin/repos/repo_edit.html:171
-#: rhodecode/templates/base/base.html:44
+#: rhodecode/templates/base/base.html:50
 msgid "Public journal"
 msgstr ""
 
@@ -302,8 +302,8 @@ msgstr ""
 #: rhodecode/templates/admin/users_groups/users_group_add.html:8
 #: rhodecode/templates/admin/users_groups/users_group_edit.html:9
 #: rhodecode/templates/admin/users_groups/users_groups.html:9
-#: rhodecode/templates/base/base.html:273 rhodecode/templates/base/base.html:360
-#: rhodecode/templates/base/base.html:362 rhodecode/templates/base/base.html:364
+#: rhodecode/templates/base/base.html:279 rhodecode/templates/base/base.html:366
+#: rhodecode/templates/base/base.html:368 rhodecode/templates/base/base.html:370
 msgid "Admin"
 msgstr ""
 
@@ -827,7 +827,7 @@ msgstr ""
 msgid "quick filter..."
 msgstr ""
 
-#: rhodecode/templates/index_base.html:23 rhodecode/templates/base/base.html:294
+#: rhodecode/templates/index_base.html:23 rhodecode/templates/base/base.html:300
 msgid "repositories"
 msgstr ""
 
@@ -906,23 +906,23 @@ msgid "Atom"
 msgstr ""
 
 #: rhodecode/templates/index_base.html:87 rhodecode/templates/index_base.html:89
-#: rhodecode/templates/index_base.html:91 rhodecode/templates/base/base.html:203
-#: rhodecode/templates/base/base.html:205 rhodecode/templates/base/base.html:207
+#: rhodecode/templates/index_base.html:91 rhodecode/templates/base/base.html:209
+#: rhodecode/templates/base/base.html:211 rhodecode/templates/base/base.html:213
 #: rhodecode/templates/summary/summary.html:4
 msgid "Summary"
 msgstr ""
 
 #: rhodecode/templates/index_base.html:95 rhodecode/templates/index_base.html:97
-#: rhodecode/templates/index_base.html:99 rhodecode/templates/base/base.html:219
-#: rhodecode/templates/base/base.html:221 rhodecode/templates/base/base.html:223
+#: rhodecode/templates/index_base.html:99 rhodecode/templates/base/base.html:225
+#: rhodecode/templates/base/base.html:227 rhodecode/templates/base/base.html:229
 #: rhodecode/templates/changelog/changelog.html:6
 #: rhodecode/templates/changelog/changelog.html:14
 msgid "Changelog"
 msgstr ""
 
 #: rhodecode/templates/index_base.html:103 rhodecode/templates/index_base.html:105
-#: rhodecode/templates/index_base.html:107 rhodecode/templates/base/base.html:262
-#: rhodecode/templates/base/base.html:264 rhodecode/templates/base/base.html:266
+#: rhodecode/templates/index_base.html:107 rhodecode/templates/base/base.html:268
+#: rhodecode/templates/base/base.html:270 rhodecode/templates/base/base.html:272
 #: rhodecode/templates/files/files.html:4
 msgid "Files"
 msgstr ""
@@ -954,7 +954,7 @@ msgstr ""
 msgid "public repository"
 msgstr ""
 
-#: rhodecode/templates/index_base.html:133 rhodecode/templates/base/base.html:285
+#: rhodecode/templates/index_base.html:133 rhodecode/templates/base/base.html:291
 #: rhodecode/templates/settings/repo_fork.html:13
 msgid "fork"
 msgstr ""
@@ -983,6 +983,7 @@ msgid "Subscribe to %s atom feed"
 msgstr ""
 
 #: rhodecode/templates/login.html:5 rhodecode/templates/login.html:54
+#: rhodecode/templates/base/base.html:38
 msgid "Sign In"
 msgstr ""
 
@@ -1011,7 +1012,7 @@ msgstr ""
 msgid "Forgot your password ?"
 msgstr ""
 
-#: rhodecode/templates/login.html:63
+#: rhodecode/templates/login.html:63 rhodecode/templates/base/base.html:35
 msgid "Don't have an account ?"
 msgstr ""
 
@@ -1393,7 +1394,7 @@ msgstr ""
 
 #: rhodecode/templates/admin/repos/repo_edit_perms.html:6
 #: rhodecode/templates/admin/users/users.html:38
-#: rhodecode/templates/base/base.html:290
+#: rhodecode/templates/base/base.html:296
 msgid "admin"
 msgstr ""
 
@@ -1791,7 +1792,7 @@ msgid "active"
 msgstr ""
 
 #: rhodecode/templates/admin/users/users.html:39
-#: rhodecode/templates/base/base.html:299
+#: rhodecode/templates/base/base.html:305
 msgid "ldap"
 msgstr ""
 
@@ -1856,116 +1857,116 @@ msgstr ""
 msgid "Forgot password ?"
 msgstr ""
 
-#: rhodecode/templates/base/base.html:51 rhodecode/templates/base/base.html:332
-#: rhodecode/templates/base/base.html:334 rhodecode/templates/base/base.html:336
+#: rhodecode/templates/base/base.html:57 rhodecode/templates/base/base.html:338
+#: rhodecode/templates/base/base.html:340 rhodecode/templates/base/base.html:342
 msgid "Home"
 msgstr ""
 
-#: rhodecode/templates/base/base.html:55 rhodecode/templates/base/base.html:341
-#: rhodecode/templates/base/base.html:343 rhodecode/templates/base/base.html:345
+#: rhodecode/templates/base/base.html:61 rhodecode/templates/base/base.html:347
+#: rhodecode/templates/base/base.html:349 rhodecode/templates/base/base.html:351
 #: rhodecode/templates/journal/journal.html:4
 #: rhodecode/templates/journal/journal.html:17
 #: rhodecode/templates/journal/public_journal.html:4
 msgid "Journal"
 msgstr ""
 
-#: rhodecode/templates/base/base.html:60
+#: rhodecode/templates/base/base.html:66
 msgid "Login"
 msgstr ""
 
-#: rhodecode/templates/base/base.html:62
+#: rhodecode/templates/base/base.html:68
 msgid "Log Out"
 msgstr ""
 
-#: rhodecode/templates/base/base.html:101
+#: rhodecode/templates/base/base.html:107
 msgid "Submit a bug"
 msgstr ""
 
-#: rhodecode/templates/base/base.html:135
+#: rhodecode/templates/base/base.html:141
 msgid "Switch repository"
 msgstr ""
 
-#: rhodecode/templates/base/base.html:137
+#: rhodecode/templates/base/base.html:143
 msgid "Products"
 msgstr ""
 
-#: rhodecode/templates/base/base.html:143
+#: rhodecode/templates/base/base.html:149
 msgid "loading..."
 msgstr ""
 
-#: rhodecode/templates/base/base.html:228 rhodecode/templates/base/base.html:230
-#: rhodecode/templates/base/base.html:232
+#: rhodecode/templates/base/base.html:234 rhodecode/templates/base/base.html:236
+#: rhodecode/templates/base/base.html:238
 msgid "Switch to"
 msgstr ""
 
-#: rhodecode/templates/base/base.html:236
+#: rhodecode/templates/base/base.html:242
 #: rhodecode/templates/branches/branches.html:13
 msgid "branches"
 msgstr ""
 
-#: rhodecode/templates/base/base.html:243
+#: rhodecode/templates/base/base.html:249
 #: rhodecode/templates/branches/branches_data.html:52
 msgid "There are no branches yet"
 msgstr ""
 
-#: rhodecode/templates/base/base.html:248
+#: rhodecode/templates/base/base.html:254
 #: rhodecode/templates/shortlog/shortlog_data.html:10
 #: rhodecode/templates/tags/tags.html:14
 msgid "tags"
 msgstr ""
 
-#: rhodecode/templates/base/base.html:255
+#: rhodecode/templates/base/base.html:261
 #: rhodecode/templates/tags/tags_data.html:32
 msgid "There are no tags yet"
 msgstr ""
 
-#: rhodecode/templates/base/base.html:271 rhodecode/templates/base/base.html:275
+#: rhodecode/templates/base/base.html:277 rhodecode/templates/base/base.html:281
 #: rhodecode/templates/files/files_annotate.html:40
 #: rhodecode/templates/files/files_source.html:11
 msgid "Options"
 msgstr ""
 
-#: rhodecode/templates/base/base.html:280 rhodecode/templates/base/base.html:282
-#: rhodecode/templates/base/base.html:300
+#: rhodecode/templates/base/base.html:286 rhodecode/templates/base/base.html:288
+#: rhodecode/templates/base/base.html:306
 msgid "settings"
 msgstr ""
 
-#: rhodecode/templates/base/base.html:286
+#: rhodecode/templates/base/base.html:292
 msgid "search"
 msgstr ""
 
-#: rhodecode/templates/base/base.html:293
+#: rhodecode/templates/base/base.html:299
 msgid "journal"
 msgstr ""
 
-#: rhodecode/templates/base/base.html:295
+#: rhodecode/templates/base/base.html:301
 msgid "repositories groups"
 msgstr ""
 
-#: rhodecode/templates/base/base.html:296
+#: rhodecode/templates/base/base.html:302
 msgid "users"
 msgstr ""
 
-#: rhodecode/templates/base/base.html:297
+#: rhodecode/templates/base/base.html:303
 msgid "users groups"
 msgstr ""
 
-#: rhodecode/templates/base/base.html:298
+#: rhodecode/templates/base/base.html:304
 msgid "permissions"
 msgstr ""
 
-#: rhodecode/templates/base/base.html:311 rhodecode/templates/base/base.html:313
+#: rhodecode/templates/base/base.html:317 rhodecode/templates/base/base.html:319
 #: rhodecode/templates/followers/followers.html:5
 msgid "Followers"
 msgstr ""
 
-#: rhodecode/templates/base/base.html:319 rhodecode/templates/base/base.html:321
+#: rhodecode/templates/base/base.html:325 rhodecode/templates/base/base.html:327
 #: rhodecode/templates/forks/forks.html:5
 msgid "Forks"
 msgstr ""
 
-#: rhodecode/templates/base/base.html:350 rhodecode/templates/base/base.html:352
-#: rhodecode/templates/base/base.html:354 rhodecode/templates/search/search.html:4
+#: rhodecode/templates/base/base.html:356 rhodecode/templates/base/base.html:358
+#: rhodecode/templates/base/base.html:360 rhodecode/templates/search/search.html:4
 #: rhodecode/templates/search/search.html:24
 #: rhodecode/templates/search/search.html:46
 msgid "Search"
