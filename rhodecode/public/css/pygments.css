@@ -24,7 +24,11 @@ div.codeblock .code-header .commit{
 }
 
 div.codeblock .code-body table{
-    width: 0 !important;    
+    width: 0 !important;
+    border: 0px !important;
+}
+div.codeblock .code-body table td {
+	border: 0px !important;
 }
 div.code-body {
 	background-color: #FFFFFF;
