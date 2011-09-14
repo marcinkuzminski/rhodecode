@@ -141,11 +141,11 @@
 		            	<a href="${h.url('summary_home',repo_name=repo['dbrepo_fork']['repo_name'])}">
 		            	<img class="icon" alt="${_('public')}"
 		            	title="${_('Fork of')} ${repo['dbrepo_fork']['repo_name']}" 
-		            	src="${h.url("/images/icons/arrow_divide.png")}"/></a>
+		            	src="${h.url('/images/icons/arrow_divide.png')}"/></a>
 		            %endif		            
 		            </td> 
-		            <td><span class="tooltip" title="${repo['repo'].last_change}">${("r%s:%s") % (h.get_changeset_safe(repo['repo'],'tip').revision,h.short_id(h.get_changeset_safe(repo['repo'],'tip').raw_id))}</span></td>
-		            <td><a href="${h.url('repo_settings_home',repo_name=repo['name'])}" title="${_('edit')}"><img class="icon" alt="${_('private')}" src="${h.url("/images/icons/application_form_edit.png")}"/></a></td>
+		            <td><span class="tooltip" title="${repo['last_change']}">${("r%s:%s") % (repo['rev'],h.short_id(repo['tip']))}</span></td>
+		            <td><a href="${h.url('repo_settings_home',repo_name=repo['name'])}" title="${_('edit')}"><img class="icon" alt="${_('private')}" src="${h.url('/images/icons/application_form_edit.png')}"/></a></td>
 		            <td>
 	                  ${h.form(url('repo_settings_delete', repo_name=repo['name']),method='delete')}
 	                    ${h.submit('remove_%s' % repo['name'],'',class_="delete_icon action_button",onclick="return confirm('Confirm to delete this repository');")}
