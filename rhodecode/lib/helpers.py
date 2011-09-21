@@ -456,7 +456,7 @@ HasRepoPermissionAny, HasRepoPermissionAll
 def gravatar_url(email_address, size=30):
     if not str2bool(config['app_conf'].get('use_gravatar')) or \
         email_address == 'anonymous@rhodecode.org':
-        return "/images/user%s.png" % size
+        return url("/images/user%s.png" % size)
 
     ssl_enabled = 'https' == request.environ.get('wsgi.url_scheme')
     default = 'identicon'
