@@ -34,7 +34,7 @@ from pylons.i18n.translation import _
 from pylons.controllers.util import redirect
 from pylons.decorators import jsonify
 
-from vcs.backends import ARCHIVE_SPECS
+from vcs.conf import settings
 from vcs.exceptions import RepositoryError, ChangesetDoesNotExistError, \
     EmptyRepositoryError, ImproperArchiveTypeError, VCSError
 from vcs.nodes import FileNode, NodeKind
@@ -295,7 +295,7 @@ class FilesController(BaseRepoController):
         ext = None
         subrepos = request.GET.get('subrepos') == 'true'
 
-        for a_type, ext_data in ARCHIVE_SPECS.items():
+        for a_type, ext_data in settings.ARCHIVE_SPECS.items():
             archive_spec = fname.split(ext_data[1])
             if len(archive_spec) == 2 and archive_spec[1] == '':
                 fileformat = a_type or ext_data[1]
@@ -308,7 +308,7 @@ class FilesController(BaseRepoController):
                 return _('downloads disabled')
 
             cs = c.rhodecode_repo.get_changeset(revision)
-            content_type = ARCHIVE_SPECS[fileformat][0]
+            content_type = settings.ARCHIVE_SPECS[fileformat][0]
         except ChangesetDoesNotExistError:
             return _('Unknown revision %s') % revision
         except EmptyRepositoryError:
