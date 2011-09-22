@@ -1,18 +1,4 @@
 <%page args="parent" /> 
-    <%def name="get_sort(name)">
-        <%name_slug = name.lower().replace(' ','_') %>
-        
-        %if name_slug == c.sort_slug:
-          %if c.sort_by.startswith('-'):
-            <a href="?sort=${name_slug}">${name}&uarr;</a>
-          %else:
-            <a href="?sort=-${name_slug}">${name}&darr;</a>
-          %endif:
-        %else:
-            <a href="?sort=${name_slug}">${name}</a>
-        %endif
-    </%def>
-    
     <div class="box">
         <!-- box / title -->
         <div class="title">
@@ -67,11 +53,11 @@
             <thead>
                 <tr>
                     <th class="left"></th>
-                    <th class="left">${get_sort(_('Name'))}</th>
-                    <th class="left">${get_sort(_('Description'))}</th>
-                    <th class="left">${get_sort(_('Last change'))}</th>
-                    <th class="left">${get_sort(_('Tip'))}</th>
-                    <th class="left">${get_sort(_('Owner'))}</th>
+                    <th class="left">${_('Name')}</th>
+                    <th class="left">${_('Description')}</th>
+                    <th class="left">${_('Last change')}</th>
+                    <th class="left">${_('Tip')}</th>
+                    <th class="left">${_('Owner')}</th>
                     <th class="left">${_('RSS')}</th>
                     <th class="left">${_('Atom')}</th>
                 </tr>
@@ -145,10 +131,7 @@
                     </td>
                     <td>
                         %if repo['rev']>=0:
-                        ${h.link_to('r%s:%s' % (repo['rev'],h.short_id(repo['tip'])),
-                        h.url('changeset_home',repo_name=repo['name'],revision=repo['tip']),
-                        class_="tooltip",
-                        title=h.tooltip('%s\n%s' % (repo['author'],repo['last_msg'])))}
+                        <a title="${h.tooltip('%s\n%s' % (repo['author'],repo['last_msg']))}" class="tooltip" href="${h.url('changeset_home',repo_name=repo['name'],revision=repo['tip'])}">${'r%s:%s' % (repo['rev'],h.short_id(repo['tip']))}</a>
                         %else:
                             ${_('No changesets yet')}
                         %endif    
@@ -170,7 +153,6 @@
                     </td>
                 </tr>
             %endfor
-            
             </tbody>
             </table>
             </div>

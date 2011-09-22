@@ -165,11 +165,10 @@ class ReposGroupsController(BaseController):
                     category='error')
             return redirect(url('repos_groups'))
 
-
         try:
             repos_group_model.delete(id)
             h.flash(_('removed repos group %s' % gr.group_name), category='success')
-            #TODO: in futureaction_logger(, '', '', '', self.sa)
+            #TODO: in future action_logger(, '', '', '', self.sa)
         except Exception:
             log.error(traceback.format_exc())
             h.flash(_('error occurred during deletion of repos group %s' % gr.group_name),
@@ -181,26 +180,12 @@ class ReposGroupsController(BaseController):
         """GET /repos_groups/id: Show a specific item"""
         # url('repos_group', id=ID)
 
-        gr = c.group = Group.get(id)
+        c.group = Group.get(id)
 
         if c.group:
             c.group_repos = c.group.repositories.all()
         else:
             return redirect(url('home'))
-
-
-        sortables = ['name', 'description', 'last_change', 'tip', 'owner']
-        current_sort = request.GET.get('sort', 'name')
-        current_sort_slug = current_sort.replace('-', '')
-
-        if current_sort_slug not in sortables:
-            c.sort_by = 'name'
-            current_sort_slug = c.sort_by
-        else:
-            c.sort_by = current_sort
-        c.sort_slug = current_sort_slug
-
-        sort_key = current_sort_slug + '_sort'
 
         #overwrite our cached list with current filter
         gr_filter = c.group_repos
@@ -220,13 +205,13 @@ class ReposGroupsController(BaseController):
         """GET /repos_groups/id/edit: Form to edit an existing item"""
         # url('edit_repos_group', id=ID)
 
-        id = int(id)
+        id_ = int(id)
 
-        c.repos_group = Group.get(id)
-        defaults = self.__load_data(id)
+        c.repos_group = Group.get(id_)
+        defaults = self.__load_data(id_)
 
         # we need to exclude this group from the group list for editing
-        c.repo_groups = filter(lambda x:x[0] != id, c.repo_groups)
+        c.repo_groups = filter(lambda x:x[0] != id_, c.repo_groups)
 
         return htmlfill.render(
             render('admin/repos_groups/repos_groups_edit.html'),

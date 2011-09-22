@@ -43,20 +43,8 @@ class HomeController(BaseController):
         super(HomeController, self).__before__()
 
     def index(self):
-        sortables = ['name', 'description', 'last_change', 'tip', 'owner']
-        current_sort = request.GET.get('sort', 'name')
-        current_sort_slug = current_sort.replace('-', '')
 
-        if current_sort_slug not in sortables:
-            c.sort_by = 'name'
-            current_sort_slug = c.sort_by
-        else:
-            c.sort_by = current_sort
-        c.sort_slug = current_sort_slug
-
-        sort_key = current_sort_slug + '_sort'
-
-        c.repos_list = self.scm_model.get_repos(sort_key=sort_key)
+        c.repos_list = self.scm_model.get_repos()
 
         c.groups = Group.query().filter(Group.group_parent_id == None).all()
 
