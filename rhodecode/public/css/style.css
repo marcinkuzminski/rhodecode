@@ -928,6 +928,9 @@ font-weight:700;
 #content div.box div.form div.fields div.field div.input {
 margin:0 0 0 200px;
 }
+#content div.box div.form div.fields div.field div.file {
+margin:0 0 0 200px;
+}
 #content div.box-left div.form div.fields div.field div.input,#content div.box-right div.form div.fields div.field div.input {
 margin:0 0 0 0px;
 }
@@ -945,6 +948,17 @@ margin:0;
 padding:7px 7px 6px;
 }
 
+#content div.box div.form div.fields div.field div.file input {
+    background: none repeat scroll 0 0 #FFFFFF;
+    border-color: #B3B3B3 #EAEAEA #EAEAEA #B3B3B3;
+    border-style: solid;
+    border-width: 1px;
+    color: #000000;
+    font-family: Lucida Grande,Verdana,Lucida Sans Regular,Lucida Sans Unicode,Arial,sans-serif;
+    font-size: 11px;
+    margin: 0;
+    padding: 7px 7px 6px;
+}
 
 
 #content div.box div.form div.fields div.field div.input input.small {
@@ -2359,20 +2373,20 @@ border:1px solid #316293;
 
 
 input.ui-button-small {
-background:#e5e3e3 url("../images/button.png") repeat-x;
-border-top:1px solid #DDD;
-border-left:1px solid #c6c6c6;
-border-right:1px solid #DDD;
-border-bottom:1px solid #c6c6c6;
-color:#515151;
-outline:none;
-margin:0;
--webkit-border-radius: 4px 4px 4px 4px;
--khtml-border-radius: 4px 4px 4px 4px; 
--moz-border-radius: 4px 4px 4px 4px;
-border-radius: 4px 4px 4px 4px;
-box-shadow: 0 1px 0 #ececec;
-cursor: pointer;
+background:#e5e3e3 url("../images/button.png") repeat-x !important;
+border-top:1px solid #DDD !important;
+border-left:1px solid #c6c6c6 !important;
+border-right:1px solid #DDD !important;
+border-bottom:1px solid #c6c6c6 !important;
+color:#515151 !important;
+outline:none !important;
+margin:0 !important;
+-webkit-border-radius: 4px 4px 4px 4px !important;
+-khtml-border-radius: 4px 4px 4px 4px !important; 
+-moz-border-radius: 4px 4px 4px 4px !important;
+border-radius: 4px 4px 4px 4px !important;
+box-shadow: 0 1px 0 #ececec !important;
+cursor: pointer !important;
 }
 
 input.ui-button-small:hover {

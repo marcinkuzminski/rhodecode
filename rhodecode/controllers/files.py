@@ -36,7 +36,7 @@ from pylons.decorators import jsonify
 
 from vcs.conf import settings
 from vcs.exceptions import RepositoryError, ChangesetDoesNotExistError, \
-    EmptyRepositoryError, ImproperArchiveTypeError, VCSError
+    EmptyRepositoryError, ImproperArchiveTypeError, VCSError, NodeAlreadyExistsError
 from vcs.nodes import FileNode, NodeKind
 from vcs.utils import diffs as differ
 
@@ -73,9 +73,9 @@ class FilesController(BaseRepoController):
                 return None
             url_ = url('files_add_home',
                        repo_name=c.repo_name,
-                       revision=0,f_path='')
-            add_new = '<a href="%s">[%s]</a>' % (url_,_('add new'))
-            h.flash(h.literal(_('There are no files yet %s' % add_new)), 
+                       revision=0, f_path='')
+            add_new = '<a href="%s">[%s]</a>' % (url_, _('add new'))
+            h.flash(h.literal(_('There are no files yet %s' % add_new)),
                     category='warning')
             redirect(h.url('summary_home', repo_name=repo_name))
 
@@ -295,7 +295,7 @@ class FilesController(BaseRepoController):
     @HasRepoPermissionAnyDecorator('repository.write', 'repository.admin')
     def add(self, repo_name, revision, f_path):
         r_post = request.POST
-        c.cs = self.__get_cs_or_redirect(revision, repo_name, 
+        c.cs = self.__get_cs_or_redirect(revision, repo_name,
                                          redirect_after=False)
         if c.cs is None:
             c.cs = EmptyChangeset(alias=c.rhodecode_repo.alias)
@@ -310,6 +310,12 @@ class FilesController(BaseRepoController):
                                                 % (f_path))
             location = r_post.get('location')
             filename = r_post.get('filename')
+            file_obj = r_post.get('upload_file', None)
+
+            if file_obj is not None and hasattr(file_obj, 'filename'):
+                filename = file_obj.filename
+                content = file_obj.file
+
             node_path = os.path.join(location, filename)
             author = self.rhodecode_user.full_contact
 
@@ -320,7 +326,7 @@ class FilesController(BaseRepoController):
             if not filename:
                 h.flash(_('No filename'), category='warning')
                 return redirect(url('changeset_home', repo_name=c.repo_name,
-                                    revision='tip'))                
+                                    revision='tip'))
 
             try:
                 self.scm_model.create_node(repo=c.rhodecode_repo,
@@ -330,7 +336,8 @@ class FilesController(BaseRepoController):
                                              content=content, f_path=node_path)
                 h.flash(_('Successfully committed to %s' % node_path),
                         category='success')
-
+            except NodeAlreadyExistsError, e:
+                h.flash(_(e), category='error')
             except Exception:
                 log.error(traceback.format_exc())
                 h.flash(_('Error occurred during commit'), category='error')

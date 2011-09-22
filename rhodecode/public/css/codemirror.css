@@ -4,6 +4,7 @@
   line-height: 1em;
   font-family: monospace;
   _position: relative; /* IE6 hack */
+  margin:20px;
 }
 
 .CodeMirror-gutter {

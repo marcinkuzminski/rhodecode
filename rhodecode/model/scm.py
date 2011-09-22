@@ -360,7 +360,12 @@ class ScmModel(BaseModel):
             from vcs.backends.git import GitInMemoryChangeset as IMC
         # decoding here will force that we have proper encoded values
         # in any other case this will throw exceptions and deny commit
-        content = safe_str(content)
+        
+        if isinstance(content,(basestring,)):
+            content = safe_str(content)
+        elif isinstance(content,file):
+            content = content.read()
+            
         message = safe_str(message)
         path = safe_str(f_path)
         author = safe_str(author)
