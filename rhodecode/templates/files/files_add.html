@@ -46,6 +46,7 @@
                             </div>
                             <div class="input">
                                 <input type="text" value="${c.f_path}" size="30" name="location" id="location">
+                                ${_('use / to separate directories')}
                             </div>
                          </div>
                                       
@@ -62,7 +63,7 @@
 			<div id="body" class="codeblock">
 			    <pre id="editor_pre"></pre>
 				<textarea id="editor" name="content" style="display:none"></textarea>
-				<div style="padding-top: 10px;">${_('commit message')}</div>
+				<div style="padding: 10px;color:#666666">${_('commit message')}</div>
 				<textarea id="commit" name="message" style="height: 100px;width: 99%"></textarea>
 			</div>
 			<div style="text-align: right;padding-top: 5px">

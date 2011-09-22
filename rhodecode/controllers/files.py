@@ -317,6 +317,10 @@ class FilesController(BaseRepoController):
                 h.flash(_('No content'), category='warning')
                 return redirect(url('changeset_home', repo_name=c.repo_name,
                                     revision='tip'))
+            if not filename:
+                h.flash(_('No filename'), category='warning')
+                return redirect(url('changeset_home', repo_name=c.repo_name,
+                                    revision='tip'))                
 
             try:
                 self.scm_model.create_node(repo=c.rhodecode_repo,
