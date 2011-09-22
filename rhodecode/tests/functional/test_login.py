@@ -173,7 +173,7 @@ class TestLoginController(TestController):
                                              'lastname':'test'})
 
         self.assertEqual(response.status , '200 OK')
-        assert 'Password do not match' in response.body
+        assert 'Passwords do not match' in response.body
 
     def test_register_ok(self):
         username = 'test_regular4'
