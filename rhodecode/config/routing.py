@@ -378,6 +378,11 @@ def make_map(config):
                  controller='files', action='edit', revision='tip',
                  f_path='', conditions=dict(function=check_repo))
 
+    rmap.connect('files_add_home',
+                 '/{repo_name:.*}/add/{revision}/{f_path:.*}',
+                 controller='files', action='add', revision='tip',
+                 f_path='', conditions=dict(function=check_repo))
+
     rmap.connect('files_archive_home', '/{repo_name:.*}/archive/{fname}',
                 controller='files', action='archivefile',
                 conditions=dict(function=check_repo))

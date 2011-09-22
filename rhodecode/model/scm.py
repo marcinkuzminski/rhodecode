@@ -39,7 +39,7 @@ from rhodecode.lib import helpers as h
 from rhodecode.lib import safe_str
 from rhodecode.lib.auth import HasRepoPermissionAny
 from rhodecode.lib.utils import get_repos as get_filesystem_repos, make_ui, \
-    action_logger
+    action_logger, EmptyChangeset
 from rhodecode.model import BaseModel
 from rhodecode.model.user import UserModel
 from rhodecode.model.db import Repository, RhodeCodeUi, CacheInvalidation, \
@@ -352,6 +352,37 @@ class ScmModel(BaseModel):
 
         self.mark_for_invalidation(repo_name)
 
+    def create_node(self, repo, repo_name, cs, user, author, message, content,
+                      f_path):
+        if repo.alias == 'hg':
+            from vcs.backends.hg import MercurialInMemoryChangeset as IMC
+        elif repo.alias == 'git':
+            from vcs.backends.git import GitInMemoryChangeset as IMC
+        # decoding here will force that we have proper encoded values
+        # in any other case this will throw exceptions and deny commit
+        content = safe_str(content)
+        message = safe_str(message)
+        path = safe_str(f_path)
+        author = safe_str(author)
+        m = IMC(repo)
+
+        if isinstance(cs, EmptyChangeset):
+            # Emptychangeset means we we're editing empty repository
+            parents = None
+        else:
+            parents = [cs]
+
+        m.add(FileNode(path, content=content))
+        tip = m.commit(message=message,
+                 author=author,
+                 parents=parents, branch=cs.branch)
+        new_cs = tip.short_id
+        action = 'push_local:%s' % new_cs
+
+        action_logger(user, action, repo_name)
+
+        self.mark_for_invalidation(repo_name)
+
 
     def get_unread_journal(self):
         return self.sa.query(UserLog).count()
@@ -368,3 +399,4 @@ class ScmModel(BaseModel):
             .scalar()
 
         return ret
+

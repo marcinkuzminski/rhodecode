@@ -1867,9 +1867,21 @@ font-weight:700;
 div.browserblock .browser-search{
 	clear:both;
 	padding:8px 8px 0px 5px;
+	height: 20px;
+}
+div.browserblock #node_filter_box {
 }
 
-div.browserblock .search_activate #filter_activate{
+div.browserblock .search_activate{
+    float: left
+}
+
+div.browserblock .add_node{
+    float: left;
+    padding-left: 5px;
+}
+
+div.browserblock .search_activate #filter_activate,div.browserblock .add_node a{
 	vertical-align: sub;
 	border: 1px solid;
 	padding:2px;
@@ -1882,7 +1894,7 @@ div.browserblock .search_activate #filter_activate{
 	color: #515151;
 }
 
-div.browserblock .search_activate a:hover{
+div.browserblock .search_activate a:hover,div.browserblock .add_node a:hover{
     text-decoration: none !important;    
 }
 

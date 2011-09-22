@@ -57,7 +57,7 @@ class FilesController(BaseRepoController):
         super(FilesController, self).__before__()
         c.cut_off_limit = self.cut_off_limit
 
-    def __get_cs_or_redirect(self, rev, repo_name):
+    def __get_cs_or_redirect(self, rev, repo_name, redirect_after=True):
         """
         Safe way to get changeset if error occur it redirects to tip with
         proper message
@@ -69,7 +69,14 @@ class FilesController(BaseRepoController):
         try:
             return c.rhodecode_repo.get_changeset(rev)
         except EmptyRepositoryError, e:
-            h.flash(_('There are no files yet'), category='warning')
+            if not redirect_after:
+                return None
+            url_ = url('files_add_home',
+                       repo_name=c.repo_name,
+                       revision=0,f_path='')
+            add_new = '<a href="%s">[%s]</a>' % (url_,_('add new'))
+            h.flash(h.literal(_('There are no files yet %s' % add_new)), 
+                    category='warning')
             redirect(h.url('summary_home', repo_name=repo_name))
 
         except RepositoryError, e:
@@ -247,7 +254,6 @@ class FilesController(BaseRepoController):
             return redirect(url('files_home', repo_name=c.repo_name,
                          revision=c.cs.raw_id, f_path=f_path))
 
-        c.file_history = self._get_node_history(c.cs, f_path)
         c.f_path = f_path
 
         if r_post:
@@ -285,6 +291,49 @@ class FilesController(BaseRepoController):
                                 repo_name=c.repo_name, revision='tip'))
 
         return render('files/files_edit.html')
+
+    @HasRepoPermissionAnyDecorator('repository.write', 'repository.admin')
+    def add(self, repo_name, revision, f_path):
+        r_post = request.POST
+        c.cs = self.__get_cs_or_redirect(revision, repo_name, 
+                                         redirect_after=False)
+        if c.cs is None:
+            c.cs = EmptyChangeset(alias=c.rhodecode_repo.alias)
+
+        c.f_path = f_path
+
+        if r_post:
+            unix_mode = 0
+            content = convert_line_endings(r_post.get('content'), unix_mode)
+
+            message = r_post.get('message') or (_('Added %s via RhodeCode')
+                                                % (f_path))
+            location = r_post.get('location')
+            filename = r_post.get('filename')
+            node_path = os.path.join(location, filename)
+            author = self.rhodecode_user.full_contact
+
+            if not content:
+                h.flash(_('No content'), category='warning')
+                return redirect(url('changeset_home', repo_name=c.repo_name,
+                                    revision='tip'))
+
+            try:
+                self.scm_model.create_node(repo=c.rhodecode_repo,
+                                             repo_name=repo_name, cs=c.cs,
+                                             user=self.rhodecode_user,
+                                             author=author, message=message,
+                                             content=content, f_path=node_path)
+                h.flash(_('Successfully committed to %s' % node_path),
+                        category='success')
+
+            except Exception:
+                log.error(traceback.format_exc())
+                h.flash(_('Error occurred during commit'), category='error')
+            return redirect(url('changeset_home',
+                                repo_name=c.repo_name, revision='tip'))
+
+        return render('files/files_add.html')
 
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
                                    'repository.admin')

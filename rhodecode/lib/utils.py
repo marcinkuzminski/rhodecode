@@ -42,6 +42,7 @@ from webhelpers.text import collapse, remove_formatting, strip_tags
 
 from vcs.backends.base import BaseChangeset
 from vcs.utils.lazy import LazyProperty
+from vcs import get_backend
 
 from rhodecode.model import meta
 from rhodecode.model.caching_query import FromCache
@@ -313,7 +314,7 @@ class EmptyChangeset(BaseChangeset):
     an EmptyChangeset
     """
 
-    def __init__(self, cs='0' * 40, repo=None,requested_revision=None):
+    def __init__(self, cs='0' * 40, repo=None, requested_revision=None, alias=None):
         self._empty_cs = cs
         self.revision = -1
         self.message = ''
@@ -321,7 +322,8 @@ class EmptyChangeset(BaseChangeset):
         self.date = ''
         self.repository = repo
         self.requested_revision = requested_revision
-        
+        self.alias = alias
+
     @LazyProperty
     def raw_id(self):
         """Returns raw string identifying this changeset, useful for web
@@ -329,6 +331,10 @@ class EmptyChangeset(BaseChangeset):
         """
 
         return self._empty_cs
+
+    @LazyProperty
+    def branch(self):
+        return get_backend(self.alias).DEFAULT_BRANCH_NAME
 
     @LazyProperty
     def short_id(self):
@@ -602,3 +608,4 @@ class BasePasterCommand(Command):
         path_to_ini_file = os.path.realpath(conf)
         conf = paste.deploy.appconfig('config:' + path_to_ini_file)
         pylonsconfig.init_app(conf.global_conf, conf.local_conf)
+
