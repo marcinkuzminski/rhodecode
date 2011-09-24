@@ -2390,11 +2390,11 @@ cursor: pointer !important;
 }
 
 input.ui-button-small:hover {
-background:#b4b4b4 url("../images/button_selected.png") repeat-x;
-border-top:1px solid #ccc;
-border-left:1px solid #bebebe;
-border-right:1px solid #b1b1b1;
-border-bottom:1px solid #afafaf;	
+background:#b4b4b4 url("../images/button_selected.png") repeat-x !important;
+border-top:1px solid #ccc !important;
+border-left:1px solid #bebebe !important;
+border-right:1px solid #b1b1b1 !important;
+border-bottom:1px solid #afafaf !important;	
 }
 
 input.ui-button-small-blue {
