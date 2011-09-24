@@ -38,7 +38,8 @@ news
   repository, and manually updated (via pull) from admin panel
 - beta git support - push/pull server + basic view for git repos
 - added followers page and forks page
-- server side file edition with commits powered by codemirror
+- server side file creation (with binary file upload interface) 
+  and edition with commits powered by codemirror 
 - #111 file browser file finder, quick lookup files on whole file tree 
 - added quick login sliding menu into main page
 - changelog uses lazy loading of affected files details, in some scenarios 

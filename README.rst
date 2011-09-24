@@ -25,13 +25,13 @@ The default access is anonymous but you can login to an administrative account
 using the following credentials:
 
 - username: demo
-- password: demo
+- password: demo12
 
 Source code
 -----------
 
 The latest sources can be obtained from official RhodeCode instance
-https://hg.rhodecode.org 
+https://secure.rhodecode.org 
 
 
 MIRRORS:
@@ -63,8 +63,8 @@ RhodeCode Features
 - Repository groups let you group repos and manage them easier.
 - Users can fork other users repo. RhodeCode have also compare view to see
   combined changeset for all changeset made within single push.
-- Build in commit-api let's you edit and commit files right from RhodeCode
-  interface using simple editor.
+- Build in commit-api let's you add, edit and commit files right from RhodeCode
+  interface using simple editor or upload form for binaries.
 - Mako templates let's you customize the look and feel of the application.
 - Beautiful diffs, annotations and source code browsing all colored by pygments. 
   Raw diffs are made in git-diff format, including git_ binary-patches
@@ -94,7 +94,9 @@ RhodeCode Features
 Incoming / Plans
 ----------------
 
-- Finer granular permissions (per branch or subrepo)
+- Finer granular permissions per branch, repo group or subrepo
+- pull requests and web based merges
+- notification and message system 
 - SSH based authentication with server side key management
 - Code review (probably based on hg-review)
 - Full git_ support, with push/pull server (currently in beta tests)
