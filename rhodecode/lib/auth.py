@@ -235,12 +235,12 @@ class  AuthUser(object):
     in
     """
 
-    def __init__(self, user_id=None, api_key=None):
+    def __init__(self, user_id=None, api_key=None, username=None):
 
         self.user_id = user_id
         self.api_key = None
 
-        self.username = 'None'
+        self.username = 'None' if username is None else username
         self.name = ''
         self.lastname = ''
         self.email = ''
@@ -253,23 +253,37 @@ class  AuthUser(object):
     def propagate_data(self):
         user_model = UserModel()
         self.anonymous_user = user_model.get_by_username('default', cache=True)
+        is_user_loaded = False
         if self._api_key and self._api_key != self.anonymous_user.api_key:
             #try go get user by api key
             log.debug('Auth User lookup by API KEY %s', self._api_key)
             user_model.fill_data(self, api_key=self._api_key)
-        else:
+            is_user_loaded = True
+        elif self.user_id is not None \
+            and self.user_id != self.anonymous_user.user_id:
             log.debug('Auth User lookup by USER ID %s', self.user_id)
-            if self.user_id is not None \
-                and self.user_id != self.anonymous_user.user_id:
-                user_model.fill_data(self, user_id=self.user_id)
+            user_model.fill_data(self, user_id=self.user_id)
+            is_user_loaded = True
+        elif self.username != 'None':
+            #Removing realm from username
+            self.username = self.username.partition('@')[0]
+
+            log.debug('Auth User lookup by USER NAME %s', self.username)
+            dbuser = user_model.get_by_username(self.username)
+            if dbuser is not None and dbuser.active:
+                for k, v in dbuser.get_dict().items():
+                    setattr(self, k, v)
+                self.set_authenticated()
+                is_user_loaded = True
+
+        if not is_user_loaded:
+            if self.anonymous_user.active is True:
+                user_model.fill_data(self,
+                                     user_id=self.anonymous_user.user_id)
+                #then we set this user is logged in
+                self.is_authenticated = True
             else:
-                if self.anonymous_user.active is True:
-                    user_model.fill_data(self,
-                                         user_id=self.anonymous_user.user_id)
-                    #then we set this user is logged in
-                    self.is_authenticated = True
-                else:
-                    self.is_authenticated = False
+                self.is_authenticated = False
 
         log.debug('Auth User is now %s', self)
         user_model.fill_perms(self)

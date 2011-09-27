@@ -9,6 +9,9 @@ from pylons.controllers import WSGIController
 from pylons.controllers.util import redirect
 from pylons.templating import render_mako as render
 
+from paste.deploy.converters import asbool
+from paste.httpheaders import REMOTE_USER
+
 from rhodecode import __version__
 from rhodecode.lib.auth import AuthUser
 from rhodecode.lib.utils import get_repo_slug
@@ -43,8 +46,14 @@ class BaseController(WSGIController):
             # putting this here makes sure that we update permissions each time
             api_key = request.GET.get('api_key')
             user_id = getattr(session.get('rhodecode_user'), 'user_id', None)
-            self.rhodecode_user = c.rhodecode_user = AuthUser(user_id, api_key)
-            self.rhodecode_user.set_authenticated(
+            if asbool(config.get('container_auth_enabled', False)):
+                username = REMOTE_USER(environ)
+            else:
+                username = None
+
+            self.rhodecode_user = c.rhodecode_user = AuthUser(user_id, api_key, username)
+            if not self.rhodecode_user.is_authenticated:
+                self.rhodecode_user.set_authenticated(
                                         getattr(session.get('rhodecode_user'),
                                        'is_authenticated', False))
             session['rhodecode_user'] = self.rhodecode_user

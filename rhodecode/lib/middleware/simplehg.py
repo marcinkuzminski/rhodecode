@@ -128,9 +128,12 @@ class SimpleHg(object):
                 #==============================================================
 
                 if self.action in ['pull', 'push']:
-                    username = REMOTE_USER(environ)
+                    #Removing realm from username
+                    username = REMOTE_USER(environ).partition('@')[0]
                     try:
                         user = self.__get_user(username)
+                        if user is None:
+                            return HTTPForbidden()(environ, start_response)
                         self.username = user.username
                     except:
                         log.error(traceback.format_exc())
