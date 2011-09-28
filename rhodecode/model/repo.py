@@ -332,8 +332,8 @@ class RepoModel(BaseModel):
         old_path = os.path.join(self.repos_path, old)
         new_path = os.path.join(self.repos_path, new)
         if os.path.isdir(new_path):
-            raise Exception('Was trying to rename to already existing dir %s',
-                            new_path)
+            raise Exception('Was trying to rename to already existing dir %s' \
+            		     % new_path)
         shutil.move(old_path, new_path)
 
     def __delete_repo(self, repo):
