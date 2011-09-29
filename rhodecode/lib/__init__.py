@@ -177,7 +177,7 @@ def safe_unicode(str_, from_encoding='utf8'):
     except UnicodeDecodeError:
         pass
     
-    try:
+    try:        
         import chardet
         encoding = chardet.detect(str_)['encoding']
         if encoding is None:
@@ -203,7 +203,7 @@ def safe_str(unicode_, to_encoding='utf8'):
         return unicode_
 
     try:
-        return str(unicode_)
+        return unicode_.encode(to_encoding)
     except UnicodeEncodeError:
         pass
     
