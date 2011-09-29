@@ -39,7 +39,7 @@ from pylons.controllers.util import Response
 from webob.exc import HTTPNotFound, HTTPForbidden, HTTPInternalServerError, \
 HTTPBadRequest, HTTPError
 
-from rhodecode.model.user import User
+from rhodecode.model.db import User
 from rhodecode.lib.auth import AuthUser
 
 log = logging.getLogger('JSONRPC')
@@ -85,10 +85,9 @@ class JSONRPCController(WSGIController):
         Parse the request body as JSON, look up the method on the
         controller and if it exists, dispatch to it.
         """
-
         if 'CONTENT_LENGTH' not in environ:
             log.debug("No Content-Length")
-            return jsonrpc_error(0, "No Content-Length")
+            return jsonrpc_error(message="No Content-Length in request")
         else:
             length = environ['CONTENT_LENGTH'] or 0
             length = int(environ['CONTENT_LENGTH'])
@@ -96,7 +95,7 @@ class JSONRPCController(WSGIController):
 
         if length == 0:
             log.debug("Content-Length is 0")
-            return jsonrpc_error(0, "Content-Length is 0")
+            return jsonrpc_error(message="Content-Length is 0")
 
         raw_body = environ['wsgi.input'].read(length)
 
@@ -104,12 +103,10 @@ class JSONRPCController(WSGIController):
             json_body = json.loads(urllib.unquote_plus(raw_body))
         except ValueError as e:
             #catch JSON errors Here
-            return jsonrpc_error("JSON parse error ERR:%s RAW:%r" \
+            return jsonrpc_error(message="JSON parse error ERR:%s RAW:%r" \
                                  % (e, urllib.unquote_plus(raw_body)))
 
-
         #check AUTH based on API KEY
-
         try:
             self._req_api_key = json_body['api_key']
             self._req_method = json_body['method']
@@ -131,7 +128,7 @@ class JSONRPCController(WSGIController):
         try:
             self._func = self._find_method()
         except AttributeError, e:
-            return jsonrpc_error(str(e))
+            return jsonrpc_error(message=str(e))
 
         # now that we have a method, add self._req_params to
         # self.kargs and dispatch control to WGIController
@@ -143,7 +140,7 @@ class JSONRPCController(WSGIController):
         self.rhodecode_user = auth_u
 
         if 'user' not in arglist:
-            return jsonrpc_error('This method [%s] does not support '
+            return jsonrpc_error(message='This method [%s] does not support '
                                  'authentication (missing user param)' %
                                  self._func.__name__)
 
@@ -155,7 +152,7 @@ class JSONRPCController(WSGIController):
                 continue
 
             if not self._req_params or arg not in self._req_params:
-                return jsonrpc_error('Missing %s arg in JSON DATA' % arg)
+                return jsonrpc_error(message='Missing %s arg in JSON DATA' % arg)
 
         self._rpc_args = dict(user=u)
         self._rpc_args.update(self._req_params)

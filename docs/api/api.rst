@@ -7,7 +7,8 @@ API
 
 Starting from RhodeCode version 1.2 a simple API was implemented.
 There's one schema for calling all api methods. API is implemented
-with JSON protocol both ways. 
+with JSON protocol both ways. An url to send API request in RhodeCode is 
+<your-server>/_admin/api
 
 
 Clients need to send JSON data in such format::
@@ -50,7 +51,7 @@ remote repos upto date. This command can be executed only using admin users
 api_key
 
 ::
-    
+    api_key:"<api_key>"
     method: "pull"
     args: {"repo":<repo_name>}
 
