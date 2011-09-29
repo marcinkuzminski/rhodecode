@@ -38,7 +38,7 @@ from rhodecode.lib import safe_str
 from rhodecode.lib.auth import authfunc, HasPermissionAnyMiddleware
 from rhodecode.lib.utils import make_ui, invalidate_cache, \
     check_repo_fast, ui_sections
-from rhodecode.model.user import UserModel
+from rhodecode.model.db import User
 
 from webob.exc import HTTPNotFound, HTTPForbidden, HTTPInternalServerError
 
@@ -228,7 +228,7 @@ class SimpleHg(object):
         return repo_name
 
     def __get_user(self, username):
-        return UserModel().get_by_username(username, cache=True)
+        return User.by_username(username)
 
     def __get_action(self, environ):
         """

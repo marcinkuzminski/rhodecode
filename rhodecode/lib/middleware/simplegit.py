@@ -72,7 +72,7 @@ from paste.httpheaders import REMOTE_USER, AUTH_TYPE
 from rhodecode.lib import safe_str
 from rhodecode.lib.auth import authfunc, HasPermissionAnyMiddleware
 from rhodecode.lib.utils import invalidate_cache, check_repo_fast
-from rhodecode.model.user import UserModel
+from rhodecode.model.db import User
 
 from webob.exc import HTTPNotFound, HTTPForbidden, HTTPInternalServerError
 
@@ -262,7 +262,7 @@ class SimpleGit(object):
         return repo_name
 
     def __get_user(self, username):
-        return UserModel().get_by_username(username, cache=True)
+        return User.by_username(username)
 
     def __get_action(self, environ):
         """Maps git request commands into a pull or push command.
