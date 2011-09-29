@@ -157,44 +157,66 @@ def generate_api_key(username, salt=None):
     return hashlib.sha1(username + salt).hexdigest()
 
 
-def safe_unicode(_str, from_encoding='utf8'):
+def safe_unicode(str_, from_encoding='utf8'):
     """
-    safe unicode function. In case of UnicodeDecode error we try to return
-    unicode with errors replaceed
+    safe unicode function. Does few trick to turn str_ into unicode
+     
+    In case of UnicodeDecode error we try to return it with encoding detected
+    by chardet library if it fails fallback to unicode with errors replaced
 
-    :param _str: string to decode
+    :param str_: string to decode
     :rtype: unicode
     :returns: unicode object
     """
 
-    if isinstance(_str, unicode):
-        return _str
+    if isinstance(str_, unicode):
+        return str_
 
     try:
-        u_str = unicode(_str, from_encoding)
+        return unicode(str_, from_encoding)
     except UnicodeDecodeError:
-        u_str = unicode(_str, from_encoding, 'replace')
+        pass
+    
+    try:
+        import chardet
+        encoding = chardet.detect(str_)['encoding']
+        if encoding is None:
+            raise UnicodeDecodeError()
+        
+        return str_.decode(encoding)
+    except (ImportError, UnicodeDecodeError):
+        return unicode(str_, from_encoding, 'replace')    
 
-    return u_str
-
-
-def safe_str(_unicode, to_encoding='utf8'):
+def safe_str(unicode_, to_encoding='utf8'):
     """
-    safe str function. In case of UnicodeEncode error we try to return
-    str with errors replaceed
+    safe str function. Does few trick to turn unicode_ into string
+     
+    In case of UnicodeEncodeError we try to return it with encoding detected
+    by chardet library if it fails fallback to string with errors replaced
 
-    :param _unicode: unicode to encode
+    :param unicode_: unicode to encode
     :rtype: str
     :returns: str object
     """
 
-    if isinstance(_unicode, str):
-        return _unicode
+    if isinstance(unicode_, str):
+        return unicode_
 
     try:
-        safe_str = str(_unicode)
+        return str(unicode_)
     except UnicodeEncodeError:
-        safe_str = _unicode.encode(to_encoding, 'replace')
+        pass
+    
+    try:
+        import chardet
+        encoding = chardet.detect(unicode_)['encoding']
+        print encoding
+        if encoding is None:
+            raise UnicodeEncodeError()
+        
+        return unicode_.encode(encoding)
+    except (ImportError, UnicodeEncodeError):
+        return unicode_.encode(to_encoding, 'replace')
 
     return safe_str
 
