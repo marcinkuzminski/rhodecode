@@ -51,6 +51,7 @@ try:
 except ImportError:
     #python 2.5 compatibility
     import simplejson as json
+    
 log = logging.getLogger(__name__)
 
 
@@ -138,10 +139,10 @@ class SummaryController(BaseRepoController):
             lang_stats_d = json.loads(stats.languages)
             c.commit_data = stats.commit_activity
             c.overview_data = stats.commit_activity_combined
-
-            lang_stats = [(x, {"count": y,
+            
+            lang_stats = ((x, {"count": y,
                                "desc": LANGUAGES_EXTENSIONS_MAP.get(x)})
-                          for x, y in lang_stats_d.items()]
+                          for x, y in lang_stats_d.items())
 
             c.trending_languages = json.dumps(OrderedDict(
                                        sorted(lang_stats, reverse=True,
@@ -161,7 +162,7 @@ class SummaryController(BaseRepoController):
             c.overview_data = json.dumps([[ts_min_y, 0], [ts_max_y, 10]])
             c.trending_languages = json.dumps({})
             c.no_data = True
-
+            
         c.enable_downloads = dbrepo.enable_downloads
         if c.enable_downloads:
             c.download_options = self._get_download_links(c.rhodecode_repo)
