@@ -29,8 +29,7 @@ import logging
 import traceback
 
 from mercurial.error import RepoError
-from mercurial.hgweb import hgweb
-from mercurial.hgweb.request import wsgiapplication
+from mercurial.hgweb import hgweb_mod
 
 from paste.auth.basic import AuthBasicAuthenticator
 from paste.httpheaders import REMOTE_USER, AUTH_TYPE
@@ -61,12 +60,11 @@ class SimpleHg(object):
     def __init__(self, application, config):
         self.application = application
         self.config = config
+        # base path of repo locations
+        self.basepath = self.config['base_path']
         #authenticate this mercurial request using authfunc
         self.authenticate = AuthBasicAuthenticator('', authfunc)
         self.ipaddr = '0.0.0.0'
-        self.repo_name = None
-        self.username = None
-        self.action = None
 
     def __call__(self, environ, start_response):
         if not is_mercurial(environ):
@@ -74,31 +72,34 @@ class SimpleHg(object):
 
         proxy_key = 'HTTP_X_REAL_IP'
         def_key = 'REMOTE_ADDR'
-        self.ipaddr = environ.get(proxy_key, environ.get(def_key, '0.0.0.0'))
+        ipaddr = environ.get(proxy_key, environ.get(def_key, '0.0.0.0'))
+
         # skip passing error to error controller
         environ['pylons.status_code_redirect'] = True
-
+                
         #======================================================================
-        # GET ACTION PULL or PUSH
+        # EXTRACT REPOSITORY NAME FROM ENV
         #======================================================================
-        self.action = self.__get_action(environ)
         try:
-            #==================================================================
-            # GET REPOSITORY NAME
-            #==================================================================
-            self.repo_name = self.__get_repository(environ)
+            repo_name = environ['REPO_NAME'] = self.__get_repository(environ)
+            log.debug('Extracted repo name is %s' % repo_name)
         except:
             return HTTPInternalServerError()(environ, start_response)
 
         #======================================================================
+        # GET ACTION PULL or PUSH
+        #======================================================================
+        action = self.__get_action(environ)
+        
+        #======================================================================
         # CHECK ANONYMOUS PERMISSION
         #======================================================================
-        if self.action in ['pull', 'push']:
+        if action in ['pull', 'push']:
             anonymous_user = self.__get_user('default')
-            self.username = anonymous_user.username
-            anonymous_perm = self.__check_permission(self.action,
+            username = anonymous_user.username
+            anonymous_perm = self.__check_permission(action,
                                                      anonymous_user,
-                                                     self.repo_name)
+                                                     repo_name)
 
             if anonymous_perm is not True or anonymous_user.active is False:
                 if anonymous_perm is not True:
@@ -127,40 +128,49 @@ class SimpleHg(object):
                 # BASIC AUTH
                 #==============================================================
 
-                if self.action in ['pull', 'push']:
+                if action in ['pull', 'push']:
                     username = REMOTE_USER(environ)
                     try:
                         user = self.__get_user(username)
-                        self.username = user.username
+                        username = user.username
                     except:
                         log.error(traceback.format_exc())
                         return HTTPInternalServerError()(environ,
                                                          start_response)
 
                     #check permissions for this repository
-                    perm = self.__check_permission(self.action, user,
-                                                   self.repo_name)
+                    perm = self.__check_permission(action, user,
+                                                   repo_name)
                     if perm is not True:
                         return HTTPForbidden()(environ, start_response)
 
-        self.extras = {'ip': self.ipaddr,
-                       'username': self.username,
-                       'action': self.action,
-                       'repository': self.repo_name}
+        extras = {'ip': ipaddr,
+                  'username': username,
+                  'action': action,
+                  'repository': repo_name}
 
         #======================================================================
         # MERCURIAL REQUEST HANDLING
         #======================================================================
-        environ['PATH_INFO'] = '/'  # since we wrap into hgweb, reset the path
-        self.baseui = make_ui('db')
-        self.basepath = self.config['base_path']
-        self.repo_path = os.path.join(self.basepath, self.repo_name)
+        
+        repo_path = safe_str(os.path.join(self.basepath, repo_name))
+        log.debug('Repository path is %s' % repo_path)
+        
+        baseui = make_ui('db')
+        self.__inject_extras(repo_path, baseui, extras)
+        
 
-        #quick check if that dir exists...
-        if check_repo_fast(self.repo_name, self.basepath):
+        # quick check if that dir exists...
+        if check_repo_fast(repo_name, self.basepath):
             return HTTPNotFound()(environ, start_response)
+
         try:
-            app = wsgiapplication(self.__make_app)
+            #invalidate cache on push
+            if action == 'push':
+                self.__invalidate_cache(repo_name)
+
+            app = self.__make_app(repo_path, baseui, extras)
+            return app(environ, start_response)
         except RepoError, e:
             if str(e).find('not found') != -1:
                 return HTTPNotFound()(environ, start_response)
@@ -168,19 +178,12 @@ class SimpleHg(object):
             log.error(traceback.format_exc())
             return HTTPInternalServerError()(environ, start_response)
 
-        #invalidate cache on push
-        if self.action == 'push':
-            self.__invalidate_cache(self.repo_name)
-
-        return app(environ, start_response)
-
-    def __make_app(self):
+    def __make_app(self, repo_name, baseui, extras):
         """
         Make an wsgi application using hgweb, and inject generated baseui
         instance, additionally inject some extras into ui object
         """
-        self.__inject_extras(self.baseui, self.extras)
-        return hgweb(str(self.repo_path), baseui=self.baseui)
+        return hgweb_mod.hgweb(repo_name, name=repo_name, baseui=baseui)
 
 
     def __check_permission(self, action, user, repo_name):
@@ -254,7 +257,7 @@ class SimpleHg(object):
         push requests"""
         invalidate_cache('get_repo_cached_%s' % repo_name)
 
-    def __inject_extras(self, baseui, extras={}):
+    def __inject_extras(self,repo_path, baseui, extras={}):
         """
         Injects some extra params into baseui instance
         
@@ -264,7 +267,10 @@ class SimpleHg(object):
         :param extras: dict with extra params to put into baseui
         """
 
-        hgrc = os.path.join(self.repo_path, '.hg', 'hgrc')
+        hgrc = os.path.join(repo_path, '.hg', 'hgrc')
+
+        # make our hgweb quiet so it doesn't print output
+        baseui.setconfig('ui', 'quiet', 'true')
 
         #inject some additional parameters that will be available in ui
         #for hooks
@@ -278,3 +284,4 @@ class SimpleHg(object):
             for section in ui_sections:
                 for k, v in repoui.configitems(section):
                     baseui.setconfig(section, k, v)
+
