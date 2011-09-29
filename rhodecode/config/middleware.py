@@ -51,9 +51,6 @@ def make_app(global_conf, full_stack=True, static_files=True, **app_conf):
         from rhodecode.lib.profiler import ProfilingMiddleware
         app = ProfilingMiddleware(app)
 
-    app = SimpleHg(app, config)
-    app = SimpleGit(app, config)
-
     if asbool(full_stack):
         # Handle Python exceptions
         app = ErrorHandler(app, global_conf, **config['pylons.errorware'])
@@ -76,6 +73,11 @@ def make_app(global_conf, full_stack=True, static_files=True, **app_conf):
         static_app = StaticURLParser(config['pylons.paths']['static_files'])
         app = Cascade([static_app, app])
         app = make_gzip_middleware(app, global_conf, compress_level=1)
+
+    # we want our low level middleware to get to the request ASAP. We don't
+    # need any pylons stack middleware in them
+    app = SimpleHg(app, config)
+    app = SimpleGit(app, config)
 
     app.config = config
 

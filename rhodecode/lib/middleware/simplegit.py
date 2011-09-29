@@ -44,11 +44,11 @@ class SimpleGitUploadPackHandler(dulserver.UploadPackHandler):
           get_tagged=self.get_tagged)
 
         # Do they want any objects?
-        if len(objects_iter) == 0:
+        if objects_iter is None or len(objects_iter) == 0:
             return
 
         self.progress("counting objects: %d, done.\n" % len(objects_iter))
-        dulserver.write_pack_data(dulserver.ProtocolFile(None, write),
+        dulserver.write_pack_objects(dulserver.ProtocolFile(None, write),
                                   objects_iter, len(objects_iter))
         messages = []
         messages.append('thank you for using rhodecode')
@@ -96,12 +96,10 @@ class SimpleGit(object):
     def __init__(self, application, config):
         self.application = application
         self.config = config
-        #authenticate this git request using
+        # base path of repo locations
+        self.basepath = self.config['base_path']
+        #authenticate this mercurial request using authfunc
         self.authenticate = AuthBasicAuthenticator('', authfunc)
-        self.ipaddr = '0.0.0.0'
-        self.repo_name = None
-        self.username = None
-        self.action = None
 
     def __call__(self, environ, start_response):
         if not is_git(environ):
@@ -109,31 +107,34 @@ class SimpleGit(object):
 
         proxy_key = 'HTTP_X_REAL_IP'
         def_key = 'REMOTE_ADDR'
-        self.ipaddr = environ.get(proxy_key, environ.get(def_key, '0.0.0.0'))
+        ipaddr = environ.get(proxy_key, environ.get(def_key, '0.0.0.0'))
+        username = None
         # skip passing error to error controller
         environ['pylons.status_code_redirect'] = True
 
         #======================================================================
-        # GET ACTION PULL or PUSH
+        # EXTRACT REPOSITORY NAME FROM ENV
         #======================================================================
-        self.action = self.__get_action(environ)
         try:
-            #==================================================================
-            # GET REPOSITORY NAME
-            #==================================================================
-            self.repo_name = self.__get_repository(environ)
+            repo_name = self.__get_repository(environ)
+            log.debug('Extracted repo name is %s' % repo_name)
         except:
             return HTTPInternalServerError()(environ, start_response)
 
         #======================================================================
+        # GET ACTION PULL or PUSH
+        #======================================================================
+        action = self.__get_action(environ)
+
+        #======================================================================
         # CHECK ANONYMOUS PERMISSION
         #======================================================================
-        if self.action in ['pull', 'push']:
+        if action in ['pull', 'push']:
             anonymous_user = self.__get_user('default')
-            self.username = anonymous_user.username
-            anonymous_perm = self.__check_permission(self.action,
+            username = anonymous_user.username
+            anonymous_perm = self.__check_permission(action,
                                                      anonymous_user,
-                                                     self.repo_name)
+                                                     repo_name)
 
             if anonymous_perm is not True or anonymous_user.active is False:
                 if anonymous_perm is not True:
@@ -162,56 +163,66 @@ class SimpleGit(object):
                 # BASIC AUTH
                 #==============================================================
 
-                if self.action in ['pull', 'push']:
+                if action in ['pull', 'push']:
                     username = REMOTE_USER(environ)
                     try:
                         user = self.__get_user(username)
-                        self.username = user.username
+                        username = user.username
                     except:
                         log.error(traceback.format_exc())
                         return HTTPInternalServerError()(environ,
                                                          start_response)
 
                     #check permissions for this repository
-                    perm = self.__check_permission(self.action, user,
-                                                   self.repo_name)
+                    perm = self.__check_permission(action, user,
+                                                   repo_name)
                     if perm is not True:
                         return HTTPForbidden()(environ, start_response)
 
-        self.extras = {'ip': self.ipaddr,
-                       'username': self.username,
-                       'action': self.action,
-                       'repository': self.repo_name}
+        extras = {'ip': ipaddr,
+                  'username': username,
+                  'action': action,
+                  'repository': repo_name}
 
         #===================================================================
         # GIT REQUEST HANDLING
         #===================================================================
-        self.basepath = self.config['base_path']
-        self.repo_path = os.path.join(self.basepath, self.repo_name)
-        #quick check if that dir exists...
-        if check_repo_fast(self.repo_name, self.basepath):
+
+        repo_path = safe_str(os.path.join(self.basepath, repo_name))
+        log.debug('Repository path is %s' % repo_path)
+
+        # quick check if that dir exists...
+        if check_repo_fast(repo_name, self.basepath):
             return HTTPNotFound()(environ, start_response)
+
         try:
-            app = self.__make_app()
-        except:
+            #invalidate cache on push
+            if action == 'push':
+                self.__invalidate_cache(repo_name)
+
+            app = self.__make_app(repo_name, repo_path)
+            return app(environ, start_response)
+        except Exception:
             log.error(traceback.format_exc())
             return HTTPInternalServerError()(environ, start_response)
 
-        #invalidate cache on push
-        if self.action == 'push':
-            self.__invalidate_cache(self.repo_name)
+    def __make_app(self, repo_name, repo_path):
+        """
+        Make an wsgi application using dulserver
+        
+        :param repo_name: name of the repository
+        :param repo_path: full path to the repository
+        """
 
-        return app(environ, start_response)
-
-    def __make_app(self):
-        _d = {'/' + self.repo_name: Repo(self.repo_path)}
+        _d = {'/' + repo_name: Repo(repo_path)}
         backend = dulserver.DictBackend(_d)
         gitserve = HTTPGitApplication(backend)
 
         return gitserve
 
     def __check_permission(self, action, user, repo_name):
-        """Checks permissions using action (push/pull) user and repository
+        """
+        Checks permissions using action (push/pull) user and repository
         name
 
         :param action: push or pull action
@@ -235,7 +246,8 @@ class SimpleGit(object):
         return True
 
     def __get_repository(self, environ):
-        """Get's repository name out of PATH_INFO header
+        """
+        Get's repository name out of PATH_INFO header
 
         :param environ: environ where PATH_INFO is stored
         """
@@ -274,3 +286,4 @@ class SimpleGit(object):
         invalidate the cache to see the changes right away but only for
         push requests"""
         invalidate_cache('get_repo_cached_%s' % repo_name)
+
