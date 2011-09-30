@@ -411,42 +411,30 @@ class DbManage(object):
 
     def create_user(self, username, password, email='', admin=False):
         log.info('creating administrator user %s', username)
-        new_user = User()
-        new_user.username = username
-        new_user.password = get_crypt_password(password)
-        new_user.api_key = generate_api_key(username)
-        new_user.name = 'RhodeCode'
-        new_user.lastname = 'Admin'
-        new_user.email = email
-        new_user.admin = admin
-        new_user.active = True
+        
+        form_data = dict(username=username,
+                         password=password,
+                         active=True,
+                         admin=admin,
+                         name='RhodeCode',
+                         lastname='Admin',
+                         email=email)
+        User.create(form_data)
 
-        try:
-            self.sa.add(new_user)
-            self.sa.commit()
-        except:
-            self.sa.rollback()
-            raise
 
     def create_default_user(self):
         log.info('creating default user')
         #create default user for handling default permissions.
-        def_user = User()
-        def_user.username = 'default'
-        def_user.password = get_crypt_password(str(uuid.uuid1())[:8])
-        def_user.api_key = generate_api_key('default')
-        def_user.name = 'Anonymous'
-        def_user.lastname = 'User'
-        def_user.email = 'anonymous@rhodecode.org'
-        def_user.admin = False
-        def_user.active = False
-        try:
-            self.sa.add(def_user)
-            self.sa.commit()
-        except:
-            self.sa.rollback()
-            raise
 
+        form_data = dict(username='default',
+                         password=str(uuid.uuid1())[:8],
+                         active=False,
+                         admin=False,
+                         name='Anonymous',
+                         lastname='User',
+                         email='anonymous@rhodecode.org')
+        User.create(form_data)
+        
     def create_permissions(self):
         #module.(access|create|change|delete)_[name]
         #module.(read|write|owner)
