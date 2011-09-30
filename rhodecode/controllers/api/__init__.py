@@ -136,25 +136,29 @@ class JSONRPCController(WSGIController):
 
         # this is little trick to inject logged in user for 
         # perms decorators to work they expect the controller class to have
-        # rhodecode_user set
+        # rhodecode_user attribute set
         self.rhodecode_user = auth_u
 
-        if 'user' not in arglist:
+        # This attribute will need to be first param of a method that uses
+        # api_key, which is translated to instance of user at that name
+        USER_SESSION_ATTR = 'apiuser'
+
+        if USER_SESSION_ATTR not in arglist:
             return jsonrpc_error(message='This method [%s] does not support '
-                                 'authentication (missing user param)' %
-                                 self._func.__name__)
+                                 'authentication (missing %s param)' %
+                                 (self._func.__name__, USER_SESSION_ATTR))
 
         # get our arglist and check if we provided them as args
         for arg in arglist:
-            if arg == 'user':
-                # user is something translated from api key and this is
-                # checked before
+            if arg == USER_SESSION_ATTR:
+                # USER_SESSION_ATTR is something translated from api key and 
+                # this is checked before so we don't need validate it
                 continue
 
             if not self._req_params or arg not in self._req_params:
                 return jsonrpc_error(message='Missing %s arg in JSON DATA' % arg)
 
-        self._rpc_args = dict(user=u)
+        self._rpc_args = {USER_SESSION_ATTR:u}
         self._rpc_args.update(self._req_params)
 
         self._rpc_args['action'] = self._req_method
@@ -183,7 +187,6 @@ class JSONRPCController(WSGIController):
         """
         try:
             raw_response = self._inspect_call(self._func)
-            print raw_response
             if isinstance(raw_response, HTTPError):
                 self._error = str(raw_response)
         except JSONRPCError as e:
@@ -223,3 +226,4 @@ class JSONRPCController(WSGIController):
             return func
         else:
             raise AttributeError("No such method: %s" % self._req_method)
+

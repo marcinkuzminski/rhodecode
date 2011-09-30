@@ -38,12 +38,13 @@ from beaker.cache import cache_region, region_invalidate
 
 from vcs import get_backend
 from vcs.utils.helpers import get_scm
-from vcs.exceptions import RepositoryError, VCSError
+from vcs.exceptions import VCSError
 from vcs.utils.lazy import LazyProperty
-from vcs.nodes import FileNode
 
 from rhodecode.lib.exceptions import UsersGroupsAssignedException
-from rhodecode.lib import str2bool, json, safe_str, get_changeset_safe
+from rhodecode.lib import str2bool, json, safe_str, get_changeset_safe,\
+    generate_api_key
+
 from rhodecode.model.meta import Base, Session
 from rhodecode.model.caching_query import FromCache
 
@@ -298,6 +299,25 @@ class User(Base, BaseModel):
         Session.commit()
         log.debug('updated user %s lastlogin', self.username)
 
+    @classmethod
+    def create(cls, form_data):
+        from rhodecode.lib.auth import get_crypt_password
+        
+        try:
+            new_user = cls()
+            for k, v in form_data.items():
+                if k == 'password':
+                    v = get_crypt_password(v)
+                setattr(new_user, k, v)
+
+            new_user.api_key = generate_api_key(form_data['username'])
+            Session.add(new_user)
+            Session.commit()
+            return new_user
+        except:
+            log.error(traceback.format_exc())
+            Session.rollback()
+            raise
 
 class UserLog(Base, BaseModel):
     __tablename__ = 'user_logs'
@@ -362,6 +382,7 @@ class UsersGroup(Base, BaseModel):
 
             Session.add(new_users_group)
             Session.commit()
+            return new_users_group
         except:
             log.error(traceback.format_exc())
             Session.rollback()
