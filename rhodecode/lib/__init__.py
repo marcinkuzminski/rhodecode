@@ -168,24 +168,27 @@ def safe_unicode(str_, from_encoding='utf8'):
     :rtype: unicode
     :returns: unicode object
     """
-
     if isinstance(str_, unicode):
         return str_
+
+    try:
+        return unicode(str_)
+    except UnicodeDecodeError:
+        pass
 
     try:
         return unicode(str_, from_encoding)
     except UnicodeDecodeError:
         pass
-    
-    try:        
+
+    try:
         import chardet
         encoding = chardet.detect(str_)['encoding']
         if encoding is None:
-            raise UnicodeDecodeError()
-        
+            raise Exception()
         return str_.decode(encoding)
-    except (ImportError, UnicodeDecodeError):
-        return unicode(str_, from_encoding, 'replace')    
+    except (ImportError, UnicodeDecodeError, Exception):
+        return unicode(str_, from_encoding, 'replace')
 
 def safe_str(unicode_, to_encoding='utf8'):
     """
