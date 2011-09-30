@@ -23,19 +23,21 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import logging
+import traceback
+import formencode
 from formencode import htmlfill
+
 from pylons import request, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
 from pylons.i18n.translation import _
+
 from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator
 from rhodecode.lib.base import BaseController, render
-from rhodecode.model.forms import LdapSettingsForm, DefaultPermissionsForm
+from rhodecode.model.forms import DefaultPermissionsForm
 from rhodecode.model.permission import PermissionModel
-from rhodecode.model.user import UserModel
-import formencode
-import logging
-import traceback
+from rhodecode.model.db import User
 
 log = logging.getLogger(__name__)
 
@@ -142,7 +144,7 @@ class PermissionsController(BaseController):
         c.create_choices = self.create_choices
 
         if id == 'default':
-            default_user = UserModel().get_by_username('default')
+            default_user = User.by_username('default')
             defaults = {'_method': 'put',
                         'anonymous': default_user.active}
 

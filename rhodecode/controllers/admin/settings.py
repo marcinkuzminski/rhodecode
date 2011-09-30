@@ -46,6 +46,7 @@ from rhodecode.model.forms import UserForm, ApplicationSettingsForm, \
     ApplicationUiSettingsForm
 from rhodecode.model.scm import ScmModel
 from rhodecode.model.user import UserModel
+from rhodecode.model.db import User
 
 log = logging.getLogger(__name__)
 
@@ -299,7 +300,7 @@ class SettingsController(BaseController):
         """
         # url('admin_settings_my_account')
 
-        c.user = UserModel().get(self.rhodecode_user.user_id, cache=False)
+        c.user = User.get(self.rhodecode_user.user_id)
         all_repos = self.sa.query(Repository)\
                      .filter(Repository.user_id == c.user.user_id)\
                      .order_by(func.lower(Repository.repo_name)).all()
@@ -340,8 +341,7 @@ class SettingsController(BaseController):
                     category='success')
 
         except formencode.Invalid, errors:
-            c.user = user_model.get(self.rhodecode_user.user_id, cache=False)
-            c.user = UserModel().get(self.rhodecode_user.user_id, cache=False)
+            c.user = User.get(self.rhodecode_user.user_id)
             all_repos = self.sa.query(Repository)\
                 .filter(Repository.user_id == c.user.user_id)\
                 .order_by(func.lower(Repository.repo_name))\
