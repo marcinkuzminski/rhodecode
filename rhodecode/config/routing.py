@@ -20,8 +20,8 @@ def make_map(config):
     rmap.minimization = False
     rmap.explicit = False
     
-    from rhodecode.lib.utils import check_repo_fast
-    from rhodecode.lib.utils import check_repos_group_fast
+    from rhodecode.lib.utils import is_valid_repo
+    from rhodecode.lib.utils import is_valid_repos_group
     
     def check_repo(environ, match_dict):
         """
@@ -32,7 +32,7 @@ def make_map(config):
         """
          
         repo_name = match_dict.get('repo_name')
-        return check_repo_fast(repo_name, config['base_path'])
+        return is_valid_repo(repo_name, config['base_path'])
 
     def check_group(environ, match_dict):
         """
@@ -43,7 +43,7 @@ def make_map(config):
         """
         repos_group_name = match_dict.get('group_name')
         
-        return check_repos_group_fast(repos_group_name, config['base_path'])
+        return is_valid_repos_group(repos_group_name, config['base_path'])
 
 
     def check_int(environ, match_dict):

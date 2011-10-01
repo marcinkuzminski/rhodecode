@@ -37,7 +37,7 @@ from paste.httpheaders import REMOTE_USER, AUTH_TYPE
 from rhodecode.lib import safe_str
 from rhodecode.lib.auth import authfunc, HasPermissionAnyMiddleware
 from rhodecode.lib.utils import make_ui, invalidate_cache, \
-    check_repo_fast, ui_sections
+    is_valid_repo, ui_sections
 from rhodecode.model.db import User
 
 from webob.exc import HTTPNotFound, HTTPForbidden, HTTPInternalServerError
@@ -161,7 +161,7 @@ class SimpleHg(object):
         
 
         # quick check if that dir exists...
-        if check_repo_fast(repo_name, self.basepath) is False:
+        if is_valid_repo(repo_name, self.basepath) is False:
             return HTTPNotFound()(environ, start_response)
 
         try:

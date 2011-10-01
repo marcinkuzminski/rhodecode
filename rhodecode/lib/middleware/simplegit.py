@@ -71,7 +71,7 @@ from paste.httpheaders import REMOTE_USER, AUTH_TYPE
 
 from rhodecode.lib import safe_str
 from rhodecode.lib.auth import authfunc, HasPermissionAnyMiddleware
-from rhodecode.lib.utils import invalidate_cache, check_repo_fast
+from rhodecode.lib.utils import invalidate_cache, is_valid_repo
 from rhodecode.model.db import User
 
 from webob.exc import HTTPNotFound, HTTPForbidden, HTTPInternalServerError
@@ -192,7 +192,7 @@ class SimpleGit(object):
         log.debug('Repository path is %s' % repo_path)
 
         # quick check if that dir exists...
-        if check_repo_fast(repo_name, self.basepath) is False:
+        if is_valid_repo(repo_name, self.basepath) is False:
             return HTTPNotFound()(environ, start_response)
 
         try:

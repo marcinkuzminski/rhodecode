@@ -301,7 +301,7 @@ class RepoModel(BaseModel):
         :param parent_id:
         :param clone_uri:
         """
-        from rhodecode.lib.utils import check_repo_fast
+        from rhodecode.lib.utils import is_valid_repo
         
         if new_parent_id:
             paths = Group.get(new_parent_id).full_path.split(Group.url_sep())
@@ -312,7 +312,7 @@ class RepoModel(BaseModel):
         repo_path = os.path.join(*map(lambda x:safe_str(x),
                                 [self.repos_path, new_parent_path, repo_name]))
 
-        if check_repo_fast(repo_path, self.repos_path) is False:
+        if is_valid_repo(repo_path, self.repos_path) is False:
             log.info('creating repo %s in %s @ %s', repo_name, repo_path,
                      clone_uri)
             backend = get_backend(alias)

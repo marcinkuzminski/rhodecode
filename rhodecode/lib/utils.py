@@ -180,7 +180,7 @@ def get_repos(path, recursive=False):
     return _get_repos(path)
 
 
-def check_repo_fast(repo_name, base_path):
+def is_valid_repo(repo_name, base_path):
     """
     Returns True if given path is a valid repository False otherwise
     :param repo_name:
@@ -196,7 +196,7 @@ def check_repo_fast(repo_name, base_path):
     except VCSError:
         return False
 
-def check_repos_group_fast(repos_group_name, base_path):
+def is_valid_repos_group(repos_group_name, base_path):
     """
     Returns True if given path is a repos group False otherwise
     
@@ -206,7 +206,7 @@ def check_repos_group_fast(repos_group_name, base_path):
     full_path = os.path.join(base_path, repos_group_name)
     
     # check if it's not a repo
-    if check_repo_fast(repos_group_name, base_path):
+    if is_valid_repo(repos_group_name, base_path):
         return False
     
     # check if it's a valid path
