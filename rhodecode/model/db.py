@@ -504,28 +504,6 @@ class Repository(Base, BaseModel):
         return "<%s('%s:%s')>" % (self.__class__.__name__,
                                   self.repo_id, self.repo_name)
 
-    @staticmethod
-    def create(name, description, repo_type, private, owner, group, clone):
-        try:
-            repo = Repository()
-            repo.repo_name = name
-            repo.clone_uri = clone
-            repo.repo_type = repo_type
-            repo.user = owner
-            repo.private = private
-            repo.description = description
-            repo.group = group
-
-            Session.add(repo)
-            Session.commit()
-
-            RepoToPerm.create(repo, owner, Permission.get_by_name('repository.write'))
-            return repo
-        except:
-            log.error(traceback.format_exc())
-            Session.rollback()
-            raise
-
     @classmethod
     def by_repo_name(cls, repo_name):
         q = cls.query().filter(cls.repo_name == repo_name)
@@ -855,23 +833,6 @@ class RepoToPerm(Base, BaseModel):
     user = relationship('User')
     permission = relationship('Permission')
     repository = relationship('Repository')
-
-    @staticmethod
-    def create(repo, user, p):
-        try:
-            perm = RepoToPerm()
-            perm.repository = repo
-            perm.user = user
-            perm.permission = p
-
-            Session.add(perm)
-            Session.commit()
-
-            return perm
-        except:
-            log.error(traceback.format_exc())
-            Session.rollback()
-            raise
 
 class UserToPerm(Base, BaseModel):
     __tablename__ = 'user_to_perm'
