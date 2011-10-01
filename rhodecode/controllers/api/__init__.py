@@ -30,6 +30,7 @@ import json
 import logging
 import types
 import urllib
+from itertools import izip_longest
 
 from paste.response import replace_header
 
@@ -132,7 +133,12 @@ class JSONRPCController(WSGIController):
 
         # now that we have a method, add self._req_params to
         # self.kargs and dispatch control to WGIController
-        arglist = inspect.getargspec(self._func)[0][1:]
+        argspec = inspect.getargspec(self._func)
+        arglist = argspec[0][1:]
+        defaults = argspec[3]
+        default_empty = types.NotImplementedType
+        kwarglist = list(izip_longest(reversed(arglist),reversed(defaults),
+                                fillvalue=default_empty))
 
         # this is little trick to inject logged in user for 
         # perms decorators to work they expect the controller class to have
@@ -149,14 +155,18 @@ class JSONRPCController(WSGIController):
                                  (self._func.__name__, USER_SESSION_ATTR))
 
         # get our arglist and check if we provided them as args
-        for arg in arglist:
+        for arg,default in kwarglist:
             if arg == USER_SESSION_ATTR:
                 # USER_SESSION_ATTR is something translated from api key and 
                 # this is checked before so we don't need validate it
                 continue
-
-            if not self._req_params or arg not in self._req_params:
-                return jsonrpc_error(message='Missing %s arg in JSON DATA' % arg)
+            
+            # skip the required param check if it's default value is 
+            # NotImplementedType (default_empty)
+            if not self._req_params or (type(default) == default_empty
+                                        and arg not in self._req_params):
+                return jsonrpc_error(message=('Missing non optional %s arg '
+                                              'in JSON DATA') % arg)
 
         self._rpc_args = {USER_SESSION_ATTR:u}
         self._rpc_args.update(self._req_params)
