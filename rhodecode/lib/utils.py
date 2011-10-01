@@ -33,23 +33,21 @@ from os.path import dirname as dn, join as jn
 
 from paste.script.command import Command, BadCommand
 
-from UserDict import DictMixin
-
-from mercurial import ui, config, hg
-from mercurial.error import RepoError
+from mercurial import ui, config
 
 from webhelpers.text import collapse, remove_formatting, strip_tags
 
+from vcs import get_backend
 from vcs.backends.base import BaseChangeset
 from vcs.utils.lazy import LazyProperty
-from vcs import get_backend
+from vcs.utils.helpers import get_scm
+from vcs.exceptions import VCSError
 
 from rhodecode.model import meta
 from rhodecode.model.caching_query import FromCache
 from rhodecode.model.db import Repository, User, RhodeCodeUi, UserLog, Group, \
     RhodeCodeSettings
 from rhodecode.model.repo import RepoModel
-from rhodecode.model.user import UserModel
 
 log = logging.getLogger(__name__)
 
@@ -111,11 +109,10 @@ def action_logger(user, action, repo, ipaddr='', sa=None):
         sa = meta.Session()
 
     try:
-        um = UserModel()
         if hasattr(user, 'user_id'):
             user_obj = user
         elif isinstance(user, basestring):
-            user_obj = um.get_by_username(user, cache=False)
+            user_obj = User.by_username(user, cache=False)
         else:
             raise Exception('You have to provide user object or username')
 
@@ -185,36 +182,39 @@ def get_repos(path, recursive=False):
 
 def check_repo_fast(repo_name, base_path):
     """
-    Check given path for existence of directory
+    Returns True if given path is a valid repository False otherwise
     :param repo_name:
     :param base_path:
 
-    :return False: if this directory is present
+    :return True: if given path is a valid repository
     """
-    if os.path.isdir(os.path.join(base_path, repo_name)):
-        return False
-    return True
-
-
-def check_repo(repo_name, base_path, verify=True):
-
-    repo_path = os.path.join(base_path, repo_name)
-
+    full_path = os.path.join(base_path, repo_name)
+    
     try:
-        if not check_repo_fast(repo_name, base_path):
-            return False
-        r = hg.repository(ui.ui(), repo_path)
-        if verify:
-            hg.verify(r)
-        #here we hnow that repo exists it was verified
-        log.info('%s repo is already created', repo_name)
-        return False
-    except RepoError:
-        #it means that there is no valid repo there...
-        log.info('%s repo is free for creation', repo_name)
+        get_scm(full_path)
         return True
+    except VCSError:
+        return False
 
-
+def check_repos_group_fast(repos_group_name, base_path):
+    """
+    Returns True if given path is a repos group False otherwise
+    
+    :param repo_name:
+    :param base_path:
+    """
+    full_path = os.path.join(base_path, repos_group_name)
+    
+    # check if it's not a repo
+    if check_repo_fast(repos_group_name, base_path):
+        return False
+    
+    # check if it's a valid path
+    if os.path.isdir(full_path):
+        return True
+    
+    return False
+    
 def ask_ok(prompt, retries=4, complaint='Yes or no, please!'):
     while True:
         ok = raw_input(prompt)

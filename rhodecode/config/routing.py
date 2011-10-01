@@ -7,7 +7,7 @@ refer to the routes manual at http://routes.groovie.org/docs/
 """
 from __future__ import with_statement
 from routes import Mapper
-from rhodecode.lib.utils import check_repo_fast as cr
+
 
 # prefix for non repository related links needs to be prefixed with `/`
 ADMIN_PREFIX = '/_admin'
@@ -19,22 +19,35 @@ def make_map(config):
                  always_scan=config['debug'])
     rmap.minimization = False
     rmap.explicit = False
-
+    
+    from rhodecode.lib.utils import check_repo_fast
+    from rhodecode.lib.utils import check_repos_group_fast
+    
     def check_repo(environ, match_dict):
         """
         check for valid repository for proper 404 handling
+        
         :param environ:
         :param match_dict:
         """
+         
         repo_name = match_dict.get('repo_name')
-        return not cr(repo_name, config['base_path'])
+        return check_repo_fast(repo_name, config['base_path'])
+
+    def check_group(environ, match_dict):
+        """
+        check for valid repositories group for proper 404 handling
+        
+        :param environ:
+        :param match_dict:
+        """
+        repos_group_name = match_dict.get('group_name')
+        
+        return check_repos_group_fast(repos_group_name, config['base_path'])
 
 
     def check_int(environ, match_dict):
         return match_dict.get('id').isdigit()
-
-
-
 
     # The ErrorController route (handles 404/500 error pages); it should
     # likely stay at the top, ensuring it can always be resolved
@@ -319,6 +332,14 @@ def make_map(config):
     #==========================================================================
     # REPOSITORY ROUTES
     #==========================================================================
+    rmap.connect('summary_home', '/{repo_name:.*}',
+                controller='summary', 
+                conditions=dict(function=check_repo))
+    
+#    rmap.connect('repo_group_home', '/{group_name:.*}',
+#                controller='admin/repos_groups',action="show_by_name", 
+#                conditions=dict(function=check_group))
+    
     rmap.connect('changeset_home', '/{repo_name:.*}/changeset/{revision}',
                 controller='changeset', revision='tip',
                 conditions=dict(function=check_repo))
@@ -327,9 +348,6 @@ def make_map(config):
                  '/{repo_name:.*}/raw-changeset/{revision}',
                  controller='changeset', action='raw_changeset',
                  revision='tip', conditions=dict(function=check_repo))
-
-    rmap.connect('summary_home', '/{repo_name:.*}',
-                controller='summary', conditions=dict(function=check_repo))
 
     rmap.connect('summary_home', '/{repo_name:.*}/summary',
                 controller='summary', conditions=dict(function=check_repo))
