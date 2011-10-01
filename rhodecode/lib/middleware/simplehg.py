@@ -161,7 +161,7 @@ class SimpleHg(object):
         
 
         # quick check if that dir exists...
-        if check_repo_fast(repo_name, self.basepath):
+        if check_repo_fast(repo_name, self.basepath) is False:
             return HTTPNotFound()(environ, start_response)
 
         try:
