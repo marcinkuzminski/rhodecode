@@ -307,6 +307,10 @@ class ScmModel(BaseModel):
 
     def pull_changes(self, repo_name, username):
         dbrepo = Repository.by_repo_name(repo_name)
+        clone_uri = dbrepo.clone_uri
+        if not clone_uri:
+            raise Exception("This repository doesn't have a clone uri")
+        
         repo = dbrepo.scm_instance
         try:
             extras = {'ip': '',
@@ -318,12 +322,11 @@ class ScmModel(BaseModel):
             for k, v in extras.items():
                 repo._repo.ui.setconfig('rhodecode_extras', k, v)
 
-            repo.pull(dbrepo.clone_uri)
+            repo.pull(clone_uri)
             self.mark_for_invalidation(repo_name)
         except:
             log.error(traceback.format_exc())
             raise
-
 
     def commit_change(self, repo, repo_name, cs, user, author, message, content,
                       f_path):

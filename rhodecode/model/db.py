@@ -499,6 +499,17 @@ class Repository(Base, BaseModel):
     def get_repo_forks(cls, repo_id):
         return Session.query(cls).filter(Repository.fork_id == repo_id)
 
+    @classmethod
+    def base_path(cls):
+        """
+        Returns base path when all repos are stored
+        
+        :param cls:
+        """
+        q = Session.query(RhodeCodeUi).filter(RhodeCodeUi.ui_key == '/')
+        q.options(FromCache("sql_cache_short", "repository_repo_path"))
+        return q.one().ui_value
+
     @property
     def just_name(self):
         return self.repo_name.split(os.sep)[-1]
@@ -569,6 +580,19 @@ class Repository(Base, BaseModel):
                 baseui.setconfig(ui_.ui_section, ui_.ui_key, ui_.ui_value)
 
         return baseui
+
+    @classmethod
+    def is_valid(cls, repo_name):
+        """
+        returns True if given repo name is a valid filesystem repository
+         
+        @param cls:
+        @param repo_name:
+        """
+        from rhodecode.lib.utils import is_valid_repo
+
+        return is_valid_repo(repo_name, cls.base_path())
+
 
     #==========================================================================
     # SCM PROPERTIES

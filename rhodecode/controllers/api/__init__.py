@@ -30,6 +30,7 @@ import json
 import logging
 import types
 import urllib
+import traceback
 from itertools import izip_longest
 
 from paste.response import replace_header
@@ -135,8 +136,9 @@ class JSONRPCController(WSGIController):
         # self.kargs and dispatch control to WGIController
         argspec = inspect.getargspec(self._func)
         arglist = argspec[0][1:]
-        defaults = argspec[3]
+        defaults = argspec[3] or []
         default_empty = types.NotImplementedType
+        
         kwarglist = list(izip_longest(reversed(arglist),reversed(defaults),
                                 fillvalue=default_empty))
 
@@ -202,7 +204,7 @@ class JSONRPCController(WSGIController):
         except JSONRPCError as e:
             self._error = str(e)
         except Exception as e:
-            log.debug('Encountered unhandled exception: %s', repr(e))
+            log.error('Encountered unhandled exception: %s' % traceback.format_exc())
             json_exc = JSONRPCError('Internal server error')
             self._error = str(json_exc)
 

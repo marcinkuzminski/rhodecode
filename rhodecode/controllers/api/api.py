@@ -5,7 +5,7 @@ from rhodecode.controllers.api import JSONRPCController, JSONRPCError
 from rhodecode.lib.auth import HasPermissionAllDecorator
 from rhodecode.model.scm import ScmModel
 
-from rhodecode.model.db import User, UsersGroup
+from rhodecode.model.db import User, UsersGroup, Repository
 
 log = logging.getLogger(__name__)
 
@@ -36,6 +36,9 @@ class ApiController(JSONRPCController):
         :param repo:
         """
 
+        if Repository.is_valid(repo) is False:
+            raise JSONRPCError('Unknown repo "%s"' % repo)
+        
         try:
             ScmModel().pull_changes(repo, self.rhodecode_user.username)
             return 'Pulled from %s' % repo
