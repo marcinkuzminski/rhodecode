@@ -48,7 +48,6 @@ PERM_WEIGHTS = {'repository.none': 0,
 
 
 class UserModel(BaseModel):
-
     def get(self, user_id, cache=False):
         user = self.sa.query(User)
         if cache:
@@ -86,6 +85,7 @@ class UserModel(BaseModel):
             new_user.api_key = generate_api_key(form_data['username'])
             self.sa.add(new_user)
             self.sa.commit()
+            return new_user
         except:
             log.error(traceback.format_exc())
             self.sa.rollback()

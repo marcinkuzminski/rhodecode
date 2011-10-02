@@ -454,22 +454,6 @@ class UsersGroupMember(Base, BaseModel):
         self.users_group_id = gr_id
         self.user_id = u_id
 
-    @classmethod
-    def create(cls, user, users_group):
-        try:
-            users_group_member = cls()
-            users_group_member.user = user
-            users_group_member.users_group = users_group
-
-            Session.add(users_group_member)
-            Session.commit()
-            return users_group_member
-        except:
-            log.error(traceback.format_exc())
-            Session.rollback()
-            raise
-
-
 class Repository(Base, BaseModel):
     __tablename__ = 'repositories'
     __table_args__ = (UniqueConstraint('repo_name'), {'extend_existing':True},)
@@ -817,10 +801,6 @@ class Permission(Base, BaseModel):
     @classmethod
     def get_by_key(cls, key):
         return cls.query().filter(cls.permission_name == key).scalar()
-
-    @classmethod
-    def get_by_name(cls, name):
-        return cls.query().filter(cls.permission_name == name).one()
 
 class RepoToPerm(Base, BaseModel):
     __tablename__ = 'repo_to_perm'
