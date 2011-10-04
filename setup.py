@@ -12,6 +12,7 @@ if py_version < (2, 5):
 requirements = [
         "Pylons==1.0.0",
         "WebHelpers>=1.2",
+        "formencode==1.2.4",
         "SQLAlchemy>=0.7.2,<0.8",
         "Mako>=0.4.2",
         "pygments>=1.4",
