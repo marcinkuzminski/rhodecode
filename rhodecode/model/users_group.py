@@ -30,52 +30,55 @@ from rhodecode.model import BaseModel
 from rhodecode.model.caching_query import FromCache
 from rhodecode.model.db import UsersGroupMember, UsersGroup
 
-log = logging.getLogger(__name__)
+log = logging.getLogger( __name__ )
 
-class UsersGroupModel(BaseModel):
+class UsersGroupModel( BaseModel ):
 
-    def get(self, users_group_id, cache=False):
+    def get( self, users_group_id, cache = False ):
         users_group = UsersGroup.query()
         if cache:
-            users_group = users_group.options(FromCache("sql_cache_short",
-                                          "get_users_group_%s" % users_group_id))
-        return users_group.get(users_group_id)
+            users_group = users_group.options( FromCache( "sql_cache_short",
+                                          "get_users_group_%s" % users_group_id ) )
+        return users_group.get( users_group_id )
 
-    def get_by_name(self, name, cache=False, case_insensitive=False):
+    def get_by_name( self, name, cache = False, case_insensitive = False ):
         users_group = UsersGroup.query()
         if case_insensitive:
-            users_group = users_group.filter(UsersGroup.users_group_name.ilike(name))
+            users_group = users_group.filter( UsersGroup.users_group_name.ilike( name ) )
         else:
-            users_group = users_group.filter(UsersGroup.users_group_name == name)
+            users_group = users_group.filter( UsersGroup.users_group_name == name )
         if cache:
-            users_group = users_group.options(FromCache("sql_cache_short",
-                                          "get_users_group_%s" % name))
+            users_group = users_group.options( FromCache( "sql_cache_short",
+                                          "get_users_group_%s" % name ) )
         return users_group.scalar()
 
-    def create(self, form_data):
+    def create( self, form_data ):
         try:
             new_users_group = UsersGroup()
             for k, v in form_data.items():
-                setattr(new_users_group, k, v)
+                setattr( new_users_group, k, v )
 
-            self.sa.add(new_users_group)
+            self.sa.add( new_users_group )
             self.sa.commit()
             return new_users_group
         except:
-            log.error(traceback.format_exc())
+            log.error( traceback.format_exc() )
             self.sa.rollback()
             raise
 
-    def add_user_to_group(self, users_group, user):
+    def add_user_to_group( self, users_group, user ):
         try:
             users_group_member = UsersGroupMember()
             users_group_member.user = user
             users_group_member.users_group = users_group
 
-            self.sa.add(users_group_member)
+            users_group.members.append( users_group_member )
+            user.group_member.append( users_group_member )
+
+            self.sa.add( users_group_member )
             self.sa.commit()
             return users_group_member
         except:
-            log.error(traceback.format_exc())
+            log.error( traceback.format_exc() )
             self.sa.rollback()
             raise
