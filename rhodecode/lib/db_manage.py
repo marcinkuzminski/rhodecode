@@ -160,7 +160,9 @@ class DbManage(object):
             def step_3(self):
                 print ('Adding additional settings into RhodeCode db')
                 self.klass.fix_settings()
-
+                print ('Adding ldap defaults')
+                self.klass.create_ldap_options(skip_existing=True)
+                
         upgrade_steps = [0] + range(curr_version + 1, __dbversion__ + 1)
 
         #CALL THE PROPER ORDER OF STEPS TO PERFORM FULL UPGRADE
@@ -307,7 +309,7 @@ class DbManage(object):
             self.sa.rollback()
             raise
 
-    def create_ldap_options(self):
+    def create_ldap_options(self,skip_existing=False):
         """Creates ldap settings"""
 
         try:
@@ -319,6 +321,9 @@ class DbManage(object):
                         ('ldap_attr_login', ''), ('ldap_attr_firstname', ''),
                         ('ldap_attr_lastname', ''), ('ldap_attr_email', '')]:
 
+                if skip_existing and RhodeCodeSettings.get_by_name(k) != None:
+                    log.debug('Skipping option %s' % k)
+                    continue
                 setting = RhodeCodeSettings(k, v)
                 self.sa.add(setting)
             self.sa.commit()
