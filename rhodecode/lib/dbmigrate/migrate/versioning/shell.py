@@ -77,8 +77,7 @@ def main(argv=None, **kwargs):
         %s
 
     Enter "%%prog help COMMAND" for information on a particular command.
-    """ % '\n\t'.join(["%s - %s" % (command.ljust(28),
-                    api.command_desc.get(command)) for command in commands])
+    """ % '\n\t'.join(["%s - %s" % (command.ljust(28), api.command_desc.get(command)) for command in commands])
 
     parser = PassiveOptionParser(usage=usage)
     parser.add_option("-d", "--debug",

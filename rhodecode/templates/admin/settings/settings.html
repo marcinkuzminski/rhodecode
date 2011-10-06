@@ -42,7 +42,7 @@
 			</div>
                             
             <div class="buttons">
-            ${h.submit('rescan','Rescan repositories',class_="ui-button ui-widget ui-state-default ui-corner-all")}
+            ${h.submit('rescan',_('Rescan repositories'),class_="ui-button")}
             </div>                                                          
         </div>
     </div>  
@@ -67,7 +67,7 @@
             </div>
                             
             <div class="buttons">
-            ${h.submit('reindex','Reindex',class_="ui-button ui-widget ui-state-default ui-corner-all")}
+            ${h.submit('reindex',_('Reindex'),class_="ui-button")}
             </div>                                                          
         </div>
     </div>  
@@ -97,10 +97,19 @@
                     ${h.text('rhodecode_realm',size=30)}
                 </div>
             </div>
-                                     
+            
+            <div class="field">
+                <div class="label">
+                    <label for="ga_code">${_('GA code')}:</label>
+                </div>
+                <div class="input">
+                    ${h.text('rhodecode_ga_code',size=30)}
+                </div>
+            </div>
+                                                 
             <div class="buttons">
-                ${h.submit('save','Save settings',class_="ui-button ui-widget ui-state-default ui-corner-all")}
-                ${h.reset('reset','Reset',class_="ui-button ui-widget ui-state-default ui-corner-all")}
+                ${h.submit('save',_('Save settings'),class_="ui-button")}
+                ${h.reset('reset',_('Reset'),class_="ui-button")}
            </div>                                                          
         </div>
     </div>      
@@ -129,6 +138,9 @@
                 <div class="label label-checkbox">
                     <label for="web_push_ssl">${_('Hooks')}:</label>
                 </div>
+                <div class="input">
+                    ${h.link_to(_('advanced setup'),url('admin_edit_setting',setting_id='hooks'))}
+                </div>                
                 <div class="checkboxes">
 					<div class="checkbox">
 						${h.checkbox('hooks_changegroup_update','True')}
@@ -156,14 +168,14 @@
                 <div class="input">
                     ${h.text('paths_root_path',size=30,readonly="readonly")}			                    
 					<span id="path_unlock" class="tooltip" 
-						title="${h.tooltip(_('This a crucial application setting. If You really sure you need to change this, you must restart application in order to make this settings take effect. Click this label to unlock.'))}">
+						title="${h.tooltip(_('This a crucial application setting. If you are really sure you need to change this, you must restart application in order to make this setting take effect. Click this label to unlock.'))}">
 		                ${_('unlock')}</span>
                 </div>
             </div>
                                      
             <div class="buttons">
-                ${h.submit('save','Save settings',class_="ui-button ui-widget ui-state-default ui-corner-all")}
-                ${h.reset('reset','Reset',class_="ui-button ui-widget ui-state-default ui-corner-all")}
+                ${h.submit('save',_('Save settings'),class_="ui-button")}
+                ${h.reset('reset',_('Reset'),class_="ui-button")}
            </div>                                                          
         </div>
     </div>      

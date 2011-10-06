@@ -21,13 +21,13 @@
     <div class="title">
         ${self.breadcrumbs()}       
     </div>
-    <h3>${_('LDAP administration')}</h3>
     ${h.form(url('ldap_settings'))}
     <div class="form">
         <div class="fields">
 
+	  <h3>${_('Connection settings')}</h3>
             <div class="field">
-                <div class="label label-checkbox"><label for="ldap_active">${_('Enable ldap')}</label></div>
+                <div class="label label-checkbox"><label for="ldap_active">${_('Enable LDAP')}</label></div>
                 <div class="checkboxes"><div class="checkbox">${h.checkbox('ldap_active',True,class_='small')}</div></div>
             </div>
             <div class="field">
@@ -39,10 +39,6 @@
                 <div class="input">${h.text('ldap_port',class_='small')}</div>
             </div>
             <div class="field">
-                <div class="label label-checkbox"><label for="ldap_ldaps">${_('Enable LDAPS')}</label></div>
-                <div class="checkboxes"><div class="checkbox">${h.checkbox('ldap_ldaps',True,class_='small')}</div></div>
-            </div>
-            <div class="field">
                 <div class="label"><label for="ldap_dn_user">${_('Account')}</label></div>
                 <div class="input">${h.text('ldap_dn_user',class_='small')}</div>
             </div>
@@ -51,12 +47,46 @@
                 <div class="input">${h.password('ldap_dn_pass',class_='small')}</div>
             </div>
             <div class="field">
+                <div class="label"><label for="ldap_tls_kind">${_('Connection security')}</label></div>
+                <div class="select">${h.select('ldap_tls_kind',c.tls_kind_cur,c.tls_kind_choices,class_='small')}</div>
+            </div>
+            <div class="field">
+                <div class="label"><label for="ldap_tls_reqcert">${_('Certificate Checks')}</label></div>
+                <div class="select">${h.select('ldap_tls_reqcert',c.tls_reqcert_cur,c.tls_reqcert_choices,class_='small')}</div>
+            </div>
+	  <h3>${_('Search settings')}</h3>
+            <div class="field">
                 <div class="label"><label for="ldap_base_dn">${_('Base DN')}</label></div>
                 <div class="input">${h.text('ldap_base_dn',class_='small')}</div>
             </div>
+            <div class="field">
+                <div class="label"><label for="ldap_filter">${_('LDAP Filter')}</label></div>
+                <div class="input">${h.text('ldap_filter',class_='small')}</div>
+            </div>
+            <div class="field">
+                <div class="label"><label for="ldap_search_scope">${_('LDAP Search Scope')}</label></div>
+                <div class="select">${h.select('ldap_search_scope',c.search_scope_cur,c.search_scope_choices,class_='small')}</div>
+            </div>
+	  <h3>${_('Attribute mappings')}</h3>
+            <div class="field">
+                <div class="label"><label for="ldap_attr_login">${_('Login Attribute')}</label></div>
+                <div class="input">${h.text('ldap_attr_login',class_='small')}</div>
+            </div>
+            <div class="field">
+                <div class="label"><label for="ldap_attr_firstname">${_('First Name Attribute')}</label></div>
+                <div class="input">${h.text('ldap_attr_firstname',class_='small')}</div>
+            </div>
+            <div class="field">
+                <div class="label"><label for="ldap_attr_lastname">${_('Last Name Attribute')}</label></div>
+                <div class="input">${h.text('ldap_attr_lastname',class_='small')}</div>
+            </div>
+            <div class="field">
+                <div class="label"><label for="ldap_attr_email">${_('E-mail Attribute')}</label></div>
+                <div class="input">${h.text('ldap_attr_email',class_='small')}</div>
+            </div>
             
             <div class="buttons">
-            ${h.submit('save','Save',class_="ui-button ui-widget ui-state-default ui-corner-all")}
+            ${h.submit('save',_('Save'),class_="ui-button")}
             </div>              
         </div>
     </div>     

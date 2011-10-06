@@ -27,15 +27,14 @@ import logging
 
 from pylons import tmpl_context as c, request, url
 
-from webhelpers.paginate import Page
-
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
-from rhodecode.lib.base import BaseController, render
-from rhodecode.model.scm import ScmModel
+from rhodecode.lib.base import BaseRepoController, render
+from rhodecode.lib.helpers import RepoPage
 
 log = logging.getLogger(__name__)
 
-class ShortlogController(BaseController):
+
+class ShortlogController(BaseRepoController):
 
     @LoginRequired()
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
@@ -47,15 +46,14 @@ class ShortlogController(BaseController):
         p = int(request.params.get('page', 1))
         size = int(request.params.get('size', 20))
 
-        print repo_name
         def url_generator(**kw):
             return url('shortlog_home', repo_name=repo_name, size=size, **kw)
 
-        repo = ScmModel().get_repo(c.repo_name)
-        c.repo_changesets = Page(repo, page=p, items_per_page=size,
-                                                url=url_generator)
+        c.repo_changesets = RepoPage(c.rhodecode_repo, page=p,
+                                                       items_per_page=size,
+                                                       url=url_generator)
         c.shortlog_data = render('shortlog/shortlog_data.html')
-        if request.params.get('partial'):
+        if request.environ.get('HTTP_X_PARTIAL_XHR'):
             return c.shortlog_data
         r = render('shortlog/shortlog.html')
         return r

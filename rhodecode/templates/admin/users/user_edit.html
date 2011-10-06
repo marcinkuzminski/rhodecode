@@ -18,32 +18,45 @@
 </%def>
 
 <%def name="main()">
-<div class="box">
+<div class="box box-left">
     <!-- box / title -->
     <div class="title">
         ${self.breadcrumbs()}       
     </div>
     <!-- end box / title -->
-    ${h.form(url('user', id=c.user.user_id),method='put')}
+    ${h.form(url('update_user', id=c.user.user_id),method='put')}
     <div class="form">
-        <!-- fields -->
+        <div class="field">
+           <div class="gravatar_box">
+               <div class="gravatar"><img alt="gravatar" src="${h.gravatar_url(c.user.email)}"/></div>
+               <p>
+               <strong>${_('Change your avatar at')} <a href="http://gravatar.com">gravatar.com</a></strong><br/> 
+               ${_('Using')} ${c.user.email}
+               </p>
+           </div>
+        </div>
+        <div class="field">
+            <div class="label">
+                <label>${_('API key')}</label> ${c.user.api_key}
+            </div>
+        </div>
+                 
         <div class="fields">
-             <div class="field">
-                <div class="gravatar_box">
-              		<div class="gravatar"><img alt="gravatar" src="${h.gravatar_url(c.user.email)}"/></div>
-              		<p>
-              		<strong>Change your avatar at <a href="http://gravatar.com">gravatar.com</a></strong><br/> 
-              		${_('Using')} ${c.user.email}
-              		</p>
-            	</div>
-             </div>        
-        
              <div class="field">
                 <div class="label">
                     <label for="username">${_('Username')}:</label>
                 </div>
                 <div class="input">
-                    ${h.text('username',class_='small')}
+                    ${h.text('username',class_='medium')}
+                </div>
+             </div>
+            
+             <div class="field">
+                <div class="label">
+                    <label for="ldap_dn">${_('LDAP DN')}:</label>
+                </div>
+                <div class="input">
+                    ${h.text('ldap_dn',class_='medium')}
                 </div>
              </div>
             
@@ -52,7 +65,7 @@
                     <label for="new_password">${_('New password')}:</label>
                 </div>
                 <div class="input">
-                    ${h.password('new_password',class_='small')}
+                    ${h.password('new_password',class_='medium',autocomplete="off")}
                 </div>
              </div>
             
@@ -61,7 +74,7 @@
                     <label for="name">${_('First Name')}:</label>
                 </div>
                 <div class="input">
-                    ${h.text('name',class_='small')}
+                    ${h.text('name',class_='medium')}
                 </div>
              </div>
             
@@ -70,7 +83,7 @@
                     <label for="lastname">${_('Last Name')}:</label>
                 </div>
                 <div class="input">
-                    ${h.text('lastname',class_='small')}
+                    ${h.text('lastname',class_='medium')}
                 </div>
              </div>
             
@@ -79,7 +92,7 @@
                     <label for="email">${_('Email')}:</label>
                 </div>
                 <div class="input">
-                    ${h.text('email',class_='small')}
+                    ${h.text('email',class_='medium')}
                 </div>
              </div>
             
@@ -101,11 +114,36 @@
                 </div>
              </div>             
             <div class="buttons">
-              ${h.submit('save','Save',class_="ui-button ui-widget ui-state-default ui-corner-all")}
-              ${h.reset('reset','Reset',class_="ui-button ui-widget ui-state-default ui-corner-all")}
+              ${h.submit('save',_('Save'),class_="ui-button")}
+              ${h.reset('reset',_('Reset'),class_="ui-button")}
             </div>             
     	</div>    
     </div>
     ${h.end_form()}
-</div>    
-</%def>  
+</div>
+<div class="box box-right">
+    <!-- box / title -->
+    <div class="title">
+        <h5>${_('Permissions')}</h5>       
+    </div>
+    ${h.form(url('user_perm', id=c.user.user_id),method='put')}
+    <div class="form">
+        <!-- fields -->
+        <div class="fields">
+             <div class="field">
+                <div class="label label-checkbox">
+                    <label for="">${_('Create repositories')}:</label>
+                </div>
+                <div class="checkboxes">
+                    ${h.checkbox('create_repo_perm',value=True)}
+                </div>
+             </div>
+            <div class="buttons">
+              ${h.submit('save',_('Save'),class_="ui-button")}
+              ${h.reset('reset',_('Reset'),class_="ui-button")}
+            </div>             
+        </div>    
+    </div>
+    ${h.end_form()}    
+</div>
+</%def>

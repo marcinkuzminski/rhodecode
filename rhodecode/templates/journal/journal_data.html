@@ -1,0 +1,47 @@
+## -*- coding: utf-8 -*-
+
+%if c.journal_day_aggreagate:
+    %for day,items in c.journal_day_aggreagate:
+    <div class="journal_day">${day}</div>
+        % for user,entries in items:
+	        <div class="journal_container">
+	            <div class="gravatar">
+	                <img alt="gravatar" src="${h.gravatar_url(user.email,24)}"/>
+	            </div>
+	            <div class="journal_user">${user.name} ${user.lastname}</div>
+	            <div class="journal_action_container">
+	            % for entry in entries:
+		            <div class="journal_icon"> ${h.action_parser_icon(entry)}</div>
+		            <div class="journal_action">${h.action_parser(entry)[0]}</div>
+		            <div class="journal_repo">
+		                <span class="journal_repo_name">
+		                %if entry.repository is not None:
+		                  ${h.link_to(entry.repository.repo_name,
+		                              h.url('summary_home',repo_name=entry.repository.repo_name))}
+		                %else:
+		                  ${entry.repository_name}
+		                %endif             
+		                </span>
+		            </div>
+		            <div class="journal_action_params">${h.literal(h.action_parser(entry)[1]())}</div>
+		            <div class="date"><span class="tooltip" title="${entry.action_date}">${h.age(entry.action_date)}</span></div>
+	            %endfor
+	            </div>
+	        </div>
+        %endfor
+    %endfor
+    
+<div class="pagination-wh pagination-left">
+<script type="text/javascript">
+YUE.onDOMReady(function(){
+    YUE.delegate("journal","click",function(e, matchedEl, container){
+    	ypjax(e.target.href,"journal",function(){show_more_event();tooltip_activate();});
+        YUE.preventDefault(e);
+    },'.pager_link');
+});
+</script>
+${c.journal_pager.pager('$link_previous ~2~ $link_next')}
+</div>
+%else:
+    ${_('No entries yet')}
+%endif

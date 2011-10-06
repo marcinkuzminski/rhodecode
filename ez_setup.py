@@ -202,14 +202,13 @@ def main(argv, version=DEFAULT_VERSION):
         except ImportError:
             from easy_install import main
         main(list(argv) + [download_setuptools(delay=0)])
-        sys.exit(0)  # try to force an exit
+        sys.exit(0) # try to force an exit
     else:
         if argv:
             from setuptools.command.easy_install import main
             main(argv)
         else:
-            print "Setuptools version", version, ("or greater has "
-                                                  "been installed.")
+            print "Setuptools version", version, "or greater has been installed."
             print '(Run "ez_setup.py -U setuptools" to reinstall or upgrade.)'
 
 

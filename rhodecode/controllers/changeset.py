@@ -3,11 +3,12 @@
     rhodecode.controllers.changeset
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    changeset controller for pylons
-    
+    changeset controller for pylons showoing changes beetween
+    revisions
+
     :created_on: Apr 25, 2010
     :author: marcink
-    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
+    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software: you can redistribute it and/or modify
@@ -31,26 +32,28 @@ from pylons.controllers.util import redirect
 
 import rhodecode.lib.helpers as h
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
-from rhodecode.lib.base import BaseController, render
+from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.utils import EmptyChangeset
-from rhodecode.model.scm import ScmModel
+from rhodecode.lib.odict import OrderedDict
 
-from vcs.exceptions import RepositoryError, ChangesetError
+from vcs.exceptions import RepositoryError, ChangesetError, \
+ChangesetDoesNotExistError
 from vcs.nodes import FileNode
 from vcs.utils import diffs as differ
 
 log = logging.getLogger(__name__)
 
-class ChangesetController(BaseController):
+
+class ChangesetController(BaseRepoController):
 
     @LoginRequired()
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
                                    'repository.admin')
     def __before__(self):
         super(ChangesetController, self).__before__()
+        c.affected_files_cut_off = 60
 
     def index(self, revision):
-        hg_model = ScmModel()
 
         def wrap_to_table(str):
 
@@ -61,94 +64,150 @@ class ChangesetController(BaseController):
                         </tr>
                       </table>''' % str
 
+        #get ranges of revisions if preset
+        rev_range = revision.split('...')[:2]
+
         try:
-            c.changeset = hg_model.get_repo(c.repo_name).get_changeset(revision)
-        except RepositoryError, e:
+            if len(rev_range) == 2:
+                rev_start = rev_range[0]
+                rev_end = rev_range[1]
+                rev_ranges = c.rhodecode_repo.get_changesets(start=rev_start,
+                                                            end=rev_end)
+            else:
+                rev_ranges = [c.rhodecode_repo.get_changeset(revision)]
+
+            c.cs_ranges = list(rev_ranges)
+
+        except (RepositoryError, ChangesetDoesNotExistError, Exception), e:
             log.error(traceback.format_exc())
             h.flash(str(e), category='warning')
             return redirect(url('home'))
-        else:
-            try:
-                c.changeset_old = c.changeset.parents[0]
-            except IndexError:
-                c.changeset_old = None
-            c.changes = []
 
-            #===================================================================
+        c.changes = OrderedDict()
+        c.sum_added = 0
+        c.sum_removed = 0
+        c.lines_added = 0
+        c.lines_deleted = 0
+        c.cut_off = False  # defines if cut off limit is reached
+
+        # Iterate over ranges (default changeset view is always one changeset)
+        for changeset in c.cs_ranges:
+            c.changes[changeset.raw_id] = []
+            try:
+                changeset_parent = changeset.parents[0]
+            except IndexError:
+                changeset_parent = None
+
+            #==================================================================
             # ADDED FILES
-            #===================================================================
-            c.sum_added = 0
-            for node in c.changeset.added:
+            #==================================================================
+            for node in changeset.added:
 
                 filenode_old = FileNode(node.path, '', EmptyChangeset())
                 if filenode_old.is_binary or node.is_binary:
                     diff = wrap_to_table(_('binary file'))
+                    st = (0, 0)
                 else:
+                    # in this case node.size is good parameter since those are
+                    # added nodes and their size defines how many changes were
+                    # made
                     c.sum_added += node.size
                     if c.sum_added < self.cut_off_limit:
-                        f_udiff = differ.get_udiff(filenode_old, node)
-                        diff = differ.DiffProcessor(f_udiff).as_html()
+                        f_gitdiff = differ.get_gitdiff(filenode_old, node)
+                        d = differ.DiffProcessor(f_gitdiff, format='gitdiff')
+
+                        st = d.stat()
+                        diff = d.as_html()
 
                     else:
-                        diff = wrap_to_table(_('Changeset is to big and was cut'
-                                            ' off, see raw changeset instead'))
+                        diff = wrap_to_table(_('Changeset is to big and '
+                                               'was cut off, see raw '
+                                               'changeset instead'))
+                        c.cut_off = True
+                        break
 
                 cs1 = None
                 cs2 = node.last_changeset.raw_id
-                c.changes.append(('added', node, diff, cs1, cs2))
+                c.lines_added += st[0]
+                c.lines_deleted += st[1]
+                c.changes[changeset.raw_id].append(('added', node, diff,
+                                                    cs1, cs2, st))
 
-            #===================================================================
+            #==================================================================
             # CHANGED FILES
-            #===================================================================
-            c.sum_removed = 0
-            for node in c.changeset.changed:
-                try:
-                    filenode_old = c.changeset_old.get_node(node.path)
-                except ChangesetError:
-                    filenode_old = FileNode(node.path, '', EmptyChangeset())
+            #==================================================================
+            if not c.cut_off:
+                for node in changeset.changed:
+                    try:
+                        filenode_old = changeset_parent.get_node(node.path)
+                    except ChangesetError:
+                        log.warning('Unable to fetch parent node for diff')
+                        filenode_old = FileNode(node.path, '',
+                                                EmptyChangeset())
 
-                if filenode_old.is_binary or node.is_binary:
-                    diff = wrap_to_table(_('binary file'))
-                else:
-
-                    if c.sum_removed < self.cut_off_limit:
-                        f_udiff = differ.get_udiff(filenode_old, node)
-                        diff = differ.DiffProcessor(f_udiff).as_html()
-                        if diff:
-                            c.sum_removed += len(diff)
+                    if filenode_old.is_binary or node.is_binary:
+                        diff = wrap_to_table(_('binary file'))
+                        st = (0, 0)
                     else:
-                        diff = wrap_to_table(_('Changeset is to big and was cut'
-                                            ' off, see raw changeset instead'))
 
+                        if c.sum_removed < self.cut_off_limit:
+                            f_gitdiff = differ.get_gitdiff(filenode_old, node)
+                            d = differ.DiffProcessor(f_gitdiff,
+                                                     format='gitdiff')
+                            st = d.stat()
+                            if (st[0] + st[1]) * 256 > self.cut_off_limit:
+                                diff = wrap_to_table(_('Diff is to big '
+                                                       'and was cut off, see '
+                                                       'raw diff instead'))
+                            else:
+                                diff = d.as_html()
 
-                cs1 = filenode_old.last_changeset.raw_id
-                cs2 = node.last_changeset.raw_id
-                c.changes.append(('changed', node, diff, cs1, cs2))
+                            if diff:
+                                c.sum_removed += len(diff)
+                        else:
+                            diff = wrap_to_table(_('Changeset is to big and '
+                                                   'was cut off, see raw '
+                                                   'changeset instead'))
+                            c.cut_off = True
+                            break
 
-            #===================================================================
-            # REMOVED FILES    
-            #===================================================================
-            for node in c.changeset.removed:
-                c.changes.append(('removed', node, None, None, None))
+                    cs1 = filenode_old.last_changeset.raw_id
+                    cs2 = node.last_changeset.raw_id
+                    c.lines_added += st[0]
+                    c.lines_deleted += st[1]
+                    c.changes[changeset.raw_id].append(('changed', node, diff,
+                                                        cs1, cs2, st))
 
-        return render('changeset/changeset.html')
+            #==================================================================
+            # REMOVED FILES
+            #==================================================================
+            if not c.cut_off:
+                for node in changeset.removed:
+                    c.changes[changeset.raw_id].append(('removed', node, None,
+                                                        None, None, (0, 0)))
+
+        if len(c.cs_ranges) == 1:
+            c.changeset = c.cs_ranges[0]
+            c.changes = c.changes[c.changeset.raw_id]
+
+            return render('changeset/changeset.html')
+        else:
+            return render('changeset/changeset_range.html')
 
     def raw_changeset(self, revision):
 
-        hg_model = ScmModel()
         method = request.GET.get('diff', 'show')
         try:
-            r = hg_model.get_repo(c.repo_name)
-            c.scm_type = r.alias
-            c.changeset = r.get_changeset(revision)
+            c.scm_type = c.rhodecode_repo.alias
+            c.changeset = c.rhodecode_repo.get_changeset(revision)
         except RepositoryError:
             log.error(traceback.format_exc())
             return redirect(url('home'))
         else:
             try:
-                c.changeset_old = c.changeset.parents[0]
+                c.changeset_parent = c.changeset.parents[0]
             except IndexError:
-                c.changeset_old = None
+                c.changeset_parent = None
             c.changes = []
 
             for node in c.changeset.added:
@@ -156,20 +215,22 @@ class ChangesetController(BaseController):
                 if filenode_old.is_binary or node.is_binary:
                     diff = _('binary file') + '\n'
                 else:
-                    f_udiff = differ.get_udiff(filenode_old, node)
-                    diff = differ.DiffProcessor(f_udiff).raw_diff()
+                    f_gitdiff = differ.get_gitdiff(filenode_old, node)
+                    diff = differ.DiffProcessor(f_gitdiff,
+                                                format='gitdiff').raw_diff()
 
                 cs1 = None
                 cs2 = node.last_changeset.raw_id
                 c.changes.append(('added', node, diff, cs1, cs2))
 
             for node in c.changeset.changed:
-                filenode_old = c.changeset_old.get_node(node.path)
+                filenode_old = c.changeset_parent.get_node(node.path)
                 if filenode_old.is_binary or node.is_binary:
                     diff = _('binary file')
                 else:
-                    f_udiff = differ.get_udiff(filenode_old, node)
-                    diff = differ.DiffProcessor(f_udiff).raw_diff()
+                    f_gitdiff = differ.get_gitdiff(filenode_old, node)
+                    diff = differ.DiffProcessor(f_gitdiff,
+                                                format='gitdiff').raw_diff()
 
                 cs1 = filenode_old.last_changeset.raw_id
                 cs2 = node.last_changeset.raw_id
@@ -178,10 +239,11 @@ class ChangesetController(BaseController):
         response.content_type = 'text/plain'
 
         if method == 'download':
-            response.content_disposition = 'attachment; filename=%s.patch' % revision
+            response.content_disposition = 'attachment; filename=%s.patch' \
+                                            % revision
 
-        parent = True if len(c.changeset.parents) > 0 else False
-        c.parent_tmpl = 'Parent  %s' % c.changeset.parents[0].raw_id if parent else ''
+        c.parent_tmpl = ''.join(['# Parent  %s\n' % x.raw_id for x in
+                                                 c.changeset.parents])
 
         c.diffs = ''
         for x in c.changes:

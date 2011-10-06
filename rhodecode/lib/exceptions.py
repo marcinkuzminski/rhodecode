@@ -3,12 +3,11 @@
     rhodecode.lib.exceptions
     ~~~~~~~~~~~~~~~~~~~~~~~~
 
-    Custom Exceptions modules
+    Set of custom exceptions used in RhodeCode
 
-    :created_on: Apr 10, 2010
-    :author: marcink
-    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
-    :license: GPLv3, see COPYING for more details.
+    :created_on: Nov 17, 2010
+    :copyright: (c) 2010 by marcink.
+    :license: LICENSE_NAME, see LICENSE_FILE for more details.
 """
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -45,4 +44,7 @@ class DefaultUserException(Exception):
 
 
 class UserOwnsReposException(Exception):
+    pass
+
+class UsersGroupsAssignedException(Exception):
     pass

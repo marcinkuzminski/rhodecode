@@ -4,10 +4,10 @@
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Search controller for rhodecode
-    
+
     :created_on: Aug 7, 2010
     :author: marcink
-    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
+    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software: you can redistribute it and/or modify
@@ -26,8 +26,7 @@ import logging
 import traceback
 
 from pylons.i18n.translation import _
-from pylons import request, response, config, session, tmpl_context as c, url
-from pylons.controllers.util import abort, redirect
+from pylons import request, config, session, tmpl_context as c
 
 from rhodecode.lib.auth import LoginRequired
 from rhodecode.lib.base import BaseController, render
@@ -38,9 +37,10 @@ from webhelpers.util import update_params
 
 from whoosh.index import open_dir, EmptyIndexError
 from whoosh.qparser import QueryParser, QueryParserError
-from whoosh.query import Phrase
+from whoosh.query import Phrase, Wildcard, Term, Prefix
 
 log = logging.getLogger(__name__)
+
 
 class SearchController(BaseController):
 
@@ -54,12 +54,11 @@ class SearchController(BaseController):
         c.runtime = ''
         c.cur_query = request.GET.get('q', None)
         c.cur_type = request.GET.get('type', 'source')
-        c.cur_search = search_type = {'content':'content',
-                                      'commit':'content',
-                                      'path':'path',
-                                      'repository':'repository'}\
+        c.cur_search = search_type = {'content': 'content',
+                                      'commit': 'content',
+                                      'path': 'path',
+                                      'repository': 'repository'}\
                                       .get(c.cur_type, 'content')
-
 
         if c.cur_query:
             cur_query = c.cur_query.lower()
@@ -68,8 +67,8 @@ class SearchController(BaseController):
             p = int(request.params.get('page', 1))
             highlight_items = set()
             try:
-                idx = open_dir(config['app_conf']['index_dir']
-                               , indexname=IDX_NAME)
+                idx = open_dir(config['app_conf']['index_dir'],
+                               indexname=IDX_NAME)
                 searcher = idx.searcher()
 
                 qp = QueryParser(search_type, schema=SCHEMA)
@@ -80,6 +79,8 @@ class SearchController(BaseController):
 
                     if isinstance(query, Phrase):
                         highlight_items.update(query.words)
+                    elif isinstance(query, Prefix):
+                        highlight_items.add(query.text)
                     else:
                         for i in query.all_terms():
                             if i[0] == 'content':
@@ -104,7 +105,6 @@ class SearchController(BaseController):
                                 page=p, item_count=res_ln,
                                 items_per_page=10, url=url_generator)
 
-
                 except QueryParserError:
                     c.runtime = _('Invalid search query. Try quoting it.')
                 searcher.close()
@@ -113,6 +113,9 @@ class SearchController(BaseController):
                 log.error('Empty Index data')
                 c.runtime = _('There is no index to search in. '
                               'Please run whoosh indexer')
+            except (Exception):
+                log.error(traceback.format_exc())
+                c.runtime = _('An error occurred during this search operation')
 
         # Return a rendered template
         return render('/search/search.html')

@@ -2,7 +2,7 @@
 
 from beaker.cache import CacheManager
 from beaker.util import parse_cache_config_options
-from vcs.utils.lazy import LazyProperty
+
 
 class Globals(object):
     """Globals acts as a container for objects available throughout the
@@ -18,14 +18,3 @@ class Globals(object):
         """
         self.cache = CacheManager(**parse_cache_config_options(config))
         self.available_permissions = None   # propagated after init_model
-        self.baseui = None                  # propagated after init_model        
-
-    @LazyProperty
-    def paths(self):
-        if self.baseui:
-            return self.baseui.configitems('paths')
-
-    @LazyProperty
-    def base_path(self):
-        if self.baseui:
-            return self.paths[0][1]

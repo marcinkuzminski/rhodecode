@@ -100,7 +100,7 @@ class TestAdminUsersController(TestController):
         new_user = self.sa.query(User).filter(User.username == username).one()
         response = self.app.delete(url('user', id=new_user.user_id))
 
-        assert """sucessfully deleted user""" in response.session['flash'][0], 'No info about user deletion'
+        assert """successfully deleted user""" in response.session['flash'][0], 'No info about user deletion'
 
 
     def test_delete_browser_fakeout(self):

@@ -19,8 +19,11 @@ Documentation
 .. toctree::
    :maxdepth: 1
 
-   enable_git
-   statistics
+   usage/general
+   usage/enable_git
+   usage/statistics
+   usage/backup
+   usage/api_key_access
    
 **Develop**
 

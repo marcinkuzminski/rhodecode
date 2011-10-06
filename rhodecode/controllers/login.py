@@ -4,10 +4,10 @@
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Login controller for rhodeocode
-    
+
     :created_on: Apr 22, 2010
     :author: marcink
-    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
+    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software: you can redistribute it and/or modify
@@ -35,11 +35,13 @@ from pylons import request, response, session, tmpl_context as c, url
 import rhodecode.lib.helpers as h
 from rhodecode.lib.auth import AuthUser, HasPermissionAnyDecorator
 from rhodecode.lib.base import BaseController, render
+from rhodecode.model.db import User
 from rhodecode.model.forms import LoginForm, RegisterForm, PasswordResetForm
 from rhodecode.model.user import UserModel
 
 
 log = logging.getLogger(__name__)
+
 
 class LoginController(BaseController):
 
@@ -50,8 +52,8 @@ class LoginController(BaseController):
         #redirect if already logged in
         c.came_from = request.GET.get('came_from', None)
 
-        if c.rhodecode_user.is_authenticated \
-                            and c.rhodecode_user.username != 'default':
+        if self.rhodecode_user.is_authenticated \
+                            and self.rhodecode_user.username != 'default':
 
             return redirect(url('home'))
 
@@ -60,19 +62,17 @@ class LoginController(BaseController):
             login_form = LoginForm()
             try:
                 c.form_result = login_form.to_python(dict(request.POST))
+                #form checks for username/password, now we're authenticated
                 username = c.form_result['username']
-                user = UserModel().get_by_username(username, case_insensitive=True)
-                auth_user = AuthUser()
-                auth_user.username = user.username
-                auth_user.is_authenticated = True
-                auth_user.is_admin = user.admin
-                auth_user.user_id = user.user_id
-                auth_user.name = user.name
-                auth_user.lastname = user.lastname
+                user = User.by_username(username,
+                                                   case_insensitive=True)
+                auth_user = AuthUser(user.user_id)
+                auth_user.set_authenticated()
                 session['rhodecode_user'] = auth_user
                 session.save()
-                log.info('user %s is now authenticated', username)
 
+                log.info('user %s is now authenticated and stored in session',
+                         username)
                 user.update_lastlogin()
 
                 if c.came_from:
@@ -95,7 +95,8 @@ class LoginController(BaseController):
     def register(self):
         user_model = UserModel()
         c.auto_active = False
-        for perm in user_model.get_by_username('default', cache=False).user_perms:
+        for perm in user_model.get_by_username('default',
+                                               cache=False).user_perms:
             if perm.permission.permission_name == 'hg.register.auto_activate':
                 c.auto_active = True
                 break
@@ -128,8 +129,8 @@ class LoginController(BaseController):
             password_reset_form = PasswordResetForm()()
             try:
                 form_result = password_reset_form.to_python(dict(request.POST))
-                user_model.reset_password(form_result)
-                h.flash(_('Your new password was sent'),
+                user_model.reset_password_link(form_result)
+                h.flash(_('Your password reset link was sent'),
                             category='success')
                 return redirect(url('login_home'))
 
@@ -143,8 +144,25 @@ class LoginController(BaseController):
 
         return render('/password_reset.html')
 
+    def password_reset_confirmation(self):
+
+        if request.GET and request.GET.get('key'):
+            try:
+                user_model = UserModel()
+                user = User.get_by_api_key(request.GET.get('key'))
+                data = dict(email=user.email)
+                user_model.reset_password(data)
+                h.flash(_('Your password reset was successful, '
+                          'new password has been sent to your email'),
+                            category='success')
+            except Exception, e:
+                log.error(e)
+                return redirect(url('reset_password'))
+
+        return redirect(url('login_home'))
+
     def logout(self):
-        session['rhodecode_user'] = AuthUser()
+        del session['rhodecode_user']
         session.save()
         log.info('Logging out and setting user as Empty')
         redirect(url('home'))

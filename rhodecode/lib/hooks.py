@@ -24,13 +24,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import os
 import sys
-import getpass
 
-from mercurial.cmdutil import revrange
+from mercurial.scmutil import revrange
 from mercurial.node import nullrev
 
 from rhodecode.lib import helpers as h
 from rhodecode.lib.utils import action_logger
+
 
 def repo_size(ui, repo, hooktype=None, **kwargs):
     """Presents size of repository after push
@@ -63,6 +63,7 @@ def repo_size(ui, repo, hooktype=None, **kwargs):
     sys.stdout.write('Repository size .hg:%s repo:%s total:%s\n' \
                      % (size_hg_f, size_root_f, size_total_f))
 
+
 def log_pull_action(ui, repo, **kwargs):
     """Logs user last pull action
 
@@ -79,6 +80,7 @@ def log_pull_action(ui, repo, **kwargs):
 
     return 0
 
+
 def log_push_action(ui, repo, **kwargs):
     """Maps user last push action to new changeset id, from mercurial
 
@@ -89,7 +91,7 @@ def log_push_action(ui, repo, **kwargs):
     extra_params = dict(repo.ui.configitems('rhodecode_extras'))
     username = extra_params['username']
     repository = extra_params['repository']
-    action = 'push:%s'
+    action = extra_params['action'] + ':%s'
     node = kwargs['node']
 
     def get_revs(repo, rev_opt):

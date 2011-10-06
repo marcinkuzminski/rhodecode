@@ -23,10 +23,12 @@ from email.mime.text import MIMEText
 from email.utils import formatdate
 from email import encoders
 
+
 class SmtpMailer(object):
     """SMTP mailer class
 
-    mailer = SmtpMailer(mail_from, user, passwd, mail_server, mail_port, ssl, tls)
+    mailer = SmtpMailer(mail_from, user, passwd, mail_server,
+                        mail_port, ssl, tls)
     mailer.send(recipients, subject, body, attachment_files)
 
     :param recipients might be a list of string or single string
@@ -70,16 +72,21 @@ class SmtpMailer(object):
         if self.user and self.passwd:
             smtp_serv.login(self.user, self.passwd)
 
-
         date_ = formatdate(localtime=True)
         msg = MIMEMultipart()
+        msg.set_type('multipart/alternative')
+        msg.preamble = 'You will not see this in a MIME-aware mail reader.\n'
+
+        text_msg = MIMEText(body)
+        text_msg.set_type('text/plain')
+        text_msg.set_param('charset', 'UTF-8')
+
         msg['From'] = self.mail_from
         msg['To'] = ','.join(recipients)
         msg['Date'] = date_
         msg['Subject'] = subject
-        msg.preamble = 'You will not see this in a MIME-aware mail reader.\n'
 
-        msg.attach(MIMEText(body))
+        msg.attach(text_msg)
 
         if attachment_files:
             self.__atach_files(msg, attachment_files)
@@ -93,16 +100,15 @@ class SmtpMailer(object):
             # sslerror is raised in tls connections on closing sometimes
             pass
 
-
-
     def __atach_files(self, msg, attachment_files):
         if isinstance(attachment_files, dict):
             for f_name, msg_file in attachment_files.items():
                 ctype, encoding = mimetypes.guess_type(f_name)
-                logging.info("guessing file %s type based on %s" , ctype, f_name)
+                logging.info("guessing file %s type based on %s", ctype,
+                             f_name)
                 if ctype is None or encoding is not None:
-                    # No guess could be made, or the file is encoded (compressed), so
-                    # use a generic bag-of-bits type.
+                    # No guess could be made, or the file is encoded
+                    # (compressed), so use a generic bag-of-bits type.
                     ctype = 'application/octet-stream'
                 maintype, subtype = ctype.split('/', 1)
                 if maintype == 'text':

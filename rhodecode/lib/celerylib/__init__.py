@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-    package.rhodecode.lib.celerylib.__init__
-    ~~~~~~~~~~~~~~
+    rhodecode.lib.celerylib.__init__
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     celery libs for RhodeCode
-    
+
     :created_on: Nov 27, 2010
     :author: marcink
-    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
+    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software: you can redistribute it and/or modify
@@ -28,24 +28,27 @@ import sys
 import socket
 import traceback
 import logging
+from os.path import dirname as dn, join as jn
 
 from hashlib import md5
 from decorator import decorator
-from vcs.utils.lazy import LazyProperty
-
-from rhodecode.lib.pidlock import DaemonLock, LockHeld
-
 from pylons import  config
 
-log = logging.getLogger(__name__)
+from vcs.utils.lazy import LazyProperty
 
-def str2bool(v):
-    return v.lower() in ["yes", "true", "t", "1"] if v else None
+from rhodecode.lib import str2bool
+from rhodecode.lib.pidlock import DaemonLock, LockHeld
+
+from celery.messaging import establish_connection
+
+
+log = logging.getLogger(__name__)
 
 try:
     CELERY_ON = str2bool(config['app_conf'].get('use_celery'))
 except KeyError:
     CELERY_ON = False
+
 
 class ResultWrapper(object):
     def __init__(self, task):
@@ -55,14 +58,16 @@ class ResultWrapper(object):
     def result(self):
         return self.task
 
+
 def run_task(task, *args, **kwargs):
     if CELERY_ON:
         try:
-            t = task.delay(*args, **kwargs)
+            t = task.apply_async(args=args, kwargs=kwargs)
             log.info('running task %s:%s', t.task_id, task)
             return t
+
         except socket.error, e:
-            if  e.errno == 111:
+            if isinstance(e, IOError) and e.errno == 111:
                 log.debug('Unable to connect to celeryd. Sync execution')
             else:
                 log.error(traceback.format_exc())
@@ -75,17 +80,25 @@ def run_task(task, *args, **kwargs):
     return ResultWrapper(task(*args, **kwargs))
 
 
+def __get_lockkey(func, *fargs, **fkwargs):
+    params = list(fargs)
+    params.extend(['%s-%s' % ar for ar in fkwargs.items()])
+
+    func_name = str(func.__name__) if hasattr(func, '__name__') else str(func)
+
+    lockkey = 'task_%s.lock' % \
+        md5(func_name + '-' + '-'.join(map(str, params))).hexdigest()
+    return lockkey
+
+
 def locked_task(func):
     def __wrapper(func, *fargs, **fkwargs):
-        params = list(fargs)
-        params.extend(['%s-%s' % ar for ar in fkwargs.items()])
+        lockkey = __get_lockkey(func, *fargs, **fkwargs)
+        lockkey_path = dn(dn(dn(os.path.abspath(__file__))))
 
-        lockkey = 'task_%s' % \
-            md5(str(func.__name__) + '-' + \
-                '-'.join(map(str, params))).hexdigest()
         log.info('running task with lockkey %s', lockkey)
         try:
-            l = DaemonLock(lockkey)
+            l = DaemonLock(jn(lockkey_path, lockkey))
             ret = func(*fargs, **fkwargs)
             l.release()
             return ret
@@ -94,11 +107,3 @@ def locked_task(func):
             return 'Task with key %s already running' % lockkey
 
     return decorator(__wrapper, func)
-
-
-
-
-
-
-
-

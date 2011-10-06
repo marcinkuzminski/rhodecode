@@ -8,15 +8,16 @@ import threading
 
 from StringIO import StringIO
 
+
 class ProfilingMiddleware(object):
     def __init__(self, app):
         self.lock = threading.Lock()
         self.app = app
 
-
     def __call__(self, environ, start_response):
         with self.lock:
             profiler = cProfile.Profile()
+
             def run_app(*a, **kw):
                 self.response = self.app(environ, start_response)
 
@@ -39,7 +40,8 @@ class ProfilingMiddleware(object):
             if resp.strip().startswith('<'):
                 ## The profiling info is just appended to the response.
                 ##  Browsers don't mind this.
-                resp += '<pre style="text-align:left; border-top: 4px dashed red; padding: 1em;">'
+                resp += ('<pre style="text-align:left; '
+                         'border-top: 4px dashed red; padding: 1em;">')
                 resp += cgi.escape(out.getvalue(), True)
 
                 output = StringIO()

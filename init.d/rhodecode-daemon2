@@ -1,6 +1,6 @@
 #!/bin/sh -e
 ########################################
-#### THIS IS AN DEBIAN INIT.D SCRIPT####
+#### THIS IS A DEBIAN INIT.D SCRIPT ####
 ########################################
 
 ### BEGIN INIT INFO
@@ -29,47 +29,46 @@ RUN_AS="marcink"
 DAEMON="$PYTHON_PATH/bin/paster"
 
 DAEMON_OPTS="serve --daemon \
---user=$RUN_AS \
---group=$RUN_AS \
---pid-file=$PID_PATH \
---log-file=$LOG_PATH  $APP_PATH/$CONF_NAME"
+  --user=$RUN_AS \
+  --group=$RUN_AS \
+  --pid-file=$PID_PATH \
+  --log-file=$LOG_PATH  $APP_PATH/$CONF_NAME"
 
+
+start() {
+  echo "Starting $APP_NAME"
+  PYTHON_EGG_CACHE="/tmp" start-stop-daemon -d $APP_PATH \
+      --start --quiet \
+      --pidfile $PID_PATH \
+      --user $RUN_AS \
+      --exec $DAEMON -- $DAEMON_OPTS
+}
+
+stop() {
+  echo "Stopping $APP_NAME"
+  start-stop-daemon -d $APP_PATH \
+      --stop --quiet \
+      --pidfile $PID_PATH || echo "$APP_NAME - Not running!"
+  
+  if [ -f $PID_PATH ]; then
+    rm $PID_PATH
+  fi
+}
 
 case "$1" in
   start)
-    echo "Starting $APP_NAME"
-    start-stop-daemon -d $APP_PATH -e PYTHON_EGG_CACHE="/tmp" \
-        --start --quiet \
-        --pidfile $PID_PATH \
-        --user $RUN_AS \
-        --exec $DAEMON -- $DAEMON_OPTS
+    start
     ;;
   stop)
-    echo "Stopping $APP_NAME"
-    start-stop-daemon -d $APP_PATH \
-        --stop --quiet \
-        --pidfile $PID_PATH || echo "$APP_NAME - Not running!"
-    if [ -f $PID_PATH ]; then
-        rm $PID_PATH
-    fi
+    stop
     ;;
   restart)
     echo "Restarting $APP_NAME"
     ### stop ###
-    echo "Stopping $APP_NAME"
-    start-stop-daemon -d $APP_PATH \
-        --stop --quiet \
-        --pidfile $PID_PATH || echo "$APP_NAME - Not running!"
-    if [ -f $PID_PATH ]; then
-        rm $PID_PATH
-    fi
+    stop
+    wait
     ### start ###
-    echo "Starting $APP_NAME"
-    start-stop-daemon -d $APP_PATH -e PYTHON_EGG_CACHE="/tmp" \
-        --start --quiet \
-        --pidfile $PID_PATH \
-        --user $RUN_AS \
-        --exec $DAEMON -- $DAEMON_OPTS
+    start
     ;;
   *)
     echo "Usage: $0 {start|stop|restart}"

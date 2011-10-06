@@ -3,7 +3,79 @@
 Changelog
 =========
 
+1.2.0 (**2011-10-07**)
+======================
 
+
+news
+----
+
+- implemented #47 repository groups
+- implemented #89 Can setup google analytics code from settings menu
+- implemented #91 added nicer looking archive urls with more download options
+  like tags, branches
+- implemented #44 into file browsing, and added follow branch option
+- implemented #84 downloads can be enabled/disabled for each repository
+- anonymous repository can be cloned without having to pass default:default
+  into clone url
+- fixed #90 whoosh indexer can index chooses repositories passed in command 
+  line
+- extended journal with day aggregates and paging
+- implemented #107 source code lines highlight ranges
+- implemented #93 customizable changelog on combined revision ranges - 
+  equivalent of githubs compare view 
+- implemented #108 extended and more powerful LDAP configuration
+- implemented #56 users groups
+- major code rewrites optimized codes for speed and memory usage
+- raw and diff downloads are now in git format
+- setup command checks for write access to given path
+- fixed many issues with international characters and unicode. It uses utf8
+  decode with replace to provide less errors even with non utf8 encoded strings
+- #125 added API KEY access to feeds
+- #109 Repository can be created from external Mercurial link (aka. remote 
+  repository, and manually updated (via pull) from admin panel
+- beta git support - push/pull server + basic view for git repos
+- added followers page and forks page
+- server side file creation (with binary file upload interface) 
+  and edition with commits powered by codemirror 
+- #111 file browser file finder, quick lookup files on whole file tree 
+- added quick login sliding menu into main page
+- changelog uses lazy loading of affected files details, in some scenarios 
+  this can improve speed of changelog page dramatically especially for 
+  larger repositories.
+- implements #214 added support for downloading subrepos in download menu.
+- Added basic API for direct operations on rhodecode via JSON
+- Implemented advanced hook management
+
+fixes
+-----
+
+- fixed file browser bug, when switching into given form revision the url was 
+  not changing
+- fixed propagation to error controller on simplehg and simplegit middlewares
+- fixed error when trying to make a download on empty repository
+- fixed problem with '[' chars in commit messages in journal
+- fixed #99 Unicode errors, on file node paths with non utf-8 characters
+- journal fork fixes
+- removed issue with space inside renamed repository after deletion
+- fixed strange issue on formencode imports
+- fixed #126 Deleting repository on Windows, rename used incompatible chars. 
+- #150 fixes for errors on repositories mapped in db but corrupted in 
+  filesystem
+- fixed problem with ascendant characters in realm #181
+- fixed problem with sqlite file based database connection pool
+- whoosh indexer and code stats share the same dynamic extensions map
+- fixes #188 - relationship delete of repo_to_perm entry on user removal
+- fixes issue #189 Trending source files shows "show more" when no more exist
+- fixes issue #197 Relative paths for pidlocks
+- fixes issue #198 password will require only 3 chars now for login form
+- fixes issue #199 wrong redirection for non admin users after creating a repository
+- fixes issues #202, bad db constraint made impossible to attach same group 
+  more than one time. Affects only mysql/postgres
+- fixes #218 os.kill patch for windows was missing sig param
+- improved rendering of dag (they are not trimmed anymore when number of 
+  heads exceeds 5)
+    
 1.1.8 (**2011-04-12**)
 ======================
 
@@ -33,6 +105,7 @@ fixes
 - fixed compatibility for 1024px displays, and larger dpi settings, thanks to 
   Thomas Waldmann
 - fixed issue #166 summary pager was skipping 10 revisions on second page
+
 
 1.1.7 (**2011-03-23**)
 ======================
@@ -92,7 +165,6 @@ fixes
   when that page was accessed as first after server start
 - journal fixes
 - fixed option to access repository just by entering http://server/<repo_name> 
-
 
 1.1.3 (**2011-02-16**)
 ======================

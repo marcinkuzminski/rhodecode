@@ -4,10 +4,10 @@
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     branches controller for rhodecode
-    
+
     :created_on: Apr 21, 2010
     :author: marcink
-    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
+    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software: you can redistribute it and/or modify
@@ -26,15 +26,16 @@
 import logging
 
 from pylons import tmpl_context as c
+import binascii
 
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
-from rhodecode.lib.base import BaseController, render
-from rhodecode.lib.utils import OrderedDict
-from rhodecode.model.scm import ScmModel
-
+from rhodecode.lib.base import BaseRepoController, render
+from rhodecode.lib.odict import OrderedDict
+from rhodecode.lib import safe_unicode
 log = logging.getLogger(__name__)
 
-class BranchesController(BaseController):
+
+class BranchesController(BaseRepoController):
 
     @LoginRequired()
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
@@ -43,10 +44,35 @@ class BranchesController(BaseController):
         super(BranchesController, self).__before__()
 
     def index(self):
-        hg_model = ScmModel()
-        c.repo_info = hg_model.get_repo(c.repo_name)
-        c.repo_branches = OrderedDict()
-        for name, hash_ in c.repo_info.branches.items():
-            c.repo_branches[name] = c.repo_info.get_changeset(hash_)
+
+        def _branchtags(localrepo):
+
+            bt = {}
+            bt_closed = {}
+
+            for bn, heads in localrepo.branchmap().iteritems():
+                tip = heads[-1]
+                if 'close' not in localrepo.changelog.read(tip)[5]:
+                    bt[bn] = tip
+                else:
+                    bt_closed[bn] = tip
+            return bt, bt_closed
+
+
+        bt, bt_closed = _branchtags(c.rhodecode_repo._repo)
+        cs_g = c.rhodecode_repo.get_changeset
+        _branches = [(safe_unicode(n), cs_g(binascii.hexlify(h)),) for n, h in
+                     bt.items()]
+
+        _closed_branches = [(safe_unicode(n), cs_g(binascii.hexlify(h)),) for n, h in
+                     bt_closed.items()]
+
+        c.repo_branches = OrderedDict(sorted(_branches,
+                                             key=lambda ctx: ctx[0],
+                                             reverse=False))
+        c.repo_closed_branches = OrderedDict(sorted(_closed_branches,
+                                                    key=lambda ctx: ctx[0],
+                                                    reverse=False))
+
 
         return render('branches/branches.html')

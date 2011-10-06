@@ -1,14 +1,17 @@
-import os, time
+import os
 import sys
+import time
+import errno
+
 from warnings import warn
 from multiprocessing.util import Finalize
-import errno
 
 from rhodecode import __platform__, PLATFORM_WIN
 
 if __platform__ in PLATFORM_WIN:
     import ctypes
-    def kill(pid):
+
+    def kill(pid, sig):
         """kill function for Win32"""
         kernel32 = ctypes.windll.kernel32
         handle = kernel32.OpenProcess(1, 0, pid)
@@ -17,7 +20,9 @@ if __platform__ in PLATFORM_WIN:
 else:
     kill = os.kill
 
-class LockHeld(Exception):pass
+
+class LockHeld(Exception):
+    pass
 
 
 class DaemonLock(object):
@@ -34,8 +39,9 @@ class DaemonLock(object):
     def __init__(self, file=None, callbackfn=None,
                  desc='daemon lock', debug=False):
 
-        self.pidfile = file if file else os.path.join(os.path.dirname(__file__),
-                                                      'running.lock')
+        self.pidfile = file if file else os.path.join(
+                                                    os.path.dirname(__file__),
+                                                    'running.lock')
         self.callbackfn = callbackfn
         self.desc = desc
         self.debug = debug
@@ -52,9 +58,10 @@ class DaemonLock(object):
                 print 'leck held finilazing and running lock.release()'
             lock.release()
 
-
     def lock(self):
-        """locking function, if lock is present it will raise LockHeld exception
+        """
+        locking function, if lock is present it
+        will raise LockHeld exception
         """
         lockname = '%s' % (os.getpid())
         if self.debug:
@@ -75,8 +82,8 @@ class DaemonLock(object):
             pidfile.close()
 
             if self.debug:
-                print 'lock file present running_pid: %s, checking for execution'\
-                % running_pid
+                print ('lock file present running_pid: %s, '
+                       'checking for execution') % running_pid
             # Now we check the PID from lock file matches to the current
             # process PID
             if running_pid:
@@ -84,7 +91,8 @@ class DaemonLock(object):
                     kill(running_pid, 0)
                 except OSError, exc:
                     if exc.errno in (errno.ESRCH, errno.EPERM):
-                        print "Lock File is there but the program is not running"
+                        print ("Lock File is there but"
+                               " the program is not running")
                         print "Removing lock file for the: %s" % running_pid
                         self.release()
                     else:
@@ -122,6 +130,7 @@ class DaemonLock(object):
     def makelock(self, lockname, pidfile):
         """
         this function will make an actual lock
+
         :param lockname: acctual pid of file
         :param pidfile: the file to write the pid in
         """

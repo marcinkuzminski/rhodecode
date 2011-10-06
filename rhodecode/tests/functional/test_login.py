@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from rhodecode.tests import *
 from rhodecode.model.db import User
+from rhodecode.lib import generate_api_key
 from rhodecode.lib.auth import check_password
 
 
@@ -8,64 +9,67 @@ class TestLoginController(TestController):
 
     def test_index(self):
         response = self.app.get(url(controller='login', action='index'))
-        assert response.status == '200 OK', 'Wrong response from login page got %s' % response.status
+        self.assertEqual(response.status, '200 OK')
         # Test response...
 
     def test_login_admin_ok(self):
         response = self.app.post(url(controller='login', action='index'),
                                  {'username':'test_admin',
                                   'password':'test12'})
-        assert response.status == '302 Found', 'Wrong response code from login got %s' % response.status
-        assert response.session['rhodecode_user'].username == 'test_admin', 'wrong logged in user'
+        self.assertEqual(response.status, '302 Found')
+        self.assertEqual(response.session['rhodecode_user'].username ,
+                         'test_admin')
         response = response.follow()
-        assert '%s repository' % HG_REPO in response.body
+        self.assertTrue('%s repository' % HG_REPO in response.body)
 
     def test_login_regular_ok(self):
         response = self.app.post(url(controller='login', action='index'),
                                  {'username':'test_regular',
                                   'password':'test12'})
-        print response
-        assert response.status == '302 Found', 'Wrong response code from login got %s' % response.status
-        assert response.session['rhodecode_user'].username == 'test_regular', 'wrong logged in user'
+
+        self.assertEqual(response.status, '302 Found')
+        self.assertEqual(response.session['rhodecode_user'].username ,
+                         'test_regular')
         response = response.follow()
-        assert '%s repository' % HG_REPO in response.body
-        assert '<a title="Admin" href="/_admin">' not in response.body
+        self.assertTrue('%s repository' % HG_REPO in response.body)
+        self.assertTrue('<a title="Admin" href="/_admin">' not in response.body)
 
     def test_login_ok_came_from(self):
         test_came_from = '/_admin/users'
-        response = self.app.post(url(controller='login', action='index', came_from=test_came_from),
+        response = self.app.post(url(controller='login', action='index',
+                                     came_from=test_came_from),
                                  {'username':'test_admin',
                                   'password':'test12'})
-        assert response.status == '302 Found', 'Wrong response code from came from redirection'
+        self.assertEqual(response.status, '302 Found')
         response = response.follow()
 
-        assert response.status == '200 OK', 'Wrong response from login page got %s' % response.status
-        assert 'Users administration' in response.body, 'No proper title in response'
+        self.assertEqual(response.status, '200 OK')
+        self.assertTrue('Users administration' in response.body)
 
 
     def test_login_short_password(self):
         response = self.app.post(url(controller='login', action='index'),
-                                 {'username':'error',
-                                  'password':'test'})
-        assert response.status == '200 OK', 'Wrong response from login page'
-        print response.body
-        assert 'Enter 6 characters or more' in response.body, 'No error password message in response'
+                                 {'username':'test_admin',
+                                  'password':'as'})
+        self.assertEqual(response.status, '200 OK')
+
+        self.assertTrue('Enter 3 characters or more' in response.body)
 
     def test_login_wrong_username_password(self):
         response = self.app.post(url(controller='login', action='index'),
                                  {'username':'error',
                                   'password':'test12'})
-        assert response.status == '200 OK', 'Wrong response from login page'
+        self.assertEqual(response.status , '200 OK')
 
-        assert 'invalid user name' in response.body, 'No error username message in response'
-        assert 'invalid password' in response.body, 'No error password message in response'
+        self.assertTrue('invalid user name' in response.body)
+        self.assertTrue('invalid password' in response.body)
 
     #==========================================================================
     # REGISTRATIONS
     #==========================================================================
     def test_register(self):
         response = self.app.get(url(controller='login', action='register'))
-        assert 'Sign Up to RhodeCode' in response.body, 'wrong page for user registration'
+        self.assertTrue('Sign Up to RhodeCode' in response.body)
 
     def test_register_err_same_username(self):
         response = self.app.post(url(controller='login', action='register'),
@@ -76,8 +80,8 @@ class TestLoginController(TestController):
                                              'name':'test',
                                              'lastname':'test'})
 
-        assert response.status == '200 OK', 'Wrong response from register page got %s' % response.status
-        assert 'This username already exists' in response.body
+        self.assertEqual(response.status , '200 OK')
+        self.assertTrue('This username already exists' in response.body)
 
     def test_register_err_same_email(self):
         response = self.app.post(url(controller='login', action='register'),
@@ -88,7 +92,7 @@ class TestLoginController(TestController):
                                              'name':'test',
                                              'lastname':'test'})
 
-        assert response.status == '200 OK', 'Wrong response from register page got %s' % response.status
+        self.assertEqual(response.status , '200 OK')
         assert 'This e-mail address is already taken' in response.body
 
     def test_register_err_same_email_case_sensitive(self):
@@ -99,7 +103,7 @@ class TestLoginController(TestController):
                                              'email':'TesT_Admin@mail.COM',
                                              'name':'test',
                                              'lastname':'test'})
-        assert response.status == '200 OK', 'Wrong response from register page got %s' % response.status
+        self.assertEqual(response.status , '200 OK')
         assert 'This e-mail address is already taken' in response.body
 
     def test_register_err_wrong_data(self):
@@ -110,7 +114,7 @@ class TestLoginController(TestController):
                                              'email':'goodmailm',
                                              'name':'test',
                                              'lastname':'test'})
-        assert response.status == '200 OK', 'Wrong response from register page got %s' % response.status
+        self.assertEqual(response.status , '200 OK')
         assert 'An email address must contain a single @' in response.body
         assert 'Enter a value 6 characters long or more' in response.body
 
@@ -124,8 +128,7 @@ class TestLoginController(TestController):
                                              'name':'test',
                                              'lastname':'test'})
 
-        print response.body
-        assert response.status == '200 OK', 'Wrong response from register page got %s' % response.status
+        self.assertEqual(response.status , '200 OK')
         assert 'An email address must contain a single @' in response.body
         assert ('Username may only contain '
                 'alphanumeric characters underscores, '
@@ -141,7 +144,7 @@ class TestLoginController(TestController):
                                              'name':'test',
                                              'lastname':'test'})
 
-        assert response.status == '200 OK', 'Wrong response from register page got %s' % response.status
+        self.assertEqual(response.status , '200 OK')
         assert 'An email address must contain a single @' in response.body
         assert 'This username already exists' in response.body
 
@@ -156,8 +159,7 @@ class TestLoginController(TestController):
                                              'name':'test',
                                              'lastname':'test'})
 
-        print response.body
-        assert response.status == '200 OK', 'Wrong response from register page got %s' % response.status
+        self.assertEqual(response.status , '200 OK')
         assert 'Invalid characters in password' in response.body
 
 
@@ -170,9 +172,8 @@ class TestLoginController(TestController):
                                              'name':'test',
                                              'lastname':'test'})
 
-        assert response.status == '200 OK', 'Wrong response from register page got %s' % response.status
-        print response.body
-        assert 'Password do not match' in response.body
+        self.assertEqual(response.status , '200 OK')
+        assert 'Passwords do not match' in response.body
 
     def test_register_ok(self):
         username = 'test_regular4'
@@ -188,7 +189,7 @@ class TestLoginController(TestController):
                                              'email':email,
                                              'name':name,
                                              'lastname':lastname})
-        assert response.status == '302 Found', 'Wrong response from register page got %s' % response.status
+        self.assertEqual(response.status , '302 Found')
         assert 'You have successfully registered into rhodecode' in response.session['flash'][0], 'No flash message about user registration'
 
         ret = self.sa.query(User).filter(User.username == 'test_regular4').one()
@@ -206,8 +207,9 @@ class TestLoginController(TestController):
         assert "This e-mail address doesn't exist" in response.body, 'Missing error message about wrong email'
 
     def test_forgot_password(self):
-        response = self.app.get(url(controller='login', action='password_reset'))
-        assert response.status == '200 OK', 'Wrong response from login page got %s' % response.status
+        response = self.app.get(url(controller='login',
+                                    action='password_reset'))
+        self.assertEqual(response.status , '200 OK')
 
         username = 'test_password_reset_1'
         password = 'qweqwe'
@@ -215,19 +217,45 @@ class TestLoginController(TestController):
         name = 'passwd'
         lastname = 'reset'
 
-        response = self.app.post(url(controller='login', action='register'),
-                                            {'username':username,
-                                             'password':password,
-                                             'password_confirmation':password,
-                                             'email':email,
-                                             'name':name,
-                                             'lastname':lastname})
-        #register new user for email test
-        response = self.app.post(url(controller='login', action='password_reset'),
-                                            {'email':email, })
-        print response.session['flash']
-        assert 'You have successfully registered into rhodecode' in response.session['flash'][0], 'No flash message about user registration'
-        assert 'Your new password was sent' in response.session['flash'][1], 'No flash message about password reset'
+        new = User()
+        new.username = username
+        new.password = password
+        new.email = email
+        new.name = name
+        new.lastname = lastname
+        new.api_key = generate_api_key(username)
+        self.sa.add(new)
+        self.sa.commit()
 
+        response = self.app.post(url(controller='login',
+                                     action='password_reset'),
+                                 {'email':email, })
 
+        self.checkSessionFlash(response, 'Your password reset link was sent')
 
+        response = response.follow()
+
+        # BAD KEY
+
+        key = "bad"
+        response = self.app.get(url(controller='login',
+                                    action='password_reset_confirmation',
+                                    key=key))
+        self.assertEqual(response.status, '302 Found')
+        self.assertTrue(response.location.endswith(url('reset_password')))
+
+        # GOOD KEY
+
+        key = User.by_username(username).api_key
+
+        response = self.app.get(url(controller='login',
+                                    action='password_reset_confirmation',
+                                    key=key))
+        self.assertEqual(response.status, '302 Found')
+        self.assertTrue(response.location.endswith(url('login_home')))
+
+        self.checkSessionFlash(response,
+                               ('Your password reset was successful, '
+                                'new password has been sent to your email'))
+
+        response = response.follow()

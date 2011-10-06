@@ -1,0 +1,97 @@
+<%inherit file="/base/base.html"/>
+
+<%def name="title()">
+    ${c.repo_name} ${_('Changesets')} - r${c.cs_ranges[0].revision}:${h.short_id(c.cs_ranges[0].raw_id)} -> r${c.cs_ranges[-1].revision}:${h.short_id(c.cs_ranges[-1].raw_id)} - ${c.rhodecode_name}
+</%def>
+
+<%def name="breadcrumbs_links()">
+    ${h.link_to(u'Home',h.url('/'))}
+    &raquo;
+    ${h.link_to(c.repo_name,h.url('summary_home',repo_name=c.repo_name))}
+    &raquo;
+    ${_('Changesets')} - r${c.cs_ranges[0].revision}:${h.short_id(c.cs_ranges[0].raw_id)} -> r${c.cs_ranges[-1].revision}:${h.short_id(c.cs_ranges[-1].raw_id)}
+</%def>
+
+<%def name="page_nav()">
+    ${self.menu('changelog')}     
+</%def>
+
+<%def name="main()">
+<div class="box">
+    <!-- box / title -->
+    <div class="title">
+        ${self.breadcrumbs()}
+    </div>
+    <div class="table">
+		<div id="body" class="diffblock">
+			<div class="code-header">
+				<div>
+				${_('Changesets')} - r${c.cs_ranges[0].revision}:${h.short_id(c.cs_ranges[0].raw_id)} -> r${c.cs_ranges[-1].revision}:${h.short_id(c.cs_ranges[-1].raw_id)}
+				<h3>${_('Compare View')}</h3>
+				 ##&raquo; <span>${h.link_to(_('raw diff'),
+				##h.url('raw_changeset_home',repo_name=c.repo_name,revision=c.changeset.raw_id,diff='show'))}</span>
+				 ##&raquo; <span>${h.link_to(_('download diff'),
+				##h.url('raw_changeset_home',repo_name=c.repo_name,revision=c.changeset.raw_id,diff='download'))}</span>
+				</div>
+			</div>
+		</div>
+	    <div id="changeset_compare_view_content">
+			<div class="container">
+			<table class="compare_view_commits">
+            %for cs in c.cs_ranges:
+                <tr>
+                <td><div class="gravatar"><img alt="gravatar" src="${h.gravatar_url(h.email(cs.author),14)}"/></div></td>
+                <td>${h.link_to('r%s:%s' % (cs.revision,h.short_id(cs.raw_id)),h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id))}</td>
+                <td><div class="author">${h.person(cs.author)}</div></td>
+                <td><span class="tooltip" title="${h.age(cs.date)}">${cs.date}</span></td>
+                <td><div class="message">${h.link_to(h.wrap_paragraphs(cs.message),h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id))}</div></td>
+                </tr>
+            %endfor
+            </table>
+	        </div>
+	        <div style="font-size:1.1em;font-weight: bold;clear:both;padding-top:10px">${_('Files affected')}</div>
+	        <div class="cs_files">
+	               %for cs in c.cs_ranges:
+	                   <div class="cur_cs">r${cs}</div>
+	                %for change,filenode,diff,cs1,cs2,st in c.changes[cs.raw_id]:
+	                    <div class="cs_${change}">${h.link_to(h.safe_unicode(filenode.path),h.url.current(anchor=h.repo_name_slug('C%s-%s' % (cs.short_id,h.safe_unicode(filenode.path)))))}</div>
+	                %endfor
+	               %endfor 
+	        </div>         
+	    </div>
+	    
+    </div>
+   %for cs in c.cs_ranges:    	
+	%for change,filenode,diff,cs1,cs2,st in c.changes[cs.raw_id]:
+		%if change !='removed':
+		<div style="clear:both;height:10px"></div>
+		<div class="diffblock">
+			<div id="${h.repo_name_slug('C%s-%s' % (cs.short_id,h.safe_unicode(filenode.path)))}" class="code-header">
+				<div class="changeset_header">
+					<span class="changeset_file">
+						${h.link_to_if(change!='removed',h.safe_unicode(filenode.path),h.url('files_home',repo_name=c.repo_name,
+						revision=filenode.changeset.raw_id,f_path=h.safe_unicode(filenode.path)))}
+					</span>
+					%if 1:
+					&raquo; <span>${h.link_to(_('diff'),
+					h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(filenode.path),diff2=cs2,diff1=cs1,diff='diff'))}</span>
+					&raquo; <span>${h.link_to(_('raw diff'),
+					h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(filenode.path),diff2=cs2,diff1=cs1,diff='raw'))}</span>
+					&raquo; <span>${h.link_to(_('download diff'),
+					h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(filenode.path),diff2=cs2,diff1=cs1,diff='download'))}</span>
+					%endif
+				</div>
+			</div>
+			<div class="code-body">        
+					%if diff:
+						${diff|n}
+					%else:
+						${_('No changes in this file')}
+					%endif
+			</div>
+		</div>
+		%endif
+	%endfor
+   %endfor  
+    </div>
+</%def>

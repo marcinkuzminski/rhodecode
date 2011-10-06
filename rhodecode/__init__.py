@@ -25,14 +25,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import platform
 
-VERSION = (1, 1, 8)
+VERSION = (1, 2, 0)
 __version__ = '.'.join((str(each) for each in VERSION[:4]))
-__dbversion__ = 2  # defines current db version for migrations
+__dbversion__ = 3 #defines current db version for migrations
 __platform__ = platform.system()
 __license__ = 'GPLv3'
 
 PLATFORM_WIN = ('Windows')
-PLATFORM_OTHERS = ('Linux', 'Darwin', 'FreeBSD', 'OpenBSD')
+PLATFORM_OTHERS = ('Linux', 'Darwin', 'FreeBSD', 'OpenBSD', 'SunOS')
 
 try:
     from rhodecode.lib.utils import get_current_revision

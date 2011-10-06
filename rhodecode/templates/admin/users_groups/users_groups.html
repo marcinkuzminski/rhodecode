@@ -1,0 +1,53 @@
+## -*- coding: utf-8 -*-
+<%inherit file="/base/base.html"/>
+
+<%def name="title()">
+    ${_('Users groups administration')} - ${c.rhodecode_name}
+</%def>
+
+<%def name="breadcrumbs_links()">
+    ${h.link_to(_('Admin'),h.url('admin_home'))} &raquo; ${_('Users groups')}
+</%def>
+
+<%def name="page_nav()">
+    ${self.menu('admin')}
+</%def>
+
+<%def name="main()">
+<div class="box">
+    <!-- box / title -->
+    <div class="title">
+        ${self.breadcrumbs()}
+        <ul class="links">
+          <li>
+            <span>${h.link_to(_(u'ADD NEW USER GROUP'),h.url('new_users_group'))}</span>
+          </li>
+          
+        </ul>        
+    </div>
+    <!-- end box / title -->
+    <div class="table">
+        <table class="table_disp">
+        <tr class="header">
+            <th class="left">${_('group name')}</th>
+            <th class="left">${_('members')}</th>
+            <th class="left">${_('active')}</th>
+            <th class="left">${_('action')}</th>
+        </tr>
+            %for cnt,u_group in enumerate(c.users_groups_list):
+                <tr class="parity${cnt%2}">
+                    <td>${h.link_to(u_group.users_group_name,h.url('edit_users_group', id=u_group.users_group_id))}</td>
+                    <td><span class="tooltip" title="${', '.join([x.user.username for x in u_group.members[:50]])}">${len(u_group.members)}</span></td>
+                    <td>${h.bool2icon(u_group.users_group_active)}</td>
+                    <td>
+                        ${h.form(url('users_group', id=u_group.users_group_id),method='delete')}
+                            ${h.submit('remove_','delete',id="remove_group_%s" % u_group.users_group_id,
+                            class_="delete_icon action_button",onclick="return confirm('Confirm to delete this users group');")}
+                        ${h.end_form()}
+                    </td>
+                </tr>
+            %endfor
+        </table>
+    </div>
+</div>
+</%def>

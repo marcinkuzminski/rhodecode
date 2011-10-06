@@ -1,0 +1,41 @@
+## -*- coding: utf-8 -*-
+<%inherit file="/base/base.html"/>
+<%def name="title()">
+    ${_('Journal')} - ${c.rhodecode_name}
+</%def>
+<%def name="breadcrumbs()">
+	${c.rhodecode_name}
+</%def>
+<%def name="page_nav()">
+	${self.menu('home')}
+</%def>
+<%def name="main()">
+	
+    <div class="box">
+	    <!-- box / title -->
+	    <div class="title">
+	        <h5>${_('Public Journal')}</h5>
+                <ul class="links">
+                  <li>
+                    <span>${h.link_to(_('RSS'),h.url('public_journal_rss'),class_='rss_icon')}</span>
+                  </li>
+                  <li>
+                    <span>${h.link_to(_('Atom'),h.url('public_journal_atom'),class_='atom_icon')}</span>
+                  </li>                  
+                  
+                </ul>  	        
+	        
+	    </div>
+		<script type="text/javascript">
+		function show_more_event(){
+		YUE.on(YUD.getElementsByClassName('show_more'),'click',function(e){
+		    var el = e.target;
+		    YUD.setStyle(YUD.get(el.id.substring(1)),'display','');
+		    YUD.setStyle(el.parentNode,'display','none');
+		});
+		}
+		</script> 	    
+	    <div id="journal">${c.journal_data}</div>
+    </div>
+     
+</%def>    

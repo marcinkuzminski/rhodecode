@@ -7,4 +7,4 @@ API Reference
    :maxdepth: 3
 
    models
-    
+   api 

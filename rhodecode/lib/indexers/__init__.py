@@ -31,17 +31,7 @@ from os.path import dirname as dn, join as jn
 sys.path.append(dn(dn(dn(os.path.realpath(__file__)))))
 
 from string import strip
-
-from rhodecode.model import init_model
-from rhodecode.model.scm import ScmModel
-from rhodecode.config.environment import load_environment
-from rhodecode.lib.utils import BasePasterCommand, Command, add_cache
-
 from shutil import rmtree
-from webhelpers.html.builder import escape
-from vcs.utils.lazy import LazyProperty
-
-from sqlalchemy import engine_from_config
 
 from whoosh.analysis import RegexTokenizer, LowercaseFilter, StopFilter
 from whoosh.fields import TEXT, ID, STORED, Schema, FieldType
@@ -49,15 +39,19 @@ from whoosh.index import create_in, open_dir
 from whoosh.formats import Characters
 from whoosh.highlight import highlight, SimpleFragmenter, HtmlFormatter
 
+from webhelpers.html.builder import escape
+from sqlalchemy import engine_from_config
+from vcs.utils.lazy import LazyProperty
+
+from rhodecode.model import init_model
+from rhodecode.model.scm import ScmModel
+from rhodecode.model.repo import RepoModel
+from rhodecode.config.environment import load_environment
+from rhodecode.lib import LANGUAGES_EXTENSIONS_MAP
+from rhodecode.lib.utils import BasePasterCommand, Command, add_cache
 
 #EXTENSIONS WE WANT TO INDEX CONTENT OFF
-INDEX_EXTENSIONS = ['action', 'adp', 'ashx', 'asmx', 'aspx', 'asx', 'axd', 'c',
-                    'cfg', 'cfm', 'cpp', 'cs', 'css', 'diff', 'do', 'el', 'erl',
-                    'h', 'htm', 'html', 'ini', 'java', 'js', 'jsp', 'jspx', 'lisp',
-                    'lua', 'm', 'mako', 'ml', 'pas', 'patch', 'php', 'php3',
-                    'php4', 'phtml', 'pm', 'py', 'rb', 'rst', 's', 'sh', 'sql',
-                    'tpl', 'txt', 'vim', 'wss', 'xhtml', 'xml', 'xsl', 'xslt',
-                    'yaws']
+INDEX_EXTENSIONS = LANGUAGES_EXTENSIONS_MAP.keys()
 
 #CUSTOM ANALYZER wordsplit + lowercase filter
 ANALYZER = RegexTokenizer(expression=r"\w+") | LowercaseFilter()
@@ -96,7 +90,10 @@ class MakeIndex(BasePasterCommand):
         init_model(engine)
 
         index_location = config['index_dir']
-        repo_location = self.options.repo_location
+        repo_location = self.options.repo_location \
+            if self.options.repo_location else RepoModel().repos_path
+        repo_list = map(strip, self.options.repo_list.split(',')) \
+            if self.options.repo_list else None
 
         #======================================================================
         # WHOOSH DAEMON
@@ -104,9 +101,10 @@ class MakeIndex(BasePasterCommand):
         from rhodecode.lib.pidlock import LockHeld, DaemonLock
         from rhodecode.lib.indexers.daemon import WhooshIndexingDaemon
         try:
-            l = DaemonLock()
+            l = DaemonLock(file=jn(dn(dn(index_location)), 'make_index.lock'))
             WhooshIndexingDaemon(index_location=index_location,
-                                 repo_location=repo_location)\
+                                 repo_location=repo_location,
+                                 repo_list=repo_list)\
                 .run(full_index=self.options.full_index)
             l.release()
         except LockHeld:
@@ -116,7 +114,13 @@ class MakeIndex(BasePasterCommand):
         self.parser.add_option('--repo-location',
                           action='store',
                           dest='repo_location',
-                          help="Specifies repositories location to index REQUIRED",
+                          help="Specifies repositories location to index OPTIONAL",
+                          )
+        self.parser.add_option('--index-only',
+                          action='store',
+                          dest='repo_list',
+                          help="Specifies a comma separated list of repositores "
+                                "to build index on OPTIONAL",
                           )
         self.parser.add_option('-f',
                           action='store_true',
@@ -194,8 +198,9 @@ class ResultWrapper(object):
         Smart function that implements chunking the content
         but not overlap chunks so it doesn't highlight the same
         close occurrences twice.
-        @param matcher:
-        @param size:
+        
+        :param matcher:
+        :param size:
         """
         memory = [(0, 0)]
         for span in self.matcher.spans():

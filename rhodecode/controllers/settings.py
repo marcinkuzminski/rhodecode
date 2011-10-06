@@ -4,10 +4,10 @@
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Settings controller for rhodecode
-    
+
     :created_on: Jun 30, 2010
     :author: marcink
-    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>    
+    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software: you can redistribute it and/or modify
@@ -34,16 +34,20 @@ from pylons.controllers.util import redirect
 from pylons.i18n.translation import _
 
 import rhodecode.lib.helpers as h
+
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAllDecorator, \
     HasRepoPermissionAnyDecorator, NotAnonymous
-from rhodecode.lib.base import BaseController, render
+from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.utils import invalidate_cache, action_logger
+
 from rhodecode.model.forms import RepoSettingsForm, RepoForkForm
 from rhodecode.model.repo import RepoModel
+from rhodecode.model.db import User
 
 log = logging.getLogger(__name__)
 
-class SettingsController(BaseController):
+
+class SettingsController(BaseRepoController):
 
     @LoginRequired()
     def __before__(self):
@@ -61,12 +65,28 @@ class SettingsController(BaseController):
                       category='error')
 
             return redirect(url('home'))
-        defaults = c.repo_info.get_dict()
-        defaults.update({'user':c.repo_info.user.username})
-        c.users_array = repo_model.get_users_js()
 
+        c.users_array = repo_model.get_users_js()
+        c.users_groups_array = repo_model.get_users_groups_js()
+
+        defaults = c.repo_info.get_dict()
+
+        #fill owner
+        if c.repo_info.user:
+            defaults.update({'user': c.repo_info.user.username})
+        else:
+            replacement_user = self.sa.query(User)\
+            .filter(User.admin == True).first().username
+            defaults.update({'user': replacement_user})
+
+        #fill repository users
         for p in c.repo_info.repo_to_perm:
-            defaults.update({'perm_%s' % p.user.username:
+            defaults.update({'u_perm_%s' % p.user.username:
+                             p.permission.permission_name})
+
+        #fill repository groups
+        for p in c.repo_info.users_group_to_perm:
+            defaults.update({'g_perm_%s' % p.users_group.users_group_name:
                              p.permission.permission_name})
 
         return htmlfill.render(
@@ -80,7 +100,8 @@ class SettingsController(BaseController):
     def update(self, repo_name):
         repo_model = RepoModel()
         changed_name = repo_name
-        _form = RepoSettingsForm(edit=True, old_data={'repo_name':repo_name})()
+        _form = RepoSettingsForm(edit=True,
+                                 old_data={'repo_name': repo_name})()
         try:
             form_result = _form.to_python(dict(request.POST))
             repo_model.update(repo_name, form_result)
@@ -93,7 +114,7 @@ class SettingsController(BaseController):
         except formencode.Invalid, errors:
             c.repo_info = repo_model.get_by_repo_name(repo_name)
             c.users_array = repo_model.get_users_js()
-            errors.value.update({'user':c.repo_info.user.username})
+            errors.value.update({'user': c.repo_info.user.username})
             return htmlfill.render(
                 render('settings/repo_settings.html'),
                 defaults=errors.value,
@@ -106,7 +127,6 @@ class SettingsController(BaseController):
                     % repo_name, category='error')
 
         return redirect(url('repo_settings_home', repo_name=changed_name))
-
 
     @HasRepoPermissionAllDecorator('repository.admin')
     def delete(self, repo_name):
@@ -135,6 +155,7 @@ class SettingsController(BaseController):
             invalidate_cache('get_repo_cached_%s' % repo_name)
             h.flash(_('deleted repository %s') % repo_name, category='success')
         except Exception:
+            log.error(traceback.format_exc())
             h.flash(_('An error occurred during deletion of %s') % repo_name,
                     category='error')
 
@@ -163,12 +184,12 @@ class SettingsController(BaseController):
     def fork_create(self, repo_name):
         repo_model = RepoModel()
         c.repo_info = repo_model.get_by_repo_name(repo_name)
-        _form = RepoForkForm(old_data={'repo_type':c.repo_info.repo_type})()
+        _form = RepoForkForm(old_data={'repo_type': c.repo_info.repo_type})()
         form_result = {}
         try:
             form_result = _form.to_python(dict(request.POST))
-            form_result.update({'repo_name':repo_name})
-            repo_model.create_fork(form_result, c.rhodecode_user)
+            form_result.update({'repo_name': repo_name})
+            repo_model.create_fork(form_result, self.rhodecode_user)
             h.flash(_('forked %s repository as %s') \
                       % (repo_name, form_result['fork_name']),
                     category='success')
@@ -185,4 +206,9 @@ class SettingsController(BaseController):
                 errors=errors.error_dict or {},
                 prefix_error=False,
                 encoding="UTF-8")
+        except Exception:
+            log.error(traceback.format_exc())
+            h.flash(_('An error occurred during repository forking %s') %
+                    repo_name, category='error')
+
         return redirect(url('home'))

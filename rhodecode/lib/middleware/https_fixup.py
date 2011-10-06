@@ -4,10 +4,10 @@
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     middleware to handle https correctly
-    
+
     :created_on: May 23, 2010
     :author: marcink
-    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>    
+    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software: you can redistribute it and/or modify
@@ -25,7 +25,9 @@
 
 from rhodecode.lib import str2bool
 
+
 class HttpsFixup(object):
+
     def __init__(self, app, config):
         self.application = app
         self.config = config
@@ -34,10 +36,10 @@ class HttpsFixup(object):
         self.__fixup(environ)
         return self.application(environ, start_response)
 
-
     def __fixup(self, environ):
-        """Function to fixup the environ as needed. In order to use this
-        middleware you should set this header inside your 
+        """
+        Function to fixup the environ as needed. In order to use this
+        middleware you should set this header inside your
         proxy ie. nginx, apache etc.
         """
         proto = environ.get('HTTP_X_URL_SCHEME')

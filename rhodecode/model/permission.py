@@ -4,10 +4,10 @@
     ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     permissions model for RhodeCode
-    
+
     :created_on: Aug 20, 2010
     :author: marcink
-    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
+    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software: you can redistribute it and/or modify
@@ -41,7 +41,7 @@ class PermissionModel(BaseModel):
 
     def get_permission(self, permission_id, cache=False):
         """Get's permissions by id
-        
+
         :param permission_id: id of permission to get from database
         :param cache: use Cache for this query
         """
@@ -53,7 +53,7 @@ class PermissionModel(BaseModel):
 
     def get_permission_by_name(self, name, cache=False):
         """Get's permissions by given name
-        
+
         :param name: name to fetch
         :param cache: Use cache for this query
         """
@@ -66,15 +66,17 @@ class PermissionModel(BaseModel):
 
     def update(self, form_result):
         perm_user = self.sa.query(User)\
-                .filter(User.username == form_result['perm_user_name']).scalar()
-        u2p = self.sa.query(UserToPerm).filter(UserToPerm.user == perm_user).all()
+                .filter(User.username ==
+                        form_result['perm_user_name']).scalar()
+        u2p = self.sa.query(UserToPerm).filter(UserToPerm.user ==
+                                               perm_user).all()
         if len(u2p) != 3:
             raise Exception('Defined: %s should be 3  permissions for default'
                             ' user. This should not happen please verify'
                             ' your database' % len(u2p))
 
         try:
-            #stage 1 change defaults    
+            #stage 1 change defaults
             for p in u2p:
                 if p.permission.permission_name.startswith('repository.'):
                     p.permission = self.get_permission_by_name(
@@ -103,7 +105,6 @@ class PermissionModel(BaseModel):
             if perm_user.username == 'default':
                 perm_user.active = bool(form_result['anonymous'])
                 self.sa.add(perm_user)
-
 
             self.sa.commit()
         except (DatabaseError,):

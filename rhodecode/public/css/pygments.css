@@ -24,7 +24,11 @@ div.codeblock .code-header .commit{
 }
 
 div.codeblock .code-body table{
-    width: 0 !important;    
+    width: 0 !important;
+    border: 0px !important;
+}
+div.codeblock .code-body table td {
+	border: 0px !important;
 }
 div.code-body {
 	background-color: #FFFFFF;
@@ -53,6 +57,10 @@ div.annotatediv{
 	padding: 5px;
     margin: 0;
 }
+.code-highlight pre div:target { 
+    background-color: #FFFFBE !important;
+}
+    
 .linenos a { text-decoration: none; }
 
 .code { display: block; }

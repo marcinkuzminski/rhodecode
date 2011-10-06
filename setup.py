@@ -11,22 +11,29 @@ if py_version < (2, 5):
 
 requirements = [
         "Pylons==1.0.0",
-        "WebHelpers==1.2",
-        "SQLAlchemy==0.6.6",
-        "Mako==0.4.0",
-        "vcs==0.1.11",
-        "pygments==1.4.0",
-        "mercurial==1.7.5",
-        "whoosh==1.3.4",
-        "celery==2.2.5",
+        "WebHelpers>=1.2",
+        "formencode==1.2.4",
+        "SQLAlchemy>=0.7.2,<0.8",
+        "Mako>=0.4.2",
+        "pygments>=1.4",
+        "mercurial>=1.9.3,<2.0",
+        "whoosh<1.8",
+        "celery>=2.2.5,<2.3",
         "babel",
         "python-dateutil>=1.5.0,<2.0.0",
+        "dulwich>=0.8.0",
+        "vcs>=0.2.1",
+        "webob==1.0.8"    
     ]
+
+dependency_links = [
+]
 
 classifiers = ['Development Status :: 5 - Production/Stable',
                'Environment :: Web Environment',
                'Framework :: Pylons',
                'Intended Audience :: Developers',
+               'License :: OSI Approved :: BSD License',
                'Operating System :: OS Independent',
                'Programming Language :: Python',
                'Programming Language :: Python :: 2.5',
@@ -85,6 +92,7 @@ setup(
     license=__license__,
     author='Marcin Kuzminski',
     author_email='marcin@python-works.com',
+    dependency_links=dependency_links,
     url='http://rhodecode.org',
     install_requires=requirements,
     classifiers=classifiers,

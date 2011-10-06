@@ -1,0 +1,226 @@
+<%page args="parent" /> 
+    <div class="box">
+        <!-- box / title -->
+        <div class="title">
+            <h5>
+            <input class="top-right-rounded-corner top-left-rounded-corner bottom-left-rounded-corner bottom-right-rounded-corner" id="q_filter" size="15" type="text" name="filter" value="${_('quick filter...')}"/>
+            ${parent.breadcrumbs()} <span id="repo_count"></span> ${_('repositories')} 
+            </h5>
+            %if c.rhodecode_user.username != 'default':
+                %if h.HasPermissionAny('hg.admin','hg.create.repository')():
+                <ul class="links">
+                  <li>
+                    <span>${h.link_to(_('ADD NEW REPOSITORY'),h.url('admin_settings_create_repository'))}</span>
+                  </li>          
+                </ul>           
+                %endif
+            %endif
+        </div>
+        <!-- end box / title -->
+        <div class="table">
+           % if c.groups:
+            <table>
+                <thead>
+                    <tr>
+                        <th class="left"><a href="#">${_('Group name')}</a></th>
+                        <th class="left"><a href="#">${_('Description')}</a></th>
+                        ##<th class="left"><a href="#">${_('Number of repositories')}</a></th>
+                    </tr>
+                </thead>
+                
+                ## REPO GROUPS
+                
+                % for gr in c.groups:
+                  <tr>
+                      <td>
+                          <div style="white-space: nowrap">
+                          <img class="icon" alt="${_('Repositories group')}" src="${h.url('/images/icons/database_link.png')}"/>
+                          ${h.link_to(gr.group_name,url('repos_group',id=gr.group_id))}
+                          </div>
+                      </td>
+                      <td>${gr.group_description}</td>
+                      ##<td><b>${gr.repositories.count()}</b></td>
+                  </tr>
+                % endfor
+                
+            </table>
+            <div style="height: 20px"></div>
+            % endif
+            <div id="welcome" style="display:none;text-align:center">
+                <h1><a href="${h.url('home')}">${c.rhodecode_name} ${c.rhodecode_version}</a></h1>
+            </div>
+            <table id="repos_list">
+            <thead>
+                <tr>
+                    <th class="left"></th>
+                    <th class="left">${_('Name')}</th>
+                    <th class="left">${_('Description')}</th>
+                    <th class="left">${_('Last change')}</th>
+                    <th class="left">${_('Tip')}</th>
+                    <th class="left">${_('Owner')}</th>
+                    <th class="left">${_('RSS')}</th>
+                    <th class="left">${_('Atom')}</th>
+                </tr>
+            </thead>
+            <tbody>
+            %for cnt,repo in enumerate(c.repos_list):
+                <tr class="parity${cnt%2}">
+                    <td class="quick_repo_menu">
+                    <ul class="menu_items hidden">
+                      <li>
+                         <a title="${_('Summary')}" href="${h.url('summary_home',repo_name=repo['name'])}">
+                         <span class="icon">
+                             <img src="${h.url('/images/icons/clipboard_16.png')}" alt="${_('Summary')}" />
+                         </span>
+                         <span>${_('Summary')}</span>                 
+                         </a>             
+                      </li>
+                      <li>
+                         <a title="${_('Changelog')}" href="${h.url('changelog_home',repo_name=repo['name'])}">
+                         <span class="icon">
+                             <img src="${h.url('/images/icons/time.png')}" alt="${_('Changelog')}" />
+                         </span>
+                         <span>${_('Changelog')}</span>                 
+                         </a>             
+                      </li>
+                      <li>
+                         <a title="${_('Files')}" href="${h.url('files_home',repo_name=repo['name'])}">
+                         <span class="icon">
+                             <img src="${h.url('/images/icons/file.png')}" alt="${_('Files')}" />
+                         </span>
+                         <span>${_('Files')}</span>                 
+                         </a>             
+                      </li>                                    
+                    </ul>
+                    </td>
+                    <td>
+                    ## TYPE OF REPO
+                    <div style="white-space: nowrap">
+                     %if repo['dbrepo']['repo_type'] =='hg':
+                       <img class="icon" title="${_('Mercurial repository')}" alt="${_('Mercurial repository')}" src="${h.url('/images/icons/hgicon.png')}"/>
+                     %elif repo['dbrepo']['repo_type'] =='git':
+                       <img class="icon" title="${_('Git repository')}" alt="${_('Git repository')}" src="${h.url('/images/icons/giticon.png')}"/>
+                     %endif 
+                    
+                     ##PRIVATE/PUBLIC
+                     %if repo['dbrepo']['private']:
+                        <img class="icon" title="${_('private repository')}" alt="${_('private repository')}" src="${h.url('/images/icons/lock.png')}"/>
+                     %else:
+                        <img class="icon" title="${_('public repository')}" alt="${_('public repository')}" src="${h.url('/images/icons/lock_open.png')}"/>
+                     %endif
+                    
+                    ##NAME   
+                    ${h.link_to(repo['name'],
+                        h.url('summary_home',repo_name=repo['name']),class_="repo_name")}
+                    %if repo['dbrepo_fork']:
+                        <a href="${h.url('summary_home',repo_name=repo['dbrepo_fork']['repo_name'])}">
+                        <img class="icon" alt="${_('fork')}"
+                        title="${_('Fork of')} ${repo['dbrepo_fork']['repo_name']}" 
+                        src="${h.url('/images/icons/arrow_divide.png')}"/></a>
+                    %endif
+                    </div>
+                    </td>
+                    ##DESCRIPTION
+                    <td><span class="tooltip" title="${h.tooltip(repo['description'])}">
+                       ${h.truncate(repo['description'],60)}</span>
+                    </td>
+                    ##LAST CHANGE
+                    <td>
+                      <span class="tooltip" title="${repo['last_change']}">
+                      ${h.age(repo['last_change'])}</span>
+                    </td>
+                    <td>
+                        %if repo['rev']>=0:
+                        <a title="${h.tooltip('%s\n%s' % (repo['author'],repo['last_msg']))}" class="tooltip" href="${h.url('changeset_home',repo_name=repo['name'],revision=repo['tip'])}">${'r%s:%s' % (repo['rev'],h.short_id(repo['tip']))}</a>
+                        %else:
+                            ${_('No changesets yet')}
+                        %endif    
+                    </td>
+                    <td title="${repo['contact']}">${h.person(repo['contact'])}</td>
+                    <td>
+                      %if c.rhodecode_user.username != 'default':
+                        <a title="${_('Subscribe to %s rss feed')%repo['name']}" class="rss_icon"  href="${h.url('rss_feed_home',repo_name=repo['name'],api_key=c.rhodecode_user.api_key)}"></a>
+                      %else:
+                        <a title="${_('Subscribe to %s rss feed')%repo['name']}" class="rss_icon"  href="${h.url('rss_feed_home',repo_name=repo['name'])}"></a>
+                      %endif:                       
+                    </td>        
+                    <td>
+                      %if c.rhodecode_user.username != 'default':
+                        <a title="${_('Subscribe to %s atom feed')%repo['name']}"  class="atom_icon" href="${h.url('atom_feed_home',repo_name=repo['name'],api_key=c.rhodecode_user.api_key)}"></a>
+                      %else:
+                        <a title="${_('Subscribe to %s atom feed')%repo['name']}"  class="atom_icon" href="${h.url('atom_feed_home',repo_name=repo['name'])}"></a>
+                      %endif:
+                    </td>
+                </tr>
+            %endfor
+            </tbody>
+            </table>
+            </div>
+    </div>
+    
+    
+    <script type="text/javascript">
+     var D = YAHOO.util.Dom;
+     var E = YAHOO.util.Event;
+     var S = YAHOO.util.Selector;
+     
+     var q_filter = D.get('q_filter');
+     var F = YAHOO.namespace('q_filter'); 
+     
+     E.on(q_filter,'click',function(){
+        q_filter.value = '';
+     });
+
+     F.filterTimeout = null;
+     
+     function set_count(count){
+    
+    	 if(count == 0){
+    		 YUD.setStyle('repos_list','display','none');
+    		 YUD.setStyle('welcome','display','');
+    	 }
+    	 else{
+    		 YUD.setStyle('repos_list','display','');
+    		 YUD.setStyle('welcome','display','none');
+    	 }
+    	 YUD.get('repo_count').innerHTML = count;
+    	 
+     }
+     
+     
+     //set initial count for repos
+     var nodes = S.query('div.table tr td div a.repo_name');
+     
+     set_count(nodes.length)
+     F.updateFilter  = function() { 
+        // Reset timeout 
+        F.filterTimeout = null;
+        
+        var obsolete = [];
+        nodes = S.query('div.table tr td div a.repo_name');
+        var req = q_filter.value.toLowerCase();
+        for (n in nodes){
+            D.setStyle(nodes[n].parentNode.parentNode.parentNode,'display','')
+        }
+        if (req){
+            for (n in nodes){
+                if (nodes[n].innerHTML.toLowerCase().indexOf(req) == -1) {
+                    obsolete.push(nodes[n]); 
+                }
+            }
+            if(obsolete){
+                for (n in obsolete){
+                    D.setStyle(obsolete[n].parentNode.parentNode.parentNode,'display','none');
+                }
+            }
+        }
+        // set new count into dashboard
+        set_count(nodes.length - obsolete.length)
+     }
+     
+     E.on(q_filter,'keyup',function(e){
+         clearTimeout(F.filterTimeout); 
+         F.filterTimeout = setTimeout(F.updateFilter,600); 
+     });
+     
+    </script>

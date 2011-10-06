@@ -3,19 +3,12 @@
 Installation
 ============
 
-``RhodeCode`` is written entirely in Python. In order to gain maximum performance
-there are some third-party you must install. When RhodeCode is used 
-together with celery you have to install some kind of message broker,
-recommended one is rabbitmq_ to make the async tasks work.
+``RhodeCode`` is written entirely in Python. Before posting any issues make 
+sure, your not missing any system libraries and using right version of 
+libraries required by RhodeCode. There's also restriction in terms of mercurial
+clients. Minimal version of hg client known working fine with RhodeCode is
+**1.6**. If you're using older client, please upgrade.
 
-Of course RhodeCode works in sync mode also and then you do not have to install
-any third party applications. However, using Celery_ will give you a large 
-speed improvement when using many big repositories. If you plan to use 
-RhodeCode for say 7 to 10 small repositories, RhodeCode will perform perfectly 
-well without celery running.
-   
-If you make the decision to run RhodeCode with celery make sure you run 
-celeryd using paster and message broker together with the application.   
 
 Installing RhodeCode from Cheese Shop
 -------------------------------------
@@ -40,7 +33,12 @@ Step by step installation example
 ---------------------------------
 
 
-- Assuming you have installed virtualenv_ create a new virtual environment using virtualenv:: 
+For installing RhodeCode i highly recommend using separate virtualenv_. This
+way many required by RhodeCode libraries will remain sandboxed from your main
+python and making things less problematic when doing system python updates. 
+
+- Assuming you have installed virtualenv_ create a new virtual environment 
+  using virtualenv command:: 
 
     virtualenv --no-site-packages /var/www/rhodecode-venv
 
@@ -64,20 +62,39 @@ Step by step installation example
    ``virtualenv`` script.  It's perfectly acceptable (and desirable)
    to create a virtualenv as a normal user.
      
-- Make a folder for rhodecode somewhere on the filesystem for example::
+- Make a folder for rhodecode data files, and configuration somewhere on the 
+  filesystem. For example::
 
     mkdir /var/www/rhodecode
   
     
-- Run this command to install rhodecode::
+- Go into the created directory run this command to install rhodecode::
 
-    easy_install rhodecode 
+    easy_install rhodecode
+  
+  or::
+ 
+    pip install rhodecode 
 
-- This will install rhodecode together with pylons and all other required python
-  libraries
+- This will install rhodecode together with pylons and all other required 
+  python libraries into activated virtualenv
 
 Requirements for Celery (optional)
 ----------------------------------
+
+In order to gain maximum performance
+there are some third-party you must install. When RhodeCode is used 
+together with celery you have to install some kind of message broker,
+recommended one is rabbitmq_ to make the async tasks work.
+
+Of course RhodeCode works in sync mode also and then you do not have to install
+any third party applications. However, using Celery_ will give you a large 
+speed improvement when using many big repositories. If you plan to use 
+RhodeCode for say 7 to 10 repositories, RhodeCode will perform perfectly well 
+without celery running.
+   
+If you make the decision to run RhodeCode with celery make sure you run 
+celeryd using paster and message broker together with the application. 
 
 .. note::
    Installing message broker and using celery is optional, RhodeCode will

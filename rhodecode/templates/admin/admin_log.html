@@ -12,7 +12,10 @@
 	%for cnt,l in enumerate(c.users_log):
 	<tr class="parity${cnt%2}">
 		<td>${h.link_to(l.user.username,h.url('edit_user', id=l.user.user_id))}</td>
-		<td>${h.action_parser(l)}</td>
+		<td>${h.action_parser(l)[0]}
+		  <div class="journal_action_params">
+		  ${h.literal(h.action_parser(l)[1]())}</div>
+		</td>
 		<td>
 		%if l.repository:
 		  ${h.link_to(l.repository.repo_name,h.url('summary_home',repo_name=l.repository.repo_name))}
@@ -28,35 +31,22 @@
 </table>
 
 <script type="text/javascript">
-  var data_div = 'user_log';
   YUE.onDOMReady(function(){
-	YUE.on(YUD.getElementsByClassName('pager_link'),"click",function(){
-			YUD.setStyle(data_div,'opacity','0.3');});
-	YUE.on(YUD.getElementsByClassName('show_more'),'click',function(e){
+	YUE.delegate("user_log","click",function(e, matchedEl, container){
+		ypjax(e.target.href,"user_log",function(){show_more_event();tooltip_activate();});
+		YUE.preventDefault(e);
+	},'.pager_link');
+	
+	YUE.delegate("user_log","click",function(e,matchedEl,container){
 	      var el = e.target;
 	      YUD.setStyle(YUD.get(el.id.substring(1)),'display','');
 	      YUD.setStyle(el.parentNode,'display','none');
-	  });
+	  },'.show_more');
   });
 </script>
-		
-		
-<div class="pagination-wh pagination-left">
-${c.users_log.pager('$link_previous ~2~ $link_next',
-onclick="""YAHOO.util.Connect.asyncRequest('GET','$partial_url',{
-success:function(o){
-    YUD.get(data_div).innerHTML=o.responseText;
-    YUE.on(YUD.getElementsByClassName('pager_link'),"click",function(){
-        YUD.setStyle(data_div,'opacity','0.3');
-    });		
-    YUE.on(YUD.getElementsByClassName('show_more'),'click',function(e){
-      var el = e.target;
-      YUD.setStyle(YUD.get(el.id.substring(1)),'display','');
-      YUD.setStyle(el.parentNode,'display','none');
-    });
-    YUD.setStyle(data_div,'opacity','1');}    
 
-},null); return false;""")}
+<div class="pagination-wh pagination-left">
+${c.users_log.pager('$link_previous ~2~ $link_next')}
 </div>
 %else: 
 	${_('No actions yet')} 

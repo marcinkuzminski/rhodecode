@@ -25,64 +25,92 @@
 
 import logging
 
-from pylons import url, response
+from pylons import url, response, tmpl_context as c
+from pylons.i18n.translation import _
 
+from rhodecode.lib import safe_unicode
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
-from rhodecode.lib.base import BaseController
-from rhodecode.model.scm import ScmModel
+from rhodecode.lib.base import BaseRepoController
 
 from webhelpers.feedgenerator import Atom1Feed, Rss201rev2Feed
 
 log = logging.getLogger(__name__)
 
-class FeedController(BaseController):
 
-    @LoginRequired()
+class FeedController(BaseRepoController):
+
+    @LoginRequired(api_access=True)
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
                                    'repository.admin')
     def __before__(self):
         super(FeedController, self).__before__()
         #common values for feeds
-        self.description = 'Changes on %s repository'
-        self.title = "%s feed"
+        self.description = _('Changes on %s repository')
+        self.title = self.title = _('%s %s feed') % (c.rhodecode_name, '%s')
         self.language = 'en-us'
         self.ttl = "5"
         self.feed_nr = 10
 
+    def __changes(self, cs):
+        changes = []
+
+        a = [safe_unicode(n.path) for n in cs.added]
+        if a:
+            changes.append('\nA ' + '\nA '.join(a))
+
+        m = [safe_unicode(n.path) for n in cs.changed]
+        if m:
+            changes.append('\nM ' + '\nM '.join(m))
+
+        d = [safe_unicode(n.path) for n in cs.removed]
+        if d:
+            changes.append('\nD ' + '\nD '.join(d))
+
+        changes.append('</pre>')
+
+        return ''.join(changes)
+
     def atom(self, repo_name):
         """Produce an atom-1.0 feed via feedgenerator module"""
         feed = Atom1Feed(title=self.title % repo_name,
-                         link=url('summary_home', repo_name=repo_name, qualified=True),
+                         link=url('summary_home', repo_name=repo_name,
+                                  qualified=True),
                          description=self.description % repo_name,
                          language=self.language,
                          ttl=self.ttl)
+        desc_msg = []
+        for cs in reversed(list(c.rhodecode_repo[-self.feed_nr:])):
+            desc_msg.append('%s - %s<br/><pre>' % (cs.author, cs.date))
+            desc_msg.append(self.__changes(cs))
 
-        changesets = ScmModel().get_repo(repo_name)
-
-        for cs in changesets[:self.feed_nr]:
             feed.add_item(title=cs.message,
                           link=url('changeset_home', repo_name=repo_name,
                                    revision=cs.raw_id, qualified=True),
-                                   description=str(cs.date))
+                          author_name=cs.author,
+                          description=''.join(desc_msg))
 
         response.content_type = feed.mime_type
         return feed.writeString('utf-8')
 
-
     def rss(self, repo_name):
         """Produce an rss2 feed via feedgenerator module"""
         feed = Rss201rev2Feed(title=self.title % repo_name,
-                         link=url('summary_home', repo_name=repo_name, qualified=True),
+                         link=url('summary_home', repo_name=repo_name,
+                                  qualified=True),
                          description=self.description % repo_name,
                          language=self.language,
                          ttl=self.ttl)
+        desc_msg = []
+        for cs in reversed(list(c.rhodecode_repo[-self.feed_nr:])):
+            desc_msg.append('%s - %s<br/><pre>' % (cs.author, cs.date))
+            desc_msg.append(self.__changes(cs))
 
-        changesets = ScmModel().get_repo(repo_name)
-        for cs in changesets[:self.feed_nr]:
             feed.add_item(title=cs.message,
                           link=url('changeset_home', repo_name=repo_name,
                                    revision=cs.raw_id, qualified=True),
-                          description=str(cs.date))
+                          author_name=cs.author,
+                          description=''.join(desc_msg),
+                         )
 
         response.content_type = feed.mime_type
         return feed.writeString('utf-8')

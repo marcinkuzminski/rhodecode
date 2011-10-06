@@ -4,10 +4,10 @@
     ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Tags controller for rhodecode
-    
+
     :created_on: Apr 21, 2010
     :author: marcink
-    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
+    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software: you can redistribute it and/or modify
@@ -27,13 +27,13 @@ import logging
 from pylons import tmpl_context as c
 
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
-from rhodecode.lib.base import BaseController, render
-from rhodecode.lib.utils import OrderedDict
-from rhodecode.model.scm import ScmModel
+from rhodecode.lib.base import BaseRepoController, render
+from rhodecode.lib.odict import OrderedDict
 
 log = logging.getLogger(__name__)
 
-class TagsController(BaseController):
+
+class TagsController(BaseRepoController):
 
     @LoginRequired()
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
@@ -42,10 +42,12 @@ class TagsController(BaseController):
         super(TagsController, self).__before__()
 
     def index(self):
-        hg_model = ScmModel()
-        c.repo_info = hg_model.get_repo(c.repo_name)
         c.repo_tags = OrderedDict()
-        for name, hash_ in c.repo_info.tags.items():
-            c.repo_tags[name] = c.repo_info.get_changeset(hash_)
+
+        tags = [(name, c.rhodecode_repo.get_changeset(hash_)) for \
+                 name, hash_ in c.rhodecode_repo.tags.items()]
+        ordered_tags = sorted(tags, key=lambda x: x[1].date, reverse=True)
+        for name, cs_tag in ordered_tags:
+            c.repo_tags[name] = cs_tag
 
         return render('tags/tags.html')

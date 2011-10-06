@@ -115,6 +115,7 @@ class Repository(pathed.Pathed):
         options.setdefault('version_table', 'migrate_version')
         options.setdefault('repository_id', name)
         options.setdefault('required_dbs', [])
+        options.setdefault('use_timestamp_numbering', '0')
 
         tmpl = open(os.path.join(tmpl_dir, cls._config)).read()
         ret = TempitaTemplate(tmpl).substitute(options)
@@ -152,11 +153,14 @@ class Repository(pathed.Pathed):
 
     def create_script(self, description, **k):
         """API to :meth:`migrate.versioning.version.Collection.create_new_python_version`"""
+        
+        k['use_timestamp_numbering'] = self.use_timestamp_numbering
         self.versions.create_new_python_version(description, **k)
 
-    def create_script_sql(self, database, **k):
+    def create_script_sql(self, database, description, **k):
         """API to :meth:`migrate.versioning.version.Collection.create_new_sql_version`"""
-        self.versions.create_new_sql_version(database, **k)
+        k['use_timestamp_numbering'] = self.use_timestamp_numbering
+        self.versions.create_new_sql_version(database, description, **k)
 
     @property
     def latest(self):
@@ -172,6 +176,13 @@ class Repository(pathed.Pathed):
     def id(self):
         """Returns repository id specified in config"""
         return self.config.get('db_settings', 'repository_id')
+
+    @property
+    def use_timestamp_numbering(self):
+        """Returns use_timestamp_numbering specified in config"""
+        ts_numbering = self.config.get('db_settings', 'use_timestamp_numbering', raw=True)
+        
+        return ts_numbering
 
     def version(self, *p, **k):
         """API to :attr:`migrate.versioning.version.Collection.version`"""
@@ -218,7 +229,7 @@ class Repository(pathed.Pathed):
     @classmethod
     def create_manage_file(cls, file_, **opts):
         """Create a project management script (manage.py)
-        
+
         :param file_: Destination file to be written
         :param opts: Options that are passed to :func:`migrate.versioning.shell.main`
         """

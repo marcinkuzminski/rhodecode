@@ -1,0 +1,64 @@
+<%inherit file="/base/base.html"/>
+
+<%def name="title()">
+    ${c.repo_name} ${_('Edit file')} - ${c.rhodecode_name}
+</%def>
+
+<%def name="js_extra()">
+<script type="text/javascript" src="${h.url('/js/codemirror.js')}"></script>
+</%def>
+<%def name="css_extra()">
+<link rel="stylesheet" type="text/css" href="${h.url('/css/codemirror.css')}"/>
+</%def>
+
+<%def name="breadcrumbs_links()">
+    ${h.link_to(u'Home',h.url('/'))}
+    &raquo;
+    ${h.link_to(c.repo_name,h.url('summary_home',repo_name=c.repo_name))}
+    &raquo;
+    ${_('edit file')} @ R${c.cs.revision}:${h.short_id(c.cs.raw_id)}
+</%def>
+
+<%def name="page_nav()">
+		${self.menu('files')}     
+</%def>
+<%def name="main()">
+<div class="box">
+    <!-- box / title -->
+    <div class="title">
+        ${self.breadcrumbs()}
+        <ul class="links">
+            <li>
+              <span style="text-transform: uppercase;">
+              <a href="#">${_('branch')}: ${c.cs.branch}</a></span>
+            </li>          
+        </ul>          
+    </div>
+    <div class="table">
+		<div id="files_data">
+			<h3 class="files_location">${_('Location')}: ${h.files_breadcrumbs(c.repo_name,c.cs.revision,c.file.path)}</h3>
+			${h.form(h.url.current(),method='post',id='eform')}
+			<div id="body" class="codeblock">
+			    <pre id="editor_pre"></pre>
+				<textarea id="editor" name="content" style="display:none">${c.file.content|n}</textarea>
+				<div style="padding: 10px;color:#666666">${_('commit message')}</div>
+				<textarea id="commit" name="message" style="height: 60px;width: 99%;margin-left:4px"></textarea>
+			</div>
+			<div style="text-align: right;padding-top: 5px">
+			<input id="reset" type="button" value="${_('Reset')}" class="ui-button-small" />
+			${h.submit('commit',_('Commit changes'),class_="ui-button-small-blue")}
+			</div>
+			${h.end_form()}
+			<script type="text/javascript">
+			 var myCodeMirror = CodeMirror.fromTextArea(YUD.get('editor'),{
+	                mode:  "null",
+	                lineNumbers:true
+	              });
+			 YUE.on('reset','click',function(){
+				 window.location="${h.url('files_home',repo_name=c.repo_name,revision=c.cs.revision,f_path=c.file.path)}";
+			 })
+			</script>
+		</div>    
+    </div>
+</div>    
+</%def>   

@@ -1,0 +1,55 @@
+## -*- coding: utf-8 -*-
+<%inherit file="/base/base.html"/>
+
+<%def name="title()">
+    ${_('Add users group')} - ${c.rhodecode_name}
+</%def>
+<%def name="breadcrumbs_links()">
+    ${h.link_to(_('Admin'),h.url('admin_home'))} 
+    &raquo; 
+    ${h.link_to(_('Users groups'),h.url('users_groups'))} 
+    &raquo;
+    ${_('add new users group')}
+</%def>
+
+<%def name="page_nav()">
+    ${self.menu('admin')}
+</%def>
+
+<%def name="main()">
+<div class="box">
+    <!-- box / title -->
+    <div class="title">
+        ${self.breadcrumbs()}       
+    </div>
+    <!-- end box / title -->
+    ${h.form(url('users_groups'))}
+    <div class="form">
+        <!-- fields -->
+        <div class="fields">
+             <div class="field">
+                <div class="label">
+                    <label for="users_group_name">${_('Group name')}:</label>
+                </div>
+                <div class="input">
+                    ${h.text('users_group_name',class_='small')}
+                </div>
+             </div>
+            
+             <div class="field">
+                <div class="label label-checkbox">
+                    <label for="users_group_active">${_('Active')}:</label>
+                </div>
+                <div class="checkboxes">
+                    ${h.checkbox('users_group_active',value=True)}
+                </div>
+             </div>
+            
+            <div class="buttons">
+              ${h.submit('save',_('save'),class_="ui-button")}
+            </div>             
+        </div>
+    </div>
+    ${h.end_form()}
+</div>    
+</%def>    

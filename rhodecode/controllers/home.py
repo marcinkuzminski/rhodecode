@@ -27,12 +27,14 @@ import logging
 from operator import itemgetter
 
 from pylons import tmpl_context as c, request
+from paste.httpexceptions import HTTPBadRequest
 
 from rhodecode.lib.auth import LoginRequired
 from rhodecode.lib.base import BaseController, render
-from rhodecode.model.scm import ScmModel
+from rhodecode.model.db import Group, Repository
 
 log = logging.getLogger(__name__)
+
 
 class HomeController(BaseController):
 
@@ -41,24 +43,18 @@ class HomeController(BaseController):
         super(HomeController, self).__before__()
 
     def index(self):
-        sortables = ['name', 'description', 'last_change', 'tip', 'owner']
-        current_sort = request.GET.get('sort', 'name')
-        current_sort_slug = current_sort.replace('-', '')
 
-        if current_sort_slug not in sortables:
-            c.sort_by = 'name'
-            current_sort_slug = c.sort_by
-        else:
-            c.sort_by = current_sort
-        c.sort_slug = current_sort_slug
-        cached_repo_list = ScmModel().get_repos()
+        c.repos_list = self.scm_model.get_repos()
 
-        sort_key = current_sort_slug + '_sort'
-        if c.sort_by.startswith('-'):
-            c.repos_list = sorted(cached_repo_list, key=itemgetter(sort_key),
-                                  reverse=True)
-        else:
-            c.repos_list = sorted(cached_repo_list, key=itemgetter(sort_key),
-                                  reverse=False)
+        c.groups = Group.query().filter(Group.group_parent_id == None).all()
 
         return render('/index.html')
+
+    def repo_switcher(self):
+        if request.is_xhr:
+            all_repos = Repository.query().order_by(Repository.repo_name).all()
+            c.repos_list = self.scm_model.get_repos(all_repos,
+                                                    sort_key='name_sort')
+            return render('/repo_switcher_list.html')
+        else:
+            return HTTPBadRequest()

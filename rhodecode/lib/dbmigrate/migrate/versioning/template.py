@@ -33,7 +33,7 @@ class SQLScriptCollection(Collection):
 
 class Template(pathed.Pathed):
     """Finds the paths/packages of various Migrate templates.
-    
+
     :param path: Templates are loaded from rhodecode.lib.dbmigrate.migrate package
     if `path` is not provided.
     """
@@ -66,7 +66,7 @@ class Template(pathed.Pathed):
 
     def _get_item(self, collection, theme=None):
         """Locates and returns collection.
-        
+
         :param collection: name of collection to locate
         :param type_: type of subfolder in collection (defaults to "_default")
         :returns: (package, source)

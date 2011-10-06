@@ -1,0 +1,28 @@
+## -*- coding: utf-8 -*-
+
+% for f in c.followers_pager:
+    <div>
+        <div class="follower_user">
+            <div class="gravatar">
+                <img alt="gravatar" src="${h.gravatar_url(f.user.email,24)}"/>
+            </div>
+            <span style="font-size: 20px"> <b>${f.user.username}</b> (${f.user.name} ${f.user.lastname})</span>
+        </div>
+        <div style="clear:both;padding-top: 10px"></div>
+        <div class="follower_date">${_('Started following')} - 
+        <span class="tooltip" title="${f.follows_from}"> ${h.age(f.follows_from)}</span></div>
+        <div style="border-bottom: 1px solid #DDD;margin:10px 0px 10px 0px"></div>
+    </div>                
+% endfor 
+
+<div class="pagination-wh pagination-left">
+<script type="text/javascript">
+YUE.onDOMReady(function(){
+    YUE.delegate("followers","click",function(e, matchedEl, container){
+        ypjax(e.target.href,"followers",function(){show_more_event();tooltip_activate();});
+        YUE.preventDefault(e);
+    },'.pager_link');
+});
+</script>
+${c.followers_pager.pager('$link_previous ~2~ $link_next')}
+</div>

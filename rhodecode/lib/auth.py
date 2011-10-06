@@ -2,9 +2,9 @@
 """
     rhodecode.lib.auth
     ~~~~~~~~~~~~~~~~~~
-    
+
     authentication and permission libraries
-    
+
     :created_on: Apr 4, 2010
     :copyright: (c) 2010 by marcink.
     :license: LICENSE_NAME, see LICENSE_FILE for more details.
@@ -25,7 +25,9 @@
 import random
 import logging
 import traceback
+import hashlib
 
+from tempfile import _RandomNameSequence
 from decorator import decorator
 
 from pylons import config, session, url, request
@@ -39,36 +41,37 @@ if __platform__ in PLATFORM_WIN:
 if __platform__ in PLATFORM_OTHERS:
     import bcrypt
 
-from rhodecode.lib import str2bool
+from rhodecode.lib import str2bool, safe_unicode
 from rhodecode.lib.exceptions import LdapPasswordError, LdapUsernameError
 from rhodecode.lib.utils import get_repo_slug
 from rhodecode.lib.auth_ldap import AuthLdap
 
 from rhodecode.model import meta
 from rhodecode.model.user import UserModel
-from rhodecode.model.db import Permission, RepoToPerm, Repository, \
-    User, UserToPerm
-
+from rhodecode.model.db import Permission, RhodeCodeSettings
 
 log = logging.getLogger(__name__)
+
 
 class PasswordGenerator(object):
     """This is a simple class for generating password from
         different sets of characters
         usage:
         passwd_gen = PasswordGenerator()
-        #print 8-letter password containing only big and small letters of alphabet
-        print passwd_gen.gen_password(8, passwd_gen.ALPHABETS_BIG_SMALL)        
+        #print 8-letter password containing only big and small letters
+            of alphabet
+        print passwd_gen.gen_password(8, passwd_gen.ALPHABETS_BIG_SMALL)
     """
-    ALPHABETS_NUM = r'''1234567890'''#[0]
-    ALPHABETS_SMALL = r'''qwertyuiopasdfghjklzxcvbnm'''#[1]
-    ALPHABETS_BIG = r'''QWERTYUIOPASDFGHJKLZXCVBNM'''#[2]
-    ALPHABETS_SPECIAL = r'''`-=[]\;',./~!@#$%^&*()_+{}|:"<>?'''    #[3]
-    ALPHABETS_FULL = ALPHABETS_BIG + ALPHABETS_SMALL + ALPHABETS_NUM + ALPHABETS_SPECIAL#[4]
-    ALPHABETS_ALPHANUM = ALPHABETS_BIG + ALPHABETS_SMALL + ALPHABETS_NUM#[5]
+    ALPHABETS_NUM = r'''1234567890'''
+    ALPHABETS_SMALL = r'''qwertyuiopasdfghjklzxcvbnm'''
+    ALPHABETS_BIG = r'''QWERTYUIOPASDFGHJKLZXCVBNM'''
+    ALPHABETS_SPECIAL = r'''`-=[]\;',./~!@#$%^&*()_+{}|:"<>?'''
+    ALPHABETS_FULL = ALPHABETS_BIG + ALPHABETS_SMALL \
+        + ALPHABETS_NUM + ALPHABETS_SPECIAL
+    ALPHABETS_ALPHANUM = ALPHABETS_BIG + ALPHABETS_SMALL + ALPHABETS_NUM
     ALPHABETS_BIG_SMALL = ALPHABETS_BIG + ALPHABETS_SMALL
-    ALPHABETS_ALPHANUM_BIG = ALPHABETS_BIG + ALPHABETS_NUM#[6]
-    ALPHABETS_ALPHANUM_SMALL = ALPHABETS_SMALL + ALPHABETS_NUM#[7]
+    ALPHABETS_ALPHANUM_BIG = ALPHABETS_BIG + ALPHABETS_NUM
+    ALPHABETS_ALPHANUM_SMALL = ALPHABETS_SMALL + ALPHABETS_NUM
 
     def __init__(self, passwd=''):
         self.passwd = passwd
@@ -77,6 +80,7 @@ class PasswordGenerator(object):
         self.passwd = ''.join([random.choice(type) for _ in xrange(len)])
         return self.passwd
 
+
 class RhodeCodeCrypto(object):
 
     @classmethod
@@ -84,7 +88,7 @@ class RhodeCodeCrypto(object):
         """
         Cryptographic function used for password hashing based on pybcrypt
         or pycrypto in windows
-        
+
         :param password: password to hash
         """
         if __platform__ in PLATFORM_WIN:
@@ -92,14 +96,15 @@ class RhodeCodeCrypto(object):
         elif __platform__ in PLATFORM_OTHERS:
             return bcrypt.hashpw(str_, bcrypt.gensalt(10))
         else:
-            raise Exception('Unknown or unsupported platform %s' % __platform__)
+            raise Exception('Unknown or unsupported platform %s' \
+                            % __platform__)
 
     @classmethod
     def hash_check(cls, password, hashed):
         """
         Checks matching password with it's hashed value, runs different
         implementation based on platform it runs on
-        
+
         :param password: password
         :param hashed: password in hashed form
         """
@@ -109,46 +114,55 @@ class RhodeCodeCrypto(object):
         elif __platform__ in PLATFORM_OTHERS:
             return bcrypt.hashpw(password, hashed) == hashed
         else:
-            raise Exception('Unknown or unsupported platform %s' % __platform__)
+            raise Exception('Unknown or unsupported platform %s' \
+                            % __platform__)
 
 
 def get_crypt_password(password):
     return RhodeCodeCrypto.hash_string(password)
 
+
 def check_password(password, hashed):
     return RhodeCodeCrypto.hash_check(password, hashed)
 
+
+def generate_api_key(username, salt=None):
+    if salt is None:
+        salt = _RandomNameSequence().next()
+
+    return hashlib.sha1(username + salt).hexdigest()
+
+
 def authfunc(environ, username, password):
-    """
-    Dummy authentication function used in Mercurial/Git/ and access control,
-    
+    """Dummy authentication function used in Mercurial/Git/ and access control,
+
     :param environ: needed only for using in Basic auth
     """
     return authenticate(username, password)
 
 
 def authenticate(username, password):
-    """
-    Authentication function used for access control,
+    """Authentication function used for access control,
     firstly checks for db authentication then if ldap is enabled for ldap
     authentication, also creates ldap user if not in database
-    
+
     :param username: username
     :param password: password
     """
+
     user_model = UserModel()
     user = user_model.get_by_username(username, cache=False)
 
     log.debug('Authenticating user using RhodeCode account')
-    if user is not None and user.is_ldap is False:
+    if user is not None and not user.ldap_dn:
         if user.active:
-
             if user.username == 'default' and user.active:
                 log.info('user %s authenticated correctly as anonymous user',
                          username)
                 return True
 
-            elif user.username == username and check_password(password, user.password):
+            elif user.username == username and check_password(password,
+                                                              user.password):
                 log.info('user %s authenticated correctly', username)
                 return True
         else:
@@ -159,35 +173,48 @@ def authenticate(username, password):
         user_obj = user_model.get_by_username(username, cache=False,
                                             case_insensitive=True)
 
-        if user_obj is not None and user_obj.is_ldap is False:
+        if user_obj is not None and not user_obj.ldap_dn:
             log.debug('this user already exists as non ldap')
             return False
 
-        from rhodecode.model.settings import SettingsModel
-        ldap_settings = SettingsModel().get_ldap_settings()
-
+        ldap_settings = RhodeCodeSettings.get_ldap_settings()
         #======================================================================
-        # FALLBACK TO LDAP AUTH IN ENABLE                
+        # FALLBACK TO LDAP AUTH IF ENABLE
         #======================================================================
         if str2bool(ldap_settings.get('ldap_active')):
             log.debug("Authenticating user using ldap")
             kwargs = {
-                  'server':ldap_settings.get('ldap_host', ''),
-                  'base_dn':ldap_settings.get('ldap_base_dn', ''),
-                  'port':ldap_settings.get('ldap_port'),
-                  'bind_dn':ldap_settings.get('ldap_dn_user'),
-                  'bind_pass':ldap_settings.get('ldap_dn_pass'),
-                  'use_ldaps':str2bool(ldap_settings.get('ldap_ldaps')),
-                  'ldap_version':3,
+                  'server': ldap_settings.get('ldap_host', ''),
+                  'base_dn': ldap_settings.get('ldap_base_dn', ''),
+                  'port': ldap_settings.get('ldap_port'),
+                  'bind_dn': ldap_settings.get('ldap_dn_user'),
+                  'bind_pass': ldap_settings.get('ldap_dn_pass'),
+                  'tls_kind': ldap_settings.get('ldap_tls_kind'),
+                  'tls_reqcert': ldap_settings.get('ldap_tls_reqcert'),
+                  'ldap_filter': ldap_settings.get('ldap_filter'),
+                  'search_scope': ldap_settings.get('ldap_search_scope'),
+                  'attr_login': ldap_settings.get('ldap_attr_login'),
+                  'ldap_version': 3,
                   }
             log.debug('Checking for ldap authentication')
             try:
                 aldap = AuthLdap(**kwargs)
-                res = aldap.authenticate_ldap(username, password)
-                log.debug('Got ldap response %s', res)
+                (user_dn, ldap_attrs) = aldap.authenticate_ldap(username,
+                                                                password)
+                log.debug('Got ldap DN response %s', user_dn)
 
-                if user_model.create_ldap(username, password):
-                    log.info('created new ldap user')
+                get_ldap_attr = lambda k: ldap_attrs.get(ldap_settings\
+                                                           .get(k), [''])[0]
+
+                user_attrs = {
+                 'name': safe_unicode(get_ldap_attr('ldap_attr_firstname')),
+                 'lastname': safe_unicode(get_ldap_attr('ldap_attr_lastname')),
+                 'email': get_ldap_attr('ldap_attr_email'),
+                }
+
+                if user_model.create_ldap(username, password, user_dn,
+                                          user_attrs):
+                    log.info('created new ldap user %s', username)
 
                 return True
             except (LdapUsernameError, LdapPasswordError,):
@@ -197,30 +224,82 @@ def authenticate(username, password):
                 pass
     return False
 
+
 class  AuthUser(object):
     """
-    A simple object that handles a mercurial username for authentication
+    A simple object that handles all attributes of user in RhodeCode
+
+    It does lookup based on API key,given user, or user present in session
+    Then it fills all required information for such user. It also checks if
+    anonymous access is enabled and if so, it returns default user as logged
+    in
     """
-    def __init__(self):
+
+    def __init__(self, user_id=None, api_key=None):
+
+        self.user_id = user_id
+        self.api_key = None
+
         self.username = 'None'
         self.name = ''
         self.lastname = ''
         self.email = ''
-        self.user_id = None
         self.is_authenticated = False
-        self.is_admin = False
+        self.admin = False
         self.permissions = {}
+        self._api_key = api_key
+        self.propagate_data()
+
+    def propagate_data(self):
+        user_model = UserModel()
+        self.anonymous_user = user_model.get_by_username('default', cache=True)
+        if self._api_key and self._api_key != self.anonymous_user.api_key:
+            #try go get user by api key
+            log.debug('Auth User lookup by API KEY %s', self._api_key)
+            user_model.fill_data(self, api_key=self._api_key)
+        else:
+            log.debug('Auth User lookup by USER ID %s', self.user_id)
+            if self.user_id is not None \
+                and self.user_id != self.anonymous_user.user_id:
+                user_model.fill_data(self, user_id=self.user_id)
+            else:
+                if self.anonymous_user.active is True:
+                    user_model.fill_data(self,
+                                         user_id=self.anonymous_user.user_id)
+                    #then we set this user is logged in
+                    self.is_authenticated = True
+                else:
+                    self.is_authenticated = False
+
+        log.debug('Auth User is now %s', self)
+        user_model.fill_perms(self)
+
+    @property
+    def is_admin(self):
+        return self.admin
+
+    @property
+    def full_contact(self):
+        return '%s %s <%s>' % (self.name, self.lastname, self.email)
 
     def __repr__(self):
-        return "<AuthUser('id:%s:%s')>" % (self.user_id, self.username)
+        return "<AuthUser('id:%s:%s|%s')>" % (self.user_id, self.username,
+                                              self.is_authenticated)
+
+    def set_authenticated(self, authenticated=True):
+
+        if self.user_id != self.anonymous_user.user_id:
+            self.is_authenticated = authenticated
+
 
 def set_available_permissions(config):
-    """
-    This function will propagate pylons globals with all available defined
-    permission given in db. We don't wannt to check each time from db for new 
+    """This function will propagate pylons globals with all available defined
+    permission given in db. We don't want to check each time from db for new
     permissions since adding a new permission also requires application restart
     ie. to decorate new views with the newly created permission
-    :param config:
+
+    :param config: current pylons config instance
+
     """
     log.info('getting information about all available permissions')
     try:
@@ -233,159 +312,78 @@ def set_available_permissions(config):
 
     config['available_permissions'] = [x.permission_name for x in all_perms]
 
-def set_base_path(config):
-    config['base_path'] = config['pylons.app_globals'].base_path
 
-
-def fill_perms(user):
-    """
-    Fills user permission attribute with permissions taken from database
-    :param user:
-    """
-
-    sa = meta.Session()
-    user.permissions['repositories'] = {}
-    user.permissions['global'] = set()
-
-    #===========================================================================
-    # fetch default permissions
-    #===========================================================================
-    default_user = UserModel().get_by_username('default', cache=True)
-
-    default_perms = sa.query(RepoToPerm, Repository, Permission)\
-        .join((Repository, RepoToPerm.repository_id == Repository.repo_id))\
-        .join((Permission, RepoToPerm.permission_id == Permission.permission_id))\
-        .filter(RepoToPerm.user == default_user).all()
-
-    if user.is_admin:
-        #=======================================================================
-        # #admin have all default rights set to admin        
-        #=======================================================================
-        user.permissions['global'].add('hg.admin')
-
-        for perm in default_perms:
-            p = 'repository.admin'
-            user.permissions['repositories'][perm.RepoToPerm.repository.repo_name] = p
-
-    else:
-        #=======================================================================
-        # set default permissions
-        #=======================================================================
-
-        #default global
-        default_global_perms = sa.query(UserToPerm)\
-            .filter(UserToPerm.user == sa.query(User)\
-                   .filter(User.username == 'default').one())
-
-        for perm in default_global_perms:
-            user.permissions['global'].add(perm.permission.permission_name)
-
-        #default repositories
-        for perm in default_perms:
-            if perm.Repository.private and not perm.Repository.user_id == user.user_id:
-                #disable defaults for private repos,
-                p = 'repository.none'
-            elif perm.Repository.user_id == user.user_id:
-                #set admin if owner
-                p = 'repository.admin'
-            else:
-                p = perm.Permission.permission_name
-
-            user.permissions['repositories'][perm.RepoToPerm.repository.repo_name] = p
-
-        #=======================================================================
-        # #overwrite default with user permissions if any
-        #=======================================================================
-        user_perms = sa.query(RepoToPerm, Permission, Repository)\
-            .join((Repository, RepoToPerm.repository_id == Repository.repo_id))\
-            .join((Permission, RepoToPerm.permission_id == Permission.permission_id))\
-            .filter(RepoToPerm.user_id == user.user_id).all()
-
-        for perm in user_perms:
-            if perm.Repository.user_id == user.user_id:#set admin if owner
-                p = 'repository.admin'
-            else:
-                p = perm.Permission.permission_name
-            user.permissions['repositories'][perm.RepoToPerm.repository.repo_name] = p
-    meta.Session.remove()
-    return user
-
-def get_user(session):
-    """
-    Gets user from session, and wraps permissions into user
-    :param session:
-    """
-    user = session.get('rhodecode_user', AuthUser())
-    #if the user is not logged in we check for anonymous access
-    #if user is logged and it's a default user check if we still have anonymous
-    #access enabled
-    if user.user_id is None or user.username == 'default':
-        anonymous_user = UserModel().get_by_username('default', cache=True)
-        if anonymous_user.active is True:
-            #then we set this user is logged in
-            user.is_authenticated = True
-            user.user_id = anonymous_user.user_id
-        else:
-            user.is_authenticated = False
-
-    if user.is_authenticated:
-        user = UserModel().fill_data(user)
-
-    user = fill_perms(user)
-    session['rhodecode_user'] = user
-    session.save()
-    return user
-
-#===============================================================================
+#==============================================================================
 # CHECK DECORATORS
-#===============================================================================
+#==============================================================================
 class LoginRequired(object):
-    """Must be logged in to execute this function else 
-    redirect to login page"""
+    """
+    Must be logged in to execute this function else
+    redirect to login page
+
+    :param api_access: if enabled this checks only for valid auth token
+        and grants access based on valid token
+    """
+
+    def __init__(self, api_access=False):
+        self.api_access = api_access
 
     def __call__(self, func):
         return decorator(self.__wrapper, func)
 
     def __wrapper(self, func, *fargs, **fkwargs):
-        user = session.get('rhodecode_user', AuthUser())
-        log.debug('Checking login required for user:%s', user.username)
-        if user.is_authenticated:
+        cls = fargs[0]
+        user = cls.rhodecode_user
+
+        api_access_ok = False
+        if self.api_access:
+            log.debug('Checking API KEY access for %s', cls)
+            if user.api_key == request.GET.get('api_key'):
+                api_access_ok = True
+            else:
+                log.debug("API KEY token not valid")
+
+        log.debug('Checking if %s is authenticated @ %s', user.username, cls)
+        if user.is_authenticated or api_access_ok:
             log.debug('user %s is authenticated', user.username)
             return func(*fargs, **fkwargs)
         else:
-            log.warn('user %s not authenticated', user.username)
+            log.warn('user %s NOT authenticated', user.username)
             p = url.current()
 
             log.debug('redirecting to login page with %s', p)
             return redirect(url('login_home', came_from=p))
 
+
 class NotAnonymous(object):
-    """Must be logged in to execute this function else 
+    """Must be logged in to execute this function else
     redirect to login page"""
 
     def __call__(self, func):
         return decorator(self.__wrapper, func)
 
     def __wrapper(self, func, *fargs, **fkwargs):
-        user = session.get('rhodecode_user', AuthUser())
-        log.debug('Checking if user is not anonymous')
+        cls = fargs[0]
+        self.user = cls.rhodecode_user
 
-        anonymous = user.username == 'default'
+        log.debug('Checking if user is not anonymous @%s', cls)
+
+        anonymous = self.user.username == 'default'
 
         if anonymous:
-            p = ''
-            if request.environ.get('SCRIPT_NAME') != '/':
-                p += request.environ.get('SCRIPT_NAME')
+            p = url.current()
 
-            p += request.environ.get('PATH_INFO')
-            if request.environ.get('QUERY_STRING'):
-                p += '?' + request.environ.get('QUERY_STRING')
+            import rhodecode.lib.helpers as h
+            h.flash(_('You need to be a registered user to '
+                      'perform this action'),
+                    category='warning')
             return redirect(url('login_home', came_from=p))
         else:
             return func(*fargs, **fkwargs)
 
+
 class PermsDecorator(object):
-    """Base class for decorators"""
+    """Base class for controller decorators"""
 
     def __init__(self, *required_perms):
         available_perms = config['available_permissions']
@@ -398,35 +396,44 @@ class PermsDecorator(object):
     def __call__(self, func):
         return decorator(self.__wrapper, func)
 
-
     def __wrapper(self, func, *fargs, **fkwargs):
-#        _wrapper.__name__ = func.__name__
-#        _wrapper.__dict__.update(func.__dict__)
-#        _wrapper.__doc__ = func.__doc__
-        self.user = session.get('rhodecode_user', AuthUser())
+        cls = fargs[0]
+        self.user = cls.rhodecode_user
         self.user_perms = self.user.permissions
         log.debug('checking %s permissions %s for %s %s',
-           self.__class__.__name__, self.required_perms, func.__name__,
+           self.__class__.__name__, self.required_perms, cls,
                self.user)
 
         if self.check_permissions():
-            log.debug('Permission granted for %s %s', func.__name__, self.user)
-
+            log.debug('Permission granted for %s %s', cls, self.user)
             return func(*fargs, **fkwargs)
 
         else:
-            log.warning('Permission denied for %s %s', func.__name__, self.user)
-            #redirect with forbidden ret code
-            return abort(403)
+            log.warning('Permission denied for %s %s', cls, self.user)
 
 
+            anonymous = self.user.username == 'default'
+
+            if anonymous:
+                p = url.current()
+
+                import rhodecode.lib.helpers as h
+                h.flash(_('You need to be a signed in to '
+                          'view this page'),
+                        category='warning')
+                return redirect(url('login_home', came_from=p))
+
+            else:
+                #redirect with forbidden ret code
+                return abort(403)
 
     def check_permissions(self):
         """Dummy function for overriding"""
         raise Exception('You have to write this function in child class')
 
+
 class HasPermissionAllDecorator(PermsDecorator):
-    """Checks for access permission for all given predicates. All of them 
+    """Checks for access permission for all given predicates. All of them
     have to be meet in order to fulfill the request
     """
 
@@ -437,7 +444,7 @@ class HasPermissionAllDecorator(PermsDecorator):
 
 
 class HasPermissionAnyDecorator(PermsDecorator):
-    """Checks for access permission for any of given predicates. In order to 
+    """Checks for access permission for any of given predicates. In order to
     fulfill the request any of predicates must be meet
     """
 
@@ -446,8 +453,9 @@ class HasPermissionAnyDecorator(PermsDecorator):
             return True
         return False
 
+
 class HasRepoPermissionAllDecorator(PermsDecorator):
-    """Checks for access permission for all given predicates for specific 
+    """Checks for access permission for all given predicates for specific
     repository. All of them have to be meet in order to fulfill the request
     """
 
@@ -463,7 +471,7 @@ class HasRepoPermissionAllDecorator(PermsDecorator):
 
 
 class HasRepoPermissionAnyDecorator(PermsDecorator):
-    """Checks for access permission for any of given predicates for specific 
+    """Checks for access permission for any of given predicates for specific
     repository. In order to fulfill the request any of predicates must be meet
     """
 
@@ -477,10 +485,11 @@ class HasRepoPermissionAnyDecorator(PermsDecorator):
         if self.required_perms.intersection(user_perms):
             return True
         return False
-#===============================================================================
-# CHECK FUNCTIONS
-#===============================================================================
 
+
+#==============================================================================
+# CHECK FUNCTIONS
+#==============================================================================
 class PermsFunction(object):
     """Base function for other check functions"""
 
@@ -500,23 +509,24 @@ class PermsFunction(object):
         if not user:
             return False
         self.user_perms = user.permissions
-        self.granted_for = user.username
+        self.granted_for = user
         log.debug('checking %s %s %s', self.__class__.__name__,
                   self.required_perms, user)
 
         if self.check_permissions():
-            log.debug('Permission granted for %s @ %s %s', self.granted_for,
-                      check_Location, user)
+            log.debug('Permission granted %s @ %s', self.granted_for,
+                      check_Location or 'unspecified location')
             return True
 
         else:
-            log.warning('Permission denied for %s @ %s %s', self.granted_for,
-                        check_Location, user)
+            log.warning('Permission denied for %s @ %s', self.granted_for,
+                        check_Location or 'unspecified location')
             return False
 
     def check_permissions(self):
         """Dummy function for overriding"""
         raise Exception('You have to write this function in child class')
+
 
 class HasPermissionAll(PermsFunction):
     def check_permissions(self):
@@ -524,11 +534,13 @@ class HasPermissionAll(PermsFunction):
             return True
         return False
 
+
 class HasPermissionAny(PermsFunction):
     def check_permissions(self):
         if self.required_perms.intersection(self.user_perms.get('global')):
             return True
         return False
+
 
 class HasRepoPermissionAll(PermsFunction):
 
@@ -541,14 +553,15 @@ class HasRepoPermissionAll(PermsFunction):
             self.repo_name = get_repo_slug(request)
 
         try:
-            self.user_perms = set([self.user_perms['repositories']\
-                                   [self.repo_name]])
+            self.user_perms = set([self.user_perms['reposit'
+                                                   'ories'][self.repo_name]])
         except KeyError:
             return False
         self.granted_for = self.repo_name
         if self.required_perms.issubset(self.user_perms):
             return True
         return False
+
 
 class HasRepoPermissionAny(PermsFunction):
 
@@ -561,8 +574,8 @@ class HasRepoPermissionAny(PermsFunction):
             self.repo_name = get_repo_slug(request)
 
         try:
-            self.user_perms = set([self.user_perms['repositories']\
-                                   [self.repo_name]])
+            self.user_perms = set([self.user_perms['reposi'
+                                                   'tories'][self.repo_name]])
         except KeyError:
             return False
         self.granted_for = self.repo_name
@@ -570,23 +583,18 @@ class HasRepoPermissionAny(PermsFunction):
             return True
         return False
 
-#===============================================================================
-# SPECIAL VERSION TO HANDLE MIDDLEWARE AUTH
-#===============================================================================
 
+#==============================================================================
+# SPECIAL VERSION TO HANDLE MIDDLEWARE AUTH
+#==============================================================================
 class HasPermissionAnyMiddleware(object):
     def __init__(self, *perms):
         self.required_perms = set(perms)
 
     def __call__(self, user, repo_name):
-        usr = AuthUser()
-        usr.user_id = user.user_id
-        usr.username = user.username
-        usr.is_admin = user.admin
-
+        usr = AuthUser(user.user_id)
         try:
-            self.user_perms = set([fill_perms(usr)\
-                                   .permissions['repositories'][repo_name]])
+            self.user_perms = set([usr.permissions['repositories'][repo_name]])
         except:
             self.user_perms = set()
         self.granted_for = ''
@@ -596,7 +604,7 @@ class HasPermissionAnyMiddleware(object):
 
     def check_permissions(self):
         log.debug('checking mercurial protocol '
-                  'permissions for user:%s repository:%s',
+                  'permissions %s for user:%s repository:%s', self.user_perms,
                                                 self.username, self.repo_name)
         if self.required_perms.intersection(self.user_perms):
             log.debug('permission granted')

@@ -29,24 +29,25 @@ import datetime
 import traceback
 import paste
 import beaker
+from os.path import dirname as dn, join as jn
 
 from paste.script.command import Command, BadCommand
 
-from UserDict import DictMixin
-
-from mercurial import ui, config, hg
-from mercurial.error import RepoError
+from mercurial import ui, config
 
 from webhelpers.text import collapse, remove_formatting, strip_tags
 
+from vcs import get_backend
 from vcs.backends.base import BaseChangeset
 from vcs.utils.lazy import LazyProperty
+from vcs.utils.helpers import get_scm
+from vcs.exceptions import VCSError
 
 from rhodecode.model import meta
 from rhodecode.model.caching_query import FromCache
-from rhodecode.model.db import Repository, User, RhodeCodeUi, UserLog
+from rhodecode.model.db import Repository, User, RhodeCodeUi, UserLog, Group, \
+    RhodeCodeSettings
 from rhodecode.model.repo import RepoModel
-from rhodecode.model.user import UserModel
 
 log = logging.getLogger(__name__)
 
@@ -108,11 +109,10 @@ def action_logger(user, action, repo, ipaddr='', sa=None):
         sa = meta.Session()
 
     try:
-        um = UserModel()
         if hasattr(user, 'user_id'):
             user_obj = user
         elif isinstance(user, basestring):
-            user_obj = um.get_by_username(user, cache=False)
+            user_obj = User.by_username(user, cache=False)
         else:
             raise Exception('You have to provide user object or username')
 
@@ -144,64 +144,77 @@ def action_logger(user, action, repo, ipaddr='', sa=None):
         sa.rollback()
 
 
-def get_repos(path, recursive=False, initial=False):
+def get_repos(path, recursive=False):
     """
-    Scans given path for repos and return (name,(type,path)) tuple 
-    
-    :param prefix:
-    :param path:
-    :param recursive:
-    :param initial:
+    Scans given path for repos and return (name,(type,path)) tuple
+
+    :param path: path to scann for repositories
+    :param recursive: recursive search and return names with subdirs in front
     """
     from vcs.utils.helpers import get_scm
     from vcs.exceptions import VCSError
 
-    try:
-        scm = get_scm(path)
-    except:
-        pass
-    else:
-        raise Exception('The given path %s should not be a repository got %s',
-                        path, scm)
+    if path.endswith(os.sep):
+        #remove ending slash for better results
+        path = path[:-1]
 
-    for dirpath in os.listdir(path):
-        try:
-            yield dirpath, get_scm(os.path.join(path, dirpath))
-        except VCSError:
-            pass
+    def _get_repos(p):
+        if not os.access(p, os.W_OK):
+            return
+        for dirpath in os.listdir(p):
+            if os.path.isfile(os.path.join(p, dirpath)):
+                continue
+            cur_path = os.path.join(p, dirpath)
+            try:
+                scm_info = get_scm(cur_path)
+                yield scm_info[1].split(path)[-1].lstrip(os.sep), scm_info
+            except VCSError:
+                if not recursive:
+                    continue
+                #check if this dir containts other repos for recursive scan
+                rec_path = os.path.join(p, dirpath)
+                if os.path.isdir(rec_path):
+                    for inner_scm in _get_repos(rec_path):
+                        yield inner_scm
 
-def check_repo_fast(repo_name, base_path):
+    return _get_repos(path)
+
+
+def is_valid_repo(repo_name, base_path):
     """
-    Check given path for existence of directory
+    Returns True if given path is a valid repository False otherwise
     :param repo_name:
     :param base_path:
 
-    :return False: if this directory is present
+    :return True: if given path is a valid repository
     """
-    if os.path.isdir(os.path.join(base_path, repo_name)):
-        return False
-    return True
-
-
-def check_repo(repo_name, base_path, verify=True):
-
-    repo_path = os.path.join(base_path, repo_name)
-
+    full_path = os.path.join(base_path, repo_name)
+    
     try:
-        if not check_repo_fast(repo_name, base_path):
-            return False
-        r = hg.repository(ui.ui(), repo_path)
-        if verify:
-            hg.verify(r)
-        #here we hnow that repo exists it was verified
-        log.info('%s repo is already created', repo_name)
-        return False
-    except RepoError:
-        #it means that there is no valid repo there...
-        log.info('%s repo is free for creation', repo_name)
+        get_scm(full_path)
         return True
+    except VCSError:
+        return False
 
-
+def is_valid_repos_group(repos_group_name, base_path):
+    """
+    Returns True if given path is a repos group False otherwise
+    
+    :param repo_name:
+    :param base_path:
+    """
+    full_path = os.path.join(base_path, repos_group_name)
+    
+    # check if it's not a repo
+    if is_valid_repo(repos_group_name, base_path):
+        return False
+    
+    # check if it's a valid path
+    if os.path.isdir(full_path):
+        return True
+    
+    return False
+    
 def ask_ok(prompt, retries=4, complaint='Yes or no, please!'):
     while True:
         ok = raw_input(prompt)
@@ -277,8 +290,7 @@ def set_rhodecode_config(config):
 
     :param config:
     """
-    from rhodecode.model.settings import SettingsModel
-    hgsettings = SettingsModel().get_app_settings()
+    hgsettings = RhodeCodeSettings.get_app_settings()
 
     for k, v in hgsettings.items():
         config[k] = v
@@ -302,13 +314,15 @@ class EmptyChangeset(BaseChangeset):
     an EmptyChangeset
     """
 
-    def __init__(self, cs='0' * 40, repo=None):
+    def __init__(self, cs='0' * 40, repo=None, requested_revision=None, alias=None):
         self._empty_cs = cs
         self.revision = -1
         self.message = ''
         self.author = ''
         self.date = ''
         self.repository = repo
+        self.requested_revision = requested_revision
+        self.alias = alias
 
     @LazyProperty
     def raw_id(self):
@@ -317,6 +331,10 @@ class EmptyChangeset(BaseChangeset):
         """
 
         return self._empty_cs
+
+    @LazyProperty
+    def branch(self):
+        return get_backend(self.alias).DEFAULT_BRANCH_NAME
 
     @LazyProperty
     def short_id(self):
@@ -331,135 +349,70 @@ class EmptyChangeset(BaseChangeset):
     def get_file_size(self, path):
         return 0
 
+
+def map_groups(groups):
+    """Checks for groups existence, and creates groups structures.
+    It returns last group in structure
+
+    :param groups: list of groups structure
+    """
+    sa = meta.Session()
+
+    parent = None
+    group = None
+    for lvl, group_name in enumerate(groups[:-1]):
+        group = sa.query(Group).filter(Group.group_name == group_name).scalar()
+
+        if group is None:
+            group = Group(group_name, parent)
+            sa.add(group)
+            sa.commit()
+
+        parent = group
+
+    return group
+
+
 def repo2db_mapper(initial_repo_list, remove_obsolete=False):
-    """maps all found repositories into db
+    """maps all repos given in initial_repo_list, non existing repositories
+    are created, if remove_obsolete is True it also check for db entries
+    that are not in initial_repo_list and removes them.
+
+    :param initial_repo_list: list of repositories found by scanning methods
+    :param remove_obsolete: check for obsolete entries in database
     """
 
     sa = meta.Session()
     rm = RepoModel()
     user = sa.query(User).filter(User.admin == True).first()
-
+    added = []
     for name, repo in initial_repo_list.items():
+        group = map_groups(name.split(os.sep))
         if not rm.get_by_repo_name(name, cache=False):
             log.info('repository %s not found creating default', name)
-
+            added.append(name)
             form_data = {
-                         'repo_name':name,
-                         'repo_type':repo.alias,
-                         'description':repo.description \
+                         'repo_name': name,
+                         'repo_name_full': name,
+                         'repo_type': repo.alias,
+                         'description': repo.description \
                             if repo.description != 'unknown' else \
                                         '%s repository' % name,
-                         'private':False
+                         'private': False,
+                         'group_id': getattr(group, 'group_id', None)
                          }
             rm.create(form_data, user, just_db=True)
 
+    removed = []
     if remove_obsolete:
         #remove from database those repositories that are not in the filesystem
         for repo in sa.query(Repository).all():
             if repo.repo_name not in initial_repo_list.keys():
+                removed.append(repo.repo_name)
                 sa.delete(repo)
                 sa.commit()
 
-
-class OrderedDict(dict, DictMixin):
-
-    def __init__(self, *args, **kwds):
-        if len(args) > 1:
-            raise TypeError('expected at most 1 arguments, got %d' % len(args))
-        try:
-            self.__end
-        except AttributeError:
-            self.clear()
-        self.update(*args, **kwds)
-
-    def clear(self):
-        self.__end = end = []
-        end += [None, end, end]         # sentinel node for doubly linked list
-        self.__map = {}                 # key --> [key, prev, next]
-        dict.clear(self)
-
-    def __setitem__(self, key, value):
-        if key not in self:
-            end = self.__end
-            curr = end[1]
-            curr[2] = end[1] = self.__map[key] = [key, curr, end]
-        dict.__setitem__(self, key, value)
-
-    def __delitem__(self, key):
-        dict.__delitem__(self, key)
-        key, prev, next = self.__map.pop(key)
-        prev[2] = next
-        next[1] = prev
-
-    def __iter__(self):
-        end = self.__end
-        curr = end[2]
-        while curr is not end:
-            yield curr[0]
-            curr = curr[2]
-
-    def __reversed__(self):
-        end = self.__end
-        curr = end[1]
-        while curr is not end:
-            yield curr[0]
-            curr = curr[1]
-
-    def popitem(self, last=True):
-        if not self:
-            raise KeyError('dictionary is empty')
-        if last:
-            key = reversed(self).next()
-        else:
-            key = iter(self).next()
-        value = self.pop(key)
-        return key, value
-
-    def __reduce__(self):
-        items = [[k, self[k]] for k in self]
-        tmp = self.__map, self.__end
-        del self.__map, self.__end
-        inst_dict = vars(self).copy()
-        self.__map, self.__end = tmp
-        if inst_dict:
-            return (self.__class__, (items,), inst_dict)
-        return self.__class__, (items,)
-
-    def keys(self):
-        return list(self)
-
-    setdefault = DictMixin.setdefault
-    update = DictMixin.update
-    pop = DictMixin.pop
-    values = DictMixin.values
-    items = DictMixin.items
-    iterkeys = DictMixin.iterkeys
-    itervalues = DictMixin.itervalues
-    iteritems = DictMixin.iteritems
-
-    def __repr__(self):
-        if not self:
-            return '%s()' % (self.__class__.__name__,)
-        return '%s(%r)' % (self.__class__.__name__, self.items())
-
-    def copy(self):
-        return self.__class__(self)
-
-    @classmethod
-    def fromkeys(cls, iterable, value=None):
-        d = cls()
-        for key in iterable:
-            d[key] = value
-        return d
-
-    def __eq__(self, other):
-        if isinstance(other, OrderedDict):
-            return len(self) == len(other) and self.items() == other.items()
-        return dict.__eq__(self, other)
-
-    def __ne__(self, other):
-        return not self == other
-
+    return added, removed
 
 #set cache regions for beaker so celery can utilise it
 def add_cache(settings):
@@ -512,21 +465,25 @@ def get_current_revision():
 #==============================================================================
 # TEST FUNCTIONS AND CREATORS
 #==============================================================================
-def create_test_index(repo_location, full_index):
-    """Makes default test index
-    :param repo_location:
+def create_test_index(repo_location, config, full_index):
+    """
+    Makes default test index
+    
+    :param config: test config
     :param full_index:
     """
+
     from rhodecode.lib.indexers.daemon import WhooshIndexingDaemon
     from rhodecode.lib.pidlock import DaemonLock, LockHeld
-    import shutil
 
-    index_location = os.path.join(repo_location, 'index')
-    if os.path.exists(index_location):
-        shutil.rmtree(index_location)
+    repo_location = repo_location
+
+    index_location = os.path.join(config['app_conf']['index_dir'])
+    if not os.path.exists(index_location):
+        os.makedirs(index_location)
 
     try:
-        l = DaemonLock()
+        l = DaemonLock(file=jn(dn(index_location), 'make_index.lock'))
         WhooshIndexingDaemon(index_location=index_location,
                              repo_location=repo_location)\
             .run(full_index=full_index)
@@ -544,29 +501,16 @@ def create_test_env(repos_test_path, config):
         HG_FORK, GIT_FORK, TESTS_TMP_PATH
     import tarfile
     import shutil
-    from os.path import dirname as dn, join as jn, abspath
+    from os.path import abspath
 
-    log = logging.getLogger('TestEnvCreator')
-    # create logger
-    log.setLevel(logging.DEBUG)
-    log.propagate = True
-    # create console handler and set level to debug
-    ch = logging.StreamHandler()
-    ch.setLevel(logging.DEBUG)
-
-    # create formatter
-    formatter = logging.Formatter("%(asctime)s - %(name)s -"
-                                  " %(levelname)s - %(message)s")
-
-    # add formatter to ch
-    ch.setFormatter(formatter)
-
-    # add ch to logger
-    log.addHandler(ch)
-
-    #PART ONE create db
+    # PART ONE create db
     dbconf = config['sqlalchemy.db1.url']
     log.debug('making test db %s', dbconf)
+
+    # create test dir if it doesn't exist
+    if not os.path.isdir(repos_test_path):
+        log.debug('Creating testdir %s' % repos_test_path)
+        os.makedirs(repos_test_path)
 
     dbmanage = DbManage(log_sql=True, dbconf=dbconf, root=config['here'],
                         tests=True)
@@ -577,15 +521,20 @@ def create_test_env(repos_test_path, config):
     dbmanage.create_permissions()
     dbmanage.populate_default_permissions()
 
-    #PART TWO make test repo
+    # PART TWO make test repo
     log.debug('making test vcs repositories')
 
-    #remove old one from previos tests
-    for r in [HG_REPO, GIT_REPO, NEW_HG_REPO, NEW_GIT_REPO, HG_FORK, GIT_FORK]:
+    idx_path = config['app_conf']['index_dir']
+    data_path = config['app_conf']['cache_dir']
 
-        if os.path.isdir(jn(TESTS_TMP_PATH, r)):
-            log.debug('removing %s', r)
-            shutil.rmtree(jn(TESTS_TMP_PATH, r))
+    #clean index and data
+    if idx_path and os.path.exists(idx_path):
+        log.debug('remove %s' % idx_path)
+        shutil.rmtree(idx_path)
+
+    if data_path and os.path.exists(data_path):
+        log.debug('remove %s' % data_path)
+        shutil.rmtree(data_path)
 
     #CREATE DEFAULT HG REPOSITORY
     cur_dir = dn(dn(abspath(__file__)))
@@ -659,3 +608,4 @@ class BasePasterCommand(Command):
         path_to_ini_file = os.path.realpath(conf)
         conf = paste.deploy.appconfig('config:' + path_to_ini_file)
         pylonsconfig.init_app(conf.global_conf, conf.local_conf)
+

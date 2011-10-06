@@ -1,0 +1,2530 @@
+# Portuguese (Brazil) translations for RhodeCode.
+# Copyright (C) 2011 Augusto Herrmann
+# This file is distributed under the same license as the RhodeCode project.
+# Augusto Herrmann <augusto.herrmann@gmail.com>, 2011.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: RhodeCode 1.2.0\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2011-09-14 15:50-0300\n"
+"PO-Revision-Date: 2011-09-14 15:53-0300\n"
+"Last-Translator: Augusto Herrmann <augusto.herrmann@gmail.com>\n"
+"Language-Team: pt_BR <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 0.9.6\n"
+
+#: rhodecode/controllers/changeset.py:108
+#: rhodecode/controllers/changeset.py:149
+#: rhodecode/controllers/changeset.py:216
+#: rhodecode/controllers/changeset.py:229
+msgid "binary file"
+msgstr "arquivo binário"
+
+#: rhodecode/controllers/changeset.py:123
+#: rhodecode/controllers/changeset.py:168
+msgid "Changeset is to big and was cut off, see raw changeset instead"
+msgstr "Conjunto de mudanças é grande demais e foi cortado, em vez disso veja o conjunto de mudanças bruto"
+
+#: rhodecode/controllers/changeset.py:159
+msgid "Diff is to big and was cut off, see raw diff instead"
+msgstr "Diff é grande demais e foi cortado, em vez disso veja diff bruto"
+
+#: rhodecode/controllers/error.py:69
+msgid "Home page"
+msgstr "Página inicial"
+
+#: rhodecode/controllers/error.py:98
+msgid "The request could not be understood by the server due to malformed syntax."
+msgstr "A requisição não pôde ser compreendida pelo servidor devido à sintaxe mal formada"
+
+#: rhodecode/controllers/error.py:101
+msgid "Unauthorized access to resource"
+msgstr "Acesso não autorizado ao recurso"
+
+#: rhodecode/controllers/error.py:103
+msgid "You don't have permission to view this page"
+msgstr "Você não tem permissão para ver esta página"
+
+#: rhodecode/controllers/error.py:105
+msgid "The resource could not be found"
+msgstr "O recurso não pôde ser encontrado"
+
+#: rhodecode/controllers/error.py:107
+msgid "The server encountered an unexpected condition which prevented it from fulfilling the request."
+msgstr "O servidor encontrou uma condição inesperada que o impediu de satisfazer a requisição"
+
+#: rhodecode/controllers/feed.py:48
+#, python-format
+msgid "Changes on %s repository"
+msgstr "Alterações no repositório %s"
+
+#: rhodecode/controllers/feed.py:49
+#, python-format
+msgid "%s %s feed"
+msgstr "%s - feed %s"
+
+#: rhodecode/controllers/files.py:72
+msgid "There are no files yet"
+msgstr "Ainda não há arquivos"
+
+#: rhodecode/controllers/files.py:262
+#, python-format
+msgid "Edited %s via RhodeCode"
+msgstr "Editado %s via RhodeCode"
+
+#: rhodecode/controllers/files.py:267
+#: rhodecode/templates/files/file_diff.html:40
+msgid "No changes"
+msgstr "Sem alterações"
+
+#: rhodecode/controllers/files.py:278
+#, python-format
+msgid "Successfully committed to %s"
+msgstr "Commit realizado com sucesso para %s"
+
+#: rhodecode/controllers/files.py:283
+msgid "Error occurred during commit"
+msgstr "Ocorreu um erro ao realizar commit"
+
+#: rhodecode/controllers/files.py:308
+msgid "downloads disabled"
+msgstr "downloads desabilitados"
+
+#: rhodecode/controllers/files.py:313
+#, python-format
+msgid "Unknown revision %s"
+msgstr "Revisão desconhecida %s"
+
+#: rhodecode/controllers/files.py:315
+msgid "Empty repository"
+msgstr "Repositório vazio"
+
+#: rhodecode/controllers/files.py:317
+msgid "Unknown archive type"
+msgstr "Arquivo de tipo desconhecido"
+
+#: rhodecode/controllers/files.py:385
+#: rhodecode/controllers/files.py:398
+msgid "Binary file"
+msgstr "Arquivo binário"
+
+#: rhodecode/controllers/files.py:417
+#: rhodecode/templates/changeset/changeset_range.html:4
+#: rhodecode/templates/changeset/changeset_range.html:12
+#: rhodecode/templates/changeset/changeset_range.html:29
+msgid "Changesets"
+msgstr "Conjuntos de mudanças"
+
+#: rhodecode/controllers/files.py:418
+#: rhodecode/controllers/summary.py:175
+#: rhodecode/templates/branches/branches.html:5
+#: rhodecode/templates/summary/summary.html:690
+msgid "Branches"
+msgstr "Ramos"
+
+#: rhodecode/controllers/files.py:419
+#: rhodecode/controllers/summary.py:176
+#: rhodecode/templates/summary/summary.html:679
+#: rhodecode/templates/tags/tags.html:5
+msgid "Tags"
+msgstr "Etiquetas"
+
+#: rhodecode/controllers/journal.py:50
+#, python-format
+msgid "%s public journal %s feed"
+msgstr "diário público de %s - feed %s"
+
+#: rhodecode/controllers/journal.py:178
+#: rhodecode/controllers/journal.py:212
+#: rhodecode/templates/admin/repos/repo_edit.html:171
+#: rhodecode/templates/base/base.html:50
+msgid "Public journal"
+msgstr "Diário público"
+
+#: rhodecode/controllers/login.py:111
+msgid "You have successfully registered into rhodecode"
+msgstr "Você se registrou com sucesso no rhodecode"
+
+#: rhodecode/controllers/login.py:133
+msgid "Your password reset link was sent"
+msgstr "Seu link de reinicialização de senha foi enviado"
+
+#: rhodecode/controllers/login.py:155
+msgid "Your password reset was successful, new password has been sent to your email"
+msgstr "Sua reinicialização de senha foi bem sucedida, sua senha foi enviada ao seu e-mail"
+
+#: rhodecode/controllers/search.py:109
+msgid "Invalid search query. Try quoting it."
+msgstr "Consulta de busca inválida. Tente usar aspas."
+
+#: rhodecode/controllers/search.py:114
+msgid "There is no index to search in. Please run whoosh indexer"
+msgstr "Não há índice onde pesquisa. Por favor execute o indexador whoosh"
+
+#: rhodecode/controllers/search.py:118
+msgid "An error occurred during this search operation"
+msgstr "Ocorreu um erro durante essa operação de busca"
+
+#: rhodecode/controllers/settings.py:61
+#: rhodecode/controllers/settings.py:171
+#, python-format
+msgid "%s repository is not mapped to db perhaps it was created or renamed from the file system please run the application again in order to rescan repositories"
+msgstr "repositório %s não está mapeado ao bd. Talvez ele tenha sido criado ou renomeado a partir do sistema de arquivos. Por favor execute a aplicação outra vez para varrer novamente por repositórios"
+
+#: rhodecode/controllers/settings.py:109
+#: rhodecode/controllers/admin/repos.py:239
+#, python-format
+msgid "Repository %s updated successfully"
+msgstr "Repositório %s atualizado com sucesso"
+
+#: rhodecode/controllers/settings.py:126
+#: rhodecode/controllers/admin/repos.py:257
+#, python-format
+msgid "error occurred during update of repository %s"
+msgstr "ocorreu um erro ao atualizar o repositório %s"
+
+#: rhodecode/controllers/settings.py:144
+#: rhodecode/controllers/admin/repos.py:275
+#, python-format
+msgid "%s repository is not mapped to db perhaps it was moved or renamed  from the filesystem please run the application again in order to rescan repositories"
+msgstr "repositório %s não está mapeado ao bd. Talvez ele tenha sido movido ou renomeado a partir do sistema de arquivos. Por favor execute a aplicação outra vez para varrer novamente por repositórios"
+
+#: rhodecode/controllers/settings.py:156
+#: rhodecode/controllers/admin/repos.py:287
+#, python-format
+msgid "deleted repository %s"
+msgstr "excluído o repositório %s"
+
+#: rhodecode/controllers/settings.py:159
+#: rhodecode/controllers/admin/repos.py:297
+#: rhodecode/controllers/admin/repos.py:303
+#, python-format
+msgid "An error occurred during deletion of %s"
+msgstr "Ocorreu um erro durante a exclusão de %s"
+
+#: rhodecode/controllers/settings.py:193
+#, python-format
+msgid "forked %s repository as %s"
+msgstr "bifurcado repositório %s como %s"
+
+#: rhodecode/controllers/settings.py:211
+#, python-format
+msgid "An error occurred during repository forking %s"
+msgstr "Ocorreu um erro ao bifurcar o repositório %s"
+
+#: rhodecode/controllers/summary.py:123
+msgid "No data loaded yet"
+msgstr "Ainda não há dados carregados"
+
+#: rhodecode/controllers/summary.py:126
+msgid "Statistics are disabled for this repository"
+msgstr "As estatísticas estão desabillitadas para este repositório"
+
+#: rhodecode/controllers/admin/ldap_settings.py:49
+msgid "BASE"
+msgstr "BASE"
+
+#: rhodecode/controllers/admin/ldap_settings.py:50
+msgid "ONELEVEL"
+msgstr "UMNÍVEL"
+
+#: rhodecode/controllers/admin/ldap_settings.py:51
+msgid "SUBTREE"
+msgstr "SUBÁRVORE"
+
+#: rhodecode/controllers/admin/ldap_settings.py:55
+msgid "NEVER"
+msgstr "NUNCA"
+
+#: rhodecode/controllers/admin/ldap_settings.py:56
+msgid "ALLOW"
+msgstr "PERMITIR"
+
+#: rhodecode/controllers/admin/ldap_settings.py:57
+msgid "TRY"
+msgstr "TENTAR"
+
+#: rhodecode/controllers/admin/ldap_settings.py:58
+msgid "DEMAND"
+msgstr "EXIGIR"
+
+#: rhodecode/controllers/admin/ldap_settings.py:59
+msgid "HARD"
+msgstr "DIFÍCIL"
+
+#: rhodecode/controllers/admin/ldap_settings.py:63
+msgid "No encryption"
+msgstr "Sem criptografia"
+
+#: rhodecode/controllers/admin/ldap_settings.py:64
+msgid "LDAPS connection"
+msgstr "Conexão LDAPS"
+
+#: rhodecode/controllers/admin/ldap_settings.py:65
+msgid "START_TLS on LDAP connection"
+msgstr "START_TLS na conexão LDAP"
+
+#: rhodecode/controllers/admin/ldap_settings.py:115
+msgid "Ldap settings updated successfully"
+msgstr "Configurações de LDAP atualizadas com sucesso"
+
+#: rhodecode/controllers/admin/ldap_settings.py:120
+msgid "Unable to activate ldap. The \"python-ldap\" library is missing."
+msgstr "Não foi possível ativar LDAP. A biblioteca \"python-ldap\" está faltando."
+
+#: rhodecode/controllers/admin/ldap_settings.py:134
+msgid "error occurred during update of ldap settings"
+msgstr "ocorreu um erro ao atualizar as configurações de LDAP"
+
+#: rhodecode/controllers/admin/permissions.py:56
+msgid "None"
+msgstr "Nenhum"
+
+#: rhodecode/controllers/admin/permissions.py:57
+msgid "Read"
+msgstr "Ler"
+
+#: rhodecode/controllers/admin/permissions.py:58
+msgid "Write"
+msgstr "Gravar"
+
+#: rhodecode/controllers/admin/permissions.py:59
+#: rhodecode/templates/admin/ldap/ldap.html:9
+#: rhodecode/templates/admin/permissions/permissions.html:9
+#: rhodecode/templates/admin/repos/repo_add.html:9
+#: rhodecode/templates/admin/repos/repo_edit.html:9
+#: rhodecode/templates/admin/repos/repos.html:10
+#: rhodecode/templates/admin/repos_groups/repos_groups_add.html:8
+#: rhodecode/templates/admin/repos_groups/repos_groups_edit.html:8
+#: rhodecode/templates/admin/repos_groups/repos_groups_show.html:10
+#: rhodecode/templates/admin/settings/hooks.html:9
+#: rhodecode/templates/admin/settings/settings.html:9
+#: rhodecode/templates/admin/users/user_add.html:8
+#: rhodecode/templates/admin/users/user_edit.html:9
+#: rhodecode/templates/admin/users/user_edit.html:110
+#: rhodecode/templates/admin/users/users.html:9
+#: rhodecode/templates/admin/users_groups/users_group_add.html:8
+#: rhodecode/templates/admin/users_groups/users_group_edit.html:9
+#: rhodecode/templates/admin/users_groups/users_groups.html:9
+#: rhodecode/templates/base/base.html:279
+#: rhodecode/templates/base/base.html:366
+#: rhodecode/templates/base/base.html:368
+#: rhodecode/templates/base/base.html:370
+msgid "Admin"
+msgstr "Administrador"
+
+#: rhodecode/controllers/admin/permissions.py:62
+msgid "disabled"
+msgstr "desabilitado"
+
+#: rhodecode/controllers/admin/permissions.py:64
+msgid "allowed with manual account activation"
+msgstr "permitido com ativação manual de conta"
+
+#: rhodecode/controllers/admin/permissions.py:66
+msgid "allowed with automatic account activation"
+msgstr "permitido com ativação automática de conta"
+
+#: rhodecode/controllers/admin/permissions.py:68
+msgid "Disabled"
+msgstr "Desabilitado"
+
+#: rhodecode/controllers/admin/permissions.py:69
+msgid "Enabled"
+msgstr "Habilitado"
+
+#: rhodecode/controllers/admin/permissions.py:102
+msgid "Default permissions updated successfully"
+msgstr "Permissões padrões atualizadas com sucesso"
+
+#: rhodecode/controllers/admin/permissions.py:119
+msgid "error occurred during update of permissions"
+msgstr "ocorreu um erro ao atualizar as permissões"
+
+#: rhodecode/controllers/admin/repos.py:96
+#, python-format
+msgid "%s repository is not mapped to db perhaps it was created or renamed from the filesystem please run the application again in order to rescan repositories"
+msgstr "repositório %s não está mapeado ao bd. Talvez ele tenha sido criado ou renomeado a partir do sistema de arquivos. Por favor execute a aplicação outra vez para varrer novamente por repositórios"
+
+#: rhodecode/controllers/admin/repos.py:172
+#, python-format
+msgid "created repository %s from %s"
+msgstr "repositório %s criado a partir de %s"
+
+#: rhodecode/controllers/admin/repos.py:176
+#, python-format
+msgid "created repository %s"
+msgstr "repositório %s criado"
+
+#: rhodecode/controllers/admin/repos.py:205
+#, python-format
+msgid "error occurred during creation of repository %s"
+msgstr "ocorreu um erro ao criar o repositório %s"
+
+#: rhodecode/controllers/admin/repos.py:292
+#, python-format
+msgid "Cannot delete %s it still contains attached forks"
+msgstr "Nao é possível excluir %s pois ele ainda contém bifurcações vinculadas"
+
+#: rhodecode/controllers/admin/repos.py:320
+msgid "An error occurred during deletion of repository user"
+msgstr "Ocorreu um erro ao excluir usuário de repositório"
+
+#: rhodecode/controllers/admin/repos.py:335
+msgid "An error occurred during deletion of repository users groups"
+msgstr "Ocorreu um erro ao excluir grupo de usuário de repositório"
+
+#: rhodecode/controllers/admin/repos.py:352
+msgid "An error occurred during deletion of repository stats"
+msgstr "Ocorreu um erro ao excluir estatísticas de repositório"
+
+#: rhodecode/controllers/admin/repos.py:367
+msgid "An error occurred during cache invalidation"
+msgstr "Ocorreu um erro ao invalidar o cache"
+
+#: rhodecode/controllers/admin/repos.py:387
+msgid "Updated repository visibility in public journal"
+msgstr "Atualizada a visibilidade do repositório no diário público"
+
+#: rhodecode/controllers/admin/repos.py:390
+msgid "An error occurred during setting this repository in public journal"
+msgstr "Ocorreu um erro ao ajustar esse repositório no diário público"
+
+#: rhodecode/controllers/admin/repos.py:395
+#: rhodecode/model/forms.py:53
+msgid "Token mismatch"
+msgstr "Descompasso de Token"
+
+#: rhodecode/controllers/admin/repos.py:408
+msgid "Pulled from remote location"
+msgstr "Realizado pull de localização remota"
+
+#: rhodecode/controllers/admin/repos.py:410
+msgid "An error occurred during pull from remote location"
+msgstr "Ocorreu um erro ao realizar pull de localização remota"
+
+#: rhodecode/controllers/admin/repos_groups.py:83
+#, python-format
+msgid "created repos group %s"
+msgstr "criado grupo de repositórios %s"
+
+#: rhodecode/controllers/admin/repos_groups.py:96
+#, python-format
+msgid "error occurred during creation of repos group %s"
+msgstr "ccorreu um erro ao criar grupo de repositório %s"
+
+#: rhodecode/controllers/admin/repos_groups.py:130
+#, python-format
+msgid "updated repos group %s"
+msgstr "atualizado grupo de repositórios %s"
+
+#: rhodecode/controllers/admin/repos_groups.py:143
+#, python-format
+msgid "error occurred during update of repos group %s"
+msgstr "ocorreu um erro ao atualizar grupo de repositórios %s"
+
+#: rhodecode/controllers/admin/repos_groups.py:164
+#, python-format
+msgid "This group contains %s repositores and cannot be deleted"
+msgstr "Esse grupo contém %s repositórios e não pode ser excluído"
+
+#: rhodecode/controllers/admin/repos_groups.py:171
+#, python-format
+msgid "removed repos group %s"
+msgstr "removido grupo de repositórios %s"
+
+#: rhodecode/controllers/admin/repos_groups.py:175
+#, python-format
+msgid "error occurred during deletion of repos group %s"
+msgstr "ccorreu um erro ao excluir grupo de repositórios %s"
+
+#: rhodecode/controllers/admin/settings.py:109
+#, python-format
+msgid "Repositories successfully rescanned added: %s,removed: %s"
+msgstr "Repositórios varridos com sucesso adicionados: %s, removidos: %s"
+
+#: rhodecode/controllers/admin/settings.py:118
+msgid "Whoosh reindex task scheduled"
+msgstr "Tarefa de reindexação do whoosh agendada"
+
+#: rhodecode/controllers/admin/settings.py:143
+msgid "Updated application settings"
+msgstr "Configurações da aplicação atualizadas"
+
+#: rhodecode/controllers/admin/settings.py:148
+#: rhodecode/controllers/admin/settings.py:215
+msgid "error occurred during updating application settings"
+msgstr "ocorreu um erro ao atualizar as configurações da aplicação"
+
+#: rhodecode/controllers/admin/settings.py:210
+msgid "Updated mercurial settings"
+msgstr "Atualizadas as configurações do mercurial"
+
+#: rhodecode/controllers/admin/settings.py:236
+msgid "Added new hook"
+msgstr "Adicionado novo gancho"
+
+#: rhodecode/controllers/admin/settings.py:247
+msgid "Updated hooks"
+msgstr "Atualizados os ganchos"
+
+#: rhodecode/controllers/admin/settings.py:251
+msgid "error occurred during hook creation"
+msgstr "ocorreu um erro ao criar gancho"
+
+#: rhodecode/controllers/admin/settings.py:310
+msgid "You can't edit this user since it's crucial for entire application"
+msgstr "Você não pode editar esse usuário pois ele é crucial para toda a aplicação"
+
+#: rhodecode/controllers/admin/settings.py:339
+msgid "Your account was updated successfully"
+msgstr "Sua conta foi atualizada com sucesso"
+
+#: rhodecode/controllers/admin/settings.py:359
+#: rhodecode/controllers/admin/users.py:130
+#, python-format
+msgid "error occurred during update of user %s"
+msgstr "ocorreu um erro ao atualizar o usuário %s"
+
+#: rhodecode/controllers/admin/users.py:78
+#, python-format
+msgid "created user %s"
+msgstr "usuário %s criado"
+
+#: rhodecode/controllers/admin/users.py:90
+#, python-format
+msgid "error occurred during creation of user %s"
+msgstr "ocorreu um erro ao criar o usuário %s"
+
+#: rhodecode/controllers/admin/users.py:116
+msgid "User updated successfully"
+msgstr "Usuário atualizado com sucesso"
+
+#: rhodecode/controllers/admin/users.py:146
+msgid "successfully deleted user"
+msgstr "usuário excluído com sucesso"
+
+#: rhodecode/controllers/admin/users.py:150
+msgid "An error occurred during deletion of user"
+msgstr "Ocorreu um erro ao excluir o usuário"
+
+#: rhodecode/controllers/admin/users.py:166
+msgid "You can't edit this user"
+msgstr "Você não pode editar esse usuário"
+
+#: rhodecode/controllers/admin/users.py:195
+#: rhodecode/controllers/admin/users_groups.py:202
+msgid "Granted 'repository create' permission to user"
+msgstr "Concedida permissão de 'criar repositório' ao usuário"
+
+#: rhodecode/controllers/admin/users.py:204
+#: rhodecode/controllers/admin/users_groups.py:211
+msgid "Revoked 'repository create' permission to user"
+msgstr "Revogada permissão de 'criar repositório' ao usuário"
+
+#: rhodecode/controllers/admin/users_groups.py:74
+#, python-format
+msgid "created users group %s"
+msgstr "criado grupo de usuários %s"
+
+#: rhodecode/controllers/admin/users_groups.py:86
+#, python-format
+msgid "error occurred during creation of users group %s"
+msgstr "ocorreu um erro ao criar o grupo de usuários %s"
+
+#: rhodecode/controllers/admin/users_groups.py:119
+#, python-format
+msgid "updated users group %s"
+msgstr "grupo de usuários %s atualizado"
+
+#: rhodecode/controllers/admin/users_groups.py:138
+#, python-format
+msgid "error occurred during update of users group %s"
+msgstr "ocorreu um erro ao atualizar o grupo de usuários %s"
+
+#: rhodecode/controllers/admin/users_groups.py:154
+msgid "successfully deleted users group"
+msgstr "grupo de usuários excluído com sucesso"
+
+#: rhodecode/controllers/admin/users_groups.py:158
+msgid "An error occurred during deletion of users group"
+msgstr "Ocorreu um erro ao excluir o grupo de usuários"
+
+#: rhodecode/lib/__init__.py:279
+msgid "year"
+msgstr "ano"
+
+#: rhodecode/lib/__init__.py:280
+msgid "month"
+msgstr "mês"
+
+#: rhodecode/lib/__init__.py:281
+msgid "day"
+msgstr "dia"
+
+#: rhodecode/lib/__init__.py:282
+msgid "hour"
+msgstr "hora"
+
+#: rhodecode/lib/__init__.py:283
+msgid "minute"
+msgstr "minuto"
+
+#: rhodecode/lib/__init__.py:284
+msgid "second"
+msgstr "segundo"
+
+#: rhodecode/lib/__init__.py:293
+msgid "ago"
+msgstr "atrás"
+
+#: rhodecode/lib/__init__.py:296
+msgid "just now"
+msgstr "agora há pouco"
+
+#: rhodecode/lib/auth.py:377
+msgid "You need to be a registered user to perform this action"
+msgstr "Você precisa ser um usuário registrado para realizar essa ação"
+
+#: rhodecode/lib/auth.py:421
+msgid "You need to be a signed in to view this page"
+msgstr "Você precisa estar logado para ver essa página"
+
+#: rhodecode/lib/helpers.py:307
+msgid "True"
+msgstr "Verdadeiro"
+
+#: rhodecode/lib/helpers.py:311
+msgid "False"
+msgstr "Falso"
+
+#: rhodecode/lib/helpers.py:352
+#, python-format
+msgid "Show all combined changesets %s->%s"
+msgstr "Ver todos os conjuntos de mudanças combinados %s->%s"
+
+#: rhodecode/lib/helpers.py:356
+msgid "compare view"
+msgstr "comparar exibir"
+
+#: rhodecode/lib/helpers.py:365
+msgid "and"
+msgstr "e"
+
+#: rhodecode/lib/helpers.py:365
+#, python-format
+msgid "%s more"
+msgstr "%s mais"
+
+#: rhodecode/lib/helpers.py:367
+#: rhodecode/templates/changelog/changelog.html:14
+#: rhodecode/templates/changelog/changelog.html:39
+msgid "revisions"
+msgstr "revisões"
+
+#: rhodecode/lib/helpers.py:385
+msgid "fork name "
+msgstr "nome da bifurcação"
+
+#: rhodecode/lib/helpers.py:388
+msgid "[deleted] repository"
+msgstr "repositório [excluído]"
+
+#: rhodecode/lib/helpers.py:389
+#: rhodecode/lib/helpers.py:393
+msgid "[created] repository"
+msgstr "repositório [criado]"
+
+#: rhodecode/lib/helpers.py:390
+#: rhodecode/lib/helpers.py:394
+msgid "[forked] repository"
+msgstr "repositório [bifurcado]"
+
+#: rhodecode/lib/helpers.py:391
+#: rhodecode/lib/helpers.py:395
+msgid "[updated] repository"
+msgstr "repositório [atualizado]"
+
+#: rhodecode/lib/helpers.py:392
+msgid "[delete] repository"
+msgstr "[excluir] repositório"
+
+#: rhodecode/lib/helpers.py:396
+msgid "[pushed] into"
+msgstr "[realizado push] para"
+
+#: rhodecode/lib/helpers.py:397
+msgid "[committed via RhodeCode] into"
+msgstr "[realizado commit via RhodeCode] para"
+
+#: rhodecode/lib/helpers.py:398
+msgid "[pulled from remote] into"
+msgstr "[realizado pull remoto] para"
+
+#: rhodecode/lib/helpers.py:399
+msgid "[pulled] from"
+msgstr "[realizado pull] a partir de"
+
+#: rhodecode/lib/helpers.py:400
+msgid "[started following] repository"
+msgstr "[passou a seguir] o repositório"
+
+#: rhodecode/lib/helpers.py:401
+msgid "[stopped following] repository"
+msgstr "[parou de seguir] o repositório"
+
+#: rhodecode/lib/helpers.py:577
+#, python-format
+msgid " and %s more"
+msgstr " e mais %s"
+
+#: rhodecode/lib/helpers.py:581
+msgid "No Files"
+msgstr "Nenhum Arquivo"
+
+#: rhodecode/model/forms.py:66
+msgid "Invalid username"
+msgstr "Nome de usuário inválido"
+
+#: rhodecode/model/forms.py:75
+msgid "This username already exists"
+msgstr "Esse nome de usuário já existe"
+
+#: rhodecode/model/forms.py:79
+msgid "Username may only contain alphanumeric characters underscores, periods or dashes and must begin with alphanumeric character"
+msgstr "Nome de usuário pode conter somente caracteres alfanuméricos, sublinha, pontos e hífens e deve iniciar com caractere alfanumérico"
+
+#: rhodecode/model/forms.py:94
+msgid "Invalid group name"
+msgstr "Nome de grupo inválido"
+
+#: rhodecode/model/forms.py:104
+msgid "This users group already exists"
+msgstr "Esse grupo de usuários já existe"
+
+#: rhodecode/model/forms.py:110
+msgid "Group name may only contain alphanumeric characters underscores, periods or dashes and must begin with alphanumeric character"
+msgstr "Nome de grupo pode conter somente caracteres alfanuméricos, sublinha, pontos e hífens e deve iniciar com caractere alfanumérico"
+
+#: rhodecode/model/forms.py:132
+msgid "Cannot assign this group as parent"
+msgstr "Não é possível associar esse grupo como progenitor"
+
+#: rhodecode/model/forms.py:148
+msgid "This group already exists"
+msgstr "Esse grupo já existe"
+
+#: rhodecode/model/forms.py:164
+#: rhodecode/model/forms.py:172
+#: rhodecode/model/forms.py:180
+msgid "Invalid characters in password"
+msgstr "Caracteres inválidos na senha"
+
+#: rhodecode/model/forms.py:191
+msgid "Passwords do not match"
+msgstr "Senhas não conferem"
+
+#: rhodecode/model/forms.py:196
+msgid "invalid password"
+msgstr "senha inválida"
+
+#: rhodecode/model/forms.py:197
+msgid "invalid user name"
+msgstr "nome de usuário inválido"
+
+#: rhodecode/model/forms.py:198
+msgid "Your account is disabled"
+msgstr "Sua conta está desabilitada"
+
+#: rhodecode/model/forms.py:233
+msgid "This username is not valid"
+msgstr "Esse nome de usuário não é válido"
+
+#: rhodecode/model/forms.py:245
+msgid "This repository name is disallowed"
+msgstr "Esse nome de repositório não é permitido"
+
+#: rhodecode/model/forms.py:266
+#, python-format
+msgid "This repository already exists in group \"%s\""
+msgstr "Esse repositório já existe no grupo \"%s\""
+
+#: rhodecode/model/forms.py:274
+msgid "This repository already exists"
+msgstr "Esse repositório já existe"
+
+#: rhodecode/model/forms.py:312
+#: rhodecode/model/forms.py:319
+msgid "invalid clone url"
+msgstr "URL de clonagem inválida"
+
+#: rhodecode/model/forms.py:322
+msgid "Invalid clone url, provide a valid clone http\\s url"
+msgstr "URL de clonagem inválida, forneça uma URL válida de clonagem http\\s"
+
+#: rhodecode/model/forms.py:334
+msgid "Fork have to be the same type as original"
+msgstr "Bifurcação precisa ser do mesmo tipo que o original"
+
+#: rhodecode/model/forms.py:341
+msgid "This username or users group name is not valid"
+msgstr "Esse nome de usuário ou nome de grupo de usuários não é válido"
+
+#: rhodecode/model/forms.py:403
+msgid "This is not a valid path"
+msgstr "Esse não é um caminho válido"
+
+#: rhodecode/model/forms.py:416
+msgid "This e-mail address is already taken"
+msgstr "Esse endereço de e-mail já está tomado"
+
+#: rhodecode/model/forms.py:427
+msgid "This e-mail address doesn't exist."
+msgstr "Esse endereço de e-mail não existe."
+
+#: rhodecode/model/forms.py:447
+msgid "The LDAP Login attribute of the CN must be specified - this is the name of the attribute that is equivalent to 'username'"
+msgstr "O atributo de login LDAP do CN deve ser especificado - isto é o nome do atributo que é equivalente ao 'nome de usuário'"
+
+#: rhodecode/model/forms.py:466
+msgid "Please enter a login"
+msgstr "Por favor entre um login"
+
+#: rhodecode/model/forms.py:467
+#, python-format
+msgid "Enter a value %(min)i characters long or more"
+msgstr "Entre um valor com %(min)i caracteres ou mais"
+
+#: rhodecode/model/forms.py:475
+msgid "Please enter a password"
+msgstr "Por favor entre com uma senha"
+
+#: rhodecode/model/forms.py:476
+#, python-format
+msgid "Enter %(min)i characters or more"
+msgstr "Entre com %(min)i caracteres ou mais"
+
+#: rhodecode/model/user.py:145
+msgid "[RhodeCode] New User registration"
+msgstr "[RhodeCode] Registro de Novo Usuário"
+
+#: rhodecode/model/user.py:157
+#: rhodecode/model/user.py:179
+msgid "You can't Edit this user since it's crucial for entire application"
+msgstr "Você não pode Editar esse usuário, pois ele é crucial para toda a aplicação"
+
+#: rhodecode/model/user.py:201
+msgid "You can't remove this user since it's crucial for entire application"
+msgstr "Você não pode remover esse usuário, pois ele é crucial para toda a aplicação"
+
+#: rhodecode/model/user.py:204
+#, python-format
+msgid "This user still owns %s repositories and cannot be removed. Switch owners or remove those repositories"
+msgstr "Esse usuário ainda é dono de %s repositórios e não pode ser removido. Troque os donos ou remova esses repositórios"
+
+#: rhodecode/templates/index.html:4
+msgid "Dashboard"
+msgstr "Painel de Controle"
+
+#: rhodecode/templates/index_base.html:22
+#: rhodecode/templates/admin/users/user_edit_my_account.html:102
+msgid "quick filter..."
+msgstr "filtro rápido..."
+
+#: rhodecode/templates/index_base.html:23
+#: rhodecode/templates/base/base.html:300
+msgid "repositories"
+msgstr "repositórios"
+
+#: rhodecode/templates/index_base.html:29
+#: rhodecode/templates/admin/repos/repos.html:22
+msgid "ADD NEW REPOSITORY"
+msgstr "ADICIONAR NOVO REPOSITÓRIO"
+
+#: rhodecode/templates/index_base.html:41
+#: rhodecode/templates/admin/repos_groups/repos_groups_add.html:32
+#: rhodecode/templates/admin/repos_groups/repos_groups_edit.html:32
+#: rhodecode/templates/admin/repos_groups/repos_groups_show.html:33
+#: rhodecode/templates/admin/users_groups/users_group_add.html:32
+#: rhodecode/templates/admin/users_groups/users_group_edit.html:33
+msgid "Group name"
+msgstr "Nome do grupo"
+
+#: rhodecode/templates/index_base.html:42
+#: rhodecode/templates/index_base.html:73
+#: rhodecode/templates/admin/repos/repo_add_base.html:44
+#: rhodecode/templates/admin/repos/repo_edit.html:64
+#: rhodecode/templates/admin/repos/repos.html:31
+#: rhodecode/templates/admin/repos_groups/repos_groups_add.html:41
+#: rhodecode/templates/admin/repos_groups/repos_groups_edit.html:41
+#: rhodecode/templates/admin/repos_groups/repos_groups_show.html:34
+#: rhodecode/templates/settings/repo_fork.html:40
+#: rhodecode/templates/settings/repo_settings.html:40
+#: rhodecode/templates/summary/summary.html:92
+msgid "Description"
+msgstr "Descrição"
+
+#: rhodecode/templates/index_base.html:53
+#: rhodecode/templates/admin/repos_groups/repos_groups_show.html:46
+msgid "Repositories group"
+msgstr "Grupo de repositórios"
+
+#: rhodecode/templates/index_base.html:72
+#: rhodecode/templates/admin/repos/repo_add_base.html:9
+#: rhodecode/templates/admin/repos/repo_edit.html:32
+#: rhodecode/templates/admin/repos/repos.html:30
+#: rhodecode/templates/admin/users/user_edit_my_account.html:117
+#: rhodecode/templates/files/files_browser.html:157
+#: rhodecode/templates/settings/repo_settings.html:31
+#: rhodecode/templates/summary/summary.html:31
+#: rhodecode/templates/summary/summary.html:107
+msgid "Name"
+msgstr "Nome"
+
+#: rhodecode/templates/index_base.html:74
+#: rhodecode/templates/admin/repos/repos.html:32
+#: rhodecode/templates/summary/summary.html:114
+msgid "Last change"
+msgstr "Última alteração"
+
+#: rhodecode/templates/index_base.html:75
+#: rhodecode/templates/admin/repos/repos.html:33
+msgid "Tip"
+msgstr "Ponta"
+
+#: rhodecode/templates/index_base.html:76
+#: rhodecode/templates/admin/repos/repo_edit.html:97
+msgid "Owner"
+msgstr "Dono"
+
+#: rhodecode/templates/index_base.html:77
+#: rhodecode/templates/journal/public_journal.html:20
+#: rhodecode/templates/summary/summary.html:180
+#: rhodecode/templates/summary/summary.html:183
+msgid "RSS"
+msgstr "RSS"
+
+#: rhodecode/templates/index_base.html:78
+#: rhodecode/templates/journal/public_journal.html:23
+#: rhodecode/templates/summary/summary.html:181
+#: rhodecode/templates/summary/summary.html:184
+msgid "Atom"
+msgstr "Atom"
+
+#: rhodecode/templates/index_base.html:87
+#: rhodecode/templates/index_base.html:89
+#: rhodecode/templates/index_base.html:91
+#: rhodecode/templates/base/base.html:209
+#: rhodecode/templates/base/base.html:211
+#: rhodecode/templates/base/base.html:213
+#: rhodecode/templates/summary/summary.html:4
+msgid "Summary"
+msgstr "Sumário"
+
+#: rhodecode/templates/index_base.html:95
+#: rhodecode/templates/index_base.html:97
+#: rhodecode/templates/index_base.html:99
+#: rhodecode/templates/base/base.html:225
+#: rhodecode/templates/base/base.html:227
+#: rhodecode/templates/base/base.html:229
+#: rhodecode/templates/changelog/changelog.html:6
+#: rhodecode/templates/changelog/changelog.html:14
+msgid "Changelog"
+msgstr "Registro de alterações"
+
+#: rhodecode/templates/index_base.html:103
+#: rhodecode/templates/index_base.html:105
+#: rhodecode/templates/index_base.html:107
+#: rhodecode/templates/base/base.html:268
+#: rhodecode/templates/base/base.html:270
+#: rhodecode/templates/base/base.html:272
+#: rhodecode/templates/files/files.html:4
+msgid "Files"
+msgstr "Arquivos"
+
+#: rhodecode/templates/index_base.html:116
+#: rhodecode/templates/admin/repos/repos.html:42
+#: rhodecode/templates/admin/users/user_edit_my_account.html:127
+#: rhodecode/templates/summary/summary.html:48
+msgid "Mercurial repository"
+msgstr "Repositório Mercurial"
+
+#: rhodecode/templates/index_base.html:118
+#: rhodecode/templates/admin/repos/repos.html:44
+#: rhodecode/templates/admin/users/user_edit_my_account.html:129
+#: rhodecode/templates/summary/summary.html:51
+msgid "Git repository"
+msgstr "Repositório Git"
+
+#: rhodecode/templates/index_base.html:123
+#: rhodecode/templates/admin/repos/repo_edit_perms.html:16
+#: rhodecode/templates/journal/journal.html:53
+#: rhodecode/templates/summary/summary.html:56
+msgid "private repository"
+msgstr "repositório privado"
+
+#: rhodecode/templates/index_base.html:125
+#: rhodecode/templates/journal/journal.html:55
+#: rhodecode/templates/summary/summary.html:58
+msgid "public repository"
+msgstr "repositório público"
+
+#: rhodecode/templates/index_base.html:133
+#: rhodecode/templates/base/base.html:291
+#: rhodecode/templates/settings/repo_fork.html:13
+msgid "fork"
+msgstr "bifurcação"
+
+#: rhodecode/templates/index_base.html:134
+#: rhodecode/templates/admin/repos/repos.html:60
+#: rhodecode/templates/admin/users/user_edit_my_account.html:143
+#: rhodecode/templates/summary/summary.html:69
+#: rhodecode/templates/summary/summary.html:71
+msgid "Fork of"
+msgstr "Bifurcação de"
+
+#: rhodecode/templates/index_base.html:155
+#: rhodecode/templates/admin/repos/repos.html:73
+msgid "No changesets yet"
+msgstr "Ainda não há conjuntos de mudanças"
+
+#: rhodecode/templates/index_base.html:161
+#: rhodecode/templates/index_base.html:163
+#, python-format
+msgid "Subscribe to %s rss feed"
+msgstr "Assinar o feed rss de %s"
+
+#: rhodecode/templates/index_base.html:168
+#: rhodecode/templates/index_base.html:170
+#, python-format
+msgid "Subscribe to %s atom feed"
+msgstr "Assinar o feed atom de %s"
+
+#: rhodecode/templates/login.html:5
+#: rhodecode/templates/login.html:54
+#: rhodecode/templates/base/base.html:38
+msgid "Sign In"
+msgstr "Entrar"
+
+#: rhodecode/templates/login.html:21
+msgid "Sign In to"
+msgstr "Entrar em"
+
+#: rhodecode/templates/login.html:31
+#: rhodecode/templates/register.html:20
+#: rhodecode/templates/admin/admin_log.html:5
+#: rhodecode/templates/admin/users/user_add.html:32
+#: rhodecode/templates/admin/users/user_edit.html:47
+#: rhodecode/templates/admin/users/user_edit_my_account.html:45
+#: rhodecode/templates/base/base.html:15
+#: rhodecode/templates/summary/summary.html:106
+msgid "Username"
+msgstr "Nome de usuário"
+
+#: rhodecode/templates/login.html:40
+#: rhodecode/templates/register.html:29
+#: rhodecode/templates/admin/ldap/ldap.html:46
+#: rhodecode/templates/admin/users/user_add.html:41
+#: rhodecode/templates/base/base.html:24
+msgid "Password"
+msgstr "Senha"
+
+#: rhodecode/templates/login.html:60
+msgid "Forgot your password ?"
+msgstr "Esqueceu sua senha ?"
+
+#: rhodecode/templates/login.html:63
+#: rhodecode/templates/base/base.html:35
+msgid "Don't have an account ?"
+msgstr "Não possui uma conta ?"
+
+#: rhodecode/templates/password_reset.html:5
+msgid "Reset your password"
+msgstr "Reinicializar sua senha"
+
+#: rhodecode/templates/password_reset.html:11
+msgid "Reset your password to"
+msgstr "Reinicializar sua senha para"
+
+#: rhodecode/templates/password_reset.html:21
+msgid "Email address"
+msgstr "Endereço de e-mail"
+
+#: rhodecode/templates/password_reset.html:30
+msgid "Reset my password"
+msgstr "Reinicializar minha senha"
+
+#: rhodecode/templates/password_reset.html:31
+msgid "Password reset link will be send to matching email address"
+msgstr "Link de reinicialização de senha será enviado ao endereço de e-mail correspondente"
+
+#: rhodecode/templates/register.html:5
+#: rhodecode/templates/register.html:74
+msgid "Sign Up"
+msgstr "Inscrever-se"
+
+#: rhodecode/templates/register.html:11
+msgid "Sign Up to"
+msgstr "Inscrever-se em"
+
+#: rhodecode/templates/register.html:38
+msgid "Re-enter password"
+msgstr "Repita a senha"
+
+#: rhodecode/templates/register.html:47
+#: rhodecode/templates/admin/users/user_add.html:50
+#: rhodecode/templates/admin/users/user_edit.html:74
+#: rhodecode/templates/admin/users/user_edit_my_account.html:63
+msgid "First Name"
+msgstr "Primeiro Nome"
+
+#: rhodecode/templates/register.html:56
+#: rhodecode/templates/admin/users/user_add.html:59
+#: rhodecode/templates/admin/users/user_edit.html:83
+#: rhodecode/templates/admin/users/user_edit_my_account.html:72
+msgid "Last Name"
+msgstr "Último Nome"
+
+#: rhodecode/templates/register.html:65
+#: rhodecode/templates/admin/users/user_add.html:68
+#: rhodecode/templates/admin/users/user_edit.html:92
+#: rhodecode/templates/admin/users/user_edit_my_account.html:81
+#: rhodecode/templates/summary/summary.html:108
+msgid "Email"
+msgstr "E-mail"
+
+#: rhodecode/templates/register.html:76
+msgid "Your account will be activated right after registration"
+msgstr "Sua conta será ativada logo após o registro ser concluído"
+
+#: rhodecode/templates/register.html:78
+msgid "Your account must wait for activation by administrator"
+msgstr "Sua conta precisa esperar ativação por um administrador"
+
+#: rhodecode/templates/repo_switcher_list.html:14
+msgid "Private repository"
+msgstr "Repositório privado"
+
+#: rhodecode/templates/repo_switcher_list.html:19
+msgid "Public repository"
+msgstr "Repositório público"
+
+#: rhodecode/templates/admin/admin.html:5
+#: rhodecode/templates/admin/admin.html:9
+msgid "Admin journal"
+msgstr "Diário do administrador"
+
+#: rhodecode/templates/admin/admin_log.html:6
+msgid "Action"
+msgstr "Ação"
+
+#: rhodecode/templates/admin/admin_log.html:7
+msgid "Repository"
+msgstr "Repositório"
+
+#: rhodecode/templates/admin/admin_log.html:8
+msgid "Date"
+msgstr "Data"
+
+#: rhodecode/templates/admin/admin_log.html:9
+msgid "From IP"
+msgstr "A partir do IP"
+
+#: rhodecode/templates/admin/admin_log.html:52
+msgid "No actions yet"
+msgstr "Ainda não há ações"
+
+#: rhodecode/templates/admin/ldap/ldap.html:5
+msgid "LDAP administration"
+msgstr "Administração de LDAP"
+
+#: rhodecode/templates/admin/ldap/ldap.html:11
+msgid "Ldap"
+msgstr "LDAP"
+
+#: rhodecode/templates/admin/ldap/ldap.html:28
+msgid "Connection settings"
+msgstr "Configurações de conexão"
+
+#: rhodecode/templates/admin/ldap/ldap.html:30
+msgid "Enable LDAP"
+msgstr "Habilitar LDAP"
+
+#: rhodecode/templates/admin/ldap/ldap.html:34
+msgid "Host"
+msgstr "Host"
+
+#: rhodecode/templates/admin/ldap/ldap.html:38
+msgid "Port"
+msgstr "Porta"
+
+#: rhodecode/templates/admin/ldap/ldap.html:42
+msgid "Account"
+msgstr "Conta"
+
+#: rhodecode/templates/admin/ldap/ldap.html:50
+msgid "Connection security"
+msgstr "Segurança da conexão"
+
+#: rhodecode/templates/admin/ldap/ldap.html:54
+msgid "Certificate Checks"
+msgstr "Verificações de Certificados"
+
+#: rhodecode/templates/admin/ldap/ldap.html:57
+msgid "Search settings"
+msgstr "Configurações de busca"
+
+#: rhodecode/templates/admin/ldap/ldap.html:59
+msgid "Base DN"
+msgstr "DN Base"
+
+#: rhodecode/templates/admin/ldap/ldap.html:63
+msgid "LDAP Filter"
+msgstr "Filtro LDAP"
+
+#: rhodecode/templates/admin/ldap/ldap.html:67
+msgid "LDAP Search Scope"
+msgstr "Escopo de Buscas LDAP"
+
+#: rhodecode/templates/admin/ldap/ldap.html:70
+msgid "Attribute mappings"
+msgstr "Mapeamento de atributos"
+
+#: rhodecode/templates/admin/ldap/ldap.html:72
+msgid "Login Attribute"
+msgstr "Atributo de Login"
+
+#: rhodecode/templates/admin/ldap/ldap.html:76
+msgid "First Name Attribute"
+msgstr "Atributo do Primeiro Nome"
+
+#: rhodecode/templates/admin/ldap/ldap.html:80
+msgid "Last Name Attribute"
+msgstr "Atributo do Último Nome"
+
+#: rhodecode/templates/admin/ldap/ldap.html:84
+msgid "E-mail Attribute"
+msgstr "Atributo de E-mail"
+
+#: rhodecode/templates/admin/ldap/ldap.html:89
+#: rhodecode/templates/admin/settings/hooks.html:73
+#: rhodecode/templates/admin/users/user_edit.html:117
+#: rhodecode/templates/admin/users/user_edit.html:142
+#: rhodecode/templates/admin/users/user_edit_my_account.html:89
+#: rhodecode/templates/admin/users_groups/users_group_edit.html:263
+msgid "Save"
+msgstr "Salvar"
+
+#: rhodecode/templates/admin/permissions/permissions.html:5
+msgid "Permissions administration"
+msgstr "Administração de permissões"
+
+#: rhodecode/templates/admin/permissions/permissions.html:11
+#: rhodecode/templates/admin/repos/repo_edit.html:109
+#: rhodecode/templates/admin/users/user_edit.html:127
+#: rhodecode/templates/admin/users_groups/users_group_edit.html:248
+#: rhodecode/templates/settings/repo_settings.html:58
+msgid "Permissions"
+msgstr "Permissões"
+
+#: rhodecode/templates/admin/permissions/permissions.html:24
+msgid "Default permissions"
+msgstr "Permissões padrão"
+
+#: rhodecode/templates/admin/permissions/permissions.html:31
+msgid "Anonymous access"
+msgstr "Acesso anônimo"
+
+#: rhodecode/templates/admin/permissions/permissions.html:41
+msgid "Repository permission"
+msgstr "Permissão de repositório"
+
+#: rhodecode/templates/admin/permissions/permissions.html:49
+msgid "All default permissions on each repository will be reset to choosen permission, note that all custom default permission on repositories will be lost"
+msgstr "Todas as permissões padrão em cada repositório serão reinicializadas para as permissões escolhidas. Note que todas as permissões padrão customizadas nos repositórios serão perdidas"
+
+#: rhodecode/templates/admin/permissions/permissions.html:50
+msgid "overwrite existing settings"
+msgstr "sobrescrever configurações existentes"
+
+#: rhodecode/templates/admin/permissions/permissions.html:55
+msgid "Registration"
+msgstr "Registro"
+
+#: rhodecode/templates/admin/permissions/permissions.html:63
+msgid "Repository creation"
+msgstr "Criação de repositório"
+
+#: rhodecode/templates/admin/permissions/permissions.html:71
+msgid "set"
+msgstr "ajustar"
+
+#: rhodecode/templates/admin/repos/repo_add.html:5
+#: rhodecode/templates/admin/repos/repo_add_create_repository.html:5
+msgid "Add repository"
+msgstr "Adicionar repositório"
+
+#: rhodecode/templates/admin/repos/repo_add.html:11
+#: rhodecode/templates/admin/repos/repo_edit.html:11
+#: rhodecode/templates/admin/repos/repos.html:10
+#: rhodecode/templates/admin/repos_groups/repos_groups_show.html:10
+msgid "Repositories"
+msgstr "Repositórios"
+
+#: rhodecode/templates/admin/repos/repo_add.html:13
+msgid "add new"
+msgstr "adicionar novo"
+
+#: rhodecode/templates/admin/repos/repo_add_base.html:20
+#: rhodecode/templates/summary/summary.html:80
+#: rhodecode/templates/summary/summary.html:82
+msgid "Clone from"
+msgstr "Clonar de"
+
+#: rhodecode/templates/admin/repos/repo_add_base.html:28
+#: rhodecode/templates/admin/repos/repo_edit.html:48
+#: rhodecode/templates/admin/repos_groups/repos_groups.html:4
+msgid "Repository group"
+msgstr "Grupo de repositórios"
+
+#: rhodecode/templates/admin/repos/repo_add_base.html:36
+#: rhodecode/templates/admin/repos/repo_edit.html:56
+msgid "Type"
+msgstr "Tipo"
+
+#: rhodecode/templates/admin/repos/repo_add_base.html:52
+#: rhodecode/templates/admin/repos/repo_edit.html:73
+#: rhodecode/templates/settings/repo_fork.html:48
+#: rhodecode/templates/settings/repo_settings.html:49
+msgid "Private"
+msgstr "Privado"
+
+#: rhodecode/templates/admin/repos/repo_add_base.html:59
+msgid "add"
+msgstr "adicionar"
+
+#: rhodecode/templates/admin/repos/repo_add_create_repository.html:9
+msgid "add new repository"
+msgstr "adicionar novo repositório"
+
+#: rhodecode/templates/admin/repos/repo_edit.html:5
+msgid "Edit repository"
+msgstr "Editar repositório"
+
+#: rhodecode/templates/admin/repos/repo_edit.html:13
+#: rhodecode/templates/admin/users/user_edit.html:13
+#: rhodecode/templates/admin/users/user_edit_my_account.html:148
+#: rhodecode/templates/admin/users_groups/users_group_edit.html:13
+#: rhodecode/templates/files/files_annotate.html:49
+#: rhodecode/templates/files/files_source.html:20
+msgid "edit"
+msgstr "editar"
+
+#: rhodecode/templates/admin/repos/repo_edit.html:40
+msgid "Clone uri"
+msgstr "URI de clonagem"
+
+#: rhodecode/templates/admin/repos/repo_edit.html:81
+msgid "Enable statistics"
+msgstr "Habilitar estatísticas"
+
+#: rhodecode/templates/admin/repos/repo_edit.html:89
+msgid "Enable downloads"
+msgstr "Habilitar downloads"
+
+#: rhodecode/templates/admin/repos/repo_edit.html:127
+msgid "Administration"
+msgstr "Administração"
+
+#: rhodecode/templates/admin/repos/repo_edit.html:130
+msgid "Statistics"
+msgstr "Estatísticas"
+
+#: rhodecode/templates/admin/repos/repo_edit.html:134
+msgid "Reset current statistics"
+msgstr "Reinicializar estatísticas atuais"
+
+#: rhodecode/templates/admin/repos/repo_edit.html:134
+msgid "Confirm to remove current statistics"
+msgstr "Confirma remover atuais estatísticas"
+
+#: rhodecode/templates/admin/repos/repo_edit.html:137
+msgid "Fetched to rev"
+msgstr "Trazida à rev"
+
+#: rhodecode/templates/admin/repos/repo_edit.html:138
+msgid "Percentage of stats gathered"
+msgstr "Porcentagem das estatísticas totalizadas"
+
+#: rhodecode/templates/admin/repos/repo_edit.html:147
+msgid "Remote"
+msgstr "Remoto"
+
+#: rhodecode/templates/admin/repos/repo_edit.html:151
+msgid "Pull changes from remote location"
+msgstr "Realizar pull de alterações a partir de localização remota"
+
+#: rhodecode/templates/admin/repos/repo_edit.html:151
+msgid "Confirm to pull changes from remote side"
+msgstr "Confirma realizar pull de alterações a partir de lado remoto"
+
+#: rhodecode/templates/admin/repos/repo_edit.html:162
+msgid "Cache"
+msgstr "Cache"
+
+#: rhodecode/templates/admin/repos/repo_edit.html:166
+msgid "Invalidate repository cache"
+msgstr "Invalidar cache do repositório"
+
+#: rhodecode/templates/admin/repos/repo_edit.html:166
+msgid "Confirm to invalidate repository cache"
+msgstr "Confirma invalidar cache do repositório"
+
+#: rhodecode/templates/admin/repos/repo_edit.html:177
+msgid "Remove from public journal"
+msgstr "Remover do diário público"
+
+#: rhodecode/templates/admin/repos/repo_edit.html:179
+msgid "Add to public journal"
+msgstr "Adicionar ao diário público"
+
+#: rhodecode/templates/admin/repos/repo_edit.html:185
+msgid "Delete"
+msgstr "Excluir"
+
+#: rhodecode/templates/admin/repos/repo_edit.html:189
+msgid "Remove this repository"
+msgstr "Remover deste repositório"
+
+#: rhodecode/templates/admin/repos/repo_edit.html:189
+#: rhodecode/templates/admin/repos/repos.html:79
+msgid "Confirm to delete this repository"
+msgstr "Confirma excluir este repositório"
+
+#: rhodecode/templates/admin/repos/repo_edit_perms.html:3
+msgid "none"
+msgstr "nenhum"
+
+#: rhodecode/templates/admin/repos/repo_edit_perms.html:4
+msgid "read"
+msgstr "ler"
+
+#: rhodecode/templates/admin/repos/repo_edit_perms.html:5
+msgid "write"
+msgstr "escrever"
+
+#: rhodecode/templates/admin/repos/repo_edit_perms.html:6
+#: rhodecode/templates/admin/users/users.html:38
+#: rhodecode/templates/base/base.html:296
+msgid "admin"
+msgstr "administrador"
+
+#: rhodecode/templates/admin/repos/repo_edit_perms.html:7
+msgid "member"
+msgstr "membro"
+
+#: rhodecode/templates/admin/repos/repo_edit_perms.html:33
+#: rhodecode/templates/admin/repos/repo_edit_perms.html:53
+msgid "revoke"
+msgstr "revogar"
+
+#: rhodecode/templates/admin/repos/repo_edit_perms.html:75
+msgid "Add another member"
+msgstr "Adicionar outro membro"
+
+#: rhodecode/templates/admin/repos/repo_edit_perms.html:89
+msgid "Failed to remove user"
+msgstr "Falha ao reomver usuário"
+
+#: rhodecode/templates/admin/repos/repo_edit_perms.html:104
+msgid "Failed to remove users group"
+msgstr "Falha ao remover grupo de usuários"
+
+#: rhodecode/templates/admin/repos/repo_edit_perms.html:205
+msgid "Group"
+msgstr "Grupo"
+
+#: rhodecode/templates/admin/repos/repo_edit_perms.html:206
+#: rhodecode/templates/admin/users_groups/users_groups.html:33
+msgid "members"
+msgstr "membros"
+
+#: rhodecode/templates/admin/repos/repos.html:5
+msgid "Repositories administration"
+msgstr "Administração de repositórios"
+
+#: rhodecode/templates/admin/repos/repos.html:34
+#: rhodecode/templates/summary/summary.html:100
+msgid "Contact"
+msgstr "Contato"
+
+#: rhodecode/templates/admin/repos/repos.html:35
+#: rhodecode/templates/admin/repos_groups/repos_groups_show.html:36
+#: rhodecode/templates/admin/users/user_edit_my_account.html:119
+#: rhodecode/templates/admin/users/users.html:40
+#: rhodecode/templates/admin/users_groups/users_groups.html:35
+msgid "action"
+msgstr "ação"
+
+#: rhodecode/templates/admin/repos/repos.html:51
+#: rhodecode/templates/admin/users/user_edit_my_account.html:134
+#: rhodecode/templates/admin/users/user_edit_my_account.html:148
+msgid "private"
+msgstr "privado"
+
+#: rhodecode/templates/admin/repos/repos.html:53
+#: rhodecode/templates/admin/repos/repos.html:59
+#: rhodecode/templates/admin/users/user_edit_my_account.html:136
+#: rhodecode/templates/admin/users/user_edit_my_account.html:142
+#: rhodecode/templates/summary/summary.html:68
+msgid "public"
+msgstr "público"
+
+#: rhodecode/templates/admin/repos/repos.html:79
+#: rhodecode/templates/admin/users/users.html:55
+msgid "delete"
+msgstr "excluir"
+
+#: rhodecode/templates/admin/repos_groups/repos_groups.html:8
+msgid "Groups"
+msgstr "Grupos"
+
+#: rhodecode/templates/admin/repos_groups/repos_groups.html:13
+msgid "with"
+msgstr "com"
+
+#: rhodecode/templates/admin/repos_groups/repos_groups_add.html:5
+msgid "Add repos group"
+msgstr "Adicionar grupo de repositórios"
+
+#: rhodecode/templates/admin/repos_groups/repos_groups_add.html:10
+#: rhodecode/templates/admin/repos_groups/repos_groups_edit.html:10
+msgid "Repos groups"
+msgstr "Grupo de repositórios"
+
+#: rhodecode/templates/admin/repos_groups/repos_groups_add.html:12
+msgid "add new repos group"
+msgstr "adicionar novo grupo de repositórios"
+
+#: rhodecode/templates/admin/repos_groups/repos_groups_add.html:50
+#: rhodecode/templates/admin/repos_groups/repos_groups_edit.html:50
+msgid "Group parent"
+msgstr "Progenitor do grupo"
+
+#: rhodecode/templates/admin/repos_groups/repos_groups_add.html:58
+#: rhodecode/templates/admin/repos_groups/repos_groups_edit.html:58
+#: rhodecode/templates/admin/users/user_add.html:85
+#: rhodecode/templates/admin/users_groups/users_group_add.html:49
+#: rhodecode/templates/admin/users_groups/users_group_edit.html:90
+msgid "save"
+msgstr "salvar"
+
+#: rhodecode/templates/admin/repos_groups/repos_groups_edit.html:5
+msgid "Edit repos group"
+msgstr "Editar grupo de repositórios"
+
+#: rhodecode/templates/admin/repos_groups/repos_groups_edit.html:12
+msgid "edit repos group"
+msgstr "editar grupo de repositórios"
+
+#: rhodecode/templates/admin/repos_groups/repos_groups_show.html:5
+msgid "Repositories groups administration"
+msgstr "Administração de grupos de repositórios"
+
+#: rhodecode/templates/admin/repos_groups/repos_groups_show.html:22
+msgid "ADD NEW GROUP"
+msgstr "ADICIONAR NOVO GRUPO"
+
+#: rhodecode/templates/admin/repos_groups/repos_groups_show.html:35
+msgid "Number of repositories"
+msgstr "Número de repositórios"
+
+#: rhodecode/templates/admin/repos_groups/repos_groups_show.html:54
+msgid "Confirm to delete this group"
+msgstr "Confirme para excluir este grupo"
+
+#: rhodecode/templates/admin/repos_groups/repos_groups_show.html:62
+msgid "There are no repositories groups yet"
+msgstr "Ainda não há grupos de repositórios"
+
+#: rhodecode/templates/admin/settings/hooks.html:5
+#: rhodecode/templates/admin/settings/settings.html:5
+msgid "Settings administration"
+msgstr "Administração de configurações"
+
+#: rhodecode/templates/admin/settings/hooks.html:9
+#: rhodecode/templates/admin/settings/settings.html:9
+#: rhodecode/templates/settings/repo_settings.html:5
+#: rhodecode/templates/settings/repo_settings.html:13
+msgid "Settings"
+msgstr "Configurações"
+
+#: rhodecode/templates/admin/settings/hooks.html:24
+msgid "Built in hooks - read only"
+msgstr "Ganchos pré-definidos - somente leitura"
+
+#: rhodecode/templates/admin/settings/hooks.html:40
+msgid "Custom hooks"
+msgstr "Ganchos customizados"
+
+#: rhodecode/templates/admin/settings/hooks.html:56
+msgid "remove"
+msgstr "remover"
+
+#: rhodecode/templates/admin/settings/hooks.html:88
+msgid "Failed to remove hook"
+msgstr "Falha ao remover gancho"
+
+#: rhodecode/templates/admin/settings/settings.html:24
+msgid "Remap and rescan repositories"
+msgstr "Remapear e varrer novamente repositórios"
+
+#: rhodecode/templates/admin/settings/settings.html:32
+msgid "rescan option"
+msgstr "opção de varredura"
+
+#: rhodecode/templates/admin/settings/settings.html:38
+msgid "In case a repository was deleted from filesystem and there are leftovers in the database check this option to scan obsolete data in database and remove it."
+msgstr "Caso um repositório tenha sido excluído do sistema de arquivos e haja restos no banco de dados, marque esta opção para varrer dados obsoletos no banco e removê-los."
+
+#: rhodecode/templates/admin/settings/settings.html:39
+msgid "destroy old data"
+msgstr "destruir dados antigos"
+
+#: rhodecode/templates/admin/settings/settings.html:45
+msgid "Rescan repositories"
+msgstr "Varrer repositórios"
+
+#: rhodecode/templates/admin/settings/settings.html:51
+msgid "Whoosh indexing"
+msgstr "Indexação do Whoosh"
+
+#: rhodecode/templates/admin/settings/settings.html:59
+msgid "index build option"
+msgstr "opção de construção de índice"
+
+#: rhodecode/templates/admin/settings/settings.html:64
+msgid "build from scratch"
+msgstr "construir do início"
+
+#: rhodecode/templates/admin/settings/settings.html:70
+msgid "Reindex"
+msgstr "Reindexar"
+
+#: rhodecode/templates/admin/settings/settings.html:76
+msgid "Global application settings"
+msgstr "Configurações globais da aplicação"
+
+#: rhodecode/templates/admin/settings/settings.html:85
+msgid "Application name"
+msgstr "Nome da aplicação"
+
+#: rhodecode/templates/admin/settings/settings.html:94
+msgid "Realm text"
+msgstr "Texto de esfera"
+
+#: rhodecode/templates/admin/settings/settings.html:103
+msgid "GA code"
+msgstr "Código GA"
+
+#: rhodecode/templates/admin/settings/settings.html:111
+#: rhodecode/templates/admin/settings/settings.html:177
+msgid "Save settings"
+msgstr "Salvar configurações"
+
+#: rhodecode/templates/admin/settings/settings.html:112
+#: rhodecode/templates/admin/settings/settings.html:178
+#: rhodecode/templates/admin/users/user_edit.html:118
+#: rhodecode/templates/admin/users/user_edit.html:143
+#: rhodecode/templates/admin/users/user_edit_my_account.html:90
+#: rhodecode/templates/admin/users_groups/users_group_edit.html:264
+#: rhodecode/templates/files/files_edit.html:50
+msgid "Reset"
+msgstr "Limpar"
+
+#: rhodecode/templates/admin/settings/settings.html:118
+msgid "Mercurial settings"
+msgstr "Configurações do Mercurial"
+
+#: rhodecode/templates/admin/settings/settings.html:127
+msgid "Web"
+msgstr "Web"
+
+#: rhodecode/templates/admin/settings/settings.html:132
+msgid "require ssl for pushing"
+msgstr "exigir ssl para realizar push"
+
+#: rhodecode/templates/admin/settings/settings.html:139
+msgid "Hooks"
+msgstr "Ganchos"
+
+#: rhodecode/templates/admin/settings/settings.html:142
+msgid "advanced setup"
+msgstr "confirguações avançadas"
+
+#: rhodecode/templates/admin/settings/settings.html:147
+msgid "Update repository after push (hg update)"
+msgstr "Atualizar repositório após realizar push (hg update)"
+
+#: rhodecode/templates/admin/settings/settings.html:151
+msgid "Show repository size after push"
+msgstr "Mostrar tamanho do repositório após o push"
+
+#: rhodecode/templates/admin/settings/settings.html:155
+msgid "Log user push commands"
+msgstr "Armazenar registro de comandos de push dos usuários"
+
+#: rhodecode/templates/admin/settings/settings.html:159
+msgid "Log user pull commands"
+msgstr "Armazenar registro de comandos de pull dos usuários"
+
+#: rhodecode/templates/admin/settings/settings.html:166
+msgid "Repositories location"
+msgstr "Localização dos repositórios"
+
+#: rhodecode/templates/admin/settings/settings.html:171
+msgid "This a crucial application setting. If you are really sure you need to change this, you must restart application in order to make this setting take effect. Click this label to unlock."
+msgstr "Essa é uma configuração crucial da aplicação. Se você realmente tem certeza de que quer mudar isto, você precisa reiniciar a aplicação para que essa configuração tenha efeito. Clique este rótulo para destravar."
+
+#: rhodecode/templates/admin/settings/settings.html:172
+msgid "unlock"
+msgstr "destravar"
+
+#: rhodecode/templates/admin/users/user_add.html:5
+msgid "Add user"
+msgstr "Adicionar usuário"
+
+#: rhodecode/templates/admin/users/user_add.html:10
+#: rhodecode/templates/admin/users/user_edit.html:11
+#: rhodecode/templates/admin/users/users.html:9
+msgid "Users"
+msgstr "Usuários"
+
+#: rhodecode/templates/admin/users/user_add.html:12
+msgid "add new user"
+msgstr "adicionar novo usuário"
+
+#: rhodecode/templates/admin/users/user_add.html:77
+#: rhodecode/templates/admin/users/user_edit.html:101
+#: rhodecode/templates/admin/users_groups/users_group_add.html:41
+#: rhodecode/templates/admin/users_groups/users_group_edit.html:42
+msgid "Active"
+msgstr "Ativo"
+
+#: rhodecode/templates/admin/users/user_edit.html:5
+msgid "Edit user"
+msgstr "Editar usuário"
+
+#: rhodecode/templates/admin/users/user_edit.html:33
+#: rhodecode/templates/admin/users/user_edit_my_account.html:32
+msgid "Change your avatar at"
+msgstr "Altere o seu avatar em"
+
+#: rhodecode/templates/admin/users/user_edit.html:34
+#: rhodecode/templates/admin/users/user_edit_my_account.html:33
+msgid "Using"
+msgstr "Usando"
+
+#: rhodecode/templates/admin/users/user_edit.html:40
+#: rhodecode/templates/admin/users/user_edit_my_account.html:39
+msgid "API key"
+msgstr "Chave de API"
+
+#: rhodecode/templates/admin/users/user_edit.html:56
+msgid "LDAP DN"
+msgstr "DN LDAP"
+
+#: rhodecode/templates/admin/users/user_edit.html:65
+#: rhodecode/templates/admin/users/user_edit_my_account.html:54
+msgid "New password"
+msgstr "Nova senha"
+
+#: rhodecode/templates/admin/users/user_edit.html:135
+#: rhodecode/templates/admin/users_groups/users_group_edit.html:256
+msgid "Create repositories"
+msgstr "Criar repositórios"
+
+#: rhodecode/templates/admin/users/user_edit_my_account.html:5
+msgid "My account"
+msgstr "Minha conta"
+
+#: rhodecode/templates/admin/users/user_edit_my_account.html:9
+msgid "My Account"
+msgstr "Minha Conta"
+
+#: rhodecode/templates/admin/users/user_edit_my_account.html:101
+msgid "My repositories"
+msgstr "Meus repositórios"
+
+#: rhodecode/templates/admin/users/user_edit_my_account.html:107
+msgid "ADD REPOSITORY"
+msgstr "ADICIONAR REPOSITÓRIO"
+
+#: rhodecode/templates/admin/users/user_edit_my_account.html:118
+#: rhodecode/templates/branches/branches_data.html:7
+#: rhodecode/templates/shortlog/shortlog_data.html:8
+#: rhodecode/templates/tags/tags_data.html:7
+msgid "revision"
+msgstr "revisão"
+
+#: rhodecode/templates/admin/users/user_edit_my_account.html:157
+msgid "No repositories yet"
+msgstr "Ainda não há repositórios"
+
+#: rhodecode/templates/admin/users/user_edit_my_account.html:159
+msgid "create one now"
+msgstr "criar um agora"
+
+#: rhodecode/templates/admin/users/users.html:5
+msgid "Users administration"
+msgstr "Administração de usuários"
+
+#: rhodecode/templates/admin/users/users.html:23
+msgid "ADD NEW USER"
+msgstr "ADICIONAR NOVO USUÁRIO"
+
+#: rhodecode/templates/admin/users/users.html:33
+msgid "username"
+msgstr "nome de usuário"
+
+#: rhodecode/templates/admin/users/users.html:34
+#: rhodecode/templates/branches/branches_data.html:5
+#: rhodecode/templates/tags/tags_data.html:5
+msgid "name"
+msgstr "nome"
+
+#: rhodecode/templates/admin/users/users.html:35
+msgid "lastname"
+msgstr "sobrenome"
+
+#: rhodecode/templates/admin/users/users.html:36
+msgid "last login"
+msgstr "último login"
+
+#: rhodecode/templates/admin/users/users.html:37
+#: rhodecode/templates/admin/users_groups/users_groups.html:34
+msgid "active"
+msgstr "ativo"
+
+#: rhodecode/templates/admin/users/users.html:39
+#: rhodecode/templates/base/base.html:305
+msgid "ldap"
+msgstr "ldap"
+
+#: rhodecode/templates/admin/users/users.html:56
+msgid "Confirm to delete this user"
+msgstr "Conforma excluir este usuário"
+
+#: rhodecode/templates/admin/users_groups/users_group_add.html:5
+msgid "Add users group"
+msgstr "Adicionar grupo de usuários"
+
+#: rhodecode/templates/admin/users_groups/users_group_add.html:10
+#: rhodecode/templates/admin/users_groups/users_groups.html:9
+msgid "Users groups"
+msgstr "Grupos de usuários"
+
+#: rhodecode/templates/admin/users_groups/users_group_add.html:12
+msgid "add new users group"
+msgstr "Adicionar novo grupo de usuários"
+
+#: rhodecode/templates/admin/users_groups/users_group_edit.html:5
+msgid "Edit users group"
+msgstr "Editar grupo de usuários"
+
+#: rhodecode/templates/admin/users_groups/users_group_edit.html:11
+msgid "UsersGroups"
+msgstr "Grupos de Usuários"
+
+#: rhodecode/templates/admin/users_groups/users_group_edit.html:50
+msgid "Members"
+msgstr "Membros"
+
+#: rhodecode/templates/admin/users_groups/users_group_edit.html:58
+msgid "Choosen group members"
+msgstr "Membros escolhidos do grupo"
+
+#: rhodecode/templates/admin/users_groups/users_group_edit.html:61
+msgid "Remove all elements"
+msgstr "Remover todos os elementos"
+
+#: rhodecode/templates/admin/users_groups/users_group_edit.html:75
+msgid "Available members"
+msgstr "Membros disponíveis"
+
+#: rhodecode/templates/admin/users_groups/users_group_edit.html:79
+msgid "Add all elements"
+msgstr "Adicionar todos os elementos"
+
+#: rhodecode/templates/admin/users_groups/users_groups.html:5
+msgid "Users groups administration"
+msgstr "Administração de grupos de usuários"
+
+#: rhodecode/templates/admin/users_groups/users_groups.html:23
+msgid "ADD NEW USER GROUP"
+msgstr "ADICIONAR NOVO GRUPO DE USUÁRIOS"
+
+#: rhodecode/templates/admin/users_groups/users_groups.html:32
+msgid "group name"
+msgstr "nome do grupo"
+
+#: rhodecode/templates/base/base.html:32
+msgid "Forgot password ?"
+msgstr "Esqueceu a senha ?"
+
+#: rhodecode/templates/base/base.html:57
+#: rhodecode/templates/base/base.html:338
+#: rhodecode/templates/base/base.html:340
+#: rhodecode/templates/base/base.html:342
+msgid "Home"
+msgstr "Início"
+
+#: rhodecode/templates/base/base.html:61
+#: rhodecode/templates/base/base.html:347
+#: rhodecode/templates/base/base.html:349
+#: rhodecode/templates/base/base.html:351
+#: rhodecode/templates/journal/journal.html:4
+#: rhodecode/templates/journal/journal.html:17
+#: rhodecode/templates/journal/public_journal.html:4
+msgid "Journal"
+msgstr "Diário"
+
+#: rhodecode/templates/base/base.html:66
+msgid "Login"
+msgstr "Entrar"
+
+#: rhodecode/templates/base/base.html:68
+msgid "Log Out"
+msgstr "Sair"
+
+#: rhodecode/templates/base/base.html:107
+msgid "Submit a bug"
+msgstr "Encaminhe um bug"
+
+#: rhodecode/templates/base/base.html:141
+msgid "Switch repository"
+msgstr "Trocar repositório"
+
+#: rhodecode/templates/base/base.html:143
+msgid "Products"
+msgstr "Produtos"
+
+#: rhodecode/templates/base/base.html:149
+msgid "loading..."
+msgstr "carregando..."
+
+#: rhodecode/templates/base/base.html:234
+#: rhodecode/templates/base/base.html:236
+#: rhodecode/templates/base/base.html:238
+msgid "Switch to"
+msgstr "Trocar para"
+
+#: rhodecode/templates/base/base.html:242
+#: rhodecode/templates/branches/branches.html:13
+msgid "branches"
+msgstr "ramos"
+
+#: rhodecode/templates/base/base.html:249
+#: rhodecode/templates/branches/branches_data.html:52
+msgid "There are no branches yet"
+msgstr "Ainda não há ramos"
+
+#: rhodecode/templates/base/base.html:254
+#: rhodecode/templates/shortlog/shortlog_data.html:10
+#: rhodecode/templates/tags/tags.html:14
+msgid "tags"
+msgstr "etiquetas"
+
+#: rhodecode/templates/base/base.html:261
+#: rhodecode/templates/tags/tags_data.html:32
+msgid "There are no tags yet"
+msgstr "Ainda não há etiquetas"
+
+#: rhodecode/templates/base/base.html:277
+#: rhodecode/templates/base/base.html:281
+#: rhodecode/templates/files/files_annotate.html:40
+#: rhodecode/templates/files/files_source.html:11
+msgid "Options"
+msgstr "Opções"
+
+#: rhodecode/templates/base/base.html:286
+#: rhodecode/templates/base/base.html:288
+#: rhodecode/templates/base/base.html:306
+msgid "settings"
+msgstr "configurações"
+
+#: rhodecode/templates/base/base.html:292
+msgid "search"
+msgstr "pesquisar"
+
+#: rhodecode/templates/base/base.html:299
+msgid "journal"
+msgstr "diário"
+
+#: rhodecode/templates/base/base.html:301
+msgid "repositories groups"
+msgstr "grupos de repositórios"
+
+#: rhodecode/templates/base/base.html:302
+msgid "users"
+msgstr "usuários"
+
+#: rhodecode/templates/base/base.html:303
+msgid "users groups"
+msgstr "grupos de usuários"
+
+#: rhodecode/templates/base/base.html:304
+msgid "permissions"
+msgstr "permissões"
+
+#: rhodecode/templates/base/base.html:317
+#: rhodecode/templates/base/base.html:319
+#: rhodecode/templates/followers/followers.html:5
+msgid "Followers"
+msgstr "Seguidores"
+
+#: rhodecode/templates/base/base.html:325
+#: rhodecode/templates/base/base.html:327
+#: rhodecode/templates/forks/forks.html:5
+msgid "Forks"
+msgstr "Bifurcações"
+
+#: rhodecode/templates/base/base.html:356
+#: rhodecode/templates/base/base.html:358
+#: rhodecode/templates/base/base.html:360
+#: rhodecode/templates/search/search.html:4
+#: rhodecode/templates/search/search.html:24
+#: rhodecode/templates/search/search.html:46
+msgid "Search"
+msgstr "Pesquisar"
+
+#: rhodecode/templates/base/root.html:57
+#: rhodecode/templates/journal/journal.html:48
+#: rhodecode/templates/summary/summary.html:36
+msgid "Stop following this repository"
+msgstr "Parar de seguir este repositório"
+
+#: rhodecode/templates/base/root.html:66
+#: rhodecode/templates/summary/summary.html:40
+msgid "Start following this repository"
+msgstr "Passar a seguir este repositório"
+
+#: rhodecode/templates/branches/branches_data.html:4
+#: rhodecode/templates/tags/tags_data.html:4
+msgid "date"
+msgstr "data"
+
+#: rhodecode/templates/branches/branches_data.html:6
+#: rhodecode/templates/shortlog/shortlog_data.html:7
+#: rhodecode/templates/tags/tags_data.html:6
+msgid "author"
+msgstr "autor"
+
+#: rhodecode/templates/branches/branches_data.html:8
+#: rhodecode/templates/shortlog/shortlog_data.html:11
+#: rhodecode/templates/tags/tags_data.html:8
+msgid "links"
+msgstr "inks"
+
+#: rhodecode/templates/branches/branches_data.html:23
+#: rhodecode/templates/branches/branches_data.html:43
+#: rhodecode/templates/shortlog/shortlog_data.html:39
+#: rhodecode/templates/tags/tags_data.html:24
+msgid "changeset"
+msgstr "conjunto de mudanças"
+
+#: rhodecode/templates/branches/branches_data.html:25
+#: rhodecode/templates/branches/branches_data.html:45
+#: rhodecode/templates/files/files.html:12
+#: rhodecode/templates/shortlog/shortlog_data.html:41
+#: rhodecode/templates/summary/summary.html:233
+#: rhodecode/templates/tags/tags_data.html:26
+msgid "files"
+msgstr "arquivos"
+
+#: rhodecode/templates/changelog/changelog.html:14
+msgid "showing "
+msgstr "mostrando "
+
+#: rhodecode/templates/changelog/changelog.html:14
+msgid "out of"
+msgstr "de"
+
+#: rhodecode/templates/changelog/changelog.html:37
+msgid "Show"
+msgstr "Mostrar"
+
+#: rhodecode/templates/changelog/changelog.html:50
+#: rhodecode/templates/changeset/changeset.html:42
+#: rhodecode/templates/summary/summary.html:609
+msgid "commit"
+msgstr "commit"
+
+#: rhodecode/templates/changelog/changelog.html:63
+msgid "Affected number of files, click to show more details"
+msgstr "Número de arquivos afetados, clique para mostrar mais detalhes"
+
+#: rhodecode/templates/changelog/changelog.html:67
+#: rhodecode/templates/changeset/changeset.html:66
+msgid "merge"
+msgstr "mesclar"
+
+#: rhodecode/templates/changelog/changelog.html:72
+#: rhodecode/templates/changeset/changeset.html:72
+msgid "Parent"
+msgstr "Progenitor"
+
+#: rhodecode/templates/changelog/changelog.html:77
+#: rhodecode/templates/changeset/changeset.html:77
+msgid "No parents"
+msgstr "Sem progenitores"
+
+#: rhodecode/templates/changelog/changelog.html:82
+#: rhodecode/templates/changeset/changeset.html:80
+#: rhodecode/templates/files/files.html:29
+#: rhodecode/templates/files/files_annotate.html:25
+#: rhodecode/templates/files/files_edit.html:33
+#: rhodecode/templates/shortlog/shortlog_data.html:9
+msgid "branch"
+msgstr "ramo"
+
+#: rhodecode/templates/changelog/changelog.html:86
+#: rhodecode/templates/changeset/changeset.html:83
+msgid "tag"
+msgstr "etiqueta"
+
+#: rhodecode/templates/changelog/changelog.html:122
+msgid "Show selected changes __S -> __E"
+msgstr "Mostrar alterações selecionadas __S -> __E"
+
+#: rhodecode/templates/changelog/changelog.html:172
+#: rhodecode/templates/shortlog/shortlog_data.html:61
+msgid "There are no changes yet"
+msgstr "Ainda não há alteações"
+
+#: rhodecode/templates/changelog/changelog_details.html:2
+#: rhodecode/templates/changeset/changeset.html:55
+msgid "removed"
+msgstr "removidos"
+
+#: rhodecode/templates/changelog/changelog_details.html:3
+#: rhodecode/templates/changeset/changeset.html:56
+msgid "changed"
+msgstr "alterados"
+
+#: rhodecode/templates/changelog/changelog_details.html:4
+#: rhodecode/templates/changeset/changeset.html:57
+msgid "added"
+msgstr "adicionados"
+
+#: rhodecode/templates/changelog/changelog_details.html:6
+#: rhodecode/templates/changelog/changelog_details.html:7
+#: rhodecode/templates/changelog/changelog_details.html:8
+#: rhodecode/templates/changeset/changeset.html:59
+#: rhodecode/templates/changeset/changeset.html:60
+#: rhodecode/templates/changeset/changeset.html:61
+#, python-format
+msgid "affected %s files"
+msgstr "%s arquivos afetados"
+
+#: rhodecode/templates/changeset/changeset.html:6
+#: rhodecode/templates/changeset/changeset.html:14
+#: rhodecode/templates/changeset/changeset.html:31
+msgid "Changeset"
+msgstr "Conjunto de Mudanças"
+
+#: rhodecode/templates/changeset/changeset.html:32
+#: rhodecode/templates/changeset/changeset.html:121
+#: rhodecode/templates/changeset/changeset_range.html:78
+#: rhodecode/templates/files/file_diff.html:32
+#: rhodecode/templates/files/file_diff.html:42
+msgid "raw diff"
+msgstr "diff bruto"
+
+#: rhodecode/templates/changeset/changeset.html:34
+#: rhodecode/templates/changeset/changeset.html:123
+#: rhodecode/templates/changeset/changeset_range.html:80
+#: rhodecode/templates/files/file_diff.html:34
+msgid "download diff"
+msgstr "descarregar diff"
+
+#: rhodecode/templates/changeset/changeset.html:90
+#, python-format
+msgid "%s files affected with %s additions and %s deletions."
+msgstr "%s arquivos afetados com %s adições e %s exclusões"
+
+#: rhodecode/templates/changeset/changeset.html:101
+msgid "Changeset was too big and was cut off..."
+msgstr "Conjunto de mudanças era grande demais e foi cortado..."
+
+#: rhodecode/templates/changeset/changeset.html:119
+#: rhodecode/templates/changeset/changeset_range.html:76
+#: rhodecode/templates/files/file_diff.html:30
+msgid "diff"
+msgstr "diff"
+
+#: rhodecode/templates/changeset/changeset.html:132
+#: rhodecode/templates/changeset/changeset_range.html:89
+msgid "No changes in this file"
+msgstr "Nenhuma alteração nesse arquivo"
+
+#: rhodecode/templates/changeset/changeset_range.html:30
+msgid "Compare View"
+msgstr "Exibir Comparação"
+
+#: rhodecode/templates/changeset/changeset_range.html:52
+msgid "Files affected"
+msgstr "Arquivos afetados"
+
+#: rhodecode/templates/errors/error_document.html:44
+#, python-format
+msgid "You will be redirected to %s in %s seconds"
+msgstr "Você será redirecionado para %s em %s segundos"
+
+#: rhodecode/templates/files/file_diff.html:4
+#: rhodecode/templates/files/file_diff.html:12
+msgid "File diff"
+msgstr "Diff do arquivo"
+
+#: rhodecode/templates/files/file_diff.html:42
+msgid "Diff is to big to display"
+msgstr "Diff é grande demais para exibir"
+
+#: rhodecode/templates/files/files.html:37
+#: rhodecode/templates/files/files_annotate.html:31
+#: rhodecode/templates/files/files_edit.html:39
+msgid "Location"
+msgstr "Local"
+
+#: rhodecode/templates/files/files.html:46
+msgid "Go back"
+msgstr "Voltar"
+
+#: rhodecode/templates/files/files.html:47
+msgid "No files at given path"
+msgstr "Nenhum arquivo no caminho especificado"
+
+#: rhodecode/templates/files/files_annotate.html:4
+msgid "File annotate"
+msgstr "Anotar arquivo"
+
+#: rhodecode/templates/files/files_annotate.html:12
+msgid "annotate"
+msgstr "anotar"
+
+#: rhodecode/templates/files/files_annotate.html:33
+#: rhodecode/templates/files/files_browser.html:160
+#: rhodecode/templates/files/files_source.html:2
+msgid "Revision"
+msgstr "Revisão"
+
+#: rhodecode/templates/files/files_annotate.html:36
+#: rhodecode/templates/files/files_browser.html:158
+#: rhodecode/templates/files/files_source.html:7
+msgid "Size"
+msgstr "Tamanho"
+
+#: rhodecode/templates/files/files_annotate.html:38
+#: rhodecode/templates/files/files_browser.html:159
+#: rhodecode/templates/files/files_source.html:9
+msgid "Mimetype"
+msgstr "Mimetype"
+
+#: rhodecode/templates/files/files_annotate.html:41
+msgid "show source"
+msgstr "mostrar fonte"
+
+#: rhodecode/templates/files/files_annotate.html:43
+#: rhodecode/templates/files/files_annotate.html:78
+#: rhodecode/templates/files/files_source.html:14
+#: rhodecode/templates/files/files_source.html:51
+msgid "show as raw"
+msgstr "mostrar como bruto"
+
+#: rhodecode/templates/files/files_annotate.html:45
+#: rhodecode/templates/files/files_source.html:16
+msgid "download as raw"
+msgstr "descarregar como bruto"
+
+#: rhodecode/templates/files/files_annotate.html:54
+#: rhodecode/templates/files/files_source.html:25
+msgid "History"
+msgstr "Histórico"
+
+#: rhodecode/templates/files/files_annotate.html:73
+#: rhodecode/templates/files/files_source.html:46
+#, python-format
+msgid "Binary file (%s)"
+msgstr "Arquivo binário (%s)"
+
+#: rhodecode/templates/files/files_annotate.html:78
+#: rhodecode/templates/files/files_source.html:51
+msgid "File is too big to display"
+msgstr "Arquivo é grande demais para exibir"
+
+#: rhodecode/templates/files/files_browser.html:13
+msgid "view"
+msgstr "ver"
+
+#: rhodecode/templates/files/files_browser.html:14
+msgid "previous revision"
+msgstr "revisão anterior"
+
+#: rhodecode/templates/files/files_browser.html:16
+msgid "next revision"
+msgstr "próxima revisão"
+
+#: rhodecode/templates/files/files_browser.html:23
+msgid "follow current branch"
+msgstr "seguir ramo atual"
+
+#: rhodecode/templates/files/files_browser.html:27
+msgid "search file list"
+msgstr "pesquisar lista de arquivos"
+
+#: rhodecode/templates/files/files_browser.html:32
+msgid "Loading file list..."
+msgstr "Carregando lista de arquivos..."
+
+#: rhodecode/templates/files/files_browser.html:111
+msgid "search truncated"
+msgstr "pesquisa truncada"
+
+#: rhodecode/templates/files/files_browser.html:122
+msgid "no matching files"
+msgstr "nenhum arquivo corresponde"
+
+#: rhodecode/templates/files/files_browser.html:161
+msgid "Last modified"
+msgstr "Última alteração"
+
+#: rhodecode/templates/files/files_browser.html:162
+msgid "Last commiter"
+msgstr "Último commiter"
+
+#: rhodecode/templates/files/files_edit.html:4
+msgid "Edit file"
+msgstr "Editar arquivo"
+
+#: rhodecode/templates/files/files_edit.html:19
+msgid "edit file"
+msgstr "editar arquivo"
+
+#: rhodecode/templates/files/files_edit.html:45
+#: rhodecode/templates/shortlog/shortlog_data.html:5
+msgid "commit message"
+msgstr "mensagem de commit"
+
+#: rhodecode/templates/files/files_edit.html:51
+msgid "Commit changes"
+msgstr "Realizar commit das alterações"
+
+#: rhodecode/templates/files/files_source.html:12
+msgid "show annotation"
+msgstr "mostrar anotação"
+
+#: rhodecode/templates/files/files_source.html:153
+msgid "Selection link"
+msgstr "Link da seleção"
+
+#: rhodecode/templates/followers/followers.html:13
+msgid "followers"
+msgstr "seguidores"
+
+#: rhodecode/templates/followers/followers_data.html:12
+msgid "Started following"
+msgstr "Passou a seguir"
+
+#: rhodecode/templates/forks/forks.html:13
+msgid "forks"
+msgstr "bifurcações"
+
+#: rhodecode/templates/forks/forks_data.html:17
+msgid "forked"
+msgstr "bifurcado"
+
+#: rhodecode/templates/forks/forks_data.html:34
+msgid "There are no forks yet"
+msgstr "Ainda não há bifurcações"
+
+#: rhodecode/templates/journal/journal.html:34
+msgid "Following"
+msgstr "Seguindo"
+
+#: rhodecode/templates/journal/journal.html:41
+msgid "following user"
+msgstr "seguindo usuário"
+
+#: rhodecode/templates/journal/journal.html:41
+msgid "user"
+msgstr "usuário"
+
+#: rhodecode/templates/journal/journal.html:65
+msgid "You are not following any users or repositories"
+msgstr "Você não está seguindo quaisquer usuários ou repositórios"
+
+#: rhodecode/templates/journal/journal_data.html:46
+msgid "No entries yet"
+msgstr "Ainda não há entradas"
+
+#: rhodecode/templates/journal/public_journal.html:17
+msgid "Public Journal"
+msgstr "Diário Público"
+
+#: rhodecode/templates/search/search.html:7
+#: rhodecode/templates/search/search.html:26
+msgid "in repository: "
+msgstr "no repositório"
+
+#: rhodecode/templates/search/search.html:9
+#: rhodecode/templates/search/search.html:28
+msgid "in all repositories"
+msgstr "em todos os repositórios"
+
+#: rhodecode/templates/search/search.html:42
+msgid "Search term"
+msgstr "Termo de pesquisa"
+
+#: rhodecode/templates/search/search.html:54
+msgid "Search in"
+msgstr "Pesquisando em"
+
+#: rhodecode/templates/search/search.html:57
+msgid "File contents"
+msgstr "Conteúdo dos arquivos"
+
+#: rhodecode/templates/search/search.html:59
+msgid "File names"
+msgstr "Nomes dos arquivos"
+
+#: rhodecode/templates/search/search_content.html:20
+#: rhodecode/templates/search/search_path.html:15
+msgid "Permission denied"
+msgstr "Permissão negada"
+
+#: rhodecode/templates/settings/repo_fork.html:5
+msgid "Fork"
+msgstr "Bifurcação"
+
+#: rhodecode/templates/settings/repo_fork.html:31
+msgid "Fork name"
+msgstr "Nome da bifurcação"
+
+#: rhodecode/templates/settings/repo_fork.html:55
+msgid "fork this repository"
+msgstr "bifurcar este repositório"
+
+#: rhodecode/templates/shortlog/shortlog.html:5
+#: rhodecode/templates/summary/summary.html:666
+msgid "Shortlog"
+msgstr "Log resumido"
+
+#: rhodecode/templates/shortlog/shortlog.html:14
+msgid "shortlog"
+msgstr "log resumido"
+
+#: rhodecode/templates/shortlog/shortlog_data.html:6
+msgid "age"
+msgstr "idade"
+
+#: rhodecode/templates/summary/summary.html:12
+msgid "summary"
+msgstr "sumário"
+
+#: rhodecode/templates/summary/summary.html:79
+msgid "remote clone"
+msgstr "clone remoto"
+
+#: rhodecode/templates/summary/summary.html:121
+msgid "by"
+msgstr "por"
+
+#: rhodecode/templates/summary/summary.html:128
+msgid "Clone url"
+msgstr "URL de clonagem"
+
+#: rhodecode/templates/summary/summary.html:137
+msgid "Trending source files"
+msgstr "Tendências nos arquivos fonte"
+
+#: rhodecode/templates/summary/summary.html:146
+msgid "Download"
+msgstr "Download"
+
+#: rhodecode/templates/summary/summary.html:150
+msgid "There are no downloads yet"
+msgstr "Ainda não há downloads"
+
+#: rhodecode/templates/summary/summary.html:152
+msgid "Downloads are disabled for this repository"
+msgstr "Downloads estão desabilitados para este repositório"
+
+#: rhodecode/templates/summary/summary.html:154
+#: rhodecode/templates/summary/summary.html:320
+msgid "enable"
+msgstr "habilitar"
+
+#: rhodecode/templates/summary/summary.html:162
+#: rhodecode/templates/summary/summary.html:297
+#, python-format
+msgid "Download %s as %s"
+msgstr "Descarregar %s como %s"
+
+#: rhodecode/templates/summary/summary.html:168
+msgid "Check this to download archive with subrepos"
+msgstr "Marque isto para descarregar arquivo com subrepositórios"
+
+#: rhodecode/templates/summary/summary.html:168
+msgid "with subrepos"
+msgstr "com subrepositórios"
+
+#: rhodecode/templates/summary/summary.html:176
+msgid "Feeds"
+msgstr "Feeds"
+
+#: rhodecode/templates/summary/summary.html:257
+#: rhodecode/templates/summary/summary.html:684
+#: rhodecode/templates/summary/summary.html:695
+msgid "show more"
+msgstr "mostrar mais"
+
+#: rhodecode/templates/summary/summary.html:312
+msgid "Commit activity by day / author"
+msgstr "Atividade de commit por dia / autor"
+
+#: rhodecode/templates/summary/summary.html:324
+msgid "Loaded in"
+msgstr "Carregado em"
+
+#: rhodecode/templates/summary/summary.html:603
+msgid "commits"
+msgstr "commits"
+
+#: rhodecode/templates/summary/summary.html:604
+msgid "files added"
+msgstr "arquivos adicionados"
+
+#: rhodecode/templates/summary/summary.html:605
+msgid "files changed"
+msgstr "arquivos alterados"
+
+#: rhodecode/templates/summary/summary.html:606
+msgid "files removed"
+msgstr "arquivos removidos"
+
+#: rhodecode/templates/summary/summary.html:610
+msgid "file added"
+msgstr "arquivo adicionado"
+
+#: rhodecode/templates/summary/summary.html:611
+msgid "file changed"
+msgstr "arquivo alterado"
+
+#: rhodecode/templates/summary/summary.html:612
+msgid "file removed"
+msgstr "arquivo removido"
+

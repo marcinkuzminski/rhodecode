@@ -4,10 +4,10 @@
     ~~~~~~~~~~~~~~~~~~~~
 
     Repository model for rhodecode
-    
+
     :created_on: Jun 5, 2010
     :author: marcink
-    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>    
+    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software: you can redistribute it and/or modify
@@ -33,13 +33,16 @@ from sqlalchemy.orm import joinedload, make_transient
 from vcs.utils.lazy import LazyProperty
 from vcs.backends import get_backend
 
+from rhodecode.lib import safe_str
+
 from rhodecode.model import BaseModel
 from rhodecode.model.caching_query import FromCache
 from rhodecode.model.db import Repository, RepoToPerm, User, Permission, \
-    Statistics, RhodeCodeUi
+    Statistics, UsersGroup, UsersGroupRepoToPerm, RhodeCodeUi, Group
 from rhodecode.model.user import UserModel
 
 log = logging.getLogger(__name__)
+
 
 class RepoModel(BaseModel):
 
@@ -60,7 +63,6 @@ class RepoModel(BaseModel):
                                           "get_repo_%s" % repo_id))
         return repo.scalar()
 
-
     def get_by_repo_name(self, repo_name, cache=False):
         repo = self.sa.query(Repository)\
             .filter(Repository.repo_name == repo_name)
@@ -70,56 +72,96 @@ class RepoModel(BaseModel):
                                           "get_repo_%s" % repo_name))
         return repo.scalar()
 
+
     def get_users_js(self):
 
         users = self.sa.query(User).filter(User.active == True).all()
         u_tmpl = '''{id:%s, fname:"%s", lname:"%s", nname:"%s"},'''
-        users_array = '[%s];' % '\n'.join([u_tmpl % (u.user_id, u.name,
+        users_array = '[%s]' % '\n'.join([u_tmpl % (u.user_id, u.name,
                                                     u.lastname, u.username)
                                         for u in users])
         return users_array
 
+    def get_users_groups_js(self):
+        users_groups = self.sa.query(UsersGroup)\
+            .filter(UsersGroup.users_group_active == True).all()
+
+        g_tmpl = '''{id:%s, grname:"%s",grmembers:"%s"},'''
+
+        users_groups_array = '[%s]' % '\n'.join([g_tmpl % \
+                                    (gr.users_group_id, gr.users_group_name,
+                                     len(gr.members))
+                                        for gr in users_groups])
+        return users_groups_array
 
     def update(self, repo_name, form_data):
         try:
             cur_repo = self.get_by_repo_name(repo_name, cache=False)
-            user_model = UserModel(self.sa)
 
             #update permissions
-            for username, perm in form_data['perms_updates']:
-                r2p = self.sa.query(RepoToPerm)\
-                        .filter(RepoToPerm.user == user_model.get_by_username(username))\
-                        .filter(RepoToPerm.repository == cur_repo)\
-                        .one()
+            for member, perm, member_type in form_data['perms_updates']:
+                if member_type == 'user':
+                    r2p = self.sa.query(RepoToPerm)\
+                            .filter(RepoToPerm.user == User.by_username(member))\
+                            .filter(RepoToPerm.repository == cur_repo)\
+                            .one()
 
-                r2p.permission = self.sa.query(Permission)\
-                                    .filter(Permission.permission_name == perm)\
-                                    .scalar()
-                self.sa.add(r2p)
+                    r2p.permission = self.sa.query(Permission)\
+                                        .filter(Permission.permission_name ==
+                                                perm).scalar()
+                    self.sa.add(r2p)
+                else:
+                    g2p = self.sa.query(UsersGroupRepoToPerm)\
+                            .filter(UsersGroupRepoToPerm.users_group ==
+                                    UsersGroup.get_by_group_name(member))\
+                            .filter(UsersGroupRepoToPerm.repository ==
+                                    cur_repo).one()
+
+                    g2p.permission = self.sa.query(Permission)\
+                                        .filter(Permission.permission_name ==
+                                                perm).scalar()
+                    self.sa.add(g2p)
 
             #set new permissions
-            for username, perm in form_data['perms_new']:
-                r2p = RepoToPerm()
-                r2p.repository = cur_repo
-                r2p.user = user_model.get_by_username(username, cache=False)
+            for member, perm, member_type in form_data['perms_new']:
+                if member_type == 'user':
+                    r2p = RepoToPerm()
+                    r2p.repository = cur_repo
+                    r2p.user = User.by_username(member)
 
-                r2p.permission = self.sa.query(Permission)\
-                                    .filter(Permission.permission_name == perm)\
-                                    .scalar()
-                self.sa.add(r2p)
+                    r2p.permission = self.sa.query(Permission)\
+                                        .filter(Permission.
+                                                permission_name == perm)\
+                                                .scalar()
+                    self.sa.add(r2p)
+                else:
+                    g2p = UsersGroupRepoToPerm()
+                    g2p.repository = cur_repo
+                    g2p.users_group = UsersGroup.get_by_group_name(member)
+                    g2p.permission = self.sa.query(Permission)\
+                                        .filter(Permission.
+                                                permission_name == perm)\
+                                                .scalar()
+                    self.sa.add(g2p)
 
             #update current repo
             for k, v in form_data.items():
                 if k == 'user':
-                    cur_repo.user = user_model.get(v)
+                    cur_repo.user = User.by_username(v)
+                elif k == 'repo_name':
+                    cur_repo.repo_name = form_data['repo_name_full']
+                elif k == 'repo_group':
+                    cur_repo.group_id = v
+
                 else:
                     setattr(cur_repo, k, v)
 
             self.sa.add(cur_repo)
 
-            if repo_name != form_data['repo_name']:
-                #rename our data
-                self.__rename_repo(repo_name, form_data['repo_name'])
+            if repo_name != form_data['repo_name_full']:
+                # rename repository
+                self.__rename_repo(old=repo_name,
+                                   new=form_data['repo_name_full'])
 
             self.sa.commit()
         except:
@@ -128,24 +170,33 @@ class RepoModel(BaseModel):
             raise
 
     def create(self, form_data, cur_user, just_db=False, fork=False):
+
         try:
             if fork:
-                #force str since hg doesn't go with unicode
-                repo_name = str(form_data['fork_name'])
-                org_name = str(form_data['repo_name'])
+                repo_name = form_data['fork_name']
+                org_name = form_data['repo_name']
+                org_full_name = org_name
 
             else:
-                org_name = repo_name = str(form_data['repo_name'])
+                org_name = repo_name = form_data['repo_name']
+                repo_name_full = form_data['repo_name_full']
+
             new_repo = Repository()
-            new_repo.enable_statistics = True
+            new_repo.enable_statistics = False
             for k, v in form_data.items():
                 if k == 'repo_name':
-                    v = repo_name
+                    if fork:
+                        v = repo_name
+                    else:
+                        v = repo_name_full
+                if k == 'repo_group':
+                    k = 'group_id'
+
                 setattr(new_repo, k, v)
 
             if fork:
                 parent_repo = self.sa.query(Repository)\
-                        .filter(Repository.repo_name == org_name).scalar()
+                        .filter(Repository.repo_name == org_full_name).one()
                 new_repo.fork = parent_repo
 
             new_repo.user_id = cur_user.user_id
@@ -154,7 +205,8 @@ class RepoModel(BaseModel):
             #create default permission
             repo_to_perm = RepoToPerm()
             default = 'repository.read'
-            for p in UserModel(self.sa).get_by_username('default', cache=False).user_perms:
+            for p in UserModel(self.sa).get_by_username('default',
+                                                    cache=False).user_perms:
                 if p.permission.permission_name.startswith('repository.'):
                     default = p.permission.permission_name
                     break
@@ -172,7 +224,9 @@ class RepoModel(BaseModel):
             self.sa.add(repo_to_perm)
 
             if not just_db:
-                self.__create_repo(repo_name, form_data['repo_type'])
+                self.__create_repo(repo_name, form_data['repo_type'],
+                                   form_data['repo_group'],
+                                   form_data['clone_uri'])
 
             self.sa.commit()
 
@@ -212,6 +266,19 @@ class RepoModel(BaseModel):
             self.sa.rollback()
             raise
 
+    def delete_perm_users_group(self, form_data, repo_name):
+        try:
+            self.sa.query(UsersGroupRepoToPerm)\
+                .filter(UsersGroupRepoToPerm.repository \
+                        == self.get_by_repo_name(repo_name))\
+                .filter(UsersGroupRepoToPerm.users_group_id \
+                        == form_data['users_group_id']).delete()
+            self.sa.commit()
+        except:
+            log.error(traceback.format_exc())
+            self.sa.rollback()
+            raise
+
     def delete_stats(self, repo_name):
         try:
             self.sa.query(Statistics)\
@@ -223,23 +290,40 @@ class RepoModel(BaseModel):
             self.sa.rollback()
             raise
 
-
-    def __create_repo(self, repo_name, alias):
+    def __create_repo(self, repo_name, alias, new_parent_id, clone_uri=False):
         """
-        makes repository on filesystem
+        makes repository on filesystem. It's group aware means it'll create
+        a repository within a group, and alter the paths accordingly of
+        group location
+
         :param repo_name:
         :param alias:
+        :param parent_id:
+        :param clone_uri:
         """
-        from rhodecode.lib.utils import check_repo
-        repo_path = os.path.join(self.repos_path, repo_name)
-        if check_repo(repo_name, self.repos_path):
-            log.info('creating repo %s in %s', repo_name, repo_path)
+        from rhodecode.lib.utils import is_valid_repo
+        
+        if new_parent_id:
+            paths = Group.get(new_parent_id).full_path.split(Group.url_sep())
+            new_parent_path = os.sep.join(paths)
+        else:
+            new_parent_path = ''
+
+        repo_path = os.path.join(*map(lambda x:safe_str(x),
+                                [self.repos_path, new_parent_path, repo_name]))
+
+        if is_valid_repo(repo_path, self.repos_path) is False:
+            log.info('creating repo %s in %s @ %s', repo_name, repo_path,
+                     clone_uri)
             backend = get_backend(alias)
-            backend(repo_path, create=True)
+
+            backend(repo_path, create=True, src_url=clone_uri)
+
 
     def __rename_repo(self, old, new):
         """
         renames repository on filesystem
+
         :param old: old name
         :param new: new name
         """
@@ -248,8 +332,8 @@ class RepoModel(BaseModel):
         old_path = os.path.join(self.repos_path, old)
         new_path = os.path.join(self.repos_path, new)
         if os.path.isdir(new_path):
-            raise Exception('Was trying to rename to already existing dir %s',
-                            new_path)
+            raise Exception('Was trying to rename to already existing dir %s' \
+            		     % new_path)
         shutil.move(old_path, new_path)
 
     def __delete_repo(self, repo):
@@ -258,6 +342,7 @@ class RepoModel(BaseModel):
         added rm__ prefix into dir, and rename internat .hg/.git dirs so this
         repository is no longer valid for rhodecode, can be undeleted later on
         by reverting the renames on this repository
+
         :param repo: repo object
         """
         rm_path = os.path.join(self.repos_path, repo.repo_name)
@@ -268,5 +353,6 @@ class RepoModel(BaseModel):
                     os.path.join(rm_path, 'rm__.%s' % alias))
         #disable repo
         shutil.move(rm_path, os.path.join(self.repos_path, 'rm__%s__%s' \
-                                          % (datetime.today().isoformat(),
-                                             repo.repo_name)))
+                                          % (datetime.today()\
+                                             .strftime('%Y%m%d_%H%M%S_%f'),
+                                            repo.repo_name)))

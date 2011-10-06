@@ -1,0 +1,69 @@
+## -*- coding: utf-8 -*-
+<%inherit file="/base/base.html"/>
+<%def name="title()">
+    ${_('Journal')} - ${c.rhodecode_name}
+</%def>
+<%def name="breadcrumbs()">
+	${c.rhodecode_name}
+</%def>
+<%def name="page_nav()">
+	${self.menu('home')}
+</%def>
+<%def name="main()">
+	
+    <div class="box box-left">
+	    <!-- box / title -->
+	    <div class="title">
+	        <h5>${_('Journal')}</h5>
+	    </div>
+		<script type="text/javascript">
+		function show_more_event(){
+		YUE.on(YUD.getElementsByClassName('show_more'),'click',function(e){
+		    var el = e.target;
+		    YUD.setStyle(YUD.get(el.id.substring(1)),'display','');
+		    YUD.setStyle(el.parentNode,'display','none');
+		});
+		}
+		</script> 	    
+	    <div id="journal">${c.journal_data}</div>
+    </div>
+    
+    <div class="box box-right">
+        <!-- box / title -->
+        <div class="title">
+            <h5>${_('Following')}</h5>
+        </div>
+        <div>
+		%if c.following:
+		    %for entry in c.following:
+		        <div class="currently_following">
+		            %if entry.follows_user_id:
+		              <img title="${_('following user')}" alt="${_('user')}" src="${h.url("/images/icons/user.png")}"/>
+		              ${entry.follows_user.full_contact}
+		            %endif
+		            
+		            %if entry.follows_repo_id:
+		              
+		              <div style="float:left;padding-right:5px">
+                      <span id="follow_toggle_${entry.follows_repository.repo_id}" class="following" title="${_('Stop following this repository')}"
+                            onclick="javascript:toggleFollowingRepo(this,${entry.follows_repository.repo_id},'${str(h.get_token())}')">
+                      </span>		            
+		              </div>
+		              %if entry.follows_repository.private:
+		                <img class="icon" title="${_('private repository')}" alt="${_('private repository')}" src="${h.url("/images/icons/lock.png")}"/>
+		              %else:
+		                <img class="icon" title="${_('public repository')}" alt="${_('public repository')}" src="${h.url("/images/icons/lock_open.png")}"/>
+		              %endif
+		              
+		              ${h.link_to(entry.follows_repository.repo_name,h.url('summary_home',
+		                repo_name=entry.follows_repository.repo_name))}
+		              
+		            %endif
+		        </div>
+		    %endfor
+		%else:
+		    ${_('You are not following any users or repositories')}
+		%endif
+        </div>
+    </div>    
+</%def>    

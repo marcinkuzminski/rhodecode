@@ -1,96 +1,92 @@
 ## -*- coding: utf-8 -*-
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-    <head>
-        <title>${_('Sign Up')} - ${c.rhodecode_name}</title>
-        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
-        <link rel="icon" href="${h.url("/images/hgicon.png")}" type="image/png" />
-        <meta name="robots" content="index, nofollow"/>
-            
-        <!-- stylesheets -->
-        <link rel="stylesheet" type="text/css" href="${h.url('/css/style.css')}" media="screen" />
+<%inherit file="base/root.html"/>
 
-    </head>
-    <body>
-		<div id="register">
-			
-			<div class="title top-left-rounded-corner top-right-rounded-corner">
-				<h5>${_('Sign Up to')} ${c.rhodecode_name}</h5>
-			</div>
-			<div class="inner">
-			    ${h.form(url('register'))}
-			    <div class="form">
-			        <!-- fields -->
-			        <div class="fields">
-			             <div class="field">
-			                <div class="label">
-			                    <label for="username">${_('Username')}:</label>
-			                </div>
-			                <div class="input">
-			                    ${h.text('username',class_="medium")}
-			                </div>
-			             </div>
-			            
-			             <div class="field">
-			                <div class="label">
-			                    <label for="password">${_('Password')}:</label>
-			                </div>
-			                <div class="input">
-			                    ${h.password('password',class_="medium")}
-			                </div>
-			             </div>
-                         
-                         <div class="field">
-                            <div class="label">
-                                <label for="password">${_('Re-enter password')}:</label>
-                            </div>
-                            <div class="input">
-                                ${h.password('password_confirmation',class_="medium")}
-                            </div>
-                         </div>
-                         			            
-			             <div class="field">
-			                <div class="label">
-			                    <label for="name">${_('First Name')}:</label>
-			                </div>
-			                <div class="input">
-			                    ${h.text('name',class_="medium")}
-			                </div>
-			             </div>
-			            
-			             <div class="field">
-			                <div class="label">
-			                    <label for="lastname">${_('Last Name')}:</label>
-			                </div>
-			                <div class="input">
-			                    ${h.text('lastname',class_="medium")}
-			                </div>
-			             </div>
-			            
-			             <div class="field">
-			                <div class="label">
-			                    <label for="email">${_('Email')}:</label>
-			                </div>
-			                <div class="input">
-			                    ${h.text('email',class_="medium")}
-			                </div>
-			             </div>
-			                        
-			            <div class="buttons">
-				            <div class="nohighlight">
-				              ${h.submit('sign_up','Sign Up',class_="ui-button")}
-				              %if c.auto_active:
-							  	<div class="activation_msg">${_('Your account will be activated right after registration')}</div>
-							  %else:
-							  	<div class="activation_msg">${_('Your account must wait for activation by administrator')}</div>
-							  %endif
-				            </div>
-			            </div>             
-			    	</div>
-			    </div>
-			    ${h.end_form()}
-			</div>    
+<%def name="title()">
+    ${_('Sign Up')} - ${c.rhodecode_name}
+</%def>
+    
+<div id="register">
+	
+	<div class="title top-left-rounded-corner top-right-rounded-corner">
+		<h5>${_('Sign Up to')} ${c.rhodecode_name}</h5>
+	</div>
+	<div class="inner">
+	    ${h.form(url('register'))}
+	    <div class="form">
+	        <!-- fields -->
+	        <div class="fields">
+	             <div class="field">
+	                <div class="label">
+	                    <label for="username">${_('Username')}:</label>
+	                </div>
+	                <div class="input">
+	                    ${h.text('username',class_="medium")}
+	                </div>
+	             </div>
+	            
+	             <div class="field">
+	                <div class="label">
+	                    <label for="password">${_('Password')}:</label>
+	                </div>
+	                <div class="input">
+	                    ${h.password('password',class_="medium")}
+	                </div>
+	             </div>
+                       
+                       <div class="field">
+                          <div class="label">
+                              <label for="password">${_('Re-enter password')}:</label>
+                          </div>
+                          <div class="input">
+                              ${h.password('password_confirmation',class_="medium")}
+                          </div>
+                       </div>
+                       			            
+	             <div class="field">
+	                <div class="label">
+	                    <label for="name">${_('First Name')}:</label>
+	                </div>
+	                <div class="input">
+	                    ${h.text('name',class_="medium")}
+	                </div>
+	             </div>
+	            
+	             <div class="field">
+	                <div class="label">
+	                    <label for="lastname">${_('Last Name')}:</label>
+	                </div>
+	                <div class="input">
+	                    ${h.text('lastname',class_="medium")}
+	                </div>
+	             </div>
+	            
+	             <div class="field">
+	                <div class="label">
+	                    <label for="email">${_('Email')}:</label>
+	                </div>
+	                <div class="input">
+	                    ${h.text('email',class_="medium")}
+	                </div>
+	             </div>
+	                        
+	            <div class="buttons">
+		            <div class="nohighlight">
+		              ${h.submit('sign_up',_('Sign Up'),class_="ui-button")}
+		              %if c.auto_active:
+					  	<div class="activation_msg">${_('Your account will be activated right after registration')}</div>
+					  %else:
+					  	<div class="activation_msg">${_('Your account must wait for activation by administrator')}</div>
+					  %endif
+		            </div>
+	            </div>             
+	    	</div>
 	    </div>
-    </body>
-</html>
+	    ${h.end_form()}
+        <script type="text/javascript">
+        YUE.onDOMReady(function(){
+            YUD.get('username').focus();
+        })
+        </script>	    
+	</div>    
+ </div>
 

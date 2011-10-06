@@ -25,7 +25,7 @@
         ${self.breadcrumbs()}
     </div>
     <div class="table">
-		<div id="body" class="diffblock">
+		<div class="diffblock">
 			<div class="code-header">
 				<div>
 				${_('Changeset')} - r${c.changeset.revision}:${h.short_id(c.changeset.raw_id)}
@@ -51,9 +51,15 @@
 	             </div>
 	             <div class="right">
 		             <div class="changes">
+                        % if len(c.changeset.affected_files) <= c.affected_files_cut_off:	             
 		                 <span class="removed" title="${_('removed')}">${len(c.changeset.removed)}</span>
 		                 <span class="changed" title="${_('changed')}">${len(c.changeset.changed)}</span>
 		                 <span class="added" title="${_('added')}">${len(c.changeset.added)}</span>
+	                    % else:
+                         <span class="removed" title="${_('affected %s files') % len(c.changeset.affected_files)}">!</span>
+                         <span class="changed" title="${_('affected %s files') % len(c.changeset.affected_files)}">!</span>
+                         <span class="added"   title="${_('affected %s files') % len(c.changeset.affected_files)}">!</span>	                    
+	                    % endif		                 
 		             </div>                  
 		                 %if len(c.changeset.parents)>1:
 		                 <div class="merge">
@@ -80,21 +86,30 @@
 		         </span>                                                                 
 	                </div>              
 	        </div>
-	        <span style="font-size:1.1em;font-weight: bold">${_('Files affected')}</span>
+	        <span style="font-size:1.1em;font-weight: bold">
+	        ${_('%s files affected with %s additions and %s deletions.') % (len(c.changeset.affected_files),c.lines_added,c.lines_deleted)}
+	        </span>
 	        <div class="cs_files">
-	                %for change,filenode,diff,cs1,cs2 in c.changes:
-	                    <div class="cs_${change}">${h.link_to(h.safe_unicode(filenode.path),h.url.current(anchor=h.repo_name_slug('CHANGE-%s' % h.safe_unicode(filenode.path))))}</div>
+	                %for change,filenode,diff,cs1,cs2,stat in c.changes:
+	                    <div class="cs_${change}">
+		                    <div class="node">${h.link_to(h.safe_unicode(filenode.path),
+		                                        h.url.current(anchor=h.repo_name_slug('C%s' % h.safe_unicode(filenode.path))))}</div>
+		                    <div class="changes">${h.fancy_file_stats(stat)}</div>
+	                    </div>
 	                %endfor
+	                % if c.cut_off:
+	                  ${_('Changeset was too big and was cut off...')}
+	                % endif
 	        </div>         
 	    </div>
 	    
     </div>
     	
-	%for change,filenode,diff,cs1,cs2 in c.changes:
+	%for change,filenode,diff,cs1,cs2,stat in c.changes:
 		%if change !='removed':
 		<div style="clear:both;height:10px"></div>
-		<div id="body" class="diffblock">
-			<div id="${h.repo_name_slug('CHANGE-%s' % h.safe_unicode(filenode.path))}" class="code-header">
+		<div class="diffblock">
+			<div id="${h.repo_name_slug('C%s' % h.safe_unicode(filenode.path))}" class="code-header">
 				<div class="changeset_header">
 					<span class="changeset_file">
 						${h.link_to_if(change!='removed',h.safe_unicode(filenode.path),h.url('files_home',repo_name=c.repo_name,
@@ -120,7 +135,5 @@
 		</div>
 		%endif
 	%endfor 
-    </div>
-</div>    
-	
+    </div>	
 </%def>

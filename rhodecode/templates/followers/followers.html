@@ -1,0 +1,32 @@
+## -*- coding: utf-8 -*-
+<%inherit file="/base/base.html"/>
+
+<%def name="title()">
+    ${c.repo_name} ${_('Followers')} - ${c.rhodecode_name}
+</%def>
+
+<%def name="breadcrumbs_links()">
+    ${h.link_to(u'Home',h.url('/'))}
+    &raquo; 
+    ${h.link_to(c.repo_name,h.url('summary_home',repo_name=c.repo_name))}
+    &raquo;
+    ${_('followers')}
+</%def>
+
+<%def name="page_nav()">
+    ${self.menu('followers')}
+</%def>
+<%def name="main()">
+<div class="box">
+    <!-- box / title -->
+    <div class="title">
+        ${self.breadcrumbs()}
+    </div>
+    <!-- end box / title -->
+    <div class="table">
+        <div id="followers">
+            ${c.followers_data}
+        </div>   
+    </div>
+</div>    
+</%def> 

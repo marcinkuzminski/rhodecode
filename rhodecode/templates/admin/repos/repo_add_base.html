@@ -1,0 +1,63 @@
+## -*- coding: utf-8 -*-
+
+${h.form(url('repos'))}
+<div class="form">
+    <!-- fields -->
+    <div class="fields">
+        <div class="field">
+            <div class="label">
+                <label for="repo_name">${_('Name')}:</label>
+            </div>
+            <div class="input">
+                ${h.text('repo_name',c.new_repo,class_="small")}
+                %if not h.HasPermissionAll('hg.admin')('repo create form'):
+                    ${h.hidden('user_created',True)}
+                %endif
+            </div>
+         </div>
+        <div class="field">
+            <div class="label">
+                <label for="clone_uri">${_('Clone from')}:</label>
+            </div>
+            <div class="input">
+                ${h.text('clone_uri',class_="small")}
+            </div>
+         </div>             
+         <div class="field">
+             <div class="label">
+                 <label for="repo_group">${_('Repository group')}:</label>
+             </div>
+             <div class="input">
+                 ${h.select('repo_group','',c.repo_groups,class_="medium")}
+             </div>
+         </div>         
+        <div class="field">
+            <div class="label">
+                <label for="repo_type">${_('Type')}:</label>
+            </div>
+            <div class="input">
+                ${h.select('repo_type','hg',c.backends,class_="small")}
+            </div>
+         </div>             
+        <div class="field">
+            <div class="label label-textarea">
+                <label for="description">${_('Description')}:</label>
+            </div>
+            <div class="textarea text-area editor">
+                ${h.textarea('description',cols=23,rows=5)}
+            </div>
+         </div>
+        <div class="field">
+            <div class="label label-checkbox">
+                <label for="private">${_('Private')}:</label>
+            </div>
+            <div class="checkboxes">
+                ${h.checkbox('private',value="True")}
+            </div>
+         </div>
+        <div class="buttons">
+          ${h.submit('add',_('add'),class_="ui-button")}
+        </div>                                                          
+    </div>
+</div>    
+${h.end_form()}    

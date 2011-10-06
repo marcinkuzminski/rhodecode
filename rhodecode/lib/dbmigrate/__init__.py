@@ -2,12 +2,12 @@
 """
     rhodecode.lib.dbmigrate.__init__
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    
+
     Database migration modules
-    
+
     :created_on: Dec 11, 2010
     :author: marcink
-    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
+    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software: you can redistribute it and/or modify
@@ -31,6 +31,7 @@ from rhodecode.lib.utils import BasePasterCommand, Command, add_cache
 from rhodecode.lib.db_manage import DbManage
 
 log = logging.getLogger(__name__)
+
 
 class UpgradeDb(BasePasterCommand):
     """Command used for paster to upgrade our database to newer version
@@ -56,8 +57,6 @@ class UpgradeDb(BasePasterCommand):
                             root=config['here'], tests=False)
 
         dbmanage.upgrade()
-
-
 
     def update_parser(self):
         self.parser.add_option('--sql',

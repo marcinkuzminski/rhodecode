@@ -1,0 +1,281 @@
+<table id="permissions_manage">
+    <tr>
+        <td>${_('none')}</td>
+        <td>${_('read')}</td>
+        <td>${_('write')}</td>
+        <td>${_('admin')}</td>
+        <td>${_('member')}</td>
+        <td></td>
+    </tr>
+    ## USERS                        
+    %for r2p in c.repo_info.repo_to_perm:
+        %if r2p.user.username =='default' and c.repo_info.private:
+            <tr>
+                <td colspan="4">
+                    <span class="private_repo_msg">
+                    ${_('private repository')}
+                    </span>
+                </td>
+                <td class="private_repo_msg"><img style="vertical-align:bottom" src="${h.url("/images/icons/user.png")}"/>${r2p.user.username}</td>
+            </tr>
+        %else:
+        <tr id="id${id(r2p.user.username)}">
+            <td>${h.radio('u_perm_%s' % r2p.user.username,'repository.none')}</td>
+            <td>${h.radio('u_perm_%s' % r2p.user.username,'repository.read')}</td>
+            <td>${h.radio('u_perm_%s' % r2p.user.username,'repository.write')}</td>
+            <td>${h.radio('u_perm_%s' % r2p.user.username,'repository.admin')}</td>
+            <td style="white-space: nowrap;">
+                <img style="vertical-align:bottom" src="${h.url('/images/icons/user.png')}"/>${r2p.user.username}
+            </td>
+            <td>
+              %if r2p.user.username !='default':
+                <span class="delete_icon action_button" onclick="ajaxActionUser(${r2p.user.user_id},'${'id%s'%id(r2p.user.username)}')">
+                ${_('revoke')}
+                </span>
+              %endif                    
+            </td>
+        </tr>
+        %endif
+    %endfor
+    
+    ## USERS GROUPS                          
+    %for g2p in c.repo_info.users_group_to_perm:
+        <tr id="id${id(g2p.users_group.users_group_name)}">
+            <td>${h.radio('g_perm_%s' % g2p.users_group.users_group_name,'repository.none')}</td>
+            <td>${h.radio('g_perm_%s' % g2p.users_group.users_group_name,'repository.read')}</td>
+            <td>${h.radio('g_perm_%s' % g2p.users_group.users_group_name,'repository.write')}</td>
+            <td>${h.radio('g_perm_%s' % g2p.users_group.users_group_name,'repository.admin')}</td>
+            <td style="white-space: nowrap;">
+                <img  style="vertical-align:bottom" src="${h.url('/images/icons/group.png')}"/>${g2p.users_group.users_group_name}
+            </td>
+            <td>
+                <span class="delete_icon action_button" onclick="ajaxActionUsersGroup(${g2p.users_group.users_group_id},'${'id%s'%id(g2p.users_group.users_group_name)}')">
+                ${_('revoke')}
+                </span>
+            </td>
+        </tr>
+    %endfor
+    <tr id="add_perm_input">
+        <td>${h.radio('perm_new_member','repository.none')}</td>
+        <td>${h.radio('perm_new_member','repository.read')}</td>
+        <td>${h.radio('perm_new_member','repository.write')}</td>
+        <td>${h.radio('perm_new_member','repository.admin')}</td>
+        <td class='ac'>
+            <div class="perm_ac" id="perm_ac">
+                ${h.text('perm_new_member_name',class_='yui-ac-input')}
+                ${h.hidden('perm_new_member_type')}
+                <div id="perm_container"></div>
+            </div>
+        </td>
+        <td></td>
+    </tr>
+    <tr>
+        <td colspan="6">
+            <span id="add_perm" class="add_icon" style="cursor: pointer;">
+            ${_('Add another member')}
+            </span>
+        </td>
+    </tr>
+</table>
+<script type="text/javascript">
+function ajaxActionUser(user_id, field_id) {
+    var sUrl = "${h.url('delete_repo_user',repo_name=c.repo_name)}";
+    var callback = {
+        success: function (o) {
+            var tr = YUD.get(String(field_id));
+            tr.parentNode.removeChild(tr);
+        },
+        failure: function (o) {
+            alert("${_('Failed to remove user')}");
+        },
+    };
+    var postData = '_method=delete&user_id=' + user_id;
+    var request = YAHOO.util.Connect.asyncRequest('POST', sUrl, callback, postData);
+};
+            
+function ajaxActionUsersGroup(users_group_id,field_id){
+    var sUrl = "${h.url('delete_repo_users_group',repo_name=c.repo_name)}";
+    var callback = { 
+    	success:function(o){
+    	    var tr = YUD.get(String(field_id));
+    		tr.parentNode.removeChild(tr);
+    	},
+        failure:function(o){
+            alert("${_('Failed to remove users group')}");
+        },
+    };
+    var postData = '_method=delete&users_group_id='+users_group_id; 
+    var request = YAHOO.util.Connect.asyncRequest('POST', sUrl, callback, postData);
+};
+
+YUE.onDOMReady(function () {
+    if (!YUD.hasClass('perm_new_member_name', 'error')) {
+        YUD.setStyle('add_perm_input', 'display', 'none');
+    }
+    YAHOO.util.Event.addListener('add_perm', 'click', function () {
+        YUD.setStyle('add_perm_input', 'display', '');
+        YUD.setStyle('add_perm', 'opacity', '0.6');
+        YUD.setStyle('add_perm', 'cursor', 'default');
+    });
+});
+
+YAHOO.example.FnMultipleFields = function () {
+    var myUsers = ${c.users_array|n};
+    var myGroups = ${c.users_groups_array|n};
+
+    // Define a custom search function for the DataSource of users
+    var matchUsers = function (sQuery) {
+            // Case insensitive matching
+            var query = sQuery.toLowerCase();
+            var i = 0;
+            var l = myUsers.length;
+            var matches = [];
+
+            // Match against each name of each contact
+            for (; i < l; i++) {
+                contact = myUsers[i];
+                if ((contact.fname.toLowerCase().indexOf(query) > -1) || (contact.lname.toLowerCase().indexOf(query) > -1) || (contact.nname && (contact.nname.toLowerCase().indexOf(query) > -1))) {
+                    matches[matches.length] = contact;
+                }
+            }
+            return matches;
+        };
+
+    // Define a custom search function for the DataSource of usersGroups
+    var matchGroups = function (sQuery) {
+            // Case insensitive matching
+            var query = sQuery.toLowerCase();
+            var i = 0;
+            var l = myGroups.length;
+            var matches = [];
+
+            // Match against each name of each contact
+            for (; i < l; i++) {
+                matched_group = myGroups[i];
+                if (matched_group.grname.toLowerCase().indexOf(query) > -1) {
+                    matches[matches.length] = matched_group;
+                }
+            }
+            return matches;
+        };
+
+    //match all
+    var matchAll = function (sQuery) {
+            u = matchUsers(sQuery);
+            g = matchGroups(sQuery);
+            return u.concat(g);
+        };
+
+    // DataScheme for members
+    var memberDS = new YAHOO.util.FunctionDataSource(matchAll);
+    memberDS.responseSchema = {
+        fields: ["id", "fname", "lname", "nname", "grname", "grmembers"]
+    };
+
+    // DataScheme for owner
+    var ownerDS = new YAHOO.util.FunctionDataSource(matchUsers);
+    ownerDS.responseSchema = {
+        fields: ["id", "fname", "lname", "nname"]
+    };
+
+    // Instantiate AutoComplete for perms
+    var membersAC = new YAHOO.widget.AutoComplete("perm_new_member_name", "perm_container", memberDS);
+    membersAC.useShadow = false;
+    membersAC.resultTypeList = false;
+
+    // Instantiate AutoComplete for owner
+    var ownerAC = new YAHOO.widget.AutoComplete("user", "owner_container", ownerDS);
+    ownerAC.useShadow = false;
+    ownerAC.resultTypeList = false;
+
+
+    // Helper highlight function for the formatter
+    var highlightMatch = function (full, snippet, matchindex) {
+            return full.substring(0, matchindex) + "<span class='match'>" + full.substr(matchindex, snippet.length) + "</span>" + full.substring(matchindex + snippet.length);
+        };
+
+    // Custom formatter to highlight the matching letters
+    var custom_formatter = function (oResultData, sQuery, sResultMatch) {
+            var query = sQuery.toLowerCase();
+
+            if (oResultData.grname != undefined) {
+                var grname = oResultData.grname;
+                var grmembers = oResultData.grmembers;
+                var grnameMatchIndex = grname.toLowerCase().indexOf(query);
+                var grprefix = "${_('Group')}: ";
+                var grsuffix = " (" + grmembers + "  ${_('members')})";
+
+                if (grnameMatchIndex > -1) {
+                    return grprefix + highlightMatch(grname, query, grnameMatchIndex) + grsuffix;
+                }
+
+                return grprefix + oResultData.grname + grsuffix;
+            } else if (oResultData.fname != undefined) {
+
+                var fname = oResultData.fname,
+                    lname = oResultData.lname,
+                    nname = oResultData.nname || "",
+                    // Guard against null value
+                    fnameMatchIndex = fname.toLowerCase().indexOf(query),
+                    lnameMatchIndex = lname.toLowerCase().indexOf(query),
+                    nnameMatchIndex = nname.toLowerCase().indexOf(query),
+                    displayfname, displaylname, displaynname;
+
+                if (fnameMatchIndex > -1) {
+                    displayfname = highlightMatch(fname, query, fnameMatchIndex);
+                } else {
+                    displayfname = fname;
+                }
+
+                if (lnameMatchIndex > -1) {
+                    displaylname = highlightMatch(lname, query, lnameMatchIndex);
+                } else {
+                    displaylname = lname;
+                }
+
+                if (nnameMatchIndex > -1) {
+                    displaynname = "(" + highlightMatch(nname, query, nnameMatchIndex) + ")";
+                } else {
+                    displaynname = nname ? "(" + nname + ")" : "";
+                }
+
+                return displayfname + " " + displaylname + " " + displaynname;
+            } else {
+                return '';
+            }
+        };
+    membersAC.formatResult = custom_formatter;
+    ownerAC.formatResult = custom_formatter;
+
+    var myHandler = function (sType, aArgs) {
+
+            var myAC = aArgs[0]; // reference back to the AC instance
+            var elLI = aArgs[1]; // reference to the selected LI element
+            var oData = aArgs[2]; // object literal of selected item's result data
+            //fill the autocomplete with value
+            if (oData.nname != undefined) {
+                //users
+                myAC.getInputEl().value = oData.nname;
+                YUD.get('perm_new_member_type').value = 'user';
+            } else {
+                //groups
+                myAC.getInputEl().value = oData.grname;
+                YUD.get('perm_new_member_type').value = 'users_group';
+            }
+
+        };
+
+    membersAC.itemSelectEvent.subscribe(myHandler);
+    if(ownerAC.itemSelectEvent){
+    	ownerAC.itemSelectEvent.subscribe(myHandler);	
+    }
+
+    return {
+        memberDS: memberDS,
+        ownerDS: ownerDS,
+        membersAC: membersAC,
+        ownerAC: ownerAC,
+    };
+}();
+            
+</script>      

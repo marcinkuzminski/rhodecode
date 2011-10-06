@@ -1,0 +1,144 @@
+## -*- coding: utf-8 -*-
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>${self.title()}</title>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <meta name="robots" content="index, nofollow"/>
+        <link rel="icon" href="${h.url('/images/icons/database_gear.png')}" type="image/png" />
+
+        ## CSS ###
+        <%def name="css()">
+            <link rel="stylesheet" type="text/css" href="${h.url('/css/style.css')}" media="screen"/>
+            <link rel="stylesheet" type="text/css" href="${h.url('/css/pygments.css')}"/>
+            <link rel="stylesheet" type="text/css" href="${h.url('/css/diff.css')}"/>
+            ## EXTRA FOR CSS
+            ${self.css_extra()}
+        </%def>
+        <%def name="css_extra()">
+        </%def>
+                    
+        ${self.css()}
+        
+        %if c.ga_code:
+        <!-- Analytics -->
+	     <script type="text/javascript">
+	      var _gaq = _gaq || [];
+	      _gaq.push(['_setAccount', '${c.ga_code}']);
+	      _gaq.push(['_trackPageview']);
+	    
+	      (function() {
+	        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+	        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+	        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	      })();
+	     </script>
+	    %endif
+        
+        ## JAVASCRIPT ##
+        <%def name="js()">
+            <script type="text/javascript" src="${h.url('/js/yui.2.9.js')}"></script>
+            <!--[if IE]>
+               <script language="javascript" type="text/javascript" src="${h.url('/js/excanvas.min.js')}"></script>
+            <![endif]-->
+            <script type="text/javascript" src="${h.url('/js/yui.flot.js')}"></script>
+            <script type="text/javascript" src="${h.url('/js/rhodecode.js')}"></script>
+           ## EXTRA FOR JS
+           ${self.js_extra()}
+        
+            <script type="text/javascript">
+            var base_url  = "${h.url('toggle_following')}";
+            function onSuccess(target){
+                var f = YUD.get(target.id);
+                var f_cnt = YUD.get('current_followers_count');
+                
+                if(f.getAttribute('class')=='follow'){
+                    f.setAttribute('class','following');
+                    f.setAttribute('title',"${_('Stop following this repository')}");
+                    
+                    if(f_cnt){
+                        var cnt = Number(f_cnt.innerHTML)+1;
+                        f_cnt.innerHTML = cnt;
+                    }
+                }
+                else{
+                    f.setAttribute('class','follow');
+                    f.setAttribute('title',"${_('Start following this repository')}");
+                    if(f_cnt){
+                        var cnt = Number(f_cnt.innerHTML)+1;
+                        f_cnt.innerHTML = cnt;
+                    }      
+                }
+            }
+            
+            function toggleFollowingUser(target,fallows_user_id,token,user_id){
+                args = 'follows_user_id='+fallows_user_id;
+                args+= '&amp;auth_token='+token;
+                if(user_id != undefined){
+                    args+="&amp;user_id="+user_id;
+                }
+                YUC.asyncRequest('POST',base_url,{
+                    success:function(o){
+                        onSuccess(target);
+                    }
+                },args);
+                return false;
+            }
+            
+            function toggleFollowingRepo(target,fallows_repo_id,token,user_id){
+            
+                args = 'follows_repo_id='+fallows_repo_id;
+                args+= '&amp;auth_token='+token;
+                if(user_id != undefined){
+                    args+="&amp;user_id="+user_id;
+                }    
+                YUC.asyncRequest('POST',base_url,{
+                    success:function(o){
+                        onSuccess(target);
+                    }
+                },args); 
+                return false;
+            }
+           YUE.onDOMReady(function(){
+               
+             YUE.on('quick_login_link','click',function(e){
+                 
+                 if(YUD.hasClass('quick_login_link','enabled')){
+                     YUD.setStyle('quick_login','display','none');
+                     YUD.removeClass('quick_login_link','enabled');
+                 }
+                 else{
+                     YUD.setStyle('quick_login','display','');
+                     YUD.addClass('quick_login_link','enabled');
+                     YUD.get('username').focus();
+                 }
+                 //make sure we don't redirect 
+                 YUE.preventDefault(e);
+             });
+               
+            tooltip_activate();
+            show_more_event();
+            
+            YUE.on(YUQ('.quick_repo_menu'),'click',function(e){
+            	var menu = e.currentTarget.firstElementChild;
+            	if(YUD.hasClass(menu,'hidden')){
+            		YUD.addClass(e.currentTarget,'active');
+            		YUD.removeClass(menu,'hidden');
+            	}else{
+            		YUD.removeClass(e.currentTarget,'active');
+            		YUD.addClass(menu,'hidden');
+            	}
+            })
+            
+           })   
+            </script>
+        
+        </%def>
+        <%def name="js_extra()">
+        </%def>      
+        ${self.js()}
+    </head>
+    <body id="body">
+        ${next.body()}
+    </body>
+</html>

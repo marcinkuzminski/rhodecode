@@ -2,12 +2,12 @@
 """
     rhodecode.controllers.admin.permissions
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    
+
     permissions controller for Rhodecode
-    
+
     :created_on: Apr 27, 2010
     :author: marcink
-    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
+    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software: you can redistribute it and/or modify
@@ -23,23 +23,24 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import logging
+import traceback
+import formencode
 from formencode import htmlfill
+
 from pylons import request, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
 from pylons.i18n.translation import _
+
 from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator
-from rhodecode.lib.auth_ldap import LdapImportError
 from rhodecode.lib.base import BaseController, render
-from rhodecode.model.forms import LdapSettingsForm, DefaultPermissionsForm
+from rhodecode.model.forms import DefaultPermissionsForm
 from rhodecode.model.permission import PermissionModel
-from rhodecode.model.settings import SettingsModel
-from rhodecode.model.user import UserModel
-import formencode
-import logging
-import traceback
+from rhodecode.model.db import User
 
 log = logging.getLogger(__name__)
+
 
 class PermissionsController(BaseController):
     """REST Controller styled on the Atom Publishing Protocol"""
@@ -68,7 +69,6 @@ class PermissionsController(BaseController):
 
         self.create_choices = [('hg.create.none', _('Disabled')),
                                ('hg.create.repository', _('Enabled'))]
-
 
     def index(self, format='html'):
         """GET /permissions: All items in the collection"""
@@ -99,7 +99,7 @@ class PermissionsController(BaseController):
 
         try:
             form_result = _form.to_python(dict(request.POST))
-            form_result.update({'perm_user_name':id})
+            form_result.update({'perm_user_name': id})
             permission_model.update(form_result)
             h.flash(_('Default permissions updated successfully'),
                     category='success')
@@ -123,8 +123,6 @@ class PermissionsController(BaseController):
 
         return redirect(url('edit_permission', id=id))
 
-
-
     def delete(self, id):
         """DELETE /permissions/id: Delete an existing item"""
         # Forms posted to this method should contain a hidden field:
@@ -146,9 +144,9 @@ class PermissionsController(BaseController):
         c.create_choices = self.create_choices
 
         if id == 'default':
-            default_user = UserModel().get_by_username('default')
-            defaults = {'_method':'put',
-                        'anonymous':default_user.active}
+            default_user = User.by_username('default')
+            defaults = {'_method': 'put',
+                        'anonymous': default_user.active}
 
             for p in default_user.user_perms:
                 if p.permission.permission_name.startswith('repository.'):

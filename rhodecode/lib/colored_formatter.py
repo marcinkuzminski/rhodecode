@@ -5,17 +5,18 @@ BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = xrange(30, 38)
 
 # Sequences
 RESET_SEQ = "\033[0m"
-COLOR_SEQ = "\033[1;%dm"
+COLOR_SEQ = "\033[0;%dm"
 BOLD_SEQ = "\033[1m"
 
 COLORS = {
-    'CRITICAL': MAGENTA, # level 50
-    'ERROR': RED, # level 40
-    'WARNING': CYAN, # level 30
-    'INFO': GREEN, # level 20
-    'DEBUG': BLUE, # level 10
-    'SQL' : YELLOW
+    'CRITICAL': MAGENTA,
+    'ERROR': RED,
+    'WARNING': CYAN,
+    'INFO': GREEN,
+    'DEBUG': BLUE,
+    'SQL': YELLOW
 }
+
 
 def one_space_trim(s):
     if s.find("  ") == -1:
@@ -23,6 +24,7 @@ def one_space_trim(s):
     else:
         s = s.replace('  ', ' ')
         return one_space_trim(s)
+
 
 def format_sql(sql):
     sql = sql.replace('\n', '')
@@ -43,6 +45,7 @@ def format_sql(sql):
         .replace('DELETE', '\n\tDELETE')
     return sql
 
+
 class ColorFormatter(logging.Formatter):
 
     def __init__(self, *args, **kwargs):
@@ -59,7 +62,7 @@ class ColorFormatter(logging.Formatter):
         def_record = logging.Formatter.format(self, record)
         end = RESET_SEQ
 
-        colored_record = start + def_record + end
+        colored_record = ''.join([start, def_record, end])
         return colored_record
 
 
@@ -78,5 +81,5 @@ class ColorFormatterSql(logging.Formatter):
         def_record = format_sql(logging.Formatter.format(self, record))
         end = RESET_SEQ
 
-        colored_record = start + def_record + end
+        colored_record = ''.join([start, def_record, end])
         return colored_record

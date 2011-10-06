@@ -20,7 +20,7 @@
         ${self.breadcrumbs()}
         <ul class="links">
           <li>
-            <span>${h.link_to(u'ADD NEW USER',h.url('new_user'))}</span>
+            <span>${h.link_to(_(u'ADD NEW USER'),h.url('new_user'))}</span>
           </li>
           
         </ul>        
@@ -33,6 +33,7 @@
             <th class="left">${_('username')}</th>
             <th class="left">${_('name')}</th>
             <th class="left">${_('lastname')}</th>
+            <th class="left">${_('last login')}</th>
             <th class="left">${_('active')}</th>
             <th class="left">${_('admin')}</th>
             <th class="left">${_('ldap')}</th>
@@ -45,13 +46,14 @@
                     <td>${h.link_to(user.username,h.url('edit_user', id=user.user_id))}</td>
                     <td>${user.name}</td>
                     <td>${user.lastname}</td>
+                    <td>${user.last_login}</td>
                     <td>${h.bool2icon(user.active)}</td>
                     <td>${h.bool2icon(user.admin)}</td>
-                    <td>${h.bool2icon(user.is_ldap)}</td>
+                    <td>${h.bool2icon(bool(user.ldap_dn))}</td>
                     <td>
-                        ${h.form(url('user', id=user.user_id),method='delete')}
-                            ${h.submit('remove_','delete',id="remove_user_%s" % user.user_id,
-                            class_="delete_icon action_button",onclick="return confirm('Confirm to delete this user');")}
+                        ${h.form(url('delete_user', id=user.user_id),method='delete')}
+                            ${h.submit('remove_',_('delete'),id="remove_user_%s" % user.user_id,
+                            class_="delete_icon action_button",onclick="return confirm('"+_('Confirm to delete this user')+"');")}
                         ${h.end_form()}
                     </td>
                 </tr>
