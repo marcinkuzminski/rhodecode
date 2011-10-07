@@ -112,7 +112,7 @@ def action_logger(user, action, repo, ipaddr='', sa=None):
         if hasattr(user, 'user_id'):
             user_obj = user
         elif isinstance(user, basestring):
-            user_obj = User.by_username(user, cache=False)
+            user_obj = User.by_username(user)
         else:
             raise Exception('You have to provide user object or username')
 
@@ -189,7 +189,7 @@ def is_valid_repo(repo_name, base_path):
     :return True: if given path is a valid repository
     """
     full_path = os.path.join(base_path, repo_name)
-    
+
     try:
         get_scm(full_path)
         return True
@@ -204,17 +204,17 @@ def is_valid_repos_group(repos_group_name, base_path):
     :param base_path:
     """
     full_path = os.path.join(base_path, repos_group_name)
-    
+
     # check if it's not a repo
     if is_valid_repo(repos_group_name, base_path):
         return False
-    
+
     # check if it's a valid path
     if os.path.isdir(full_path):
         return True
-    
+
     return False
-    
+
 def ask_ok(prompt, retries=4, complaint='Yes or no, please!'):
     while True:
         ok = raw_input(prompt)
