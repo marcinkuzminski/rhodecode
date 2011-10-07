@@ -25,9 +25,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import platform
 
-VERSION = (1, 2, 0, 'beta')
+VERSION = (1, 3, 0, 'beta')
 __version__ = '.'.join((str(each) for each in VERSION[:4]))
-__dbversion__ = 3 #defines current db version for migrations
+__dbversion__ = 4 #defines current db version for migrations
 __platform__ = platform.system()
 __license__ = 'GPLv3'
 
