@@ -2,10 +2,11 @@
 Welcome to RhodeCode (RhodiumCode) documentation!
 =================================================
 
-``RhodeCode`` (formerly hg-app) is a Pylons framework based Mercurial repository 
+``RhodeCode`` is a Pylons framework based Mercurial repository 
 browser/management tool with a built in push/pull server and full text search.
 It works on http/https and has a built in permission/authentication system with 
-the ability to authenticate via LDAP.
+the ability to authenticate via LDAP or ActiveDirectory. RhodeCode also supports
+simple API so it's easy integrable with existing systems.
 
 RhodeCode is similar in some respects to github or bitbucket_, 
 however RhodeCode can be run as standalone hosted application on your own server.  
