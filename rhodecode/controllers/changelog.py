@@ -25,18 +25,13 @@
 
 import logging
 
-try:
-    import json
-except ImportError:
-    #python 2.5 compatibility
-    import simplejson as json
-
 from mercurial import graphmod
 from pylons import request, session, tmpl_context as c
 
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.helpers import RepoPage
+from rhodecode.lib.compat import json
 
 log = logging.getLogger(__name__)
 

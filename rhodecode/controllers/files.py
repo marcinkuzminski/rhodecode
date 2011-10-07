@@ -316,6 +316,13 @@ class FilesController(BaseRepoController):
                 filename = file_obj.filename
                 content = file_obj.file
 
+            #TODO: REMOVE THIS !!
+            ################################
+            import ipdb;ipdb.set_trace()
+            print 'setting ipdb debuggin for rhodecode.controllers.files.FilesController.add'
+            ################################
+
+
             node_path = os.path.join(location, filename)
             author = self.rhodecode_user.full_contact
 

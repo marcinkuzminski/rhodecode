@@ -30,7 +30,7 @@ import binascii
 
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseRepoController, render
-from rhodecode.lib.odict import OrderedDict
+from rhodecode.lib.compat import OrderedDict
 from rhodecode.lib import safe_unicode
 log = logging.getLogger(__name__)
 

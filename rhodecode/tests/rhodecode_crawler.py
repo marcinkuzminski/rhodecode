@@ -102,7 +102,7 @@ def test_files_walk(limit=100):
 
     repo = vcs.get_repo(jn(PROJECT_PATH, PROJECT))
 
-    from rhodecode.lib.oset import OrderedSet
+    from rhodecode.lib.compat import OrderedSet
 
     paths_ = OrderedSet([''])
     try:

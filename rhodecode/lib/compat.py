@@ -1,3 +1,66 @@
+# -*- coding: utf-8 -*-
+"""
+    rhodecode.lib.compat
+    ~~~~~~~~~~~~~~~~~~~~
+
+    Python backward compatibility functions and common libs
+    
+    
+    :created_on: Oct 7, 2011
+    :author: marcink
+    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
+    :license: GPLv3, see COPYING for more details.
+"""
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+#==============================================================================
+# json
+#==============================================================================
+try:
+    import json
+except ImportError:
+    import simplejson as json
+
+
+#==============================================================================
+# izip_longest
+#==============================================================================
+try:
+    from itertools import izip_longest
+except ImportError:
+    import itertools
+
+    def izip_longest(*args, **kwds): # noqa
+        fillvalue = kwds.get("fillvalue")
+
+        def sentinel(counter=([fillvalue] * (len(args) - 1)).pop):
+            yield counter() # yields the fillvalue, or raises IndexError
+
+        fillers = itertools.repeat(fillvalue)
+        iters = [itertools.chain(it, sentinel(), fillers)
+                    for it in args]
+        try:
+            for tup in itertools.izip(*iters):
+                yield tup
+        except IndexError:
+            pass
+
+
+#==============================================================================
+# OrderedDict
+#==============================================================================
+
 # Python Software Foundation License
 
 # XXX: it feels like using the class with "is" and "is not" instead of "==" and
@@ -289,3 +352,9 @@ class OrderedDict(_odict, dict):
 
     def _dict_impl(self):
         return dict
+
+
+#==============================================================================
+# OrderedSet
+#==============================================================================
+from sqlalchemy.util import OrderedSet

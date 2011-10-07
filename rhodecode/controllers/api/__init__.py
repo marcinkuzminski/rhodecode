@@ -26,12 +26,12 @@
 # MA  02110-1301, USA.
 
 import inspect
-import json
 import logging
 import types
 import urllib
 import traceback
-from itertools import izip_longest
+
+from rhodecode.lib.compat import izip_longest, json
 
 from paste.response import replace_header
 
@@ -103,7 +103,7 @@ class JSONRPCController(WSGIController):
 
         try:
             json_body = json.loads(urllib.unquote_plus(raw_body))
-        except ValueError as e:
+        except ValueError, e:
             #catch JSON errors Here
             return jsonrpc_error(message="JSON parse error ERR:%s RAW:%r" \
                                  % (e, urllib.unquote_plus(raw_body)))
@@ -116,14 +116,14 @@ class JSONRPCController(WSGIController):
             log.debug('method: %s, params: %s',
                       self._req_method,
                       self._req_params)
-        except KeyError as e:
+        except KeyError, e:
             return jsonrpc_error(message='Incorrect JSON query missing %s' % e)
 
         #check if we can find this session using api_key
         try:
             u = User.get_by_api_key(self._req_api_key)
             auth_u = AuthUser(u.user_id, self._req_api_key)
-        except Exception as e:
+        except Exception, e:
             return jsonrpc_error(message='Invalid API KEY')
 
         self._error = None
@@ -138,8 +138,8 @@ class JSONRPCController(WSGIController):
         arglist = argspec[0][1:]
         defaults = argspec[3] or []
         default_empty = types.NotImplementedType
-        
-        kwarglist = list(izip_longest(reversed(arglist),reversed(defaults),
+
+        kwarglist = list(izip_longest(reversed(arglist), reversed(defaults),
                                 fillvalue=default_empty))
 
         # this is little trick to inject logged in user for 
@@ -157,12 +157,12 @@ class JSONRPCController(WSGIController):
                                  (self._func.__name__, USER_SESSION_ATTR))
 
         # get our arglist and check if we provided them as args
-        for arg,default in kwarglist:
+        for arg, default in kwarglist:
             if arg == USER_SESSION_ATTR:
                 # USER_SESSION_ATTR is something translated from api key and 
                 # this is checked before so we don't need validate it
                 continue
-            
+
             # skip the required param check if it's default value is 
             # NotImplementedType (default_empty)
             if not self._req_params or (type(default) == default_empty
@@ -201,10 +201,11 @@ class JSONRPCController(WSGIController):
             raw_response = self._inspect_call(self._func)
             if isinstance(raw_response, HTTPError):
                 self._error = str(raw_response)
-        except JSONRPCError as e:
+        except JSONRPCError, e:
             self._error = str(e)
-        except Exception as e:
-            log.error('Encountered unhandled exception: %s' % traceback.format_exc())
+        except Exception, e:
+            log.error('Encountered unhandled exception: %s' \
+                      % traceback.format_exc())
             json_exc = JSONRPCError('Internal server error')
             self._error = str(json_exc)
 
