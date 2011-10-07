@@ -28,6 +28,7 @@ import traceback
 
 from pylons.i18n.translation import _
 
+from rhodecode.lib import safe_unicode
 from rhodecode.model import BaseModel
 from rhodecode.model.caching_query import FromCache
 from rhodecode.model.db import User, RepoToPerm, Repository, Permission, \
@@ -111,7 +112,7 @@ class UserModel(BaseModel):
                 new_user.api_key = generate_api_key(username)
                 new_user.email = attrs['email']
                 new_user.active = True
-                new_user.ldap_dn = user_dn
+                new_user.ldap_dn = safe_unicode(user_dn)
                 new_user.name = attrs['name']
                 new_user.lastname = attrs['lastname']
 
