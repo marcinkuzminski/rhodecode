@@ -29,7 +29,7 @@ from sqlalchemy import engine_from_config
 from rhodecode.lib.utils import add_cache
 from rhodecode.model import init_model
 from rhodecode.model import meta
-from rhodecode.model.db import User, Repository
+from rhodecode.model.db import User, Repository, UserLog
 from rhodecode.lib.auth import get_crypt_password
 
 from rhodecode.tests import TESTS_TMP_PATH, NEW_HG_REPO, HG_REPO
@@ -45,7 +45,7 @@ USER = 'test_admin'
 PASS = 'test12'
 HOST = '127.0.0.1:5000'
 DEBUG = bool(int(sys.argv[1]))
-print 'DEBUG:',DEBUG
+print 'DEBUG:', DEBUG
 log = logging.getLogger(__name__)
 
 
@@ -70,15 +70,17 @@ class Command(object):
 
 
 def test_wrapp(func):
-    
-    def __wrapp(*args,**kwargs):
-        print '###%s###' %func.__name__
+
+    def __wrapp(*args, **kwargs):
+        print '###%s###' % func.__name__
         try:
-            res = func(*args,**kwargs)
-        except:
-            print '--%s failed--' % func.__name__
-            return
-        print 'ok'
+            res = func(*args, **kwargs)
+        except Exception, e:
+            print ('###############\n-'
+                   '--%s failed %s--\n'
+                   '###############\n' % (func.__name__, e))
+            sys.exit()
+        print '++OK++'
         return res
     return __wrapp
 
@@ -90,20 +92,20 @@ def get_session():
 
 
 def create_test_user(force=True):
-    print 'creating test user'
+    print '\tcreating test user'
     sa = get_session()
 
     user = sa.query(User).filter(User.username == USER).scalar()
 
     if force and user is not None:
-        print 'removing current user'
+        print '\tremoving current user'
         for repo in sa.query(Repository).filter(Repository.user == user).all():
             sa.delete(repo)
         sa.delete(user)
         sa.commit()
 
     if user is None or force:
-        print 'creating new one'
+        print '\tcreating new one'
         new_usr = User()
         new_usr.username = USER
         new_usr.password = get_crypt_password(PASS)
@@ -115,7 +117,7 @@ def create_test_user(force=True):
         sa.add(new_usr)
         sa.commit()
 
-    print 'done'
+    print '\tdone'
 
 
 def create_test_repo(force=True):
@@ -130,7 +132,7 @@ def create_test_repo(force=True):
     repo = sa.query(Repository).filter(Repository.repo_name == HG_REPO).scalar()
 
     if repo is None:
-        print 'repo not found creating'
+        print '\trepo not found creating'
 
         form_data = {'repo_name':HG_REPO,
                      'repo_type':'hg',
@@ -144,12 +146,13 @@ def create_test_repo(force=True):
 def set_anonymous_access(enable=True):
     sa = get_session()
     user = sa.query(User).filter(User.username == 'default').one()
+    sa.expire(user)
     user.active = enable
     sa.add(user)
     sa.commit()
     sa.remove()
-    
-    print 'anonymous access is now:',enable
+    import time;time.sleep(3)
+    print '\tanonymous access is now:', enable
 
 
 def get_anonymous_access():
@@ -173,13 +176,13 @@ def test_clone_with_credentials(no_errors=False):
     except OSError:
         raise
 
-    print 'checking if anonymous access is enabled'
+    print '\tchecking if anonymous access is enabled'
     anonymous_access = get_anonymous_access()
     if anonymous_access:
-        print 'enabled, disabling it '
+        print '\tenabled, disabling it '
         set_anonymous_access(enable=False)
         time.sleep(1)
-        
+
     clone_url = 'http://%(user)s:%(pass)s@%(host)s/%(cloned_repo)s %(dest)s' % \
                   {'user':USER,
                    'pass':PASS,
@@ -206,13 +209,13 @@ def test_clone_anonymous():
         raise
 
 
-    print 'checking if anonymous access is enabled'
+    print '\tchecking if anonymous access is enabled'
     anonymous_access = get_anonymous_access()
     if not anonymous_access:
-        print 'not enabled, enabling it '
+        print '\tnot enabled, enabling it '
         set_anonymous_access(enable=True)
         time.sleep(1)
-        
+
     clone_url = 'http://%(host)s/%(cloned_repo)s %(dest)s' % \
                   {'user':USER,
                    'pass':PASS,
@@ -227,7 +230,7 @@ def test_clone_anonymous():
 
     #disable if it was enabled
     if not anonymous_access:
-        print 'disabling anonymous access'
+        print '\tdisabling anonymous access'
         set_anonymous_access(enable=False)
 
 @test_wrapp
@@ -241,12 +244,12 @@ def test_clone_wrong_credentials():
     except OSError:
         raise
 
-    print 'checking if anonymous access is enabled'
+    print '\tchecking if anonymous access is enabled'
     anonymous_access = get_anonymous_access()
     if anonymous_access:
-        print 'enabled, disabling it '
+        print '\tenabled, disabling it '
         set_anonymous_access(enable=False)
-        
+
     clone_url = 'http://%(user)s:%(pass)s@%(host)s/%(cloned_repo)s %(dest)s' % \
                   {'user':USER + 'error',
                    'pass':PASS,
@@ -257,7 +260,7 @@ def test_clone_wrong_credentials():
     stdout, stderr = Command(cwd).execute('hg clone', clone_url)
 
     if not """abort: authorization failed"""  in stderr:
-        raise Exception('Failure')    
+        raise Exception('Failure')
 
 @test_wrapp
 def test_pull():
@@ -335,7 +338,7 @@ def test_push_wrong_path():
     try:
         shutil.rmtree(path, ignore_errors=True)
         os.makedirs(path)
-        print 'made dirs %s' % jn(path)
+        print '\tmade dirs %s' % jn(path)
     except OSError:
         raise
 
@@ -361,19 +364,37 @@ def test_push_wrong_path():
     if not """abort: HTTP Error 403: Forbidden"""  in stderr:
         raise Exception('Failure')
 
+@test_wrapp
+def get_logs():
+    sa = get_session()
+    return len(sa.query(UserLog).all())
+
+@test_wrapp
+def test_logs(initial):
+    sa = get_session()
+    logs = sa.query(UserLog).all()
+    operations = 7
+    if initial + operations != len(logs):
+        raise Exception("missing number of logs %s vs %s" % (initial, len(logs)))
+
 
 if __name__ == '__main__':
     create_test_user(force=False)
     create_test_repo()
-    
+
+    initial_logs = get_logs()
+
 #    test_push_modify_file()
     test_clone_with_credentials()
     test_clone_wrong_credentials()
 
 
     test_push_new_file(commits=2, with_clone=True)
-#
-    test_push_wrong_path()
-    
+
     test_clone_anonymous()
+    test_push_wrong_path()
+
+
     test_push_wrong_credentials()
+
+    test_logs(initial_logs)

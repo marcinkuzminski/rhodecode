@@ -76,7 +76,7 @@ class SimpleHg(object):
 
         # skip passing error to error controller
         environ['pylons.status_code_redirect'] = True
-                
+
         #======================================================================
         # EXTRACT REPOSITORY NAME FROM ENV
         #======================================================================
@@ -90,12 +90,13 @@ class SimpleHg(object):
         # GET ACTION PULL or PUSH
         #======================================================================
         action = self.__get_action(environ)
-        
+
         #======================================================================
         # CHECK ANONYMOUS PERMISSION
         #======================================================================
         if action in ['pull', 'push']:
             anonymous_user = self.__get_user('default')
+
             username = anonymous_user.username
             anonymous_perm = self.__check_permission(action,
                                                      anonymous_user,
@@ -152,13 +153,13 @@ class SimpleHg(object):
         #======================================================================
         # MERCURIAL REQUEST HANDLING
         #======================================================================
-        
+
         repo_path = safe_str(os.path.join(self.basepath, repo_name))
         log.debug('Repository path is %s' % repo_path)
-        
+
         baseui = make_ui('db')
         self.__inject_extras(repo_path, baseui, extras)
-        
+
 
         # quick check if that dir exists...
         if is_valid_repo(repo_name, self.basepath) is False:
@@ -257,7 +258,7 @@ class SimpleHg(object):
         push requests"""
         invalidate_cache('get_repo_cached_%s' % repo_name)
 
-    def __inject_extras(self,repo_path, baseui, extras={}):
+    def __inject_extras(self, repo_path, baseui, extras={}):
         """
         Injects some extra params into baseui instance
         
