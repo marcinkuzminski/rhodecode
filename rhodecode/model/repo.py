@@ -192,6 +192,9 @@ class RepoModel(BaseModel):
                 if k == 'repo_group':
                     k = 'group_id'
 
+                if k == 'description':
+                    v = v or repo_name
+
                 setattr(new_repo, k, v)
 
             if fork:
@@ -302,7 +305,7 @@ class RepoModel(BaseModel):
         :param clone_uri:
         """
         from rhodecode.lib.utils import is_valid_repo
-        
+
         if new_parent_id:
             paths = Group.get(new_parent_id).full_path.split(Group.url_sep())
             new_parent_path = os.sep.join(paths)
