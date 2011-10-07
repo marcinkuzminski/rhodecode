@@ -11,6 +11,8 @@ from rhodecode.model.user import UserModel
 from rhodecode.model.repo_permission import RepositoryPermissionModel
 from rhodecode.model.users_group import UsersGroupModel
 from rhodecode.model import users_group
+from rhodecode.model.repos_group import ReposGroupModel
+from sqlalchemy.orm.exc import NoResultFound
 
 log = logging.getLogger( __name__ )
 
@@ -59,8 +61,9 @@ class ApiController( JSONRPCController ):
         :param username
         """
 
-        user = User.by_username( username )
-        if not user:
+        try:
+            user = User.by_username( username )
+        except NoResultFound:
             return None
 
         return dict( id = user.user_id,
@@ -108,6 +111,9 @@ class ApiController( JSONRPCController ):
         :param admin:
         :param ldap_dn:
         """
+
+        if self.get_user( apiuser, username ):
+            raise JSONRPCError( "user %s already exist" % username )
 
         try:
             form_data = dict( username = username,
@@ -191,6 +197,9 @@ class ApiController( JSONRPCController ):
         :param active:
         """
 
+        if self.get_users_group( apiuser, name ):
+            raise JSONRPCError( "users group %s already exist" % name )
+
         try:
             form_data = dict( users_group_name = name,
                              users_group_active = active )
@@ -216,8 +225,9 @@ class ApiController( JSONRPCController ):
             if not users_group:
                 raise JSONRPCError( 'unknown users group %s' % group_name )
 
-            user = User.by_username( user_name )
-            if not user:
+            try:
+                user = User.by_username( user_name )
+            except NoResultFound:
                 raise JSONRPCError( 'unknown user %s' % user_name )
 
             ugm = UsersGroupModel().add_user_to_group( users_group, user )
@@ -237,8 +247,9 @@ class ApiController( JSONRPCController ):
         :param repo_name
         """
 
-        repo = Repository.by_repo_name( repo_name )
-        if not repo:
+        try:
+            repo = Repository.by_repo_name( repo_name )
+        except NoResultFound:
             return None
 
         members = []
@@ -287,8 +298,8 @@ class ApiController( JSONRPCController ):
         return result
 
     @HasPermissionAnyDecorator( 'hg.admin', 'hg.create.repository' )
-    def create_repo( self, apiuser, name, owner_name, description = None, repo_type = 'hg', \
-                    private = False, group_name = None ):
+    def create_repo( self, apiuser, name, owner_name, description = '', repo_type = 'hg', \
+                    private = False ):
         """
         Create a repository
 
@@ -298,29 +309,36 @@ class ApiController( JSONRPCController ):
         :param type
         :param private
         :param owner_name
-        :param group_name
-        :param clone
         """
 
         try:
-            if group_name:
-                group = Group.get_by_group_name( group_name )
-                if group is None:
-                    raise JSONRPCError( 'unknown group %s' % group_name )
-            else:
-                group = None
-
-            owner = User.by_username( owner_name )
-            if owner is None:
+            try:
+                owner = User.by_username( owner_name )
+            except NoResultFound:
                 raise JSONRPCError( 'unknown user %s' % owner )
 
-            RepoModel().create( { "repo_name" : name,
-                                 "repo_name_full" : name,
-                                 "description" : description,
-                                 "private" : private,
-                                 "repo_type" : repo_type,
-                                 "repo_group" : group,
-                                 "clone_uri" : None }, owner )
+            if self.get_repo( apiuser, name ):
+                raise JSONRPCError( "repo %s already exist" % name )
+
+            groups = name.split( '/' )
+            real_name = groups[-1]
+            groups = groups[:-1]
+            parent_id = None
+            for g in groups:
+                group = Group.get_by_group_name( g )
+                if not group:
+                    group = ReposGroupModel().create( dict( group_name = g,
+                                                  group_description = '',
+                                                  group_parent_id = parent_id ) )
+                parent_id = group.group_id
+
+            RepoModel().create( dict( repo_name = real_name,
+                                     repo_name_full = name,
+                                     description = description,
+                                     private = private,
+                                     repo_type = repo_type,
+                                     repo_group = parent_id,
+                                     clone_uri = None ), owner )
         except Exception:
             log.error( traceback.format_exc() )
             raise JSONRPCError( 'failed to create repository %s' % name )
@@ -337,12 +355,14 @@ class ApiController( JSONRPCController ):
         """
 
         try:
-            repo = Repository.by_repo_name( repo_name )
-            if not repo:
+            try:
+                repo = Repository.by_repo_name( repo_name )
+            except NoResultFound:
                 raise JSONRPCError( 'unknown repository %s' % repo )
 
-            user = User.by_username( user_name )
-            if not user:
+            try:
+                user = User.by_username( user_name )
+            except NoResultFound:
                 raise JSONRPCError( 'unknown user %s' % user )
 
             RepositoryPermissionModel().updateOrDeleteUserPermission( repo, user, perm )

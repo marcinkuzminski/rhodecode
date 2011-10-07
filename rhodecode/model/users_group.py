@@ -67,6 +67,11 @@ class UsersGroupModel( BaseModel ):
             raise
 
     def add_user_to_group( self, users_group, user ):
+        for m in users_group.members:
+            u = m.user
+            if u.user_id == user.user_id:
+                return m
+
         try:
             users_group_member = UsersGroupMember()
             users_group_member.user = user

@@ -27,18 +27,18 @@ import logging
 from rhodecode.model.db import BaseModel, RepoToPerm, Permission
 from rhodecode.model.meta import Session
 
-log = logging.getLogger(__name__)
+log = logging.getLogger( __name__ )
 
-class RepositoryPermissionModel(BaseModel):
-    def getUserPermission(self, repository, user):
+class RepositoryPermissionModel( BaseModel ):
+    def getUserPermission( self, repository, user ):
         return RepoToPerm.query() \
-                .filter(RepoToPerm.user == user) \
-                .filter(RepoToPerm.repository == repository) \
+                .filter( RepoToPerm.user == user ) \
+                .filter( RepoToPerm.repository == repository ) \
                 .scalar()
 
-    def updateUserPermission(self, repository, user, permission):
-        permission = Permission.get_by_key(permission)
-        current = self.getUserPermission(repository, user)
+    def updateUserPermission( self, repository, user, permission ):
+        permission = Permission.get_by_key( permission )
+        current = self.getUserPermission( repository, user )
         if current:
             if not current.permission is permission:
                 current.permission = permission
@@ -47,16 +47,17 @@ class RepositoryPermissionModel(BaseModel):
             p.user = user
             p.repository = repository
             p.permission = permission
-            Session.add(p)
+            Session.add( p )
         Session.commit()
 
-    def deleteUserPermission(self, repository, user):
-        current = self.getUserPermission(repository, user)
-        Session.delete(current)
-        Session.commit()
+    def deleteUserPermission( self, repository, user ):
+        current = self.getUserPermission( repository, user )
+        if current:
+            Session.delete( current )
+            Session.commit()
 
-    def updateOrDeleteUserPermission(self, repository, user, permission):
+    def updateOrDeleteUserPermission( self, repository, user, permission ):
         if permission:
-            self.updateUserPermission(repository, user, permission)
+            self.updateUserPermission( repository, user, permission )
         else:
-            self.deleteUserPermission(repository, user)
+            self.deleteUserPermission( repository, user )

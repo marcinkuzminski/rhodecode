@@ -1,8 +1,6 @@
 syntax: glob
 *.pyc
 *.swp
-*.ini
-Paste*
 
 syntax: regexp
 ^build
@@ -16,4 +14,3 @@ syntax: regexp
 ^test\.db$
 ^repositories\.config$
 ^RhodeCode\.egg-info$
-^env$
