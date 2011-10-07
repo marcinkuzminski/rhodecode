@@ -28,7 +28,7 @@ from pylons import tmpl_context as c
 
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseRepoController, render
-from rhodecode.lib.odict import OrderedDict
+from rhodecode.lib.compat import OrderedDict
 
 log = logging.getLogger(__name__)
 

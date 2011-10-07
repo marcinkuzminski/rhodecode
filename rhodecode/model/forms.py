@@ -283,6 +283,19 @@ def ValidRepoName(edit, old_data):
 def ValidForkName():
     class _ValidForkName(formencode.validators.FancyValidator):
         def to_python(self, value, state):
+
+            repo_name = value.get('fork_name')
+
+            slug = repo_name_slug(repo_name)
+            if slug in ['_admin', '']:
+                e_dict = {'repo_name': _('This repository name is disallowed')}
+                raise formencode.Invalid('', value, state, error_dict=e_dict)
+
+            if RepoModel().get_by_repo_name(repo_name):
+                e_dict = {'fork_name':_('This repository '
+                                        'already exists')}
+                raise formencode.Invalid('', value, state,
+                                         error_dict=e_dict)
             return value
     return _ValidForkName
 

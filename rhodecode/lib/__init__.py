@@ -23,14 +23,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-try:
-    import json
-except ImportError:
-    #python 2.5 compatibility
-    import simplejson as json
-
-
 def __get_lem():
     from pygments import lexers
     from string import lower
@@ -209,14 +201,14 @@ def safe_str(unicode_, to_encoding='utf8'):
         return unicode_.encode(to_encoding)
     except UnicodeEncodeError:
         pass
-    
+
     try:
         import chardet
         encoding = chardet.detect(unicode_)['encoding']
         print encoding
         if encoding is None:
             raise UnicodeEncodeError()
-        
+
         return unicode_.encode(encoding)
     except (ImportError, UnicodeEncodeError):
         return unicode_.encode(to_encoding, 'replace')
