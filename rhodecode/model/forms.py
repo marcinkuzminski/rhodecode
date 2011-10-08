@@ -32,6 +32,7 @@ from formencode.validators import UnicodeString, OneOf, Int, Number, Regex, \
 from pylons.i18n.translation import _
 from webhelpers.pylonslib.secure_form import authentication_token
 
+from rhodecode.config.routing import ADMIN_PREFIX
 from rhodecode.lib.utils import repo_name_slug
 from rhodecode.lib.auth import authenticate, get_crypt_password
 from rhodecode.lib.exceptions import LdapImportError
@@ -240,7 +241,7 @@ def ValidRepoName(edit, old_data):
             repo_name = value.get('repo_name')
 
             slug = repo_name_slug(repo_name)
-            if slug in ['_admin', '']:
+            if slug in [ADMIN_PREFIX, '']:
                 e_dict = {'repo_name': _('This repository name is disallowed')}
                 raise formencode.Invalid('', value, state, error_dict=e_dict)
 
@@ -286,7 +287,7 @@ def ValidForkName():
             repo_name = value.get('fork_name')
 
             slug = repo_name_slug(repo_name)
-            if slug in ['_admin', '']:
+            if slug in [ADMIN_PREFIX, '']:
                 e_dict = {'repo_name': _('This repository name is disallowed')}
                 raise formencode.Invalid('', value, state, error_dict=e_dict)
 
