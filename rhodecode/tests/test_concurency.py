@@ -6,9 +6,21 @@
     Test suite for making push/pull operations
 
     :created_on: Dec 30, 2010
-    :copyright: (c) 2010 by marcink.
-    :license: LICENSE_NAME, see LICENSE_FILE for more details.
+    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
+    :license: GPLv3, see COPYING for more details.
 """
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
 import sys
@@ -123,7 +135,7 @@ def create_test_repo(force=True):
         rm = RepoModel(sa)
         rm.base_path = '/home/hg'
         rm.create(form_data, user)
-    
+
     print 'done'
 
 def set_anonymous_access(enable=True):
@@ -141,10 +153,10 @@ def get_anonymous_access():
 #==============================================================================
 # TESTS
 #==============================================================================
-def test_clone_with_credentials(no_errors=False,repo=HG_REPO):
+def test_clone_with_credentials(no_errors=False, repo=HG_REPO):
     cwd = path = jn(TESTS_TMP_PATH, repo)
 
-    
+
     try:
         shutil.rmtree(path, ignore_errors=True)
         os.makedirs(path)
@@ -158,7 +170,7 @@ def test_clone_with_credentials(no_errors=False,repo=HG_REPO):
                    'pass':PASS,
                    'host':HOST,
                    'cloned_repo':repo,
-                   'dest':path+_RandomNameSequence().next()}
+                   'dest':path + _RandomNameSequence().next()}
 
     stdout, stderr = Command(cwd).execute('hg clone', clone_url)
 
@@ -173,5 +185,5 @@ if __name__ == '__main__':
         for i in range(int(sys.argv[2])):
             test_clone_with_credentials(repo=sys.argv[1])
 
-    except Exception,e:
+    except Exception, e:
         sys.exit('stop on %s' % e)
