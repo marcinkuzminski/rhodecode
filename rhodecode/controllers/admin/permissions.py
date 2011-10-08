@@ -144,7 +144,7 @@ class PermissionsController(BaseController):
         c.create_choices = self.create_choices
 
         if id == 'default':
-            default_user = User.by_username('default')
+            default_user = User.get_by_username('default')
             defaults = {'_method': 'put',
                         'anonymous': default_user.active}
 

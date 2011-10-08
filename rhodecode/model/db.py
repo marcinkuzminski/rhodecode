@@ -281,16 +281,15 @@ class User(Base, BaseModel):
             return self.__class__.__name__
 
     @classmethod
-    def by_username(cls, username, case_insensitive=False):
+    def get_by_username(cls, username, case_insensitive=False):
         if case_insensitive:
-            return Session.query(cls).filter(cls.username.like(username)).one()
+            return Session.query(cls).filter(cls.username.like(username)).scalar()
         else:
-            return Session.query(cls).filter(cls.username == username).one()
+            return Session.query(cls).filter(cls.username == username).scalar()
 
     @classmethod
     def get_by_api_key(cls, api_key):
         return Session.query(cls).filter(cls.api_key == api_key).one()
-
 
     def update_lastlogin(self):
         """Update user lastlogin"""
@@ -487,7 +486,7 @@ class Repository(Base, BaseModel):
                                   self.repo_id, self.repo_name)
 
     @classmethod
-    def by_repo_name(cls, repo_name):
+    def get_by_repo_name(cls, repo_name):
         q = Session.query(cls).filter(cls.repo_name == repo_name)
 
         q = q.options(joinedload(Repository.fork))\

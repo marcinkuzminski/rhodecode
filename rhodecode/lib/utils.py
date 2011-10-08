@@ -112,7 +112,7 @@ def action_logger(user, action, repo, ipaddr='', sa=None):
         if hasattr(user, 'user_id'):
             user_obj = user
         elif isinstance(user, basestring):
-            user_obj = User.by_username(user)
+            user_obj = User.get_by_username(user)
         else:
             raise Exception('You have to provide user object or username')
 

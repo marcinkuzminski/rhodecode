@@ -48,7 +48,7 @@ from rhodecode.lib.auth_ldap import AuthLdap
 
 from rhodecode.model import meta
 from rhodecode.model.user import UserModel
-from rhodecode.model.db import Permission, RhodeCodeSettings
+from rhodecode.model.db import Permission, RhodeCodeSettings, User
 
 log = logging.getLogger(__name__)
 
@@ -151,7 +151,7 @@ def authenticate(username, password):
     """
 
     user_model = UserModel()
-    user = user_model.get_by_username(username, cache=False)
+    user = User.get_by_username(username)
 
     log.debug('Authenticating user using RhodeCode account')
     if user is not None and not user.ldap_dn:
@@ -170,8 +170,7 @@ def authenticate(username, password):
 
     else:
         log.debug('Regular authentication failed')
-        user_obj = user_model.get_by_username(username, cache=False,
-                                            case_insensitive=True)
+        user_obj = User.get_by_username(username, case_insensitive=True)
 
         if user_obj is not None and not user_obj.ldap_dn:
             log.debug('this user already exists as non ldap')
@@ -252,7 +251,7 @@ class  AuthUser(object):
 
     def propagate_data(self):
         user_model = UserModel()
-        self.anonymous_user = user_model.get_by_username('default', cache=True)
+        self.anonymous_user = User.get_by_username('default')
         if self._api_key and self._api_key != self.anonymous_user.api_key:
             #try go get user by api key
             log.debug('Auth User lookup by API KEY %s', self._api_key)

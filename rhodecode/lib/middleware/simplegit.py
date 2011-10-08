@@ -262,7 +262,7 @@ class SimpleGit(object):
         return repo_name
 
     def __get_user(self, username):
-        return User.by_username(username)
+        return User.get_by_username(username)
 
     def __get_action(self, environ):
         """Maps git request commands into a pull or push command.

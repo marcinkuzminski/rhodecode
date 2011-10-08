@@ -44,7 +44,7 @@ add_cache(conf)
 USER = 'test_admin'
 PASS = 'test12'
 HOST = '127.0.0.1:5000'
-DEBUG = bool(int(sys.argv[1]))
+DEBUG = True if sys.argv[1:] else False
 print 'DEBUG:', DEBUG
 log = logging.getLogger(__name__)
 
@@ -72,7 +72,7 @@ class Command(object):
 def test_wrapp(func):
 
     def __wrapp(*args, **kwargs):
-        print '###%s###' % func.__name__
+        print '>>>%s' % func.__name__
         try:
             res = func(*args, **kwargs)
         except Exception, e:

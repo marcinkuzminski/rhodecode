@@ -70,8 +70,7 @@ def ValidUsername(edit, old_data):
                 old_un = UserModel().get(old_data.get('user_id')).username
 
             if old_un != value or not edit:
-                if UserModel().get_by_username(value, cache=False,
-                                               case_insensitive=True):
+                if User.get_by_username(value, case_insensitive=True):
                     raise formencode.Invalid(_('This username already '
                                                'exists') , value, state)
 
@@ -206,7 +205,7 @@ class ValidAuth(formencode.validators.FancyValidator):
     def validate_python(self, value, state):
         password = value['password']
         username = value['username']
-        user = UserModel().get_by_username(username)
+        user = User.get_by_username(username)
 
         if authenticate(username, password):
             return value
