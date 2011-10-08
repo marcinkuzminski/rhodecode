@@ -25,7 +25,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import platform
 
-VERSION = (1, 2, 0)
+VERSION = (1, 2, 1)
 __version__ = '.'.join((str(each) for each in VERSION[:4]))
 __dbversion__ = 3 #defines current db version for migrations
 __platform__ = platform.system()

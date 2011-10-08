@@ -1466,7 +1466,7 @@ clear:both;
 overflow:hidden;
 text-align:right;
 margin:0;
-padding:10px 14px 3px 5px;
+padding:10px 14px 0px 5px;
 }
 
 #quick_login div.form div.links {
@@ -2555,7 +2555,7 @@ border-top:1px solid #DDD;
 border-left:1px solid #c6c6c6;
 border-right:1px solid #DDD;
 border-bottom:1px solid #c6c6c6;
-color:#515151;
+color:#515151 !important;
 outline:none;
 margin:0;
 padding:6px 12px;
