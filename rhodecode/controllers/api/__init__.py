@@ -26,10 +26,12 @@
 # MA  02110-1301, USA.
 
 import inspect
-import json
 import logging
 import types
 import urllib
+import traceback
+
+from rhodecode.lib.compat import izip_longest, json
 
 from paste.response import replace_header
 
@@ -39,7 +41,7 @@ from pylons.controllers.util import Response
 from webob.exc import HTTPNotFound, HTTPForbidden, HTTPInternalServerError, \
 HTTPBadRequest, HTTPError
 
-from rhodecode.model.user import User
+from rhodecode.model.db import User
 from rhodecode.lib.auth import AuthUser
 
 log = logging.getLogger('JSONRPC')
@@ -85,10 +87,9 @@ class JSONRPCController(WSGIController):
         Parse the request body as JSON, look up the method on the
         controller and if it exists, dispatch to it.
         """
-
         if 'CONTENT_LENGTH' not in environ:
             log.debug("No Content-Length")
-            return jsonrpc_error(0, "No Content-Length")
+            return jsonrpc_error(message="No Content-Length in request")
         else:
             length = environ['CONTENT_LENGTH'] or 0
             length = int(environ['CONTENT_LENGTH'])
@@ -96,20 +97,18 @@ class JSONRPCController(WSGIController):
 
         if length == 0:
             log.debug("Content-Length is 0")
-            return jsonrpc_error(0, "Content-Length is 0")
+            return jsonrpc_error(message="Content-Length is 0")
 
         raw_body = environ['wsgi.input'].read(length)
 
         try:
             json_body = json.loads(urllib.unquote_plus(raw_body))
-        except ValueError as e:
+        except ValueError, e:
             #catch JSON errors Here
-            return jsonrpc_error("JSON parse error ERR:%s RAW:%r" \
+            return jsonrpc_error(message="JSON parse error ERR:%s RAW:%r" \
                                  % (e, urllib.unquote_plus(raw_body)))
 
-
         #check AUTH based on API KEY
-
         try:
             self._req_api_key = json_body['api_key']
             self._req_method = json_body['method']
@@ -117,47 +116,61 @@ class JSONRPCController(WSGIController):
             log.debug('method: %s, params: %s',
                       self._req_method,
                       self._req_params)
-        except KeyError as e:
+        except KeyError, e:
             return jsonrpc_error(message='Incorrect JSON query missing %s' % e)
 
         #check if we can find this session using api_key
         try:
             u = User.get_by_api_key(self._req_api_key)
             auth_u = AuthUser(u.user_id, self._req_api_key)
-        except Exception as e:
+        except Exception, e:
             return jsonrpc_error(message='Invalid API KEY')
 
         self._error = None
         try:
             self._func = self._find_method()
         except AttributeError, e:
-            return jsonrpc_error(str(e))
+            return jsonrpc_error(message=str(e))
 
         # now that we have a method, add self._req_params to
         # self.kargs and dispatch control to WGIController
-        arglist = inspect.getargspec(self._func)[0][1:]
+        argspec = inspect.getargspec(self._func)
+        arglist = argspec[0][1:]
+        defaults = argspec[3] or []
+        default_empty = types.NotImplementedType
+
+        kwarglist = list(izip_longest(reversed(arglist), reversed(defaults),
+                                fillvalue=default_empty))
 
         # this is little trick to inject logged in user for 
         # perms decorators to work they expect the controller class to have
-        # rhodecode_user set
+        # rhodecode_user attribute set
         self.rhodecode_user = auth_u
 
-        if 'user' not in arglist:
-            return jsonrpc_error('This method [%s] does not support '
-                                 'authentication (missing user param)' %
-                                 self._func.__name__)
+        # This attribute will need to be first param of a method that uses
+        # api_key, which is translated to instance of user at that name
+        USER_SESSION_ATTR = 'apiuser'
+
+        if USER_SESSION_ATTR not in arglist:
+            return jsonrpc_error(message='This method [%s] does not support '
+                                 'authentication (missing %s param)' %
+                                 (self._func.__name__, USER_SESSION_ATTR))
 
         # get our arglist and check if we provided them as args
-        for arg in arglist:
-            if arg == 'user':
-                # user is something translated from api key and this is
-                # checked before
+        for arg, default in kwarglist:
+            if arg == USER_SESSION_ATTR:
+                # USER_SESSION_ATTR is something translated from api key and 
+                # this is checked before so we don't need validate it
                 continue
 
-            if not self._req_params or arg not in self._req_params:
-                return jsonrpc_error('Missing %s arg in JSON DATA' % arg)
+            # skip the required param check if it's default value is 
+            # NotImplementedType (default_empty)
+            if not self._req_params or (type(default) == default_empty
+                                        and arg not in self._req_params):
+                return jsonrpc_error(message=('Missing non optional %s arg '
+                                              'in JSON DATA') % arg)
 
-        self._rpc_args = dict(user=u)
+        self._rpc_args = {USER_SESSION_ATTR:u}
         self._rpc_args.update(self._req_params)
 
         self._rpc_args['action'] = self._req_method
@@ -186,13 +199,13 @@ class JSONRPCController(WSGIController):
         """
         try:
             raw_response = self._inspect_call(self._func)
-            print raw_response
             if isinstance(raw_response, HTTPError):
                 self._error = str(raw_response)
-        except JSONRPCError as e:
+        except JSONRPCError, e:
             self._error = str(e)
-        except Exception as e:
-            log.debug('Encountered unhandled exception: %s', repr(e))
+        except Exception, e:
+            log.error('Encountered unhandled exception: %s' \
+                      % traceback.format_exc())
             json_exc = JSONRPCError('Internal server error')
             self._error = str(json_exc)
 
@@ -226,3 +239,4 @@ class JSONRPCController(WSGIController):
             return func
         else:
             raise AttributeError("No such method: %s" % self._req_method)
+

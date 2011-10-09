@@ -32,6 +32,7 @@ from formencode.validators import UnicodeString, OneOf, Int, Number, Regex, \
 from pylons.i18n.translation import _
 from webhelpers.pylonslib.secure_form import authentication_token
 
+from rhodecode.config.routing import ADMIN_PREFIX
 from rhodecode.lib.utils import repo_name_slug
 from rhodecode.lib.auth import authenticate, get_crypt_password
 from rhodecode.lib.exceptions import LdapImportError
@@ -70,8 +71,7 @@ def ValidUsername(edit, old_data):
                 old_un = UserModel().get(old_data.get('user_id')).username
 
             if old_un != value or not edit:
-                if UserModel().get_by_username(value, cache=False,
-                                               case_insensitive=True):
+                if User.get_by_username(value, case_insensitive=True):
                     raise formencode.Invalid(_('This username already '
                                                'exists') , value, state)
 
@@ -206,7 +206,7 @@ class ValidAuth(formencode.validators.FancyValidator):
     def validate_python(self, value, state):
         password = value['password']
         username = value['username']
-        user = UserModel().get_by_username(username)
+        user = User.get_by_username(username)
 
         if authenticate(username, password):
             return value
@@ -241,7 +241,7 @@ def ValidRepoName(edit, old_data):
             repo_name = value.get('repo_name')
 
             slug = repo_name_slug(repo_name)
-            if slug in ['_admin', '']:
+            if slug in [ADMIN_PREFIX, '']:
                 e_dict = {'repo_name': _('This repository name is disallowed')}
                 raise formencode.Invalid('', value, state, error_dict=e_dict)
 
@@ -283,6 +283,19 @@ def ValidRepoName(edit, old_data):
 def ValidForkName():
     class _ValidForkName(formencode.validators.FancyValidator):
         def to_python(self, value, state):
+
+            repo_name = value.get('fork_name')
+
+            slug = repo_name_slug(repo_name)
+            if slug in [ADMIN_PREFIX, '']:
+                e_dict = {'repo_name': _('This repository name is disallowed')}
+                raise formencode.Invalid('', value, state, error_dict=e_dict)
+
+            if RepoModel().get_by_repo_name(repo_name):
+                e_dict = {'fork_name':_('This repository '
+                                        'already exists')}
+                raise formencode.Invalid('', value, state,
+                                         error_dict=e_dict)
             return value
     return _ValidForkName
 

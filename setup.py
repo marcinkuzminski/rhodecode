@@ -12,6 +12,7 @@ if py_version < (2, 5):
 requirements = [
         "Pylons==1.0.0",
         "WebHelpers>=1.2",
+        "formencode==1.2.4",
         "SQLAlchemy>=0.7.2,<0.8",
         "Mako>=0.4.2",
         "pygments>=1.4",
@@ -22,12 +23,12 @@ requirements = [
         "python-dateutil>=1.5.0,<2.0.0",
         "dulwich>=0.8.0",
         "vcs>=0.2.1.dev",
-        "webob==1.0.8"    
+        "webob==1.0.8"
     ]
 
 dependency_links = [
-    "https://secure.rhodecode.org/vcs/archive/default.zip#egg=vcs-0.2.1.dev",
-    "https://bitbucket.org/marcinkuzminski/vcs/get/default.zip#egg=vcs-0.2.1.dev",
+    "https://secure.rhodecode.org/vcs/archive/default.zip#egg=vcs-0.2.2.dev",
+    "https://bitbucket.org/marcinkuzminski/vcs/get/default.zip#egg=vcs-0.2.2.dev",
 ]
 
 classifiers = ['Development Status :: 4 - Beta',

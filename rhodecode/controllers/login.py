@@ -64,8 +64,7 @@ class LoginController(BaseController):
                 c.form_result = login_form.to_python(dict(request.POST))
                 #form checks for username/password, now we're authenticated
                 username = c.form_result['username']
-                user = User.by_username(username,
-                                                   case_insensitive=True)
+                user = User.get_by_username(username, case_insensitive=True)
                 auth_user = AuthUser(user.user_id)
                 auth_user.set_authenticated()
                 session['rhodecode_user'] = auth_user
@@ -95,8 +94,7 @@ class LoginController(BaseController):
     def register(self):
         user_model = UserModel()
         c.auto_active = False
-        for perm in user_model.get_by_username('default',
-                                               cache=False).user_perms:
+        for perm in User.get_by_username('default').user_perms:
             if perm.permission.permission_name == 'hg.register.auto_activate':
                 c.auto_active = True
                 break

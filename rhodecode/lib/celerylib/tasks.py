@@ -43,7 +43,8 @@ from rhodecode.lib.celerylib import run_task, locked_task, str2bool, \
 from rhodecode.lib.helpers import person
 from rhodecode.lib.smtp_mailer import SmtpMailer
 from rhodecode.lib.utils import add_cache
-from rhodecode.lib.odict import OrderedDict
+from rhodecode.lib.compat import json, OrderedDict
+
 from rhodecode.model import init_model
 from rhodecode.model import meta
 from rhodecode.model.db import RhodeCodeUi, Statistics, Repository
@@ -54,11 +55,7 @@ from sqlalchemy import engine_from_config
 
 add_cache(config)
 
-try:
-    import json
-except ImportError:
-    #python 2.5 compatibility
-    import simplejson as json
+
 
 __all__ = ['whoosh_index', 'get_commits_stats',
            'reset_user_password', 'send_email']

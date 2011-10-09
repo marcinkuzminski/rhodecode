@@ -76,6 +76,14 @@ def upgrade(migrate_engine):
     #==========================================================================
     from rhodecode.model.db import Repository
 
+    #ADD clone_uri column#
+
+    clone_uri = Column("clone_uri", String(length=255, convert_unicode=False,
+                                           assert_unicode=None),
+                        nullable=True, unique=False, default=None)
+
+    clone_uri.create(Repository().__table__)
+    
     #ADD downloads column#
     enable_downloads = Column("downloads", Boolean(), nullable=True, unique=None, default=True)
     enable_downloads.create(Repository().__table__)
@@ -92,21 +100,16 @@ def upgrade(migrate_engine):
     group_id.create(Repository().__table__)
 
 
-    #ADD clone_uri column#
-
-    clone_uri = Column("clone_uri", String(length=255, convert_unicode=False,
-                                           assert_unicode=None),
-                        nullable=True, unique=False, default=None)
-
-    clone_uri.create(Repository().__table__)
-
-
     #==========================================================================
     # Upgrade of `user_followings` table
     #==========================================================================
 
-    follows_from = Column('follows_from', DateTime(timezone=False), nullable=True, unique=None, default=datetime.datetime.now)
-    follows_from.create(Repository().__table__)
+    from rhodecode.model.db import UserFollowing
+
+    follows_from = Column('follows_from', DateTime(timezone=False), 
+                          nullable=True, unique=None, 
+                          default=datetime.datetime.now)
+    follows_from.create(UserFollowing().__table__)
 
     return
 

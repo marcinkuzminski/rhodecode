@@ -89,7 +89,7 @@ class ReposController(BaseController):
         """
         self.__load_defaults()
 
-        c.repo_info = db_repo = Repository.by_repo_name(repo_name)
+        c.repo_info = db_repo = Repository.get_by_repo_name(repo_name)
         repo = scm_repo = db_repo.scm_instance
 
         if c.repo_info is None:
@@ -101,7 +101,7 @@ class ReposController(BaseController):
 
             return redirect(url('repos'))
 
-        c.default_user_id = User.by_username('default').user_id
+        c.default_user_id = User.get_by_username('default').user_id
         c.in_public_journal = self.sa.query(UserFollowing)\
             .filter(UserFollowing.user_id == c.default_user_id)\
             .filter(UserFollowing.follows_repository == c.repo_info).scalar()
@@ -381,8 +381,8 @@ class ReposController(BaseController):
         token = get_token()
         if cur_token == token:
             try:
-                repo_id = Repository.by_repo_name(repo_name).repo_id
-                user_id = User.by_username('default').user_id
+                repo_id = Repository.get_by_repo_name(repo_name).repo_id
+                user_id = User.get_by_username('default').user_id
                 self.scm_model.toggle_following_repo(repo_id, user_id)
                 h.flash(_('Updated repository visibility in public journal'),
                         category='success')

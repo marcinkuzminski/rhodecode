@@ -39,18 +39,13 @@ from rhodecode.model.repo import RepoModel
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.utils import EmptyChangeset
-from rhodecode.lib.odict import OrderedDict
 
 from rhodecode.lib.celerylib import run_task
 from rhodecode.lib.celerylib.tasks import get_commits_stats, \
     LANGUAGES_EXTENSIONS_MAP
 from rhodecode.lib.helpers import RepoPage
+from rhodecode.lib.compat import json, OrderedDict
 
-try:
-    import json
-except ImportError:
-    #python 2.5 compatibility
-    import simplejson as json
 log = logging.getLogger(__name__)
 
 
@@ -139,9 +134,9 @@ class SummaryController(BaseRepoController):
             c.commit_data = stats.commit_activity
             c.overview_data = stats.commit_activity_combined
 
-            lang_stats = [(x, {"count": y,
+            lang_stats = ((x, {"count": y,
                                "desc": LANGUAGES_EXTENSIONS_MAP.get(x)})
-                          for x, y in lang_stats_d.items()]
+                          for x, y in lang_stats_d.items())
 
             c.trending_languages = json.dumps(OrderedDict(
                                        sorted(lang_stats, reverse=True,

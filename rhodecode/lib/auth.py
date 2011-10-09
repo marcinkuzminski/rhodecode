@@ -6,8 +6,8 @@
     authentication and permission libraries
 
     :created_on: Apr 4, 2010
-    :copyright: (c) 2010 by marcink.
-    :license: LICENSE_NAME, see LICENSE_FILE for more details.
+    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
+    :license: GPLv3, see COPYING for more details.
 """
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -48,7 +48,7 @@ from rhodecode.lib.auth_ldap import AuthLdap
 
 from rhodecode.model import meta
 from rhodecode.model.user import UserModel
-from rhodecode.model.db import Permission, RhodeCodeSettings
+from rhodecode.model.db import Permission, RhodeCodeSettings, User
 
 log = logging.getLogger(__name__)
 
@@ -151,7 +151,7 @@ def authenticate(username, password):
     """
 
     user_model = UserModel()
-    user = user_model.get_by_username(username, cache=False)
+    user = User.get_by_username(username)
 
     log.debug('Authenticating user using RhodeCode account')
     if user is not None and not user.ldap_dn:
@@ -170,8 +170,7 @@ def authenticate(username, password):
 
     else:
         log.debug('Regular authentication failed')
-        user_obj = user_model.get_by_username(username, cache=False,
-                                            case_insensitive=True)
+        user_obj = User.get_by_username(username, case_insensitive=True)
 
         if user_obj is not None and not user_obj.ldap_dn:
             log.debug('this user already exists as non ldap')
@@ -252,7 +251,7 @@ class  AuthUser(object):
 
     def propagate_data(self):
         user_model = UserModel()
-        self.anonymous_user = user_model.get_by_username('default', cache=True)
+        self.anonymous_user = User.get_by_username('default')
         is_user_loaded = False
         if self._api_key and self._api_key != self.anonymous_user.api_key:
             #try go get user by api key
@@ -269,7 +268,7 @@ class  AuthUser(object):
             self.username = self.username.partition('@')[0]
 
             log.debug('Auth User lookup by USER NAME %s', self.username)
-            dbuser = user_model.get_by_username(self.username)
+            dbuser = User.get_by_username(self.username)
             if dbuser is not None and dbuser.active:
                 for k, v in dbuser.get_dict().items():
                     setattr(self, k, v)

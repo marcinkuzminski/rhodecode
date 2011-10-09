@@ -102,7 +102,7 @@ class RepoModel(BaseModel):
             for member, perm, member_type in form_data['perms_updates']:
                 if member_type == 'user':
                     r2p = self.sa.query(RepoToPerm)\
-                            .filter(RepoToPerm.user == User.by_username(member))\
+                            .filter(RepoToPerm.user == User.get_by_username(member))\
                             .filter(RepoToPerm.repository == cur_repo)\
                             .one()
 
@@ -127,7 +127,7 @@ class RepoModel(BaseModel):
                 if member_type == 'user':
                     r2p = RepoToPerm()
                     r2p.repository = cur_repo
-                    r2p.user = User.by_username(member)
+                    r2p.user = User.get_by_username(member)
 
                     r2p.permission = self.sa.query(Permission)\
                                         .filter(Permission.
@@ -147,7 +147,7 @@ class RepoModel(BaseModel):
             #update current repo
             for k, v in form_data.items():
                 if k == 'user':
-                    cur_repo.user = User.by_username(v)
+                    cur_repo.user = User.get_by_username(v)
                 elif k == 'repo_name':
                     cur_repo.repo_name = form_data['repo_name_full']
                 elif k == 'repo_group':
@@ -192,6 +192,9 @@ class RepoModel(BaseModel):
                 if k == 'repo_group':
                     k = 'group_id'
 
+                if k == 'description':
+                    v = v or repo_name
+
                 setattr(new_repo, k, v)
 
             if fork:
@@ -205,8 +208,7 @@ class RepoModel(BaseModel):
             #create default permission
             repo_to_perm = RepoToPerm()
             default = 'repository.read'
-            for p in UserModel(self.sa).get_by_username('default',
-                                                    cache=False).user_perms:
+            for p in User.get_by_username('default').user_perms:
                 if p.permission.permission_name.startswith('repository.'):
                     default = p.permission.permission_name
                     break
@@ -218,8 +220,7 @@ class RepoModel(BaseModel):
                     .one().permission_id
 
             repo_to_perm.repository = new_repo
-            repo_to_perm.user_id = UserModel(self.sa)\
-                .get_by_username('default', cache=False).user_id
+            repo_to_perm.user_id = User.get_by_username('default').user_id
 
             self.sa.add(repo_to_perm)
 
@@ -301,7 +302,7 @@ class RepoModel(BaseModel):
         :param parent_id:
         :param clone_uri:
         """
-        from rhodecode.lib.utils import check_repo
+        from rhodecode.lib.utils import is_valid_repo
 
         if new_parent_id:
             paths = Group.get(new_parent_id).full_path.split(Group.url_sep())
@@ -312,7 +313,7 @@ class RepoModel(BaseModel):
         repo_path = os.path.join(*map(lambda x:safe_str(x),
                                 [self.repos_path, new_parent_path, repo_name]))
 
-        if check_repo(repo_path, self.repos_path):
+        if is_valid_repo(repo_path, self.repos_path) is False:
             log.info('creating repo %s in %s @ %s', repo_name, repo_path,
                      clone_uri)
             backend = get_backend(alias)
@@ -332,8 +333,8 @@ class RepoModel(BaseModel):
         old_path = os.path.join(self.repos_path, old)
         new_path = os.path.join(self.repos_path, new)
         if os.path.isdir(new_path):
-            raise Exception('Was trying to rename to already existing dir %s',
-                            new_path)
+            raise Exception('Was trying to rename to already existing dir %s' \
+            		     % new_path)
         shutil.move(old_path, new_path)
 
     def __delete_repo(self, repo):

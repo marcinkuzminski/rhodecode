@@ -38,12 +38,14 @@ from beaker.cache import cache_region, region_invalidate
 
 from vcs import get_backend
 from vcs.utils.helpers import get_scm
-from vcs.exceptions import RepositoryError, VCSError
+from vcs.exceptions import VCSError
 from vcs.utils.lazy import LazyProperty
-from vcs.nodes import FileNode
 
+from rhodecode.lib import str2bool, safe_str, get_changeset_safe, \
+    generate_api_key
 from rhodecode.lib.exceptions import UsersGroupsAssignedException
-from rhodecode.lib import str2bool, json, safe_str, get_changeset_safe
+from rhodecode.lib.compat import json
+
 from rhodecode.model.meta import Base, Session
 from rhodecode.model.caching_query import FromCache
 
@@ -279,16 +281,15 @@ class User(Base, BaseModel):
             return self.__class__.__name__
 
     @classmethod
-    def by_username(cls, username, case_insensitive=False):
+    def get_by_username(cls, username, case_insensitive=False):
         if case_insensitive:
-            return Session.query(cls).filter(cls.username.like(username)).one()
+            return Session.query(cls).filter(cls.username.like(username)).scalar()
         else:
-            return Session.query(cls).filter(cls.username == username).one()
+            return Session.query(cls).filter(cls.username == username).scalar()
 
     @classmethod
     def get_by_api_key(cls, api_key):
         return Session.query(cls).filter(cls.api_key == api_key).one()
-
 
     def update_lastlogin(self):
         """Update user lastlogin"""
@@ -298,6 +299,25 @@ class User(Base, BaseModel):
         Session.commit()
         log.debug('updated user %s lastlogin', self.username)
 
+    @classmethod
+    def create(cls, form_data):
+        from rhodecode.lib.auth import get_crypt_password
+
+        try:
+            new_user = cls()
+            for k, v in form_data.items():
+                if k == 'password':
+                    v = get_crypt_password(v)
+                setattr(new_user, k, v)
+
+            new_user.api_key = generate_api_key(form_data['username'])
+            Session.add(new_user)
+            Session.commit()
+            return new_user
+        except:
+            log.error(traceback.format_exc())
+            Session.rollback()
+            raise
 
 class UserLog(Base, BaseModel):
     __tablename__ = 'user_logs'
@@ -362,6 +382,7 @@ class UsersGroup(Base, BaseModel):
 
             Session.add(new_users_group)
             Session.commit()
+            return new_users_group
         except:
             log.error(traceback.format_exc())
             Session.rollback()
@@ -465,7 +486,7 @@ class Repository(Base, BaseModel):
                                   self.repo_id, self.repo_name)
 
     @classmethod
-    def by_repo_name(cls, repo_name):
+    def get_by_repo_name(cls, repo_name):
         q = Session.query(cls).filter(cls.repo_name == repo_name)
 
         q = q.options(joinedload(Repository.fork))\
@@ -477,6 +498,17 @@ class Repository(Base, BaseModel):
     @classmethod
     def get_repo_forks(cls, repo_id):
         return Session.query(cls).filter(Repository.fork_id == repo_id)
+
+    @classmethod
+    def base_path(cls):
+        """
+        Returns base path when all repos are stored
+        
+        :param cls:
+        """
+        q = Session.query(RhodeCodeUi).filter(RhodeCodeUi.ui_key == '/')
+        q.options(FromCache("sql_cache_short", "repository_repo_path"))
+        return q.one().ui_value
 
     @property
     def just_name(self):
@@ -548,6 +580,19 @@ class Repository(Base, BaseModel):
                 baseui.setconfig(ui_.ui_section, ui_.ui_key, ui_.ui_value)
 
         return baseui
+
+    @classmethod
+    def is_valid(cls, repo_name):
+        """
+        returns True if given repo name is a valid filesystem repository
+         
+        @param cls:
+        @param repo_name:
+        """
+        from rhodecode.lib.utils import is_valid_repo
+
+        return is_valid_repo(repo_name, cls.base_path())
+
 
     #==========================================================================
     # SCM PROPERTIES

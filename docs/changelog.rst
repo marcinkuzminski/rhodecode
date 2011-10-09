@@ -3,11 +3,35 @@
 Changelog
 =========
 
-1.2.0 (**2011-XX-XX**)
+
+1.3.0 (**XXXX-XX-XX**)
 ======================
 
 :status: in-progress
 :branch: beta
+
+news
+----
+
+fixes
+-----
+
+1.2.1 (**2011-10-08**)
+======================
+
+news
+----
+
+
+fixes
+-----
+
+- fixed problems with basic auth and push problems 
+- gui fixes
+- fixed logger
+
+1.2.0 (**2011-10-07**)
+======================
 
 news
 ----
