@@ -3,7 +3,8 @@ import unittest
 from rhodecode.tests import *
 
 from rhodecode.model.repos_group import ReposGroupModel
-from rhodecode.model.db import Group
+from rhodecode.model.repo import RepoModel
+from rhodecode.model.db import Group, User
 from sqlalchemy.exc import IntegrityError
 
 class TestReposGroups(unittest.TestCase):
@@ -112,4 +113,41 @@ class TestReposGroups(unittest.TestCase):
         self.assertTrue(self.__check_path('hello'))
 
         self.assertEqual(Group.get_by_group_name('hello'), new_sg1)
+
+
+
+    def test_subgrouping_with_repo(self):
+
+        g1 = self.__make_group('g1')
+        g2 = self.__make_group('g2')
+
+        # create new repo
+        form_data = dict(repo_name='john',
+                         repo_name_full='john',
+                         fork_name=None,
+                         description=None,
+                         repo_group=None,
+                         private=False,
+                         repo_type='hg',
+                         clone_uri=None)
+        cur_user = User.get_by_username(TEST_USER_ADMIN_LOGIN)
+        r = RepoModel().create(form_data, cur_user)
+
+        self.assertEqual(r.repo_name, 'john')
+
+        # put repo into group
+        form_data = form_data
+        form_data['repo_group'] = g1.group_id
+        form_data['perms_new'] = []
+        form_data['perms_updates'] = []
+        RepoModel().update(r.repo_name, form_data)
+        self.assertEqual(r.repo_name, 'g1/john')
+
+
+        self.__update_group(g1.group_id, 'g1', parent_id=g2.group_id)
+        self.assertTrue(self.__check_path('g2', 'g1'))
+
+        # test repo
+        self.assertEqual(r.repo_name, os.path.join('g2', 'g1', r.just_name))
+
 

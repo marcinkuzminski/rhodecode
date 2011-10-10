@@ -122,7 +122,7 @@ def ValidReposGroup(edit, old_data):
         def validate_python(self, value, state):
             #TODO WRITE VALIDATIONS
             group_name = value.get('group_name')
-            group_parent_id = int(value.get('group_parent_id') or - 1)
+            group_parent_id = int(value.get('group_parent_id') or -1)
 
             # slugify repo group just in case :)
             slug = repo_name_slug(group_name)

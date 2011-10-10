@@ -284,7 +284,7 @@ class User(Base, BaseModel):
     @classmethod
     def get_by_username(cls, username, case_insensitive=False):
         if case_insensitive:
-            return Session.query(cls).filter(cls.username.like(username)).scalar()
+            return Session.query(cls).filter(cls.username.ilike(username)).scalar()
         else:
             return Session.query(cls).filter(cls.username == username).scalar()
 
@@ -554,6 +554,15 @@ class Repository(Base, BaseModel):
         # into a valid system path
         p += self.repo_name.split('/')
         return os.path.join(*p)
+
+    def get_new_name(self, repo_name):
+        """
+        returns new full repository name based on assigned group and new new
+        
+        :param group_name:
+        """
+        path_prefix = self.group.full_path_splitted if self.group else []
+        return '/'.join(path_prefix + [repo_name])
 
     @property
     def _ui(self):

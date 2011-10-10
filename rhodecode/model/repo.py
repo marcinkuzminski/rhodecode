@@ -98,7 +98,7 @@ class RepoModel(BaseModel):
         try:
             cur_repo = self.get_by_repo_name(repo_name, cache=False)
 
-            #update permissions
+            # update permissions
             for member, perm, member_type in form_data['perms_updates']:
                 if member_type == 'user':
                     r2p = self.sa.query(RepoToPerm)\
@@ -122,7 +122,7 @@ class RepoModel(BaseModel):
                                                 perm).scalar()
                     self.sa.add(g2p)
 
-            #set new permissions
+            # set new permissions
             for member, perm, member_type in form_data['perms_new']:
                 if member_type == 'user':
                     r2p = RepoToPerm()
@@ -144,26 +144,29 @@ class RepoModel(BaseModel):
                                                 .scalar()
                     self.sa.add(g2p)
 
-            #update current repo
+            # update current repo
             for k, v in form_data.items():
                 if k == 'user':
                     cur_repo.user = User.get_by_username(v)
                 elif k == 'repo_name':
-                    cur_repo.repo_name = form_data['repo_name_full']
+                    pass
                 elif k == 'repo_group':
                     cur_repo.group_id = v
 
                 else:
                     setattr(cur_repo, k, v)
 
+            new_name = cur_repo.get_new_name(form_data['repo_name'])
+            cur_repo.repo_name = new_name
+
             self.sa.add(cur_repo)
 
-            if repo_name != form_data['repo_name_full']:
+            if repo_name != new_name:
                 # rename repository
-                self.__rename_repo(old=repo_name,
-                                   new=form_data['repo_name_full'])
+                self.__rename_repo(old=repo_name, new=new_name)
 
             self.sa.commit()
+            return cur_repo
         except:
             log.error(traceback.format_exc())
             self.sa.rollback()
@@ -235,7 +238,7 @@ class RepoModel(BaseModel):
             from rhodecode.model.scm import ScmModel
             ScmModel(self.sa).toggle_following_repo(new_repo.repo_id,
                                              cur_user.user_id)
-
+            return new_repo
         except:
             log.error(traceback.format_exc())
             self.sa.rollback()

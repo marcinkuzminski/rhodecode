@@ -234,11 +234,11 @@ class ReposController(BaseController):
                          repo_groups=c.repo_groups_choices)()
         try:
             form_result = _form.to_python(dict(request.POST))
-            repo_model.update(repo_name, form_result)
+            repo = repo_model.update(repo_name, form_result)
             invalidate_cache('get_repo_cached_%s' % repo_name)
             h.flash(_('Repository %s updated successfully' % repo_name),
                     category='success')
-            changed_name = form_result['repo_name_full']
+            changed_name = repo.repo_name
             action_logger(self.rhodecode_user, 'admin_updated_repo',
                               changed_name, '', self.sa)
 

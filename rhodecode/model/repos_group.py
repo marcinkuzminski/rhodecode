@@ -137,6 +137,12 @@ class ReposGroupModel(BaseModel):
 
             self.__rename_group(old_path, new_path)
 
+            # we need to get all repositories from this new group and 
+            # rename them accordingly to new group path
+            for r in repos_group.repositories:
+                r.repo_name = r.get_new_name(r.just_name)
+                self.sa.add(r)
+
             self.sa.commit()
             return repos_group
         except:
