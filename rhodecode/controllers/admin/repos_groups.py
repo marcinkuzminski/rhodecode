@@ -33,14 +33,10 @@ class ReposGroupsController(BaseController):
     def __load_defaults(self):
 
         c.repo_groups = [('', '')]
-        parents_link = lambda k: h.literal('&raquo;'.join(
-                                    map(lambda k: k.group_name,
-                                        k.parents + [k])
-                                    )
-                                )
+        parents_link = lambda k: h.literal('&raquo;'.join(k))
 
-        c.repo_groups.extend([(x.group_id, parents_link(x)) for \
-                                            x in self.sa.query(Group).all()])
+        c.repo_groups.extend([(x.group_id, parents_link(x.full_path_splitted))
+                              for x in self.sa.query(Group).all()])
 
         c.repo_groups = sorted(c.repo_groups,
                                key=lambda t: t[1].split('&raquo;')[0])
@@ -57,6 +53,8 @@ class ReposGroupsController(BaseController):
         repo_group = Group.get(group_id)
 
         data = repo_group.get_dict()
+
+        data['group_name'] = repo_group.name
 
         return data
 
@@ -175,6 +173,10 @@ class ReposGroupsController(BaseController):
                     category='error')
 
         return redirect(url('repos_groups'))
+
+    def show_by_name(self, group_name):
+        id_ = Group.get_by_group_name(group_name).group_id
+        return self.show(id_)
 
     def show(self, id, format='html'):
         """GET /repos_groups/id: Show a specific item"""

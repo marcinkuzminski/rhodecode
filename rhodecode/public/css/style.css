@@ -564,6 +564,14 @@ padding:12px 9px 7px 24px;
 }
 
 
+.groups_breadcrumbs a {
+	color: #fff;
+}
+.groups_breadcrumbs a:hover {
+    color: #bfe3ff;
+    text-decoration: none;
+}
+
 .quick_repo_menu{
 	background: #FFF url("../images/vertical-indicator.png") 8px 50% no-repeat !important;
 	cursor: pointer;

@@ -360,16 +360,19 @@ def map_groups(groups):
 
     parent = None
     group = None
-    for lvl, group_name in enumerate(groups[:-1]):
+
+    # last element is repo in nested groups structure
+    groups = groups[:-1]
+
+    for lvl, group_name in enumerate(groups):
+        group_name = '/'.join(groups[:lvl] + [group_name])
         group = sa.query(Group).filter(Group.group_name == group_name).scalar()
 
         if group is None:
             group = Group(group_name, parent)
             sa.add(group)
             sa.commit()
-
         parent = group
-
     return group
 
 

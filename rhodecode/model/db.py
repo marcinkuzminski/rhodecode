@@ -126,7 +126,8 @@ class BaseModel(object):
 
     @classmethod
     def get(cls, id_):
-        return Session.query(cls).get(id_)
+        if id_:
+            return Session.query(cls).get(id_)
 
     @classmethod
     def delete(cls, id_):
@@ -721,6 +722,10 @@ class Group(Base, BaseModel):
     def url_sep(cls):
         return '/'
 
+    @classmethod
+    def get_by_group_name(cls, group_name):
+        return cls.query().filter(cls.group_name == group_name).scalar()
+
     @property
     def parents(self):
         parents_recursion_limit = 5
@@ -750,9 +755,16 @@ class Group(Base, BaseModel):
         return Session.query(Group).filter(Group.parent_group == self)
 
     @property
+    def name(self):
+        return self.group_name.split(Group.url_sep())[-1]
+
+    @property
     def full_path(self):
-        return Group.url_sep().join([g.group_name for g in self.parents] +
-                        [self.group_name])
+        return self.group_name
+
+    @property
+    def full_path_splitted(self):
+        return self.group_name.split(Group.url_sep())
 
     @property
     def repositories(self):
@@ -770,6 +782,17 @@ class Group(Base, BaseModel):
             return cnt
 
         return cnt + children_count(self)
+
+
+    def get_new_name(self, group_name):
+        """
+        returns new full group name based on parent and new name
+        
+        :param group_name:
+        """
+        path_prefix = self.parent_group.full_path_splitted if self.parent_group else []
+        return Group.url_sep().join(path_prefix + [group_name])
+
 
 class Permission(Base, BaseModel):
     __tablename__ = 'permissions'
