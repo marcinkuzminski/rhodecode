@@ -100,7 +100,9 @@ class ReposGroupModel(BaseModel):
         paths = os.sep.join(paths)
 
         rm_path = os.path.join(self.repos_path, paths)
-        os.rmdir(rm_path)
+        if os.path.isdir(rm_path):
+            # delete only if that path really exists
+            os.rmdir(rm_path)
 
     def create(self, form_data):
         try:
