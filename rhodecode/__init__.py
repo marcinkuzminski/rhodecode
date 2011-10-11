@@ -35,7 +35,7 @@ PLATFORM_WIN = ('Windows')
 PLATFORM_OTHERS = ('Linux', 'Darwin', 'FreeBSD', 'OpenBSD', 'SunOS')
 
 try:
-    from rhodecode.lib.utils import get_current_revision
+    from rhodecode.lib import get_current_revision
     _rev = get_current_revision()
 except ImportError:
     #this is needed when doing some setup.py operations
