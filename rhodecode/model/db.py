@@ -744,6 +744,19 @@ class Group(Base, BaseModel):
                                   self.group_name)
 
     @classmethod
+    def groups_choices(cls):
+        from webhelpers.html import literal as _literal
+        repo_groups = [('', '')]
+        sep = ' &raquo; '
+        _name = lambda k: _literal(sep.join(k))
+
+        repo_groups.extend([(x.group_id, _name(x.full_path_splitted))
+                              for x in cls.query().all()])
+        
+        repo_groups = sorted(repo_groups,key=lambda t: t[1].split(sep)[0])        
+        return repo_groups
+    
+    @classmethod
     def url_sep(cls):
         return '/'
 

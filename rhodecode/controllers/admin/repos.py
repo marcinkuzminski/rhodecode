@@ -64,20 +64,10 @@ class ReposController(BaseController):
         super(ReposController, self).__before__()
 
     def __load_defaults(self):
-        repo_model = RepoModel()
-
-        c.repo_groups = [('', '')]
-        parents_link = lambda k: h.literal('&raquo;'.join(
-                                    map(lambda k: k.group_name,
-                                        k.parents + [k])
-                                    )
-                                )
-
-        c.repo_groups.extend([(x.group_id, parents_link(x)) for \
-                                            x in self.sa.query(Group).all()])
-        c.repo_groups = sorted(c.repo_groups,
-                               key=lambda t: t[1].split('&raquo;')[0])
+        c.repo_groups = Group.groups_choices()
         c.repo_groups_choices = map(lambda k: unicode(k[0]), c.repo_groups)
+        
+        repo_model = RepoModel()
         c.users_array = repo_model.get_users_js()
         c.users_groups_array = repo_model.get_users_groups_js()
 

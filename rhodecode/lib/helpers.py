@@ -598,11 +598,10 @@ def repo_link(groups_and_repos):
         return repo_name
     else:
         def make_link(group):
-            return link_to(group.group_name, url('repos_group',
-                                                 id=group.group_id))
+            return link_to(group.name, url('repos_group_home',
+                                           group_name=group.group_name))
         return literal(' &raquo; '.join(map(make_link, groups)) + \
                        " &raquo; " + repo_name)
-
 
 def fancy_file_stats(stats):
     """

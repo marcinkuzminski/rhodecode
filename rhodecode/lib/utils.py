@@ -389,6 +389,11 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False):
     rm = RepoModel()
     user = sa.query(User).filter(User.admin == True).first()
     added = []
+    # fixup groups paths to new format on the fly
+    # TODO: remove this in future
+    for g in Group.query().all():
+        g.group_name = g.get_new_name(g.name)
+        sa.add(g)    
     for name, repo in initial_repo_list.items():
         group = map_groups(name.split(os.sep))
         if not rm.get_by_repo_name(name, cache=False):

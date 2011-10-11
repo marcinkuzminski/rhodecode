@@ -32,15 +32,7 @@ class ReposGroupsController(BaseController):
         super(ReposGroupsController, self).__before__()
 
     def __load_defaults(self):
-
-        c.repo_groups = [('', '')]
-        parents_link = lambda k: h.literal('&raquo;'.join(k))
-
-        c.repo_groups.extend([(x.group_id, parents_link(x.full_path_splitted))
-                              for x in self.sa.query(Group).all()])
-
-        c.repo_groups = sorted(c.repo_groups,
-                               key=lambda t: t[1].split('&raquo;')[0])
+        c.repo_groups = Group.groups_choices()
         c.repo_groups_choices = map(lambda k: unicode(k[0]), c.repo_groups)
 
     def __load_data(self, group_id):
