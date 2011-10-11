@@ -9,9 +9,10 @@ from pylons import request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
 from pylons.i18n.translation import _
 
+from sqlalchemy.exc import IntegrityError
+
 from rhodecode.lib import helpers as h
-from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator, \
-    HasPermissionAnyDecorator
+from rhodecode.lib.auth import LoginRequired, HasPermissionAnyDecorator
 from rhodecode.lib.base import BaseController, render
 from rhodecode.model.db import Group
 from rhodecode.model.repos_group import ReposGroupModel
@@ -167,10 +168,21 @@ class ReposGroupsController(BaseController):
             repos_group_model.delete(id)
             h.flash(_('removed repos group %s' % gr.group_name), category='success')
             #TODO: in future action_logger(, '', '', '', self.sa)
+        except IntegrityError, e:
+            if e.message.find('groups_group_parent_id_fkey'):
+                log.error(traceback.format_exc())
+                h.flash(_('Cannot delete this group it still contains '
+                          'subgroups'),
+                        category='warning')
+            else:
+                log.error(traceback.format_exc())
+                h.flash(_('error occurred during deletion of repos '
+                          'group %s' % gr.group_name), category='error')
+
         except Exception:
             log.error(traceback.format_exc())
-            h.flash(_('error occurred during deletion of repos group %s' % gr.group_name),
-                    category='error')
+            h.flash(_('error occurred during deletion of repos '
+                      'group %s' % gr.group_name), category='error')
 
         return redirect(url('repos_groups'))
 
