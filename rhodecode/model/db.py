@@ -31,6 +31,7 @@ from datetime import date
 
 from sqlalchemy import *
 from sqlalchemy.exc import DatabaseError
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship, backref, joinedload, class_mapper
 from sqlalchemy.orm.interfaces import MapperExtension
 
@@ -42,12 +43,13 @@ from vcs.exceptions import VCSError
 from vcs.utils.lazy import LazyProperty
 
 from rhodecode.lib import str2bool, safe_str, get_changeset_safe, \
-    generate_api_key
+    generate_api_key, safe_unicode
 from rhodecode.lib.exceptions import UsersGroupsAssignedException
 from rhodecode.lib.compat import json
 
 from rhodecode.model.meta import Base, Session
 from rhodecode.model.caching_query import FromCache
+
 
 log = logging.getLogger(__name__)
 
@@ -141,11 +143,28 @@ class RhodeCodeSettings(Base, BaseModel):
     __table_args__ = (UniqueConstraint('app_settings_name'), {'extend_existing':True})
     app_settings_id = Column("app_settings_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     app_settings_name = Column("app_settings_name", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
-    app_settings_value = Column("app_settings_value", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    _app_settings_value = Column("app_settings_value", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
 
     def __init__(self, k='', v=''):
         self.app_settings_name = k
         self.app_settings_value = v
+
+
+    @hybrid_property
+    def app_settings_value(self):
+        v = self._app_settings_value
+        if v == 'ldap_active':
+            v = str2bool(v)
+        return v 
+
+    @app_settings_value.setter
+    def app_settings_value(self,val):
+        """
+        Setter that will always make sure we use unicode in app_settings_value
+        
+        :param val:
+        """
+        self._app_settings_value = safe_unicode(val)
 
     def __repr__(self):
         return "<%s('%s:%s')>" % (self.__class__.__name__,
@@ -177,13 +196,10 @@ class RhodeCodeSettings(Base, BaseModel):
     @classmethod
     def get_ldap_settings(cls, cache=False):
         ret = Session.query(cls)\
-                .filter(cls.app_settings_name.startswith('ldap_'))\
-                .all()
+                .filter(cls.app_settings_name.startswith('ldap_')).all()
         fd = {}
         for row in ret:
             fd.update({row.app_settings_name:row.app_settings_value})
-
-        fd.update({'ldap_active':str2bool(fd.get('ldap_active'))})
 
         return fd
 
