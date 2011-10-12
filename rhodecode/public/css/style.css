@@ -246,12 +246,13 @@ color:#FFF;
 }
 
 #header #header-inner {
-height:40px;
+min-height:40px;
 clear:both;
 position:relative;
 background:#003367 url("../images/header_inner.png") repeat-x;
 margin:0;
 padding:0;
+display:block;
 box-shadow: 0 2px 2px rgba(0, 0, 0, 0.6);
 -webkit-border-radius: 4px 4px 4px 4px;
 -khtml-border-radius: 4px 4px 4px 4px; 
@@ -272,7 +273,10 @@ padding:0;
 #header #header-inner #home a:hover {
 background-position:0 -40px;
 }
-
+#header #header-inner #logo {
+    float: left;
+    position: absolute;	
+}
 #header #header-inner #logo h1 {
 color:#FFF;
 font-size:18px;
@@ -348,7 +352,7 @@ top:0;
 left:0;
 border-left:none;
 border-right:1px solid #2e5c89;
-padding:8px 8px 4px;
+padding:8px 6px 4px;
 }
 
 #header #header-inner #quick li span.icon_short {
@@ -356,7 +360,10 @@ top:0;
 left:0;
 border-left:none;
 border-right:1px solid #2e5c89;
-padding:9px 4px 4px;
+padding:8px 6px 4px;
+}
+#header #header-inner #quick li span.icon img, #header #header-inner #quick li span.icon_short img {
+	margin: 0px -2px 0px 0px;
 }
 
 #header #header-inner #quick li a:hover {
