@@ -6,20 +6,7 @@ import errno
 from warnings import warn
 from multiprocessing.util import Finalize
 
-from rhodecode import __platform__, PLATFORM_WIN
-
-if __platform__ in PLATFORM_WIN:
-    import ctypes
-
-    def kill(pid, sig):
-        """kill function for Win32"""
-        kernel32 = ctypes.windll.kernel32
-        handle = kernel32.OpenProcess(1, 0, pid)
-        return (0 != kernel32.TerminateProcess(handle, 0))
-
-else:
-    kill = os.kill
-
+from rhodecode.lib.compat import kill
 
 class LockHeld(Exception):
     pass
