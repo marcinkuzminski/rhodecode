@@ -151,7 +151,7 @@
 		        %elif c.enable_downloads is False:
 		          ${_('Downloads are disabled for this repository')}
                     %if h.HasPermissionAll('hg.admin')('enable stats on from summary'):
-                        [${h.link_to(_('enable'),h.url('edit_repo',repo_name=c.repo_name))}]
+                        ${h.link_to(_('enable'),h.url('edit_repo',repo_name=c.repo_name),class_="ui-button-small")}
                     %endif  		          
 		        %else:
 			        ${h.select('download_options',c.rhodecode_repo.get_changeset().raw_id,c.download_options)}
@@ -317,7 +317,7 @@
          %if c.no_data:
            ${c.no_data_msg}
            %if h.HasPermissionAll('hg.admin')('enable stats on from summary'):
-                [${h.link_to(_('enable'),h.url('edit_repo',repo_name=c.repo_name))}]
+                ${h.link_to(_('enable'),h.url('edit_repo',repo_name=c.repo_name),class_="ui-button-small")}
            %endif         
            
         %else:
