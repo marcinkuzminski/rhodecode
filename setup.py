@@ -11,6 +11,7 @@ if py_version < (2, 5):
 
 requirements = [
         "Pylons==1.0.0",
+        "Beaker==1.5.4",
         "WebHelpers>=1.2",
         "formencode==1.2.4",
         "SQLAlchemy>=0.7.2,<0.8",
@@ -21,9 +22,9 @@ requirements = [
         "celery>=2.2.5,<2.3",
         "babel",
         "python-dateutil>=1.5.0,<2.0.0",
-        "dulwich>=0.8.0",
-        "vcs>=0.2.1.dev",
-        "webob==1.0.8"
+        "dulwich>=0.8.0,<0.9.0",
+        "vcs>=0.2.2.dev",
+        "webob>1.1.0,<1.2.0"
     ]
 
 dependency_links = [
