@@ -443,8 +443,8 @@ in the production.ini file::
 In order to not have the statics served by the application. This improves speed.
 
 
-Apache virtual host example
----------------------------
+Apache virtual host reverse proxy example
+-----------------------------------------
 
 Here is a sample configuration file for apache using proxy::
 
@@ -503,6 +503,27 @@ then change <someprefix> into your choosen prefix
 Apache's WSGI config
 --------------------
 
+Alternatively, RhodeCode can be set up with Apache under mod_wsgi. For
+that, you'll need to:
+
+- Install mod_wsgi. If using a Debian-based distro, you can install
+  the package libapache2-mod-wsgi::
+    aptitude install libapache2-mod-wsgi
+- Enable mod_wsgi::
+    a2enmod wsgi
+- Create a wsgi dispatch script, like the one below. Make sure you
+  check the paths correctly point to where you installed RhodeCode
+  and its Python Virtual Environment.
+- Enable the WSGIScriptAlias directive for the wsgi dispatch script,
+  as in the following example. Once again, check the paths are
+  correctly specified.
+
+Here is a sample excerpt from an Apache Virtual Host configuration file::
+
+    WSGIDaemonProcess pylons user=www-data group=www-data processes=1 \
+        threads=4 \
+        python-path=/home/web/rhodecode/pyenv/lib/python2.6/site-packages
+    WSGIScriptAlias / /home/web/rhodecode/dispatch.wsgi
 
 Example wsgi dispatch script::
 
@@ -512,12 +533,19 @@ Example wsgi dispatch script::
     
     # sometimes it's needed to set the curent dir
     os.chdir('/home/web/rhodecode/') 
+
+    import site
+    site.addsitedir("/home/web/rhodecode/pyenv/lib/python2.6/site-packages")
     
     from paste.deploy import loadapp
     from paste.script.util.logging_config import fileConfig
 
     fileConfig('/home/web/rhodecode/production.ini')
     application = loadapp('config:/home/web/rhodecode/production.ini')
+
+Note: when using mod_wsgi you'll need to install the same version of
+Mercurial that's inside RhodeCode's virtualenv also on the system's Python
+environment.
 
 
 Other configuration files
