@@ -503,6 +503,10 @@ class Repository(Base, BaseModel):
                                   self.repo_id, self.repo_name)
 
     @classmethod
+    def url_sep(cls):
+        return '/'
+    
+    @classmethod
     def get_by_repo_name(cls, repo_name):
         q = Session.query(cls).filter(cls.repo_name == repo_name)
 
@@ -523,7 +527,8 @@ class Repository(Base, BaseModel):
         
         :param cls:
         """
-        q = Session.query(RhodeCodeUi).filter(RhodeCodeUi.ui_key == '/')
+        q = Session.query(RhodeCodeUi).filter(RhodeCodeUi.ui_key == 
+                                              cls.url_sep())
         q.options(FromCache("sql_cache_short", "repository_repo_path"))
         return q.one().ui_value
 
@@ -558,7 +563,8 @@ class Repository(Base, BaseModel):
         Returns base full path for that repository means where it actually
         exists on a filesystem
         """
-        q = Session.query(RhodeCodeUi).filter(RhodeCodeUi.ui_key == '/')
+        q = Session.query(RhodeCodeUi).filter(RhodeCodeUi.ui_key == 
+                                              Repository.url_sep())
         q.options(FromCache("sql_cache_short", "repository_repo_path"))
         return q.one().ui_value
 
@@ -568,7 +574,7 @@ class Repository(Base, BaseModel):
         # we need to split the name by / since this is how we store the
         # names in the database, but that eventually needs to be converted
         # into a valid system path
-        p += self.repo_name.split('/')
+        p += self.repo_name.split(Repository.url_sep())
         return os.path.join(*p)
 
     def get_new_name(self, repo_name):
@@ -578,7 +584,7 @@ class Repository(Base, BaseModel):
         :param group_name:
         """
         path_prefix = self.group.full_path_splitted if self.group else []
-        return '/'.join(path_prefix + [repo_name])
+        return Repository.url_sep().join(path_prefix + [repo_name])
 
     @property
     def _ui(self):
