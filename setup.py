@@ -24,7 +24,7 @@ requirements = [
         "python-dateutil>=1.5.0,<2.0.0",
         "dulwich>=0.8.0,<0.9.0",
         "vcs>=0.2.2.dev",
-        "webob>1.1.0,<1.2.0"
+        "webob==1.1.1"
     ]
 
 dependency_links = [
