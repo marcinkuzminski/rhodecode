@@ -508,9 +508,13 @@ that, you'll need to:
 
 - Install mod_wsgi. If using a Debian-based distro, you can install
   the package libapache2-mod-wsgi::
+
     aptitude install libapache2-mod-wsgi
+
 - Enable mod_wsgi::
+
     a2enmod wsgi
+
 - Create a wsgi dispatch script, like the one below. Make sure you
   check the paths correctly point to where you installed RhodeCode
   and its Python Virtual Environment.
