@@ -511,8 +511,8 @@ class Repository(Base, BaseModel):
         q = Session.query(cls).filter(cls.repo_name == repo_name)
 
         q = q.options(joinedload(Repository.fork))\
-            .options(joinedload(Repository.user))\
-            .options(joinedload(Repository.group))\
+                .options(joinedload(Repository.user))\
+                .options(joinedload(Repository.group))\
 
         return q.one()
 
@@ -534,7 +534,7 @@ class Repository(Base, BaseModel):
 
     @property
     def just_name(self):
-        return self.repo_name.split(os.sep)[-1]
+        return self.repo_name.split(Repository.url_sep())[-1]
 
     @property
     def groups_with_parents(self):
