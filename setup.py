@@ -28,8 +28,8 @@ requirements = [
     ]
 
 dependency_links = [
-    "https://secure.rhodecode.org/vcs/archive/default.zip#egg=vcs-0.2.2.dev",
-    "https://bitbucket.org/marcinkuzminski/vcs/get/default.zip#egg=vcs-0.2.2.dev",
+    "https://secure.rhodecode.org/vcs/archive/default.zip#egg=vcs-0.2.3.dev",
+    "https://bitbucket.org/marcinkuzminski/vcs/get/default.zip#egg=vcs-0.2.3.dev",
 ]
 
 classifiers = ['Development Status :: 4 - Beta',
