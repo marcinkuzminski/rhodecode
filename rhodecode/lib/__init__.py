@@ -383,10 +383,12 @@ def get_changeset_safe(repo, rev):
     return cs
 
 
-def get_current_revision():
+def get_current_revision(quiet=False):
     """
     Returns tuple of (number, id) from repository containing this package
     or None if repository could not be found.
+    
+    :param quiet: prints error for fetching revision if True
     """
 
     try:
@@ -399,6 +401,8 @@ def get_current_revision():
         tip = repo.get_changeset()
         return (tip.revision, tip.short_id)
     except (ImportError, RepositoryError, VCSError), err:
-        print ("Cannot retrieve rhodecode's revision. Original error "
-               "was: %s" % err)
+        if not quiet:
+            print ("Cannot retrieve rhodecode's revision. Original error "
+                   "was: %s" % err)
         return None
+
