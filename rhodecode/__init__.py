@@ -36,7 +36,7 @@ PLATFORM_OTHERS = ('Linux', 'Darwin', 'FreeBSD', 'OpenBSD', 'SunOS')
 
 try:
     from rhodecode.lib import get_current_revision
-    _rev = get_current_revision()
+    _rev = get_current_revision(quiet=True)
 except ImportError:
     #this is needed when doing some setup.py operations
     _rev = False
