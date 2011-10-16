@@ -80,7 +80,7 @@ class ReposController(BaseController):
         self.__load_defaults()
 
         c.repo_info = db_repo = Repository.get_by_repo_name(repo_name)
-        repo = scm_repo = db_repo.scm_instance
+        repo = db_repo.scm_instance
 
         if c.repo_info is None:
             h.flash(_('%s repository is not mapped to db perhaps'

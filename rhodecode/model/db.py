@@ -32,9 +32,9 @@ from datetime import date
 from sqlalchemy import *
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.orm import relationship, backref, joinedload, class_mapper
+from sqlalchemy.orm import relationship, backref, joinedload, class_mapper, \
+    validates
 from sqlalchemy.orm.interfaces import MapperExtension
-
 from beaker.cache import cache_region, region_invalidate
 
 from vcs import get_backend
@@ -149,6 +149,11 @@ class RhodeCodeSettings(Base, BaseModel):
         self.app_settings_name = k
         self.app_settings_value = v
 
+
+    @validates('_app_settings_value')
+    def validate_settings_value(self, key, val):
+        assert type(val) == unicode
+        return val
 
     @hybrid_property
     def app_settings_value(self):
