@@ -22,7 +22,7 @@ requirements = [
         "celery>=2.2.5,<2.3",
         "babel",
         "python-dateutil>=1.5.0,<2.0.0",
-        "dulwich>=0.8.0",
+        "dulwich>=0.8.0,<0.9.0",
         "vcs==0.2.2",
         "webob==1.0.8"    
     ]
