@@ -41,9 +41,8 @@ from rhodecode.lib.auth import HasRepoPermissionAny
 from rhodecode.lib.utils import get_repos as get_filesystem_repos, make_ui, \
     action_logger, EmptyChangeset
 from rhodecode.model import BaseModel
-from rhodecode.model.user import UserModel
 from rhodecode.model.db import Repository, RhodeCodeUi, CacheInvalidation, \
-    UserFollowing, UserLog
+    UserFollowing, UserLog, User
 
 log = logging.getLogger(__name__)
 
@@ -148,10 +147,15 @@ class ScmModel(BaseModel):
         repos_list = {}
 
         for name, path in get_filesystem_repos(repos_path, recursive=True):
+            
+            # name need to be decomposed and put back together using the /
+            # since this is internal storage separator for rhodecode
+            name = Repository.url_sep().join(name.split(os.sep))
+            
             try:
                 if name in repos_list:
                     raise RepositoryError('Duplicate repository name %s '
-                                    'found in %s' % (name, path))
+                                          'found in %s' % (name, path))
                 else:
 
                     klass = get_backend(path[0])
@@ -283,7 +287,7 @@ class ScmModel(BaseModel):
         return f is not None
 
     def is_following_user(self, username, user_id, cache=False):
-        u = UserModel(self.sa).get_by_username(username)
+        u = User.get_by_username(username)
 
         f = self.sa.query(UserFollowing)\
             .filter(UserFollowing.follows_user == u)\
@@ -293,24 +297,24 @@ class ScmModel(BaseModel):
 
     def get_followers(self, repo_id):
         if not isinstance(repo_id, int):
-            repo_id = getattr(Repository.by_repo_name(repo_id), 'repo_id')
+            repo_id = getattr(Repository.get_by_repo_name(repo_id), 'repo_id')
 
         return self.sa.query(UserFollowing)\
                 .filter(UserFollowing.follows_repo_id == repo_id).count()
 
     def get_forks(self, repo_id):
         if not isinstance(repo_id, int):
-            repo_id = getattr(Repository.by_repo_name(repo_id), 'repo_id')
+            repo_id = getattr(Repository.get_by_repo_name(repo_id), 'repo_id')
 
         return self.sa.query(Repository)\
                 .filter(Repository.fork_id == repo_id).count()
 
     def pull_changes(self, repo_name, username):
-        dbrepo = Repository.by_repo_name(repo_name)
+        dbrepo = Repository.get_by_repo_name(repo_name)
         clone_uri = dbrepo.clone_uri
         if not clone_uri:
             raise Exception("This repository doesn't have a clone uri")
-        
+
         repo = dbrepo.scm_instance
         try:
             extras = {'ip': '',
@@ -363,12 +367,12 @@ class ScmModel(BaseModel):
             from vcs.backends.git import GitInMemoryChangeset as IMC
         # decoding here will force that we have proper encoded values
         # in any other case this will throw exceptions and deny commit
-        
-        if isinstance(content,(basestring,)):
+
+        if isinstance(content, (basestring,)):
             content = safe_str(content)
-        elif isinstance(content,file):
+        elif isinstance(content, file):
             content = content.read()
-            
+
         message = safe_str(message)
         path = safe_str(f_path)
         author = safe_str(author)

@@ -64,20 +64,10 @@ class ReposController(BaseController):
         super(ReposController, self).__before__()
 
     def __load_defaults(self):
-        repo_model = RepoModel()
-
-        c.repo_groups = [('', '')]
-        parents_link = lambda k: h.literal('&raquo;'.join(
-                                    map(lambda k: k.group_name,
-                                        k.parents + [k])
-                                    )
-                                )
-
-        c.repo_groups.extend([(x.group_id, parents_link(x)) for \
-                                            x in self.sa.query(Group).all()])
-        c.repo_groups = sorted(c.repo_groups,
-                               key=lambda t: t[1].split('&raquo;')[0])
+        c.repo_groups = Group.groups_choices()
         c.repo_groups_choices = map(lambda k: unicode(k[0]), c.repo_groups)
+        
+        repo_model = RepoModel()
         c.users_array = repo_model.get_users_js()
         c.users_groups_array = repo_model.get_users_groups_js()
 
@@ -89,8 +79,8 @@ class ReposController(BaseController):
         """
         self.__load_defaults()
 
-        c.repo_info = db_repo = Repository.by_repo_name(repo_name)
-        repo = scm_repo = db_repo.scm_instance
+        c.repo_info = db_repo = Repository.get_by_repo_name(repo_name)
+        repo = db_repo.scm_instance
 
         if c.repo_info is None:
             h.flash(_('%s repository is not mapped to db perhaps'
@@ -101,7 +91,7 @@ class ReposController(BaseController):
 
             return redirect(url('repos'))
 
-        c.default_user_id = User.by_username('default').user_id
+        c.default_user_id = User.get_by_username('default').user_id
         c.in_public_journal = self.sa.query(UserFollowing)\
             .filter(UserFollowing.user_id == c.default_user_id)\
             .filter(UserFollowing.follows_repository == c.repo_info).scalar()
@@ -234,11 +224,11 @@ class ReposController(BaseController):
                          repo_groups=c.repo_groups_choices)()
         try:
             form_result = _form.to_python(dict(request.POST))
-            repo_model.update(repo_name, form_result)
+            repo = repo_model.update(repo_name, form_result)
             invalidate_cache('get_repo_cached_%s' % repo_name)
             h.flash(_('Repository %s updated successfully' % repo_name),
                     category='success')
-            changed_name = form_result['repo_name_full']
+            changed_name = repo.repo_name
             action_logger(self.rhodecode_user, 'admin_updated_repo',
                               changed_name, '', self.sa)
 
@@ -381,8 +371,8 @@ class ReposController(BaseController):
         token = get_token()
         if cur_token == token:
             try:
-                repo_id = Repository.by_repo_name(repo_name).repo_id
-                user_id = User.by_username('default').user_id
+                repo_id = Repository.get_by_repo_name(repo_name).repo_id
+                user_id = User.get_by_username('default').user_id
                 self.scm_model.toggle_following_repo(repo_id, user_id)
                 h.flash(_('Updated repository visibility in public journal'),
                         category='success')

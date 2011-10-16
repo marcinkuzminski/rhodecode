@@ -11,10 +11,11 @@ if py_version < (2, 5):
 
 requirements = [
         "Pylons==1.0.0",
+        "Beaker==1.5.4",
         "WebHelpers>=1.2",
         "formencode==1.2.4",
-        "SQLAlchemy>=0.7.2,<0.8",
-        "Mako>=0.4.2",
+        "SQLAlchemy==0.7.3",
+        "Mako==0.5.0",
         "pygments>=1.4",
         "mercurial>=1.9.3,<2.0",
         "whoosh<1.8",
@@ -22,7 +23,7 @@ requirements = [
         "babel",
         "python-dateutil>=1.5.0,<2.0.0",
         "dulwich>=0.8.0",
-        "vcs>=0.2.1",
+        "vcs==0.2.2",
         "webob==1.0.8"    
     ]
 
@@ -33,7 +34,7 @@ classifiers = ['Development Status :: 5 - Production/Stable',
                'Environment :: Web Environment',
                'Framework :: Pylons',
                'Intended Audience :: Developers',
-               'License :: OSI Approved :: BSD License',
+               'License :: OSI Approved :: GNU General Public License (GPL)',
                'Operating System :: OS Independent',
                'Programming Language :: Python',
                'Programming Language :: Python :: 2.5',

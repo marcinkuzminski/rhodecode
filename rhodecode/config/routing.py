@@ -19,10 +19,10 @@ def make_map(config):
                  always_scan=config['debug'])
     rmap.minimization = False
     rmap.explicit = False
-    
+
     from rhodecode.lib.utils import is_valid_repo
     from rhodecode.lib.utils import is_valid_repos_group
-    
+
     def check_repo(environ, match_dict):
         """
         check for valid repository for proper 404 handling
@@ -30,7 +30,7 @@ def make_map(config):
         :param environ:
         :param match_dict:
         """
-         
+
         repo_name = match_dict.get('repo_name')
         return is_valid_repo(repo_name, config['base_path'])
 
@@ -42,7 +42,7 @@ def make_map(config):
         :param match_dict:
         """
         repos_group_name = match_dict.get('group_name')
-        
+
         return is_valid_repos_group(repos_group_name, config['base_path'])
 
 
@@ -333,13 +333,13 @@ def make_map(config):
     # REPOSITORY ROUTES
     #==========================================================================
     rmap.connect('summary_home', '/{repo_name:.*}',
-                controller='summary', 
+                controller='summary',
                 conditions=dict(function=check_repo))
-    
-#    rmap.connect('repo_group_home', '/{group_name:.*}',
-#                controller='admin/repos_groups',action="show_by_name", 
-#                conditions=dict(function=check_group))
-    
+
+    rmap.connect('repos_group_home', '/{group_name:.*}',
+                controller='admin/repos_groups', action="show_by_name",
+                conditions=dict(function=check_group))
+
     rmap.connect('changeset_home', '/{repo_name:.*}/changeset/{revision}',
                 controller='changeset', revision='tip',
                 conditions=dict(function=check_repo))

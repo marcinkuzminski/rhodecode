@@ -94,11 +94,11 @@ def __get_lockkey(func, *fargs, **fkwargs):
 def locked_task(func):
     def __wrapper(func, *fargs, **fkwargs):
         lockkey = __get_lockkey(func, *fargs, **fkwargs)
-        lockkey_path = dn(dn(dn(os.path.abspath(__file__))))
+        lockkey_path = config['here']
 
         log.info('running task with lockkey %s', lockkey)
         try:
-            l = DaemonLock(jn(lockkey_path, lockkey))
+            l = DaemonLock(file_=jn(lockkey_path, lockkey))
             ret = func(*fargs, **fkwargs)
             l.release()
             return ret

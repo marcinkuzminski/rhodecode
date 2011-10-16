@@ -366,17 +366,7 @@ class SettingsController(BaseController):
     def create_repository(self):
         """GET /_admin/create_repository: Form to create a new item"""
 
-        c.repo_groups = [('', '')]
-        parents_link = lambda k: h.literal('&raquo;'.join(
-                                    map(lambda k: k.group_name,
-                                        k.parents + [k])
-                                    )
-                                )
-
-        c.repo_groups.extend([(x.group_id, parents_link(x)) for \
-                                            x in self.sa.query(Group).all()])
-        c.repo_groups = sorted(c.repo_groups,
-                               key=lambda t: t[1].split('&raquo;')[0])
+        c.repo_groups = Group.groups_choices()
         c.repo_groups_choices = map(lambda k: unicode(k[0]), c.repo_groups)
 
         new_repo = request.GET.get('repo', '')

@@ -101,7 +101,7 @@ class MakeIndex(BasePasterCommand):
         from rhodecode.lib.pidlock import LockHeld, DaemonLock
         from rhodecode.lib.indexers.daemon import WhooshIndexingDaemon
         try:
-            l = DaemonLock(file=jn(dn(dn(index_location)), 'make_index.lock'))
+            l = DaemonLock(file_=jn(dn(dn(index_location)), 'make_index.lock'))
             WhooshIndexingDaemon(index_location=index_location,
                                  repo_location=repo_location,
                                  repo_list=repo_list)\

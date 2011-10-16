@@ -25,7 +25,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import platform
 
-VERSION = (1, 2, 1)
+VERSION = (1, 2, 2)
 __version__ = '.'.join((str(each) for each in VERSION[:4]))
 __dbversion__ = 3 #defines current db version for migrations
 __platform__ = platform.system()
@@ -35,7 +35,7 @@ PLATFORM_WIN = ('Windows')
 PLATFORM_OTHERS = ('Linux', 'Darwin', 'FreeBSD', 'OpenBSD', 'SunOS')
 
 try:
-    from rhodecode.lib.utils import get_current_revision
+    from rhodecode.lib import get_current_revision
     _rev = get_current_revision()
 except ImportError:
     #this is needed when doing some setup.py operations

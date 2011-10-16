@@ -67,7 +67,7 @@ class BaseRepoController(BaseController):
         super(BaseRepoController, self).__before__()
         if c.repo_name:
 
-            c.rhodecode_db_repo = Repository.by_repo_name(c.repo_name)
+            c.rhodecode_db_repo = Repository.get_by_repo_name(c.repo_name)
             c.rhodecode_repo = c.rhodecode_db_repo.scm_instance
 
             if c.rhodecode_repo is None:

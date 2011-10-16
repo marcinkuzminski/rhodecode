@@ -145,8 +145,8 @@ class TestLoginController(TestController):
                                              'lastname':'test'})
 
         self.assertEqual(response.status , '200 OK')
-        assert 'An email address must contain a single @' in response.body
-        assert 'This username already exists' in response.body
+        self.assertTrue('An email address must contain a single @' in response.body)
+        self.assertTrue('This username already exists' in response.body)
 
 
 
@@ -160,7 +160,7 @@ class TestLoginController(TestController):
                                              'lastname':'test'})
 
         self.assertEqual(response.status , '200 OK')
-        assert 'Invalid characters in password' in response.body
+        self.assertTrue('Invalid characters in password' in response.body)
 
 
     def test_register_password_mismatch(self):
@@ -246,7 +246,7 @@ class TestLoginController(TestController):
 
         # GOOD KEY
 
-        key = User.by_username(username).api_key
+        key = User.get_by_username(username).api_key
 
         response = self.app.get(url(controller='login',
                                     action='password_reset_confirmation',

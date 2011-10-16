@@ -98,11 +98,11 @@ class RepoModel(BaseModel):
         try:
             cur_repo = self.get_by_repo_name(repo_name, cache=False)
 
-            #update permissions
+            # update permissions
             for member, perm, member_type in form_data['perms_updates']:
                 if member_type == 'user':
                     r2p = self.sa.query(RepoToPerm)\
-                            .filter(RepoToPerm.user == User.by_username(member))\
+                            .filter(RepoToPerm.user == User.get_by_username(member))\
                             .filter(RepoToPerm.repository == cur_repo)\
                             .one()
 
@@ -122,12 +122,12 @@ class RepoModel(BaseModel):
                                                 perm).scalar()
                     self.sa.add(g2p)
 
-            #set new permissions
+            # set new permissions
             for member, perm, member_type in form_data['perms_new']:
                 if member_type == 'user':
                     r2p = RepoToPerm()
                     r2p.repository = cur_repo
-                    r2p.user = User.by_username(member)
+                    r2p.user = User.get_by_username(member)
 
                     r2p.permission = self.sa.query(Permission)\
                                         .filter(Permission.
@@ -144,26 +144,29 @@ class RepoModel(BaseModel):
                                                 .scalar()
                     self.sa.add(g2p)
 
-            #update current repo
+            # update current repo
             for k, v in form_data.items():
                 if k == 'user':
-                    cur_repo.user = User.by_username(v)
+                    cur_repo.user = User.get_by_username(v)
                 elif k == 'repo_name':
-                    cur_repo.repo_name = form_data['repo_name_full']
+                    pass
                 elif k == 'repo_group':
                     cur_repo.group_id = v
 
                 else:
                     setattr(cur_repo, k, v)
 
+            new_name = cur_repo.get_new_name(form_data['repo_name'])
+            cur_repo.repo_name = new_name
+
             self.sa.add(cur_repo)
 
-            if repo_name != form_data['repo_name_full']:
+            if repo_name != new_name:
                 # rename repository
-                self.__rename_repo(old=repo_name,
-                                   new=form_data['repo_name_full'])
+                self.__rename_repo(old=repo_name, new=new_name)
 
             self.sa.commit()
+            return cur_repo
         except:
             log.error(traceback.format_exc())
             self.sa.rollback()
@@ -208,8 +211,7 @@ class RepoModel(BaseModel):
             #create default permission
             repo_to_perm = RepoToPerm()
             default = 'repository.read'
-            for p in UserModel(self.sa).get_by_username('default',
-                                                    cache=False).user_perms:
+            for p in User.get_by_username('default').user_perms:
                 if p.permission.permission_name.startswith('repository.'):
                     default = p.permission.permission_name
                     break
@@ -221,8 +223,7 @@ class RepoModel(BaseModel):
                     .one().permission_id
 
             repo_to_perm.repository = new_repo
-            repo_to_perm.user_id = UserModel(self.sa)\
-                .get_by_username('default', cache=False).user_id
+            repo_to_perm.user_id = User.get_by_username('default').user_id
 
             self.sa.add(repo_to_perm)
 
@@ -237,7 +238,7 @@ class RepoModel(BaseModel):
             from rhodecode.model.scm import ScmModel
             ScmModel(self.sa).toggle_following_repo(new_repo.repo_id,
                                              cur_user.user_id)
-
+            return new_repo
         except:
             log.error(traceback.format_exc())
             self.sa.rollback()
@@ -304,7 +305,7 @@ class RepoModel(BaseModel):
         :param parent_id:
         :param clone_uri:
         """
-        from rhodecode.lib.utils import is_valid_repo
+        from rhodecode.lib.utils import is_valid_repo,is_valid_repos_group
 
         if new_parent_id:
             paths = Group.get(new_parent_id).full_path.split(Group.url_sep())
@@ -315,12 +316,20 @@ class RepoModel(BaseModel):
         repo_path = os.path.join(*map(lambda x:safe_str(x),
                                 [self.repos_path, new_parent_path, repo_name]))
 
-        if is_valid_repo(repo_path, self.repos_path) is False:
-            log.info('creating repo %s in %s @ %s', repo_name, repo_path,
-                     clone_uri)
-            backend = get_backend(alias)
+        
+        # check if this path is not a repository
+        if is_valid_repo(repo_path, self.repos_path):
+            raise Exception('This path %s is a valid repository' % repo_path)
 
-            backend(repo_path, create=True, src_url=clone_uri)
+        # check if this path is a group
+        if is_valid_repos_group(repo_path, self.repos_path):
+            raise Exception('This path %s is a valid group' % repo_path)
+                
+        log.info('creating repo %s in %s @ %s', repo_name, repo_path,
+                 clone_uri)
+        backend = get_backend(alias)
+
+        backend(repo_path, create=True, src_url=clone_uri)
 
 
     def __rename_repo(self, old, new):

@@ -6,20 +6,7 @@ import errno
 from warnings import warn
 from multiprocessing.util import Finalize
 
-from rhodecode import __platform__, PLATFORM_WIN
-
-if __platform__ in PLATFORM_WIN:
-    import ctypes
-
-    def kill(pid, sig):
-        """kill function for Win32"""
-        kernel32 = ctypes.windll.kernel32
-        handle = kernel32.OpenProcess(1, 0, pid)
-        return (0 != kernel32.TerminateProcess(handle, 0))
-
-else:
-    kill = os.kill
-
+from rhodecode.lib.compat import kill
 
 class LockHeld(Exception):
     pass
@@ -29,17 +16,17 @@ class DaemonLock(object):
     """daemon locking
     USAGE:
     try:
-        l = DaemonLock(desc='test lock')
+        l = DaemonLock(file_='/path/tolockfile',desc='test lock')
         main()
         l.release()
     except LockHeld:
         sys.exit(1)
     """
 
-    def __init__(self, file=None, callbackfn=None,
+    def __init__(self, file_=None, callbackfn=None,
                  desc='daemon lock', debug=False):
 
-        self.pidfile = file if file else os.path.join(
+        self.pidfile = file_ if file_ else os.path.join(
                                                     os.path.dirname(__file__),
                                                     'running.lock')
         self.callbackfn = callbackfn
