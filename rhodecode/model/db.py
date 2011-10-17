@@ -422,10 +422,9 @@ class UsersGroup(Base, BaseModel):
                     Session.flush()
                     members_list = []
                     if v:
-                        for u_id in set(v):
-                            members_list.append(UsersGroupMember(
-                                                            users_group_id,
-                                                            u_id))
+                        for u_id in set(list(v)):
+                            member = UsersGroupMember(users_group_id,u_id)
+                            members_list.append(member)
                     setattr(users_group, 'members', members_list)
                 setattr(users_group, k, v)
 
