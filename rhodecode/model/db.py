@@ -31,9 +31,10 @@ from datetime import date
 
 from sqlalchemy import *
 from sqlalchemy.exc import DatabaseError
-from sqlalchemy.orm import relationship, backref, joinedload, class_mapper
+from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.orm import relationship, backref, joinedload, class_mapper, \
+    validates
 from sqlalchemy.orm.interfaces import MapperExtension
-
 from beaker.cache import cache_region, region_invalidate
 
 from vcs import get_backend
@@ -42,12 +43,13 @@ from vcs.exceptions import VCSError
 from vcs.utils.lazy import LazyProperty
 
 from rhodecode.lib import str2bool, safe_str, get_changeset_safe, \
-    generate_api_key
+    generate_api_key, safe_unicode
 from rhodecode.lib.exceptions import UsersGroupsAssignedException
 from rhodecode.lib.compat import json
 
 from rhodecode.model.meta import Base, Session
 from rhodecode.model.caching_query import FromCache
+
 
 log = logging.getLogger(__name__)
 
@@ -126,7 +128,8 @@ class BaseModel(object):
 
     @classmethod
     def get(cls, id_):
-        return Session.query(cls).get(id_)
+        if id_:
+            return Session.query(cls).get(id_)
 
     @classmethod
     def delete(cls, id_):
@@ -140,11 +143,33 @@ class RhodeCodeSettings(Base, BaseModel):
     __table_args__ = (UniqueConstraint('app_settings_name'), {'extend_existing':True})
     app_settings_id = Column("app_settings_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     app_settings_name = Column("app_settings_name", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
-    app_settings_value = Column("app_settings_value", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    _app_settings_value = Column("app_settings_value", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
 
     def __init__(self, k='', v=''):
         self.app_settings_name = k
         self.app_settings_value = v
+
+
+    @validates('_app_settings_value')
+    def validate_settings_value(self, key, val):
+        assert type(val) == unicode
+        return val
+
+    @hybrid_property
+    def app_settings_value(self):
+        v = self._app_settings_value
+        if v == 'ldap_active':
+            v = str2bool(v)
+        return v 
+
+    @app_settings_value.setter
+    def app_settings_value(self,val):
+        """
+        Setter that will always make sure we use unicode in app_settings_value
+        
+        :param val:
+        """
+        self._app_settings_value = safe_unicode(val)
 
     def __repr__(self):
         return "<%s('%s:%s')>" % (self.__class__.__name__,
@@ -176,13 +201,10 @@ class RhodeCodeSettings(Base, BaseModel):
     @classmethod
     def get_ldap_settings(cls, cache=False):
         ret = Session.query(cls)\
-                .filter(cls.app_settings_name.startswith('ldap_'))\
-                .all()
+                .filter(cls.app_settings_name.startswith('ldap_')).all()
         fd = {}
         for row in ret:
             fd.update({row.app_settings_name:row.app_settings_value})
-
-        fd.update({'ldap_active':str2bool(fd.get('ldap_active'))})
 
         return fd
 
@@ -283,7 +305,7 @@ class User(Base, BaseModel):
     @classmethod
     def get_by_username(cls, username, case_insensitive=False):
         if case_insensitive:
-            return Session.query(cls).filter(cls.username.like(username)).scalar()
+            return Session.query(cls).filter(cls.username.ilike(username)).scalar()
         else:
             return Session.query(cls).filter(cls.username == username).scalar()
 
@@ -486,12 +508,16 @@ class Repository(Base, BaseModel):
                                   self.repo_id, self.repo_name)
 
     @classmethod
+    def url_sep(cls):
+        return '/'
+    
+    @classmethod
     def get_by_repo_name(cls, repo_name):
         q = Session.query(cls).filter(cls.repo_name == repo_name)
 
         q = q.options(joinedload(Repository.fork))\
-            .options(joinedload(Repository.user))\
-            .options(joinedload(Repository.group))\
+                .options(joinedload(Repository.user))\
+                .options(joinedload(Repository.group))\
 
         return q.one()
 
@@ -506,13 +532,14 @@ class Repository(Base, BaseModel):
         
         :param cls:
         """
-        q = Session.query(RhodeCodeUi).filter(RhodeCodeUi.ui_key == '/')
+        q = Session.query(RhodeCodeUi).filter(RhodeCodeUi.ui_key == 
+                                              cls.url_sep())
         q.options(FromCache("sql_cache_short", "repository_repo_path"))
         return q.one().ui_value
 
     @property
     def just_name(self):
-        return self.repo_name.split(os.sep)[-1]
+        return self.repo_name.split(Repository.url_sep())[-1]
 
     @property
     def groups_with_parents(self):
@@ -541,7 +568,8 @@ class Repository(Base, BaseModel):
         Returns base full path for that repository means where it actually
         exists on a filesystem
         """
-        q = Session.query(RhodeCodeUi).filter(RhodeCodeUi.ui_key == '/')
+        q = Session.query(RhodeCodeUi).filter(RhodeCodeUi.ui_key == 
+                                              Repository.url_sep())
         q.options(FromCache("sql_cache_short", "repository_repo_path"))
         return q.one().ui_value
 
@@ -551,8 +579,17 @@ class Repository(Base, BaseModel):
         # we need to split the name by / since this is how we store the
         # names in the database, but that eventually needs to be converted
         # into a valid system path
-        p += self.repo_name.split('/')
+        p += self.repo_name.split(Repository.url_sep())
         return os.path.join(*p)
+
+    def get_new_name(self, repo_name):
+        """
+        returns new full repository name based on assigned group and new new
+        
+        :param group_name:
+        """
+        path_prefix = self.group.full_path_splitted if self.group else []
+        return Repository.url_sep().join(path_prefix + [repo_name])
 
     @property
     def _ui(self):
@@ -718,8 +755,25 @@ class Group(Base, BaseModel):
                                   self.group_name)
 
     @classmethod
+    def groups_choices(cls):
+        from webhelpers.html import literal as _literal
+        repo_groups = [('', '')]
+        sep = ' &raquo; '
+        _name = lambda k: _literal(sep.join(k))
+
+        repo_groups.extend([(x.group_id, _name(x.full_path_splitted))
+                              for x in cls.query().all()])
+        
+        repo_groups = sorted(repo_groups,key=lambda t: t[1].split(sep)[0])        
+        return repo_groups
+    
+    @classmethod
     def url_sep(cls):
         return '/'
+
+    @classmethod
+    def get_by_group_name(cls, group_name):
+        return cls.query().filter(cls.group_name == group_name).scalar()
 
     @property
     def parents(self):
@@ -750,9 +804,16 @@ class Group(Base, BaseModel):
         return Session.query(Group).filter(Group.parent_group == self)
 
     @property
+    def name(self):
+        return self.group_name.split(Group.url_sep())[-1]
+
+    @property
     def full_path(self):
-        return Group.url_sep().join([g.group_name for g in self.parents] +
-                        [self.group_name])
+        return self.group_name
+
+    @property
+    def full_path_splitted(self):
+        return self.group_name.split(Group.url_sep())
 
     @property
     def repositories(self):
@@ -770,6 +831,17 @@ class Group(Base, BaseModel):
             return cnt
 
         return cnt + children_count(self)
+
+
+    def get_new_name(self, group_name):
+        """
+        returns new full group name based on parent and new name
+        
+        :param group_name:
+        """
+        path_prefix = self.parent_group.full_path_splitted if self.parent_group else []
+        return Group.url_sep().join(path_prefix + [group_name])
+
 
 class Permission(Base, BaseModel):
     __tablename__ = 'permissions'

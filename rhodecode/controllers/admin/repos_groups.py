@@ -9,9 +9,10 @@ from pylons import request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
 from pylons.i18n.translation import _
 
+from sqlalchemy.exc import IntegrityError
+
 from rhodecode.lib import helpers as h
-from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator, \
-    HasPermissionAnyDecorator
+from rhodecode.lib.auth import LoginRequired, HasPermissionAnyDecorator
 from rhodecode.lib.base import BaseController, render
 from rhodecode.model.db import Group
 from rhodecode.model.repos_group import ReposGroupModel
@@ -31,19 +32,7 @@ class ReposGroupsController(BaseController):
         super(ReposGroupsController, self).__before__()
 
     def __load_defaults(self):
-
-        c.repo_groups = [('', '')]
-        parents_link = lambda k: h.literal('&raquo;'.join(
-                                    map(lambda k: k.group_name,
-                                        k.parents + [k])
-                                    )
-                                )
-
-        c.repo_groups.extend([(x.group_id, parents_link(x)) for \
-                                            x in self.sa.query(Group).all()])
-
-        c.repo_groups = sorted(c.repo_groups,
-                               key=lambda t: t[1].split('&raquo;')[0])
+        c.repo_groups = Group.groups_choices()
         c.repo_groups_choices = map(lambda k: unicode(k[0]), c.repo_groups)
 
     def __load_data(self, group_id):
@@ -57,6 +46,8 @@ class ReposGroupsController(BaseController):
         repo_group = Group.get(group_id)
 
         data = repo_group.get_dict()
+
+        data['group_name'] = repo_group.name
 
         return data
 
@@ -169,12 +160,27 @@ class ReposGroupsController(BaseController):
             repos_group_model.delete(id)
             h.flash(_('removed repos group %s' % gr.group_name), category='success')
             #TODO: in future action_logger(, '', '', '', self.sa)
+        except IntegrityError, e:
+            if e.message.find('groups_group_parent_id_fkey'):
+                log.error(traceback.format_exc())
+                h.flash(_('Cannot delete this group it still contains '
+                          'subgroups'),
+                        category='warning')
+            else:
+                log.error(traceback.format_exc())
+                h.flash(_('error occurred during deletion of repos '
+                          'group %s' % gr.group_name), category='error')
+
         except Exception:
             log.error(traceback.format_exc())
-            h.flash(_('error occurred during deletion of repos group %s' % gr.group_name),
-                    category='error')
+            h.flash(_('error occurred during deletion of repos '
+                      'group %s' % gr.group_name), category='error')
 
         return redirect(url('repos_groups'))
+
+    def show_by_name(self, group_name):
+        id_ = Group.get_by_group_name(group_name).group_id
+        return self.show(id_)
 
     def show(self, id, format='html'):
         """GET /repos_groups/id: Show a specific item"""

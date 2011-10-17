@@ -1,0 +1,132 @@
+#!/bin/sh
+########################################
+#### THIS IS A REDHAT INIT.D SCRIPT ####
+########################################
+
+##################################################
+#
+# RhodeCode server startup script
+# Recommended default-startup: 2 3 4 5
+# Recommended default-stop: 0 1 6
+#
+##################################################
+
+
+APP_NAME="rhodecode"
+# the location of your app
+# since this is a web app, it should go in /var/www
+APP_PATH="/var/www/$APP_NAME"
+
+CONF_NAME="production.ini"
+
+# write to wherever the PID should be stored, just ensure
+# that the user you run paster as has the appropriate permissions
+# same goes for the log file
+PID_PATH="/var/run/rhodecode/pid"
+LOG_PATH="/var/log/rhodecode/rhodecode.log"
+
+# replace this with the path to the virtual environment you
+# made for RhodeCode
+PYTHON_PATH="/opt/python_virtualenvironments/rhodecode-venv"
+
+RUN_AS="rhodecode"
+
+DAEMON="$PYTHON_PATH/bin/paster"
+
+DAEMON_OPTS="serve --daemon \
+    --user=$RUN_AS \
+    --group=$RUN_AS \
+    --pid-file=$PID_PATH \
+    --log-file=$LOG_PATH $APP_PATH/$CONF_NAME"
+
+DESC="rhodecode-server"
+LOCK_FILE="/var/lock/subsys/$APP_NAME"
+
+# source CentOS init functions
+. /etc/init.d/functions
+
+RETVAL=0
+
+remove_pid () {
+  rm -f ${PID_PATH}
+  rmdir `dirname ${PID_PATH}`
+}
+
+ensure_pid_dir () {
+  PID_DIR=`dirname ${PID_PATH}`
+  if [ ! -d ${PID_DIR} ] ; then
+    mkdir -p ${PID_DIR}
+    chown -R ${RUN_AS}:${RUN_AS} ${PID_DIR}
+    chmod 755 ${PID_DIR}
+  fi
+}
+
+start_rhodecode () {
+    ensure_pid_dir
+    PYTHON_EGG_CACHE="/tmp" daemon --pidfile $PID_PATH \
+        --user $RUN_AS "$DAEMON $DAEMON_OPTS"
+    RETVAL=$?
+    [ $RETVAL -eq 0 ] && touch $LOCK_FILE
+    return $RETVAL
+}
+
+stop_rhodecode () {
+    if [ -e $LOCK_FILE ]; then
+      killproc -p $PID_PATH
+      RETVAL=$?
+      rm -f $LOCK_FILE
+      rm -f $PID_PATH
+    else
+      RETVAL=1
+    fi
+    return $RETVAL
+}
+
+status_rhodecode() {
+  if [ -e $LOCK_FILE ]; then
+    # exit with non-zero to indicate failure
+    RETVAL=1
+  else
+    RETVAL=0
+  fi
+  return $RETVAL
+}
+
+restart_rhodecode () {
+    stop_rhodecode
+    start_rhodecode
+    RETVAL=$?
+}
+
+case "$1" in
+  start)
+    echo -n $"Starting $DESC: "
+    start_rhodecode
+    echo
+    ;;
+  stop)
+    echo -n $"Stopping $DESC: "
+    stop_rhodecode
+    echo
+    ;;
+  status)
+    status_rhodecode
+    RETVAL=$?
+    if [ ! $RETVAL -eq 0 ]; then
+      echo "RhodeCode server is running..."
+    else
+      echo "RhodeCode server is stopped."
+    fi
+    ;;
+  restart)
+    echo -n $"Restarting $DESC: "
+    restart_rhodecode
+    echo
+    ;;
+  *)
+    echo $"Usage: $0 {start|stop|restart|status}"
+    RETVAL=1
+    ;;
+esac
+
+exit $RETVAL

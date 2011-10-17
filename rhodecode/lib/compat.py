@@ -24,6 +24,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import os
+from rhodecode import __platform__, PLATFORM_WIN
+
 #==============================================================================
 # json
 #==============================================================================
@@ -358,3 +361,19 @@ class OrderedDict(_odict, dict):
 # OrderedSet
 #==============================================================================
 from sqlalchemy.util import OrderedSet
+
+
+#==============================================================================
+# kill FUNCTIONS
+#==============================================================================
+if __platform__ in PLATFORM_WIN:
+    import ctypes
+
+    def kill(pid, sig):
+        """kill function for Win32"""
+        kernel32 = ctypes.windll.kernel32
+        handle = kernel32.OpenProcess(1, 0, pid)
+        return (0 != kernel32.TerminateProcess(handle, 0))
+
+else:
+    kill = os.kill

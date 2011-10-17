@@ -13,8 +13,33 @@ Changelog
 news
 ----
 
+ 
 fixes
 -----
+
+
+1.2.2 (**2011-10-17**)
+======================
+
+news
+----
+
+- #226 repo groups are available by path instead of numerical id
+ 
+fixes
+-----
+
+- #259 Groups with the same name but with different parent group
+- #260 Put repo in group, then move group to another group -> repo becomes unavailable
+- #258 RhodeCode 1.2 assumes egg folder is writable (lockfiles problems)
+- #265 ldap save fails sometimes on converting attributes to booleans, 
+  added getter and setter into model that will prevent from this on db model level
+- fixed problems with timestamps issues #251 and #213
+- fixes #266 Rhodecode allows to create repo with the same name and in 
+  the same parent as group
+- fixes #245 Rescan of the repositories on Windows
+- fixes #248 cannot edit repos inside a group on windows
+- fixes #219 forking problems on windows
 
 1.2.1 (**2011-10-08**)
 ======================

@@ -360,16 +360,19 @@ def map_groups(groups):
 
     parent = None
     group = None
-    for lvl, group_name in enumerate(groups[:-1]):
+
+    # last element is repo in nested groups structure
+    groups = groups[:-1]
+
+    for lvl, group_name in enumerate(groups):
+        group_name = '/'.join(groups[:lvl] + [group_name])
         group = sa.query(Group).filter(Group.group_name == group_name).scalar()
 
         if group is None:
             group = Group(group_name, parent)
             sa.add(group)
             sa.commit()
-
         parent = group
-
     return group
 
 
@@ -386,8 +389,13 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False):
     rm = RepoModel()
     user = sa.query(User).filter(User.admin == True).first()
     added = []
+    # fixup groups paths to new format on the fly
+    # TODO: remove this in future
+    for g in Group.query().all():
+        g.group_name = g.get_new_name(g.name)
+        sa.add(g)    
     for name, repo in initial_repo_list.items():
-        group = map_groups(name.split(os.sep))
+        group = map_groups(name.split(Repository.url_sep()))
         if not rm.get_by_repo_name(name, cache=False):
             log.info('repository %s not found creating default', name)
             added.append(name)
@@ -442,26 +450,6 @@ def add_cache(settings):
             beaker.cache.cache_regions[region] = region_settings
 
 
-def get_current_revision():
-    """Returns tuple of (number, id) from repository containing this package
-    or None if repository could not be found.
-    """
-
-    try:
-        from vcs import get_repo
-        from vcs.utils.helpers import get_scm
-        from vcs.exceptions import RepositoryError, VCSError
-        repopath = os.path.join(os.path.dirname(__file__), '..', '..')
-        scm = get_scm(repopath)[0]
-        repo = get_repo(path=repopath, alias=scm)
-        tip = repo.get_changeset()
-        return (tip.revision, tip.short_id)
-    except (ImportError, RepositoryError, VCSError), err:
-        logging.debug("Cannot retrieve rhodecode's revision. Original error "
-                      "was: %s" % err)
-        return None
-
-
 #==============================================================================
 # TEST FUNCTIONS AND CREATORS
 #==============================================================================
@@ -483,7 +471,7 @@ def create_test_index(repo_location, config, full_index):
         os.makedirs(index_location)
 
     try:
-        l = DaemonLock(file=jn(dn(index_location), 'make_index.lock'))
+        l = DaemonLock(file_=jn(dn(index_location), 'make_index.lock'))
         WhooshIndexingDaemon(index_location=index_location,
                              repo_location=repo_location)\
             .run(full_index=full_index)

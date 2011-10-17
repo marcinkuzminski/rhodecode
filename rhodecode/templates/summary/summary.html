@@ -45,17 +45,17 @@
                  
                  ##REPO TYPE
 		         %if c.dbrepo.repo_type =='hg':
-		           <img style="margin-bottom:2px" class="icon" title="${_('Mercurial repository')}" alt="${_('Mercurial repository')}" src="${h.url("/images/icons/hgicon.png")}"/>
+		           <img style="margin-bottom:2px" class="icon" title="${_('Mercurial repository')}" alt="${_('Mercurial repository')}" src="${h.url('/images/icons/hgicon.png')}"/>
 		         %endif
 		         %if c.dbrepo.repo_type =='git':
-		           <img style="margin-bottom:2px" class="icon" title="${_('Git repository')}" alt="${_('Git repository')}" src="${h.url("/images/icons/giticon.png")}"/>
+		           <img style="margin-bottom:2px" class="icon" title="${_('Git repository')}" alt="${_('Git repository')}" src="${h.url('/images/icons/giticon.png')}"/>
 		         %endif 
                             
                  ##PUBLIC/PRIVATE     			  
 	             %if c.dbrepo.private:
-	                <img style="margin-bottom:2px" class="icon" title="${_('private repository')}" alt="${_('private repository')}" src="${h.url("/images/icons/lock.png")}"/>
+	                <img style="margin-bottom:2px" class="icon" title="${_('private repository')}" alt="${_('private repository')}" src="${h.url('/images/icons/lock.png')}"/>
 	             %else:
-	                <img style="margin-bottom:2px" class="icon" title="${_('public repository')}" alt="${_('public repository')}" src="${h.url("/images/icons/lock_open.png")}"/>
+	                <img style="margin-bottom:2px" class="icon" title="${_('public repository')}" alt="${_('public repository')}" src="${h.url('/images/icons/lock_open.png')}"/>
 	             %endif
 	             
 	              ##REPO NAME
@@ -67,7 +67,7 @@
 	            	<a href="${h.url('summary_home',repo_name=c.dbrepo.fork.repo_name)}">
 	            	<img class="icon" alt="${_('public')}"
 	            	title="${_('Fork of')} ${c.dbrepo.fork.repo_name}" 
-	            	src="${h.url("/images/icons/arrow_divide.png")}"/>
+	            	src="${h.url('/images/icons/arrow_divide.png')}"/>
 	            	${_('Fork of')} ${c.dbrepo.fork.repo_name}
 	            	</a>
 	            	</div>
@@ -78,7 +78,7 @@
                     <a href="${h.url(str(h.hide_credentials(c.dbrepo.clone_uri)))}">
                     <img class="icon" alt="${_('remote clone')}"
                     title="${_('Clone from')} ${h.hide_credentials(c.dbrepo.clone_uri)}" 
-                    src="${h.url("/images/icons/connect.png")}"/>
+                    src="${h.url('/images/icons/connect.png')}"/>
                     ${_('Clone from')} ${h.hide_credentials(c.dbrepo.clone_uri)}
                     </a>
                     </div>					
@@ -151,7 +151,7 @@
 		        %elif c.enable_downloads is False:
 		          ${_('Downloads are disabled for this repository')}
                     %if h.HasPermissionAll('hg.admin')('enable stats on from summary'):
-                        [${h.link_to(_('enable'),h.url('edit_repo',repo_name=c.repo_name))}]
+                        ${h.link_to(_('enable'),h.url('edit_repo',repo_name=c.repo_name),class_="ui-button-small")}
                     %endif  		          
 		        %else:
 			        ${h.select('download_options',c.rhodecode_repo.get_changeset().raw_id,c.download_options)}
@@ -317,7 +317,7 @@
          %if c.no_data:
            ${c.no_data_msg}
            %if h.HasPermissionAll('hg.admin')('enable stats on from summary'):
-                [${h.link_to(_('enable'),h.url('edit_repo',repo_name=c.repo_name))}]
+                ${h.link_to(_('enable'),h.url('edit_repo',repo_name=c.repo_name),class_="ui-button-small")}
            %endif         
            
         %else:

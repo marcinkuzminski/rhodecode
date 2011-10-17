@@ -22,6 +22,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+import os
 import time
 import traceback
 import logging
@@ -146,10 +147,15 @@ class ScmModel(BaseModel):
         repos_list = {}
 
         for name, path in get_filesystem_repos(repos_path, recursive=True):
+            
+            # name need to be decomposed and put back together using the /
+            # since this is internal storage separator for rhodecode
+            name = Repository.url_sep().join(name.split(os.sep))
+            
             try:
                 if name in repos_list:
                     raise RepositoryError('Duplicate repository name %s '
-                                    'found in %s' % (name, path))
+                                          'found in %s' % (name, path))
                 else:
 
                     klass = get_backend(path[0])

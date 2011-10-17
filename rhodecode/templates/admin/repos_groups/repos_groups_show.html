@@ -44,14 +44,14 @@
                       <td>
                           <div style="white-space: nowrap">
                           <img class="icon" alt="${_('Repositories group')}" src="${h.url('/images/icons/database_link.png')}"/>
-                          ${h.link_to(h.literal(' &raquo; '.join([g.group_name for g in gr.parents+[gr]])),url('edit_repos_group',id=gr.group_id))}
+                          ${h.link_to(h.literal(' &raquo; '.join([g.name for g in gr.parents+[gr]])),url('edit_repos_group',id=gr.group_id))}
                           </div>
                       </td>
                       <td>${gr.group_description}</td>
                       <td><b>${gr.repositories.count()}</b></td>
 		               <td>
 		                 ${h.form(url('repos_group', id=gr.group_id),method='delete')}
-		                   ${h.submit('remove_%s' % gr.group_name,'delete',class_="delete_icon action_button",onclick="return confirm('"+_('Confirm to delete this group')+"');")}
+		                   ${h.submit('remove_%s' % gr.name,'delete',class_="delete_icon action_button",onclick="return confirm('"+_('Confirm to delete this group')+"');")}
 		                 ${h.end_form()}
 		               </td>                      
                   </tr>

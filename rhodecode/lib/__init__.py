@@ -23,6 +23,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import os
+
 def __get_lem():
     from pygments import lexers
     from string import lower
@@ -379,3 +381,28 @@ def get_changeset_safe(repo, rev):
         from rhodecode.lib.utils import EmptyChangeset
         cs = EmptyChangeset(requested_revision=rev)
     return cs
+
+
+def get_current_revision(quiet=False):
+    """
+    Returns tuple of (number, id) from repository containing this package
+    or None if repository could not be found.
+    
+    :param quiet: prints error for fetching revision if True
+    """
+
+    try:
+        from vcs import get_repo
+        from vcs.utils.helpers import get_scm
+        from vcs.exceptions import RepositoryError, VCSError
+        repopath = os.path.join(os.path.dirname(__file__), '..', '..')
+        scm = get_scm(repopath)[0]
+        repo = get_repo(path=repopath, alias=scm)
+        tip = repo.get_changeset()
+        return (tip.revision, tip.short_id)
+    except (ImportError, RepositoryError, VCSError), err:
+        if not quiet:
+            print ("Cannot retrieve rhodecode's revision. Original error "
+                   "was: %s" % err)
+        return None
+

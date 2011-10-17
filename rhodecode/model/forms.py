@@ -122,7 +122,7 @@ def ValidReposGroup(edit, old_data):
         def validate_python(self, value, state):
             #TODO WRITE VALIDATIONS
             group_name = value.get('group_name')
-            group_parent_id = int(value.get('group_parent_id') or - 1)
+            group_parent_id = int(value.get('group_parent_id') or -1)
 
             # slugify repo group just in case :)
             slug = repo_name_slug(group_name)
@@ -250,7 +250,7 @@ def ValidRepoName(edit, old_data):
                 gr = Group.get(value.get('repo_group'))
                 group_path = gr.full_path
                 # value needs to be aware of group name in order to check
-                # db key This is an actuall just the name to store in the
+                # db key This is an actual just the name to store in the
                 # database
                 repo_name_full = group_path + Group.url_sep() + repo_name
             else:
@@ -259,24 +259,31 @@ def ValidRepoName(edit, old_data):
 
 
             value['repo_name_full'] = repo_name_full
-            if old_data.get('repo_name') != repo_name_full or not edit:
+            rename = old_data.get('repo_name') != repo_name_full
+            create = not edit
+            if  rename or create:
 
                 if group_path != '':
                     if RepoModel().get_by_repo_name(repo_name_full,):
                         e_dict = {'repo_name':_('This repository already '
-                                                'exists in group "%s"') %
+                                                'exists in a group "%s"') %
                                   gr.group_name}
                         raise formencode.Invalid('', value, state,
                                                  error_dict=e_dict)
+                elif Group.get_by_group_name(repo_name_full):
+                        e_dict = {'repo_name':_('There is a group with this'
+                                                ' name already "%s"') %
+                                  repo_name_full}
+                        raise formencode.Invalid('', value, state,
+                                                 error_dict=e_dict)
 
-                else:
-                    if RepoModel().get_by_repo_name(repo_name_full):
+                elif RepoModel().get_by_repo_name(repo_name_full):
                         e_dict = {'repo_name':_('This repository '
                                                 'already exists')}
                         raise formencode.Invalid('', value, state,
                                                  error_dict=e_dict)
-            return value
 
+            return value
 
     return _ValidRepoName
 
