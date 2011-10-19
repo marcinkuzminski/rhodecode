@@ -53,8 +53,10 @@ class AuthLdap(object):
         if self.TLS_KIND == 'LDAPS':
             port = port or 689
             ldap_server_type = ldap_server_type + 's'
-
-        self.TLS_REQCERT = ldap.__dict__['OPT_X_TLS_' + tls_reqcert]
+        
+        OPT_X_TLS_DEMAND = 2
+        self.TLS_REQCERT = getattr(ldap, 'OPT_X_TLS_%s' % tls_reqcert, 
+                                   OPT_X_TLS_DEMAND)
         self.LDAP_SERVER_ADDRESS = server
         self.LDAP_SERVER_PORT = port
 
@@ -63,12 +65,12 @@ class AuthLdap(object):
         self.LDAP_BIND_PASS = bind_pass
 
         self.LDAP_SERVER = "%s://%s:%s" % (ldap_server_type,
-                                               self.LDAP_SERVER_ADDRESS,
-                                               self.LDAP_SERVER_PORT)
+                                           self.LDAP_SERVER_ADDRESS,
+                                           self.LDAP_SERVER_PORT)
 
         self.BASE_DN = base_dn
         self.LDAP_FILTER = ldap_filter
-        self.SEARCH_SCOPE = ldap.__dict__['SCOPE_' + search_scope]
+        self.SEARCH_SCOPE = getattr(ldap, 'SCOPE_%s' % search_scope)
         self.attr_login = attr_login
 
     def authenticate_ldap(self, username, password):
@@ -88,7 +90,9 @@ class AuthLdap(object):
         if "," in username:
             raise LdapUsernameError("invalid character in username: ,")
         try:
-            ldap.set_option(ldap.OPT_X_TLS_CACERTDIR, '/etc/openldap/cacerts')
+            if hasattr(ldap,'OPT_X_TLS_CACERTDIR'):
+                ldap.set_option(ldap.OPT_X_TLS_CACERTDIR, 
+                                '/etc/openldap/cacerts')
             ldap.set_option(ldap.OPT_REFERRALS, ldap.OPT_OFF)
             ldap.set_option(ldap.OPT_RESTART, ldap.OPT_ON)
             ldap.set_option(ldap.OPT_TIMEOUT, 20)
