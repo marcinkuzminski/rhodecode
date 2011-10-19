@@ -422,7 +422,8 @@ class UsersGroup(Base, BaseModel):
                     Session.flush()
                     members_list = []
                     if v:
-                        for u_id in set(list(v)):
+                        v = [v] if isinstance(v, basestring) else v
+                        for u_id in set(v):
                             member = UsersGroupMember(users_group_id,u_id)
                             members_list.append(member)
                     setattr(users_group, 'members', members_list)
