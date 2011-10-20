@@ -36,6 +36,7 @@ from email.utils import formatdate
 from email import encoders
 
 
+
 class SmtpMailer(object):
     """SMTP mailer class
 
@@ -49,7 +50,7 @@ class SmtpMailer(object):
 
     """
 
-    def __init__(self, mail_from, user, passwd, mail_server,
+    def __init__(self, mail_from, user, passwd, mail_server,smtp_auth,
                     mail_port=None, ssl=False, tls=False, debug=False):
 
         self.mail_from = mail_from
@@ -60,6 +61,7 @@ class SmtpMailer(object):
         self.ssl = ssl
         self.tls = tls
         self.debug = debug
+        self.auth = smtp_auth
 
     def send(self, recipients=[], subject='', body='', attachment_files=None):
 
@@ -78,6 +80,8 @@ class SmtpMailer(object):
             smtp_serv.set_debuglevel(1)
 
         smtp_serv.ehlo()
+        if self.auth:
+            smtp_serv.esmtp_features["auth"] = self.auth
 
         #if server requires authorization you must provide login and password
         #but only if we have them

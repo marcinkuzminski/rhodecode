@@ -356,9 +356,10 @@ def send_email(recipients, subject, body):
     tls = str2bool(email_config.get('smtp_use_tls'))
     ssl = str2bool(email_config.get('smtp_use_ssl'))
     debug = str2bool(config.get('debug'))
+    smtp_auth = email_config.get('smtp_auth')
 
     try:
-        m = SmtpMailer(mail_from, user, passwd, mail_server,
+        m = SmtpMailer(mail_from, user, passwd, mail_server,smtp_auth,
                        mail_port, ssl, tls, debug=debug)
         m.send(recipients, subject, body)
     except:
