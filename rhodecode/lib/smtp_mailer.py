@@ -36,11 +36,10 @@ from email.utils import formatdate
 from email import encoders
 
 
-
 class SmtpMailer(object):
     """SMTP mailer class
 
-    mailer = SmtpMailer(mail_from, user, passwd, mail_server,
+    mailer = SmtpMailer(mail_from, user, passwd, mail_server, smtp_auth
                         mail_port, ssl, tls)
     mailer.send(recipients, subject, body, attachment_files)
 
@@ -50,8 +49,8 @@ class SmtpMailer(object):
 
     """
 
-    def __init__(self, mail_from, user, passwd, mail_server,smtp_auth,
-                    mail_port=None, ssl=False, tls=False, debug=False):
+    def __init__(self, mail_from, user, passwd, mail_server, smtp_auth=None,
+                 mail_port=None, ssl=False, tls=False, debug=False):
 
         self.mail_from = mail_from
         self.mail_server = mail_server
@@ -83,8 +82,8 @@ class SmtpMailer(object):
         if self.auth:
             smtp_serv.esmtp_features["auth"] = self.auth
 
-        #if server requires authorization you must provide login and password
-        #but only if we have them
+        # if server requires authorization you must provide login and password
+        # but only if we have them
         if self.user and self.passwd:
             smtp_serv.login(self.user, self.passwd)
 
@@ -160,6 +159,7 @@ class SmtpMailer(object):
         if isinstance(msg_file, str):
             return open(msg_file, "rb").read()
         else:
-            #just for safe seek to 0
+            # just for safe seek to 0
             msg_file.seek(0)
             return msg_file.read()
+
