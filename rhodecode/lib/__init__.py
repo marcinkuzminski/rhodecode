@@ -394,13 +394,12 @@ def get_current_revision(quiet=False):
     try:
         from vcs import get_repo
         from vcs.utils.helpers import get_scm
-        from vcs.exceptions import RepositoryError, VCSError
         repopath = os.path.join(os.path.dirname(__file__), '..', '..')
         scm = get_scm(repopath)[0]
         repo = get_repo(path=repopath, alias=scm)
         tip = repo.get_changeset()
         return (tip.revision, tip.short_id)
-    except (ImportError, RepositoryError, VCSError), err:
+    except Exception, err:
         if not quiet:
             print ("Cannot retrieve rhodecode's revision. Original error "
                    "was: %s" % err)

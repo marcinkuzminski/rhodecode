@@ -24,6 +24,8 @@ pdebug = false
 #smtp_port = 
 #smtp_use_tls = false
 #smtp_use_ssl = true
+# Specify available auth parameters here (e.g. LOGIN PLAIN CRAM-MD5, etc.)
+#smtp_auth = 
 
 [server:main]
 ##nr of threads to spawn
@@ -146,7 +148,7 @@ logview.pylons.util = #eee
 # SQLITE [default]
 sqlalchemy.db1.url = sqlite:///%(here)s/rhodecode.db
  
-# POSTGRES
+# POSTGRESQL
 # sqlalchemy.db1.url = postgresql://user:pass@localhost/rhodecode
 
 # MySQL
