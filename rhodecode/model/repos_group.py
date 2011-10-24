@@ -50,7 +50,7 @@ class ReposGroupModel(BaseModel):
         q = RhodeCodeUi.get_by_key('/').one()
         return q.ui_value
 
-    def __create_group(self, group_name, parent_id):
+    def __create_group(self, group_name):
         """
         makes repositories group on filesystem
 
@@ -58,44 +58,30 @@ class ReposGroupModel(BaseModel):
         :param parent_id:
         """
 
-        if parent_id:
-            paths = Group.get(parent_id).full_path.split(Group.url_sep())
-            parent_path = os.sep.join(paths)
-        else:
-            parent_path = ''
-
-        create_path = os.path.join(self.repos_path, parent_path, group_name)
+        create_path = os.path.join(self.repos_path, group_name)
         log.debug('creating new group in %s', create_path)
 
         if os.path.isdir(create_path):
             raise Exception('That directory already exists !')
 
-
         os.makedirs(create_path)
 
-
-    def __rename_group(self, old, old_parent_id, new, new_parent_id):
+    def __rename_group(self, old, new):
         """
         Renames a group on filesystem
-
+        
         :param group_name:
         """
+
+        if old == new:
+            log.debug('skipping group rename')
+            return
+
         log.debug('renaming repos group from %s to %s', old, new)
 
-        if new_parent_id:
-            paths = Group.get(new_parent_id).full_path.split(Group.url_sep())
-            new_parent_path = os.sep.join(paths)
-        else:
-            new_parent_path = ''
 
-        if old_parent_id:
-            paths = Group.get(old_parent_id).full_path.split(Group.url_sep())
-            old_parent_path = os.sep.join(paths)
-        else:
-            old_parent_path = ''
-
-        old_path = os.path.join(self.repos_path, old_parent_path, old)
-        new_path = os.path.join(self.repos_path, new_parent_path, new)
+        old_path = os.path.join(self.repos_path, old)
+        new_path = os.path.join(self.repos_path, new)
 
         log.debug('renaming repos paths from %s to %s', old_path, new_path)
 
@@ -107,27 +93,27 @@ class ReposGroupModel(BaseModel):
     def __delete_group(self, group):
         """
         Deletes a group from a filesystem
-
+        
         :param group: instance of group from database
         """
         paths = group.full_path.split(Group.url_sep())
         paths = os.sep.join(paths)
 
         rm_path = os.path.join(self.repos_path, paths)
-        os.rmdir(rm_path)
+        if os.path.isdir(rm_path):
+            # delete only if that path really exists
+            os.rmdir(rm_path)
 
     def create(self, form_data):
         try:
             new_repos_group = Group()
-            new_repos_group.group_name = form_data['group_name']
-            new_repos_group.group_description = \
-                form_data['group_description']
-            new_repos_group.group_parent_id = form_data['group_parent_id']
+            new_repos_group.group_description = form_data['group_description']
+            new_repos_group.parent_group = Group.get(form_data['group_parent_id'])
+            new_repos_group.group_name = new_repos_group.get_new_name(form_data['group_name'])
 
             self.sa.add(new_repos_group)
 
-            self.__create_group(form_data['group_name'],
-                                form_data['group_parent_id'])
+            self.__create_group(new_repos_group.group_name)
 
             self.sa.commit()
             return new_repos_group
@@ -140,23 +126,27 @@ class ReposGroupModel(BaseModel):
 
         try:
             repos_group = Group.get(repos_group_id)
-            old_name = repos_group.group_name
-            old_parent_id = repos_group.group_parent_id
+            old_path = repos_group.full_path
+                
+            # change properties
+            repos_group.group_description = form_data['group_description']
+            repos_group.parent_group = Group.get(form_data['group_parent_id'])
+            repos_group.group_name = repos_group.get_new_name(form_data['group_name'])
 
-            repos_group.group_name = form_data['group_name']
-            repos_group.group_description = \
-                form_data['group_description']
-            repos_group.group_parent_id = form_data['group_parent_id']
+            new_path = repos_group.full_path
 
             self.sa.add(repos_group)
 
-            if old_name != form_data['group_name'] or (old_parent_id !=
-                                                form_data['group_parent_id']):
-                self.__rename_group(old = old_name, old_parent_id = old_parent_id,
-                                    new = form_data['group_name'],
-                                    new_parent_id = form_data['group_parent_id'])
+            self.__rename_group(old_path, new_path)
+
+            # we need to get all repositories from this new group and 
+            # rename them accordingly to new group path
+            for r in repos_group.repositories:
+                r.repo_name = r.get_new_name(r.just_name)
+                self.sa.add(r)
 
             self.sa.commit()
+            return repos_group
         except:
             log.error(traceback.format_exc())
             self.sa.rollback()

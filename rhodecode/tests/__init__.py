@@ -77,8 +77,6 @@ class TestController(TestCase):
         self.assertEqual(response.session['rhodecode_user'].username, username)
         return response.follow()
 
-
-
     def checkSessionFlash(self, response, msg):
         self.assertTrue('flash' in response.session)
         self.assertTrue(msg in response.session['flash'][0][1])

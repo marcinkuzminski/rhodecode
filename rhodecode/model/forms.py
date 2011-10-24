@@ -193,12 +193,12 @@ class ValidPasswordsMatch(formencode.validators.FancyValidator):
 
 class ValidAuth(formencode.validators.FancyValidator):
     messages = {
-            'invalid_password':_('invalid password'),
-            'invalid_login':_('invalid user name'),
-            'disabled_account':_('Your account is disabled')
-
-            }
-    #error mapping
+        'invalid_password':_('invalid password'),
+        'invalid_login':_('invalid user name'),
+        'disabled_account':_('Your account is disabled')
+    }
+    
+    # error mapping
     e_dict = {'username':messages['invalid_login'],
               'password':messages['invalid_password']}
     e_dict_disable = {'username':messages['disabled_account']}
@@ -253,6 +253,7 @@ def ValidRepoName(edit, old_data):
                 # db key This is an actual just the name to store in the
                 # database
                 repo_name_full = group_path + Group.url_sep() + repo_name
+                
             else:
                 group_path = ''
                 repo_name_full = repo_name
@@ -616,16 +617,19 @@ def RepoForkForm(edit=False, old_data={}, supported_backends=BACKENDS.keys()):
 
     return _RepoForkForm
 
-def RepoSettingsForm(edit=False, old_data={}):
+def RepoSettingsForm(edit=False, old_data={}, supported_backends=BACKENDS.keys(),
+                     repo_groups=[]):
     class _RepoForm(formencode.Schema):
         allow_extra_fields = True
         filter_extra_fields = False
         repo_name = All(UnicodeString(strip=True, min=1, not_empty=True),
                         SlugifyName())
         description = UnicodeString(strip=True, min=1, not_empty=True)
+        repo_group = OneOf(repo_groups, hideList=True)
         private = StringBoolean(if_missing=False)
 
-        chained_validators = [ValidRepoName(edit, old_data), ValidPerms, ValidSettings]
+        chained_validators = [ValidRepoName(edit, old_data), ValidPerms, 
+                              ValidSettings]
     return _RepoForm
 
 

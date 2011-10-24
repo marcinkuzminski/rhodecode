@@ -26,7 +26,6 @@
 import logging
 import traceback
 import formencode
-from operator import itemgetter
 from formencode import htmlfill
 
 from paste.httpexceptions import HTTPInternalServerError
@@ -92,7 +91,7 @@ class ReposController(BaseController):
             return redirect(url('repos'))
 
         c.default_user_id = User.get_by_username('default').user_id
-        c.in_public_journal = self.sa.query(UserFollowing)\
+        c.in_public_journal = UserFollowing.query()\
             .filter(UserFollowing.user_id == c.default_user_id)\
             .filter(UserFollowing.follows_repository == c.repo_info).scalar()
 
@@ -110,30 +109,7 @@ class ReposController(BaseController):
             c.stats_percentage = '%.2f' % ((float((last_rev)) /
                                             c.repo_last_rev) * 100)
 
-        defaults = c.repo_info.get_dict()
-        group, repo_name = c.repo_info.groups_and_repo
-        defaults['repo_name'] = repo_name
-        defaults['repo_group'] = getattr(group[-1] if group else None,
-                                         'group_id', None)
-
-        #fill owner
-        if c.repo_info.user:
-            defaults.update({'user': c.repo_info.user.username})
-        else:
-            replacement_user = self.sa.query(User)\
-            .filter(User.admin == True).first().username
-            defaults.update({'user': replacement_user})
-
-        #fill repository users
-        for p in c.repo_info.repo_to_perm:
-            defaults.update({'u_perm_%s' % p.user.username:
-                             p.permission.permission_name})
-
-        #fill repository groups
-        for p in c.repo_info.users_group_to_perm:
-            defaults.update({'g_perm_%s' % p.users_group.users_group_name:
-                             p.permission.permission_name})
-
+        defaults = RepoModel()._get_defaults(repo_name)
         return defaults
 
     @HasPermissionAllDecorator('hg.admin')

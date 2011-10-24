@@ -30,11 +30,8 @@ import traceback
 from datetime import date
 
 from sqlalchemy import *
-from sqlalchemy.exc import DatabaseError
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.orm import relationship, backref, joinedload, class_mapper, \
-    validates
-from sqlalchemy.orm.interfaces import MapperExtension
+from sqlalchemy.orm import relationship, joinedload, class_mapper, validates
 from beaker.cache import cache_region, region_invalidate
 
 from vcs import get_backend
@@ -128,7 +125,8 @@ class BaseModel(object):
 
     @classmethod
     def get(cls, id_):
-        return cls.query().get(id_)
+        if id_:
+            return cls.query().get(id_)
 
     @classmethod
     def getAll(cls):
@@ -144,11 +142,11 @@ class BaseModel(object):
 class RhodeCodeSettings(Base, BaseModel):
     __tablename__ = 'rhodecode_settings'
     __table_args__ = (UniqueConstraint('app_settings_name'), {'extend_existing':True})
-    app_settings_id = Column("app_settings_id", Integer(), nullable = False, unique = True, default = None, primary_key = True)
-    app_settings_name = Column("app_settings_name", String(length = 255, convert_unicode = False, assert_unicode = None), nullable = True, unique = None, default = None)
-    _app_settings_value = Column("app_settings_value", String(length = 255, convert_unicode = False, assert_unicode = None), nullable = True, unique = None, default = None)
+    app_settings_id = Column("app_settings_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
+    app_settings_name = Column("app_settings_name", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    _app_settings_value = Column("app_settings_value", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
 
-    def __init__(self, k = '', v = ''):
+    def __init__(self, k='', v=''):
         self.app_settings_name = k
         self.app_settings_value = v
 
@@ -185,7 +183,7 @@ class RhodeCodeSettings(Base, BaseModel):
             .filter(cls.app_settings_name == ldap_key).scalar()
 
     @classmethod
-    def get_app_settings(cls, cache = False):
+    def get_app_settings(cls, cache=False):
 
         ret = cls.query()
 
@@ -202,7 +200,7 @@ class RhodeCodeSettings(Base, BaseModel):
         return settings
 
     @classmethod
-    def get_ldap_settings(cls, cache = False):
+    def get_ldap_settings(cls, cache=False):
         ret = cls.query()\
                 .filter(cls.app_settings_name.startswith('ldap_')).all()
         fd = {}
@@ -221,11 +219,11 @@ class RhodeCodeUi(Base, BaseModel):
     HOOK_PUSH = 'pretxnchangegroup.push_logger'
     HOOK_PULL = 'preoutgoing.pull_logger'
 
-    ui_id = Column("ui_id", Integer(), nullable = False, unique = True, default = None, primary_key = True)
-    ui_section = Column("ui_section", String(length = 255, convert_unicode = False, assert_unicode = None), nullable = True, unique = None, default = None)
-    ui_key = Column("ui_key", String(length = 255, convert_unicode = False, assert_unicode = None), nullable = True, unique = None, default = None)
-    ui_value = Column("ui_value", String(length = 255, convert_unicode = False, assert_unicode = None), nullable = True, unique = None, default = None)
-    ui_active = Column("ui_active", Boolean(), nullable = True, unique = None, default = True)
+    ui_id = Column("ui_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
+    ui_section = Column("ui_section", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    ui_key = Column("ui_key", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    ui_value = Column("ui_value", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    ui_active = Column("ui_active", Boolean(), nullable=True, unique=None, default=True)
 
 
     @classmethod
@@ -265,26 +263,26 @@ class RhodeCodeUi(Base, BaseModel):
 class User(Base, BaseModel):
     __tablename__ = 'users'
     __table_args__ = (UniqueConstraint('username'), UniqueConstraint('email'), {'extend_existing':True})
-    user_id = Column("user_id", Integer(), nullable = False, unique = True, default = None, primary_key = True)
-    username = Column("username", String(length = 255, convert_unicode = False, assert_unicode = None), nullable = True, unique = None, default = None)
-    password = Column("password", String(length = 255, convert_unicode = False, assert_unicode = None), nullable = True, unique = None, default = None)
-    active = Column("active", Boolean(), nullable = True, unique = None, default = None)
-    admin = Column("admin", Boolean(), nullable = True, unique = None, default = False)
-    name = Column("name", String(length = 255, convert_unicode = False, assert_unicode = None), nullable = True, unique = None, default = None)
-    lastname = Column("lastname", String(length = 255, convert_unicode = False, assert_unicode = None), nullable = True, unique = None, default = None)
-    email = Column("email", String(length = 255, convert_unicode = False, assert_unicode = None), nullable = True, unique = None, default = None)
-    last_login = Column("last_login", DateTime(timezone = False), nullable = True, unique = None, default = None)
-    ldap_dn = Column("ldap_dn", String(length = 255, convert_unicode = False, assert_unicode = None), nullable = True, unique = None, default = None)
-    api_key = Column("api_key", String(length = 255, convert_unicode = False, assert_unicode = None), nullable = True, unique = None, default = None)
+    user_id = Column("user_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
+    username = Column("username", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    password = Column("password", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    active = Column("active", Boolean(), nullable=True, unique=None, default=None)
+    admin = Column("admin", Boolean(), nullable=True, unique=None, default=False)
+    name = Column("name", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    lastname = Column("lastname", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    email = Column("email", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    last_login = Column("last_login", DateTime(timezone=False), nullable=True, unique=None, default=None)
+    ldap_dn = Column("ldap_dn", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    api_key = Column("api_key", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
 
-    user_log = relationship('UserLog', cascade = 'all')
-    user_perms = relationship('UserToPerm', primaryjoin = "User.user_id==UserToPerm.user_id", cascade = 'all')
+    user_log = relationship('UserLog', cascade='all')
+    user_perms = relationship('UserToPerm', primaryjoin="User.user_id==UserToPerm.user_id", cascade='all')
 
     repositories = relationship('Repository')
-    user_followers = relationship('UserFollowing', primaryjoin = 'UserFollowing.follows_user_id==User.user_id', cascade = 'all')
-    repo_to_perm = relationship('RepoToPerm', primaryjoin = 'RepoToPerm.user_id==User.user_id', cascade = 'all')
+    user_followers = relationship('UserFollowing', primaryjoin='UserFollowing.follows_user_id==User.user_id', cascade='all')
+    repo_to_perm = relationship('RepoToPerm', primaryjoin='RepoToPerm.user_id==User.user_id', cascade='all')
 
-    group_member = relationship('UsersGroupMember', cascade = 'all')
+    group_member = relationship('UsersGroupMember', cascade='all')
 
     @property
     def full_contact(self):
@@ -306,7 +304,7 @@ class User(Base, BaseModel):
             return self.__class__.__name__
 
     @classmethod
-    def get_by_username(cls, username, case_insensitive = False):
+    def get_by_username(cls, username, case_insensitive=False):
         if case_insensitive:
             return Session.query(cls).filter(cls.username.ilike(username)).scalar()
         else:
@@ -347,13 +345,13 @@ class User(Base, BaseModel):
 class UserLog(Base, BaseModel):
     __tablename__ = 'user_logs'
     __table_args__ = {'extend_existing':True}
-    user_log_id = Column("user_log_id", Integer(), nullable = False, unique = True, default = None, primary_key = True)
-    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable = False, unique = None, default = None)
-    repository_id = Column("repository_id", Integer(), ForeignKey('repositories.repo_id'), nullable = False, unique = None, default = None)
-    repository_name = Column("repository_name", String(length = 255, convert_unicode = False, assert_unicode = None), nullable = True, unique = None, default = None)
-    user_ip = Column("user_ip", String(length = 255, convert_unicode = False, assert_unicode = None), nullable = True, unique = None, default = None)
-    action = Column("action", UnicodeText(length = 1200000, convert_unicode = False, assert_unicode = None), nullable = True, unique = None, default = None)
-    action_date = Column("action_date", DateTime(timezone = False), nullable = True, unique = None, default = None)
+    user_log_id = Column("user_log_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
+    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None, default=None)
+    repository_id = Column("repository_id", Integer(), ForeignKey('repositories.repo_id'), nullable=False, unique=None, default=None)
+    repository_name = Column("repository_name", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    user_ip = Column("user_ip", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    action = Column("action", UnicodeText(length=1200000, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    action_date = Column("action_date", DateTime(timezone=False), nullable=True, unique=None, default=None)
 
     @property
     def action_as_day(self):
@@ -367,17 +365,17 @@ class UsersGroup(Base, BaseModel):
     __tablename__ = 'users_groups'
     __table_args__ = {'extend_existing':True}
 
-    users_group_id = Column("users_group_id", Integer(), nullable = False, unique = True, default = None, primary_key = True)
-    users_group_name = Column("users_group_name", String(length = 255, convert_unicode = False, assert_unicode = None), nullable = False, unique = True, default = None)
-    users_group_active = Column("users_group_active", Boolean(), nullable = True, unique = None, default = None)
+    users_group_id = Column("users_group_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
+    users_group_name = Column("users_group_name", String(length=255, convert_unicode=False, assert_unicode=None), nullable=False, unique=True, default=None)
+    users_group_active = Column("users_group_active", Boolean(), nullable=True, unique=None, default=None)
 
-    members = relationship('UsersGroupMember', cascade = "all, delete, delete-orphan", lazy = "joined")
+    members = relationship('UsersGroupMember', cascade="all, delete, delete-orphan", lazy="joined")
 
     def __repr__(self):
         return '<userGroup(%s)>' % (self.users_group_name)
 
     @classmethod
-    def get_by_group_name(cls, group_name, cache = False, case_insensitive = False):
+    def get_by_group_name(cls, group_name, cache=False, case_insensitive=False):
         if case_insensitive:
             gr = cls.query()\
                 .filter(cls.users_group_name.ilike(group_name))
@@ -391,7 +389,7 @@ class UsersGroup(Base, BaseModel):
 
 
     @classmethod
-    def get(cls, users_group_id, cache = False):
+    def get(cls, users_group_id, cache=False):
         users_group = cls.query()
         if cache:
             users_group = users_group.options(FromCache("sql_cache_short",
@@ -417,7 +415,7 @@ class UsersGroup(Base, BaseModel):
     def update(cls, users_group_id, form_data):
 
         try:
-            users_group = cls.get(users_group_id, cache = False)
+            users_group = cls.get(users_group_id, cache=False)
 
             for k, v in form_data.items():
                 if k == 'users_group_members':
@@ -452,7 +450,7 @@ class UsersGroup(Base, BaseModel):
                 raise UsersGroupsAssignedException('Group assigned to %s' %
                                                    assigned_groups)
 
-            users_group = cls.get(users_group_id, cache = False)
+            users_group = cls.get(users_group_id, cache=False)
             Session.delete(users_group)
             Session.commit()
         except:
@@ -464,14 +462,14 @@ class UsersGroupMember(Base, BaseModel):
     __tablename__ = 'users_groups_members'
     __table_args__ = {'extend_existing':True}
 
-    users_group_member_id = Column("users_group_member_id", Integer(), nullable = False, unique = True, default = None, primary_key = True)
-    users_group_id = Column("users_group_id", Integer(), ForeignKey('users_groups.users_group_id'), nullable = False, unique = None, default = None)
-    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable = False, unique = None, default = None)
+    users_group_member_id = Column("users_group_member_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
+    users_group_id = Column("users_group_id", Integer(), ForeignKey('users_groups.users_group_id'), nullable=False, unique=None, default=None)
+    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None, default=None)
 
-    user = relationship('User', lazy = 'joined')
+    user = relationship('User', lazy='joined')
     users_group = relationship('UsersGroup')
 
-    def __init__(self, gr_id = '', u_id = ''):
+    def __init__(self, gr_id='', u_id=''):
         self.users_group_id = gr_id
         self.user_id = u_id
 
@@ -488,31 +486,31 @@ class Repository(Base, BaseModel):
     __tablename__ = 'repositories'
     __table_args__ = (UniqueConstraint('repo_name'), {'extend_existing':True},)
 
-    repo_id = Column("repo_id", Integer(), nullable = False, unique = True, default = None, primary_key = True)
-    repo_name = Column("repo_name", String(length = 255, convert_unicode = False, assert_unicode = None), nullable = False, unique = True, default = None)
-    clone_uri = Column("clone_uri", String(length = 255, convert_unicode = False, assert_unicode = None), nullable = True, unique = False, default = None)
-    repo_type = Column("repo_type", String(length = 255, convert_unicode = False, assert_unicode = None), nullable = False, unique = False, default = 'hg')
-    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable = False, unique = False, default = None)
-    private = Column("private", Boolean(), nullable = True, unique = None, default = None)
-    enable_statistics = Column("statistics", Boolean(), nullable = True, unique = None, default = True)
-    enable_downloads = Column("downloads", Boolean(), nullable = True, unique = None, default = True)
-    description = Column("description", String(length = 10000, convert_unicode = False, assert_unicode = None), nullable = True, unique = None, default = None)
-    created_on = Column('created_on', DateTime(timezone = False), nullable = True, unique = None, default = datetime.datetime.now)
+    repo_id = Column("repo_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
+    repo_name = Column("repo_name", String(length=255, convert_unicode=False, assert_unicode=None), nullable=False, unique=True, default=None)
+    clone_uri = Column("clone_uri", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=False, default=None)
+    repo_type = Column("repo_type", String(length=255, convert_unicode=False, assert_unicode=None), nullable=False, unique=False, default='hg')
+    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=False, default=None)
+    private = Column("private", Boolean(), nullable=True, unique=None, default=None)
+    enable_statistics = Column("statistics", Boolean(), nullable=True, unique=None, default=True)
+    enable_downloads = Column("downloads", Boolean(), nullable=True, unique=None, default=True)
+    description = Column("description", String(length=10000, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    created_on = Column('created_on', DateTime(timezone=False), nullable=True, unique=None, default=datetime.datetime.now)
 
-    fork_id = Column("fork_id", Integer(), ForeignKey('repositories.repo_id'), nullable = True, unique = False, default = None)
-    group_id = Column("group_id", Integer(), ForeignKey('groups.group_id'), nullable = True, unique = False, default = None)
+    fork_id = Column("fork_id", Integer(), ForeignKey('repositories.repo_id'), nullable=True, unique=False, default=None)
+    group_id = Column("group_id", Integer(), ForeignKey('groups.group_id'), nullable=True, unique=False, default=None)
 
 
     user = relationship('User')
-    fork = relationship('Repository', remote_side = repo_id)
+    fork = relationship('Repository', remote_side=repo_id)
     group = relationship('Group')
-    repo_to_perm = relationship('RepoToPerm', cascade = 'all', order_by = 'RepoToPerm.repo_to_perm_id')
-    users_group_to_perm = relationship('UsersGroupRepoToPerm', cascade = 'all')
-    stats = relationship('Statistics', cascade = 'all', uselist = False)
+    repo_to_perm = relationship('RepoToPerm', cascade='all', order_by='RepoToPerm.repo_to_perm_id')
+    users_group_to_perm = relationship('UsersGroupRepoToPerm', cascade='all')
+    stats = relationship('Statistics', cascade='all', uselist=False)
 
-    followers = relationship('UserFollowing', primaryjoin = 'UserFollowing.follows_repo_id==Repository.repo_id', cascade = 'all')
+    followers = relationship('UserFollowing', primaryjoin='UserFollowing.follows_repo_id==Repository.repo_id', cascade='all')
 
-    logs = relationship('UserLog', cascade = 'all')
+    logs = relationship('UserLog', cascade='all')
 
     def __repr__(self):
         return "<%s('%s:%s')>" % (self.__class__.__name__,
@@ -730,13 +728,13 @@ class Repository(Base, BaseModel):
 
         if alias == 'hg':
 
-            repo = backend(safe_str(repo_full_path), create = False,
-                           baseui = self._ui)
+            repo = backend(safe_str(repo_full_path), create=False,
+                           baseui=self._ui)
             #skip hidden web repository
             if repo._get_hidden():
                 return
         else:
-            repo = backend(repo_full_path, create = False)
+            repo = backend(repo_full_path, create=False)
 
         return repo
 
@@ -747,15 +745,15 @@ class Group(Base, BaseModel):
                       CheckConstraint('group_id != group_parent_id'), {'extend_existing':True},)
     __mapper_args__ = {'order_by':'group_name'}
 
-    group_id = Column("group_id", Integer(), nullable = False, unique = True, default = None, primary_key = True)
-    group_name = Column("group_name", String(length = 255, convert_unicode = False, assert_unicode = None), nullable = False, unique = True, default = None)
-    group_parent_id = Column("group_parent_id", Integer(), ForeignKey('groups.group_id'), nullable = True, unique = None, default = None)
-    group_description = Column("group_description", String(length = 10000, convert_unicode = False, assert_unicode = None), nullable = True, unique = None, default = None)
+    group_id = Column("group_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
+    group_name = Column("group_name", String(length=255, convert_unicode=False, assert_unicode=None), nullable=False, unique=True, default=None)
+    group_parent_id = Column("group_parent_id", Integer(), ForeignKey('groups.group_id'), nullable=True, unique=None, default=None)
+    group_description = Column("group_description", String(length=10000, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
 
-    parent_group = relationship('Group', remote_side = group_id)
+    parent_group = relationship('Group', remote_side=group_id)
 
 
-    def __init__(self, group_name = '', parent_group = None):
+    def __init__(self, group_name='', parent_group=None):
         self.group_name = group_name
         self.parent_group = parent_group
 
@@ -773,7 +771,7 @@ class Group(Base, BaseModel):
         repo_groups.extend([(x.group_id, _name(x.full_path_splitted))
                               for x in cls.query().all()])
 
-        repo_groups = sorted(repo_groups, key = lambda t: t[1].split(sep)[0])
+        repo_groups = sorted(repo_groups, key=lambda t: t[1].split(sep)[0])
         return repo_groups
 
     @classmethod
@@ -781,7 +779,7 @@ class Group(Base, BaseModel):
         return '/'
 
     @classmethod
-    def get_by_group_name(cls, group_name, cache = False, case_insensitive = False):
+    def get_by_group_name(cls, group_name, cache=False, case_insensitive=False):
         if case_insensitive:
             gr = cls.query()\
                 .filter(cls.group_name.ilike(group_name))
@@ -827,8 +825,7 @@ class Group(Base, BaseModel):
 
     @property
     def full_path(self):
-        return Group.url_sep().join([g.group_name for g in self.parents] +
-                        [self.group_name])
+        return self.group_name
 
     @property
     def full_path_splitted(self):
@@ -858,16 +855,17 @@ class Group(Base, BaseModel):
 
         :param group_name:
         """
-        path_prefix = self.parent_group.full_path_splitted if self.parent_group else []
+        path_prefix = (self.parent_group.full_path_splitted if 
+                       self.parent_group else [])
         return Group.url_sep().join(path_prefix + [group_name])
 
 
 class Permission(Base, BaseModel):
     __tablename__ = 'permissions'
     __table_args__ = {'extend_existing':True}
-    permission_id = Column("permission_id", Integer(), nullable = False, unique = True, default = None, primary_key = True)
-    permission_name = Column("permission_name", String(length = 255, convert_unicode = False, assert_unicode = None), nullable = True, unique = None, default = None)
-    permission_longname = Column("permission_longname", String(length = 255, convert_unicode = False, assert_unicode = None), nullable = True, unique = None, default = None)
+    permission_id = Column("permission_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
+    permission_name = Column("permission_name", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    permission_longname = Column("permission_longname", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
 
     def __repr__(self):
         return "<%s('%s:%s')>" % (self.__class__.__name__,
@@ -880,10 +878,10 @@ class Permission(Base, BaseModel):
 class RepoToPerm(Base, BaseModel):
     __tablename__ = 'repo_to_perm'
     __table_args__ = (UniqueConstraint('user_id', 'repository_id'), {'extend_existing':True})
-    repo_to_perm_id = Column("repo_to_perm_id", Integer(), nullable = False, unique = True, default = None, primary_key = True)
-    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable = False, unique = None, default = None)
-    permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable = False, unique = None, default = None)
-    repository_id = Column("repository_id", Integer(), ForeignKey('repositories.repo_id'), nullable = False, unique = None, default = None)
+    repo_to_perm_id = Column("repo_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
+    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None, default=None)
+    permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable=False, unique=None, default=None)
+    repository_id = Column("repository_id", Integer(), ForeignKey('repositories.repo_id'), nullable=False, unique=None, default=None)
 
     user = relationship('User')
     permission = relationship('Permission')
@@ -892,9 +890,9 @@ class RepoToPerm(Base, BaseModel):
 class UserToPerm(Base, BaseModel):
     __tablename__ = 'user_to_perm'
     __table_args__ = (UniqueConstraint('user_id', 'permission_id'), {'extend_existing':True})
-    user_to_perm_id = Column("user_to_perm_id", Integer(), nullable = False, unique = True, default = None, primary_key = True)
-    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable = False, unique = None, default = None)
-    permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable = False, unique = None, default = None)
+    user_to_perm_id = Column("user_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
+    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None, default=None)
+    permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable=False, unique=None, default=None)
 
     user = relationship('User')
     permission = relationship('Permission')
@@ -937,10 +935,10 @@ class UserToPerm(Base, BaseModel):
 class UsersGroupRepoToPerm(Base, BaseModel):
     __tablename__ = 'users_group_repo_to_perm'
     __table_args__ = (UniqueConstraint('repository_id', 'users_group_id', 'permission_id'), {'extend_existing':True})
-    users_group_to_perm_id = Column("users_group_to_perm_id", Integer(), nullable = False, unique = True, default = None, primary_key = True)
-    users_group_id = Column("users_group_id", Integer(), ForeignKey('users_groups.users_group_id'), nullable = False, unique = None, default = None)
-    permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable = False, unique = None, default = None)
-    repository_id = Column("repository_id", Integer(), ForeignKey('repositories.repo_id'), nullable = False, unique = None, default = None)
+    users_group_to_perm_id = Column("users_group_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
+    users_group_id = Column("users_group_id", Integer(), ForeignKey('users_groups.users_group_id'), nullable=False, unique=None, default=None)
+    permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable=False, unique=None, default=None)
+    repository_id = Column("repository_id", Integer(), ForeignKey('repositories.repo_id'), nullable=False, unique=None, default=None)
 
     users_group = relationship('UsersGroup')
     permission = relationship('Permission')
@@ -951,9 +949,9 @@ class UsersGroupRepoToPerm(Base, BaseModel):
 
 class UsersGroupToPerm(Base, BaseModel):
     __tablename__ = 'users_group_to_perm'
-    users_group_to_perm_id = Column("users_group_to_perm_id", Integer(), nullable = False, unique = True, default = None, primary_key = True)
-    users_group_id = Column("users_group_id", Integer(), ForeignKey('users_groups.users_group_id'), nullable = False, unique = None, default = None)
-    permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable = False, unique = None, default = None)
+    users_group_to_perm_id = Column("users_group_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
+    users_group_id = Column("users_group_id", Integer(), ForeignKey('users_groups.users_group_id'), nullable=False, unique=None, default=None)
+    permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable=False, unique=None, default=None)
 
     users_group = relationship('UsersGroup')
     permission = relationship('Permission')
@@ -1001,10 +999,10 @@ class GroupToPerm(Base, BaseModel):
     __tablename__ = 'group_to_perm'
     __table_args__ = (UniqueConstraint('group_id', 'permission_id'), {'extend_existing':True})
 
-    group_to_perm_id = Column("group_to_perm_id", Integer(), nullable = False, unique = True, default = None, primary_key = True)
-    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable = False, unique = None, default = None)
-    permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable = False, unique = None, default = None)
-    group_id = Column("group_id", Integer(), ForeignKey('groups.group_id'), nullable = False, unique = None, default = None)
+    group_to_perm_id = Column("group_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
+    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None, default=None)
+    permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable=False, unique=None, default=None)
+    group_id = Column("group_id", Integer(), ForeignKey('groups.group_id'), nullable=False, unique=None, default=None)
 
     user = relationship('User')
     permission = relationship('Permission')
@@ -1013,14 +1011,14 @@ class GroupToPerm(Base, BaseModel):
 class Statistics(Base, BaseModel):
     __tablename__ = 'statistics'
     __table_args__ = (UniqueConstraint('repository_id'), {'extend_existing':True})
-    stat_id = Column("stat_id", Integer(), nullable = False, unique = True, default = None, primary_key = True)
-    repository_id = Column("repository_id", Integer(), ForeignKey('repositories.repo_id'), nullable = False, unique = True, default = None)
-    stat_on_revision = Column("stat_on_revision", Integer(), nullable = False)
-    commit_activity = Column("commit_activity", LargeBinary(1000000), nullable = False)#JSON data
-    commit_activity_combined = Column("commit_activity_combined", LargeBinary(), nullable = False)#JSON data
-    languages = Column("languages", LargeBinary(1000000), nullable = False)#JSON data
+    stat_id = Column("stat_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
+    repository_id = Column("repository_id", Integer(), ForeignKey('repositories.repo_id'), nullable=False, unique=True, default=None)
+    stat_on_revision = Column("stat_on_revision", Integer(), nullable=False)
+    commit_activity = Column("commit_activity", LargeBinary(1000000), nullable=False)#JSON data
+    commit_activity_combined = Column("commit_activity_combined", LargeBinary(), nullable=False)#JSON data
+    languages = Column("languages", LargeBinary(1000000), nullable=False)#JSON data
 
-    repository = relationship('Repository', single_parent = True)
+    repository = relationship('Repository', single_parent=True)
 
 class UserFollowing(Base, BaseModel):
     __tablename__ = 'user_followings'
@@ -1028,16 +1026,16 @@ class UserFollowing(Base, BaseModel):
                       UniqueConstraint('user_id', 'follows_user_id')
                       , {'extend_existing':True})
 
-    user_following_id = Column("user_following_id", Integer(), nullable = False, unique = True, default = None, primary_key = True)
-    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable = False, unique = None, default = None)
-    follows_repo_id = Column("follows_repository_id", Integer(), ForeignKey('repositories.repo_id'), nullable = True, unique = None, default = None)
-    follows_user_id = Column("follows_user_id", Integer(), ForeignKey('users.user_id'), nullable = True, unique = None, default = None)
-    follows_from = Column('follows_from', DateTime(timezone = False), nullable = True, unique = None, default = datetime.datetime.now)
+    user_following_id = Column("user_following_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
+    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None, default=None)
+    follows_repo_id = Column("follows_repository_id", Integer(), ForeignKey('repositories.repo_id'), nullable=True, unique=None, default=None)
+    follows_user_id = Column("follows_user_id", Integer(), ForeignKey('users.user_id'), nullable=True, unique=None, default=None)
+    follows_from = Column('follows_from', DateTime(timezone=False), nullable=True, unique=None, default=datetime.datetime.now)
 
-    user = relationship('User', primaryjoin = 'User.user_id==UserFollowing.user_id')
+    user = relationship('User', primaryjoin='User.user_id==UserFollowing.user_id')
 
-    follows_user = relationship('User', primaryjoin = 'User.user_id==UserFollowing.follows_user_id')
-    follows_repository = relationship('Repository', order_by = 'Repository.repo_name')
+    follows_user = relationship('User', primaryjoin='User.user_id==UserFollowing.follows_user_id')
+    follows_repository = relationship('Repository', order_by='Repository.repo_name')
 
 
     @classmethod
@@ -1047,13 +1045,13 @@ class UserFollowing(Base, BaseModel):
 class CacheInvalidation(Base, BaseModel):
     __tablename__ = 'cache_invalidation'
     __table_args__ = (UniqueConstraint('cache_key'), {'extend_existing':True})
-    cache_id = Column("cache_id", Integer(), nullable = False, unique = True, default = None, primary_key = True)
-    cache_key = Column("cache_key", String(length = 255, convert_unicode = False, assert_unicode = None), nullable = True, unique = None, default = None)
-    cache_args = Column("cache_args", String(length = 255, convert_unicode = False, assert_unicode = None), nullable = True, unique = None, default = None)
-    cache_active = Column("cache_active", Boolean(), nullable = True, unique = None, default = False)
+    cache_id = Column("cache_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
+    cache_key = Column("cache_key", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    cache_args = Column("cache_args", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    cache_active = Column("cache_active", Boolean(), nullable=True, unique=None, default=False)
 
 
-    def __init__(self, cache_key, cache_args = ''):
+    def __init__(self, cache_key, cache_args=''):
         self.cache_key = cache_key
         self.cache_args = cache_args
         self.cache_active = False
@@ -1065,6 +1063,7 @@ class CacheInvalidation(Base, BaseModel):
 class DbMigrateVersion(Base, BaseModel):
     __tablename__ = 'db_migrate_version'
     __table_args__ = {'extend_existing':True}
-    repository_id = Column('repository_id', String(250), primary_key = True)
+    repository_id = Column('repository_id', String(250), primary_key=True)
     repository_path = Column('repository_path', Text)
     version = Column('version', Integer)
+

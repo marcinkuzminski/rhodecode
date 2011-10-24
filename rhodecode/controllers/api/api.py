@@ -2,7 +2,8 @@ import traceback
 import logging
 
 from rhodecode.controllers.api import JSONRPCController, JSONRPCError
-from rhodecode.lib.auth import HasPermissionAllDecorator, HasPermissionAnyDecorator
+from rhodecode.lib.auth import HasPermissionAllDecorator, \
+    HasPermissionAnyDecorator
 from rhodecode.model.scm import ScmModel
 
 from rhodecode.model.db import User, UsersGroup, Group, Repository
@@ -65,14 +66,14 @@ class ApiController(JSONRPCController):
         if not user:
             return None
 
-        return dict(id = user.user_id,
-                        username = user.username,
-                        firstname = user.name,
-                        lastname = user.lastname,
-                        email = user.email,
-                        active = user.active,
-                        admin = user.admin,
-                        ldap = user.ldap_dn)
+        return dict(id=user.user_id,
+                        username=user.username,
+                        firstname=user.name,
+                        lastname=user.lastname,
+                        email=user.email,
+                        active=user.active,
+                        admin=user.admin,
+                        ldap=user.ldap_dn)
 
     @HasPermissionAllDecorator('hg.admin')
     def get_users(self, apiuser):
@@ -84,19 +85,19 @@ class ApiController(JSONRPCController):
 
         result = []
         for user in User.getAll():
-            result.append(dict(id = user.user_id,
-                                username = user.username,
-                                firstname = user.name,
-                                lastname = user.lastname,
-                                email = user.email,
-                                active = user.active,
-                                admin = user.admin,
-                                ldap = user.ldap_dn))
+            result.append(dict(id=user.user_id,
+                                username=user.username,
+                                firstname=user.name,
+                                lastname=user.lastname,
+                                email=user.email,
+                                active=user.active,
+                                admin=user.admin,
+                                ldap=user.ldap_dn))
         return result
 
     @HasPermissionAllDecorator('hg.admin')
     def create_user(self, apiuser, username, password, firstname,
-                    lastname, email, active = True, admin = False, ldap_dn = None):
+                    lastname, email, active=True, admin=False, ldap_dn=None):
         """
         Create new user
 
@@ -115,16 +116,16 @@ class ApiController(JSONRPCController):
             raise JSONRPCError("user %s already exist" % username)
 
         try:
-            form_data = dict(username = username,
-                             password = password,
-                             active = active,
-                             admin = admin,
-                             name = firstname,
-                             lastname = lastname,
-                             email = email,
-                             ldap_dn = ldap_dn)
+            form_data = dict(username=username,
+                             password=password,
+                             active=active,
+                             admin=admin,
+                             name=firstname,
+                             lastname=lastname,
+                             email=email,
+                             ldap_dn=ldap_dn)
             UserModel().create_ldap(username, password, ldap_dn, form_data)
-            return dict(msg = 'created new user %s' % username)
+            return dict(msg='created new user %s' % username)
         except Exception:
             log.error(traceback.format_exc())
             raise JSONRPCError('failed to create user %s' % username)
@@ -145,19 +146,19 @@ class ApiController(JSONRPCController):
         members = []
         for user in users_group.members:
             user = user.user
-            members.append(dict(id = user.user_id,
-                            username = user.username,
-                            firstname = user.name,
-                            lastname = user.lastname,
-                            email = user.email,
-                            active = user.active,
-                            admin = user.admin,
-                            ldap = user.ldap_dn))
+            members.append(dict(id=user.user_id,
+                            username=user.username,
+                            firstname=user.name,
+                            lastname=user.lastname,
+                            email=user.email,
+                            active=user.active,
+                            admin=user.admin,
+                            ldap=user.ldap_dn))
 
-        return dict(id = users_group.users_group_id,
-                    name = users_group.users_group_name,
-                    active = users_group.users_group_active,
-                    members = members)
+        return dict(id=users_group.users_group_id,
+                    name=users_group.users_group_name,
+                    active=users_group.users_group_active,
+                    members=members)
 
     @HasPermissionAllDecorator('hg.admin')
     def get_users_groups(self, apiuser):
@@ -172,23 +173,23 @@ class ApiController(JSONRPCController):
             members = []
             for user in users_group.members:
                 user = user.user
-                members.append(dict(id = user.user_id,
-                                username = user.username,
-                                firstname = user.name,
-                                lastname = user.lastname,
-                                email = user.email,
-                                active = user.active,
-                                admin = user.admin,
-                                ldap = user.ldap_dn))
+                members.append(dict(id=user.user_id,
+                                username=user.username,
+                                firstname=user.name,
+                                lastname=user.lastname,
+                                email=user.email,
+                                active=user.active,
+                                admin=user.admin,
+                                ldap=user.ldap_dn))
 
-            result.append(dict(id = users_group.users_group_id,
-                                name = users_group.users_group_name,
-                                active = users_group.users_group_active,
-                                members = members))
+            result.append(dict(id=users_group.users_group_id,
+                                name=users_group.users_group_name,
+                                active=users_group.users_group_active,
+                                members=members))
         return result
 
     @HasPermissionAllDecorator('hg.admin')
-    def create_users_group(self, apiuser, name, active = True):
+    def create_users_group(self, apiuser, name, active=True):
         """
         Creates an new usergroup
 
@@ -200,11 +201,11 @@ class ApiController(JSONRPCController):
             raise JSONRPCError("users group %s already exist" % name)
 
         try:
-            form_data = dict(users_group_name = name,
-                             users_group_active = active)
+            form_data = dict(users_group_name=name,
+                             users_group_active=active)
             ug = UsersGroup.create(form_data)
-            return dict(id = ug.users_group_id,
-                        msg = 'created new users group %s' % name)
+            return dict(id=ug.users_group_id,
+                        msg='created new users group %s' % name)
         except Exception:
             log.error(traceback.format_exc())
             raise JSONRPCError('failed to create group %s' % name)
@@ -231,8 +232,8 @@ class ApiController(JSONRPCController):
 
             ugm = UsersGroupModel().add_user_to_group(users_group, user)
 
-            return dict(id = ugm.users_group_member_id,
-                        msg = 'created new users group member')
+            return dict(id=ugm.users_group_member_id,
+                        msg='created new users group member')
         except Exception:
             log.error(traceback.format_exc())
             raise JSONRPCError('failed to create users group member')
@@ -255,30 +256,30 @@ class ApiController(JSONRPCController):
         for user in repo.repo_to_perm:
             perm = user.permission.permission_name
             user = user.user
-            members.append(dict(type_ = "user",
-                                    id = user.user_id,
-                                    username = user.username,
-                                    firstname = user.name,
-                                    lastname = user.lastname,
-                                    email = user.email,
-                                    active = user.active,
-                                    admin = user.admin,
-                                    ldap = user.ldap_dn,
-                                    permission = perm))
+            members.append(dict(type_="user",
+                                    id=user.user_id,
+                                    username=user.username,
+                                    firstname=user.name,
+                                    lastname=user.lastname,
+                                    email=user.email,
+                                    active=user.active,
+                                    admin=user.admin,
+                                    ldap=user.ldap_dn,
+                                    permission=perm))
         for users_group in repo.users_group_to_perm:
             perm = users_group.permission.permission_name
             users_group = users_group.users_group
-            members.append(dict(type_ = "users_group",
-                                    id = users_group.users_group_id,
-                                    name = users_group.users_group_name,
-                                    active = users_group.users_group_active,
-                                    permission = perm))
+            members.append(dict(type_="users_group",
+                                    id=users_group.users_group_id,
+                                    name=users_group.users_group_name,
+                                    active=users_group.users_group_active,
+                                    permission=perm))
 
-        return dict(id = repo.repo_id,
-                    name = repo.repo_name,
-                    type = repo.repo_type,
-                    description = repo.description,
-                    members = members)
+        return dict(id=repo.repo_id,
+                    name=repo.repo_name,
+                    type=repo.repo_type,
+                    description=repo.description,
+                    members=members)
 
     @HasPermissionAnyDecorator('hg.admin')
     def get_repos(self, apiuser):
@@ -290,15 +291,15 @@ class ApiController(JSONRPCController):
 
         result = []
         for repository in Repository.getAll():
-            result.append(dict(id = repository.repo_id,
-                                name = repository.repo_name,
-                                type = repository.repo_type,
-                                description = repository.description))
+            result.append(dict(id=repository.repo_id,
+                                name=repository.repo_name,
+                                type=repository.repo_type,
+                                description=repository.description))
         return result
 
     @HasPermissionAnyDecorator('hg.admin', 'hg.create.repository')
-    def create_repo(self, apiuser, name, owner_name, description = '', repo_type = 'hg', \
-                    private = False):
+    def create_repo(self, apiuser, name, owner_name, description='', 
+                    repo_type='hg', private=False):
         """
         Create a repository
 
@@ -326,18 +327,18 @@ class ApiController(JSONRPCController):
             for g in groups:
                 group = Group.get_by_group_name(g)
                 if not group:
-                    group = ReposGroupModel().create(dict(group_name = g,
-                                                  group_description = '',
-                                                  group_parent_id = parent_id))
+                    group = ReposGroupModel().create(dict(group_name=g,
+                                                  group_description='',
+                                                  group_parent_id=parent_id))
                 parent_id = group.group_id
 
-            RepoModel().create(dict(repo_name = real_name,
-                                     repo_name_full = name,
-                                     description = description,
-                                     private = private,
-                                     repo_type = repo_type,
-                                     repo_group = parent_id,
-                                     clone_uri = None), owner)
+            RepoModel().create(dict(repo_name=real_name,
+                                     repo_name_full=name,
+                                     description=description,
+                                     private=private,
+                                     repo_type=repo_type,
+                                     repo_group=parent_id,
+                                     clone_uri=None), owner)
         except Exception:
             log.error(traceback.format_exc())
             raise JSONRPCError('failed to create repository %s' % name)
@@ -364,9 +365,10 @@ class ApiController(JSONRPCController):
             except NoResultFound:
                 raise JSONRPCError('unknown user %s' % user)
 
-            RepositoryPermissionModel().update_or_delete_user_permission(repo, user, perm)
+            RepositoryPermissionModel()\
+                .update_or_delete_user_permission(repo, user, perm)
         except Exception:
             log.error(traceback.format_exc())
             raise JSONRPCError('failed to edit permission %(repo)s for %(user)s'
-                            % dict(user = user_name, repo = repo_name))
+                            % dict(user=user_name, repo=repo_name))
 

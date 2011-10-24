@@ -94,6 +94,46 @@ class RepoModel(BaseModel):
                                         for gr in users_groups])
         return users_groups_array
 
+    def _get_defaults(self, repo_name):
+        """
+        Get's information about repository, and returns a dict for 
+        usage in forms
+        
+        :param repo_name:
+        """
+
+        repo_info = Repository.get_by_repo_name(repo_name)
+
+        if repo_info is None:
+            return None
+
+        defaults = repo_info.get_dict()
+        group, repo_name = repo_info.groups_and_repo
+        defaults['repo_name'] = repo_name
+        defaults['repo_group'] = getattr(group[-1] if group else None,
+                                         'group_id', None)
+
+        # fill owner
+        if repo_info.user:
+            defaults.update({'user': repo_info.user.username})
+        else:
+            replacement_user = User.query().filter(User.admin ==
+                                                   True).first().username
+            defaults.update({'user': replacement_user})
+
+        # fill repository users
+        for p in repo_info.repo_to_perm:
+            defaults.update({'u_perm_%s' % p.user.username:
+                             p.permission.permission_name})
+
+        # fill repository groups
+        for p in repo_info.users_group_to_perm:
+            defaults.update({'g_perm_%s' % p.users_group.users_group_name:
+                             p.permission.permission_name})
+
+        return defaults
+
+
     def update(self, repo_name, form_data):
         try:
             cur_repo = self.get_by_repo_name(repo_name, cache=False)
@@ -151,7 +191,7 @@ class RepoModel(BaseModel):
                 elif k == 'repo_name':
                     pass
                 elif k == 'repo_group':
-                    cur_repo.group_id = v
+                    cur_repo.group = Group.get(v)
 
                 else:
                     setattr(cur_repo, k, v)
@@ -305,7 +345,7 @@ class RepoModel(BaseModel):
         :param parent_id:
         :param clone_uri:
         """
-        from rhodecode.lib.utils import is_valid_repo,is_valid_repos_group
+        from rhodecode.lib.utils import is_valid_repo, is_valid_repos_group
 
         if new_parent_id:
             paths = Group.get(new_parent_id).full_path.split(Group.url_sep())
@@ -316,7 +356,7 @@ class RepoModel(BaseModel):
         repo_path = os.path.join(*map(lambda x:safe_str(x),
                                 [self.repos_path, new_parent_path, repo_name]))
 
-        
+
         # check if this path is not a repository
         if is_valid_repo(repo_path, self.repos_path):
             raise Exception('This path %s is a valid repository' % repo_path)
@@ -324,7 +364,7 @@ class RepoModel(BaseModel):
         # check if this path is a group
         if is_valid_repos_group(repo_path, self.repos_path):
             raise Exception('This path %s is a valid group' % repo_path)
-                
+
         log.info('creating repo %s in %s @ %s', repo_name, repo_path,
                  clone_uri)
         backend = get_backend(alias)
@@ -368,3 +408,4 @@ class RepoModel(BaseModel):
                                           % (datetime.today()\
                                              .strftime('%Y%m%d_%H%M%S_%f'),
                                             repo.repo_name)))
+

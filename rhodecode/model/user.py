@@ -49,14 +49,14 @@ PERM_WEIGHTS = {'repository.none': 0,
 
 
 class UserModel(BaseModel):
-    def get(self, user_id, cache = False):
+    def get(self, user_id, cache=False):
         user = self.sa.query(User)
         if cache:
             user = user.options(FromCache("sql_cache_short",
                                           "get_user_%s" % user_id))
         return user.get(user_id)
 
-    def get_by_username(self, username, cache = False, case_insensitive = False):
+    def get_by_username(self, username, cache=False, case_insensitive=False):
 
         if case_insensitive:
             user = self.sa.query(User).filter(User.username.ilike(username))
@@ -68,7 +68,7 @@ class UserModel(BaseModel):
                                           "get_user_%s" % username))
         return user.scalar()
 
-    def get_by_api_key(self, api_key, cache = False):
+    def get_by_api_key(self, api_key, cache=False):
 
         user = self.sa.query(User)\
                 .filter(User.api_key == api_key)
@@ -96,6 +96,7 @@ class UserModel(BaseModel):
         """
         Checks if user is in database, if not creates this user marked
         as ldap user
+        
         :param username:
         :param password:
         :param user_dn:
@@ -103,7 +104,7 @@ class UserModel(BaseModel):
         """
         from rhodecode.lib.auth import get_crypt_password
         log.debug('Checking for such ldap account in RhodeCode database')
-        if self.get_by_username(username, case_insensitive = True) is None:
+        if self.get_by_username(username, case_insensitive=True) is None:
             try:
                 new_user = User()
                 # add ldap account always lowercase
@@ -152,7 +153,7 @@ class UserModel(BaseModel):
 
     def update(self, user_id, form_data):
         try:
-            user = self.get(user_id, cache = False)
+            user = self.get(user_id, cache=False)
             if user.username == 'default':
                 raise DefaultUserException(
                                 _("You can't Edit this user since it's"
@@ -174,7 +175,7 @@ class UserModel(BaseModel):
 
     def update_my_account(self, user_id, form_data):
         try:
-            user = self.get(user_id, cache = False)
+            user = self.get(user_id, cache=False)
             if user.username == 'default':
                 raise DefaultUserException(
                                 _("You can't Edit this user since it's"
@@ -196,7 +197,7 @@ class UserModel(BaseModel):
 
     def delete(self, user_id):
         try:
-            user = self.get(user_id, cache = False)
+            user = self.get(user_id, cache=False)
             if user.username == 'default':
                 raise DefaultUserException(
                                 _("You can't remove this user since it's"
@@ -222,7 +223,7 @@ class UserModel(BaseModel):
         from rhodecode.lib.celerylib import tasks, run_task
         run_task(tasks.reset_user_password, data['email'])
 
-    def fill_data(self, auth_user, user_id = None, api_key = None):
+    def fill_data(self, auth_user, user_id=None, api_key=None):
         """
         Fetches auth_user by user_id,or api_key if present.
         Fills auth_user attributes with those taken from database.
@@ -268,7 +269,7 @@ class UserModel(BaseModel):
         #======================================================================
         # fetch default permissions
         #======================================================================
-        default_user = self.get_by_username('default', cache = True)
+        default_user = self.get_by_username('default', cache=True)
 
         default_perms = self.sa.query(RepoToPerm, Repository, Permission)\
             .join((Repository, RepoToPerm.repository_id ==
@@ -386,3 +387,4 @@ class UserModel(BaseModel):
                                                      repository.repo_name] = p
 
         return user
+
