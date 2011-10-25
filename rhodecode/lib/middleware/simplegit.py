@@ -167,6 +167,8 @@ class SimpleGit(object):
                     username = REMOTE_USER(environ)
                     try:
                         user = self.__get_user(username)
+                        if user is None:
+                            return HTTPForbidden()(environ, start_response)                        
                         username = user.username
                     except:
                         log.error(traceback.format_exc())

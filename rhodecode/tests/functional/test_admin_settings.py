@@ -137,6 +137,7 @@ class TestAdminSettingsController(TestController):
                                  params=dict(_method='put',
                                              username='test_admin',
                                              new_password=new_password,
+                                             password_confirmation = new_password,
                                              password='',
                                              name=new_name,
                                              lastname=new_lastname,
@@ -160,6 +161,7 @@ class TestAdminSettingsController(TestController):
                                                             _method='put',
                                                             username='test_admin',
                                                             new_password=old_password,
+                                                            password_confirmation = old_password,
                                                             password='',
                                                             name=old_name,
                                                             lastname=old_lastname,
@@ -186,6 +188,7 @@ class TestAdminSettingsController(TestController):
                                                             _method='put',
                                                             username='test_admin',
                                                             new_password='test12',
+                                                            password_confirmation = 'test122',
                                                             name='NewName',
                                                             lastname='NewLastname',
                                                             email=new_email,))
@@ -201,6 +204,7 @@ class TestAdminSettingsController(TestController):
                                                             _method='put',
                                                             username='test_admin',
                                                             new_password='test12',
+                                                            password_confirmation = 'test122',
                                                             name='NewName',
                                                             lastname='NewLastname',
                                                             email=new_email,))

@@ -30,11 +30,8 @@ import traceback
 from datetime import date
 
 from sqlalchemy import *
-from sqlalchemy.exc import DatabaseError
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.orm import relationship, backref, joinedload, class_mapper, \
-    validates
-from sqlalchemy.orm.interfaces import MapperExtension
+from sqlalchemy.orm import relationship, joinedload, class_mapper, validates
 from beaker.cache import cache_region, region_invalidate
 
 from vcs import get_backend
@@ -60,24 +57,24 @@ log = logging.getLogger(__name__)
 class ModelSerializer(json.JSONEncoder):
     """
     Simple Serializer for JSON,
-    
+
     usage::
-        
+
         to make object customized for serialization implement a __json__
         method that will return a dict for serialization into json
-        
+
     example::
-        
+
         class Task(object):
-        
+
             def __init__(self, name, value):
                 self.name = name
                 self.value = value
-        
+
             def __json__(self):
                 return dict(name=self.name,
-                            value=self.value)     
-        
+                            value=self.value)
+
     """
 
     def default(self, obj):
@@ -129,11 +126,15 @@ class BaseModel(object):
     @classmethod
     def get(cls, id_):
         if id_:
-            return Session.query(cls).get(id_)
+            return cls.query().get(id_)
+
+    @classmethod
+    def getAll(cls):
+        return cls.query().all()
 
     @classmethod
     def delete(cls, id_):
-        obj = Session.query(cls).get(id_)
+        obj = cls.query().get(id_)
         Session.delete(obj)
         Session.commit()
 
@@ -160,13 +161,13 @@ class RhodeCodeSettings(Base, BaseModel):
         v = self._app_settings_value
         if v == 'ldap_active':
             v = str2bool(v)
-        return v 
+        return v
 
     @app_settings_value.setter
-    def app_settings_value(self,val):
+    def app_settings_value(self, val):
         """
         Setter that will always make sure we use unicode in app_settings_value
-        
+
         :param val:
         """
         self._app_settings_value = safe_unicode(val)
@@ -178,13 +179,13 @@ class RhodeCodeSettings(Base, BaseModel):
 
     @classmethod
     def get_by_name(cls, ldap_key):
-        return Session.query(cls)\
+        return cls.query()\
             .filter(cls.app_settings_name == ldap_key).scalar()
 
     @classmethod
     def get_app_settings(cls, cache=False):
 
-        ret = Session.query(cls)
+        ret = cls.query()
 
         if cache:
             ret = ret.options(FromCache("sql_cache_short", "get_hg_settings"))
@@ -200,7 +201,7 @@ class RhodeCodeSettings(Base, BaseModel):
 
     @classmethod
     def get_ldap_settings(cls, cache=False):
-        ret = Session.query(cls)\
+        ret = cls.query()\
                 .filter(cls.app_settings_name.startswith('ldap_')).all()
         fd = {}
         for row in ret:
@@ -227,7 +228,7 @@ class RhodeCodeUi(Base, BaseModel):
 
     @classmethod
     def get_by_key(cls, key):
-        return Session.query(cls).filter(cls.ui_key == key)
+        return cls.query().filter(cls.ui_key == key)
 
 
     @classmethod
@@ -311,7 +312,7 @@ class User(Base, BaseModel):
 
     @classmethod
     def get_by_api_key(cls, api_key):
-        return Session.query(cls).filter(cls.api_key == api_key).one()
+        return cls.query().filter(cls.api_key == api_key).one()
 
     def update_lastlogin(self):
         """Update user lastlogin"""
@@ -376,11 +377,11 @@ class UsersGroup(Base, BaseModel):
     @classmethod
     def get_by_group_name(cls, group_name, cache=False, case_insensitive=False):
         if case_insensitive:
-            gr = Session.query(cls)\
-            .filter(cls.users_group_name.ilike(group_name))
+            gr = cls.query()\
+                .filter(cls.users_group_name.ilike(group_name))
         else:
-            gr = Session.query(UsersGroup)\
-                .filter(UsersGroup.users_group_name == group_name)
+            gr = cls.query()\
+                .filter(cls.users_group_name == group_name)
         if cache:
             gr = gr.options(FromCache("sql_cache_short",
                                           "get_user_%s" % group_name))
@@ -389,7 +390,7 @@ class UsersGroup(Base, BaseModel):
 
     @classmethod
     def get(cls, users_group_id, cache=False):
-        users_group = Session.query(cls)
+        users_group = cls.query()
         if cache:
             users_group = users_group.options(FromCache("sql_cache_short",
                                     "get_users_group_%s" % users_group_id))
@@ -422,10 +423,10 @@ class UsersGroup(Base, BaseModel):
                     Session.flush()
                     members_list = []
                     if v:
+                        v = [v] if isinstance(v, basestring) else v
                         for u_id in set(v):
-                            members_list.append(UsersGroupMember(
-                                                            users_group_id,
-                                                            u_id))
+                            member = UsersGroupMember(users_group_id, u_id)
+                            members_list.append(member)
                     setattr(users_group, 'members', members_list)
                 setattr(users_group, k, v)
 
@@ -457,7 +458,6 @@ class UsersGroup(Base, BaseModel):
             Session.rollback()
             raise
 
-
 class UsersGroupMember(Base, BaseModel):
     __tablename__ = 'users_groups_members'
     __table_args__ = {'extend_existing':True}
@@ -472,6 +472,15 @@ class UsersGroupMember(Base, BaseModel):
     def __init__(self, gr_id='', u_id=''):
         self.users_group_id = gr_id
         self.user_id = u_id
+
+    @staticmethod
+    def add_user_to_group(group, user):
+        ugm = UsersGroupMember()
+        ugm.users_group = group
+        ugm.user = user
+        Session.add(ugm)
+        Session.commit()
+        return ugm
 
 class Repository(Base, BaseModel):
     __tablename__ = 'repositories'
@@ -510,29 +519,27 @@ class Repository(Base, BaseModel):
     @classmethod
     def url_sep(cls):
         return '/'
-    
+
     @classmethod
     def get_by_repo_name(cls, repo_name):
         q = Session.query(cls).filter(cls.repo_name == repo_name)
-
         q = q.options(joinedload(Repository.fork))\
                 .options(joinedload(Repository.user))\
-                .options(joinedload(Repository.group))\
-
+                .options(joinedload(Repository.group))
         return q.one()
 
     @classmethod
     def get_repo_forks(cls, repo_id):
-        return Session.query(cls).filter(Repository.fork_id == repo_id)
+        return cls.query().filter(Repository.fork_id == repo_id)
 
     @classmethod
     def base_path(cls):
         """
         Returns base path when all repos are stored
-        
+
         :param cls:
         """
-        q = Session.query(RhodeCodeUi).filter(RhodeCodeUi.ui_key == 
+        q = Session.query(RhodeCodeUi).filter(RhodeCodeUi.ui_key ==
                                               cls.url_sep())
         q.options(FromCache("sql_cache_short", "repository_repo_path"))
         return q.one().ui_value
@@ -568,7 +575,7 @@ class Repository(Base, BaseModel):
         Returns base full path for that repository means where it actually
         exists on a filesystem
         """
-        q = Session.query(RhodeCodeUi).filter(RhodeCodeUi.ui_key == 
+        q = Session.query(RhodeCodeUi).filter(RhodeCodeUi.ui_key ==
                                               Repository.url_sep())
         q.options(FromCache("sql_cache_short", "repository_repo_path"))
         return q.one().ui_value
@@ -585,7 +592,7 @@ class Repository(Base, BaseModel):
     def get_new_name(self, repo_name):
         """
         returns new full repository name based on assigned group and new new
-        
+
         :param group_name:
         """
         path_prefix = self.group.full_path_splitted if self.group else []
@@ -606,7 +613,7 @@ class Repository(Base, BaseModel):
         baseui._tcfg = config.config()
 
 
-        ret = Session.query(RhodeCodeUi)\
+        ret = RhodeCodeUi.query()\
             .options(FromCache("sql_cache_short", "repository_repo_ui")).all()
 
         hg_ui = ret
@@ -622,7 +629,7 @@ class Repository(Base, BaseModel):
     def is_valid(cls, repo_name):
         """
         returns True if given repo name is a valid filesystem repository
-         
+
         @param cls:
         @param repo_name:
         """
@@ -661,7 +668,7 @@ class Repository(Base, BaseModel):
         None otherwise. `cache_active = False` means that this cache
         state is not valid and needs to be invalidated
         """
-        return Session.query(CacheInvalidation)\
+        return CacheInvalidation.query()\
             .filter(CacheInvalidation.cache_key == self.repo_name)\
             .filter(CacheInvalidation.cache_active == False)\
             .scalar()
@@ -670,7 +677,7 @@ class Repository(Base, BaseModel):
         """
         set a cache for invalidation for this instance
         """
-        inv = Session.query(CacheInvalidation)\
+        inv = CacheInvalidation.query()\
             .filter(CacheInvalidation.cache_key == self.repo_name)\
             .scalar()
 
@@ -763,17 +770,26 @@ class Group(Base, BaseModel):
 
         repo_groups.extend([(x.group_id, _name(x.full_path_splitted))
                               for x in cls.query().all()])
-        
-        repo_groups = sorted(repo_groups,key=lambda t: t[1].split(sep)[0])        
+
+        repo_groups = sorted(repo_groups, key=lambda t: t[1].split(sep)[0])
         return repo_groups
-    
+
     @classmethod
     def url_sep(cls):
         return '/'
 
     @classmethod
-    def get_by_group_name(cls, group_name):
-        return cls.query().filter(cls.group_name == group_name).scalar()
+    def get_by_group_name(cls, group_name, cache=False, case_insensitive=False):
+        if case_insensitive:
+            gr = cls.query()\
+                .filter(cls.group_name.ilike(group_name))
+        else:
+            gr = cls.query()\
+                .filter(cls.group_name == group_name)
+        if cache:
+            gr = gr.options(FromCache("sql_cache_short",
+                                          "get_group_%s" % group_name))
+        return gr.scalar()
 
     @property
     def parents(self):
@@ -801,7 +817,7 @@ class Group(Base, BaseModel):
 
     @property
     def children(self):
-        return Session.query(Group).filter(Group.parent_group == self)
+        return Group.query().filter(Group.parent_group == self)
 
     @property
     def name(self):
@@ -817,7 +833,7 @@ class Group(Base, BaseModel):
 
     @property
     def repositories(self):
-        return Session.query(Repository).filter(Repository.group == self)
+        return Repository.query().filter(Repository.group == self)
 
     @property
     def repositories_recursive_count(self):
@@ -836,10 +852,11 @@ class Group(Base, BaseModel):
     def get_new_name(self, group_name):
         """
         returns new full group name based on parent and new name
-        
+
         :param group_name:
         """
-        path_prefix = self.parent_group.full_path_splitted if self.parent_group else []
+        path_prefix = (self.parent_group.full_path_splitted if 
+                       self.parent_group else [])
         return Group.url_sep().join(path_prefix + [group_name])
 
 
@@ -856,7 +873,7 @@ class Permission(Base, BaseModel):
 
     @classmethod
     def get_by_key(cls, key):
-        return Session.query(cls).filter(cls.permission_name == key).scalar()
+        return cls.query().filter(cls.permission_name == key).scalar()
 
 class RepoToPerm(Base, BaseModel):
     __tablename__ = 'repo_to_perm'
@@ -885,7 +902,7 @@ class UserToPerm(Base, BaseModel):
         if not isinstance(perm, Permission):
             raise Exception('perm needs to be an instance of Permission class')
 
-        return Session.query(cls).filter(cls.user_id == user_id)\
+        return cls.query().filter(cls.user_id == user_id)\
             .filter(cls.permission == perm).scalar() is not None
 
     @classmethod
@@ -909,7 +926,7 @@ class UserToPerm(Base, BaseModel):
             raise Exception('perm needs to be an instance of Permission class')
 
         try:
-            Session.query(cls).filter(cls.user_id == user_id)\
+            cls.query().filter(cls.user_id == user_id)\
                 .filter(cls.permission == perm).delete()
             Session.commit()
         except:
@@ -945,7 +962,7 @@ class UsersGroupToPerm(Base, BaseModel):
         if not isinstance(perm, Permission):
             raise Exception('perm needs to be an instance of Permission class')
 
-        return Session.query(cls).filter(cls.users_group_id ==
+        return cls.query().filter(cls.users_group_id ==
                                          users_group_id)\
                                          .filter(cls.permission == perm)\
                                          .scalar() is not None
@@ -971,7 +988,7 @@ class UsersGroupToPerm(Base, BaseModel):
             raise Exception('perm needs to be an instance of Permission class')
 
         try:
-            Session.query(cls).filter(cls.users_group_id == users_group_id)\
+            cls.query().filter(cls.users_group_id == users_group_id)\
                 .filter(cls.permission == perm).delete()
             Session.commit()
         except:
@@ -1023,7 +1040,7 @@ class UserFollowing(Base, BaseModel):
 
     @classmethod
     def get_repo_followers(cls, repo_id):
-        return Session.query(cls).filter(cls.follows_repo_id == repo_id)
+        return cls.query().filter(cls.follows_repo_id == repo_id)
 
 class CacheInvalidation(Base, BaseModel):
     __tablename__ = 'cache_invalidation'
@@ -1049,3 +1066,4 @@ class DbMigrateVersion(Base, BaseModel):
     repository_id = Column('repository_id', String(250), primary_key=True)
     repository_path = Column('repository_path', Text)
     version = Column('version', Integer)
+

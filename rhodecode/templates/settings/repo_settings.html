@@ -34,7 +34,14 @@
                     ${h.text('repo_name',class_="small")}
                 </div>
              </div>
-             
+            <div class="field">
+                <div class="label">
+                    <label for="repo_group">${_('Repository group')}:</label>
+                </div>
+                <div class="input">
+                    ${h.select('repo_group','',c.repo_groups,class_="medium")}
+                </div>
+            </div>             
             <div class="field">
                 <div class="label label-textarea">
                     <label for="description">${_('Description')}:</label>

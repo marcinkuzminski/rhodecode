@@ -34,7 +34,7 @@
 		        <div class="checkboxes">
 		            <div class="checkbox">
 		                ${h.checkbox('destroy',True)}
-		                <label for="checkbox-1">
+		                <label for="destroy">
 		                <span class="tooltip" title="${h.tooltip(_('In case a repository was deleted from filesystem and there are leftovers in the database check this option to scan obsolete data in database and remove it.'))}">
 		                ${_('destroy old data')}</span> </label>
 		            </div>
@@ -56,12 +56,12 @@
         <div class="fields">
             <div class="field">
                 <div class="label label-checkbox">
-                    <label for="destroy">${_('index build option')}:</label>
+                    <label>${_('index build option')}:</label>
                 </div>
                 <div class="checkboxes">
                     <div class="checkbox">
                         ${h.checkbox('full_index',True)}
-                        <label for="checkbox-1">${_('build from scratch')}</label>
+                        <label for="full_index">${_('build from scratch')}</label>
                     </div>
                 </div>
             </div>
@@ -100,7 +100,7 @@
             
             <div class="field">
                 <div class="label">
-                    <label for="ga_code">${_('GA code')}:</label>
+                    <label for="rhodecode_ga_code">${_('GA code')}:</label>
                 </div>
                 <div class="input">
                     ${h.text('rhodecode_ga_code',size=30)}
@@ -124,7 +124,7 @@
              
              <div class="field">
                 <div class="label label-checkbox">
-                    <label for="web_push_ssl">${_('Web')}:</label>
+                    <label>${_('Web')}:</label>
                 </div>
                 <div class="checkboxes">
 					<div class="checkbox">
@@ -136,7 +136,7 @@
 
              <div class="field">
                 <div class="label label-checkbox">
-                    <label for="web_push_ssl">${_('Hooks')}:</label>
+                    <label>${_('Hooks')}:</label>
                 </div>
                 <div class="input">
                     ${h.link_to(_('advanced setup'),url('admin_edit_setting',setting_id='hooks'))}

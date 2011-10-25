@@ -127,8 +127,8 @@ class ReposGroupModel(BaseModel):
         try:
             repos_group = Group.get(repos_group_id)
             old_path = repos_group.full_path
-
-            #change properties
+                
+            # change properties
             repos_group.group_description = form_data['group_description']
             repos_group.parent_group = Group.get(form_data['group_parent_id'])
             repos_group.group_name = repos_group.get_new_name(form_data['group_name'])

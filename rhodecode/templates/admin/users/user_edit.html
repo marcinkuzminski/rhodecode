@@ -68,7 +68,16 @@
                     ${h.password('new_password',class_='medium',autocomplete="off")}
                 </div>
              </div>
-            
+             
+             <div class="field">
+                <div class="label">
+                    <label for="password_confirmation">${_('New password confirmation')}:</label>
+                </div>
+                <div class="input">
+                    ${h.password('password_confirmation',class_="medium",autocomplete="off")}
+                </div>
+             </div>
+                         
              <div class="field">
                 <div class="label">
                     <label for="name">${_('First Name')}:</label>
@@ -132,7 +141,7 @@
         <div class="fields">
              <div class="field">
                 <div class="label label-checkbox">
-                    <label for="">${_('Create repositories')}:</label>
+                    <label for="create_repo_perm">${_('Create repositories')}:</label>
                 </div>
                 <div class="checkboxes">
                     ${h.checkbox('create_repo_perm',value=True)}

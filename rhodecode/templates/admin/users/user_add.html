@@ -44,7 +44,16 @@
                     ${h.password('password',class_='small')}
                 </div>
              </div>
-            
+             
+             <div class="field">
+                <div class="label">
+                    <label for="password_confirmation">${_('Password confirmation')}:</label>
+                </div>
+                <div class="input">
+                    ${h.password('password_confirmation',class_="small",autocomplete="off")}
+                </div>
+             </div>    
+                         
              <div class="field">
                 <div class="label">
                     <label for="name">${_('First Name')}:</label>
