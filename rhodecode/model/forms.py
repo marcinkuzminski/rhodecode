@@ -185,8 +185,9 @@ class ValidPassword(formencode.validators.FancyValidator):
 class ValidPasswordsMatch(formencode.validators.FancyValidator):
 
     def validate_python(self, value, state):
-
-        if value['password'] != value['password_confirmation']:
+        
+        pass_val = value.get('password') or value.get('new_password')
+        if pass_val != value['password_confirmation']:
             e_dict = {'password_confirmation':
                    _('Passwords do not match')}
             raise formencode.Invalid('', value, state, error_dict=e_dict)
@@ -497,8 +498,6 @@ class LoginForm(formencode.Schema):
                                 'tooShort':_('Enter %(min)i characters or more')}
                                 )
 
-
-    #chained validators have access to all data
     chained_validators = [ValidAuth]
 
 def UserForm(edit=False, old_data={}):
@@ -509,15 +508,18 @@ def UserForm(edit=False, old_data={}):
                        ValidUsername(edit, old_data))
         if edit:
             new_password = All(UnicodeString(strip=True, min=6, not_empty=False))
+            password_confirmation = All(UnicodeString(strip=True, min=6, not_empty=False))
             admin = StringBoolean(if_missing=False)
         else:
             password = All(UnicodeString(strip=True, min=6, not_empty=True))
+            password_confirmation = All(UnicodeString(strip=True, min=6, not_empty=False))
+            
         active = StringBoolean(if_missing=False)
         name = UnicodeString(strip=True, min=1, not_empty=True)
         lastname = UnicodeString(strip=True, min=1, not_empty=True)
         email = All(Email(not_empty=True), UniqSystemEmail(old_data))
 
-        chained_validators = [ValidPassword]
+        chained_validators = [ValidPasswordsMatch, ValidPassword]
 
     return _UserForm
 

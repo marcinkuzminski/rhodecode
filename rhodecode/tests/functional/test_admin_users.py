@@ -16,12 +16,14 @@ class TestAdminUsersController(TestController):
         self.log_user()
         username = 'newtestuser'
         password = 'test12'
+        password_confirmation = password
         name = 'name'
         lastname = 'lastname'
         email = 'mail@mail.com'
 
         response = self.app.post(url('users'), {'username':username,
                                                'password':password,
+                                               'password_confirmation':password_confirmation,
                                                'name':name,
                                                'active':True,
                                                'lastname':lastname,
@@ -90,6 +92,7 @@ class TestAdminUsersController(TestController):
 
         response = self.app.post(url('users'), {'username':username,
                                                'password':password,
+                                               'password_confirmation':password,
                                                'name':name,
                                                'active':True,
                                                'lastname':lastname,

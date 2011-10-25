@@ -57,7 +57,16 @@
 	                    ${h.password('new_password',class_="medium",autocomplete="off")}
 	                </div>
 	             </div>
-	            
+                 
+                 <div class="field">
+                    <div class="label">
+                        <label for="password_confirmation">${_('New password confirmation')}:</label>
+                    </div>
+                    <div class="input">
+                        ${h.password('password_confirmation',class_="medium",autocomplete="off")}
+                    </div>
+                 </div>
+                 	            
 	             <div class="field">
 	                <div class="label">
 	                    <label for="name">${_('First Name')}:</label>
@@ -154,10 +163,12 @@
 		        </tr>
 		     %endfor
 	     %else:
+            <div style="padding:5px 0px 10px 0px;">
 	     	${_('No repositories yet')} 
 	     	%if h.HasPermissionAny('hg.admin','hg.create.repository')():
-	     		${h.link_to(_('create one now'),h.url('admin_settings_create_repository'))}
+	     		${h.link_to(_('create one now'),h.url('admin_settings_create_repository'),class_="ui-button-small")}
 	     	%endif
+            </div>
 	     %endif
 	     </tbody>
 	     </table>
