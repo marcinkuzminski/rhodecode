@@ -54,6 +54,7 @@ force_https = false
 commit_parse_limit = 50
 use_gravatar = true
 container_auth_enabled = false
+proxypass_auth_enabled = false
 
 ####################################
 ###        CELERY CONFIG        ####

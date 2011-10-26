@@ -223,6 +223,21 @@ def authenticate(username, password):
                 pass
     return False
 
+def get_container_username(environ, cfg=config):
+    from paste.httpheaders import REMOTE_USER
+    from paste.deploy.converters import asbool
+    username = REMOTE_USER(environ)
+
+    if not username and asbool(cfg.get('proxypass_auth_enabled', False)):
+        username = environ.get('HTTP_X_FORWARDED_USER')
+
+    if username:
+        #Removing realm and domain from username
+        username = username.partition('@')[0]
+        username = username.rpartition('\\')[2]
+        log.debug('Received username %s from container', username)
+
+    return username
 
 class  AuthUser(object):
     """
@@ -238,8 +253,8 @@ class  AuthUser(object):
 
         self.user_id = user_id
         self.api_key = None
-
-        self.username = 'None' if username is None else username
+        self.username = username
+        
         self.name = ''
         self.lastname = ''
         self.email = ''
@@ -263,10 +278,7 @@ class  AuthUser(object):
             log.debug('Auth User lookup by USER ID %s', self.user_id)
             user_model.fill_data(self, user_id=self.user_id)
             is_user_loaded = True
-        elif self.username != 'None':
-            #Removing realm from username
-            self.username = self.username.partition('@')[0]
-
+        elif self.username:
             log.debug('Auth User lookup by USER NAME %s', self.username)
             dbuser = User.get_by_username(self.username)
             if dbuser is not None and dbuser.active:
@@ -274,6 +286,8 @@ class  AuthUser(object):
                     setattr(self, k, v)
                 self.set_authenticated()
                 is_user_loaded = True
+                log.debug('User %s is now logged in', self.username)
+                dbuser.update_lastlogin()
 
         if not is_user_loaded:
             if self.anonymous_user.active is True:
@@ -283,6 +297,9 @@ class  AuthUser(object):
                 self.is_authenticated = True
             else:
                 self.is_authenticated = False
+
+        if not self.username:
+            self.username = 'None'
 
         log.debug('Auth User is now %s', self)
         user_model.fill_perms(self)

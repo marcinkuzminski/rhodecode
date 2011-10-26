@@ -8,12 +8,10 @@ from pylons import config, tmpl_context as c, request, session, url
 from pylons.controllers import WSGIController
 from pylons.controllers.util import redirect
 from pylons.templating import render_mako as render
-
 from paste.deploy.converters import asbool
-from paste.httpheaders import REMOTE_USER
 
 from rhodecode import __version__
-from rhodecode.lib.auth import AuthUser
+from rhodecode.lib.auth import AuthUser, get_container_username
 from rhodecode.lib.utils import get_repo_slug
 from rhodecode.model import meta
 from rhodecode.model.scm import ScmModel
@@ -47,7 +45,7 @@ class BaseController(WSGIController):
             api_key = request.GET.get('api_key')
             user_id = getattr(session.get('rhodecode_user'), 'user_id', None)
             if asbool(config.get('container_auth_enabled', False)):
-                username = REMOTE_USER(environ)
+                username = get_container_username(environ)
             else:
                 username = None
 
