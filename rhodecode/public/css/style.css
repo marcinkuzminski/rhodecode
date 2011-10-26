@@ -197,8 +197,19 @@ div.options a {
 	-moz-border-radius: 0px 0px 8px 8px;
 	border-radius: 0px 0px 8px 8px;
 	height: 37px;
-	background: url("../images/header_inner.png") repeat-x scroll 0 0
-		#003367;
+    background-color: #eedc94;
+    background-repeat: repeat-x;
+    background-image: -khtml-gradient(linear, left top, left bottom, from(#fceec1),
+        to(#eedc94) );
+    background-image: -moz-linear-gradient(top, #003b76, #00376e);
+    background-image: -ms-linear-gradient(top, #003b76, #00376e);
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #003b76),
+        color-stop(100%, #00376e) );
+    background-image: -webkit-linear-gradient(top, #003b76, #00376e) );
+    background-image: -o-linear-gradient(top, #003b76, #00376e) );
+    background-image: linear-gradient(top, #003b76, #00376e);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#003b76',
+        endColorstr='#00376e', GradientType=0 );
 	box-shadow: 0 2px 2px rgba(0, 0, 0, 0.6);
 }
 
@@ -250,7 +261,19 @@ div.options a {
 	min-height: 40px;
 	clear: both;
 	position: relative;
-	background: #003367 url("../images/header_inner.png") repeat-x;
+    background-color: #eedc94;
+    background-repeat: repeat-x;
+    background-image: -khtml-gradient(linear, left top, left bottom, from(#fceec1),
+        to(#eedc94) );
+    background-image: -moz-linear-gradient(top, #003b76, #00376e);
+    background-image: -ms-linear-gradient(top, #003b76, #00376e);
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #003b76),
+        color-stop(100%, #00376e) );
+    background-image: -webkit-linear-gradient(top, #003b76, #00376e) );
+    background-image: -o-linear-gradient(top, #003b76, #00376e) );
+    background-image: linear-gradient(top, #003b76, #00376e);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#003b76',
+        endColorstr='#00376e', GradientType=0 );
 	margin: 0;
 	padding: 0;
 	display: block;
@@ -1601,7 +1624,19 @@ div.form div.fields div.field div.button {
 	clear: both;
 	overflow: hidden;
 	position: relative;
-	background: #003367 url("../images/header_inner.png") repeat-x;
+    background-color: #eedc94;
+    background-repeat: repeat-x;
+    background-image: -khtml-gradient(linear, left top, left bottom, from(#fceec1),
+        to(#eedc94) );
+    background-image: -moz-linear-gradient(top, #003b76, #00376e);
+    background-image: -ms-linear-gradient(top, #003b76, #00376e);
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #003b76),
+        color-stop(100%, #00376e) );
+    background-image: -webkit-linear-gradient(top, #003b76, #00376e) );
+    background-image: -o-linear-gradient(top, #003b76, #00376e) );
+    background-image: linear-gradient(top, #003b76, #00376e);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#003b76',
+        endColorstr='#00376e', GradientType=0 );
 	margin: 0 auto;
 	padding: 0;
 }
@@ -2545,7 +2580,7 @@ div.gravatar img {
 }
 
 #content div.box div.title div.search {
-	background: url("../images/title_link.png") no-repeat top left;
+	
 	border-left: 1px solid #316293;
 }
 
