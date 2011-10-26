@@ -39,36 +39,35 @@
 		  ${h.form(h.url.current(),method='post',id='eform',enctype="multipart/form-data")}
             <h3>${_('Add new file')}</h3>
             <div class="form">
-                    <div class="fields">
-                         <div class="field">
-                            <div class="label">
-                                <label for="location">${_('Location')}</label>
-                            </div>
-                            <div class="input">
-                                <input type="text" value="${c.f_path}" size="30" name="location" id="location">
-                                ${_('use / to separate directories')}
-                            </div>
-                         </div>
-                                      
-                        <div id="filename_container" class="field file">
-                            <div class="label">
-                                <label for="filename">${_('File Name')}:</label>
-                            </div>
-                            <div class="input">
-                                <input type="text" value="" size="30" name="filename" id="filename">
-                                <input type="button" class="ui-button-small" value="upload file" id="upload_file_enable">
-                            </div>
-                        </div>
-                        <div id="upload_file_container" class="field" style="display:none">
-                          <div class="label">
-                              <label for="location">${_('Upload file')}</label>
-                          </div>
-                          <div class="file">
-                              <input type="file"  size="30" name="upload_file" id="upload_file">
-                              <input type="button" class="ui-button-small" value="create file" id="file_enable">                        
-                          </div>
-                        </div>                                                                      
+              <div class="fields">
+                  <div id="filename_container" class="field file">
+                      <div class="label">
+                          <label for="filename">${_('File Name')}:</label>
+                      </div>
+                      <div class="input">
+                          <input type="text" value="" size="30" name="filename" id="filename">
+                          <input type="button" class="ui-button-small" value="upload file" id="upload_file_enable">
+                      </div>
+                  </div>                    
+                  <div id="upload_file_container" class="field" style="display:none">
+                    <div class="label">
+                        <label for="location">${_('Upload file')}</label>
                     </div>
+                    <div class="file">
+                        <input type="file"  size="30" name="upload_file" id="upload_file">
+                        <input type="button" class="ui-button-small" value="create file" id="file_enable">                        
+                    </div>
+                  </div>
+                   <div class="field">
+                      <div class="label">
+                          <label for="location">${_('Location')}</label>
+                      </div>
+                      <div class="input">
+                          <input type="text" value="${c.f_path}" size="30" name="location" id="location">
+                          ${_('use / to separate directories')}
+                      </div>
+                   </div>                                                                    
+              </div>
             </div>            
 			<div id="body" class="codeblock">
 			    <div id="editor_container">    
