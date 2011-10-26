@@ -1951,6 +1951,10 @@ h3.files_location {
 	white-space: pre-wrap;
 }
 
+#graph_content .container .left .message a:hover{
+	text-decoration: none;
+}
+
 .right div {
 	clear: both;
 }
