@@ -23,23 +23,25 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import traceback
 import calendar
 import logging
 from time import mktime
-from datetime import datetime, timedelta, date
+from datetime import timedelta, date
+from itertools import product
 
-from vcs.exceptions import ChangesetError
+from vcs.exceptions import ChangesetError, EmptyRepositoryError, \
+    NodeDoesNotExistError
 
 from pylons import tmpl_context as c, request, url
 from pylons.i18n.translation import _
 
-from rhodecode.model.db import Statistics, Repository
-from rhodecode.model.repo import RepoModel
-
+from rhodecode.model.db import Statistics
+from rhodecode.lib import ALL_READMES, ALL_EXTS
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.utils import EmptyChangeset
-
+from rhodecode.lib.markup_renderer import MarkupRenderer
 from rhodecode.lib.celerylib import run_task
 from rhodecode.lib.celerylib.tasks import get_commits_stats, \
     LANGUAGES_EXTENSIONS_MAP
@@ -48,6 +50,9 @@ from rhodecode.lib.compat import json, OrderedDict
 
 log = logging.getLogger(__name__)
 
+README_FILES = [''.join([x[0][0], x[1][0]]) for x in 
+                    sorted(list(product(ALL_READMES, ALL_EXTS)),
+                           key=lambda y:y[0][1] + y[1][1])]
 
 class SummaryController(BaseRepoController):
 
@@ -161,7 +166,32 @@ class SummaryController(BaseRepoController):
         if c.enable_downloads:
             c.download_options = self._get_download_links(c.rhodecode_repo)
 
+        c.readme_data,c.readme_file = self.__get_readme_data()
         return render('summary/summary.html')
+
+    def __get_readme_data(self):
+        readme_data = None
+        readme_file = None
+        
+        try:
+            cs = c.rhodecode_repo.get_changeset('tip')
+            renderer = MarkupRenderer()
+            for f in README_FILES:
+                try:
+                    readme = cs.get_node(f)
+                    readme_file = f
+                    readme_data = renderer.render(readme.content, f)
+                    break
+                except NodeDoesNotExistError:
+                    continue
+        except ChangesetError:
+            pass
+        except EmptyRepositoryError:
+            pass
+        except Exception:
+            log.error(traceback.format_exc())        
+
+        return readme_data, readme_file
 
     def _get_download_links(self, repo):
 
@@ -181,3 +211,4 @@ class SummaryController(BaseRepoController):
         download_l.append(tags_group)
 
         return download_l
+
