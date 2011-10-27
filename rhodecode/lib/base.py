@@ -50,7 +50,8 @@ class BaseController(WSGIController):
                 username = None
 
             self.rhodecode_user = c.rhodecode_user = AuthUser(user_id, api_key, username)
-            if not self.rhodecode_user.is_authenticated:
+            if not self.rhodecode_user.is_authenticated and \
+                       self.rhodecode_user.user_id is not None:
                 self.rhodecode_user.set_authenticated(
                                         getattr(session.get('rhodecode_user'),
                                        'is_authenticated', False))
