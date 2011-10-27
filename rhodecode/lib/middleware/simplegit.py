@@ -70,7 +70,7 @@ from paste.auth.basic import AuthBasicAuthenticator
 from paste.httpheaders import REMOTE_USER, AUTH_TYPE
 
 from rhodecode.lib import safe_str
-from rhodecode.lib.auth import authfunc, HasPermissionAnyMiddleware
+from rhodecode.lib.auth import authfunc, HasPermissionAnyMiddleware, get_container_username
 from rhodecode.lib.utils import invalidate_cache, is_valid_repo
 from rhodecode.model.db import User
 
@@ -148,7 +148,7 @@ class SimpleGit(object):
                 # NEED TO AUTHENTICATE AND ASK FOR AUTH USER PERMISSIONS
                 #==============================================================
 
-                if not REMOTE_USER(environ):
+                if not get_container_username(environ, self.config):
                     self.authenticate.realm = \
                         safe_str(self.config['rhodecode_realm'])
                     result = self.authenticate(environ)
@@ -164,7 +164,7 @@ class SimpleGit(object):
                 #==============================================================
 
                 if action in ['pull', 'push']:
-                    username = REMOTE_USER(environ)
+                    username = get_container_username(environ, self.config)
                     try:
                         user = self.__get_user(username)
                         if user is None:
