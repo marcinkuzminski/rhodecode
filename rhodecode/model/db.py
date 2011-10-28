@@ -663,29 +663,13 @@ class Repository(Base, BaseModel):
 
     @property
     def invalidate(self):
-        """
-        Returns Invalidation object if this repo should be invalidated
-        None otherwise. `cache_active = False` means that this cache
-        state is not valid and needs to be invalidated
-        """
-        return CacheInvalidation.query()\
-            .filter(CacheInvalidation.cache_key == self.repo_name)\
-            .filter(CacheInvalidation.cache_active == False)\
-            .scalar()
+        return CacheInvalidation.invalidate(self.repo_name)
 
     def set_invalidate(self):
         """
         set a cache for invalidation for this instance
         """
-        inv = CacheInvalidation.query()\
-            .filter(CacheInvalidation.cache_key == self.repo_name)\
-            .scalar()
-
-        if inv is None:
-            inv = CacheInvalidation(self.repo_name)
-        inv.cache_active = True
-        Session.add(inv)
-        Session.commit()
+        CacheInvalidation.set_invalidate(self.repo_name)
 
     @LazyProperty
     def scm_instance(self):
@@ -696,19 +680,13 @@ class Repository(Base, BaseModel):
         @cache_region('long_term')
         def _c(repo_name):
             return self.__get_instance()
-
-        # TODO: remove this trick when beaker 1.6 is released
-        # and have fixed this issue with not supporting unicode keys
-        rn = safe_str(self.repo_name)
+        rn = self.repo_name
 
         inv = self.invalidate
         if inv is not None:
             region_invalidate(_c, None, rn)
             # update our cache
-            inv.cache_active = True
-            Session.add(inv)
-            Session.commit()
-
+            CacheInvalidation.set_valid(inv.cache_key)
         return _c(rn)
 
     def __get_instance(self):
@@ -730,7 +708,7 @@ class Repository(Base, BaseModel):
 
             repo = backend(safe_str(repo_full_path), create=False,
                            baseui=self._ui)
-            #skip hidden web repository
+            # skip hidden web repository
             if repo._get_hidden():
                 return
         else:
@@ -855,7 +833,7 @@ class Group(Base, BaseModel):
 
         :param group_name:
         """
-        path_prefix = (self.parent_group.full_path_splitted if 
+        path_prefix = (self.parent_group.full_path_splitted if
                        self.parent_group else [])
         return Group.url_sep().join(path_prefix + [group_name])
 
@@ -1059,6 +1037,57 @@ class CacheInvalidation(Base, BaseModel):
     def __repr__(self):
         return "<%s('%s:%s')>" % (self.__class__.__name__,
                                   self.cache_id, self.cache_key)
+
+    @classmethod
+    def invalidate(cls, key):
+        """
+        Returns Invalidation object if this given key should be invalidated
+        None otherwise. `cache_active = False` means that this cache
+        state is not valid and needs to be invalidated
+        
+        :param key:
+        """
+        return cls.query()\
+                .filter(CacheInvalidation.cache_key == key)\
+                .filter(CacheInvalidation.cache_active == False)\
+                .scalar()
+
+    @classmethod
+    def set_invalidate(cls, key):
+        """
+        Mark this Cache key for invalidation
+        
+        :param key:
+        """
+
+        log.debug('marking %s for invalidation' % key)
+        inv_obj = Session().query(cls)\
+            .filter(cls.cache_key == key).scalar()
+        if inv_obj:
+            inv_obj.cache_active = False
+        else:
+            log.debug('cache key not found in invalidation db -> creating one')
+            inv_obj = CacheInvalidation(key)
+
+        try:
+            Session.add(inv_obj)
+            Session.commit()
+        except Exception:
+            log.error(traceback.format_exc())
+            Session.rollback()
+
+    @classmethod
+    def set_valid(cls, key):
+        """
+        Mark this cache key as active and currently cached
+        
+        :param key:
+        """
+        inv_obj = Session().query(CacheInvalidation)\
+            .filter(CacheInvalidation.cache_key == key).scalar()
+        inv_obj.cache_active = True
+        Session.add(inv_obj)
+        Session.commit()
 
 class DbMigrateVersion(Base, BaseModel):
     __tablename__ = 'db_migrate_version'

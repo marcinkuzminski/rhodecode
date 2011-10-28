@@ -197,24 +197,8 @@ class ScmModel(BaseModel):
 
         :param repo_name: this repo that should invalidation take place
         """
-
-        log.debug('marking %s for invalidation', repo_name)
-        cache = self.sa.query(CacheInvalidation)\
-            .filter(CacheInvalidation.cache_key == repo_name).scalar()
-
-        if cache:
-            # mark this cache as inactive
-            cache.cache_active = False
-        else:
-            log.debug('cache key not found in invalidation db -> creating one')
-            cache = CacheInvalidation(repo_name)
-
-        try:
-            self.sa.add(cache)
-            self.sa.commit()
-        except (DatabaseError,):
-            log.error(traceback.format_exc())
-            self.sa.rollback()
+        CacheInvalidation.set_invalidate(repo_name)
+        CacheInvalidation.set_invalidate(repo_name+"_README")
 
     def toggle_following_repo(self, follow_repo_id, user_id):
 
@@ -395,20 +379,5 @@ class ScmModel(BaseModel):
 
         self.mark_for_invalidation(repo_name)
 
-
     def get_unread_journal(self):
         return self.sa.query(UserLog).count()
-
-    def _should_invalidate(self, repo_name):
-        """Looks up database for invalidation signals for this repo_name
-
-        :param repo_name:
-        """
-
-        ret = self.sa.query(CacheInvalidation)\
-            .filter(CacheInvalidation.cache_key == repo_name)\
-            .filter(CacheInvalidation.cache_active == False)\
-            .scalar()
-
-        return ret
-
