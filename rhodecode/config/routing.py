@@ -62,6 +62,8 @@ def make_map(config):
     rmap.connect('home', '/', controller='home', action='index')
     rmap.connect('repo_switcher', '/repos', controller='home',
                  action='repo_switcher')
+    rmap.connect('branch_tag_switcher', '/branches-tags/{repo_name:.*}', 
+                 controller='home',action='branch_tag_switcher')    
     rmap.connect('bugtracker',
                  "http://bitbucket.org/marcinkuzminski/rhodecode/issues",
                  _static=True)
