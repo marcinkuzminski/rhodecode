@@ -3,7 +3,7 @@
 Provides the BaseController class for subclassing.
 """
 import logging
-
+import time
 from pylons import config, tmpl_context as c, request, session, url
 from pylons.controllers import WSGIController
 from pylons.controllers.util import redirect
@@ -40,6 +40,7 @@ class BaseController(WSGIController):
         # WSGIController.__call__ dispatches to the Controller method
         # the request is routed to. This routing information is
         # available in environ['pylons.routes_dict']
+        start = time.time()
         try:
             # putting this here makes sure that we update permissions each time
             api_key = request.GET.get('api_key')
@@ -59,6 +60,7 @@ class BaseController(WSGIController):
             session.save()
             return WSGIController.__call__(self, environ, start_response)
         finally:
+            log.debug('Request time: %.3fs' % (time.time()-start))
             meta.Session.remove()
 
 

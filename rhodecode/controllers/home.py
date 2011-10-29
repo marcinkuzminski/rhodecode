@@ -24,7 +24,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
-from operator import itemgetter
 
 from pylons import tmpl_context as c, request
 from paste.httpexceptions import HTTPBadRequest
@@ -58,3 +57,12 @@ class HomeController(BaseController):
             return render('/repo_switcher_list.html')
         else:
             return HTTPBadRequest()
+
+    def branch_tag_switcher(self, repo_name):
+        if request.is_xhr:
+            c.rhodecode_db_repo = Repository.get_by_repo_name(c.repo_name)
+            c.rhodecode_repo = c.rhodecode_db_repo.scm_instance
+            return render('/switch_to_list.html')
+        else:
+            return HTTPBadRequest()
+
