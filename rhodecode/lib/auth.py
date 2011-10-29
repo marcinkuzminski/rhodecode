@@ -223,9 +223,31 @@ def authenticate(username, password):
                 pass
     return False
 
+def login_container_auth(username):
+    user = User.get_by_username(username)
+    if user is None:
+        user_model = UserModel()
+        user_attrs = {
+                 'name': username,
+                 'lastname': None,
+                 'email': None,
+                }
+        if not user_model.create_for_container_auth(username, user_attrs):
+            return None
+        user = User.get_by_username(username)
+        log.info('User %s was created by container authentication', username)
+
+    if not user.active:
+        return None
+
+    user.update_lastlogin()
+    log.debug('User %s is now logged in by container authentication', user.username)
+    return user
+
 def get_container_username(environ, cfg=config):
     from paste.httpheaders import REMOTE_USER
     from paste.deploy.converters import asbool
+
     username = REMOTE_USER(environ)
 
     if not username and asbool(cfg.get('proxypass_auth_enabled', False)):
@@ -278,14 +300,12 @@ class  AuthUser(object):
             is_user_loaded = user_model.fill_data(self, user_id=self.user_id)
         elif self.username:
             log.debug('Auth User lookup by USER NAME %s', self.username)
-            dbuser = User.get_by_username(self.username)
-            if dbuser is not None and dbuser.active:
+            dbuser = login_container_auth(self.username)
+            if dbuser is not None:
                 for k, v in dbuser.get_dict().items():
                     setattr(self, k, v)
                 self.set_authenticated()
                 is_user_loaded = True
-                log.debug('User %s is now logged in', self.username)
-                dbuser.update_lastlogin()
 
         if not is_user_loaded:
             if self.anonymous_user.active is True:
