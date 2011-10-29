@@ -36,7 +36,7 @@ from pylons import  config
 
 from vcs.utils.lazy import LazyProperty
 
-from rhodecode.lib import str2bool
+from rhodecode.lib import str2bool, safe_str
 from rhodecode.lib.pidlock import DaemonLock, LockHeld
 
 from celery.messaging import establish_connection
@@ -87,7 +87,7 @@ def __get_lockkey(func, *fargs, **fkwargs):
     func_name = str(func.__name__) if hasattr(func, '__name__') else str(func)
 
     lockkey = 'task_%s.lock' % \
-        md5(func_name + '-' + '-'.join(map(str, params))).hexdigest()
+        md5(func_name + '-' + '-'.join(map(safe_str, params))).hexdigest()
     return lockkey
 
 
