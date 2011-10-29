@@ -129,10 +129,16 @@
             		YUD.addClass(menu,'hidden');
             	}
             })
-            
+            YUE.on(window,'scroll',function(){
+                if(YUD.getDocumentScrollTop() > 45){
+                      YUD.addClass('header-inner','hover');
+                }
+                else{
+                    YUD.removeClass('header-inner','hover');
+                }
+            }) 
            })   
             </script>
-        
         </%def>
         <%def name="js_extra()">
         </%def>      

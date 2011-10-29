@@ -283,7 +283,13 @@ div.options a {
 	-moz-border-radius: 4px 4px 4px 4px;
 	border-radius: 4px 4px 4px 4px;
 }
-
+#header #header-inner.hover{
+	position: fixed !important;
+	width: 100% !important;
+	margin-left: -10px !important;
+	z-index: 10000;
+	border-radius: 0px 0px 4px 4px;
+}
 #header #header-inner #home a {
 	height: 40px;
 	width: 46px;
