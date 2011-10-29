@@ -167,7 +167,7 @@ class SimpleGit(object):
                     username = get_container_username(environ, self.config)
                     try:
                         user = self.__get_user(username)
-                        if user is None:
+                        if user is None or not user.active:
                             return HTTPForbidden()(environ, start_response)                        
                         username = user.username
                     except:
