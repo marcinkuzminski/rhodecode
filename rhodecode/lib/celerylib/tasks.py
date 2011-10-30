@@ -47,7 +47,7 @@ from rhodecode.lib.compat import json, OrderedDict
 
 from rhodecode.model import init_model
 from rhodecode.model import meta
-from rhodecode.model.db import RhodeCodeUi, Statistics, Repository
+from rhodecode.model.db import RhodeCodeUi, Statistics, Repository, User
 
 from vcs.backends import get_repo
 
@@ -346,7 +346,9 @@ def send_email(recipients, subject, body):
     email_config = config
 
     if not recipients:
-        recipients = [email_config.get('email_to')]
+        # if recipients are not defined we send to email_config + all admins
+        admins = [u.email for u in User.query().filter(User.admin==True).all()]
+        recipients = [email_config.get('email_to')] + admins
 
     mail_from = email_config.get('app_email_from')
     user = email_config.get('smtp_username')
