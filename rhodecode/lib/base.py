@@ -10,6 +10,7 @@ from pylons.controllers.util import redirect
 from pylons.templating import render_mako as render
 
 from rhodecode import __version__
+from rhodecode.lib import str2bool
 from rhodecode.lib.auth import AuthUser
 from rhodecode.lib.utils import get_repo_slug
 from rhodecode.model import meta
@@ -24,6 +25,7 @@ class BaseController(WSGIController):
     def __before__(self):
         c.rhodecode_version = __version__
         c.rhodecode_name = config.get('rhodecode_title')
+        c.use_gravatar = str2bool(config.get('use_gravatar'))
         c.ga_code = config.get('rhodecode_ga_code')
         c.repo_name = get_repo_slug(request)
         c.backends = BACKENDS.keys()
@@ -31,8 +33,6 @@ class BaseController(WSGIController):
 
         self.sa = meta.Session()
         self.scm_model = ScmModel(self.sa)
-
-        #c.unread_journal = scm_model.get_unread_journal()
 
     def __call__(self, environ, start_response):
         """Invoke the Controller"""
@@ -56,11 +56,13 @@ class BaseController(WSGIController):
 
 class BaseRepoController(BaseController):
     """
-    Base class for controllers responsible for loading all needed data
-    for those controllers, loaded items are
+    Base class for controllers responsible for loading all needed data for
+    repository loaded items are
 
-    c.rhodecode_repo: instance of scm repository (taken from cache)
-
+    c.rhodecode_repo: instance of scm repository
+    c.rhodecode_db_repo: instance of db
+    c.repository_followers: number of followers
+    c.repository_forks: number of forks
     """
 
     def __before__(self):
@@ -76,7 +78,6 @@ class BaseRepoController(BaseController):
 
                 redirect(url('home'))
 
-            c.repository_followers = \
-                self.scm_model.get_followers(c.repo_name)
+            c.repository_followers = self.scm_model.get_followers(c.repo_name)
             c.repository_forks = self.scm_model.get_forks(c.repo_name)
 
