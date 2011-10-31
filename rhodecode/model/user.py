@@ -112,7 +112,7 @@ class UserModel(BaseModel):
                 new_user.password = get_crypt_password(password)
                 new_user.api_key = generate_api_key(username)
                 new_user.email = attrs['email']
-                new_user.active = True
+                new_user.active = attrs.get('active',True)
                 new_user.ldap_dn = safe_unicode(user_dn)
                 new_user.name = attrs['name']
                 new_user.lastname = attrs['lastname']
