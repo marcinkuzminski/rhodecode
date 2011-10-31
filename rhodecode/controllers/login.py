@@ -49,7 +49,7 @@ class LoginController(BaseController):
         super(LoginController, self).__before__()
 
     def index(self):
-        #redirect if already logged in
+        # redirect if already logged in
         c.came_from = request.GET.get('came_from', None)
 
         if self.rhodecode_user.is_authenticated \
@@ -62,7 +62,7 @@ class LoginController(BaseController):
             login_form = LoginForm()
             try:
                 c.form_result = login_form.to_python(dict(request.POST))
-                #form checks for username/password, now we're authenticated
+                # form checks for username/password, now we're authenticated
                 username = c.form_result['username']
                 user = User.get_by_username(username, case_insensitive=True)
                 auth_user = AuthUser(user.user_id)

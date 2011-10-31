@@ -33,8 +33,6 @@ class BaseController(WSGIController):
         self.sa = meta.Session()
         self.scm_model = ScmModel(self.sa)
 
-        #c.unread_journal = scm_model.get_unread_journal()
-
     def __call__(self, environ, start_response):
         """Invoke the Controller"""
         # WSGIController.__call__ dispatches to the Controller method
@@ -42,15 +40,15 @@ class BaseController(WSGIController):
         # available in environ['pylons.routes_dict']
         start = time.time()
         try:
-            # putting this here makes sure that we update permissions each time
+            # make sure that we update permissions each time we call controller
             api_key = request.GET.get('api_key')
             user_id = getattr(session.get('rhodecode_user'), 'user_id', None)
             if asbool(config.get('container_auth_enabled', False)):
                 username = get_container_username(environ)
             else:
                 username = None
-
-            self.rhodecode_user = c.rhodecode_user = AuthUser(user_id, api_key, username)
+            auth_user = AuthUser(user_id, api_key, username)
+            self.rhodecode_user = c.rhodecode_user = auth_user
             if not self.rhodecode_user.is_authenticated and \
                        self.rhodecode_user.user_id is not None:
                 self.rhodecode_user.set_authenticated(
@@ -66,11 +64,13 @@ class BaseController(WSGIController):
 
 class BaseRepoController(BaseController):
     """
-    Base class for controllers responsible for loading all needed data
-    for those controllers, loaded items are
+    Base class for controllers responsible for loading all needed data for
+    repository loaded items are
 
-    c.rhodecode_repo: instance of scm repository (taken from cache)
-
+    c.rhodecode_repo: instance of scm repository
+    c.rhodecode_db_repo: instance of db
+    c.repository_followers: number of followers
+    c.repository_forks: number of forks
     """
 
     def __before__(self):
@@ -86,7 +86,6 @@ class BaseRepoController(BaseController):
 
                 redirect(url('home'))
 
-            c.repository_followers = \
-                self.scm_model.get_followers(c.repo_name)
+            c.repository_followers = self.scm_model.get_followers(c.repo_name)
             c.repository_forks = self.scm_model.get_forks(c.repo_name)
 

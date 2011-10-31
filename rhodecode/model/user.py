@@ -106,20 +106,20 @@ class UserModel(BaseModel):
                 new_user.password = None
                 new_user.api_key = generate_api_key(username)
                 new_user.email = attrs['email']
-                new_user.active = True
+                new_user.active = attrs.get('active', True)
                 new_user.name = attrs['name']
                 new_user.lastname = attrs['lastname']
 
                 self.sa.add(new_user)
                 self.sa.commit()
-                return True
+                return new_user
             except (DatabaseError,):
                 log.error(traceback.format_exc())
                 self.sa.rollback()
                 raise
-        log.debug('User %s already exists. Skipping creation of account for container auth.',
-                  username)
-        return False
+        log.debug('User %s already exists. Skipping creation of account'
+                  ' for container auth.', username)
+        return None
 
     def create_ldap(self, username, password, user_dn, attrs):
         """
@@ -141,21 +141,21 @@ class UserModel(BaseModel):
                 new_user.password = get_crypt_password(password)
                 new_user.api_key = generate_api_key(username)
                 new_user.email = attrs['email']
-                new_user.active = attrs.get('active',True)
+                new_user.active = attrs.get('active', True)
                 new_user.ldap_dn = safe_unicode(user_dn)
                 new_user.name = attrs['name']
                 new_user.lastname = attrs['lastname']
 
                 self.sa.add(new_user)
                 self.sa.commit()
-                return True
+                return new_user
             except (DatabaseError,):
                 log.error(traceback.format_exc())
                 self.sa.rollback()
                 raise
         log.debug('this %s user exists skipping creation of ldap account',
                   username)
-        return False
+        return None
 
     def create_registration(self, form_data):
         from rhodecode.lib.celerylib import tasks, run_task

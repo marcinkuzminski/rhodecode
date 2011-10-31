@@ -208,7 +208,7 @@ class ValidAuth(formencode.validators.FancyValidator):
         password = value['password']
         username = value['username']
         user = User.get_by_username(username)
-
+        
         if authenticate(username, password):
             return value
         else:

@@ -125,16 +125,23 @@ def get_crypt_password(password):
 def check_password(password, hashed):
     return RhodeCodeCrypto.hash_check(password, hashed)
 
-
-def generate_api_key(username, salt=None):
+def generate_api_key(str_, salt=None):
+    """
+    Generates API KEY from given string
+    
+    :param str_:
+    :param salt:
+    """
+    
     if salt is None:
         salt = _RandomNameSequence().next()
 
-    return hashlib.sha1(username + salt).hexdigest()
+    return hashlib.sha1(str_ + salt).hexdigest()
 
 
 def authfunc(environ, username, password):
-    """Dummy authentication function used in Mercurial/Git/ and access control,
+    """
+    Dummy authentication function used in Mercurial/Git/ and access control,
 
     :param environ: needed only for using in Basic auth
     """
@@ -142,7 +149,8 @@ def authfunc(environ, username, password):
 
 
 def authenticate(username, password):
-    """Authentication function used for access control,
+    """
+    Authentication function used for access control,
     firstly checks for db authentication then if ldap is enabled for ldap
     authentication, also creates ldap user if not in database
 
@@ -228,33 +236,35 @@ def login_container_auth(username):
     if user is None:
         user_model = UserModel()
         user_attrs = {
-                 'name': username,
-                 'lastname': None,
-                 'email': None,
-                }
-        if not user_model.create_for_container_auth(username, user_attrs):
+            'name': username,
+            'lastname': None,
+            'email': None,
+        }
+        user = user_model.create_for_container_auth(username, user_attrs)
+        if not user:
             return None
-        user = User.get_by_username(username)
         log.info('User %s was created by container authentication', username)
 
     if not user.active:
         return None
 
     user.update_lastlogin()
-    log.debug('User %s is now logged in by container authentication', user.username)
+    log.debug('User %s is now logged in by container authentication', 
+              user.username)
     return user
 
-def get_container_username(environ, cfg=config):
+def get_container_username(environ, cfg):
     from paste.httpheaders import REMOTE_USER
     from paste.deploy.converters import asbool
 
+    proxy_pass_enabled = asbool(cfg.get('proxypass_auth_enabled', False))
     username = REMOTE_USER(environ)
-
-    if not username and asbool(cfg.get('proxypass_auth_enabled', False)):
+    
+    if not username and proxy_pass_enabled:
         username = environ.get('HTTP_X_FORWARDED_USER')
 
-    if username:
-        #Removing realm and domain from username
+    if username and proxy_pass_enabled:
+        # Removing realm and domain from username
         username = username.partition('@')[0]
         username = username.rpartition('\\')[2]
         log.debug('Received username %s from container', username)
@@ -276,7 +286,7 @@ class  AuthUser(object):
         self.user_id = user_id
         self.api_key = None
         self.username = username
-        
+
         self.name = ''
         self.lastname = ''
         self.email = ''
@@ -290,14 +300,17 @@ class  AuthUser(object):
         user_model = UserModel()
         self.anonymous_user = User.get_by_username('default')
         is_user_loaded = False
+        
+        # try go get user by api key
         if self._api_key and self._api_key != self.anonymous_user.api_key:
-            #try go get user by api key
             log.debug('Auth User lookup by API KEY %s', self._api_key)
             is_user_loaded = user_model.fill_data(self, api_key=self._api_key)
-        elif self.user_id is not None \
-            and self.user_id != self.anonymous_user.user_id:
+        # lookup by userid    
+        elif (self.user_id is not None and 
+              self.user_id != self.anonymous_user.user_id):
             log.debug('Auth User lookup by USER ID %s', self.user_id)
             is_user_loaded = user_model.fill_data(self, user_id=self.user_id)
+        # lookup by username    
         elif self.username:
             log.debug('Auth User lookup by USER NAME %s', self.username)
             dbuser = login_container_auth(self.username)
@@ -308,10 +321,10 @@ class  AuthUser(object):
                 is_user_loaded = True
 
         if not is_user_loaded:
+            # if we cannot authenticate user try anonymous
             if self.anonymous_user.active is True:
-                user_model.fill_data(self,
-                                     user_id=self.anonymous_user.user_id)
-                #then we set this user is logged in
+                user_model.fill_data(self,user_id=self.anonymous_user.user_id)
+                # then we set this user is logged in
                 self.is_authenticated = True
             else:
                 self.user_id = None
@@ -337,13 +350,13 @@ class  AuthUser(object):
                                               self.is_authenticated)
 
     def set_authenticated(self, authenticated=True):
-
         if self.user_id != self.anonymous_user.user_id:
             self.is_authenticated = authenticated
 
 
 def set_available_permissions(config):
-    """This function will propagate pylons globals with all available defined
+    """
+    This function will propagate pylons globals with all available defined
     permission given in db. We don't want to check each time from db for new
     permissions since adding a new permission also requires application restart
     ie. to decorate new views with the newly created permission
@@ -474,7 +487,7 @@ class PermsDecorator(object):
                 return redirect(url('login_home', came_from=p))
 
             else:
-                #redirect with forbidden ret code
+                # redirect with forbidden ret code
                 return abort(403)
 
     def check_permissions(self):
@@ -661,3 +674,4 @@ class HasPermissionAnyMiddleware(object):
             return True
         log.debug('permission denied')
         return False
+

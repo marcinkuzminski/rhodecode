@@ -21,7 +21,6 @@ from webtest import TestApp
 from rhodecode.model import meta
 import logging
 
-
 log = logging.getLogger(__name__)
 
 import pylons.test
@@ -31,7 +30,7 @@ __all__ = ['environ', 'url', 'TestController', 'TESTS_TMP_PATH', 'HG_REPO',
            'TEST_USER_ADMIN_LOGIN', 'TEST_USER_ADMIN_PASS' ]
 
 # Invoke websetup with the current config file
-#SetupCommand('setup-app').run([config_file])
+# SetupCommand('setup-app').run([config_file])
 
 ##RUNNING DESIRED TESTS
 # nosetests -x rhodecode.tests.functional.test_admin_settings:TestSettingsController.test_my_account
@@ -69,7 +68,7 @@ class TestController(TestCase):
         response = self.app.post(url(controller='login', action='index'),
                                  {'username':username,
                                   'password':password})
-
+        
         if 'invalid user name' in response.body:
             self.fail('could not login using %s %s' % (username, password))
 
