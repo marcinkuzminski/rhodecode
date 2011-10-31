@@ -11,6 +11,7 @@ from pylons.templating import render_mako as render
 from paste.deploy.converters import asbool
 
 from rhodecode import __version__
+from rhodecode.lib import str2bool
 from rhodecode.lib.auth import AuthUser, get_container_username
 from rhodecode.lib.utils import get_repo_slug
 from rhodecode.model import meta
@@ -25,6 +26,7 @@ class BaseController(WSGIController):
     def __before__(self):
         c.rhodecode_version = __version__
         c.rhodecode_name = config.get('rhodecode_title')
+        c.use_gravatar = str2bool(config.get('use_gravatar'))
         c.ga_code = config.get('rhodecode_ga_code')
         c.repo_name = get_repo_slug(request)
         c.backends = BACKENDS.keys()
