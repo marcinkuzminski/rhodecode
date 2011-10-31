@@ -5,11 +5,9 @@
 </%def>
 
 <%def name="breadcrumbs()">
-    <span class="groups_breadcrumbs">
-    ${_('Groups')} 
+    <span class="groups_breadcrumbs"> ${_('Groups')} 
     %if c.group.parent_group:
-        &raquo; ${h.link_to(c.group.parent_group.name,
-        h.url('repos_group_home',group_name=c.group.parent_group.group_name))}
+        &raquo; ${h.link_to(c.group.parent_group.name,h.url('repos_group_home',group_name=c.group.parent_group.group_name))}
     %endif
     &raquo; "${c.group.name}" ${_('with')}
     </span> 

@@ -3005,6 +3005,13 @@ div#legend_container table td,div#legend_choices table td {
 	padding: 0 !important;
 }
 
+.q_filter_box {
+	-webkit-box-shadow: rgba(0,0,0,0.07) 0 1px 2px inset;
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;	
+}
+
 #q_filter {
 	border: 0 none;
 	color: #AAAAAA;
