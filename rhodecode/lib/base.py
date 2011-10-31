@@ -8,7 +8,6 @@ from pylons import config, tmpl_context as c, request, session, url
 from pylons.controllers import WSGIController
 from pylons.controllers.util import redirect
 from pylons.templating import render_mako as render
-from paste.deploy.converters import asbool
 
 from rhodecode import __version__
 from rhodecode.lib import str2bool
@@ -45,10 +44,8 @@ class BaseController(WSGIController):
             # make sure that we update permissions each time we call controller
             api_key = request.GET.get('api_key')
             user_id = getattr(session.get('rhodecode_user'), 'user_id', None)
-            if asbool(config.get('container_auth_enabled', False)):
-                username = get_container_username(environ)
-            else:
-                username = None
+            username = get_container_username(environ, config)
+
             auth_user = AuthUser(user_id, api_key, username)
             self.rhodecode_user = c.rhodecode_user = auth_user
             if not self.rhodecode_user.is_authenticated and \

@@ -114,23 +114,26 @@ class SimpleHg(object):
                 # NEED TO AUTHENTICATE AND ASK FOR AUTH USER PERMISSIONS
                 #==============================================================
 
-                if not get_container_username(environ, self.config):
+                # Attempting to retrieve username from the container
+                username = get_container_username(environ, self.config)
+
+                # If not authenticated by the container, running basic auth
+                if not username:
                     self.authenticate.realm = \
                         safe_str(self.config['rhodecode_realm'])
                     result = self.authenticate(environ)
                     if isinstance(result, str):
                         AUTH_TYPE.update(environ, 'basic')
                         REMOTE_USER.update(environ, result)
+                        username = result
                     else:
                         return result.wsgi_application(environ, start_response)
 
                 #==============================================================
-                # CHECK PERMISSIONS FOR THIS REQUEST USING GIVEN USERNAME FROM
-                # BASIC AUTH
+                # CHECK PERMISSIONS FOR THIS REQUEST USING GIVEN USERNAME
                 #==============================================================
 
                 if action in ['pull', 'push']:
-                    username = get_container_username(environ, self.config)
                     try:
                         user = self.__get_user(username)
                         if user is None or not user.active:

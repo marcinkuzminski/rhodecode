@@ -253,17 +253,17 @@ def login_container_auth(username):
               user.username)
     return user
 
-def get_container_username(environ, cfg):
-    from paste.httpheaders import REMOTE_USER
-    from paste.deploy.converters import asbool
+def get_container_username(environ, config):
+    username = None
 
-    proxy_pass_enabled = asbool(cfg.get('proxypass_auth_enabled', False))
-    username = REMOTE_USER(environ)
-    
-    if not username and proxy_pass_enabled:
+    if str2bool(config.get('container_auth_enabled', False)):
+        from paste.httpheaders import REMOTE_USER
+        username = REMOTE_USER(environ)
+
+    if not username and str2bool(config.get('proxypass_auth_enabled', False)):
         username = environ.get('HTTP_X_FORWARDED_USER')
 
-    if username and proxy_pass_enabled:
+    if username:
         # Removing realm and domain from username
         username = username.partition('@')[0]
         username = username.rpartition('\\')[2]
