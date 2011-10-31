@@ -92,6 +92,35 @@ class UserModel(BaseModel):
             self.sa.rollback()
             raise
 
+    def create_for_container_auth(self, username, attrs):
+        """
+        Creates the given user if it's not already in the database
+        
+        :param username:
+        :param attrs:
+        """
+        if self.get_by_username(username, case_insensitive=True) is None:
+            try:
+                new_user = User()
+                new_user.username = username
+                new_user.password = None
+                new_user.api_key = generate_api_key(username)
+                new_user.email = attrs['email']
+                new_user.active = True
+                new_user.name = attrs['name']
+                new_user.lastname = attrs['lastname']
+
+                self.sa.add(new_user)
+                self.sa.commit()
+                return True
+            except (DatabaseError,):
+                log.error(traceback.format_exc())
+                self.sa.rollback()
+                raise
+        log.debug('User %s already exists. Skipping creation of account for container auth.',
+                  username)
+        return False
+
     def create_ldap(self, username, password, user_dn, attrs):
         """
         Checks if user is in database, if not creates this user marked
@@ -243,16 +272,19 @@ class UserModel(BaseModel):
             else:
                 dbuser = self.get(user_id)
 
-            if dbuser is not None:
+            if dbuser is not None and dbuser.active:
                 log.debug('filling %s data', dbuser)
                 for k, v in dbuser.get_dict().items():
                     setattr(auth_user, k, v)
+            else:
+                return False
 
         except:
             log.error(traceback.format_exc())
             auth_user.is_authenticated = False
+            return False
 
-        return auth_user
+        return True
 
     def fill_perms(self, user):
         """
