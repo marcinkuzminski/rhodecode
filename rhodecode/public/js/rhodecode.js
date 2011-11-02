@@ -172,8 +172,7 @@ function ypjax(url,container,s_call,f_call,args){
 	YUC.asyncRequest(method,url,{
 		success:s_wrapper,
 		failure:function(o){
-			//failure
-			window.location = url;
+			console.log(o)
 		}
 	},args);
 	
