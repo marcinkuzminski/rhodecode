@@ -83,6 +83,5 @@ class NotSupportedError(Error):
 class InvalidConstraintError(Error):
     """Invalid constraint error"""
 
-
 class MigrateDeprecationWarning(DeprecationWarning):
     """Warning for deprecated features in Migrate"""

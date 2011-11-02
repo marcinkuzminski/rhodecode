@@ -21,7 +21,7 @@ def upgrade(migrate_engine):
     #==========================================================================
     # Add table `groups``
     #==========================================================================
-    from rhodecode.lib.dbmigrate.schema.db_1_2_0 import Group
+    from rhodecode.lib.dbmigrate.schema.db_1_2_0 import RepoGroup as Group
     Group().__table__.create()
 
     #==========================================================================
