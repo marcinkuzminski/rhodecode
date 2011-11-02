@@ -116,15 +116,8 @@ class ApiController(JSONRPCController):
             raise JSONRPCError("user %s already exist" % username)
 
         try:
-            form_data = dict(username=username,
-                             password=password,
-                             active=active,
-                             admin=admin,
-                             name=firstname,
-                             lastname=lastname,
-                             email=email,
-                             ldap_dn=ldap_dn)
-            UserModel().create_ldap(username, password, ldap_dn, form_data)
+            UserModel().create_or_update(username, password, email, firstname, 
+                                         lastname, active, admin, ldap_dn)
             return dict(msg='created new user %s' % username)
         except Exception:
             log.error(traceback.format_exc())
