@@ -42,7 +42,7 @@ from rhodecode.lib.utils import invalidate_cache, action_logger
 
 from rhodecode.model.forms import RepoSettingsForm, RepoForkForm
 from rhodecode.model.repo import RepoModel
-from rhodecode.model.db import User
+from rhodecode.model.db import Group
 
 log = logging.getLogger(__name__)
 
@@ -52,7 +52,15 @@ class SettingsController(BaseRepoController):
     @LoginRequired()
     def __before__(self):
         super(SettingsController, self).__before__()
-
+    
+    def __load_defaults(self):
+        c.repo_groups = Group.groups_choices()
+        c.repo_groups_choices = map(lambda k: unicode(k[0]), c.repo_groups)
+        
+        repo_model = RepoModel()
+        c.users_array = repo_model.get_users_js()
+        c.users_groups_array = repo_model.get_users_groups_js()
+        
     @HasRepoPermissionAllDecorator('repository.admin')
     def index(self, repo_name):
         repo_model = RepoModel()
@@ -66,28 +74,9 @@ class SettingsController(BaseRepoController):
 
             return redirect(url('home'))
 
-        c.users_array = repo_model.get_users_js()
-        c.users_groups_array = repo_model.get_users_groups_js()
+        self.__load_defaults()
 
-        defaults = c.repo_info.get_dict()
-
-        #fill owner
-        if c.repo_info.user:
-            defaults.update({'user': c.repo_info.user.username})
-        else:
-            replacement_user = self.sa.query(User)\
-            .filter(User.admin == True).first().username
-            defaults.update({'user': replacement_user})
-
-        #fill repository users
-        for p in c.repo_info.repo_to_perm:
-            defaults.update({'u_perm_%s' % p.user.username:
-                             p.permission.permission_name})
-
-        #fill repository groups
-        for p in c.repo_info.users_group_to_perm:
-            defaults.update({'g_perm_%s' % p.users_group.users_group_name:
-                             p.permission.permission_name})
+        defaults = RepoModel()._get_defaults(repo_name)
 
         return htmlfill.render(
             render('settings/repo_settings.html'),
@@ -100,17 +89,22 @@ class SettingsController(BaseRepoController):
     def update(self, repo_name):
         repo_model = RepoModel()
         changed_name = repo_name
+        
+        self.__load_defaults()
+        
         _form = RepoSettingsForm(edit=True,
-                                 old_data={'repo_name': repo_name})()
+                                 old_data={'repo_name': repo_name},
+                                 repo_groups=c.repo_groups_choices)()
         try:
             form_result = _form.to_python(dict(request.POST))
+            
             repo_model.update(repo_name, form_result)
             invalidate_cache('get_repo_cached_%s' % repo_name)
             h.flash(_('Repository %s updated successfully' % repo_name),
                     category='success')
-            changed_name = form_result['repo_name']
+            changed_name = form_result['repo_name_full']
             action_logger(self.rhodecode_user, 'user_updated_repo',
-                              changed_name, '', self.sa)
+                          changed_name, '', self.sa)
         except formencode.Invalid, errors:
             c.repo_info = repo_model.get_by_repo_name(repo_name)
             c.users_array = repo_model.get_users_js()

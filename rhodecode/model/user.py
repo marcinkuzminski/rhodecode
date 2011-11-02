@@ -49,7 +49,6 @@ PERM_WEIGHTS = {'repository.none': 0,
 
 
 class UserModel(BaseModel):
-
     def get(self, user_id, cache=False):
         user = self.sa.query(User)
         if cache:
@@ -87,6 +86,7 @@ class UserModel(BaseModel):
             new_user.api_key = generate_api_key(form_data['username'])
             self.sa.add(new_user)
             self.sa.commit()
+            return new_user
         except:
             log.error(traceback.format_exc())
             self.sa.rollback()
@@ -96,6 +96,7 @@ class UserModel(BaseModel):
         """
         Checks if user is in database, if not creates this user marked
         as ldap user
+        
         :param username:
         :param password:
         :param user_dn:
@@ -386,3 +387,4 @@ class UserModel(BaseModel):
                                                      repository.repo_name] = p
 
         return user
+
