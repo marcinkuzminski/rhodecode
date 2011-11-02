@@ -92,6 +92,54 @@ class UserModel(BaseModel):
             self.sa.rollback()
             raise
 
+
+    def create_or_update(self, username, password, email, name, lastname, 
+                         active=True, admin=False, ldap_dn=None):
+        """
+        Creates a new instance if not found, or updates current one
+        
+        :param username:
+        :param password:
+        :param email:
+        :param active:
+        :param name:
+        :param lastname:
+        :param active:
+        :param admin:
+        :param ldap_dn:
+        """
+        
+        from rhodecode.lib.auth import get_crypt_password
+        
+        log.debug('Checking for %s account in RhodeCode database', username)
+        user = User.get_by_username(username, case_insensitive=True)
+        if user is None:
+            log.debug('creating new user %s', username)            
+            new_user = User()
+        else:
+            log.debug('updating user %s', username)            
+            new_user = user
+            
+        try:
+            new_user.username = username
+            new_user.admin = admin
+            new_user.password = get_crypt_password(password)
+            new_user.api_key = generate_api_key(username)
+            new_user.email = email
+            new_user.active = active
+            new_user.ldap_dn = safe_unicode(ldap_dn) if ldap_dn else None
+            new_user.name = name
+            new_user.lastname = lastname
+
+            self.sa.add(new_user)
+            self.sa.commit()
+            return new_user
+        except (DatabaseError,):
+            log.error(traceback.format_exc())
+            self.sa.rollback()
+            raise
+    
+    
     def create_for_container_auth(self, username, attrs):
         """
         Creates the given user if it's not already in the database

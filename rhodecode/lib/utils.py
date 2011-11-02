@@ -47,15 +47,14 @@ from rhodecode.model import meta
 from rhodecode.model.caching_query import FromCache
 from rhodecode.model.db import Repository, User, RhodeCodeUi, UserLog, RepoGroup, \
     RhodeCodeSetting
-from rhodecode.model.repo import RepoModel
 
 log = logging.getLogger(__name__)
 
 
-def recursive_replace(str, replace=' '):
+def recursive_replace(str_, replace=' '):
     """Recursive replace of given sign to just one instance
 
-    :param str: given string
+    :param str_: given string
     :param replace: char to find and replace multiple instances
 
     Examples::
@@ -63,11 +62,11 @@ def recursive_replace(str, replace=' '):
     'Mighty-Mighty-Bo-sstones'
     """
 
-    if str.find(replace * 2) == -1:
-        return str
+    if str_.find(replace * 2) == -1:
+        return str_
     else:
-        str = str.replace(replace * 2, replace)
-        return recursive_replace(str, replace)
+        str_ = str_.replace(replace * 2, replace)
+        return recursive_replace(str_, replace)
 
 
 def repo_name_slug(value):
@@ -116,13 +115,12 @@ def action_logger(user, action, repo, ipaddr='', sa=None):
         else:
             raise Exception('You have to provide user object or username')
 
-        rm = RepoModel()
         if hasattr(repo, 'repo_id'):
-            repo_obj = rm.get(repo.repo_id, cache=False)
+            repo_obj = Repository.get(repo.repo_id)
             repo_name = repo_obj.repo_name
         elif  isinstance(repo, basestring):
             repo_name = repo.lstrip('/')
-            repo_obj = rm.get_by_repo_name(repo_name, cache=False)
+            repo_obj = Repository.get_by_repo_name(repo_name)
         else:
             raise Exception('You have to provide repository to action logger')
 
@@ -151,8 +149,6 @@ def get_repos(path, recursive=False):
     :param path: path to scann for repositories
     :param recursive: recursive search and return names with subdirs in front
     """
-    from vcs.utils.helpers import get_scm
-    from vcs.exceptions import VCSError
 
     if path.endswith(os.sep):
         #remove ending slash for better results
@@ -377,17 +373,20 @@ def map_groups(groups):
 
 
 def repo2db_mapper(initial_repo_list, remove_obsolete=False):
-    """maps all repos given in initial_repo_list, non existing repositories
+    """
+    maps all repos given in initial_repo_list, non existing repositories
     are created, if remove_obsolete is True it also check for db entries
     that are not in initial_repo_list and removes them.
 
     :param initial_repo_list: list of repositories found by scanning methods
     :param remove_obsolete: check for obsolete entries in database
     """
-
+    from rhodecode.model.repo import RepoModel
     sa = meta.Session()
     rm = RepoModel()
     user = sa.query(User).filter(User.admin == True).first()
+    if user is None:
+        raise Exception('Missing administrative account !')    
     added = []
     # fixup groups paths to new format on the fly
     # TODO: remove this in future

@@ -33,7 +33,7 @@ from os.path import dirname as dn, join as jn
 from rhodecode import __dbversion__
 from rhodecode.model import meta
 
-from rhodecode.lib.auth import get_crypt_password, generate_api_key
+from rhodecode.model.user import UserModel
 from rhodecode.lib.utils import ask_ok
 from rhodecode.model import init_model
 from rhodecode.model.db import User, Permission, RhodeCodeUi, \
@@ -415,30 +415,18 @@ class DbManage(object):
         log.info('created ui config')
 
     def create_user(self, username, password, email='', admin=False):
-        log.info('creating administrator user %s', username)
-        
-        form_data = dict(username=username,
-                         password=password,
-                         active=True,
-                         admin=admin,
-                         name='RhodeCode',
-                         lastname='Admin',
-                         email=email)
-        User.create(form_data)
-
+        log.info('creating user %s', username)
+        UserModel().create_or_update(username, password, email, 
+                                     name='RhodeCode', lastname='Admin', 
+                                     active=True, admin=admin)
 
     def create_default_user(self):
         log.info('creating default user')
-        #create default user for handling default permissions.
-
-        form_data = dict(username='default',
-                         password=str(uuid.uuid1())[:8],
-                         active=False,
-                         admin=False,
-                         name='Anonymous',
-                         lastname='User',
-                         email='anonymous@rhodecode.org')
-        User.create(form_data)
+        # create default user for handling default permissions.
+        UserModel().create_or_update(username='default', 
+                              password=str(uuid.uuid1())[:8], 
+                              email='anonymous@rhodecode.org', 
+                              name='Anonymous', lastname='User')
         
     def create_permissions(self):
         #module.(access|create|change|delete)_[name]
