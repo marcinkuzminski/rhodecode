@@ -45,8 +45,8 @@ from vcs.exceptions import VCSError
 
 from rhodecode.model import meta
 from rhodecode.model.caching_query import FromCache
-from rhodecode.model.db import Repository, User, RhodeCodeUi, UserLog, Group, \
-    RhodeCodeSettings
+from rhodecode.model.db import Repository, User, RhodeCodeUi, UserLog, RepoGroup, \
+    RhodeCodeSetting
 from rhodecode.model.repo import RepoModel
 
 log = logging.getLogger(__name__)
@@ -290,7 +290,7 @@ def set_rhodecode_config(config):
 
     :param config:
     """
-    hgsettings = RhodeCodeSettings.get_app_settings()
+    hgsettings = RhodeCodeSetting.get_app_settings()
 
     for k, v in hgsettings.items():
         config[k] = v
@@ -366,10 +366,10 @@ def map_groups(groups):
 
     for lvl, group_name in enumerate(groups):
         group_name = '/'.join(groups[:lvl] + [group_name])
-        group = sa.query(Group).filter(Group.group_name == group_name).scalar()
+        group = sa.query(RepoGroup).filter(RepoGroup.group_name == group_name).scalar()
 
         if group is None:
-            group = Group(group_name, parent)
+            group = RepoGroup(group_name, parent)
             sa.add(group)
             sa.commit()
         parent = group
@@ -391,7 +391,7 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False):
     added = []
     # fixup groups paths to new format on the fly
     # TODO: remove this in future
-    for g in Group.query().all():
+    for g in RepoGroup.query().all():
         g.group_name = g.get_new_name(g.name)
         sa.add(g)    
     for name, repo in initial_repo_list.items():

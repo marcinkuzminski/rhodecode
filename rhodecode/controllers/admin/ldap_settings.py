@@ -39,7 +39,7 @@ from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator
 from rhodecode.lib.exceptions import LdapImportError
 from rhodecode.model.forms import LdapSettingsForm
-from rhodecode.model.db import RhodeCodeSettings
+from rhodecode.model.db import RhodeCodeSetting
 
 log = logging.getLogger(__name__)
 
@@ -83,7 +83,7 @@ class LdapSettingsController(BaseController):
         super(LdapSettingsController, self).__before__()
 
     def index(self):
-        defaults = RhodeCodeSettings.get_ldap_settings()
+        defaults = RhodeCodeSetting.get_ldap_settings()
         c.search_scope_cur = defaults.get('ldap_search_scope')
         c.tls_reqcert_cur = defaults.get('ldap_tls_reqcert')
         c.tls_kind_cur = defaults.get('ldap_tls_kind')
@@ -107,7 +107,7 @@ class LdapSettingsController(BaseController):
 
                 for k, v in form_result.items():
                     if k.startswith('ldap_'):
-                        setting = RhodeCodeSettings.get_by_name(k)
+                        setting = RhodeCodeSetting.get_by_name(k)
                         setting.app_settings_value = v
                         self.sa.add(setting)
 

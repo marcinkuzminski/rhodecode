@@ -38,7 +38,7 @@ from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator
 from rhodecode.lib.base import BaseController, render
 
-from rhodecode.model.db import User, RepoToPerm, UserToPerm, Permission
+from rhodecode.model.db import User, UserRepoToPerm, UserToPerm, Permission
 from rhodecode.model.forms import UserForm
 from rhodecode.model.user import UserModel
 

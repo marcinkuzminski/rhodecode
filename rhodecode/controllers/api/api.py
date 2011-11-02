@@ -6,7 +6,7 @@ from rhodecode.lib.auth import HasPermissionAllDecorator, \
     HasPermissionAnyDecorator
 from rhodecode.model.scm import ScmModel
 
-from rhodecode.model.db import User, UsersGroup, Group, Repository
+from rhodecode.model.db import User, UsersGroup, RepoGroup, Repository
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.user import UserModel
 from rhodecode.model.repo_permission import RepositoryPermissionModel
@@ -325,7 +325,7 @@ class ApiController(JSONRPCController):
             groups = groups[:-1]
             parent_id = None
             for g in groups:
-                group = Group.get_by_group_name(g)
+                group = RepoGroup.get_by_group_name(g)
                 if not group:
                     group = ReposGroupModel().create(dict(group_name=g,
                                                   group_description='',

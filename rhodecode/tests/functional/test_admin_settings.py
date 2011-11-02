@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from rhodecode.lib.auth import get_crypt_password, check_password
-from rhodecode.model.db import User, RhodeCodeSettings
+from rhodecode.model.db import User, RhodeCodeSetting
 from rhodecode.tests import *
 
 class TestAdminSettingsController(TestController):
@@ -63,7 +63,7 @@ class TestAdminSettingsController(TestController):
 
         self.checkSessionFlash(response, 'Updated application settings')
 
-        self.assertEqual(RhodeCodeSettings
+        self.assertEqual(RhodeCodeSetting
                          .get_app_settings()['rhodecode_ga_code'], new_ga_code)
 
         response = response.follow()
@@ -85,7 +85,7 @@ class TestAdminSettingsController(TestController):
 
         self.assertTrue('Updated application settings' in
                         response.session['flash'][0][1])
-        self.assertEqual(RhodeCodeSettings
+        self.assertEqual(RhodeCodeSetting
                         .get_app_settings()['rhodecode_ga_code'], new_ga_code)
 
         response = response.follow()
@@ -109,7 +109,7 @@ class TestAdminSettingsController(TestController):
                                                      ))
 
             self.checkSessionFlash(response, 'Updated application settings')
-            self.assertEqual(RhodeCodeSettings
+            self.assertEqual(RhodeCodeSetting
                              .get_app_settings()['rhodecode_title'],
                              new_title.decode('utf-8'))
 

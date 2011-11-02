@@ -48,7 +48,7 @@ from rhodecode.lib.auth_ldap import AuthLdap
 
 from rhodecode.model import meta
 from rhodecode.model.user import UserModel
-from rhodecode.model.db import Permission, RhodeCodeSettings, User
+from rhodecode.model.db import Permission, RhodeCodeSetting, User
 
 log = logging.getLogger(__name__)
 
@@ -184,7 +184,7 @@ def authenticate(username, password):
             log.debug('this user already exists as non ldap')
             return False
 
-        ldap_settings = RhodeCodeSettings.get_ldap_settings()
+        ldap_settings = RhodeCodeSetting.get_ldap_settings()
         #======================================================================
         # FALLBACK TO LDAP AUTH IF ENABLE
         #======================================================================

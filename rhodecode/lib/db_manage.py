@@ -37,7 +37,7 @@ from rhodecode.lib.auth import get_crypt_password, generate_api_key
 from rhodecode.lib.utils import ask_ok
 from rhodecode.model import init_model
 from rhodecode.model.db import User, Permission, RhodeCodeUi, \
-    RhodeCodeSettings, UserToPerm, DbMigrateVersion
+    RhodeCodeSetting, UserToPerm, DbMigrateVersion
 
 from sqlalchemy.engine import create_engine
 
@@ -210,7 +210,7 @@ class DbManage(object):
         """Fixes rhodecode settings adds ga_code key for google analytics
         """
 
-        hgsettings3 = RhodeCodeSettings('ga_code', '')
+        hgsettings3 = RhodeCodeSetting('ga_code', '')
 
         try:
             self.sa.add(hgsettings3)
@@ -321,10 +321,10 @@ class DbManage(object):
                         ('ldap_attr_login', ''), ('ldap_attr_firstname', ''),
                         ('ldap_attr_lastname', ''), ('ldap_attr_email', '')]:
 
-                if skip_existing and RhodeCodeSettings.get_by_name(k) != None:
+                if skip_existing and RhodeCodeSetting.get_by_name(k) != None:
                     log.debug('Skipping option %s' % k)
                     continue
-                setting = RhodeCodeSettings(k, v)
+                setting = RhodeCodeSetting(k, v)
                 self.sa.add(setting)
             self.sa.commit()
         except:
@@ -391,9 +391,9 @@ class DbManage(object):
         paths.ui_key = '/'
         paths.ui_value = path
 
-        hgsettings1 = RhodeCodeSettings('realm', 'RhodeCode authentication')
-        hgsettings2 = RhodeCodeSettings('title', 'RhodeCode')
-        hgsettings3 = RhodeCodeSettings('ga_code', '')
+        hgsettings1 = RhodeCodeSetting('realm', 'RhodeCode authentication')
+        hgsettings2 = RhodeCodeSetting('title', 'RhodeCode')
+        hgsettings3 = RhodeCodeSetting('ga_code', '')
 
         try:
             self.sa.add(web1)

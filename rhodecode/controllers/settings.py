@@ -42,7 +42,7 @@ from rhodecode.lib.utils import invalidate_cache, action_logger
 
 from rhodecode.model.forms import RepoSettingsForm, RepoForkForm
 from rhodecode.model.repo import RepoModel
-from rhodecode.model.db import Group
+from rhodecode.model.db import RepoGroup
 
 log = logging.getLogger(__name__)
 
@@ -54,7 +54,7 @@ class SettingsController(BaseRepoController):
         super(SettingsController, self).__before__()
     
     def __load_defaults(self):
-        c.repo_groups = Group.groups_choices()
+        c.repo_groups = RepoGroup.groups_choices()
         c.repo_groups_choices = map(lambda k: unicode(k[0]), c.repo_groups)
         
         repo_model = RepoModel()

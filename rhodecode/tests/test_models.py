@@ -4,7 +4,7 @@ from rhodecode.tests import *
 
 from rhodecode.model.repos_group import ReposGroupModel
 from rhodecode.model.repo import RepoModel
-from rhodecode.model.db import Group, User
+from rhodecode.model.db import RepoGroup, User
 from sqlalchemy.exc import IntegrityError
 
 class TestReposGroups(unittest.TestCase):
@@ -28,7 +28,7 @@ class TestReposGroups(unittest.TestCase):
     def __make_group(self, path, desc='desc', parent_id=None,
                      skip_if_exists=False):
 
-        gr = Group.get_by_group_name(path)
+        gr = RepoGroup.get_by_group_name(path)
         if gr and skip_if_exists:
             return gr
 
@@ -77,13 +77,13 @@ class TestReposGroups(unittest.TestCase):
         sg1 = self.__make_group('deleteme')
         self.__delete_group(sg1.group_id)
 
-        self.assertEqual(Group.get(sg1.group_id), None)
+        self.assertEqual(RepoGroup.get(sg1.group_id), None)
         self.assertFalse(self.__check_path('deteteme'))
 
         sg1 = self.__make_group('deleteme', parent_id=self.g1.group_id)
         self.__delete_group(sg1.group_id)
 
-        self.assertEqual(Group.get(sg1.group_id), None)
+        self.assertEqual(RepoGroup.get(sg1.group_id), None)
         self.assertFalse(self.__check_path('test1', 'deteteme'))
 
 
@@ -92,7 +92,7 @@ class TestReposGroups(unittest.TestCase):
 
         new_sg1 = self.__update_group(sg1.group_id, 'after')
         self.assertTrue(self.__check_path('after'))
-        self.assertEqual(Group.get_by_group_name('initial'), None)
+        self.assertEqual(RepoGroup.get_by_group_name('initial'), None)
 
 
     def test_update_group_parent(self):
@@ -101,18 +101,18 @@ class TestReposGroups(unittest.TestCase):
 
         new_sg1 = self.__update_group(sg1.group_id, 'after', parent_id=self.g1.group_id)
         self.assertTrue(self.__check_path('test1', 'after'))
-        self.assertEqual(Group.get_by_group_name('test1/initial'), None)
+        self.assertEqual(RepoGroup.get_by_group_name('test1/initial'), None)
 
 
         new_sg1 = self.__update_group(sg1.group_id, 'after', parent_id=self.g3.group_id)
         self.assertTrue(self.__check_path('test3', 'after'))
-        self.assertEqual(Group.get_by_group_name('test3/initial'), None)
+        self.assertEqual(RepoGroup.get_by_group_name('test3/initial'), None)
 
 
         new_sg1 = self.__update_group(sg1.group_id, 'hello')
         self.assertTrue(self.__check_path('hello'))
 
-        self.assertEqual(Group.get_by_group_name('hello'), new_sg1)
+        self.assertEqual(RepoGroup.get_by_group_name('hello'), new_sg1)
 
 
 

@@ -29,7 +29,7 @@ import traceback
 from sqlalchemy.exc import DatabaseError
 
 from rhodecode.model import BaseModel
-from rhodecode.model.db import User, Permission, UserToPerm, RepoToPerm
+from rhodecode.model.db import User, Permission, UserToPerm, UserRepoToPerm
 from rhodecode.model.caching_query import FromCache
 
 log = logging.getLogger(__name__)
@@ -95,8 +95,8 @@ class PermissionModel(BaseModel):
 
             #stage 2 update all default permissions for repos if checked
             if form_result['overwrite_default'] == True:
-                for r2p in self.sa.query(RepoToPerm)\
-                               .filter(RepoToPerm.user == perm_user).all():
+                for r2p in self.sa.query(UserRepoToPerm)\
+                               .filter(UserRepoToPerm.user == perm_user).all():
                     r2p.permission = self.get_permission_by_name(
                                          form_result['default_perm'])
                     self.sa.add(r2p)

@@ -38,7 +38,7 @@ from rhodecode.lib.auth import authenticate, get_crypt_password
 from rhodecode.lib.exceptions import LdapImportError
 from rhodecode.model.user import UserModel
 from rhodecode.model.repo import RepoModel
-from rhodecode.model.db import User, UsersGroup, Group
+from rhodecode.model.db import User, UsersGroup, RepoGroup
 from rhodecode import BACKENDS
 
 log = logging.getLogger(__name__)
@@ -107,7 +107,7 @@ def ValidUsersGroup(edit, old_data):
 
 
             if re.match(r'^[a-zA-Z0-9]{1}[a-zA-Z0-9\-\_\.]+$', value) is None:
-                raise formencode.Invalid(_('Group name may only contain '
+                raise formencode.Invalid(_('RepoGroup name may only contain '
                                            'alphanumeric characters '
                                            'underscores, periods or dashes '
                                            'and must begin with alphanumeric '
@@ -136,13 +136,13 @@ def ValidReposGroup(edit, old_data):
 
             old_gname = None
             if edit:
-                old_gname = Group.get(
+                old_gname = RepoGroup.get(
                             old_data.get('group_id')).group_name
 
             if old_gname != group_name or not edit:
                 # check filesystem
-                gr = Group.query().filter(Group.group_name == slug)\
-                    .filter(Group.group_parent_id == group_parent_id).scalar()
+                gr = RepoGroup.query().filter(RepoGroup.group_name == slug)\
+                    .filter(RepoGroup.group_parent_id == group_parent_id).scalar()
 
                 if gr:
                     e_dict = {'group_name':_('This group already exists')}
@@ -248,12 +248,12 @@ def ValidRepoName(edit, old_data):
 
 
             if value.get('repo_group'):
-                gr = Group.get(value.get('repo_group'))
+                gr = RepoGroup.get(value.get('repo_group'))
                 group_path = gr.full_path
                 # value needs to be aware of group name in order to check
                 # db key This is an actual just the name to store in the
                 # database
-                repo_name_full = group_path + Group.url_sep() + repo_name
+                repo_name_full = group_path + RepoGroup.url_sep() + repo_name
                 
             else:
                 group_path = ''
@@ -272,7 +272,7 @@ def ValidRepoName(edit, old_data):
                                   gr.group_name}
                         raise formencode.Invalid('', value, state,
                                                  error_dict=e_dict)
-                elif Group.get_by_group_name(repo_name_full):
+                elif RepoGroup.get_by_group_name(repo_name_full):
                         e_dict = {'repo_name':_('There is a group with this'
                                                 ' name already "%s"') %
                                   repo_name_full}

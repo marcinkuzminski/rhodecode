@@ -31,7 +31,7 @@ from pylons.i18n.translation import _
 from rhodecode.lib import safe_unicode
 from rhodecode.model import BaseModel
 from rhodecode.model.caching_query import FromCache
-from rhodecode.model.db import User, RepoToPerm, Repository, Permission, \
+from rhodecode.model.db import User, UserRepoToPerm, Repository, Permission, \
     UserToPerm, UsersGroupRepoToPerm, UsersGroupToPerm, UsersGroupMember
 from rhodecode.lib.exceptions import DefaultUserException, \
     UserOwnsReposException
@@ -303,12 +303,12 @@ class UserModel(BaseModel):
         #======================================================================
         default_user = self.get_by_username('default', cache=True)
 
-        default_perms = self.sa.query(RepoToPerm, Repository, Permission)\
-            .join((Repository, RepoToPerm.repository_id ==
+        default_perms = self.sa.query(UserRepoToPerm, Repository, Permission)\
+            .join((Repository, UserRepoToPerm.repository_id ==
                    Repository.repo_id))\
-            .join((Permission, RepoToPerm.permission_id ==
+            .join((Permission, UserRepoToPerm.permission_id ==
                    Permission.permission_id))\
-            .filter(RepoToPerm.user == default_user).all()
+            .filter(UserRepoToPerm.user == default_user).all()
 
         if user.is_admin:
             #==================================================================
@@ -318,7 +318,7 @@ class UserModel(BaseModel):
 
             for perm in default_perms:
                 p = 'repository.admin'
-                user.permissions['repositories'][perm.RepoToPerm.
+                user.permissions['repositories'][perm.UserRepoToPerm.
                                                  repository.repo_name] = p
 
         else:
@@ -346,7 +346,7 @@ class UserModel(BaseModel):
                 else:
                     p = perm.Permission.permission_name
 
-                user.permissions['repositories'][perm.RepoToPerm.
+                user.permissions['repositories'][perm.UserRepoToPerm.
                                                  repository.repo_name] = p
 
             #==================================================================
@@ -363,13 +363,13 @@ class UserModel(BaseModel):
                                                permission_name)
 
             #user repositories
-            user_repo_perms = self.sa.query(RepoToPerm, Permission,
+            user_repo_perms = self.sa.query(UserRepoToPerm, Permission,
                                             Repository)\
-                .join((Repository, RepoToPerm.repository_id ==
+                .join((Repository, UserRepoToPerm.repository_id ==
                        Repository.repo_id))\
-                .join((Permission, RepoToPerm.permission_id ==
+                .join((Permission, UserRepoToPerm.permission_id ==
                        Permission.permission_id))\
-                .filter(RepoToPerm.user_id == uid).all()
+                .filter(UserRepoToPerm.user_id == uid).all()
 
             for perm in user_repo_perms:
                 # set admin if owner
@@ -377,7 +377,7 @@ class UserModel(BaseModel):
                     p = 'repository.admin'
                 else:
                     p = perm.Permission.permission_name
-                user.permissions['repositories'][perm.RepoToPerm.
+                user.permissions['repositories'][perm.UserRepoToPerm.
                                                  repository.repo_name] = p
 
             #==================================================================

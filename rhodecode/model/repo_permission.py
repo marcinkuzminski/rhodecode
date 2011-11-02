@@ -24,16 +24,16 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
-from rhodecode.model.db import BaseModel, RepoToPerm, Permission
+from rhodecode.model.db import BaseModel, UserRepoToPerm, Permission
 from rhodecode.model.meta import Session
 
 log = logging.getLogger(__name__)
 
 class RepositoryPermissionModel(BaseModel):
     def get_user_permission(self, repository, user):
-        return RepoToPerm.query() \
-                .filter(RepoToPerm.user == user) \
-                .filter(RepoToPerm.repository == repository) \
+        return UserRepoToPerm.query() \
+                .filter(UserRepoToPerm.user == user) \
+                .filter(UserRepoToPerm.repository == repository) \
                 .scalar()
 
     def update_user_permission(self, repository, user, permission):
@@ -43,7 +43,7 @@ class RepositoryPermissionModel(BaseModel):
             if not current.permission is permission:
                 current.permission = permission
         else:
-            p = RepoToPerm()
+            p = UserRepoToPerm()
             p.user = user
             p.repository = repository
             p.permission = permission

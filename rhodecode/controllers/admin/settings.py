@@ -40,8 +40,8 @@ from rhodecode.lib.base import BaseController, render
 from rhodecode.lib.celerylib import tasks, run_task
 from rhodecode.lib.utils import repo2db_mapper, invalidate_cache, \
     set_rhodecode_config, repo_name_slug
-from rhodecode.model.db import RhodeCodeUi, Repository, Group, \
-    RhodeCodeSettings
+from rhodecode.model.db import RhodeCodeUi, Repository, RepoGroup, \
+    RhodeCodeSetting
 from rhodecode.model.forms import UserForm, ApplicationSettingsForm, \
     ApplicationUiSettingsForm
 from rhodecode.model.scm import ScmModel
@@ -69,7 +69,7 @@ class SettingsController(BaseController):
         """GET /admin/settings: All items in the collection"""
         # url('admin_settings')
 
-        defaults = RhodeCodeSettings.get_app_settings()
+        defaults = RhodeCodeSetting.get_app_settings()
         defaults.update(self.get_hg_ui_settings())
         return htmlfill.render(
             render('admin/settings/settings.html'),
@@ -124,15 +124,15 @@ class SettingsController(BaseController):
                 form_result = application_form.to_python(dict(request.POST))
 
                 try:
-                    hgsettings1 = RhodeCodeSettings.get_by_name('title')
+                    hgsettings1 = RhodeCodeSetting.get_by_name('title')
                     hgsettings1.app_settings_value = \
                         form_result['rhodecode_title']
 
-                    hgsettings2 = RhodeCodeSettings.get_by_name('realm')
+                    hgsettings2 = RhodeCodeSetting.get_by_name('realm')
                     hgsettings2.app_settings_value = \
                         form_result['rhodecode_realm']
 
-                    hgsettings3 = RhodeCodeSettings.get_by_name('ga_code')
+                    hgsettings3 = RhodeCodeSetting.get_by_name('ga_code')
                     hgsettings3.app_settings_value = \
                         form_result['rhodecode_ga_code']
 
@@ -366,7 +366,7 @@ class SettingsController(BaseController):
     def create_repository(self):
         """GET /_admin/create_repository: Form to create a new item"""
 
-        c.repo_groups = Group.groups_choices()
+        c.repo_groups = RepoGroup.groups_choices()
         c.repo_groups_choices = map(lambda k: unicode(k[0]), c.repo_groups)
 
         new_repo = request.GET.get('repo', '')

@@ -14,7 +14,7 @@ from sqlalchemy.exc import IntegrityError
 from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import LoginRequired, HasPermissionAnyDecorator
 from rhodecode.lib.base import BaseController, render
-from rhodecode.model.db import Group
+from rhodecode.model.db import RepoGroup
 from rhodecode.model.repos_group import ReposGroupModel
 from rhodecode.model.forms import ReposGroupForm
 
@@ -32,7 +32,7 @@ class ReposGroupsController(BaseController):
         super(ReposGroupsController, self).__before__()
 
     def __load_defaults(self):
-        c.repo_groups = Group.groups_choices()
+        c.repo_groups = RepoGroup.groups_choices()
         c.repo_groups_choices = map(lambda k: unicode(k[0]), c.repo_groups)
 
     def __load_data(self, group_id):
@@ -43,7 +43,7 @@ class ReposGroupsController(BaseController):
         """
         self.__load_defaults()
 
-        repo_group = Group.get(group_id)
+        repo_group = RepoGroup.get(group_id)
 
         data = repo_group.get_dict()
 
@@ -57,7 +57,7 @@ class ReposGroupsController(BaseController):
         # url('repos_groups')
 
         sk = lambda g:g.parents[0].group_name if g.parents else g.group_name
-        c.groups = sorted(Group.query().all(), key=sk)
+        c.groups = sorted(RepoGroup.query().all(), key=sk)
         return render('admin/repos_groups/repos_groups_show.html')
 
     @HasPermissionAnyDecorator('hg.admin')
@@ -108,7 +108,7 @@ class ReposGroupsController(BaseController):
         # url('repos_group', id=ID)
 
         self.__load_defaults()
-        c.repos_group = Group.get(id)
+        c.repos_group = RepoGroup.get(id)
 
         repos_group_model = ReposGroupModel()
         repos_group_form = ReposGroupForm(edit=True,
@@ -148,7 +148,7 @@ class ReposGroupsController(BaseController):
         # url('repos_group', id=ID)
 
         repos_group_model = ReposGroupModel()
-        gr = Group.get(id)
+        gr = RepoGroup.get(id)
         repos = gr.repositories.all()
         if repos:
             h.flash(_('This group contains %s repositores and cannot be '
@@ -179,14 +179,14 @@ class ReposGroupsController(BaseController):
         return redirect(url('repos_groups'))
 
     def show_by_name(self, group_name):
-        id_ = Group.get_by_group_name(group_name).group_id
+        id_ = RepoGroup.get_by_group_name(group_name).group_id
         return self.show(id_)
 
     def show(self, id, format='html'):
         """GET /repos_groups/id: Show a specific item"""
         # url('repos_group', id=ID)
 
-        c.group = Group.get(id)
+        c.group = RepoGroup.get(id)
 
         if c.group:
             c.group_repos = c.group.repositories.all()
@@ -201,8 +201,8 @@ class ReposGroupsController(BaseController):
 
         c.repo_cnt = 0
 
-        c.groups = self.sa.query(Group).order_by(Group.group_name)\
-            .filter(Group.group_parent_id == id).all()
+        c.groups = self.sa.query(RepoGroup).order_by(RepoGroup.group_name)\
+            .filter(RepoGroup.group_parent_id == id).all()
 
         return render('admin/repos_groups/repos_groups.html')
 
@@ -213,7 +213,7 @@ class ReposGroupsController(BaseController):
 
         id_ = int(id)
 
-        c.repos_group = Group.get(id_)
+        c.repos_group = RepoGroup.get(id_)
         defaults = self.__load_data(id_)
 
         # we need to exclude this group from the group list for editing

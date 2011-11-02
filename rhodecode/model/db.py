@@ -139,7 +139,7 @@ class BaseModel(object):
         Session.commit()
 
 
-class RhodeCodeSettings(Base, BaseModel):
+class RhodeCodeSetting(Base, BaseModel):
     __tablename__ = 'rhodecode_settings'
     __table_args__ = (UniqueConstraint('app_settings_name'), {'extend_existing':True})
     app_settings_id = Column("app_settings_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -280,7 +280,7 @@ class User(Base, BaseModel):
 
     repositories = relationship('Repository')
     user_followers = relationship('UserFollowing', primaryjoin='UserFollowing.follows_user_id==User.user_id', cascade='all')
-    repo_to_perm = relationship('RepoToPerm', primaryjoin='RepoToPerm.user_id==User.user_id', cascade='all')
+    repo_to_perm = relationship('UserRepoToPerm', primaryjoin='UserRepoToPerm.user_id==User.user_id', cascade='all')
 
     group_member = relationship('UsersGroupMember', cascade='all')
 
@@ -447,7 +447,7 @@ class UsersGroup(Base, BaseModel):
                         users_group_id).all()
 
             if assigned_groups:
-                raise UsersGroupsAssignedException('Group assigned to %s' %
+                raise UsersGroupsAssignedException('RepoGroup assigned to %s' %
                                                    assigned_groups)
 
             users_group = cls.get(users_group_id, cache=False)
@@ -503,8 +503,8 @@ class Repository(Base, BaseModel):
 
     user = relationship('User')
     fork = relationship('Repository', remote_side=repo_id)
-    group = relationship('Group')
-    repo_to_perm = relationship('RepoToPerm', cascade='all', order_by='RepoToPerm.repo_to_perm_id')
+    group = relationship('RepoGroup')
+    repo_to_perm = relationship('UserRepoToPerm', cascade='all', order_by='UserRepoToPerm.repo_to_perm_id')
     users_group_to_perm = relationship('UsersGroupRepoToPerm', cascade='all')
     stats = relationship('Statistics', cascade='all', uselist=False)
 
@@ -717,7 +717,7 @@ class Repository(Base, BaseModel):
         return repo
 
 
-class Group(Base, BaseModel):
+class RepoGroup(Base, BaseModel):
     __tablename__ = 'groups'
     __table_args__ = (UniqueConstraint('group_name', 'group_parent_id'),
                       CheckConstraint('group_id != group_parent_id'), {'extend_existing':True},)
@@ -728,7 +728,7 @@ class Group(Base, BaseModel):
     group_parent_id = Column("group_parent_id", Integer(), ForeignKey('groups.group_id'), nullable=True, unique=None, default=None)
     group_description = Column("group_description", String(length=10000, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
 
-    parent_group = relationship('Group', remote_side=group_id)
+    parent_group = relationship('RepoGroup', remote_side=group_id)
 
 
     def __init__(self, group_name='', parent_group=None):
@@ -795,11 +795,11 @@ class Group(Base, BaseModel):
 
     @property
     def children(self):
-        return Group.query().filter(Group.parent_group == self)
+        return RepoGroup.query().filter(RepoGroup.parent_group == self)
 
     @property
     def name(self):
-        return self.group_name.split(Group.url_sep())[-1]
+        return self.group_name.split(RepoGroup.url_sep())[-1]
 
     @property
     def full_path(self):
@@ -807,7 +807,7 @@ class Group(Base, BaseModel):
 
     @property
     def full_path_splitted(self):
-        return self.group_name.split(Group.url_sep())
+        return self.group_name.split(RepoGroup.url_sep())
 
     @property
     def repositories(self):
@@ -835,7 +835,7 @@ class Group(Base, BaseModel):
         """
         path_prefix = (self.parent_group.full_path_splitted if
                        self.parent_group else [])
-        return Group.url_sep().join(path_prefix + [group_name])
+        return RepoGroup.url_sep().join(path_prefix + [group_name])
 
 
 class Permission(Base, BaseModel):
@@ -853,7 +853,7 @@ class Permission(Base, BaseModel):
     def get_by_key(cls, key):
         return cls.query().filter(cls.permission_name == key).scalar()
 
-class RepoToPerm(Base, BaseModel):
+class UserRepoToPerm(Base, BaseModel):
     __tablename__ = 'repo_to_perm'
     __table_args__ = (UniqueConstraint('user_id', 'repository_id'), {'extend_existing':True})
     repo_to_perm_id = Column("repo_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -973,7 +973,7 @@ class UsersGroupToPerm(Base, BaseModel):
             Session.rollback()
 
 
-class GroupToPerm(Base, BaseModel):
+class UserRepoGroupToPerm(Base, BaseModel):
     __tablename__ = 'group_to_perm'
     __table_args__ = (UniqueConstraint('group_id', 'permission_id'), {'extend_existing':True})
 
@@ -984,7 +984,20 @@ class GroupToPerm(Base, BaseModel):
 
     user = relationship('User')
     permission = relationship('Permission')
-    group = relationship('Group')
+    group = relationship('RepoGroup')
+
+class UsersGroupRepoGroupToPerm(Base, BaseModel):
+    __tablename__ = 'users_group_repo_group_to_perm'
+    __table_args__ = (UniqueConstraint('group_id', 'permission_id'), {'extend_existing':True})
+
+    users_group_repo_group_to_perm_id = Column("users_group_repo_group_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
+    users_group_id = Column("users_group_id", Integer(), ForeignKey('users_groups.users_group_id'), nullable=False, unique=None, default=None)
+    permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable=False, unique=None, default=None)
+    group_id = Column("group_id", Integer(), ForeignKey('groups.group_id'), nullable=False, unique=None, default=None)
+
+    users_group = relationship('UsersGroup')
+    permission = relationship('Permission')
+    group = relationship('RepoGroup')
 
 class Statistics(Base, BaseModel):
     __tablename__ = 'statistics'

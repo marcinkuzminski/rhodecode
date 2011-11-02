@@ -33,8 +33,7 @@ from pylons.i18n.translation import _
 from vcs.utils.lazy import LazyProperty
 
 from rhodecode.model import BaseModel
-from rhodecode.model.caching_query import FromCache
-from rhodecode.model.db import Group, RhodeCodeUi
+from rhodecode.model.db import RepoGroup, RhodeCodeUi
 
 log = logging.getLogger(__name__)
 
@@ -96,7 +95,7 @@ class ReposGroupModel(BaseModel):
         
         :param group: instance of group from database
         """
-        paths = group.full_path.split(Group.url_sep())
+        paths = group.full_path.split(RepoGroup.url_sep())
         paths = os.sep.join(paths)
 
         rm_path = os.path.join(self.repos_path, paths)
@@ -106,9 +105,9 @@ class ReposGroupModel(BaseModel):
 
     def create(self, form_data):
         try:
-            new_repos_group = Group()
+            new_repos_group = RepoGroup()
             new_repos_group.group_description = form_data['group_description']
-            new_repos_group.parent_group = Group.get(form_data['group_parent_id'])
+            new_repos_group.parent_group = RepoGroup.get(form_data['group_parent_id'])
             new_repos_group.group_name = new_repos_group.get_new_name(form_data['group_name'])
 
             self.sa.add(new_repos_group)
@@ -125,12 +124,12 @@ class ReposGroupModel(BaseModel):
     def update(self, repos_group_id, form_data):
 
         try:
-            repos_group = Group.get(repos_group_id)
+            repos_group = RepoGroup.get(repos_group_id)
             old_path = repos_group.full_path
                 
             # change properties
             repos_group.group_description = form_data['group_description']
-            repos_group.parent_group = Group.get(form_data['group_parent_id'])
+            repos_group.parent_group = RepoGroup.get(form_data['group_parent_id'])
             repos_group.group_name = repos_group.get_new_name(form_data['group_name'])
 
             new_path = repos_group.full_path
@@ -154,7 +153,7 @@ class ReposGroupModel(BaseModel):
 
     def delete(self, users_group_id):
         try:
-            users_group = Group.get(users_group_id)
+            users_group = RepoGroup.get(users_group_id)
             self.sa.delete(users_group)
             self.__delete_group(users_group)
             self.sa.commit()

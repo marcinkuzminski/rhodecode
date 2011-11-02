@@ -1,5 +1,5 @@
 from rhodecode.tests import *
-from rhodecode.model.db import RhodeCodeSettings
+from rhodecode.model.db import RhodeCodeSetting
 from nose.plugins.skip import SkipTest
 
 skip_ldap_test = False
@@ -41,7 +41,7 @@ class TestLdapSettingsController(TestController):
                     'ldap_attr_lastname':'tester',
                     'ldap_attr_email':'test@example.com' })
 
-        new_settings = RhodeCodeSettings.get_ldap_settings()
+        new_settings = RhodeCodeSetting.get_ldap_settings()
         self.assertEqual(new_settings['ldap_host'], u'dc.example.com',
                          'fail db write compare')
 

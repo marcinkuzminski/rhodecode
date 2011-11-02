@@ -37,8 +37,8 @@ from rhodecode.lib import safe_str
 
 from rhodecode.model import BaseModel
 from rhodecode.model.caching_query import FromCache
-from rhodecode.model.db import Repository, RepoToPerm, User, Permission, \
-    Statistics, UsersGroup, UsersGroupRepoToPerm, RhodeCodeUi, Group
+from rhodecode.model.db import Repository, UserRepoToPerm, User, Permission, \
+    Statistics, UsersGroup, UsersGroupRepoToPerm, RhodeCodeUi, RepoGroup
 from rhodecode.model.user import UserModel
 
 log = logging.getLogger(__name__)
@@ -141,9 +141,9 @@ class RepoModel(BaseModel):
             # update permissions
             for member, perm, member_type in form_data['perms_updates']:
                 if member_type == 'user':
-                    r2p = self.sa.query(RepoToPerm)\
-                            .filter(RepoToPerm.user == User.get_by_username(member))\
-                            .filter(RepoToPerm.repository == cur_repo)\
+                    r2p = self.sa.query(UserRepoToPerm)\
+                            .filter(UserRepoToPerm.user == User.get_by_username(member))\
+                            .filter(UserRepoToPerm.repository == cur_repo)\
                             .one()
 
                     r2p.permission = self.sa.query(Permission)\
@@ -165,7 +165,7 @@ class RepoModel(BaseModel):
             # set new permissions
             for member, perm, member_type in form_data['perms_new']:
                 if member_type == 'user':
-                    r2p = RepoToPerm()
+                    r2p = UserRepoToPerm()
                     r2p.repository = cur_repo
                     r2p.user = User.get_by_username(member)
 
@@ -191,7 +191,7 @@ class RepoModel(BaseModel):
                 elif k == 'repo_name':
                     pass
                 elif k == 'repo_group':
-                    cur_repo.group = Group.get(v)
+                    cur_repo.group = RepoGroup.get(v)
 
                 else:
                     setattr(cur_repo, k, v)
@@ -249,7 +249,7 @@ class RepoModel(BaseModel):
             self.sa.add(new_repo)
 
             #create default permission
-            repo_to_perm = RepoToPerm()
+            repo_to_perm = UserRepoToPerm()
             default = 'repository.read'
             for p in User.get_by_username('default').user_perms:
                 if p.permission.permission_name.startswith('repository.'):
@@ -300,10 +300,10 @@ class RepoModel(BaseModel):
 
     def delete_perm_user(self, form_data, repo_name):
         try:
-            self.sa.query(RepoToPerm)\
-                .filter(RepoToPerm.repository \
+            self.sa.query(UserRepoToPerm)\
+                .filter(UserRepoToPerm.repository \
                         == self.get_by_repo_name(repo_name))\
-                .filter(RepoToPerm.user_id == form_data['user_id']).delete()
+                .filter(UserRepoToPerm.user_id == form_data['user_id']).delete()
             self.sa.commit()
         except:
             log.error(traceback.format_exc())
@@ -348,7 +348,7 @@ class RepoModel(BaseModel):
         from rhodecode.lib.utils import is_valid_repo, is_valid_repos_group
 
         if new_parent_id:
-            paths = Group.get(new_parent_id).full_path.split(Group.url_sep())
+            paths = RepoGroup.get(new_parent_id).full_path.split(RepoGroup.url_sep())
             new_parent_path = os.sep.join(paths)
         else:
             new_parent_path = ''
