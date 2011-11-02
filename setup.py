@@ -17,7 +17,7 @@ requirements = [
         "SQLAlchemy==0.7.3",
         "Mako==0.5.0",
         "pygments>=1.4",
-        "mercurial>=1.9.3,<2.0",
+        "mercurial>=2.0,<2.1",
         "whoosh<1.8",
         "celery>=2.2.5,<2.3",
         "babel",
