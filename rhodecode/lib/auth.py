@@ -141,7 +141,8 @@ def generate_api_key(str_, salt=None):
 
 def authfunc(environ, username, password):
     """
-    Dummy authentication function used in Mercurial/Git/ and access control,
+    Dummy authentication wrapper function used in Mercurial and Git for 
+    access control.
 
     :param environ: needed only for using in Basic auth
     """

@@ -71,9 +71,9 @@ class UsersController(BaseController):
         # url('users')
 
         user_model = UserModel()
-        login_form = UserForm()()
+        user_form = UserForm()()
         try:
-            form_result = login_form.to_python(dict(request.POST))
+            form_result = user_form.to_python(dict(request.POST))
             user_model.create(form_result)
             h.flash(_('created user %s') % form_result['username'],
                     category='success')
