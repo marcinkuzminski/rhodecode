@@ -4,6 +4,30 @@ Changelog
 =========
 
 
+1.2.3 (**2011-11-02**)
+======================
+
+news
+----
+
+- added option to manage repos group for non admin users
+- added following API methods for get_users, create_user, get_users_groups, 
+  get_users_group, create_users_group, add_user_to_users_groups, get_repos, 
+  get_repo, create_repo, add_user_to_repo
+- implements #237 added password confirmation for my account 
+  and admin edit user.
+- implements #291 email notification for global events are now sent to all
+  administrator users, and global config email.
+     
+fixes
+-----
+
+- added option for passing auth method for smtp mailer
+- #276 issue with adding a single user with id>10 to usergroups
+- #277 fixes windows LDAP settings in which missing values breaks the ldap auth 
+- #288 fixes managing of repos in a group for non admin user
+
+
 1.2.2 (**2011-10-17**)
 ======================
 
@@ -21,11 +45,12 @@ fixes
 - #265 ldap save fails sometimes on converting attributes to booleans, 
   added getter and setter into model that will prevent from this on db model level
 - fixed problems with timestamps issues #251 and #213
-- fixes #266 Rhodecode allows to create repo with the same name and in 
+- fixes #266 RhodeCode allows to create repo with the same name and in 
   the same parent as group
 - fixes #245 Rescan of the repositories on Windows
 - fixes #248 cannot edit repos inside a group on windows
 - fixes #219 forking problems on windows
+
 
 1.2.1 (**2011-10-08**)
 ======================
@@ -40,6 +65,7 @@ fixes
 - fixed problems with basic auth and push problems 
 - gui fixes
 - fixed logger
+
 
 1.2.0 (**2011-10-07**)
 ======================
@@ -112,7 +138,8 @@ fixes
 - fixes #218 os.kill patch for windows was missing sig param
 - improved rendering of dag (they are not trimmed anymore when number of 
   heads exceeds 5)
-    
+
+
 1.1.8 (**2011-04-12**)
 ======================
 
