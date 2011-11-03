@@ -111,8 +111,9 @@
 <div class="box box-right">
     <!-- box / title -->
     <div class="title">
-        <h5>${_('My repositories')} 
-        <input class="top-right-rounded-corner top-left-rounded-corner bottom-left-rounded-corner bottom-right-rounded-corner" id="q_filter" size="15" type="text" name="filter" value="${_('quick filter...')}"/>
+        <h5> 
+        <input class="q_filter_box" id="q_filter" size="15" type="text" name="filter" value="${_('quick filter...')}"/>
+        ${_('My repositories')}
         </h5>
          %if h.HasPermissionAny('hg.admin','hg.create.repository')():
          <ul class="links">
