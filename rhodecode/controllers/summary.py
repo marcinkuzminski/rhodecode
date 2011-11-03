@@ -29,11 +29,12 @@ import logging
 from time import mktime
 from datetime import timedelta, date
 from itertools import product
+from urlparse import urlparse
 
 from vcs.exceptions import ChangesetError, EmptyRepositoryError, \
     NodeDoesNotExistError
 
-from pylons import tmpl_context as c, request, url
+from pylons import tmpl_context as c, request, url, config
 from pylons.i18n.translation import _
 
 from beaker.cache import cache_region, region_invalidate
@@ -79,25 +80,26 @@ class SummaryController(BaseRepoController):
                                      items_per_page=10, url=url_generator)
 
         if self.rhodecode_user.username == 'default':
-            #for default(anonymous) user we don't need to pass credentials
+            # for default(anonymous) user we don't need to pass credentials
             username = ''
             password = ''
         else:
             username = str(self.rhodecode_user.username)
             password = '@'
 
-        if e.get('wsgi.url_scheme') == 'https':
-            split_s = 'https://'
-        else:
-            split_s = 'http://'
-
-        qualified_uri = [split_s] + [url.current(qualified=True)\
-                                     .split(split_s)[-1]]
-        uri = u'%(proto)s%(user)s%(pass)s%(rest)s' \
-                % {'user': username,
-                     'pass': password,
-                     'proto': qualified_uri[0],
-                     'rest': qualified_uri[1]}
+        parsed_url = urlparse(url.current(qualified=True))
+        
+        default_clone_uri = '{scheme}://{user}{pass}{netloc}{path}'
+        
+        uri_tmpl = config.get('clone_uri',default_clone_uri)
+        uri_tmpl = uri_tmpl.replace('{','%(').replace('}',')s')
+        
+        uri =  uri_tmpl % {'user': username,
+                           'pass': password,
+                           'scheme': parsed_url.scheme,
+                           'netloc':parsed_url.netloc,
+                           'path':parsed_url.path}
+        
         c.clone_repo_url = uri
         c.repo_tags = OrderedDict()
         for name, hash in c.rhodecode_repo.tags.items()[:10]:
