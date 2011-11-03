@@ -172,7 +172,10 @@ function ypjax(url,container,s_call,f_call,args){
 	YUC.asyncRequest(method,url,{
 		success:s_wrapper,
 		failure:function(o){
-			console.log(o)
+			console.log(o);
+			YUD.get(container).innerHTML='ERROR';
+			YUD.setStyle(container,'opacity','1.0');
+			YUD.setStyle(container,'color','red');
 		}
 	},args);
 	

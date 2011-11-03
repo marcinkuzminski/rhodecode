@@ -11,12 +11,12 @@ name="filter" size="15" id="q_filter_rs" />
      
       %if repo['dbrepo']['private']:
          <li>
-             <img src="${h.url("/images/icons/lock.png")}" alt="${_('Private repository')}" class="repo_switcher_type"/>
+             <img src="${h.url('/images/icons/lock.png')}" alt="${_('Private repository')}" class="repo_switcher_type"/>
              ${h.link_to(repo['name'],h.url('summary_home',repo_name=repo['name']),class_="repo_name %s" % repo['dbrepo']['repo_type'])}
           </li>
       %else:
          <li>
-             <img src="${h.url("/images/icons/lock_open.png")}" alt="${_('Public repository')}" class="repo_switcher_type" />
+             <img src="${h.url('/images/icons/lock_open.png')}" alt="${_('Public repository')}" class="repo_switcher_type" />
              ${h.link_to(repo['name'],h.url('summary_home',repo_name=repo['name']),class_="repo_name %s" % repo['dbrepo']['repo_type'])}
          </li>
       %endif  
