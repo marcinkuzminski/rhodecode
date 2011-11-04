@@ -156,70 +156,11 @@
             </table>
             </div>
     </div>
-    
-    
-    <script type="text/javascript">
-     var D = YAHOO.util.Dom;
-     var E = YAHOO.util.Event;
-     var S = YAHOO.util.Selector;
-     
-     var q_filter = D.get('q_filter');
-     var F = YAHOO.namespace('q_filter'); 
-     
-     E.on(q_filter,'click',function(){
-        q_filter.value = '';
-     });
-
-     F.filterTimeout = null;
-     
-     function set_count(count){
-    
-    	 if(count == 0){
-    		 YUD.setStyle('repos_list','display','none');
-    		 YUD.setStyle('welcome','display','');
-    	 }
-    	 else{
-    		 YUD.setStyle('repos_list','display','');
-    		 YUD.setStyle('welcome','display','none');
-    	 }
-    	 YUD.get('repo_count').innerHTML = count;
-    	 
-     }
-     
-     
-     //set initial count for repos
-     var nodes = S.query('div.table tr td div a.repo_name');
-     
-     set_count(nodes.length)
-     F.updateFilter  = function() { 
-        // Reset timeout 
-        F.filterTimeout = null;
-        
-        var obsolete = [];
-        nodes = S.query('div.table tr td div a.repo_name');
-        var req = q_filter.value.toLowerCase();
-        for (n in nodes){
-            D.setStyle(nodes[n].parentNode.parentNode.parentNode,'display','')
-        }
-        if (req){
-            for (n in nodes){
-                if (nodes[n].innerHTML.toLowerCase().indexOf(req) == -1) {
-                    obsolete.push(nodes[n]); 
-                }
-            }
-            if(obsolete){
-                for (n in obsolete){
-                    D.setStyle(obsolete[n].parentNode.parentNode.parentNode,'display','none');
-                }
-            }
-        }
-        // set new count into dashboard
-        set_count(nodes.length - obsolete.length)
-     }
-     
-     E.on(q_filter,'keyup',function(e){
-         clearTimeout(F.filterTimeout); 
-         F.filterTimeout = setTimeout(F.updateFilter,600); 
-     });
-     
+    <script>
+      var nodes = YUQ('div.table tr td a.repo_name');
+      var target = 'q_filter';
+      var func = function(node){
+    	  return node.parentNode.parentNode.parentNode;
+      }
+      q_filter(target,nodes,func);
     </script>

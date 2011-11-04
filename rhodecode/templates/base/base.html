@@ -256,46 +256,13 @@
             <script type="text/javascript">
                YUE.on('repo_switcher','mouseover',function(){
                       function qfilter(){
-                         var S = YAHOO.util.Selector;
-                         
-                         var q_filter = YUD.get('q_filter_rs');
-                         var F = YAHOO.namespace('q_filter_rs'); 
-                         
-                         YUE.on(q_filter,'click',function(){
-                            q_filter.value = '';
-                         });
-                    
-                         F.filterTimeout = null;
-                         
-                         F.updateFilter  = function() { 
-                            // Reset timeout 
-                            F.filterTimeout = null;
-                            
-                            var obsolete = [];
-                            var nodes = S.query('ul#repo_switcher_list li a.repo_name');
-                            var req = YUD.get('q_filter_rs').value.toLowerCase();
-                            for (n in nodes){
-                                YUD.setStyle(nodes[n].parentNode,'display','')
-                            }
-                            if (req){
-                                for (n in nodes){
-                                    if (nodes[n].innerHTML.toLowerCase().indexOf(req) == -1) {
-                                        obsolete.push(nodes[n]); 
-                                    }
-                                }
-                                if(obsolete){
-                                    for (n in obsolete){
-                                        YUD.setStyle(obsolete[n].parentNode,'display','none');
-                                    }
-                                }
-                            }
-                         }
-                         
-                         YUE.on(q_filter,'keyup',function(e){
-                             clearTimeout(F.filterTimeout); 
-                             F.filterTimeout = setTimeout(F.updateFilter,600); 
-                         });
-                }
+                          var nodes = YUQ('ul#repo_switcher_list li a.repo_name');
+                          var target = 'q_filter_rs';
+                          var func = function(node){
+                              return node.parentNode;
+                          }                          
+                          q_filter(target,nodes,func);                         
+                      }
                    var loaded = YUD.hasClass('repo_switcher','loaded');
                    if(!loaded){
                        YUD.addClass('repo_switcher','loaded');
@@ -307,17 +274,17 @@
                    return false;
                });
 
-            YUE.on('branch_tag_switcher','mouseover',function(){
-               var loaded = YUD.hasClass('branch_tag_switcher','loaded');
-               if(!loaded){
-                   YUD.addClass('branch_tag_switcher','loaded');
-                   ypjax("${h.url('branch_tag_switcher',repo_name=c.repo_name)}",'switch_to_list',
-                       function(o){},
-                       function(o){YUD.removeClass('branch_tag_switcher','loaded');}
-                       ,null);
-               }
-               return false;
-            });
+              YUE.on('branch_tag_switcher','mouseover',function(){
+                 var loaded = YUD.hasClass('branch_tag_switcher','loaded');
+                 if(!loaded){
+                     YUD.addClass('branch_tag_switcher','loaded');
+                     ypjax("${h.url('branch_tag_switcher',repo_name=c.repo_name)}",'switch_to_list',
+                         function(o){},
+                         function(o){YUD.removeClass('branch_tag_switcher','loaded');}
+                         ,null);
+                 }
+                 return false;
+              });
             </script>             
 		%else:
 		    ##ROOT MENU

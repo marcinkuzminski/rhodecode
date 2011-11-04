@@ -219,3 +219,63 @@ var show_more_event = function(){
     });
 }
 
+
+/**
+ * Quick filter widget
+ * 
+ * @param target: filter input target
+ * @param nodes: list of nodes in html we want to filter.
+ * @param display_element function that takes current node from nodes and
+ *    does hide or show based on the node
+ * 
+ */
+var q_filter = function(target,nodes,display_element){
+	
+	var nodes = nodes;
+	var q_filter_field = YUD.get(target);
+	var F = YAHOO.namespace(target);
+
+	YUE.on(q_filter_field,'click',function(){
+	   q_filter_field.value = '';
+	});
+
+	YUE.on(q_filter_field,'keyup',function(e){
+	    clearTimeout(F.filterTimeout); 
+	    F.filterTimeout = setTimeout(F.updateFilter,600); 
+	});
+
+	F.filterTimeout = null;
+
+	var show_node = function(node){
+		YUD.setStyle(node,'display','')
+	}
+	var hide_node = function(node){
+		YUD.setStyle(node,'display','none');
+	}
+	
+	F.updateFilter  = function() { 
+	   // Reset timeout 
+	   F.filterTimeout = null;
+	   
+	   var obsolete = [];
+	   
+	   var req = q_filter_field.value.toLowerCase();
+	   
+	   var l = nodes.length;
+	   var i;
+       for (i=0;i<l;i++ ){
+    	   var n = nodes[i];
+    	   var target_element = display_element(n)
+    	   if(req && n.innerHTML.toLowerCase().indexOf(req) == -1){
+    		   hide_node(target_element);
+    	   }
+    	   else{
+    		   show_node(target_element);
+    	   }
+       }	  	   
+
+	}	
+}
+
+
+

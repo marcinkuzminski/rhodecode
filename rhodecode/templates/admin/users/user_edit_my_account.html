@@ -112,7 +112,7 @@
     <!-- box / title -->
     <div class="title">
         <h5> 
-        <input class="q_filter_box" id="q_filter" size="15" type="text" name="filter" value="${_('quick filter...')}"/>
+        <input class="q_filter_box" id="q_filter" size="15" type="text" name="filter" value="${_('quick filter...')}"/>        
         ${_('My repositories')}
         </h5>
          %if h.HasPermissionAny('hg.admin','hg.create.repository')():
@@ -178,50 +178,13 @@
 	     </tbody>
 	     </table>
     </div>
-    
 </div>
-    <script type="text/javascript">
-     var D = YAHOO.util.Dom;
-     var E = YAHOO.util.Event;
-     var S = YAHOO.util.Selector;
-     
-     var q_filter = D.get('q_filter');
-     var F = YAHOO.namespace('q_filter'); 
-     
-     E.on(q_filter,'click',function(){
-        q_filter.value = '';
-     });
-
-     F.filterTimeout = null;
-     
-     F.updateFilter  = function() { 
-        // Reset timeout 
-        F.filterTimeout = null;
-        
-        var obsolete = [];
-        var nodes = S.query('div.table tr td a.repo_name');
-        var req = q_filter.value.toLowerCase();
-        for (n in nodes){
-            D.setStyle(nodes[n].parentNode.parentNode,'display','')
-        }
-        if (req){
-            for (n in nodes){
-                if (nodes[n].innerHTML.toLowerCase().indexOf(req) == -1) {
-                    obsolete.push(nodes[n]); 
-                }
-            }
-            if(obsolete){
-                for (n in obsolete){
-                    D.setStyle(obsolete[n].parentNode.parentNode,'display','none');
-                }
-            }
-        }
-     }
-     
-     E.on(q_filter,'keyup',function(e){
-         clearTimeout(F.filterTimeout); 
-         F.filterTimeout = setTimeout(F.updateFilter,600); 
-     });
-     
-    </script>
+<script type="text/javascript">
+var nodes = YUQ('div.table tr td a.repo_name');
+var target = 'q_filter';
+var func = function(node){
+    return node.parentNode.parentNode;
+}
+q_filter(target,nodes,func);
+</script>
 </%def>  
