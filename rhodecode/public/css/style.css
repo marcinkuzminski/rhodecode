@@ -1903,7 +1903,7 @@ h3.files_location {
 #graph_nodes {
 	float: left;
 	margin-right: -6px;
-	margin-top: -4px;
+	margin-top: 0px;
 }
 
 #graph_content {
