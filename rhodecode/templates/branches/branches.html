@@ -6,6 +6,7 @@
 </%def>
 
 <%def name="breadcrumbs_links()">
+    <input class="q_filter_box" id="q_filter_branches" size="15" type="text" name="filter" value="${_('quick filter...')}"/>
     ${h.link_to(u'Home',h.url('/'))}
     &raquo; 
     ${h.link_to(c.repo_name,h.url('summary_home',repo_name=c.repo_name))}
@@ -27,5 +28,13 @@
     <div class="table">
         <%include file='branches_data.html'/>
     </div>
-</div>    
+</div>
+<script type="text/javascript">
+var nodes = YUQ('div.table tr td .logtags .branchtag a');
+var target = 'q_filter_branches';
+var func = function(node){
+    return node.parentNode.parentNode.parentNode.parentNode;
+}
+q_filter(target,nodes,func);
+</script>
 </%def>     

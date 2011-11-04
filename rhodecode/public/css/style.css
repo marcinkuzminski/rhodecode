@@ -3009,15 +3009,12 @@ div#legend_container table td,div#legend_choices table td {
 	-webkit-box-shadow: rgba(0,0,0,0.07) 0 1px 2px inset;
 	-webkit-border-radius: 4px;
 	-moz-border-radius: 4px;
-	border-radius: 4px;	
-}
-
-#q_filter {
-	border: 0 none;
-	color: #AAAAAA;
-	margin-bottom: -4px;
-	margin-top: -4px;
-	padding-left: 3px;
+	border-radius: 4px;
+    border: 0 none;
+    color: #AAAAAA;
+    margin-bottom: -4px;
+    margin-top: -4px;
+    padding-left: 3px;		
 }
 
 #node_filter {
