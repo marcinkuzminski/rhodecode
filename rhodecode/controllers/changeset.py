@@ -66,7 +66,7 @@ class ChangesetController(BaseRepoController):
 
         #get ranges of revisions if preset
         rev_range = revision.split('...')[:2]
-
+        
         try:
             if len(rev_range) == 2:
                 rev_start = rev_range[0]
@@ -77,6 +77,8 @@ class ChangesetController(BaseRepoController):
                 rev_ranges = [c.rhodecode_repo.get_changeset(revision)]
 
             c.cs_ranges = list(rev_ranges)
+            if not c.cs_ranges:
+                raise RepositoryError('Changeset range returned empty result')
 
         except (RepositoryError, ChangesetDoesNotExistError, Exception), e:
             log.error(traceback.format_exc())

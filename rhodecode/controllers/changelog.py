@@ -24,14 +24,21 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
+import traceback
 
 from mercurial import graphmod
-from pylons import request, session, tmpl_context as c
+from pylons import request, url, session, tmpl_context as c
+from pylons.controllers.util import redirect
+from pylons.i18n.translation import _
 
+import rhodecode.lib.helpers as h
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.helpers import RepoPage
 from rhodecode.lib.compat import json
+
+from vcs.exceptions import RepositoryError, ChangesetError, \
+ChangesetDoesNotExistError,BranchDoesNotExistError
 
 log = logging.getLogger(__name__)
 
@@ -62,12 +69,30 @@ class ChangelogController(BaseRepoController):
 
         p = int(request.params.get('page', 1))
         branch_name = request.params.get('branch', None)
-        c.total_cs = len(c.rhodecode_repo)
-        c.pagination = RepoPage(c.rhodecode_repo, page=p,
-                                item_count=c.total_cs, items_per_page=c.size,
-                                branch_name=branch_name)
+        try:
+            if branch_name:
+                collection = [z for z in 
+                              c.rhodecode_repo.get_changesets(start=0, 
+                                                    branch_name=branch_name)]
+                c.total_cs = len(collection)
+            else:
+                collection = list(c.rhodecode_repo)
+                c.total_cs = len(c.rhodecode_repo)
 
-        self._graph(c.rhodecode_repo, c.total_cs, c.size, p)
+        
+            c.pagination = RepoPage(collection, page=p, item_count=c.total_cs,
+                                    items_per_page=c.size, branch=branch_name)
+        except (RepositoryError, ChangesetDoesNotExistError, Exception), e:
+            log.error(traceback.format_exc())
+            h.flash(str(e), category='warning')
+            return redirect(url('home'))        
+
+        self._graph(c.rhodecode_repo, collection, c.total_cs, c.size, p)
+
+        c.branch_name = branch_name
+        c.branch_filters = [('',_('All Branches'))] + \
+            [(k,k) for k in c.rhodecode_repo.branches.keys()]
+
 
         return render('changelog/changelog.html')
 
@@ -76,7 +101,7 @@ class ChangelogController(BaseRepoController):
             c.cs = c.rhodecode_repo.get_changeset(cs)
             return render('changelog/changelog_details.html')
 
-    def _graph(self, repo, repo_size, size, p):
+    def _graph(self, repo, collection, repo_size, size, p):
         """
         Generates a DAG graph for mercurial
 
@@ -84,16 +109,16 @@ class ChangelogController(BaseRepoController):
         :param size: number of commits to show
         :param p: page number
         """
-        if not repo.revisions:
+        if not collection:
             c.jsdata = json.dumps([])
             return
 
         revcount = min(repo_size, size)
         offset = 1 if p == 1 else  ((p - 1) * revcount + 1)
         try:
-            rev_end = repo.revisions.index(repo.revisions[(-1 * offset)])
+            rev_end = collection.index(collection[(-1 * offset)])
         except IndexError:
-            rev_end = repo.revisions.index(repo.revisions[-1])
+            rev_end = collection.index(collection[-1])
         rev_start = max(0, rev_end - revcount)
 
         data = []
@@ -114,3 +139,4 @@ class ChangelogController(BaseRepoController):
                 data.append(['', vtx, edges])
 
         c.jsdata = json.dumps(data)
+

@@ -50,8 +50,8 @@ class ShortlogController(BaseRepoController):
             return url('shortlog_home', repo_name=repo_name, size=size, **kw)
 
         c.repo_changesets = RepoPage(c.rhodecode_repo, page=p,
-                                                       items_per_page=size,
-                                                       url=url_generator)
+                                    items_per_page=size, url=url_generator)
+        
         c.shortlog_data = render('shortlog/shortlog_data.html')
         if request.environ.get('HTTP_X_PARTIAL_XHR'):
             return c.shortlog_data

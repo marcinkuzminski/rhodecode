@@ -37,7 +37,7 @@ from webhelpers.html.tags import _set_input_attrs, _set_id_attr, \
 
 from vcs.utils.annotate import annotate_highlight
 from rhodecode.lib.utils import repo_name_slug
-from rhodecode.lib import str2bool, safe_unicode, safe_str,get_changeset_safe
+from rhodecode.lib import str2bool, safe_unicode, safe_str, get_changeset_safe
 
 def _reset(name, value=None, id=NotGiven, type="reset", **attrs):
     """
@@ -480,7 +480,7 @@ def gravatar_url(email_address, size=30):
 class RepoPage(Page):
 
     def __init__(self, collection, page=1, items_per_page=20,
-        item_count=None, url=None, branch_name=None, **kwargs):
+                 item_count=None, url=None, **kwargs):
 
         """Create a "RepoPage" instance. special pager for paging
         repository
@@ -531,11 +531,8 @@ class RepoPage(Page):
             self.last_item = ((self.item_count - 1) - items_per_page *
                               (self.page - 1))
 
-            iterator = self.collection.get_changesets(start=self.first_item,
-                                                      end=self.last_item,
-                                                      reverse=True,
-                                                      branch_name=branch_name)
-            self.items = list(iterator)
+            self.items = list(self.collection[self.first_item:self.last_item+1])
+
 
             # Links to previous and next page
             if self.page > self.first_page:
@@ -560,7 +557,7 @@ class RepoPage(Page):
             self.items = []
 
         # This is a subclass of the 'list' type. Initialise the list now.
-        list.__init__(self, self.items)
+        list.__init__(self, reversed(self.items))
 
 
 def changed_tooltip(nodes):
@@ -670,3 +667,4 @@ def urlify_text(text):
         return '<a href="%(url)s">%(url)s</a>' % ({'url':url_full})
 
     return literal(url_pat.sub(url_func, text))
+

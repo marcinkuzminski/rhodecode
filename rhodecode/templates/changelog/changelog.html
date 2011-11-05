@@ -33,12 +33,13 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
 				<div id="graph_content">
 					<div class="container_header">
 				        ${h.form(h.url.current(),method='get')}
-				        <div class="info_box">
+				        <div class="info_box" style="float:left">
 				          ${h.submit('set',_('Show'),class_="ui-button-small")}
 				          ${h.text('size',size=1,value=c.size)}
 				          <span class="rev">${_('revisions')}</span>
 				        </div>
 				        ${h.end_form()}
+                    <div style="float:right">${h.select('branch_filter',c.branch_name,c.branch_filters)}</div>
 					<div id="rev_range_container" style="display:none"></div>
 					</div>
 					
@@ -63,9 +64,7 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
                                         <span id="${cs.raw_id}" class="changed_total tooltip" title="${_('Affected number of files, click to show more details')}">${len(cs.affected_files)}</span>
 									</div>					
 										%if len(cs.parents)>1:
-										<div class="merge">
-											${_('merge')}<img alt="merge" src="${h.url('/images/icons/arrow_join.png')}"/>
-										</div>
+										<div class="merge">${_('merge')}</div>
 										%endif
 								   %if cs.parents:							
 									%for p_cs in reversed(cs.parents):
@@ -131,7 +130,7 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
                         }
                     });					
 					
-                    //Fetch changeset details 
+                    // Fetch changeset details 
                     YUE.on(YUD.getElementsByClassName('changed_total'),'click',function(e){
                     	var id = e.currentTarget.id
                     	var url = "${h.url('changelog_details',repo_name=c.repo_name,cs='__CS__')}"
@@ -139,6 +138,20 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
                     	ypjax(url,id+'_changes_info',function(){tooltip_activate()});
                     });
                     
+                    // change branch filter
+                    YUE.on(YUD.get('branch_filter'),'change',function(e){
+                    	var selected_branch = e.currentTarget.options[e.currentTarget.selectedIndex].value;
+                    	console.log(selected_branch);
+                    	var url_main = "${h.url('changelog_home',repo_name=c.repo_name)}";
+                    	var url = "${h.url('changelog_home',repo_name=c.repo_name,branch='__BRANCH__')}";
+                    	var url = url.replace('__BRANCH__',selected_branch);
+                    	if(selected_branch != ''){
+                    		window.location = url;
+                    	}else{
+                    		window.location = url_main;
+                    	}
+                        
+                    });
                     
 					function set_canvas(heads) {
 						var c = document.getElementById('graph_nodes');
@@ -165,7 +178,7 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
 					
 					var r = new BranchRenderer();
 					r.render(jsdata,max_w);
-					
+										
 				});
 			</script>
 		%else:

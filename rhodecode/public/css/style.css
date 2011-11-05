@@ -1914,10 +1914,12 @@ h3.files_location {
 #graph_content .container_header {
 	border: 1px solid #CCC;
 	padding: 10px;
+	height: 45px;
 }
 
 #graph_content #rev_range_container {
 	padding: 10px 0px;
+	clear: both;
 }
 
 #graph_content .container {
@@ -2022,23 +2024,42 @@ h3.files_location {
 .right .parent {
 	font-size: 90%;
 	font-family: monospace;
+	padding: 2px 2px 2px 2px;
 }
-
-.right .logtags .branchtag {
-	background: #FFF url("../images/icons/arrow_branch.png") no-repeat right
-		6px;
-	display: block;
-	font-size: 0.8em;
-	padding: 11px 16px 0 0;
+.right .logtags{
+	padding: 2px 2px 2px 2px;
 }
-
-.right .logtags .tagtag {
-	background: #FFF url("../images/icons/tag_blue.png") no-repeat right 6px;
-	display: block;
-	font-size: 0.8em;
-	padding: 11px 16px 0 0;
+.right .logtags .branchtag,.logtags .branchtag {
+  padding: 1px 3px 2px;
+  background-color: #bfbfbf;
+  font-size: 9.75px;
+  font-weight: bold;
+  color: #ffffff;
+  text-transform: uppercase;
+  white-space: nowrap;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+  padding-left:4px;
 }
-
+.right .logtags .branchtag a:hover,.logtags .branchtag a:hover{
+	text-decoration: none;
+}
+.right .logtags .tagtag,.logtags .tagtag {
+  padding: 1px 3px 2px;
+  background-color: #62cffc;
+  font-size: 9.75px;
+  font-weight: bold;
+  color: #ffffff;
+  text-transform: uppercase;
+  white-space: nowrap;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+}
+.right .logtags .tagtag a:hover,.logtags .tagtag a:hover{
+    text-decoration: none;
+}
 div.browserblock {
 	overflow: hidden;
 	border: 1px solid #ccc;
@@ -3095,22 +3116,22 @@ div.readme .readme_box code {
 }
 
 div.readme .readme_box pre code {
-padding: 0 !important;
-font-size: 12px !important;
-background-color: #eee !important;
-border: none !important;
+	padding: 0 !important;
+	font-size: 12px !important;
+	background-color: #eee !important;
+	border: none !important;
 }
 
 div.readme .readme_box pre {
-margin: 1em 0;
-font-size: 12px;
-background-color: #eee;
-border: 1px solid #ddd;
-padding: 5px;
-color: #444;
-overflow: auto;
--webkit-box-shadow: rgba(0,0,0,0.07) 0 1px 2px inset;
--webkit-border-radius: 3px;
--moz-border-radius: 3px;
-border-radius: 3px;
+	margin: 1em 0;
+	font-size: 12px;
+	background-color: #eee;
+	border: 1px solid #ddd;
+	padding: 5px;
+	color: #444;
+	overflow: auto;
+	-webkit-box-shadow: rgba(0,0,0,0.07) 0 1px 2px inset;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
 }

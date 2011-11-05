@@ -36,9 +36,9 @@
 			</span>
 		</td>
 		<td class="nowrap">
-		${h.link_to(_('changeset'),h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id))}
-		|
-		${h.link_to(_('files'),h.url('files_home',repo_name=c.repo_name,revision=cs.raw_id))}
+		${h.link_to(_('changeset'),h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id),class_="ui-button-small")}
+		<span style="color:#515151">|</span>
+		${h.link_to(_('files'),h.url('files_home',repo_name=c.repo_name,revision=cs.raw_id),class_="ui-button-small")}
 		</td>
 	</tr>
 %endfor
