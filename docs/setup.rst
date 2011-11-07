@@ -347,6 +347,86 @@ appropriately configured.
 
 
 
+Authentication by container or reverse-proxy
+--------------------------------------------
+
+Starting with version 1.3, RhodeCode supports delegating the authentication
+of users to its WSGI container, or to a reverse-proxy server through which all
+clients access the application.
+
+When these authentication methods are enabled in RhodeCode, it uses the
+username that the container/proxy (Apache/Nginx/etc) authenticated and doesn't
+perform the authentication itself. The authorization, however, is still done by
+RhodeCode according to its settings.
+
+When a user logs in for the first time using these authentication methods,
+a matching user account is created in RhodeCode with default permissions. An
+administrator can then modify it using RhodeCode's admin interface.
+It's also possible for an administrator to create accounts and configure their
+permissions before the user logs in for the first time.
+
+Container-based authentication
+''''''''''''''''''''''''''''''
+
+In a container-based authentication setup, RhodeCode reads the user name from
+the ``REMOTE_USER`` server variable provided by the WSGI container.
+
+After setting up your container (see `Apache's WSGI config`_), you'd need
+to configure it to require authentication on the location configured for
+RhodeCode.
+
+In order for RhodeCode to start using the provided username, you should set the
+following in the [app:main] section of your .ini file::
+
+    container_auth_enabled = true
+
+
+Proxy pass-through authentication
+'''''''''''''''''''''''''''''''''
+
+In a proxy pass-through authentication setup, RhodeCode reads the user name
+from the ``X-Forwarded-User`` request header, which should be configured to be
+sent by the reverse-proxy server.
+
+After setting up your proxy solution (see `Apache virtual host reverse proxy example`_,
+`Apache as subdirectory`_ or `Nginx virtual host example`_), you'd need to
+configure the authentication and add the username in a request header named
+``X-Forwarded-User``.
+
+For example, the following config section for Apache sets a subdirectory in a
+reverse-proxy setup with basic auth::
+
+    <Location /<someprefix> >
+      ProxyPass http://127.0.0.1:5000/<someprefix>
+      ProxyPassReverse http://127.0.0.1:5000/<someprefix>
+      SetEnvIf X-Url-Scheme https HTTPS=1
+
+      AuthType Basic
+      AuthName "RhodeCode authentication"
+      AuthUserFile /home/web/rhodecode/.htpasswd
+      require valid-user
+
+      RequestHeader unset X-Forwarded-User
+
+      RewriteEngine On
+      RewriteCond %{LA-U:REMOTE_USER} (.+)
+      RewriteRule .* - [E=RU:%1]
+      RequestHeader set X-Forwarded-User %{RU}e
+    </Location> 
+
+In order for RhodeCode to start using the forwarded username, you should set
+the following in the [app:main] section of your .ini file::
+
+    proxypass_auth_enabled = true
+
+.. note::
+   If you enable proxy pass-through authentication, make sure your server is
+   only accessible through the proxy. Otherwise, any client would be able to
+   forge the authentication header and could effectively become authenticated
+   using any account of their liking.
+
+
+
 Hook management
 ---------------
 

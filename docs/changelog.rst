@@ -14,7 +14,7 @@ news
 ----
 
 - #215 rst and markdown README files support
-- #252 pass-through user identity
+- Container-based and proxy pass-through authentication support (#252)
 - hover top menu
 - configurable clone url posibility to specify ssh:// manually as 
   alternative clone url.
