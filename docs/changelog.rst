@@ -14,9 +14,10 @@ news
 ----
 
 - #215 rst and markdown README files support
-- Container-based and proxy pass-through authentication support (#252)
+- #252 Container-based and proxy pass-through authentication support
+- #44 branch browser. Filtering of changelog by branches
 - hover top menu
-- configurable clone url posibility to specify ssh:// manually as 
+- configurable clone url possibility to specify ssh:// manually as 
   alternative clone url.
    
 fixes
