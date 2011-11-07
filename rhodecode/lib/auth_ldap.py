@@ -87,6 +87,9 @@ class AuthLdap(object):
 
         uid = chop_at(username, "@%s" % self.LDAP_SERVER_ADDRESS)
 
+        if not password:
+            log.debug("Attempt to authenticate LDAP user with blank password rejected.")
+            raise LdapPasswordError()
         if "," in username:
             raise LdapUsernameError("invalid character in username: ,")
         try:
