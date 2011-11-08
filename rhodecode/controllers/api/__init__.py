@@ -36,7 +36,7 @@ from rhodecode.lib.compat import izip_longest, json
 from paste.response import replace_header
 
 from pylons.controllers import WSGIController
-from pylons.controllers.util import Response
+
 
 from webob.exc import HTTPNotFound, HTTPForbidden, HTTPInternalServerError, \
 HTTPBadRequest, HTTPError
@@ -56,9 +56,15 @@ class JSONRPCError(BaseException):
 
 
 def jsonrpc_error(message, code=None):
-    """Generate a Response object with a JSON-RPC error body"""
-    return Response(body=json.dumps(dict(result=None,
-                                         error=message)))
+    """
+    Generate a Response object with a JSON-RPC error body
+    """
+    from pylons.controllers.util import Response
+    resp = Response(body=json.dumps(dict(result=None, error=message)),
+                    status=code,
+                    content_type='application/json')
+    return resp
+
 
 
 class JSONRPCController(WSGIController):
