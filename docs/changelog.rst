@@ -314,7 +314,7 @@ news
 - uses mercurial 1.7 with dotencode disabled for maintaining compatibility 
   with older clients
 - anonymous access, authentication via ldap
-- performance upgrade for cached repos list - each repository has it's own 
+- performance upgrade for cached repos list - each repository has its own 
   cache that's invalidated when needed.
 - performance upgrades on repositories with large amount of commits (20K+)
 - main page quick filter for filtering repositories

@@ -54,7 +54,7 @@ Please visit http://packages.python.org/RhodeCode/installation.html
 RhodeCode Features
 ------------------
 
-- Has it's own middleware to handle mercurial_ protocol requests. 
+- Has its own middleware to handle mercurial_ protocol requests. 
   Each request can be logged and authenticated.
 - Runs on threads unlike hgweb. You can make multiple pulls/pushes simultaneous.
   Supports http/https and LDAP
