@@ -367,6 +367,11 @@ class FilesController(BaseRepoController):
             if dbrepo.enable_downloads is False:
                 return _('downloads disabled')
 
+            # patch and reset hooks section of UI config to not run any 
+            # hooks on fetching archives with subrepos
+            for k, v in c.rhodecode_repo._repo.ui.configitems('hooks'):
+                c.rhodecode_repo._repo.ui.setconfig('hooks', k, None)
+
             cs = c.rhodecode_repo.get_changeset(revision)
             content_type = settings.ARCHIVE_SPECS[fileformat][0]
         except ChangesetDoesNotExistError:
