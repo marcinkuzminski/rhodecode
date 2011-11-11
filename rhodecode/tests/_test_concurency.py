@@ -54,6 +54,7 @@ add_cache(conf)
 USER = 'test_admin'
 PASS = 'test12'
 HOST = '127.0.0.1:5000'
+METHOD = 'pull'
 DEBUG = True
 log = logging.getLogger(__name__)
 
@@ -153,9 +154,12 @@ def get_anonymous_access():
 #==============================================================================
 # TESTS
 #==============================================================================
-def test_clone_with_credentials(no_errors=False, repo=HG_REPO):
+def test_clone_with_credentials(no_errors=False, repo=HG_REPO, method=METHOD,
+                                seq=None):
     cwd = path = jn(TESTS_TMP_PATH, repo)
 
+    if seq == None:
+        seq = _RandomNameSequence().next()
 
     try:
         shutil.rmtree(path, ignore_errors=True)
@@ -165,25 +169,38 @@ def test_clone_with_credentials(no_errors=False, repo=HG_REPO):
         raise
 
 
-    clone_url = 'http://%(user)s:%(pass)s@%(host)s/%(cloned_repo)s %(dest)s' % \
+    clone_url = 'http://%(user)s:%(pass)s@%(host)s/%(cloned_repo)s' % \
                   {'user':USER,
                    'pass':PASS,
                    'host':HOST,
-                   'cloned_repo':repo,
-                   'dest':path + _RandomNameSequence().next()}
+                   'cloned_repo':repo, }
 
-    stdout, stderr = Command(cwd).execute('hg clone', clone_url)
+    dest = path + seq
+    if method == 'pull':
+        stdout, stderr = Command(cwd).execute('hg', method, '--cwd', dest, clone_url)
+    else:
+        stdout, stderr = Command(cwd).execute('hg', method, clone_url, dest)
 
-    if no_errors is False:
-        assert """adding file changes""" in stdout, 'no messages about cloning'
-        assert """abort""" not in stderr , 'got error from clone'
+        if no_errors is False:
+            assert """adding file changes""" in stdout, 'no messages about cloning'
+            assert """abort""" not in stderr , 'got error from clone'
 
 if __name__ == '__main__':
     try:
         create_test_user(force=False)
+        seq = None
+        import time
 
+        if METHOD == 'pull':
+            seq = _RandomNameSequence().next()
+            test_clone_with_credentials(repo=sys.argv[1], method='clone',
+                                        seq=seq)
+        s = time.time()
         for i in range(int(sys.argv[2])):
-            test_clone_with_credentials(repo=sys.argv[1])
-
+            print 'take', i
+            test_clone_with_credentials(repo=sys.argv[1], method=METHOD,
+                                        seq=seq)
+        print 'time taken %.3f' % (time.time() - s)
     except Exception, e:
+        raise
         sys.exit('stop on %s' % e)
