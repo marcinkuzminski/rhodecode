@@ -43,8 +43,9 @@ from vcs.utils.lazy import LazyProperty
 from vcs.utils.helpers import get_scm
 from vcs.exceptions import VCSError
 
+from rhodecode.lib.caching_query import FromCache
+
 from rhodecode.model import meta
-from rhodecode.model.caching_query import FromCache
 from rhodecode.model.db import Repository, User, RhodeCodeUi, UserLog, RepoGroup, \
     RhodeCodeSetting
 

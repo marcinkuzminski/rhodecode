@@ -34,9 +34,9 @@ from vcs.utils.lazy import LazyProperty
 from vcs.backends import get_backend
 
 from rhodecode.lib import safe_str
+from rhodecode.lib.caching_query import FromCache
 
 from rhodecode.model import BaseModel
-from rhodecode.model.caching_query import FromCache
 from rhodecode.model.db import Repository, UserRepoToPerm, User, Permission, \
     Statistics, UsersGroup, UsersGroupRepoToPerm, RhodeCodeUi, RepoGroup
 from rhodecode.model.user import UserModel

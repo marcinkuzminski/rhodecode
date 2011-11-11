@@ -29,8 +29,9 @@ import traceback
 from pylons.i18n.translation import _
 
 from rhodecode.lib import safe_unicode
+from rhodecode.lib.caching_query import FromCache
+
 from rhodecode.model import BaseModel
-from rhodecode.model.caching_query import FromCache
 from rhodecode.model.db import User, UserRepoToPerm, Repository, Permission, \
     UserToPerm, UsersGroupRepoToPerm, UsersGroupToPerm, UsersGroupMember
 from rhodecode.lib.exceptions import DefaultUserException, \

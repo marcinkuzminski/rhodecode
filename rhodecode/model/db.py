@@ -44,9 +44,10 @@ from rhodecode.lib import str2bool, safe_str, get_changeset_safe, \
     generate_api_key, safe_unicode
 from rhodecode.lib.exceptions import UsersGroupsAssignedException
 from rhodecode.lib.compat import json
+from rhodecode.lib.caching_query import FromCache
 
 from rhodecode.model.meta import Base, Session
-from rhodecode.model.caching_query import FromCache
+
 
 
 log = logging.getLogger(__name__)

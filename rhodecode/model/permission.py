@@ -28,9 +28,11 @@ import traceback
 
 from sqlalchemy.exc import DatabaseError
 
+from rhodecode.lib.caching_query import FromCache
+
 from rhodecode.model import BaseModel
 from rhodecode.model.db import User, Permission, UserToPerm, UserRepoToPerm
-from rhodecode.model.caching_query import FromCache
+
 
 log = logging.getLogger(__name__)
 
