@@ -1095,6 +1095,22 @@ class CacheInvalidation(Base, BaseModel):
         Session.commit()
 
 
+class ChangesetComment(Base, BaseModel):
+    __tablename__ = 'changeset_comments'
+    __table_args__ = ({'extend_existing':True},)
+    comment_id = Column('comment_id', Integer(), nullable=False, primary_key=True)
+    repo_id = Column('repo_id', Integer(), ForeignKey('repositories.repo_id'), nullable=False)
+    commit_id = Column('commit_id', String(100), nullable=False)
+    line_no = Column('line_no', Integer(), nullable=True)
+    f_path = Column('f_path', String(1000), nullable=True)
+    user_id = Column('user_id', Integer(), ForeignKey('users.user_id'), nullable=False)
+    text = Column('text', String(25000), nullable=False)
+    modified_at = Column('modified_at', DateTime(timezone=False), nullable=False, default=datetime.datetime.now)
+
+    author = relationship('User')
+    repo = relationship('Repository')
+
+
 class DbMigrateVersion(Base, BaseModel):
     __tablename__ = 'db_migrate_version'
     __table_args__ = {'extend_existing':True}

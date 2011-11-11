@@ -346,6 +346,14 @@ def make_map(config):
                 controller='changeset', revision='tip',
                 conditions=dict(function=check_repo))
 
+    rmap.connect('changeset_comment', '/{repo_name:.*}/changeset/{revision}/comment',
+                controller='changeset', revision='tip', action='comment',
+                conditions=dict(function=check_repo))
+
+    rmap.connect('changeset_comment_delete', '/{repo_name:.*}/changeset/comment/{comment_id}/delete',
+                controller='changeset', action='delete_comment',
+                conditions=dict(function=check_repo))
+
     rmap.connect('raw_changeset_home',
                  '/{repo_name:.*}/raw-changeset/{revision}',
                  controller='changeset', action='raw_changeset',

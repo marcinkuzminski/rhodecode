@@ -29,15 +29,19 @@ import traceback
 from pylons import tmpl_context as c, url, request, response
 from pylons.i18n.translation import _
 from pylons.controllers.util import redirect
+from pylons.decorators import jsonify
 
 import rhodecode.lib.helpers as h
-from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
+from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator, \
+    NotAnonymous
 from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.utils import EmptyChangeset
 from rhodecode.lib.compat import OrderedDict
+from rhodecode.model.db import ChangesetComment
+from rhodecode.model.comment import ChangesetCommentsModel
 
 from vcs.exceptions import RepositoryError, ChangesetError, \
-ChangesetDoesNotExistError
+    ChangesetDoesNotExistError
 from vcs.nodes import FileNode
 from vcs.utils import diffs as differ
 
@@ -66,7 +70,7 @@ class ChangesetController(BaseRepoController):
 
         #get ranges of revisions if preset
         rev_range = revision.split('...')[:2]
-        
+
         try:
             if len(rev_range) == 2:
                 rev_start = rev_range[0]
@@ -91,6 +95,14 @@ class ChangesetController(BaseRepoController):
         c.lines_added = 0
         c.lines_deleted = 0
         c.cut_off = False  # defines if cut off limit is reached
+
+        c.comments = []
+        for cs in c.cs_ranges:
+            c.comments.extend(ChangesetComment.query()\
+                              .filter(ChangesetComment.repo_id == c.rhodecode_db_repo.repo_id)\
+                              .filter(ChangesetComment.commit_id == cs.raw_id)\
+                              .filter(ChangesetComment.line_no == None)\
+                              .filter(ChangesetComment.f_path == None).all())
 
         # Iterate over ranges (default changeset view is always one changeset)
         for changeset in c.cs_ranges:
@@ -252,3 +264,22 @@ class ChangesetController(BaseRepoController):
             c.diffs += x[2]
 
         return render('changeset/raw_changeset.html')
+
+    def comment(self, repo_name, revision):
+        ccmodel = ChangesetCommentsModel()
+
+        ccmodel.create(text=request.POST.get('text'),
+                       repo_id=c.rhodecode_db_repo.repo_id, 
+                       user_id=c.rhodecode_user.user_id, 
+                       commit_id=revision, f_path=request.POST.get('f_path'), 
+                       line_no = request.POST.get('line'))
+
+        return redirect(h.url('changeset_home', repo_name=repo_name,
+                              revision=revision))
+
+    @jsonify
+    @HasRepoPermissionAnyDecorator('hg.admin', 'repository.admin')
+    def delete_comment(self, comment_id):
+        ccmodel = ChangesetCommentsModel()
+        ccmodel.delete(comment_id=comment_id)
+        return True

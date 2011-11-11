@@ -8,6 +8,11 @@ div.diffblock {
     /* new */
     line-height: 125%;
 }
+
+div.diffblock.margined{
+	margin: 0px 20px 0px 20px;
+}
+
 div.diffblock .code-header{
 	border-bottom: 1px solid #CCCCCC;
 	background: #EEEEEE;

@@ -1,0 +1,31 @@
+##usage:
+## <%namespace name="comment" file="/changeset/changeset_file_comment.html"/>
+## ${comment.comment_block(co)}
+##
+<%def name="comment_block(co)">
+  <div class="comment" id="comment-${co.comment_id}">
+  	<div class="meta">
+  		<span class="user">
+  			<img src="${h.gravatar_url(co.author.email, 20)}" />
+  			${co.author.username}
+  		</span>
+  		<a href="${h.url.current(anchor='comment-%s' % co.comment_id)}"> ${_('commented on')} </a>
+  		${h.short_id(co.commit_id)}
+  		%if co.f_path:
+  			${_(' in file ')}
+  			${co.f_path}:L${co.line_no}
+  		%endif
+  		<span class="date">
+  			${h.age(co.modified_at)}
+  		</span>
+  	</div>
+  	<div class="text">
+  		%if h.HasPermissionAny('hg.admin', 'repository.admin')() or co.author.user_id == c.rhodecode_user.user_id:
+  			<div class="buttons">
+  				<a href="javascript:void(0);" onClick="deleteComment(${co.comment_id})" class="">${_('Delete')}</a>
+  			</div>
+  		%endif
+  		${h.rst(co.text)|n}
+  	</div>
+  </div>
+</%def>

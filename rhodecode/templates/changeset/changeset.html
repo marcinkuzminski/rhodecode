@@ -108,7 +108,7 @@
 	%for change,filenode,diff,cs1,cs2,stat in c.changes:
 		%if change !='removed':
 		<div style="clear:both;height:10px"></div>
-		<div class="diffblock">
+		<div class="diffblock  margined">
 			<div id="${h.repo_name_slug('C%s' % h.safe_unicode(filenode.path))}" class="code-header">
 				<div class="changeset_header">
 					<span class="changeset_file">
@@ -134,6 +134,30 @@
 			</div>
 		</div>
 		%endif
-	%endfor 
-    </div>	
+	%endfor
+  
+    <%namespace name="comment" file="/changeset/changeset_file_comment.html"/>
+    
+    <div class="comments">
+        <div class="comments-number">${len(c.comments)} comment(s)</div>
+        %for co in c.comments:
+            ${comment.comment_block(co)}
+        %endfor
+        %if c.rhodecode_user.username != 'default':
+        <div class="comment-form">
+            ${h.form(h.url('changeset_comment', repo_name=c.repo_name, revision=c.changeset.raw_id))}
+            <strong>Leave a comment</strong>
+            <div class="clearfix">
+                <div class="comment-help">${_('Comments parsed using RST syntax')}</div>
+                    ${h.textarea('text')}
+            </div>
+            <div class="comment-button">
+            ${h.submit('save', _('Comment'), class_='ui-button')}
+            </div>
+            ${h.end_form()}
+        </div>
+        %endif
+    </div>
+    
+  </div>	
 </%def>
