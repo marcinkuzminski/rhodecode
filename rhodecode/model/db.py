@@ -305,15 +305,25 @@ class User(Base, BaseModel):
             return self.__class__.__name__
 
     @classmethod
-    def get_by_username(cls, username, case_insensitive=False):
+    def get_by_username(cls, username, case_insensitive=False, cache=False):
         if case_insensitive:
-            return Session.query(cls).filter(cls.username.ilike(username)).scalar()
+            q = cls.query().filter(cls.username.ilike(username))
         else:
-            return Session.query(cls).filter(cls.username == username).scalar()
+            q = cls.query().filter(cls.username == username)
+
+        if cache:
+            q = q.options(FromCache("sql_cache_short",
+                                    "get_user_%s" % username))
+        return q.scalar()
 
     @classmethod
-    def get_by_api_key(cls, api_key):
-        return cls.query().filter(cls.api_key == api_key).one()
+    def get_by_api_key(cls, api_key, cache=False):
+        q = cls.query().filter(cls.api_key == api_key)
+
+        if cache:
+            q = q.options(FromCache("sql_cache_short",
+                                    "get_api_key_%s" % api_key))
+        q.one()
 
     def update_lastlogin(self):
         """Update user lastlogin"""
@@ -1082,6 +1092,7 @@ class CacheInvalidation(Base, BaseModel):
         inv_obj.cache_active = True
         Session.add(inv_obj)
         Session.commit()
+
 
 class DbMigrateVersion(Base, BaseModel):
     __tablename__ = 'db_migrate_version'
