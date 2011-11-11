@@ -263,6 +263,8 @@ var q_filter = function(target,nodes,display_element){
 	   
 	   var l = nodes.length;
 	   var i;
+	   var showing = 0;
+	   
        for (i=0;i<l;i++ ){
     	   var n = nodes[i];
     	   var target_element = display_element(n)
@@ -271,9 +273,16 @@ var q_filter = function(target,nodes,display_element){
     	   }
     	   else{
     		   show_node(target_element);
+    		   showing+=1;
     	   }
        }	  	   
 
+	   // if repo_count is set update the number
+	   var cnt = YUD.get('repo_count');
+	   if(cnt){
+		   YUD.get('repo_count').innerHTML = showing;
+	   }       
+       
 	}	
 }
 
