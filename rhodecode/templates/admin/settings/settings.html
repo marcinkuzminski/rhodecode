@@ -188,5 +188,28 @@
             });
         });
     </script>
+    
+    <h3>${_('Test Email')}</h3>
+    ${h.form(url('admin_setting', setting_id='email'),method='put')}
+    <div class="form">
+        <!-- fields -->
+        
+        <div class="fields">
+            <div class="field">
+                <div class="label">
+                    <label for="test_email">${_('Email to')}:</label>
+                </div>
+                <div class="input">
+                    ${h.text('test_email',size=30)}
+                </div>
+            </div>
+                            
+            <div class="buttons">
+            ${h.submit('send',_('Send'),class_="ui-button")}
+            </div>                                                          
+        </div>
+    </div>  
+    ${h.end_form()}    
+    
 </div>
 </%def>    

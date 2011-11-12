@@ -231,7 +231,7 @@ class SettingsController(BaseController):
             ui_key = request.POST.get('new_hook_ui_key')
             ui_value = request.POST.get('new_hook_ui_value')
             try:
-                
+
                 if ui_value and ui_key:
                     RhodeCodeUi.create_or_update_hook(ui_key, ui_value)
                     h.flash(_('Added new hook'),
@@ -240,7 +240,7 @@ class SettingsController(BaseController):
                 # check for edits
                 update = False
                 _d = request.POST.dict_of_lists()
-                for k, v in zip(_d.get('hook_ui_key',[]), _d.get('hook_ui_value_new',[])):
+                for k, v in zip(_d.get('hook_ui_key', []), _d.get('hook_ui_value_new', [])):
                     RhodeCodeUi.create_or_update_hook(k, v)
                     update = True
 
@@ -254,6 +254,16 @@ class SettingsController(BaseController):
 
             return redirect(url('admin_edit_setting', setting_id='hooks'))
 
+
+
+        if setting_id == 'email':
+            test_email = request.POST.get('test_email')
+            test_email_subj = 'RhodeCode TestEmail'
+            test_email_body = 'RhodeCode Email test'
+
+            run_task(tasks.send_email, [test_email], test_email_subj,
+                     test_email_body)
+            h.flash(_('Email task created'), category='success')
         return redirect(url('admin_settings'))
 
     @HasPermissionAllDecorator('hg.admin')
@@ -268,8 +278,8 @@ class SettingsController(BaseController):
         if setting_id == 'hooks':
             hook_id = request.POST.get('hook_id')
             RhodeCodeUi.delete(hook_id)
-            
-            
+
+
     @HasPermissionAllDecorator('hg.admin')
     def show(self, setting_id, format='html'):
         """

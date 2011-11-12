@@ -347,7 +347,7 @@ def send_email(recipients, subject, body):
 
     if not recipients:
         # if recipients are not defined we send to email_config + all admins
-        admins = [u.email for u in User.query().filter(User.admin==True).all()]
+        admins = [u.email for u in User.query().filter(User.admin == True).all()]
         recipients = [email_config.get('email_to')] + admins
 
     mail_from = email_config.get('app_email_from')
@@ -361,7 +361,7 @@ def send_email(recipients, subject, body):
     smtp_auth = email_config.get('smtp_auth')
 
     try:
-        m = SmtpMailer(mail_from, user, passwd, mail_server,smtp_auth,
+        m = SmtpMailer(mail_from, user, passwd, mail_server, smtp_auth,
                        mail_port, ssl, tls, debug=debug)
         m.send(recipients, subject, body)
     except:
