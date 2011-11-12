@@ -33,7 +33,7 @@ from webhelpers.text import chop_at, collapse, convert_accented_entities, \
 from webhelpers.date import time_ago_in_words
 from webhelpers.paginate import Page
 from webhelpers.html.tags import _set_input_attrs, _set_id_attr, \
-    convert_boolean_attrs, NotGiven
+    convert_boolean_attrs, NotGiven, _make_safe_id_component
 
 from vcs.utils.annotate import annotate_highlight
 from rhodecode.lib.utils import repo_name_slug
@@ -51,7 +51,7 @@ def _reset(name, value=None, id=NotGiven, type="reset", **attrs):
     return HTML.input(**attrs)
 
 reset = _reset
-
+safeid = _make_safe_id_component
 
 def get_token():
     """Return the current authentication token, creating one if one doesn't

@@ -63,7 +63,7 @@
 		             </div>                  
 		                 %if len(c.changeset.parents)>1:
 		                 <div class="merge">
-		                     ${_('merge')}<img alt="merge" src="${h.url("/images/icons/arrow_join.png")}"/>
+		                     ${_('merge')}<img alt="merge" src="${h.url('/images/icons/arrow_join.png')}"/>
 		                 </div>
 		                 %endif
 		                 
@@ -92,8 +92,7 @@
 	        <div class="cs_files">
 	                %for change,filenode,diff,cs1,cs2,stat in c.changes:
 	                    <div class="cs_${change}">
-		                    <div class="node">${h.link_to(h.safe_unicode(filenode.path),
-		                                        h.url.current(anchor=h.repo_name_slug('C%s' % h.safe_unicode(filenode.path))))}</div>
+		                    <div class="node">${h.link_to(h.safe_unicode(filenode.path),h.url.current(anchor='C-%s-%s' % (h.short_id(filenode.changeset.raw_id),h.safeid(h.safe_unicode(filenode.path)))))}</div>
 		                    <div class="changes">${h.fancy_file_stats(stat)}</div>
 	                    </div>
 	                %endfor
@@ -109,7 +108,7 @@
 		%if change !='removed':
 		<div style="clear:both;height:10px"></div>
 		<div class="diffblock  margined">
-			<div id="${h.repo_name_slug('C%s' % h.safe_unicode(filenode.path))}" class="code-header">
+			<div id="${'C-%s-%s' % (h.short_id(filenode.changeset.raw_id),h.safeid(h.safe_unicode(filenode.path)))}" class="code-header">
 				<div class="changeset_header">
 					<span class="changeset_file">
 						${h.link_to_if(change!='removed',h.safe_unicode(filenode.path),h.url('files_home',repo_name=c.repo_name,

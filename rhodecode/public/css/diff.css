@@ -34,10 +34,6 @@ table.code-difftable{
 	border-collapse: collapse;
 	width: 99%;
 }
-table.code-difftable td:target *{
-	background:  repeat scroll 0 0 #FFFFBE !important;
-	text-decoration: underline;
-}
 
 table.code-difftable td {
     padding: 0 !important; 

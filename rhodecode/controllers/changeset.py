@@ -268,10 +268,10 @@ class ChangesetController(BaseRepoController):
         ccmodel = ChangesetCommentsModel()
 
         ccmodel.create(text=request.POST.get('text'),
-                       repo_id=c.rhodecode_db_repo.repo_id, 
-                       user_id=c.rhodecode_user.user_id, 
-                       revision=revision, f_path=request.POST.get('f_path'), 
-                       line_no = request.POST.get('line'))
+                       repo_id=c.rhodecode_db_repo.repo_id,
+                       user_id=c.rhodecode_user.user_id,
+                       revision=revision, f_path=request.POST.get('f_path'),
+                       line_no=request.POST.get('line'))
 
         return redirect(h.url('changeset_home', repo_name=repo_name,
                               revision=revision))
