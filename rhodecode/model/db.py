@@ -1100,7 +1100,7 @@ class ChangesetComment(Base, BaseModel):
     __table_args__ = ({'extend_existing':True},)
     comment_id = Column('comment_id', Integer(), nullable=False, primary_key=True)
     repo_id = Column('repo_id', Integer(), ForeignKey('repositories.repo_id'), nullable=False)
-    commit_id = Column('commit_id', String(100), nullable=False)
+    revision = Column('revision', String(40), nullable=False)
     line_no = Column('line_no', Integer(), nullable=True)
     f_path = Column('f_path', String(1000), nullable=True)
     user_id = Column('user_id', Integer(), ForeignKey('users.user_id'), nullable=False)

@@ -10,7 +10,7 @@
   			${co.author.username}
   		</span>
   		<a href="${h.url.current(anchor='comment-%s' % co.comment_id)}"> ${_('commented on')} </a>
-  		${h.short_id(co.commit_id)}
+  		${h.short_id(co.revision)}
   		%if co.f_path:
   			${_(' in file ')}
   			${co.f_path}:L${co.line_no}

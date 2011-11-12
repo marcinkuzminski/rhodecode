@@ -29,6 +29,7 @@ import traceback
 
 from rhodecode.model import BaseModel
 from rhodecode.model.db import ChangesetComment
+from sqlalchemy.util.compat import defaultdict
 
 log = logging.getLogger(__name__)
 
@@ -36,7 +37,7 @@ log = logging.getLogger(__name__)
 class ChangesetCommentsModel(BaseModel):
 
 
-    def create(self, text, repo_id, user_id, commit_id, f_path=None,
+    def create(self, text, repo_id, user_id, revision, f_path=None,
                line_no=None):
         """
         Creates new comment for changeset
@@ -44,7 +45,7 @@ class ChangesetCommentsModel(BaseModel):
         :param text:
         :param repo_id:
         :param user_id:
-        :param commit_id:
+        :param revision:
         :param f_path:
         :param line_no:
         """
@@ -52,7 +53,7 @@ class ChangesetCommentsModel(BaseModel):
         comment = ChangesetComment()
         comment.repo_id = repo_id
         comment.user_id = user_id
-        comment.commit_id = commit_id
+        comment.revision = revision
         comment.text = text
         comment.f_path = f_path
         comment.line_no = line_no
@@ -71,3 +72,22 @@ class ChangesetCommentsModel(BaseModel):
         self.sa.delete(comment)
         self.sa.commit()
         return comment
+
+
+    def get_comments(self, repo_id, revision):
+        return ChangesetComment.query()\
+                .filter(ChangesetComment.repo_id == repo_id)\
+                .filter(ChangesetComment.revision == revision)\
+                .filter(ChangesetComment.line_no == None)\
+                .filter(ChangesetComment.f_path == None).all()
+
+    def get_comments_for_file(self, repo_id, f_path, raw_id):
+        comments = self.sa.query(ChangesetComment)\
+            .filter(ChangesetComment.repo_id == repo_id)\
+            .filter(ChangesetComment.commit_id == raw_id)\
+            .filter(ChangesetComment.f_path == f_path).all()
+
+        d = defaultdict(list)
+        for co in comments:
+            d[co.line_no].append(co)
+        return d.items()

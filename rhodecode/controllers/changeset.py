@@ -98,15 +98,13 @@ class ChangesetController(BaseRepoController):
         c.cut_off = False  # defines if cut off limit is reached
 
         c.comments = []
-        for cs in c.cs_ranges:
-            c.comments.extend(ChangesetComment.query()\
-                              .filter(ChangesetComment.repo_id == c.rhodecode_db_repo.repo_id)\
-                              .filter(ChangesetComment.commit_id == cs.raw_id)\
-                              .filter(ChangesetComment.line_no == None)\
-                              .filter(ChangesetComment.f_path == None).all())
 
         # Iterate over ranges (default changeset view is always one changeset)
         for changeset in c.cs_ranges:
+            c.comments.extend(ChangesetCommentsModel()\
+                              .get_comments(c.rhodecode_db_repo.repo_id,
+                                            changeset.raw_id))
+
             c.changes[changeset.raw_id] = []
             try:
                 changeset_parent = changeset.parents[0]
@@ -272,7 +270,7 @@ class ChangesetController(BaseRepoController):
         ccmodel.create(text=request.POST.get('text'),
                        repo_id=c.rhodecode_db_repo.repo_id, 
                        user_id=c.rhodecode_user.user_id, 
-                       commit_id=revision, f_path=request.POST.get('f_path'), 
+                       revision=revision, f_path=request.POST.get('f_path'), 
                        line_no = request.POST.get('line'))
 
         return redirect(h.url('changeset_home', repo_name=repo_name,
