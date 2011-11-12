@@ -1,6 +1,8 @@
 from rhodecode.lib.utils import BasePasterCommand, Command
 from celery.app import app_or_default
 from celery.bin import camqadm, celerybeat, celeryd, celeryev
+from pylons import config
+from rhodecode.lib import str2bool
 
 __all__ = ['CeleryDaemonCommand', 'CeleryBeatCommand',
            'CAMQPAdminCommand', 'CeleryEventCommand']
@@ -26,6 +28,15 @@ class CeleryCommand(BasePasterCommand):
             self.parser.add_option(x)
 
     def command(self):
+        try:
+            CELERY_ON = str2bool(config['app_conf'].get('use_celery'))
+        except KeyError:
+            CELERY_ON = False
+
+        if CELERY_ON == False:
+            raise Exception('Please enable celery_on in .ini config '
+                            'file before running celeryd')
+
         cmd = self.celery_command(app_or_default())
         return cmd.run(**vars(self.options))
 
