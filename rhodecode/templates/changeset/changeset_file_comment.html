@@ -22,7 +22,7 @@
   	<div class="text">
   		%if h.HasPermissionAny('hg.admin', 'repository.admin')() or co.author.user_id == c.rhodecode_user.user_id:
   			<div class="buttons">
-  				<a href="javascript:void(0);" onClick="deleteComment(${co.comment_id})" class="">${_('Delete')}</a>
+  				<span onClick="deleteComment(${co.comment_id})" class="delete-comment ui-button-small">${_('Delete')}</span>
   			</div>
   		%endif
   		${h.rst(co.text)|n}

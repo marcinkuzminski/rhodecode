@@ -3263,9 +3263,8 @@ div.rst-block  pre {
 }
 
 .comments .comment .text {
-    margin-top: 7px;
-    padding: 6px;
-    padding-bottom: 13px;
+    padding: 8px 6px 6px 14px;
+    background-color: #FAFAFA;
 }
 
 .comments .comments-number{
@@ -3330,6 +3329,6 @@ form.comment-form {
 }
 
 .comment .buttons {
-    float: right;
-    display: none;
+    position: absolute;
+    right:40px;
 }

@@ -44,6 +44,7 @@ from vcs.exceptions import RepositoryError, ChangesetError, \
     ChangesetDoesNotExistError
 from vcs.nodes import FileNode
 from vcs.utils import diffs as differ
+from webob.exc import HTTPForbidden
 
 log = logging.getLogger(__name__)
 
@@ -278,8 +279,13 @@ class ChangesetController(BaseRepoController):
                               revision=revision))
 
     @jsonify
-    @HasRepoPermissionAnyDecorator('hg.admin', 'repository.admin')
     def delete_comment(self, comment_id):
-        ccmodel = ChangesetCommentsModel()
-        ccmodel.delete(comment_id=comment_id)
-        return True
+        co = ChangesetComment.get(comment_id)
+        if (h.HasPermissionAny('hg.admin', 'repository.admin')() or
+            co.author.user_id == c.rhodecode_user.user_id):
+            ccmodel = ChangesetCommentsModel()
+            ccmodel.delete(comment_id=comment_id)
+            return True
+        else:
+            raise HTTPForbidden()
+

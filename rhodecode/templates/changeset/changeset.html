@@ -158,6 +158,17 @@
         </div>
         %endif
     </div>
-    
+    <script type="text/javascript">
+      var deleteComment = function(comment_id){
+
+          var url = "${url('changeset_comment_delete',repo_name=c.repo_name,comment_id='__COMMENT_ID__')}".replace('__COMMENT_ID__',comment_id);
+          var postData = '_method=delete';
+          var success = function(o){
+              var n = YUD.get('comment-'+comment_id);
+              n.parentNode.removeChild(n);
+          }
+          ajaxPOST(url,postData,success);
+      } 
+    </script> 
   </div>	
 </%def>

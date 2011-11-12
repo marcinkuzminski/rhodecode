@@ -286,5 +286,15 @@ var q_filter = function(target,nodes,display_element){
 	}	
 }
 
-
+var ajaxPOST = function(url,postData,success) {
+    var sUrl = url;
+    var callback = {
+        success: success,
+        failure: function (o) {
+            alert("error");
+        },
+    };
+    var postData = postData;
+    var request = YAHOO.util.Connect.asyncRequest('POST', sUrl, callback, postData);
+};
 
