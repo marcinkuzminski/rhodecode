@@ -67,6 +67,9 @@ def make_map(config):
     rmap.connect('bugtracker',
                  "http://bitbucket.org/marcinkuzminski/rhodecode/issues",
                  _static=True)
+    rmap.connect('rst_help',
+                 "http://docutils.sourceforge.net/docs/user/rst/quickref.html",
+                 _static=True)
     rmap.connect('rhodecode_official', "http://rhodecode.org", _static=True)
 
     #ADMIN REPOSITORY REST ROUTES

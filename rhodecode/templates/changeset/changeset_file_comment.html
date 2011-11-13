@@ -38,7 +38,8 @@
   %if c.rhodecode_user.username != 'default':
       ${h.form(h.url('changeset_comment', repo_name=c.repo_name, revision=c.changeset.raw_id))}
       <div class="clearfix">
-          <div class="comment-help">${_('Commenting on line')} {1} ${_('comments parsed using RST syntax')}</div>
+          <div class="comment-help">${_('Commenting on line')} {1} ${_('comments parsed using')} 
+          <a href="${h.url('rst_help')}">RST</a> ${_('syntax')}</div>
               ${h.textarea('text')}
       </div>
       <div class="comment-button">
