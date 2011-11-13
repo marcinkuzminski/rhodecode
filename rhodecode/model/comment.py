@@ -84,7 +84,9 @@ class ChangesetCommentsModel(BaseModel):
     def get_inline_comments(self, repo_id, revision):
         comments = self.sa.query(ChangesetComment)\
             .filter(ChangesetComment.repo_id == repo_id)\
-            .filter(ChangesetComment.revision == revision).all()
+            .filter(ChangesetComment.revision == revision)\
+            .filter(ChangesetComment.line_no != None)\
+            .filter(ChangesetComment.f_path != None).all()
 
         paths = defaultdict(lambda:defaultdict(list))
 
