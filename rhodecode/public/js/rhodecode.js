@@ -328,10 +328,10 @@ var getLineNo = function(tr) {
 	var o = tr.children[0].id.split('_');
 	var n = tr.children[1].id.split('_');
 
-	if (n.length == 2) {
-		line = n[1];
-	} else if (o.length == 2) {
-		line = o[1];
+	if (n.length >= 2) {
+		line = n[n.length-1];
+	} else if (o.length >= 2) {
+		line = o[n.length-1];
 	}
 
 	return line
