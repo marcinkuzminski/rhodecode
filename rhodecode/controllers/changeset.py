@@ -98,13 +98,17 @@ class ChangesetController(BaseRepoController):
         c.cut_off = False  # defines if cut off limit is reached
 
         c.comments = []
-
+        c.inline_comments = []
+        c.inline_cnt = 0
         # Iterate over ranges (default changeset view is always one changeset)
         for changeset in c.cs_ranges:
             c.comments.extend(ChangesetCommentsModel()\
                               .get_comments(c.rhodecode_db_repo.repo_id,
                                             changeset.raw_id))
-
+            inlines = ChangesetCommentsModel()\
+                        .get_inline_comments(c.rhodecode_db_repo.repo_id,
+                                             changeset.raw_id)
+            c.inline_comments.extend(inlines)
             c.changes[changeset.raw_id] = []
             try:
                 changeset_parent = changeset.parents[0]
@@ -198,6 +202,11 @@ class ChangesetController(BaseRepoController):
                 for node in changeset.removed:
                     c.changes[changeset.raw_id].append(('removed', node, None,
                                                         None, None, (0, 0)))
+
+        # count inline comments
+        for path, lines in c.inline_comments:
+            for comments in lines.values():
+                c.inline_cnt += len(comments)
 
         if len(c.cs_ranges) == 1:
             c.changeset = c.cs_ranges[0]

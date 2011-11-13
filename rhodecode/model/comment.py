@@ -49,18 +49,18 @@ class ChangesetCommentsModel(BaseModel):
         :param f_path:
         :param line_no:
         """
+        if text:
+            comment = ChangesetComment()
+            comment.repo_id = repo_id
+            comment.user_id = user_id
+            comment.revision = revision
+            comment.text = text
+            comment.f_path = f_path
+            comment.line_no = line_no
 
-        comment = ChangesetComment()
-        comment.repo_id = repo_id
-        comment.user_id = user_id
-        comment.revision = revision
-        comment.text = text
-        comment.f_path = f_path
-        comment.line_no = line_no
-
-        self.sa.add(comment)
-        self.sa.commit()
-        return comment
+            self.sa.add(comment)
+            self.sa.commit()
+            return comment
 
     def delete(self, comment_id):
         """
@@ -81,13 +81,13 @@ class ChangesetCommentsModel(BaseModel):
                 .filter(ChangesetComment.line_no == None)\
                 .filter(ChangesetComment.f_path == None).all()
 
-    def get_comments_for_file(self, repo_id, f_path, raw_id):
+    def get_inline_comments(self, repo_id, revision):
         comments = self.sa.query(ChangesetComment)\
             .filter(ChangesetComment.repo_id == repo_id)\
-            .filter(ChangesetComment.commit_id == raw_id)\
-            .filter(ChangesetComment.f_path == f_path).all()
+            .filter(ChangesetComment.revision == revision).all()
 
-        d = defaultdict(list)
+        paths = defaultdict(lambda:defaultdict(list))
+
         for co in comments:
-            d[co.line_no].append(co)
-        return d.items()
+            paths[co.f_path][co.line_no].append(co)
+        return paths.items()

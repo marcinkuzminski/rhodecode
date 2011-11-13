@@ -298,3 +298,41 @@ var ajaxPOST = function(url,postData,success) {
     var request = YAHOO.util.Connect.asyncRequest('POST', sUrl, callback, postData);
 };
 
+
+/** comments **/
+var removeInlineForm = function(form) {
+	form.parentNode.removeChild(form);
+}
+
+var createInlineForm = function(parent_tr, f_path, line) {
+	var form = document.createElement('tr');
+	YUD.addClass(form, 'comment-form-inline');
+	var tmpl = YUD.get('comment-inline-form-template').innerHTML;
+	tmpl = tmpl.format(f_path, line);
+	form.innerHTML = '<td class="lineno new"></td>'+
+		             '<td class="lineno old"></td>'+ 
+			         '<td>{0}</td>'.format(tmpl);
+
+	// create event for hide button
+	form = new YAHOO.util.Element(form);
+	var form_hide_button = new YAHOO.util.Element(form.getElementsByClassName('hide-inline-form')[0]);
+	form_hide_button.on('click', function(e) {
+		var newtr = e.currentTarget.parentNode.parentNode.parentNode.parentNode.parentNode;
+		removeInlineForm(newtr);
+		YUD.removeClass(parent_tr, 'form-open');
+	});
+	return form
+}
+var getLineNo = function(tr) {
+	var line;
+	var o = tr.children[0].id.split('_');
+	var n = tr.children[1].id.split('_');
+
+	if (n.length == 2) {
+		line = n[1];
+	} else if (o.length == 2) {
+		line = o[1];
+	}
+
+	return line
+}

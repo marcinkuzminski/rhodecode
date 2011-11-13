@@ -114,38 +114,52 @@
 						${h.link_to_if(change!='removed',h.safe_unicode(filenode.path),h.url('files_home',repo_name=c.repo_name,
 						revision=filenode.changeset.raw_id,f_path=h.safe_unicode(filenode.path)))}
 					</span>
-					%if 1:
 					&raquo; <span>${h.link_to(_('diff'),
 					h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(filenode.path),diff2=cs2,diff1=cs1,diff='diff'))}</span>
 					&raquo; <span>${h.link_to(_('raw diff'),
 					h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(filenode.path),diff2=cs2,diff1=cs1,diff='raw'))}</span>
 					&raquo; <span>${h.link_to(_('download diff'),
 					h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(filenode.path),diff2=cs2,diff1=cs1,diff='download'))}</span>
-					%endif
 				</div>
 			</div>
-			<div class="code-body">        
-					%if diff:
-						${diff|n}
-					%else:
-						${_('No changes in this file')}
-					%endif
+			<div class="code-body">
+                <div class="full_f_path" path="${filenode.path}"></div>        
+				%if diff:
+					${diff|n}
+				%else:
+					${_('No changes in this file')}
+				%endif
 			</div>
 		</div>
 		%endif
 	%endfor
   
     <%namespace name="comment" file="/changeset/changeset_file_comment.html"/>
+    ## template for inline comment form
+    ${comment.comment_inline_form()}
     
     <div class="comments">
-        <div class="comments-number">${len(c.comments)} comment(s)</div>
+        <div class="comments-number">${len(c.comments)} comment(s) (${c.inline_cnt} ${_('inline')})</div>
+        
+        %for path, lines in c.inline_comments:
+            <div class="inline-comment-placeholder" path="${path} ">
+            % for line,comments in lines.iteritems():
+                <div class="inline-comment-placeholder-line" line="${line}"> 
+                %for co in comments:
+                    ${comment.comment_block(co)}
+                %endfor
+                </div>
+            %endfor
+            </div>
+        %endfor        
+        
         %for co in c.comments:
             ${comment.comment_block(co)}
         %endfor
         %if c.rhodecode_user.username != 'default':
         <div class="comment-form">
             ${h.form(h.url('changeset_comment', repo_name=c.repo_name, revision=c.changeset.raw_id))}
-            <strong>Leave a comment</strong>
+            <strong>${_('Leave a comment')}</strong>
             <div class="clearfix">
                 <div class="comment-help">${_('Comments parsed using RST syntax')}</div>
                     ${h.textarea('text')}
@@ -167,7 +181,34 @@
               n.parentNode.removeChild(n);
           }
           ajaxPOST(url,postData,success);
-      } 
+      }
+
+      YUE.onDOMReady(function(){
+    	  YUE.on(YUQ('.line'),'mouseenter',function(e){
+    		  var tr = e.currentTarget;
+              if(YUD.hasClass(tr,'form-open') || YUD.hasClass(tr,'context')){
+                  return
+              }    		  
+    		  YUD.addClass(tr,'highlight');
+    	  });
+          YUE.on(YUQ('.line'),'mouseleave',function(e){
+              YUD.removeClass(e.currentTarget,'highlight');
+          });
+          
+          YUE.on(YUQ('.line'),'click',function(e){
+        	  var tr = e.currentTarget;
+        	  if(YUD.hasClass(tr,'form-open') || YUD.hasClass(tr,'context')){
+        		  return
+        	  }
+        	  YUD.addClass(tr,'form-open');
+        	  var node = tr.parentNode.parentNode.parentNode.getElementsByClassName('full_f_path')[0];
+        	  var f_path = YUD.getAttribute(node,'path');
+        	  var lineno = getLineNo(tr);
+        	  var form = createInlineForm(tr, f_path, lineno);
+        	  YUD.insertAfter(form,tr);
+          })
+      })
+      
     </script> 
   </div>	
 </%def>
