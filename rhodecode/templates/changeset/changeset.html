@@ -98,7 +98,13 @@
 	        <div class="cs_files">
 	                %for change,filenode,diff,cs1,cs2,stat in c.changes:
 	                    <div class="cs_${change}">
-		                    <div class="node">${h.link_to(h.safe_unicode(filenode.path),h.url.current(anchor=self.fid(filenode.changeset.raw_id,filenode.path)))}</div>
+                            <div class="node">
+                            %if change != 'removed':
+                                ${h.link_to(h.safe_unicode(filenode.path),h.url.current(anchor=self.fid(filenode.changeset.raw_id,filenode.path)))}
+                            %else:
+                                ${h.link_to(h.safe_unicode(filenode.path),h.url.current(anchor=self.fid('',filenode.path)))}
+                            %endif
+                            </div>
 		                    <div class="changes">${h.fancy_file_stats(stat)}</div>
 	                    </div>
 	                %endfor
@@ -242,14 +248,15 @@
           for (f in file_comments){
         	  var box = file_comments[f];
         	  var inlines = box.children;
-        	  
         	  for(var i=0; i<inlines.length; i++){
-        		  var inline = inlines[i];
-        		  var lineno = YUD.getAttribute(inlines[i],'line');
-        		  var lineid = "a{0}_{1}".format(YUD.getAttribute(inline,'target_id'),lineno);
-                  var target_line = YUD.get(lineid);
-                  var comments = new YAHOO.util.Element(tableTr('inline-comments',inline.innerHTML))
-                  YUD.insertAfter(comments,target_line.parentNode);        		  
+        		  try{
+          		    var inline = inlines[i];
+          		    var lineno = YUD.getAttribute(inlines[i],'line');
+          		    var lineid = "{0}_{1}".format(YUD.getAttribute(inline,'target_id'),lineno);
+                    var target_line = YUD.get(lineid);
+                    var comments = new YAHOO.util.Element(tableTr('inline-comments',inline.innerHTML))
+                    YUD.insertAfter(comments,target_line.parentNode);
+        		  }catch(e){}
         	  }
           }
       })
