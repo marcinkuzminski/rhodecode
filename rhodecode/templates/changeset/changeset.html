@@ -18,6 +18,12 @@
     ${self.menu('changelog')}     
 </%def>
 
+<%def name="fid(raw_id,path)" filter="strip">
+  <% 
+    return 'C-%s-%s' % (h.short_id(raw_id),h.safeid(h.safe_unicode(path))) 
+  %>
+</%def>
+
 <%def name="main()">
 <div class="box">
     <!-- box / title -->
@@ -92,7 +98,7 @@
 	        <div class="cs_files">
 	                %for change,filenode,diff,cs1,cs2,stat in c.changes:
 	                    <div class="cs_${change}">
-		                    <div class="node">${h.link_to(h.safe_unicode(filenode.path),h.url.current(anchor='C-%s-%s' % (h.short_id(filenode.changeset.raw_id),h.safeid(h.safe_unicode(filenode.path)))))}</div>
+		                    <div class="node">${h.link_to(h.safe_unicode(filenode.path),h.url.current(anchor=self.fid(filenode.changeset.raw_id,filenode.path)))}</div>
 		                    <div class="changes">${h.fancy_file_stats(stat)}</div>
 	                    </div>
 	                %endfor
@@ -108,7 +114,7 @@
 		%if change !='removed':
 		<div style="clear:both;height:10px"></div>
 		<div class="diffblock  margined">
-			<div id="${'C-%s-%s' % (h.short_id(filenode.changeset.raw_id),h.safeid(h.safe_unicode(filenode.path)))}" class="code-header">
+			<div id="${self.fid(filenode.changeset.raw_id,filenode.path)}" class="code-header">
 				<div class="changeset_header">
 					<span class="changeset_file">
 						${h.link_to_if(change!='removed',h.safe_unicode(filenode.path),h.url('files_home',repo_name=c.repo_name,
@@ -142,9 +148,9 @@
         <div class="comments-number">${len(c.comments)} comment(s) (${c.inline_cnt} ${_('inline')})</div>
         
         %for path, lines in c.inline_comments:
-            <div class="inline-comment-placeholder" path="${path} ">
+            <div style="display:none" class="inline-comment-placeholder" path="${path}" target_id="${self.fid(c.changeset.raw_id,path)}">
             % for line,comments in lines.iteritems():
-                <div class="inline-comment-placeholder-line" line="${line}"> 
+                <div class="inline-comment-placeholder-line" line="${line}" target_id="${h.safeid(h.safe_unicode(path))}"> 
                 %for co in comments:
                     ${comment.comment_block(co)}
                 %endfor
@@ -208,7 +214,24 @@
         	  var lineno = getLineNo(tr);
         	  var form = createInlineForm(tr, f_path, lineno);
         	  YUD.insertAfter(form,tr);
-          })
+          });
+          
+          // inject comments into they proper positions
+          var file_comments = YUQ('.inline-comment-placeholder');
+          
+          for (f in file_comments){
+        	  var box = file_comments[f];
+        	  var inlines = box.children;
+        	  
+        	  for(var i=0; i<inlines.length; i++){
+        		  var inline = inlines[i];
+        		  var lineno = YUD.getAttribute(inlines[i],'line');
+        		  var lineid = "a{0}_{1}".format(YUD.getAttribute(inline,'target_id'),lineno);
+                  var target_line = YUD.get(lineid);
+                  var comments = new YAHOO.util.Element(tableTr('inline-comments',inline.innerHTML))
+                  YUD.insertAfter(comments,target_line.parentNode);        		  
+        	  }
+          }
       })
       
     </script> 

@@ -3235,7 +3235,7 @@ div.rst-block  pre {
 }
 
 
-
+/** comment main **/
 .comments {
     padding:10px 20px;
 }
@@ -3277,6 +3277,7 @@ div.rst-block  pre {
 	color: #666;
 	font-size: 16px;
 }
+
 /** comment form **/
 
 .comment-form .clearfix{
@@ -3394,4 +3395,55 @@ form.comment-inline-form {
 
 .comment-inline-form .comment-button{
     padding-top:5px;
+}
+
+/** comment inline **/
+.inline-comments {
+    padding:10px 20px;
+}
+
+.inline-comments div.rst-block  {
+	clear:both;
+	overflow:hidden;
+	margin:0;
+	padding:0 20px 0px;
+}
+.inline-comments .comment {
+    border: 1px solid #ddd;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    margin-left: 5px;
+    margin-right: 5px;
+    margin-bottom: 3px;    
+}
+
+.inline-comments .comment .meta {
+    background: #f8f8f8;
+    padding: 6px;
+    border-bottom: 1px solid #ddd;
+}
+
+.inline-comments .comment .meta img {
+    vertical-align: middle;
+}
+
+.inline-comments .comment .meta .user {
+    font-weight: bold;
+}
+
+.inline-comments .comment .meta .date {
+    float: right;
+}
+
+.inline-comments .comment .text {
+    padding: 8px 6px 6px 14px;
+    background-color: #FAFAFA;
+}
+
+.inline-comments .comments-number{
+    padding:0px 0px 10px 0px;
+    font-weight: bold;
+    color: #666;
+    font-size: 16px;
 }

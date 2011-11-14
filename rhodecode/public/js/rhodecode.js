@@ -304,15 +304,20 @@ var removeInlineForm = function(form) {
 	form.parentNode.removeChild(form);
 }
 
-var createInlineForm = function(parent_tr, f_path, line) {
+var tableTr = function(cls,body){
 	var form = document.createElement('tr');
-	YUD.addClass(form, 'comment-form-inline');
+	YUD.addClass(form, cls);
+	form.innerHTML = '<td class="lineno new"></td>'+
+    				 '<td class="lineno old"></td>'+ 
+                     '<td>{0}</td>'.format(body);
+	return form;
+}
+
+var createInlineForm = function(parent_tr, f_path, line) {
 	var tmpl = YUD.get('comment-inline-form-template').innerHTML;
 	tmpl = tmpl.format(f_path, line);
-	form.innerHTML = '<td class="lineno new"></td>'+
-		             '<td class="lineno old"></td>'+ 
-			         '<td>{0}</td>'.format(tmpl);
-
+	var form = tableTr('comment-form-inline',tmpl)
+	
 	// create event for hide button
 	form = new YAHOO.util.Element(form);
 	var form_hide_button = new YAHOO.util.Element(form.getElementsByClassName('hide-inline-form')[0]);
