@@ -3342,6 +3342,10 @@ form.comment-form {
 }
 
 
+.show-inline-comments{
+	position: relative;
+	top:1px
+}
 
 /** comment inline form **/
 
