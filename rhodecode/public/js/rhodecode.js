@@ -336,7 +336,7 @@ var getLineNo = function(tr) {
 	if (n.length >= 2) {
 		line = n[n.length-1];
 	} else if (o.length >= 2) {
-		line = o[n.length-1];
+		line = o[o.length-1];
 	}
 
 	return line
