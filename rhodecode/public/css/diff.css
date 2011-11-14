@@ -70,12 +70,29 @@ table.code-difftable td {
 	-moz-user-select:none;
 	-webkit-user-select: none;
 }
+.code-difftable .lineno-inline{
+    background:none repeat scroll 0 0 #FFF !important;
+    padding-left:2px;
+    padding-right:2px;
+    text-align:right;
+    width:30px;
+    -moz-user-select:none;
+    -webkit-user-select: none;
+}
 .code-difftable .new {
 	border-right: 1px solid #CCC !important;
 }
 .code-difftable .old {
     border-right: 1px solid #CCC !important;
 }
+
+.code-difftable .lineno-inline.new-inline{
+	
+}
+.code-difftable .lineno-inline.old-inline{
+	border-right: 1px solid #CCC !important;
+}
+
 .code-difftable .lineno pre{
 	color:#747474 !important;
 	font:11px "Bitstream Vera Sans Mono",Monaco,"Courier New",Courier,monospace !important;

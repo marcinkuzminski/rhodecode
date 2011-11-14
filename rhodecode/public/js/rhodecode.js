@@ -307,8 +307,8 @@ var removeInlineForm = function(form) {
 var tableTr = function(cls,body){
 	var form = document.createElement('tr');
 	YUD.addClass(form, cls);
-	form.innerHTML = '<td class="lineno new"></td>'+
-    				 '<td class="lineno old"></td>'+ 
+	form.innerHTML = '<td class="lineno-inline new-inline"></td>'+
+    				 '<td class="lineno-inline old-inline"></td>'+ 
                      '<td>{0}</td>'.format(body);
 	return form;
 }
