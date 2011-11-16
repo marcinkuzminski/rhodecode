@@ -135,12 +135,11 @@ cursor: pointer;
 	padding:0;
 	margin:0;
 }
-
-.line.highlight{
-	background-color:#FFFFCC;
-	cursor: pointer;
-	background-image:url("../images/icons/comment_add.png");
-	background-repeat:no-repeat;
-	background-position: right;
-	background-position: 100% 50%;
+.line:hover{
+    background-color:#FFFFCC !important;
+    cursor: pointer !important;
+    background-image:url("../images/icons/comment_add.png") !important;
+    background-repeat:no-repeat !important;
+    background-position: right !important;
+    background-position: 100% 50% !important;
 }

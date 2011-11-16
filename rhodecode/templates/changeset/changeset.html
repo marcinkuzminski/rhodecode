@@ -218,16 +218,7 @@
     		  }
     	  })
     	  
-    	  YUE.on(YUQ('.line'),'mouseenter',function(e){
-    		  var tr = e.currentTarget;
-              if(YUD.hasClass(tr,'form-open') || YUD.hasClass(tr,'context')){
-                  return
-              }    		  
-    		  YUD.addClass(tr,'highlight');
-    	  });
-          YUE.on(YUQ('.line'),'mouseleave',function(e){
-              YUD.removeClass(e.currentTarget,'highlight');
-          });
+
           
           YUE.on(YUQ('.line'),'click',function(e){
         	  var tr = e.currentTarget;
