@@ -183,13 +183,18 @@ class UserModel(BaseModel):
         from rhodecode.lib.auth import get_crypt_password
         log.debug('Checking for such ldap account in RhodeCode database')
         if self.get_by_username(username, case_insensitive=True) is None:
+
+            # autogenerate email for ldap account without one
+            generate_email = lambda usr: '%s@ldap.account' % usr
+
             try:
                 new_user = User()
+                username = username.lower()
                 # add ldap account always lowercase
-                new_user.username = username.lower()
+                new_user.username = username
                 new_user.password = get_crypt_password(password)
                 new_user.api_key = generate_api_key(username)
-                new_user.email = attrs['email']
+                new_user.email = attrs['email'] or generate_email(username)
                 new_user.active = attrs.get('active', True)
                 new_user.ldap_dn = safe_unicode(user_dn)
                 new_user.name = attrs['name']
