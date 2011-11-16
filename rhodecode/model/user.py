@@ -149,6 +149,10 @@ class UserModel(BaseModel):
         :param attrs:
         """
         if self.get_by_username(username, case_insensitive=True) is None:
+
+            # autogenerate email for container account without one
+            generate_email = lambda usr: '%s@container_auth.account' % usr
+
             try:
                 new_user = User()
                 new_user.username = username
@@ -156,7 +160,7 @@ class UserModel(BaseModel):
                 new_user.api_key = generate_api_key(username)
                 new_user.email = attrs['email']
                 new_user.active = attrs.get('active', True)
-                new_user.name = attrs['name']
+                new_user.name = attrs['name'] or generate_email(username)
                 new_user.lastname = attrs['lastname']
 
                 self.sa.add(new_user)

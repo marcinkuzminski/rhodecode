@@ -43,8 +43,7 @@ class AuthLdap(object):
     def __init__(self, server, base_dn, port=389, bind_dn='', bind_pass='',
                  tls_kind='PLAIN', tls_reqcert='DEMAND', ldap_version=3,
                  ldap_filter='(&(objectClass=user)(!(objectClass=computer)))',
-                 search_scope='SUBTREE',
-                 attr_login='uid'):
+                 search_scope = 'SUBTREE', attr_login = 'uid'):
         self.ldap_version = ldap_version
         ldap_server_type = 'ldap'
 
@@ -60,7 +59,7 @@ class AuthLdap(object):
         self.LDAP_SERVER_ADDRESS = server
         self.LDAP_SERVER_PORT = port
 
-        #USE FOR READ ONLY BIND TO LDAP SERVER
+        # USE FOR READ ONLY BIND TO LDAP SERVER
         self.LDAP_BIND_DN = bind_dn
         self.LDAP_BIND_PASS = bind_pass
 
