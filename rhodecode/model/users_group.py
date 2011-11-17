@@ -28,7 +28,7 @@ import traceback
 
 from rhodecode.lib.caching_query import FromCache
 
-from rhodecode.model import BaseMode
+from rhodecode.model import BaseModel
 from rhodecode.model.db import UsersGroupMember, UsersGroup
 
 log = logging.getLogger(__name__)
