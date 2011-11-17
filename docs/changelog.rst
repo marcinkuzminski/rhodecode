@@ -13,12 +13,14 @@ Changelog
 news
 ----
 
+- code review, inspired by github code-comments 
 - #215 rst and markdown README files support
 - #252 Container-based and proxy pass-through authentication support
 - #44 branch browser. Filtering of changelog by branches
 - hover top menu
 - configurable clone url possibility to specify ssh:// manually as 
   alternative clone url.
+- enabled largefiles extension by default
    
 fixes
 -----
