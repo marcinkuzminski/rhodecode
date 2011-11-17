@@ -292,11 +292,17 @@ class DbManage(object):
         hooks4.ui_key = RhodeCodeUi.HOOK_PULL
         hooks4.ui_value = 'python:rhodecode.lib.hooks.log_pull_action'
 
-        #For mercurial 1.7 set backward comapatibility with format
+        # For mercurial 1.7 set backward comapatibility with format
         dotencode_disable = RhodeCodeUi()
         dotencode_disable.ui_section = 'format'
         dotencode_disable.ui_key = 'dotencode'
         dotencode_disable.ui_value = 'false'
+
+        # enable largefiles
+        dotencode_disable = RhodeCodeUi()
+        dotencode_disable.ui_section = 'extensions'
+        dotencode_disable.ui_key = 'largefiles'
+        dotencode_disable.ui_value = '1'
 
         try:
             self.sa.add(hooks1)
