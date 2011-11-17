@@ -114,7 +114,7 @@ class JSONRPCController(WSGIController):
             return jsonrpc_error(message="JSON parse error ERR:%s RAW:%r" \
                                  % (e, urllib.unquote_plus(raw_body)))
 
-        #check AUTH based on API KEY
+        # check AUTH based on API KEY
         try:
             self._req_api_key = json_body['api_key']
             self._req_method = json_body['method']
@@ -125,9 +125,11 @@ class JSONRPCController(WSGIController):
         except KeyError, e:
             return jsonrpc_error(message='Incorrect JSON query missing %s' % e)
 
-        #check if we can find this session using api_key
+        # check if we can find this session using api_key
         try:
             u = User.get_by_api_key(self._req_api_key)
+            if u is None:
+                return jsonrpc_error(message='Invalid API KEY')
             auth_u = AuthUser(u.user_id, self._req_api_key)
         except Exception, e:
             return jsonrpc_error(message='Invalid API KEY')

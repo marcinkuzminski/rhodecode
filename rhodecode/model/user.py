@@ -70,13 +70,7 @@ class UserModel(BaseModel):
         return user.scalar()
 
     def get_by_api_key(self, api_key, cache=False):
-
-        user = self.sa.query(User)\
-                .filter(User.api_key == api_key)
-        if cache:
-            user = user.options(FromCache("sql_cache_short",
-                                          "get_user_%s" % api_key))
-        return user.scalar()
+        return User.get_by_api_key(api_key, cache)
 
     def create(self, form_data):
         try:

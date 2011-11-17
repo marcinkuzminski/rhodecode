@@ -247,7 +247,6 @@ class TestLoginController(TestController):
         # GOOD KEY
 
         key = User.get_by_username(username).api_key
-
         response = self.app.get(url(controller='login',
                                     action='password_reset_confirmation',
                                     key=key))

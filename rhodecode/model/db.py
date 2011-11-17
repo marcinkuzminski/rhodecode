@@ -324,7 +324,7 @@ class User(Base, BaseModel):
         if cache:
             q = q.options(FromCache("sql_cache_short",
                                     "get_api_key_%s" % api_key))
-        q.one()
+        return q.scalar()
 
     def update_lastlogin(self):
         """Update user lastlogin"""
