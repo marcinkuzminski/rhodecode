@@ -50,13 +50,8 @@
 			</div>
 			${h.end_form()}
 			<script type="text/javascript">
-			 var myCodeMirror = CodeMirror.fromTextArea(YUD.get('editor'),{
-	                mode:  "null",
-	                lineNumbers:true
-	              });
-			 YUE.on('reset','click',function(){
-				 window.location="${h.url('files_home',repo_name=c.repo_name,revision=c.cs.revision,f_path=c.file.path)}";
-			 })
+			var reset_url = "${h.url('files_home',repo_name=c.repo_name,revision=c.cs.raw_id,f_path=c.file.path)}";
+			initCodeMirror('editor',reset_url);
 			</script>
 		</div>    
     </div>

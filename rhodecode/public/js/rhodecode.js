@@ -7,10 +7,10 @@ if (typeof console == "undefined" || typeof console.log == "undefined"){
 }
 
 
-function str_repeat(i, m) {
+var str_repeat = function(i, m) {
 	for (var o = []; m > 0; o[--m] = i);
 	return o.join('');
-}
+};
 
 /**
  * INJECT .format function into String
@@ -55,7 +55,7 @@ String.prototype.format = function() {
  * 
  * @returns {ColorGenerator}
  */
-function ColorGenerator(){
+var ColorGenerator = function(){
 	this.GOLDEN_RATIO = 0.618033988749895;
 	this.CURRENT_RATIO = 0.22717784590367374 // this can be random
 	this.HSV_1 = 0.75;//saturation
@@ -129,7 +129,7 @@ var push_state_enabled = Boolean(
 				/* disable for the mercury iOS browser, or at least older versions of the webkit engine */
 				|| (/AppleWebKit\/5([0-2]|3[0-2])/i).test(navigator.userAgent)
 		)
-)
+);
 
 /**
  * Partial Ajax Implementation
@@ -179,7 +179,7 @@ function ypjax(url,container,s_call,f_call,args){
 		}
 	},args);
 	
-}
+};
 
 /**
  * tooltip activate
@@ -206,7 +206,7 @@ var tooltip_activate = function(){
         hidedelay:5,
         showdelay:20,
     });
-}
+};
 
 /**
  * show more
@@ -217,7 +217,7 @@ var show_more_event = function(){
         YUD.setStyle(YUD.get(el.id.substring(1)),'display','');
         YUD.setStyle(el.parentNode,'display','none');
     });
-}
+};
 
 
 /**
@@ -284,7 +284,7 @@ var q_filter = function(target,nodes,display_element){
 	   }       
        
 	}	
-}
+};
 
 var ajaxPOST = function(url,postData,success) {
     var sUrl = url;
@@ -302,7 +302,7 @@ var ajaxPOST = function(url,postData,success) {
 /** comments **/
 var removeInlineForm = function(form) {
 	form.parentNode.removeChild(form);
-}
+};
 
 var tableTr = function(cls,body){
 	var form = document.createElement('tr');
@@ -311,7 +311,7 @@ var tableTr = function(cls,body){
     				 '<td class="lineno-inline old-inline"></td>'+ 
                      '<td>{0}</td>'.format(body);
 	return form;
-}
+};
 
 var createInlineForm = function(parent_tr, f_path, line) {
 	var tmpl = YUD.get('comment-inline-form-template').innerHTML;
@@ -327,7 +327,8 @@ var createInlineForm = function(parent_tr, f_path, line) {
 		YUD.removeClass(parent_tr, 'form-open');
 	});
 	return form
-}
+};
+
 var getLineNo = function(tr) {
 	var line;
 	var o = tr.children[0].id.split('_');
@@ -340,4 +341,206 @@ var getLineNo = function(tr) {
 	}
 
 	return line
-}
+};
+
+
+var fileBrowserListeners = function(current_url, node_list_url, url_base){
+	var current_url_branch = +"?branch=__BRANCH__";
+	var url = url_base;
+	var node_url = node_list_url;	
+
+	YUE.on('stay_at_branch','click',function(e){
+	    if(e.target.checked){
+	        var uri = current_url_branch;
+	        uri = uri.replace('__BRANCH__',e.target.value);
+	        window.location = uri;
+	    }
+	    else{
+	        window.location = current_url;
+	    }
+	})            
+
+	var n_filter = YUD.get('node_filter');
+	var F = YAHOO.namespace('node_filter');
+	
+	url  = url.replace('__REPO__','${c.repo_name}');
+	url  = url.replace('__REVISION__','${c.changeset.raw_id}');
+	url  = url.replace('__FPATH__','${c.files_list.path}');
+
+	node_url  = node_url.replace('__REPO__','${c.repo_name}');
+	node_url  = node_url.replace('__REVISION__','${c.changeset.raw_id}');
+
+	F.filterTimeout = null;
+	var nodes = null;
+
+	F.initFilter = function(){
+	  YUD.setStyle('node_filter_box_loading','display','');
+	  YUD.setStyle('search_activate_id','display','none');
+	  YUD.setStyle('add_node_id','display','none');
+	  YUC.initHeader('X-PARTIAL-XHR',true);
+	  YUC.asyncRequest('GET',url,{
+	      success:function(o){
+	        nodes = JSON.parse(o.responseText);
+	        YUD.setStyle('node_filter_box_loading','display','none');
+	        YUD.setStyle('node_filter_box','display','');
+	      },
+	      failure:function(o){
+	          console.log('failed to load');
+	      }
+	  },null);            
+	}
+
+	F.updateFilter  = function(e) {
+	    
+	    return function(){
+	        // Reset timeout 
+	        F.filterTimeout = null;
+	        var query = e.target.value;
+	        var match = [];
+	        var matches = 0;
+	        var matches_max = 20;
+	        if (query != ""){
+	            for(var i=0;i<nodes.length;i++){
+	                var pos = nodes[i].toLowerCase().indexOf(query)
+	                if(query && pos != -1){
+	                    
+	                    matches++
+	                    //show only certain amount to not kill browser 
+	                    if (matches > matches_max){
+	                        break;
+	                    }
+	                    
+	                    var n = nodes[i];
+	                    var n_hl = n.substring(0,pos)
+	                      +"<b>{0}</b>".format(n.substring(pos,pos+query.length))
+	                      +n.substring(pos+query.length)                    
+	                    match.push('<tr><td><a class="browser-file" href="{0}">{1}</a></td><td colspan="5"></td></tr>'.format(node_url.replace('__FPATH__',n),n_hl));
+	                }
+	                if(match.length >= matches_max){
+	                    match.push('<tr><td>{0}</td><td colspan="5"></td></tr>'.format("${_('search truncated')}"));
+	                }
+	                
+	            }                       
+	        }
+	        
+	        if(query != ""){
+	            YUD.setStyle('tbody','display','none');
+	            YUD.setStyle('tbody_filtered','display','');
+	            
+	            if (match.length==0){
+	              match.push('<tr><td>{0}</td><td colspan="5"></td></tr>'.format("${_('no matching files')}"));
+	            }                           
+	            
+	            YUD.get('tbody_filtered').innerHTML = match.join("");   
+	        }
+	        else{
+	            YUD.setStyle('tbody','display','');
+	            YUD.setStyle('tbody_filtered','display','none');
+	        }
+	        
+	    }
+	};
+
+	YUE.on(YUD.get('filter_activate'),'click',function(){
+	    F.initFilter();
+	})
+	YUE.on(n_filter,'click',function(){
+	    n_filter.value = '';
+	 });
+	YUE.on(n_filter,'keyup',function(e){
+	    clearTimeout(F.filterTimeout); 
+	    F.filterTimeout = setTimeout(F.updateFilter(e),600);
+	});
+};
+
+
+var initCodeMirror = function(textAreadId,resetUrl){  
+    var myCodeMirror = CodeMirror.fromTextArea(YUD.get(textAreadId),{
+           mode:  "null",
+           lineNumbers:true
+         });
+    YUE.on('reset','click',function(e){
+        window.location=resetUrl
+    });
+    
+    YUE.on('file_enable','click',function(){
+        YUD.setStyle('editor_container','display','');
+        YUD.setStyle('upload_file_container','display','none');
+        YUD.setStyle('filename_container','display','');
+    });
+    
+    YUE.on('upload_file_enable','click',function(){
+        YUD.setStyle('editor_container','display','none');
+        YUD.setStyle('upload_file_container','display','');
+        YUD.setStyle('filename_container','display','none');
+    });	
+};
+
+
+
+var getIdentNode = function(n){
+	//iterate thru nodes untill matched interesting node !
+	
+	if (typeof n == 'undefined'){
+		return -1
+	}
+	
+	if(typeof n.id != "undefined" && n.id.match('L[0-9]+')){
+			return n
+		}
+	else{
+		return getIdentNode(n.parentNode);
+	}
+};
+
+var  getSelectionLink = function(selection_link_label) {
+	return function(){
+	    //get selection from start/to nodes    	
+	    if (typeof window.getSelection != "undefined") {
+	    	s = window.getSelection();
+	
+	       	from = getIdentNode(s.anchorNode);
+	       	till = getIdentNode(s.focusNode);
+	        
+	        f_int = parseInt(from.id.replace('L',''));
+	        t_int = parseInt(till.id.replace('L',''));
+	        
+	        if (f_int > t_int){
+	        	//highlight from bottom 
+	        	offset = -35;
+	        	ranges = [t_int,f_int];
+	        	
+	        }
+	        else{
+	        	//highligth from top 
+	        	offset = 35;
+	        	ranges = [f_int,t_int];
+	        }
+	        
+	        if (ranges[0] != ranges[1]){
+	            if(YUD.get('linktt') == null){
+	                hl_div = document.createElement('div');
+	                hl_div.id = 'linktt';
+	            }
+	            anchor = '#L'+ranges[0]+'-'+ranges[1];
+	            hl_div.innerHTML = '';
+	            l = document.createElement('a');
+	            l.href = location.href.substring(0,location.href.indexOf('#'))+anchor;
+	            l.innerHTML = selection_link_label;
+	            hl_div.appendChild(l);
+	            
+	            YUD.get('body').appendChild(hl_div);
+	            
+	            xy = YUD.getXY(till.id);
+	            
+	            YUD.addClass('linktt','yui-tt');
+	            YUD.setStyle('linktt','top',xy[1]+offset+'px');
+	            YUD.setStyle('linktt','left',xy[0]+'px');
+	            YUD.setStyle('linktt','visibility','visible');
+	        }
+	        else{
+	        	YUD.setStyle('linktt','visibility','hidden');
+	        }
+	    }
+	}
+};

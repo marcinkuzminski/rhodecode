@@ -1919,6 +1919,9 @@ h3.files_location {
 	border: 1px solid #CCC;
 	padding: 10px;
 	height: 45px;
+    -webkit-border-radius: 6px 6px 0px 0px;
+    -moz-border-radius: 6px 6px 0px 0px;
+    border-radius: 6px 6px 0px 0px;	
 }
 
 #graph_content #rev_range_container {
@@ -1978,7 +1981,7 @@ h3.files_location {
 }
 
 .right .changes .changed_total {
-	border: 1px solid #DDD;
+	border: 0px solid #DDD;
 	display: block;
 	float: right;
 	text-align: center;
@@ -1986,6 +1989,10 @@ h3.files_location {
 	cursor: pointer;
 	background: #FD8;
 	font-weight: bold;
+	-webkit-border-radius: 0px 0px 0px 6px;
+	-moz-border-radius: 0px 0px 0px 6px;
+	border-radius: 0px 0px 0px 6px;
+	padding: 2px;	
 }
 
 .right .changes .added,.changed,.removed {

@@ -83,26 +83,8 @@
 			</div>
 			${h.end_form()}
 			<script type="text/javascript">
-			 var myCodeMirror = CodeMirror.fromTextArea(YUD.get('editor'),{
-	                mode:  "null",
-	                lineNumbers:true
-	              });
-			 YUE.on('reset','click',function(e){
-				 window.location="${h.url('files_home',repo_name=c.repo_name,revision=c.cs.revision,f_path=c.f_path)}";
-			 });
-             
-			 YUE.on('file_enable','click',function(){
-                 YUD.setStyle('editor_container','display','');
-                 YUD.setStyle('upload_file_container','display','none');
-                 YUD.setStyle('filename_container','display','');
-             });
-             
-			 YUE.on('upload_file_enable','click',function(){
-				 YUD.setStyle('editor_container','display','none');
-				 YUD.setStyle('upload_file_container','display','');
-				 YUD.setStyle('filename_container','display','none');
-			 });
-			 
+			var reset_url = "${h.url('files_home',repo_name=c.repo_name,revision=c.cs.raw_id,f_path=c.f_path)}";
+		    initCodeMirror('editor',reset_url);			 
 			</script>
 		</div>    
     </div>
