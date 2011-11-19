@@ -4,8 +4,13 @@ from rhodecode.tests import *
 
 from rhodecode.model.repos_group import ReposGroupModel
 from rhodecode.model.repo import RepoModel
-from rhodecode.model.db import RepoGroup, User
+from rhodecode.model.db import RepoGroup, User, Notification, UserNotification
 from sqlalchemy.exc import IntegrityError
+from rhodecode.model.user import UserModel
+
+from rhodecode.model import meta
+
+Session = meta.Session()
 
 class TestReposGroups(unittest.TestCase):
 
@@ -151,3 +156,61 @@ class TestReposGroups(unittest.TestCase):
         self.assertEqual(r.repo_name, os.path.join('g2', 'g1', r.just_name))
 
 
+class TestNotifications(unittest.TestCase):
+
+
+
+    def setUp(self):
+        self.u1 = UserModel().create_or_update(username='u1', password='qweqwe',
+                                               email='u1@rhodecode.org',
+                                               name='u1', lastname='u1')
+        self.u2 = UserModel().create_or_update(username='u2', password='qweqwe',
+                                               email='u2@rhodecode.org',
+                                               name='u2', lastname='u3')
+        self.u3 = UserModel().create_or_update(username='u3', password='qweqwe',
+                                               email='u3@rhodecode.org',
+                                               name='u3', lastname='u3')
+
+
+
+    def test_create_notification(self):
+        usrs = [self.u1, self.u2]
+        notification = Notification.create(subject='subj', body='hi there',
+                            recipients=usrs)
+
+        notifications = Session.query(Notification).all()
+        unotification = UserNotification.query()\
+            .filter(UserNotification.notification == notification).all()
+        self.assertEqual(len(notifications), 1)
+        self.assertEqual(notifications[0].recipients, [self.u1, self.u2])
+        self.assertEqual(notification, notifications[0])
+        self.assertEqual(len(unotification), len(usrs))
+        self.assertEqual([x.user.user_id for x in unotification],
+                         [x.user_id for x in usrs])
+
+    def test_user_notifications(self):
+        notification1 = Notification.create(subject='subj', body='hi there',
+                            recipients=[self.u3])
+        notification2 = Notification.create(subject='subj', body='hi there',
+                            recipients=[self.u3])
+        self.assertEqual(self.u3.notifications, [notification1, notification2])
+
+    def test_delete_notifications(self):
+        notification = Notification.create(subject='title', body='hi there3',
+                            recipients=[self.u3, self.u1, self.u2])
+        notifications = Notification.query().all()
+        self.assertTrue(notification in notifications)
+
+        Notification.delete(notification.notification_id)
+
+        notifications = Notification.query().all()
+        self.assertFalse(notification in notifications)
+
+        un = UserNotification.query().filter(UserNotification.notification
+                                             == notification).all()
+        self.assertEqual(un, [])
+
+    def tearDown(self):
+        User.delete(self.u1.user_id)
+        User.delete(self.u2.user_id)
+        User.delete(self.u3.user_id)

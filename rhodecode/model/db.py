@@ -286,6 +286,8 @@ class User(Base, BaseModel):
 
     group_member = relationship('UsersGroupMember', cascade='all')
 
+    notifications = relationship('Notification', secondary='user_to_notification')
+
     @property
     def full_contact(self):
         return '%s %s <%s>' % (self.name, self.lastname, self.email)
@@ -1109,6 +1111,47 @@ class ChangesetComment(Base, BaseModel):
 
     author = relationship('User')
     repo = relationship('Repository')
+
+
+class Notification(Base, BaseModel):
+    __tablename__ = 'notifications'
+    __table_args__ = ({'extend_existing':True})
+    notification_id = Column('notification_id', Integer(), nullable=False, primary_key=True)
+    subject = Column('subject', Unicode(512), nullable=True)
+    body = Column('body', Unicode(50000), nullable=True)
+    created_on = Column('created_on', DateTime(timezone=False), nullable=False, default=datetime.datetime.now)
+
+    user_notifications = relationship('UserNotification',
+        primaryjoin = 'Notification.notification_id==UserNotification.notification_id',
+        cascade = "all, delete, delete-orphan")
+
+    @property
+    def recipients(self):
+        return [x.user for x in UserNotification.query()\
+                .filter(UserNotification.notification == self).all()]
+
+    @classmethod
+    def create(cls, subject, body, recipients):
+        notification = cls()
+        notification.subject = subject
+        notification.body = body
+        Session.add(notification)
+        for u in recipients:
+            u.notifications.append(notification)
+        Session.commit()
+        return notification
+
+class UserNotification(Base, BaseModel):
+    __tablename__ = 'user_to_notification'
+    __table_args__ = ({'extend_existing':True})
+    user_to_notification_id = Column("user_to_notification_id", Integer(), nullable=False, unique=True, primary_key=True)
+    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None, default=None)
+    notification_id = Column("notification_id", Integer(), ForeignKey('notifications.notification_id'), nullable=False)
+    sent_on = Column('sent_on', DateTime(timezone=False), nullable=True, unique=None)
+
+    user = relationship('User', single_parent=True, lazy="joined")
+    notification = relationship('Notification',single_parent=True,
+                                cascade="all, delete, delete-orphan")
 
 
 class DbMigrateVersion(Base, BaseModel):

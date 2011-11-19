@@ -1,0 +1,28 @@
+## -*- coding: utf-8 -*-
+<%inherit file="/base/base.html"/>
+
+<%def name="title()">
+    ${_('My Notifications')} ${c.rhodecode_user.username} - ${c.rhodecode_name}
+</%def>
+
+<%def name="breadcrumbs_links()">
+    ${_('My Notifications')}
+</%def>
+
+<%def name="page_nav()">
+	${self.menu('admin')}
+</%def>
+
+<%def name="main()">
+<div class="box">
+    <!-- box / title -->
+    <div class="title">
+        ${self.breadcrumbs()}       
+    </div>
+    % for notification in c.notifications:
+        ${notification.title}
+    %else:
+        <div class="table">${_('No notifications here yet')}</div>
+    %endfor
+</div>    
+</%def>  

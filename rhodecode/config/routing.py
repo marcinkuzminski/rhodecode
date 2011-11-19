@@ -267,6 +267,8 @@ def make_map(config):
                   action="show", conditions=dict(method=["GET"]))
         m.connect("admin_settings_my_account", "/my_account",
                   action="my_account", conditions=dict(method=["GET"]))
+        m.connect("admin_settings_notifications", "/notifications",
+                  action="notifications", conditions=dict(method=["GET"]))
         m.connect("admin_settings_my_account_update", "/my_account_update",
                   action="my_account_update", conditions=dict(method=["PUT"]))
         m.connect("admin_settings_create_repository", "/create_repository",

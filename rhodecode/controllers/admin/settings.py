@@ -47,6 +47,7 @@ from rhodecode.model.forms import UserForm, ApplicationSettingsForm, \
 from rhodecode.model.scm import ScmModel
 from rhodecode.model.user import UserModel
 from rhodecode.model.db import User
+from rhodecode.model.notification import NotificationModel
 
 log = logging.getLogger(__name__)
 
@@ -370,6 +371,14 @@ class SettingsController(BaseController):
                     % form_result.get('username'), category='error')
 
         return redirect(url('my_account'))
+
+
+    @NotAnonymous()
+    def notifications(self):
+        c.user = User.get(self.rhodecode_user.user_id)
+        c.notifications = NotificationModel().get_for_user(c.user.user_id)
+        return render('admin/users/notifications.html'),
+
 
     @NotAnonymous()
     @HasPermissionAnyDecorator('hg.admin', 'hg.create.repository')

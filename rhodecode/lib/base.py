@@ -17,6 +17,7 @@ from rhodecode.model import meta
 from rhodecode.model.scm import ScmModel
 from rhodecode import BACKENDS
 from rhodecode.model.db import Repository
+from rhodecode.model.notification import NotificationModel
 
 log = logging.getLogger(__name__)
 
@@ -29,6 +30,8 @@ class BaseController(WSGIController):
         c.ga_code = config.get('rhodecode_ga_code')
         c.repo_name = get_repo_slug(request)
         c.backends = BACKENDS.keys()
+        c.unread_notifications = NotificationModel()\
+                        .get_unread_cnt_for_user(c.rhodecode_user.user_id)
         self.cut_off_limit = int(config.get('cut_off_limit'))
 
         self.sa = meta.Session()

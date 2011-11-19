@@ -2600,7 +2600,7 @@ table#permissions_manage tr#add_perm_input td {
 
 div.gravatar {
 	background-color: #FFF;
-	border: 1px solid #D0D0D0;
+	border: 0px solid #D0D0D0;
 	float: left;
 	margin-right: 0.7em;
 	padding: 2px 2px 0;
@@ -3455,4 +3455,23 @@ form.comment-inline-form {
     font-weight: bold;
     color: #666;
     font-size: 16px;
+}
+.notifications{
+	width:22px;
+    padding:2px;
+	float:right;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    text-align: center;
+    margin: -1px -10px 0px 5px;
+    background-color: #DEDEDE;
+}
+.notifications a{
+	color:#888 !important;
+	display: block;
+	font-size: 10px
+}
+.notifications a:hover{
+	text-decoration: none !important;
 }
