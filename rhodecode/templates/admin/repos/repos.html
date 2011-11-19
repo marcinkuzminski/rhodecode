@@ -58,7 +58,7 @@
 	            	<a href="${h.url('summary_home',repo_name=repo['dbrepo_fork']['repo_name'])}">
 	            	<img class="icon" alt="${_('public')}"
 	            	title="${_('Fork of')} ${repo['dbrepo_fork']['repo_name']}" 
-	            	src="${h.url("/images/icons/arrow_divide.png")}"/></a>
+	            	src="${h.url('/images/icons/arrow_divide.png')}"/></a>
 	            %endif                
                 </td>
 				<td title="${repo['description']}">${h.truncate(repo['description'],60)}</td>

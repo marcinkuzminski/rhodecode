@@ -119,7 +119,7 @@
 	%for change,filenode,diff,cs1,cs2,stat in c.changes:
 		%if change !='removed':
 		<div style="clear:both;height:10px"></div>
-		<div class="diffblock  margined" id="${self.fid(filenode.changeset.raw_id,filenode.path)}">
+		<div class="diffblock  margined comm" id="${self.fid(filenode.changeset.raw_id,filenode.path)}">
 			<div class="code-header">
 				<div class="changeset_header">
 					<span class="changeset_file">
