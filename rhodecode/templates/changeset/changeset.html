@@ -217,8 +217,6 @@
     		     YUD.setStyle(comments[c],'display',show);
     		  }
     	  })
-    	  
-
           
           YUE.on(YUQ('.line'),'click',function(e){
         	  var tr = e.currentTarget;
@@ -230,7 +228,12 @@
         	  var f_path = YUD.getAttribute(node,'path');
         	  var lineno = getLineNo(tr);
         	  var form = createInlineForm(tr, f_path, lineno);
-        	  YUD.insertAfter(form,tr);
+        	  var target_tr = tr;
+        	  if(YUD.hasClass(YUD.getNextSibling(tr),'inline-comments')){
+        		  target_tr = YUD.getNextSibling(tr);
+        	  }
+        	  YUD.insertAfter(form,target_tr);
+        	  YUD.get('text_'+lineno).focus()
           });
           
           // inject comments into they proper positions
@@ -241,12 +244,13 @@
         	  var inlines = box.children;
         	  for(var i=0; i<inlines.length; i++){
         		  try{
+
           		    var inline = inlines[i];
           		    var lineno = YUD.getAttribute(inlines[i],'line');
           		    var lineid = "{0}_{1}".format(YUD.getAttribute(inline,'target_id'),lineno);
                     var target_line = YUD.get(lineid);
-                    var comments = new YAHOO.util.Element(tableTr('inline-comments',inline.innerHTML))
-                    YUD.insertAfter(comments,target_line.parentNode);
+                    var comment = new YAHOO.util.Element(tableTr('inline-comments',inline.innerHTML))
+                    YUD.insertAfter(comment,target_line.parentNode);
         		  }catch(e){}
         	  }
           }

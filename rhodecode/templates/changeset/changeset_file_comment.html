@@ -40,7 +40,7 @@
       <div class="clearfix">
           <div class="comment-help">${_('Commenting on line')} {1} ${_('comments parsed using')} 
           <a href="${h.url('rst_help')}">RST</a> ${_('syntax')}</div>
-              ${h.textarea('text')}
+              <textarea id="text_{1}" name="text"></textarea>
       </div>
       <div class="comment-button">
       <input type="hidden" name="f_path" value="{0}">
