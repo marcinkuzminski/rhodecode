@@ -2655,7 +2655,7 @@ input.ui-button-small,.ui-button-small {
 	border-radius: 4px 4px 4px 4px !important;
 	box-shadow: 0 1px 0 #ececec !important;
 	cursor: pointer !important;
-	padding: 0px 2px 1px 2px;
+	padding: 3px 3px 3px 3px;
 }
 
 input.ui-button-small:hover,.ui-button-small:hover {

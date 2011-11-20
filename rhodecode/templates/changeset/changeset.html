@@ -220,20 +220,7 @@
           
           YUE.on(YUQ('.line'),'click',function(e){
         	  var tr = e.currentTarget;
-        	  if(YUD.hasClass(tr,'form-open') || YUD.hasClass(tr,'context')){
-        		  return
-        	  }
-        	  YUD.addClass(tr,'form-open');
-        	  var node = tr.parentNode.parentNode.parentNode.getElementsByClassName('full_f_path')[0];
-        	  var f_path = YUD.getAttribute(node,'path');
-        	  var lineno = getLineNo(tr);
-        	  var form = createInlineForm(tr, f_path, lineno);
-        	  var target_tr = tr;
-        	  if(YUD.hasClass(YUD.getNextSibling(tr),'inline-comments')){
-        		  target_tr = YUD.getNextSibling(tr);
-        	  }
-        	  YUD.insertAfter(form,target_tr);
-        	  YUD.get('text_'+lineno).focus()
+        	  injectInlineForm(tr);
           });
           
           // inject comments into they proper positions
@@ -249,6 +236,10 @@
           		    var lineno = YUD.getAttribute(inlines[i],'line');
           		    var lineid = "{0}_{1}".format(YUD.getAttribute(inline,'target_id'),lineno);
                     var target_line = YUD.get(lineid);
+                    
+                    var add = createInlineAddButton(target_line.parentNode,'${_("add another comment")}');
+                    YUD.insertAfter(add,target_line.parentNode);
+                    
                     var comment = new YAHOO.util.Element(tableTr('inline-comments',inline.innerHTML))
                     YUD.insertAfter(comment,target_line.parentNode);
         		  }catch(e){}

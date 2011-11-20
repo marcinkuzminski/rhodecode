@@ -328,6 +328,32 @@ var createInlineForm = function(parent_tr, f_path, line) {
 	});
 	return form
 };
+var injectInlineForm = function(tr){
+	  if(YUD.hasClass(tr,'form-open') || YUD.hasClass(tr,'context')){
+		  return
+	  }	
+	  YUD.addClass(tr,'form-open');
+	  var node = tr.parentNode.parentNode.parentNode.getElementsByClassName('full_f_path')[0];
+	  var f_path = YUD.getAttribute(node,'path');
+	  var lineno = getLineNo(tr);
+	  var form = createInlineForm(tr, f_path, lineno);
+	  var target_tr = tr;
+	  if(YUD.hasClass(YUD.getNextSibling(tr),'inline-comments')){
+		  target_tr = YUD.getNextSibling(tr);
+	  }
+	  YUD.insertAfter(form,target_tr);
+	  YUD.get('text_'+lineno).focus();	
+};
+
+var createInlineAddButton = function(tr,label){
+	var html = '<div class="add-comment"><span class="ui-button-small">{0}</span></div>'.format(label);
+        
+	var add = new YAHOO.util.Element(tableTr('inline-comments-button',html));
+	add.on('click', function(e) {
+		injectInlineForm(tr);
+	});
+	return add;
+};
 
 var getLineNo = function(tr) {
 	var line;
@@ -344,7 +370,8 @@ var getLineNo = function(tr) {
 };
 
 
-var fileBrowserListeners = function(current_url, node_list_url, url_base){
+var fileBrowserListeners = function(current_url, node_list_url, url_base,
+									truncated_lbl, nomatch_lbl){
 	var current_url_branch = +"?branch=__BRANCH__";
 	var url = url_base;
 	var node_url = node_list_url;	
@@ -363,13 +390,6 @@ var fileBrowserListeners = function(current_url, node_list_url, url_base){
 	var n_filter = YUD.get('node_filter');
 	var F = YAHOO.namespace('node_filter');
 	
-	url  = url.replace('__REPO__','${c.repo_name}');
-	url  = url.replace('__REVISION__','${c.changeset.raw_id}');
-	url  = url.replace('__FPATH__','${c.files_list.path}');
-
-	node_url  = node_url.replace('__REPO__','${c.repo_name}');
-	node_url  = node_url.replace('__REVISION__','${c.changeset.raw_id}');
-
 	F.filterTimeout = null;
 	var nodes = null;
 
@@ -417,18 +437,17 @@ var fileBrowserListeners = function(current_url, node_list_url, url_base){
 	                    match.push('<tr><td><a class="browser-file" href="{0}">{1}</a></td><td colspan="5"></td></tr>'.format(node_url.replace('__FPATH__',n),n_hl));
 	                }
 	                if(match.length >= matches_max){
-	                    match.push('<tr><td>{0}</td><td colspan="5"></td></tr>'.format("${_('search truncated')}"));
+	                    match.push('<tr><td>{0}</td><td colspan="5"></td></tr>'.format(truncated_lbl));
 	                }
 	                
 	            }                       
 	        }
-	        
 	        if(query != ""){
 	            YUD.setStyle('tbody','display','none');
 	            YUD.setStyle('tbody_filtered','display','');
 	            
 	            if (match.length==0){
-	              match.push('<tr><td>{0}</td><td colspan="5"></td></tr>'.format("${_('no matching files')}"));
+	              match.push('<tr><td>{0}</td><td colspan="5"></td></tr>'.format(nomatch_lbl));
 	            }                           
 	            
 	            YUD.get('tbody_filtered').innerHTML = match.join("");   
