@@ -38,18 +38,43 @@ from rhodecode.model.db import Notification, User, UserNotification
 
 class NotificationModel(BaseModel):
 
-    def create(self, subject, body, recipients):
+    def create(self, created_by, subject, body, recipients,
+               type_=Notification.TYPE_MESSAGE):
+        """
+        
+        Creates notification of given type
+        
+        :param created_by: int, str or User instance. User who created this
+            notification
+        :param subject:
+        :param body:
+        :param recipients: list of int, str or User objects
+        :param type_: type of notification
+        """
 
         if not getattr(recipients, '__iter__', False):
             raise Exception('recipients must be a list of iterable')
 
-        for x in recipients:
-            if not isinstance(x, User):
-                raise Exception('recipient is not instance of %s got %s' % \
-                                (User, type(x)))
+        created_by_obj = created_by
+        if not isinstance(created_by, User):
+            created_by_obj = User.get(created_by)
 
 
-        Notification.create(subject, body, recipients)
+        recipients_objs = []
+        for u in recipients:
+            if isinstance(u, User):
+                recipients_objs.append(u)
+            elif isinstance(u, basestring):
+                recipients_objs.append(User.get_by_username(username=u))
+            elif isinstance(u, int):
+                recipients_objs.append(User.get(u))
+            else:
+                raise Exception('Unsupported recipient must be one of int,'
+                                'str or User object')
+
+        Notification.create(created_by=created_by_obj, subject=subject,
+                            body = body, recipients = recipients_objs,
+                            type_=type_)
 
 
     def get_for_user(self, user_id):

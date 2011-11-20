@@ -1109,18 +1109,40 @@ class ChangesetComment(Base, BaseModel):
     text = Column('text', Unicode(25000), nullable=False)
     modified_at = Column('modified_at', DateTime(), nullable=False, default=datetime.datetime.now)
 
-    author = relationship('User')
+    author = relationship('User', lazy='joined')
     repo = relationship('Repository')
+
+
+    @classmethod
+    def get_users(cls, revision):
+        """
+        Returns user associated with this changesetComment. ie those
+        who actually commented
+        
+        :param cls:
+        :param revision:
+        """
+        return Session.query(User)\
+                .filter(cls.revision == revision)\
+                .join(ChangesetComment.author).all()
 
 
 class Notification(Base, BaseModel):
     __tablename__ = 'notifications'
     __table_args__ = ({'extend_existing':True})
+
+    TYPE_CHANGESET_COMMENT = 'cs_comment'
+    TYPE_MESSAGE = 'message'
+    TYPE_MENTION = 'mention'
+
     notification_id = Column('notification_id', Integer(), nullable=False, primary_key=True)
     subject = Column('subject', Unicode(512), nullable=True)
     body = Column('body', Unicode(50000), nullable=True)
+    created_by = Column("created_by", Integer(), ForeignKey('users.user_id'), nullable=True)
     created_on = Column('created_on', DateTime(timezone=False), nullable=False, default=datetime.datetime.now)
+    type_ = Column('type', Unicode(256))
 
+    create_by_user = relationship('User')
     user_notifications = relationship('UserNotification',
         primaryjoin = 'Notification.notification_id==UserNotification.notification_id',
         cascade = "all, delete, delete-orphan")
@@ -1131,10 +1153,15 @@ class Notification(Base, BaseModel):
                 .filter(UserNotification.notification == self).all()]
 
     @classmethod
-    def create(cls, subject, body, recipients):
+    def create(cls, created_by, subject, body, recipients, type_=None):
+        if type_ is None:
+            type_ = Notification.TYPE_MESSAGE
+
         notification = cls()
+        notification.create_by_user = created_by
         notification.subject = subject
         notification.body = body
+        notification.type_ = type_
         Session.add(notification)
         for u in recipients:
             u.notifications.append(notification)
@@ -1143,10 +1170,12 @@ class Notification(Base, BaseModel):
 
 class UserNotification(Base, BaseModel):
     __tablename__ = 'user_to_notification'
-    __table_args__ = ({'extend_existing':True})
+    __table_args__ = (UniqueConstraint('user_id', 'notification_id'),
+                      {'extend_existing':True})
     user_to_notification_id = Column("user_to_notification_id", Integer(), nullable=False, unique=True, primary_key=True)
     user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None, default=None)
     notification_id = Column("notification_id", Integer(), ForeignKey('notifications.notification_id'), nullable=False)
+    read = Column('read', Boolean, default=False)
     sent_on = Column('sent_on', DateTime(timezone=False), nullable=True, unique=None)
 
     user = relationship('User', single_parent=True, lazy="joined")

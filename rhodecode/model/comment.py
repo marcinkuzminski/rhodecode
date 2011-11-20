@@ -28,8 +28,9 @@ import logging
 import traceback
 
 from rhodecode.model import BaseModel
-from rhodecode.model.db import ChangesetComment
+from rhodecode.model.db import ChangesetComment, User, Notification
 from sqlalchemy.util.compat import defaultdict
+from rhodecode.model.notification import NotificationModel
 
 log = logging.getLogger(__name__)
 
@@ -60,6 +61,17 @@ class ChangesetCommentsModel(BaseModel):
 
             self.sa.add(comment)
             self.sa.commit()
+
+            # make notification
+            usr = User.get(user_id)
+            subj = 'User %s commented on %s' % (usr.username, revision)
+            body = text
+            recipients = ChangesetComment.get_users(revision=revision)
+            NotificationModel().create(created_by=user_id, subject=subj,
+                                   body = body, recipients = recipients,
+                                   type_ = Notification.TYPE_CHANGESET_COMMENT)
+
+
             return comment
 
     def delete(self, comment_id):

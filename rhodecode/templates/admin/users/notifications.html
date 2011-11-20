@@ -18,11 +18,21 @@
     <!-- box / title -->
     <div class="title">
         ${self.breadcrumbs()}       
+        <ul class="links">
+            <li>
+              <span style="text-transform: uppercase;"><a href="#">${_('Compose message')}</a></span>
+            </li>          
+        </ul>            
     </div>
-    % for notification in c.notifications:
-        ${notification.title}
+    % if c.notifications:
+      %for notification in c.notifications:
+          <div class="table">
+            <h4>${notification.subject}</h4>
+            <div>${h.rst(notification.body)}</div>
+          </div>
+      %endfor
     %else:
         <div class="table">${_('No notifications here yet')}</div>
-    %endfor
+    %endif
 </div>    
 </%def>  
