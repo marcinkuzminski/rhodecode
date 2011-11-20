@@ -138,9 +138,6 @@
                 <div class="label label-checkbox">
                     <label>${_('Hooks')}:</label>
                 </div>
-                <div class="input">
-                    ${h.link_to(_('advanced setup'),url('admin_edit_setting',setting_id='hooks'))}
-                </div>                
                 <div class="checkboxes">
 					<div class="checkbox">
 						${h.checkbox('hooks_changegroup_update','True')}
@@ -159,8 +156,10 @@
                         <label for="hooks_preoutgoing_pull_logger">${_('Log user pull commands')}</label>
                     </div>                    										
 				</div>
+                <div class="input" style="margin-top:10px">
+                    ${h.link_to(_('advanced setup'),url('admin_edit_setting',setting_id='hooks'),class_="ui-button-small")}
+                </div>         
              </div>	
-							                          
             <div class="field">
                 <div class="label">
                     <label for="paths_root_path">${_('Repositories location')}:</label>

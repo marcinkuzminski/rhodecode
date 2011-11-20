@@ -2658,6 +2658,10 @@ input.ui-button-small,.ui-button-small {
 	padding: 3px 3px 3px 3px;
 }
 
+input.ui-button-small.xsmall,.ui-button-small.xsmall{
+    padding: 1px 2px 1px 1px;
+}
+
 input.ui-button-small:hover,.ui-button-small:hover {
 	background: #b4b4b4 url("../images/button_selected.png") repeat-x
 		!important;
@@ -3467,7 +3471,7 @@ form.comment-inline-form {
     -moz-border-radius: 4px;
     border-radius: 4px;
     text-align: center;
-    margin: -1px -10px 0px 5px;
+    margin: 0px -10px 0px 5px;
     background-color: #DEDEDE;
 }
 .notifications a{
