@@ -8,6 +8,7 @@ This module initializes the application via ``websetup`` (`paster
 setup-app`) and provides the base testing objects.
 """
 import os
+import time
 from os.path import join as jn
 
 from unittest import TestCase
@@ -20,10 +21,12 @@ from webtest import TestApp
 
 from rhodecode.model import meta
 import logging
+import pylons.test
+
+os.environ['TZ'] = 'UTC'
+time.tzset()
 
 log = logging.getLogger(__name__)
-
-import pylons.test
 
 __all__ = ['environ', 'url', 'TestController', 'TESTS_TMP_PATH', 'HG_REPO',
            'GIT_REPO', 'NEW_HG_REPO', 'NEW_GIT_REPO', 'HG_FORK', 'GIT_FORK',
