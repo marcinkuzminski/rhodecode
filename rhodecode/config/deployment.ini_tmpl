@@ -131,10 +131,16 @@ beaker.cache.sql_cache_long.key_length = 256
 ## dbm, file, memcached, database, and memory. 
 ## The storage uses the Container API 
 ##that is also used by the cache system.
-beaker.session.type = file
 
+#db session example
+#beaker.session.type = ext:database
+#beaker.session.sa.url = postgresql://postgres:qwe@localhost/rhodecode
+#beaker.session.table_name = db_session 
+
+beaker.session.type = cookie
 beaker.session.key = rhodecode
-beaker.session.secret = ${app_instance_secret}
+beaker.session.encrypt_key = ${app_instance_secret}
+beaker.session.validate_key = ${app_instance_secret}
 beaker.session.timeout = 36000
 
 ##auto save the session to not to use .save()
@@ -142,7 +148,6 @@ beaker.session.auto = False
 
 ##true exire at browser close
 #beaker.session.cookie_expires = 3600
-
     
 ################################################################################
 ## WARNING: *THE LINE BELOW MUST BE UNCOMMENTED ON A PRODUCTION ENVIRONMENT*  ##
