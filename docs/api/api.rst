@@ -11,18 +11,20 @@ with JSON protocol both ways. An url to send API request in RhodeCode is
 <your_server>/_admin/api
 
 
-All clients need to send JSON data in such format::
+All clients are required to send JSON-RPC spec JSON data::
 
-    {
+    {   
+        "id:<id>,
         "api_key":"<api_key>",
         "method":"<method_name>",
         "args":{"<arg_key>":"<arg_val>"}
     }
 
 Example call for autopulling remotes repos using curl::
-    curl https://server.com/_admin/api -X POST -H 'content-type:text/plain' --data-binary '{"api_key":"xe7cdb2v278e4evbdf5vs04v832v0efvcbcve4a3","method":"pull","args":{"repo":"CPython"}}'
+    curl https://server.com/_admin/api -X POST -H 'content-type:text/plain' --data-binary '{"id":1,"api_key":"xe7cdb2v278e4evbdf5vs04v832v0efvcbcve4a3","method":"pull","args":{"repo":"CPython"}}'
 
 Simply provide
+ - *id* A value of any type, which is used to match the response with the request that it is replying to.
  - *api_key* for access and permission validation.
  - *method* is name of method to call
  - *args* is an key:value list of arguments to pass to method
@@ -32,9 +34,10 @@ Simply provide
     api_key can be found in your user account page
 
 
-RhodeCode API will return always a JSON formatted answer::
+RhodeCode API will return always a JSON-RPC response::
 
-    {
+    {   
+        "id":<id>,
         "result": "<result>",
         "error": null
     }

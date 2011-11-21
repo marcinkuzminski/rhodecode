@@ -50,6 +50,7 @@ class JSONRPCError(BaseException):
 
     def __init__(self, message):
         self.message = message
+        super(JSONRPCError, self).__init__()
 
     def __str__(self):
         return str(self.message)
@@ -60,7 +61,7 @@ def jsonrpc_error(message, code=None):
     Generate a Response object with a JSON-RPC error body
     """
     from pylons.controllers.util import Response
-    resp = Response(body=json.dumps(dict(result=None, error=message)),
+    resp = Response(body=json.dumps(dict(id=None, result=None, error=message)),
                     status=code,
                     content_type='application/json')
     return resp
@@ -117,6 +118,7 @@ class JSONRPCController(WSGIController):
         # check AUTH based on API KEY
         try:
             self._req_api_key = json_body['api_key']
+            self._req_id = json_body['id']
             self._req_method = json_body['method']
             self._req_params = json_body['args']
             log.debug('method: %s, params: %s',
@@ -220,7 +222,8 @@ class JSONRPCController(WSGIController):
         if self._error is not None:
             raw_response = None
 
-        response = dict(result=raw_response, error=self._error)
+        response = dict(id=self._req_id, result=raw_response,
+                        error=self._error)
 
         try:
             return json.dumps(response)
