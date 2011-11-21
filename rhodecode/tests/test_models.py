@@ -175,29 +175,34 @@ class TestNotifications(unittest.TestCase):
 
     def test_create_notification(self):
         usrs = [self.u1, self.u2]
-        notification = Notification.create(subject='subj', body='hi there',
-                            recipients=usrs)
+        notification = Notification.create(created_by=self.u1,
+                                           subject='subj', body='hi there',
+                                           recipients=usrs)
 
         notifications = Session.query(Notification).all()
         unotification = UserNotification.query()\
             .filter(UserNotification.notification == notification).all()
         self.assertEqual(len(notifications), 1)
         self.assertEqual(notifications[0].recipients, [self.u1, self.u2])
-        self.assertEqual(notification, notifications[0])
+        self.assertEqual(notification.notification_id,
+                         notifications[0].notification_id)
         self.assertEqual(len(unotification), len(usrs))
         self.assertEqual([x.user.user_id for x in unotification],
                          [x.user_id for x in usrs])
 
     def test_user_notifications(self):
-        notification1 = Notification.create(subject='subj', body='hi there',
-                            recipients=[self.u3])
-        notification2 = Notification.create(subject='subj', body='hi there',
-                            recipients=[self.u3])
+        notification1 = Notification.create(created_by=self.u1,
+                                            subject='subj', body='hi there',
+                                            recipients=[self.u3])
+        notification2 = Notification.create(created_by=self.u1,
+                                            subject='subj', body='hi there',
+                                            recipients=[self.u3])
         self.assertEqual(self.u3.notifications, [notification1, notification2])
 
     def test_delete_notifications(self):
-        notification = Notification.create(subject='title', body='hi there3',
-                            recipients=[self.u3, self.u1, self.u2])
+        notification = Notification.create(created_by=self.u1,
+                                           subject='title', body='hi there3',
+                                    recipients=[self.u3, self.u1, self.u2])
         notifications = Notification.query().all()
         self.assertTrue(notification in notifications)
 

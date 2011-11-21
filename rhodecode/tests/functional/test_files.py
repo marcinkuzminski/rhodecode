@@ -15,11 +15,11 @@ class TestFilesController(TestController):
                                     revision='tip',
                                     f_path='/'))
         # Test response...
-        assert '<a class="browser-dir" href="/vcs_test_hg/files/27cd5cce30c96924232dffcd24178a07ffeb5dfc/docs">docs</a>' in response.body, 'missing dir'
-        assert '<a class="browser-dir" href="/vcs_test_hg/files/27cd5cce30c96924232dffcd24178a07ffeb5dfc/tests">tests</a>' in response.body, 'missing dir'
-        assert '<a class="browser-dir" href="/vcs_test_hg/files/27cd5cce30c96924232dffcd24178a07ffeb5dfc/vcs">vcs</a>' in response.body, 'missing dir'
-        assert '<a class="browser-file" href="/vcs_test_hg/files/27cd5cce30c96924232dffcd24178a07ffeb5dfc/.hgignore">.hgignore</a>' in response.body, 'missing file'
-        assert '<a class="browser-file" href="/vcs_test_hg/files/27cd5cce30c96924232dffcd24178a07ffeb5dfc/MANIFEST.in">MANIFEST.in</a>' in response.body, 'missing file'
+        assert '<a class="browser-dir ypjax-link" href="/vcs_test_hg/files/27cd5cce30c96924232dffcd24178a07ffeb5dfc/docs">docs</a>' in response.body, 'missing dir'
+        assert '<a class="browser-dir ypjax-link" href="/vcs_test_hg/files/27cd5cce30c96924232dffcd24178a07ffeb5dfc/tests">tests</a>' in response.body, 'missing dir'
+        assert '<a class="browser-dir ypjax-link" href="/vcs_test_hg/files/27cd5cce30c96924232dffcd24178a07ffeb5dfc/vcs">vcs</a>' in response.body, 'missing dir'
+        assert '<a class="browser-file ypjax-link" href="/vcs_test_hg/files/27cd5cce30c96924232dffcd24178a07ffeb5dfc/.hgignore">.hgignore</a>' in response.body, 'missing file'
+        assert '<a class="browser-file ypjax-link" href="/vcs_test_hg/files/27cd5cce30c96924232dffcd24178a07ffeb5dfc/MANIFEST.in">MANIFEST.in</a>' in response.body, 'missing file'
 
 
     def test_index_revision(self):
@@ -34,9 +34,9 @@ class TestFilesController(TestController):
 
         #Test response...
 
-        assert '<a class="browser-dir" href="/vcs_test_hg/files/7ba66bec8d6dbba14a2155be32408c435c5f4492/docs">docs</a>' in response.body, 'missing dir'
-        assert '<a class="browser-dir" href="/vcs_test_hg/files/7ba66bec8d6dbba14a2155be32408c435c5f4492/tests">tests</a>' in response.body, 'missing dir'
-        assert '<a class="browser-file" href="/vcs_test_hg/files/7ba66bec8d6dbba14a2155be32408c435c5f4492/README.rst">README.rst</a>' in response.body, 'missing file'
+        assert '<a class="browser-dir ypjax-link" href="/vcs_test_hg/files/7ba66bec8d6dbba14a2155be32408c435c5f4492/docs">docs</a>' in response.body, 'missing dir'
+        assert '<a class="browser-dir ypjax-link" href="/vcs_test_hg/files/7ba66bec8d6dbba14a2155be32408c435c5f4492/tests">tests</a>' in response.body, 'missing dir'
+        assert '<a class="browser-file ypjax-link" href="/vcs_test_hg/files/7ba66bec8d6dbba14a2155be32408c435c5f4492/README.rst">README.rst</a>' in response.body, 'missing file'
         assert '1.1 KiB' in response.body, 'missing size of setup.py'
         assert 'text/x-python' in response.body, 'missing mimetype of setup.py'
 
