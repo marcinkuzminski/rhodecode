@@ -43,7 +43,8 @@ from rhodecode.model.scm import ScmModel
 from rhodecode.lib import safe_unicode
 from rhodecode.lib.indexers import INDEX_EXTENSIONS, SCHEMA, IDX_NAME
 
-from vcs.exceptions import ChangesetError, RepositoryError
+from vcs.exceptions import ChangesetError, RepositoryError, \
+    NodeDoesNotExistError
 
 from whoosh.index import create_in, open_dir
 
@@ -198,7 +199,7 @@ class WhooshIndexingDaemon(object):
 
             try:
                 node = self.get_node(repo, indexed_path)
-            except ChangesetError:
+            except (ChangesetError, NodeDoesNotExistError):
                 # This file was deleted since it was indexed
                 log.debug('removing from index %s' % indexed_path)
                 writer.delete_by_term('path', indexed_path)
