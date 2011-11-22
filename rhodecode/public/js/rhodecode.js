@@ -563,3 +563,19 @@ var  getSelectionLink = function(selection_link_label) {
 	    }
 	}
 };
+
+var deleteNotification = function(url, notification_id){
+    var callback = { 
+		success:function(o){
+		    var obj = YUD.get(String("notification_"+notification_id));
+			obj.parentNode.removeChild(obj);
+		},
+	    failure:function(o){
+	        alert("error");
+	    },
+	};
+    var postData = '_method=delete';
+    var sUrl = url.replace('__NOTIFICATION_ID__',notification_id);
+    var request = YAHOO.util.Connect.asyncRequest('POST', sUrl, 
+    											  callback, postData);
+};	

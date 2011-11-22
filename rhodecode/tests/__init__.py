@@ -9,6 +9,7 @@ setup-app`) and provides the base testing objects.
 """
 import os
 import time
+import logging
 from os.path import join as jn
 
 from unittest import TestCase
@@ -20,7 +21,8 @@ from routes.util import URLGenerator
 from webtest import TestApp
 
 from rhodecode.model import meta
-import logging
+from rhodecode.model.db import User
+
 import pylons.test
 
 os.environ['TZ'] = 'UTC'
@@ -68,16 +70,21 @@ class TestController(TestCase):
 
     def log_user(self, username=TEST_USER_ADMIN_LOGIN,
                  password=TEST_USER_ADMIN_PASS):
+        self._logged_username = username
         response = self.app.post(url(controller='login', action='index'),
                                  {'username':username,
                                   'password':password})
-        
+
         if 'invalid user name' in response.body:
             self.fail('could not login using %s %s' % (username, password))
 
         self.assertEqual(response.status, '302 Found')
         self.assertEqual(response.session['rhodecode_user'].username, username)
         return response.follow()
+
+    def _get_logged_user(self):
+        return User.get_by_username(self._logged_username)
+
 
     def checkSessionFlash(self, response, msg):
         self.assertTrue('flash' in response.session)

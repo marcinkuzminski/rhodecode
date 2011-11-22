@@ -62,8 +62,8 @@ def make_map(config):
     rmap.connect('home', '/', controller='home', action='index')
     rmap.connect('repo_switcher', '/repos', controller='home',
                  action='repo_switcher')
-    rmap.connect('branch_tag_switcher', '/branches-tags/{repo_name:.*}', 
-                 controller='home',action='branch_tag_switcher')    
+    rmap.connect('branch_tag_switcher', '/branches-tags/{repo_name:.*}',
+                 controller='home', action='branch_tag_switcher')
     rmap.connect('bugtracker',
                  "http://bitbucket.org/marcinkuzminski/rhodecode/issues",
                  _static=True)
@@ -267,12 +267,39 @@ def make_map(config):
                   action="show", conditions=dict(method=["GET"]))
         m.connect("admin_settings_my_account", "/my_account",
                   action="my_account", conditions=dict(method=["GET"]))
-        m.connect("admin_settings_notifications", "/notifications",
-                  action="notifications", conditions=dict(method=["GET"]))
         m.connect("admin_settings_my_account_update", "/my_account_update",
                   action="my_account_update", conditions=dict(method=["PUT"]))
         m.connect("admin_settings_create_repository", "/create_repository",
                   action="create_repository", conditions=dict(method=["GET"]))
+
+
+    #NOTIFICATION REST ROUTES
+    with rmap.submapper(path_prefix=ADMIN_PREFIX,
+                        controller='admin/notifications') as m:
+        m.connect("notifications", "/notifications",
+                  action="create", conditions=dict(method=["POST"]))
+        m.connect("notifications", "/notifications",
+                  action="index", conditions=dict(method=["GET"]))
+        m.connect("formatted_notifications", "/notifications.{format}",
+                  action="index", conditions=dict(method=["GET"]))
+        m.connect("new_notification", "/notifications/new",
+                  action="new", conditions=dict(method=["GET"]))
+        m.connect("formatted_new_notification", "/notifications/new.{format}",
+                  action="new", conditions=dict(method=["GET"]))
+        m.connect("/notification/{notification_id}",
+                  action="update", conditions=dict(method=["PUT"]))
+        m.connect("/notification/{notification_id}",
+                  action="delete", conditions=dict(method=["DELETE"]))
+        m.connect("edit_notification", "/notification/{notification_id}/edit",
+                  action="edit", conditions=dict(method=["GET"]))
+        m.connect("formatted_edit_notification",
+                  "/notification/{notification_id}.{format}/edit",
+                  action="edit", conditions=dict(method=["GET"]))
+        m.connect("notification", "/notification/{notification_id}",
+                  action="show", conditions=dict(method=["GET"]))
+        m.connect("formatted_notification", "/notifications/{notification_id}.{format}",
+                  action="show", conditions=dict(method=["GET"]))
+
 
 
     #ADMIN MAIN PAGES
@@ -357,7 +384,7 @@ def make_map(config):
 
     rmap.connect('changeset_comment_delete', '/{repo_name:.*}/changeset/comment/{comment_id}/delete',
                 controller='changeset', action='delete_comment',
-                conditions = dict(function=check_repo, method=["DELETE"]))
+                conditions=dict(function=check_repo, method=["DELETE"]))
 
     rmap.connect('raw_changeset_home',
                  '/{repo_name:.*}/raw-changeset/{revision}',

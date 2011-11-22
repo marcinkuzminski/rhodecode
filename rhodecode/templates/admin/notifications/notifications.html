@@ -1,0 +1,60 @@
+## -*- coding: utf-8 -*-
+<%inherit file="/base/base.html"/>
+
+<%def name="title()">
+    ${_('My Notifications')} ${c.rhodecode_user.username} - ${c.rhodecode_name}
+</%def>
+
+<%def name="breadcrumbs_links()">
+    ${_('My Notifications')}
+</%def>
+
+<%def name="page_nav()">
+	${self.menu('admin')}
+</%def>
+
+<%def name="main()">
+<div class="box">
+    <!-- box / title -->
+    <div class="title">
+        ${self.breadcrumbs()}       
+        <ul class="links">
+            <li>
+              <span style="text-transform: uppercase;"><a href="#">${_('Compose message')}</a></span>
+            </li>          
+        </ul>            
+    </div>
+    % if c.notifications:
+    <%
+    unread = lambda n:{False:'unread'}.get(n)
+    %>
+    <div class="table">
+      %for notification in c.notifications:
+        <div id="notification_${notification.notification_id}">
+          <div class="notification-header">
+            <div class="gravatar">
+                <img alt="gravatar" src="${h.gravatar_url(h.email(notification.created_by_user.email),24)}"/>
+            </div>
+            <div class="desc">
+            <a href="${url('notification', notification_id=notification.notification_id)}">${notification.description}</a>
+            </div>
+            <div class="delete-notifications">
+              <span id="${notification.notification_id}" class="delete-notification delete_icon action"></span>
+            </div>
+          </div>
+          <div class="notification-subject">${h.urlify_text(notification.subject)}</div>
+        </div>
+      %endfor
+    </div>
+    %else:
+        <div class="table">${_('No notifications here yet')}</div>
+    %endif
+</div>
+<script type="text/javascript">
+var url = "${url('notification', notification_id='__NOTIFICATION_ID__')}";
+   YUE.on(YUQ('.delete-notification'),'click',function(e){
+	   var notification_id = e.currentTarget.id;
+	   deleteNotification(url,notification_id)
+   })
+</script>
+</%def>  

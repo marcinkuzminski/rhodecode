@@ -161,28 +161,35 @@ class TestNotifications(unittest.TestCase):
 
 
     def setUp(self):
-        self.u1 = UserModel().create_or_update(username='u1', password='qweqwe',
-                                               email='u1@rhodecode.org',
-                                               name='u1', lastname='u1')
-        self.u2 = UserModel().create_or_update(username='u2', password='qweqwe',
-                                               email='u2@rhodecode.org',
-                                               name='u2', lastname='u3')
-        self.u3 = UserModel().create_or_update(username='u3', password='qweqwe',
-                                               email='u3@rhodecode.org',
-                                               name='u3', lastname='u3')
-
+        self.u1 = UserModel().create_or_update(username=u'u1', password=u'qweqwe',
+                                               email=u'u1@rhodecode.org',
+                                               name=u'u1', lastname=u'u1')
+        self.u2 = UserModel().create_or_update(username=u'u2', password=u'qweqwe',
+                                               email=u'u2@rhodecode.org',
+                                               name=u'u2', lastname=u'u3')
+        self.u3 = UserModel().create_or_update(username=u'u3', password=u'qweqwe',
+                                               email=u'u3@rhodecode.org',
+                                               name=u'u3', lastname=u'u3')
+    def tearDown(self):
+        User.delete(self.u1.user_id)
+        User.delete(self.u2.user_id)
+        User.delete(self.u3.user_id)
 
 
     def test_create_notification(self):
         usrs = [self.u1, self.u2]
         notification = Notification.create(created_by=self.u1,
-                                           subject='subj', body='hi there',
+                                           subject=u'subj', body=u'hi there',
                                            recipients=usrs)
+        Session.commit()
 
-        notifications = Session.query(Notification).all()
+
+        notifications = Notification.query().all()
+        self.assertEqual(len(notifications), 1)
+
         unotification = UserNotification.query()\
             .filter(UserNotification.notification == notification).all()
-        self.assertEqual(len(notifications), 1)
+
         self.assertEqual(notifications[0].recipients, [self.u1, self.u2])
         self.assertEqual(notification.notification_id,
                          notifications[0].notification_id)
@@ -192,21 +199,23 @@ class TestNotifications(unittest.TestCase):
 
     def test_user_notifications(self):
         notification1 = Notification.create(created_by=self.u1,
-                                            subject='subj', body='hi there',
+                                            subject=u'subj', body=u'hi there',
                                             recipients=[self.u3])
         notification2 = Notification.create(created_by=self.u1,
-                                            subject='subj', body='hi there',
+                                            subject=u'subj', body=u'hi there',
                                             recipients=[self.u3])
         self.assertEqual(self.u3.notifications, [notification1, notification2])
 
     def test_delete_notifications(self):
         notification = Notification.create(created_by=self.u1,
-                                           subject='title', body='hi there3',
+                                           subject=u'title', body=u'hi there3',
                                     recipients=[self.u3, self.u1, self.u2])
+        Session.commit()
         notifications = Notification.query().all()
         self.assertTrue(notification in notifications)
 
         Notification.delete(notification.notification_id)
+        Session.commit()
 
         notifications = Notification.query().all()
         self.assertFalse(notification in notifications)
@@ -214,8 +223,3 @@ class TestNotifications(unittest.TestCase):
         un = UserNotification.query().filter(UserNotification.notification
                                              == notification).all()
         self.assertEqual(un, [])
-
-    def tearDown(self):
-        User.delete(self.u1.user_id)
-        User.delete(self.u2.user_id)
-        User.delete(self.u3.user_id)

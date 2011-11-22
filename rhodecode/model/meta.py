@@ -15,7 +15,8 @@ __all__ = ['Base', 'Session']
 #
 Session = scoped_session(
                 sessionmaker(
-                    query_cls=caching_query.query_callable(cache_manager)
+                    query_cls = caching_query.query_callable(cache_manager),
+                    expire_on_commit = True,
                 )
           )
 

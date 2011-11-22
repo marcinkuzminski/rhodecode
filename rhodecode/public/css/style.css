@@ -2603,7 +2603,8 @@ div.gravatar {
 	border: 0px solid #D0D0D0;
 	float: left;
 	margin-right: 0.7em;
-	padding: 2px 2px 0;
+	padding: 2px 2px 2px 2px;
+    line-height:0;
 	-webkit-border-radius: 6px;
 	-khtml-border-radius: 6px;
 	-moz-border-radius: 6px;
@@ -3481,4 +3482,29 @@ form.comment-inline-form {
 }
 .notifications a:hover{
 	text-decoration: none !important;
+}
+.notification-header{
+	
+}
+.notification-header .desc{
+	font-size: 16px;
+    height: 24px;
+    padding-top: 6px;
+    float: left
+}
+
+.notification-header .desc.unread{
+    font-weight: bold;
+    font-size: 17px;
+}
+
+.notification-header .delete-notifications{
+    float: right;
+    padding-top: 8px;
+    cursor: pointer;
+}
+.notification-subject{
+    clear:both;
+    border-bottom: 1px solid #eee;
+    padding:5px 0px 5px 38px;
 }

@@ -53,7 +53,7 @@
             ${h.link_to(c.rhodecode_user.username,h.url('admin_settings_my_account'),title='%s %s'%(c.rhodecode_user.name,c.rhodecode_user.lastname))}
             </div>
             <div class="notifications">
-            <a href="${h.url('admin_settings_notifications')}">${c.unread_notifications}</a>
+            <a href="${h.url('notifications')}">${c.unread_notifications}</a>
             </div>
           %endif
           </div>	

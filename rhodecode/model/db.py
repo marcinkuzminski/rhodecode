@@ -49,7 +49,6 @@ from rhodecode.lib.caching_query import FromCache
 from rhodecode.model.meta import Base, Session
 
 
-
 log = logging.getLogger(__name__)
 
 #==============================================================================
@@ -286,7 +285,9 @@ class User(Base, BaseModel):
 
     group_member = relationship('UsersGroupMember', cascade='all')
 
-    notifications = relationship('Notification', secondary='user_to_notification')
+    notifications = relationship('Notification',
+                            secondary='user_to_notification',
+                            order_by=lambda :Notification.created_on.desc())
 
     @property
     def full_contact(self):
@@ -301,11 +302,9 @@ class User(Base, BaseModel):
         return self.admin
 
     def __repr__(self):
-        try:
-            return "<%s('id:%s:%s')>" % (self.__class__.__name__,
-                                             self.user_id, self.username)
-        except:
-            return self.__class__.__name__
+        return "<%s('id:%s:%s')>" % (self.__class__.__name__,
+                                     self.user_id, self.username)
+
 
     @classmethod
     def get_by_username(cls, username, case_insensitive=False, cache=False):
@@ -335,6 +334,7 @@ class User(Base, BaseModel):
         Session.add(self)
         Session.commit()
         log.debug('updated user %s lastlogin', self.username)
+
 
 class UserLog(Base, BaseModel):
     __tablename__ = 'user_logs'
@@ -1131,9 +1131,9 @@ class Notification(Base, BaseModel):
     __tablename__ = 'notifications'
     __table_args__ = ({'extend_existing':True})
 
-    TYPE_CHANGESET_COMMENT = 'cs_comment'
-    TYPE_MESSAGE = 'message'
-    TYPE_MENTION = 'mention'
+    TYPE_CHANGESET_COMMENT = u'cs_comment'
+    TYPE_MESSAGE = u'message'
+    TYPE_MENTION = u'mention'
 
     notification_id = Column('notification_id', Integer(), nullable=False, primary_key=True)
     subject = Column('subject', Unicode(512), nullable=True)
@@ -1142,9 +1142,10 @@ class Notification(Base, BaseModel):
     created_on = Column('created_on', DateTime(timezone=False), nullable=False, default=datetime.datetime.now)
     type_ = Column('type', Unicode(256))
 
-    create_by_user = relationship('User')
-    user_notifications = relationship('UserNotification',
-        primaryjoin = 'Notification.notification_id==UserNotification.notification_id',
+    created_by_user = relationship('User')
+    notifications_to_users = relationship('UserNotification',
+        primaryjoin='Notification.notification_id==UserNotification.notification_id',
+        lazy='joined',
         cascade = "all, delete, delete-orphan")
 
     @property
@@ -1158,15 +1159,19 @@ class Notification(Base, BaseModel):
             type_ = Notification.TYPE_MESSAGE
 
         notification = cls()
-        notification.create_by_user = created_by
+        notification.created_by_user = created_by
         notification.subject = subject
         notification.body = body
         notification.type_ = type_
         Session.add(notification)
         for u in recipients:
             u.notifications.append(notification)
-        Session.commit()
         return notification
+
+    @property
+    def description(self):
+        from rhodecode.model.notification import NotificationModel
+        return NotificationModel().make_description(self)
 
 class UserNotification(Base, BaseModel):
     __tablename__ = 'user_to_notification'
@@ -1179,9 +1184,12 @@ class UserNotification(Base, BaseModel):
     sent_on = Column('sent_on', DateTime(timezone=False), nullable=True, unique=None)
 
     user = relationship('User', single_parent=True, lazy="joined")
-    notification = relationship('Notification',single_parent=True,
-                                cascade="all, delete, delete-orphan")
+    notification = relationship('Notification', single_parent=True,)
 
+    def mark_as_read(self):
+        self.read = True
+        Session.add(self)
+        Session.commit()
 
 class DbMigrateVersion(Base, BaseModel):
     __tablename__ = 'db_migrate_version'

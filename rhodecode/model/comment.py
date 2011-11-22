@@ -23,13 +23,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
+import re
 import logging
 import traceback
 
-from rhodecode.model import BaseModel
-from rhodecode.model.db import ChangesetComment, User, Notification
+from pylons.i18n.translation import _
 from sqlalchemy.util.compat import defaultdict
+
+from rhodecode.lib import helpers as h
+from rhodecode.model import BaseModel
+from rhodecode.model.db import ChangesetComment, User, Repository, Notification
 from rhodecode.model.notification import NotificationModel
 
 log = logging.getLogger(__name__)
@@ -37,6 +40,15 @@ log = logging.getLogger(__name__)
 
 class ChangesetCommentsModel(BaseModel):
 
+
+    def _extract_mentions(self, s):
+        usrs = []
+        for username in re.findall(r'(?:^@|\s@)(\w+)', s):
+            user_obj = User.get_by_username(username, case_insensitive=True)
+            if user_obj:
+                usrs.append(user_obj)
+
+        return usrs
 
     def create(self, text, repo_id, user_id, revision, f_path=None,
                line_no=None):
@@ -51,8 +63,10 @@ class ChangesetCommentsModel(BaseModel):
         :param line_no:
         """
         if text:
+            repo = Repository.get(repo_id)
+            desc = repo.scm_instance.get_changeset(revision).message
             comment = ChangesetComment()
-            comment.repo_id = repo_id
+            comment.repo = repo
             comment.user_id = user_id
             comment.revision = revision
             comment.text = text
@@ -60,17 +74,25 @@ class ChangesetCommentsModel(BaseModel):
             comment.line_no = line_no
 
             self.sa.add(comment)
-            self.sa.commit()
+            self.sa.flush()
 
             # make notification
-            usr = User.get(user_id)
-            subj = 'User %s commented on %s' % (usr.username, revision)
+            line = ''
+            if line_no:
+                line = _('on line %s') % line_no
+            subj = h.link_to('Re commit: %(commit_desc)s %(line)s' % \
+                                    {'commit_desc':desc,'line':line},
+                             h.url('changeset_home', repo_name=repo.repo_name,
+                                   revision = revision,
+                                   anchor = 'comment-%s' % comment.comment_id
+                                   )
+                             )
             body = text
             recipients = ChangesetComment.get_users(revision=revision)
+            recipients += self._extract_mentions(body)
             NotificationModel().create(created_by=user_id, subject=subj,
                                    body = body, recipients = recipients,
                                    type_ = Notification.TYPE_CHANGESET_COMMENT)
-
 
             return comment
 

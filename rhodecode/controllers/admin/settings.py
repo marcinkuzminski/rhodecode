@@ -372,14 +372,6 @@ class SettingsController(BaseController):
 
         return redirect(url('my_account'))
 
-
-    @NotAnonymous()
-    def notifications(self):
-        c.user = User.get(self.rhodecode_user.user_id)
-        c.notifications = NotificationModel().get_for_user(c.user.user_id)
-        return render('admin/users/notifications.html'),
-
-
     @NotAnonymous()
     @HasPermissionAnyDecorator('hg.admin', 'hg.create.repository')
     def create_repository(self):

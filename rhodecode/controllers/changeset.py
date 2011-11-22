@@ -32,8 +32,7 @@ from pylons.controllers.util import redirect
 from pylons.decorators import jsonify
 
 import rhodecode.lib.helpers as h
-from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator, \
-    NotAnonymous
+from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.utils import EmptyChangeset
 from rhodecode.lib.compat import OrderedDict
@@ -274,13 +273,12 @@ class ChangesetController(BaseRepoController):
         return render('changeset/raw_changeset.html')
 
     def comment(self, repo_name, revision):
-        ccmodel = ChangesetCommentsModel()
-
-        ccmodel.create(text=request.POST.get('text'),
-                       repo_id=c.rhodecode_db_repo.repo_id,
-                       user_id=c.rhodecode_user.user_id,
-                       revision=revision, f_path=request.POST.get('f_path'),
-                       line_no=request.POST.get('line'))
+        ChangesetCommentsModel().create(text=request.POST.get('text'),
+                                        repo_id=c.rhodecode_db_repo.repo_id,
+                                        user_id=c.rhodecode_user.user_id,
+                                        revision=revision,
+                                        f_path=request.POST.get('f_path'),
+                                        line_no=request.POST.get('line'))
 
         return redirect(h.url('changeset_home', repo_name=repo_name,
                               revision=revision))
@@ -288,8 +286,8 @@ class ChangesetController(BaseRepoController):
     @jsonify
     def delete_comment(self, comment_id):
         co = ChangesetComment.get(comment_id)
-        if (h.HasPermissionAny('hg.admin', 'repository.admin')() or
-            co.author.user_id == c.rhodecode_user.user_id):
+        owner = lambda : co.author.user_id == c.rhodecode_user.user_id
+        if h.HasPermissionAny('hg.admin', 'repository.admin')() or owner:
             ccmodel = ChangesetCommentsModel()
             ccmodel.delete(comment_id=comment_id)
             return True
