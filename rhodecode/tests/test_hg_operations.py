@@ -184,7 +184,6 @@ def test_clone_with_credentials(no_errors=False):
     if anonymous_access:
         print '\tenabled, disabling it '
         set_anonymous_access(enable=False)
-        time.sleep(1)
 
     clone_url = 'http://%(user)s:%(pass)s@%(host)s/%(cloned_repo)s %(dest)s' % \
                   {'user':USER,
@@ -217,7 +216,6 @@ def test_clone_anonymous():
     if not anonymous_access:
         print '\tnot enabled, enabling it '
         set_anonymous_access(enable=True)
-        time.sleep(1)
 
     clone_url = 'http://%(host)s/%(cloned_repo)s %(dest)s' % \
                   {'user':USER,
@@ -386,7 +384,7 @@ if __name__ == '__main__':
 
     initial_logs = get_logs()
     print 'initial activity logs: %s' % len(initial_logs)
-
+    s = time.time()
     #test_push_modify_file()
     test_clone_with_credentials()
     test_clone_wrong_credentials()
@@ -399,3 +397,4 @@ if __name__ == '__main__':
     test_push_wrong_credentials()
 
     test_logs(initial_logs)
+    print 'finished ok in %.3f' % (time.time() - s)
