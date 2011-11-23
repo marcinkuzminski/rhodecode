@@ -168,7 +168,7 @@ class DbManage(object):
         #CALL THE PROPER ORDER OF STEPS TO PERFORM FULL UPGRADE
         for step in upgrade_steps:
             print ('performing upgrade step %s' % step)
-            callable = getattr(UpgradeSteps(self), 'step_%s' % step)()
+            getattr(UpgradeSteps(self), 'step_%s' % step)()
 
     def fix_repo_paths(self):
         """Fixes a old rhodecode version path into new one without a '*'

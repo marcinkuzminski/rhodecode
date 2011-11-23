@@ -73,7 +73,7 @@ class BaseModel(object):
         else:
             self.sa = meta.Session()
 
-    def __get_instance(self, cls, instance):
+    def _get_instance(self, cls, instance):
         """
         Get's instance of given cls using some simple lookup mechanism
         

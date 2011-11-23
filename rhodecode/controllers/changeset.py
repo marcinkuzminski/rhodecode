@@ -280,17 +280,17 @@ class ChangesetController(BaseRepoController):
                                         revision=revision,
                                         f_path=request.POST.get('f_path'),
                                         line_no=request.POST.get('line'))
-        Session.commit()
+        Session().commit()
         return redirect(h.url('changeset_home', repo_name=repo_name,
                               revision=revision))
 
     @jsonify
-    def delete_comment(self, comment_id):
+    def delete_comment(self, repo_name, comment_id):
         co = ChangesetComment.get(comment_id)
         owner = lambda : co.author.user_id == c.rhodecode_user.user_id
         if h.HasPermissionAny('hg.admin', 'repository.admin')() or owner:
             ChangesetCommentsModel().delete(comment=co)
-            Session.commit()
+            Session().commit()
             return True
         else:
             raise HTTPForbidden()

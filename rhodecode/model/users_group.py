@@ -26,22 +26,21 @@
 import logging
 import traceback
 
-from rhodecode.lib.caching_query import FromCache
-
 from rhodecode.model import BaseModel
 from rhodecode.model.db import UsersGroupMember, UsersGroup
 
 log = logging.getLogger(__name__)
 
+
 class UsersGroupModel(BaseModel):
 
     def __get_users_group(self, users_group):
-        return self.__get_instance(UsersGroup, users_group)
+        return self._get_instance(UsersGroup, users_group)
 
-    def get(self, users_group_id, cache = False):
+    def get(self, users_group_id, cache=False):
         return UsersGroup.get(users_group_id)
 
-    def get_by_name(self, name, cache = False, case_insensitive = False):
+    def get_by_name(self, name, cache=False, case_insensitive=False):
         return UsersGroup.get_by_group_name(name, cache, case_insensitive)
 
     def create(self, form_data):

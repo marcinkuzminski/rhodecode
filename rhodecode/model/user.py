@@ -50,6 +50,7 @@ PERM_WEIGHTS = {'repository.none': 0,
 
 
 class UserModel(BaseModel):
+
     def get(self, user_id, cache=False):
         user = self.sa.query(User)
         if cache:

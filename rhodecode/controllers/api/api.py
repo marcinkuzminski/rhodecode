@@ -67,13 +67,13 @@ class ApiController(JSONRPCController):
             return None
 
         return dict(id=user.user_id,
-                        username=user.username,
-                        firstname=user.name,
-                        lastname=user.lastname,
-                        email=user.email,
-                        active=user.active,
-                        admin=user.admin,
-                        ldap=user.ldap_dn)
+                    username=user.username,
+                    firstname=user.name,
+                    lastname=user.lastname,
+                    email=user.email,
+                    active=user.active,
+                    admin=user.admin,
+                    ldap=user.ldap_dn)
 
     @HasPermissionAllDecorator('hg.admin')
     def get_users(self, apiuser):
@@ -112,7 +112,7 @@ class ApiController(JSONRPCController):
         :param ldap_dn:
         """
 
-        if self.get_user(apiuser, username):
+        if User.get_by_username(username):
             raise JSONRPCError("user %s already exist" % username)
 
         try:

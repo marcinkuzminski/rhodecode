@@ -24,12 +24,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
-from rhodecode.model.db import BaseModel, UserRepoToPerm, Permission
-from rhodecode.model.meta import Session
+from rhodecode.model import BaseModel
+from rhodecode.model.db import UserRepoToPerm, Permission
 
 log = logging.getLogger(__name__)
 
+
 class RepositoryPermissionModel(BaseModel):
+
     def get_user_permission(self, repository, user):
         return UserRepoToPerm.query() \
                 .filter(UserRepoToPerm.user == user) \
@@ -47,14 +49,14 @@ class RepositoryPermissionModel(BaseModel):
             p.user = user
             p.repository = repository
             p.permission = permission
-            Session.add(p)
-        Session.commit()
+            self.sa.add(p)
+        self.sa.commit()
 
     def delete_user_permission(self, repository, user):
         current = self.get_user_permission(repository, user)
         if current:
-            Session.delete(current)
-            Session.commit()
+            self.sa.delete(current)
+            self.sa.commit()
 
     def update_or_delete_user_permission(self, repository, user, permission):
         if permission:

@@ -10,7 +10,7 @@ import urllib
 import math
 
 from datetime import datetime
-from pygments.formatters import HtmlFormatter
+from pygments.formatters.html import HtmlFormatter
 from pygments import highlight as code_highlight
 from pylons import url, request, config
 from pylons.i18n.translation import _, ungettext

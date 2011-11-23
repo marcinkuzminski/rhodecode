@@ -27,8 +27,6 @@ import time
 import traceback
 import logging
 
-from sqlalchemy.exc import DatabaseError
-
 from vcs import get_backend
 from vcs.exceptions import RepositoryError
 from vcs.utils.lazy import LazyProperty
@@ -119,12 +117,14 @@ class CachedRepoList(object):
             yield tmp_d
 
 class ScmModel(BaseModel):
-    """Generic Scm Model
+    """
+    Generic Scm Model
     """
 
     @LazyProperty
     def repos_path(self):
-        """Get's the repositories root path from database
+        """
+        Get's the repositories root path from database
         """
 
         q = self.sa.query(RhodeCodeUi).filter(RhodeCodeUi.ui_key == '/').one()
@@ -132,7 +132,8 @@ class ScmModel(BaseModel):
         return q.ui_value
 
     def repo_scan(self, repos_path=None):
-        """Listing of repositories in given path. This path should not be a
+        """
+        Listing of repositories in given path. This path should not be a
         repository itself. Return a dictionary of repository objects
 
         :param repos_path: path to directory containing repositories
@@ -147,11 +148,11 @@ class ScmModel(BaseModel):
         repos_list = {}
 
         for name, path in get_filesystem_repos(repos_path, recursive=True):
-            
+
             # name need to be decomposed and put back together using the /
             # since this is internal storage separator for rhodecode
             name = Repository.url_sep().join(name.split(os.sep))
-            
+
             try:
                 if name in repos_list:
                     raise RepositoryError('Duplicate repository name %s '
@@ -198,7 +199,7 @@ class ScmModel(BaseModel):
         :param repo_name: this repo that should invalidation take place
         """
         CacheInvalidation.set_invalidate(repo_name)
-        CacheInvalidation.set_invalidate(repo_name+"_README")
+        CacheInvalidation.set_invalidate(repo_name + "_README")
 
     def toggle_following_repo(self, follow_repo_id, user_id):
 

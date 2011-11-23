@@ -151,7 +151,8 @@ class SmtpMailer(object):
                             'a dict in format {"filename":"filepath"}')
 
     def get_content(self, msg_file):
-        """Get content based on type, if content is a string do open first
+        """
+        Get content based on type, if content is a string do open first
         else just read because it's a probably open file object
 
         :param msg_file:

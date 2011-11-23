@@ -54,9 +54,11 @@ log = logging.getLogger(__name__)
 
 
 class PasswordGenerator(object):
-    """This is a simple class for generating password from
-        different sets of characters
-        usage:
+    """
+    This is a simple class for generating password from different sets of 
+    characters
+    usage::
+
         passwd_gen = PasswordGenerator()
         #print 8-letter password containing only big and small letters
             of alphabet
@@ -420,7 +422,8 @@ class LoginRequired(object):
 
 
 class NotAnonymous(object):
-    """Must be logged in to execute this function else
+    """
+    Must be logged in to execute this function else
     redirect to login page"""
 
     def __call__(self, func):
@@ -497,7 +500,8 @@ class PermsDecorator(object):
 
 
 class HasPermissionAllDecorator(PermsDecorator):
-    """Checks for access permission for all given predicates. All of them
+    """
+    Checks for access permission for all given predicates. All of them
     have to be meet in order to fulfill the request
     """
 
@@ -508,7 +512,8 @@ class HasPermissionAllDecorator(PermsDecorator):
 
 
 class HasPermissionAnyDecorator(PermsDecorator):
-    """Checks for access permission for any of given predicates. In order to
+    """
+    Checks for access permission for any of given predicates. In order to
     fulfill the request any of predicates must be meet
     """
 
@@ -519,7 +524,8 @@ class HasPermissionAnyDecorator(PermsDecorator):
 
 
 class HasRepoPermissionAllDecorator(PermsDecorator):
-    """Checks for access permission for all given predicates for specific
+    """
+    Checks for access permission for all given predicates for specific
     repository. All of them have to be meet in order to fulfill the request
     """
 
@@ -535,7 +541,8 @@ class HasRepoPermissionAllDecorator(PermsDecorator):
 
 
 class HasRepoPermissionAnyDecorator(PermsDecorator):
-    """Checks for access permission for any of given predicates for specific
+    """
+    Checks for access permission for any of given predicates for specific
     repository. In order to fulfill the request any of predicates must be meet
     """
 

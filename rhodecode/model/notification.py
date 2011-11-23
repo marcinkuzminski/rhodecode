@@ -36,19 +36,15 @@ from rhodecode.model.db import Notification, User, UserNotification
 
 log = logging.getLogger(__name__)
 
+
 class NotificationModel(BaseModel):
 
 
     def __get_user(self, user):
-        if isinstance(user, User):
-            return user
-        elif isinstance(user, basestring):
+        if isinstance(user, basestring):
             return User.get_by_username(username=user)
-        elif isinstance(user, int):
-            return User.get(user)
         else:
-            raise Exception('Unsupported user must be one of int,'
-                            'str or User object')
+            return self._get_instance(User, user)
 
     def __get_notification(self, notification):
         if isinstance(notification, Notification):
@@ -82,7 +78,9 @@ class NotificationModel(BaseModel):
 
         recipients_objs = []
         for u in recipients:
-            recipients_objs.append(self.__get_user(u))
+            obj = self.__get_user(u)
+            if obj:
+                recipients_objs.append(obj)
         recipients_objs = set(recipients_objs)
         return Notification.create(created_by=created_by_obj, subject=subject,
                             body=body, recipients=recipients_objs,

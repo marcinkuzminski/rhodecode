@@ -323,6 +323,15 @@ class User(Base, BaseModel):
                                     "get_api_key_%s" % api_key))
         return q.scalar()
 
+    @classmethod
+    def get_by_email(cls, email, cache=False):
+        q = cls.query().filter(cls.email == email)
+
+        if cache:
+            q = q.options(FromCache("sql_cache_short",
+                                    "get_api_key_%s" % email))
+        return q.scalar()
+
     def update_lastlogin(self):
         """Update user lastlogin"""
 

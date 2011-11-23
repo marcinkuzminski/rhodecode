@@ -33,16 +33,17 @@ from rhodecode.lib.caching_query import FromCache
 from rhodecode.model import BaseModel
 from rhodecode.model.db import User, Permission, UserToPerm, UserRepoToPerm
 
-
 log = logging.getLogger(__name__)
 
 
 class PermissionModel(BaseModel):
-    """Permissions model for RhodeCode
+    """
+    Permissions model for RhodeCode
     """
 
     def get_permission(self, permission_id, cache=False):
-        """Get's permissions by id
+        """
+        Get's permissions by id
 
         :param permission_id: id of permission to get from database
         :param cache: use Cache for this query
@@ -54,7 +55,8 @@ class PermissionModel(BaseModel):
         return perm.get(permission_id)
 
     def get_permission_by_name(self, name, cache=False):
-        """Get's permissions by given name
+        """
+        Get's permissions by given name
 
         :param name: name to fetch
         :param cache: Use cache for this query
@@ -78,7 +80,7 @@ class PermissionModel(BaseModel):
                             ' your database' % len(u2p))
 
         try:
-            #stage 1 change defaults
+            # stage 1 change defaults
             for p in u2p:
                 if p.permission.permission_name.startswith('repository.'):
                     p.permission = self.get_permission_by_name(
@@ -103,7 +105,7 @@ class PermissionModel(BaseModel):
                                          form_result['default_perm'])
                     self.sa.add(r2p)
 
-            #stage 3 set anonymous access
+            # stage 3 set anonymous access
             if perm_user.username == 'default':
                 perm_user.active = bool(form_result['anonymous'])
                 self.sa.add(perm_user)

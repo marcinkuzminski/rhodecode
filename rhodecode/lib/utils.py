@@ -389,11 +389,7 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False):
     if user is None:
         raise Exception('Missing administrative account !')    
     added = []
-    # fixup groups paths to new format on the fly
-    # TODO: remove this in future
-    for g in RepoGroup.query().all():
-        g.group_name = g.get_new_name(g.name)
-        sa.add(g)    
+
     for name, repo in initial_repo_list.items():
         group = map_groups(name.split(Repository.url_sep()))
         if not rm.get_by_repo_name(name, cache=False):
@@ -485,8 +481,7 @@ def create_test_env(repos_test_path, config):
     install test repository into tmp dir
     """
     from rhodecode.lib.db_manage import DbManage
-    from rhodecode.tests import HG_REPO, GIT_REPO, NEW_HG_REPO, NEW_GIT_REPO, \
-        HG_FORK, GIT_FORK, TESTS_TMP_PATH
+    from rhodecode.tests import HG_REPO, TESTS_TMP_PATH
     import tarfile
     import shutil
     from os.path import abspath

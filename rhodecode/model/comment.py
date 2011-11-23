@@ -41,7 +41,7 @@ log = logging.getLogger(__name__)
 class ChangesetCommentsModel(BaseModel):
 
     def __get_changeset_comment(self, changeset_comment):
-        return self.__get_instance(ChangesetComment, changeset_comment)
+        return self._get_instance(ChangesetComment, changeset_comment)
 
     def _extract_mentions(self, s):
         user_objects = []
@@ -65,7 +65,9 @@ class ChangesetCommentsModel(BaseModel):
         """
         if text:
             repo = Repository.get(repo_id)
-            desc = repo.scm_instance.get_changeset(revision).message
+            cs = repo.scm_instance.get_changeset(revision)
+            desc = cs.message
+            author = cs.author_email
             comment = ChangesetComment()
             comment.repo = repo
             comment.user_id = user_id
@@ -90,11 +92,21 @@ class ChangesetCommentsModel(BaseModel):
                              )
             body = text
             recipients = ChangesetComment.get_users(revision=revision)
-            recipients += self._extract_mentions(body)
+            # add changeset author
+            recipients += [User.get_by_email(author)]
+
             NotificationModel().create(created_by=user_id, subject=subj,
                                    body=body, recipients=recipients,
                                    type_=Notification.TYPE_CHANGESET_COMMENT)
 
+            mention_recipients = set(self._extract_mentions(body)).difference(recipients)
+            if mention_recipients:
+                subj = _('[Mention]') + ' ' + subj
+                NotificationModel().create(created_by=user_id, subject=subj,
+                                    body = body, recipients = mention_recipients,
+                                    type_=Notification.TYPE_CHANGESET_COMMENT)
+
+            self.sa.commit()
             return comment
 
     def delete(self, comment):

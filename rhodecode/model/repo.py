@@ -28,8 +28,6 @@ import logging
 import traceback
 from datetime import datetime
 
-from sqlalchemy.orm import joinedload, make_transient
-
 from vcs.utils.lazy import LazyProperty
 from vcs.backends import get_backend
 
@@ -39,7 +37,6 @@ from rhodecode.lib.caching_query import FromCache
 from rhodecode.model import BaseModel
 from rhodecode.model.db import Repository, UserRepoToPerm, User, Permission, \
     Statistics, UsersGroup, UsersGroupRepoToPerm, RhodeCodeUi, RepoGroup
-from rhodecode.model.user import UserModel
 
 log = logging.getLogger(__name__)
 
@@ -48,7 +45,8 @@ class RepoModel(BaseModel):
 
     @LazyProperty
     def repos_path(self):
-        """Get's the repositories root path from database
+        """
+        Get's the repositories root path from database
         """
 
         q = self.sa.query(RhodeCodeUi).filter(RhodeCodeUi.ui_key == '/').one()
@@ -141,10 +139,11 @@ class RepoModel(BaseModel):
             # update permissions
             for member, perm, member_type in form_data['perms_updates']:
                 if member_type == 'user':
+                    _member = User.get_by_username(member)
                     r2p = self.sa.query(UserRepoToPerm)\
-                            .filter(UserRepoToPerm.user == User.get_by_username(member))\
-                            .filter(UserRepoToPerm.repository == cur_repo)\
-                            .one()
+                        .filter(UserRepoToPerm.user == _member)\
+                        .filter(UserRepoToPerm.repository == cur_repo)\
+                        .one()
 
                     r2p.permission = self.sa.query(Permission)\
                                         .filter(Permission.permission_name ==
@@ -316,8 +315,8 @@ class RepoModel(BaseModel):
             obj = self.sa.query(UsersGroupRepoToPerm)\
                 .filter(UsersGroupRepoToPerm.repository \
                         == self.get_by_repo_name(repo_name))\
-                .filter(UsersGroupRepoToPerm.users_group_id \
- == form_data['users_group_id']).one()
+                .filter(UsersGroupRepoToPerm.users_group_id
+                        == form_data['users_group_id']).one()
             self.sa.delete(obj)
             self.sa.commit()
         except:
@@ -351,7 +350,8 @@ class RepoModel(BaseModel):
         from rhodecode.lib.utils import is_valid_repo, is_valid_repos_group
 
         if new_parent_id:
-            paths = RepoGroup.get(new_parent_id).full_path.split(RepoGroup.url_sep())
+            paths = RepoGroup.get(new_parent_id)\
+                .full_path.split(RepoGroup.url_sep())
             new_parent_path = os.sep.join(paths)
         else:
             new_parent_path = ''
