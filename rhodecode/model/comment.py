@@ -23,13 +23,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import re
 import logging
 import traceback
 
 from pylons.i18n.translation import _
 from sqlalchemy.util.compat import defaultdict
 
+from rhodecode.lib import extract_mentioned_users
 from rhodecode.lib import helpers as h
 from rhodecode.model import BaseModel
 from rhodecode.model.db import ChangesetComment, User, Repository, Notification
@@ -40,15 +40,16 @@ log = logging.getLogger(__name__)
 
 class ChangesetCommentsModel(BaseModel):
 
+    def __get_changeset_comment(self, changeset_comment):
+        return self.__get_instance(ChangesetComment, changeset_comment)
 
     def _extract_mentions(self, s):
-        usrs = []
-        for username in re.findall(r'(?:^@|\s@)(\w+)', s):
+        user_objects = []
+        for username in extract_mentioned_users(s):
             user_obj = User.get_by_username(username, case_insensitive=True)
             if user_obj:
-                usrs.append(user_obj)
-
-        return usrs
+                user_objects.append(user_obj)
+        return user_objects
 
     def create(self, text, repo_id, user_id, revision, f_path=None,
                line_no=None):
@@ -81,30 +82,30 @@ class ChangesetCommentsModel(BaseModel):
             if line_no:
                 line = _('on line %s') % line_no
             subj = h.link_to('Re commit: %(commit_desc)s %(line)s' % \
-                                    {'commit_desc':desc,'line':line},
+                                    {'commit_desc':desc, 'line':line},
                              h.url('changeset_home', repo_name=repo.repo_name,
-                                   revision = revision,
-                                   anchor = 'comment-%s' % comment.comment_id
+                                   revision=revision,
+                                   anchor='comment-%s' % comment.comment_id
                                    )
                              )
             body = text
             recipients = ChangesetComment.get_users(revision=revision)
             recipients += self._extract_mentions(body)
             NotificationModel().create(created_by=user_id, subject=subj,
-                                   body = body, recipients = recipients,
-                                   type_ = Notification.TYPE_CHANGESET_COMMENT)
+                                   body=body, recipients=recipients,
+                                   type_=Notification.TYPE_CHANGESET_COMMENT)
 
             return comment
 
-    def delete(self, comment_id):
+    def delete(self, comment):
         """
         Deletes given comment
         
         :param comment_id:
         """
-        comment = ChangesetComment.get(comment_id)
+        comment = self.__get_changeset_comment(comment)
         self.sa.delete(comment)
-        self.sa.commit()
+
         return comment
 
 

@@ -32,7 +32,7 @@ class TestSettingsController(TestController):
                       % (repo_name, fork_name) in response.session['flash'][0], 'No flash message about fork'
 
         #test if the fork was created in the database
-        fork_repo = self.sa.query(Repository).filter(Repository.repo_name == fork_name).one()
+        fork_repo = self.Session().query(Repository).filter(Repository.repo_name == fork_name).one()
 
         assert fork_repo.repo_name == fork_name, 'wrong name of repo name in new db fork repo'
         assert fork_repo.fork.repo_name == repo_name, 'wrong fork parrent'

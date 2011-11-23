@@ -64,7 +64,7 @@ class TestController(TestCase):
 
         self.app = TestApp(wsgiapp)
         url._push_object(URLGenerator(config['routes.map'], environ))
-        self.sa = meta.Session
+        self.Session = meta.Session
         self.index_location = config['app_conf']['index_dir']
         TestCase.__init__(self, *args, **kwargs)
 

@@ -24,6 +24,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import re
 
 def __get_lem():
     from pygments import lexers
@@ -78,9 +79,9 @@ ALL_READMES = [
 
 # extension together with weights to search lower is first
 RST_EXTS = [
-    ('', 0), ('.rst', 1),('.rest', 1),
-    ('.RST', 2) ,('.REST', 2), 
-    ('.txt', 3), ('.TXT', 3) 
+    ('', 0), ('.rst', 1), ('.rest', 1),
+    ('.RST', 2) , ('.REST', 2),
+    ('.txt', 3), ('.TXT', 3)
 ]
 
 MARKDOWN_EXTS = [
@@ -90,7 +91,7 @@ MARKDOWN_EXTS = [
     ('.markdown', 4), ('.MARKDOWN', 4)
 ]
 
-PLAIN_EXTS = [('.text', 2),('.TEXT', 2)]
+PLAIN_EXTS = [('.text', 2), ('.TEXT', 2)]
 
 ALL_EXTS = MARKDOWN_EXTS + RST_EXTS + PLAIN_EXTS
 
@@ -223,7 +224,7 @@ def safe_str(unicode_, to_encoding='utf8'):
     :rtype: str
     :returns: str object
     """
-    
+
     if not isinstance(unicode_, basestring):
         return str(unicode_)
 
@@ -436,3 +437,14 @@ def get_current_revision(quiet=False):
                    "was: %s" % err)
         return None
 
+def extract_mentioned_users(s):
+    """
+    Returns unique usernames from given string s that have @mention
+    
+    :param s: string to get mentions
+    """
+    usrs = {}
+    for username in re.findall(r'(?:^@|\s@)(\w+)', s):
+        usrs[username] = username
+
+    return sorted(usrs.keys())

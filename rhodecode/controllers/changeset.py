@@ -44,6 +44,7 @@ from vcs.exceptions import RepositoryError, ChangesetError, \
 from vcs.nodes import FileNode
 from vcs.utils import diffs as differ
 from webob.exc import HTTPForbidden
+from rhodecode.model.meta import Session
 
 log = logging.getLogger(__name__)
 
@@ -279,7 +280,7 @@ class ChangesetController(BaseRepoController):
                                         revision=revision,
                                         f_path=request.POST.get('f_path'),
                                         line_no=request.POST.get('line'))
-
+        Session.commit()
         return redirect(h.url('changeset_home', repo_name=repo_name,
                               revision=revision))
 
@@ -288,8 +289,8 @@ class ChangesetController(BaseRepoController):
         co = ChangesetComment.get(comment_id)
         owner = lambda : co.author.user_id == c.rhodecode_user.user_id
         if h.HasPermissionAny('hg.admin', 'repository.admin')() or owner:
-            ccmodel = ChangesetCommentsModel()
-            ccmodel.delete(comment_id=comment_id)
+            ChangesetCommentsModel().delete(comment=co)
+            Session.commit()
             return True
         else:
             raise HTTPForbidden()

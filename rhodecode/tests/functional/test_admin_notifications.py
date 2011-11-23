@@ -3,19 +3,23 @@ from rhodecode.model.db import Notification, User, UserNotification
 
 from rhodecode.model.user import UserModel
 from rhodecode.model.notification import NotificationModel
+from rhodecode.model.meta import Session
 
 class TestNotificationsController(TestController):
+
+
+    def tearDown(self):
+        for n in Notification.query().all():
+            inst = Notification.get(n.notification_id)
+            Session().delete(inst)
+        Session().commit()
 
     def test_index(self):
         self.log_user()
 
-
         u1 = UserModel().create_or_update(username='u1', password='qweqwe',
                                                email='u1@rhodecode.org',
                                                name='u1', lastname='u1').user_id
-        u2 = UserModel().create_or_update(username='u2', password='qweqwe',
-                                               email='u2@rhodecode.org',
-                                               name='u2', lastname='u2').user_id
 
         response = self.app.get(url('notifications'))
         self.assertTrue('''<div class="table">No notifications here yet</div>'''
@@ -23,15 +27,12 @@ class TestNotificationsController(TestController):
 
         cur_user = self._get_logged_user()
 
-        NotificationModel().create(created_by=u1, subject=u'test',
+        NotificationModel().create(created_by=u1, subject=u'test_notification_1',
                                    body=u'notification_1',
                                    recipients=[cur_user])
+        Session().commit()
         response = self.app.get(url('notifications'))
-
-        self.assertTrue(u'notification_1' in response.body)
-
-        User.delete(u1)
-        User.delete(u2)
+        self.assertTrue(u'test_notification_1' in response.body)
 
 #    def test_index_as_xml(self):
 #        response = self.app.get(url('formatted_notifications', format='xml'))
@@ -62,27 +63,29 @@ class TestNotificationsController(TestController):
                                                email='u2@rhodecode.org',
                                                name='u2', lastname='u2')
 
-        # make two notifications 
+        # make notifications
         notification = NotificationModel().create(created_by=cur_user,
                                                   subject=u'test',
                                                   body=u'hi there',
                                                   recipients=[cur_user, u1, u2])
-
+        Session().commit()
         u1 = User.get(u1.user_id)
         u2 = User.get(u2.user_id)
 
         # check DB
-        self.assertEqual(u1.notifications, [notification])
-        self.assertEqual(u2.notifications, [notification])
+        get_notif = lambda un:[x.notification for x in un]
+        self.assertEqual(get_notif(cur_user.notifications), [notification])
+        self.assertEqual(get_notif(u1.notifications), [notification])
+        self.assertEqual(get_notif(u2.notifications), [notification])
         cur_usr_id = cur_user.user_id
+
+
         response = self.app.delete(url('notification',
-                                       notification_id=cur_usr_id))
+                                       notification_id=
+                                       notification.notification_id))
 
-        cur_user = self._get_logged_user()
+        cur_user = User.get(cur_usr_id)
         self.assertEqual(cur_user.notifications, [])
-
-        User.delete(u1.user_id)
-        User.delete(u2.user_id)
 
 
 #    def test_delete_browser_fakeout(self):
@@ -100,7 +103,7 @@ class TestNotificationsController(TestController):
 
         notification = NotificationModel().create(created_by=cur_user,
                                                   subject='test',
-                                                  body='hi there',
+                                                  body=u'hi there',
                                                   recipients=[cur_user, u1, u2])
 
         response = self.app.get(url('notification',
@@ -114,4 +117,3 @@ class TestNotificationsController(TestController):
 #
 #    def test_edit_as_xml(self):
 #        response = self.app.get(url('formatted_edit_notification', notification_id=1, format='xml'))
-

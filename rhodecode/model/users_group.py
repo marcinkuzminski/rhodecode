@@ -35,23 +35,14 @@ log = logging.getLogger(__name__)
 
 class UsersGroupModel(BaseModel):
 
+    def __get_users_group(self, users_group):
+        return self.__get_instance(UsersGroup, users_group)
+
     def get(self, users_group_id, cache = False):
-        users_group = UsersGroup.query()
-        if cache:
-            users_group = users_group.options(FromCache("sql_cache_short",
-                                          "get_users_group_%s" % users_group_id))
-        return users_group.get(users_group_id)
+        return UsersGroup.get(users_group_id)
 
     def get_by_name(self, name, cache = False, case_insensitive = False):
-        users_group = UsersGroup.query()
-        if case_insensitive:
-            users_group = users_group.filter(UsersGroup.users_group_name.ilike(name))
-        else:
-            users_group = users_group.filter(UsersGroup.users_group_name == name)
-        if cache:
-            users_group = users_group.options(FromCache("sql_cache_short",
-                                          "get_users_group_%s" % name))
-        return users_group.scalar()
+        return UsersGroup.get_by_group_name(name, cache, case_insensitive)
 
     def create(self, form_data):
         try:
@@ -66,6 +57,18 @@ class UsersGroupModel(BaseModel):
             log.error(traceback.format_exc())
             self.sa.rollback()
             raise
+
+
+    def create_(self, name, active=True):
+        new = UsersGroup()
+        new.users_group_name = name
+        new.users_group_active = active
+        self.sa.add(new)
+        return new
+
+    def delete(self, users_group):
+        obj = self.__get_users_group(users_group)
+        self.sa.delete(obj)
 
     def add_user_to_group(self, users_group, user):
         for m in users_group.members:

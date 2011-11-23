@@ -30,19 +30,19 @@
     %>
     <div class="table">
       %for notification in c.notifications:
-        <div id="notification_${notification.notification_id}">
+        <div id="notification_${notification.notification.notification_id}">
           <div class="notification-header">
             <div class="gravatar">
-                <img alt="gravatar" src="${h.gravatar_url(h.email(notification.created_by_user.email),24)}"/>
+                <img alt="gravatar" src="${h.gravatar_url(h.email(notification.notification.created_by_user.email),24)}"/>
             </div>
-            <div class="desc">
-            <a href="${url('notification', notification_id=notification.notification_id)}">${notification.description}</a>
+            <div class="desc ${unread(notification.read)}">
+            <a href="${url('notification', notification_id=notification.notification.notification_id)}">${notification.notification.description}</a>
             </div>
             <div class="delete-notifications">
-              <span id="${notification.notification_id}" class="delete-notification delete_icon action"></span>
+              <span id="${notification.notification.notification_id}" class="delete-notification delete_icon action"></span>
             </div>
           </div>
-          <div class="notification-subject">${h.urlify_text(notification.subject)}</div>
+          <div class="notification-subject">${h.urlify_text(notification.notification.subject)}</div>
         </div>
       %endfor
     </div>

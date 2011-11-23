@@ -1,6 +1,7 @@
 import logging
+import traceback
 
-from pylons import tmpl_context as c
+from pylons import tmpl_context as c, url
 
 from rhodecode.lib.base import BaseController, render
 from rhodecode.model.db import Notification
@@ -8,6 +9,8 @@ from rhodecode.model.db import Notification
 from rhodecode.model.notification import NotificationModel
 from rhodecode.lib.auth import LoginRequired
 from rhodecode.lib import helpers as h
+from rhodecode.model.meta import Session
+from pylons.controllers.util import redirect
 
 log = logging.getLogger(__name__)
 
@@ -57,27 +60,42 @@ class NotificationsController(BaseController):
         #           method='delete')
         # url('notification', notification_id=ID)
 
-        no = Notification.get(notification_id)
-        owner = lambda: no.notifications_to_users.user.user_id == c.rhodecode_user.user_id
-        if h.HasPermissionAny('hg.admin', 'repository.admin')() or owner:
-                NotificationModel().delete(notification_id)
-                return 'ok'
+        try:
+            no = Notification.get(notification_id)
+            owner = lambda: (no.notifications_to_users.user.user_id
+                             == c.rhodecode_user.user_id)
+            if h.HasPermissionAny('hg.admin', 'repository.admin')() or owner:
+                    NotificationModel().delete(c.rhodecode_user.user_id, no)
+                    Session.commit()
+                    return 'ok'
+        except Exception:
+            Session.rollback()
+            log.error(traceback.format_exc())
         return 'fail'
 
     def show(self, notification_id, format='html'):
         """GET /_admin/notifications/id: Show a specific item"""
         # url('notification', notification_id=ID)
         c.user = self.rhodecode_user
-        c.notification = Notification.get(notification_id)
+        no = Notification.get(notification_id)
 
-        unotification = NotificationModel()\
-                            .get_user_notification(c.user.user_id,
-                                                   c.notification)
+        owner = lambda: (no.notifications_to_users.user.user_id
+                         == c.user.user_id)
+        if no and (h.HasPermissionAny('hg.admin', 'repository.admin')() or owner):
+            unotification = NotificationModel()\
+                            .get_user_notification(c.user.user_id, no)
 
-        if unotification.read is False:
-            unotification.mark_as_read()
+            # if this association to user is not valid, we don't want to show
+            # this message
+            if unotification:
+                if unotification.read is False:
+                    unotification.mark_as_read()
+                    Session.commit()
+                c.notification = no
 
-        return render('admin/notifications/show_notification.html')
+                return render('admin/notifications/show_notification.html')
+
+        return redirect(url('notifications'))
 
     def edit(self, notification_id, format='html'):
         """GET /_admin/notifications/id/edit: Form to edit an existing item"""

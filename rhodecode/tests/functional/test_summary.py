@@ -43,5 +43,5 @@ class TestSummaryController(TestController):
     def _enable_stats(self):
         r = Repository.get_by_repo_name(HG_REPO)
         r.enable_statistics = True
-        self.sa.add(r)
-        self.sa.commit()
+        self.Session().add(r)
+        self.Session().commit()

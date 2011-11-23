@@ -32,7 +32,7 @@ class TestAdminUsersController(TestController):
 
         assert '''created user %s''' % (username) in response.session['flash'][0], 'No flash message about new user'
 
-        new_user = self.sa.query(User).filter(User.username == username).one()
+        new_user = self.Session().query(User).filter(User.username == username).one()
 
 
         assert new_user.username == username, 'wrong info about username'
@@ -66,7 +66,7 @@ class TestAdminUsersController(TestController):
         assert """<span class="error-message">An email address must contain a single @</span>""" in response.body
 
         def get_user():
-            self.sa.query(User).filter(User.username == username).one()
+            self.Session().query(User).filter(User.username == username).one()
 
         self.assertRaises(NoResultFound, get_user), 'found user in database'
 
@@ -100,7 +100,7 @@ class TestAdminUsersController(TestController):
 
         response = response.follow()
 
-        new_user = self.sa.query(User).filter(User.username == username).one()
+        new_user = self.Session().query(User).filter(User.username == username).one()
         response = self.app.delete(url('user', id=new_user.user_id))
 
         assert """successfully deleted user""" in response.session['flash'][0], 'No info about user deletion'

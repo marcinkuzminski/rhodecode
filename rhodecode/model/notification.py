@@ -88,30 +88,35 @@ class NotificationModel(BaseModel):
                             body=body, recipients=recipients_objs,
                             type_=type_)
 
-    def delete(self, notification_id):
-        # we don't want to remove actuall notification just the assignment
+    def delete(self, user, notification):
+        # we don't want to remove actual notification just the assignment
         try:
-            notification_id = int(notification_id)
-            no = self.__get_notification(notification_id)
-            if no:
-                UserNotification.delete(no.notifications_to_users.user_to_notification_id)
+            notification = self.__get_notification(notification)
+            user = self.__get_user(user)
+            if notification and user:
+                obj = UserNotification.query().filter(UserNotification.user == user)\
+                    .filter(UserNotification.notification == notification).one()
+                self.sa.delete(obj)
                 return True
         except Exception:
             log.error(traceback.format_exc())
             raise
 
-    def get_for_user(self, user_id):
-        return User.get(user_id).notifications
+    def get_for_user(self, user):
+        user = self.__get_user(user)
+        return user.notifications
 
-    def get_unread_cnt_for_user(self, user_id):
+    def get_unread_cnt_for_user(self, user):
+        user = self.__get_user(user)
         return UserNotification.query()\
                 .filter(UserNotification.read == False)\
-                .filter(UserNotification.user_id == user_id).count()
+                .filter(UserNotification.user == user).count()
 
-    def get_unread_for_user(self, user_id):
+    def get_unread_for_user(self, user):
+        user = self.__get_user(user)
         return [x.notification for x in UserNotification.query()\
                 .filter(UserNotification.read == False)\
-                .filter(UserNotification.user_id == user_id).all()]
+                .filter(UserNotification.user == user).all()]
 
     def get_user_notification(self, user, notification):
         user = self.__get_user(user)

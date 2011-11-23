@@ -52,13 +52,13 @@ class TestAdminUsersGroupsController(TestController):
                                'created users group %s' % users_group_name)
 
 
-        gr = self.sa.query(UsersGroup)\
+        gr = self.Session().query(UsersGroup)\
                            .filter(UsersGroup.users_group_name ==
                                    users_group_name).one()
 
         response = self.app.delete(url('users_group', id=gr.users_group_id))
 
-        gr = self.sa.query(UsersGroup)\
+        gr = self.Session().query(UsersGroup)\
                            .filter(UsersGroup.users_group_name ==
                                    users_group_name).scalar()
 

@@ -55,8 +55,6 @@ from sqlalchemy import engine_from_config
 
 add_cache(config)
 
-
-
 __all__ = ['whoosh_index', 'get_commits_stats',
            'reset_user_password', 'send_email']
 
@@ -101,6 +99,7 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
 
     log.info('running task with lockkey %s', lockkey)
     try:
+        sa = get_session()
         lock = l = DaemonLock(file_=jn(lockkey_path, lockkey))
 
         #for js data compatibilty cleans the key for person from '
@@ -121,8 +120,6 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
         last_rev = 0
         last_cs = None
         timegetter = itemgetter('time')
-
-        sa = get_session()
 
         dbrepo = sa.query(Repository)\
             .filter(Repository.repo_name == repo_name).scalar()

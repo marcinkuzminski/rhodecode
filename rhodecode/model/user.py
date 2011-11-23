@@ -353,7 +353,7 @@ class UserModel(BaseModel):
         #======================================================================
         # fetch default permissions
         #======================================================================
-        default_user = self.get_by_username('default')
+        default_user = User.get_by_username('default')
 
         default_perms = self.sa.query(UserRepoToPerm, Repository, Permission)\
             .join((Repository, UserRepoToPerm.repository_id ==

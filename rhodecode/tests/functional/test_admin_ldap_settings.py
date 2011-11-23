@@ -42,6 +42,7 @@ class TestLdapSettingsController(TestController):
                     'ldap_attr_email':'test@example.com' })
 
         new_settings = RhodeCodeSetting.get_ldap_settings()
+        print new_settings
         self.assertEqual(new_settings['ldap_host'], u'dc.example.com',
                          'fail db write compare')
 

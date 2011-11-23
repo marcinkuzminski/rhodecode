@@ -48,7 +48,6 @@ from rhodecode.lib.caching_query import FromCache
 
 from rhodecode.model.meta import Base, Session
 
-
 log = logging.getLogger(__name__)
 
 #==============================================================================
@@ -122,7 +121,7 @@ class BaseModel(object):
 
     @classmethod
     def query(cls):
-        return Session.query(cls)
+        return Session().query(cls)
 
     @classmethod
     def get(cls, id_):
@@ -136,8 +135,7 @@ class BaseModel(object):
     @classmethod
     def delete(cls, id_):
         obj = cls.query().get(id_)
-        Session.delete(obj)
-        Session.commit()
+        Session().delete(obj)
 
 
 class RhodeCodeSetting(Base, BaseModel):
@@ -257,8 +255,8 @@ class RhodeCodeUi(Base, BaseModel):
         new_ui.ui_key = key
         new_ui.ui_value = val
 
-        Session.add(new_ui)
-        Session.commit()
+        Session().add(new_ui)
+        Session().commit()
 
 
 class User(Base, BaseModel):
@@ -285,9 +283,7 @@ class User(Base, BaseModel):
 
     group_member = relationship('UsersGroupMember', cascade='all')
 
-    notifications = relationship('Notification',
-                            secondary='user_to_notification',
-                            order_by=lambda :Notification.created_on.desc())
+    notifications = relationship('UserNotification')
 
     @property
     def full_contact(self):
@@ -331,8 +327,8 @@ class User(Base, BaseModel):
         """Update user lastlogin"""
 
         self.last_login = datetime.datetime.now()
-        Session.add(self)
-        Session.commit()
+        Session().add(self)
+        Session().commit()
         log.debug('updated user %s lastlogin', self.username)
 
 
@@ -397,12 +393,12 @@ class UsersGroup(Base, BaseModel):
             for k, v in form_data.items():
                 setattr(new_users_group, k, v)
 
-            Session.add(new_users_group)
-            Session.commit()
+            Session().add(new_users_group)
+            Session().commit()
             return new_users_group
         except:
             log.error(traceback.format_exc())
-            Session.rollback()
+            Session().rollback()
             raise
 
     @classmethod
@@ -414,7 +410,7 @@ class UsersGroup(Base, BaseModel):
             for k, v in form_data.items():
                 if k == 'users_group_members':
                     users_group.members = []
-                    Session.flush()
+                    Session().flush()
                     members_list = []
                     if v:
                         v = [v] if isinstance(v, basestring) else v
@@ -424,11 +420,11 @@ class UsersGroup(Base, BaseModel):
                     setattr(users_group, 'members', members_list)
                 setattr(users_group, k, v)
 
-            Session.add(users_group)
-            Session.commit()
+            Session().add(users_group)
+            Session().commit()
         except:
             log.error(traceback.format_exc())
-            Session.rollback()
+            Session().rollback()
             raise
 
     @classmethod
@@ -445,11 +441,11 @@ class UsersGroup(Base, BaseModel):
                                                    assigned_groups)
 
             users_group = cls.get(users_group_id, cache=False)
-            Session.delete(users_group)
-            Session.commit()
+            Session().delete(users_group)
+            Session().commit()
         except:
             log.error(traceback.format_exc())
-            Session.rollback()
+            Session().rollback()
             raise
 
 class UsersGroupMember(Base, BaseModel):
@@ -472,8 +468,8 @@ class UsersGroupMember(Base, BaseModel):
         ugm = UsersGroupMember()
         ugm.users_group = group
         ugm.user = user
-        Session.add(ugm)
-        Session.commit()
+        Session().add(ugm)
+        Session().commit()
         return ugm
 
 class Repository(Base, BaseModel):
@@ -516,7 +512,7 @@ class Repository(Base, BaseModel):
 
     @classmethod
     def get_by_repo_name(cls, repo_name):
-        q = Session.query(cls).filter(cls.repo_name == repo_name)
+        q = Session().query(cls).filter(cls.repo_name == repo_name)
         q = q.options(joinedload(Repository.fork))\
                 .options(joinedload(Repository.user))\
                 .options(joinedload(Repository.group))
@@ -533,7 +529,7 @@ class Repository(Base, BaseModel):
 
         :param cls:
         """
-        q = Session.query(RhodeCodeUi).filter(RhodeCodeUi.ui_key ==
+        q = Session().query(RhodeCodeUi).filter(RhodeCodeUi.ui_key ==
                                               cls.url_sep())
         q.options(FromCache("sql_cache_short", "repository_repo_path"))
         return q.one().ui_value
@@ -569,7 +565,7 @@ class Repository(Base, BaseModel):
         Returns base full path for that repository means where it actually
         exists on a filesystem
         """
-        q = Session.query(RhodeCodeUi).filter(RhodeCodeUi.ui_key ==
+        q = Session().query(RhodeCodeUi).filter(RhodeCodeUi.ui_key ==
                                               Repository.url_sep())
         q.options(FromCache("sql_cache_short", "repository_repo_path"))
         return q.one().ui_value
@@ -886,10 +882,10 @@ class UserToPerm(Base, BaseModel):
         new.user_id = user_id
         new.permission = perm
         try:
-            Session.add(new)
-            Session.commit()
+            Session().add(new)
+            Session().commit()
         except:
-            Session.rollback()
+            Session().rollback()
 
 
     @classmethod
@@ -898,11 +894,12 @@ class UserToPerm(Base, BaseModel):
             raise Exception('perm needs to be an instance of Permission class')
 
         try:
-            cls.query().filter(cls.user_id == user_id)\
-                .filter(cls.permission == perm).delete()
-            Session.commit()
+            obj = cls.query().filter(cls.user_id == user_id)\
+                    .filter(cls.permission == perm).one()
+            Session().delete(obj)
+            Session().commit()
         except:
-            Session.rollback()
+            Session().rollback()
 
 class UsersGroupRepoToPerm(Base, BaseModel):
     __tablename__ = 'users_group_repo_to_perm'
@@ -948,10 +945,10 @@ class UsersGroupToPerm(Base, BaseModel):
         new.users_group_id = users_group_id
         new.permission = perm
         try:
-            Session.add(new)
-            Session.commit()
+            Session().add(new)
+            Session().commit()
         except:
-            Session.rollback()
+            Session().rollback()
 
 
     @classmethod
@@ -960,11 +957,12 @@ class UsersGroupToPerm(Base, BaseModel):
             raise Exception('perm needs to be an instance of Permission class')
 
         try:
-            cls.query().filter(cls.users_group_id == users_group_id)\
-                .filter(cls.permission == perm).delete()
-            Session.commit()
+            obj = cls.query().filter(cls.users_group_id == users_group_id)\
+                .filter(cls.permission == perm).one()
+            Session().delete(obj)
+            Session().commit()
         except:
-            Session.rollback()
+            Session().rollback()
 
 
 class UserRepoGroupToPerm(Base, BaseModel):
@@ -1077,11 +1075,11 @@ class CacheInvalidation(Base, BaseModel):
             inv_obj = CacheInvalidation(key)
 
         try:
-            Session.add(inv_obj)
-            Session.commit()
+            Session().add(inv_obj)
+            Session().commit()
         except Exception:
             log.error(traceback.format_exc())
-            Session.rollback()
+            Session().rollback()
 
     @classmethod
     def set_valid(cls, key):
@@ -1090,11 +1088,11 @@ class CacheInvalidation(Base, BaseModel):
         
         :param key:
         """
-        inv_obj = Session().query(CacheInvalidation)\
+        inv_obj = CacheInvalidation.query()\
             .filter(CacheInvalidation.cache_key == key).scalar()
         inv_obj.cache_active = True
-        Session.add(inv_obj)
-        Session.commit()
+        Session().add(inv_obj)
+        Session().commit()
 
 
 class ChangesetComment(Base, BaseModel):
@@ -1122,7 +1120,7 @@ class ChangesetComment(Base, BaseModel):
         :param cls:
         :param revision:
         """
-        return Session.query(User)\
+        return Session().query(User)\
                 .filter(cls.revision == revision)\
                 .join(ChangesetComment.author).all()
 
@@ -1146,7 +1144,7 @@ class Notification(Base, BaseModel):
     notifications_to_users = relationship('UserNotification',
         primaryjoin='Notification.notification_id==UserNotification.notification_id',
         lazy='joined',
-        cascade = "all, delete, delete-orphan")
+        cascade="all, delete, delete-orphan")
 
     @property
     def recipients(self):
@@ -1163,9 +1161,12 @@ class Notification(Base, BaseModel):
         notification.subject = subject
         notification.body = body
         notification.type_ = type_
-        Session.add(notification)
+
         for u in recipients:
-            u.notifications.append(notification)
+            assoc = UserNotification()
+            assoc.notification = notification
+            u.notifications.append(assoc)
+        Session().add(notification)
         return notification
 
     @property
@@ -1177,19 +1178,17 @@ class UserNotification(Base, BaseModel):
     __tablename__ = 'user_to_notification'
     __table_args__ = (UniqueConstraint('user_id', 'notification_id'),
                       {'extend_existing':True})
-    user_to_notification_id = Column("user_to_notification_id", Integer(), nullable=False, unique=True, primary_key=True)
-    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None, default=None)
-    notification_id = Column("notification_id", Integer(), ForeignKey('notifications.notification_id'), nullable=False)
+    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), primary_key=True)
+    notification_id = Column("notification_id", Integer(), ForeignKey('notifications.notification_id'), primary_key=True)
     read = Column('read', Boolean, default=False)
     sent_on = Column('sent_on', DateTime(timezone=False), nullable=True, unique=None)
 
-    user = relationship('User', single_parent=True, lazy="joined")
-    notification = relationship('Notification', single_parent=True,)
+    user = relationship('User', lazy="joined")
+    notification = relationship('Notification', lazy="joined", cascade='all')
 
     def mark_as_read(self):
         self.read = True
-        Session.add(self)
-        Session.commit()
+        Session().add(self)
 
 class DbMigrateVersion(Base, BaseModel):
     __tablename__ = 'db_migrate_version'

@@ -300,10 +300,11 @@ class RepoModel(BaseModel):
 
     def delete_perm_user(self, form_data, repo_name):
         try:
-            self.sa.query(UserRepoToPerm)\
+            obj = self.sa.query(UserRepoToPerm)\
                 .filter(UserRepoToPerm.repository \
                         == self.get_by_repo_name(repo_name))\
-                .filter(UserRepoToPerm.user_id == form_data['user_id']).delete()
+                .filter(UserRepoToPerm.user_id == form_data['user_id']).one()
+            self.sa.delete(obj)
             self.sa.commit()
         except:
             log.error(traceback.format_exc())
@@ -312,11 +313,12 @@ class RepoModel(BaseModel):
 
     def delete_perm_users_group(self, form_data, repo_name):
         try:
-            self.sa.query(UsersGroupRepoToPerm)\
+            obj = self.sa.query(UsersGroupRepoToPerm)\
                 .filter(UsersGroupRepoToPerm.repository \
                         == self.get_by_repo_name(repo_name))\
                 .filter(UsersGroupRepoToPerm.users_group_id \
-                        == form_data['users_group_id']).delete()
+ == form_data['users_group_id']).one()
+            self.sa.delete(obj)
             self.sa.commit()
         except:
             log.error(traceback.format_exc())
@@ -325,9 +327,10 @@ class RepoModel(BaseModel):
 
     def delete_stats(self, repo_name):
         try:
-            self.sa.query(Statistics)\
-                .filter(Statistics.repository == \
-                        self.get_by_repo_name(repo_name)).delete()
+            obj = self.sa.query(Statistics)\
+                    .filter(Statistics.repository == \
+                        self.get_by_repo_name(repo_name)).one()
+            self.sa.delete(obj)
             self.sa.commit()
         except:
             log.error(traceback.format_exc())

@@ -71,4 +71,22 @@ class BaseModel(object):
         if sa is not None:
             self.sa = sa
         else:
-            self.sa = meta.Session
+            self.sa = meta.Session()
+
+    def __get_instance(self, cls, instance):
+        """
+        Get's instance of given cls using some simple lookup mechanism
+        
+        :param cls: class to fetch
+        :param instance: int or Instance
+        """
+
+        if isinstance(instance, cls):
+            return instance
+        elif isinstance(instance, int) or str(instance).isdigit():
+            return cls.get(instance)
+        else:
+            if instance:
+                raise Exception('given object must be int or Instance'
+                                ' of %s got %s' % (type(cls),
+                                                   type(instance)))

@@ -103,3 +103,14 @@ class TestLibs(unittest.TestCase):
         for case in test_cases:
             self.assertEqual(str2bool(case[0]), case[1])
 
+
+    def test_mention_extractor(self):
+        from rhodecode.lib import extract_mentioned_users
+        sample = ("@first hi there @marcink here's my email marcin@email.com "
+                  "@lukaszb check it pls @ ttwelve @D[] @one@two@three "
+                  "@MARCIN    @maRCiN @2one_more22")
+        s = ['2one_more22', 'D', 'MARCIN', 'first', 'lukaszb',
+             'maRCiN', 'marcink', 'one']
+        self.assertEqual(s, extract_mentioned_users(sample))
+
+
