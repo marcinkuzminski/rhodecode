@@ -142,13 +142,17 @@ beaker.session.key = rhodecode
 beaker.session.encrypt_key = ${app_instance_secret}
 beaker.session.validate_key = ${app_instance_secret}
 beaker.session.timeout = 36000
+beaker.session.httponly = true
+# uncomment for https secure cookie
+beaker.session.secure = false
 
 ##auto save the session to not to use .save()
 beaker.session.auto = False
 
 ##true exire at browser close
 #beaker.session.cookie_expires = 3600
-    
+
+
 ################################################################################
 ## WARNING: *THE LINE BELOW MUST BE UNCOMMENTED ON A PRODUCTION ENVIRONMENT*  ##
 ## Debug mode will enable the interactive debugging tool, allowing ANYONE to  ##
