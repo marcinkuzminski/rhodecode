@@ -88,18 +88,18 @@ class SummaryController(BaseRepoController):
             password = '@'
 
         parsed_url = urlparse(url.current(qualified=True))
-        
+
         default_clone_uri = '{scheme}://{user}{pass}{netloc}{path}'
-        
-        uri_tmpl = config.get('clone_uri',default_clone_uri)
-        uri_tmpl = uri_tmpl.replace('{','%(').replace('}',')s')
-        
-        uri =  uri_tmpl % {'user': username,
+
+        uri_tmpl = config.get('clone_uri', default_clone_uri)
+        uri_tmpl = uri_tmpl.replace('{', '%(').replace('}', ')s')
+
+        uri = uri_tmpl % {'user': username,
                            'pass': password,
                            'scheme': parsed_url.scheme,
                            'netloc':parsed_url.netloc,
                            'path':parsed_url.path}
-        
+
         c.clone_repo_url = uri
         c.repo_tags = OrderedDict()
         for name, hash in c.rhodecode_repo.tags.items()[:10]:
@@ -124,9 +124,11 @@ class SummaryController(BaseRepoController):
         ts_max_y = mktime(td.timetuple())
 
         if dbrepo.enable_statistics:
+            c.show_stats = True
             c.no_data_msg = _('No data loaded yet')
             run_task(get_commits_stats, c.dbrepo.repo_name, ts_min_y, ts_max_y)
         else:
+            c.show_stats = False
             c.no_data_msg = _('Statistics are disabled for this repository')
         c.ts_min = ts_min_m
         c.ts_max = ts_max_y

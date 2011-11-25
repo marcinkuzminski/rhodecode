@@ -17,7 +17,11 @@
 </%def>
 
 <%def name="main()">
-<div class="box box-left">
+    %if c.show_stats:
+        <div class="box box-left">
+    %else:
+        <div class="box">
+    %endif
     <!-- box / title -->
     <div class="title">
         ${self.breadcrumbs()}
@@ -30,7 +34,16 @@
 			  <div class="label">
 			      <label>${_('Name')}:</label>
 			  </div>
-			  <div class="input-short">
+			  <div class="input">
+                  <div style="float:right;padding-top:5px">		  
+                     %if c.rhodecode_user.username != 'default':
+                      ${h.link_to(_('RSS'),h.url('rss_feed_home',repo_name=c.dbrepo.repo_name,api_key=c.rhodecode_user.api_key),class_='rss_icon')}
+                      ${h.link_to(_('ATOM'),h.url('atom_feed_home',repo_name=c.dbrepo.repo_name,api_key=c.rhodecode_user.api_key),class_='atom_icon')}
+                     %else:
+                      ${h.link_to(_('RSS'),h.url('rss_feed_home',repo_name=c.dbrepo.repo_name),class_='rss_icon')}
+                      ${h.link_to(_('ATOM'),h.url('atom_feed_home',repo_name=c.dbrepo.repo_name),class_='atom_icon')}            
+                     %endif  
+                  </div>
                   %if c.rhodecode_user.username != 'default':
                       %if c.following:
                       <span id="follow_toggle" class="following" title="${_('Stop following this repository')}"
@@ -41,8 +54,7 @@
                             onclick="javascript:toggleFollowingRepo(this,${c.dbrepo.repo_id},'${str(h.get_token())}')">
                       </span>
                       %endif
-                  %endif:			  
-                 
+                  %endif:                                  
                  ##REPO TYPE
 		         %if c.dbrepo.repo_type =='hg':
 		           <img style="margin-bottom:2px" class="icon" title="${_('Mercurial repository')}" alt="${_('Mercurial repository')}" src="${h.url('/images/icons/hgicon.png')}"/>
@@ -84,14 +96,14 @@
 			  <div class="label">
 			      <label>${_('Description')}:</label>
 			  </div>
-			  <div class="input-short desc">${h.urlify_text(c.dbrepo.description)}</div>
+			  <div class="input desc">${h.urlify_text(c.dbrepo.description)}</div>
 			 </div>
 			
 			 <div class="field">
 			  <div class="label">
 			      <label>${_('Contact')}:</label>
 			  </div>
-			  <div class="input-short">
+			  <div class="input">
 			  	<div class="gravatar">
 			  		<img alt="gravatar" src="${h.gravatar_url(c.dbrepo.user.email)}"/>
 			  	</div>
@@ -105,11 +117,11 @@
 			  <div class="label">
 			      <label>${_('Last change')}:</label>
 			  </div>
-			  <div class="input-short">
+			  <div class="input">
                   <b>${'r%s:%s' % (h.get_changeset_safe(c.rhodecode_repo,'tip').revision,
                             h.get_changeset_safe(c.rhodecode_repo,'tip').short_id)}</b> - 
 			      <span class="tooltip" title="${c.rhodecode_repo.last_change}">
-			      ${h.age(c.rhodecode_repo.last_change)}</span><br/>
+			      ${h.age(c.rhodecode_repo.last_change)}</span>
 			      ${_('by')} ${h.get_changeset_safe(c.rhodecode_repo,'tip').author} 
 			  </div>
 			 </div>
@@ -118,8 +130,8 @@
 			  <div class="label">
 			      <label>${_('Clone url')}:</label>
 			  </div>
-			  <div class="input-short">
-			      <input type="text" id="clone_url" readonly="readonly" value="${c.rhodecode_repo.alias} clone ${c.clone_repo_url}" size="70"/>
+			  <div class="input">
+			      <input type="text" id="clone_url" readonly="readonly" value="${c.rhodecode_repo.alias} clone ${c.clone_repo_url}" size="65"/>
 			  </div>
 			 </div>
 			 
@@ -127,8 +139,14 @@
 			  <div class="label">
 			      <label>${_('Trending source files')}:</label>
 			  </div>
-			  <div class="input-short">
-			    <div id="lang_stats"></div> 			   
+			  <div class="input">
+                %if c.show_stats:
+			    <div id="lang_stats"></div>
+                %else:
+                   %if h.HasPermissionAll('hg.admin')('enable stats on from summary'):
+                        ${_('Statistics are disabled for this repository')} ${h.link_to(_('enable'),h.url('edit_repo',repo_name=c.repo_name),class_="ui-button-small")}
+                   %endif                  
+                %endif		   
 			  </div>
 			 </div>
 			 			
@@ -136,12 +154,12 @@
 			  <div class="label">
 			      <label>${_('Download')}:</label>
 			  </div>
-			  <div class="input-short">
+			  <div class="input">
 		        %if len(c.rhodecode_repo.revisions) == 0:
 		          ${_('There are no downloads yet')}
 		        %elif c.enable_downloads is False:
 		          ${_('Downloads are disabled for this repository')}
-                    %if h.HasPermissionAll('hg.admin')('enable stats on from summary'):
+                    %if h.HasPermissionAll('hg.admin')('enable downloads on from summary'):
                         ${h.link_to(_('enable'),h.url('edit_repo',repo_name=c.repo_name),class_="ui-button-small")}
                     %endif  		          
 		        %else:
@@ -160,26 +178,12 @@
                     </span>
 			    %endif
 			  </div>
-			 </div>
-			 
-			 <div class="field">
-			  <div class="label">
-			      <label>${_('Feeds')}:</label>
-			  </div>
-			  <div class="input-short">
-			   %if c.rhodecode_user.username != 'default':
-	            ${h.link_to(_('RSS'),h.url('rss_feed_home',repo_name=c.dbrepo.repo_name,api_key=c.rhodecode_user.api_key),class_='rss_icon')}
-	            ${h.link_to(_('Atom'),h.url('atom_feed_home',repo_name=c.dbrepo.repo_name,api_key=c.rhodecode_user.api_key),class_='atom_icon')}
-	           %else:
-                ${h.link_to(_('RSS'),h.url('rss_feed_home',repo_name=c.dbrepo.repo_name),class_='rss_icon')}
-                ${h.link_to(_('Atom'),h.url('atom_feed_home',repo_name=c.dbrepo.repo_name),class_='atom_icon')}	           
-	           %endif 
-			  </div>
-			 </div>				 			 			 
+			 </div>			 			 			 
 	  </div>		 
 	</div>
 </div>
-        
+
+%if c.show_stats:        
 <div class="box box-right"  style="min-height:455px">
     <!-- box / title -->
     <div class="title">
@@ -209,6 +213,7 @@
     	</div>
     </div>
 </div>    
+%endif
 
 <div class="box">    
     <div class="title">
@@ -235,444 +240,440 @@
 %endif
 
 <script type="text/javascript">
-        YUE.onDOMReady(function(e){
-            id = 'clone_url';
-            YUE.on(id,'click',function(e){
-                if(YUD.hasClass(id,'selected')){
-                    return
-                }
-                else{
-                    YUD.addClass(id,'selected');
-                    YUD.get(id).select();                   
-                }
+var clone_url = 'clone_url';
+YUE.on(clone_url,'click',function(e){
+    if(YUD.hasClass(clone_url,'selected')){
+        return
+    }
+    else{
+        YUD.addClass(clone_url,'selected');
+        YUD.get(clone_url).select();                   
+    }
+})
 
-            })
-        })
-        var data = ${c.trending_languages|n};
-        var total = 0;
-        var no_data = true;
-        for (k in data){
-            total += data[k].count;
-            no_data = false;
-        } 
-        var tbl = document.createElement('table');
-        tbl.setAttribute('class','trending_language_tbl');
-        var cnt = 0;
-        for (k in data){
-            cnt += 1;
-            var hide = cnt>2;
-            var tr = document.createElement('tr');
-            if (hide){
-                tr.setAttribute('style','display:none');
-                tr.setAttribute('class','stats_hidden');
+var tmpl_links = {};
+%for cnt,archive in enumerate(c.rhodecode_repo._get_archives()):
+  tmpl_links['${archive['type']}'] = '${h.link_to(archive['type'],
+       h.url('files_archive_home',repo_name=c.dbrepo.repo_name,
+       fname='__CS__'+archive['extension'],subrepos='__SUB__'),class_="archive_icon")}';
+%endfor
+
+YUE.on(['download_options','archive_subrepos'],'change',function(e){
+   var sm = YUD.get('download_options');
+   var new_cs = sm.options[sm.selectedIndex];
+   
+   for(k in tmpl_links){
+       var s = YUD.get(k+'_link');
+       title_tmpl = "${_('Download %s as %s') % ('__CS_NAME__','__CS_EXT__')}";
+       s.title = title_tmpl.replace('__CS_NAME__',new_cs.text);
+       s.title = s.title.replace('__CS_EXT__',k);
+       var url = tmpl_links[k].replace('__CS__',new_cs.value);
+       var subrepos = YUD.get('archive_subrepos').checked
+       url = url.replace('__SUB__',subrepos);
+       s.innerHTML = url 
+   }
+});
+</script>
+%if c.show_stats:
+<script type="text/javascript">
+var data = ${c.trending_languages|n};
+var total = 0;
+var no_data = true;
+for (k in data){
+    total += data[k].count;
+    no_data = false;
+} 
+var tbl = document.createElement('table');
+tbl.setAttribute('class','trending_language_tbl');
+var cnt = 0;
+for (k in data){
+    cnt += 1;
+    var hide = cnt>2;
+    var tr = document.createElement('tr');
+    if (hide){
+        tr.setAttribute('style','display:none');
+        tr.setAttribute('class','stats_hidden');
+    }
+    var percentage = Math.round((data[k].count/total*100),2);
+    var value = data[k].count;
+    var td1 = document.createElement('td');
+    td1.width = 150;
+    var trending_language_label = document.createElement('div');
+    trending_language_label.innerHTML = data[k].desc+" ("+k+")";
+    td1.appendChild(trending_language_label);
+
+    var td2 = document.createElement('td');
+    td2.setAttribute('style','padding-right:14px !important');
+    var trending_language = document.createElement('div');
+    var nr_files = value+" ${_('files')}";
+    
+    trending_language.title = k+" "+nr_files;
+    
+    if (percentage>22){
+        trending_language.innerHTML = "<b style='font-size:0.8em'>"+percentage+"% "+nr_files+ "</b>";   
+    }
+    else{
+        trending_language.innerHTML = "<b style='font-size:0.8em'>"+percentage+"%</b>";
+    }
+    
+    trending_language.setAttribute("class", 'trending_language top-right-rounded-corner bottom-right-rounded-corner');
+    trending_language.style.width=percentage+"%";
+    td2.appendChild(trending_language);
+    
+    tr.appendChild(td1);
+    tr.appendChild(td2);
+    tbl.appendChild(tr);
+    if(cnt == 3){
+        var show_more = document.createElement('tr');
+        var td = document.createElement('td');
+        lnk = document.createElement('a');
+        
+        lnk.href='#';
+        lnk.innerHTML = "${_('show more')}";
+        lnk.id='code_stats_show_more';
+        td.appendChild(lnk);
+        
+        show_more.appendChild(td);
+        show_more.appendChild(document.createElement('td'));
+        tbl.appendChild(show_more);
+    }
+    
+}
+
+YUD.get('lang_stats').appendChild(tbl);
+YUE.on('code_stats_show_more','click',function(){
+    l = YUD.getElementsByClassName('stats_hidden')
+    for (e in l){
+        YUD.setStyle(l[e],'display','');
+    };
+    YUD.setStyle(YUD.get('code_stats_show_more'),
+            'display','none');
+});
+</script>   
+<script type="text/javascript">
+/**
+ * Plots summary graph
+ *
+ * @class SummaryPlot
+ * @param {from} initial from for detailed graph
+ * @param {to} initial to for detailed graph
+ * @param {dataset}
+ * @param {overview_dataset}
+ */
+function SummaryPlot(from,to,dataset,overview_dataset) {
+    var initial_ranges = {
+        "xaxis":{
+            "from":from,
+            "to":to,
+        },
+    };
+    var dataset = dataset;
+    var overview_dataset = [overview_dataset];
+    var choiceContainer = YUD.get("legend_choices");
+    var choiceContainerTable = YUD.get("legend_choices_tables");
+    var plotContainer = YUD.get('commit_history');
+    var overviewContainer = YUD.get('overview');
+    
+    var plot_options = {
+        bars: {show:true,align:'center',lineWidth:4},
+        legend: {show:true, container:"legend_container"},
+        points: {show:true,radius:0,fill:false},
+        yaxis: {tickDecimals:0,},
+        xaxis: {
+            mode: "time", 
+            timeformat: "%d/%m",
+            min:from,
+            max:to, 
+        }, 
+        grid: {
+            hoverable: true, 
+            clickable: true,
+            autoHighlight:true,
+            color: "#999"
+        },
+        //selection: {mode: "x"}
+    };
+    var overview_options = {
+        legend:{show:false},
+        bars: {show:true,barWidth: 2,},
+        shadowSize: 0,
+        xaxis: {mode: "time", timeformat: "%d/%m/%y",},
+        yaxis: {ticks: 3, min: 0,tickDecimals:0,},
+        grid: {color: "#999",},
+        selection: {mode: "x"}
+    };
+
+    /**
+    *get dummy data needed in few places
+    */
+    function getDummyData(label){
+        return {"label":label,
+         "data":[{"time":0,
+             "commits":0,
+                 "added":0,
+                 "changed":0,
+                 "removed":0,
+            }],
+            "schema":["commits"],
+            "color":'#ffffff',
+        }
+    }
+    
+    /**
+     * generate checkboxes accordindly to data
+     * @param keys
+     * @returns
+     */
+    function generateCheckboxes(data) {
+        //append checkboxes
+        var i = 0;
+        choiceContainerTable.innerHTML = '';
+        for(var pos in data) {
+            
+            data[pos].color = i;
+            i++;
+            if(data[pos].label != ''){
+                choiceContainerTable.innerHTML += '<tr><td>'+
+                '<input type="checkbox" name="' + data[pos].label +'" checked="checked" />'
+                +data[pos].label+
+                '</td></tr>';
             }
-            var percentage = Math.round((data[k].count/total*100),2);
-            var value = data[k].count;
-            var td1 = document.createElement('td');
-            td1.width = 150;
-            var trending_language_label = document.createElement('div');
-            trending_language_label.innerHTML = data[k].desc+" ("+k+")";
-            td1.appendChild(trending_language_label);
+        }   
+    }
+    
+    /**
+     * ToolTip show
+     */
+    function showTooltip(x, y, contents) {
+        var div=document.getElementById('tooltip');
+        if(!div) {
+            div = document.createElement('div');
+            div.id="tooltip";
+            div.style.position="absolute";
+            div.style.border='1px solid #fdd';
+            div.style.padding='2px';
+            div.style.backgroundColor='#fee';
+            document.body.appendChild(div);
+        }
+        YUD.setStyle(div, 'opacity', 0);
+        div.innerHTML = contents;
+        div.style.top=(y + 5) + "px";
+        div.style.left=(x + 5) + "px";
 
-            var td2 = document.createElement('td');
-            td2.setAttribute('style','padding-right:14px !important');
-            var trending_language = document.createElement('div');
-            var nr_files = value+" ${_('files')}";
+        var anim = new YAHOO.util.Anim(div, {opacity: {to: 0.8}}, 0.2);
+        anim.animate();
+    }
+    
+    /**
+     * This function will detect if selected period has some changesets 
+       for this user if it does this data is then pushed for displaying
+       Additionally it will only display users that are selected by the checkbox
+    */
+    function getDataAccordingToRanges(ranges) {
+        
+        var data = [];
+        var new_dataset = {};
+        var keys = [];
+        var max_commits = 0;
+        for(var key in dataset){
             
-            trending_language.title = k+" "+nr_files;
+            for(var ds in dataset[key].data){
+                commit_data = dataset[key].data[ds];
+                if (commit_data.time >= ranges.xaxis.from && commit_data.time <= ranges.xaxis.to){
+
+                    if(new_dataset[key] === undefined){
+                        new_dataset[key] = {data:[],schema:["commits"],label:key};  
+                    }
+                    new_dataset[key].data.push(commit_data);
+                }
+            }
+            if (new_dataset[key] !== undefined){
+                data.push(new_dataset[key]);    
+            }
+        }
+
+        if (data.length > 0){
+            return data;    
+        }
+        else{
+            //just return dummy data for graph to plot itself
+            return [getDummyData('')];  
+        }
+    }
+    
+    /**
+    * redraw using new checkbox data
+    */
+    function plotchoiced(e,args){
+        var cur_data = args[0];
+        var cur_ranges = args[1];
+        
+        var new_data = [];
+        var inputs = choiceContainer.getElementsByTagName("input");
+
+        //show only checked labels
+        for(var i=0; i<inputs.length; i++) {
+            var checkbox_key = inputs[i].name;
             
-            if (percentage>22){
-                trending_language.innerHTML = "<b style='font-size:0.8em'>"+percentage+"% "+nr_files+ "</b>";   
+            if(inputs[i].checked){
+                for(var d in cur_data){
+                    if(cur_data[d].label == checkbox_key){
+                        new_data.push(cur_data[d]);
+                    }
+                }                           
             }
             else{
-                trending_language.innerHTML = "<b style='font-size:0.8em'>"+percentage+"%</b>";
+                //push dummy data to not hide the label
+                new_data.push(getDummyData(checkbox_key));
             }
-            
-            trending_language.setAttribute("class", 'trending_language top-right-rounded-corner bottom-right-rounded-corner');
-            trending_language.style.width=percentage+"%";
-            td2.appendChild(trending_language);
-            
-            tr.appendChild(td1);
-            tr.appendChild(td2);
-            tbl.appendChild(tr);
-            if(cnt == 3){
-                var show_more = document.createElement('tr');
-                var td = document.createElement('td');
-                lnk = document.createElement('a');
-                
-                lnk.href='#';
-                lnk.innerHTML = "${_('show more')}";
-                lnk.id='code_stats_show_more';
-                td.appendChild(lnk);
-                
-                show_more.appendChild(td);
-                show_more.appendChild(document.createElement('td'));
-                tbl.appendChild(show_more);
-            }
-            
         }
-        if(no_data){
-            var tr = document.createElement('tr');
-            var td1 = document.createElement('td');
-            td1.innerHTML = "${c.no_data_msg}";
-            tr.appendChild(td1);
-            tbl.appendChild(tr);
+                    
+        var new_options = YAHOO.lang.merge(plot_options, {
+            xaxis: { 
+                min: cur_ranges.xaxis.from, 
+                max: cur_ranges.xaxis.to,
+                mode:"time",
+                timeformat: "%d/%m",
+            },
+        });
+        if (!new_data){
+            new_data = [[0,1]];
         }
-        YUD.get('lang_stats').appendChild(tbl);
-        YUE.on('code_stats_show_more','click',function(){
-            l = YUD.getElementsByClassName('stats_hidden')
-            for (e in l){
-                YUD.setStyle(l[e],'display','');
-            };
-            YUD.setStyle(YUD.get('code_stats_show_more'),
-                    'display','none');
-        })
+        // do the zooming
+       plot = YAHOO.widget.Flot(plotContainer, new_data, new_options);
+       
+       plot.subscribe("plotselected", plotselected);
+
+       //resubscribe plothover
+       plot.subscribe("plothover", plothover);
+        
+       // don't fire event on the overview to prevent eternal loop 
+       overview.setSelection(cur_ranges, true);
+
+    }
     
-             var tmpl_links = {}
-              %for cnt,archive in enumerate(c.rhodecode_repo._get_archives()):
-                tmpl_links['${archive['type']}'] = '${h.link_to(archive['type'],
-                     h.url('files_archive_home',repo_name=c.dbrepo.repo_name,
-                     fname='__CS__'+archive['extension'],subrepos='__SUB__'),class_="archive_icon")}';
-              %endfor
+    /**
+     * plot only selected items from overview
+     * @param ranges
+     * @returns
+     */
+    function plotselected(ranges,cur_data) {
+        //updates the data for new plot
+        var data = getDataAccordingToRanges(ranges);
+        generateCheckboxes(data);
+        
+        var new_options = YAHOO.lang.merge(plot_options, {
+            xaxis: { 
+                min: ranges.xaxis.from, 
+                max: ranges.xaxis.to,
+                mode:"time",
+                timeformat: "%d/%m",
+            },
+        });
+        // do the zooming 
+        plot = YAHOO.widget.Flot(plotContainer, data, new_options);
+
+        plot.subscribe("plotselected", plotselected);
+
+        //resubscribe plothover
+        plot.subscribe("plothover", plothover);
+        
+        // don't fire event on the overview to prevent eternal loop
+        overview.setSelection(ranges, true);
+
+        //resubscribe choiced 
+        YUE.on(choiceContainer.getElementsByTagName("input"), "click", plotchoiced, [data, ranges]);
+    }
+    
+    var previousPoint = null;
+
+    function plothover(o) {
+        var pos = o.pos;
+        var item = o.item;
+        
+        //YUD.get("x").innerHTML = pos.x.toFixed(2);
+        //YUD.get("y").innerHTML = pos.y.toFixed(2);
+        if (item) {
+            if (previousPoint != item.datapoint) {
+                previousPoint = item.datapoint;
+                
+                var tooltip = YUD.get("tooltip");
+                if(tooltip) {
+                      tooltip.parentNode.removeChild(tooltip);
+                }
+                var x = item.datapoint.x.toFixed(2);
+                var y = item.datapoint.y.toFixed(2);
+                
+                if (!item.series.label){
+                    item.series.label = 'commits';
+                }
+                var d = new Date(x*1000);
+                var fd = d.toDateString()
+                var nr_commits = parseInt(y);
+                
+                var cur_data = dataset[item.series.label].data[item.dataIndex];
+                var added = cur_data.added;
+                var changed = cur_data.changed;
+                var removed = cur_data.removed;
+                
+                var nr_commits_suffix = " ${_('commits')} ";
+                var added_suffix = " ${_('files added')} ";
+                var changed_suffix = " ${_('files changed')} ";
+                var removed_suffix = " ${_('files removed')} ";
+
+                
+                if(nr_commits == 1){nr_commits_suffix = " ${_('commit')} ";}
+                if(added==1){added_suffix=" ${_('file added')} ";}
+                if(changed==1){changed_suffix=" ${_('file changed')} ";}
+                if(removed==1){removed_suffix=" ${_('file removed')} ";}
+                                                
+                showTooltip(item.pageX, item.pageY, item.series.label + " on " + fd
+                         +'<br/>'+
+                         nr_commits + nr_commits_suffix+'<br/>'+
+                         added + added_suffix +'<br/>'+
+                         changed + changed_suffix + '<br/>'+
+                         removed + removed_suffix + '<br/>');
+            }
+        }
+        else {
+              var tooltip = YUD.get("tooltip");
               
-             YUE.on(['download_options','archive_subrepos'],'change',function(e){
-                 var sm = YUD.get('download_options');
-                 var new_cs = sm.options[sm.selectedIndex];
-                 
-                 for(k in tmpl_links){
-                     var s = YUD.get(k+'_link');
-                     title_tmpl = "${_('Download %s as %s') % ('__CS_NAME__','__CS_EXT__')}";
-                     s.title = title_tmpl.replace('__CS_NAME__',new_cs.text);
-                     s.title = s.title.replace('__CS_EXT__',k);
-                     var url = tmpl_links[k].replace('__CS__',new_cs.value);
-                     var subrepos = YUD.get('archive_subrepos').checked
-                     url = url.replace('__SUB__',subrepos);
-                     s.innerHTML = url 
-                 }
-             });
-    </script>   
-<script type="text/javascript">
-        /**
-         * Plots summary graph
-         *
-         * @class SummaryPlot
-         * @param {from} initial from for detailed graph
-         * @param {to} initial to for detailed graph
-         * @param {dataset}
-         * @param {overview_dataset}
-         */
-        function SummaryPlot(from,to,dataset,overview_dataset) {
-            var initial_ranges = {
-                "xaxis":{
-                    "from":from,
-                    "to":to,
-                },
-            };
-            var dataset = dataset;
-            var overview_dataset = [overview_dataset];
-            var choiceContainer = YUD.get("legend_choices");
-            var choiceContainerTable = YUD.get("legend_choices_tables");
-            var plotContainer = YUD.get('commit_history');
-            var overviewContainer = YUD.get('overview');
-            
-            var plot_options = {
-                bars: {show:true,align:'center',lineWidth:4},
-                legend: {show:true, container:"legend_container"},
-                points: {show:true,radius:0,fill:false},
-                yaxis: {tickDecimals:0,},
-                xaxis: {
-                    mode: "time", 
-                    timeformat: "%d/%m",
-                    min:from,
-                    max:to, 
-                }, 
-                grid: {
-                    hoverable: true, 
-                    clickable: true,
-                    autoHighlight:true,
-                    color: "#999"
-                },
-                //selection: {mode: "x"}
-            };
-            var overview_options = {
-                legend:{show:false},
-                bars: {show:true,barWidth: 2,},
-                shadowSize: 0,
-                xaxis: {mode: "time", timeformat: "%d/%m/%y",},
-                yaxis: {ticks: 3, min: 0,tickDecimals:0,},
-                grid: {color: "#999",},
-                selection: {mode: "x"}
-            };
-
-            /**
-            *get dummy data needed in few places
-            */
-            function getDummyData(label){
-                return {"label":label,
-                 "data":[{"time":0,
-                     "commits":0,
-                         "added":0,
-                         "changed":0,
-                         "removed":0,
-                    }],
-                    "schema":["commits"],
-                    "color":'#ffffff',
-                }
-            }
-            
-            /**
-             * generate checkboxes accordindly to data
-             * @param keys
-             * @returns
-             */
-            function generateCheckboxes(data) {
-                //append checkboxes
-                var i = 0;
-                choiceContainerTable.innerHTML = '';
-                for(var pos in data) {
-                    
-                    data[pos].color = i;
-                    i++;
-                    if(data[pos].label != ''){
-                        choiceContainerTable.innerHTML += '<tr><td>'+
-                        '<input type="checkbox" name="' + data[pos].label +'" checked="checked" />'
-                        +data[pos].label+
-                        '</td></tr>';
-                    }
-                }   
-            }
-            
-            /**
-             * ToolTip show
-             */
-            function showTooltip(x, y, contents) {
-                var div=document.getElementById('tooltip');
-                if(!div) {
-                    div = document.createElement('div');
-                    div.id="tooltip";
-                    div.style.position="absolute";
-                    div.style.border='1px solid #fdd';
-                    div.style.padding='2px';
-                    div.style.backgroundColor='#fee';
-                    document.body.appendChild(div);
-                }
-                YUD.setStyle(div, 'opacity', 0);
-                div.innerHTML = contents;
-                div.style.top=(y + 5) + "px";
-                div.style.left=(x + 5) + "px";
-
-                var anim = new YAHOO.util.Anim(div, {opacity: {to: 0.8}}, 0.2);
-                anim.animate();
-            }
-            
-            /**
-             * This function will detect if selected period has some changesets 
-               for this user if it does this data is then pushed for displaying
-               Additionally it will only display users that are selected by the checkbox
-            */
-            function getDataAccordingToRanges(ranges) {
-                
-                var data = [];
-                var new_dataset = {};
-                var keys = [];
-                var max_commits = 0;
-                for(var key in dataset){
-                    
-                    for(var ds in dataset[key].data){
-                        commit_data = dataset[key].data[ds];
-                        if (commit_data.time >= ranges.xaxis.from && commit_data.time <= ranges.xaxis.to){
-
-                            if(new_dataset[key] === undefined){
-                                new_dataset[key] = {data:[],schema:["commits"],label:key};  
-                            }
-                            new_dataset[key].data.push(commit_data);
-                        }
-                    }
-                    if (new_dataset[key] !== undefined){
-                        data.push(new_dataset[key]);    
-                    }
-                }
-
-                if (data.length > 0){
-                    return data;    
-                }
-                else{
-                    //just return dummy data for graph to plot itself
-                    return [getDummyData('')];  
-                }
-            }
-            
-            /**
-            * redraw using new checkbox data
-            */
-            function plotchoiced(e,args){
-                var cur_data = args[0];
-                var cur_ranges = args[1];
-                
-                var new_data = [];
-                var inputs = choiceContainer.getElementsByTagName("input");
-
-                //show only checked labels
-                for(var i=0; i<inputs.length; i++) {
-                    var checkbox_key = inputs[i].name;
-                    
-                    if(inputs[i].checked){
-                        for(var d in cur_data){
-                            if(cur_data[d].label == checkbox_key){
-                                new_data.push(cur_data[d]);
-                            }
-                        }                           
-                    }
-                    else{
-                        //push dummy data to not hide the label
-                        new_data.push(getDummyData(checkbox_key));
-                    }
-                }
-                            
-                var new_options = YAHOO.lang.merge(plot_options, {
-                    xaxis: { 
-                        min: cur_ranges.xaxis.from, 
-                        max: cur_ranges.xaxis.to,
-                        mode:"time",
-                        timeformat: "%d/%m",
-                    },
-                });
-                if (!new_data){
-                    new_data = [[0,1]];
-                }
-                // do the zooming
-               plot = YAHOO.widget.Flot(plotContainer, new_data, new_options);
-               
-               plot.subscribe("plotselected", plotselected);
-    
-               //resubscribe plothover
-               plot.subscribe("plothover", plothover);
-                
-               // don't fire event on the overview to prevent eternal loop 
-               overview.setSelection(cur_ranges, true);
-    
-            }
-            
-            /**
-             * plot only selected items from overview
-             * @param ranges
-             * @returns
-             */
-            function plotselected(ranges,cur_data) {
-                //updates the data for new plot
-                var data = getDataAccordingToRanges(ranges);
-                generateCheckboxes(data);
-                
-                var new_options = YAHOO.lang.merge(plot_options, {
-                    xaxis: { 
-                        min: ranges.xaxis.from, 
-                        max: ranges.xaxis.to,
-                        mode:"time",
-                        timeformat: "%d/%m",
-                    },
-                });
-                // do the zooming 
-                plot = YAHOO.widget.Flot(plotContainer, data, new_options);
-
-                plot.subscribe("plotselected", plotselected);
-
-                //resubscribe plothover
-                plot.subscribe("plothover", plothover);
-                
-                // don't fire event on the overview to prevent eternal loop
-                overview.setSelection(ranges, true);
-
-                //resubscribe choiced 
-                YUE.on(choiceContainer.getElementsByTagName("input"), "click", plotchoiced, [data, ranges]);
-            }
-            
-            var previousPoint = null;
-
-            function plothover(o) {
-                var pos = o.pos;
-                var item = o.item;
-                
-                //YUD.get("x").innerHTML = pos.x.toFixed(2);
-                //YUD.get("y").innerHTML = pos.y.toFixed(2);
-                if (item) {
-                    if (previousPoint != item.datapoint) {
-                        previousPoint = item.datapoint;
-                        
-                        var tooltip = YUD.get("tooltip");
-                        if(tooltip) {
-                              tooltip.parentNode.removeChild(tooltip);
-                        }
-                        var x = item.datapoint.x.toFixed(2);
-                        var y = item.datapoint.y.toFixed(2);
-                        
-                        if (!item.series.label){
-                            item.series.label = 'commits';
-                        }
-                        var d = new Date(x*1000);
-                        var fd = d.toDateString()
-                        var nr_commits = parseInt(y);
-                        
-                        var cur_data = dataset[item.series.label].data[item.dataIndex];
-                        var added = cur_data.added;
-                        var changed = cur_data.changed;
-                        var removed = cur_data.removed;
-                        
-                        var nr_commits_suffix = " ${_('commits')} ";
-                        var added_suffix = " ${_('files added')} ";
-                        var changed_suffix = " ${_('files changed')} ";
-                        var removed_suffix = " ${_('files removed')} ";
-
-                        
-                        if(nr_commits == 1){nr_commits_suffix = " ${_('commit')} ";}
-                        if(added==1){added_suffix=" ${_('file added')} ";}
-                        if(changed==1){changed_suffix=" ${_('file changed')} ";}
-                        if(removed==1){removed_suffix=" ${_('file removed')} ";}
-                                                        
-                        showTooltip(item.pageX, item.pageY, item.series.label + " on " + fd
-                                 +'<br/>'+
-                                 nr_commits + nr_commits_suffix+'<br/>'+
-                                 added + added_suffix +'<br/>'+
-                                 changed + changed_suffix + '<br/>'+
-                                 removed + removed_suffix + '<br/>');
-                    }
-                }
-                else {
-                      var tooltip = YUD.get("tooltip");
-                      
-                      if(tooltip) {
-                            tooltip.parentNode.removeChild(tooltip);
-                      }
-                    previousPoint = null;
-                }
-            }
-            
-            /**
-             * MAIN EXECUTION
-             */
-            
-            var data = getDataAccordingToRanges(initial_ranges);    
-            generateCheckboxes(data);
-            
-            //main plot 
-            var plot = YAHOO.widget.Flot(plotContainer,data,plot_options);
-            
-            //overview 
-            var overview = YAHOO.widget.Flot(overviewContainer, 
-                    overview_dataset, overview_options);
-            
-            //show initial selection on overview 
-            overview.setSelection(initial_ranges);    
-            
-            plot.subscribe("plotselected", plotselected);
-            plot.subscribe("plothover", plothover)
-            
-            overview.subscribe("plotselected", function (ranges) {
-                plot.setSelection(ranges);
-            });     
-
-            YUE.on(choiceContainer.getElementsByTagName("input"), "click", plotchoiced, [data, initial_ranges]);
+              if(tooltip) {
+                    tooltip.parentNode.removeChild(tooltip);
+              }
+            previousPoint = null;
         }
-            SummaryPlot(${c.ts_min},${c.ts_max},${c.commit_data|n},${c.overview_data|n});       
-        </script>
+    }
+    
+    /**
+     * MAIN EXECUTION
+     */
+    
+    var data = getDataAccordingToRanges(initial_ranges);    
+    generateCheckboxes(data);
+    
+    //main plot 
+    var plot = YAHOO.widget.Flot(plotContainer,data,plot_options);
+    
+    //overview 
+    var overview = YAHOO.widget.Flot(overviewContainer, 
+            overview_dataset, overview_options);
+    
+    //show initial selection on overview 
+    overview.setSelection(initial_ranges);    
+    
+    plot.subscribe("plotselected", plotselected);
+    plot.subscribe("plothover", plothover)
+    
+    overview.subscribe("plotselected", function (ranges) {
+        plot.setSelection(ranges);
+    });     
+
+    // user choices on overview
+    YUE.on(choiceContainer.getElementsByTagName("input"), "click", plotchoiced, [data, initial_ranges]);
+}
+    SummaryPlot(${c.ts_min},${c.ts_max},${c.commit_data|n},${c.overview_data|n});       
+</script>
+%endif
 
 </%def>    
