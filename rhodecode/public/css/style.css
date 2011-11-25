@@ -993,7 +993,15 @@ div.options a {
 	width: 155px;
 	position: absolute;
 	margin: 0;
-	padding: 0px 0 0 0px;
+	padding: 5px 0 0 0px;
+}
+
+#content div.box div.form div.fields div.field div.label-summary {
+    left: 30px;
+    width: 155px;
+    position: absolute;
+    margin: 0;
+    padding: 0px 0 0 0px;
 }
 
 #content div.box-left div.form div.fields div.field div.label,#content div.box-right div.form div.fields div.field div.label
@@ -1026,9 +1034,17 @@ div.options a {
 	color: #393939;
 	font-weight: 700;
 }
-
+#content div.box div.form div.fields div.field div.label label,div.label-summary label
+    {
+    color: #393939;
+    font-weight: 700;
+}
 #content div.box div.form div.fields div.field div.input {
 	margin: 0 0 0 200px;
+}
+
+#content div.box div.form div.fields div.field div.input.summary {
+    margin: 0 0 0 150px;
 }
 
 #content div.box div.form div.fields div.field div.file {

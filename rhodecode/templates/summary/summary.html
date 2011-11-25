@@ -31,10 +31,10 @@
 	  <div id="summary" class="fields">
 		 
 			 <div class="field">
-			  <div class="label">
+			  <div class="label-summary">
 			      <label>${_('Name')}:</label>
 			  </div>
-			  <div class="input">
+			  <div class="input summary">
                   <div style="float:right;padding-top:5px">		  
                      %if c.rhodecode_user.username != 'default':
                       ${h.link_to(_('RSS'),h.url('rss_feed_home',repo_name=c.dbrepo.repo_name,api_key=c.rhodecode_user.api_key),class_='rss_icon')}
@@ -93,17 +93,17 @@
 			 </div>
 			
 			 <div class="field">
-			  <div class="label">
+			  <div class="label-summary">
 			      <label>${_('Description')}:</label>
 			  </div>
-			  <div class="input desc">${h.urlify_text(c.dbrepo.description)}</div>
+			  <div class="input summary desc">${h.urlify_text(c.dbrepo.description)}</div>
 			 </div>
 			
 			 <div class="field">
-			  <div class="label">
+			  <div class="label-summary">
 			      <label>${_('Contact')}:</label>
 			  </div>
-			  <div class="input">
+			  <div class="input summary">
 			  	<div class="gravatar">
 			  		<img alt="gravatar" src="${h.gravatar_url(c.dbrepo.user.email)}"/>
 			  	</div>
@@ -114,10 +114,10 @@
 			 </div>
 			
 			 <div class="field">
-			  <div class="label">
+			  <div class="label-summary">
 			      <label>${_('Last change')}:</label>
 			  </div>
-			  <div class="input">
+			  <div class="input summary">
                   <b>${'r%s:%s' % (h.get_changeset_safe(c.rhodecode_repo,'tip').revision,
                             h.get_changeset_safe(c.rhodecode_repo,'tip').short_id)}</b> - 
 			      <span class="tooltip" title="${c.rhodecode_repo.last_change}">
@@ -127,19 +127,19 @@
 			 </div>
 			
 			 <div class="field">
-			  <div class="label">
+			  <div class="label-summary">
 			      <label>${_('Clone url')}:</label>
 			  </div>
-			  <div class="input">
+			  <div class="input summary">
 			      <input type="text" id="clone_url" readonly="readonly" value="${c.rhodecode_repo.alias} clone ${c.clone_repo_url}" size="65"/>
 			  </div>
 			 </div>
 			 
 			 <div class="field">
-			  <div class="label">
+			  <div class="label-summary">
 			      <label>${_('Trending source files')}:</label>
 			  </div>
-			  <div class="input">
+			  <div class="input summary">
                 %if c.show_stats:
 			    <div id="lang_stats"></div>
                 %else:
@@ -151,10 +151,10 @@
 			 </div>
 			 			
 			 <div class="field">
-			  <div class="label">
+			  <div class="label-summary">
 			      <label>${_('Download')}:</label>
 			  </div>
-			  <div class="input">
+			  <div class="input summary">
 		        %if len(c.rhodecode_repo.revisions) == 0:
 		          ${_('There are no downloads yet')}
 		        %elif c.enable_downloads is False:
