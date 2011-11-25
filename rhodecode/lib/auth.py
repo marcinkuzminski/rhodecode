@@ -134,7 +134,7 @@ def generate_api_key(str_, salt=None):
     :param str_:
     :param salt:
     """
-    
+
     if salt is None:
         salt = _RandomNameSequence().next()
 
@@ -252,7 +252,7 @@ def login_container_auth(username):
         return None
 
     user.update_lastlogin()
-    log.debug('User %s is now logged in by container authentication', 
+    log.debug('User %s is now logged in by container authentication',
               user.username)
     return user
 
@@ -303,13 +303,13 @@ class  AuthUser(object):
         user_model = UserModel()
         self.anonymous_user = User.get_by_username('default')
         is_user_loaded = False
-        
+
         # try go get user by api key
         if self._api_key and self._api_key != self.anonymous_user.api_key:
             log.debug('Auth User lookup by API KEY %s', self._api_key)
             is_user_loaded = user_model.fill_data(self, api_key=self._api_key)
         # lookup by userid    
-        elif (self.user_id is not None and 
+        elif (self.user_id is not None and
               self.user_id != self.anonymous_user.user_id):
             log.debug('Auth User lookup by USER ID %s', self.user_id)
             is_user_loaded = user_model.fill_data(self, user_id=self.user_id)
@@ -326,7 +326,7 @@ class  AuthUser(object):
         if not is_user_loaded:
             # if we cannot authenticate user try anonymous
             if self.anonymous_user.active is True:
-                user_model.fill_data(self,user_id=self.anonymous_user.user_id)
+                user_model.fill_data(self, user_id=self.anonymous_user.user_id)
                 # then we set this user is logged in
                 self.is_authenticated = True
             else:
@@ -356,6 +356,17 @@ class  AuthUser(object):
         if self.user_id != self.anonymous_user.user_id:
             self.is_authenticated = authenticated
 
+    def get_cookie_store(self):
+        return {'username':self.username,
+                'user_id': self.user_id,
+                'is_authenticated':self.is_authenticated}
+
+    @classmethod
+    def from_cookie_store(cls, cookie_store):
+        user_id = cookie_store.get('user_id')
+        username = cookie_store.get('username')
+        api_key = cookie_store.get('api_key')
+        return AuthUser(user_id, api_key, username)
 
 def set_available_permissions(config):
     """
@@ -576,7 +587,8 @@ class PermsFunction(object):
         self.repo_name = None
 
     def __call__(self, check_Location=''):
-        user = session.get('rhodecode_user', False)
+        cookie_store = session.get('rhodecode_user')
+        user = AuthUser.from_cookie_store(cookie_store)
         if not user:
             return False
         self.user_perms = user.permissions

@@ -9,15 +9,16 @@ from pylons.controllers import WSGIController
 from pylons.controllers.util import redirect
 from pylons.templating import render_mako as render
 
-from rhodecode import __version__
+from rhodecode import __version__, BACKENDS
+
 from rhodecode.lib import str2bool
 from rhodecode.lib.auth import AuthUser, get_container_username
 from rhodecode.lib.utils import get_repo_slug
 from rhodecode.model import meta
-from rhodecode.model.scm import ScmModel
-from rhodecode import BACKENDS
+
 from rhodecode.model.db import Repository
 from rhodecode.model.notification import NotificationModel
+from rhodecode.model.scm import ScmModel
 
 log = logging.getLogger(__name__)
 
@@ -46,21 +47,22 @@ class BaseController(WSGIController):
         try:
             # make sure that we update permissions each time we call controller
             api_key = request.GET.get('api_key')
-            user_id = getattr(session.get('rhodecode_user'), 'user_id', None)
+            cookie_store = session.get('rhodecode_user') or {}
+            user_id = cookie_store.get('user_id', None)
             username = get_container_username(environ, config)
 
             auth_user = AuthUser(user_id, api_key, username)
             self.rhodecode_user = c.rhodecode_user = auth_user
             if not self.rhodecode_user.is_authenticated and \
                        self.rhodecode_user.user_id is not None:
-                self.rhodecode_user.set_authenticated(
-                                        getattr(session.get('rhodecode_user'),
-                                       'is_authenticated', False))
-            session['rhodecode_user'] = self.rhodecode_user
+                self.rhodecode_user\
+                    .set_authenticated(cookie_store.get('is_authenticated'))
+
+            session['rhodecode_user'] = self.rhodecode_user.get_cookie_store()
             session.save()
             return WSGIController.__call__(self, environ, start_response)
         finally:
-            log.debug('Request time: %.3fs' % (time.time()-start))
+            log.debug('Request time: %.3fs' % (time.time() - start))
             meta.Session.remove()
 
 

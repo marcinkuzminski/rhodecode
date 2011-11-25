@@ -79,7 +79,8 @@ class TestController(TestCase):
             self.fail('could not login using %s %s' % (username, password))
 
         self.assertEqual(response.status, '302 Found')
-        self.assertEqual(response.session['rhodecode_user'].username, username)
+        self.assertEqual(response.session['rhodecode_user'].get('username'),
+                         username)
         return response.follow()
 
     def _get_logged_user(self):

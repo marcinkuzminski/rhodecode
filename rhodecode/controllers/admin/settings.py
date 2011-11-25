@@ -47,8 +47,7 @@ from rhodecode.model.forms import UserForm, ApplicationSettingsForm, \
 from rhodecode.model.scm import ScmModel
 from rhodecode.model.user import UserModel
 from rhodecode.model.db import User
-from rhodecode.model.notification import NotificationModel, \
-    EmailNotificationModel
+from rhodecode.model.notification import EmailNotificationModel
 
 log = logging.getLogger(__name__)
 

@@ -58,7 +58,7 @@ class LoginController(BaseController):
             return redirect(url('home'))
 
         if request.POST:
-            #import Login Form validator class
+            # import Login Form validator class
             login_form = LoginForm()
             try:
                 c.form_result = login_form.to_python(dict(request.POST))
@@ -67,11 +67,12 @@ class LoginController(BaseController):
                 user = User.get_by_username(username, case_insensitive=True)
                 auth_user = AuthUser(user.user_id)
                 auth_user.set_authenticated()
-                session['rhodecode_user'] = auth_user
+                cs = auth_user.get_cookie_store()
+                session['rhodecode_user'] = cs
                 session.save()
 
-                log.info('user %s is now authenticated and stored in session',
-                         username)
+                log.info('user %s is now authenticated and stored in '
+                         'session, session attrs %s' % (username, cs))
                 user.update_lastlogin()
 
                 if c.came_from:

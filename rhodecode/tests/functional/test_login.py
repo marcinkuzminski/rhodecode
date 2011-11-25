@@ -17,7 +17,7 @@ class TestLoginController(TestController):
                                  {'username':'test_admin',
                                   'password':'test12'})
         self.assertEqual(response.status, '302 Found')
-        self.assertEqual(response.session['rhodecode_user'].username ,
+        self.assertEqual(response.session['rhodecode_user'].get('username') ,
                          'test_admin')
         response = response.follow()
         self.assertTrue('%s repository' % HG_REPO in response.body)
@@ -28,7 +28,7 @@ class TestLoginController(TestController):
                                   'password':'test12'})
 
         self.assertEqual(response.status, '302 Found')
-        self.assertEqual(response.session['rhodecode_user'].username ,
+        self.assertEqual(response.session['rhodecode_user'].get('username') ,
                          'test_regular')
         response = response.follow()
         self.assertTrue('%s repository' % HG_REPO in response.body)
