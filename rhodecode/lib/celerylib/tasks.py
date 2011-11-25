@@ -28,7 +28,7 @@ from celery.decorators import task
 import os
 import traceback
 import logging
-from os.path import dirname as dn, join as jn
+from os.path import join as jn
 
 from time import mktime
 from operator import itemgetter
@@ -37,11 +37,12 @@ from string import lower
 from pylons import config, url
 from pylons.i18n.translation import _
 
+
 from rhodecode.lib import LANGUAGES_EXTENSIONS_MAP, safe_str
 from rhodecode.lib.celerylib import run_task, locked_task, str2bool, \
     __get_lockkey, LockHeld, DaemonLock
 from rhodecode.lib.helpers import person
-from rhodecode.lib.smtp_mailer import SmtpMailer
+from rhodecode.lib.rcmail.smtp_mailer import SmtpMailer
 from rhodecode.lib.utils import add_cache
 from rhodecode.lib.compat import json, OrderedDict
 
@@ -52,6 +53,7 @@ from rhodecode.model.db import RhodeCodeUi, Statistics, Repository, User
 from vcs.backends import get_repo
 
 from sqlalchemy import engine_from_config
+
 
 add_cache(config)
 
@@ -68,6 +70,16 @@ def get_session():
     sa = meta.Session()
     return sa
 
+def get_logger(cls):
+    if CELERY_ON:
+        try:
+            log = cls.get_logger()
+        except:
+            log = logging.getLogger(__name__)
+    else:
+        log = logging.getLogger(__name__)
+
+    return log
 
 def get_repos_path():
     sa = get_session()
@@ -88,10 +100,7 @@ def whoosh_index(repo_location, full_index):
 
 @task(ignore_result=True)
 def get_commits_stats(repo_name, ts_min_y, ts_max_y):
-    try:
-        log = get_commits_stats.get_logger()
-    except:
-        log = logging.getLogger(__name__)
+    log = get_logger(get_commits_stats)
 
     lockkey = __get_lockkey('get_commits_stats', repo_name, ts_min_y,
                             ts_max_y)
@@ -246,39 +255,27 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
 
 @task(ignore_result=True)
 def send_password_link(user_email):
-    try:
-        log = reset_user_password.get_logger()
-    except:
-        log = logging.getLogger(__name__)
-
-    from rhodecode.lib import auth
-    from rhodecode.model.db import User
+    log = get_logger(send_password_link)
 
     try:
+        from rhodecode.model.notification import EmailNotificationModel
         sa = get_session()
-        user = sa.query(User).filter(User.email == user_email).scalar()
-
+        user = User.get_by_email(user_email)
         if user:
+            log.debug('password reset user found %s' % user)
             link = url('reset_password_confirmation', key=user.api_key,
                        qualified=True)
-            tmpl = """
-Hello %s
-
-We received a request to create a new password for your account.
-
-You can generate it by clicking following URL:
-
-%s
-
-If you didn't request new password please ignore this email.
-            """
+            reg_type = EmailNotificationModel.TYPE_PASSWORD_RESET
+            body = EmailNotificationModel().get_email_tmpl(reg_type,
+                                                **{'user':user.short_contact,
+                                                   'reset_url':link})
+            log.debug('sending email')
             run_task(send_email, user_email,
-                     "RhodeCode password reset link",
-                     tmpl % (user.short_contact, link))
+                     _("password reset link"), body)
             log.info('send new password mail to %s', user_email)
-
+        else:
+            log.debug("password reset email %s not found" % user_email)
     except:
-        log.error('Failed to update user password')
         log.error(traceback.format_exc())
         return False
 
@@ -286,18 +283,14 @@ If you didn't request new password please ignore this email.
 
 @task(ignore_result=True)
 def reset_user_password(user_email):
-    try:
-        log = reset_user_password.get_logger()
-    except:
-        log = logging.getLogger(__name__)
+    log = get_logger(reset_user_password)
 
     from rhodecode.lib import auth
-    from rhodecode.model.db import User
 
     try:
         try:
             sa = get_session()
-            user = sa.query(User).filter(User.email == user_email).scalar()
+            user = User.get_by_email(user_email)
             new_passwd = auth.PasswordGenerator().gen_password(8,
                              auth.PasswordGenerator.ALPHABETS_BIG_SMALL)
             if user:
@@ -308,13 +301,12 @@ def reset_user_password(user_email):
                 log.info('change password for %s', user_email)
             if new_passwd is None:
                 raise Exception('unable to generate new password')
-
         except:
             log.error(traceback.format_exc())
             sa.rollback()
 
         run_task(send_email, user_email,
-                 "Your new RhodeCode password",
+                 'Your new password',
                  'Your new RhodeCode password:%s' % (new_passwd))
         log.info('send new password mail to %s', user_email)
 
@@ -326,7 +318,7 @@ def reset_user_password(user_email):
 
 
 @task(ignore_result=True)
-def send_email(recipients, subject, body):
+def send_email(recipients, subject, body, html_body=''):
     """
     Sends an email with defined parameters from the .ini files.
 
@@ -334,20 +326,19 @@ def send_email(recipients, subject, body):
         address from field 'email_to' is used instead
     :param subject: subject of the mail
     :param body: body of the mail
+    :param html_body: html version of body
     """
-    try:
-        log = send_email.get_logger()
-    except:
-        log = logging.getLogger(__name__)
-
+    log = get_logger(send_email)
     email_config = config
 
+    subject = "%s %s" % (email_config.get('email_prefix'), subject)
     if not recipients:
         # if recipients are not defined we send to email_config + all admins
-        admins = [u.email for u in User.query().filter(User.admin == True).all()]
+        admins = [u.email for u in User.query()
+                  .filter(User.admin == True).all()]
         recipients = [email_config.get('email_to')] + admins
 
-    mail_from = email_config.get('app_email_from')
+    mail_from = email_config.get('app_email_from', 'RhodeCode')
     user = email_config.get('smtp_username')
     passwd = email_config.get('smtp_password')
     mail_server = email_config.get('smtp_server')
@@ -360,7 +351,7 @@ def send_email(recipients, subject, body):
     try:
         m = SmtpMailer(mail_from, user, passwd, mail_server, smtp_auth,
                        mail_port, ssl, tls, debug=debug)
-        m.send(recipients, subject, body)
+        m.send(recipients, subject, body, html_body)
     except:
         log.error('Mail sending failed')
         log.error(traceback.format_exc())
@@ -370,13 +361,10 @@ def send_email(recipients, subject, body):
 
 @task(ignore_result=True)
 def create_repo_fork(form_data, cur_user):
+    log = get_logger(create_repo_fork)
+
     from rhodecode.model.repo import RepoModel
     from vcs import get_backend
-
-    try:
-        log = create_repo_fork.get_logger()
-    except:
-        log = logging.getLogger(__name__)
 
     repo_model = RepoModel(get_session())
     repo_model.create(form_data, cur_user, just_db=True, fork=True)

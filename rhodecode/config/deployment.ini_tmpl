@@ -17,6 +17,7 @@ pdebug = false
 #error_email_from = paste_error@localhost
 #app_email_from = rhodecode-noreply@localhost
 #error_message =
+#email_prefix = [RhodeCode]
 
 #smtp_server = mail.server.com
 #smtp_username = 

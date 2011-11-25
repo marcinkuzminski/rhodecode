@@ -47,7 +47,8 @@ from rhodecode.model.forms import UserForm, ApplicationSettingsForm, \
 from rhodecode.model.scm import ScmModel
 from rhodecode.model.user import UserModel
 from rhodecode.model.db import User
-from rhodecode.model.notification import NotificationModel
+from rhodecode.model.notification import NotificationModel, \
+    EmailNotificationModel
 
 log = logging.getLogger(__name__)
 
@@ -261,9 +262,12 @@ class SettingsController(BaseController):
             test_email = request.POST.get('test_email')
             test_email_subj = 'RhodeCode TestEmail'
             test_email_body = 'RhodeCode Email test'
+            test_email_html_body = EmailNotificationModel()\
+                .get_email_tmpl(EmailNotificationModel.TYPE_DEFAULT)
 
             run_task(tasks.send_email, [test_email], test_email_subj,
-                     test_email_body)
+                     test_email_body, test_email_html_body)
+
             h.flash(_('Email task created'), category='success')
         return redirect(url('admin_settings'))
 

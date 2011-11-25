@@ -131,6 +131,20 @@ var push_state_enabled = Boolean(
 		)
 );
 
+var _run_callbacks = function(callbacks){
+	if (callbacks !== undefined){
+		var _l = callbacks.length;
+	    for (var i=0;i<_l;i++){
+	    	var func = callbacks[i];
+	    	if(typeof(func)=='function'){
+	            try{
+	          	    func();
+	            }catch (err){};            		
+	    	}
+	    }
+	}		
+}
+
 /**
  * Partial Ajax Implementation
  * 
@@ -564,11 +578,14 @@ var  getSelectionLink = function(selection_link_label) {
 	}
 };
 
-var deleteNotification = function(url, notification_id){
+var deleteNotification = function(url, notification_id,callbacks){
     var callback = { 
 		success:function(o){
 		    var obj = YUD.get(String("notification_"+notification_id));
-			obj.parentNode.removeChild(obj);
+		    if(obj.parentNode !== undefined){
+				obj.parentNode.removeChild(obj);
+			}
+			_run_callbacks(callbacks);
 		},
 	    failure:function(o){
 	        alert("error");

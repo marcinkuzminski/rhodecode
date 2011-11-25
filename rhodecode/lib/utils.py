@@ -29,6 +29,9 @@ import datetime
 import traceback
 import paste
 import beaker
+import tarfile
+import shutil
+from os.path import abspath
 from os.path import dirname as dn, join as jn
 
 from paste.script.command import Command, BadCommand
@@ -46,8 +49,8 @@ from vcs.exceptions import VCSError
 from rhodecode.lib.caching_query import FromCache
 
 from rhodecode.model import meta
-from rhodecode.model.db import Repository, User, RhodeCodeUi, UserLog, RepoGroup, \
-    RhodeCodeSetting
+from rhodecode.model.db import Repository, User, RhodeCodeUi, \
+    UserLog, RepoGroup, RhodeCodeSetting
 
 log = logging.getLogger(__name__)
 
@@ -283,7 +286,8 @@ def make_ui(read_from='file', path=None, checkpaths=True):
 
 
 def set_rhodecode_config(config):
-    """Updates pylons config with new settings from database
+    """
+    Updates pylons config with new settings from database
 
     :param config:
     """
@@ -294,7 +298,8 @@ def set_rhodecode_config(config):
 
 
 def invalidate_cache(cache_key, *args):
-    """Puts cache invalidation task into db for
+    """
+    Puts cache invalidation task into db for
     further global cache invalidation
     """
 
@@ -323,7 +328,8 @@ class EmptyChangeset(BaseChangeset):
 
     @LazyProperty
     def raw_id(self):
-        """Returns raw string identifying this changeset, useful for web
+        """
+        Returns raw string identifying this changeset, useful for web
         representation.
         """
 
@@ -348,7 +354,8 @@ class EmptyChangeset(BaseChangeset):
 
 
 def map_groups(groups):
-    """Checks for groups existence, and creates groups structures.
+    """
+    Checks for groups existence, and creates groups structures.
     It returns last group in structure
 
     :param groups: list of groups structure
@@ -387,7 +394,7 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False):
     rm = RepoModel()
     user = sa.query(User).filter(User.admin == True).first()
     if user is None:
-        raise Exception('Missing administrative account !')    
+        raise Exception('Missing administrative account !')
     added = []
 
     for name, repo in initial_repo_list.items():
@@ -418,7 +425,7 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False):
 
     return added, removed
 
-#set cache regions for beaker so celery can utilise it
+# set cache regions for beaker so celery can utilise it
 def add_cache(settings):
     cache_settings = {'regions': None}
     for key in settings.keys():
@@ -477,14 +484,12 @@ def create_test_index(repo_location, config, full_index):
 
 
 def create_test_env(repos_test_path, config):
-    """Makes a fresh database and
+    """
+    Makes a fresh database and
     install test repository into tmp dir
     """
     from rhodecode.lib.db_manage import DbManage
     from rhodecode.tests import HG_REPO, TESTS_TMP_PATH
-    import tarfile
-    import shutil
-    from os.path import abspath
 
     # PART ONE create db
     dbconf = config['sqlalchemy.db1.url']

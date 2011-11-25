@@ -283,7 +283,7 @@ class User(Base, BaseModel):
 
     group_member = relationship('UsersGroupMember', cascade='all')
 
-    notifications = relationship('UserNotification')
+    notifications = relationship('UserNotification',)
 
     @property
     def full_contact(self):
@@ -1150,10 +1150,8 @@ class Notification(Base, BaseModel):
     type_ = Column('type', Unicode(256))
 
     created_by_user = relationship('User')
-    notifications_to_users = relationship('UserNotification',
-        primaryjoin='Notification.notification_id==UserNotification.notification_id',
-        lazy='joined',
-        cascade="all, delete, delete-orphan")
+    notifications_to_users = relationship('UserNotification', lazy='joined',
+                                          cascade="all, delete, delete-orphan")
 
     @property
     def recipients(self):
@@ -1170,6 +1168,7 @@ class Notification(Base, BaseModel):
         notification.subject = subject
         notification.body = body
         notification.type_ = type_
+        notification.created_on = datetime.datetime.now()
 
         for u in recipients:
             assoc = UserNotification()
@@ -1193,7 +1192,9 @@ class UserNotification(Base, BaseModel):
     sent_on = Column('sent_on', DateTime(timezone=False), nullable=True, unique=None)
 
     user = relationship('User', lazy="joined")
-    notification = relationship('Notification', lazy="joined", cascade='all')
+    notification = relationship('Notification', lazy="joined",
+                                order_by=lambda:Notification.created_on.desc(),
+                                cascade='all')
 
     def mark_as_read(self):
         self.read = True

@@ -42,7 +42,7 @@
               <span id="${notification.notification.notification_id}" class="delete-notification delete_icon action"></span>
             </div>
           </div>
-          <div class="notification-subject">${h.urlify_text(notification.notification.subject)}</div>
+          <div class="notification-subject">${h.literal(notification.notification.subject)}</div>
         </div>
       %endfor
     </div>

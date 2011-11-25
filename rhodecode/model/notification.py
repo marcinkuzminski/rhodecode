@@ -24,15 +24,19 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import os
 import logging
 import traceback
+import datetime
 
+from pylons import config
 from pylons.i18n.translation import _
 
-from rhodecode.lib.helpers import age
-
+from rhodecode.lib import helpers as h
 from rhodecode.model import BaseModel
 from rhodecode.model.db import Notification, User, UserNotification
+from rhodecode.lib.celerylib import run_task
+from rhodecode.lib.celerylib.tasks import send_email
 
 log = logging.getLogger(__name__)
 
@@ -82,9 +86,24 @@ class NotificationModel(BaseModel):
             if obj:
                 recipients_objs.append(obj)
         recipients_objs = set(recipients_objs)
-        return Notification.create(created_by=created_by_obj, subject=subject,
-                            body=body, recipients=recipients_objs,
-                            type_=type_)
+
+        notif = Notification.create(created_by=created_by_obj, subject=subject,
+                                    body=body, recipients=recipients_objs,
+                                    type_=type_)
+
+
+        # send email with notification
+        for rec in recipients_objs:
+            email_subject = NotificationModel().make_description(notif, False)
+            type_ = EmailNotificationModel.TYPE_CHANGESET_COMMENT
+            email_body = body
+            email_body_html = EmailNotificationModel()\
+                            .get_email_tmpl(type_, **{'subject':subject,
+                                                      'body':h.rst(body)})
+            run_task(send_email, rec.email, email_subject, email_body,
+                     email_body_html)
+
+        return notif
 
     def delete(self, user, notification):
         # we don't want to remove actual notification just the assignment
@@ -92,8 +111,11 @@ class NotificationModel(BaseModel):
             notification = self.__get_notification(notification)
             user = self.__get_user(user)
             if notification and user:
-                obj = UserNotification.query().filter(UserNotification.user == user)\
-                    .filter(UserNotification.notification == notification).one()
+                obj = UserNotification.query()\
+                        .filter(UserNotification.user == user)\
+                        .filter(UserNotification.notification
+                                == notification)\
+                        .one()
                 self.sa.delete(obj)
                 return True
         except Exception:
@@ -124,7 +146,7 @@ class NotificationModel(BaseModel):
             .filter(UserNotification.notification == notification)\
             .filter(UserNotification.user == user).scalar()
 
-    def make_description(self, notification):
+    def make_description(self, notification, show_age=True):
         """
         Creates a human readable description based on properties
         of notification object
@@ -133,9 +155,51 @@ class NotificationModel(BaseModel):
         _map = {notification.TYPE_CHANGESET_COMMENT:_('commented on commit'),
                 notification.TYPE_MESSAGE:_('sent message'),
                 notification.TYPE_MENTION:_('mentioned you')}
+        DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 
         tmpl = "%(user)s %(action)s %(when)s"
+        if show_age:
+            when = h.age(notification.created_on)
+        else:
+            DTF = lambda d: datetime.datetime.strftime(d, DATETIME_FORMAT)
+            when = DTF(notification.created_on)
         data = dict(user=notification.created_by_user.username,
                     action=_map[notification.type_],
-                    when=age(notification.created_on))
+                    when=when)
         return tmpl % data
+
+
+class EmailNotificationModel(BaseModel):
+
+    TYPE_CHANGESET_COMMENT = 'changeset_comment'
+    TYPE_PASSWORD_RESET = 'passoword_link'
+    TYPE_REGISTRATION = 'registration'
+    TYPE_DEFAULT = 'default'
+
+    def __init__(self):
+        self._template_root = config['pylons.paths']['templates'][0]
+
+        self.email_types = {
+            self.TYPE_CHANGESET_COMMENT:'email_templates/changeset_comment.html',
+            self.TYPE_PASSWORD_RESET:'email_templates/password_reset.html',
+            self.TYPE_REGISTRATION:'email_templates/registration.html',
+            self.TYPE_DEFAULT:'email_templates/default.html'
+        }
+
+    def get_email_tmpl(self, type_, **kwargs):
+        """
+        return generated template for email based on given type
+        
+        :param type_:
+        """
+        base = self.email_types.get(type_, self.TYPE_DEFAULT)
+
+        lookup = config['pylons.app_globals'].mako_lookup
+        email_template = lookup.get_template(base)
+        # translator inject
+        _kwargs = {'_':_}
+        _kwargs.update(kwargs)
+        log.debug('rendering tmpl %s with kwargs %s' % (base, _kwargs))
+        return email_template.render(**_kwargs)
+
+

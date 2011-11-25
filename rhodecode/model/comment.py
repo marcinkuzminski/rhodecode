@@ -87,7 +87,8 @@ class ChangesetCommentsModel(BaseModel):
                                     {'commit_desc':desc, 'line':line},
                              h.url('changeset_home', repo_name=repo.repo_name,
                                    revision=revision,
-                                   anchor='comment-%s' % comment.comment_id
+                                   anchor='comment-%s' % comment.comment_id,
+                                   qualified=True,
                                    )
                              )
             body = text
@@ -99,11 +100,13 @@ class ChangesetCommentsModel(BaseModel):
                                    body=body, recipients=recipients,
                                    type_=Notification.TYPE_CHANGESET_COMMENT)
 
-            mention_recipients = set(self._extract_mentions(body)).difference(recipients)
+            mention_recipients = set(self._extract_mentions(body))\
+                                    .difference(recipients)
             if mention_recipients:
                 subj = _('[Mention]') + ' ' + subj
                 NotificationModel().create(created_by=user_id, subject=subj,
-                                    body = body, recipients = mention_recipients,
+                                    body=body,
+                                    recipients=mention_recipients,
                                     type_=Notification.TYPE_CHANGESET_COMMENT)
 
             self.sa.commit()
