@@ -465,19 +465,20 @@ def make_map(config):
                 conditions=dict(function=check_repo))
 
     rmap.connect('repo_fork_create_home', '/{repo_name:.*}/fork',
-                controller='settings', action='fork_create',
+                controller='forks', action='fork_create',
                 conditions=dict(function=check_repo, method=["POST"]))
 
     rmap.connect('repo_fork_home', '/{repo_name:.*}/fork',
-                controller='settings', action='fork',
+                controller='forks', action='fork',
                 conditions=dict(function=check_repo))
+
+    rmap.connect('repo_forks_home', '/{repo_name:.*}/forks',
+                 controller='forks', action='forks',
+                 conditions=dict(function=check_repo))
 
     rmap.connect('repo_followers_home', '/{repo_name:.*}/followers',
                  controller='followers', action='followers',
                  conditions=dict(function=check_repo))
 
-    rmap.connect('repo_forks_home', '/{repo_name:.*}/forks',
-                 controller='forks', action='forks',
-                 conditions=dict(function=check_repo))
 
     return rmap

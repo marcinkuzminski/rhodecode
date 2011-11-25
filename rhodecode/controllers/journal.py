@@ -23,21 +23,22 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import logging
+from itertools import groupby
 
 from sqlalchemy import or_
-from sqlalchemy.orm import joinedload, make_transient
+from sqlalchemy.orm import joinedload
 from webhelpers.paginate import Page
-from itertools import groupby
+from webhelpers.feedgenerator import Atom1Feed, Rss201rev2Feed
 
 from paste.httpexceptions import HTTPBadRequest
 from pylons import request, tmpl_context as c, response, url
 from pylons.i18n.translation import _
-from webhelpers.feedgenerator import Atom1Feed, Rss201rev2Feed
 
 import rhodecode.lib.helpers as h
 from rhodecode.lib.auth import LoginRequired, NotAnonymous
 from rhodecode.lib.base import BaseController, render
 from rhodecode.model.db import UserLog, UserFollowing
+from rhodecode.model.meta import Session
 
 log = logging.getLogger(__name__)
 
@@ -124,6 +125,7 @@ class JournalController(BaseController):
                 try:
                     self.scm_model.toggle_following_user(user_id,
                                                 self.rhodecode_user.user_id)
+                    Session().commit()
                     return 'ok'
                 except:
                     raise HTTPBadRequest()
@@ -133,6 +135,7 @@ class JournalController(BaseController):
                 try:
                     self.scm_model.toggle_following_repo(repo_id,
                                                 self.rhodecode_user.user_id)
+                    Session().commit()
                     return 'ok'
                 except:
                     raise HTTPBadRequest()

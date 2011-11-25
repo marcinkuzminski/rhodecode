@@ -208,17 +208,14 @@ class ScmModel(BaseModel):
             .filter(UserFollowing.user_id == user_id).scalar()
 
         if f is not None:
-
             try:
                 self.sa.delete(f)
-                self.sa.commit()
                 action_logger(UserTemp(user_id),
                               'stopped_following_repo',
                               RepoTemp(follow_repo_id))
                 return
             except:
                 log.error(traceback.format_exc())
-                self.sa.rollback()
                 raise
 
         try:
@@ -226,13 +223,12 @@ class ScmModel(BaseModel):
             f.user_id = user_id
             f.follows_repo_id = follow_repo_id
             self.sa.add(f)
-            self.sa.commit()
+
             action_logger(UserTemp(user_id),
                           'started_following_repo',
                           RepoTemp(follow_repo_id))
         except:
             log.error(traceback.format_exc())
-            self.sa.rollback()
             raise
 
     def toggle_following_user(self, follow_user_id, user_id):
@@ -243,11 +239,9 @@ class ScmModel(BaseModel):
         if f is not None:
             try:
                 self.sa.delete(f)
-                self.sa.commit()
                 return
             except:
                 log.error(traceback.format_exc())
-                self.sa.rollback()
                 raise
 
         try:
@@ -255,10 +249,8 @@ class ScmModel(BaseModel):
             f.user_id = user_id
             f.follows_user_id = follow_user_id
             self.sa.add(f)
-            self.sa.commit()
         except:
             log.error(traceback.format_exc())
-            self.sa.rollback()
             raise
 
     def is_following_repo(self, repo_name, user_id, cache=False):
@@ -317,8 +309,8 @@ class ScmModel(BaseModel):
             log.error(traceback.format_exc())
             raise
 
-    def commit_change(self, repo, repo_name, cs, user, author, message, content,
-                      f_path):
+    def commit_change(self, repo, repo_name, cs, user, author, message,
+                      content, f_path):
 
         if repo.alias == 'hg':
             from vcs.backends.hg import MercurialInMemoryChangeset as IMC

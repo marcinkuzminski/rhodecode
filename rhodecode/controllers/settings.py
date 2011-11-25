@@ -35,14 +35,14 @@ from pylons.i18n.translation import _
 
 import rhodecode.lib.helpers as h
 
-from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAllDecorator, \
-    HasRepoPermissionAnyDecorator, NotAnonymous
+from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAllDecorator
 from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.utils import invalidate_cache, action_logger
 
-from rhodecode.model.forms import RepoSettingsForm, RepoForkForm
+from rhodecode.model.forms import RepoSettingsForm
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.db import RepoGroup
+from rhodecode.model.meta import Session
 
 log = logging.getLogger(__name__)
 
@@ -52,15 +52,15 @@ class SettingsController(BaseRepoController):
     @LoginRequired()
     def __before__(self):
         super(SettingsController, self).__before__()
-    
+
     def __load_defaults(self):
         c.repo_groups = RepoGroup.groups_choices()
         c.repo_groups_choices = map(lambda k: unicode(k[0]), c.repo_groups)
-        
+
         repo_model = RepoModel()
         c.users_array = repo_model.get_users_js()
         c.users_groups_array = repo_model.get_users_groups_js()
-        
+
     @HasRepoPermissionAllDecorator('repository.admin')
     def index(self, repo_name):
         repo_model = RepoModel()
@@ -89,15 +89,15 @@ class SettingsController(BaseRepoController):
     def update(self, repo_name):
         repo_model = RepoModel()
         changed_name = repo_name
-        
+
         self.__load_defaults()
-        
+
         _form = RepoSettingsForm(edit=True,
                                  old_data={'repo_name': repo_name},
                                  repo_groups=c.repo_groups_choices)()
         try:
             form_result = _form.to_python(dict(request.POST))
-            
+
             repo_model.update(repo_name, form_result)
             invalidate_cache('get_repo_cached_%s' % repo_name)
             h.flash(_('Repository %s updated successfully' % repo_name),
@@ -105,6 +105,7 @@ class SettingsController(BaseRepoController):
             changed_name = form_result['repo_name_full']
             action_logger(self.rhodecode_user, 'user_updated_repo',
                           changed_name, '', self.sa)
+            Session().commit()
         except formencode.Invalid, errors:
             c.repo_info = repo_model.get_by_repo_name(repo_name)
             c.users_array = repo_model.get_users_js()
@@ -148,61 +149,10 @@ class SettingsController(BaseRepoController):
             repo_model.delete(repo)
             invalidate_cache('get_repo_cached_%s' % repo_name)
             h.flash(_('deleted repository %s') % repo_name, category='success')
+            Session().commit()
         except Exception:
             log.error(traceback.format_exc())
             h.flash(_('An error occurred during deletion of %s') % repo_name,
                     category='error')
-
-        return redirect(url('home'))
-
-    @NotAnonymous()
-    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
-                                   'repository.admin')
-    def fork(self, repo_name):
-        repo_model = RepoModel()
-        c.repo_info = repo = repo_model.get_by_repo_name(repo_name)
-        if not repo:
-            h.flash(_('%s repository is not mapped to db perhaps'
-                      ' it was created or renamed from the file system'
-                      ' please run the application again'
-                      ' in order to rescan repositories') % repo_name,
-                      category='error')
-
-            return redirect(url('home'))
-
-        return render('settings/repo_fork.html')
-
-    @NotAnonymous()
-    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
-                                   'repository.admin')
-    def fork_create(self, repo_name):
-        repo_model = RepoModel()
-        c.repo_info = repo_model.get_by_repo_name(repo_name)
-        _form = RepoForkForm(old_data={'repo_type': c.repo_info.repo_type})()
-        form_result = {}
-        try:
-            form_result = _form.to_python(dict(request.POST))
-            form_result.update({'repo_name': repo_name})
-            repo_model.create_fork(form_result, self.rhodecode_user)
-            h.flash(_('forked %s repository as %s') \
-                      % (repo_name, form_result['fork_name']),
-                    category='success')
-            action_logger(self.rhodecode_user,
-                          'user_forked_repo:%s' % form_result['fork_name'],
-                           repo_name, '', self.sa)
-        except formencode.Invalid, errors:
-            c.new_repo = errors.value['fork_name']
-            r = render('settings/repo_fork.html')
-
-            return htmlfill.render(
-                r,
-                defaults=errors.value,
-                errors=errors.error_dict or {},
-                prefix_error=False,
-                encoding="UTF-8")
-        except Exception:
-            log.error(traceback.format_exc())
-            h.flash(_('An error occurred during repository forking %s') %
-                    repo_name, category='error')
 
         return redirect(url('home'))

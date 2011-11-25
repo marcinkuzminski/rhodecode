@@ -1790,6 +1790,10 @@ div.form div.fields div.field div.button {
 	padding: 0 !important;
 }
 
+.trending_language_tbl,.trending_language_tbl tr {
+    border-spacing: 1px;
+}
+
 .trending_language {
 	background-color: #003367;
 	color: #FFF;
@@ -1797,7 +1801,7 @@ div.form div.fields div.field div.button {
 	min-width: 20px;
 	text-decoration: none;
 	height: 12px;
-	margin-bottom: 4px;
+	margin-bottom: 0px;
 	margin-left: 5px;
 	white-space: pre;
 	padding: 3px;

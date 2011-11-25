@@ -212,36 +212,33 @@ class RepoModel(BaseModel):
             raise
 
     def create(self, form_data, cur_user, just_db=False, fork=False):
+        from rhodecode.model.scm import ScmModel
 
         try:
             if fork:
-                repo_name = form_data['fork_name']
-                org_name = form_data['repo_name']
-                org_full_name = org_name
+                fork_parent_id = form_data['fork_parent_id']
 
-            else:
-                org_name = repo_name = form_data['repo_name']
-                repo_name_full = form_data['repo_name_full']
+            # repo name is just a name of repository
+            # while repo_name_full is a full qualified name that is combined
+            # with name and path of group
+            repo_name = form_data['repo_name']
+            repo_name_full = form_data['repo_name_full']
 
             new_repo = Repository()
             new_repo.enable_statistics = False
+
             for k, v in form_data.items():
                 if k == 'repo_name':
-                    if fork:
-                        v = repo_name
-                    else:
-                        v = repo_name_full
+                    v = repo_name_full
                 if k == 'repo_group':
                     k = 'group_id'
-
                 if k == 'description':
                     v = v or repo_name
 
                 setattr(new_repo, k, v)
 
             if fork:
-                parent_repo = self.sa.query(Repository)\
-                        .filter(Repository.repo_name == org_full_name).one()
+                parent_repo = Repository.get(fork_parent_id)
                 new_repo.fork = parent_repo
 
             new_repo.user_id = cur_user.user_id
@@ -271,19 +268,21 @@ class RepoModel(BaseModel):
                                    form_data['repo_group'],
                                    form_data['clone_uri'])
 
-            self.sa.commit()
-
-            #now automatically start following this repository as owner
-            from rhodecode.model.scm import ScmModel
+            # now automatically start following this repository as owner
             ScmModel(self.sa).toggle_following_repo(new_repo.repo_id,
-                                             cur_user.user_id)
+                                                    cur_user.user_id)
             return new_repo
         except:
             log.error(traceback.format_exc())
-            self.sa.rollback()
             raise
 
     def create_fork(self, form_data, cur_user):
+        """
+        Simple wrapper into executing celery task for fork creation
+        
+        :param form_data:
+        :param cur_user:
+        """
         from rhodecode.lib.celerylib import tasks, run_task
         run_task(tasks.create_repo_fork, form_data, cur_user)
 
@@ -325,6 +324,11 @@ class RepoModel(BaseModel):
             raise
 
     def delete_stats(self, repo_name):
+        """
+        removes stats for given repo
+        
+        :param repo_name:
+        """
         try:
             obj = self.sa.query(Statistics)\
                     .filter(Statistics.repository == \

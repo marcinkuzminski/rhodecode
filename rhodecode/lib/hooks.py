@@ -33,7 +33,8 @@ from rhodecode.lib.utils import action_logger
 
 
 def repo_size(ui, repo, hooktype=None, **kwargs):
-    """Presents size of repository after push
+    """
+    Presents size of repository after push
 
     :param ui:
     :param repo:
@@ -65,7 +66,8 @@ def repo_size(ui, repo, hooktype=None, **kwargs):
 
 
 def log_pull_action(ui, repo, **kwargs):
-    """Logs user last pull action
+    """
+    Logs user last pull action
 
     :param ui:
     :param repo:
@@ -76,13 +78,15 @@ def log_pull_action(ui, repo, **kwargs):
     repository = extra_params['repository']
     action = 'pull'
 
-    action_logger(username, action, repository, extra_params['ip'])
+    action_logger(username, action, repository, extra_params['ip'],
+                  commit=True)
 
     return 0
 
 
 def log_push_action(ui, repo, **kwargs):
-    """Maps user last push action to new changeset id, from mercurial
+    """
+    Maps user last push action to new changeset id, from mercurial
 
     :param ui:
     :param repo:
@@ -110,6 +114,7 @@ def log_push_action(ui, repo, **kwargs):
 
     action = action % ','.join(revs)
 
-    action_logger(username, action, repository, extra_params['ip'])
+    action_logger(username, action, repository, extra_params['ip'],
+                  commit=True)
 
     return 0

@@ -35,8 +35,6 @@ from pylons.i18n.translation import _
 from rhodecode.lib import helpers as h
 from rhodecode.model import BaseModel
 from rhodecode.model.db import Notification, User, UserNotification
-from rhodecode.lib.celerylib import run_task
-from rhodecode.lib.celerylib.tasks import send_email
 
 log = logging.getLogger(__name__)
 
@@ -74,6 +72,7 @@ class NotificationModel(BaseModel):
         :param recipients: list of int, str or User objects
         :param type_: type of notification
         """
+        from rhodecode.lib.celerylib import tasks, run_task
 
         if not getattr(recipients, '__iter__', False):
             raise Exception('recipients must be a list of iterable')
@@ -100,7 +99,7 @@ class NotificationModel(BaseModel):
             email_body_html = EmailNotificationModel()\
                             .get_email_tmpl(type_, **{'subject':subject,
                                                       'body':h.rst(body)})
-            run_task(send_email, rec.email, email_subject, email_body,
+            run_task(tasks.send_email, rec.email, email_subject, email_body,
                      email_body_html)
 
         return notif

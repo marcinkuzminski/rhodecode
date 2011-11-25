@@ -93,7 +93,7 @@ def get_repo_slug(request):
     return request.environ['pylons.routes_dict'].get('repo_name')
 
 
-def action_logger(user, action, repo, ipaddr='', sa=None):
+def action_logger(user, action, repo, ipaddr='', sa=None, commit=False):
     """
     Action logger for various actions made by users
 
@@ -138,12 +138,13 @@ def action_logger(user, action, repo, ipaddr='', sa=None):
         user_log.action_date = datetime.datetime.now()
         user_log.user_ip = ipaddr
         sa.add(user_log)
-        sa.commit()
 
         log.info('Adding user %s, action %s on %s', user_obj, action, repo)
+        if commit:
+            sa.commit()
     except:
         log.error(traceback.format_exc())
-        sa.rollback()
+        raise
 
 
 def get_repos(path, recursive=False):

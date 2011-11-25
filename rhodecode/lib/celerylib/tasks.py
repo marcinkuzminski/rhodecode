@@ -37,28 +37,27 @@ from string import lower
 from pylons import config, url
 from pylons.i18n.translation import _
 
+from vcs import get_backend
 
 from rhodecode.lib import LANGUAGES_EXTENSIONS_MAP, safe_str
 from rhodecode.lib.celerylib import run_task, locked_task, str2bool, \
     __get_lockkey, LockHeld, DaemonLock
 from rhodecode.lib.helpers import person
 from rhodecode.lib.rcmail.smtp_mailer import SmtpMailer
-from rhodecode.lib.utils import add_cache
+from rhodecode.lib.utils import add_cache, action_logger
 from rhodecode.lib.compat import json, OrderedDict
 
 from rhodecode.model import init_model
 from rhodecode.model import meta
-from rhodecode.model.db import RhodeCodeUi, Statistics, Repository, User
-
-from vcs.backends import get_repo
+from rhodecode.model.db import Statistics, Repository, User
 
 from sqlalchemy import engine_from_config
-
 
 add_cache(config)
 
 __all__ = ['whoosh_index', 'get_commits_stats',
            'reset_user_password', 'send_email']
+
 
 CELERY_ON = str2bool(config['app_conf'].get('use_celery'))
 
@@ -81,17 +80,13 @@ def get_logger(cls):
 
     return log
 
-def get_repos_path():
-    sa = get_session()
-    q = sa.query(RhodeCodeUi).filter(RhodeCodeUi.ui_key == '/').one()
-    return q.ui_value
-
-
 @task(ignore_result=True)
 @locked_task
 def whoosh_index(repo_location, full_index):
-    #log = whoosh_index.get_logger()
     from rhodecode.lib.indexers.daemon import WhooshIndexingDaemon
+
+    #log = whoosh_index.get_logger()
+
     index_location = config['index_dir']
     WhooshIndexingDaemon(index_location=index_location,
                          repo_location=repo_location, sa=get_session())\
@@ -111,13 +106,12 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
         sa = get_session()
         lock = l = DaemonLock(file_=jn(lockkey_path, lockkey))
 
-        #for js data compatibilty cleans the key for person from '
+        # for js data compatibilty cleans the key for person from '
         akc = lambda k: person(k).replace('"', "")
 
         co_day_auth_aggr = {}
         commits_by_day_aggregate = {}
-        repos_path = get_repos_path()
-        repo = get_repo(safe_str(os.path.join(repos_path, repo_name)))
+        repo = Repository.get_by_repo_name(repo_name).scm_instance
         repo_size = len(repo.revisions)
         #return if repo have no revisions
         if repo_size < 1:
@@ -139,9 +133,9 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
             last_rev = cur_stats.stat_on_revision
 
         if last_rev == repo.get_changeset().revision and repo_size > 1:
-            #pass silently without any work if we're not on first revision or
-            #current state of parsing revision(from db marker) is the
-            #last revision
+            # pass silently without any work if we're not on first revision or
+            # current state of parsing revision(from db marker) is the
+            # last revision
             lock.release()
             return True
 
@@ -255,10 +249,11 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
 
 @task(ignore_result=True)
 def send_password_link(user_email):
+    from rhodecode.model.notification import EmailNotificationModel
+
     log = get_logger(send_password_link)
 
     try:
-        from rhodecode.model.notification import EmailNotificationModel
         sa = get_session()
         user = User.get_by_email(user_email)
         if user:
@@ -283,9 +278,9 @@ def send_password_link(user_email):
 
 @task(ignore_result=True)
 def reset_user_password(user_email):
-    log = get_logger(reset_user_password)
-
     from rhodecode.lib import auth
+
+    log = get_logger(reset_user_password)
 
     try:
         try:
@@ -361,27 +356,39 @@ def send_email(recipients, subject, body, html_body=''):
 
 @task(ignore_result=True)
 def create_repo_fork(form_data, cur_user):
+    """
+    Creates a fork of repository using interval VCS methods
+    
+    :param form_data:
+    :param cur_user:
+    """
+    from rhodecode.model.repo import RepoModel
+
     log = get_logger(create_repo_fork)
 
-    from rhodecode.model.repo import RepoModel
-    from vcs import get_backend
+    Session = get_session()
+    base_path = Repository.base_path()
 
-    repo_model = RepoModel(get_session())
-    repo_model.create(form_data, cur_user, just_db=True, fork=True)
-    repo_name = form_data['repo_name']
-    repos_path = get_repos_path()
-    repo_path = os.path.join(repos_path, repo_name)
-    repo_fork_path = os.path.join(repos_path, form_data['fork_name'])
+    RepoModel(Session).create(form_data, cur_user, just_db=True, fork=True)
+
     alias = form_data['repo_type']
+    org_repo_name = form_data['org_path']
+    source_repo_path = os.path.join(base_path, org_repo_name)
+    destination_fork_path = os.path.join(base_path, form_data['repo_name_full'])
 
-    log.info('creating repo fork %s as %s', repo_name, repo_path)
+    log.info('creating fork of %s as %s', source_repo_path,
+             destination_fork_path)
     backend = get_backend(alias)
-    backend(str(repo_fork_path), create=True, src_url=str(repo_path))
-
+    backend(safe_str(destination_fork_path), create=True,
+            src_url=safe_str(source_repo_path))
+    action_logger(cur_user, 'user_forked_repo:%s' % org_repo_name,
+                   org_repo_name, '', Session)
+    # finally commit at latest possible stage
+    Session.commit()
 
 def __get_codes_stats(repo_name):
-    repos_path = get_repos_path()
-    repo = get_repo(safe_str(os.path.join(repos_path, repo_name)))
+    repo = Repository.get_by_repo_name(repo_name).scm_instance
+
     tip = repo.get_changeset()
     code_stats = {}
 

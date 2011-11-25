@@ -185,7 +185,7 @@ class ValidPassword(formencode.validators.FancyValidator):
 class ValidPasswordsMatch(formencode.validators.FancyValidator):
 
     def validate_python(self, value, state):
-        
+
         pass_val = value.get('password') or value.get('new_password')
         if pass_val != value['password_confirmation']:
             e_dict = {'password_confirmation':
@@ -198,7 +198,7 @@ class ValidAuth(formencode.validators.FancyValidator):
         'invalid_login':_('invalid user name'),
         'disabled_account':_('Your account is disabled')
     }
-    
+
     # error mapping
     e_dict = {'username':messages['invalid_login'],
               'password':messages['invalid_password']}
@@ -208,7 +208,7 @@ class ValidAuth(formencode.validators.FancyValidator):
         password = value['password']
         username = value['username']
         user = User.get_by_username(username)
-        
+
         if authenticate(username, password):
             return value
         else:
@@ -254,7 +254,7 @@ def ValidRepoName(edit, old_data):
                 # db key This is an actual just the name to store in the
                 # database
                 repo_name_full = group_path + RepoGroup.url_sep() + repo_name
-                
+
             else:
                 group_path = ''
                 repo_name_full = repo_name
@@ -289,24 +289,8 @@ def ValidRepoName(edit, old_data):
 
     return _ValidRepoName
 
-def ValidForkName():
-    class _ValidForkName(formencode.validators.FancyValidator):
-        def to_python(self, value, state):
-
-            repo_name = value.get('fork_name')
-
-            slug = repo_name_slug(repo_name)
-            if slug in [ADMIN_PREFIX, '']:
-                e_dict = {'repo_name': _('This repository name is disallowed')}
-                raise formencode.Invalid('', value, state, error_dict=e_dict)
-
-            if RepoModel().get_by_repo_name(repo_name):
-                e_dict = {'fork_name':_('This repository '
-                                        'already exists')}
-                raise formencode.Invalid('', value, state,
-                                         error_dict=e_dict)
-            return value
-    return _ValidForkName
+def ValidForkName(*args, **kwargs):
+    return ValidRepoName(*args, **kwargs)
 
 
 def SlugifyName():
@@ -513,7 +497,7 @@ def UserForm(edit=False, old_data={}):
         else:
             password = All(UnicodeString(strip=True, min=6, not_empty=True))
             password_confirmation = All(UnicodeString(strip=True, min=6, not_empty=False))
-            
+
         active = StringBoolean(if_missing=False)
         name = UnicodeString(strip=True, min=1, not_empty=True)
         lastname = UnicodeString(strip=True, min=1, not_empty=True)
@@ -605,17 +589,20 @@ def RepoForm(edit=False, old_data={}, supported_backends=BACKENDS.keys(),
         chained_validators = [ValidRepoName(edit, old_data), ValidPerms]
     return _RepoForm
 
-def RepoForkForm(edit=False, old_data={}, supported_backends=BACKENDS.keys()):
+def RepoForkForm(edit=False, old_data={}, supported_backends=BACKENDS.keys(),
+                 repo_groups=[]):
     class _RepoForkForm(formencode.Schema):
         allow_extra_fields = True
         filter_extra_fields = False
-        fork_name = All(UnicodeString(strip=True, min=1, not_empty=True),
+        repo_name = All(UnicodeString(strip=True, min=1, not_empty=True),
                         SlugifyName())
+        repo_group = OneOf(repo_groups, hideList=True)
+        repo_type = All(ValidForkType(old_data), OneOf(supported_backends))
         description = UnicodeString(strip=True, min=1, not_empty=True)
         private = StringBoolean(if_missing=False)
-        repo_type = All(ValidForkType(old_data), OneOf(supported_backends))
-
-        chained_validators = [ValidForkName()]
+        copy_permissions = StringBoolean(if_missing=False)
+        fork_parent_id = UnicodeString()
+        chained_validators = [ValidForkName(edit, old_data)]
 
     return _RepoForkForm
 
@@ -630,7 +617,7 @@ def RepoSettingsForm(edit=False, old_data={}, supported_backends=BACKENDS.keys()
         repo_group = OneOf(repo_groups, hideList=True)
         private = StringBoolean(if_missing=False)
 
-        chained_validators = [ValidRepoName(edit, old_data), ValidPerms, 
+        chained_validators = [ValidRepoName(edit, old_data), ValidPerms,
                               ValidSettings]
     return _RepoForm
 
