@@ -30,6 +30,7 @@ from pylons import tmpl_context as c, request, url
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.helpers import RepoPage
+from pylons.controllers.util import redirect
 
 log = logging.getLogger(__name__)
 
@@ -51,7 +52,10 @@ class ShortlogController(BaseRepoController):
 
         c.repo_changesets = RepoPage(c.rhodecode_repo, page=p,
                                     items_per_page=size, url=url_generator)
-        
+
+        if not c.repo_changesets:
+            return redirect(url('summary_home', repo_name=repo_name))
+
         c.shortlog_data = render('shortlog/shortlog_data.html')
         if request.environ.get('HTTP_X_PARTIAL_XHR'):
             return c.shortlog_data

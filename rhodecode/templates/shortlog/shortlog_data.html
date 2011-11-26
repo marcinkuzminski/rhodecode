@@ -1,5 +1,5 @@
 ## -*- coding: utf-8 -*-
-% if c.repo_changesets:
+%if c.repo_changesets:
 <table>
 	<tr>
 		<th class="left">${_('commit message')}</th>
@@ -58,5 +58,27 @@
 ${c.repo_changesets.pager('$link_previous ~2~ $link_next')}
 </div>
 %else:
-    ${_('There are no changes yet')}
+
+%if h.HasRepoPermissionAny('repository.write','repository.admin')(c.repo_name):
+<h4>${_('Add or upload files directly via RhodeCode')}</h4>
+<div style="margin: 20px 30px;">
+  <div id="add_node_id" class="add_node">
+      <a class="ui-button-small" href="${h.url('files_add_home',repo_name=c.repo_name,revision=0,f_path='')}">${_('add new file')}</a>
+  </div>
+</div>
+%endif
+ 
+
+<h4>${_('Push new repo')}</h4>     
+<pre>
+    hg clone ${c.clone_repo_url}
+    hg add README # add first file
+    hg commit -m "Initial" # commit with message
+    hg push # push changes back
+</pre>
+ 
+<h4>${_('Existing repository?')}</h4>
+<pre>
+    hg push ${c.clone_repo_url}
+</pre>    
 %endif

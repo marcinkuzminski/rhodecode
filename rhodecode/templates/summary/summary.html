@@ -221,7 +221,13 @@
 
 <div class="box">    
     <div class="title">
-        <div class="breadcrumbs">${h.link_to(_('Shortlog'),h.url('shortlog_home',repo_name=c.repo_name))}</div>
+        <div class="breadcrumbs">
+        %if c.repo_changesets:
+            ${h.link_to(_('Shortlog'),h.url('shortlog_home',repo_name=c.repo_name))}
+        %else:
+            ${_('Quick start')}
+         %endif
+        </div>
     </div>    
     <div class="table">
         <div id="shortlog_data">

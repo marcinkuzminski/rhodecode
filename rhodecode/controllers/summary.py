@@ -66,10 +66,7 @@ class SummaryController(BaseRepoController):
         super(SummaryController, self).__before__()
 
     def index(self, repo_name):
-
-        e = request.environ
         c.dbrepo = dbrepo = c.rhodecode_db_repo
-
         c.following = self.scm_model.is_following_repo(repo_name,
                                                 self.rhodecode_user.user_id)
 
