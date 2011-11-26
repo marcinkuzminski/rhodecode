@@ -283,6 +283,10 @@ class User(Base, BaseModel):
     notifications = relationship('UserNotification',)
 
     @property
+    def full_name(self):
+        return '%s %s' % (self.name, self.lastname)
+
+    @property
     def full_contact(self):
         return '%s %s <%s>' % (self.name, self.lastname, self.email)
 
@@ -1170,6 +1174,7 @@ class Notification(Base, BaseModel):
     TYPE_CHANGESET_COMMENT = u'cs_comment'
     TYPE_MESSAGE = u'message'
     TYPE_MENTION = u'mention'
+    TYPE_REGISTRATION = u'registration'
 
     notification_id = Column('notification_id', Integer(), nullable=False, primary_key=True)
     subject = Column('subject', Unicode(512), nullable=True)

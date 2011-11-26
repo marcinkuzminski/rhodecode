@@ -26,6 +26,7 @@
 import logging
 import traceback
 
+from pylons import url
 from pylons.i18n.translation import _
 
 from rhodecode.lib import safe_unicode
@@ -33,7 +34,8 @@ from rhodecode.lib.caching_query import FromCache
 
 from rhodecode.model import BaseModel
 from rhodecode.model.db import User, UserRepoToPerm, Repository, Permission, \
-    UserToPerm, UsersGroupRepoToPerm, UsersGroupToPerm, UsersGroupMember
+    UserToPerm, UsersGroupRepoToPerm, UsersGroupToPerm, UsersGroupMember, \
+    Notification
 from rhodecode.lib.exceptions import DefaultUserException, \
     UserOwnsReposException
 
@@ -42,6 +44,7 @@ from rhodecode.lib import generate_api_key
 from sqlalchemy.orm import joinedload
 
 log = logging.getLogger(__name__)
+
 
 PERM_WEIGHTS = {'repository.none': 0,
                 'repository.read': 1,
@@ -211,7 +214,8 @@ class UserModel(BaseModel):
         return None
 
     def create_registration(self, form_data):
-        from rhodecode.lib.celerylib import tasks, run_task
+        from rhodecode.model.notification import NotificationModel
+
         try:
             new_user = User()
             for k, v in form_data.items():
@@ -219,18 +223,26 @@ class UserModel(BaseModel):
                     setattr(new_user, k, v)
 
             self.sa.add(new_user)
-            self.sa.commit()
-            body = ('New user registration\n'
-                    'username: %s\n'
-                    'email: %s\n')
-            body = body % (form_data['username'], form_data['email'])
+            self.sa.flush()
 
-            run_task(tasks.send_email, None,
-                     _('[RhodeCode] New User registration'),
-                     body)
+            # notification to admins
+            subject = _('new user registration')
+            body = ('New user registration\n'
+                    '---------------------\n'
+                    '- Username: %s\n'
+                    '- Full Name: %s\n'
+                    '- Email: %s\n')
+            body = body % (new_user.username, new_user.full_name,
+                           new_user.email)
+            edit_url = url('edit_user', id=new_user.user_id, qualified=True)
+            kw = {'registered_user_url':edit_url}
+            NotificationModel().create(created_by=new_user, subject=subject,
+                                       body=body, recipients=None,
+                                       type_=Notification.TYPE_REGISTRATION,
+                                       email_kwargs=kw)
+
         except:
             log.error(traceback.format_exc())
-            self.sa.rollback()
             raise
 
     def update(self, user_id, form_data):

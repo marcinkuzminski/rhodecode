@@ -57,8 +57,9 @@ class NotificationModel(BaseModel):
                 raise Exception('notification must be int or Instance'
                                 ' of Notification got %s' % type(notification))
 
-    def create(self, created_by, subject, body, recipients,
-               type_=Notification.TYPE_MESSAGE):
+    def create(self, created_by, subject, body, recipients=None,
+               type_=Notification.TYPE_MESSAGE, with_email=True,
+               email_kwargs={}):
         """
         
         Creates notification of given type
@@ -67,35 +68,46 @@ class NotificationModel(BaseModel):
             notification
         :param subject:
         :param body:
-        :param recipients: list of int, str or User objects
+        :param recipients: list of int, str or User objects, when None 
+            is given send to all admins
         :param type_: type of notification
+        :param with_email: send email with this notification
+        :param email_kwargs: additional dict to pass as args to email template
         """
         from rhodecode.lib.celerylib import tasks, run_task
 
-        if not getattr(recipients, '__iter__', False):
+        if recipients and not getattr(recipients, '__iter__', False):
             raise Exception('recipients must be a list of iterable')
 
         created_by_obj = self.__get_user(created_by)
 
-        recipients_objs = []
-        for u in recipients:
-            obj = self.__get_user(u)
-            if obj:
-                recipients_objs.append(obj)
-        recipients_objs = set(recipients_objs)
+        if recipients:
+            recipients_objs = []
+            for u in recipients:
+                obj = self.__get_user(u)
+                if obj:
+                    recipients_objs.append(obj)
+            recipients_objs = set(recipients_objs)
+        else:
+            # empty recipients means to all admins
+            recipients_objs = User.query().filter(User.admin == True).all()
 
         notif = Notification.create(created_by=created_by_obj, subject=subject,
                                     body=body, recipients=recipients_objs,
                                     type_=type_)
 
+        if with_email is False:
+            return notif
+
         # send email with notification
         for rec in recipients_objs:
             email_subject = NotificationModel().make_description(notif, False)
-            type_ = EmailNotificationModel.TYPE_CHANGESET_COMMENT
+            type_ = type_
             email_body = body
+            kwargs = {'subject':subject, 'body':h.rst(body)}
+            kwargs.update(email_kwargs)
             email_body_html = EmailNotificationModel()\
-                            .get_email_tmpl(type_, **{'subject':subject,
-                                                      'body':h.rst(body)})
+                                .get_email_tmpl(type_, **kwargs)
             run_task(tasks.send_email, rec.email, email_subject, email_body,
                      email_body_html)
 
@@ -150,7 +162,9 @@ class NotificationModel(BaseModel):
 
         _map = {notification.TYPE_CHANGESET_COMMENT:_('commented on commit'),
                 notification.TYPE_MESSAGE:_('sent message'),
-                notification.TYPE_MENTION:_('mentioned you')}
+                notification.TYPE_MENTION:_('mentioned you'),
+                notification.TYPE_REGISTRATION:_('registered in RhodeCode')}
+
         DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 
         tmpl = "%(user)s %(action)s %(when)s"

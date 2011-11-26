@@ -38,6 +38,7 @@ from rhodecode.lib.base import BaseController, render
 from rhodecode.model.db import User
 from rhodecode.model.forms import LoginForm, RegisterForm, PasswordResetForm
 from rhodecode.model.user import UserModel
+from rhodecode.model.meta import Session
 
 
 log = logging.getLogger(__name__)
@@ -109,6 +110,7 @@ class LoginController(BaseController):
                 user_model.create_registration(form_result)
                 h.flash(_('You have successfully registered into rhodecode'),
                             category='success')
+                Session().commit()
                 return redirect(url('login_home'))
 
             except formencode.Invalid, errors:
