@@ -267,6 +267,7 @@ class TestNotifications(unittest.TestCase):
         self.assertEqual(un, [])
 
         self._clean_notifications()
+
     def test_delete_association(self):
 
         self.assertEqual([], Notification.query().all())
@@ -289,13 +290,31 @@ class TestNotifications(unittest.TestCase):
                                    notification.notification_id)
         Session().commit()
 
-        unotification = UserNotification.query()\
+        u3notification = UserNotification.query()\
                             .filter(UserNotification.notification ==
                                     notification)\
                             .filter(UserNotification.user_id == self.u3)\
                             .scalar()
 
-        self.assertEqual(unotification, None)
+        self.assertEqual(u3notification, None)
+
+        # notification object is still there
+        self.assertEqual(Notification.query().all(), [notification])
+
+        #u1 and u2 still have assignments
+        u1notification = UserNotification.query()\
+                            .filter(UserNotification.notification ==
+                                    notification)\
+                            .filter(UserNotification.user_id == self.u1)\
+                            .scalar()
+        self.assertNotEqual(u1notification, None)
+        u2notification = UserNotification.query()\
+                            .filter(UserNotification.notification ==
+                                    notification)\
+                            .filter(UserNotification.user_id == self.u2)\
+                            .scalar()
+        self.assertNotEqual(u2notification, None)
+
         self._clean_notifications()
 
     def test_notification_counter(self):
