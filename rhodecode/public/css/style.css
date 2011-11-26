@@ -1004,7 +1004,12 @@ div.options a {
     padding: 0px 0 0 0px;
 }
 
-#content div.box-left div.form div.fields div.field div.label,#content div.box-right div.form div.fields div.field div.label
+#content div.box-left div.form div.fields div.field div.label,
+#content div.box-right div.form div.fields div.field div.label,
+#content div.box-left div.form div.fields div.field div.label,
+#content div.box-left div.form div.fields div.field div.label-summary,
+#content div.box-right div.form div.fields div.field div.label-summary,
+#content div.box-left div.form div.fields div.field div.label-summary
 	{
 	clear: both;
 	overflow: hidden;
@@ -1019,12 +1024,14 @@ div.options a {
 	padding: 5px 0 0 5px;
 }
 
-#content div.box-left div.form div.fields div.field div.label-select,#content div.box-right div.form div.fields div.field div.label-select
+#content div.box-left div.form div.fields div.field div.label-select,
+#content div.box-right div.form div.fields div.field div.label-select
 	{
 	padding: 0 0 8px;
 }
 
-#content div.box-left div.form div.fields div.field div.label-textarea,#content div.box-right div.form div.fields div.field div.label-textarea
+#content div.box-left div.form div.fields div.field div.label-textarea,
+#content div.box-right div.form div.fields div.field div.label-textarea
 	{
 	padding: 0 0 8px !important;
 }
@@ -1044,7 +1051,7 @@ div.options a {
 }
 
 #content div.box div.form div.fields div.field div.input.summary {
-    margin: 0 0 0 150px;
+    margin: 0 0 0 110px;
 }
 
 #content div.box div.form div.fields div.field div.file {
@@ -2416,15 +2423,17 @@ table.code-browser .browser-dir {
 .rss_icon {
 	background: url("../images/icons/rss_16.png") no-repeat scroll 3px;
 	padding-left: 20px;
-	padding-top: 0px;
+	padding-top: 4px;
 	text-align: left;
+	font-size: 8px
 }
 
 .atom_icon {
 	background: url("../images/icons/atom.png") no-repeat scroll 3px;
 	padding-left: 20px;
-	padding-top: 0px;
+	padding-top: 4px;
 	text-align: left;
+	font-size: 8px
 }
 
 .archive_icon {

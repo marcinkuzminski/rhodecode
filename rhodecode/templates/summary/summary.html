@@ -16,6 +16,10 @@
 	${self.menu('summary')}    
 </%def>
 
+<%
+summary = lambda n:{False:'summary'}.get(n)
+%>
+
 <%def name="main()">
     %if c.show_stats:
         <div class="box box-left">
@@ -34,8 +38,8 @@
 			  <div class="label-summary">
 			      <label>${_('Name')}:</label>
 			  </div>
-			  <div class="input summary">
-                  <div style="float:right;padding-top:5px">		  
+			  <div class="input summary(c.show_stats)">
+                  <div style="float:right;padding:5px 0px 0px 5px">		  
                      %if c.rhodecode_user.username != 'default':
                       ${h.link_to(_('RSS'),h.url('rss_feed_home',repo_name=c.dbrepo.repo_name,api_key=c.rhodecode_user.api_key),class_='rss_icon')}
                       ${h.link_to(_('ATOM'),h.url('atom_feed_home',repo_name=c.dbrepo.repo_name,api_key=c.rhodecode_user.api_key),class_='atom_icon')}
@@ -96,14 +100,14 @@
 			  <div class="label-summary">
 			      <label>${_('Description')}:</label>
 			  </div>
-			  <div class="input summary desc">${h.urlify_text(c.dbrepo.description)}</div>
+			  <div class="input summary(c.show_stats) desc">${h.urlify_text(c.dbrepo.description)}</div>
 			 </div>
 			
 			 <div class="field">
 			  <div class="label-summary">
 			      <label>${_('Contact')}:</label>
 			  </div>
-			  <div class="input summary">
+			  <div class="input summary(c.show_stats)">
 			  	<div class="gravatar">
 			  		<img alt="gravatar" src="${h.gravatar_url(c.dbrepo.user.email)}"/>
 			  	</div>
@@ -117,7 +121,7 @@
 			  <div class="label-summary">
 			      <label>${_('Last change')}:</label>
 			  </div>
-			  <div class="input summary">
+			  <div class="input summary(c.show_stats)">
                   <b>${'r%s:%s' % (h.get_changeset_safe(c.rhodecode_repo,'tip').revision,
                             h.get_changeset_safe(c.rhodecode_repo,'tip').short_id)}</b> - 
 			      <span class="tooltip" title="${c.rhodecode_repo.last_change}">
@@ -130,16 +134,16 @@
 			  <div class="label-summary">
 			      <label>${_('Clone url')}:</label>
 			  </div>
-			  <div class="input summary">
-			      <input type="text" id="clone_url" readonly="readonly" value="${c.rhodecode_repo.alias} clone ${c.clone_repo_url}" size="65"/>
+			  <div class="input summary(c.show_stats)">
+			      <input type="text" id="clone_url" readonly="readonly" value="${c.rhodecode_repo.alias} clone ${c.clone_repo_url}" size="70"/>
 			  </div>
 			 </div>
 			 
 			 <div class="field">
 			  <div class="label-summary">
-			      <label>${_('Trending source files')}:</label>
+			      <label>${_('Trending files')}:</label>
 			  </div>
-			  <div class="input summary">
+			  <div class="input summary(c.show_stats)">
                 %if c.show_stats:
 			    <div id="lang_stats"></div>
                 %else:
@@ -154,7 +158,7 @@
 			  <div class="label-summary">
 			      <label>${_('Download')}:</label>
 			  </div>
-			  <div class="input summary">
+			  <div class="input summary(c.show_stats)">
 		        %if len(c.rhodecode_repo.revisions) == 0:
 		          ${_('There are no downloads yet')}
 		        %elif c.enable_downloads is False:
