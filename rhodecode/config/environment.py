@@ -39,7 +39,7 @@ def load_environment(global_conf, app_conf, initial=False):
     # Initialize config with the basic options
     config.init_app(global_conf, app_conf, package='rhodecode', paths=paths)
 
-    # store some globals into our main isntance
+    # store some globals into rhodecode
     rhodecode.CELERY_ON = str2bool(config['app_conf'].get('use_celery'))
     rhodecode.CONFIG = config
 

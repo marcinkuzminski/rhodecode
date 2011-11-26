@@ -1,7 +1,7 @@
 from rhodecode.lib.utils import BasePasterCommand, Command
 from celery.app import app_or_default
 from celery.bin import camqadm, celerybeat, celeryd, celeryev
-from pylons import config
+
 from rhodecode.lib import str2bool
 
 __all__ = ['CeleryDaemonCommand', 'CeleryBeatCommand',
@@ -28,6 +28,7 @@ class CeleryCommand(BasePasterCommand):
             self.parser.add_option(x)
 
     def command(self):
+        from pylons import config
         try:
             CELERY_ON = str2bool(config['app_conf'].get('use_celery'))
         except KeyError:
