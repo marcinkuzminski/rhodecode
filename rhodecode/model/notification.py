@@ -181,9 +181,9 @@ class NotificationModel(BaseModel):
 
 class EmailNotificationModel(BaseModel):
 
-    TYPE_CHANGESET_COMMENT = 'changeset_comment'
+    TYPE_CHANGESET_COMMENT = Notification.TYPE_CHANGESET_COMMENT
     TYPE_PASSWORD_RESET = 'passoword_link'
-    TYPE_REGISTRATION = 'registration'
+    TYPE_REGISTRATION = Notification.TYPE_REGISTRATION
     TYPE_DEFAULT = 'default'
 
     def __init__(self):
@@ -204,7 +204,7 @@ class EmailNotificationModel(BaseModel):
         :param type_:
         """
 
-        base = self.email_types.get(type_, self.TYPE_DEFAULT)
+        base = self.email_types.get(type_, self.email_types[self.TYPE_DEFAULT])
         email_template = self._tmpl_lookup.get_template(base)
         # translator inject
         _kwargs = {'_':_}

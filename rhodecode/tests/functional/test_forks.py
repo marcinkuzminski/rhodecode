@@ -76,7 +76,10 @@ class TestForksController(TestController):
         response = response.follow()
 
 
-        #check if fork is marked as fork
+        # check if fork is marked as fork
+        # wait for cache to expire
+        import time
+        time.sleep(10)
         response = self.app.get(url(controller='summary', action='index',
                                     repo_name=fork_name))
 

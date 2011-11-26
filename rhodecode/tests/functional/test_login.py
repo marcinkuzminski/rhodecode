@@ -1,11 +1,18 @@
 # -*- coding: utf-8 -*-
 from rhodecode.tests import *
-from rhodecode.model.db import User
+from rhodecode.model.db import User, Notification
 from rhodecode.lib import generate_api_key
 from rhodecode.lib.auth import check_password
-
+from rhodecode.model.meta import Session
 
 class TestLoginController(TestController):
+
+    def tearDown(self):
+        for n in Notification.query().all():
+            Session().delete(n)
+
+        Session().commit()
+        self.assertEqual(Notification.query().all(), [])
 
     def test_index(self):
         response = self.app.get(url(controller='login', action='index'))
