@@ -301,7 +301,7 @@ class  AuthUser(object):
 
     def propagate_data(self):
         user_model = UserModel()
-        self.anonymous_user = User.get_by_username('default')
+        self.anonymous_user = User.get_by_username('default', cache=True)
         is_user_loaded = False
 
         # try go get user by api key
@@ -488,8 +488,6 @@ class PermsDecorator(object):
 
         else:
             log.warning('Permission denied for %s %s', cls, self.user)
-
-
             anonymous = self.user.username == 'default'
 
             if anonymous:
@@ -587,8 +585,7 @@ class PermsFunction(object):
         self.repo_name = None
 
     def __call__(self, check_Location=''):
-        cookie_store = session.get('rhodecode_user')
-        user = AuthUser.from_cookie_store(cookie_store)
+        user = request.user
         if not user:
             return False
         self.user_perms = user.permissions

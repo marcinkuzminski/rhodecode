@@ -89,7 +89,7 @@ class UserModel(BaseModel):
             raise
 
 
-    def create_or_update(self, username, password, email, name, lastname, 
+    def create_or_update(self, username, password, email, name, lastname,
                          active=True, admin=False, ldap_dn=None):
         """
         Creates a new instance if not found, or updates current one
@@ -104,18 +104,18 @@ class UserModel(BaseModel):
         :param admin:
         :param ldap_dn:
         """
-        
+
         from rhodecode.lib.auth import get_crypt_password
-        
+
         log.debug('Checking for %s account in RhodeCode database', username)
         user = User.get_by_username(username, case_insensitive=True)
         if user is None:
-            log.debug('creating new user %s', username)            
+            log.debug('creating new user %s', username)
             new_user = User()
         else:
-            log.debug('updating user %s', username)            
+            log.debug('updating user %s', username)
             new_user = user
-            
+
         try:
             new_user.username = username
             new_user.admin = admin
@@ -134,8 +134,8 @@ class UserModel(BaseModel):
             log.error(traceback.format_exc())
             self.sa.rollback()
             raise
-    
-    
+
+
     def create_for_container_auth(self, username, attrs):
         """
         Creates the given user if it's not already in the database
@@ -354,14 +354,10 @@ class UserModel(BaseModel):
         #======================================================================
         # fetch default permissions
         #======================================================================
-        default_user = User.get_by_username('default')
+        default_user = User.get_by_username('default', cache=True)
+        default_user_id = default_user.user_id
 
-        default_perms = self.sa.query(UserRepoToPerm, Repository, Permission)\
-            .join((Repository, UserRepoToPerm.repository_id ==
-                   Repository.repo_id))\
-            .join((Permission, UserRepoToPerm.permission_id ==
-                   Permission.permission_id))\
-            .filter(UserRepoToPerm.user == default_user).all()
+        default_perms = Permission.get_default_perms(default_user_id)
 
         if user.is_admin:
             #==================================================================
@@ -382,7 +378,7 @@ class UserModel(BaseModel):
 
             #default global
             default_global_perms = self.sa.query(UserToPerm)\
-                .filter(UserToPerm.user == default_user)
+                .filter(UserToPerm.user_id == default_user_id)
 
             for perm in default_global_perms:
                 user.permissions['global'].add(perm.permission.permission_name)
@@ -391,7 +387,7 @@ class UserModel(BaseModel):
             for perm in default_perms:
                 if perm.Repository.private and not (perm.Repository.user_id ==
                                                     uid):
-                    #diself.sable defaults for private repos,
+                    #disable defaults for private repos,
                     p = 'repository.none'
                 elif perm.Repository.user_id == uid:
                     #set admin if owner
@@ -438,7 +434,7 @@ class UserModel(BaseModel):
             # (or replace with higher) permissions
             #==================================================================
 
-            #users group global
+            # users group global
             user_perms_from_users_groups = self.sa.query(UsersGroupToPerm)\
                 .options(joinedload(UsersGroupToPerm.permission))\
                 .join((UsersGroupMember, UsersGroupToPerm.users_group_id ==
@@ -448,7 +444,7 @@ class UserModel(BaseModel):
             for perm in user_perms_from_users_groups:
                 user.permissions['global'].add(perm.permission.permission_name)
 
-            #users group repositories
+            # users group repositories
             user_repo_perms_from_users_groups = self.sa.query(
                                                 UsersGroupRepoToPerm,
                                                 Permission, Repository,)\
@@ -465,7 +461,7 @@ class UserModel(BaseModel):
                 cur_perm = user.permissions['repositories'][perm.
                                                     UsersGroupRepoToPerm.
                                                     repository.repo_name]
-                #overwrite permission only if it's greater than permission
+                # overwrite permission only if it's greater than permission
                 # given from other sources
                 if PERM_WEIGHTS[p] > PERM_WEIGHTS[cur_perm]:
                     user.permissions['repositories'][perm.UsersGroupRepoToPerm.

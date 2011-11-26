@@ -1053,7 +1053,9 @@ div.options a {
 #content div.box div.form div.fields div.field div.input.summary {
     margin: 0 0 0 110px;
 }
-
+#content div.box div.form div.fields div.field div.input.summary-short {
+    margin: 0 0 0 110px;
+}
 #content div.box div.form div.fields div.field div.file {
 	margin: 0 0 0 200px;
 }

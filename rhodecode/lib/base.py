@@ -52,6 +52,7 @@ class BaseController(WSGIController):
             username = get_container_username(environ, config)
 
             auth_user = AuthUser(user_id, api_key, username)
+            request.user = auth_user
             self.rhodecode_user = c.rhodecode_user = auth_user
             if not self.rhodecode_user.is_authenticated and \
                        self.rhodecode_user.user_id is not None:

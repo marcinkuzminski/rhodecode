@@ -1,3 +1,4 @@
+import rhodecode
 from rhodecode.lib.utils import BasePasterCommand, Command
 from celery.app import app_or_default
 from celery.bin import camqadm, celerybeat, celeryd, celeryev
@@ -37,7 +38,7 @@ class CeleryCommand(BasePasterCommand):
         if CELERY_ON == False:
             raise Exception('Please enable celery_on in .ini config '
                             'file before running celeryd')
-
+        rhodecode.CELERY_ON = CELERY_ON
         cmd = self.celery_command(app_or_default())
         return cmd.run(**vars(self.options))
 

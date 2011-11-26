@@ -322,8 +322,8 @@ def send_email(recipients, subject, body, html_body=''):
     :param html_body: html version of body
     """
     log = get_logger(send_email)
+    sa = get_session()
     email_config = config
-
     subject = "%s %s" % (email_config.get('email_prefix'), subject)
     if not recipients:
         # if recipients are not defined we send to email_config + all admins

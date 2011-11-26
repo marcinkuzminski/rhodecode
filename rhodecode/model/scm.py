@@ -76,9 +76,7 @@ class CachedRepoList(object):
 
     def __iter__(self):
         for dbr in self.db_repo_list:
-
             scmr = dbr.scm_instance_cached
-
             # check permission at this level
             if not HasRepoPermissionAny('repository.read', 'repository.write',
                                         'repository.admin')(dbr.repo_name,
@@ -100,8 +98,7 @@ class CachedRepoList(object):
             tmp_d['description'] = dbr.description
             tmp_d['description_sort'] = tmp_d['description']
             tmp_d['last_change'] = last_change
-            tmp_d['last_change_sort'] = time.mktime(last_change \
-                                                    .timetuple())
+            tmp_d['last_change_sort'] = time.mktime(last_change.timetuple())
             tmp_d['tip'] = tip.raw_id
             tmp_d['tip_sort'] = tip.revision
             tmp_d['rev'] = tip.revision
@@ -112,8 +109,7 @@ class CachedRepoList(object):
             tmp_d['last_msg'] = tip.message
             tmp_d['author'] = tip.author
             tmp_d['dbrepo'] = dbr.get_dict()
-            tmp_d['dbrepo_fork'] = dbr.fork.get_dict() if dbr.fork \
-                                                                    else {}
+            tmp_d['dbrepo_fork'] = dbr.fork.get_dict() if dbr.fork else {}
             yield tmp_d
 
 class ScmModel(BaseModel):

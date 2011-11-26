@@ -371,17 +371,16 @@ class UsersGroup(Base, BaseModel):
         return '<userGroup(%s)>' % (self.users_group_name)
 
     @classmethod
-    def get_by_group_name(cls, group_name, cache=False, case_insensitive=False):
+    def get_by_group_name(cls, group_name, cache=False,
+                          case_insensitive=False):
         if case_insensitive:
-            gr = cls.query()\
-                .filter(cls.users_group_name.ilike(group_name))
+            q = cls.query().filter(cls.users_group_name.ilike(group_name))
         else:
-            gr = cls.query()\
-                .filter(cls.users_group_name == group_name)
+            q = cls.query().filter(cls.users_group_name == group_name)
         if cache:
-            gr = gr.options(FromCache("sql_cache_short",
-                                          "get_user_%s" % group_name))
-        return gr.scalar()
+            q = q.options(FromCache("sql_cache_short",
+                                    "get_user_%s" % group_name))
+        return q.scalar()
 
 
     @classmethod
@@ -535,9 +534,9 @@ class Repository(Base, BaseModel):
 
         :param cls:
         """
-        q = Session().query(RhodeCodeUi).filter(RhodeCodeUi.ui_key ==
-                                              cls.url_sep())
-        q.options(FromCache("sql_cache_short", "repository_repo_path"))
+        q = Session().query(RhodeCodeUi)\
+            .filter(RhodeCodeUi.ui_key == cls.url_sep())
+        q = q.options(FromCache("sql_cache_short", "repository_repo_path"))
         return q.one().ui_value
 
     @property
@@ -849,6 +848,18 @@ class Permission(Base, BaseModel):
     def get_by_key(cls, key):
         return cls.query().filter(cls.permission_name == key).scalar()
 
+    @classmethod
+    def get_default_perms(cls, default_user_id, cache=True):
+        q = Session().query(UserRepoToPerm, Repository, cls)\
+            .join((Repository, UserRepoToPerm.repository_id == Repository.repo_id))\
+            .join((cls, UserRepoToPerm.permission_id == cls.permission_id))\
+            .filter(UserRepoToPerm.user_id == default_user_id)
+        if cache:
+            q = q.options(FromCache("sql_cache_short", "get_default_perms"))
+
+        return q.all()
+
+
 class UserRepoToPerm(Base, BaseModel):
     __tablename__ = 'repo_to_perm'
     __table_args__ = (UniqueConstraint('user_id', 'repository_id'), {'extend_existing':True})
@@ -869,7 +880,7 @@ class UserToPerm(Base, BaseModel):
     permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable=False, unique=None, default=None)
 
     user = relationship('User')
-    permission = relationship('Permission')
+    permission = relationship('Permission', lazy='joined')
 
     @classmethod
     def has_perm(cls, user_id, perm):
