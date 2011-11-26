@@ -872,6 +872,18 @@ class UserRepoToPerm(Base, BaseModel):
     permission = relationship('Permission')
     repository = relationship('Repository')
 
+    @classmethod
+    def create(cls, user, repository, permission):
+        n = cls()
+        n.user = user
+        n.repository = repository
+        n.permission = permission
+        Session().add(n)
+        return n
+
+    def __repr__(self):
+        return '<user:%s => %s >' % (self.user, self.repository)
+
 class UserToPerm(Base, BaseModel):
     __tablename__ = 'user_to_perm'
     __table_args__ = (UniqueConstraint('user_id', 'permission_id'), {'extend_existing':True})
@@ -929,6 +941,15 @@ class UsersGroupRepoToPerm(Base, BaseModel):
     users_group = relationship('UsersGroup')
     permission = relationship('Permission')
     repository = relationship('Repository')
+
+    @classmethod
+    def create(cls, users_group, repository, permission):
+        n = cls()
+        n.users_group = users_group
+        n.repository = repository
+        n.permission = permission
+        Session().add(n)
+        return n
 
     def __repr__(self):
         return '<userGroup:%s => %s >' % (self.users_group, self.repository)

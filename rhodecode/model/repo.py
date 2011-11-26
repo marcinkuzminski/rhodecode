@@ -244,24 +244,46 @@ class RepoModel(BaseModel):
             new_repo.user_id = cur_user.user_id
             self.sa.add(new_repo)
 
-            #create default permission
-            repo_to_perm = UserRepoToPerm()
-            default = 'repository.read'
-            for p in User.get_by_username('default').user_perms:
-                if p.permission.permission_name.startswith('repository.'):
-                    default = p.permission.permission_name
-                    break
+            def _create_default_perms():
+                # create default permission
+                repo_to_perm = UserRepoToPerm()
+                default = 'repository.read'
+                for p in User.get_by_username('default').user_perms:
+                    if p.permission.permission_name.startswith('repository.'):
+                        default = p.permission.permission_name
+                        break
 
-            default_perm = 'repository.none' if form_data['private'] else default
+                default_perm = 'repository.none' if form_data['private'] else default
 
-            repo_to_perm.permission_id = self.sa.query(Permission)\
-                    .filter(Permission.permission_name == default_perm)\
-                    .one().permission_id
+                repo_to_perm.permission_id = self.sa.query(Permission)\
+                        .filter(Permission.permission_name == default_perm)\
+                        .one().permission_id
 
-            repo_to_perm.repository = new_repo
-            repo_to_perm.user_id = User.get_by_username('default').user_id
+                repo_to_perm.repository = new_repo
+                repo_to_perm.user_id = User.get_by_username('default').user_id
 
-            self.sa.add(repo_to_perm)
+                self.sa.add(repo_to_perm)
+
+
+            if fork:
+                if form_data.get('copy_permissions'):
+                    repo = Repository.get(fork_parent_id)
+                    user_perms = UserRepoToPerm.query()\
+                        .filter(UserRepoToPerm.repository == repo).all()
+                    group_perms = UsersGroupRepoToPerm.query()\
+                        .filter(UsersGroupRepoToPerm.repository == repo).all()
+
+                    for perm in user_perms:
+                        UserRepoToPerm.create(perm.user, new_repo,
+                                              perm.permission)
+
+                    for perm in group_perms:
+                        UsersGroupRepoToPerm.create(perm.users_group, new_repo,
+                                                    perm.permission)
+                else:
+                    _create_default_perms()
+            else:
+                _create_default_perms()
 
             if not just_db:
                 self.__create_repo(repo_name, form_data['repo_type'],

@@ -376,21 +376,21 @@ class UserModel(BaseModel):
             #==================================================================
             uid = user.user_id
 
-            #default global
+            # default global
             default_global_perms = self.sa.query(UserToPerm)\
                 .filter(UserToPerm.user_id == default_user_id)
 
             for perm in default_global_perms:
                 user.permissions['global'].add(perm.permission.permission_name)
 
-            #default for repositories
+            # default for repositories
             for perm in default_perms:
                 if perm.Repository.private and not (perm.Repository.user_id ==
                                                     uid):
-                    #disable defaults for private repos,
+                    # disable defaults for private repos,
                     p = 'repository.none'
                 elif perm.Repository.user_id == uid:
-                    #set admin if owner
+                    # set admin if owner
                     p = 'repository.admin'
                 else:
                     p = perm.Permission.permission_name
@@ -402,16 +402,15 @@ class UserModel(BaseModel):
             # overwrite default with user permissions if any
             #==================================================================
 
-            #user global
+            # user global
             user_perms = self.sa.query(UserToPerm)\
                     .options(joinedload(UserToPerm.permission))\
                     .filter(UserToPerm.user_id == uid).all()
 
             for perm in user_perms:
-                user.permissions['global'].add(perm.permission.
-                                               permission_name)
+                user.permissions['global'].add(perm.permission.permission_name)
 
-            #user repositories
+            # user repositories
             user_repo_perms = self.sa.query(UserRepoToPerm, Permission,
                                             Repository)\
                 .join((Repository, UserRepoToPerm.repository_id ==
