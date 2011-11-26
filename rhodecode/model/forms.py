@@ -120,15 +120,17 @@ def ValidReposGroup(edit, old_data):
     class _ValidReposGroup(formencode.validators.FancyValidator):
 
         def validate_python(self, value, state):
-            #TODO WRITE VALIDATIONS
+            # TODO WRITE VALIDATIONS
             group_name = value.get('group_name')
-            group_parent_id = int(value.get('group_parent_id') or -1)
+            group_parent_id = value.get('group_parent_id')
 
             # slugify repo group just in case :)
             slug = repo_name_slug(group_name)
 
             # check for parent of self
-            if edit and old_data['group_id'] == group_parent_id:
+            parent_of_self = lambda:(old_data['group_id'] == int(group_parent_id)
+                                     if group_parent_id else False)
+            if edit and parent_of_self():
                     e_dict = {'group_parent_id':_('Cannot assign this group '
                                                   'as parent')}
                     raise formencode.Invalid('', value, state,
@@ -136,10 +138,10 @@ def ValidReposGroup(edit, old_data):
 
             old_gname = None
             if edit:
-                old_gname = RepoGroup.get(
-                            old_data.get('group_id')).group_name
+                old_gname = RepoGroup.get(old_data.get('group_id')).group_name
 
             if old_gname != group_name or not edit:
+
                 # check filesystem
                 gr = RepoGroup.query().filter(RepoGroup.group_name == slug)\
                     .filter(RepoGroup.group_parent_id == group_parent_id).scalar()
