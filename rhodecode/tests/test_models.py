@@ -42,6 +42,7 @@ class TestReposGroups(unittest.TestCase):
                          group_description=desc,
                          group_parent_id=parent_id)
         gr = ReposGroupModel().create(form_data)
+        Session.commit()
         return gr
 
     def __delete_group(self, id_):
@@ -65,7 +66,7 @@ class TestReposGroups(unittest.TestCase):
 
     def test_create_same_name_group(self):
         self.assertRaises(IntegrityError, lambda:self.__make_group('newGroup'))
-
+        Session().rollback()
 
     def test_same_subgroup(self):
         sg1 = self.__make_group('sub1', parent_id=self.g1.group_id)
@@ -162,16 +163,20 @@ class TestUser(unittest.TestCase):
         usr = UserModel().create_or_update(username=u'test_user', password=u'qweqwe',
                                      email=u'u232@rhodecode.org',
                                      name=u'u1', lastname=u'u1')
+        Session().commit()
         self.assertEqual(User.get_by_username(u'test_user'), usr)
 
         # make users group
-        users_group = UsersGroupModel().create_('some_example_group')
+        users_group = UsersGroupModel().create('some_example_group')
         Session().commit()
+
         UsersGroupModel().add_user_to_group(users_group, usr)
+        Session().commit()
 
         self.assertEqual(UsersGroup.get(users_group.users_group_id), users_group)
         self.assertEqual(UsersGroupMember.query().count(), 1)
         UserModel().delete(usr.user_id)
+        Session().commit()
 
         self.assertEqual(UsersGroupMember.query().all(), [])
 
@@ -182,15 +187,24 @@ class TestNotifications(unittest.TestCase):
         self.u1 = UserModel().create_or_update(username=u'u1',
                                         password=u'qweqwe',
                                         email=u'u1@rhodecode.org',
-                                        name=u'u1', lastname=u'u1').user_id
+                                        name=u'u1', lastname=u'u1')
+        Session.commit()
+        self.u1 = self.u1.user_id
+
         self.u2 = UserModel().create_or_update(username=u'u2',
                                         password=u'qweqwe',
                                         email=u'u2@rhodecode.org',
-                                        name=u'u2', lastname=u'u3').user_id
+                                        name=u'u2', lastname=u'u3')
+        Session.commit()
+        self.u2 = self.u2.user_id
+
         self.u3 = UserModel().create_or_update(username=u'u3',
                                         password=u'qweqwe',
                                         email=u'u3@rhodecode.org',
-                                        name=u'u3', lastname=u'u3').user_id
+                                        name=u'u3', lastname=u'u3')
+        Session.commit()
+        self.u3 = self.u3.user_id
+
         super(TestNotifications, self).__init__(methodName=methodName)
 
     def _clean_notifications(self):

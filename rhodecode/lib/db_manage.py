@@ -78,16 +78,11 @@ class DbManage(object):
         log.info('Created tables for %s', self.dbname)
 
     def set_db_version(self):
-        try:
-            ver = DbMigrateVersion()
-            ver.version = __dbversion__
-            ver.repository_id = 'rhodecode_db_migrations'
-            ver.repository_path = 'versions'
-            self.sa.add(ver)
-            self.sa.commit()
-        except:
-            self.sa.rollback()
-            raise
+        ver = DbMigrateVersion()
+        ver.version = __dbversion__
+        ver.repository_id = 'rhodecode_db_migrations'
+        ver.repository_path = 'versions'
+        self.sa.add(ver)
         log.info('db version set to: %s', __dbversion__)
 
     def upgrade(self):
@@ -162,7 +157,7 @@ class DbManage(object):
                 self.klass.fix_settings()
                 print ('Adding ldap defaults')
                 self.klass.create_ldap_options(skip_existing=True)
-                
+
         upgrade_steps = [0] + range(curr_version + 1, __dbversion__ + 1)
 
         #CALL THE PROPER ORDER OF STEPS TO PERFORM FULL UPGRADE
@@ -299,43 +294,33 @@ class DbManage(object):
         dotencode_disable.ui_value = 'false'
 
         # enable largefiles
-        dotencode_disable = RhodeCodeUi()
-        dotencode_disable.ui_section = 'extensions'
-        dotencode_disable.ui_key = 'largefiles'
-        dotencode_disable.ui_value = '1'
+        largefiles = RhodeCodeUi()
+        largefiles.ui_section = 'extensions'
+        largefiles.ui_key = 'largefiles'
+        largefiles.ui_value = '1'
 
-        try:
-            self.sa.add(hooks1)
-            self.sa.add(hooks2)
-            self.sa.add(hooks3)
-            self.sa.add(hooks4)
-            self.sa.add(dotencode_disable)
-            self.sa.commit()
-        except:
-            self.sa.rollback()
-            raise
+        self.sa.add(hooks1)
+        self.sa.add(hooks2)
+        self.sa.add(hooks3)
+        self.sa.add(hooks4)
+        self.sa.add(largefiles)
 
-    def create_ldap_options(self,skip_existing=False):
+    def create_ldap_options(self, skip_existing=False):
         """Creates ldap settings"""
 
-        try:
-            for k, v in [('ldap_active', 'false'), ('ldap_host', ''),
-                        ('ldap_port', '389'), ('ldap_tls_kind', 'PLAIN'),
-                        ('ldap_tls_reqcert', ''), ('ldap_dn_user', ''),
-                        ('ldap_dn_pass', ''), ('ldap_base_dn', ''),
-                        ('ldap_filter', ''), ('ldap_search_scope', ''),
-                        ('ldap_attr_login', ''), ('ldap_attr_firstname', ''),
-                        ('ldap_attr_lastname', ''), ('ldap_attr_email', '')]:
+        for k, v in [('ldap_active', 'false'), ('ldap_host', ''),
+                    ('ldap_port', '389'), ('ldap_tls_kind', 'PLAIN'),
+                    ('ldap_tls_reqcert', ''), ('ldap_dn_user', ''),
+                    ('ldap_dn_pass', ''), ('ldap_base_dn', ''),
+                    ('ldap_filter', ''), ('ldap_search_scope', ''),
+                    ('ldap_attr_login', ''), ('ldap_attr_firstname', ''),
+                    ('ldap_attr_lastname', ''), ('ldap_attr_email', '')]:
 
-                if skip_existing and RhodeCodeSetting.get_by_name(k) != None:
-                    log.debug('Skipping option %s' % k)
-                    continue
-                setting = RhodeCodeSetting(k, v)
-                self.sa.add(setting)
-            self.sa.commit()
-        except:
-            self.sa.rollback()
-            raise
+            if skip_existing and RhodeCodeSetting.get_by_name(k) != None:
+                log.debug('Skipping option %s' % k)
+                continue
+            setting = RhodeCodeSetting(k, v)
+            self.sa.add(setting)
 
     def config_prompt(self, test_repo_path='', retries=3):
         if retries == 3:
@@ -401,20 +386,14 @@ class DbManage(object):
         hgsettings2 = RhodeCodeSetting('title', 'RhodeCode')
         hgsettings3 = RhodeCodeSetting('ga_code', '')
 
-        try:
-            self.sa.add(web1)
-            self.sa.add(web2)
-            self.sa.add(web3)
-            self.sa.add(web4)
-            self.sa.add(paths)
-            self.sa.add(hgsettings1)
-            self.sa.add(hgsettings2)
-            self.sa.add(hgsettings3)
-
-            self.sa.commit()
-        except:
-            self.sa.rollback()
-            raise
+        self.sa.add(web1)
+        self.sa.add(web2)
+        self.sa.add(web3)
+        self.sa.add(web4)
+        self.sa.add(paths)
+        self.sa.add(hgsettings1)
+        self.sa.add(hgsettings2)
+        self.sa.add(hgsettings3)
 
         self.create_ldap_options()
 
@@ -422,18 +401,18 @@ class DbManage(object):
 
     def create_user(self, username, password, email='', admin=False):
         log.info('creating user %s', username)
-        UserModel().create_or_update(username, password, email, 
-                                     name='RhodeCode', lastname='Admin', 
+        UserModel().create_or_update(username, password, email,
+                                     name='RhodeCode', lastname='Admin',
                                      active=True, admin=admin)
 
     def create_default_user(self):
         log.info('creating default user')
         # create default user for handling default permissions.
-        UserModel().create_or_update(username='default', 
-                              password=str(uuid.uuid1())[:8], 
-                              email='anonymous@rhodecode.org', 
+        UserModel().create_or_update(username='default',
+                              password=str(uuid.uuid1())[:8],
+                              email='anonymous@rhodecode.org',
                               name='Anonymous', lastname='User')
-        
+
     def create_permissions(self):
         #module.(access|create|change|delete)_[name]
         #module.(read|write|owner)
@@ -458,12 +437,7 @@ class DbManage(object):
             new_perm = Permission()
             new_perm.permission_name = p[0]
             new_perm.permission_longname = p[1]
-            try:
-                self.sa.add(new_perm)
-                self.sa.commit()
-            except:
-                self.sa.rollback()
-                raise
+            self.sa.add(new_perm)
 
     def populate_default_permissions(self):
         log.info('creating default user permissions')
@@ -489,11 +463,6 @@ class DbManage(object):
         .filter(Permission.permission_name == 'repository.read')\
         .scalar()
 
-        try:
-            self.sa.add(reg_perm)
-            self.sa.add(create_repo_perm)
-            self.sa.add(default_repo_perm)
-            self.sa.commit()
-        except:
-            self.sa.rollback()
-            raise
+        self.sa.add(reg_perm)
+        self.sa.add(create_repo_perm)
+        self.sa.add(default_repo_perm)

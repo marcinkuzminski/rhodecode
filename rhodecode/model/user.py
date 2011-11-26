@@ -129,13 +129,10 @@ class UserModel(BaseModel):
             new_user.ldap_dn = safe_unicode(ldap_dn) if ldap_dn else None
             new_user.name = name
             new_user.lastname = lastname
-
             self.sa.add(new_user)
-            self.sa.commit()
             return new_user
         except (DatabaseError,):
             log.error(traceback.format_exc())
-            self.sa.rollback()
             raise
 
 

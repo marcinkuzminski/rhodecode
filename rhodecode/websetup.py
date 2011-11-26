@@ -28,6 +28,7 @@ import logging
 
 from rhodecode.config.environment import load_environment
 from rhodecode.lib.db_manage import DbManage
+from rhodecode.model.meta import Session
 
 
 log = logging.getLogger(__name__)
@@ -45,5 +46,5 @@ def setup_app(command, conf, vars):
     dbmanage.admin_prompt()
     dbmanage.create_permissions()
     dbmanage.populate_default_permissions()
-
+    Session().commit()
     load_environment(conf.global_conf, conf.local_conf, initial=True)

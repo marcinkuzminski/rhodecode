@@ -50,13 +50,11 @@ class RepositoryPermissionModel(BaseModel):
             p.repository = repository
             p.permission = permission
             self.sa.add(p)
-        self.sa.commit()
 
     def delete_user_permission(self, repository, user):
         current = self.get_user_permission(repository, user)
         if current:
             self.sa.delete(current)
-            self.sa.commit()
 
     def update_or_delete_user_permission(self, repository, user, permission):
         if permission:

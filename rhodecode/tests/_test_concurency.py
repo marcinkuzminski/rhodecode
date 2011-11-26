@@ -53,7 +53,7 @@ add_cache(conf)
 
 USER = 'test_admin'
 PASS = 'test12'
-HOST = '127.0.0.1:5000'
+HOST = 'hg.local'
 METHOD = 'pull'
 DEBUG = True
 log = logging.getLogger(__name__)

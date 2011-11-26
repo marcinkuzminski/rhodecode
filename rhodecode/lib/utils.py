@@ -51,6 +51,7 @@ from rhodecode.lib.caching_query import FromCache
 from rhodecode.model import meta
 from rhodecode.model.db import Repository, User, RhodeCodeUi, \
     UserLog, RepoGroup, RhodeCodeSetting
+from rhodecode.model.meta import Session
 
 log = logging.getLogger(__name__)
 
@@ -509,7 +510,7 @@ def create_test_env(repos_test_path, config):
     dbmanage.admin_prompt()
     dbmanage.create_permissions()
     dbmanage.populate_default_permissions()
-
+    Session().commit()
     # PART TWO make test repo
     log.debug('making test vcs repositories')
 

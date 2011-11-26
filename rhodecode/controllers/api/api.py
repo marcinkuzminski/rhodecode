@@ -1,19 +1,21 @@
 import traceback
 import logging
 
+from sqlalchemy.orm.exc import NoResultFound
+
 from rhodecode.controllers.api import JSONRPCController, JSONRPCError
 from rhodecode.lib.auth import HasPermissionAllDecorator, \
     HasPermissionAnyDecorator
-from rhodecode.model.scm import ScmModel
 
+from rhodecode.model.meta import Session
+from rhodecode.model.scm import ScmModel
 from rhodecode.model.db import User, UsersGroup, RepoGroup, Repository
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.user import UserModel
 from rhodecode.model.repo_permission import RepositoryPermissionModel
 from rhodecode.model.users_group import UsersGroupModel
-from rhodecode.model import users_group
 from rhodecode.model.repos_group import ReposGroupModel
-from sqlalchemy.orm.exc import NoResultFound
+
 
 log = logging.getLogger(__name__)
 
@@ -116,8 +118,9 @@ class ApiController(JSONRPCController):
             raise JSONRPCError("user %s already exist" % username)
 
         try:
-            UserModel().create_or_update(username, password, email, firstname, 
+            UserModel().create_or_update(username, password, email, firstname,
                                          lastname, active, admin, ldap_dn)
+            Session().commit()
             return dict(msg='created new user %s' % username)
         except Exception:
             log.error(traceback.format_exc())
@@ -194,9 +197,8 @@ class ApiController(JSONRPCController):
             raise JSONRPCError("users group %s already exist" % name)
 
         try:
-            form_data = dict(users_group_name=name,
-                             users_group_active=active)
-            ug = UsersGroup.create(form_data)
+            ug = UsersGroupModel().create(name=name, active=active)
+            Session().commit()
             return dict(id=ug.users_group_id,
                         msg='created new users group %s' % name)
         except Exception:
@@ -224,7 +226,7 @@ class ApiController(JSONRPCController):
                 raise JSONRPCError('unknown user %s' % user_name)
 
             ugm = UsersGroupModel().add_user_to_group(users_group, user)
-
+            Session().commit()
             return dict(id=ugm.users_group_member_id,
                         msg='created new users group member')
         except Exception:
@@ -291,7 +293,7 @@ class ApiController(JSONRPCController):
         return result
 
     @HasPermissionAnyDecorator('hg.admin', 'hg.create.repository')
-    def create_repo(self, apiuser, name, owner_name, description='', 
+    def create_repo(self, apiuser, name, owner_name, description='',
                     repo_type='hg', private=False):
         """
         Create a repository
@@ -332,6 +334,7 @@ class ApiController(JSONRPCController):
                                      repo_type=repo_type,
                                      repo_group=parent_id,
                                      clone_uri=None), owner)
+            Session().commit()
         except Exception:
             log.error(traceback.format_exc())
             raise JSONRPCError('failed to create repository %s' % name)
@@ -360,6 +363,7 @@ class ApiController(JSONRPCController):
 
             RepositoryPermissionModel()\
                 .update_or_delete_user_permission(repo, user, perm)
+            Session().commit()
         except Exception:
             log.error(traceback.format_exc())
             raise JSONRPCError('failed to edit permission %(repo)s for %(user)s'

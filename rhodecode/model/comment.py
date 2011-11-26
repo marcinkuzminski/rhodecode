@@ -109,7 +109,6 @@ class ChangesetCommentsModel(BaseModel):
                                     recipients=mention_recipients,
                                     type_=Notification.TYPE_CHANGESET_COMMENT)
 
-            self.sa.commit()
             return comment
 
     def delete(self, comment):

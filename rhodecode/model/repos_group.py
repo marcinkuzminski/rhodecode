@@ -111,14 +111,12 @@ class ReposGroupModel(BaseModel):
             new_repos_group.group_name = new_repos_group.get_new_name(form_data['group_name'])
 
             self.sa.add(new_repos_group)
-
+            self.sa.flush()
             self.__create_group(new_repos_group.group_name)
 
-            self.sa.commit()
             return new_repos_group
         except:
             log.error(traceback.format_exc())
-            self.sa.rollback()
             raise
 
     def update(self, repos_group_id, form_data):
@@ -126,7 +124,7 @@ class ReposGroupModel(BaseModel):
         try:
             repos_group = RepoGroup.get(repos_group_id)
             old_path = repos_group.full_path
-                
+
             # change properties
             repos_group.group_description = form_data['group_description']
             repos_group.parent_group = RepoGroup.get(form_data['group_parent_id'])
@@ -144,11 +142,9 @@ class ReposGroupModel(BaseModel):
                 r.repo_name = r.get_new_name(r.just_name)
                 self.sa.add(r)
 
-            self.sa.commit()
             return repos_group
         except:
             log.error(traceback.format_exc())
-            self.sa.rollback()
             raise
 
     def delete(self, users_group_id):
@@ -156,8 +152,6 @@ class ReposGroupModel(BaseModel):
             users_group = RepoGroup.get(users_group_id)
             self.sa.delete(users_group)
             self.__delete_group(users_group)
-            self.sa.commit()
         except:
             log.error(traceback.format_exc())
-            self.sa.rollback()
             raise

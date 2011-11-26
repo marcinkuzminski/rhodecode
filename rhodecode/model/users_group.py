@@ -43,22 +43,7 @@ class UsersGroupModel(BaseModel):
     def get_by_name(self, name, cache=False, case_insensitive=False):
         return UsersGroup.get_by_group_name(name, cache, case_insensitive)
 
-    def create(self, form_data):
-        try:
-            new_users_group = UsersGroup()
-            for k, v in form_data.items():
-                setattr(new_users_group, k, v)
-
-            self.sa.add(new_users_group)
-            self.sa.commit()
-            return new_users_group
-        except:
-            log.error(traceback.format_exc())
-            self.sa.rollback()
-            raise
-
-
-    def create_(self, name, active=True):
+    def create(self, name, active=True):
         new = UsersGroup()
         new.users_group_name = name
         new.users_group_active = active
@@ -84,9 +69,7 @@ class UsersGroupModel(BaseModel):
             user.group_member.append(users_group_member)
 
             self.sa.add(users_group_member)
-            self.sa.commit()
             return users_group_member
         except:
             log.error(traceback.format_exc())
-            self.sa.rollback()
             raise

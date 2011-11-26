@@ -38,6 +38,7 @@ from rhodecode.lib.base import BaseController, render
 from rhodecode.model.forms import DefaultPermissionsForm
 from rhodecode.model.permission import PermissionModel
 from rhodecode.model.db import User
+from rhodecode.model.meta import Session
 
 log = logging.getLogger(__name__)
 
@@ -101,6 +102,7 @@ class PermissionsController(BaseController):
             form_result = _form.to_python(dict(request.POST))
             form_result.update({'perm_user_name': id})
             permission_model.update(form_result)
+            Session().commit()
             h.flash(_('Default permissions updated successfully'),
                     category='success')
 

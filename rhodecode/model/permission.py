@@ -70,8 +70,8 @@ class PermissionModel(BaseModel):
 
     def update(self, form_result):
         perm_user = self.sa.query(User)\
-                .filter(User.username ==
-                        form_result['perm_user_name']).scalar()
+                        .filter(User.username ==
+                                form_result['perm_user_name']).scalar()
         u2p = self.sa.query(UserToPerm).filter(UserToPerm.user ==
                                                perm_user).all()
         if len(u2p) != 3:
@@ -110,8 +110,6 @@ class PermissionModel(BaseModel):
                 perm_user.active = bool(form_result['anonymous'])
                 self.sa.add(perm_user)
 
-            self.sa.commit()
         except (DatabaseError,):
             log.error(traceback.format_exc())
-            self.sa.rollback()
             raise

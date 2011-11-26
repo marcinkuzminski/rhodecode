@@ -17,6 +17,7 @@ from rhodecode.lib.base import BaseController, render
 from rhodecode.model.db import RepoGroup
 from rhodecode.model.repos_group import ReposGroupModel
 from rhodecode.model.forms import ReposGroupForm
+from rhodecode.model.meta import Session
 
 log = logging.getLogger(__name__)
 
@@ -65,12 +66,12 @@ class ReposGroupsController(BaseController):
         """POST /repos_groups: Create a new item"""
         # url('repos_groups')
         self.__load_defaults()
-        repos_group_model = ReposGroupModel()
         repos_group_form = ReposGroupForm(available_groups=
                                           c.repo_groups_choices)()
         try:
             form_result = repos_group_form.to_python(dict(request.POST))
-            repos_group_model.create(form_result)
+            ReposGroupModel().create(form_result)
+            Session().commit()
             h.flash(_('created repos group %s') \
                     % form_result['group_name'], category='success')
             #TODO: in futureaction_logger(, '', '', '', self.sa)
@@ -110,14 +111,14 @@ class ReposGroupsController(BaseController):
         self.__load_defaults()
         c.repos_group = RepoGroup.get(id)
 
-        repos_group_model = ReposGroupModel()
         repos_group_form = ReposGroupForm(edit=True,
                                           old_data=c.repos_group.get_dict(),
                                           available_groups=
                                             c.repo_groups_choices)()
         try:
             form_result = repos_group_form.to_python(dict(request.POST))
-            repos_group_model.update(id, form_result)
+            ReposGroupModel().update(id, form_result)
+            Session().commit()
             h.flash(_('updated repos group %s') \
                     % form_result['group_name'], category='success')
             #TODO: in futureaction_logger(, '', '', '', self.sa)
@@ -147,7 +148,6 @@ class ReposGroupsController(BaseController):
         #           method='delete')
         # url('repos_group', id=ID)
 
-        repos_group_model = ReposGroupModel()
         gr = RepoGroup.get(id)
         repos = gr.repositories.all()
         if repos:
@@ -157,7 +157,8 @@ class ReposGroupsController(BaseController):
             return redirect(url('repos_groups'))
 
         try:
-            repos_group_model.delete(id)
+            ReposGroupModel().delete(id)
+            Session().commit()
             h.flash(_('removed repos group %s' % gr.group_name), category='success')
             #TODO: in future action_logger(, '', '', '', self.sa)
         except IntegrityError, e:
