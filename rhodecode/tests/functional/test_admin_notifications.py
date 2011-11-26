@@ -102,7 +102,7 @@ class TestNotificationsController(TestController):
                                                name='u2', lastname='u2')
 
         notification = NotificationModel().create(created_by=cur_user,
-                                                  subject='test',
+                                                  subject=u'test',
                                                   body=u'hi there',
                                                   recipients=[cur_user, u1, u2])
 

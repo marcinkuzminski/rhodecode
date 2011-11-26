@@ -39,6 +39,7 @@ from pylons.i18n.translation import _
 
 from vcs import get_backend
 
+from rhodecode import CELERY_ON
 from rhodecode.lib import LANGUAGES_EXTENSIONS_MAP, safe_str
 from rhodecode.lib.celerylib import run_task, locked_task, str2bool, \
     __get_lockkey, LockHeld, DaemonLock
@@ -57,9 +58,6 @@ add_cache(config)
 
 __all__ = ['whoosh_index', 'get_commits_stats',
            'reset_user_password', 'send_email']
-
-
-CELERY_ON = str2bool(config['app_conf'].get('use_celery'))
 
 
 def get_session():

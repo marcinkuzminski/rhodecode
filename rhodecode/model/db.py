@@ -27,10 +27,8 @@ import os
 import logging
 import datetime
 import traceback
-from datetime import date
 
 from sqlalchemy import *
-from sqlalchemy.exc import DatabaseError
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship, joinedload, class_mapper, validates
 from beaker.cache import cache_region, region_invalidate
@@ -40,8 +38,7 @@ from vcs.utils.helpers import get_scm
 from vcs.exceptions import VCSError
 from vcs.utils.lazy import LazyProperty
 
-from rhodecode.lib import str2bool, safe_str, get_changeset_safe, \
-    generate_api_key, safe_unicode
+from rhodecode.lib import str2bool, safe_str, get_changeset_safe, safe_unicode
 from rhodecode.lib.exceptions import UsersGroupsAssignedException
 from rhodecode.lib.compat import json
 from rhodecode.lib.caching_query import FromCache
@@ -354,7 +351,7 @@ class UserLog(Base, BaseModel):
 
     @property
     def action_as_day(self):
-        return date(*self.action_date.timetuple()[:3])
+        return datetime.date(*self.action_date.timetuple()[:3])
 
     user = relationship('User')
     repository = relationship('Repository')

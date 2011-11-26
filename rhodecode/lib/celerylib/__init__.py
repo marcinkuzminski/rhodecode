@@ -32,10 +32,9 @@ from os.path import dirname as dn, join as jn
 
 from hashlib import md5
 from decorator import decorator
-from pylons import  config
 
 from vcs.utils.lazy import LazyProperty
-
+from rhodecode import CELERY_ON
 from rhodecode.lib import str2bool, safe_str
 from rhodecode.lib.pidlock import DaemonLock, LockHeld
 
@@ -44,10 +43,7 @@ from celery.messaging import establish_connection
 
 log = logging.getLogger(__name__)
 
-try:
-    CELERY_ON = str2bool(config['app_conf'].get('use_celery'))
-except KeyError:
-    CELERY_ON = False
+
 
 
 class ResultWrapper(object):

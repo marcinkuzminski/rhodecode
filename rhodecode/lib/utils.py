@@ -414,7 +414,7 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False):
                          'group_id': getattr(group, 'group_id', None)
                          }
             rm.create(form_data, user, just_db=True)
-
+    sa.commit()
     removed = []
     if remove_obsolete:
         #remove from database those repositories that are not in the filesystem

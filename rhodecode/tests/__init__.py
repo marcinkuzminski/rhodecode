@@ -13,6 +13,7 @@ import logging
 from os.path import join as jn
 
 from unittest import TestCase
+from tempfile import _RandomNameSequence
 
 from paste.deploy import loadapp
 from paste.script.appinstall import SetupCommand
@@ -20,7 +21,7 @@ from pylons import config, url
 from routes.util import URLGenerator
 from webtest import TestApp
 
-from rhodecode.model import meta
+from rhodecode.model.meta import Session
 from rhodecode.model.db import User
 
 import pylons.test
@@ -43,7 +44,7 @@ __all__ = ['environ', 'url', 'TestController', 'TESTS_TMP_PATH', 'HG_REPO',
 environ = {}
 
 #SOME GLOBALS FOR TESTS
-from tempfile import _RandomNameSequence
+
 TESTS_TMP_PATH = jn('/', 'tmp', 'rc_test_%s' % _RandomNameSequence().next())
 TEST_USER_ADMIN_LOGIN = 'test_admin'
 TEST_USER_ADMIN_PASS = 'test12'
@@ -64,7 +65,7 @@ class TestController(TestCase):
 
         self.app = TestApp(wsgiapp)
         url._push_object(URLGenerator(config['routes.map'], environ))
-        self.Session = meta.Session
+        self.Session = Session
         self.index_location = config['app_conf']['index_dir']
         TestCase.__init__(self, *args, **kwargs)
 
@@ -79,13 +80,15 @@ class TestController(TestCase):
             self.fail('could not login using %s %s' % (username, password))
 
         self.assertEqual(response.status, '302 Found')
-        self.assertEqual(response.session['rhodecode_user'].get('username'),
-                         username)
-        return response.follow()
+        ses = response.session['rhodecode_user']
+        self.assertEqual(ses.get('username'), username)
+        response = response.follow()
+        self.assertEqual(ses.get('is_authenticated'), True)
+
+        return response.session['rhodecode_user']
 
     def _get_logged_user(self):
         return User.get_by_username(self._logged_username)
-
 
     def checkSessionFlash(self, response, msg):
         self.assertTrue('flash' in response.session)

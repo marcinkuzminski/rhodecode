@@ -2,6 +2,7 @@ import logging
 import traceback
 
 from pylons import tmpl_context as c, url
+from pylons.controllers.util import redirect
 
 from rhodecode.lib.base import BaseController, render
 from rhodecode.model.db import Notification
@@ -10,7 +11,7 @@ from rhodecode.model.notification import NotificationModel
 from rhodecode.lib.auth import LoginRequired
 from rhodecode.lib import helpers as h
 from rhodecode.model.meta import Session
-from pylons.controllers.util import redirect
+
 
 log = logging.getLogger(__name__)
 

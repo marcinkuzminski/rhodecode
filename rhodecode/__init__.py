@@ -54,3 +54,10 @@ BACKENDS = {
     'hg': 'Mercurial repository',
     #'git': 'Git repository',
 }
+
+CELERY_ON = False
+
+# link to config for pylons
+CONFIG = None
+
+

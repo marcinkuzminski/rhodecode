@@ -108,7 +108,7 @@ class TestChangeSetCommentrController(TestController):
         users = [x.user.username for x in UserNotification.query().all()]
 
         # test_regular get's notification by @mention
-        self.assertEqual(users, [u'test_admin', u'test_regular'])
+        self.assertEqual(sorted(users), [u'test_admin', u'test_regular'])
 
     def test_delete(self):
         self.log_user()
@@ -128,7 +128,7 @@ class TestChangeSetCommentrController(TestController):
         self.app.delete(url(controller='changeset',
                                     action='delete_comment',
                                     repo_name=HG_REPO,
-                                    comment_id = comment_id))
+                                    comment_id=comment_id))
 
         comments = ChangesetComment.query().all()
         self.assertEqual(len(comments), 0)

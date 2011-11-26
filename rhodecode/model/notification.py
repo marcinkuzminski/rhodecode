@@ -29,9 +29,9 @@ import logging
 import traceback
 import datetime
 
-from pylons import config
 from pylons.i18n.translation import _
 
+import rhodecode
 from rhodecode.lib import helpers as h
 from rhodecode.model import BaseModel
 from rhodecode.model.db import Notification, User, UserNotification
@@ -40,7 +40,6 @@ log = logging.getLogger(__name__)
 
 
 class NotificationModel(BaseModel):
-
 
     def __get_user(self, user):
         if isinstance(user, basestring):
@@ -57,7 +56,6 @@ class NotificationModel(BaseModel):
             if notification:
                 raise Exception('notification must be int or Instance'
                                 ' of Notification got %s' % type(notification))
-
 
     def create(self, created_by, subject, body, recipients,
                type_=Notification.TYPE_MESSAGE):
@@ -89,7 +87,6 @@ class NotificationModel(BaseModel):
         notif = Notification.create(created_by=created_by_obj, subject=subject,
                                     body=body, recipients=recipients_objs,
                                     type_=type_)
-
 
         # send email with notification
         for rec in recipients_objs:
@@ -176,7 +173,8 @@ class EmailNotificationModel(BaseModel):
     TYPE_DEFAULT = 'default'
 
     def __init__(self):
-        self._template_root = config['pylons.paths']['templates'][0]
+        self._template_root = rhodecode.CONFIG['pylons.paths']['templates'][0]
+        self._tmpl_lookup = rhodecode.CONFIG['pylons.app_globals'].mako_lookup
 
         self.email_types = {
             self.TYPE_CHANGESET_COMMENT:'email_templates/changeset_comment.html',
@@ -191,10 +189,9 @@ class EmailNotificationModel(BaseModel):
         
         :param type_:
         """
-        base = self.email_types.get(type_, self.TYPE_DEFAULT)
 
-        lookup = config['pylons.app_globals'].mako_lookup
-        email_template = lookup.get_template(base)
+        base = self.email_types.get(type_, self.TYPE_DEFAULT)
+        email_template = self._tmpl_lookup.get_template(base)
         # translator inject
         _kwargs = {'_':_}
         _kwargs.update(kwargs)
