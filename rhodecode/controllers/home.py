@@ -45,7 +45,8 @@ class HomeController(BaseController):
 
         c.repos_list = self.scm_model.get_repos()
 
-        c.groups = RepoGroup.query().filter(RepoGroup.group_parent_id == None).all()
+        c.groups = RepoGroup.query()\
+            .filter(RepoGroup.group_parent_id == None).all()
 
         return render('/index.html')
 

@@ -573,7 +573,7 @@ class Repository(Base, BaseModel):
         """
         q = Session().query(RhodeCodeUi).filter(RhodeCodeUi.ui_key ==
                                               Repository.url_sep())
-        q.options(FromCache("sql_cache_short", "repository_repo_path"))
+        q = q.options(FromCache("sql_cache_short", "repository_repo_path"))
         return q.one().ui_value
 
     @property
