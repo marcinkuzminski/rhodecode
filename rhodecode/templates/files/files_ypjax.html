@@ -1,8 +1,8 @@
-%if c.files_list:
+%if c.file:
     <h3 class="files_location">
-        ${_('Location')}: ${h.files_breadcrumbs(c.repo_name,c.changeset.raw_id,c.files_list.path)}
+        ${_('Location')}: ${h.files_breadcrumbs(c.repo_name,c.changeset.raw_id,c.file.path)}
     </h3>
-        %if c.files_list.is_dir():
+        %if c.file.is_dir():
             <%include file='files_browser.html'/>
         %else:
             <%include file='files_source.html'/>            

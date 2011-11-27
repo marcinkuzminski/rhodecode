@@ -39,6 +39,25 @@
 			<h3 class="files_location">${_('Location')}: ${h.files_breadcrumbs(c.repo_name,c.cs.revision,c.file.path)}</h3>
 			${h.form(h.url.current(),method='post',id='eform')}
 			<div id="body" class="codeblock">
+            <div class="code-header">
+                <div class="stats">
+                    <div class="left"><img src="${h.url('/images/icons/file.png')}"/></div>
+                    <div class="left item">${h.link_to("r%s:%s" % (c.file.last_changeset.revision,h.short_id(c.file.last_changeset.raw_id)),h.url('changeset_home',repo_name=c.repo_name,revision=c.file.last_changeset.raw_id))}</div>      
+                    <div class="left item">${h.format_byte_size(c.file.size,binary=True)}</div>
+                    <div class="left item last">${c.file.mimetype}</div>
+                    <div class="buttons">
+                      ${h.link_to(_('show annotation'),h.url('files_annotate_home',repo_name=c.repo_name,revision=c.cs.raw_id,f_path=c.f_path),class_="ui-button-small")}
+                      ${h.link_to(_('show as raw'),h.url('files_raw_home',repo_name=c.repo_name,revision=c.cs.raw_id,f_path=c.f_path),class_="ui-button-small")}           
+                      ${h.link_to(_('download as raw'),h.url('files_rawfile_home',repo_name=c.repo_name,revision=c.cs.raw_id,f_path=c.f_path),class_="ui-button-small")}
+                      % if h.HasRepoPermissionAny('repository.write','repository.admin')(c.repo_name):            
+                       % if not c.file.is_binary:
+                        ${h.link_to(_('source'),h.url('files_home',repo_name=c.repo_name,revision=c.cs.raw_id,f_path=c.f_path),class_="ui-button-small")}
+                       % endif
+                      % endif            
+                    </div>
+                </div>
+                <div class="commit">${_('Editing file')}: ${c.file.path}</div>
+            </div>      
 			    <pre id="editor_pre"></pre>
 				<textarea id="editor" name="content" style="display:none">${c.file.content|n}</textarea>
 				<div style="padding: 10px;color:#666666">${_('commit message')}</div>

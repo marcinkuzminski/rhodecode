@@ -7,15 +7,47 @@ div.codeblock {
     line-height: 100%;
     /* new */
     line-height: 125%;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;     
 }
 div.codeblock .code-header{
 	border-bottom: 1px solid #CCCCCC;
 	background: #EEEEEE;
 	padding:10px 0 10px 0;
 }
-div.codeblock .code-header .revision{
+
+div.codeblock .code-header .stats{
+	clear: both;
+	margin-top:-3px; 
+	padding-left: 8px; 
+	border-bottom: 1px solid rgb(204, 204, 204); 
+	margin-bottom: 5px; height: 23px;
+}
+
+div.codeblock .code-header .stats .left{
+	float:left;
+}
+div.codeblock .code-header .stats .left.item{
+	float:left;
+	padding: 0 9px 0 9px;
+	border-right:1px solid #ccc;
+}
+div.codeblock .code-header .stats .left.item.last{
+	border-right:none;
+}
+div.codeblock .code-header .stats .buttons{
+	float:right;
+	padding-right:4px;
+}
+
+div.codeblock .code-header .author{
 	margin-left:25px;
 	font-weight: bold;
+	height: 25px;
+}
+div.codeblock .code-header .author .user{
+	padding-top:3px;
 }
 div.codeblock .code-header .commit{
 	margin-left:25px;

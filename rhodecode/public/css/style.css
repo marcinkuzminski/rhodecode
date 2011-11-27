@@ -642,20 +642,22 @@ div.options a {
 }
 
 .quick_repo_menu {
-	background: #FFF url("../images/vertical-indicator.png") 8px 50%
-		no-repeat !important;
+	background: #FFF url("../images/vertical-indicator.png") 8px 50% no-repeat !important;
 	cursor: pointer;
 	width: 8px;
+	border: 1px solid transparent;
 }
 
 .quick_repo_menu.active {
-	background: #FFF url("../images/horizontal-indicator.png") 4px 50%
-		no-repeat !important;
-	cursor: pointer;
+    background: url("../images/horizontal-indicator.png") no-repeat scroll 5px 50% #FFFFFF !important;
+    border: 1px solid #003367;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
 }
 
 .quick_repo_menu .menu_items {
-	margin-top: 6px;
+	margin-top: 10px;
+	margin-left:-6px;
 	width: 150px;
 	position: absolute;
 	background-color: #FFF;
@@ -664,7 +666,8 @@ div.options a {
 	border-right: 1px solid #666666;
 	border-style: solid;
 	border-width: 1px;
-	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+	box-shadow: 2px 8px 4px rgba(0, 0, 0, 0.2);
+	border-top-style: none;
 }
 
 .quick_repo_menu .menu_items li {
@@ -807,7 +810,7 @@ div.options a {
 }
 
 #content div.box dl {
-	margin: 10px 24px;
+	margin: 10px 0px;
 }
 
 #content div.box dt {
@@ -1825,7 +1828,7 @@ h3.files_location {
 
 #files_data dl dt {
 	float: left;
-	width: 115px;
+	width: 60px;
 	margin: 0 !important;
 	padding: 5px;
 }

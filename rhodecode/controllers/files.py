@@ -162,9 +162,9 @@ class FilesController(BaseRepoController):
 
         #files or dirs
         try:
-            c.files_list = c.changeset.get_node(f_path)
+            c.file = c.changeset.get_node(f_path)
 
-            if c.files_list.is_file():
+            if c.file.is_file():
                 c.file_history = self._get_node_history(c.changeset, f_path)
             else:
                 c.file_history = []

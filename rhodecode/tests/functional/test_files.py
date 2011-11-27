@@ -129,11 +129,11 @@ class TestFilesController(TestController):
 </optgroup>""" in response.body
 
 
-        assert """<div class="commit">"Partially implemented #16. filecontent/commit message/author/node name are safe_unicode now.
+        assert """<div class="commit">Partially implemented #16. filecontent/commit message/author/node name are safe_unicode now.
 In addition some other __str__ are unicode as well
 Added test for unicode
 Improved test to clone into uniq repository.
-removed extra unicode conversion in diff."</div>""" in response.body
+removed extra unicode conversion in diff.</div>""" in response.body
 
         assert """<span style="text-transform: uppercase;"><a href="#">branch: default</a></span>""" in response.body, 'missing or wrong branch info'
 
