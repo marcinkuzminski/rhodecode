@@ -90,7 +90,15 @@
                          </span>
                          <span>${_('Files')}</span>                 
                          </a>             
-                      </li>                                    
+                      </li>
+                      <li>
+                         <a title="${_('Fork')}" href="${h.url('repo_fork_home',repo_name=repo['name'])}">
+                         <span class="icon">
+                             <img src="${h.url('/images/icons/arrow_divide.png')}" alt="${_('Fork')}" />
+                         </span>
+                         <span>${_('Fork')}</span>                 
+                         </a>             
+                      </li>                                                      
                     </ul>
                     </td>
                     <td>
