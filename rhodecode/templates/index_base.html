@@ -3,7 +3,7 @@
         <!-- box / title -->
         <div class="title">
             <h5>
-            <input class="q_filter_box" id="q_filter" size="15" type="text" name="filter" value="${_('quick filter...')}"/> ${parent.breadcrumbs()} <span id="repo_count">${len(c.repos_list)}</span> ${_('repositories')} 
+            <input class="q_filter_box" id="q_filter" size="15" type="text" name="filter" value="${_('quick filter...')}"/> ${parent.breadcrumbs()} <span id="repo_count">0</span> ${_('repositories')} 
             </h5>
             %if c.rhodecode_user.username != 'default':
                 %if h.HasPermissionAny('hg.admin','hg.create.repository')():
@@ -62,7 +62,7 @@
                 </tr>
             </thead>
             <tbody>
-            %for cnt,repo in enumerate(c.repos_list):
+            %for cnt,repo in enumerate(c.repos_list,1):
                 <tr class="parity${cnt%2}">
                     <td class="quick_repo_menu">
                     <ul class="menu_items hidden">
@@ -166,6 +166,7 @@
             </div>
     </div>
     <script>
+      YUD.get('repo_count').innerHTML = ${cnt}; 
       var nodes = YUQ('div.table tr td a.repo_name');
       var target = 'q_filter';
       var func = function(node){
