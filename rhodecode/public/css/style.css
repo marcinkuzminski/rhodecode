@@ -3526,7 +3526,9 @@ form.comment-inline-form {
     padding-top: 6px;
     float: left
 }
-
+.notification-list .container.unread{
+	
+}
 .notification-header .desc.unread{
     font-weight: bold;
     font-size: 17px;

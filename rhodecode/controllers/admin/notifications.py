@@ -8,7 +8,7 @@ from rhodecode.lib.base import BaseController, render
 from rhodecode.model.db import Notification
 
 from rhodecode.model.notification import NotificationModel
-from rhodecode.lib.auth import LoginRequired
+from rhodecode.lib.auth import LoginRequired, NotAnonymous
 from rhodecode.lib import helpers as h
 from rhodecode.model.meta import Session
 
@@ -23,6 +23,7 @@ class NotificationsController(BaseController):
     #         path_prefix='/_admin', name_prefix='_admin_')
 
     @LoginRequired()
+    @NotAnonymous()
     def __before__(self):
         super(NotificationsController, self).__before__()
 
