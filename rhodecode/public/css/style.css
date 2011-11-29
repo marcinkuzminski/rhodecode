@@ -758,6 +758,10 @@ div.options a {
 	padding: 11px 0 11px 10px;
 }
 
+#content div.box div.title .link-white{
+	color: #FFFFFF;
+}
+
 #content div.box div.title ul.links li {
 	list-style: none;
 	float: left;

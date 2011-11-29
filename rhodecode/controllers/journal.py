@@ -37,8 +37,10 @@ from pylons.i18n.translation import _
 import rhodecode.lib.helpers as h
 from rhodecode.lib.auth import LoginRequired, NotAnonymous
 from rhodecode.lib.base import BaseController, render
-from rhodecode.model.db import UserLog, UserFollowing
+from rhodecode.model.db import UserLog, UserFollowing, Repository, User
 from rhodecode.model.meta import Session
+from sqlalchemy.sql.expression import func
+from rhodecode.model.scm import ScmModel
 
 log = logging.getLogger(__name__)
 
@@ -58,6 +60,13 @@ class JournalController(BaseController):
     def index(self):
         # Return a rendered template
         p = int(request.params.get('page', 1))
+
+        c.user = User.get(self.rhodecode_user.user_id)
+        all_repos = self.sa.query(Repository)\
+                     .filter(Repository.user_id == c.user.user_id)\
+                     .order_by(func.lower(Repository.repo_name)).all()
+
+        c.user_repos = ScmModel().get_repos(all_repos)
 
         c.following = self.sa.query(UserFollowing)\
             .filter(UserFollowing.user_id == self.rhodecode_user.user_id)\
