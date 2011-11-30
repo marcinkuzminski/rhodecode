@@ -62,6 +62,7 @@
                 </tr>
             </thead>
             <tbody>
+            <%cnt=0%>
             %for cnt,repo in enumerate(c.repos_list,1):
                 <tr class="parity${cnt%2}">
                     <td class="quick_repo_menu">
