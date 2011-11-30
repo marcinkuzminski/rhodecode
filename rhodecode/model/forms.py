@@ -603,6 +603,7 @@ def RepoForkForm(edit=False, old_data={}, supported_backends=BACKENDS.keys(),
         description = UnicodeString(strip=True, min=1, not_empty=True)
         private = StringBoolean(if_missing=False)
         copy_permissions = StringBoolean(if_missing=False)
+        update_after_clone = StringBoolean(if_missing=False)
         fork_parent_id = UnicodeString()
         chained_validators = [ValidForkName(edit, old_data)]
 

@@ -372,6 +372,7 @@ def create_repo_fork(form_data, cur_user):
     alias = form_data['repo_type']
     org_repo_name = form_data['org_path']
     fork_name = form_data['repo_name_full']
+    update_after_clone = form_data['update_after_clone']
     source_repo_path = os.path.join(base_path, org_repo_name)
     destination_fork_path = os.path.join(base_path, fork_name)
 
@@ -379,7 +380,8 @@ def create_repo_fork(form_data, cur_user):
              destination_fork_path)
     backend = get_backend(alias)
     backend(safe_str(destination_fork_path), create=True,
-            src_url=safe_str(source_repo_path))
+            src_url=safe_str(source_repo_path),
+            update_after_clone=update_after_clone)
     action_logger(cur_user, 'user_forked_repo:%s' % fork_name,
                    org_repo_name, '', Session)
     # finally commit at latest possible stage

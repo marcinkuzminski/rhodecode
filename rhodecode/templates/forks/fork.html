@@ -67,7 +67,15 @@
                 <div class="checkboxes">
                     ${h.checkbox('copy_permissions',value="True")}
                 </div>
-             </div>             
+             </div>      
+            <div class="field">
+                <div class="label label-checkbox">
+                    <label for="private">${_('Update after clone')}:</label>
+                </div>
+                <div class="checkboxes">
+                    ${h.checkbox('update_after_clone',value="True")}
+                </div>
+             </div>                       
 	        <div class="buttons">
 	          ${h.submit('',_('fork this repository'),class_="ui-button")}
 	        </div>                                                          
