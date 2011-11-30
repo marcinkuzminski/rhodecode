@@ -680,7 +680,7 @@ class Repository(Base, BaseModel):
         def _c(repo_name):
             return self.__get_instance()
         rn = self.repo_name
-
+        log.debug('Getting cached instance of repo')
         inv = self.invalidate
         if inv is not None:
             region_invalidate(_c, None, rn)
@@ -689,9 +689,7 @@ class Repository(Base, BaseModel):
         return _c(rn)
 
     def __get_instance(self):
-
         repo_full_path = self.repo_full_path
-
         try:
             alias = get_scm(repo_full_path)[0]
             log.debug('Creating instance of %s repository', alias)
@@ -704,7 +702,6 @@ class Repository(Base, BaseModel):
             return
 
         if alias == 'hg':
-
             repo = backend(safe_str(repo_full_path), create=False,
                            baseui=self._ui)
             # skip hidden web repository
@@ -853,13 +850,11 @@ class Permission(Base, BaseModel):
         return cls.query().filter(cls.permission_name == key).scalar()
 
     @classmethod
-    def get_default_perms(cls, default_user_id, cache=True):
+    def get_default_perms(cls, default_user_id):
         q = Session().query(UserRepoToPerm, Repository, cls)\
             .join((Repository, UserRepoToPerm.repository_id == Repository.repo_id))\
             .join((cls, UserRepoToPerm.permission_id == cls.permission_id))\
             .filter(UserRepoToPerm.user_id == default_user_id)
-        if cache:
-            q = q.options(FromCache("sql_cache_short", "get_default_perms"))
 
         return q.all()
 
