@@ -477,27 +477,36 @@ Nginx virtual host example
 
 Sample config for nginx using proxy::
 
+    upstream rc {
+        server 127.0.0.1:5000;
+        # add more instances for load balancing
+        #server 127.0.0.1:5001;
+        #server 127.0.0.1:5002;
+    }
+    
     server {
        listen          80;
        server_name     hg.myserver.com;
        access_log      /var/log/nginx/rhodecode.access.log;
        error_log       /var/log/nginx/rhodecode.error.log;
+
        location / {
-               root /var/www/rhodecode/rhodecode/public/;
-               if (!-f $request_filename){
-                   proxy_pass      http://127.0.0.1:5000;
-               }
-               #this is important if you want to use https !!!
-               proxy_set_header X-Url-Scheme $scheme;
-               include         /etc/nginx/proxy.conf;  
+            try_files $uri @rhode;
        }
+    
+       location @rhode {
+            proxy_pass      http://rc;
+            include         /etc/nginx/proxy.conf;
+       }
+
     }  
   
 Here's the proxy.conf. It's tuned so it will not timeout on long
 pushes or large pushes::
-
+    
     proxy_redirect              off;
     proxy_set_header            Host $host;
+    proxy_set_header            X-Url-Scheme $scheme;
     proxy_set_header            X-Host $http_host;
     proxy_set_header            X-Real-IP $remote_addr;
     proxy_set_header            X-Forwarded-For $proxy_add_x_forwarded_for;
