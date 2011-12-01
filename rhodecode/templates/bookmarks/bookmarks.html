@@ -1,0 +1,40 @@
+## -*- coding: utf-8 -*-
+<%inherit file="/base/base.html"/>
+
+<%def name="title()">
+    ${c.repo_name} ${_('Bookmarks')} - ${c.rhodecode_name}
+</%def>
+
+
+<%def name="breadcrumbs_links()">
+    <input class="q_filter_box" id="q_filter_bookmarks" size="15" type="text" name="filter" value="${_('quick filter...')}"/>
+    ${h.link_to(u'Home',h.url('/'))}
+    &raquo; 
+    ${h.link_to(c.repo_name,h.url('summary_home',repo_name=c.repo_name))}
+    &raquo;
+    ${_('bookmarks')}
+</%def>
+
+<%def name="page_nav()">
+    ${self.menu('bookmarks')}
+</%def>
+<%def name="main()">
+<div class="box">
+    <!-- box / title -->
+    <div class="title">
+        ${self.breadcrumbs()}
+    </div>
+    <!-- end box / title -->
+    <div class="table">
+        <%include file='bookmarks_data.html'/>
+    </div>
+</div>
+<script type="text/javascript">
+var nodes = YUQ('div.table tr td .logtags .tagtag a');
+var target = 'q_filter_bookmarks';
+var func = function(node){
+    return node.parentNode.parentNode.parentNode.parentNode;
+}
+q_filter(target,nodes,func);
+</script>
+</%def> 

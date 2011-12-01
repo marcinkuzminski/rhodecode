@@ -616,16 +616,24 @@ div.options a {
 	padding: 12px 9px 7px 24px;
 }
 
-#header #header-inner #quick li ul li a.tags,#header #header-inner #quick li ul li a.tags:hover
-	{
+#header #header-inner #quick li ul li a.tags,
+#header #header-inner #quick li ul li a.tags:hover{
 	background: #FFF url("../images/icons/tag_blue.png") no-repeat 4px 9px;
 	width: 167px;
 	margin: 0;
 	padding: 12px 9px 7px 24px;
 }
 
-#header #header-inner #quick li ul li a.admin,#header #header-inner #quick li ul li a.admin:hover
-	{
+#header #header-inner #quick li ul li a.bookmarks,
+#header #header-inner #quick li ul li a.bookmarks:hover{
+    background: #FFF url("../images/icons/tag_green.png") no-repeat 4px 9px;
+    width: 167px;
+    margin: 0;
+    padding: 12px 9px 7px 24px;
+}
+
+#header #header-inner #quick li ul li a.admin,
+#header #header-inner #quick li ul li a.admin:hover{
 	background: #FFF url("../images/icons/cog_edit.png") no-repeat 4px 9px;
 	width: 167px;
 	margin: 0;
@@ -1082,6 +1090,11 @@ div.options a {
 	font-size: 11px;
 	margin: 0;
 	padding: 7px 7px 6px;
+}
+
+#content div.box div.form div.fields div.field div.input input#clone_url{
+    font-size: 16px;
+    padding: 2px 7px 2px;	
 }
 
 #content div.box div.form div.fields div.field div.file input {
@@ -2089,8 +2102,12 @@ h3.files_location {
   border-radius: 3px;
   padding-left:4px;
 }
+.right .logtags .branchtag a:hover,.logtags .branchtag a{
+	color: #ffffff;
+}
 .right .logtags .branchtag a:hover,.logtags .branchtag a:hover{
 	text-decoration: none;
+	color: #ffffff;
 }
 .right .logtags .tagtag,.logtags .tagtag {
   padding: 1px 3px 2px;
@@ -2104,8 +2121,31 @@ h3.files_location {
   -moz-border-radius: 3px;
   border-radius: 3px;
 }
+.right .logtags .tagtag a:hover,.logtags .tagtag a{
+	color: #ffffff;
+}
 .right .logtags .tagtag a:hover,.logtags .tagtag a:hover{
     text-decoration: none;
+    color: #ffffff;
+}
+.right .logbooks .bookbook,.logbooks .bookbook {
+  padding: 1px 3px 2px;
+  background-color: #46A546;
+  font-size: 9.75px;
+  font-weight: bold;
+  color: #ffffff;
+  text-transform: uppercase;
+  white-space: nowrap;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+}
+.right .logbooks .bookbook,.logbooks .bookbook a{
+	color: #ffffff;
+}
+.right .logbooks .bookbook,.logbooks .bookbook a:hover{
+    text-decoration: none;
+    color: #ffffff;
 }
 div.browserblock {
 	overflow: hidden;

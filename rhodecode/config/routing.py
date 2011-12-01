@@ -403,6 +403,9 @@ def make_map(config):
     rmap.connect('tags_home', '/{repo_name:.*}/tags',
                 controller='tags', conditions=dict(function=check_repo))
 
+    rmap.connect('bookmarks_home', '/{repo_name:.*}/bookmarks',
+                controller='bookmarks', conditions=dict(function=check_repo))
+
     rmap.connect('changelog_home', '/{repo_name:.*}/changelog',
                 controller='changelog', conditions=dict(function=check_repo))
 

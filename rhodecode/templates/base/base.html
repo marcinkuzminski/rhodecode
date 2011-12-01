@@ -63,8 +63,7 @@
          </li>
          %if c.rhodecode_user.username != 'default':
             <li>
-               <a href="${h.url('journal')}">${_('Journal')}</a> 
-               ##(${c.unread_journal}
+               <a href="${h.url('journal')}">${_('Journal')}</a>
             </li>
             %endif
             %if c.rhodecode_user.username == 'default':

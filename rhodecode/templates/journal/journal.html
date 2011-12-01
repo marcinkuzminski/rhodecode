@@ -17,7 +17,7 @@
 	        <h5>${_('Journal')}</h5>
              <ul class="links">
                <li>
-                 <span><a href="#"><img id="refresh" class="icon" title="${_('Refresh')}" alt="${_('Refresh')}" src="${h.url('/images/icons/arrow_refresh.png')}"/>
+                 <span><a id="refresh" href="${h.url('journal')}"><img class="icon" title="${_('Refresh')}" alt="${_('Refresh')}" src="${h.url('/images/icons/arrow_refresh.png')}"/>
                  </a></span>
                </li>          
              </ul>            
@@ -170,7 +170,7 @@
         YUE.preventDefault(e);        
     })
     YUE.on('refresh','click',function(e){
-        ypjax(e.target.href,"journal",function(){show_more_event();tooltip_activate();});
+        ypjax(e.currentTarget.href,"journal",function(){show_more_event();tooltip_activate();});
         YUE.preventDefault(e);
     })
     </script>    

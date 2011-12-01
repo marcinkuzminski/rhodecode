@@ -22,4 +22,16 @@
         <li>${h.link_to(_('There are no tags yet'),'#')}</li>
     %endif
     </ul>                        
+</li>
+<li>
+    ${h.link_to('%s (%s)' % (_('bookmarks'),len(c.rhodecode_repo.bookmarks.values()),),h.url('bookmarks_home',repo_name=c.repo_name),class_='bookmarks childs')}
+    <ul>
+    %if c.rhodecode_repo.bookmarks.values():
+        %for cnt,book in enumerate(c.rhodecode_repo.bookmarks.items()):
+         <li>${h.link_to('%s - %s' % (book[0],h.short_id(book[1])),h.url('files_home',repo_name=c.repo_name,revision=book[1]))}</li>
+        %endfor
+    %else:
+        <li>${h.link_to(_('There are no bookmarks yet'),'#')}</li>
+    %endif
+    </ul>                        
 </li>  

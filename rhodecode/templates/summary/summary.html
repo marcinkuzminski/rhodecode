@@ -118,23 +118,10 @@
 			
 			 <div class="field">
 			  <div class="label-summary">
-			      <label>${_('Last change')}:</label>
-			  </div>
-			  <div class="input ${summary(c.show_stats)}">
-                  <b>${'r%s:%s' % (h.get_changeset_safe(c.rhodecode_repo,'tip').revision,
-                            h.get_changeset_safe(c.rhodecode_repo,'tip').short_id)}</b> - 
-			      <span class="tooltip" title="${c.rhodecode_repo.last_change}">
-			      ${h.age(c.rhodecode_repo.last_change)}</span>
-			      ${_('by')} ${h.get_changeset_safe(c.rhodecode_repo,'tip').author} 
-			  </div>
-			 </div>
-			
-			 <div class="field">
-			  <div class="label-summary">
 			      <label>${_('Clone url')}:</label>
 			  </div>
 			  <div class="input ${summary(c.show_stats)}">
-			      <input type="text" id="clone_url" readonly="readonly" value="${c.rhodecode_repo.alias} clone ${c.clone_repo_url}" size="70"/>
+			      <input type="text" id="clone_url" readonly="readonly" value="${c.clone_repo_url}" size="70"/>
 			  </div>
 			 </div>
 			 
