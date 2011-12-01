@@ -384,6 +384,9 @@ def create_repo_fork(form_data, cur_user):
             update_after_clone=update_after_clone)
     action_logger(cur_user, 'user_forked_repo:%s' % fork_name,
                    org_repo_name, '', Session)
+    
+    action_logger(cur_user, 'user_created_fork:%s' % fork_name,
+                   fork_name, '', Session)    
     # finally commit at latest possible stage
     Session.commit()
 

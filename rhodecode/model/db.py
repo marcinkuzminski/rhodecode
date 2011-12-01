@@ -347,7 +347,7 @@ class UserLog(Base, BaseModel):
     __table_args__ = {'extend_existing':True}
     user_log_id = Column("user_log_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None, default=None)
-    repository_id = Column("repository_id", Integer(), ForeignKey('repositories.repo_id'), nullable=False, unique=None, default=None)
+    repository_id = Column("repository_id", Integer(), ForeignKey('repositories.repo_id'), nullable=True)
     repository_name = Column("repository_name", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     user_ip = Column("user_ip", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     action = Column("action", UnicodeText(length=1200000, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
@@ -358,7 +358,7 @@ class UserLog(Base, BaseModel):
         return datetime.date(*self.action_date.timetuple()[:3])
 
     user = relationship('User')
-    repository = relationship('Repository')
+    repository = relationship('Repository',cascade='')
 
 
 class UsersGroup(Base, BaseModel):
@@ -509,7 +509,7 @@ class Repository(Base, BaseModel):
 
     followers = relationship('UserFollowing', primaryjoin='UserFollowing.follows_repo_id==Repository.repo_id', cascade='all')
 
-    logs = relationship('UserLog', cascade='all')
+    logs = relationship('UserLog')
 
     def __repr__(self):
         return "<%s('%s:%s')>" % (self.__class__.__name__,

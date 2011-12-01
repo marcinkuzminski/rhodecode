@@ -389,6 +389,7 @@ def action_parser(user_log, feed=False):
 
     action_map = {'user_deleted_repo':(_('[deleted] repository'), None),
            'user_created_repo':(_('[created] repository'), None),
+           'user_created_fork':(_('[created] repository as fork'), None),
            'user_forked_repo':(_('[forked] repository'), get_fork_name),
            'user_updated_repo':(_('[updated] repository'), None),
            'admin_deleted_repo':(_('[delete] repository'), None),
@@ -428,6 +429,7 @@ def action_parser_icon(user_log):
     tmpl = """<img src="%s%s" alt="%s"/>"""
     map = {'user_deleted_repo':'database_delete.png',
            'user_created_repo':'database_add.png',
+           'user_created_fork':'arrow_divide.png',
            'user_forked_repo':'arrow_divide.png',
            'user_updated_repo':'database_edit.png',
            'admin_deleted_repo':'database_delete.png',
