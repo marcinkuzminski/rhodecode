@@ -15,16 +15,13 @@
 	    <!-- box / title -->
 	    <div class="title">
 	        <h5>${_('Journal')}</h5>
-	    </div>
-		<script type="text/javascript">
-		function show_more_event(){
-		YUE.on(YUD.getElementsByClassName('show_more'),'click',function(e){
-		    var el = e.target;
-		    YUD.setStyle(YUD.get(el.id.substring(1)),'display','');
-		    YUD.setStyle(el.parentNode,'display','none');
-		});
-		}
-		</script> 	    
+             <ul class="links">
+               <li>
+                 <span><a href="#"><img id="refresh" class="icon" title="${_('Refresh')}" alt="${_('Refresh')}" src="${h.url('/images/icons/arrow_refresh.png')}"/>
+                 </a></span>
+               </li>          
+             </ul>            
+	    </div>    
 	    <div id="journal">${c.journal_data}</div>
     </div>
     <div class="box box-right">
@@ -44,6 +41,7 @@
         </div>
         <!-- end box / title -->
         <div id="my" class="table">
+            %if c.user_repos:
             <table>
             <thead>
                 <tr>
@@ -52,7 +50,6 @@
                 <th colspan="2" class="left">${_('action')}</th>            
             </thead>
              <tbody>
-             %if c.user_repos:
                  %for repo in c.user_repos:
                     <tr>
                         <td>
@@ -86,6 +83,8 @@
                         </td>
                     </tr>
                  %endfor
+             </tbody>
+             </table>
              %else:
                 <div style="padding:5px 0px 10px 0px;">
                 ${_('No repositories yet')} 
@@ -93,29 +92,26 @@
                     ${h.link_to(_('create one now'),h.url('admin_settings_create_repository'),class_="ui-button-small")}
                 %endif
                 </div>
-             %endif
-             </tbody>
-             </table>
+             %endif             
         </div>
     
         <div id="watched" class="table" style="display:none">
-          <table>
-          <thead>
-              <tr>
-              <th class="left">${_('Name')}</th>
-          </thead>
-           <tbody>        
           %if c.following:
-              %for entry in c.following:
-              <tr>
-                <td>
+            <table>
+            <thead>
+                <tr>
+                <th class="left">${_('Name')}</th>
+            </thead>
+             <tbody>
+                %for entry in c.following:
+                  <tr>
+                    <td>
                       %if entry.follows_user_id:
                         <img title="${_('following user')}" alt="${_('user')}" src="${h.url('/images/icons/user.png')}"/>
                         ${entry.follows_user.full_contact}
                       %endif
                       
                       %if entry.follows_repo_id:
-                        
                         <div style="float:right;padding-right:5px">
                         <span id="follow_toggle_${entry.follows_repository.repo_id}" class="following" title="${_('Stop following this repository')}"
                               onclick="javascript:toggleFollowingRepo(this,${entry.follows_repository.repo_id},'${str(h.get_token())}')">
@@ -137,15 +133,19 @@
                             ${h.link_to(entry.follows_repository.repo_name,h.url('summary_home',repo_name=entry.follows_repository.repo_name))}
                         </span>
                       %endif
-                </td>
-              </tr>
-              %endfor
+                    </td>
+                  </tr>
+                %endfor
+            </tbody>
+            </table>
           %else:
-          </tbody>
+              <div style="padding:5px 0px 10px 0px;">
               ${_('You are not following any users or repositories')}
-          %endif   
-          </table>     
+              </div>
+          %endif                  
         </div> 
+    </div>
+    
     <script type="text/javascript">
     YUE.on('show_my','click',function(e){
         YUD.setStyle('watched','display','none');
@@ -168,6 +168,10 @@
         }
         q_filter(target,nodes,func);        
         YUE.preventDefault(e);        
+    })
+    YUE.on('refresh','click',function(e){
+        ypjax(e.target.href,"journal",function(){show_more_event();tooltip_activate();});
+        YUE.preventDefault(e);
     })
     </script>    
 </%def>    
