@@ -110,7 +110,7 @@ def action_logger(user, action, repo, ipaddr='', sa=None, commit=False):
     """
 
     if not sa:
-        sa = meta.Session()
+        sa = meta.Session
 
     try:
         if hasattr(user, 'user_id'):
@@ -271,7 +271,7 @@ def make_ui(read_from='file', path=None, checkpaths=True):
                 baseui.setconfig(section, k, v)
 
     elif read_from == 'db':
-        sa = meta.Session()
+        sa = meta.Session
         ret = sa.query(RhodeCodeUi)\
             .options(FromCache("sql_cache_short",
                                "get_hg_ui_settings")).all()
@@ -362,7 +362,7 @@ def map_groups(groups):
 
     :param groups: list of groups structure
     """
-    sa = meta.Session()
+    sa = meta.Session
 
     parent = None
     group = None
@@ -392,7 +392,7 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False):
     :param remove_obsolete: check for obsolete entries in database
     """
     from rhodecode.model.repo import RepoModel
-    sa = meta.Session()
+    sa = meta.Session
     rm = RepoModel()
     user = sa.query(User).filter(User.admin == True).first()
     if user is None:
@@ -510,7 +510,7 @@ def create_test_env(repos_test_path, config):
     dbmanage.admin_prompt()
     dbmanage.create_permissions()
     dbmanage.populate_default_permissions()
-    Session().commit()
+    Session.commit()
     # PART TWO make test repo
     log.debug('making test vcs repositories')
 

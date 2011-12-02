@@ -48,6 +48,7 @@ from rhodecode.model.scm import ScmModel
 from rhodecode.model.user import UserModel
 from rhodecode.model.db import User
 from rhodecode.model.notification import EmailNotificationModel
+from rhodecode.model.meta import Session
 
 log = logging.getLogger(__name__)
 
@@ -247,7 +248,7 @@ class SettingsController(BaseController):
 
                 if update:
                     h.flash(_('Updated hooks'), category='success')
-
+                Session.commit()
             except:
                 log.error(traceback.format_exc())
                 h.flash(_('error occurred during hook creation'),
@@ -353,7 +354,7 @@ class SettingsController(BaseController):
             user_model.update_my_account(uid, form_result)
             h.flash(_('Your account was updated successfully'),
                     category='success')
-
+            Session.commit()
         except formencode.Invalid, errors:
             c.user = User.get(self.rhodecode_user.user_id)
             all_repos = self.sa.query(Repository)\

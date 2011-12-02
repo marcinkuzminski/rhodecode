@@ -64,7 +64,7 @@ def get_session():
     if CELERY_ON:
         engine = engine_from_config(config, 'sqlalchemy.db1.')
         init_model(engine)
-    sa = meta.Session()
+    sa = meta.Session
     return sa
 
 def get_logger(cls):
@@ -109,7 +109,11 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
 
         co_day_auth_aggr = {}
         commits_by_day_aggregate = {}
-        repo = Repository.get_by_repo_name(repo_name).scm_instance
+        repo = Repository.get_by_repo_name(repo_name)
+        if repo is None:
+            return True
+        
+        repo = repo.scm_instance
         repo_size = len(repo.revisions)
         #return if repo have no revisions
         if repo_size < 1:

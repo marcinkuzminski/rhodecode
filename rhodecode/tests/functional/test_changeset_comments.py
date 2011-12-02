@@ -6,21 +6,21 @@ class TestChangeSetCommentrController(TestController):
 
     def setUp(self):
         for x in ChangesetComment.query().all():
-            self.Session().delete(x)
-        self.Session().commit()
+            self.Session.delete(x)
+        self.Session.commit()
 
         for x in Notification.query().all():
-            self.Session().delete(x)
-        self.Session().commit()
+            self.Session.delete(x)
+        self.Session.commit()
 
     def tearDown(self):
         for x in ChangesetComment.query().all():
-            self.Session().delete(x)
-        self.Session().commit()
+            self.Session.delete(x)
+        self.Session.commit()
 
         for x in Notification.query().all():
-            self.Session().delete(x)
-        self.Session().commit()
+            self.Session.delete(x)
+        self.Session.commit()
 
     def test_create(self):
         self.log_user()

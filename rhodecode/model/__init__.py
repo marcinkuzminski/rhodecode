@@ -71,7 +71,7 @@ class BaseModel(object):
         if sa is not None:
             self.sa = sa
         else:
-            self.sa = meta.Session()
+            self.sa = meta.Session
 
     def _get_instance(self, cls, instance):
         """

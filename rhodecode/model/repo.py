@@ -204,11 +204,9 @@ class RepoModel(BaseModel):
                 # rename repository
                 self.__rename_repo(old=repo_name, new=new_name)
 
-            self.sa.commit()
             return cur_repo
         except:
             log.error(traceback.format_exc())
-            self.sa.rollback()
             raise
 
     def create(self, form_data, cur_user, just_db=False, fork=False):
@@ -312,10 +310,8 @@ class RepoModel(BaseModel):
         try:
             self.sa.delete(repo)
             self.__delete_repo(repo)
-            self.sa.commit()
         except:
             log.error(traceback.format_exc())
-            self.sa.rollback()
             raise
 
     def delete_perm_user(self, form_data, repo_name):
@@ -325,10 +321,8 @@ class RepoModel(BaseModel):
                         == self.get_by_repo_name(repo_name))\
                 .filter(UserRepoToPerm.user_id == form_data['user_id']).one()
             self.sa.delete(obj)
-            self.sa.commit()
         except:
             log.error(traceback.format_exc())
-            self.sa.rollback()
             raise
 
     def delete_perm_users_group(self, form_data, repo_name):
@@ -339,10 +333,8 @@ class RepoModel(BaseModel):
                 .filter(UsersGroupRepoToPerm.users_group_id
                         == form_data['users_group_id']).one()
             self.sa.delete(obj)
-            self.sa.commit()
         except:
             log.error(traceback.format_exc())
-            self.sa.rollback()
             raise
 
     def delete_stats(self, repo_name):
@@ -356,10 +348,8 @@ class RepoModel(BaseModel):
                     .filter(Statistics.repository == \
                         self.get_by_repo_name(repo_name)).one()
             self.sa.delete(obj)
-            self.sa.commit()
         except:
             log.error(traceback.format_exc())
-            self.sa.rollback()
             raise
 
     def __create_repo(self, repo_name, alias, new_parent_id, clone_uri=False):
@@ -428,11 +418,11 @@ class RepoModel(BaseModel):
         """
         rm_path = os.path.join(self.repos_path, repo.repo_name)
         log.info("Removing %s", rm_path)
-        #disable hg/git
+        # disable hg/git
         alias = repo.repo_type
         shutil.move(os.path.join(rm_path, '.%s' % alias),
                     os.path.join(rm_path, 'rm__.%s' % alias))
-        #disable repo
+        # disable repo
         shutil.move(rm_path, os.path.join(self.repos_path, 'rm__%s__%s' \
                                           % (datetime.today()\
                                              .strftime('%Y%m%d_%H%M%S_%f'),

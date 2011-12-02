@@ -65,7 +65,7 @@ class TestForksController(TestController):
                       % (repo_name, fork_name) in response.session['flash'][0])
 
         #test if the fork was created in the database
-        fork_repo = self.Session().query(Repository)\
+        fork_repo = self.Session.query(Repository)\
             .filter(Repository.repo_name == fork_name).one()
 
         self.assertEqual(fork_repo.repo_name, fork_name)

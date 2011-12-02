@@ -36,9 +36,7 @@ from rhodecode.config.routing import ADMIN_PREFIX
 from rhodecode.lib.utils import repo_name_slug
 from rhodecode.lib.auth import authenticate, get_crypt_password
 from rhodecode.lib.exceptions import LdapImportError
-from rhodecode.model.user import UserModel
-from rhodecode.model.repo import RepoModel
-from rhodecode.model.db import User, UsersGroup, RepoGroup
+from rhodecode.model.db import User, UsersGroup, RepoGroup, Repository
 from rhodecode import BACKENDS
 
 log = logging.getLogger(__name__)
@@ -68,7 +66,7 @@ def ValidUsername(edit, old_data):
             #check if user is unique
             old_un = None
             if edit:
-                old_un = UserModel().get(old_data.get('user_id')).username
+                old_un = User.get(old_data.get('user_id')).username
 
             if old_un != value or not edit:
                 if User.get_by_username(value, case_insensitive=True):
@@ -268,7 +266,7 @@ def ValidRepoName(edit, old_data):
             if  rename or create:
 
                 if group_path != '':
-                    if RepoModel().get_by_repo_name(repo_name_full,):
+                    if Repository.get_by_repo_name(repo_name_full):
                         e_dict = {'repo_name':_('This repository already '
                                                 'exists in a group "%s"') %
                                   gr.group_name}
@@ -281,7 +279,7 @@ def ValidRepoName(edit, old_data):
                         raise formencode.Invalid('', value, state,
                                                  error_dict=e_dict)
 
-                elif RepoModel().get_by_repo_name(repo_name_full):
+                elif Repository.get_by_repo_name(repo_name_full):
                         e_dict = {'repo_name':_('This repository '
                                                 'already exists')}
                         raise formencode.Invalid('', value, state,

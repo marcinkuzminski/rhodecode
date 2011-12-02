@@ -311,3 +311,16 @@ removed extra unicode conversion in diff.</div>""" in response.body
                                     f_path=f_path))
 
         assert "There is no file nor directory at the given path: %r at revision %r" % (f_path, rev[:12]) in response.session['flash'][0][1], 'No flash message'
+
+    def test_ajaxed_files_list(self):
+        self.log_user()
+        rev = '27cd5cce30c96924232dffcd24178a07ffeb5dfc' 
+        response = self.app.get(url('files_nodelist_home',repo_name=HG_REPO,
+                                    f_path='/',
+                                    revision=rev),
+                                extra_environ={'HTTP_X_PARTIAL_XHR':'1'},
+                                )
+        self.assertTrue("vcs/web/simplevcs/views/repository.py" in response.body)
+
+
+

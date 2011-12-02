@@ -9,9 +9,9 @@ class TestLoginController(TestController):
 
     def tearDown(self):
         for n in Notification.query().all():
-            Session().delete(n)
+            Session.delete(n)
 
-        Session().commit()
+        Session.commit()
         self.assertEqual(Notification.query().all(), [])
 
     def test_index(self):
@@ -199,7 +199,7 @@ class TestLoginController(TestController):
         self.assertEqual(response.status , '302 Found')
         assert 'You have successfully registered into rhodecode' in response.session['flash'][0], 'No flash message about user registration'
 
-        ret = self.Session().query(User).filter(User.username == 'test_regular4').one()
+        ret = self.Session.query(User).filter(User.username == 'test_regular4').one()
         assert ret.username == username , 'field mismatch %s %s' % (ret.username, username)
         assert check_password(password, ret.password) == True , 'password mismatch'
         assert ret.email == email , 'field mismatch %s %s' % (ret.email, email)
@@ -231,8 +231,8 @@ class TestLoginController(TestController):
         new.name = name
         new.lastname = lastname
         new.api_key = generate_api_key(username)
-        self.Session().add(new)
-        self.Session().commit()
+        self.Session.add(new)
+        self.Session.commit()
 
         response = self.app.post(url(controller='login',
                                      action='password_reset'),

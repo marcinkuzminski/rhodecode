@@ -105,7 +105,7 @@ class SettingsController(BaseRepoController):
             changed_name = form_result['repo_name_full']
             action_logger(self.rhodecode_user, 'user_updated_repo',
                           changed_name, '', self.sa)
-            Session().commit()
+            Session.commit()
         except formencode.Invalid, errors:
             c.repo_info = repo_model.get_by_repo_name(repo_name)
             c.users_array = repo_model.get_users_js()
@@ -149,7 +149,7 @@ class SettingsController(BaseRepoController):
             repo_model.delete(repo)
             invalidate_cache('get_repo_cached_%s' % repo_name)
             h.flash(_('deleted repository %s') % repo_name, category='success')
-            Session().commit()
+            Session.commit()
         except Exception:
             log.error(traceback.format_exc())
             h.flash(_('An error occurred during deletion of %s') % repo_name,

@@ -66,7 +66,7 @@ class TestReposGroups(unittest.TestCase):
 
     def test_create_same_name_group(self):
         self.assertRaises(IntegrityError, lambda:self.__make_group('newGroup'))
-        Session().rollback()
+        Session.rollback()
 
     def test_same_subgroup(self):
         sg1 = self.__make_group('sub1', parent_id=self.g1.group_id)
@@ -163,20 +163,20 @@ class TestUser(unittest.TestCase):
         usr = UserModel().create_or_update(username=u'test_user', password=u'qweqwe',
                                      email=u'u232@rhodecode.org',
                                      name=u'u1', lastname=u'u1')
-        Session().commit()
+        Session.commit()
         self.assertEqual(User.get_by_username(u'test_user'), usr)
 
         # make users group
         users_group = UsersGroupModel().create('some_example_group')
-        Session().commit()
+        Session.commit()
 
         UsersGroupModel().add_user_to_group(users_group, usr)
-        Session().commit()
+        Session.commit()
 
         self.assertEqual(UsersGroup.get(users_group.users_group_id), users_group)
         self.assertEqual(UsersGroupMember.query().count(), 1)
         UserModel().delete(usr.user_id)
-        Session().commit()
+        Session.commit()
 
         self.assertEqual(UsersGroupMember.query().all(), [])
 
@@ -209,9 +209,9 @@ class TestNotifications(unittest.TestCase):
 
     def _clean_notifications(self):
         for n in Notification.query().all():
-            Session().delete(n)
+            Session.delete(n)
 
-        Session().commit()
+        Session.commit()
         self.assertEqual(Notification.query().all(), [])
 
 
@@ -223,7 +223,7 @@ class TestNotifications(unittest.TestCase):
         notification = NotificationModel().create(created_by=self.u1,
                                            subject=u'subj', body=u'hi there',
                                            recipients=usrs)
-        Session().commit()
+        Session.commit()
         u1 = User.get(self.u1)
         u2 = User.get(self.u2)
         u3 = User.get(self.u3)
@@ -248,12 +248,12 @@ class TestNotifications(unittest.TestCase):
         notification1 = NotificationModel().create(created_by=self.u1,
                                             subject=u'subj', body=u'hi there1',
                                             recipients=[self.u3])
-        Session().commit()
+        Session.commit()
         notification2 = NotificationModel().create(created_by=self.u1,
                                             subject=u'subj', body=u'hi there2',
                                             recipients=[self.u3])
-        Session().commit()
-        u3 = Session().query(User).get(self.u3)
+        Session.commit()
+        u3 = Session.query(User).get(self.u3)
 
         self.assertEqual(sorted([x.notification for x in u3.notifications]),
                          sorted([notification2, notification1]))
@@ -266,12 +266,12 @@ class TestNotifications(unittest.TestCase):
         notification = NotificationModel().create(created_by=self.u1,
                                            subject=u'title', body=u'hi there3',
                                     recipients=[self.u3, self.u1, self.u2])
-        Session().commit()
+        Session.commit()
         notifications = Notification.query().all()
         self.assertTrue(notification in notifications)
 
         Notification.delete(notification.notification_id)
-        Session().commit()
+        Session.commit()
 
         notifications = Notification.query().all()
         self.assertFalse(notification in notifications)
@@ -290,7 +290,7 @@ class TestNotifications(unittest.TestCase):
         notification = NotificationModel().create(created_by=self.u1,
                                            subject=u'title', body=u'hi there3',
                                     recipients=[self.u3, self.u1, self.u2])
-        Session().commit()
+        Session.commit()
 
         unotification = UserNotification.query()\
                             .filter(UserNotification.notification ==
@@ -302,7 +302,7 @@ class TestNotifications(unittest.TestCase):
 
         NotificationModel().delete(self.u3,
                                    notification.notification_id)
-        Session().commit()
+        Session.commit()
 
         u3notification = UserNotification.query()\
                             .filter(UserNotification.notification ==
@@ -339,7 +339,7 @@ class TestNotifications(unittest.TestCase):
         NotificationModel().create(created_by=self.u1,
                             subject=u'title', body=u'hi there_delete',
                             recipients=[self.u3, self.u1])
-        Session().commit()
+        Session.commit()
 
         self.assertEqual(NotificationModel()
                          .get_unread_cnt_for_user(self.u1), 1)
@@ -351,7 +351,7 @@ class TestNotifications(unittest.TestCase):
         notification = NotificationModel().create(created_by=self.u1,
                                            subject=u'title', body=u'hi there3',
                                     recipients=[self.u3, self.u1, self.u2])
-        Session().commit()
+        Session.commit()
 
         self.assertEqual(NotificationModel()
                          .get_unread_cnt_for_user(self.u1), 2)

@@ -37,11 +37,11 @@ class TestSummaryController(TestController):
                         in response.body)
 
         # clone url...
-        self.assertTrue("""<input type="text" id="clone_url" readonly="readonly" value="hg clone http://test_admin@localhost:80/%s" size="70"/>""" % HG_REPO in response.body)
+        self.assertTrue("""<input type="text" id="clone_url" readonly="readonly" value="http://test_admin@localhost:80/%s" size="70"/>""" % HG_REPO in response.body)
 
 
     def _enable_stats(self):
         r = Repository.get_by_repo_name(HG_REPO)
         r.enable_statistics = True
-        self.Session().add(r)
-        self.Session().commit()
+        self.Session.add(r)
+        self.Session.commit()

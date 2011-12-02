@@ -150,7 +150,7 @@ class ReposController(BaseController):
             else:
                 action_logger(self.rhodecode_user, 'admin_created_repo',
                               form_result['repo_name_full'], '', self.sa)
-            Session().commit()
+            Session.commit()
         except formencode.Invalid, errors:
 
             c.new_repo = errors.value['repo_name']
@@ -208,7 +208,7 @@ class ReposController(BaseController):
             changed_name = repo.repo_name
             action_logger(self.rhodecode_user, 'admin_updated_repo',
                               changed_name, '', self.sa)
-            Session().commit()
+            Session.commit()
         except formencode.Invalid, errors:
             defaults = self.__load_data(repo_name)
             defaults.update(errors.value)
@@ -252,7 +252,7 @@ class ReposController(BaseController):
             repo_model.delete(repo)
             invalidate_cache('get_repo_cached_%s' % repo_name)
             h.flash(_('deleted repository %s') % repo_name, category='success')
-            Session().commit()
+            Session.commit()
         except IntegrityError, e:
             if e.message.find('repositories_fork_id_fkey'):
                 log.error(traceback.format_exc())

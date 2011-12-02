@@ -11,8 +11,8 @@ class TestNotificationsController(TestController):
     def tearDown(self):
         for n in Notification.query().all():
             inst = Notification.get(n.notification_id)
-            Session().delete(inst)
-        Session().commit()
+            Session.delete(inst)
+        Session.commit()
 
     def test_index(self):
         self.log_user()
@@ -30,7 +30,7 @@ class TestNotificationsController(TestController):
         NotificationModel().create(created_by=u1, subject=u'test_notification_1',
                                    body=u'notification_1',
                                    recipients=[cur_user])
-        Session().commit()
+        Session.commit()
         response = self.app.get(url('notifications'))
         self.assertTrue(u'test_notification_1' in response.body)
 
@@ -68,7 +68,7 @@ class TestNotificationsController(TestController):
                                                   subject=u'test',
                                                   body=u'hi there',
                                                   recipients=[cur_user, u1, u2])
-        Session().commit()
+        Session.commit()
         u1 = User.get(u1.user_id)
         u2 = User.get(u2.user_id)
 

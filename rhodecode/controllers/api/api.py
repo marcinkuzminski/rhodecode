@@ -120,7 +120,7 @@ class ApiController(JSONRPCController):
         try:
             UserModel().create_or_update(username, password, email, firstname,
                                          lastname, active, admin, ldap_dn)
-            Session().commit()
+            Session.commit()
             return dict(msg='created new user %s' % username)
         except Exception:
             log.error(traceback.format_exc())
@@ -198,7 +198,7 @@ class ApiController(JSONRPCController):
 
         try:
             ug = UsersGroupModel().create(name=name, active=active)
-            Session().commit()
+            Session.commit()
             return dict(id=ug.users_group_id,
                         msg='created new users group %s' % name)
         except Exception:
@@ -226,7 +226,7 @@ class ApiController(JSONRPCController):
                 raise JSONRPCError('unknown user %s' % user_name)
 
             ugm = UsersGroupModel().add_user_to_group(users_group, user)
-            Session().commit()
+            Session.commit()
             return dict(id=ugm.users_group_member_id,
                         msg='created new users group member')
         except Exception:
@@ -242,10 +242,9 @@ class ApiController(JSONRPCController):
         :param repo_name
         """
 
-        try:
-            repo = Repository.get_by_repo_name(repo_name)
-        except NoResultFound:
-            return None
+        repo = Repository.get_by_repo_name(repo_name)
+        if repo is None:
+            raise JSONRPCError('unknown repository %s' % repo)
 
         members = []
         for user in repo.repo_to_perm:
@@ -334,7 +333,7 @@ class ApiController(JSONRPCController):
                                      repo_type=repo_type,
                                      repo_group=parent_id,
                                      clone_uri=None), owner)
-            Session().commit()
+            Session.commit()
         except Exception:
             log.error(traceback.format_exc())
             raise JSONRPCError('failed to create repository %s' % name)
@@ -351,10 +350,9 @@ class ApiController(JSONRPCController):
         """
 
         try:
-            try:
-                repo = Repository.get_by_repo_name(repo_name)
-            except NoResultFound:
-                raise JSONRPCError('unknown repository %s' % repo)
+            repo = Repository.get_by_repo_name(repo_name)
+            if repo is None:
+                raise JSONRPCError('unknown repository %s' % repo)            
 
             try:
                 user = User.get_by_username(user_name)
@@ -363,7 +361,7 @@ class ApiController(JSONRPCController):
 
             RepositoryPermissionModel()\
                 .update_or_delete_user_permission(repo, user, perm)
-            Session().commit()
+            Session.commit()
         except Exception:
             log.error(traceback.format_exc())
             raise JSONRPCError('failed to edit permission %(repo)s for %(user)s'

@@ -134,7 +134,7 @@ class JournalController(BaseController):
                 try:
                     self.scm_model.toggle_following_user(user_id,
                                                 self.rhodecode_user.user_id)
-                    Session().commit()
+                    Session.commit()
                     return 'ok'
                 except:
                     raise HTTPBadRequest()
@@ -144,7 +144,7 @@ class JournalController(BaseController):
                 try:
                     self.scm_model.toggle_following_repo(repo_id,
                                                 self.rhodecode_user.user_id)
-                    Session().commit()
+                    Session.commit()
                     return 'ok'
                 except:
                     raise HTTPBadRequest()

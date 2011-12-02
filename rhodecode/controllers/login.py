@@ -75,7 +75,8 @@ class LoginController(BaseController):
                 log.info('user %s is now authenticated and stored in '
                          'session, session attrs %s' % (username, cs))
                 user.update_lastlogin()
-
+                Session.commit()
+                
                 if c.came_from:
                     return redirect(c.came_from)
                 else:
@@ -94,7 +95,6 @@ class LoginController(BaseController):
     @HasPermissionAnyDecorator('hg.admin', 'hg.register.auto_activate',
                                'hg.register.manual_activate')
     def register(self):
-        user_model = UserModel()
         c.auto_active = False
         for perm in User.get_by_username('default').user_perms:
             if perm.permission.permission_name == 'hg.register.auto_activate':
@@ -107,10 +107,10 @@ class LoginController(BaseController):
             try:
                 form_result = register_form.to_python(dict(request.POST))
                 form_result['active'] = c.auto_active
-                user_model.create_registration(form_result)
+                UserModel().create_registration(form_result)
                 h.flash(_('You have successfully registered into rhodecode'),
                             category='success')
-                Session().commit()
+                Session.commit()
                 return redirect(url('login_home'))
 
             except formencode.Invalid, errors:
@@ -124,13 +124,11 @@ class LoginController(BaseController):
         return render('/register.html')
 
     def password_reset(self):
-        user_model = UserModel()
         if request.POST:
-
             password_reset_form = PasswordResetForm()()
             try:
                 form_result = password_reset_form.to_python(dict(request.POST))
-                user_model.reset_password_link(form_result)
+                UserModel().reset_password_link(form_result)
                 h.flash(_('Your password reset link was sent'),
                             category='success')
                 return redirect(url('login_home'))
@@ -146,13 +144,11 @@ class LoginController(BaseController):
         return render('/password_reset.html')
 
     def password_reset_confirmation(self):
-
         if request.GET and request.GET.get('key'):
             try:
-                user_model = UserModel()
                 user = User.get_by_api_key(request.GET.get('key'))
                 data = dict(email=user.email)
-                user_model.reset_password(data)
+                UserModel().reset_password(data)
                 h.flash(_('Your password reset was successful, '
                           'new password has been sent to your email'),
                             category='success')

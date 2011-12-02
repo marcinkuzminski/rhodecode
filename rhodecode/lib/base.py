@@ -35,7 +35,7 @@ class BaseController(WSGIController):
                         .get_unread_cnt_for_user(c.rhodecode_user.user_id)
         self.cut_off_limit = int(config.get('cut_off_limit'))
 
-        self.sa = meta.Session()
+        self.sa = meta.Session
         self.scm_model = ScmModel(self.sa)
 
     def __call__(self, environ, start_response):

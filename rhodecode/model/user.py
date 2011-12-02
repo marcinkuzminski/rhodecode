@@ -54,6 +54,9 @@ PERM_WEIGHTS = {'repository.none': 0,
 
 class UserModel(BaseModel):
 
+    def __get_user(self, user):
+        return self._get_instance(User, user)
+
     def get(self, user_id, cache=False):
         user = self.sa.query(User)
         if cache:
@@ -84,11 +87,9 @@ class UserModel(BaseModel):
 
             new_user.api_key = generate_api_key(form_data['username'])
             self.sa.add(new_user)
-            self.sa.commit()
             return new_user
         except:
             log.error(traceback.format_exc())
-            self.sa.rollback()
             raise
 
 
@@ -159,7 +160,6 @@ class UserModel(BaseModel):
                 new_user.lastname = attrs['lastname']
 
                 self.sa.add(new_user)
-                self.sa.commit()
                 return new_user
             except (DatabaseError,):
                 log.error(traceback.format_exc())
@@ -200,7 +200,6 @@ class UserModel(BaseModel):
                 new_user.lastname = attrs['lastname']
 
                 self.sa.add(new_user)
-                self.sa.commit()
                 return new_user
             except (DatabaseError,):
                 log.error(traceback.format_exc())
@@ -258,10 +257,8 @@ class UserModel(BaseModel):
                     setattr(user, k, v)
 
             self.sa.add(user)
-            self.sa.commit()
         except:
             log.error(traceback.format_exc())
-            self.sa.rollback()
             raise
 
     def update_my_account(self, user_id, form_data):
@@ -280,10 +277,8 @@ class UserModel(BaseModel):
                         setattr(user, k, v)
 
             self.sa.add(user)
-            self.sa.commit()
         except:
             log.error(traceback.format_exc())
-            self.sa.rollback()
             raise
 
     def delete(self, user_id):
@@ -300,10 +295,8 @@ class UserModel(BaseModel):
                                                'remove those repositories') \
                                                % user.repositories)
             self.sa.delete(user)
-            self.sa.commit()
         except:
             log.error(traceback.format_exc())
-            self.sa.rollback()
             raise
 
     def reset_password_link(self, data):
@@ -477,3 +470,35 @@ class UserModel(BaseModel):
 
         return user
 
+
+
+    def has_perm(self, user, perm):
+        if not isinstance(perm, Permission):
+            raise Exception('perm needs to be an instance of Permission class')
+
+        user = self.__get_user(user)
+
+        return UserToPerm.query().filter(UserToPerm.user == user.user)\
+            .filter(UserToPerm.permission == perm).scalar() is not None
+
+    def grant_perm(self, user, perm):
+        if not isinstance(perm, Permission):
+            raise Exception('perm needs to be an instance of Permission class')
+
+        user = self.__get_user(user)
+
+        new = UserToPerm()
+        new.user = user.user
+        new.permission = perm
+        self.sa.add(new)
+
+
+    def revoke_perm(self, user, perm):
+        if not isinstance(perm, Permission):
+            raise Exception('perm needs to be an instance of Permission class')
+        
+        user = self.__get_user(user)
+        
+        obj = UserToPerm.query().filter(UserToPerm.user == user.user)\
+                .filter(UserToPerm.permission == perm).one()
+        self.sa.delete(obj)

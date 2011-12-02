@@ -71,7 +71,7 @@ class ReposGroupsController(BaseController):
         try:
             form_result = repos_group_form.to_python(dict(request.POST))
             ReposGroupModel().create(form_result)
-            Session().commit()
+            Session.commit()
             h.flash(_('created repos group %s') \
                     % form_result['group_name'], category='success')
             #TODO: in futureaction_logger(, '', '', '', self.sa)
@@ -118,7 +118,7 @@ class ReposGroupsController(BaseController):
         try:
             form_result = repos_group_form.to_python(dict(request.POST))
             ReposGroupModel().update(id, form_result)
-            Session().commit()
+            Session.commit()
             h.flash(_('updated repos group %s') \
                     % form_result['group_name'], category='success')
             #TODO: in futureaction_logger(, '', '', '', self.sa)
@@ -158,7 +158,7 @@ class ReposGroupsController(BaseController):
 
         try:
             ReposGroupModel().delete(id)
-            Session().commit()
+            Session.commit()
             h.flash(_('removed repos group %s' % gr.group_name), category='success')
             #TODO: in future action_logger(, '', '', '', self.sa)
         except IntegrityError, e:

@@ -35,6 +35,7 @@ from pylons.controllers.util import abort, redirect
 from pylons.i18n.translation import _
 
 from rhodecode import __platform__, PLATFORM_WIN, PLATFORM_OTHERS
+from rhodecode.model.meta import Session
 
 if __platform__ in PLATFORM_WIN:
     from hashlib import sha256
@@ -225,7 +226,8 @@ def authenticate(username, password):
                 if user_model.create_ldap(username, password, user_dn,
                                           user_attrs):
                     log.info('created new ldap user %s', username)
-
+                    
+                Session.commit()    
                 return True
             except (LdapUsernameError, LdapPasswordError,):
                 pass
@@ -237,13 +239,12 @@ def authenticate(username, password):
 def login_container_auth(username):
     user = User.get_by_username(username)
     if user is None:
-        user_model = UserModel()
         user_attrs = {
             'name': username,
             'lastname': None,
             'email': None,
         }
-        user = user_model.create_for_container_auth(username, user_attrs)
+        user = UserModel().create_for_container_auth(username, user_attrs)
         if not user:
             return None
         log.info('User %s was created by container authentication', username)
@@ -252,6 +253,8 @@ def login_container_auth(username):
         return None
 
     user.update_lastlogin()
+    Session.commit()
+    
     log.debug('User %s is now logged in by container authentication',
               user.username)
     return user
@@ -380,7 +383,7 @@ def set_available_permissions(config):
     """
     log.info('getting information about all available permissions')
     try:
-        sa = meta.Session()
+        sa = meta.Session
         all_perms = sa.query(Permission).all()
     except:
         pass

@@ -57,7 +57,7 @@ class DbManage(object):
     def init_db(self):
         engine = create_engine(self.dburi, echo=self.log_sql)
         init_model(engine)
-        self.sa = meta.Session()
+        self.sa = meta.Session
 
     def create_tables(self, override=False):
         """Create a auth database

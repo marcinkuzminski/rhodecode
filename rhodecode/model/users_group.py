@@ -27,7 +27,9 @@ import logging
 import traceback
 
 from rhodecode.model import BaseModel
-from rhodecode.model.db import UsersGroupMember, UsersGroup
+from rhodecode.model.db import UsersGroupMember, UsersGroup,\
+    UsersGroupRepoToPerm, Permission, UsersGroupToPerm
+from rhodecode.lib.exceptions import UsersGroupsAssignedException
 
 log = logging.getLogger(__name__)
 
@@ -44,15 +46,55 @@ class UsersGroupModel(BaseModel):
         return UsersGroup.get_by_group_name(name, cache, case_insensitive)
 
     def create(self, name, active=True):
-        new = UsersGroup()
-        new.users_group_name = name
-        new.users_group_active = active
-        self.sa.add(new)
-        return new
+        try:
+            new = UsersGroup()
+            new.users_group_name = name
+            new.users_group_active = active
+            self.sa.add(new)
+            return new
+        except:
+            log.error(traceback.format_exc())
+            raise
+
+    def update(self, users_group, form_data):
+
+        try:
+            users_group = self.__get_users_group(users_group)
+
+            for k, v in form_data.items():
+                if k == 'users_group_members':
+                    users_group.members = []
+                    self.sa.flush()
+                    members_list = []
+                    if v:
+                        v = [v] if isinstance(v, basestring) else v
+                        for u_id in set(v):
+                            member = UsersGroupMember(users_group.users_group_id, u_id)
+                            members_list.append(member)
+                    setattr(users_group, 'members', members_list)
+                setattr(users_group, k, v)
+
+            self.sa.add(users_group)
+        except:
+            log.error(traceback.format_exc())
+            raise
 
     def delete(self, users_group):
-        obj = self.__get_users_group(users_group)
-        self.sa.delete(obj)
+        try:
+            users_group = self.__get_users_group(users_group)
+            
+            # check if this group is not assigned to repo
+            assigned_groups = UsersGroupRepoToPerm.query()\
+                .filter(UsersGroupRepoToPerm.users_group == users_group).all()
+
+            if assigned_groups:
+                raise UsersGroupsAssignedException('RepoGroup assigned to %s' %
+                                                   assigned_groups)
+            
+            self.sa.delete(users_group)
+        except:
+            log.error(traceback.format_exc())
+            raise
 
     def add_user_to_group(self, users_group, user):
         for m in users_group.members:
@@ -73,3 +115,38 @@ class UsersGroupModel(BaseModel):
         except:
             log.error(traceback.format_exc())
             raise
+
+    def has_perm(self, users_group, perm):
+        if not isinstance(perm, Permission):
+            raise Exception('perm needs to be an instance of Permission class')
+
+        users_group = self.__get_users_group(users_group)
+
+        return UsersGroupToPerm.query()\
+            .filter(UsersGroupToPerm.users_group == users_group)\
+            .filter(UsersGroupToPerm.permission == perm).scalar() is not None
+
+    def grant_perm(self, users_group, perm):
+        if not isinstance(perm, Permission):
+            raise Exception('perm needs to be an instance of Permission class')
+
+        users_group = self.__get_users_group(users_group)
+
+        new = UsersGroupToPerm()
+        new.users_group = users_group
+        new.permission = perm
+        self.sa.add(new)
+
+
+    def revoke_perm(self, users_group, perm):
+        if not isinstance(perm, Permission):
+            raise Exception('perm needs to be an instance of Permission class')
+        
+        users_group = self.__get_users_group(users_group)
+        
+        obj = UsersGroupToPerm.query()\
+            .filter(UsersGroupToPerm.users_group == users_group)\
+            .filter(UsersGroupToPerm.permission == perm).one()
+        self.sa.delete(obj)
+
+

@@ -1061,7 +1061,7 @@ class CacheInvalidation(Base, BaseModel):
         """
 
         log.debug('marking %s for invalidation' % key)
-        inv_obj = Session().query(cls)\
+        inv_obj = Session.query(cls)\
             .filter(cls.cache_key == key).scalar()
         if inv_obj:
             inv_obj.cache_active = False
@@ -1083,7 +1083,7 @@ class CacheInvalidation(Base, BaseModel):
         
         :param key:
         """
-        inv_obj = Session().query(CacheInvalidation)\
+        inv_obj = Session.query(CacheInvalidation)\
             .filter(CacheInvalidation.cache_key == key).scalar()
         inv_obj.cache_active = True
         Session.add(inv_obj)

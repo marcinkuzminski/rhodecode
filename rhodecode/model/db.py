@@ -118,7 +118,7 @@ class BaseModel(object):
 
     @classmethod
     def query(cls):
-        return Session().query(cls)
+        return Session.query(cls)
 
     @classmethod
     def get(cls, id_):
@@ -132,7 +132,7 @@ class BaseModel(object):
     @classmethod
     def delete(cls, id_):
         obj = cls.query().get(id_)
-        Session().delete(obj)
+        Session.delete(obj)
 
 
 class RhodeCodeSetting(Base, BaseModel):
@@ -252,8 +252,7 @@ class RhodeCodeUi(Base, BaseModel):
         new_ui.ui_key = key
         new_ui.ui_value = val
 
-        Session().add(new_ui)
-        Session().commit()
+        Session.add(new_ui)
 
 
 class User(Base, BaseModel):
@@ -335,10 +334,8 @@ class User(Base, BaseModel):
 
     def update_lastlogin(self):
         """Update user lastlogin"""
-
         self.last_login = datetime.datetime.now()
-        Session().add(self)
-        Session().commit()
+        Session.add(self)
         log.debug('updated user %s lastlogin', self.username)
 
 
@@ -386,7 +383,6 @@ class UsersGroup(Base, BaseModel):
                                     "get_user_%s" % group_name))
         return q.scalar()
 
-
     @classmethod
     def get(cls, users_group_id, cache=False):
         users_group = cls.query()
@@ -394,68 +390,6 @@ class UsersGroup(Base, BaseModel):
             users_group = users_group.options(FromCache("sql_cache_short",
                                     "get_users_group_%s" % users_group_id))
         return users_group.get(users_group_id)
-
-    @classmethod
-    def create(cls, form_data):
-        try:
-            new_users_group = cls()
-            for k, v in form_data.items():
-                setattr(new_users_group, k, v)
-
-            Session().add(new_users_group)
-            Session().commit()
-            return new_users_group
-        except:
-            log.error(traceback.format_exc())
-            Session().rollback()
-            raise
-
-    @classmethod
-    def update(cls, users_group_id, form_data):
-
-        try:
-            users_group = cls.get(users_group_id, cache=False)
-
-            for k, v in form_data.items():
-                if k == 'users_group_members':
-                    users_group.members = []
-                    Session().flush()
-                    members_list = []
-                    if v:
-                        v = [v] if isinstance(v, basestring) else v
-                        for u_id in set(v):
-                            member = UsersGroupMember(users_group_id, u_id)
-                            members_list.append(member)
-                    setattr(users_group, 'members', members_list)
-                setattr(users_group, k, v)
-
-            Session().add(users_group)
-            Session().commit()
-        except:
-            log.error(traceback.format_exc())
-            Session().rollback()
-            raise
-
-    @classmethod
-    def delete(cls, users_group_id):
-        try:
-
-            # check if this group is not assigned to repo
-            assigned_groups = UsersGroupRepoToPerm.query()\
-                .filter(UsersGroupRepoToPerm.users_group_id ==
-                        users_group_id).all()
-
-            if assigned_groups:
-                raise UsersGroupsAssignedException('RepoGroup assigned to %s' %
-                                                   assigned_groups)
-
-            users_group = cls.get(users_group_id, cache=False)
-            Session().delete(users_group)
-            Session().commit()
-        except:
-            log.error(traceback.format_exc())
-            Session().rollback()
-            raise
 
 class UsersGroupMember(Base, BaseModel):
     __tablename__ = 'users_groups_members'
@@ -477,8 +411,8 @@ class UsersGroupMember(Base, BaseModel):
         ugm = UsersGroupMember()
         ugm.users_group = group
         ugm.user = user
-        Session().add(ugm)
-        Session().commit()
+        Session.add(ugm)
+        Session.commit()
         return ugm
 
 class Repository(Base, BaseModel):
@@ -521,11 +455,11 @@ class Repository(Base, BaseModel):
 
     @classmethod
     def get_by_repo_name(cls, repo_name):
-        q = Session().query(cls).filter(cls.repo_name == repo_name)
+        q = Session.query(cls).filter(cls.repo_name == repo_name)
         q = q.options(joinedload(Repository.fork))\
                 .options(joinedload(Repository.user))\
                 .options(joinedload(Repository.group))
-        return q.one()
+        return q.scalar()
 
     @classmethod
     def get_repo_forks(cls, repo_id):
@@ -538,7 +472,7 @@ class Repository(Base, BaseModel):
 
         :param cls:
         """
-        q = Session().query(RhodeCodeUi)\
+        q = Session.query(RhodeCodeUi)\
             .filter(RhodeCodeUi.ui_key == cls.url_sep())
         q = q.options(FromCache("sql_cache_short", "repository_repo_path"))
         return q.one().ui_value
@@ -574,7 +508,7 @@ class Repository(Base, BaseModel):
         Returns base full path for that repository means where it actually
         exists on a filesystem
         """
-        q = Session().query(RhodeCodeUi).filter(RhodeCodeUi.ui_key ==
+        q = Session.query(RhodeCodeUi).filter(RhodeCodeUi.ui_key ==
                                               Repository.url_sep())
         q = q.options(FromCache("sql_cache_short", "repository_repo_path"))
         return q.one().ui_value
@@ -851,7 +785,7 @@ class Permission(Base, BaseModel):
 
     @classmethod
     def get_default_perms(cls, default_user_id):
-        q = Session().query(UserRepoToPerm, Repository, cls)\
+        q = Session.query(UserRepoToPerm, Repository, cls)\
             .join((Repository, UserRepoToPerm.repository_id == Repository.repo_id))\
             .join((cls, UserRepoToPerm.permission_id == cls.permission_id))\
             .filter(UserRepoToPerm.user_id == default_user_id)
@@ -877,7 +811,7 @@ class UserRepoToPerm(Base, BaseModel):
         n.user = user
         n.repository = repository
         n.permission = permission
-        Session().add(n)
+        Session.add(n)
         return n
 
     def __repr__(self):
@@ -893,41 +827,6 @@ class UserToPerm(Base, BaseModel):
     user = relationship('User')
     permission = relationship('Permission', lazy='joined')
 
-    @classmethod
-    def has_perm(cls, user_id, perm):
-        if not isinstance(perm, Permission):
-            raise Exception('perm needs to be an instance of Permission class')
-
-        return cls.query().filter(cls.user_id == user_id)\
-            .filter(cls.permission == perm).scalar() is not None
-
-    @classmethod
-    def grant_perm(cls, user_id, perm):
-        if not isinstance(perm, Permission):
-            raise Exception('perm needs to be an instance of Permission class')
-
-        new = cls()
-        new.user_id = user_id
-        new.permission = perm
-        try:
-            Session().add(new)
-            Session().commit()
-        except:
-            Session().rollback()
-
-
-    @classmethod
-    def revoke_perm(cls, user_id, perm):
-        if not isinstance(perm, Permission):
-            raise Exception('perm needs to be an instance of Permission class')
-
-        try:
-            obj = cls.query().filter(cls.user_id == user_id)\
-                    .filter(cls.permission == perm).one()
-            Session().delete(obj)
-            Session().commit()
-        except:
-            Session().rollback()
 
 class UsersGroupRepoToPerm(Base, BaseModel):
     __tablename__ = 'users_group_repo_to_perm'
@@ -947,7 +846,7 @@ class UsersGroupRepoToPerm(Base, BaseModel):
         n.users_group = users_group
         n.repository = repository
         n.permission = permission
-        Session().add(n)
+        Session.add(n)
         return n
 
     def __repr__(self):
@@ -961,45 +860,6 @@ class UsersGroupToPerm(Base, BaseModel):
 
     users_group = relationship('UsersGroup')
     permission = relationship('Permission')
-
-
-    @classmethod
-    def has_perm(cls, users_group_id, perm):
-        if not isinstance(perm, Permission):
-            raise Exception('perm needs to be an instance of Permission class')
-
-        return cls.query().filter(cls.users_group_id ==
-                                         users_group_id)\
-                                         .filter(cls.permission == perm)\
-                                         .scalar() is not None
-
-    @classmethod
-    def grant_perm(cls, users_group_id, perm):
-        if not isinstance(perm, Permission):
-            raise Exception('perm needs to be an instance of Permission class')
-
-        new = cls()
-        new.users_group_id = users_group_id
-        new.permission = perm
-        try:
-            Session().add(new)
-            Session().commit()
-        except:
-            Session().rollback()
-
-
-    @classmethod
-    def revoke_perm(cls, users_group_id, perm):
-        if not isinstance(perm, Permission):
-            raise Exception('perm needs to be an instance of Permission class')
-
-        try:
-            obj = cls.query().filter(cls.users_group_id == users_group_id)\
-                .filter(cls.permission == perm).one()
-            Session().delete(obj)
-            Session().commit()
-        except:
-            Session().rollback()
 
 
 class UserRepoGroupToPerm(Base, BaseModel):
@@ -1103,7 +963,7 @@ class CacheInvalidation(Base, BaseModel):
         """
 
         log.debug('marking %s for invalidation' % key)
-        inv_obj = Session().query(cls)\
+        inv_obj = Session.query(cls)\
             .filter(cls.cache_key == key).scalar()
         if inv_obj:
             inv_obj.cache_active = False
@@ -1112,11 +972,11 @@ class CacheInvalidation(Base, BaseModel):
             inv_obj = CacheInvalidation(key)
 
         try:
-            Session().add(inv_obj)
-            Session().commit()
+            Session.add(inv_obj)
+            Session.commit()
         except Exception:
             log.error(traceback.format_exc())
-            Session().rollback()
+            Session.rollback()
 
     @classmethod
     def set_valid(cls, key):
@@ -1128,8 +988,8 @@ class CacheInvalidation(Base, BaseModel):
         inv_obj = CacheInvalidation.query()\
             .filter(CacheInvalidation.cache_key == key).scalar()
         inv_obj.cache_active = True
-        Session().add(inv_obj)
-        Session().commit()
+        Session.add(inv_obj)
+        Session.commit()
 
 
 class ChangesetComment(Base, BaseModel):
@@ -1157,7 +1017,7 @@ class ChangesetComment(Base, BaseModel):
         :param cls:
         :param revision:
         """
-        return Session().query(User)\
+        return Session.query(User)\
                 .filter(cls.revision == revision)\
                 .join(ChangesetComment.author).all()
 
@@ -1203,7 +1063,7 @@ class Notification(Base, BaseModel):
             assoc = UserNotification()
             assoc.notification = notification
             u.notifications.append(assoc)
-        Session().add(notification)
+        Session.add(notification)
         return notification
 
     @property
@@ -1226,7 +1086,7 @@ class UserNotification(Base, BaseModel):
 
     def mark_as_read(self):
         self.read = True
-        Session().add(self)
+        Session.add(self)
 
 class DbMigrateVersion(Base, BaseModel):
     __tablename__ = 'db_migrate_version'
