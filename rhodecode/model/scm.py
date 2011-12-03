@@ -141,7 +141,7 @@ class ScmModel(BaseModel):
             repos_path = self.repos_path
 
         baseui = make_ui('db')
-        repos_list = {}
+        repos = {}
 
         for name, path in get_filesystem_repos(repos_path, recursive=True):
 
@@ -150,7 +150,7 @@ class ScmModel(BaseModel):
             name = Repository.url_sep().join(name.split(os.sep))
 
             try:
-                if name in repos_list:
+                if name in repos:
                     raise RepositoryError('Duplicate repository name %s '
                                           'found in %s' % (name, path))
                 else:
@@ -160,15 +160,15 @@ class ScmModel(BaseModel):
                     if path[0] == 'hg' and path[0] in BACKENDS.keys():
 
                         # for mercurial we need to have an str path
-                        repos_list[name] = klass(safe_str(path[1]),
+                        repos[name] = klass(safe_str(path[1]),
                                                  baseui=baseui)
 
                     if path[0] == 'git' and path[0] in BACKENDS.keys():
-                        repos_list[name] = klass(path[1])
+                        repos[name] = klass(path[1])
             except OSError:
                 continue
 
-        return repos_list
+        return repos
 
     def get_repos(self, all_repos=None, sort_key=None):
         """

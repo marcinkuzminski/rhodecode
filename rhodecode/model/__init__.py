@@ -61,7 +61,8 @@ def init_model(engine):
 
 
 class BaseModel(object):
-    """Base Model for all RhodeCode models, it adds sql alchemy session
+    """
+    Base Model for all RhodeCode models, it adds sql alchemy session
     into instance of model
 
     :param sa: If passed it reuses this session instead of creating a new one

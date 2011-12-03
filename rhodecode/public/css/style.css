@@ -2154,6 +2154,9 @@ div.browserblock {
 	font-size: 100%;
 	line-height: 125%;
 	padding: 0;
+    -webkit-border-radius: 6px 6px 0px 0px;
+    -moz-border-radius: 6px 6px 0px 0px;
+    border-radius: 6px 6px 0px 0px;	
 }
 
 div.browserblock .browser-header {
@@ -2715,12 +2718,18 @@ div.gravatar img {
 	border: 1px solid #316293;
 }
 
-.ui-button-small a:hover {
+input.ui-button-small,
+.ui-button-small {
+    background-color: #eedc94;
+    background-repeat: repeat-x;
+    background-image: -khtml-gradient(linear, left top, left bottom, from(#F4F4F4),to(#ECECEC) );
+    background-image: -moz-linear-gradient(top, #F4F4F4, #ECECEC);
+    background-image: -ms-linear-gradient(top, #F4F4F4, #ECECEC);
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #F4F4F4),color-stop(100%, #F4F4F4) );
+    background-image: -webkit-linear-gradient(top, #F4F4F4, #ECECEC) );
+    background-image: -o-linear-gradient(top, #F4F4F4, #ECECEC) );
+    background-image: linear-gradient(top, #F4F4F4, #ECECEC);
 	
-}
-
-input.ui-button-small,.ui-button-small {
-	background: #e5e3e3 url("../images/button.png") repeat-x !important;
 	border-top: 1px solid #DDD !important;
 	border-left: 1px solid #c6c6c6 !important;
 	border-right: 1px solid #DDD !important;
@@ -2737,13 +2746,16 @@ input.ui-button-small,.ui-button-small {
 	padding: 3px 3px 3px 3px;
 }
 
-input.ui-button-small.xsmall,.ui-button-small.xsmall{
+input.ui-button-small.xsmall,
+.ui-button-small.xsmall{
     padding: 1px 2px 1px 1px;
 }
 
-input.ui-button-small:hover,.ui-button-small:hover {
-	background: #b4b4b4 url("../images/button_selected.png") repeat-x
-		!important;
+input.ui-button-small:hover,
+.ui-button-small:hover,
+.ui-button-small.xsmall:hover
+ {
+	background: #b4b4b4 url("../images/button_selected.png") repeat-x !important;
 	border-top: 1px solid #ccc !important;
 	border-left: 1px solid #bebebe !important;
 	border-right: 1px solid #b1b1b1 !important;
@@ -2775,8 +2787,12 @@ ins,div.options a:hover {
 	text-decoration: none;
 }
 
-img,#header #header-inner #quick li a:hover span.normal,#header #header-inner #quick li ul li.last,#content div.box div.form div.fields div.field div.textarea table td table td a,#clone_url
-	{
+img,
+#header #header-inner #quick li a:hover span.normal,
+#header #header-inner #quick li ul li.last,
+#content div.box div.form div.fields div.field div.textarea table td table td a,
+#clone_url
+{
 	border: none;
 }
 
@@ -2784,19 +2800,27 @@ img.icon,.right .merge img {
 	vertical-align: bottom;
 }
 
-#header ul#logged-user,#content div.box div.title ul.links,#content div.box div.message div.dismiss,#content div.box div.traffic div.legend ul
+#header ul#logged-user,#content div.box div.title ul.links,
+#content div.box div.message div.dismiss,
+#content div.box div.traffic div.legend ul
 	{
 	float: right;
 	margin: 0;
 	padding: 0;
 }
 
-#header #header-inner #home,#header #header-inner #logo,#content div.box ul.left,#content div.box ol.left,#content div.box div.pagination-left,div#commit_history,div#legend_data,div#legend_container,div#legend_choices
+#header #header-inner #home,#header #header-inner #logo,
+#content div.box ul.left,#content div.box ol.left,
+#content div.box div.pagination-left,div#commit_history,
+div#legend_data,div#legend_container,div#legend_choices
 	{
 	float: left;
 }
 
-#header #header-inner #quick li:hover ul ul,#header #header-inner #quick li:hover ul ul ul,#header #header-inner #quick li:hover ul ul ul ul,#content #left #menu ul.closed,#content #left #menu li ul.collapsed,.yui-tt-shadow
+#header #header-inner #quick li:hover ul ul,
+#header #header-inner #quick li:hover ul ul ul,
+#header #header-inner #quick li:hover ul ul ul ul,
+#content #left #menu ul.closed,#content #left #menu li ul.collapsed,.yui-tt-shadow
 	{
 	display: none;
 }

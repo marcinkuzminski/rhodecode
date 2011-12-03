@@ -155,15 +155,7 @@
                     %endif  		          
 		        %else:
 			        ${h.select('download_options',c.rhodecode_repo.get_changeset().raw_id,c.download_options)}
-			        %for cnt,archive in enumerate(c.rhodecode_repo._get_archives()):
-			             %if cnt >=1:
-			             |
-			             %endif
-			             <span class="tooltip" title="${_('Download %s as %s') %('tip',archive['type'])}" 
-			                  id="${archive['type']+'_link'}">${h.link_to(archive['type'],
-			                h.url('files_archive_home',repo_name=c.dbrepo.repo_name,
-			                fname='tip'+archive['extension']),class_="archive_icon")}</span>
-			        %endfor
+			             <span id="${'zip_link'}">${h.link_to('Download as zip',h.url('files_archive_home',repo_name=c.dbrepo.repo_name,fname='tip.zip'),class_="archive_icon ui-button-small")}</span>
                     <span style="vertical-align: bottom">
                         <input id="archive_subrepos" type="checkbox" name="subrepos"/> <span class="tooltip" title="${_('Check this to download archive with subrepos')}" >${_('with subrepos')}</span>
                     </span>
@@ -250,9 +242,7 @@ YUE.on(clone_url,'click',function(e){
 
 var tmpl_links = {};
 %for cnt,archive in enumerate(c.rhodecode_repo._get_archives()):
-  tmpl_links['${archive['type']}'] = '${h.link_to(archive['type'],
-       h.url('files_archive_home',repo_name=c.dbrepo.repo_name,
-       fname='__CS__'+archive['extension'],subrepos='__SUB__'),class_="archive_icon")}';
+  tmpl_links["${archive['type']}"] = '${h.link_to('__NAME__', h.url('files_archive_home',repo_name=c.dbrepo.repo_name, fname='__CS__'+archive['extension'],subrepos='__SUB__'),class_='archive_icon ui-button-small')}';
 %endfor
 
 YUE.on(['download_options','archive_subrepos'],'change',function(e){
@@ -261,13 +251,17 @@ YUE.on(['download_options','archive_subrepos'],'change',function(e){
    
    for(k in tmpl_links){
        var s = YUD.get(k+'_link');
-       title_tmpl = "${_('Download %s as %s') % ('__CS_NAME__','__CS_EXT__')}";
-       s.title = title_tmpl.replace('__CS_NAME__',new_cs.text);
-       s.title = s.title.replace('__CS_EXT__',k);
-       var url = tmpl_links[k].replace('__CS__',new_cs.value);
-       var subrepos = YUD.get('archive_subrepos').checked
-       url = url.replace('__SUB__',subrepos);
-       s.innerHTML = url 
+       if(s){
+         var title_tmpl = "${_('Download %s as %s') % ('__CS_NAME__','__CS_EXT__')}";
+         title_tmpl= title_tmpl.replace('__CS_NAME__',new_cs.text);
+         title_tmpl = title_tmpl.replace('__CS_EXT__',k);
+         
+         var url = tmpl_links[k].replace('__CS__',new_cs.value);
+         var subrepos = YUD.get('archive_subrepos').checked;
+         url = url.replace('__SUB__',subrepos);
+         url = url.replace('__NAME__',title_tmpl);
+         s.innerHTML = url
+       }
    }
 });
 </script>

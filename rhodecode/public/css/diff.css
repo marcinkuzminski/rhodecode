@@ -7,7 +7,7 @@ div.diffblock {
     line-height: 100%;
     /* new */
     line-height: 125%;
-        -webkit-border-radius: 6px 6px 0px 0px;
+    -webkit-border-radius: 6px 6px 0px 0px;
     -moz-border-radius: 6px 6px 0px 0px;
     border-radius: 6px 6px 0px 0px;     
 }
