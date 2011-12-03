@@ -21,9 +21,12 @@ news
 - configurable clone url possibility to specify ssh:// manually as 
   alternative clone url.
 - enabled largefiles extension by default
+- optimized summary file pages and saved a lot of unused space in them
    
 fixes
 -----
+
+- rewrote dbsession management for atomic operations, and better error handling
 
 1.2.3 (**2011-11-02**)
 ======================

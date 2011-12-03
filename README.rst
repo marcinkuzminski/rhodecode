@@ -2,16 +2,16 @@
 Welcome to RhodeCode (RhodiumCode) documentation!
 =================================================
 
-``RhodeCode`` is a Pylons framework based Mercurial repository 
-browser/management tool with a built in push/pull server and full text search.
+``RhodeCode`` is a fast and powerful management tool for Mercurial_ and GIT_ 
+with a built in push/pull server and full text search.
 It works on http/https and has a built in permission/authentication system with 
 the ability to authenticate via LDAP or ActiveDirectory. RhodeCode also supports
-simple API so it's easy integrable with existing systems.
+simple API so it's easy integrable with existing external systems.
 
 RhodeCode is similar in some respects to github or bitbucket_, 
-however RhodeCode can be run as standalone hosted application on your own server.  
+however RhodeCode can be run as standalone hosted application on your own server.
 It is open source and donation ware and focuses more on providing a customized, 
-self administered interface for Mercurial(and soon GIT) repositories. 
+self administered interface for Mercurial and GIT repositories. 
 RhodeCode is powered by a vcs_ library that Lukasz Balcerzak and I created to 
 handle multiple different version control systems.
 
@@ -75,6 +75,9 @@ RhodeCode Features
 - Server side forks. It is possible to fork a project and modify it freely 
   without breaking the main repository. You can even write Your own hooks 
   and install them
+- code review with notification system, inline commenting, all parsed using
+  rst syntax
+- rst and markdown README support for repositories  
 - Full text search powered by Whoosh on the source files, and file names.
   Build in indexing daemons, with optional incremental index build
   (no external search servers required all in one application)
@@ -97,10 +100,8 @@ Incoming / Plans
 
 - Finer granular permissions per branch, repo group or subrepo
 - pull requests and web based merges
-- notification and message system 
+- per line file history
 - SSH based authentication with server side key management
-- Code review (probably based on hg-review)
-- Full git_ support, with push/pull server (currently in beta tests)
 - Redmine and other bugtrackers integration
 - Commit based built in wiki system
 - More statistics and graph (global annotation + some more statistics)
