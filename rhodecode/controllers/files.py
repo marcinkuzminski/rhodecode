@@ -404,6 +404,7 @@ class FilesController(BaseRepoController):
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
                                    'repository.admin')
     def diff(self, repo_name, f_path):
+        ignore_whitespace = request.GET.get('ignorews') == '1'
         diff1 = request.GET.get('diff1')
         diff2 = request.GET.get('diff2')
         c.action = request.GET.get('diff')
@@ -430,8 +431,9 @@ class FilesController(BaseRepoController):
                                 repo_name=c.repo_name, f_path=f_path))
 
         if c.action == 'download':
-            diff = differ.DiffProcessor(differ.get_gitdiff(node1, node2),
-                                        format='gitdiff')
+            _diff = differ.get_gitdiff(node1, node2,
+                                       ignore_whitespace=ignore_whitespace)
+            diff = differ.DiffProcessor(_diff,format='gitdiff')
 
             diff_name = '%s_vs_%s.diff' % (diff1, diff2)
             response.content_type = 'text/plain'
@@ -440,8 +442,9 @@ class FilesController(BaseRepoController):
             return diff.raw_diff()
 
         elif c.action == 'raw':
-            diff = differ.DiffProcessor(differ.get_gitdiff(node1, node2),
-                                        format='gitdiff')
+            _diff = differ.get_gitdiff(node1, node2,
+                                       ignore_whitespace=ignore_whitespace)
+            diff = differ.DiffProcessor(_diff,format='gitdiff')
             response.content_type = 'text/plain'
             return diff.raw_diff()
 
@@ -453,8 +456,9 @@ class FilesController(BaseRepoController):
                 c.cur_diff = ''
                 c.big_diff = True
             else:
-                diff = differ.DiffProcessor(differ.get_gitdiff(node1, node2),
-                                        format='gitdiff')
+                _diff = differ.get_gitdiff(node1, node2,
+                                           ignore_whitespace=ignore_whitespace)
+                diff = differ.DiffProcessor(_diff,format='gitdiff')
                 c.cur_diff = diff.as_html()
         else:
 
@@ -467,8 +471,9 @@ class FilesController(BaseRepoController):
                 c.big_diff = True
 
             else:
-                diff = differ.DiffProcessor(differ.get_gitdiff(node1, node2),
-                                        format='gitdiff')
+                _diff = differ.get_gitdiff(node1, node2,
+                                           ignore_whitespace=ignore_whitespace)
+                diff = differ.DiffProcessor(_diff,format='gitdiff')
                 c.cur_diff = diff.as_html()
 
         if not c.cur_diff and not c.big_diff:

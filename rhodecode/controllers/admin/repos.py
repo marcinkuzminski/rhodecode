@@ -254,7 +254,7 @@ class ReposController(BaseController):
             h.flash(_('deleted repository %s') % repo_name, category='success')
             Session.commit()
         except IntegrityError, e:
-            if e.message.find('repositories_fork_id_fkey'):
+            if e.message.find('repositories_fork_id_fkey') != -1:
                 log.error(traceback.format_exc())
                 h.flash(_('Cannot delete %s it still contains attached '
                           'forks') % repo_name,

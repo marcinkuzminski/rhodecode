@@ -162,7 +162,7 @@ class ReposGroupsController(BaseController):
             h.flash(_('removed repos group %s' % gr.group_name), category='success')
             #TODO: in future action_logger(, '', '', '', self.sa)
         except IntegrityError, e:
-            if e.message.find('groups_group_parent_id_fkey'):
+            if e.message.find('groups_group_parent_id_fkey') != -1:
                 log.error(traceback.format_exc())
                 h.flash(_('Cannot delete this group it still contains '
                           'subgroups'),
