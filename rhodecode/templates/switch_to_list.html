@@ -23,6 +23,7 @@
     %endif
     </ul>                        
 </li>
+%if c.rhodecode_repo.alias == 'hg': 
 <li>
     ${h.link_to('%s (%s)' % (_('bookmarks'),len(c.rhodecode_repo.bookmarks.values()),),h.url('bookmarks_home',repo_name=c.repo_name),class_='bookmarks childs')}
     <ul>
@@ -35,3 +36,4 @@
     %endif
     </ul>                        
 </li>  
+%endif

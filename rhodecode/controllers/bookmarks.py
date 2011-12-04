@@ -29,6 +29,7 @@ from pylons import tmpl_context as c
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.compat import OrderedDict
+from webob.exc import HTTPNotFound
 
 log = logging.getLogger(__name__)
 
@@ -42,6 +43,9 @@ class BookmarksController(BaseRepoController):
         super(BookmarksController, self).__before__()
 
     def index(self):
+        if c.rhodecode_repo.alias != 'hg':
+            raise HTTPNotFound()
+        
         c.repo_bookmarks = OrderedDict()
 
         bookmarks = [(name, c.rhodecode_repo.get_changeset(hash_)) for \
