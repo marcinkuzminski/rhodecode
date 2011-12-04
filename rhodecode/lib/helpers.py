@@ -35,7 +35,7 @@ from webhelpers.paginate import Page
 from webhelpers.html.tags import _set_input_attrs, _set_id_attr, \
     convert_boolean_attrs, NotGiven, _make_safe_id_component
 
-from vcs.utils.annotate import annotate_highlight
+from rhodecode.lib.annotate import annotate_highlight
 from rhodecode.lib.utils import repo_name_slug
 from rhodecode.lib import str2bool, safe_unicode, safe_str, get_changeset_safe
 

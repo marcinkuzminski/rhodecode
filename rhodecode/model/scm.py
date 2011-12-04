@@ -158,10 +158,7 @@ class ScmModel(BaseModel):
                     klass = get_backend(path[0])
 
                     if path[0] == 'hg' and path[0] in BACKENDS.keys():
-
-                        # for mercurial we need to have an str path
-                        repos[name] = klass(safe_str(path[1]),
-                                                 baseui=baseui)
+                        repos[name] = klass(safe_str(path[1]), baseui=baseui)
 
                     if path[0] == 'git' and path[0] in BACKENDS.keys():
                         repos[name] = klass(path[1])

@@ -36,13 +36,13 @@ from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.utils import EmptyChangeset
 from rhodecode.lib.compat import OrderedDict
+from rhodecode.lib import diffs
 from rhodecode.model.db import ChangesetComment
 from rhodecode.model.comment import ChangesetCommentsModel
 
 from vcs.exceptions import RepositoryError, ChangesetError, \
     ChangesetDoesNotExistError
 from vcs.nodes import FileNode
-from vcs.utils import diffs as differ
 from webob.exc import HTTPForbidden
 from rhodecode.model.meta import Session
 
@@ -130,9 +130,9 @@ class ChangesetController(BaseRepoController):
                     # made
                     c.sum_added += node.size
                     if c.sum_added < self.cut_off_limit:
-                        f_gitdiff = differ.get_gitdiff(filenode_old, node,
+                        f_gitdiff = diffs.get_gitdiff(filenode_old, node,
                                            ignore_whitespace=ignore_whitespace)
-                        d = differ.DiffProcessor(f_gitdiff, format='gitdiff')
+                        d = diffs.DiffProcessor(f_gitdiff, format='gitdiff')
 
                         st = d.stat()
                         diff = d.as_html()
@@ -169,9 +169,9 @@ class ChangesetController(BaseRepoController):
                     else:
 
                         if c.sum_removed < self.cut_off_limit:
-                            f_gitdiff = differ.get_gitdiff(filenode_old, node,
+                            f_gitdiff = diffs.get_gitdiff(filenode_old, node,
                                            ignore_whitespace=ignore_whitespace)
-                            d = differ.DiffProcessor(f_gitdiff,
+                            d = diffs.DiffProcessor(f_gitdiff,
                                                      format='gitdiff')
                             st = d.stat()
                             if (st[0] + st[1]) * 256 > self.cut_off_limit:
@@ -240,9 +240,9 @@ class ChangesetController(BaseRepoController):
                 if filenode_old.is_binary or node.is_binary:
                     diff = _('binary file') + '\n'
                 else:
-                    f_gitdiff = differ.get_gitdiff(filenode_old, node,
+                    f_gitdiff = diffs.get_gitdiff(filenode_old, node,
                                            ignore_whitespace=ignore_whitespace)
-                    diff = differ.DiffProcessor(f_gitdiff,
+                    diff = diffs.DiffProcessor(f_gitdiff,
                                                 format='gitdiff').raw_diff()
 
                 cs1 = None
@@ -254,9 +254,9 @@ class ChangesetController(BaseRepoController):
                 if filenode_old.is_binary or node.is_binary:
                     diff = _('binary file')
                 else:
-                    f_gitdiff = differ.get_gitdiff(filenode_old, node,
+                    f_gitdiff = diffs.get_gitdiff(filenode_old, node,
                                            ignore_whitespace=ignore_whitespace)
-                    diff = differ.DiffProcessor(f_gitdiff,
+                    diff = diffs.DiffProcessor(f_gitdiff,
                                                 format='gitdiff').raw_diff()
 
                 cs1 = filenode_old.last_changeset.raw_id

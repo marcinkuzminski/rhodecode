@@ -598,4 +598,3 @@ class BasePasterCommand(Command):
         path_to_ini_file = os.path.realpath(conf)
         conf = paste.deploy.appconfig('config:' + path_to_ini_file)
         pylonsconfig.init_app(conf.global_conf, conf.local_conf)
-

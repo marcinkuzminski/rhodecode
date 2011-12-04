@@ -38,12 +38,13 @@ from vcs.conf import settings
 from vcs.exceptions import RepositoryError, ChangesetDoesNotExistError, \
     EmptyRepositoryError, ImproperArchiveTypeError, VCSError, NodeAlreadyExistsError
 from vcs.nodes import FileNode, NodeKind
-from vcs.utils import diffs as differ
+
 
 from rhodecode.lib import convert_line_endings, detect_mode, safe_str
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.utils import EmptyChangeset
+from rhodecode.lib import diffs
 import rhodecode.lib.helpers as h
 from rhodecode.model.repo import RepoModel
 
@@ -431,9 +432,9 @@ class FilesController(BaseRepoController):
                                 repo_name=c.repo_name, f_path=f_path))
 
         if c.action == 'download':
-            _diff = differ.get_gitdiff(node1, node2,
+            _diff = diffs.get_gitdiff(node1, node2,
                                        ignore_whitespace=ignore_whitespace)
-            diff = differ.DiffProcessor(_diff,format='gitdiff')
+            diff = diffs.DiffProcessor(_diff,format='gitdiff')
 
             diff_name = '%s_vs_%s.diff' % (diff1, diff2)
             response.content_type = 'text/plain'
@@ -442,9 +443,9 @@ class FilesController(BaseRepoController):
             return diff.raw_diff()
 
         elif c.action == 'raw':
-            _diff = differ.get_gitdiff(node1, node2,
+            _diff = diffs.get_gitdiff(node1, node2,
                                        ignore_whitespace=ignore_whitespace)
-            diff = differ.DiffProcessor(_diff,format='gitdiff')
+            diff = diffs.DiffProcessor(_diff,format='gitdiff')
             response.content_type = 'text/plain'
             return diff.raw_diff()
 
@@ -456,9 +457,9 @@ class FilesController(BaseRepoController):
                 c.cur_diff = ''
                 c.big_diff = True
             else:
-                _diff = differ.get_gitdiff(node1, node2,
+                _diff = diffs.get_gitdiff(node1, node2,
                                            ignore_whitespace=ignore_whitespace)
-                diff = differ.DiffProcessor(_diff,format='gitdiff')
+                diff = diffs.DiffProcessor(_diff,format='gitdiff')
                 c.cur_diff = diff.as_html()
         else:
 
@@ -471,9 +472,9 @@ class FilesController(BaseRepoController):
                 c.big_diff = True
 
             else:
-                _diff = differ.get_gitdiff(node1, node2,
+                _diff = diffs.get_gitdiff(node1, node2,
                                            ignore_whitespace=ignore_whitespace)
-                diff = differ.DiffProcessor(_diff,format='gitdiff')
+                diff = diffs.DiffProcessor(_diff,format='gitdiff')
                 c.cur_diff = diff.as_html()
 
         if not c.cur_diff and not c.big_diff:
