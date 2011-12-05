@@ -396,7 +396,7 @@ class ValidPerms(formencode.validators.FancyValidator):
 class ValidSettings(formencode.validators.FancyValidator):
 
     def to_python(self, value, state):
-        #settings  form can't edit user
+        # settings  form can't edit user
         if value.has_key('user'):
             del['value']['user']
 
@@ -416,7 +416,7 @@ def UniqSystemEmail(old_data):
         def to_python(self, value, state):
             value = value.lower()
             if old_data.get('email') != value:
-                user = User.query().filter(User.email == value).scalar()
+                user = User.get_by_email(value, case_insensitive=True)
                 if user:
                     raise formencode.Invalid(
                                     _("This e-mail address is already taken"),
@@ -428,7 +428,7 @@ def UniqSystemEmail(old_data):
 class ValidSystemEmail(formencode.validators.FancyValidator):
     def to_python(self, value, state):
         value = value.lower()
-        user = User.query().filter(User.email == value).scalar()
+        user = User.get_by_email(value, case_insensitive=True)
         if  user is None:
             raise formencode.Invalid(_("This e-mail address doesn't exist.") ,
                                      value, state)

@@ -265,7 +265,7 @@ class User(Base, BaseModel):
     admin = Column("admin", Boolean(), nullable=True, unique=None, default=False)
     name = Column("name", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     lastname = Column("lastname", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
-    email = Column("email", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    _email = Column("email", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     last_login = Column("last_login", DateTime(timezone=False), nullable=True, unique=None, default=None)
     ldap_dn = Column("ldap_dn", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     api_key = Column("api_key", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
@@ -280,6 +280,14 @@ class User(Base, BaseModel):
     group_member = relationship('UsersGroupMember', cascade='all')
 
     notifications = relationship('UserNotification',)
+
+    @hybrid_property
+    def email(self):
+        return self._email
+
+    @email.setter
+    def email(self, val):
+        self._email = val.lower() if val else None
 
     @property
     def full_name(self):
@@ -324,8 +332,11 @@ class User(Base, BaseModel):
         return q.scalar()
 
     @classmethod
-    def get_by_email(cls, email, cache=False):
-        q = cls.query().filter(cls.email == email)
+    def get_by_email(cls, email, case_insensitive=False, cache=False):
+        if case_insensitive:
+            q = cls.query().filter(cls.email.ilike(email))
+        else:
+            q = cls.query().filter(cls.email == email)
 
         if cache:
             q = q.options(FromCache("sql_cache_short",
