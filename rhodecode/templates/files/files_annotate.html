@@ -36,8 +36,8 @@
 			        ${h.form(h.url('files_diff_home',repo_name=c.repo_name,f_path=c.f_path),method='get')}
 			        ${h.hidden('diff2',c.file.last_changeset.raw_id)}
 			        ${h.select('diff1',c.file.last_changeset.raw_id,c.file_history)}
-			        ${h.submit('diff','diff to revision',class_="ui-button-small")}
-			        ${h.submit('show_rev','show at revision',class_="ui-button-small")}
+			        ${h.submit('diff','diff to revision',class_="ui-btn")}
+			        ${h.submit('show_rev','show at revision',class_="ui-btn")}
 			        ${h.end_form()}
 			        </div>
 			    </dd>					
@@ -50,12 +50,12 @@
                         <div class="left item">${h.format_byte_size(c.file.size,binary=True)}</div>
                         <div class="left item last">${c.file.mimetype}</div>
                         <div class="buttons">
-                          ${h.link_to(_('show source'),h.url('files_home',repo_name=c.repo_name,revision=c.cs.raw_id,f_path=c.f_path),class_="ui-button-small")}
-                          ${h.link_to(_('show as raw'),h.url('files_raw_home',repo_name=c.repo_name,revision=c.cs.raw_id,f_path=c.f_path),class_="ui-button-small")}           
-                          ${h.link_to(_('download as raw'),h.url('files_rawfile_home',repo_name=c.repo_name,revision=c.cs.raw_id,f_path=c.f_path),class_="ui-button-small")}
+                          ${h.link_to(_('show source'),h.url('files_home',repo_name=c.repo_name,revision=c.cs.raw_id,f_path=c.f_path),class_="ui-btn")}
+                          ${h.link_to(_('show as raw'),h.url('files_raw_home',repo_name=c.repo_name,revision=c.cs.raw_id,f_path=c.f_path),class_="ui-btn")}           
+                          ${h.link_to(_('download as raw'),h.url('files_rawfile_home',repo_name=c.repo_name,revision=c.cs.raw_id,f_path=c.f_path),class_="ui-btn")}
                           % if h.HasRepoPermissionAny('repository.write','repository.admin')(c.repo_name):            
                            % if not c.file.is_binary:
-                            ${h.link_to(_('edit'),h.url('files_edit_home',repo_name=c.repo_name,revision=c.cs.raw_id,f_path=c.f_path),class_="ui-button-small")}
+                            ${h.link_to(_('edit'),h.url('files_edit_home',repo_name=c.repo_name,revision=c.cs.raw_id,f_path=c.f_path),class_="ui-btn")}
                            % endif
                           % endif            
                         </div>

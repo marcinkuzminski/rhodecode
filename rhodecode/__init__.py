@@ -52,7 +52,7 @@ def get_version():
 
 BACKENDS = {
     'hg': 'Mercurial repository',
-    #'git': 'Git repository',
+    'git': 'Git repository',
 }
 
 CELERY_ON = False

@@ -89,7 +89,7 @@
                 <div style="padding:5px 0px 10px 0px;">
                 ${_('No repositories yet')} 
                 %if h.HasPermissionAny('hg.admin','hg.create.repository')():
-                    ${h.link_to(_('create one now'),h.url('admin_settings_create_repository'),class_="ui-button-small")}
+                    ${h.link_to(_('create one now'),h.url('admin_settings_create_repository'),class_="ui-btn")}
                 %endif
                 </div>
              %endif             

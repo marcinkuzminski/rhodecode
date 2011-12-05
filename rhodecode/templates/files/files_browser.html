@@ -11,10 +11,10 @@
 			${h.form(h.url.current())}
 			<div class="info_box">
 	          <span class="rev">${_('view')}@rev</span> 
-	          <a class="ui-button-small" href="${c.url_prev}" title="${_('previous revision')}">&laquo;</a>
+	          <a class="ui-btn" href="${c.url_prev}" title="${_('previous revision')}">&laquo;</a>
 	          ${h.text('at_rev',value=c.changeset.revision,size=5)}
-	          <a class="ui-button-small" href="${c.url_next}" title="${_('next revision')}">&raquo;</a>
-	          ## ${h.submit('view',_('view'),class_="ui-button-small")}
+	          <a class="ui-btn" href="${c.url_next}" title="${_('next revision')}">&raquo;</a>
+	          ## ${h.submit('view',_('view'),class_="ui-btn")}
 		    </div>           
 			${h.end_form()}
 		</div>
@@ -24,11 +24,11 @@
 	    </div>
         <div class="browser-search">
               <div id="search_activate_id" class="search_activate">
-                  <a class="ui-button-small" id="filter_activate" href="#">${_('search file list')}</a>
+                  <a class="ui-btn" id="filter_activate" href="#">${_('search file list')}</a>
               </div>
               % if h.HasRepoPermissionAny('repository.write','repository.admin')(c.repo_name):            
                     <div id="add_node_id" class="add_node">
-                        <a class="ui-button-small" href="${h.url('files_add_home',repo_name=c.repo_name,revision=c.changeset.raw_id,f_path=c.f_path)}">${_('add new file')}</a>
+                        <a class="ui-btn" href="${h.url('files_add_home',repo_name=c.repo_name,revision=c.changeset.raw_id,f_path=c.f_path)}">${_('add new file')}</a>
                     </div>
               % endif               
         <div>

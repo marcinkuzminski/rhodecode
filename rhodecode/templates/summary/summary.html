@@ -135,7 +135,7 @@
                 %else:
                    ${_('Statistics are disabled for this repository')} 
                    %if h.HasPermissionAll('hg.admin')('enable stats on from summary'):
-                        ${h.link_to(_('enable'),h.url('edit_repo',repo_name=c.repo_name),class_="ui-button-small")}
+                        ${h.link_to(_('enable'),h.url('edit_repo',repo_name=c.repo_name),class_="ui-btn")}
                    %endif
                 %endif		   
 			  </div>
@@ -151,11 +151,11 @@
 		        %elif c.enable_downloads is False:
 		          ${_('Downloads are disabled for this repository')}
                     %if h.HasPermissionAll('hg.admin')('enable downloads on from summary'):
-                        ${h.link_to(_('enable'),h.url('edit_repo',repo_name=c.repo_name),class_="ui-button-small")}
+                        ${h.link_to(_('enable'),h.url('edit_repo',repo_name=c.repo_name),class_="ui-btn")}
                     %endif  		          
 		        %else:
 			        ${h.select('download_options',c.rhodecode_repo.get_changeset().raw_id,c.download_options)}
-			             <span id="${'zip_link'}">${h.link_to('Download as zip',h.url('files_archive_home',repo_name=c.dbrepo.repo_name,fname='tip.zip'),class_="archive_icon ui-button-small")}</span>
+			             <span id="${'zip_link'}">${h.link_to('Download as zip',h.url('files_archive_home',repo_name=c.dbrepo.repo_name,fname='tip.zip'),class_="archive_icon ui-btn")}</span>
                     <span style="vertical-align: bottom">
                         <input id="archive_subrepos" type="checkbox" name="subrepos"/> <span class="tooltip" title="${_('Check this to download archive with subrepos')}" >${_('with subrepos')}</span>
                     </span>
@@ -178,7 +178,7 @@
          %if c.no_data:
            ${c.no_data_msg}
            %if h.HasPermissionAll('hg.admin')('enable stats on from summary'):
-                ${h.link_to(_('enable'),h.url('edit_repo',repo_name=c.repo_name),class_="ui-button-small")}
+                ${h.link_to(_('enable'),h.url('edit_repo',repo_name=c.repo_name),class_="ui-btn")}
            %endif         
         %else:
             ${_('Loaded in')} ${c.stats_percentage} %
@@ -242,7 +242,7 @@ YUE.on(clone_url,'click',function(e){
 
 var tmpl_links = {};
 %for cnt,archive in enumerate(c.rhodecode_repo._get_archives()):
-  tmpl_links["${archive['type']}"] = '${h.link_to('__NAME__', h.url('files_archive_home',repo_name=c.dbrepo.repo_name, fname='__CS__'+archive['extension'],subrepos='__SUB__'),class_='archive_icon ui-button-small')}';
+  tmpl_links["${archive['type']}"] = '${h.link_to('__NAME__', h.url('files_archive_home',repo_name=c.dbrepo.repo_name, fname='__CS__'+archive['extension'],subrepos='__SUB__'),class_='archive_icon ui-btn')}';
 %endfor
 
 YUE.on(['download_options','archive_subrepos'],'change',function(e){

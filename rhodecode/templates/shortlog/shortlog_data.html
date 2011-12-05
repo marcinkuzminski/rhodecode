@@ -8,8 +8,6 @@
 		<th class="left">${_('revision')}</th>
 		<th class="left">${_('branch')}</th>
 		<th class="left">${_('tags')}</th>
-		<th class="left">${_('links')}</th>
-		
 	</tr>
 %for cnt,cs in enumerate(c.repo_changesets):
 	<tr class="parity${cnt%2}">
@@ -22,7 +20,7 @@
                       ${h.age(cs.date)}</span>
         </td>        	
 		<td title="${cs.author}">${h.person(cs.author)}</td>
-		<td>r${cs.revision}:${h.short_id(cs.raw_id)}</td>
+		<td><a href="${h.url('files_home',repo_name=c.repo_name,revision=cs.raw_id)}">r${cs.revision}:${h.short_id(cs.raw_id)}</a></td>
 		<td>
 			<span class="logtags">
 				<span class="branchtag">${cs.branch}</span>
@@ -34,11 +32,6 @@
 					<span class="tagtag">${tag}</span>
 				%endfor
 			</span>
-		</td>
-		<td class="nowrap">
-		${h.link_to(_('changeset'),h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id),class_="ui-button-small xsmall")}
-		<span style="color:#515151">|</span>
-		${h.link_to(_('files'),h.url('files_home',repo_name=c.repo_name,revision=cs.raw_id),class_="ui-button-small xsmall")}
 		</td>
 	</tr>
 %endfor
@@ -63,7 +56,7 @@ ${c.repo_changesets.pager('$link_previous ~2~ $link_next')}
 <h4>${_('Add or upload files directly via RhodeCode')}</h4>
 <div style="margin: 20px 30px;">
   <div id="add_node_id" class="add_node">
-      <a class="ui-button-small" href="${h.url('files_add_home',repo_name=c.repo_name,revision=0,f_path='')}">${_('add new file')}</a>
+      <a class="ui-btn" href="${h.url('files_add_home',repo_name=c.repo_name,revision=0,f_path='')}">${_('add new file')}</a>
   </div>
 </div>
 %endif

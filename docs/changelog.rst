@@ -22,6 +22,7 @@ news
   alternative clone url.
 - enabled largefiles extension by default
 - optimized summary file pages and saved a lot of unused space in them
+- #239 option to manually mark repository as fork
    
 fixes
 -----

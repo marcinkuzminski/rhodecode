@@ -22,7 +22,7 @@
   	<div class="text">
   		%if h.HasPermissionAny('hg.admin', 'repository.admin')() or co.author.user_id == c.rhodecode_user.user_id:
   			<div class="buttons">
-  				<span onClick="deleteComment(${co.comment_id})" class="delete-comment ui-button-small">${_('Delete')}</span>
+  				<span onClick="deleteComment(${co.comment_id})" class="delete-comment ui-btn">${_('Delete')}</span>
   			</div>
   		%endif
   		${h.rst(co.text)|n}
@@ -45,8 +45,8 @@
       <div class="comment-button">
       <input type="hidden" name="f_path" value="{0}">
       <input type="hidden" name="line" value="{1}">            
-      ${h.submit('save', _('Comment'), class_='ui-button-small')}
-      ${h.reset('hide-inline-form', _('Hide'), class_='ui-button-small hide-inline-form')}
+      ${h.submit('save', _('Comment'), class_='ui-btn')}
+      ${h.reset('hide-inline-form', _('Hide'), class_='ui-btn hide-inline-form')}
       </div>
       ${h.end_form()}
   %else:
@@ -57,7 +57,7 @@
           </div>
       </div>
       <div class="comment-button">
-      ${h.reset('hide-inline-form', _('Hide'), class_='ui-button-small hide-inline-form')}
+      ${h.reset('hide-inline-form', _('Hide'), class_='ui-btn hide-inline-form')}
       </div>
       ${h.end_form()}  
   %endif      

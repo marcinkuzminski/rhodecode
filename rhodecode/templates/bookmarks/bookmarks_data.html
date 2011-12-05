@@ -21,9 +21,9 @@
 	        <td title="${book[1].author}">${h.person(book[1].author)}</td>
 	        <td>r${book[1].revision}:${h.short_id(book[1].raw_id)}</td>
 			<td class="nowrap">
-			${h.link_to(_('changeset'),h.url('changeset_home',repo_name=c.repo_name,revision=book[1].raw_id),class_="ui-button-small xsmall")}
+			${h.link_to(_('changeset'),h.url('changeset_home',repo_name=c.repo_name,revision=book[1].raw_id),class_="ui-btn xsmall")}
 			<span style="color:#515151">|</span>
-			${h.link_to(_('files'),h.url('files_home',repo_name=c.repo_name,revision=book[1].raw_id),class_="ui-button-small xsmall")}
+			${h.link_to(_('files'),h.url('files_home',repo_name=c.repo_name,revision=book[1].raw_id),class_="ui-btn xsmall")}
 			</td>
 		</tr>	
 		%endfor
