@@ -117,6 +117,18 @@ class ScmModel(BaseModel):
     Generic Scm Model
     """
 
+    def __get_repo(self, instance):
+        cls = Repository
+        if isinstance(instance, cls):
+            return instance
+        elif isinstance(instance, int) or str(instance).isdigit():
+            return cls.get(instance)
+        elif isinstance(instance, basestring):
+            return cls.get_by_repo_name(instance)
+        elif instance:
+            raise Exception('given object must be int, basestr or Instance'
+                            ' of %s got %s' % (type(cls), type(instance)))
+
     @LazyProperty
     def repos_path(self):
         """
@@ -278,6 +290,13 @@ class ScmModel(BaseModel):
 
         return self.sa.query(Repository)\
                 .filter(Repository.fork_id == repo_id).count()
+
+    def mark_as_fork(self, repo, fork, user):
+        repo = self.__get_repo(repo)
+        fork = self.__get_repo(fork)
+        repo.fork = fork
+        self.sa.add(repo)
+        return repo
 
     def pull_changes(self, repo_name, username):
         dbrepo = Repository.get_by_repo_name(repo_name)

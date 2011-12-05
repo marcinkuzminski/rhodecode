@@ -89,5 +89,4 @@ class BaseModel(object):
         else:
             if instance:
                 raise Exception('given object must be int or Instance'
-                                ' of %s got %s' % (type(cls),
-                                                   type(instance)))
+                                ' of %s got %s' % (type(cls), type(instance)))

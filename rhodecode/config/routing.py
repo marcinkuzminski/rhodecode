@@ -116,19 +116,21 @@ def make_map(config):
 
         #settings actions
         m.connect('repo_stats', "/repos_stats/{repo_name:.*}",
-             action="repo_stats", conditions=dict(method=["DELETE"],
-                                                        function=check_repo))
+                  action="repo_stats", conditions=dict(method=["DELETE"],
+                                                       function=check_repo))
         m.connect('repo_cache', "/repos_cache/{repo_name:.*}",
-             action="repo_cache", conditions=dict(method=["DELETE"],
-                                                        function=check_repo))
-        m.connect('repo_public_journal',
-                  "/repos_public_journal/{repo_name:.*}",
+                  action="repo_cache", conditions=dict(method=["DELETE"],
+                                                       function=check_repo))
+        m.connect('repo_public_journal',"/repos_public_journal/{repo_name:.*}",
                   action="repo_public_journal", conditions=dict(method=["PUT"],
-                  function=check_repo))
-        m.connect('repo_pull', "/repo_pull/{repo_name:.*}",
-             action="repo_pull", conditions=dict(method=["PUT"],
                                                         function=check_repo))
-
+        m.connect('repo_pull', "/repo_pull/{repo_name:.*}",
+                  action="repo_pull", conditions=dict(method=["PUT"],
+                                                      function=check_repo))
+        m.connect('repo_as_fork', "/repo_as_fork/{repo_name:.*}",
+                  action="repo_as_fork", conditions=dict(method=["PUT"],
+                                                      function=check_repo))
+        
     with rmap.submapper(path_prefix=ADMIN_PREFIX,
                         controller='admin/repos_groups') as m:
         m.connect("repos_groups", "/repos_groups",

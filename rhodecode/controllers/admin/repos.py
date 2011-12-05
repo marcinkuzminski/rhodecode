@@ -111,6 +111,10 @@ class ReposController(BaseController):
                                             c.repo_last_rev) * 100)
 
         defaults = RepoModel()._get_defaults(repo_name)
+        
+        c.repos_list = [('', _('--REMOVE FORK--'))]
+        c.repos_list += [(x.repo_id, x.repo_name) for x in
+                   Repository.query().order_by(Repository.repo_name).all()]
         return defaults
 
     @HasPermissionAllDecorator('hg.admin')
@@ -375,6 +379,28 @@ class ReposController(BaseController):
             h.flash(_('Pulled from remote location'), category='success')
         except Exception, e:
             h.flash(_('An error occurred during pull from remote location'),
+                    category='error')
+
+        return redirect(url('edit_repo', repo_name=repo_name))
+
+    @HasPermissionAllDecorator('hg.admin')
+    def repo_as_fork(self, repo_name):
+        """
+        Mark given repository as a fork of another
+        
+        :param repo_name:
+        """
+        try:
+            fork_id = request.POST.get('id_fork_of')
+            repo = ScmModel().mark_as_fork(repo_name, fork_id,
+                                    self.rhodecode_user.username)
+            fork = repo.fork.repo_name if repo.fork else _('Nothing')
+            Session.commit()
+            h.flash(_('Marked repo %s as fork of %s' % (repo_name,fork)), 
+                    category='success')
+        except Exception, e:
+            raise
+            h.flash(_('An error occurred during this operation'),
                     category='error')
 
         return redirect(url('edit_repo', repo_name=repo_name))

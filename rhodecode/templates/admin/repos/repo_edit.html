@@ -131,14 +131,13 @@
         ${h.form(url('repo_stats', repo_name=c.repo_info.repo_name),method='delete')}
         <div class="form">
            <div class="fields">
-               ${h.submit('reset_stats_%s' % c.repo_info.repo_name,_('Reset current statistics'),class_="refresh_icon action_button",onclick="return confirm('"+_('Confirm to remove current statistics')+"');")}
-               <div class="field" style="border:none">
+               ${h.submit('reset_stats_%s' % c.repo_info.repo_name,_('Reset current statistics'),class_="ui-btn",onclick="return confirm('"+_('Confirm to remove current statistics')+"');")}
+               <div class="field" style="border:none;color:#888">
                <ul>
                     <li>${_('Fetched to rev')}: ${c.stats_revision}/${c.repo_last_rev}</li>
                     <li>${_('Percentage of stats gathered')}: ${c.stats_percentage} %</li>
                </ul>
                </div>
-               
            </div>
         </div>                    
         ${h.end_form()}
@@ -148,7 +147,7 @@
         ${h.form(url('repo_pull', repo_name=c.repo_info.repo_name),method='put')}
         <div class="form">
            <div class="fields">
-               ${h.submit('remote_pull_%s' % c.repo_info.repo_name,_('Pull changes from remote location'),class_="pull_icon action_button",onclick="return confirm('"+_('Confirm to pull changes from remote side')+"');")}
+               ${h.submit('remote_pull_%s' % c.repo_info.repo_name,_('Pull changes from remote location'),class_="ui-btn",onclick="return confirm('"+_('Confirm to pull changes from remote side')+"');")}
                <div class="field" style="border:none">
                <ul>
                     <li><a href="${c.repo_info.clone_uri}">${c.repo_info.clone_uri}</a></li>
@@ -163,7 +162,7 @@
         ${h.form(url('repo_cache', repo_name=c.repo_info.repo_name),method='delete')}
         <div class="form">
            <div class="fields">
-               ${h.submit('reset_cache_%s' % c.repo_info.repo_name,_('Invalidate repository cache'),class_="refresh_icon action_button",onclick="return confirm('"+_('Confirm to invalidate repository cache')+"');")}
+               ${h.submit('reset_cache_%s' % c.repo_info.repo_name,_('Invalidate repository cache'),class_="ui-btn",onclick="return confirm('"+_('Confirm to invalidate repository cache')+"');")}
            </div>
         </div>                    
         ${h.end_form()}
@@ -171,14 +170,20 @@
         <h3>${_('Public journal')}</h3>
         ${h.form(url('repo_public_journal', repo_name=c.repo_info.repo_name),method='put')}
         <div class="form">
-            <div class="fields">
                 ${h.hidden('auth_token',str(h.get_token()))}
+                <div class="field">
                 %if c.in_public_journal:
-                    ${h.submit('set_public_%s' % c.repo_info.repo_name,_('Remove from public journal'),class_="stop_following_icon action_button")}
+                    ${h.submit('set_public_%s' % c.repo_info.repo_name,_('Remove from public journal'),class_="ui-btn")}
                 %else:
-		            ${h.submit('set_public_%s' % c.repo_info.repo_name,_('Add to public journal'),class_="start_following_icon action_button")}
+		            ${h.submit('set_public_%s' % c.repo_info.repo_name,_('Add to public journal'),class_="ui-btn")}
 		        %endif
-	         </div>        
+                </div>
+               <div class="field" style="border:none;color:#888">
+               <ul>
+                    <li>${_('''All actions made on this repository will be accessible to everyone in public journal''')}
+                    </li>
+               </ul>
+               </div>                  
         </div>
         ${h.end_form()}
         
@@ -186,8 +191,30 @@
         ${h.form(url('repo', repo_name=c.repo_info.repo_name),method='delete')}
         <div class="form">
            <div class="fields">
-               ${h.submit('remove_%s' % c.repo_info.repo_name,_('Remove this repository'),class_="delete_icon action_button",onclick="return confirm('"+_('Confirm to delete this repository')+"');")}
+               ${h.submit('remove_%s' % c.repo_info.repo_name,_('Remove this repository'),class_="ui-btn red",onclick="return confirm('"+_('Confirm to delete this repository')+"');")}
            </div>
+           <div class="field" style="border:none;color:#888">
+           <ul>
+                <li>${_('''This repository will be renamed in a special way in order to be unaccesible for RhodeCode and VCS systems. 
+                         If you need fully delete it from filesystem please do it manually''')}
+                </li>
+           </ul>
+           </div>           
+        </div>                    
+        ${h.end_form()}
+
+        <h3>${_('Set as fork')}</h3>
+        ${h.form(url('repo_as_fork', repo_name=c.repo_info.repo_name),method='put')}
+        <div class="form">
+           <div class="fields">
+               ${h.select('id_fork_of','',c.repos_list,class_="medium")}
+               ${h.submit('set_as_fork_%s' % c.repo_info.repo_name,_('set'),class_="ui-btn",)}
+           </div>
+               <div class="field" style="border:none;color:#888">
+               <ul>
+                    <li>${_('''Manually set this repository as a fork of another''')}</li>
+               </ul>
+               </div>              
         </div>                    
         ${h.end_form()}
     
