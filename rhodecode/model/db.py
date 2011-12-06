@@ -82,8 +82,8 @@ class ModelSerializer(json.JSONEncoder):
             return json.JSONEncoder.default(self, obj)
 
 class BaseModel(object):
-    """Base Model for all classess
-
+    """
+    Base Model for all classess
     """
 
     @classmethod
@@ -91,13 +91,20 @@ class BaseModel(object):
         """return column names for this model """
         return class_mapper(cls).c.keys()
 
-    def get_dict(self):
-        """return dict with keys and values corresponding
-        to this model data """
+    def get_dict(self, serialized=False):
+        """
+        return dict with keys and values corresponding
+        to this model data 
+        """
 
         d = {}
         for k in self._get_keys():
             d[k] = getattr(self, k)
+        
+        # also use __json__() if present to get additional fields
+        if hasattr(self, '__json__'):
+            for k,val in self.__json__().iteritems():
+                d[k] = val 
         return d
 
     def get_appstruct(self):
@@ -348,6 +355,11 @@ class User(Base, BaseModel):
         self.last_login = datetime.datetime.now()
         Session.add(self)
         log.debug('updated user %s lastlogin', self.username)
+
+
+    def __json__(self):
+        return dict(email=self.email,
+                    full_name=self.full_name)
 
 
 class UserLog(Base, BaseModel):

@@ -281,9 +281,10 @@ class UserModel(BaseModel):
             log.error(traceback.format_exc())
             raise
 
-    def delete(self, user_id):
+    def delete(self, user):
+        user = self.__get_user(user)
+        
         try:
-            user = self.get(user_id, cache=False)
             if user.username == 'default':
                 raise DefaultUserException(
                                 _("You can't remove this user since it's"
@@ -470,35 +471,37 @@ class UserModel(BaseModel):
 
         return user
 
-
-
     def has_perm(self, user, perm):
         if not isinstance(perm, Permission):
-            raise Exception('perm needs to be an instance of Permission class')
+            raise Exception('perm needs to be an instance of Permission class '
+                            'got %s instead' % type(perm))
 
         user = self.__get_user(user)
 
-        return UserToPerm.query().filter(UserToPerm.user == user.user)\
+        return UserToPerm.query().filter(UserToPerm.user == user)\
             .filter(UserToPerm.permission == perm).scalar() is not None
 
     def grant_perm(self, user, perm):
         if not isinstance(perm, Permission):
-            raise Exception('perm needs to be an instance of Permission class')
+            raise Exception('perm needs to be an instance of Permission class '
+                            'got %s instead' % type(perm))
 
         user = self.__get_user(user)
 
         new = UserToPerm()
-        new.user = user.user
+        new.user = user
         new.permission = perm
         self.sa.add(new)
 
 
     def revoke_perm(self, user, perm):
         if not isinstance(perm, Permission):
-            raise Exception('perm needs to be an instance of Permission class')
+            raise Exception('perm needs to be an instance of Permission class '
+                            'got %s instead' % type(perm))
         
         user = self.__get_user(user)
         
-        obj = UserToPerm.query().filter(UserToPerm.user == user.user)\
-                .filter(UserToPerm.permission == perm).one()
-        self.sa.delete(obj)
+        obj = UserToPerm.query().filter(UserToPerm.user == user)\
+                .filter(UserToPerm.permission == perm).scalar()
+        if obj:
+            self.sa.delete(obj)

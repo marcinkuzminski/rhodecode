@@ -197,7 +197,7 @@ class UsersController(BaseController):
             user_model.grant_perm(id, perm)
             h.flash(_("Granted 'repository create' permission to user"),
                     category='success')
-
+            Session.commit()
         else:
             perm = Permission.get_by_key('hg.create.repository')
             user_model.revoke_perm(id, perm)
@@ -206,5 +206,5 @@ class UsersController(BaseController):
             user_model.grant_perm(id, perm)
             h.flash(_("Revoked 'repository create' permission to user"),
                     category='success')
-
+            Session.commit()
         return redirect(url('edit_user', id=id))

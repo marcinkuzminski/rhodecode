@@ -31,9 +31,13 @@ time.tzset()
 
 log = logging.getLogger(__name__)
 
-__all__ = ['environ', 'url', 'TestController', 'TESTS_TMP_PATH', 'HG_REPO',
-           'GIT_REPO', 'NEW_HG_REPO', 'NEW_GIT_REPO', 'HG_FORK', 'GIT_FORK',
-           'TEST_USER_ADMIN_LOGIN', 'TEST_USER_ADMIN_PASS' ]
+__all__ = [
+    'environ', 'url', 'TestController', 'TESTS_TMP_PATH', 'HG_REPO',
+    'GIT_REPO', 'NEW_HG_REPO', 'NEW_GIT_REPO', 'HG_FORK', 'GIT_FORK',
+    'TEST_USER_ADMIN_LOGIN', 'TEST_USER_REGULAR_LOGIN', 'TEST_USER_REGULAR_PASS',
+    'TEST_USER_REGULAR_EMAIL', 'TEST_USER_REGULAR2_LOGIN',
+    'TEST_USER_REGULAR2_PASS', 'TEST_USER_REGULAR2_EMAIL'
+]
 
 # Invoke websetup with the current config file
 # SetupCommand('setup-app').run([config_file])
@@ -48,6 +52,16 @@ environ = {}
 TESTS_TMP_PATH = jn('/', 'tmp', 'rc_test_%s' % _RandomNameSequence().next())
 TEST_USER_ADMIN_LOGIN = 'test_admin'
 TEST_USER_ADMIN_PASS = 'test12'
+TEST_USER_ADMIN_EMAIL = 'test_admin@mail.com'
+
+TEST_USER_REGULAR_LOGIN = 'test_regular'
+TEST_USER_REGULAR_PASS = 'test12'
+TEST_USER_REGULAR_EMAIL = 'test_regular@mail.com'
+
+TEST_USER_REGULAR2_LOGIN = 'test_regular2'
+TEST_USER_REGULAR2_PASS = 'test12'
+TEST_USER_REGULAR2_EMAIL = 'test_regular2@mail.com'
+
 HG_REPO = 'vcs_test_hg'
 GIT_REPO = 'vcs_test_git'
 

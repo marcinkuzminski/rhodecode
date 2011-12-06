@@ -5,7 +5,7 @@ from rhodecode.tests import *
 from rhodecode.model.repos_group import ReposGroupModel
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.db import RepoGroup, User, Notification, UserNotification, \
-    UsersGroup, UsersGroupMember
+    UsersGroup, UsersGroupMember, Permission
 from sqlalchemy.exc import IntegrityError
 from rhodecode.model.user import UserModel
 
@@ -158,7 +158,10 @@ class TestReposGroups(unittest.TestCase):
         self.assertEqual(r.repo_name, os.path.join('g2', 'g1', r.just_name))
 
 class TestUser(unittest.TestCase):
-
+    def __init__(self, methodName='runTest'):
+        Session.remove()
+        super(TestUser, self).__init__(methodName=methodName)
+        
     def test_create_and_remove(self):
         usr = UserModel().create_or_update(username=u'test_user', password=u'qweqwe',
                                      email=u'u232@rhodecode.org',
@@ -184,6 +187,7 @@ class TestUser(unittest.TestCase):
 class TestNotifications(unittest.TestCase):
 
     def __init__(self, methodName='runTest'):
+        Session.remove()
         self.u1 = UserModel().create_or_update(username=u'u1',
                                         password=u'qweqwe',
                                         email=u'u1@rhodecode.org',
@@ -214,6 +218,8 @@ class TestNotifications(unittest.TestCase):
         Session.commit()
         self.assertEqual(Notification.query().all(), [])
 
+    def tearDown(self):
+        self._clean_notifications()
 
     def test_create_notification(self):
         self.assertEqual([], Notification.query().all())
@@ -239,7 +245,6 @@ class TestNotifications(unittest.TestCase):
         self.assertEqual(len(unotification), len(usrs))
         self.assertEqual([x.user.user_id for x in unotification], usrs)
 
-        self._clean_notifications()
 
     def test_user_notifications(self):
         self.assertEqual([], Notification.query().all())
@@ -257,7 +262,6 @@ class TestNotifications(unittest.TestCase):
 
         self.assertEqual(sorted([x.notification for x in u3.notifications]),
                          sorted([notification2, notification1]))
-        self._clean_notifications()
 
     def test_delete_notifications(self):
         self.assertEqual([], Notification.query().all())
@@ -280,7 +284,6 @@ class TestNotifications(unittest.TestCase):
                                              == notification).all()
         self.assertEqual(un, [])
 
-        self._clean_notifications()
 
     def test_delete_association(self):
 
@@ -329,8 +332,6 @@ class TestNotifications(unittest.TestCase):
                             .scalar()
         self.assertNotEqual(u2notification, None)
 
-        self._clean_notifications()
-
     def test_notification_counter(self):
         self._clean_notifications()
         self.assertEqual([], Notification.query().all())
@@ -359,4 +360,51 @@ class TestNotifications(unittest.TestCase):
                          .get_unread_cnt_for_user(self.u2), 1)
         self.assertEqual(NotificationModel()
                          .get_unread_cnt_for_user(self.u3), 2)
-        self._clean_notifications()
+
+class TestUsers(unittest.TestCase):
+
+    def __init__(self, methodName='runTest'):
+        super(TestUsers, self).__init__(methodName=methodName)
+
+    def setUp(self):
+        self.u1 = UserModel().create_or_update(username=u'u1',
+                                        password=u'qweqwe',
+                                        email=u'u1@rhodecode.org',
+                                        name=u'u1', lastname=u'u1')        
+
+    def tearDown(self):
+        perm = Permission.query().all()
+        for p in perm:
+            UserModel().revoke_perm(self.u1, p)
+            
+        UserModel().delete(self.u1)
+        Session.commit()
+
+    def test_add_perm(self):
+        perm = Permission.query().all()[0]
+        UserModel().grant_perm(self.u1, perm)
+        Session.commit()
+        self.assertEqual(UserModel().has_perm(self.u1, perm), True)
+
+    def test_has_perm(self):
+        perm = Permission.query().all()
+        for p in perm:
+            has_p = UserModel().has_perm(self.u1, p)
+            self.assertEqual(False, has_p)
+
+    def test_revoke_perm(self):
+        perm = Permission.query().all()[0]
+        UserModel().grant_perm(self.u1, perm)
+        Session.commit()
+        self.assertEqual(UserModel().has_perm(self.u1, perm), True)
+
+        #revoke
+        UserModel().revoke_perm(self.u1, perm)
+        Session.commit()
+        self.assertEqual(UserModel().has_perm(self.u1, perm),False)
+        
+    
+
+        
+
+

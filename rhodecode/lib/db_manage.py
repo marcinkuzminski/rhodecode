@@ -245,12 +245,20 @@ class DbManage(object):
             self.create_user(username, password, email, True)
         else:
             log.info('creating admin and regular test users')
-            self.create_user('test_admin', 'test12',
-                             'test_admin@mail.com', True)
-            self.create_user('test_regular', 'test12',
-                             'test_regular@mail.com', False)
-            self.create_user('test_regular2', 'test12',
-                             'test_regular2@mail.com', False)
+            from rhodecode.tests import TEST_USER_ADMIN_LOGIN,\
+            TEST_USER_ADMIN_PASS ,TEST_USER_ADMIN_EMAIL,TEST_USER_REGULAR_LOGIN,\
+            TEST_USER_REGULAR_PASS,TEST_USER_REGULAR_EMAIL,\
+            TEST_USER_REGULAR2_LOGIN,TEST_USER_REGULAR2_PASS,\
+            TEST_USER_REGULAR2_EMAIL
+
+            self.create_user(TEST_USER_ADMIN_LOGIN, TEST_USER_ADMIN_PASS,
+                             TEST_USER_ADMIN_EMAIL, True)
+            
+            self.create_user(TEST_USER_REGULAR_LOGIN, TEST_USER_REGULAR_PASS,
+                             TEST_USER_REGULAR_EMAIL, False)
+            
+            self.create_user(TEST_USER_REGULAR2_LOGIN, TEST_USER_REGULAR2_PASS,
+                             TEST_USER_REGULAR2_EMAIL, False)
 
     def create_ui_settings(self):
         """Creates ui settings, fills out hooks
