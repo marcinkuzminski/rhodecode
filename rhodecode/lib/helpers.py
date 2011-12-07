@@ -19,11 +19,11 @@ from webhelpers.html import literal, HTML, escape
 from webhelpers.html.tools import *
 from webhelpers.html.builder import make_tag
 from webhelpers.html.tags import auto_discovery_link, checkbox, css_classes, \
-    end_form, file, form, hidden, image, javascript_link, link_to, link_to_if, \
-    link_to_unless, ol, required_legend, select, stylesheet_link, submit, text, \
-    password, textarea, title, ul, xml_declaration, radio
-from webhelpers.html.tools import auto_link, button_to, highlight, js_obfuscate, \
-    mail_to, strip_links, strip_tags, tag_re
+    end_form, file, form, hidden, image, javascript_link, link_to, \
+    link_to_if, link_to_unless, ol, required_legend, select, stylesheet_link, \
+    submit, text, password, textarea, title, ul, xml_declaration, radio
+from webhelpers.html.tools import auto_link, button_to, highlight, \
+    js_obfuscate, mail_to, strip_links, strip_tags, tag_re
 from webhelpers.number import format_byte_size, format_bit_size
 from webhelpers.pylonslib import Flash as _Flash
 from webhelpers.pylonslib.secure_form import secure_form
@@ -105,10 +105,14 @@ class _FilesBreadCrumbs(object):
         paths_l = paths.split('/')
         for cnt, p in enumerate(paths_l):
             if p != '':
-                url_l.append(link_to(p, url('files_home',
-                                            repo_name=repo_name,
-                                            revision=rev,
-                                            f_path='/'.join(paths_l[:cnt + 1]))))
+                url_l.append(link_to(p, 
+                                     url('files_home',
+                                         repo_name=repo_name,
+                                         revision=rev,
+                                         f_path='/'.join(paths_l[:cnt + 1])
+                                         )
+                                     )
+                             )
 
         return literal('/'.join(url_l))
 
@@ -292,7 +296,6 @@ from rhodecode.model.db import User
 age = lambda  x:_age(x)
 capitalize = lambda x: x.capitalize()
 email = author_email
-person = lambda x: author_name(x)
 short_id = lambda x: x[:12]
 hide_credentials = lambda x: ''.join(credentials_filter(x))
 
@@ -556,7 +559,8 @@ class RepoPage(Page):
                                             self.items_per_page))
             self.last_page = self.first_page + self.page_count - 1
 
-            # Make sure that the requested page number is the range of valid pages
+            # Make sure that the requested page number is the range of 
+            # valid pages
             if self.page > self.last_page:
                 self.page = self.last_page
             elif self.page < self.first_page:
@@ -698,7 +702,8 @@ def fancy_file_stats(stats):
 def urlify_text(text):
     import re
 
-    url_pat = re.compile(r'(http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+)')
+    url_pat = re.compile(r'''(http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]'''
+                         '''|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+)''')
 
     def url_func(match_obj):
         url_full = match_obj.groups()[0]
@@ -708,4 +713,5 @@ def urlify_text(text):
 
 
 def rst(source):
-    return literal('<div class="rst-block">%s</div>' % MarkupRenderer.rst(source))
+    return literal('<div class="rst-block">%s</div>' % 
+                   MarkupRenderer.rst(source))
