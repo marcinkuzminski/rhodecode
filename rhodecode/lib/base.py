@@ -4,6 +4,9 @@ Provides the BaseController class for subclassing.
 """
 import logging
 import time
+
+from paste.auth.basic import AuthBasicAuthenticator
+
 from pylons import config, tmpl_context as c, request, session, url
 from pylons.controllers import WSGIController
 from pylons.controllers.util import redirect
@@ -12,8 +15,9 @@ from pylons.templating import render_mako as render
 from rhodecode import __version__, BACKENDS
 
 from rhodecode.lib import str2bool
-from rhodecode.lib.auth import AuthUser, get_container_username
-from rhodecode.lib.utils import get_repo_slug
+from rhodecode.lib.auth import AuthUser, get_container_username, authfunc,\
+    HasPermissionAnyMiddleware
+from rhodecode.lib.utils import get_repo_slug, invalidate_cache
 from rhodecode.model import meta
 
 from rhodecode.model.db import Repository
@@ -21,6 +25,60 @@ from rhodecode.model.notification import NotificationModel
 from rhodecode.model.scm import ScmModel
 
 log = logging.getLogger(__name__)
+
+class BaseVCSController(object):
+    
+    def __init__(self, application, config):
+        self.application = application
+        self.config = config
+        # base path of repo locations
+        self.basepath = self.config['base_path']
+        #authenticate this mercurial request using authfunc
+        self.authenticate = AuthBasicAuthenticator('', authfunc)
+        self.ipaddr = '0.0.0.0'
+    
+    def _invalidate_cache(self, repo_name):
+        """
+        Set's cache for this repository for invalidation on next access
+        
+        :param repo_name: full repo name, also a cache key
+        """
+        invalidate_cache('get_repo_cached_%s' % repo_name)
+                
+    def _check_permission(self, action, user, repo_name):
+        """
+        Checks permissions using action (push/pull) user and repository
+        name
+
+        :param action: push or pull action
+        :param user: user instance
+        :param repo_name: repository name
+        """
+        if action == 'push':
+            if not HasPermissionAnyMiddleware('repository.write',
+                                              'repository.admin')(user,
+                                                                  repo_name):
+                return False
+
+        else:
+            #any other action need at least read permission
+            if not HasPermissionAnyMiddleware('repository.read',
+                                              'repository.write',
+                                              'repository.admin')(user,
+                                                                  repo_name):
+                return False
+
+        return True        
+        
+    def __call__(self, environ, start_response):
+        start = time.time()
+        try:
+            return self._handle_request(environ, start_response)
+        finally:
+            log = logging.getLogger(self.__class__.__name__)
+            log.debug('Request time: %.3fs' % (time.time() - start))
+            meta.Session.remove()
+
 
 class BaseController(WSGIController):
 

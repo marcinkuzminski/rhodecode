@@ -30,7 +30,6 @@ import traceback
 
 from dulwich import server as dulserver
 
-
 class SimpleGitUploadPackHandler(dulserver.UploadPackHandler):
 
     def handle(self):
@@ -66,12 +65,12 @@ dulserver.DEFAULT_HANDLERS = {
 from dulwich.repo import Repo
 from dulwich.web import HTTPGitApplication
 
-from paste.auth.basic import AuthBasicAuthenticator
 from paste.httpheaders import REMOTE_USER, AUTH_TYPE
 
 from rhodecode.lib import safe_str
-from rhodecode.lib.auth import authfunc, HasPermissionAnyMiddleware, get_container_username
-from rhodecode.lib.utils import invalidate_cache, is_valid_repo
+from rhodecode.lib.base import BaseVCSController
+from rhodecode.lib.auth import get_container_username
+from rhodecode.lib.utils import is_valid_repo
 from rhodecode.model.db import User
 
 from webob.exc import HTTPNotFound, HTTPForbidden, HTTPInternalServerError
@@ -91,17 +90,9 @@ def is_git(environ):
     return False
 
 
-class SimpleGit(object):
+class SimpleGit(BaseVCSController):
 
-    def __init__(self, application, config):
-        self.application = application
-        self.config = config
-        # base path of repo locations
-        self.basepath = self.config['base_path']
-        #authenticate this mercurial request using authfunc
-        self.authenticate = AuthBasicAuthenticator('', authfunc)
-
-    def __call__(self, environ, start_response):
+    def _handle_request(self, environ, start_response):
         if not is_git(environ):
             return self.application(environ, start_response)
 
@@ -132,9 +123,8 @@ class SimpleGit(object):
         if action in ['pull', 'push']:
             anonymous_user = self.__get_user('default')
             username = anonymous_user.username
-            anonymous_perm = self.__check_permission(action,
-                                                     anonymous_user,
-                                                     repo_name)
+            anonymous_perm = self._check_permission(action,anonymous_user,
+                                                    repo_name)
 
             if anonymous_perm is not True or anonymous_user.active is False:
                 if anonymous_perm is not True:
@@ -179,15 +169,10 @@ class SimpleGit(object):
                                                          start_response)
 
                     #check permissions for this repository
-                    perm = self.__check_permission(action, user,
+                    perm = self._check_permission(action, user,
                                                    repo_name)
                     if perm is not True:
                         return HTTPForbidden()(environ, start_response)
-
-        extras = {'ip': ipaddr,
-                  'username': username,
-                  'action': action,
-                  'repository': repo_name}
 
         #===================================================================
         # GIT REQUEST HANDLING
@@ -203,7 +188,7 @@ class SimpleGit(object):
         try:
             #invalidate cache on push
             if action == 'push':
-                self.__invalidate_cache(repo_name)
+                self._invalidate_cache(repo_name)
 
             app = self.__make_app(repo_name, repo_path)
             return app(environ, start_response)
@@ -224,31 +209,6 @@ class SimpleGit(object):
         gitserve = HTTPGitApplication(backend)
 
         return gitserve
-
-    def __check_permission(self, action, user, repo_name):
-        """
-        Checks permissions using action (push/pull) user and repository
-        name
-
-        :param action: push or pull action
-        :param user: user instance
-        :param repo_name: repository name
-        """
-        if action == 'push':
-            if not HasPermissionAnyMiddleware('repository.write',
-                                              'repository.admin')(user,
-                                                                  repo_name):
-                return False
-
-        else:
-            #any other action need at least read permission
-            if not HasPermissionAnyMiddleware('repository.read',
-                                              'repository.write',
-                                              'repository.admin')(user,
-                                                                  repo_name):
-                return False
-
-        return True
 
     def __get_repository(self, environ):
         """
@@ -285,10 +245,3 @@ class SimpleGit(object):
                                service_cmd if service_cmd else 'other')
         else:
             return 'other'
-
-    def __invalidate_cache(self, repo_name):
-        """we know that some change was made to repositories and we should
-        invalidate the cache to see the changes right away but only for
-        push requests"""
-        invalidate_cache('get_repo_cached_%s' % repo_name)
-
