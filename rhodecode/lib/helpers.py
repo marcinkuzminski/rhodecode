@@ -300,12 +300,13 @@ short_id = lambda x: x[:12]
 hide_credentials = lambda x: ''.join(credentials_filter(x))
 
 
-def email_or_none(x):
-    if email(x) != '':
-        return email(x)
+def email_or_none(author):
+    _email = email(author)
+    if _email != '':
+        return _email
 
     # See if it contains a username we can get an email from
-    user = User.get_by_username(author_name(x), case_insensitive=True,
+    user = User.get_by_username(author_name(author), case_insensitive=True,
                                 cache=True)
     if user is not None:
         return user.email
@@ -313,26 +314,27 @@ def email_or_none(x):
     # No valid email, not a valid user in the system, none!
     return None
 
-def person(x):
-    # Valid email in the attribute passed, see if they're in the system
-
+def person(author):
     # attr to return from fetched user
     person_getter = lambda usr: usr.username
-
-    if email(x) != '':
-        user = User.get_by_email(email(x), case_insensitive=True, cache=True)
+    
+    # Valid email in the attribute passed, see if they're in the system
+    _email = email(author)
+    if _email != '':
+        user = User.get_by_email(_email, case_insensitive=True, cache=True)
         if user is not None:
             return person_getter(user)
-        return email(x)
+        return _email
 
     # Maybe it's a username?
-    user = User.get_by_username(author_name(x), case_insensitive=True,
+    _author = author_name(author)
+    user = User.get_by_username(_author, case_insensitive=True,
                                 cache=True)
     if user is not None:
         return person_getter(user)
 
     # Still nothing?  Just pass back the author name then
-    return author_name(x)
+    return _author
 
 def bool2icon(value):
     """Returns True/False values represented as small html image of true/false
