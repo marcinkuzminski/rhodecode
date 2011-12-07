@@ -75,7 +75,7 @@ class BaseVCSController(object):
         try:
             return self._handle_request(environ, start_response)
         finally:
-            log = logging.getLogger(self.__class__.__name__)
+            log = logging.getLogger('rhodecode.' + self.__class__.__name__)
             log.debug('Request time: %.3fs' % (time.time() - start))
             meta.Session.remove()
 
