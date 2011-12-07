@@ -60,7 +60,7 @@ def upgrade(migrate_engine):
     from rhodecode.lib.dbmigrate.schema.db_1_2_0 import User
 
     #add column
-    ldap_dn = Column("ldap_dn", String(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    ldap_dn = Column("ldap_dn", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     ldap_dn.create(User().__table__)
 
     api_key = Column("api_key", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
