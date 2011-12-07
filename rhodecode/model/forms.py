@@ -415,7 +415,7 @@ def UniqSystemEmail(old_data):
     class _UniqSystemEmail(formencode.validators.FancyValidator):
         def to_python(self, value, state):
             value = value.lower()
-            if old_data.get('email').lower() != value:
+            if old_data.get('email','').lower() != value:
                 user = User.get_by_email(value, case_insensitive=True)
                 if user:
                     raise formencode.Invalid(
