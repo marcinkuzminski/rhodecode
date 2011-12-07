@@ -38,7 +38,6 @@ from webhelpers.html.tags import _set_input_attrs, _set_id_attr, \
 from rhodecode.lib.annotate import annotate_highlight
 from rhodecode.lib.utils import repo_name_slug
 from rhodecode.lib import str2bool, safe_unicode, safe_str, get_changeset_safe
-
 from rhodecode.lib.markup_renderer import MarkupRenderer
 
 def _reset(name, value=None, id=NotGiven, type="reset", **attrs):
@@ -288,14 +287,49 @@ flash = _Flash()
 #==============================================================================
 from vcs.utils import author_name, author_email
 from rhodecode.lib import credentials_filter, age as _age
+from rhodecode.model.db import User
 
 age = lambda  x:_age(x)
 capitalize = lambda x: x.capitalize()
 email = author_email
-email_or_none = lambda x: email(x) if email(x) != x else None
 person = lambda x: author_name(x)
 short_id = lambda x: x[:12]
 hide_credentials = lambda x: ''.join(credentials_filter(x))
+
+
+def email_or_none(x):
+    if email(x) != '':
+        return email(x)
+
+    # See if it contains a username we can get an email from
+    user = User.get_by_username(author_name(x), case_insensitive=True,
+                                cache=True)
+    if user is not None:
+        return user.email
+
+    # No valid email, not a valid user in the system, none!
+    return None
+
+def person(x):
+    # Valid email in the attribute passed, see if they're in the system
+
+    # attr to return from fetched user
+    person_getter = lambda usr: usr.username
+
+    if email(x) != '':
+        user = User.get_by_email(email(x), case_insensitive=True, cache=True)
+        if user is not None:
+            return person_getter(user)
+        return email(x)
+
+    # Maybe it's a username?
+    user = User.get_by_username(author_name(x), case_insensitive=True,
+                                cache=True)
+    if user is not None:
+        return person_getter(user)
+
+    # Still nothing?  Just pass back the author name then
+    return author_name(x)
 
 def bool2icon(value):
     """Returns True/False values represented as small html image of true/false

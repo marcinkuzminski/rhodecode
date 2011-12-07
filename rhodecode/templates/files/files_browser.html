@@ -96,7 +96,9 @@
 		             </td>
 		             <td>
 		             	%if node.is_file():
-		             		${node.last_changeset.author}
+		             		<span title="${node.last_changeset.author}">
+                            ${h.person(node.last_changeset.author)}
+                            </span>
 		             	%endif                    
 		             </td>
 				</tr>

@@ -35,7 +35,7 @@
             <div class="gravatar">
                 <img alt="gravatar" src="${h.gravatar_url(h.email(c.changeset.author),16)}"/>
             </div>
-            <div title="${h.email_or_none(c.changeset.author)}" class="user">${h.person(c.changeset.author)}</div>
+            <div title="${c.changeset.author}" class="user">${h.person(c.changeset.author)}</div>
         </div>
 		<div class="commit">${c.file.last_changeset.message}</div>
 	</div>
