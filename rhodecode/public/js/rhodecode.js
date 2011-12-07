@@ -360,7 +360,7 @@ var injectInlineForm = function(tr){
 };
 
 var createInlineAddButton = function(tr,label){
-	var html = '<div class="add-comment"><span class="ui-button-small">{0}</span></div>'.format(label);
+	var html = '<div class="add-comment"><span class="ui-btn">{0}</span></div>'.format(label);
         
 	var add = new YAHOO.util.Element(tableTr('inline-comments-button',html));
 	add.on('click', function(e) {
