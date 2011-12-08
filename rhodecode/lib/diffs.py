@@ -35,7 +35,7 @@ from mercurial.match import match
 from vcs.exceptions import VCSError
 from vcs.nodes import FileNode
 
-def get_gitdiff(filenode_old, filenode_new, ignore_whitespace=True):
+def get_gitdiff(filenode_old, filenode_new, ignore_whitespace=True, context=3):
     """
     Returns git style diff between given ``filenode_old`` and ``filenode_new``.
     
@@ -52,7 +52,7 @@ def get_gitdiff(filenode_old, filenode_new, ignore_whitespace=True):
 
     repo = filenode_new.changeset.repository
     vcs_gitdiff = repo._get_diff(old_raw_id, new_raw_id, filenode_new.path,
-                                 ignore_whitespace)
+                                 ignore_whitespace, context)
 
     return vcs_gitdiff
 

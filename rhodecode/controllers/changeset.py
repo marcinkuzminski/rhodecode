@@ -60,6 +60,7 @@ class ChangesetController(BaseRepoController):
 
     def index(self, revision):
         ignore_whitespace = request.GET.get('ignorews') == '1'
+        line_context = request.GET.get('context', 3)
         def wrap_to_table(str):
 
             return '''<table class="code-difftable">
@@ -131,7 +132,8 @@ class ChangesetController(BaseRepoController):
                     c.sum_added += node.size
                     if c.sum_added < self.cut_off_limit:
                         f_gitdiff = diffs.get_gitdiff(filenode_old, node,
-                                           ignore_whitespace=ignore_whitespace)
+                                           ignore_whitespace=ignore_whitespace,
+                                           context=line_context)
                         d = diffs.DiffProcessor(f_gitdiff, format='gitdiff')
 
                         st = d.stat()
@@ -170,7 +172,8 @@ class ChangesetController(BaseRepoController):
 
                         if c.sum_removed < self.cut_off_limit:
                             f_gitdiff = diffs.get_gitdiff(filenode_old, node,
-                                           ignore_whitespace=ignore_whitespace)
+                                           ignore_whitespace=ignore_whitespace,
+                                           context=line_context)
                             d = diffs.DiffProcessor(f_gitdiff,
                                                      format='gitdiff')
                             st = d.stat()
@@ -222,6 +225,7 @@ class ChangesetController(BaseRepoController):
 
         method = request.GET.get('diff', 'show')
         ignore_whitespace = request.GET.get('ignorews') == '1'
+        line_context = request.GET.get('context', 3)
         try:
             c.scm_type = c.rhodecode_repo.alias
             c.changeset = c.rhodecode_repo.get_changeset(revision)
@@ -241,7 +245,8 @@ class ChangesetController(BaseRepoController):
                     diff = _('binary file') + '\n'
                 else:
                     f_gitdiff = diffs.get_gitdiff(filenode_old, node,
-                                           ignore_whitespace=ignore_whitespace)
+                                           ignore_whitespace=ignore_whitespace,
+                                           context=line_context)
                     diff = diffs.DiffProcessor(f_gitdiff,
                                                 format='gitdiff').raw_diff()
 
@@ -255,7 +260,8 @@ class ChangesetController(BaseRepoController):
                     diff = _('binary file')
                 else:
                     f_gitdiff = diffs.get_gitdiff(filenode_old, node,
-                                           ignore_whitespace=ignore_whitespace)
+                                           ignore_whitespace=ignore_whitespace,
+                                           context=line_context)
                     diff = diffs.DiffProcessor(f_gitdiff,
                                                 format='gitdiff').raw_diff()
 

@@ -406,6 +406,7 @@ class FilesController(BaseRepoController):
                                    'repository.admin')
     def diff(self, repo_name, f_path):
         ignore_whitespace = request.GET.get('ignorews') == '1'
+        line_context = request.GET.get('context', 3)
         diff1 = request.GET.get('diff1')
         diff2 = request.GET.get('diff2')
         c.action = request.GET.get('diff')
@@ -433,7 +434,8 @@ class FilesController(BaseRepoController):
 
         if c.action == 'download':
             _diff = diffs.get_gitdiff(node1, node2,
-                                       ignore_whitespace=ignore_whitespace)
+                                      ignore_whitespace=ignore_whitespace,
+                                      context=line_context)
             diff = diffs.DiffProcessor(_diff,format='gitdiff')
 
             diff_name = '%s_vs_%s.diff' % (diff1, diff2)
@@ -444,7 +446,8 @@ class FilesController(BaseRepoController):
 
         elif c.action == 'raw':
             _diff = diffs.get_gitdiff(node1, node2,
-                                       ignore_whitespace=ignore_whitespace)
+                                      ignore_whitespace=ignore_whitespace,
+                                      context=line_context)
             diff = diffs.DiffProcessor(_diff,format='gitdiff')
             response.content_type = 'text/plain'
             return diff.raw_diff()
@@ -458,7 +461,8 @@ class FilesController(BaseRepoController):
                 c.big_diff = True
             else:
                 _diff = diffs.get_gitdiff(node1, node2,
-                                           ignore_whitespace=ignore_whitespace)
+                                           ignore_whitespace=ignore_whitespace,
+                                           context=line_context)
                 diff = diffs.DiffProcessor(_diff,format='gitdiff')
                 c.cur_diff = diff.as_html()
         else:
@@ -473,7 +477,8 @@ class FilesController(BaseRepoController):
 
             else:
                 _diff = diffs.get_gitdiff(node1, node2,
-                                           ignore_whitespace=ignore_whitespace)
+                                          ignore_whitespace=ignore_whitespace,
+                                          context=line_context)
                 diff = diffs.DiffProcessor(_diff,format='gitdiff')
                 c.cur_diff = diff.as_html()
 
