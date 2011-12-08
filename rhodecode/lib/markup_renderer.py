@@ -127,3 +127,13 @@ class MarkupRenderer(object):
             log.warning('Install docutils to use this function')
             return cls.plain(source)
 
+    @classmethod
+    def rst_with_mentions(cls, source):
+        mention_pat = re.compile(r'(?:^@|\s@)(\w+)')
+        
+        def wrapp(match_obj):
+            uname = match_obj.groups()[0]
+            return ' **@%(uname)s** ' % {'uname':uname}
+        mention_hl = mention_pat.sub(wrapp, source).strip()
+        return cls.rst(mention_hl)
+

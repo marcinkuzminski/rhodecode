@@ -717,3 +717,12 @@ def urlify_text(text):
 def rst(source):
     return literal('<div class="rst-block">%s</div>' % 
                    MarkupRenderer.rst(source))
+    
+def rst_w_mentions(source):
+    """
+    Wrapped rst renderer with @mention highlighting
+    
+    :param source:
+    """
+    return literal('<div class="rst-block">%s</div>' % 
+                   MarkupRenderer.rst_with_mentions(source))    

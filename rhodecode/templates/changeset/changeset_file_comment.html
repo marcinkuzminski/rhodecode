@@ -25,7 +25,7 @@
   				<span onClick="deleteComment(${co.comment_id})" class="delete-comment ui-btn">${_('Delete')}</span>
   			</div>
   		%endif
-  		${h.rst(co.text)|n}
+  		${h.rst_w_mentions(co.text)|n}
   	</div>
   </div>
 </%def>

@@ -104,7 +104,7 @@ class NotificationModel(BaseModel):
             email_subject = NotificationModel().make_description(notif, False)
             type_ = type_
             email_body = body
-            kwargs = {'subject':subject, 'body':h.rst(body)}
+            kwargs = {'subject':subject, 'body':h.rst_w_mentions(body)}
             kwargs.update(email_kwargs)
             email_body_html = EmailNotificationModel()\
                                 .get_email_tmpl(type_, **kwargs)
