@@ -1,6 +1,6 @@
 ## -*- coding: utf-8 -*-
 %if c.repo_changesets:
-<table>
+<table class="table_disp">
 	<tr>
 		<th class="left">${_('commit message')}</th>
 		<th class="left">${_('age')}</th>
@@ -20,7 +20,7 @@
                       ${h.age(cs.date)}</span>
         </td>        	
 		<td title="${cs.author}">${h.person(cs.author)}</td>
-		<td><a href="${h.url('files_home',repo_name=c.repo_name,revision=cs.raw_id)}">r${cs.revision}:${h.short_id(cs.raw_id)}</a></td>
+		<td><div><pre><a href="${h.url('files_home',repo_name=c.repo_name,revision=cs.raw_id)}">r${cs.revision}:${h.short_id(cs.raw_id)}</a></pre></div></td>
 		<td>
 			<span class="logtags">
 				<span class="branchtag">${cs.branch}</span>

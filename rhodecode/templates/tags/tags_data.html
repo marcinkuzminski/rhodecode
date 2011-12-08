@@ -1,30 +1,27 @@
 %if c.repo_tags:    
-    <table>
+    <table class="table_disp">
     	<tr>
-	        <th class="left">${_('date')}</th>
-	        <th class="left">${_('name')}</th>
-	        <th class="left">${_('author')}</th>
-	        <th class="left">${_('revision')}</th>
-			<th class="left">${_('links')}</th>
+            <th class="left">${_('name')}</th>
+            <th class="left">${_('date')}</th>
+            <th class="left">${_('author')}</th>
+            <th class="left">${_('revision')}</th>
     	</tr>
 		%for cnt,tag in enumerate(c.repo_tags.items()):
 		<tr class="parity${cnt%2}">		
-	        <td><span class="tooltip" title="${h.age(tag[1].date)}">
-                      ${tag[1].date}</span>
-            </td>
             <td>
                 <span class="logtags">
                     <span class="tagtag">${h.link_to(tag[0],
-                    h.url('changeset_home',repo_name=c.repo_name,revision=tag[1].raw_id))}</span>
+                    h.url('files_home',repo_name=c.repo_name,revision=tag[1].raw_id))}
+                    </span>
                 </span>
-            </td>	        
+            </td>
+            <td><span class="tooltip" title="${h.age(tag[1].date)}">${tag[1].date}</span></td>            
 	        <td title="${tag[1].author}">${h.person(tag[1].author)}</td>
-	        <td>r${tag[1].revision}:${h.short_id(tag[1].raw_id)}</td>
-			<td class="nowrap">
-			${h.link_to(_('changeset'),h.url('changeset_home',repo_name=c.repo_name,revision=tag[1].raw_id),class_="ui-btn xsmall")}
-			<span style="color:#515151">|</span>
-			${h.link_to(_('files'),h.url('files_home',repo_name=c.repo_name,revision=tag[1].raw_id),class_="ui-btn xsmall")}
-			</td>
+	        <td>
+                <div>
+                    <pre><a href="${h.url('files_home',repo_name=c.repo_name,revision=tag[1].raw_id)}">r${tag[1].revision}:${h.short_id(tag[1].raw_id)}</a></pre>
+                </div>
+            </td>
 		</tr>	
 		%endfor
     </table>

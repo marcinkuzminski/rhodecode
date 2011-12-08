@@ -9,7 +9,7 @@
                 %if h.HasPermissionAny('hg.admin','hg.create.repository')():
                 <ul class="links">
                   <li>
-                    <span>${h.link_to(_('ADD NEW REPOSITORY'),h.url('admin_settings_create_repository'))}</span>
+                    <span>${h.link_to(_('ADD REPOSITORY'),h.url('admin_settings_create_repository'))}</span>
                   </li>          
                 </ul>           
                 %endif
@@ -139,11 +139,13 @@
                       ${h.age(repo['last_change'])}</span>
                     </td>
                     <td>
+                        <div>
                         %if repo['rev']>=0:
-                        <a title="${h.tooltip('%s\n%s' % (repo['author'],repo['last_msg']))}" class="tooltip" href="${h.url('changeset_home',repo_name=repo['name'],revision=repo['tip'])}">${'r%s:%s' % (repo['rev'],h.short_id(repo['tip']))}</a>
+                        <pre><a title="${h.tooltip('%s\n%s' % (repo['author'],repo['last_msg']))}" class="tooltip" href="${h.url('changeset_home',repo_name=repo['name'],revision=repo['tip'])}">${'r%s:%s' % (repo['rev'],h.short_id(repo['tip']))}</a></pre>
                         %else:
                             ${_('No changesets yet')}
-                        %endif    
+                        %endif
+                        </div>    
                     </td>
                     <td title="${repo['contact']}">${h.person(repo['contact'])}</td>
                     <td>

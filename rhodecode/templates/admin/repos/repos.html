@@ -19,7 +19,7 @@
         ${self.breadcrumbs()}
         <ul class="links">
           <li>
-            <span>${h.link_to(_(u'ADD NEW REPOSITORY'),h.url('new_repo'))}</span>
+            <span>${h.link_to(_(u'ADD REPOSITORY'),h.url('new_repo'))}</span>
           </li>          
         </ul>        
     </div>
@@ -65,10 +65,7 @@
 	            <td>${h.age(repo['last_change'])}</td>
 	            <td>
 	            	%if repo['rev']>=0:
-	            	${h.link_to('r%s:%s' % (repo['rev'],h.short_id(repo['tip'])),
-	                h.url('changeset_home',repo_name=repo['name'],revision=repo['tip']),
-	                class_="tooltip",
-	                title=h.tooltip(repo['last_msg']))}
+	            	<div><pre>${h.link_to('r%s:%s' % (repo['rev'],h.short_id(repo['tip'])),h.url('changeset_home',repo_name=repo['name'],revision=repo['tip']),class_="tooltip",title=h.tooltip(repo['last_msg']))}</pre></div>
 	            	%else:
 	            		${_('No changesets yet')}
 	            	%endif    

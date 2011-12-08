@@ -29,12 +29,12 @@
         <div class="title">
             <h5> 
             <input class="q_filter_box" id="q_filter" size="15" type="text" name="filter" value="${_('quick filter...')}"/>        
-            <a id="show_my" class="link-white" href="#my">${_('My repositories')}</a> / <a id="show_watched" class="link-white" href="#watched">${_('Watched')}</a>
+            <a id="show_my" class="link-white" href="#my">${_('My repos')}</a> / <a id="show_watched" class="link-white" href="#watched">${_('Watched')}</a>
             </h5>
              %if h.HasPermissionAny('hg.admin','hg.create.repository')():
              <ul class="links">
                <li>
-                 <span>${h.link_to(_('ADD REPOSITORY'),h.url('admin_settings_create_repository'))}</span>
+                 <span>${h.link_to(_('ADD'),h.url('admin_settings_create_repository'))}</span>
                </li>          
              </ul>           
              %endif        
@@ -74,7 +74,7 @@
                             src="${h.url('/images/icons/arrow_divide.png')}"/></a>
                         %endif                  
                         </td> 
-                        <td><span class="tooltip" title="${repo['last_change']}">${("r%s:%s") % (repo['rev'],h.short_id(repo['tip']))}</span></td>
+                        <td><div class="tooltip" title="${repo['last_change']}"><pre>${("r%s:%s") % (repo['rev'],h.short_id(repo['tip']))}</pre></div></td>
                         <td><a href="${h.url('repo_settings_home',repo_name=repo['name'])}" title="${_('edit')}"><img class="icon" alt="${_('private')}" src="${h.url('/images/icons/application_form_edit.png')}"/></a></td>
                         <td>
                           ${h.form(url('repo_settings_delete', repo_name=repo['name']),method='delete')}
