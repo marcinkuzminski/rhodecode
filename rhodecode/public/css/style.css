@@ -3712,7 +3712,7 @@ table.code-difftable .lineno{
     padding-left:2px;
     padding-right:2px;
     text-align:right;
-    width:30px;
+    width:32px;
     -moz-user-select:none;
     -webkit-user-select: none;
     border-right: 1px solid #CCC !important;
@@ -3731,8 +3731,6 @@ table.code-difftable .lineno a{
     font:11px "Bitstream Vera Sans Mono",Monaco,"Courier New",Courier,monospace !important;
     letter-spacing:-1px;
     text-align:right;
-    float:right;
-    width:20px;
     padding-right: 2px;
     cursor: pointer;
 }
