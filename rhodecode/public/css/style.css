@@ -3733,6 +3733,8 @@ table.code-difftable .lineno a{
     text-align:right;
     padding-right: 2px;
     cursor: pointer;
+    display: block;
+    width: 32px;
 }
 
 table.code-difftable .lineno-inline{
