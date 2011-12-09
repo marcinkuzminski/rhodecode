@@ -4,6 +4,7 @@
 ##
 <%def name="comment_block(co)">
   <div class="comment" id="comment-${co.comment_id}">
+    <div class="comment-wrapp">
   	<div class="meta">
   		<span class="user">
   			<img src="${h.gravatar_url(co.author.email, 20)}" />
@@ -27,6 +28,7 @@
   		%endif
   		${h.rst_w_mentions(co.text)|n}
   	</div>
+    </div>
   </div>
 </%def>
 
@@ -38,9 +40,11 @@
   %if c.rhodecode_user.username != 'default':
       ${h.form(h.url('changeset_comment', repo_name=c.repo_name, revision=c.changeset.raw_id))}
       <div class="clearfix">
-          <div class="comment-help">${_('Commenting on line')} {1} ${_('comments parsed using')} 
-          <a href="${h.url('rst_help')}">RST</a> ${_('syntax')}</div>
-              <textarea id="text_{1}" name="text"></textarea>
+          <div class="comment-help">${_('Commenting on line')} {1}. ${_('Comments parsed using')} 
+          <a href="${h.url('rst_help')}">RST</a> ${_('syntax')} ${_('with')} 
+          <span style="color:#003367" class="tooltip" title="${_('Use @username inside this text to send notification to this RhodeCode user')}">@mention</span> ${_('support')}
+          </div>
+          <textarea id="text_{1}" name="text"></textarea>
       </div>
       <div class="comment-button">
       <input type="hidden" name="f_path" value="{0}">

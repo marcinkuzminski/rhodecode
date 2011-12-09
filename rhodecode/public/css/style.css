@@ -2742,7 +2742,6 @@ div.gravatar img {
     -khtml-border-radius: 4px 4px 4px 4px !important;
     -moz-border-radius: 4px 4px 4px 4px !important;
     border-radius: 4px 4px 4px 4px !important;
-    box-shadow: 0 1px 0 #DADADA !important;
     cursor: pointer !important;
 	padding: 3px 3px 3px 3px;	
 
@@ -3557,8 +3556,11 @@ form.comment-inline-form {
     -moz-border-radius: 4px;
     border-radius: 4px;
     margin: 3px 3px 5px 5px;
+    background-color: #FAFAFA;
 }
-
+.inline-comments .comment-wrapp{
+	padding:1px;
+}
 .inline-comments .comment .meta {
     background: #f8f8f8;
     padding: 6px;
@@ -3636,4 +3638,137 @@ form.comment-inline-form {
     clear:both;
     border-bottom: 1px solid #eee;
     padding:5px 0px 5px 38px;
+}
+
+
+/*****************************************************************************
+                                  DIFFS CSS
+******************************************************************************/
+
+div.diffblock {
+    overflow: auto;
+    padding: 0px;
+    border: 1px solid #ccc;
+    background: #f8f8f8;
+    font-size: 100%;
+    line-height: 100%;
+    /* new */
+    line-height: 125%;
+    -webkit-border-radius: 6px 6px 0px 0px;
+    -moz-border-radius: 6px 6px 0px 0px;
+    border-radius: 6px 6px 0px 0px;     
+}
+div.diffblock.margined{
+    margin: 0px 20px 0px 20px;
+}
+div.diffblock .code-header{
+    border-bottom: 1px solid #CCCCCC;
+    background: #EEEEEE;
+    padding:10px 0 10px 0;
+}
+div.diffblock .code-header div{
+    margin-left:10px;
+    font-weight: bold;
+    font-size: 14px;
+}
+div.diffblock .code-body{
+    background: #FFFFFF;
+}
+div.diffblock pre.raw{
+    background: #FFFFFF;
+    color:#000000;
+}
+table.code-difftable{
+    border-collapse: collapse;
+    width: 99%;
+}
+table.code-difftable td {
+    padding: 0 !important; 
+    background: none !important; 
+    border:0 !important;
+    vertical-align: none !important;
+}
+table.code-difftable .context{
+    background:none repeat scroll 0 0 #DDE7EF;
+}
+table.code-difftable .add{
+    background:none repeat scroll 0 0 #DDFFDD;
+}
+table.code-difftable .add ins{
+    background:none repeat scroll 0 0 #AAFFAA;
+    text-decoration:none;
+}
+table.code-difftable .del{
+    background:none repeat scroll 0 0 #FFDDDD;
+}
+table.code-difftable .del del{
+    background:none repeat scroll 0 0 #FFAAAA;
+    text-decoration:none;
+}
+
+/** LINE NUMBERS **/
+table.code-difftable .lineno{
+    background:none repeat scroll 0 0 #EEEEEE !important;
+    padding-left:2px;
+    padding-right:2px;
+    text-align:right;
+    width:30px;
+    -moz-user-select:none;
+    -webkit-user-select: none;
+    border-right: 1px solid #CCC !important;
+    border-left: 0px solid #CCC !important;
+    border-top: 0px solid #CCC !important;
+    border-bottom: none !important;
+    vertical-align: middle !important;
+    
+}
+table.code-difftable .lineno.new {
+}
+table.code-difftable .lineno.old {
+}
+table.code-difftable .lineno a{
+    color:#747474 !important;
+    font:11px "Bitstream Vera Sans Mono",Monaco,"Courier New",Courier,monospace !important;
+    letter-spacing:-1px;
+    text-align:right;
+    float:right;
+    width:20px;
+    padding-right: 2px;
+    cursor: pointer;
+}
+
+table.code-difftable .lineno-inline{
+    background:none repeat scroll 0 0 #FFF !important;
+    padding-left:2px;
+    padding-right:2px;
+    text-align:right;
+    width:30px;
+    -moz-user-select:none;
+    -webkit-user-select: none;
+}
+
+/** CODE **/
+table.code-difftable .code { 
+    display: block;
+    width: 100%;
+}
+table.code-difftable .code td{
+    margin:0;
+    padding:0;
+}
+table.code-difftable .code pre{
+    margin:0;
+    padding:0;
+    height: 17px;
+    line-height: 17px;
+}
+
+
+.diffblock.margined.comm .line .code:hover{
+    background-color:#FFFFCC !important;
+    cursor: pointer !important;
+    background-image:url("../images/icons/comment_add.png") !important;
+    background-repeat:no-repeat !important;
+    background-position: right !important;
+    background-position: 0% 50% !important;
 }

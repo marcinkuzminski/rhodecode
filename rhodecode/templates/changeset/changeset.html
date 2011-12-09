@@ -132,7 +132,7 @@
 					h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(filenode.path),diff2=cs2,diff1=cs1,diff='raw'))}</span>
 					&raquo; <span>${h.link_to(_('download diff'),
 					h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(filenode.path),diff2=cs2,diff1=cs1,diff='download'))}</span>
-                    <span style="float:right">
+                    <span style="float:right;margin-top:-3px">
                       <label>
                       ${_('show inline comments')}
                       ${h.checkbox('',checked="checked",class_="show-inline-comments",id_for=self.fid(filenode.changeset.raw_id,filenode.path))}
@@ -181,6 +181,7 @@
             <div class="clearfix">
                 <div class="comment-help">
                     ${_('Comments parsed using')} <a href="${h.url('rst_help')}">RST</a> ${_('syntax')}
+                    ${_('with')} <span style="color:#003367" class="tooltip" title="${_('Use @username inside this text to send notification to this RhodeCode user')}">@mention</span> ${_('support')}
                 </div>
                     ${h.textarea('text')}
             </div>
@@ -216,6 +217,10 @@
     		  for(c in comments){ 
     		     YUD.setStyle(comments[c],'display',show);
     		  }
+    		  var btns = YUQ('#{0} .inline-comments-button'.format(boxid));
+              for(c in btns){ 
+                  YUD.setStyle(btns[c],'display',show);
+               }    		  
     	  })
           
           YUE.on(YUQ('.line'),'click',function(e){

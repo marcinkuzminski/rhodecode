@@ -408,7 +408,7 @@ class DiffProcessor(object):
                                     % {'a_id': anchor_old_id,
                                        'old_lineno_cls': old_lineno_class})
 
-                    _html.append('''<pre>%(link)s</pre>''' \
+                    _html.append('''%(link)s''' \
                         % {'link':
                         _link_to_if(cond_old, change['old_lineno'], '#%s' \
                                                                 % anchor_old)})
@@ -421,7 +421,7 @@ class DiffProcessor(object):
                                     % {'a_id': anchor_new_id,
                                        'new_lineno_cls': new_lineno_class})
 
-                    _html.append('''<pre>%(link)s</pre>''' \
+                    _html.append('''%(link)s''' \
                         % {'link':
                         _link_to_if(cond_new, change['new_lineno'], '#%s' \
                                                                 % anchor_new)})

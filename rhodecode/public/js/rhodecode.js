@@ -356,7 +356,8 @@ var injectInlineForm = function(tr){
 		  target_tr = YUD.getNextSibling(tr);
 	  }
 	  YUD.insertAfter(form,target_tr);
-	  YUD.get('text_'+lineno).focus();	
+	  YUD.get('text_'+lineno).focus();
+	  tooltip_activate();
 };
 
 var createInlineAddButton = function(tr,label){
