@@ -18,12 +18,6 @@
     ${self.menu('changelog')}     
 </%def>
 
-<%def name="fid(raw_id,path)" filter="strip">
-  <% 
-    return 'C-%s-%s' % (h.short_id(raw_id),h.safeid(h.safe_unicode(path))) 
-  %>
-</%def>
-
 <%def name="main()">
 <div class="box">
     <!-- box / title -->
@@ -33,19 +27,24 @@
     <div class="table">
 		<div class="diffblock">
 			<div class="code-header">
-				<div>
-                <span>${h.link_to(_('raw diff'),
-				h.url('raw_changeset_home',repo_name=c.repo_name,revision=c.changeset.raw_id,diff='show'))}</span>
-				 &raquo; <span>${h.link_to(_('download diff'),
-				h.url('raw_changeset_home',repo_name=c.repo_name,revision=c.changeset.raw_id,diff='download'))}</span>
-				<div class="comments-number" style="float:right;padding-right:5px">${len(c.comments)} comment(s) (${c.inline_cnt} ${_('inline')})</div>
-                </div>
+                <div class="date">${_('commit')} ${c.changeset.revision}:${h.short_id(c.changeset.raw_id)} ${c.changeset.date}</div>
+                <div class="diff-menu-wrapper">
+                    <img class="diff-menu-activate" style="cursor: pointer" alt="diff-menu" src="${h.url('/images/icons/script_gear.png')}" />
+                    <div class="diff-menu" style="display:none">
+                        <ul>
+                          <li>${h.link_to(_('raw diff'),h.url('raw_changeset_home',repo_name=c.repo_name,revision=c.changeset.raw_id,diff='show'))}</li>
+                          <li>${h.link_to(_('download diff'),h.url('raw_changeset_home',repo_name=c.repo_name,revision=c.changeset.raw_id,diff='download'))}</li>
+                          <li>${c.ignorews_url()}</li>
+                          <li>${c.context_url()}</li>
+                        </ul>
+                    </div>                        
+                </div>				
+                <div class="comments-number" style="float:right;padding-right:5px">${len(c.comments)} comment(s) (${c.inline_cnt} ${_('inline')})</div>
 			</div>
 		</div>
 	    <div id="changeset_content">
 			<div class="container">
 	             <div class="left">
-	                 <div class="date">${_('commit')} ${c.changeset.revision}: ${h.short_id(c.changeset.raw_id)}@${c.changeset.date}</div>
 	                 <div class="author">
 	                     <div class="gravatar">
 	                         <img alt="gravatar" src="${h.gravatar_url(h.email(c.changeset.author),20)}"/>
@@ -100,9 +99,9 @@
 	                    <div class="cs_${change}">
                             <div class="node">
                             %if change != 'removed':
-                                ${h.link_to(h.safe_unicode(filenode.path),h.url.current(anchor=self.fid(filenode.changeset.raw_id,filenode.path)))}
+                                ${h.link_to(h.safe_unicode(filenode.path),c.anchor_url(filenode.changeset.raw_id,filenode.path))}
                             %else:
-                                ${h.link_to(h.safe_unicode(filenode.path),h.url.current(anchor=self.fid('',filenode.path)))}
+                                ${h.link_to(h.safe_unicode(filenode.path),h.url.current(anchor=h.FID('',filenode.path)))}
                             %endif
                             </div>
 		                    <div class="changes">${h.fancy_file_stats(stat)}</div>
@@ -118,8 +117,8 @@
     	
 	%for change,filenode,diff,cs1,cs2,stat in c.changes:
 		%if change !='removed':
-		<div style="clear:both;height:10px"></div>
-		<div class="diffblock  margined comm" id="${self.fid(filenode.changeset.raw_id,filenode.path)}">
+		<div id="${h.FID(filenode.changeset.raw_id,filenode.path)}" style="clear:both;height:90px;margin-top:-60px"></div>
+		<div class="diffblock  margined comm">
 			<div class="code-header">
 				<div class="changeset_header">
 					<div class="changeset_file">
@@ -133,13 +132,15 @@
                               <li>${h.link_to(_('diff'),h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(filenode.path),diff2=cs2,diff1=cs1,diff='diff'))}</li>
                               <li>${h.link_to(_('raw diff'),h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(filenode.path),diff2=cs2,diff1=cs1,diff='raw'))}</li>
                               <li>${h.link_to(_('download diff'),h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(filenode.path),diff2=cs2,diff1=cs1,diff='download'))}</li>
+                              <li>${c.ignorews_url(h.FID(filenode.changeset.raw_id,filenode.path))}</li>
+                              <li>${c.context_url(h.FID(filenode.changeset.raw_id,filenode.path))}</li>
                             </ul>
                         </div>                        
                     </div>
                     <span style="float:right;margin-top:-3px">
                       <label>
                       ${_('show inline comments')}
-                      ${h.checkbox('',checked="checked",class_="show-inline-comments",id_for=self.fid(filenode.changeset.raw_id,filenode.path))}
+                      ${h.checkbox('',checked="checked",class_="show-inline-comments",id_for=h.FID(filenode.changeset.raw_id,filenode.path))}
                       </label>
                     </span>
 				</div>
@@ -164,7 +165,7 @@
         <div class="comments-number">${len(c.comments)} comment(s) (${c.inline_cnt} ${_('inline')})</div>
         
         %for path, lines in c.inline_comments:
-            <div style="display:none" class="inline-comment-placeholder" path="${path}" target_id="${self.fid(c.changeset.raw_id,path)}">
+            <div style="display:none" class="inline-comment-placeholder" path="${path}" target_id="${h.FID(c.changeset.raw_id,path)}">
             % for line,comments in lines.iteritems():
                 <div class="inline-comment-placeholder-line" line="${line}" target_id="${h.safeid(h.safe_unicode(path))}"> 
                 %for co in comments:

@@ -1890,7 +1890,9 @@ h3.files_location {
 	color: #556CB5;
 	white-space: pre-wrap;
 }
-
+#changeset_content .container .left .message a:hover {
+	text-decoration: none;
+}
 .cs_files .cur_cs {
 	margin: 10px 2px;
 	font-weight: bold;
@@ -2254,7 +2256,7 @@ table.code-browser .browser-file {
 	float: left;
 }
 
-.diffblock .changeset_header .diff-menu{
+.diffblock .diff-menu{
     position: absolute;
     background: none repeat scroll 0 0 #FFFFFF;
     border-color: #003367 #666666 #666666;
@@ -2267,14 +2269,14 @@ table.code-browser .browser-file {
     
 }
 
-.diffblock .changeset_header .diff-menu ul li {
+.diffblock  .diff-menu ul li {
 	padding: 0px 0px 0px 0px !important;
 }
-.diffblock .changeset_header .diff-menu ul li a{
+.diffblock  .diff-menu ul li a{
 	display: block;
 	padding: 3px 8px 3px 8px !important;
 }
-.diffblock .changeset_header .diff-menu ul li a:hover{
+.diffblock  .diff-menu ul li a:hover{
     text-decoration: none;
     background-color: #EEEEEE;
 }
@@ -3689,6 +3691,11 @@ div.diffblock .code-header{
     border-bottom: 1px solid #CCCCCC;
     background: #EEEEEE;
     padding:10px 0 10px 0;
+    height: 14px;
+}
+div.diffblock .code-header .date{
+    float:left;
+    text-transform: uppercase;
 }
 div.diffblock .code-header div{
     margin-left:4px;

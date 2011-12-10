@@ -25,11 +25,17 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import logging
 import traceback
+from collections import defaultdict
+from webob.exc import HTTPForbidden
 
 from pylons import tmpl_context as c, url, request, response
 from pylons.i18n.translation import _
 from pylons.controllers.util import redirect
 from pylons.decorators import jsonify
+
+from vcs.exceptions import RepositoryError, ChangesetError, \
+    ChangesetDoesNotExistError
+from vcs.nodes import FileNode
 
 import rhodecode.lib.helpers as h
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
@@ -39,15 +45,108 @@ from rhodecode.lib.compat import OrderedDict
 from rhodecode.lib import diffs
 from rhodecode.model.db import ChangesetComment
 from rhodecode.model.comment import ChangesetCommentsModel
-
-from vcs.exceptions import RepositoryError, ChangesetError, \
-    ChangesetDoesNotExistError
-from vcs.nodes import FileNode
-from webob.exc import HTTPForbidden
 from rhodecode.model.meta import Session
 
 log = logging.getLogger(__name__)
 
+
+def anchor_url(revision,path):
+    fid = h.FID(revision, path)
+    return h.url.current(anchor=fid,**request.GET)
+
+def get_ignore_ws(fid, GET):
+    ig_ws_global = request.GET.get('ignorews')
+    ig_ws = filter(lambda k:k.startswith('WS'),GET.getall(fid))
+    if ig_ws:
+        try:
+            return int(ig_ws[0].split(':')[-1])
+        except:
+            pass
+    return ig_ws_global
+
+def _ignorews_url(fileid=None):
+
+    params = defaultdict(list)
+    lbl = _('show white space')
+    ig_ws = get_ignore_ws(fileid, request.GET)
+    ln_ctx = get_line_ctx(fileid, request.GET)
+    # global option
+    if fileid is None:
+        if ig_ws is None:
+            params['ignorews'] += [1]
+            lbl = _('ignore white space')
+        ctx_key = 'context'
+        ctx_val = ln_ctx
+    # per file options
+    else:
+        if ig_ws is None:
+            params[fileid] += ['WS:1']
+            lbl = _('ignore white space')
+
+        ctx_key = fileid
+        ctx_val = 'C:%s' % ln_ctx
+    # if we have passed in ln_ctx pass it along to our params
+    if ln_ctx:
+        params[ctx_key] += [ctx_val]
+    
+    params['anchor'] = fileid
+    return h.link_to(lbl, h.url.current(**params))
+
+def get_line_ctx(fid, GET):
+    ln_ctx_global = request.GET.get('context')
+    ln_ctx = filter(lambda k:k.startswith('C'),GET.getall(fid))
+    
+    if ln_ctx:
+        retval = ln_ctx[0].split(':')[-1]
+    else:
+        retval = ln_ctx_global
+
+    try:
+        return int(retval)
+    except:
+        return
+
+def _context_url(fileid=None):
+    """
+    Generates url for context lines
+    
+    :param fileid:
+    """
+    ig_ws = get_ignore_ws(fileid, request.GET)
+    ln_ctx = (get_line_ctx(fileid, request.GET) or 3) * 2
+
+    params = defaultdict(list)
+
+    # global option
+    if fileid is None:
+        if ln_ctx > 0:
+            params['context'] += [ln_ctx]
+
+        if ig_ws:
+            ig_ws_key = 'ignorews'
+            ig_ws_val = 1
+
+    # per file option
+    else:
+        params[fileid] += ['C:%s' % ln_ctx]
+        ig_ws_key = fileid
+        ig_ws_val = 'WS:%s' % 1
+        
+    if ig_ws:
+        params[ig_ws_key] += [ig_ws_val]
+
+    lbl = _('%s line context') % ln_ctx
+
+    params['anchor'] = fileid
+    return h.link_to(lbl, h.url.current(**params))
+
+def wrap_to_table(str_):
+    return '''<table class="code-difftable">
+                <tr class="line">
+                <td class="lineno new"></td>
+                <td class="code"><pre>%s</pre></td>
+                </tr>
+              </table>''' % str_
 
 class ChangesetController(BaseRepoController):
 
@@ -59,16 +158,10 @@ class ChangesetController(BaseRepoController):
         c.affected_files_cut_off = 60
 
     def index(self, revision):
-        ignore_whitespace = request.GET.get('ignorews') == '1'
-        line_context = request.GET.get('context', 3)
-        def wrap_to_table(str):
 
-            return '''<table class="code-difftable">
-                        <tr class="line">
-                        <td class="lineno new"></td>
-                        <td class="code"><pre>%s</pre></td>
-                        </tr>
-                      </table>''' % str
+        c.anchor_url = anchor_url
+        c.ignorews_url = _ignorews_url
+        c.context_url = _context_url
 
         #get ranges of revisions if preset
         rev_range = revision.split('...')[:2]
@@ -130,10 +223,13 @@ class ChangesetController(BaseRepoController):
                     # added nodes and their size defines how many changes were
                     # made
                     c.sum_added += node.size
+                    fid = h.FID(revision, node.path)
+                    line_context_lcl = get_line_ctx(fid, request.GET)
+                    ignore_whitespace_lcl = get_ignore_ws(fid, request.GET)
                     if c.sum_added < self.cut_off_limit:
                         f_gitdiff = diffs.get_gitdiff(filenode_old, node,
-                                           ignore_whitespace=ignore_whitespace,
-                                           context=line_context)
+                                        ignore_whitespace=ignore_whitespace_lcl,
+                                        context=line_context_lcl)
                         d = diffs.DiffProcessor(f_gitdiff, format='gitdiff')
 
                         st = d.stat()
@@ -171,9 +267,12 @@ class ChangesetController(BaseRepoController):
                     else:
 
                         if c.sum_removed < self.cut_off_limit:
+                            fid = h.FID(revision, node.path)
+                            line_context_lcl = get_line_ctx(fid, request.GET)
+                            ignore_whitespace_lcl = get_ignore_ws(fid, request.GET,)
                             f_gitdiff = diffs.get_gitdiff(filenode_old, node,
-                                           ignore_whitespace=ignore_whitespace,
-                                           context=line_context)
+                                    ignore_whitespace=ignore_whitespace_lcl,
+                                    context=line_context_lcl)
                             d = diffs.DiffProcessor(f_gitdiff,
                                                      format='gitdiff')
                             st = d.stat()

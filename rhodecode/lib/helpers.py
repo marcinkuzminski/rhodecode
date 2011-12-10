@@ -52,6 +52,17 @@ def _reset(name, value=None, id=NotGiven, type="reset", **attrs):
 reset = _reset
 safeid = _make_safe_id_component
 
+        
+def FID(raw_id,path):
+    """
+    Creates a uniqe ID for filenode based on it's path and revision
+    
+    :param raw_id:
+    :param path:
+    """
+    return 'C-%s-%s' % (short_id(raw_id), safeid(safe_unicode(path)))
+
+
 def get_token():
     """Return the current authentication token, creating one if one doesn't
     already exist.
