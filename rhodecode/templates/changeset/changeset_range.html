@@ -16,12 +16,6 @@
     ${self.menu('changelog')}     
 </%def>
 
-<%def name="fid(raw_id,path)" filter="strip">
-  <% 
-    return 'C-%s-%s' % (h.short_id(raw_id),h.safeid(h.safe_unicode(path))) 
-  %>
-</%def>
-
 <%def name="main()">
 <div class="box">
     <!-- box / title -->
@@ -56,7 +50,7 @@
 	               %for cs in c.cs_ranges:
 	                   <div class="cur_cs">r${cs}</div>
 	                %for change,filenode,diff,cs1,cs2,st in c.changes[cs.raw_id]:
-	                    <div class="cs_${change}">${h.link_to(h.safe_unicode(filenode.path),h.url.current(anchor=self.fid(cs.raw_id,filenode.path)))}</div>
+	                    <div class="cs_${change}">${h.link_to(h.safe_unicode(filenode.path),h.url.current(anchor=h.FID(cs.raw_id,filenode.path)))}</div>
 	                %endfor
 	               %endfor 
 	        </div>         
@@ -68,7 +62,7 @@
 		%if change !='removed':
 		<div style="clear:both;height:10px"></div>
 		<div class="diffblock margined">
-			<div id="${self.fid(cs.raw_id,filenode.path)}" class="code-header">
+			<div id="${h.FID(cs.raw_id,filenode.path)}" class="code-header">
 				<div class="changeset_header">
 					<span class="changeset_file">
 						${h.link_to_if(change!='removed',h.safe_unicode(filenode.path),h.url('files_home',repo_name=c.repo_name,
