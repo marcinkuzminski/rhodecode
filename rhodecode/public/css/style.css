@@ -2241,19 +2241,43 @@ table.code-browser .browser-file {
 	padding-left: 20px;
 	text-align: left;
 }
-
+.diffblock .changeset_header {
+    height: 16px;
+}
 .diffblock .changeset_file {
 	background: url("../images/icons/file.png") no-repeat scroll 3px;
-	height: 16px;
-	padding-left: 22px;
 	text-align: left;
-	font-size: 14px;
+	float: left;
+	padding: 2px 0px 2px 22px;
+}
+.diffblock .diff-menu-wrapper{
+	float: left;
 }
 
-.diffblock .changeset_header {
-	margin-left: 6px !important;
+.diffblock .changeset_header .diff-menu{
+    position: absolute;
+    background: none repeat scroll 0 0 #FFFFFF;
+    border-color: #003367 #666666 #666666;
+    border-right: 1px solid #666666;
+    border-style: solid solid solid;
+    border-width: 1px;
+    box-shadow: 2px 8px 4px rgba(0, 0, 0, 0.2);
+    margin-top:5px;
+    margin-left:1px;
+    
 }
 
+.diffblock .changeset_header .diff-menu ul li {
+	padding: 0px 0px 0px 0px !important;
+}
+.diffblock .changeset_header .diff-menu ul li a{
+	display: block;
+	padding: 3px 8px 3px 8px !important;
+}
+.diffblock .changeset_header .diff-menu ul li a:hover{
+    text-decoration: none;
+    background-color: #EEEEEE;
+}
 table.code-browser .browser-dir {
 	background: url("../images/icons/folder_16.png") no-repeat scroll 3px;
 	height: 16px;
@@ -3667,7 +3691,7 @@ div.diffblock .code-header{
     padding:10px 0 10px 0;
 }
 div.diffblock .code-header div{
-    margin-left:10px;
+    margin-left:4px;
     font-weight: bold;
     font-size: 14px;
 }
