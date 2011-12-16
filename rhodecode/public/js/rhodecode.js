@@ -600,6 +600,23 @@ var deleteNotification = function(url, notification_id,callbacks){
 
 
 /**
+ * QUICK REPO MENU
+ */
+var quick_repo_menu = function(){
+    YUE.on(YUQ('.quick_repo_menu'),'click',function(e){
+        var menu = e.currentTarget.firstElementChild.firstElementChild;
+        if(YUD.hasClass(menu,'hidden')){
+            YUD.addClass(e.currentTarget,'active');
+            YUD.removeClass(menu,'hidden');
+        }else{
+            YUD.removeClass(e.currentTarget,'active');
+            YUD.addClass(menu,'hidden');
+        }
+    })
+};
+
+
+/**
  * TABLE SORTING
  */
 
