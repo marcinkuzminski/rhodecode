@@ -18,36 +18,38 @@
         <!-- end box / title -->
         <div class="table">
            % if c.groups:
-            <table>
-                <thead>
+            <div id='groups_list_wrap' class="yui-skin-sam">
+              <table id="groups_list">
+                  <thead>
+                      <tr>
+                          <th class="left"><a href="#">${_('Group name')}</a></th>
+                          <th class="left"><a href="#">${_('Description')}</a></th>
+                          ##<th class="left"><a href="#">${_('Number of repositories')}</a></th>
+                      </tr>
+                  </thead>
+                  
+                  ## REPO GROUPS
+                  % for gr in c.groups:
                     <tr>
-                        <th class="left"><a href="#">${_('Group name')}</a></th>
-                        <th class="left"><a href="#">${_('Description')}</a></th>
-                        ##<th class="left"><a href="#">${_('Number of repositories')}</a></th>
+                        <td>
+                            <div style="white-space: nowrap">
+                            <img class="icon" alt="${_('Repositories group')}" src="${h.url('/images/icons/database_link.png')}"/>
+                            ${h.link_to(gr.name,url('repos_group_home',group_name=gr.group_name))}
+                            </div>
+                        </td>
+                        <td>${gr.group_description}</td>
+                        ##<td><b>${gr.repositories.count()}</b></td>
                     </tr>
-                </thead>
-                
-                ## REPO GROUPS
-                
-                % for gr in c.groups:
-                  <tr>
-                      <td>
-                          <div style="white-space: nowrap">
-                          <img class="icon" alt="${_('Repositories group')}" src="${h.url('/images/icons/database_link.png')}"/>
-                          ${h.link_to(gr.name,url('repos_group_home',group_name=gr.group_name))}
-                          </div>
-                      </td>
-                      <td>${gr.group_description}</td>
-                      ##<td><b>${gr.repositories.count()}</b></td>
-                  </tr>
-                % endfor
-                
-            </table>
+                  % endfor
+                  
+              </table>
+            </div>
             <div style="height: 20px"></div>
             % endif
             <div id="welcome" style="display:none;text-align:center">
                 <h1><a href="${h.url('home')}">${c.rhodecode_name} ${c.rhodecode_version}</a></h1>
             </div>
+            <div id='repos_list_wrap' class="yui-skin-sam">
             <table id="repos_list">
             <thead>
                 <tr>
@@ -167,13 +169,94 @@
             </tbody>
             </table>
             </div>
+        </div>
     </div>
     <script>
       YUD.get('repo_count').innerHTML = ${cnt}; 
-      var nodes = YUQ('div.table tr td a.repo_name');
-      var target = 'q_filter';
       var func = function(node){
-    	  return node.parentNode.parentNode.parentNode;
+          return node.parentNode.parentNode.parentNode.parentNode;
       }
-      q_filter(target,nodes,func);
+      var qrm = function(){
+        YUE.on(YUQ('.quick_repo_menu'),'click',function(e){
+            var menu = e.currentTarget.firstElementChild.firstElementChild;
+            if(YUD.hasClass(menu,'hidden')){
+                YUD.addClass(e.currentTarget,'active');
+                YUD.removeClass(menu,'hidden');
+            }else{
+                YUD.removeClass(e.currentTarget,'active');
+                YUD.addClass(menu,'hidden');
+            }
+        })
+      };
+
+      // groups table sorting
+      var myColumnDefs = [
+          {key:"name",label:"${_('Group Name')}",sortable:true,
+              sortOptions: { sortFunction: groupNameSort }},
+          {key:"desc",label:"${_('Description')}",sortable:true},
+      ];
+
+      var myDataSource = new YAHOO.util.DataSource(YUD.get("groups_list"));
+      
+      myDataSource.responseType = YAHOO.util.DataSource.TYPE_HTMLTABLE;
+      myDataSource.responseSchema = {
+          fields: [
+              {key:"name"},
+              {key:"desc"},
+          ]
+      };
+
+      var myDataTable = new YAHOO.widget.DataTable("groups_list_wrap", myColumnDefs, myDataSource,
+              {
+               sortedBy:{key:"name",dir:"asc"},
+               MSG_SORTASC:"${_('Click to sort ascending')}",
+               MSG_SORTDESC:"${_('Click to sort descending')}"
+              }
+      );
+      
+      // main table sorting
+      var myColumnDefs = [
+          {key:"menu",label:"",sortable:false,className:"quick_repo_menu hidden"},
+          {key:"name",label:"${_('Name')}",sortable:true,
+              sortOptions: { sortFunction: nameSort }},
+          {key:"desc",label:"${_('Description')}",sortable:true},
+          {key:"last_change",label:"${_('Last Change')}",sortable:true,
+              sortOptions: { sortFunction: ageSort }},
+          {key:"tip",label:"${_('Tip')}",sortable:true,
+        	  sortOptions: { sortFunction: revisionSort }},
+          {key:"owner",label:"${_('Owner')}",sortable:true},
+          {key:"rss",label:"",sortable:false},
+          {key:"atom",label:"",sortable:false},
+      ];
+
+      var myDataSource = new YAHOO.util.DataSource(YUD.get("repos_list"));
+      
+      myDataSource.responseType = YAHOO.util.DataSource.TYPE_HTMLTABLE;
+      
+      myDataSource.responseSchema = {
+          fields: [
+              {key:"menu"},
+              {key:"name"},
+              {key:"desc"},
+              {key:"last_change"},
+              {key:"tip"},
+              {key:"owner"},
+              {key:"rss"},
+              {key:"atom"},
+          ]
+      };
+
+      var myDataTable = new YAHOO.widget.DataTable("repos_list_wrap", myColumnDefs, myDataSource,
+              {
+               sortedBy:{key:"name",dir:"asc"},
+               MSG_SORTASC:"${_('Click to sort ascending')}",
+               MSG_SORTDESC:"${_('Click to sort descending')}"
+              }
+      );
+      myDataTable.subscribe('postRenderEvent',function(oArgs) {
+          tooltip_activate();
+          qrm();
+          q_filter('q_filter',YUQ('div.table tr td a.repo_name'),func);          
+      });          
+      
     </script>

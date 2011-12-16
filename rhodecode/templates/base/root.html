@@ -121,17 +121,7 @@
                  }
              });
              
-            YUE.on(YUQ('.quick_repo_menu'),'click',function(e){
-            	var menu = e.currentTarget.firstElementChild;
-            	if(YUD.hasClass(menu,'hidden')){
-            		YUD.addClass(e.currentTarget,'active');
-            		YUD.removeClass(menu,'hidden');
-            	}else{
-            		YUD.removeClass(e.currentTarget,'active');
-            		YUD.addClass(menu,'hidden');
-            	}
-            })
-            
+            // hover menu 
             YUE.on(window,'scroll',function(){
                 if(YUD.getDocumentScrollTop() > 45){
                       YUD.addClass('header-inner','hover');
@@ -139,7 +129,7 @@
                 else{
                     YUD.removeClass('header-inner','hover');
                 }
-            }) 
+            })
            })   
             </script>
         </%def>

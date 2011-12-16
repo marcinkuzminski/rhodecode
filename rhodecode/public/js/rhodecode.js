@@ -597,3 +597,82 @@ var deleteNotification = function(url, notification_id,callbacks){
     var request = YAHOO.util.Connect.asyncRequest('POST', sUrl, 
     											  callback, postData);
 };	
+
+
+/**
+ * TABLE SORTING
+ */
+
+// returns a node from given html;
+var fromHTML = function(html){
+	  var _html = document.createElement('element');
+	  _html.innerHTML = html;
+	  return _html;
+}
+var get_rev = function(node){
+    var n = node.firstElementChild.firstElementChild;
+    
+    if (n===null){
+        return -1
+    }
+    else{
+        out = n.firstElementChild.innerHTML.split(':')[0].replace('r','');
+        return parseInt(out);
+    }
+}
+
+var get_name = function(node){
+	 var name = node.firstElementChild.children[2].innerHTML; 
+	 return name
+}
+var get_group_name = function(node){
+	var name = node.firstElementChild.children[1].innerHTML;
+	return name
+}
+var revisionSort = function(a, b, desc, field) {
+	  
+	  var a_ = fromHTML(a.getData(field));
+	  var b_ = fromHTML(b.getData(field));
+	  
+	  // extract revisions from string nodes 
+	  a_ = get_rev(a_)
+	  b_ = get_rev(b_)
+	      	  
+	  var comp = YAHOO.util.Sort.compare;
+	  var compState = comp(a_, b_, desc);
+	  return compState;
+};
+var ageSort = function(a, b, desc, field) {
+    var a_ = a.getData(field);
+    var b_ = b.getData(field);
+    
+    var comp = YAHOO.util.Sort.compare;
+    var compState = comp(a_, b_, desc);
+    return compState;
+};
+
+var nameSort = function(a, b, desc, field) {
+    var a_ = fromHTML(a.getData(field));
+    var b_ = fromHTML(b.getData(field));
+    
+    // extract name from table
+    a_ = get_name(a_)
+    b_ = get_name(b_)          
+    
+    var comp = YAHOO.util.Sort.compare;
+    var compState = comp(a_, b_, desc);
+    return compState;
+};
+
+var groupNameSort = function(a, b, desc, field) {
+    var a_ = fromHTML(a.getData(field));
+    var b_ = fromHTML(b.getData(field));
+    
+    // extract name from table
+    a_ = get_group_name(a_)
+    b_ = get_group_name(b_)          
+    
+    var comp = YAHOO.util.Sort.compare;
+    var compState = comp(a_, b_, desc);
+    return compState;
+};
