@@ -64,14 +64,14 @@ ${c.repo_changesets.pager('$link_previous ~2~ $link_next')}
 
 <h4>${_('Push new repo')}</h4>     
 <pre>
-    hg clone ${c.clone_repo_url}
-    hg add README # add first file
-    hg commit -m "Initial" # commit with message
-    hg push # push changes back
+    ${c.rhodecode_repo.alias} clone ${c.clone_repo_url}
+    ${c.rhodecode_repo.alias} add README # add first file
+    ${c.rhodecode_repo.alias} commit -m "Initial" # commit with message
+    ${c.rhodecode_repo.alias} push # push changes back
 </pre>
  
 <h4>${_('Existing repository?')}</h4>
 <pre>
-    hg push ${c.clone_repo_url}
+    ${c.rhodecode_repo.alias} push ${c.clone_repo_url}
 </pre>    
 %endif
