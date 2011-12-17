@@ -60,7 +60,8 @@ class DbManage(object):
         self.sa = meta.Session
 
     def create_tables(self, override=False):
-        """Create a auth database
+        """
+        Create a auth database
         """
 
         log.info("Any existing database is going to be destroyed")
@@ -86,7 +87,8 @@ class DbManage(object):
         log.info('db version set to: %s', __dbversion__)
 
     def upgrade(self):
-        """Upgrades given database schema to given revision following
+        """
+        Upgrades given database schema to given revision following
         all needed steps, to perform the upgrade
 
         """
@@ -125,7 +127,8 @@ class DbManage(object):
         # UPGRADE STEPS
         #======================================================================
         class UpgradeSteps(object):
-            """Those steps follow schema versions so for example schema
+            """
+            Those steps follow schema versions so for example schema
             for example schema with seq 002 == step_2 and so on.
             """
 
@@ -133,7 +136,7 @@ class DbManage(object):
                 self.klass = klass
 
             def step_0(self):
-                #step 0 is the schema upgrade, and than follow proper upgrades
+                # step 0 is the schema upgrade, and than follow proper upgrades
                 print ('attempting to do database upgrade to version %s' \
                                 % __dbversion__)
                 api.upgrade(db_uri, repository_path, __dbversion__)
@@ -160,13 +163,14 @@ class DbManage(object):
 
         upgrade_steps = [0] + range(curr_version + 1, __dbversion__ + 1)
 
-        #CALL THE PROPER ORDER OF STEPS TO PERFORM FULL UPGRADE
+        # CALL THE PROPER ORDER OF STEPS TO PERFORM FULL UPGRADE
         for step in upgrade_steps:
             print ('performing upgrade step %s' % step)
             getattr(UpgradeSteps(self), 'step_%s' % step)()
 
     def fix_repo_paths(self):
-        """Fixes a old rhodecode version path into new one without a '*'
+        """
+        Fixes a old rhodecode version path into new one without a '*'
         """
 
         paths = self.sa.query(RhodeCodeUi)\
@@ -183,7 +187,8 @@ class DbManage(object):
             raise
 
     def fix_default_user(self):
-        """Fixes a old default user with some 'nicer' default values,
+        """
+        Fixes a old default user with some 'nicer' default values,
         used mostly for anonymous access
         """
         def_user = self.sa.query(User)\
@@ -202,7 +207,8 @@ class DbManage(object):
             raise
 
     def fix_settings(self):
-        """Fixes rhodecode settings adds ga_code key for google analytics
+        """
+        Fixes rhodecode settings adds ga_code key for google analytics
         """
 
         hgsettings3 = RhodeCodeSetting('ga_code', '')
@@ -246,25 +252,26 @@ class DbManage(object):
         else:
             log.info('creating admin and regular test users')
             from rhodecode.tests import TEST_USER_ADMIN_LOGIN,\
-            TEST_USER_ADMIN_PASS ,TEST_USER_ADMIN_EMAIL,TEST_USER_REGULAR_LOGIN,\
-            TEST_USER_REGULAR_PASS,TEST_USER_REGULAR_EMAIL,\
-            TEST_USER_REGULAR2_LOGIN,TEST_USER_REGULAR2_PASS,\
-            TEST_USER_REGULAR2_EMAIL
+            TEST_USER_ADMIN_PASS, TEST_USER_ADMIN_EMAIL,\
+            TEST_USER_REGULAR_LOGIN, TEST_USER_REGULAR_PASS,\
+            TEST_USER_REGULAR_EMAIL, TEST_USER_REGULAR2_LOGIN, \
+            TEST_USER_REGULAR2_PASS, TEST_USER_REGULAR2_EMAIL
 
             self.create_user(TEST_USER_ADMIN_LOGIN, TEST_USER_ADMIN_PASS,
                              TEST_USER_ADMIN_EMAIL, True)
-            
+
             self.create_user(TEST_USER_REGULAR_LOGIN, TEST_USER_REGULAR_PASS,
                              TEST_USER_REGULAR_EMAIL, False)
-            
+
             self.create_user(TEST_USER_REGULAR2_LOGIN, TEST_USER_REGULAR2_PASS,
                              TEST_USER_REGULAR2_EMAIL, False)
 
     def create_ui_settings(self):
-        """Creates ui settings, fills out hooks
-        and disables dotencode
-
         """
+        Creates ui settings, fills out hooks
+        and disables dotencode
+        """
+
         #HOOKS
         hooks1_key = RhodeCodeUi.HOOK_UPDATE
         hooks1_ = self.sa.query(RhodeCodeUi)\
@@ -305,7 +312,7 @@ class DbManage(object):
         largefiles = RhodeCodeUi()
         largefiles.ui_section = 'extensions'
         largefiles.ui_key = 'largefiles'
-        largefiles.ui_value = '1'
+        largefiles.ui_value = ''
 
         self.sa.add(hooks1)
         self.sa.add(hooks2)
@@ -341,16 +348,15 @@ class DbManage(object):
             path = test_repo_path
         path_ok = True
 
-        #check proper dir
+        # check proper dir
         if not os.path.isdir(path):
             path_ok = False
             log.error('Given path %s is not a valid directory', path)
 
-        #check write access
+        # check write access
         if not os.access(path, os.W_OK) and path_ok:
             path_ok = False
             log.error('No write permission to given path %s', path)
-
 
         if retries == 0:
             sys.exit('max retries reached')
@@ -422,8 +428,8 @@ class DbManage(object):
                               name='Anonymous', lastname='User')
 
     def create_permissions(self):
-        #module.(access|create|change|delete)_[name]
-        #module.(read|write|owner)
+        # module.(access|create|change|delete)_[name]
+        # module.(read|write|owner)
         perms = [('repository.none', 'Repository no access'),
                  ('repository.read', 'Repository read access'),
                  ('repository.write', 'Repository write access'),
