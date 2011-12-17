@@ -4,12 +4,12 @@
     ~~~~~~~~~~~~~~~~~~~
 
     Set of diffing helpers, previously part of vcs
-    
-    
+
+
     :created_on: Dec 4, 2011
     :author: marcink
     :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
-    :original copyright: 2007-2008 by Armin Ronacher    
+    :original copyright: 2007-2008 by Armin Ronacher
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software: you can redistribute it and/or modify
@@ -30,15 +30,15 @@ import difflib
 
 from itertools import tee, imap
 
-from mercurial.match import match
-
 from vcs.exceptions import VCSError
 from vcs.nodes import FileNode
+import markupsafe
+
 
 def get_gitdiff(filenode_old, filenode_new, ignore_whitespace=True, context=3):
     """
     Returns git style diff between given ``filenode_old`` and ``filenode_new``.
-    
+
     :param ignore_whitespace: ignore whitespaces in diff
     """
 
@@ -95,7 +95,7 @@ class DiffProcessor(object):
             self.differ = self._highlight_line_udiff
 
     def escaper(self, string):
-        return string.replace('<', '&lt;').replace('>', '&gt;')
+        return markupsafe.escape(string)
 
     def copy_iterator(self):
         """
@@ -153,15 +153,15 @@ class DiffProcessor(object):
 
         raise Exception('wrong size of diff %s' % size)
 
-    def _highlight_line_difflib(self, line, next):
+    def _highlight_line_difflib(self, line, next_):
         """
         Highlight inline changes in both lines.
         """
 
         if line['action'] == 'del':
-            old, new = line, next
+            old, new = line, next_
         else:
-            old, new = next, line
+            old, new = next_, line
 
         oldwords = re.split(r'(\W)', old['line'])
         newwords = re.split(r'(\W)', new['line'])
@@ -183,17 +183,17 @@ class DiffProcessor(object):
         old['line'] = "".join(oldfragments)
         new['line'] = "".join(newfragments)
 
-    def _highlight_line_udiff(self, line, next):
+    def _highlight_line_udiff(self, line, next_):
         """
         Highlight inline changes in both lines.
         """
         start = 0
-        limit = min(len(line['line']), len(next['line']))
-        while start < limit and line['line'][start] == next['line'][start]:
+        limit = min(len(line['line']), len(next_['line']))
+        while start < limit and line['line'][start] == next_['line'][start]:
             start += 1
         end = -1
         limit -= start
-        while -end <= limit and line['line'][end] == next['line'][end]:
+        while -end <= limit and line['line'][end] == next_['line'][end]:
             end -= 1
         end += 1
         if start or end:
@@ -211,7 +211,7 @@ class DiffProcessor(object):
                     l['line'][last:]
                 )
             do(line)
-            do(next)
+            do(next_)
 
     def _parse_udiff(self):
         """
@@ -302,7 +302,7 @@ class DiffProcessor(object):
             pass
 
         # highlight inline changes
-        for file in files:
+        for _ in files:
             for chunk in chunks:
                 lineiter = iter(chunk)
                 #first = True

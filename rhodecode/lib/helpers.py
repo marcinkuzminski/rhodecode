@@ -214,13 +214,16 @@ def pygmentize(filenode, **kwargs):
     return literal(code_highlight(filenode.content,
                                   filenode.lexer, CodeHtmlFormatter(**kwargs)))
 
+
 def pygmentize_annotation(repo_name, filenode, **kwargs):
-    """pygmentize function for annotation
+    """
+    pygmentize function for annotation
 
     :param filenode:
     """
 
     color_dict = {}
+
     def gen_color(n=10000):
         """generator for getting n of evenly distributed colors using
         hsv color and golden ratio. It always return same order of colors
@@ -229,19 +232,26 @@ def pygmentize_annotation(repo_name, filenode, **kwargs):
         """
 
         def hsv_to_rgb(h, s, v):
-            if s == 0.0: return v, v, v
-            i = int(h * 6.0) # XXX assume int() truncates!
+            if s == 0.0:
+                return v, v, v
+            i = int(h * 6.0)  # XXX assume int() truncates!
             f = (h * 6.0) - i
             p = v * (1.0 - s)
             q = v * (1.0 - s * f)
             t = v * (1.0 - s * (1.0 - f))
             i = i % 6
-            if i == 0: return v, t, p
-            if i == 1: return q, v, p
-            if i == 2: return p, v, t
-            if i == 3: return p, q, v
-            if i == 4: return t, p, v
-            if i == 5: return v, p, q
+            if i == 0:
+                return v, t, p
+            if i == 1:
+                return q, v, p
+            if i == 2:
+                return p, v, t
+            if i == 3:
+                return p, q, v
+            if i == 4:
+                return t, p, v
+            if i == 5:
+                return v, p, q
 
         golden_ratio = 0.618033988749895
         h = 0.22717784590367374
@@ -251,12 +261,12 @@ def pygmentize_annotation(repo_name, filenode, **kwargs):
             h %= 1
             HSV_tuple = [h, 0.95, 0.95]
             RGB_tuple = hsv_to_rgb(*HSV_tuple)
-            yield map(lambda x:str(int(x * 256)), RGB_tuple)
+            yield map(lambda x: str(int(x * 256)), RGB_tuple)
 
     cgenerator = gen_color()
 
     def get_color_string(cs):
-        if color_dict.has_key(cs):
+        if cs in color_dict:
             col = color_dict[cs]
         else:
             col = color_dict[cs] = cgenerator.next()
@@ -291,6 +301,7 @@ def pygmentize_annotation(repo_name, filenode, **kwargs):
 
     return literal(annotate_highlight(filenode, url_func(repo_name), **kwargs))
 
+
 def is_following_repo(repo_name, user_id):
     from rhodecode.model.scm import ScmModel
     return ScmModel().is_following_repo(repo_name, user_id)
@@ -304,7 +315,7 @@ from vcs.utils import author_name, author_email
 from rhodecode.lib import credentials_filter, age as _age
 from rhodecode.model.db import User
 
-age = lambda  x:_age(x)
+age = lambda  x: _age(x)
 capitalize = lambda x: x.capitalize()
 email = author_email
 short_id = lambda x: x[:12]
@@ -325,10 +336,11 @@ def email_or_none(author):
     # No valid email, not a valid user in the system, none!
     return None
 
+
 def person(author):
     # attr to return from fetched user
     person_getter = lambda usr: usr.username
-    
+
     # Valid email in the attribute passed, see if they're in the system
     _email = email(author)
     if _email != '':
