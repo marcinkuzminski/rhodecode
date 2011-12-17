@@ -657,7 +657,7 @@ td.quick_repo_menu {
 }
 
 td.quick_repo_menu.active {
-    background: url("../images/horizontal-indicator.png") no-repeat scroll 5px 50% #FFFFFF !important;
+    background: url("../images/dt-arrow-dn.png") no-repeat scroll 5px 50% #FFFFFF !important;
     border: 1px solid #003367;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     cursor: pointer;

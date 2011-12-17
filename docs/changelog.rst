@@ -17,17 +17,25 @@ news
 - #215 rst and markdown README files support
 - #252 Container-based and proxy pass-through authentication support
 - #44 branch browser. Filtering of changelog by branches
+- mercurial bookmarks support
 - hover top menu
-- configurable clone url possibility to specify ssh:// manually as 
-  alternative clone url.
+- configurable clone url template with possibility to specify  protocol like 
+  ssh:// or http:// and also manually alter other parts of clone_url.
 - enabled largefiles extension by default
 - optimized summary file pages and saved a lot of unused space in them
 - #239 option to manually mark repository as fork
-   
+- #320 mapping of commit authors to RhodeCode users
+- #304 hashes are displayed using monospace font    
+- diff configuration, toggle white lines and context lines
+- #307 configurable diffs, whitespace toggle, increasing context lines
+- sorting on branches, tags and bookmarks using YUI datatable
+
 fixes
 -----
 
 - rewrote dbsession management for atomic operations, and better error handling
+- fixed sorting of repo tables
+- #326 escape of special html entities in diffs
 
 1.2.3 (**2011-11-02**)
 ======================
