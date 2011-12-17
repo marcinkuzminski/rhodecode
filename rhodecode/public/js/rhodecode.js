@@ -646,6 +646,12 @@ var get_group_name = function(node){
 	var name = node.firstElementChild.children[1].innerHTML;
 	return name
 }
+var get_date = function(node){
+	console.log(node.firstElementChild)
+	var date_ = node.firstElementChild.innerHTML;
+	return date_
+}
+
 var revisionSort = function(a, b, desc, field) {
 	  
 	  var a_ = fromHTML(a.getData(field));
@@ -688,6 +694,18 @@ var groupNameSort = function(a, b, desc, field) {
     // extract name from table
     a_ = get_group_name(a_)
     b_ = get_group_name(b_)          
+    
+    var comp = YAHOO.util.Sort.compare;
+    var compState = comp(a_, b_, desc);
+    return compState;
+};
+var dateSort = function(a, b, desc, field) {
+    var a_ = fromHTML(a.getData(field));
+    var b_ = fromHTML(b.getData(field));
+    
+    // extract name from table
+    a_ = get_date(a_)
+    b_ = get_date(b_)          
     
     var comp = YAHOO.util.Sort.compare;
     var compState = comp(a_, b_, desc);

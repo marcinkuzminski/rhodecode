@@ -1,11 +1,14 @@
-%if c.repo_bookmarks:    
-    <table class="table_disp">
+%if c.repo_bookmarks:
+   <div id="table_wrap" class="yui-skin-sam">    
+    <table id="bookmarks_data">
+      <thead>
     	<tr>
-            <th class="left">${_('name')}</th>
-            <th class="left">${_('date')}</th>
-            <th class="left">${_('author')}</th>
-            <th class="left">${_('revision')}</th>
+            <th class="left">${_('Name')}</th>
+            <th class="left">${_('Date')}</th>
+            <th class="left">${_('Author')}</th>
+            <th class="left">${_('Revision')}</th>
     	</tr>
+      </thead>
 		%for cnt,book in enumerate(c.repo_bookmarks.items()):
 		<tr class="parity${cnt%2}">		
             <td>
@@ -24,6 +27,7 @@
 		</tr>
 		%endfor
     </table>
+    </div>
 %else:
 	${_('There are no bookmarks yet')}
 %endif    

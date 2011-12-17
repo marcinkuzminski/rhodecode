@@ -1,11 +1,14 @@
 %if c.repo_branches:
-    <table class="table_disp">
+   <div id="table_wrap" class="yui-skin-sam">    
+    <table id="branches_data">
+      <thead>
         <tr>
             <th class="left">${_('name')}</th>
             <th class="left">${_('date')}</th>
             <th class="left">${_('author')}</th>
             <th class="left">${_('revision')}</th>
         </tr>
+      </thead>
 		%for cnt,branch in enumerate(c.repo_branches.items()):
 		<tr class="parity${cnt%2}">
             <td>
@@ -43,6 +46,7 @@
           %endfor
         %endif
     </table>
+    </div>
 %else:
     ${_('There are no branches yet')}
 %endif
