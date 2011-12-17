@@ -198,9 +198,12 @@
 
     var myDataTable = new YAHOO.widget.DataTable("repos_list_wrap", myColumnDefs, myDataSource,
             {
-             sortedBy:{key:"name",dir:"asc"},
-             MSG_SORTASC:"${_('Click to sort ascending')}",
-             MSG_SORTDESC:"${_('Click to sort descending')}"
+              sortedBy:{key:"name",dir:"asc"},
+              MSG_SORTASC:"${_('Click to sort ascending')}",
+              MSG_SORTDESC:"${_('Click to sort descending')}",
+              MSG_EMPTY:"${_('No records found.')}",
+              MSG_ERROR:"${_('Data error.')}",
+              MSG_LOADING:"${_('Loading...')}",                
             }
     );
     myDataTable.subscribe('postRenderEvent',function(oArgs) {
