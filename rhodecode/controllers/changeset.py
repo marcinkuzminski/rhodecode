@@ -46,6 +46,7 @@ from rhodecode.lib import diffs
 from rhodecode.model.db import ChangesetComment
 from rhodecode.model.comment import ChangesetCommentsModel
 from rhodecode.model.meta import Session
+from rhodecode.lib.diffs import wrapped_diff
 
 log = logging.getLogger(__name__)
 
@@ -145,15 +146,6 @@ def _context_url(fileid=None):
     return h.link_to(lbl, h.url.current(**params))
 
 
-def wrap_to_table(str_):
-    return '''<table class="code-difftable">
-                <tr class="line no-comment">
-                <td class="lineno new"></td>
-                <td class="code no-comment"><pre>%s</pre></td>
-                </tr>
-              </table>''' % str_
-
-
 class ChangesetController(BaseRepoController):
 
     @LoginRequired()
@@ -192,10 +184,11 @@ class ChangesetController(BaseRepoController):
             return redirect(url('home'))
 
         c.changes = OrderedDict()
-        c.sum_added = 0
-        c.sum_removed = 0
-        c.lines_added = 0
-        c.lines_deleted = 0
+
+        c.lines_added = 0  # count of lines added
+        c.lines_deleted = 0  # count of lines removes
+
+        cumulative_diff = 0
         c.cut_off = False  # defines if cut off limit is reached
 
         c.comments = []
@@ -220,37 +213,19 @@ class ChangesetController(BaseRepoController):
             # ADDED FILES
             #==================================================================
             for node in changeset.added:
-
-                filenode_old = FileNode(node.path, '', EmptyChangeset())
-                if filenode_old.is_binary or node.is_binary:
-                    diff = wrap_to_table(_('binary file'))
-                    st = (0, 0)
-                else:
-                    # in this case node.size is good parameter since those are
-                    # added nodes and their size defines how many changes were
-                    # made
-                    c.sum_added += node.size
-                    fid = h.FID(revision, node.path)
-                    line_context_lcl = get_line_ctx(fid, request.GET)
-                    ignore_whitespace_lcl = get_ignore_ws(fid, request.GET)
-                    if c.sum_added < self.cut_off_limit:
-                        f_gitdiff = diffs.get_gitdiff(filenode_old, node,
-                                        ignore_whitespace=ignore_whitespace_lcl,
-                                        context=line_context_lcl)
-                        d = diffs.DiffProcessor(f_gitdiff, format='gitdiff')
-
-                        st = d.stat()
-                        diff = d.as_html(enable_comments=enable_comments)
-
-                    else:
-                        diff = wrap_to_table(_('Changeset is to big and '
-                                               'was cut off, see raw '
-                                               'changeset instead'))
-                        c.cut_off = True
-                        break
-
-                cs1 = None
-                cs2 = node.last_changeset.raw_id
+                fid = h.FID(revision, node.path)
+                line_context_lcl = get_line_ctx(fid, request.GET)
+                ign_whitespace_lcl = get_ignore_ws(fid, request.GET)
+                lim = self.cut_off_limit
+                if cumulative_diff > self.cut_off_limit:
+                    lim = -1
+                size, cs1, cs2, diff, st = wrapped_diff(filenode_old=None,
+                                         filenode_new=node,
+                                         cut_off_limit=lim,
+                                         ignore_whitespace=ign_whitespace_lcl,
+                                         line_context=line_context_lcl,
+                                         enable_comments=enable_comments)
+                cumulative_diff += size
                 c.lines_added += st[0]
                 c.lines_deleted += st[1]
                 c.changes[changeset.raw_id].append(('added', node, diff,
@@ -259,60 +234,37 @@ class ChangesetController(BaseRepoController):
             #==================================================================
             # CHANGED FILES
             #==================================================================
-            if not c.cut_off:
-                for node in changeset.changed:
-                    try:
-                        filenode_old = changeset_parent.get_node(node.path)
-                    except ChangesetError:
-                        log.warning('Unable to fetch parent node for diff')
-                        filenode_old = FileNode(node.path, '',
-                                                EmptyChangeset())
+            for node in changeset.changed:
+                try:
+                    filenode_old = changeset_parent.get_node(node.path)
+                except ChangesetError:
+                    log.warning('Unable to fetch parent node for diff')
+                    filenode_old = FileNode(node.path, '', EmptyChangeset())
 
-                    if filenode_old.is_binary or node.is_binary:
-                        diff = wrap_to_table(_('binary file'))
-                        st = (0, 0)
-                    else:
-
-                        if c.sum_removed < self.cut_off_limit:
-                            fid = h.FID(revision, node.path)
-                            line_context_lcl = get_line_ctx(fid, request.GET)
-                            ignore_whitespace_lcl = get_ignore_ws(fid, request.GET,)
-                            f_gitdiff = diffs.get_gitdiff(filenode_old, node,
-                                    ignore_whitespace=ignore_whitespace_lcl,
-                                    context=line_context_lcl)
-                            d = diffs.DiffProcessor(f_gitdiff,
-                                                     format='gitdiff')
-                            st = d.stat()
-                            if (st[0] + st[1]) * 256 > self.cut_off_limit:
-                                diff = wrap_to_table(_('Diff is to big '
-                                                       'and was cut off, see '
-                                                       'raw diff instead'))
-                            else:
-                                diff = d.as_html(enable_comments=enable_comments)
-
-                            if diff:
-                                c.sum_removed += len(diff)
-                        else:
-                            diff = wrap_to_table(_('Changeset is to big and '
-                                                   'was cut off, see raw '
-                                                   'changeset instead'))
-                            c.cut_off = True
-                            break
-
-                    cs1 = filenode_old.last_changeset.raw_id
-                    cs2 = node.last_changeset.raw_id
-                    c.lines_added += st[0]
-                    c.lines_deleted += st[1]
-                    c.changes[changeset.raw_id].append(('changed', node, diff,
-                                                        cs1, cs2, st))
+                fid = h.FID(revision, node.path)
+                line_context_lcl = get_line_ctx(fid, request.GET)
+                ign_whitespace_lcl = get_ignore_ws(fid, request.GET)
+                lim = self.cut_off_limit
+                if cumulative_diff > self.cut_off_limit:
+                    lim = -1
+                size, cs1, cs2, diff, st = wrapped_diff(filenode_old=filenode_old,
+                                         filenode_new=node,
+                                         cut_off_limit=lim,
+                                         ignore_whitespace=ign_whitespace_lcl,
+                                         line_context=line_context_lcl,
+                                         enable_comments=enable_comments)
+                cumulative_diff += size
+                c.lines_added += st[0]
+                c.lines_deleted += st[1]
+                c.changes[changeset.raw_id].append(('changed', node, diff,
+                                                    cs1, cs2, st))
 
             #==================================================================
             # REMOVED FILES
             #==================================================================
-            if not c.cut_off:
-                for node in changeset.removed:
-                    c.changes[changeset.raw_id].append(('removed', node, None,
-                                                        None, None, (0, 0)))
+            for node in changeset.removed:
+                c.changes[changeset.raw_id].append(('removed', node, None,
+                                                    None, None, (0, 0)))
 
         # count inline comments
         for path, lines in c.inline_comments:

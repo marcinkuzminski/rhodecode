@@ -21,33 +21,29 @@
     <div class="title">
         ${self.breadcrumbs()}
     </div>
-    <div class="table">
-		<div id="body" class="diffblock">
-			<div class="code-header">
-                <div class="changeset_header">
-                <span class="changeset_file">${h.link_to(c.f_path,h.url('files_home',repo_name=c.repo_name,
-				revision=c.changeset_2.raw_id,f_path=c.f_path))}</span>
-				 &raquo; <span>${h.link_to(_('diff'),
-				h.url.current(diff2=c.changeset_2.raw_id,diff1=c.changeset_1.raw_id,diff='diff'))}</span>
-				 &raquo; <span>${h.link_to(_('raw diff'),
-				h.url.current(diff2=c.changeset_2.raw_id,diff1=c.changeset_1.raw_id,diff='raw'))}</span>
-				 &raquo; <span>${h.link_to(_('download diff'),
-				h.url.current(diff2=c.changeset_2.raw_id,diff1=c.changeset_1.raw_id,diff='download'))}</span>
-				</div>
-			</div>
-			<div class="code-body">
-		 			%if c.no_changes:
-		            	${_('No changes')}
-		            %elif c.big_diff:
-		                ${_('Diff is to big to display')} ${h.link_to(_('raw diff'),
-                           h.url.current(diff2=c.changeset_2.raw_id,diff1=c.changeset_1.raw_id,diff='raw'))}
-		            %else:        
-						${c.cur_diff|n}
-		            %endif
-			</div>
-		</div>   
+    <div>
+    ## diff block       
+    <%namespace name="diff_block" file="/changeset/diff_block.html"/>
+    ${diff_block.diff_block(c.changes)}  
     </div>
 </div>    
+<script>
+YUE.onDOMReady(function(){
+    
+    YUE.on(YUQ('.diff-menu-activate'),'click',function(e){
+        var act = e.currentTarget.nextElementSibling;
+        
+        if(YUD.hasClass(act,'active')){
+            YUD.removeClass(act,'active');
+            YUD.setStyle(act,'display','none');
+        }else{
+            YUD.addClass(act,'active');
+            YUD.setStyle(act,'display','');
+        }
+    });
+
+})
+</script>
 </%def>  
 
    

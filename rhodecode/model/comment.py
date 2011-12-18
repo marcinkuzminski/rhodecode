@@ -4,7 +4,7 @@
     ~~~~~~~~~~~~~~~~~~~~~~~
 
     comments model for RhodeCode
-    
+
     :created_on: Nov 11, 2011
     :author: marcink
     :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
@@ -55,7 +55,7 @@ class ChangesetCommentsModel(BaseModel):
                line_no=None):
         """
         Creates new comment for changeset
-        
+
         :param text:
         :param repo_id:
         :param user_id:
@@ -84,7 +84,7 @@ class ChangesetCommentsModel(BaseModel):
             if line_no:
                 line = _('on line %s') % line_no
             subj = h.link_to('Re commit: %(commit_desc)s %(line)s' % \
-                                    {'commit_desc':desc, 'line':line},
+                                    {'commit_desc': desc, 'line': line},
                              h.url('changeset_home', repo_name=repo.repo_name,
                                    revision=revision,
                                    anchor='comment-%s' % comment.comment_id,
@@ -114,14 +114,13 @@ class ChangesetCommentsModel(BaseModel):
     def delete(self, comment):
         """
         Deletes given comment
-        
+
         :param comment_id:
         """
         comment = self.__get_changeset_comment(comment)
         self.sa.delete(comment)
 
         return comment
-
 
     def get_comments(self, repo_id, revision):
         return ChangesetComment.query()\
@@ -137,7 +136,7 @@ class ChangesetCommentsModel(BaseModel):
             .filter(ChangesetComment.line_no != None)\
             .filter(ChangesetComment.f_path != None).all()
 
-        paths = defaultdict(lambda:defaultdict(list))
+        paths = defaultdict(lambda: defaultdict(list))
 
         for co in comments:
             paths[co.f_path][co.line_no].append(co)

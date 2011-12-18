@@ -27,12 +27,66 @@
 
 import re
 import difflib
-
+import markupsafe
 from itertools import tee, imap
+
+from pylons.i18n.translation import _
 
 from vcs.exceptions import VCSError
 from vcs.nodes import FileNode
-import markupsafe
+
+from rhodecode.lib.utils import EmptyChangeset
+
+
+def wrap_to_table(str_):
+    return '''<table class="code-difftable">
+                <tr class="line no-comment">
+                <td class="lineno new"></td>
+                <td class="code no-comment"><pre>%s</pre></td>
+                </tr>
+              </table>''' % str_
+
+
+def wrapped_diff(filenode_old, filenode_new, cut_off_limit=None,
+                ignore_whitespace=True, line_context=3,
+                enable_comments=False):
+    """
+    returns a wrapped diff into a table, checks for cut_off_limit and presents
+    proper message
+    """
+
+    if filenode_old is None:
+        filenode_old = FileNode(filenode_new.path, '', EmptyChangeset())
+
+    if filenode_old.is_binary or filenode_new.is_binary:
+        diff = wrap_to_table(_('binary file'))
+        stats = (0, 0)
+        size = 0
+
+    elif cut_off_limit != -1 and (cut_off_limit is None or
+    (filenode_old.size < cut_off_limit and filenode_new.size < cut_off_limit)):
+
+        f_gitdiff = get_gitdiff(filenode_old, filenode_new,
+                                ignore_whitespace=ignore_whitespace,
+                                context=line_context)
+        diff_processor = DiffProcessor(f_gitdiff, format='gitdiff')
+
+        diff = diff_processor.as_html(enable_comments=enable_comments)
+        stats = diff_processor.stat()
+        size = len(diff or '')
+    else:
+        diff = wrap_to_table(_('Changeset was to big and was cut off, use '
+                               'diff menu to display this diff'))
+        stats = (0, 0)
+        size = 0
+
+    if not diff:
+        diff = wrap_to_table(_('No changes detected'))
+
+    cs1 = filenode_old.last_changeset.raw_id
+    cs2 = filenode_new.last_changeset.raw_id
+
+    return size, cs1, cs2, diff, stats
 
 
 def get_gitdiff(filenode_old, filenode_new, ignore_whitespace=True, context=3):
@@ -263,8 +317,8 @@ class DiffProcessor(object):
                             lines.append({
                                 'old_lineno': '...',
                                 'new_lineno': '...',
-                                'action': 'context',
-                                'line': line,
+                                'action':     'context',
+                                'line':       line,
                             })
                         else:
                             skipfirst = False
@@ -371,34 +425,40 @@ class DiffProcessor(object):
             """
 
             if condition:
-                return '''<a href="%(url)s">%(label)s</a>''' % {'url': url,
-                                                                'label': label}
+                return '''<a href="%(url)s">%(label)s</a>''' % {
+                    'url': url,
+                    'label': label
+                }
             else:
                 return label
         diff_lines = self.prepare()
         _html_empty = True
         _html = []
-        _html.append('''<table class="%(table_class)s">\n''' \
-                                            % {'table_class': table_class})
+        _html.append('''<table class="%(table_class)s">\n''' % {
+            'table_class': table_class
+        })
         for diff in diff_lines:
             for line in diff['chunks']:
                 _html_empty = False
                 for change in line:
-                    _html.append('''<tr class="%(line_class)s %(action)s">\n''' \
-                        % {'line_class': line_class,
-                           'action': change['action']})
+                    _html.append('''<tr class="%(lc)s %(action)s">\n''' % {
+                        'lc': line_class,
+                        'action': change['action']
+                    })
                     anchor_old_id = ''
                     anchor_new_id = ''
-                    anchor_old = "%(filename)s_o%(oldline_no)s" % \
-                                {'filename': self._safe_id(diff['filename']),
-                                 'oldline_no': change['old_lineno']}
-                    anchor_new = "%(filename)s_n%(oldline_no)s" % \
-                                {'filename': self._safe_id(diff['filename']),
-                                 'oldline_no': change['new_lineno']}
-                    cond_old = change['old_lineno'] != '...' and \
-                                                        change['old_lineno']
-                    cond_new = change['new_lineno'] != '...' and \
-                                                        change['new_lineno']
+                    anchor_old = "%(filename)s_o%(oldline_no)s" % {
+                        'filename': self._safe_id(diff['filename']),
+                        'oldline_no': change['old_lineno']
+                    }
+                    anchor_new = "%(filename)s_n%(oldline_no)s" % {
+                        'filename': self._safe_id(diff['filename']),
+                        'oldline_no': change['new_lineno']
+                    }
+                    cond_old = (change['old_lineno'] != '...' and
+                                change['old_lineno'])
+                    cond_new = (change['new_lineno'] != '...' and
+                                change['new_lineno'])
                     if cond_old:
                         anchor_old_id = 'id="%s"' % anchor_old
                     if cond_new:
@@ -406,37 +466,41 @@ class DiffProcessor(object):
                     ###########################################################
                     # OLD LINE NUMBER
                     ###########################################################
-                    _html.append('''\t<td %(a_id)s class="%(old_lineno_cls)s">''' \
-                                    % {'a_id': anchor_old_id,
-                                       'old_lineno_cls': old_lineno_class})
+                    _html.append('''\t<td %(a_id)s class="%(olc)s">''' % {
+                        'a_id': anchor_old_id,
+                        'olc': old_lineno_class
+                    })
 
-                    _html.append('''%(link)s''' \
-                        % {'link':
-                        _link_to_if(cond_old, change['old_lineno'], '#%s' \
-                                                                % anchor_old)})
+                    _html.append('''%(link)s''' % {
+                        'link': _link_to_if(True, change['old_lineno'],
+                                            '#%s' % anchor_old)
+                    })
                     _html.append('''</td>\n''')
                     ###########################################################
                     # NEW LINE NUMBER
                     ###########################################################
 
-                    _html.append('''\t<td %(a_id)s class="%(new_lineno_cls)s">''' \
-                                    % {'a_id': anchor_new_id,
-                                       'new_lineno_cls': new_lineno_class})
+                    _html.append('''\t<td %(a_id)s class="%(nlc)s">''' % {
+                        'a_id': anchor_new_id,
+                        'nlc': new_lineno_class
+                    })
 
-                    _html.append('''%(link)s''' \
-                        % {'link':
-                        _link_to_if(cond_new, change['new_lineno'], '#%s' \
-                                                                % anchor_new)})
+                    _html.append('''%(link)s''' % {
+                        'link': _link_to_if(True, change['new_lineno'],
+                                            '#%s' % anchor_new)
+                    })
                     _html.append('''</td>\n''')
                     ###########################################################
                     # CODE
                     ###########################################################
                     comments = '' if enable_comments else 'no-comment'
-                    _html.append('''\t<td class="%(code_class)s %(in-comments)s">''' \
-                                                % {'code_class': code_class,
-                                                   'in-comments': comments})
-                    _html.append('''\n\t\t<pre>%(code)s</pre>\n''' \
-                                                % {'code': change['line']})
+                    _html.append('''\t<td class="%(cc)s %(inc)s">''' % {
+                        'cc': code_class,
+                        'inc': comments
+                    })
+                    _html.append('''\n\t\t<pre>%(code)s</pre>\n''' % {
+                        'code': change['line']
+                    })
                     _html.append('''\t</td>''')
                     _html.append('''\n</tr>\n''')
         _html.append('''</table>''')

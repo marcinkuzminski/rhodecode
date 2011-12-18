@@ -40,6 +40,7 @@ from rhodecode.lib.utils import repo_name_slug
 from rhodecode.lib import str2bool, safe_unicode, safe_str, get_changeset_safe
 from rhodecode.lib.markup_renderer import MarkupRenderer
 
+
 def _reset(name, value=None, id=NotGiven, type="reset", **attrs):
     """
     Reset button
@@ -52,11 +53,11 @@ def _reset(name, value=None, id=NotGiven, type="reset", **attrs):
 reset = _reset
 safeid = _make_safe_id_component
 
-        
-def FID(raw_id,path):
+
+def FID(raw_id, path):
     """
     Creates a uniqe ID for filenode based on it's path and revision
-    
+
     :param raw_id:
     :param path:
     """
@@ -116,7 +117,7 @@ class _FilesBreadCrumbs(object):
         paths_l = paths.split('/')
         for cnt, p in enumerate(paths_l):
             if p != '':
-                url_l.append(link_to(p, 
+                url_l.append(link_to(p,
                                      url('files_home',
                                          repo_name=repo_name,
                                          revision=rev,
@@ -738,14 +739,14 @@ def urlify_text(text):
 
 
 def rst(source):
-    return literal('<div class="rst-block">%s</div>' % 
+    return literal('<div class="rst-block">%s</div>' %
                    MarkupRenderer.rst(source))
-    
+
 def rst_w_mentions(source):
     """
     Wrapped rst renderer with @mention highlighting
     
     :param source:
     """
-    return literal('<div class="rst-block">%s</div>' % 
-                   MarkupRenderer.rst_with_mentions(source))    
+    return literal('<div class="rst-block">%s</div>' %
+                   MarkupRenderer.rst_with_mentions(source))
