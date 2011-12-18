@@ -27,7 +27,7 @@ import platform
 
 VERSION = (1, 3, 0, 'beta')
 __version__ = '.'.join((str(each) for each in VERSION[:4]))
-__dbversion__ = 4 #defines current db version for migrations
+__dbversion__ = 4  # defines current db version for migrations
 __platform__ = platform.system()
 __license__ = 'GPLv3'
 
@@ -38,7 +38,7 @@ try:
     from rhodecode.lib import get_current_revision
     _rev = get_current_revision()
 except ImportError:
-    #this is needed when doing some setup.py operations
+    # this is needed when doing some setup.py operations
     _rev = False
 
 if len(VERSION) > 3 and _rev:
@@ -59,5 +59,3 @@ CELERY_ON = False
 
 # link to config for pylons
 CONFIG = None
-
-
