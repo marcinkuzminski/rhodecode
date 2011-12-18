@@ -50,19 +50,21 @@ from rhodecode.model.meta import Session
 log = logging.getLogger(__name__)
 
 
-def anchor_url(revision,path):
+def anchor_url(revision, path):
     fid = h.FID(revision, path)
-    return h.url.current(anchor=fid,**request.GET)
+    return h.url.current(anchor=fid, **request.GET)
+
 
 def get_ignore_ws(fid, GET):
     ig_ws_global = request.GET.get('ignorews')
-    ig_ws = filter(lambda k:k.startswith('WS'),GET.getall(fid))
+    ig_ws = filter(lambda k: k.startswith('WS'), GET.getall(fid))
     if ig_ws:
         try:
             return int(ig_ws[0].split(':')[-1])
         except:
             pass
     return ig_ws_global
+
 
 def _ignorews_url(fileid=None):
 
@@ -88,14 +90,15 @@ def _ignorews_url(fileid=None):
     # if we have passed in ln_ctx pass it along to our params
     if ln_ctx:
         params[ctx_key] += [ctx_val]
-    
+
     params['anchor'] = fileid
     return h.link_to(lbl, h.url.current(**params))
 
+
 def get_line_ctx(fid, GET):
     ln_ctx_global = request.GET.get('context')
-    ln_ctx = filter(lambda k:k.startswith('C'),GET.getall(fid))
-    
+    ln_ctx = filter(lambda k: k.startswith('C'), GET.getall(fid))
+
     if ln_ctx:
         retval = ln_ctx[0].split(':')[-1]
     else:
@@ -106,10 +109,11 @@ def get_line_ctx(fid, GET):
     except:
         return
 
+
 def _context_url(fileid=None):
     """
     Generates url for context lines
-    
+
     :param fileid:
     """
     ig_ws = get_ignore_ws(fileid, request.GET)
@@ -131,7 +135,7 @@ def _context_url(fileid=None):
         params[fileid] += ['C:%s' % ln_ctx]
         ig_ws_key = fileid
         ig_ws_val = 'WS:%s' % 1
-        
+
     if ig_ws:
         params[ig_ws_key] += [ig_ws_val]
 
@@ -140,13 +144,15 @@ def _context_url(fileid=None):
     params['anchor'] = fileid
     return h.link_to(lbl, h.url.current(**params))
 
+
 def wrap_to_table(str_):
     return '''<table class="code-difftable">
-                <tr class="line">
+                <tr class="line no-comment">
                 <td class="lineno new"></td>
-                <td class="code"><pre>%s</pre></td>
+                <td class="code no-comment"><pre>%s</pre></td>
                 </tr>
               </table>''' % str_
+
 
 class ChangesetController(BaseRepoController):
 
@@ -165,9 +171,10 @@ class ChangesetController(BaseRepoController):
 
         #get ranges of revisions if preset
         rev_range = revision.split('...')[:2]
-
+        enable_comments = True
         try:
             if len(rev_range) == 2:
+                enable_comments = False
                 rev_start = rev_range[0]
                 rev_end = rev_range[1]
                 rev_ranges = c.rhodecode_repo.get_changesets(start=rev_start,
@@ -233,7 +240,7 @@ class ChangesetController(BaseRepoController):
                         d = diffs.DiffProcessor(f_gitdiff, format='gitdiff')
 
                         st = d.stat()
-                        diff = d.as_html()
+                        diff = d.as_html(enable_comments=enable_comments)
 
                     else:
                         diff = wrap_to_table(_('Changeset is to big and '
@@ -281,7 +288,7 @@ class ChangesetController(BaseRepoController):
                                                        'and was cut off, see '
                                                        'raw diff instead'))
                             else:
-                                diff = d.as_html()
+                                diff = d.as_html(enable_comments=enable_comments)
 
                             if diff:
                                 c.sum_removed += len(diff)
@@ -397,11 +404,10 @@ class ChangesetController(BaseRepoController):
     @jsonify
     def delete_comment(self, repo_name, comment_id):
         co = ChangesetComment.get(comment_id)
-        owner = lambda : co.author.user_id == c.rhodecode_user.user_id
+        owner = lambda: co.author.user_id == c.rhodecode_user.user_id
         if h.HasPermissionAny('hg.admin', 'repository.admin')() or owner:
             ChangesetCommentsModel().delete(comment=co)
             Session.commit()
             return True
         else:
             raise HTTPForbidden()
-

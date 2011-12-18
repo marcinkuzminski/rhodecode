@@ -1,0 +1,50 @@
+## -*- coding: utf-8 -*-
+##usage:
+## <%namespace name="diff_block" file="/changeset/diff_block.html"/>
+## ${diff_block.diff_block(changes)}
+##
+<%def name="diff_block(changes)">
+
+%for change,filenode,diff,cs1,cs2,stat in changes:
+    %if change !='removed':
+    <div id="${h.FID(filenode.changeset.raw_id,filenode.path)}" style="clear:both;height:90px;margin-top:-60px"></div>
+    <div class="diffblock  margined comm">
+        <div class="code-header">
+            <div class="changeset_header">
+                <div class="changeset_file">
+                    ${h.link_to_if(change!='removed',h.safe_unicode(filenode.path),h.url('files_home',repo_name=c.repo_name,
+                    revision=filenode.changeset.raw_id,f_path=h.safe_unicode(filenode.path)))}
+                </div>
+                <div class="diff-menu-wrapper">
+                    <img class="diff-menu-activate" style="margin-bottom:-6px;cursor: pointer" alt="diff-menu" src="${h.url('/images/icons/script_gear.png')}" />
+                    <div class="diff-menu" style="display:none">
+                        <ul>
+                          <li>${h.link_to(_('diff'),h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(filenode.path),diff2=cs2,diff1=cs1,diff='diff'))}</li>
+                          <li>${h.link_to(_('raw diff'),h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(filenode.path),diff2=cs2,diff1=cs1,diff='raw'))}</li>
+                          <li>${h.link_to(_('download diff'),h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(filenode.path),diff2=cs2,diff1=cs1,diff='download'))}</li>
+                          <li>${c.ignorews_url(h.FID(filenode.changeset.raw_id,filenode.path))}</li>
+                          <li>${c.context_url(h.FID(filenode.changeset.raw_id,filenode.path))}</li>
+                        </ul>
+                    </div>                        
+                </div>
+                <span style="float:right;margin-top:-3px">
+                  <label>
+                  ${_('show inline comments')}
+                  ${h.checkbox('',checked="checked",class_="show-inline-comments",id_for=h.FID(filenode.changeset.raw_id,filenode.path))}
+                  </label>
+                </span>
+            </div>
+        </div>
+        <div class="code-body">
+            <div class="full_f_path" path="${h.safe_unicode(filenode.path)}"></div>        
+            %if diff:
+                ${diff|n}
+            %else:
+                ${_('No changes in this file')}
+            %endif
+        </div>
+    </div>
+    %endif
+%endfor
+
+</%def>

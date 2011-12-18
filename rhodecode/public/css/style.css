@@ -3898,15 +3898,17 @@ form.comment-inline-form {
 	text-decoration: none !important;
 }
 .notification-header{
-	
+	padding-top:6px;
 }
 .notification-header .desc{
 	font-size: 16px;
     height: 24px;
-    padding-top: 6px;
     float: left
 }
 .notification-list .container.unread{
+	
+}
+.notification-header .gravatar{
 	
 }
 .notification-header .desc.unread{
@@ -4069,4 +4071,10 @@ table.code-difftable .code pre{
     background-repeat:no-repeat !important;
     background-position: right !important;
     background-position: 0% 50% !important;
+}
+.diffblock.margined.comm .line .code.no-comment:hover{
+	background-image: none !important;
+	cursor: auto !important;
+	background-color: inherit !important;
+	
 }

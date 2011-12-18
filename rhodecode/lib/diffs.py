@@ -114,15 +114,17 @@ class DiffProcessor(object):
         try:
             if line1.startswith('--- ') and line2.startswith('+++ '):
                 l1 = line1[4:].split(None, 1)
-                old_filename = l1[0].lstrip('a/') if len(l1) >= 1 else None
+                old_filename = (l1[0].replace('a/', '', 1)
+                                if len(l1) >= 1 else None)
                 old_rev = l1[1] if len(l1) == 2 else 'old'
 
                 l2 = line2[4:].split(None, 1)
-                new_filename = l2[0].lstrip('b/') if len(l1) >= 1 else None
+                new_filename = (l2[0].replace('b/', '', 1)
+                                if len(l1) >= 1 else None)
                 new_rev = l2[1] if len(l2) == 2 else 'new'
 
-                filename = old_filename if (old_filename !=
-                                            'dev/null') else new_filename
+                filename = (old_filename
+                            if old_filename != '/dev/null' else new_filename)
 
                 return filename, new_rev, old_rev
         except (ValueError, IndexError):
@@ -359,7 +361,7 @@ class DiffProcessor(object):
 
     def as_html(self, table_class='code-difftable', line_class='line',
                 new_lineno_class='lineno old', old_lineno_class='lineno new',
-                code_class='code'):
+                code_class='code', enable_comments=False):
         """
         Return udiff as html table with customized css classes
         """
@@ -429,8 +431,10 @@ class DiffProcessor(object):
                     ###########################################################
                     # CODE
                     ###########################################################
-                    _html.append('''\t<td class="%(code_class)s">''' \
-                                                % {'code_class': code_class})
+                    comments = '' if enable_comments else 'no-comment'
+                    _html.append('''\t<td class="%(code_class)s %(in-comments)s">''' \
+                                                % {'code_class': code_class,
+                                                   'in-comments': comments})
                     _html.append('''\n\t\t<pre>%(code)s</pre>\n''' \
                                                 % {'code': change['line']})
                     _html.append('''\t</td>''')

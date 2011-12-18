@@ -343,7 +343,7 @@ var createInlineForm = function(parent_tr, f_path, line) {
 	return form
 };
 var injectInlineForm = function(tr){
-	  if(YUD.hasClass(tr,'form-open') || YUD.hasClass(tr,'context')){
+	  if(YUD.hasClass(tr,'form-open') || YUD.hasClass(tr,'context') || YUD.hasClass(tr,'no-comment')){
 		  return
 	  }	
 	  YUD.addClass(tr,'form-open');
