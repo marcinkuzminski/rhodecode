@@ -24,39 +24,22 @@
             </li>          
         </ul>            
     </div>
-    % if c.notifications:
-    <%
-    unread = lambda n:{False:'unread'}.get(n)
-    %>
-    <div class="table">
-      <div class="notification-list">
-      %for notification in c.notifications:
-        <div id="notification_${notification.notification.notification_id}" class="container ${unread(notification.read)}">
-          <div class="notification-header">
-            <div class="gravatar">
-                <img alt="gravatar" src="${h.gravatar_url(h.email(notification.notification.created_by_user.email),24)}"/>
-            </div>
-            <div class="desc ${unread(notification.read)}">
-            <a href="${url('notification', notification_id=notification.notification.notification_id)}">${notification.notification.description}</a>
-            </div>
-            <div class="delete-notifications">
-              <span id="${notification.notification.notification_id}" class="delete-notification delete_icon action"></span>
-            </div>
-          </div>
-          <div class="notification-subject">${h.literal(notification.notification.subject)}</div>
-        </div>
-      %endfor
-      </div>
-    </div>
-    %else:
-        <div class="table">${_('No notifications here yet')}</div>
-    %endif
+      <div style="padding:10px 15px;text-align: right">
+      <span id='mark_all_read' class="ui-btn">${_('Mark all read')}</span>
+  </div>
+  <div id='notification_data'>
+    <%include file='notifications_data.html'/>
+  </div>
 </div>
 <script type="text/javascript">
 var url = "${url('notification', notification_id='__NOTIFICATION_ID__')}";
-   YUE.on(YUQ('.delete-notification'),'click',function(e){
-	   var notification_id = e.currentTarget.id;
-	   deleteNotification(url,notification_id)
-   })
+YUE.on(YUQ('.delete-notification'),'click',function(e){
+ var notification_id = e.currentTarget.id;
+ deleteNotification(url,notification_id)
+})
+ YUE.on('mark_all_read','click',function(e){
+	    var url = "${h.url('notifications_mark_all_read')}";
+	    ypjax(url,'notification_data',function(){YUD.get('notification_counter').innerHTML=0});
+ })
 </script>
 </%def>  

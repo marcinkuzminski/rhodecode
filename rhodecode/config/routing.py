@@ -26,7 +26,7 @@ def make_map(config):
     def check_repo(environ, match_dict):
         """
         check for valid repository for proper 404 handling
-        
+
         :param environ:
         :param match_dict:
         """
@@ -37,14 +37,13 @@ def make_map(config):
     def check_group(environ, match_dict):
         """
         check for valid repositories group for proper 404 handling
-        
+
         :param environ:
         :param match_dict:
         """
         repos_group_name = match_dict.get('group_name')
 
         return is_valid_repos_group(repos_group_name, config['base_path'])
-
 
     def check_int(environ, match_dict):
         return match_dict.get('id').isdigit()
@@ -274,7 +273,6 @@ def make_map(config):
         m.connect("admin_settings_create_repository", "/create_repository",
                   action="create_repository", conditions=dict(method=["GET"]))
 
-
     #NOTIFICATION REST ROUTES
     with rmap.submapper(path_prefix=ADMIN_PREFIX,
                         controller='admin/notifications') as m:
@@ -282,6 +280,8 @@ def make_map(config):
                   action="create", conditions=dict(method=["POST"]))
         m.connect("notifications", "/notifications",
                   action="index", conditions=dict(method=["GET"]))
+        m.connect("notifications_mark_all_read", "/notifications/mark_all_read",
+                  action="mark_all_read", conditions=dict(method=["GET"]))
         m.connect("formatted_notifications", "/notifications.{format}",
                   action="index", conditions=dict(method=["GET"]))
         m.connect("new_notification", "/notifications/new",

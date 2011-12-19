@@ -1,6 +1,7 @@
 import logging
 import traceback
 
+from pylons import request
 from pylons import tmpl_context as c, url
 from pylons.controllers.util import redirect
 
@@ -15,6 +16,7 @@ from rhodecode.model.meta import Session
 
 log = logging.getLogger(__name__)
 
+
 class NotificationsController(BaseController):
     """REST Controller styled on the Atom Publishing Protocol"""
     # To properly map this controller, ensure your config/routing.py
@@ -27,7 +29,6 @@ class NotificationsController(BaseController):
     def __before__(self):
         super(NotificationsController, self).__before__()
 
-
     def index(self, format='html'):
         """GET /_admin/notifications: All items in the collection"""
         # url('notifications')
@@ -35,6 +36,16 @@ class NotificationsController(BaseController):
         c.notifications = NotificationModel()\
                             .get_for_user(self.rhodecode_user.user_id)
         return render('admin/notifications/notifications.html')
+
+    def mark_all_read(self):
+        if request.environ.get('HTTP_X_PARTIAL_XHR'):
+            nm = NotificationModel()
+            # mark all read
+            nm.mark_all_read_for_user(self.rhodecode_user.user_id)
+            Session.commit()
+            c.user = self.rhodecode_user
+            c.notifications = nm.get_for_user(self.rhodecode_user.user_id)
+            return render('admin/notifications/notifications_data.html')
 
     def create(self):
         """POST /_admin/notifications: Create a new item"""
