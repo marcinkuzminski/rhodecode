@@ -60,41 +60,47 @@ class ApiController(JSONRPCController):
         """"
         Get a user by username
 
-        :param apiuser
-        :param username
+        :param apiuser:
+        :param username:
         """
 
         user = User.get_by_username(username)
         if not user:
             return None
 
-        return dict(id=user.user_id,
-                    username=user.username,
-                    firstname=user.name,
-                    lastname=user.lastname,
-                    email=user.email,
-                    active=user.active,
-                    admin=user.admin,
-                    ldap=user.ldap_dn)
+        return dict(
+            id=user.user_id,
+            username=user.username,
+            firstname=user.name,
+            lastname=user.lastname,
+            email=user.email,
+            active=user.active,
+            admin=user.admin,
+            ldap=user.ldap_dn
+        )
 
     @HasPermissionAllDecorator('hg.admin')
     def get_users(self, apiuser):
         """"
         Get all users
 
-        :param apiuser
+        :param apiuser:
         """
 
         result = []
         for user in User.getAll():
-            result.append(dict(id=user.user_id,
-                                username=user.username,
-                                firstname=user.name,
-                                lastname=user.lastname,
-                                email=user.email,
-                                active=user.active,
-                                admin=user.admin,
-                                ldap=user.ldap_dn))
+            result.append(
+                dict(
+                    id=user.user_id,
+                    username=user.username,
+                    firstname=user.name,
+                    lastname=user.lastname,
+                    email=user.email,
+                    active=user.active,
+                    admin=user.admin,
+                    ldap=user.ldap_dn
+                )
+            )
         return result
 
     @HasPermissionAllDecorator('hg.admin')
@@ -131,8 +137,8 @@ class ApiController(JSONRPCController):
         """"
         Get users group by name
 
-        :param apiuser
-        :param group_name
+        :param apiuser:
+        :param group_name:
         """
 
         users_group = UsersGroup.get_by_group_name(group_name)
@@ -161,7 +167,7 @@ class ApiController(JSONRPCController):
         """"
         Get all users groups
 
-        :param apiuser
+        :param apiuser:
         """
 
         result = []
@@ -210,9 +216,9 @@ class ApiController(JSONRPCController):
         """"
         Add a user to a group
 
-        :param apiuser
-        :param group_name
-        :param user_name
+        :param apiuser:
+        :param group_name:
+        :param user_name:
         """
 
         try:
@@ -238,8 +244,8 @@ class ApiController(JSONRPCController):
         """"
         Get repository by name
 
-        :param apiuser
-        :param repo_name
+        :param apiuser:
+        :param repo_name:
         """
 
         repo = Repository.get_by_repo_name(repo_name)
@@ -250,45 +256,59 @@ class ApiController(JSONRPCController):
         for user in repo.repo_to_perm:
             perm = user.permission.permission_name
             user = user.user
-            members.append(dict(type_="user",
-                                    id=user.user_id,
-                                    username=user.username,
-                                    firstname=user.name,
-                                    lastname=user.lastname,
-                                    email=user.email,
-                                    active=user.active,
-                                    admin=user.admin,
-                                    ldap=user.ldap_dn,
-                                    permission=perm))
+            members.append(
+                dict(
+                    type_="user",
+                    id=user.user_id,
+                    username=user.username,
+                    firstname=user.name,
+                    lastname=user.lastname,
+                    email=user.email,
+                    active=user.active,
+                    admin=user.admin,
+                    ldap=user.ldap_dn,
+                    permission=perm
+                )
+            )
         for users_group in repo.users_group_to_perm:
             perm = users_group.permission.permission_name
             users_group = users_group.users_group
-            members.append(dict(type_="users_group",
-                                    id=users_group.users_group_id,
-                                    name=users_group.users_group_name,
-                                    active=users_group.users_group_active,
-                                    permission=perm))
+            members.append(
+                dict(
+                    type_="users_group",
+                    id=users_group.users_group_id,
+                    name=users_group.users_group_name,
+                    active=users_group.users_group_active,
+                    permission=perm
+                )
+            )
 
-        return dict(id=repo.repo_id,
-                    name=repo.repo_name,
-                    type=repo.repo_type,
-                    description=repo.description,
-                    members=members)
+        return dict(
+            id=repo.repo_id,
+            name=repo.repo_name,
+            type=repo.repo_type,
+            description=repo.description,
+            members=members
+        )
 
     @HasPermissionAnyDecorator('hg.admin')
     def get_repos(self, apiuser):
         """"
         Get all repositories
 
-        :param apiuser
+        :param apiuser:
         """
 
         result = []
         for repository in Repository.getAll():
-            result.append(dict(id=repository.repo_id,
-                                name=repository.repo_name,
-                                type=repository.repo_type,
-                                description=repository.description))
+            result.append(
+                dict(
+                    id=repository.repo_id,
+                    name=repository.repo_name,
+                    type=repository.repo_type,
+                    description=repository.description
+                )
+            )
         return result
 
     @HasPermissionAnyDecorator('hg.admin', 'hg.create.repository')
@@ -297,12 +317,12 @@ class ApiController(JSONRPCController):
         """
         Create a repository
 
-        :param apiuser
-        :param name
-        :param description
-        :param type
-        :param private
-        :param owner_name
+        :param apiuser:
+        :param name:
+        :param description:
+        :param type:
+        :param private:
+        :param owner_name:
         """
 
         try:
@@ -321,18 +341,27 @@ class ApiController(JSONRPCController):
             for g in groups:
                 group = RepoGroup.get_by_group_name(g)
                 if not group:
-                    group = ReposGroupModel().create(dict(group_name=g,
-                                                  group_description='',
-                                                  group_parent_id=parent_id))
+                    group = ReposGroupModel().create(
+                        dict(
+                            group_name=g,
+                            group_description='',
+                            group_parent_id=parent_id
+                        )
+                    )
                 parent_id = group.group_id
 
-            RepoModel().create(dict(repo_name=real_name,
-                                     repo_name_full=name,
-                                     description=description,
-                                     private=private,
-                                     repo_type=repo_type,
-                                     repo_group=parent_id,
-                                     clone_uri=None), owner)
+            RepoModel().create(
+                dict(
+                    repo_name=real_name,
+                    repo_name_full=name,
+                    description=description,
+                    private=private,
+                    repo_type=repo_type,
+                    repo_group=parent_id,
+                    clone_uri=None
+                ),
+                owner
+            )
             Session.commit()
         except Exception:
             log.error(traceback.format_exc())
@@ -343,16 +372,16 @@ class ApiController(JSONRPCController):
         """
         Add permission for a user to a repository
 
-        :param apiuser
-        :param repo_name
-        :param user_name
-        :param perm
+        :param apiuser:
+        :param repo_name:
+        :param user_name:
+        :param perm:
         """
 
         try:
             repo = Repository.get_by_repo_name(repo_name)
             if repo is None:
-                raise JSONRPCError('unknown repository %s' % repo)            
+                raise JSONRPCError('unknown repository %s' % repo)
 
             try:
                 user = User.get_by_username(user_name)
@@ -362,8 +391,54 @@ class ApiController(JSONRPCController):
             RepositoryPermissionModel()\
                 .update_or_delete_user_permission(repo, user, perm)
             Session.commit()
+
+            return dict(
+                msg='Added perm: %s for %s in repo: %s' % (
+                    perm, user_name, repo_name
+                )
+            )
         except Exception:
             log.error(traceback.format_exc())
-            raise JSONRPCError('failed to edit permission %(repo)s for %(user)s'
-                            % dict(user=user_name, repo=repo_name))
+            raise JSONRPCError(
+                'failed to edit permission %(repo)s for %(user)s' % dict(
+                    user=user_name, repo=repo_name
+                )
+            )
 
+    @HasPermissionAnyDecorator('hg.admin')
+    def add_users_group_to_repo(self, apiuser, repo_name, group_name, perm):
+        """
+        Add permission for a users group to a repository
+
+        :param apiuser:
+        :param repo_name:
+        :param group_name:
+        :param perm:
+        """
+
+        try:
+            repo = Repository.get_by_repo_name(repo_name)
+            if repo is None:
+                raise JSONRPCError('unknown repository %s' % repo)
+
+            try:
+                user_group = UsersGroup.get_by_group_name(group_name)
+            except NoResultFound:
+                raise JSONRPCError('unknown users group %s' % user_group)
+
+            RepositoryPermissionModel()\
+                .update_or_delete_users_group_permission(repo, user_group,
+                                                         perm)
+            Session.commit()
+            return dict(
+                msg='Added perm: %s for %s in repo: %s' % (
+                    perm, group_name, repo_name
+                )
+            )
+        except Exception:
+            log.error(traceback.format_exc())
+            raise JSONRPCError(
+                'failed to edit permission %(repo)s for %(usergr)s' % dict(
+                    usergr=group_name, repo=repo_name
+                )
+            )

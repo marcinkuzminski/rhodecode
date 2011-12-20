@@ -6,8 +6,9 @@
     repository permission model for RhodeCode
 
     :created_on: Oct 1, 2011
-    :author: nvinot
+    :author: nvinot, marcink
     :copyright: (C) 2011-2011 Nicolas Vinot <aeris@imirhil.fr>
+    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software: you can redistribute it and/or modify
@@ -25,7 +26,7 @@
 
 import logging
 from rhodecode.model import BaseModel
-from rhodecode.model.db import UserRepoToPerm, Permission
+from rhodecode.model.db import UserRepoToPerm, UsersGroupRepoToPerm, Permission
 
 log = logging.getLogger(__name__)
 
@@ -39,6 +40,15 @@ class RepositoryPermissionModel(BaseModel):
                 .scalar()
 
     def update_user_permission(self, repository, user, permission):
+        
+        #TODO: REMOVE THIS !!
+        ################################
+        import ipdb;ipdb.set_trace()
+        print 'setting ipdb debuggin for rhodecode.model.repo_permission.RepositoryPermissionModel.update_user_permission'
+        ################################
+        
+
+        
         permission = Permission.get_by_key(permission)
         current = self.get_user_permission(repository, user)
         if current:
@@ -56,8 +66,41 @@ class RepositoryPermissionModel(BaseModel):
         if current:
             self.sa.delete(current)
 
+    def get_users_group_permission(self, repository, users_group):
+        return UsersGroupRepoToPerm.query() \
+                .filter(UsersGroupRepoToPerm.users_group == users_group) \
+                .filter(UsersGroupRepoToPerm.repository == repository) \
+                .scalar()
+
+    def update_users_group_permission(self, repository, users_group, 
+                                      permission):
+        permission = Permission.get_by_key(permission)
+        current = self.get_users_group_permission(repository, users_group)
+        if current:
+            if not current.permission is permission:
+                current.permission = permission
+        else:
+            p = UsersGroupRepoToPerm()
+            p.users_group = users_group
+            p.repository = repository
+            p.permission = permission
+            self.sa.add(p)
+
+    def delete_users_group_permission(self, repository, users_group):
+        current = self.get_users_group_permission(repository, users_group)
+        if current:
+            self.sa.delete(current)
+
     def update_or_delete_user_permission(self, repository, user, permission):
         if permission:
             self.update_user_permission(repository, user, permission)
         else:
             self.delete_user_permission(repository, user)
+
+    def update_or_delete_users_group_permission(self, repository, user_group,
+                                              permission):
+        if permission:
+            self.update_users_group_permission(repository, user_group,
+                                               permission)
+        else:
+            self.delete_users_group_permission(repository, user_group)

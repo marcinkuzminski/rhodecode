@@ -46,6 +46,7 @@ from rhodecode.lib.auth import AuthUser
 
 log = logging.getLogger('JSONRPC')
 
+
 class JSONRPCError(BaseException):
 
     def __init__(self, message):
@@ -67,19 +68,18 @@ def jsonrpc_error(message, code=None):
     return resp
 
 
-
 class JSONRPCController(WSGIController):
     """
      A WSGI-speaking JSON-RPC controller class
-    
+
      See the specification:
      <http://json-rpc.org/wiki/specification>`.
-   
+
      Valid controller return values should be json-serializable objects.
-    
+
      Sub-classes should catch their exceptions and raise JSONRPCError
      if they want to pass meaningful errors to the client.
-    
+
      """
 
     def _get_method_args(self):
@@ -111,7 +111,7 @@ class JSONRPCController(WSGIController):
         try:
             json_body = json.loads(urllib.unquote_plus(raw_body))
         except ValueError, e:
-            #catch JSON errors Here
+            # catch JSON errors Here
             return jsonrpc_error(message="JSON parse error ERR:%s RAW:%r" \
                                  % (e, urllib.unquote_plus(raw_body)))
 
@@ -120,10 +120,10 @@ class JSONRPCController(WSGIController):
             self._req_api_key = json_body['api_key']
             self._req_id = json_body['id']
             self._req_method = json_body['method']
-            self._req_params = json_body['args']
+            self._request_params = json_body['args']
             log.debug('method: %s, params: %s',
                       self._req_method,
-                      self._req_params)
+                      self._request_params)
         except KeyError, e:
             return jsonrpc_error(message='Incorrect JSON query missing %s' % e)
 
@@ -146,13 +146,14 @@ class JSONRPCController(WSGIController):
         # self.kargs and dispatch control to WGIController
         argspec = inspect.getargspec(self._func)
         arglist = argspec[0][1:]
-        defaults = argspec[3] or []
+        defaults = map(type, argspec[3] or [])
         default_empty = types.NotImplementedType
 
-        kwarglist = list(izip_longest(reversed(arglist), reversed(defaults),
-                                fillvalue=default_empty))
+        # kw arguments required by this method
+        func_kwargs = dict(izip_longest(reversed(arglist), reversed(defaults),
+                                        fillvalue=default_empty))
 
-        # this is little trick to inject logged in user for 
+        # this is little trick to inject logged in user for
         # perms decorators to work they expect the controller class to have
         # rhodecode_user attribute set
         self.rhodecode_user = auth_u
@@ -167,21 +168,23 @@ class JSONRPCController(WSGIController):
                                  (self._func.__name__, USER_SESSION_ATTR))
 
         # get our arglist and check if we provided them as args
-        for arg, default in kwarglist:
+        for arg, default in func_kwargs.iteritems():
             if arg == USER_SESSION_ATTR:
-                # USER_SESSION_ATTR is something translated from api key and 
+                # USER_SESSION_ATTR is something translated from api key and
                 # this is checked before so we don't need validate it
                 continue
 
-            # skip the required param check if it's default value is 
+            # skip the required param check if it's default value is
             # NotImplementedType (default_empty)
-            if not self._req_params or (type(default) == default_empty
-                                        and arg not in self._req_params):
-                return jsonrpc_error(message=('Missing non optional %s arg '
-                                              'in JSON DATA') % arg)
+            if (default == default_empty and arg not in self._request_params):
+                return jsonrpc_error(
+                    message=(
+                        'Missing non optional `%s` arg in JSON DATA' % arg
+                    )
+                )
 
-        self._rpc_args = {USER_SESSION_ATTR:u}
-        self._rpc_args.update(self._req_params)
+        self._rpc_args = {USER_SESSION_ATTR: u}
+        self._rpc_args.update(self._request_params)
 
         self._rpc_args['action'] = self._req_method
         self._rpc_args['environ'] = environ
@@ -190,6 +193,7 @@ class JSONRPCController(WSGIController):
         status = []
         headers = []
         exc_info = []
+
         def change_content(new_status, new_headers, new_exc_info=None):
             status.append(new_status)
             headers.extend(new_headers)
