@@ -11,7 +11,7 @@ with JSON protocol both ways. An url to send API request in RhodeCode is
 <your_server>/_admin/api
 
 
-All clients need to send JSON data in such format::
+All clients are required to send JSON-RPC spec JSON data::
 
     {
         "api_key":"<api_key>",
@@ -32,7 +32,7 @@ Simply provide
     api_key can be found in your user account page
 
 
-RhodeCode API will return always a JSON formatted answer::
+RhodeCode API will return always a JSON-RPC response::
 
     {
         "result": "<result>",
@@ -220,8 +220,8 @@ OUTPUT::
             }
     error:  null
 
-add_user_to_users_groups
-------------------------
+add_user_to_users_group
+-----------------------
 
 Adds a user to a users group. This command can be executed only using api_key
 belonging to user with admin rights
@@ -299,14 +299,14 @@ OUTPUT::
 	                                "active" :     "<bool>",
 	                                "admin" :      "<bool>",
 	                                "ldap" :       "<ldap_dn>",
-	                                "permission" : "repository_(read|write|admin)"
+	                                "permission" : "repository.(read|write|admin)"
 	                              },
                                   …
                                   {
                                     "id" :       "<usersgroupid>",
                                     "name" :     "<usersgroupname>",
                                     "active":    "<bool>",
-                                    "permission" : "repository_(read|write|admin)"
+                                    "permission" : "repository.(read|write|admin)"
                                   },
                                   …
                                 ]
@@ -353,10 +353,27 @@ INPUT::
     args:     {
                 "repo_name" :  "<reponame>",
                 "user_name" :  "<username>",
-                "perm" :       "(None|repository_(read|write|admin))",
+                "perm" :       "(None|repository.(read|write|admin))",
               }
 
 OUTPUT::
 
     result: None
     error:  null
+
+add_users_group_to_repo
+-----------------------
+
+Add a users group to a repository. This command can be executed only using 
+api_key belonging to user with admin rights. If "perm" is None, group will 
+be removed from the repository.
+
+INPUT::
+
+    api_key : "<api_key>"
+    method :  "add_users_group_to_repo"
+    args:     {
+                "repo_name" :  "<reponame>",
+                "group_name" :  "<groupname>",
+                "perm" :       "(None|repository.(read|write|admin))",
+              }
