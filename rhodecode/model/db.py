@@ -51,6 +51,7 @@ log = logging.getLogger(__name__)
 # BASE CLASSES
 #==============================================================================
 
+
 class ModelSerializer(json.JSONEncoder):
     """
     Simple Serializer for JSON,
@@ -81,6 +82,7 @@ class ModelSerializer(json.JSONEncoder):
         else:
             return json.JSONEncoder.default(self, obj)
 
+
 class BaseModel(object):
     """
     Base Model for all classess
@@ -100,10 +102,10 @@ class BaseModel(object):
         d = {}
         for k in self._get_keys():
             d[k] = getattr(self, k)
-        
+
         # also use __json__() if present to get additional fields
         if hasattr(self, '__json__'):
-            for k,val in self.__json__().iteritems():
+            for k, val in self.__json__().iteritems():
                 d[k] = val 
         return d
 
@@ -179,7 +181,6 @@ class RhodeCodeSetting(Base, BaseModel):
         return "<%s('%s:%s')>" % (self.__class__.__name__,
                                   self.app_settings_name, self.app_settings_value)
 
-
     @classmethod
     def get_by_name(cls, ldap_key):
         return cls.query()\
@@ -228,11 +229,9 @@ class RhodeCodeUi(Base, BaseModel):
     ui_value = Column("ui_value", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     ui_active = Column("ui_active", Boolean(), nullable=True, unique=None, default=True)
 
-
     @classmethod
     def get_by_key(cls, key):
         return cls.query().filter(cls.ui_key == key)
-
 
     @classmethod
     def get_builtin_hooks(cls):
@@ -316,7 +315,6 @@ class User(Base, BaseModel):
         return "<%s('id:%s:%s')>" % (self.__class__.__name__,
                                      self.user_id, self.username)
 
-
     @classmethod
     def get_by_username(cls, username, case_insensitive=False, cache=False):
         if case_insensitive:
@@ -355,7 +353,6 @@ class User(Base, BaseModel):
         self.last_login = datetime.datetime.now()
         Session.add(self)
         log.debug('updated user %s lastlogin', self.username)
-
 
     def __json__(self):
         return dict(email=self.email,
@@ -414,6 +411,7 @@ class UsersGroup(Base, BaseModel):
                                     "get_users_group_%s" % users_group_id))
         return users_group.get(users_group_id)
 
+
 class UsersGroupMember(Base, BaseModel):
     __tablename__ = 'users_groups_members'
     __table_args__ = {'extend_existing':True}
@@ -438,6 +436,7 @@ class UsersGroupMember(Base, BaseModel):
         Session.commit()
         return ugm
 
+
 class Repository(Base, BaseModel):
     __tablename__ = 'repositories'
     __table_args__ = (UniqueConstraint('repo_name'), {'extend_existing':True},)
@@ -455,7 +454,6 @@ class Repository(Base, BaseModel):
 
     fork_id = Column("fork_id", Integer(), ForeignKey('repositories.repo_id'), nullable=True, unique=False, default=None)
     group_id = Column("group_id", Integer(), ForeignKey('groups.group_id'), nullable=True, unique=False, default=None)
-
 
     user = relationship('User')
     fork = relationship('Repository', remote_side=repo_id)
@@ -568,7 +566,6 @@ class Repository(Base, BaseModel):
         baseui._ucfg = config.config()
         baseui._tcfg = config.config()
 
-
         ret = RhodeCodeUi.query()\
             .options(FromCache("sql_cache_short", "repository_repo_ui")).all()
 
@@ -592,7 +589,6 @@ class Repository(Base, BaseModel):
         from rhodecode.lib.utils import is_valid_repo
 
         return is_valid_repo(repo_name, cls.base_path())
-
 
     #==========================================================================
     # SCM PROPERTIES
@@ -682,7 +678,6 @@ class RepoGroup(Base, BaseModel):
     group_description = Column("group_description", String(length=10000, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
 
     parent_group = relationship('RepoGroup', remote_side=group_id)
-
 
     def __init__(self, group_name='', parent_group=None):
         self.group_name = group_name
@@ -840,6 +835,7 @@ class UserRepoToPerm(Base, BaseModel):
     def __repr__(self):
         return '<user:%s => %s >' % (self.user, self.repository)
 
+
 class UserToPerm(Base, BaseModel):
     __tablename__ = 'user_to_perm'
     __table_args__ = (UniqueConstraint('user_id', 'permission_id'), {'extend_existing':True})
@@ -875,6 +871,7 @@ class UsersGroupRepoToPerm(Base, BaseModel):
     def __repr__(self):
         return '<userGroup:%s => %s >' % (self.users_group, self.repository)
 
+
 class UsersGroupToPerm(Base, BaseModel):
     __tablename__ = 'users_group_to_perm'
     users_group_to_perm_id = Column("users_group_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -898,6 +895,7 @@ class UserRepoGroupToPerm(Base, BaseModel):
     permission = relationship('Permission')
     group = relationship('RepoGroup')
 
+
 class UsersGroupRepoGroupToPerm(Base, BaseModel):
     __tablename__ = 'users_group_repo_group_to_perm'
     __table_args__ = (UniqueConstraint('group_id', 'permission_id'), {'extend_existing':True})
@@ -911,6 +909,7 @@ class UsersGroupRepoGroupToPerm(Base, BaseModel):
     permission = relationship('Permission')
     group = relationship('RepoGroup')
 
+
 class Statistics(Base, BaseModel):
     __tablename__ = 'statistics'
     __table_args__ = (UniqueConstraint('repository_id'), {'extend_existing':True})
@@ -922,6 +921,7 @@ class Statistics(Base, BaseModel):
     languages = Column("languages", LargeBinary(1000000), nullable=False)#JSON data
 
     repository = relationship('Repository', single_parent=True)
+
 
 class UserFollowing(Base, BaseModel):
     __tablename__ = 'user_followings'
@@ -944,6 +944,7 @@ class UserFollowing(Base, BaseModel):
     @classmethod
     def get_repo_followers(cls, repo_id):
         return cls.query().filter(cls.follows_repo_id == repo_id)
+
 
 class CacheInvalidation(Base, BaseModel):
     __tablename__ = 'cache_invalidation'
@@ -1094,6 +1095,7 @@ class Notification(Base, BaseModel):
         from rhodecode.model.notification import NotificationModel
         return NotificationModel().make_description(self)
 
+
 class UserNotification(Base, BaseModel):
     __tablename__ = 'user_to_notification'
     __table_args__ = (UniqueConstraint('user_id', 'notification_id'),
@@ -1110,6 +1112,7 @@ class UserNotification(Base, BaseModel):
     def mark_as_read(self):
         self.read = True
         Session.add(self)
+
 
 class DbMigrateVersion(Base, BaseModel):
     __tablename__ = 'db_migrate_version'

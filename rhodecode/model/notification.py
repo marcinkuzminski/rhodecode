@@ -4,8 +4,8 @@
     ~~~~~~~~~~~~~~
 
     Model for notifications
-    
-    
+
+
     :created_on: Nov 20, 2011
     :author: marcink
     :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
@@ -61,9 +61,9 @@ class NotificationModel(BaseModel):
                type_=Notification.TYPE_MESSAGE, with_email=True,
                email_kwargs={}):
         """
-        
+
         Creates notification of given type
-        
+
         :param created_by: int, str or User instance. User who created this
             notification
         :param subject:
@@ -104,7 +104,7 @@ class NotificationModel(BaseModel):
             email_subject = NotificationModel().make_description(notif, False)
             type_ = type_
             email_body = body
-            kwargs = {'subject':subject, 'body':h.rst_w_mentions(body)}
+            kwargs = {'subject': subject, 'body': h.rst_w_mentions(body)}
             kwargs.update(email_kwargs)
             email_body_html = EmailNotificationModel()\
                                 .get_email_tmpl(type_, **kwargs)
