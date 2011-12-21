@@ -26,6 +26,7 @@ import os
 import time
 import traceback
 import logging
+import cStringIO
 
 from vcs import get_backend
 from vcs.exceptions import RepositoryError
@@ -59,6 +60,7 @@ class RepoTemp(object):
 
     def __repr__(self):
         return "<%s('id:%s')>" % (self.__class__.__name__, self.repo_id)
+
 
 class CachedRepoList(object):
 
@@ -111,6 +113,7 @@ class CachedRepoList(object):
             tmp_d['dbrepo'] = dbr.get_dict()
             tmp_d['dbrepo_fork'] = dbr.fork.get_dict() if dbr.fork else {}
             yield tmp_d
+
 
 class ScmModel(BaseModel):
     """
@@ -359,8 +362,12 @@ class ScmModel(BaseModel):
 
         if isinstance(content, (basestring,)):
             content = safe_str(content)
-        elif isinstance(content, file):
+        elif isinstance(content, (file, cStringIO.OutputType,)):
             content = content.read()
+        else:
+            raise Exception('Content is of unrecognized type %s' % (
+                type(content)
+            ))
 
         message = safe_str(message)
         path = safe_str(f_path)
