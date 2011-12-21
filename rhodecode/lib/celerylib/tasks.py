@@ -55,8 +55,6 @@ from sqlalchemy import engine_from_config
 
 add_cache(config)
 
-
-
 __all__ = ['whoosh_index', 'get_commits_stats',
            'reset_user_password', 'send_email']
 
@@ -67,6 +65,7 @@ def get_session():
     if CELERY_ON:
         engine = engine_from_config(config, 'sqlalchemy.db1.')
         init_model(engine)
+
     sa = meta.Session()
     return sa
 
@@ -103,7 +102,7 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
     try:
         lock = l = DaemonLock(file_=jn(lockkey_path, lockkey))
 
-        #for js data compatibilty cleans the key for person from '
+        # for js data compatibilty cleans the key for person from '
         akc = lambda k: person(k).replace('"', "")
 
         co_day_auth_aggr = {}
@@ -236,10 +235,10 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
             lock.release()
             return False
 
-        #final release
+        # final release
         lock.release()
 
-        #execute another task if celery is enabled
+        # execute another task if celery is enabled
         if len(repo.revisions) > 1 and CELERY_ON:
             run_task(get_commits_stats, repo_name, ts_min_y, ts_max_y)
         return True
@@ -342,12 +341,15 @@ def send_email(recipients, subject, body):
         log = send_email.get_logger()
     except:
         log = logging.getLogger(__name__)
-
+    
+    sa = get_session()
     email_config = config
 
     if not recipients:
         # if recipients are not defined we send to email_config + all admins
-        admins = [u.email for u in User.query().filter(User.admin==True).all()]
+        admins = [
+            u.email for u in sa.query(User).filter(User.admin==True).all()
+        ]
         recipients = [email_config.get('email_to')] + admins
 
     mail_from = email_config.get('app_email_from')
