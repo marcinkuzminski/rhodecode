@@ -4,7 +4,7 @@
     ~~~~~~~~~~~~~~~~~~~~~~~~~
 
     JSON RPC controller
-    
+
     :created_on: Aug 20, 2011
     :author: marcink
     :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
@@ -226,15 +226,20 @@ class JSONRPCController(WSGIController):
         if self._error is not None:
             raw_response = None
 
-        response = dict(id=self._req_id, result=raw_response,
+        response = dict(id=self._req_id, result=raw_response, 
                         error=self._error)
 
         try:
             return json.dumps(response)
         except TypeError, e:
             log.debug('Error encoding response: %s', e)
-            return json.dumps(dict(result=None,
-                                   error="Error encoding response"))
+            return json.dumps(
+                dict(
+                    self._req_id,
+                    result=None,
+                    error="Error encoding response"
+                )
+            )
 
     def _find_method(self):
         """
