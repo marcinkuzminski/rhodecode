@@ -70,6 +70,11 @@ class LoginController(BaseController):
                 auth_user.set_authenticated()
                 cs = auth_user.get_cookie_store()
                 session['rhodecode_user'] = cs
+                # If they want to be remembered, update the cookie
+                if c.form_result['remember'] is not False:
+                    session.cookie_expires = False
+                    session._set_cookie_values()
+                session._update_cookie_out()
                 session.save()
 
                 log.info('user %s is now authenticated and stored in '
@@ -159,7 +164,6 @@ class LoginController(BaseController):
         return redirect(url('login_home'))
 
     def logout(self):
-        del session['rhodecode_user']
-        session.save()
-        log.info('Logging out and setting user as Empty')
+        session.delete()
+        log.info('Logging out and deleting session for user')
         redirect(url('home'))

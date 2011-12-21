@@ -482,6 +482,8 @@ class LoginForm(formencode.Schema):
                                 'tooShort':_('Enter %(min)i characters or more')}
                                 )
 
+    remember = StringBoolean(if_missing=False)
+    
     chained_validators = [ValidAuth]
 
 def UserForm(edit=False, old_data={}):
