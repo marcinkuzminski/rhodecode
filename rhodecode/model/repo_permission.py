@@ -40,15 +40,6 @@ class RepositoryPermissionModel(BaseModel):
                 .scalar()
 
     def update_user_permission(self, repository, user, permission):
-        
-        #TODO: REMOVE THIS !!
-        ################################
-        import ipdb;ipdb.set_trace()
-        print 'setting ipdb debuggin for rhodecode.model.repo_permission.RepositoryPermissionModel.update_user_permission'
-        ################################
-        
-
-        
         permission = Permission.get_by_key(permission)
         current = self.get_user_permission(repository, user)
         if current:
