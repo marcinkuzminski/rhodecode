@@ -228,7 +228,6 @@ class SettingsController(BaseController):
                      prefix_error=False,
                      encoding="UTF-8")
 
-
         if setting_id == 'hooks':
             ui_key = request.POST.get('new_hook_ui_key')
             ui_value = request.POST.get('new_hook_ui_value')
@@ -242,7 +241,8 @@ class SettingsController(BaseController):
                 # check for edits
                 update = False
                 _d = request.POST.dict_of_lists()
-                for k, v in zip(_d.get('hook_ui_key', []), _d.get('hook_ui_value_new', [])):
+                for k, v in zip(_d.get('hook_ui_key', []),
+                                _d.get('hook_ui_value_new', [])):
                     RhodeCodeUi.create_or_update_hook(k, v)
                     update = True
 
@@ -256,16 +256,18 @@ class SettingsController(BaseController):
 
             return redirect(url('admin_edit_setting', setting_id='hooks'))
 
-
-
         if setting_id == 'email':
             test_email = request.POST.get('test_email')
             test_email_subj = 'RhodeCode TestEmail'
             test_email_body = 'RhodeCode Email test'
-            test_email_html_body = EmailNotificationModel()\
-                .get_email_tmpl(EmailNotificationModel.TYPE_DEFAULT)
 
-            run_task(tasks.send_email, [test_email], test_email_subj,
+            test_email_html_body = EmailNotificationModel()\
+                .get_email_tmpl(EmailNotificationModel.TYPE_DEFAULT,
+                                body=test_email_body)
+
+            recipients = [test_email] if [test_email] else None
+
+            run_task(tasks.send_email, recipients, test_email_subj,
                      test_email_body, test_email_html_body)
 
             h.flash(_('Email task created'), category='success')
