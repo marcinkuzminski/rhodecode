@@ -17,14 +17,14 @@ requirements = [
         "SQLAlchemy==0.7.3",
         "Mako==0.5.0",
         "pygments>=1.4",
-        "mercurial>=1.9.3,<2.0",
+        "mercurial>=2.0,<2.1",
         "whoosh<1.8",
         "celery>=2.2.5,<2.3",
         "babel",
         "python-dateutil>=1.5.0,<2.0.0",
         "dulwich>=0.8.0,<0.9.0",
-        "vcs==0.2.2",
-        "webob==1.0.8"    
+        "vcs==0.2.3",
+        "webob==1.0.8"
     ]
 
 dependency_links = [
@@ -49,19 +49,20 @@ if __platform__ in PLATFORM_OTHERS:
     requirements.append("py-bcrypt")
 
 
-#additional files from project that goes somewhere in the filesystem
-#relative to sys.prefix
+# additional files from project that goes somewhere in the filesystem
+# relative to sys.prefix
 data_files = []
 
-#additional files that goes into package itself
+# additional files that goes into package itself
 package_data = {'rhodecode': ['i18n/*/LC_MESSAGES/*.mo', ], }
 
 description = ('Mercurial repository browser/management with '
                'build in push/pull server and full text search')
 keywords = ' '.join(['rhodecode', 'rhodiumcode', 'mercurial', 'git',
+                     'code review', 'repo groups', 'ldap'
                       'repository management', 'hgweb replacement'
                       'hgwebdir', 'gitweb replacement', 'serving hgweb', ])
-#long description
+# long description
 try:
     readme_file = 'README.rst'
     changelog_file = 'docs/changelog.rst'
@@ -81,7 +82,7 @@ except ImportError:
     from ez_setup import use_setuptools
     use_setuptools()
     from setuptools import setup, find_packages
-#packages
+# packages
 packages = find_packages(exclude=['ez_setup'])
 
 setup(

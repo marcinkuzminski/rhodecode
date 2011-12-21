@@ -298,12 +298,19 @@ class DbManage(object):
         dotencode_disable.ui_key = 'dotencode'
         dotencode_disable.ui_value = 'false'
 
+        # enable largefiles
+        largefiles = RhodeCodeUi()
+        largefiles.ui_section = 'extensions'
+        largefiles.ui_key = 'largefiles'
+        largefiles.ui_value = ''
+
         try:
             self.sa.add(hooks1)
             self.sa.add(hooks2)
             self.sa.add(hooks3)
             self.sa.add(hooks4)
             self.sa.add(dotencode_disable)
+            self.sa.add(largefiles)
             self.sa.commit()
         except:
             self.sa.rollback()
