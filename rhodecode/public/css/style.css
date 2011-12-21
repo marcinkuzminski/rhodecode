@@ -4008,7 +4008,7 @@ table.code-difftable .del del{
 
 /** LINE NUMBERS **/
 table.code-difftable .lineno{
-    background:none repeat scroll 0 0 #EEEEEE !important;
+
     padding-left:2px;
     padding-right:2px;
     text-align:right;
