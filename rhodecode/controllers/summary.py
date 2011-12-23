@@ -57,6 +57,7 @@ README_FILES = [''.join([x[0][0], x[1][0]]) for x in
                     sorted(list(product(ALL_READMES, ALL_EXTS)),
                            key=lambda y:y[0][1] + y[1][1])]
 
+
 class SummaryController(BaseRepoController):
 
     @LoginRequired()
@@ -94,7 +95,7 @@ class SummaryController(BaseRepoController):
         uri = uri_tmpl % {'user': username,
                            'pass': password,
                            'scheme': parsed_url.scheme,
-                           'netloc':parsed_url.netloc,
+                           'netloc': parsed_url.netloc,
                            'path':parsed_url.path}
 
         c.clone_repo_url = uri
@@ -151,8 +152,8 @@ class SummaryController(BaseRepoController):
                                             key=lambda k: k[1])[:10]
                                         )
                                     )
-            last_rev = stats.stat_on_revision
-            c.repo_last_rev = c.rhodecode_repo.count() - 1 \
+            last_rev = stats.stat_on_revision + 1
+            c.repo_last_rev = c.rhodecode_repo.count()\
                 if c.rhodecode_repo.revisions else 0
             if last_rev == 0 or c.repo_last_rev == 0:
                 pass

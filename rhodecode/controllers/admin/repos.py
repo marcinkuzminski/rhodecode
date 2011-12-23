@@ -97,12 +97,13 @@ class ReposController(BaseController):
             .filter(UserFollowing.follows_repository == c.repo_info).scalar()
 
         if c.repo_info.stats:
-            last_rev = c.repo_info.stats.stat_on_revision
+            # this is on what revision we ended up so we add +1 for count
+            last_rev = c.repo_info.stats.stat_on_revision + 1
         else:
             last_rev = 0
         c.stats_revision = last_rev
 
-        c.repo_last_rev = repo.count() - 1 if repo.revisions else 0
+        c.repo_last_rev = repo.count() if repo.revisions else 0
 
         if last_rev == 0 or c.repo_last_rev == 0:
             c.stats_percentage = 0
@@ -287,6 +288,7 @@ class ReposController(BaseController):
         try:
             repo_model = RepoModel()
             repo_model.delete_perm_user(request.POST, repo_name)
+            Session.commit()
         except Exception, e:
             h.flash(_('An error occurred during deletion of repository user'),
                     category='error')
@@ -302,6 +304,7 @@ class ReposController(BaseController):
         try:
             repo_model = RepoModel()
             repo_model.delete_perm_users_group(request.POST, repo_name)
+            Session.commit()
         except Exception, e:
             h.flash(_('An error occurred during deletion of repository'
                       ' users groups'),
@@ -319,6 +322,7 @@ class ReposController(BaseController):
         try:
             repo_model = RepoModel()
             repo_model.delete_stats(repo_name)
+            Session.commit()
         except Exception, e:
             h.flash(_('An error occurred during deletion of repository stats'),
                     category='error')
@@ -334,6 +338,7 @@ class ReposController(BaseController):
 
         try:
             ScmModel().mark_for_invalidation(repo_name)
+            Session.commit()
         except Exception, e:
             h.flash(_('An error occurred during cache invalidation'),
                     category='error')
@@ -357,6 +362,7 @@ class ReposController(BaseController):
                 self.scm_model.toggle_following_repo(repo_id, user_id)
                 h.flash(_('Updated repository visibility in public journal'),
                         category='success')
+                Session.commit()
             except:
                 h.flash(_('An error occurred during setting this'
                           ' repository in public journal'),

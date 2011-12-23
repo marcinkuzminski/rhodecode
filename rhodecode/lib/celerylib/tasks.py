@@ -78,12 +78,13 @@ def get_logger(cls):
 
     return log
 
+
 @task(ignore_result=True)
 @locked_task
 def whoosh_index(repo_location, full_index):
     from rhodecode.lib.indexers.daemon import WhooshIndexingDaemon
 
-    #log = whoosh_index.get_logger()
+    # log = whoosh_index.get_logger(whoosh_index)
 
     index_location = config['index_dir']
     WhooshIndexingDaemon(index_location=index_location,
@@ -100,6 +101,7 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
     lockkey_path = config['here']
 
     log.info('running task with lockkey %s', lockkey)
+
     try:
         sa = get_session()
         lock = l = DaemonLock(file_=jn(lockkey_path, lockkey))
@@ -114,15 +116,15 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
             return True
         
         repo = repo.scm_instance
-        repo_size = len(repo.revisions)
-        #return if repo have no revisions
+        repo_size = repo.count()
+        # return if repo have no revisions
         if repo_size < 1:
             lock.release()
             return True
 
         skip_date_limit = True
         parse_limit = int(config['app_conf'].get('commit_parse_limit'))
-        last_rev = 0
+        last_rev = None
         last_cs = None
         timegetter = itemgetter('time')
 
@@ -149,8 +151,10 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
         log.debug('starting parsing %s', parse_limit)
         lmktime = mktime
 
-        last_rev = last_rev + 1 if last_rev > 0 else last_rev
-
+        last_rev = last_rev + 1 if last_rev >= 0 else 0
+        log.debug('Getting revisions from %s to %s' % (
+             last_rev, last_rev + parse_limit)
+        )
         for cs in repo[last_rev:last_rev + parse_limit]:
             last_cs = cs  # remember last parsed changeset
             k = lmktime([cs.date.timetuple()[0], cs.date.timetuple()[1],

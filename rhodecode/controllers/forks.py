@@ -80,12 +80,12 @@ class ForksController(BaseRepoController):
             .filter(UserFollowing.follows_repository == c.repo_info).scalar()
 
         if c.repo_info.stats:
-            last_rev = c.repo_info.stats.stat_on_revision
+            last_rev = c.repo_info.stats.stat_on_revision+1
         else:
             last_rev = 0
         c.stats_revision = last_rev
 
-        c.repo_last_rev = repo.count() - 1 if repo.revisions else 0
+        c.repo_last_rev = repo.count() if repo.revisions else 0
 
         if last_rev == 0 or c.repo_last_rev == 0:
             c.stats_percentage = 0
