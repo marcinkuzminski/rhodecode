@@ -316,8 +316,10 @@ class  AuthUser(object):
               self.user_id != self.anonymous_user.user_id):
             log.debug('Auth User lookup by USER ID %s', self.user_id)
             is_user_loaded = user_model.fill_data(self, user_id=self.user_id)
-        # lookup by username    
-        elif self.username:
+        # lookup by username
+        elif self.username and \
+            str2bool(config.get('container_auth_enabled', False)):
+            
             log.debug('Auth User lookup by USER NAME %s', self.username)
             dbuser = login_container_auth(self.username)
             if dbuser is not None:
