@@ -11,6 +11,13 @@ with JSON protocol both ways. An url to send API request in RhodeCode is
 <your_server>/_admin/api
 
 
+API access can also be turned on for each view decorated with `@LoginRequired`
+decorator. To enable API access simple change standard login decorator into
+`@LoginRequired(api_access=True)`. After such a change view can be accessed
+by adding a GET parameter to url `?api_key=<api_key>`. By default it's only
+enabled on RSS/ATOM feed views.
+
+
 All clients are required to send JSON-RPC spec JSON data::
 
     {   
