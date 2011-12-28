@@ -41,8 +41,6 @@ def repo_size(ui, repo, hooktype=None, **kwargs):
     :param hooktype:
     """
 
-    if hooktype != 'changegroup':
-        return False
     size_hg, size_root = 0, 0
     for path, dirs, files in os.walk(repo.root):
         if path.find('.hg') != -1:
@@ -61,8 +59,15 @@ def repo_size(ui, repo, hooktype=None, **kwargs):
     size_hg_f = h.format_byte_size(size_hg)
     size_root_f = h.format_byte_size(size_root)
     size_total_f = h.format_byte_size(size_root + size_hg)
-    sys.stdout.write('Repository size .hg:%s repo:%s total:%s\n' \
-                     % (size_hg_f, size_root_f, size_total_f))
+
+    last_cs = repo[len(repo) - 1]
+
+    msg = ('Repository size .hg:%s repo:%s total:%s\n'
+           'Last revision is now r%s:%s\n') % (
+        size_hg_f, size_root_f, size_total_f, last_cs.rev(), last_cs.hex()[:12]
+    )
+
+    sys.stdout.write(msg)
 
 
 def log_pull_action(ui, repo, **kwargs):
