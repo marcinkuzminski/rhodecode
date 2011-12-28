@@ -418,6 +418,11 @@ var fileBrowserListeners = function(current_url, node_list_url, url_base,
 	        nodes = JSON.parse(o.responseText);
 	        YUD.setStyle('node_filter_box_loading','display','none');
 	        YUD.setStyle('node_filter_box','display','');
+	        n_filter.focus();
+			if(YUD.hasClass(n_filter,'init')){
+				n_filter.value = '';
+				YUD.removeClass(n_filter,'init');
+			}   
 	      },
 	      failure:function(o){
 	          console.log('failed to load');
@@ -430,13 +435,14 @@ var fileBrowserListeners = function(current_url, node_list_url, url_base,
 	    return function(){
 	        // Reset timeout 
 	        F.filterTimeout = null;
-	        var query = e.target.value;
+	        var query = e.target.value.toLowerCase();
 	        var match = [];
 	        var matches = 0;
 	        var matches_max = 20;
 	        if (query != ""){
 	            for(var i=0;i<nodes.length;i++){
-	                var pos = nodes[i].toLowerCase().indexOf(query)
+	            	
+	                var pos = nodes[i].name.toLowerCase().indexOf(query)
 	                if(query && pos != -1){
 	                    
 	                    matches++
@@ -445,11 +451,12 @@ var fileBrowserListeners = function(current_url, node_list_url, url_base,
 	                        break;
 	                    }
 	                    
-	                    var n = nodes[i];
+	                    var n = nodes[i].name;
+	                    var t = nodes[i].type;
 	                    var n_hl = n.substring(0,pos)
 	                      +"<b>{0}</b>".format(n.substring(pos,pos+query.length))
 	                      +n.substring(pos+query.length)                    
-	                    match.push('<tr><td><a class="browser-file" href="{0}">{1}</a></td><td colspan="5"></td></tr>'.format(node_url.replace('__FPATH__',n),n_hl));
+	                    match.push('<tr><td><a class="browser-{0}" href="{1}">{2}</a></td><td colspan="5"></td></tr>'.format(t,node_url.replace('__FPATH__',n),n_hl));
 	                }
 	                if(match.length >= matches_max){
 	                    match.push('<tr><td>{0}</td><td colspan="5"></td></tr>'.format(truncated_lbl));
@@ -479,7 +486,10 @@ var fileBrowserListeners = function(current_url, node_list_url, url_base,
 	    F.initFilter();
 	})
 	YUE.on(n_filter,'click',function(){
-	    n_filter.value = '';
+		if(YUD.hasClass(n_filter,'init')){
+			n_filter.value = '';
+			YUD.removeClass(n_filter,'init');
+		}
 	 });
 	YUE.on(n_filter,'keyup',function(e){
 	    clearTimeout(F.filterTimeout); 

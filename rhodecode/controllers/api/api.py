@@ -212,13 +212,13 @@ class ApiController(JSONRPCController):
             raise JSONRPCError('failed to create group %s' % name)
 
     @HasPermissionAllDecorator('hg.admin')
-    def add_user_to_users_group(self, apiuser, group_name, user_name):
+    def add_user_to_users_group(self, apiuser, group_name, username):
         """"
         Add a user to a group
 
         :param apiuser:
         :param group_name:
-        :param user_name:
+        :param username:
         """
 
         try:
@@ -227,9 +227,9 @@ class ApiController(JSONRPCController):
                 raise JSONRPCError('unknown users group %s' % group_name)
 
             try:
-                user = User.get_by_username(user_name)
+                user = User.get_by_username(username)
             except NoResultFound:
-                raise JSONRPCError('unknown user %s' % user_name)
+                raise JSONRPCError('unknown user %s' % username)
 
             ugm = UsersGroupModel().add_user_to_group(users_group, user)
             Session.commit()
@@ -311,6 +311,34 @@ class ApiController(JSONRPCController):
             )
         return result
 
+    @HasPermissionAnyDecorator('hg.admin')
+    def get_repo_nodes(self, apiuser, repo_name, revision, root_path,
+                       ret_type='all'):
+        """
+        returns a list of nodes and it's children
+        for a given path at given revision. It's possible to specify ret_type
+        to show only files or dirs
+
+        :param apiuser:
+        :param repo_name: name of repository
+        :param revision: revision for which listing should be done
+        :param root_path: path from which start displaying
+        :param ret_type: return type 'all|files|dirs' nodes
+        """
+        try:
+            _d, _f = ScmModel().get_nodes(repo_name, revision, root_path,
+                                          flat=False)
+            _map = {
+                'all': _d + _f,
+                'files': _f,
+                'dirs': _d,
+            }
+            return _map[ret_type]
+        except KeyError:
+            raise JSONRPCError('ret_type must be one of %s' % _map.keys())
+        except Exception, e:
+            raise JSONRPCError(e)
+
     @HasPermissionAnyDecorator('hg.admin', 'hg.create.repository')
     def create_repo(self, apiuser, name, owner_name, description='',
                     repo_type='hg', private=False):
@@ -368,13 +396,13 @@ class ApiController(JSONRPCController):
             raise JSONRPCError('failed to create repository %s' % name)
 
     @HasPermissionAnyDecorator('hg.admin')
-    def add_user_to_repo(self, apiuser, repo_name, user_name, perm):
+    def add_user_to_repo(self, apiuser, repo_name, username, perm):
         """
         Add permission for a user to a repository
 
         :param apiuser:
         :param repo_name:
-        :param user_name:
+        :param username:
         :param perm:
         """
 
@@ -384,7 +412,7 @@ class ApiController(JSONRPCController):
                 raise JSONRPCError('unknown repository %s' % repo)
 
             try:
-                user = User.get_by_username(user_name)
+                user = User.get_by_username(username)
             except NoResultFound:
                 raise JSONRPCError('unknown user %s' % user)
 
@@ -394,14 +422,14 @@ class ApiController(JSONRPCController):
 
             return dict(
                 msg='Added perm: %s for %s in repo: %s' % (
-                    perm, user_name, repo_name
+                    perm, username, repo_name
                 )
             )
         except Exception:
             log.error(traceback.format_exc())
             raise JSONRPCError(
                 'failed to edit permission %(repo)s for %(user)s' % dict(
-                    user=user_name, repo=repo_name
+                    user=username, repo=repo_name
                 )
             )
 

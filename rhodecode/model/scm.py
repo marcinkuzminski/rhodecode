@@ -391,5 +391,35 @@ class ScmModel(BaseModel):
 
         self.mark_for_invalidation(repo_name)
 
+    def get_nodes(self, repo_name, revision, root_path='/', flat=True):
+        """
+        recursive walk in root dir and return a set of all path in that dir
+        based on repository walk function
+
+        :param repo_name: name of repository
+        :param revision: revision for which to list nodes
+        :param root_path: root path to list
+        :param flat: return as a list, if False returns a dict with decription
+
+        """
+        _files = list()
+        _dirs = list()
+        try:
+            _repo = self.__get_repo(repo_name)
+            changeset = _repo.scm_instance.get_changeset(revision)
+            root_path = root_path.lstrip('/')
+            for topnode, dirs, files in changeset.walk(root_path):
+                for f in files:
+                    _files.append(f.path if flat else {"name": f.path,
+                                                       "type": "file"})
+                for d in dirs:
+                    _dirs.append(d.path if flat else {"name": d.path,
+                                                      "type": "dir"})
+        except RepositoryError:
+            log.debug(traceback.format_exc())
+            raise
+
+        return _dirs, _files
+
     def get_unread_journal(self):
         return self.sa.query(UserLog).count()

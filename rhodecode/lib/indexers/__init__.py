@@ -129,6 +129,7 @@ class MakeIndex(BasePasterCommand):
                                 " destroy old and build from scratch",
                           default=False)
 
+
 class ResultWrapper(object):
     def __init__(self, search_type, searcher, matcher, highlight_items):
         self.search_type = search_type
@@ -176,7 +177,6 @@ class ResultWrapper(object):
             slice.append(self.get_full_content(docid))
         return slice
 
-
     def get_full_content(self, docid):
         res = self.searcher.stored_fields(docid[0])
         f_path = res['path'][res['path'].find(res['repository']) \
@@ -198,7 +198,7 @@ class ResultWrapper(object):
         Smart function that implements chunking the content
         but not overlap chunks so it doesn't highlight the same
         close occurrences twice.
-        
+
         :param matcher:
         :param size:
         """

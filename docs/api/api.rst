@@ -235,7 +235,7 @@ INPUT::
     method :  "add_user_users_group"
     args:     {
                 "group_name" :  "<groupname>",
-                "user_name" :   "<username>"
+                "username" :   "<username>"
               }
 
 OUTPUT::
@@ -316,6 +316,38 @@ OUTPUT::
             }
     error:  null
 
+get_repo_nodes
+--------------
+
+returns a list of nodes and it's children in a flat list for a given path 
+at given revision. It's possible to specify ret_type to show only files or 
+dirs. This command can be executed only using api_key belonging to user 
+with admin rights
+
+INPUT::
+
+    api_key : "<api_key>"
+    method :  "get_repo_nodes"
+    args:     {
+                "repo_name" : "<name>",
+                "revision"  : "<revision>",
+                "root_path" : "<root_path>",
+                "ret_type"  : "<ret_type>" = 'all'
+              }
+
+OUTPUT::
+
+    result: [
+              {
+                "name" :        "<name>"
+                "type" :        "<type>",
+              },
+              …
+            ]
+    error:  null
+
+
+
 create_repo
 -----------
 
@@ -355,7 +387,7 @@ INPUT::
     method :  "add_user_to_repo"
     args:     {
                 "repo_name" :  "<reponame>",
-                "user_name" :  "<username>",
+                "username" :  "<username>",
                 "perm" :       "(None|repository.(read|write|admin))",
               }
 

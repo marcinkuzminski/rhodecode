@@ -29,6 +29,8 @@ news
 - diff configuration, toggle white lines and context lines
 - #307 configurable diffs, whitespace toggle, increasing context lines
 - sorting on branches, tags and bookmarks using YUI datatable
+- improved file filter on files page
+- implements #330 api method for listing nodes ar particular revision
 
 fixes
 -----
@@ -36,6 +38,7 @@ fixes
 - rewrote dbsession management for atomic operations, and better error handling
 - fixed sorting of repo tables
 - #326 escape of special html entities in diffs
+- normalized user_name => username in api attributes
 
 1.2.3 (**2011-11-02**)
 ======================

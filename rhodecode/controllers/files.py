@@ -49,6 +49,7 @@ from rhodecode.model.repo import RepoModel
 from rhodecode.controllers.changeset import anchor_url, _ignorews_url,\
     _context_url, get_line_ctx, get_ignore_ws
 from rhodecode.lib.diffs import wrapped_diff
+from rhodecode.model.scm import ScmModel
 
 log = logging.getLogger(__name__)
 
@@ -106,25 +107,6 @@ class FilesController(BaseRepoController):
                            revision=cs.raw_id))
 
         return file_node
-
-    def __get_paths(self, changeset, starting_path):
-        """recursive walk in root dir and return a set of all path in that dir
-        based on repository walk function
-        """
-        _files = list()
-        _dirs = list()
-
-        try:
-            tip = changeset
-            for topnode, dirs, files in tip.walk(starting_path):
-                for f in files:
-                    _files.append(f.path)
-                for d in dirs:
-                    _dirs.append(d.path)
-        except RepositoryError, e:
-            log.debug(traceback.format_exc())
-            pass
-        return _dirs, _files
 
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
                                    'repository.admin')
@@ -505,6 +487,7 @@ class FilesController(BaseRepoController):
     def nodelist(self, repo_name, revision, f_path):
         if request.environ.get('HTTP_X_PARTIAL_XHR'):
             cs = self.__get_cs_or_redirect(revision, repo_name)
-            _d, _f = self.__get_paths(cs, f_path)
+            _d, _f = ScmModel().get_nodes(repo_name, cs.raw_id, f_path,
+                                          flat=False)
             return _d + _f
 
