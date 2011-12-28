@@ -1350,9 +1350,11 @@ tbody .yui-dt-editable { cursor: pointer }
 	padding: 7px 7px 6px;
 }
 
-#content div.box div.form div.fields div.field div.input input#clone_url{
+#content div.box div.form div.fields div.field div.input input#clone_url,
+#content div.box div.form div.fields div.field div.input input#clone_url_id
+{
     font-size: 16px;
-    padding: 2px 7px 2px;	
+    padding: 2px;	
 }
 
 #content div.box div.form div.fields div.field div.file input {
@@ -3034,7 +3036,18 @@ div.gravatar img {
 .ui-btn.xsmall{
     padding: 1px 2px 1px 1px;
 }
-
+.ui-btn.clone{
+	padding: 5px 2px 6px 1px;
+	margin: 0px -4px 3px 0px;
+    -webkit-border-radius: 4px 0px 0px 4px !important;
+    -khtml-border-radius: 4px 0px 0px 4px !important;
+    -moz-border-radius: 4px 0px 0px 4px !important;
+    border-radius: 4px 0px 0px 4px !important;
+    width: 100px;
+    text-align: center;
+    float: left;
+    position: absolute;
+}
 .ui-btn:focus {
   outline: none;
 }
@@ -3100,7 +3113,8 @@ img,
 #header #header-inner #quick li a:hover span.normal,
 #header #header-inner #quick li ul li.last,
 #content div.box div.form div.fields div.field div.textarea table td table td a,
-#clone_url
+#clone_url,
+#clone_url_id
 {
 	border: none;
 }

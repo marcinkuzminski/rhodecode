@@ -74,7 +74,7 @@
 	             %endif
 	             
 	              ##REPO NAME
-			      <span class="repo_name">${h.repo_link(c.dbrepo.groups_and_repo)}</span>
+			      <span class="repo_name" title="${_('Non changable ID %s') % c.dbrepo.repo_id}">${h.repo_link(c.dbrepo.groups_and_repo)}</span>
                   
                   ##FORK
 		          %if c.dbrepo.fork:
@@ -121,7 +121,10 @@
 			      <label>${_('Clone url')}:</label>
 			  </div>
 			  <div class="input ${summary(c.show_stats)}">
-			      <input type="text" id="clone_url" readonly="readonly" value="${c.clone_repo_url}" size="70"/>
+                  <div  style="display:none" id="clone_by_name" class="ui-btn clone">${_('Show by Name')}</div>
+                  <div id="clone_by_id" class="ui-btn clone">${_('Show by ID')}</div>
+			      <input style="width:80%;margin-left:105px" type="text" id="clone_url" readonly="readonly" value="${c.clone_repo_url}"/>
+                  <input style="display:none;width:80%;margin-left:105px" type="text" id="clone_url_id" readonly="readonly" value="${c.clone_repo_url_id}"/>
 			  </div>
 			 </div>
 			 
@@ -239,6 +242,28 @@ YUE.on(clone_url,'click',function(e){
         YUD.get(clone_url).select();                   
     }
 })
+
+YUE.on('clone_by_name','click',function(e){
+    // show url by name and hide name button
+    YUD.setStyle('clone_url','display','');
+    YUD.setStyle('clone_by_name','display','none');
+    
+    // hide url by id and show name button
+    YUD.setStyle('clone_by_id','display','');
+    YUD.setStyle('clone_url_id','display','none');    
+    
+})
+YUE.on('clone_by_id','click',function(e){
+	
+	// show url by id and hide id button
+	YUD.setStyle('clone_by_id','display','none');
+    YUD.setStyle('clone_url_id','display','');
+	   
+    // hide url by name and show id button
+	YUD.setStyle('clone_by_name','display','');
+	YUD.setStyle('clone_url','display','none');
+})
+
 
 var tmpl_links = {};
 %for cnt,archive in enumerate(c.rhodecode_repo._get_archives()):

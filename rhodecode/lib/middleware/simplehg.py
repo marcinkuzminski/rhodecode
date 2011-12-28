@@ -180,7 +180,6 @@ class SimpleHg(BaseVCSController):
         """
         return hgweb_mod.hgweb(repo_name, name=repo_name, baseui=baseui)
 
-
     def __get_repository(self, environ):
         """
         Get's repository name out of PATH_INFO header
@@ -188,6 +187,7 @@ class SimpleHg(BaseVCSController):
         :param environ: environ where PATH_INFO is stored
         """
         try:
+            environ['PATH_INFO'] = self._get_by_id(environ['PATH_INFO'])
             repo_name = '/'.join(environ['PATH_INFO'].split('/')[1:])
             if repo_name.endswith('/'):
                 repo_name = repo_name.rstrip('/')

@@ -168,7 +168,6 @@ def test_clone_with_credentials(no_errors=False, repo=HG_REPO, method=METHOD,
     except OSError:
         raise
 
-
     clone_url = 'http://%(user)s:%(pass)s@%(host)s/%(cloned_repo)s' % \
                   {'user':USER,
                    'pass':PASS,
@@ -191,12 +190,17 @@ if __name__ == '__main__':
         seq = None
         import time
 
+        try:
+            METHOD = sys.argv[3]
+        except:
+            pass
+
         if METHOD == 'pull':
             seq = _RandomNameSequence().next()
             test_clone_with_credentials(repo=sys.argv[1], method='clone',
                                         seq=seq)
         s = time.time()
-        for i in range(int(sys.argv[2])):
+        for i in range(1, int(sys.argv[2]) + 1):
             print 'take', i
             test_clone_with_credentials(repo=sys.argv[1], method=METHOD,
                                         seq=seq)

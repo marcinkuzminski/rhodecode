@@ -4,6 +4,7 @@ Provides the BaseController class for subclassing.
 """
 import logging
 import time
+import traceback
 
 from paste.auth.basic import AuthBasicAuthenticator
 
@@ -26,8 +27,9 @@ from rhodecode.model.scm import ScmModel
 
 log = logging.getLogger(__name__)
 
+
 class BaseVCSController(object):
-    
+
     def __init__(self, application, config):
         self.application = application
         self.config = config
@@ -36,15 +38,37 @@ class BaseVCSController(object):
         #authenticate this mercurial request using authfunc
         self.authenticate = AuthBasicAuthenticator('', authfunc)
         self.ipaddr = '0.0.0.0'
-    
+
+    def _get_by_id(self, repo_name):
+        """
+        Get's a special pattern _<ID> from clone url and tries to replace it
+        with a repository_name for support of _<ID> non changable urls
+
+        :param repo_name:
+        """
+        try:
+            data = repo_name.split('/')
+            if len(data) >= 2:
+                by_id = data[1].split('_')
+                if len(by_id) == 2 and by_id[1].isdigit():
+                    _repo_name = Repository.get(by_id[1]).repo_name
+                    data[1] = _repo_name
+        except:
+            log.debug('Failed to extract repo_name from id %s' % (
+                      traceback.format_exc()
+                      )
+            )
+
+        return '/'.join(data)
+
     def _invalidate_cache(self, repo_name):
         """
         Set's cache for this repository for invalidation on next access
-        
+
         :param repo_name: full repo name, also a cache key
         """
         invalidate_cache('get_repo_cached_%s' % repo_name)
-                
+
     def _check_permission(self, action, user, repo_name):
         """
         Checks permissions using action (push/pull) user and repository
@@ -68,8 +92,8 @@ class BaseVCSController(object):
                                                                   repo_name):
                 return False
 
-        return True        
-        
+        return True
+
     def __call__(self, environ, start_response):
         start = time.time()
         try:

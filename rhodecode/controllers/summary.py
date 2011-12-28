@@ -92,13 +92,20 @@ class SummaryController(BaseRepoController):
         uri_tmpl = config.get('clone_uri', default_clone_uri)
         uri_tmpl = uri_tmpl.replace('{', '%(').replace('}', ')s')
 
-        uri = uri_tmpl % {'user': username,
-                           'pass': password,
-                           'scheme': parsed_url.scheme,
-                           'netloc': parsed_url.netloc,
-                           'path':parsed_url.path}
+        uri_dict = {
+           'user': username,
+           'pass': password,
+           'scheme': parsed_url.scheme,
+           'netloc': parsed_url.netloc,
+           'path': parsed_url.path
+        }
+        uri = uri_tmpl % uri_dict
+        # generate another clone url by id
+        uri_dict.update({'path': '/_%s' % c.dbrepo.repo_id})
+        uri_id = uri_tmpl % uri_dict
 
         c.clone_repo_url = uri
+        c.clone_repo_url_id = uri_id
         c.repo_tags = OrderedDict()
         for name, hash in c.rhodecode_repo.tags.items()[:10]:
             try:

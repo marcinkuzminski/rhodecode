@@ -2,26 +2,26 @@ from rhodecode.tests import *
 from rhodecode.model.db import Repository
 from rhodecode.lib.utils import invalidate_cache
 
+
 class TestSummaryController(TestController):
 
     def test_index(self):
         self.log_user()
+        ID = Repository.get_by_repo_name(HG_REPO).repo_id
         response = self.app.get(url(controller='summary',
-                                    action='index', repo_name=HG_REPO))
+                                    action='index', 
+                                    repo_name=HG_REPO))
 
         #repo type
-        self.assertTrue("""<img style="margin-bottom:2px" class="icon" """
+        response.mustcontain("""<img style="margin-bottom:2px" class="icon" """
                         """title="Mercurial repository" alt="Mercurial """
-                        """repository" src="/images/icons/hgicon.png"/>"""
-                        in response.body)
-        self.assertTrue("""<img style="margin-bottom:2px" class="icon" """
+                        """repository" src="/images/icons/hgicon.png"/>""")
+        response.mustcontain("""<img style="margin-bottom:2px" class="icon" """
                         """title="public repository" alt="public """
-                        """repository" src="/images/icons/lock_open.png"/>"""
-                        in response.body)
+                        """repository" src="/images/icons/lock_open.png"/>""")
 
         #codes stats
         self._enable_stats()
-
 
         invalidate_cache('get_repo_cached_%s' % HG_REPO)
         response = self.app.get(url(controller='summary', action='index',
@@ -37,8 +37,23 @@ class TestSummaryController(TestController):
                         in response.body)
 
         # clone url...
-        self.assertTrue("""<input type="text" id="clone_url" readonly="readonly" value="http://test_admin@localhost:80/%s" size="70"/>""" % HG_REPO in response.body)
+        response.mustcontain("""<input style="width:80%;margin-left:105px" type="text" id="clone_url" readonly="readonly" value="http://test_admin@localhost:80/vcs_test_hg"/>""")
+        response.mustcontain("""<input style="display:none;width:80%;margin-left:105px" type="text" id="clone_url_id" readonly="readonly" value="http://test_admin@localhost:80/_1"/>""")
 
+    def test_index_by_id(self):
+        self.log_user()
+        ID = Repository.get_by_repo_name(HG_REPO).repo_id
+        response = self.app.get(url(controller='summary',
+                                    action='index', 
+                                    repo_name='_%s' % ID))
+
+        #repo type
+        response.mustcontain("""<img style="margin-bottom:2px" class="icon" """
+                        """title="Mercurial repository" alt="Mercurial """
+                        """repository" src="/images/icons/hgicon.png"/>""")
+        response.mustcontain("""<img style="margin-bottom:2px" class="icon" """
+                        """title="public repository" alt="public """
+                        """repository" src="/images/icons/lock_open.png"/>""")
 
     def _enable_stats(self):
         r = Repository.get_by_repo_name(HG_REPO)

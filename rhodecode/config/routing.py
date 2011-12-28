@@ -8,7 +8,6 @@ refer to the routes manual at http://routes.groovie.org/docs/
 from __future__ import with_statement
 from routes import Mapper
 
-
 # prefix for non repository related links needs to be prefixed with `/`
 ADMIN_PREFIX = '/_admin'
 
@@ -30,8 +29,17 @@ def make_map(config):
         :param environ:
         :param match_dict:
         """
-
+        from rhodecode.model.db import Repository
         repo_name = match_dict.get('repo_name')
+
+        try:
+            by_id = repo_name.split('_')
+            if len(by_id) == 2 and by_id[1].isdigit():
+                repo_name = Repository.get(by_id[1]).repo_name
+                match_dict['repo_name'] = repo_name
+        except:
+            pass
+
         return is_valid_repo(repo_name, config['base_path'])
 
     def check_group(environ, match_dict):

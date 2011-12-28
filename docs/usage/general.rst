@@ -36,6 +36,31 @@ Compare view is also available from the journal on pushes having more than
 one changeset
 
 
+Non changeable repository urls
+------------------------------
+
+Due to complicated nature of repository grouping, often urls of repositories
+can change.
+
+example::
+  
+  #before
+  http://server.com/repo_name
+  # after insertion to test_group group the url will be
+  http://server.com/test_group/repo_name
+  
+This can be an issue for build systems and any other hardcoded scripts, moving
+repository to a group leads to a need for changing external systems. To 
+overcome this RhodeCode introduces a non changable replacement url. It's 
+simply an repository ID prefixed with `_` above urls are also accessible as::
+
+  http://server.com/_<ID>
+  
+Since ID are always the same moving the repository will not affect such url.
+the _<ID> syntax can be used anywhere in the system so urls with repo_name 
+for changelogs, files and other can be exchanged with _<ID> syntax.
+
+
 
 Mailing
 -------
