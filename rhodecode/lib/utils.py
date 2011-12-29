@@ -201,7 +201,7 @@ def is_valid_repo(repo_name, base_path):
 def is_valid_repos_group(repos_group_name, base_path):
     """
     Returns True if given path is a repos group False otherwise
-    
+
     :param repo_name:
     :param base_path:
     """
@@ -461,7 +461,7 @@ def add_cache(settings):
 def create_test_index(repo_location, config, full_index):
     """
     Makes default test index
-    
+
     :param config: test config
     :param full_index:
     """

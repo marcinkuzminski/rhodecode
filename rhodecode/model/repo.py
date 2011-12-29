@@ -94,9 +94,9 @@ class RepoModel(BaseModel):
 
     def _get_defaults(self, repo_name):
         """
-        Get's information about repository, and returns a dict for 
+        Get's information about repository, and returns a dict for
         usage in forms
-        
+
         :param repo_name:
         """
 
@@ -299,7 +299,7 @@ class RepoModel(BaseModel):
     def create_fork(self, form_data, cur_user):
         """
         Simple wrapper into executing celery task for fork creation
-        
+
         :param form_data:
         :param cur_user:
         """
@@ -340,7 +340,7 @@ class RepoModel(BaseModel):
     def delete_stats(self, repo_name):
         """
         removes stats for given repo
-        
+
         :param repo_name:
         """
         try:
@@ -427,4 +427,3 @@ class RepoModel(BaseModel):
                                           % (datetime.today()\
                                              .strftime('%Y%m%d_%H%M%S_%f'),
                                             repo.repo_name)))
-

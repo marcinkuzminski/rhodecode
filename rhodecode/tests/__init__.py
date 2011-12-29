@@ -44,7 +44,7 @@ __all__ = [
 
 ##RUNNING DESIRED TESTS
 # nosetests -x rhodecode.tests.functional.test_admin_settings:TestSettingsController.test_my_account
-# nosetests --pdb --pdb-failures 
+# nosetests --pdb --pdb-failures
 environ = {}
 
 #SOME GLOBALS FOR TESTS
@@ -107,4 +107,3 @@ class TestController(TestCase):
     def checkSessionFlash(self, response, msg):
         self.assertTrue('flash' in response.session)
         self.assertTrue(msg in response.session['flash'][0][1])
-

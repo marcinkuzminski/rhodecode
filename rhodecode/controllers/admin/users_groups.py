@@ -113,9 +113,9 @@ class UsersGroupsController(BaseController):
 
         c.available_members = [(x.user_id, x.username) for x in
                                self.sa.query(User).all()]
-        
+
         available_members = [safe_unicode(x[0]) for x in c.available_members]
-        
+
         users_group_form = UsersGroupForm(edit=True,
                                           old_data=c.users_group.get_dict(),
                                           available_members=available_members)()
@@ -210,7 +210,7 @@ class UsersGroupsController(BaseController):
             UsersGroupModel().grant_perm(id, perm)
             h.flash(_("Granted 'repository create' permission to user"),
                     category='success')
-            
+
             Session.commit()
         else:
             perm = Permission.get_by_key('hg.create.repository')

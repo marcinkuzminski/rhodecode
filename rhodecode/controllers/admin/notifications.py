@@ -21,7 +21,7 @@ class NotificationsController(BaseController):
     """REST Controller styled on the Atom Publishing Protocol"""
     # To properly map this controller, ensure your config/routing.py
     # file has a resource setup:
-    #     map.resource('notification', 'notifications', controller='_admin/notifications', 
+    #     map.resource('notification', 'notifications', controller='_admin/notifications',
     #         path_prefix='/_admin', name_prefix='_admin_')
 
     @LoginRequired()

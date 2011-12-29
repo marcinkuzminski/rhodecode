@@ -63,7 +63,7 @@ class RepositoryPermissionModel(BaseModel):
                 .filter(UsersGroupRepoToPerm.repository == repository) \
                 .scalar()
 
-    def update_users_group_permission(self, repository, users_group, 
+    def update_users_group_permission(self, repository, users_group,
                                       permission):
         permission = Permission.get_by_key(permission)
         current = self.get_users_group_permission(repository, users_group)

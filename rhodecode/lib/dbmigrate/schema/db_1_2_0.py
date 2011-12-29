@@ -1044,7 +1044,7 @@ class CacheInvalidation(Base, BaseModel):
         Returns Invalidation object if this given key should be invalidated
         None otherwise. `cache_active = False` means that this cache
         state is not valid and needs to be invalidated
-        
+
         :param key:
         """
         return cls.query()\
@@ -1056,7 +1056,7 @@ class CacheInvalidation(Base, BaseModel):
     def set_invalidate(cls, key):
         """
         Mark this Cache key for invalidation
-        
+
         :param key:
         """
 
@@ -1080,7 +1080,7 @@ class CacheInvalidation(Base, BaseModel):
     def set_valid(cls, key):
         """
         Mark this cache key as active and currently cached
-        
+
         :param key:
         """
         inv_obj = Session.query(CacheInvalidation)\
@@ -1095,4 +1095,3 @@ class DbMigrateVersion(Base, BaseModel):
     repository_id = Column('repository_id', String(250), primary_key=True)
     repository_path = Column('repository_path', Text)
     version = Column('version', Integer)
-

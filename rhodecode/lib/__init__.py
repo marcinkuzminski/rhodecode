@@ -116,12 +116,12 @@ def str2bool(_str):
 def convert_line_endings(line, mode):
     """
     Converts a given line  "line end" accordingly to given mode
-    
+
     Available modes are::
         0 - Unix
         1 - Mac
         2 - DOS
-    
+
     :param line: given line to convert
     :param mode: mode to convert to
     :rtype: str
@@ -183,7 +183,7 @@ def generate_api_key(username, salt=None):
 def safe_unicode(str_, from_encoding='utf8'):
     """
     safe unicode function. Does few trick to turn str_ into unicode
-     
+
     In case of UnicodeDecode error we try to return it with encoding detected
     by chardet library if it fails fallback to unicode with errors replaced
 
@@ -216,7 +216,7 @@ def safe_unicode(str_, from_encoding='utf8'):
 def safe_str(unicode_, to_encoding='utf8'):
     """
     safe str function. Does few trick to turn unicode_ into string
-     
+
     In case of UnicodeEncodeError we try to return it with encoding detected
     by chardet library if it fails fallback to string with errors replaced
 
@@ -254,7 +254,7 @@ def safe_str(unicode_, to_encoding='utf8'):
 def engine_from_config(configuration, prefix='sqlalchemy.', **kwargs):
     """
     Custom engine_from_config functions that makes sure we use NullPool for
-    file based sqlite databases. This prevents errors on sqlite. This only 
+    file based sqlite databases. This prevents errors on sqlite. This only
     applies to sqlalchemy versions < 0.7.0
 
     """
@@ -313,7 +313,7 @@ def engine_from_config(configuration, prefix='sqlalchemy.', **kwargs):
 def age(curdate):
     """
     turns a datetime into an age string.
-    
+
     :param curdate: datetime object
     :rtype: unicode
     :returns: unicode words describing age
@@ -350,10 +350,10 @@ def age(curdate):
 def uri_filter(uri):
     """
     Removes user:password from given url string
-    
+
     :param uri:
     :rtype: unicode
-    :returns: filtered list of strings  
+    :returns: filtered list of strings
     """
     if not uri:
         return ''
@@ -382,7 +382,7 @@ def uri_filter(uri):
 def credentials_filter(uri):
     """
     Returns a url with removed credentials
-    
+
     :param uri:
     """
 
@@ -395,9 +395,9 @@ def credentials_filter(uri):
 
 def get_changeset_safe(repo, rev):
     """
-    Safe version of get_changeset if this changeset doesn't exists for a 
+    Safe version of get_changeset if this changeset doesn't exists for a
     repo it returns a Dummy one instead
-    
+
     :param repo:
     :param rev:
     """
@@ -419,7 +419,7 @@ def get_current_revision(quiet=False):
     """
     Returns tuple of (number, id) from repository containing this package
     or None if repository could not be found.
-    
+
     :param quiet: prints error for fetching revision if True
     """
 
@@ -440,7 +440,7 @@ def get_current_revision(quiet=False):
 def extract_mentioned_users(s):
     """
     Returns unique usernames from given string s that have @mention
-    
+
     :param s: string to get mentions
     """
     usrs = {}

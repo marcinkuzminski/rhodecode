@@ -161,7 +161,7 @@ class SimpleGit(BaseVCSController):
                     try:
                         user = self.__get_user(username)
                         if user is None or not user.active:
-                            return HTTPForbidden()(environ, start_response)                        
+                            return HTTPForbidden()(environ, start_response)
                         username = user.username
                     except:
                         log.error(traceback.format_exc())
@@ -199,7 +199,7 @@ class SimpleGit(BaseVCSController):
     def __make_app(self, repo_name, repo_path):
         """
         Make an wsgi application using dulserver
-        
+
         :param repo_name: name of the repository
         :param repo_path: full path to the repository
         """

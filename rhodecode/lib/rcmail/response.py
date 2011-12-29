@@ -48,7 +48,7 @@ VALUE_IS_EMAIL_ADDRESS = lambda v: '@' in v
 def normalize_header(header):
     return string.capwords(header.lower(), '-')
 
-class EncodingError(Exception): 
+class EncodingError(Exception):
     """Thrown when there is an encoding error."""
     pass
 
@@ -61,7 +61,7 @@ class MailBase(object):
         self.headers = dict(items)
         self.parts = []
         self.body = None
-        self.content_encoding = {'Content-Type': (None, {}), 
+        self.content_encoding = {'Content-Type': (None, {}),
                                  'Content-Disposition': (None, {}),
                                  'Content-Transfer-Encoding': (None, {})}
 
@@ -312,7 +312,7 @@ class MailResponse(object):
 
 def to_message(mail):
     """
-    Given a MailBase message, this will construct a MIMEPart 
+    Given a MailBase message, this will construct a MIMEPart
     that is canonicalized for use with the Python email API.
     """
     ctype, params = mail.content_encoding['Content-Type']

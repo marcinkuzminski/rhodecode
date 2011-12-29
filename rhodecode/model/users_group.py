@@ -82,7 +82,7 @@ class UsersGroupModel(BaseModel):
     def delete(self, users_group):
         try:
             users_group = self.__get_users_group(users_group)
-            
+
             # check if this group is not assigned to repo
             assigned_groups = UsersGroupRepoToPerm.query()\
                 .filter(UsersGroupRepoToPerm.users_group == users_group).all()
@@ -90,7 +90,7 @@ class UsersGroupModel(BaseModel):
             if assigned_groups:
                 raise UsersGroupsAssignedException('RepoGroup assigned to %s' %
                                                    assigned_groups)
-            
+
             self.sa.delete(users_group)
         except:
             log.error(traceback.format_exc())
@@ -141,12 +141,10 @@ class UsersGroupModel(BaseModel):
     def revoke_perm(self, users_group, perm):
         if not isinstance(perm, Permission):
             raise Exception('perm needs to be an instance of Permission class')
-        
+
         users_group = self.__get_users_group(users_group)
-        
+
         obj = UsersGroupToPerm.query()\
             .filter(UsersGroupToPerm.users_group == users_group)\
             .filter(UsersGroupToPerm.permission == perm).one()
         self.sa.delete(obj)
-
-

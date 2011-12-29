@@ -3,9 +3,9 @@
     rhodecode.lib.markup_renderer
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    
+
     Renderer for markup languages with ability to parse using rst or markdown
-    
+
     :created_on: Oct 27, 2011
     :author: marcink
     :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
@@ -33,18 +33,18 @@ log = logging.getLogger(__name__)
 
 class MarkupRenderer(object):
     RESTRUCTUREDTEXT_DISALLOWED_DIRECTIVES = ['include', 'meta', 'raw']
-    
+
     MARKDOWN_PAT = re.compile(r'md|mkdn?|mdown|markdown',re.IGNORECASE)
     RST_PAT = re.compile(r're?st',re.IGNORECASE)
     PLAIN_PAT = re.compile(r'readme',re.IGNORECASE)
-    
+
     def __detect_renderer(self, source, filename=None):
         """
         runs detection of what renderer should be used for generating html
         from a markup language
-        
+
         filename can be also explicitly a renderer name
-        
+
         :param source:
         :param filename:
         """
@@ -66,7 +66,7 @@ class MarkupRenderer(object):
         Renders a given filename using detected renderer
         it detects renderers based on file extension or mimetype.
         At last it will just do a simple html replacing new lines with <br/>
-        
+
         :param file_name:
         :param source:
         """
@@ -130,10 +130,9 @@ class MarkupRenderer(object):
     @classmethod
     def rst_with_mentions(cls, source):
         mention_pat = re.compile(r'(?:^@|\s@)(\w+)')
-        
+
         def wrapp(match_obj):
             uname = match_obj.groups()[0]
             return ' **@%(uname)s** ' % {'uname':uname}
         mention_hl = mention_pat.sub(wrapp, source).strip()
         return cls.rst(mention_hl)
-

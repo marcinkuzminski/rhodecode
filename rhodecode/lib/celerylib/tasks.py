@@ -114,7 +114,7 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
         repo = Repository.get_by_repo_name(repo_name)
         if repo is None:
             return True
-        
+
         repo = repo.scm_instance
         repo_size = repo.count()
         # return if repo have no revisions
@@ -364,7 +364,7 @@ def send_email(recipients, subject, body, html_body=''):
 def create_repo_fork(form_data, cur_user):
     """
     Creates a fork of repository using interval VCS methods
-    
+
     :param form_data:
     :param cur_user:
     """
@@ -392,9 +392,9 @@ def create_repo_fork(form_data, cur_user):
             update_after_clone=update_after_clone)
     action_logger(cur_user, 'user_forked_repo:%s' % fork_name,
                    org_repo_name, '', Session)
-    
+
     action_logger(cur_user, 'user_created_fork:%s' % fork_name,
-                   fork_name, '', Session)    
+                   fork_name, '', Session)
     # finally commit at latest possible stage
     Session.commit()
 

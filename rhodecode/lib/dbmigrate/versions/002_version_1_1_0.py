@@ -71,7 +71,7 @@ def upgrade(migrate_engine):
     #==========================================================================
     from rhodecode.lib.dbmigrate.schema.db_1_1_0 import UserFollowing
     UserFollowing().__table__.create()
-    
+
     #==========================================================================
     # Add table `cache_invalidation`
     #==========================================================================

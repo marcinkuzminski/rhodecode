@@ -137,7 +137,7 @@ def make_map(config):
         m.connect('repo_as_fork', "/repo_as_fork/{repo_name:.*}",
                   action="repo_as_fork", conditions=dict(method=["PUT"],
                                                       function=check_repo))
-        
+
     with rmap.submapper(path_prefix=ADMIN_PREFIX,
                         controller='admin/repos_groups') as m:
         m.connect("repos_groups", "/repos_groups",

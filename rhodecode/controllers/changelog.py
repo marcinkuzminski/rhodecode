@@ -71,21 +71,21 @@ class ChangelogController(BaseRepoController):
         branch_name = request.params.get('branch', None)
         try:
             if branch_name:
-                collection = [z for z in 
-                              c.rhodecode_repo.get_changesets(start=0, 
+                collection = [z for z in
+                              c.rhodecode_repo.get_changesets(start=0,
                                                     branch_name=branch_name)]
                 c.total_cs = len(collection)
             else:
                 collection = list(c.rhodecode_repo)
                 c.total_cs = len(c.rhodecode_repo)
 
-        
+
             c.pagination = RepoPage(collection, page=p, item_count=c.total_cs,
                                     items_per_page=c.size, branch=branch_name)
         except (RepositoryError, ChangesetDoesNotExistError, Exception), e:
             log.error(traceback.format_exc())
             h.flash(str(e), category='warning')
-            return redirect(url('home'))        
+            return redirect(url('home'))
 
         self._graph(c.rhodecode_repo, collection, c.total_cs, c.size, p)
 
@@ -139,4 +139,3 @@ class ChangelogController(BaseRepoController):
                 data.append(['', vtx, edges])
 
         c.jsdata = json.dumps(data)
-

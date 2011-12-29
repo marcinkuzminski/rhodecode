@@ -233,4 +233,3 @@ class SummaryController(BaseRepoController):
         download_l.append(tags_group)
 
         return download_l
-

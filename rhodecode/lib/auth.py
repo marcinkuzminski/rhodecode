@@ -56,7 +56,7 @@ log = logging.getLogger(__name__)
 
 class PasswordGenerator(object):
     """
-    This is a simple class for generating password from different sets of 
+    This is a simple class for generating password from different sets of
     characters
     usage::
 
@@ -131,7 +131,7 @@ def check_password(password, hashed):
 def generate_api_key(str_, salt=None):
     """
     Generates API KEY from given string
-    
+
     :param str_:
     :param salt:
     """
@@ -144,7 +144,7 @@ def generate_api_key(str_, salt=None):
 
 def authfunc(environ, username, password):
     """
-    Dummy authentication wrapper function used in Mercurial and Git for 
+    Dummy authentication wrapper function used in Mercurial and Git for
     access control.
 
     :param environ: needed only for using in Basic auth
@@ -226,8 +226,8 @@ def authenticate(username, password):
                 if user_model.create_ldap(username, password, user_dn,
                                           user_attrs):
                     log.info('created new ldap user %s', username)
-                    
-                Session.commit()    
+
+                Session.commit()
                 return True
             except (LdapUsernameError, LdapPasswordError,):
                 pass
@@ -254,7 +254,7 @@ def login_container_auth(username):
 
     user.update_lastlogin()
     Session.commit()
-    
+
     log.debug('User %s is now logged in by container authentication',
               user.username)
     return user
@@ -311,7 +311,7 @@ class  AuthUser(object):
         if self._api_key and self._api_key != self.anonymous_user.api_key:
             log.debug('Auth User lookup by API KEY %s', self._api_key)
             is_user_loaded = user_model.fill_data(self, api_key=self._api_key)
-        # lookup by userid    
+        # lookup by userid
         elif (self.user_id is not None and
               self.user_id != self.anonymous_user.user_id):
             log.debug('Auth User lookup by USER ID %s', self.user_id)
@@ -319,7 +319,7 @@ class  AuthUser(object):
         # lookup by username
         elif self.username and \
             str2bool(config.get('container_auth_enabled', False)):
-            
+
             log.debug('Auth User lookup by USER NAME %s', self.username)
             dbuser = login_container_auth(self.username)
             if dbuser is not None:
@@ -696,4 +696,3 @@ class HasPermissionAnyMiddleware(object):
             return True
         log.debug('permission denied')
         return False
-

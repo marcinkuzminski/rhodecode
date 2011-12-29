@@ -96,7 +96,7 @@ class BaseModel(object):
     def get_dict(self, serialized=False):
         """
         return dict with keys and values corresponding
-        to this model data 
+        to this model data
         """
 
         d = {}
@@ -106,7 +106,7 @@ class BaseModel(object):
         # also use __json__() if present to get additional fields
         if hasattr(self, '__json__'):
             for k, val in self.__json__().iteritems():
-                d[k] = val 
+                d[k] = val
         return d
 
     def get_appstruct(self):
@@ -970,7 +970,7 @@ class CacheInvalidation(Base, BaseModel):
         Returns Invalidation object if this given key should be invalidated
         None otherwise. `cache_active = False` means that this cache
         state is not valid and needs to be invalidated
-        
+
         :param key:
         """
         return cls.query()\
@@ -982,7 +982,7 @@ class CacheInvalidation(Base, BaseModel):
     def set_invalidate(cls, key):
         """
         Mark this Cache key for invalidation
-        
+
         :param key:
         """
 
@@ -1006,7 +1006,7 @@ class CacheInvalidation(Base, BaseModel):
     def set_valid(cls, key):
         """
         Mark this cache key as active and currently cached
-        
+
         :param key:
         """
         inv_obj = CacheInvalidation.query()\
@@ -1037,7 +1037,7 @@ class ChangesetComment(Base, BaseModel):
         """
         Returns user associated with this changesetComment. ie those
         who actually commented
-        
+
         :param cls:
         :param revision:
         """
@@ -1120,4 +1120,3 @@ class DbMigrateVersion(Base, BaseModel):
     repository_id = Column('repository_id', String(250), primary_key=True)
     repository_path = Column('repository_path', Text)
     version = Column('version', Integer)
-

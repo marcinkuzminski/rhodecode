@@ -188,7 +188,7 @@ class UsersController(BaseController):
 
         grant_perm = request.POST.get('create_repo_perm', False)
         user_model = UserModel()
-        
+
         if grant_perm:
             perm = Permission.get_by_key('hg.create.none')
             user_model.revoke_perm(id, perm)

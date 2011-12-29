@@ -83,7 +83,7 @@ def upgrade(migrate_engine):
                         nullable=True, unique=False, default=None)
 
     clone_uri.create(Repository().__table__)
-    
+
     #ADD downloads column#
     enable_downloads = Column("downloads", Boolean(), nullable=True, unique=None, default=True)
     enable_downloads.create(Repository().__table__)
@@ -106,8 +106,8 @@ def upgrade(migrate_engine):
 
     from rhodecode.lib.dbmigrate.schema.db_1_2_0 import UserFollowing
 
-    follows_from = Column('follows_from', DateTime(timezone=False), 
-                          nullable=True, unique=None, 
+    follows_from = Column('follows_from', DateTime(timezone=False),
+                          nullable=True, unique=None,
                           default=datetime.datetime.now)
     follows_from.create(UserFollowing().__table__)
 

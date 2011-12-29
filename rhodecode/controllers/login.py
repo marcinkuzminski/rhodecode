@@ -81,7 +81,7 @@ class LoginController(BaseController):
                          'session, session attrs %s' % (username, cs))
                 user.update_lastlogin()
                 Session.commit()
-                
+
                 if c.came_from:
                     return redirect(c.came_from)
                 else:

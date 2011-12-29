@@ -23,7 +23,7 @@ class TestAdminUsersController(TestController):
         lastname = 'lastname'
         email = 'mail@mail.com'
 
-        response = self.app.post(url('users'), 
+        response = self.app.post(url('users'),
                                  {'username':username,
                                    'password':password,
                                    'password_confirmation':password_confirmation,
@@ -33,7 +33,7 @@ class TestAdminUsersController(TestController):
                                    'email':email})
 
 
-        self.assertTrue('''created user %s''' % (username) in 
+        self.assertTrue('''created user %s''' % (username) in
                         response.session['flash'][0])
 
         new_user = self.Session.query(User).\
@@ -108,12 +108,12 @@ class TestAdminUsersController(TestController):
             .filter(User.username == username).one()
         response = self.app.delete(url('user', id=new_user.user_id))
 
-        self.assertTrue("""successfully deleted user""" in 
+        self.assertTrue("""successfully deleted user""" in
                         response.session['flash'][0])
 
 
     def test_delete_browser_fakeout(self):
-        response = self.app.post(url('user', id=1), 
+        response = self.app.post(url('user', id=1),
                                  params=dict(_method='delete'))
 
     def test_show(self):

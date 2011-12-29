@@ -585,7 +585,7 @@ class RepoPage(Page):
                                             self.items_per_page))
             self.last_page = self.first_page + self.page_count - 1
 
-            # Make sure that the requested page number is the range of 
+            # Make sure that the requested page number is the range of
             # valid pages
             if self.page > self.last_page:
                 self.page = self.last_page
@@ -632,7 +632,7 @@ def changed_tooltip(nodes):
     """
     Generates a html string for changed nodes in changeset page.
     It limits the output to 30 entries
-    
+
     :param nodes: LazyNodesGenerator
     """
     if nodes:
@@ -651,10 +651,10 @@ def repo_link(groups_and_repos):
     """
     Makes a breadcrumbs link to repo within a group
     joins &raquo; on each group to create a fancy link
-    
+
     ex::
         group >> subgroup >> repo
-    
+
     :param groups_and_repos:
     """
     groups, repo_name = groups_and_repos
@@ -672,7 +672,7 @@ def fancy_file_stats(stats):
     """
     Displays a fancy two colored bar for number of added/deleted
     lines of code on file
-    
+
     :param stats: two element list of added/deleted lines of code
     """
 
@@ -745,7 +745,7 @@ def rst(source):
 def rst_w_mentions(source):
     """
     Wrapped rst renderer with @mention highlighting
-    
+
     :param source:
     """
     return literal('<div class="rst-block">%s</div>' %

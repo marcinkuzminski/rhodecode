@@ -175,4 +175,3 @@ class BaseRepoController(BaseController):
 
             c.repository_followers = self.scm_model.get_followers(c.repo_name)
             c.repository_forks = self.scm_model.get_forks(c.repo_name)
-

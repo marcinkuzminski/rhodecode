@@ -226,5 +226,3 @@ class ReposGroupsController(BaseController):
             encoding="UTF-8",
             force_defaults=False
         )
-
-

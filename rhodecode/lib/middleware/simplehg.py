@@ -225,9 +225,9 @@ class SimpleHg(BaseVCSController):
     def __inject_extras(self, repo_path, baseui, extras={}):
         """
         Injects some extra params into baseui instance
-        
+
         also overwrites global settings with those takes from local hgrc file
-        
+
         :param baseui: baseui instance
         :param extras: dict with extra params to put into baseui
         """
@@ -249,4 +249,3 @@ class SimpleHg(BaseVCSController):
             for section in ui_sections:
                 for k, v in repoui.configitems(section):
                     baseui.setconfig(section, k, v)
-

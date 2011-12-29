@@ -66,4 +66,3 @@ class HomeController(BaseController):
             return render('/switch_to_list.html')
         else:
             return HTTPBadRequest()
-

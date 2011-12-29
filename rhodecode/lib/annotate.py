@@ -4,10 +4,10 @@
     ~~~~~~~~~~~~~~~~~~~~~~
 
     Anontation library for usage in rhodecode, previously part of vcs
-    
+
     :created_on: Dec 4, 2011
     :author: marcink
-    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>    
+    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 

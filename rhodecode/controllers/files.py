@@ -417,7 +417,7 @@ class FilesController(BaseRepoController):
                 c.changeset_2 = EmptyChangeset(repo=c.rhodecode_repo)
                 node2 = FileNode('.', '', changeset=c.changeset_2)
         except RepositoryError:
-            return redirect(url('files_home', repo_name=c.repo_name, 
+            return redirect(url('files_home', repo_name=c.repo_name,
                                 f_path=f_path))
 
         if c.action == 'download':
@@ -490,4 +490,3 @@ class FilesController(BaseRepoController):
             _d, _f = ScmModel().get_nodes(repo_name, cs.raw_id, f_path,
                                           flat=False)
             return _d + _f
-

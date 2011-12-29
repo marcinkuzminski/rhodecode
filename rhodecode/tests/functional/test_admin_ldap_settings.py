@@ -22,7 +22,7 @@ class TestLdapSettingsController(TestController):
         self.log_user()
         if skip_ldap_test:
             raise SkipTest('skipping due to missing ldap lib')
-        
+
         test_url = url(controller='admin/ldap_settings',
                        action='ldap_settings')
 
@@ -53,7 +53,7 @@ class TestLdapSettingsController(TestController):
         self.log_user()
         if skip_ldap_test:
             raise SkipTest('skipping due to missing ldap lib')
-                
+
         test_url = url(controller='admin/ldap_settings',
                        action='ldap_settings')
 
@@ -71,13 +71,13 @@ class TestLdapSettingsController(TestController):
                     'ldap_attr_firstname':'',
                     'ldap_attr_lastname':'',
                     'ldap_attr_email':'' })
-        
+
         self.assertTrue("""<span class="error-message">The LDAP Login"""
                         """ attribute of the CN must be specified""" in
                         response.body)
-        
-        
-        
+
+
+
         self.assertTrue("""<span class="error-message">Please """
                         """enter a number</span>""" in response.body)
 

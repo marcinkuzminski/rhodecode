@@ -9,7 +9,7 @@ class TestSummaryController(TestController):
         self.log_user()
         ID = Repository.get_by_repo_name(HG_REPO).repo_id
         response = self.app.get(url(controller='summary',
-                                    action='index', 
+                                    action='index',
                                     repo_name=HG_REPO))
 
         #repo type
@@ -44,7 +44,7 @@ class TestSummaryController(TestController):
         self.log_user()
         ID = Repository.get_by_repo_name(HG_REPO).repo_id
         response = self.app.get(url(controller='summary',
-                                    action='index', 
+                                    action='index',
                                     repo_name='_%s' % ID))
 
         #repo type

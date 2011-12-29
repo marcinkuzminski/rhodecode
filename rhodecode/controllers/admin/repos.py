@@ -112,7 +112,7 @@ class ReposController(BaseController):
                                             c.repo_last_rev) * 100)
 
         defaults = RepoModel()._get_defaults(repo_name)
-        
+
         c.repos_list = [('', _('--REMOVE FORK--'))]
         c.repos_list += [(x.repo_id, x.repo_name) for x in
                    Repository.query().order_by(Repository.repo_name).all()]
@@ -393,7 +393,7 @@ class ReposController(BaseController):
     def repo_as_fork(self, repo_name):
         """
         Mark given repository as a fork of another
-        
+
         :param repo_name:
         """
         try:
@@ -402,7 +402,7 @@ class ReposController(BaseController):
                                     self.rhodecode_user.username)
             fork = repo.fork.repo_name if repo.fork else _('Nothing')
             Session.commit()
-            h.flash(_('Marked repo %s as fork of %s' % (repo_name,fork)), 
+            h.flash(_('Marked repo %s as fork of %s' % (repo_name,fork)),
                     category='success')
         except Exception, e:
             raise

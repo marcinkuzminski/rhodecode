@@ -45,7 +45,7 @@ class BookmarksController(BaseRepoController):
     def index(self):
         if c.rhodecode_repo.alias != 'hg':
             raise HTTPNotFound()
-        
+
         c.repo_bookmarks = OrderedDict()
 
         bookmarks = [(name, c.rhodecode_repo.get_changeset(hash_)) for \

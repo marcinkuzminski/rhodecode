@@ -68,7 +68,7 @@ class NotificationModel(BaseModel):
             notification
         :param subject:
         :param body:
-        :param recipients: list of int, str or User objects, when None 
+        :param recipients: list of int, str or User objects, when None
             is given send to all admins
         :param type_: type of notification
         :param with_email: send email with this notification
@@ -206,7 +206,7 @@ class EmailNotificationModel(BaseModel):
     def get_email_tmpl(self, type_, **kwargs):
         """
         return generated template for email based on given type
-        
+
         :param type_:
         """
 
@@ -217,5 +217,3 @@ class EmailNotificationModel(BaseModel):
         _kwargs.update(kwargs)
         log.debug('rendering tmpl %s with kwargs %s' % (base, _kwargs))
         return email_template.render(**_kwargs)
-
-

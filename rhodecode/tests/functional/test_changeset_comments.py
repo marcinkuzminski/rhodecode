@@ -137,7 +137,3 @@ class TestChangeSetCommentrController(TestController):
                                 repo_name=HG_REPO, revision=rev))
         self.assertTrue('''<div class="comments-number">0 comment(s)'''
                         ''' (0 inline)</div>''' in response.body)
-
-
-
-

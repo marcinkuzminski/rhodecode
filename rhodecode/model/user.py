@@ -97,7 +97,7 @@ class UserModel(BaseModel):
                          active=True, admin=False, ldap_dn=None):
         """
         Creates a new instance if not found, or updates current one
-        
+
         :param username:
         :param password:
         :param email:
@@ -140,7 +140,7 @@ class UserModel(BaseModel):
     def create_for_container_auth(self, username, attrs):
         """
         Creates the given user if it's not already in the database
-        
+
         :param username:
         :param attrs:
         """
@@ -173,7 +173,7 @@ class UserModel(BaseModel):
         """
         Checks if user is in database, if not creates this user marked
         as ldap user
-        
+
         :param username:
         :param password:
         :param user_dn:
@@ -283,7 +283,7 @@ class UserModel(BaseModel):
 
     def delete(self, user):
         user = self.__get_user(user)
-        
+
         try:
             if user.username == 'default':
                 raise DefaultUserException(
@@ -498,9 +498,9 @@ class UserModel(BaseModel):
         if not isinstance(perm, Permission):
             raise Exception('perm needs to be an instance of Permission class '
                             'got %s instead' % type(perm))
-        
+
         user = self.__get_user(user)
-        
+
         obj = UserToPerm.query().filter(UserToPerm.user == user)\
                 .filter(UserToPerm.permission == perm).scalar()
         if obj:

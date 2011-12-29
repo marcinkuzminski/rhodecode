@@ -161,7 +161,7 @@ class TestUser(unittest.TestCase):
     def __init__(self, methodName='runTest'):
         Session.remove()
         super(TestUser, self).__init__(methodName=methodName)
-        
+
     def test_create_and_remove(self):
         usr = UserModel().create_or_update(username=u'test_user', password=u'qweqwe',
                                      email=u'u232@rhodecode.org',
@@ -370,13 +370,13 @@ class TestUsers(unittest.TestCase):
         self.u1 = UserModel().create_or_update(username=u'u1',
                                         password=u'qweqwe',
                                         email=u'u1@rhodecode.org',
-                                        name=u'u1', lastname=u'u1')        
+                                        name=u'u1', lastname=u'u1')
 
     def tearDown(self):
         perm = Permission.query().all()
         for p in perm:
             UserModel().revoke_perm(self.u1, p)
-            
+
         UserModel().delete(self.u1)
         Session.commit()
 
@@ -402,9 +402,3 @@ class TestUsers(unittest.TestCase):
         UserModel().revoke_perm(self.u1, perm)
         Session.commit()
         self.assertEqual(UserModel().has_perm(self.u1, perm),False)
-        
-    
-
-        
-
-

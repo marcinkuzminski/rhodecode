@@ -68,7 +68,7 @@ class ReposGroupModel(BaseModel):
     def __rename_group(self, old, new):
         """
         Renames a group on filesystem
-        
+
         :param group_name:
         """
 
@@ -92,7 +92,7 @@ class ReposGroupModel(BaseModel):
     def __delete_group(self, group):
         """
         Deletes a group from a filesystem
-        
+
         :param group: instance of group from database
         """
         paths = group.full_path.split(RepoGroup.url_sep())
@@ -136,7 +136,7 @@ class ReposGroupModel(BaseModel):
 
             self.__rename_group(old_path, new_path)
 
-            # we need to get all repositories from this new group and 
+            # we need to get all repositories from this new group and
             # rename them accordingly to new group path
             for r in repos_group.repositories:
                 r.repo_name = r.get_new_name(r.just_name)

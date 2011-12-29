@@ -4,11 +4,11 @@
     ~~~~~~~~~~~~~~~~~~~~
 
     Python backward compatibility functions and common libs
-    
-    
+
+
     :created_on: Oct 7, 2011
     :author: marcink
-    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
+    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software: you can redistribute it and/or modify
@@ -90,7 +90,7 @@ _nil = _Nil()
 class _odict(object):
     """Ordered dict data structure, with O(1) complexity for dict operations
     that modify one element.
-    
+
     Overwriting values doesn't change their original sequential order.
     """
 
