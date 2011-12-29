@@ -630,8 +630,8 @@ class Repository(Base, BaseModel):
         """
         returns True if given repo name is a valid filesystem repository
 
-        @param cls:
-        @param repo_name:
+        :param cls:
+        :param repo_name:
         """
         from rhodecode.lib.utils import is_valid_repo
 
