@@ -156,9 +156,8 @@ def get_repos(path, recursive=False):
     :param recursive: recursive search and return names with subdirs in front
     """
 
-    if path.endswith(os.sep):
-        #remove ending slash for better results
-        path = path[:-1]
+    # remove ending slash for better results
+    path = path.rstrip('/')
 
     def _get_repos(p):
         if not os.access(p, os.W_OK):
@@ -169,7 +168,7 @@ def get_repos(path, recursive=False):
             cur_path = os.path.join(p, dirpath)
             try:
                 scm_info = get_scm(cur_path)
-                yield scm_info[1].split(path)[-1].lstrip(os.sep), scm_info
+                yield scm_info[1].split(path, 1)[-1].lstrip(os.sep), scm_info
             except VCSError:
                 if not recursive:
                     continue
