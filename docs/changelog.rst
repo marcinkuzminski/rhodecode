@@ -31,7 +31,9 @@ news
 - sorting on branches, tags and bookmarks using YUI datatable
 - improved file filter on files page
 - implements #330 api method for listing nodes ar particular revision
-
+- fixed #331 RhodeCode mangles repository names if the a repository group 
+  contains the "full path" to the repositories
+  
 fixes
 -----
 
