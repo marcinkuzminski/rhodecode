@@ -53,7 +53,7 @@
                     <td>
                         ${h.form(url('delete_user', id=user.user_id),method='delete')}
                             ${h.submit('remove_',_('delete'),id="remove_user_%s" % user.user_id,
-                            class_="delete_icon action_button",onclick="return confirm('"+_('Confirm to delete this user')+"');")}
+                            class_="delete_icon action_button",onclick="return confirm('"+_('Confirm to delete this user: %s') % user.username+"');")}
                         ${h.end_form()}
                     </td>
                 </tr>

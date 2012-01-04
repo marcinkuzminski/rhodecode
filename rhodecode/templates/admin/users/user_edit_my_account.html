@@ -162,7 +162,7 @@
 		            <td><a href="${h.url('repo_settings_home',repo_name=repo['name'])}" title="${_('edit')}"><img class="icon" alt="${_('private')}" src="${h.url('/images/icons/application_form_edit.png')}"/></a></td>
 		            <td>
 	                  ${h.form(url('repo_settings_delete', repo_name=repo['name']),method='delete')}
-	                    ${h.submit('remove_%s' % repo['name'],'',class_="delete_icon action_button",onclick="return confirm('Confirm to delete this repository');")}
+	                    ${h.submit('remove_%s' % repo['name'],'',class_="delete_icon action_button",onclick="return confirm('"+_('Confirm to delete this repository: %s') % repo['name']+"');")}
 	                  ${h.end_form()}	            
 		            </td>
 		        </tr>
