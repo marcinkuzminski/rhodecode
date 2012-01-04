@@ -270,7 +270,7 @@ class User(Base, BaseModel):
     admin = Column("admin", Boolean(), nullable=True, unique=None, default=False)
     name = Column("name", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     lastname = Column("lastname", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
-    email = Column("email", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    _email = Column("email", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     last_login = Column("last_login", DateTime(timezone=False), nullable=True, unique=None, default=None)
     ldap_dn = Column("ldap_dn", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     api_key = Column("api_key", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
@@ -283,6 +283,18 @@ class User(Base, BaseModel):
     repo_to_perm = relationship('RepoToPerm', primaryjoin='RepoToPerm.user_id==User.user_id', cascade='all')
 
     group_member = relationship('UsersGroupMember', cascade='all')
+
+    @hybrid_property
+    def email(self):
+        return self._email
+
+    @email.setter
+    def email(self, val):
+        self._email = val.lower() if val else None
+
+    @property
+    def full_name(self):
+        return '%s %s' % (self.name, self.lastname)
 
     @property
     def full_contact(self):
