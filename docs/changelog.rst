@@ -41,6 +41,9 @@ fixes
 - fixed sorting of repo tables
 - #326 escape of special html entities in diffs
 - normalized user_name => username in api attributes
+- fixes #298 ldap created users with mixed case emails created conflicts 
+  on saving a form
+
 
 1.2.3 (**2011-11-02**)
 ======================
