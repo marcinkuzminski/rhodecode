@@ -8,7 +8,7 @@
 
     :created_on: Dec 4, 2011
     :author: marcink
-    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
+    :copyright: (C) 2010-2012 Marcin Kuzminski <marcin@python-works.com>
     :original copyright: 2007-2008 by Armin Ronacher
     :license: GPLv3, see COPYING for more details.
 """

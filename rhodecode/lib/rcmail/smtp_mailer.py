@@ -6,7 +6,7 @@
     Simple smtp mailer used in RhodeCode
 
     :created_on: Sep 13, 2010
-    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
+    :copyright: (C) 2010-2012 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software: you can redistribute it and/or modify
@@ -26,6 +26,7 @@ import logging
 import smtplib
 from socket import sslerror
 from rhodecode.lib.rcmail.message import Message
+
 
 class SmtpMailer(object):
     """SMTP mailer class
@@ -52,7 +53,6 @@ class SmtpMailer(object):
         self.tls = tls
         self.debug = debug
         self.auth = smtp_auth
-
 
     def send(self, recipients=[], subject='', body='', html='',
              attachment_files=None):

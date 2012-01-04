@@ -7,7 +7,7 @@
 
     :created_on: Apr 4, 2010
     :author: marcink
-    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
+    :copyright: (C) 2010-2012 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software: you can redistribute it and/or modify
@@ -29,7 +29,7 @@ import formencode
 
 from formencode import htmlfill
 from pylons import request, session, tmpl_context as c, url, config
-from pylons.controllers.util import abort, redirect
+from pylons.controllers.util import redirect
 from pylons.i18n.translation import _
 
 from rhodecode.lib.exceptions import DefaultUserException, \
@@ -38,7 +38,7 @@ from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator
 from rhodecode.lib.base import BaseController, render
 
-from rhodecode.model.db import User, UserRepoToPerm, UserToPerm, Permission
+from rhodecode.model.db import User, Permission
 from rhodecode.model.forms import UserForm
 from rhodecode.model.user import UserModel
 from rhodecode.model.meta import Session

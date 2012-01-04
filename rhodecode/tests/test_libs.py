@@ -7,7 +7,7 @@
     Package for testing various lib/helper functions in rhodecode
 
     :created_on: Jun 9, 2011
-    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
+    :copyright: (C) 2011-2012 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software: you can redistribute it and/or modify

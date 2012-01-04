@@ -8,7 +8,7 @@
     :created_on: Oct 1, 2011
     :author: nvinot, marcink
     :copyright: (C) 2011-2011 Nicolas Vinot <aeris@imirhil.fr>
-    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
+    :copyright: (C) 2011-2012 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software: you can redistribute it and/or modify

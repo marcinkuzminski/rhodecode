@@ -6,7 +6,8 @@
     Test suite for making push/pull operations
 
     :created_on: Dec 30, 2010
-    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
+    :author: marcink
+    :copyright: (C) 2010-2012 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software: you can redistribute it and/or modify
