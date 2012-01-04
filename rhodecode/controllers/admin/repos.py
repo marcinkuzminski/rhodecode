@@ -35,7 +35,7 @@ from pylons.i18n.translation import _
 
 from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator, \
-    HasPermissionAnyDecorator
+    HasPermissionAnyDecorator, HasRepoPermissionAllDecorator
 from rhodecode.lib.base import BaseController, render
 from rhodecode.lib.utils import invalidate_cache, action_logger, repo_name_slug
 from rhodecode.lib.helpers import get_token
@@ -271,7 +271,8 @@ class ReposController(BaseController):
 
         return redirect(url('repos'))
 
-    @HasPermissionAllDecorator('hg.admin')
+
+    @HasRepoPermissionAllDecorator('repository.admin')   
     def delete_perm_user(self, repo_name):
         """
         DELETE an existing repository permission user
@@ -287,7 +288,7 @@ class ReposController(BaseController):
                     category='error')
             raise HTTPInternalServerError()
 
-    @HasPermissionAllDecorator('hg.admin')
+    @HasRepoPermissionAllDecorator('repository.admin')
     def delete_perm_users_group(self, repo_name):
         """
         DELETE an existing repository permission users group
