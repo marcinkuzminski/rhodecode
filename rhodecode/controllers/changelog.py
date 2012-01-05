@@ -54,7 +54,7 @@ class ChangelogController(BaseRepoController):
 
     def index(self):
         limit = 100
-        default = 20
+        default = 40
         if request.params.get('size'):
             try:
                 int_size = int(request.params.get('size'))

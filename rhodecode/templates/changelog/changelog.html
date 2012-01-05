@@ -36,11 +36,11 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
 				        <div class="info_box" style="float:left">
 				          ${h.submit('set',_('Show'),class_="ui-btn")}
 				          ${h.text('size',size=1,value=c.size)}
-				          <span class="rev">${_('revisions')}</span>
+				          ${_('revisions')}
 				        </div>
 				        ${h.end_form()}
-                    <div style="float:right">${h.select('branch_filter',c.branch_name,c.branch_filters)}</div>
 					<div id="rev_range_container" style="display:none"></div>
+                    <div style="float:right">${h.select('branch_filter',c.branch_name,c.branch_filters)}</div>
 					</div>
 					
 				%for cnt,cs in enumerate(c.pagination):

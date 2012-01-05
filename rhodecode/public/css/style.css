@@ -2229,15 +2229,15 @@ h3.files_location {
 #graph_content .container_header {
 	border: 1px solid #CCC;
 	padding: 10px;
-	height: 45px;
+	height: 25px;
     -webkit-border-radius: 6px 6px 0px 0px;
     -moz-border-radius: 6px 6px 0px 0px;
     border-radius: 6px 6px 0px 0px;	
 }
 
 #graph_content #rev_range_container {
-	padding: 10px 0px;
-	clear: both;
+	padding: 5px 20px;
+	float: left;
 }
 
 #graph_content .container {
