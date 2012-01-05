@@ -2141,7 +2141,7 @@ h3.files_location {
 
 #changeset_content .container .right {
 	float: right;
-	width: 25%;
+	width: 20%;
 	text-align: right;
 }
 
@@ -2222,7 +2222,7 @@ h3.files_location {
 }
 
 #graph_content {
-	width: 800px;
+	width: 80%;
 	float: left;
 }
 
@@ -2244,21 +2244,32 @@ h3.files_location {
 	border-bottom: 1px solid #CCC;
 	border-left: 1px solid #CCC;
 	border-right: 1px solid #CCC;
-	min-height: 70px;
+	height: 60px;
 	overflow: hidden;
-	font-size: 1.2em;
 }
 
 #graph_content .container .right {
 	float: right;
-	width: 28%;
+	width: 23%;
 	text-align: right;
-	padding-bottom: 5px;
 }
 
+#graph_content .container .left {
+	float: left;
+	width: 25%;
+	padding-left: 5px;
+}
+
+#graph_content .container .mid {
+	float: left;
+	width: 49%;
+}
+
+
 #graph_content .container .left .date {
-	font-weight: 700;
-	padding-bottom: 5px;
+	color: #444444;
+	f_ont-weight: 700;
+	p_adding-bottom: 5px;
 }
 
 #graph_content .container .left .date span {
@@ -2272,7 +2283,6 @@ h3.files_location {
 #graph_content .container .left .author .user {
 	color: #444444;
 	float: left;
-	font-size: 12px;
 	margin-left: -4px;
 	margin-top: 4px;
 }
@@ -2281,6 +2291,11 @@ h3.files_location {
 	font-size: 100%;
 	padding-top: 3px;
 	white-space: pre-wrap;
+	border: 1px solid red;
+	position: relative;
+	top: -30px;
+	left: 40%;
+	width: 30%;
 }
 
 #graph_content .container .left .message a:hover{
@@ -3449,9 +3464,9 @@ div.form div.fields div.field div.highlight,#content div.box div.form div.fields
 	width: 600px;
 }
 
-#changeset_content .container .left,#graph_content .container .left {
+#changeset_content .container .left {
 	float: left;
-	width: 70%;
+	width: 75%;
 	padding-left: 5px;
 }
 
