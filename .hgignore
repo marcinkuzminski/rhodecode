@@ -1,6 +1,7 @@
 syntax: glob
 *.pyc
 *.swp
+Paste*.egg
 
 syntax: regexp
 ^build
