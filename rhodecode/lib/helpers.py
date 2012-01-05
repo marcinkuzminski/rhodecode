@@ -14,6 +14,7 @@ from pygments.formatters.html import HtmlFormatter
 from pygments import highlight as code_highlight
 from pylons import url, request, config
 from pylons.i18n.translation import _, ungettext
+from hashlib import md5
 
 from webhelpers.html import literal, HTML, escape
 from webhelpers.html.tools import *
@@ -56,12 +57,14 @@ safeid = _make_safe_id_component
 
 def FID(raw_id, path):
     """
-    Creates a uniqe ID for filenode based on it's path and revision
+    Creates a uniqe ID for filenode based on it's hash of path and revision
+    it's safe to use in urls
 
     :param raw_id:
     :param path:
     """
-    return 'C-%s-%s' % (short_id(raw_id), safeid(safe_unicode(path)))
+
+    return 'C-%s-%s' % (short_id(raw_id), md5(path).hexdigest()[:12])
 
 
 def get_token():
