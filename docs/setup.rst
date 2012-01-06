@@ -425,7 +425,25 @@ the following in the [app:main] section of your .ini file::
    forge the authentication header and could effectively become authenticated
    using any account of their liking.
 
+Integration with Issue trackers
+-------------------------------
 
+RhodeCode provides a simple integration with issue trackers. It's possible
+to define a regular expression that will fetch issue id stored in commit
+messages and replace that with an url to this issue. To enable this simply
+uncomment following variables in the ini file::
+
+    url_pat = (?:^#|\s#)(\w+)
+    issue_server = https://myissueserver.com/issue/{id}
+    issue_prefix = #
+
+`url_pat` is the regular expression that will match issues, default given regex
+will match issues in format of #<number> eg. #300. 
+Matched issues will be replace with the `issue_server` url replacing {id} with
+id fetched from regex. Since the # is striped `issue_prefix` is added as a 
+prefix to url. `issue_prefix` can be something different than # if you pass 
+ISSUE- as issue prefix this will generate an url in format 
+`<a href="https://myissueserver.com/issue/300">ISSUE-300</a>`  
 
 Hook management
 ---------------
