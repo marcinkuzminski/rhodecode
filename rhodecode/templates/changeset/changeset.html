@@ -92,8 +92,8 @@
 		         </span>                                                                 
 	                </div>              
 	        </div>
-	        <span style="font-size:1.1em;font-weight: bold">
-	        ${_('%s files affected with %s additions and %s deletions.') % (len(c.changeset.affected_files),c.lines_added,c.lines_deleted)}
+	        <span>
+	        ${_('%s files affected with %s additions and %s deletions:') % (len(c.changeset.affected_files),c.lines_added,c.lines_deleted)}
 	        </span>
 	        <div class="cs_files">
 	                %for change,filenode,diff,cs1,cs2,stat in c.changes:

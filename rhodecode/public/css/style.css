@@ -2129,7 +2129,9 @@ h3.files_location {
 }
 
 #changeset_content {
-	border: 1px solid #CCC;
+	border-left: 1px solid #CCC;
+	border-right: 1px solid #CCC;
+	border-bottom: 1px solid #CCC;
 	padding: 5px;
 }
 
@@ -2139,7 +2141,7 @@ h3.files_location {
 }
 
 #changeset_content .container {
-	min-height: 120px;
+	min-height: 100px;
 	font-size: 1.2em;
 	overflow: hidden;
 }
