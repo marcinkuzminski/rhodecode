@@ -68,11 +68,6 @@
                          <span class="added"   title="${_('affected %s files') % len(c.changeset.affected_files)}">!</span>	                    
 	                    % endif		                 
 		             </div>                  
-		                 %if len(c.changeset.parents)>1:
-		                 <div class="merge">
-		                     ${_('merge')}<img alt="merge" src="${h.url('/images/icons/arrow_join.png')}"/>
-		                 </div>
-		                 %endif
 		                 
 		            %if c.changeset.parents:
 		             %for p_cs in reversed(c.changeset.parents):
@@ -84,6 +79,9 @@
                         <div class="parent">${_('No parents')}</div>   
                     %endif		             
 		         <span class="logtags">
+                 %if len(c.changeset.parents)>1:
+                 <span class="merge">${_('merge')}</span>
+                 %endif
 		             <span class="branchtag" title="${'%s %s' % (_('branch'),c.changeset.branch)}">
 		             ${h.link_to(c.changeset.branch,h.url('files_home',repo_name=c.repo_name,revision=c.changeset.raw_id))}</span>
 		             %for tag in c.changeset.tags:

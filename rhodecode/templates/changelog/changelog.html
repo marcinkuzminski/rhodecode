@@ -65,10 +65,7 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
 									<div id="${cs.raw_id}_changes_info" class="changes">
                                         <span id="${cs.raw_id}" class="changed_total tooltip" title="${_('Affected number of files, click to show more details')}">${len(cs.affected_files)}</span>
 									</div>					
-										%if len(cs.parents)>1:
-										<div class="merge">${_('merge')}</div>
-										%endif
-								   %if cs.parents:							
+								   %if cs.parents:
 									%for p_cs in reversed(cs.parents):
 										<div class="parent">${_('Parent')}
 											<span class="changeset_id">${p_cs.revision}:<span class="changeset_hash">${h.link_to(h.short_id(p_cs.raw_id),
@@ -80,6 +77,9 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
                                    %endif  
                     									
 								<span class="logtags">
+									%if len(cs.parents)>1:
+									<span class="merge">${_('merge')}</span>
+									%endif
 									%if cs.branch:
 									<span class="branchtag" title="${'%s %s' % (_('branch'),cs.branch)}">
 									   ${h.link_to(cs.branch,h.url('files_home',repo_name=c.repo_name,revision=cs.raw_id))}</span>
