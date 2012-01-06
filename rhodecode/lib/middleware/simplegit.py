@@ -27,6 +27,7 @@
 import os
 import logging
 import traceback
+import time
 
 from dulwich import server as dulserver
 
@@ -72,6 +73,7 @@ from paste.httpheaders import REMOTE_USER, AUTH_TYPE
 from rhodecode.lib import safe_str
 from rhodecode.lib.auth import authfunc, HasPermissionAnyMiddleware
 from rhodecode.lib.utils import invalidate_cache, is_valid_repo
+from rhodecode.model import meta
 from rhodecode.model.db import User
 
 from webob.exc import HTTPNotFound, HTTPForbidden, HTTPInternalServerError
@@ -102,6 +104,15 @@ class SimpleGit(object):
         self.authenticate = AuthBasicAuthenticator('', authfunc)
 
     def __call__(self, environ, start_response):
+        start = time.time()
+        try:
+            return self._handle_request(environ, start_response)
+        finally:
+            log = logging.getLogger(self.__class__.__name__)
+            log.debug('Request time: %.3fs' % (time.time() - start))
+            meta.Session.remove()
+
+    def _handle_request(self, environ, start_response):
         if not is_git(environ):
             return self.application(environ, start_response)
 

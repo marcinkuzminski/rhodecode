@@ -27,6 +27,7 @@
 import os
 import logging
 import traceback
+import time
 
 from mercurial.error import RepoError
 from mercurial.hgweb import hgweb_mod
@@ -38,6 +39,7 @@ from rhodecode.lib import safe_str
 from rhodecode.lib.auth import authfunc, HasPermissionAnyMiddleware
 from rhodecode.lib.utils import make_ui, invalidate_cache, \
     is_valid_repo, ui_sections
+from rhodecode.model import meta
 from rhodecode.model.db import User
 
 from webob.exc import HTTPNotFound, HTTPForbidden, HTTPInternalServerError
@@ -67,6 +69,15 @@ class SimpleHg(object):
         self.ipaddr = '0.0.0.0'
 
     def __call__(self, environ, start_response):
+        start = time.time()
+        try:
+            return self._handle_request(environ, start_response)
+        finally:
+            log = logging.getLogger(self.__class__.__name__)
+            log.debug('Request time: %.3fs' % (time.time() - start))
+            meta.Session.remove()
+
+    def _handle_request(self, environ, start_response):
         if not is_mercurial(environ):
             return self.application(environ, start_response)
 
