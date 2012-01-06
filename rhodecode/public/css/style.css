@@ -2307,49 +2307,38 @@ h3.files_location {
 }
 
 .right .changes .changed_total {
-	border: 0px solid #DDD;
 	display: block;
 	float: right;
 	text-align: center;
 	min-width: 45px;
 	cursor: pointer;
-	background: #FD8;
-	font-weight: bold;
+	color: #444444;
+	background: #FEA;
 	-webkit-border-radius: 0px 0px 0px 6px;
 	-moz-border-radius: 0px 0px 0px 6px;
 	border-radius: 0px 0px 0px 6px;
-	padding: 2px;	
+	padding: 1px;
 }
 
 .right .changes .added,.changed,.removed {
-	border: 1px solid #DDD;
 	display: block;
+	padding: 1px;
+	color: #444444;
 	float: right;
 	text-align: center;
 	min-width: 15px;
-	cursor: help;
-}
-
-.right .changes .large {
-	border: 1px solid #DDD;
-	display: block;
-	float: right;
-	text-align: center;
-	min-width: 45px;
-	cursor: help;
-	background: #54A9F7;
 }
 
 .right .changes .added {
-	background: #BFB;
+	background: #CFC;
 }
 
 .right .changes .changed {
-	background: #FD8;
+	background: #FEA;
 }
 
 .right .changes .removed {
-	background: #F88;
+	background: #FAA;
 }
 
 .right .merge {
