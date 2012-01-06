@@ -100,7 +100,7 @@ function BranchRenderer() {
 				
 				this.setColor(color, 0.0, 0.65);
 				
-				y = row.offsetTop-rela.offsetTop+20;
+				y = row.offsetTop-rela.offsetTop+row.offsetHeight/2;
 				x = pad-((this.cell[0] + this.box_size * start - 1) + this.bg_height-2);
 				
 				this.ctx.lineWidth=this.line_width;
@@ -118,7 +118,7 @@ function BranchRenderer() {
 			color = node[1]
 			
 			radius = this.dot_radius;
-			y = row.offsetTop-rela.offsetTop+20;
+			y = row.offsetTop-rela.offsetTop+row.offsetHeight/2;
 			x = pad-(Math.round(this.cell[0] * scale/2 * column + radius) + 15 - (column*4));
 		
 			this.ctx.beginPath();
