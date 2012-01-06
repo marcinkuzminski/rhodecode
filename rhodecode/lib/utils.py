@@ -152,12 +152,12 @@ def get_repos(path, recursive=False):
     """
     Scans given path for repos and return (name,(type,path)) tuple
 
-    :param path: path to scann for repositories
+    :param path: path to scan for repositories
     :param recursive: recursive search and return names with subdirs in front
     """
 
     # remove ending slash for better results
-    path = path.rstrip('/')
+    path = path.rstrip(os.sep)
 
     def _get_repos(p):
         if not os.access(p, os.W_OK):
