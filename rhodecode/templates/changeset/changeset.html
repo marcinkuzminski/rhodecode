@@ -71,8 +71,9 @@
 		                 
 		            %if c.changeset.parents:
 		             %for p_cs in reversed(c.changeset.parents):
-		                 <div class="parent">${_('Parent')} ${p_cs.revision}: ${h.link_to(h.short_id(p_cs.raw_id),
-		                     h.url('changeset_home',repo_name=c.repo_name,revision=p_cs.raw_id),title=p_cs.message)}
+		                 <div class="parent">${_('Parent')}
+                     <span class="changeset_id">${p_cs.revision}:<span class="changeset_hash">${h.link_to(h.short_id(p_cs.raw_id),
+		                     h.url('changeset_home',repo_name=c.repo_name,revision=p_cs.raw_id),title=p_cs.message)}</span></span>
 		                 </div>
 		             %endfor
                     %else: 
