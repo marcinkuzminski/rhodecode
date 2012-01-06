@@ -731,7 +731,7 @@ def fancy_file_stats(stats):
     return literal('<div style="width:%spx">%s%s</div>' % (width, d_a, d_d))
 
 
-def urlify_text(text):
+def urlify_text(text_):
     import re
 
     url_pat = re.compile(r'''(http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]'''
@@ -741,9 +741,9 @@ def urlify_text(text):
         url_full = match_obj.groups()[0]
         return '<a href="%(url)s">%(url)s</a>' % ({'url':url_full})
 
-    return literal(url_pat.sub(url_func, text))
+    return literal(url_pat.sub(url_func, text_))
 
-def urlify_commit(text):
+def urlify_commit(text_):
     import re
     import traceback
     
@@ -757,19 +757,26 @@ def urlify_commit(text):
             ISSUE_PREFIX = conf.get('issue_prefix')
             def url_func(match_obj):
                 issue_id = match_obj.groups()[0]
-                return ' <a href="%(url)s">%(issue-prefix)s%(id-repr)s</a>' % (
-                    {'url':ISSUE_SERVER.replace('{id}',issue_id),
+                tmpl = (
+                '<a class="%(cls)s" href="%(url)s">'
+                ' %(issue-prefix)s%(id-repr)s'
+                '</a>'
+                )
+                return tmpl % (
+                    {
+                     'cls':'issue-tracker-link',
+                     'url':ISSUE_SERVER.replace('{id}',issue_id),
                      'id-repr':issue_id,
                      'issue-prefix':ISSUE_PREFIX,
                      'serv':ISSUE_SERVER,
                     }
                 )
-            return literal(URL_PAT.sub(url_func, text))
+            return literal(URL_PAT.sub(url_func, text_))
     except:
         log.error(traceback.format_exc())
         pass
 
-    return text
+    return text_
 
 def rst(source):
     return literal('<div class="rst-block">%s</div>' %
