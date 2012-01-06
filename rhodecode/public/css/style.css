@@ -2115,6 +2115,19 @@ h3.files_location {
 	padding: 5px !important;
 }
 
+.tablerow1 {
+	background-color: #F8F8F8;
+}
+
+.changeset_id {
+	font-family: monospace;
+	color: #666666;
+}
+
+.changeset_hash {
+	color: #000000;
+}
+
 #changeset_content {
 	border: 1px solid #CCC;
 	padding: 5px;
@@ -2225,12 +2238,9 @@ h3.files_location {
 }
 
 #graph_content .container_header {
-	border: 1px solid #CCC;
+	border-bottom: 1px solid #DDD;
 	padding: 10px;
 	height: 25px;
-    -webkit-border-radius: 6px 6px 0px 0px;
-    -moz-border-radius: 6px 6px 0px 0px;
-    border-radius: 6px 6px 0px 0px;	
 }
 
 #graph_content #rev_range_container {
@@ -2239,10 +2249,8 @@ h3.files_location {
 }
 
 #graph_content .container {
-	border-bottom: 1px solid #CCC;
-	border-left: 1px solid #CCC;
-	border-right: 1px solid #CCC;
-	height: 60px;
+	border-bottom: 1px solid #DDD;
+	height: 55px;
 	overflow: hidden;
 }
 
@@ -2266,12 +2274,6 @@ h3.files_location {
 
 #graph_content .container .left .date {
 	color: #444444;
-	f_ont-weight: 700;
-	p_adding-bottom: 5px;
-}
-
-#graph_content .container .left .date span {
-	vertical-align: text-top;
 }
 
 #graph_content .container .left .author {
@@ -2357,9 +2359,7 @@ h3.files_location {
 }
 
 .right .parent {
-	font-size: 90%;
-	font-family: monospace;
-	padding: 2px 2px 2px 2px;
+	color: #666666;
 }
 .right .logtags{
 	padding: 2px 2px 2px 2px;

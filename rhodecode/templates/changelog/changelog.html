@@ -44,11 +44,11 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
 					</div>
 					
 				%for cnt,cs in enumerate(c.pagination):
-					<div id="chg_${cnt+1}" class="container">
+					<div id="chg_${cnt+1}" class="container ${'tablerow1' if cnt%2==0 else 'tablerow2'}">
 						<div class="left">
-							<div class="date">
+							<div>
 							${h.checkbox(cs.short_id,class_="changeset_range")}
-							<span>${cs.revision}: ${h.short_id(cs.raw_id)}<br/>${cs.date}</span>
+							<span class="changeset_id">${cs.revision}:<span class="changeset_hash">${h.short_id(cs.raw_id)}</span></span>
 							</div>
 							<div class="author">
 								<div class="gravatar">
@@ -56,6 +56,7 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
 								</div>
 								<div title="${cs.author}" class="user">${h.person(cs.author)}</div>
 							</div>
+							<div class="date">${cs.date}</div>
 						</div>
 						<div class="mid">
 							<div class="message">${h.link_to(h.wrap_paragraphs(cs.message),h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id))}</div>
@@ -69,8 +70,9 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
 										%endif
 								   %if cs.parents:							
 									%for p_cs in reversed(cs.parents):
-										<div class="parent">${_('Parent')} ${p_cs.revision}: ${h.link_to(h.short_id(p_cs.raw_id),
-											h.url('changeset_home',repo_name=c.repo_name,revision=p_cs.raw_id),title=p_cs.message)}
+										<div class="parent">${_('Parent')}
+											<span class="changeset_id">${p_cs.revision}:<span class="changeset_hash">${h.link_to(h.short_id(p_cs.raw_id),
+											h.url('changeset_home',repo_name=c.repo_name,revision=p_cs.raw_id),title=p_cs.message)}</span></span>
 										</div>
 									%endfor
 								   %else:	
