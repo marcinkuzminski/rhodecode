@@ -2,15 +2,18 @@
 %if c.repo_changesets:
 <table class="table_disp">
 	<tr>
-		<th class="left">${_('commit message')}</th>
+	    <th class="left">${_('revision')}</th>	
+        <th class="left">${_('commit message')}</th>
 		<th class="left">${_('age')}</th>
 		<th class="left">${_('author')}</th>
-		<th class="left">${_('revision')}</th>
 		<th class="left">${_('branch')}</th>
 		<th class="left">${_('tags')}</th>
 	</tr>
 %for cnt,cs in enumerate(c.repo_changesets):
 	<tr class="parity${cnt%2}">
+        <td>
+            <div><pre><a href="${h.url('files_home',repo_name=c.repo_name,revision=cs.raw_id)}">r${cs.revision}:${h.short_id(cs.raw_id)}</a></pre></div>
+        </td>  
         <td>
             ${h.link_to(h.truncate(cs.message,50),
             h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id),
@@ -20,7 +23,6 @@
                       ${h.age(cs.date)}</span>
         </td>        	
 		<td title="${cs.author}">${h.person(cs.author)}</td>
-		<td><div><pre><a href="${h.url('files_home',repo_name=c.repo_name,revision=cs.raw_id)}">r${cs.revision}:${h.short_id(cs.raw_id)}</a></pre></div></td>
 		<td>
 			<span class="logtags">
 				<span class="branchtag">${cs.branch}</span>

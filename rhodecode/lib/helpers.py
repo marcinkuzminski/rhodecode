@@ -8,6 +8,7 @@ import hashlib
 import StringIO
 import urllib
 import math
+import logging
 
 from datetime import datetime
 from pygments.formatters.html import HtmlFormatter
@@ -40,6 +41,8 @@ from rhodecode.lib.annotate import annotate_highlight
 from rhodecode.lib.utils import repo_name_slug
 from rhodecode.lib import str2bool, safe_unicode, safe_str, get_changeset_safe
 from rhodecode.lib.markup_renderer import MarkupRenderer
+
+log = logging.getLogger(__name__)
 
 
 def _reset(name, value=None, id=NotGiven, type="reset", **attrs):
@@ -740,6 +743,33 @@ def urlify_text(text):
 
     return literal(url_pat.sub(url_func, text))
 
+def urlify_commit(text):
+    import re
+    import traceback
+    
+    try:
+        conf = config['app_conf']
+        
+        URL_PAT = re.compile(r'%s' % conf.get('url_pat'))
+        
+        if URL_PAT:
+            ISSUE_SERVER = conf.get('issue_server')
+            ISSUE_PREFIX = conf.get('issue_prefix')
+            def url_func(match_obj):
+                issue_id = match_obj.groups()[0]
+                return ' <a href="%(url)s">%(issue-prefix)s%(id-repr)s</a>' % (
+                    {'url':ISSUE_SERVER.replace('{id}',issue_id),
+                     'id-repr':issue_id,
+                     'issue-prefix':ISSUE_PREFIX,
+                     'serv':ISSUE_SERVER,
+                    }
+                )
+            return literal(URL_PAT.sub(url_func, text))
+    except:
+        log.error(traceback.format_exc())
+        pass
+
+    return text
 
 def rst(source):
     return literal('<div class="rst-block">%s</div>' %

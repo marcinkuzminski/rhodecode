@@ -2146,8 +2146,6 @@ h3.files_location {
 }
 
 #changeset_content .container .left .message {
-	font-style: italic;
-	color: #556CB5;
 	white-space: pre-wrap;
 }
 #changeset_content .container .left .message a:hover {
