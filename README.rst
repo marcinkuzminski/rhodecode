@@ -1,6 +1,6 @@
-=================================================
-Welcome to RhodeCode (RhodiumCode) documentation!
-=================================================
+========================
+RhodeCode documentation!
+========================
 
 ``RhodeCode`` is a fast and powerful management tool for Mercurial_ and GIT_ 
 with a built in push/pull server and full text search.
@@ -102,7 +102,6 @@ Incoming / Plans
 - pull requests and web based merges
 - per line file history
 - SSH based authentication with server side key management
-- Redmine and other bugtrackers integration
 - Commit based built in wiki system
 - More statistics and graph (global annotation + some more statistics)
 - Other advancements as development continues (or you can of course make 
