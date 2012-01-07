@@ -141,12 +141,14 @@ class MailResponse(object):
     MailResponse.to_message.  This lets you change it and work with it, then
     send it out when it's ready.
     """
-    def __init__(self, To=None, From=None, Subject=None, Body=None, Html=None):
+    def __init__(self, To=None, From=None, Subject=None, Body=None, Html=None, 
+                 separator="; "):
         self.Body = Body
         self.Html = Html
         self.base = MailBase([('To', To), ('From', From), ('Subject', Subject)])
         self.multipart = self.Body and self.Html
         self.attachments = []
+        self.separator = separator
 
     def __contains__(self, key):
         return self.base.__contains__(key)
@@ -298,7 +300,7 @@ class MailResponse(object):
             self.base.body = self.Html
             self.base.content_encoding['Content-Type'] = ('text/html', {})
 
-        return to_message(self.base)
+        return to_message(self.base, separator=self.separator)
 
     def all_parts(self):
         """
@@ -310,7 +312,7 @@ class MailResponse(object):
     def keys(self):
         return self.base.keys()
 
-def to_message(mail):
+def to_message(mail, separator="; "):
     """
     Given a MailBase message, this will construct a MIMEPart
     that is canonicalized for use with the Python email API.
@@ -339,10 +341,16 @@ def to_message(mail):
 
     for k in mail.keys():
         if k in ADDRESS_HEADERS_WHITELIST:
-            out[k.encode('ascii')] = header_to_mime_encoding(mail[k])
+            out[k.encode('ascii')] = header_to_mime_encoding(
+                                         mail[k],
+                                         not_email=False,
+                                         separator=separator
+                                     )
         else:
-            out[k.encode('ascii')] = header_to_mime_encoding(mail[k],
-                                                             not_email=True)
+            out[k.encode('ascii')] = header_to_mime_encoding(
+                                         mail[k],
+                                         not_email=True
+                                    )
 
     out.extract_payload(mail)
 
@@ -403,12 +411,12 @@ class MIMEPart(MIMEBase):
             self.is_multipart())
 
 
-def header_to_mime_encoding(value, not_email=False):
+def header_to_mime_encoding(value, not_email=False, separator=", "):
     if not value: return ""
 
     encoder = Charset(DEFAULT_ENCODING)
     if type(value) == list:
-        return "; ".join(properly_encode_header(
+        return separator.join(properly_encode_header(
             v, encoder, not_email) for v in value)
     else:
         return properly_encode_header(value, encoder, not_email)

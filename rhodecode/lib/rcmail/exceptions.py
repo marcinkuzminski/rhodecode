@@ -1,9 +1,11 @@
 
+
 class InvalidMessage(RuntimeError):
     """
     Raised if message is missing vital headers, such
     as recipients or sender address.
     """
+
 
 class BadHeaders(RuntimeError):
     """
