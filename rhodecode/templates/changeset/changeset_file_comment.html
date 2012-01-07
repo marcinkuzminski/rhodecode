@@ -11,22 +11,16 @@
   			<img src="${h.gravatar_url(co.author.email, 20)}" />
   			${co.author.username}
   		</span>
-  		<a href="${h.url.current(anchor='comment-%s' % co.comment_id)}"> ${_('commented on')} </a>
-  		${h.short_id(co.revision)}
-  		%if co.f_path:
-  			${_(' in file ')}
-  			${co.f_path}:L ${co.line_no}
-  		%endif
   		<span class="date">
   			${h.age(co.modified_at)}
   		</span>
+      %if h.HasPermissionAny('hg.admin', 'repository.admin')() or co.author.user_id == c.rhodecode_user.user_id:
+        <span class="buttons">
+          <span onClick="deleteComment(${co.comment_id})" class="delete-comment ui-btn">${_('Delete')}</span>
+        </span>
+      %endif
   	</div>
   	<div class="text">
-  		%if h.HasPermissionAny('hg.admin', 'repository.admin')() or co.author.user_id == c.rhodecode_user.user_id:
-  			<div class="buttons">
-  				<span onClick="deleteComment(${co.comment_id})" class="delete-comment ui-btn">${_('Delete')}</span>
-  			</div>
-  		%endif
   		${h.rst_w_mentions(co.text)|n}
   	</div>
     </div>

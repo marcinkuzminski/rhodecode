@@ -3697,7 +3697,7 @@ div.rst-block  pre {
 
 .comments .comment .meta {
     background: #f8f8f8;
-    padding: 6px;
+    padding: 4px;
     border-bottom: 1px solid #ddd;
 }
 
@@ -3710,12 +3710,13 @@ div.rst-block  pre {
 }
 
 .comments .comment .meta .date {
-    float: right;
 }
 
 .comments .comment .text {
-    padding: 8px 6px 6px 14px;
     background-color: #FAFAFA;
+}
+.comment .text div.rst-block p {
+	margin: 0.5em 0px !important;
 }
 
 .comments .comments-number{
@@ -3784,8 +3785,7 @@ form.comment-form {
 }
 
 .comment .buttons {
-    position: absolute;
-    right:40px;
+	float: right;
 }
 
 
@@ -3872,7 +3872,7 @@ form.comment-inline-form {
 }
 .inline-comments .comment .meta {
     background: #f8f8f8;
-    padding: 6px;
+    padding: 4px;
     border-bottom: 1px solid #ddd;
 }
 
@@ -3885,11 +3885,9 @@ form.comment-inline-form {
 }
 
 .inline-comments .comment .meta .date {
-    float: right;
 }
 
 .inline-comments .comment .text {
-    padding: 8px 6px 6px 14px;
     background-color: #FAFAFA;
 }
 
