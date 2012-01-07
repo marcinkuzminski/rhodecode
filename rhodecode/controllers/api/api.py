@@ -64,23 +64,23 @@ class ApiController(JSONRPCController):
     """
 
     @HasPermissionAllDecorator('hg.admin')
-    def pull(self, apiuser, repo):
+    def pull(self, apiuser, repo_name):
         """
         Dispatch pull action on given repo
 
 
         :param user:
-        :param repo:
+        :param repo_name:
         """
 
-        if Repository.is_valid(repo) is False:
-            raise JSONRPCError('Unknown repo "%s"' % repo)
+        if Repository.is_valid(repo_name) is False:
+            raise JSONRPCError('Unknown repo "%s"' % repo_name)
 
         try:
-            ScmModel().pull_changes(repo, self.rhodecode_user.username)
-            return 'Pulled from %s' % repo
+            ScmModel().pull_changes(repo_name, self.rhodecode_user.username)
+            return 'Pulled from %s' % repo_name
         except Exception:
-            raise JSONRPCError('Unable to pull changes from "%s"' % repo)
+            raise JSONRPCError('Unable to pull changes from "%s"' % repo_name)
 
     @HasPermissionAllDecorator('hg.admin')
     def get_user(self, apiuser, username):
@@ -151,10 +151,15 @@ class ApiController(JSONRPCController):
             raise JSONRPCError("user %s already exist" % username)
 
         try:
-            UserModel().create_or_update(username, password, email, firstname,
-                                         lastname, active, admin, ldap_dn)
+            usr = UserModel().create_or_update(
+                username, password, email, firstname,
+                lastname, active, admin, ldap_dn
+            )
             Session.commit()
-            return dict(msg='created new user %s' % username)
+            return dict(
+                id=usr.user_id,
+                msg='created new user %s' % username
+            )
         except Exception:
             log.error(traceback.format_exc())
             raise JSONRPCError('failed to create user %s' % username)
@@ -185,7 +190,7 @@ class ApiController(JSONRPCController):
                             ldap=user.ldap_dn))
 
         return dict(id=users_group.users_group_id,
-                    name=users_group.users_group_name,
+                    group_name=users_group.users_group_name,
                     active=users_group.users_group_active,
                     members=members)
 
@@ -212,31 +217,31 @@ class ApiController(JSONRPCController):
                                 ldap=user.ldap_dn))
 
             result.append(dict(id=users_group.users_group_id,
-                                name=users_group.users_group_name,
+                                group_name=users_group.users_group_name,
                                 active=users_group.users_group_active,
                                 members=members))
         return result
 
     @HasPermissionAllDecorator('hg.admin')
-    def create_users_group(self, apiuser, name, active=True):
+    def create_users_group(self, apiuser, group_name, active=True):
         """
         Creates an new usergroup
 
-        :param name:
+        :param group_name:
         :param active:
         """
 
-        if self.get_users_group(apiuser, name):
-            raise JSONRPCError("users group %s already exist" % name)
+        if self.get_users_group(apiuser, group_name):
+            raise JSONRPCError("users group %s already exist" % group_name)
 
         try:
-            ug = UsersGroupModel().create(name=name, active=active)
+            ug = UsersGroupModel().create(name=group_name, active=active)
             Session.commit()
             return dict(id=ug.users_group_id,
-                        msg='created new users group %s' % name)
+                        msg='created new users group %s' % group_name)
         except Exception:
             log.error(traceback.format_exc())
-            raise JSONRPCError('failed to create group %s' % name)
+            raise JSONRPCError('failed to create group %s' % group_name)
 
     @HasPermissionAllDecorator('hg.admin')
     def add_user_to_users_group(self, apiuser, group_name, username):
@@ -312,7 +317,7 @@ class ApiController(JSONRPCController):
 
         return dict(
             id=repo.repo_id,
-            name=repo.repo_name,
+            repo_name=repo.repo_name,
             type=repo.repo_type,
             description=repo.description,
             members=members
@@ -331,7 +336,7 @@ class ApiController(JSONRPCController):
             result.append(
                 dict(
                     id=repository.repo_id,
-                    name=repository.repo_name,
+                    repo_name=repository.repo_name,
                     type=repository.repo_type,
                     description=repository.description
                 )
@@ -367,13 +372,13 @@ class ApiController(JSONRPCController):
             raise JSONRPCError(e)
 
     @HasPermissionAnyDecorator('hg.admin', 'hg.create.repository')
-    def create_repo(self, apiuser, name, owner_name, description='',
+    def create_repo(self, apiuser, repo_name, owner_name, description='',
                     repo_type='hg', private=False):
         """
         Create a repository
 
         :param apiuser:
-        :param name:
+        :param repo_name:
         :param description:
         :param type:
         :param private:
@@ -386,10 +391,10 @@ class ApiController(JSONRPCController):
             except NoResultFound:
                 raise JSONRPCError('unknown user %s' % owner)
 
-            if self.get_repo(apiuser, name):
-                raise JSONRPCError("repo %s already exist" % name)
+            if Repository.get_by_repo_name(repo_name):
+                raise JSONRPCError("repo %s already exist" % repo_name)
 
-            groups = name.split('/')
+            groups = repo_name.split('/')
             real_name = groups[-1]
             groups = groups[:-1]
             parent_id = None
@@ -405,10 +410,10 @@ class ApiController(JSONRPCController):
                     )
                 parent_id = group.group_id
 
-            RepoModel().create(
+            repo = RepoModel().create(
                 dict(
                     repo_name=real_name,
-                    repo_name_full=name,
+                    repo_name_full=repo_name,
                     description=description,
                     private=private,
                     repo_type=repo_type,
@@ -418,9 +423,15 @@ class ApiController(JSONRPCController):
                 owner
             )
             Session.commit()
+
+            return dict(
+                id=repo.repo_id,
+                msg="Created new repository %s" % repo.repo_name
+            )
+
         except Exception:
             log.error(traceback.format_exc())
-            raise JSONRPCError('failed to create repository %s' % name)
+            raise JSONRPCError('failed to create repository %s' % repo_name)
 
     @HasPermissionAnyDecorator('hg.admin')
     def add_user_to_repo(self, apiuser, repo_name, username, perm):
