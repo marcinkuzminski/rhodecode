@@ -99,7 +99,7 @@
 	                    <div class="cs_${change}">
                             <div class="node">
                             %if change != 'removed':
-                                ${h.link_to(h.safe_unicode(filenode.path),c.anchor_url(filenode.changeset.raw_id,filenode.path))}
+                                ${h.link_to(h.safe_unicode(filenode.path),c.anchor_url(filenode.changeset.raw_id,filenode.path)+"_target")}
                             %else:
                                 ${h.link_to(h.safe_unicode(filenode.path),h.url.current(anchor=h.FID('',filenode.path)))}
                             %endif
@@ -154,11 +154,15 @@
           YUE.on(YUQ('.show-inline-comments'),'change',function(e){
               var show = 'none';
               var target = e.currentTarget;
+              console.log(target);
               if(target.checked){
                   var show = ''
               }
+              console.log('aa')
               var boxid = YUD.getAttribute(target,'id_for');
+              console.log(boxid);
               var comments = YUQ('#{0} .inline-comments'.format(boxid));
+              console.log(comments)
               for(c in comments){ 
                  YUD.setStyle(comments[c],'display',show);
               }
