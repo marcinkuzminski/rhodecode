@@ -15,18 +15,13 @@
                     ${h.link_to_if(change!='removed',h.safe_unicode(filenode.path),h.url('files_home',repo_name=c.repo_name,
                     revision=filenode.changeset.raw_id,f_path=h.safe_unicode(filenode.path)))}
                 </div>
-                <div class="diff-menu-wrapper">
-                    <img class="diff-menu-activate" style="margin-bottom:-6px;cursor: pointer" alt="diff-menu" src="${h.url('/images/icons/script_gear.png')}" />
-                    <div class="diff-menu" style="display:none">
-                        <ul>
-                          <li>${h.link_to(_('diff'),h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(filenode.path),diff2=cs2,diff1=cs1,diff='diff',fulldiff=1))}</li>
-                          <li>${h.link_to(_('raw diff'),h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(filenode.path),diff2=cs2,diff1=cs1,diff='raw'))}</li>
-                          <li>${h.link_to(_('download diff'),h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(filenode.path),diff2=cs2,diff1=cs1,diff='download'))}</li>
-                          <li>${c.ignorews_url(h.FID(filenode.changeset.raw_id,filenode.path))}</li>
-                          <li>${c.context_url(h.FID(filenode.changeset.raw_id,filenode.path))}</li>
-                        </ul>
-                    </div>                        
-                </div>
+                <span class="diff-actions">
+                  <a href="${h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(filenode.path),diff2=cs2,diff1=cs1,diff='diff',fulldiff=1)}" title="${_('diff')}"><img class="icon" src="${h.url('/images/icons/page_white_text.png')}"/></a>
+                  <a href="${h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(filenode.path),diff2=cs2,diff1=cs1,diff='raw')}" title="${_('raw diff')}"><img class="icon" src="${h.url('/images/icons/page_white_text.png')}"/></a>
+                  <a href="${h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(filenode.path),diff2=cs2,diff1=cs1,diff='download')}" title="${_('download diff')}"><img class="icon" src="${h.url('/images/icons/down_16.png')}"/></a>
+                  ${c.ignorews_url(h.FID(filenode.changeset.raw_id,filenode.path))}
+                  ${c.context_url(h.FID(filenode.changeset.raw_id,filenode.path))}
+                </span>
                 <span style="float:right;margin-top:-3px">
                   <label>
                   ${_('show inline comments')}
