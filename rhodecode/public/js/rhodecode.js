@@ -657,7 +657,6 @@ var get_group_name = function(node){
 	return name
 }
 var get_date = function(node){
-	console.log(node.firstElementChild)
 	var date_ = node.firstElementChild.innerHTML;
 	return date_
 }

@@ -154,15 +154,11 @@
           YUE.on(YUQ('.show-inline-comments'),'change',function(e){
               var show = 'none';
               var target = e.currentTarget;
-              console.log(target);
               if(target.checked){
                   var show = ''
               }
-              console.log('aa')
               var boxid = YUD.getAttribute(target,'id_for');
-              console.log(boxid);
               var comments = YUQ('#{0} .inline-comments'.format(boxid));
-              console.log(comments)
               for(c in comments){ 
                  YUD.setStyle(comments[c],'display',show);
               }

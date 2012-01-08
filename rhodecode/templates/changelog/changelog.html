@@ -140,7 +140,6 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
                     // change branch filter
                     YUE.on(YUD.get('branch_filter'),'change',function(e){
                     	var selected_branch = e.currentTarget.options[e.currentTarget.selectedIndex].value;
-                    	console.log(selected_branch);
                     	var url_main = "${h.url('changelog_home',repo_name=c.repo_name)}";
                     	var url = "${h.url('changelog_home',repo_name=c.repo_name,branch='__BRANCH__')}";
                     	var url = url.replace('__BRANCH__',selected_branch);
