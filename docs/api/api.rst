@@ -10,6 +10,8 @@ There's a single schema for calling all api methods. API is implemented
 with JSON protocol both ways. An url to send API request in RhodeCode is
 <your_server>/_admin/api
 
+API ACCESS FOR WEB VIEWS
+++++++++++++++++++++++++
 
 API access can also be turned on for each view decorated with `@LoginRequired`
 decorator. To enable API access simple change standard login decorator into
@@ -17,6 +19,9 @@ decorator. To enable API access simple change standard login decorator into
 by adding a GET parameter to url `?api_key=<api_key>`. By default it's only
 enabled on RSS/ATOM feed views.
 
+
+API ACCESS
+++++++++++
 
 All clients are required to send JSON-RPC spec JSON data::
 
@@ -69,13 +74,45 @@ INPUT::
     api_key : "<api_key>"
     method :  "pull"
     args :    {
-                "repo" : "<repo_name>"
+                "repo_name" : "<reponame>"
               }
 
 OUTPUT::
 
-    result : "Pulled from <repo_name>"
+    result : "Pulled from <reponame>"
     error :  null
+
+
+get_user
+--------
+
+Get's an user by username, Returns empty result if user is not found.
+This command can be executed only using api_key belonging to user with admin 
+rights.
+
+INPUT::
+
+    api_key : "<api_key>"
+    method :  "get_user"
+    args :    { 
+                "username" : "<username>"
+              }
+
+OUTPUT::
+
+    result: None if user does not exist or 
+            {
+                "id" :       "<id>",
+                "username" : "<username>",
+                "firstname": "<firstname>",
+                "lastname" : "<lastname>",
+                "email" :    "<email>",
+                "active" :   "<bool>",
+                "admin" :    "<bool>",
+                "ldap" :     "<ldap_dn>"
+            }
+
+    error:  null
 
 
 get_users
@@ -131,45 +168,10 @@ INPUT::
 OUTPUT::
 
     result: {
+              "id" : "<new_user_id>",
               "msg" : "created new user <username>"
             }
     error:  null
-
-get_users_groups
-----------------
-
-Lists all existing users groups. This command can be executed only using api_key
-belonging to user with admin rights.
-
-INPUT::
-
-    api_key : "<api_key>"
-    method :  "get_users_groups"
-    args :    { }
-
-OUTPUT::
-
-    result : [
-               {
-                 "id" :       "<id>",
-                 "name" :     "<name>",
-                 "active":    "<bool>",
-                 "members" :  [
-	    	                    {
-	    	                      "id" :       "<userid>",
-	                              "username" : "<username>",
-	                              "firstname": "<firstname>",
-	                              "lastname" : "<lastname>",
-	                              "email" :    "<email>",
-	                              "active" :   "<bool>",
-	                              "admin" :    "<bool>",
-	                              "ldap" :     "<ldap_dn>"
-	                            },
-	    	                    …
-	                          ]
-	            }
-              ]
-    error : null
 
 get_users_group
 ---------------
@@ -189,23 +191,60 @@ OUTPUT::
 
     result : None if group not exist
              {
-               "id" :       "<id>",
-               "name" :     "<name>",
-               "active":    "<bool>",
+               "id" :         "<id>",
+               "group_name" : "<groupname>",
+               "active":      "<bool>",
                "members" :  [
-	    	                  { "id" :       "<userid>",
-	                            "username" : "<username>",
-	                            "firstname": "<firstname>",
-	                            "lastname" : "<lastname>",
-	                            "email" :    "<email>",
-	                            "active" :   "<bool>",
-	                            "admin" :    "<bool>",
-	                            "ldap" :     "<ldap_dn>"
-	                          },
-	    	                  …
-	                        ]
+                              { "id" :       "<userid>",
+                                "username" : "<username>",
+                                "firstname": "<firstname>",
+                                "lastname" : "<lastname>",
+                                "email" :    "<email>",
+                                "active" :   "<bool>",
+                                "admin" :    "<bool>",
+                                "ldap" :     "<ldap_dn>"
+                              },
+                              …
+                            ]
              }
     error : null
+
+get_users_groups
+----------------
+
+Lists all existing users groups. This command can be executed only using 
+api_key belonging to user with admin rights.
+
+INPUT::
+
+    api_key : "<api_key>"
+    method :  "get_users_groups"
+    args :    { }
+
+OUTPUT::
+
+    result : [
+               {
+                 "id" :         "<id>",
+                 "group_name" : "<groupname>",
+                 "active":      "<bool>",
+                 "members" :  [
+	    	                    {
+	    	                      "id" :       "<userid>",
+	                              "username" : "<username>",
+	                              "firstname": "<firstname>",
+	                              "lastname" : "<lastname>",
+	                              "email" :    "<email>",
+	                              "active" :   "<bool>",
+	                              "admin" :    "<bool>",
+	                              "ldap" :     "<ldap_dn>"
+	                            },
+	    	                    …
+	                          ]
+	            }
+              ]
+    error : null
+
 
 create_users_group
 ------------------
@@ -218,7 +257,7 @@ INPUT::
     api_key : "<api_key>"
     method :  "create_users_group"
     args:     {
-                "name":  "<name>",
+                "group_name":  "<groupname>",
                 "active":"<bool> = True"
               }
 
@@ -226,7 +265,7 @@ OUTPUT::
 
     result: {
               "id":  "<newusersgroupid>",
-              "msg": "created new users group <name>"
+              "msg": "created new users group <groupname>"
             }
     error:  null
 
@@ -253,6 +292,51 @@ OUTPUT::
             }
     error:  null
 
+get_repo
+--------
+
+Gets an existing repository. This command can be executed only using api_key
+belonging to user with admin rights
+
+INPUT::
+
+    api_key : "<api_key>"
+    method :  "get_repo"
+    args:     {
+                "repo_name" : "<reponame>"
+              }
+
+OUTPUT::
+
+    result: None if repository does not exist or
+            {
+                "id" :          "<id>",
+                "repo_name" :   "<reponame>"
+                "type" :        "<type>",
+                "description" : "<description>",
+                "members" :     [
+                                  { "id" :         "<userid>",
+                                    "username" :   "<username>",
+                                    "firstname":   "<firstname>",
+                                    "lastname" :   "<lastname>",
+                                    "email" :      "<email>",
+                                    "active" :     "<bool>",
+                                    "admin" :      "<bool>",
+                                    "ldap" :       "<ldap_dn>",
+                                    "permission" : "repository.(read|write|admin)"
+                                  },
+                                  …
+                                  {
+                                    "id" :       "<usersgroupid>",
+                                    "name" :     "<usersgroupname>",
+                                    "active":    "<bool>",
+                                    "permission" : "repository.(read|write|admin)"
+                                  },
+                                  …
+                                ]
+            }
+    error:  null
+
 get_repos
 ---------
 
@@ -270,7 +354,7 @@ OUTPUT::
     result: [
               {
                 "id" :          "<id>",
-                "name" :        "<name>"
+                "repo_name" :   "<reponame>"
                 "type" :        "<type>",
                 "description" : "<description>"
               },
@@ -278,57 +362,13 @@ OUTPUT::
             ]
     error:  null
 
-get_repo
---------
-
-Gets an existing repository. This command can be executed only using api_key
-belonging to user with admin rights
-
-INPUT::
-
-    api_key : "<api_key>"
-    method :  "get_repo"
-    args:     {
-                "name" : "<name>"
-              }
-
-OUTPUT::
-
-    result: None if repository not exist
-            {
-                "id" :          "<id>",
-                "name" :        "<name>"
-                "type" :        "<type>",
-                "description" : "<description>",
-                "members" :     [
-                                  { "id" :         "<userid>",
-	                                "username" :   "<username>",
-	                                "firstname":   "<firstname>",
-	                                "lastname" :   "<lastname>",
-	                                "email" :      "<email>",
-	                                "active" :     "<bool>",
-	                                "admin" :      "<bool>",
-	                                "ldap" :       "<ldap_dn>",
-	                                "permission" : "repository.(read|write|admin)"
-	                              },
-                                  …
-                                  {
-                                    "id" :       "<usersgroupid>",
-                                    "name" :     "<usersgroupname>",
-                                    "active":    "<bool>",
-                                    "permission" : "repository.(read|write|admin)"
-                                  },
-                                  …
-                                ]
-            }
-    error:  null
 
 get_repo_nodes
 --------------
 
 returns a list of nodes and it's children in a flat list for a given path 
-at given revision. It's possible to specify ret_type to show only files or 
-dirs. This command can be executed only using api_key belonging to user 
+at given revision. It's possible to specify ret_type to show only `files` or 
+`dirs`. This command can be executed only using api_key belonging to user 
 with admin rights
 
 INPUT::
@@ -336,7 +376,7 @@ INPUT::
     api_key : "<api_key>"
     method :  "get_repo_nodes"
     args:     {
-                "repo_name" : "<name>",
+                "repo_name" : "<reponame>",
                 "revision"  : "<revision>",
                 "root_path" : "<root_path>",
                 "ret_type"  : "<ret_type>" = 'all'
@@ -369,7 +409,7 @@ INPUT::
     api_key : "<api_key>"
     method :  "create_repo"
     args:     {
-                "name" :        "<name>",
+                "repo_name" :   "<reponame>",
                 "owner_name" :  "<ownername>",
                 "description" : "<description> = ''",
                 "repo_type" :   "<type> = 'hg'",
@@ -378,7 +418,10 @@ INPUT::
 
 OUTPUT::
 
-    result: None
+    result: {
+                "id": "<newrepoid>",
+                "msg": "Created new repository <reponame>",
+            }
     error:  null
 
 add_user_to_repo
@@ -394,13 +437,15 @@ INPUT::
     method :  "add_user_to_repo"
     args:     {
                 "repo_name" :  "<reponame>",
-                "username" :  "<username>",
+                "username" :   "<username>",
                 "perm" :       "(None|repository.(read|write|admin))",
               }
 
 OUTPUT::
 
-    result: None
+    result: {
+                "msg" : "Added perm: <perm> for <username> in repo: <reponame>"
+            }
     error:  null
 
 add_users_group_to_repo
@@ -416,6 +461,12 @@ INPUT::
     method :  "add_users_group_to_repo"
     args:     {
                 "repo_name" :  "<reponame>",
-                "group_name" :  "<groupname>",
+                "group_name" : "<groupname>",
                 "perm" :       "(None|repository.(read|write|admin))",
               }
+OUTPUT::
+    
+    result: {
+                "msg" : Added perm: <perm> for <groupname> in repo: <reponame>"
+            }
+

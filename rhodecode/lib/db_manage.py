@@ -97,6 +97,13 @@ class DbManage(object):
         from rhodecode.lib.dbmigrate.migrate.exceptions import \
             DatabaseNotControlledError
 
+        if 'sqlite' in self.dburi:
+            print (
+               '********************** WARNING **********************\n'
+               'Make sure your version of sqlite is at least 3.7.X.  \n'
+               'Earlier versions are known to fail on some migrations\n'
+               '*****************************************************\n'
+            )
         upgrade = ask_ok('You are about to perform database upgrade, make '
                          'sure You backed up your database before. '
                          'Continue ? [y/n]')
@@ -160,6 +167,9 @@ class DbManage(object):
                 self.klass.fix_settings()
                 print ('Adding ldap defaults')
                 self.klass.create_ldap_options(skip_existing=True)
+
+            def step_4(self):
+                print ('TODO:')
 
         upgrade_steps = [0] + range(curr_version + 1, __dbversion__ + 1)
 

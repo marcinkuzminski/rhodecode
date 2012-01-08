@@ -59,7 +59,8 @@ class SmtpMailer(object):
 
         if isinstance(recipients, basestring):
             recipients = [recipients]
-        msg = Message(subject, recipients, body, html, self.mail_from)
+        msg = Message(subject, recipients, body, html, self.mail_from,
+                      recipients_separator=", ")
         raw_msg = msg.to_message()
 
         if self.ssl:

@@ -48,7 +48,7 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
 						<div class="left">
 							<div>
 							${h.checkbox(cs.short_id,class_="changeset_range")}
-							<span class="changeset_id">${cs.revision}:<span class="changeset_hash">${h.short_id(cs.raw_id)}</span></span>
+							<span class="tooltip" title="${cs.date}"><a href="${h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id)}"><span class="changeset_id">${cs.revision}:<span class="changeset_hash">${h.short_id(cs.raw_id)}</span></span></a></span>
 							</div>
 							<div class="author">
 								<div class="gravatar">

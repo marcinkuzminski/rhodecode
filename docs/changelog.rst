@@ -33,7 +33,9 @@ news
 - implements #330 api method for listing nodes ar particular revision
 - fixed #331 RhodeCode mangles repository names if the a repository group 
   contains the "full path" to the repositories
-  
+- #73 added linking issues in commit messages to choosen issue tracker url
+  based on user defined regular expression
+    
 fixes
 -----
 

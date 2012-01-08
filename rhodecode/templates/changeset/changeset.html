@@ -49,7 +49,7 @@
 	                     <span>${h.person(c.changeset.author)}</span><br/>
 	                     <span><a href="mailto:${h.email_or_none(c.changeset.author)}">${h.email_or_none(c.changeset.author)}</a></span><br/>
 	                 </div>
-	                 <div class="message">${h.wrap_paragraphs(c.changeset.message)}</div>
+	                 <div class="message">${h.urlify_commit(h.wrap_paragraphs(c.changeset.message))}</div>
 	             </div>
 	             <div class="right">
 		             <div class="changes">
@@ -95,7 +95,7 @@
 	                    <div class="cs_${change}">
                             <div class="node">
                             %if change != 'removed':
-                                ${h.link_to(h.safe_unicode(filenode.path),c.anchor_url(filenode.changeset.raw_id,filenode.path))}
+                                ${h.link_to(h.safe_unicode(filenode.path),c.anchor_url(filenode.changeset.raw_id,filenode.path)+"_target")}
                             %else:
                                 ${h.link_to(h.safe_unicode(filenode.path),h.url.current(anchor=h.FID('',filenode.path)))}
                             %endif
@@ -138,11 +138,15 @@
           YUE.on(YUQ('.show-inline-comments'),'change',function(e){
               var show = 'none';
               var target = e.currentTarget;
+              console.log(target);
               if(target.checked){
                   var show = ''
               }
+              console.log('aa')
               var boxid = YUD.getAttribute(target,'id_for');
+              console.log(boxid);
               var comments = YUQ('#{0} .inline-comments'.format(boxid));
+              console.log(comments)
               for(c in comments){ 
                  YUD.setStyle(comments[c],'display',show);
               }

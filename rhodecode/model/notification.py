@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
     rhodecode.model.notification
-    ~~~~~~~~~~~~~~
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Model for notifications
 
