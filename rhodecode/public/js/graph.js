@@ -107,10 +107,20 @@ function BranchRenderer() {
 				this.ctx.beginPath();
 				this.ctx.moveTo(x, y);
 
-				y += row.offsetHeight;
 				
-				x = pad-((1 + this.box_size * end) + this.bg_height-2);
-				this.ctx.lineTo(x,y+extra,3);
+				if (start == end)
+				{
+					x = pad-((1 + this.box_size * end) + this.bg_height-2);
+					y += row.offsetHeight;
+					this.ctx.lineTo(x,y+extra,3);
+				}
+				else
+				{
+					var x2 = pad-((1 + this.box_size * end) + this.bg_height-2);
+					var y2 = y + row.offsetHeight;
+					var ymid = (y+y2) / 2;
+					this.ctx.bezierCurveTo (x,ymid,x2,ymid,x2,y2);
+				}
 				this.ctx.stroke();
 			}
 			
