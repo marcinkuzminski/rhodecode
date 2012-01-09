@@ -68,6 +68,8 @@ function BranchRenderer() {
 			this.scale(scale);
 
 			var row = document.getElementById("chg_"+idx);
+			if (row == null)
+				continue;
 			var	next = document.getElementById("chg_"+(idx+1));
 			var extra = 0;
 			
