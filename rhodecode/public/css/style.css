@@ -2289,18 +2289,11 @@ h3.files_location {
 	margin-top: 4px;
 }
 
-#graph_content .container .left .message {
-	font-size: 100%;
-	padding-top: 3px;
+#graph_content .container .mid .message {
 	white-space: pre-wrap;
-	border: 1px solid red;
-	position: relative;
-	top: -30px;
-	left: 40%;
-	width: 30%;
 }
 
-#graph_content .container .left .message a:hover{
+#graph_content .container .mid .message a:hover{
 	text-decoration: none;
 }
 
