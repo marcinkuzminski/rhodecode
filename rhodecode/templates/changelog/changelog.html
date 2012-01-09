@@ -155,6 +155,20 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
                         
                     });
                     
+                    // Expand long messages on click
+                    var messages = YUD.getElementsByClassName('message');
+                    for (idx in messages) {
+                    	var msg = messages[idx];
+                    	// would the message be clipped?
+                    	if (msg.scrollHeight > msg.parentNode.parentNode.offsetHeight)
+	                    {
+	                    	msg.style.cursor = 's-resize';
+	                    	msg.onclick = function() {
+	                    		this.parentNode.parentNode.style.height = 'auto';
+	                    	}
+                    	}
+                    }
+
 					function set_canvas(heads) {
 						var c = document.getElementById('graph_nodes');
 						var t = document.getElementById('graph_content');
