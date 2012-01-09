@@ -165,11 +165,12 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
 	                    	msg.style.cursor = 's-resize';
 	                    	msg.onclick = function() {
 	                    		this.parentNode.parentNode.style.height = 'auto';
+	                    		repaint_graph();
 	                    	}
                     	}
                     }
 
-					function set_canvas(heads) {
+					function set_canvas(max_w) {
 						var c = document.getElementById('graph_nodes');
 						var t = document.getElementById('graph_content');
 						canvas = document.getElementById('graph_canvas');
@@ -179,22 +180,25 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
 						c.style.height=max_w+'px';
 						canvas.setAttribute('width',max_w);
 					};
-					var heads = 1;
-					var max_heads = 0;
-					var jsdata = ${c.jsdata|n};
-					
-					for( var i=0;i<jsdata.length;i++){
-					    var m = Math.max.apply(Math, jsdata[i][1]);
-					    if (m>max_heads){
-					        max_heads = m;
-					    }
+					function calc_max_w(jsdata) {
+						var heads = 1;
+						var max_heads = 0;
+						for( var i=0;i<jsdata.length;i++){
+						    var m = Math.max.apply(Math, jsdata[i][1]);
+						    if (m>max_heads){
+						        max_heads = m;
+						    }
+						}
+						return Math.max(100,max_heads*25);
 					}
-					var max_w = Math.max(100,max_heads*25);
-					set_canvas(max_w);
-					
-					var r = new BranchRenderer();
-					r.render(jsdata,max_w);
-										
+					function repaint_graph() {
+						var jsdata = ${c.jsdata|n};
+						var max_w = calc_max_w(jsdata);
+						set_canvas(max_w);
+						var r = new BranchRenderer();
+						r.render(jsdata,max_w);							
+					}
+					repaint_graph ();
 				});
 			</script>
 		%else:
