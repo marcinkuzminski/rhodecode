@@ -2322,6 +2322,11 @@ h3.files_location {
 	text-decoration: none;
 }
 
+#content #graph_content .message .issue-tracker-link {
+	font-weight: bold !important;
+}
+
+
 .right div {
 	clear: both;
 }

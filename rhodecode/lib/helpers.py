@@ -744,9 +744,12 @@ def urlify_text(text_):
     return literal(url_pat.sub(url_func, text_))
 
 
-def urlify_commit(text_, repository=None):
+def urlify_commit(text_, repository=None, link_=None):
     import re
     import traceback
+
+    if link_:
+        link_ = '<a href="' + link_ + '">'
 
     try:
         conf = config['app_conf']
@@ -768,6 +771,9 @@ def urlify_commit(text_, repository=None):
                 if repository:
                     url = url.replace('{repo}', repository)
 
+                if link_:
+                    tmpl = '</a>' + tmpl + link_
+
                 return tmpl % (
                     {
                      'cls': 'issue-tracker-link',
@@ -777,10 +783,15 @@ def urlify_commit(text_, repository=None):
                      'serv': ISSUE_SERVER_LNK,
                     }
                 )
-            return literal(URL_PAT.sub(url_func, text_))
+            newtext = URL_PAT.sub(url_func, text_)
+            if link_:
+                newtext = link_ + newtext + '</a>'
+            return literal(newtext)
     except:
         log.error(traceback.format_exc())
         pass
+
+    
 
     return text_
 
