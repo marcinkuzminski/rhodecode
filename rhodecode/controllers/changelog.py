@@ -37,8 +37,7 @@ from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.helpers import RepoPage
 from rhodecode.lib.compat import json
 
-from vcs.exceptions import RepositoryError, ChangesetError, \
-ChangesetDoesNotExistError,BranchDoesNotExistError
+from vcs.exceptions import RepositoryError, ChangesetDoesNotExistError
 
 log = logging.getLogger(__name__)
 
@@ -54,7 +53,7 @@ class ChangelogController(BaseRepoController):
 
     def index(self):
         limit = 100
-        default = 40
+        default = 20
         if request.params.get('size'):
             try:
                 int_size = int(request.params.get('size'))

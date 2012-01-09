@@ -141,7 +141,7 @@ class MailResponse(object):
     MailResponse.to_message.  This lets you change it and work with it, then
     send it out when it's ready.
     """
-    def __init__(self, To=None, From=None, Subject=None, Body=None, Html=None, 
+    def __init__(self, To=None, From=None, Subject=None, Body=None, Html=None,
                  separator="; "):
         self.Body = Body
         self.Html = Html

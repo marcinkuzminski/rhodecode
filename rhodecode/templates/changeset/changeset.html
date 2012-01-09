@@ -27,15 +27,15 @@
     <div class="table">
 		<div class="diffblock">
 			<div class="code-header">
-                <div class="date">${c.changeset.revision}:
-                  ${h.link_to(h.short_id(c.changeset.raw_id),h.url('changeset_home',repo_name=c.repo_name,revision=c.changeset.raw_id))}
+                <div class="date">
+                  R${c.changeset.revision}:${h.link_to(h.short_id(c.changeset.raw_id),h.url('changeset_home',repo_name=c.repo_name,revision=c.changeset.raw_id))}
                   ${c.changeset.date}</div>
-                <span class="diff-actions">
-                  <a href="${h.url('raw_changeset_home',repo_name=c.repo_name,revision=c.changeset.raw_id,diff='show')}" title="${_('raw diff')}"><img class="icon" src="${h.url('/images/icons/page_white_text.png')}"/></a>
-                  <a href="${h.url('raw_changeset_home',repo_name=c.repo_name,revision=c.changeset.raw_id,diff='download')}" title="${_('download diff')}"><img class="icon" src="${h.url('/images/icons/down_16.png')}"/></a>
+                <div class="diff-actions">
+                  <a href="${h.url('raw_changeset_home',repo_name=c.repo_name,revision=c.changeset.raw_id,diff='show')}" title="${_('raw diff')}"><img class="icon" src="${h.url('/images/icons/page_white.png')}"/></a>
+                  <a href="${h.url('raw_changeset_home',repo_name=c.repo_name,revision=c.changeset.raw_id,diff='download')}" title="${_('download diff')}"><img class="icon" src="${h.url('/images/icons/page_white_get.png')}"/></a>
                   ${c.ignorews_url()}
                   ${c.context_url()}
-                </span>
+                </div>
                 <div class="comments-number" style="float:right;padding-right:5px">${len(c.comments)} comment(s) (${c.inline_cnt} ${_('inline')})</div>
 			</div>
 		</div>
@@ -49,7 +49,7 @@
 	                     <span>${h.person(c.changeset.author)}</span><br/>
 	                     <span><a href="mailto:${h.email_or_none(c.changeset.author)}">${h.email_or_none(c.changeset.author)}</a></span><br/>
 	                 </div>
-	                 <div class="message">${h.urlify_commit(h.wrap_paragraphs(c.changeset.message))}</div>
+	                 <div class="message">${h.urlify_commit(h.wrap_paragraphs(c.changeset.message),c.repo_name)}</div>
 	             </div>
 	             <div class="right">
 		             <div class="changes">
@@ -138,15 +138,11 @@
           YUE.on(YUQ('.show-inline-comments'),'change',function(e){
               var show = 'none';
               var target = e.currentTarget;
-              console.log(target);
               if(target.checked){
                   var show = ''
               }
-              console.log('aa')
               var boxid = YUD.getAttribute(target,'id_for');
-              console.log(boxid);
               var comments = YUQ('#{0} .inline-comments'.format(boxid));
-              console.log(comments)
               for(c in comments){ 
                  YUD.setStyle(comments[c],'display',show);
               }

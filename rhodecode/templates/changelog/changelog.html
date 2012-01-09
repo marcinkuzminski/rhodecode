@@ -44,11 +44,11 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
 					</div>
 					
 				%for cnt,cs in enumerate(c.pagination):
-					<div id="chg_${cnt+1}" class="container ${'tablerow1' if cnt%2==0 else 'tablerow2'}">
+					<div id="chg_${cnt+1}" class="container ${'tablerow%s' % (cnt%2)}">
 						<div class="left">
 							<div>
 							${h.checkbox(cs.short_id,class_="changeset_range")}
-							<span class="tooltip" title="${cs.date}"><a href="${h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id)}"><span class="changeset_id">${cs.revision}:<span class="changeset_hash">${h.short_id(cs.raw_id)}</span></span></a></span>
+							<span class="tooltip" title="${h.age(cs.date)}"><a href="${h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id)}"><span class="changeset_id">${cs.revision}:<span class="changeset_hash">${h.short_id(cs.raw_id)}</span></span></a></span>
 							</div>
 							<div class="author">
 								<div class="gravatar">
@@ -56,9 +56,11 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
 								</div>
 								<div title="${cs.author}" class="user">${h.person(cs.author)}</div>
 							</div>
+                            <div class="date">${cs.date}</div>
 						</div>
 						<div class="mid">
-							<div class="message">${h.link_to(h.wrap_paragraphs(cs.message),h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id))}</div>
+                            <div class="message">${h.urlify_commit(h.wrap_paragraphs(cs.message),c.repo_name)}</div>
+                            <div class="expand ${'tablerow%s' % (cnt%2)}">&darr; ${_('show more')} &darr;</div>
 						</div>	
 						<div class="right">
 									<div id="${cs.raw_id}_changes_info" class="changes">
@@ -132,6 +134,34 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
                         }
                     });					
 					
+                    var msgs = YUQ('.message');
+                    // get firts element height;
+                    var el = YUQ('.container')[0];
+                    var row_h = el.clientHeight;
+                    for(var i=0;i<msgs.length;i++){
+                    	var m = msgs[i];
+
+                    	var h = m.clientHeight;
+                    	var pad = YUD.getStyle(m,'padding');
+                    	if(h > row_h){
+                    		YUD.setStyle(m.nextElementSibling,'display','block');
+                    		YUD.setStyle(m.nextElementSibling,'margin-top',row_h-(h+14)+'px');
+                    		YUD.setAttribute(m.nextElementSibling,'expand',h);
+                    	};
+                    }
+                    YUE.on(YUQ('.expand'),'click',function(e){
+                    	var elem = e.currentTarget.parentElement.parentElement;
+                    	YUD.setStyle(e.currentTarget,'display','none');
+                    	YUD.setStyle(elem,'height',YUD.getAttribute(e.currentTarget,'expand')+'px');
+                    	
+                    	//redraw the graph max_w and jsdata are global vars
+                        set_canvas(max_w);
+                        
+                        var r = new BranchRenderer();
+                        r.render(jsdata,max_w);                    	
+                    	
+                    })
+                    
                     // Fetch changeset details 
                     YUE.on(YUD.getElementsByClassName('changed_total'),'click',function(e){
                     	var id = e.currentTarget.id
@@ -143,7 +173,6 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
                     // change branch filter
                     YUE.on(YUD.get('branch_filter'),'change',function(e){
                     	var selected_branch = e.currentTarget.options[e.currentTarget.selectedIndex].value;
-                    	console.log(selected_branch);
                     	var url_main = "${h.url('changelog_home',repo_name=c.repo_name)}";
                     	var url = "${h.url('changelog_home',repo_name=c.repo_name,branch='__BRANCH__')}";
                     	var url = url.replace('__BRANCH__',selected_branch);

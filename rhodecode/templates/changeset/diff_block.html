@@ -15,13 +15,13 @@
                     ${h.link_to_if(change!='removed',h.safe_unicode(filenode.path),h.url('files_home',repo_name=c.repo_name,
                     revision=filenode.changeset.raw_id,f_path=h.safe_unicode(filenode.path)))}
                 </div>
-                <span class="diff-actions">
-                  <a href="${h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(filenode.path),diff2=cs2,diff1=cs1,diff='diff',fulldiff=1)}" title="${_('diff')}"><img class="icon" src="${h.url('/images/icons/page_white_text.png')}"/></a>
-                  <a href="${h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(filenode.path),diff2=cs2,diff1=cs1,diff='raw')}" title="${_('raw diff')}"><img class="icon" src="${h.url('/images/icons/page_white_text.png')}"/></a>
-                  <a href="${h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(filenode.path),diff2=cs2,diff1=cs1,diff='download')}" title="${_('download diff')}"><img class="icon" src="${h.url('/images/icons/down_16.png')}"/></a>
+                <div class="diff-actions">
+                  <a href="${h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(filenode.path),diff2=cs2,diff1=cs1,diff='diff',fulldiff=1)}" title="${_('diff')}"><img class="icon" src="${h.url('/images/icons/page_white_go.png')}"/></a>
+                  <a href="${h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(filenode.path),diff2=cs2,diff1=cs1,diff='raw')}" title="${_('raw diff')}"><img class="icon" src="${h.url('/images/icons/page_white.png')}"/></a>
+                  <a href="${h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(filenode.path),diff2=cs2,diff1=cs1,diff='download')}" title="${_('download diff')}"><img class="icon" src="${h.url('/images/icons/page_white_get.png')}"/></a>
                   ${c.ignorews_url(h.FID(filenode.changeset.raw_id,filenode.path))}
                   ${c.context_url(h.FID(filenode.changeset.raw_id,filenode.path))}
-                </span>
+                </div>
                 <span style="float:right;margin-top:-3px">
                   <label>
                   ${_('show inline comments')}

@@ -739,36 +739,42 @@ def urlify_text(text_):
 
     def url_func(match_obj):
         url_full = match_obj.groups()[0]
-        return '<a href="%(url)s">%(url)s</a>' % ({'url':url_full})
+        return '<a href="%(url)s">%(url)s</a>' % ({'url': url_full})
 
     return literal(url_pat.sub(url_func, text_))
 
-def urlify_commit(text_):
+
+def urlify_commit(text_, repository=None):
     import re
     import traceback
-    
+
     try:
         conf = config['app_conf']
-        
+
         URL_PAT = re.compile(r'%s' % conf.get('url_pat'))
-        
+
         if URL_PAT:
-            ISSUE_SERVER = conf.get('issue_server')
+            ISSUE_SERVER_LNK = conf.get('issue_server_link')
             ISSUE_PREFIX = conf.get('issue_prefix')
+
             def url_func(match_obj):
                 issue_id = match_obj.groups()[0]
                 tmpl = (
-                '<a class="%(cls)s" href="%(url)s">'
-                ' %(issue-prefix)s%(id-repr)s'
+                ' <a class="%(cls)s" href="%(url)s">'
+                '%(issue-prefix)s%(id-repr)s'
                 '</a>'
                 )
+                url = ISSUE_SERVER_LNK.replace('{id}', issue_id)
+                if repository:
+                    url = url.replace('{repo}', repository)
+
                 return tmpl % (
                     {
-                     'cls':'issue-tracker-link',
-                     'url':ISSUE_SERVER.replace('{id}',issue_id),
-                     'id-repr':issue_id,
-                     'issue-prefix':ISSUE_PREFIX,
-                     'serv':ISSUE_SERVER,
+                     'cls': 'issue-tracker-link',
+                     'url': url,
+                     'id-repr': issue_id,
+                     'issue-prefix': ISSUE_PREFIX,
+                     'serv': ISSUE_SERVER_LNK,
                     }
                 )
             return literal(URL_PAT.sub(url_func, text_))
@@ -778,9 +784,11 @@ def urlify_commit(text_):
 
     return text_
 
+
 def rst(source):
     return literal('<div class="rst-block">%s</div>' %
                    MarkupRenderer.rst(source))
+
 
 def rst_w_mentions(source):
     """

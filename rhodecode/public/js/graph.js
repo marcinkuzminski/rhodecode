@@ -63,18 +63,14 @@ function BranchRenderer() {
 		var rela = document.getElementById('graph');
 		var pad = pad;
 		var scale = 22;
-		
+
 		for (var i in data) {
 			this.scale(scale);
+
 			var row = document.getElementById("chg_"+idx);
 			var	next = document.getElementById("chg_"+(idx+1));
 			var extra = 0;
 			
-			//skip this since i don't have DATE in my app
-			//if (next.is('.changesets-date')) {
-			//	extra = next.outerHeight();
-			//}
-						
 			this.cell[1] += row.clientWidth;
 			this.bg[1] += this.bg_height;
 			
@@ -102,6 +98,7 @@ function BranchRenderer() {
 				}
 				
 				this.setColor(color, 0.0, 0.65);
+
 				
 				x = pad-((this.cell[0] + this.box_size * start - 1) + this.bg_height-2);
 				
@@ -128,6 +125,7 @@ function BranchRenderer() {
 			color = node[1]
 			
 			radius = this.dot_radius;
+
 			x = pad-(Math.round(this.cell[0] * scale/2 * column + radius) + 15 - (column*4));
 		
 			this.ctx.beginPath();

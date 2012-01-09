@@ -278,7 +278,7 @@ class ReposController(BaseController):
         return redirect(url('repos'))
 
 
-    @HasRepoPermissionAllDecorator('repository.admin')   
+    @HasRepoPermissionAllDecorator('repository.admin')
     def delete_perm_user(self, repo_name):
         """
         DELETE an existing repository permission user
