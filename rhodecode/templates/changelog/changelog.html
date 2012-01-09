@@ -135,7 +135,7 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
                     });					
 					
                     var msgs = YUQ('.message');
-                    // get firts element height;
+                    // get first element height
                     var el = YUQ('.container')[0];
                     var row_h = el.clientHeight;
                     for(var i=0;i<msgs.length;i++){
@@ -146,15 +146,14 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
                     	if(h > row_h){
                     		YUD.setStyle(m.nextElementSibling,'display','block');
                     		YUD.setStyle(m.nextElementSibling,'margin-top',row_h-(h+14)+'px');
-                    		YUD.setAttribute(m.nextElementSibling,'expand',h);
                     	};
                     }
                     YUE.on(YUQ('.expand'),'click',function(e){
-                    	var elem = e.currentTarget.parentElement.parentElement;
+                    	var elem = e.currentTarget.parentNode.parentNode;
                     	YUD.setStyle(e.currentTarget,'display','none');
-                    	YUD.setStyle(elem,'height',YUD.getAttribute(e.currentTarget,'expand')+'px');
+                    	YUD.setStyle(elem,'height','auto');
                     	
-                    	//redraw the graph max_w and jsdata are global vars
+                    	//redraw the graph, max_w and jsdata are global vars
                         set_canvas(max_w);
                         
                         var r = new BranchRenderer();
