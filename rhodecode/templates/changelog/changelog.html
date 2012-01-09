@@ -60,7 +60,7 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
 						</div>
 						<div class="mid">
                             <div class="message">${h.urlify_commit(h.wrap_paragraphs(cs.message),c.repo_name,h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id))}</div>
-                            <div class="expand ${'tablerow%s' % (cnt%2)}">&darr; ${_('show more')} &darr;</div>
+                            <div class="expand"><span class="expandtext">&darr; ${_('show more')} &darr;</span></div>
 						</div>	
 						<div class="right">
 									<div id="${cs.raw_id}_changes_info" class="changes">

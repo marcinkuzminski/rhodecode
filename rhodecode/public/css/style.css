@@ -1133,24 +1133,27 @@ tbody .yui-dt-editable { cursor: pointer }
 	padding: 5px 0;
     white-space: pre-wrap;
 }
-#content div.box div.expand{
-position:absolute;
-width:inherit;
-height:14px;
-font-size:14px;
-text-align:left;
-cursor: pointer;
-font-family: monospace;
-color:#003367;
-/*
-background:-webkit-gradient(linear,0% 50%,100% 50%,color-stop(0%,rgba(255,255,255,0)),color-stop(100%,rgba(255,255,255,1)));
-background:-webkit-linear-gradient(top,rgba(255,255,255,0),rgba(255,255,255,1));
-background:-moz-linear-gradient(top,rgba(255,255,255,0),rgba(255,255,255,1));
-background:-o-linear-gradient(top,rgba(255,255,255,0),rgba(255,255,255,1));
-background:-ms-linear-gradient(top,rgba(255,255,255,0),rgba(255,255,255,1));
-background:linear-gradient(top,rgba(255,255,255,0),rgba(255,255,255,1));
-*/
-display: none;
+#content div.box div.expand {
+	width: 110%;
+	height:14px;
+	font-size:10px;
+	text-align:right;
+	cursor: pointer;
+	color:#666;
+
+	background:-webkit-gradient(linear,0% 50%,100% 50%,color-stop(0%,rgba(255,255,255,0)),color-stop(100%,rgba(64,96,128,0.1)));
+	background:-webkit-linear-gradient(top,rgba(255,255,255,0),rgba(64,96,128,0.1));
+	background:-moz-linear-gradient(top,rgba(255,255,255,0),rgba(64,96,128,0.1));
+	background:-o-linear-gradient(top,rgba(255,255,255,0),rgba(64,96,128,0.1));
+	background:-ms-linear-gradient(top,rgba(255,255,255,0),rgba(64,96,128,0.1));
+	background:linear-gradient(top,rgba(255,255,255,0),rgba(64,96,128,0.1));
+
+	display: none;
+}
+#content div.box div.expand .expandtext {
+	background-color: #ffffff;
+	padding: 2px;
+	border-radius: 2px;
 }
 
 #content div.box div.message a {
