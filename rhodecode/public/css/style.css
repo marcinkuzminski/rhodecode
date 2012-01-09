@@ -1130,7 +1130,27 @@ tbody .yui-dt-editable { cursor: pointer }
 	clear: both;
 	overflow: hidden;
 	margin: 0;
-	padding: 10px 0;
+	padding: 5px 0;
+    white-space: pre-wrap;
+}
+#content div.box div.expand{
+position:absolute;
+width:inherit;
+height:14px;
+font-size:14px;
+text-align:left;
+cursor: pointer;
+font-family: monospace;
+color:#003367;
+/*
+background:-webkit-gradient(linear,0% 50%,100% 50%,color-stop(0%,rgba(255,255,255,0)),color-stop(100%,rgba(255,255,255,1)));
+background:-webkit-linear-gradient(top,rgba(255,255,255,0),rgba(255,255,255,1));
+background:-moz-linear-gradient(top,rgba(255,255,255,0),rgba(255,255,255,1));
+background:-o-linear-gradient(top,rgba(255,255,255,0),rgba(255,255,255,1));
+background:-ms-linear-gradient(top,rgba(255,255,255,0),rgba(255,255,255,1));
+background:linear-gradient(top,rgba(255,255,255,0),rgba(255,255,255,1));
+*/
+display: none;
 }
 
 #content div.box div.message a {
@@ -2115,8 +2135,12 @@ h3.files_location {
 	padding: 5px !important;
 }
 
-.tablerow1 {
+.tablerow0 {
 	background-color: #F8F8F8;
+}
+
+.tablerow1 {
+    background-color: #FFFFFF;
 }
 
 .changeset_id {
@@ -2246,7 +2270,7 @@ h3.files_location {
 }
 
 #graph_content #rev_range_container {
-	padding: 5px 20px;
+	padding: 7px 20px;
 	float: left;
 }
 
@@ -2276,6 +2300,7 @@ h3.files_location {
 
 #graph_content .container .left .date {
 	color: #444444;
+	padding-left: 22px;
 }
 
 #graph_content .container .left .author {
@@ -2539,7 +2564,10 @@ table.code-browser .browser-file {
     margin-left:1px;
     
 }
-
+.diffblock .diff-actions {
+    padding: 2px 0px 0px 2px;
+    float: left;
+}
 .diffblock  .diff-menu ul li {
 	padding: 0px 0px 0px 0px !important;
 }
@@ -3987,6 +4015,7 @@ div.diffblock .code-header-title{
 div.diffblock .code-header .date{
     float:left;
     text-transform: uppercase;
+    padding: 2px 0px 0px 2px;
 }
 div.diffblock .code-header div{
     margin-left:4px;

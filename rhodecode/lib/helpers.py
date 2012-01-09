@@ -758,8 +758,8 @@ def urlify_commit(text_):
             def url_func(match_obj):
                 issue_id = match_obj.groups()[0]
                 tmpl = (
-                '<a class="%(cls)s" href="%(url)s">'
-                ' %(issue-prefix)s%(id-repr)s'
+                ' <a class="%(cls)s" href="%(url)s">'
+                '%(issue-prefix)s%(id-repr)s'
                 '</a>'
                 )
                 return tmpl % (

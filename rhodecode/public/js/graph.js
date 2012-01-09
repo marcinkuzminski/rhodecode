@@ -63,18 +63,17 @@ function BranchRenderer() {
 		var rela = document.getElementById('graph');
 		var pad = pad;
 		var scale = 22;
-		
+
 		for (var i in data) {
 			this.scale(scale);
+
 			var row = document.getElementById("chg_"+idx);
 			var	next = document.getElementById("chg_"+idx+1);
+			if(row == null){
+				continue
+			}
 			var extra = 0;
 			
-			//skip this since i don't have DATE in my app
-			//if (next.is('.changesets-date')) {
-			//	extra = next.outerHeight();
-			//}
-						
 			this.cell[1] += row.clientWidth;
 			this.bg[1] += this.bg_height;
 			
@@ -82,7 +81,9 @@ function BranchRenderer() {
 			nodeid = cur[0];
 			node = cur[1];
 			in_l = cur[2];
-			
+
+			var pos_ = 26;
+
 			for (var j in in_l) {
 				
 				line = in_l[j];
@@ -99,8 +100,7 @@ function BranchRenderer() {
 				}
 				
 				this.setColor(color, 0.0, 0.65);
-				
-				y = row.offsetTop-rela.offsetTop+row.offsetHeight/2;
+				y = row.offsetTop-rela.offsetTop+pos_;
 				x = pad-((this.cell[0] + this.box_size * start - 1) + this.bg_height-2);
 				
 				this.ctx.lineWidth=this.line_width;
@@ -119,7 +119,7 @@ function BranchRenderer() {
 					var x2 = pad-((1 + this.box_size * end) + this.bg_height-2);
 					var y2 = y + row.offsetHeight;
 					var ymid = (y+y2) / 2;
-					this.ctx.bezierCurveTo (x,ymid,x2,ymid,x2,y2);
+					this.ctx.bezierCurveTo(x,ymid,x2,ymid,x2,y2);
 				}
 				this.ctx.stroke();
 			}
@@ -128,7 +128,7 @@ function BranchRenderer() {
 			color = node[1]
 			
 			radius = this.dot_radius;
-			y = row.offsetTop-rela.offsetTop+row.offsetHeight/2;
+			y = row.offsetTop-rela.offsetTop+pos_;
 			x = pad-(Math.round(this.cell[0] * scale/2 * column + radius) + 15 - (column*4));
 		
 			this.ctx.beginPath();
