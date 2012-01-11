@@ -38,6 +38,7 @@ from rhodecode.lib.helpers import RepoPage
 from rhodecode.lib.compat import json
 
 from vcs.exceptions import RepositoryError, ChangesetDoesNotExistError
+from rhodecode.model.db import Repository
 
 log = logging.getLogger(__name__)
 
@@ -75,12 +76,15 @@ class ChangelogController(BaseRepoController):
                                                     branch_name=branch_name)]
                 c.total_cs = len(collection)
             else:
-                collection = list(c.rhodecode_repo)
+                collection = c.rhodecode_repo
                 c.total_cs = len(c.rhodecode_repo)
-
 
             c.pagination = RepoPage(collection, page=p, item_count=c.total_cs,
                                     items_per_page=c.size, branch=branch_name)
+            collection = list(c.pagination)
+            page_revisions = [x.raw_id for x in collection]
+            c.comments = c.rhodecode_db_repo.comments(page_revisions)
+
         except (RepositoryError, ChangesetDoesNotExistError, Exception), e:
             log.error(traceback.format_exc())
             h.flash(str(e), category='warning')
@@ -89,9 +93,8 @@ class ChangelogController(BaseRepoController):
         self._graph(c.rhodecode_repo, collection, c.total_cs, c.size, p)
 
         c.branch_name = branch_name
-        c.branch_filters = [('',_('All Branches'))] + \
-            [(k,k) for k in c.rhodecode_repo.branches.keys()]
-
+        c.branch_filters = [('', _('All Branches'))] + \
+            [(k, k) for k in c.rhodecode_repo.branches.keys()]
 
         return render('changelog/changelog.html')
 
@@ -112,25 +115,16 @@ class ChangelogController(BaseRepoController):
             c.jsdata = json.dumps([])
             return
 
-        revcount = min(repo_size, size)
-        offset = 1 if p == 1 else  ((p - 1) * revcount + 1)
-        try:
-            rev_end = collection.index(collection[(-1 * offset)])
-        except IndexError:
-            rev_end = collection.index(collection[-1])
-        rev_start = max(0, rev_end - revcount)
-
         data = []
-        rev_end += 1
+        revs = [x.revision for x in collection]
 
         if repo.alias == 'git':
-            for _ in xrange(rev_start, rev_end):
+            for _ in revs:
                 vtx = [0, 1]
                 edges = [[0, 0, 1]]
                 data.append(['', vtx, edges])
 
         elif repo.alias == 'hg':
-            revs = list(reversed(xrange(rev_start, rev_end)))
             c.dag = graphmod.colored(graphmod.dagwalker(repo._repo, revs))
             for (id, type, ctx, vtx, edges) in c.dag:
                 if type != graphmod.CHANGESET:

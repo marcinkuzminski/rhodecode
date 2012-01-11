@@ -27,6 +27,7 @@ import os
 import logging
 import datetime
 import traceback
+from collections import defaultdict
 
 from sqlalchemy import *
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -609,6 +610,22 @@ class Repository(Base, BaseModel):
     def last_change(self):
         return self.scm_instance.last_change
 
+    def comments(self, revisions=None):
+        """
+        Returns comments for this repository grouped by revisions
+
+        :param revisions: filter query by revisions only
+        """
+        cmts = ChangesetComment.query()\
+            .filter(ChangesetComment.repo == self)
+        if revisions:
+            cmts = cmts.filter(ChangesetComment.revision.in_(revisions))
+        grouped = defaultdict(list)
+        for cmt in cmts.all():
+            grouped[cmt.revision].append(cmt)
+        return grouped
+
+
     #==========================================================================
     # SCM CACHE INSTANCE
     #==========================================================================
@@ -1044,7 +1061,7 @@ class ChangesetComment(Base, BaseModel):
         return Session.query(User)\
                 .filter(cls.revision == revision)\
                 .join(ChangesetComment.author).all()
-
+    
 
 class Notification(Base, BaseModel):
     __tablename__ = 'notifications'

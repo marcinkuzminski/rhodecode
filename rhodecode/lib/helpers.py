@@ -607,7 +607,6 @@ class RepoPage(Page):
 
             self.items = list(self.collection[self.first_item:self.last_item + 1])
 
-
             # Links to previous and next page
             if self.page > self.first_page:
                 self.previous_page = self.page - 1
@@ -790,8 +789,6 @@ def urlify_commit(text_, repository=None, link_=None):
     except:
         log.error(traceback.format_exc())
         pass
-
-    
 
     return text_
 

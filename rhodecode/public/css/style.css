@@ -2279,7 +2279,7 @@ h3.files_location {
 
 #graph_content .container {
 	border-bottom: 1px solid #DDD;
-	height: 55px;
+	height: 57px;
 	overflow: hidden;
 }
 
@@ -2330,8 +2330,20 @@ h3.files_location {
 	font-weight: bold !important;
 }
 
+.right .comments-container{
+	padding-right: 5px;
+	margin-top:1px;
+	float:right;
+	height:16px;
+}
 
-.right div {
+.right .comments-cnt{
+    float: left;
+    color: rgb(136, 136, 136); 
+    padding-right: 2px; 
+}
+
+.right .changes{
 	clear: both;
 }
 
@@ -2386,6 +2398,7 @@ h3.files_location {
 
 .right .parent {
 	color: #666666;
+	clear:both;
 }
 .right .logtags{
 	padding: 2px 2px 2px 2px;
