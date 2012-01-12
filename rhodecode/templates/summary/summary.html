@@ -201,69 +201,71 @@
 
 	  	    })
 	  	})
-  		var data = ${c.trending_languages|n};
-  		var total = 0;
-  		var no_data = true;
-  		for (k in data){
-  		    total += data[k].count;
-  		    no_data = false;
-  		} 
-		var tbl = document.createElement('table');
-		tbl.setAttribute('class','trending_language_tbl');
-		var cnt = 0;
-  		for (k in data){
-  			cnt += 1;
-  			var hide = cnt>2;
-	  		var tr = document.createElement('tr');
-	  		if (hide){
-	  			tr.setAttribute('style','display:none');
-	  			tr.setAttribute('class','stats_hidden');
-	  		}
-	  		var percentage = Math.round((data[k].count/total*100),2);
-			var value = data[k].count;
-	  		var td1 = document.createElement('td');
-	  		td1.width = 150;
-	  		var trending_language_label = document.createElement('div');
-	  		trending_language_label.innerHTML = data[k].desc+" ("+k+")";
-	  		td1.appendChild(trending_language_label);
+        var data = ${c.trending_languages|n};
+        var total = 0;
+        var no_data = true;
+        var tbl = document.createElement('table');
+        tbl.setAttribute('class','trending_language_tbl');
+        var cnt = 0;
+        
+        for (var i=0;i<data.length;i++){
+            total += data[i][1].count;    
+            cnt += 1;
+            no_data = false;
+            
+            var hide = cnt>2;
+            var tr = document.createElement('tr');
+            if (hide){
+                tr.setAttribute('style','display:none');
+                tr.setAttribute('class','stats_hidden');
+            }
+            var k = data[i][0];
+            var obj = data[i][1];
+            var percentage = Math.round((obj.count/total*100),2);
+            
+            var td1 = document.createElement('td');
+            td1.width = 150;
+            var trending_language_label = document.createElement('div');
+            trending_language_label.innerHTML = obj.desc+" ("+k+")";
+            td1.appendChild(trending_language_label);
 
-	  		var td2 = document.createElement('td');
-	  		td2.setAttribute('style','padding-right:14px !important');
-  		    var trending_language = document.createElement('div');
-  		    var nr_files = value+" ${_('files')}";
-  		    
-  		    trending_language.title = k+" "+nr_files;
-  		    
-  		    if (percentage>22){
-  		    	trending_language.innerHTML = "<b style='font-size:0.8em'>"+percentage+"% "+nr_files+ "</b>";	
-  		    }
-  		    else{
-  		    	trending_language.innerHTML = "<b style='font-size:0.8em'>"+percentage+"%</b>";
-  		    }
-  		    
-  		    trending_language.setAttribute("class", 'trending_language top-right-rounded-corner bottom-right-rounded-corner');
-  		    trending_language.style.width=percentage+"%";
-			td2.appendChild(trending_language);
-			
-			tr.appendChild(td1);
-			tr.appendChild(td2);
-  		    tbl.appendChild(tr);
-  		    if(cnt == 3){
-  		    	var show_more = document.createElement('tr');
-  		    	var td = document.createElement('td');
-  		    	lnk = document.createElement('a');
-  		    	
-  		    	lnk.href='#';
-  		    	lnk.innerHTML = "${_('show more')}";
-  		    	lnk.id='code_stats_show_more';
-  		        td.appendChild(lnk);
-  		        
-  		    	show_more.appendChild(td);
-  		    	show_more.appendChild(document.createElement('td'));
-  		    	tbl.appendChild(show_more);
-  		    }
-  		    
-  		}
+            var td2 = document.createElement('td');
+            td2.setAttribute('style','padding-right:14px !important');
+            var trending_language = document.createElement('div');
+            var nr_files = obj.count+" ${_('files')}";
+
+            trending_language.title = k+" "+nr_files;
+
+            if (percentage>22){
+                trending_language.innerHTML = "<b style='font-size:0.8em'>"+percentage+"% "+nr_files+ "</b>";
+            }
+            else{
+                trending_language.innerHTML = "<b style='font-size:0.8em'>"+percentage+"%</b>";
+            }
+
+            trending_language.setAttribute("class", 'trending_language top-right-rounded-corner bottom-right-rounded-corner');
+            trending_language.style.width=percentage+"%";
+            td2.appendChild(trending_language);
+
+            tr.appendChild(td1);
+            tr.appendChild(td2);
+            tbl.appendChild(tr);
+            if(cnt == 3){
+                var show_more = document.createElement('tr');
+                var td = document.createElement('td');
+                lnk = document.createElement('a');
+
+                lnk.href='#';
+                lnk.innerHTML = "${_('show more')}";
+                lnk.id='code_stats_show_more';
+                td.appendChild(lnk);
+
+                show_more.appendChild(td);
+                show_more.appendChild(document.createElement('td'));
+                tbl.appendChild(show_more);
+            }
+
+        }
   		if(no_data){
   			var tr = document.createElement('tr');
   			var td1 = document.createElement('td');
