@@ -67,8 +67,12 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
                                         <div id="${cs.raw_id}"  style="float:right;" class="changed_total tooltip" title="${_('Affected number of files, click to show more details')}">${len(cs.affected_files)}</div>
                                         <div class="comments-container">
                                         %if len(c.comments.get(cs.raw_id,[])) > 0:
-                                            <div class="comments-cnt" title="${('comments')}">${len(c.comments.get(cs.raw_id,[]))}</div>
-                                            <img src="${h.url('/images/icons/comments.png')}">
+                                            <div class="comments-cnt" title="${('comments')}">
+                                              <a href="${h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id,anchor='comment-%s' % c.comments[cs.raw_id][0].comment_id)}">
+                                               <div class="comments-cnt">${len(c.comments[cs.raw_id])}</div>
+                                               <img src="${h.url('/images/icons/comments.png')}">
+                                              </a>
+                                            </div>
                                         %endif    
                                         </div>
 									</div>

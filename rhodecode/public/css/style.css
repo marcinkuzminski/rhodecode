@@ -2279,7 +2279,7 @@ h3.files_location {
 
 #graph_content .container {
 	border-bottom: 1px solid #DDD;
-	height: 57px;
+	height: 56px;
 	overflow: hidden;
 }
 
@@ -2334,7 +2334,7 @@ h3.files_location {
 	padding-right: 5px;
 	margin-top:1px;
 	float:right;
-	height:16px;
+	height:14px;
 }
 
 .right .comments-cnt{
