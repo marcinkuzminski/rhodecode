@@ -115,9 +115,11 @@ class SummaryController(BaseRepoController):
         ts_max_y = mktime(td.timetuple())
 
         if dbrepo.enable_statistics:
+            c.show_stats = True
             c.no_data_msg = _('No data loaded yet')
             run_task(get_commits_stats, c.dbrepo.repo_name, ts_min_y, ts_max_y)
         else:
+            c.show_stats = False
             c.no_data_msg = _('Statistics are disabled for this repository')
         c.ts_min = ts_min_m
         c.ts_max = ts_max_y
@@ -143,8 +145,8 @@ class SummaryController(BaseRepoController):
                                             key=lambda k: k[1])[:10]
                                         )
                                     )
-            last_rev = stats.stat_on_revision
-            c.repo_last_rev = c.rhodecode_repo.count() - 1 \
+            last_rev = stats.stat_on_revision + 1
+            c.repo_last_rev = c.rhodecode_repo.count()\
                 if c.rhodecode_repo.revisions else 0
             if last_rev == 0 or c.repo_last_rev == 0:
                 pass

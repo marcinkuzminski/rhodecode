@@ -100,6 +100,7 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
 
     log.info('running task with lockkey %s', lockkey)
     try:
+        sa = get_session()
         lock = l = DaemonLock(file_=jn(lockkey_path, lockkey))
 
         # for js data compatibilty cleans the key for person from '
@@ -109,19 +110,17 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
         commits_by_day_aggregate = {}
         repos_path = get_repos_path()
         repo = get_repo(safe_str(os.path.join(repos_path, repo_name)))
-        repo_size = len(repo.revisions)
-        #return if repo have no revisions
+        repo_size = repo.count()
+        # return if repo have no revisions
         if repo_size < 1:
             lock.release()
             return True
 
         skip_date_limit = True
         parse_limit = int(config['app_conf'].get('commit_parse_limit'))
-        last_rev = 0
+        last_rev = None
         last_cs = None
         timegetter = itemgetter('time')
-
-        sa = get_session()
 
         dbrepo = sa.query(Repository)\
             .filter(Repository.repo_name == repo_name).scalar()
@@ -132,9 +131,9 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
             last_rev = cur_stats.stat_on_revision
 
         if last_rev == repo.get_changeset().revision and repo_size > 1:
-            #pass silently without any work if we're not on first revision or
-            #current state of parsing revision(from db marker) is the
-            #last revision
+            # pass silently without any work if we're not on first revision or
+            # current state of parsing revision(from db marker) is the
+            # last revision
             lock.release()
             return True
 
@@ -146,8 +145,10 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
         log.debug('starting parsing %s', parse_limit)
         lmktime = mktime
 
-        last_rev = last_rev + 1 if last_rev > 0 else last_rev
-
+        last_rev = last_rev + 1 if last_rev >= 0 else 0
+        log.debug('Getting revisions from %s to %s' % (
+             last_rev, last_rev + parse_limit)
+        )
         for cs in repo[last_rev:last_rev + parse_limit]:
             last_cs = cs  # remember last parsed changeset
             k = lmktime([cs.date.timetuple()[0], cs.date.timetuple()[1],
