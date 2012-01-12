@@ -295,33 +295,35 @@ YUE.on(['download_options','archive_subrepos'],'change',function(e){
 var data = ${c.trending_languages|n};
 var total = 0;
 var no_data = true;
-for (k in data){
-    total += data[k].count;
-    no_data = false;
-}
 var tbl = document.createElement('table');
 tbl.setAttribute('class','trending_language_tbl');
 var cnt = 0;
-for (k in data){
+
+for (var i=0;i<data.length;i++){
+    total += data[i][1].count;    
     cnt += 1;
+    no_data = false;
+    
     var hide = cnt>2;
     var tr = document.createElement('tr');
     if (hide){
         tr.setAttribute('style','display:none');
         tr.setAttribute('class','stats_hidden');
     }
-    var percentage = Math.round((data[k].count/total*100),2);
-    var value = data[k].count;
+    var k = data[i][0];
+    var obj = data[i][1];
+    var percentage = Math.round((obj.count/total*100),2);
+    
     var td1 = document.createElement('td');
     td1.width = 150;
     var trending_language_label = document.createElement('div');
-    trending_language_label.innerHTML = data[k].desc+" ("+k+")";
+    trending_language_label.innerHTML = obj.desc+" ("+k+")";
     td1.appendChild(trending_language_label);
 
     var td2 = document.createElement('td');
     td2.setAttribute('style','padding-right:14px !important');
     var trending_language = document.createElement('div');
-    var nr_files = value+" ${_('files')}";
+    var nr_files = obj.count+" ${_('files')}";
 
     trending_language.title = k+" "+nr_files;
 

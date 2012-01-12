@@ -154,11 +154,9 @@ class SummaryController(BaseRepoController):
                                "desc": LANGUAGES_EXTENSIONS_MAP.get(x)})
                           for x, y in lang_stats_d.items())
 
-            c.trending_languages = json.dumps(OrderedDict(
-                                       sorted(lang_stats, reverse=True,
-                                            key=lambda k: k[1])[:10]
-                                        )
-                                    )
+            c.trending_languages = json.dumps(
+                sorted(lang_stats, reverse=True, key=lambda k: k[1])[:10]
+            )
             last_rev = stats.stat_on_revision + 1
             c.repo_last_rev = c.rhodecode_repo.count()\
                 if c.rhodecode_repo.revisions else 0

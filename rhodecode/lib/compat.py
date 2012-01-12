@@ -87,6 +87,7 @@ class _Nil(object):
 
 _nil = _Nil()
 
+
 class _odict(object):
     """Ordered dict data structure, with O(1) complexity for dict operations
     that modify one element.
@@ -146,7 +147,7 @@ class _odict(object):
         dict_impl = self._dict_impl()
         try:
             dict_impl.__getitem__(self, key)[1] = val
-        except KeyError, e:
+        except KeyError:
             new = [dict_impl.__getattribute__(self, 'lt'), val, _nil]
             dict_impl.__setitem__(self, key, new)
             if dict_impl.__getattribute__(self, 'lt') == _nil:
@@ -158,7 +159,7 @@ class _odict(object):
 
     def __delitem__(self, key):
         dict_impl = self._dict_impl()
-        pred, _ , succ = self._dict_impl().__getitem__(self, key)
+        pred, _, succ = self._dict_impl().__getitem__(self, key)
         if pred == _nil:
             dict_impl.__setattr__(self, 'lh', succ)
         else:
@@ -350,6 +351,7 @@ class _odict(object):
         return form % (dict_impl.__getattribute__(self, 'lh'),
                        dict_impl.__getattribute__(self, 'lt'),
                        dict_impl.__repr__(self))
+
 
 class OrderedDict(_odict, dict):
 
