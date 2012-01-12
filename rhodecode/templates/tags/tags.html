@@ -9,7 +9,7 @@
 <%def name="breadcrumbs_links()">
     <input class="q_filter_box" id="q_filter_tags" size="15" type="text" name="filter" value="${_('quick filter...')}"/>
     ${h.link_to(u'Home',h.url('/'))}
-    &raquo; 
+    &raquo;
     ${h.link_to(c.repo_name,h.url('summary_home',repo_name=c.repo_name))}
     &raquo;
     ${_('tags')}
@@ -61,7 +61,7 @@ var myDataTable = new YAHOO.widget.DataTable("table_wrap", myColumnDefs, myDataS
          MSG_SORTDESC:"${_('Click to sort descending')}",
          MSG_EMPTY:"${_('No records found.')}",
          MSG_ERROR:"${_('Data error.')}",
-         MSG_LOADING:"${_('Loading...')}",                
+         MSG_LOADING:"${_('Loading...')}",
         }
 );
 myDataTable.subscribe('postRenderEvent',function(oArgs) {
@@ -69,8 +69,8 @@ myDataTable.subscribe('postRenderEvent',function(oArgs) {
     var func = function(node){
         return node.parentNode.parentNode.parentNode.parentNode.parentNode;
     }
-    q_filter('q_filter_tags',YUQ('div.table tr td .logtags .tagtag a'),func);    
-});         
+    q_filter('q_filter_tags',YUQ('div.table tr td .logtags .tagtag a'),func);
+});
 
 </script>
-</%def> 
+</%def>

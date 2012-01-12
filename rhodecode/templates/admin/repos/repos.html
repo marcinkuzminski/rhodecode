@@ -20,15 +20,15 @@
         <ul class="links">
           <li>
             <span>${h.link_to(_(u'ADD REPOSITORY'),h.url('new_repo'))}</span>
-          </li>          
-        </ul>        
+          </li>
+        </ul>
     </div>
 
     <div class="table">
         <div id='repos_list_wrap' class="yui-skin-sam">
         <%cnt=0%>
         <%namespace name="dt" file="/_data_table/_dt_elements.html"/>
-        
+
         <table id="repos_list">
          <thead>
           <tr>
@@ -41,7 +41,7 @@
             <th class="left">${_('Action')}</th>
           </tr>
          </thead>
-            
+
           %for cnt,repo in enumerate(c.repos_list,1):
           <tr class="parity${cnt%2}">
               <td class="quick_repo_menu">
@@ -60,7 +60,7 @@
               </td>
               ##LAST REVISION
               <td>
-                  ${dt.revision(repo['name'],repo['rev'],repo['tip'],repo['author'],repo['last_msg'])}  
+                  ${dt.revision(repo['name'],repo['rev'],repo['tip'],repo['author'],repo['last_msg'])}
               </td>
             <td title="${repo['contact']}">${h.person(repo['contact'])}</td>
               <td>
@@ -73,9 +73,9 @@
         </table>
         </div>
     </div>
-</div> 
+</div>
 <script>
- 
+
   // main table sorting
   var myColumnDefs = [
       {key:"menu",label:"",sortable:false,className:"quick_repo_menu hidden"},
@@ -91,9 +91,9 @@
   ];
 
   var myDataSource = new YAHOO.util.DataSource(YUD.get("repos_list"));
-  
+
   myDataSource.responseType = YAHOO.util.DataSource.TYPE_HTMLTABLE;
-  
+
   myDataSource.responseSchema = {
       fields: [
           {key:"menu"},
@@ -113,12 +113,12 @@
             MSG_SORTDESC:"${_('Click to sort descending')}",
             MSG_EMPTY:"${_('No records found.')}",
             MSG_ERROR:"${_('Data error.')}",
-            MSG_LOADING:"${_('Loading...')}",                
+            MSG_LOADING:"${_('Loading...')}",
           }
   );
   myDataTable.subscribe('postRenderEvent',function(oArgs) {
       tooltip_activate();
       quick_repo_menu();
-  });          
-</script>   
-</%def>    
+  });
+</script>
+</%def>

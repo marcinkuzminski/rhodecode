@@ -20,7 +20,7 @@
 </%def>
 
 <%def name="page_nav()">
-		${self.menu('files')}     
+		${self.menu('files')}
 </%def>
 <%def name="main()">
 <div class="box">
@@ -31,8 +31,8 @@
             <li>
               <span style="text-transform: uppercase;">
               <a href="#">${_('branch')}: ${c.cs.branch}</a></span>
-            </li>          
-        </ul>          
+            </li>
+        </ul>
     </div>
     <div class="table">
 		<div id="files_data">
@@ -48,14 +48,14 @@
                           <input type="text" value="" size="30" name="filename" id="filename">
                           ${_('or')} <span class="ui-btn" id="upload_file_enable">${_('Upload file')}</span>
                       </div>
-                  </div>                    
+                  </div>
                   <div id="upload_file_container" class="field" style="display:none">
                     <div class="label">
                         <label for="location">${_('Upload file')}</label>
                     </div>
                     <div class="file">
                         <input type="file"  size="30" name="upload_file" id="upload_file">
-                        ${_('or')} <span class="ui-btn" id="file_enable">${_('Create new file')}</span>                    
+                        ${_('or')} <span class="ui-btn" id="file_enable">${_('Create new file')}</span>
                     </div>
                   </div>
                    <div class="field">
@@ -66,11 +66,11 @@
                           <input type="text" value="${c.f_path}" size="30" name="location" id="location">
                           ${_('use / to separate directories')}
                       </div>
-                   </div>                                                                    
+                   </div>
               </div>
-            </div>            
+            </div>
 			<div id="body" class="codeblock">
-			    <div id="editor_container">    
+			    <div id="editor_container">
                     <pre id="editor_pre"></pre>
 				    <textarea id="editor" name="content" style="display:none"></textarea>
                 </div>
@@ -84,9 +84,9 @@
 			${h.end_form()}
 			<script type="text/javascript">
 			var reset_url = "${h.url('files_home',repo_name=c.repo_name,revision=c.cs.raw_id,f_path=c.f_path)}";
-		    initCodeMirror('editor',reset_url);			 
+		    initCodeMirror('editor',reset_url);
 			</script>
-		</div>    
+		</div>
     </div>
-</div>    
-</%def>   
+</div>
+</%def>

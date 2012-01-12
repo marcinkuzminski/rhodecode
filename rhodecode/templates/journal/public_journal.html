@@ -10,7 +10,7 @@
 	${self.menu('home')}
 </%def>
 <%def name="main()">
-	
+
     <div class="box">
 	    <!-- box / title -->
 	    <div class="title">
@@ -21,10 +21,10 @@
                   </li>
                   <li>
                     <span>${h.link_to(_('Atom'),h.url('public_journal_atom'),class_='atom_icon')}</span>
-                  </li>                  
-                  
-                </ul>  	        
-	        
+                  </li>
+
+                </ul>
+
 	    </div>
 		<script type="text/javascript">
 		function show_more_event(){
@@ -34,8 +34,8 @@
 		    YUD.setStyle(el.parentNode,'display','none');
 		});
 		}
-		</script> 	    
+		</script>
 	    <div id="journal">${c.journal_data}</div>
     </div>
-     
-</%def>    
+
+</%def>

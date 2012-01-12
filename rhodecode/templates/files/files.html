@@ -12,11 +12,11 @@
     ${_('files')}
     %if c.file:
         @ r${c.changeset.revision}:${h.short_id(c.changeset.raw_id)}
-    %endif        
+    %endif
 </%def>
 
 <%def name="page_nav()">
-    ${self.menu('files')}     
+    ${self.menu('files')}
 </%def>
 
 <%def name="main()">
@@ -27,15 +27,15 @@
 	    <ul class="links">
 		    <li>
 		      <span style="text-transform: uppercase;"><a href="#">${_('branch')}: ${c.changeset.branch}</a></span>
-	        </li>          
-	    </ul>             
+	        </li>
+	    </ul>
     </div>
     <div class="table">
 		<div id="files_data">
 			<%include file='files_ypjax.html'/>
-		</div>    
+		</div>
     </div>
-</div>    
+</div>
 <script type="text/javascript">
 var YPJAX_TITLE = "${c.repo_name} ${_('Files')} - ${c.rhodecode_name}";
 var current_url = "${h.url.current()}";

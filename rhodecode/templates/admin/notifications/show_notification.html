@@ -7,7 +7,7 @@
 
 <%def name="breadcrumbs_links()">
     ${h.link_to(_('Notifications'),h.url('notifications'))}
-    &raquo; 
+    &raquo;
     ${_('Show notification')}
 </%def>
 
@@ -19,12 +19,12 @@
 <div class="box">
     <!-- box / title -->
     <div class="title">
-        ${self.breadcrumbs()}       
+        ${self.breadcrumbs()}
         <ul class="links">
             <li>
               <span style="text-transform: uppercase;"><a href="#">${_('Compose message')}</a></span>
-            </li>          
-        </ul>            
+            </li>
+        </ul>
     </div>
     <div class="table">
       <div id="notification_${c.notification.notification_id}">
@@ -51,4 +51,4 @@ var main = "${url('notifications')}";
        deleteNotification(url,notification_id,[function(){window.location=main}])
    })
 </script>
-</%def>  
+</%def>

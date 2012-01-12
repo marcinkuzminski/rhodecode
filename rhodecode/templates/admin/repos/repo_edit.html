@@ -6,9 +6,9 @@
 </%def>
 
 <%def name="breadcrumbs_links()">
-    ${h.link_to(_('Admin'),h.url('admin_home'))} 
-    &raquo; 
-    ${h.link_to(_('Repositories'),h.url('repos'))} 
+    ${h.link_to(_('Admin'),h.url('admin_home'))}
+    &raquo;
+    ${h.link_to(_('Repositories'),h.url('repos'))}
     &raquo;
     ${_('edit')} &raquo; ${h.link_to(c.repo_info.just_name,h.url('summary_home',repo_name=c.repo_name))}
 </%def>
@@ -21,7 +21,7 @@
 <div class="box box-left">
     <!-- box / title -->
     <div class="title">
-        ${self.breadcrumbs()}      
+        ${self.breadcrumbs()}
     </div>
     ${h.form(url('repo', repo_name=c.repo_info.repo_name),method='put')}
     <div class="form">
@@ -42,7 +42,7 @@
 	           <div class="input">
 	               ${h.text('clone_uri',class_="medium")}
 	           </div>
-	        </div>             
+	        </div>
 	        <div class="field">
 	            <div class="label">
 	                <label for="repo_group">${_('Repository group')}:</label>
@@ -50,7 +50,7 @@
 	            <div class="input">
 	                ${h.select('repo_group','',c.repo_groups,class_="medium")}
 	            </div>
-	        </div>         
+	        </div>
             <div class="field">
                 <div class="label">
                     <label for="repo_type">${_('Type')}:</label>
@@ -58,7 +58,7 @@
                 <div class="input">
                     ${h.select('repo_type','hg',c.backends,class_="medium")}
                 </div>
-            </div>             
+            </div>
             <div class="field">
                 <div class="label label-textarea">
                     <label for="description">${_('Description')}:</label>
@@ -67,7 +67,7 @@
                     ${h.textarea('description',cols=23,rows=5)}
                 </div>
             </div>
-            
+
             <div class="field">
                 <div class="label label-checkbox">
                     <label for="private">${_('Private')}:</label>
@@ -83,7 +83,7 @@
                 <div class="checkboxes">
                     ${h.checkbox('enable_statistics',value="True")}
                 </div>
-            </div>     
+            </div>
             <div class="field">
                 <div class="label label-checkbox">
                     <label for="enable_downloads">${_('Enable downloads')}:</label>
@@ -91,7 +91,7 @@
                 <div class="checkboxes">
                     ${h.checkbox('enable_downloads',value="True")}
                 </div>
-            </div>                      
+            </div>
             <div class="field">
                 <div class="label">
                     <label for="user">${_('Owner')}:</label>
@@ -102,8 +102,8 @@
                        <div id="owner_container"></div>
                     </div>
                 </div>
-             </div>                
-             
+             </div>
+
             <div class="field">
                 <div class="label">
                     <label for="input">${_('Permissions')}:</label>
@@ -111,22 +111,22 @@
                 <div class="input">
                     <%include file="repo_edit_perms.html"/>
                 </div>
-             
+
             <div class="buttons">
               ${h.submit('save','Save',class_="ui-button")}
               ${h.reset('reset','Reset',class_="ui-button")}
-            </div>                                                          
+            </div>
         </div>
     </div>
-    </div>    
+    </div>
     ${h.end_form()}
 </div>
 
 <div class="box box-right">
     <div class="title">
-        <h5>${_('Administration')}</h5>    
+        <h5>${_('Administration')}</h5>
     </div>
-    
+
         <h3>${_('Statistics')}</h3>
         ${h.form(url('repo_stats', repo_name=c.repo_info.repo_name),method='delete')}
         <div class="form">
@@ -139,9 +139,9 @@
                </ul>
                </div>
            </div>
-        </div>                    
+        </div>
         ${h.end_form()}
-        
+
         %if c.repo_info.clone_uri:
         <h3>${_('Remote')}</h3>
         ${h.form(url('repo_pull', repo_name=c.repo_info.repo_name),method='put')}
@@ -151,22 +151,22 @@
                <div class="field" style="border:none">
                <ul>
                     <li><a href="${c.repo_info.clone_uri}">${c.repo_info.clone_uri}</a></li>
-               </ul> 
-               </div>              
+               </ul>
+               </div>
            </div>
-        </div>                    
+        </div>
         ${h.end_form()}
         %endif
-        
+
         <h3>${_('Cache')}</h3>
         ${h.form(url('repo_cache', repo_name=c.repo_info.repo_name),method='delete')}
         <div class="form">
            <div class="fields">
                ${h.submit('reset_cache_%s' % c.repo_info.repo_name,_('Invalidate repository cache'),class_="ui-btn",onclick="return confirm('"+_('Confirm to invalidate repository cache')+"');")}
            </div>
-        </div>                    
+        </div>
         ${h.end_form()}
-        
+
         <h3>${_('Public journal')}</h3>
         ${h.form(url('repo_public_journal', repo_name=c.repo_info.repo_name),method='put')}
         <div class="form">
@@ -183,10 +183,10 @@
                     <li>${_('''All actions made on this repository will be accessible to everyone in public journal''')}
                     </li>
                </ul>
-               </div>                  
+               </div>
         </div>
         ${h.end_form()}
-        
+
         <h3>${_('Delete')}</h3>
         ${h.form(url('repo', repo_name=c.repo_info.repo_name),method='delete')}
         <div class="form">
@@ -195,12 +195,12 @@
            </div>
            <div class="field" style="border:none;color:#888">
            <ul>
-                <li>${_('''This repository will be renamed in a special way in order to be unaccesible for RhodeCode and VCS systems. 
+                <li>${_('''This repository will be renamed in a special way in order to be unaccesible for RhodeCode and VCS systems.
                          If you need fully delete it from filesystem please do it manually''')}
                 </li>
            </ul>
-           </div>           
-        </div>                    
+           </div>
+        </div>
         ${h.end_form()}
 
         <h3>${_('Set as fork')}</h3>
@@ -214,11 +214,11 @@
                <ul>
                     <li>${_('''Manually set this repository as a fork of another''')}</li>
                </ul>
-               </div>              
-        </div>                    
+               </div>
+        </div>
         ${h.end_form()}
-    
+
 </div>
 
 
-</%def> 
+</%def>

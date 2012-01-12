@@ -10,7 +10,7 @@
 	${self.menu('home')}
 </%def>
 <%def name="main()">
-	
+
     <div class="box box-left">
 	    <!-- box / title -->
 	    <div class="title">
@@ -19,25 +19,25 @@
                <li>
                  <span><a id="refresh" href="${h.url('journal')}"><img class="icon" title="${_('Refresh')}" alt="${_('Refresh')}" src="${h.url('/images/icons/arrow_refresh.png')}"/>
                  </a></span>
-               </li>          
-             </ul>            
-	    </div>    
+               </li>
+             </ul>
+	    </div>
 	    <div id="journal">${c.journal_data}</div>
     </div>
     <div class="box box-right">
         <!-- box / title -->
         <div class="title">
-            <h5> 
-            <input class="q_filter_box" id="q_filter" size="15" type="text" name="filter" value="${_('quick filter...')}"/>        
+            <h5>
+            <input class="q_filter_box" id="q_filter" size="15" type="text" name="filter" value="${_('quick filter...')}"/>
             <a id="show_my" class="link-white" href="#my">${_('My repos')}</a> / <a id="show_watched" class="link-white" href="#watched">${_('Watched')}</a>
             </h5>
              %if h.HasPermissionAny('hg.admin','hg.create.repository')():
              <ul class="links">
                <li>
                  <span>${h.link_to(_('ADD'),h.url('admin_settings_create_repository'))}</span>
-               </li>          
-             </ul>           
-             %endif        
+               </li>
+             </ul>
+             %endif
         </div>
         <!-- end box / title -->
         <div id="my" class="table">
@@ -50,7 +50,7 @@
                   <th class="left">${_('Name')}</th>
                   <th class="left">${_('Tip')}</th>
                   <th class="left">${_('Action')}</th>
-                  <th class="left">${_('Action')}</th>            
+                  <th class="left">${_('Action')}</th>
              </thead>
              <tbody>
                  <%namespace name="dt" file="/_data_table/_dt_elements.html"/>
@@ -66,14 +66,14 @@
                         </td>
                         ##LAST REVISION
                         <td>
-                            ${dt.revision(repo['name'],repo['rev'],repo['tip'],repo['author'],repo['last_msg'])}  
+                            ${dt.revision(repo['name'],repo['rev'],repo['tip'],repo['author'],repo['last_msg'])}
                         </td>
                         ##
                         <td><a href="${h.url('repo_settings_home',repo_name=repo['name'])}" title="${_('edit')}"><img class="icon" alt="${_('private')}" src="${h.url('/images/icons/application_form_edit.png')}"/></a></td>
                         <td>
                           ${h.form(url('repo_settings_delete', repo_name=repo['name']),method='delete')}
                             ${h.submit('remove_%s' % repo['name'],'',class_="delete_icon action_button",onclick="return confirm('Confirm to delete this repository');")}
-                          ${h.end_form()}               
+                          ${h.end_form()}
                         </td>
                     </tr>
                  %endfor
@@ -82,14 +82,14 @@
              </div>
              %else:
                 <div style="padding:5px 0px 10px 0px;">
-                ${_('No repositories yet')} 
+                ${_('No repositories yet')}
                 %if h.HasPermissionAny('hg.admin','hg.create.repository')():
                     ${h.link_to(_('create one now'),h.url('admin_settings_create_repository'),class_="ui-btn")}
                 %endif
                 </div>
-             %endif             
+             %endif
         </div>
-    
+
         <div id="watched" class="table" style="display:none">
           %if c.following:
             <table>
@@ -105,20 +105,20 @@
                         <img title="${_('following user')}" alt="${_('user')}" src="${h.url('/images/icons/user.png')}"/>
                         ${entry.follows_user.full_contact}
                       %endif
-                      
+
                       %if entry.follows_repo_id:
                         <div style="float:right;padding-right:5px">
                         <span id="follow_toggle_${entry.follows_repository.repo_id}" class="following" title="${_('Stop following this repository')}"
                               onclick="javascript:toggleFollowingRepo(this,${entry.follows_repository.repo_id},'${str(h.get_token())}')">
-                        </span>                   
+                        </span>
                         </div>
-                        
+
                          %if entry.follows_repository.repo_type == 'hg':
                            <img class="icon" title="${_('Mercurial repository')}" alt="${_('Mercurial repository')}" src="${h.url('/images/icons/hgicon.png')}"/>
                          %elif entry.follows_repository.repo_type == 'git':
                            <img class="icon" title="${_('Git repository')}" alt="${_('Git repository')}" src="${h.url('/images/icons/giticon.png')}"/>
-                         %endif                        
-                        
+                         %endif
+
                         %if entry.follows_repository.private:
                           <img class="icon" title="${_('private repository')}" alt="${_('private repository')}" src="${h.url('/images/icons/lock.png')}"/>
                         %else:
@@ -137,12 +137,12 @@
               <div style="padding:5px 0px 10px 0px;">
               ${_('You are not following any users or repositories')}
               </div>
-          %endif                  
-        </div> 
+          %endif
+        </div>
     </div>
-    
+
     <script type="text/javascript">
-    
+
     YUE.on('show_my','click',function(e){
         YUD.setStyle('watched','display','none');
         YUD.setStyle('my','display','');
@@ -150,8 +150,8 @@
         var target = 'q_filter';
         var func = function(node){
             return node.parentNode.parentNode.parentNode.parentNode;
-        }        
-        q_filter(target,nodes,func);        
+        }
+        q_filter(target,nodes,func);
         YUE.preventDefault(e);
     })
     YUE.on('show_watched','click',function(e){
@@ -162,14 +162,14 @@
         var func = function(node){
             return node.parentNode.parentNode;
         }
-        q_filter(target,nodes,func);        
-        YUE.preventDefault(e);        
+        q_filter(target,nodes,func);
+        YUE.preventDefault(e);
     })
     YUE.on('refresh','click',function(e){
         ypjax(e.currentTarget.href,"journal",function(){show_more_event();tooltip_activate();});
         YUE.preventDefault(e);
     });
-    
+
 
     // main table sorting
     var myColumnDefs = [
@@ -183,9 +183,9 @@
     ];
 
     var myDataSource = new YAHOO.util.DataSource(YUD.get("repos_list"));
-    
+
     myDataSource.responseType = YAHOO.util.DataSource.TYPE_HTMLTABLE;
-    
+
     myDataSource.responseSchema = {
         fields: [
             {key:"menu"},
@@ -203,7 +203,7 @@
               MSG_SORTDESC:"${_('Click to sort descending')}",
               MSG_EMPTY:"${_('No records found.')}",
               MSG_ERROR:"${_('Data error.')}",
-              MSG_LOADING:"${_('Loading...')}",                
+              MSG_LOADING:"${_('Loading...')}",
             }
     );
     myDataTable.subscribe('postRenderEvent',function(oArgs) {
@@ -211,10 +211,10 @@
         quick_repo_menu();
         var func = function(node){
             return node.parentNode.parentNode.parentNode.parentNode;
-        }        
+        }
         q_filter('q_filter',YUQ('#my tr td a.repo_name'),func);
-    });      
-    
-    
-    </script>    
-</%def>    
+    });
+
+
+    </script>
+</%def>

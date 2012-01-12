@@ -1,4 +1,4 @@
-## -*- coding: utf-8 -*-                        
+## -*- coding: utf-8 -*-
 <li>
     ${h.link_to('%s (%s)' % (_('branches'),len(c.rhodecode_repo.branches.values()),),h.url('branches_home',repo_name=c.repo_name),class_='branches childs')}
     <ul>
@@ -9,7 +9,7 @@
     %else:
         <li>${h.link_to(_('There are no branches yet'),'#')}</li>
     %endif
-    </ul>                        
+    </ul>
 </li>
 <li>
     ${h.link_to('%s (%s)' % (_('tags'),len(c.rhodecode_repo.tags.values()),),h.url('tags_home',repo_name=c.repo_name),class_='tags childs')}
@@ -21,9 +21,9 @@
     %else:
         <li>${h.link_to(_('There are no tags yet'),'#')}</li>
     %endif
-    </ul>                        
+    </ul>
 </li>
-%if c.rhodecode_repo.alias == 'hg': 
+%if c.rhodecode_repo.alias == 'hg':
 <li>
     ${h.link_to('%s (%s)' % (_('bookmarks'),len(c.rhodecode_repo.bookmarks.values()),),h.url('bookmarks_home',repo_name=c.repo_name),class_='bookmarks childs')}
     <ul>
@@ -34,6 +34,6 @@
     %else:
         <li>${h.link_to(_('There are no bookmarks yet'),'#')}</li>
     %endif
-    </ul>                        
-</li>  
+    </ul>
+</li>
 %endif

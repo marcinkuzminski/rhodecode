@@ -13,7 +13,7 @@
 </%def>
 
 <%def name="page_nav()">
-    ${self.menu('files')}     
+    ${self.menu('files')}
 </%def>
 <%def name="main()">
 <div class="box">
@@ -22,17 +22,17 @@
         ${self.breadcrumbs()}
     </div>
     <div>
-    ## diff block       
+    ## diff block
     <%namespace name="diff_block" file="/changeset/diff_block.html"/>
-    ${diff_block.diff_block(c.changes)}  
+    ${diff_block.diff_block(c.changes)}
     </div>
-</div>    
+</div>
 <script>
 YUE.onDOMReady(function(){
-    
+
     YUE.on(YUQ('.diff-menu-activate'),'click',function(e){
         var act = e.currentTarget.nextElementSibling;
-        
+
         if(YUD.hasClass(act,'active')){
             YUD.removeClass(act,'active');
             YUD.setStyle(act,'display','none');
@@ -44,6 +44,4 @@ YUE.onDOMReady(function(){
 
 })
 </script>
-</%def>  
-
-   
+</%def>

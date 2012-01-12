@@ -15,12 +15,12 @@
         % endfor
     </ul>
     % endif
-</div>          
+</div>
     <!-- login -->
     <div class="title top-left-rounded-corner top-right-rounded-corner">
         <h5>${_('Sign In to')} ${c.rhodecode_name}</h5>
     </div>
-    <div class="inner">            
+    <div class="inner">
         ${h.form(h.url.current(came_from=c.came_from))}
         <div class="form">
             <!-- fields -->
@@ -33,8 +33,8 @@
                     <div class="input">
                         ${h.text('username',class_='focus',size=40)}
                     </div>
-                    
-                </div>                     
+
+                </div>
                 <div class="field">
                     <div class="label">
                         <label for="password">${_('Password')}:</label>
@@ -42,7 +42,7 @@
                     <div class="input">
                         ${h.password('password',class_='focus',size=40)}
                     </div>
-                    
+
                 </div>
                 <div class="field">
                     <div class="checkbox">
@@ -59,7 +59,7 @@
             <div class="links">
                 ${h.link_to(_('Forgot your password ?'),h.url('reset_password'))}
                 %if h.HasPermissionAny('hg.admin', 'hg.register.auto_activate', 'hg.register.manual_activate')():
-                  / 
+                  /
                  ${h.link_to(_("Don't have an account ?"),h.url('register'))}
                 %endif
             </div>

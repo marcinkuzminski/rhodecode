@@ -20,7 +20,7 @@
 </%def>
 
 <%def name="page_nav()">
-		${self.menu('files')}     
+		${self.menu('files')}
 </%def>
 <%def name="main()">
 <div class="box">
@@ -31,8 +31,8 @@
             <li>
               <span style="text-transform: uppercase;">
               <a href="#">${_('branch')}: ${c.cs.branch}</a></span>
-            </li>          
-        </ul>          
+            </li>
+        </ul>
     </div>
     <div class="table">
 		<div id="files_data">
@@ -42,22 +42,22 @@
             <div class="code-header">
                 <div class="stats">
                     <div class="left"><img src="${h.url('/images/icons/file.png')}"/></div>
-                    <div class="left item">${h.link_to("r%s:%s" % (c.file.last_changeset.revision,h.short_id(c.file.last_changeset.raw_id)),h.url('changeset_home',repo_name=c.repo_name,revision=c.file.last_changeset.raw_id))}</div>      
+                    <div class="left item">${h.link_to("r%s:%s" % (c.file.last_changeset.revision,h.short_id(c.file.last_changeset.raw_id)),h.url('changeset_home',repo_name=c.repo_name,revision=c.file.last_changeset.raw_id))}</div>
                     <div class="left item">${h.format_byte_size(c.file.size,binary=True)}</div>
                     <div class="left item last">${c.file.mimetype}</div>
                     <div class="buttons">
                       ${h.link_to(_('show annotation'),h.url('files_annotate_home',repo_name=c.repo_name,revision=c.cs.raw_id,f_path=c.f_path),class_="ui-btn")}
-                      ${h.link_to(_('show as raw'),h.url('files_raw_home',repo_name=c.repo_name,revision=c.cs.raw_id,f_path=c.f_path),class_="ui-btn")}           
+                      ${h.link_to(_('show as raw'),h.url('files_raw_home',repo_name=c.repo_name,revision=c.cs.raw_id,f_path=c.f_path),class_="ui-btn")}
                       ${h.link_to(_('download as raw'),h.url('files_rawfile_home',repo_name=c.repo_name,revision=c.cs.raw_id,f_path=c.f_path),class_="ui-btn")}
-                      % if h.HasRepoPermissionAny('repository.write','repository.admin')(c.repo_name):            
+                      % if h.HasRepoPermissionAny('repository.write','repository.admin')(c.repo_name):
                        % if not c.file.is_binary:
                         ${h.link_to(_('source'),h.url('files_home',repo_name=c.repo_name,revision=c.cs.raw_id,f_path=c.f_path),class_="ui-btn")}
                        % endif
-                      % endif            
+                      % endif
                     </div>
                 </div>
                 <div class="commit">${_('Editing file')}: ${c.file.path}</div>
-            </div>      
+            </div>
 			    <pre id="editor_pre"></pre>
 				<textarea id="editor" name="content" style="display:none">${h.escape(c.file.content)|n}</textarea>
 				<div style="padding: 10px;color:#666666">${_('commit message')}</div>
@@ -72,7 +72,7 @@
 			var reset_url = "${h.url('files_home',repo_name=c.repo_name,revision=c.cs.raw_id,f_path=c.file.path)}";
 			initCodeMirror('editor',reset_url);
 			</script>
-		</div>    
+		</div>
     </div>
-</div>    
-</%def>   
+</div>
+</%def>

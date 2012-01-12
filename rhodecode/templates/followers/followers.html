@@ -7,7 +7,7 @@
 
 <%def name="breadcrumbs_links()">
     ${h.link_to(u'Home',h.url('/'))}
-    &raquo; 
+    &raquo;
     ${h.link_to(c.repo_name,h.url('summary_home',repo_name=c.repo_name))}
     &raquo;
     ${_('followers')}
@@ -26,7 +26,7 @@
     <div class="table">
         <div id="followers">
             ${c.followers_data}
-        </div>   
+        </div>
     </div>
-</div>    
-</%def> 
+</div>
+</%def>

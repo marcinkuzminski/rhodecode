@@ -1,5 +1,5 @@
 %if c.repo_branches:
-   <div id="table_wrap" class="yui-skin-sam">    
+   <div id="table_wrap" class="yui-skin-sam">
     <table id="branches_data">
       <thead>
         <tr>
@@ -15,14 +15,14 @@
                 <span class="logtags">
                     <span class="branchtag">${h.link_to(branch[0],
                     h.url('files_home',repo_name=c.repo_name,revision=branch[1].raw_id))}</span>
-                </span>         
+                </span>
             </td>
-            <td><span class="tooltip" title="${h.age(branch[1].date)}">${branch[1].date}</span></td>		
+            <td><span class="tooltip" title="${h.age(branch[1].date)}">${branch[1].date}</span></td>
             <td title="${branch[1].author}">${h.person(branch[1].author)}</td>
             <td>
                 <div>
                     <pre><a href="${h.url('files_home',repo_name=c.repo_name,revision=branch[1].raw_id)}">r${branch[1].revision}:${h.short_id(branch[1].raw_id)}</a></pre>
-                </div>            
+                </div>
             </td>
 		</tr>
 		%endfor
@@ -33,9 +33,9 @@
                   <span class="logtags">
                       <span class="branchtag">${h.link_to(branch[0]+' [closed]',
                       h.url('changeset_home',repo_name=c.repo_name,revision=branch[1].raw_id))}</span>
-                  </span>         
+                  </span>
               </td>
-              <td><span class="tooltip" title="${h.age(branch[1].date)}">${branch[1].date}</span></td>              
+              <td><span class="tooltip" title="${h.age(branch[1].date)}">${branch[1].date}</span></td>
               <td title="${branch[1].author}">${h.person(branch[1].author)}</td>
               <td>
                 <div>

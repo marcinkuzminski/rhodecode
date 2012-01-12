@@ -17,8 +17,8 @@
 			            <div class="input">
 			                ${h.text('username',class_='focus',size=40)}
 			            </div>
-			            
-			        </div>                     
+
+			        </div>
 			        <div class="field">
 			            <div class="label">
 			                <label for="password">${_('Password')}:</label>
@@ -26,29 +26,29 @@
 			            <div class="input">
 			                ${h.password('password',class_='focus',size=40)}
 			            </div>
-			            
+
 			        </div>
 			        <div class="buttons">
 			            <div class="password_forgoten">${h.link_to(_('Forgot password ?'),h.url('reset_password'))}</div>
                         <div class="register">
                         %if h.HasPermissionAny('hg.admin', 'hg.register.auto_activate', 'hg.register.manual_activate')():
                          ${h.link_to(_("Don't have an account ?"),h.url('register'))}
-                        %endif                        
+                        %endif
                         </div>
                             ${h.submit('sign_in',_('Sign In'),class_="ui-button")}
 			        </div>
 			    </div>
 			</div>
 			${h.end_form()}
-			</div>         
-         
+			</div>
+
              <div class="gravatar">
                  <img alt="gravatar" src="${h.gravatar_url(c.rhodecode_user.email,20)}" />
              </div>
           <div class="account">
           %if c.rhodecode_user.username == 'default':
-              <a href="${h.url('public_journal')}">${_('Public journal')}</a>   
-          %else:                        		            
+              <a href="${h.url('public_journal')}">${_('Public journal')}</a>
+          %else:
           	<div style="float: left">
             ${h.link_to(c.rhodecode_user.username,h.url('admin_settings_my_account'),title='%s %s'%(c.rhodecode_user.name,c.rhodecode_user.lastname))}
             </div>
@@ -56,7 +56,7 @@
             <a id="notification_counter" href="${h.url('notifications')}">${c.unread_notifications}</a>
             </div>
           %endif
-          </div>	
+          </div>
          </li>
          <li>
             <a href="${h.url('home')}">${_('Home')}</a>
@@ -82,11 +82,11 @@
         <!-- END MENU -->
         ${self.body()}
     </div>
-</div>     
+</div>
 <!-- END HEADER -->
-    
+
 <!-- CONTENT -->
-<div id="content"> 
+<div id="content">
     <div class="flash_msg">
         <% messages = h.flash.pop_messages() %>
         % if messages:
@@ -96,11 +96,11 @@
             % endfor
         </ul>
         % endif
-    </div>	    
-    <div id="main"> 
+    </div>
+    <div id="main">
         ${next.main()}
     </div>
-</div> 
+</div>
 <!-- END CONTENT -->
 
 <!-- FOOTER -->
@@ -111,7 +111,7 @@
                 <a href="${h.url('bugtracker')}">${_('Submit a bug')}</a>
            </p>
 	       <p class="footer-link-right">
-	           <a href="${h.url('rhodecode_official')}">RhodeCode</a> 
+	           <a href="${h.url('rhodecode_official')}">RhodeCode</a>
 	           ${c.rhodecode_version} &copy; 2010-${h.datetime.today().year} by Marcin Kuzminski
 	       </p>
        </div>
@@ -132,13 +132,13 @@
 
 
 <%def name="menu(current=None)">
-		<% 
+		<%
 		def is_current(selected):
 			if selected == current:
 				return h.literal('class="current"')
 		%>
-		%if current not in ['home','admin']:           		
-		   ##REGULAR MENU            
+		%if current not in ['home','admin']:
+		   ##REGULAR MENU
 	        <ul id="quick">
 				<!-- repo switcher -->
 				<li>
@@ -146,7 +146,7 @@
                     <span class="icon">
                         <img src="${h.url('/images/icons/database.png')}" alt="${_('Products')}" />
                     </span>
-                    <span>&darr;</span>					
+                    <span>&darr;</span>
 					</a>
 					<ul id="repo_switcher_list" class="repo_switcher">
                         <li>
@@ -154,58 +154,58 @@
                         </li>
 					</ul>
 				</li>
-				
+
 	            <li ${is_current('summary')}>
 	               <a title="${_('Summary')}" href="${h.url('summary_home',repo_name=c.repo_name)}">
 	               <span class="icon">
 	                   <img src="${h.url('/images/icons/clipboard_16.png')}" alt="${_('Summary')}" />
 	               </span>
-	               <span>${_('Summary')}</span>                 
-	               </a>	            
+	               <span>${_('Summary')}</span>
+	               </a>
 	            </li>
                 ##<li ${is_current('shortlog')}>
                 ##   <a title="${_('Shortlog')}" href="${h.url('shortlog_home',repo_name=c.repo_name)}">
                 ##   <span class="icon">
                 ##       <img src="${h.url('/images/icons/application_view_list.png')}" alt="${_('Shortlog')}" />
                 ##   </span>
-                ##   <span>${_('Shortlog')}</span>                 
-                ##   </a>             
-                ##</li>	            
+                ##   <span>${_('Shortlog')}</span>
+                ##   </a>
+                ##</li>
                 <li ${is_current('changelog')}>
                    <a title="${_('Changelog')}" href="${h.url('changelog_home',repo_name=c.repo_name)}">
                    <span class="icon">
                        <img src="${h.url('/images/icons/time.png')}" alt="${_('Changelog')}" />
                    </span>
-                   <span>${_('Changelog')}</span>                 
-                   </a>             
-                </li>   	
-                
+                   <span>${_('Changelog')}</span>
+                   </a>
+                </li>
+
                 <li ${is_current('switch_to')}>
                    <a id="branch_tag_switcher" title="${_('Switch to')}" href="#">
                    <span class="icon">
                        <img src="${h.url('/images/icons/arrow_switch.png')}" alt="${_('Switch to')}" />
                    </span>
-                   <span>${_('Switch to')}</span>                 
-                   </a>    
+                   <span>${_('Switch to')}</span>
+                   </a>
                     <ul id="switch_to_list" class="switch_to">
                         <li><a href="#">${_('loading...')}</a></li>
-                    </ul>                     
+                    </ul>
                 </li>
                 <li ${is_current('files')}>
                    <a title="${_('Files')}" href="${h.url('files_home',repo_name=c.repo_name)}">
                    <span class="icon">
                        <img src="${h.url('/images/icons/file.png')}" alt="${_('Files')}" />
                    </span>
-                   <span>${_('Files')}</span>                 
-                   </a>             
-                </li>                            
-				
+                   <span>${_('Files')}</span>
+                   </a>
+                </li>
+
                 <li ${is_current('options')}>
                    <a title="${_('Options')}" href="#">
                    <span class="icon">
                        <img src="${h.url('/images/icons/table_gear.png')}" alt="${_('Admin')}" />
                    </span>
-                   <span>${_('Options')}</span>                 
+                   <span>${_('Options')}</span>
                    </a>
                    <ul>
                    %if h.HasRepoPermissionAll('repository.admin')(c.repo_name):
@@ -217,10 +217,10 @@
                    %endif
                    	<li>${h.link_to(_('fork'),h.url('repo_fork_home',repo_name=c.repo_name),class_='fork')}</li>
                    	<li>${h.link_to(_('search'),h.url('search_repo',search_repo=c.repo_name),class_='search')}</li>
-                    
+
                     % if h.HasPermissionAll('hg.admin')('access admin main page'):
                      <li>
-                       ${h.link_to(_('admin'),h.url('admin_home'),class_='admin')}  
+                       ${h.link_to(_('admin'),h.url('admin_home'),class_='admin')}
                         <%def name="admin_menu()">
                         <ul>
                             <li>${h.link_to(_('journal'),h.url('admin_home'),class_='journal')}</li>
@@ -230,16 +230,16 @@
                             <li>${h.link_to(_('users groups'),h.url('users_groups'),class_='groups')}</li>
                             <li>${h.link_to(_('permissions'),h.url('edit_permission',id='default'),class_='permissions')}</li>
                             <li>${h.link_to(_('ldap'),h.url('ldap_home'),class_='ldap')}</li>
-                            <li class="last">${h.link_to(_('settings'),h.url('admin_settings'),class_='settings')}</li>        
+                            <li class="last">${h.link_to(_('settings'),h.url('admin_settings'),class_='settings')}</li>
                         </ul>
                         </%def>
-                        
+
                         ${admin_menu()}
                      </li>
                     % endif
-                   </ul>             
+                   </ul>
                 </li>
-                
+
                 <li>
                     <a title="${_('Followers')}" href="${h.url('repo_followers_home',repo_name=c.repo_name)}">
                     <span class="icon_short">
@@ -255,7 +255,7 @@
                     </span>
                     <span class="short">${c.repository_forks}</span>
                     </a>
-                </li>                
+                </li>
 	        </ul>
             <script type="text/javascript">
                YUE.on('repo_switcher','mouseover',function(){
@@ -264,8 +264,8 @@
                           var target = 'q_filter_rs';
                           var func = function(node){
                               return node.parentNode;
-                          }                          
-                          q_filter(target,nodes,func);                         
+                          }
+                          q_filter(target,nodes,func);
                       }
                    var loaded = YUD.hasClass('repo_switcher','loaded');
                    if(!loaded){
@@ -289,7 +289,7 @@
                  }
                  return false;
               });
-            </script>             
+            </script>
 		%else:
 		    ##ROOT MENU
             <ul id="quick">
@@ -298,8 +298,8 @@
                     <span class="icon">
                         <img src="${h.url('/images/icons/home_16.png')}" alt="${_('Home')}" />
                     </span>
-                    <span>${_('Home')}</span>                 
-                    </a>        
+                    <span>${_('Home')}</span>
+                    </a>
                 </li>
                 % if c.rhodecode_user.username != 'default':
                  <li>
@@ -307,8 +307,8 @@
                     <span class="icon">
                         <img src="${h.url('/images/icons/book.png')}" alt="${_('Journal')}" />
                     </span>
-                    <span>${_('Journal')}</span>                 
-                    </a>        
+                    <span>${_('Journal')}</span>
+                    </a>
                  </li>
                 % endif
                 <li>
@@ -316,17 +316,17 @@
                     <span class="icon">
                         <img src="${h.url('/images/icons/search_16.png')}" alt="${_('Search')}" />
                     </span>
-                    <span>${_('Search')}</span>                 
-                    </a>        
+                    <span>${_('Search')}</span>
+                    </a>
                 </li>
-                
+
 				%if h.HasPermissionAll('hg.admin')('access admin main page'):
                 <li ${is_current('admin')}>
                    <a title="${_('Admin')}" href="${h.url('admin_home')}">
                    <span class="icon">
                        <img src="${h.url('/images/icons/cog_edit.png')}" alt="${_('Admin')}" />
                    </span>
-                   <span>${_('Admin')}</span>                 
+                   <span>${_('Admin')}</span>
                    </a>
                     ${admin_menu()}
                 </li>

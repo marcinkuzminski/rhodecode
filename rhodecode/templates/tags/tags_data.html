@@ -1,5 +1,5 @@
 %if c.repo_tags:
-   <div id="table_wrap" class="yui-skin-sam">    
+   <div id="table_wrap" class="yui-skin-sam">
     <table id="tags_data">
       <thead>
     	<tr>
@@ -10,7 +10,7 @@
     	</tr>
       </thead>
 		%for cnt,tag in enumerate(c.repo_tags.items()):
-		<tr class="parity${cnt%2}">		
+		<tr class="parity${cnt%2}">
             <td>
                 <span class="logtags">
                     <span class="tagtag">${h.link_to(tag[0],
@@ -18,7 +18,7 @@
                     </span>
                 </span>
             </td>
-            <td><span class="tooltip" title="${h.age(tag[1].date)}">${tag[1].date}</span></td>            
+            <td><span class="tooltip" title="${h.age(tag[1].date)}">${tag[1].date}</span></td>
 	        <td title="${tag[1].author}">${h.person(tag[1].author)}</td>
 	        <td>
                 <div>
@@ -31,4 +31,4 @@
    </div>
 %else:
 	${_('There are no tags yet')}
-%endif    
+%endif

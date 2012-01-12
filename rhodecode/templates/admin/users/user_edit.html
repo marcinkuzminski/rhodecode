@@ -6,9 +6,9 @@
 </%def>
 
 <%def name="breadcrumbs_links()">
-    ${h.link_to(_('Admin'),h.url('admin_home'))} 
-    &raquo; 
-    ${h.link_to(_('Users'),h.url('users'))} 
+    ${h.link_to(_('Admin'),h.url('admin_home'))}
+    &raquo;
+    ${h.link_to(_('Users'),h.url('users'))}
     &raquo;
     ${_('edit')} "${c.user.username}"
 </%def>
@@ -21,7 +21,7 @@
 <div class="box box-left">
     <!-- box / title -->
     <div class="title">
-        ${self.breadcrumbs()}       
+        ${self.breadcrumbs()}
     </div>
     <!-- end box / title -->
     ${h.form(url('update_user', id=c.user.user_id),method='put')}
@@ -35,7 +35,7 @@
                 <br/>${_('Using')} ${c.user.email}
                 %else:
                 <br/>${c.user.email}
-                %endif 
+                %endif
            </div>
         </div>
         <div class="field">
@@ -43,7 +43,7 @@
                 <label>${_('API key')}</label> ${c.user.api_key}
             </div>
         </div>
-                 
+
         <div class="fields">
              <div class="field">
                 <div class="label">
@@ -53,7 +53,7 @@
                     ${h.text('username',class_='medium')}
                 </div>
              </div>
-            
+
              <div class="field">
                 <div class="label">
                     <label for="ldap_dn">${_('LDAP DN')}:</label>
@@ -62,7 +62,7 @@
                     ${h.text('ldap_dn',class_='medium')}
                 </div>
              </div>
-            
+
              <div class="field">
                 <div class="label">
                     <label for="new_password">${_('New password')}:</label>
@@ -71,7 +71,7 @@
                     ${h.password('new_password',class_='medium',autocomplete="off")}
                 </div>
              </div>
-             
+
              <div class="field">
                 <div class="label">
                     <label for="password_confirmation">${_('New password confirmation')}:</label>
@@ -80,7 +80,7 @@
                     ${h.password('password_confirmation',class_="medium",autocomplete="off")}
                 </div>
              </div>
-                         
+
              <div class="field">
                 <div class="label">
                     <label for="name">${_('First Name')}:</label>
@@ -89,7 +89,7 @@
                     ${h.text('name',class_='medium')}
                 </div>
              </div>
-            
+
              <div class="field">
                 <div class="label">
                     <label for="lastname">${_('Last Name')}:</label>
@@ -98,7 +98,7 @@
                     ${h.text('lastname',class_='medium')}
                 </div>
              </div>
-            
+
              <div class="field">
                 <div class="label">
                     <label for="email">${_('Email')}:</label>
@@ -107,7 +107,7 @@
                     ${h.text('email',class_='medium')}
                 </div>
              </div>
-            
+
              <div class="field">
                 <div class="label label-checkbox">
                     <label for="active">${_('Active')}:</label>
@@ -116,7 +116,7 @@
                     ${h.checkbox('active',value=True)}
                 </div>
              </div>
-             
+
              <div class="field">
                 <div class="label label-checkbox">
                     <label for="admin">${_('Admin')}:</label>
@@ -124,19 +124,19 @@
                 <div class="checkboxes">
                     ${h.checkbox('admin',value=True)}
                 </div>
-             </div>             
+             </div>
             <div class="buttons">
               ${h.submit('save',_('Save'),class_="ui-button")}
               ${h.reset('reset',_('Reset'),class_="ui-button")}
-            </div>             
-    	</div>    
+            </div>
+    	</div>
     </div>
     ${h.end_form()}
 </div>
 <div class="box box-right">
     <!-- box / title -->
     <div class="title">
-        <h5>${_('Permissions')}</h5>       
+        <h5>${_('Permissions')}</h5>
     </div>
     ${h.form(url('user_perm', id=c.user.user_id),method='put')}
     <div class="form">
@@ -153,9 +153,9 @@
             <div class="buttons">
               ${h.submit('save',_('Save'),class_="ui-button")}
               ${h.reset('reset',_('Reset'),class_="ui-button")}
-            </div>             
-        </div>    
+            </div>
+        </div>
     </div>
-    ${h.end_form()}    
+    ${h.end_form()}
 </div>
 </%def>

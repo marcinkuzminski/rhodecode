@@ -6,14 +6,14 @@
 
 <%def name="breadcrumbs_links()">
     ${h.link_to(u'Home',h.url('/'))}
-    &raquo; 
+    &raquo;
     ${h.link_to(c.dbrepo.just_name,h.url('summary_home',repo_name=c.repo_name))}
     &raquo;
     ${_('summary')}
 </%def>
 
 <%def name="page_nav()">
-	${self.menu('summary')}    
+	${self.menu('summary')}
 </%def>
 
 <%def name="main()">
@@ -32,50 +32,50 @@
     <!-- end box / title -->
 	<div class="form">
 	  <div id="summary" class="fields">
-		 
+
 			 <div class="field">
 			  <div class="label-summary">
 			      <label>${_('Name')}:</label>
 			  </div>
 			  <div class="input ${summary(c.show_stats)}">
-                  <div style="float:right;padding:5px 0px 0px 5px">		  
+                  <div style="float:right;padding:5px 0px 0px 5px">
                      %if c.rhodecode_user.username != 'default':
                       ${h.link_to(_('RSS'),h.url('rss_feed_home',repo_name=c.dbrepo.repo_name,api_key=c.rhodecode_user.api_key),class_='rss_icon')}
                       ${h.link_to(_('ATOM'),h.url('atom_feed_home',repo_name=c.dbrepo.repo_name,api_key=c.rhodecode_user.api_key),class_='atom_icon')}
                      %else:
                       ${h.link_to(_('RSS'),h.url('rss_feed_home',repo_name=c.dbrepo.repo_name),class_='rss_icon')}
-                      ${h.link_to(_('ATOM'),h.url('atom_feed_home',repo_name=c.dbrepo.repo_name),class_='atom_icon')}            
-                     %endif  
+                      ${h.link_to(_('ATOM'),h.url('atom_feed_home',repo_name=c.dbrepo.repo_name),class_='atom_icon')}
+                     %endif
                   </div>
                   %if c.rhodecode_user.username != 'default':
                       %if c.following:
                       <span id="follow_toggle" class="following" title="${_('Stop following this repository')}"
                             onclick="javascript:toggleFollowingRepo(this,${c.dbrepo.repo_id},'${str(h.get_token())}')">
-                      </span>                 
+                      </span>
                       %else:
                       <span id="follow_toggle" class="follow" title="${_('Start following this repository')}"
                             onclick="javascript:toggleFollowingRepo(this,${c.dbrepo.repo_id},'${str(h.get_token())}')">
                       </span>
                       %endif
-                  %endif:                                  
+                  %endif:
                  ##REPO TYPE
 		         %if c.dbrepo.repo_type =='hg':
 		           <img style="margin-bottom:2px" class="icon" title="${_('Mercurial repository')}" alt="${_('Mercurial repository')}" src="${h.url('/images/icons/hgicon.png')}"/>
 		         %endif
 		         %if c.dbrepo.repo_type =='git':
 		           <img style="margin-bottom:2px" class="icon" title="${_('Git repository')}" alt="${_('Git repository')}" src="${h.url('/images/icons/giticon.png')}"/>
-		         %endif 
-                            
-                 ##PUBLIC/PRIVATE     			  
+		         %endif
+
+                 ##PUBLIC/PRIVATE
 	             %if c.dbrepo.private:
 	                <img style="margin-bottom:2px" class="icon" title="${_('private repository')}" alt="${_('private repository')}" src="${h.url('/images/icons/lock.png')}"/>
 	             %else:
 	                <img style="margin-bottom:2px" class="icon" title="${_('public repository')}" alt="${_('public repository')}" src="${h.url('/images/icons/lock_open.png')}"/>
 	             %endif
-	             
+
 	              ##REPO NAME
 			      <span class="repo_name" title="${_('Non changable ID %s') % c.dbrepo.repo_id}">${h.repo_link(c.dbrepo.groups_and_repo)}</span>
-                  
+
                   ##FORK
 		          %if c.dbrepo.fork:
 	            	<div style="margin-top:5px;clear:both"">
@@ -90,18 +90,18 @@
                     <a href="${h.url(str(h.hide_credentials(c.dbrepo.clone_uri)))}"><img class="icon" alt="${_('remote clone')}" title="${_('Clone from')} ${h.hide_credentials(c.dbrepo.clone_uri)}" src="${h.url('/images/icons/connect.png')}"/>
                         ${_('Clone from')} ${h.hide_credentials(c.dbrepo.clone_uri)}
                     </a>
-                    </div>					
-				  %endif		            		      
+                    </div>
+				  %endif
 			  </div>
 			 </div>
-			
+
 			 <div class="field">
 			  <div class="label-summary">
 			      <label>${_('Description')}:</label>
 			  </div>
 			  <div class="input ${summary(c.show_stats)} desc">${h.urlify_text(c.dbrepo.description)}</div>
 			 </div>
-			
+
 			 <div class="field">
 			  <div class="label-summary">
 			      <label>${_('Contact')}:</label>
@@ -115,7 +115,7 @@
 			  		${_('Email')}: <a href="mailto:${c.dbrepo.user.email}">${c.dbrepo.user.email}</a>
 			  </div>
 			 </div>
-			
+
 			 <div class="field">
 			  <div class="label-summary">
 			      <label>${_('Clone url')}:</label>
@@ -127,7 +127,7 @@
                   <input style="display:none;width:80%;margin-left:105px" type="text" id="clone_url_id" readonly="readonly" value="${c.clone_repo_url_id}"/>
 			  </div>
 			 </div>
-			 
+
 			 <div class="field">
 			  <div class="label-summary">
 			      <label>${_('Trending files')}:</label>
@@ -136,14 +136,14 @@
                 %if c.show_stats:
 			    <div id="lang_stats"></div>
                 %else:
-                   ${_('Statistics are disabled for this repository')} 
+                   ${_('Statistics are disabled for this repository')}
                    %if h.HasPermissionAll('hg.admin')('enable stats on from summary'):
                         ${h.link_to(_('enable'),h.url('edit_repo',repo_name=c.repo_name),class_="ui-btn")}
                    %endif
-                %endif		   
+                %endif
 			  </div>
 			 </div>
-			 			
+
 			 <div class="field">
 			  <div class="label-summary">
 			      <label>${_('Download')}:</label>
@@ -155,7 +155,7 @@
 		          ${_('Downloads are disabled for this repository')}
                     %if h.HasPermissionAll('hg.admin')('enable downloads on from summary'):
                         ${h.link_to(_('enable'),h.url('edit_repo',repo_name=c.repo_name),class_="ui-btn")}
-                    %endif  		          
+                    %endif
 		        %else:
 			        ${h.select('download_options',c.rhodecode_repo.get_changeset().raw_id,c.download_options)}
 			             <span id="${'zip_link'}">${h.link_to('Download as zip',h.url('files_archive_home',repo_name=c.dbrepo.repo_name,fname='tip.zip'),class_="archive_icon ui-btn")}</span>
@@ -164,33 +164,33 @@
                     </span>
 			    %endif
 			  </div>
-			 </div>			 			 			 
-	  </div>		 
+			 </div>
+	  </div>
 	</div>
 </div>
 
-%if c.show_stats:        
+%if c.show_stats:
 <div class="box box-right"  style="min-height:455px">
     <!-- box / title -->
     <div class="title">
         <h5>${_('Commit activity by day / author')}</h5>
     </div>
-    
+
     <div class="graph">
          <div style="padding:0 10px 10px 15px;font-size: 1.2em;">
          %if c.no_data:
            ${c.no_data_msg}
            %if h.HasPermissionAll('hg.admin')('enable stats on from summary'):
                 ${h.link_to(_('enable'),h.url('edit_repo',repo_name=c.repo_name),class_="ui-btn")}
-           %endif         
+           %endif
         %else:
             ${_('Loaded in')} ${c.stats_percentage} %
         %endif
-        </div>  
+        </div>
         <div id="commit_history" style="width:450px;height:300px;float:left"></div>
         <div style="clear: both;height: 10px"></div>
         <div id="overview" style="width:450px;height:100px;float:left"></div>
-        
+
     	<div id="legend_data" style="clear:both;margin-top:10px;">
 	    	<div id="legend_container"></div>
 	    	<div id="legend_choices">
@@ -198,10 +198,10 @@
 	    	</div>
     	</div>
     </div>
-</div>    
+</div>
 %endif
 
-<div class="box">    
+<div class="box">
     <div class="title">
         <div class="breadcrumbs">
         %if c.repo_changesets:
@@ -210,7 +210,7 @@
             ${_('Quick start')}
          %endif
         </div>
-    </div>    
+    </div>
     <div class="table">
         <div id="shortlog_data">
             <%include file='../shortlog/shortlog_data.html'/>
@@ -219,10 +219,10 @@
 </div>
 
 %if c.readme_data:
-<div class="box" style="background-color: #FAFAFA">    
+<div class="box" style="background-color: #FAFAFA">
     <div class="title">
         <div class="breadcrumbs"><a href="${h.url('files_home',repo_name=c.repo_name,revision='tip',f_path=c.readme_file)}">${c.readme_file}</a></div>
-    </div>    
+    </div>
     <div class="readme">
       <div class="readme_box">
         ${c.readme_data|n}
@@ -239,7 +239,7 @@ YUE.on(clone_url,'click',function(e){
     }
     else{
         YUD.addClass(clone_url,'selected');
-        YUD.get(clone_url).select();                   
+        YUD.get(clone_url).select();
     }
 })
 
@@ -247,18 +247,18 @@ YUE.on('clone_by_name','click',function(e){
     // show url by name and hide name button
     YUD.setStyle('clone_url','display','');
     YUD.setStyle('clone_by_name','display','none');
-    
+
     // hide url by id and show name button
     YUD.setStyle('clone_by_id','display','');
-    YUD.setStyle('clone_url_id','display','none');    
-    
+    YUD.setStyle('clone_url_id','display','none');
+
 })
 YUE.on('clone_by_id','click',function(e){
-	
+
 	// show url by id and hide id button
 	YUD.setStyle('clone_by_id','display','none');
     YUD.setStyle('clone_url_id','display','');
-	   
+
     // hide url by name and show id button
 	YUD.setStyle('clone_by_name','display','');
 	YUD.setStyle('clone_url','display','none');
@@ -273,14 +273,14 @@ var tmpl_links = {};
 YUE.on(['download_options','archive_subrepos'],'change',function(e){
    var sm = YUD.get('download_options');
    var new_cs = sm.options[sm.selectedIndex];
-   
+
    for(k in tmpl_links){
        var s = YUD.get(k+'_link');
        if(s){
          var title_tmpl = "${_('Download %s as %s') % ('__CS_NAME__','__CS_EXT__')}";
          title_tmpl= title_tmpl.replace('__CS_NAME__',new_cs.text);
          title_tmpl = title_tmpl.replace('__CS_EXT__',k);
-         
+
          var url = tmpl_links[k].replace('__CS__',new_cs.value);
          var subrepos = YUD.get('archive_subrepos').checked;
          url = url.replace('__SUB__',subrepos);
@@ -298,7 +298,7 @@ var no_data = true;
 for (k in data){
     total += data[k].count;
     no_data = false;
-} 
+}
 var tbl = document.createElement('table');
 tbl.setAttribute('class','trending_language_tbl');
 var cnt = 0;
@@ -322,20 +322,20 @@ for (k in data){
     td2.setAttribute('style','padding-right:14px !important');
     var trending_language = document.createElement('div');
     var nr_files = value+" ${_('files')}";
-    
+
     trending_language.title = k+" "+nr_files;
-    
+
     if (percentage>22){
-        trending_language.innerHTML = "<b style='font-size:0.8em'>"+percentage+"% "+nr_files+ "</b>";   
+        trending_language.innerHTML = "<b style='font-size:0.8em'>"+percentage+"% "+nr_files+ "</b>";
     }
     else{
         trending_language.innerHTML = "<b style='font-size:0.8em'>"+percentage+"%</b>";
     }
-    
+
     trending_language.setAttribute("class", 'trending_language top-right-rounded-corner bottom-right-rounded-corner');
     trending_language.style.width=percentage+"%";
     td2.appendChild(trending_language);
-    
+
     tr.appendChild(td1);
     tr.appendChild(td2);
     tbl.appendChild(tr);
@@ -343,17 +343,17 @@ for (k in data){
         var show_more = document.createElement('tr');
         var td = document.createElement('td');
         lnk = document.createElement('a');
-        
+
         lnk.href='#';
         lnk.innerHTML = "${_('show more')}";
         lnk.id='code_stats_show_more';
         td.appendChild(lnk);
-        
+
         show_more.appendChild(td);
         show_more.appendChild(document.createElement('td'));
         tbl.appendChild(show_more);
     }
-    
+
 }
 
 YUD.get('lang_stats').appendChild(tbl);
@@ -365,7 +365,7 @@ YUE.on('code_stats_show_more','click',function(){
     YUD.setStyle(YUD.get('code_stats_show_more'),
             'display','none');
 });
-</script>   
+</script>
 <script type="text/javascript">
 /**
  * Plots summary graph
@@ -389,20 +389,20 @@ function SummaryPlot(from,to,dataset,overview_dataset) {
     var choiceContainerTable = YUD.get("legend_choices_tables");
     var plotContainer = YUD.get('commit_history');
     var overviewContainer = YUD.get('overview');
-    
+
     var plot_options = {
         bars: {show:true,align:'center',lineWidth:4},
         legend: {show:true, container:"legend_container"},
         points: {show:true,radius:0,fill:false},
         yaxis: {tickDecimals:0,},
         xaxis: {
-            mode: "time", 
+            mode: "time",
             timeformat: "%d/%m",
             min:from,
-            max:to, 
-        }, 
+            max:to,
+        },
         grid: {
-            hoverable: true, 
+            hoverable: true,
             clickable: true,
             autoHighlight:true,
             color: "#999"
@@ -434,7 +434,7 @@ function SummaryPlot(from,to,dataset,overview_dataset) {
             "color":'#ffffff',
         }
     }
-    
+
     /**
      * generate checkboxes accordindly to data
      * @param keys
@@ -445,7 +445,7 @@ function SummaryPlot(from,to,dataset,overview_dataset) {
         var i = 0;
         choiceContainerTable.innerHTML = '';
         for(var pos in data) {
-            
+
             data[pos].color = i;
             i++;
             if(data[pos].label != ''){
@@ -454,9 +454,9 @@ function SummaryPlot(from,to,dataset,overview_dataset) {
                 +data[pos].label+
                 '</td></tr>';
             }
-        }   
+        }
     }
-    
+
     /**
      * ToolTip show
      */
@@ -479,74 +479,74 @@ function SummaryPlot(from,to,dataset,overview_dataset) {
         var anim = new YAHOO.util.Anim(div, {opacity: {to: 0.8}}, 0.2);
         anim.animate();
     }
-    
+
     /**
-     * This function will detect if selected period has some changesets 
+     * This function will detect if selected period has some changesets
        for this user if it does this data is then pushed for displaying
        Additionally it will only display users that are selected by the checkbox
     */
     function getDataAccordingToRanges(ranges) {
-        
+
         var data = [];
         var new_dataset = {};
         var keys = [];
         var max_commits = 0;
         for(var key in dataset){
-            
+
             for(var ds in dataset[key].data){
                 commit_data = dataset[key].data[ds];
                 if (commit_data.time >= ranges.xaxis.from && commit_data.time <= ranges.xaxis.to){
 
                     if(new_dataset[key] === undefined){
-                        new_dataset[key] = {data:[],schema:["commits"],label:key};  
+                        new_dataset[key] = {data:[],schema:["commits"],label:key};
                     }
                     new_dataset[key].data.push(commit_data);
                 }
             }
             if (new_dataset[key] !== undefined){
-                data.push(new_dataset[key]);    
+                data.push(new_dataset[key]);
             }
         }
 
         if (data.length > 0){
-            return data;    
+            return data;
         }
         else{
             //just return dummy data for graph to plot itself
-            return [getDummyData('')];  
+            return [getDummyData('')];
         }
     }
-    
+
     /**
     * redraw using new checkbox data
     */
     function plotchoiced(e,args){
         var cur_data = args[0];
         var cur_ranges = args[1];
-        
+
         var new_data = [];
         var inputs = choiceContainer.getElementsByTagName("input");
 
         //show only checked labels
         for(var i=0; i<inputs.length; i++) {
             var checkbox_key = inputs[i].name;
-            
+
             if(inputs[i].checked){
                 for(var d in cur_data){
                     if(cur_data[d].label == checkbox_key){
                         new_data.push(cur_data[d]);
                     }
-                }                           
+                }
             }
             else{
                 //push dummy data to not hide the label
                 new_data.push(getDummyData(checkbox_key));
             }
         }
-                    
+
         var new_options = YAHOO.lang.merge(plot_options, {
-            xaxis: { 
-                min: cur_ranges.xaxis.from, 
+            xaxis: {
+                min: cur_ranges.xaxis.from,
                 max: cur_ranges.xaxis.to,
                 mode:"time",
                 timeformat: "%d/%m",
@@ -557,17 +557,17 @@ function SummaryPlot(from,to,dataset,overview_dataset) {
         }
         // do the zooming
        plot = YAHOO.widget.Flot(plotContainer, new_data, new_options);
-       
+
        plot.subscribe("plotselected", plotselected);
 
        //resubscribe plothover
        plot.subscribe("plothover", plothover);
-        
-       // don't fire event on the overview to prevent eternal loop 
+
+       // don't fire event on the overview to prevent eternal loop
        overview.setSelection(cur_ranges, true);
 
     }
-    
+
     /**
      * plot only selected items from overview
      * @param ranges
@@ -577,72 +577,72 @@ function SummaryPlot(from,to,dataset,overview_dataset) {
         //updates the data for new plot
         var data = getDataAccordingToRanges(ranges);
         generateCheckboxes(data);
-        
+
         var new_options = YAHOO.lang.merge(plot_options, {
-            xaxis: { 
-                min: ranges.xaxis.from, 
+            xaxis: {
+                min: ranges.xaxis.from,
                 max: ranges.xaxis.to,
                 mode:"time",
                 timeformat: "%d/%m",
             },
         });
-        // do the zooming 
+        // do the zooming
         plot = YAHOO.widget.Flot(plotContainer, data, new_options);
 
         plot.subscribe("plotselected", plotselected);
 
         //resubscribe plothover
         plot.subscribe("plothover", plothover);
-        
+
         // don't fire event on the overview to prevent eternal loop
         overview.setSelection(ranges, true);
 
-        //resubscribe choiced 
+        //resubscribe choiced
         YUE.on(choiceContainer.getElementsByTagName("input"), "click", plotchoiced, [data, ranges]);
     }
-    
+
     var previousPoint = null;
 
     function plothover(o) {
         var pos = o.pos;
         var item = o.item;
-        
+
         //YUD.get("x").innerHTML = pos.x.toFixed(2);
         //YUD.get("y").innerHTML = pos.y.toFixed(2);
         if (item) {
             if (previousPoint != item.datapoint) {
                 previousPoint = item.datapoint;
-                
+
                 var tooltip = YUD.get("tooltip");
                 if(tooltip) {
                       tooltip.parentNode.removeChild(tooltip);
                 }
                 var x = item.datapoint.x.toFixed(2);
                 var y = item.datapoint.y.toFixed(2);
-                
+
                 if (!item.series.label){
                     item.series.label = 'commits';
                 }
                 var d = new Date(x*1000);
                 var fd = d.toDateString()
                 var nr_commits = parseInt(y);
-                
+
                 var cur_data = dataset[item.series.label].data[item.dataIndex];
                 var added = cur_data.added;
                 var changed = cur_data.changed;
                 var removed = cur_data.removed;
-                
+
                 var nr_commits_suffix = " ${_('commits')} ";
                 var added_suffix = " ${_('files added')} ";
                 var changed_suffix = " ${_('files changed')} ";
                 var removed_suffix = " ${_('files removed')} ";
 
-                
+
                 if(nr_commits == 1){nr_commits_suffix = " ${_('commit')} ";}
                 if(added==1){added_suffix=" ${_('file added')} ";}
                 if(changed==1){changed_suffix=" ${_('file changed')} ";}
                 if(removed==1){removed_suffix=" ${_('file removed')} ";}
-                                                
+
                 showTooltip(item.pageX, item.pageY, item.series.label + " on " + fd
                          +'<br/>'+
                          nr_commits + nr_commits_suffix+'<br/>'+
@@ -653,43 +653,43 @@ function SummaryPlot(from,to,dataset,overview_dataset) {
         }
         else {
               var tooltip = YUD.get("tooltip");
-              
+
               if(tooltip) {
                     tooltip.parentNode.removeChild(tooltip);
               }
             previousPoint = null;
         }
     }
-    
+
     /**
      * MAIN EXECUTION
      */
-    
-    var data = getDataAccordingToRanges(initial_ranges);    
+
+    var data = getDataAccordingToRanges(initial_ranges);
     generateCheckboxes(data);
-    
-    //main plot 
+
+    //main plot
     var plot = YAHOO.widget.Flot(plotContainer,data,plot_options);
-    
-    //overview 
-    var overview = YAHOO.widget.Flot(overviewContainer, 
+
+    //overview
+    var overview = YAHOO.widget.Flot(overviewContainer,
             overview_dataset, overview_options);
-    
-    //show initial selection on overview 
-    overview.setSelection(initial_ranges);    
-    
+
+    //show initial selection on overview
+    overview.setSelection(initial_ranges);
+
     plot.subscribe("plotselected", plotselected);
     plot.subscribe("plothover", plothover)
-    
+
     overview.subscribe("plotselected", function (ranges) {
         plot.setSelection(ranges);
-    });     
+    });
 
     // user choices on overview
     YUE.on(choiceContainer.getElementsByTagName("input"), "click", plotchoiced, [data, initial_ranges]);
 }
-    SummaryPlot(${c.ts_min},${c.ts_max},${c.commit_data|n},${c.overview_data|n});       
+    SummaryPlot(${c.ts_min},${c.ts_max},${c.commit_data|n},${c.overview_data|n});
 </script>
 %endif
 
-</%def>    
+</%def>

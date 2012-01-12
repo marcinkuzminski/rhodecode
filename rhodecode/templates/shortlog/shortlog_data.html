@@ -2,7 +2,7 @@
 %if c.repo_changesets:
 <table class="table_disp">
 	<tr>
-	    <th class="left">${_('revision')}</th>	
+	    <th class="left">${_('revision')}</th>
         <th class="left">${_('commit message')}</th>
 		<th class="left">${_('age')}</th>
 		<th class="left">${_('author')}</th>
@@ -13,7 +13,7 @@
 	<tr class="parity${cnt%2}">
         <td>
             <div><pre><a href="${h.url('files_home',repo_name=c.repo_name,revision=cs.raw_id)}">r${cs.revision}:${h.short_id(cs.raw_id)}</a></pre></div>
-        </td>  
+        </td>
         <td>
             ${h.link_to(h.truncate(cs.message,50),
             h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id),
@@ -21,7 +21,7 @@
         </td>
         <td><span class="tooltip" title="${cs.date}">
                       ${h.age(cs.date)}</span>
-        </td>        	
+        </td>
 		<td title="${cs.author}">${h.person(cs.author)}</td>
 		<td>
 			<span class="logtags">
@@ -45,7 +45,7 @@
     YUE.delegate("shortlog_data","click",function(e, matchedEl, container){
         ypjax(e.target.href,"shortlog_data",function(){tooltip_activate();});
         YUE.preventDefault(e);
-    },'.pager_link');	  
+    },'.pager_link');
   });
 </script>
 
@@ -62,18 +62,18 @@ ${c.repo_changesets.pager('$link_previous ~2~ $link_next')}
   </div>
 </div>
 %endif
- 
 
-<h4>${_('Push new repo')}</h4>     
+
+<h4>${_('Push new repo')}</h4>
 <pre>
     ${c.rhodecode_repo.alias} clone ${c.clone_repo_url}
     ${c.rhodecode_repo.alias} add README # add first file
     ${c.rhodecode_repo.alias} commit -m "Initial" # commit with message
     ${c.rhodecode_repo.alias} push # push changes back
 </pre>
- 
+
 <h4>${_('Existing repository?')}</h4>
 <pre>
     ${c.rhodecode_repo.alias} push ${c.clone_repo_url}
-</pre>    
+</pre>
 %endif

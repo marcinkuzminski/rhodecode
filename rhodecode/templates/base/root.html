@@ -16,16 +16,16 @@
         </%def>
         <%def name="css_extra()">
         </%def>
-                    
+
         ${self.css()}
-        
+
         %if c.ga_code:
         <!-- Analytics -->
 	     <script type="text/javascript">
 	      var _gaq = _gaq || [];
 	      _gaq.push(['_setAccount', '${c.ga_code}']);
 	      _gaq.push(['_trackPageview']);
-	    
+
 	      (function() {
 	        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
 	        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
@@ -33,7 +33,7 @@
 	      })();
 	     </script>
 	    %endif
-        
+
         ## JAVASCRIPT ##
         <%def name="js()">
             <script type="text/javascript" src="${h.url('/js/yui.2.9.js')}"></script>
@@ -44,21 +44,21 @@
             <script type="text/javascript" src="${h.url('/js/rhodecode.js')}"></script>
            ## EXTRA FOR JS
            ${self.js_extra()}
-        
+
             <script type="text/javascript">
             var follow_base_url  = "${h.url('toggle_following')}";
             var stop_follow_text = "${_('Stop following this repository')}";
-            var start_follow_text = "${_('Start following this repository')}"; 
-            
-            
+            var start_follow_text = "${_('Start following this repository')}";
+
+
             var onSuccessFollow = function(target){
                 var f = YUD.get(target.id);
                 var f_cnt = YUD.get('current_followers_count');
-                
+
                 if(f.getAttribute('class')=='follow'){
                     f.setAttribute('class','following');
                     f.setAttribute('title',stop_follow_text);
-                    
+
                     if(f_cnt){
                         var cnt = Number(f_cnt.innerHTML)+1;
                         f_cnt.innerHTML = cnt;
@@ -70,10 +70,10 @@
                     if(f_cnt){
                         var cnt = Number(f_cnt.innerHTML)+1;
                         f_cnt.innerHTML = cnt;
-                    }      
+                    }
                 }
             }
-            
+
             var toggleFollowingUser = function(target,fallows_user_id,token,user_id){
                 args = 'follows_user_id='+fallows_user_id;
                 args+= '&amp;auth_token='+token;
@@ -87,29 +87,29 @@
                 },args);
                 return false;
             }
-            
+
             var toggleFollowingRepo = function(target,fallows_repo_id,token,user_id){
-            
+
                 args = 'follows_repo_id='+fallows_repo_id;
                 args+= '&amp;auth_token='+token;
                 if(user_id != undefined){
                     args+="&amp;user_id="+user_id;
-                }    
+                }
                 YUC.asyncRequest('POST',follow_base_url,{
                     success:function(o){
                     	onSuccessFollow(target);
                     }
-                },args); 
+                },args);
                 return false;
             }
            YUE.onDOMReady(function(){
              tooltip_activate();
-             show_more_event();               
-             
+             show_more_event();
+
              YUE.on('quick_login_link','click',function(e){
-                 // make sure we don't redirect 
+                 // make sure we don't redirect
                  YUE.preventDefault(e);
-                 
+
                  if(YUD.hasClass('quick_login_link','enabled')){
                      YUD.setStyle('quick_login','display','none');
                      YUD.removeClass('quick_login_link','enabled');
@@ -120,8 +120,8 @@
                      YUD.get('username').focus();
                  }
              });
-             
-            // hover menu 
+
+            // hover menu
             YUE.on(window,'scroll',function(){
                 if(YUD.getDocumentScrollTop() > 45){
                       YUD.addClass('header-inner','hover');
@@ -130,7 +130,7 @@
                     YUD.removeClass('header-inner','hover');
                 }
             })
-           })   
+           })
             </script>
         </%def>
         <%def name="js_extra()"></%def>

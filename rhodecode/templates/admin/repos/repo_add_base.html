@@ -22,7 +22,7 @@ ${h.form(url('repos'))}
             <div class="input">
                 ${h.text('clone_uri',class_="small")}
             </div>
-         </div>             
+         </div>
          <div class="field">
              <div class="label">
                  <label for="repo_group">${_('Repository group')}:</label>
@@ -30,7 +30,7 @@ ${h.form(url('repos'))}
              <div class="input">
                  ${h.select('repo_group','',c.repo_groups,class_="medium")}
              </div>
-         </div>         
+         </div>
         <div class="field">
             <div class="label">
                 <label for="repo_type">${_('Type')}:</label>
@@ -38,7 +38,7 @@ ${h.form(url('repos'))}
             <div class="input">
                 ${h.select('repo_type','hg',c.backends,class_="small")}
             </div>
-         </div>             
+         </div>
         <div class="field">
             <div class="label label-textarea">
                 <label for="description">${_('Description')}:</label>
@@ -57,7 +57,7 @@ ${h.form(url('repos'))}
          </div>
         <div class="buttons">
           ${h.submit('add',_('add'),class_="ui-button")}
-        </div>                                                          
+        </div>
     </div>
-</div>    
-${h.end_form()}    
+</div>
+${h.end_form()}

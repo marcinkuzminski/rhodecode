@@ -11,23 +11,23 @@
 		</div>
 	</dd>
 </dl>
-	
+
 <div id="body" class="codeblock">
 	<div class="code-header">
         <div class="stats">
             <div class="left"><img src="${h.url('/images/icons/file.png')}"/></div>
-            <div class="left item"><pre>${h.link_to("r%s:%s" % (c.file.last_changeset.revision,h.short_id(c.file.last_changeset.raw_id)),h.url('changeset_home',repo_name=c.repo_name,revision=c.file.last_changeset.raw_id))}</pre></div>      
+            <div class="left item"><pre>${h.link_to("r%s:%s" % (c.file.last_changeset.revision,h.short_id(c.file.last_changeset.raw_id)),h.url('changeset_home',repo_name=c.repo_name,revision=c.file.last_changeset.raw_id))}</pre></div>
             <div class="left item">${h.format_byte_size(c.file.size,binary=True)}</div>
             <div class="left item last">${c.file.mimetype}</div>
             <div class="buttons">
               ${h.link_to(_('show annotation'),h.url('files_annotate_home',repo_name=c.repo_name,revision=c.changeset.raw_id,f_path=c.f_path),class_="ui-btn")}
-              ${h.link_to(_('show as raw'),h.url('files_raw_home',repo_name=c.repo_name,revision=c.changeset.raw_id,f_path=c.f_path),class_="ui-btn")}           
+              ${h.link_to(_('show as raw'),h.url('files_raw_home',repo_name=c.repo_name,revision=c.changeset.raw_id,f_path=c.f_path),class_="ui-btn")}
               ${h.link_to(_('download as raw'),h.url('files_rawfile_home',repo_name=c.repo_name,revision=c.changeset.raw_id,f_path=c.f_path),class_="ui-btn")}
-              % if h.HasRepoPermissionAny('repository.write','repository.admin')(c.repo_name):            
+              % if h.HasRepoPermissionAny('repository.write','repository.admin')(c.repo_name):
                % if not c.file.is_binary:
                 ${h.link_to(_('edit'),h.url('files_edit_home',repo_name=c.repo_name,revision=c.changeset.raw_id,f_path=c.f_path),class_="ui-btn")}
                % endif
-              % endif            
+              % endif
             </div>
         </div>
         <div class="author">
@@ -51,9 +51,9 @@
        <script type="text/javascript">
            function highlight_lines(lines){
                for(pos in lines){
-                 YUD.setStyle('L'+lines[pos],'background-color','#FFFFBE');                       
+                 YUD.setStyle('L'+lines[pos],'background-color','#FFFFBE');
                }
-           }       
+           }
            page_highlights = location.href.substring(location.href.indexOf('#')+1).split('L');
            if (page_highlights.length == 2){
               highlight_ranges  = page_highlights[1].split(",");
@@ -68,26 +68,26 @@
                            for(var i=start;i<=end;i++){
                                h_lines.push(i);
                            }
-                       } 
+                       }
                    }
                    else{
                        h_lines.push(parseInt(highlight_ranges[pos]));
                    }
              }
            highlight_lines(h_lines);
-           
-           //remember original location 
+
+           //remember original location
            var old_hash  = location.href.substring(location.href.indexOf('#'));
-           
-           // this makes a jump to anchor moved by 3 posstions for padding 
+
+           // this makes a jump to anchor moved by 3 posstions for padding
            window.location.hash = '#L'+Math.max(parseInt(h_lines[0])-3,1);
-           
-           //sets old anchor 
+
+           //sets old anchor
            window.location.hash = old_hash;
-           
+
            }
        </script>
-     %endif		
+     %endif
 	</div>
 </div>
 

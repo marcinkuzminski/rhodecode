@@ -18,13 +18,13 @@
 <div class="box box-left">
     <!-- box / title -->
     <div class="title">
-        ${self.breadcrumbs()}       
+        ${self.breadcrumbs()}
     </div>
     <!-- end box / title -->
     <div>
     ${h.form(url('admin_settings_my_account_update'),method='put')}
 	    <div class="form">
-	    
+
              <div class="field">
                 <div class="gravatar_box">
                     <div class="gravatar"><img alt="gravatar" src="${h.gravatar_url(c.user.email)}"/></div>
@@ -34,15 +34,15 @@
                     <br/>${_('Using')} ${c.user.email}
                     %else:
                     <br/>${c.user.email}
-                    %endif 
+                    %endif
                     </p>
                 </div>
-             </div>   	    
+             </div>
 	        <div class="field">
 	            <div class="label">
 	                <label>${_('API key')}</label> ${c.user.api_key}
 	            </div>
-	        </div>	    
+	        </div>
 	        <div class="fields">
 	             <div class="field">
 	                <div class="label">
@@ -52,7 +52,7 @@
 	                    ${h.text('username',class_="medium")}
 	                </div>
 	             </div>
-	            
+
 	             <div class="field">
 	                <div class="label">
 	                    <label for="new_password">${_('New password')}:</label>
@@ -61,7 +61,7 @@
 	                    ${h.password('new_password',class_="medium",autocomplete="off")}
 	                </div>
 	             </div>
-                 
+
                  <div class="field">
                     <div class="label">
                         <label for="password_confirmation">${_('New password confirmation')}:</label>
@@ -70,7 +70,7 @@
                         ${h.password('password_confirmation',class_="medium",autocomplete="off")}
                     </div>
                  </div>
-                 	            
+
 	             <div class="field">
 	                <div class="label">
 	                    <label for="name">${_('First Name')}:</label>
@@ -79,7 +79,7 @@
 	                    ${h.text('name',class_="medium")}
 	                </div>
 	             </div>
-	            
+
 	             <div class="field">
 	                <div class="label">
 	                    <label for="lastname">${_('Last Name')}:</label>
@@ -88,7 +88,7 @@
 	                    ${h.text('lastname',class_="medium")}
 	                </div>
 	             </div>
-	            
+
 	             <div class="field">
 	                <div class="label">
 	                    <label for="email">${_('Email')}:</label>
@@ -97,31 +97,31 @@
 	                    ${h.text('email',class_="medium")}
 	                </div>
 	             </div>
-	            
+
 	            <div class="buttons">
 	              ${h.submit('save',_('Save'),class_="ui-button")}
 	              ${h.reset('reset',_('Reset'),class_="ui-button")}
-	            </div>             
+	            </div>
 	    	</div>
-	    </div>    	
+	    </div>
     ${h.end_form()}
     </div>
-</div>    
+</div>
 
 <div class="box box-right">
     <!-- box / title -->
     <div class="title">
-        <h5> 
-        <input class="q_filter_box" id="q_filter" size="15" type="text" name="filter" value="${_('quick filter...')}"/>        
+        <h5>
+        <input class="q_filter_box" id="q_filter" size="15" type="text" name="filter" value="${_('quick filter...')}"/>
         ${_('My repositories')}
         </h5>
          %if h.HasPermissionAny('hg.admin','hg.create.repository')():
          <ul class="links">
            <li>
              <span>${h.link_to(_('ADD REPOSITORY'),h.url('admin_settings_create_repository'))}</span>
-           </li>          
-         </ul>           
-         %endif        
+           </li>
+         </ul>
+         %endif
     </div>
     <!-- end box / title -->
     <div class="table">
@@ -130,7 +130,7 @@
             <tr>
             <th class="left">${_('Name')}</th>
             <th class="left">${_('revision')}</th>
-            <th colspan="2" class="left">${_('action')}</th>            
+            <th colspan="2" class="left">${_('action')}</th>
 	    </thead>
 	     <tbody>
 	     %if c.user_repos:
@@ -142,34 +142,34 @@
                      %elif repo['dbrepo']['repo_type'] =='git':
                        <img class="icon" title="${_('Git repository')}" alt="${_('Git repository')}" src="${h.url('/images/icons/giticon.png')}"/>
                      %else:
-                       
-                     %endif 		            
+
+                     %endif
 		             %if repo['dbrepo']['private']:
 		                <img class="icon" alt="${_('private')}" src="${h.url('/images/icons/lock.png')}"/>
 		             %else:
 		                <img class="icon" alt="${_('public')}" src="${h.url('/images/icons/lock_open.png')}"/>
 		             %endif
-		                                             
+
 		            ${h.link_to(repo['name'], h.url('summary_home',repo_name=repo['name']),class_="repo_name")}
 		            %if repo['dbrepo_fork']:
 		            	<a href="${h.url('summary_home',repo_name=repo['dbrepo_fork']['repo_name'])}">
 		            	<img class="icon" alt="${_('public')}"
-		            	title="${_('Fork of')} ${repo['dbrepo_fork']['repo_name']}" 
+		            	title="${_('Fork of')} ${repo['dbrepo_fork']['repo_name']}"
 		            	src="${h.url('/images/icons/arrow_divide.png')}"/></a>
-		            %endif		            
-		            </td> 
+		            %endif
+		            </td>
 		            <td><span class="tooltip" title="${repo['last_change']}">${("r%s:%s") % (repo['rev'],h.short_id(repo['tip']))}</span></td>
 		            <td><a href="${h.url('repo_settings_home',repo_name=repo['name'])}" title="${_('edit')}"><img class="icon" alt="${_('private')}" src="${h.url('/images/icons/application_form_edit.png')}"/></a></td>
 		            <td>
 	                  ${h.form(url('repo_settings_delete', repo_name=repo['name']),method='delete')}
 	                    ${h.submit('remove_%s' % repo['name'],'',class_="delete_icon action_button",onclick="return confirm('"+_('Confirm to delete this repository: %s') % repo['name']+"');")}
-	                  ${h.end_form()}	            
+	                  ${h.end_form()}
 		            </td>
 		        </tr>
 		     %endfor
 	     %else:
             <div style="padding:5px 0px 10px 0px;">
-	     	${_('No repositories yet')} 
+	     	${_('No repositories yet')}
 	     	%if h.HasPermissionAny('hg.admin','hg.create.repository')():
 	     		${h.link_to(_('create one now'),h.url('admin_settings_create_repository'),class_="ui-btn")}
 	     	%endif
@@ -187,4 +187,4 @@ var func = function(node){
 }
 q_filter(target,nodes,func);
 </script>
-</%def>  
+</%def>

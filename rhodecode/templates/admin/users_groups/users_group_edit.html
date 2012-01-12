@@ -6,9 +6,9 @@
 </%def>
 
 <%def name="breadcrumbs_links()">
-    ${h.link_to(_('Admin'),h.url('admin_home'))} 
-    &raquo; 
-    ${h.link_to(_('UsersGroups'),h.url('users_groups'))} 
+    ${h.link_to(_('Admin'),h.url('admin_home'))}
+    &raquo;
+    ${h.link_to(_('UsersGroups'),h.url('users_groups'))}
     &raquo;
     ${_('edit')} "${c.users_group.users_group_name}"
 </%def>
@@ -21,7 +21,7 @@
 <div class="box box-left">
     <!-- box / title -->
     <div class="title">
-        ${self.breadcrumbs()}       
+        ${self.breadcrumbs()}
     </div>
     <!-- end box / title -->
     ${h.form(url('users_group', id=c.users_group.users_group_id),method='put', id='edit_users_group')}
@@ -36,7 +36,7 @@
 	                    ${h.text('users_group_name',class_='small')}
 	                </div>
 	             </div>
-	            
+
 	             <div class="field">
 	                <div class="label label-checkbox">
 	                    <label for="users_group_active">${_('Active')}:</label>
@@ -50,7 +50,7 @@
                         <label for="users_group_active">${_('Members')}:</label>
                     </div>
                     <div class="select">
-	                    <table> 
+	                    <table>
 	                            <tr>
 	                                <td>
 	                                    <div>
@@ -63,12 +63,12 @@
 	                                           </div>
 	                                        </div>
 	                                        <div style="float:left;width:20px;padding-top:50px">
-	                                            <img alt="add" id="add_element" 
-	                                                style="padding:2px;cursor:pointer" 
+	                                            <img alt="add" id="add_element"
+	                                                style="padding:2px;cursor:pointer"
 	                                                src="${h.url('/images/icons/arrow_left.png')}"/>
 	                                            <br />
-	                                            <img alt="remove" id="remove_element" 
-	                                                style="padding:2px;cursor:pointer" 
+	                                            <img alt="remove" id="remove_element"
+	                                                style="padding:2px;cursor:pointer"
 	                                                src="${h.url('/images/icons/arrow_right.png')}"/>
 	                                        </div>
 	                                        <div style="float:left">
@@ -77,41 +77,41 @@
 	                                             <div id="add_all_elements" style="cursor:pointer;text-align:center">
 	                                                   <img alt="add" style="vertical-align:text-bottom" src="${h.url('/images/icons/arrow_left.png')}"/>
 	                                                    ${_('Add all elements')}
-	                                             </div>	                                        
+	                                             </div>
 	                                        </div>
 	                                    </div>
-	                                </td>           
-	                            </tr>       
-	                    </table>                    
-                    </div>	            
+	                                </td>
+	                            </tr>
+	                    </table>
+                    </div>
 
-                </div>			        
+                </div>
                 <div class="buttons">
                   ${h.submit('save',_('save'),class_="ui-button")}
-                </div>             
-            </div>          
-    </div>        
-${h.end_form()}        
+                </div>
+            </div>
+    </div>
+${h.end_form()}
 </div>
-    
+
 <script type="text/javascript">
     YAHOO.util.Event.onDOMReady(function(){
             var D = YAHOO.util.Dom;
             var E = YAHOO.util.Event;
-            
+
             //definition of containers ID's
             var available_container = 'available_members';
             var selected_container = 'users_group_members';
-            
+
             //form containing containers id
             var form_id = 'edit_users_group';
-            
+
             //temp container for selected storage.
             var cache = new Array();
             var av_cache = new Array();
             var c =  D.get(selected_container);
             var ac = D.get(available_container);
-            
+
             //get only selected options for further fullfilment
             for(var i = 0;node =c.options[i];i++){
                 if(node.selected){
@@ -119,7 +119,7 @@ ${h.end_form()}
                     cache.push(node);
                 }
             }
-            
+
             //clear 'selected' select
             //c.options.length = 0;
 
@@ -127,18 +127,18 @@ ${h.end_form()}
             //for(var i = 0;node = cache[i];i++){
             //   c.options[i]=new Option(node.text, node.value, false, false);
             //}
-            
-           
+
+
             //get all available options to cache
             for(var i = 0;node =ac.options[i];i++){
                     //push selected to my temp storage left overs :)
                     av_cache.push(node);
-            }            
-            
+            }
+
             //fill available only with those not in choosen
             ac.options.length=0;
             tmp_cache = new Array();
-            
+
             for(var i = 0;node = av_cache[i];i++){
             	var add = true;
 	            for(var i2 = 0;node_2 = cache[i2];i2++){
@@ -150,23 +150,23 @@ ${h.end_form()}
 	            if(add){
 	            	tmp_cache.push(new Option(node.text, node.value, false, false));
 	            }
-            }            
-            
+            }
+
             for(var i = 0;node = tmp_cache[i];i++){
                 ac.options[i] = node;
             }
-            
+
             function prompts_action_callback(e){
-                
-                var choosen = D.get(selected_container);  
+
+                var choosen = D.get(selected_container);
                 var available = D.get(available_container);
-                
+
                 //get checked and unchecked options from field
                 function get_checked(from_field){
                     //temp container for storage.
                     var sel_cache = new Array();
                     var oth_cache = new Array();
-                    
+
                     for(var i = 0;node = from_field.options[i];i++){
                         if(node.selected){
                             //push selected fields :)
@@ -175,29 +175,29 @@ ${h.end_form()}
                         else{
                         	oth_cache.push(node)
                         }
-                    }                    
-                    
+                    }
+
                     return [sel_cache,oth_cache]
                 }
-                
+
                 //fill the field with given options
                 function fill_with(field,options){
                 	//clear firtst
                 	field.options.length=0;
                     for(var i = 0;node = options[i];i++){
-                            field.options[i]=new Option(node.text, node.value, 
+                            field.options[i]=new Option(node.text, node.value,
                                     false, false);
                     }
-                	
+
                 }
                 //adds to current field
                 function add_to(field,options){
                     for(var i = 0;node = options[i];i++){
-                            field.appendChild(new Option(node.text, node.value, 
+                            field.appendChild(new Option(node.text, node.value,
                                     false, false));
                     }
                 }
-                
+
                 // add action
                 if (this.id=='add_element'){
                     var c = get_checked(available);
@@ -208,12 +208,12 @@ ${h.end_form()}
                 if (this.id=='remove_element'){
                     var c = get_checked(choosen);
                     add_to(available,c[0]);
-                    fill_with(choosen,c[1]);             
-                }                   
+                    fill_with(choosen,c[1]);
+                }
                 // add all elements
                 if(this.id=='add_all_elements'){
                     for(var i=0; node = available.options[i];i++){
-                            choosen.appendChild(new Option(node.text, 
+                            choosen.appendChild(new Option(node.text,
                                     node.value, false, false));
                     }
                     available.options.length = 0;
@@ -221,15 +221,15 @@ ${h.end_form()}
                 //remove all elements
                 if(this.id=='remove_all_elements'){
                     for(var i=0; node = choosen.options[i];i++){
-                        available.appendChild(new Option(node.text, 
+                        available.appendChild(new Option(node.text,
                                 node.value, false, false));
                     }
-                    choosen.options.length = 0;                	
+                    choosen.options.length = 0;
                 }
-                
+
             }
-            
-    
+
+
             E.addListener(['add_element','remove_element',
                            'add_all_elements','remove_all_elements'],'click',
                            prompts_action_callback)
@@ -239,13 +239,13 @@ ${h.end_form()}
                 for (var i = 0; i < choosen.options.length; i++) {
                     choosen.options[i].selected = 'selected';
                 }
-            })  
+            })
         });
-</script>    
+</script>
 <div class="box box-right">
     <!-- box / title -->
     <div class="title">
-        <h5>${_('Permissions')}</h5>       
+        <h5>${_('Permissions')}</h5>
     </div>
     ${h.form(url('users_group_perm', id=c.users_group.users_group_id), method='put')}
     <div class="form">
@@ -262,9 +262,9 @@ ${h.end_form()}
             <div class="buttons">
               ${h.submit('save',_('Save'),class_="ui-button")}
               ${h.reset('reset',_('Reset'),class_="ui-button")}
-            </div>             
-        </div>    
+            </div>
+        </div>
     </div>
-    ${h.end_form()}    
+    ${h.end_form()}
 </div>
-</%def>  
+</%def>

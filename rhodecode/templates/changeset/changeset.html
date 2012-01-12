@@ -15,7 +15,7 @@
 </%def>
 
 <%def name="page_nav()">
-    ${self.menu('changelog')}     
+    ${self.menu('changelog')}
 </%def>
 
 <%def name="main()">
@@ -53,17 +53,17 @@
 	             </div>
 	             <div class="right">
 		             <div class="changes">
-                        % if len(c.changeset.affected_files) <= c.affected_files_cut_off:	             
+                        % if len(c.changeset.affected_files) <= c.affected_files_cut_off:
 		                 <span class="removed" title="${_('removed')}">${len(c.changeset.removed)}</span>
 		                 <span class="changed" title="${_('changed')}">${len(c.changeset.changed)}</span>
 		                 <span class="added" title="${_('added')}">${len(c.changeset.added)}</span>
 	                    % else:
                          <span class="removed" title="${_('affected %s files') % len(c.changeset.affected_files)}">!</span>
                          <span class="changed" title="${_('affected %s files') % len(c.changeset.affected_files)}">!</span>
-                         <span class="added"   title="${_('affected %s files') % len(c.changeset.affected_files)}">!</span>	                    
-	                    % endif		                 
-		             </div>                  
-		                 
+                         <span class="added"   title="${_('affected %s files') % len(c.changeset.affected_files)}">!</span>
+	                    % endif
+		             </div>
+
 		            %if c.changeset.parents:
 		             %for p_cs in reversed(c.changeset.parents):
 		                 <div class="parent">${_('Parent')}
@@ -71,9 +71,9 @@
 		                     h.url('changeset_home',repo_name=c.repo_name,revision=p_cs.raw_id),title=p_cs.message)}</span></span>
 		                 </div>
 		             %endfor
-                    %else: 
-                        <div class="parent">${_('No parents')}</div>   
-                    %endif		             
+                    %else:
+                        <div class="parent">${_('No parents')}</div>
+                    %endif
 		         <span class="logtags">
                  %if len(c.changeset.parents)>1:
                  <span class="merge">${_('merge')}</span>
@@ -84,8 +84,8 @@
 		                 <span class="tagtag"  title="${'%s %s' % (_('tag'),tag)}">
 		                 ${h.link_to(tag,h.url('files_home',repo_name=c.repo_name,revision=c.changeset.raw_id))}</span>
 		             %endfor
-		         </span>                                                                 
-	                </div>              
+		         </span>
+	                </div>
 	        </div>
 	        <span>
 	        ${_('%s files affected with %s additions and %s deletions:') % (len(c.changeset.affected_files),c.lines_added,c.lines_deleted)}
@@ -106,21 +106,21 @@
 	                % if c.cut_off:
 	                  ${_('Changeset was too big and was cut off...')}
 	                % endif
-	        </div>         
+	        </div>
 	    </div>
-	    
+
     </div>
-    
-    ## diff block    	
+
+    ## diff block
     <%namespace name="diff_block" file="/changeset/diff_block.html"/>
     ${diff_block.diff_block(c.changes)}
-    
+
     ## template for inline comment form
     <%namespace name="comment" file="/changeset/changeset_file_comment.html"/>
     ${comment.comment_inline_form(c.changeset)}
-    
+
     ${comment.comments(c.changeset)}
-    
+
     <script type="text/javascript">
       var deleteComment = function(comment_id){
 
@@ -134,7 +134,7 @@
       }
 
       YUE.onDOMReady(function(){
-          
+
           YUE.on(YUQ('.show-inline-comments'),'change',function(e){
               var show = 'none';
               var target = e.currentTarget;
@@ -143,23 +143,23 @@
               }
               var boxid = YUD.getAttribute(target,'id_for');
               var comments = YUQ('#{0} .inline-comments'.format(boxid));
-              for(c in comments){ 
+              for(c in comments){
                  YUD.setStyle(comments[c],'display',show);
               }
               var btns = YUQ('#{0} .inline-comments-button'.format(boxid));
-              for(c in btns){ 
+              for(c in btns){
                   YUD.setStyle(btns[c],'display',show);
-               }              
+               }
           })
-          
+
           YUE.on(YUQ('.line'),'click',function(e){
               var tr = e.currentTarget;
               injectInlineForm(tr);
           });
-          
+
           // inject comments into they proper positions
           var file_comments = YUQ('.inline-comment-placeholder');
-          
+
           for (f in file_comments){
               var box = file_comments[f];
               var inlines = box.children;
@@ -170,10 +170,10 @@
                     var lineno = YUD.getAttribute(inlines[i],'line');
                     var lineid = "{0}_{1}".format(YUD.getAttribute(inline,'target_id'),lineno);
                     var target_line = YUD.get(lineid);
-                    
+
                     var add = createInlineAddButton(target_line.parentNode,'${_("add another comment")}');
                     YUD.insertAfter(add,target_line.parentNode);
-                    
+
                     var comment = new YAHOO.util.Element(tableTr('inline-comments',inline.innerHTML))
                     YUD.insertAfter(comment,target_line.parentNode);
                   }catch(e){
@@ -182,8 +182,8 @@
               }
           }
       })
-      
-    </script>     
-    
+
+    </script>
+
     </div>
 </%def>

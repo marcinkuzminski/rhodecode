@@ -2,11 +2,11 @@
 <%inherit file="/base/base.html"/>
 <%def name="title()">
    ${_('Search')}
-   ${'"%s"' % c.cur_query if c.cur_query else None} 
+   ${'"%s"' % c.cur_query if c.cur_query else None}
 	%if c.repo_name:
 		${_('in repository: ') + c.repo_name}
 	%else:
-		${_('in all repositories')}		
+		${_('in all repositories')}
 	%endif
 	- ${c.rhodecode_name}
 </%def>
@@ -26,12 +26,12 @@
 			${_('in repository: ') + c.repo_name}
 		%else:
 			${_('in all repositories')}
-		%endif		
+		%endif
 		</h5>
 	</div>
 	<!-- end box / title -->
 	%if c.repo_name:
-		${h.form(h.url('search_repo',search_repo=c.repo_name),method='get')}	
+		${h.form(h.url('search_repo',search_repo=c.repo_name),method='get')}
 	%else:
 		${h.form(h.url('search'),method='get')}
 	%endif
@@ -40,13 +40,13 @@
 			<div class="field field-first field-noborder">
              <div class="label">
                  <label for="q">${_('Search term')}</label>
-             </div> 			
+             </div>
 				<div class="input">${h.text('q',c.cur_query,class_="small")}
 					<div class="button highlight">
 						<input type="submit" value="${_('Search')}" class="ui-button"/>
 					</div>
 				</div>
-				<div style="font-weight: bold;clear:Both;margin-left:200px">${c.runtime}</div>		
+				<div style="font-weight: bold;clear:Both;margin-left:200px">${c.runtime}</div>
 			</div>
 
 			<div class="field">
@@ -58,14 +58,14 @@
                         ##('commit',_('Commit messages')),
                         ('path',_('File names')),
                         ##('repository',_('Repository names')),
-                        ])} 
+                        ])}
                 </div>
              </div>
-			             
+
 		</div>
 	</div>
 	${h.end_form()}
-	
+
     %if c.cur_search == 'content':
         <%include file='search_content.html'/>
     %elif c.cur_search == 'path':
@@ -74,7 +74,7 @@
         <%include file='search_commit.html'/>
     %elif c.cur_search == 'repository':
         <%include file='search_repository.html'/>
-    %endif                            
+    %endif
 </div>
 
-</%def>    
+</%def>

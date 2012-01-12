@@ -20,7 +20,7 @@
 		                              h.url('summary_home',repo_name=entry.repository.repo_name))}
 		                %else:
 		                  ${entry.repository_name}
-		                %endif             
+		                %endif
 		                </span>
 		            </div>
 		            <div class="journal_action_params">${h.literal(h.action_parser(entry)[1]())}</div>
@@ -30,7 +30,7 @@
 	        </div>
         %endfor
     %endfor
-    
+
   <div class="pagination-wh pagination-left">
     <script type="text/javascript">
     YUE.onDOMReady(function(){
@@ -45,5 +45,5 @@
 %else:
   <div style="padding:5px 0px 10px 10px;">
       ${_('No entries yet')}
-  </div>    
+  </div>
 %endif
