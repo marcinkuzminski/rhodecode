@@ -48,7 +48,8 @@ fixes
   on saving a form
 - fixes issue when owner of a repo couldn't revoke permissions for users 
   and groups
-
+- fixes #271 rare JSON serialization problem with statistics
+ 
 1.2.3 (**2011-11-02**)
 ======================
 
