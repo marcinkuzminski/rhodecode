@@ -165,8 +165,9 @@ beaker.cache.sql_cache_long.key_length = 256
 
 beaker.session.type = file
 beaker.session.key = rhodecode
-beaker.session.encrypt_key = ${app_instance_secret}
-beaker.session.validate_key = ${app_instance_secret}
+# secure cookie requires AES python libraries
+#beaker.session.encrypt_key = ${app_instance_secret}
+#beaker.session.validate_key = ${app_instance_secret}
 beaker.session.timeout = 36000
 beaker.session.httponly = true
 
