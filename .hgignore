@@ -11,7 +11,8 @@ syntax: regexp
 ^\.settings$
 ^\.project$
 ^\.pydevproject$
+^\.coverage$
 ^rhodecode\.db$
 ^test\.db$
-^repositories\.config$
 ^RhodeCode\.egg-info$
+^rc\.ini$
