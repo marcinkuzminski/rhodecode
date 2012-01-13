@@ -28,13 +28,13 @@ class TestSummaryController(TestController):
                                     repo_name=HG_REPO))
 
         response.mustcontain(
-            """var data = {"py": {"count": 42, "desc": """
-            """["Python"]}, "rst": {"count": 11, "desc": """
-            """["Rst"]}, "sh": {"count": 2, "desc": ["Bash"]}, """
-            """"makefile": {"count": 1, "desc": ["Makefile", """
-            """"Makefile"]}, "cfg": {"count": 1, "desc": ["Ini"]},"""
-            """ "css": {"count": 1, "desc": ["Css"]}, "bat": """
-            """{"count": 1, "desc": ["Batch"]}};"""
+            """var data = [["py", {"count": 42, "desc": ["Python"]}], """
+            """["rst", {"count": 11, "desc": ["Rst"]}], """
+            """["sh", {"count": 2, "desc": ["Bash"]}], """
+            """["makefile", {"count": 1, "desc": ["Makefile", "Makefile"]}],"""
+            """ ["cfg", {"count": 1, "desc": ["Ini"]}], """
+            """["css", {"count": 1, "desc": ["Css"]}], """
+            """["bat", {"count": 1, "desc": ["Batch"]}]];"""
         )
 
         # clone url...
