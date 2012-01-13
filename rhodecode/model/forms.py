@@ -41,9 +41,11 @@ from rhodecode import BACKENDS
 
 log = logging.getLogger(__name__)
 
+
 #this is needed to translate the messages using _() in validators
 class State_obj(object):
     _ = staticmethod(_)
+
 
 #==============================================================================
 # VALIDATORS
@@ -56,6 +58,7 @@ class ValidAuthToken(formencode.validators.FancyValidator):
         if value != authentication_token():
             raise formencode.Invalid(self.message('invalid_token', state,
                                             search_number=value), value, state)
+
 
 def ValidUsername(edit, old_data):
     class _ValidUsername(formencode.validators.FancyValidator):
@@ -103,7 +106,6 @@ def ValidUsersGroup(edit, old_data):
                                                'already exists') , value,
                                              state)
 
-
             if re.match(r'^[a-zA-Z0-9]{1}[a-zA-Z0-9\-\_\.]+$', value) is None:
                 raise formencode.Invalid(_('RepoGroup name may only contain '
                                            'alphanumeric characters '
@@ -126,11 +128,14 @@ def ValidReposGroup(edit, old_data):
             slug = repo_name_slug(group_name)
 
             # check for parent of self
-            parent_of_self = lambda:(old_data['group_id'] == int(group_parent_id)
-                                     if group_parent_id else False)
+            parent_of_self = lambda: (
+                old_data['group_id'] == int(group_parent_id)
+                if group_parent_id else False
+            )
             if edit and parent_of_self():
-                    e_dict = {'group_parent_id':_('Cannot assign this group '
-                                                  'as parent')}
+                    e_dict = {
+                        'group_parent_id': _('Cannot assign this group as parent')
+                    }
                     raise formencode.Invalid('', value, state,
                                              error_dict=e_dict)
 
@@ -140,16 +145,33 @@ def ValidReposGroup(edit, old_data):
 
             if old_gname != group_name or not edit:
 
-                # check filesystem
-                gr = RepoGroup.query().filter(RepoGroup.group_name == slug)\
-                    .filter(RepoGroup.group_parent_id == group_parent_id).scalar()
+                # check group
+                gr = RepoGroup.query()\
+                      .filter(RepoGroup.group_name == slug)\
+                      .filter(RepoGroup.group_parent_id == group_parent_id)\
+                      .scalar()
 
                 if gr:
-                    e_dict = {'group_name':_('This group already exists')}
+                    e_dict = {
+                        'group_name': _('This group already exists')
+                    }
+                    raise formencode.Invalid('', value, state,
+                                             error_dict=e_dict)
+
+                # check for same repo
+                repo = Repository.query()\
+                      .filter(Repository.repo_name == slug)\
+                      .scalar()
+
+                if repo:
+                    e_dict = {
+                        'group_name': _('Repository with this name already exists')
+                    }
                     raise formencode.Invalid('', value, state,
                                              error_dict=e_dict)
 
     return _ValidReposGroup
+
 
 class ValidPassword(formencode.validators.FancyValidator):
 
@@ -182,6 +204,7 @@ class ValidPassword(formencode.validators.FancyValidator):
 
             return value
 
+
 class ValidPasswordsMatch(formencode.validators.FancyValidator):
 
     def validate_python(self, value, state):
@@ -191,6 +214,7 @@ class ValidPasswordsMatch(formencode.validators.FancyValidator):
             e_dict = {'password_confirmation':
                    _('Passwords do not match')}
             raise formencode.Invalid('', value, state, error_dict=e_dict)
+
 
 class ValidAuth(formencode.validators.FancyValidator):
     messages = {
@@ -224,6 +248,7 @@ class ValidAuth(formencode.validators.FancyValidator):
                                          state=State_obj), value, state,
                                          error_dict=self.e_dict)
 
+
 class ValidRepoUser(formencode.validators.FancyValidator):
 
     def to_python(self, value, state):
@@ -234,6 +259,7 @@ class ValidRepoUser(formencode.validators.FancyValidator):
             raise formencode.Invalid(_('This username is not valid'),
                                      value, state)
         return value
+
 
 def ValidRepoName(edit, old_data):
     class _ValidRepoName(formencode.validators.FancyValidator):
@@ -289,6 +315,7 @@ def ValidRepoName(edit, old_data):
 
     return _ValidRepoName
 
+
 def ValidForkName(*args, **kwargs):
     return ValidRepoName(*args, **kwargs)
 
@@ -300,6 +327,7 @@ def SlugifyName():
             return repo_name_slug(value)
 
     return _SlugifyName
+
 
 def ValidCloneUri():
     from mercurial.httprepo import httprepository, httpsrepository
@@ -332,6 +360,7 @@ def ValidCloneUri():
 
     return _ValidCloneUri
 
+
 def ValidForkType(old_data):
     class _ValidForkType(formencode.validators.FancyValidator):
 
@@ -342,6 +371,7 @@ def ValidForkType(old_data):
 
             return value
     return _ValidForkType
+
 
 class ValidPerms(formencode.validators.FancyValidator):
     messages = {'perm_new_member_name':_('This username or users group name'
@@ -393,6 +423,7 @@ class ValidPerms(formencode.validators.FancyValidator):
                                          error_dict={'perm_new_member_name':msg})
         return value
 
+
 class ValidSettings(formencode.validators.FancyValidator):
 
     def to_python(self, value, state):
@@ -402,6 +433,7 @@ class ValidSettings(formencode.validators.FancyValidator):
 
         return value
 
+
 class ValidPath(formencode.validators.FancyValidator):
     def to_python(self, value, state):
 
@@ -410,6 +442,7 @@ class ValidPath(formencode.validators.FancyValidator):
             raise formencode.Invalid(msg, value, state,
                                      error_dict={'paths_root_path':msg})
         return value
+
 
 def UniqSystemEmail(old_data):
     class _UniqSystemEmail(formencode.validators.FancyValidator):
@@ -425,6 +458,7 @@ def UniqSystemEmail(old_data):
 
     return _UniqSystemEmail
 
+
 class ValidSystemEmail(formencode.validators.FancyValidator):
     def to_python(self, value, state):
         value = value.lower()
@@ -435,6 +469,7 @@ class ValidSystemEmail(formencode.validators.FancyValidator):
 
         return value
 
+
 class LdapLibValidator(formencode.validators.FancyValidator):
 
     def to_python(self, value, state):
@@ -444,6 +479,7 @@ class LdapLibValidator(formencode.validators.FancyValidator):
         except ImportError:
             raise LdapImportError
         return value
+
 
 class AttrLoginValidator(formencode.validators.FancyValidator):
 
@@ -458,9 +494,9 @@ class AttrLoginValidator(formencode.validators.FancyValidator):
 
         return value
 
-#===============================================================================
+#==============================================================================
 # FORMS
-#===============================================================================
+#==============================================================================
 class LoginForm(formencode.Schema):
     allow_extra_fields = True
     filter_extra_fields = True
@@ -485,6 +521,7 @@ class LoginForm(formencode.Schema):
     remember = StringBoolean(if_missing=False)
 
     chained_validators = [ValidAuth]
+
 
 def UserForm(edit=False, old_data={}):
     class _UserForm(formencode.Schema):
@@ -527,6 +564,7 @@ def UsersGroupForm(edit=False, old_data={}, available_members=[]):
 
     return _UsersGroupForm
 
+
 def ReposGroupForm(edit=False, old_data={}, available_groups=[]):
     class _ReposGroupForm(formencode.Schema):
         allow_extra_fields = True
@@ -543,6 +581,7 @@ def ReposGroupForm(edit=False, old_data={}, available_groups=[]):
         chained_validators = [ValidReposGroup(edit, old_data)]
 
     return _ReposGroupForm
+
 
 def RegisterForm(edit=False, old_data={}):
     class _RegisterForm(formencode.Schema):

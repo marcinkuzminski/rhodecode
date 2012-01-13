@@ -81,7 +81,7 @@ class ReposGroupsController(BaseController):
         """GET /repos_groups: All items in the collection"""
         # url('repos_groups')
 
-        sk = lambda g:g.parents[0].group_name if g.parents else g.group_name
+        sk = lambda g: g.parents[0].group_name if g.parents else g.group_name
         c.groups = sorted(RepoGroup.query().all(), key=sk)
         return render('admin/repos_groups/repos_groups_show.html')
 
@@ -90,7 +90,7 @@ class ReposGroupsController(BaseController):
         """POST /repos_groups: Create a new item"""
         # url('repos_groups')
         self.__load_defaults()
-        repos_group_form = ReposGroupForm(available_groups=
+        repos_group_form = ReposGroupForm(available_groups =
                                           c.repo_groups_choices)()
         try:
             form_result = repos_group_form.to_python(dict(request.POST))
@@ -113,7 +113,6 @@ class ReposGroupsController(BaseController):
                     % request.POST.get('group_name'), category='error')
 
         return redirect(url('repos_groups'))
-
 
     @HasPermissionAnyDecorator('hg.admin')
     def new(self, format='html'):
