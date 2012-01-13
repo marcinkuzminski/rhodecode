@@ -38,7 +38,7 @@ from rhodecode.lib.auth import authenticate, get_crypt_password
 from rhodecode.lib.exceptions import LdapImportError
 from rhodecode.model.user import UserModel
 from rhodecode.model.repo import RepoModel
-from rhodecode.model.db import User, UsersGroup, Group
+from rhodecode.model.db import User, UsersGroup, Group, Repository
 from rhodecode import BACKENDS
 
 log = logging.getLogger(__name__)
@@ -120,17 +120,22 @@ def ValidReposGroup(edit, old_data):
     class _ValidReposGroup(formencode.validators.FancyValidator):
 
         def validate_python(self, value, state):
-            #TODO WRITE VALIDATIONS
+            # TODO WRITE VALIDATIONS
             group_name = value.get('group_name')
-            group_parent_id = int(value.get('group_parent_id') or -1)
+            group_parent_id = value.get('group_parent_id')
 
             # slugify repo group just in case :)
             slug = repo_name_slug(group_name)
 
             # check for parent of self
-            if edit and old_data['group_id'] == group_parent_id:
-                    e_dict = {'group_parent_id':_('Cannot assign this group '
-                                                  'as parent')}
+            parent_of_self = lambda: (
+                old_data['group_id'] == int(group_parent_id)
+                if group_parent_id else False
+            )
+            if edit and parent_of_self():
+                    e_dict = {
+                        'group_parent_id': _('Cannot assign this group as parent')
+                    }
                     raise formencode.Invalid('', value, state,
                                              error_dict=e_dict)
 
@@ -140,12 +145,29 @@ def ValidReposGroup(edit, old_data):
                             old_data.get('group_id')).group_name
 
             if old_gname != group_name or not edit:
-                # check filesystem
-                gr = Group.query().filter(Group.group_name == slug)\
-                    .filter(Group.group_parent_id == group_parent_id).scalar()
+
+                # check group
+                gr = Group.query()\
+                      .filter(Group.group_name == slug)\
+                      .filter(Group.group_parent_id == group_parent_id)\
+                      .scalar()
 
                 if gr:
-                    e_dict = {'group_name':_('This group already exists')}
+                    e_dict = {
+                        'group_name': _('This group already exists')
+                    }
+                    raise formencode.Invalid('', value, state,
+                                             error_dict=e_dict)
+
+                # check for same repo
+                repo = Repository.query()\
+                      .filter(Repository.repo_name == slug)\
+                      .scalar()
+
+                if repo:
+                    e_dict = {
+                        'group_name': _('Repository with this name already exists')
+                    }
                     raise formencode.Invalid('', value, state,
                                              error_dict=e_dict)
 
