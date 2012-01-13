@@ -352,8 +352,10 @@ class DbManage(object):
             log.info('Setting up repositories config')
 
         if not self.tests and not test_repo_path:
-            path = raw_input('Specify valid full path to your repositories'
-                        ' you can change this later in application settings:')
+            path = raw_input(
+                 'Enter a valid path to store repositories. '
+                 'All repositories in that path will be added automatically:'
+            )
         else:
             path = test_repo_path
         path_ok = True
