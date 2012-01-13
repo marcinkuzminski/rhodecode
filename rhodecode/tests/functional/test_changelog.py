@@ -1,5 +1,6 @@
 from rhodecode.tests import *
 
+
 class TestChangelogController(TestController):
 
     def test_index_hg(self):
@@ -7,21 +8,24 @@ class TestChangelogController(TestController):
         response = self.app.get(url(controller='changelog', action='index',
                                     repo_name=HG_REPO))
 
-        self.assertTrue("""<div id="chg_20" class="container">"""
-                        in response.body)
-        self.assertTrue("""<input class="changeset_range" id="5e204e7583b9" """
-                        """name="5e204e7583b9" type="checkbox" value="1" />"""
-                        in response.body)
-        self.assertTrue("""<span>commit 154: 5e204e7583b9@2010-08-09 """
-                        """23:18:46</span>""" in response.body)
+        response.mustcontain("""<div id="chg_20" class="container tablerow1">""")
+        response.mustcontain(
+            """<input class="changeset_range" id="5e204e7583b9" """
+            """name="5e204e7583b9" type="checkbox" value="1" />"""
+        )
+        response.mustcontain(
+            """<span class="changeset_id">154:"""
+            """<span class="changeset_hash">5e204e7583b9</span></span>"""
+        )
 
-        self.assertTrue("""Small update at simplevcs app""" in response.body)
+        response.mustcontain("""Small update at simplevcs app""")
 
-
-        self.assertTrue("""<span id="5e204e7583b9c8e7b93a020bd036564b1e"""
-                        """731dae" class="changed_total tooltip" """
-                        """title="Affected number of files, click to """
-                        """show more details">3</span>""" in response.body)
+        response.mustcontain(
+            """<div id="5e204e7583b9c8e7b93a020bd036564b1e731dae"  """
+            """style="float:right;" class="changed_total tooltip" """
+            """title="Affected number of files, click to show """
+            """more details">3</div>"""
+        )
 
         #pagination
         response = self.app.get(url(controller='changelog', action='index',
@@ -37,19 +41,24 @@ class TestChangelogController(TestController):
         response = self.app.get(url(controller='changelog', action='index',
                                     repo_name=HG_REPO), {'page':6})
 
-
         # Test response after pagination...
-        self.assertTrue("""<input class="changeset_range" id="46ad32a4f974" """
-                        """name="46ad32a4f974" type="checkbox" value="1" />"""
-                        in response.body)
-        self.assertTrue("""<span>commit 64: 46ad32a4f974@2010-04-19"""
-                        """ 22:33:21</span>"""in response.body)
+        response.mustcontain(
+            """<input class="changeset_range" id="46ad32a4f974" """
+            """name="46ad32a4f974" type="checkbox" value="1" />"""
+        )
+        response.mustcontain(
+            """<span class="changeset_id">64:"""
+            """<span class="changeset_hash">46ad32a4f974</span></span>"""
+        )
 
-        self.assertTrue("""<span id="46ad32a4f974e45472a898c6b0acb600320"""
-                        """579b1" class="changed_total tooltip" """
-                        """title="Affected number of files, click to """
-                        """show more details">21</span>"""in response.body)
-        self.assertTrue("""<div class="message"><a href="/%s/changeset/"""
+        response.mustcontain(
+            """<div id="46ad32a4f974e45472a898c6b0acb600320579b1"  """
+            """style="float:right;" class="changed_total tooltip" """
+            """title="Affected number of files, click to show """
+            """more details">21</div>"""
+        )
+
+        response.mustcontain("""<div class="message"><a href="/%s/changeset/"""
                         """46ad32a4f974e45472a898c6b0acb600320579b1">"""
                         """Merge with 2e6a2bf9356ca56df08807f4ad86d48"""
-                        """0da72a8f4</a></div>""" % HG_REPO in response.body)
+                        """0da72a8f4</a></div>""" % HG_REPO)
