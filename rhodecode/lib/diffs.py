@@ -95,16 +95,18 @@ def get_gitdiff(filenode_old, filenode_new, ignore_whitespace=True, context=3):
 
     :param ignore_whitespace: ignore whitespaces in diff
     """
+    # make sure we pass in default context
+    context = context or 3
 
     for filenode in (filenode_old, filenode_new):
         if not isinstance(filenode, FileNode):
             raise VCSError("Given object should be FileNode object, not %s"
                 % filenode.__class__)
 
-    old_raw_id = getattr(filenode_old.changeset, 'raw_id', '0' * 40)
-    new_raw_id = getattr(filenode_new.changeset, 'raw_id', '0' * 40)
-
     repo = filenode_new.changeset.repository
+    old_raw_id = getattr(filenode_old.changeset, 'raw_id', repo.EMPTY_CHANGESET)
+    new_raw_id = getattr(filenode_new.changeset, 'raw_id', repo.EMPTY_CHANGESET)
+
     vcs_gitdiff = repo.get_diff(old_raw_id, new_raw_id, filenode_new.path,
                                  ignore_whitespace, context)
 
