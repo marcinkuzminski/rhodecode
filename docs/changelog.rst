@@ -49,6 +49,8 @@ fixes
 - fixes issue when owner of a repo couldn't revoke permissions for users 
   and groups
 - fixes #271 rare JSON serialization problem with statistics
+- fixes #337 missing validation check for conflicting names of a group with a
+  repositories group
  
 1.2.3 (**2011-11-02**)
 ======================
