@@ -41,16 +41,19 @@ from email.charset import Charset
 from email.utils import parseaddr
 from email.mime.base import MIMEBase
 
-ADDRESS_HEADERS_WHITELIST = ['From', 'To', 'Delivered-To', 'Cc', 'Bcc']
+ADDRESS_HEADERS_WHITELIST = ['From', 'To', 'Delivered-To', 'Cc']
 DEFAULT_ENCODING = "utf-8"
 VALUE_IS_EMAIL_ADDRESS = lambda v: '@' in v
+
 
 def normalize_header(header):
     return string.capwords(header.lower(), '-')
 
+
 class EncodingError(Exception):
     """Thrown when there is an encoding error."""
     pass
+
 
 class MailBase(object):
     """MailBase is used as the basis of lamson.mail and contains the basics of
@@ -105,7 +108,6 @@ class MailBase(object):
                                                         {'filename': filename})
         self.parts.append(part)
 
-
     def attach_text(self, data, ctype):
         """
         This attaches a simpler text encoded part, which doesn't have a
@@ -123,6 +125,7 @@ class MailBase(object):
             yield p
             for x in p.walk():
                 yield x
+
 
 class MailResponse(object):
     """
@@ -194,6 +197,7 @@ class MailResponse(object):
                                  'content_type': content_type,
                                  'data': data,
                                  'disposition': disposition,})
+        
     def attach_part(self, part):
         """
         Attaches a raw MailBase part from a MailRequest (or anywhere)
@@ -226,7 +230,6 @@ class MailResponse(object):
         del self.attachments[:]
         del self.base.parts[:]
         self.multipart = False
-
 
     def update(self, message):
         """
@@ -312,6 +315,7 @@ class MailResponse(object):
     def keys(self):
         return self.base.keys()
 
+
 def to_message(mail, separator="; "):
     """
     Given a MailBase message, this will construct a MIMEPart
@@ -334,7 +338,7 @@ def to_message(mail, separator="; "):
 
     try:
         out = MIMEPart(ctype, **params)
-    except TypeError, exc: # pragma: no cover
+    except TypeError, exc:  # pragma: no cover
         raise EncodingError("Content-Type malformed, not allowed: %r; "
                             "%r (Python ERROR: %s" %
                             (ctype, params, exc.message))
@@ -381,7 +385,6 @@ class MIMEPart(MIMEBase):
             charset = 'utf-8'
 
         self.set_payload(encoded, charset=charset)
-
 
     def extract_payload(self, mail):
         if mail.body == None: return  # only None, '' is still ok
