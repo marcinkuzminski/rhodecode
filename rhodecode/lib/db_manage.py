@@ -170,6 +170,7 @@ class DbManage(object):
 
             def step_4(self):
                 print ('TODO:')
+                raise NotImplementedError()
 
         upgrade_steps = [0] + range(curr_version + 1, __dbversion__ + 1)
 

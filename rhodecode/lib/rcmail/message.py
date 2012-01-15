@@ -99,9 +99,6 @@ class Message(object):
                                 Html=self.html,
                                 separator=self.recipients_separator)
 
-        if self.bcc:
-            response.base['Bcc'] = self.bcc
-
         if self.cc:
             response.base['Cc'] = self.cc
 
