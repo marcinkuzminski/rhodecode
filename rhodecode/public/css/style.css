@@ -1391,6 +1391,9 @@ tbody .yui-dt-editable { cursor: pointer }
 	padding: 7px 7px 6px;
 }
 
+input.disabled {
+    background-color: #F5F5F5 !important;	
+}
 #content div.box div.form div.fields div.field div.input input.small {
 	width: 30%;
 }
