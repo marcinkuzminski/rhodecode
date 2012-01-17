@@ -197,7 +197,7 @@ class MailResponse(object):
                                  'content_type': content_type,
                                  'data': data,
                                  'disposition': disposition,})
-        
+
     def attach_part(self, part):
         """
         Attaches a raw MailBase part from a MailRequest (or anywhere)

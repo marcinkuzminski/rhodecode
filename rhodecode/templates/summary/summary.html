@@ -300,10 +300,10 @@ tbl.setAttribute('class','trending_language_tbl');
 var cnt = 0;
 
 for (var i=0;i<data.length;i++){
-    total += data[i][1].count;    
+    total += data[i][1].count;
     cnt += 1;
     no_data = false;
-    
+
     var hide = cnt>2;
     var tr = document.createElement('tr');
     if (hide){
@@ -313,7 +313,7 @@ for (var i=0;i<data.length;i++){
     var k = data[i][0];
     var obj = data[i][1];
     var percentage = Math.round((obj.count/total*100),2);
-    
+
     var td1 = document.createElement('td');
     td1.width = 150;
     var trending_language_label = document.createElement('div');
