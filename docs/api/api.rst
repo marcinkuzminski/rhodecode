@@ -147,8 +147,8 @@ OUTPUT::
 create_user
 -----------
 
-Creates new user in RhodeCode. This command can be executed only using api_key
-belonging to user with admin rights.
+Creates new user or updates current one if such user exists. This command can 
+be executed only using api_key belonging to user with admin rights.
 
 INPUT::
 

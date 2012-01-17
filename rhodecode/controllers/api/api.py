@@ -134,7 +134,7 @@ class ApiController(JSONRPCController):
     def create_user(self, apiuser, username, password, firstname,
                     lastname, email, active=True, admin=False, ldap_dn=None):
         """
-        Create new user
+        Create new user or updates current one
 
         :param apiuser:
         :param username:
