@@ -53,7 +53,7 @@ fixes
 - fixes #337 missing validation check for conflicting names of a group with a
   repositories group
  
- 1.2.4 (**2012-01-19**)
+1.2.4 (**2012-01-19**)
 ======================
 
 news
