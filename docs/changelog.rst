@@ -35,6 +35,7 @@ news
   contains the "full path" to the repositories
 - #73 added linking issues in commit messages to chosen issue tracker url
   based on user defined regular expression
+- added linking of changesets in commit messages  
 - new compact changelog with expandable commit messages
     
 fixes
