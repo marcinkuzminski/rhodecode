@@ -100,6 +100,13 @@ class DbManage(object):
         from rhodecode.lib.dbmigrate.migrate.exceptions import \
             DatabaseNotControlledError
 
+        if 'sqlite' in self.dburi:
+            print (
+               '********************** WARNING **********************\n'
+               'Make sure your version of sqlite is at least 3.7.X.  \n'
+               'Earlier versions are known to fail on some migrations\n'
+               '*****************************************************\n'
+            )
         upgrade = ask_ok('You are about to perform database upgrade, make '
                          'sure You backed up your database before. '
                          'Continue ? [y/n]')
@@ -130,7 +137,8 @@ class DbManage(object):
         # UPGRADE STEPS
         #======================================================================
         class UpgradeSteps(object):
-            """Those steps follow schema versions so for example schema
+            """
+            Those steps follow schema versions so for example schema
             for example schema with seq 002 == step_2 and so on.
             """
 
@@ -168,7 +176,7 @@ class DbManage(object):
         #CALL THE PROPER ORDER OF STEPS TO PERFORM FULL UPGRADE
         for step in upgrade_steps:
             print ('performing upgrade step %s' % step)
-            callable = getattr(UpgradeSteps(self), 'step_%s' % step)()
+            getattr(UpgradeSteps(self), 'step_%s' % step)()
 
     def fix_repo_paths(self):
         """Fixes a old rhodecode version path into new one without a '*'
@@ -343,8 +351,10 @@ class DbManage(object):
             log.info('Setting up repositories config')
 
         if not self.tests and not test_repo_path:
-            path = raw_input('Specify valid full path to your repositories'
-                        ' you can change this later in application settings:')
+            path = raw_input(
+                 'Enter a valid path to store repositories. '
+                 'All repositories in that path will be added automatically:'
+            )
         else:
             path = test_repo_path
         path_ok = True
