@@ -742,14 +742,48 @@ def urlify_text(text_):
 
     return literal(url_pat.sub(url_func, text_))
 
+def urlify_changesets(text_, repository):
+    import re
+    URL_PAT = re.compile(r'([0-9a-fA-F]{12,})')
+
+    def url_func(match_obj):
+        rev = match_obj.groups()[0]
+        pref = ''
+        if match_obj.group().startswith(' '):
+            pref = ' '
+        tmpl = (
+        '%(pref)s<a class="%(cls)s" href="%(url)s">'
+        '%(rev)s'
+        '</a>'
+        )
+        return tmpl % {
+         'pref': pref,
+         'cls': 'revision-link',
+         'url': url('changeset_home', repo_name=repository, revision=rev),
+         'rev': rev,
+        }
+
+    newtext = URL_PAT.sub(url_func, text_)
+
+    return newtext
 
 def urlify_commit(text_, repository=None, link_=None):
     import re
     import traceback
 
-    if link_:
-        link_ = '<a href="' + link_ + '">'
-
+    # urlify changesets
+    text_ = urlify_changesets(text_, repository)
+        
+    def linkify_others(t,l):
+        urls = re.compile(r'(\<a.*?\<\/a\>)',)
+        links = []
+        for e in urls.split(t):
+            if not urls.match(e):
+                links.append('<a class="message-link" href="%s">%s</a>' % (l,e))
+            else:
+                links.append(e)        
+        
+        return ''.join(links)
     try:
         conf = config['app_conf']
 
@@ -774,22 +808,20 @@ def urlify_commit(text_, repository=None, link_=None):
                 if repository:
                     url = url.replace('{repo}', repository)
 
-                if link_:
-                    tmpl = '</a>' + tmpl + link_
-
-                return tmpl % (
-                    {
+                return tmpl % {
                      'pref': pref,
                      'cls': 'issue-tracker-link',
                      'url': url,
                      'id-repr': issue_id,
                      'issue-prefix': ISSUE_PREFIX,
                      'serv': ISSUE_SERVER_LNK,
-                    }
-                )
+                }
+                
             newtext = URL_PAT.sub(url_func, text_)
-            if link_:
-                newtext = link_ + newtext + '</a>'
+            
+            # wrap not links into final link => link_
+            newtext = linkify_others(newtext, link_)
+            
             return literal(newtext)
     except:
         log.error(traceback.format_exc())
