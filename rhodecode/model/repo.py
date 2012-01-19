@@ -28,18 +28,15 @@ import logging
 import traceback
 from datetime import datetime
 
-from sqlalchemy.orm import joinedload, make_transient
-
 from vcs.utils.lazy import LazyProperty
 from vcs.backends import get_backend
 
-from rhodecode.lib import safe_str
+from rhodecode.lib import safe_str, safe_unicode
 
 from rhodecode.model import BaseModel
 from rhodecode.model.caching_query import FromCache
 from rhodecode.model.db import Repository, RepoToPerm, User, Permission, \
     Statistics, UsersGroup, UsersGroupRepoToPerm, RhodeCodeUi, Group
-from rhodecode.model.user import UserModel
 
 log = logging.getLogger(__name__)
 
@@ -236,7 +233,7 @@ class RepoModel(BaseModel):
                     k = 'group_id'
 
                 if k == 'description':
-                    v = v or repo_name
+                    v = safe_unicode(v) or repo_name
 
                 setattr(new_repo, k, v)
 

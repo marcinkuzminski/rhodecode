@@ -30,7 +30,7 @@ fixes
   a group name. A proper message is now displayed.
 - #292 made ldap_dn in user edit readonly, to get rid of confusion that field
   doesn't work   
-
+- #316 fixes issues with web description in hgrc files 
 
 1.2.3 (**2011-11-02**)
 ======================
