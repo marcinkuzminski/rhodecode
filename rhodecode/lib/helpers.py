@@ -760,9 +760,13 @@ def urlify_commit(text_, repository=None, link_=None):
             ISSUE_PREFIX = conf.get('issue_prefix')
 
             def url_func(match_obj):
+                pref = ''
+                if match_obj.group().startswith(' '):
+                    pref = ' '
+
                 issue_id = match_obj.groups()[0]
                 tmpl = (
-                ' <a class="%(cls)s" href="%(url)s">'
+                '%(pref)s<a class="%(cls)s" href="%(url)s">'
                 '%(issue-prefix)s%(id-repr)s'
                 '</a>'
                 )
@@ -775,6 +779,7 @@ def urlify_commit(text_, repository=None, link_=None):
 
                 return tmpl % (
                     {
+                     'pref': pref,
                      'cls': 'issue-tracker-link',
                      'url': url,
                      'id-repr': issue_id,
