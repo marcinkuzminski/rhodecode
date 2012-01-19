@@ -53,6 +53,34 @@ fixes
 - fixes #337 missing validation check for conflicting names of a group with a
   repositories group
  
+ 1.2.4 (**2012-01-19**)
+======================
+
+news
+----
+
+- RhodeCode is bundled with mercurial series 2.0.X by default, with
+  full support to largefiles extension. Enabled by default in new installations
+- #329 Ability to Add/Remove Groups to/from a Repository via AP
+- added requires.txt file with requirements
+     
+fixes
+-----
+
+- fixes db session issues with celery when emailing admins
+- #331 RhodeCode mangles repository names if the a repository group 
+  contains the "full path" to the repositories
+- #298 Conflicting e-mail addresses for LDAP and RhodeCode users
+- DB session cleanup after hg protocol operations, fixes issues with
+  `mysql has gone away` errors
+- #333 doc fixes for get_repo api function
+- #271 rare JSON serialization problem with statistics enabled
+- #337 Fixes issues with validation of repository name conflicting with 
+  a group name. A proper message is now displayed.
+- #292 made ldap_dn in user edit readonly, to get rid of confusion that field
+  doesn't work   
+- #316 fixes issues with web description in hgrc files 
+
 1.2.3 (**2011-11-02**)
 ======================
 
