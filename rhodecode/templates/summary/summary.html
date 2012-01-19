@@ -452,12 +452,14 @@ function SummaryPlot(from,to,dataset,overview_dataset) {
             data[pos].color = i;
             i++;
             if(data[pos].label != ''){
+                var l = data[pos].label;
                 choiceContainerTable.innerHTML += '<tr><td>'+
-                '<input type="checkbox" name="' + data[pos].label +'" checked="checked" />'
-                +data[pos].label+
-                '</td></tr>';
+                    '<input type="checkbox" id="id_user_' + l + '" name="' + l +'" checked="checked" />' +
+                    '<label for="id_user_' + l + '">' +  l + '</label></td></tr>';
             }
         }
+
+        console.log(data);
     }
 
     /**
