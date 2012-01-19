@@ -150,10 +150,10 @@ class ScmModel(BaseModel):
         :param repos_path: path to directory containing repositories
         """
 
-        log.info('scanning for repositories in %s', repos_path)
-
         if repos_path is None:
             repos_path = self.repos_path
+
+        log.info('scanning for repositories in %s' % repos_path)
 
         baseui = make_ui('db')
         repos = {}
