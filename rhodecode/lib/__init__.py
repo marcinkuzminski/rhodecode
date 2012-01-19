@@ -7,7 +7,7 @@
 
     :created_on: Jan 5, 2011
     :author: marcink
-    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
+    :copyright: (C) 2011-2012 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software: you can redistribute it and/or modify
@@ -87,12 +87,12 @@ def str2bool(_str):
 def convert_line_endings(line, mode):
     """
     Converts a given line  "line end" accordingly to given mode
-    
+
     Available modes are::
         0 - Unix
         1 - Mac
         2 - DOS
-    
+
     :param line: given line to convert
     :param mode: mode to convert to
     :rtype: str
@@ -154,7 +154,7 @@ def generate_api_key(username, salt=None):
 def safe_unicode(str_, from_encoding='utf8'):
     """
     safe unicode function. Does few trick to turn str_ into unicode
-     
+
     In case of UnicodeDecode error we try to return it with encoding detected
     by chardet library if it fails fallback to unicode with errors replaced
 

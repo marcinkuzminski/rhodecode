@@ -1,4 +1,4 @@
-.. _api:
+.. _indexapi:
 
 API Reference
 =============

@@ -8,7 +8,7 @@
 
     :created_on: Apr 9, 2010
     :author: marcink
-    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
+    :copyright: (C) 2010-2012 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software: you can redistribute it and/or modify
@@ -34,11 +34,30 @@ __license__ = 'GPLv3'
 PLATFORM_WIN = ('Windows')
 PLATFORM_OTHERS = ('Linux', 'Darwin', 'FreeBSD', 'OpenBSD', 'SunOS')
 
+requirements = [
+    "Pylons==1.0.0",
+    "Beaker==1.5.4",
+    "WebHelpers>=1.2",
+    "formencode==1.2.4",
+    "SQLAlchemy==0.7.4",
+    "Mako==0.5.0",
+    "pygments>=1.4",
+    "mercurial>=2.0,<2.1",
+    "whoosh<1.8",
+    "celery>=2.2.5,<2.3",
+    "babel",
+    "python-dateutil>=1.5.0,<2.0.0",
+    "dulwich>=0.8.0,<0.9.0",
+    "vcs==0.2.2",
+    "webob==1.0.8"
+]
+
+
 try:
     from rhodecode.lib import get_current_revision
     _rev = get_current_revision(quiet=True)
 except ImportError:
-    #this is needed when doing some setup.py operations
+    # this is needed when doing some setup.py operations
     _rev = False
 
 if len(VERSION) > 3 and _rev:

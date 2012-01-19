@@ -10,6 +10,19 @@ There's a single schema for calling all api methods. API is implemented
 with JSON protocol both ways. An url to send API request in RhodeCode is
 <your_server>/_admin/api
 
+API ACCESS FOR WEB VIEWS
+++++++++++++++++++++++++
+
+API access can also be turned on for each web view in RhodeCode that is 
+decorated with `@LoginRequired` decorator. To enable API access simple change 
+the standard login decorator to `@LoginRequired(api_access=True)`. 
+After this change, a rhodecode view can be accessed without login by adding a 
+GET parameter `?api_key=<api_key>` to url. By default this is only
+enabled on RSS/ATOM feed views.
+
+
+API ACCESS
+++++++++++
 
 All clients are required to send JSON-RPC spec JSON data::
 
