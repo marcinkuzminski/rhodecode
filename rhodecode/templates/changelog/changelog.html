@@ -146,7 +146,7 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
 
                     var msgs = YUQ('.message');
                     // get first element height
-                    var el = YUQ('.container')[0];
+                    var el = YUQ('#graph_content .container')[0];
                     var row_h = el.clientHeight;
                     for(var i=0;i<msgs.length;i++){
                     	var m = msgs[i];
@@ -154,8 +154,9 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
                     	var h = m.clientHeight;
                     	var pad = YUD.getStyle(m,'padding');
                     	if(h > row_h){
+                    		var offset = row_h - (h+12);
                     		YUD.setStyle(m.nextElementSibling,'display','block');
-                    		YUD.setStyle(m.nextElementSibling,'margin-top',row_h-(h+14)+'px');
+                    		YUD.setStyle(m.nextElementSibling,'margin-top',offset+'px');
                     	};
                     }
                     YUE.on(YUQ('.expand'),'click',function(e){
