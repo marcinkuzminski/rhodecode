@@ -64,9 +64,9 @@
   <div class="user-menu">
       <div class="container">
        <div class="gravatar" id="quick_login_link">
-           <img alt="gravatar" src="${h.gravatar_url(c.rhodecode_user.email,20)}" />
+           <img alt="gravatar" src="${h.gravatar_url(c.rhodecode_user.email,24)}" />
        </div>
-       %if c.rhodecode_user.username != 'default':
+       %if c.rhodecode_user.username != 'default' and c.unread_notifications != 0:
         <div class="notifications">
           <a id="notification_counter" href="${h.url('notifications')}">${c.unread_notifications}</a>
         </div>

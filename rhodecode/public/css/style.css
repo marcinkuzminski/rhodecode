@@ -1897,7 +1897,12 @@ div.form div.fields div.field div.button {
     margin: 0px 0px 0px 0px;
     cursor: pointer;
 }
-
+.user-menu .gravatar.enabled{
+	background-color: #FDF784 !important;
+}
+.user-menu .gravatar:hover{
+    background-color: #FDF784 !important; 
+}
 #quick_login{
     min-height: 80px;
     margin: 31px 0 0 -251px;
@@ -4044,10 +4049,10 @@ form.comment-inline-form {
     -webkit-border-radius: 4px;
     -moz-border-radius: 4px;    
     float: right;
-    margin: 24px 0px 0px;
+    margin: 20px 0px 0px 0px;
     position: absolute;
     text-align: center;
-    width: 22px;
+    width: 26px;
     z-index: 1000;
 }
 .notifications a{
@@ -4061,6 +4066,7 @@ form.comment-inline-form {
 }
 .notifications a:hover{
 	text-decoration: none !important;
+	background-color: #EEEFFF !important;
 }
 .notification-header{
 	padding-top:6px;
