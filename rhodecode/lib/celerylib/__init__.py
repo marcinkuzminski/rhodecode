@@ -122,6 +122,7 @@ def dbsession(func):
             ret = func(*fargs, **fkwargs)
             return ret
         finally:
-            meta.Session.remove()
+            if CELERY_ON:
+                meta.Session.remove()
 
     return decorator(__wrapper, func)
