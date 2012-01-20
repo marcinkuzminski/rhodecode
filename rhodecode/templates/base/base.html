@@ -3,76 +3,6 @@
 
 <!-- HEADER -->
 <div id="header">
-    <!-- user -->
-    <ul id="logged-user">
-         <li class="first">
-			<div id="quick_login" style="display:none">
-			${h.form(h.url('login_home',came_from=h.url.current()))}
-			<div class="form">
-			    <div class="fields">
-			        <div class="field">
-			            <div class="label">
-			                <label for="username">${_('Username')}:</label>
-			            </div>
-			            <div class="input">
-			                ${h.text('username',class_='focus',size=40)}
-			            </div>
-
-			        </div>
-			        <div class="field">
-			            <div class="label">
-			                <label for="password">${_('Password')}:</label>
-			            </div>
-			            <div class="input">
-			                ${h.password('password',class_='focus',size=40)}
-			            </div>
-
-			        </div>
-			        <div class="buttons">
-			            <div class="password_forgoten">${h.link_to(_('Forgot password ?'),h.url('reset_password'))}</div>
-                        <div class="register">
-                        %if h.HasPermissionAny('hg.admin', 'hg.register.auto_activate', 'hg.register.manual_activate')():
-                         ${h.link_to(_("Don't have an account ?"),h.url('register'))}
-                        %endif
-                        </div>
-                            ${h.submit('sign_in',_('Sign In'),class_="ui-button")}
-			        </div>
-			    </div>
-			</div>
-			${h.end_form()}
-			</div>
-
-             <div class="gravatar">
-                 <img alt="gravatar" src="${h.gravatar_url(c.rhodecode_user.email,20)}" />
-             </div>
-          <div class="account">
-          %if c.rhodecode_user.username == 'default':
-              <a href="${h.url('public_journal')}">${_('Public journal')}</a>
-          %else:
-          	<div style="float: left">
-            ${h.link_to(c.rhodecode_user.username,h.url('admin_settings_my_account'),title='%s %s'%(c.rhodecode_user.name,c.rhodecode_user.lastname))}
-            </div>
-            <div class="notifications">
-            <a id="notification_counter" href="${h.url('notifications')}">${c.unread_notifications}</a>
-            </div>
-          %endif
-          </div>
-         </li>
-         <li>
-            <a href="${h.url('home')}">${_('Home')}</a>
-         </li>
-         %if c.rhodecode_user.username != 'default':
-            <li>
-               <a href="${h.url('journal')}">${_('Journal')}</a>
-            </li>
-            %endif
-            %if c.rhodecode_user.username == 'default':
-                <li class="last highlight">${h.link_to(_(u'Login'),h.url('login_home'),id='quick_login_link')}</li>
-            %else:
-                <li class="last highlight">${h.link_to(_(u'Log Out'),h.url('logout_home'))}</li>
-            %endif
-    </ul>
-    <!-- end user -->
     <div id="header-inner" class="title">
         <div id="logo">
             <h1><a href="${h.url('home')}">${c.rhodecode_name}</a></h1>
@@ -130,6 +60,73 @@
     </div>
 </%def>
 
+<%def name="usermenu()">
+  <div class="user-menu">
+      <div class="container">
+       <div class="gravatar" id="quick_login_link">
+           <img alt="gravatar" src="${h.gravatar_url(c.rhodecode_user.email,20)}" />
+       </div>
+       %if c.rhodecode_user.username != 'default':
+        <div class="notifications">
+          <a id="notification_counter" href="${h.url('notifications')}">${c.unread_notifications}</a>
+        </div>
+       %endif
+      </div>
+      <div id="quick_login" style="display:none">
+        %if c.rhodecode_user.username == 'default':
+            <h4>${_('Login to your account')}</h4>
+            ${h.form(h.url('login_home',came_from=h.url.current()))}
+            <div class="form">
+                <div class="fields">
+                    <div class="field">
+                        <div class="label">
+                            <label for="username">${_('Username')}:</label>
+                        </div>
+                        <div class="input">
+                            ${h.text('username',class_='focus',size=40)}
+                        </div>
+    
+                    </div>
+                    <div class="field">
+                        <div class="label">
+                            <label for="password">${_('Password')}:</label>
+                        </div>
+                        <div class="input">
+                            ${h.password('password',class_='focus',size=40)}
+                        </div>
+    
+                    </div>
+                    <div class="buttons">
+                        <div class="password_forgoten">${h.link_to(_('Forgot password ?'),h.url('reset_password'))}</div>
+                        <div class="register">
+                        %if h.HasPermissionAny('hg.admin', 'hg.register.auto_activate', 'hg.register.manual_activate')():
+                         ${h.link_to(_("Don't have an account ?"),h.url('register'))}
+                        %endif
+                        </div>
+                        <div class="submit">
+                            ${h.submit('sign_in',_('Sign In'),class_="ui-btn xsmall")}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            ${h.end_form()}
+        %else:
+            <div class="links_left">
+                <div class="full_name">${c.rhodecode_user.full_name}</div>
+                <div class="email">${c.rhodecode_user.email}</div>
+                <div class="big_gravatar"><img alt="gravatar" src="${h.gravatar_url(c.rhodecode_user.email,48)}" /></div>
+            </div>
+            <div class="links_right">
+            <ol class="links">
+              <li>${h.link_to(_(u'Home'),h.url('home'))}</li>
+              <li>${h.link_to(_(u'My account'),h.url('admin_settings_my_account'))}</li>
+              <li class="logout">${h.link_to(_(u'Log Out'),h.url('logout_home'))}</li>
+            </ol>
+            </div>
+        %endif
+      </div>                     
+ </div>
+</%def>
 
 <%def name="menu(current=None)">
 		<%
@@ -142,7 +139,7 @@
 	        <ul id="quick">
 				<!-- repo switcher -->
 				<li>
-					<a id="repo_switcher" title="${_('Switch repository')}" href="#">
+					<a class="menu_link" id="repo_switcher" title="${_('Switch repository')}" href="#">
                     <span class="icon">
                         <img src="${h.url('/images/icons/database.png')}" alt="${_('Products')}" />
                     </span>
@@ -156,23 +153,15 @@
 				</li>
 
 	            <li ${is_current('summary')}>
-	               <a title="${_('Summary')}" href="${h.url('summary_home',repo_name=c.repo_name)}">
+	               <a class="menu_link" title="${_('Summary')}" href="${h.url('summary_home',repo_name=c.repo_name)}">
 	               <span class="icon">
 	                   <img src="${h.url('/images/icons/clipboard_16.png')}" alt="${_('Summary')}" />
 	               </span>
 	               <span>${_('Summary')}</span>
 	               </a>
 	            </li>
-                ##<li ${is_current('shortlog')}>
-                ##   <a title="${_('Shortlog')}" href="${h.url('shortlog_home',repo_name=c.repo_name)}">
-                ##   <span class="icon">
-                ##       <img src="${h.url('/images/icons/application_view_list.png')}" alt="${_('Shortlog')}" />
-                ##   </span>
-                ##   <span>${_('Shortlog')}</span>
-                ##   </a>
-                ##</li>
                 <li ${is_current('changelog')}>
-                   <a title="${_('Changelog')}" href="${h.url('changelog_home',repo_name=c.repo_name)}">
+                   <a class="menu_link" title="${_('Changelog')}" href="${h.url('changelog_home',repo_name=c.repo_name)}">
                    <span class="icon">
                        <img src="${h.url('/images/icons/time.png')}" alt="${_('Changelog')}" />
                    </span>
@@ -181,7 +170,7 @@
                 </li>
 
                 <li ${is_current('switch_to')}>
-                   <a id="branch_tag_switcher" title="${_('Switch to')}" href="#">
+                   <a class="menu_link" id="branch_tag_switcher" title="${_('Switch to')}" href="#">
                    <span class="icon">
                        <img src="${h.url('/images/icons/arrow_switch.png')}" alt="${_('Switch to')}" />
                    </span>
@@ -192,7 +181,7 @@
                     </ul>
                 </li>
                 <li ${is_current('files')}>
-                   <a title="${_('Files')}" href="${h.url('files_home',repo_name=c.repo_name)}">
+                   <a class="menu_link" title="${_('Files')}" href="${h.url('files_home',repo_name=c.repo_name)}">
                    <span class="icon">
                        <img src="${h.url('/images/icons/file.png')}" alt="${_('Files')}" />
                    </span>
@@ -201,7 +190,7 @@
                 </li>
 
                 <li ${is_current('options')}>
-                   <a title="${_('Options')}" href="#">
+                   <a class="menu_link" title="${_('Options')}" href="#">
                    <span class="icon">
                        <img src="${h.url('/images/icons/table_gear.png')}" alt="${_('Admin')}" />
                    </span>
@@ -241,7 +230,7 @@
                 </li>
 
                 <li>
-                    <a title="${_('Followers')}" href="${h.url('repo_followers_home',repo_name=c.repo_name)}">
+                    <a class="menu_link" title="${_('Followers')}" href="${h.url('repo_followers_home',repo_name=c.repo_name)}">
                     <span class="icon_short">
                         <img src="${h.url('/images/icons/heart.png')}" alt="${_('Followers')}" />
                     </span>
@@ -249,13 +238,14 @@
                     </a>
                 </li>
                 <li>
-                    <a title="${_('Forks')}" href="${h.url('repo_forks_home',repo_name=c.repo_name)}">
+                    <a class="menu_link" title="${_('Forks')}" href="${h.url('repo_forks_home',repo_name=c.repo_name)}">
                     <span class="icon_short">
                         <img src="${h.url('/images/icons/arrow_divide.png')}" alt="${_('Forks')}" />
                     </span>
                     <span class="short">${c.repository_forks}</span>
                     </a>
                 </li>
+                ${usermenu()}
 	        </ul>
             <script type="text/javascript">
                YUE.on('repo_switcher','mouseover',function(){
@@ -294,25 +284,34 @@
 		    ##ROOT MENU
             <ul id="quick">
                 <li>
-                    <a title="${_('Home')}"  href="${h.url('home')}">
+                    <a class="menu_link" title="${_('Home')}"  href="${h.url('home')}">
                     <span class="icon">
                         <img src="${h.url('/images/icons/home_16.png')}" alt="${_('Home')}" />
                     </span>
                     <span>${_('Home')}</span>
                     </a>
                 </li>
-                % if c.rhodecode_user.username != 'default':
+                %if c.rhodecode_user.username != 'default':
                  <li>
-                    <a title="${_('Journal')}"  href="${h.url('journal')}">
+                    <a class="menu_link" title="${_('Journal')}"  href="${h.url('journal')}">
                     <span class="icon">
                         <img src="${h.url('/images/icons/book.png')}" alt="${_('Journal')}" />
                     </span>
                     <span>${_('Journal')}</span>
                     </a>
                  </li>
-                % endif
+                %else:
+                 <li>
+                    <a class="menu_link" title="${_('Public journal')}"  href="${h.url('public_journal')}">
+                    <span class="icon">
+                        <img src="${h.url('/images/icons/book.png')}" alt="${_('Public journal')}" />
+                    </span>
+                    <span>${_('Public journal')}</span>
+                    </a>
+                 </li>
+                %endif
                 <li>
-                    <a title="${_('Search')}"  href="${h.url('search')}">
+                    <a class="menu_link" title="${_('Search')}"  href="${h.url('search')}">
                     <span class="icon">
                         <img src="${h.url('/images/icons/search_16.png')}" alt="${_('Search')}" />
                     </span>
@@ -322,7 +321,7 @@
 
 				%if h.HasPermissionAll('hg.admin')('access admin main page'):
                 <li ${is_current('admin')}>
-                   <a title="${_('Admin')}" href="${h.url('admin_home')}">
+                   <a class="menu_link" title="${_('Admin')}" href="${h.url('admin_home')}">
                    <span class="icon">
                        <img src="${h.url('/images/icons/cog_edit.png')}" alt="${_('Admin')}" />
                    </span>
@@ -331,6 +330,7 @@
                     ${admin_menu()}
                 </li>
 				%endif
+                ${usermenu()}
 			</ul>
 		%endif
 </%def>

@@ -117,7 +117,10 @@
                  else{
                      YUD.setStyle('quick_login','display','');
                      YUD.addClass('quick_login_link','enabled');
-                     YUD.get('username').focus();
+                     var usr = YUD.get('username');
+                     if(usr){
+                    	 usr.focus();
+                     }
                  }
              });
 

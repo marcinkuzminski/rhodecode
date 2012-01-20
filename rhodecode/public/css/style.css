@@ -258,22 +258,19 @@ div.options a {
 }
 
 #header #header-inner {
-	min-height: 40px;
+	min-height: 44px;
 	clear: both;
 	position: relative;
     background-color: #eedc94;
     background-repeat: repeat-x;
-    background-image: -khtml-gradient(linear, left top, left bottom, from(#fceec1),
-        to(#eedc94) );
+    background-image: -khtml-gradient(linear, left top, left bottom, from(#fceec1),to(#eedc94) );
     background-image: -moz-linear-gradient(top, #003b76, #00376e);
     background-image: -ms-linear-gradient(top, #003b76, #00376e);
-    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #003b76),
-        color-stop(100%, #00376e) );
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #003b76),color-stop(100%, #00376e) );
     background-image: -webkit-linear-gradient(top, #003b76, #00376e) );
     background-image: -o-linear-gradient(top, #003b76, #00376e) );
     background-image: linear-gradient(top, #003b76, #00376e);
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#003b76',
-        endColorstr='#00376e', GradientType=0 );
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#003b76',endColorstr='#00376e', GradientType=0 );
 	margin: 0;
 	padding: 0;
 	display: block;
@@ -330,7 +327,7 @@ div.options a {
 	float: right;
 	list-style-type: none;
 	list-style-position: outside;
-	margin: 6px 5px 0 0;
+	margin: 8px 5px 0 0;
 	padding: 0;
 }
 
@@ -341,7 +338,7 @@ div.options a {
 	padding: 0;
 }
 
-#header #header-inner #quick li a {
+#header #header-inner #quick li a.menu_link {
 	top: 0;
 	left: 0;
 	height: 1%;
@@ -424,7 +421,7 @@ div.options a {
 	border: 1px solid #666;
 	border-top: 1px solid #003367;
 	z-index: 100;
-	margin: 0;
+	margin: 2px 0px 0px 0px;
 	padding: 0;
 }
 
@@ -1886,39 +1883,102 @@ div.form div.fields div.field div.button {
 	padding: 0 0 2px;
 }
 
-#quick_login {
-	top: 31px;
-	background-color: rgb(0, 51, 103);
+.user-menu{
+    margin: 0px !important;
+    float: left;
+}
+
+.user-menu .container{
+    padding:0px 4px 0px 4px;
+    margin: 0px 0px 0px 0px;
+}
+
+.user-menu .gravatar{
+    margin: 0px 0px 0px 0px;
+    cursor: pointer;
+}
+
+#quick_login{
+    min-height: 80px;
+    margin: 31px 0 0 -251px;
+    padding: 4px;
+    position: absolute;
+    width: 278px;
+    
+    background-repeat: repeat-x;
+    background-image: -khtml-gradient(linear, left top, left bottom, from(#fceec1),
+        to(#eedc94) );
+    background-image: -moz-linear-gradient(top, #003b76, #00376e);
+    background-image: -ms-linear-gradient(top, #003b76, #00376e);
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #003b76),
+        color-stop(100%, #00376e) );
+    background-image: -webkit-linear-gradient(top, #003b76, #00376e) );
+    background-image: -o-linear-gradient(top, #003b76, #00376e) );
+    background-image: linear-gradient(top, #003b76, #00376e);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#003b76',
+        endColorstr='#00376e', GradientType=0 );
+
 	z-index: 999;
-	height: 150px;
-	position: absolute;
-	margin-left: -16px;
-	width: 281px;
 	-webkit-border-radius: 0px 0px 4px 4px;
 	-khtml-border-radius: 0px 0px 4px 4px;
 	-moz-border-radius: 0px 0px 4px 4px;
 	border-radius: 0px 0px 4px 4px;
 	box-shadow: 0 2px 2px rgba(0, 0, 0, 0.6);
 }
+#quick_login h4{
+    color: #fff;
+    padding: 5px 0px 5px 14px;
+}
 
 #quick_login .password_forgoten {
 	padding-right: 10px;
 	padding-top: 0px;
-	float: left;
+	text-align: left;
 }
 
 #quick_login .password_forgoten a {
-	font-size: 10px
+	font-size: 10px;
+	color: #fff;
 }
 
 #quick_login .register {
 	padding-right: 10px;
 	padding-top: 5px;
-	float: left;
+	text-align: left;
 }
 
 #quick_login .register a {
-	font-size: 10px
+	font-size: 10px;
+	color: #fff;
+}
+
+#quick_login .submit {
+    margin: -20px 0 0 194px;
+    position: absolute;
+}
+
+#quick_login .links_left{
+	float: left;
+}
+#quick_login .links_right{
+    float: right;
+}
+#quick_login .full_name{
+    color: #FFFFFF;
+    font-weight: bold;
+    padding: 3px;
+}
+#quick_login .big_gravatar{
+	padding:4px 0px 0px 6px;
+}
+
+#quick_login .email,#quick_login .email a{
+    color: #FFFFFF;
+    padding: 3px;
+    
+}
+#quick_login .links .logout{
+
 }
 
 #quick_login div.form div.fields {
@@ -1953,7 +2013,7 @@ div.form div.fields div.field div.button {
 	overflow: hidden;
 	text-align: right;
 	margin: 0;
-	padding: 10px 14px 0px 5px;
+	padding: 5px 14px 0px 5px;
 }
 
 #quick_login div.form div.links {
@@ -1961,6 +2021,30 @@ div.form div.fields div.field div.button {
 	overflow: hidden;
 	margin: 10px 0 0;
 	padding: 0 0 2px;
+}
+
+#quick_login ol.links{
+    display: block;
+    font-weight: bold;
+    list-style: none outside none;
+    text-align: right;
+}
+#quick_login ol.links li{
+    line-height: 27px;
+    margin: 0;
+    padding: 0;
+    color: #fff;
+    display: block;
+    float:none !important;
+}
+
+#quick_login ol.links li a{
+    color: #fff;
+    display: block;
+    padding: 2px;
+}
+#quick_login ol.links li a:HOVER{
+    background-color: inherit !important;
 }
 
 #register div.title {
@@ -3955,20 +4039,24 @@ form.comment-inline-form {
 	margin:10px 5px !important;
 }
 .notifications{
-	width:22px;
-    padding:2px;
-	float:right;
+    border-radius: 4px 4px 4px 4px;
     -webkit-border-radius: 4px;
-    -moz-border-radius: 4px;
-    border-radius: 4px;
+    -moz-border-radius: 4px;    
+    float: right;
+    margin: 24px 0px 0px;
+    position: absolute;
     text-align: center;
-    margin: 0px -10px 0px 5px;
-    background-color: #DEDEDE;
+    width: 22px;
+    z-index: 1000;
 }
 .notifications a{
 	color:#888 !important;
 	display: block;
-	font-size: 10px
+	font-size: 10px;
+	background-color: #DEDEDE !important;
+    border-radius: 2px !important;
+    -webkit-border-radius: 2px !important;
+    -moz-border-radius: 2px !important;  	
 }
 .notifications a:hover{
 	text-decoration: none !important;
