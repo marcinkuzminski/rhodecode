@@ -146,5 +146,6 @@ class UsersGroupModel(BaseModel):
 
         obj = UsersGroupToPerm.query()\
             .filter(UsersGroupToPerm.users_group == users_group)\
-            .filter(UsersGroupToPerm.permission == perm).one()
-        self.sa.delete(obj)
+            .filter(UsersGroupToPerm.permission == perm).scalar()
+        if obj:
+            self.sa.delete(obj)
