@@ -308,8 +308,8 @@ div.options a {
 
 #header #header-inner #logo h1 {
 	color: #FFF;
-	font-size: 18px;
-	margin: 10px 0 0 13px;
+	font-size: 20px;
+	margin: 12px 0 0 13px;
 	padding: 0;
 }
 
@@ -1953,8 +1953,9 @@ div.form div.fields div.field div.button {
 }
 
 #quick_login .submit {
-    margin: -20px 0 0 194px;
+    margin: -20px 0 0 0px;
     position: absolute;
+    right: 15px;
 }
 
 #quick_login .links_left{
