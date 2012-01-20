@@ -29,6 +29,7 @@ import socket
 import traceback
 import logging
 from os.path import dirname as dn, join as jn
+from pylons import config
 
 from hashlib import md5
 from decorator import decorator
@@ -37,13 +38,15 @@ from vcs.utils.lazy import LazyProperty
 from rhodecode import CELERY_ON
 from rhodecode.lib import str2bool, safe_str
 from rhodecode.lib.pidlock import DaemonLock, LockHeld
+from rhodecode.model import init_model
+from rhodecode.model import meta
+from rhodecode.model.db import Statistics, Repository, User
+
+from sqlalchemy import engine_from_config
 
 from celery.messaging import establish_connection
 
-
 log = logging.getLogger(__name__)
-
-
 
 
 class ResultWrapper(object):
@@ -101,5 +104,24 @@ def locked_task(func):
         except LockHeld:
             log.info('LockHeld')
             return 'Task with key %s already running' % lockkey
+
+    return decorator(__wrapper, func)
+
+
+def get_session():
+    if CELERY_ON:
+        engine = engine_from_config(config, 'sqlalchemy.db1.')
+        init_model(engine)
+    sa = meta.Session
+    return sa
+
+
+def dbsession(func):
+    def __wrapper(func, *fargs, **fkwargs):
+        try:
+            ret = func(*fargs, **fkwargs)
+            return ret
+        finally:
+            meta.Session.remove()
 
     return decorator(__wrapper, func)
