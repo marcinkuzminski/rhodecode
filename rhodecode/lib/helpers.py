@@ -788,7 +788,7 @@ def urlify_commit(text_, repository=None, link_=None):
     try:
         conf = config['app_conf']
 
-        URL_PAT = re.compile(r'%s' % conf.get('url_pat'))
+        URL_PAT = re.compile(r'%s' % conf.get('issue_pat'))
 
         if URL_PAT:
             ISSUE_SERVER_LNK = conf.get('issue_server_link')
@@ -799,7 +799,7 @@ def urlify_commit(text_, repository=None, link_=None):
                 if match_obj.group().startswith(' '):
                     pref = ' '
 
-                issue_id = match_obj.groups()[0]
+                issue_id = ''.join(match_obj.groups())
                 tmpl = (
                 '%(pref)s<a class="%(cls)s" href="%(url)s">'
                 '%(issue-prefix)s%(id-repr)s'
