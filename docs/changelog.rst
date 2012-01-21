@@ -18,7 +18,7 @@ news
 - #252 Container-based and proxy pass-through authentication support
 - #44 branch browser. Filtering of changelog by branches
 - mercurial bookmarks support
-- hover top menu
+- new hover top menu, optimized to add maximum size for important views
 - configurable clone url template with possibility to specify  protocol like 
   ssh:// or http:// and also manually alter other parts of clone_url.
 - enabled largefiles extension by default
@@ -52,7 +52,9 @@ fixes
 - fixes #271 rare JSON serialization problem with statistics
 - fixes #337 missing validation check for conflicting names of a group with a
   repositories group
- 
+- #340 fixed session problem for mysql and celery tasks
+
+  
 1.2.4 (**2012-01-19**)
 ======================
 
