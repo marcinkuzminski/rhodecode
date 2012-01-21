@@ -8,7 +8,7 @@
 
     :created_on: Oct 6, 2010
     :author: marcink
-    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
+    :copyright: (C) 2010-2012 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software: you can redistribute it and/or modify
@@ -39,19 +39,16 @@ from pylons.i18n.translation import _
 
 from rhodecode.lib import LANGUAGES_EXTENSIONS_MAP, safe_str
 from rhodecode.lib.celerylib import run_task, locked_task, str2bool, \
-    __get_lockkey, LockHeld, DaemonLock
+    __get_lockkey, LockHeld, DaemonLock, get_session, dbsession
 from rhodecode.lib.helpers import person
 from rhodecode.lib.smtp_mailer import SmtpMailer
 from rhodecode.lib.utils import add_cache
 from rhodecode.lib.compat import json, OrderedDict
 
-from rhodecode.model import init_model
-from rhodecode.model import meta
 from rhodecode.model.db import RhodeCodeUi, Statistics, Repository, User
 
 from vcs.backends import get_repo
-
-from sqlalchemy import engine_from_config
+from vcs import get_backend
 
 add_cache(config)
 
@@ -59,15 +56,6 @@ __all__ = ['whoosh_index', 'get_commits_stats',
            'reset_user_password', 'send_email']
 
 CELERY_ON = str2bool(config['app_conf'].get('use_celery'))
-
-
-def get_session():
-    if CELERY_ON:
-        engine = engine_from_config(config, 'sqlalchemy.db1.')
-        init_model(engine)
-
-    sa = meta.Session()
-    return sa
 
 
 def get_repos_path():
@@ -78,6 +66,7 @@ def get_repos_path():
 
 @task(ignore_result=True)
 @locked_task
+@dbsession
 def whoosh_index(repo_location, full_index):
     #log = whoosh_index.get_logger()
     from rhodecode.lib.indexers.daemon import WhooshIndexingDaemon
@@ -88,6 +77,7 @@ def whoosh_index(repo_location, full_index):
 
 
 @task(ignore_result=True)
+@dbsession
 def get_commits_stats(repo_name, ts_min_y, ts_max_y):
     try:
         log = get_commits_stats.get_logger()
@@ -248,6 +238,7 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
         return 'Task with key %s already running' % lockkey
 
 @task(ignore_result=True)
+@dbsession
 def send_password_link(user_email):
     try:
         log = reset_user_password.get_logger()
@@ -255,7 +246,6 @@ def send_password_link(user_email):
         log = logging.getLogger(__name__)
 
     from rhodecode.lib import auth
-    from rhodecode.model.db import User
 
     try:
         sa = get_session()
@@ -288,6 +278,7 @@ If you didn't request new password please ignore this email.
     return True
 
 @task(ignore_result=True)
+@dbsession
 def reset_user_password(user_email):
     try:
         log = reset_user_password.get_logger()
@@ -295,7 +286,6 @@ def reset_user_password(user_email):
         log = logging.getLogger(__name__)
 
     from rhodecode.lib import auth
-    from rhodecode.model.db import User
 
     try:
         try:
@@ -329,6 +319,7 @@ def reset_user_password(user_email):
 
 
 @task(ignore_result=True)
+@dbsession
 def send_email(recipients, subject, body):
     """
     Sends an email with defined parameters from the .ini files.
@@ -375,9 +366,9 @@ def send_email(recipients, subject, body):
 
 
 @task(ignore_result=True)
+@dbsession
 def create_repo_fork(form_data, cur_user):
     from rhodecode.model.repo import RepoModel
-    from vcs import get_backend
 
     try:
         log = create_repo_fork.get_logger()
