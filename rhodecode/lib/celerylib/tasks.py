@@ -367,8 +367,8 @@ def create_repo_fork(form_data, cur_user):
     from rhodecode.model.repo import RepoModel
 
     log = get_logger(create_repo_fork)
-    DBS = create_repo_fork.DBS
-    
+    DBS = get_session()
+
     base_path = Repository.base_path()
 
     RepoModel(DBS).create(form_data, cur_user, just_db=True, fork=True)
