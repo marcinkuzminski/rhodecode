@@ -7,7 +7,7 @@
 
     :created_on: Apr 21, 2010
     :author: marcink
-    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
+    :copyright: (C) 2010-2012 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software: you can redistribute it and/or modify
@@ -127,7 +127,7 @@ class FilesController(BaseRepoController):
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
                                    'repository.admin')
     def index(self, repo_name, revision, f_path):
-        #reditect to given revision from form if given
+        # redirect to given revision from form if given
         post_revision = request.POST.get('at_rev', None)
         if post_revision:
             cs = self.__get_cs_or_redirect(post_revision, repo_name)
@@ -140,7 +140,7 @@ class FilesController(BaseRepoController):
 
         cur_rev = c.changeset.revision
 
-        #prev link
+        # prev link
         try:
             prev_rev = c.rhodecode_repo.get_changeset(cur_rev).prev(c.branch)
             c.url_prev = url('files_home', repo_name=c.repo_name,
@@ -150,7 +150,7 @@ class FilesController(BaseRepoController):
         except (ChangesetDoesNotExistError, VCSError):
             c.url_prev = '#'
 
-        #next link
+        # next link
         try:
             next_rev = c.rhodecode_repo.get_changeset(cur_rev).next(c.branch)
             c.url_next = url('files_home', repo_name=c.repo_name,
@@ -160,7 +160,7 @@ class FilesController(BaseRepoController):
         except (ChangesetDoesNotExistError, VCSError):
             c.url_next = '#'
 
-        #files or dirs
+        # files or dirs
         try:
             c.files_list = c.changeset.get_node(f_path)
 
@@ -366,6 +366,12 @@ class FilesController(BaseRepoController):
             dbrepo = RepoModel().get_by_repo_name(repo_name)
             if dbrepo.enable_downloads is False:
                 return _('downloads disabled')
+
+            if c.rhodecode_repo.alias == 'hg':
+                # patch and reset hooks section of UI config to not run any
+                # hooks on fetching archives with subrepos
+                for k, v in c.rhodecode_repo._repo.ui.configitems('hooks'):
+                    c.rhodecode_repo._repo.ui.setconfig('hooks', k, None)
 
             cs = c.rhodecode_repo.get_changeset(revision)
             content_type = settings.ARCHIVE_SPECS[fileformat][0]
