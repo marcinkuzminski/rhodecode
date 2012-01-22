@@ -774,7 +774,7 @@ def urlify_commit(text_, repository=None, link_=None):
 
     # urlify changesets
     text_ = urlify_changesets(text_, repository)
-        
+
     def linkify_others(t,l):
         urls = re.compile(r'(\<a.*?\<\/a\>)',)
         links = []
@@ -782,8 +782,8 @@ def urlify_commit(text_, repository=None, link_=None):
             if not urls.match(e):
                 links.append('<a class="message-link" href="%s">%s</a>' % (l,e))
             else:
-                links.append(e)        
-        
+                links.append(e)
+
         return ''.join(links)
     try:
         conf = config['app_conf']
@@ -817,12 +817,12 @@ def urlify_commit(text_, repository=None, link_=None):
                      'issue-prefix': ISSUE_PREFIX,
                      'serv': ISSUE_SERVER_LNK,
                 }
-                
+
             newtext = URL_PAT.sub(url_func, text_)
-            
+
             # wrap not links into final link => link_
             newtext = linkify_others(newtext, link_)
-            
+
             return literal(newtext)
     except:
         log.error(traceback.format_exc())

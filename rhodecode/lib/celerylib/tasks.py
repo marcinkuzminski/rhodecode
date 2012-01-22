@@ -251,7 +251,7 @@ def send_password_link(user_email):
 
     log = get_logger(send_password_link)
     DBS = get_session()
-    
+
     try:
         user = User.get_by_email(user_email)
         if user:
@@ -281,7 +281,7 @@ def reset_user_password(user_email):
 
     log = get_logger(reset_user_password)
     DBS = get_session()
-    
+
     try:
         try:
             user = User.get_by_email(user_email)
@@ -325,7 +325,7 @@ def send_email(recipients, subject, body, html_body=''):
     """
     log = get_logger(send_email)
     DBS = get_session()
-    
+
     email_config = config
     subject = "%s %s" % (email_config.get('email_prefix'), subject)
     if not recipients:
