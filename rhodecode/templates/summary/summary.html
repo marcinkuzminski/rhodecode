@@ -299,9 +299,10 @@ var no_data = true;
 var tbl = document.createElement('table');
 tbl.setAttribute('class','trending_language_tbl');
 var cnt = 0;
-
 for (var i=0;i<data.length;i++){
-    total += data[i][1].count;
+	total+= data[i][1].count;
+}
+for (var i=0;i<data.length;i++){
     cnt += 1;
     no_data = false;
 
