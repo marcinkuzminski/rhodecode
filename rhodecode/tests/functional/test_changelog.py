@@ -58,7 +58,9 @@ class TestChangelogController(TestController):
             """more details">21</div>"""
         )
 
-        response.mustcontain("""<div class="message"><a href="/%s/changeset/"""
-                        """46ad32a4f974e45472a898c6b0acb600320579b1">"""
-                        """Merge with 2e6a2bf9356ca56df08807f4ad86d48"""
-                        """0da72a8f4</a></div>""" % HG_REPO)
+        response.mustcontain(
+            """<a href="/%s/changeset/"""
+            """46ad32a4f974e45472a898c6b0acb600320579b1" """
+            """title="Merge with 2e6a2bf9356ca56df08807f4ad86d480da72a8f4">"""
+            """46ad32a4f974</a>""" % HG_REPO
+        )
