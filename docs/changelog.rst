@@ -31,8 +31,6 @@ news
 - sorting on branches, tags and bookmarks using YUI datatable
 - improved file filter on files page
 - implements #330 api method for listing nodes ar particular revision
-- fixed #331 RhodeCode mangles repository names if the a repository group 
-  contains the "full path" to the repositories
 - #73 added linking issues in commit messages to chosen issue tracker url
   based on user defined regular expression
 - added linking of changesets in commit messages  
@@ -53,6 +51,8 @@ fixes
 - fixes #337 missing validation check for conflicting names of a group with a
   repositories group
 - #340 fixed session problem for mysql and celery tasks
+- fixed #331 RhodeCode mangles repository names if the a repository group 
+  contains the "full path" to the repositories
 
   
 1.2.4 (**2012-01-19**)
