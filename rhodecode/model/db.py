@@ -54,6 +54,7 @@ log = logging.getLogger(__name__)
 # BASE CLASSES
 #==============================================================================
 
+
 class ModelSerializer(json.JSONEncoder):
     """
     Simple Serializer for JSON,
@@ -84,6 +85,7 @@ class ModelSerializer(json.JSONEncoder):
         else:
             return json.JSONEncoder.default(self, obj)
 
+
 class BaseModel(object):
     """Base Model for all classess
 
@@ -101,6 +103,10 @@ class BaseModel(object):
         d = {}
         for k in self._get_keys():
             d[k] = getattr(self, k)
+
+        # also use __json__() if present to get additional fields
+        for k, val in getattr(self, '__json__', lambda: {})().iteritems():
+            d[k] = val
         return d
 
     def get_appstruct(self):
@@ -314,6 +320,9 @@ class User(Base, BaseModel):
                                              self.user_id, self.username)
         except:
             return self.__class__.__name__
+
+    def __json__(self):
+        return {'email': self.email}
 
     @classmethod
     def get_by_username(cls, username, case_insensitive=False):
