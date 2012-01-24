@@ -94,20 +94,18 @@ class BaseModel(object):
         """return column names for this model """
         return class_mapper(cls).c.keys()
 
-    def get_dict(self, serialized=False):
+    def get_dict(self):
         """
         return dict with keys and values corresponding
-        to this model data
-        """
+        to this model data """
 
         d = {}
         for k in self._get_keys():
             d[k] = getattr(self, k)
 
         # also use __json__() if present to get additional fields
-        if hasattr(self, '__json__'):
-            for k, val in self.__json__().iteritems():
-                d[k] = val
+        for k, val in getattr(self, '__json__', lambda: {})().iteritems():
+            d[k] = val
         return d
 
     def get_appstruct(self):
