@@ -11,7 +11,7 @@
     &raquo;
     ${h.link_to(c.repo_name,h.url('summary_home',repo_name=c.repo_name))}
     &raquo;
-    ${_('Changeset')} - r${c.changeset.revision}:${h.short_id(c.changeset.raw_id)}
+    ${_('Changeset')} - r${c.changeset.revision}:<span class='changeset_hash'>${h.short_id(c.changeset.raw_id)}</span>
 </%def>
 
 <%def name="page_nav()">
