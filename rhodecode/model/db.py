@@ -145,7 +145,10 @@ class BaseModel(object):
 
 class RhodeCodeSetting(Base, BaseModel):
     __tablename__ = 'rhodecode_settings'
-    __table_args__ = (UniqueConstraint('app_settings_name'), {'extend_existing': True})
+    __table_args__ = (
+        UniqueConstraint('app_settings_name'),
+        {'extend_existing': True}
+    )
     app_settings_id = Column("app_settings_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     app_settings_name = Column("app_settings_name", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     _app_settings_value = Column("app_settings_value", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
@@ -153,7 +156,6 @@ class RhodeCodeSetting(Base, BaseModel):
     def __init__(self, k='', v=''):
         self.app_settings_name = k
         self.app_settings_value = v
-
 
     @validates('_app_settings_value')
     def validate_settings_value(self, key, val):
@@ -177,8 +179,10 @@ class RhodeCodeSetting(Base, BaseModel):
         self._app_settings_value = safe_unicode(val)
 
     def __repr__(self):
-        return "<%s('%s:%s')>" % (self.__class__.__name__,
-                                  self.app_settings_name, self.app_settings_value)
+        return "<%s('%s:%s')>" % (
+            self.__class__.__name__,
+            self.app_settings_name, self.app_settings_value
+        )
 
     @classmethod
     def get_by_name(cls, ldap_key):
@@ -215,7 +219,10 @@ class RhodeCodeSetting(Base, BaseModel):
 
 class RhodeCodeUi(Base, BaseModel):
     __tablename__ = 'rhodecode_ui'
-    __table_args__ = (UniqueConstraint('ui_key'), {'extend_existing': True})
+    __table_args__ = (
+        UniqueConstraint('ui_key'), 
+        {'extend_existing': True}
+    )
 
     HOOK_UPDATE = 'changegroup.update'
     HOOK_REPO_SIZE = 'changegroup.repo_size'
@@ -262,7 +269,10 @@ class RhodeCodeUi(Base, BaseModel):
 
 class User(Base, BaseModel):
     __tablename__ = 'users'
-    __table_args__ = (UniqueConstraint('username'), UniqueConstraint('email'), {'extend_existing': True})
+    __table_args__ = (
+        UniqueConstraint('username'), UniqueConstraint('email'), 
+        {'extend_existing': True}
+    )
     user_id = Column("user_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     username = Column("username", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     password = Column("password", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
@@ -448,7 +458,10 @@ class UsersGroupMember(Base, BaseModel):
 
 class Repository(Base, BaseModel):
     __tablename__ = 'repositories'
-    __table_args__ = (UniqueConstraint('repo_name'), {'extend_existing': True},)
+    __table_args__ = (
+        UniqueConstraint('repo_name'), 
+        {'extend_existing': True},
+    )
 
     repo_id = Column("repo_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     repo_name = Column("repo_name", String(length=255, convert_unicode=False, assert_unicode=None), nullable=False, unique=True, default=None)
@@ -633,7 +646,6 @@ class Repository(Base, BaseModel):
             grouped[cmt.revision].append(cmt)
         return grouped
 
-
     #==========================================================================
     # SCM CACHE INSTANCE
     #==========================================================================
@@ -693,9 +705,12 @@ class Repository(Base, BaseModel):
 
 class RepoGroup(Base, BaseModel):
     __tablename__ = 'groups'
-    __table_args__ = (UniqueConstraint('group_name', 'group_parent_id'),
-                      CheckConstraint('group_id != group_parent_id'), {'extend_existing': True},)
-    __mapper_args__ = {'order_by':'group_name'}
+    __table_args__ = (
+        UniqueConstraint('group_name', 'group_parent_id'),
+        CheckConstraint('group_id != group_parent_id'), 
+        {'extend_existing': True},
+    )
+    __mapper_args__ = {'order_by': 'group_name'}
 
     group_id = Column("group_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     group_name = Column("group_name", String(length=255, convert_unicode=False, assert_unicode=None), nullable=False, unique=True, default=None)
@@ -799,7 +814,6 @@ class RepoGroup(Base, BaseModel):
 
         return cnt + children_count(self)
 
-
     def get_new_name(self, group_name):
         """
         returns new full group name based on parent and new name
@@ -838,7 +852,9 @@ class Permission(Base, BaseModel):
 
 class UserRepoToPerm(Base, BaseModel):
     __tablename__ = 'repo_to_perm'
-    __table_args__ = (UniqueConstraint('user_id', 'repository_id'), {'extend_existing': True})
+    __table_args__ = (
+        UniqueConstraint('user_id', 'repository_id'), {'extend_existing': True}
+    )
     repo_to_perm_id = Column("repo_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None, default=None)
     permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable=False, unique=None, default=None)
@@ -874,7 +890,10 @@ class UserToPerm(Base, BaseModel):
 
 class UsersGroupRepoToPerm(Base, BaseModel):
     __tablename__ = 'users_group_repo_to_perm'
-    __table_args__ = (UniqueConstraint('repository_id', 'users_group_id', 'permission_id'), {'extend_existing': True})
+    __table_args__ = (
+        UniqueConstraint('repository_id', 'users_group_id', 'permission_id'), 
+        {'extend_existing': True}
+    )
     users_group_to_perm_id = Column("users_group_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     users_group_id = Column("users_group_id", Integer(), ForeignKey('users_groups.users_group_id'), nullable=False, unique=None, default=None)
     permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable=False, unique=None, default=None)
@@ -908,13 +927,16 @@ class UsersGroupToPerm(Base, BaseModel):
 
 
 class UserRepoGroupToPerm(Base, BaseModel):
-    __tablename__ = 'group_to_perm'
-    __table_args__ = (UniqueConstraint('group_id', 'permission_id'), {'extend_existing': True})
+    __tablename__ = 'user_repo_group_to_perm'
+    __table_args__ = (
+        UniqueConstraint('group_id', 'permission_id'), 
+        {'extend_existing': True}
+    )
 
     group_to_perm_id = Column("group_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None, default=None)
-    permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable=False, unique=None, default=None)
     group_id = Column("group_id", Integer(), ForeignKey('groups.group_id'), nullable=False, unique=None, default=None)
+    permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable=False, unique=None, default=None)
 
     user = relationship('User')
     permission = relationship('Permission')
@@ -923,7 +945,10 @@ class UserRepoGroupToPerm(Base, BaseModel):
 
 class UsersGroupRepoGroupToPerm(Base, BaseModel):
     __tablename__ = 'users_group_repo_group_to_perm'
-    __table_args__ = (UniqueConstraint('group_id', 'permission_id'), {'extend_existing': True})
+    __table_args__ = (
+        UniqueConstraint('group_id', 'permission_id'), 
+        {'extend_existing': True}
+    )
 
     users_group_repo_group_to_perm_id = Column("users_group_repo_group_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     users_group_id = Column("users_group_id", Integer(), ForeignKey('users_groups.users_group_id'), nullable=False, unique=None, default=None)
@@ -950,9 +975,11 @@ class Statistics(Base, BaseModel):
 
 class UserFollowing(Base, BaseModel):
     __tablename__ = 'user_followings'
-    __table_args__ = (UniqueConstraint('user_id', 'follows_repository_id'),
-                      UniqueConstraint('user_id', 'follows_user_id')
-                      , {'extend_existing': True})
+    __table_args__ = (
+        UniqueConstraint('user_id', 'follows_repository_id'),
+        UniqueConstraint('user_id', 'follows_user_id'),
+        {'extend_existing': True}
+    )
 
     user_following_id = Column("user_following_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None, default=None)
@@ -964,7 +991,6 @@ class UserFollowing(Base, BaseModel):
 
     follows_user = relationship('User', primaryjoin='User.user_id==UserFollowing.follows_user_id')
     follows_repository = relationship('Repository', order_by='Repository.repo_name')
-
 
     @classmethod
     def get_repo_followers(cls, repo_id):
@@ -978,7 +1004,6 @@ class CacheInvalidation(Base, BaseModel):
     cache_key = Column("cache_key", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     cache_args = Column("cache_args", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     cache_active = Column("cache_active", Boolean(), nullable=True, unique=None, default=False)
-
 
     def __init__(self, cache_key, cache_args=''):
         self.cache_key = cache_key
@@ -1122,16 +1147,18 @@ class Notification(Base, BaseModel):
 
 class UserNotification(Base, BaseModel):
     __tablename__ = 'user_to_notification'
-    __table_args__ = (UniqueConstraint('user_id', 'notification_id'),
-                      {'extend_existing': True})
-    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), primary_key=True)
+    __table_args__ = (
+        UniqueConstraint('user_id', 'notification_id'),
+        {'extend_existing': True}
+    )
+    user_id = Column('user_id', Integer(), ForeignKey('users.user_id'), primary_key=True)
     notification_id = Column("notification_id", Integer(), ForeignKey('notifications.notification_id'), primary_key=True)
     read = Column('read', Boolean, default=False)
     sent_on = Column('sent_on', DateTime(timezone=False), nullable=True, unique=None)
 
     user = relationship('User', lazy="joined")
     notification = relationship('Notification', lazy="joined",
-                            order_by=lambda:Notification.created_on.desc(),)
+                                rder_by=lambda: Notification.created_on.desc(),)
 
     def mark_as_read(self):
         self.read = True
