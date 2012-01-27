@@ -2984,11 +2984,6 @@ table.code-browser .browser-dir {
 	padding: 11px 0 11px 10px;
 }
 
-.breadcrumbs .changeset_hash {
-	text-transform: none;
-	color: #fff;
-}
-
 .breadcrumbs a {
 	color: #FFF;
 }
@@ -4140,6 +4135,7 @@ div.diffblock .code-header-title{
 
 div.diffblock .code-header .date{
     float:left;
+    text-transform: uppercase;
     padding: 2px 0px 0px 2px;
 }
 div.diffblock .code-header div{
