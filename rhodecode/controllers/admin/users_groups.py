@@ -108,8 +108,9 @@ class UsersGroupsController(BaseController):
         # url('users_group', id=ID)
 
         c.users_group = UsersGroup.get(id)
-        c.group_members = [(x.user_id, x.user.username) for x in
-                           c.users_group.members]
+        c.group_members_obj = [x.user for x in c.users_group.members]
+        c.group_members = [(x.user_id, x.username) for x in
+                           c.group_members_obj]
 
         c.available_members = [(x.user_id, x.username) for x in
                                self.sa.query(User).all()]
@@ -181,8 +182,9 @@ class UsersGroupsController(BaseController):
             return redirect(url('users_groups'))
 
         c.users_group.permissions = {}
-        c.group_members = [(x.user_id, x.user.username) for x in
-                           c.users_group.members]
+        c.group_members_obj = [x.user for x in c.users_group.members]
+        c.group_members = [(x.user_id, x.username) for x in
+                           c.group_members_obj]
         c.available_members = [(x.user_id, x.username) for x in
                                self.sa.query(User).all()]
         defaults = c.users_group.get_dict()

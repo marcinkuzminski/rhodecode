@@ -3639,6 +3639,16 @@ div#legend_container table td,div#legend_choices table td {
 	padding-left: 3px;
 }
 
+
+.group_members_wrap{
+	
+}
+
+.group_members .group_member{
+	height: 30px;
+	padding:0px 0px 0px 10px;
+}
+
 /*README STYLE*/
 
 div.readme {

@@ -94,6 +94,51 @@
 ${h.end_form()}
 </div>
 
+<div class="box box-right">
+    <!-- box / title -->
+    <div class="title">
+        <h5>${_('Permissions')}</h5>
+    </div>
+    ${h.form(url('users_group_perm', id=c.users_group.users_group_id), method='put')}
+    <div class="form">
+        <!-- fields -->
+        <div class="fields">
+             <div class="field">
+                <div class="label label-checkbox">
+                    <label for="create_repo_perm">${_('Create repositories')}:</label>
+                </div>
+                <div class="checkboxes">
+                    ${h.checkbox('create_repo_perm',value=True)}
+                </div>
+             </div>
+            <div class="buttons">
+              ${h.submit('save',_('Save'),class_="ui-button")}
+              ${h.reset('reset',_('Reset'),class_="ui-button")}
+            </div>
+        </div>
+    </div>
+    ${h.end_form()}
+</div>
+
+<div class="box box-right">
+    <!-- box / title -->
+    <div class="title">
+        <h5>${_('Group members')}</h5>
+    </div>
+    <div class="group_members_wrap">
+      <ul class="group_members">
+      %for user in c.group_members_obj:
+        <li>
+          <div class="group_member">
+            <div class="gravatar"><img alt="gravatar" src="${h.gravatar_url(user.email,24)}"/> </div>
+            <div>${user.username}</div>
+            <div>${user.full_name}</div>
+          </div>
+        </li>
+      %endfor
+      </ul>
+    </div>
+</div>
 <script type="text/javascript">
     YAHOO.util.Event.onDOMReady(function(){
             var D = YAHOO.util.Dom;
@@ -140,16 +185,16 @@ ${h.end_form()}
             tmp_cache = new Array();
 
             for(var i = 0;node = av_cache[i];i++){
-            	var add = true;
-	            for(var i2 = 0;node_2 = cache[i2];i2++){
-	                if(node.value == node_2.value){
-	                	add=false;
-	                	break;
-	                }
-	            }
-	            if(add){
-	            	tmp_cache.push(new Option(node.text, node.value, false, false));
-	            }
+                var add = true;
+                for(var i2 = 0;node_2 = cache[i2];i2++){
+                    if(node.value == node_2.value){
+                        add=false;
+                        break;
+                    }
+                }
+                if(add){
+                    tmp_cache.push(new Option(node.text, node.value, false, false));
+                }
             }
 
             for(var i = 0;node = tmp_cache[i];i++){
@@ -173,7 +218,7 @@ ${h.end_form()}
                             sel_cache.push(node);
                         }
                         else{
-                        	oth_cache.push(node)
+                            oth_cache.push(node)
                         }
                     }
 
@@ -182,8 +227,8 @@ ${h.end_form()}
 
                 //fill the field with given options
                 function fill_with(field,options){
-                	//clear firtst
-                	field.options.length=0;
+                    //clear firtst
+                    field.options.length=0;
                     for(var i = 0;node = options[i];i++){
                             field.options[i]=new Option(node.text, node.value,
                                     false, false);
@@ -242,29 +287,4 @@ ${h.end_form()}
             })
         });
 </script>
-<div class="box box-right">
-    <!-- box / title -->
-    <div class="title">
-        <h5>${_('Permissions')}</h5>
-    </div>
-    ${h.form(url('users_group_perm', id=c.users_group.users_group_id), method='put')}
-    <div class="form">
-        <!-- fields -->
-        <div class="fields">
-             <div class="field">
-                <div class="label label-checkbox">
-                    <label for="create_repo_perm">${_('Create repositories')}:</label>
-                </div>
-                <div class="checkboxes">
-                    ${h.checkbox('create_repo_perm',value=True)}
-                </div>
-             </div>
-            <div class="buttons">
-              ${h.submit('save',_('Save'),class_="ui-button")}
-              ${h.reset('reset',_('Reset'),class_="ui-button")}
-            </div>
-        </div>
-    </div>
-    ${h.end_form()}
-</div>
 </%def>
