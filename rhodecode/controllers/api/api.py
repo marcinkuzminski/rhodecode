@@ -131,17 +131,17 @@ class ApiController(JSONRPCController):
         return result
 
     @HasPermissionAllDecorator('hg.admin')
-    def create_user(self, apiuser, username, password, firstname,
-                    lastname, email, active=True, admin=False, ldap_dn=None):
+    def create_user(self, apiuser, username, password, email, firstname=None,
+                    lastname=None, active=True, admin=False, ldap_dn=None):
         """
         Create new user or updates current one
 
         :param apiuser:
         :param username:
         :param password:
+        :param email:
         :param name:
         :param lastname:
-        :param email:
         :param active:
         :param admin:
         :param ldap_dn:

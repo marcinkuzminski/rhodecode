@@ -51,13 +51,17 @@ class State_obj(object):
 # VALIDATORS
 #==============================================================================
 class ValidAuthToken(formencode.validators.FancyValidator):
-    messages = {'invalid_token':_('Token mismatch')}
+    messages = {'invalid_token': _('Token mismatch')}
 
     def validate_python(self, value, state):
 
         if value != authentication_token():
-            raise formencode.Invalid(self.message('invalid_token', state,
-                                            search_number=value), value, state)
+            raise formencode.Invalid(
+                self.message('invalid_token',
+                             state, search_number=value),
+                value,
+                state
+            )
 
 
 def ValidUsername(edit, old_data):
@@ -77,11 +81,13 @@ def ValidUsername(edit, old_data):
                                                'exists') , value, state)
 
             if re.match(r'^[a-zA-Z0-9]{1}[a-zA-Z0-9\-\_\.]+$', value) is None:
-                raise formencode.Invalid(_('Username may only contain '
-                                           'alphanumeric characters '
-                                           'underscores, periods or dashes '
-                                           'and must begin with alphanumeric '
-                                           'character'), value, state)
+                raise formencode.Invalid(
+                    _('Username may only contain alphanumeric characters '
+                      'underscores, periods or dashes and must begin with '
+                      'alphanumeric character'), 
+                    value, 
+                    state
+                )
 
     return _ValidUsername
 
@@ -103,15 +109,17 @@ def ValidUsersGroup(edit, old_data):
                 if UsersGroup.get_by_group_name(value, cache=False,
                                                case_insensitive=True):
                     raise formencode.Invalid(_('This users group '
-                                               'already exists') , value,
+                                               'already exists'), value,
                                              state)
 
             if re.match(r'^[a-zA-Z0-9]{1}[a-zA-Z0-9\-\_\.]+$', value) is None:
-                raise formencode.Invalid(_('RepoGroup name may only contain '
-                                           'alphanumeric characters '
-                                           'underscores, periods or dashes '
-                                           'and must begin with alphanumeric '
-                                           'character'), value, state)
+                raise formencode.Invalid(
+                    _('RepoGroup name may only contain  alphanumeric characters '
+                      'underscores, periods or dashes and must begin with '
+                      'alphanumeric character'), 
+                    value, 
+                    state
+                )
 
     return _ValidUsersGroup
 
@@ -177,32 +185,35 @@ class ValidPassword(formencode.validators.FancyValidator):
 
     def to_python(self, value, state):
 
-        if value:
+        if not value:
+            return
 
-            if value.get('password'):
-                try:
-                    value['password'] = get_crypt_password(value['password'])
-                except UnicodeEncodeError:
-                    e_dict = {'password':_('Invalid characters in password')}
-                    raise formencode.Invalid('', value, state, error_dict=e_dict)
+        if value.get('password'):
+            try:
+                value['password'] = get_crypt_password(value['password'])
+            except UnicodeEncodeError:
+                e_dict = {'password': _('Invalid characters in password')}
+                raise formencode.Invalid('', value, state, error_dict=e_dict)
 
-            if value.get('password_confirmation'):
-                try:
-                    value['password_confirmation'] = \
-                        get_crypt_password(value['password_confirmation'])
-                except UnicodeEncodeError:
-                    e_dict = {'password_confirmation':_('Invalid characters in password')}
-                    raise formencode.Invalid('', value, state, error_dict=e_dict)
+        if value.get('password_confirmation'):
+            try:
+                value['password_confirmation'] = \
+                    get_crypt_password(value['password_confirmation'])
+            except UnicodeEncodeError:
+                e_dict = {
+                    'password_confirmation': _('Invalid characters in password')
+                }
+                raise formencode.Invalid('', value, state, error_dict=e_dict)
 
-            if value.get('new_password'):
-                try:
-                    value['new_password'] = \
-                        get_crypt_password(value['new_password'])
-                except UnicodeEncodeError:
-                    e_dict = {'new_password':_('Invalid characters in password')}
-                    raise formencode.Invalid('', value, state, error_dict=e_dict)
+        if value.get('new_password'):
+            try:
+                value['new_password'] = \
+                    get_crypt_password(value['new_password'])
+            except UnicodeEncodeError:
+                e_dict = {'new_password': _('Invalid characters in password')}
+                raise formencode.Invalid('', value, state, error_dict=e_dict)
 
-            return value
+        return value
 
 
 class ValidPasswordsMatch(formencode.validators.FancyValidator):
@@ -224,9 +235,9 @@ class ValidAuth(formencode.validators.FancyValidator):
     }
 
     # error mapping
-    e_dict = {'username':messages['invalid_login'],
-              'password':messages['invalid_password']}
-    e_dict_disable = {'username':messages['disabled_account']}
+    e_dict = {'username': messages['invalid_login'],
+              'password': messages['invalid_password']}
+    e_dict_disable = {'username': messages['disabled_account']}
 
     def validate_python(self, value, state):
         password = value['password']
@@ -238,15 +249,19 @@ class ValidAuth(formencode.validators.FancyValidator):
         else:
             if user and user.active is False:
                 log.warning('user %s is disabled', username)
-                raise formencode.Invalid(self.message('disabled_account',
-                                         state=State_obj),
-                                         value, state,
-                                         error_dict=self.e_dict_disable)
+                raise formencode.Invalid(
+                    self.message('disabled_account',
+                    state=State_obj),
+                    value, state,
+                    error_dict=self.e_dict_disable
+                )
             else:
                 log.warning('user %s not authenticated', username)
-                raise formencode.Invalid(self.message('invalid_password',
-                                         state=State_obj), value, state,
-                                         error_dict=self.e_dict)
+                raise formencode.Invalid(
+                    self.message('invalid_password',
+                    state=State_obj), value, state,
+                    error_dict=self.e_dict
+                )
 
 
 class ValidRepoUser(formencode.validators.FancyValidator):
@@ -272,7 +287,6 @@ def ValidRepoName(edit, old_data):
                 e_dict = {'repo_name': _('This repository name is disallowed')}
                 raise formencode.Invalid('', value, state, error_dict=e_dict)
 
-
             if value.get('repo_group'):
                 gr = RepoGroup.get(value.get('repo_group'))
                 group_path = gr.full_path
@@ -285,7 +299,6 @@ def ValidRepoName(edit, old_data):
                 group_path = ''
                 repo_name_full = repo_name
 
-
             value['repo_name_full'] = repo_name_full
             rename = old_data.get('repo_name') != repo_name_full
             create = not edit
@@ -293,20 +306,22 @@ def ValidRepoName(edit, old_data):
 
                 if group_path != '':
                     if Repository.get_by_repo_name(repo_name_full):
-                        e_dict = {'repo_name':_('This repository already '
-                                                'exists in a group "%s"') %
-                                  gr.group_name}
+                        e_dict = {
+                            'repo_name': _('This repository already exists in '
+                                           'a group "%s"') % gr.group_name
+                        }
                         raise formencode.Invalid('', value, state,
                                                  error_dict=e_dict)
                 elif RepoGroup.get_by_group_name(repo_name_full):
-                        e_dict = {'repo_name':_('There is a group with this'
-                                                ' name already "%s"') %
-                                  repo_name_full}
+                        e_dict = {
+                            'repo_name': _('There is a group with this name '
+                                           'already "%s"') % repo_name_full
+                        }
                         raise formencode.Invalid('', value, state,
                                                  error_dict=e_dict)
 
                 elif Repository.get_by_repo_name(repo_name_full):
-                        e_dict = {'repo_name':_('This repository '
+                        e_dict = {'repo_name': _('This repository '
                                                 'already exists')}
                         raise formencode.Invalid('', value, state,
                                                  error_dict=e_dict)
@@ -341,14 +356,14 @@ def ValidCloneUri():
             elif value.startswith('https'):
                 try:
                     httpsrepository(make_ui('db'), value).capabilities
-                except Exception, e:
+                except Exception:
                     log.error(traceback.format_exc())
                     raise formencode.Invalid(_('invalid clone url'), value,
                                              state)
             elif value.startswith('http'):
                 try:
                     httprepository(make_ui('db'), value).capabilities
-                except Exception, e:
+                except Exception:
                     log.error(traceback.format_exc())
                     raise formencode.Invalid(_('invalid clone url'), value,
                                              state)
@@ -374,7 +389,7 @@ def ValidForkType(old_data):
 
 
 class ValidPerms(formencode.validators.FancyValidator):
-    messages = {'perm_new_member_name':_('This username or users group name'
+    messages = {'perm_new_member_name': _('This username or users group name'
                                          ' is not valid')}
 
     def to_python(self, value, state):
@@ -393,8 +408,9 @@ class ValidPerms(formencode.validators.FancyValidator):
                         perms_new.append((new_member, new_perm, new_type))
             elif k.startswith('u_perm_') or k.startswith('g_perm_'):
                 member = k[7:]
-                t = {'u':'user',
-                     'g':'users_group'}[k[0]]
+                t = {'u': 'user',
+                     'g': 'users_group'
+                }[k[0]]
                 if member == 'default':
                     if value['private']:
                         #set none for default when updating to private repo
@@ -419,8 +435,9 @@ class ValidPerms(formencode.validators.FancyValidator):
             except Exception:
                 msg = self.message('perm_new_member_name',
                                      state=State_obj)
-                raise formencode.Invalid(msg, value, state,
-                                         error_dict={'perm_new_member_name':msg})
+                raise formencode.Invalid(
+                    msg, value, state, error_dict={'perm_new_member_name': msg}
+                )
         return value
 
 
@@ -428,9 +445,8 @@ class ValidSettings(formencode.validators.FancyValidator):
 
     def to_python(self, value, state):
         # settings  form can't edit user
-        if value.has_key('user'):
+        if 'user' in value:
             del['value']['user']
-
         return value
 
 
@@ -440,7 +456,7 @@ class ValidPath(formencode.validators.FancyValidator):
         if not os.path.isdir(value):
             msg = _('This is not a valid path')
             raise formencode.Invalid(msg, value, state,
-                                     error_dict={'paths_root_path':msg})
+                                     error_dict={'paths_root_path': msg})
         return value
 
 
@@ -448,12 +464,12 @@ def UniqSystemEmail(old_data):
     class _UniqSystemEmail(formencode.validators.FancyValidator):
         def to_python(self, value, state):
             value = value.lower()
-            if old_data.get('email','').lower() != value:
+            if old_data.get('email', '').lower() != value:
                 user = User.get_by_email(value, case_insensitive=True)
                 if user:
                     raise formencode.Invalid(
-                                    _("This e-mail address is already taken"),
-                                    value, state)
+                        _("This e-mail address is already taken"), value, state
+                    )
             return value
 
     return _UniqSystemEmail
@@ -464,8 +480,9 @@ class ValidSystemEmail(formencode.validators.FancyValidator):
         value = value.lower()
         user = User.get_by_email(value, case_insensitive=True)
         if  user is None:
-            raise formencode.Invalid(_("This e-mail address doesn't exist.") ,
-                                     value, state)
+            raise formencode.Invalid(
+                _("This e-mail address doesn't exist."), value, state
+            )
 
         return value
 
@@ -486,13 +503,14 @@ class AttrLoginValidator(formencode.validators.FancyValidator):
     def to_python(self, value, state):
 
         if not value or not isinstance(value, (str, unicode)):
-            raise formencode.Invalid(_("The LDAP Login attribute of the CN "
-                                       "must be specified - this is the name "
-                                       "of the attribute that is equivalent "
-                                       "to 'username'"),
-                                     value, state)
+            raise formencode.Invalid(
+                _("The LDAP Login attribute of the CN must be specified - "
+                  "this is the name of the attribute that is equivalent "
+                  "to 'username'"), value, state
+            )
 
         return value
+
 
 #==============================================================================
 # FORMS
@@ -501,22 +519,22 @@ class LoginForm(formencode.Schema):
     allow_extra_fields = True
     filter_extra_fields = True
     username = UnicodeString(
-                             strip=True,
-                             min=1,
-                             not_empty=True,
-                             messages={
-                                'empty':_('Please enter a login'),
-                                'tooShort':_('Enter a value %(min)i characters long or more')}
-                            )
+        strip=True,
+        min=1,
+        not_empty=True,
+        messages={
+           'empty': _('Please enter a login'),
+           'tooShort': _('Enter a value %(min)i characters long or more')}
+    )
 
     password = UnicodeString(
-                            strip=True,
-                            min=3,
-                            not_empty=True,
-                            messages={
-                                'empty':_('Please enter a password'),
-                                'tooShort':_('Enter %(min)i characters or more')}
-                                )
+        strip=True,
+        min=3,
+        not_empty=True,
+        messages={
+            'empty': _('Please enter a password'),
+            'tooShort': _('Enter %(min)i characters or more')}
+    )
 
     remember = StringBoolean(if_missing=False)
 
@@ -531,15 +549,17 @@ def UserForm(edit=False, old_data={}):
                        ValidUsername(edit, old_data))
         if edit:
             new_password = All(UnicodeString(strip=True, min=6, not_empty=False))
-            password_confirmation = All(UnicodeString(strip=True, min=6, not_empty=False))
+            password_confirmation = All(UnicodeString(strip=True, min=6,
+                                                      not_empty=False))
             admin = StringBoolean(if_missing=False)
         else:
             password = All(UnicodeString(strip=True, min=6, not_empty=True))
-            password_confirmation = All(UnicodeString(strip=True, min=6, not_empty=False))
+            password_confirmation = All(UnicodeString(strip=True, min=6,
+                                                      not_empty=False))
 
         active = StringBoolean(if_missing=False)
-        name = UnicodeString(strip=True, min=1, not_empty=True)
-        lastname = UnicodeString(strip=True, min=1, not_empty=True)
+        name = UnicodeString(strip=True, min=1, not_empty=False)
+        lastname = UnicodeString(strip=True, min=1, not_empty=False)
         email = All(Email(not_empty=True), UniqSystemEmail(old_data))
 
         chained_validators = [ValidPasswordsMatch, ValidPassword]
@@ -592,13 +612,14 @@ def RegisterForm(edit=False, old_data={}):
         password = All(UnicodeString(strip=True, min=6, not_empty=True))
         password_confirmation = All(UnicodeString(strip=True, min=6, not_empty=True))
         active = StringBoolean(if_missing=False)
-        name = UnicodeString(strip=True, min=1, not_empty=True)
-        lastname = UnicodeString(strip=True, min=1, not_empty=True)
+        name = UnicodeString(strip=True, min=1, not_empty=False)
+        lastname = UnicodeString(strip=True, min=1, not_empty=False)
         email = All(Email(not_empty=True), UniqSystemEmail(old_data))
 
         chained_validators = [ValidPasswordsMatch, ValidPassword]
 
     return _RegisterForm
+
 
 def PasswordResetForm():
     class _PasswordResetForm(formencode.Schema):
@@ -606,6 +627,7 @@ def PasswordResetForm():
         filter_extra_fields = True
         email = All(ValidSystemEmail(), Email(not_empty=True))
     return _PasswordResetForm
+
 
 def RepoForm(edit=False, old_data={}, supported_backends=BACKENDS.keys(),
              repo_groups=[]):
@@ -630,6 +652,7 @@ def RepoForm(edit=False, old_data={}, supported_backends=BACKENDS.keys(),
         chained_validators = [ValidRepoName(edit, old_data), ValidPerms]
     return _RepoForm
 
+
 def RepoForkForm(edit=False, old_data={}, supported_backends=BACKENDS.keys(),
                  repo_groups=[]):
     class _RepoForkForm(formencode.Schema):
@@ -647,6 +670,7 @@ def RepoForkForm(edit=False, old_data={}, supported_backends=BACKENDS.keys(),
         chained_validators = [ValidForkName(edit, old_data)]
 
     return _RepoForkForm
+
 
 def RepoSettingsForm(edit=False, old_data={}, supported_backends=BACKENDS.keys(),
                      repo_groups=[]):
@@ -674,6 +698,7 @@ def ApplicationSettingsForm():
 
     return _ApplicationSettingsForm
 
+
 def ApplicationUiSettingsForm():
     class _ApplicationUiSettingsForm(formencode.Schema):
         allow_extra_fields = True
@@ -686,6 +711,7 @@ def ApplicationUiSettingsForm():
         hooks_preoutgoing_pull_logger = OneOf(['True', 'False'], if_missing=False)
 
     return _ApplicationUiSettingsForm
+
 
 def DefaultPermissionsForm(perms_choices, register_choices, create_choices):
     class _DefaultPermissionsForm(formencode.Schema):

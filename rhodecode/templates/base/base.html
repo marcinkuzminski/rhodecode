@@ -112,7 +112,7 @@
             ${h.end_form()}
         %else:
             <div class="links_left">
-                <div class="full_name">${c.rhodecode_user.full_name}</div>
+                <div class="full_name">${c.rhodecode_user.full_name_or_username}</div>
                 <div class="email">${c.rhodecode_user.email}</div>
                 <div class="big_gravatar"><img alt="gravatar" src="${h.gravatar_url(c.rhodecode_user.email,48)}" /></div>
             </div>

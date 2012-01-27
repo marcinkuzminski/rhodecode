@@ -129,6 +129,7 @@ def get_crypt_password(password):
 def check_password(password, hashed):
     return RhodeCodeCrypto.hash_check(password, hashed)
 
+
 def generate_api_key(str_, salt=None):
     """
     Generates API KEY from given string
@@ -237,6 +238,7 @@ def authenticate(username, password):
                 pass
     return False
 
+
 def login_container_auth(username):
     user = User.get_by_username(username)
     if user is None:
@@ -260,6 +262,7 @@ def login_container_auth(username):
               user.username)
     return user
 
+
 def get_container_username(environ, config):
     username = None
 
@@ -277,6 +280,7 @@ def get_container_username(environ, config):
         log.debug('Received username %s from container', username)
 
     return username
+
 
 class  AuthUser(object):
     """
@@ -302,6 +306,7 @@ class  AuthUser(object):
         self.permissions = {}
         self._api_key = api_key
         self.propagate_data()
+        self._instance = None
 
     def propagate_data(self):
         user_model = UserModel()
@@ -350,10 +355,6 @@ class  AuthUser(object):
     def is_admin(self):
         return self.admin
 
-    @property
-    def full_contact(self):
-        return '%s %s <%s>' % (self.name, self.lastname, self.email)
-
     def __repr__(self):
         return "<AuthUser('id:%s:%s|%s')>" % (self.user_id, self.username,
                                               self.is_authenticated)
@@ -363,9 +364,9 @@ class  AuthUser(object):
             self.is_authenticated = authenticated
 
     def get_cookie_store(self):
-        return {'username':self.username,
+        return {'username': self.username,
                 'user_id': self.user_id,
-                'is_authenticated':self.is_authenticated}
+                'is_authenticated': self.is_authenticated}
 
     @classmethod
     def from_cookie_store(cls, cookie_store):
@@ -373,6 +374,7 @@ class  AuthUser(object):
         username = cookie_store.get('username')
         api_key = cookie_store.get('api_key')
         return AuthUser(user_id, api_key, username)
+
 
 def set_available_permissions(config):
     """
@@ -388,7 +390,7 @@ def set_available_permissions(config):
     try:
         sa = meta.Session
         all_perms = sa.query(Permission).all()
-    except:
+    except Exception:
         pass
     finally:
         meta.Session.remove()

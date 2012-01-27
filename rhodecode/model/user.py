@@ -92,7 +92,6 @@ class UserModel(BaseModel):
             log.error(traceback.format_exc())
             raise
 
-
     def create_or_update(self, username, password, email, name, lastname,
                          active=True, admin=False, ldap_dn=None):
         """
@@ -135,7 +134,6 @@ class UserModel(BaseModel):
         except (DatabaseError,):
             log.error(traceback.format_exc())
             raise
-
 
     def create_for_container_auth(self, username, attrs):
         """
@@ -231,7 +229,7 @@ class UserModel(BaseModel):
             body = body % (new_user.username, new_user.full_name,
                            new_user.email)
             edit_url = url('edit_user', id=new_user.user_id, qualified=True)
-            kw = {'registered_user_url':edit_url}
+            kw = {'registered_user_url': edit_url}
             NotificationModel().create(created_by=new_user, subject=subject,
                                        body=body, recipients=None,
                                        type_=Notification.TYPE_REGISTRATION,
@@ -492,7 +490,6 @@ class UserModel(BaseModel):
         new.user = user
         new.permission = perm
         self.sa.add(new)
-
 
     def revoke_perm(self, user, perm):
         if not isinstance(perm, Permission):
