@@ -1158,7 +1158,7 @@ class UserNotification(Base, BaseModel):
 
     user = relationship('User', lazy="joined")
     notification = relationship('Notification', lazy="joined",
-                                rder_by=lambda: Notification.created_on.desc(),)
+                                order_by=lambda: Notification.created_on.desc(),)
 
     def mark_as_read(self):
         self.read = True
