@@ -137,9 +137,9 @@
 		     %for repo in c.user_repos:
 		        <tr>
 		            <td>
-                     %if repo['dbrepo']['repo_type'] =='hg':
+                     %if h.is_hg(repo['dbrepo']['repo_type']):
                        <img class="icon" title="${_('Mercurial repository')}" alt="${_('Mercurial repository')}" src="${h.url('/images/icons/hgicon.png')}"/>
-                     %elif repo['dbrepo']['repo_type'] =='git':
+                     %elif h.is_git(repo['dbrepo']['repo_type']):
                        <img class="icon" title="${_('Git repository')}" alt="${_('Git repository')}" src="${h.url('/images/icons/giticon.png')}"/>
                      %else:
 

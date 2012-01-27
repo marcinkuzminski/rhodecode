@@ -160,7 +160,6 @@ class ReposGroupsController(BaseController):
 
         return redirect(url('repos_groups'))
 
-
     @HasPermissionAnyDecorator('hg.admin')
     def delete(self, id):
         """DELETE /repos_groups/id: Delete an existing item"""
