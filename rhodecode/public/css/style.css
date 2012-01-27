@@ -2984,6 +2984,11 @@ table.code-browser .browser-dir {
 	padding: 11px 0 11px 10px;
 }
 
+.breadcrumbs .hash {
+	text-transform: none;
+	color: #fff;
+}
+
 .breadcrumbs a {
 	color: #FFF;
 }
