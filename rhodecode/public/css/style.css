@@ -4149,8 +4149,7 @@ div.diffblock .code-header-title{
 }
 div.diffblock .code-header .hash{
     float: left;
-    font-family: monospace;
-    padding: 3px 0 0 2px;
+    padding: 2px 0 0 2px;
 }
 div.diffblock .code-header .date{
     float:left;
