@@ -59,10 +59,10 @@
                       %endif
                   %endif:
                  ##REPO TYPE
-		         %if c.dbrepo.repo_type =='hg':
+		         %if h.is_hg(c.dbrepo):
 		           <img style="margin-bottom:2px" class="icon" title="${_('Mercurial repository')}" alt="${_('Mercurial repository')}" src="${h.url('/images/icons/hgicon.png')}"/>
 		         %endif
-		         %if c.dbrepo.repo_type =='git':
+		         %if h.is_git(c.dbrepo):
 		           <img style="margin-bottom:2px" class="icon" title="${_('Git repository')}" alt="${_('Git repository')}" src="${h.url('/images/icons/giticon.png')}"/>
 		         %endif
 

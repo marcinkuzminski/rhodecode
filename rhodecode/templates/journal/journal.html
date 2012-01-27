@@ -113,9 +113,9 @@
                         </span>
                         </div>
 
-                         %if entry.follows_repository.repo_type == 'hg':
+                         %if h.is_hg(entry.follows_repository):
                            <img class="icon" title="${_('Mercurial repository')}" alt="${_('Mercurial repository')}" src="${h.url('/images/icons/hgicon.png')}"/>
-                         %elif entry.follows_repository.repo_type == 'git':
+                         %elif h.is_git(entry.follows_repository):
                            <img class="icon" title="${_('Git repository')}" alt="${_('Git repository')}" src="${h.url('/images/icons/giticon.png')}"/>
                          %endif
 

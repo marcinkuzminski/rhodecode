@@ -329,6 +329,26 @@ short_id = lambda x: x[:12]
 hide_credentials = lambda x: ''.join(credentials_filter(x))
 
 
+def is_git(repository):
+    if hasattr(repository, 'alias'):
+        _type = repository.alias
+    elif hasattr(repository, 'repo_type'):
+        _type = repository.repo_type
+    else:
+        _type = repository
+    return _type == 'git'
+
+
+def is_hg(repository):
+    if hasattr(repository, 'alias'):
+        _type = repository.alias
+    elif hasattr(repository, 'repo_type'):
+        _type = repository.repo_type
+    else:
+        _type = repository
+    return _type == 'hg'
+
+
 def email_or_none(author):
     _email = email(author)
     if _email != '':
@@ -365,6 +385,7 @@ def person(author):
 
     # Still nothing?  Just pass back the author name then
     return _author
+
 
 def bool2icon(value):
     """Returns True/False values represented as small html image of true/false
@@ -487,6 +508,7 @@ def action_parser(user_log, feed=False):
 
     return [literal(action), action_params_func]
 
+
 def action_parser_icon(user_log):
     action = user_log.action
     action_params = None
@@ -521,6 +543,7 @@ def action_parser_icon(user_log):
 #==============================================================================
 from rhodecode.lib.auth import HasPermissionAny, HasPermissionAll, \
 HasRepoPermissionAny, HasRepoPermissionAll
+
 
 #==============================================================================
 # GRAVATAR URL
@@ -652,7 +675,6 @@ def changed_tooltip(nodes):
         return ': ' + _('No Files')
 
 
-
 def repo_link(groups_and_repos):
     """
     Makes a breadcrumbs link to repo within a group
@@ -673,6 +695,7 @@ def repo_link(groups_and_repos):
                                            group_name=group.group_name))
         return literal(' &raquo; '.join(map(make_link, groups)) + \
                        " &raquo; " + repo_name)
+
 
 def fancy_file_stats(stats):
     """
@@ -701,13 +724,12 @@ def fancy_file_stats(stats):
     a_v = a if a > 0 else ''
     d_v = d if d > 0 else ''
 
-
     def cgen(l_type):
-        mapping = {'tr':'top-right-rounded-corner',
-                   'tl':'top-left-rounded-corner',
-                   'br':'bottom-right-rounded-corner',
-                   'bl':'bottom-left-rounded-corner'}
-        map_getter = lambda x:mapping[x]
+        mapping = {'tr': 'top-right-rounded-corner',
+                   'tl': 'top-left-rounded-corner',
+                   'br': 'bottom-right-rounded-corner',
+                   'bl': 'bottom-left-rounded-corner'}
+        map_getter = lambda x: mapping[x]
 
         if l_type == 'a' and d_v:
             #case when added and deleted are present
@@ -722,12 +744,12 @@ def fancy_file_stats(stats):
         if l_type == 'd' and not a_v:
             return ' '.join(map(map_getter, ['tr', 'br', 'tl', 'bl']))
 
-
-
-    d_a = '<div class="added %s" style="width:%s%%">%s</div>' % (cgen('a'),
-                                                                 a_p, a_v)
-    d_d = '<div class="deleted %s" style="width:%s%%">%s</div>' % (cgen('d'),
-                                                                   d_p, d_v)
+    d_a = '<div class="added %s" style="width:%s%%">%s</div>' % (
+        cgen('a'),a_p, a_v
+    )
+    d_d = '<div class="deleted %s" style="width:%s%%">%s</div>' % (
+        cgen('d'),d_p, d_v
+    )
     return literal('<div style="width:%spx">%s%s</div>' % (width, d_a, d_d))
 
 
@@ -742,6 +764,7 @@ def urlify_text(text_):
         return '<a href="%(url)s">%(url)s</a>' % ({'url': url_full})
 
     return literal(url_pat.sub(url_func, text_))
+
 
 def urlify_changesets(text_, repository):
     import re
@@ -767,6 +790,7 @@ def urlify_changesets(text_, repository):
     newtext = URL_PAT.sub(url_func, text_)
 
     return newtext
+
 
 def urlify_commit(text_, repository=None, link_=None):
     import re

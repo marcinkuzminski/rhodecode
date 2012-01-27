@@ -91,7 +91,7 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
 									%if len(cs.parents)>1:
 									<span class="merge">${_('merge')}</span>
 									%endif
-									%if cs.branch:
+									%if h.is_hg(c.rhodecode_repo) and cs.branch:
 									<span class="branchtag" title="${'%s %s' % (_('branch'),cs.branch)}">
 									   ${h.link_to(cs.branch,h.url('files_home',repo_name=c.repo_name,revision=cs.raw_id))}</span>
 									%endif
