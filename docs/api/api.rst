@@ -158,9 +158,9 @@ INPUT::
     args :    {
                 "username" :  "<username>",
                 "password" :  "<password>",
-                "firstname" : "<firstname>",
-                "lastname" :  "<lastname>",
-                "email" :     "<useremail>"
+                "email" :     "<useremail>",
+                "firstname" : "<firstname> = None",
+                "lastname" :  "<lastname> = None",
                 "active" :    "<bool> = True",
                 "admin" :     "<bool> = False",
                 "ldap_dn" :   "<ldap_dn> = None"

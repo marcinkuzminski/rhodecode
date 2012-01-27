@@ -35,6 +35,7 @@ news
   based on user defined regular expression
 - added linking of changesets in commit messages  
 - new compact changelog with expandable commit messages
+- firstname and lastname are optional in user creation
     
 fixes
 -----

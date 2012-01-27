@@ -299,6 +299,11 @@ class User(Base, BaseModel):
         return '%s %s' % (self.name, self.lastname)
 
     @property
+    def full_name_or_username(self):
+        return ('%s %s' % (self.name, self.lastname)
+                if (self.name and self.lastname) else self.username)
+
+    @property
     def full_contact(self):
         return '%s %s <%s>' % (self.name, self.lastname, self.email)
 
@@ -354,8 +359,13 @@ class User(Base, BaseModel):
         log.debug('updated user %s lastlogin', self.username)
 
     def __json__(self):
-        return dict(email=self.email,
-                    full_name=self.full_name)
+        return dict(
+            email=self.email,
+            full_name=self.full_name,
+            full_name_or_username=self.full_name_or_username,
+            short_contact=self.short_contact,
+            full_contact=self.full_contact
+        )
 
 
 class UserLog(Base, BaseModel):
