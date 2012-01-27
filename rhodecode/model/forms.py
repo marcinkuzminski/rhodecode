@@ -388,57 +388,66 @@ def ValidForkType(old_data):
     return _ValidForkType
 
 
-class ValidPerms(formencode.validators.FancyValidator):
-    messages = {'perm_new_member_name': _('This username or users group name'
-                                         ' is not valid')}
+def ValidPerms(type_='repo'):
+    if type_ == 'group':
+        EMPTY_PERM = 'group.none'
+    elif type_ == 'repo':
+        EMPTY_PERM = 'repository.none'
 
-    def to_python(self, value, state):
-        perms_update = []
-        perms_new = []
-        #build a list of permission to update and new permission to create
-        for k, v in value.items():
-            #means new added member to permissions
-            if k.startswith('perm_new_member'):
-                new_perm = value.get('perm_new_member', False)
-                new_member = value.get('perm_new_member_name', False)
-                new_type = value.get('perm_new_member_type')
+    class _ValidPerms(formencode.validators.FancyValidator):
+        messages = {
+            'perm_new_member_name':
+                _('This username or users group name is not valid')
+        }
 
-                if new_member and new_perm:
-                    if (new_member, new_perm, new_type) not in perms_new:
-                        perms_new.append((new_member, new_perm, new_type))
-            elif k.startswith('u_perm_') or k.startswith('g_perm_'):
-                member = k[7:]
-                t = {'u': 'user',
-                     'g': 'users_group'
-                }[k[0]]
-                if member == 'default':
-                    if value['private']:
-                        #set none for default when updating to private repo
-                        v = 'repository.none'
-                perms_update.append((member, v, t))
+        def to_python(self, value, state):
+            perms_update = []
+            perms_new = []
+            # build a list of permission to update and new permission to create
+            for k, v in value.items():
+                # means new added member to permissions
+                if k.startswith('perm_new_member'):
+                    new_perm = value.get('perm_new_member', False)
+                    new_member = value.get('perm_new_member_name', False)
+                    new_type = value.get('perm_new_member_type')
 
-        value['perms_updates'] = perms_update
-        value['perms_new'] = perms_new
+                    if new_member and new_perm:
+                        if (new_member, new_perm, new_type) not in perms_new:
+                            perms_new.append((new_member, new_perm, new_type))
+                elif k.startswith('u_perm_') or k.startswith('g_perm_'):
+                    member = k[7:]
+                    t = {'u': 'user',
+                         'g': 'users_group'
+                    }[k[0]]
+                    if member == 'default':
+                        if value.get('private'):
+                            # set none for default when updating to private repo
+                            v = EMPTY_PERM
+                    perms_update.append((member, v, t))
 
-        #update permissions
-        for k, v, t in perms_new:
-            try:
-                if t is 'user':
-                    self.user_db = User.query()\
-                        .filter(User.active == True)\
-                        .filter(User.username == k).one()
-                if t is 'users_group':
-                    self.user_db = UsersGroup.query()\
-                        .filter(UsersGroup.users_group_active == True)\
-                        .filter(UsersGroup.users_group_name == k).one()
+            value['perms_updates'] = perms_update
+            value['perms_new'] = perms_new
 
-            except Exception:
-                msg = self.message('perm_new_member_name',
-                                     state=State_obj)
-                raise formencode.Invalid(
-                    msg, value, state, error_dict={'perm_new_member_name': msg}
-                )
-        return value
+            # update permissions
+            for k, v, t in perms_new:
+                try:
+                    if t is 'user':
+                        self.user_db = User.query()\
+                            .filter(User.active == True)\
+                            .filter(User.username == k).one()
+                    if t is 'users_group':
+                        self.user_db = UsersGroup.query()\
+                            .filter(UsersGroup.users_group_active == True)\
+                            .filter(UsersGroup.users_group_name == k).one()
+
+                except Exception:
+                    msg = self.message('perm_new_member_name',
+                                         state=State_obj)
+                    raise formencode.Invalid(
+                        msg, value, state, error_dict={'perm_new_member_name': msg}
+                    )
+            return value
+    return _ValidPerms
 
 
 class ValidSettings(formencode.validators.FancyValidator):
@@ -588,7 +597,7 @@ def UsersGroupForm(edit=False, old_data={}, available_members=[]):
 def ReposGroupForm(edit=False, old_data={}, available_groups=[]):
     class _ReposGroupForm(formencode.Schema):
         allow_extra_fields = True
-        filter_extra_fields = True
+        filter_extra_fields = False
 
         group_name = All(UnicodeString(strip=True, min=1, not_empty=True),
                                SlugifyName())
@@ -598,7 +607,7 @@ def ReposGroupForm(edit=False, old_data={}, available_groups=[]):
                                         testValueList=True,
                                         if_missing=None, not_empty=False)
 
-        chained_validators = [ValidReposGroup(edit, old_data)]
+        chained_validators = [ValidReposGroup(edit, old_data), ValidPerms('group')]
 
     return _ReposGroupForm
 
@@ -649,7 +658,7 @@ def RepoForm(edit=False, old_data={}, supported_backends=BACKENDS.keys(),
             #this is repo owner
             user = All(UnicodeString(not_empty=True), ValidRepoUser)
 
-        chained_validators = [ValidRepoName(edit, old_data), ValidPerms]
+        chained_validators = [ValidRepoName(edit, old_data), ValidPerms()]
     return _RepoForm
 
 
@@ -683,7 +692,7 @@ def RepoSettingsForm(edit=False, old_data={}, supported_backends=BACKENDS.keys()
         repo_group = OneOf(repo_groups, hideList=True)
         private = StringBoolean(if_missing=False)
 
-        chained_validators = [ValidRepoName(edit, old_data), ValidPerms,
+        chained_validators = [ValidRepoName(edit, old_data), ValidPerms(),
                               ValidSettings]
     return _RepoForm
 

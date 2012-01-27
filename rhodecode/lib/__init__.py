@@ -25,6 +25,8 @@
 
 import os
 import re
+from vcs.utils.lazy import LazyProperty
+
 
 def __get_lem():
     from pygments import lexers
@@ -213,6 +215,7 @@ def safe_unicode(str_, from_encoding='utf8'):
     except (ImportError, UnicodeDecodeError, Exception):
         return unicode(str_, from_encoding, 'replace')
 
+
 def safe_str(unicode_, to_encoding='utf8'):
     """
     safe str function. Does few trick to turn unicode_ into string
@@ -248,7 +251,6 @@ def safe_str(unicode_, to_encoding='utf8'):
         return unicode_.encode(to_encoding, 'replace')
 
     return safe_str
-
 
 
 def engine_from_config(configuration, prefix='sqlalchemy.', **kwargs):
@@ -393,6 +395,7 @@ def credentials_filter(uri):
 
     return ''.join(uri)
 
+
 def get_changeset_safe(repo, rev):
     """
     Safe version of get_changeset if this changeset doesn't exists for a
@@ -436,6 +439,7 @@ def get_current_revision(quiet=False):
             print ("Cannot retrieve rhodecode's revision. Original error "
                    "was: %s" % err)
         return None
+
 
 def extract_mentioned_users(s):
     """

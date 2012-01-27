@@ -113,8 +113,9 @@ def make_map(config):
                                             function=check_repo))
         #ajax delete repo perm user
         m.connect('delete_repo_user', "/repos_delete_user/{repo_name:.*}",
-             action="delete_perm_user", conditions=dict(method=["DELETE"],
-                                                        function=check_repo))
+             action="delete_perm_user",
+             conditions=dict(method=["DELETE"], function=check_repo))
+
         #ajax delete repo perm users_group
         m.connect('delete_repo_users_group',
                   "/repos_delete_users_group/{repo_name:.*}",
@@ -128,7 +129,7 @@ def make_map(config):
         m.connect('repo_cache', "/repos_cache/{repo_name:.*}",
                   action="repo_cache", conditions=dict(method=["DELETE"],
                                                        function=check_repo))
-        m.connect('repo_public_journal',"/repos_public_journal/{repo_name:.*}",
+        m.connect('repo_public_journal', "/repos_public_journal/{repo_name:.*}",
                   action="repo_public_journal", conditions=dict(method=["PUT"],
                                                         function=check_repo))
         m.connect('repo_pull', "/repo_pull/{repo_name:.*}",
@@ -169,6 +170,17 @@ def make_map(config):
         m.connect("formatted_repos_group", "/repos_groups/{id}.{format}",
                   action="show", conditions=dict(method=["GET"],
                                                  function=check_int))
+        # ajax delete repos group perm user
+        m.connect('delete_repos_group_user_perm',
+                  "/delete_repos_group_user_perm/{group_name:.*}",
+             action="delete_repos_group_user_perm",
+             conditions=dict(method=["DELETE"], function=check_group))
+
+        # ajax delete repos group perm users_group
+        m.connect('delete_repos_group_users_group_perm',
+                  "/delete_repos_group_users_group_perm/{group_name:.*}",
+                  action="delete_repos_group_users_group_perm",
+                  conditions=dict(method=["DELETE"], function=check_group))
 
     #ADMIN USER REST ROUTES
     with rmap.submapper(path_prefix=ADMIN_PREFIX,
@@ -310,8 +322,6 @@ def make_map(config):
         m.connect("formatted_notification", "/notifications/{notification_id}.{format}",
                   action="show", conditions=dict(method=["GET"]))
 
-
-
     #ADMIN MAIN PAGES
     with rmap.submapper(path_prefix=ADMIN_PREFIX,
                         controller='admin/admin') as m:
@@ -320,12 +330,11 @@ def make_map(config):
                   action='add_repo')
 
     #==========================================================================
-    # API V1
+    # API V2
     #==========================================================================
     with rmap.submapper(path_prefix=ADMIN_PREFIX,
                         controller='api/api') as m:
         m.connect('api', '/api')
-
 
     #USER JOURNAL
     rmap.connect('journal', '%s/journal' % ADMIN_PREFIX, controller='journal')
@@ -388,11 +397,13 @@ def make_map(config):
                 controller='changeset', revision='tip',
                 conditions=dict(function=check_repo))
 
-    rmap.connect('changeset_comment', '/{repo_name:.*}/changeset/{revision}/comment',
+    rmap.connect('changeset_comment',
+                 '/{repo_name:.*}/changeset/{revision}/comment',
                 controller='changeset', revision='tip', action='comment',
                 conditions=dict(function=check_repo))
 
-    rmap.connect('changeset_comment_delete', '/{repo_name:.*}/changeset/comment/{comment_id}/delete',
+    rmap.connect('changeset_comment_delete',
+                 '/{repo_name:.*}/changeset/comment/{comment_id}/delete',
                 controller='changeset', action='delete_comment',
                 conditions=dict(function=check_repo, method=["DELETE"]))
 
@@ -492,6 +503,5 @@ def make_map(config):
     rmap.connect('repo_followers_home', '/{repo_name:.*}/followers',
                  controller='followers', action='followers',
                  conditions=dict(function=check_repo))
-
 
     return rmap

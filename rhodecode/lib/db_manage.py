@@ -442,23 +442,28 @@ class DbManage(object):
 
     def create_permissions(self):
         # module.(access|create|change|delete)_[name]
-        # module.(read|write|owner)
-        perms = [('repository.none', 'Repository no access'),
-                 ('repository.read', 'Repository read access'),
-                 ('repository.write', 'Repository write access'),
-                 ('repository.admin', 'Repository admin access'),
-                 ('hg.admin', 'Hg Administrator'),
-                 ('hg.create.repository', 'Repository create'),
-                 ('hg.create.none', 'Repository creation disabled'),
-                 ('hg.register.none', 'Register disabled'),
-                 ('hg.register.manual_activate', 'Register new user with '
-                                                 'RhodeCode without manual'
-                                                 'activation'),
+        # module.(none|read|write|admin)
+        perms = [
+         ('repository.none', 'Repository no access'),
+         ('repository.read', 'Repository read access'),
+         ('repository.write', 'Repository write access'),
+         ('repository.admin', 'Repository admin access'),
 
-                 ('hg.register.auto_activate', 'Register new user with '
-                                               'RhodeCode without auto '
-                                               'activation'),
-                ]
+         ('group.none', 'Repositories Group no access'),
+         ('group.read', 'Repositories Group read access'),
+         ('group.write', 'Repositories Group write access'),
+         ('group.admin', 'Repositories Group admin access'),
+
+         ('hg.admin', 'Hg Administrator'),
+         ('hg.create.repository', 'Repository create'),
+         ('hg.create.none', 'Repository creation disabled'),
+         ('hg.register.none', 'Register disabled'),
+         ('hg.register.manual_activate', 'Register new user with RhodeCode '
+                                         'without manual activation'),
+
+         ('hg.register.auto_activate', 'Register new user with RhodeCode '
+                                        'without auto activation'),
+        ]
 
         for p in perms:
             new_perm = Permission()

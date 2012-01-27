@@ -130,7 +130,7 @@ def log_create_repository(repository_dict, created_by, **kwargs):
     Post create repository Hook. This is a dummy function for admins to re-use
     if needed
 
-    :param repository: dict dump of repository object 
+    :param repository: dict dump of repository object
     :param created_by: username who created repository
     :param created_date: date of creation
 

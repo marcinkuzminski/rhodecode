@@ -91,6 +91,7 @@ Get's an user by username, Returns empty result if user is not found.
 This command can be executed only using api_key belonging to user with admin 
 rights.
 
+
 INPUT::
 
     api_key : "<api_key>"
@@ -122,6 +123,7 @@ get_users
 Lists all existing users. This command can be executed only using api_key
 belonging to user with admin rights.
 
+
 INPUT::
 
     api_key : "<api_key>"
@@ -145,11 +147,13 @@ OUTPUT::
             ]
     error:  null
 
+
 create_user
 -----------
 
 Creates new user or updates current one if such user exists. This command can 
 be executed only using api_key belonging to user with admin rights.
+
 
 INPUT::
 
@@ -174,11 +178,13 @@ OUTPUT::
             }
     error:  null
 
+
 get_users_group
 ---------------
 
 Gets an existing users group. This command can be executed only using api_key
 belonging to user with admin rights.
+
 
 INPUT::
 
@@ -210,11 +216,13 @@ OUTPUT::
              }
     error : null
 
+
 get_users_groups
 ----------------
 
 Lists all existing users groups. This command can be executed only using 
 api_key belonging to user with admin rights.
+
 
 INPUT::
 
@@ -253,6 +261,7 @@ create_users_group
 Creates new users group. This command can be executed only using api_key
 belonging to user with admin rights
 
+
 INPUT::
 
     api_key : "<api_key>"
@@ -270,11 +279,13 @@ OUTPUT::
             }
     error:  null
 
+
 add_user_to_users_group
 -----------------------
 
 Adds a user to a users group. This command can be executed only using api_key
 belonging to user with admin rights
+
 
 INPUT::
 
@@ -293,11 +304,13 @@ OUTPUT::
             }
     error:  null
 
+
 get_repo
 --------
 
 Gets an existing repository. This command can be executed only using api_key
 belonging to user with admin rights
+
 
 INPUT::
 
@@ -338,11 +351,13 @@ OUTPUT::
             }
     error:  null
 
+
 get_repos
 ---------
 
 Lists all existing repositories. This command can be executed only using api_key
 belonging to user with admin rights
+
 
 INPUT::
 
@@ -372,6 +387,7 @@ at given revision. It's possible to specify ret_type to show only `files` or
 `dirs`. This command can be executed only using api_key belonging to user 
 with admin rights
 
+
 INPUT::
 
     api_key : "<api_key>"
@@ -395,7 +411,6 @@ OUTPUT::
     error:  null
 
 
-
 create_repo
 -----------
 
@@ -404,6 +419,7 @@ belonging to user with admin rights.
 If repository name contains "/", all needed repository groups will be created.
 For example "foo/bar/baz" will create groups "foo", "bar" (with "foo" as parent),
 and create "baz" repository with "bar" as group.
+
 
 INPUT::
 
@@ -420,54 +436,106 @@ INPUT::
 OUTPUT::
 
     result: {
-                "id": "<newrepoid>",
-                "msg": "Created new repository <reponame>",
+              "id": "<newrepoid>",
+              "msg": "Created new repository <reponame>",
             }
     error:  null
 
-add_user_to_repo
-----------------
 
-Add a user to a repository. This command can be executed only using api_key
-belonging to user with admin rights.
-If "perm" is None, user will be removed from the repository.
+grant_user_permission
+---------------------
+
+Grant permission for user on given repository, or update existing one
+if found. This command can be executed only using api_key belonging to user 
+with admin rights.
+
 
 INPUT::
 
     api_key : "<api_key>"
-    method :  "add_user_to_repo"
+    method :  "grant_user_permission"
     args:     {
                 "repo_name" :  "<reponame>",
                 "username" :   "<username>",
-                "perm" :       "(None|repository.(read|write|admin))",
+                "perm" :       "(repository.(none|read|write|admin))",
               }
 
 OUTPUT::
 
     result: {
-                "msg" : "Added perm: <perm> for <username> in repo: <reponame>"
+              "msg" : "Granted perm: <perm> for user: <username> in repo: <reponame>"
             }
     error:  null
 
-add_users_group_to_repo
------------------------
 
-Add a users group to a repository. This command can be executed only using 
-api_key belonging to user with admin rights. If "perm" is None, group will 
-be removed from the repository.
+revoke_user_permission
+----------------------
+
+Revoke permission for user on given repository. This command can be executed 
+only using api_key belonging to user with admin rights.
+
 
 INPUT::
 
     api_key : "<api_key>"
-    method :  "add_users_group_to_repo"
+    method  : "revoke_user_permission"
     args:     {
                 "repo_name" :  "<reponame>",
-                "group_name" : "<groupname>",
-                "perm" :       "(None|repository.(read|write|admin))",
+                "username" :   "<username>",
               }
-OUTPUT::
-    
-    result: {
-                "msg" : Added perm: <perm> for <groupname> in repo: <reponame>"
-            }
 
+OUTPUT::
+
+    result: {
+              "msg" : "Revoked perm for user: <suername> in repo: <reponame>"
+            }
+    error:  null
+
+
+grant_users_group_permission
+----------------------------
+
+Grant permission for users group on given repository, or update
+existing one if found. This command can be executed only using 
+api_key belonging to user with admin rights.
+
+
+INPUT::
+
+    api_key : "<api_key>"
+    method :  "grant_users_group_permission"
+    args:     {
+                "repo_name" : "<reponame>",
+                "group_name" : "<usersgroupname>",
+                "perm" : "(repository.(none|read|write|admin))",
+              }
+
+OUTPUT::
+
+    result: {
+              "msg" : "Granted perm: <perm> for group: <usersgroupname> in repo: <reponame>"
+            }
+    error:  null
+    
+    
+revoke_users_group_permission
+-----------------------------
+
+Revoke permission for users group on given repository.This command can be 
+executed only using api_key belonging to user with admin rights.
+
+INPUT::
+
+    api_key : "<api_key>"
+    method  : "revoke_users_group_permission"
+    args:     {
+                "repo_name" :  "<reponame>",
+                "users_group" :   "<usersgroupname>",
+              }
+
+OUTPUT::
+
+    result: {
+              "msg" : "Revoked perm for group: <usersgroupname> in repo: <reponame>"
+            }
+    error:  null

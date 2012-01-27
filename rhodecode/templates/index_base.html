@@ -38,7 +38,9 @@
                             </div>
                         </td>
                         <td>${gr.group_description}</td>
-                        ##<td><b>${gr.repositories.count()}</b></td>
+                        ## this is commented out since for multi nested repos can be HEAVY!
+                        ## in number of executed queries during traversing uncomment at will
+                        ##<td><b>${gr.repositories_recursive_count}</b></td>
                     </tr>
                   % endfor
 

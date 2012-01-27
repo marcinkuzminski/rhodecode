@@ -38,7 +38,12 @@ log = logging.getLogger(__name__)
 class UsersGroupModel(BaseModel):
 
     def __get_users_group(self, users_group):
-        return self._get_instance(UsersGroup, users_group)
+        return self._get_instance(UsersGroup, users_group,
+                                  callback=UsersGroup.get_by_group_name)
+
+    def __get_perm(self, permission):
+        return self._get_instance(Permission, permission,
+                                  callback=Permission.get_by_key)
 
     def get(self, users_group_id, cache=False):
         return UsersGroup.get(users_group_id)
@@ -80,7 +85,15 @@ class UsersGroupModel(BaseModel):
             log.error(traceback.format_exc())
             raise
 
-    def delete(self, users_group):
+    def delete(self, users_group, force=False):
+        """
+        Deletes repos group, unless force flag is used
+        raises exception if there are members in that group, else deletes
+        group and users
+
+        :param users_group:
+        :param force:
+        """
         try:
             users_group = self.__get_users_group(users_group)
 
@@ -88,7 +101,7 @@ class UsersGroupModel(BaseModel):
             assigned_groups = UsersGroupRepoToPerm.query()\
                 .filter(UsersGroupRepoToPerm.users_group == users_group).all()
 
-            if assigned_groups:
+            if assigned_groups and force is False:
                 raise UsersGroupsAssignedException('RepoGroup assigned to %s' %
                                                    assigned_groups)
 
@@ -118,10 +131,8 @@ class UsersGroupModel(BaseModel):
             raise
 
     def has_perm(self, users_group, perm):
-        if not isinstance(perm, Permission):
-            raise Exception('perm needs to be an instance of Permission class')
-
         users_group = self.__get_users_group(users_group)
+        perm = self.__get_perm(perm)
 
         return UsersGroupToPerm.query()\
             .filter(UsersGroupToPerm.users_group == users_group)\
@@ -139,10 +150,8 @@ class UsersGroupModel(BaseModel):
         self.sa.add(new)
 
     def revoke_perm(self, users_group, perm):
-        if not isinstance(perm, Permission):
-            raise Exception('perm needs to be an instance of Permission class')
-
         users_group = self.__get_users_group(users_group)
+        perm = self.__get_perm(perm)
 
         obj = UsersGroupToPerm.query()\
             .filter(UsersGroupToPerm.users_group == users_group)\

@@ -3,7 +3,7 @@
     rhodecode.controllers.admin.repos_groups
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    repos groups controller for RhodeCode
+    Repositories groups controller for RhodeCode
 
     :created_on: Mar 23, 2010
     :author: marcink
@@ -29,19 +29,22 @@ import formencode
 
 from formencode import htmlfill
 
-from pylons import request, response, session, tmpl_context as c, url
-from pylons.controllers.util import abort, redirect
+from pylons import request, tmpl_context as c, url
+from pylons.controllers.util import redirect
 from pylons.i18n.translation import _
 
 from sqlalchemy.exc import IntegrityError
 
 from rhodecode.lib import helpers as h
-from rhodecode.lib.auth import LoginRequired, HasPermissionAnyDecorator
+from rhodecode.lib.auth import LoginRequired, HasPermissionAnyDecorator,\
+    HasReposGroupPermissionAnyDecorator
 from rhodecode.lib.base import BaseController, render
 from rhodecode.model.db import RepoGroup
 from rhodecode.model.repos_group import ReposGroupModel
 from rhodecode.model.forms import ReposGroupForm
 from rhodecode.model.meta import Session
+from rhodecode.model.repo import RepoModel
+from webob.exc import HTTPInternalServerError
 
 log = logging.getLogger(__name__)
 
@@ -60,6 +63,10 @@ class ReposGroupsController(BaseController):
         c.repo_groups = RepoGroup.groups_choices()
         c.repo_groups_choices = map(lambda k: unicode(k[0]), c.repo_groups)
 
+        repo_model = RepoModel()
+        c.users_array = repo_model.get_users_js()
+        c.users_groups_array = repo_model.get_users_groups_js()
+
     def __load_data(self, group_id):
         """
         Load defaults settings for edit, and update
@@ -74,13 +81,22 @@ class ReposGroupsController(BaseController):
 
         data['group_name'] = repo_group.name
 
+        # fill repository users
+        for p in repo_group.repo_group_to_perm:
+            data.update({'u_perm_%s' % p.user.username:
+                             p.permission.permission_name})
+
+        # fill repository groups
+        for p in repo_group.users_group_to_perm:
+            data.update({'g_perm_%s' % p.users_group.users_group_name:
+                             p.permission.permission_name})
+
         return data
 
     @HasPermissionAnyDecorator('hg.admin')
     def index(self, format='html'):
         """GET /repos_groups: All items in the collection"""
         # url('repos_groups')
-
         sk = lambda g: g.parents[0].group_name if g.parents else g.group_name
         c.groups = sorted(RepoGroup.query().all(), key=sk)
         return render('admin/repos_groups/repos_groups_show.html')
@@ -94,7 +110,11 @@ class ReposGroupsController(BaseController):
                                           c.repo_groups_choices)()
         try:
             form_result = repos_group_form.to_python(dict(request.POST))
-            ReposGroupModel().create(form_result)
+            ReposGroupModel().create(
+                    group_name=form_result['group_name'],
+                    group_description=form_result['group_description'],
+                    parent=form_result['group_parent_id']
+            )
             Session.commit()
             h.flash(_('created repos group %s') \
                     % form_result['group_name'], category='success')
@@ -134,10 +154,11 @@ class ReposGroupsController(BaseController):
         self.__load_defaults()
         c.repos_group = RepoGroup.get(id)
 
-        repos_group_form = ReposGroupForm(edit=True,
-                                          old_data=c.repos_group.get_dict(),
-                                          available_groups=
-                                            c.repo_groups_choices)()
+        repos_group_form = ReposGroupForm(
+            edit=True,
+            old_data=c.repos_group.get_dict(),
+            available_groups=c.repo_groups_choices
+        )()
         try:
             form_result = repos_group_form.to_python(dict(request.POST))
             ReposGroupModel().update(id, form_result)
@@ -201,10 +222,52 @@ class ReposGroupsController(BaseController):
 
         return redirect(url('repos_groups'))
 
+    @HasReposGroupPermissionAnyDecorator('group.admin')
+    def delete_repos_group_user_perm(self, group_name):
+        """
+        DELETE an existing repositories group permission user
+
+        :param group_name:
+        """
+
+        try:
+            ReposGroupModel().revoke_user_permission(
+                repos_group=group_name, user=request.POST['user_id']
+            )
+            Session.commit()
+        except Exception:
+            log.error(traceback.format_exc())
+            h.flash(_('An error occurred during deletion of group user'),
+                    category='error')
+            raise HTTPInternalServerError()
+
+    @HasReposGroupPermissionAnyDecorator('group.admin')
+    def delete_repos_group_users_group_perm(self, group_name):
+        """
+        DELETE an existing repositories group permission users group
+
+        :param group_name:
+        """
+
+        try:
+            ReposGroupModel().revoke_users_group_permission(
+                repos_group=group_name,
+                group_name=request.POST['users_group_id']
+            )
+            Session.commit()
+        except Exception:
+            log.error(traceback.format_exc())
+            h.flash(_('An error occurred during deletion of group'
+                      ' users groups'),
+                    category='error')
+            raise HTTPInternalServerError()
+
     def show_by_name(self, group_name):
         id_ = RepoGroup.get_by_group_name(group_name).group_id
         return self.show(id_)
 
+    @HasReposGroupPermissionAnyDecorator('group.read', 'group.write',
+                                         'group.admin')
     def show(self, id, format='html'):
         """GET /repos_groups/id: Show a specific item"""
         # url('repos_group', id=ID)
@@ -240,7 +303,7 @@ class ReposGroupsController(BaseController):
         defaults = self.__load_data(id_)
 
         # we need to exclude this group from the group list for editing
-        c.repo_groups = filter(lambda x:x[0] != id_, c.repo_groups)
+        c.repo_groups = filter(lambda x: x[0] != id_, c.repo_groups)
 
         return htmlfill.render(
             render('admin/repos_groups/repos_groups_edit.html'),

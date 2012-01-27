@@ -52,6 +52,7 @@ from rhodecode.model import meta
 from rhodecode.model.db import Repository, User, RhodeCodeUi, \
     UserLog, RepoGroup, RhodeCodeSetting
 from rhodecode.model.meta import Session
+from rhodecode.model.repos_group import ReposGroupModel
 
 log = logging.getLogger(__name__)
 
@@ -92,6 +93,10 @@ def repo_name_slug(value):
 
 def get_repo_slug(request):
     return request.environ['pylons.routes_dict'].get('repo_name')
+
+
+def get_repos_group_slug(request):
+    return request.environ['pylons.routes_dict'].get('group_name')
 
 
 def action_logger(user, action, repo, ipaddr='', sa=None, commit=False):
@@ -197,6 +202,7 @@ def is_valid_repo(repo_name, base_path):
     except VCSError:
         return False
 
+
 def is_valid_repos_group(repos_group_name, base_path):
     """
     Returns True if given path is a repos group False otherwise
@@ -215,6 +221,7 @@ def is_valid_repos_group(repos_group_name, base_path):
         return True
 
     return False
+
 
 def ask_ok(prompt, retries=4, complaint='Yes or no, please!'):
     while True:
@@ -317,7 +324,8 @@ class EmptyChangeset(BaseChangeset):
     an EmptyChangeset
     """
 
-    def __init__(self, cs='0' * 40, repo=None, requested_revision=None, alias=None):
+    def __init__(self, cs='0' * 40, repo=None, requested_revision=None,
+                 alias=None):
         self._empty_cs = cs
         self.revision = -1
         self.message = ''
@@ -368,14 +376,23 @@ def map_groups(groups):
 
     # last element is repo in nested groups structure
     groups = groups[:-1]
-
+    rgm = ReposGroupModel(sa)
     for lvl, group_name in enumerate(groups):
+        log.debug('creating group level: %s group_name: %s' % (lvl, group_name))
         group_name = '/'.join(groups[:lvl] + [group_name])
-        group = sa.query(RepoGroup).filter(RepoGroup.group_name == group_name).scalar()
+        group = RepoGroup.get_by_group_name(group_name)
+        desc = '%s group' % group_name
+
+#        # WTF that doesn't work !?
+#        if group is None:
+#            group = rgm.create(group_name, desc, parent, just_db=True)
+#            sa.commit()
 
         if group is None:
             group = RepoGroup(group_name, parent)
+            group.group_description = desc
             sa.add(group)
+            rgm._create_default_perms(group)
             sa.commit()
         parent = group
     return group
@@ -404,15 +421,14 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False):
             log.info('repository %s not found creating default' % name)
             added.append(name)
             form_data = {
-                         'repo_name': name,
-                         'repo_name_full': name,
-                         'repo_type': repo.alias,
-                         'description': repo.description \
-                            if repo.description != 'unknown' else \
-                                        '%s repository' % name,
-                         'private': False,
-                         'group_id': getattr(group, 'group_id', None)
-                         }
+             'repo_name': name,
+             'repo_name_full': name,
+             'repo_type': repo.alias,
+             'description': repo.description \
+                if repo.description != 'unknown' else '%s repository' % name,
+             'private': False,
+             'group_id': getattr(group, 'group_id', None)
+            }
             rm.create(form_data, user, just_db=True)
     sa.commit()
     removed = []
@@ -425,6 +441,7 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False):
                 sa.commit()
 
     return added, removed
+
 
 # set cache regions for beaker so celery can utilise it
 def add_cache(settings):

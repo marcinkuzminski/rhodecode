@@ -717,6 +717,9 @@ class RepoGroup(Base, BaseModel):
     group_parent_id = Column("group_parent_id", Integer(), ForeignKey('groups.group_id'), nullable=True, unique=None, default=None)
     group_description = Column("group_description", String(length=10000, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
 
+    repo_group_to_perm = relationship('UserRepoGroupToPerm', cascade='all', order_by='UserRepoGroupToPerm.group_to_perm_id')
+    users_group_to_perm = relationship('UsersGroupRepoGroupToPerm', cascade='all')
+
     parent_group = relationship('RepoGroup', remote_side=group_id)
 
     def __init__(self, group_name='', parent_group=None):
@@ -833,8 +836,9 @@ class Permission(Base, BaseModel):
     permission_longname = Column("permission_longname", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
 
     def __repr__(self):
-        return "<%s('%s:%s')>" % (self.__class__.__name__,
-                                  self.permission_id, self.permission_name)
+        return "<%s('%s:%s')>" % (
+            self.__class__.__name__, self.permission_id, self.permission_name
+        )
 
     @classmethod
     def get_by_key(cls, key):
@@ -843,9 +847,18 @@ class Permission(Base, BaseModel):
     @classmethod
     def get_default_perms(cls, default_user_id):
         q = Session.query(UserRepoToPerm, Repository, cls)\
-            .join((Repository, UserRepoToPerm.repository_id == Repository.repo_id))\
-            .join((cls, UserRepoToPerm.permission_id == cls.permission_id))\
-            .filter(UserRepoToPerm.user_id == default_user_id)
+         .join((Repository, UserRepoToPerm.repository_id == Repository.repo_id))\
+         .join((cls, UserRepoToPerm.permission_id == cls.permission_id))\
+         .filter(UserRepoToPerm.user_id == default_user_id)
+
+        return q.all()
+
+    @classmethod
+    def get_default_group_perms(cls, default_user_id):
+        q = Session.query(UserRepoGroupToPerm, RepoGroup, cls)\
+         .join((RepoGroup, UserRepoGroupToPerm.group_id == RepoGroup.group_id))\
+         .join((cls, UserRepoGroupToPerm.permission_id == cls.permission_id))\
+         .filter(UserRepoGroupToPerm.user_id == default_user_id)
 
         return q.all()
 

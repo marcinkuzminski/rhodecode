@@ -53,9 +53,18 @@
 	                 ${h.select('group_parent_id','',c.repo_groups,class_="medium")}
 	             </div>
 	         </div>
+            <div class="field">
+                <div class="label">
+                    <label for="input">${_('Permissions')}:</label>
+                </div>
+                <div class="input">
+                    <%include file="repos_group_edit_perms.html"/>
+                </div>
 
+            </div>
             <div class="buttons">
-              ${h.submit('save',_('save'),class_="ui-button")}
+              ${h.submit('save',_('Save'),class_="ui-button")}
+              ${h.reset('reset',_('Reset'),class_="ui-button")}
             </div>
         </div>
     </div>

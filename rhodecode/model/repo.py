@@ -28,9 +28,9 @@ import logging
 import traceback
 from datetime import datetime
 
-from vcs.utils.lazy import LazyProperty
 from vcs.backends import get_backend
 
+from rhodecode.lib import LazyProperty
 from rhodecode.lib import safe_str, safe_unicode
 from rhodecode.lib.caching_query import FromCache
 from rhodecode.lib.hooks import log_create_repository
@@ -39,10 +39,30 @@ from rhodecode.model import BaseModel
 from rhodecode.model.db import Repository, UserRepoToPerm, User, Permission, \
     Statistics, UsersGroup, UsersGroupRepoToPerm, RhodeCodeUi, RepoGroup
 
+
 log = logging.getLogger(__name__)
 
 
 class RepoModel(BaseModel):
+
+    def __get_user(self, user):
+        return self._get_instance(User, user, callback=User.get_by_username)
+
+    def __get_users_group(self, users_group):
+        return self._get_instance(UsersGroup, users_group,
+                                  callback=UsersGroup.get_by_group_name)
+
+    def __get_repos_group(self, repos_group):
+        return self._get_instance(RepoGroup, repos_group,
+                                  callback=RepoGroup.get_by_group_name)
+
+    def __get_repo(self, repository):
+        return self._get_instance(Repository, repository,
+                                  callback=Repository.get_by_repo_name)
+
+    def __get_perm(self, permission):
+        return self._get_instance(Permission, permission,
+                                  callback=Permission.get_by_key)
 
     @LazyProperty
     def repos_path(self):
@@ -138,49 +158,24 @@ class RepoModel(BaseModel):
             # update permissions
             for member, perm, member_type in form_data['perms_updates']:
                 if member_type == 'user':
-                    _member = User.get_by_username(member)
-                    r2p = self.sa.query(UserRepoToPerm)\
-                        .filter(UserRepoToPerm.user == _member)\
-                        .filter(UserRepoToPerm.repository == cur_repo)\
-                        .one()
-
-                    r2p.permission = self.sa.query(Permission)\
-                                        .filter(Permission.permission_name ==
-                                                perm).scalar()
-                    self.sa.add(r2p)
+                    # this updates existing one
+                    RepoModel().grant_user_permission(
+                        repo=cur_repo, user=member, perm=perm
+                    )
                 else:
-                    g2p = self.sa.query(UsersGroupRepoToPerm)\
-                            .filter(UsersGroupRepoToPerm.users_group ==
-                                    UsersGroup.get_by_group_name(member))\
-                            .filter(UsersGroupRepoToPerm.repository ==
-                                    cur_repo).one()
-
-                    g2p.permission = self.sa.query(Permission)\
-                                        .filter(Permission.permission_name ==
-                                                perm).scalar()
-                    self.sa.add(g2p)
-
+                    RepoModel().grant_users_group_permission(
+                        repo=cur_repo, group_name=member, perm=perm
+                    )
             # set new permissions
             for member, perm, member_type in form_data['perms_new']:
                 if member_type == 'user':
-                    r2p = UserRepoToPerm()
-                    r2p.repository = cur_repo
-                    r2p.user = User.get_by_username(member)
-
-                    r2p.permission = self.sa.query(Permission)\
-                                        .filter(Permission.
-                                                permission_name == perm)\
-                                                .scalar()
-                    self.sa.add(r2p)
+                    RepoModel().grant_user_permission(
+                        repo=cur_repo, user=member, perm=perm
+                    )
                 else:
-                    g2p = UsersGroupRepoToPerm()
-                    g2p.repository = cur_repo
-                    g2p.users_group = UsersGroup.get_by_group_name(member)
-                    g2p.permission = self.sa.query(Permission)\
-                                        .filter(Permission.
-                                                permission_name == perm)\
-                                                .scalar()
-                    self.sa.add(g2p)
+                    RepoModel().grant_users_group_permission(
+                        repo=cur_repo, group_name=member, perm=perm
+                    )
 
             # update current repo
             for k, v in form_data.items():
@@ -314,28 +309,93 @@ class RepoModel(BaseModel):
             log.error(traceback.format_exc())
             raise
 
-    def delete_perm_user(self, form_data, repo_name):
-        try:
-            obj = self.sa.query(UserRepoToPerm)\
-                .filter(UserRepoToPerm.repository \
-                        == self.get_by_repo_name(repo_name))\
-                .filter(UserRepoToPerm.user_id == form_data['user_id']).one()
-            self.sa.delete(obj)
-        except:
-            log.error(traceback.format_exc())
-            raise
+    def grant_user_permission(self, repo, user, perm):
+        """
+        Grant permission for user on given repository, or update existing one
+        if found
 
-    def delete_perm_users_group(self, form_data, repo_name):
-        try:
-            obj = self.sa.query(UsersGroupRepoToPerm)\
-                .filter(UsersGroupRepoToPerm.repository \
-                        == self.get_by_repo_name(repo_name))\
-                .filter(UsersGroupRepoToPerm.users_group_id
-                        == form_data['users_group_id']).one()
-            self.sa.delete(obj)
-        except:
-            log.error(traceback.format_exc())
-            raise
+        :param repo: Instance of Repository, repository_id, or repository name
+        :param user: Instance of User, user_id or username
+        :param perm: Instance of Permission, or permission_name
+        """
+        user = self.__get_user(user)
+        repo = self.__get_repo(repo)
+        permission = self.__get_perm(perm)
+
+        # check if we have that permission already
+        obj = self.sa.query(UserRepoToPerm)\
+            .filter(UserRepoToPerm.user == user)\
+            .filter(UserRepoToPerm.repository == repo)\
+            .scalar()
+        if obj is None:
+            # create new !
+            obj = UserRepoToPerm()
+        obj.repository = repo
+        obj.user = user
+        obj.permission = permission
+        self.sa.add(obj)
+
+    def revoke_user_permission(self, repo, user):
+        """
+        Revoke permission for user on given repository
+
+        :param repo: Instance of Repository, repository_id, or repository name
+        :param user: Instance of User, user_id or username
+        """
+        user = self.__get_user(user)
+        repo = self.__get_repo(repo)
+
+        obj = self.sa.query(UserRepoToPerm)\
+            .filter(UserRepoToPerm.repository == repo)\
+            .filter(UserRepoToPerm.user == user)\
+            .one()
+        self.sa.delete(obj)
+
+    def grant_users_group_permission(self, repo, group_name, perm):
+        """
+        Grant permission for users group on given repository, or update
+        existing one if found
+
+        :param repo: Instance of Repository, repository_id, or repository name
+        :param group_name: Instance of UserGroup, users_group_id,
+            or users group name
+        :param perm: Instance of Permission, or permission_name
+        """
+        repo = self.__get_repo(repo)
+        group_name = self.__get_users_group(group_name)
+        permission = self.__get_perm(perm)
+
+        # check if we have that permission already
+        obj = self.sa.query(UsersGroupRepoToPerm)\
+            .filter(UsersGroupRepoToPerm.users_group == group_name)\
+            .filter(UsersGroupRepoToPerm.repository == repo)\
+            .scalar()
+
+        if obj is None:
+            # create new
+            obj = UsersGroupRepoToPerm()
+
+        obj.repository = repo
+        obj.users_group = group_name
+        obj.permission = permission
+        self.sa.add(obj)
+
+    def revoke_users_group_permission(self, repo, group_name):
+        """
+        Revoke permission for users group on given repository
+
+        :param repo: Instance of Repository, repository_id, or repository name
+        :param group_name: Instance of UserGroup, users_group_id,
+            or users group name
+        """
+        repo = self.__get_repo(repo)
+        group_name = self.__get_users_group(group_name)
+
+        obj = self.sa.query(UsersGroupRepoToPerm)\
+            .filter(UsersGroupRepoToPerm.repository == repo)\
+            .filter(UsersGroupRepoToPerm.users_group == group_name)\
+            .one()
+        self.sa.delete(obj)
 
     def delete_stats(self, repo_name):
         """
@@ -345,8 +405,9 @@ class RepoModel(BaseModel):
         """
         try:
             obj = self.sa.query(Statistics)\
-                    .filter(Statistics.repository == \
-                        self.get_by_repo_name(repo_name)).one()
+                    .filter(Statistics.repository ==
+                            self.get_by_repo_name(repo_name))\
+                    .one()
             self.sa.delete(obj)
         except:
             log.error(traceback.format_exc())
@@ -373,9 +434,8 @@ class RepoModel(BaseModel):
             new_parent_path = ''
 
         # we need to make it str for mercurial
-        repo_path = os.path.join(*map(lambda x:safe_str(x),
+        repo_path = os.path.join(*map(lambda x: safe_str(x),
                                 [self.repos_path, new_parent_path, repo_name]))
-
 
         # check if this path is not a repository
         if is_valid_repo(repo_path, self.repos_path):
@@ -393,7 +453,6 @@ class RepoModel(BaseModel):
 
         backend(repo_path, create=True, src_url=clone_uri)
 
-
     def __rename_repo(self, old, new):
         """
         renames repository on filesystem
@@ -406,8 +465,9 @@ class RepoModel(BaseModel):
         old_path = os.path.join(self.repos_path, old)
         new_path = os.path.join(self.repos_path, new)
         if os.path.isdir(new_path):
-            raise Exception('Was trying to rename to already existing dir %s' \
-            		     % new_path)
+            raise Exception(
+                'Was trying to rename to already existing dir %s' % new_path
+            )
         shutil.move(old_path, new_path)
 
     def __delete_repo(self, repo):
@@ -426,7 +486,6 @@ class RepoModel(BaseModel):
         shutil.move(os.path.join(rm_path, '.%s' % alias),
                     os.path.join(rm_path, 'rm__.%s' % alias))
         # disable repo
-        shutil.move(rm_path, os.path.join(self.repos_path, 'rm__%s__%s' \
-                                          % (datetime.today()\
-                                             .strftime('%Y%m%d_%H%M%S_%f'),
-                                            repo.repo_name)))
+        _d = 'rm__%s__%s' % (datetime.now().strftime('%Y%m%d_%H%M%S_%f'),
+                             repo.repo_name)
+        shutil.move(rm_path, os.path.join(self.repos_path, _d))

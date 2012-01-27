@@ -36,12 +36,12 @@ from vcs.nodes import FileNode
 from rhodecode import BACKENDS
 from rhodecode.lib import helpers as h
 from rhodecode.lib import safe_str
-from rhodecode.lib.auth import HasRepoPermissionAny
+from rhodecode.lib.auth import HasRepoPermissionAny, HasReposGroupPermissionAny
 from rhodecode.lib.utils import get_repos as get_filesystem_repos, make_ui, \
     action_logger, EmptyChangeset
 from rhodecode.model import BaseModel
 from rhodecode.model.db import Repository, RhodeCodeUi, CacheInvalidation, \
-    UserFollowing, UserLog, User
+    UserFollowing, UserLog, User, RepoGroup
 
 log = logging.getLogger(__name__)
 
@@ -80,15 +80,16 @@ class CachedRepoList(object):
         for dbr in self.db_repo_list:
             scmr = dbr.scm_instance_cached
             # check permission at this level
-            if not HasRepoPermissionAny('repository.read', 'repository.write',
-                                        'repository.admin')(dbr.repo_name,
-                                                            'get repo check'):
+            if not HasRepoPermissionAny(
+                'repository.read', 'repository.write', 'repository.admin'
+            )(dbr.repo_name, 'get repo check'):
                 continue
 
             if scmr is None:
-                log.error('%s this repository is present in database but it '
-                          'cannot be created as an scm instance',
-                          dbr.repo_name)
+                log.error(
+                    '%s this repository is present in database but it '
+                    'cannot be created as an scm instance' % dbr.repo_name
+                )
                 continue
 
             last_change = scmr.last_change
@@ -113,6 +114,28 @@ class CachedRepoList(object):
             tmp_d['dbrepo'] = dbr.get_dict()
             tmp_d['dbrepo_fork'] = dbr.fork.get_dict() if dbr.fork else {}
             yield tmp_d
+
+
+class GroupList(object):
+
+    def __init__(self, db_repo_group_list):
+        self.db_repo_group_list = db_repo_group_list
+
+    def __len__(self):
+        return len(self.db_repo_group_list)
+
+    def __repr__(self):
+        return '<%s (%s)>' % (self.__class__.__name__, self.__len__())
+
+    def __iter__(self):
+        for dbgr in self.db_repo_group_list:
+            # check permission at this level
+            if not HasReposGroupPermissionAny(
+                'group.read', 'group.write', 'group.admin'
+            )(dbgr.group_name, 'get group repo check'):
+                continue
+
+            yield dbgr
 
 
 class ScmModel(BaseModel):
@@ -199,6 +222,14 @@ class ScmModel(BaseModel):
                                    order_by=sort_key)
 
         return repo_iter
+
+    def get_repos_groups(self, all_groups=None):
+        if all_groups is None:
+            all_groups = RepoGroup.query()\
+                .filter(RepoGroup.group_parent_id == None).all()
+        group_iter = GroupList(all_groups)
+
+        return group_iter
 
     def mark_for_invalidation(self, repo_name):
         """Puts cache invalidation task into db for

@@ -12,13 +12,27 @@ from rhodecode.model.user import UserModel
 from rhodecode.model.meta import Session
 from rhodecode.model.notification import NotificationModel
 from rhodecode.model.users_group import UsersGroupModel
+from rhodecode.lib.auth import AuthUser
+
+
+def _make_group(path, desc='desc', parent_id=None,
+                 skip_if_exists=False):
+
+    gr = RepoGroup.get_by_group_name(path)
+    if gr and skip_if_exists:
+        return gr
+
+    gr = ReposGroupModel().create(path, desc, parent_id)
+    Session.commit()
+    return gr
+
 
 class TestReposGroups(unittest.TestCase):
 
     def setUp(self):
-        self.g1 = self.__make_group('test1', skip_if_exists=True)
-        self.g2 = self.__make_group('test2', skip_if_exists=True)
-        self.g3 = self.__make_group('test3', skip_if_exists=True)
+        self.g1 = _make_group('test1', skip_if_exists=True)
+        self.g2 = _make_group('test2', skip_if_exists=True)
+        self.g3 = _make_group('test3', skip_if_exists=True)
 
     def tearDown(self):
         print 'out'
@@ -31,102 +45,81 @@ class TestReposGroups(unittest.TestCase):
     def _check_folders(self):
         print os.listdir(TESTS_TMP_PATH)
 
-    def __make_group(self, path, desc='desc', parent_id=None,
-                     skip_if_exists=False):
-
-        gr = RepoGroup.get_by_group_name(path)
-        if gr and skip_if_exists:
-            return gr
-
-        form_data = dict(group_name=path,
-                         group_description=desc,
-                         group_parent_id=parent_id)
-        gr = ReposGroupModel().create(form_data)
-        Session.commit()
-        return gr
-
     def __delete_group(self, id_):
         ReposGroupModel().delete(id_)
-
 
     def __update_group(self, id_, path, desc='desc', parent_id=None):
         form_data = dict(group_name=path,
                          group_description=desc,
-                         group_parent_id=parent_id)
+                         group_parent_id=parent_id,
+                         perms_updates=[],
+                         perms_new=[])
 
         gr = ReposGroupModel().update(id_, form_data)
         return gr
 
     def test_create_group(self):
-        g = self.__make_group('newGroup')
+        g = _make_group('newGroup')
         self.assertEqual(g.full_path, 'newGroup')
 
         self.assertTrue(self.__check_path('newGroup'))
 
-
     def test_create_same_name_group(self):
-        self.assertRaises(IntegrityError, lambda:self.__make_group('newGroup'))
+        self.assertRaises(IntegrityError, lambda:_make_group('newGroup'))
         Session.rollback()
 
     def test_same_subgroup(self):
-        sg1 = self.__make_group('sub1', parent_id=self.g1.group_id)
+        sg1 = _make_group('sub1', parent_id=self.g1.group_id)
         self.assertEqual(sg1.parent_group, self.g1)
         self.assertEqual(sg1.full_path, 'test1/sub1')
         self.assertTrue(self.__check_path('test1', 'sub1'))
 
-        ssg1 = self.__make_group('subsub1', parent_id=sg1.group_id)
+        ssg1 = _make_group('subsub1', parent_id=sg1.group_id)
         self.assertEqual(ssg1.parent_group, sg1)
         self.assertEqual(ssg1.full_path, 'test1/sub1/subsub1')
         self.assertTrue(self.__check_path('test1', 'sub1', 'subsub1'))
 
-
     def test_remove_group(self):
-        sg1 = self.__make_group('deleteme')
+        sg1 = _make_group('deleteme')
         self.__delete_group(sg1.group_id)
 
         self.assertEqual(RepoGroup.get(sg1.group_id), None)
         self.assertFalse(self.__check_path('deteteme'))
 
-        sg1 = self.__make_group('deleteme', parent_id=self.g1.group_id)
+        sg1 = _make_group('deleteme', parent_id=self.g1.group_id)
         self.__delete_group(sg1.group_id)
 
         self.assertEqual(RepoGroup.get(sg1.group_id), None)
         self.assertFalse(self.__check_path('test1', 'deteteme'))
 
-
     def test_rename_single_group(self):
-        sg1 = self.__make_group('initial')
+        sg1 = _make_group('initial')
 
         new_sg1 = self.__update_group(sg1.group_id, 'after')
         self.assertTrue(self.__check_path('after'))
         self.assertEqual(RepoGroup.get_by_group_name('initial'), None)
 
-
     def test_update_group_parent(self):
 
-        sg1 = self.__make_group('initial', parent_id=self.g1.group_id)
+        sg1 = _make_group('initial', parent_id=self.g1.group_id)
 
         new_sg1 = self.__update_group(sg1.group_id, 'after', parent_id=self.g1.group_id)
         self.assertTrue(self.__check_path('test1', 'after'))
         self.assertEqual(RepoGroup.get_by_group_name('test1/initial'), None)
 
-
         new_sg1 = self.__update_group(sg1.group_id, 'after', parent_id=self.g3.group_id)
         self.assertTrue(self.__check_path('test3', 'after'))
         self.assertEqual(RepoGroup.get_by_group_name('test3/initial'), None)
-
 
         new_sg1 = self.__update_group(sg1.group_id, 'hello')
         self.assertTrue(self.__check_path('hello'))
 
         self.assertEqual(RepoGroup.get_by_group_name('hello'), new_sg1)
 
-
-
     def test_subgrouping_with_repo(self):
 
-        g1 = self.__make_group('g1')
-        g2 = self.__make_group('g2')
+        g1 = _make_group('g1')
+        g2 = _make_group('g2')
 
         # create new repo
         form_data = dict(repo_name='john',
@@ -150,12 +143,12 @@ class TestReposGroups(unittest.TestCase):
         RepoModel().update(r.repo_name, form_data)
         self.assertEqual(r.repo_name, 'g1/john')
 
-
         self.__update_group(g1.group_id, 'g1', parent_id=g2.group_id)
         self.assertTrue(self.__check_path('g2', 'g1'))
 
         # test repo
         self.assertEqual(r.repo_name, os.path.join('g2', 'g1', r.just_name))
+
 
 class TestUser(unittest.TestCase):
     def __init__(self, methodName='runTest'):
@@ -245,7 +238,6 @@ class TestNotifications(unittest.TestCase):
         self.assertEqual(len(unotification), len(usrs))
         self.assertEqual([x.user.user_id for x in unotification], usrs)
 
-
     def test_user_notifications(self):
         self.assertEqual([], Notification.query().all())
         self.assertEqual([], UserNotification.query().all())
@@ -283,7 +275,6 @@ class TestNotifications(unittest.TestCase):
         un = UserNotification.query().filter(UserNotification.notification
                                              == notification).all()
         self.assertEqual(un, [])
-
 
     def test_delete_association(self):
 
@@ -361,6 +352,7 @@ class TestNotifications(unittest.TestCase):
         self.assertEqual(NotificationModel()
                          .get_unread_cnt_for_user(self.u3), 2)
 
+
 class TestUsers(unittest.TestCase):
 
     def __init__(self, methodName='runTest'):
@@ -401,4 +393,163 @@ class TestUsers(unittest.TestCase):
         #revoke
         UserModel().revoke_perm(self.u1, perm)
         Session.commit()
-        self.assertEqual(UserModel().has_perm(self.u1, perm),False)
+        self.assertEqual(UserModel().has_perm(self.u1, perm), False)
+
+
+class TestPermissions(unittest.TestCase):
+    def __init__(self, methodName='runTest'):
+        super(TestPermissions, self).__init__(methodName=methodName)
+
+    def setUp(self):
+        self.u1 = UserModel().create_or_update(
+            username=u'u1', password=u'qweqwe',
+            email=u'u1@rhodecode.org', name=u'u1', lastname=u'u1'
+        )
+        self.a1 = UserModel().create_or_update(
+            username=u'a1', password=u'qweqwe',
+            email=u'a1@rhodecode.org', name=u'a1', lastname=u'a1', admin=True
+        )
+        Session.commit()
+
+    def tearDown(self):
+        UserModel().delete(self.u1)
+        UserModel().delete(self.a1)
+        if hasattr(self, 'g1'):
+            ReposGroupModel().delete(self.g1.group_id)
+        if hasattr(self, 'g2'):
+            ReposGroupModel().delete(self.g2.group_id)
+
+        if hasattr(self, 'ug1'):
+            UsersGroupModel().delete(self.ug1, force=True)
+
+        Session.commit()
+
+    def test_default_perms_set(self):
+        u1_auth = AuthUser(user_id=self.u1.user_id)
+        perms = {
+            'repositories_groups': {},
+            'global': set([u'hg.create.repository', u'repository.read',
+                           u'hg.register.manual_activate']),
+            'repositories': {u'vcs_test_hg': u'repository.read'}
+        }
+        self.assertEqual(u1_auth.permissions['repositories'][HG_REPO],
+                         perms['repositories'][HG_REPO])
+        new_perm = 'repository.write'
+        RepoModel().grant_user_permission(repo=HG_REPO, user=self.u1, perm=new_perm)
+        Session.commit()
+
+        u1_auth = AuthUser(user_id=self.u1.user_id)
+        self.assertEqual(u1_auth.permissions['repositories'][HG_REPO], new_perm)
+
+    def test_default_admin_perms_set(self):
+        a1_auth = AuthUser(user_id=self.a1.user_id)
+        perms = {
+            'repositories_groups': {},
+            'global': set([u'hg.admin']),
+            'repositories': {u'vcs_test_hg': u'repository.admin'}
+        }
+        self.assertEqual(a1_auth.permissions['repositories'][HG_REPO],
+                         perms['repositories'][HG_REPO])
+        new_perm = 'repository.write'
+        RepoModel().grant_user_permission(repo=HG_REPO, user=self.a1, perm=new_perm)
+        Session.commit()
+        # cannot really downgrade admins permissions !? they still get's set as
+        # admin !
+        u1_auth = AuthUser(user_id=self.a1.user_id)
+        self.assertEqual(u1_auth.permissions['repositories'][HG_REPO],
+                         perms['repositories'][HG_REPO])
+
+    def test_default_group_perms(self):
+        self.g1 = _make_group('test1', skip_if_exists=True)
+        self.g2 = _make_group('test2', skip_if_exists=True)
+        u1_auth = AuthUser(user_id=self.u1.user_id)
+        perms = {
+            'repositories_groups': {u'test1': 'group.read', u'test2': 'group.read'},
+            'global': set([u'hg.create.repository', u'repository.read', u'hg.register.manual_activate']),
+            'repositories': {u'vcs_test_hg': u'repository.read'}
+        }
+        self.assertEqual(u1_auth.permissions['repositories'][HG_REPO],
+                         perms['repositories'][HG_REPO])
+        self.assertEqual(u1_auth.permissions['repositories_groups'],
+                         perms['repositories_groups'])
+
+    def test_default_admin_group_perms(self):
+        self.g1 = _make_group('test1', skip_if_exists=True)
+        self.g2 = _make_group('test2', skip_if_exists=True)
+        a1_auth = AuthUser(user_id=self.a1.user_id)
+        perms = {
+            'repositories_groups': {u'test1': 'group.admin', u'test2': 'group.admin'},
+            'global': set(['hg.admin']),
+            'repositories': {u'vcs_test_hg': 'repository.admin'}
+        }
+
+        self.assertEqual(a1_auth.permissions['repositories'][HG_REPO],
+                         perms['repositories'][HG_REPO])
+        self.assertEqual(a1_auth.permissions['repositories_groups'],
+                         perms['repositories_groups'])
+
+    def test_propagated_permission_from_users_group(self):
+        # make group
+        self.ug1 = UsersGroupModel().create('G1')
+        # add user to group
+        UsersGroupModel().add_user_to_group(self.ug1, self.u1)
+
+        # set permission to lower
+        new_perm = 'repository.none'
+        RepoModel().grant_user_permission(repo=HG_REPO, user=self.u1, perm=new_perm)
+        Session.commit()
+        u1_auth = AuthUser(user_id=self.u1.user_id)
+        self.assertEqual(u1_auth.permissions['repositories'][HG_REPO],
+                         new_perm)
+
+        # grant perm for group this should override permission from user
+        new_perm = 'repository.write'
+        RepoModel().grant_users_group_permission(repo=HG_REPO,
+                                                 group_name=self.ug1,
+                                                 perm=new_perm)
+        # check perms
+        u1_auth = AuthUser(user_id=self.u1.user_id)
+        perms = {
+            'repositories_groups': {},
+            'global': set([u'hg.create.repository', u'repository.read',
+                           u'hg.register.manual_activate']),
+            'repositories': {u'vcs_test_hg': u'repository.read'}
+        }
+        self.assertEqual(u1_auth.permissions['repositories'][HG_REPO],
+                         new_perm)
+        self.assertEqual(u1_auth.permissions['repositories_groups'],
+                         perms['repositories_groups'])
+
+    def test_propagated_permission_from_users_group_lower_weight(self):
+        # make group
+        self.ug1 = UsersGroupModel().create('G1')
+        # add user to group
+        UsersGroupModel().add_user_to_group(self.ug1, self.u1)
+
+        # set permission to lower
+        new_perm_h = 'repository.write'
+        RepoModel().grant_user_permission(repo=HG_REPO, user=self.u1,
+                                          perm=new_perm_h)
+        Session.commit()
+        u1_auth = AuthUser(user_id=self.u1.user_id)
+        self.assertEqual(u1_auth.permissions['repositories'][HG_REPO],
+                         new_perm_h)
+
+        # grant perm for group this should NOT override permission from user
+        # since it's lower than granted
+        new_perm_l = 'repository.read'
+        RepoModel().grant_users_group_permission(repo=HG_REPO,
+                                                 group_name=self.ug1,
+                                                 perm=new_perm_l)
+        # check perms
+        u1_auth = AuthUser(user_id=self.u1.user_id)
+        perms = {
+            'repositories_groups': {},
+            'global': set([u'hg.create.repository', u'repository.read',
+                           u'hg.register.manual_activate']),
+            'repositories': {u'vcs_test_hg': u'repository.write'}
+        }
+        self.assertEqual(u1_auth.permissions['repositories'][HG_REPO],
+                         new_perm_h)
+        self.assertEqual(u1_auth.permissions['repositories_groups'],
+                         perms['repositories_groups'])

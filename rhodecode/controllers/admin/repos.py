@@ -3,7 +3,7 @@
     rhodecode.controllers.admin.repos
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    Admin controller for RhodeCode
+    Repositories controller for RhodeCode
 
     :created_on: Apr 7, 2010
     :author: marcink
@@ -277,7 +277,6 @@ class ReposController(BaseController):
 
         return redirect(url('repos'))
 
-
     @HasRepoPermissionAllDecorator('repository.admin')
     def delete_perm_user(self, repo_name):
         """
@@ -287,10 +286,11 @@ class ReposController(BaseController):
         """
 
         try:
-            repo_model = RepoModel()
-            repo_model.delete_perm_user(request.POST, repo_name)
+            RepoModel().revoke_user_permission(repo=repo_name,
+                                               user=request.POST['user_id'])
             Session.commit()
-        except Exception, e:
+        except Exception:
+            log.error(traceback.format_exc())
             h.flash(_('An error occurred during deletion of repository user'),
                     category='error')
             raise HTTPInternalServerError()
@@ -302,11 +302,14 @@ class ReposController(BaseController):
 
         :param repo_name:
         """
+
         try:
-            repo_model = RepoModel()
-            repo_model.delete_perm_users_group(request.POST, repo_name)
+            RepoModel().revoke_users_group_permission(
+                repo=repo_name, group_name=request.POST['users_group_id']
+            )
             Session.commit()
-        except Exception, e:
+        except Exception:
+            log.error(traceback.format_exc())
             h.flash(_('An error occurred during deletion of repository'
                       ' users groups'),
                     category='error')
@@ -321,8 +324,7 @@ class ReposController(BaseController):
         """
 
         try:
-            repo_model = RepoModel()
-            repo_model.delete_stats(repo_name)
+            RepoModel().delete_stats(repo_name)
             Session.commit()
         except Exception, e:
             h.flash(_('An error occurred during deletion of repository stats'),

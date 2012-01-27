@@ -74,12 +74,13 @@ class BaseModel(object):
         else:
             self.sa = meta.Session
 
-    def _get_instance(self, cls, instance):
+    def _get_instance(self, cls, instance, callback=None):
         """
-        Get's instance of given cls using some simple lookup mechanism
+        Get's instance of given cls using some simple lookup mechanism.
 
         :param cls: class to fetch
         :param instance: int or Instance
+        :param callback: callback to call if all lookups failed
         """
 
         if isinstance(instance, cls):
@@ -88,5 +89,10 @@ class BaseModel(object):
             return cls.get(instance)
         else:
             if instance:
-                raise Exception('given object must be int or Instance'
-                                ' of %s got %s' % (type(cls), type(instance)))
+                if callback is None:
+                    raise Exception(
+                        'given object must be int or Instance of %s got %s, '
+                        'no callback provided' % (cls, type(instance))
+                    )
+                else:
+                    return callback(instance)

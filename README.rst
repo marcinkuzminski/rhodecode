@@ -3,9 +3,9 @@ RhodeCode documentation!
 ========================
 
 ``RhodeCode`` is a fast and powerful management tool for Mercurial_ and GIT_ 
-with a built in push/pull server and full text search.
+with a built in push/pull server and full text search and code-review.
 It works on http/https and has a built in permission/authentication system with 
-the ability to authenticate via LDAP or ActiveDirectory. RhodeCode also supports
+the ability to authenticate via LDAP or ActiveDirectory. RhodeCode also provides
 simple API so it's easy integrable with existing external systems.
 
 RhodeCode is similar in some respects to github or bitbucket_, 

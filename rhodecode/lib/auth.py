@@ -31,7 +31,7 @@ import hashlib
 from tempfile import _RandomNameSequence
 from decorator import decorator
 
-from pylons import config, session, url, request
+from pylons import config, url, request
 from pylons.controllers.util import abort, redirect
 from pylons.i18n.translation import _
 
@@ -45,7 +45,7 @@ if __platform__ in PLATFORM_OTHERS:
 
 from rhodecode.lib import str2bool, safe_unicode
 from rhodecode.lib.exceptions import LdapPasswordError, LdapUsernameError
-from rhodecode.lib.utils import get_repo_slug
+from rhodecode.lib.utils import get_repo_slug, get_repos_group_slug
 from rhodecode.lib.auth_ldap import AuthLdap
 
 from rhodecode.model import meta
@@ -80,8 +80,8 @@ class PasswordGenerator(object):
     def __init__(self, passwd=''):
         self.passwd = passwd
 
-    def gen_password(self, len, type):
-        self.passwd = ''.join([random.choice(type) for _ in xrange(len)])
+    def gen_password(self, length, type_):
+        self.passwd = ''.join([random.choice(type_) for _ in xrange(length)])
         return self.passwd
 
 
@@ -575,6 +575,41 @@ class HasRepoPermissionAnyDecorator(PermsDecorator):
         return False
 
 
+class HasReposGroupPermissionAllDecorator(PermsDecorator):
+    """
+    Checks for access permission for all given predicates for specific
+    repository. All of them have to be meet in order to fulfill the request
+    """
+
+    def check_permissions(self):
+        group_name = get_repos_group_slug(request)
+        try:
+            user_perms = set([self.user_perms['repositories_groups'][group_name]])
+        except KeyError:
+            return False
+        if self.required_perms.issubset(user_perms):
+            return True
+        return False
+
+
+class HasReposGroupPermissionAnyDecorator(PermsDecorator):
+    """
+    Checks for access permission for any of given predicates for specific
+    repository. In order to fulfill the request any of predicates must be meet
+    """
+
+    def check_permissions(self):
+        group_name = get_repos_group_slug(request)
+
+        try:
+            user_perms = set([self.user_perms['repositories_groups'][group_name]])
+        except KeyError:
+            return False
+        if self.required_perms.intersection(user_perms):
+            return True
+        return False
+
+
 #==============================================================================
 # CHECK FUNCTIONS
 #==============================================================================
@@ -641,8 +676,9 @@ class HasRepoPermissionAll(PermsFunction):
             self.repo_name = get_repo_slug(request)
 
         try:
-            self.user_perms = set([self.user_perms['reposit'
-                                                   'ories'][self.repo_name]])
+            self.user_perms = set(
+                [self.user_perms['repositories'][self.repo_name]]
+            )
         except KeyError:
             return False
         self.granted_for = self.repo_name
@@ -662,12 +698,49 @@ class HasRepoPermissionAny(PermsFunction):
             self.repo_name = get_repo_slug(request)
 
         try:
-            self.user_perms = set([self.user_perms['reposi'
-                                                   'tories'][self.repo_name]])
+            self.user_perms = set(
+                [self.user_perms['repositories'][self.repo_name]]
+            )
         except KeyError:
             return False
         self.granted_for = self.repo_name
         if self.required_perms.intersection(self.user_perms):
+            return True
+        return False
+
+
+class HasReposGroupPermissionAny(PermsFunction):
+    def __call__(self, group_name=None, check_Location=''):
+        self.group_name = group_name
+        return super(HasReposGroupPermissionAny, self).__call__(check_Location)
+
+    def check_permissions(self):
+        try:
+            self.user_perms = set(
+                [self.user_perms['repositories_groups'][self.group_name]]
+            )
+        except KeyError:
+            return False
+        self.granted_for = self.repo_name
+        if self.required_perms.intersection(self.user_perms):
+            return True
+        return False
+
+
+class HasReposGroupPermissionAll(PermsFunction):
+    def __call__(self, group_name=None, check_Location=''):
+        self.group_name = group_name
+        return super(HasReposGroupPermissionAny, self).__call__(check_Location)
+
+    def check_permissions(self):
+        try:
+            self.user_perms = set(
+                [self.user_perms['repositories_groups'][self.group_name]]
+            )
+        except KeyError:
+            return False
+        self.granted_for = self.repo_name
+        if self.required_perms.issubset(self.user_perms):
             return True
         return False
 

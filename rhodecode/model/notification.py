@@ -42,10 +42,7 @@ log = logging.getLogger(__name__)
 class NotificationModel(BaseModel):
 
     def __get_user(self, user):
-        if isinstance(user, basestring):
-            return User.get_by_username(username=user)
-        else:
-            return self._get_instance(User, user)
+        return self._get_instance(User, user, callback=User.get_by_username)
 
     def __get_notification(self, notification):
         if isinstance(notification, Notification):

@@ -401,13 +401,7 @@ class ApiController(JSONRPCController):
             for g in groups:
                 group = RepoGroup.get_by_group_name(g)
                 if not group:
-                    group = ReposGroupModel().create(
-                        dict(
-                            group_name=g,
-                            group_description='',
-                            group_parent_id=parent_id
-                        )
-                    )
+                    group = ReposGroupModel().create(g, '', parent_id)
                 parent_id = group.group_id
 
             repo = RepoModel().create(
@@ -434,11 +428,11 @@ class ApiController(JSONRPCController):
             raise JSONRPCError('failed to create repository %s' % repo_name)
 
     @HasPermissionAnyDecorator('hg.admin')
-    def add_user_to_repo(self, apiuser, repo_name, username, perm):
+    def grant_user_permission(self, repo_name, username, perm):
         """
-        Add permission for a user to a repository
+        Grant permission for user on given repository, or update existing one
+        if found
 
-        :param apiuser:
         :param repo_name:
         :param username:
         :param perm:
@@ -449,17 +443,15 @@ class ApiController(JSONRPCController):
             if repo is None:
                 raise JSONRPCError('unknown repository %s' % repo)
 
-            try:
-                user = User.get_by_username(username)
-            except NoResultFound:
-                raise JSONRPCError('unknown user %s' % user)
+            user = User.get_by_username(username)
+            if user is None:
+                raise JSONRPCError('unknown user %s' % username)
 
-            RepositoryPermissionModel()\
-                .update_or_delete_user_permission(repo, user, perm)
+            RepoModel().grant_user_permission(repo=repo, user=user, perm=perm)
+
             Session.commit()
-
             return dict(
-                msg='Added perm: %s for %s in repo: %s' % (
+                msg='Granted perm: %s for user: %s in repo: %s' % (
                     perm, username, repo_name
                 )
             )
@@ -472,11 +464,45 @@ class ApiController(JSONRPCController):
             )
 
     @HasPermissionAnyDecorator('hg.admin')
-    def add_users_group_to_repo(self, apiuser, repo_name, group_name, perm):
+    def revoke_user_permission(self, repo_name, username):
         """
-        Add permission for a users group to a repository
+        Revoke permission for user on given repository
 
-        :param apiuser:
+        :param repo_name:
+        :param username:
+        """
+
+        try:
+            repo = Repository.get_by_repo_name(repo_name)
+            if repo is None:
+                raise JSONRPCError('unknown repository %s' % repo)
+
+            user = User.get_by_username(username)
+            if user is None:
+                raise JSONRPCError('unknown user %s' % username)
+
+            RepoModel().revoke_user_permission(repo=repo_name, user=username)
+
+            Session.commit()
+            return dict(
+                msg='Revoked perm for user: %s in repo: %s' % (
+                    username, repo_name
+                )
+            )
+        except Exception:
+            log.error(traceback.format_exc())
+            raise JSONRPCError(
+                'failed to edit permission %(repo)s for %(user)s' % dict(
+                    user=username, repo=repo_name
+                )
+            )
+
+    @HasPermissionAnyDecorator('hg.admin')
+    def grant_users_group_permission(self, repo_name, group_name, perm):
+        """
+        Grant permission for users group on given repository, or update
+        existing one if found
+
         :param repo_name:
         :param group_name:
         :param perm:
@@ -487,24 +513,59 @@ class ApiController(JSONRPCController):
             if repo is None:
                 raise JSONRPCError('unknown repository %s' % repo)
 
-            try:
-                user_group = UsersGroup.get_by_group_name(group_name)
-            except NoResultFound:
+            user_group = UsersGroup.get_by_group_name(group_name)
+            if user_group is None:
                 raise JSONRPCError('unknown users group %s' % user_group)
 
-            RepositoryPermissionModel()\
-                .update_or_delete_users_group_permission(repo, user_group,
-                                                         perm)
+            RepoModel().grant_users_group_permission(repo=repo_name,
+                                                     group_name=group_name,
+                                                     perm=perm)
+
             Session.commit()
             return dict(
-                msg='Added perm: %s for %s in repo: %s' % (
+                msg='Granted perm: %s for group: %s in repo: %s' % (
                     perm, group_name, repo_name
                 )
             )
         except Exception:
             log.error(traceback.format_exc())
             raise JSONRPCError(
-                'failed to edit permission %(repo)s for %(usergr)s' % dict(
-                    usergr=group_name, repo=repo_name
+                'failed to edit permission %(repo)s for %(usersgr)s' % dict(
+                    usersgr=group_name, repo=repo_name
+                )
+            )
+
+    @HasPermissionAnyDecorator('hg.admin')
+    def revoke_users_group_permission(self, repo_name, group_name):
+        """
+        Revoke permission for users group on given repository
+
+        :param repo_name:
+        :param group_name:
+        """
+
+        try:
+            repo = Repository.get_by_repo_name(repo_name)
+            if repo is None:
+                raise JSONRPCError('unknown repository %s' % repo)
+
+            user_group = UsersGroup.get_by_group_name(group_name)
+            if user_group is None:
+                raise JSONRPCError('unknown users group %s' % user_group)
+
+            RepoModel().revoke_users_group_permission(repo=repo_name,
+                                                      group_name=group_name)
+
+            Session.commit()
+            return dict(
+                msg='Revoked perm for group: %s in repo: %s' % (
+                    group_name, repo_name
+                )
+            )
+        except Exception:
+            log.error(traceback.format_exc())
+            raise JSONRPCError(
+                'failed to edit permission %(repo)s for %(usersgr)s' % dict(
+                    usersgr=group_name, repo=repo_name
                 )
             )

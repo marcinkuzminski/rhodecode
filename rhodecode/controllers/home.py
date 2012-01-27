@@ -30,7 +30,7 @@ from paste.httpexceptions import HTTPBadRequest
 
 from rhodecode.lib.auth import LoginRequired
 from rhodecode.lib.base import BaseController, render
-from rhodecode.model.db import RepoGroup, Repository
+from rhodecode.model.db import Repository
 
 log = logging.getLogger(__name__)
 
@@ -42,11 +42,8 @@ class HomeController(BaseController):
         super(HomeController, self).__before__()
 
     def index(self):
-
         c.repos_list = self.scm_model.get_repos()
-
-        c.groups = RepoGroup.query()\
-            .filter(RepoGroup.group_parent_id == None).all()
+        c.groups = self.scm_model.get_repos_groups()
 
         return render('/index.html')
 
