@@ -4132,7 +4132,11 @@ div.diffblock .code-header-title{
 	padding: 0px 0px 10px 5px !important;
 	margin: 0 !important;
 }
-
+div.diffblock .code-header .hash{
+    float: left;
+    font-family: monospace;
+    padding: 3px 0 0 2px;
+}
 div.diffblock .code-header .date{
     float:left;
     text-transform: uppercase;
