@@ -55,7 +55,25 @@ fixes
 - fixed #331 RhodeCode mangles repository names if the a repository group 
   contains the "full path" to the repositories
 
-  
+1.2.5 (**2012-01-28**)
+======================
+
+news
+----
+
+fixes
+-----
+
+- #340 Celery complains about MySQL server gone away, added session cleanup
+  for celery tasks
+- #341 "scanning for repositories in None" log message during Rescan was missing
+  a parameter
+- fixed creating archives with subrepos. Some hooks were triggered during that
+  operation leading to crash.
+- fixed missing email in account page.
+- Reverted Mercurial to 2.0.1 for windows due to bug in Mercurial that makes
+  forking on windows impossible 
+
 1.2.4 (**2012-01-19**)
 ======================
 
