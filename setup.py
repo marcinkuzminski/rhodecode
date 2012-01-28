@@ -1,29 +1,30 @@
 import sys
 from rhodecode import get_version
 from rhodecode import __license__
+from rhodecode import __py_version__
 from rhodecode import requirements
 
-py_version = sys.version_info
-
-if py_version < (2, 5):
+if __py_version__ < (2, 5):
     raise Exception('RhodeCode requires python 2.5 or later')
 
 
 dependency_links = [
-    "https://secure.rhodecode.org/vcs/archive/default.zip#egg=vcs-0.2.3.dev",
-    "https://bitbucket.org/marcinkuzminski/vcs/get/default.zip#egg=vcs-0.2.3.dev",
+ "https://secure.rhodecode.org/vcs/archive/default.zip#egg=vcs-0.2.3.dev",
+ "https://bitbucket.org/marcinkuzminski/vcs/get/default.zip#egg=vcs-0.2.3.dev",
 ]
 
-classifiers = ['Development Status :: 4 - Beta',
-               'Environment :: Web Environment',
-               'Framework :: Pylons',
-               'Intended Audience :: Developers',
-               'License :: OSI Approved :: GNU General Public License (GPL)',
-               'Operating System :: OS Independent',
-               'Programming Language :: Python',
-               'Programming Language :: Python :: 2.5',
-               'Programming Language :: Python :: 2.6',
-               'Programming Language :: Python :: 2.7', ]
+classifiers = [
+    'Development Status :: 4 - Beta',
+    'Environment :: Web Environment',
+    'Framework :: Pylons',
+    'Intended Audience :: Developers',
+    'License :: OSI Approved :: GNU General Public License (GPL)',
+    'Operating System :: OS Independent',
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 2.5',
+    'Programming Language :: Python :: 2.6',
+    'Programming Language :: Python :: 2.7',
+]
 
 
 # additional files from project that goes somewhere in the filesystem
