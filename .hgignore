@@ -1,6 +1,7 @@
 syntax: glob
 *.pyc
 *.swp
+*.sqlite
 Paste*.egg
 
 syntax: regexp
