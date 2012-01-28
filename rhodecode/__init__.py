@@ -23,6 +23,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+import sys
 import platform
 
 VERSION = (1, 2, 5)
@@ -30,6 +31,7 @@ __version__ = '.'.join((str(each) for each in VERSION[:4]))
 __dbversion__ = 3  # defines current db version for migrations
 __platform__ = platform.system()
 __license__ = 'GPLv3'
+__py_version__ = sys.version_info
 
 PLATFORM_WIN = ('Windows')
 PLATFORM_OTHERS = ('Linux', 'Darwin', 'FreeBSD', 'OpenBSD', 'SunOS')
@@ -42,7 +44,6 @@ requirements = [
     "SQLAlchemy==0.7.4",
     "Mako==0.5.0",
     "pygments>=1.4",
-    "mercurial>=2.0,<2.1",
     "whoosh<1.8",
     "celery>=2.2.5,<2.3",
     "babel",
@@ -51,6 +52,16 @@ requirements = [
     "vcs==0.2.2",
     "webob==1.0.8"
 ]
+
+if __py_version__ < (2, 6):
+    requirements.append("simplejson")
+    requirements.append("pysqlite")
+
+if __platform__ in PLATFORM_WIN:
+    requirements.append("mercurial==2.0.1")
+else:
+    requirements.append("py-bcrypt")
+    requirements.append("mercurial==2.0.2")
 
 
 try:

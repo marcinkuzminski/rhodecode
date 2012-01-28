@@ -1,13 +1,10 @@
 import sys
 from rhodecode import get_version
-from rhodecode import __platform__
 from rhodecode import __license__
-from rhodecode import PLATFORM_OTHERS
+from rhodecode import __py_version__
 from rhodecode import requirements
 
-py_version = sys.version_info
-
-if py_version < (2, 5):
+if __py_version__ < (2, 5):
     raise Exception('RhodeCode requires python 2.5 or later')
 
 
@@ -24,13 +21,6 @@ classifiers = ['Development Status :: 5 - Production/Stable',
                'Programming Language :: Python :: 2.5',
                'Programming Language :: Python :: 2.6',
                'Programming Language :: Python :: 2.7', ]
-
-if py_version < (2, 6):
-    requirements.append("simplejson")
-    requirements.append("pysqlite")
-
-if __platform__ in PLATFORM_OTHERS:
-    requirements.append("py-bcrypt")
 
 
 # additional files from project that goes somewhere in the filesystem
