@@ -5,7 +5,6 @@ formencode==1.2.4
 SQLAlchemy==0.7.4
 Mako==0.5.0
 pygments>=1.4
-mercurial>=2.0,<2.1
 whoosh<1.8
 celery>=2.2.5,<2.3
 babel
@@ -15,3 +14,5 @@ vcs>=0.2.3.dev
 webob==1.0.8
 markdown==2.0.3
 docutils==0.8.1
+py-bcrypt
+mercurial>=2.0,<2.1
