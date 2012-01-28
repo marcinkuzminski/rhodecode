@@ -84,8 +84,8 @@ def ValidUsername(edit, old_data):
                 raise formencode.Invalid(
                     _('Username may only contain alphanumeric characters '
                       'underscores, periods or dashes and must begin with '
-                      'alphanumeric character'), 
-                    value, 
+                      'alphanumeric character'),
+                    value,
                     state
                 )
 
@@ -116,8 +116,8 @@ def ValidUsersGroup(edit, old_data):
                 raise formencode.Invalid(
                     _('RepoGroup name may only contain  alphanumeric characters '
                       'underscores, periods or dashes and must begin with '
-                      'alphanumeric character'), 
-                    value, 
+                      'alphanumeric character'),
+                    value,
                     state
                 )
 

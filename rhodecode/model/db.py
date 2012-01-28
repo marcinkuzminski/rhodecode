@@ -220,7 +220,7 @@ class RhodeCodeSetting(Base, BaseModel):
 class RhodeCodeUi(Base, BaseModel):
     __tablename__ = 'rhodecode_ui'
     __table_args__ = (
-        UniqueConstraint('ui_key'), 
+        UniqueConstraint('ui_key'),
         {'extend_existing': True}
     )
 
@@ -270,7 +270,7 @@ class RhodeCodeUi(Base, BaseModel):
 class User(Base, BaseModel):
     __tablename__ = 'users'
     __table_args__ = (
-        UniqueConstraint('username'), UniqueConstraint('email'), 
+        UniqueConstraint('username'), UniqueConstraint('email'),
         {'extend_existing': True}
     )
     user_id = Column("user_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -459,7 +459,7 @@ class UsersGroupMember(Base, BaseModel):
 class Repository(Base, BaseModel):
     __tablename__ = 'repositories'
     __table_args__ = (
-        UniqueConstraint('repo_name'), 
+        UniqueConstraint('repo_name'),
         {'extend_existing': True},
     )
 
@@ -707,7 +707,7 @@ class RepoGroup(Base, BaseModel):
     __tablename__ = 'groups'
     __table_args__ = (
         UniqueConstraint('group_name', 'group_parent_id'),
-        CheckConstraint('group_id != group_parent_id'), 
+        CheckConstraint('group_id != group_parent_id'),
         {'extend_existing': True},
     )
     __mapper_args__ = {'order_by': 'group_name'}
@@ -891,7 +891,7 @@ class UserToPerm(Base, BaseModel):
 class UsersGroupRepoToPerm(Base, BaseModel):
     __tablename__ = 'users_group_repo_to_perm'
     __table_args__ = (
-        UniqueConstraint('repository_id', 'users_group_id', 'permission_id'), 
+        UniqueConstraint('repository_id', 'users_group_id', 'permission_id'),
         {'extend_existing': True}
     )
     users_group_to_perm_id = Column("users_group_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -929,7 +929,7 @@ class UsersGroupToPerm(Base, BaseModel):
 class UserRepoGroupToPerm(Base, BaseModel):
     __tablename__ = 'user_repo_group_to_perm'
     __table_args__ = (
-        UniqueConstraint('group_id', 'permission_id'), 
+        UniqueConstraint('group_id', 'permission_id'),
         {'extend_existing': True}
     )
 
@@ -946,7 +946,7 @@ class UserRepoGroupToPerm(Base, BaseModel):
 class UsersGroupRepoGroupToPerm(Base, BaseModel):
     __tablename__ = 'users_group_repo_group_to_perm'
     __table_args__ = (
-        UniqueConstraint('group_id', 'permission_id'), 
+        UniqueConstraint('group_id', 'permission_id'),
         {'extend_existing': True}
     )
 
