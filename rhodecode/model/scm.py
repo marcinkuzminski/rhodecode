@@ -7,7 +7,7 @@
 
     :created_on: Apr 9, 2010
     :author: marcink
-    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
+    :copyright: (C) 2010-2012 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software: you can redistribute it and/or modify
@@ -26,6 +26,7 @@ import os
 import time
 import traceback
 import logging
+import cStringIO
 
 from sqlalchemy.exc import DatabaseError
 
@@ -370,8 +371,12 @@ class ScmModel(BaseModel):
 
         if isinstance(content, (basestring,)):
             content = safe_str(content)
-        elif isinstance(content, file):
+        elif isinstance(content, (file, cStringIO.OutputType,)):
             content = content.read()
+        else:
+            raise Exception('Content is of unrecognized type %s' % (
+                type(content)
+            ))
 
         message = safe_str(message)
         path = safe_str(f_path)
