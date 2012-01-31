@@ -33,6 +33,7 @@ from vcs.backends import get_backend
 
 from rhodecode.lib import safe_str
 from rhodecode.lib.caching_query import FromCache
+from rhodecode.lib.hooks import log_create_repository
 
 from rhodecode.model import BaseModel
 from rhodecode.model.db import Repository, UserRepoToPerm, User, Permission, \
@@ -69,7 +70,6 @@ class RepoModel(BaseModel):
             repo = repo.options(FromCache("sql_cache_short",
                                           "get_repo_%s" % repo_name))
         return repo.scalar()
-
 
     def get_users_js(self):
 
@@ -130,7 +130,6 @@ class RepoModel(BaseModel):
                              p.permission.permission_name})
 
         return defaults
-
 
     def update(self, repo_name, form_data):
         try:
@@ -262,7 +261,6 @@ class RepoModel(BaseModel):
 
                 self.sa.add(repo_to_perm)
 
-
             if fork:
                 if form_data.get('copy_permissions'):
                     repo = Repository.get(fork_parent_id)
@@ -291,6 +289,8 @@ class RepoModel(BaseModel):
             # now automatically start following this repository as owner
             ScmModel(self.sa).toggle_following_repo(new_repo.repo_id,
                                                     cur_user.user_id)
+            log_create_repository(new_repo.get_dict(),
+                                  created_by=cur_user.username)
             return new_repo
         except:
             log.error(traceback.format_exc())

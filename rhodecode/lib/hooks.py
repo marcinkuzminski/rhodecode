@@ -123,3 +123,33 @@ def log_push_action(ui, repo, **kwargs):
                   commit=True)
 
     return 0
+
+
+def log_create_repository(repository_dict, created_by, **kwargs):
+    """
+    Post create repository Hook. This is a dummy function for admins to re-use
+    if needed
+
+    :param repository: dict dump of repository object 
+    :param created_by: username who created repository
+    :param created_date: date of creation
+
+    available keys of repository_dict:
+
+     'repo_type',
+     'description',
+     'private',
+     'created_on',
+     'enable_downloads',
+     'repo_id',
+     'user_id',
+     'enable_statistics',
+     'clone_uri',
+     'fork_id',
+     'group_id',
+     'repo_name'
+
+    """
+
+
+    return 0

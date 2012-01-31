@@ -36,6 +36,7 @@ news
 - added linking of changesets in commit messages  
 - new compact changelog with expandable commit messages
 - firstname and lastname are optional in user creation
+- #348 added post-create repository hook
     
 fixes
 -----
