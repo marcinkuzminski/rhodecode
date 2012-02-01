@@ -60,10 +60,10 @@ if __py_version__ < (2, 6):
     requirements.append("pysqlite")
 
 if __platform__ in PLATFORM_WIN:
-    requirements.append("mercurial==2.0.1")
+    requirements.append("mercurial>=2.1,<2.2")
 else:
     requirements.append("py-bcrypt")
-    requirements.append("mercurial>=2.0,<2.1")
+    requirements.append("mercurial>=2.1,<2.2")
 
 
 try:
