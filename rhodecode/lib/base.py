@@ -39,6 +39,9 @@ class BaseVCSController(object):
         self.authenticate = AuthBasicAuthenticator('', authfunc)
         self.ipaddr = '0.0.0.0'
 
+    def _handle_request(self, environ, start_response):
+        raise NotImplementedError()
+
     def _get_by_id(self, repo_name):
         """
         Get's a special pattern _<ID> from clone url and tries to replace it
