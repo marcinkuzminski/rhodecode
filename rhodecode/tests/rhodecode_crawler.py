@@ -103,6 +103,7 @@ def test_files_walk(limit=100):
     repo = vcs.get_repo(jn(PROJECT_PATH, PROJECT))
 
     from rhodecode.lib.compat import OrderedSet
+    from vcs.exceptions import RepositoryError
 
     paths_ = OrderedSet([''])
     try:
@@ -117,7 +118,7 @@ def test_files_walk(limit=100):
             for f in files:
                 paths_.add(f.path)
 
-    except vcs.exception.RepositoryError, e:
+    except RepositoryError, e:
         pass
 
     cnt = 0
