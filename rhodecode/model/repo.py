@@ -31,7 +31,7 @@ from datetime import datetime
 from vcs.utils.lazy import LazyProperty
 from vcs.backends import get_backend
 
-from rhodecode.lib import safe_str
+from rhodecode.lib import safe_str, safe_unicode
 from rhodecode.lib.caching_query import FromCache
 from rhodecode.lib.hooks import log_create_repository
 
@@ -372,6 +372,7 @@ class RepoModel(BaseModel):
         else:
             new_parent_path = ''
 
+        # we need to make it str for mercurial
         repo_path = os.path.join(*map(lambda x:safe_str(x),
                                 [self.repos_path, new_parent_path, repo_name]))
 
@@ -384,8 +385,10 @@ class RepoModel(BaseModel):
         if is_valid_repos_group(repo_path, self.repos_path):
             raise Exception('This path %s is a valid group' % repo_path)
 
-        log.info('creating repo %s in %s @ %s', repo_name, repo_path,
-                 clone_uri)
+        log.info('creating repo %s in %s @ %s' % (
+                     repo_name, safe_unicode(repo_path), clone_uri
+                )
+        )
         backend = get_backend(alias)
 
         backend(repo_path, create=True, src_url=clone_uri)
