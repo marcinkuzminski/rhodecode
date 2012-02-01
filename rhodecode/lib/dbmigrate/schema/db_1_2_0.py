@@ -320,7 +320,7 @@ class User(Base, BaseModel):
         self.last_login = datetime.datetime.now()
         Session.add(self)
         Session.commit()
-        log.debug('updated user %s lastlogin', self.username)
+        log.debug('updated user %s lastlogin' % self.username)
 
     @classmethod
     def create(cls, form_data):
@@ -695,7 +695,7 @@ class Repository(Base, BaseModel):
 
         try:
             alias = get_scm(repo_full_path)[0]
-            log.debug('Creating instance of %s repository', alias)
+            log.debug('Creating instance of %s repository' % alias)
             backend = get_backend(alias)
         except VCSError:
             log.error(traceback.format_exc())

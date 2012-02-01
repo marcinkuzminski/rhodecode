@@ -62,7 +62,7 @@ def run_task(task, *args, **kwargs):
     if CELERY_ON:
         try:
             t = task.apply_async(args=args, kwargs=kwargs)
-            log.info('running task %s:%s', t.task_id, task)
+            log.info('running task %s:%s' % (t.task_id, task))
             return t
 
         except socket.error, e:
@@ -75,7 +75,7 @@ def run_task(task, *args, **kwargs):
         except Exception, e:
             log.error(traceback.format_exc())
 
-    log.debug('executing task %s in sync mode', task)
+    log.debug('executing task %s in sync mode' % task)
     return ResultWrapper(task(*args, **kwargs))
 
 
@@ -95,7 +95,7 @@ def locked_task(func):
         lockkey = __get_lockkey(func, *fargs, **fkwargs)
         lockkey_path = config['here']
 
-        log.info('running task with lockkey %s', lockkey)
+        log.info('running task with lockkey %s' % lockkey)
         try:
             l = DaemonLock(file_=jn(lockkey_path, lockkey))
             ret = func(*fargs, **fkwargs)

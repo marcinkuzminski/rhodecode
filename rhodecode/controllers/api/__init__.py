@@ -100,7 +100,7 @@ class JSONRPCController(WSGIController):
         else:
             length = environ['CONTENT_LENGTH'] or 0
             length = int(environ['CONTENT_LENGTH'])
-            log.debug('Content-Length: %s', length)
+            log.debug('Content-Length: %s' % length)
 
         if length == 0:
             log.debug("Content-Length is 0")
@@ -121,9 +121,10 @@ class JSONRPCController(WSGIController):
             self._req_id = json_body['id']
             self._req_method = json_body['method']
             self._request_params = json_body['args']
-            log.debug('method: %s, params: %s',
-                      self._req_method,
-                      self._request_params)
+            log.debug(
+                'method: %s, params: %s' % (self._req_method,
+                                            self._request_params)
+            )
         except KeyError, e:
             return jsonrpc_error(message='Incorrect JSON query missing %s' % e)
 
@@ -232,7 +233,7 @@ class JSONRPCController(WSGIController):
         try:
             return json.dumps(response)
         except TypeError, e:
-            log.debug('Error encoding response: %s', e)
+            log.debug('Error encoding response: %s' % e)
             return json.dumps(
                 dict(
                     self._req_id,
@@ -245,7 +246,7 @@ class JSONRPCController(WSGIController):
         """
         Return method named by `self._req_method` in controller if able
         """
-        log.debug('Trying to find JSON-RPC method: %s', self._req_method)
+        log.debug('Trying to find JSON-RPC method: %s' % self._req_method)
         if self._req_method.startswith('_'):
             raise AttributeError("Method not allowed")
 

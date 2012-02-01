@@ -56,7 +56,7 @@ def init_model(engine):
 
     :param engine: engine to bind to
     """
-    log.info("initializing db for %s", engine)
+    log.info("initializing db for %s" % engine)
     meta.Base.metadata.bind = engine
 
 

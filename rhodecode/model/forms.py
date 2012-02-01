@@ -248,7 +248,7 @@ class ValidAuth(formencode.validators.FancyValidator):
             return value
         else:
             if user and user.active is False:
-                log.warning('user %s is disabled', username)
+                log.warning('user %s is disabled' % username)
                 raise formencode.Invalid(
                     self.message('disabled_account',
                     state=State_obj),
@@ -256,7 +256,7 @@ class ValidAuth(formencode.validators.FancyValidator):
                     error_dict=self.e_dict_disable
                 )
             else:
-                log.warning('user %s not authenticated', username)
+                log.warning('user %s not authenticated' % username)
                 raise formencode.Invalid(
                     self.message('invalid_password',
                     state=State_obj), value, state,

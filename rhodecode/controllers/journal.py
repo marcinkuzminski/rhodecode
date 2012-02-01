@@ -149,7 +149,7 @@ class JournalController(BaseController):
                 except:
                     raise HTTPBadRequest()
 
-        log.debug('token mismatch %s vs %s', cur_token, token)
+        log.debug('token mismatch %s vs %s' % (cur_token, token))
         raise HTTPBadRequest()
 
     @LoginRequired()

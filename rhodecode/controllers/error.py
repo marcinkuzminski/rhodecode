@@ -54,7 +54,7 @@ class ErrorController(BaseController):
         resp = request.environ.get('pylons.original_response')
         c.rhodecode_name = config.get('rhodecode_title')
 
-        log.debug('### %s ###', resp.status)
+        log.debug('### %s ###' % resp.status)
 
         e = request.environ
         c.serv_p = r'%(protocol)s://%(host)s/' \

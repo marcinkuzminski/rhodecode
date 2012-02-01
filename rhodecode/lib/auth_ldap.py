@@ -138,8 +138,11 @@ class AuthLdap(object):
                     break
 
                 except ldap.INVALID_CREDENTIALS:
-                    log.debug("LDAP rejected password for user '%s' (%s): %s",
-                              uid, username, dn)
+                    log.debug(
+                        "LDAP rejected password for user '%s' (%s): %s" % (
+                            uid, username, dn
+                        )
+                    )
 
             else:
                 log.debug("No matching LDAP objects for authentication "
@@ -147,7 +150,7 @@ class AuthLdap(object):
                 raise LdapPasswordError()
 
         except ldap.NO_SUCH_OBJECT:
-            log.debug("LDAP says no such user '%s' (%s)", uid, username)
+            log.debug("LDAP says no such user '%s' (%s)" % (uid, username))
             raise LdapUsernameError()
         except ldap.SERVER_DOWN:
             raise LdapConnectionError("LDAP can't access "

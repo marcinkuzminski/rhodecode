@@ -159,7 +159,7 @@ def with_engine(f, *a, **kw):
         return f(*a, **kw)
     finally:
         if isinstance(engine, Engine):
-            log.debug('Disposing SQLAlchemy engine %s', engine)
+            log.debug('Disposing SQLAlchemy engine %s' % engine)
             engine.dispose()
 
 

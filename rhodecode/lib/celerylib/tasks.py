@@ -92,12 +92,12 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
                             ts_max_y)
     lockkey_path = config['here']
 
-    log.info('running task with lockkey %s', lockkey)
+    log.info('running task with lockkey %s' % lockkey)
 
     try:
         lock = l = DaemonLock(file_=jn(lockkey_path, lockkey))
 
-        # for js data compatibilty cleans the key for person from '
+        # for js data compatibility cleans the key for person from '
         akc = lambda k: person(k).replace('"', "")
 
         co_day_auth_aggr = {}
@@ -139,7 +139,7 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
                                         cur_stats.commit_activity_combined))
             co_day_auth_aggr = json.loads(cur_stats.commit_activity)
 
-        log.debug('starting parsing %s', parse_limit)
+        log.debug('starting parsing %s' % parse_limit)
         lmktime = mktime
 
         last_rev = last_rev + 1 if last_rev >= 0 else 0
@@ -214,9 +214,9 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
         stats.commit_activity = json.dumps(co_day_auth_aggr)
         stats.commit_activity_combined = json.dumps(overview_data)
 
-        log.debug('last revison %s', last_rev)
+        log.debug('last revison %s' % last_rev)
         leftovers = len(repo.revisions[last_rev:])
-        log.debug('revisions to parse %s', leftovers)
+        log.debug('revisions to parse %s' % leftovers)
 
         if last_rev == 0 or leftovers < parse_limit:
             log.debug('getting code trending stats')
@@ -265,7 +265,7 @@ def send_password_link(user_email):
             log.debug('sending email')
             run_task(send_email, user_email,
                      _("password reset link"), body)
-            log.info('send new password mail to %s', user_email)
+            log.info('send new password mail to %s' % user_email)
         else:
             log.debug("password reset email %s not found" % user_email)
     except:
@@ -292,7 +292,7 @@ def reset_user_password(user_email):
                 user.api_key = auth.generate_api_key(user.username)
                 DBS.add(user)
                 DBS.commit()
-                log.info('change password for %s', user_email)
+                log.info('change password for %s' % user_email)
             if new_passwd is None:
                 raise Exception('unable to generate new password')
         except:
@@ -302,7 +302,7 @@ def reset_user_password(user_email):
         run_task(send_email, user_email,
                  'Your new password',
                  'Your new RhodeCode password:%s' % (new_passwd))
-        log.info('send new password mail to %s', user_email)
+        log.info('send new password mail to %s' % user_email)
 
     except:
         log.error('Failed to update user password')

@@ -58,7 +58,7 @@ class ReposGroupModel(BaseModel):
         """
 
         create_path = os.path.join(self.repos_path, group_name)
-        log.debug('creating new group in %s', create_path)
+        log.debug('creating new group in %s' % create_path)
 
         if os.path.isdir(create_path):
             raise Exception('That directory already exists !')
@@ -76,13 +76,12 @@ class ReposGroupModel(BaseModel):
             log.debug('skipping group rename')
             return
 
-        log.debug('renaming repos group from %s to %s', old, new)
-
+        log.debug('renaming repos group from %s to %s' % (old, new))
 
         old_path = os.path.join(self.repos_path, old)
         new_path = os.path.join(self.repos_path, new)
 
-        log.debug('renaming repos paths from %s to %s', old_path, new_path)
+        log.debug('renaming repos paths from %s to %s' % (old_path, new_path))
 
         if os.path.isdir(new_path):
             raise Exception('Was trying to rename to already '

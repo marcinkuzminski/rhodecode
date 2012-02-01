@@ -110,13 +110,13 @@ class UserModel(BaseModel):
 
         from rhodecode.lib.auth import get_crypt_password
 
-        log.debug('Checking for %s account in RhodeCode database', username)
+        log.debug('Checking for %s account in RhodeCode database' % username)
         user = User.get_by_username(username, case_insensitive=True)
         if user is None:
-            log.debug('creating new user %s', username)
+            log.debug('creating new user %s' % username)
             new_user = User()
         else:
-            log.debug('updating user %s', username)
+            log.debug('updating user %s' % username)
             new_user = user
 
         try:
@@ -327,7 +327,7 @@ class UserModel(BaseModel):
                 dbuser = self.get(user_id)
 
             if dbuser is not None and dbuser.active:
-                log.debug('filling %s data', dbuser)
+                log.debug('filling %s data' % dbuser)
                 for k, v in dbuser.get_dict().items():
                     setattr(auth_user, k, v)
             else:

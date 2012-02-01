@@ -401,7 +401,7 @@ class RepoModel(BaseModel):
         :param old: old name
         :param new: new name
         """
-        log.info('renaming repo from %s to %s', old, new)
+        log.info('renaming repo from %s to %s' % (old, new))
 
         old_path = os.path.join(self.repos_path, old)
         new_path = os.path.join(self.repos_path, new)
@@ -420,7 +420,7 @@ class RepoModel(BaseModel):
         :param repo: repo object
         """
         rm_path = os.path.join(self.repos_path, repo.repo_name)
-        log.info("Removing %s", rm_path)
+        log.info("Removing %s" % (rm_path))
         # disable hg/git
         alias = repo.repo_type
         shutil.move(os.path.join(rm_path, '.%s' % alias),

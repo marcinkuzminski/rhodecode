@@ -366,7 +366,7 @@ class User(Base, BaseModel):
         """Update user lastlogin"""
         self.last_login = datetime.datetime.now()
         Session.add(self)
-        log.debug('updated user %s lastlogin', self.username)
+        log.debug('updated user %s lastlogin' % self.username)
 
     def __json__(self):
         return dict(
@@ -682,7 +682,7 @@ class Repository(Base, BaseModel):
         repo_full_path = self.repo_full_path
         try:
             alias = get_scm(repo_full_path)[0]
-            log.debug('Creating instance of %s repository', alias)
+            log.debug('Creating instance of %s repository' % alias)
             backend = get_backend(alias)
         except VCSError:
             log.error(traceback.format_exc())

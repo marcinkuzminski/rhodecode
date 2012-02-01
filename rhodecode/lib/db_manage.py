@@ -76,7 +76,7 @@ class DbManage(object):
 
         checkfirst = not override
         meta.Base.metadata.create_all(checkfirst=checkfirst)
-        log.info('Created tables for %s', self.dbname)
+        log.info('Created tables for %s' % self.dbname)
 
     def set_db_version(self):
         ver = DbMigrateVersion()
@@ -84,7 +84,7 @@ class DbManage(object):
         ver.repository_id = 'rhodecode_db_migrations'
         ver.repository_path = 'versions'
         self.sa.add(ver)
-        log.info('db version set to: %s', __dbversion__)
+        log.info('db version set to: %s' % __dbversion__)
 
     def upgrade(self):
         """
@@ -364,12 +364,12 @@ class DbManage(object):
         # check proper dir
         if not os.path.isdir(path):
             path_ok = False
-            log.error('Given path %s is not a valid directory', path)
+            log.error('Given path %s is not a valid directory' % path)
 
         # check write access
         if not os.access(path, os.W_OK) and path_ok:
             path_ok = False
-            log.error('No write permission to given path %s', path)
+            log.error('No write permission to given path %s' % path)
 
         if retries == 0:
             sys.exit('max retries reached')
@@ -427,7 +427,7 @@ class DbManage(object):
         log.info('created ui config')
 
     def create_user(self, username, password, email='', admin=False):
-        log.info('creating user %s', username)
+        log.info('creating user %s' % username)
         UserModel().create_or_update(username, password, email,
                                      name='RhodeCode', lastname='Admin',
                                      active=True, admin=admin)

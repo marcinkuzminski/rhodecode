@@ -177,10 +177,10 @@ def authenticate(username, password):
 
             elif user.username == username and check_password(password,
                                                               user.password):
-                log.info('user %s authenticated correctly', username)
+                log.info('user %s authenticated correctly' % username)
                 return True
         else:
-            log.warning('user %s is disabled', username)
+            log.warning('user %s is disabled' % username)
 
     else:
         log.debug('Regular authentication failed')
@@ -214,7 +214,7 @@ def authenticate(username, password):
                 aldap = AuthLdap(**kwargs)
                 (user_dn, ldap_attrs) = aldap.authenticate_ldap(username,
                                                                 password)
-                log.debug('Got ldap DN response %s', user_dn)
+                log.debug('Got ldap DN response %s' % user_dn)
 
                 get_ldap_attr = lambda k: ldap_attrs.get(ldap_settings\
                                                            .get(k), [''])[0]
@@ -227,7 +227,7 @@ def authenticate(username, password):
 
                 if user_model.create_ldap(username, password, user_dn,
                                           user_attrs):
-                    log.info('created new ldap user %s', username)
+                    log.info('created new ldap user %s' % username)
 
                 Session.commit()
                 return True
@@ -250,7 +250,7 @@ def login_container_auth(username):
         user = UserModel().create_for_container_auth(username, user_attrs)
         if not user:
             return None
-        log.info('User %s was created by container authentication', username)
+        log.info('User %s was created by container authentication' % username)
 
     if not user.active:
         return None
@@ -277,7 +277,7 @@ def get_container_username(environ, config):
         # Removing realm and domain from username
         username = username.partition('@')[0]
         username = username.rpartition('\\')[2]
-        log.debug('Received username %s from container', username)
+        log.debug('Received username %s from container' % username)
 
     return username
 
@@ -315,18 +315,18 @@ class  AuthUser(object):
 
         # try go get user by api key
         if self._api_key and self._api_key != self.anonymous_user.api_key:
-            log.debug('Auth User lookup by API KEY %s', self._api_key)
+            log.debug('Auth User lookup by API KEY %s' % self._api_key)
             is_user_loaded = user_model.fill_data(self, api_key=self._api_key)
         # lookup by userid
         elif (self.user_id is not None and
               self.user_id != self.anonymous_user.user_id):
-            log.debug('Auth User lookup by USER ID %s', self.user_id)
+            log.debug('Auth User lookup by USER ID %s' % self.user_id)
             is_user_loaded = user_model.fill_data(self, user_id=self.user_id)
         # lookup by username
         elif self.username and \
             str2bool(config.get('container_auth_enabled', False)):
 
-            log.debug('Auth User lookup by USER NAME %s', self.username)
+            log.debug('Auth User lookup by USER NAME %s' % self.username)
             dbuser = login_container_auth(self.username)
             if dbuser is not None:
                 for k, v in dbuser.get_dict().items():
@@ -348,7 +348,7 @@ class  AuthUser(object):
         if not self.username:
             self.username = 'None'
 
-        log.debug('Auth User is now %s', self)
+        log.debug('Auth User is now %s' % self)
         user_model.fill_perms(self)
 
     @property
@@ -422,21 +422,21 @@ class LoginRequired(object):
 
         api_access_ok = False
         if self.api_access:
-            log.debug('Checking API KEY access for %s', cls)
+            log.debug('Checking API KEY access for %s' % cls)
             if user.api_key == request.GET.get('api_key'):
                 api_access_ok = True
             else:
                 log.debug("API KEY token not valid")
 
-        log.debug('Checking if %s is authenticated @ %s', user.username, cls)
+        log.debug('Checking if %s is authenticated @ %s' % (user.username, cls))
         if user.is_authenticated or api_access_ok:
-            log.debug('user %s is authenticated', user.username)
+            log.debug('user %s is authenticated' % user.username)
             return func(*fargs, **fkwargs)
         else:
-            log.warn('user %s NOT authenticated', user.username)
+            log.warn('user %s NOT authenticated' % user.username)
             p = url.current()
 
-            log.debug('redirecting to login page with %s', p)
+            log.debug('redirecting to login page with %s' % p)
             return redirect(url('login_home', came_from=p))
 
 
@@ -452,7 +452,7 @@ class NotAnonymous(object):
         cls = fargs[0]
         self.user = cls.rhodecode_user
 
-        log.debug('Checking if user is not anonymous @%s', cls)
+        log.debug('Checking if user is not anonymous @%s' % cls)
 
         anonymous = self.user.username == 'default'
 
@@ -491,11 +491,11 @@ class PermsDecorator(object):
                self.user)
 
         if self.check_permissions():
-            log.debug('Permission granted for %s %s', cls, self.user)
+            log.debug('Permission granted for %s %s' % (cls, self.user))
             return func(*fargs, **fkwargs)
 
         else:
-            log.warning('Permission denied for %s %s', cls, self.user)
+            log.warning('Permission denied for %s %s' % (cls, self.user))
             anonymous = self.user.username == 'default'
 
             if anonymous:

@@ -140,7 +140,7 @@ def action_logger(user, action, repo, ipaddr='', sa=None, commit=False):
         user_log.user_ip = ipaddr
         sa.add(user_log)
 
-        log.info('Adding user %s, action %s on %s', user_obj, action, repo)
+        log.info('Adding user %s, action %s on %s' % (user_obj, action, repo))
         if commit:
             sa.commit()
     except:
@@ -261,12 +261,12 @@ def make_ui(read_from='file', path=None, checkpaths=True):
         if not os.path.isfile(path):
             log.warning('Unable to read config file %s' % path)
             return False
-        log.debug('reading hgrc from %s', path)
+        log.debug('reading hgrc from %s' % path)
         cfg = config.config()
         cfg.read(path)
         for section in ui_sections:
             for k, v in cfg.items(section):
-                log.debug('settings ui from file[%s]%s:%s', section, k, v)
+                log.debug('settings ui from file[%s]%s:%s' % (section, k, v))
                 baseui.setconfig(section, k, v)
 
     elif read_from == 'db':
@@ -401,7 +401,7 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False):
     for name, repo in initial_repo_list.items():
         group = map_groups(name.split(Repository.url_sep()))
         if not rm.get_by_repo_name(name, cache=False):
-            log.info('repository %s not found creating default', name)
+            log.info('repository %s not found creating default' % name)
             added.append(name)
             form_data = {
                          'repo_name': name,
@@ -494,7 +494,7 @@ def create_test_env(repos_test_path, config):
 
     # PART ONE create db
     dbconf = config['sqlalchemy.db1.url']
-    log.debug('making test db %s', dbconf)
+    log.debug('making test db %s' % dbconf)
 
     # create test dir if it doesn't exist
     if not os.path.isdir(repos_test_path):

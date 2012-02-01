@@ -74,7 +74,7 @@ class User(Base):
             self.last_login = datetime.datetime.now()
             session.add(self)
             session.commit()
-            log.debug('updated user %s lastlogin', self.username)
+            log.debug('updated user %s lastlogin' % self.username)
         except (DatabaseError,):
             session.rollback()
 

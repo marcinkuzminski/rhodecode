@@ -101,7 +101,7 @@ class SettingsController(BaseController):
         # url('admin_setting', setting_id=ID)
         if setting_id == 'mapping':
             rm_obsolete = request.POST.get('destroy', False)
-            log.debug('Rescanning directories with destroy=%s', rm_obsolete)
+            log.debug('Rescanning directories with destroy=%s' % rm_obsolete)
             initial = ScmModel().repo_scan()
             log.debug('invalidating all repositories')
             for repo_name in initial.keys():
