@@ -178,14 +178,14 @@
     </div>
 
     <div class="graph">
-         <div style="padding:0 10px 10px 15px;font-size: 1.2em;">
+         <div style="padding:0 10px 10px 17px;">
          %if c.no_data:
            ${c.no_data_msg}
            %if h.HasPermissionAll('hg.admin')('enable stats on from summary'):
                 ${h.link_to(_('enable'),h.url('edit_repo',repo_name=c.repo_name),class_="ui-btn")}
            %endif
         %else:
-            ${_('Loaded in')} ${c.stats_percentage} %
+            ${_('Stats gathered: ')} ${c.stats_percentage}%
         %endif
         </div>
         <div id="commit_history" style="width:450px;height:300px;float:left"></div>
