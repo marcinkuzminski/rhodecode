@@ -448,7 +448,18 @@ def action_parser(user_log, feed=False):
                                     _('compare view'))
                         )
 
-        if len(revs) > revs_limit:
+        # if we have exactly one more than normally displayed:
+        # just display it, takes less space than displaying "and 1 more revisions"
+        if len(revs) == revs_limit + 1:
+            rev = revs[revs_limit]
+            cs_links.append(", " + link_to(rev,
+                url('changeset_home',
+                repo_name=repo_name,
+                revision=rev), title=tooltip(message(rev)),
+                class_='tooltip') )
+
+        # hidden-by-default ones
+        if len(revs) > revs_limit + 1:
             uniq_id = revs[0]
             html_tmpl = ('<span> %s '
             '<a class="show_more" id="_%s" href="#more">%s</a> '
@@ -459,15 +470,20 @@ def action_parser(user_log, feed=False):
                                         _('revisions')))
 
             if not feed:
-                html_tmpl = '<span id="%s" style="display:none"> %s </span>'
+                html_tmpl = '<span id="%s" style="display:none">, %s </span>'
             else:
                 html_tmpl = '<span id="%s"> %s </span>'
 
-            cs_links.append(html_tmpl % (uniq_id, ', '.join([link_to(rev,
+            morelinks = ', '.join([link_to(rev,
                 url('changeset_home',
                 repo_name=repo_name, revision=rev),
                 title=message(rev), class_='tooltip')
-                for rev in revs[revs_limit:revs_top_limit]])))
+                for rev in revs[revs_limit:revs_top_limit]])
+
+            if len(revs) > revs_top_limit:
+                morelinks += ', ...'
+
+            cs_links.append(html_tmpl % (uniq_id, morelinks))
         if len(revs) > 1:
             cs_links.append(compare_view)
         return ''.join(cs_links)
