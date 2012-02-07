@@ -466,7 +466,7 @@ class FilesController(BaseRepoController):
         tags_group = ([], _("Tags"))
 
         for chs in changesets:
-            n_desc = 'r%s:%s' % (chs.revision, chs.short_id)
+            n_desc = 'r%s:%s (%s)' % (chs.revision, chs.short_id, chs.branch)
             changesets_group[0].append((chs.raw_id, n_desc,))
 
         hist_l.append(changesets_group)
