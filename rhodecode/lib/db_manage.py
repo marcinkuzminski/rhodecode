@@ -172,7 +172,7 @@ class DbManage(object):
 
             def step_4(self):
                 print ('TODO:')
-                self.create_permissions()
+                self.klass.create_permissions()
                 self.klass.fixup_groups()
 
         upgrade_steps = [0] + range(curr_version + 1, __dbversion__ + 1)
@@ -181,7 +181,8 @@ class DbManage(object):
         for step in upgrade_steps:
             print ('performing upgrade step %s' % step)
             getattr(UpgradeSteps(self), 'step_%s' % step)()
-
+            self.sa.commit()
+            
     def fix_repo_paths(self):
         """
         Fixes a old rhodecode version path into new one without a '*'
@@ -484,7 +485,7 @@ class DbManage(object):
         ]
 
         for p in perms:
-            if not Permission.get_by_key(p):
+            if not Permission.get_by_key(p[0]):
                 new_perm = Permission()
                 new_perm.permission_name = p[0]
                 new_perm.permission_longname = p[1]
