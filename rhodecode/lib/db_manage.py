@@ -172,6 +172,7 @@ class DbManage(object):
 
             def step_4(self):
                 print ('TODO:')
+                self.create_permissions()
                 self.klass.fixup_groups()
 
         upgrade_steps = [0] + range(curr_version + 1, __dbversion__ + 1)
@@ -483,10 +484,11 @@ class DbManage(object):
         ]
 
         for p in perms:
-            new_perm = Permission()
-            new_perm.permission_name = p[0]
-            new_perm.permission_longname = p[1]
-            self.sa.add(new_perm)
+            if not Permission.get_by_key(p):
+                new_perm = Permission()
+                new_perm.permission_name = p[0]
+                new_perm.permission_longname = p[1]
+                self.sa.add(new_perm)
 
     def populate_default_permissions(self):
         log.info('creating default user permissions')
