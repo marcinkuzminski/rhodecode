@@ -37,9 +37,11 @@ from rhodecode.model.user import UserModel
 from rhodecode.lib.utils import ask_ok
 from rhodecode.model import init_model
 from rhodecode.model.db import User, Permission, RhodeCodeUi, \
-    RhodeCodeSetting, UserToPerm, DbMigrateVersion
+    RhodeCodeSetting, UserToPerm, DbMigrateVersion, RepoGroup,\
+    UserRepoGroupToPerm
 
 from sqlalchemy.engine import create_engine
+from rhodecode.model.repos_group import ReposGroupModel
 
 log = logging.getLogger(__name__)
 
@@ -170,7 +172,7 @@ class DbManage(object):
 
             def step_4(self):
                 print ('TODO:')
-                raise NotImplementedError()
+                self.klass.fixup_groups()
 
         upgrade_steps = [0] + range(curr_version + 1, __dbversion__ + 1)
 
@@ -347,6 +349,21 @@ class DbManage(object):
                 continue
             setting = RhodeCodeSetting(k, v)
             self.sa.add(setting)
+
+    def fixup_groups(self):
+        def_usr = User.get_by_username('default')
+        for g in RepoGroup.query().all():
+            g.group_name = g.get_new_name(g.name)
+            self.sa.add(g)
+            # get default perm
+            default = UserRepoGroupToPerm.query()\
+                .filter(UserRepoGroupToPerm.group == g)\
+                .filter(UserRepoGroupToPerm.user == def_usr)\
+                .scalar()
+
+            if default is None:
+                log.debug('missing default permission for group %s adding' % g)
+                ReposGroupModel()._create_default_perms(g)
 
     def config_prompt(self, test_repo_path='', retries=3):
         if retries == 3:
