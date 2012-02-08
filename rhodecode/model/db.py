@@ -866,7 +866,8 @@ class Permission(Base, BaseModel):
 class UserRepoToPerm(Base, BaseModel):
     __tablename__ = 'repo_to_perm'
     __table_args__ = (
-        UniqueConstraint('user_id', 'repository_id'), {'extend_existing': True}
+        UniqueConstraint('user_id', 'repository_id'),
+        {'extend_existing': True}
     )
     repo_to_perm_id = Column("repo_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None, default=None)
@@ -892,7 +893,10 @@ class UserRepoToPerm(Base, BaseModel):
 
 class UserToPerm(Base, BaseModel):
     __tablename__ = 'user_to_perm'
-    __table_args__ = (UniqueConstraint('user_id', 'permission_id'), {'extend_existing': True})
+    __table_args__ = (
+        UniqueConstraint('user_id', 'permission_id'),
+        {'extend_existing': True}
+    )
     user_to_perm_id = Column("user_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None, default=None)
     permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable=False, unique=None, default=None)
@@ -904,7 +908,7 @@ class UserToPerm(Base, BaseModel):
 class UsersGroupRepoToPerm(Base, BaseModel):
     __tablename__ = 'users_group_repo_to_perm'
     __table_args__ = (
-        UniqueConstraint('repository_id', 'users_group_id', 'permission_id'),
+        UniqueConstraint('repository_id', 'users_group_id',),
         {'extend_existing': True}
     )
     users_group_to_perm_id = Column("users_group_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -931,6 +935,10 @@ class UsersGroupRepoToPerm(Base, BaseModel):
 
 class UsersGroupToPerm(Base, BaseModel):
     __tablename__ = 'users_group_to_perm'
+    __table_args__ = (
+        UniqueConstraint('users_group_id', 'permission_id',),
+        {'extend_existing': True}
+    )
     users_group_to_perm_id = Column("users_group_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     users_group_id = Column("users_group_id", Integer(), ForeignKey('users_groups.users_group_id'), nullable=False, unique=None, default=None)
     permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable=False, unique=None, default=None)
@@ -942,7 +950,7 @@ class UsersGroupToPerm(Base, BaseModel):
 class UserRepoGroupToPerm(Base, BaseModel):
     __tablename__ = 'user_repo_group_to_perm'
     __table_args__ = (
-        UniqueConstraint('group_id', 'permission_id'),
+        UniqueConstraint('user_id', 'group_id'),
         {'extend_existing': True}
     )
 
@@ -959,14 +967,14 @@ class UserRepoGroupToPerm(Base, BaseModel):
 class UsersGroupRepoGroupToPerm(Base, BaseModel):
     __tablename__ = 'users_group_repo_group_to_perm'
     __table_args__ = (
-        UniqueConstraint('group_id', 'permission_id'),
+        UniqueConstraint('users_group_id', 'group_id'),
         {'extend_existing': True}
     )
 
     users_group_repo_group_to_perm_id = Column("users_group_repo_group_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     users_group_id = Column("users_group_id", Integer(), ForeignKey('users_groups.users_group_id'), nullable=False, unique=None, default=None)
-    permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable=False, unique=None, default=None)
     group_id = Column("group_id", Integer(), ForeignKey('groups.group_id'), nullable=False, unique=None, default=None)
+    permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable=False, unique=None, default=None)
 
     users_group = relationship('UsersGroup')
     permission = relationship('Permission')
