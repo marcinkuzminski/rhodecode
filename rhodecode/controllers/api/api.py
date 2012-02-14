@@ -92,8 +92,8 @@ class ApiController(JSONRPCController):
         """
 
         user = User.get_by_username(username)
-        if not user:
-            return None
+        if user is None:
+            return user
 
         return dict(
             id=user.user_id,
@@ -258,18 +258,52 @@ class ApiController(JSONRPCController):
             if not users_group:
                 raise JSONRPCError('unknown users group %s' % group_name)
 
-            try:
-                user = User.get_by_username(username)
-            except NoResultFound:
+            user = User.get_by_username(username)
+            if user is None:
                 raise JSONRPCError('unknown user %s' % username)
 
             ugm = UsersGroupModel().add_user_to_group(users_group, user)
+            success = True if ugm != True else False
+            msg = 'added member %s to users group %s' % (username, group_name)
+            msg = msg if success else 'User is already in that group'
             Session.commit()
-            return dict(id=ugm.users_group_member_id,
-                        msg='created new users group member')
+
+            return dict(
+                id=ugm.users_group_member_id if ugm != True else None,
+                success=success,
+                msg=msg
+            )
         except Exception:
             log.error(traceback.format_exc())
-            raise JSONRPCError('failed to create users group member')
+            raise JSONRPCError('failed to add users group member')
+
+    @HasPermissionAllDecorator('hg.admin')
+    def remove_user_from_users_group(self, apiuser, group_name, username):
+        """
+        Remove user from a group
+
+        :param apiuser
+        :param group_name
+        :param username
+        """
+
+        try:
+            users_group = UsersGroup.get_by_group_name(group_name)
+            if not users_group:
+                raise JSONRPCError('unknown users group %s' % group_name)
+
+            user = User.get_by_username(username)
+            if user is None:
+                raise JSONRPCError('unknown user %s' % username)
+
+            success = UsersGroupModel().remove_user_from_group(users_group, user)
+            msg = 'removed member %s from users group %s' % (username, group_name)
+            msg = msg if success else "User wasn't in group"
+            Session.commit()
+            return dict(success=success, msg=msg)
+        except Exception:
+            log.error(traceback.format_exc())
+            raise JSONRPCError('failed to remove user from group')
 
     @HasPermissionAnyDecorator('hg.admin')
     def get_repo(self, apiuser, repo_name):
@@ -386,10 +420,9 @@ class ApiController(JSONRPCController):
         """
 
         try:
-            try:
-                owner = User.get_by_username(owner_name)
-            except NoResultFound:
-                raise JSONRPCError('unknown user %s' % owner)
+            owner = User.get_by_username(owner_name)
+            if owner is None:
+                raise JSONRPCError('unknown user %s' % owner_name)
 
             if Repository.get_by_repo_name(repo_name):
                 raise JSONRPCError("repo %s already exist" % repo_name)

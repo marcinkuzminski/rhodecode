@@ -283,7 +283,8 @@ OUTPUT::
 add_user_to_users_group
 -----------------------
 
-Adds a user to a users group. This command can be executed only using api_key
+Adds a user to a users group. If user exists in that group success will be 
+`false`. This command can be executed only using api_key
 belonging to user with admin rights
 
 
@@ -300,7 +301,36 @@ OUTPUT::
 
     result: {
               "id":  "<newusersgroupmemberid>",
-              "msg": "created new users group member"
+              "success": True|False # depends on if member is in group
+              "msg": "added member <username> to users group <groupname> | 
+                      User is already in that group"
+            }
+    error:  null
+
+
+remove_user_from_users_group
+----------------------------
+
+Removes a user from a users group. If user is not in given group success will
+be `false`. This command can be executed only 
+using api_key belonging to user with admin rights
+
+
+INPUT::
+
+    api_key : "<api_key>"
+    method :  "remove_user_from_users_group"
+    args:     {
+                "group_name" :  "<groupname>",
+                "username" :   "<username>"
+              }
+
+OUTPUT::
+
+    result: {
+              "success":  True|False,  # depends on if member is in group
+              "msg": "removed member <username> from users group <groupname> | 
+                      User wasn't in group"
             }
     error:  null
 

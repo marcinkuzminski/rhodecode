@@ -29,13 +29,16 @@ import traceback
 
 from rhodecode.model import BaseModel
 from rhodecode.model.db import UsersGroupMember, UsersGroup,\
-    UsersGroupRepoToPerm, Permission, UsersGroupToPerm
+    UsersGroupRepoToPerm, Permission, UsersGroupToPerm, User
 from rhodecode.lib.exceptions import UsersGroupsAssignedException
 
 log = logging.getLogger(__name__)
 
 
 class UsersGroupModel(BaseModel):
+
+    def __get_user(self, user):
+        return self._get_instance(User, user, callback=User.get_by_username)
 
     def __get_users_group(self, users_group):
         return self._get_instance(UsersGroup, users_group,
@@ -111,10 +114,13 @@ class UsersGroupModel(BaseModel):
             raise
 
     def add_user_to_group(self, users_group, user):
+        users_group = self.__get_users_group(users_group)
+        user = self.__get_user(user)
+
         for m in users_group.members:
             u = m.user
             if u.user_id == user.user_id:
-                return m
+                return True
 
         try:
             users_group_member = UsersGroupMember()
@@ -129,6 +135,28 @@ class UsersGroupModel(BaseModel):
         except:
             log.error(traceback.format_exc())
             raise
+
+    def remove_user_from_group(self, users_group, user):
+        users_group = self.__get_users_group(users_group)
+        user = self.__get_user(user)
+
+        users_group_member = None
+        for m in users_group.members:
+            if m.user.user_id == user.user_id:
+                # Found this user's membership row
+                users_group_member = m
+                break
+
+        if users_group_member:
+            try:
+                self.sa.delete(users_group_member)
+                return True
+            except:
+                log.error(traceback.format_exc())
+                raise
+        else:
+            # User isn't in that group
+            return False
 
     def has_perm(self, users_group, perm):
         users_group = self.__get_users_group(users_group)
