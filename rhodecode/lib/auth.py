@@ -224,8 +224,13 @@ def authenticate(username, password):
                  'lastname': safe_unicode(get_ldap_attr('ldap_attr_lastname')),
                  'email': get_ldap_attr('ldap_attr_email'),
                 }
-
-                if user_model.create_ldap(username, password, user_dn,
+                
+                # don't store LDAP password since we don't need it. Override 
+                # with some random generated password
+                _password = PasswordGenerator().gen_password(length=8)
+                # create this user on the fly if it doesn't exist in rhodecode
+                # database
+                if user_model.create_ldap(username, _password, user_dn,
                                           user_attrs):
                     log.info('created new ldap user %s' % username)
 
