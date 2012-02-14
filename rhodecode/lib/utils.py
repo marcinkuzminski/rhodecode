@@ -259,14 +259,14 @@ def make_ui(read_from='file', path=None, checkpaths=True):
 
     baseui = ui.ui()
 
-    #clean the baseui object
+    # clean the baseui object
     baseui._ocfg = config.config()
     baseui._ucfg = config.config()
     baseui._tcfg = config.config()
 
     if read_from == 'file':
         if not os.path.isfile(path):
-            log.warning('Unable to read config file %s' % path)
+            log.debug('hgrc file is not present at %s skipping...' % path)
             return False
         log.debug('reading hgrc from %s' % path)
         cfg = config.config()
@@ -279,8 +279,8 @@ def make_ui(read_from='file', path=None, checkpaths=True):
     elif read_from == 'db':
         sa = meta.Session
         ret = sa.query(RhodeCodeUi)\
-            .options(FromCache("sql_cache_short",
-                               "get_hg_ui_settings")).all()
+            .options(FromCache("sql_cache_short", "get_hg_ui_settings"))\
+            .all()
 
         hg_ui = ret
         for ui_ in hg_ui:
