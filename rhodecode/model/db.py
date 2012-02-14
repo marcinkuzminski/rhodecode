@@ -446,16 +446,6 @@ class UsersGroupMember(Base, BaseModel):
         self.users_group_id = gr_id
         self.user_id = u_id
 
-    @staticmethod
-    def add_user_to_group(group, user):
-        ugm = UsersGroupMember()
-        ugm.users_group = group
-        ugm.user = user
-        Session.add(ugm)
-        Session.commit()
-        return ugm
-
-
 class Repository(Base, BaseModel):
     __tablename__ = 'repositories'
     __table_args__ = (
