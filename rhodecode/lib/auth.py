@@ -80,7 +80,9 @@ class PasswordGenerator(object):
     def __init__(self, passwd=''):
         self.passwd = passwd
 
-    def gen_password(self, length, type_):
+    def gen_password(self, length, type_=None):
+        if type_ is None:
+            type_ = self.ALPHABETS_FULL
         self.passwd = ''.join([random.choice(type_) for _ in xrange(length)])
         return self.passwd
 
