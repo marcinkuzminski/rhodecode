@@ -118,7 +118,6 @@ class JSONRPCController(WSGIController):
         # check AUTH based on API KEY
         try:
             self._req_api_key = json_body['api_key']
-            self._req_id = json_body['id']
             self._req_method = json_body['method']
             self._request_params = json_body['args']
             log.debug('method: %s, params: %s',
