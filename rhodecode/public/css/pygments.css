@@ -65,10 +65,20 @@ div.codeblock .code-body table td {
 div.code-body {
 	background-color: #FFFFFF;
 }
-div.code-body pre .match{
+
+div.codeblock .code-header .search-path {
+	padding: 0px 0px 0px 10px;
+}
+
+div.search-code-body {
+    background-color: #FFFFFF;
+    padding: 5px 0px 5px 10px;
+}
+
+div.search-code-body pre .match{
 	background-color: #FAFFA6;
 }
-div.code-body pre .break{
+div.search-code-body pre .break{
 	background-color: #DDE7EF;
 	width: 100%;
 	color: #747474;

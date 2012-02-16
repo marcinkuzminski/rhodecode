@@ -37,38 +37,39 @@ from whoosh.analysis import RegexTokenizer, LowercaseFilter, StopFilter
 from whoosh.fields import TEXT, ID, STORED, Schema, FieldType
 from whoosh.index import create_in, open_dir
 from whoosh.formats import Characters
-from whoosh.highlight import highlight, SimpleFragmenter, HtmlFormatter
+from whoosh.highlight import highlight, HtmlFormatter, ContextFragmenter
 
 from webhelpers.html.builder import escape
 from sqlalchemy import engine_from_config
-from vcs.utils.lazy import LazyProperty
 
 from rhodecode.model import init_model
 from rhodecode.model.scm import ScmModel
 from rhodecode.model.repo import RepoModel
 from rhodecode.config.environment import load_environment
-from rhodecode.lib import LANGUAGES_EXTENSIONS_MAP
+from rhodecode.lib import LANGUAGES_EXTENSIONS_MAP, LazyProperty
 from rhodecode.lib.utils import BasePasterCommand, Command, add_cache
 
-#EXTENSIONS WE WANT TO INDEX CONTENT OFF
+# EXTENSIONS WE WANT TO INDEX CONTENT OFF
 INDEX_EXTENSIONS = LANGUAGES_EXTENSIONS_MAP.keys()
 
-#CUSTOM ANALYZER wordsplit + lowercase filter
+# CUSTOM ANALYZER wordsplit + lowercase filter
 ANALYZER = RegexTokenizer(expression=r"\w+") | LowercaseFilter()
 
 
 #INDEX SCHEMA DEFINITION
-SCHEMA = Schema(owner=TEXT(),
-                repository=TEXT(stored=True),
-                path=TEXT(stored=True),
-                content=FieldType(format=Characters(ANALYZER),
-                             scorable=True, stored=True),
-                modtime=STORED(), extension=TEXT(stored=True))
-
+SCHEMA = Schema(
+    owner=TEXT(),
+    repository=TEXT(stored=True),
+    path=TEXT(stored=True),
+    content=FieldType(format=Characters(), analyzer=ANALYZER,
+                      scorable=True, stored=True),
+    modtime=STORED(),
+    extension=TEXT(stored=True)
+)
 
 IDX_NAME = 'HG_INDEX'
 FORMATTER = HtmlFormatter('span', between='\n<span class="break">...</span>\n')
-FRAGMENTER = SimpleFragmenter(200)
+FRAGMENTER = ContextFragmenter(200)
 
 
 class MakeIndex(BasePasterCommand):
@@ -136,7 +137,7 @@ class ResultWrapper(object):
         self.searcher = searcher
         self.matcher = matcher
         self.highlight_items = highlight_items
-        self.fragment_size = 200 / 2
+        self.fragment_size = 200
 
     @LazyProperty
     def doc_ids(self):
@@ -172,10 +173,10 @@ class ResultWrapper(object):
         """
         i, j = key.start, key.stop
 
-        slice = []
+        slices = []
         for docid in self.doc_ids[i:j]:
-            slice.append(self.get_full_content(docid))
-        return slice
+            slices.append(self.get_full_content(docid))
+        return slices
 
     def get_full_content(self, docid):
         res = self.searcher.stored_fields(docid[0])
@@ -183,9 +184,9 @@ class ResultWrapper(object):
                              + len(res['repository']):].lstrip('/')
 
         content_short = self.get_short_content(res, docid[1])
-        res.update({'content_short':content_short,
-                    'content_short_hl':self.highlight(content_short),
-                    'f_path':f_path})
+        res.update({'content_short': content_short,
+                    'content_short_hl': self.highlight(content_short),
+                    'f_path': f_path})
 
         return res
 
@@ -217,10 +218,12 @@ class ResultWrapper(object):
     def highlight(self, content, top=5):
         if self.search_type != 'content':
             return ''
-        hl = highlight(escape(content),
-                 self.highlight_items,
-                 analyzer=ANALYZER,
-                 fragmenter=FRAGMENTER,
-                 formatter=FORMATTER,
-                 top=top)
+        hl = highlight(
+            text=escape(content),
+            terms=self.highlight_items,
+            analyzer=ANALYZER,
+            fragmenter=FRAGMENTER,
+            formatter=FORMATTER,
+            top=top
+        )
         return hl

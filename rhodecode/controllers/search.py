@@ -26,7 +26,7 @@ import logging
 import traceback
 
 from pylons.i18n.translation import _
-from pylons import request, config, session, tmpl_context as c
+from pylons import request, config, tmpl_context as c
 
 from rhodecode.lib.auth import LoginRequired
 from rhodecode.lib.base import BaseController, render
@@ -76,7 +76,7 @@ class SearchController(BaseController):
                     cur_query = u'repository:%s %s' % (c.repo_name, cur_query)
                 try:
                     query = qp.parse(unicode(cur_query))
-
+                    # extract words for highlight
                     if isinstance(query, Phrase):
                         highlight_items.update(query.words)
                     elif isinstance(query, Prefix):
@@ -92,18 +92,22 @@ class SearchController(BaseController):
                     log.debug(highlight_items)
                     results = searcher.search(query)
                     res_ln = len(results)
-                    c.runtime = '%s results (%.3f seconds)' \
-                        % (res_ln, results.runtime)
+                    c.runtime = '%s results (%.3f seconds)' % (
+                        res_ln, results.runtime
+                    )
 
                     def url_generator(**kw):
                         return update_params("?q=%s&type=%s" \
                                            % (c.cur_query, c.cur_search), **kw)
 
                     c.formated_results = Page(
-                                ResultWrapper(search_type, searcher, matcher,
-                                              highlight_items),
-                                page=p, item_count=res_ln,
-                                items_per_page=10, url=url_generator)
+                        ResultWrapper(search_type, searcher, matcher,
+                                      highlight_items),
+                        page=p,
+                        item_count=res_ln,
+                        items_per_page=10,
+                        url=url_generator
+                    )
 
                 except QueryParserError:
                     c.runtime = _('Invalid search query. Try quoting it.')
@@ -116,6 +120,7 @@ class SearchController(BaseController):
             except (Exception):
                 log.error(traceback.format_exc())
                 c.runtime = _('An error occurred during this search operation')
+
 
         # Return a rendered template
         return render('/search/search.html')

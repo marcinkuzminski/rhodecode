@@ -49,7 +49,6 @@ from vcs.exceptions import ChangesetError, RepositoryError, \
 from whoosh.index import create_in, open_dir
 
 
-
 log = logging.getLogger('whooshIndexer')
 # create logger
 log.setLevel(logging.DEBUG)
@@ -68,12 +67,13 @@ ch.setFormatter(formatter)
 # add ch to logger
 log.addHandler(ch)
 
+
 class WhooshIndexingDaemon(object):
     """
     Daemon for atomic jobs
     """
 
-    def __init__(self, indexname='HG_INDEX', index_location=None,
+    def __init__(self, indexname=IDX_NAME, index_location=None,
                  repo_location=None, sa=None, repo_list=None):
         self.indexname = indexname
 
@@ -94,7 +94,6 @@ class WhooshIndexingDaemon(object):
                     filtered_repo_paths[repo_name] = repo
 
             self.repo_paths = filtered_repo_paths
-
 
         self.initial = False
         if not os.path.isdir(self.index_location):
@@ -155,7 +154,6 @@ class WhooshIndexingDaemon(object):
                         modtime=self.get_node_mtime(node),
                         extension=node.extension)
 
-
     def build_index(self):
         if os.path.exists(self.index_location):
             log.debug('removing previous index')
@@ -176,7 +174,6 @@ class WhooshIndexingDaemon(object):
         log.debug('>> COMMITING CHANGES <<')
         writer.commit(merge=True)
         log.debug('>>> FINISHED BUILDING INDEX <<<')
-
 
     def update_index(self):
         log.debug('STARTING INCREMENTAL INDEXING UPDATE')
