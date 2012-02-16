@@ -31,12 +31,13 @@ from rhodecode.lib import safe_unicode
 
 log = logging.getLogger(__name__)
 
+
 class MarkupRenderer(object):
     RESTRUCTUREDTEXT_DISALLOWED_DIRECTIVES = ['include', 'meta', 'raw']
 
-    MARKDOWN_PAT = re.compile(r'md|mkdn?|mdown|markdown',re.IGNORECASE)
-    RST_PAT = re.compile(r're?st',re.IGNORECASE)
-    PLAIN_PAT = re.compile(r'readme',re.IGNORECASE)
+    MARKDOWN_PAT = re.compile(r'md|mkdn?|mdown|markdown', re.IGNORECASE)
+    RST_PAT = re.compile(r're?st', re.IGNORECASE)
+    PLAIN_PAT = re.compile(r'readme', re.IGNORECASE)
 
     def __detect_renderer(self, source, filename=None):
         """
@@ -60,7 +61,6 @@ class MarkupRenderer(object):
 
         return getattr(MarkupRenderer, detected_renderer)
 
-
     def render(self, source, filename=None):
         """
         Renders a given filename using detected renderer
@@ -78,30 +78,29 @@ class MarkupRenderer(object):
     @classmethod
     def plain(cls, source):
         source = safe_unicode(source)
+
         def urlify_text(text):
             url_pat = re.compile(r'(http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]'
                                  '|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+)')
 
             def url_func(match_obj):
                 url_full = match_obj.groups()[0]
-                return '<a href="%(url)s">%(url)s</a>' % ({'url':url_full})
+                return '<a href="%(url)s">%(url)s</a>' % ({'url': url_full})
 
             return url_pat.sub(url_func, text)
 
         source = urlify_text(source)
         return '<br />' + source.replace("\n", '<br />')
 
-
     @classmethod
     def markdown(cls, source):
         source = safe_unicode(source)
         try:
             import markdown as __markdown
-            return __markdown.markdown(source)
+            return __markdown.markdown(source, ['codehilite'])
         except ImportError:
             log.warning('Install markdown to use this function')
             return cls.plain(source)
-
 
     @classmethod
     def rst(cls, source):
@@ -113,7 +112,7 @@ class MarkupRenderer(object):
                                 cls.RESTRUCTUREDTEXT_DISALLOWED_DIRECTIVES])
 
             docutils_settings.update({'input_encoding': 'unicode',
-                                      'report_level':4})
+                                      'report_level': 4})
 
             for k, v in docutils_settings.iteritems():
                 directives.register_directive(k, v)
