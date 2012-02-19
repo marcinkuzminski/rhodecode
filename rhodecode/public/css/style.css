@@ -203,10 +203,9 @@ div.options a {
         to(#eedc94) );
     background-image: -moz-linear-gradient(top, #003b76, #00376e);
     background-image: -ms-linear-gradient(top, #003b76, #00376e);
-    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #003b76),
-        color-stop(100%, #00376e) );
-    background-image: -webkit-linear-gradient(top, #003b76, #00376e) );
-    background-image: -o-linear-gradient(top, #003b76, #00376e) );
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #003b76), color-stop(100%, #00376e) );
+    background-image: -webkit-linear-gradient(top, #003b76, #00376e);
+    background-image: -o-linear-gradient(top, #003b76, #00376e);
     background-image: linear-gradient(top, #003b76, #00376e);
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#003b76',
         endColorstr='#00376e', GradientType=0 );
@@ -267,8 +266,8 @@ div.options a {
     background-image: -moz-linear-gradient(top, #003b76, #00376e);
     background-image: -ms-linear-gradient(top, #003b76, #00376e);
     background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #003b76),color-stop(100%, #00376e) );
-    background-image: -webkit-linear-gradient(top, #003b76, #00376e) );
-    background-image: -o-linear-gradient(top, #003b76, #00376e) );
+    background-image: -webkit-linear-gradient(top, #003b76, #00376e);
+    background-image: -o-linear-gradient(top, #003b76, #00376e);
     background-image: linear-gradient(top, #003b76, #00376e);
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#003b76',endColorstr='#00376e', GradientType=0 );
 	margin: 0;
@@ -1001,10 +1000,9 @@ tbody .yui-dt-editable { cursor: pointer }
 		to(#eedc94) );
 	background-image: -moz-linear-gradient(top, #003b76, #00376e);
 	background-image: -ms-linear-gradient(top, #003b76, #00376e);
-	background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #003b76),
-		color-stop(100%, #00376e) );
-	background-image: -webkit-linear-gradient(top, #003b76, #00376e) );
-	background-image: -o-linear-gradient(top, #003b76, #00376e) );
+	background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #003b76), color-stop(100%, #00376e) );
+	background-image: -webkit-linear-gradient(top, #003b76, #00376e);
+	background-image:e)(top, #003b76, #00376e);
 	background-image: linear-gradient(top, #003b76, #00376e);
 	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#003b76',
 		endColorstr='#00376e', GradientType=0 );
@@ -1780,10 +1778,9 @@ div.form div.fields div.field div.button {
 		to(#eedc94) );
 	background-image: -moz-linear-gradient(top, #003b76, #00376e);
 	background-image: -ms-linear-gradient(top, #003b76, #00376e);
-	background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #003b76),
-		color-stop(100%, #00376e) );
-	background-image: -webkit-linear-gradient(top, #003b76, #00376e) );
-	background-image: -o-linear-gradient(top, #003b76, #00376e) );
+	background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #003b76), color-stop(100%, #00376e) );
+	background-image: -webkit-linear-gradient(top, #003b76, #00376e);
+	background-image: -o-linear-gradient(top, #003b76, #00376e);
 	background-image: linear-gradient(top, #003b76, #00376e);
 	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#003b76',
 		endColorstr='#00376e', GradientType=0 );
@@ -1828,10 +1825,9 @@ div.form div.fields div.field div.button {
 		to(#eedc94) );
 	background-image: -moz-linear-gradient(top, #003b76, #00376e);
 	background-image: -ms-linear-gradient(top, #003b76, #00376e);
-	background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #003b76),
-		color-stop(100%, #00376e) );
-	background-image: -webkit-linear-gradient(top, #003b76, #00376e) );
-	background-image: -o-linear-gradient(top, #003b76, #00376e) );
+	background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #003b76), color-stop(100%, #00376e) );
+	background-image: -webkit-linear-gradient(top, #003b76, #00376e);
+	background-image: -o-linear-gradient(top, #003b76, #00376e);
 	background-image: linear-gradient(top, #003b76, #00376e);
 	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#003b76',
 		endColorstr='#00376e', GradientType=0 );
@@ -1915,10 +1911,9 @@ div.form div.fields div.field div.button {
         to(#eedc94) );
     background-image: -moz-linear-gradient(top, #003b76, #00376e);
     background-image: -ms-linear-gradient(top, #003b76, #00376e);
-    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #003b76),
-        color-stop(100%, #00376e) );
-    background-image: -webkit-linear-gradient(top, #003b76, #00376e) );
-    background-image: -o-linear-gradient(top, #003b76, #00376e) );
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #003b76), color-stop(100%, #00376e) );
+    background-image: -webkit-linear-gradient(top, #003b76, #00376e);
+    background-image: -o-linear-gradient(top, #003b76, #00376e);
     background-image: linear-gradient(top, #003b76, #00376e);
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#003b76',
         endColorstr='#00376e', GradientType=0 );
@@ -2063,10 +2058,9 @@ div.form div.fields div.field div.button {
         to(#eedc94) );
     background-image: -moz-linear-gradient(top, #003b76, #00376e);
     background-image: -ms-linear-gradient(top, #003b76, #00376e);
-    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #003b76),
-        color-stop(100%, #00376e) );
-    background-image: -webkit-linear-gradient(top, #003b76, #00376e) );
-    background-image: -o-linear-gradient(top, #003b76, #00376e) );
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #003b76), color-stop(100%, #00376e) );
+    background-image: -webkit-linear-gradient(top, #003b76, #00376e);
+    background-image: -o-linear-gradient(top, #003b76, #00376e);
     background-image: linear-gradient(top, #003b76, #00376e);
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#003b76',
         endColorstr='#00376e', GradientType=0 );
