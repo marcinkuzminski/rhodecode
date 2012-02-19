@@ -512,7 +512,7 @@ class ApiController(JSONRPCController):
             raise JSONRPCError('failed to delete repository %s' % repo_name)
 
     @HasPermissionAnyDecorator('hg.admin')
-    def grant_user_permission(self, repo_name, username, perm):
+    def grant_user_permission(self, apiuser, repo_name, username, perm):
         """
         Grant permission for user on given repository, or update existing one
         if found
@@ -548,7 +548,7 @@ class ApiController(JSONRPCController):
             )
 
     @HasPermissionAnyDecorator('hg.admin')
-    def revoke_user_permission(self, repo_name, username):
+    def revoke_user_permission(self, apiuser, repo_name, username):
         """
         Revoke permission for user on given repository
 
@@ -582,7 +582,7 @@ class ApiController(JSONRPCController):
             )
 
     @HasPermissionAnyDecorator('hg.admin')
-    def grant_users_group_permission(self, repo_name, group_name, perm):
+    def grant_users_group_permission(self, apiuser, repo_name, group_name, perm):
         """
         Grant permission for users group on given repository, or update
         existing one if found
@@ -620,7 +620,7 @@ class ApiController(JSONRPCController):
             )
 
     @HasPermissionAnyDecorator('hg.admin')
-    def revoke_users_group_permission(self, repo_name, group_name):
+    def revoke_users_group_permission(self, apiuser, repo_name, group_name):
         """
         Revoke permission for users group on given repository
 
