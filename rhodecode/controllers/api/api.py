@@ -439,16 +439,17 @@ class ApiController(JSONRPCController):
 
     @HasPermissionAnyDecorator('hg.admin', 'hg.create.repository')
     def create_repo(self, apiuser, repo_name, owner_name, description='',
-                    repo_type='hg', private=False):
+                    repo_type='hg', private=False, clone_uri=None):
         """
-        Create a repository
+        Create repository, if clone_url is given it makes a remote clone
 
         :param apiuser:
         :param repo_name:
-        :param description:
-        :param type:
-        :param private:
         :param owner_name:
+        :param description:
+        :param repo_type:
+        :param private:
+        :param clone_uri:
         """
 
         try:
@@ -477,7 +478,7 @@ class ApiController(JSONRPCController):
                     private=private,
                     repo_type=repo_type,
                     repo_group=parent_id,
-                    clone_uri=None
+                    clone_uri=clone_uri
                 ),
                 owner
             )

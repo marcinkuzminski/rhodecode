@@ -177,7 +177,7 @@ class DbManage(object):
 
             def step_5(self):
                 pass
-            
+
         upgrade_steps = [0] + range(curr_version + 1, __dbversion__ + 1)
 
         # CALL THE PROPER ORDER OF STEPS TO PERFORM FULL UPGRADE

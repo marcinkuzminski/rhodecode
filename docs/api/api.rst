@@ -491,7 +491,8 @@ INPUT::
                 "owner_name" :  "<ownername>",
                 "description" : "<description> = ''",
                 "repo_type" :   "<type> = 'hg'",
-                "private" :     "<bool> = False"
+                "private" :     "<bool> = False",
+                "clone_uri" :   "<clone_uri> = None",
               }
 
 OUTPUT::
