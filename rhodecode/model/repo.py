@@ -302,6 +302,7 @@ class RepoModel(BaseModel):
         run_task(tasks.create_repo_fork, form_data, cur_user)
 
     def delete(self, repo):
+        repo = self.__get_repo(repo)
         try:
             self.sa.delete(repo)
             self.__delete_repo(repo)

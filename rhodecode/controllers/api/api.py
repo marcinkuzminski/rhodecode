@@ -493,6 +493,25 @@ class ApiController(JSONRPCController):
             raise JSONRPCError('failed to create repository %s' % repo_name)
 
     @HasPermissionAnyDecorator('hg.admin')
+    def delete_repo(self, apiuser, repo_name):
+        """
+        Deletes a given repository
+
+        :param repo_name:
+        """
+        if not Repository.get_by_repo_name(repo_name):
+            raise JSONRPCError("repo %s does not exist" % repo_name)
+        try:
+            RepoModel().delete(repo_name)
+            Session.commit()
+            return dict(
+                msg='Deleted repository %s' % repo_name
+            )
+        except Exception:
+            log.error(traceback.format_exc())
+            raise JSONRPCError('failed to delete repository %s' % repo_name)
+
+    @HasPermissionAnyDecorator('hg.admin')
     def grant_user_permission(self, repo_name, username, perm):
         """
         Grant permission for user on given repository, or update existing one

@@ -503,6 +503,29 @@ OUTPUT::
     error:  null
 
 
+delete_repo
+-----------
+
+Deletes a repository. This command can be executed only using api_key
+belonging to user with admin rights.
+
+
+INPUT::
+
+    api_key : "<api_key>"
+    method :  "delete_repo"
+    args:     {
+                "repo_name" :   "<reponame>",
+              }
+
+OUTPUT::
+
+    result: {
+              "msg": "Deleted repository <reponame>",
+            }
+    error:  null
+
+
 grant_user_permission
 ---------------------
 
