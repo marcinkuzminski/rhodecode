@@ -226,8 +226,8 @@ def authenticate(username, password):
                  'lastname': safe_unicode(get_ldap_attr('ldap_attr_lastname')),
                  'email': get_ldap_attr('ldap_attr_email'),
                 }
-                
-                # don't store LDAP password since we don't need it. Override 
+
+                # don't store LDAP password since we don't need it. Override
                 # with some random generated password
                 _password = PasswordGenerator().gen_password(length=8)
                 # create this user on the fly if it doesn't exist in rhodecode

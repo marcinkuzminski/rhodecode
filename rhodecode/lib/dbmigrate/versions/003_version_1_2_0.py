@@ -13,6 +13,7 @@ from rhodecode.model.meta import Base
 
 log = logging.getLogger(__name__)
 
+
 def upgrade(migrate_engine):
     """ Upgrade operations go here.
     Don't create your own engine; bind migrate_engine to your metadata

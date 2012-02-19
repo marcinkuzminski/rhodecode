@@ -11,11 +11,8 @@ from sqlalchemy.databases import sqlite as sa_base
 from rhodecode.lib.dbmigrate.migrate import exceptions
 from rhodecode.lib.dbmigrate.migrate.changeset import ansisql, SQLA_06
 
+SQLiteSchemaGenerator = sa_base.SQLiteDDLCompiler
 
-if not SQLA_06:
-    SQLiteSchemaGenerator = sa_base.SQLiteSchemaGenerator
-else:
-    SQLiteSchemaGenerator = sa_base.SQLiteDDLCompiler
 
 class SQLiteCommon(object):
 

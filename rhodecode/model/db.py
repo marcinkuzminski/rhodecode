@@ -40,11 +40,11 @@ from vcs.exceptions import VCSError
 from vcs.utils.lazy import LazyProperty
 
 from rhodecode.lib import str2bool, safe_str, get_changeset_safe, safe_unicode
-from rhodecode.lib.exceptions import UsersGroupsAssignedException
 from rhodecode.lib.compat import json
 from rhodecode.lib.caching_query import FromCache
 
 from rhodecode.model.meta import Base, Session
+
 
 log = logging.getLogger(__name__)
 
@@ -682,6 +682,7 @@ class Repository(Base, BaseModel):
             return
 
         if alias == 'hg':
+
             repo = backend(safe_str(repo_full_path), create=False,
                            baseui=self._ui)
             # skip hidden web repository
@@ -856,7 +857,7 @@ class Permission(Base, BaseModel):
 class UserRepoToPerm(Base, BaseModel):
     __tablename__ = 'repo_to_perm'
     __table_args__ = (
-        UniqueConstraint('user_id', 'repository_id'),
+        UniqueConstraint('user_id', 'repository_id', 'permission_id'),
         {'extend_existing': True}
     )
     repo_to_perm_id = Column("repo_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -865,8 +866,8 @@ class UserRepoToPerm(Base, BaseModel):
     repository_id = Column("repository_id", Integer(), ForeignKey('repositories.repo_id'), nullable=False, unique=None, default=None)
 
     user = relationship('User')
-    permission = relationship('Permission')
     repository = relationship('Repository')
+    permission = relationship('Permission')
 
     @classmethod
     def create(cls, user, repository, permission):
@@ -898,7 +899,7 @@ class UserToPerm(Base, BaseModel):
 class UsersGroupRepoToPerm(Base, BaseModel):
     __tablename__ = 'users_group_repo_to_perm'
     __table_args__ = (
-        UniqueConstraint('repository_id', 'users_group_id',),
+        UniqueConstraint('repository_id', 'users_group_id', 'permission_id'),
         {'extend_existing': True}
     )
     users_group_to_perm_id = Column("users_group_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -940,7 +941,7 @@ class UsersGroupToPerm(Base, BaseModel):
 class UserRepoGroupToPerm(Base, BaseModel):
     __tablename__ = 'user_repo_group_to_perm'
     __table_args__ = (
-        UniqueConstraint('user_id', 'group_id'),
+        UniqueConstraint('user_id', 'group_id', 'permission_id'),
         {'extend_existing': True}
     )
 
@@ -950,8 +951,8 @@ class UserRepoGroupToPerm(Base, BaseModel):
     permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable=False, unique=None, default=None)
 
     user = relationship('User')
-    permission = relationship('Permission')
     group = relationship('RepoGroup')
+    permission = relationship('Permission')
 
 
 class UsersGroupRepoGroupToPerm(Base, BaseModel):

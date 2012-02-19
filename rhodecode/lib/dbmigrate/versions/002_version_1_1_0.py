@@ -12,6 +12,7 @@ from rhodecode.lib.dbmigrate.migrate.changeset import *
 
 log = logging.getLogger(__name__)
 
+
 def upgrade(migrate_engine):
     """ Upgrade operations go here.
     Don't create your own engine; bind migrate_engine to your metadata
@@ -43,8 +44,6 @@ def upgrade(migrate_engine):
                                        assert_unicode=None),
                       nullable=True, unique=None, default=None)
     revision.create(tbl)
-
-
 
     #==========================================================================
     # Upgrade of `repositories` table
@@ -79,6 +78,7 @@ def upgrade(migrate_engine):
     CacheInvalidation().__table__.create()
 
     return
+
 
 def downgrade(migrate_engine):
     meta = MetaData()

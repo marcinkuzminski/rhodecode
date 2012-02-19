@@ -927,6 +927,7 @@ class UsersGroupRepoToPerm(Base, BaseModel):
 
 class UsersGroupToPerm(Base, BaseModel):
     __tablename__ = 'users_group_to_perm'
+    __table_args__ = {'extend_existing':True}
     users_group_to_perm_id = Column("users_group_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     users_group_id = Column("users_group_id", Integer(), ForeignKey('users_groups.users_group_id'), nullable=False, unique=None, default=None)
     permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable=False, unique=None, default=None)

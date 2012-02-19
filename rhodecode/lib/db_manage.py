@@ -171,10 +171,13 @@ class DbManage(object):
                 self.klass.create_ldap_options(skip_existing=True)
 
             def step_4(self):
-                print ('TODO:')
+                print ('create permissions and fix groups')
                 self.klass.create_permissions()
                 self.klass.fixup_groups()
 
+            def step_5(self):
+                pass
+            
         upgrade_steps = [0] + range(curr_version + 1, __dbversion__ + 1)
 
         # CALL THE PROPER ORDER OF STEPS TO PERFORM FULL UPGRADE
@@ -182,7 +185,7 @@ class DbManage(object):
             print ('performing upgrade step %s' % step)
             getattr(UpgradeSteps(self), 'step_%s' % step)()
             self.sa.commit()
-            
+
     def fix_repo_paths(self):
         """
         Fixes a old rhodecode version path into new one without a '*'
