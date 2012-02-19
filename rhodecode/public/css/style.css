@@ -284,7 +284,10 @@ div.options a {
 	width: 100% !important;
 	margin-left: -10px !important;
 	z-index: 10000;
-	border-radius: 0px 0px 4px 4px;
+    -webkit-border-radius: 0px 0px 0px 0px;
+    -khtml-border-radius: 0px 0px 0px 0px;
+    -moz-border-radius: 0px 0px 0px 0px;
+    border-radius: 0px 0px 0px 0px;	
 }
 #header #header-inner #home a {
 	height: 40px;
@@ -326,7 +329,7 @@ div.options a {
 	float: right;
 	list-style-type: none;
 	list-style-position: outside;
-	margin: 8px 5px 0 0;
+	margin: 8px 8px 0 0;
 	padding: 0;
 }
 
@@ -1970,7 +1973,14 @@ div.form div.fields div.field div.button {
 #quick_login .big_gravatar{
 	padding:4px 0px 0px 6px;
 }
-
+#quick_login .inbox{
+    padding:4px 0px 0px 6px;
+    color: #FFFFFF;
+    font-weight: bold;    
+}
+#quick_login .inbox a{
+	color: #FFFFFF;
+}
 #quick_login .email,#quick_login .email a{
     color: #FFFFFF;
     padding: 3px;
@@ -3143,7 +3153,7 @@ div.gravatar img {
 #content {
 	clear: both;
 	overflow: hidden;
-	padding: 14px 10px;
+	padding: 54px 10px 14px 10px;
 }
 
 #content div.box div.title div.search {

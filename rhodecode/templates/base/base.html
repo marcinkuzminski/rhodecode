@@ -3,7 +3,7 @@
 
 <!-- HEADER -->
 <div id="header">
-    <div id="header-inner" class="title">
+    <div id="header-inner" class="title hover">
         <div id="logo">
             <h1><a href="${h.url('home')}">${c.rhodecode_name}</a></h1>
         </div>
@@ -115,6 +115,7 @@
                 <div class="full_name">${c.rhodecode_user.full_name_or_username}</div>
                 <div class="email">${c.rhodecode_user.email}</div>
                 <div class="big_gravatar"><img alt="gravatar" src="${h.gravatar_url(c.rhodecode_user.email,48)}" /></div>
+                <div class="inbox"><a href="${h.url('notifications')}">${_('Inbox')}: ${c.unread_notifications}</a></div>
             </div>
             <div class="links_right">
             <ol class="links">
