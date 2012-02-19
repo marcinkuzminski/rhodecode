@@ -151,7 +151,7 @@ OUTPUT::
 create_user
 -----------
 
-Creates new user or updates current one if such user exists. This command can 
+Creates new user. This command can 
 be executed only using api_key belonging to user with admin rights.
 
 
@@ -175,6 +175,37 @@ OUTPUT::
     result: {
               "id" : "<new_user_id>",
               "msg" : "created new user <username>"
+            }
+    error:  null
+
+
+update_user
+-----------
+
+updates current one if such user exists. This command can 
+be executed only using api_key belonging to user with admin rights.
+
+
+INPUT::
+
+    api_key : "<api_key>"
+    method :  "update_user"
+    args :    {
+                "username" :  "<username>",
+                "password" :  "<password>",
+                "email" :     "<useremail>",
+                "firstname" : "<firstname> = None",
+                "lastname" :  "<lastname> = None",
+                "active" :    "<bool> = True",
+                "admin" :     "<bool> = False",
+                "ldap_dn" :   "<ldap_dn> = None"
+              }
+
+OUTPUT::
+
+    result: {
+              "id" : "<edited_user_id>",
+              "msg" : "updated user <username>"
             }
     error:  null
 

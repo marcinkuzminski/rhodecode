@@ -134,7 +134,7 @@ class ApiController(JSONRPCController):
     def create_user(self, apiuser, username, password, email, firstname=None,
                     lastname=None, active=True, admin=False, ldap_dn=None):
         """
-        Create new user or updates current one
+        Create new user
 
         :param apiuser:
         :param username:
@@ -146,7 +146,6 @@ class ApiController(JSONRPCController):
         :param admin:
         :param ldap_dn:
         """
-
         if User.get_by_username(username):
             raise JSONRPCError("user %s already exist" % username)
 
@@ -163,6 +162,39 @@ class ApiController(JSONRPCController):
         except Exception:
             log.error(traceback.format_exc())
             raise JSONRPCError('failed to create user %s' % username)
+
+    @HasPermissionAllDecorator('hg.admin')
+    def update_user(self, apiuser, username, password, email, firstname=None,
+                    lastname=None, active=True, admin=False, ldap_dn=None):
+        """
+        Updates given user
+
+        :param apiuser:
+        :param username:
+        :param password:
+        :param email:
+        :param name:
+        :param lastname:
+        :param active:
+        :param admin:
+        :param ldap_dn:
+        """
+        if not User.get_by_username(username):
+            raise JSONRPCError("user %s does not exist" % username)
+
+        try:
+            usr = UserModel().create_or_update(
+                username, password, email, firstname,
+                lastname, active, admin, ldap_dn
+            )
+            Session.commit()
+            return dict(
+                id=usr.user_id,
+                msg='updated user %s' % username
+            )
+        except Exception:
+            log.error(traceback.format_exc())
+            raise JSONRPCError('failed to update user %s' % username)
 
     @HasPermissionAllDecorator('hg.admin')
     def get_users_group(self, apiuser, group_name):
