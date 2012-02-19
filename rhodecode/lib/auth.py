@@ -76,8 +76,10 @@ class PasswordGenerator(object):
     def __init__(self, passwd=''):
         self.passwd = passwd
 
-    def gen_password(self, len, type):
-        self.passwd = ''.join([random.choice(type) for _ in xrange(len)])
+    def gen_password(self, length, type_=None):
+        if type_ is None:
+            type_ = self.ALPHABETS_FULL
+        self.passwd = ''.join([random.choice(type_) for _ in xrange(length)])
         return self.passwd
 
 
@@ -211,9 +213,14 @@ def authenticate(username, password):
                  'email': get_ldap_attr('ldap_attr_email'),
                 }
 
-                if user_model.create_ldap(username, password, user_dn,
+                # don't store LDAP password since we don't need it. Override
+                # with some random generated password
+                _password = PasswordGenerator().gen_password(length=8)
+                # create this user on the fly if it doesn't exist in rhodecode
+                # database
+                if user_model.create_ldap(username, _password, user_dn,
                                           user_attrs):
-                    log.info('created new ldap user %s', username)
+                    log.info('created new ldap user %s' % username)
 
                 return True
             except (LdapUsernameError, LdapPasswordError,):
