@@ -43,7 +43,7 @@ from rhodecode.model.scm import ScmModel
 from rhodecode.lib import safe_unicode
 from rhodecode.lib.indexers import INDEX_EXTENSIONS, SCHEMA, IDX_NAME
 
-from vcs.exceptions import ChangesetError, RepositoryError, \
+from rhodecode.lib.vcs.exceptions import ChangesetError, RepositoryError, \
     NodeDoesNotExistError
 
 from whoosh.index import create_in, open_dir

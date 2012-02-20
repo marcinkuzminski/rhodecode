@@ -28,10 +28,10 @@ import traceback
 import logging
 import cStringIO
 
-from vcs import get_backend
-from vcs.exceptions import RepositoryError
-from vcs.utils.lazy import LazyProperty
-from vcs.nodes import FileNode
+from rhodecode.lib.vcs import get_backend
+from rhodecode.lib.vcs.exceptions import RepositoryError
+from rhodecode.lib.vcs.utils.lazy import LazyProperty
+from rhodecode.lib.vcs.nodes import FileNode
 
 from rhodecode import BACKENDS
 from rhodecode.lib import helpers as h
@@ -359,9 +359,9 @@ class ScmModel(BaseModel):
                       content, f_path):
 
         if repo.alias == 'hg':
-            from vcs.backends.hg import MercurialInMemoryChangeset as IMC
+            from rhodecode.lib.vcs.backends.hg import MercurialInMemoryChangeset as IMC
         elif repo.alias == 'git':
-            from vcs.backends.git import GitInMemoryChangeset as IMC
+            from rhodecode.lib.vcs.backends.git import GitInMemoryChangeset as IMC
 
         # decoding here will force that we have proper encoded values
         # in any other case this will throw exceptions and deny commit
@@ -385,9 +385,9 @@ class ScmModel(BaseModel):
     def create_node(self, repo, repo_name, cs, user, author, message, content,
                       f_path):
         if repo.alias == 'hg':
-            from vcs.backends.hg import MercurialInMemoryChangeset as IMC
+            from rhodecode.lib.vcs.backends.hg import MercurialInMemoryChangeset as IMC
         elif repo.alias == 'git':
-            from vcs.backends.git import GitInMemoryChangeset as IMC
+            from rhodecode.lib.vcs.backends.git import GitInMemoryChangeset as IMC
         # decoding here will force that we have proper encoded values
         # in any other case this will throw exceptions and deny commit
 

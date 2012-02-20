@@ -34,10 +34,10 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship, joinedload, class_mapper, validates
 from beaker.cache import cache_region, region_invalidate
 
-from vcs import get_backend
-from vcs.utils.helpers import get_scm
-from vcs.exceptions import VCSError
-from vcs.utils.lazy import LazyProperty
+from rhodecode.lib.vcs import get_backend
+from rhodecode.lib.vcs.utils.helpers import get_scm
+from rhodecode.lib.vcs.exceptions import VCSError
+from rhodecode.lib.vcs.utils.lazy import LazyProperty
 
 from rhodecode.lib import str2bool, safe_str, get_changeset_safe, \
     generate_api_key, safe_unicode

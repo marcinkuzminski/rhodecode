@@ -25,7 +25,7 @@
 
 import os
 import re
-from vcs.utils.lazy import LazyProperty
+from rhodecode.lib.vcs.utils.lazy import LazyProperty
 
 
 def __get_lem():
@@ -82,7 +82,7 @@ ALL_READMES = [
 # extension together with weights to search lower is first
 RST_EXTS = [
     ('', 0), ('.rst', 1), ('.rest', 1),
-    ('.RST', 2) , ('.REST', 2),
+    ('.RST', 2), ('.REST', 2),
     ('.txt', 3), ('.TXT', 3)
 ]
 
@@ -138,7 +138,6 @@ def convert_line_endings(line, mode):
             line = replace(line, '\r\n', '\r')
             line = replace(line, '\n', '\r')
     elif mode == 2:
-            import re
             line = re.sub("\r(?!\n)|(?<!\r)\n", "\r\n", line)
     return line
 
@@ -324,7 +323,7 @@ def age(curdate):
     from datetime import datetime
     from webhelpers.date import time_ago_in_words
 
-    _ = lambda s:s
+    _ = lambda s: s
 
     if not curdate:
         return ''
@@ -341,7 +340,8 @@ def age(curdate):
     pos = 1
     for scale in agescales:
         if scale[1] <= age_seconds:
-            if pos == 6:pos = 5
+            if pos == 6:
+                pos = 5
             return '%s %s' % (time_ago_in_words(curdate,
                                                 agescales[pos][0]), _('ago'))
         pos += 1
@@ -404,8 +404,8 @@ def get_changeset_safe(repo, rev):
     :param repo:
     :param rev:
     """
-    from vcs.backends.base import BaseRepository
-    from vcs.exceptions import RepositoryError
+    from rhodecode.lib.vcs.backends.base import BaseRepository
+    from rhodecode.lib.vcs.exceptions import RepositoryError
     if not isinstance(repo, BaseRepository):
         raise Exception('You must pass an Repository '
                         'object as first argument got %s', type(repo))
@@ -427,8 +427,8 @@ def get_current_revision(quiet=False):
     """
 
     try:
-        from vcs import get_repo
-        from vcs.utils.helpers import get_scm
+        from rhodecode.lib.vcs import get_repo
+        from rhodecode.lib.vcs.utils.helpers import get_scm
         repopath = os.path.join(os.path.dirname(__file__), '..', '..')
         scm = get_scm(repopath)[0]
         repo = get_repo(path=repopath, alias=scm)

@@ -1,16 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-    rhodecode.lib.annotate
-    ~~~~~~~~~~~~~~~~~~~~~~
-
-    Anontation library for usage in rhodecode, previously part of vcs
-
-    :created_on: Dec 4, 2011
-    :author: marcink
-    :copyright: (C) 2011-2012 Marcin Kuzminski <marcin@python-works.com>
-    :license: GPLv3, see COPYING for more details.
-"""
-
 from rhodecode.lib.vcs.exceptions import VCSError
 from rhodecode.lib.vcs.nodes import FileNode
 from pygments.formatters import HtmlFormatter

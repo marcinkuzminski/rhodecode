@@ -34,7 +34,7 @@ from pylons import config
 from hashlib import md5
 from decorator import decorator
 
-from vcs.utils.lazy import LazyProperty
+from rhodecode.lib.vcs.utils.lazy import LazyProperty
 from rhodecode import CELERY_ON
 from rhodecode.lib import str2bool, safe_str
 from rhodecode.lib.pidlock import DaemonLock, LockHeld

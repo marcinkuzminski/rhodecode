@@ -154,7 +154,6 @@ class SimpleHg(BaseVCSController):
         baseui = make_ui('db')
         self.__inject_extras(repo_path, baseui, extras)
 
-
         # quick check if that dir exists...
         if is_valid_repo(repo_name, self.basepath) is False:
             return HTTPNotFound()(environ, start_response)
@@ -220,7 +219,6 @@ class SimpleHg(BaseVCSController):
                     return mapping[cmd]
                 else:
                     return 'pull'
-
 
     def __inject_extras(self, repo_path, baseui, extras={}):
         """

@@ -1,114 +1,71 @@
 # -*- coding: utf-8 -*-
-"""
-    rhodecode.lib.diffs
-    ~~~~~~~~~~~~~~~~~~~
-
-    Set of diffing helpers, previously part of vcs
-
-
-    :created_on: Dec 4, 2011
-    :author: marcink
-    :copyright: (C) 2010-2012 Marcin Kuzminski <marcin@python-works.com>
-    :original copyright: 2007-2008 by Armin Ronacher
-    :license: GPLv3, see COPYING for more details.
-"""
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# original copyright: 2007-2008 by Armin Ronacher
+# licensed under the BSD license.
 
 import re
 import difflib
-import markupsafe
+import logging
+
+from difflib import unified_diff
 from itertools import tee, imap
 
-from pylons.i18n.translation import _
+from mercurial.match import match
 
 from rhodecode.lib.vcs.exceptions import VCSError
-from rhodecode.lib.vcs.nodes import FileNode
-
-from rhodecode.lib.utils import EmptyChangeset
+from rhodecode.lib.vcs.nodes import FileNode, NodeError
 
 
-def wrap_to_table(str_):
-    return '''<table class="code-difftable">
-                <tr class="line no-comment">
-                <td class="lineno new"></td>
-                <td class="code no-comment"><pre>%s</pre></td>
-                </tr>
-              </table>''' % str_
-
-
-def wrapped_diff(filenode_old, filenode_new, cut_off_limit=None,
-                ignore_whitespace=True, line_context=3,
-                enable_comments=False):
+def get_udiff(filenode_old, filenode_new,show_whitespace=True):
     """
-    returns a wrapped diff into a table, checks for cut_off_limit and presents
-    proper message
+    Returns unified diff between given ``filenode_old`` and ``filenode_new``.
     """
+    try:
+        filenode_old_date = filenode_old.last_changeset.date
+    except NodeError:
+        filenode_old_date = None
 
-    if filenode_old is None:
-        filenode_old = FileNode(filenode_new.path, '', EmptyChangeset())
-
-    if filenode_old.is_binary or filenode_new.is_binary:
-        diff = wrap_to_table(_('binary file'))
-        stats = (0, 0)
-        size = 0
-
-    elif cut_off_limit != -1 and (cut_off_limit is None or
-    (filenode_old.size < cut_off_limit and filenode_new.size < cut_off_limit)):
-
-        f_gitdiff = get_gitdiff(filenode_old, filenode_new,
-                                ignore_whitespace=ignore_whitespace,
-                                context=line_context)
-        diff_processor = DiffProcessor(f_gitdiff, format='gitdiff')
-
-        diff = diff_processor.as_html(enable_comments=enable_comments)
-        stats = diff_processor.stat()
-        size = len(diff or '')
-    else:
-        diff = wrap_to_table(_('Changeset was to big and was cut off, use '
-                               'diff menu to display this diff'))
-        stats = (0, 0)
-        size = 0
-
-    if not diff:
-        diff = wrap_to_table(_('No changes detected'))
-
-    cs1 = filenode_old.last_changeset.raw_id
-    cs2 = filenode_new.last_changeset.raw_id
-
-    return size, cs1, cs2, diff, stats
-
-
-def get_gitdiff(filenode_old, filenode_new, ignore_whitespace=True, context=3):
-    """
-    Returns git style diff between given ``filenode_old`` and ``filenode_new``.
-
-    :param ignore_whitespace: ignore whitespaces in diff
-    """
-    # make sure we pass in default context
-    context = context or 3
+    try:
+        filenode_new_date = filenode_new.last_changeset.date
+    except NodeError:
+        filenode_new_date = None
 
     for filenode in (filenode_old, filenode_new):
         if not isinstance(filenode, FileNode):
             raise VCSError("Given object should be FileNode object, not %s"
                 % filenode.__class__)
 
-    repo = filenode_new.changeset.repository
-    old_raw_id = getattr(filenode_old.changeset, 'raw_id', repo.EMPTY_CHANGESET)
-    new_raw_id = getattr(filenode_new.changeset, 'raw_id', repo.EMPTY_CHANGESET)
+    if filenode_old_date and filenode_new_date:
+        if not filenode_old_date < filenode_new_date:
+            logging.debug("Generating udiff for filenodes with not increasing "
+                "dates")
 
-    vcs_gitdiff = repo.get_diff(old_raw_id, new_raw_id, filenode_new.path,
-                                 ignore_whitespace, context)
+    vcs_udiff = unified_diff(filenode_old.content.splitlines(True),
+                               filenode_new.content.splitlines(True),
+                               filenode_old.name,
+                               filenode_new.name,
+                               filenode_old_date,
+                               filenode_old_date)
+    return vcs_udiff
+
+
+def get_gitdiff(filenode_old, filenode_new, ignore_whitespace=True):
+    """
+    Returns git style diff between given ``filenode_old`` and ``filenode_new``.
+
+    :param ignore_whitespace: ignore whitespaces in diff
+    """
+
+    for filenode in (filenode_old, filenode_new):
+        if not isinstance(filenode, FileNode):
+            raise VCSError("Given object should be FileNode object, not %s"
+                % filenode.__class__)
+
+    old_raw_id = getattr(filenode_old.changeset, 'raw_id', '0' * 40)
+    new_raw_id = getattr(filenode_new.changeset, 'raw_id', '0' * 40)
+
+    repo = filenode_new.changeset.repository
+    vcs_gitdiff = repo._get_diff(old_raw_id, new_raw_id, filenode_new.path,
+                                 ignore_whitespace)
 
     return vcs_gitdiff
 
@@ -151,7 +108,7 @@ class DiffProcessor(object):
             self.differ = self._highlight_line_udiff
 
     def escaper(self, string):
-        return markupsafe.escape(string)
+        return string.replace('<', '&lt;').replace('>', '&gt;')
 
     def copy_iterator(self):
         """
@@ -170,17 +127,15 @@ class DiffProcessor(object):
         try:
             if line1.startswith('--- ') and line2.startswith('+++ '):
                 l1 = line1[4:].split(None, 1)
-                old_filename = (l1[0].replace('a/', '', 1)
-                                if len(l1) >= 1 else None)
+                old_filename = l1[0].lstrip('a/') if len(l1) >= 1 else None
                 old_rev = l1[1] if len(l1) == 2 else 'old'
 
                 l2 = line2[4:].split(None, 1)
-                new_filename = (l2[0].replace('b/', '', 1)
-                                if len(l1) >= 1 else None)
+                new_filename = l2[0].lstrip('b/') if len(l1) >= 1 else None
                 new_rev = l2[1] if len(l2) == 2 else 'new'
 
-                filename = (old_filename
-                            if old_filename != '/dev/null' else new_filename)
+                filename = old_filename if (old_filename !=
+                                            'dev/null') else new_filename
 
                 return filename, new_rev, old_rev
         except (ValueError, IndexError):
@@ -211,15 +166,15 @@ class DiffProcessor(object):
 
         raise Exception('wrong size of diff %s' % size)
 
-    def _highlight_line_difflib(self, line, next_):
+    def _highlight_line_difflib(self, line, next):
         """
         Highlight inline changes in both lines.
         """
 
         if line['action'] == 'del':
-            old, new = line, next_
+            old, new = line, next
         else:
-            old, new = next_, line
+            old, new = next, line
 
         oldwords = re.split(r'(\W)', old['line'])
         newwords = re.split(r'(\W)', new['line'])
@@ -241,17 +196,17 @@ class DiffProcessor(object):
         old['line'] = "".join(oldfragments)
         new['line'] = "".join(newfragments)
 
-    def _highlight_line_udiff(self, line, next_):
+    def _highlight_line_udiff(self, line, next):
         """
         Highlight inline changes in both lines.
         """
         start = 0
-        limit = min(len(line['line']), len(next_['line']))
-        while start < limit and line['line'][start] == next_['line'][start]:
+        limit = min(len(line['line']), len(next['line']))
+        while start < limit and line['line'][start] == next['line'][start]:
             start += 1
         end = -1
         limit -= start
-        while -end <= limit and line['line'][end] == next_['line'][end]:
+        while -end <= limit and line['line'][end] == next['line'][end]:
             end -= 1
         end += 1
         if start or end:
@@ -269,7 +224,7 @@ class DiffProcessor(object):
                     l['line'][last:]
                 )
             do(line)
-            do(next_)
+            do(next)
 
     def _parse_udiff(self):
         """
@@ -319,8 +274,8 @@ class DiffProcessor(object):
                             lines.append({
                                 'old_lineno': '...',
                                 'new_lineno': '...',
-                                'action':     'context',
-                                'line':       line,
+                                'action': 'context',
+                                'line': line,
                             })
                         else:
                             skipfirst = False
@@ -360,7 +315,7 @@ class DiffProcessor(object):
             pass
 
         # highlight inline changes
-        for _ in files:
+        for file in files:
             for chunk in chunks:
                 lineiter = iter(chunk)
                 #first = True
@@ -417,7 +372,7 @@ class DiffProcessor(object):
 
     def as_html(self, table_class='code-difftable', line_class='line',
                 new_lineno_class='lineno old', old_lineno_class='lineno new',
-                code_class='code', enable_comments=False):
+                code_class='code'):
         """
         Return udiff as html table with customized css classes
         """
@@ -427,40 +382,34 @@ class DiffProcessor(object):
             """
 
             if condition:
-                return '''<a href="%(url)s">%(label)s</a>''' % {
-                    'url': url,
-                    'label': label
-                }
+                return '''<a href="%(url)s">%(label)s</a>''' % {'url': url,
+                                                                'label': label}
             else:
                 return label
         diff_lines = self.prepare()
         _html_empty = True
         _html = []
-        _html.append('''<table class="%(table_class)s">\n''' % {
-            'table_class': table_class
-        })
+        _html.append('''<table class="%(table_class)s">\n''' \
+                                            % {'table_class': table_class})
         for diff in diff_lines:
             for line in diff['chunks']:
                 _html_empty = False
                 for change in line:
-                    _html.append('''<tr class="%(lc)s %(action)s">\n''' % {
-                        'lc': line_class,
-                        'action': change['action']
-                    })
+                    _html.append('''<tr class="%(line_class)s %(action)s">\n''' \
+                        % {'line_class': line_class,
+                           'action': change['action']})
                     anchor_old_id = ''
                     anchor_new_id = ''
-                    anchor_old = "%(filename)s_o%(oldline_no)s" % {
-                        'filename': self._safe_id(diff['filename']),
-                        'oldline_no': change['old_lineno']
-                    }
-                    anchor_new = "%(filename)s_n%(oldline_no)s" % {
-                        'filename': self._safe_id(diff['filename']),
-                        'oldline_no': change['new_lineno']
-                    }
-                    cond_old = (change['old_lineno'] != '...' and
-                                change['old_lineno'])
-                    cond_new = (change['new_lineno'] != '...' and
-                                change['new_lineno'])
+                    anchor_old = "%(filename)s_o%(oldline_no)s" % \
+                                {'filename': self._safe_id(diff['filename']),
+                                 'oldline_no': change['old_lineno']}
+                    anchor_new = "%(filename)s_n%(oldline_no)s" % \
+                                {'filename': self._safe_id(diff['filename']),
+                                 'oldline_no': change['new_lineno']}
+                    cond_old = change['old_lineno'] != '...' and \
+                                                        change['old_lineno']
+                    cond_new = change['new_lineno'] != '...' and \
+                                                        change['new_lineno']
                     if cond_old:
                         anchor_old_id = 'id="%s"' % anchor_old
                     if cond_new:
@@ -468,41 +417,35 @@ class DiffProcessor(object):
                     ###########################################################
                     # OLD LINE NUMBER
                     ###########################################################
-                    _html.append('''\t<td %(a_id)s class="%(olc)s">''' % {
-                        'a_id': anchor_old_id,
-                        'olc': old_lineno_class
-                    })
+                    _html.append('''\t<td %(a_id)s class="%(old_lineno_cls)s">''' \
+                                    % {'a_id': anchor_old_id,
+                                       'old_lineno_cls': old_lineno_class})
 
-                    _html.append('''%(link)s''' % {
-                        'link': _link_to_if(True, change['old_lineno'],
-                                            '#%s' % anchor_old)
-                    })
+                    _html.append('''<pre>%(link)s</pre>''' \
+                        % {'link':
+                        _link_to_if(cond_old, change['old_lineno'], '#%s' \
+                                                                % anchor_old)})
                     _html.append('''</td>\n''')
                     ###########################################################
                     # NEW LINE NUMBER
                     ###########################################################
 
-                    _html.append('''\t<td %(a_id)s class="%(nlc)s">''' % {
-                        'a_id': anchor_new_id,
-                        'nlc': new_lineno_class
-                    })
+                    _html.append('''\t<td %(a_id)s class="%(new_lineno_cls)s">''' \
+                                    % {'a_id': anchor_new_id,
+                                       'new_lineno_cls': new_lineno_class})
 
-                    _html.append('''%(link)s''' % {
-                        'link': _link_to_if(True, change['new_lineno'],
-                                            '#%s' % anchor_new)
-                    })
+                    _html.append('''<pre>%(link)s</pre>''' \
+                        % {'link':
+                        _link_to_if(cond_new, change['new_lineno'], '#%s' \
+                                                                % anchor_new)})
                     _html.append('''</td>\n''')
                     ###########################################################
                     # CODE
                     ###########################################################
-                    comments = '' if enable_comments else 'no-comment'
-                    _html.append('''\t<td class="%(cc)s %(inc)s">''' % {
-                        'cc': code_class,
-                        'inc': comments
-                    })
-                    _html.append('''\n\t\t<pre>%(code)s</pre>\n''' % {
-                        'code': change['line']
-                    })
+                    _html.append('''\t<td class="%(code_class)s">''' \
+                                                % {'code_class': code_class})
+                    _html.append('''\n\t\t<pre>%(code)s</pre>\n''' \
+                                                % {'code': change['line']})
                     _html.append('''\t</td>''')
                     _html.append('''\n</tr>\n''')
         _html.append('''</table>''')
@@ -512,6 +455,6 @@ class DiffProcessor(object):
 
     def stat(self):
         """
-        Returns tuple of added, and removed lines for this instance
+        Returns tuple of adde,and removed lines for this instance
         """
         return self.adds, self.removes

@@ -28,7 +28,7 @@ import logging
 import traceback
 from datetime import datetime
 
-from vcs.backends import get_backend
+from rhodecode.lib.vcs.backends import get_backend
 
 from rhodecode.lib import LazyProperty
 from rhodecode.lib import safe_str, safe_unicode

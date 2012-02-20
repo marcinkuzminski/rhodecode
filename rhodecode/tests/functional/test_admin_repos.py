@@ -1,17 +1,15 @@
 # -*- coding: utf-8 -*-
 
 import os
-import vcs
+from rhodecode.lib import vcs
 
 from rhodecode.model.db import Repository
 from rhodecode.tests import *
 
 class TestAdminReposController(TestController):
 
-
     def __make_repo(self):
         pass
-
 
     def test_index(self):
         self.log_user()

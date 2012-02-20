@@ -33,9 +33,9 @@ from pylons.i18n.translation import _
 from pylons.controllers.util import redirect
 from pylons.decorators import jsonify
 
-from vcs.exceptions import RepositoryError, ChangesetError, \
+from rhodecode.lib.vcs.exceptions import RepositoryError, ChangesetError, \
     ChangesetDoesNotExistError
-from vcs.nodes import FileNode
+from rhodecode.lib.vcs.nodes import FileNode
 
 import rhodecode.lib.helpers as h
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator

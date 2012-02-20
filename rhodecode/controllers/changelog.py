@@ -37,7 +37,7 @@ from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.helpers import RepoPage
 from rhodecode.lib.compat import json
 
-from vcs.exceptions import RepositoryError, ChangesetDoesNotExistError
+from rhodecode.lib.vcs.exceptions import RepositoryError, ChangesetDoesNotExistError
 from rhodecode.model.db import Repository
 
 log = logging.getLogger(__name__)

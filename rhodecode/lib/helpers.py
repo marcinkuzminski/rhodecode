@@ -318,7 +318,7 @@ flash = _Flash()
 #==============================================================================
 # SCM FILTERS available via h.
 #==============================================================================
-from vcs.utils import author_name, author_email
+from rhodecode.lib.vcs.utils import author_name, author_email
 from rhodecode.lib import credentials_filter, age as _age
 from rhodecode.model.db import User
 

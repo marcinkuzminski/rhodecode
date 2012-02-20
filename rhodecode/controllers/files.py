@@ -32,11 +32,11 @@ from pylons.i18n.translation import _
 from pylons.controllers.util import redirect
 from pylons.decorators import jsonify
 
-from vcs.conf import settings
-from vcs.exceptions import RepositoryError, ChangesetDoesNotExistError, \
+from rhodecode.lib.vcs.conf import settings
+from rhodecode.lib.vcs.exceptions import RepositoryError, ChangesetDoesNotExistError, \
     EmptyRepositoryError, ImproperArchiveTypeError, VCSError, \
     NodeAlreadyExistsError
-from vcs.nodes import FileNode
+from rhodecode.lib.vcs.nodes import FileNode
 
 from rhodecode.lib.compat import OrderedDict
 from rhodecode.lib import convert_line_endings, detect_mode, safe_str

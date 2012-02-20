@@ -37,7 +37,7 @@ from string import lower
 from pylons import config, url
 from pylons.i18n.translation import _
 
-from vcs import get_backend
+from rhodecode.lib.vcs import get_backend
 
 from rhodecode import CELERY_ON
 from rhodecode.lib import LANGUAGES_EXTENSIONS_MAP, safe_str

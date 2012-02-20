@@ -30,6 +30,7 @@ import traceback
 
 from dulwich import server as dulserver
 
+
 class SimpleGitUploadPackHandler(dulserver.UploadPackHandler):
 
     def handle(self):

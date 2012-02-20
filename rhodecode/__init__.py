@@ -49,9 +49,8 @@ requirements = [
     "babel",
     "python-dateutil>=1.5.0,<2.0.0",
     "dulwich>=0.8.0,<0.9.0",
-    "vcs>=0.2.3.dev",
     "webob==1.0.8",
-    "markdown==2.0.3",
+    "markdown==2.1.1",
     "docutils==0.8.1",
 ]
 

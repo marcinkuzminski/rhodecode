@@ -7,10 +7,7 @@ from rhodecode import requirements
 if __py_version__ < (2, 5):
     raise Exception('RhodeCode requires python 2.5 or later')
 
-
 dependency_links = [
- "https://secure.rhodecode.org/vcs/archive/default.zip#egg=vcs-0.2.3.dev",
- "https://bitbucket.org/marcinkuzminski/vcs/get/default.zip#egg=vcs-0.2.3.dev",
 ]
 
 classifiers = [

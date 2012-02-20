@@ -31,7 +31,7 @@ from datetime import timedelta, date
 from itertools import product
 from urlparse import urlparse
 
-from vcs.exceptions import ChangesetError, EmptyRepositoryError, \
+from rhodecode.lib.vcs.exceptions import ChangesetError, EmptyRepositoryError, \
     NodeDoesNotExistError
 
 from pylons import tmpl_context as c, request, url, config

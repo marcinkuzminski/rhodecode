@@ -40,11 +40,11 @@ from mercurial import ui, config
 
 from webhelpers.text import collapse, remove_formatting, strip_tags
 
-from vcs import get_backend
-from vcs.backends.base import BaseChangeset
-from vcs.utils.lazy import LazyProperty
-from vcs.utils.helpers import get_scm
-from vcs.exceptions import VCSError
+from rhodecode.lib.vcs import get_backend
+from rhodecode.lib.vcs.backends.base import BaseChangeset
+from rhodecode.lib.vcs.utils.lazy import LazyProperty
+from rhodecode.lib.vcs.utils.helpers import get_scm
+from rhodecode.lib.vcs.exceptions import VCSError
 
 from rhodecode.lib.caching_query import FromCache
 
