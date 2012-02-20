@@ -28,18 +28,15 @@
 import traceback
 import logging
 
-from sqlalchemy.orm.exc import NoResultFound
-
 from rhodecode.controllers.api import JSONRPCController, JSONRPCError
 from rhodecode.lib.auth import HasPermissionAllDecorator, \
-    HasPermissionAnyDecorator
+    HasPermissionAnyDecorator, PasswordGenerator
 
 from rhodecode.model.meta import Session
 from rhodecode.model.scm import ScmModel
 from rhodecode.model.db import User, UsersGroup, RepoGroup, Repository
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.user import UserModel
-from rhodecode.model.repo_permission import RepositoryPermissionModel
 from rhodecode.model.users_group import UsersGroupModel
 from rhodecode.model.repos_group import ReposGroupModel
 
@@ -131,7 +128,7 @@ class ApiController(JSONRPCController):
         return result
 
     @HasPermissionAllDecorator('hg.admin')
-    def create_user(self, apiuser, username, password, email, firstname=None,
+    def create_user(self, apiuser, username, email, password, firstname=None,
                     lastname=None, active=True, admin=False, ldap_dn=None):
         """
         Create new user
@@ -148,6 +145,13 @@ class ApiController(JSONRPCController):
         """
         if User.get_by_username(username):
             raise JSONRPCError("user %s already exist" % username)
+
+        if User.get_by_email(email, case_insensitive=True):
+            raise JSONRPCError("email %s already exist" % email)
+
+        if ldap_dn:
+            # generate temporary password if ldap_dn
+            password = PasswordGenerator().gen_password(length=8)
 
         try:
             usr = UserModel().create_or_update(
