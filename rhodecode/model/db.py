@@ -165,7 +165,7 @@ class RhodeCodeSetting(Base, BaseModel):
     @hybrid_property
     def app_settings_value(self):
         v = self._app_settings_value
-        if v == 'ldap_active':
+        if self.app_settings_name == 'ldap_active':
             v = str2bool(v)
         return v
 
@@ -445,6 +445,7 @@ class UsersGroupMember(Base, BaseModel):
     def __init__(self, gr_id='', u_id=''):
         self.users_group_id = gr_id
         self.user_id = u_id
+
 
 class Repository(Base, BaseModel):
     __tablename__ = 'repositories'
@@ -1027,6 +1028,19 @@ class CacheInvalidation(Base, BaseModel):
                                   self.cache_id, self.cache_key)
 
     @classmethod
+    def _get_key(cls, key):
+        """
+        Wrapper for generating a key
+
+        :param key:
+        """
+        return "%s" % (key)
+
+    @classmethod
+    def get_by_key(cls, key):
+        return cls.query().filter(cls.cache_key == key).scalar()
+
+    @classmethod
     def invalidate(cls, key):
         """
         Returns Invalidation object if this given key should be invalidated
@@ -1071,8 +1085,7 @@ class CacheInvalidation(Base, BaseModel):
 
         :param key:
         """
-        inv_obj = CacheInvalidation.query()\
-            .filter(CacheInvalidation.cache_key == key).scalar()
+        inv_obj = cls.get_by_key(key)
         inv_obj.cache_active = True
         Session.add(inv_obj)
         Session.commit()
