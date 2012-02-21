@@ -426,6 +426,10 @@ def action_parser(user_log, feed=False):
         revs_limit = 3  # display this amount always
         revs_top_limit = 50  # show upto this amount of changesets hidden
         revs_ids = action_params.split(',')
+        deleted = user_log.repository is None
+        if deleted:
+            return ','.join(revs_ids)
+
         repo_name = user_log.repository.repo_name
 
         repo = user_log.repository.scm_instance
