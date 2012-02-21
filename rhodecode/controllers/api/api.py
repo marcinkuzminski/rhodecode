@@ -80,7 +80,7 @@ class ApiController(JSONRPCController):
             raise JSONRPCError('Unable to pull changes from "%s"' % repo_name)
 
     @HasPermissionAllDecorator('hg.admin')
-    def get_user(self, apiuser, username):
+    def get_user(self, apiuser, userid):
         """"
         Get a user by username
 
@@ -88,7 +88,7 @@ class ApiController(JSONRPCController):
         :param username:
         """
 
-        user = User.get_by_username(username)
+        user = UserModel().get_user(userid)
         if user is None:
             return user
 
@@ -342,7 +342,7 @@ class ApiController(JSONRPCController):
             raise JSONRPCError('failed to remove user from group')
 
     @HasPermissionAnyDecorator('hg.admin')
-    def get_repo(self, apiuser, repo_name):
+    def get_repo(self, apiuser, repoid):
         """"
         Get repository by name
 
@@ -350,7 +350,7 @@ class ApiController(JSONRPCController):
         :param repo_name:
         """
 
-        repo = Repository.get_by_repo_name(repo_name)
+        repo = RepoModel().get_repo(repoid)
         if repo is None:
             raise JSONRPCError('unknown repository %s' % repo)
 

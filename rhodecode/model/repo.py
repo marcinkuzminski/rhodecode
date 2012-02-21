@@ -82,6 +82,9 @@ class RepoModel(BaseModel):
                                           "get_repo_%s" % repo_id))
         return repo.scalar()
 
+    def get_repo(self, repository):
+        return self.__get_repo(repository)
+
     def get_by_repo_name(self, repo_name, cache=False):
         repo = self.sa.query(Repository)\
             .filter(Repository.repo_name == repo_name)

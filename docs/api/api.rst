@@ -87,7 +87,7 @@ OUTPUT::
 get_user
 --------
 
-Get's an user by username, Returns empty result if user is not found.
+Get's an user by username or user_id, Returns empty result if user is not found.
 This command can be executed only using api_key belonging to user with admin 
 rights.
 
@@ -97,7 +97,7 @@ INPUT::
     api_key : "<api_key>"
     method :  "get_user"
     args :    { 
-                "username" : "<username>"
+                "userid" : "<username or user_id>"
               }
 
 OUTPUT::
@@ -370,8 +370,8 @@ OUTPUT::
 get_repo
 --------
 
-Gets an existing repository. This command can be executed only using api_key
-belonging to user with admin rights
+Gets an existing repository by it's name or repository_id. This command can 
+be executed only using api_key belonging to user with admin rights.
 
 
 INPUT::
@@ -379,7 +379,7 @@ INPUT::
     api_key : "<api_key>"
     method :  "get_repo"
     args:     {
-                "repo_name" : "<reponame>"
+                "repoid" : "<reponame or repo_id>"
               }
 
 OUTPUT::
