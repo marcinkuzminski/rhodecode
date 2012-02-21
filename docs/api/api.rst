@@ -111,7 +111,7 @@ OUTPUT::
                 "email" :    "<email>",
                 "active" :   "<bool>",
                 "admin" :    "<bool>",
-                "ldap" :     "<ldap_dn>"
+                "ldap_dn" :  "<ldap_dn>"
             }
 
     error:  null
@@ -141,7 +141,7 @@ OUTPUT::
                 "email" :    "<email>",
                 "active" :   "<bool>",
                 "admin" :    "<bool>",
-                "ldap" :     "<ldap_dn>"
+                "ldap_dn" :  "<ldap_dn>"
               },
     	      …
             ]
@@ -191,14 +191,15 @@ INPUT::
     api_key : "<api_key>"
     method :  "update_user"
     args :    {
+                "userid" : "<user_id or username>",
                 "username" :  "<username>",
                 "password" :  "<password>",
                 "email" :     "<useremail>",
-                "firstname" : "<firstname> = None",
-                "lastname" :  "<lastname> = None",
-                "active" :    "<bool> = True",
-                "admin" :     "<bool> = False",
-                "ldap_dn" :   "<ldap_dn> = None"
+                "firstname" : "<firstname>",
+                "lastname" :  "<lastname>",
+                "active" :    "<bool>",
+                "admin" :     "<bool>",
+                "ldap_dn" :   "<ldap_dn>"
               }
 
 OUTPUT::

@@ -100,7 +100,7 @@ class ApiController(JSONRPCController):
             email=user.email,
             active=user.active,
             admin=user.admin,
-            ldap=user.ldap_dn
+            ldap_dn=user.ldap_dn
         )
 
     @HasPermissionAllDecorator('hg.admin')
@@ -122,7 +122,7 @@ class ApiController(JSONRPCController):
                     email=user.email,
                     active=user.active,
                     admin=user.admin,
-                    ldap=user.ldap_dn
+                    ldap_dn=user.ldap_dn
                 )
             )
         return result
@@ -168,8 +168,8 @@ class ApiController(JSONRPCController):
             raise JSONRPCError('failed to create user %s' % username)
 
     @HasPermissionAllDecorator('hg.admin')
-    def update_user(self, apiuser, username, password, email, firstname=None,
-                    lastname=None, active=True, admin=False, ldap_dn=None):
+    def update_user(self, apiuser, userid, username, password, email,
+                    firstname, lastname, active, admin, ldap_dn):
         """
         Updates given user
 
@@ -183,7 +183,7 @@ class ApiController(JSONRPCController):
         :param admin:
         :param ldap_dn:
         """
-        if not User.get_by_username(username):
+        if not UserModel().get_user(userid):
             raise JSONRPCError("user %s does not exist" % username)
 
         try:

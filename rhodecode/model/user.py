@@ -74,6 +74,9 @@ class UserModel(BaseModel):
                                           "get_user_%s" % user_id))
         return user.get(user_id)
 
+    def get_user(self, user):
+        return self.__get_user(user)
+
     def get_by_username(self, username, cache=False, case_insensitive=False):
 
         if case_insensitive:
