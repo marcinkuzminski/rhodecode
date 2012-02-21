@@ -406,7 +406,8 @@ def bool2icon(value):
 
 
 def action_parser(user_log, feed=False):
-    """This helper will action_map the specified string action into translated
+    """
+    This helper will action_map the specified string action into translated
     fancy names with icons and links
 
     :param user_log: user log instance
@@ -422,65 +423,77 @@ def action_parser(user_log, feed=False):
         action, action_params = x
 
     def get_cs_links():
-        revs_limit = 3 #display this amount always
-        revs_top_limit = 50 #show upto this amount of changesets hidden
-        revs = action_params.split(',')
+        revs_limit = 3  # display this amount always
+        revs_top_limit = 50  # show upto this amount of changesets hidden
+        revs_ids = action_params.split(',')
         repo_name = user_log.repository.repo_name
 
-        from rhodecode.model.scm import ScmModel
         repo = user_log.repository.scm_instance
 
-        message = lambda rev: get_changeset_safe(repo, rev).message
+        message = lambda rev: rev.message
+        lnk = lambda rev, repo_name: (
+            link_to('r%s:%s' % (rev.revision, rev.short_id),
+                    url('changeset_home', repo_name=repo_name,
+                        revision=rev.raw_id),
+                    title=tooltip(message(rev)), class_='tooltip')
+        )
+        # get only max revs_top_limit of changeset for performance/ui reasons
+        revs = [
+            x for x in repo.get_changesets(revs_ids[0],
+                                           revs_ids[:revs_top_limit][-1])
+        ]
+
         cs_links = []
-        cs_links.append(" " + ', '.join ([link_to(rev,
-                url('changeset_home',
-                repo_name=repo_name,
-                revision=rev), title=tooltip(message(rev)),
-                class_='tooltip') for rev in revs[:revs_limit] ]))
+        cs_links.append(" " + ', '.join(
+            [lnk(rev, repo_name) for rev in revs[:revs_limit]]
+            )
+        )
 
-        compare_view = (' <div class="compare_view tooltip" title="%s">'
-                        '<a href="%s">%s</a> '
-                        '</div>' % (_('Show all combined changesets %s->%s' \
-                                      % (revs[0], revs[-1])),
-                                    url('changeset_home', repo_name=repo_name,
-                                        revision='%s...%s' % (revs[0], revs[-1])
-                                    ),
-                                    _('compare view'))
-                        )
+        compare_view = (
+            ' <div class="compare_view tooltip" title="%s">'
+            '<a href="%s">%s</a> </div>' % (
+                _('Show all combined changesets %s->%s') % (
+                    revs_ids[0], revs_ids[-1]
+                ),
+                url('changeset_home', repo_name=repo_name,
+                    revision='%s...%s' % (revs_ids[0], revs_ids[-1])
+                ),
+                _('compare view')
+            )
+        )
 
-        # if we have exactly one more than normally displayed:
-        # just display it, takes less space than displaying "and 1 more revisions"
-        if len(revs) == revs_limit + 1:
+        # if we have exactly one more than normally displayed
+        # just display it, takes less space than displaying
+        # "and 1 more revisions"
+        if len(revs_ids) == revs_limit + 1:
             rev = revs[revs_limit]
-            cs_links.append(", " + link_to(rev,
-                url('changeset_home',
-                repo_name=repo_name,
-                revision=rev), title=tooltip(message(rev)),
-                class_='tooltip') )
+            cs_links.append(", " + lnk(rev, repo_name))
 
         # hidden-by-default ones
-        if len(revs) > revs_limit + 1:
-            uniq_id = revs[0]
-            html_tmpl = ('<span> %s '
-            '<a class="show_more" id="_%s" href="#more">%s</a> '
-            '%s</span>')
+        if len(revs_ids) > revs_limit + 1:
+            uniq_id = revs_ids[0]
+            html_tmpl = (
+                '<span> %s <a class="show_more" id="_%s" '
+                'href="#more">%s</a> %s</span>'
+            )
             if not feed:
-                cs_links.append(html_tmpl % (_('and'), uniq_id, _('%s more') \
-                                        % (len(revs) - revs_limit),
-                                        _('revisions')))
+                cs_links.append(html_tmpl % (
+                      _('and'),
+                      uniq_id, _('%s more') % (len(revs_ids) - revs_limit),
+                      _('revisions')
+                    )
+                )
 
             if not feed:
                 html_tmpl = '<span id="%s" style="display:none">, %s </span>'
             else:
                 html_tmpl = '<span id="%s"> %s </span>'
 
-            morelinks = ', '.join([link_to(rev,
-                url('changeset_home',
-                repo_name=repo_name, revision=rev),
-                title=message(rev), class_='tooltip')
-                for rev in revs[revs_limit:revs_top_limit]])
+            morelinks = ', '.join(
+              [lnk(rev, repo_name) for rev in revs[revs_limit:]]
+            )
 
-            if len(revs) > revs_top_limit:
+            if len(revs_ids) > revs_top_limit:
                 morelinks += ', ...'
 
             cs_links.append(html_tmpl % (uniq_id, morelinks))
@@ -493,31 +506,32 @@ def action_parser(user_log, feed=False):
         return _('fork name ') + str(link_to(action_params, url('summary_home',
                                           repo_name=repo_name,)))
 
-    action_map = {'user_deleted_repo':(_('[deleted] repository'), None),
-           'user_created_repo':(_('[created] repository'), None),
-           'user_created_fork':(_('[created] repository as fork'), None),
-           'user_forked_repo':(_('[forked] repository'), get_fork_name),
-           'user_updated_repo':(_('[updated] repository'), None),
-           'admin_deleted_repo':(_('[delete] repository'), None),
-           'admin_created_repo':(_('[created] repository'), None),
-           'admin_forked_repo':(_('[forked] repository'), None),
-           'admin_updated_repo':(_('[updated] repository'), None),
-           'push':(_('[pushed] into'), get_cs_links),
-           'push_local':(_('[committed via RhodeCode] into'), get_cs_links),
-           'push_remote':(_('[pulled from remote] into'), get_cs_links),
-           'pull':(_('[pulled] from'), None),
-           'started_following_repo':(_('[started following] repository'), None),
-           'stopped_following_repo':(_('[stopped following] repository'), None),
+    action_map = {'user_deleted_repo': (_('[deleted] repository'), None),
+           'user_created_repo': (_('[created] repository'), None),
+           'user_created_fork': (_('[created] repository as fork'), None),
+           'user_forked_repo': (_('[forked] repository'), get_fork_name),
+           'user_updated_repo': (_('[updated] repository'), None),
+           'admin_deleted_repo': (_('[delete] repository'), None),
+           'admin_created_repo': (_('[created] repository'), None),
+           'admin_forked_repo': (_('[forked] repository'), None),
+           'admin_updated_repo': (_('[updated] repository'), None),
+           'push': (_('[pushed] into'), get_cs_links),
+           'push_local': (_('[committed via RhodeCode] into'), get_cs_links),
+           'push_remote': (_('[pulled from remote] into'), get_cs_links),
+           'pull': (_('[pulled] from'), None),
+           'started_following_repo': (_('[started following] repository'), None),
+           'stopped_following_repo': (_('[stopped following] repository'), None),
             }
 
     action_str = action_map.get(action, action)
     if feed:
         action = action_str[0].replace('[', '').replace(']', '')
     else:
-        action = action_str[0].replace('[', '<span class="journal_highlight">')\
-                   .replace(']', '</span>')
+        action = action_str[0]\
+            .replace('[', '<span class="journal_highlight">')\
+            .replace(']', '</span>')
 
-    action_params_func = lambda :""
+    action_params_func = lambda: ""
 
     if callable(action_str[1]):
         action_params_func = action_str[1]
@@ -568,7 +582,7 @@ HasRepoPermissionAny, HasRepoPermissionAll
 def gravatar_url(email_address, size=30):
     if (not str2bool(config['app_conf'].get('use_gravatar')) or
         not email_address or email_address == 'anonymous@rhodecode.org'):
-        f=lambda a,l:min(l,key=lambda x:abs(x-a))
+        f = lambda a, l: min(l, key=lambda x: abs(x - a))
         return url("/images/user%s.png" % f(size, [14, 16, 20, 24, 30]))
 
     ssl_enabled = 'https' == request.environ.get('wsgi.url_scheme')
@@ -582,7 +596,7 @@ def gravatar_url(email_address, size=30):
         email_address = safe_str(email_address)
     # construct the url
     gravatar_url = baseurl + hashlib.md5(email_address.lower()).hexdigest() + "?"
-    gravatar_url += urllib.urlencode({'d':default, 's':str(size)})
+    gravatar_url += urllib.urlencode({'d': default, 's': str(size)})
 
     return gravatar_url
 
@@ -611,7 +625,7 @@ class RepoPage(Page):
         # The self.page is the number of the current page.
         # The first page has the number 1!
         try:
-            self.page = int(page) # make it int() if we get it as a string
+            self.page = int(page)  # make it int() if we get it as a string
         except (ValueError, TypeError):
             self.page = 1
 
@@ -761,10 +775,10 @@ def fancy_file_stats(stats):
             return ' '.join(map(map_getter, ['tr', 'br', 'tl', 'bl']))
 
     d_a = '<div class="added %s" style="width:%s%%">%s</div>' % (
-        cgen('a'),a_p, a_v
+        cgen('a'), a_p, a_v
     )
     d_d = '<div class="deleted %s" style="width:%s%%">%s</div>' % (
-        cgen('d'),d_p, d_v
+        cgen('d'), d_p, d_v
     )
     return literal('<div style="width:%spx">%s%s</div>' % (width, d_a, d_d))
 
@@ -815,12 +829,12 @@ def urlify_commit(text_, repository=None, link_=None):
     # urlify changesets
     text_ = urlify_changesets(text_, repository)
 
-    def linkify_others(t,l):
+    def linkify_others(t, l):
         urls = re.compile(r'(\<a.*?\<\/a\>)',)
         links = []
         for e in urls.split(t):
             if not urls.match(e):
-                links.append('<a class="message-link" href="%s">%s</a>' % (l,e))
+                links.append('<a class="message-link" href="%s">%s</a>' % (l, e))
             else:
                 links.append(e)
 
