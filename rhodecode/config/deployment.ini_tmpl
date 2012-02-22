@@ -46,16 +46,17 @@ port = 5000
 use = egg:rhodecode
 full_stack = true
 static_files = true
-lang=en
+lang = en
 cache_dir = %(here)s/data
 index_dir = %(here)s/data/index
 app_instance_uuid = ${app_instance_uuid}
 cut_off_limit = 256000
-force_https = false 
+force_https = false
 commit_parse_limit = 50
 use_gravatar = true
 container_auth_enabled = false
 proxypass_auth_enabled = false
+default_encoding = utf8
 
 ## overwrite schema of clone url
 ## available vars:
@@ -65,7 +66,7 @@ proxypass_auth_enabled = false
 ## netloc - network location
 ## path - usually repo_name
 
-# clone_uri = {scheme}://{user}{pass}{netloc}{path}
+#clone_uri = {scheme}://{user}{pass}{netloc}{path}
 
 ## issue tracking mapping for commits messages
 ## comment out issue_pat, issue_server, issue_prefix to enable
@@ -86,6 +87,11 @@ issue_server_link = https://myissueserver.com/{repo}/issue/{id}
 
 issue_prefix = #
 
+## instance-id prefix
+## a prefix key for this instance used for cache invalidation when running 
+## multiple instances of rhodecode, make sure it's globally unique for 
+## all running rhodecode instances. Leave empty if you don't use it
+instance_id = 
 
 ####################################
 ###        CELERY CONFIG        ####
@@ -272,13 +278,13 @@ propagate = 0
 class = StreamHandler
 args = (sys.stderr,)
 level = INFO
-formatter = color_formatter
+formatter = generic
 
 [handler_console_sql]
 class = StreamHandler
 args = (sys.stderr,)
 level = WARN
-formatter = color_formatter_sql
+formatter = generic
 
 ################
 ## FORMATTERS ##

@@ -27,7 +27,7 @@ def date_fromtimestamp(unixts, tzoffset=0):
     return datetime.datetime.fromtimestamp(float(unixts))
 
 
-def safe_unicode(str_, from_encoding='utf8'):
+def safe_unicode(str_, from_encoding=None):
     """
     safe unicode function. Does few trick to turn str_ into unicode
 
@@ -40,7 +40,10 @@ def safe_unicode(str_, from_encoding='utf8'):
     """
     if isinstance(str_, unicode):
         return str_
-
+    if not from_encoding:
+        import rhodecode
+        DEFAULT_ENCODING = rhodecode.CONFIG.get('default_encoding','utf8')
+        from_encoding = DEFAULT_ENCODING
     try:
         return unicode(str_)
     except UnicodeDecodeError:
@@ -61,7 +64,7 @@ def safe_unicode(str_, from_encoding='utf8'):
         return unicode(str_, from_encoding, 'replace')
 
 
-def safe_str(unicode_, to_encoding='utf8'):
+def safe_str(unicode_, to_encoding=None):
     """
     safe str function. Does few trick to turn unicode_ into string
 
@@ -75,7 +78,10 @@ def safe_str(unicode_, to_encoding='utf8'):
 
     if isinstance(unicode_, str):
         return unicode_
-
+    if not to_encoding:
+        import rhodecode
+        DEFAULT_ENCODING = rhodecode.CONFIG.get('default_encoding','utf8')
+        to_encoding = DEFAULT_ENCODING
     try:
         return unicode_.encode(to_encoding)
     except UnicodeEncodeError:

@@ -1034,7 +1034,12 @@ class CacheInvalidation(Base, BaseModel):
 
         :param key:
         """
-        return "%s" % (key)
+        import rhodecode
+        prefix = ''
+        iid = rhodecode.CONFIG.get('instance_id')
+        if iid:
+            prefix = iid 
+        return "%s%s" % (prefix, key)
 
     @classmethod
     def get_by_key(cls, key):

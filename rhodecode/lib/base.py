@@ -111,6 +111,7 @@ class BaseController(WSGIController):
 
     def __before__(self):
         c.rhodecode_version = __version__
+        c.rhodecode_instanceid = config.get('instance_id')
         c.rhodecode_name = config.get('rhodecode_title')
         c.use_gravatar = str2bool(config.get('use_gravatar'))
         c.ga_code = config.get('rhodecode_ga_code')
