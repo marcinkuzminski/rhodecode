@@ -37,6 +37,12 @@ news
 - new compact changelog with expandable commit messages
 - firstname and lastname are optional in user creation
 - #348 added post-create repository hook
+- #212 global encoding settings is now configurable from .ini files 
+- #227 added repository groups permissions
+- markdown gets codehilite extensions
+- new API methods, delete_repositories, grante/revoke permissions for groups 
+  and repos
+  
     
 fixes
 -----
@@ -55,6 +61,7 @@ fixes
 - #340 fixed session problem for mysql and celery tasks
 - fixed #331 RhodeCode mangles repository names if the a repository group 
   contains the "full path" to the repositories
+- #355 RhodeCode doesn't store encrypted LDAP passwords
 
 1.2.5 (**2012-01-28**)
 ======================
