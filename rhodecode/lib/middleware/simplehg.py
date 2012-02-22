@@ -80,7 +80,6 @@ class SimpleHg(BaseVCSController):
         # GET ACTION PULL or PUSH
         #======================================================================
         action = self.__get_action(environ)
-
         #======================================================================
         # CHECK ANONYMOUS PERMISSION
         #======================================================================
@@ -88,7 +87,7 @@ class SimpleHg(BaseVCSController):
             anonymous_user = self.__get_user('default')
 
             username = anonymous_user.username
-            anonymous_perm = self._check_permission(action,anonymous_user,
+            anonymous_perm = self._check_permission(action, anonymous_user,
                                                     repo_name)
 
             if anonymous_perm is not True or anonymous_user.active is False:
@@ -121,7 +120,7 @@ class SimpleHg(BaseVCSController):
                 #==============================================================
                 # CHECK PERMISSIONS FOR THIS REQUEST USING GIVEN USERNAME
                 #==============================================================
-
+                log.info('%s action on HG repo "%s"' % (action, repo_name))
                 if action in ['pull', 'push']:
                     try:
                         user = self.__get_user(username)

@@ -157,7 +157,7 @@ class SimpleGit(BaseVCSController):
                 #==============================================================
                 # CHECK PERMISSIONS FOR THIS REQUEST USING GIVEN USERNAME
                 #==============================================================
-
+                log.info('%s action on GIT repo "%s"' % (action, repo_name))
                 if action in ['pull', 'push']:
                     try:
                         user = self.__get_user(username)
