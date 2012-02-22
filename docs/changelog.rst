@@ -5,13 +5,13 @@ Changelog
 
 
 1.3.0 (**XXXX-XX-XX**)
-======================
+----------------------
 
 :status: in-progress
 :branch: beta
 
 news
-----
+++++
 
 - code review, inspired by github code-comments 
 - #215 rst and markdown README files support
@@ -45,7 +45,7 @@ news
   
     
 fixes
------
++++++
 
 - rewrote dbsession management for atomic operations, and better error handling
 - fixed sorting of repo tables
@@ -64,13 +64,13 @@ fixes
 - #355 RhodeCode doesn't store encrypted LDAP passwords
 
 1.2.5 (**2012-01-28**)
-======================
+----------------------
 
 news
-----
+++++
 
 fixes
------
++++++
 
 - #340 Celery complains about MySQL server gone away, added session cleanup
   for celery tasks
@@ -83,10 +83,10 @@ fixes
   forking on windows impossible 
 
 1.2.4 (**2012-01-19**)
-======================
+----------------------
 
 news
-----
+++++
 
 - RhodeCode is bundled with mercurial series 2.0.X by default, with
   full support to largefiles extension. Enabled by default in new installations
@@ -94,7 +94,7 @@ news
 - added requires.txt file with requirements
      
 fixes
------
++++++
 
 - fixes db session issues with celery when emailing admins
 - #331 RhodeCode mangles repository names if the a repository group 
@@ -111,10 +111,10 @@ fixes
 - #316 fixes issues with web description in hgrc files 
 
 1.2.3 (**2011-11-02**)
-======================
+----------------------
 
 news
-----
+++++
 
 - added option to manage repos group for non admin users
 - added following API methods for get_users, create_user, get_users_groups, 
@@ -126,7 +126,7 @@ news
   administrator users, and global config email.
      
 fixes
------
++++++
 
 - added option for passing auth method for smtp mailer
 - #276 issue with adding a single user with id>10 to usergroups
@@ -134,15 +134,15 @@ fixes
 - #288 fixes managing of repos in a group for non admin user
 
 1.2.2 (**2011-10-17**)
-======================
+----------------------
 
 news
-----
+++++
 
 - #226 repo groups are available by path instead of numerical id
  
 fixes
------
++++++
 
 - #259 Groups with the same name but with different parent group
 - #260 Put repo in group, then move group to another group -> repo becomes unavailable
@@ -157,24 +157,24 @@ fixes
 - fixes #219 forking problems on windows
 
 1.2.1 (**2011-10-08**)
-======================
+----------------------
 
 news
-----
+++++
 
 
 fixes
------
++++++
 
 - fixed problems with basic auth and push problems 
 - gui fixes
 - fixed logger
 
 1.2.0 (**2011-10-07**)
-======================
+----------------------
 
 news
-----
+++++
 
 - implemented #47 repository groups
 - implemented #89 Can setup google analytics code from settings menu
@@ -214,7 +214,7 @@ news
 - Implemented advanced hook management
 
 fixes
------
++++++
 
 - fixed file browser bug, when switching into given form revision the url was 
   not changing
@@ -243,15 +243,15 @@ fixes
   heads exceeds 5)
     
 1.1.8 (**2011-04-12**)
-======================
+----------------------
 
 news
-----
+++++
 
 - improved windows support
 
 fixes
------
++++++
 
 - fixed #140 freeze of python dateutil library, since new version is python2.x
   incompatible
@@ -274,40 +274,40 @@ fixes
 
 
 1.1.7 (**2011-03-23**)
-======================
+----------------------
 
 news
-----
+++++
 
 fixes
------
++++++
 
 - fixed (again) #136 installation support for FreeBSD
 
 
 1.1.6 (**2011-03-21**)
-======================
+----------------------
 
 news
-----
+++++
 
 fixes
------
++++++
 
 - fixed #136 installation support for FreeBSD
 - RhodeCode will check for python version during installation
 
 1.1.5 (**2011-03-17**)
-======================
+----------------------
 
 news
-----
+++++
 
 - basic windows support, by exchanging pybcrypt into sha256 for windows only
   highly inspired by idea of mantis406
 
 fixes
------
++++++
 
 - fixed sorting by author in main page
 - fixed crashes with diffs on binary files
@@ -319,13 +319,13 @@ fixes
 - cleaned out docs, big thanks to Jason Harris
 
 1.1.4 (**2011-02-19**)
-======================
+----------------------
 
 news
-----
+++++
 
 fixes
------
++++++
 
 - fixed formencode import problem on settings page, that caused server crash
   when that page was accessed as first after server start
@@ -333,17 +333,17 @@ fixes
 - fixed option to access repository just by entering http://server/<repo_name> 
 
 1.1.3 (**2011-02-16**)
-======================
+----------------------
 
 news
-----
+++++
 
 - implemented #102 allowing the '.' character in username
 - added option to access repository just by entering http://server/<repo_name>
 - celery task ignores result for better performance
 
 fixes
------
++++++
 
 - fixed ehlo command and non auth mail servers on smtp_lib. Thanks to 
   apollo13 and Johan Walles
@@ -359,31 +359,31 @@ fixes
 - fixed static files paths links to use of url() method
 
 1.1.2 (**2011-01-12**)
-======================
+----------------------
 
 news
-----
+++++
 
 
 fixes
------
++++++
 
 - fixes #98 protection against float division of percentage stats
 - fixed graph bug
 - forced webhelpers version since it was making troubles during installation 
 
 1.1.1 (**2011-01-06**)
-======================
+----------------------
  
 news
-----
+++++
 
 - added force https option into ini files for easier https usage (no need to
   set server headers with this options)
 - small css updates
 
 fixes
------
++++++
 
 - fixed #96 redirect loop on files view on repositories without changesets
 - fixed #97 unicode string passed into server header in special cases (mod_wsgi)
@@ -392,10 +392,10 @@ fixes
 - fixed #92 whoosh indexer is more error proof
 
 1.1.0 (**2010-12-18**)
-======================
+----------------------
 
 news
-----
+++++
 
 - rewrite of internals for vcs >=0.1.10
 - uses mercurial 1.7 with dotencode disabled for maintaining compatibility 
@@ -420,7 +420,7 @@ news
 - other than sqlite database backends can be used
 
 fixes
------
++++++
 
 - fixes #61 forked repo was showing only after cache expired
 - fixes #76 no confirmation on user deletes
@@ -440,16 +440,16 @@ fixes
 
 
 1.0.2 (**2010-11-12**)
-======================
+----------------------
 
 news
-----
+++++
 
 - tested under python2.7
 - bumped sqlalchemy and celery versions
 
 fixes
------
++++++
 
 - fixed #59 missing graph.js
 - fixed repo_size crash when repository had broken symlinks
@@ -457,15 +457,15 @@ fixes
 
 
 1.0.1 (**2010-11-10**)
-======================
+----------------------
 
 news
-----
+++++
 
 - small css updated
 
 fixes
------
++++++
 
 - fixed #53 python2.5 incompatible enumerate calls
 - fixed #52 disable mercurial extension for web
@@ -473,7 +473,7 @@ fixes
 
 
 1.0.0 (**2010-11-02**)
-======================
+----------------------
 
 - security bugfix simplehg wasn't checking for permissions on commands
   other than pull or push.
@@ -483,7 +483,7 @@ fixes
 - permissions cached queries
 
 1.0.0rc4  (**2010-10-12**)
-==========================
+--------------------------
 
 - fixed python2.5 missing simplejson imports (thanks to Jens Bäckman)
 - removed cache_manager settings from sqlalchemy meta
@@ -493,12 +493,12 @@ fixes
 
 
 1.0.0rc3 (**2010-10-11**)
-=========================
+-------------------------
 
 - fixed i18n during installation.
 
 1.0.0rc2 (**2010-10-11**)
-=========================
+-------------------------
 
 - Disabled dirsize in file browser, it's causing nasty bug when dir renames 
   occure. After vcs is fixed it'll be put back again.

@@ -1,6 +1,9 @@
-========================
-RhodeCode documentation!
-========================
+=========
+RhodeCode
+=========
+
+About
+-----
 
 ``RhodeCode`` is a fast and powerful management tool for Mercurial_ and GIT_ 
 with a built in push/pull server and full text search and code-review.
@@ -16,6 +19,21 @@ RhodeCode is powered by a vcs_ library that Lukasz Balcerzak and I created to
 handle multiple different version control systems.
 
 RhodeCode uses `Semantic Versioning <http://semver.org/>`_
+
+Installation
+------------
+Stable releases of RhodeCode are best installed via::
+
+    easy_install rhodecode
+
+Or::
+
+    pip install rhodecode 
+
+Detailed instructions and links may be found on the Installation page.
+
+Please visit http://packages.python.org/RhodeCode/installation.html for
+more details
 
 RhodeCode demo
 --------------
@@ -44,11 +62,6 @@ http://bitbucket.org/marcinkuzminski/rhodecode
 Sources at github_
 
 https://github.com/marcinkuzminski/rhodecode
-
-Installation
-------------
-
-Please visit http://packages.python.org/RhodeCode/installation.html
 
 
 RhodeCode Features
@@ -91,9 +104,6 @@ RhodeCode Features
   location 
 - Based on pylons / sqlalchemy / sqlite / whoosh / vcs
 
-
-.. include:: ./docs/screenshots.rst
-    
     
 Incoming / Plans
 ----------------
@@ -113,21 +123,35 @@ License
 ``RhodeCode`` is released under the GPLv3 license.
 
 
-Mailing group Q&A
------------------
+Getting help
+------------
 
-Join the `Google group <http://groups.google.com/group/rhodecode>`_
+Listed bellow are various support resources that should help.
 
-Open an issue at `issue tracker <http://bitbucket.org/marcinkuzminski/rhodecode/issues>`_
+.. note::
+   
+   Please try to read the documentation before posting any issues
+ 
+- Join the `Google group <http://groups.google.com/group/rhodecode>`_ and ask
+  any questions.
 
-Join #rhodecode on FreeNode (irc.freenode.net)
-or use http://webchat.freenode.net/?channels=rhodecode for web access to irc.
+- Open an issue at `issue tracker <http://bitbucket.org/marcinkuzminski/rhodecode/issues>`_
+
+
+- Join #rhodecode on FreeNode (irc.freenode.net)
+  or use http://webchat.freenode.net/?channels=rhodecode for web access to irc.
+
+- You can also follow me on twitter @marcinkuzminski where i often post some
+  news about RhodeCode
+
 
 Online documentation
 --------------------
 
 Online documentation for the current version of RhodeCode is available at
-http://packages.python.org/RhodeCode/.
+ - http://packages.python.org/RhodeCode/
+ - http://rhodecode.readthedocs.org/en/latest/index.html
+
 You may also build the documentation for yourself - go into ``docs/`` and run::
 
    make html
