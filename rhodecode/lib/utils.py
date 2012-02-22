@@ -378,7 +378,6 @@ def map_groups(groups):
     groups = groups[:-1]
     rgm = ReposGroupModel(sa)
     for lvl, group_name in enumerate(groups):
-        log.debug('creating group level: %s group_name: %s' % (lvl, group_name))
         group_name = '/'.join(groups[:lvl] + [group_name])
         group = RepoGroup.get_by_group_name(group_name)
         desc = '%s group' % group_name
@@ -389,6 +388,7 @@ def map_groups(groups):
 #            sa.commit()
 
         if group is None:
+            log.debug('creating group level: %s group_name: %s' % (lvl, group_name))
             group = RepoGroup(group_name, parent)
             group.group_description = desc
             sa.add(group)
