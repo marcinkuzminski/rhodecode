@@ -415,23 +415,6 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False):
         raise Exception('Missing administrative account !')
     added = []
 
-    # fixup groups paths to new format on the fly. Helps with migration from
-    # old rhodecode versions also set permissions if they are not present !
-    # TODO: remove this in future, before release
-    def_usr = User.get_by_username('default')
-    for g in RepoGroup.query().all():
-        g.group_name = g.get_new_name(g.name)
-        sa.add(g)
-        # get default perm
-        default = UserRepoGroupToPerm.query()\
-            .filter(UserRepoGroupToPerm.group == g)\
-            .filter(UserRepoGroupToPerm.user == def_usr)\
-            .scalar()
-
-        if default is None:
-            log.debug('missing default permission for group %s adding' % g)
-            ReposGroupModel()._create_default_perms(g)
-
     for name, repo in initial_repo_list.items():
         group = map_groups(name.split(Repository.url_sep()))
         if not rm.get_by_repo_name(name, cache=False):
