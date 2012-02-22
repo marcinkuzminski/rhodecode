@@ -37,7 +37,8 @@ Users Guide
 .. toctree::
    :maxdepth: 1
 
-   api/index
+   api/api
+   api/models
    
 
 Other topics
