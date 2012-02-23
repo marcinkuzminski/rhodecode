@@ -124,7 +124,7 @@ class SimpleGit(BaseVCSController):
         if action in ['pull', 'push']:
             anonymous_user = self.__get_user('default')
             username = anonymous_user.username
-            anonymous_perm = self._check_permission(action,anonymous_user,
+            anonymous_perm = self._check_permission(action, anonymous_user,
                                                     repo_name)
 
             if anonymous_perm is not True or anonymous_user.active is False:
@@ -157,7 +157,6 @@ class SimpleGit(BaseVCSController):
                 #==============================================================
                 # CHECK PERMISSIONS FOR THIS REQUEST USING GIVEN USERNAME
                 #==============================================================
-                log.info('%s action on GIT repo "%s"' % (action, repo_name))
                 if action in ['pull', 'push']:
                     try:
                         user = self.__get_user(username)
@@ -190,7 +189,7 @@ class SimpleGit(BaseVCSController):
             #invalidate cache on push
             if action == 'push':
                 self._invalidate_cache(repo_name)
-
+            log.info('%s action on GIT repo "%s"' % (action, repo_name))
             app = self.__make_app(repo_name, repo_path)
             return app(environ, start_response)
         except Exception:

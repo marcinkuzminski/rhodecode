@@ -120,7 +120,6 @@ class SimpleHg(BaseVCSController):
                 #==============================================================
                 # CHECK PERMISSIONS FOR THIS REQUEST USING GIVEN USERNAME
                 #==============================================================
-                log.info('%s action on HG repo "%s"' % (action, repo_name))
                 if action in ['pull', 'push']:
                     try:
                         user = self.__get_user(username)
@@ -161,7 +160,7 @@ class SimpleHg(BaseVCSController):
             # invalidate cache on push
             if action == 'push':
                 self._invalidate_cache(repo_name)
-
+            log.info('%s action on HG repo "%s"' % (action, repo_name))
             app = self.__make_app(repo_path, baseui, extras)
             return app(environ, start_response)
         except RepoError, e:
