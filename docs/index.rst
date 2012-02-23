@@ -20,7 +20,7 @@ Users Guide
    :maxdepth: 1
 
    usage/general
-   usage/enable_git
+   usage/git_support
    usage/statistics
    usage/backup
    
