@@ -147,9 +147,12 @@ class BaseController(WSGIController):
 
             session['rhodecode_user'] = self.rhodecode_user.get_cookie_store()
             session.save()
+            log.info('User: %s accessed %s' % (auth_user, 
+                                               environ.get('PATH_INFO')))
             return WSGIController.__call__(self, environ, start_response)
         finally:
-            log.debug('Request time: %.3fs' % (time.time() - start))
+            log.info('Request to %s time: %.3fs' % (environ.get('PATH_INFO'),
+                                                    time.time() - start))
             meta.Session.remove()
 
 

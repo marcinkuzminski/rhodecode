@@ -89,4 +89,4 @@ BACKENDS = {
 CELERY_ON = False
 
 # link to config for pylons
-CONFIG = None
+CONFIG = {}

@@ -256,7 +256,7 @@ class ValidAuth(formencode.validators.FancyValidator):
                     error_dict=self.e_dict_disable
                 )
             else:
-                log.warning('user %s not authenticated' % username)
+                log.warning('user %s failed to authenticate' % username)
                 raise formencode.Invalid(
                     self.message('invalid_password',
                     state=State_obj), value, state,

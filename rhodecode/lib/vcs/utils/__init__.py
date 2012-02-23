@@ -42,7 +42,7 @@ def safe_unicode(str_, from_encoding=None):
         return str_
     if not from_encoding:
         import rhodecode
-        DEFAULT_ENCODING = rhodecode.CONFIG.get('default_encoding','utf8')
+        DEFAULT_ENCODING = rhodecode.CONFIG.get('default_encoding', 'utf8')
         from_encoding = DEFAULT_ENCODING
     try:
         return unicode(str_)
@@ -80,7 +80,7 @@ def safe_str(unicode_, to_encoding=None):
         return unicode_
     if not to_encoding:
         import rhodecode
-        DEFAULT_ENCODING = rhodecode.CONFIG.get('default_encoding','utf8')
+        DEFAULT_ENCODING = rhodecode.CONFIG.get('default_encoding', 'utf8')
         to_encoding = DEFAULT_ENCODING
     try:
         return unicode_.encode(to_encoding)

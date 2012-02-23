@@ -173,7 +173,7 @@ def authenticate(username, password):
     if user is not None and not user.ldap_dn:
         if user.active:
             if user.username == 'default' and user.active:
-                log.info('user %s authenticated correctly as anonymous user',
+                log.info('user %s authenticated correctly as anonymous user' %
                          username)
                 return True
 
@@ -182,7 +182,7 @@ def authenticate(username, password):
                 log.info('user %s authenticated correctly' % username)
                 return True
         else:
-            log.warning('user %s is disabled' % username)
+            log.warning('user %s tried auth but is disabled' % username)
 
     else:
         log.debug('Regular authentication failed')
@@ -434,13 +434,17 @@ class LoginRequired(object):
                 api_access_ok = True
             else:
                 log.debug("API KEY token not valid")
-
-        log.debug('Checking if %s is authenticated @ %s' % (user.username, cls))
+        loc = "%s:%s" % (cls.__class__.__name__, func.__name__)
+        log.debug('Checking if %s is authenticated @ %s' % (user.username, loc))
         if user.is_authenticated or api_access_ok:
-            log.debug('user %s is authenticated' % user.username)
+            log.info('user %s is authenticated and granted access to %s' % (
+                       user.username, loc)
+            )
             return func(*fargs, **fkwargs)
         else:
-            log.warn('user %s NOT authenticated' % user.username)
+            log.warn('user %s NOT authenticated on func: %s' % (
+                user, loc)
+            )
             p = url.current()
 
             log.debug('redirecting to login page with %s' % p)
@@ -502,7 +506,7 @@ class PermsDecorator(object):
             return func(*fargs, **fkwargs)
 
         else:
-            log.warning('Permission denied for %s %s' % (cls, self.user))
+            log.debug('Permission denied for %s %s' % (cls, self.user))
             anonymous = self.user.username == 'default'
 
             if anonymous:
@@ -649,7 +653,7 @@ class PermsFunction(object):
             return True
 
         else:
-            log.warning('Permission denied for %s @ %s', self.granted_for,
+            log.debug('Permission denied for %s @ %s', self.granted_for,
                         check_Location or 'unspecified location')
             return False
 
