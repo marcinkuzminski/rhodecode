@@ -16,16 +16,22 @@ http server that supports chunked encoding which git http protocol uses,
 i recommend using waitress_ or gunicorn_ (linux only) for `paste` wsgi app 
 replacement.
 
-To use waitress simply change::
+To use waitress simply change change the following in the .ini file::
 
-    use = egg:Paste#main
+    use = egg:Paste#http
 
 To::
     
     use = egg:waitress#main
 
-In you .ini file, then you can simply run `paster serve` as usual.
+And comment out bellow options::
 
+    threadpool_workers = 
+    threadpool_max_requests = 
+    use_threadpool = 
+    
+
+You can simply run `paster serve` as usual.
 
   
 You can always disable git/hg support by editing a 
