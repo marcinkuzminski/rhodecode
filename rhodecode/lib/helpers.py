@@ -827,6 +827,15 @@ def urlify_changesets(text_, repository):
 
 
 def urlify_commit(text_, repository=None, link_=None):
+    """
+    Parses given text message and makes proper links.
+    issues are linked to given issue-server, and rest is a changeset link
+    if link_ is given, in other case it's a plain text
+
+    :param text_:
+    :param repository:
+    :param link_: changeset link
+    """
     import re
     import traceback
 
@@ -878,8 +887,9 @@ def urlify_commit(text_, repository=None, link_=None):
 
             newtext = URL_PAT.sub(url_func, text_)
 
-            # wrap not links into final link => link_
-            newtext = linkify_others(newtext, link_)
+            if link_:
+                # wrap not links into final link => link_
+                newtext = linkify_others(newtext, link_)
 
             return literal(newtext)
     except:
