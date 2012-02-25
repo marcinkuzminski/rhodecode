@@ -289,6 +289,21 @@ def get_container_username(environ, config):
     return username
 
 
+class CookieStoreWrapper(object):
+
+    def __init__(self, cookie_store):
+        self.cookie_store = cookie_store
+
+    def __repr__(self):
+        return 'CookieStore<%s>' % (self.cookie_store)
+
+    def get(self, key, other=None):
+        if isinstance(self.cookie_store, dict):
+            return self.cookie_store.get(key, other)
+        elif isinstance(self.cookie_store, AuthUser):
+            return self.cookie_store.__dict__.get(key, other)
+
+
 class  AuthUser(object):
     """
     A simple object that handles all attributes of user in RhodeCode
@@ -377,6 +392,12 @@ class  AuthUser(object):
 
     @classmethod
     def from_cookie_store(cls, cookie_store):
+        """
+        Creates AuthUser from a cookie store
+
+        :param cls:
+        :param cookie_store:
+        """
         user_id = cookie_store.get('user_id')
         username = cookie_store.get('username')
         api_key = cookie_store.get('api_key')

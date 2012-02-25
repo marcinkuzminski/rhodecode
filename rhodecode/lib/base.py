@@ -17,7 +17,7 @@ from rhodecode import __version__, BACKENDS
 
 from rhodecode.lib import str2bool, safe_unicode
 from rhodecode.lib.auth import AuthUser, get_container_username, authfunc,\
-    HasPermissionAnyMiddleware
+    HasPermissionAnyMiddleware, CookieStoreWrapper
 from rhodecode.lib.utils import get_repo_slug, invalidate_cache
 from rhodecode.model import meta
 
@@ -133,7 +133,7 @@ class BaseController(WSGIController):
         try:
             # make sure that we update permissions each time we call controller
             api_key = request.GET.get('api_key')
-            cookie_store = session.get('rhodecode_user') or {}
+            cookie_store = CookieStoreWrapper(session.get('rhodecode_user'))
             user_id = cookie_store.get('user_id', None)
             username = get_container_username(environ, config)
 
@@ -142,11 +142,9 @@ class BaseController(WSGIController):
             self.rhodecode_user = c.rhodecode_user = auth_user
             if not self.rhodecode_user.is_authenticated and \
                        self.rhodecode_user.user_id is not None:
-                self.rhodecode_user\
-                    .set_authenticated(cookie_store.get('is_authenticated'))
-
-            session['rhodecode_user'] = self.rhodecode_user.get_cookie_store()
-            session.save()
+                self.rhodecode_user.set_authenticated(
+                    cookie_store.get('is_authenticated')
+                )
             log.info('User: %s accessed %s' % (
                 auth_user, safe_unicode(environ.get('PATH_INFO')))
             )
