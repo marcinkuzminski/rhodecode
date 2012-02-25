@@ -19,19 +19,25 @@ div.codeblock .code-header{
 
 div.codeblock .code-header .stats{
 	clear: both;
-	margin-top:-3px; 
-	padding-left: 8px; 
-	border-bottom: 1px solid rgb(204, 204, 204); 
-	margin-bottom: 5px; height: 23px;
+	padding: 6px 8px 6px 10px; 
+	border-bottom: 1px solid rgb(204, 204, 204);  
+	height: 23px;
+	margin-bottom: 6px;
 }
 
 div.codeblock .code-header .stats .left{
 	float:left;
 }
+div.codeblock .code-header .stats .left.img{
+	margin-top:-2px;
+}
 div.codeblock .code-header .stats .left.item{
 	float:left;
 	padding: 0 9px 0 9px;
 	border-right:1px solid #ccc;
+}
+div.codeblock .code-header .stats .left.item pre{
+	
 }
 div.codeblock .code-header .stats .left.item.last{
 	border-right:none;

@@ -15,10 +15,10 @@
 <div id="body" class="codeblock">
 	<div class="code-header">
         <div class="stats">
-            <div class="left"><img src="${h.url('/images/icons/file.png')}"/></div>
+            <div class="left img"><img src="${h.url('/images/icons/file.png')}"/></div>
             <div class="left item"><pre>${h.link_to("r%s:%s" % (c.file.last_changeset.revision,h.short_id(c.file.last_changeset.raw_id)),h.url('changeset_home',repo_name=c.repo_name,revision=c.file.last_changeset.raw_id))}</pre></div>
-            <div class="left item">${h.format_byte_size(c.file.size,binary=True)}</div>
-            <div class="left item last">${c.file.mimetype}</div>
+            <div class="left item"><pre>${h.format_byte_size(c.file.size,binary=True)}</pre></div>
+            <div class="left item last"><pre>${c.file.mimetype}</pre></div>
             <div class="buttons">
               ${h.link_to(_('show annotation'),h.url('files_annotate_home',repo_name=c.repo_name,revision=c.file.last_changeset.raw_id,f_path=c.f_path),class_="ui-btn")}
               ${h.link_to(_('show as raw'),h.url('files_raw_home',repo_name=c.repo_name,revision=c.file.last_changeset.raw_id,f_path=c.f_path),class_="ui-btn")}
@@ -36,7 +36,7 @@
             </div>
             <div title="${c.file.last_changeset.author}" class="user">${h.person(c.file.last_changeset.author)}</div>
         </div>
-		<div class="commit">${c.file.last_changeset.message}</div>
+		<div class="commit">${h.urlify_commit(c.file.last_changeset.message,c.repo_name)}</div>
 	</div>
 	<div class="code-body">
 	   %if c.file.is_binary:
