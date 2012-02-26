@@ -1,0 +1,105 @@
+## -*- coding: utf-8 -*-
+## usage:
+## <%namespace name="comment" file="/changeset/changeset_file_comment.html"/>
+## ${comment.comment_block(co)}
+##
+<%def name="comment_block(co)">
+  <div class="comment" id="comment-${co.comment_id}">
+    <div class="comment-wrapp">
+  	<div class="meta">
+  		<span class="user">
+  			<img src="${h.gravatar_url(co.author.email, 20)}" />
+  			${co.author.username}
+  		</span>
+  		<span class="date">
+  			${h.age(co.modified_at)}
+  		</span>
+      %if h.HasPermissionAny('hg.admin', 'repository.admin')() or co.author.user_id == c.rhodecode_user.user_id:
+        <span class="buttons">
+          <span onClick="deleteComment(${co.comment_id})" class="delete-comment ui-btn">${_('Delete')}</span>
+        </span>
+      %endif
+  	</div>
+  	<div class="text">
+  		${h.rst_w_mentions(co.text)|n}
+  	</div>
+    </div>
+  </div>
+</%def>
+
+
+<%def name="comment_inline_form(changeset)">
+<div id='comment-inline-form-template' style="display:none">
+  <div class="comment-inline-form">
+  %if c.rhodecode_user.username != 'default':
+      ${h.form(h.url('changeset_comment', repo_name=c.repo_name, revision=changeset.raw_id))}
+      <div class="clearfix">
+          <div class="comment-help">${_('Commenting on line')} {1}. ${_('Comments parsed using')}
+          <a href="${h.url('rst_help')}">RST</a> ${_('syntax')} ${_('with')}
+          <span style="color:#003367" class="tooltip" title="${_('Use @username inside this text to send notification to this RhodeCode user')}">@mention</span> ${_('support')}
+          </div>
+          <textarea id="text_{1}" name="text"></textarea>
+      </div>
+      <div class="comment-button">
+      <input type="hidden" name="f_path" value="{0}">
+      <input type="hidden" name="line" value="{1}">
+      ${h.submit('save', _('Comment'), class_='ui-btn')}
+      ${h.reset('hide-inline-form', _('Hide'), class_='ui-btn hide-inline-form')}
+      </div>
+      ${h.end_form()}
+  %else:
+      ${h.form('')}
+      <div class="clearfix">
+          <div class="comment-help">
+            ${'You need to be logged in to comment.'} <a href="${h.url('login_home',came_from=h.url.current())}">${_('Login now')}</a>
+          </div>
+      </div>
+      <div class="comment-button">
+      ${h.reset('hide-inline-form', _('Hide'), class_='ui-btn hide-inline-form')}
+      </div>
+      ${h.end_form()}
+  %endif
+  </div>
+</div>
+</%def>
+
+
+<%def name="comments(changeset)">
+
+<div class="comments">
+    <div class="comments-number">${len(c.comments)} comment(s) (${c.inline_cnt} ${_('inline')})</div>
+
+    %for path, lines in c.inline_comments:
+        <div style="display:none" class="inline-comment-placeholder" path="${path}" target_id="${h.FID(changeset.raw_id,path)}">
+        % for line,comments in lines.iteritems():
+            <div class="inline-comment-placeholder-line" line="${line}" target_id="${h.safeid(h.safe_unicode(path))}">
+            %for co in comments:
+                ${comment_block(co)}
+            %endfor
+            </div>
+        %endfor
+        </div>
+    %endfor
+
+    %for co in c.comments:
+        ${comment_block(co)}
+    %endfor
+    %if c.rhodecode_user.username != 'default':
+    <div class="comment-form">
+        ${h.form(h.url('changeset_comment', repo_name=c.repo_name, revision=changeset.raw_id))}
+        <strong>${_('Leave a comment')}</strong>
+        <div class="clearfix">
+            <div class="comment-help">
+                ${_('Comments parsed using')} <a href="${h.url('rst_help')}">RST</a> ${_('syntax')}
+                ${_('with')} <span style="color:#003367" class="tooltip" title="${_('Use @username inside this text to send notification to this RhodeCode user')}">@mention</span> ${_('support')}
+            </div>
+                ${h.textarea('text')}
+        </div>
+        <div class="comment-button">
+        ${h.submit('save', _('Comment'), class_='ui-button')}
+        </div>
+        ${h.end_form()}
+    </div>
+    %endif
+</div>
+</%def>

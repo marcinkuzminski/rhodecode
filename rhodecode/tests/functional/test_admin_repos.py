@@ -1,17 +1,15 @@
 # -*- coding: utf-8 -*-
 
 import os
-import vcs
+from rhodecode.lib import vcs
 
 from rhodecode.model.db import Repository
 from rhodecode.tests import *
 
 class TestAdminReposController(TestController):
 
-
     def __make_repo(self):
         pass
-
 
     def test_index(self):
         self.log_user()
@@ -32,11 +30,10 @@ class TestAdminReposController(TestController):
                                                 'repo_group':'',
                                                 'description':description,
                                                 'private':private})
-
         self.checkSessionFlash(response, 'created repository %s' % (repo_name))
 
         #test if the repo was created in the database
-        new_repo = self.sa.query(Repository).filter(Repository.repo_name ==
+        new_repo = self.Session.query(Repository).filter(Repository.repo_name ==
                                                     repo_name).one()
 
         self.assertEqual(new_repo.repo_name, repo_name)
@@ -73,7 +70,7 @@ class TestAdminReposController(TestController):
                                'created repository %s' % (repo_name_unicode))
 
         #test if the repo was created in the database
-        new_repo = self.sa.query(Repository).filter(Repository.repo_name ==
+        new_repo = self.Session.query(Repository).filter(Repository.repo_name ==
                                                 repo_name_unicode).one()
 
         self.assertEqual(new_repo.repo_name, repo_name_unicode)
@@ -113,7 +110,7 @@ class TestAdminReposController(TestController):
         assert '''created repository %s''' % (repo_name) in response.session['flash'][0], 'No flash message about new repo'
 
         #test if the fork was created in the database
-        new_repo = self.sa.query(Repository).filter(Repository.repo_name == repo_name).one()
+        new_repo = self.Session.query(Repository).filter(Repository.repo_name == repo_name).one()
 
         assert new_repo.repo_name == repo_name, 'wrong name of repo name in db'
         assert new_repo.description == description, 'wrong description'
@@ -162,7 +159,7 @@ class TestAdminReposController(TestController):
                         response.session['flash'][0])
 
         #test if the repo was created in the database
-        new_repo = self.sa.query(Repository).filter(Repository.repo_name ==
+        new_repo = self.Session.query(Repository).filter(Repository.repo_name ==
                                                     repo_name).one()
 
         self.assertEqual(new_repo.repo_name, repo_name)
@@ -182,7 +179,7 @@ class TestAdminReposController(TestController):
         response.follow()
 
         #check if repo was deleted from db
-        deleted_repo = self.sa.query(Repository).filter(Repository.repo_name
+        deleted_repo = self.Session.query(Repository).filter(Repository.repo_name
                                                         == repo_name).scalar()
 
         self.assertEqual(deleted_repo, None)

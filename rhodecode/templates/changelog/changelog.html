@@ -11,11 +11,11 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
     &raquo;
     ${h.link_to(c.repo_name,h.url('summary_home',repo_name=c.repo_name))}
     &raquo;
-    ${_('Changelog')} - ${_('showing ')} ${c.size if c.size <= c.total_cs else c.total_cs} ${_('out of')} ${c.total_cs} ${_('revisions')}  
+    ${_('Changelog')} - ${_('showing ')} ${c.size if c.size <= c.total_cs else c.total_cs} ${_('out of')} ${c.total_cs} ${_('revisions')}
 </%def>
 
 <%def name="page_nav()">
-	${self.menu('changelog')}     
+	${self.menu('changelog')}
 </%def>
 
 <%def name="main()">
@@ -33,52 +33,65 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
 				<div id="graph_content">
 					<div class="container_header">
 				        ${h.form(h.url.current(),method='get')}
-				        <div class="info_box">
-				          ${h.submit('set',_('Show'),class_="ui-button-small")}
+				        <div class="info_box" style="float:left">
+				          ${h.submit('set',_('Show'),class_="ui-btn")}
 				          ${h.text('size',size=1,value=c.size)}
-				          <span class="rev">${_('revisions')}</span>
+				          ${_('revisions')}
 				        </div>
 				        ${h.end_form()}
 					<div id="rev_range_container" style="display:none"></div>
+                    <div style="float:right">${h.select('branch_filter',c.branch_name,c.branch_filters)}</div>
 					</div>
-					
+
 				%for cnt,cs in enumerate(c.pagination):
-					<div id="chg_${cnt+1}" class="container">
+					<div id="chg_${cnt+1}" class="container ${'tablerow%s' % (cnt%2)}">
 						<div class="left">
-							<div class="date">
+							<div>
 							${h.checkbox(cs.short_id,class_="changeset_range")}
-							<span>${_('commit')} ${cs.revision}: ${h.short_id(cs.raw_id)}@${cs.date}</span>
+							<span class="tooltip" title="${h.age(cs.date)}"><a href="${h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id)}"><span class="changeset_id">${cs.revision}:<span class="changeset_hash">${h.short_id(cs.raw_id)}</span></span></a></span>
 							</div>
 							<div class="author">
 								<div class="gravatar">
 									<img alt="gravatar" src="${h.gravatar_url(h.email(cs.author),16)}"/>
 								</div>
-								<div title="${h.email_or_none(cs.author)}" class="user">${h.person(cs.author)}</div>
-								##<span><a href="mailto:${h.email_or_none(cs.author)}">${h.email_or_none(cs.author)}</a></span><br/>
+								<div title="${cs.author}" class="user">${h.person(cs.author)}</div>
 							</div>
-							<div class="message">${h.link_to(h.wrap_paragraphs(cs.message),h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id))}</div>
-						</div>	
+                            <div class="date">${cs.date}</div>
+						</div>
+						<div class="mid">
+                            <div class="message">${h.urlify_commit(h.wrap_paragraphs(cs.message),c.repo_name,h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id))}</div>
+                            <div class="expand"><span class="expandtext">&darr; ${_('show more')} &darr;</span></div>
+						</div>
 						<div class="right">
 									<div id="${cs.raw_id}_changes_info" class="changes">
-                                        <span id="${cs.raw_id}" class="changed_total tooltip" title="${_('Affected number of files, click to show more details')}">${len(cs.affected_files)}</span>
-									</div>					
-										%if len(cs.parents)>1:
-										<div class="merge">
-											${_('merge')}<img alt="merge" src="${h.url('/images/icons/arrow_join.png')}"/>
-										</div>
-										%endif
-								   %if cs.parents:							
+                                        <div id="${cs.raw_id}"  style="float:right;" class="changed_total tooltip" title="${_('Affected number of files, click to show more details')}">${len(cs.affected_files)}</div>
+                                        <div class="comments-container">
+                                        %if len(c.comments.get(cs.raw_id,[])) > 0:
+                                            <div class="comments-cnt" title="${('comments')}">
+                                              <a href="${h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id,anchor='comment-%s' % c.comments[cs.raw_id][0].comment_id)}">
+                                               <div class="comments-cnt">${len(c.comments[cs.raw_id])}</div>
+                                               <img src="${h.url('/images/icons/comments.png')}">
+                                              </a>
+                                            </div>
+                                        %endif
+                                        </div>
+									</div>
+								   %if cs.parents:
 									%for p_cs in reversed(cs.parents):
-										<div class="parent">${_('Parent')} ${p_cs.revision}: ${h.link_to(h.short_id(p_cs.raw_id),
-											h.url('changeset_home',repo_name=c.repo_name,revision=p_cs.raw_id),title=p_cs.message)}
+										<div class="parent">${_('Parent')}
+											<span class="changeset_id">${p_cs.revision}:<span class="changeset_hash">${h.link_to(h.short_id(p_cs.raw_id),
+											h.url('changeset_home',repo_name=c.repo_name,revision=p_cs.raw_id),title=p_cs.message)}</span></span>
 										</div>
 									%endfor
-								   %else:	
-                                        <div class="parent">${_('No parents')}</div>   
-                                   %endif  
-                    									
+								   %else:
+                                        <div class="parent">${_('No parents')}</div>
+                                   %endif
+
 								<span class="logtags">
-									%if cs.branch:
+									%if len(cs.parents)>1:
+									<span class="merge">${_('merge')}</span>
+									%endif
+									%if h.is_hg(c.rhodecode_repo) and cs.branch:
 									<span class="branchtag" title="${'%s %s' % (_('branch'),cs.branch)}">
 									   ${h.link_to(cs.branch,h.url('files_home',repo_name=c.repo_name,revision=cs.raw_id))}</span>
 									%endif
@@ -86,26 +99,26 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
 										<span class="tagtag"  title="${'%s %s' % (_('tag'),tag)}">
 										${h.link_to(tag,h.url('files_home',repo_name=c.repo_name,revision=cs.raw_id))}</span>
 									%endfor
-								</span>																	
-						</div>				
+								</span>
+						</div>
 					</div>
-					
+
 				%endfor
 				<div class="pagination-wh pagination-left">
 					${c.pagination.pager('$link_previous ~2~ $link_next')}
-				</div>			
+				</div>
 				</div>
 			</div>
-			
+
 			<script type="text/javascript" src="${h.url('/js/graph.js')}"></script>
 			<script type="text/javascript">
 				YAHOO.util.Event.onDOMReady(function(){
-					
+
                     //Monitor range checkboxes and build a link to changesets
-                    //ranges 
+                    //ranges
                     var checkboxes = YUD.getElementsByClassName('changeset_range');
                     var url_tmpl = "${h.url('changeset_home',repo_name=c.repo_name,revision='__REVRANGE__')}";
-                    YUE.on(checkboxes,'click',function(e){      
+                    YUE.on(checkboxes,'click',function(e){
                         var checked_checkboxes = [];
                         for (pos in checkboxes){
                             if(checkboxes[pos].checked){
@@ -115,10 +128,10 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
                         if(checked_checkboxes.length>1){
                         	var rev_end = checked_checkboxes[0].name;
                         	var rev_start = checked_checkboxes[checked_checkboxes.length-1].name;
-                        	
+
                             var url = url_tmpl.replace('__REVRANGE__',
                             		rev_start+'...'+rev_end);
-                            
+
                         var link = "<a href="+url+">${_('Show selected changes __S -> __E')}</a>"
                         link = link.replace('__S',rev_start);
                         link = link.replace('__E',rev_end);
@@ -127,19 +140,60 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
                         }
                         else{
                         	YUD.setStyle('rev_range_container','display','none');
-                        	
+
                         }
-                    });					
-					
-                    //Fetch changeset details 
+                    });
+
+                    var msgs = YUQ('.message');
+                    // get first element height
+                    var el = YUQ('#graph_content .container')[0];
+                    var row_h = el.clientHeight;
+                    for(var i=0;i<msgs.length;i++){
+                    	var m = msgs[i];
+
+                    	var h = m.clientHeight;
+                    	var pad = YUD.getStyle(m,'padding');
+                    	if(h > row_h){
+                    		var offset = row_h - (h+12);
+                    		YUD.setStyle(m.nextElementSibling,'display','block');
+                    		YUD.setStyle(m.nextElementSibling,'margin-top',offset+'px');
+                    	};
+                    }
+                    YUE.on(YUQ('.expand'),'click',function(e){
+                    	var elem = e.currentTarget.parentNode.parentNode;
+                    	YUD.setStyle(e.currentTarget,'display','none');
+                    	YUD.setStyle(elem,'height','auto');
+
+                    	//redraw the graph, max_w and jsdata are global vars
+                        set_canvas(max_w);
+
+                        var r = new BranchRenderer();
+                        r.render(jsdata,max_w);
+
+                    })
+
+                    // Fetch changeset details
                     YUE.on(YUD.getElementsByClassName('changed_total'),'click',function(e){
                     	var id = e.currentTarget.id
                     	var url = "${h.url('changelog_details',repo_name=c.repo_name,cs='__CS__')}"
                     	var url = url.replace('__CS__',id);
                     	ypjax(url,id+'_changes_info',function(){tooltip_activate()});
                     });
-                    
-                    
+
+                    // change branch filter
+                    YUE.on(YUD.get('branch_filter'),'change',function(e){
+                    	var selected_branch = e.currentTarget.options[e.currentTarget.selectedIndex].value;
+                    	var url_main = "${h.url('changelog_home',repo_name=c.repo_name)}";
+                    	var url = "${h.url('changelog_home',repo_name=c.repo_name,branch='__BRANCH__')}";
+                    	var url = url.replace('__BRANCH__',selected_branch);
+                    	if(selected_branch != ''){
+                    		window.location = url;
+                    	}else{
+                    		window.location = url_main;
+                    	}
+
+                    });
+
 					function set_canvas(heads) {
 						var c = document.getElementById('graph_nodes');
 						var t = document.getElementById('graph_content');
@@ -153,7 +207,7 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
 					var heads = 1;
 					var max_heads = 0;
 					var jsdata = ${c.jsdata|n};
-					
+
 					for( var i=0;i<jsdata.length;i++){
 					    var m = Math.max.apply(Math, jsdata[i][1]);
 					    if (m>max_heads){
@@ -162,15 +216,15 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
 					}
 					var max_w = Math.max(100,max_heads*25);
 					set_canvas(max_w);
-					
+
 					var r = new BranchRenderer();
 					r.render(jsdata,max_w);
-					
+
 				});
 			</script>
 		%else:
 			${_('There are no changes yet')}
-		%endif  
+		%endif
     </div>
-</div>    
+</div>
 </%def>

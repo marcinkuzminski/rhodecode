@@ -1,0 +1,33 @@
+%if c.repo_bookmarks:
+   <div id="table_wrap" class="yui-skin-sam">
+    <table id="bookmarks_data">
+      <thead>
+    	<tr>
+            <th class="left">${_('Name')}</th>
+            <th class="left">${_('Date')}</th>
+            <th class="left">${_('Author')}</th>
+            <th class="left">${_('Revision')}</th>
+    	</tr>
+      </thead>
+		%for cnt,book in enumerate(c.repo_bookmarks.items()):
+		<tr class="parity${cnt%2}">
+            <td>
+                <span class="logbooks">
+                    <span class="bookbook">${h.link_to(book[0],
+                    h.url('files_home',repo_name=c.repo_name,revision=book[1].raw_id))}</span>
+                </span>
+            </td>
+            <td><span class="tooltip" title="${h.age(book[1].date)}">${book[1].date}</span></td>
+	        <td title="${book[1].author}">${h.person(book[1].author)}</td>
+	        <td>
+              <div>
+                  <pre><a href="${h.url('files_home',repo_name=c.repo_name,revision=book[1].raw_id)}">r${book[1].revision}:${h.short_id(book[1].raw_id)}</a></pre>
+              </div>
+            </td>
+		</tr>
+		%endfor
+    </table>
+    </div>
+%else:
+	${_('There are no bookmarks yet')}
+%endif

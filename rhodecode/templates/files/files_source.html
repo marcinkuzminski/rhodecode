@@ -1,62 +1,59 @@
 <dl>
-	<dt>${_('Revision')}</dt>
-	<dd>
-		${h.link_to("r%s:%s" % (c.files_list.last_changeset.revision,h.short_id(c.files_list.last_changeset.raw_id)),
-						h.url('changeset_home',repo_name=c.repo_name,revision=c.files_list.last_changeset.raw_id))} 
-	</dd>
-	<dt>${_('Size')}</dt>
-	<dd>${h.format_byte_size(c.files_list.size,binary=True)}</dd>
-	<dt>${_('Mimetype')}</dt>
-	<dd>${c.files_list.mimetype}</dd>
-	<dt>${_('Options')}</dt>
-	<dd>${h.link_to(_('show annotation'),
-			h.url('files_annotate_home',repo_name=c.repo_name,revision=c.changeset.raw_id,f_path=c.f_path))}
-		 / ${h.link_to(_('show as raw'),
-			h.url('files_raw_home',repo_name=c.repo_name,revision=c.changeset.raw_id,f_path=c.f_path))}			
-		 / ${h.link_to(_('download as raw'),
-			h.url('files_rawfile_home',repo_name=c.repo_name,revision=c.changeset.raw_id,f_path=c.f_path))}
-        % if h.HasRepoPermissionAny('repository.write','repository.admin')(c.repo_name):			
-         % if not c.files_list.is_binary:
-         / ${h.link_to(_('edit'),
-            h.url('files_edit_home',repo_name=c.repo_name,revision=c.changeset.raw_id,f_path=c.f_path))}
-         % endif
-        % endif			
-	</dd>
-	<dt>${_('History')}</dt>
+	<dt style="padding-top:10px;font-size:16px">${_('History')}</dt>
 	<dd>
 		<div>
 		${h.form(h.url('files_diff_home',repo_name=c.repo_name,f_path=c.f_path),method='get')}
-		${h.hidden('diff2',c.files_list.last_changeset.raw_id)}
-		${h.select('diff1',c.files_list.last_changeset.raw_id,c.file_history)}
-		${h.submit('diff','diff to revision',class_="ui-button-small")}
-		${h.submit('show_rev','show at revision',class_="ui-button-small")}
+		${h.hidden('diff2',c.file.last_changeset.raw_id)}
+		${h.select('diff1',c.file.last_changeset.raw_id,c.file_history)}
+		${h.submit('diff','diff to revision',class_="ui-btn")}
+		${h.submit('show_rev','show at revision',class_="ui-btn")}
 		${h.end_form()}
 		</div>
 	</dd>
-</dl>	
+</dl>
 
-	
 <div id="body" class="codeblock">
 	<div class="code-header">
-		<div class="revision">${c.files_list.name}@r${c.files_list.last_changeset.revision}:${h.short_id(c.files_list.last_changeset.raw_id)}</div>
-		<div class="commit">"${c.files_list.last_changeset.message}"</div>
+        <div class="stats">
+            <div class="left img"><img src="${h.url('/images/icons/file.png')}"/></div>
+            <div class="left item"><pre>${h.link_to("r%s:%s" % (c.file.last_changeset.revision,h.short_id(c.file.last_changeset.raw_id)),h.url('changeset_home',repo_name=c.repo_name,revision=c.file.last_changeset.raw_id))}</pre></div>
+            <div class="left item"><pre>${h.format_byte_size(c.file.size,binary=True)}</pre></div>
+            <div class="left item last"><pre>${c.file.mimetype}</pre></div>
+            <div class="buttons">
+              ${h.link_to(_('show annotation'),h.url('files_annotate_home',repo_name=c.repo_name,revision=c.file.last_changeset.raw_id,f_path=c.f_path),class_="ui-btn")}
+              ${h.link_to(_('show as raw'),h.url('files_raw_home',repo_name=c.repo_name,revision=c.file.last_changeset.raw_id,f_path=c.f_path),class_="ui-btn")}
+              ${h.link_to(_('download as raw'),h.url('files_rawfile_home',repo_name=c.repo_name,revision=c.file.last_changeset.raw_id,f_path=c.f_path),class_="ui-btn")}
+              % if h.HasRepoPermissionAny('repository.write','repository.admin')(c.repo_name):
+               % if not c.file.is_binary:
+                ${h.link_to(_('edit'),h.url('files_edit_home',repo_name=c.repo_name,revision=c.file.last_changeset.raw_id,f_path=c.f_path),class_="ui-btn")}
+               % endif
+              % endif
+            </div>
+        </div>
+        <div class="author">
+            <div class="gravatar">
+                <img alt="gravatar" src="${h.gravatar_url(h.email(c.file.last_changeset.author),16)}"/>
+            </div>
+            <div title="${c.file.last_changeset.author}" class="user">${h.person(c.file.last_changeset.author)}</div>
+        </div>
+		<div class="commit">${h.urlify_commit(c.file.last_changeset.message,c.repo_name)}</div>
 	</div>
 	<div class="code-body">
-	   %if c.files_list.is_binary:
-	       ${_('Binary file (%s)') % c.files_list.mimetype}
+	   %if c.file.is_binary:
+	       ${_('Binary file (%s)') % c.file.mimetype}
 	   %else:
-		% if c.files_list.size < c.cut_off_limit:
-			${h.pygmentize(c.files_list,linenos=True,anchorlinenos=True,lineanchors='L',cssclass="code-highlight")}
+		% if c.file.size < c.cut_off_limit:
+			${h.pygmentize(c.file,linenos=True,anchorlinenos=True,lineanchors='L',cssclass="code-highlight")}
 		%else:
 			${_('File is too big to display')} ${h.link_to(_('show as raw'),
-			h.url('files_raw_home',repo_name=c.repo_name,revision=c.changeset.raw_id,f_path=c.f_path))}
+			h.url('files_raw_home',repo_name=c.repo_name,revision=c.file.last_changeset.raw_id,f_path=c.f_path))}
 		%endif
        <script type="text/javascript">
            function highlight_lines(lines){
                for(pos in lines){
-                 YUD.setStyle('L'+lines[pos],'background-color','#FFFFBE');                       
+                 YUD.setStyle('L'+lines[pos],'background-color','#FFFFBE');
                }
-           }       
+           }
            page_highlights = location.href.substring(location.href.indexOf('#')+1).split('L');
            if (page_highlights.length == 2){
               highlight_ranges  = page_highlights[1].split(",");
@@ -71,26 +68,26 @@
                            for(var i=start;i<=end;i++){
                                h_lines.push(i);
                            }
-                       } 
+                       }
                    }
                    else{
                        h_lines.push(parseInt(highlight_ranges[pos]));
                    }
              }
            highlight_lines(h_lines);
-           
-           //remember original location 
+
+           //remember original location
            var old_hash  = location.href.substring(location.href.indexOf('#'));
-           
-           // this makes a jump to anchor moved by 3 posstions for padding 
+
+           // this makes a jump to anchor moved by 3 posstions for padding
            window.location.hash = '#L'+Math.max(parseInt(h_lines[0])-3,1);
-           
-           //sets old anchor 
+
+           //sets old anchor
            window.location.hash = old_hash;
-           
+
            }
        </script>
-     %endif		
+     %endif
 	</div>
 </div>
 
@@ -98,77 +95,10 @@
 YUE.onDOMReady(function(){
     YUE.on('show_rev','click',function(e){
     	YUE.preventDefault(e);
-        var cs = YAHOO.util.Dom.get('diff1').value;
+        var cs = YUD.get('diff1').value;
         var url = "${h.url('files_home',repo_name=c.repo_name,revision='__CS__',f_path=c.f_path)}".replace('__CS__',cs);
         window.location = url;
     });
-    
-    function getIdentNode(n){
-    	//iterate thru nodes untill matched interesting node !
-    	
-    	if (typeof n == 'undefined'){
-    		return -1
-    	}
-    	
-    	if(typeof n.id != "undefined" && n.id.match('L[0-9]+')){
-   			return n
-   		}
-    	else{
-    		return getIdentNode(n.parentNode);
-    	}
-    }
-    
-    function getSelectionLink() {
-        //get selection from start/to nodes    	
-        if (typeof window.getSelection != "undefined") {
-        	s = window.getSelection();
-
-           	from = getIdentNode(s.anchorNode);
-           	till = getIdentNode(s.focusNode);
-            
-            f_int = parseInt(from.id.replace('L',''));
-            t_int = parseInt(till.id.replace('L',''));
-            
-            if (f_int > t_int){
-            	//highlight from bottom 
-            	offset = -35;
-            	ranges = [t_int,f_int];
-            	
-            }
-            else{
-            	//highligth from top 
-            	offset = 35;
-            	ranges = [f_int,t_int];
-            }
-            
-            if (ranges[0] != ranges[1]){
-	            if(YUD.get('linktt') == null){
-	                hl_div = document.createElement('div');
-	                hl_div.id = 'linktt';
-	            }
-	            anchor = '#L'+ranges[0]+'-'+ranges[1];
-	            hl_div.innerHTML = '';
-	            l = document.createElement('a');
-	            l.href = location.href.substring(0,location.href.indexOf('#'))+anchor;
-	            l.innerHTML = "${_('Selection link')}"
-	            hl_div.appendChild(l);
-	            
-	            YUD.get('body').appendChild(hl_div);
-	            
-	            xy = YUD.getXY(till.id);
-	            
-	            YUD.addClass('linktt','yui-tt');
-	            YUD.setStyle('linktt','top',xy[1]+offset+'px');
-	            YUD.setStyle('linktt','left',xy[0]+'px');
-	            YUD.setStyle('linktt','visibility','visible');
-            }
-            else{
-            	YUD.setStyle('linktt','visibility','hidden');
-            }
-        }
-   }
-    
-    YUE.on('hlcode','mouseup',getSelectionLink)
-    
+    YUE.on('hlcode','mouseup',getSelectionLink("${_('Selection link')}"))
    });
 </script>

@@ -1,6 +1,7 @@
 syntax: glob
 *.pyc
 *.swp
+*.sqlite
 *.egg-info
 *.egg
 
@@ -12,6 +13,9 @@ syntax: regexp
 ^\.settings$
 ^\.project$
 ^\.pydevproject$
+^\.coverage$
 ^rhodecode\.db$
 ^test\.db$
-^repositories\.config$
+^RhodeCode\.egg-info$
+^rc\.ini$
+^fabfile.py

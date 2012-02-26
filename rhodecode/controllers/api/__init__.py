@@ -7,19 +7,19 @@
 
     :created_on: Aug 20, 2011
     :author: marcink
-    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>    
+    :copyright: (C) 2011-2012 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; version 2
 # of the License or (at your opinion) any later version of the license.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
@@ -62,7 +62,7 @@ def jsonrpc_error(message, code=None):
     Generate a Response object with a JSON-RPC error body
     """
     from pylons.controllers.util import Response
-    resp = Response(body=json.dumps(dict(result=None, error=message)),
+    resp = Response(body=json.dumps(dict(id=None, result=None, error=message)),
                     status=code,
                     content_type='application/json')
     return resp
@@ -100,7 +100,7 @@ class JSONRPCController(WSGIController):
         else:
             length = environ['CONTENT_LENGTH'] or 0
             length = int(environ['CONTENT_LENGTH'])
-            log.debug('Content-Length: %s', length)
+            log.debug('Content-Length: %s' % length)
 
         if length == 0:
             log.debug("Content-Length is 0")
@@ -118,11 +118,13 @@ class JSONRPCController(WSGIController):
         # check AUTH based on API KEY
         try:
             self._req_api_key = json_body['api_key']
+            self._req_id = json_body['id']
             self._req_method = json_body['method']
             self._request_params = json_body['args']
-            log.debug('method: %s, params: %s',
-                      self._req_method,
-                      self._request_params)
+            log.debug(
+                'method: %s, params: %s' % (self._req_method,
+                                            self._request_params)
+            )
         except KeyError, e:
             return jsonrpc_error(message='Incorrect JSON query missing %s' % e)
 
@@ -225,21 +227,26 @@ class JSONRPCController(WSGIController):
         if self._error is not None:
             raw_response = None
 
-        response = dict(result=raw_response,
+        response = dict(id=self._req_id, result=raw_response,
                         error=self._error)
 
         try:
             return json.dumps(response)
         except TypeError, e:
-            log.debug('Error encoding response: %s', e)
-            return json.dumps(dict(result=None,
-                                   error="Error encoding response"))
+            log.debug('Error encoding response: %s' % e)
+            return json.dumps(
+                dict(
+                    self._req_id,
+                    result=None,
+                    error="Error encoding response"
+                )
+            )
 
     def _find_method(self):
         """
         Return method named by `self._req_method` in controller if able
         """
-        log.debug('Trying to find JSON-RPC method: %s', self._req_method)
+        log.debug('Trying to find JSON-RPC method: %s' % self._req_method)
         if self._req_method.startswith('_'):
             raise AttributeError("Method not allowed")
 
@@ -253,4 +260,3 @@ class JSONRPCController(WSGIController):
             return func
         else:
             raise AttributeError("No such method: %s" % self._req_method)
-

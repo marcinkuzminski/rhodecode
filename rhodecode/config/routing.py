@@ -8,7 +8,6 @@ refer to the routes manual at http://routes.groovie.org/docs/
 from __future__ import with_statement
 from routes import Mapper
 
-
 # prefix for non repository related links needs to be prefixed with `/`
 ADMIN_PREFIX = '/_admin'
 
@@ -26,25 +25,33 @@ def make_map(config):
     def check_repo(environ, match_dict):
         """
         check for valid repository for proper 404 handling
-        
+
         :param environ:
         :param match_dict:
         """
-
+        from rhodecode.model.db import Repository
         repo_name = match_dict.get('repo_name')
+
+        try:
+            by_id = repo_name.split('_')
+            if len(by_id) == 2 and by_id[1].isdigit():
+                repo_name = Repository.get(by_id[1]).repo_name
+                match_dict['repo_name'] = repo_name
+        except:
+            pass
+
         return is_valid_repo(repo_name, config['base_path'])
 
     def check_group(environ, match_dict):
         """
         check for valid repositories group for proper 404 handling
-        
+
         :param environ:
         :param match_dict:
         """
         repos_group_name = match_dict.get('group_name')
 
         return is_valid_repos_group(repos_group_name, config['base_path'])
-
 
     def check_int(environ, match_dict):
         return match_dict.get('id').isdigit()
@@ -62,8 +69,13 @@ def make_map(config):
     rmap.connect('home', '/', controller='home', action='index')
     rmap.connect('repo_switcher', '/repos', controller='home',
                  action='repo_switcher')
+    rmap.connect('branch_tag_switcher', '/branches-tags/{repo_name:.*}',
+                 controller='home', action='branch_tag_switcher')
     rmap.connect('bugtracker',
                  "http://bitbucket.org/marcinkuzminski/rhodecode/issues",
+                 _static=True)
+    rmap.connect('rst_help',
+                 "http://docutils.sourceforge.net/docs/user/rst/quickref.html",
                  _static=True)
     rmap.connect('rhodecode_official', "http://rhodecode.org", _static=True)
 
@@ -101,8 +113,9 @@ def make_map(config):
                                             function=check_repo))
         #ajax delete repo perm user
         m.connect('delete_repo_user', "/repos_delete_user/{repo_name:.*}",
-             action="delete_perm_user", conditions=dict(method=["DELETE"],
-                                                        function=check_repo))
+             action="delete_perm_user",
+             conditions=dict(method=["DELETE"], function=check_repo))
+
         #ajax delete repo perm users_group
         m.connect('delete_repo_users_group',
                   "/repos_delete_users_group/{repo_name:.*}",
@@ -111,18 +124,20 @@ def make_map(config):
 
         #settings actions
         m.connect('repo_stats', "/repos_stats/{repo_name:.*}",
-             action="repo_stats", conditions=dict(method=["DELETE"],
-                                                        function=check_repo))
+                  action="repo_stats", conditions=dict(method=["DELETE"],
+                                                       function=check_repo))
         m.connect('repo_cache', "/repos_cache/{repo_name:.*}",
-             action="repo_cache", conditions=dict(method=["DELETE"],
-                                                        function=check_repo))
-        m.connect('repo_public_journal',
-                  "/repos_public_journal/{repo_name:.*}",
+                  action="repo_cache", conditions=dict(method=["DELETE"],
+                                                       function=check_repo))
+        m.connect('repo_public_journal', "/repos_public_journal/{repo_name:.*}",
                   action="repo_public_journal", conditions=dict(method=["PUT"],
-                  function=check_repo))
-        m.connect('repo_pull', "/repo_pull/{repo_name:.*}",
-             action="repo_pull", conditions=dict(method=["PUT"],
                                                         function=check_repo))
+        m.connect('repo_pull', "/repo_pull/{repo_name:.*}",
+                  action="repo_pull", conditions=dict(method=["PUT"],
+                                                      function=check_repo))
+        m.connect('repo_as_fork', "/repo_as_fork/{repo_name:.*}",
+                  action="repo_as_fork", conditions=dict(method=["PUT"],
+                                                      function=check_repo))
 
     with rmap.submapper(path_prefix=ADMIN_PREFIX,
                         controller='admin/repos_groups') as m:
@@ -155,6 +170,17 @@ def make_map(config):
         m.connect("formatted_repos_group", "/repos_groups/{id}.{format}",
                   action="show", conditions=dict(method=["GET"],
                                                  function=check_int))
+        # ajax delete repos group perm user
+        m.connect('delete_repos_group_user_perm',
+                  "/delete_repos_group_user_perm/{group_name:.*}",
+             action="delete_repos_group_user_perm",
+             conditions=dict(method=["DELETE"], function=check_group))
+
+        # ajax delete repos group perm users_group
+        m.connect('delete_repos_group_users_group_perm',
+                  "/delete_repos_group_users_group_perm/{group_name:.*}",
+                  action="delete_repos_group_users_group_perm",
+                  conditions=dict(method=["DELETE"], function=check_group))
 
     #ADMIN USER REST ROUTES
     with rmap.submapper(path_prefix=ADMIN_PREFIX,
@@ -267,6 +293,34 @@ def make_map(config):
         m.connect("admin_settings_create_repository", "/create_repository",
                   action="create_repository", conditions=dict(method=["GET"]))
 
+    #NOTIFICATION REST ROUTES
+    with rmap.submapper(path_prefix=ADMIN_PREFIX,
+                        controller='admin/notifications') as m:
+        m.connect("notifications", "/notifications",
+                  action="create", conditions=dict(method=["POST"]))
+        m.connect("notifications", "/notifications",
+                  action="index", conditions=dict(method=["GET"]))
+        m.connect("notifications_mark_all_read", "/notifications/mark_all_read",
+                  action="mark_all_read", conditions=dict(method=["GET"]))
+        m.connect("formatted_notifications", "/notifications.{format}",
+                  action="index", conditions=dict(method=["GET"]))
+        m.connect("new_notification", "/notifications/new",
+                  action="new", conditions=dict(method=["GET"]))
+        m.connect("formatted_new_notification", "/notifications/new.{format}",
+                  action="new", conditions=dict(method=["GET"]))
+        m.connect("/notification/{notification_id}",
+                  action="update", conditions=dict(method=["PUT"]))
+        m.connect("/notification/{notification_id}",
+                  action="delete", conditions=dict(method=["DELETE"]))
+        m.connect("edit_notification", "/notification/{notification_id}/edit",
+                  action="edit", conditions=dict(method=["GET"]))
+        m.connect("formatted_edit_notification",
+                  "/notification/{notification_id}.{format}/edit",
+                  action="edit", conditions=dict(method=["GET"]))
+        m.connect("notification", "/notification/{notification_id}",
+                  action="show", conditions=dict(method=["GET"]))
+        m.connect("formatted_notification", "/notifications/{notification_id}.{format}",
+                  action="show", conditions=dict(method=["GET"]))
 
     #ADMIN MAIN PAGES
     with rmap.submapper(path_prefix=ADMIN_PREFIX,
@@ -276,12 +330,11 @@ def make_map(config):
                   action='add_repo')
 
     #==========================================================================
-    # API V1
+    # API V2
     #==========================================================================
     with rmap.submapper(path_prefix=ADMIN_PREFIX,
                         controller='api/api') as m:
         m.connect('api', '/api')
-
 
     #USER JOURNAL
     rmap.connect('journal', '%s/journal' % ADMIN_PREFIX, controller='journal')
@@ -344,6 +397,16 @@ def make_map(config):
                 controller='changeset', revision='tip',
                 conditions=dict(function=check_repo))
 
+    rmap.connect('changeset_comment',
+                 '/{repo_name:.*}/changeset/{revision}/comment',
+                controller='changeset', revision='tip', action='comment',
+                conditions=dict(function=check_repo))
+
+    rmap.connect('changeset_comment_delete',
+                 '/{repo_name:.*}/changeset/comment/{comment_id}/delete',
+                controller='changeset', action='delete_comment',
+                conditions=dict(function=check_repo, method=["DELETE"]))
+
     rmap.connect('raw_changeset_home',
                  '/{repo_name:.*}/raw-changeset/{revision}',
                  controller='changeset', action='raw_changeset',
@@ -360,6 +423,9 @@ def make_map(config):
 
     rmap.connect('tags_home', '/{repo_name:.*}/tags',
                 controller='tags', conditions=dict(function=check_repo))
+
+    rmap.connect('bookmarks_home', '/{repo_name:.*}/bookmarks',
+                controller='bookmarks', conditions=dict(function=check_repo))
 
     rmap.connect('changelog_home', '/{repo_name:.*}/changelog',
                 controller='changelog', conditions=dict(function=check_repo))
@@ -423,19 +489,19 @@ def make_map(config):
                 conditions=dict(function=check_repo))
 
     rmap.connect('repo_fork_create_home', '/{repo_name:.*}/fork',
-                controller='settings', action='fork_create',
+                controller='forks', action='fork_create',
                 conditions=dict(function=check_repo, method=["POST"]))
 
     rmap.connect('repo_fork_home', '/{repo_name:.*}/fork',
-                controller='settings', action='fork',
+                controller='forks', action='fork',
                 conditions=dict(function=check_repo))
-
-    rmap.connect('repo_followers_home', '/{repo_name:.*}/followers',
-                 controller='followers', action='followers',
-                 conditions=dict(function=check_repo))
 
     rmap.connect('repo_forks_home', '/{repo_name:.*}/forks',
                  controller='forks', action='forks',
+                 conditions=dict(function=check_repo))
+
+    rmap.connect('repo_followers_home', '/{repo_name:.*}/followers',
+                 controller='followers', action='followers',
                  conditions=dict(function=check_repo))
 
     return rmap

@@ -7,7 +7,7 @@
 
     :created_on: Jan 26, 2010
     :author: marcink
-    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
+    :copyright: (C) 2010-2012 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software: you can redistribute it and/or modify
@@ -43,10 +43,10 @@ from rhodecode.model.scm import ScmModel
 from rhodecode.lib import safe_unicode
 from rhodecode.lib.indexers import INDEX_EXTENSIONS, SCHEMA, IDX_NAME
 
-from vcs.exceptions import ChangesetError, RepositoryError
+from rhodecode.lib.vcs.exceptions import ChangesetError, RepositoryError, \
+    NodeDoesNotExistError
 
 from whoosh.index import create_in, open_dir
-
 
 
 log = logging.getLogger('whooshIndexer')
@@ -67,12 +67,13 @@ ch.setFormatter(formatter)
 # add ch to logger
 log.addHandler(ch)
 
+
 class WhooshIndexingDaemon(object):
     """
     Daemon for atomic jobs
     """
 
-    def __init__(self, indexname='HG_INDEX', index_location=None,
+    def __init__(self, indexname=IDX_NAME, index_location=None,
                  repo_location=None, sa=None, repo_list=None):
         self.indexname = indexname
 
@@ -93,7 +94,6 @@ class WhooshIndexingDaemon(object):
                     filtered_repo_paths[repo_name] = repo
 
             self.repo_paths = filtered_repo_paths
-
 
         self.initial = False
         if not os.path.isdir(self.index_location):
@@ -154,7 +154,6 @@ class WhooshIndexingDaemon(object):
                         modtime=self.get_node_mtime(node),
                         extension=node.extension)
 
-
     def build_index(self):
         if os.path.exists(self.index_location):
             log.debug('removing previous index')
@@ -175,7 +174,6 @@ class WhooshIndexingDaemon(object):
         log.debug('>> COMMITING CHANGES <<')
         writer.commit(merge=True)
         log.debug('>>> FINISHED BUILDING INDEX <<<')
-
 
     def update_index(self):
         log.debug('STARTING INCREMENTAL INDEXING UPDATE')
@@ -198,7 +196,7 @@ class WhooshIndexingDaemon(object):
 
             try:
                 node = self.get_node(repo, indexed_path)
-            except ChangesetError:
+            except (ChangesetError, NodeDoesNotExistError):
                 # This file was deleted since it was indexed
                 log.debug('removing from index %s' % indexed_path)
                 writer.delete_by_term('path', indexed_path)

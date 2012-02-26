@@ -7,7 +7,7 @@
 
     :created_on: Jan 25, 2011
     :author: marcink
-    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
+    :copyright: (C) 2010-2012 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software: you can redistribute it and/or modify
@@ -33,12 +33,15 @@ from pylons.controllers.util import abort, redirect
 from pylons.i18n.translation import _
 
 from rhodecode.lib.exceptions import UsersGroupsAssignedException
-from rhodecode.lib import helpers as h
+from rhodecode.lib import helpers as h, safe_unicode
 from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator
 from rhodecode.lib.base import BaseController, render
 
+from rhodecode.model.users_group import UsersGroupModel
+
 from rhodecode.model.db import User, UsersGroup, Permission, UsersGroupToPerm
-from rhodecode.model.forms import UserForm, UsersGroupForm
+from rhodecode.model.forms import UsersGroupForm
+from rhodecode.model.meta import Session
 
 log = logging.getLogger(__name__)
 
@@ -70,10 +73,12 @@ class UsersGroupsController(BaseController):
         users_group_form = UsersGroupForm()()
         try:
             form_result = users_group_form.to_python(dict(request.POST))
-            UsersGroup.create(form_result)
+            UsersGroupModel().create(name=form_result['users_group_name'],
+                                     active=form_result['users_group_active'])
             h.flash(_('created users group %s') \
                     % form_result['users_group_name'], category='success')
             #action_logger(self.rhodecode_user, 'new_user', '', '', self.sa)
+            Session.commit()
         except formencode.Invalid, errors:
             return htmlfill.render(
                 render('admin/users_groups/users_group_add.html'),
@@ -103,29 +108,33 @@ class UsersGroupsController(BaseController):
         # url('users_group', id=ID)
 
         c.users_group = UsersGroup.get(id)
-        c.group_members = [(x.user_id, x.user.username) for x in
-                           c.users_group.members]
+        c.group_members_obj = [x.user for x in c.users_group.members]
+        c.group_members = [(x.user_id, x.username) for x in
+                           c.group_members_obj]
 
         c.available_members = [(x.user_id, x.username) for x in
                                self.sa.query(User).all()]
+
+        available_members = [safe_unicode(x[0]) for x in c.available_members]
+
         users_group_form = UsersGroupForm(edit=True,
                                           old_data=c.users_group.get_dict(),
-                                          available_members=[str(x[0]) for x
-                                                in c.available_members])()
+                                          available_members=available_members)()
 
         try:
             form_result = users_group_form.to_python(request.POST)
-            UsersGroup.update(id, form_result)
+            UsersGroupModel().update(c.users_group, form_result)
             h.flash(_('updated users group %s') \
                         % form_result['users_group_name'],
                     category='success')
             #action_logger(self.rhodecode_user, 'new_user', '', '', self.sa)
+            Session.commit()
         except formencode.Invalid, errors:
             e = errors.error_dict or {}
 
             perm = Permission.get_by_key('hg.create.repository')
             e.update({'create_repo_perm':
-                         UsersGroupToPerm.has_perm(id, perm)})
+                         UsersGroupModel().has_perm(id, perm)})
 
             return htmlfill.render(
                 render('admin/users_groups/users_group_edit.html'),
@@ -150,8 +159,9 @@ class UsersGroupsController(BaseController):
         # url('users_group', id=ID)
 
         try:
-            UsersGroup.delete(id)
+            UsersGroupModel().delete(id)
             h.flash(_('successfully deleted users group'), category='success')
+            Session.commit()
         except UsersGroupsAssignedException, e:
             h.flash(e, category='error')
         except Exception:
@@ -172,14 +182,15 @@ class UsersGroupsController(BaseController):
             return redirect(url('users_groups'))
 
         c.users_group.permissions = {}
-        c.group_members = [(x.user_id, x.user.username) for x in
-                           c.users_group.members]
+        c.group_members_obj = [x.user for x in c.users_group.members]
+        c.group_members = [(x.user_id, x.username) for x in
+                           c.group_members_obj]
         c.available_members = [(x.user_id, x.username) for x in
                                self.sa.query(User).all()]
         defaults = c.users_group.get_dict()
         perm = Permission.get_by_key('hg.create.repository')
         defaults.update({'create_repo_perm':
-                         UsersGroupToPerm.has_perm(id, perm)})
+                         UsersGroupModel().has_perm(c.users_group, perm)})
         return htmlfill.render(
             render('admin/users_groups/users_group_edit.html'),
             defaults=defaults,
@@ -195,20 +206,21 @@ class UsersGroupsController(BaseController):
 
         if grant_perm:
             perm = Permission.get_by_key('hg.create.none')
-            UsersGroupToPerm.revoke_perm(id, perm)
+            UsersGroupModel().revoke_perm(id, perm)
 
             perm = Permission.get_by_key('hg.create.repository')
-            UsersGroupToPerm.grant_perm(id, perm)
+            UsersGroupModel().grant_perm(id, perm)
             h.flash(_("Granted 'repository create' permission to user"),
                     category='success')
 
+            Session.commit()
         else:
             perm = Permission.get_by_key('hg.create.repository')
-            UsersGroupToPerm.revoke_perm(id, perm)
+            UsersGroupModel().revoke_perm(id, perm)
 
             perm = Permission.get_by_key('hg.create.none')
-            UsersGroupToPerm.grant_perm(id, perm)
+            UsersGroupModel().grant_perm(id, perm)
             h.flash(_("Revoked 'repository create' permission to user"),
                     category='success')
-
+            Session.commit()
         return redirect(url('edit_users_group', id=id))

@@ -11,11 +11,8 @@ from sqlalchemy.databases import sqlite as sa_base
 from rhodecode.lib.dbmigrate.migrate import exceptions
 from rhodecode.lib.dbmigrate.migrate.changeset import ansisql, SQLA_06
 
+SQLiteSchemaGenerator = sa_base.SQLiteDDLCompiler
 
-if not SQLA_06:
-    SQLiteSchemaGenerator = sa_base.SQLiteSchemaGenerator
-else:
-    SQLiteSchemaGenerator = sa_base.SQLiteDDLCompiler
 
 class SQLiteCommon(object):
 
@@ -39,7 +36,7 @@ class SQLiteHelper(SQLiteCommon):
 
         insertion_string = self._modify_table(table, column, delta)
 
-        table.create()
+        table.create(bind=self.connection)
         self.append(insertion_string % {'table_name': table_name})
         self.execute()
         self.append('DROP TABLE migration_tmp')

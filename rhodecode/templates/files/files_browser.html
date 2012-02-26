@@ -10,12 +10,12 @@
 		<div class="browser-nav">
 			${h.form(h.url.current())}
 			<div class="info_box">
-	          <span class="rev">${_('view')}@rev</span> 
-	          <a class="ui-button-small" href="${c.url_prev}" title="${_('previous revision')}">&laquo;</a>
+	          <span class="rev">${_('view')}@rev</span>
+	          <a class="ui-btn" href="${c.url_prev}" title="${_('previous revision')}">&laquo;</a>
 	          ${h.text('at_rev',value=c.changeset.revision,size=5)}
-	          <a class="ui-button-small" href="${c.url_next}" title="${_('next revision')}">&raquo;</a>
-	          ## ${h.submit('view',_('view'),class_="ui-button-small")}
-		    </div>           
+	          <a class="ui-btn" href="${c.url_next}" title="${_('next revision')}">&raquo;</a>
+	          ## ${h.submit('view',_('view'),class_="ui-btn")}
+		    </div>
 			${h.end_form()}
 		</div>
 	    <div class="browser-branch">
@@ -24,136 +24,22 @@
 	    </div>
         <div class="browser-search">
               <div id="search_activate_id" class="search_activate">
-                  <a class="ui-button-small" id="filter_activate" href="#">${_('search file list')}</a>
+                  <a class="ui-btn" id="filter_activate" href="#">${_('search file list')}</a>
               </div>
-              % if h.HasRepoPermissionAny('repository.write','repository.admin')(c.repo_name):            
+              % if h.HasRepoPermissionAny('repository.write','repository.admin')(c.repo_name):
                     <div id="add_node_id" class="add_node">
-                        <a class="ui-button-small" href="${h.url('files_add_home',repo_name=c.repo_name,revision=c.changeset.raw_id,f_path=c.f_path)}">${_('add new file')}</a>
+                        <a class="ui-btn" href="${h.url('files_add_home',repo_name=c.repo_name,revision=c.changeset.raw_id,f_path=c.f_path)}">${_('add new file')}</a>
                     </div>
-              % endif               
+              % endif
         <div>
             <div id="node_filter_box_loading" style="display:none">${_('Loading file list...')}</div>
             <div id="node_filter_box" style="display:none">
-            ${h.files_breadcrumbs(c.repo_name,c.changeset.raw_id,c.files_list.path)}/<input type="text" value="type to search..." name="filter" size="25" id="node_filter" autocomplete="off">
-            
-            <script type="text/javascript">
-            
-            YUE.on('stay_at_branch','click',function(e){
-                if(e.target.checked){
-                    var uri = "${h.url.current(branch='__BRANCH__')}"
-                    uri = uri.replace('__BRANCH__',e.target.value);
-                    window.location = uri;
-                }
-                else{
-                    window.location = "${h.url.current()}";
-                }
-                
-            })            
-            
-            var n_filter = YUD.get('node_filter');
-            var F = YAHOO.namespace('node_filter');
-            
-            var url = '${h.url("files_nodelist_home",repo_name="__REPO__",revision="__REVISION__",f_path="__FPATH__")}';
-            var node_url = '${h.url("files_home",repo_name="__REPO__",revision="__REVISION__",f_path="__FPATH__")}';
-            
-            url  = url.replace('__REPO__','${c.repo_name}');
-            url  = url.replace('__REVISION__','${c.changeset.raw_id}');
-            url  = url.replace('__FPATH__','${c.files_list.path}');
-
-            node_url  = node_url.replace('__REPO__','${c.repo_name}');
-            node_url  = node_url.replace('__REVISION__','${c.changeset.raw_id}');
-            
-            
-            F.filterTimeout = null;
-            var nodes = null;
-            
-            
-            F.initFilter = function(){
-              YUD.setStyle('node_filter_box_loading','display','');
-              YUD.setStyle('search_activate_id','display','none');
-              YUD.setStyle('add_node_id','display','none');
-              YUC.initHeader('X-PARTIAL-XHR',true);
-              YUC.asyncRequest('GET',url,{
-                  success:function(o){
-                  	nodes = JSON.parse(o.responseText);
-                  	YUD.setStyle('node_filter_box_loading','display','none');
-                  	YUD.setStyle('node_filter_box','display','');
-                  },
-                  failure:function(o){
-                      console.log('failed to load');
-                  }
-              },null);            
-            }
-            
-            F.updateFilter  = function(e) {
-            	
-            	return function(){
-                    // Reset timeout 
-                    F.filterTimeout = null;
-                    var query = e.target.value;
-                    var match = [];
-                    var matches = 0;
-                    var matches_max = 20;
-                    if (query != ""){
-                        for(var i=0;i<nodes.length;i++){
-                            var pos = nodes[i].toLowerCase().indexOf(query)
-                            if(query && pos != -1){
-                                
-                                matches++
-                                //show only certain amount to not kill browser 
-                                if (matches > matches_max){
-                                    break;
-                                }
-                                
-                                var n = nodes[i];
-                                var n_hl = n.substring(0,pos)
-                                  +"<b>{0}</b>".format(n.substring(pos,pos+query.length))
-                                  +n.substring(pos+query.length)                    
-                                match.push('<tr><td><a class="browser-file" href="{0}">{1}</a></td><td colspan="5"></td></tr>'.format(node_url.replace('__FPATH__',n),n_hl));
-                            }
-                            if(match.length >= matches_max){
-                                match.push('<tr><td>{0}</td><td colspan="5"></td></tr>'.format("${_('search truncated')}"));
-                            }
-                            
-                        }                    	
-                    }
-                    
-                    if(query != ""){
-                        YUD.setStyle('tbody','display','none');
-                        YUD.setStyle('tbody_filtered','display','');
-                        
-                        if (match.length==0){
-                          match.push('<tr><td>{0}</td><td colspan="5"></td></tr>'.format("${_('no matching files')}"));
-                        }                        	
-                        
-                    	YUD.get('tbody_filtered').innerHTML = match.join("");	
-                    }
-                    else{
-                    	YUD.setStyle('tbody','display','');
-                    	YUD.setStyle('tbody_filtered','display','none');
-                    }
-                    
-            	}
-            }
-            
-            
-            YUE.on(YUD.get('filter_activate'),'click',function(){
-                F.initFilter();
-            })
-            YUE.on(n_filter,'click',function(){
-                n_filter.value = '';
-             });
-            YUE.on(n_filter,'keyup',function(e){
-                clearTimeout(F.filterTimeout); 
-                F.filterTimeout = setTimeout(F.updateFilter(e),600);
-            });            
-            </script>
-            
-            </div>        
+            ${h.files_breadcrumbs(c.repo_name,c.changeset.raw_id,c.file.path)}/<input class="init" type="text" value="type to search..." name="filter" size="25" id="node_filter" autocomplete="off">
+            </div>
         </div>
-        </div>      
+        </div>
     </div>
-    
+
 	<div class="browser-body">
 		<table class="code-browser">
 		         <thead>
@@ -166,12 +52,12 @@
 		                 <th>${_('Last commiter')}</th>
 		             </tr>
 		         </thead>
-                
+
                 <tbody id="tbody">
-          		%if c.files_list.parent:
+          		%if c.file.parent:
          		<tr class="parity0">
-	          		<td>		          		
-	          			${h.link_to('..',h.url('files_home',repo_name=c.repo_name,revision=c.changeset.raw_id,f_path=c.files_list.parent.path),class_="browser-dir")}
+	          		<td>
+	          			${h.link_to('..',h.url('files_home',repo_name=c.repo_name,revision=c.changeset.raw_id,f_path=c.file.parent.path),class_="browser-dir ypjax-link")}
 	          		</td>
 	          		<td></td>
 	          		<td></td>
@@ -180,16 +66,16 @@
 	          		<td></td>
 				</tr>
           		%endif
-		         	
-		    %for cnt,node in enumerate(c.files_list):
+
+		    %for cnt,node in enumerate(c.file):
 				<tr class="parity${cnt%2}">
 		             <td>
-						${h.link_to(node.name,h.url('files_home',repo_name=c.repo_name,revision=c.changeset.raw_id,f_path=h.safe_unicode(node.path)),class_=file_class(node))}
+						${h.link_to(node.name,h.url('files_home',repo_name=c.repo_name,revision=c.changeset.raw_id,f_path=h.safe_unicode(node.path)),class_=file_class(node)+" ypjax-link")}
 		             </td>
 		             <td>
 		             %if node.is_file():
 		             	${h.format_byte_size(node.size,binary=True)}
-		             %endif	
+		             %endif
 		             </td>
 		             <td>
 		              %if node.is_file():
@@ -198,8 +84,9 @@
 		             </td>
 		             <td>
 		             	%if node.is_file():
-		             		<span class="tooltip" title="${node.last_changeset.raw_id}">
-		             		${'r%s:%s' % (node.last_changeset.revision,node.last_changeset.short_id)}</span>
+		             		<div class="tooltip" title="${node.last_changeset.message}">
+		             		<pre>${'r%s:%s' % (node.last_changeset.revision,node.last_changeset.short_id)}</pre>
+                            </div>
 		             	%endif
 		             </td>
 		             <td>
@@ -210,14 +97,16 @@
 		             </td>
 		             <td>
 		             	%if node.is_file():
-		             		${node.last_changeset.author}
-		             	%endif                    
+		             		<span title="${node.last_changeset.author}">
+                            ${h.person(node.last_changeset.author)}
+                            </span>
+		             	%endif
 		             </td>
 				</tr>
 			%endfor
                 </tbody>
                 <tbody id="tbody_filtered" style="display:none">
-                </tbody>                
+                </tbody>
 		</table>
 	</div>
 </div>

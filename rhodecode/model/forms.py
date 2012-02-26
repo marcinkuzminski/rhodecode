@@ -36,28 +36,33 @@ from rhodecode.config.routing import ADMIN_PREFIX
 from rhodecode.lib.utils import repo_name_slug
 from rhodecode.lib.auth import authenticate, get_crypt_password
 from rhodecode.lib.exceptions import LdapImportError
-from rhodecode.model.user import UserModel
-from rhodecode.model.repo import RepoModel
-from rhodecode.model.db import User, UsersGroup, Group, Repository
+from rhodecode.model.db import User, UsersGroup, RepoGroup, Repository
 from rhodecode import BACKENDS
 
 log = logging.getLogger(__name__)
+
 
 #this is needed to translate the messages using _() in validators
 class State_obj(object):
     _ = staticmethod(_)
 
+
 #==============================================================================
 # VALIDATORS
 #==============================================================================
 class ValidAuthToken(formencode.validators.FancyValidator):
-    messages = {'invalid_token':_('Token mismatch')}
+    messages = {'invalid_token': _('Token mismatch')}
 
     def validate_python(self, value, state):
 
         if value != authentication_token():
-            raise formencode.Invalid(self.message('invalid_token', state,
-                                            search_number=value), value, state)
+            raise formencode.Invalid(
+                self.message('invalid_token',
+                             state, search_number=value),
+                value,
+                state
+            )
+
 
 def ValidUsername(edit, old_data):
     class _ValidUsername(formencode.validators.FancyValidator):
@@ -68,7 +73,7 @@ def ValidUsername(edit, old_data):
             #check if user is unique
             old_un = None
             if edit:
-                old_un = UserModel().get(old_data.get('user_id')).username
+                old_un = User.get(old_data.get('user_id')).username
 
             if old_un != value or not edit:
                 if User.get_by_username(value, case_insensitive=True):
@@ -76,11 +81,13 @@ def ValidUsername(edit, old_data):
                                                'exists') , value, state)
 
             if re.match(r'^[a-zA-Z0-9]{1}[a-zA-Z0-9\-\_\.]+$', value) is None:
-                raise formencode.Invalid(_('Username may only contain '
-                                           'alphanumeric characters '
-                                           'underscores, periods or dashes '
-                                           'and must begin with alphanumeric '
-                                           'character'), value, state)
+                raise formencode.Invalid(
+                    _('Username may only contain alphanumeric characters '
+                      'underscores, periods or dashes and must begin with '
+                      'alphanumeric character'),
+                    value,
+                    state
+                )
 
     return _ValidUsername
 
@@ -102,16 +109,17 @@ def ValidUsersGroup(edit, old_data):
                 if UsersGroup.get_by_group_name(value, cache=False,
                                                case_insensitive=True):
                     raise formencode.Invalid(_('This users group '
-                                               'already exists') , value,
+                                               'already exists'), value,
                                              state)
 
-
             if re.match(r'^[a-zA-Z0-9]{1}[a-zA-Z0-9\-\_\.]+$', value) is None:
-                raise formencode.Invalid(_('Group name may only contain '
-                                           'alphanumeric characters '
-                                           'underscores, periods or dashes '
-                                           'and must begin with alphanumeric '
-                                           'character'), value, state)
+                raise formencode.Invalid(
+                    _('RepoGroup name may only contain  alphanumeric characters '
+                      'underscores, periods or dashes and must begin with '
+                      'alphanumeric character'),
+                    value,
+                    state
+                )
 
     return _ValidUsersGroup
 
@@ -141,15 +149,14 @@ def ValidReposGroup(edit, old_data):
 
             old_gname = None
             if edit:
-                old_gname = Group.get(
-                            old_data.get('group_id')).group_name
+                old_gname = RepoGroup.get(old_data.get('group_id')).group_name
 
             if old_gname != group_name or not edit:
 
                 # check group
-                gr = Group.query()\
-                      .filter(Group.group_name == slug)\
-                      .filter(Group.group_parent_id == group_parent_id)\
+                gr = RepoGroup.query()\
+                      .filter(RepoGroup.group_name == slug)\
+                      .filter(RepoGroup.group_parent_id == group_parent_id)\
                       .scalar()
 
                 if gr:
@@ -173,46 +180,52 @@ def ValidReposGroup(edit, old_data):
 
     return _ValidReposGroup
 
+
 class ValidPassword(formencode.validators.FancyValidator):
 
     def to_python(self, value, state):
 
-        if value:
+        if not value:
+            return
 
-            if value.get('password'):
-                try:
-                    value['password'] = get_crypt_password(value['password'])
-                except UnicodeEncodeError:
-                    e_dict = {'password':_('Invalid characters in password')}
-                    raise formencode.Invalid('', value, state, error_dict=e_dict)
+        if value.get('password'):
+            try:
+                value['password'] = get_crypt_password(value['password'])
+            except UnicodeEncodeError:
+                e_dict = {'password': _('Invalid characters in password')}
+                raise formencode.Invalid('', value, state, error_dict=e_dict)
 
-            if value.get('password_confirmation'):
-                try:
-                    value['password_confirmation'] = \
-                        get_crypt_password(value['password_confirmation'])
-                except UnicodeEncodeError:
-                    e_dict = {'password_confirmation':_('Invalid characters in password')}
-                    raise formencode.Invalid('', value, state, error_dict=e_dict)
+        if value.get('password_confirmation'):
+            try:
+                value['password_confirmation'] = \
+                    get_crypt_password(value['password_confirmation'])
+            except UnicodeEncodeError:
+                e_dict = {
+                    'password_confirmation': _('Invalid characters in password')
+                }
+                raise formencode.Invalid('', value, state, error_dict=e_dict)
 
-            if value.get('new_password'):
-                try:
-                    value['new_password'] = \
-                        get_crypt_password(value['new_password'])
-                except UnicodeEncodeError:
-                    e_dict = {'new_password':_('Invalid characters in password')}
-                    raise formencode.Invalid('', value, state, error_dict=e_dict)
+        if value.get('new_password'):
+            try:
+                value['new_password'] = \
+                    get_crypt_password(value['new_password'])
+            except UnicodeEncodeError:
+                e_dict = {'new_password': _('Invalid characters in password')}
+                raise formencode.Invalid('', value, state, error_dict=e_dict)
 
-            return value
+        return value
+
 
 class ValidPasswordsMatch(formencode.validators.FancyValidator):
 
     def validate_python(self, value, state):
-        
+
         pass_val = value.get('password') or value.get('new_password')
         if pass_val != value['password_confirmation']:
             e_dict = {'password_confirmation':
                    _('Passwords do not match')}
             raise formencode.Invalid('', value, state, error_dict=e_dict)
+
 
 class ValidAuth(formencode.validators.FancyValidator):
     messages = {
@@ -220,11 +233,11 @@ class ValidAuth(formencode.validators.FancyValidator):
         'invalid_login':_('invalid user name'),
         'disabled_account':_('Your account is disabled')
     }
-    
+
     # error mapping
-    e_dict = {'username':messages['invalid_login'],
-              'password':messages['invalid_password']}
-    e_dict_disable = {'username':messages['disabled_account']}
+    e_dict = {'username': messages['invalid_login'],
+              'password': messages['invalid_password']}
+    e_dict_disable = {'username': messages['disabled_account']}
 
     def validate_python(self, value, state):
         password = value['password']
@@ -235,16 +248,21 @@ class ValidAuth(formencode.validators.FancyValidator):
             return value
         else:
             if user and user.active is False:
-                log.warning('user %s is disabled', username)
-                raise formencode.Invalid(self.message('disabled_account',
-                                         state=State_obj),
-                                         value, state,
-                                         error_dict=self.e_dict_disable)
+                log.warning('user %s is disabled' % username)
+                raise formencode.Invalid(
+                    self.message('disabled_account',
+                    state=State_obj),
+                    value, state,
+                    error_dict=self.e_dict_disable
+                )
             else:
-                log.warning('user %s not authenticated', username)
-                raise formencode.Invalid(self.message('invalid_password',
-                                         state=State_obj), value, state,
-                                         error_dict=self.e_dict)
+                log.warning('user %s failed to authenticate' % username)
+                raise formencode.Invalid(
+                    self.message('invalid_password',
+                    state=State_obj), value, state,
+                    error_dict=self.e_dict
+                )
+
 
 class ValidRepoUser(formencode.validators.FancyValidator):
 
@@ -257,6 +275,7 @@ class ValidRepoUser(formencode.validators.FancyValidator):
                                      value, state)
         return value
 
+
 def ValidRepoName(edit, old_data):
     class _ValidRepoName(formencode.validators.FancyValidator):
         def to_python(self, value, state):
@@ -268,19 +287,17 @@ def ValidRepoName(edit, old_data):
                 e_dict = {'repo_name': _('This repository name is disallowed')}
                 raise formencode.Invalid('', value, state, error_dict=e_dict)
 
-
             if value.get('repo_group'):
-                gr = Group.get(value.get('repo_group'))
+                gr = RepoGroup.get(value.get('repo_group'))
                 group_path = gr.full_path
                 # value needs to be aware of group name in order to check
                 # db key This is an actual just the name to store in the
                 # database
-                repo_name_full = group_path + Group.url_sep() + repo_name
-                
+                repo_name_full = group_path + RepoGroup.url_sep() + repo_name
+
             else:
                 group_path = ''
                 repo_name_full = repo_name
-
 
             value['repo_name_full'] = repo_name_full
             rename = old_data.get('repo_name') != repo_name_full
@@ -288,21 +305,23 @@ def ValidRepoName(edit, old_data):
             if  rename or create:
 
                 if group_path != '':
-                    if RepoModel().get_by_repo_name(repo_name_full,):
-                        e_dict = {'repo_name':_('This repository already '
-                                                'exists in a group "%s"') %
-                                  gr.group_name}
+                    if Repository.get_by_repo_name(repo_name_full):
+                        e_dict = {
+                            'repo_name': _('This repository already exists in '
+                                           'a group "%s"') % gr.group_name
+                        }
                         raise formencode.Invalid('', value, state,
                                                  error_dict=e_dict)
-                elif Group.get_by_group_name(repo_name_full):
-                        e_dict = {'repo_name':_('There is a group with this'
-                                                ' name already "%s"') %
-                                  repo_name_full}
+                elif RepoGroup.get_by_group_name(repo_name_full):
+                        e_dict = {
+                            'repo_name': _('There is a group with this name '
+                                           'already "%s"') % repo_name_full
+                        }
                         raise formencode.Invalid('', value, state,
                                                  error_dict=e_dict)
 
-                elif RepoModel().get_by_repo_name(repo_name_full):
-                        e_dict = {'repo_name':_('This repository '
+                elif Repository.get_by_repo_name(repo_name_full):
+                        e_dict = {'repo_name': _('This repository '
                                                 'already exists')}
                         raise formencode.Invalid('', value, state,
                                                  error_dict=e_dict)
@@ -311,24 +330,9 @@ def ValidRepoName(edit, old_data):
 
     return _ValidRepoName
 
-def ValidForkName():
-    class _ValidForkName(formencode.validators.FancyValidator):
-        def to_python(self, value, state):
 
-            repo_name = value.get('fork_name')
-
-            slug = repo_name_slug(repo_name)
-            if slug in [ADMIN_PREFIX, '']:
-                e_dict = {'repo_name': _('This repository name is disallowed')}
-                raise formencode.Invalid('', value, state, error_dict=e_dict)
-
-            if RepoModel().get_by_repo_name(repo_name):
-                e_dict = {'fork_name':_('This repository '
-                                        'already exists')}
-                raise formencode.Invalid('', value, state,
-                                         error_dict=e_dict)
-            return value
-    return _ValidForkName
+def ValidForkName(*args, **kwargs):
+    return ValidRepoName(*args, **kwargs)
 
 
 def SlugifyName():
@@ -338,6 +342,7 @@ def SlugifyName():
             return repo_name_slug(value)
 
     return _SlugifyName
+
 
 def ValidCloneUri():
     from mercurial.httprepo import httprepository, httpsrepository
@@ -351,14 +356,14 @@ def ValidCloneUri():
             elif value.startswith('https'):
                 try:
                     httpsrepository(make_ui('db'), value).capabilities
-                except Exception, e:
+                except Exception:
                     log.error(traceback.format_exc())
                     raise formencode.Invalid(_('invalid clone url'), value,
                                              state)
             elif value.startswith('http'):
                 try:
                     httprepository(make_ui('db'), value).capabilities
-                except Exception, e:
+                except Exception:
                     log.error(traceback.format_exc())
                     raise formencode.Invalid(_('invalid clone url'), value,
                                              state)
@@ -369,6 +374,7 @@ def ValidCloneUri():
             return value
 
     return _ValidCloneUri
+
 
 def ValidForkType(old_data):
     class _ValidForkType(formencode.validators.FancyValidator):
@@ -381,64 +387,77 @@ def ValidForkType(old_data):
             return value
     return _ValidForkType
 
-class ValidPerms(formencode.validators.FancyValidator):
-    messages = {'perm_new_member_name':_('This username or users group name'
-                                         ' is not valid')}
 
-    def to_python(self, value, state):
-        perms_update = []
-        perms_new = []
-        #build a list of permission to update and new permission to create
-        for k, v in value.items():
-            #means new added member to permissions
-            if k.startswith('perm_new_member'):
-                new_perm = value.get('perm_new_member', False)
-                new_member = value.get('perm_new_member_name', False)
-                new_type = value.get('perm_new_member_type')
+def ValidPerms(type_='repo'):
+    if type_ == 'group':
+        EMPTY_PERM = 'group.none'
+    elif type_ == 'repo':
+        EMPTY_PERM = 'repository.none'
 
-                if new_member and new_perm:
-                    if (new_member, new_perm, new_type) not in perms_new:
-                        perms_new.append((new_member, new_perm, new_type))
-            elif k.startswith('u_perm_') or k.startswith('g_perm_'):
-                member = k[7:]
-                t = {'u':'user',
-                     'g':'users_group'}[k[0]]
-                if member == 'default':
-                    if value['private']:
-                        #set none for default when updating to private repo
-                        v = 'repository.none'
-                perms_update.append((member, v, t))
+    class _ValidPerms(formencode.validators.FancyValidator):
+        messages = {
+            'perm_new_member_name':
+                _('This username or users group name is not valid')
+        }
 
-        value['perms_updates'] = perms_update
-        value['perms_new'] = perms_new
+        def to_python(self, value, state):
+            perms_update = []
+            perms_new = []
+            # build a list of permission to update and new permission to create
+            for k, v in value.items():
+                # means new added member to permissions
+                if k.startswith('perm_new_member'):
+                    new_perm = value.get('perm_new_member', False)
+                    new_member = value.get('perm_new_member_name', False)
+                    new_type = value.get('perm_new_member_type')
 
-        #update permissions
-        for k, v, t in perms_new:
-            try:
-                if t is 'user':
-                    self.user_db = User.query()\
-                        .filter(User.active == True)\
-                        .filter(User.username == k).one()
-                if t is 'users_group':
-                    self.user_db = UsersGroup.query()\
-                        .filter(UsersGroup.users_group_active == True)\
-                        .filter(UsersGroup.users_group_name == k).one()
+                    if new_member and new_perm:
+                        if (new_member, new_perm, new_type) not in perms_new:
+                            perms_new.append((new_member, new_perm, new_type))
+                elif k.startswith('u_perm_') or k.startswith('g_perm_'):
+                    member = k[7:]
+                    t = {'u': 'user',
+                         'g': 'users_group'
+                    }[k[0]]
+                    if member == 'default':
+                        if value.get('private'):
+                            # set none for default when updating to private repo
+                            v = EMPTY_PERM
+                    perms_update.append((member, v, t))
 
-            except Exception:
-                msg = self.message('perm_new_member_name',
-                                     state=State_obj)
-                raise formencode.Invalid(msg, value, state,
-                                         error_dict={'perm_new_member_name':msg})
-        return value
+            value['perms_updates'] = perms_update
+            value['perms_new'] = perms_new
+
+            # update permissions
+            for k, v, t in perms_new:
+                try:
+                    if t is 'user':
+                        self.user_db = User.query()\
+                            .filter(User.active == True)\
+                            .filter(User.username == k).one()
+                    if t is 'users_group':
+                        self.user_db = UsersGroup.query()\
+                            .filter(UsersGroup.users_group_active == True)\
+                            .filter(UsersGroup.users_group_name == k).one()
+
+                except Exception:
+                    msg = self.message('perm_new_member_name',
+                                         state=State_obj)
+                    raise formencode.Invalid(
+                        msg, value, state, error_dict={'perm_new_member_name': msg}
+                    )
+            return value
+    return _ValidPerms
+
 
 class ValidSettings(formencode.validators.FancyValidator):
 
     def to_python(self, value, state):
-        #settings  form can't edit user
-        if value.has_key('user'):
+        # settings  form can't edit user
+        if 'user' in value:
             del['value']['user']
-
         return value
+
 
 class ValidPath(formencode.validators.FancyValidator):
     def to_python(self, value, state):
@@ -446,32 +465,36 @@ class ValidPath(formencode.validators.FancyValidator):
         if not os.path.isdir(value):
             msg = _('This is not a valid path')
             raise formencode.Invalid(msg, value, state,
-                                     error_dict={'paths_root_path':msg})
+                                     error_dict={'paths_root_path': msg})
         return value
+
 
 def UniqSystemEmail(old_data):
     class _UniqSystemEmail(formencode.validators.FancyValidator):
         def to_python(self, value, state):
             value = value.lower()
-            if old_data.get('email') != value:
-                user = User.query().filter(User.email == value).scalar()
+            if old_data.get('email', '').lower() != value:
+                user = User.get_by_email(value, case_insensitive=True)
                 if user:
                     raise formencode.Invalid(
-                                    _("This e-mail address is already taken"),
-                                    value, state)
+                        _("This e-mail address is already taken"), value, state
+                    )
             return value
 
     return _UniqSystemEmail
 
+
 class ValidSystemEmail(formencode.validators.FancyValidator):
     def to_python(self, value, state):
         value = value.lower()
-        user = User.query().filter(User.email == value).scalar()
+        user = User.get_by_email(value, case_insensitive=True)
         if  user is None:
-            raise formencode.Invalid(_("This e-mail address doesn't exist.") ,
-                                     value, state)
+            raise formencode.Invalid(
+                _("This e-mail address doesn't exist."), value, state
+            )
 
         return value
+
 
 class LdapLibValidator(formencode.validators.FancyValidator):
 
@@ -483,44 +506,49 @@ class LdapLibValidator(formencode.validators.FancyValidator):
             raise LdapImportError
         return value
 
+
 class AttrLoginValidator(formencode.validators.FancyValidator):
 
     def to_python(self, value, state):
 
         if not value or not isinstance(value, (str, unicode)):
-            raise formencode.Invalid(_("The LDAP Login attribute of the CN "
-                                       "must be specified - this is the name "
-                                       "of the attribute that is equivalent "
-                                       "to 'username'"),
-                                     value, state)
+            raise formencode.Invalid(
+                _("The LDAP Login attribute of the CN must be specified - "
+                  "this is the name of the attribute that is equivalent "
+                  "to 'username'"), value, state
+            )
 
         return value
 
-#===============================================================================
+
+#==============================================================================
 # FORMS
-#===============================================================================
+#==============================================================================
 class LoginForm(formencode.Schema):
     allow_extra_fields = True
     filter_extra_fields = True
     username = UnicodeString(
-                             strip=True,
-                             min=1,
-                             not_empty=True,
-                             messages={
-                                'empty':_('Please enter a login'),
-                                'tooShort':_('Enter a value %(min)i characters long or more')}
-                            )
+        strip=True,
+        min=1,
+        not_empty=True,
+        messages={
+           'empty': _('Please enter a login'),
+           'tooShort': _('Enter a value %(min)i characters long or more')}
+    )
 
     password = UnicodeString(
-                            strip=True,
-                            min=3,
-                            not_empty=True,
-                            messages={
-                                'empty':_('Please enter a password'),
-                                'tooShort':_('Enter %(min)i characters or more')}
-                                )
+        strip=True,
+        min=3,
+        not_empty=True,
+        messages={
+            'empty': _('Please enter a password'),
+            'tooShort': _('Enter %(min)i characters or more')}
+    )
+
+    remember = StringBoolean(if_missing=False)
 
     chained_validators = [ValidAuth]
+
 
 def UserForm(edit=False, old_data={}):
     class _UserForm(formencode.Schema):
@@ -530,15 +558,17 @@ def UserForm(edit=False, old_data={}):
                        ValidUsername(edit, old_data))
         if edit:
             new_password = All(UnicodeString(strip=True, min=6, not_empty=False))
-            password_confirmation = All(UnicodeString(strip=True, min=6, not_empty=False))
+            password_confirmation = All(UnicodeString(strip=True, min=6,
+                                                      not_empty=False))
             admin = StringBoolean(if_missing=False)
         else:
             password = All(UnicodeString(strip=True, min=6, not_empty=True))
-            password_confirmation = All(UnicodeString(strip=True, min=6, not_empty=False))
-            
+            password_confirmation = All(UnicodeString(strip=True, min=6,
+                                                      not_empty=False))
+
         active = StringBoolean(if_missing=False)
-        name = UnicodeString(strip=True, min=1, not_empty=True)
-        lastname = UnicodeString(strip=True, min=1, not_empty=True)
+        name = UnicodeString(strip=True, min=1, not_empty=False)
+        lastname = UnicodeString(strip=True, min=1, not_empty=False)
         email = All(Email(not_empty=True), UniqSystemEmail(old_data))
 
         chained_validators = [ValidPasswordsMatch, ValidPassword]
@@ -563,10 +593,11 @@ def UsersGroupForm(edit=False, old_data={}, available_members=[]):
 
     return _UsersGroupForm
 
+
 def ReposGroupForm(edit=False, old_data={}, available_groups=[]):
     class _ReposGroupForm(formencode.Schema):
         allow_extra_fields = True
-        filter_extra_fields = True
+        filter_extra_fields = False
 
         group_name = All(UnicodeString(strip=True, min=1, not_empty=True),
                                SlugifyName())
@@ -576,9 +607,10 @@ def ReposGroupForm(edit=False, old_data={}, available_groups=[]):
                                         testValueList=True,
                                         if_missing=None, not_empty=False)
 
-        chained_validators = [ValidReposGroup(edit, old_data)]
+        chained_validators = [ValidReposGroup(edit, old_data), ValidPerms('group')]
 
     return _ReposGroupForm
+
 
 def RegisterForm(edit=False, old_data={}):
     class _RegisterForm(formencode.Schema):
@@ -589,13 +621,14 @@ def RegisterForm(edit=False, old_data={}):
         password = All(UnicodeString(strip=True, min=6, not_empty=True))
         password_confirmation = All(UnicodeString(strip=True, min=6, not_empty=True))
         active = StringBoolean(if_missing=False)
-        name = UnicodeString(strip=True, min=1, not_empty=True)
-        lastname = UnicodeString(strip=True, min=1, not_empty=True)
+        name = UnicodeString(strip=True, min=1, not_empty=False)
+        lastname = UnicodeString(strip=True, min=1, not_empty=False)
         email = All(Email(not_empty=True), UniqSystemEmail(old_data))
 
         chained_validators = [ValidPasswordsMatch, ValidPassword]
 
     return _RegisterForm
+
 
 def PasswordResetForm():
     class _PasswordResetForm(formencode.Schema):
@@ -603,6 +636,7 @@ def PasswordResetForm():
         filter_extra_fields = True
         email = All(ValidSystemEmail(), Email(not_empty=True))
     return _PasswordResetForm
+
 
 def RepoForm(edit=False, old_data={}, supported_backends=BACKENDS.keys(),
              repo_groups=[]):
@@ -624,22 +658,28 @@ def RepoForm(edit=False, old_data={}, supported_backends=BACKENDS.keys(),
             #this is repo owner
             user = All(UnicodeString(not_empty=True), ValidRepoUser)
 
-        chained_validators = [ValidRepoName(edit, old_data), ValidPerms]
+        chained_validators = [ValidRepoName(edit, old_data), ValidPerms()]
     return _RepoForm
 
-def RepoForkForm(edit=False, old_data={}, supported_backends=BACKENDS.keys()):
+
+def RepoForkForm(edit=False, old_data={}, supported_backends=BACKENDS.keys(),
+                 repo_groups=[]):
     class _RepoForkForm(formencode.Schema):
         allow_extra_fields = True
         filter_extra_fields = False
-        fork_name = All(UnicodeString(strip=True, min=1, not_empty=True),
+        repo_name = All(UnicodeString(strip=True, min=1, not_empty=True),
                         SlugifyName())
+        repo_group = OneOf(repo_groups, hideList=True)
+        repo_type = All(ValidForkType(old_data), OneOf(supported_backends))
         description = UnicodeString(strip=True, min=1, not_empty=True)
         private = StringBoolean(if_missing=False)
-        repo_type = All(ValidForkType(old_data), OneOf(supported_backends))
-
-        chained_validators = [ValidForkName()]
+        copy_permissions = StringBoolean(if_missing=False)
+        update_after_clone = StringBoolean(if_missing=False)
+        fork_parent_id = UnicodeString()
+        chained_validators = [ValidForkName(edit, old_data)]
 
     return _RepoForkForm
+
 
 def RepoSettingsForm(edit=False, old_data={}, supported_backends=BACKENDS.keys(),
                      repo_groups=[]):
@@ -652,7 +692,7 @@ def RepoSettingsForm(edit=False, old_data={}, supported_backends=BACKENDS.keys()
         repo_group = OneOf(repo_groups, hideList=True)
         private = StringBoolean(if_missing=False)
 
-        chained_validators = [ValidRepoName(edit, old_data), ValidPerms, 
+        chained_validators = [ValidRepoName(edit, old_data), ValidPerms(),
                               ValidSettings]
     return _RepoForm
 
@@ -667,6 +707,7 @@ def ApplicationSettingsForm():
 
     return _ApplicationSettingsForm
 
+
 def ApplicationUiSettingsForm():
     class _ApplicationUiSettingsForm(formencode.Schema):
         allow_extra_fields = True
@@ -679,6 +720,7 @@ def ApplicationUiSettingsForm():
         hooks_preoutgoing_pull_logger = OneOf(['True', 'False'], if_missing=False)
 
     return _ApplicationUiSettingsForm
+
 
 def DefaultPermissionsForm(perms_choices, register_choices, create_choices):
     class _DefaultPermissionsForm(formencode.Schema):

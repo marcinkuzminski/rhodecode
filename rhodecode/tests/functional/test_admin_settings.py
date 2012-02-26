@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from rhodecode.lib.auth import get_crypt_password, check_password
-from rhodecode.model.db import User, RhodeCodeSettings
+from rhodecode.model.db import User, RhodeCodeSetting
 from rhodecode.tests import *
 
 class TestAdminSettingsController(TestController):
@@ -63,7 +63,7 @@ class TestAdminSettingsController(TestController):
 
         self.checkSessionFlash(response, 'Updated application settings')
 
-        self.assertEqual(RhodeCodeSettings
+        self.assertEqual(RhodeCodeSetting
                          .get_app_settings()['rhodecode_ga_code'], new_ga_code)
 
         response = response.follow()
@@ -85,7 +85,7 @@ class TestAdminSettingsController(TestController):
 
         self.assertTrue('Updated application settings' in
                         response.session['flash'][0][1])
-        self.assertEqual(RhodeCodeSettings
+        self.assertEqual(RhodeCodeSetting
                         .get_app_settings()['rhodecode_ga_code'], new_ga_code)
 
         response = response.follow()
@@ -109,7 +109,7 @@ class TestAdminSettingsController(TestController):
                                                      ))
 
             self.checkSessionFlash(response, 'Updated application settings')
-            self.assertEqual(RhodeCodeSettings
+            self.assertEqual(RhodeCodeSetting
                              .get_app_settings()['rhodecode_title'],
                              new_title.decode('utf-8'))
 
@@ -145,7 +145,7 @@ class TestAdminSettingsController(TestController):
         response.follow()
 
         assert 'Your account was updated successfully' in response.session['flash'][0][1], 'no flash message about success of change'
-        user = self.sa.query(User).filter(User.username == 'test_admin').one()
+        user = self.Session.query(User).filter(User.username == 'test_admin').one()
         assert user.email == new_email , 'incorrect user email after update got %s vs %s' % (user.email, new_email)
         assert user.name == new_name, 'updated field mismatch %s vs %s' % (user.name, new_name)
         assert user.lastname == new_lastname, 'updated field mismatch %s vs %s' % (user.lastname, new_lastname)
@@ -171,7 +171,7 @@ class TestAdminSettingsController(TestController):
         self.checkSessionFlash(response,
                                'Your account was updated successfully')
 
-        user = self.sa.query(User).filter(User.username == 'test_admin').one()
+        user = self.Session.query(User).filter(User.username == 'test_admin').one()
         assert user.email == old_email , 'incorrect user email after update got %s vs %s' % (user.email, old_email)
 
         assert user.email == old_email , 'incorrect user email after update got %s vs %s' % (user.email, old_email)

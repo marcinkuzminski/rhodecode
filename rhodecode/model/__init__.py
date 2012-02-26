@@ -7,7 +7,7 @@
 
     :created_on: Nov 25, 2010
     :author: marcink
-    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
+    :copyright: (C) 2010-2012 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 
 
@@ -56,12 +56,13 @@ def init_model(engine):
 
     :param engine: engine to bind to
     """
-    log.info("initializing db for %s", engine)
+    log.info("initializing db for %s" % engine)
     meta.Base.metadata.bind = engine
 
 
 class BaseModel(object):
-    """Base Model for all RhodeCode models, it adds sql alchemy session
+    """
+    Base Model for all RhodeCode models, it adds sql alchemy session
     into instance of model
 
     :param sa: If passed it reuses this session instead of creating a new one
@@ -72,3 +73,26 @@ class BaseModel(object):
             self.sa = sa
         else:
             self.sa = meta.Session
+
+    def _get_instance(self, cls, instance, callback=None):
+        """
+        Get's instance of given cls using some simple lookup mechanism.
+
+        :param cls: class to fetch
+        :param instance: int or Instance
+        :param callback: callback to call if all lookups failed
+        """
+
+        if isinstance(instance, cls):
+            return instance
+        elif isinstance(instance, int) or str(instance).isdigit():
+            return cls.get(instance)
+        else:
+            if instance:
+                if callback is None:
+                    raise Exception(
+                        'given object must be int or Instance of %s got %s, '
+                        'no callback provided' % (cls, type(instance))
+                    )
+                else:
+                    return callback(instance)

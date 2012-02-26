@@ -4,9 +4,9 @@
 <%def name="title()">
     ${_('Sign Up')} - ${c.rhodecode_name}
 </%def>
-    
+
 <div id="register">
-	
+
 	<div class="title top-left-rounded-corner top-right-rounded-corner">
 		<h5>${_('Sign Up to')} ${c.rhodecode_name}</h5>
 	</div>
@@ -23,7 +23,7 @@
 	                    ${h.text('username',class_="medium")}
 	                </div>
 	             </div>
-	            
+
 	             <div class="field">
 	                <div class="label">
 	                    <label for="password">${_('Password')}:</label>
@@ -32,7 +32,7 @@
 	                    ${h.password('password',class_="medium")}
 	                </div>
 	             </div>
-                       
+
                        <div class="field">
                           <div class="label">
                               <label for="password">${_('Re-enter password')}:</label>
@@ -41,7 +41,7 @@
                               ${h.password('password_confirmation',class_="medium")}
                           </div>
                        </div>
-                       			            
+
 	             <div class="field">
 	                <div class="label">
 	                    <label for="name">${_('First Name')}:</label>
@@ -50,7 +50,7 @@
 	                    ${h.text('name',class_="medium")}
 	                </div>
 	             </div>
-	            
+
 	             <div class="field">
 	                <div class="label">
 	                    <label for="lastname">${_('Last Name')}:</label>
@@ -59,7 +59,7 @@
 	                    ${h.text('lastname',class_="medium")}
 	                </div>
 	             </div>
-	            
+
 	             <div class="field">
 	                <div class="label">
 	                    <label for="email">${_('Email')}:</label>
@@ -68,7 +68,7 @@
 	                    ${h.text('email',class_="medium")}
 	                </div>
 	             </div>
-	                        
+
 	            <div class="buttons">
 		            <div class="nohighlight">
 		              ${h.submit('sign_up',_('Sign Up'),class_="ui-button")}
@@ -78,7 +78,7 @@
 					  	<div class="activation_msg">${_('Your account must wait for activation by administrator')}</div>
 					  %endif
 		            </div>
-	            </div>             
+	            </div>
 	    	</div>
 	    </div>
 	    ${h.end_form()}
@@ -86,7 +86,6 @@
         YUE.onDOMReady(function(){
             YUD.get('username').focus();
         })
-        </script>	    
-	</div>    
+        </script>
+	</div>
  </div>
-

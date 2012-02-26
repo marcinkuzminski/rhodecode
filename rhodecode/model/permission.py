@@ -7,7 +7,7 @@
 
     :created_on: Aug 20, 2010
     :author: marcink
-    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
+    :copyright: (C) 2010-2012 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software: you can redistribute it and/or modify
@@ -28,19 +28,22 @@ import traceback
 
 from sqlalchemy.exc import DatabaseError
 
+from rhodecode.lib.caching_query import FromCache
+
 from rhodecode.model import BaseModel
-from rhodecode.model.db import User, Permission, UserToPerm, RepoToPerm
-from rhodecode.model.caching_query import FromCache
+from rhodecode.model.db import User, Permission, UserToPerm, UserRepoToPerm
 
 log = logging.getLogger(__name__)
 
 
 class PermissionModel(BaseModel):
-    """Permissions model for RhodeCode
+    """
+    Permissions model for RhodeCode
     """
 
     def get_permission(self, permission_id, cache=False):
-        """Get's permissions by id
+        """
+        Get's permissions by id
 
         :param permission_id: id of permission to get from database
         :param cache: use Cache for this query
@@ -52,7 +55,8 @@ class PermissionModel(BaseModel):
         return perm.get(permission_id)
 
     def get_permission_by_name(self, name, cache=False):
-        """Get's permissions by given name
+        """
+        Get's permissions by given name
 
         :param name: name to fetch
         :param cache: Use cache for this query
@@ -66,8 +70,8 @@ class PermissionModel(BaseModel):
 
     def update(self, form_result):
         perm_user = self.sa.query(User)\
-                .filter(User.username ==
-                        form_result['perm_user_name']).scalar()
+                        .filter(User.username ==
+                                form_result['perm_user_name']).scalar()
         u2p = self.sa.query(UserToPerm).filter(UserToPerm.user ==
                                                perm_user).all()
         if len(u2p) != 3:
@@ -76,7 +80,7 @@ class PermissionModel(BaseModel):
                             ' your database' % len(u2p))
 
         try:
-            #stage 1 change defaults
+            # stage 1 change defaults
             for p in u2p:
                 if p.permission.permission_name.startswith('repository.'):
                     p.permission = self.get_permission_by_name(
@@ -95,19 +99,17 @@ class PermissionModel(BaseModel):
 
             #stage 2 update all default permissions for repos if checked
             if form_result['overwrite_default'] == True:
-                for r2p in self.sa.query(RepoToPerm)\
-                               .filter(RepoToPerm.user == perm_user).all():
+                for r2p in self.sa.query(UserRepoToPerm)\
+                               .filter(UserRepoToPerm.user == perm_user).all():
                     r2p.permission = self.get_permission_by_name(
                                          form_result['default_perm'])
                     self.sa.add(r2p)
 
-            #stage 3 set anonymous access
+            # stage 3 set anonymous access
             if perm_user.username == 'default':
                 perm_user.active = bool(form_result['anonymous'])
                 self.sa.add(perm_user)
 
-            self.sa.commit()
         except (DatabaseError,):
             log.error(traceback.format_exc())
-            self.sa.rollback()
             raise

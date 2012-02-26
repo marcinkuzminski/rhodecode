@@ -30,17 +30,15 @@ import logging
 
 from rhodecode.controllers.api import JSONRPCController, JSONRPCError
 from rhodecode.lib.auth import HasPermissionAllDecorator, \
-    HasPermissionAnyDecorator
-from rhodecode.model.scm import ScmModel
+    HasPermissionAnyDecorator, PasswordGenerator
 
-from rhodecode.model.db import User, UsersGroup, Group, Repository
+from rhodecode.model.meta import Session
+from rhodecode.model.scm import ScmModel
+from rhodecode.model.db import User, UsersGroup, RepoGroup, Repository
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.user import UserModel
-from rhodecode.model.repo_permission import RepositoryPermissionModel
 from rhodecode.model.users_group import UsersGroupModel
-from rhodecode.model import users_group
 from rhodecode.model.repos_group import ReposGroupModel
-from sqlalchemy.orm.exc import NoResultFound
 
 
 log = logging.getLogger(__name__)
@@ -63,26 +61,26 @@ class ApiController(JSONRPCController):
     """
 
     @HasPermissionAllDecorator('hg.admin')
-    def pull(self, apiuser, repo):
+    def pull(self, apiuser, repo_name):
         """
         Dispatch pull action on given repo
 
 
         :param user:
-        :param repo:
+        :param repo_name:
         """
 
-        if Repository.is_valid(repo) is False:
-            raise JSONRPCError('Unknown repo "%s"' % repo)
+        if Repository.is_valid(repo_name) is False:
+            raise JSONRPCError('Unknown repo "%s"' % repo_name)
 
         try:
-            ScmModel().pull_changes(repo, self.rhodecode_user.username)
-            return 'Pulled from %s' % repo
+            ScmModel().pull_changes(repo_name, self.rhodecode_user.username)
+            return 'Pulled from %s' % repo_name
         except Exception:
-            raise JSONRPCError('Unable to pull changes from "%s"' % repo)
+            raise JSONRPCError('Unable to pull changes from "%s"' % repo_name)
 
     @HasPermissionAllDecorator('hg.admin')
-    def get_user(self, apiuser, username):
+    def get_user(self, apiuser, userid):
         """"
         Get a user by username
 
@@ -90,9 +88,9 @@ class ApiController(JSONRPCController):
         :param username:
         """
 
-        user = User.get_by_username(username)
-        if not user:
-            return None
+        user = UserModel().get_user(userid)
+        if user is None:
+            return user
 
         return dict(
             id=user.user_id,
@@ -102,7 +100,7 @@ class ApiController(JSONRPCController):
             email=user.email,
             active=user.active,
             admin=user.admin,
-            ldap=user.ldap_dn
+            ldap_dn=user.ldap_dn
         )
 
     @HasPermissionAllDecorator('hg.admin')
@@ -124,45 +122,83 @@ class ApiController(JSONRPCController):
                     email=user.email,
                     active=user.active,
                     admin=user.admin,
-                    ldap=user.ldap_dn
+                    ldap_dn=user.ldap_dn
                 )
             )
         return result
 
     @HasPermissionAllDecorator('hg.admin')
-    def create_user(self, apiuser, username, password, firstname,
-                    lastname, email, active=True, admin=False, ldap_dn=None):
+    def create_user(self, apiuser, username, email, password, firstname=None,
+                    lastname=None, active=True, admin=False, ldap_dn=None):
         """
         Create new user
 
         :param apiuser:
         :param username:
         :param password:
+        :param email:
         :param name:
         :param lastname:
-        :param email:
         :param active:
         :param admin:
         :param ldap_dn:
         """
-
         if User.get_by_username(username):
             raise JSONRPCError("user %s already exist" % username)
 
+        if User.get_by_email(email, case_insensitive=True):
+            raise JSONRPCError("email %s already exist" % email)
+
+        if ldap_dn:
+            # generate temporary password if ldap_dn
+            password = PasswordGenerator().gen_password(length=8)
+
         try:
-            form_data = dict(username=username,
-                             password=password,
-                             active=active,
-                             admin=admin,
-                             name=firstname,
-                             lastname=lastname,
-                             email=email,
-                             ldap_dn=ldap_dn)
-            UserModel().create_ldap(username, password, ldap_dn, form_data)
-            return dict(msg='created new user %s' % username)
+            usr = UserModel().create_or_update(
+                username, password, email, firstname,
+                lastname, active, admin, ldap_dn
+            )
+            Session.commit()
+            return dict(
+                id=usr.user_id,
+                msg='created new user %s' % username
+            )
         except Exception:
             log.error(traceback.format_exc())
             raise JSONRPCError('failed to create user %s' % username)
+
+    @HasPermissionAllDecorator('hg.admin')
+    def update_user(self, apiuser, userid, username, password, email,
+                    firstname, lastname, active, admin, ldap_dn):
+        """
+        Updates given user
+
+        :param apiuser:
+        :param username:
+        :param password:
+        :param email:
+        :param name:
+        :param lastname:
+        :param active:
+        :param admin:
+        :param ldap_dn:
+        """
+        if not UserModel().get_user(userid):
+            raise JSONRPCError("user %s does not exist" % username)
+
+        try:
+            usr = UserModel().create_or_update(
+                username, password, email, firstname,
+                lastname, active, admin, ldap_dn
+            )
+            Session.commit()
+            return dict(
+                id=usr.user_id,
+                msg='updated user %s' % username
+            )
+        except Exception:
+            log.error(traceback.format_exc())
+            raise JSONRPCError('failed to update user %s' % username)
 
     @HasPermissionAllDecorator('hg.admin')
     def get_users_group(self, apiuser, group_name):
@@ -190,7 +226,7 @@ class ApiController(JSONRPCController):
                             ldap=user.ldap_dn))
 
         return dict(id=users_group.users_group_id,
-                    name=users_group.users_group_name,
+                    group_name=users_group.users_group_name,
                     active=users_group.users_group_active,
                     members=members)
 
@@ -217,41 +253,40 @@ class ApiController(JSONRPCController):
                                 ldap=user.ldap_dn))
 
             result.append(dict(id=users_group.users_group_id,
-                                name=users_group.users_group_name,
+                                group_name=users_group.users_group_name,
                                 active=users_group.users_group_active,
                                 members=members))
         return result
 
     @HasPermissionAllDecorator('hg.admin')
-    def create_users_group(self, apiuser, name, active=True):
+    def create_users_group(self, apiuser, group_name, active=True):
         """
         Creates an new usergroup
 
-        :param name:
+        :param group_name:
         :param active:
         """
 
-        if self.get_users_group(apiuser, name):
-            raise JSONRPCError("users group %s already exist" % name)
+        if self.get_users_group(apiuser, group_name):
+            raise JSONRPCError("users group %s already exist" % group_name)
 
         try:
-            form_data = dict(users_group_name=name,
-                             users_group_active=active)
-            ug = UsersGroup.create(form_data)
+            ug = UsersGroupModel().create(name=group_name, active=active)
+            Session.commit()
             return dict(id=ug.users_group_id,
-                        msg='created new users group %s' % name)
+                        msg='created new users group %s' % group_name)
         except Exception:
             log.error(traceback.format_exc())
-            raise JSONRPCError('failed to create group %s' % name)
+            raise JSONRPCError('failed to create group %s' % group_name)
 
     @HasPermissionAllDecorator('hg.admin')
-    def add_user_to_users_group(self, apiuser, group_name, user_name):
+    def add_user_to_users_group(self, apiuser, group_name, username):
         """"
         Add a user to a group
 
-        :param apiuser
-        :param group_name
-        :param user_name
+        :param apiuser:
+        :param group_name:
+        :param username:
         """
 
         try:
@@ -259,32 +294,65 @@ class ApiController(JSONRPCController):
             if not users_group:
                 raise JSONRPCError('unknown users group %s' % group_name)
 
-            try:
-                user = User.get_by_username(user_name)
-            except NoResultFound:
-                raise JSONRPCError('unknown user %s' % user_name)
+            user = User.get_by_username(username)
+            if user is None:
+                raise JSONRPCError('unknown user %s' % username)
 
             ugm = UsersGroupModel().add_user_to_group(users_group, user)
+            success = True if ugm != True else False
+            msg = 'added member %s to users group %s' % (username, group_name)
+            msg = msg if success else 'User is already in that group'
+            Session.commit()
 
-            return dict(id=ugm.users_group_member_id,
-                        msg='created new users group member')
+            return dict(
+                id=ugm.users_group_member_id if ugm != True else None,
+                success=success,
+                msg=msg
+            )
         except Exception:
             log.error(traceback.format_exc())
-            raise JSONRPCError('failed to create users group member')
+            raise JSONRPCError('failed to add users group member')
 
-    @HasPermissionAnyDecorator('hg.admin')
-    def get_repo(self, apiuser, name):
-        """"
-        Get repository by name
+    @HasPermissionAllDecorator('hg.admin')
+    def remove_user_from_users_group(self, apiuser, group_name, username):
+        """
+        Remove user from a group
 
         :param apiuser
-        :param repo_name
+        :param group_name
+        :param username
         """
 
         try:
-            repo = Repository.get_by_repo_name(name)
-        except NoResultFound:
-            return None
+            users_group = UsersGroup.get_by_group_name(group_name)
+            if not users_group:
+                raise JSONRPCError('unknown users group %s' % group_name)
+
+            user = User.get_by_username(username)
+            if user is None:
+                raise JSONRPCError('unknown user %s' % username)
+
+            success = UsersGroupModel().remove_user_from_group(users_group, user)
+            msg = 'removed member %s from users group %s' % (username, group_name)
+            msg = msg if success else "User wasn't in group"
+            Session.commit()
+            return dict(success=success, msg=msg)
+        except Exception:
+            log.error(traceback.format_exc())
+            raise JSONRPCError('failed to remove user from group')
+
+    @HasPermissionAnyDecorator('hg.admin')
+    def get_repo(self, apiuser, repoid):
+        """"
+        Get repository by name
+
+        :param apiuser:
+        :param repo_name:
+        """
+
+        repo = RepoModel().get_repo(repoid)
+        if repo is None:
+            raise JSONRPCError('unknown repository %s' % repo)
 
         members = []
         for user in repo.repo_to_perm:
@@ -319,7 +387,7 @@ class ApiController(JSONRPCController):
 
         return dict(
             id=repo.repo_id,
-            name=repo.repo_name,
+            repo_name=repo.repo_name,
             type=repo.repo_type,
             description=repo.description,
             members=members
@@ -330,7 +398,7 @@ class ApiController(JSONRPCController):
         """"
         Get all repositories
 
-        :param apiuser
+        :param apiuser:
         """
 
         result = []
@@ -338,85 +406,255 @@ class ApiController(JSONRPCController):
             result.append(
                 dict(
                     id=repository.repo_id,
-                    name=repository.repo_name,
+                    repo_name=repository.repo_name,
                     type=repository.repo_type,
                     description=repository.description
                 )
             )
         return result
 
-    @HasPermissionAnyDecorator('hg.admin', 'hg.create.repository')
-    def create_repo(self, apiuser, name, owner_name, description='', 
-                    repo_type='hg', private=False):
+    @HasPermissionAnyDecorator('hg.admin')
+    def get_repo_nodes(self, apiuser, repo_name, revision, root_path,
+                       ret_type='all'):
         """
-        Create a repository
+        returns a list of nodes and it's children
+        for a given path at given revision. It's possible to specify ret_type
+        to show only files or dirs
 
-        :param apiuser
-        :param name
-        :param description
-        :param type
-        :param private
-        :param owner_name
+        :param apiuser:
+        :param repo_name: name of repository
+        :param revision: revision for which listing should be done
+        :param root_path: path from which start displaying
+        :param ret_type: return type 'all|files|dirs' nodes
+        """
+        try:
+            _d, _f = ScmModel().get_nodes(repo_name, revision, root_path,
+                                          flat=False)
+            _map = {
+                'all': _d + _f,
+                'files': _f,
+                'dirs': _d,
+            }
+            return _map[ret_type]
+        except KeyError:
+            raise JSONRPCError('ret_type must be one of %s' % _map.keys())
+        except Exception, e:
+            raise JSONRPCError(e)
+
+    @HasPermissionAnyDecorator('hg.admin', 'hg.create.repository')
+    def create_repo(self, apiuser, repo_name, owner_name, description='',
+                    repo_type='hg', private=False, clone_uri=None):
+        """
+        Create repository, if clone_url is given it makes a remote clone
+
+        :param apiuser:
+        :param repo_name:
+        :param owner_name:
+        :param description:
+        :param repo_type:
+        :param private:
+        :param clone_uri:
         """
 
         try:
-            try:
-                owner = User.get_by_username(owner_name)
-            except NoResultFound:
-                raise JSONRPCError('unknown user %s' % owner)
+            owner = User.get_by_username(owner_name)
+            if owner is None:
+                raise JSONRPCError('unknown user %s' % owner_name)
 
-            if self.get_repo(apiuser, name):
-                raise JSONRPCError("repo %s already exist" % name)
+            if Repository.get_by_repo_name(repo_name):
+                raise JSONRPCError("repo %s already exist" % repo_name)
 
-            groups = name.split('/')
+            groups = repo_name.split('/')
             real_name = groups[-1]
             groups = groups[:-1]
             parent_id = None
             for g in groups:
-                group = Group.get_by_group_name(g)
+                group = RepoGroup.get_by_group_name(g)
                 if not group:
-                    group = ReposGroupModel().create(dict(group_name=g,
-                                                  group_description='',
-                                                  group_parent_id=parent_id))
+                    group = ReposGroupModel().create(g, '', parent_id)
                 parent_id = group.group_id
 
-            RepoModel().create(dict(repo_name=real_name,
-                                     repo_name_full=name,
-                                     description=description,
-                                     private=private,
-                                     repo_type=repo_type,
-                                     repo_group=parent_id,
-                                     clone_uri=None), owner)
+            repo = RepoModel().create(
+                dict(
+                    repo_name=real_name,
+                    repo_name_full=repo_name,
+                    description=description,
+                    private=private,
+                    repo_type=repo_type,
+                    repo_group=parent_id,
+                    clone_uri=clone_uri
+                ),
+                owner
+            )
+            Session.commit()
+
+            return dict(
+                id=repo.repo_id,
+                msg="Created new repository %s" % repo.repo_name
+            )
+
         except Exception:
             log.error(traceback.format_exc())
-            raise JSONRPCError('failed to create repository %s' % name)
+            raise JSONRPCError('failed to create repository %s' % repo_name)
 
     @HasPermissionAnyDecorator('hg.admin')
-    def add_user_to_repo(self, apiuser, repo_name, user_name, perm):
+    def delete_repo(self, apiuser, repo_name):
         """
-        Add permission for a user to a repository
+        Deletes a given repository
 
-        :param apiuser
-        :param repo_name
-        :param user_name
-        :param perm
+        :param repo_name:
+        """
+        if not Repository.get_by_repo_name(repo_name):
+            raise JSONRPCError("repo %s does not exist" % repo_name)
+        try:
+            RepoModel().delete(repo_name)
+            Session.commit()
+            return dict(
+                msg='Deleted repository %s' % repo_name
+            )
+        except Exception:
+            log.error(traceback.format_exc())
+            raise JSONRPCError('failed to delete repository %s' % repo_name)
+
+    @HasPermissionAnyDecorator('hg.admin')
+    def grant_user_permission(self, apiuser, repo_name, username, perm):
+        """
+        Grant permission for user on given repository, or update existing one
+        if found
+
+        :param repo_name:
+        :param username:
+        :param perm:
         """
 
         try:
-            try:
-                repo = Repository.get_by_repo_name(repo_name)
-            except NoResultFound:
+            repo = Repository.get_by_repo_name(repo_name)
+            if repo is None:
                 raise JSONRPCError('unknown repository %s' % repo)
 
-            try:
-                user = User.get_by_username(user_name)
-            except NoResultFound:
-                raise JSONRPCError('unknown user %s' % user)
+            user = User.get_by_username(username)
+            if user is None:
+                raise JSONRPCError('unknown user %s' % username)
 
-            RepositoryPermissionModel()\
-                .update_or_delete_user_permission(repo, user, perm)
+            RepoModel().grant_user_permission(repo=repo, user=user, perm=perm)
+
+            Session.commit()
+            return dict(
+                msg='Granted perm: %s for user: %s in repo: %s' % (
+                    perm, username, repo_name
+                )
+            )
         except Exception:
             log.error(traceback.format_exc())
-            raise JSONRPCError('failed to edit permission %(repo)s for %(user)s'
-                            % dict(user=user_name, repo=repo_name))
+            raise JSONRPCError(
+                'failed to edit permission %(repo)s for %(user)s' % dict(
+                    user=username, repo=repo_name
+                )
+            )
 
+    @HasPermissionAnyDecorator('hg.admin')
+    def revoke_user_permission(self, apiuser, repo_name, username):
+        """
+        Revoke permission for user on given repository
+
+        :param repo_name:
+        :param username:
+        """
+
+        try:
+            repo = Repository.get_by_repo_name(repo_name)
+            if repo is None:
+                raise JSONRPCError('unknown repository %s' % repo)
+
+            user = User.get_by_username(username)
+            if user is None:
+                raise JSONRPCError('unknown user %s' % username)
+
+            RepoModel().revoke_user_permission(repo=repo_name, user=username)
+
+            Session.commit()
+            return dict(
+                msg='Revoked perm for user: %s in repo: %s' % (
+                    username, repo_name
+                )
+            )
+        except Exception:
+            log.error(traceback.format_exc())
+            raise JSONRPCError(
+                'failed to edit permission %(repo)s for %(user)s' % dict(
+                    user=username, repo=repo_name
+                )
+            )
+
+    @HasPermissionAnyDecorator('hg.admin')
+    def grant_users_group_permission(self, apiuser, repo_name, group_name, perm):
+        """
+        Grant permission for users group on given repository, or update
+        existing one if found
+
+        :param repo_name:
+        :param group_name:
+        :param perm:
+        """
+
+        try:
+            repo = Repository.get_by_repo_name(repo_name)
+            if repo is None:
+                raise JSONRPCError('unknown repository %s' % repo)
+
+            user_group = UsersGroup.get_by_group_name(group_name)
+            if user_group is None:
+                raise JSONRPCError('unknown users group %s' % user_group)
+
+            RepoModel().grant_users_group_permission(repo=repo_name,
+                                                     group_name=group_name,
+                                                     perm=perm)
+
+            Session.commit()
+            return dict(
+                msg='Granted perm: %s for group: %s in repo: %s' % (
+                    perm, group_name, repo_name
+                )
+            )
+        except Exception:
+            log.error(traceback.format_exc())
+            raise JSONRPCError(
+                'failed to edit permission %(repo)s for %(usersgr)s' % dict(
+                    usersgr=group_name, repo=repo_name
+                )
+            )
+
+    @HasPermissionAnyDecorator('hg.admin')
+    def revoke_users_group_permission(self, apiuser, repo_name, group_name):
+        """
+        Revoke permission for users group on given repository
+
+        :param repo_name:
+        :param group_name:
+        """
+
+        try:
+            repo = Repository.get_by_repo_name(repo_name)
+            if repo is None:
+                raise JSONRPCError('unknown repository %s' % repo)
+
+            user_group = UsersGroup.get_by_group_name(group_name)
+            if user_group is None:
+                raise JSONRPCError('unknown users group %s' % user_group)
+
+            RepoModel().revoke_users_group_permission(repo=repo_name,
+                                                      group_name=group_name)
+
+            Session.commit()
+            return dict(
+                msg='Revoked perm for group: %s in repo: %s' % (
+                    group_name, repo_name
+                )
+            )
+        except Exception:
+            log.error(traceback.format_exc())
+            raise JSONRPCError(
+                'failed to edit permission %(repo)s for %(usersgr)s' % dict(
+                    usersgr=group_name, repo=repo_name
+                )
+            )

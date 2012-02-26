@@ -8,9 +8,9 @@
 <%def name="breadcrumbs_links()">
     ${h.link_to(u'Home',h.url('/'))}
     &raquo;
-    ${h.link_to(c.repo_info.repo_name,h.url('summary_home',repo_name=c.repo_info.repo_name))} 
-    &raquo; 
-    ${_('Settings')} 
+    ${h.link_to(c.repo_info.repo_name,h.url('summary_home',repo_name=c.repo_info.repo_name))}
+    &raquo;
+    ${_('Settings')}
 </%def>
 
 <%def name="page_nav()">
@@ -20,7 +20,7 @@
 <div class="box">
     <!-- box / title -->
     <div class="title">
-        ${self.breadcrumbs()}      
+        ${self.breadcrumbs()}
     </div>
     ${h.form(url('repo_settings_update', repo_name=c.repo_info.repo_name),method='put')}
     <div class="form">
@@ -41,7 +41,7 @@
                 <div class="input">
                     ${h.select('repo_group','',c.repo_groups,class_="medium")}
                 </div>
-            </div>             
+            </div>
             <div class="field">
                 <div class="label label-textarea">
                     <label for="description">${_('Description')}:</label>
@@ -50,7 +50,7 @@
                     ${h.textarea('description',cols=23,rows=5)}
                 </div>
             </div>
-            
+
             <div class="field">
                 <div class="label label-checkbox">
                     <label for="private">${_('Private')}:</label>
@@ -59,7 +59,7 @@
                     ${h.checkbox('private',value="True")}
                 </div>
             </div>
-             
+
              <div class="field">
                 <div class="label">
                     <label for="">${_('Permissions')}:</label>
@@ -67,16 +67,14 @@
                 <div class="input">
                     <%include file="../admin/repos/repo_edit_perms.html"/>
                 </div>
-             
+
             <div class="buttons">
               ${h.submit('save','Save',class_="ui-button")}
               ${h.reset('reset','Reset',class_="ui-button")}
-            </div>                                                          
+            </div>
         </div>
-    </div>    
+    </div>
     ${h.end_form()}
 </div>
 </div>
-</%def> 
-       
-   
+</%def>

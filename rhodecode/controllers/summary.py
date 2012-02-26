@@ -7,7 +7,7 @@
 
     :created_on: Apr 18, 2010
     :author: marcink
-    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
+    :copyright: (C) 2010-2012 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software: you can redistribute it and/or modify
@@ -23,23 +23,28 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import traceback
 import calendar
 import logging
 from time import mktime
-from datetime import datetime, timedelta, date
+from datetime import timedelta, date
+from itertools import product
+from urlparse import urlparse
 
-from vcs.exceptions import ChangesetError
+from rhodecode.lib.vcs.exceptions import ChangesetError, EmptyRepositoryError, \
+    NodeDoesNotExistError
 
-from pylons import tmpl_context as c, request, url
+from pylons import tmpl_context as c, request, url, config
 from pylons.i18n.translation import _
 
-from rhodecode.model.db import Statistics, Repository
-from rhodecode.model.repo import RepoModel
+from beaker.cache import cache_region, region_invalidate
 
+from rhodecode.model.db import Statistics, CacheInvalidation
+from rhodecode.lib import ALL_READMES, ALL_EXTS
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.utils import EmptyChangeset
-
+from rhodecode.lib.markup_renderer import MarkupRenderer
 from rhodecode.lib.celerylib import run_task
 from rhodecode.lib.celerylib.tasks import get_commits_stats, \
     LANGUAGES_EXTENSIONS_MAP
@@ -47,6 +52,10 @@ from rhodecode.lib.helpers import RepoPage
 from rhodecode.lib.compat import json, OrderedDict
 
 log = logging.getLogger(__name__)
+
+README_FILES = [''.join([x[0][0], x[1][0]]) for x in
+                    sorted(list(product(ALL_READMES, ALL_EXTS)),
+                           key=lambda y:y[0][1] + y[1][1])]
 
 
 class SummaryController(BaseRepoController):
@@ -58,10 +67,7 @@ class SummaryController(BaseRepoController):
         super(SummaryController, self).__before__()
 
     def index(self, repo_name):
-
-        e = request.environ
         c.dbrepo = dbrepo = c.rhodecode_db_repo
-
         c.following = self.scm_model.is_following_repo(repo_name,
                                                 self.rhodecode_user.user_id)
 
@@ -72,26 +78,34 @@ class SummaryController(BaseRepoController):
                                      items_per_page=10, url=url_generator)
 
         if self.rhodecode_user.username == 'default':
-            #for default(anonymous) user we don't need to pass credentials
+            # for default(anonymous) user we don't need to pass credentials
             username = ''
             password = ''
         else:
             username = str(self.rhodecode_user.username)
             password = '@'
 
-        if e.get('wsgi.url_scheme') == 'https':
-            split_s = 'https://'
-        else:
-            split_s = 'http://'
+        parsed_url = urlparse(url.current(qualified=True))
 
-        qualified_uri = [split_s] + [url.current(qualified=True)\
-                                     .split(split_s)[-1]]
-        uri = u'%(proto)s%(user)s%(pass)s%(rest)s' \
-                % {'user': username,
-                     'pass': password,
-                     'proto': qualified_uri[0],
-                     'rest': qualified_uri[1]}
+        default_clone_uri = '{scheme}://{user}{pass}{netloc}{path}'
+
+        uri_tmpl = config.get('clone_uri', default_clone_uri)
+        uri_tmpl = uri_tmpl.replace('{', '%(').replace('}', ')s')
+
+        uri_dict = {
+           'user': username,
+           'pass': password,
+           'scheme': parsed_url.scheme,
+           'netloc': parsed_url.netloc,
+           'path': parsed_url.path
+        }
+        uri = uri_tmpl % uri_dict
+        # generate another clone url by id
+        uri_dict.update({'path': '/_%s' % c.dbrepo.repo_id})
+        uri_id = uri_tmpl % uri_dict
+
         c.clone_repo_url = uri
+        c.clone_repo_url_id = uri_id
         c.repo_tags = OrderedDict()
         for name, hash in c.rhodecode_repo.tags.items()[:10]:
             try:
@@ -161,7 +175,43 @@ class SummaryController(BaseRepoController):
         if c.enable_downloads:
             c.download_options = self._get_download_links(c.rhodecode_repo)
 
+        c.readme_data, c.readme_file = self.__get_readme_data(c.rhodecode_repo)
         return render('summary/summary.html')
+
+    def __get_readme_data(self, repo):
+
+        @cache_region('long_term')
+        def _get_readme_from_cache(key):
+            readme_data = None
+            readme_file = None
+            log.debug('Fetching readme file')
+            try:
+                cs = repo.get_changeset('tip')
+                renderer = MarkupRenderer()
+                for f in README_FILES:
+                    try:
+                        readme = cs.get_node(f)
+                        readme_file = f
+                        readme_data = renderer.render(readme.content, f)
+                        log.debug('Found readme %s' % readme_file)
+                        break
+                    except NodeDoesNotExistError:
+                        continue
+            except ChangesetError:
+                pass
+            except EmptyRepositoryError:
+                pass
+            except Exception:
+                log.error(traceback.format_exc())
+
+            return readme_data, readme_file
+
+        key = repo.name + '_README'
+        inv = CacheInvalidation.invalidate(key)
+        if inv is not None:
+            region_invalidate(_get_readme_from_cache, None, key)
+            CacheInvalidation.set_valid(inv.cache_key)
+        return _get_readme_from_cache(key)
 
     def _get_download_links(self, repo):
 

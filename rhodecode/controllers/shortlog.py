@@ -7,7 +7,7 @@
 
     :created_on: Apr 18, 2010
     :author: marcink
-    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
+    :copyright: (C) 2010-2012 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software: you can redistribute it and/or modify
@@ -30,6 +30,7 @@ from pylons import tmpl_context as c, request, url
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.helpers import RepoPage
+from pylons.controllers.util import redirect
 
 log = logging.getLogger(__name__)
 
@@ -50,8 +51,11 @@ class ShortlogController(BaseRepoController):
             return url('shortlog_home', repo_name=repo_name, size=size, **kw)
 
         c.repo_changesets = RepoPage(c.rhodecode_repo, page=p,
-                                                       items_per_page=size,
-                                                       url=url_generator)
+                                    items_per_page=size, url=url_generator)
+
+        if not c.repo_changesets:
+            return redirect(url('summary_home', repo_name=repo_name))
+
         c.shortlog_data = render('shortlog/shortlog_data.html')
         if request.environ.get('HTTP_X_PARTIAL_XHR'):
             return c.shortlog_data

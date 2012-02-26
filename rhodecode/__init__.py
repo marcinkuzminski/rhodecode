@@ -26,9 +26,9 @@
 import sys
 import platform
 
-VERSION = (1, 2, 5)
+VERSION = (1, 3, 0)
 __version__ = '.'.join((str(each) for each in VERSION[:4]))
-__dbversion__ = 3  # defines current db version for migrations
+__dbversion__ = 5  # defines current db version for migrations
 __platform__ = platform.system()
 __license__ = 'GPLv3'
 __py_version__ = sys.version_info
@@ -38,19 +38,20 @@ PLATFORM_OTHERS = ('Linux', 'Darwin', 'FreeBSD', 'OpenBSD', 'SunOS')
 
 requirements = [
     "Pylons==1.0.0",
-    "Beaker==1.5.4",
+    "Beaker==1.6.2",
     "WebHelpers>=1.2",
     "formencode==1.2.4",
     "SQLAlchemy==0.7.4",
     "Mako==0.5.0",
     "pygments>=1.4",
-    "whoosh<1.8",
+    "whoosh>=2.3.0,<2.4",
     "celery>=2.2.5,<2.3",
     "babel",
     "python-dateutil>=1.5.0,<2.0.0",
     "dulwich>=0.8.0,<0.9.0",
-    "vcs==0.2.2",
-    "webob==1.0.8"
+    "webob==1.0.8",
+    "markdown==2.1.1",
+    "docutils==0.8.1",
 ]
 
 if __py_version__ < (2, 6):
@@ -58,15 +59,15 @@ if __py_version__ < (2, 6):
     requirements.append("pysqlite")
 
 if __platform__ in PLATFORM_WIN:
-    requirements.append("mercurial==2.0.1")
+    requirements.append("mercurial>=2.1,<2.2")
 else:
     requirements.append("py-bcrypt")
-    requirements.append("mercurial==2.0.2")
+    requirements.append("mercurial>=2.1,<2.2")
 
 
 try:
     from rhodecode.lib import get_current_revision
-    _rev = get_current_revision(quiet=True)
+    _rev = get_current_revision()
 except ImportError:
     # this is needed when doing some setup.py operations
     _rev = False
@@ -82,5 +83,10 @@ def get_version():
 
 BACKENDS = {
     'hg': 'Mercurial repository',
-    #'git': 'Git repository',
+    'git': 'Git repository',
 }
+
+CELERY_ON = False
+
+# link to config for pylons
+CONFIG = {}

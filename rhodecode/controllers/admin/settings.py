@@ -7,7 +7,7 @@
 
     :created_on: Jul 14, 2010
     :author: marcink
-    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
+    :copyright: (C) 2010-2012 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software: you can redistribute it and/or modify
@@ -40,13 +40,15 @@ from rhodecode.lib.base import BaseController, render
 from rhodecode.lib.celerylib import tasks, run_task
 from rhodecode.lib.utils import repo2db_mapper, invalidate_cache, \
     set_rhodecode_config, repo_name_slug
-from rhodecode.model.db import RhodeCodeUi, Repository, Group, \
-    RhodeCodeSettings
+from rhodecode.model.db import RhodeCodeUi, Repository, RepoGroup, \
+    RhodeCodeSetting
 from rhodecode.model.forms import UserForm, ApplicationSettingsForm, \
     ApplicationUiSettingsForm
 from rhodecode.model.scm import ScmModel
 from rhodecode.model.user import UserModel
 from rhodecode.model.db import User
+from rhodecode.model.notification import EmailNotificationModel
+from rhodecode.model.meta import Session
 
 log = logging.getLogger(__name__)
 
@@ -69,7 +71,7 @@ class SettingsController(BaseController):
         """GET /admin/settings: All items in the collection"""
         # url('admin_settings')
 
-        defaults = RhodeCodeSettings.get_app_settings()
+        defaults = RhodeCodeSetting.get_app_settings()
         defaults.update(self.get_hg_ui_settings())
         return htmlfill.render(
             render('admin/settings/settings.html'),
@@ -99,7 +101,7 @@ class SettingsController(BaseController):
         # url('admin_setting', setting_id=ID)
         if setting_id == 'mapping':
             rm_obsolete = request.POST.get('destroy', False)
-            log.debug('Rescanning directories with destroy=%s', rm_obsolete)
+            log.debug('Rescanning directories with destroy=%s' % rm_obsolete)
             initial = ScmModel().repo_scan()
             log.debug('invalidating all repositories')
             for repo_name in initial.keys():
@@ -124,15 +126,15 @@ class SettingsController(BaseController):
                 form_result = application_form.to_python(dict(request.POST))
 
                 try:
-                    hgsettings1 = RhodeCodeSettings.get_by_name('title')
+                    hgsettings1 = RhodeCodeSetting.get_by_name('title')
                     hgsettings1.app_settings_value = \
                         form_result['rhodecode_title']
 
-                    hgsettings2 = RhodeCodeSettings.get_by_name('realm')
+                    hgsettings2 = RhodeCodeSetting.get_by_name('realm')
                     hgsettings2.app_settings_value = \
                         form_result['rhodecode_realm']
 
-                    hgsettings3 = RhodeCodeSettings.get_by_name('ga_code')
+                    hgsettings3 = RhodeCodeSetting.get_by_name('ga_code')
                     hgsettings3.app_settings_value = \
                         form_result['rhodecode_ga_code']
 
@@ -226,12 +228,11 @@ class SettingsController(BaseController):
                      prefix_error=False,
                      encoding="UTF-8")
 
-
         if setting_id == 'hooks':
             ui_key = request.POST.get('new_hook_ui_key')
             ui_value = request.POST.get('new_hook_ui_value')
             try:
-                
+
                 if ui_value and ui_key:
                     RhodeCodeUi.create_or_update_hook(ui_key, ui_value)
                     h.flash(_('Added new hook'),
@@ -240,13 +241,14 @@ class SettingsController(BaseController):
                 # check for edits
                 update = False
                 _d = request.POST.dict_of_lists()
-                for k, v in zip(_d.get('hook_ui_key',[]), _d.get('hook_ui_value_new',[])):
+                for k, v in zip(_d.get('hook_ui_key', []),
+                                _d.get('hook_ui_value_new', [])):
                     RhodeCodeUi.create_or_update_hook(k, v)
                     update = True
 
                 if update:
                     h.flash(_('Updated hooks'), category='success')
-
+                Session.commit()
             except:
                 log.error(traceback.format_exc())
                 h.flash(_('error occurred during hook creation'),
@@ -254,6 +256,21 @@ class SettingsController(BaseController):
 
             return redirect(url('admin_edit_setting', setting_id='hooks'))
 
+        if setting_id == 'email':
+            test_email = request.POST.get('test_email')
+            test_email_subj = 'RhodeCode TestEmail'
+            test_email_body = 'RhodeCode Email test'
+
+            test_email_html_body = EmailNotificationModel()\
+                .get_email_tmpl(EmailNotificationModel.TYPE_DEFAULT,
+                                body=test_email_body)
+
+            recipients = [test_email] if [test_email] else None
+
+            run_task(tasks.send_email, recipients, test_email_subj,
+                     test_email_body, test_email_html_body)
+
+            h.flash(_('Email task created'), category='success')
         return redirect(url('admin_settings'))
 
     @HasPermissionAllDecorator('hg.admin')
@@ -268,8 +285,8 @@ class SettingsController(BaseController):
         if setting_id == 'hooks':
             hook_id = request.POST.get('hook_id')
             RhodeCodeUi.delete(hook_id)
-            
-            
+
+
     @HasPermissionAllDecorator('hg.admin')
     def show(self, setting_id, format='html'):
         """
@@ -339,7 +356,7 @@ class SettingsController(BaseController):
             user_model.update_my_account(uid, form_result)
             h.flash(_('Your account was updated successfully'),
                     category='success')
-
+            Session.commit()
         except formencode.Invalid, errors:
             c.user = User.get(self.rhodecode_user.user_id)
             all_repos = self.sa.query(Repository)\
@@ -366,7 +383,7 @@ class SettingsController(BaseController):
     def create_repository(self):
         """GET /_admin/create_repository: Form to create a new item"""
 
-        c.repo_groups = Group.groups_choices()
+        c.repo_groups = RepoGroup.groups_choices()
         c.repo_groups_choices = map(lambda k: unicode(k[0]), c.repo_groups)
 
         new_repo = request.GET.get('repo', '')

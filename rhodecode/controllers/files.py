@@ -27,25 +27,29 @@ import os
 import logging
 import traceback
 
-from os.path import join as jn
-
-from pylons import request, response, session, tmpl_context as c, url
+from pylons import request, response, tmpl_context as c, url
 from pylons.i18n.translation import _
 from pylons.controllers.util import redirect
 from pylons.decorators import jsonify
 
-from vcs.conf import settings
-from vcs.exceptions import RepositoryError, ChangesetDoesNotExistError, \
-    EmptyRepositoryError, ImproperArchiveTypeError, VCSError, NodeAlreadyExistsError
-from vcs.nodes import FileNode, NodeKind
-from vcs.utils import diffs as differ
+from rhodecode.lib.vcs.conf import settings
+from rhodecode.lib.vcs.exceptions import RepositoryError, ChangesetDoesNotExistError, \
+    EmptyRepositoryError, ImproperArchiveTypeError, VCSError, \
+    NodeAlreadyExistsError
+from rhodecode.lib.vcs.nodes import FileNode
 
+from rhodecode.lib.compat import OrderedDict
 from rhodecode.lib import convert_line_endings, detect_mode, safe_str
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.utils import EmptyChangeset
+from rhodecode.lib import diffs
 import rhodecode.lib.helpers as h
 from rhodecode.model.repo import RepoModel
+from rhodecode.controllers.changeset import anchor_url, _ignorews_url,\
+    _context_url, get_line_ctx, get_ignore_ws
+from rhodecode.lib.diffs import wrapped_diff
+from rhodecode.model.scm import ScmModel
 
 log = logging.getLogger(__name__)
 
@@ -104,26 +108,6 @@ class FilesController(BaseRepoController):
 
         return file_node
 
-
-    def __get_paths(self, changeset, starting_path):
-        """recursive walk in root dir and return a set of all path in that dir
-        based on repository walk function
-        """
-        _files = list()
-        _dirs = list()
-
-        try:
-            tip = changeset
-            for topnode, dirs, files in tip.walk(starting_path):
-                for f in files:
-                    _files.append(f.path)
-                for d in dirs:
-                    _dirs.append(d.path)
-        except RepositoryError, e:
-            log.debug(traceback.format_exc())
-            pass
-        return _dirs, _files
-
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
                                    'repository.admin')
     def index(self, repo_name, revision, f_path):
@@ -162,9 +146,9 @@ class FilesController(BaseRepoController):
 
         # files or dirs
         try:
-            c.files_list = c.changeset.get_node(f_path)
+            c.file = c.changeset.get_node(f_path)
 
-            if c.files_list.is_file():
+            if c.file.is_file():
                 c.file_history = self._get_node_history(c.changeset, f_path)
             else:
                 c.file_history = []
@@ -405,13 +389,19 @@ class FilesController(BaseRepoController):
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
                                    'repository.admin')
     def diff(self, repo_name, f_path):
-        diff1 = request.GET.get('diff1')
-        diff2 = request.GET.get('diff2')
+        ignore_whitespace = request.GET.get('ignorews') == '1'
+        line_context = request.GET.get('context', 3)
+        diff1 = request.GET.get('diff1', '')
+        diff2 = request.GET.get('diff2', '')
         c.action = request.GET.get('diff')
         c.no_changes = diff1 == diff2
         c.f_path = f_path
         c.big_diff = False
-
+        c.anchor_url = anchor_url
+        c.ignorews_url = _ignorews_url
+        c.context_url = _context_url
+        c.changes = OrderedDict()
+        c.changes[diff2] = []
         try:
             if diff1 not in ['', None, 'None', '0' * 12, '0' * 40]:
                 c.changeset_1 = c.rhodecode_repo.get_changeset(diff1)
@@ -427,12 +417,14 @@ class FilesController(BaseRepoController):
                 c.changeset_2 = EmptyChangeset(repo=c.rhodecode_repo)
                 node2 = FileNode('.', '', changeset=c.changeset_2)
         except RepositoryError:
-            return redirect(url('files_home',
-                                repo_name=c.repo_name, f_path=f_path))
+            return redirect(url('files_home', repo_name=c.repo_name,
+                                f_path=f_path))
 
         if c.action == 'download':
-            diff = differ.DiffProcessor(differ.get_gitdiff(node1, node2),
-                                        format='gitdiff')
+            _diff = diffs.get_gitdiff(node1, node2,
+                                      ignore_whitespace=ignore_whitespace,
+                                      context=line_context)
+            diff = diffs.DiffProcessor(_diff, format='gitdiff')
 
             diff_name = '%s_vs_%s.diff' % (diff1, diff2)
             response.content_type = 'text/plain'
@@ -441,39 +433,28 @@ class FilesController(BaseRepoController):
             return diff.raw_diff()
 
         elif c.action == 'raw':
-            diff = differ.DiffProcessor(differ.get_gitdiff(node1, node2),
-                                        format='gitdiff')
+            _diff = diffs.get_gitdiff(node1, node2,
+                                      ignore_whitespace=ignore_whitespace,
+                                      context=line_context)
+            diff = diffs.DiffProcessor(_diff, format='gitdiff')
             response.content_type = 'text/plain'
             return diff.raw_diff()
 
-        elif c.action == 'diff':
-            if node1.is_binary or node2.is_binary:
-                c.cur_diff = _('Binary file')
-            elif node1.size > self.cut_off_limit or \
-                    node2.size > self.cut_off_limit:
-                c.cur_diff = ''
-                c.big_diff = True
-            else:
-                diff = differ.DiffProcessor(differ.get_gitdiff(node1, node2),
-                                        format='gitdiff')
-                c.cur_diff = diff.as_html()
         else:
+            fid = h.FID(diff2, node2.path)
+            line_context_lcl = get_line_ctx(fid, request.GET)
+            ign_whitespace_lcl = get_ignore_ws(fid, request.GET)
 
-            #default option
-            if node1.is_binary or node2.is_binary:
-                c.cur_diff = _('Binary file')
-            elif node1.size > self.cut_off_limit or \
-                    node2.size > self.cut_off_limit:
-                c.cur_diff = ''
-                c.big_diff = True
+            lim = request.GET.get('fulldiff') or self.cut_off_limit
+            _, cs1, cs2, diff, st = wrapped_diff(filenode_old=node1,
+                                         filenode_new=node2,
+                                         cut_off_limit=lim,
+                                         ignore_whitespace=ign_whitespace_lcl,
+                                         line_context=line_context_lcl,
+                                         enable_comments=False)
 
-            else:
-                diff = differ.DiffProcessor(differ.get_gitdiff(node1, node2),
-                                        format='gitdiff')
-                c.cur_diff = diff.as_html()
+            c.changes = [('', node2, diff, cs1, cs2, st,)]
 
-        if not c.cur_diff and not c.big_diff:
-            c.no_changes = True
         return render('files/file_diff.html')
 
     def _get_node_history(self, cs, f_path):
@@ -485,18 +466,16 @@ class FilesController(BaseRepoController):
         tags_group = ([], _("Tags"))
 
         for chs in changesets:
-            n_desc = 'r%s:%s' % (chs.revision, chs.short_id)
+            n_desc = 'r%s:%s (%s)' % (chs.revision, chs.short_id, chs.branch)
             changesets_group[0].append((chs.raw_id, n_desc,))
 
         hist_l.append(changesets_group)
 
         for name, chs in c.rhodecode_repo.branches.items():
-            #chs = chs.split(':')[-1]
             branches_group[0].append((chs, name),)
         hist_l.append(branches_group)
 
         for name, chs in c.rhodecode_repo.tags.items():
-            #chs = chs.split(':')[-1]
             tags_group[0].append((chs, name),)
         hist_l.append(tags_group)
 
@@ -508,6 +487,6 @@ class FilesController(BaseRepoController):
     def nodelist(self, repo_name, revision, f_path):
         if request.environ.get('HTTP_X_PARTIAL_XHR'):
             cs = self.__get_cs_or_redirect(revision, repo_name)
-            _d, _f = self.__get_paths(cs, f_path)
+            _d, _f = ScmModel().get_nodes(repo_name, cs.raw_id, f_path,
+                                          flat=False)
             return _d + _f
-

@@ -13,7 +13,7 @@
 </%def>
 
 <%def name="page_nav()">
-		${self.menu('files')}     
+		${self.menu('files')}
 </%def>
 <%def name="main()">
 <div class="box">
@@ -23,55 +23,55 @@
         <ul class="links">
             <li>
               <span style="text-transform: uppercase;"><a href="#">${_('branch')}: ${c.cs.branch}</a></span>
-            </li>          
-        </ul>          
+            </li>
+        </ul>
     </div>
     <div class="table">
 		<div id="files_data">
 			<h3 class="files_location">${_('Location')}: ${h.files_breadcrumbs(c.repo_name,c.cs.revision,c.file.path)}</h3>
-			<dl class="overview">
-				<dt>${_('Revision')}</dt>
-				<dd>${h.link_to("r%s:%s" % (c.file.last_changeset.revision,h.short_id(c.file.last_changeset.raw_id)),
-						h.url('changeset_home',repo_name=c.repo_name,revision=c.file.last_changeset.raw_id))} </dd>
-				<dt>${_('Size')}</dt>
-				<dd>${h.format_byte_size(c.file.size,binary=True)}</dd>
-    			<dt>${_('Mimetype')}</dt>
-				<dd>${c.file.mimetype}</dd>				
-				<dt>${_('Options')}</dt>
-				<dd>${h.link_to(_('show source'),
-						h.url('files_home',repo_name=c.repo_name,revision=c.cs.raw_id,f_path=c.f_path))}  
-					/ ${h.link_to(_('show as raw'),
-						h.url('files_raw_home',repo_name=c.repo_name,revision=c.cs.raw_id,f_path=c.f_path))}
-					/ ${h.link_to(_('download as raw'),
-						h.url('files_rawfile_home',repo_name=c.repo_name,revision=c.cs.raw_id,f_path=c.f_path))}
-                    % if h.HasRepoPermissionAny('repository.write','repository.admin')(c.repo_name):
-                     % if not c.file.is_binary:                   
-                    / ${h.link_to(_('edit'),
-                        h.url('files_edit_home',repo_name=c.repo_name,revision=c.cs.raw_id,f_path=c.f_path))}
-                     % endif 
-                    % endif						
-				</dd>
-			    <dt>${_('History')}</dt>
+			<dl>
+			    <dt style="padding-top:10px;font-size:16px">${_('History')}</dt>
 			    <dd>
 			        <div>
 			        ${h.form(h.url('files_diff_home',repo_name=c.repo_name,f_path=c.f_path),method='get')}
 			        ${h.hidden('diff2',c.file.last_changeset.raw_id)}
 			        ${h.select('diff1',c.file.last_changeset.raw_id,c.file_history)}
-			        ${h.submit('diff','diff to revision',class_="ui-button-small")}
-			        ${h.submit('show_rev','show at revision',class_="ui-button-small")}
+			        ${h.submit('diff','diff to revision',class_="ui-btn")}
+			        ${h.submit('show_rev','show at revision',class_="ui-btn")}
 			        ${h.end_form()}
 			        </div>
-			    </dd>					
+			    </dd>
 			</dl>
 			<div id="body" class="codeblock">
-				<div class="code-header">
-					<div class="revision">${c.file.name}@r${c.file.last_changeset.revision}:${h.short_id(c.file.last_changeset.raw_id)}</div>
-					<div class="commit">"${c.file.message}"</div>
-				</div>
+                <div class="code-header">
+                    <div class="stats">
+                        <div class="left"><img src="${h.url('/images/icons/file.png')}"/></div>
+                        <div class="left item">${h.link_to("r%s:%s" % (c.file.last_changeset.revision,h.short_id(c.file.last_changeset.raw_id)),h.url('changeset_home',repo_name=c.repo_name,revision=c.file.last_changeset.raw_id))}</div>
+                        <div class="left item">${h.format_byte_size(c.file.size,binary=True)}</div>
+                        <div class="left item last">${c.file.mimetype}</div>
+                        <div class="buttons">
+                          ${h.link_to(_('show source'),h.url('files_home',repo_name=c.repo_name,revision=c.cs.raw_id,f_path=c.f_path),class_="ui-btn")}
+                          ${h.link_to(_('show as raw'),h.url('files_raw_home',repo_name=c.repo_name,revision=c.cs.raw_id,f_path=c.f_path),class_="ui-btn")}
+                          ${h.link_to(_('download as raw'),h.url('files_rawfile_home',repo_name=c.repo_name,revision=c.cs.raw_id,f_path=c.f_path),class_="ui-btn")}
+                          % if h.HasRepoPermissionAny('repository.write','repository.admin')(c.repo_name):
+                           % if not c.file.is_binary:
+                            ${h.link_to(_('edit'),h.url('files_edit_home',repo_name=c.repo_name,revision=c.cs.raw_id,f_path=c.f_path),class_="ui-btn")}
+                           % endif
+                          % endif
+                        </div>
+                    </div>
+                    <div class="author">
+                        <div class="gravatar">
+                            <img alt="gravatar" src="${h.gravatar_url(h.email(c.cs.author),16)}"/>
+                        </div>
+                        <div title="${c.cs.author}" class="user">${h.person(c.cs.author)}</div>
+                    </div>
+                    <div class="commit">${c.file.last_changeset.message}</div>
+                </div>
 				<div class="code-body">
 			       %if c.file.is_binary:
 			           ${_('Binary file (%s)') % c.file.mimetype}
-			       %else:				
+			       %else:
 					% if c.file.size < c.cut_off_limit:
 						${h.pygmentize_annotation(c.repo_name,c.file,linenos=True,anchorlinenos=True,lineanchors='L',cssclass="code-highlight")}
 					%else:
@@ -81,13 +81,13 @@
 			       <script type="text/javascript">
 			           function highlight_lines(lines){
 			               for(pos in lines){
-			                 YUD.setStyle('L'+lines[pos],'background-color','#FFFFBE');                       
+			                 YUD.setStyle('L'+lines[pos],'background-color','#FFFFBE');
 			               }
-			           }       
+			           }
 			           page_highlights = location.href.substring(location.href.indexOf('#')+1).split('L');
 			           if (page_highlights.length == 2){
 			              highlight_ranges  = page_highlights[1].split(",");
-			
+
 			              var h_lines = [];
 			              for (pos in highlight_ranges){
 			                   var _range = highlight_ranges[pos].split('-');
@@ -98,26 +98,26 @@
 			                           for(var i=start;i<=end;i++){
 			                               h_lines.push(i);
 			                           }
-			                       } 
+			                       }
 			                   }
 			                   else{
 			                       h_lines.push(parseInt(highlight_ranges[pos]));
 			                   }
 			             }
 			           highlight_lines(h_lines);
-			           
-			           //remember original location 
+
+			           //remember original location
 			           var old_hash  = location.href.substring(location.href.indexOf('#'));
-			           
-			           // this makes a jump to anchor moved by 3 posstions for padding 
+
+			           // this makes a jump to anchor moved by 3 posstions for padding
 			           window.location.hash = '#L'+Math.max(parseInt(h_lines[0])-3,1);
-			           
-			           //sets old anchor 
+
+			           //sets old anchor
 			           window.location.hash = old_hash;
-			           
+
 			           }
-			       </script>					
-				   %endif				
+			       </script>
+				   %endif
 				</div>
 			</div>
             <script type="text/javascript">
@@ -129,8 +129,8 @@
                     window.location = url;
                     });
                });
-            </script>			
-		</div>    
+            </script>
+		</div>
     </div>
-</div>    
-</%def>   
+</div>
+</%def>

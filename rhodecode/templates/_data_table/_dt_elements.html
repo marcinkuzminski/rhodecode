@@ -1,0 +1,78 @@
+## DATA TABLE RE USABLE ELEMENTS
+## usage:
+## <%namespace name="dt" file="/_data_table/_dt_elements.html"/>
+
+<%def name="quick_menu(repo_name)">
+  <ul class="menu_items hidden">
+    <li style="border-top:1px solid #003367;margin-left:18px;padding-left:-99px"></li>
+    <li>
+       <a title="${_('Summary')}" href="${h.url('summary_home',repo_name=repo_name)}">
+       <span class="icon">
+           <img src="${h.url('/images/icons/clipboard_16.png')}" alt="${_('Summary')}" />
+       </span>
+       <span>${_('Summary')}</span>
+       </a>
+    </li>
+    <li>
+       <a title="${_('Changelog')}" href="${h.url('changelog_home',repo_name=repo_name)}">
+       <span class="icon">
+           <img src="${h.url('/images/icons/time.png')}" alt="${_('Changelog')}" />
+       </span>
+       <span>${_('Changelog')}</span>
+       </a>
+    </li>
+    <li>
+       <a title="${_('Files')}" href="${h.url('files_home',repo_name=repo_name)}">
+       <span class="icon">
+           <img src="${h.url('/images/icons/file.png')}" alt="${_('Files')}" />
+       </span>
+       <span>${_('Files')}</span>
+       </a>
+    </li>
+    <li>
+       <a title="${_('Fork')}" href="${h.url('repo_fork_home',repo_name=repo_name)}">
+       <span class="icon">
+           <img src="${h.url('/images/icons/arrow_divide.png')}" alt="${_('Fork')}" />
+       </span>
+       <span>${_('Fork')}</span>
+       </a>
+    </li>
+  </ul>
+</%def>
+
+<%def name="repo_name(name,rtype,private,fork_of)">
+  <div style="white-space: nowrap">
+   ##TYPE OF REPO
+   %if h.is_hg(rtype):
+     <img class="icon" title="${_('Mercurial repository')}" alt="${_('Mercurial repository')}" src="${h.url('/images/icons/hgicon.png')}"/>
+   %elif h.is_git(rtype):
+     <img class="icon" title="${_('Git repository')}" alt="${_('Git repository')}" src="${h.url('/images/icons/giticon.png')}"/>
+   %endif
+
+   ##PRIVATE/PUBLIC
+   %if private:
+      <img class="icon" title="${_('private repository')}" alt="${_('private repository')}" src="${h.url('/images/icons/lock.png')}"/>
+   %else:
+      <img class="icon" title="${_('public repository')}" alt="${_('public repository')}" src="${h.url('/images/icons/lock_open.png')}"/>
+   %endif
+
+   ##NAME
+   ${h.link_to(name,h.url('summary_home',repo_name=name),class_="repo_name")}
+   %if fork_of:
+        <a href="${h.url('summary_home',repo_name=fork_of)}">
+        <img class="icon" alt="${_('fork')}" title="${_('Fork of')} ${fork_of}" src="${h.url('/images/icons/arrow_divide.png')}"/></a>
+   %endif
+  </div>
+</%def>
+
+
+
+<%def name="revision(name,rev,tip,author,last_msg)">
+  <div>
+  %if rev >= 0:
+      <pre><a title="${h.tooltip('%s:\n\n%s' % (author,last_msg))}" class="tooltip" href="${h.url('changeset_home',repo_name=name,revision=tip)}">${'r%s:%s' % (rev,h.short_id(tip))}</a></pre>
+  %else:
+      ${_('No changesets yet')}
+  %endif
+  </div>
+</%def>

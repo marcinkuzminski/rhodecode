@@ -5,9 +5,9 @@
 
 
     Package for testing various lib/helper functions in rhodecode
-    
+
     :created_on: Jun 9, 2011
-    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
+    :copyright: (C) 2011-2012 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software: you can redistribute it and/or modify
@@ -103,3 +103,12 @@ class TestLibs(unittest.TestCase):
         for case in test_cases:
             self.assertEqual(str2bool(case[0]), case[1])
 
+
+    def test_mention_extractor(self):
+        from rhodecode.lib import extract_mentioned_users
+        sample = ("@first hi there @marcink here's my email marcin@email.com "
+                  "@lukaszb check it pls @ ttwelve @D[] @one@two@three "
+                  "@MARCIN    @maRCiN @2one_more22")
+        s = ['2one_more22', 'D', 'MARCIN', 'first', 'lukaszb',
+             'maRCiN', 'marcink', 'one']
+        self.assertEqual(s, extract_mentioned_users(sample))

@@ -3,11 +3,12 @@
     rhodecode.lib.backup_manager
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    Mercurial repositories backup manager, it allows to backups all 
+    Mercurial repositories backup manager, it allows to backups all
     repositories and send it to backup server using RSA key via ssh.
 
     :created_on: Feb 28, 2010
-    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
+    :author: marcink
+    :copyright: (C) 2010-2012 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software: you can redistribute it and/or modify

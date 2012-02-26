@@ -7,7 +7,7 @@
 
     :created_on: Aug 6, 2010
     :author: marcink
-    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
+    :copyright: (C) 2010-2012 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software: you can redistribute it and/or modify
@@ -33,15 +33,14 @@ from rhodecode.lib.utils import action_logger
 
 
 def repo_size(ui, repo, hooktype=None, **kwargs):
-    """Presents size of repository after push
+    """
+    Presents size of repository after push
 
     :param ui:
     :param repo:
     :param hooktype:
     """
 
-    if hooktype != 'changegroup':
-        return False
     size_hg, size_root = 0, 0
     for path, dirs, files in os.walk(repo.root):
         if path.find('.hg') != -1:
@@ -60,12 +59,20 @@ def repo_size(ui, repo, hooktype=None, **kwargs):
     size_hg_f = h.format_byte_size(size_hg)
     size_root_f = h.format_byte_size(size_root)
     size_total_f = h.format_byte_size(size_root + size_hg)
-    sys.stdout.write('Repository size .hg:%s repo:%s total:%s\n' \
-                     % (size_hg_f, size_root_f, size_total_f))
+
+    last_cs = repo[len(repo) - 1]
+
+    msg = ('Repository size .hg:%s repo:%s total:%s\n'
+           'Last revision is now r%s:%s\n') % (
+        size_hg_f, size_root_f, size_total_f, last_cs.rev(), last_cs.hex()[:12]
+    )
+
+    sys.stdout.write(msg)
 
 
 def log_pull_action(ui, repo, **kwargs):
-    """Logs user last pull action
+    """
+    Logs user last pull action
 
     :param ui:
     :param repo:
@@ -76,13 +83,15 @@ def log_pull_action(ui, repo, **kwargs):
     repository = extra_params['repository']
     action = 'pull'
 
-    action_logger(username, action, repository, extra_params['ip'])
+    action_logger(username, action, repository, extra_params['ip'],
+                  commit=True)
 
     return 0
 
 
 def log_push_action(ui, repo, **kwargs):
-    """Maps user last push action to new changeset id, from mercurial
+    """
+    Maps user last push action to new changeset id, from mercurial
 
     :param ui:
     :param repo:
@@ -110,6 +119,37 @@ def log_push_action(ui, repo, **kwargs):
 
     action = action % ','.join(revs)
 
-    action_logger(username, action, repository, extra_params['ip'])
+    action_logger(username, action, repository, extra_params['ip'],
+                  commit=True)
+
+    return 0
+
+
+def log_create_repository(repository_dict, created_by, **kwargs):
+    """
+    Post create repository Hook. This is a dummy function for admins to re-use
+    if needed
+
+    :param repository: dict dump of repository object
+    :param created_by: username who created repository
+    :param created_date: date of creation
+
+    available keys of repository_dict:
+
+     'repo_type',
+     'description',
+     'private',
+     'created_on',
+     'enable_downloads',
+     'repo_id',
+     'user_id',
+     'enable_statistics',
+     'clone_uri',
+     'fork_id',
+     'group_id',
+     'repo_name'
+
+    """
+
 
     return 0

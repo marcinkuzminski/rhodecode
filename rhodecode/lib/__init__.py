@@ -24,6 +24,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import re
+from rhodecode.lib.vcs.utils.lazy import LazyProperty
+
 
 def __get_lem():
     from pygments import lexers
@@ -66,6 +69,34 @@ ADDITIONAL_MAPPINGS = {'xaml': 'XAML'}
 
 LANGUAGES_EXTENSIONS_MAP.update(ADDITIONAL_MAPPINGS)
 
+# list of readme files to search in file tree and display in summary
+# attached weights defines the search  order lower is first
+ALL_READMES = [
+    ('readme', 0), ('README', 0), ('Readme', 0),
+    ('doc/readme', 1), ('doc/README', 1), ('doc/Readme', 1),
+    ('Docs/readme', 2), ('Docs/README', 2), ('Docs/Readme', 2),
+    ('DOCS/readme', 2), ('DOCS/README', 2), ('DOCS/Readme', 2),
+    ('docs/readme', 2), ('docs/README', 2), ('docs/Readme', 2),
+]
+
+# extension together with weights to search lower is first
+RST_EXTS = [
+    ('', 0), ('.rst', 1), ('.rest', 1),
+    ('.RST', 2), ('.REST', 2),
+    ('.txt', 3), ('.TXT', 3)
+]
+
+MARKDOWN_EXTS = [
+    ('.md', 1), ('.MD', 1),
+    ('.mkdn', 2), ('.MKDN', 2),
+    ('.mdown', 3), ('.MDOWN', 3),
+    ('.markdown', 4), ('.MARKDOWN', 4)
+]
+
+PLAIN_EXTS = [('.text', 2), ('.TEXT', 2)]
+
+ALL_EXTS = MARKDOWN_EXTS + RST_EXTS + PLAIN_EXTS
+
 
 def str2bool(_str):
     """
@@ -107,7 +138,6 @@ def convert_line_endings(line, mode):
             line = replace(line, '\r\n', '\r')
             line = replace(line, '\n', '\r')
     elif mode == 2:
-            import re
             line = re.sub("\r(?!\n)|(?<!\r)\n", "\r\n", line)
     return line
 
@@ -151,7 +181,7 @@ def generate_api_key(username, salt=None):
     return hashlib.sha1(username + salt).hexdigest()
 
 
-def safe_unicode(str_, from_encoding='utf8'):
+def safe_unicode(str_, from_encoding=None):
     """
     safe unicode function. Does few trick to turn str_ into unicode
 
@@ -164,6 +194,11 @@ def safe_unicode(str_, from_encoding='utf8'):
     """
     if isinstance(str_, unicode):
         return str_
+
+    if not from_encoding:
+        import rhodecode
+        DEFAULT_ENCODING = rhodecode.CONFIG.get('default_encoding','utf8')
+        from_encoding = DEFAULT_ENCODING
 
     try:
         return unicode(str_)
@@ -184,10 +219,11 @@ def safe_unicode(str_, from_encoding='utf8'):
     except (ImportError, UnicodeDecodeError, Exception):
         return unicode(str_, from_encoding, 'replace')
 
-def safe_str(unicode_, to_encoding='utf8'):
+
+def safe_str(unicode_, to_encoding=None):
     """
     safe str function. Does few trick to turn unicode_ into string
-     
+
     In case of UnicodeEncodeError we try to return it with encoding detected
     by chardet library if it fails fallback to string with errors replaced
 
@@ -199,8 +235,16 @@ def safe_str(unicode_, to_encoding='utf8'):
     if not isinstance(unicode_, basestring):
         return str(unicode_)
 
+    if not isinstance(unicode_, basestring):
+        return str(unicode_)
+
     if isinstance(unicode_, str):
         return unicode_
+
+    if not to_encoding:
+        import rhodecode
+        DEFAULT_ENCODING = rhodecode.CONFIG.get('default_encoding','utf8')
+        to_encoding = DEFAULT_ENCODING
 
     try:
         return unicode_.encode(to_encoding)
@@ -221,11 +265,10 @@ def safe_str(unicode_, to_encoding='utf8'):
     return safe_str
 
 
-
 def engine_from_config(configuration, prefix='sqlalchemy.', **kwargs):
     """
     Custom engine_from_config functions that makes sure we use NullPool for
-    file based sqlite databases. This prevents errors on sqlite. This only 
+    file based sqlite databases. This prevents errors on sqlite. This only
     applies to sqlalchemy versions < 0.7.0
 
     """
@@ -284,7 +327,7 @@ def engine_from_config(configuration, prefix='sqlalchemy.', **kwargs):
 def age(curdate):
     """
     turns a datetime into an age string.
-    
+
     :param curdate: datetime object
     :rtype: unicode
     :returns: unicode words describing age
@@ -293,7 +336,7 @@ def age(curdate):
     from datetime import datetime
     from webhelpers.date import time_ago_in_words
 
-    _ = lambda s:s
+    _ = lambda s: s
 
     if not curdate:
         return ''
@@ -310,7 +353,8 @@ def age(curdate):
     pos = 1
     for scale in agescales:
         if scale[1] <= age_seconds:
-            if pos == 6:pos = 5
+            if pos == 6:
+                pos = 5
             return '%s %s' % (time_ago_in_words(curdate,
                                                 agescales[pos][0]), _('ago'))
         pos += 1
@@ -321,10 +365,10 @@ def age(curdate):
 def uri_filter(uri):
     """
     Removes user:password from given url string
-    
+
     :param uri:
     :rtype: unicode
-    :returns: filtered list of strings  
+    :returns: filtered list of strings
     """
     if not uri:
         return ''
@@ -353,7 +397,7 @@ def uri_filter(uri):
 def credentials_filter(uri):
     """
     Returns a url with removed credentials
-    
+
     :param uri:
     """
 
@@ -364,16 +408,17 @@ def credentials_filter(uri):
 
     return ''.join(uri)
 
+
 def get_changeset_safe(repo, rev):
     """
-    Safe version of get_changeset if this changeset doesn't exists for a 
+    Safe version of get_changeset if this changeset doesn't exists for a
     repo it returns a Dummy one instead
-    
+
     :param repo:
     :param rev:
     """
-    from vcs.backends.base import BaseRepository
-    from vcs.exceptions import RepositoryError
+    from rhodecode.lib.vcs.backends.base import BaseRepository
+    from rhodecode.lib.vcs.exceptions import RepositoryError
     if not isinstance(repo, BaseRepository):
         raise Exception('You must pass an Repository '
                         'object as first argument got %s', type(repo))
@@ -390,13 +435,13 @@ def get_current_revision(quiet=False):
     """
     Returns tuple of (number, id) from repository containing this package
     or None if repository could not be found.
-    
+
     :param quiet: prints error for fetching revision if True
     """
 
     try:
-        from vcs import get_repo
-        from vcs.utils.helpers import get_scm
+        from rhodecode.lib.vcs import get_repo
+        from rhodecode.lib.vcs.utils.helpers import get_scm
         repopath = os.path.join(os.path.dirname(__file__), '..', '..')
         scm = get_scm(repopath)[0]
         repo = get_repo(path=repopath, alias=scm)
@@ -408,3 +453,15 @@ def get_current_revision(quiet=False):
                    "was: %s" % err)
         return None
 
+
+def extract_mentioned_users(s):
+    """
+    Returns unique usernames from given string s that have @mention
+
+    :param s: string to get mentions
+    """
+    usrs = {}
+    for username in re.findall(r'(?:^@|\s@)(\w+)', s):
+        usrs[username] = username
+
+    return sorted(usrs.keys())

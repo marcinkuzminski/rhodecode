@@ -8,7 +8,7 @@
 
     :created_on: Apr 28, 2010
     :author: marcink
-    :copyright: (C) 2009-2010 Marcin Kuzminski <marcin@python-works.com>
+    :copyright: (C) 2010-2012 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software: you can redistribute it and/or modify
@@ -27,19 +27,16 @@
 import os
 import logging
 import traceback
-import time
 
 from mercurial.error import RepoError
 from mercurial.hgweb import hgweb_mod
 
-from paste.auth.basic import AuthBasicAuthenticator
 from paste.httpheaders import REMOTE_USER, AUTH_TYPE
 
 from rhodecode.lib import safe_str
-from rhodecode.lib.auth import authfunc, HasPermissionAnyMiddleware
-from rhodecode.lib.utils import make_ui, invalidate_cache, \
-    is_valid_repo, ui_sections
-from rhodecode.model import meta
+from rhodecode.lib.base import BaseVCSController
+from rhodecode.lib.auth import get_container_username
+from rhodecode.lib.utils import make_ui, is_valid_repo, ui_sections
 from rhodecode.model.db import User
 
 from webob.exc import HTTPNotFound, HTTPForbidden, HTTPInternalServerError
@@ -57,25 +54,7 @@ def is_mercurial(environ):
     return False
 
 
-class SimpleHg(object):
-
-    def __init__(self, application, config):
-        self.application = application
-        self.config = config
-        # base path of repo locations
-        self.basepath = self.config['base_path']
-        #authenticate this mercurial request using authfunc
-        self.authenticate = AuthBasicAuthenticator('', authfunc)
-        self.ipaddr = '0.0.0.0'
-
-    def __call__(self, environ, start_response):
-        start = time.time()
-        try:
-            return self._handle_request(environ, start_response)
-        finally:
-            log = logging.getLogger(self.__class__.__name__)
-            log.debug('Request time: %.3fs' % (time.time() - start))
-            meta.Session.remove()
+class SimpleHg(BaseVCSController):
 
     def _handle_request(self, environ, start_response):
         if not is_mercurial(environ):
@@ -101,7 +80,6 @@ class SimpleHg(object):
         # GET ACTION PULL or PUSH
         #======================================================================
         action = self.__get_action(environ)
-
         #======================================================================
         # CHECK ANONYMOUS PERMISSION
         #======================================================================
@@ -109,9 +87,8 @@ class SimpleHg(object):
             anonymous_user = self.__get_user('default')
 
             username = anonymous_user.username
-            anonymous_perm = self.__check_permission(action,
-                                                     anonymous_user,
-                                                     repo_name)
+            anonymous_perm = self._check_permission(action, anonymous_user,
+                                                    repo_name)
 
             if anonymous_perm is not True or anonymous_user.active is False:
                 if anonymous_perm is not True:
@@ -125,26 +102,28 @@ class SimpleHg(object):
                 # NEED TO AUTHENTICATE AND ASK FOR AUTH USER PERMISSIONS
                 #==============================================================
 
-                if not REMOTE_USER(environ):
+                # Attempting to retrieve username from the container
+                username = get_container_username(environ, self.config)
+
+                # If not authenticated by the container, running basic auth
+                if not username:
                     self.authenticate.realm = \
                         safe_str(self.config['rhodecode_realm'])
                     result = self.authenticate(environ)
                     if isinstance(result, str):
                         AUTH_TYPE.update(environ, 'basic')
                         REMOTE_USER.update(environ, result)
+                        username = result
                     else:
                         return result.wsgi_application(environ, start_response)
 
                 #==============================================================
-                # CHECK PERMISSIONS FOR THIS REQUEST USING GIVEN USERNAME FROM
-                # BASIC AUTH
+                # CHECK PERMISSIONS FOR THIS REQUEST USING GIVEN USERNAME
                 #==============================================================
-
                 if action in ['pull', 'push']:
-                    username = REMOTE_USER(environ)
                     try:
                         user = self.__get_user(username)
-                        if user is None:
+                        if user is None or not user.active:
                             return HTTPForbidden()(environ, start_response)
                         username = user.username
                     except:
@@ -153,7 +132,7 @@ class SimpleHg(object):
                                                          start_response)
 
                     #check permissions for this repository
-                    perm = self.__check_permission(action, user,
+                    perm = self._check_permission(action, user,
                                                    repo_name)
                     if perm is not True:
                         return HTTPForbidden()(environ, start_response)
@@ -173,16 +152,15 @@ class SimpleHg(object):
         baseui = make_ui('db')
         self.__inject_extras(repo_path, baseui, extras)
 
-
         # quick check if that dir exists...
         if is_valid_repo(repo_name, self.basepath) is False:
             return HTTPNotFound()(environ, start_response)
 
         try:
-            #invalidate cache on push
+            # invalidate cache on push
             if action == 'push':
-                self.__invalidate_cache(repo_name)
-
+                self._invalidate_cache(repo_name)
+            log.info('%s action on HG repo "%s"' % (action, repo_name))
             app = self.__make_app(repo_path, baseui, extras)
             return app(environ, start_response)
         except RepoError, e:
@@ -199,32 +177,6 @@ class SimpleHg(object):
         """
         return hgweb_mod.hgweb(repo_name, name=repo_name, baseui=baseui)
 
-
-    def __check_permission(self, action, user, repo_name):
-        """
-        Checks permissions using action (push/pull) user and repository
-        name
-
-        :param action: push or pull action
-        :param user: user instance
-        :param repo_name: repository name
-        """
-        if action == 'push':
-            if not HasPermissionAnyMiddleware('repository.write',
-                                              'repository.admin')(user,
-                                                                  repo_name):
-                return False
-
-        else:
-            #any other action need at least read permission
-            if not HasPermissionAnyMiddleware('repository.read',
-                                              'repository.write',
-                                              'repository.admin')(user,
-                                                                  repo_name):
-                return False
-
-        return True
-
     def __get_repository(self, environ):
         """
         Get's repository name out of PATH_INFO header
@@ -232,6 +184,7 @@ class SimpleHg(object):
         :param environ: environ where PATH_INFO is stored
         """
         try:
+            environ['PATH_INFO'] = self._get_by_id(environ['PATH_INFO'])
             repo_name = '/'.join(environ['PATH_INFO'].split('/')[1:])
             if repo_name.endswith('/'):
                 repo_name = repo_name.rstrip('/')
@@ -265,18 +218,12 @@ class SimpleHg(object):
                 else:
                     return 'pull'
 
-    def __invalidate_cache(self, repo_name):
-        """we know that some change was made to repositories and we should
-        invalidate the cache to see the changes right away but only for
-        push requests"""
-        invalidate_cache('get_repo_cached_%s' % repo_name)
-
     def __inject_extras(self, repo_path, baseui, extras={}):
         """
         Injects some extra params into baseui instance
-        
+
         also overwrites global settings with those takes from local hgrc file
-        
+
         :param baseui: baseui instance
         :param extras: dict with extra params to put into baseui
         """
@@ -298,4 +245,3 @@ class SimpleHg(object):
             for section in ui_sections:
                 for k, v in repoui.configitems(section):
                     baseui.setconfig(section, k, v)
-

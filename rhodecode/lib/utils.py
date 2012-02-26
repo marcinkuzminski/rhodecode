@@ -7,7 +7,7 @@
 
     :created_on: Apr 18, 2010
     :author: marcink
-    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
+    :copyright: (C) 2010-2012 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software: you can redistribute it and/or modify
@@ -29,6 +29,9 @@ import datetime
 import traceback
 import paste
 import beaker
+import tarfile
+import shutil
+from os.path import abspath
 from os.path import dirname as dn, join as jn
 
 from paste.script.command import Command, BadCommand
@@ -37,25 +40,27 @@ from mercurial import ui, config
 
 from webhelpers.text import collapse, remove_formatting, strip_tags
 
-from vcs import get_backend
-from vcs.backends.base import BaseChangeset
-from vcs.utils.lazy import LazyProperty
-from vcs.utils.helpers import get_scm
-from vcs.exceptions import VCSError
+from rhodecode.lib.vcs import get_backend
+from rhodecode.lib.vcs.backends.base import BaseChangeset
+from rhodecode.lib.vcs.utils.lazy import LazyProperty
+from rhodecode.lib.vcs.utils.helpers import get_scm
+from rhodecode.lib.vcs.exceptions import VCSError
+
+from rhodecode.lib.caching_query import FromCache
 
 from rhodecode.model import meta
-from rhodecode.model.caching_query import FromCache
-from rhodecode.model.db import Repository, User, RhodeCodeUi, UserLog, Group, \
-    RhodeCodeSettings
-from rhodecode.model.repo import RepoModel
+from rhodecode.model.db import Repository, User, RhodeCodeUi, \
+    UserLog, RepoGroup, RhodeCodeSetting, UserRepoGroupToPerm
+from rhodecode.model.meta import Session
+from rhodecode.model.repos_group import ReposGroupModel
 
 log = logging.getLogger(__name__)
 
 
-def recursive_replace(str, replace=' '):
+def recursive_replace(str_, replace=' '):
     """Recursive replace of given sign to just one instance
 
-    :param str: given string
+    :param str_: given string
     :param replace: char to find and replace multiple instances
 
     Examples::
@@ -63,11 +68,11 @@ def recursive_replace(str, replace=' '):
     'Mighty-Mighty-Bo-sstones'
     """
 
-    if str.find(replace * 2) == -1:
-        return str
+    if str_.find(replace * 2) == -1:
+        return str_
     else:
-        str = str.replace(replace * 2, replace)
-        return recursive_replace(str, replace)
+        str_ = str_.replace(replace * 2, replace)
+        return recursive_replace(str_, replace)
 
 
 def repo_name_slug(value):
@@ -90,7 +95,11 @@ def get_repo_slug(request):
     return request.environ['pylons.routes_dict'].get('repo_name')
 
 
-def action_logger(user, action, repo, ipaddr='', sa=None):
+def get_repos_group_slug(request):
+    return request.environ['pylons.routes_dict'].get('group_name')
+
+
+def action_logger(user, action, repo, ipaddr='', sa=None, commit=False):
     """
     Action logger for various actions made by users
 
@@ -106,7 +115,7 @@ def action_logger(user, action, repo, ipaddr='', sa=None):
     """
 
     if not sa:
-        sa = meta.Session()
+        sa = meta.Session
 
     try:
         if hasattr(user, 'user_id'):
@@ -116,13 +125,12 @@ def action_logger(user, action, repo, ipaddr='', sa=None):
         else:
             raise Exception('You have to provide user object or username')
 
-        rm = RepoModel()
         if hasattr(repo, 'repo_id'):
-            repo_obj = rm.get(repo.repo_id, cache=False)
+            repo_obj = Repository.get(repo.repo_id)
             repo_name = repo_obj.repo_name
         elif  isinstance(repo, basestring):
             repo_name = repo.lstrip('/')
-            repo_obj = rm.get_by_repo_name(repo_name, cache=False)
+            repo_obj = Repository.get_by_repo_name(repo_name)
         else:
             raise Exception('You have to provide repository to action logger')
 
@@ -136,26 +144,25 @@ def action_logger(user, action, repo, ipaddr='', sa=None):
         user_log.action_date = datetime.datetime.now()
         user_log.user_ip = ipaddr
         sa.add(user_log)
-        sa.commit()
 
-        log.info('Adding user %s, action %s on %s', user_obj, action, repo)
+        log.info('Adding user %s, action %s on %s' % (user_obj, action, repo))
+        if commit:
+            sa.commit()
     except:
         log.error(traceback.format_exc())
-        sa.rollback()
+        raise
 
 
 def get_repos(path, recursive=False):
     """
     Scans given path for repos and return (name,(type,path)) tuple
 
-    :param path: path to scann for repositories
+    :param path: path to scan for repositories
     :param recursive: recursive search and return names with subdirs in front
     """
-    from vcs.utils.helpers import get_scm
-    from vcs.exceptions import VCSError
 
     # remove ending slash for better results
-    path = path.rstrip('/')
+    path = path.rstrip(os.sep)
 
     def _get_repos(p):
         if not os.access(p, os.W_OK):
@@ -195,10 +202,11 @@ def is_valid_repo(repo_name, base_path):
     except VCSError:
         return False
 
+
 def is_valid_repos_group(repos_group_name, base_path):
     """
     Returns True if given path is a repos group False otherwise
-    
+
     :param repo_name:
     :param base_path:
     """
@@ -213,6 +221,7 @@ def is_valid_repos_group(repos_group_name, base_path):
         return True
 
     return False
+
 
 def ask_ok(prompt, retries=4, complaint='Yes or no, please!'):
     while True:
@@ -250,28 +259,28 @@ def make_ui(read_from='file', path=None, checkpaths=True):
 
     baseui = ui.ui()
 
-    #clean the baseui object
+    # clean the baseui object
     baseui._ocfg = config.config()
     baseui._ucfg = config.config()
     baseui._tcfg = config.config()
 
     if read_from == 'file':
         if not os.path.isfile(path):
-            log.warning('Unable to read config file %s' % path)
+            log.debug('hgrc file is not present at %s skipping...' % path)
             return False
-        log.debug('reading hgrc from %s', path)
+        log.debug('reading hgrc from %s' % path)
         cfg = config.config()
         cfg.read(path)
         for section in ui_sections:
             for k, v in cfg.items(section):
-                log.debug('settings ui from file[%s]%s:%s', section, k, v)
+                log.debug('settings ui from file[%s]%s:%s' % (section, k, v))
                 baseui.setconfig(section, k, v)
 
     elif read_from == 'db':
-        sa = meta.Session()
+        sa = meta.Session
         ret = sa.query(RhodeCodeUi)\
-            .options(FromCache("sql_cache_short",
-                               "get_hg_ui_settings")).all()
+            .options(FromCache("sql_cache_short", "get_hg_ui_settings"))\
+            .all()
 
         hg_ui = ret
         for ui_ in hg_ui:
@@ -285,18 +294,20 @@ def make_ui(read_from='file', path=None, checkpaths=True):
 
 
 def set_rhodecode_config(config):
-    """Updates pylons config with new settings from database
+    """
+    Updates pylons config with new settings from database
 
     :param config:
     """
-    hgsettings = RhodeCodeSettings.get_app_settings()
+    hgsettings = RhodeCodeSetting.get_app_settings()
 
     for k, v in hgsettings.items():
         config[k] = v
 
 
 def invalidate_cache(cache_key, *args):
-    """Puts cache invalidation task into db for
+    """
+    Puts cache invalidation task into db for
     further global cache invalidation
     """
 
@@ -313,7 +324,8 @@ class EmptyChangeset(BaseChangeset):
     an EmptyChangeset
     """
 
-    def __init__(self, cs='0' * 40, repo=None, requested_revision=None, alias=None):
+    def __init__(self, cs='0' * 40, repo=None, requested_revision=None,
+                 alias=None):
         self._empty_cs = cs
         self.revision = -1
         self.message = ''
@@ -325,7 +337,8 @@ class EmptyChangeset(BaseChangeset):
 
     @LazyProperty
     def raw_id(self):
-        """Returns raw string identifying this changeset, useful for web
+        """
+        Returns raw string identifying this changeset, useful for web
         representation.
         """
 
@@ -350,66 +363,74 @@ class EmptyChangeset(BaseChangeset):
 
 
 def map_groups(groups):
-    """Checks for groups existence, and creates groups structures.
+    """
+    Checks for groups existence, and creates groups structures.
     It returns last group in structure
 
     :param groups: list of groups structure
     """
-    sa = meta.Session()
+    sa = meta.Session
 
     parent = None
     group = None
 
     # last element is repo in nested groups structure
     groups = groups[:-1]
-
+    rgm = ReposGroupModel(sa)
     for lvl, group_name in enumerate(groups):
         group_name = '/'.join(groups[:lvl] + [group_name])
-        group = sa.query(Group).filter(Group.group_name == group_name).scalar()
+        group = RepoGroup.get_by_group_name(group_name)
+        desc = '%s group' % group_name
+
+#        # WTF that doesn't work !?
+#        if group is None:
+#            group = rgm.create(group_name, desc, parent, just_db=True)
+#            sa.commit()
 
         if group is None:
-            group = Group(group_name, parent)
+            log.debug('creating group level: %s group_name: %s' % (lvl, group_name))
+            group = RepoGroup(group_name, parent)
+            group.group_description = desc
             sa.add(group)
+            rgm._create_default_perms(group)
             sa.commit()
         parent = group
     return group
 
 
 def repo2db_mapper(initial_repo_list, remove_obsolete=False):
-    """maps all repos given in initial_repo_list, non existing repositories
+    """
+    maps all repos given in initial_repo_list, non existing repositories
     are created, if remove_obsolete is True it also check for db entries
     that are not in initial_repo_list and removes them.
 
     :param initial_repo_list: list of repositories found by scanning methods
     :param remove_obsolete: check for obsolete entries in database
     """
-
-    sa = meta.Session()
+    from rhodecode.model.repo import RepoModel
+    sa = meta.Session
     rm = RepoModel()
     user = sa.query(User).filter(User.admin == True).first()
+    if user is None:
+        raise Exception('Missing administrative account !')
     added = []
-    # fixup groups paths to new format on the fly
-    # TODO: remove this in future
-    for g in Group.query().all():
-        g.group_name = g.get_new_name(g.name)
-        sa.add(g)    
+
     for name, repo in initial_repo_list.items():
         group = map_groups(name.split(Repository.url_sep()))
         if not rm.get_by_repo_name(name, cache=False):
-            log.info('repository %s not found creating default', name)
+            log.info('repository %s not found creating default' % name)
             added.append(name)
             form_data = {
-                         'repo_name': name,
-                         'repo_name_full': name,
-                         'repo_type': repo.alias,
-                         'description': repo.description \
-                            if repo.description != 'unknown' else \
-                                        '%s repository' % name,
-                         'private': False,
-                         'group_id': getattr(group, 'group_id', None)
-                         }
+             'repo_name': name,
+             'repo_name_full': name,
+             'repo_type': repo.alias,
+             'description': repo.description \
+                if repo.description != 'unknown' else '%s repository' % name,
+             'private': False,
+             'group_id': getattr(group, 'group_id', None)
+            }
             rm.create(form_data, user, just_db=True)
-
+    sa.commit()
     removed = []
     if remove_obsolete:
         #remove from database those repositories that are not in the filesystem
@@ -421,7 +442,8 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False):
 
     return added, removed
 
-#set cache regions for beaker so celery can utilise it
+
+# set cache regions for beaker so celery can utilise it
 def add_cache(settings):
     cache_settings = {'regions': None}
     for key in settings.keys():
@@ -455,7 +477,7 @@ def add_cache(settings):
 def create_test_index(repo_location, config, full_index):
     """
     Makes default test index
-    
+
     :param config: test config
     :param full_index:
     """
@@ -480,19 +502,16 @@ def create_test_index(repo_location, config, full_index):
 
 
 def create_test_env(repos_test_path, config):
-    """Makes a fresh database and
+    """
+    Makes a fresh database and
     install test repository into tmp dir
     """
     from rhodecode.lib.db_manage import DbManage
-    from rhodecode.tests import HG_REPO, GIT_REPO, NEW_HG_REPO, NEW_GIT_REPO, \
-        HG_FORK, GIT_FORK, TESTS_TMP_PATH
-    import tarfile
-    import shutil
-    from os.path import abspath
+    from rhodecode.tests import HG_REPO, TESTS_TMP_PATH
 
     # PART ONE create db
     dbconf = config['sqlalchemy.db1.url']
-    log.debug('making test db %s', dbconf)
+    log.debug('making test db %s' % dbconf)
 
     # create test dir if it doesn't exist
     if not os.path.isdir(repos_test_path):
@@ -507,7 +526,7 @@ def create_test_env(repos_test_path, config):
     dbmanage.admin_prompt()
     dbmanage.create_permissions()
     dbmanage.populate_default_permissions()
-
+    Session.commit()
     # PART TWO make test repo
     log.debug('making test vcs repositories')
 
@@ -595,4 +614,3 @@ class BasePasterCommand(Command):
         path_to_ini_file = os.path.realpath(conf)
         conf = paste.deploy.appconfig('config:' + path_to_ini_file)
         pylonsconfig.init_app(conf.global_conf, conf.local_conf)
-

@@ -1,0 +1,54 @@
+## -*- coding: utf-8 -*-
+<%inherit file="/base/base.html"/>
+
+<%def name="title()">
+    ${_('Show notification')} ${c.rhodecode_user.username} - ${c.rhodecode_name}
+</%def>
+
+<%def name="breadcrumbs_links()">
+    ${h.link_to(_('Notifications'),h.url('notifications'))}
+    &raquo;
+    ${_('Show notification')}
+</%def>
+
+<%def name="page_nav()">
+    ${self.menu('admin')}
+</%def>
+
+<%def name="main()">
+<div class="box">
+    <!-- box / title -->
+    <div class="title">
+        ${self.breadcrumbs()}
+        ##<ul class="links">
+        ##    <li>
+        ##      <span style="text-transform: uppercase;"><a href="#">${_('Compose message')}</a></span>
+        ##    </li>
+        ##</ul>
+    </div>
+    <div class="table">
+      <div id="notification_${c.notification.notification_id}">
+        <div class="notification-header">
+          <div class="gravatar">
+              <img alt="gravatar" src="${h.gravatar_url(h.email(c.notification.created_by_user.email),24)}"/>
+          </div>
+          <div class="desc">
+              ${c.notification.description}
+          </div>
+          <div class="delete-notifications">
+            <span id="${c.notification.notification_id}" class="delete-notification delete_icon action"></span>
+          </div>
+        </div>
+        <div>${h.rst_w_mentions(c.notification.body)}</div>
+      </div>
+    </div>
+</div>
+<script type="text/javascript">
+var url = "${url('notification', notification_id='__NOTIFICATION_ID__')}";
+var main = "${url('notifications')}";
+   YUE.on(YUQ('.delete-notification'),'click',function(e){
+       var notification_id = e.currentTarget.id;
+       deleteNotification(url,notification_id,[function(){window.location=main}])
+   })
+</script>
+</%def>

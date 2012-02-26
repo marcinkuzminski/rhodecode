@@ -8,9 +8,12 @@ This module initializes the application via ``websetup`` (`paster
 setup-app`) and provides the base testing objects.
 """
 import os
+import time
+import logging
 from os.path import join as jn
 
 from unittest import TestCase
+from tempfile import _RandomNameSequence
 
 from paste.deploy import loadapp
 from paste.script.appinstall import SetupCommand
@@ -18,31 +21,47 @@ from pylons import config, url
 from routes.util import URLGenerator
 from webtest import TestApp
 
-from rhodecode.model import meta
-import logging
-
-
-log = logging.getLogger(__name__)
+from rhodecode.model.meta import Session
+from rhodecode.model.db import User
 
 import pylons.test
 
-__all__ = ['environ', 'url', 'TestController', 'TESTS_TMP_PATH', 'HG_REPO',
-           'GIT_REPO', 'NEW_HG_REPO', 'NEW_GIT_REPO', 'HG_FORK', 'GIT_FORK',
-           'TEST_USER_ADMIN_LOGIN', 'TEST_USER_ADMIN_PASS' ]
+os.environ['TZ'] = 'UTC'
+time.tzset()
+
+log = logging.getLogger(__name__)
+
+__all__ = [
+    'environ', 'url', 'TestController', 'TESTS_TMP_PATH', 'HG_REPO',
+    'GIT_REPO', 'NEW_HG_REPO', 'NEW_GIT_REPO', 'HG_FORK', 'GIT_FORK',
+    'TEST_USER_ADMIN_LOGIN', 'TEST_USER_REGULAR_LOGIN', 'TEST_USER_REGULAR_PASS',
+    'TEST_USER_REGULAR_EMAIL', 'TEST_USER_REGULAR2_LOGIN',
+    'TEST_USER_REGULAR2_PASS', 'TEST_USER_REGULAR2_EMAIL'
+]
 
 # Invoke websetup with the current config file
-#SetupCommand('setup-app').run([config_file])
+# SetupCommand('setup-app').run([config_file])
 
 ##RUNNING DESIRED TESTS
 # nosetests -x rhodecode.tests.functional.test_admin_settings:TestSettingsController.test_my_account
-# nosetests --pdb --pdb-failures 
+# nosetests --pdb --pdb-failures
 environ = {}
 
 #SOME GLOBALS FOR TESTS
-from tempfile import _RandomNameSequence
+
 TESTS_TMP_PATH = jn('/', 'tmp', 'rc_test_%s' % _RandomNameSequence().next())
 TEST_USER_ADMIN_LOGIN = 'test_admin'
 TEST_USER_ADMIN_PASS = 'test12'
+TEST_USER_ADMIN_EMAIL = 'test_admin@mail.com'
+
+TEST_USER_REGULAR_LOGIN = 'test_regular'
+TEST_USER_REGULAR_PASS = 'test12'
+TEST_USER_REGULAR_EMAIL = 'test_regular@mail.com'
+
+TEST_USER_REGULAR2_LOGIN = 'test_regular2'
+TEST_USER_REGULAR2_PASS = 'test12'
+TEST_USER_REGULAR2_EMAIL = 'test_regular2@mail.com'
+
 HG_REPO = 'vcs_test_hg'
 GIT_REPO = 'vcs_test_git'
 
@@ -60,12 +79,13 @@ class TestController(TestCase):
 
         self.app = TestApp(wsgiapp)
         url._push_object(URLGenerator(config['routes.map'], environ))
-        self.sa = meta.Session
+        self.Session = Session
         self.index_location = config['app_conf']['index_dir']
         TestCase.__init__(self, *args, **kwargs)
 
     def log_user(self, username=TEST_USER_ADMIN_LOGIN,
                  password=TEST_USER_ADMIN_PASS):
+        self._logged_username = username
         response = self.app.post(url(controller='login', action='index'),
                                  {'username':username,
                                   'password':password})
@@ -74,10 +94,16 @@ class TestController(TestCase):
             self.fail('could not login using %s %s' % (username, password))
 
         self.assertEqual(response.status, '302 Found')
-        self.assertEqual(response.session['rhodecode_user'].username, username)
-        return response.follow()
+        ses = response.session['rhodecode_user']
+        self.assertEqual(ses.get('username'), username)
+        response = response.follow()
+        self.assertEqual(ses.get('is_authenticated'), True)
+
+        return response.session['rhodecode_user']
+
+    def _get_logged_user(self):
+        return User.get_by_username(self._logged_username)
 
     def checkSessionFlash(self, response, msg):
         self.assertTrue('flash' in response.session)
         self.assertTrue(msg in response.session['flash'][0][1])
-

@@ -17,10 +17,10 @@
 <div class="box">
     <!-- box / title -->
     <div class="title">
-        ${self.breadcrumbs()}       
+        ${self.breadcrumbs()}
     </div>
     <!-- end box / title -->
-    
+
     <h3>${_('Built in hooks - read only')}</h3>
     <div class="form">
         <div class="fields">
@@ -36,29 +36,29 @@
           % endfor
 		</div>
     </div>
-    
+
     <h3>${_('Custom hooks')}</h3>
     ${h.form(url('admin_setting', setting_id='hooks'),method='put')}
     <div class="form">
         <div class="fields">
-        
+
           % for hook in c.custom_hooks:
           <div class="field"  id="${'id%s' % hook.ui_id }">
             <div class="label label">
                 <label for="${hook.ui_key}">${hook.ui_key}</label>
             </div>
-            <div class="input" style="margin-left:280px">                
+            <div class="input" style="margin-left:280px">
                 ${h.hidden('hook_ui_key',hook.ui_key)}
                 ${h.hidden('hook_ui_value',hook.ui_value)}
                 ${h.text('hook_ui_value_new',hook.ui_value,size=60)}
-                <span class="delete_icon action_button" 
+                <span class="delete_icon action_button"
                 onclick="ajaxActionHook(${hook.ui_id},'${'id%s' % hook.ui_id }')">
                 ${_('remove')}
                 </span>
             </div>
           </div>
-          % endfor        
-        
+          % endfor
+
           <div class="field">
             <div class="input" style="margin-left:-180px;position: absolute;">
               <div class="input">
@@ -71,7 +71,7 @@
           </div>
           <div class="buttons" style="margin-left:280px">
              ${h.submit('save',_('Save'),class_="ui-button")}
-          </div>          
+          </div>
         </div>
     </div>
     ${h.end_form()}
@@ -92,5 +92,5 @@ function ajaxActionHook(hook_id,field_id) {
     var request = YAHOO.util.Connect.asyncRequest('POST', sUrl, callback, postData);
 };
 </script>
-      
-</%def>    
+
+</%def>

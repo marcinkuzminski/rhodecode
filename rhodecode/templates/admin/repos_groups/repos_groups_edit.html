@@ -5,9 +5,9 @@
     ${_('Edit repos group')} ${c.repos_group.name} - ${c.rhodecode_name}
 </%def>
 <%def name="breadcrumbs_links()">
-    ${h.link_to(_('Admin'),h.url('admin_home'))} 
-    &raquo; 
-    ${h.link_to(_('Repos groups'),h.url('repos_groups'))} 
+    ${h.link_to(_('Admin'),h.url('admin_home'))}
+    &raquo;
+    ${h.link_to(_('Repos groups'),h.url('repos_groups'))}
     &raquo;
     ${_('edit repos group')} "${c.repos_group.name}"
 </%def>
@@ -20,7 +20,7 @@
 <div class="box">
     <!-- box / title -->
     <div class="title">
-        ${self.breadcrumbs()}       
+        ${self.breadcrumbs()}
     </div>
     <!-- end box / title -->
     ${h.form(url('repos_group',id=c.repos_group.group_id),method='put')}
@@ -35,7 +35,7 @@
                     ${h.text('group_name',class_='medium')}
                 </div>
              </div>
-             
+
 	        <div class="field">
 	            <div class="label label-textarea">
 	                <label for="group_description">${_('Description')}:</label>
@@ -44,7 +44,7 @@
 	                ${h.textarea('group_description',cols=23,rows=5,class_="medium")}
 	            </div>
 	         </div>
-             
+
 	         <div class="field">
 	             <div class="label">
 	                 <label for="group_parent_id">${_('Group parent')}:</label>
@@ -52,13 +52,22 @@
 	             <div class="input">
 	                 ${h.select('group_parent_id','',c.repo_groups,class_="medium")}
 	             </div>
-	         </div>             
-                         
+	         </div>
+            <div class="field">
+                <div class="label">
+                    <label for="input">${_('Permissions')}:</label>
+                </div>
+                <div class="input">
+                    <%include file="repos_group_edit_perms.html"/>
+                </div>
+
+            </div>
             <div class="buttons">
-              ${h.submit('save',_('save'),class_="ui-button")}
-            </div>             
+              ${h.submit('save',_('Save'),class_="ui-button")}
+              ${h.reset('reset',_('Reset'),class_="ui-button")}
+            </div>
         </div>
     </div>
     ${h.end_form()}
-</div>    
-</%def>    
+</div>
+</%def>

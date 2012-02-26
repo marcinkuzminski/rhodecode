@@ -51,14 +51,15 @@ def make_app(global_conf, full_stack=True, static_files=True, **app_conf):
         from rhodecode.lib.profiler import ProfilingMiddleware
         app = ProfilingMiddleware(app)
 
-    # we want our low level middleware to get to the request ASAP. We don't
-    # need any pylons stack middleware in them
-    app = SimpleHg(app, config)
-    app = SimpleGit(app, config)
-
     if asbool(full_stack):
+
         # Handle Python exceptions
         app = ErrorHandler(app, global_conf, **config['pylons.errorware'])
+
+        # we want our low level middleware to get to the request ASAP. We don't
+        # need any pylons stack middleware in them
+        app = SimpleHg(app, config)
+        app = SimpleGit(app, config)
 
         # Display error documents for 401, 403, 404 status codes (and
         # 500 when debug is disabled)

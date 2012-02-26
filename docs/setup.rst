@@ -346,6 +346,106 @@ All other LDAP settings will likely be site-specific and should be
 appropriately configured.
 
 
+Authentication by container or reverse-proxy
+--------------------------------------------
+
+Starting with version 1.3, RhodeCode supports delegating the authentication
+of users to its WSGI container, or to a reverse-proxy server through which all
+clients access the application.
+
+When these authentication methods are enabled in RhodeCode, it uses the
+username that the container/proxy (Apache/Nginx/etc) authenticated and doesn't
+perform the authentication itself. The authorization, however, is still done by
+RhodeCode according to its settings.
+
+When a user logs in for the first time using these authentication methods,
+a matching user account is created in RhodeCode with default permissions. An
+administrator can then modify it using RhodeCode's admin interface.
+It's also possible for an administrator to create accounts and configure their
+permissions before the user logs in for the first time.
+
+Container-based authentication
+''''''''''''''''''''''''''''''
+
+In a container-based authentication setup, RhodeCode reads the user name from
+the ``REMOTE_USER`` server variable provided by the WSGI container.
+
+After setting up your container (see `Apache's WSGI config`_), you'd need
+to configure it to require authentication on the location configured for
+RhodeCode.
+
+In order for RhodeCode to start using the provided username, you should set the
+following in the [app:main] section of your .ini file::
+
+    container_auth_enabled = true
+
+
+Proxy pass-through authentication
+'''''''''''''''''''''''''''''''''
+
+In a proxy pass-through authentication setup, RhodeCode reads the user name
+from the ``X-Forwarded-User`` request header, which should be configured to be
+sent by the reverse-proxy server.
+
+After setting up your proxy solution (see `Apache virtual host reverse proxy example`_,
+`Apache as subdirectory`_ or `Nginx virtual host example`_), you'd need to
+configure the authentication and add the username in a request header named
+``X-Forwarded-User``.
+
+For example, the following config section for Apache sets a subdirectory in a
+reverse-proxy setup with basic auth::
+
+    <Location /<someprefix> >
+      ProxyPass http://127.0.0.1:5000/<someprefix>
+      ProxyPassReverse http://127.0.0.1:5000/<someprefix>
+      SetEnvIf X-Url-Scheme https HTTPS=1
+
+      AuthType Basic
+      AuthName "RhodeCode authentication"
+      AuthUserFile /home/web/rhodecode/.htpasswd
+      require valid-user
+
+      RequestHeader unset X-Forwarded-User
+
+      RewriteEngine On
+      RewriteCond %{LA-U:REMOTE_USER} (.+)
+      RewriteRule .* - [E=RU:%1]
+      RequestHeader set X-Forwarded-User %{RU}e
+    </Location> 
+
+In order for RhodeCode to start using the forwarded username, you should set
+the following in the [app:main] section of your .ini file::
+
+    proxypass_auth_enabled = true
+
+.. note::
+   If you enable proxy pass-through authentication, make sure your server is
+   only accessible through the proxy. Otherwise, any client would be able to
+   forge the authentication header and could effectively become authenticated
+   using any account of their liking.
+
+Integration with Issue trackers
+-------------------------------
+
+RhodeCode provides a simple integration with issue trackers. It's possible
+to define a regular expression that will fetch issue id stored in commit
+messages and replace that with an url to this issue. To enable this simply
+uncomment following variables in the ini file::
+
+    url_pat = (?:^#|\s#)(\w+)
+    issue_server_link = https://myissueserver.com/{repo}/issue/{id}
+    issue_prefix = #
+
+`url_pat` is the regular expression that will fetch issues from commit messages.
+Default regex will match issues in format of #<number> eg. #300.
+ 
+Matched issues will be replace with the link specified as `issue_server_link` 
+{id} will be replaced with issue id, and {repo} with repository name.
+Since the # is striped `issue_prefix` is added as a prefix to url. 
+`issue_prefix` can be something different than # if you pass 
+ISSUE- as issue prefix this will generate an url in format::
+ 
+  <a href="https://myissueserver.com/example_repo/issue/300">ISSUE-300</a>  
 
 Hook management
 ---------------
@@ -359,6 +459,17 @@ checkboxes on previos section).
 To add another custom hook simply fill in first section with 
 <name>.<hook_type> and the second one with hook path. Example hooks
 can be found at *rhodecode.lib.hooks*. 
+
+
+Changing default encoding
+-------------------------
+
+By default RhodeCode uses utf8 encoding, starting from 1.3 series this
+can be changed, simply edit default_encoding in .ini file to desired one.
+This affects many parts in rhodecode including commiters names, filenames,
+encoding of commit messages. In addition RhodeCode can detect if `chardet`
+library is installed. If `chardet` is detected RhodeCode will fallback to it
+when there are encode/decode errors.
 
 
 Setting Up Celery
@@ -397,27 +508,36 @@ Nginx virtual host example
 
 Sample config for nginx using proxy::
 
+    upstream rc {
+        server 127.0.0.1:5000;
+        # add more instances for load balancing
+        #server 127.0.0.1:5001;
+        #server 127.0.0.1:5002;
+    }
+    
     server {
        listen          80;
        server_name     hg.myserver.com;
        access_log      /var/log/nginx/rhodecode.access.log;
        error_log       /var/log/nginx/rhodecode.error.log;
+
        location / {
-               root /var/www/rhodecode/rhodecode/public/;
-               if (!-f $request_filename){
-                   proxy_pass      http://127.0.0.1:5000;
-               }
-               #this is important if you want to use https !!!
-               proxy_set_header X-Url-Scheme $scheme;
-               include         /etc/nginx/proxy.conf;  
+            try_files $uri @rhode;
        }
+    
+       location @rhode {
+            proxy_pass      http://rc;
+            include         /etc/nginx/proxy.conf;
+       }
+
     }  
   
 Here's the proxy.conf. It's tuned so it will not timeout on long
 pushes or large pushes::
-
+    
     proxy_redirect              off;
     proxy_set_header            Host $host;
+    proxy_set_header            X-Url-Scheme $scheme;
     proxy_set_header            X-Host $http_host;
     proxy_set_header            X-Real-IP $remote_addr;
     proxy_set_header            X-Forwarded-For $proxy_add_x_forwarded_for;

@@ -3,7 +3,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session, sessionmaker
 from beaker import cache
 
-from rhodecode.model import caching_query
+from rhodecode.lib import caching_query
 
 
 # Beaker CacheManager.  A home base for cache configurations.
@@ -15,7 +15,8 @@ __all__ = ['Base', 'Session']
 #
 Session = scoped_session(
                 sessionmaker(
-                    query_cls=caching_query.query_callable(cache_manager)
+                    query_cls=caching_query.query_callable(cache_manager),
+                    expire_on_commit=True,
                 )
           )
 

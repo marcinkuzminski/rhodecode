@@ -7,7 +7,7 @@
 
     :created_on: Apr 4, 2010
     :author: marcink
-    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
+    :copyright: (C) 2010-2012 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software: you can redistribute it and/or modify
@@ -29,7 +29,7 @@ import formencode
 
 from formencode import htmlfill
 from pylons import request, session, tmpl_context as c, url, config
-from pylons.controllers.util import abort, redirect
+from pylons.controllers.util import redirect
 from pylons.i18n.translation import _
 
 from rhodecode.lib.exceptions import DefaultUserException, \
@@ -38,9 +38,10 @@ from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator
 from rhodecode.lib.base import BaseController, render
 
-from rhodecode.model.db import User, RepoToPerm, UserToPerm, Permission
+from rhodecode.model.db import User, Permission
 from rhodecode.model.forms import UserForm
 from rhodecode.model.user import UserModel
+from rhodecode.model.meta import Session
 
 log = logging.getLogger(__name__)
 
@@ -71,12 +72,13 @@ class UsersController(BaseController):
         # url('users')
 
         user_model = UserModel()
-        login_form = UserForm()()
+        user_form = UserForm()()
         try:
-            form_result = login_form.to_python(dict(request.POST))
+            form_result = user_form.to_python(dict(request.POST))
             user_model.create(form_result)
             h.flash(_('created user %s') % form_result['username'],
                     category='success')
+            Session.commit()
             #action_logger(self.rhodecode_user, 'new_user', '', '', self.sa)
         except formencode.Invalid, errors:
             return htmlfill.render(
@@ -114,11 +116,11 @@ class UsersController(BaseController):
             form_result = _form.to_python(dict(request.POST))
             user_model.update(id, form_result)
             h.flash(_('User updated successfully'), category='success')
-
+            Session.commit()
         except formencode.Invalid, errors:
             e = errors.error_dict or {}
             perm = Permission.get_by_key('hg.create.repository')
-            e.update({'create_repo_perm': UserToPerm.has_perm(id, perm)})
+            e.update({'create_repo_perm': user_model.has_perm(id, perm)})
             return htmlfill.render(
                 render('admin/users/user_edit.html'),
                 defaults=errors.value,
@@ -144,6 +146,7 @@ class UsersController(BaseController):
         try:
             user_model.delete(id)
             h.flash(_('successfully deleted user'), category='success')
+            Session.commit()
         except (UserOwnsReposException, DefaultUserException), e:
             h.flash(str(e), category='warning')
         except Exception:
@@ -158,20 +161,19 @@ class UsersController(BaseController):
     def edit(self, id, format='html'):
         """GET /users/id/edit: Form to edit an existing item"""
         # url('edit_user', id=ID)
-        user_model = UserModel()
-        c.user = user_model.get(id)
+        c.user = User.get(id)
         if not c.user:
             return redirect(url('users'))
         if c.user.username == 'default':
             h.flash(_("You can't edit this user"), category='warning')
             return redirect(url('users'))
         c.user.permissions = {}
-        c.granted_permissions = user_model.fill_perms(c.user)\
+        c.granted_permissions = UserModel().fill_perms(c.user)\
             .permissions['global']
 
         defaults = c.user.get_dict()
         perm = Permission.get_by_key('hg.create.repository')
-        defaults.update({'create_repo_perm': UserToPerm.has_perm(id, perm)})
+        defaults.update({'create_repo_perm': UserModel().has_perm(id, perm)})
 
         return htmlfill.render(
             render('admin/users/user_edit.html'),
@@ -185,23 +187,24 @@ class UsersController(BaseController):
         # url('user_perm', id=ID, method='put')
 
         grant_perm = request.POST.get('create_repo_perm', False)
+        user_model = UserModel()
 
         if grant_perm:
             perm = Permission.get_by_key('hg.create.none')
-            UserToPerm.revoke_perm(id, perm)
+            user_model.revoke_perm(id, perm)
 
             perm = Permission.get_by_key('hg.create.repository')
-            UserToPerm.grant_perm(id, perm)
+            user_model.grant_perm(id, perm)
             h.flash(_("Granted 'repository create' permission to user"),
                     category='success')
-
+            Session.commit()
         else:
             perm = Permission.get_by_key('hg.create.repository')
-            UserToPerm.revoke_perm(id, perm)
+            user_model.revoke_perm(id, perm)
 
             perm = Permission.get_by_key('hg.create.none')
-            UserToPerm.grant_perm(id, perm)
+            user_model.grant_perm(id, perm)
             h.flash(_("Revoked 'repository create' permission to user"),
                     category='success')
-
+            Session.commit()
         return redirect(url('edit_user', id=id))

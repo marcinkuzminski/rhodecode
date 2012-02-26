@@ -7,7 +7,7 @@
 
     :created_on: Apr 23, 2010
     :author: marcink
-    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
+    :copyright: (C) 2010-2012 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software: you can redistribute it and/or modify
@@ -51,6 +51,11 @@ class FeedController(BaseRepoController):
         self.ttl = "5"
         self.feed_nr = 10
 
+    def _get_title(self, cs):
+        return "R%s:%s - %s" % (
+            cs.revision, cs.short_id, cs.message
+        )
+
     def __changes(self, cs):
         changes = []
 
@@ -72,18 +77,21 @@ class FeedController(BaseRepoController):
 
     def atom(self, repo_name):
         """Produce an atom-1.0 feed via feedgenerator module"""
-        feed = Atom1Feed(title=self.title % repo_name,
-                         link=url('summary_home', repo_name=repo_name,
-                                  qualified=True),
-                         description=self.description % repo_name,
-                         language=self.language,
-                         ttl=self.ttl)
-        desc_msg = []
+        feed = Atom1Feed(
+             title=self.title % repo_name,
+             link=url('summary_home', repo_name=repo_name,
+                      qualified=True),
+             description=self.description % repo_name,
+             language=self.language,
+             ttl=self.ttl
+        )
+
         for cs in reversed(list(c.rhodecode_repo[-self.feed_nr:])):
+            desc_msg = []
             desc_msg.append('%s - %s<br/><pre>' % (cs.author, cs.date))
             desc_msg.append(self.__changes(cs))
 
-            feed.add_item(title=cs.message,
+            feed.add_item(title=self._get_title(cs),
                           link=url('changeset_home', repo_name=repo_name,
                                    revision=cs.raw_id, qualified=True),
                           author_name=cs.author,
@@ -94,18 +102,21 @@ class FeedController(BaseRepoController):
 
     def rss(self, repo_name):
         """Produce an rss2 feed via feedgenerator module"""
-        feed = Rss201rev2Feed(title=self.title % repo_name,
-                         link=url('summary_home', repo_name=repo_name,
-                                  qualified=True),
-                         description=self.description % repo_name,
-                         language=self.language,
-                         ttl=self.ttl)
-        desc_msg = []
+        feed = Rss201rev2Feed(
+            title=self.title % repo_name,
+            link=url('summary_home', repo_name=repo_name,
+                     qualified=True),
+            description=self.description % repo_name,
+            language=self.language,
+            ttl=self.ttl
+        )
+
         for cs in reversed(list(c.rhodecode_repo[-self.feed_nr:])):
+            desc_msg = []
             desc_msg.append('%s - %s<br/><pre>' % (cs.author, cs.date))
             desc_msg.append(self.__changes(cs))
 
-            feed.add_item(title=cs.message,
+            feed.add_item(title=self._get_title(cs),
                           link=url('changeset_home', repo_name=repo_name,
                                    revision=cs.raw_id, qualified=True),
                           author_name=cs.author,

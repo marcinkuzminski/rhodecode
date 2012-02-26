@@ -22,8 +22,8 @@
           <li>
             <span>${h.link_to(_(u'ADD NEW USER GROUP'),h.url('new_users_group'))}</span>
           </li>
-          
-        </ul>        
+
+        </ul>
     </div>
     <!-- end box / title -->
     <div class="table">
@@ -42,7 +42,7 @@
                     <td>
                         ${h.form(url('users_group', id=u_group.users_group_id),method='delete')}
                             ${h.submit('remove_','delete',id="remove_group_%s" % u_group.users_group_id,
-                            class_="delete_icon action_button",onclick="return confirm('Confirm to delete this users group');")}
+                            class_="delete_icon action_button",onclick="return  confirm('"+_('Confirm to delete this users group: %s') % u_group.users_group_name+"');")}
                         ${h.end_form()}
                     </td>
                 </tr>

@@ -23,10 +23,6 @@ class TestAdminUsersGroupsController(TestController):
         self.checkSessionFlash(response,
                                'created users group %s' % TEST_USERS_GROUP)
 
-
-
-
-
     def test_new(self):
         response = self.app.get(url('new_users_group'))
 
@@ -52,13 +48,13 @@ class TestAdminUsersGroupsController(TestController):
                                'created users group %s' % users_group_name)
 
 
-        gr = self.sa.query(UsersGroup)\
+        gr = self.Session.query(UsersGroup)\
                            .filter(UsersGroup.users_group_name ==
                                    users_group_name).one()
 
         response = self.app.delete(url('users_group', id=gr.users_group_id))
 
-        gr = self.sa.query(UsersGroup)\
+        gr = self.Session.query(UsersGroup)\
                            .filter(UsersGroup.users_group_name ==
                                    users_group_name).scalar()
 
@@ -89,7 +85,3 @@ class TestAdminUsersGroupsController(TestController):
 
     def test_revoke_members(self):
         pass
-
-
-
-

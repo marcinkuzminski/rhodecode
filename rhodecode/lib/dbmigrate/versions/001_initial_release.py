@@ -14,7 +14,7 @@ from rhodecode.lib.dbmigrate.migrate import *
 
 log = logging.getLogger(__name__)
 
-class RhodeCodeSettings(Base):
+class RhodeCodeSetting(Base):
     __tablename__ = 'rhodecode_settings'
     __table_args__ = (UniqueConstraint('app_settings_name'), {'useexisting':True})
     app_settings_id = Column("app_settings_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -74,7 +74,7 @@ class User(Base):
             self.last_login = datetime.datetime.now()
             session.add(self)
             session.commit()
-            log.debug('updated user %s lastlogin', self.username)
+            log.debug('updated user %s lastlogin' % self.username)
         except (DatabaseError,):
             session.rollback()
 
@@ -107,7 +107,7 @@ class Repository(Base):
 
     user = relation('User')
     fork = relation('Repository', remote_side=repo_id)
-    repo_to_perm = relation('RepoToPerm', cascade='all')
+    repo_to_perm = relation('UserRepoToPerm', cascade='all')
     stats = relation('Statistics', cascade='all', uselist=False)
 
     repo_followers = relation('UserFollowing', primaryjoin='UserFollowing.follows_repo_id==Repository.repo_id', cascade='all')
@@ -126,7 +126,7 @@ class Permission(Base):
     def __repr__(self):
         return "<Permission('%s:%s')>" % (self.permission_id, self.permission_name)
 
-class RepoToPerm(Base):
+class UserRepoToPerm(Base):
     __tablename__ = 'repo_to_perm'
     __table_args__ = (UniqueConstraint('user_id', 'repository_id'), {'useexisting':True})
     repo_to_perm_id = Column("repo_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)

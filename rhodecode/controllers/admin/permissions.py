@@ -7,7 +7,7 @@
 
     :created_on: Apr 27, 2010
     :author: marcink
-    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
+    :copyright: (C) 2010-2012 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software: you can redistribute it and/or modify
@@ -38,6 +38,7 @@ from rhodecode.lib.base import BaseController, render
 from rhodecode.model.forms import DefaultPermissionsForm
 from rhodecode.model.permission import PermissionModel
 from rhodecode.model.db import User
+from rhodecode.model.meta import Session
 
 log = logging.getLogger(__name__)
 
@@ -101,6 +102,7 @@ class PermissionsController(BaseController):
             form_result = _form.to_python(dict(request.POST))
             form_result.update({'perm_user_name': id})
             permission_model.update(form_result)
+            Session.commit()
             h.flash(_('Default permissions updated successfully'),
                     category='success')
 

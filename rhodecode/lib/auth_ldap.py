@@ -7,7 +7,7 @@
 
     :created_on: Created on Nov 17, 2010
     :author: marcink
-    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
+    :copyright: (C) 2010-2012 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software: you can redistribute it and/or modify
@@ -43,8 +43,7 @@ class AuthLdap(object):
     def __init__(self, server, base_dn, port=389, bind_dn='', bind_pass='',
                  tls_kind='PLAIN', tls_reqcert='DEMAND', ldap_version=3,
                  ldap_filter='(&(objectClass=user)(!(objectClass=computer)))',
-                 search_scope='SUBTREE',
-                 attr_login='uid'):
+                 search_scope='SUBTREE', attr_login='uid'):
         self.ldap_version = ldap_version
         ldap_server_type = 'ldap'
 
@@ -53,14 +52,14 @@ class AuthLdap(object):
         if self.TLS_KIND == 'LDAPS':
             port = port or 689
             ldap_server_type = ldap_server_type + 's'
-        
+
         OPT_X_TLS_DEMAND = 2
-        self.TLS_REQCERT = getattr(ldap, 'OPT_X_TLS_%s' % tls_reqcert, 
+        self.TLS_REQCERT = getattr(ldap, 'OPT_X_TLS_%s' % tls_reqcert,
                                    OPT_X_TLS_DEMAND)
         self.LDAP_SERVER_ADDRESS = server
         self.LDAP_SERVER_PORT = port
 
-        #USE FOR READ ONLY BIND TO LDAP SERVER
+        # USE FOR READ ONLY BIND TO LDAP SERVER
         self.LDAP_BIND_DN = bind_dn
         self.LDAP_BIND_PASS = bind_pass
 
@@ -74,7 +73,8 @@ class AuthLdap(object):
         self.attr_login = attr_login
 
     def authenticate_ldap(self, username, password):
-        """Authenticate a user via LDAP and return his/her LDAP properties.
+        """
+        Authenticate a user via LDAP and return his/her LDAP properties.
 
         Raises AuthenticationError if the credentials are rejected, or
         EnvironmentError if the LDAP server can't be reached.
@@ -87,11 +87,15 @@ class AuthLdap(object):
 
         uid = chop_at(username, "@%s" % self.LDAP_SERVER_ADDRESS)
 
+        if not password:
+            log.debug("Attempt to authenticate LDAP user "
+                      "with blank password rejected.")
+            raise LdapPasswordError()
         if "," in username:
             raise LdapUsernameError("invalid character in username: ,")
         try:
-            if hasattr(ldap,'OPT_X_TLS_CACERTDIR'):
-                ldap.set_option(ldap.OPT_X_TLS_CACERTDIR, 
+            if hasattr(ldap, 'OPT_X_TLS_CACERTDIR'):
+                ldap.set_option(ldap.OPT_X_TLS_CACERTDIR,
                                 '/etc/openldap/cacerts')
             ldap.set_option(ldap.OPT_REFERRALS, ldap.OPT_OFF)
             ldap.set_option(ldap.OPT_RESTART, ldap.OPT_ON)
@@ -112,12 +116,12 @@ class AuthLdap(object):
             if self.LDAP_BIND_DN and self.LDAP_BIND_PASS:
                 server.simple_bind_s(self.LDAP_BIND_DN, self.LDAP_BIND_PASS)
 
-            filt = '(&%s(%s=%s))' % (self.LDAP_FILTER, self.attr_login,
+            filter_ = '(&%s(%s=%s))' % (self.LDAP_FILTER, self.attr_login,
                                      username)
-            log.debug("Authenticating %r filt %s at %s", self.BASE_DN,
-                      filt, self.LDAP_SERVER)
+            log.debug("Authenticating %r filter %s at %s", self.BASE_DN,
+                      filter_, self.LDAP_SERVER)
             lobjects = server.search_ext_s(self.BASE_DN, self.SEARCH_SCOPE,
-                                           filt)
+                                           filter_)
 
             if not lobjects:
                 raise ldap.NO_SUCH_OBJECT()
@@ -127,24 +131,28 @@ class AuthLdap(object):
                     continue
 
                 try:
+                    log.debug('Trying simple bind with %s' % dn)
                     server.simple_bind_s(dn, password)
                     attrs = server.search_ext_s(dn, ldap.SCOPE_BASE,
                                                 '(objectClass=*)')[0][1]
                     break
 
-                except ldap.INVALID_CREDENTIALS, e:
-                    log.debug("LDAP rejected password for user '%s' (%s): %s",
-                              uid, username, dn)
+                except ldap.INVALID_CREDENTIALS:
+                    log.debug(
+                        "LDAP rejected password for user '%s' (%s): %s" % (
+                            uid, username, dn
+                        )
+                    )
 
             else:
                 log.debug("No matching LDAP objects for authentication "
                           "of '%s' (%s)", uid, username)
                 raise LdapPasswordError()
 
-        except ldap.NO_SUCH_OBJECT, e:
-            log.debug("LDAP says no such user '%s' (%s)", uid, username)
+        except ldap.NO_SUCH_OBJECT:
+            log.debug("LDAP says no such user '%s' (%s)" % (uid, username))
             raise LdapUsernameError()
-        except ldap.SERVER_DOWN, e:
+        except ldap.SERVER_DOWN:
             raise LdapConnectionError("LDAP can't access "
                                       "authentication server")
 

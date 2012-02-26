@@ -7,20 +7,21 @@ from rhodecode import requirements
 if __py_version__ < (2, 5):
     raise Exception('RhodeCode requires python 2.5 or later')
 
-
 dependency_links = [
 ]
 
-classifiers = ['Development Status :: 5 - Production/Stable',
-               'Environment :: Web Environment',
-               'Framework :: Pylons',
-               'Intended Audience :: Developers',
-               'License :: OSI Approved :: GNU General Public License (GPL)',
-               'Operating System :: OS Independent',
-               'Programming Language :: Python',
-               'Programming Language :: Python :: 2.5',
-               'Programming Language :: Python :: 2.6',
-               'Programming Language :: Python :: 2.7', ]
+classifiers = [
+    'Development Status :: 5 - Production/Stable',
+    'Environment :: Web Environment',
+    'Framework :: Pylons',
+    'Intended Audience :: Developers',
+    'License :: OSI Approved :: GNU General Public License (GPL)',
+    'Operating System :: OS Independent',
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 2.5',
+    'Programming Language :: Python :: 2.6',
+    'Programming Language :: Python :: 2.7',
+]
 
 
 # additional files from project that goes somewhere in the filesystem

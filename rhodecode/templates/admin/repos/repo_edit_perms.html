@@ -1,4 +1,4 @@
-<table id="permissions_manage">
+<table id="permissions_manage" class="noborder">
     <tr>
         <td>${_('none')}</td>
         <td>${_('read')}</td>
@@ -7,7 +7,7 @@
         <td>${_('member')}</td>
         <td></td>
     </tr>
-    ## USERS                        
+    ## USERS
     %for r2p in c.repo_info.repo_to_perm:
         %if r2p.user.username =='default' and c.repo_info.private:
             <tr>
@@ -16,7 +16,7 @@
                     ${_('private repository')}
                     </span>
                 </td>
-                <td class="private_repo_msg"><img style="vertical-align:bottom" src="${h.url("/images/icons/user.png")}"/>${r2p.user.username}</td>
+                <td class="private_repo_msg"><img style="vertical-align:bottom" src="${h.url('/images/icons/user.png')}"/>${r2p.user.username}</td>
             </tr>
         %else:
         <tr id="id${id(r2p.user.username)}">
@@ -32,13 +32,13 @@
                 <span class="delete_icon action_button" onclick="ajaxActionUser(${r2p.user.user_id},'${'id%s'%id(r2p.user.username)}')">
                 ${_('revoke')}
                 </span>
-              %endif                    
+              %endif
             </td>
         </tr>
         %endif
     %endfor
-    
-    ## USERS GROUPS                          
+
+    ## USERS GROUPS
     %for g2p in c.repo_info.users_group_to_perm:
         <tr id="id${id(g2p.users_group.users_group_name)}">
             <td>${h.radio('g_perm_%s' % g2p.users_group.users_group_name,'repository.none')}</td>
@@ -92,10 +92,10 @@ function ajaxActionUser(user_id, field_id) {
     var postData = '_method=delete&user_id=' + user_id;
     var request = YAHOO.util.Connect.asyncRequest('POST', sUrl, callback, postData);
 };
-            
+
 function ajaxActionUsersGroup(users_group_id,field_id){
     var sUrl = "${h.url('delete_repo_users_group',repo_name=c.repo_name)}";
-    var callback = { 
+    var callback = {
     	success:function(o){
     	    var tr = YUD.get(String(field_id));
     		tr.parentNode.removeChild(tr);
@@ -104,7 +104,7 @@ function ajaxActionUsersGroup(users_group_id,field_id){
             alert("${_('Failed to remove users group')}");
         },
     };
-    var postData = '_method=delete&users_group_id='+users_group_id; 
+    var postData = '_method=delete&users_group_id='+users_group_id;
     var request = YAHOO.util.Connect.asyncRequest('POST', sUrl, callback, postData);
 };
 
@@ -267,7 +267,7 @@ YAHOO.example.FnMultipleFields = function () {
 
     membersAC.itemSelectEvent.subscribe(myHandler);
     if(ownerAC.itemSelectEvent){
-    	ownerAC.itemSelectEvent.subscribe(myHandler);	
+    	ownerAC.itemSelectEvent.subscribe(myHandler);
     }
 
     return {
@@ -277,5 +277,5 @@ YAHOO.example.FnMultipleFields = function () {
         ownerAC: ownerAC,
     };
 }();
-            
-</script>      
+
+</script>

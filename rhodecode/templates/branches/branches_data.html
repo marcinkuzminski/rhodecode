@@ -1,53 +1,52 @@
-% if c.repo_branches:
-    <table class="table_disp">
+%if c.repo_branches:
+   <div id="table_wrap" class="yui-skin-sam">
+    <table id="branches_data">
+      <thead>
         <tr>
-            <th class="left">${_('date')}</th>
             <th class="left">${_('name')}</th>
+            <th class="left">${_('date')}</th>
             <th class="left">${_('author')}</th>
             <th class="left">${_('revision')}</th>
-            <th class="left">${_('links')}</th>
         </tr>
+      </thead>
 		%for cnt,branch in enumerate(c.repo_branches.items()):
 		<tr class="parity${cnt%2}">
-            <td><span class="tooltip" title="${h.age(branch[1].date)}">${branch[1].date}</span>
-            </td>
             <td>
                 <span class="logtags">
                     <span class="branchtag">${h.link_to(branch[0],
-                    h.url('changeset_home',repo_name=c.repo_name,revision=branch[1].raw_id))}</span>
-                </span>         
-            </td>		
+                    h.url('files_home',repo_name=c.repo_name,revision=branch[1].raw_id))}</span>
+                </span>
+            </td>
+            <td><span class="tooltip" title="${h.age(branch[1].date)}">${branch[1].date}</span></td>
             <td title="${branch[1].author}">${h.person(branch[1].author)}</td>
-            <td>r${branch[1].revision}:${h.short_id(branch[1].raw_id)}</td>
-			<td class="nowrap">
-			${h.link_to(_('changeset'),h.url('changeset_home',repo_name=c.repo_name,revision=branch[1].raw_id))}
-			|
-			${h.link_to(_('files'),h.url('files_home',repo_name=c.repo_name,revision=branch[1].raw_id))}
-			</td>
-		</tr>	
+            <td>
+                <div>
+                    <pre><a href="${h.url('files_home',repo_name=c.repo_name,revision=branch[1].raw_id)}">r${branch[1].revision}:${h.short_id(branch[1].raw_id)}</a></pre>
+                </div>
+            </td>
+		</tr>
 		%endfor
         % if hasattr(c,'repo_closed_branches') and c.repo_closed_branches:
           %for cnt,branch in enumerate(c.repo_closed_branches.items()):
           <tr class="parity${cnt%2}">
-              <td><span class="tooltip" title="${h.age(branch[1].date)}">${branch[1].date}</span>
-              </td>
               <td>
                   <span class="logtags">
                       <span class="branchtag">${h.link_to(branch[0]+' [closed]',
                       h.url('changeset_home',repo_name=c.repo_name,revision=branch[1].raw_id))}</span>
-                  </span>         
-              </td>       
-              <td title="${branch[1].author}">${h.person(branch[1].author)}</td>
-              <td>r${branch[1].revision}:${h.short_id(branch[1].raw_id)}</td>
-              <td class="nowrap">
-              ${h.link_to(_('changeset'),h.url('changeset_home',repo_name=c.repo_name,revision=branch[1].raw_id))}
-              |
-              ${h.link_to(_('files'),h.url('files_home',repo_name=c.repo_name,revision=branch[1].raw_id))}
+                  </span>
               </td>
-          </tr>   
+              <td><span class="tooltip" title="${h.age(branch[1].date)}">${branch[1].date}</span></td>
+              <td title="${branch[1].author}">${h.person(branch[1].author)}</td>
+              <td>
+                <div>
+                    <pre><a href="${h.url('files_home',repo_name=c.repo_name,revision=branch[1].raw_id)}">r${branch[1].revision}:${h.short_id(branch[1].raw_id)}</a></pre>
+                </div>
+              </td>
+          </tr>
           %endfor
-        %endif  
+        %endif
     </table>
+    </div>
 %else:
     ${_('There are no branches yet')}
 %endif

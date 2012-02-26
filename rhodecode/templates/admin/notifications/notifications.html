@@ -1,0 +1,53 @@
+## -*- coding: utf-8 -*-
+<%inherit file="/base/base.html"/>
+
+<%def name="title()">
+    ${_('My Notifications')} ${c.rhodecode_user.username} - ${c.rhodecode_name}
+</%def>
+
+<%def name="breadcrumbs_links()">
+    ${_('My Notifications')}
+</%def>
+
+<%def name="page_nav()">
+	${self.menu('admin')}
+</%def>
+
+<%def name="main()">
+<div class="box">
+    <!-- box / title -->
+    <div class="title">
+        ${self.breadcrumbs()}
+        ##<ul class="links">
+        ##    <li>
+        ##      <span style="text-transform: uppercase;"><a href="#">${_('Compose message')}</a></span>
+        ##    </li>
+        ##</ul>
+    </div>
+    %if c.notifications:
+      <div style="padding:10px 15px;text-align: right">
+      <span id='mark_all_read' class="ui-btn">${_('Mark all read')}</span>
+      </div>
+    %endif
+  <div id='notification_data'>
+    <%include file='notifications_data.html'/>
+  </div>
+</div>
+<script type="text/javascript">
+var url_del = "${url('notification', notification_id='__NOTIFICATION_ID__')}";
+YUE.on(YUQ('.delete-notification'),'click',function(e){
+ var notification_id = e.currentTarget.id;
+ deleteNotification(url_del,notification_id)
+})
+ YUE.on('mark_all_read','click',function(e){
+	    var url = "${h.url('notifications_mark_all_read')}";
+	    ypjax(url,'notification_data',function(){
+	    	YUD.get('notification_counter').innerHTML=0;
+	    	YUE.on(YUQ('.delete-notification'),'click',function(e){
+	    		 var notification_id = e.currentTarget.id;
+	    		 deleteNotification(url_del,notification_id)
+	    	})
+	    });
+ })
+</script>
+</%def>

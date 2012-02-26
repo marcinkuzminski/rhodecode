@@ -1,0 +1,39 @@
+## -*- coding: utf-8 -*-
+<li>
+    ${h.link_to('%s (%s)' % (_('branches'),len(c.rhodecode_repo.branches.values()),),h.url('branches_home',repo_name=c.repo_name),class_='branches childs')}
+    <ul>
+    %if c.rhodecode_repo.branches.values():
+        %for cnt,branch in enumerate(c.rhodecode_repo.branches.items()):
+            <li><div><pre>${h.link_to('%s - %s' % (branch[0],h.short_id(branch[1])),h.url('files_home',repo_name=c.repo_name,revision=branch[1]))}</pre></div></li>
+        %endfor
+    %else:
+        <li>${h.link_to(_('There are no branches yet'),'#')}</li>
+    %endif
+    </ul>
+</li>
+<li>
+    ${h.link_to('%s (%s)' % (_('tags'),len(c.rhodecode_repo.tags.values()),),h.url('tags_home',repo_name=c.repo_name),class_='tags childs')}
+    <ul>
+    %if c.rhodecode_repo.tags.values():
+        %for cnt,tag in enumerate(c.rhodecode_repo.tags.items()):
+         <li><div><pre>${h.link_to('%s - %s' % (tag[0],h.short_id(tag[1])),h.url('files_home',repo_name=c.repo_name,revision=tag[1]))}</pre></div></li>
+        %endfor
+    %else:
+        <li>${h.link_to(_('There are no tags yet'),'#')}</li>
+    %endif
+    </ul>
+</li>
+%if c.rhodecode_repo.alias == 'hg':
+<li>
+    ${h.link_to('%s (%s)' % (_('bookmarks'),len(c.rhodecode_repo.bookmarks.values()),),h.url('bookmarks_home',repo_name=c.repo_name),class_='bookmarks childs')}
+    <ul>
+    %if c.rhodecode_repo.bookmarks.values():
+        %for cnt,book in enumerate(c.rhodecode_repo.bookmarks.items()):
+         <li><div><pre>${h.link_to('%s - %s' % (book[0],h.short_id(book[1])),h.url('files_home',repo_name=c.repo_name,revision=book[1]))}</pre></div></li>
+        %endfor
+    %else:
+        <li>${h.link_to(_('There are no bookmarks yet'),'#')}</li>
+    %endif
+    </ul>
+</li>
+%endif

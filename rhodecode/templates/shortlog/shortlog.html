@@ -8,7 +8,7 @@
 
 <%def name="breadcrumbs_links()">
     ${h.link_to(u'Home',h.url('/'))}
-    &raquo; 
+    &raquo;
     ${h.link_to(c.repo_name,h.url('summary_home',repo_name=c.repo_name))}
     &raquo;
     ${_('shortlog')}
@@ -29,5 +29,5 @@
 	        ${c.shortlog_data}
 	    </div>
     </div>
-</div>    
+</div>
 </%def>

@@ -3,11 +3,11 @@
     rhodecode.controllers.admin.repos
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    Admin controller for RhodeCode
+    Repositories controller for RhodeCode
 
     :created_on: Apr 7, 2010
     :author: marcink
-    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
+    :copyright: (C) 2010-2012 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software: you can redistribute it and/or modify
@@ -29,9 +29,10 @@ import formencode
 from formencode import htmlfill
 
 from paste.httpexceptions import HTTPInternalServerError
-from pylons import request, response, session, tmpl_context as c, url
-from pylons.controllers.util import abort, redirect
+from pylons import request, session, tmpl_context as c, url
+from pylons.controllers.util import redirect
 from pylons.i18n.translation import _
+from sqlalchemy.exc import IntegrityError
 
 from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator, \
@@ -39,11 +40,11 @@ from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator, \
 from rhodecode.lib.base import BaseController, render
 from rhodecode.lib.utils import invalidate_cache, action_logger, repo_name_slug
 from rhodecode.lib.helpers import get_token
-from rhodecode.model.db import User, Repository, UserFollowing, Group
+from rhodecode.model.meta import Session
+from rhodecode.model.db import User, Repository, UserFollowing, RepoGroup
 from rhodecode.model.forms import RepoForm
 from rhodecode.model.scm import ScmModel
 from rhodecode.model.repo import RepoModel
-from sqlalchemy.exc import IntegrityError
 
 log = logging.getLogger(__name__)
 
@@ -63,9 +64,9 @@ class ReposController(BaseController):
         super(ReposController, self).__before__()
 
     def __load_defaults(self):
-        c.repo_groups = Group.groups_choices()
+        c.repo_groups = RepoGroup.groups_choices()
         c.repo_groups_choices = map(lambda k: unicode(k[0]), c.repo_groups)
-        
+
         repo_model = RepoModel()
         c.users_array = repo_model.get_users_js()
         c.users_groups_array = repo_model.get_users_groups_js()
@@ -96,12 +97,13 @@ class ReposController(BaseController):
             .filter(UserFollowing.follows_repository == c.repo_info).scalar()
 
         if c.repo_info.stats:
-            last_rev = c.repo_info.stats.stat_on_revision
+            # this is on what revision we ended up so we add +1 for count
+            last_rev = c.repo_info.stats.stat_on_revision + 1
         else:
             last_rev = 0
         c.stats_revision = last_rev
 
-        c.repo_last_rev = repo.count() - 1 if repo.revisions else 0
+        c.repo_last_rev = repo.count() if repo.revisions else 0
 
         if last_rev == 0 or c.repo_last_rev == 0:
             c.stats_percentage = 0
@@ -110,6 +112,10 @@ class ReposController(BaseController):
                                             c.repo_last_rev) * 100)
 
         defaults = RepoModel()._get_defaults(repo_name)
+
+        c.repos_list = [('', _('--REMOVE FORK--'))]
+        c.repos_list += [(x.repo_id, x.repo_name) for x in
+                   Repository.query().order_by(Repository.repo_name).all()]
         return defaults
 
     @HasPermissionAllDecorator('hg.admin')
@@ -127,13 +133,13 @@ class ReposController(BaseController):
         """
         POST /repos: Create a new item"""
         # url('repos')
-        repo_model = RepoModel()
+
         self.__load_defaults()
         form_result = {}
         try:
             form_result = RepoForm(repo_groups=c.repo_groups_choices)()\
                             .to_python(dict(request.POST))
-            repo_model.create(form_result, self.rhodecode_user)
+            RepoModel().create(form_result, self.rhodecode_user)
             if form_result['clone_uri']:
                 h.flash(_('created repository %s from %s') \
                     % (form_result['repo_name'], form_result['clone_uri']),
@@ -143,13 +149,13 @@ class ReposController(BaseController):
                     category='success')
 
             if request.POST.get('user_created'):
-                #created by regular non admin user
+                # created by regular non admin user
                 action_logger(self.rhodecode_user, 'user_created_repo',
                               form_result['repo_name_full'], '', self.sa)
             else:
                 action_logger(self.rhodecode_user, 'admin_created_repo',
                               form_result['repo_name_full'], '', self.sa)
-
+            Session.commit()
         except formencode.Invalid, errors:
 
             c.new_repo = errors.value['repo_name']
@@ -207,7 +213,7 @@ class ReposController(BaseController):
             changed_name = repo.repo_name
             action_logger(self.rhodecode_user, 'admin_updated_repo',
                               changed_name, '', self.sa)
-
+            Session.commit()
         except formencode.Invalid, errors:
             defaults = self.__load_data(repo_name)
             defaults.update(errors.value)
@@ -251,9 +257,9 @@ class ReposController(BaseController):
             repo_model.delete(repo)
             invalidate_cache('get_repo_cached_%s' % repo_name)
             h.flash(_('deleted repository %s') % repo_name, category='success')
-
+            Session.commit()
         except IntegrityError, e:
-            if e.message.find('repositories_fork_id_fkey'):
+            if e.message.find('repositories_fork_id_fkey') != -1:
                 log.error(traceback.format_exc())
                 h.flash(_('Cannot delete %s it still contains attached '
                           'forks') % repo_name,
@@ -271,8 +277,7 @@ class ReposController(BaseController):
 
         return redirect(url('repos'))
 
-
-    @HasRepoPermissionAllDecorator('repository.admin')   
+    @HasRepoPermissionAllDecorator('repository.admin')
     def delete_perm_user(self, repo_name):
         """
         DELETE an existing repository permission user
@@ -281,9 +286,11 @@ class ReposController(BaseController):
         """
 
         try:
-            repo_model = RepoModel()
-            repo_model.delete_perm_user(request.POST, repo_name)
-        except Exception, e:
+            RepoModel().revoke_user_permission(repo=repo_name,
+                                               user=request.POST['user_id'])
+            Session.commit()
+        except Exception:
+            log.error(traceback.format_exc())
             h.flash(_('An error occurred during deletion of repository user'),
                     category='error')
             raise HTTPInternalServerError()
@@ -295,10 +302,14 @@ class ReposController(BaseController):
 
         :param repo_name:
         """
+
         try:
-            repo_model = RepoModel()
-            repo_model.delete_perm_users_group(request.POST, repo_name)
-        except Exception, e:
+            RepoModel().revoke_users_group_permission(
+                repo=repo_name, group_name=request.POST['users_group_id']
+            )
+            Session.commit()
+        except Exception:
+            log.error(traceback.format_exc())
             h.flash(_('An error occurred during deletion of repository'
                       ' users groups'),
                     category='error')
@@ -313,8 +324,8 @@ class ReposController(BaseController):
         """
 
         try:
-            repo_model = RepoModel()
-            repo_model.delete_stats(repo_name)
+            RepoModel().delete_stats(repo_name)
+            Session.commit()
         except Exception, e:
             h.flash(_('An error occurred during deletion of repository stats'),
                     category='error')
@@ -330,6 +341,7 @@ class ReposController(BaseController):
 
         try:
             ScmModel().mark_for_invalidation(repo_name)
+            Session.commit()
         except Exception, e:
             h.flash(_('An error occurred during cache invalidation'),
                     category='error')
@@ -353,6 +365,7 @@ class ReposController(BaseController):
                 self.scm_model.toggle_following_repo(repo_id, user_id)
                 h.flash(_('Updated repository visibility in public journal'),
                         category='success')
+                Session.commit()
             except:
                 h.flash(_('An error occurred during setting this'
                           ' repository in public journal'),
@@ -375,6 +388,28 @@ class ReposController(BaseController):
             h.flash(_('Pulled from remote location'), category='success')
         except Exception, e:
             h.flash(_('An error occurred during pull from remote location'),
+                    category='error')
+
+        return redirect(url('edit_repo', repo_name=repo_name))
+
+    @HasPermissionAllDecorator('hg.admin')
+    def repo_as_fork(self, repo_name):
+        """
+        Mark given repository as a fork of another
+
+        :param repo_name:
+        """
+        try:
+            fork_id = request.POST.get('id_fork_of')
+            repo = ScmModel().mark_as_fork(repo_name, fork_id,
+                                    self.rhodecode_user.username)
+            fork = repo.fork.repo_name if repo.fork else _('Nothing')
+            Session.commit()
+            h.flash(_('Marked repo %s as fork of %s' % (repo_name,fork)),
+                    category='success')
+        except Exception, e:
+            raise
+            h.flash(_('An error occurred during this operation'),
                     category='error')
 
         return redirect(url('edit_repo', repo_name=repo_name))

@@ -1,21 +1,39 @@
-=================================================
-Welcome to RhodeCode (RhodiumCode) documentation!
-=================================================
+=========
+RhodeCode
+=========
 
-``RhodeCode`` is a Pylons framework based Mercurial repository 
-browser/management tool with a built in push/pull server and full text search.
+About
+-----
+
+``RhodeCode`` is a fast and powerful management tool for Mercurial_ and GIT_ 
+with a built in push/pull server and full text search and code-review.
 It works on http/https and has a built in permission/authentication system with 
-the ability to authenticate via LDAP or ActiveDirectory. RhodeCode also supports
-simple API so it's easy integrable with existing systems.
+the ability to authenticate via LDAP or ActiveDirectory. RhodeCode also provides
+simple API so it's easy integrable with existing external systems.
 
 RhodeCode is similar in some respects to github or bitbucket_, 
-however RhodeCode can be run as standalone hosted application on your own server.  
+however RhodeCode can be run as standalone hosted application on your own server.
 It is open source and donation ware and focuses more on providing a customized, 
-self administered interface for Mercurial(and soon GIT) repositories. 
+self administered interface for Mercurial and GIT repositories. 
 RhodeCode is powered by a vcs_ library that Lukasz Balcerzak and I created to 
 handle multiple different version control systems.
 
 RhodeCode uses `Semantic Versioning <http://semver.org/>`_
+
+Installation
+------------
+Stable releases of RhodeCode are best installed via::
+
+    easy_install rhodecode
+
+Or::
+
+    pip install rhodecode 
+
+Detailed instructions and links may be found on the Installation page.
+
+Please visit http://packages.python.org/RhodeCode/installation.html for
+more details
 
 RhodeCode demo
 --------------
@@ -45,16 +63,11 @@ Sources at github_
 
 https://github.com/marcinkuzminski/rhodecode
 
-Installation
-------------
-
-Please visit http://packages.python.org/RhodeCode/installation.html
-
 
 RhodeCode Features
 ------------------
 
-- Has it's own middleware to handle mercurial_ protocol requests. 
+- Has its own middleware to handle mercurial_ protocol requests. 
   Each request can be logged and authenticated.
 - Runs on threads unlike hgweb. You can make multiple pulls/pushes simultaneous.
   Supports http/https and LDAP
@@ -75,6 +88,9 @@ RhodeCode Features
 - Server side forks. It is possible to fork a project and modify it freely 
   without breaking the main repository. You can even write Your own hooks 
   and install them
+- code review with notification system, inline commenting, all parsed using
+  rst syntax
+- rst and markdown README support for repositories  
 - Full text search powered by Whoosh on the source files, and file names.
   Build in indexing daemons, with optional incremental index build
   (no external search servers required all in one application)
@@ -88,20 +104,14 @@ RhodeCode Features
   location 
 - Based on pylons / sqlalchemy / sqlite / whoosh / vcs
 
-
-.. include:: ./docs/screenshots.rst
-    
     
 Incoming / Plans
 ----------------
 
 - Finer granular permissions per branch, repo group or subrepo
 - pull requests and web based merges
-- notification and message system 
+- per line file history
 - SSH based authentication with server side key management
-- Code review (probably based on hg-review)
-- Full git_ support, with push/pull server (currently in beta tests)
-- Redmine and other bugtrackers integration
 - Commit based built in wiki system
 - More statistics and graph (global annotation + some more statistics)
 - Other advancements as development continues (or you can of course make 
@@ -113,21 +123,35 @@ License
 ``RhodeCode`` is released under the GPLv3 license.
 
 
-Mailing group Q&A
------------------
+Getting help
+------------
 
-Join the `Google group <http://groups.google.com/group/rhodecode>`_
+Listed bellow are various support resources that should help.
 
-Open an issue at `issue tracker <http://bitbucket.org/marcinkuzminski/rhodecode/issues>`_
+.. note::
+   
+   Please try to read the documentation before posting any issues
+ 
+- Join the `Google group <http://groups.google.com/group/rhodecode>`_ and ask
+  any questions.
 
-Join #rhodecode on FreeNode (irc.freenode.net)
-or use http://webchat.freenode.net/?channels=rhodecode for web access to irc.
+- Open an issue at `issue tracker <http://bitbucket.org/marcinkuzminski/rhodecode/issues>`_
+
+
+- Join #rhodecode on FreeNode (irc.freenode.net)
+  or use http://webchat.freenode.net/?channels=rhodecode for web access to irc.
+
+- You can also follow me on twitter @marcinkuzminski where i often post some
+  news about RhodeCode
+
 
 Online documentation
 --------------------
 
 Online documentation for the current version of RhodeCode is available at
-http://packages.python.org/RhodeCode/.
+ - http://packages.python.org/RhodeCode/
+ - http://rhodecode.readthedocs.org/en/latest/index.html
+
 You may also build the documentation for yourself - go into ``docs/`` and run::
 
    make html

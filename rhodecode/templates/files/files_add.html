@@ -20,7 +20,7 @@
 </%def>
 
 <%def name="page_nav()">
-		${self.menu('files')}     
+		${self.menu('files')}
 </%def>
 <%def name="main()">
 <div class="box">
@@ -31,8 +31,8 @@
             <li>
               <span style="text-transform: uppercase;">
               <a href="#">${_('branch')}: ${c.cs.branch}</a></span>
-            </li>          
-        </ul>          
+            </li>
+        </ul>
     </div>
     <div class="table">
 		<div id="files_data">
@@ -46,16 +46,16 @@
                       </div>
                       <div class="input">
                           <input type="text" value="" size="30" name="filename" id="filename">
-                          <input type="button" class="ui-button-small" value="upload file" id="upload_file_enable">
+                          ${_('or')} <span class="ui-btn" id="upload_file_enable">${_('Upload file')}</span>
                       </div>
-                  </div>                    
+                  </div>
                   <div id="upload_file_container" class="field" style="display:none">
                     <div class="label">
                         <label for="location">${_('Upload file')}</label>
                     </div>
                     <div class="file">
                         <input type="file"  size="30" name="upload_file" id="upload_file">
-                        <input type="button" class="ui-button-small" value="create file" id="file_enable">                        
+                        ${_('or')} <span class="ui-btn" id="file_enable">${_('Create new file')}</span>
                     </div>
                   </div>
                    <div class="field">
@@ -66,45 +66,27 @@
                           <input type="text" value="${c.f_path}" size="30" name="location" id="location">
                           ${_('use / to separate directories')}
                       </div>
-                   </div>                                                                    
+                   </div>
               </div>
-            </div>            
+            </div>
 			<div id="body" class="codeblock">
-			    <div id="editor_container">    
+			    <div id="editor_container">
                     <pre id="editor_pre"></pre>
 				    <textarea id="editor" name="content" style="display:none"></textarea>
                 </div>
 				<div style="padding: 10px;color:#666666">${_('commit message')}</div>
 				<textarea id="commit" name="message" style="height: 100px;width: 99%;margin-left:4px"></textarea>
 			</div>
-			<div style="text-align: right;padding-top: 5px">
-			<input id="reset" type="button" value="${_('Reset')}" class="ui-button-small" />
-			${h.submit('commit',_('Commit changes'),class_="ui-button-small-blue")}
+			<div style="text-align: l;padding-top: 5px">
+            ${h.submit('commit',_('Commit changes'),class_="ui-btn")}
+            ${h.reset('reset',_('Reset'),class_="ui-btn")}
 			</div>
 			${h.end_form()}
 			<script type="text/javascript">
-			 var myCodeMirror = CodeMirror.fromTextArea(YUD.get('editor'),{
-	                mode:  "null",
-	                lineNumbers:true
-	              });
-			 YUE.on('reset','click',function(e){
-				 window.location="${h.url('files_home',repo_name=c.repo_name,revision=c.cs.revision,f_path=c.f_path)}";
-			 });
-             
-			 YUE.on('file_enable','click',function(){
-                 YUD.setStyle('editor_container','display','');
-                 YUD.setStyle('upload_file_container','display','none');
-                 YUD.setStyle('filename_container','display','');
-             });
-             
-			 YUE.on('upload_file_enable','click',function(){
-				 YUD.setStyle('editor_container','display','none');
-				 YUD.setStyle('upload_file_container','display','');
-				 YUD.setStyle('filename_container','display','none');
-			 });
-			 
+			var reset_url = "${h.url('files_home',repo_name=c.repo_name,revision=c.cs.raw_id,f_path=c.f_path)}";
+		    initCodeMirror('editor',reset_url);
 			</script>
-		</div>    
+		</div>
     </div>
-</div>    
-</%def>   
+</div>
+</%def>

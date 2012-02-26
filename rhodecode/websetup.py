@@ -7,7 +7,7 @@
 
     :created_on: Dec 11, 2010
     :author: marcink
-    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
+    :copyright: (C) 2010-2012 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software: you can redistribute it and/or modify
@@ -23,11 +23,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import os
 import logging
 
 from rhodecode.config.environment import load_environment
 from rhodecode.lib.db_manage import DbManage
+from rhodecode.model.meta import Session
 
 
 log = logging.getLogger(__name__)
@@ -45,5 +45,5 @@ def setup_app(command, conf, vars):
     dbmanage.admin_prompt()
     dbmanage.create_permissions()
     dbmanage.populate_default_permissions()
-
+    Session.commit()
     load_environment(conf.global_conf, conf.local_conf, initial=True)

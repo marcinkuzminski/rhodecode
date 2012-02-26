@@ -4,7 +4,7 @@
 from sqlalchemy import schema
 
 from rhodecode.lib.dbmigrate.migrate.exceptions import *
-from rhodecode.lib.dbmigrate.migrate.changeset import SQLA_06
+
 
 class ConstraintChangeset(object):
     """Base class for Constraint classes."""
@@ -85,7 +85,6 @@ class PrimaryKeyConstraint(ConstraintChangeset, schema.PrimaryKeyConstraint):
         if table is not None:
             self._set_parent(table)
 
-
     def autoname(self):
         """Mimic the database's automatic constraint names"""
         return "%s_pkey" % self.table.name
@@ -111,8 +110,9 @@ class ForeignKeyConstraint(ConstraintChangeset, schema.ForeignKeyConstraint):
         table = kwargs.pop('table', table)
         refcolnames, reftable = self._normalize_columns(refcolumns,
                                                         table_name=True)
-        super(ForeignKeyConstraint, self).__init__(colnames, refcolnames, *args,
-                                                   **kwargs)
+        super(ForeignKeyConstraint, self).__init__(
+            colnames, refcolnames, *args,**kwargs
+        )
         if table is not None:
             self._set_parent(table)
 
@@ -165,8 +165,6 @@ class CheckConstraint(ConstraintChangeset, schema.CheckConstraint):
         table = kwargs.pop('table', table)
         schema.CheckConstraint.__init__(self, sqltext, *args, **kwargs)
         if table is not None:
-            if not SQLA_06:
-                self.table = table
             self._set_parent(table)
         self.colnames = colnames
 
@@ -199,4 +197,4 @@ class UniqueConstraint(ConstraintChangeset, schema.UniqueConstraint):
 
     def autoname(self):
         """Mimic the database's automatic constraint names"""
-        return "%s_%s_key" % (self.table.name, self.colnames[0])
+        return "%s_%s_key" % (self.table.name, '_'.join(self.colnames))

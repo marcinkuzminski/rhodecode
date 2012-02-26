@@ -10,13 +10,13 @@
     ${h.link_to(c.repo_name,h.url('files_home',repo_name=c.repo_name))}
     &raquo;
     ${_('files')}
-    %if c.files_list:
+    %if c.file:
         @ r${c.changeset.revision}:${h.short_id(c.changeset.raw_id)}
-    %endif        
+    %endif
 </%def>
 
 <%def name="page_nav()">
-    ${self.menu('files')}     
+    ${self.menu('files')}
 </%def>
 
 <%def name="main()">
@@ -27,29 +27,22 @@
 	    <ul class="links">
 		    <li>
 		      <span style="text-transform: uppercase;"><a href="#">${_('branch')}: ${c.changeset.branch}</a></span>
-	        </li>          
-	    </ul>             
+	        </li>
+	    </ul>
     </div>
     <div class="table">
 		<div id="files_data">
-			%if c.files_list:
-				<h3 class="files_location">
-				    ${_('Location')}: ${h.files_breadcrumbs(c.repo_name,c.changeset.raw_id,c.files_list.path)}
-				</h3>
-					%if c.files_list.is_dir():
-						<%include file='files_browser.html'/>
-					%else:
-						<%include file='files_source.html'/>			
-					%endif	
-			%else:
-				<h2>
-					<a href="#" onClick="javascript:parent.history.back();" target="main">${_('Go back')}</a> 
-					${_('No files at given path')}: "${c.f_path or "/"}" 
-				</h2>
-			%endif
-		
-		</div>    
+			<%include file='files_ypjax.html'/>
+		</div>
     </div>
-</div>    
-	
-</%def>    
+</div>
+<script type="text/javascript">
+var YPJAX_TITLE = "${c.repo_name} ${_('Files')} - ${c.rhodecode_name}";
+var current_url = "${h.url.current()}";
+var node_list_url = '${h.url("files_home",repo_name=c.repo_name,revision=c.changeset.raw_id,f_path='__FPATH__')}';
+var url_base = '${h.url("files_nodelist_home",repo_name=c.repo_name,revision=c.changeset.raw_id,f_path=c.file.path)}';
+var truncated_lbl = "${_('search truncated')}";
+var nomatch_lbl = "${_('no matching files')}";
+fileBrowserListeners(current_url, node_list_url, url_base, truncated_lbl, nomatch_lbl);
+</script>
+</%def>

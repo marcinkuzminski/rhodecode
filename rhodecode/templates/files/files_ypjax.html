@@ -1,0 +1,15 @@
+%if c.file:
+    <h3 class="files_location">
+        ${_('Location')}: ${h.files_breadcrumbs(c.repo_name,c.changeset.raw_id,c.file.path)}
+    </h3>
+        %if c.file.is_dir():
+            <%include file='files_browser.html'/>
+        %else:
+            <%include file='files_source.html'/>
+        %endif
+%else:
+    <h2>
+        <a href="#" onClick="javascript:parent.history.back();" target="main">${_('Go back')}</a>
+        ${_('No files at given path')}: "${c.f_path or "/"}"
+    </h2>
+%endif

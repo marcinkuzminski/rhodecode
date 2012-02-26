@@ -23,7 +23,7 @@
 		  ${l.repository_name}
 		%endif
 		</td>
-		
+
 		<td>${l.action_date}</td>
 		<td>${l.user_ip}</td>
 	</tr>
@@ -36,7 +36,7 @@
 		ypjax(e.target.href,"user_log",function(){show_more_event();tooltip_activate();});
 		YUE.preventDefault(e);
 	},'.pager_link');
-	
+
 	YUE.delegate("user_log","click",function(e,matchedEl,container){
 	      var el = e.target;
 	      YUD.setStyle(YUD.get(el.id.substring(1)),'display','');
@@ -48,6 +48,6 @@
 <div class="pagination-wh pagination-left">
 ${c.users_log.pager('$link_previous ~2~ $link_next')}
 </div>
-%else: 
-	${_('No actions yet')} 
+%else:
+	${_('No actions yet')}
 %endif

@@ -7,13 +7,14 @@ from mako.lookup import TemplateLookup
 from pylons.configuration import PylonsConfig
 from pylons.error import handle_mako_error
 
+import rhodecode
 import rhodecode.lib.app_globals as app_globals
 import rhodecode.lib.helpers
 
 from rhodecode.config.routing import make_map
-from rhodecode.lib import celerypylons
+# don't remove this import it does magic for celery
+from rhodecode.lib import celerypylons, str2bool
 from rhodecode.lib import engine_from_config
-from rhodecode.lib.timerproxy import TimerProxy
 from rhodecode.lib.auth import set_available_permissions
 from rhodecode.lib.utils import repo2db_mapper, make_ui, set_rhodecode_config
 from rhodecode.model import init_model
@@ -38,10 +39,13 @@ def load_environment(global_conf, app_conf, initial=False):
     # Initialize config with the basic options
     config.init_app(global_conf, app_conf, package='rhodecode', paths=paths)
 
+    # store some globals into rhodecode
+    rhodecode.CELERY_ON = str2bool(config['app_conf'].get('use_celery'))
+
     config['routes.map'] = make_map(config)
     config['pylons.app_globals'] = app_globals.Globals(config)
     config['pylons.h'] = rhodecode.lib.helpers
-
+    rhodecode.CONFIG = config
     # Setup cache object as early as possible
     import pylons
     pylons.cache._push_object(config['pylons.app_globals'].cache)
@@ -54,7 +58,7 @@ def load_environment(global_conf, app_conf, initial=False):
         input_encoding='utf-8', default_filters=['escape'],
         imports=['from webhelpers.html import escape'])
 
-    #sets the c attribute access when don't existing attribute are accessed
+    # sets the c attribute access when don't existing attribute are accessed
     config['pylons.strict_tmpl_context'] = True
     test = os.path.split(config['__file__'])[-1] == 'test.ini'
     if test:
@@ -63,7 +67,7 @@ def load_environment(global_conf, app_conf, initial=False):
         create_test_env(TESTS_TMP_PATH, config)
         create_test_index(TESTS_TMP_PATH, config, True)
 
-    #MULTIPLE DB configs
+    # MULTIPLE DB configs
     # Setup the SQLAlchemy database engine
     sa_engine_db1 = engine_from_config(config, 'sqlalchemy.db1.')
 
@@ -77,4 +81,7 @@ def load_environment(global_conf, app_conf, initial=False):
     # CONFIGURATION OPTIONS HERE (note: all config options will override
     # any Pylons config options)
 
+    # store config reference into our module to skip import magic of
+    # pylons
+    rhodecode.CONFIG.update(config)
     return config

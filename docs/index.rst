@@ -2,8 +2,8 @@
 
 .. include:: ./../README.rst
 
-Documentation
--------------
+Users Guide
+-----------
 
 **Installation:**
 
@@ -20,10 +20,9 @@ Documentation
    :maxdepth: 1
 
    usage/general
-   usage/enable_git
+   usage/git_support
    usage/statistics
    usage/backup
-   usage/api_key_access
    
 **Develop**
 
@@ -36,9 +35,10 @@ Documentation
 **API**
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
-   api/index
+   api/api
+   api/models
    
 
 Other topics

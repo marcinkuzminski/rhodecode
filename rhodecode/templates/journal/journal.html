@@ -10,60 +10,211 @@
 	${self.menu('home')}
 </%def>
 <%def name="main()">
-	
+
     <div class="box box-left">
 	    <!-- box / title -->
 	    <div class="title">
 	        <h5>${_('Journal')}</h5>
+             <ul class="links">
+               <li>
+                 <span><a id="refresh" href="${h.url('journal')}"><img class="icon" title="${_('Refresh')}" alt="${_('Refresh')}" src="${h.url('/images/icons/arrow_refresh.png')}"/>
+                 </a></span>
+               </li>
+             </ul>
 	    </div>
-		<script type="text/javascript">
-		function show_more_event(){
-		YUE.on(YUD.getElementsByClassName('show_more'),'click',function(e){
-		    var el = e.target;
-		    YUD.setStyle(YUD.get(el.id.substring(1)),'display','');
-		    YUD.setStyle(el.parentNode,'display','none');
-		});
-		}
-		</script> 	    
 	    <div id="journal">${c.journal_data}</div>
     </div>
-    
     <div class="box box-right">
         <!-- box / title -->
         <div class="title">
-            <h5>${_('Following')}</h5>
+            <h5>
+            <input class="q_filter_box" id="q_filter" size="15" type="text" name="filter" value="${_('quick filter...')}"/>
+            <a id="show_my" class="link-white" href="#my">${_('My repos')}</a> / <a id="show_watched" class="link-white" href="#watched">${_('Watched')}</a>
+            </h5>
+             %if h.HasPermissionAny('hg.admin','hg.create.repository')():
+             <ul class="links">
+               <li>
+                 <span>${h.link_to(_('ADD'),h.url('admin_settings_create_repository'))}</span>
+               </li>
+             </ul>
+             %endif
         </div>
-        <div>
-		%if c.following:
-		    %for entry in c.following:
-		        <div class="currently_following">
-		            %if entry.follows_user_id:
-		              <img title="${_('following user')}" alt="${_('user')}" src="${h.url("/images/icons/user.png")}"/>
-		              ${entry.follows_user.full_contact}
-		            %endif
-		            
-		            %if entry.follows_repo_id:
-		              
-		              <div style="float:left;padding-right:5px">
-                      <span id="follow_toggle_${entry.follows_repository.repo_id}" class="following" title="${_('Stop following this repository')}"
-                            onclick="javascript:toggleFollowingRepo(this,${entry.follows_repository.repo_id},'${str(h.get_token())}')">
-                      </span>		            
-		              </div>
-		              %if entry.follows_repository.private:
-		                <img class="icon" title="${_('private repository')}" alt="${_('private repository')}" src="${h.url("/images/icons/lock.png")}"/>
-		              %else:
-		                <img class="icon" title="${_('public repository')}" alt="${_('public repository')}" src="${h.url("/images/icons/lock_open.png")}"/>
-		              %endif
-		              
-		              ${h.link_to(entry.follows_repository.repo_name,h.url('summary_home',
-		                repo_name=entry.follows_repository.repo_name))}
-		              
-		            %endif
-		        </div>
-		    %endfor
-		%else:
-		    ${_('You are not following any users or repositories')}
-		%endif
+        <!-- end box / title -->
+        <div id="my" class="table">
+            %if c.user_repos:
+            <div id='repos_list_wrap' class="yui-skin-sam">
+            <table id="repos_list">
+             <thead>
+                  <tr>
+                  <th></th>
+                  <th class="left">${_('Name')}</th>
+                  <th class="left">${_('Tip')}</th>
+                  <th class="left">${_('Action')}</th>
+                  <th class="left">${_('Action')}</th>
+             </thead>
+             <tbody>
+                 <%namespace name="dt" file="/_data_table/_dt_elements.html"/>
+                 %for repo in c.user_repos:
+                    <tr>
+                        ##QUICK MENU
+                        <td class="quick_repo_menu">
+                          ${dt.quick_menu(repo['name'])}
+                        </td>
+                        ##REPO NAME AND ICONS
+                        <td class="reponame">
+                          ${dt.repo_name(repo['name'],repo['dbrepo']['repo_type'],repo['dbrepo']['private'],repo['dbrepo_fork'].get('repo_name'))}
+                        </td>
+                        ##LAST REVISION
+                        <td>
+                            ${dt.revision(repo['name'],repo['rev'],repo['tip'],repo['author'],repo['last_msg'])}
+                        </td>
+                        ##
+                        <td><a href="${h.url('repo_settings_home',repo_name=repo['name'])}" title="${_('edit')}"><img class="icon" alt="${_('private')}" src="${h.url('/images/icons/application_form_edit.png')}"/></a></td>
+                        <td>
+                          ${h.form(url('repo_settings_delete', repo_name=repo['name']),method='delete')}
+                            ${h.submit('remove_%s' % repo['name'],'',class_="delete_icon action_button",onclick="return confirm('Confirm to delete this repository');")}
+                          ${h.end_form()}
+                        </td>
+                    </tr>
+                 %endfor
+             </tbody>
+             </table>
+             </div>
+             %else:
+                <div style="padding:5px 0px 10px 0px;">
+                ${_('No repositories yet')}
+                %if h.HasPermissionAny('hg.admin','hg.create.repository')():
+                    ${h.link_to(_('create one now'),h.url('admin_settings_create_repository'),class_="ui-btn")}
+                %endif
+                </div>
+             %endif
         </div>
-    </div>    
-</%def>    
+
+        <div id="watched" class="table" style="display:none">
+          %if c.following:
+            <table>
+            <thead>
+                <tr>
+                <th class="left">${_('Name')}</th>
+            </thead>
+             <tbody>
+                %for entry in c.following:
+                  <tr>
+                    <td>
+                      %if entry.follows_user_id:
+                        <img title="${_('following user')}" alt="${_('user')}" src="${h.url('/images/icons/user.png')}"/>
+                        ${entry.follows_user.full_contact}
+                      %endif
+
+                      %if entry.follows_repo_id:
+                        <div style="float:right;padding-right:5px">
+                        <span id="follow_toggle_${entry.follows_repository.repo_id}" class="following" title="${_('Stop following this repository')}"
+                              onclick="javascript:toggleFollowingRepo(this,${entry.follows_repository.repo_id},'${str(h.get_token())}')">
+                        </span>
+                        </div>
+
+                         %if h.is_hg(entry.follows_repository):
+                           <img class="icon" title="${_('Mercurial repository')}" alt="${_('Mercurial repository')}" src="${h.url('/images/icons/hgicon.png')}"/>
+                         %elif h.is_git(entry.follows_repository):
+                           <img class="icon" title="${_('Git repository')}" alt="${_('Git repository')}" src="${h.url('/images/icons/giticon.png')}"/>
+                         %endif
+
+                        %if entry.follows_repository.private:
+                          <img class="icon" title="${_('private repository')}" alt="${_('private repository')}" src="${h.url('/images/icons/lock.png')}"/>
+                        %else:
+                          <img class="icon" title="${_('public repository')}" alt="${_('public repository')}" src="${h.url('/images/icons/lock_open.png')}"/>
+                        %endif
+                        <span class="watched_repo">
+                            ${h.link_to(entry.follows_repository.repo_name,h.url('summary_home',repo_name=entry.follows_repository.repo_name))}
+                        </span>
+                      %endif
+                    </td>
+                  </tr>
+                %endfor
+            </tbody>
+            </table>
+          %else:
+              <div style="padding:5px 0px 10px 0px;">
+              ${_('You are not following any users or repositories')}
+              </div>
+          %endif
+        </div>
+    </div>
+
+    <script type="text/javascript">
+
+    YUE.on('show_my','click',function(e){
+        YUD.setStyle('watched','display','none');
+        YUD.setStyle('my','display','');
+        var nodes = YUQ('#my tr td a.repo_name');
+        var target = 'q_filter';
+        var func = function(node){
+            return node.parentNode.parentNode.parentNode.parentNode;
+        }
+        q_filter(target,nodes,func);
+        YUE.preventDefault(e);
+    })
+    YUE.on('show_watched','click',function(e){
+        YUD.setStyle('my','display','none');
+        YUD.setStyle('watched','display','');
+        var nodes = YUQ('#watched .watched_repo a');
+        var target = 'q_filter';
+        var func = function(node){
+            return node.parentNode.parentNode;
+        }
+        q_filter(target,nodes,func);
+        YUE.preventDefault(e);
+    })
+    YUE.on('refresh','click',function(e){
+        ypjax(e.currentTarget.href,"journal",function(){show_more_event();tooltip_activate();});
+        YUE.preventDefault(e);
+    });
+
+
+    // main table sorting
+    var myColumnDefs = [
+        {key:"menu",label:"",sortable:false,className:"quick_repo_menu hidden"},
+        {key:"name",label:"${_('Name')}",sortable:true,
+            sortOptions: { sortFunction: nameSort }},
+        {key:"tip",label:"${_('Tip')}",sortable:true,
+            sortOptions: { sortFunction: revisionSort }},
+        {key:"action1",label:"",sortable:false},
+        {key:"action2",label:"",sortable:false},
+    ];
+
+    var myDataSource = new YAHOO.util.DataSource(YUD.get("repos_list"));
+
+    myDataSource.responseType = YAHOO.util.DataSource.TYPE_HTMLTABLE;
+
+    myDataSource.responseSchema = {
+        fields: [
+            {key:"menu"},
+            {key:"name"},
+            {key:"tip"},
+            {key:"action1"},
+            {key:"action2"}
+        ]
+    };
+
+    var myDataTable = new YAHOO.widget.DataTable("repos_list_wrap", myColumnDefs, myDataSource,
+            {
+              sortedBy:{key:"name",dir:"asc"},
+              MSG_SORTASC:"${_('Click to sort ascending')}",
+              MSG_SORTDESC:"${_('Click to sort descending')}",
+              MSG_EMPTY:"${_('No records found.')}",
+              MSG_ERROR:"${_('Data error.')}",
+              MSG_LOADING:"${_('Loading...')}",
+            }
+    );
+    myDataTable.subscribe('postRenderEvent',function(oArgs) {
+        tooltip_activate();
+        quick_repo_menu();
+        var func = function(node){
+            return node.parentNode.parentNode.parentNode.parentNode;
+        }
+        q_filter('q_filter',YUQ('#my tr td a.repo_name'),func);
+    });
+
+
+    </script>
+</%def>

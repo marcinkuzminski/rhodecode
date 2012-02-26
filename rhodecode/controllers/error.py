@@ -7,7 +7,7 @@
 
     :created_on: Dec 8, 2010
     :author: marcink
-    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
+    :copyright: (C) 2010-2012 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software: you can redistribute it and/or modify
@@ -54,7 +54,7 @@ class ErrorController(BaseController):
         resp = request.environ.get('pylons.original_response')
         c.rhodecode_name = config.get('rhodecode_title')
 
-        log.debug('### %s ###', resp.status)
+        log.debug('### %s ###' % resp.status)
 
         e = request.environ
         c.serv_p = r'%(protocol)s://%(host)s/' \

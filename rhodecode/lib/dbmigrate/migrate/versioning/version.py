@@ -60,7 +60,7 @@ class Collection(pathed.Pathed):
         and store them in self.versions
         """
         super(Collection, self).__init__(path)
-        
+
         # Create temporary list of files, allowing skipped version numbers.
         files = os.listdir(path)
         if '1' in files:
@@ -90,9 +90,7 @@ class Collection(pathed.Pathed):
         return max([VerNum(0)] + self.versions.keys())
 
     def _next_ver_num(self, use_timestamp_numbering):
-        print use_timestamp_numbering
         if use_timestamp_numbering == True:
-            print "Creating new timestamp version!"
             return VerNum(int(datetime.utcnow().strftime('%Y%m%d%H%M%S')))
         else:
             return self.latest + 1
@@ -113,7 +111,7 @@ class Collection(pathed.Pathed):
 
         script.PythonScript.create(filepath, **k)
         self.versions[ver] = Version(ver, self.path, [filename])
-        
+
     def create_new_sql_version(self, database, description, **k):
         """Create SQL files for new version"""
         ver = self._next_ver_num(k.pop('use_timestamp_numbering', False))
@@ -133,7 +131,7 @@ class Collection(pathed.Pathed):
             filepath = self._version_path(filename)
             script.SqlScript.create(filepath, **k)
             self.versions[ver].add_script(filepath)
-        
+
     def version(self, vernum=None):
         """Returns latest Version if vernum is not given.
         Otherwise, returns wanted version"""
@@ -152,7 +150,7 @@ class Collection(pathed.Pathed):
 
 class Version(object):
     """A single version in a collection
-    :param vernum: Version Number 
+    :param vernum: Version Number
     :param path: Path to script files
     :param filelist: List of scripts
     :type vernum: int, VerNum
@@ -169,7 +167,7 @@ class Version(object):
 
         for script in filelist:
             self.add_script(os.path.join(path, script))
-    
+
     def script(self, database=None, operation=None):
         """Returns SQL or Python Script"""
         for db in (database, 'default'):
@@ -198,7 +196,7 @@ class Version(object):
     def _add_script_sql(self, path):
         basename = os.path.basename(path)
         match = self.SQL_FILENAME.match(basename)
-        
+
         if match:
             basename = basename.replace('.sql', '')
             parts = basename.split('_')

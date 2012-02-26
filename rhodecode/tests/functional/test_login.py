@@ -1,11 +1,18 @@
 # -*- coding: utf-8 -*-
 from rhodecode.tests import *
-from rhodecode.model.db import User
+from rhodecode.model.db import User, Notification
 from rhodecode.lib import generate_api_key
 from rhodecode.lib.auth import check_password
-
+from rhodecode.model.meta import Session
 
 class TestLoginController(TestController):
+
+    def tearDown(self):
+        for n in Notification.query().all():
+            Session.delete(n)
+
+        Session.commit()
+        self.assertEqual(Notification.query().all(), [])
 
     def test_index(self):
         response = self.app.get(url(controller='login', action='index'))
@@ -17,7 +24,7 @@ class TestLoginController(TestController):
                                  {'username':'test_admin',
                                   'password':'test12'})
         self.assertEqual(response.status, '302 Found')
-        self.assertEqual(response.session['rhodecode_user'].username ,
+        self.assertEqual(response.session['rhodecode_user'].get('username') ,
                          'test_admin')
         response = response.follow()
         self.assertTrue('%s repository' % HG_REPO in response.body)
@@ -28,7 +35,7 @@ class TestLoginController(TestController):
                                   'password':'test12'})
 
         self.assertEqual(response.status, '302 Found')
-        self.assertEqual(response.session['rhodecode_user'].username ,
+        self.assertEqual(response.session['rhodecode_user'].get('username') ,
                          'test_regular')
         response = response.follow()
         self.assertTrue('%s repository' % HG_REPO in response.body)
@@ -192,7 +199,7 @@ class TestLoginController(TestController):
         self.assertEqual(response.status , '302 Found')
         assert 'You have successfully registered into rhodecode' in response.session['flash'][0], 'No flash message about user registration'
 
-        ret = self.sa.query(User).filter(User.username == 'test_regular4').one()
+        ret = self.Session.query(User).filter(User.username == 'test_regular4').one()
         assert ret.username == username , 'field mismatch %s %s' % (ret.username, username)
         assert check_password(password, ret.password) == True , 'password mismatch'
         assert ret.email == email , 'field mismatch %s %s' % (ret.email, email)
@@ -224,8 +231,8 @@ class TestLoginController(TestController):
         new.name = name
         new.lastname = lastname
         new.api_key = generate_api_key(username)
-        self.sa.add(new)
-        self.sa.commit()
+        self.Session.add(new)
+        self.Session.commit()
 
         response = self.app.post(url(controller='login',
                                      action='password_reset'),
@@ -247,7 +254,6 @@ class TestLoginController(TestController):
         # GOOD KEY
 
         key = User.get_by_username(username).api_key
-
         response = self.app.get(url(controller='login',
                                     action='password_reset_confirmation',
                                     key=key))

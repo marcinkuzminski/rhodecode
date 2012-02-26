@@ -7,7 +7,7 @@
 
     :created_on: Feb 18, 2010
     :author: marcink
-    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
+    :copyright: (C) 2010-2012 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software: you can redistribute it and/or modify
@@ -24,14 +24,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
-from operator import itemgetter
 
 from pylons import tmpl_context as c, request
 from paste.httpexceptions import HTTPBadRequest
 
 from rhodecode.lib.auth import LoginRequired
 from rhodecode.lib.base import BaseController, render
-from rhodecode.model.db import Group, Repository
+from rhodecode.model.db import Repository
 
 log = logging.getLogger(__name__)
 
@@ -43,10 +42,8 @@ class HomeController(BaseController):
         super(HomeController, self).__before__()
 
     def index(self):
-
         c.repos_list = self.scm_model.get_repos()
-
-        c.groups = Group.query().filter(Group.group_parent_id == None).all()
+        c.groups = self.scm_model.get_repos_groups()
 
         return render('/index.html')
 
@@ -56,5 +53,13 @@ class HomeController(BaseController):
             c.repos_list = self.scm_model.get_repos(all_repos,
                                                     sort_key='name_sort')
             return render('/repo_switcher_list.html')
+        else:
+            return HTTPBadRequest()
+
+    def branch_tag_switcher(self, repo_name):
+        if request.is_xhr:
+            c.rhodecode_db_repo = Repository.get_by_repo_name(c.repo_name)
+            c.rhodecode_repo = c.rhodecode_db_repo.scm_instance
+            return render('/switch_to_list.html')
         else:
             return HTTPBadRequest()

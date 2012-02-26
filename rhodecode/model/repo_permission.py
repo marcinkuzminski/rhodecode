@@ -8,7 +8,7 @@
     :created_on: Oct 1, 2011
     :author: nvinot, marcink
     :copyright: (C) 2011-2011 Nicolas Vinot <aeris@imirhil.fr>
-    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
+    :copyright: (C) 2011-2012 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software: you can redistribute it and/or modify
@@ -25,18 +25,33 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
-from rhodecode.model.db import BaseModel, RepoToPerm, Permission,\
-    UsersGroupRepoToPerm
-from rhodecode.model.meta import Session
+from rhodecode.model import BaseModel
+from rhodecode.model.db import UserRepoToPerm, UsersGroupRepoToPerm, Permission,\
+    User, Repository
 
 log = logging.getLogger(__name__)
 
 
 class RepositoryPermissionModel(BaseModel):
+
+    def __get_user(self, user):
+        return self._get_instance(User, user, callback=User.get_by_username)
+
+    def __get_repo(self, repository):
+        return self._get_instance(Repository, repository,
+                                  callback=Repository.get_by_repo_name)
+
+    def __get_perm(self, permission):
+        return self._get_instance(Permission, permission,
+                                  callback=Permission.get_by_key)
+
     def get_user_permission(self, repository, user):
-        return RepoToPerm.query() \
-                .filter(RepoToPerm.user == user) \
-                .filter(RepoToPerm.repository == repository) \
+        repository = self.__get_repo(repository)
+        user = self.__get_user(user)
+
+        return UserRepoToPerm.query() \
+                .filter(UserRepoToPerm.user == user) \
+                .filter(UserRepoToPerm.repository == repository) \
                 .scalar()
 
     def update_user_permission(self, repository, user, permission):
@@ -46,18 +61,16 @@ class RepositoryPermissionModel(BaseModel):
             if not current.permission is permission:
                 current.permission = permission
         else:
-            p = RepoToPerm()
+            p = UserRepoToPerm()
             p.user = user
             p.repository = repository
             p.permission = permission
-            Session.add(p)
-        Session.commit()
+            self.sa.add(p)
 
     def delete_user_permission(self, repository, user):
         current = self.get_user_permission(repository, user)
         if current:
-            Session.delete(current)
-            Session.commit()
+            self.sa.delete(current)
 
     def get_users_group_permission(self, repository, users_group):
         return UsersGroupRepoToPerm.query() \
@@ -78,13 +91,11 @@ class RepositoryPermissionModel(BaseModel):
             p.repository = repository
             p.permission = permission
             self.sa.add(p)
-        Session.commit()
 
     def delete_users_group_permission(self, repository, users_group):
         current = self.get_users_group_permission(repository, users_group)
         if current:
             self.sa.delete(current)
-        Session.commit()
 
     def update_or_delete_user_permission(self, repository, user, permission):
         if permission:

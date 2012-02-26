@@ -1,0 +1,78 @@
+## -*- coding: utf-8 -*-
+<%inherit file="/base/base.html"/>
+
+<%def name="title()">
+    ${c.repo_name} ${_('Bookmarks')} - ${c.rhodecode_name}
+</%def>
+
+
+<%def name="breadcrumbs_links()">
+    <input class="q_filter_box" id="q_filter_bookmarks" size="15" type="text" name="filter" value="${_('quick filter...')}"/>
+    ${h.link_to(u'Home',h.url('/'))}
+    &raquo;
+    ${h.link_to(c.repo_name,h.url('summary_home',repo_name=c.repo_name))}
+    &raquo;
+    ${_('bookmarks')}
+</%def>
+
+<%def name="page_nav()">
+    ${self.menu('bookmarks')}
+</%def>
+<%def name="main()">
+<div class="box">
+    <!-- box / title -->
+    <div class="title">
+        ${self.breadcrumbs()}
+    </div>
+    <!-- end box / title -->
+    <div class="table">
+        <%include file='bookmarks_data.html'/>
+    </div>
+</div>
+<script type="text/javascript">
+
+// main table sorting
+var myColumnDefs = [
+    {key:"name",label:"${_('Name')}",sortable:true},
+    {key:"date",label:"${_('Date')}",sortable:true,
+        sortOptions: { sortFunction: dateSort }},
+    {key:"author",label:"${_('Author')}",sortable:true},
+    {key:"revision",label:"${_('Revision')}",sortable:true,
+        sortOptions: { sortFunction: revisionSort }},
+];
+
+var myDataSource = new YAHOO.util.DataSource(YUD.get("bookmarks_data"));
+
+myDataSource.responseType = YAHOO.util.DataSource.TYPE_HTMLTABLE;
+
+myDataSource.responseSchema = {
+    fields: [
+        {key:"name"},
+        {key:"date"},
+        {key:"author"},
+        {key:"revision"},
+    ]
+};
+
+var myDataTable = new YAHOO.widget.DataTable("table_wrap", myColumnDefs, myDataSource,
+        {
+         sortedBy:{key:"name",dir:"asc"},
+         MSG_SORTASC:"${_('Click to sort ascending')}",
+         MSG_SORTDESC:"${_('Click to sort descending')}",
+         MSG_EMPTY:"${_('No records found.')}",
+         MSG_ERROR:"${_('Data error.')}",
+         MSG_LOADING:"${_('Loading...')}",
+        }
+);
+myDataTable.subscribe('postRenderEvent',function(oArgs) {
+    tooltip_activate();
+    var func = function(node){
+        return node.parentNode.parentNode.parentNode.parentNode.parentNode;
+    }
+    q_filter('q_filter_bookmarks',YUQ('div.table tr td .logbooks .bookbook a'),func);
+});
+
+</script>
+
+
+</%def>

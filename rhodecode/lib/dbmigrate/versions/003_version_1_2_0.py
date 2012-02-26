@@ -13,6 +13,7 @@ from rhodecode.model.meta import Base
 
 log = logging.getLogger(__name__)
 
+
 def upgrade(migrate_engine):
     """ Upgrade operations go here.
     Don't create your own engine; bind migrate_engine to your metadata
@@ -21,46 +22,46 @@ def upgrade(migrate_engine):
     #==========================================================================
     # Add table `groups``
     #==========================================================================
-    from rhodecode.model.db import Group
+    from rhodecode.lib.dbmigrate.schema.db_1_2_0 import RepoGroup as Group
     Group().__table__.create()
 
     #==========================================================================
     # Add table `group_to_perm`
     #==========================================================================
-    from rhodecode.model.db import GroupToPerm
-    GroupToPerm().__table__.create()
+    from rhodecode.lib.dbmigrate.schema.db_1_2_0 import UserRepoGroupToPerm
+    UserRepoGroupToPerm().__table__.create()
 
     #==========================================================================
     # Add table `users_groups`
     #==========================================================================
-    from rhodecode.model.db import UsersGroup
+    from rhodecode.lib.dbmigrate.schema.db_1_2_0 import UsersGroup
     UsersGroup().__table__.create()
 
     #==========================================================================
     # Add table `users_groups_members`
     #==========================================================================
-    from rhodecode.model.db import UsersGroupMember
+    from rhodecode.lib.dbmigrate.schema.db_1_2_0 import UsersGroupMember
     UsersGroupMember().__table__.create()
 
     #==========================================================================
     # Add table `users_group_repo_to_perm`
     #==========================================================================
-    from rhodecode.model.db import UsersGroupRepoToPerm
+    from rhodecode.lib.dbmigrate.schema.db_1_2_0 import UsersGroupRepoToPerm
     UsersGroupRepoToPerm().__table__.create()
 
     #==========================================================================
     # Add table `users_group_to_perm`
     #==========================================================================
-    from rhodecode.model.db import UsersGroupToPerm
+    from rhodecode.lib.dbmigrate.schema.db_1_2_0 import UsersGroupToPerm
     UsersGroupToPerm().__table__.create()
 
     #==========================================================================
     # Upgrade of `users` table
     #==========================================================================
-    from rhodecode.model.db import User
+    from rhodecode.lib.dbmigrate.schema.db_1_2_0 import User
 
     #add column
-    ldap_dn = Column("ldap_dn", String(length=None, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    ldap_dn = Column("ldap_dn", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     ldap_dn.create(User().__table__)
 
     api_key = Column("api_key", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
@@ -74,7 +75,7 @@ def upgrade(migrate_engine):
     #==========================================================================
     # Upgrade of `repositories` table
     #==========================================================================
-    from rhodecode.model.db import Repository
+    from rhodecode.lib.dbmigrate.schema.db_1_2_0 import Repository
 
     #ADD clone_uri column#
 
@@ -83,7 +84,7 @@ def upgrade(migrate_engine):
                         nullable=True, unique=False, default=None)
 
     clone_uri.create(Repository().__table__)
-    
+
     #ADD downloads column#
     enable_downloads = Column("downloads", Boolean(), nullable=True, unique=None, default=True)
     enable_downloads.create(Repository().__table__)
@@ -104,10 +105,10 @@ def upgrade(migrate_engine):
     # Upgrade of `user_followings` table
     #==========================================================================
 
-    from rhodecode.model.db import UserFollowing
+    from rhodecode.lib.dbmigrate.schema.db_1_2_0 import UserFollowing
 
-    follows_from = Column('follows_from', DateTime(timezone=False), 
-                          nullable=True, unique=None, 
+    follows_from = Column('follows_from', DateTime(timezone=False),
+                          nullable=True, unique=None,
                           default=datetime.datetime.now)
     follows_from.create(UserFollowing().__table__)
 

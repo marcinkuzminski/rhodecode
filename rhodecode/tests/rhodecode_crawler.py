@@ -6,12 +6,12 @@
     Test for crawling a project for memory usage
     This should be runned just as regular script together
     with a watch script that will show memory usage.
-    
+
     watch -n1 ./rhodecode/tests/mem_watch
 
     :created_on: Apr 21, 2010
     :author: marcink
-    :copyright: (C) 2009-2011 Marcin Kuzminski <marcin@python-works.com>
+    :copyright: (C) 2010-2012 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
 # This program is free software: you can redistribute it and/or modify
@@ -31,11 +31,10 @@
 import cookielib
 import urllib
 import urllib2
-import vcs
 import time
 
 from os.path import join as jn
-
+from rhodecode.lib import vcs
 
 BASE_URI = 'http://127.0.0.1:5000/%s'
 PROJECT = 'CPython'
@@ -52,7 +51,6 @@ o.addheaders = [
 urllib2.install_opener(o)
 
 
-
 def test_changelog_walk(pages=100):
     total_time = 0
     for i in range(1, pages):
@@ -66,7 +64,6 @@ def test_changelog_walk(pages=100):
         e = time.time() - s
         total_time += e
         print 'visited %s size:%s req:%s ms' % (full_uri, size, e)
-
 
     print 'total_time', total_time
     print 'average on req', total_time / float(pages)
@@ -103,6 +100,7 @@ def test_files_walk(limit=100):
     repo = vcs.get_repo(jn(PROJECT_PATH, PROJECT))
 
     from rhodecode.lib.compat import OrderedSet
+    from rhodecode.lib.vcs.exceptions import RepositoryError
 
     paths_ = OrderedSet([''])
     try:
@@ -117,7 +115,7 @@ def test_files_walk(limit=100):
             for f in files:
                 paths_.add(f.path)
 
-    except vcs.exception.RepositoryError, e:
+    except RepositoryError, e:
         pass
 
     cnt = 0
@@ -138,7 +136,6 @@ def test_files_walk(limit=100):
 
     print 'total_time', total_time
     print 'average on req', total_time / float(cnt)
-
 
 
 test_changelog_walk(40)
