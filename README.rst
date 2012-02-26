@@ -11,10 +11,10 @@ It works on http/https and has a built in permission/authentication system with
 the ability to authenticate via LDAP or ActiveDirectory. RhodeCode also provides
 simple API so it's easy integrable with existing external systems.
 
-RhodeCode is similar in some respects to github or bitbucket_, 
+RhodeCode is similar in some respects to github_ or bitbucket_, 
 however RhodeCode can be run as standalone hosted application on your own server.
 It is open source and donation ware and focuses more on providing a customized, 
-self administered interface for Mercurial and GIT repositories. 
+self administered interface for Mercurial_ and GIT_  repositories. 
 RhodeCode is powered by a vcs_ library that Lukasz Balcerzak and I created to 
 handle multiple different version control systems.
 
@@ -141,7 +141,7 @@ Listed bellow are various support resources that should help.
 - Join #rhodecode on FreeNode (irc.freenode.net)
   or use http://webchat.freenode.net/?channels=rhodecode for web access to irc.
 
-- You can also follow me on twitter @marcinkuzminski where i often post some
+- You can also follow me on twitter **@marcinkuzminski** where i often post some
   news about RhodeCode
 
 
