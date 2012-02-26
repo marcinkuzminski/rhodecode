@@ -26,16 +26,23 @@ def upgrade(migrate_engine):
     tbl = UserRepoToPerm().__table__
     new_cons = UniqueConstraint('user_id', 'repository_id', 'permission_id', table=tbl)
     new_cons.create()
-
+    old_cons = None
     if migrate_engine.name in ['mysql']:
         old_cons = UniqueConstraint('user_id', 'repository_id', table=tbl, name="user_id")
-        old_cons.drop()
     elif migrate_engine.name in ['postgresql']:
         old_cons = UniqueConstraint('user_id', 'repository_id', table=tbl)
-        old_cons.drop()
     else:
         # sqlite doesn't support dropping constraints...
         print """Please manually drop UniqueConstraint('user_id', 'repository_id')"""
+
+    if old_cons:
+        try:
+            old_cons.drop()
+        except Exception, e:
+            # we don't care if this fails really... better to pass migration than
+            # leave this in intermidiate state
+            print 'Failed to remove Unique for user_id, repository_id reason %s' % e
+
 
     #==========================================================================
     # fix uniques of table `user_repo_group_to_perm`
@@ -44,18 +51,25 @@ def upgrade(migrate_engine):
     tbl = UserRepoGroupToPerm().__table__
     new_cons = UniqueConstraint('group_id', 'permission_id', 'user_id', table=tbl)
     new_cons.create()
+    old_cons = None
 
     # fix uniqueConstraints
     if migrate_engine.name in ['mysql']:
         #mysql is givinig troubles here...
         old_cons = UniqueConstraint('group_id', 'permission_id', table=tbl, name="group_id")
-        old_cons.drop()
     elif migrate_engine.name in ['postgresql']:
         old_cons = UniqueConstraint('group_id', 'permission_id', table=tbl, name='group_to_perm_group_id_permission_id_key')
-        old_cons.drop()
     else:
         # sqlite doesn't support dropping constraints...
         print """Please manually drop UniqueConstraint('group_id', 'permission_id')"""
+
+    if old_cons:
+        try:
+            old_cons.drop()
+        except Exception, e:
+            # we don't care if this fails really... better to pass migration than
+            # leave this in intermidiate state
+            print 'Failed to remove Unique for user_id, repository_id reason %s' % e
 
     return
 
