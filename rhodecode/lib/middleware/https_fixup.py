@@ -42,13 +42,21 @@ class HttpsFixup(object):
         middleware you should set this header inside your
         proxy ie. nginx, apache etc.
         """
-        proto = environ.get('HTTP_X_URL_SCHEME')
 
         if str2bool(self.config.get('force_https')):
             proto = 'https'
-
+        else:
+            if 'HTTP_X_URL_SCHEME' in environ:
+                proto = environ.get('HTTP_X_URL_SCHEME')
+            elif 'HTTP_X_FORWARDED_SCHEME' in environ:
+                proto = environ.get('HTTP_X_FORWARDED_SCHEME')
+            elif 'HTTP_X_FORWARDED_PROTO' in environ:
+                proto = environ.get('HTTP_X_FORWARDED_PROTO')
+            else:
+                proto = 'http'
         if proto == 'https':
             environ['wsgi.url_scheme'] = proto
         else:
             environ['wsgi.url_scheme'] = 'http'
+
         return None
