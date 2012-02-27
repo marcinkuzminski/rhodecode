@@ -4,7 +4,7 @@ Changelog
 =========
 
 
-1.3.1 (**2012-XX-XX**)
+1.3.2 (**2012-XX-XX**)
 ----------------------
 
 :status: in-progress
@@ -17,6 +17,20 @@ news
 fixes
 +++++
 
+
+1.3.1 (**2012-02-27**)
+----------------------
+
+news
+++++
+
+
+fixes
++++++
+
+- redirection loop occurs when remember-me wasn't checked during login
+- fixes issues with git blob history generation 
+- don't fetch branch for git in file history dropdown. Causes unneeded slowness
 
 1.3.0 (**2012-02-26**)
 ----------------------

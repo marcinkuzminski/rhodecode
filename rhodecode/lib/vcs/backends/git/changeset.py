@@ -246,8 +246,9 @@ class GitChangeset(BaseChangeset):
         which is generally not good. Should be replaced with algorithm
         iterating commits.
         """
-        cmd = 'log --name-status -p %s -- "%s" | grep "^commit"' \
-            % (self.id, path)
+        cmd = 'log --pretty="format: %%H" --name-status -p %s -- "%s"' % (
+                  '', path
+               )
         so, se = self.repository.run_git_command(cmd)
         ids = re.findall(r'\w{40}', so)
         return [self.repository.get_changeset(id) for id in ids]
