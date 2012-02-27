@@ -263,6 +263,11 @@ class ReposGroupsController(BaseController):
             raise HTTPInternalServerError()
 
     def show_by_name(self, group_name):
+        """
+        This is a proxy that does a lookup group_name -> id, and shows
+        the group by id view instead
+        """
+        group_name = group_name.rstrip('/')
         id_ = RepoGroup.get_by_group_name(group_name).group_id
         return self.show(id_)
 

@@ -92,11 +92,17 @@ def repo_name_slug(value):
 
 
 def get_repo_slug(request):
-    return request.environ['pylons.routes_dict'].get('repo_name')
+    _repo = request.environ['pylons.routes_dict'].get('repo_name')
+    if _repo:
+        _repo = _repo.rstrip('/')
+    return _repo
 
 
 def get_repos_group_slug(request):
-    return request.environ['pylons.routes_dict'].get('group_name')
+    _group = request.environ['pylons.routes_dict'].get('group_name')
+    if _group:
+        _group = _group.rstrip('/')
+    return _group
 
 
 def action_logger(user, action, repo, ipaddr='', sa=None, commit=False):
