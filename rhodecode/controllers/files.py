@@ -464,9 +464,10 @@ class FilesController(BaseRepoController):
         changesets_group = ([], _("Changesets"))
         branches_group = ([], _("Branches"))
         tags_group = ([], _("Tags"))
-
+        _hg = cs.repository.alias == 'hg'
         for chs in changesets:
-            n_desc = 'r%s:%s (%s)' % (chs.revision, chs.short_id, chs.branch)
+            _branch = '(%s)' % chs.branch if _hg else ''
+            n_desc = 'r%s:%s %s' % (chs.revision, chs.short_id, _branch)
             changesets_group[0].append((chs.raw_id, n_desc,))
 
         hist_l.append(changesets_group)

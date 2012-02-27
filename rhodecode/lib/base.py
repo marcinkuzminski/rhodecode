@@ -136,7 +136,6 @@ class BaseController(WSGIController):
             cookie_store = CookieStoreWrapper(session.get('rhodecode_user'))
             user_id = cookie_store.get('user_id', None)
             username = get_container_username(environ, config)
-
             auth_user = AuthUser(user_id, api_key, username)
             request.user = auth_user
             self.rhodecode_user = c.rhodecode_user = auth_user

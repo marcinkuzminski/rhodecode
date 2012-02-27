@@ -355,6 +355,8 @@ class  AuthUser(object):
                     setattr(self, k, v)
                 self.set_authenticated()
                 is_user_loaded = True
+        else:
+            log.debug('No data in %s that could been used to log in' % self)
 
         if not is_user_loaded:
             # if we cannot authenticate user try anonymous
@@ -661,12 +663,13 @@ class PermsFunction(object):
 
     def __call__(self, check_Location=''):
         user = request.user
+        log.debug('checking %s %s %s', self.__class__.__name__,
+                  self.required_perms, user)
         if not user:
+            log.debug('Empty request user')
             return False
         self.user_perms = user.permissions
         self.granted_for = user
-        log.debug('checking %s %s %s', self.__class__.__name__,
-                  self.required_perms, user)
 
         if self.check_permissions():
             log.debug('Permission granted %s @ %s', self.granted_for,

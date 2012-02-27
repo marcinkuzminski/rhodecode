@@ -242,8 +242,7 @@ class GitRepository(BaseRepository):
         sortkey = lambda ctx: ctx[0]
         _branches = [('/'.join(ref.split('/')[2:]), head)
             for ref, head in refs.items()
-            if ref.startswith('refs/heads/') or
-            ref.startswith('refs/remotes/') and not ref.endswith('/HEAD')]
+            if ref.startswith('refs/heads/') and not ref.endswith('/HEAD')]
         return OrderedDict(sorted(_branches, key=sortkey, reverse=False))
 
     def _get_tags(self):
