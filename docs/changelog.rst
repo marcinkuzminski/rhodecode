@@ -18,6 +18,7 @@ fixes
 +++++
 
 - fixed git protocol issues with repos-groups
+- fixed git remote repos validator that prevented from cloning remote git repos
 
 1.3.1 (**2012-02-27**)
 ----------------------

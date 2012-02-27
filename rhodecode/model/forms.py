@@ -345,32 +345,46 @@ def SlugifyName():
 
 
 def ValidCloneUri():
-    from mercurial.httprepo import httprepository, httpsrepository
     from rhodecode.lib.utils import make_ui
+
+    def url_handler(repo_type, url, proto, ui=None):
+        if repo_type == 'hg':
+            from mercurial.httprepo import httprepository, httpsrepository
+            if proto == 'https':
+                httpsrepository(make_ui('db'), url).capabilities
+            elif proto == 'http':
+                httprepository(make_ui('db'), url).capabilities
+        elif repo_type == 'git':
+            #TODO: write a git url validator
+            pass
 
     class _ValidCloneUri(formencode.validators.FancyValidator):
 
         def to_python(self, value, state):
-            if not value:
+
+            repo_type = value.get('repo_type')
+            url = value.get('clone_uri')
+            e_dict = {'clone_uri': _('invalid clone url')}
+
+            if not url:
                 pass
-            elif value.startswith('https'):
+            elif url.startswith('https'):
                 try:
-                    httpsrepository(make_ui('db'), value).capabilities
+                    url_handler(repo_type, url, 'https', make_ui('db'))
                 except Exception:
                     log.error(traceback.format_exc())
-                    raise formencode.Invalid(_('invalid clone url'), value,
-                                             state)
-            elif value.startswith('http'):
+                    raise formencode.Invalid('', value, state, error_dict=e_dict)
+            elif url.startswith('http'):
                 try:
-                    httprepository(make_ui('db'), value).capabilities
+                    url_handler(repo_type, url, 'http', make_ui('db'))
                 except Exception:
                     log.error(traceback.format_exc())
-                    raise formencode.Invalid(_('invalid clone url'), value,
-                                             state)
+                    raise formencode.Invalid('', value, state, error_dict=e_dict)
             else:
-                raise formencode.Invalid(_('Invalid clone url, provide a '
-                                           'valid clone http\s url'), value,
-                                         state)
+                e_dict = {'clone_uri': _('Invalid clone url, provide a '
+                                         'valid clone http\s url')}
+                raise formencode.Invalid('', value, state, error_dict=e_dict)
+
             return value
 
     return _ValidCloneUri
@@ -645,8 +659,7 @@ def RepoForm(edit=False, old_data={}, supported_backends=BACKENDS.keys(),
         filter_extra_fields = False
         repo_name = All(UnicodeString(strip=True, min=1, not_empty=True),
                         SlugifyName())
-        clone_uri = All(UnicodeString(strip=True, min=1, not_empty=False),
-                        ValidCloneUri()())
+        clone_uri = All(UnicodeString(strip=True, min=1, not_empty=False))
         repo_group = OneOf(repo_groups, hideList=True)
         repo_type = OneOf(supported_backends)
         description = UnicodeString(strip=True, min=1, not_empty=True)
@@ -658,7 +671,9 @@ def RepoForm(edit=False, old_data={}, supported_backends=BACKENDS.keys(),
             #this is repo owner
             user = All(UnicodeString(not_empty=True), ValidRepoUser)
 
-        chained_validators = [ValidRepoName(edit, old_data), ValidPerms()]
+        chained_validators = [ValidCloneUri()(),
+                              ValidRepoName(edit, old_data), 
+                              ValidPerms()]
     return _RepoForm
 
 
