@@ -25,6 +25,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import re
 import logging
 import traceback
 
@@ -77,6 +78,9 @@ from rhodecode.model.db import User
 from webob.exc import HTTPNotFound, HTTPForbidden, HTTPInternalServerError
 
 log = logging.getLogger(__name__)
+
+
+GIT_PROTO_PAT = re.compile(r'git-upload-pack|git-receive-pack|info\/refs')
 
 
 def is_git(environ):
@@ -219,12 +223,16 @@ class SimpleGit(BaseVCSController):
         try:
             environ['PATH_INFO'] = self._get_by_id(environ['PATH_INFO'])
             repo_name = '/'.join(environ['PATH_INFO'].split('/')[1:])
+            repo_name = GIT_PROTO_PAT.split(repo_name)
+            if repo_name:
+                repo_name = repo_name[0]
+
             if repo_name.endswith('/'):
                 repo_name = repo_name.rstrip('/')
         except:
             log.error(traceback.format_exc())
             raise
-        repo_name = repo_name.split('/')[0]
+
         return repo_name
 
     def __get_user(self, username):

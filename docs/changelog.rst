@@ -17,6 +17,7 @@ news
 fixes
 +++++
 
+- fixed git protocol issues with repos-groups
 
 1.3.1 (**2012-02-27**)
 ----------------------
