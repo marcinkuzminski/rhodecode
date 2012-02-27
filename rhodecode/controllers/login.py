@@ -73,7 +73,7 @@ class LoginController(BaseController):
                 # If they want to be remembered, update the cookie
                 if c.form_result['remember'] is not False:
                     session.cookie_expires = False
-                    session._set_cookie_values()
+                session._set_cookie_values()
                 session._update_cookie_out()
                 session.save()
 
