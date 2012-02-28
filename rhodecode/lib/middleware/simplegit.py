@@ -83,19 +83,22 @@ log = logging.getLogger(__name__)
 GIT_PROTO_PAT = re.compile(r'git-upload-pack|git-receive-pack|info\/refs')
 
 
-def is_git(action):
-    return action in ['pull','push']
+def is_git(environ):
+    """Returns True if request's target is git server.
+    ``HTTP_USER_AGENT`` would then have git client version given.
+
+    :param environ:
+    """
+    http_user_agent = environ.get('HTTP_USER_AGENT')
+    if http_user_agent and http_user_agent.startswith('git'):
+        return True
+    return False
 
 
 class SimpleGit(BaseVCSController):
 
     def _handle_request(self, environ, start_response):
-        #======================================================================
-        # GET ACTION PULL or PUSH
-        #======================================================================
-        action = self.__get_action(environ)
-
-        if not is_git(action):
+        if not is_git(environ):
             return self.application(environ, start_response)
 
         proxy_key = 'HTTP_X_REAL_IP'
@@ -114,6 +117,10 @@ class SimpleGit(BaseVCSController):
         except:
             return HTTPInternalServerError()(environ, start_response)
 
+        #======================================================================
+        # GET ACTION PULL or PUSH
+        #======================================================================
+        action = self.__get_action(environ)
 
         #======================================================================
         # CHECK ANONYMOUS PERMISSION
