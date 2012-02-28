@@ -187,19 +187,19 @@ class ReposGroupModel(BaseModel):
             # change properties
             repos_group.group_description = form_data['group_description']
             repos_group.parent_group = RepoGroup.get(form_data['group_parent_id'])
+            repos_group.group_parent_id = form_data['group_parent_id']
             repos_group.group_name = repos_group.get_new_name(form_data['group_name'])
-
             new_path = repos_group.full_path
 
             self.sa.add(repos_group)
-
-            self.__rename_group(old_path, new_path)
 
             # we need to get all repositories from this new group and
             # rename them accordingly to new group path
             for r in repos_group.repositories:
                 r.repo_name = r.get_new_name(r.just_name)
                 self.sa.add(r)
+
+            self.__rename_group(old_path, new_path)
 
             return repos_group
         except:
