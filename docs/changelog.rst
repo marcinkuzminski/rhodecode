@@ -20,6 +20,7 @@ fixes
 - fixed git protocol issues with repos-groups
 - fixed git remote repos validator that prevented from cloning remote git repos
 - fixes #370 ending slashes fixes for repo and groups
+- fixes #368 improved git-protocol detection to handle other clients
 
 1.3.1 (**2012-02-27**)
 ----------------------

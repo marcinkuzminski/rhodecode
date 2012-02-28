@@ -672,7 +672,7 @@ def RepoForm(edit=False, old_data={}, supported_backends=BACKENDS.keys(),
             user = All(UnicodeString(not_empty=True), ValidRepoUser)
 
         chained_validators = [ValidCloneUri()(),
-                              ValidRepoName(edit, old_data), 
+                              ValidRepoName(edit, old_data),
                               ValidPerms()]
     return _RepoForm
 

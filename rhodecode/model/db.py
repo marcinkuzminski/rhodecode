@@ -1038,7 +1038,7 @@ class CacheInvalidation(Base, BaseModel):
         prefix = ''
         iid = rhodecode.CONFIG.get('instance_id')
         if iid:
-            prefix = iid 
+            prefix = iid
         return "%s%s" % (prefix, key)
 
     @classmethod

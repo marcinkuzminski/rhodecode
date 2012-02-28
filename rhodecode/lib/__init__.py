@@ -231,7 +231,7 @@ def safe_str(unicode_, to_encoding=None):
     :rtype: str
     :returns: str object
     """
-    
+
     # if it's not basestr cast to str
     if not isinstance(unicode_, basestring):
         return str(unicode_)

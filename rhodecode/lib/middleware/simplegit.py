@@ -82,8 +82,10 @@ log = logging.getLogger(__name__)
 
 GIT_PROTO_PAT = re.compile(r'git-upload-pack|git-receive-pack|info\/refs')
 
+
 def is_git(action):
     return action in ['pull','push']
+
 
 class SimpleGit(BaseVCSController):
 
@@ -230,16 +232,18 @@ class SimpleGit(BaseVCSController):
         return User.get_by_username(username)
 
     def __get_action(self, environ):
-        """Maps git request commands into a pull or push command.
+        """
+        Maps git request commands into a pull or push command.
 
         :param environ:
         """
         service = environ['QUERY_STRING'].split('=')
         if len(service) > 1:
             service_cmd = service[1]
-            mapping = {'git-receive-pack': 'push',
-                       'git-upload-pack': 'pull',
-                       }
+            mapping = {
+                'git-receive-pack': 'push',
+                'git-upload-pack': 'pull',
+            }
 
             return mapping.get(service_cmd,
                                service_cmd if service_cmd else 'other')
