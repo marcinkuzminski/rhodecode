@@ -21,6 +21,8 @@ fixes
 - fixed git remote repos validator that prevented from cloning remote git repos
 - fixes #370 ending slashes fixes for repo and groups
 - fixes #368 improved git-protocol detection to handle other clients
+- fixes #366 When Setting Repository Group To Blank Repo Group Wont Be 
+  Moved To Root
 
 1.3.1 (**2012-02-27**)
 ----------------------

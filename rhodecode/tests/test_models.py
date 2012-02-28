@@ -23,7 +23,6 @@ def _make_group(path, desc='desc', parent_id=None,
         return gr
 
     gr = ReposGroupModel().create(path, desc, parent_id)
-    Session.commit()
     return gr
 
 
@@ -31,13 +30,19 @@ class TestReposGroups(unittest.TestCase):
 
     def setUp(self):
         self.g1 = _make_group('test1', skip_if_exists=True)
+        Session.commit()
         self.g2 = _make_group('test2', skip_if_exists=True)
+        Session.commit()
         self.g3 = _make_group('test3', skip_if_exists=True)
+        Session.commit()
 
     def tearDown(self):
         print 'out'
 
     def __check_path(self, *path):
+        """
+        Checks the path for existance !
+        """
         path = [TESTS_TMP_PATH] + list(path)
         path = os.path.join(*path)
         return os.path.isdir(path)
@@ -49,12 +54,13 @@ class TestReposGroups(unittest.TestCase):
         ReposGroupModel().delete(id_)
 
     def __update_group(self, id_, path, desc='desc', parent_id=None):
-        form_data = dict(group_name=path,
-                         group_description=desc,
-                         group_parent_id=parent_id,
-                         perms_updates=[],
-                         perms_new=[])
-
+        form_data = dict(
+            group_name=path,
+            group_description=desc,
+            group_parent_id=parent_id,
+            perms_updates=[],
+            perms_new=[]
+        )
         gr = ReposGroupModel().update(id_, form_data)
         return gr
 
@@ -149,6 +155,25 @@ class TestReposGroups(unittest.TestCase):
         # test repo
         self.assertEqual(r.repo_name, os.path.join('g2', 'g1', r.just_name))
 
+
+    def test_move_to_root(self):
+        g1 = _make_group('t11')
+        Session.commit()
+        g2 = _make_group('t22',parent_id=g1.group_id)
+        Session.commit()
+        
+        self.assertEqual(g2.full_path,'t11/t22')
+        self.assertTrue(self.__check_path('t11', 't22'))
+        
+        g2 = self.__update_group(g2.group_id, 'g22', parent_id=None)
+        Session.commit()
+        
+        self.assertEqual(g2.group_name,'g22')
+        # we moved out group from t1 to '' so it's full path should be 'g2'
+        self.assertEqual(g2.full_path,'g22')
+        self.assertFalse(self.__check_path('t11', 't22'))
+        self.assertTrue(self.__check_path('g22'))
+        
 
 class TestUser(unittest.TestCase):
     def __init__(self, methodName='runTest'):
