@@ -80,24 +80,20 @@ from webob.exc import HTTPNotFound, HTTPForbidden, HTTPInternalServerError
 log = logging.getLogger(__name__)
 
 
-GIT_PROTO_PAT = re.compile(r'git-upload-pack|git-receive-pack|info\/refs')
+GIT_PROTO_PAT = re.compile(r'^/(.+)/(info/refs|git-upload-pack|git-receive-pack)')
 
 
 def is_git(environ):
-    """Returns True if request's target is git server.
-    ``HTTP_USER_AGENT`` would then have git client version given.
-
-    :param environ:
-    """
-    http_user_agent = environ.get('HTTP_USER_AGENT')
-    if http_user_agent and http_user_agent.startswith('git'):
-        return True
-    return False
+    path_info = environ['PATH_INFO']
+    isgit_path = GIT_PROTO_PAT.match(path_info)
+    log.debug('is a git path %s pathinfo : %s' % (isgit_path, path_info))
+    return isgit_path
 
 
 class SimpleGit(BaseVCSController):
 
     def _handle_request(self, environ, start_response):
+
         if not is_git(environ):
             return self.application(environ, start_response)
 
@@ -222,13 +218,7 @@ class SimpleGit(BaseVCSController):
         """
         try:
             environ['PATH_INFO'] = self._get_by_id(environ['PATH_INFO'])
-            repo_name = '/'.join(environ['PATH_INFO'].split('/')[1:])
-            repo_name = GIT_PROTO_PAT.split(repo_name)
-            if repo_name:
-                repo_name = repo_name[0]
-
-            if repo_name.endswith('/'):
-                repo_name = repo_name.rstrip('/')
+            repo_name = GIT_PROTO_PAT.match(environ['PATH_INFO']).group(1)
         except:
             log.error(traceback.format_exc())
             raise
@@ -239,8 +229,7 @@ class SimpleGit(BaseVCSController):
         return User.get_by_username(username)
 
     def __get_action(self, environ):
-        """
-        Maps git request commands into a pull or push command.
+        """Maps git request commands into a pull or push command.
 
         :param environ:
         """
