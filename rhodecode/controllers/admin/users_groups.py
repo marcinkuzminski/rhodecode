@@ -160,11 +160,12 @@ class UsersGroupsController(BaseController):
 
         try:
             UsersGroupModel().delete(id)
-            h.flash(_('successfully deleted users group'), category='success')
             Session.commit()
+            h.flash(_('successfully deleted users group'), category='success')
         except UsersGroupsAssignedException, e:
             h.flash(e, category='error')
         except Exception:
+            log.error(traceback.format_exc())
             h.flash(_('An error occurred during deletion of users group'),
                     category='error')
         return redirect(url('users_groups'))

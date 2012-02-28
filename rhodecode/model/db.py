@@ -400,7 +400,7 @@ class UserLog(Base, BaseModel):
         return datetime.date(*self.action_date.timetuple()[:3])
 
     user = relationship('User')
-    repository = relationship('Repository',cascade='')
+    repository = relationship('Repository', cascade='')
 
 
 class UsersGroup(Base, BaseModel):
@@ -412,6 +412,7 @@ class UsersGroup(Base, BaseModel):
     users_group_active = Column("users_group_active", Boolean(), nullable=True, unique=None, default=None)
 
     members = relationship('UsersGroupMember', cascade="all, delete, delete-orphan", lazy="joined")
+    users_group_to_perm = relationship('UsersGroupToPerm', cascade='all')
 
     def __repr__(self):
         return '<userGroup(%s)>' % (self.users_group_name)
