@@ -82,6 +82,8 @@ log = logging.getLogger(__name__)
 
 GIT_PROTO_PAT = re.compile(r'git-upload-pack|git-receive-pack|info\/refs')
 
+def is_git(action):
+    return action in ['pull','push']
 
 class SimpleGit(BaseVCSController):
 
@@ -91,7 +93,7 @@ class SimpleGit(BaseVCSController):
         #======================================================================
         action = self.__get_action(environ)
 
-        if not action in ['pull','push']:
+        if not is_git(action):
             return self.application(environ, start_response)
 
         proxy_key = 'HTTP_X_REAL_IP'
