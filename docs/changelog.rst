@@ -23,6 +23,8 @@ fixes
 - fixes #368 improved git-protocol detection to handle other clients
 - fixes #366 When Setting Repository Group To Blank Repo Group Wont Be 
   Moved To Root
+- fixes #371 fixed issues with beaker/sqlalchemy and non-ascii cache keys 
+
 
 1.3.1 (**2012-02-27**)
 ----------------------

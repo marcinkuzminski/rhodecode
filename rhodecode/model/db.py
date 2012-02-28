@@ -44,6 +44,7 @@ from rhodecode.lib.compat import json
 from rhodecode.lib.caching_query import FromCache
 
 from rhodecode.model.meta import Base, Session
+import hashlib
 
 
 log = logging.getLogger(__name__)
@@ -51,6 +52,8 @@ log = logging.getLogger(__name__)
 #==============================================================================
 # BASE CLASSES
 #==============================================================================
+
+_hash_key = lambda k: hashlib.md5(safe_str(k)).hexdigest()
 
 
 class ModelSerializer(json.JSONEncoder):
@@ -337,8 +340,11 @@ class User(Base, BaseModel):
             q = cls.query().filter(cls.username == username)
 
         if cache:
-            q = q.options(FromCache("sql_cache_short",
-                                    "get_user_%s" % username))
+            q = q.options(FromCache(
+                            "sql_cache_short",
+                            "get_user_%s" % _hash_key(username)
+                          )
+            )
         return q.scalar()
 
     @classmethod
@@ -418,8 +424,11 @@ class UsersGroup(Base, BaseModel):
         else:
             q = cls.query().filter(cls.users_group_name == group_name)
         if cache:
-            q = q.options(FromCache("sql_cache_short",
-                                    "get_user_%s" % group_name))
+            q = q.options(FromCache(
+                            "sql_cache_short",
+                            "get_user_%s" % _hash_key(group_name)
+                          )
+            )
         return q.scalar()
 
     @classmethod
@@ -748,8 +757,11 @@ class RepoGroup(Base, BaseModel):
             gr = cls.query()\
                 .filter(cls.group_name == group_name)
         if cache:
-            gr = gr.options(FromCache("sql_cache_short",
-                                          "get_group_%s" % group_name))
+            gr = gr.options(FromCache(
+                            "sql_cache_short",
+                            "get_group_%s" % _hash_key(group_name)
+                            )
+            )
         return gr.scalar()
 
     @property

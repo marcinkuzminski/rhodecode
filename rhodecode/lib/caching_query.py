@@ -24,6 +24,7 @@ from beaker.exceptions import BeakerException
 from sqlalchemy.orm.interfaces import MapperOption
 from sqlalchemy.orm.query import Query
 from sqlalchemy.sql import visitors
+from rhodecode.lib import safe_str
 
 
 class CachingQuery(Query):
@@ -137,9 +138,10 @@ def _get_cache_parameters(query):
 
     if cache_key is None:
         # cache key - the value arguments from this query's parameters.
-        args = [str(x) for x in _params_from_query(query)]
-        args.extend(filter(lambda k:k not in ['None', None, u'None'],
+        args = [safe_str(x) for x in _params_from_query(query)]
+        args.extend(filter(lambda k: k not in ['None', None, u'None'],
                            [str(query._limit), str(query._offset)]))
+
         cache_key = " ".join(args)
 
     if cache_key is None:
