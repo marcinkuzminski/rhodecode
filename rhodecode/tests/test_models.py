@@ -161,19 +161,19 @@ class TestReposGroups(unittest.TestCase):
         Session.commit()
         g2 = _make_group('t22',parent_id=g1.group_id)
         Session.commit()
-        
+
         self.assertEqual(g2.full_path,'t11/t22')
         self.assertTrue(self.__check_path('t11', 't22'))
-        
+
         g2 = self.__update_group(g2.group_id, 'g22', parent_id=None)
         Session.commit()
-        
+
         self.assertEqual(g2.group_name,'g22')
         # we moved out group from t1 to '' so it's full path should be 'g2'
         self.assertEqual(g2.full_path,'g22')
         self.assertFalse(self.__check_path('t11', 't22'))
         self.assertTrue(self.__check_path('g22'))
-        
+
 
 class TestUser(unittest.TestCase):
     def __init__(self, methodName='runTest'):
