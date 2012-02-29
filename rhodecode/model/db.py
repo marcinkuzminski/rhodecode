@@ -807,7 +807,9 @@ class RepoGroup(Base, BaseModel):
 
     @property
     def repositories(self):
-        return Repository.query().filter(Repository.group == self)
+        return Repository.query()\
+                .filter(Repository.group == self)\
+                .order_by(Repository.repo_name)
 
     @property
     def repositories_recursive_count(self):
