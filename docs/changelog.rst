@@ -21,6 +21,8 @@ fixes
 - fixed issues with removed repos was accidentally added as groups, after
   full rescan of paths
 - fixes #376 Cannot edit user (using container auth)
+- fixes #378 Invalid image urls on changeset screen with proxy-prefix 
+  configuration
 
 1.3.2 (**2012-02-28**)
 ----------------------
