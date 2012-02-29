@@ -93,7 +93,7 @@ def _ignorews_url(fileid=None):
         params[ctx_key] += [ctx_val]
 
     params['anchor'] = fileid
-    img = h.image('/images/icons/text_strikethrough.png', lbl, class_='icon')
+    img = h.image(h.url('/images/icons/text_strikethrough.png'), lbl, class_='icon')
     return h.link_to(img, h.url.current(**params), title=lbl, class_='tooltip')
 
 
@@ -144,7 +144,7 @@ def _context_url(fileid=None):
     lbl = _('%s line context') % ln_ctx
 
     params['anchor'] = fileid
-    img = h.image('/images/icons/table_add.png', lbl, class_='icon')
+    img = h.image(h.url('/images/icons/table_add.png'), lbl, class_='icon')
     return h.link_to(img, h.url.current(**params), title=lbl, class_='tooltip')
 
 
