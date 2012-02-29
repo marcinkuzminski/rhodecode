@@ -28,8 +28,8 @@ import calendar
 import logging
 from time import mktime
 from datetime import timedelta, date
-from itertools import product
 from urlparse import urlparse
+from rhodecode.lib.compat import product
 
 from rhodecode.lib.vcs.exceptions import ChangesetError, EmptyRepositoryError, \
     NodeDoesNotExistError

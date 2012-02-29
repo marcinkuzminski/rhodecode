@@ -17,6 +17,8 @@ news
 fixes
 +++++
 
+- fixed some python2.5 compatibility issues 
+
 1.3.2 (**2012-02-28**)
 ----------------------
 

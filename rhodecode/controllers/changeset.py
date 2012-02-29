@@ -53,7 +53,7 @@ log = logging.getLogger(__name__)
 
 def anchor_url(revision, path):
     fid = h.FID(revision, path)
-    return h.url.current(anchor=fid, **request.GET)
+    return h.url.current(anchor=fid, **dict(request.GET))
 
 
 def get_ignore_ws(fid, GET):
