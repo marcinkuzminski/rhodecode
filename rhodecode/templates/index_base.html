@@ -69,8 +69,8 @@
                 </tr>
             </thead>
             <tbody>
-            %for cnt,repo in enumerate(c.repos_list,1):
-                <tr class="parity${cnt%2}">
+            %for cnt,repo in enumerate(c.repos_list):
+                <tr class="parity${(cnt+1)%2}">
                     ##QUICK MENU
                     <td class="quick_repo_menu">
                       ${dt.quick_menu(repo['name'])}
@@ -115,7 +115,7 @@
         </div>
     </div>
     <script>
-      YUD.get('repo_count').innerHTML = ${cnt};
+      YUD.get('repo_count').innerHTML = ${cnt+1};
       var func = function(node){
           return node.parentNode.parentNode.parentNode.parentNode;
       }

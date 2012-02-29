@@ -29,12 +29,13 @@ to make a backup of your configuration file before hand and recheck the
 content after the automerge.
 
 .. note::
-   The next steps only apply to upgrading from non bugfix releases eg. from
-   any minor or major releases. Bugfix releases (eg. 1.1.2->1.1.3) will 
-   not have any database schema changes or whoosh library updates.
+   Please always make sure your .ini files are upto date. Often errors are
+   caused by missing params added in new versions.
+
 
 It is also recommended that you rebuild the whoosh index after upgrading since 
-the new whoosh version could introduce some incompatible index changes.
+the new whoosh version could introduce some incompatible index changes. Please
+Read the changelog to see if there were any changes to whoosh.
 
 
 The final step is to upgrade the database. To do this simply run::

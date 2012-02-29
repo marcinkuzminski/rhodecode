@@ -24,6 +24,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import re
 import logging
 import datetime
 import traceback
@@ -55,6 +56,8 @@ from rhodecode.model.meta import Session
 from rhodecode.model.repos_group import ReposGroupModel
 
 log = logging.getLogger(__name__)
+
+REMOVED_REPO_PAT = re.compile(r'rm__\d{8}_\d{6}_\d{6}__.*')
 
 
 def recursive_replace(str_, replace=' '):
@@ -392,6 +395,10 @@ def map_groups(groups):
 #        if group is None:
 #            group = rgm.create(group_name, desc, parent, just_db=True)
 #            sa.commit()
+
+        # skip folders that are now removed repos
+        if REMOVED_REPO_PAT.match(group_name):
+            break
 
         if group is None:
             log.debug('creating group level: %s group_name: %s' % (lvl, group_name))

@@ -38,7 +38,7 @@ from rhodecode.lib import helpers as h
 from rhodecode.lib import safe_str
 from rhodecode.lib.auth import HasRepoPermissionAny, HasReposGroupPermissionAny
 from rhodecode.lib.utils import get_repos as get_filesystem_repos, make_ui, \
-    action_logger, EmptyChangeset
+    action_logger, EmptyChangeset, REMOVED_REPO_PAT
 from rhodecode.model import BaseModel
 from rhodecode.model.db import Repository, RhodeCodeUi, CacheInvalidation, \
     UserFollowing, UserLog, User, RepoGroup
@@ -182,6 +182,9 @@ class ScmModel(BaseModel):
         repos = {}
 
         for name, path in get_filesystem_repos(repos_path, recursive=True):
+            # skip removed repos
+            if REMOVED_REPO_PAT.match(name):
+                continue
 
             # name need to be decomposed and put back together using the /
             # since this is internal storage separator for rhodecode

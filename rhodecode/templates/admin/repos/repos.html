@@ -42,8 +42,8 @@
           </tr>
          </thead>
 
-          %for cnt,repo in enumerate(c.repos_list,1):
-          <tr class="parity${cnt%2}">
+          %for cnt,repo in enumerate(c.repos_list):
+          <tr class="parity${(cnt+1)%2}">
               <td class="quick_repo_menu">
                 ${dt.quick_menu(repo['name'])}
               </td>
