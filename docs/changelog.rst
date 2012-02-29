@@ -23,6 +23,8 @@ fixes
 - fixes #376 Cannot edit user (using container auth)
 - fixes #378 Invalid image urls on changeset screen with proxy-prefix 
   configuration
+- fixed initial sorting of repos inside repo group
+- fixes issue when user tried to resubmit same permission into user/user_groups
 
 1.3.2 (**2012-02-28**)
 ----------------------
