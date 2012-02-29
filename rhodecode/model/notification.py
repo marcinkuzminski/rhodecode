@@ -85,13 +85,19 @@ class NotificationModel(BaseModel):
                 if obj:
                     recipients_objs.append(obj)
             recipients_objs = set(recipients_objs)
+            log.debug('sending notifications %s to %s' % (
+                type_, recipients_objs)
+            )
         else:
             # empty recipients means to all admins
             recipients_objs = User.query().filter(User.admin == True).all()
-
-        notif = Notification.create(created_by=created_by_obj, subject=subject,
-                                    body=body, recipients=recipients_objs,
-                                    type_=type_)
+            log.debug('sending notifications %s to admins: %s' % (
+                type_, recipients_objs)
+            )
+        notif = Notification.create(
+            created_by=created_by_obj, subject=subject,
+            body=body, recipients=recipients_objs, type_=type_
+        )
 
         if with_email is False:
             return notif

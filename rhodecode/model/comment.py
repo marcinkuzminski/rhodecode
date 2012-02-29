@@ -92,22 +92,27 @@ class ChangesetCommentsModel(BaseModel):
                                    )
                              )
             body = text
+
+            # get the current participants of this changeset
             recipients = ChangesetComment.get_users(revision=revision)
+
             # add changeset author
             recipients += [User.get_by_email(author)]
 
-            NotificationModel().create(created_by=user_id, subject=subj,
-                                   body=body, recipients=recipients,
-                                   type_=Notification.TYPE_CHANGESET_COMMENT)
+            NotificationModel().create(
+              created_by=user_id, subject=subj, body=body,
+              recipients=recipients, type_=Notification.TYPE_CHANGESET_COMMENT
+            )
 
             mention_recipients = set(self._extract_mentions(body))\
                                     .difference(recipients)
             if mention_recipients:
                 subj = _('[Mention]') + ' ' + subj
-                NotificationModel().create(created_by=user_id, subject=subj,
-                                    body=body,
-                                    recipients=mention_recipients,
-                                    type_=Notification.TYPE_CHANGESET_COMMENT)
+                NotificationModel().create(
+                    created_by=user_id, subject=subj, body=body,
+                    recipients=mention_recipients,
+                    type_=Notification.TYPE_CHANGESET_COMMENT
+                )
 
             return comment
 
