@@ -18,6 +18,8 @@ fixes
 +++++
 
 - fixed some python2.5 compatibility issues 
+- fixed issues with removed repos was accidentally added as groups, after
+  full rescan of paths
 
 1.3.2 (**2012-02-28**)
 ----------------------
