@@ -34,8 +34,8 @@
 			    <dd>
 			        <div>
 			        ${h.form(h.url('files_diff_home',repo_name=c.repo_name,f_path=c.f_path),method='get')}
-			        ${h.hidden('diff2',c.file.last_changeset.raw_id)}
-			        ${h.select('diff1',c.file.last_changeset.raw_id,c.file_history)}
+			        ${h.hidden('diff2',c.file.changeset.raw_id)}
+			        ${h.select('diff1',c.file.changeset.raw_id,c.file_history)}
 			        ${h.submit('diff','diff to revision',class_="ui-btn")}
 			        ${h.submit('show_rev','show at revision',class_="ui-btn")}
 			        ${h.end_form()}
@@ -46,7 +46,7 @@
                 <div class="code-header">
                     <div class="stats">
                         <div class="left"><img src="${h.url('/images/icons/file.png')}"/></div>
-                        <div class="left item">${h.link_to("r%s:%s" % (c.file.last_changeset.revision,h.short_id(c.file.last_changeset.raw_id)),h.url('changeset_home',repo_name=c.repo_name,revision=c.file.last_changeset.raw_id))}</div>
+                        <div class="left item">${h.link_to("r%s:%s" % (c.file.changeset.revision,h.short_id(c.file.changeset.raw_id)),h.url('changeset_home',repo_name=c.repo_name,revision=c.file.changeset.raw_id))}</div>
                         <div class="left item">${h.format_byte_size(c.file.size,binary=True)}</div>
                         <div class="left item last">${c.file.mimetype}</div>
                         <div class="buttons">

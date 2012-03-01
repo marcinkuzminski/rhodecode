@@ -317,7 +317,7 @@ class ChangesetController(BaseRepoController):
                                                 format='gitdiff').raw_diff()
 
                 cs1 = None
-                cs2 = node.last_changeset.raw_id
+                cs2 = node.changeset.raw_id
                 c.changes.append(('added', node, diff, cs1, cs2))
 
             for node in c.changeset.changed:
@@ -331,8 +331,8 @@ class ChangesetController(BaseRepoController):
                     diff = diffs.DiffProcessor(f_gitdiff,
                                                 format='gitdiff').raw_diff()
 
-                cs1 = filenode_old.last_changeset.raw_id
-                cs2 = node.last_changeset.raw_id
+                cs1 = filenode_old.changeset.raw_id
+                cs2 = node.changeset.raw_id
                 c.changes.append(('changed', node, diff, cs1, cs2))
 
         response.content_type = 'text/plain'

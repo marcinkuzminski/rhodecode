@@ -83,8 +83,8 @@ def wrapped_diff(filenode_old, filenode_new, cut_off_limit=None,
     if not diff:
         diff = wrap_to_table(_('No changes detected'))
 
-    cs1 = filenode_old.last_changeset.raw_id
-    cs2 = filenode_new.last_changeset.raw_id
+    cs1 = filenode_old.changeset.raw_id
+    cs2 = filenode_new.changeset.raw_id
 
     return size, cs1, cs2, diff, stats
 
