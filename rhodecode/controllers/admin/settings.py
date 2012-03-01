@@ -248,7 +248,7 @@ class SettingsController(BaseController):
 
                 if update:
                     h.flash(_('Updated hooks'), category='success')
-                Session.commit()
+                self.sa.commit()
             except:
                 log.error(traceback.format_exc())
                 h.flash(_('error occurred during hook creation'),
@@ -285,7 +285,7 @@ class SettingsController(BaseController):
         if setting_id == 'hooks':
             hook_id = request.POST.get('hook_id')
             RhodeCodeUi.delete(hook_id)
-
+            self.sa.commit()
 
     @HasPermissionAllDecorator('hg.admin')
     def show(self, setting_id, format='html'):

@@ -25,6 +25,10 @@ fixes
   configuration
 - fixed initial sorting of repos inside repo group
 - fixes issue when user tried to resubmit same permission into user/user_groups
+- bumped beaker version that fixes #375 leap error bug
+- fixed raw_changeset for git. It was generated with hg patch headers
+- fixed vcs issue with last_changeset for filenodes
+- fixed missing commit after hook delete
 
 1.3.2 (**2012-02-28**)
 ----------------------
