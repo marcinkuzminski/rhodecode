@@ -221,17 +221,20 @@ class ChangesetController(BaseRepoController):
                 lim = self.cut_off_limit
                 if cumulative_diff > self.cut_off_limit:
                     lim = -1
-                size, cs1, cs2, diff, st = wrapped_diff(filenode_old=None,
-                                         filenode_new=node,
-                                         cut_off_limit=lim,
-                                         ignore_whitespace=ign_whitespace_lcl,
-                                         line_context=line_context_lcl,
-                                         enable_comments=enable_comments)
+                size, cs1, cs2, diff, st = wrapped_diff(
+                    filenode_old=None,
+                    filenode_new=node,
+                    cut_off_limit=lim,
+                    ignore_whitespace=ign_whitespace_lcl,
+                    line_context=line_context_lcl,
+                    enable_comments=enable_comments
+                )
                 cumulative_diff += size
                 c.lines_added += st[0]
                 c.lines_deleted += st[1]
-                c.changes[changeset.raw_id].append(('added', node, diff,
-                                                    cs1, cs2, st))
+                c.changes[changeset.raw_id].append(
+                    ('added', node, diff, cs1, cs2, st)
+                )
 
             #==================================================================
             # CHANGED FILES
@@ -249,24 +252,27 @@ class ChangesetController(BaseRepoController):
                 lim = self.cut_off_limit
                 if cumulative_diff > self.cut_off_limit:
                     lim = -1
-                size, cs1, cs2, diff, st = wrapped_diff(filenode_old=filenode_old,
-                                         filenode_new=node,
-                                         cut_off_limit=lim,
-                                         ignore_whitespace=ign_whitespace_lcl,
-                                         line_context=line_context_lcl,
-                                         enable_comments=enable_comments)
+                size, cs1, cs2, diff, st = wrapped_diff(
+                    filenode_old=filenode_old,
+                    filenode_new=node,
+                    cut_off_limit=lim,
+                    ignore_whitespace=ign_whitespace_lcl,
+                    line_context=line_context_lcl,
+                    enable_comments=enable_comments
+                )
                 cumulative_diff += size
                 c.lines_added += st[0]
                 c.lines_deleted += st[1]
-                c.changes[changeset.raw_id].append(('changed', node, diff,
-                                                    cs1, cs2, st))
-
+                c.changes[changeset.raw_id].append(
+                    ('changed', node, diff, cs1, cs2, st)
+                )
             #==================================================================
             # REMOVED FILES
             #==================================================================
             for node in changeset.removed:
-                c.changes[changeset.raw_id].append(('removed', node, None,
-                                                    None, None, (0, 0)))
+                c.changes[changeset.raw_id].append(
+                    ('removed', node, None, None, None, (0, 0))
+                )
 
         # count inline comments
         for path, lines in c.inline_comments:
@@ -335,8 +341,8 @@ class ChangesetController(BaseRepoController):
             response.content_disposition = 'attachment; filename=%s.patch' \
                                             % revision
 
-        c.parent_tmpl = ''.join(['# Parent  %s\n' % x.raw_id for x in
-                                                 c.changeset.parents])
+        c.parent_tmpl = ''.join(['# Parent  %s\n' % x.raw_id
+                                 for x in c.changeset.parents])
 
         c.diffs = ''
         for x in c.changes:
