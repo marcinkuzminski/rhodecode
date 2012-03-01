@@ -75,7 +75,7 @@ class TestFilesController(TestController):
 
         #test or history
         response.mustcontain("""<optgroup label="Changesets">
-<option selected="selected" value="8911406ad776fdd3d0b9932a2e89677e57405a48">r167:8911406ad776 (default)</option>
+<option value="8911406ad776fdd3d0b9932a2e89677e57405a48">r167:8911406ad776 (default)</option>
 <option value="aa957ed78c35a1541f508d2ec90e501b0a9e3167">r165:aa957ed78c35 (default)</option>
 <option value="48e11b73e94c0db33e736eaeea692f990cb0b5f1">r140:48e11b73e94c (default)</option>
 <option value="adf3cbf483298563b968a6c673cd5bde5f7d5eea">r126:adf3cbf48329 (default)</option>
@@ -110,23 +110,20 @@ class TestFilesController(TestController):
 <option value="3803844fdbd3b711175fc3da9bdacfcd6d29a6fb">r7:3803844fdbd3 (default)</option>
 </optgroup>
 <optgroup label="Branches">
-<option value="27cd5cce30c96924232dffcd24178a07ffeb5dfc">default</option>
+<option selected="selected" value="27cd5cce30c96924232dffcd24178a07ffeb5dfc">default</option>
 <option value="97e8b885c04894463c51898e14387d80c30ed1ee">git</option>
 <option value="2e6a2bf9356ca56df08807f4ad86d480da72a8f4">web</option>
 </optgroup>
 <optgroup label="Tags">
-<option value="27cd5cce30c96924232dffcd24178a07ffeb5dfc">tip</option>
+<option selected="selected" value="27cd5cce30c96924232dffcd24178a07ffeb5dfc">tip</option>
 <option value="fd4bdb5e9b2a29b4393a4ac6caef48c17ee1a200">0.1.4</option>
 <option value="17544fbfcd33ffb439e2b728b5d526b1ef30bfcf">0.1.3</option>
 <option value="a7e60bff65d57ac3a1a1ce3b12a70f8a9e8a7720">0.1.2</option>
 <option value="eb3a60fc964309c1a318b8dfe26aa2d1586c85ae">0.1.1</option>
-</optgroup>""")
+</optgroup>
+""")
 
-        response.mustcontain("""<div class="commit">Partially implemented #16. filecontent/commit message/author/node name are safe_unicode now.
-In addition some other __str__ are unicode as well
-Added test for unicode
-Improved test to clone into uniq repository.
-removed extra unicode conversion in diff.</div>""")
+        response.mustcontain("""<div class="commit">merge</div>""")
 
         response.mustcontain("""<span style="text-transform: uppercase;"><a href="#">branch: default</a></span>""")
 
@@ -139,7 +136,7 @@ removed extra unicode conversion in diff.</div>""")
 
 
         response.mustcontain("""<optgroup label="Changesets">
-<option selected="selected" value="8911406ad776fdd3d0b9932a2e89677e57405a48">r167:8911406ad776 (default)</option>
+<option value="8911406ad776fdd3d0b9932a2e89677e57405a48">r167:8911406ad776 (default)</option>
 <option value="aa957ed78c35a1541f508d2ec90e501b0a9e3167">r165:aa957ed78c35 (default)</option>
 <option value="48e11b73e94c0db33e736eaeea692f990cb0b5f1">r140:48e11b73e94c (default)</option>
 <option value="adf3cbf483298563b968a6c673cd5bde5f7d5eea">r126:adf3cbf48329 (default)</option>
@@ -174,18 +171,17 @@ removed extra unicode conversion in diff.</div>""")
 <option value="3803844fdbd3b711175fc3da9bdacfcd6d29a6fb">r7:3803844fdbd3 (default)</option>
 </optgroup>
 <optgroup label="Branches">
-<option value="27cd5cce30c96924232dffcd24178a07ffeb5dfc">default</option>
+<option selected="selected" value="27cd5cce30c96924232dffcd24178a07ffeb5dfc">default</option>
 <option value="97e8b885c04894463c51898e14387d80c30ed1ee">git</option>
 <option value="2e6a2bf9356ca56df08807f4ad86d480da72a8f4">web</option>
 </optgroup>
 <optgroup label="Tags">
-<option value="27cd5cce30c96924232dffcd24178a07ffeb5dfc">tip</option>
+<option selected="selected" value="27cd5cce30c96924232dffcd24178a07ffeb5dfc">tip</option>
 <option value="fd4bdb5e9b2a29b4393a4ac6caef48c17ee1a200">0.1.4</option>
 <option value="17544fbfcd33ffb439e2b728b5d526b1ef30bfcf">0.1.3</option>
 <option value="a7e60bff65d57ac3a1a1ce3b12a70f8a9e8a7720">0.1.2</option>
 <option value="eb3a60fc964309c1a318b8dfe26aa2d1586c85ae">0.1.1</option>
-</optgroup>
-""")
+</optgroup>""")
 
         response.mustcontain("""<span style="text-transform: uppercase;"><a href="#">branch: default</a></span>""")
 
