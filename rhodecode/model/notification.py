@@ -169,10 +169,12 @@ class NotificationModel(BaseModel):
         of notification object
         """
 
-        _map = {notification.TYPE_CHANGESET_COMMENT:_('commented on commit'),
-                notification.TYPE_MESSAGE:_('sent message'),
-                notification.TYPE_MENTION:_('mentioned you'),
-                notification.TYPE_REGISTRATION:_('registered in RhodeCode')}
+        _map = {
+            notification.TYPE_CHANGESET_COMMENT: _('commented on commit'),
+            notification.TYPE_MESSAGE: _('sent message'),
+            notification.TYPE_MENTION: _('mentioned you'),
+            notification.TYPE_REGISTRATION: _('registered in RhodeCode')
+        }
 
         DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 
@@ -182,9 +184,10 @@ class NotificationModel(BaseModel):
         else:
             DTF = lambda d: datetime.datetime.strftime(d, DATETIME_FORMAT)
             when = DTF(notification.created_on)
-        data = dict(user=notification.created_by_user.username,
-                    action=_map[notification.type_],
-                    when=when)
+        data = dict(
+            user=notification.created_by_user.username,
+            action=_map[notification.type_], when=when,
+        )
         return tmpl % data
 
 
@@ -200,10 +203,10 @@ class EmailNotificationModel(BaseModel):
         self._tmpl_lookup = rhodecode.CONFIG['pylons.app_globals'].mako_lookup
 
         self.email_types = {
-            self.TYPE_CHANGESET_COMMENT:'email_templates/changeset_comment.html',
-            self.TYPE_PASSWORD_RESET:'email_templates/password_reset.html',
-            self.TYPE_REGISTRATION:'email_templates/registration.html',
-            self.TYPE_DEFAULT:'email_templates/default.html'
+         self.TYPE_CHANGESET_COMMENT: 'email_templates/changeset_comment.html',
+         self.TYPE_PASSWORD_RESET: 'email_templates/password_reset.html',
+         self.TYPE_REGISTRATION: 'email_templates/registration.html',
+         self.TYPE_DEFAULT: 'email_templates/default.html'
         }
 
     def get_email_tmpl(self, type_, **kwargs):
@@ -216,7 +219,7 @@ class EmailNotificationModel(BaseModel):
         base = self.email_types.get(type_, self.email_types[self.TYPE_DEFAULT])
         email_template = self._tmpl_lookup.get_template(base)
         # translator inject
-        _kwargs = {'_':_}
+        _kwargs = {'_': _}
         _kwargs.update(kwargs)
         log.debug('rendering tmpl %s with kwargs %s' % (base, _kwargs))
         return email_template.render(**_kwargs)
