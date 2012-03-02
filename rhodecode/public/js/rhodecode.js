@@ -614,6 +614,15 @@ var deleteNotification = function(url, notification_id,callbacks){
  */
 var quick_repo_menu = function(){
     YUE.on(YUQ('.quick_repo_menu'),'click',function(e){
+    	//close all opened ones before !
+    	var actives = YUQ('.quick_repo_menu.active');
+    	for(var i=0;i<actives.length;i++){
+    		var el = actives[i];  
+    		if(el != e.currentTarget){
+	    		YUD.removeClass(el,'active');    	
+	    		YUD.addClass(el.firstElementChild.firstElementChild,'hidden');
+    		}
+    	}
         var menu = e.currentTarget.firstElementChild.firstElementChild;
         if(YUD.hasClass(menu,'hidden')){
             YUD.addClass(e.currentTarget,'active');
