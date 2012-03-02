@@ -26,7 +26,7 @@
 import sys
 import platform
 
-VERSION = (1, 3, 3, 'beta')
+VERSION = (1, 3, 4, 'beta')
 __version__ = '.'.join((str(each) for each in VERSION[:4]))
 __dbversion__ = 5  # defines current db version for migrations
 __platform__ = platform.system()

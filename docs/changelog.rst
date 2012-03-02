@@ -4,11 +4,21 @@ Changelog
 =========
 
 
-1.3.3 (**2012-XX-XX**)
+1.3.4 (**2012-XX-XX**)
 ----------------------
 
 :status: in-progress
 :branch: beta
+
+news
+++++
+
+
+fixes
++++++
+
+1.3.3 (**2012-03-02**)
+----------------------
 
 news
 ++++
@@ -31,6 +41,7 @@ fixes
 - fixed missing commit after hook delete
 - fixed #372 issues with git operation detection that caused a security issue 
   for git repos
+
 1.3.2 (**2012-02-28**)
 ----------------------
 
