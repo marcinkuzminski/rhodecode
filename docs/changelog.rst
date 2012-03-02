@@ -29,7 +29,8 @@ fixes
 - fixed raw_changeset for git. It was generated with hg patch headers
 - fixed vcs issue with last_changeset for filenodes
 - fixed missing commit after hook delete
-
+- fixed #372 issues with git operation detection that caused a security issue 
+  for git repos
 1.3.2 (**2012-02-28**)
 ----------------------
 
