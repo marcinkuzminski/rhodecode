@@ -14,16 +14,19 @@ fix might be already fixed there and i try to merge all fixes from beta into
 stable, and not the other way. Finally, when you are finished making a change, 
 please send me a pull request.
 
-To run RhodeCode in a development version you always need to install the tip
-version of RhodeCode and the VCS library.
+To run RhodeCode in a development version you always need to install the latest
+required libs from `requires.txt` file.
 
-after downloading RhodeCode make sure you run::
+after downloading/pulling RhodeCode make sure you run::
 
     python setup.py develop
 
-command to install all required packages, and prepare development enviroment
+command to install/verify all required packages, and prepare development 
+enviroment.
 
 
+After finishing your changes make sure all tests passes ok. You can run
+the testsuite running nosetest from the project root.
 
 | Thank you for any contributions!
 |  Marcin
