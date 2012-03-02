@@ -1,5 +1,6 @@
 .. _general:
 
+=======================
 General RhodeCode usage
 =======================
 

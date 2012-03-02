@@ -1,5 +1,6 @@
 .. _contributing:
 
+=========================
 Contributing to RhodeCode
 =========================
 

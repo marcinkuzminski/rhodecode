@@ -1,5 +1,6 @@
 .. _git_support:
 
+===========
 GIT support
 ===========
 
