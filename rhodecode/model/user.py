@@ -531,6 +531,13 @@ class UserModel(BaseModel):
         """
         user = self.__get_user(user)
         perm = self.__get_perm(perm)
+        # if this permission is already granted skip it
+        _perm = UserToPerm.query()\
+            .filter(UserToPerm.user == user)\
+            .filter(UserToPerm.permission == perm)\
+            .scalar()
+        if _perm:
+            return
         new = UserToPerm()
         new.user = user
         new.permission = perm
@@ -546,7 +553,9 @@ class UserModel(BaseModel):
         user = self.__get_user(user)
         perm = self.__get_perm(perm)
 
-        obj = UserToPerm.query().filter(UserToPerm.user == user)\
-                .filter(UserToPerm.permission == perm).scalar()
+        obj = UserToPerm.query()\
+                .filter(UserToPerm.user == user)\
+                .filter(UserToPerm.permission == perm)\
+                .scalar()
         if obj:
             self.sa.delete(obj)

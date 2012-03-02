@@ -15,17 +15,17 @@ from rhodecode.lib.vcs.exceptions import VCSError
 from rhodecode.lib.vcs.nodes import FileNode, NodeError
 
 
-def get_udiff(filenode_old, filenode_new,show_whitespace=True):
+def get_udiff(filenode_old, filenode_new, show_whitespace=True):
     """
     Returns unified diff between given ``filenode_old`` and ``filenode_new``.
     """
     try:
-        filenode_old_date = filenode_old.last_changeset.date
+        filenode_old_date = filenode_old.changeset.date
     except NodeError:
         filenode_old_date = None
 
     try:
-        filenode_new_date = filenode_new.last_changeset.date
+        filenode_new_date = filenode_new.changeset.date
     except NodeError:
         filenode_new_date = None
 

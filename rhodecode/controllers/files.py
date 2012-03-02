@@ -428,8 +428,9 @@ class FilesController(BaseRepoController):
 
             diff_name = '%s_vs_%s.diff' % (diff1, diff2)
             response.content_type = 'text/plain'
-            response.content_disposition = 'attachment; filename=%s' \
-                                                    % diff_name
+            response.content_disposition = (
+                'attachment; filename=%s' % diff_name
+            )
             return diff.raw_diff()
 
         elif c.action == 'raw':

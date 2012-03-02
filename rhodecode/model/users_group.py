@@ -172,6 +172,14 @@ class UsersGroupModel(BaseModel):
 
         users_group = self.__get_users_group(users_group)
 
+        # if this permission is already granted skip it
+        _perm = UsersGroupToPerm.query()\
+            .filter(UsersGroupToPerm.users_group == users_group)\
+            .filter(UsersGroupToPerm.permission == perm)\
+            .scalar()
+        if _perm:
+            return
+
         new = UsersGroupToPerm()
         new.users_group = users_group
         new.permission = perm

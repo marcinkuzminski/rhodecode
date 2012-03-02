@@ -121,6 +121,7 @@ class SimpleGit(BaseVCSController):
         #======================================================================
         # CHECK ANONYMOUS PERMISSION
         #======================================================================
+
         if action in ['pull', 'push']:
             anonymous_user = self.__get_user('default')
             username = anonymous_user.username
@@ -169,15 +170,13 @@ class SimpleGit(BaseVCSController):
                                                          start_response)
 
                     #check permissions for this repository
-                    perm = self._check_permission(action, user,
-                                                   repo_name)
+                    perm = self._check_permission(action, user, repo_name)
                     if perm is not True:
                         return HTTPForbidden()(environ, start_response)
 
         #===================================================================
         # GIT REQUEST HANDLING
         #===================================================================
-
         repo_path = safe_str(os.path.join(self.basepath, repo_name))
         log.debug('Repository path is %s' % repo_path)
 
@@ -203,7 +202,6 @@ class SimpleGit(BaseVCSController):
         :param repo_name: name of the repository
         :param repo_path: full path to the repository
         """
-
         _d = {'/' + repo_name: Repo(repo_path)}
         backend = dulserver.DictBackend(_d)
         gitserve = HTTPGitApplication(backend)
@@ -229,19 +227,24 @@ class SimpleGit(BaseVCSController):
         return User.get_by_username(username)
 
     def __get_action(self, environ):
-        """Maps git request commands into a pull or push command.
+        """
+        Maps git request commands into a pull or push command.
 
         :param environ:
         """
         service = environ['QUERY_STRING'].split('=')
+
         if len(service) > 1:
             service_cmd = service[1]
             mapping = {
                 'git-receive-pack': 'push',
                 'git-upload-pack': 'pull',
             }
-
-            return mapping.get(service_cmd,
-                               service_cmd if service_cmd else 'other')
+            op = mapping[service_cmd]
+            self._git_stored_op = op
+            return op
         else:
-            return 'other'
+            # try to fallback to stored variable as we don't know if the last
+            # operation is pull/push
+            op = getattr(self, '_git_stored_op', 'pull')
+        return op

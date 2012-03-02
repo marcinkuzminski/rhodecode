@@ -247,7 +247,7 @@ class GitChangeset(BaseChangeset):
         iterating commits.
         """
         cmd = 'log --pretty="format: %%H" --name-status -p %s -- "%s"' % (
-                  '', path
+                  self.id, path
                )
         so, se = self.repository.run_git_command(cmd)
         ids = re.findall(r'\w{40}', so)

@@ -1,8 +1,9 @@
+%if h.is_hg(c.scm_type):
 # ${c.scm_type.upper()} changeset patch
 # User ${c.changeset.author|n}
 # Date ${c.changeset.date}
 # Node ID ${c.changeset.raw_id}
 ${c.parent_tmpl}
 ${c.changeset.message}
-
+%endif
 ${c.diffs|n}

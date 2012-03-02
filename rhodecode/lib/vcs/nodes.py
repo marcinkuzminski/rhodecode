@@ -306,14 +306,14 @@ class FileNode(Node):
         attribute to indicate that type should *NOT* be calculated).
         """
         if hasattr(self, '_mimetype'):
-            if (isinstance(self._mimetype,(tuple,list,)) and
+            if (isinstance(self._mimetype, (tuple, list,)) and
                 len(self._mimetype) == 2):
                 return self._mimetype
             else:
                 raise NodeError('given _mimetype attribute must be an 2 '
                                'element list or tuple')
 
-        mtype,encoding = mimetypes.guess_type(self.name)
+        mtype, encoding = mimetypes.guess_type(self.name)
 
         if mtype is None:
             if self.is_binary:
@@ -322,7 +322,7 @@ class FileNode(Node):
             else:
                 mtype = 'text/plain'
                 encoding = None
-        return mtype,encoding
+        return mtype, encoding
 
     @LazyProperty
     def mimetype(self):
@@ -392,8 +392,8 @@ class FileNode(Node):
         """
         Returns True if file has binary content.
         """
-        bin = '\0' in self.content
-        return bin
+        _bin = '\0' in self.content
+        return _bin
 
     @LazyProperty
     def extension(self):
@@ -405,6 +405,10 @@ class FileNode(Node):
         Returns ``True`` if file has executable flag turned on.
         """
         return bool(self.mode & stat.S_IXUSR)
+
+    def __repr__(self):
+        return '<%s %r @ %s>' % (self.__class__.__name__, self.path,
+                                 self.changeset.short_id)
 
 
 class RemovedFileNode(FileNode):
@@ -536,6 +540,10 @@ class DirNode(Node):
                 size += f.size
 
         return size
+
+    def __repr__(self):
+        return '<%s %r @ %s>' % (self.__class__.__name__, self.path,
+                                 self.changeset.short_id)
 
 
 class RootNode(DirNode):

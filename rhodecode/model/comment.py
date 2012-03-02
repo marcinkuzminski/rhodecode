@@ -67,7 +67,7 @@ class ChangesetCommentsModel(BaseModel):
             repo = Repository.get(repo_id)
             cs = repo.scm_instance.get_changeset(revision)
             desc = cs.message
-            author = cs.author_email
+            author_email = cs.author_email
             comment = ChangesetComment()
             comment.repo = repo
             comment.user_id = user_id
@@ -92,22 +92,27 @@ class ChangesetCommentsModel(BaseModel):
                                    )
                              )
             body = text
-            recipients = ChangesetComment.get_users(revision=revision)
-            # add changeset author
-            recipients += [User.get_by_email(author)]
 
-            NotificationModel().create(created_by=user_id, subject=subj,
-                                   body=body, recipients=recipients,
-                                   type_=Notification.TYPE_CHANGESET_COMMENT)
+            # get the current participants of this changeset
+            recipients = ChangesetComment.get_users(revision=revision)
+
+            # add changeset author if it's in rhodecode system
+            recipients += [User.get_by_email(author_email)]
+
+            NotificationModel().create(
+              created_by=user_id, subject=subj, body=body,
+              recipients=recipients, type_=Notification.TYPE_CHANGESET_COMMENT
+            )
 
             mention_recipients = set(self._extract_mentions(body))\
                                     .difference(recipients)
             if mention_recipients:
                 subj = _('[Mention]') + ' ' + subj
-                NotificationModel().create(created_by=user_id, subject=subj,
-                                    body=body,
-                                    recipients=mention_recipients,
-                                    type_=Notification.TYPE_CHANGESET_COMMENT)
+                NotificationModel().create(
+                    created_by=user_id, subject=subj, body=body,
+                    recipients=mention_recipients,
+                    type_=Notification.TYPE_CHANGESET_COMMENT
+                )
 
             return comment
 

@@ -187,9 +187,8 @@ class MercurialChangeset(BaseChangeset):
         """
         Returns last commit of the file at the given ``path``.
         """
-        fctx = self._get_filectx(path)
-        changeset = self.repository.get_changeset(fctx.linkrev())
-        return changeset
+        node = self.get_node(path)
+        return node.history[0]
 
     def get_file_history(self, path):
         """

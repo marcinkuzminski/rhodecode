@@ -648,6 +648,7 @@ Here is a sample excerpt from an Apache Virtual Host configuration file::
         threads=4 \
         python-path=/home/web/rhodecode/pyenv/lib/python2.6/site-packages
     WSGIScriptAlias / /home/web/rhodecode/dispatch.wsgi
+    WSGIPassAuthorization On
 
 Example wsgi dispatch script::
 

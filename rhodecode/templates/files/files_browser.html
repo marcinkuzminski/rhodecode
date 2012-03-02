@@ -47,7 +47,7 @@
 		                 <th>${_('Name')}</th>
 		                 <th>${_('Size')}</th>
 		                 <th>${_('Mimetype')}</th>
-		                 <th>${_('Revision')}</th>
+		                 <th>${_('Last Revision')}</th>
 		                 <th>${_('Last modified')}</th>
 		                 <th>${_('Last commiter')}</th>
 		             </tr>
@@ -70,7 +70,7 @@
 		    %for cnt,node in enumerate(c.file):
 				<tr class="parity${cnt%2}">
 		             <td>
-						${h.link_to(node.name,h.url('files_home',repo_name=c.repo_name,revision=c.changeset.raw_id,f_path=h.safe_unicode(node.path)),class_=file_class(node)+" ypjax-link")}
+                        ${h.link_to(node.name,h.url('files_home',repo_name=c.repo_name,revision=c.changeset.raw_id,f_path=h.safe_unicode(node.path)),class_=file_class(node)+" ypjax-link")}
 		             </td>
 		             <td>
 		             %if node.is_file():
