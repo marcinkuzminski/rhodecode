@@ -1,5 +1,6 @@
 .. _upgrade:
 
+=======
 Upgrade
 =======
 
@@ -25,11 +26,11 @@ Then make sure you run the following command from the installation directory::
  
 This will display any changes made by the new version of RhodeCode to your
 current configuration. It will try to perform an automerge. It's always better
-to make a backup of your configuration file before hand and recheck the 
+to make a backup of your configuration file before hand and re check the 
 content after the automerge.
 
 .. note::
-   Please always make sure your .ini files are upto date. Often errors are
+   Please always make sure your .ini files are up to date. Often errors are
    caused by missing params added in new versions.
 
 

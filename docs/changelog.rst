@@ -1,8 +1,35 @@
 .. _changelog:
 
+=========
 Changelog
 =========
 
+
+
+1.3.3 (**2012-03-02**)
+----------------------
+
+news
+++++
+
+
+fixes
++++++
+
+- fixed some python2.5 compatibility issues 
+- fixed issues with removed repos was accidentally added as groups, after
+  full rescan of paths
+- fixes #376 Cannot edit user (using container auth)
+- fixes #378 Invalid image urls on changeset screen with proxy-prefix 
+  configuration
+- fixed initial sorting of repos inside repo group
+- fixes issue when user tried to resubmit same permission into user/user_groups
+- bumped beaker version that fixes #375 leap error bug
+- fixed raw_changeset for git. It was generated with hg patch headers
+- fixed vcs issue with last_changeset for filenodes
+- fixed missing commit after hook delete
+- fixed #372 issues with git operation detection that caused a security issue 
+  for git repos
 
 1.3.2 (**2012-02-28**)
 ----------------------
