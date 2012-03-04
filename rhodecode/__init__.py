@@ -39,7 +39,7 @@ PLATFORM_OTHERS = ('Linux', 'Darwin', 'FreeBSD', 'OpenBSD', 'SunOS')
 requirements = [
     "Pylons==1.0.0",
     "Beaker==1.6.3",
-    "WebHelpers>=1.2",
+    "WebHelpers==1.3",
     "formencode==1.2.4",
     "SQLAlchemy==0.7.4",
     "Mako==0.5.0",
