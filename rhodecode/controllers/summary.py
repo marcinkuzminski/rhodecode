@@ -26,6 +26,7 @@
 import traceback
 import calendar
 import logging
+import urllib
 from time import mktime
 from datetime import timedelta, date
 from urlparse import urlparse
@@ -40,7 +41,7 @@ from pylons.i18n.translation import _
 from beaker.cache import cache_region, region_invalidate
 
 from rhodecode.model.db import Statistics, CacheInvalidation
-from rhodecode.lib import ALL_READMES, ALL_EXTS
+from rhodecode.lib import ALL_READMES, ALL_EXTS, safe_unicode
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.utils import EmptyChangeset
@@ -91,34 +92,37 @@ class SummaryController(BaseRepoController):
 
         uri_tmpl = config.get('clone_uri', default_clone_uri)
         uri_tmpl = uri_tmpl.replace('{', '%(').replace('}', ')s')
-
+        decoded_path = safe_unicode(urllib.unquote(parsed_url.path))
         uri_dict = {
            'user': username,
            'pass': password,
            'scheme': parsed_url.scheme,
            'netloc': parsed_url.netloc,
-           'path': parsed_url.path
+           'path': decoded_path
         }
+
         uri = uri_tmpl % uri_dict
         # generate another clone url by id
-        uri_dict.update({'path': '/_%s' % c.dbrepo.repo_id})
+        uri_dict.update(
+         {'path': decoded_path.replace(repo_name, '_%s' % c.dbrepo.repo_id)}
+        )
         uri_id = uri_tmpl % uri_dict
 
         c.clone_repo_url = uri
         c.clone_repo_url_id = uri_id
         c.repo_tags = OrderedDict()
-        for name, hash in c.rhodecode_repo.tags.items()[:10]:
+        for name, hash_ in c.rhodecode_repo.tags.items()[:10]:
             try:
-                c.repo_tags[name] = c.rhodecode_repo.get_changeset(hash)
+                c.repo_tags[name] = c.rhodecode_repo.get_changeset(hash_)
             except ChangesetError:
-                c.repo_tags[name] = EmptyChangeset(hash)
+                c.repo_tags[name] = EmptyChangeset(hash_)
 
         c.repo_branches = OrderedDict()
-        for name, hash in c.rhodecode_repo.branches.items()[:10]:
+        for name, hash_ in c.rhodecode_repo.branches.items()[:10]:
             try:
-                c.repo_branches[name] = c.rhodecode_repo.get_changeset(hash)
+                c.repo_branches[name] = c.rhodecode_repo.get_changeset(hash_)
             except ChangesetError:
-                c.repo_branches[name] = EmptyChangeset(hash)
+                c.repo_branches[name] = EmptyChangeset(hash_)
 
         td = date.today() + timedelta(days=1)
         td_1m = td - timedelta(days=calendar.mdays[td.month])
