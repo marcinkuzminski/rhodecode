@@ -788,10 +788,15 @@ class HasPermissionAnyMiddleware(object):
         self.required_perms = set(perms)
 
     def __call__(self, user, repo_name):
+        # repo_name MUST be unicode, since we handle keys in permission
+        # dict by unicode
+        repo_name = safe_unicode(repo_name)
         usr = AuthUser(user.user_id)
         try:
             self.user_perms = set([usr.permissions['repositories'][repo_name]])
-        except:
+        except Exception:
+            log.error('Exception while accessing permissions %s' % 
+                      traceback.format_exc())
             self.user_perms = set()
         self.granted_for = ''
         self.username = user.username

@@ -86,7 +86,9 @@ GIT_PROTO_PAT = re.compile(r'^/(.+)/(info/refs|git-upload-pack|git-receive-pack)
 def is_git(environ):
     path_info = environ['PATH_INFO']
     isgit_path = GIT_PROTO_PAT.match(path_info)
-    log.debug('is a git path %s pathinfo : %s' % (isgit_path, path_info))
+    log.debug('pathinfo: %s detected as GIT %s' % (
+        path_info, isgit_path != None)
+    )
     return isgit_path
 
 
@@ -121,7 +123,6 @@ class SimpleGit(BaseVCSController):
         #======================================================================
         # CHECK ANONYMOUS PERMISSION
         #======================================================================
-
         if action in ['pull', 'push']:
             anonymous_user = self.__get_user('default')
             username = anonymous_user.username
@@ -177,7 +178,7 @@ class SimpleGit(BaseVCSController):
         #===================================================================
         # GIT REQUEST HANDLING
         #===================================================================
-        repo_path = safe_str(os.path.join(self.basepath, repo_name))
+        repo_path = os.path.join(safe_str(self.basepath), safe_str(repo_name))
         log.debug('Repository path is %s' % repo_path)
 
         # quick check if that dir exists...

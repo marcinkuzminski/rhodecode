@@ -54,6 +54,7 @@ from rhodecode.model.db import Repository, User, RhodeCodeUi, \
     UserLog, RepoGroup, RhodeCodeSetting, UserRepoGroupToPerm
 from rhodecode.model.meta import Session
 from rhodecode.model.repos_group import ReposGroupModel
+from rhodecode.lib import safe_str, safe_unicode
 
 log = logging.getLogger(__name__)
 
@@ -154,7 +155,10 @@ def action_logger(user, action, repo, ipaddr='', sa=None, commit=False):
         user_log.user_ip = ipaddr
         sa.add(user_log)
 
-        log.info('Adding user %s, action %s on %s' % (user_obj, action, repo))
+        log.info(
+            'Adding user %s, action %s on %s' % (user_obj, action,
+                                                 safe_unicode(repo))
+        )
         if commit:
             sa.commit()
     except:
@@ -198,12 +202,13 @@ def get_repos(path, recursive=False):
 def is_valid_repo(repo_name, base_path):
     """
     Returns True if given path is a valid repository False otherwise
+
     :param repo_name:
     :param base_path:
 
     :return True: if given path is a valid repository
     """
-    full_path = os.path.join(base_path, repo_name)
+    full_path = os.path.join(safe_str(base_path), safe_str(repo_name))
 
     try:
         get_scm(full_path)
@@ -219,7 +224,7 @@ def is_valid_repos_group(repos_group_name, base_path):
     :param repo_name:
     :param base_path:
     """
-    full_path = os.path.join(base_path, repos_group_name)
+    full_path = os.path.join(safe_str(base_path), safe_str(repos_group_name))
 
     # check if it's not a repo
     if is_valid_repo(repos_group_name, base_path):
