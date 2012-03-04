@@ -48,24 +48,7 @@ from rhodecode.lib.vcs.exceptions import ChangesetError, RepositoryError, \
 
 from whoosh.index import create_in, open_dir
 
-
-log = logging.getLogger('whooshIndexer')
-# create logger
-log.setLevel(logging.DEBUG)
-log.propagate = False
-# create console handler and set level to debug
-ch = logging.StreamHandler()
-ch.setLevel(logging.DEBUG)
-
-# create formatter
-formatter = logging.Formatter("%(asctime)s - %(name)s -"
-                              " %(levelname)s - %(message)s")
-
-# add formatter to ch
-ch.setFormatter(formatter)
-
-# add ch to logger
-log.addHandler(ch)
+log = logging.getLogger('whoosh_indexer')
 
 
 class WhooshIndexingDaemon(object):
@@ -103,7 +86,8 @@ class WhooshIndexingDaemon(object):
             self.initial = True
 
     def get_paths(self, repo):
-        """recursive walk in root dir and return a set of all path in that dir
+        """
+        recursive walk in root dir and return a set of all path in that dir
         based on repository walk function
         """
         index_paths_ = set()
@@ -127,32 +111,37 @@ class WhooshIndexingDaemon(object):
         return mktime(node.last_changeset.date.timetuple())
 
     def add_doc(self, writer, path, repo, repo_name):
-        """Adding doc to writer this function itself fetches data from
-        the instance of vcs backend"""
+        """
+        Adding doc to writer this function itself fetches data from
+        the instance of vcs backend
+        """
+
         node = self.get_node(repo, path)
 
-        #we just index the content of chosen files, and skip binary files
+        # we just index the content of chosen files, and skip binary files
         if node.extension in INDEX_EXTENSIONS and not node.is_binary:
 
             u_content = node.content
             if not isinstance(u_content, unicode):
                 log.warning('  >> %s Could not get this content as unicode '
-                          'replacing with empty content', path)
+                            'replacing with empty content' % path)
                 u_content = u''
             else:
                 log.debug('    >> %s [WITH CONTENT]' % path)
 
         else:
             log.debug('    >> %s' % path)
-            #just index file name without it's content
+            # just index file name without it's content
             u_content = u''
 
-        writer.add_document(owner=unicode(repo.contact),
-                        repository=safe_unicode(repo_name),
-                        path=safe_unicode(path),
-                        content=u_content,
-                        modtime=self.get_node_mtime(node),
-                        extension=node.extension)
+        writer.add_document(
+            owner=unicode(repo.contact),
+            repository=safe_unicode(repo_name),
+            path=safe_unicode(path),
+            content=u_content,
+            modtime=self.get_node_mtime(node),
+            extension=node.extension
+        )
 
     def build_index(self):
         if os.path.exists(self.index_location):
