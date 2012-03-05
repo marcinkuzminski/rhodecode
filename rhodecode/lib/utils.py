@@ -629,6 +629,6 @@ class BasePasterCommand(Command):
         """
         from pylons import config as pylonsconfig
 
-        path_to_ini_file = os.path.realpath(conf)
-        conf = paste.deploy.appconfig('config:' + path_to_ini_file)
+        self.path_to_ini_file = os.path.realpath(conf)
+        conf = paste.deploy.appconfig('config:' + self.path_to_ini_file)
         pylonsconfig.init_app(conf.global_conf, conf.local_conf)

@@ -25,6 +25,7 @@
 import os
 import sys
 import traceback
+import logging
 from os.path import dirname as dn, join as jn
 
 #to get the rhodecode import
@@ -84,7 +85,7 @@ class MakeIndex(BasePasterCommand):
     parser = Command.standard_parser(verbose=True)
 
     def command(self):
-
+        logging.config.fileConfig(self.path_to_ini_file)
         from pylons import config
         add_cache(config)
         engine = engine_from_config(config, 'sqlalchemy.db1.')

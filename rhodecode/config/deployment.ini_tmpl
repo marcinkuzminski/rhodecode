@@ -224,7 +224,7 @@ sqlalchemy.convert_unicode = true
 ### LOGGING CONFIGURATION   ####
 ################################
 [loggers]
-keys = root, routes, rhodecode, sqlalchemy, beaker, templates
+keys = root, routes, rhodecode, sqlalchemy, beaker, templates, whoosh_indexer
 
 [handlers]
 keys = console, console_sql
@@ -269,6 +269,12 @@ level = INFO
 handlers = console_sql
 qualname = sqlalchemy.engine
 propagate = 0
+
+[logger_whoosh_indexer]
+level = DEBUG
+handlers = 
+qualname = whoosh_indexer
+propagate = 1
 
 ##############
 ## HANDLERS ##
