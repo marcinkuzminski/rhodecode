@@ -179,7 +179,7 @@ class SummaryController(BaseRepoController):
         if c.enable_downloads:
             c.download_options = self._get_download_links(c.rhodecode_repo)
 
-        c.readme_data, c.readme_file = self.__get_readme_data(c.rhodecode_repo)
+        c.readme_data, c.readme_file = self.__get_readme_data(c.rhodecode_db_repo)
         return render('summary/summary.html')
 
     def __get_readme_data(self, repo):
@@ -210,7 +210,7 @@ class SummaryController(BaseRepoController):
 
             return readme_data, readme_file
 
-        key = repo.name + '_README'
+        key = repo.repo_name + '_README'
         inv = CacheInvalidation.invalidate(key)
         if inv is not None:
             region_invalidate(_get_readme_from_cache, None, key)
