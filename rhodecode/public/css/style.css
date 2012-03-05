@@ -185,6 +185,13 @@ div.options a {
 	border-bottom-right-radius: 8px;
 }
 
+.help-block {
+    color: #999999;
+    display: block;
+    margin-bottom: 0;
+    margin-top: 5px;
+}
+
 #header {
 	margin: 0;
 	padding: 0 10px;
@@ -2799,7 +2806,7 @@ table.code-browser .browser-dir {
 }
 
 .ac .perm_ac {
-	width: 15em;
+	width: 20em;
 }
 
 .ac .yui-ac-input {
