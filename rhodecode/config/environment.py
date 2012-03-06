@@ -52,6 +52,7 @@ def load_environment(global_conf, app_conf, initial=False):
     if os.path.isfile(path):
         rcext = create_module('rc', path)
         rhodecode.EXTENSIONS = rcext
+        log.debug('Found rcextensions now loading %s...' % rcext)
     # Setup cache object as early as possible
     import pylons
     pylons.cache._push_object(config['pylons.app_globals'].cache)
