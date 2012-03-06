@@ -655,7 +655,7 @@ class PermsFunction(object):
 
         for perm in perms:
             if perm not in available_perms:
-                raise Exception("'%s' permission in not defined" % perm)
+                raise Exception("'%s' permission is not defined" % perm)
         self.required_perms = set(perms)
         self.user_perms = None
         self.granted_for = ''

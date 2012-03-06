@@ -20,9 +20,10 @@ following command to do this::
 
 
 Next, you need to create the databases used by RhodeCode. I recommend that you
-use sqlite (default) or postgresql. If you choose a database other than the
+use postgresql or sqlite (default). If you choose a database other than the
 default ensure you properly adjust the db url in your production.ini
-configuration file to use this other database. Create the databases by running
+configuration file to use this other database. RhodeCode currently supports
+postgresql, sqlite and mysql databases. Create the database by running
 the following command::
 
     paster setup-app production.ini
@@ -57,15 +58,18 @@ You are now ready to use RhodeCode, to run it simply execute::
 - In the admin panel you can toggle ldap, anonymous, permissions settings. As
   well as edit more advanced options on users and repositories
 
-Try copying your own mercurial repository into the "root" directory you are
-using, then from within the RhodeCode web application choose Admin >
-repositories. Then choose Add New Repository. Add the repository you copied 
-into the root. Test that you can browse your repository from within RhodeCode 
-and then try cloning your repository from RhodeCode with::
+Optionally users can create `rcextensions` package that extends RhodeCode
+functionality. To do this simply execute::
 
-    hg clone http://127.0.0.1:5000/<repository name>
+    paster make-rcext production.ini
 
-where *repository name* is replaced by the name of your repository.
+This will create `rcextensions` package in the same place that your `ini` file
+lives. With `rcextensions` it's possible to add additional mapping for whoosh, 
+stats and add additional code into the push/pull/create repo hooks. For example
+for sending signals to build-bots such as jenkins.
+Please see the `__init__.py` file inside `rcextensions` package 
+for more details.
+
 
 Using RhodeCode with SSH
 ------------------------

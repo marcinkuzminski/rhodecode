@@ -25,6 +25,7 @@
 
 import os
 import re
+from rhodecode import EXTENSIONS
 from rhodecode.lib.vcs.utils.lazy import LazyProperty
 
 
@@ -64,10 +65,21 @@ def __get_lem():
 LANGUAGES_EXTENSIONS_MAP = __get_lem()
 
 # Additional mappings that are not present in the pygments lexers
-# NOTE: that this will overide any mappings in LANGUAGES_EXTENSIONS_MAP
-ADDITIONAL_MAPPINGS = {'xaml': 'XAML'}
+LANGUAGES_EXTENSIONS_MAP.update(getattr(EXTENSIONS, 'EXTRA_MAPPINGS', {}))
 
-LANGUAGES_EXTENSIONS_MAP.update(ADDITIONAL_MAPPINGS)
+#==============================================================================
+# WHOOSH INDEX EXTENSIONS
+#==============================================================================
+# EXTENSIONS WE WANT TO INDEX CONTENT OFF USING WHOOSH
+INDEX_EXTENSIONS = LANGUAGES_EXTENSIONS_MAP.keys()
+
+#OVERRIDE OUR EXTENSIONS FROM RC-EXTENSIONS (if present)
+
+if getattr(EXTENSIONS, 'INDEX_EXTENSIONS', []) != []:
+    INDEX_EXTENSIONS = getattr(EXTENSIONS, 'INDEX_EXTENSIONS', [])
+
+#ADDITIONAL MAPPINGS
+INDEX_EXTENSIONS.extend(getattr(EXTENSIONS, 'EXTRA_INDEX_EXTENSIONS', []))
 
 # list of readme files to search in file tree and display in summary
 # attached weights defines the search  order lower is first

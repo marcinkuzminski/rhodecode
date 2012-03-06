@@ -17,6 +17,8 @@ news
 - Whoosh logging is now controlled by the .ini files logging setup
 - added clone-url into edit form on /settings page
 - added help text into repo add/edit forms
+- created rcextensions module with additional mappings (ref #322) and
+  post push/pull/create repo hooks callbacks
 
 fixes
 +++++

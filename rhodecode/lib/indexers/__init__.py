@@ -47,11 +47,9 @@ from rhodecode.model import init_model
 from rhodecode.model.scm import ScmModel
 from rhodecode.model.repo import RepoModel
 from rhodecode.config.environment import load_environment
-from rhodecode.lib import LANGUAGES_EXTENSIONS_MAP, LazyProperty
+from rhodecode.lib import LANGUAGES_EXTENSIONS_MAP, INDEX_EXTENSIONS, \
+    LazyProperty
 from rhodecode.lib.utils import BasePasterCommand, Command, add_cache
-
-# EXTENSIONS WE WANT TO INDEX CONTENT OFF
-INDEX_EXTENSIONS = LANGUAGES_EXTENSIONS_MAP.keys()
 
 # CUSTOM ANALYZER wordsplit + lowercase filter
 ANALYZER = RegexTokenizer(expression=r"\w+") | LowercaseFilter()

@@ -90,3 +90,6 @@ CELERY_ON = False
 
 # link to config for pylons
 CONFIG = {}
+
+# Linked module for extensions
+EXTENSIONS = {}

@@ -19,6 +19,7 @@ from rhodecode.lib.auth import set_available_permissions
 from rhodecode.lib.utils import repo2db_mapper, make_ui, set_rhodecode_config
 from rhodecode.model import init_model
 from rhodecode.model.scm import ScmModel
+from rhodecode.lib.vcs.utils.fakemod import create_module
 
 log = logging.getLogger(__name__)
 
@@ -46,6 +47,11 @@ def load_environment(global_conf, app_conf, initial=False):
     config['pylons.app_globals'] = app_globals.Globals(config)
     config['pylons.h'] = rhodecode.lib.helpers
     rhodecode.CONFIG = config
+
+    path = os.path.join(config['here'], 'rcextensions', '__init__.py')
+    if os.path.isfile(path):
+        rcext = create_module('rc', path)
+        rhodecode.EXTENSIONS = rcext
     # Setup cache object as early as possible
     import pylons
     pylons.cache._push_object(config['pylons.app_globals'].cache)
