@@ -5,6 +5,7 @@ syntax: glob
 Paste*.egg
 
 syntax: regexp
+^rcextensions
 ^build
 ^docs/build/
 ^docs/_build/
