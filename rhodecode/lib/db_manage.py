@@ -376,7 +376,7 @@ class DbManage(object):
 
         if not self.tests and not test_repo_path:
             path = raw_input(
-                 'Enter a valid path to store repositories. '
+                 'Enter a valid absolute path to store repositories. '
                  'All repositories in that path will be added automatically:'
             )
         else:
@@ -388,8 +388,12 @@ class DbManage(object):
             path_ok = False
             log.error('Given path %s is not a valid directory' % path)
 
+        elif not os.path.isabs(path):
+            path_ok = False
+            log.error('Given path %s is not an absolute path' % path)
+
         # check write access
-        if not os.access(path, os.W_OK) and path_ok:
+        elif not os.access(path, os.W_OK) and path_ok:
             path_ok = False
             log.error('No write permission to given path %s' % path)
 
