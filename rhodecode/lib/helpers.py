@@ -802,6 +802,12 @@ def urlify_text(text_):
 
 
 def urlify_changesets(text_, repository):
+    """
+    Extract revision ids from changeset and make link from them
+    
+    :param text_:
+    :param repository:
+    """
     import re
     URL_PAT = re.compile(r'([0-9a-fA-F]{12,})')
 
@@ -839,10 +845,10 @@ def urlify_commit(text_, repository=None, link_=None):
     """
     import re
     import traceback
-
-    # urlify changesets
-    text_ = urlify_changesets(text_, repository)
-
+    
+    def escaper(string):
+        return string.replace('<', '&lt;').replace('>', '&gt;')
+    
     def linkify_others(t, l):
         urls = re.compile(r'(\<a.*?\<\/a\>)',)
         links = []
@@ -853,6 +859,11 @@ def urlify_commit(text_, repository=None, link_=None):
                 links.append(e)
 
         return ''.join(links)
+    
+    
+    # urlify changesets - extrac revisions and make link out of them
+    text_ = urlify_changesets(escaper(text_), repository)
+
     try:
         conf = config['app_conf']
 

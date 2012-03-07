@@ -26,6 +26,7 @@ fixes
 - fixed #390 cache invalidation problems on repos inside group
 - fixed #385 clone by ID url was loosing proxy prefix in URL
 - fixed some unicode problems with waitress
+- fixed issue with escaping < and > in changeset commits
 
 1.3.3 (**2012-03-02**)
 ----------------------
