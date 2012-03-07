@@ -32,6 +32,7 @@ import datetime
 from pylons.i18n.translation import _
 
 import rhodecode
+from rhodecode.config.conf import DATETIME_FORMAT
 from rhodecode.lib import helpers as h
 from rhodecode.model import BaseModel
 from rhodecode.model.db import Notification, User, UserNotification
@@ -175,8 +176,6 @@ class NotificationModel(BaseModel):
             notification.TYPE_MENTION: _('mentioned you'),
             notification.TYPE_REGISTRATION: _('registered in RhodeCode')
         }
-
-        DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 
         tmpl = "%(user)s %(action)s %(when)s"
         if show_age:

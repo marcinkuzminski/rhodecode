@@ -35,7 +35,7 @@ from rhodecode.lib.vcs.nodes import FileNode
 
 from rhodecode import BACKENDS
 from rhodecode.lib import helpers as h
-from rhodecode.lib import safe_str
+from rhodecode.lib.utils2 import safe_str
 from rhodecode.lib.auth import HasRepoPermissionAny, HasReposGroupPermissionAny
 from rhodecode.lib.utils import get_repos as get_filesystem_repos, make_ui, \
     action_logger, EmptyChangeset, REMOVED_REPO_PAT

@@ -54,7 +54,8 @@ from rhodecode.model.db import Repository, User, RhodeCodeUi, \
     UserLog, RepoGroup, RhodeCodeSetting, UserRepoGroupToPerm
 from rhodecode.model.meta import Session
 from rhodecode.model.repos_group import ReposGroupModel
-from rhodecode.lib import safe_str, safe_unicode
+from rhodecode.lib.utils2 import safe_str, safe_unicode
+from rhodecode.lib.vcs.utils.fakemod import create_module
 
 log = logging.getLogger(__name__)
 
@@ -62,7 +63,8 @@ REMOVED_REPO_PAT = re.compile(r'rm__\d{8}_\d{6}_\d{6}__.*')
 
 
 def recursive_replace(str_, replace=' '):
-    """Recursive replace of given sign to just one instance
+    """
+    Recursive replace of given sign to just one instance
 
     :param str_: given string
     :param replace: char to find and replace multiple instances
@@ -80,7 +82,8 @@ def recursive_replace(str_, replace=' '):
 
 
 def repo_name_slug(value):
-    """Return slug of name of repository
+    """
+    Return slug of name of repository
     This function is called on each creation/modification
     of repository to prevent bad names in repo
     """
@@ -263,7 +266,8 @@ ui_sections = ['alias', 'auth',
 
 
 def make_ui(read_from='file', path=None, checkpaths=True):
-    """A function that will read python rc files or database
+    """
+    A function that will read python rc files or database
     and make an mercurial ui object from read options
 
     :param path: path to mercurial config file
@@ -487,6 +491,30 @@ def add_cache(settings):
                 region_settings['type'] = cache_settings.get('type',
                                                              'memory')
             beaker.cache.cache_regions[region] = region_settings
+
+
+def load_rcextensions(root_path):
+    import rhodecode
+    from rhodecode.config import conf
+
+    path = os.path.join(root_path, 'rcextensions', '__init__.py')
+    if os.path.isfile(path):
+        rcext = create_module('rc', path)
+        EXT = rhodecode.EXTENSIONS = rcext
+        log.debug('Found rcextensions now loading %s...' % rcext)
+
+        # Additional mappings that are not present in the pygments lexers
+        conf.LANGUAGES_EXTENSIONS_MAP.update(getattr(EXT, 'EXTRA_MAPPINGS', {}))
+
+        #OVERRIDE OUR EXTENSIONS FROM RC-EXTENSIONS (if present)
+
+        if getattr(EXT, 'INDEX_EXTENSIONS', []) != []:
+            log.debug('settings custom INDEX_EXTENSIONS')
+            conf.INDEX_EXTENSIONS = getattr(EXT, 'INDEX_EXTENSIONS', [])
+
+        #ADDITIONAL MAPPINGS
+        log.debug('adding extra into INDEX_EXTENSIONS')
+        conf.INDEX_EXTENSIONS.extend(getattr(EXT, 'EXTRA_INDEX_EXTENSIONS', []))
 
 
 #==============================================================================

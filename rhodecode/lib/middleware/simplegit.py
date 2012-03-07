@@ -69,7 +69,7 @@ from dulwich.web import HTTPGitApplication
 
 from paste.httpheaders import REMOTE_USER, AUTH_TYPE
 
-from rhodecode.lib import safe_str
+from rhodecode.lib.utils2 import safe_str
 from rhodecode.lib.base import BaseVCSController
 from rhodecode.lib.auth import get_container_username
 from rhodecode.lib.utils import is_valid_repo

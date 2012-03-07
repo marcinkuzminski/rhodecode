@@ -40,15 +40,15 @@ from pylons.i18n.translation import _
 
 from beaker.cache import cache_region, region_invalidate
 
+from rhodecode.config.conf import ALL_READMES, ALL_EXTS, LANGUAGES_EXTENSIONS_MAP
 from rhodecode.model.db import Statistics, CacheInvalidation
-from rhodecode.lib import ALL_READMES, ALL_EXTS, safe_unicode
+from rhodecode.lib.utils2 import safe_unicode
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.utils import EmptyChangeset
 from rhodecode.lib.markup_renderer import MarkupRenderer
 from rhodecode.lib.celerylib import run_task
-from rhodecode.lib.celerylib.tasks import get_commits_stats, \
-    LANGUAGES_EXTENSIONS_MAP
+from rhodecode.lib.celerylib.tasks import get_commits_stats
 from rhodecode.lib.helpers import RepoPage
 from rhodecode.lib.compat import json, OrderedDict
 

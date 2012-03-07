@@ -39,7 +39,8 @@ from rhodecode.lib.vcs.utils.helpers import get_scm
 from rhodecode.lib.vcs.exceptions import VCSError
 from rhodecode.lib.vcs.utils.lazy import LazyProperty
 
-from rhodecode.lib import str2bool, safe_str, get_changeset_safe, safe_unicode
+from rhodecode.lib.utils2 import str2bool, safe_str, get_changeset_safe, \
+    safe_unicode
 from rhodecode.lib.compat import json
 from rhodecode.lib.caching_query import FromCache
 

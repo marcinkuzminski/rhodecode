@@ -77,5 +77,3 @@ class MakeRcExt(BasePasterCommand):
 
     def update_parser(self):
         pass
-
-

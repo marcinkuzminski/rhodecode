@@ -43,7 +43,7 @@ if __platform__ in PLATFORM_WIN:
 if __platform__ in PLATFORM_OTHERS:
     import bcrypt
 
-from rhodecode.lib import str2bool, safe_unicode
+from rhodecode.lib.utils2 import str2bool, safe_unicode
 from rhodecode.lib.exceptions import LdapPasswordError, LdapUsernameError
 from rhodecode.lib.utils import get_repo_slug, get_repos_group_slug
 from rhodecode.lib.auth_ldap import AuthLdap
@@ -795,7 +795,7 @@ class HasPermissionAnyMiddleware(object):
         try:
             self.user_perms = set([usr.permissions['repositories'][repo_name]])
         except Exception:
-            log.error('Exception while accessing permissions %s' % 
+            log.error('Exception while accessing permissions %s' %
                       traceback.format_exc())
             self.user_perms = set()
         self.granted_for = ''

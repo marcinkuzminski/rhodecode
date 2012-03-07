@@ -139,7 +139,7 @@ def log_push_action(ui, repo, **kwargs):
 def log_create_repository(repository_dict, created_by, **kwargs):
     """
     Post create repository Hook. This is a dummy function for admins to re-use
-    if needed. It's taken from rhodecode-extensions module and executed 
+    if needed. It's taken from rhodecode-extensions module and executed
     if present
 
     :param repository: dict dump of repository object

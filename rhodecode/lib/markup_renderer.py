@@ -27,7 +27,7 @@
 import re
 import logging
 
-from rhodecode.lib import safe_unicode
+from rhodecode.lib.utils2 import safe_unicode
 
 log = logging.getLogger(__name__)
 

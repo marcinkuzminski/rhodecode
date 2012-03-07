@@ -29,7 +29,7 @@ import traceback
 from pylons.i18n.translation import _
 from sqlalchemy.util.compat import defaultdict
 
-from rhodecode.lib import extract_mentioned_users
+from rhodecode.lib.utils2 import extract_mentioned_users
 from rhodecode.lib import helpers as h
 from rhodecode.model import BaseModel
 from rhodecode.model.db import ChangesetComment, User, Repository, Notification

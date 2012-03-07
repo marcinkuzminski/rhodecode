@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 from rhodecode.tests import *
 from rhodecode.model.db import User, Notification
-from rhodecode.lib import generate_api_key
+from rhodecode.lib.utils2 import generate_api_key
 from rhodecode.lib.auth import check_password
 from rhodecode.model.meta import Session
+
 
 class TestLoginController(TestController):
 

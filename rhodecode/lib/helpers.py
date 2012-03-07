@@ -39,7 +39,8 @@ from webhelpers.html.tags import _set_input_attrs, _set_id_attr, \
 
 from rhodecode.lib.annotate import annotate_highlight
 from rhodecode.lib.utils import repo_name_slug
-from rhodecode.lib import str2bool, safe_unicode, safe_str, get_changeset_safe
+from rhodecode.lib.utils2 import str2bool, safe_unicode, safe_str, \
+    get_changeset_safe
 from rhodecode.lib.markup_renderer import MarkupRenderer
 
 log = logging.getLogger(__name__)
@@ -319,7 +320,7 @@ flash = _Flash()
 # SCM FILTERS available via h.
 #==============================================================================
 from rhodecode.lib.vcs.utils import author_name, author_email
-from rhodecode.lib import credentials_filter, age as _age
+from rhodecode.lib.utils2 import credentials_filter, age as _age
 from rhodecode.model.db import User
 
 age = lambda  x: _age(x)

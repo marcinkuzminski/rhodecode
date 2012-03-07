@@ -39,7 +39,7 @@ from rhodecode.lib.vcs.utils.helpers import get_scm
 from rhodecode.lib.vcs.exceptions import VCSError
 from rhodecode.lib.vcs.utils.lazy import LazyProperty
 
-from rhodecode.lib import str2bool, safe_str, get_changeset_safe, \
+from rhodecode.lib.utils2 import str2bool, safe_str, get_changeset_safe, \
     generate_api_key, safe_unicode
 from rhodecode.lib.exceptions import UsersGroupsAssignedException
 from rhodecode.lib.compat import json
@@ -717,7 +717,7 @@ class Repository(Base, BaseModel):
         return repo
 
 
-class RepoGroup(Base, BaseModel):
+class Group(Base, BaseModel):
     __tablename__ = 'groups'
     __table_args__ = (UniqueConstraint('group_name', 'group_parent_id'),
                       CheckConstraint('group_id != group_parent_id'), {'extend_existing':True},)
@@ -728,8 +728,7 @@ class RepoGroup(Base, BaseModel):
     group_parent_id = Column("group_parent_id", Integer(), ForeignKey('groups.group_id'), nullable=True, unique=None, default=None)
     group_description = Column("group_description", String(length=10000, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
 
-    parent_group = relationship('RepoGroup', remote_side=group_id)
-
+    parent_group = relationship('Group', remote_side=group_id)
 
     def __init__(self, group_name='', parent_group=None):
         self.group_name = group_name

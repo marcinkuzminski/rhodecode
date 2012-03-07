@@ -30,8 +30,7 @@ from datetime import datetime
 
 from rhodecode.lib.vcs.backends import get_backend
 
-from rhodecode.lib import LazyProperty
-from rhodecode.lib import safe_str, safe_unicode
+from rhodecode.lib.utils2 import LazyProperty, safe_str, safe_unicode
 from rhodecode.lib.caching_query import FromCache
 from rhodecode.lib.hooks import log_create_repository
 

@@ -3112,7 +3112,12 @@ table.code-browser .browser-dir {
 	top: 5px;
 	width: 16px;
 }
-
+div#legend_data{
+	padding-left:10px;
+}
+div#legend_container table{
+	border: none !important;
+}
 div#legend_container table,div#legend_choices table {
 	width: auto !important;
 }

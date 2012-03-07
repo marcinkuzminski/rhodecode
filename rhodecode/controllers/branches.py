@@ -31,7 +31,7 @@ import binascii
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.compat import OrderedDict
-from rhodecode.lib import safe_unicode
+from rhodecode.lib.utils2 import safe_unicode
 log = logging.getLogger(__name__)
 
 

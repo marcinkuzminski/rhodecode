@@ -1,9 +1,9 @@
 import rhodecode
-from rhodecode.lib.utils import BasePasterCommand, Command
+from rhodecode.lib.utils import BasePasterCommand, Command, load_rcextensions
 from celery.app import app_or_default
 from celery.bin import camqadm, celerybeat, celeryd, celeryev
 
-from rhodecode.lib import str2bool
+from rhodecode.lib.utils2 import str2bool
 
 __all__ = ['CeleryDaemonCommand', 'CeleryBeatCommand',
            'CAMQPAdminCommand', 'CeleryEventCommand']
@@ -39,8 +39,10 @@ class CeleryCommand(BasePasterCommand):
             raise Exception('Please enable celery_on in .ini config '
                             'file before running celeryd')
         rhodecode.CELERY_ON = CELERY_ON
+        load_rcextensions(config['here'])
         cmd = self.celery_command(app_or_default())
         return cmd.run(**vars(self.options))
+
 
 class CeleryDaemonCommand(CeleryCommand):
     """Start the celery worker
@@ -81,6 +83,7 @@ class CAMQPAdminCommand(CeleryCommand):
 
     parser = Command.standard_parser(quiet=True)
     celery_command = camqadm.AMQPAdminCommand
+
 
 class CeleryEventCommand(CeleryCommand):
     """Celery event command.

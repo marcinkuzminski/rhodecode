@@ -29,7 +29,7 @@ import traceback
 from pylons import url
 from pylons.i18n.translation import _
 
-from rhodecode.lib import safe_unicode
+from rhodecode.lib.utils2 import safe_unicode, generate_api_key
 from rhodecode.lib.caching_query import FromCache
 
 from rhodecode.model import BaseModel
@@ -40,7 +40,7 @@ from rhodecode.lib.exceptions import DefaultUserException, \
     UserOwnsReposException
 
 from sqlalchemy.exc import DatabaseError
-from rhodecode.lib import generate_api_key
+
 from sqlalchemy.orm import joinedload
 
 log = logging.getLogger(__name__)

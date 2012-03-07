@@ -32,8 +32,9 @@ from pylons import request, session, tmpl_context as c, url, config
 from pylons.controllers.util import abort, redirect
 from pylons.i18n.translation import _
 
+from rhodecode.lib import helpers as h
 from rhodecode.lib.exceptions import UsersGroupsAssignedException
-from rhodecode.lib import helpers as h, safe_unicode
+from rhodecode.lib.utils2 import safe_unicode
 from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator
 from rhodecode.lib.base import BaseController, render
 

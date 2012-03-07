@@ -15,7 +15,7 @@ from pylons.templating import render_mako as render
 
 from rhodecode import __version__, BACKENDS
 
-from rhodecode.lib import str2bool, safe_unicode
+from rhodecode.lib.utils2 import str2bool, safe_unicode
 from rhodecode.lib.auth import AuthUser, get_container_username, authfunc,\
     HasPermissionAnyMiddleware, CookieStoreWrapper
 from rhodecode.lib.utils import get_repo_slug, invalidate_cache
