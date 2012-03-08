@@ -47,6 +47,9 @@ This will upgrade the schema and update some of the defaults in the database,
 and will always recheck the settings of the application, if there are no new 
 options that need to be set.
 
+.. note::
+   If you're using Celery, make sure you restart all instances of it after
+   upgrade.
 
 .. _virtualenv: http://pypi.python.org/pypi/virtualenv  
 .. _python: http://www.python.org/
