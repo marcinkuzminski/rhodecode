@@ -760,10 +760,10 @@ def fancy_file_stats(stats):
     d_v = d if d > 0 else ''
 
     def cgen(l_type):
-        mapping = {'tr': 'top-right-rounded-corner',
-                   'tl': 'top-left-rounded-corner',
-                   'br': 'bottom-right-rounded-corner',
-                   'bl': 'bottom-left-rounded-corner'}
+        mapping = {'tr': 'top-right-rounded-corner-mid',
+                   'tl': 'top-left-rounded-corner-mid',
+                   'br': 'bottom-right-rounded-corner-mid',
+                   'bl': 'bottom-left-rounded-corner-mid'}
         map_getter = lambda x: mapping[x]
 
         if l_type == 'a' and d_v:
