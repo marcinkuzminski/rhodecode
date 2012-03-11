@@ -23,7 +23,8 @@ Users Guide
    usage/git_support
    usage/statistics
    usage/backup
-   
+   usage/debugging
+
 **Develop**
 
 .. toctree::
