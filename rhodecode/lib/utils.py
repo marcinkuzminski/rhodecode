@@ -380,15 +380,16 @@ class EmptyChangeset(BaseChangeset):
         return 0
 
 
-def map_groups(groups):
+def map_groups(path):
     """
-    Checks for groups existence, and creates groups structures.
-    It returns last group in structure
+    Given a full path to a repository, create all nested groups that this
+    repo is inside. This function creates parent-child relationships between
+    groups and creates default perms for all new groups.
 
-    :param groups: list of groups structure
+    :param paths: full path to repository
     """
     sa = meta.Session
-
+    groups = path.split(Repository.url_sep())
     parent = None
     group = None
 
@@ -400,22 +401,18 @@ def map_groups(groups):
         group = RepoGroup.get_by_group_name(group_name)
         desc = '%s group' % group_name
 
-#        # WTF that doesn't work !?
-#        if group is None:
-#            group = rgm.create(group_name, desc, parent, just_db=True)
-#            sa.commit()
-
         # skip folders that are now removed repos
         if REMOVED_REPO_PAT.match(group_name):
             break
 
         if group is None:
-            log.debug('creating group level: %s group_name: %s' % (lvl, group_name))
+            log.debug('creating group level: %s group_name: %s' % (lvl,
+                                                                   group_name))
             group = RepoGroup(group_name, parent)
             group.group_description = desc
             sa.add(group)
             rgm._create_default_perms(group)
-            sa.commit()
+            sa.flush()
         parent = group
     return group
 
@@ -438,7 +435,7 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False):
     added = []
 
     for name, repo in initial_repo_list.items():
-        group = map_groups(name.split(Repository.url_sep()))
+        group = map_groups(name)
         if not rm.get_by_repo_name(name, cache=False):
             log.info('repository %s not found creating default' % name)
             added.append(name)

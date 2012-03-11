@@ -39,6 +39,7 @@ from rhodecode.model.repo import RepoModel
 from rhodecode.model.user import UserModel
 from rhodecode.model.users_group import UsersGroupModel
 from rhodecode.model.repos_group import ReposGroupModel
+from rhodecode.lib.utils import map_groups
 
 
 log = logging.getLogger(__name__)
@@ -464,15 +465,10 @@ class ApiController(JSONRPCController):
             if Repository.get_by_repo_name(repo_name):
                 raise JSONRPCError("repo %s already exist" % repo_name)
 
-            groups = repo_name.split('/')
+            groups = repo_name.split(Repository.url_sep())
             real_name = groups[-1]
-            groups = groups[:-1]
-            parent_id = None
-            for g in groups:
-                group = RepoGroup.get_by_group_name(g)
-                if not group:
-                    group = ReposGroupModel().create(g, '', parent_id)
-                parent_id = group.group_id
+            # create structure of groups
+            group = map_groups(repo_name)
 
             repo = RepoModel().create(
                 dict(
@@ -481,7 +477,7 @@ class ApiController(JSONRPCController):
                     description=description,
                     private=private,
                     repo_type=repo_type,
-                    repo_group=parent_id,
+                    repo_group=group.group_id if group else None,
                     clone_uri=clone_uri
                 ),
                 owner
