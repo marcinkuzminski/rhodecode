@@ -68,7 +68,7 @@ def get_ignore_ws(fid, GET):
 
 
 def _ignorews_url(fileid=None):
-
+    fileid = str(fileid)
     params = defaultdict(list)
     lbl = _('show white space')
     ig_ws = get_ignore_ws(fileid, request.GET)
@@ -118,6 +118,7 @@ def _context_url(fileid=None):
 
     :param fileid:
     """
+    fileid = str(fileid)
     ig_ws = get_ignore_ws(fileid, request.GET)
     ln_ctx = (get_line_ctx(fileid, request.GET) or 3) * 2
 

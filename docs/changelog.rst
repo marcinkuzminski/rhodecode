@@ -29,6 +29,7 @@ fixes
 - fixed issue with escaping < and > in changeset commits
 - fixed error occurring during recursive group creation in API 
   create_repo function
+- fixed #393 py2.5 fixes for routes url generator
 
 1.3.3 (**2012-03-02**)
 ----------------------
