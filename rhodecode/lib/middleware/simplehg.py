@@ -85,6 +85,10 @@ class SimpleHg(BaseVCSController):
         except:
             return HTTPInternalServerError()(environ, start_response)
 
+        # quick check if that dir exists...
+        if is_valid_repo(repo_name, self.basepath) is False:
+            return HTTPNotFound()(environ, start_response)
+
         #======================================================================
         # GET ACTION PULL or PUSH
         #======================================================================
@@ -162,10 +166,6 @@ class SimpleHg(BaseVCSController):
 
         baseui = make_ui('db')
         self.__inject_extras(repo_path, baseui, extras)
-
-        # quick check if that dir exists...
-        if is_valid_repo(repo_name, self.basepath) is False:
-            return HTTPNotFound()(environ, start_response)
 
         try:
             # invalidate cache on push
