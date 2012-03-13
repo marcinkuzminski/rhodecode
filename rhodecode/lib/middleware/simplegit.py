@@ -65,7 +65,7 @@ dulserver.DEFAULT_HANDLERS = {
 }
 
 from dulwich.repo import Repo
-from dulwich.web import HTTPGitApplication
+from dulwich.web import make_wsgi_chain
 
 from paste.httpheaders import REMOTE_USER, AUTH_TYPE
 
@@ -205,7 +205,7 @@ class SimpleGit(BaseVCSController):
         """
         _d = {'/' + repo_name: Repo(repo_path)}
         backend = dulserver.DictBackend(_d)
-        gitserve = HTTPGitApplication(backend)
+        gitserve = make_wsgi_chain(backend)
 
         return gitserve
 
