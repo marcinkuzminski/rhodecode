@@ -521,8 +521,7 @@ class PermsDecorator(object):
         self.user = cls.rhodecode_user
         self.user_perms = self.user.permissions
         log.debug('checking %s permissions %s for %s %s',
-           self.__class__.__name__, self.required_perms, cls,
-               self.user)
+           self.__class__.__name__, self.required_perms, cls, self.user)
 
         if self.check_permissions():
             log.debug('Permission granted for %s %s' % (cls, self.user))
@@ -604,6 +603,7 @@ class HasRepoPermissionAnyDecorator(PermsDecorator):
             user_perms = set([self.user_perms['repositories'][repo_name]])
         except KeyError:
             return False
+
         if self.required_perms.intersection(user_perms):
             return True
         return False
@@ -658,26 +658,34 @@ class PermsFunction(object):
                 raise Exception("'%s' permission is not defined" % perm)
         self.required_perms = set(perms)
         self.user_perms = None
-        self.granted_for = ''
         self.repo_name = None
+        self.group_name = None
 
     def __call__(self, check_Location=''):
         user = request.user
-        log.debug('checking %s %s %s', self.__class__.__name__,
-                  self.required_perms, user)
+        cls_name = self.__class__.__name__
+        check_scope = {
+            'HasPermissionAll': '',
+            'HasPermissionAny': '',
+            'HasRepoPermissionAll': 'repo:%s' % self.repo_name,
+            'HasRepoPermissionAny': 'repo:%s' % self.repo_name,
+            'HasReposGroupPermissionAll': 'group:%s' % self.group_name,
+            'HasReposGroupPermissionAny': 'group:%s' % self.group_name,
+        }.get(cls_name, '?')
+        log.debug('checking cls:%s %s usr:%s %s @ %s', cls_name,
+                  self.required_perms, user, check_scope,
+                  check_Location or 'unspecified location')
         if not user:
             log.debug('Empty request user')
             return False
         self.user_perms = user.permissions
-        self.granted_for = user
-
         if self.check_permissions():
-            log.debug('Permission granted %s @ %s', self.granted_for,
+            log.debug('Permission granted for user: %s @ %s', user,
                       check_Location or 'unspecified location')
             return True
 
         else:
-            log.debug('Permission denied for %s @ %s', self.granted_for,
+            log.debug('Permission denied for user: %s @ %s', user,
                         check_Location or 'unspecified location')
             return False
 
@@ -701,7 +709,6 @@ class HasPermissionAny(PermsFunction):
 
 
 class HasRepoPermissionAll(PermsFunction):
-
     def __call__(self, repo_name=None, check_Location=''):
         self.repo_name = repo_name
         return super(HasRepoPermissionAll, self).__call__(check_Location)
@@ -711,19 +718,17 @@ class HasRepoPermissionAll(PermsFunction):
             self.repo_name = get_repo_slug(request)
 
         try:
-            self.user_perms = set(
+            self._user_perms = set(
                 [self.user_perms['repositories'][self.repo_name]]
             )
         except KeyError:
             return False
-        self.granted_for = self.repo_name
-        if self.required_perms.issubset(self.user_perms):
+        if self.required_perms.issubset(self._user_perms):
             return True
         return False
 
 
 class HasRepoPermissionAny(PermsFunction):
-
     def __call__(self, repo_name=None, check_Location=''):
         self.repo_name = repo_name
         return super(HasRepoPermissionAny, self).__call__(check_Location)
@@ -733,13 +738,12 @@ class HasRepoPermissionAny(PermsFunction):
             self.repo_name = get_repo_slug(request)
 
         try:
-            self.user_perms = set(
+            self._user_perms = set(
                 [self.user_perms['repositories'][self.repo_name]]
             )
         except KeyError:
             return False
-        self.granted_for = self.repo_name
-        if self.required_perms.intersection(self.user_perms):
+        if self.required_perms.intersection(self._user_perms):
             return True
         return False
 
@@ -751,13 +755,12 @@ class HasReposGroupPermissionAny(PermsFunction):
 
     def check_permissions(self):
         try:
-            self.user_perms = set(
+            self._user_perms = set(
                 [self.user_perms['repositories_groups'][self.group_name]]
             )
         except KeyError:
             return False
-        self.granted_for = self.repo_name
-        if self.required_perms.intersection(self.user_perms):
+        if self.required_perms.intersection(self._user_perms):
             return True
         return False
 
@@ -769,13 +772,12 @@ class HasReposGroupPermissionAll(PermsFunction):
 
     def check_permissions(self):
         try:
-            self.user_perms = set(
+            self._user_perms = set(
                 [self.user_perms['repositories_groups'][self.group_name]]
             )
         except KeyError:
             return False
-        self.granted_for = self.repo_name
-        if self.required_perms.issubset(self.user_perms):
+        if self.required_perms.issubset(self._user_perms):
             return True
         return False
 
@@ -798,7 +800,6 @@ class HasPermissionAnyMiddleware(object):
             log.error('Exception while accessing permissions %s' %
                       traceback.format_exc())
             self.user_perms = set()
-        self.granted_for = ''
         self.username = user.username
         self.repo_name = repo_name
         return self.check_permissions()
@@ -808,7 +809,13 @@ class HasPermissionAnyMiddleware(object):
                   'permissions %s for user:%s repository:%s', self.user_perms,
                                                 self.username, self.repo_name)
         if self.required_perms.intersection(self.user_perms):
-            log.debug('permission granted')
+            log.debug('permission granted for user:%s on repo:%s' % (
+                          self.username, self.repo_name
+                     )
+            )
             return True
-        log.debug('permission denied')
+        log.debug('permission denied for user:%s on repo:%s' % (
+                      self.username, self.repo_name
+                 )
+        )
         return False
