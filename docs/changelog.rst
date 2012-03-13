@@ -31,7 +31,8 @@ fixes
   create_repo function
 - fixed #393 py2.5 fixes for routes url generator
 - fixed #397 Private repository groups shows up before login
-
+- fixed #396 fixed problems with revoking users in nested groups
+  
 1.3.3 (**2012-03-02**)
 ----------------------
 

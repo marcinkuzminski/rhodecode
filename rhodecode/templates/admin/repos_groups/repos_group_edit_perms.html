@@ -68,7 +68,7 @@
 </table>
 <script type="text/javascript">
 function ajaxActionUser(user_id, field_id) {
-    var sUrl = "${h.url('delete_repos_group_user_perm',group_name=c.repos_group.name)}";
+    var sUrl = "${h.url('delete_repos_group_user_perm',group_name=c.repos_group.group_name)}";
     var callback = {
         success: function (o) {
             var tr = YUD.get(String(field_id));
@@ -83,7 +83,7 @@ function ajaxActionUser(user_id, field_id) {
 };
 
 function ajaxActionUsersGroup(users_group_id,field_id){
-    var sUrl = "${h.url('delete_repos_group_users_group_perm',group_name=c.repos_group.name)}";
+    var sUrl = "${h.url('delete_repos_group_users_group_perm',group_name=c.repos_group.group_name)}";
     var callback = {
         success:function(o){
             var tr = YUD.get(String(field_id));
