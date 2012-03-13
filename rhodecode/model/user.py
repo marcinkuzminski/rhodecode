@@ -298,14 +298,15 @@ class UserModel(BaseModel):
         try:
             if user.username == 'default':
                 raise DefaultUserException(
-                                _("You can't remove this user since it's"
-                                  " crucial for entire application"))
+                    _("You can't remove this user since it's"
+                      " crucial for entire application")
+                )
             if user.repositories:
-                raise UserOwnsReposException(_('This user still owns %s '
-                                               'repositories and cannot be '
-                                               'removed. Switch owners or '
-                                               'remove those repositories') \
-                                               % user.repositories)
+                raise UserOwnsReposException(
+                    _('user "%s" still owns %s repositories and cannot be '
+                      'removed. Switch owners or remove those repositories')
+                    % (user.username, user.repositories)
+                )
             self.sa.delete(user)
         except:
             log.error(traceback.format_exc())
@@ -500,7 +501,7 @@ class UserModel(BaseModel):
              self.sa.query(UserRepoGroupToPerm, Permission, RepoGroup)\
              .join((RepoGroup, UserRepoGroupToPerm.group_id == RepoGroup.group_id))\
              .join((Permission, UserRepoGroupToPerm.permission_id == Permission.permission_id))\
-             .filter(UserRepoToPerm.user_id == uid)\
+             .filter(UserRepoGroupToPerm.user_id == uid)\
              .all()
 
             for perm in user_repo_groups_perms:
@@ -509,7 +510,6 @@ class UserModel(BaseModel):
                 cur_perm = user.permissions[GK][rg_k]
                 if PERM_WEIGHTS[p] > PERM_WEIGHTS[cur_perm]:
                     user.permissions[GK][rg_k] = p
-
         return user
 
     def has_perm(self, user, perm):

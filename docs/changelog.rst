@@ -30,6 +30,7 @@ fixes
 - fixed error occurring during recursive group creation in API 
   create_repo function
 - fixed #393 py2.5 fixes for routes url generator
+- fixed #397 Private repository groups shows up before login
 
 1.3.3 (**2012-03-02**)
 ----------------------

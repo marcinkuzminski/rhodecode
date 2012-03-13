@@ -430,6 +430,11 @@ class TestPermissions(unittest.TestCase):
             username=u'u1', password=u'qweqwe',
             email=u'u1@rhodecode.org', name=u'u1', lastname=u'u1'
         )
+        self.u2 = UserModel().create_or_update(
+            username=u'u2', password=u'qweqwe',
+            email=u'u2@rhodecode.org', name=u'u2', lastname=u'u2'
+        )
+        self.anon = User.get_by_username('default')
         self.a1 = UserModel().create_or_update(
             username=u'a1', password=u'qweqwe',
             email=u'a1@rhodecode.org', name=u'a1', lastname=u'a1', admin=True
@@ -437,7 +442,10 @@ class TestPermissions(unittest.TestCase):
         Session.commit()
 
     def tearDown(self):
+        if hasattr(self, 'test_repo'):
+            RepoModel().delete(repo=self.test_repo)
         UserModel().delete(self.u1)
+        UserModel().delete(self.u2)
         UserModel().delete(self.a1)
         if hasattr(self, 'g1'):
             ReposGroupModel().delete(self.g1.group_id)
@@ -578,3 +586,75 @@ class TestPermissions(unittest.TestCase):
                          new_perm_h)
         self.assertEqual(u1_auth.permissions['repositories_groups'],
                          perms['repositories_groups'])
+
+    def test_repo_in_group_permissions(self):
+        self.g1 = _make_group('group1', skip_if_exists=True)
+        self.g2 = _make_group('group2', skip_if_exists=True)
+        Session.commit()
+        # both perms should be read !
+        u1_auth = AuthUser(user_id=self.u1.user_id)
+        self.assertEqual(u1_auth.permissions['repositories_groups'],
+                         {u'group1': u'group.read', u'group2': u'group.read'})
+
+        a1_auth = AuthUser(user_id=self.anon.user_id)
+        self.assertEqual(a1_auth.permissions['repositories_groups'],
+                 {u'group1': u'group.read', u'group2': u'group.read'})
+
+        #Change perms to none for both groups
+        ReposGroupModel().grant_user_permission(repos_group=self.g1,
+                                                user=self.anon,
+                                                perm='group.none')
+        ReposGroupModel().grant_user_permission(repos_group=self.g2,
+                                                user=self.anon,
+                                                perm='group.none')
+
+        u1_auth = AuthUser(user_id=self.u1.user_id)
+        self.assertEqual(u1_auth.permissions['repositories_groups'],
+                 {u'group1': u'group.none', u'group2': u'group.none'})
+
+        a1_auth = AuthUser(user_id=self.anon.user_id)
+        self.assertEqual(a1_auth.permissions['repositories_groups'],
+                 {u'group1': u'group.none', u'group2': u'group.none'})
+
+        # add repo to group
+        form_data = {
+            'repo_name':HG_REPO,
+            'repo_name_full':os.path.join(self.g1.group_name,HG_REPO),
+            'repo_type':'hg',
+            'clone_uri':'',
+            'repo_group':self.g1.group_id,
+            'description':'desc',
+            'private':False
+        }
+        self.test_repo = RepoModel().create(form_data, cur_user=self.u1)
+        Session.commit()
+
+        u1_auth = AuthUser(user_id=self.u1.user_id)
+        self.assertEqual(u1_auth.permissions['repositories_groups'],
+                 {u'group1': u'group.none', u'group2': u'group.none'})
+
+        a1_auth = AuthUser(user_id=self.anon.user_id)
+        self.assertEqual(a1_auth.permissions['repositories_groups'],
+                 {u'group1': u'group.none', u'group2': u'group.none'})
+
+        #grant permission for u2 !
+        ReposGroupModel().grant_user_permission(repos_group=self.g1,
+                                                user=self.u2,
+                                                perm='group.read')
+        ReposGroupModel().grant_user_permission(repos_group=self.g2,
+                                                user=self.u2,
+                                                perm='group.read')
+        Session.commit()
+        self.assertNotEqual(self.u1, self.u2)
+        #u1 and anon should have not change perms while u2 should !
+        u1_auth = AuthUser(user_id=self.u1.user_id)
+        self.assertEqual(u1_auth.permissions['repositories_groups'],
+                 {u'group1': u'group.none', u'group2': u'group.none'})
+
+        u2_auth = AuthUser(user_id=self.u2.user_id)
+        self.assertEqual(u2_auth.permissions['repositories_groups'],
+                 {u'group1': u'group.read', u'group2': u'group.read'})
+
+        a1_auth = AuthUser(user_id=self.anon.user_id)
+        self.assertEqual(a1_auth.permissions['repositories_groups'],
+                 {u'group1': u'group.none', u'group2': u'group.none'})
