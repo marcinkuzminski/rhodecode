@@ -704,8 +704,9 @@ var permNameSort = function(a, b, desc, field) {
     var a_ = fromHTML(a.getData(field));
     var b_ = fromHTML(b.getData(field));
     // extract name from table
-    a_ = a_.innerHTML;
-    b_ = b_.innerHTML;      
+
+    a_ = a_.children[0].innerHTML;
+    b_ = b_.children[0].innerHTML;      
     
     var comp = YAHOO.util.Sort.compare;
     var compState = comp(a_, b_, desc);

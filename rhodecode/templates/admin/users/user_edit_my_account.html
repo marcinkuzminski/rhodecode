@@ -186,10 +186,18 @@
               <tbody>
             %for k in c.rhodecode_user.permissions[section]:
                 <tr>
-                    <td>${k}</td>
+                    <td>
+                        %if section == 'repositories':
+                            <a href="${h.url('summary_home',repo_name=k)}">${k}</a>
+                        %elif section == 'repositories_groups':
+                            <a href="${h.url('repos_group_home',group_name=k)}">${k}</a>
+                        %else:
+                            ${k}
+                        %endif
+                    </td>
                     <td>
                         %if section == 'global':
-                         ${', '.join(c.rhodecode_user.permissions[section])}
+                         ${h.bool2icon(True)}
                         %else:
                         <span class="perm_tag ${c.rhodecode_user.permissions[section].get(k).split('.')[-1] }">${c.rhodecode_user.permissions[section].get(k)}</span>
                         %endif
