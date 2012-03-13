@@ -19,6 +19,7 @@ news
 - added help text into repo add/edit forms
 - created rcextensions module with additional mappings (ref #322) and
   post push/pull/create repo hooks callbacks
+- implemented #377 Users view for his own permissions on account page
 
 fixes
 +++++
