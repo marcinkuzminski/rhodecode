@@ -5,7 +5,7 @@ from rhodecode.tests import *
 from rhodecode.model.repos_group import ReposGroupModel
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.db import RepoGroup, User, Notification, UserNotification, \
-    UsersGroup, UsersGroupMember, Permission
+    UsersGroup, UsersGroupMember, Permission, UsersGroupRepoGroupToPerm
 from sqlalchemy.exc import IntegrityError
 from rhodecode.model.user import UserModel
 
@@ -608,6 +608,7 @@ class TestPermissions(unittest.TestCase):
                                                 user=self.anon,
                                                 perm='group.none')
 
+
         u1_auth = AuthUser(user_id=self.u1.user_id)
         self.assertEqual(u1_auth.permissions['repositories_groups'],
                  {u'group1': u'group.none', u'group2': u'group.none'})
@@ -658,3 +659,57 @@ class TestPermissions(unittest.TestCase):
         a1_auth = AuthUser(user_id=self.anon.user_id)
         self.assertEqual(a1_auth.permissions['repositories_groups'],
                  {u'group1': u'group.none', u'group2': u'group.none'})
+
+    def test_repo_group_user_as_user_group_member(self):
+        # create Group1
+        self.g1 = _make_group('group1', skip_if_exists=True)
+        Session.commit()
+        a1_auth = AuthUser(user_id=self.anon.user_id)
+
+        self.assertEqual(a1_auth.permissions['repositories_groups'],
+                         {u'group1': u'group.read'})
+
+        # set default permission to none
+        ReposGroupModel().grant_user_permission(repos_group=self.g1,
+                                                user=self.anon,
+                                                perm='group.none')
+        # make group
+        self.ug1 = UsersGroupModel().create('G1')
+        # add user to group
+        UsersGroupModel().add_user_to_group(self.ug1, self.u1)
+        Session.commit()
+
+        # check if user is in the group
+        membrs = [x.user_id for x in UsersGroupModel().get(self.ug1.users_group_id).members]
+        self.assertEqual(membrs, [self.u1.user_id])
+        # add some user to that group
+
+        # check his permissions
+        a1_auth = AuthUser(user_id=self.anon.user_id)
+        self.assertEqual(a1_auth.permissions['repositories_groups'],
+                         {u'group1': u'group.none'})
+
+        u1_auth = AuthUser(user_id=self.u1.user_id)
+        self.assertEqual(u1_auth.permissions['repositories_groups'],
+                         {u'group1': u'group.none'})
+
+        # grant ug1 read permissions for
+        ReposGroupModel().grant_users_group_permission(repos_group=self.g1,
+                                                       group_name=self.ug1,
+                                                       perm='group.read')
+        Session.commit()
+        # check if the
+        obj = Session.query(UsersGroupRepoGroupToPerm)\
+            .filter(UsersGroupRepoGroupToPerm.group == self.g1)\
+            .filter(UsersGroupRepoGroupToPerm.users_group == self.ug1)\
+            .scalar()
+        self.assertEqual(obj.permission.permission_name, 'group.read')
+
+        a1_auth = AuthUser(user_id=self.anon.user_id)
+
+        self.assertEqual(a1_auth.permissions['repositories_groups'],
+                         {u'group1': u'group.none'})
+
+        u1_auth = AuthUser(user_id=self.u1.user_id)
+        self.assertEqual(u1_auth.permissions['repositories_groups'],
+                         {u'group1': u'group.read'})

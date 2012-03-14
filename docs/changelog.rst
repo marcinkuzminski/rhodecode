@@ -20,6 +20,7 @@ news
 - created rcextensions module with additional mappings (ref #322) and
   post push/pull/create repo hooks callbacks
 - implemented #377 Users view for his own permissions on account page
+- #399 added inheritance of permissions for users group on repos groups
 
 fixes
 +++++
