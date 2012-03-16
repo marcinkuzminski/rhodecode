@@ -185,6 +185,14 @@
               </thead>
               <tbody>
             %for k in c.rhodecode_user.permissions[section]:
+           <%
+           if section != 'global':
+               section_perm = c.rhodecode_user.permissions[section].get(k)
+               _perm = section_perm.split('.')[-1]
+           else:
+               _perm = section_perm = None
+           %>
+            %if _perm not in ['none']:
                 <tr>
                     <td>
                         %if section == 'repositories':
@@ -199,10 +207,11 @@
                         %if section == 'global':
                          ${h.bool2icon(True)}
                         %else:
-                        <span class="perm_tag ${c.rhodecode_user.permissions[section].get(k).split('.')[-1] }">${c.rhodecode_user.permissions[section].get(k)}</span>
+                        <span class="perm_tag ${_perm}">${section_perm}</span>
                         %endif
                      </td>
                 </tr>
+             %endif
             %endfor
             </tbody>
             </table>
