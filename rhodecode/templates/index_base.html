@@ -9,7 +9,11 @@
                 %if h.HasPermissionAny('hg.admin','hg.create.repository')():
                 <ul class="links">
                   <li>
+                  %if c.group:
+                    <span>${h.link_to(_('ADD REPOSITORY'),h.url('admin_settings_create_repository',parent_group=c.group.group_id))}</span>
+                  %else:
                     <span>${h.link_to(_('ADD REPOSITORY'),h.url('admin_settings_create_repository'))}</span>
+                  %endif  
                   </li>
                 </ul>
                 %endif

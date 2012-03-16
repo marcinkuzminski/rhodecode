@@ -44,7 +44,7 @@ class HomeController(BaseController):
     def index(self):
         c.repos_list = self.scm_model.get_repos()
         c.groups = self.scm_model.get_repos_groups()
-
+        c.group = None
         return render('/index.html')
 
     def repo_switcher(self):

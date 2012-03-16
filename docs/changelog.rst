@@ -21,6 +21,8 @@ news
   post push/pull/create repo hooks callbacks
 - implemented #377 Users view for his own permissions on account page
 - #399 added inheritance of permissions for users group on repos groups
+- #401 repository group is automatically pre-selected when adding repos 
+  inside a repository group
 
 fixes
 +++++

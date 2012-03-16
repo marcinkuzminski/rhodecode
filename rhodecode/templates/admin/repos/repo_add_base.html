@@ -29,7 +29,7 @@ ${h.form(url('repos'))}
                  <label for="repo_group">${_('Repository group')}:</label>
              </div>
              <div class="input">
-                 ${h.select('repo_group','',c.repo_groups,class_="medium")}
+                 ${h.select('repo_group',request.GET.get('parent_group'),c.repo_groups,class_="medium")}
                  <span class="help-block">${_('Optional select a group to put this repository into.')}</span>
              </div>
          </div>
