@@ -93,6 +93,11 @@ issue_prefix = #
 ## all running rhodecode instances. Leave empty if you don't use it
 instance_id = 
 
+## alternative return HTTP header for failed authentication. Default HTTP
+## response is 401 HTTPUnauthorized. Currently HG clients have troubles with 
+## handling that. Set this variable to 403 to return HTTPForbidden
+auth_ret_code =
+
 ####################################
 ###        CELERY CONFIG        ####
 ####################################

@@ -23,6 +23,8 @@ news
 - #399 added inheritance of permissions for users group on repos groups
 - #401 repository group is automatically pre-selected when adding repos 
   inside a repository group
+- added alternative HTTP 403 response when client failed to authenticate. Helps 
+  solving issues with Mercurial and LDAP
 
 fixes
 +++++
