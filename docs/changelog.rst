@@ -25,6 +25,8 @@ news
   inside a repository group
 - added alternative HTTP 403 response when client failed to authenticate. Helps 
   solving issues with Mercurial and LDAP
+- #402 removed group prefix from repository name when listing repositories 
+  inside a group
 
 fixes
 +++++

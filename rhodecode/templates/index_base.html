@@ -81,7 +81,7 @@
                     </td>
                     ##REPO NAME AND ICONS
                     <td class="reponame">
-                      ${dt.repo_name(repo['name'],repo['dbrepo']['repo_type'],repo['dbrepo']['private'],repo['dbrepo_fork'].get('repo_name'))}
+                      ${dt.repo_name(repo['name'],repo['dbrepo']['repo_type'],repo['dbrepo']['private'],repo['dbrepo_fork'].get('repo_name'),pageargs.get('short_repo_names'))}
                     </td>
                     ##DESCRIPTION
                     <td><span class="tooltip" title="${h.tooltip(repo['description'])}">
