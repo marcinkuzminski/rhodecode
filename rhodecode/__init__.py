@@ -4,7 +4,7 @@
     ~~~~~~~~~~~~~~~~~~
 
     RhodeCode, a web based repository management based on pylons
-    versioning implementation: http://semver.org/
+    versioning implementation: http://www.python.org/dev/peps/pep-0386/
 
     :created_on: Apr 9, 2010
     :author: marcink
@@ -26,8 +26,17 @@
 import sys
 import platform
 
-VERSION = (1, 3, 4, 'beta')
-__version__ = '.'.join((str(each) for each in VERSION[:4]))
+VERSION = (1, 3, 4, 'b')
+
+try:
+    from rhodecode.lib import get_current_revision
+    _rev = get_current_revision()
+    VERSION += ('dev%s' % _rev[0],)
+except ImportError:
+    pass
+
+__version__ = ('.'.join((str(each) for each in VERSION[:3])) +
+               '.'.join(VERSION[3:]))
 __dbversion__ = 5  # defines current db version for migrations
 __platform__ = platform.system()
 __license__ = 'GPLv3'
@@ -63,17 +72,6 @@ if __platform__ in PLATFORM_WIN:
 else:
     requirements.append("py-bcrypt")
     requirements.append("mercurial>=2.1,<2.2")
-
-
-try:
-    from rhodecode.lib import get_current_revision
-    _rev = get_current_revision()
-except ImportError:
-    # this is needed when doing some setup.py operations
-    _rev = False
-
-if len(VERSION) > 3 and _rev:
-    __version__ += ' [rev:%s]' % _rev[0]
 
 
 def get_version():
