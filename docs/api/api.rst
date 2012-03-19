@@ -27,7 +27,7 @@ API ACCESS
 All clients are required to send JSON-RPC spec JSON data::
 
     {   
-        "id:<id>,
+        "id:"<id>",
         "api_key":"<api_key>",
         "method":"<method_name>",
         "args":{"<arg_key>":"<arg_val>"}
@@ -50,9 +50,9 @@ Simply provide
 RhodeCode API will return always a JSON-RPC response::
 
     {   
-        "id":<id>,
-        "result": "<result>",
-        "error": null
+        "id":<id>, # matching id sent by request
+        "result": "<result>"|null, # JSON formatted result, null if any errors
+        "error": "null"|<error_message> # JSON formatted error (if any)
     }
 
 All responses from API will be `HTTP/1.0 200 OK`, if there's an error while
@@ -72,6 +72,7 @@ belonging to user with admin rights
 
 INPUT::
 
+    id : <id_for_response>
     api_key : "<api_key>"
     method :  "pull"
     args :    {
@@ -94,6 +95,7 @@ rights.
 
 INPUT::
 
+    id : <id_for_response>
     api_key : "<api_key>"
     method :  "get_user"
     args :    { 
@@ -126,6 +128,7 @@ belonging to user with admin rights.
 
 INPUT::
 
+    id : <id_for_response>
     api_key : "<api_key>"
     method :  "get_users"
     args :    { }
@@ -157,6 +160,7 @@ be executed only using api_key belonging to user with admin rights.
 
 INPUT::
 
+    id : <id_for_response>
     api_key : "<api_key>"
     method :  "create_user"
     args :    {
@@ -188,6 +192,7 @@ be executed only using api_key belonging to user with admin rights.
 
 INPUT::
 
+    id : <id_for_response>
     api_key : "<api_key>"
     method :  "update_user"
     args :    {
@@ -220,6 +225,7 @@ belonging to user with admin rights.
 
 INPUT::
 
+    id : <id_for_response>
     api_key : "<api_key>"
     method :  "get_users_group"
     args :    {
@@ -258,6 +264,7 @@ api_key belonging to user with admin rights.
 
 INPUT::
 
+    id : <id_for_response>
     api_key : "<api_key>"
     method :  "get_users_groups"
     args :    { }
@@ -296,6 +303,7 @@ belonging to user with admin rights
 
 INPUT::
 
+    id : <id_for_response>
     api_key : "<api_key>"
     method :  "create_users_group"
     args:     {
@@ -322,6 +330,7 @@ belonging to user with admin rights
 
 INPUT::
 
+    id : <id_for_response>
     api_key : "<api_key>"
     method :  "add_user_users_group"
     args:     {
@@ -350,6 +359,7 @@ using api_key belonging to user with admin rights
 
 INPUT::
 
+    id : <id_for_response>
     api_key : "<api_key>"
     method :  "remove_user_from_users_group"
     args:     {
@@ -376,6 +386,7 @@ be executed only using api_key belonging to user with admin rights.
 
 INPUT::
 
+    id : <id_for_response>
     api_key : "<api_key>"
     method :  "get_repo"
     args:     {
@@ -423,6 +434,7 @@ belonging to user with admin rights
 
 INPUT::
 
+    id : <id_for_response>
     api_key : "<api_key>"
     method :  "get_repos"
     args:     { }
@@ -452,6 +464,7 @@ with admin rights
 
 INPUT::
 
+    id : <id_for_response>
     api_key : "<api_key>"
     method :  "get_repo_nodes"
     args:     {
@@ -485,6 +498,7 @@ and create "baz" repository with "bar" as group.
 
 INPUT::
 
+    id : <id_for_response>
     api_key : "<api_key>"
     method :  "create_repo"
     args:     {
@@ -514,6 +528,7 @@ belonging to user with admin rights.
 
 INPUT::
 
+    id : <id_for_response>
     api_key : "<api_key>"
     method :  "delete_repo"
     args:     {
@@ -538,6 +553,7 @@ with admin rights.
 
 INPUT::
 
+    id : <id_for_response>
     api_key : "<api_key>"
     method :  "grant_user_permission"
     args:     {
@@ -563,6 +579,7 @@ only using api_key belonging to user with admin rights.
 
 INPUT::
 
+    id : <id_for_response>
     api_key : "<api_key>"
     method  : "revoke_user_permission"
     args:     {
@@ -588,6 +605,7 @@ api_key belonging to user with admin rights.
 
 INPUT::
 
+    id : <id_for_response>
     api_key : "<api_key>"
     method :  "grant_users_group_permission"
     args:     {
@@ -612,6 +630,7 @@ executed only using api_key belonging to user with admin rights.
 
 INPUT::
 
+    id : <id_for_response>
     api_key : "<api_key>"
     method  : "revoke_users_group_permission"
     args:     {
