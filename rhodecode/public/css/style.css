@@ -4195,7 +4195,14 @@ form.comment-inline-form {
   color: #ffffff;    
 }
 
-
+.perm-gravatar{
+	vertical-align:middle;
+	padding:2px;
+}
+.perm-gravatar-ac{
+    vertical-align:middle;
+    padding:2px;	
+}
 
 /*****************************************************************************
                                   DIFFS CSS

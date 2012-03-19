@@ -27,6 +27,7 @@ news
   solving issues with Mercurial and LDAP
 - #402 removed group prefix from repository name when listing repositories 
   inside a group
+- added gravatars into permission view and permissions autocomplete
 
 fixes
 +++++
