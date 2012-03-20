@@ -235,13 +235,13 @@ class ScmModel(BaseModel):
         return group_iter
 
     def mark_for_invalidation(self, repo_name):
-        """Puts cache invalidation task into db for
+        """
+        Puts cache invalidation task into db for
         further global cache invalidation
 
         :param repo_name: this repo that should invalidation take place
         """
         CacheInvalidation.set_invalidate(repo_name)
-        CacheInvalidation.set_invalidate(repo_name + "_README")
 
     def toggle_following_repo(self, follow_repo_id, user_id):
 

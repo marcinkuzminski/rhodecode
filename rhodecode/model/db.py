@@ -1042,11 +1042,14 @@ class CacheInvalidation(Base, BaseModel):
     def __repr__(self):
         return "<%s('%s:%s')>" % (self.__class__.__name__,
                                   self.cache_id, self.cache_key)
+    @classmethod
+    def clear_cache(cls):
+        cls.query().delete()
 
     @classmethod
     def _get_key(cls, key):
         """
-        Wrapper for generating a key
+        Wrapper for generating a key, together with a prefix
 
         :param key:
         """
@@ -1055,12 +1058,25 @@ class CacheInvalidation(Base, BaseModel):
         iid = rhodecode.CONFIG.get('instance_id')
         if iid:
             prefix = iid
-        return "%s%s" % (prefix, key)
+        return "%s%s" % (prefix, key), prefix, key.rstrip('_README')
 
     @classmethod
     def get_by_key(cls, key):
         return cls.query().filter(cls.cache_key == key).scalar()
-
+    
+    @classmethod
+    def _get_or_create_key(cls, key, prefix, org_key):
+        inv_obj = Session.query(cls).filter(cls.cache_key == key).scalar()
+        if not inv_obj:
+            try:
+                inv_obj = CacheInvalidation(key, org_key)
+                Session.add(inv_obj)
+                Session.commit()
+            except Exception:
+                log.error(traceback.format_exc())
+                Session.rollback()                
+        return inv_obj
+            
     @classmethod
     def invalidate(cls, key):
         """
@@ -1070,10 +1086,12 @@ class CacheInvalidation(Base, BaseModel):
 
         :param key:
         """
-        return cls.query()\
-                .filter(CacheInvalidation.cache_key == key)\
-                .filter(CacheInvalidation.cache_active == False)\
-                .scalar()
+        
+        key, _prefix, _org_key = cls._get_key(key)
+        inv = cls._get_or_create_key(key, _prefix, _org_key)
+
+        if inv and inv.cache_active is False:
+            return inv
 
     @classmethod
     def set_invalidate(cls, key):
@@ -1083,17 +1101,16 @@ class CacheInvalidation(Base, BaseModel):
         :param key:
         """
 
-        log.debug('marking %s for invalidation' % key)
-        inv_obj = Session.query(cls)\
-            .filter(cls.cache_key == key).scalar()
-        if inv_obj:
-            inv_obj.cache_active = False
-        else:
-            log.debug('cache key not found in invalidation db -> creating one')
-            inv_obj = CacheInvalidation(key)
-
+        key, _prefix, _org_key = cls._get_key(key)
+        inv_objs = Session.query(cls).filter(cls.cache_args == _org_key).all()
+        log.debug('marking %s key[s] %s for invalidation' % (len(inv_objs),
+                                                             _org_key))
         try:
-            Session.add(inv_obj)
+            for inv_obj in inv_objs:
+                if inv_obj:
+                    inv_obj.cache_active = False
+
+                Session.add(inv_obj)
             Session.commit()
         except Exception:
             log.error(traceback.format_exc())

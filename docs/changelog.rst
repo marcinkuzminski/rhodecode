@@ -28,6 +28,8 @@ news
 - #402 removed group prefix from repository name when listing repositories 
   inside a group
 - added gravatars into permission view and permissions autocomplete
+- #347 when running multiple RhodeCode instances, properly invalidates cache 
+  for all registered servers
 
 fixes
 +++++

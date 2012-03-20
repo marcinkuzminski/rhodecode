@@ -51,7 +51,8 @@ from rhodecode.lib.caching_query import FromCache
 
 from rhodecode.model import meta
 from rhodecode.model.db import Repository, User, RhodeCodeUi, \
-    UserLog, RepoGroup, RhodeCodeSetting, UserRepoGroupToPerm
+    UserLog, RepoGroup, RhodeCodeSetting, UserRepoGroupToPerm,\
+    CacheInvalidation
 from rhodecode.model.meta import Session
 from rhodecode.model.repos_group import ReposGroupModel
 from rhodecode.lib.utils2 import safe_str, safe_unicode
@@ -452,13 +453,19 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False):
     sa.commit()
     removed = []
     if remove_obsolete:
-        #remove from database those repositories that are not in the filesystem
+        # remove from database those repositories that are not in the filesystem
         for repo in sa.query(Repository).all():
             if repo.repo_name not in initial_repo_list.keys():
+                log.debug("Removing non existing repository found in db %s" %
+                          repo.repo_name)
                 removed.append(repo.repo_name)
                 sa.delete(repo)
                 sa.commit()
 
+    # clear cache keys
+    log.debug("Clearing cache keys now...")
+    CacheInvalidation.clear_cache()
+    sa.commit()
     return added, removed
 
 
