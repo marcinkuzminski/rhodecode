@@ -2800,7 +2800,7 @@ table.code-browser .browser-dir {
 }
 
 .ac .yui-ac {
-	position: relative;
+	position: inherit;
 	font-size: 100%;
 }
 
@@ -2815,12 +2815,11 @@ table.code-browser .browser-dir {
 .ac .yui-ac-container {
 	position: absolute;
 	top: 1.6em;
-	width: 100%;
+	width: auto;
 }
 
 .ac .yui-ac-content {
 	position: absolute;
-	width: 100%;
 	border: 1px solid gray;
 	background: #fff;
 	z-index: 9050;
@@ -2852,6 +2851,12 @@ table.code-browser .browser-dir {
 	padding: 2px 5px;
 	height: 18px;
 	z-index: 9050;
+	display: block;
+	width: auto !important;
+}
+
+.ac .yui-ac-content li .ac-container-wrap{
+    width: auto;
 }
 
 .ac .yui-ac-content li.yui-ac-prehighlight {
@@ -2867,6 +2872,7 @@ table.code-browser .browser-dir {
 .ac .yui-ac-bd{
 	z-index: 9050;
 }
+
 .follow {
 	background: url("../images/icons/heart_add.png") no-repeat scroll 3px;
 	height: 16px;
@@ -4166,7 +4172,9 @@ form.comment-inline-form {
 }
 .perm-gravatar-ac{
     vertical-align:middle;
-    padding:2px;	
+    padding:2px;
+    width: 14px;
+    height: 14px;	
 }
 
 /*****************************************************************************

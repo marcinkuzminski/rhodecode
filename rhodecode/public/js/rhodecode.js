@@ -696,7 +696,7 @@ var MembersAutoComplete = function (users_list, groups_list, group_lbl, members_
             	if (group !== undefined){
             		em = '/images/icons/group.png'
             	}
-            	tmpl = '<img class="perm-gravatar-ac" src="{0}"/>{1}'
+            	tmpl = '<div class="ac-container-wrap"><img class="perm-gravatar-ac" src="{0}"/>{1}</div>'
             	return tmpl.format(em,res)
             }
             // group
