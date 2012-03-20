@@ -380,7 +380,8 @@ OUTPUT::
 get_repo
 --------
 
-Gets an existing repository by it's name or repository_id. This command can 
+Gets an existing repository by it's name or repository_id. Members will return
+either users_group or user associated to that repository. This command can 
 be executed only using api_key belonging to user with admin rights.
 
 
@@ -402,7 +403,9 @@ OUTPUT::
                 "type" :        "<type>",
                 "description" : "<description>",
                 "members" :     [
-                                  { "id" :         "<userid>",
+                                  { 
+                                    "type": "user",
+                                    "id" :         "<userid>",
                                     "username" :   "<username>",
                                     "firstname":   "<firstname>",
                                     "lastname" :   "<lastname>",
@@ -413,7 +416,8 @@ OUTPUT::
                                     "permission" : "repository.(read|write|admin)"
                                   },
                                   …
-                                  {
+                                  { 
+                                    "type": "users_group",
                                     "id" :       "<usersgroupid>",
                                     "name" :     "<usersgroupname>",
                                     "active":    "<bool>",

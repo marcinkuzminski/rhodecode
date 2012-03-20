@@ -100,7 +100,7 @@ RhodeCode Features
 - Intelligent cache with invalidation after push or project change, provides 
   high performance and always up to date data.
 - Rss / atom feeds, gravatar support, download sources as zip/tar/gz
-- Async tasks for speed and performance using celery_ (works without them too)  
+- Optional async tasks for speed and performance using celery_  
 - Backup scripts can do backup of whole app and send it over scp to desired 
   location 
 - Based on pylons / sqlalchemy / sqlite / whoosh / vcs

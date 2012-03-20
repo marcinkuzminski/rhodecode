@@ -283,7 +283,7 @@ class ApiController(JSONRPCController):
     @HasPermissionAllDecorator('hg.admin')
     def add_user_to_users_group(self, apiuser, group_name, username):
         """"
-        Add a user to a group
+        Add a user to a users group
 
         :param apiuser:
         :param group_name:
@@ -361,7 +361,7 @@ class ApiController(JSONRPCController):
             user = user.user
             members.append(
                 dict(
-                    type_="user",
+                    type="user",
                     id=user.user_id,
                     username=user.username,
                     firstname=user.name,
@@ -378,7 +378,7 @@ class ApiController(JSONRPCController):
             users_group = users_group.users_group
             members.append(
                 dict(
-                    type_="users_group",
+                    type="users_group",
                     id=users_group.users_group_id,
                     name=users_group.users_group_name,
                     active=users_group.users_group_active,
