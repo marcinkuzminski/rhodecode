@@ -30,17 +30,15 @@ import logging
 
 from rhodecode.controllers.api import JSONRPCController, JSONRPCError
 from rhodecode.lib.auth import HasPermissionAllDecorator, \
-    HasPermissionAnyDecorator, PasswordGenerator
+    HasPermissionAnyDecorator, PasswordGenerator, AuthUser
 
 from rhodecode.model.meta import Session
 from rhodecode.model.scm import ScmModel
-from rhodecode.model.db import User, UsersGroup, RepoGroup, Repository
+from rhodecode.model.db import User, UsersGroup, Repository
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.user import UserModel
 from rhodecode.model.users_group import UsersGroupModel
-from rhodecode.model.repos_group import ReposGroupModel
 from rhodecode.lib.utils import map_groups
-
 
 log = logging.getLogger(__name__)
 
@@ -101,7 +99,9 @@ class ApiController(JSONRPCController):
             email=user.email,
             active=user.active,
             admin=user.admin,
-            ldap_dn=user.ldap_dn
+            ldap_dn=user.ldap_dn,
+            last_login=user.last_login,
+            permissions=AuthUser(user_id=user.user_id).permissions
         )
 
     @HasPermissionAllDecorator('hg.admin')
@@ -123,7 +123,8 @@ class ApiController(JSONRPCController):
                     email=user.email,
                     active=user.active,
                     admin=user.admin,
-                    ldap_dn=user.ldap_dn
+                    ldap_dn=user.ldap_dn,
+                    last_login=user.last_login,
                 )
             )
         return result

@@ -113,7 +113,15 @@ OUTPUT::
                 "email" :    "<email>",
                 "active" :   "<bool>",
                 "admin" :    "<bool>",
-                "ldap_dn" :  "<ldap_dn>"
+                "ldap_dn" :  "<ldap_dn>",
+                "last_login": "<last_login>",
+                "permissions": {
+                    "global": ["hg.create.repository",
+                               "repository.read",
+                               "hg.register.manual_activate"],
+                    "repositories": {"repo1": "repository.none"},
+                    "repositories_groups": {"Group1": "group.read"}
+                 },
             }
 
     error:  null
@@ -144,7 +152,8 @@ OUTPUT::
                 "email" :    "<email>",
                 "active" :   "<bool>",
                 "admin" :    "<bool>",
-                "ldap_dn" :  "<ldap_dn>"
+                "ldap_dn" :  "<ldap_dn>",
+                "last_login": "<last_login>",
               },
     	      …
             ]

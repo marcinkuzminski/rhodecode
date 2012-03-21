@@ -25,15 +25,54 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import datetime
+import functools
 from rhodecode import __platform__, PLATFORM_WIN
 
 #==============================================================================
 # json
 #==============================================================================
+
+
+def __obj_dump(obj):
+    DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%S"
+    DATE_FORMAT = "%Y-%m-%d"
+    if isinstance(obj, complex):
+        return [obj.real, obj.imag]
+    elif isinstance(obj, datetime.datetime):
+        return obj.strftime(DATETIME_FORMAT)
+    elif isinstance(obj, datetime.date):
+        return obj.strftime(DATE_FORMAT)
+    elif isinstance(obj, set):
+        return list(obj)
+    elif isinstance(obj, OrderedDict):
+        return obj.as_dict()
+    else:
+        raise NotImplementedError
+
 try:
     import json
+
+    # extended JSON encoder for json
+    class ExtendedEncoder(json.JSONEncoder):
+        def default(self, obj):
+            try:
+                return __obj_dump(obj)
+            except NotImplementedError:
+                pass
+            return json.JSONEncoder.default(self, obj)
+    # monkey-patch JSON encoder to use extended version
+    json.dumps = functools.partial(json.dumps, cls=ExtendedEncoder)
 except ImportError:
     import simplejson as json
+
+    def extended_encode(obj):
+        try:
+            return __obj_dump(obj)
+        except NotImplementedError:
+            pass
+        raise TypeError("%r is not JSON serializable" % (obj,))
+    json.dumps = functools.partial(json.dumps, default=extended_encode)
 
 
 #==============================================================================
@@ -44,11 +83,11 @@ try:
 except ImportError:
     import itertools
 
-    def izip_longest(*args, **kwds): # noqa
+    def izip_longest(*args, **kwds):
         fillvalue = kwds.get("fillvalue")
 
         def sentinel(counter=([fillvalue] * (len(args) - 1)).pop):
-            yield counter() # yields the fillvalue, or raises IndexError
+            yield counter()  # yields the fillvalue, or raises IndexError
 
         fillers = itertools.repeat(fillvalue)
         iters = [itertools.chain(it, sentinel(), fillers)
