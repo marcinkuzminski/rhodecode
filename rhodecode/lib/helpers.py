@@ -68,7 +68,7 @@ def FID(raw_id, path):
     :param path:
     """
 
-    return 'C-%s-%s' % (short_id(raw_id), md5(path).hexdigest()[:12])
+    return 'C-%s-%s' % (short_id(raw_id), md5(safe_str(path)).hexdigest()[:12])
 
 
 def get_token():
