@@ -299,14 +299,15 @@ class UserModel(BaseModel):
         try:
             if user.username == 'default':
                 raise DefaultUserException(
-                    _("You can't remove this user since it's"
+                    _(u"You can't remove this user since it's"
                       " crucial for entire application")
                 )
             if user.repositories:
+                repos = [x.repo_name for x in user.repositories]
                 raise UserOwnsReposException(
-                    _('user "%s" still owns %s repositories and cannot be '
-                      'removed. Switch owners or remove those repositories')
-                    % (user.username, user.repositories)
+                    _(u'user "%s" still owns %s repositories and cannot be '
+                      'removed. Switch owners or remove those repositories. %s')
+                    % (user.username, len(repos), ', '.join(repos))
                 )
             self.sa.delete(user)
         except:
