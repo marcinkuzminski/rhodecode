@@ -34,7 +34,12 @@ from rhodecode import __platform__, PLATFORM_WIN
 #==============================================================================
 
 
-def __obj_dump(obj):
+def _obj_dump(obj):
+    """
+    Custom function for dumping objects to JSON
+
+    :param obj:
+    """
     DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%S"
     DATE_FORMAT = "%Y-%m-%d"
     if isinstance(obj, complex):
@@ -47,6 +52,11 @@ def __obj_dump(obj):
         return list(obj)
     elif isinstance(obj, OrderedDict):
         return obj.as_dict()
+    elif hasattr(obj, '__json__'):
+        if callable(obj.__json__):
+            return obj.__json__()
+        else:
+            return obj.__json__
     else:
         raise NotImplementedError
 
@@ -57,7 +67,7 @@ try:
     class ExtendedEncoder(json.JSONEncoder):
         def default(self, obj):
             try:
-                return __obj_dump(obj)
+                return _obj_dump(obj)
             except NotImplementedError:
                 pass
             return json.JSONEncoder.default(self, obj)
@@ -68,7 +78,7 @@ except ImportError:
 
     def extended_encode(obj):
         try:
-            return __obj_dump(obj)
+            return _obj_dump(obj)
         except NotImplementedError:
             pass
         raise TypeError("%r is not JSON serializable" % (obj,))
