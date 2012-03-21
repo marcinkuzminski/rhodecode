@@ -151,7 +151,8 @@ class RhodeCodeSetting(Base, BaseModel):
     __tablename__ = 'rhodecode_settings'
     __table_args__ = (
         UniqueConstraint('app_settings_name'),
-        {'extend_existing': True}
+        {'extend_existing': True, 'mysql_engine':'InnoDB',
+         'mysql_charset': 'utf8'}
     )
     app_settings_id = Column("app_settings_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     app_settings_name = Column("app_settings_name", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
@@ -225,7 +226,8 @@ class RhodeCodeUi(Base, BaseModel):
     __tablename__ = 'rhodecode_ui'
     __table_args__ = (
         UniqueConstraint('ui_key'),
-        {'extend_existing': True}
+        {'extend_existing': True, 'mysql_engine':'InnoDB',
+         'mysql_charset': 'utf8'}
     )
 
     HOOK_UPDATE = 'changegroup.update'
@@ -275,7 +277,8 @@ class User(Base, BaseModel):
     __tablename__ = 'users'
     __table_args__ = (
         UniqueConstraint('username'), UniqueConstraint('email'),
-        {'extend_existing': True}
+        {'extend_existing': True, 'mysql_engine':'InnoDB',
+         'mysql_charset': 'utf8'}
     )
     user_id = Column("user_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     username = Column("username", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
@@ -295,7 +298,8 @@ class User(Base, BaseModel):
     repositories = relationship('Repository')
     user_followers = relationship('UserFollowing', primaryjoin='UserFollowing.follows_user_id==User.user_id', cascade='all')
     repo_to_perm = relationship('UserRepoToPerm', primaryjoin='UserRepoToPerm.user_id==User.user_id', cascade='all')
-
+    repo_group_to_perm = relationship('UserRepoGroupToPerm', primaryjoin='UserRepoGroupToPerm.user_id==User.user_id', cascade='all')
+    
     group_member = relationship('UsersGroupMember', cascade='all')
 
     notifications = relationship('UserNotification',)
@@ -387,7 +391,10 @@ class User(Base, BaseModel):
 
 class UserLog(Base, BaseModel):
     __tablename__ = 'user_logs'
-    __table_args__ = {'extend_existing': True}
+    __table_args__ = (
+        {'extend_existing': True, 'mysql_engine':'InnoDB',
+         'mysql_charset': 'utf8'},
+    )
     user_log_id = Column("user_log_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None, default=None)
     repository_id = Column("repository_id", Integer(), ForeignKey('repositories.repo_id'), nullable=True)
@@ -406,7 +413,10 @@ class UserLog(Base, BaseModel):
 
 class UsersGroup(Base, BaseModel):
     __tablename__ = 'users_groups'
-    __table_args__ = {'extend_existing': True}
+    __table_args__ = (
+        {'extend_existing': True, 'mysql_engine':'InnoDB',
+         'mysql_charset': 'utf8'},
+    )
 
     users_group_id = Column("users_group_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     users_group_name = Column("users_group_name", String(length=255, convert_unicode=False, assert_unicode=None), nullable=False, unique=True, default=None)
@@ -414,6 +424,7 @@ class UsersGroup(Base, BaseModel):
 
     members = relationship('UsersGroupMember', cascade="all, delete, delete-orphan", lazy="joined")
     users_group_to_perm = relationship('UsersGroupToPerm', cascade='all')
+    users_group_repo_to_perm = relationship('UsersGroupRepoToPerm', cascade='all')
 
     def __repr__(self):
         return '<userGroup(%s)>' % (self.users_group_name)
@@ -444,7 +455,10 @@ class UsersGroup(Base, BaseModel):
 
 class UsersGroupMember(Base, BaseModel):
     __tablename__ = 'users_groups_members'
-    __table_args__ = {'extend_existing': True}
+    __table_args__ = (
+        {'extend_existing': True, 'mysql_engine':'InnoDB',
+         'mysql_charset': 'utf8'},
+    )
 
     users_group_member_id = Column("users_group_member_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     users_group_id = Column("users_group_id", Integer(), ForeignKey('users_groups.users_group_id'), nullable=False, unique=None, default=None)
@@ -462,7 +476,8 @@ class Repository(Base, BaseModel):
     __tablename__ = 'repositories'
     __table_args__ = (
         UniqueConstraint('repo_name'),
-        {'extend_existing': True},
+        {'extend_existing': True, 'mysql_engine':'InnoDB',
+         'mysql_charset': 'utf8'},
     )
 
     repo_id = Column("repo_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -711,7 +726,8 @@ class RepoGroup(Base, BaseModel):
     __table_args__ = (
         UniqueConstraint('group_name', 'group_parent_id'),
         CheckConstraint('group_id != group_parent_id'),
-        {'extend_existing': True},
+        {'extend_existing': True, 'mysql_engine':'InnoDB',
+         'mysql_charset': 'utf8'},
     )
     __mapper_args__ = {'order_by': 'group_name'}
 
@@ -838,7 +854,10 @@ class RepoGroup(Base, BaseModel):
 
 class Permission(Base, BaseModel):
     __tablename__ = 'permissions'
-    __table_args__ = {'extend_existing': True}
+    __table_args__ = (
+        {'extend_existing': True, 'mysql_engine':'InnoDB',
+         'mysql_charset': 'utf8'},
+    )
     permission_id = Column("permission_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     permission_name = Column("permission_name", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     permission_longname = Column("permission_longname", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
@@ -875,7 +894,8 @@ class UserRepoToPerm(Base, BaseModel):
     __tablename__ = 'repo_to_perm'
     __table_args__ = (
         UniqueConstraint('user_id', 'repository_id', 'permission_id'),
-        {'extend_existing': True}
+        {'extend_existing': True, 'mysql_engine':'InnoDB',
+         'mysql_charset': 'utf8'}
     )
     repo_to_perm_id = Column("repo_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None, default=None)
@@ -903,7 +923,8 @@ class UserToPerm(Base, BaseModel):
     __tablename__ = 'user_to_perm'
     __table_args__ = (
         UniqueConstraint('user_id', 'permission_id'),
-        {'extend_existing': True}
+        {'extend_existing': True, 'mysql_engine':'InnoDB',
+         'mysql_charset': 'utf8'}
     )
     user_to_perm_id = Column("user_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None, default=None)
@@ -917,7 +938,8 @@ class UsersGroupRepoToPerm(Base, BaseModel):
     __tablename__ = 'users_group_repo_to_perm'
     __table_args__ = (
         UniqueConstraint('repository_id', 'users_group_id', 'permission_id'),
-        {'extend_existing': True}
+        {'extend_existing': True, 'mysql_engine':'InnoDB',
+         'mysql_charset': 'utf8'}
     )
     users_group_to_perm_id = Column("users_group_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     users_group_id = Column("users_group_id", Integer(), ForeignKey('users_groups.users_group_id'), nullable=False, unique=None, default=None)
@@ -945,7 +967,8 @@ class UsersGroupToPerm(Base, BaseModel):
     __tablename__ = 'users_group_to_perm'
     __table_args__ = (
         UniqueConstraint('users_group_id', 'permission_id',),
-        {'extend_existing': True}
+        {'extend_existing': True, 'mysql_engine':'InnoDB',  
+         'mysql_charset': 'utf8'}
     )
     users_group_to_perm_id = Column("users_group_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     users_group_id = Column("users_group_id", Integer(), ForeignKey('users_groups.users_group_id'), nullable=False, unique=None, default=None)
@@ -959,7 +982,8 @@ class UserRepoGroupToPerm(Base, BaseModel):
     __tablename__ = 'user_repo_group_to_perm'
     __table_args__ = (
         UniqueConstraint('user_id', 'group_id', 'permission_id'),
-        {'extend_existing': True}
+        {'extend_existing': True, 'mysql_engine':'InnoDB',  
+         'mysql_charset': 'utf8'}
     )
 
     group_to_perm_id = Column("group_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -976,7 +1000,8 @@ class UsersGroupRepoGroupToPerm(Base, BaseModel):
     __tablename__ = 'users_group_repo_group_to_perm'
     __table_args__ = (
         UniqueConstraint('users_group_id', 'group_id'),
-        {'extend_existing': True}
+        {'extend_existing': True, 'mysql_engine':'InnoDB',
+         'mysql_charset': 'utf8'}
     )
 
     users_group_repo_group_to_perm_id = Column("users_group_repo_group_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -991,7 +1016,11 @@ class UsersGroupRepoGroupToPerm(Base, BaseModel):
 
 class Statistics(Base, BaseModel):
     __tablename__ = 'statistics'
-    __table_args__ = (UniqueConstraint('repository_id'), {'extend_existing': True})
+    __table_args__ = (
+         UniqueConstraint('repository_id'), 
+         {'extend_existing': True, 'mysql_engine':'InnoDB',  
+          'mysql_charset': 'utf8'}
+    )
     stat_id = Column("stat_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     repository_id = Column("repository_id", Integer(), ForeignKey('repositories.repo_id'), nullable=False, unique=True, default=None)
     stat_on_revision = Column("stat_on_revision", Integer(), nullable=False)
@@ -1007,7 +1036,8 @@ class UserFollowing(Base, BaseModel):
     __table_args__ = (
         UniqueConstraint('user_id', 'follows_repository_id'),
         UniqueConstraint('user_id', 'follows_user_id'),
-        {'extend_existing': True}
+        {'extend_existing': True, 'mysql_engine':'InnoDB',
+         'mysql_charset': 'utf8'}
     )
 
     user_following_id = Column("user_following_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -1028,7 +1058,11 @@ class UserFollowing(Base, BaseModel):
 
 class CacheInvalidation(Base, BaseModel):
     __tablename__ = 'cache_invalidation'
-    __table_args__ = (UniqueConstraint('cache_key'), {'extend_existing': True})
+    __table_args__ = (
+        UniqueConstraint('cache_key'),
+        {'extend_existing': True, 'mysql_engine':'InnoDB',
+         'mysql_charset': 'utf8'},
+    )
     cache_id = Column("cache_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     cache_key = Column("cache_key", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     cache_args = Column("cache_args", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
@@ -1063,7 +1097,7 @@ class CacheInvalidation(Base, BaseModel):
     @classmethod
     def get_by_key(cls, key):
         return cls.query().filter(cls.cache_key == key).scalar()
-    
+
     @classmethod
     def _get_or_create_key(cls, key, prefix, org_key):
         inv_obj = Session.query(cls).filter(cls.cache_key == key).scalar()
@@ -1074,9 +1108,9 @@ class CacheInvalidation(Base, BaseModel):
                 Session.commit()
             except Exception:
                 log.error(traceback.format_exc())
-                Session.rollback()                
+                Session.rollback()
         return inv_obj
-            
+
     @classmethod
     def invalidate(cls, key):
         """
@@ -1086,7 +1120,7 @@ class CacheInvalidation(Base, BaseModel):
 
         :param key:
         """
-        
+
         key, _prefix, _org_key = cls._get_key(key)
         inv = cls._get_or_create_key(key, _prefix, _org_key)
 
@@ -1131,7 +1165,10 @@ class CacheInvalidation(Base, BaseModel):
 
 class ChangesetComment(Base, BaseModel):
     __tablename__ = 'changeset_comments'
-    __table_args__ = ({'extend_existing': True},)
+    __table_args__ = (
+        {'extend_existing': True, 'mysql_engine':'InnoDB',
+         'mysql_charset': 'utf8'},
+    )
     comment_id = Column('comment_id', Integer(), nullable=False, primary_key=True)
     repo_id = Column('repo_id', Integer(), ForeignKey('repositories.repo_id'), nullable=False)
     revision = Column('revision', String(40), nullable=False)
@@ -1160,7 +1197,10 @@ class ChangesetComment(Base, BaseModel):
 
 class Notification(Base, BaseModel):
     __tablename__ = 'notifications'
-    __table_args__ = ({'extend_existing': True},)
+    __table_args__ = (
+        {'extend_existing': True, 'mysql_engine':'InnoDB',
+         'mysql_charset': 'utf8'},
+    )
 
     TYPE_CHANGESET_COMMENT = u'cs_comment'
     TYPE_MESSAGE = u'message'
@@ -1212,7 +1252,8 @@ class UserNotification(Base, BaseModel):
     __tablename__ = 'user_to_notification'
     __table_args__ = (
         UniqueConstraint('user_id', 'notification_id'),
-        {'extend_existing': True}
+        {'extend_existing': True, 'mysql_engine':'InnoDB',
+         'mysql_charset': 'utf8'}
     )
     user_id = Column('user_id', Integer(), ForeignKey('users.user_id'), primary_key=True)
     notification_id = Column("notification_id", Integer(), ForeignKey('notifications.notification_id'), primary_key=True)
@@ -1230,7 +1271,10 @@ class UserNotification(Base, BaseModel):
 
 class DbMigrateVersion(Base, BaseModel):
     __tablename__ = 'db_migrate_version'
-    __table_args__ = {'extend_existing': True}
+    __table_args__ = (
+        {'extend_existing': True, 'mysql_engine':'InnoDB',
+         'mysql_charset': 'utf8'},
+    )
     repository_id = Column('repository_id', String(250), primary_key=True)
     repository_path = Column('repository_path', Text)
     version = Column('version', Integer)

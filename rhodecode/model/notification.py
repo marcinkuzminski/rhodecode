@@ -48,11 +48,11 @@ class NotificationModel(BaseModel):
     def __get_notification(self, notification):
         if isinstance(notification, Notification):
             return notification
-        elif isinstance(notification, int):
+        elif isinstance(notification, (int, long)):
             return Notification.get(notification)
         else:
             if notification:
-                raise Exception('notification must be int or Instance'
+                raise Exception('notification must be int, long or Instance'
                                 ' of Notification got %s' % type(notification))
 
     def create(self, created_by, subject, body, recipients=None,

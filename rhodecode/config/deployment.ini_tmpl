@@ -223,7 +223,7 @@ sqlalchemy.db1.url = sqlite:///%(here)s/rhodecode.db
 
 sqlalchemy.db1.echo = false
 sqlalchemy.db1.pool_recycle = 3600
-sqlalchemy.convert_unicode = true
+sqlalchemy.db1.convert_unicode = true
 
 ################################
 ### LOGGING CONFIGURATION   ####

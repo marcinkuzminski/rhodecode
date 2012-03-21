@@ -2,7 +2,8 @@ from rhodecode.tests import *
 from rhodecode.model.db import ChangesetComment, Notification, User, \
     UserNotification
 
-class TestChangeSetCommentrController(TestController):
+
+class TestChangeSetCommentsController(TestController):
 
     def setUp(self):
         for x in ChangesetComment.query().all():
@@ -27,7 +28,7 @@ class TestChangeSetCommentrController(TestController):
         rev = '27cd5cce30c96924232dffcd24178a07ffeb5dfc'
         text = u'CommentOnRevision'
 
-        params = {'text':text}
+        params = {'text': text}
         response = self.app.post(url(controller='changeset', action='comment',
                                      repo_name=HG_REPO, revision=rev),
                                      params=params)
@@ -42,13 +43,18 @@ class TestChangeSetCommentrController(TestController):
         self.assertTrue('''<div class="comments-number">%s '''
                         '''comment(s) (0 inline)</div>''' % 1 in response.body)
 
-
         self.assertEqual(Notification.query().count(), 1)
+        self.assertEqual(ChangesetComment.query().count(), 1)
+
         notification = Notification.query().all()[0]
 
-        self.assertEqual(notification.type_, Notification.TYPE_CHANGESET_COMMENT)
-        self.assertTrue((u'/vcs_test_hg/changeset/27cd5cce30c96924232df'
-                          'fcd24178a07ffeb5dfc#comment-1') in notification.subject)
+        ID = ChangesetComment.query().first().comment_id
+        self.assertEqual(notification.type_, 
+                         Notification.TYPE_CHANGESET_COMMENT)
+        sbj = (u'/vcs_test_hg/changeset/'
+               '27cd5cce30c96924232dffcd24178a07ffeb5dfc#comment-%s' % ID)
+        print "%s vs %s" % (sbj, notification.subject)
+        self.assertTrue(sbj in notification.subject)
 
     def test_create_inline(self):
         self.log_user()
@@ -57,7 +63,7 @@ class TestChangeSetCommentrController(TestController):
         f_path = 'vcs/web/simplevcs/views/repository.py'
         line = 'n1'
 
-        params = {'text':text, 'f_path':f_path, 'line':line}
+        params = {'text': text, 'f_path': f_path, 'line': line}
         response = self.app.post(url(controller='changeset', action='comment',
                                      repo_name=HG_REPO, revision=rev),
                                      params=params)
@@ -76,11 +82,16 @@ class TestChangeSetCommentrController(TestController):
                         '''repositorypy">''' in response.body)
 
         self.assertEqual(Notification.query().count(), 1)
-        notification = Notification.query().all()[0]
+        self.assertEqual(ChangesetComment.query().count(), 1)
 
-        self.assertEqual(notification.type_, Notification.TYPE_CHANGESET_COMMENT)
-        self.assertTrue((u'/vcs_test_hg/changeset/27cd5cce30c96924232df'
-                          'fcd24178a07ffeb5dfc#comment-1') in notification.subject)
+        notification = Notification.query().all()[0]
+        ID = ChangesetComment.query().first().comment_id
+        self.assertEqual(notification.type_, 
+                         Notification.TYPE_CHANGESET_COMMENT)
+        sbj = (u'/vcs_test_hg/changeset/'
+               '27cd5cce30c96924232dffcd24178a07ffeb5dfc#comment-%s' % ID)
+        print "%s vs %s" % (sbj, notification.subject)
+        self.assertTrue(sbj in notification.subject)
 
     def test_create_with_mention(self):
         self.log_user()
@@ -103,7 +114,6 @@ class TestChangeSetCommentrController(TestController):
         self.assertTrue('''<div class="comments-number">%s '''
                         '''comment(s) (0 inline)</div>''' % 1 in response.body)
 
-
         self.assertEqual(Notification.query().count(), 2)
         users = [x.user.username for x in UserNotification.query().all()]
 
@@ -115,7 +125,7 @@ class TestChangeSetCommentrController(TestController):
         rev = '27cd5cce30c96924232dffcd24178a07ffeb5dfc'
         text = u'CommentOnRevision'
 
-        params = {'text':text}
+        params = {'text': text}
         response = self.app.post(url(controller='changeset', action='comment',
                                      repo_name=HG_REPO, revision=rev),
                                      params=params)
@@ -123,7 +133,6 @@ class TestChangeSetCommentrController(TestController):
         comments = ChangesetComment.query().all()
         self.assertEqual(len(comments), 1)
         comment_id = comments[0].comment_id
-
 
         self.app.delete(url(controller='changeset',
                                     action='delete_comment',
