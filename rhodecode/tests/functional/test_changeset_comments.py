@@ -49,7 +49,7 @@ class TestChangeSetCommentsController(TestController):
         notification = Notification.query().all()[0]
 
         ID = ChangesetComment.query().first().comment_id
-        self.assertEqual(notification.type_, 
+        self.assertEqual(notification.type_,
                          Notification.TYPE_CHANGESET_COMMENT)
         sbj = (u'/vcs_test_hg/changeset/'
                '27cd5cce30c96924232dffcd24178a07ffeb5dfc#comment-%s' % ID)
@@ -86,7 +86,7 @@ class TestChangeSetCommentsController(TestController):
 
         notification = Notification.query().all()[0]
         ID = ChangesetComment.query().first().comment_id
-        self.assertEqual(notification.type_, 
+        self.assertEqual(notification.type_,
                          Notification.TYPE_CHANGESET_COMMENT)
         sbj = (u'/vcs_test_hg/changeset/'
                '27cd5cce30c96924232dffcd24178a07ffeb5dfc#comment-%s' % ID)

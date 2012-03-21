@@ -63,6 +63,7 @@ class ChangesetCommentsModel(BaseModel):
         :param f_path:
         :param line_no:
         """
+
         if text:
             repo = Repository.get(repo_id)
             cs = repo.scm_instance.get_changeset(revision)
@@ -78,7 +79,6 @@ class ChangesetCommentsModel(BaseModel):
 
             self.sa.add(comment)
             self.sa.flush()
-
             # make notification
             line = ''
             if line_no:

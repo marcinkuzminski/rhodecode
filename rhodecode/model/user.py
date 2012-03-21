@@ -526,7 +526,7 @@ class UserModel(BaseModel):
              .join((UsersGroupMember, UsersGroupRepoGroupToPerm.users_group_id == UsersGroupMember.users_group_id))\
              .filter(UsersGroupMember.user_id == uid)\
              .all()
-            
+
             for perm in user_repo_group_perms_from_users_groups:
                 g_k = perm.UsersGroupRepoGroupToPerm.group.group_name
                 print perm, g_k

@@ -299,7 +299,7 @@ class User(Base, BaseModel):
     user_followers = relationship('UserFollowing', primaryjoin='UserFollowing.follows_user_id==User.user_id', cascade='all')
     repo_to_perm = relationship('UserRepoToPerm', primaryjoin='UserRepoToPerm.user_id==User.user_id', cascade='all')
     repo_group_to_perm = relationship('UserRepoGroupToPerm', primaryjoin='UserRepoGroupToPerm.user_id==User.user_id', cascade='all')
-    
+
     group_member = relationship('UsersGroupMember', cascade='all')
 
     notifications = relationship('UserNotification',)
@@ -967,7 +967,7 @@ class UsersGroupToPerm(Base, BaseModel):
     __tablename__ = 'users_group_to_perm'
     __table_args__ = (
         UniqueConstraint('users_group_id', 'permission_id',),
-        {'extend_existing': True, 'mysql_engine':'InnoDB',  
+        {'extend_existing': True, 'mysql_engine':'InnoDB',
          'mysql_charset': 'utf8'}
     )
     users_group_to_perm_id = Column("users_group_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -982,7 +982,7 @@ class UserRepoGroupToPerm(Base, BaseModel):
     __tablename__ = 'user_repo_group_to_perm'
     __table_args__ = (
         UniqueConstraint('user_id', 'group_id', 'permission_id'),
-        {'extend_existing': True, 'mysql_engine':'InnoDB',  
+        {'extend_existing': True, 'mysql_engine':'InnoDB',
          'mysql_charset': 'utf8'}
     )
 
@@ -1017,8 +1017,8 @@ class UsersGroupRepoGroupToPerm(Base, BaseModel):
 class Statistics(Base, BaseModel):
     __tablename__ = 'statistics'
     __table_args__ = (
-         UniqueConstraint('repository_id'), 
-         {'extend_existing': True, 'mysql_engine':'InnoDB',  
+         UniqueConstraint('repository_id'),
+         {'extend_existing': True, 'mysql_engine':'InnoDB',
           'mysql_charset': 'utf8'}
     )
     stat_id = Column("stat_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
