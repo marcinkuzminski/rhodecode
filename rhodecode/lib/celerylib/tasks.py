@@ -328,7 +328,7 @@ def send_email(recipients, subject, body, html_body=''):
     DBS = get_session()
 
     email_config = config
-    subject = "%s %s" % (email_config.get('email_prefix'), subject)
+    subject = "%s %s" % (email_config.get('email_prefix', ''), subject)
     if not recipients:
         # if recipients are not defined we send to email_config + all admins
         admins = [u.email for u in User.query()
