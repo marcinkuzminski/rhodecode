@@ -112,6 +112,7 @@ class NotificationModel(BaseModel):
             kwargs.update(email_kwargs)
             email_body_html = EmailNotificationModel()\
                                 .get_email_tmpl(type_, **kwargs)
+
             run_task(tasks.send_email, rec.email, email_subject, email_body,
                      email_body_html)
 
@@ -183,6 +184,7 @@ class NotificationModel(BaseModel):
         else:
             DTF = lambda d: datetime.datetime.strftime(d, DATETIME_FORMAT)
             when = DTF(notification.created_on)
+
         data = dict(
             user=notification.created_by_user.username,
             action=_map[notification.type_], when=when,

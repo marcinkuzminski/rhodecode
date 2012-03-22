@@ -145,7 +145,12 @@ class BaseModel(object):
     def delete(cls, id_):
         obj = cls.query().get(id_)
         Session.delete(obj)
-
+    
+    def __repr__(self):
+        if hasattr(self, '__unicode__'):
+            # python repr needs to return str
+            return safe_str(self.__unicode__())
+        return '<DB:%s>' % (self.__class__.__name__)
 
 class RhodeCodeSetting(Base, BaseModel):
     __tablename__ = 'rhodecode_settings'
@@ -183,8 +188,8 @@ class RhodeCodeSetting(Base, BaseModel):
         """
         self._app_settings_value = safe_unicode(val)
 
-    def __repr__(self):
-        return "<%s('%s:%s')>" % (
+    def __unicode__(self):
+        return u"<%s('%s:%s')>" % (
             self.__class__.__name__,
             self.app_settings_name, self.app_settings_value
         )
@@ -333,8 +338,8 @@ class User(Base, BaseModel):
     def is_admin(self):
         return self.admin
 
-    def __repr__(self):
-        return "<%s('id:%s:%s')>" % (self.__class__.__name__,
+    def __unicode__(self):
+        return u"<%s('id:%s:%s')>" % (self.__class__.__name__,
                                      self.user_id, self.username)
 
     @classmethod
@@ -429,8 +434,8 @@ class UsersGroup(Base, BaseModel):
     users_group_to_perm = relationship('UsersGroupToPerm', cascade='all')
     users_group_repo_to_perm = relationship('UsersGroupRepoToPerm', cascade='all')
 
-    def __repr__(self):
-        return '<userGroup(%s)>' % (self.users_group_name)
+    def __unicode__(self):
+        return u'<userGroup(%s)>' % (self.users_group_name)
 
     @classmethod
     def get_by_group_name(cls, group_name, cache=False,
@@ -508,9 +513,9 @@ class Repository(Base, BaseModel):
 
     logs = relationship('UserLog')
 
-    def __repr__(self):
-        return "<%s('%s:%s')>" % (self.__class__.__name__,
-                                  self.repo_id, self.repo_name)
+    def __unicode__(self):
+        return u"<%s('%s:%s')>" % (self.__class__.__name__,self.repo_id, 
+                                   self.repo_name)
 
     @classmethod
     def url_sep(cls):
@@ -748,8 +753,8 @@ class RepoGroup(Base, BaseModel):
         self.group_name = group_name
         self.parent_group = parent_group
 
-    def __repr__(self):
-        return "<%s('%s:%s')>" % (self.__class__.__name__, self.group_id,
+    def __unicode__(self):
+        return u"<%s('%s:%s')>" % (self.__class__.__name__, self.group_id,
                                   self.group_name)
 
     @classmethod
@@ -865,8 +870,8 @@ class Permission(Base, BaseModel):
     permission_name = Column("permission_name", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     permission_longname = Column("permission_longname", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
 
-    def __repr__(self):
-        return "<%s('%s:%s')>" % (
+    def __unicode__(self):
+        return u"<%s('%s:%s')>" % (
             self.__class__.__name__, self.permission_id, self.permission_name
         )
 
@@ -918,8 +923,8 @@ class UserRepoToPerm(Base, BaseModel):
         Session.add(n)
         return n
 
-    def __repr__(self):
-        return '<user:%s => %s >' % (self.user, self.repository)
+    def __unicode__(self):
+        return u'<user:%s => %s >' % (self.user, self.repository)
 
 
 class UserToPerm(Base, BaseModel):
@@ -962,8 +967,8 @@ class UsersGroupRepoToPerm(Base, BaseModel):
         Session.add(n)
         return n
 
-    def __repr__(self):
-        return '<userGroup:%s => %s >' % (self.users_group, self.repository)
+    def __unicode__(self):
+        return u'<userGroup:%s => %s >' % (self.users_group, self.repository)
 
 
 class UsersGroupToPerm(Base, BaseModel):
@@ -1076,8 +1081,8 @@ class CacheInvalidation(Base, BaseModel):
         self.cache_args = cache_args
         self.cache_active = False
 
-    def __repr__(self):
-        return "<%s('%s:%s')>" % (self.__class__.__name__,
+    def __unicode__(self):
+        return u"<%s('%s:%s')>" % (self.__class__.__name__,
                                   self.cache_id, self.cache_key)
     @classmethod
     def clear_cache(cls):
