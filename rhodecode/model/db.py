@@ -307,7 +307,11 @@ class User(Base, BaseModel):
 
     group_member = relationship('UsersGroupMember', cascade='all')
 
-    notifications = relationship('UserNotification',)
+    notifications = relationship('UserNotification', cascade='all')
+    # notifications assigned to this user
+    user_created_notifications = relationship('Notification', cascade='all')
+    # comments created by this user
+    user_comments = relationship('ChangesetComment', cascade='all')
 
     @hybrid_property
     def email(self):
