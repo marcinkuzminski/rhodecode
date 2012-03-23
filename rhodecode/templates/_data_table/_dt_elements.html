@@ -40,7 +40,7 @@
   </ul>
 </%def>
 
-<%def name="repo_name(name,rtype,private,fork_of,short_name=False)">
+<%def name="repo_name(name,rtype,private,fork_of,short_name=False, admin=False)">
     <%
     def get_name(name,short_name=short_name):
       if short_name:
@@ -64,7 +64,11 @@
    %endif
 
    ##NAME
-   ${h.link_to(get_name(name),h.url('summary_home',repo_name=name),class_="repo_name")}
+   %if admin:
+    ${h.link_to(get_name(name),h.url('edit_repo',repo_name=name),class_="repo_name")}
+   %else:
+    ${h.link_to(get_name(name),h.url('summary_home',repo_name=name),class_="repo_name")}
+   %endif
    %if fork_of:
         <a href="${h.url('summary_home',repo_name=fork_of)}">
         <img class="icon" alt="${_('fork')}" title="${_('Fork of')} ${fork_of}" src="${h.url('/images/icons/arrow_divide.png')}"/></a>
