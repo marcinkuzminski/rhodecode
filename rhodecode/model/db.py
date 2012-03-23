@@ -145,7 +145,7 @@ class BaseModel(object):
     def delete(cls, id_):
         obj = cls.query().get(id_)
         Session.delete(obj)
-    
+
     def __repr__(self):
         if hasattr(self, '__unicode__'):
             # python repr needs to return str
@@ -518,7 +518,7 @@ class Repository(Base, BaseModel):
     logs = relationship('UserLog')
 
     def __unicode__(self):
-        return u"<%s('%s:%s')>" % (self.__class__.__name__,self.repo_id, 
+        return u"<%s('%s:%s')>" % (self.__class__.__name__,self.repo_id,
                                    self.repo_name)
 
     @classmethod

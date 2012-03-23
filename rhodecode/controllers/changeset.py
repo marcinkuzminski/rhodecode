@@ -51,13 +51,18 @@ from rhodecode.lib.diffs import wrapped_diff
 log = logging.getLogger(__name__)
 
 
-def anchor_url(revision, path):
+def _update_with_GET(params, GET):
+    for k in ['diff1', 'diff2', 'diff']:
+        params[k] += GET.getall(k)
+
+
+def anchor_url(revision, path, GET):
     fid = h.FID(revision, path)
-    return h.url.current(anchor=fid, **dict(request.GET))
+    return h.url.current(anchor=fid, **dict(GET))
 
 
 def get_ignore_ws(fid, GET):
-    ig_ws_global = request.GET.get('ignorews')
+    ig_ws_global = GET.get('ignorews')
     ig_ws = filter(lambda k: k.startswith('WS'), GET.getall(fid))
     if ig_ws:
         try:
@@ -67,12 +72,13 @@ def get_ignore_ws(fid, GET):
     return ig_ws_global
 
 
-def _ignorews_url(fileid=None):
-    fileid = str(fileid)
+def _ignorews_url(GET, fileid=None):
+    fileid = str(fileid) if fileid else None
     params = defaultdict(list)
+    _update_with_GET(params, GET)
     lbl = _('show white space')
-    ig_ws = get_ignore_ws(fileid, request.GET)
-    ln_ctx = get_line_ctx(fileid, request.GET)
+    ig_ws = get_ignore_ws(fileid, GET)
+    ln_ctx = get_line_ctx(fileid, GET)
     # global option
     if fileid is None:
         if ig_ws is None:
@@ -98,7 +104,7 @@ def _ignorews_url(fileid=None):
 
 
 def get_line_ctx(fid, GET):
-    ln_ctx_global = request.GET.get('context')
+    ln_ctx_global = GET.get('context')
     ln_ctx = filter(lambda k: k.startswith('C'), GET.getall(fid))
 
     if ln_ctx:
@@ -112,17 +118,19 @@ def get_line_ctx(fid, GET):
         return
 
 
-def _context_url(fileid=None):
+def _context_url(GET, fileid=None):
     """
     Generates url for context lines
 
     :param fileid:
     """
-    fileid = str(fileid)
-    ig_ws = get_ignore_ws(fileid, request.GET)
-    ln_ctx = (get_line_ctx(fileid, request.GET) or 3) * 2
+
+    fileid = str(fileid) if fileid else None
+    ig_ws = get_ignore_ws(fileid, GET)
+    ln_ctx = (get_line_ctx(fileid, GET) or 3) * 2
 
     params = defaultdict(list)
+    _update_with_GET(params, GET)
 
     # global option
     if fileid is None:
@@ -163,7 +171,7 @@ class ChangesetController(BaseRepoController):
         c.anchor_url = anchor_url
         c.ignorews_url = _ignorews_url
         c.context_url = _context_url
-
+        limit_off = request.GET.get('fulldiff')
         #get ranges of revisions if preset
         rev_range = revision.split('...')[:2]
         enable_comments = True
@@ -221,7 +229,7 @@ class ChangesetController(BaseRepoController):
                 ign_whitespace_lcl = get_ignore_ws(fid, request.GET)
                 lim = self.cut_off_limit
                 if cumulative_diff > self.cut_off_limit:
-                    lim = -1
+                    lim = -1 if limit_off is None else None
                 size, cs1, cs2, diff, st = wrapped_diff(
                     filenode_old=None,
                     filenode_new=node,
@@ -252,7 +260,7 @@ class ChangesetController(BaseRepoController):
                 ign_whitespace_lcl = get_ignore_ws(fid, request.GET)
                 lim = self.cut_off_limit
                 if cumulative_diff > self.cut_off_limit:
-                    lim = -1
+                    lim = -1 if limit_off is None else None
                 size, cs1, cs2, diff, st = wrapped_diff(
                     filenode_old=filenode_old,
                     filenode_new=node,
