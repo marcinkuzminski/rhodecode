@@ -46,6 +46,13 @@ from rhodecode.lib.markup_renderer import MarkupRenderer
 log = logging.getLogger(__name__)
 
 
+def shorter(text, size=20):
+    postfix = '...'
+    if len(text) > size:
+        return text[:size - len(postfix)] + postfix
+    return text
+
+
 def _reset(name, value=None, id=NotGiven, type="reset", **attrs):
     """
     Reset button
@@ -87,6 +94,7 @@ def get_token():
             session.save()
     return session[token_key]
 
+
 class _GetError(object):
     """Get error from form_errors, and represent it as span wrapped error
     message
@@ -102,6 +110,7 @@ class _GetError(object):
 
 get_error = _GetError()
 
+
 class _ToolTip(object):
 
     def __call__(self, tooltip_title, trim_at=50):
@@ -112,6 +121,7 @@ class _ToolTip(object):
         """
         return escape(tooltip_title)
 tooltip = _ToolTip()
+
 
 class _FilesBreadCrumbs(object):
 
@@ -137,8 +147,10 @@ class _FilesBreadCrumbs(object):
 
 files_breadcrumbs = _FilesBreadCrumbs()
 
+
 class CodeHtmlFormatter(HtmlFormatter):
-    """My code Html Formatter for source codes
+    """
+    My code Html Formatter for source codes
     """
 
     def wrap(self, source, outfile):

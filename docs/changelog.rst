@@ -45,6 +45,7 @@ fixes
 - fixed #396 fixed problems with revoking users in nested groups
 - fixed mysql unicode issues + specified InnoDB as default engine with 
   utf8 charset
+- #406 trim long branch/tag names in changelog to not break UI
   
 1.3.3 (**2012-03-02**)
 ----------------------
