@@ -322,6 +322,14 @@ div.options a {
     -moz-border-radius: 0px 0px 0px 0px;
     border-radius: 0px 0px 0px 0px;	
 }
+
+.ie7 #header #header-inner.hover,
+.ie8 #header #header-inner.hover,
+.ie9 #header #header-inner.hover
+{
+    z-index: auto !important;
+}
+
 #header #header-inner #home a {
 	height: 40px;
 	width: 46px;

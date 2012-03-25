@@ -1,5 +1,5 @@
 ## -*- coding: utf-8 -*-
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
         <title>${self.title()}</title>
@@ -130,6 +130,17 @@
         ${self.js()}
     </head>
     <body id="body">
-        ${next.body()}
+     ## IE hacks
+      <!--[if IE 7]>
+      <script>YUD.addClass(document.body,'ie7')</script>
+      <![endif]-->            
+      <!--[if IE 8]>
+      <script>YUD.addClass(document.body,'ie8')</script>
+      <![endif]-->
+      <!--[if IE 9]>
+      <script>YUD.addClass(document.body,'ie9')</script>
+      <![endif]-->    
+
+      ${next.body()}
     </body>
 </html>
