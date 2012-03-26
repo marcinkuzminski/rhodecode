@@ -7,7 +7,7 @@
 
 %for change,filenode,diff,cs1,cs2,stat in changes:
     %if change !='removed':
-    <div id="${h.FID(filenode.changeset.raw_id,filenode.path)}_target" style="clear:both;height:90px;margin-top:-60px"></div>
+    <div id="${h.FID(filenode.changeset.raw_id,filenode.path)}_target" style="clear:both;margin-top:25px"></div>
     <div id="${h.FID(filenode.changeset.raw_id,filenode.path)}" class="diffblock  margined comm">
         <div class="code-header">
             <div class="changeset_header">
