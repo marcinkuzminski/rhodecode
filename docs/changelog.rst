@@ -4,12 +4,24 @@
 Changelog
 =========
 
-
-1.3.4 (**2012-XX-XX**)
+1.3.5 (**2012-XX-XX**)
 ----------------------
 
 :status: in-progress
 :branch: beta
+
+news
+++++
+
+- use ext_json for json module
+
+fixes
++++++
+
+- fixed dev-version marker for stable when served from source codes
+
+1.3.4 (**2012-03-28**)
+----------------------
 
 news
 ++++

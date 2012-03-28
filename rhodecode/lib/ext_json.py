@@ -68,7 +68,7 @@ try:
         except NotImplementedError:
             pass
         raise TypeError("%r is not JSON serializable" % (obj,))
-    # we handle decimals our own it makes unified behavior of json vs 
+    # we handle decimals our own it makes unified behavior of json vs
     # simplejson
     _sj.dumps = functools.partial(_sj.dumps, default=extended_encode,
                                   use_decimal=False)
