@@ -51,9 +51,12 @@ from rhodecode.lib.caching_query import FromCache
 
 from rhodecode.model import meta
 from rhodecode.model.db import Repository, User, RhodeCodeUi, \
-    UserLog, RepoGroup, RhodeCodeSetting, UserRepoGroupToPerm
+    UserLog, RepoGroup, RhodeCodeSetting, UserRepoGroupToPerm,\
+    CacheInvalidation
 from rhodecode.model.meta import Session
 from rhodecode.model.repos_group import ReposGroupModel
+from rhodecode.lib.utils2 import safe_str, safe_unicode
+from rhodecode.lib.vcs.utils.fakemod import create_module
 
 log = logging.getLogger(__name__)
 
@@ -61,7 +64,8 @@ REMOVED_REPO_PAT = re.compile(r'rm__\d{8}_\d{6}_\d{6}__.*')
 
 
 def recursive_replace(str_, replace=' '):
-    """Recursive replace of given sign to just one instance
+    """
+    Recursive replace of given sign to just one instance
 
     :param str_: given string
     :param replace: char to find and replace multiple instances
@@ -79,7 +83,8 @@ def recursive_replace(str_, replace=' '):
 
 
 def repo_name_slug(value):
-    """Return slug of name of repository
+    """
+    Return slug of name of repository
     This function is called on each creation/modification
     of repository to prevent bad names in repo
     """
@@ -154,7 +159,10 @@ def action_logger(user, action, repo, ipaddr='', sa=None, commit=False):
         user_log.user_ip = ipaddr
         sa.add(user_log)
 
-        log.info('Adding user %s, action %s on %s' % (user_obj, action, repo))
+        log.info(
+            'Adding user %s, action %s on %s' % (user_obj, action,
+                                                 safe_unicode(repo))
+        )
         if commit:
             sa.commit()
     except:
@@ -198,12 +206,13 @@ def get_repos(path, recursive=False):
 def is_valid_repo(repo_name, base_path):
     """
     Returns True if given path is a valid repository False otherwise
+
     :param repo_name:
     :param base_path:
 
     :return True: if given path is a valid repository
     """
-    full_path = os.path.join(base_path, repo_name)
+    full_path = os.path.join(safe_str(base_path), safe_str(repo_name))
 
     try:
         get_scm(full_path)
@@ -219,7 +228,7 @@ def is_valid_repos_group(repos_group_name, base_path):
     :param repo_name:
     :param base_path:
     """
-    full_path = os.path.join(base_path, repos_group_name)
+    full_path = os.path.join(safe_str(base_path), safe_str(repos_group_name))
 
     # check if it's not a repo
     if is_valid_repo(repos_group_name, base_path):
@@ -258,7 +267,8 @@ ui_sections = ['alias', 'auth',
 
 
 def make_ui(read_from='file', path=None, checkpaths=True):
-    """A function that will read python rc files or database
+    """
+    A function that will read python rc files or database
     and make an mercurial ui object from read options
 
     :param path: path to mercurial config file
@@ -371,15 +381,16 @@ class EmptyChangeset(BaseChangeset):
         return 0
 
 
-def map_groups(groups):
+def map_groups(path):
     """
-    Checks for groups existence, and creates groups structures.
-    It returns last group in structure
+    Given a full path to a repository, create all nested groups that this
+    repo is inside. This function creates parent-child relationships between
+    groups and creates default perms for all new groups.
 
-    :param groups: list of groups structure
+    :param paths: full path to repository
     """
     sa = meta.Session
-
+    groups = path.split(Repository.url_sep())
     parent = None
     group = None
 
@@ -391,22 +402,18 @@ def map_groups(groups):
         group = RepoGroup.get_by_group_name(group_name)
         desc = '%s group' % group_name
 
-#        # WTF that doesn't work !?
-#        if group is None:
-#            group = rgm.create(group_name, desc, parent, just_db=True)
-#            sa.commit()
-
         # skip folders that are now removed repos
         if REMOVED_REPO_PAT.match(group_name):
             break
 
         if group is None:
-            log.debug('creating group level: %s group_name: %s' % (lvl, group_name))
+            log.debug('creating group level: %s group_name: %s' % (lvl,
+                                                                   group_name))
             group = RepoGroup(group_name, parent)
             group.group_description = desc
             sa.add(group)
             rgm._create_default_perms(group)
-            sa.commit()
+            sa.flush()
         parent = group
     return group
 
@@ -429,7 +436,7 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False):
     added = []
 
     for name, repo in initial_repo_list.items():
-        group = map_groups(name.split(Repository.url_sep()))
+        group = map_groups(name)
         if not rm.get_by_repo_name(name, cache=False):
             log.info('repository %s not found creating default' % name)
             added.append(name)
@@ -446,13 +453,19 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False):
     sa.commit()
     removed = []
     if remove_obsolete:
-        #remove from database those repositories that are not in the filesystem
+        # remove from database those repositories that are not in the filesystem
         for repo in sa.query(Repository).all():
             if repo.repo_name not in initial_repo_list.keys():
+                log.debug("Removing non existing repository found in db %s" %
+                          repo.repo_name)
                 removed.append(repo.repo_name)
                 sa.delete(repo)
                 sa.commit()
 
+    # clear cache keys
+    log.debug("Clearing cache keys now...")
+    CacheInvalidation.clear_cache()
+    sa.commit()
     return added, removed
 
 
@@ -482,6 +495,30 @@ def add_cache(settings):
                 region_settings['type'] = cache_settings.get('type',
                                                              'memory')
             beaker.cache.cache_regions[region] = region_settings
+
+
+def load_rcextensions(root_path):
+    import rhodecode
+    from rhodecode.config import conf
+
+    path = os.path.join(root_path, 'rcextensions', '__init__.py')
+    if os.path.isfile(path):
+        rcext = create_module('rc', path)
+        EXT = rhodecode.EXTENSIONS = rcext
+        log.debug('Found rcextensions now loading %s...' % rcext)
+
+        # Additional mappings that are not present in the pygments lexers
+        conf.LANGUAGES_EXTENSIONS_MAP.update(getattr(EXT, 'EXTRA_MAPPINGS', {}))
+
+        #OVERRIDE OUR EXTENSIONS FROM RC-EXTENSIONS (if present)
+
+        if getattr(EXT, 'INDEX_EXTENSIONS', []) != []:
+            log.debug('settings custom INDEX_EXTENSIONS')
+            conf.INDEX_EXTENSIONS = getattr(EXT, 'INDEX_EXTENSIONS', [])
+
+        #ADDITIONAL MAPPINGS
+        log.debug('adding extra into INDEX_EXTENSIONS')
+        conf.INDEX_EXTENSIONS.extend(getattr(EXT, 'EXTRA_INDEX_EXTENSIONS', []))
 
 
 #==============================================================================
@@ -624,6 +661,6 @@ class BasePasterCommand(Command):
         """
         from pylons import config as pylonsconfig
 
-        path_to_ini_file = os.path.realpath(conf)
-        conf = paste.deploy.appconfig('config:' + path_to_ini_file)
+        self.path_to_ini_file = os.path.realpath(conf)
+        conf = paste.deploy.appconfig('config:' + self.path_to_ini_file)
         pylonsconfig.init_app(conf.global_conf, conf.local_conf)

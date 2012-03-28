@@ -68,19 +68,24 @@ class GitChangeset(BaseChangeset):
     def branch(self):
         # TODO: Cache as we walk (id <-> branch name mapping)
         refs = self.repository._repo.get_refs()
-        heads = [(key[len('refs/heads/'):], val) for key, val in refs.items()
-            if key.startswith('refs/heads/')]
+        heads = {}
+        for key, val in refs.items():
+            for ref_key in ['refs/heads/', 'refs/remotes/origin/']:
+                if key.startswith(ref_key):
+                    n = key[len(ref_key):]
+                    if n not in ['HEAD']:
+                        heads[n] = val
 
-        for name, id in heads:
+        for name, id in heads.iteritems():
             walker = self.repository._repo.object_store.get_graph_walker([id])
             while True:
-                id = walker.next()
-                if not id:
+                id_ = walker.next()
+                if not id_:
                     break
-                if id == self.id:
+                if id_ == self.id:
                     return safe_unicode(name)
         raise ChangesetError("This should not happen... Have you manually "
-            "change id of the changeset?")
+                             "change id of the changeset?")
 
     def _fix_path(self, path):
         """
@@ -92,6 +97,7 @@ class GitChangeset(BaseChangeset):
         return path
 
     def _get_id_for_path(self, path):
+
         # FIXME: Please, spare a couple of minutes and make those codes cleaner;
         if not path in self._paths:
             path = path.strip('/')
@@ -103,24 +109,23 @@ class GitChangeset(BaseChangeset):
             splitted = path.split('/')
             dirs, name = splitted[:-1], splitted[-1]
             curdir = ''
+
+            # initially extract things from root dir
+            for item, stat, id in tree.iteritems():
+                if curdir:
+                    name = '/'.join((curdir, item))
+                else:
+                    name = item
+                self._paths[name] = id
+                self._stat_modes[name] = stat
+
             for dir in dirs:
                 if curdir:
                     curdir = '/'.join((curdir, dir))
                 else:
                     curdir = dir
-                #if curdir in self._paths:
-                    ## This path have been already traversed
-                    ## Update tree and continue
-                    #tree = self.repository._repo[self._paths[curdir]]
-                    #continue
                 dir_id = None
                 for item, stat, id in tree.iteritems():
-                    if curdir:
-                        item_path = '/'.join((curdir, item))
-                    else:
-                        item_path = item
-                    self._paths[item_path] = id
-                    self._stat_modes[item_path] = stat
                     if dir == item:
                         dir_id = id
                 if dir_id:
@@ -130,13 +135,16 @@ class GitChangeset(BaseChangeset):
                         raise ChangesetError('%s is not a directory' % curdir)
                 else:
                     raise ChangesetError('%s have not been found' % curdir)
-            for item, stat, id in tree.iteritems():
-                if curdir:
-                    name = '/'.join((curdir, item))
-                else:
-                    name = item
-                self._paths[name] = id
-                self._stat_modes[name] = stat
+
+                # cache all items from the given traversed tree
+                for item, stat, id in tree.iteritems():
+                    if curdir:
+                        name = '/'.join((curdir, item))
+                    else:
+                        name = item
+                    self._paths[name] = id
+                    self._stat_modes[name] = stat
+
             if not path in self._paths:
                 raise NodeDoesNotExistError("There is no file nor directory "
                     "at the given path %r at revision %r"

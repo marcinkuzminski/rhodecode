@@ -233,10 +233,10 @@ class JSONRPCController(WSGIController):
         try:
             return json.dumps(response)
         except TypeError, e:
-            log.debug('Error encoding response: %s' % e)
+            log.error('API FAILED. Error encoding response: %s' % e)
             return json.dumps(
                 dict(
-                    self._req_id,
+                    id=self._req_id,
                     result=None,
                     error="Error encoding response"
                 )

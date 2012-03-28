@@ -145,11 +145,12 @@ class UsersController(BaseController):
         user_model = UserModel()
         try:
             user_model.delete(id)
-            h.flash(_('successfully deleted user'), category='success')
             Session.commit()
+            h.flash(_('successfully deleted user'), category='success')
         except (UserOwnsReposException, DefaultUserException), e:
-            h.flash(str(e), category='warning')
+            h.flash(e, category='warning')
         except Exception:
+            log.error(traceback.format_exc())
             h.flash(_('An error occurred during deletion of user'),
                     category='error')
         return redirect(url('users'))

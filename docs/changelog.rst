@@ -5,7 +5,45 @@ Changelog
 =========
 
 
+1.3.4 (**2012-03-28**)
+----------------------
 
+news
+++++
+
+- Whoosh logging is now controlled by the .ini files logging setup
+- added clone-url into edit form on /settings page
+- added help text into repo add/edit forms
+- created rcextensions module with additional mappings (ref #322) and
+  post push/pull/create repo hooks callbacks
+- implemented #377 Users view for his own permissions on account page
+- #399 added inheritance of permissions for users group on repos groups
+- #401 repository group is automatically pre-selected when adding repos 
+  inside a repository group
+- added alternative HTTP 403 response when client failed to authenticate. Helps 
+  solving issues with Mercurial and LDAP
+- #402 removed group prefix from repository name when listing repositories 
+  inside a group
+- added gravatars into permission view and permissions autocomplete
+- #347 when running multiple RhodeCode instances, properly invalidates cache 
+  for all registered servers
+
+fixes
++++++
+
+- fixed #390 cache invalidation problems on repos inside group
+- fixed #385 clone by ID url was loosing proxy prefix in URL
+- fixed some unicode problems with waitress
+- fixed issue with escaping < and > in changeset commits
+- fixed error occurring during recursive group creation in API 
+  create_repo function
+- fixed #393 py2.5 fixes for routes url generator
+- fixed #397 Private repository groups shows up before login
+- fixed #396 fixed problems with revoking users in nested groups
+- fixed mysql unicode issues + specified InnoDB as default engine with 
+  utf8 charset
+- #406 trim long branch/tag names in changelog to not break UI
+  
 1.3.3 (**2012-03-02**)
 ----------------------
 

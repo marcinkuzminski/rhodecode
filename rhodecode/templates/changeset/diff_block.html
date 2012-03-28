@@ -7,7 +7,7 @@
 
 %for change,filenode,diff,cs1,cs2,stat in changes:
     %if change !='removed':
-    <div id="${h.FID(filenode.changeset.raw_id,filenode.path)}_target" style="clear:both;height:90px;margin-top:-60px"></div>
+    <div id="${h.FID(filenode.changeset.raw_id,filenode.path)}_target" style="clear:both;margin-top:25px"></div>
     <div id="${h.FID(filenode.changeset.raw_id,filenode.path)}" class="diffblock  margined comm">
         <div class="code-header">
             <div class="changeset_header">
@@ -19,8 +19,8 @@
                   <a href="${h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(filenode.path),diff2=cs2,diff1=cs1,diff='diff',fulldiff=1)}" title="${_('diff')}" class="tooltip"><img class="icon" src="${h.url('/images/icons/page_white_go.png')}"/></a>
                   <a href="${h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(filenode.path),diff2=cs2,diff1=cs1,diff='raw')}" title="${_('raw diff')}" class="tooltip"><img class="icon" src="${h.url('/images/icons/page_white.png')}"/></a>
                   <a href="${h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(filenode.path),diff2=cs2,diff1=cs1,diff='download')}" title="${_('download diff')}" class="tooltip"><img class="icon" src="${h.url('/images/icons/page_white_get.png')}"/></a>
-                  ${c.ignorews_url(h.FID(filenode.changeset.raw_id,filenode.path))}
-                  ${c.context_url(h.FID(filenode.changeset.raw_id,filenode.path))}
+                  ${c.ignorews_url(request.GET, h.FID(filenode.changeset.raw_id,filenode.path))}
+                  ${c.context_url(request.GET, h.FID(filenode.changeset.raw_id,filenode.path))}
                 </div>
                 <span style="float:right;margin-top:-3px">
                   <label>

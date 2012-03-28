@@ -27,7 +27,7 @@ API ACCESS
 All clients are required to send JSON-RPC spec JSON data::
 
     {   
-        "id:<id>,
+        "id:"<id>",
         "api_key":"<api_key>",
         "method":"<method_name>",
         "args":{"<arg_key>":"<arg_val>"}
@@ -50,9 +50,9 @@ Simply provide
 RhodeCode API will return always a JSON-RPC response::
 
     {   
-        "id":<id>,
-        "result": "<result>",
-        "error": null
+        "id":<id>, # matching id sent by request
+        "result": "<result>"|null, # JSON formatted result, null if any errors
+        "error": "null"|<error_message> # JSON formatted error (if any)
     }
 
 All responses from API will be `HTTP/1.0 200 OK`, if there's an error while
@@ -72,6 +72,7 @@ belonging to user with admin rights
 
 INPUT::
 
+    id : <id_for_response>
     api_key : "<api_key>"
     method :  "pull"
     args :    {
@@ -94,6 +95,7 @@ rights.
 
 INPUT::
 
+    id : <id_for_response>
     api_key : "<api_key>"
     method :  "get_user"
     args :    { 
@@ -111,7 +113,15 @@ OUTPUT::
                 "email" :    "<email>",
                 "active" :   "<bool>",
                 "admin" :    "<bool>",
-                "ldap_dn" :  "<ldap_dn>"
+                "ldap_dn" :  "<ldap_dn>",
+                "last_login": "<last_login>",
+                "permissions": {
+                    "global": ["hg.create.repository",
+                               "repository.read",
+                               "hg.register.manual_activate"],
+                    "repositories": {"repo1": "repository.none"},
+                    "repositories_groups": {"Group1": "group.read"}
+                 },
             }
 
     error:  null
@@ -126,6 +136,7 @@ belonging to user with admin rights.
 
 INPUT::
 
+    id : <id_for_response>
     api_key : "<api_key>"
     method :  "get_users"
     args :    { }
@@ -141,7 +152,8 @@ OUTPUT::
                 "email" :    "<email>",
                 "active" :   "<bool>",
                 "admin" :    "<bool>",
-                "ldap_dn" :  "<ldap_dn>"
+                "ldap_dn" :  "<ldap_dn>",
+                "last_login": "<last_login>",
               },
     	      …
             ]
@@ -157,6 +169,7 @@ be executed only using api_key belonging to user with admin rights.
 
 INPUT::
 
+    id : <id_for_response>
     api_key : "<api_key>"
     method :  "create_user"
     args :    {
@@ -188,6 +201,7 @@ be executed only using api_key belonging to user with admin rights.
 
 INPUT::
 
+    id : <id_for_response>
     api_key : "<api_key>"
     method :  "update_user"
     args :    {
@@ -220,6 +234,7 @@ belonging to user with admin rights.
 
 INPUT::
 
+    id : <id_for_response>
     api_key : "<api_key>"
     method :  "get_users_group"
     args :    {
@@ -258,6 +273,7 @@ api_key belonging to user with admin rights.
 
 INPUT::
 
+    id : <id_for_response>
     api_key : "<api_key>"
     method :  "get_users_groups"
     args :    { }
@@ -296,6 +312,7 @@ belonging to user with admin rights
 
 INPUT::
 
+    id : <id_for_response>
     api_key : "<api_key>"
     method :  "create_users_group"
     args:     {
@@ -322,6 +339,7 @@ belonging to user with admin rights
 
 INPUT::
 
+    id : <id_for_response>
     api_key : "<api_key>"
     method :  "add_user_users_group"
     args:     {
@@ -350,6 +368,7 @@ using api_key belonging to user with admin rights
 
 INPUT::
 
+    id : <id_for_response>
     api_key : "<api_key>"
     method :  "remove_user_from_users_group"
     args:     {
@@ -370,12 +389,14 @@ OUTPUT::
 get_repo
 --------
 
-Gets an existing repository by it's name or repository_id. This command can 
+Gets an existing repository by it's name or repository_id. Members will return
+either users_group or user associated to that repository. This command can 
 be executed only using api_key belonging to user with admin rights.
 
 
 INPUT::
 
+    id : <id_for_response>
     api_key : "<api_key>"
     method :  "get_repo"
     args:     {
@@ -391,7 +412,9 @@ OUTPUT::
                 "type" :        "<type>",
                 "description" : "<description>",
                 "members" :     [
-                                  { "id" :         "<userid>",
+                                  { 
+                                    "type": "user",
+                                    "id" :         "<userid>",
                                     "username" :   "<username>",
                                     "firstname":   "<firstname>",
                                     "lastname" :   "<lastname>",
@@ -402,7 +425,8 @@ OUTPUT::
                                     "permission" : "repository.(read|write|admin)"
                                   },
                                   …
-                                  {
+                                  { 
+                                    "type": "users_group",
                                     "id" :       "<usersgroupid>",
                                     "name" :     "<usersgroupname>",
                                     "active":    "<bool>",
@@ -423,6 +447,7 @@ belonging to user with admin rights
 
 INPUT::
 
+    id : <id_for_response>
     api_key : "<api_key>"
     method :  "get_repos"
     args:     { }
@@ -452,6 +477,7 @@ with admin rights
 
 INPUT::
 
+    id : <id_for_response>
     api_key : "<api_key>"
     method :  "get_repo_nodes"
     args:     {
@@ -485,6 +511,7 @@ and create "baz" repository with "bar" as group.
 
 INPUT::
 
+    id : <id_for_response>
     api_key : "<api_key>"
     method :  "create_repo"
     args:     {
@@ -514,6 +541,7 @@ belonging to user with admin rights.
 
 INPUT::
 
+    id : <id_for_response>
     api_key : "<api_key>"
     method :  "delete_repo"
     args:     {
@@ -538,6 +566,7 @@ with admin rights.
 
 INPUT::
 
+    id : <id_for_response>
     api_key : "<api_key>"
     method :  "grant_user_permission"
     args:     {
@@ -563,6 +592,7 @@ only using api_key belonging to user with admin rights.
 
 INPUT::
 
+    id : <id_for_response>
     api_key : "<api_key>"
     method  : "revoke_user_permission"
     args:     {
@@ -588,6 +618,7 @@ api_key belonging to user with admin rights.
 
 INPUT::
 
+    id : <id_for_response>
     api_key : "<api_key>"
     method :  "grant_users_group_permission"
     args:     {
@@ -612,6 +643,7 @@ executed only using api_key belonging to user with admin rights.
 
 INPUT::
 
+    id : <id_for_response>
     api_key : "<api_key>"
     method  : "revoke_users_group_permission"
     args:     {

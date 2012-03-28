@@ -7,6 +7,8 @@ import time
 import traceback
 
 from paste.auth.basic import AuthBasicAuthenticator
+from paste.httpexceptions import HTTPUnauthorized, HTTPForbidden
+from paste.httpheaders import WWW_AUTHENTICATE
 
 from pylons import config, tmpl_context as c, request, session, url
 from pylons.controllers import WSGIController
@@ -15,7 +17,7 @@ from pylons.templating import render_mako as render
 
 from rhodecode import __version__, BACKENDS
 
-from rhodecode.lib import str2bool, safe_unicode
+from rhodecode.lib.utils2 import str2bool, safe_unicode
 from rhodecode.lib.auth import AuthUser, get_container_username, authfunc,\
     HasPermissionAnyMiddleware, CookieStoreWrapper
 from rhodecode.lib.utils import get_repo_slug, invalidate_cache
@@ -28,6 +30,22 @@ from rhodecode.model.scm import ScmModel
 log = logging.getLogger(__name__)
 
 
+class BasicAuth(AuthBasicAuthenticator):
+
+    def __init__(self, realm, authfunc, auth_http_code=None):
+        self.realm = realm
+        self.authfunc = authfunc
+        self._rc_auth_http_code = auth_http_code
+
+    def build_authentication(self):
+        head = WWW_AUTHENTICATE.tuples('Basic realm="%s"' % self.realm)
+        if self._rc_auth_http_code and self._rc_auth_http_code == '403':
+            # return 403 if alternative http return code is specified in
+            # RhodeCode config
+            return HTTPForbidden(headers=head)
+        return HTTPUnauthorized(headers=head)
+
+
 class BaseVCSController(object):
 
     def __init__(self, application, config):
@@ -36,7 +54,8 @@ class BaseVCSController(object):
         # base path of repo locations
         self.basepath = self.config['base_path']
         #authenticate this mercurial request using authfunc
-        self.authenticate = AuthBasicAuthenticator('', authfunc)
+        self.authenticate = BasicAuth('', authfunc,
+                                      config.get('auth_ret_code'))
         self.ipaddr = '0.0.0.0'
 
     def _handle_request(self, environ, start_response):

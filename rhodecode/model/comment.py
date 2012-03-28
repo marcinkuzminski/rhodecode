@@ -29,7 +29,7 @@ import traceback
 from pylons.i18n.translation import _
 from sqlalchemy.util.compat import defaultdict
 
-from rhodecode.lib import extract_mentioned_users
+from rhodecode.lib.utils2 import extract_mentioned_users
 from rhodecode.lib import helpers as h
 from rhodecode.model import BaseModel
 from rhodecode.model.db import ChangesetComment, User, Repository, Notification
@@ -63,6 +63,7 @@ class ChangesetCommentsModel(BaseModel):
         :param f_path:
         :param line_no:
         """
+
         if text:
             repo = Repository.get(repo_id)
             cs = repo.scm_instance.get_changeset(revision)
@@ -78,7 +79,6 @@ class ChangesetCommentsModel(BaseModel):
 
             self.sa.add(comment)
             self.sa.flush()
-
             # make notification
             line = ''
             if line_no:

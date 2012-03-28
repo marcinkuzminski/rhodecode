@@ -93,6 +93,11 @@ issue_prefix = #
 ## all running rhodecode instances. Leave empty if you don't use it
 instance_id = 
 
+## alternative return HTTP header for failed authentication. Default HTTP
+## response is 401 HTTPUnauthorized. Currently HG clients have troubles with 
+## handling that. Set this variable to 403 to return HTTPForbidden
+auth_ret_code =
+
 ####################################
 ###        CELERY CONFIG        ####
 ####################################
@@ -218,13 +223,13 @@ sqlalchemy.db1.url = sqlite:///%(here)s/rhodecode.db
 
 sqlalchemy.db1.echo = false
 sqlalchemy.db1.pool_recycle = 3600
-sqlalchemy.convert_unicode = true
+sqlalchemy.db1.convert_unicode = true
 
 ################################
 ### LOGGING CONFIGURATION   ####
 ################################
 [loggers]
-keys = root, routes, rhodecode, sqlalchemy, beaker, templates
+keys = root, routes, rhodecode, sqlalchemy, beaker, templates, whoosh_indexer
 
 [handlers]
 keys = console, console_sql
@@ -269,6 +274,12 @@ level = INFO
 handlers = console_sql
 qualname = sqlalchemy.engine
 propagate = 0
+
+[logger_whoosh_indexer]
+level = DEBUG
+handlers = 
+qualname = whoosh_indexer
+propagate = 1
 
 ##############
 ## HANDLERS ##

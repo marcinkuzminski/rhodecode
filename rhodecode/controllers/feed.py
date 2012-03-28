@@ -28,7 +28,7 @@ import logging
 from pylons import url, response, tmpl_context as c
 from pylons.i18n.translation import _
 
-from rhodecode.lib import safe_unicode
+from rhodecode.lib.utils2 import safe_unicode
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseRepoController
 

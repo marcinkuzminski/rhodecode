@@ -2,21 +2,24 @@
 
 import os
 import logging
+import rhodecode
 
 from mako.lookup import TemplateLookup
 from pylons.configuration import PylonsConfig
 from pylons.error import handle_mako_error
 
-import rhodecode
+# don't remove this import it does magic for celery
+from rhodecode.lib import celerypylons
+
 import rhodecode.lib.app_globals as app_globals
-import rhodecode.lib.helpers
 
 from rhodecode.config.routing import make_map
-# don't remove this import it does magic for celery
-from rhodecode.lib import celerypylons, str2bool
-from rhodecode.lib import engine_from_config
+
+from rhodecode.lib import helpers
 from rhodecode.lib.auth import set_available_permissions
-from rhodecode.lib.utils import repo2db_mapper, make_ui, set_rhodecode_config
+from rhodecode.lib.utils import repo2db_mapper, make_ui, set_rhodecode_config,\
+    load_rcextensions
+from rhodecode.lib.utils2 import engine_from_config, str2bool
 from rhodecode.model import init_model
 from rhodecode.model.scm import ScmModel
 
@@ -24,17 +27,20 @@ log = logging.getLogger(__name__)
 
 
 def load_environment(global_conf, app_conf, initial=False):
-    """Configure the Pylons environment via the ``pylons.config``
+    """
+    Configure the Pylons environment via the ``pylons.config``
     object
     """
     config = PylonsConfig()
 
     # Pylons paths
     root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    paths = dict(root=root,
-                 controllers=os.path.join(root, 'controllers'),
-                 static_files=os.path.join(root, 'public'),
-                 templates=[os.path.join(root, 'templates')])
+    paths = dict(
+        root=root,
+        controllers=os.path.join(root, 'controllers'),
+        static_files=os.path.join(root, 'public'),
+        templates=[os.path.join(root, 'templates')]
+    )
 
     # Initialize config with the basic options
     config.init_app(global_conf, app_conf, package='rhodecode', paths=paths)
@@ -44,8 +50,11 @@ def load_environment(global_conf, app_conf, initial=False):
 
     config['routes.map'] = make_map(config)
     config['pylons.app_globals'] = app_globals.Globals(config)
-    config['pylons.h'] = rhodecode.lib.helpers
+    config['pylons.h'] = helpers
     rhodecode.CONFIG = config
+
+    load_rcextensions(root_path=config['here'])
+
     # Setup cache object as early as possible
     import pylons
     pylons.cache._push_object(config['pylons.app_globals'].cache)

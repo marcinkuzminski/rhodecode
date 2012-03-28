@@ -40,7 +40,7 @@ from pylons.i18n.translation import _
 from rhodecode.lib.vcs import get_backend
 
 from rhodecode import CELERY_ON
-from rhodecode.lib import LANGUAGES_EXTENSIONS_MAP, safe_str
+from rhodecode.lib.utils2 import safe_str
 from rhodecode.lib.celerylib import run_task, locked_task, dbsession, \
     str2bool, __get_lockkey, LockHeld, DaemonLock, get_session
 from rhodecode.lib.helpers import person
@@ -147,6 +147,7 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
              last_rev, last_rev + parse_limit)
         )
         for cs in repo[last_rev:last_rev + parse_limit]:
+            log.debug('parsing %s' % cs)
             last_cs = cs  # remember last parsed changeset
             k = lmktime([cs.date.timetuple()[0], cs.date.timetuple()[1],
                           cs.date.timetuple()[2], 0, 0, 0, 0, 0, 0])
@@ -233,10 +234,10 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
             lock.release()
             return False
 
-        #final release
+        # final release
         lock.release()
 
-        #execute another task if celery is enabled
+        # execute another task if celery is enabled
         if len(repo.revisions) > 1 and CELERY_ON:
             run_task(get_commits_stats, repo_name, ts_min_y, ts_max_y)
         return True
@@ -327,7 +328,7 @@ def send_email(recipients, subject, body, html_body=''):
     DBS = get_session()
 
     email_config = config
-    subject = "%s %s" % (email_config.get('email_prefix'), subject)
+    subject = "%s %s" % (email_config.get('email_prefix', ''), subject)
     if not recipients:
         # if recipients are not defined we send to email_config + all admins
         admins = [u.email for u in User.query()
@@ -395,6 +396,7 @@ def create_repo_fork(form_data, cur_user):
     DBS.commit()
 
 def __get_codes_stats(repo_name):
+    from rhodecode.config.conf import  LANGUAGES_EXTENSIONS_MAP
     repo = Repository.get_by_repo_name(repo_name).scm_instance
 
     tip = repo.get_changeset()

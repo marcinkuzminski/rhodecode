@@ -26,6 +26,7 @@
 import traceback
 import calendar
 import logging
+import urllib
 from time import mktime
 from datetime import timedelta, date
 from urlparse import urlparse
@@ -39,15 +40,15 @@ from pylons.i18n.translation import _
 
 from beaker.cache import cache_region, region_invalidate
 
+from rhodecode.config.conf import ALL_READMES, ALL_EXTS, LANGUAGES_EXTENSIONS_MAP
 from rhodecode.model.db import Statistics, CacheInvalidation
-from rhodecode.lib import ALL_READMES, ALL_EXTS
+from rhodecode.lib.utils2 import safe_unicode
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.utils import EmptyChangeset
 from rhodecode.lib.markup_renderer import MarkupRenderer
 from rhodecode.lib.celerylib import run_task
-from rhodecode.lib.celerylib.tasks import get_commits_stats, \
-    LANGUAGES_EXTENSIONS_MAP
+from rhodecode.lib.celerylib.tasks import get_commits_stats
 from rhodecode.lib.helpers import RepoPage
 from rhodecode.lib.compat import json, OrderedDict
 
@@ -91,34 +92,37 @@ class SummaryController(BaseRepoController):
 
         uri_tmpl = config.get('clone_uri', default_clone_uri)
         uri_tmpl = uri_tmpl.replace('{', '%(').replace('}', ')s')
-
+        decoded_path = safe_unicode(urllib.unquote(parsed_url.path))
         uri_dict = {
            'user': username,
            'pass': password,
            'scheme': parsed_url.scheme,
            'netloc': parsed_url.netloc,
-           'path': parsed_url.path
+           'path': decoded_path
         }
+
         uri = uri_tmpl % uri_dict
         # generate another clone url by id
-        uri_dict.update({'path': '/_%s' % c.dbrepo.repo_id})
+        uri_dict.update(
+         {'path': decoded_path.replace(repo_name, '_%s' % c.dbrepo.repo_id)}
+        )
         uri_id = uri_tmpl % uri_dict
 
         c.clone_repo_url = uri
         c.clone_repo_url_id = uri_id
         c.repo_tags = OrderedDict()
-        for name, hash in c.rhodecode_repo.tags.items()[:10]:
+        for name, hash_ in c.rhodecode_repo.tags.items()[:10]:
             try:
-                c.repo_tags[name] = c.rhodecode_repo.get_changeset(hash)
+                c.repo_tags[name] = c.rhodecode_repo.get_changeset(hash_)
             except ChangesetError:
-                c.repo_tags[name] = EmptyChangeset(hash)
+                c.repo_tags[name] = EmptyChangeset(hash_)
 
         c.repo_branches = OrderedDict()
-        for name, hash in c.rhodecode_repo.branches.items()[:10]:
+        for name, hash_ in c.rhodecode_repo.branches.items()[:10]:
             try:
-                c.repo_branches[name] = c.rhodecode_repo.get_changeset(hash)
+                c.repo_branches[name] = c.rhodecode_repo.get_changeset(hash_)
             except ChangesetError:
-                c.repo_branches[name] = EmptyChangeset(hash)
+                c.repo_branches[name] = EmptyChangeset(hash_)
 
         td = date.today() + timedelta(days=1)
         td_1m = td - timedelta(days=calendar.mdays[td.month])
@@ -175,7 +179,7 @@ class SummaryController(BaseRepoController):
         if c.enable_downloads:
             c.download_options = self._get_download_links(c.rhodecode_repo)
 
-        c.readme_data, c.readme_file = self.__get_readme_data(c.rhodecode_repo)
+        c.readme_data, c.readme_file = self.__get_readme_data(c.rhodecode_db_repo)
         return render('summary/summary.html')
 
     def __get_readme_data(self, repo):
@@ -206,7 +210,7 @@ class SummaryController(BaseRepoController):
 
             return readme_data, readme_file
 
-        key = repo.name + '_README'
+        key = repo.repo_name + '_README'
         inv = CacheInvalidation.invalidate(key)
         if inv is not None:
             region_invalidate(_get_readme_from_cache, None, key)

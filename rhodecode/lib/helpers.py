@@ -39,10 +39,18 @@ from webhelpers.html.tags import _set_input_attrs, _set_id_attr, \
 
 from rhodecode.lib.annotate import annotate_highlight
 from rhodecode.lib.utils import repo_name_slug
-from rhodecode.lib import str2bool, safe_unicode, safe_str, get_changeset_safe
+from rhodecode.lib.utils2 import str2bool, safe_unicode, safe_str, \
+    get_changeset_safe
 from rhodecode.lib.markup_renderer import MarkupRenderer
 
 log = logging.getLogger(__name__)
+
+
+def shorter(text, size=20):
+    postfix = '...'
+    if len(text) > size:
+        return text[:size - len(postfix)] + postfix
+    return text
 
 
 def _reset(name, value=None, id=NotGiven, type="reset", **attrs):
@@ -67,7 +75,7 @@ def FID(raw_id, path):
     :param path:
     """
 
-    return 'C-%s-%s' % (short_id(raw_id), md5(path).hexdigest()[:12])
+    return 'C-%s-%s' % (short_id(raw_id), md5(safe_str(path)).hexdigest()[:12])
 
 
 def get_token():
@@ -86,6 +94,7 @@ def get_token():
             session.save()
     return session[token_key]
 
+
 class _GetError(object):
     """Get error from form_errors, and represent it as span wrapped error
     message
@@ -101,6 +110,7 @@ class _GetError(object):
 
 get_error = _GetError()
 
+
 class _ToolTip(object):
 
     def __call__(self, tooltip_title, trim_at=50):
@@ -111,6 +121,7 @@ class _ToolTip(object):
         """
         return escape(tooltip_title)
 tooltip = _ToolTip()
+
 
 class _FilesBreadCrumbs(object):
 
@@ -136,8 +147,10 @@ class _FilesBreadCrumbs(object):
 
 files_breadcrumbs = _FilesBreadCrumbs()
 
+
 class CodeHtmlFormatter(HtmlFormatter):
-    """My code Html Formatter for source codes
+    """
+    My code Html Formatter for source codes
     """
 
     def wrap(self, source, outfile):
@@ -319,7 +332,7 @@ flash = _Flash()
 # SCM FILTERS available via h.
 #==============================================================================
 from rhodecode.lib.vcs.utils import author_name, author_email
-from rhodecode.lib import credentials_filter, age as _age
+from rhodecode.lib.utils2 import credentials_filter, age as _age
 from rhodecode.model.db import User
 
 age = lambda  x: _age(x)
@@ -759,10 +772,10 @@ def fancy_file_stats(stats):
     d_v = d if d > 0 else ''
 
     def cgen(l_type):
-        mapping = {'tr': 'top-right-rounded-corner',
-                   'tl': 'top-left-rounded-corner',
-                   'br': 'bottom-right-rounded-corner',
-                   'bl': 'bottom-left-rounded-corner'}
+        mapping = {'tr': 'top-right-rounded-corner-mid',
+                   'tl': 'top-left-rounded-corner-mid',
+                   'br': 'bottom-right-rounded-corner-mid',
+                   'bl': 'bottom-left-rounded-corner-mid'}
         map_getter = lambda x: mapping[x]
 
         if l_type == 'a' and d_v:
@@ -801,6 +814,12 @@ def urlify_text(text_):
 
 
 def urlify_changesets(text_, repository):
+    """
+    Extract revision ids from changeset and make link from them
+
+    :param text_:
+    :param repository:
+    """
     import re
     URL_PAT = re.compile(r'([0-9a-fA-F]{12,})')
 
@@ -839,8 +858,8 @@ def urlify_commit(text_, repository=None, link_=None):
     import re
     import traceback
 
-    # urlify changesets
-    text_ = urlify_changesets(text_, repository)
+    def escaper(string):
+        return string.replace('<', '&lt;').replace('>', '&gt;')
 
     def linkify_others(t, l):
         urls = re.compile(r'(\<a.*?\<\/a\>)',)
@@ -852,6 +871,11 @@ def urlify_commit(text_, repository=None, link_=None):
                 links.append(e)
 
         return ''.join(links)
+
+
+    # urlify changesets - extrac revisions and make link out of them
+    text_ = urlify_changesets(escaper(text_), repository)
+
     try:
         conf = config['app_conf']
 

@@ -25,6 +25,7 @@
 import os
 import sys
 import traceback
+import logging
 from os.path import dirname as dn, join as jn
 
 #to get the rhodecode import
@@ -46,11 +47,9 @@ from rhodecode.model import init_model
 from rhodecode.model.scm import ScmModel
 from rhodecode.model.repo import RepoModel
 from rhodecode.config.environment import load_environment
-from rhodecode.lib import LANGUAGES_EXTENSIONS_MAP, LazyProperty
-from rhodecode.lib.utils import BasePasterCommand, Command, add_cache
-
-# EXTENSIONS WE WANT TO INDEX CONTENT OFF
-INDEX_EXTENSIONS = LANGUAGES_EXTENSIONS_MAP.keys()
+from rhodecode.lib.utils2 import LazyProperty
+from rhodecode.lib.utils import BasePasterCommand, Command, add_cache,\
+    load_rcextensions
 
 # CUSTOM ANALYZER wordsplit + lowercase filter
 ANALYZER = RegexTokenizer(expression=r"\w+") | LowercaseFilter()
@@ -84,18 +83,17 @@ class MakeIndex(BasePasterCommand):
     parser = Command.standard_parser(verbose=True)
 
     def command(self):
-
+        logging.config.fileConfig(self.path_to_ini_file)
         from pylons import config
         add_cache(config)
         engine = engine_from_config(config, 'sqlalchemy.db1.')
         init_model(engine)
-
         index_location = config['index_dir']
         repo_location = self.options.repo_location \
             if self.options.repo_location else RepoModel().repos_path
         repo_list = map(strip, self.options.repo_list.split(',')) \
             if self.options.repo_list else None
-
+        load_rcextensions(config['here'])
         #======================================================================
         # WHOOSH DAEMON
         #======================================================================
@@ -105,7 +103,7 @@ class MakeIndex(BasePasterCommand):
             l = DaemonLock(file_=jn(dn(dn(index_location)), 'make_index.lock'))
             WhooshIndexingDaemon(index_location=index_location,
                                  repo_location=repo_location,
-                                 repo_list=repo_list)\
+                                 repo_list=repo_list,)\
                 .run(full_index=self.options.full_index)
             l.release()
         except LockHeld:

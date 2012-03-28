@@ -27,9 +27,10 @@ import sys
 
 from mercurial.scmutil import revrange
 from mercurial.node import nullrev
-
+from rhodecode import EXTENSIONS
 from rhodecode.lib import helpers as h
 from rhodecode.lib.utils import action_logger
+from inspect import isfunction
 
 
 def repo_size(ui, repo, hooktype=None, **kwargs):
@@ -78,14 +79,19 @@ def log_pull_action(ui, repo, **kwargs):
     :param repo:
     """
 
-    extra_params = dict(repo.ui.configitems('rhodecode_extras'))
-    username = extra_params['username']
-    repository = extra_params['repository']
+    extras = dict(repo.ui.configitems('rhodecode_extras'))
+    username = extras['username']
+    repository = extras['repository']
     action = 'pull'
 
-    action_logger(username, action, repository, extra_params['ip'],
-                  commit=True)
+    action_logger(username, action, repository, extras['ip'], commit=True)
+    # extension hook call
+    callback = getattr(EXTENSIONS, 'PULL_HOOK', None)
 
+    if isfunction(callback):
+        kw = {}
+        kw.update(extras)
+        callback(**kw)
     return 0
 
 
@@ -97,10 +103,10 @@ def log_push_action(ui, repo, **kwargs):
     :param repo:
     """
 
-    extra_params = dict(repo.ui.configitems('rhodecode_extras'))
-    username = extra_params['username']
-    repository = extra_params['repository']
-    action = extra_params['action'] + ':%s'
+    extras = dict(repo.ui.configitems('rhodecode_extras'))
+    username = extras['username']
+    repository = extras['repository']
+    action = extras['action'] + ':%s'
     node = kwargs['node']
 
     def get_revs(repo, rev_opt):
@@ -119,16 +125,22 @@ def log_push_action(ui, repo, **kwargs):
 
     action = action % ','.join(revs)
 
-    action_logger(username, action, repository, extra_params['ip'],
-                  commit=True)
+    action_logger(username, action, repository, extras['ip'], commit=True)
 
+    # extension hook call
+    callback = getattr(EXTENSIONS, 'PUSH_HOOK', None)
+    if isfunction(callback):
+        kw = {'pushed_revs': revs}
+        kw.update(extras)
+        callback(**kw)
     return 0
 
 
 def log_create_repository(repository_dict, created_by, **kwargs):
     """
     Post create repository Hook. This is a dummy function for admins to re-use
-    if needed
+    if needed. It's taken from rhodecode-extensions module and executed
+    if present
 
     :param repository: dict dump of repository object
     :param created_by: username who created repository
@@ -151,5 +163,12 @@ def log_create_repository(repository_dict, created_by, **kwargs):
 
     """
 
+    callback = getattr(EXTENSIONS, 'CREATE_REPO_HOOK', None)
+    if isfunction(callback):
+        kw = {}
+        kw.update(repository_dict)
+        kw.update({'created_by': created_by})
+        kw.update(kwargs)
+        return callback(**kw)
 
     return 0

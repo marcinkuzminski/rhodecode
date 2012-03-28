@@ -85,14 +85,14 @@ class BaseModel(object):
 
         if isinstance(instance, cls):
             return instance
-        elif isinstance(instance, int) or str(instance).isdigit():
+        elif isinstance(instance, (int, long)) or str(instance).isdigit():
             return cls.get(instance)
         else:
             if instance:
                 if callback is None:
                     raise Exception(
-                        'given object must be int or Instance of %s got %s, '
-                        'no callback provided' % (cls, type(instance))
+                        'given object must be int, long or Instance of %s '
+                        'got %s, no callback provided' % (cls, type(instance))
                     )
                 else:
                     return callback(instance)

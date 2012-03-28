@@ -35,7 +35,7 @@ from rhodecode.lib.vcs.nodes import FileNode
 
 from rhodecode import BACKENDS
 from rhodecode.lib import helpers as h
-from rhodecode.lib import safe_str
+from rhodecode.lib.utils2 import safe_str
 from rhodecode.lib.auth import HasRepoPermissionAny, HasReposGroupPermissionAny
 from rhodecode.lib.utils import get_repos as get_filesystem_repos, make_ui, \
     action_logger, EmptyChangeset, REMOVED_REPO_PAT
@@ -235,13 +235,13 @@ class ScmModel(BaseModel):
         return group_iter
 
     def mark_for_invalidation(self, repo_name):
-        """Puts cache invalidation task into db for
+        """
+        Puts cache invalidation task into db for
         further global cache invalidation
 
         :param repo_name: this repo that should invalidation take place
         """
         CacheInvalidation.set_invalidate(repo_name)
-        CacheInvalidation.set_invalidate(repo_name + "_README")
 
     def toggle_following_repo(self, follow_repo_id, user_id):
 

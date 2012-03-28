@@ -284,7 +284,6 @@ class ReposController(BaseController):
 
         :param repo_name:
         """
-
         try:
             RepoModel().revoke_user_permission(repo=repo_name,
                                                user=request.POST['user_id'])

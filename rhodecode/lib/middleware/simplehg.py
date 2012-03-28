@@ -27,13 +27,14 @@
 import os
 import logging
 import traceback
+import urllib
 
 from mercurial.error import RepoError
 from mercurial.hgweb import hgweb_mod
 
 from paste.httpheaders import REMOTE_USER, AUTH_TYPE
 
-from rhodecode.lib import safe_str
+from rhodecode.lib.utils2 import safe_str
 from rhodecode.lib.base import BaseVCSController
 from rhodecode.lib.auth import get_container_username
 from rhodecode.lib.utils import make_ui, is_valid_repo, ui_sections
@@ -45,13 +46,21 @@ log = logging.getLogger(__name__)
 
 
 def is_mercurial(environ):
-    """Returns True if request's target is mercurial server - header
+    """
+    Returns True if request's target is mercurial server - header
     ``HTTP_ACCEPT`` of such request would start with ``application/mercurial``.
     """
     http_accept = environ.get('HTTP_ACCEPT')
+    path_info = environ['PATH_INFO']
     if http_accept and http_accept.startswith('application/mercurial'):
-        return True
-    return False
+        ishg_path = True
+    else:
+        ishg_path = False
+
+    log.debug('pathinfo: %s detected as HG %s' % (
+        path_info, ishg_path)
+    )
+    return ishg_path
 
 
 class SimpleHg(BaseVCSController):
@@ -76,16 +85,20 @@ class SimpleHg(BaseVCSController):
         except:
             return HTTPInternalServerError()(environ, start_response)
 
+        # quick check if that dir exists...
+        if is_valid_repo(repo_name, self.basepath) is False:
+            return HTTPNotFound()(environ, start_response)
+
         #======================================================================
         # GET ACTION PULL or PUSH
         #======================================================================
         action = self.__get_action(environ)
+
         #======================================================================
         # CHECK ANONYMOUS PERMISSION
         #======================================================================
         if action in ['pull', 'push']:
             anonymous_user = self.__get_user('default')
-
             username = anonymous_user.username
             anonymous_perm = self._check_permission(action, anonymous_user,
                                                     repo_name)
@@ -132,29 +145,27 @@ class SimpleHg(BaseVCSController):
                                                          start_response)
 
                     #check permissions for this repository
-                    perm = self._check_permission(action, user,
-                                                   repo_name)
+                    perm = self._check_permission(action, user, repo_name)
                     if perm is not True:
                         return HTTPForbidden()(environ, start_response)
 
-        extras = {'ip': ipaddr,
-                  'username': username,
-                  'action': action,
-                  'repository': repo_name}
+        # extras are injected into mercurial UI object and later available
+        # in hg hooks executed by rhodecode
+        extras = {
+            'ip': ipaddr,
+            'username': username,
+            'action': action,
+            'repository': repo_name
+        }
 
         #======================================================================
         # MERCURIAL REQUEST HANDLING
         #======================================================================
-
-        repo_path = safe_str(os.path.join(self.basepath, repo_name))
+        repo_path = os.path.join(safe_str(self.basepath), safe_str(repo_name))
         log.debug('Repository path is %s' % repo_path)
 
         baseui = make_ui('db')
         self.__inject_extras(repo_path, baseui, extras)
-
-        # quick check if that dir exists...
-        if is_valid_repo(repo_name, self.basepath) is False:
-            return HTTPNotFound()(environ, start_response)
 
         try:
             # invalidate cache on push

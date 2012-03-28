@@ -28,7 +28,7 @@ import logging
 import traceback
 import shutil
 
-from rhodecode.lib import LazyProperty
+from rhodecode.lib.utils2 import LazyProperty
 
 from rhodecode.model import BaseModel
 from rhodecode.model.db import RepoGroup, RhodeCodeUi, UserRepoGroupToPerm, \

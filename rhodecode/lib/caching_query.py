@@ -24,7 +24,7 @@ from beaker.exceptions import BeakerException
 from sqlalchemy.orm.interfaces import MapperOption
 from sqlalchemy.orm.query import Query
 from sqlalchemy.sql import visitors
-from rhodecode.lib import safe_str
+from rhodecode.lib.utils2 import safe_str
 
 
 class CachingQuery(Query):

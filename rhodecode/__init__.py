@@ -4,7 +4,7 @@
     ~~~~~~~~~~~~~~~~~~
 
     RhodeCode, a web based repository management based on pylons
-    versioning implementation: http://semver.org/
+    versioning implementation: http://www.python.org/dev/peps/pep-0386/
 
     :created_on: Apr 9, 2010
     :author: marcink
@@ -26,8 +26,18 @@
 import sys
 import platform
 
-VERSION = (1, 3, 3)
-__version__ = '.'.join((str(each) for each in VERSION[:4]))
+VERSION = (1, 3, 4)
+
+try:
+    from rhodecode.lib import get_current_revision
+    _rev = get_current_revision()
+    if _rev:
+        VERSION += ('dev%s' % _rev[0],)
+except ImportError:
+    pass
+
+__version__ = ('.'.join((str(each) for each in VERSION[:3])) +
+               '.'.join(VERSION[3:]))
 __dbversion__ = 5  # defines current db version for migrations
 __platform__ = platform.system()
 __license__ = 'GPLv3'
@@ -39,16 +49,16 @@ PLATFORM_OTHERS = ('Linux', 'Darwin', 'FreeBSD', 'OpenBSD', 'SunOS')
 requirements = [
     "Pylons==1.0.0",
     "Beaker==1.6.3",
-    "WebHelpers>=1.2",
+    "WebHelpers==1.3",
     "formencode==1.2.4",
-    "SQLAlchemy==0.7.4",
-    "Mako==0.5.0",
+    "SQLAlchemy==0.7.6",
+    "Mako==0.6.2",
     "pygments>=1.4",
     "whoosh>=2.3.0,<2.4",
     "celery>=2.2.5,<2.3",
     "babel",
     "python-dateutil>=1.5.0,<2.0.0",
-    "dulwich>=0.8.0,<0.9.0",
+    "dulwich>=0.8.4,<0.9.0",
     "webob==1.0.8",
     "markdown==2.1.1",
     "docutils==0.8.1",
@@ -65,17 +75,6 @@ else:
     requirements.append("mercurial>=2.1,<2.2")
 
 
-try:
-    from rhodecode.lib import get_current_revision
-    _rev = get_current_revision(quiet=True)
-except ImportError:
-    # this is needed when doing some setup.py operations
-    _rev = False
-
-if len(VERSION) > 3 and _rev:
-    __version__ += ' [rev:%s]' % _rev[0]
-
-
 def get_version():
     """Returns shorter version (digit parts only) as string."""
 
@@ -90,3 +89,6 @@ CELERY_ON = False
 
 # link to config for pylons
 CONFIG = {}
+
+# Linked module for extensions
+EXTENSIONS = {}

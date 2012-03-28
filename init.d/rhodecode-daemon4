@@ -1,0 +1,70 @@
+#!/bin/bash
+###########################################
+#### THIS IS AN ARCH LINUX RC.D SCRIPT ####
+###########################################
+
+. /etc/rc.conf
+. /etc/rc.d/functions
+
+DAEMON=rhodecode
+APP_HOMEDIR="/srv"
+APP_PATH="$APP_HOMEDIR/$DAEMON"
+CONF_NAME="production.ini"
+LOG_FILE="/var/log/$DAEMON.log"
+PID_FILE="/run/daemons/$DAEMON"
+APPL=/usr/bin/paster
+RUN_AS="*****"
+
+ARGS="serve --daemon \
+--user=$RUN_AS \
+--group=$RUN_AS \
+--pid-file=$PID_FILE \
+--log-file=$LOG_FILE \
+$APP_PATH/$CONF_NAME"
+
+[ -r /etc/conf.d/$DAEMON ] && . /etc/conf.d/$DAEMON
+
+if [[ -r $PID_FILE ]]; then
+    read -r PID < "$PID_FILE"
+    if [[ $PID && ! -d /proc/$PID ]]; then
+        unset PID
+        rm_daemon $DAEMON
+    fi
+fi
+
+case "$1" in
+start)
+    stat_busy "Starting $DAEMON"
+    export HOME=$APP_PATH
+    [ -z "$PID" ] && $APPL $ARGS &>/dev/null
+    if [ $? = 0 ]; then
+        add_daemon $DAEMON
+        stat_done
+    else
+        stat_fail
+        exit 1
+    fi
+    ;;
+stop)
+    stat_busy "Stopping $DAEMON"
+    [ -n "$PID" ] && kill $PID &>/dev/null 
+    if [ $? = 0 ]; then
+        rm_daemon $DAEMON
+        stat_done
+    else
+        stat_fail
+        exit 1
+    fi
+    ;;
+restart)
+    $0 stop
+    sleep 1
+    $0 start
+    ;;
+status)
+    stat_busy "Checking $name status";
+    ck_status $name
+    ;;
+*)
+    echo "usage: $0 {start|stop|restart|status}"
+esac

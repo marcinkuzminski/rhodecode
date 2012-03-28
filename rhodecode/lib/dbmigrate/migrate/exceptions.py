@@ -71,9 +71,6 @@ class InvalidScriptError(ScriptError):
     """Invalid script error."""
 
 
-class InvalidVersionError(Error):
-    """Invalid version error."""
-
 # migrate.changeset
 
 class NotSupportedError(Error):

@@ -65,22 +65,20 @@ TEST_URLS += [
 
 class TestLibs(unittest.TestCase):
 
-
     def test_uri_filter(self):
-        from rhodecode.lib import uri_filter
+        from rhodecode.lib.utils2 import uri_filter
 
         for url in TEST_URLS:
             self.assertEqual(uri_filter(url[0]), url[1])
 
     def test_credentials_filter(self):
-        from rhodecode.lib import credentials_filter
+        from rhodecode.lib.utils2 import credentials_filter
 
         for url in TEST_URLS:
             self.assertEqual(credentials_filter(url[0]), url[2])
 
-
     def test_str2bool(self):
-        from rhodecode.lib import str2bool
+        from rhodecode.lib.utils2 import str2bool
         test_cases = [
             ('t', True),
             ('true', True),
@@ -103,9 +101,8 @@ class TestLibs(unittest.TestCase):
         for case in test_cases:
             self.assertEqual(str2bool(case[0]), case[1])
 
-
     def test_mention_extractor(self):
-        from rhodecode.lib import extract_mentioned_users
+        from rhodecode.lib.utils2 import extract_mentioned_users
         sample = ("@first hi there @marcink here's my email marcin@email.com "
                   "@lukaszb check it pls @ ttwelve @D[] @one@two@three "
                   "@MARCIN    @maRCiN @2one_more22")

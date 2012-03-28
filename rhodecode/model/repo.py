@@ -29,15 +29,15 @@ import traceback
 from datetime import datetime
 
 from rhodecode.lib.vcs.backends import get_backend
-
-from rhodecode.lib import LazyProperty
-from rhodecode.lib import safe_str, safe_unicode
+from rhodecode.lib.compat import json
+from rhodecode.lib.utils2 import LazyProperty, safe_str, safe_unicode
 from rhodecode.lib.caching_query import FromCache
 from rhodecode.lib.hooks import log_create_repository
 
 from rhodecode.model import BaseModel
 from rhodecode.model.db import Repository, UserRepoToPerm, User, Permission, \
     Statistics, UsersGroup, UsersGroupRepoToPerm, RhodeCodeUi, RepoGroup
+from rhodecode.lib import helpers as h
 
 
 log = logging.getLogger(__name__)
@@ -95,25 +95,28 @@ class RepoModel(BaseModel):
         return repo.scalar()
 
     def get_users_js(self):
-
         users = self.sa.query(User).filter(User.active == True).all()
-        u_tmpl = '''{id:%s, fname:"%s", lname:"%s", nname:"%s"},'''
-        users_array = '[%s]' % '\n'.join([u_tmpl % (u.user_id, u.name,
-                                                    u.lastname, u.username)
-                                        for u in users])
-        return users_array
+        return json.dumps([
+            {
+             'id': u.user_id,
+             'fname': u.name,
+             'lname': u.lastname,
+             'nname': u.username,
+             'gravatar_lnk': h.gravatar_url(u.email, 14)
+            } for u in users]
+        )
 
     def get_users_groups_js(self):
         users_groups = self.sa.query(UsersGroup)\
             .filter(UsersGroup.users_group_active == True).all()
 
-        g_tmpl = '''{id:%s, grname:"%s",grmembers:"%s"},'''
-
-        users_groups_array = '[%s]' % '\n'.join([g_tmpl % \
-                                    (gr.users_group_id, gr.users_group_name,
-                                     len(gr.members))
-                                        for gr in users_groups])
-        return users_groups_array
+        return json.dumps([
+            {
+             'id': gr.users_group_id,
+             'grname': gr.users_group_name,
+             'grmembers': len(gr.members),
+            } for gr in users_groups]
+        )
 
     def _get_defaults(self, repo_name):
         """
@@ -346,6 +349,7 @@ class RepoModel(BaseModel):
         :param repo: Instance of Repository, repository_id, or repository name
         :param user: Instance of User, user_id or username
         """
+
         user = self.__get_user(user)
         repo = self.__get_repo(repo)
 

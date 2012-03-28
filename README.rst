@@ -15,10 +15,11 @@ RhodeCode is similar in some respects to github_ or bitbucket_,
 however RhodeCode can be run as standalone hosted application on your own server.
 It is open source and donation ware and focuses more on providing a customized, 
 self administered interface for Mercurial_ and GIT_  repositories. 
-RhodeCode is powered by a vcs_ library that Lukasz Balcerzak and I created to 
-handle multiple different version control systems.
+RhodeCode works on *nix systems and Windows it is powered by a vcs_ library 
+that Lukasz Balcerzak and Marcin Kuzminski created to handle multiple 
+different version control systems.
 
-RhodeCode uses `Semantic Versioning <http://semver.org/>`_
+RhodeCode uses `PEP386 versioning http://www.python.org/dev/peps/pep-0386/`_
 
 Installation
 ------------
@@ -99,7 +100,7 @@ RhodeCode Features
 - Intelligent cache with invalidation after push or project change, provides 
   high performance and always up to date data.
 - Rss / atom feeds, gravatar support, download sources as zip/tar/gz
-- Async tasks for speed and performance using celery_ (works without them too)  
+- Optional async tasks for speed and performance using celery_  
 - Backup scripts can do backup of whole app and send it over scp to desired 
   location 
 - Based on pylons / sqlalchemy / sqlite / whoosh / vcs

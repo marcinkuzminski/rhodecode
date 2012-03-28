@@ -34,12 +34,22 @@
                     ${h.text('repo_name',class_="small")}
                 </div>
              </div>
+	       <div class="field">
+	           <div class="label">
+	               <label for="clone_uri">${_('Clone uri')}:</label>
+	           </div>
+	           <div class="input">
+	               ${h.text('clone_uri',class_="medium")}
+                 <span class="help-block">${_('Optional http[s] url from which repository should be cloned.')}</span>
+	           </div>
+	        </div>
             <div class="field">
                 <div class="label">
                     <label for="repo_group">${_('Repository group')}:</label>
                 </div>
                 <div class="input">
                     ${h.select('repo_group','',c.repo_groups,class_="medium")}
+                    <span class="help-block">${_('Optional select a group to put this repository into.')}</span>
                 </div>
             </div>
             <div class="field">
@@ -47,16 +57,18 @@
                     <label for="description">${_('Description')}:</label>
                 </div>
                 <div class="textarea text-area editor">
-                    ${h.textarea('description',cols=23,rows=5)}
+                    ${h.textarea('description')}
+                    <span class="help-block">${_('Keep it short and to the point. Use a README file for longer descriptions.')}</span>
                 </div>
             </div>
 
             <div class="field">
                 <div class="label label-checkbox">
-                    <label for="private">${_('Private')}:</label>
+                    <label for="private">${_('Private repository')}:</label>
                 </div>
                 <div class="checkboxes">
                     ${h.checkbox('private',value="True")}
+                    <span class="help-block">${_('Private repositories are only visible to people explicitly added as collaborators.')}</span>
                 </div>
             </div>
 

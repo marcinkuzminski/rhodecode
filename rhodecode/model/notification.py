@@ -32,6 +32,7 @@ import datetime
 from pylons.i18n.translation import _
 
 import rhodecode
+from rhodecode.config.conf import DATETIME_FORMAT
 from rhodecode.lib import helpers as h
 from rhodecode.model import BaseModel
 from rhodecode.model.db import Notification, User, UserNotification
@@ -47,11 +48,11 @@ class NotificationModel(BaseModel):
     def __get_notification(self, notification):
         if isinstance(notification, Notification):
             return notification
-        elif isinstance(notification, int):
+        elif isinstance(notification, (int, long)):
             return Notification.get(notification)
         else:
             if notification:
-                raise Exception('notification must be int or Instance'
+                raise Exception('notification must be int, long or Instance'
                                 ' of Notification got %s' % type(notification))
 
     def create(self, created_by, subject, body, recipients=None,
@@ -111,6 +112,7 @@ class NotificationModel(BaseModel):
             kwargs.update(email_kwargs)
             email_body_html = EmailNotificationModel()\
                                 .get_email_tmpl(type_, **kwargs)
+
             run_task(tasks.send_email, rec.email, email_subject, email_body,
                      email_body_html)
 
@@ -176,14 +178,13 @@ class NotificationModel(BaseModel):
             notification.TYPE_REGISTRATION: _('registered in RhodeCode')
         }
 
-        DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
-
         tmpl = "%(user)s %(action)s %(when)s"
         if show_age:
             when = h.age(notification.created_on)
         else:
             DTF = lambda d: datetime.datetime.strftime(d, DATETIME_FORMAT)
             when = DTF(notification.created_on)
+
         data = dict(
             user=notification.created_by_user.username,
             action=_map[notification.type_], when=when,

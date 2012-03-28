@@ -71,6 +71,11 @@ RhodeCode will send mails on user registration, or when RhodeCode errors occur
 on errors the mails will have a detailed traceback of error.
 
 
+Mails are also sent for code comments. If someone comments on a changeset
+mail is sent to all participants, the person who commited the changeset 
+(if present in RhodeCode), and to all people mentioned with @mention system.
+
+
 Trending source files
 ---------------------
 

@@ -30,16 +30,15 @@ import logging
 
 from rhodecode.controllers.api import JSONRPCController, JSONRPCError
 from rhodecode.lib.auth import HasPermissionAllDecorator, \
-    HasPermissionAnyDecorator, PasswordGenerator
+    HasPermissionAnyDecorator, PasswordGenerator, AuthUser
 
 from rhodecode.model.meta import Session
 from rhodecode.model.scm import ScmModel
-from rhodecode.model.db import User, UsersGroup, RepoGroup, Repository
+from rhodecode.model.db import User, UsersGroup, Repository
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.user import UserModel
 from rhodecode.model.users_group import UsersGroupModel
-from rhodecode.model.repos_group import ReposGroupModel
-
+from rhodecode.lib.utils import map_groups
 
 log = logging.getLogger(__name__)
 
@@ -100,7 +99,9 @@ class ApiController(JSONRPCController):
             email=user.email,
             active=user.active,
             admin=user.admin,
-            ldap_dn=user.ldap_dn
+            ldap_dn=user.ldap_dn,
+            last_login=user.last_login,
+            permissions=AuthUser(user_id=user.user_id).permissions
         )
 
     @HasPermissionAllDecorator('hg.admin')
@@ -122,7 +123,8 @@ class ApiController(JSONRPCController):
                     email=user.email,
                     active=user.active,
                     admin=user.admin,
-                    ldap_dn=user.ldap_dn
+                    ldap_dn=user.ldap_dn,
+                    last_login=user.last_login,
                 )
             )
         return result
@@ -282,7 +284,7 @@ class ApiController(JSONRPCController):
     @HasPermissionAllDecorator('hg.admin')
     def add_user_to_users_group(self, apiuser, group_name, username):
         """"
-        Add a user to a group
+        Add a user to a users group
 
         :param apiuser:
         :param group_name:
@@ -360,7 +362,7 @@ class ApiController(JSONRPCController):
             user = user.user
             members.append(
                 dict(
-                    type_="user",
+                    type="user",
                     id=user.user_id,
                     username=user.username,
                     firstname=user.name,
@@ -377,7 +379,7 @@ class ApiController(JSONRPCController):
             users_group = users_group.users_group
             members.append(
                 dict(
-                    type_="users_group",
+                    type="users_group",
                     id=users_group.users_group_id,
                     name=users_group.users_group_name,
                     active=users_group.users_group_active,
@@ -464,15 +466,10 @@ class ApiController(JSONRPCController):
             if Repository.get_by_repo_name(repo_name):
                 raise JSONRPCError("repo %s already exist" % repo_name)
 
-            groups = repo_name.split('/')
+            groups = repo_name.split(Repository.url_sep())
             real_name = groups[-1]
-            groups = groups[:-1]
-            parent_id = None
-            for g in groups:
-                group = RepoGroup.get_by_group_name(g)
-                if not group:
-                    group = ReposGroupModel().create(g, '', parent_id)
-                parent_id = group.group_id
+            # create structure of groups
+            group = map_groups(repo_name)
 
             repo = RepoModel().create(
                 dict(
@@ -481,7 +478,7 @@ class ApiController(JSONRPCController):
                     description=description,
                     private=private,
                     repo_type=repo_type,
-                    repo_group=parent_id,
+                    repo_group=group.group_id if group else None,
                     clone_uri=clone_uri
                 ),
                 owner

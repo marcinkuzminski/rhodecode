@@ -32,24 +32,26 @@ from pylons.i18n.translation import _
 from pylons.controllers.util import redirect
 from pylons.decorators import jsonify
 
-from rhodecode.lib.vcs.conf import settings
-from rhodecode.lib.vcs.exceptions import RepositoryError, ChangesetDoesNotExistError, \
-    EmptyRepositoryError, ImproperArchiveTypeError, VCSError, \
-    NodeAlreadyExistsError
-from rhodecode.lib.vcs.nodes import FileNode
+from rhodecode.lib import diffs
+from rhodecode.lib import helpers as h
 
 from rhodecode.lib.compat import OrderedDict
-from rhodecode.lib import convert_line_endings, detect_mode, safe_str
+from rhodecode.lib.utils2 import convert_line_endings, detect_mode, safe_str
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.utils import EmptyChangeset
-from rhodecode.lib import diffs
-import rhodecode.lib.helpers as h
+from rhodecode.lib.vcs.conf import settings
+from rhodecode.lib.vcs.exceptions import RepositoryError, \
+    ChangesetDoesNotExistError, EmptyRepositoryError, \
+    ImproperArchiveTypeError, VCSError, NodeAlreadyExistsError
+from rhodecode.lib.vcs.nodes import FileNode
+
 from rhodecode.model.repo import RepoModel
+from rhodecode.model.scm import ScmModel
+
 from rhodecode.controllers.changeset import anchor_url, _ignorews_url,\
     _context_url, get_line_ctx, get_ignore_ws
-from rhodecode.lib.diffs import wrapped_diff
-from rhodecode.model.scm import ScmModel
+
 
 log = logging.getLogger(__name__)
 
@@ -447,7 +449,7 @@ class FilesController(BaseRepoController):
             ign_whitespace_lcl = get_ignore_ws(fid, request.GET)
 
             lim = request.GET.get('fulldiff') or self.cut_off_limit
-            _, cs1, cs2, diff, st = wrapped_diff(filenode_old=node1,
+            _, cs1, cs2, diff, st = diffs.wrapped_diff(filenode_old=node1,
                                          filenode_new=node2,
                                          cut_off_limit=lim,
                                          ignore_whitespace=ign_whitespace_lcl,
