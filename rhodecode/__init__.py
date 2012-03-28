@@ -31,7 +31,7 @@ VERSION = (1, 3, 5, 'b')
 try:
     from rhodecode.lib import get_current_revision
     _rev = get_current_revision()
-    if _rev:
+    if _rev and len(VERSION) > 3:
         VERSION += ('dev%s' % _rev[0],)
 except ImportError:
     pass
