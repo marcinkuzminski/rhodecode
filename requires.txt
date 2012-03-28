@@ -9,9 +9,11 @@ whoosh>=2.3.0,<2.4
 celery>=2.2.5,<2.3
 babel
 python-dateutil>=1.5.0,<2.0.0
-https://github.com/jelmer/dulwich/tarball/master
+dulwich>=0.8.4,<0.9.0
 webob==1.0.8
 markdown==2.1.1
 docutils==0.8.1
+simplejson
+pysqlite
 py-bcrypt
 mercurial>=2.1,<2.2
