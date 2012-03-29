@@ -19,6 +19,7 @@ fixes
 +++++
 
 - fixed dev-version marker for stable when served from source codes
+- fixed missing permission checks on show forks page
 
 1.3.4 (**2012-03-28**)
 ----------------------

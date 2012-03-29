@@ -35,7 +35,7 @@ import rhodecode.lib.helpers as h
 
 from rhodecode.lib.helpers import Page
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator, \
-    NotAnonymous
+    NotAnonymous, HasRepoPermissionAny
 from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.model.db import Repository, RepoGroup, UserFollowing, User
 from rhodecode.model.repo import RepoModel
@@ -103,7 +103,13 @@ class ForksController(BaseRepoController):
     def forks(self, repo_name):
         p = int(request.params.get('page', 1))
         repo_id = c.rhodecode_db_repo.repo_id
-        d = Repository.get_repo_forks(repo_id)
+        d = []
+        for r in Repository.get_repo_forks(repo_id):
+            if not HasRepoPermissionAny(
+                'repository.read', 'repository.write', 'repository.admin'
+            )(r.repo_name, 'get forks check'):
+                continue
+            d.append(r)
         c.forks_pager = Page(d, page=p, items_per_page=20)
 
         c.forks_data = render('/forks/forks_data.html')
