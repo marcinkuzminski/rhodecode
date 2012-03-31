@@ -112,7 +112,7 @@ class FilesController(BaseRepoController):
 
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
                                    'repository.admin')
-    def index(self, repo_name, revision, f_path):
+    def index(self, repo_name, revision, f_path, annotate=False):
         # redirect to given revision from form if given
         post_revision = request.POST.get('at_rev', None)
         if post_revision:
@@ -123,7 +123,7 @@ class FilesController(BaseRepoController):
         c.changeset = self.__get_cs_or_redirect(revision, repo_name)
         c.branch = request.GET.get('branch', None)
         c.f_path = f_path
-
+        c.annotate = annotate
         cur_rev = c.changeset.revision
 
         # prev link
@@ -218,16 +218,6 @@ class FilesController(BaseRepoController):
         response.content_disposition = dispo
         response.content_type = mimetype
         return file_node.content
-
-    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
-                                   'repository.admin')
-    def annotate(self, repo_name, revision, f_path):
-        c.cs = self.__get_cs_or_redirect(revision, repo_name)
-        c.file = self.__get_filenode_or_redirect(repo_name, c.cs, f_path)
-
-        c.file_history = self._get_node_history(c.cs, f_path)
-        c.f_path = f_path
-        return render('files/files_annotate.html')
 
     @HasRepoPermissionAnyDecorator('repository.write', 'repository.admin')
     def edit(self, repo_name, revision, f_path):
