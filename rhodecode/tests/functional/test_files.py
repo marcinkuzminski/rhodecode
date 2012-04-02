@@ -129,10 +129,11 @@ class TestFilesController(TestController):
 
     def test_file_annotation(self):
         self.log_user()
-        response = self.app.get(url(controller='files', action='annotate',
+        response = self.app.get(url(controller='files', action='index',
                                     repo_name=HG_REPO,
                                     revision='27cd5cce30c96924232dffcd24178a07ffeb5dfc',
-                                    f_path='vcs/nodes.py'))
+                                    f_path='vcs/nodes.py',
+                                    annotate=True))
 
 
         response.mustcontain("""<optgroup label="Changesets">
