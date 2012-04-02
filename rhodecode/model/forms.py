@@ -551,7 +551,7 @@ class LoginForm(formencode.Schema):
     )
 
     password = UnicodeString(
-        strip=True,
+        strip=False,
         min=3,
         not_empty=True,
         messages={
@@ -571,13 +571,13 @@ def UserForm(edit=False, old_data={}):
         username = All(UnicodeString(strip=True, min=1, not_empty=True),
                        ValidUsername(edit, old_data))
         if edit:
-            new_password = All(UnicodeString(strip=True, min=6, not_empty=False))
-            password_confirmation = All(UnicodeString(strip=True, min=6,
+            new_password = All(UnicodeString(strip=False, min=6, not_empty=False))
+            password_confirmation = All(UnicodeString(strip=False, min=6,
                                                       not_empty=False))
             admin = StringBoolean(if_missing=False)
         else:
-            password = All(UnicodeString(strip=True, min=6, not_empty=True))
-            password_confirmation = All(UnicodeString(strip=True, min=6,
+            password = All(UnicodeString(strip=False, min=6, not_empty=True))
+            password_confirmation = All(UnicodeString(strip=False, min=6,
                                                       not_empty=False))
 
         active = StringBoolean(if_missing=False)
@@ -632,8 +632,8 @@ def RegisterForm(edit=False, old_data={}):
         filter_extra_fields = True
         username = All(ValidUsername(edit, old_data),
                        UnicodeString(strip=True, min=1, not_empty=True))
-        password = All(UnicodeString(strip=True, min=6, not_empty=True))
-        password_confirmation = All(UnicodeString(strip=True, min=6, not_empty=True))
+        password = All(UnicodeString(strip=False, min=6, not_empty=True))
+        password_confirmation = All(UnicodeString(strip=False, min=6, not_empty=True))
         active = StringBoolean(if_missing=False)
         name = UnicodeString(strip=True, min=1, not_empty=False)
         lastname = UnicodeString(strip=True, min=1, not_empty=False)
