@@ -78,11 +78,12 @@ class GitRepository(BaseRepository):
 
         :param cmd: git command to be executed
         """
+
         #cmd = '(cd %s && git %s)' % (self.path, cmd)
         if isinstance(cmd, basestring):
-            cmd = 'git %s' % cmd
+            cmd = 'GIT_CONFIG_NOGLOBAL=1 git %s' % cmd
         else:
-            cmd = ['git'] + cmd
+            cmd = ['GIT_CONFIG_NOGLOBAL=1', 'git'] + cmd
         try:
             opts = dict(
                 shell=isinstance(cmd, basestring),
