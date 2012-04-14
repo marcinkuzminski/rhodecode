@@ -14,12 +14,23 @@ news
 ++++
 
 - use ext_json for json module
+- unified annotation view with file source view
+- notification improvements, better inbox + css
+- #419 don't strip passwords for login forms, make rhodecode 
+  more compatible with LDAP servers
+- Added HTTP_X_FORWARDED_FOR as another method of extracting 
+  IP for pull/push logs. - moved all to base controller  
+- #415: Adding comment to changeset causes reload. 
+  Comments are now added via ajax and doesn't reload the page
 
 fixes
 +++++
 
 - fixed dev-version marker for stable when served from source codes
 - fixed missing permission checks on show forks page
+- #418 cast to unicode fixes in notification objects
+
+
 
 1.3.4 (**2012-03-28**)
 ----------------------
