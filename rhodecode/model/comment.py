@@ -142,7 +142,9 @@ class ChangesetCommentsModel(BaseModel):
             .filter(ChangesetComment.repo_id == repo_id)\
             .filter(ChangesetComment.revision == revision)\
             .filter(ChangesetComment.line_no != None)\
-            .filter(ChangesetComment.f_path != None).all()
+            .filter(ChangesetComment.f_path != None)\
+            .order_by(ChangesetComment.comment_id.asc())\
+            .all()
 
         paths = defaultdict(lambda: defaultdict(list))
 

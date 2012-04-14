@@ -122,22 +122,12 @@
     <%namespace name="comment" file="/changeset/changeset_file_comment.html"/>
     ${comment.comment_inline_form(c.changeset)}
 
+    ## render comments
     ${comment.comments(c.changeset)}
-
     <script type="text/javascript">
-      var deleteComment = function(comment_id){
-
-          var url = "${url('changeset_comment_delete',repo_name=c.repo_name,comment_id='__COMMENT_ID__')}".replace('__COMMENT_ID__',comment_id);
-          var postData = '_method=delete';
-          var success = function(o){
-              var n = YUD.get('comment-'+comment_id);
-              n.parentNode.removeChild(n);
-          }
-          ajaxPOST(url,postData,success);
-      }
-
       YUE.onDOMReady(function(){
-
+    	  AJAX_COMMENT_URL = "${url('changeset_comment',repo_name=c.repo_name,revision=c.changeset.raw_id)}";
+    	  AJAX_COMMENT_DELETE_URL = "${url('changeset_comment_delete',repo_name=c.repo_name,comment_id='__COMMENT_ID__')}"
           YUE.on(YUQ('.show-inline-comments'),'change',function(e){
               var show = 'none';
               var target = e.currentTarget;
@@ -162,28 +152,7 @@
 
           // inject comments into they proper positions
           var file_comments = YUQ('.inline-comment-placeholder');
-
-          for (f in file_comments){
-              var box = file_comments[f];
-              var inlines = box.children;
-              for(var i=0; i<inlines.length; i++){
-                  try{
-
-                    var inline = inlines[i];
-                    var lineno = YUD.getAttribute(inlines[i],'line');
-                    var lineid = "{0}_{1}".format(YUD.getAttribute(inline,'target_id'),lineno);
-                    var target_line = YUD.get(lineid);
-
-                    var add = createInlineAddButton(target_line.parentNode,'${_("add another comment")}');
-                    YUD.insertAfter(add,target_line.parentNode);
-
-                    var comment = new YAHOO.util.Element(tableTr('inline-comments',inline.innerHTML))
-                    YUD.insertAfter(comment,target_line.parentNode);
-                  }catch(e){
-                	  console.log(e);
-                  }
-              }
-          }
+          renderInlineComments(file_comments);
       })
 
     </script>

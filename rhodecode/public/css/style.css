@@ -3966,6 +3966,7 @@ form.comment-form {
 
 .comment .buttons {
 	float: right;
+	padding:2px 2px 0px 0px;
 }
 
 
@@ -3975,6 +3976,23 @@ form.comment-form {
 }
 
 /** comment inline form **/
+.comment-inline-form .overlay{
+	display: none;
+}
+.comment-inline-form .overlay.submitting{
+	display:block;
+    background: none repeat scroll 0 0 white;
+    font-size: 16px;
+    opacity: 0.5;
+    position: absolute;
+    text-align: center;
+    vertical-align: top;
+
+}
+.comment-inline-form .overlay.submitting .overlay-text{
+	width:100%;
+	margin-top:5%;
+}
 
 .comment-inline-form .clearfix{
     background: #EEE;
@@ -3987,6 +4005,7 @@ form.comment-form {
 div.comment-inline-form {
     margin-top: 5px;
     padding:2px 6px 8px 6px;
+
 }
 
 .comment-inline-form strong {
@@ -4047,6 +4066,10 @@ form.comment-inline-form {
     margin: 3px 3px 5px 5px;
     background-color: #FAFAFA;
 }
+.inline-comments .add-comment {
+	padding: 2px 4px 8px 5px;
+}
+
 .inline-comments .comment-wrapp{
 	padding:1px;
 }
@@ -4078,7 +4101,7 @@ form.comment-inline-form {
     font-size: 16px;
 }
 .inline-comments-button .add-comment{
-	margin:10px 5px !important;
+	margin:2px 0px 8px 5px !important
 }
 .notifications{
     border-radius: 4px 4px 4px 4px;

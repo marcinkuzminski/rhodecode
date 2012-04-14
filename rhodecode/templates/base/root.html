@@ -47,9 +47,13 @@
 
             <script type="text/javascript">
             var follow_base_url  = "${h.url('toggle_following')}";
-            var stop_follow_text = "${_('Stop following this repository')}";
-            var start_follow_text = "${_('Start following this repository')}";
-
+            
+            //JS translations map
+            var TRANSLATION_MAP = {
+            	'add another comment':'${_("add another comment")}',
+                'Stop following this repository':"${_('Stop following this repository')}",
+                'Start following this repository':"${_('Start following this repository')}",
+            };
 
             var onSuccessFollow = function(target){
                 var f = YUD.get(target.id);
@@ -57,7 +61,7 @@
 
                 if(f.getAttribute('class')=='follow'){
                     f.setAttribute('class','following');
-                    f.setAttribute('title',stop_follow_text);
+                    f.setAttribute('title',TRANSLATION_MAP['Stop following this repository']);
 
                     if(f_cnt){
                         var cnt = Number(f_cnt.innerHTML)+1;
@@ -66,7 +70,7 @@
                 }
                 else{
                     f.setAttribute('class','follow');
-                    f.setAttribute('title',start_follow_text);
+                    f.setAttribute('title',TRANSLATION_MAP['Start following this repository']);
                     if(f_cnt){
                         var cnt = Number(f_cnt.innerHTML)+1;
                         f_cnt.innerHTML = cnt;

@@ -359,16 +359,25 @@ class ChangesetController(BaseRepoController):
 
         return render('changeset/raw_changeset.html')
 
+    @jsonify
     def comment(self, repo_name, revision):
-        ChangesetCommentsModel().create(text=request.POST.get('text'),
-                                        repo_id=c.rhodecode_db_repo.repo_id,
-                                        user_id=c.rhodecode_user.user_id,
-                                        revision=revision,
-                                        f_path=request.POST.get('f_path'),
-                                        line_no=request.POST.get('line'))
+        comm = ChangesetCommentsModel().create(
+            text=request.POST.get('text'),
+            repo_id=c.rhodecode_db_repo.repo_id,
+            user_id=c.rhodecode_user.user_id,
+            revision=revision,
+            f_path=request.POST.get('f_path'),
+            line_no=request.POST.get('line')
+        )
         Session.commit()
-        return redirect(h.url('changeset_home', repo_name=repo_name,
-                              revision=revision))
+        data = {
+           'target_id': h.safeid(h.safe_unicode(request.POST.get('f_path'))),
+        }
+        if comm:
+            c.co = comm
+            data.update(comm.get_dict())
+            data.update({'rendered_text': render('changeset/changeset_comment_block.html')})
+        return data
 
     @jsonify
     def delete_comment(self, repo_name, comment_id):
