@@ -76,7 +76,7 @@
             </div>
         %endfor
     %endfor
-    
+
 </%def>
 
 <%def name="comments(changeset)">
@@ -85,7 +85,7 @@
     <div id="inline-comments-container">
      ${inlines(changeset)}
     </div>
-    
+
     %for co in c.comments:
         ${comment_block(co)}
     %endfor

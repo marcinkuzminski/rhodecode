@@ -376,7 +376,8 @@ class ChangesetController(BaseRepoController):
         if comm:
             c.co = comm
             data.update(comm.get_dict())
-            data.update({'rendered_text': render('changeset/changeset_comment_block.html')})
+            data.update({'rendered_text':
+                         render('changeset/changeset_comment_block.html')})
         return data
 
     @jsonify
