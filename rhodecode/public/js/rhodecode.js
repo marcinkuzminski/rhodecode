@@ -196,6 +196,9 @@ function ypjax(url,container,s_call,f_call,args){
 };
 
 var ajaxPOST = function(url,postData,success) {
+	// Set special header for ajax == HTTP_X_PARTIAL_XHR
+	YUC.initHeader('X-PARTIAL-XHR',true);
+	
 	var toQueryString = function(o) {
 	    if(typeof o !== 'object') {
 	        return false;
@@ -423,6 +426,10 @@ var injectInlineForm = function(tr){
 			  return
 		  }
 		  
+		  if(text == ""){
+			  return
+		  }
+		  
 		  var success = function(o){
 			  YUD.removeClass(tr, 'form-open');
 			  removeInlineForm(f);			  
@@ -453,7 +460,7 @@ var deleteComment = function(comment_id){
         n.parentNode.removeChild(n);
 
         // scann nodes, and attach add button to last one
-        placeAddButton(root);        
+        placeAddButton(root);
     }
     ajaxPOST(url,postData,success);
 }

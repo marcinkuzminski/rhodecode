@@ -87,7 +87,9 @@
     </div>
 
     %for co in c.comments:
-        ${comment_block(co)}
+        <div id="comment-tr-${co.comment_id}">
+          ${comment_block(co)}
+        </div>
     %endfor
     %if c.rhodecode_user.username != 'default':
     <div class="comment-form">

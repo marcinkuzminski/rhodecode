@@ -370,6 +370,10 @@ class ChangesetController(BaseRepoController):
             line_no=request.POST.get('line')
         )
         Session.commit()
+        if not request.environ.get('HTTP_X_PARTIAL_XHR'):
+            return redirect(h.url('changeset_home', repo_name=repo_name,
+                                  revision=revision))
+
         data = {
            'target_id': h.safeid(h.safe_unicode(request.POST.get('f_path'))),
         }
@@ -378,6 +382,7 @@ class ChangesetController(BaseRepoController):
             data.update(comm.get_dict())
             data.update({'rendered_text':
                          render('changeset/changeset_comment_block.html')})
+
         return data
 
     @jsonify
