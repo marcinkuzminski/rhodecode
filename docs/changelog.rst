@@ -22,6 +22,7 @@ news
   IP for pull/push logs. - moved all to base controller  
 - #415: Adding comment to changeset causes reload. 
   Comments are now added via ajax and doesn't reload the page
+- #374 LDAP config is discarded when LDAP can't be activated
 
 fixes
 +++++

@@ -754,7 +754,7 @@ def LdapSettingsForm(tls_reqcert_choices, search_scope_choices, tls_kind_choices
     class _LdapSettingsForm(formencode.Schema):
         allow_extra_fields = True
         filter_extra_fields = True
-        pre_validators = [LdapLibValidator]
+        #pre_validators = [LdapLibValidator]
         ldap_active = StringBoolean(if_missing=False)
         ldap_host = UnicodeString(strip=True,)
         ldap_port = Number(strip=True,)
