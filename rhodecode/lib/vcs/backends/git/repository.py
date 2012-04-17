@@ -246,6 +246,19 @@ class GitRepository(BaseRepository):
             if ref.startswith('refs/heads/') and not ref.endswith('/HEAD')]
         return OrderedDict(sorted(_branches, key=sortkey, reverse=False))
 
+    def _heads(self, reverse=False):
+        refs = self._repo.get_refs()
+        heads = {}
+
+        for key, val in refs.items():
+            for ref_key in ['refs/heads/', 'refs/remotes/origin/']:
+                if key.startswith(ref_key):
+                    n = key[len(ref_key):]
+                    if n not in ['HEAD']:
+                        heads[n] = val
+
+        return heads if reverse else dict((y,x) for x,y in heads.iteritems())
+
     def _get_tags(self):
         if not self.revisions:
             return {}

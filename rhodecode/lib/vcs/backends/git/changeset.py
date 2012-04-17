@@ -66,26 +66,13 @@ class GitChangeset(BaseChangeset):
 
     @LazyProperty
     def branch(self):
-        # TODO: Cache as we walk (id <-> branch name mapping)
-        refs = self.repository._repo.get_refs()
-        heads = {}
-        for key, val in refs.items():
-            for ref_key in ['refs/heads/', 'refs/remotes/origin/']:
-                if key.startswith(ref_key):
-                    n = key[len(ref_key):]
-                    if n not in ['HEAD']:
-                        heads[n] = val
 
-        for name, id in heads.iteritems():
-            walker = self.repository._repo.object_store.get_graph_walker([id])
-            while True:
-                id_ = walker.next()
-                if not id_:
-                    break
-                if id_ == self.id:
-                    return safe_unicode(name)
-        raise ChangesetError("This should not happen... Have you manually "
-                             "change id of the changeset?")
+        heads = self.repository._heads(reverse=False)
+
+        ref = heads.get(self.raw_id)
+        if ref:
+            return safe_unicode(ref)
+
 
     def _fix_path(self, path):
         """
