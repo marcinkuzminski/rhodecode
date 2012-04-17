@@ -44,13 +44,14 @@ class SimpleGitUploadPackHandler(dulserver.UploadPackHandler):
           graph_walker.determine_wants, graph_walker, self.progress,
           get_tagged=self.get_tagged)
 
-        # Do they want any objects?
-        if objects_iter is None or len(objects_iter) == 0:
+        # Did the process short-circuit (e.g. in a stateless RPC call)? Note
+        # that the client still expects a 0-object pack in most cases.
+        if objects_iter is None:
             return
 
         self.progress("counting objects: %d, done.\n" % len(objects_iter))
         dulserver.write_pack_objects(dulserver.ProtocolFile(None, write),
-                                  objects_iter, len(objects_iter))
+                                     objects_iter)
         messages = []
         messages.append('thank you for using rhodecode')
 
@@ -58,6 +59,7 @@ class SimpleGitUploadPackHandler(dulserver.UploadPackHandler):
             self.progress(msg + "\n")
         # we are done
         self.proto.write("0000")
+
 
 dulserver.DEFAULT_HANDLERS = {
   'git-upload-pack': SimpleGitUploadPackHandler,
