@@ -1,6 +1,7 @@
-"""Mercurial libs compatibility
-
 """
+Mercurial libs compatibility
+"""
+
 from mercurial import archival, merge as hg_merge, patch, ui
 from mercurial.commands import clone, nullid, pull
 from mercurial.context import memctx, memfilectx
@@ -10,3 +11,4 @@ from mercurial.localrepo import localrepository
 from mercurial.match import match
 from mercurial.mdiff import diffopts
 from mercurial.node import hex
+from mercurial.encoding import tolocal

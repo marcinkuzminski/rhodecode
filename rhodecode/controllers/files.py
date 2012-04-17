@@ -306,10 +306,10 @@ class FilesController(BaseRepoController):
 
             try:
                 self.scm_model.create_node(repo=c.rhodecode_repo,
-                                             repo_name=repo_name, cs=c.cs,
-                                             user=self.rhodecode_user,
-                                             author=author, message=message,
-                                             content=content, f_path=node_path)
+                                           repo_name=repo_name, cs=c.cs,
+                                           user=self.rhodecode_user,
+                                           author=author, message=message,
+                                           content=content, f_path=node_path)
                 h.flash(_('Successfully committed to %s' % node_path),
                         category='success')
             except NodeAlreadyExistsError, e:

@@ -73,7 +73,6 @@ class GitChangeset(BaseChangeset):
         if ref:
             return safe_unicode(ref)
 
-
     def _fix_path(self, path):
         """
         Paths are stored without trailing slash so we need to get rid off it if
@@ -131,7 +130,6 @@ class GitChangeset(BaseChangeset):
                         name = item
                     self._paths[name] = id
                     self._stat_modes[name] = stat
-
             if not path in self._paths:
                 raise NodeDoesNotExistError("There is no file nor directory "
                     "at the given path %r at revision %r"
@@ -393,7 +391,7 @@ class GitChangeset(BaseChangeset):
     def _diff_name_status(self):
         output = []
         for parent in self.parents:
-            cmd = 'diff --name-status %s %s' % (parent.raw_id, self.raw_id)
+            cmd = 'diff --name-status %s %s --encoding=utf8' % (parent.raw_id, self.raw_id)
             so, se = self.repository.run_git_command(cmd)
             output.append(so.strip())
         return '\n'.join(output)
@@ -409,13 +407,16 @@ class GitChangeset(BaseChangeset):
         for line in self._diff_name_status.splitlines():
             if not line:
                 continue
+
             if line.startswith(char):
-                splitted = line.split(char,1)
+                splitted = line.split(char, 1)
                 if not len(splitted) == 2:
                     raise VCSError("Couldn't parse diff result:\n%s\n\n and "
                         "particularly that line: %s" % (self._diff_name_status,
                         line))
-                paths.add(splitted[1].strip())
+                _path = splitted[1].strip()
+                paths.add(_path)
+
         return sorted(paths)
 
     @LazyProperty
