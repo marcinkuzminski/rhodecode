@@ -80,12 +80,14 @@ class GitRepository(BaseRepository):
         """
 
         _copts = ['-c', 'core.quotepath=false', ]
-
+        _str_cmd = False
         if isinstance(cmd, basestring):
             cmd = [cmd]
+            _str_cmd = True
 
         cmd = ['GIT_CONFIG_NOGLOBAL=1', 'git'] + _copts + cmd
-
+        if _str_cmd:
+            cmd = ' '.join(cmd)
         try:
             opts = dict(
                 shell=isinstance(cmd, basestring),
