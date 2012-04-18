@@ -103,9 +103,16 @@ class TestLibs(unittest.TestCase):
 
     def test_mention_extractor(self):
         from rhodecode.lib.utils2 import extract_mentioned_users
-        sample = ("@first hi there @marcink here's my email marcin@email.com "
-                  "@lukaszb check it pls @ ttwelve @D[] @one@two@three "
-                  "@MARCIN    @maRCiN @2one_more22")
-        s = ['2one_more22', 'D', 'MARCIN', 'first', 'lukaszb',
-             'maRCiN', 'marcink', 'one']
+        sample = (
+            "@first hi there @marcink here's my email marcin@email.com "
+            "@lukaszb check @one_more22 it pls @ ttwelve @D[] @one@two@three "
+            "@MARCIN    @maRCiN @2one_more22 @john please see this http://org.pl "
+            "@marian.user just do it @marco-polo and next extract @marco_polo "
+            "user.dot  hej ! not-needed maril@domain.org"
+        )
+
+        s = sorted([
+        'first', 'marcink', 'lukaszb', 'one_more22', 'MARCIN', 'maRCiN', 'john',
+        'marian.user', 'marco-polo', 'marco_polo'
+        ], key=lambda k: k.lower())
         self.assertEqual(s, extract_mentioned_users(sample))

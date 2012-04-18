@@ -27,7 +27,7 @@
 import re
 import logging
 
-from rhodecode.lib.utils2 import safe_unicode
+from rhodecode.lib.utils2 import safe_unicode, MENTIONS_REGEX
 
 log = logging.getLogger(__name__)
 
@@ -128,10 +128,10 @@ class MarkupRenderer(object):
 
     @classmethod
     def rst_with_mentions(cls, source):
-        mention_pat = re.compile(r'(?:^@|\s@)(\w+)')
+        mention_pat = re.compile(MENTIONS_REGEX)
 
         def wrapp(match_obj):
             uname = match_obj.groups()[0]
-            return ' **@%(uname)s** ' % {'uname':uname}
+            return ' **@%(uname)s** ' % {'uname': uname}
         mention_hl = mention_pat.sub(wrapp, source).strip()
         return cls.rst(mention_hl)

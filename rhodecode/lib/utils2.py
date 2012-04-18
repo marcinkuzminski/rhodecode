@@ -392,14 +392,18 @@ def get_changeset_safe(repo, rev):
     return cs
 
 
+MENTIONS_REGEX = r'(?:^@|\s@)([a-zA-Z0-9]{1}[a-zA-Z0-9\-\_\.]+)(?:\s{1})'
+
+
 def extract_mentioned_users(s):
     """
     Returns unique usernames from given string s that have @mention
 
     :param s: string to get mentions
     """
-    usrs = {}
-    for username in re.findall(r'(?:^@|\s@)(\w+)', s):
-        usrs[username] = username
+    usrs = set()
+    for username in re.findall(MENTIONS_REGEX, s):
+        usrs.add(username)
 
-    return sorted(usrs.keys())
+    return sorted(list(usrs), key=lambda k: k.lower())
+
