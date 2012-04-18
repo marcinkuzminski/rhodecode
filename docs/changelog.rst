@@ -30,7 +30,7 @@ fixes
 - fixed dev-version marker for stable when served from source codes
 - fixed missing permission checks on show forks page
 - #418 cast to unicode fixes in notification objects
-
+- #426 fixed mention extracting regex
 
 
 1.3.4 (**2012-03-28**)
