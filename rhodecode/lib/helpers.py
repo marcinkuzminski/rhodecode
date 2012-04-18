@@ -87,7 +87,7 @@ def get_token():
     if not token_key in session:
         try:
             token = hashlib.sha1(str(random.getrandbits(128))).hexdigest()
-        except AttributeError: # Python < 2.4
+        except AttributeError:  # Python < 2.4
             token = hashlib.sha1(str(random.randrange(2 ** 128))).hexdigest()
         session[token_key] = token
         if hasattr(session, 'save'):
@@ -454,11 +454,14 @@ def action_parser(user_log, feed=False):
                         revision=rev.raw_id),
                     title=tooltip(message(rev)), class_='tooltip')
         )
-        # get only max revs_top_limit of changeset for performance/ui reasons
-        revs = [
-            x for x in repo.get_changesets(revs_ids[0],
-                                           revs_ids[:revs_top_limit][-1])
-        ]
+
+        revs = []
+        if len(filter(lambda v: v != '', revs_ids)) > 0:
+            # get only max revs_top_limit of changeset for performance/ui reasons
+            revs = [
+                x for x in repo.get_changesets(revs_ids[0],
+                                               revs_ids[:revs_top_limit][-1])
+            ]
 
         cs_links = []
         cs_links.append(" " + ', '.join(

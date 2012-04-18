@@ -92,6 +92,7 @@ def log_pull_action(ui, repo, **kwargs):
     extras = dict(repo.ui.configitems('rhodecode_extras'))
     username = extras['username']
     repository = extras['repository']
+    scm = extras['scm']
     action = 'pull'
 
     action_logger(username, action, repository, extras['ip'], commit=True)
@@ -117,21 +118,26 @@ def log_push_action(ui, repo, **kwargs):
     username = extras['username']
     repository = extras['repository']
     action = extras['action'] + ':%s'
-    node = kwargs['node']
+    scm = extras['scm']
 
-    def get_revs(repo, rev_opt):
-        if rev_opt:
-            revs = revrange(repo, rev_opt)
+    if scm == 'hg':
+        node = kwargs['node']
 
-            if len(revs) == 0:
-                return (nullrev, nullrev)
-            return (max(revs), min(revs))
-        else:
-            return (len(repo) - 1, 0)
+        def get_revs(repo, rev_opt):
+            if rev_opt:
+                revs = revrange(repo, rev_opt)
 
-    stop, start = get_revs(repo, [node + ':'])
+                if len(revs) == 0:
+                    return (nullrev, nullrev)
+                return (max(revs), min(revs))
+            else:
+                return (len(repo) - 1, 0)
 
-    revs = (str(repo[r]) for r in xrange(start, stop + 1))
+        stop, start = get_revs(repo, [node + ':'])
+
+        revs = (str(repo[r]) for r in xrange(start, stop + 1))
+    elif scm == 'git':
+        revs = []
 
     action = action % ','.join(revs)
 

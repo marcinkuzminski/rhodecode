@@ -153,7 +153,8 @@ class SimpleHg(BaseVCSController):
             'ip': ipaddr,
             'username': username,
             'action': action,
-            'repository': repo_name
+            'repository': repo_name,
+            'scm': 'hg',
         }
 
         #======================================================================
