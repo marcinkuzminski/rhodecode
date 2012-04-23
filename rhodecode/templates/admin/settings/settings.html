@@ -218,7 +218,7 @@
       <div id="expand_modules_table"  style="display:none">
       <h5>Python - ${c.py_version}</h5>
       <h5>System - ${c.platform}</h5>
-      
+
       <table class="table" style="margin:0px 0px 0px 20px">
           <colgroup>
               <col style="width:220px">
@@ -232,15 +232,15 @@
               %endfor
           </tbody>
       </table>
-      </div>    
+      </div>
     </div>
-    
+
     <script type="text/javascript">
     YUE.on('expand_modules','click',function(e){
     	YUD.setStyle('expand_modules_table','display','');
     	YUD.setStyle('expand_modules','display','none');
     })
     </script>
-    
+
 </div>
 </%def>

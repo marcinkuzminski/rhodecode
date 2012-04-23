@@ -44,7 +44,7 @@ YUE.on('mark_all_read','click',function(e){
     ypjax(url,'notification_data',function(){
     	var notification_counter = YUD.get('notification_counter');
     	if(notification_counter){
-    		notification_counter.innerHTML=0;	
+    		notification_counter.innerHTML=0;
     	}
     	YUE.on(YUQ('.delete-notification'),'click',function(e){
     		 var notification_id = e.currentTarget.id;

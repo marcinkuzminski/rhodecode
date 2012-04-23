@@ -66,10 +66,10 @@ class SettingsController(BaseController):
     def __before__(self):
         c.admin_user = session.get('admin_user')
         c.admin_username = session.get('admin_username')
-        c.modules = sorted([(p.project_name, p.version) 
+        c.modules = sorted([(p.project_name, p.version)
                             for p in pkg_resources.working_set])
         c.py_version = platform.python_version()
-        c.platform = platform.platform()        
+        c.platform = platform.platform()
         super(SettingsController, self).__before__()
 
     @HasPermissionAllDecorator('hg.admin')

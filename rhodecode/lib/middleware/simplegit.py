@@ -284,4 +284,3 @@ class SimpleGit(BaseVCSController):
             log_push_action(ui=baseui, repo=repo)
         elif action == 'pull' and _hooks.get(pull_hook):
             log_pull_action(ui=baseui, repo=repo)
-

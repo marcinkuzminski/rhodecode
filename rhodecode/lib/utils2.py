@@ -406,4 +406,3 @@ def extract_mentioned_users(s):
         usrs.add(username)
 
     return sorted(list(usrs), key=lambda k: k.lower())
-
