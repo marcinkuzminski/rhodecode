@@ -14,4 +14,4 @@ webob==1.0.8
 markdown==2.1.1
 docutils==0.8.1
 py-bcrypt
-mercurial>=2.1,<2.2
+mercurial>=2.2,<2.3
