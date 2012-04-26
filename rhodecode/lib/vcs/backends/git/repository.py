@@ -487,6 +487,7 @@ class GitRepository(BaseRepository):
         url = self._get_url(url)
         cmd = ['pull']
         cmd.append("--ff-only")
+        cmd.append(url)
         cmd = ' '.join(cmd)
         # If error occurs run_git_command raises RepositoryError already
         self.run_git_command(cmd)
