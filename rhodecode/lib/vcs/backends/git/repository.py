@@ -47,6 +47,15 @@ class GitRepository(BaseRepository):
 
         self.path = abspath(repo_path)
         self._repo = self._get_repo(create, src_url, update_after_clone, bare)
+        #temporary set that to now at later we will move it to constructor
+        baseui = None
+        if baseui is None:
+            from mercurial.ui import ui
+            baseui = ui()
+        # patch the instance of GitRepo with an "FAKE" ui object to add 
+        # compatibility layer with Mercurial
+        setattr(self._repo, 'ui', baseui)
+
         try:
             self.head = self._repo.head()
         except KeyError:
@@ -467,6 +476,17 @@ class GitRepository(BaseRepository):
         elif not update_after_clone:
             cmd.append('--no-checkout')
         cmd += ['--', '"%s"' % url, '"%s"' % self.path]
+        cmd = ' '.join(cmd)
+        # If error occurs run_git_command raises RepositoryError already
+        self.run_git_command(cmd)
+
+    def pull(self, url):
+        """
+        Tries to pull changes from external location.
+        """
+        url = self._get_url(url)
+        cmd = ['pull']
+        cmd.append("--ff-only")
         cmd = ' '.join(cmd)
         # If error occurs run_git_command raises RepositoryError already
         self.run_git_command(cmd)

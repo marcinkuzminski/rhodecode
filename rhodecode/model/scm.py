@@ -351,7 +351,7 @@ class ScmModel(BaseModel):
                 'scm': repo.alias,
             }
 
-            #inject ui extra param to log this action via push logger
+            # inject ui extra param to log this action via push logger
             for k, v in extras.items():
                 repo._repo.ui.setconfig('rhodecode_extras', k, v)
 

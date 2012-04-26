@@ -194,8 +194,8 @@ class SimpleGit(BaseVCSController):
         log.debug('Repository path is %s' % repo_path)
 
         baseui = make_ui('db')
-        for k, v in extras.items():
-            baseui.setconfig('rhodecode_extras', k, v)
+        self.__inject_extras(repo_path, baseui, extras)
+
 
         try:
             # invalidate cache on push
@@ -265,22 +265,36 @@ class SimpleGit(BaseVCSController):
         return op
 
     def _handle_githooks(self, action, baseui, environ):
-
         from rhodecode.lib.hooks import log_pull_action, log_push_action
         service = environ['QUERY_STRING'].split('=')
         if len(service) < 2:
             return
 
-        class cont(object):
-            pass
-
-        repo = cont()
-        setattr(repo, 'ui', baseui)
+        from rhodecode.model.db import Repository
+        _repo = Repository.get_by_repo_name(repo_name)
+        _repo = _repo.scm_instance
+        _repo._repo.ui = baseui
 
         push_hook = 'pretxnchangegroup.push_logger'
         pull_hook = 'preoutgoing.pull_logger'
         _hooks = dict(baseui.configitems('hooks')) or {}
         if action == 'push' and _hooks.get(push_hook):
-            log_push_action(ui=baseui, repo=repo)
+            log_push_action(ui=baseui, repo=repo._repo)
         elif action == 'pull' and _hooks.get(pull_hook):
-            log_pull_action(ui=baseui, repo=repo)
+            log_pull_action(ui=baseui, repo=repo._repo)
+
+    def __inject_extras(self, repo_path, baseui, extras={}):
+        """
+        Injects some extra params into baseui instance
+
+        :param baseui: baseui instance
+        :param extras: dict with extra params to put into baseui
+        """
+
+        # make our hgweb quiet so it doesn't print output
+        baseui.setconfig('ui', 'quiet', 'true')
+
+        #inject some additional parameters that will be available in ui
+        #for hooks
+        for k, v in extras.items():
+            baseui.setconfig('rhodecode_extras', k, v)
