@@ -343,10 +343,13 @@ class ScmModel(BaseModel):
 
         repo = dbrepo.scm_instance
         try:
-            extras = {'ip': '',
-                      'username': username,
-                      'action': 'push_remote',
-                      'repository': repo_name}
+            extras = {
+                'ip': '',
+                'username': username,
+                'action': 'push_remote',
+                'repository': repo_name,
+                'scm': repo.alias,
+            }
 
             #inject ui extra param to log this action via push logger
             for k, v in extras.items():
@@ -362,9 +365,11 @@ class ScmModel(BaseModel):
                       content, f_path):
 
         if repo.alias == 'hg':
-            from rhodecode.lib.vcs.backends.hg import MercurialInMemoryChangeset as IMC
+            from rhodecode.lib.vcs.backends.hg import \
+                MercurialInMemoryChangeset as IMC
         elif repo.alias == 'git':
-            from rhodecode.lib.vcs.backends.git import GitInMemoryChangeset as IMC
+            from rhodecode.lib.vcs.backends.git import \
+                GitInMemoryChangeset as IMC
 
         # decoding here will force that we have proper encoded values
         # in any other case this will throw exceptions and deny commit
