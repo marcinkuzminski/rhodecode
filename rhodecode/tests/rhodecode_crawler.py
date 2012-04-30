@@ -45,7 +45,11 @@ from rhodecode.lib import vcs
 
 BASE_URI = 'http://127.0.0.1:5001/%s'
 PROJECT_PATH = jn('/', 'home', 'marcink', 'hg_repos')
-PROJECTS = ['CPython', 'rhodecode_tip', 'mastergmat']
+PROJECTS = [
+    'linux-magx-pbranch',
+    'CPython',
+    'rhodecode_tip',
+]
 
 
 cj = cookielib.FileCookieJar('/tmp/rc_test_cookie.txt')
