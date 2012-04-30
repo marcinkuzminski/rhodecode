@@ -32,30 +32,37 @@ import cookielib
 import urllib
 import urllib2
 import time
-
+import os
+import sys
 from os.path import join as jn
+from os.path import dirname as dn
+
+__here__ = os.path.abspath(__file__)
+__root__ = dn(dn(dn(__here__)))
+sys.path.append(__root__)
+
 from rhodecode.lib import vcs
 
-BASE_URI = 'http://127.0.0.1:5000/%s'
-PROJECT = 'CPython'
+BASE_URI = 'http://127.0.0.1:5001/%s'
 PROJECT_PATH = jn('/', 'home', 'marcink', 'hg_repos')
+PROJECTS = ['CPython', 'rhodecode_tip', 'mastergmat']
 
 
 cj = cookielib.FileCookieJar('/tmp/rc_test_cookie.txt')
 o = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
 o.addheaders = [
-                     ('User-agent', 'rhodecode-crawler'),
-                     ('Accept-Language', 'en - us, en;q = 0.5')
-                    ]
+    ('User-agent', 'rhodecode-crawler'),
+    ('Accept-Language', 'en - us, en;q = 0.5')
+]
 
 urllib2.install_opener(o)
 
 
-def test_changelog_walk(pages=100):
+def test_changelog_walk(proj, pages=100):
     total_time = 0
     for i in range(1, pages):
 
-        page = '/'.join((PROJECT, 'changelog',))
+        page = '/'.join((proj, 'changelog',))
 
         full_uri = (BASE_URI % page) + '?' + urllib.urlencode({'page':i})
         s = time.time()
@@ -69,19 +76,20 @@ def test_changelog_walk(pages=100):
     print 'average on req', total_time / float(pages)
 
 
-def test_changeset_walk(limit=None):
-    print 'processing', jn(PROJECT_PATH, PROJECT)
+def test_changeset_walk(proj, limit=None):
+    print 'processing', jn(PROJECT_PATH, proj)
     total_time = 0
 
-    repo = vcs.get_repo(jn(PROJECT_PATH, PROJECT))
+    repo = vcs.get_repo(jn(PROJECT_PATH, proj))
     cnt = 0
     for i in repo:
         cnt += 1
-        raw_cs = '/'.join((PROJECT, 'changeset', i.raw_id))
+        raw_cs = '/'.join((proj, 'changeset', i.raw_id))
         if limit and limit == cnt:
             break
 
         full_uri = (BASE_URI % raw_cs)
+        print '%s visiting %s\%s' % (cnt, full_uri, i)
         s = time.time()
         f = o.open(full_uri)
         size = len(f.read())
@@ -93,11 +101,11 @@ def test_changeset_walk(limit=None):
     print 'average on req', total_time / float(cnt)
 
 
-def test_files_walk(limit=100):
-    print 'processing', jn(PROJECT_PATH, PROJECT)
+def test_files_walk(proj, limit=100):
+    print 'processing', jn(PROJECT_PATH, proj)
     total_time = 0
 
-    repo = vcs.get_repo(jn(PROJECT_PATH, PROJECT))
+    repo = vcs.get_repo(jn(PROJECT_PATH, proj))
 
     from rhodecode.lib.compat import OrderedSet
     from rhodecode.lib.vcs.exceptions import RepositoryError
@@ -124,22 +132,24 @@ def test_files_walk(limit=100):
         if limit and limit == cnt:
             break
 
-        file_path = '/'.join((PROJECT, 'files', 'tip', f))
-
+        file_path = '/'.join((proj, 'files', 'tip', f))
         full_uri = (BASE_URI % file_path)
+        print '%s visiting %s' % (cnt, full_uri)
         s = time.time()
         f = o.open(full_uri)
         size = len(f.read())
         e = time.time() - s
         total_time += e
-        print '%s visited %s size:%s req:%s ms' % (cnt, full_uri, size, e)
+        print '%s visited OK size:%s req:%s ms' % (cnt, size, e)
 
     print 'total_time', total_time
     print 'average on req', total_time / float(cnt)
 
+if __name__ == '__main__':
 
-test_changelog_walk(40)
-time.sleep(2)
-test_changeset_walk(limit=100)
-time.sleep(2)
-test_files_walk(100)
+    for p in PROJECTS:
+        test_changelog_walk(p, 40)
+        time.sleep(2)
+        test_changeset_walk(p, limit=100)
+        time.sleep(2)
+        test_files_walk(p, 100)
