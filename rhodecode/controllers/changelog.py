@@ -84,7 +84,7 @@ class ChangelogController(BaseRepoController):
             collection = list(c.pagination)
             page_revisions = [x.raw_id for x in collection]
             c.comments = c.rhodecode_db_repo.comments(page_revisions)
-
+            c.statuses = c.rhodecode_db_repo.statuses(page_revisions)
         except (RepositoryError, ChangesetDoesNotExistError, Exception), e:
             log.error(traceback.format_exc())
             h.flash(str(e), category='warning')

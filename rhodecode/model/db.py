@@ -34,6 +34,8 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship, joinedload, class_mapper, validates
 from beaker.cache import cache_region, region_invalidate
 
+_ = lambda s: s
+
 from rhodecode.lib.vcs import get_backend
 from rhodecode.lib.vcs.utils.helpers import get_scm
 from rhodecode.lib.vcs.exceptions import VCSError
@@ -156,7 +158,7 @@ class RhodeCodeSetting(Base, BaseModel):
     __tablename__ = 'rhodecode_settings'
     __table_args__ = (
         UniqueConstraint('app_settings_name'),
-        {'extend_existing': True, 'mysql_engine':'InnoDB',
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'}
     )
     app_settings_id = Column("app_settings_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -231,7 +233,7 @@ class RhodeCodeUi(Base, BaseModel):
     __tablename__ = 'rhodecode_ui'
     __table_args__ = (
         UniqueConstraint('ui_key'),
-        {'extend_existing': True, 'mysql_engine':'InnoDB',
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'}
     )
 
@@ -282,7 +284,7 @@ class User(Base, BaseModel):
     __tablename__ = 'users'
     __table_args__ = (
         UniqueConstraint('username'), UniqueConstraint('email'),
-        {'extend_existing': True, 'mysql_engine':'InnoDB',
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'}
     )
     user_id = Column("user_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -404,7 +406,7 @@ class User(Base, BaseModel):
 class UserLog(Base, BaseModel):
     __tablename__ = 'user_logs'
     __table_args__ = (
-        {'extend_existing': True, 'mysql_engine':'InnoDB',
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'},
     )
     user_log_id = Column("user_log_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -426,7 +428,7 @@ class UserLog(Base, BaseModel):
 class UsersGroup(Base, BaseModel):
     __tablename__ = 'users_groups'
     __table_args__ = (
-        {'extend_existing': True, 'mysql_engine':'InnoDB',
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'},
     )
 
@@ -468,7 +470,7 @@ class UsersGroup(Base, BaseModel):
 class UsersGroupMember(Base, BaseModel):
     __tablename__ = 'users_groups_members'
     __table_args__ = (
-        {'extend_existing': True, 'mysql_engine':'InnoDB',
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'},
     )
 
@@ -488,7 +490,7 @@ class Repository(Base, BaseModel):
     __tablename__ = 'repositories'
     __table_args__ = (
         UniqueConstraint('repo_name'),
-        {'extend_existing': True, 'mysql_engine':'InnoDB',
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'},
     )
 
@@ -675,6 +677,23 @@ class Repository(Base, BaseModel):
             grouped[cmt.revision].append(cmt)
         return grouped
 
+    def statuses(self, revisions=None):
+        """
+        Returns statuses for this repository
+        :param revisions: list of revisions to get statuses for
+        :type revisions: list
+        """
+
+        statuses = ChangesetStatus.query()\
+            .filter(ChangesetStatus.repo == self)
+        if revisions:
+            statuses = statuses.filter(ChangesetStatus.revision.in_(revisions))
+        grouped = defaultdict(list)
+        for stat in statuses.all():
+            grouped[statuses.revision].append(stat)
+        return grouped
+
+        
     #==========================================================================
     # SCM CACHE INSTANCE
     #==========================================================================
@@ -738,7 +757,7 @@ class RepoGroup(Base, BaseModel):
     __table_args__ = (
         UniqueConstraint('group_name', 'group_parent_id'),
         CheckConstraint('group_id != group_parent_id'),
-        {'extend_existing': True, 'mysql_engine':'InnoDB',
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'},
     )
     __mapper_args__ = {'order_by': 'group_name'}
@@ -867,7 +886,7 @@ class RepoGroup(Base, BaseModel):
 class Permission(Base, BaseModel):
     __tablename__ = 'permissions'
     __table_args__ = (
-        {'extend_existing': True, 'mysql_engine':'InnoDB',
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'},
     )
     permission_id = Column("permission_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -906,7 +925,7 @@ class UserRepoToPerm(Base, BaseModel):
     __tablename__ = 'repo_to_perm'
     __table_args__ = (
         UniqueConstraint('user_id', 'repository_id', 'permission_id'),
-        {'extend_existing': True, 'mysql_engine':'InnoDB',
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'}
     )
     repo_to_perm_id = Column("repo_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -935,7 +954,7 @@ class UserToPerm(Base, BaseModel):
     __tablename__ = 'user_to_perm'
     __table_args__ = (
         UniqueConstraint('user_id', 'permission_id'),
-        {'extend_existing': True, 'mysql_engine':'InnoDB',
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'}
     )
     user_to_perm_id = Column("user_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -950,7 +969,7 @@ class UsersGroupRepoToPerm(Base, BaseModel):
     __tablename__ = 'users_group_repo_to_perm'
     __table_args__ = (
         UniqueConstraint('repository_id', 'users_group_id', 'permission_id'),
-        {'extend_existing': True, 'mysql_engine':'InnoDB',
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'}
     )
     users_group_to_perm_id = Column("users_group_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -979,7 +998,7 @@ class UsersGroupToPerm(Base, BaseModel):
     __tablename__ = 'users_group_to_perm'
     __table_args__ = (
         UniqueConstraint('users_group_id', 'permission_id',),
-        {'extend_existing': True, 'mysql_engine':'InnoDB',
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'}
     )
     users_group_to_perm_id = Column("users_group_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -994,7 +1013,7 @@ class UserRepoGroupToPerm(Base, BaseModel):
     __tablename__ = 'user_repo_group_to_perm'
     __table_args__ = (
         UniqueConstraint('user_id', 'group_id', 'permission_id'),
-        {'extend_existing': True, 'mysql_engine':'InnoDB',
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'}
     )
 
@@ -1012,7 +1031,7 @@ class UsersGroupRepoGroupToPerm(Base, BaseModel):
     __tablename__ = 'users_group_repo_group_to_perm'
     __table_args__ = (
         UniqueConstraint('users_group_id', 'group_id'),
-        {'extend_existing': True, 'mysql_engine':'InnoDB',
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'}
     )
 
@@ -1030,7 +1049,7 @@ class Statistics(Base, BaseModel):
     __tablename__ = 'statistics'
     __table_args__ = (
          UniqueConstraint('repository_id'),
-         {'extend_existing': True, 'mysql_engine':'InnoDB',
+         {'extend_existing': True, 'mysql_engine': 'InnoDB',
           'mysql_charset': 'utf8'}
     )
     stat_id = Column("stat_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -1048,7 +1067,7 @@ class UserFollowing(Base, BaseModel):
     __table_args__ = (
         UniqueConstraint('user_id', 'follows_repository_id'),
         UniqueConstraint('user_id', 'follows_user_id'),
-        {'extend_existing': True, 'mysql_engine':'InnoDB',
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'}
     )
 
@@ -1072,7 +1091,7 @@ class CacheInvalidation(Base, BaseModel):
     __tablename__ = 'cache_invalidation'
     __table_args__ = (
         UniqueConstraint('cache_key'),
-        {'extend_existing': True, 'mysql_engine':'InnoDB',
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'},
     )
     cache_id = Column("cache_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -1178,7 +1197,7 @@ class CacheInvalidation(Base, BaseModel):
 class ChangesetComment(Base, BaseModel):
     __tablename__ = 'changeset_comments'
     __table_args__ = (
-        {'extend_existing': True, 'mysql_engine':'InnoDB',
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'},
     )
     comment_id = Column('comment_id', Integer(), nullable=False, primary_key=True)
@@ -1207,10 +1226,48 @@ class ChangesetComment(Base, BaseModel):
                 .join(ChangesetComment.author).all()
 
 
+class ChangesetStatus(Base, BaseModel):
+    __tablename__ = 'changeset_statuses'
+    __table_args__ = (
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
+         'mysql_charset': 'utf8'}
+    )
+
+    STATUSES = [
+        ('not_reviewed', _("Not Reviewed")),  # (no icon) and default
+        ('approved', _("Approved")),
+        ('rejected', _("Rejected")),
+        ('under_review', _("Under Review")),
+    ]
+
+    changeset_status_id = Column('changeset_status_id', Integer(), nullable=False, primary_key=True)
+    repo_id = Column('repo_id', Integer(), ForeignKey('repositories.repo_id'), nullable=False)
+    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None)
+    revision = Column('revision', String(40), nullable=False)
+    status = Column('status', String(128), nullable=False, default=STATUSES[0][0])
+    modified_at = Column('modified_at', DateTime(), nullable=False, default=datetime.datetime.now)
+
+    author = relationship('User', lazy='joined')
+    repo = relationship('Repository')
+
+
+class ChangesetStatusHistory(Base, BaseModel):
+    __tablename__ = 'changeset_statuses_history'
+    __table_args__ = (
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
+         'mysql_charset': 'utf8'}
+    )
+    #TODO: check if sqla has a nice history table implementation
+    changeset_status_id = Column('changeset_status_id', Integer(), ForeignKey('changeset_statuses.changeset_status_id'), nullable=False, primary_key=True)
+    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None)
+    status = Column('status', String(128), nullable=False)
+    modified_at = Column('modified_at', DateTime(), nullable=False, default=datetime.datetime.now)
+
+
 class Notification(Base, BaseModel):
     __tablename__ = 'notifications'
     __table_args__ = (
-        {'extend_existing': True, 'mysql_engine':'InnoDB',
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'},
     )
 
@@ -1264,7 +1321,7 @@ class UserNotification(Base, BaseModel):
     __tablename__ = 'user_to_notification'
     __table_args__ = (
         UniqueConstraint('user_id', 'notification_id'),
-        {'extend_existing': True, 'mysql_engine':'InnoDB',
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'}
     )
     user_id = Column('user_id', Integer(), ForeignKey('users.user_id'), primary_key=True)
@@ -1284,7 +1341,7 @@ class UserNotification(Base, BaseModel):
 class DbMigrateVersion(Base, BaseModel):
     __tablename__ = 'db_migrate_version'
     __table_args__ = (
-        {'extend_existing': True, 'mysql_engine':'InnoDB',
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'},
     )
     repository_id = Column('repository_id', String(250), primary_key=True)

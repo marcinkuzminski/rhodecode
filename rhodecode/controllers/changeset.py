@@ -203,10 +203,16 @@ class ChangesetController(BaseRepoController):
         c.cut_off = False  # defines if cut off limit is reached
 
         c.comments = []
+        c.statuses = []
         c.inline_comments = []
         c.inline_cnt = 0
         # Iterate over ranges (default changeset view is always one changeset)
         for changeset in c.cs_ranges:
+
+            c.statuses.extend(ChangesetStatusModel()\
+                              .get_status(c.rhodecode_db_repo.repo_id,
+                                          changeset.raw_id))
+
             c.comments.extend(ChangesetCommentsModel()\
                               .get_comments(c.rhodecode_db_repo.repo_id,
                                             changeset.raw_id))
