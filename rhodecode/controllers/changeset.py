@@ -45,6 +45,7 @@ from rhodecode.lib.compat import OrderedDict
 from rhodecode.lib import diffs
 from rhodecode.model.db import ChangesetComment
 from rhodecode.model.comment import ChangesetCommentsModel
+from rhodecode.model.changeset_status import ChangesetStatusModel
 from rhodecode.model.meta import Session
 from rhodecode.lib.diffs import wrapped_diff
 
