@@ -142,7 +142,7 @@ class NotificationModel(BaseModel):
     def mark_all_read_for_user(self, user):
         user = self.__get_user(user)
         UserNotification.query()\
-            .filter(UserNotification.read==False)\
+            .filter(UserNotification.read == False)\
             .update({'read': True})
 
     def get_unread_cnt_for_user(self, user):

@@ -680,6 +680,7 @@ class Repository(Base, BaseModel):
     def statuses(self, revisions=None):
         """
         Returns statuses for this repository
+
         :param revisions: list of revisions to get statuses for
         :type revisions: list
         """
@@ -688,12 +689,11 @@ class Repository(Base, BaseModel):
             .filter(ChangesetStatus.repo == self)
         if revisions:
             statuses = statuses.filter(ChangesetStatus.revision.in_(revisions))
-        grouped = defaultdict(list)
+        grouped = {}
         for stat in statuses.all():
-            grouped[statuses.revision].append(stat)
+            grouped[stat.revision] = [str(stat.status), stat.status_lbl]
         return grouped
 
-        
     #==========================================================================
     # SCM CACHE INSTANCE
     #==========================================================================
@@ -1229,6 +1229,7 @@ class ChangesetComment(Base, BaseModel):
 class ChangesetStatus(Base, BaseModel):
     __tablename__ = 'changeset_statuses'
     __table_args__ = (
+        UniqueConstraint('repo_id', 'revision'),
         {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'}
     )
@@ -1239,16 +1240,21 @@ class ChangesetStatus(Base, BaseModel):
         ('rejected', _("Rejected")),
         ('under_review', _("Under Review")),
     ]
+    DEFAULT = STATUSES[0][0]
 
     changeset_status_id = Column('changeset_status_id', Integer(), nullable=False, primary_key=True)
     repo_id = Column('repo_id', Integer(), ForeignKey('repositories.repo_id'), nullable=False)
     user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None)
     revision = Column('revision', String(40), nullable=False)
-    status = Column('status', String(128), nullable=False, default=STATUSES[0][0])
+    status = Column('status', String(128), nullable=False, default=DEFAULT)
     modified_at = Column('modified_at', DateTime(), nullable=False, default=datetime.datetime.now)
 
     author = relationship('User', lazy='joined')
     repo = relationship('Repository')
+
+    @property
+    def status_lbl(self):
+        return dict(self.STATUSES).get(self.status)
 
 
 class ChangesetStatusHistory(Base, BaseModel):

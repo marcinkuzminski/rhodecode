@@ -65,7 +65,6 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
 						<div class="right">
 									<div id="${cs.raw_id}_changes_info" class="changes">
                                         <div id="${cs.raw_id}"  style="float:right;" class="changed_total tooltip" title="${_('Affected number of files, click to show more details')}">${len(cs.affected_files)}</div>
-                                        <div class="changeset-status-container">${c.statuses.get(cs.raw_id)}</div>
                                         <div class="comments-container">
                                         %if len(c.comments.get(cs.raw_id,[])) > 0:
                                             <div class="comments-cnt" title="${('comments')}">
@@ -75,6 +74,12 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
                                               </a>
                                             </div>
                                         %endif
+                                        </div>
+                                        <div class="changeset-status-container">
+                                            %if c.statuses.get(cs.raw_id):
+                                              <img src="${h.url('/images/icons/flag_status_%s.png' % c.statuses.get(cs.raw_id)[0])}" />
+                                              <div class="changeset-status-lbl">${c.statuses.get(cs.raw_id)[1]}</div>
+                                            %endif
                                         </div>
 									</div>
 								   %if cs.parents:

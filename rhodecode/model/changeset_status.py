@@ -29,9 +29,8 @@ import traceback
 from pylons.i18n.translation import _
 
 from rhodecode.lib.utils2 import safe_unicode
-from rhodecode.lib import helpers as h
 from rhodecode.model import BaseModel
-from rhodecode.model.db import ChangesetStatus
+from rhodecode.model.db import ChangesetStatus, Repository, User
 
 log = logging.getLogger(__name__)
 
@@ -41,5 +40,55 @@ class ChangesetStatusModel(BaseModel):
     def __get_changeset_status(self, changeset_status):
         return self._get_instance(ChangesetStatus, changeset_status)
 
+    def __get_repo(self, repository):
+        return self._get_instance(Repository, repository,
+                                  callback=Repository.get_by_repo_name)
+
+    def __get_user(self, user):
+        return self._get_instance(User, user, callback=User.get_by_username)
+
     def get_status(self, repo, revision):
-        return 'status'
+        """
+        Returns status of changeset for given revision
+
+        :param repo:
+        :type repo:
+        :param revision: 40char hash
+        :type revision: str
+        """
+        repo = self.__get_repo(repo)
+
+        status = ChangesetStatus.query()\
+            .filter(ChangesetStatus.repo == repo)\
+            .filter(ChangesetStatus.revision == revision).scalar()
+        status = status.status if status else status
+        st = status or ChangesetStatus.DEFAULT
+        return str(st)
+
+    def set_status(self, repo, revision, status, user):
+        """
+        Creates new status for changeset or updates the old one
+
+        :param repo:
+        :type repo:
+        :param revision:
+        :type revision:
+        :param status:
+        :type status:
+        :param user:
+        :type user:
+        """
+        repo = self.__get_repo(repo)
+
+        cur_status = ChangesetStatus.query()\
+            .filter(ChangesetStatus.repo == repo)\
+            .filter(ChangesetStatus.revision == revision)\
+            .scalar()
+        new_status = cur_status or ChangesetStatus()
+        new_status.author = self.__get_user(user)
+        new_status.repo = self.__get_repo(repo)
+        new_status.status = status
+        new_status.revision = revision
+        self.sa.add(new_status)
+        return new_status
+

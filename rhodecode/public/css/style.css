@@ -2447,6 +2447,17 @@ h3.files_location {
     font-weight: bold !important;
 }
 
+.right .changeset-status-container{
+    padding-right: 5px;
+    margin-top:1px;
+    float:right;
+    height:14px;
+}
+.right .changeset-status-container .changeset-status-lbl{
+	color: rgb(136, 136, 136);
+    float: left;
+    padding: 0px 4px 0px 0px;	
+}
 .right .comments-container{
 	padding-right: 5px;
 	margin-top:1px;
@@ -3907,6 +3918,11 @@ div.rst-block  pre {
 }
 
 /** comment form **/
+
+.status-block{
+    height:80px;
+    clear:both	
+}
 
 .comment-form .clearfix{
 	background: #EEE;

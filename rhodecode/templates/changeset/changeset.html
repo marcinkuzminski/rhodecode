@@ -40,7 +40,7 @@
                   ${c.context_url(request.GET)}
                 </div>
                 <div class="comments-number" style="float:right;padding-right:5px">${len(c.comments)} comment(s) (${c.inline_cnt} ${_('inline')})</div>
-			</div>
+            </div>       
 		</div>
 	    <div id="changeset_content">
 			<div class="container">
@@ -153,6 +153,15 @@
           // inject comments into they proper positions
           var file_comments = YUQ('.inline-comment-placeholder');
           renderInlineComments(file_comments);
+          
+          YUE.on(YUD.get('show_changeset_status_box'),'change',function(e){
+        	  if(e.currentTarget.checked){
+        		  YUD.setStyle('status_block_container','display','');  
+        	  }
+        	  else{
+        		  YUD.setStyle('status_block_container','display','none');
+        	  }
+          })
       })
 
     </script>

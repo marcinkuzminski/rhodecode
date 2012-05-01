@@ -42,6 +42,7 @@ from rhodecode.lib.utils import repo_name_slug
 from rhodecode.lib.utils2 import str2bool, safe_unicode, safe_str, \
     get_changeset_safe
 from rhodecode.lib.markup_renderer import MarkupRenderer
+from rhodecode.model.changeset_status import ChangesetStatusModel
 
 log = logging.getLogger(__name__)
 
@@ -875,7 +876,6 @@ def urlify_commit(text_, repository=None, link_=None):
 
         return ''.join(links)
 
-
     # urlify changesets - extrac revisions and make link out of them
     text_ = urlify_changesets(escaper(text_), repository)
 
@@ -939,3 +939,7 @@ def rst_w_mentions(source):
     """
     return literal('<div class="rst-block">%s</div>' %
                    MarkupRenderer.rst_with_mentions(source))
+
+
+def changeset_status(repo, revision):
+    return ChangesetStatusModel().get_status(repo, revision)
