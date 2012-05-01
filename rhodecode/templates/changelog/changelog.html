@@ -63,7 +63,7 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
                             <div class="expand"><span class="expandtext">&darr; ${_('show more')} &darr;</span></div>
 						</div>
 						<div class="right">
-									<div id="${cs.raw_id}_changes_info" class="changes">
+									<div class="changes">
                                         <div id="${cs.raw_id}"  style="float:right;" class="changed_total tooltip" title="${_('Affected number of files, click to show more details')}">${len(cs.affected_files)}</div>
                                         <div class="comments-container">
                                         %if len(c.comments.get(cs.raw_id,[])) > 0:
@@ -183,7 +183,7 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
                     	var id = e.currentTarget.id
                     	var url = "${h.url('changelog_details',repo_name=c.repo_name,cs='__CS__')}"
                     	var url = url.replace('__CS__',id);
-                    	ypjax(url,id+'_changes_info',function(){tooltip_activate()});
+                    	ypjax(url,id,function(){tooltip_activate()});
                     });
 
                     // change branch filter
