@@ -42,8 +42,22 @@ __root__ = dn(dn(dn(__here__)))
 sys.path.append(__root__)
 
 from rhodecode.lib import vcs
+from rhodecode.lib.compat import OrderedSet
+from rhodecode.lib.vcs.exceptions import RepositoryError
 
-BASE_URI = 'http://127.0.0.1:5001/%s'
+PASES = 3
+HOST = 'http://127.0.0.1'
+PORT = 5000
+BASE_URI = '%s:%s/' % (HOST, PORT)
+
+if len(sys.argv) == 2:
+    BASE_URI = sys.argv[1]
+
+if not BASE_URI.endswith('/'):
+    BASE_URI += '/'
+
+print 'Crawling @ %s' % BASE_URI
+BASE_URI += '%s'
 PROJECT_PATH = jn('/', 'home', 'marcink', 'hg_repos')
 PROJECTS = [
     'linux-magx-pbranch',
@@ -62,7 +76,20 @@ o.addheaders = [
 urllib2.install_opener(o)
 
 
+def _get_repo(proj):
+    if isinstance(proj, basestring):
+        repo = vcs.get_repo(jn(PROJECT_PATH, proj))
+        proj = proj
+    else:
+        repo = proj
+        proj = repo.name
+
+    return repo, proj
+
+
 def test_changelog_walk(proj, pages=100):
+    repo, proj = _get_repo(proj)
+
     total_time = 0
     for i in range(1, pages):
 
@@ -81,10 +108,11 @@ def test_changelog_walk(proj, pages=100):
 
 
 def test_changeset_walk(proj, limit=None):
+    repo, proj = _get_repo(proj)
+
     print 'processing', jn(PROJECT_PATH, proj)
     total_time = 0
 
-    repo = vcs.get_repo(jn(PROJECT_PATH, proj))
     cnt = 0
     for i in repo:
         cnt += 1
@@ -106,13 +134,10 @@ def test_changeset_walk(proj, limit=None):
 
 
 def test_files_walk(proj, limit=100):
+    repo, proj = _get_repo(proj)
+
     print 'processing', jn(PROJECT_PATH, proj)
     total_time = 0
-
-    repo = vcs.get_repo(jn(PROJECT_PATH, proj))
-
-    from rhodecode.lib.compat import OrderedSet
-    from rhodecode.lib.vcs.exceptions import RepositoryError
 
     paths_ = OrderedSet([''])
     try:
@@ -150,10 +175,10 @@ def test_files_walk(proj, limit=100):
     print 'average on req', total_time / float(cnt)
 
 if __name__ == '__main__':
-
-    for p in PROJECTS:
-        test_changelog_walk(p, 40)
-        time.sleep(2)
-        test_changeset_walk(p, limit=100)
-        time.sleep(2)
-        test_files_walk(p, 100)
+    for path in PROJECTS:
+        repo = vcs.get_repo(jn(PROJECT_PATH, path))
+        for i in range(PASES):
+            print 'PASS %s/%s' % (i, PASES)
+            test_changelog_walk(repo, pages=80)
+            test_changeset_walk(repo, limit=100)
+            test_files_walk(repo, limit=100)
