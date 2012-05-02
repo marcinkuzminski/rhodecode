@@ -67,7 +67,8 @@ class SettingsController(BaseController):
         c.admin_user = session.get('admin_user')
         c.admin_username = session.get('admin_username')
         c.modules = sorted([(p.project_name, p.version)
-                            for p in pkg_resources.working_set])
+                            for p in pkg_resources.working_set],
+                           key=lambda k: k[0].lower())
         c.py_version = platform.python_version()
         c.platform = platform.platform()
         super(SettingsController, self).__before__()

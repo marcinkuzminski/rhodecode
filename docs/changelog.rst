@@ -23,6 +23,8 @@ news
 - #415: Adding comment to changeset causes reload. 
   Comments are now added via ajax and doesn't reload the page
 - #374 LDAP config is discarded when LDAP can't be activated
+- limited push/pull operations are now logged for git in the journal
+- bumped mercurial to 2.2.X series
 
 fixes
 +++++
@@ -31,7 +33,7 @@ fixes
 - fixed missing permission checks on show forks page
 - #418 cast to unicode fixes in notification objects
 - #426 fixed mention extracting regex
-
+- fixed remote-pulling for git remotes remopositories
 
 1.3.4 (**2012-03-28**)
 ----------------------
