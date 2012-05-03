@@ -411,7 +411,7 @@ class GitRepository(BaseRepository):
             yield self.get_changeset(rev)
 
     def get_diff(self, rev1, rev2, path=None, ignore_whitespace=False,
-            context=3):
+                 context=3):
         """
         Returns (git like) *diff*, as plain text. Shows changes introduced by
         ``rev2`` since ``rev1``.

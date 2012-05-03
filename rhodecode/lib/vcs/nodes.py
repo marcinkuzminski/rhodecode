@@ -19,6 +19,7 @@ from rhodecode.lib.vcs.utils.lazy import LazyProperty
 from rhodecode.lib.vcs.utils import safe_unicode, safe_str
 from rhodecode.lib.vcs.exceptions import NodeError
 from rhodecode.lib.vcs.exceptions import RemovedFileNodeError
+from rhodecode.lib.utils import EmptyChangeset
 
 
 class NodeKind:
@@ -576,16 +577,26 @@ class SubModuleNode(Node):
     """
     represents a SubModule of Git or SubRepo of Mercurial
     """
+    is_binary = False
+    size = 0
+
     def __init__(self, name, url=None, changeset=None, alias=None):
         self.path = name
         self.kind = NodeKind.SUBMODULE
         self.alias = alias
-        # changeset MUST be STR !! since it can point to non-valid SCM
-        self.changeset = str(changeset)
+        # we have to use emptyChangeset here since this can point to svn/git/hg
+        # submodules we cannot get from repository
+        self.changeset = EmptyChangeset(str(changeset), alias=alias)
         self.url = url or self._extract_submodule_url()
+
+    def __repr__(self):
+        return '<%s %r @ %s>' % (self.__class__.__name__, self.path,
+                                 self.changeset.short_id)
 
     def _extract_submodule_url(self):
         if self.alias == 'git':
+            #TODO: find a way to parse gits submodule file and extract the
+            # linking URL
             return self.path
         if self.alias == 'hg':
             return self.path
@@ -597,4 +608,4 @@ class SubModuleNode(Node):
         then only last part is returned.
         """
         org = safe_unicode(self.path.rstrip('/').split('/')[-1])
-        return u'%s @ %s' % (org, self.changeset[:12])
+        return u'%s @ %s' % (org, self.changeset.short_id)
