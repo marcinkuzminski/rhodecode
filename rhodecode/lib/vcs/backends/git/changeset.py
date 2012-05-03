@@ -10,7 +10,8 @@ from rhodecode.lib.vcs.exceptions import VCSError
 from rhodecode.lib.vcs.exceptions import ChangesetDoesNotExistError
 from rhodecode.lib.vcs.exceptions import ImproperArchiveTypeError
 from rhodecode.lib.vcs.backends.base import BaseChangeset
-from rhodecode.lib.vcs.nodes import FileNode, DirNode, NodeKind, RootNode, RemovedFileNode
+from rhodecode.lib.vcs.nodes import FileNode, DirNode, NodeKind, RootNode, \
+    RemovedFileNode, SubModuleNode
 from rhodecode.lib.vcs.utils import safe_unicode
 from rhodecode.lib.vcs.utils import date_fromtimestamp
 from rhodecode.lib.vcs.utils.lazy import LazyProperty
@@ -329,7 +330,13 @@ class GitChangeset(BaseChangeset):
         tree = self.repository._repo[id]
         dirnodes = []
         filenodes = []
+        als = self.repository.alias
         for name, stat, id in tree.iteritems():
+            if objects.S_ISGITLINK(stat):
+                dirnodes.append(SubModuleNode(name, url=None, changeset=id,
+                                              alias=als))
+                continue
+
             obj = self.repository._repo.get_object(id)
             if path != '':
                 obj_path = '/'.join((path, name))
