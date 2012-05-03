@@ -52,7 +52,7 @@ class GitRepository(BaseRepository):
         if baseui is None:
             from mercurial.ui import ui
             baseui = ui()
-        # patch the instance of GitRepo with an "FAKE" ui object to add 
+        # patch the instance of GitRepo with an "FAKE" ui object to add
         # compatibility layer with Mercurial
         setattr(self._repo, 'ui', baseui)
 
