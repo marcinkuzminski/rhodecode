@@ -19,7 +19,7 @@ from rhodecode.lib.vcs.utils.lazy import LazyProperty
 from rhodecode.lib.vcs.utils import safe_unicode, safe_str
 from rhodecode.lib.vcs.exceptions import NodeError
 from rhodecode.lib.vcs.exceptions import RemovedFileNodeError
-from rhodecode.lib.utils import EmptyChangeset
+from rhodecode.lib.vcs.backends.base import EmptyChangeset
 
 
 class NodeKind:
