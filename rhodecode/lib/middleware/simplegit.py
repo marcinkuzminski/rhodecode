@@ -201,7 +201,7 @@ class SimpleGit(BaseVCSController):
             # invalidate cache on push
             if action == 'push':
                 self._invalidate_cache(repo_name)
-            self._handle_githooks(action, baseui, environ)
+            self._handle_githooks(repo_name, action, baseui, environ)
 
             log.info('%s action on GIT repo "%s"' % (action, repo_name))
             app = self.__make_app(repo_name, repo_path)
@@ -264,7 +264,7 @@ class SimpleGit(BaseVCSController):
             op = getattr(self, '_git_stored_op', 'pull')
         return op
 
-    def _handle_githooks(self, action, baseui, environ):
+    def _handle_githooks(self, repo_name, action, baseui, environ):
         from rhodecode.lib.hooks import log_pull_action, log_push_action
         service = environ['QUERY_STRING'].split('=')
         if len(service) < 2:
@@ -279,9 +279,9 @@ class SimpleGit(BaseVCSController):
         pull_hook = 'preoutgoing.pull_logger'
         _hooks = dict(baseui.configitems('hooks')) or {}
         if action == 'push' and _hooks.get(push_hook):
-            log_push_action(ui=baseui, repo=repo._repo)
+            log_push_action(ui=baseui, repo=_repo._repo)
         elif action == 'pull' and _hooks.get(pull_hook):
-            log_pull_action(ui=baseui, repo=repo._repo)
+            log_pull_action(ui=baseui, repo=_repo._repo)
 
     def __inject_extras(self, repo_path, baseui, extras={}):
         """
