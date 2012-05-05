@@ -52,7 +52,7 @@ class GitRepository(BaseRepository):
         if baseui is None:
             from mercurial.ui import ui
             baseui = ui()
-        # patch the instance of GitRepo with an "FAKE" ui object to add 
+        # patch the instance of GitRepo with an "FAKE" ui object to add
         # compatibility layer with Mercurial
         setattr(self._repo, 'ui', baseui)
 
@@ -411,7 +411,7 @@ class GitRepository(BaseRepository):
             yield self.get_changeset(rev)
 
     def get_diff(self, rev1, rev2, path=None, ignore_whitespace=False,
-            context=3):
+                 context=3):
         """
         Returns (git like) *diff*, as plain text. Shows changes introduced by
         ``rev2`` since ``rev1``.

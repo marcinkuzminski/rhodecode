@@ -111,7 +111,7 @@ def log_push_action(ui, repo, **kwargs):
     Maps user last push action to new changeset id, from mercurial
 
     :param ui:
-    :param repo:
+    :param repo: repo object containing the `ui` object
     """
 
     extras = dict(repo.ui.configitems('rhodecode_extras'))

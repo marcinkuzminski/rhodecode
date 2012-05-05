@@ -126,12 +126,7 @@ class ChangelogController(BaseRepoController):
 
         elif repo.alias == 'hg':
             dag = graphmod.dagwalker(repo._repo, revs)
-            try:
-                c.dag = graphmod.colored(dag)
-            except:
-                #HG 2.2+
-                c.dag = graphmod.colored(dag, repo._repo)
-
+            c.dag = graphmod.colored(dag, repo._repo)
             for (id, type, ctx, vtx, edges) in c.dag:
                 if type != graphmod.CHANGESET:
                     continue

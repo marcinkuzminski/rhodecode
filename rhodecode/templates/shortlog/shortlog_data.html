@@ -15,7 +15,7 @@
             <div><pre><a href="${h.url('files_home',repo_name=c.repo_name,revision=cs.raw_id)}">r${cs.revision}:${h.short_id(cs.raw_id)}</a></pre></div>
         </td>
         <td>
-            ${h.link_to(h.truncate(cs.message,50),
+            ${h.link_to(h.truncate(cs.message,50) or _('No commit message'),
             h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id),
             title=cs.message)}
         </td>
@@ -25,9 +25,11 @@
 		<td title="${cs.author}">${h.person(cs.author)}</td>
 		<td>
 			<span class="logtags">
+                %if cs.branch:
 				<span class="branchtag">
                     ${cs.branch}
                 </span>
+                %endif
 			</span>
 		</td>
 		<td>

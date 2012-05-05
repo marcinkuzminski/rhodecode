@@ -8,19 +8,22 @@
     :created_on: Apr 8, 2010
     :copyright: (c) 2010-2011 by Marcin Kuzminski, Lukasz Balcerzak.
 """
+import os
 import stat
 import posixpath
 import mimetypes
 
+from pygments import lexers
+
 from rhodecode.lib.vcs.utils.lazy import LazyProperty
-from rhodecode.lib.vcs.utils import safe_unicode
+from rhodecode.lib.vcs.utils import safe_unicode, safe_str
 from rhodecode.lib.vcs.exceptions import NodeError
 from rhodecode.lib.vcs.exceptions import RemovedFileNodeError
-
-from pygments import lexers
+from rhodecode.lib.vcs.backends.base import EmptyChangeset
 
 
 class NodeKind:
+    SUBMODULE = -1
     DIR = 1
     FILE = 2
 
@@ -208,6 +211,13 @@ class Node(object):
         Returns ``True`` if node is a root node and ``False`` otherwise.
         """
         return self.kind == NodeKind.DIR and self.path == ''
+
+    def is_submodule(self):
+        """
+        Returns ``True`` if node's kind is ``NodeKind.SUBMODULE``, ``False``
+        otherwise.
+        """
+        return self.kind == NodeKind.SUBMODULE
 
     @LazyProperty
     def added(self):
@@ -561,3 +571,41 @@ class RootNode(DirNode):
 
     def __repr__(self):
         return '<%s>' % self.__class__.__name__
+
+
+class SubModuleNode(Node):
+    """
+    represents a SubModule of Git or SubRepo of Mercurial
+    """
+    is_binary = False
+    size = 0
+
+    def __init__(self, name, url=None, changeset=None, alias=None):
+        self.path = name
+        self.kind = NodeKind.SUBMODULE
+        self.alias = alias
+        # we have to use emptyChangeset here since this can point to svn/git/hg
+        # submodules we cannot get from repository
+        self.changeset = EmptyChangeset(str(changeset), alias=alias)
+        self.url = url or self._extract_submodule_url()
+
+    def __repr__(self):
+        return '<%s %r @ %s>' % (self.__class__.__name__, self.path,
+                                 self.changeset.short_id)
+
+    def _extract_submodule_url(self):
+        if self.alias == 'git':
+            #TODO: find a way to parse gits submodule file and extract the
+            # linking URL
+            return self.path
+        if self.alias == 'hg':
+            return self.path
+
+    @LazyProperty
+    def name(self):
+        """
+        Returns name of the node so if its path
+        then only last part is returned.
+        """
+        org = safe_unicode(self.path.rstrip('/').split('/')[-1])
+        return u'%s @ %s' % (org, self.changeset.short_id)

@@ -33,8 +33,8 @@ from itertools import tee, imap
 from pylons.i18n.translation import _
 
 from rhodecode.lib.vcs.exceptions import VCSError
-from rhodecode.lib.vcs.nodes import FileNode
-
+from rhodecode.lib.vcs.nodes import FileNode, SubModuleNode
+from rhodecode.lib.helpers import escape
 from rhodecode.lib.utils import EmptyChangeset
 
 
@@ -79,9 +79,13 @@ def wrapped_diff(filenode_old, filenode_new, cut_off_limit=None,
                                'diff menu to display this diff'))
         stats = (0, 0)
         size = 0
-
     if not diff:
-        diff = wrap_to_table(_('No changes detected'))
+        submodules = filter(lambda o: isinstance(o, SubModuleNode),
+                            [filenode_new, filenode_old])
+        if submodules:
+            diff = wrap_to_table(escape('Submodule %r' % submodules[0]))
+        else:
+            diff = wrap_to_table(_('No changes detected'))
 
     cs1 = filenode_old.changeset.raw_id
     cs2 = filenode_new.changeset.raw_id
@@ -97,6 +101,10 @@ def get_gitdiff(filenode_old, filenode_new, ignore_whitespace=True, context=3):
     """
     # make sure we pass in default context
     context = context or 3
+    submodules = filter(lambda o: isinstance(o, SubModuleNode),
+                        [filenode_new, filenode_old])
+    if submodules:
+        return ''
 
     for filenode in (filenode_old, filenode_new):
         if not isinstance(filenode, FileNode):
@@ -109,7 +117,6 @@ def get_gitdiff(filenode_old, filenode_new, ignore_whitespace=True, context=3):
 
     vcs_gitdiff = repo.get_diff(old_raw_id, new_raw_id, filenode_new.path,
                                  ignore_whitespace, context)
-
     return vcs_gitdiff
 
 

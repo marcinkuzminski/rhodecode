@@ -54,7 +54,7 @@ requirements = [
     "SQLAlchemy==0.7.6",
     "Mako==0.7.0",
     "pygments>=1.4",
-    "whoosh>=2.3.0,<2.4",
+    "whoosh>=2.4.0,<2.5",
     "celery>=2.2.5,<2.3",
     "babel",
     "python-dateutil>=1.5.0,<2.0.0",
@@ -69,10 +69,10 @@ if __py_version__ < (2, 6):
     requirements.append("pysqlite")
 
 if __platform__ in PLATFORM_WIN:
-    requirements.append("mercurial>=2.2,<2.3")
+    requirements.append("mercurial>=2.2.1,<2.3")
 else:
     requirements.append("py-bcrypt")
-    requirements.append("mercurial>=2.2,<2.3")
+    requirements.append("mercurial>=2.2.1,<2.3")
 
 
 def get_version():

@@ -25,6 +25,7 @@ news
 - #374 LDAP config is discarded when LDAP can't be activated
 - limited push/pull operations are now logged for git in the journal
 - bumped mercurial to 2.2.X series
+- added support for displaying submodules in file-browser
 
 fixes
 +++++
@@ -34,6 +35,8 @@ fixes
 - #418 cast to unicode fixes in notification objects
 - #426 fixed mention extracting regex
 - fixed remote-pulling for git remotes remopositories
+- fixed #434: Error when accessing files or changesets of a git repository 
+  with submodules
 
 1.3.4 (**2012-03-28**)
 ----------------------

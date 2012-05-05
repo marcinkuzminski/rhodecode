@@ -2729,6 +2729,14 @@ table.code-browser .browser-dir {
 	text-align: left;
 }
 
+table.code-browser .submodule-dir {
+    background: url("../images/icons/disconnect.png") no-repeat scroll 3px;
+    height: 16px;
+    padding-left: 20px;
+    text-align: left;
+}
+
+
 .box .search {
 	clear: both;
 	overflow: hidden;

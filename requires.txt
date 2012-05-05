@@ -5,7 +5,7 @@ formencode==1.2.4
 SQLAlchemy==0.7.6
 Mako==0.7.0
 pygments>=1.4
-whoosh>=2.3.0,<2.4
+whoosh>=2.4.0,<2.5
 celery>=2.2.5,<2.3
 babel
 python-dateutil>=1.5.0,<2.0.0
@@ -14,4 +14,4 @@ webob==1.0.8
 markdown==2.1.1
 docutils==0.8.1
 py-bcrypt
-mercurial>=2.2,<2.3
+mercurial>=2.2.1,<2.3

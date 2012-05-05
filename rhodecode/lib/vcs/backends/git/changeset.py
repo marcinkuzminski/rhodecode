@@ -10,7 +10,8 @@ from rhodecode.lib.vcs.exceptions import VCSError
 from rhodecode.lib.vcs.exceptions import ChangesetDoesNotExistError
 from rhodecode.lib.vcs.exceptions import ImproperArchiveTypeError
 from rhodecode.lib.vcs.backends.base import BaseChangeset
-from rhodecode.lib.vcs.nodes import FileNode, DirNode, NodeKind, RootNode, RemovedFileNode
+from rhodecode.lib.vcs.nodes import FileNode, DirNode, NodeKind, RootNode, \
+    RemovedFileNode, SubModuleNode
 from rhodecode.lib.vcs.utils import safe_unicode
 from rhodecode.lib.vcs.utils import date_fromtimestamp
 from rhodecode.lib.vcs.utils.lazy import LazyProperty
@@ -329,7 +330,13 @@ class GitChangeset(BaseChangeset):
         tree = self.repository._repo[id]
         dirnodes = []
         filenodes = []
+        als = self.repository.alias
         for name, stat, id in tree.iteritems():
+            if objects.S_ISGITLINK(stat):
+                dirnodes.append(SubModuleNode(name, url=None, changeset=id,
+                                              alias=als))
+                continue
+
             obj = self.repository._repo.get_object(id)
             if path != '':
                 obj_path = '/'.join((path, name))
@@ -357,24 +364,31 @@ class GitChangeset(BaseChangeset):
         path = self._fix_path(path)
         if not path in self.nodes:
             try:
-                id = self._get_id_for_path(path)
+                id_ = self._get_id_for_path(path)
             except ChangesetError:
                 raise NodeDoesNotExistError("Cannot find one of parents' "
                     "directories for a given path: %s" % path)
-            obj = self.repository._repo.get_object(id)
-            if isinstance(obj, objects.Tree):
-                if path == '':
-                    node = RootNode(changeset=self)
-                else:
-                    node = DirNode(path, changeset=self)
-                node._tree = obj
-            elif isinstance(obj, objects.Blob):
-                node = FileNode(path, changeset=self)
-                node._blob = obj
+
+            als = self.repository.alias
+            _GL = lambda m: m and objects.S_ISGITLINK(m)
+            if _GL(self._stat_modes.get(path)):
+                node = SubModuleNode(path, url=None, changeset=id_, alias=als)
             else:
-                raise NodeDoesNotExistError("There is no file nor directory "
-                    "at the given path %r at revision %r"
-                    % (path, self.short_id))
+                obj = self.repository._repo.get_object(id_)
+
+                if isinstance(obj, objects.Tree):
+                    if path == '':
+                        node = RootNode(changeset=self)
+                    else:
+                        node = DirNode(path, changeset=self)
+                    node._tree = obj
+                elif isinstance(obj, objects.Blob):
+                    node = FileNode(path, changeset=self)
+                    node._blob = obj
+                else:
+                    raise NodeDoesNotExistError("There is no file nor directory "
+                        "at the given path %r at revision %r"
+                        % (path, self.short_id))
             # cache node
             self.nodes[path] = node
         return self.nodes[path]
@@ -416,7 +430,6 @@ class GitChangeset(BaseChangeset):
                         line))
                 _path = splitted[1].strip()
                 paths.add(_path)
-
         return sorted(paths)
 
     @LazyProperty
