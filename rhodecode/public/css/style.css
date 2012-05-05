@@ -2469,7 +2469,7 @@ h3.files_location {
 .right .changeset-status-container .changeset-status-ico{
     float: left;
 }
-.code-header .changeset-status-container .changeset-status-ico{
+.code-header .changeset-status-container .changeset-status-ico, .container .changeset-status-ico{
     float: left;
 }
 .right .comments-container{

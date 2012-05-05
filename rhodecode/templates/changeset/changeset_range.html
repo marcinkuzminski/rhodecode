@@ -35,12 +35,17 @@
 	    <div id="changeset_compare_view_content">
 			<div class="container">
 			<table class="compare_view_commits noborder">
-            %for cs in c.cs_ranges:
+            %for cnt,cs in enumerate(c.cs_ranges):
                 <tr>
                 <td><div class="gravatar"><img alt="gravatar" src="${h.gravatar_url(h.email(cs.author),14)}"/></div></td>
                 <td>${h.link_to('r%s:%s' % (cs.revision,h.short_id(cs.raw_id)),h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id))}</td>
                 <td><div class="author">${h.person(cs.author)}</div></td>
                 <td><span class="tooltip" title="${h.age(cs.date)}">${cs.date}</span></td>
+                <td>
+                  %if c.statuses:
+                    <div title="${_('Changeset status')}" class="changeset-status-ico"><img src="${h.url('/images/icons/flag_status_%s.png' % c.statuses[cnt])}" /></div>
+                  %endif
+                </td>
                 <td><div class="message">${h.urlify_commit(h.wrap_paragraphs(cs.message),c.repo_name)}</div></td>
                 </tr>
             %endfor
