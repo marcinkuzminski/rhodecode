@@ -334,7 +334,7 @@ flash = _Flash()
 #==============================================================================
 from rhodecode.lib.vcs.utils import author_name, author_email
 from rhodecode.lib.utils2 import credentials_filter, age as _age
-from rhodecode.model.db import User
+from rhodecode.model.db import User, ChangesetStatus
 
 age = lambda  x: _age(x)
 capitalize = lambda x: x.capitalize()
@@ -943,3 +943,7 @@ def rst_w_mentions(source):
 
 def changeset_status(repo, revision):
     return ChangesetStatusModel().get_status(repo, revision)
+
+
+def changeset_status_lbl(changeset_status):
+    return dict(ChangesetStatus.STATUSES).get(changeset_status)
