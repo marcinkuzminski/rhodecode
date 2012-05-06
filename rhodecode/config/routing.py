@@ -412,6 +412,11 @@ def make_map(config):
                  controller='changeset', action='raw_changeset',
                  revision='tip', conditions=dict(function=check_repo))
 
+    rmap.connect('compare_home',
+                 '/{repo_name:.*}/compare/{ref:.*}',
+                 controller='compare', action='index',
+                 conditions=dict(function=check_repo))
+
     rmap.connect('summary_home', '/{repo_name:.*}/summary',
                 controller='summary', conditions=dict(function=check_repo))
 
