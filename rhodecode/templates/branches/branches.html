@@ -25,12 +25,24 @@
         ${self.breadcrumbs()}
     </div>
     <!-- end box / title -->
+    <div class="info_box" id="compare_branches" style="clear: both;padding: 10px 19px;vertical-align: right;text-align: right;"><a href="#" class="ui-btn small">${_('Compare branches')}</a></div>
     <div class="table">
         <%include file='branches_data.html'/>
     </div>
 </div>
 <script type="text/javascript">
-
+YUE.on('compare_branches','click',function(e){
+	YUE.preventDefault(e);
+	var org = YUQ('input[name=compare_org]:checked')[0];
+	var other = YUQ('input[name=compare_other]:checked')[0];
+	var compare_url = "${h.url('compare_home',repo_name=c.repo_name,ref='__ORG__...__OTHER__')}";
+	if(org && other){
+		var u = compare_url.replace('__ORG__','branch:'+org.value)
+		                   .replace('__OTHER__','branch:'+other.value);
+		window.location=u;
+	}
+	
+})
 // main table sorting
 var myColumnDefs = [
     {key:"name",label:"${_('Name')}",sortable:true},
@@ -39,6 +51,7 @@ var myColumnDefs = [
     {key:"author",label:"${_('Author')}",sortable:true},
     {key:"revision",label:"${_('Revision')}",sortable:true,
         sortOptions: { sortFunction: revisionSort }},
+    {key:"compare",label:"${_('Compare')}",sortable:false,},
 ];
 
 var myDataSource = new YAHOO.util.DataSource(YUD.get("branches_data"));
@@ -51,6 +64,7 @@ myDataSource.responseSchema = {
         {key:"date"},
         {key:"author"},
         {key:"revision"},
+        {key:"compare"},
     ]
 };
 
