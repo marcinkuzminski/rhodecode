@@ -51,8 +51,8 @@ class CompareController(BaseRepoController):
         or using a repo <empty>...(repo:</rhodecode/path/to/other)
 
 
-        :param ref:
-        :type ref:
+        :param ref: <orginal_reference>...<other_reference>
+        :type ref: str
         """
         org_repo = c.rhodecode_repo.name
 

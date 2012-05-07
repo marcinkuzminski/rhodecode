@@ -30,7 +30,7 @@ from sqlalchemy.orm import joinedload
 from webhelpers.paginate import Page
 from webhelpers.feedgenerator import Atom1Feed, Rss201rev2Feed
 
-from paste.httpexceptions import HTTPBadRequest
+from webob.exc import HTTPBadRequest
 from pylons import request, tmpl_context as c, response, url
 from pylons.i18n.translation import _
 
