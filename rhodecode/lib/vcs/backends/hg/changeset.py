@@ -37,6 +37,10 @@ class MercurialChangeset(BaseChangeset):
         return  safe_unicode(self._ctx.branch())
 
     @LazyProperty
+    def bookmarks(self):
+        return map(safe_unicode, self._ctx.bookmarks())
+
+    @LazyProperty
     def message(self):
         return safe_unicode(self._ctx.description())
 

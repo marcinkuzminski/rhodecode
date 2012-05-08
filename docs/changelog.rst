@@ -26,6 +26,7 @@ news
 - limited push/pull operations are now logged for git in the journal
 - bumped mercurial to 2.2.X series
 - added support for displaying submodules in file-browser
+- #421 added bookmarks in changlog view
 
 fixes
 +++++
