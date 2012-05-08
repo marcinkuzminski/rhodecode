@@ -48,8 +48,6 @@ class CompareController(BaseRepoController):
         """
         Parse the org...other string
         Possible formats are `(branch|book|tag):<name>...(branch|book|tag):<othername>`
-        or using a repo <empty>...(repo:</rhodecode/path/to/other)
-
 
         :param ref: <orginal_reference>...<other_reference>
         :type ref: str
@@ -62,12 +60,11 @@ class CompareController(BaseRepoController):
             return _repo, (name, val)
 
         def other_parser(other):
+            _other_repo = request.GET.get('repo')
             _repo = org_repo
             name, val = other.split(':')
-            if 'repo' in other:
-                _repo = val
-                name = 'branch'
-                val = c.rhodecode_repo.DEFAULT_BRANCH_NAME
+            if _other_repo:
+                _repo = _other_repo #TODO: do an actual repo loookup within rhodecode
 
             return _repo, (name, val)
 
