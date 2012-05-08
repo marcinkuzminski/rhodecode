@@ -38,6 +38,7 @@ fixes
 - fixed remote-pulling for git remotes remopositories
 - fixed #434: Error when accessing files or changesets of a git repository 
   with submodules
+- fixed issue with empty APIKEYS for users after registration ref. #438
 
 1.3.4 (**2012-03-28**)
 ----------------------

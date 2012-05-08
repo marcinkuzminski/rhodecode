@@ -54,7 +54,6 @@ class TestLoginController(TestController):
         self.assertEqual(response.status, '200 OK')
         self.assertTrue('Users administration' in response.body)
 
-
     def test_login_short_password(self):
         response = self.app.post(url(controller='login', action='index'),
                                  {'username':'test_admin',
@@ -101,7 +100,7 @@ class TestLoginController(TestController):
                                              'lastname':'test'})
 
         self.assertEqual(response.status , '200 OK')
-        assert 'This e-mail address is already taken' in response.body
+        response.mustcontain('This e-mail address is already taken')
 
     def test_register_err_same_email_case_sensitive(self):
         response = self.app.post(url(controller='login', action='register'),
@@ -112,7 +111,7 @@ class TestLoginController(TestController):
                                              'name':'test',
                                              'lastname':'test'})
         self.assertEqual(response.status , '200 OK')
-        assert 'This e-mail address is already taken' in response.body
+        response.mustcontain('This e-mail address is already taken')
 
     def test_register_err_wrong_data(self):
         response = self.app.post(url(controller='login', action='register'),
@@ -123,9 +122,8 @@ class TestLoginController(TestController):
                                              'name':'test',
                                              'lastname':'test'})
         self.assertEqual(response.status , '200 OK')
-        assert 'An email address must contain a single @' in response.body
-        assert 'Enter a value 6 characters long or more' in response.body
-
+        response.mustcontain('An email address must contain a single @')
+        response.mustcontain('Enter a value 6 characters long or more')
 
     def test_register_err_username(self):
         response = self.app.post(url(controller='login', action='register'),
@@ -137,11 +135,11 @@ class TestLoginController(TestController):
                                              'lastname':'test'})
 
         self.assertEqual(response.status , '200 OK')
-        assert 'An email address must contain a single @' in response.body
-        assert ('Username may only contain '
+        response.mustcontain('An email address must contain a single @')
+        response.mustcontain('Username may only contain '
                 'alphanumeric characters underscores, '
                 'periods or dashes and must begin with '
-                'alphanumeric character') in response.body
+                'alphanumeric character')
 
     def test_register_err_case_sensitive(self):
         response = self.app.post(url(controller='login', action='register'),
@@ -156,8 +154,6 @@ class TestLoginController(TestController):
         self.assertTrue('An email address must contain a single @' in response.body)
         self.assertTrue('This username already exists' in response.body)
 
-
-
     def test_register_special_chars(self):
         response = self.app.post(url(controller='login', action='register'),
                                             {'username':'xxxaxn',
@@ -170,7 +166,6 @@ class TestLoginController(TestController):
         self.assertEqual(response.status , '200 OK')
         self.assertTrue('Invalid characters in password' in response.body)
 
-
     def test_register_password_mismatch(self):
         response = self.app.post(url(controller='login', action='register'),
                                             {'username':'xs',
@@ -180,8 +175,8 @@ class TestLoginController(TestController):
                                              'name':'test',
                                              'lastname':'test'})
 
-        self.assertEqual(response.status , '200 OK')
-        assert 'Passwords do not match' in response.body
+        self.assertEqual(response.status, '200 OK')
+        response.mustcontain('Passwords do not match')
 
     def test_register_ok(self):
         username = 'test_regular4'
@@ -196,28 +191,32 @@ class TestLoginController(TestController):
                                              'password_confirmation':password,
                                              'email':email,
                                              'name':name,
-                                             'lastname':lastname})
-        self.assertEqual(response.status , '302 Found')
-        assert 'You have successfully registered into rhodecode' in response.session['flash'][0], 'No flash message about user registration'
+                                             'lastname':lastname,
+                                             'admin':True}) # This should be overriden
+        self.assertEqual(response.status, '302 Found')
+        self.checkSessionFlash(response, 'You have successfully registered into rhodecode')
 
         ret = self.Session.query(User).filter(User.username == 'test_regular4').one()
-        assert ret.username == username , 'field mismatch %s %s' % (ret.username, username)
-        assert check_password(password, ret.password) == True , 'password mismatch'
-        assert ret.email == email , 'field mismatch %s %s' % (ret.email, email)
-        assert ret.name == name , 'field mismatch %s %s' % (ret.name, name)
-        assert ret.lastname == lastname , 'field mismatch %s %s' % (ret.lastname, lastname)
-
+        self.assertEqual(ret.username, username)
+        self.assertEqual(check_password(password, ret.password), True)
+        self.assertEqual(ret.email, email)
+        self.assertEqual(ret.name, name)
+        self.assertEqual(ret.lastname, lastname)
+        self.assertNotEqual(ret.api_key, None)
+        self.assertEqual(ret.admin, False)
 
     def test_forgot_password_wrong_mail(self):
-        response = self.app.post(url(controller='login', action='password_reset'),
-                                            {'email':'marcin@wrongmail.org', })
+        response = self.app.post(
+                        url(controller='login', action='password_reset'),
+                            {'email': 'marcin@wrongmail.org',}
+        )
 
-        assert "This e-mail address doesn't exist" in response.body, 'Missing error message about wrong email'
+        response.mustcontain("This e-mail address doesn't exist")
 
     def test_forgot_password(self):
         response = self.app.get(url(controller='login',
                                     action='password_reset'))
-        self.assertEqual(response.status , '200 OK')
+        self.assertEqual(response.status, '200 OK')
 
         username = 'test_password_reset_1'
         password = 'qweqwe'

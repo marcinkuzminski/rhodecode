@@ -225,10 +225,8 @@ class UserModel(BaseModel):
         from rhodecode.model.notification import NotificationModel
 
         try:
-            new_user = User()
-            for k, v in form_data.items():
-                if k != 'admin':
-                    setattr(new_user, k, v)
+            form_data['admin'] = False
+            new_user = self.create(form_data)
 
             self.sa.add(new_user)
             self.sa.flush()
