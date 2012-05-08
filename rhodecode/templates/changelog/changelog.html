@@ -31,6 +31,7 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
 					<canvas id="graph_canvas"></canvas>
 				</div>
 				<div id="graph_content">
+                    <div class="info_box" style="clear: both;padding: 10px 6px;vertical-align: right;text-align: right;"><a href="${h.url('pullrequest_home',repo_name=c.repo_name)}" class="ui-btn small">${_('Open new pull request')}</a></div>
 					<div class="container_header">
 				        ${h.form(h.url.current(),method='get')}
 				        <div class="info_box" style="float:left">

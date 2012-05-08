@@ -417,6 +417,11 @@ def make_map(config):
                  controller='compare', action='index',
                  conditions=dict(function=check_repo))
 
+    rmap.connect('pullrequest_home',
+                 '/{repo_name:.*}/pull-request/new',
+                 controller='pullrequests', action='index',
+                 conditions=dict(function=check_repo))
+
     rmap.connect('summary_home', '/{repo_name:.*}/summary',
                 controller='summary', conditions=dict(function=check_repo))
 

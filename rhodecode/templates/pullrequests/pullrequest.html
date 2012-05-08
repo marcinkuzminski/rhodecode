@@ -1,0 +1,91 @@
+<%inherit file="/base/base.html"/>
+
+<%def name="title()">
+    ${c.repo_name} ${_('Pull request')}
+</%def>
+
+<%def name="breadcrumbs_links()">
+    ${h.link_to(u'Home',h.url('/'))}
+    &raquo;
+    ${h.link_to(c.repo_name,h.url('changelog_home',repo_name=c.repo_name))}
+    &raquo;
+    ${_('Pull request')}
+</%def>
+
+<%def name="main()">
+
+<div class="box">
+    <!-- box / title -->
+    <div class="title">
+        ${self.breadcrumbs()}
+    </div>
+    <div style="padding:30px">
+        ##ORG
+        <div style="float:left">
+            <div class="fork_user">
+                <div class="gravatar">
+                    <img alt="gravatar" src="${h.gravatar_url(c.rhodecode_db_repo.user.email,24)}"/>
+                </div>
+                <span style="font-size: 20px">
+                ${h.select('other','',['%s/%s' % (c.rhodecode_db_repo.user.username,c.repo_name)])}:${h.select('other_ref','',c.org_refs)}
+                </span>
+                 <div style="padding:5px 3px 3px 42px;">${c.rhodecode_db_repo.description}</div>
+            </div>
+            <div style="clear:both;padding-top: 10px"></div>
+        </div>
+          <div style="float:left;font-size:24px;padding:0px 20px">
+          <img src="${h.url('/images/arrow_right_64.png')}"/>
+          </div>
+        
+        ##OTHER, most Probably the PARENT OF THIS FORK
+        <div style="float:left">
+            <div class="fork_user">
+                <div class="gravatar">
+                    <img alt="gravatar" src="${h.gravatar_url(c.rhodecode_db_repo.user.email,24)}"/>
+                </div>
+                <span style="font-size: 20px">
+                ${h.select('orther','',c.sources)}:${h.select('other_ref','',c.org_refs)}
+                </span>
+                 <div style="padding:5px 3px 3px 42px;">${c.rhodecode_db_repo.description}</div>
+            </div>
+            <div style="clear:both;padding-top: 10px"></div>
+        </div>
+     </div>
+     
+    <h3>${_('New pull request')} from USER:REF into PARENT:REF</h3>
+    ${h.form(url('#'),method='put')}
+    <div class="form">
+        <!-- fields -->
+
+        <div class="fields">
+
+             <div class="field">
+                <div class="label">
+                    <label for="pullrequest_title">${_('Title')}:</label>
+                </div>
+                <div class="input">
+                    ${h.text('pullrequest_title',size=30)}
+                </div>
+             </div>
+
+            <div class="field">
+                <div class="label label-textarea">
+                    <label for="pullrequest_desc">${_('description')}:</label>
+                </div>
+                <div class="textarea text-area editor">
+                    ${h.textarea('pullrequest_desc',size=30)}
+                </div>
+            </div>
+
+            <div class="buttons">
+                ${h.submit('save',_('Send pull request'),class_="ui-button")}
+                ${h.reset('reset',_('Reset'),class_="ui-button")}
+           </div>
+        </div>
+    </div>
+    ${h.end_form()}     
+     
+     
+</div>
+
+</%def>

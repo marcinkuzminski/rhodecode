@@ -1281,6 +1281,7 @@ class Notification(Base, BaseModel):
     TYPE_MESSAGE = u'message'
     TYPE_MENTION = u'mention'
     TYPE_REGISTRATION = u'registration'
+    TYPE_PULL_REQUEST = u'pull_request'
 
     notification_id = Column('notification_id', Integer(), nullable=False, primary_key=True)
     subject = Column('subject', Unicode(512), nullable=True)
