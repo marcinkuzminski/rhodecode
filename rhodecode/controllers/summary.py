@@ -190,7 +190,7 @@ class SummaryController(BaseRepoController):
             readme_file = None
             log.debug('Fetching readme file')
             try:
-                cs = repo.get_changeset('tip')
+                cs = repo.get_changeset() # fetches TIP
                 renderer = MarkupRenderer()
                 for f in README_FILES:
                     try:

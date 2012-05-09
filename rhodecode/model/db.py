@@ -645,7 +645,7 @@ class Repository(Base, BaseModel):
     # SCM PROPERTIES
     #==========================================================================
 
-    def get_changeset(self, rev):
+    def get_changeset(self, rev=None):
         return get_changeset_safe(self.scm_instance, rev)
 
     @property
