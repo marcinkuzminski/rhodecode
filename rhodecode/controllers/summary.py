@@ -195,7 +195,6 @@ class SummaryController(BaseRepoController):
                 cs = repo.get_changeset()  # fetches TIP
                 renderer = MarkupRenderer()
                 for f in README_FILES:
-                    print f
                     try:
                         readme = cs.get_node(f)
                         readme_file = f
