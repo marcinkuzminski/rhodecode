@@ -71,7 +71,6 @@ def upgrade(migrate_engine):
     is_ldap = Column("is_ldap", Boolean(), nullable=False, unique=None, default=False)
     is_ldap.drop(User().__table__)
 
-
     #==========================================================================
     # Upgrade of `repositories` table
     #==========================================================================
@@ -99,7 +98,6 @@ def upgrade(migrate_engine):
                   nullable=True, unique=False, default=None)
 
     group_id.create(Repository().__table__)
-
 
     #==========================================================================
     # Upgrade of `user_followings` table

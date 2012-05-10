@@ -29,7 +29,7 @@ import traceback
 from pylons.i18n.translation import _
 from sqlalchemy.util.compat import defaultdict
 
-from rhodecode.lib.utils2 import extract_mentioned_users
+from rhodecode.lib.utils2 import extract_mentioned_users, safe_unicode
 from rhodecode.lib import helpers as h
 from rhodecode.model import BaseModel
 from rhodecode.model.db import ChangesetComment, User, Repository, Notification
@@ -67,7 +67,7 @@ class ChangesetCommentsModel(BaseModel):
         if text:
             repo = Repository.get(repo_id)
             cs = repo.scm_instance.get_changeset(revision)
-            desc = cs.message
+            desc = "%s - %s" % (cs.short_id, h.shorter(cs.message, 256))
             author_email = cs.author_email
             comment = ChangesetComment()
             comment.repo = repo
@@ -83,14 +83,17 @@ class ChangesetCommentsModel(BaseModel):
             line = ''
             if line_no:
                 line = _('on line %s') % line_no
-            subj = h.link_to('Re commit: %(commit_desc)s %(line)s' % \
-                                    {'commit_desc': desc, 'line': line},
-                             h.url('changeset_home', repo_name=repo.repo_name,
-                                   revision=revision,
-                                   anchor='comment-%s' % comment.comment_id,
-                                   qualified=True,
-                                   )
-                             )
+            subj = safe_unicode(
+                h.link_to('Re commit: %(commit_desc)s %(line)s' % \
+                          {'commit_desc': desc, 'line': line},
+                          h.url('changeset_home', repo_name=repo.repo_name,
+                                revision=revision,
+                                anchor='comment-%s' % comment.comment_id,
+                                qualified=True,
+                          )
+                )
+            )
+
             body = text
 
             # get the current participants of this changeset
@@ -139,7 +142,9 @@ class ChangesetCommentsModel(BaseModel):
             .filter(ChangesetComment.repo_id == repo_id)\
             .filter(ChangesetComment.revision == revision)\
             .filter(ChangesetComment.line_no != None)\
-            .filter(ChangesetComment.f_path != None).all()
+            .filter(ChangesetComment.f_path != None)\
+            .order_by(ChangesetComment.comment_id.asc())\
+            .all()
 
         paths = defaultdict(lambda: defaultdict(list))
 

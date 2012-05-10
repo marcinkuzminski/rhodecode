@@ -100,25 +100,37 @@ class LdapSettingsController(BaseController):
         _form = LdapSettingsForm([x[0] for x in self.tls_reqcert_choices],
                                  [x[0] for x in self.search_scope_choices],
                                  [x[0] for x in self.tls_kind_choices])()
+        # check the ldap lib
+        ldap_active = False
+        try:
+            import ldap
+            ldap_active = True
+        except ImportError:
+            pass
 
         try:
             form_result = _form.to_python(dict(request.POST))
+
             try:
 
                 for k, v in form_result.items():
                     if k.startswith('ldap_'):
+                        if k == 'ldap_active':
+                            v = ldap_active
                         setting = RhodeCodeSetting.get_by_name(k)
                         setting.app_settings_value = v
                         self.sa.add(setting)
 
                 self.sa.commit()
                 h.flash(_('Ldap settings updated successfully'),
-                    category='success')
+                        category='success')
+                if not ldap_active:
+                    #if ldap is missing send an info to user
+                    h.flash(_('Unable to activate ldap. The "python-ldap" library '
+                              'is missing.'), category='warning')
+
             except (DatabaseError,):
                 raise
-        except LdapImportError:
-            h.flash(_('Unable to activate ldap. The "python-ldap" library '
-                      'is missing.'), category='warning')
 
         except formencode.Invalid, errors:
             e = errors.error_dict or {}

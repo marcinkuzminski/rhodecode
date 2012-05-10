@@ -26,6 +26,8 @@
 import logging
 import traceback
 import formencode
+import pkg_resources
+import platform
 
 from sqlalchemy import func
 from formencode import htmlfill
@@ -64,6 +66,11 @@ class SettingsController(BaseController):
     def __before__(self):
         c.admin_user = session.get('admin_user')
         c.admin_username = session.get('admin_username')
+        c.modules = sorted([(p.project_name, p.version)
+                            for p in pkg_resources.working_set],
+                           key=lambda k: k[0].lower())
+        c.py_version = platform.python_version()
+        c.platform = platform.platform()
         super(SettingsController, self).__before__()
 
     @HasPermissionAllDecorator('hg.admin')
@@ -73,6 +80,7 @@ class SettingsController(BaseController):
 
         defaults = RhodeCodeSetting.get_app_settings()
         defaults.update(self.get_hg_ui_settings())
+
         return htmlfill.render(
             render('admin/settings/settings.html'),
             defaults=defaults,

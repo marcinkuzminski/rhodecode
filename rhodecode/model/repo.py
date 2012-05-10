@@ -286,12 +286,12 @@ class RepoModel(BaseModel):
                 self.__create_repo(repo_name, form_data['repo_type'],
                                    form_data['repo_group'],
                                    form_data['clone_uri'])
+                log_create_repository(new_repo.get_dict(),
+                                      created_by=cur_user.username)
 
             # now automatically start following this repository as owner
             ScmModel(self.sa).toggle_following_repo(new_repo.repo_id,
                                                     cur_user.user_id)
-            log_create_repository(new_repo.get_dict(),
-                                  created_by=cur_user.username)
             return new_repo
         except:
             log.error(traceback.format_exc())

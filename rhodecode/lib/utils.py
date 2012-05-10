@@ -150,7 +150,7 @@ def action_logger(user, action, repo, ipaddr='', sa=None, commit=False):
 
         user_log = UserLog()
         user_log.user_id = user_obj.user_id
-        user_log.action = action
+        user_log.action = safe_unicode(action)
 
         user_log.repository_id = repo_obj.repo_id
         user_log.repository_name = repo_name

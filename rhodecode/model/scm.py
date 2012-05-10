@@ -35,7 +35,7 @@ from rhodecode.lib.vcs.nodes import FileNode
 
 from rhodecode import BACKENDS
 from rhodecode.lib import helpers as h
-from rhodecode.lib.utils2 import safe_str
+from rhodecode.lib.utils2 import safe_str, safe_unicode
 from rhodecode.lib.auth import HasRepoPermissionAny, HasReposGroupPermissionAny
 from rhodecode.lib.utils import get_repos as get_filesystem_repos, make_ui, \
     action_logger, EmptyChangeset, REMOVED_REPO_PAT
@@ -343,12 +343,15 @@ class ScmModel(BaseModel):
 
         repo = dbrepo.scm_instance
         try:
-            extras = {'ip': '',
-                      'username': username,
-                      'action': 'push_remote',
-                      'repository': repo_name}
+            extras = {
+                'ip': '',
+                'username': username,
+                'action': 'push_remote',
+                'repository': repo_name,
+                'scm': repo.alias,
+            }
 
-            #inject ui extra param to log this action via push logger
+            # inject ui extra param to log this action via push logger
             for k, v in extras.items():
                 repo._repo.ui.setconfig('rhodecode_extras', k, v)
 
@@ -362,21 +365,25 @@ class ScmModel(BaseModel):
                       content, f_path):
 
         if repo.alias == 'hg':
-            from rhodecode.lib.vcs.backends.hg import MercurialInMemoryChangeset as IMC
+            from rhodecode.lib.vcs.backends.hg import \
+                MercurialInMemoryChangeset as IMC
         elif repo.alias == 'git':
-            from rhodecode.lib.vcs.backends.git import GitInMemoryChangeset as IMC
+            from rhodecode.lib.vcs.backends.git import \
+                GitInMemoryChangeset as IMC
 
         # decoding here will force that we have proper encoded values
         # in any other case this will throw exceptions and deny commit
         content = safe_str(content)
-        message = safe_str(message)
         path = safe_str(f_path)
-        author = safe_str(author)
+        # message and author needs to be unicode
+        # proper backend should then translate that into required type
+        message = safe_unicode(message)
+        author = safe_unicode(author)
         m = IMC(repo)
         m.change(FileNode(path, content))
         tip = m.commit(message=message,
-                 author=author,
-                 parents=[cs], branch=cs.branch)
+                       author=author,
+                       parents=[cs], branch=cs.branch)
 
         new_cs = tip.short_id
         action = 'push_local:%s' % new_cs
@@ -403,21 +410,21 @@ class ScmModel(BaseModel):
                 type(content)
             ))
 
-        message = safe_str(message)
+        message = safe_unicode(message)
+        author = safe_unicode(author)
         path = safe_str(f_path)
-        author = safe_str(author)
         m = IMC(repo)
 
         if isinstance(cs, EmptyChangeset):
-            # Emptychangeset means we we're editing empty repository
+            # EmptyChangeset means we we're editing empty repository
             parents = None
         else:
             parents = [cs]
 
         m.add(FileNode(path, content=content))
         tip = m.commit(message=message,
-                 author=author,
-                 parents=parents, branch=cs.branch)
+                       author=author,
+                       parents=parents, branch=cs.branch)
         new_cs = tip.short_id
         action = 'push_local:%s' % new_cs
 

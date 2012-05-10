@@ -1,6 +1,9 @@
 %if c.file:
     <h3 class="files_location">
         ${_('Location')}: ${h.files_breadcrumbs(c.repo_name,c.changeset.raw_id,c.file.path)}
+        %if c.annotate:
+        - ${_('annotation')}
+        %endif
     </h3>
         %if c.file.is_dir():
             <%include file='files_browser.html'/>

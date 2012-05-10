@@ -44,13 +44,14 @@ class SimpleGitUploadPackHandler(dulserver.UploadPackHandler):
           graph_walker.determine_wants, graph_walker, self.progress,
           get_tagged=self.get_tagged)
 
-        # Do they want any objects?
-        if objects_iter is None or len(objects_iter) == 0:
+        # Did the process short-circuit (e.g. in a stateless RPC call)? Note
+        # that the client still expects a 0-object pack in most cases.
+        if objects_iter is None:
             return
 
         self.progress("counting objects: %d, done.\n" % len(objects_iter))
         dulserver.write_pack_objects(dulserver.ProtocolFile(None, write),
-                                  objects_iter, len(objects_iter))
+                                     objects_iter)
         messages = []
         messages.append('thank you for using rhodecode')
 
@@ -58,6 +59,7 @@ class SimpleGitUploadPackHandler(dulserver.UploadPackHandler):
             self.progress(msg + "\n")
         # we are done
         self.proto.write("0000")
+
 
 dulserver.DEFAULT_HANDLERS = {
   'git-upload-pack': SimpleGitUploadPackHandler,
@@ -72,7 +74,7 @@ from paste.httpheaders import REMOTE_USER, AUTH_TYPE
 from rhodecode.lib.utils2 import safe_str
 from rhodecode.lib.base import BaseVCSController
 from rhodecode.lib.auth import get_container_username
-from rhodecode.lib.utils import is_valid_repo
+from rhodecode.lib.utils import is_valid_repo, make_ui
 from rhodecode.model.db import User
 
 from webob.exc import HTTPNotFound, HTTPForbidden, HTTPInternalServerError
@@ -99,10 +101,9 @@ class SimpleGit(BaseVCSController):
         if not is_git(environ):
             return self.application(environ, start_response)
 
-        proxy_key = 'HTTP_X_REAL_IP'
-        def_key = 'REMOTE_ADDR'
-        ipaddr = environ.get(proxy_key, environ.get(def_key, '0.0.0.0'))
+        ipaddr = self._get_ip_addr(environ)
         username = None
+        self._git_first_op = False
         # skip passing error to error controller
         environ['pylons.status_code_redirect'] = True
 
@@ -178,6 +179,13 @@ class SimpleGit(BaseVCSController):
                     perm = self._check_permission(action, user, repo_name)
                     if perm is not True:
                         return HTTPForbidden()(environ, start_response)
+        extras = {
+            'ip': ipaddr,
+            'username': username,
+            'action': action,
+            'repository': repo_name,
+            'scm': 'git',
+        }
 
         #===================================================================
         # GIT REQUEST HANDLING
@@ -185,10 +193,16 @@ class SimpleGit(BaseVCSController):
         repo_path = os.path.join(safe_str(self.basepath), safe_str(repo_name))
         log.debug('Repository path is %s' % repo_path)
 
+        baseui = make_ui('db')
+        self.__inject_extras(repo_path, baseui, extras)
+
+
         try:
-            #invalidate cache on push
+            # invalidate cache on push
             if action == 'push':
                 self._invalidate_cache(repo_name)
+            self._handle_githooks(repo_name, action, baseui, environ)
+
             log.info('%s action on GIT repo "%s"' % (action, repo_name))
             app = self.__make_app(repo_name, repo_path)
             return app(environ, start_response)
@@ -249,3 +263,38 @@ class SimpleGit(BaseVCSController):
             # operation is pull/push
             op = getattr(self, '_git_stored_op', 'pull')
         return op
+
+    def _handle_githooks(self, repo_name, action, baseui, environ):
+        from rhodecode.lib.hooks import log_pull_action, log_push_action
+        service = environ['QUERY_STRING'].split('=')
+        if len(service) < 2:
+            return
+
+        from rhodecode.model.db import Repository
+        _repo = Repository.get_by_repo_name(repo_name)
+        _repo = _repo.scm_instance
+        _repo._repo.ui = baseui
+
+        push_hook = 'pretxnchangegroup.push_logger'
+        pull_hook = 'preoutgoing.pull_logger'
+        _hooks = dict(baseui.configitems('hooks')) or {}
+        if action == 'push' and _hooks.get(push_hook):
+            log_push_action(ui=baseui, repo=_repo._repo)
+        elif action == 'pull' and _hooks.get(pull_hook):
+            log_pull_action(ui=baseui, repo=_repo._repo)
+
+    def __inject_extras(self, repo_path, baseui, extras={}):
+        """
+        Injects some extra params into baseui instance
+
+        :param baseui: baseui instance
+        :param extras: dict with extra params to put into baseui
+        """
+
+        # make our hgweb quiet so it doesn't print output
+        baseui.setconfig('ui', 'quiet', 'true')
+
+        #inject some additional parameters that will be available in ui
+        #for hooks
+        for k, v in extras.items():
+            baseui.setconfig('rhodecode_extras', k, v)

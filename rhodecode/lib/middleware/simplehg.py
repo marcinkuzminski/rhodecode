@@ -69,9 +69,7 @@ class SimpleHg(BaseVCSController):
         if not is_mercurial(environ):
             return self.application(environ, start_response)
 
-        proxy_key = 'HTTP_X_REAL_IP'
-        def_key = 'REMOTE_ADDR'
-        ipaddr = environ.get(proxy_key, environ.get(def_key, '0.0.0.0'))
+        ipaddr = self._get_ip_addr(environ)
 
         # skip passing error to error controller
         environ['pylons.status_code_redirect'] = True
@@ -155,7 +153,8 @@ class SimpleHg(BaseVCSController):
             'ip': ipaddr,
             'username': username,
             'action': action,
-            'repository': repo_name
+            'repository': repo_name,
+            'scm': 'hg',
         }
 
         #======================================================================

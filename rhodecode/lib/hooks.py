@@ -33,21 +33,17 @@ from rhodecode.lib.utils import action_logger
 from inspect import isfunction
 
 
-def repo_size(ui, repo, hooktype=None, **kwargs):
-    """
-    Presents size of repository after push
+def _get_scm_size(alias, root_path):
 
-    :param ui:
-    :param repo:
-    :param hooktype:
-    """
+    if not alias.startswith('.'):
+        alias += '.'
 
-    size_hg, size_root = 0, 0
-    for path, dirs, files in os.walk(repo.root):
-        if path.find('.hg') != -1:
+    size_scm, size_root = 0, 0
+    for path, dirs, files in os.walk(root_path):
+        if path.find(alias) != -1:
             for f in files:
                 try:
-                    size_hg += os.path.getsize(os.path.join(path, f))
+                    size_scm += os.path.getsize(os.path.join(path, f))
                 except OSError:
                     pass
         else:
@@ -57,9 +53,23 @@ def repo_size(ui, repo, hooktype=None, **kwargs):
                 except OSError:
                     pass
 
-    size_hg_f = h.format_byte_size(size_hg)
+    size_scm_f = h.format_byte_size(size_scm)
     size_root_f = h.format_byte_size(size_root)
-    size_total_f = h.format_byte_size(size_root + size_hg)
+    size_total_f = h.format_byte_size(size_root + size_scm)
+
+    return size_scm_f, size_root_f, size_total_f
+
+
+def repo_size(ui, repo, hooktype=None, **kwargs):
+    """
+    Presents size of repository after push
+
+    :param ui:
+    :param repo:
+    :param hooktype:
+    """
+
+    size_hg_f, size_root_f, size_total_f = _get_scm_size('.hg', repo.root)
 
     last_cs = repo[len(repo) - 1]
 
@@ -82,6 +92,7 @@ def log_pull_action(ui, repo, **kwargs):
     extras = dict(repo.ui.configitems('rhodecode_extras'))
     username = extras['username']
     repository = extras['repository']
+    scm = extras['scm']
     action = 'pull'
 
     action_logger(username, action, repository, extras['ip'], commit=True)
@@ -100,28 +111,33 @@ def log_push_action(ui, repo, **kwargs):
     Maps user last push action to new changeset id, from mercurial
 
     :param ui:
-    :param repo:
+    :param repo: repo object containing the `ui` object
     """
 
     extras = dict(repo.ui.configitems('rhodecode_extras'))
     username = extras['username']
     repository = extras['repository']
     action = extras['action'] + ':%s'
-    node = kwargs['node']
+    scm = extras['scm']
 
-    def get_revs(repo, rev_opt):
-        if rev_opt:
-            revs = revrange(repo, rev_opt)
+    if scm == 'hg':
+        node = kwargs['node']
 
-            if len(revs) == 0:
-                return (nullrev, nullrev)
-            return (max(revs), min(revs))
-        else:
-            return (len(repo) - 1, 0)
+        def get_revs(repo, rev_opt):
+            if rev_opt:
+                revs = revrange(repo, rev_opt)
 
-    stop, start = get_revs(repo, [node + ':'])
+                if len(revs) == 0:
+                    return (nullrev, nullrev)
+                return (max(revs), min(revs))
+            else:
+                return (len(repo) - 1, 0)
 
-    revs = (str(repo[r]) for r in xrange(start, stop + 1))
+        stop, start = get_revs(repo, [node + ':'])
+
+        revs = (str(repo[r]) for r in xrange(start, stop + 1))
+    elif scm == 'git':
+        revs = []
 
     action = action % ','.join(revs)
 

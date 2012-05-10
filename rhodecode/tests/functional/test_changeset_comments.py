@@ -75,11 +75,15 @@ class TestChangeSetCommentsController(TestController):
                                 repo_name=HG_REPO, revision=rev))
         #test DB
         self.assertEqual(ChangesetComment.query().count(), 1)
-        self.assertTrue('''<div class="comments-number">0 comment(s)'''
-                        ''' (%s inline)</div>''' % 1 in response.body)
-        self.assertTrue('''<div class="inline-comment-placeholder-line"'''
-                        ''' line="n1" target_id="vcswebsimplevcsviews'''
-                        '''repositorypy">''' in response.body)
+        response.mustcontain(
+            '''<div class="comments-number">0 comment(s)'''
+            ''' (%s inline)</div>''' % 1
+        )
+        response.mustcontain(
+            '''<div style="display:none" class="inline-comment-placeholder" '''
+            '''path="vcs/web/simplevcs/views/repository.py" '''
+            '''target_id="vcswebsimplevcsviewsrepositorypy">'''
+        )
 
         self.assertEqual(Notification.query().count(), 1)
         self.assertEqual(ChangesetComment.query().count(), 1)

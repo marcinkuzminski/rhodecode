@@ -4,6 +4,39 @@
 Changelog
 =========
 
+1.3.5 (**2012-05-10**)
+----------------------
+
+news
+++++
+
+- use ext_json for json module
+- unified annotation view with file source view
+- notification improvements, better inbox + css
+- #419 don't strip passwords for login forms, make rhodecode 
+  more compatible with LDAP servers
+- Added HTTP_X_FORWARDED_FOR as another method of extracting 
+  IP for pull/push logs. - moved all to base controller  
+- #415: Adding comment to changeset causes reload. 
+  Comments are now added via ajax and doesn't reload the page
+- #374 LDAP config is discarded when LDAP can't be activated
+- limited push/pull operations are now logged for git in the journal
+- bumped mercurial to 2.2.X series
+- added support for displaying submodules in file-browser
+- #421 added bookmarks in changelog view
+
+fixes
++++++
+
+- fixed dev-version marker for stable when served from source codes
+- fixed missing permission checks on show forks page
+- #418 cast to unicode fixes in notification objects
+- #426 fixed mention extracting regex
+- fixed remote-pulling for git remotes remopositories
+- fixed #434: Error when accessing files or changesets of a git repository 
+  with submodules
+- fixed issue with empty APIKEYS for users after registration ref. #438
+- fixed issue with getting README files from git repositories
 
 1.3.4 (**2012-03-28**)
 ----------------------

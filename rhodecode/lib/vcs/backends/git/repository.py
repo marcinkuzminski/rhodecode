@@ -47,6 +47,15 @@ class GitRepository(BaseRepository):
 
         self.path = abspath(repo_path)
         self._repo = self._get_repo(create, src_url, update_after_clone, bare)
+        #temporary set that to now at later we will move it to constructor
+        baseui = None
+        if baseui is None:
+            from mercurial.ui import ui
+            baseui = ui()
+        # patch the instance of GitRepo with an "FAKE" ui object to add
+        # compatibility layer with Mercurial
+        setattr(self._repo, 'ui', baseui)
+
         try:
             self.head = self._repo.head()
         except KeyError:
@@ -78,11 +87,16 @@ class GitRepository(BaseRepository):
 
         :param cmd: git command to be executed
         """
-        #cmd = '(cd %s && git %s)' % (self.path, cmd)
+
+        _copts = ['-c', 'core.quotepath=false', ]
+        _str_cmd = False
         if isinstance(cmd, basestring):
-            cmd = 'git %s' % cmd
-        else:
-            cmd = ['git'] + cmd
+            cmd = [cmd]
+            _str_cmd = True
+
+        cmd = ['GIT_CONFIG_NOGLOBAL=1', 'git'] + _copts + cmd
+        if _str_cmd:
+            cmd = ' '.join(cmd)
         try:
             opts = dict(
                 shell=isinstance(cmd, basestring),
@@ -245,6 +259,19 @@ class GitRepository(BaseRepository):
             if ref.startswith('refs/heads/') and not ref.endswith('/HEAD')]
         return OrderedDict(sorted(_branches, key=sortkey, reverse=False))
 
+    def _heads(self, reverse=False):
+        refs = self._repo.get_refs()
+        heads = {}
+
+        for key, val in refs.items():
+            for ref_key in ['refs/heads/', 'refs/remotes/origin/']:
+                if key.startswith(ref_key):
+                    n = key[len(ref_key):]
+                    if n not in ['HEAD']:
+                        heads[n] = val
+
+        return heads if reverse else dict((y,x) for x,y in heads.iteritems())
+
     def _get_tags(self):
         if not self.revisions:
             return {}
@@ -384,7 +411,7 @@ class GitRepository(BaseRepository):
             yield self.get_changeset(rev)
 
     def get_diff(self, rev1, rev2, path=None, ignore_whitespace=False,
-            context=3):
+                 context=3):
         """
         Returns (git like) *diff*, as plain text. Shows changes introduced by
         ``rev2`` since ``rev1``.
@@ -449,6 +476,18 @@ class GitRepository(BaseRepository):
         elif not update_after_clone:
             cmd.append('--no-checkout')
         cmd += ['--', '"%s"' % url, '"%s"' % self.path]
+        cmd = ' '.join(cmd)
+        # If error occurs run_git_command raises RepositoryError already
+        self.run_git_command(cmd)
+
+    def pull(self, url):
+        """
+        Tries to pull changes from external location.
+        """
+        url = self._get_url(url)
+        cmd = ['pull']
+        cmd.append("--ff-only")
+        cmd.append(url)
         cmd = ' '.join(cmd)
         # If error occurs run_git_command raises RepositoryError already
         self.run_git_command(cmd)

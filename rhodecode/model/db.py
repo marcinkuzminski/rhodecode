@@ -645,7 +645,7 @@ class Repository(Base, BaseModel):
     # SCM PROPERTIES
     #==========================================================================
 
-    def get_changeset(self, rev):
+    def get_changeset(self, rev=None):
         return get_changeset_safe(self.scm_instance, rev)
 
     @property
@@ -1233,7 +1233,8 @@ class Notification(Base, BaseModel):
     @property
     def recipients(self):
         return [x.user for x in UserNotification.query()\
-                .filter(UserNotification.notification == self).all()]
+                .filter(UserNotification.notification == self)\
+                .order_by(UserNotification.user).all()]
 
     @classmethod
     def create(cls, created_by, subject, body, recipients, type_=None):

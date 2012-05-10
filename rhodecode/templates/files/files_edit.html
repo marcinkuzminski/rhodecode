@@ -56,7 +56,7 @@
                       % endif
                     </div>
                 </div>
-                <div class="commit">${_('Editing file')}: ${c.file.path}</div>
+                <div class="commit">${_('Editing file')}: ${c.file.unicode_path}</div>
             </div>
 			    <pre id="editor_pre"></pre>
 				<textarea id="editor" name="content" style="display:none">${h.escape(c.file.content)|n}</textarea>

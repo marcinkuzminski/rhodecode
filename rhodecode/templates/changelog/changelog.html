@@ -63,7 +63,7 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
                             <div class="expand"><span class="expandtext">&darr; ${_('show more')} &darr;</span></div>
 						</div>
 						<div class="right">
-									<div id="${cs.raw_id}_changes_info" class="changes">
+									<div class="changes">
                                         <div id="${cs.raw_id}"  style="float:right;" class="changed_total tooltip" title="${_('Affected number of files, click to show more details')}">${len(cs.affected_files)}</div>
                                         <div class="comments-container">
                                         %if len(c.comments.get(cs.raw_id,[])) > 0:
@@ -91,10 +91,18 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
 									%if len(cs.parents)>1:
 									<span class="merge">${_('merge')}</span>
 									%endif
-									%if h.is_hg(c.rhodecode_repo) and cs.branch:
+									%if cs.branch:
 									<span class="branchtag" title="${'%s %s' % (_('branch'),cs.branch)}">
-									   ${h.link_to(h.shorter(cs.branch),h.url('files_home',repo_name=c.repo_name,revision=cs.raw_id))}</span>
+									   ${h.link_to(h.shorter(cs.branch),h.url('files_home',repo_name=c.repo_name,revision=cs.raw_id))}
+                                    </span>
 									%endif
+                                    %if h.is_hg(c.rhodecode_repo):
+                                      %for book in cs.bookmarks:
+                                      <span class="bookbook" title="${'%s %s' % (_('bookmark'),book)}">
+                                         ${h.link_to(h.shorter(book),h.url('files_home',repo_name=c.repo_name,revision=cs.raw_id))}
+                                      </span>                   
+                                      %endfor                
+                                    %endif
 									%for tag in cs.tags:
 										<span class="tagtag"  title="${'%s %s' % (_('tag'),tag)}">
 										${h.link_to(h.shorter(tag),h.url('files_home',repo_name=c.repo_name,revision=cs.raw_id))}</span>
@@ -177,7 +185,7 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
                     	var id = e.currentTarget.id
                     	var url = "${h.url('changelog_details',repo_name=c.repo_name,cs='__CS__')}"
                     	var url = url.replace('__CS__',id);
-                    	ypjax(url,id+'_changes_info',function(){tooltip_activate()});
+                    	ypjax(url,id,function(){tooltip_activate()});
                     });
 
                     // change branch filter

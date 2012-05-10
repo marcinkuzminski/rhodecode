@@ -179,10 +179,12 @@ class SummaryController(BaseRepoController):
         if c.enable_downloads:
             c.download_options = self._get_download_links(c.rhodecode_repo)
 
-        c.readme_data, c.readme_file = self.__get_readme_data(c.rhodecode_db_repo)
+        c.readme_data, c.readme_file = self.__get_readme_data(
+            c.rhodecode_db_repo.repo_name, c.rhodecode_repo
+        )
         return render('summary/summary.html')
 
-    def __get_readme_data(self, repo):
+    def __get_readme_data(self, repo_name, repo):
 
         @cache_region('long_term')
         def _get_readme_from_cache(key):
@@ -190,7 +192,7 @@ class SummaryController(BaseRepoController):
             readme_file = None
             log.debug('Fetching readme file')
             try:
-                cs = repo.get_changeset('tip')
+                cs = repo.get_changeset()  # fetches TIP
                 renderer = MarkupRenderer()
                 for f in README_FILES:
                     try:
@@ -202,6 +204,7 @@ class SummaryController(BaseRepoController):
                     except NodeDoesNotExistError:
                         continue
             except ChangesetError:
+                log.error(traceback.format_exc())
                 pass
             except EmptyRepositoryError:
                 pass
@@ -210,7 +213,7 @@ class SummaryController(BaseRepoController):
 
             return readme_data, readme_file
 
-        key = repo.repo_name + '_README'
+        key = repo_name + '_README'
         inv = CacheInvalidation.invalidate(key)
         if inv is not None:
             region_invalidate(_get_readme_from_cache, None, key)

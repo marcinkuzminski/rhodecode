@@ -48,6 +48,7 @@ from rhodecode.lib.vcs.nodes import FileNode
 
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.scm import ScmModel
+from rhodecode.model.db import Repository
 
 from rhodecode.controllers.changeset import anchor_url, _ignorews_url,\
     _context_url, get_line_ctx, get_ignore_ws
@@ -112,7 +113,7 @@ class FilesController(BaseRepoController):
 
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
                                    'repository.admin')
-    def index(self, repo_name, revision, f_path):
+    def index(self, repo_name, revision, f_path, annotate=False):
         # redirect to given revision from form if given
         post_revision = request.POST.get('at_rev', None)
         if post_revision:
@@ -123,7 +124,7 @@ class FilesController(BaseRepoController):
         c.changeset = self.__get_cs_or_redirect(revision, repo_name)
         c.branch = request.GET.get('branch', None)
         c.f_path = f_path
-
+        c.annotate = annotate
         cur_rev = c.changeset.revision
 
         # prev link
@@ -168,7 +169,7 @@ class FilesController(BaseRepoController):
         file_node = self.__get_filenode_or_redirect(repo_name, cs, f_path)
 
         response.content_disposition = 'attachment; filename=%s' % \
-            safe_str(f_path.split(os.sep)[-1])
+            safe_str(f_path.split(Repository.url_sep())[-1])
 
         response.content_type = file_node.mimetype
         return file_node.content
@@ -218,16 +219,6 @@ class FilesController(BaseRepoController):
         response.content_disposition = dispo
         response.content_type = mimetype
         return file_node.content
-
-    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
-                                   'repository.admin')
-    def annotate(self, repo_name, revision, f_path):
-        c.cs = self.__get_cs_or_redirect(revision, repo_name)
-        c.file = self.__get_filenode_or_redirect(repo_name, c.cs, f_path)
-
-        c.file_history = self._get_node_history(c.cs, f_path)
-        c.f_path = f_path
-        return render('files/files_annotate.html')
 
     @HasRepoPermissionAnyDecorator('repository.write', 'repository.admin')
     def edit(self, repo_name, revision, f_path):
@@ -316,10 +307,10 @@ class FilesController(BaseRepoController):
 
             try:
                 self.scm_model.create_node(repo=c.rhodecode_repo,
-                                             repo_name=repo_name, cs=c.cs,
-                                             user=self.rhodecode_user,
-                                             author=author, message=message,
-                                             content=content, f_path=node_path)
+                                           repo_name=repo_name, cs=c.cs,
+                                           user=self.rhodecode_user,
+                                           author=author, message=message,
+                                           content=content, f_path=node_path)
                 h.flash(_('Successfully committed to %s' % node_path),
                         category='success')
             except NodeAlreadyExistsError, e:

@@ -454,8 +454,8 @@ def make_map(config):
 
     rmap.connect('files_annotate_home',
                  '/{repo_name:.*}/annotate/{revision}/{f_path:.*}',
-                 controller='files', action='annotate', revision='tip',
-                 f_path='', conditions=dict(function=check_repo))
+                 controller='files', action='index', revision='tip',
+                 f_path='', annotate=True, conditions=dict(function=check_repo))
 
     rmap.connect('files_edit_home',
                  '/{repo_name:.*}/edit/{revision}/{f_path:.*}',

@@ -116,6 +116,17 @@ class BaseVCSController(object):
 
         return True
 
+    def _get_ip_addr(self, environ):
+        proxy_key = 'HTTP_X_REAL_IP'
+        proxy_key2 = 'HTTP_X_FORWARDED_FOR'
+        def_key = 'REMOTE_ADDR'
+
+        return environ.get(proxy_key2,
+                           environ.get(proxy_key,
+                                       environ.get(def_key, '0.0.0.0')
+                            )
+                        )
+
     def __call__(self, environ, start_response):
         start = time.time()
         try:

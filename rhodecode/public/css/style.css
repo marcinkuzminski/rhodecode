@@ -2520,6 +2520,10 @@ h3.files_location {
 .right .logtags{
 	padding: 2px 2px 2px 2px;
 }
+.right .logtags .branchtag,.right .logtags .tagtag,.right .logtags .booktag{
+    margin: 0px 2px;
+}
+
 .right .logtags .branchtag,.logtags .branchtag {
   padding: 1px 3px 1px 3px;
   background-color: #bfbfbf;
@@ -2558,10 +2562,10 @@ h3.files_location {
     text-decoration: none;
     color: #ffffff;
 }
-.right .logbooks .bookbook,.logbooks .bookbook {
-  padding: 1px 3px 2px;
+.right .logbooks .bookbook,.logbooks .bookbook,.right .logtags .bookbook,.logtags .bookbook {
+  padding: 1px 3px 1px 3px;
   background-color: #46A546;
-  font-size: 9.75px;
+  font-size: 10px;
   font-weight: bold;
   color: #ffffff;
   text-transform: uppercase;
@@ -2570,10 +2574,10 @@ h3.files_location {
   -moz-border-radius: 3px;
   border-radius: 3px;
 }
-.right .logbooks .bookbook,.logbooks .bookbook a{
+.right .logbooks .bookbook,.logbooks .bookbook a,.right .logtags .bookbook,.logtags .bookbook a{
 	color: #ffffff;
 }
-.right .logbooks .bookbook,.logbooks .bookbook a:hover{
+.right .logbooks .bookbook,.logbooks .bookbook a:hover,.right .logtags .bookbook,.logtags .bookbook a:hover{
     text-decoration: none;
     color: #ffffff;
 }
@@ -2717,6 +2721,14 @@ table.code-browser .browser-dir {
 	padding-left: 20px;
 	text-align: left;
 }
+
+table.code-browser .submodule-dir {
+    background: url("../images/icons/disconnect.png") no-repeat scroll 3px;
+    height: 16px;
+    padding-left: 20px;
+    text-align: left;
+}
+
 
 .box .search {
 	clear: both;
@@ -3966,6 +3978,7 @@ form.comment-form {
 
 .comment .buttons {
 	float: right;
+	padding:2px 2px 0px 0px;
 }
 
 
@@ -3975,6 +3988,23 @@ form.comment-form {
 }
 
 /** comment inline form **/
+.comment-inline-form .overlay{
+	display: none;
+}
+.comment-inline-form .overlay.submitting{
+	display:block;
+    background: none repeat scroll 0 0 white;
+    font-size: 16px;
+    opacity: 0.5;
+    position: absolute;
+    text-align: center;
+    vertical-align: top;
+
+}
+.comment-inline-form .overlay.submitting .overlay-text{
+	width:100%;
+	margin-top:5%;
+}
 
 .comment-inline-form .clearfix{
     background: #EEE;
@@ -3987,6 +4017,7 @@ form.comment-form {
 div.comment-inline-form {
     margin-top: 5px;
     padding:2px 6px 8px 6px;
+
 }
 
 .comment-inline-form strong {
@@ -4047,6 +4078,10 @@ form.comment-inline-form {
     margin: 3px 3px 5px 5px;
     background-color: #FAFAFA;
 }
+.inline-comments .add-comment {
+	padding: 2px 4px 8px 5px;
+}
+
 .inline-comments .comment-wrapp{
 	padding:1px;
 }
@@ -4078,8 +4113,15 @@ form.comment-inline-form {
     font-size: 16px;
 }
 .inline-comments-button .add-comment{
-	margin:10px 5px !important;
+	margin:2px 0px 8px 5px !important
 }
+
+
+.notification-paginator{
+    padding: 0px 0px 4px 16px;
+    float: left;    	
+}
+
 .notifications{
     border-radius: 4px 4px 4px 4px;
     -webkit-border-radius: 4px;
@@ -4113,16 +4155,24 @@ form.comment-inline-form {
     float: left
 }
 .notification-list .container.unread{
-	
+	background: none repeat scroll 0 0 rgba(255, 255, 180, 0.6);
 }
 .notification-header .gravatar{
-	
+    background: none repeat scroll 0 0 transparent;
+    padding: 0px 0px 0px 8px;	
 }
 .notification-header .desc.unread{
     font-weight: bold;
     font-size: 17px;
 }
-
+.notification-table{
+	border: 1px solid #ccc;
+    -webkit-border-radius: 6px 6px 6px 6px;
+    -moz-border-radius: 6px 6px 6px 6px;
+    border-radius: 6px 6px 6px 6px;
+    clear: both;
+    margin: 0px 20px 0px 20px;
+}
 .notification-header .delete-notifications{
     float: right;
     padding-top: 8px;
@@ -4132,6 +4182,11 @@ form.comment-inline-form {
     clear:both;
     border-bottom: 1px solid #eee;
     padding:5px 0px 5px 38px;
+}
+
+.notification-body{
+	clear:both;
+	margin: 34px 2px 2px 8px
 }
 
 /****

@@ -5,8 +5,9 @@ from rhodecode.lib.vcs.backends.base import BaseChangeset
 from rhodecode.lib.vcs.conf import settings
 from rhodecode.lib.vcs.exceptions import  ChangesetDoesNotExistError, \
     ChangesetError, ImproperArchiveTypeError, NodeDoesNotExistError, VCSError
-from rhodecode.lib.vcs.nodes import AddedFileNodesGenerator, ChangedFileNodesGenerator, \
-    DirNode, FileNode, NodeKind, RemovedFileNodesGenerator, RootNode
+from rhodecode.lib.vcs.nodes import AddedFileNodesGenerator, \
+    ChangedFileNodesGenerator, DirNode, FileNode, NodeKind, \
+    RemovedFileNodesGenerator, RootNode, SubModuleNode
 
 from rhodecode.lib.vcs.utils import safe_str, safe_unicode, date_fromtimestamp
 from rhodecode.lib.vcs.utils.lazy import LazyProperty
@@ -34,6 +35,10 @@ class MercurialChangeset(BaseChangeset):
     @LazyProperty
     def branch(self):
         return  safe_unicode(self._ctx.branch())
+
+    @LazyProperty
+    def bookmarks(self):
+        return map(safe_unicode, self._ctx.bookmarks())
 
     @LazyProperty
     def message(self):
@@ -159,6 +164,13 @@ class MercurialChangeset(BaseChangeset):
                 " %r" % (self.revision, path))
         return self._ctx.filectx(path)
 
+    def _extract_submodules(self):
+        """
+        returns a dictionary with submodule information from substate file
+        of hg repository
+        """
+        return self._ctx.substate
+
     def get_file_mode(self, path):
         """
         Returns stat mode of the file at the given ``path``.
@@ -271,17 +283,27 @@ class MercurialChangeset(BaseChangeset):
             raise ChangesetError("Directory does not exist for revision %r at "
                 " %r" % (self.revision, path))
         path = self._fix_path(path)
+
         filenodes = [FileNode(f, changeset=self) for f in self._file_paths
             if os.path.dirname(f) == path]
         dirs = path == '' and '' or [d for d in self._dir_paths
             if d and posixpath.dirname(d) == path]
         dirnodes = [DirNode(d, changeset=self) for d in dirs
             if os.path.dirname(d) == path]
+
+        als = self.repository.alias
+        for k, vals in self._extract_submodules().iteritems():
+            #vals = url,rev,type
+            loc = vals[0]
+            cs = vals[1]
+            dirnodes.append(SubModuleNode(k, url=loc, changeset=cs,
+                                          alias=als))
         nodes = dirnodes + filenodes
         # cache nodes
         for node in nodes:
             self.nodes[node.path] = node
         nodes.sort()
+
         return nodes
 
     def get_node(self, path):

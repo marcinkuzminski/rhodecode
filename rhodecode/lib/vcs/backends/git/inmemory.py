@@ -5,12 +5,13 @@ from dulwich import objects
 from dulwich.repo import Repo
 from rhodecode.lib.vcs.backends.base import BaseInMemoryChangeset
 from rhodecode.lib.vcs.exceptions import RepositoryError
+from rhodecode.lib.vcs.utils import safe_str
 
 
 class GitInMemoryChangeset(BaseInMemoryChangeset):
 
     def commit(self, message, author, parents=None, branch=None, date=None,
-            **kwargs):
+               **kwargs):
         """
         Performs in-memory commit (doesn't check workdir in any way) and
         returns newly created ``Changeset``. Updates repository's
@@ -120,9 +121,9 @@ class GitInMemoryChangeset(BaseInMemoryChangeset):
         commit = objects.Commit()
         commit.tree = commit_tree.id
         commit.parents = [p._commit.id for p in self.parents if p]
-        commit.author = commit.committer = author
+        commit.author = commit.committer = safe_str(author)
         commit.encoding = ENCODING
-        commit.message = message + ' '
+        commit.message = safe_str(message) + ' '
 
         # Compute date
         if date is None:

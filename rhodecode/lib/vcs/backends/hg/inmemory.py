@@ -4,7 +4,7 @@ import errno
 from rhodecode.lib.vcs.backends.base import BaseInMemoryChangeset
 from rhodecode.lib.vcs.exceptions import RepositoryError
 
-from ...utils.hgcompat import memfilectx, memctx, hex
+from ...utils.hgcompat import memfilectx, memctx, hex, tolocal
 
 
 class MercurialInMemoryChangeset(BaseInMemoryChangeset):
@@ -30,9 +30,9 @@ class MercurialInMemoryChangeset(BaseInMemoryChangeset):
         self.check_integrity(parents)
 
         from .repository import MercurialRepository
-        if not isinstance(message, str) or not isinstance(author, str):
+        if not isinstance(message, unicode) or not isinstance(author, unicode):
             raise RepositoryError('Given message and author needs to be '
-                                  'an <str> instance')
+                                  'an <unicode> instance')
 
         if branch is None:
             branch = MercurialRepository.DEFAULT_BRANCH_NAME
@@ -70,7 +70,7 @@ class MercurialInMemoryChangeset(BaseInMemoryChangeset):
                         copied=False)
 
             raise RepositoryError("Given path haven't been marked as added,"
-                "changed or removed (%s)" % path)
+                                  "changed or removed (%s)" % path)
 
         parents = [None, None]
         for i, parent in enumerate(self.parents):
@@ -89,9 +89,11 @@ class MercurialInMemoryChangeset(BaseInMemoryChangeset):
             date=date,
             extra=kwargs)
 
+        loc = lambda u: tolocal(u.encode('utf-8'))
+
         # injecting given _repo params
-        commit_ctx._text = message
-        commit_ctx._user = author
+        commit_ctx._text = loc(message)
+        commit_ctx._user = loc(author)
         commit_ctx._date = date
 
         # TODO: Catch exceptions!

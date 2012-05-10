@@ -210,5 +210,37 @@
     </div>
     ${h.end_form()}
 
+    <h3>${_('System Info and Packages')}</h3>
+    <div class="form">
+    <div>
+        <h5 id="expand_modules" style="cursor: pointer">&darr; ${_('show')} &darr;</h5>
+    </div>
+      <div id="expand_modules_table"  style="display:none">
+      <h5>Python - ${c.py_version}</h5>
+      <h5>System - ${c.platform}</h5>
+
+      <table class="table" style="margin:0px 0px 0px 20px">
+          <colgroup>
+              <col style="width:220px">
+          </colgroup>
+          <tbody>
+              %for key, value in c.modules:
+                  <tr>
+                      <th style="text-align: right;padding-right:5px;">${key}</th>
+                      <td>${value}</td>
+                  </tr>
+              %endfor
+          </tbody>
+      </table>
+      </div>
+    </div>
+
+    <script type="text/javascript">
+    YUE.on('expand_modules','click',function(e){
+    	YUD.setStyle('expand_modules_table','display','');
+    	YUD.setStyle('expand_modules','display','none');
+    })
+    </script>
+
 </div>
 </%def>

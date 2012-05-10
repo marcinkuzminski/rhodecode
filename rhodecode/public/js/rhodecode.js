@@ -195,6 +195,34 @@ function ypjax(url,container,s_call,f_call,args){
 	
 };
 
+var ajaxPOST = function(url,postData,success) {
+	// Set special header for ajax == HTTP_X_PARTIAL_XHR
+	YUC.initHeader('X-PARTIAL-XHR',true);
+	
+	var toQueryString = function(o) {
+	    if(typeof o !== 'object') {
+	        return false;
+	    }
+	    var _p, _qs = [];
+	    for(_p in o) {
+	        _qs.push(encodeURIComponent(_p) + '=' + encodeURIComponent(o[_p]));
+	    }
+	    return _qs.join('&');
+	};
+	
+    var sUrl = url;
+    var callback = {
+        success: success,
+        failure: function (o) {
+            alert("error");
+        },
+    };
+    var postData = toQueryString(postData);
+    var request = YAHOO.util.Connect.asyncRequest('POST', sUrl, callback, postData);
+    return request;
+};
+
+
 /**
  * tooltip activate
  */
@@ -300,31 +328,23 @@ var q_filter = function(target,nodes,display_element){
 	}	
 };
 
-var ajaxPOST = function(url,postData,success) {
-    var sUrl = url;
-    var callback = {
-        success: success,
-        failure: function (o) {
-            alert("error");
-        },
-    };
-    var postData = postData;
-    var request = YAHOO.util.Connect.asyncRequest('POST', sUrl, callback, postData);
+var tableTr = function(cls,body){
+	var tr = document.createElement('tr');
+	YUD.addClass(tr, cls);
+	
+	
+	var cont = new YAHOO.util.Element(body);
+	var comment_id = fromHTML(body).children[0].id.split('comment-')[1];
+	tr.id = 'comment-tr-{0}'.format(comment_id);
+	tr.innerHTML = '<td class="lineno-inline new-inline"></td>'+
+    				 '<td class="lineno-inline old-inline"></td>'+ 
+                     '<td>{0}</td>'.format(body);
+	return tr;
 };
-
 
 /** comments **/
 var removeInlineForm = function(form) {
 	form.parentNode.removeChild(form);
-};
-
-var tableTr = function(cls,body){
-	var form = document.createElement('tr');
-	YUD.addClass(form, cls);
-	form.innerHTML = '<td class="lineno-inline new-inline"></td>'+
-    				 '<td class="lineno-inline old-inline"></td>'+ 
-                     '<td>{0}</td>'.format(body);
-	return form;
 };
 
 var createInlineForm = function(parent_tr, f_path, line) {
@@ -337,12 +357,27 @@ var createInlineForm = function(parent_tr, f_path, line) {
 	var form_hide_button = new YAHOO.util.Element(form.getElementsByClassName('hide-inline-form')[0]);
 	form_hide_button.on('click', function(e) {
 		var newtr = e.currentTarget.parentNode.parentNode.parentNode.parentNode.parentNode;
+		if(YUD.hasClass(newtr.nextElementSibling,'inline-comments-button')){
+			YUD.setStyle(newtr.nextElementSibling,'display','');
+		}
 		removeInlineForm(newtr);
 		YUD.removeClass(parent_tr, 'form-open');
+		
 	});
+	
 	return form
 };
+
+/**
+ * Inject inline comment for on given TR this tr should be always an .line
+ * tr containing the line. Code will detect comment, and always put the comment
+ * block at the very bottom
+ */
 var injectInlineForm = function(tr){
+	  if(!YUD.hasClass(tr, 'line')){
+		  return
+	  }
+	  var submit_url = AJAX_COMMENT_URL;
 	  if(YUD.hasClass(tr,'form-open') || YUD.hasClass(tr,'context') || YUD.hasClass(tr,'no-comment')){
 		  return
 	  }	
@@ -350,20 +385,96 @@ var injectInlineForm = function(tr){
 	  var node = tr.parentNode.parentNode.parentNode.getElementsByClassName('full_f_path')[0];
 	  var f_path = YUD.getAttribute(node,'path');
 	  var lineno = getLineNo(tr);
-	  var form = createInlineForm(tr, f_path, lineno);
-	  var target_tr = tr;
-	  if(YUD.hasClass(YUD.getNextSibling(tr),'inline-comments')){
-		  target_tr = YUD.getNextSibling(tr);
-	  }
-	  YUD.insertAfter(form,target_tr);
+	  var form = createInlineForm(tr, f_path, lineno, submit_url);
+	  
+	  var parent = tr;
+	  while (1){
+		  var n = parent.nextElementSibling;
+		  // next element are comments !
+		  if(YUD.hasClass(n,'inline-comments')){
+			  parent = n;
+		  }
+		  else{
+			  break;
+		  }
+	  }	  
+	  YUD.insertAfter(form,parent);
+	  
 	  YUD.get('text_'+lineno).focus();
+	  var f = YUD.get(form);
+	  
+	  var overlay = f.getElementsByClassName('overlay')[0];
+	  var _form = f.getElementsByClassName('inline-form')[0];
+	  
+	  form.on('submit',function(e){
+		  YUE.preventDefault(e);
+		  
+		  //ajax submit
+		  var text = YUD.get('text_'+lineno).value;
+		  var postData = {
+	            'text':text,
+	            'f_path':f_path,
+	            'line':lineno
+		  };
+		  
+		  if(lineno === undefined){
+			  alert('missing line !');
+			  return
+		  }
+		  if(f_path === undefined){
+			  alert('missing file path !');
+			  return
+		  }
+		  
+		  if(text == ""){
+			  return
+		  }
+		  
+		  var success = function(o){
+			  YUD.removeClass(tr, 'form-open');
+			  removeInlineForm(f);			  
+			  var json_data = JSON.parse(o.responseText);
+	          renderInlineComment(json_data);
+		  };
+
+		  if (YUD.hasClass(overlay,'overlay')){
+			  var w = _form.offsetWidth;
+			  var h = _form.offsetHeight;
+			  YUD.setStyle(overlay,'width',w+'px');
+			  YUD.setStyle(overlay,'height',h+'px');
+		  }		  
+		  YUD.addClass(overlay, 'submitting');		  
+		  
+		  ajaxPOST(submit_url, postData, success);
+	  });
+	  
 	  tooltip_activate();
 };
 
-var createInlineAddButton = function(tr,label){
-	var html = '<div class="add-comment"><span class="ui-btn">{0}</span></div>'.format(label);
-        
-	var add = new YAHOO.util.Element(tableTr('inline-comments-button',html));
+var deleteComment = function(comment_id){
+	var url = AJAX_COMMENT_DELETE_URL.replace('__COMMENT_ID__',comment_id);
+    var postData = {'_method':'delete'};
+    var success = function(o){
+        var n = YUD.get('comment-tr-'+comment_id);
+        var root = n.previousElementSibling.previousElementSibling;
+        n.parentNode.removeChild(n);
+
+        // scann nodes, and attach add button to last one
+        placeAddButton(root);
+    }
+    ajaxPOST(url,postData,success);
+}
+
+
+var createInlineAddButton = function(tr){
+
+	var label = TRANSLATION_MAP['add another comment'];
+	
+	var html_el = document.createElement('div');
+	YUD.addClass(html_el, 'add-comment');
+	html_el.innerHTML = '<span class="ui-btn">{0}</span>'.format(label);
+	
+	var add = new YAHOO.util.Element(html_el);
 	add.on('click', function(e) {
 		injectInlineForm(tr);
 	});
@@ -383,6 +494,103 @@ var getLineNo = function(tr) {
 
 	return line
 };
+
+var placeAddButton = function(target_tr){
+	if(!target_tr){
+		return
+	}
+	var last_node = target_tr;
+    //scann	
+	  while (1){
+		  var n = last_node.nextElementSibling;
+		  // next element are comments !
+		  if(YUD.hasClass(n,'inline-comments')){
+			  last_node = n;
+			  //also remove the comment button from previos
+			  var comment_add_buttons = last_node.getElementsByClassName('add-comment');
+			  for(var i=0;i<comment_add_buttons.length;i++){
+				  var b = comment_add_buttons[i];
+				  b.parentNode.removeChild(b);
+			  }
+		  }
+		  else{
+			  break;
+		  }
+	  }
+	  
+    var add = createInlineAddButton(target_tr);
+    // get the comment div
+    var comment_block = last_node.getElementsByClassName('comment')[0];
+    // attach add button
+    YUD.insertAfter(add,comment_block);	
+}
+
+/**
+ * Places the inline comment into the changeset block in proper line position
+ */
+var placeInline = function(target_container,lineno,html){
+	  var lineid = "{0}_{1}".format(target_container,lineno);
+	  var target_line = YUD.get(lineid);
+	  var comment = new YAHOO.util.Element(tableTr('inline-comments',html))
+	  
+	  // check if there are comments already !
+	  var parent = target_line.parentNode;
+	  var root_parent = parent;
+	  while (1){
+		  var n = parent.nextElementSibling;
+		  // next element are comments !
+		  if(YUD.hasClass(n,'inline-comments')){
+			  parent = n;
+		  }
+		  else{
+			  break;
+		  }
+	  }
+	  // put in the comment at the bottom
+	  YUD.insertAfter(comment,parent);
+	  
+	  // scann nodes, and attach add button to last one
+      placeAddButton(root_parent);
+
+	  return target_line;
+}
+
+/**
+ * make a single inline comment and place it inside
+ */
+var renderInlineComment = function(json_data){
+    try{
+	  var html =  json_data['rendered_text'];
+	  var lineno = json_data['line_no'];
+	  var target_id = json_data['target_id'];
+	  placeInline(target_id, lineno, html);
+
+    }catch(e){
+  	  console.log(e);
+    }
+}
+
+/**
+ * Iterates over all the inlines, and places them inside proper blocks of data
+ */
+var renderInlineComments = function(file_comments){
+	for (f in file_comments){
+        // holding all comments for a FILE
+		var box = file_comments[f];
+
+		var target_id = YUD.getAttribute(box,'target_id');
+		// actually comments with line numbers
+        var comments = box.children;
+        for(var i=0; i<comments.length; i++){
+        	var data = {
+        		'rendered_text': comments[i].outerHTML,
+        		'line_no': YUD.getAttribute(comments[i],'line'),
+        		'target_id': target_id
+        	}
+        	renderInlineComment(data);
+        }
+    }	
+}
 
 
 var fileBrowserListeners = function(current_url, node_list_url, url_base,

@@ -30,6 +30,8 @@ from pylons import request
 from pylons import tmpl_context as c, url
 from pylons.controllers.util import redirect
 
+from webhelpers.paginate import Page
+
 from rhodecode.lib.base import BaseController, render
 from rhodecode.model.db import Notification
 
@@ -58,8 +60,9 @@ class NotificationsController(BaseController):
         """GET /_admin/notifications: All items in the collection"""
         # url('notifications')
         c.user = self.rhodecode_user
-        c.notifications = NotificationModel()\
-                            .get_for_user(self.rhodecode_user.user_id)
+        notif = NotificationModel().get_for_user(self.rhodecode_user.user_id)
+        p = int(request.params.get('page', 1))
+        c.notifications = Page(notif, page=p, items_per_page=10)
         return render('admin/notifications/notifications.html')
 
     def mark_all_read(self):
@@ -69,7 +72,8 @@ class NotificationsController(BaseController):
             nm.mark_all_read_for_user(self.rhodecode_user.user_id)
             Session.commit()
             c.user = self.rhodecode_user
-            c.notifications = nm.get_for_user(self.rhodecode_user.user_id)
+            notif = nm.get_for_user(self.rhodecode_user.user_id)
+            c.notifications = Page(notif, page=1, items_per_page=10)
             return render('admin/notifications/notifications_data.html')
 
     def create(self):
