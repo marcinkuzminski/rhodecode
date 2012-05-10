@@ -21,13 +21,15 @@ from pylons import config, url
 from routes.util import URLGenerator
 from webtest import TestApp
 
+from rhodecode import is_windows
 from rhodecode.model.meta import Session
 from rhodecode.model.db import User
 
 import pylons.test
 
 os.environ['TZ'] = 'UTC'
-time.tzset()
+if not is_windows:
+    time.tzset()
 
 log = logging.getLogger(__name__)
 
@@ -70,6 +72,7 @@ NEW_GIT_REPO = 'vcs_test_git_new'
 
 HG_FORK = 'vcs_test_hg_fork'
 GIT_FORK = 'vcs_test_git_fork'
+
 
 class TestController(TestCase):
 

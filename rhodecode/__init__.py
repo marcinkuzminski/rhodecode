@@ -46,6 +46,9 @@ __py_version__ = sys.version_info
 PLATFORM_WIN = ('Windows')
 PLATFORM_OTHERS = ('Linux', 'Darwin', 'FreeBSD', 'OpenBSD', 'SunOS')
 
+is_windows = __platform__ in PLATFORM_WIN
+is_unix = __platform__ in PLATFORM_OTHERS
+
 requirements = [
     "Pylons==1.0.0",
     "Beaker==1.6.3",
@@ -68,7 +71,7 @@ if __py_version__ < (2, 6):
     requirements.append("simplejson")
     requirements.append("pysqlite")
 
-if __platform__ in PLATFORM_WIN:
+if is_windows:
     requirements.append("mercurial>=2.2.1,<2.3")
 else:
     requirements.append("py-bcrypt")
