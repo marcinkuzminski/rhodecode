@@ -81,22 +81,24 @@ except ImportError:
     _sj = None
 
 
-# simplejson not found try out regular json module
-import json as _json
+try:
+    # simplejson not found try out regular json module
+    import json as _json
 
-
-# extended JSON encoder for json
-class ExtendedEncoder(_json.JSONEncoder):
-    def default(self, obj):
-        try:
-            return _obj_dump(obj)
-        except NotImplementedError:
-            pass
-        return _json.JSONEncoder.default(self, obj)
-# monkey-patch JSON encoder to use extended version
-_json.dumps = functools.partial(_json.dumps, cls=ExtendedEncoder)
-_json.dump = functools.partial(_json.dump, cls=ExtendedEncoder)
-stdlib = _json
+    # extended JSON encoder for json
+    class ExtendedEncoder(_json.JSONEncoder):
+        def default(self, obj):
+            try:
+                return _obj_dump(obj)
+            except NotImplementedError:
+                pass
+            return _json.JSONEncoder.default(self, obj)
+    # monkey-patch JSON encoder to use extended version
+    _json.dumps = functools.partial(_json.dumps, cls=ExtendedEncoder)
+    _json.dump = functools.partial(_json.dump, cls=ExtendedEncoder)
+    stdlib = _json
+except ImportError:
+    _json = None
 
 # set all available json modules
 simplejson = _sj
