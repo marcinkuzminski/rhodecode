@@ -48,6 +48,7 @@ from rhodecode.lib.vcs.nodes import FileNode
 
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.scm import ScmModel
+from rhodecode.model.db import Repository
 
 from rhodecode.controllers.changeset import anchor_url, _ignorews_url,\
     _context_url, get_line_ctx, get_ignore_ws
@@ -168,7 +169,7 @@ class FilesController(BaseRepoController):
         file_node = self.__get_filenode_or_redirect(repo_name, cs, f_path)
 
         response.content_disposition = 'attachment; filename=%s' % \
-            safe_str(f_path.split(os.sep)[-1])
+            safe_str(f_path.split(Repository.url_sep())[-1])
 
         response.content_type = file_node.mimetype
         return file_node.content
