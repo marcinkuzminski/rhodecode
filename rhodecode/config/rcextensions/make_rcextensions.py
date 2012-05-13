@@ -27,6 +27,7 @@ import sys
 import pkg_resources
 import traceback
 import logging
+from __future__ import with_statement
 from os.path import dirname as dn, join as jn
 
 #to get the rhodecode import
