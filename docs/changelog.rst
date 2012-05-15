@@ -22,6 +22,7 @@ fixes
 news
 ++++
 
+- chinese traditional translation
 
 fixes
 +++++
