@@ -18,6 +18,7 @@ fixes
 - fixed no scm found warning
 - fixed __future__ import error on rcextensions
 - made simplejson required lib for speedup on JSON encoding
+- fixes #449 bad regex could get more than revisions from parsing history
 
 1.3.5 (**2012-05-10**)
 ----------------------
