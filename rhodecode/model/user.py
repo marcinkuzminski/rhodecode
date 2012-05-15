@@ -531,7 +531,6 @@ class UserModel(BaseModel):
 
         for perm in user_repo_group_perms_from_users_groups:
             g_k = perm.UsersGroupRepoGroupToPerm.group.group_name
-            print perm, g_k
             p = perm.Permission.permission_name
             cur_perm = user.permissions[GK][g_k]
             # overwrite permission only if it's greater than permission

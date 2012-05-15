@@ -190,10 +190,11 @@ class TestFilesController(TestController):
         self.log_user()
 
         for arch_ext, info in ARCHIVE_SPECS.items():
+            short = '27cd5cce30c9%s' % arch_ext
             fname = '27cd5cce30c96924232dffcd24178a07ffeb5dfc%s' % arch_ext
-            filename = '%s-%s' % (HG_REPO, fname)
-
-            response = self.app.get(url(controller='files', action='archivefile',
+            filename = '%s-%s' % (HG_REPO, short)
+            response = self.app.get(url(controller='files', 
+                                        action='archivefile',
                                         repo_name=HG_REPO,
                                         fname=fname))
 
@@ -202,7 +203,8 @@ class TestFilesController(TestController):
              [('Pragma', 'no-cache'),
               ('Cache-Control', 'no-cache'),
               ('Content-Type', '%s; charset=utf-8' % info[0]),
-              ('Content-Disposition', 'attachment; filename=%s' % filename),]
+              ('Content-Disposition', 'attachment; filename=%s' % filename),
+             ]
             )
 
     def test_archival_wrong_ext(self):
