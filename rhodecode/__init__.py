@@ -26,11 +26,11 @@
 import sys
 import platform
 
-VERSION = (1, 3, 5)
+VERSION = (1, 3, 6)
 
 try:
     from rhodecode.lib import get_current_revision
-    _rev = get_current_revision()
+    _rev = get_current_revision(quite=True)
     if _rev and len(VERSION) > 3:
         VERSION += ('dev%s' % _rev[0],)
 except ImportError:
@@ -65,10 +65,10 @@ requirements = [
     "webob==1.0.8",
     "markdown==2.1.1",
     "docutils==0.8.1",
+    "simplejson==2.5.2",
 ]
 
 if __py_version__ < (2, 6):
-    requirements.append("simplejson")
     requirements.append("pysqlite")
 
 if is_windows:
