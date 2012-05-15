@@ -260,11 +260,9 @@ class MercurialChangeset(BaseChangeset):
         elif prefix.strip() == '':
             raise VCSError("Prefix cannot be empty")
 
-        print stream.closed
         archival.archive(self.repository._repo, stream, self.raw_id,
                          kind, prefix=prefix, subrepos=subrepos)
-        print stream.closed
-        
+
         if stream.closed and hasattr(stream, 'name'):
             stream = open(stream.name, 'rb')
         elif hasattr(stream, 'mode') and 'r' not in stream.mode:
