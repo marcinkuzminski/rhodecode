@@ -65,10 +65,10 @@ requirements = [
     "webob==1.0.8",
     "markdown==2.1.1",
     "docutils==0.8.1",
+    "simplejson==2.5.2",
 ]
 
 if __py_version__ < (2, 6):
-    requirements.append("simplejson")
     requirements.append("pysqlite")
 
 if is_windows:

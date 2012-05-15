@@ -16,6 +16,19 @@ news
 fixes
 +++++
 
+1.3.6 (**2012-05-16**)
+----------------------
+
+news
+++++
+
+
+fixes
++++++
+
+- fixed no scm found warning
+- fixed __future__ import error on rcextensions
+- made simplejson required lib for speedup on JSON encoding
 
 1.3.5 (**2012-05-10**)
 ----------------------
