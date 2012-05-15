@@ -10,6 +10,7 @@ Changelog
 news
 ++++
 
+- chinese traditional translation
 
 fixes
 +++++
