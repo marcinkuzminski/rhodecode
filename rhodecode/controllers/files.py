@@ -360,9 +360,9 @@ class FilesController(BaseRepoController):
         except (ImproperArchiveTypeError, KeyError):
             return _('Unknown archive type')
 
-        archive = tempfile.NamedTemporaryFile(mode='w+r+b')
+        archive = tempfile.NamedTemporaryFile(mode='w+r+b', delete=False)
         cs.fill_archive(stream=archive, kind=fileformat, subrepos=subrepos)
-
+        archive.close()
         response.content_type = content_type
         response.content_disposition = 'attachment; filename=%s-%s%s' \
             % (repo_name, revision[:12], ext)
@@ -373,9 +373,10 @@ class FilesController(BaseRepoController):
                 data = tmpfile.read(16 * 1024)
                 if not data:
                     tmpfile.close()
+                    os.unlink(tmpfile.name)
                     break
                 yield data
-        return get_chunked_archive(tmpfile=archive)
+        return get_chunked_archive(tmpfile=open(archive.name,'rb'))
 
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
                                    'repository.admin')
