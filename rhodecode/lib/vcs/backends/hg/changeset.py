@@ -263,8 +263,6 @@ class MercurialChangeset(BaseChangeset):
         archival.archive(self.repository._repo, stream, self.raw_id,
                          kind, prefix=prefix, subrepos=subrepos)
 
-        #stream.close()
-
         if stream.closed and hasattr(stream, 'name'):
             stream = open(stream.name, 'rb')
         elif hasattr(stream, 'mode') and 'r' not in stream.mode:

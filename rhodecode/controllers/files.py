@@ -26,6 +26,7 @@
 import os
 import logging
 import traceback
+import tempfile
 
 from pylons import request, response, tmpl_context as c, url
 from pylons.i18n.translation import _
@@ -359,25 +360,22 @@ class FilesController(BaseRepoController):
         except (ImproperArchiveTypeError, KeyError):
             return _('Unknown archive type')
 
+        archive = tempfile.NamedTemporaryFile(mode='w+r+b')
+        cs.fill_archive(stream=archive, kind=fileformat, subrepos=subrepos)
+
         response.content_type = content_type
         response.content_disposition = 'attachment; filename=%s-%s%s' \
-            % (repo_name, revision, ext)
+            % (repo_name, revision[:12], ext)
+        response.content_length = str(os.path.getsize(archive.name))
 
-        import tempfile
-        archive = tempfile.mkstemp()[1]
-        t = open(archive, 'wb')
-        cs.fill_archive(stream=t, kind=fileformat, subrepos=subrepos)
-
-        def get_chunked_archive(archive):
-            stream = open(archive, 'rb')
+        def get_chunked_archive(tmpfile):
             while True:
-                data = stream.read(4096)
+                data = tmpfile.read(16 * 1024)
                 if not data:
-                    os.remove(archive)
+                    tmpfile.close()
                     break
                 yield data
-
-        return get_chunked_archive(archive)
+        return get_chunked_archive(tmpfile=archive)
 
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
                                    'repository.admin')
