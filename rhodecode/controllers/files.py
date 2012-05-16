@@ -22,7 +22,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
+from __future__ import with_statement
 import os
 import logging
 import traceback
@@ -360,13 +360,14 @@ class FilesController(BaseRepoController):
         except (ImproperArchiveTypeError, KeyError):
             return _('Unknown archive type')
 
-        archive = tempfile.NamedTemporaryFile(mode='w+r+b', delete=False)
-        cs.fill_archive(stream=archive, kind=fileformat, subrepos=subrepos)
-        archive.close()
+        fd, _archive_name = tempfile.mkstemp(suffix='rcarchive')
+        with open(_archive_name, 'wb') as f:
+            cs.fill_archive(stream=f, kind=fileformat, subrepos=subrepos)
+
         response.content_type = content_type
         response.content_disposition = 'attachment; filename=%s-%s%s' \
             % (repo_name, revision[:12], ext)
-        response.content_length = str(os.path.getsize(archive.name))
+        response.content_length = str(os.path.getsize(_archive_name))
 
         def get_chunked_archive(tmpfile):
             while True:
@@ -376,7 +377,7 @@ class FilesController(BaseRepoController):
                     os.unlink(tmpfile.name)
                     break
                 yield data
-        return get_chunked_archive(tmpfile=open(archive.name,'rb'))
+        return get_chunked_archive(tmpfile=open(_archive_name, 'rb'))
 
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
                                    'repository.admin')
