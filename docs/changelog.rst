@@ -4,13 +4,15 @@
 Changelog
 =========
 
-1.3.6 (**2012-05-16**)
+1.3.6 (**2012-05-17**)
 ----------------------
 
 news
 ++++
 
 - chinese traditional translation
+- changed setup-app into setup-rhodecode and added arguments for auto-setup 
+  mode that doesn't need user interaction 
 
 fixes
 +++++
