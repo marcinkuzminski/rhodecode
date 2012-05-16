@@ -37,10 +37,8 @@ class GitChangeset(BaseChangeset):
         self._commit = commit
         self._tree_id = commit.tree
 
-        try:
-            self.message = safe_unicode(commit.message)
-        except UnicodeDecodeError:
-            self.message = commit.message.decode(commit.encoding or 'utf-8')
+        self.message = safe_unicode(commit.message)
+
         #self.branch = None
         self.tags = []
         self.nodes = {}
