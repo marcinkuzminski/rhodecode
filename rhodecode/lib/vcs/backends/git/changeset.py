@@ -38,14 +38,11 @@ class GitChangeset(BaseChangeset):
         self._tree_id = commit.tree
 
         try:
-            self.message = safe_unicode(commit.message[:-1])
-            # Always strip last eol
+            self.message = safe_unicode(commit.message)
         except UnicodeDecodeError:
-            self.message = commit.message[:-1].decode(commit.encoding
-                or 'utf-8')
+            self.message = commit.message.decode(commit.encoding or 'utf-8')
         #self.branch = None
         self.tags = []
-        #tree = self.repository.get_object(self._tree_id)
         self.nodes = {}
         self._paths = {}
 
