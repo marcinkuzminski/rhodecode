@@ -12,7 +12,10 @@ Changelog
 
 news
 ++++
-
+ 
+ - new codereview system
+ - changed setup-app into setup-rhodecode and added default options to it.
+ 
 fixes
 +++++
 

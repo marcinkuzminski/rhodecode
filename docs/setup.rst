@@ -26,19 +26,20 @@ configuration file to use this other database. RhodeCode currently supports
 postgresql, sqlite and mysql databases. Create the database by running
 the following command::
 
-    paster setup-app production.ini
+    paster setup-rhodecode production.ini
 
 This will prompt you for a "root" path. This "root" path is the location where
 RhodeCode will store all of its repositories on the current machine. After
-entering this "root" path ``setup-app`` will also prompt you for a username 
-and password for the initial admin account which ``setup-app`` sets up for you.
+entering this "root" path ``setup-rhodecode`` will also prompt you for a username 
+and password for the initial admin account which ``setup-rhodecode`` sets 
+up for you.
 
-- The ``setup-app`` command will create all of the needed tables and an admin
-  account. When choosing a root path you can either use a new empty location, 
-  or a location which already contains existing repositories. If you choose a 
-  location which contains existing repositories RhodeCode will simply add all 
-  of the repositories at the chosen location to it's database. (Note: make 
-  sure you specify the correct path to the root).
+- The ``setup-rhodecode`` command will create all of the needed tables and an 
+  admin account. When choosing a root path you can either use a new empty 
+  location, or a location which already contains existing repositories. If you
+  choose a location which contains existing repositories RhodeCode will simply 
+  add all of the repositories at the chosen location to it's database. 
+  (Note: make sure you specify the correct path to the root).
 - Note: the given path for mercurial_ repositories **must** be write accessible
   for the application. It's very important since the RhodeCode web interface 
   will work without write access, but when trying to do a push it will 
@@ -51,8 +52,8 @@ You are now ready to use RhodeCode, to run it simply execute::
 - This command runs the RhodeCode server. The web app should be available at the 
   127.0.0.1:5000. This ip and port is configurable via the production.ini 
   file created in previous step
-- Use the admin account you created above when running ``setup-app`` to login 
-  to the web app.
+- Use the admin account you created above when running ``setup-rhodecode`` 
+  to login to the web app.
 - The default permissions on each repository is read, and the owner is admin. 
   Remember to update these if needed.
 - In the admin panel you can toggle ldap, anonymous, permissions settings. As
