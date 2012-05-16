@@ -240,9 +240,14 @@ class DbManage(object):
             self.sa.rollback()
             raise
 
-    def admin_prompt(self, second=False):
+    def admin_prompt(self, second=False, defaults={}):
         if not self.tests:
             import getpass
+
+            # defaults
+            username = defaults.get('username')
+            password = defaults.get('password')
+            email = defaults.get('email')
 
             def get_password():
                 password = getpass.getpass('Specify admin password '
@@ -257,17 +262,17 @@ class DbManage(object):
                     return False
 
                 return password
-
-            username = raw_input('Specify admin username:')
-
-            password = get_password()
-            if not password:
-                #second try
+            if username is None:
+                username = raw_input('Specify admin username:')
+            if password is None:
                 password = get_password()
                 if not password:
-                    sys.exit()
-
-            email = raw_input('Specify admin email:')
+                    #second try
+                    password = get_password()
+                    if not password:
+                        sys.exit()
+            if email is None:
+                email = raw_input('Specify admin email:')
             self.create_user(username, password, email, True)
         else:
             log.info('creating admin and regular test users')
@@ -372,11 +377,14 @@ class DbManage(object):
                 log.debug('missing default permission for group %s adding' % g)
                 ReposGroupModel()._create_default_perms(g)
 
-    def config_prompt(self, test_repo_path='', retries=3):
+    def config_prompt(self, test_repo_path='', retries=3, defaults={}):
+        _path = defaults.get('repos_location')
         if retries == 3:
             log.info('Setting up repositories config')
 
-        if not self.tests and not test_repo_path:
+        if _path is not None:
+            path = _path
+        elif not self.tests and not test_repo_path:
             path = raw_input(
                  'Enter a valid absolute path to store repositories. '
                  'All repositories in that path will be added automatically:'
