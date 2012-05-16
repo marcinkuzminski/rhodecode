@@ -1211,6 +1211,7 @@ class ChangesetComment(Base, BaseModel):
 
     author = relationship('User', lazy='joined')
     repo = relationship('Repository')
+    status_change = relationship('ChangesetStatus', uselist=False)
 
     @classmethod
     def get_users(cls, revision):
@@ -1247,10 +1248,12 @@ class ChangesetStatus(Base, BaseModel):
     user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None)
     revision = Column('revision', String(40), nullable=False)
     status = Column('status', String(128), nullable=False, default=DEFAULT)
+    changeset_comment_id = Column('changeset_comment_id', Integer(), ForeignKey('changeset_comments.comment_id'))
     modified_at = Column('modified_at', DateTime(), nullable=False, default=datetime.datetime.now)
 
     author = relationship('User', lazy='joined')
     repo = relationship('Repository')
+    comment = relationship('ChangesetComment', lazy='joined')
 
     @property
     def status_lbl(self):

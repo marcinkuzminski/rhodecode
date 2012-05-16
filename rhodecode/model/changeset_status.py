@@ -65,7 +65,7 @@ class ChangesetStatusModel(BaseModel):
         st = status or ChangesetStatus.DEFAULT
         return str(st)
 
-    def set_status(self, repo, revision, status, user):
+    def set_status(self, repo, revision, status, user, comment):
         """
         Creates new status for changeset or updates the old one
 
@@ -77,6 +77,8 @@ class ChangesetStatusModel(BaseModel):
         :type status:
         :param user:
         :type user:
+        :param comment:
+        :type comment:
         """
         repo = self.__get_repo(repo)
 
@@ -89,6 +91,7 @@ class ChangesetStatusModel(BaseModel):
         new_status.repo = self.__get_repo(repo)
         new_status.status = status
         new_status.revision = revision
+        new_status.comment = comment
         self.sa.add(new_status)
         return new_status
 

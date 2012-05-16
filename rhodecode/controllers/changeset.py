@@ -381,10 +381,11 @@ class ChangesetController(BaseRepoController):
         status = request.POST.get('changeset_status')
         if status and request.POST.get('change_changeset_status'):
             ChangesetStatusModel().set_status(
-                c.rhodecode_db_repo.repo_id, 
+                c.rhodecode_db_repo.repo_id,
                 revision,
                 status,
                 c.rhodecode_user.user_id,
+                comm,
             )
 
         Session.commit()

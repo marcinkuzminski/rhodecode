@@ -2447,7 +2447,7 @@ h3.files_location {
     font-weight: bold !important;
 }
 
-.right .changeset-status-container{
+.changeset-status-container{
     padding-right: 5px;
     margin-top:1px;
     float:right;
@@ -2457,16 +2457,16 @@ h3.files_location {
 	float:left;
 	padding:2px 0px 0px 2px;
 }
-.right .changeset-status-container .changeset-status-lbl{
+.changeset-status-container .changeset-status-lbl{
 	color: rgb(136, 136, 136);
     float: left;
-    padding: 0px 4px 0px 0px;	
+    padding: 3px 4px 0px 0px
 }
 .code-header .changeset-status-container .changeset-status-lbl{
     float: left;
     padding: 0px 4px 0px 0px;   
 }
-.right .changeset-status-container .changeset-status-ico{
+.changeset-status-container .changeset-status-ico{
     float: left;
 }
 .code-header .changeset-status-container .changeset-status-ico, .container .changeset-status-ico{
@@ -3916,6 +3916,7 @@ div.rst-block  pre {
     background: #f8f8f8;
     padding: 4px;
     border-bottom: 1px solid #ddd;
+    height: 18px;
 }
 
 .comments .comment .meta img {
@@ -3924,9 +3925,13 @@ div.rst-block  pre {
 
 .comments .comment .meta .user {
     font-weight: bold;
+    float: left;
+    padding: 4px 2px 2px 2px;
 }
 
 .comments .comment .meta .date {
+	float: left;
+	padding:4px 4px 0px 4px;
 }
 
 .comments .comment .text {
