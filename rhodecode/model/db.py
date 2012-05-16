@@ -686,7 +686,8 @@ class Repository(Base, BaseModel):
         """
 
         statuses = ChangesetStatus.query()\
-            .filter(ChangesetStatus.repo == self)
+            .filter(ChangesetStatus.repo == self)\
+            .filter(ChangesetStatus.version == 0)
         if revisions:
             statuses = statuses.filter(ChangesetStatus.revision.in_(revisions))
         grouped = {}
@@ -1230,7 +1231,7 @@ class ChangesetComment(Base, BaseModel):
 class ChangesetStatus(Base, BaseModel):
     __tablename__ = 'changeset_statuses'
     __table_args__ = (
-        UniqueConstraint('repo_id', 'revision'),
+        UniqueConstraint('repo_id', 'revision', 'version'),
         {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'}
     )
@@ -1250,7 +1251,7 @@ class ChangesetStatus(Base, BaseModel):
     status = Column('status', String(128), nullable=False, default=DEFAULT)
     changeset_comment_id = Column('changeset_comment_id', Integer(), ForeignKey('changeset_comments.comment_id'))
     modified_at = Column('modified_at', DateTime(), nullable=False, default=datetime.datetime.now)
-
+    version = Column('version', Integer(), nullable=False, default=0)
     author = relationship('User', lazy='joined')
     repo = relationship('Repository')
     comment = relationship('ChangesetComment', lazy='joined')
@@ -1258,19 +1259,6 @@ class ChangesetStatus(Base, BaseModel):
     @property
     def status_lbl(self):
         return dict(self.STATUSES).get(self.status)
-
-
-class ChangesetStatusHistory(Base, BaseModel):
-    __tablename__ = 'changeset_statuses_history'
-    __table_args__ = (
-        {'extend_existing': True, 'mysql_engine': 'InnoDB',
-         'mysql_charset': 'utf8'}
-    )
-    #TODO: check if sqla has a nice history table implementation
-    changeset_status_id = Column('changeset_status_id', Integer(), ForeignKey('changeset_statuses.changeset_status_id'), nullable=False, primary_key=True)
-    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None)
-    status = Column('status', String(128), nullable=False)
-    modified_at = Column('modified_at', DateTime(), nullable=False, default=datetime.datetime.now)
 
 
 class Notification(Base, BaseModel):

@@ -49,7 +49,9 @@ class ChangesetStatusModel(BaseModel):
 
     def get_status(self, repo, revision):
         """
-        Returns status of changeset for given revision
+        Returns status of changeset for given revision and version 0
+        versioning makes a history of statuses, and version == 0 is always the
+        current one
 
         :param repo:
         :type repo:
@@ -60,14 +62,16 @@ class ChangesetStatusModel(BaseModel):
 
         status = ChangesetStatus.query()\
             .filter(ChangesetStatus.repo == repo)\
-            .filter(ChangesetStatus.revision == revision).scalar()
+            .filter(ChangesetStatus.revision == revision)\
+            .filter(ChangesetStatus.version == 0).scalar()
         status = status.status if status else status
         st = status or ChangesetStatus.DEFAULT
         return str(st)
 
     def set_status(self, repo, revision, status, user, comment):
         """
-        Creates new status for changeset or updates the old one
+        Creates new status for changeset or updates the old ones bumping their
+        version, leaving the current status at
 
         :param repo:
         :type repo:
@@ -82,11 +86,15 @@ class ChangesetStatusModel(BaseModel):
         """
         repo = self.__get_repo(repo)
 
-        cur_status = ChangesetStatus.query()\
+        cur_statuses = ChangesetStatus.query()\
             .filter(ChangesetStatus.repo == repo)\
             .filter(ChangesetStatus.revision == revision)\
-            .scalar()
-        new_status = cur_status or ChangesetStatus()
+            .all()
+        if cur_statuses:
+            for st in cur_statuses:
+                st.version += 1
+                self.sa.add(st)
+        new_status = ChangesetStatus()
         new_status.author = self.__get_user(user)
         new_status.repo = self.__get_repo(repo)
         new_status.status = status
