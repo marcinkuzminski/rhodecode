@@ -5,7 +5,8 @@ from rhodecode.tests import *
 from rhodecode.model.repos_group import ReposGroupModel
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.db import RepoGroup, User, Notification, UserNotification, \
-    UsersGroup, UsersGroupMember, Permission, UsersGroupRepoGroupToPerm
+    UsersGroup, UsersGroupMember, Permission, UsersGroupRepoGroupToPerm,\
+    Repository
 from sqlalchemy.exc import IntegrityError
 from rhodecode.model.user import UserModel
 
@@ -153,24 +154,23 @@ class TestReposGroups(unittest.TestCase):
         self.assertTrue(self.__check_path('g2', 'g1'))
 
         # test repo
-        self.assertEqual(r.repo_name, os.path.join('g2', 'g1', r.just_name))
-
+        self.assertEqual(r.repo_name, RepoGroup.url_sep().join(['g2', 'g1', r.just_name]))
 
     def test_move_to_root(self):
         g1 = _make_group('t11')
         Session.commit()
-        g2 = _make_group('t22',parent_id=g1.group_id)
+        g2 = _make_group('t22', parent_id=g1.group_id)
         Session.commit()
 
-        self.assertEqual(g2.full_path,'t11/t22')
+        self.assertEqual(g2.full_path, 't11/t22')
         self.assertTrue(self.__check_path('t11', 't22'))
 
         g2 = self.__update_group(g2.group_id, 'g22', parent_id=None)
         Session.commit()
 
-        self.assertEqual(g2.group_name,'g22')
+        self.assertEqual(g2.group_name, 'g22')
         # we moved out group from t1 to '' so it's full path should be 'g2'
-        self.assertEqual(g2.full_path,'g22')
+        self.assertEqual(g2.full_path, 'g22')
         self.assertFalse(self.__check_path('t11', 't22'))
         self.assertTrue(self.__check_path('g22'))
 
@@ -620,7 +620,7 @@ class TestPermissions(unittest.TestCase):
         # add repo to group
         form_data = {
             'repo_name':HG_REPO,
-            'repo_name_full':os.path.join(self.g1.group_name,HG_REPO),
+            'repo_name_full':RepoGroup.url_sep().join([self.g1.group_name,HG_REPO]),
             'repo_type':'hg',
             'clone_uri':'',
             'repo_group':self.g1.group_id,

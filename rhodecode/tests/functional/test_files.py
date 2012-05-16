@@ -190,18 +190,22 @@ class TestFilesController(TestController):
         self.log_user()
 
         for arch_ext, info in ARCHIVE_SPECS.items():
+            short = '27cd5cce30c9%s' % arch_ext
             fname = '27cd5cce30c96924232dffcd24178a07ffeb5dfc%s' % arch_ext
-            filename = '%s-%s' % (HG_REPO, fname)
-
-            response = self.app.get(url(controller='files', action='archivefile',
+            filename = '%s-%s' % (HG_REPO, short)
+            response = self.app.get(url(controller='files', 
+                                        action='archivefile',
                                         repo_name=HG_REPO,
                                         fname=fname))
 
-            assert response.status == '200 OK', 'wrong response code'
-            assert response.response._headers.items() == [('Pragma', 'no-cache'),
-                                                  ('Cache-Control', 'no-cache'),
-                                                  ('Content-Type', '%s; charset=utf-8' % info[0]),
-                                                  ('Content-Disposition', 'attachment; filename=%s' % filename), ], 'wrong headers'
+            self.assertEqual(response.status, '200 OK')
+            self.assertEqual(response.response._headers.items(),
+             [('Pragma', 'no-cache'),
+              ('Cache-Control', 'no-cache'),
+              ('Content-Type', '%s; charset=utf-8' % info[0]),
+              ('Content-Disposition', 'attachment; filename=%s' % filename),
+             ]
+            )
 
     def test_archival_wrong_ext(self):
         self.log_user()
@@ -212,8 +216,7 @@ class TestFilesController(TestController):
             response = self.app.get(url(controller='files', action='archivefile',
                                         repo_name=HG_REPO,
                                         fname=fname))
-            assert 'Unknown archive type' in response.body
-
+            response.mustcontain('Unknown archive type')
 
     def test_archival_wrong_revision(self):
         self.log_user()
@@ -224,7 +227,7 @@ class TestFilesController(TestController):
             response = self.app.get(url(controller='files', action='archivefile',
                                         repo_name=HG_REPO,
                                         fname=fname))
-            assert 'Unknown revision' in response.body
+            response.mustcontain('Unknown revision')
 
     #==========================================================================
     # RAW FILE
@@ -236,8 +239,8 @@ class TestFilesController(TestController):
                                     revision='27cd5cce30c96924232dffcd24178a07ffeb5dfc',
                                     f_path='vcs/nodes.py'))
 
-        assert response.content_disposition == "attachment; filename=nodes.py"
-        assert response.content_type == "text/x-python"
+        self.assertEqual(response.content_disposition, "attachment; filename=nodes.py")
+        self.assertEqual(response.content_type, "text/x-python")
 
     def test_raw_file_wrong_cs(self):
         self.log_user()
@@ -277,7 +280,7 @@ class TestFilesController(TestController):
                                     revision='27cd5cce30c96924232dffcd24178a07ffeb5dfc',
                                     f_path='vcs/nodes.py'))
 
-        assert response.content_type == "text/plain"
+        self.assertEqual(response.content_type, "text/plain")
 
     def test_raw_wrong_cs(self):
         self.log_user()

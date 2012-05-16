@@ -4,11 +4,36 @@
 Changelog
 =========
 
-1.3.5 (**2012-XX-XX**)
+1.4.0 (**2012-XX-XX**)
 ----------------------
 
 :status: in-progress
 :branch: beta
+
+news
+++++
+
+fixes
++++++
+
+1.3.6 (**2012-05-16**)
+----------------------
+
+news
+++++
+
+- chinese traditional translation
+
+fixes
++++++
+
+- fixed no scm found warning
+- fixed __future__ import error on rcextensions
+- made simplejson required lib for speedup on JSON encoding
+- fixes #449 bad regex could get more than revisions from parsing history
+
+1.3.5 (**2012-05-10**)
+----------------------
 
 news
 ++++
@@ -26,6 +51,7 @@ news
 - limited push/pull operations are now logged for git in the journal
 - bumped mercurial to 2.2.X series
 - added support for displaying submodules in file-browser
+- #421 added bookmarks in changelog view
 
 fixes
 +++++
@@ -37,6 +63,8 @@ fixes
 - fixed remote-pulling for git remotes remopositories
 - fixed #434: Error when accessing files or changesets of a git repository 
   with submodules
+- fixed issue with empty APIKEYS for users after registration ref. #438
+- fixed issue with getting README files from git repositories
 
 1.3.4 (**2012-03-28**)
 ----------------------

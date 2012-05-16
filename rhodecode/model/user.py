@@ -225,10 +225,8 @@ class UserModel(BaseModel):
         from rhodecode.model.notification import NotificationModel
 
         try:
-            new_user = User()
-            for k, v in form_data.items():
-                if k != 'admin':
-                    setattr(new_user, k, v)
+            form_data['admin'] = False
+            new_user = self.create(form_data)
 
             self.sa.add(new_user)
             self.sa.flush()
@@ -533,7 +531,6 @@ class UserModel(BaseModel):
 
         for perm in user_repo_group_perms_from_users_groups:
             g_k = perm.UsersGroupRepoGroupToPerm.group.group_name
-            print perm, g_k
             p = perm.Permission.permission_name
             cur_perm = user.permissions[GK][g_k]
             # overwrite permission only if it's greater than permission

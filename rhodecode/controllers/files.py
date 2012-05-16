@@ -26,6 +26,7 @@
 import os
 import logging
 import traceback
+import tempfile
 
 from pylons import request, response, tmpl_context as c, url
 from pylons.i18n.translation import _
@@ -48,6 +49,7 @@ from rhodecode.lib.vcs.nodes import FileNode
 
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.scm import ScmModel
+from rhodecode.model.db import Repository
 
 from rhodecode.controllers.changeset import anchor_url, _ignorews_url,\
     _context_url, get_line_ctx, get_ignore_ws
@@ -168,7 +170,7 @@ class FilesController(BaseRepoController):
         file_node = self.__get_filenode_or_redirect(repo_name, cs, f_path)
 
         response.content_disposition = 'attachment; filename=%s' % \
-            safe_str(f_path.split(os.sep)[-1])
+            safe_str(f_path.split(Repository.url_sep())[-1])
 
         response.content_type = file_node.mimetype
         return file_node.content
@@ -358,25 +360,23 @@ class FilesController(BaseRepoController):
         except (ImproperArchiveTypeError, KeyError):
             return _('Unknown archive type')
 
+        archive = tempfile.NamedTemporaryFile(mode='w+r+b', delete=False)
+        cs.fill_archive(stream=archive, kind=fileformat, subrepos=subrepos)
+        archive.close()
         response.content_type = content_type
         response.content_disposition = 'attachment; filename=%s-%s%s' \
-            % (repo_name, revision, ext)
+            % (repo_name, revision[:12], ext)
+        response.content_length = str(os.path.getsize(archive.name))
 
-        import tempfile
-        archive = tempfile.mkstemp()[1]
-        t = open(archive, 'wb')
-        cs.fill_archive(stream=t, kind=fileformat, subrepos=subrepos)
-
-        def get_chunked_archive(archive):
-            stream = open(archive, 'rb')
+        def get_chunked_archive(tmpfile):
             while True:
-                data = stream.read(4096)
+                data = tmpfile.read(16 * 1024)
                 if not data:
-                    os.remove(archive)
+                    tmpfile.close()
+                    os.unlink(tmpfile.name)
                     break
                 yield data
-
-        return get_chunked_archive(archive)
+        return get_chunked_archive(tmpfile=open(archive.name,'rb'))
 
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
                                    'repository.admin')

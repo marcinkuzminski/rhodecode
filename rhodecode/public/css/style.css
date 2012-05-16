@@ -2545,6 +2545,10 @@ h3.files_location {
 .right .logtags{
 	padding: 2px 2px 2px 2px;
 }
+.right .logtags .branchtag,.right .logtags .tagtag,.right .logtags .booktag{
+    margin: 0px 2px;
+}
+
 .right .logtags .branchtag,.logtags .branchtag {
   padding: 1px 3px 1px 3px;
   background-color: #bfbfbf;
@@ -2583,10 +2587,10 @@ h3.files_location {
     text-decoration: none;
     color: #ffffff;
 }
-.right .logbooks .bookbook,.logbooks .bookbook {
-  padding: 1px 3px 2px;
+.right .logbooks .bookbook,.logbooks .bookbook,.right .logtags .bookbook,.logtags .bookbook {
+  padding: 1px 3px 1px 3px;
   background-color: #46A546;
-  font-size: 9.75px;
+  font-size: 10px;
   font-weight: bold;
   color: #ffffff;
   text-transform: uppercase;
@@ -2595,10 +2599,10 @@ h3.files_location {
   -moz-border-radius: 3px;
   border-radius: 3px;
 }
-.right .logbooks .bookbook,.logbooks .bookbook a{
+.right .logbooks .bookbook,.logbooks .bookbook a,.right .logtags .bookbook,.logtags .bookbook a{
 	color: #ffffff;
 }
-.right .logbooks .bookbook,.logbooks .bookbook a:hover{
+.right .logbooks .bookbook,.logbooks .bookbook a:hover,.right .logtags .bookbook,.logtags .bookbook a:hover{
     text-decoration: none;
     color: #ffffff;
 }

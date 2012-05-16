@@ -15,7 +15,7 @@ RhodeCode is similar in some respects to github_ or bitbucket_,
 however RhodeCode can be run as standalone hosted application on your own server.
 It is open source and donation ware and focuses more on providing a customized, 
 self administered interface for Mercurial_ and GIT_  repositories. 
-RhodeCode works on *nix systems and Windows it is powered by a vcs_ library 
+RhodeCode works on \*nix systems and Windows it is powered by a vcs_ library 
 that Lukasz Balcerzak and Marcin Kuzminski created to handle multiple 
 different version control systems.
 

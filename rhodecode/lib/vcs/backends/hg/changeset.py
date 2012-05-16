@@ -37,6 +37,10 @@ class MercurialChangeset(BaseChangeset):
         return  safe_unicode(self._ctx.branch())
 
     @LazyProperty
+    def bookmarks(self):
+        return map(safe_unicode, self._ctx.bookmarks())
+
+    @LazyProperty
     def message(self):
         return safe_unicode(self._ctx.description())
 
@@ -258,8 +262,6 @@ class MercurialChangeset(BaseChangeset):
 
         archival.archive(self.repository._repo, stream, self.raw_id,
                          kind, prefix=prefix, subrepos=subrepos)
-
-        #stream.close()
 
         if stream.closed and hasattr(stream, 'name'):
             stream = open(stream.name, 'rb')

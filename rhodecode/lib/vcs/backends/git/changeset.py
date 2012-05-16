@@ -240,11 +240,11 @@ class GitChangeset(BaseChangeset):
         which is generally not good. Should be replaced with algorithm
         iterating commits.
         """
-        cmd = 'log --pretty="format: %%H" --name-status -p %s -- "%s"' % (
+        cmd = 'log --pretty="format: %%H" -s -p %s -- "%s"' % (
                   self.id, path
                )
         so, se = self.repository.run_git_command(cmd)
-        ids = re.findall(r'\w{40}', so)
+        ids = re.findall(r'[0-9a-fA-F]{40}', so)
         return [self.repository.get_changeset(id) for id in ids]
 
     def get_file_annotate(self, path):

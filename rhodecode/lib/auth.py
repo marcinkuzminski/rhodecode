@@ -64,7 +64,7 @@ class PasswordGenerator(object):
         passwd_gen = PasswordGenerator()
         #print 8-letter password containing only big and small letters
             of alphabet
-        print passwd_gen.gen_password(8, passwd_gen.ALPHABETS_BIG_SMALL)
+        passwd_gen.gen_password(8, passwd_gen.ALPHABETS_BIG_SMALL)
     """
     ALPHABETS_NUM = r'''1234567890'''
     ALPHABETS_SMALL = r'''qwertyuiopasdfghjklzxcvbnm'''
