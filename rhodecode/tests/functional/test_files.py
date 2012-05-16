@@ -193,7 +193,7 @@ class TestFilesController(TestController):
             short = '27cd5cce30c9%s' % arch_ext
             fname = '27cd5cce30c96924232dffcd24178a07ffeb5dfc%s' % arch_ext
             filename = '%s-%s' % (HG_REPO, short)
-            response = self.app.get(url(controller='files', 
+            response = self.app.get(url(controller='files',
                                         action='archivefile',
                                         repo_name=HG_REPO,
                                         fname=fname))
