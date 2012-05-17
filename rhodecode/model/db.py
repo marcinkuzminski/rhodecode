@@ -1256,9 +1256,13 @@ class ChangesetStatus(Base, BaseModel):
     repo = relationship('Repository')
     comment = relationship('ChangesetComment', lazy='joined')
 
+    @classmethod
+    def get_status_lbl(cls, value):
+        return dict(cls.STATUSES).get(value)
+
     @property
     def status_lbl(self):
-        return dict(self.STATUSES).get(self.status)
+        return ChangesetStatus.get_status_lbl(self.status)
 
 
 class Notification(Base, BaseModel):

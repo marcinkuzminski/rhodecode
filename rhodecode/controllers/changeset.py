@@ -368,18 +368,22 @@ class ChangesetController(BaseRepoController):
 
     @jsonify
     def comment(self, repo_name, revision):
+        status = request.POST.get('changeset_status')
+        change_status = request.POST.get('change_changeset_status')
+
         comm = ChangesetCommentsModel().create(
             text=request.POST.get('text'),
             repo_id=c.rhodecode_db_repo.repo_id,
             user_id=c.rhodecode_user.user_id,
             revision=revision,
             f_path=request.POST.get('f_path'),
-            line_no=request.POST.get('line')
+            line_no=request.POST.get('line'),
+            status_change=(ChangesetStatus.get_status_lbl(status) 
+                           if status and change_status else None)
         )
 
         # get status if set !
-        status = request.POST.get('changeset_status')
-        if status and request.POST.get('change_changeset_status'):
+        if status and change_status:
             ChangesetStatusModel().set_status(
                 c.rhodecode_db_repo.repo_id,
                 revision,
