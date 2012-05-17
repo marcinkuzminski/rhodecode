@@ -32,6 +32,7 @@ from pylons import request, response, tmpl_context as c, url
 from pylons.i18n.translation import _
 from pylons.controllers.util import redirect
 from pylons.decorators import jsonify
+from paste.fileapp import FileApp, _FileIter
 
 from rhodecode.lib import diffs
 from rhodecode.lib import helpers as h
@@ -364,20 +365,22 @@ class FilesController(BaseRepoController):
         with open(_archive_name, 'wb') as f:
             cs.fill_archive(stream=f, kind=fileformat, subrepos=subrepos)
 
-        response.content_type = content_type
-        response.content_disposition = 'attachment; filename=%s-%s%s' \
+        content_disposition = 'attachment; filename=%s-%s%s' \
             % (repo_name, revision[:12], ext)
-        response.content_length = str(os.path.getsize(_archive_name))
+        content_length = os.path.getsize(_archive_name)
 
-        def get_chunked_archive(tmpfile):
-            while True:
-                data = tmpfile.read(16 * 1024)
-                if not data:
-                    tmpfile.close()
-                    os.unlink(tmpfile.name)
-                    break
-                yield data
-        return get_chunked_archive(tmpfile=open(_archive_name, 'rb'))
+        headers = [('Content-Disposition', str(content_disposition)),
+                   ('Content-Type', str(content_type)),
+                   ('Content-Length', str(content_length))]
+
+        class _DestroyingFileWrapper(_FileIter):
+            def close(self):
+                self.file.close
+                os.remove(self.file.name)
+
+        request.environ['wsgi.file_wrapper'] = _DestroyingFileWrapper
+        fapp = FileApp(_archive_name, headers=headers)
+        return fapp(request.environ, self.start_response)
 
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
                                    'repository.admin')

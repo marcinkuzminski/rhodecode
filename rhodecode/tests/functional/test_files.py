@@ -199,13 +199,12 @@ class TestFilesController(TestController):
                                         fname=fname))
 
             self.assertEqual(response.status, '200 OK')
-            self.assertEqual(response.response._headers.items(),
-             [('Pragma', 'no-cache'),
-              ('Cache-Control', 'no-cache'),
-              ('Content-Type', '%s; charset=utf-8' % info[0]),
-              ('Content-Disposition', 'attachment; filename=%s' % filename),
-             ]
-            )
+            heads = [
+            ('Content-Type', 'text/html; charset=utf-8'),
+            ('Content-Length', '0'), ('Pragma', 'no-cache'),
+            ('Cache-Control', 'no-cache')
+            ]
+            self.assertEqual(response.response._headers.items(), heads)
 
     def test_archival_wrong_ext(self):
         self.log_user()
