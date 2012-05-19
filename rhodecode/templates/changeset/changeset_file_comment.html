@@ -35,10 +35,10 @@
     <div class="overlay"><div class="overlay-text">${_('Submitting...')}</div></div>
       ${h.form(h.url('changeset_comment', repo_name=c.repo_name, revision=changeset.raw_id),class_='inline-form')}
       <div class="clearfix">
-          <div class="comment-help">${_('Commenting on line')} {1}. ${_('Comments parsed using')}
-          <a href="${h.url('rst_help')}">RST</a> ${_('syntax')} ${_('with')}
-          <span style="color:#003367" class="tooltip" title="${_('Use @username inside this text to send notification to this RhodeCode user')}">@mention</span> ${_('support')}
-          </div>
+          <div class="comment-help">${(_('Commenting on line {1}. Comments parsed using %s syntax with %s support.')
+          	% (('<a href="%s">RST</a>' % h.url('rst_help')),
+          	'<span style="color:#003367" class="tooltip" title="%s">@mention</span>' %
+          	_('Use @username inside this text to send notification to this RhodeCode user')))|n}</div>
           <textarea id="text_{1}" name="text"></textarea>
       </div>
       <div class="comment-button">
@@ -52,7 +52,7 @@
       ${h.form('')}
       <div class="clearfix">
           <div class="comment-help">
-            ${'You need to be logged in to comment.'} <a href="${h.url('login_home',came_from=h.url.current())}">${_('Login now')}</a>
+            ${_('You need to be logged in to comment.')} <a href="${h.url('login_home',came_from=h.url.current())}">${_('Login now')}</a>
           </div>
       </div>
       <div class="comment-button">
