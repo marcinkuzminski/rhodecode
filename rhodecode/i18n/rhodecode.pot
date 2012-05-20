@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: RhodeCode 1.4.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2012-05-20 10:47+0200\n"
+"POT-Creation-Date: 2012-05-20 11:28+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -645,8 +645,7 @@ msgstr ""
 msgid "%s more"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:503 rhodecode/templates/changelog/changelog.html:14
-#: rhodecode/templates/changelog/changelog.html:39
+#: rhodecode/lib/helpers.py:503 rhodecode/templates/changelog/changelog.html:40
 msgid "revisions"
 msgstr ""
 
@@ -1728,6 +1727,7 @@ msgstr ""
 
 #: rhodecode/templates/admin/repos/repos.html:68
 #: rhodecode/templates/admin/users/users.html:55
+#: rhodecode/templates/admin/users_groups/users_groups.html:44
 msgid "delete"
 msgstr ""
 
@@ -2254,7 +2254,7 @@ msgstr ""
 #: rhodecode/templates/base/base.html:166 rhodecode/templates/base/base.html:168
 #: rhodecode/templates/base/base.html:170
 #: rhodecode/templates/changelog/changelog.html:6
-#: rhodecode/templates/changelog/changelog.html:14
+#: rhodecode/templates/changelog/changelog.html:15
 #: rhodecode/templates/data_table/_dt_elements.html:17
 #: rhodecode/templates/data_table/_dt_elements.html:19
 #: rhodecode/templates/data_table/_dt_elements.html:21
@@ -2371,43 +2371,42 @@ msgstr ""
 msgid "revision"
 msgstr ""
 
-#: rhodecode/templates/changelog/changelog.html:14
-msgid "showing "
-msgstr ""
+#: rhodecode/templates/changelog/changelog.html:15
+#, python-format
+msgid "showing %d out of %d revision"
+msgid_plural "showing %d out of %d revisions"
+msgstr[0] ""
+msgstr[1] ""
 
-#: rhodecode/templates/changelog/changelog.html:14
-msgid "out of"
-msgstr ""
-
-#: rhodecode/templates/changelog/changelog.html:37
+#: rhodecode/templates/changelog/changelog.html:38
 msgid "Show"
 msgstr ""
 
-#: rhodecode/templates/changelog/changelog.html:63
+#: rhodecode/templates/changelog/changelog.html:64
 #: rhodecode/templates/summary/summary.html:352
 msgid "show more"
 msgstr ""
 
-#: rhodecode/templates/changelog/changelog.html:67
+#: rhodecode/templates/changelog/changelog.html:68
 msgid "Affected number of files, click to show more details"
 msgstr ""
 
-#: rhodecode/templates/changelog/changelog.html:81
+#: rhodecode/templates/changelog/changelog.html:82
 #: rhodecode/templates/changeset/changeset.html:72
 msgid "Parent"
 msgstr ""
 
-#: rhodecode/templates/changelog/changelog.html:87
+#: rhodecode/templates/changelog/changelog.html:88
 #: rhodecode/templates/changeset/changeset.html:78
 msgid "No parents"
 msgstr ""
 
-#: rhodecode/templates/changelog/changelog.html:92
+#: rhodecode/templates/changelog/changelog.html:93
 #: rhodecode/templates/changeset/changeset.html:82
 msgid "merge"
 msgstr ""
 
-#: rhodecode/templates/changelog/changelog.html:95
+#: rhodecode/templates/changelog/changelog.html:96
 #: rhodecode/templates/changeset/changeset.html:85
 #: rhodecode/templates/files/files.html:29
 #: rhodecode/templates/files/files_add.html:33
@@ -2416,20 +2415,20 @@ msgstr ""
 msgid "branch"
 msgstr ""
 
-#: rhodecode/templates/changelog/changelog.html:101
+#: rhodecode/templates/changelog/changelog.html:102
 msgid "bookmark"
 msgstr ""
 
-#: rhodecode/templates/changelog/changelog.html:107
+#: rhodecode/templates/changelog/changelog.html:108
 #: rhodecode/templates/changeset/changeset.html:90
 msgid "tag"
 msgstr ""
 
-#: rhodecode/templates/changelog/changelog.html:143
+#: rhodecode/templates/changelog/changelog.html:144
 msgid "Show selected changes __S -> __E"
 msgstr ""
 
-#: rhodecode/templates/changelog/changelog.html:234
+#: rhodecode/templates/changelog/changelog.html:235
 msgid "There are no changes yet"
 msgstr ""
 
