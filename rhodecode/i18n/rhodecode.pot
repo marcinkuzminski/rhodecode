@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: RhodeCode 1.4.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2012-05-20 11:28+0200\n"
+"POT-Creation-Date: 2012-05-20 11:45+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1377,6 +1377,7 @@ msgstr ""
 #: rhodecode/templates/admin/users/user_edit.html:154
 #: rhodecode/templates/admin/users/user_edit_my_account.html:102
 #: rhodecode/templates/admin/users_groups/users_group_edit.html:115
+#: rhodecode/templates/settings/repo_settings.html:84
 msgid "Save"
 msgstr ""
 
@@ -1726,6 +1727,7 @@ msgid "Contact"
 msgstr ""
 
 #: rhodecode/templates/admin/repos/repos.html:68
+#: rhodecode/templates/admin/repos_groups/repos_groups_show.html:54
 #: rhodecode/templates/admin/users/users.html:55
 #: rhodecode/templates/admin/users_groups/users_groups.html:44
 msgid "delete"
@@ -1787,6 +1789,7 @@ msgstr ""
 #: rhodecode/templates/admin/users_groups/users_group_edit.html:116
 #: rhodecode/templates/files/files_add.html:82
 #: rhodecode/templates/files/files_edit.html:68
+#: rhodecode/templates/settings/repo_settings.html:85
 msgid "Reset"
 msgstr ""
 
