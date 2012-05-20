@@ -30,7 +30,7 @@ from pylons import request, config, tmpl_context as c
 
 from rhodecode.lib.auth import LoginRequired
 from rhodecode.lib.base import BaseController, render
-from rhodecode.lib.indexers import SCHEMA, IDX_NAME, ResultWrapper
+from rhodecode.lib.indexers import SCHEMA, IDX_NAME, WhooshResultWrapper
 
 from webhelpers.paginate import Page
 from webhelpers.util import update_params
@@ -38,6 +38,7 @@ from webhelpers.util import update_params
 from whoosh.index import open_dir, EmptyIndexError
 from whoosh.qparser import QueryParser, QueryParserError
 from whoosh.query import Phrase, Wildcard, Term, Prefix
+from rhodecode.model.repo import RepoModel
 
 log = logging.getLogger(__name__)
 
@@ -99,10 +100,10 @@ class SearchController(BaseController):
                     def url_generator(**kw):
                         return update_params("?q=%s&type=%s" \
                                            % (c.cur_query, c.cur_search), **kw)
-
+                    repo_location = RepoModel().repos_path
                     c.formated_results = Page(
-                        ResultWrapper(search_type, searcher, matcher,
-                                      highlight_items),
+                        WhooshResultWrapper(search_type, searcher, matcher,
+                                            highlight_items, repo_location),
                         page=p,
                         item_count=res_ln,
                         items_per_page=10,
