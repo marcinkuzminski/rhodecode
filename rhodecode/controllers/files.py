@@ -361,26 +361,26 @@ class FilesController(BaseRepoController):
         except (ImproperArchiveTypeError, KeyError):
             return _('Unknown archive type')
 
-        fd, _archive_name = tempfile.mkstemp(suffix='rcarchive')
-        with open(_archive_name, 'wb') as f:
-            cs.fill_archive(stream=f, kind=fileformat, subrepos=subrepos)
+        fd, archive = tempfile.mkstemp()
+        t = open(archive, 'wb')
+        cs.fill_archive(stream=t, kind=fileformat, subrepos=subrepos)
+        t.close()
 
-        content_disposition = 'attachment; filename=%s-%s%s' \
-            % (repo_name, revision[:12], ext)
-        content_length = os.path.getsize(_archive_name)
+        def get_chunked_archive(archive):
+            stream = open(archive, 'rb')
+            while True:
+                data = stream.read(16 * 1024)
+                if not data:
+                    stream.close()
+                    os.close(fd)
+                    os.remove(archive)
+                    break
+                yield data
 
-        headers = [('Content-Disposition', str(content_disposition)),
-                   ('Content-Type', str(content_type)),
-                   ('Content-Length', str(content_length))]
-
-        class _DestroyingFileWrapper(_FileIter):
-            def close(self):
-                self.file.close
-                os.remove(self.file.name)
-
-        request.environ['wsgi.file_wrapper'] = _DestroyingFileWrapper
-        fapp = FileApp(_archive_name, headers=headers)
-        return fapp(request.environ, self.start_response)
+        response.content_disposition = str('attachment; filename=%s-%s%s' \
+                                           % (repo_name, revision[:12], ext))
+        response.content_type = str(content_type)
+        return get_chunked_archive(archive)
 
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
                                    'repository.admin')
