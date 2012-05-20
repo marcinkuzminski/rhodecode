@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: RhodeCode 1.1.5\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2012-05-19 23:46+0200\n"
-"PO-Revision-Date: 2012-05-19 23:51+0100\n"
+"POT-Creation-Date: 2012-05-20 10:14+0200\n"
+"PO-Revision-Date: 2012-05-20 10:20+0100\n"
 "Last-Translator: Vincent Duvert <vincent@duvert.net>\n"
 "Language-Team: fr <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n > 1)\n"
@@ -727,7 +727,6 @@ msgstr "Aucun fichier"
 
 #: rhodecode/lib/utils2.py:335
 #, python-format
-#| msgid "year"
 msgid "%d year"
 msgid_plural "%d years"
 msgstr[0] "%d an"
@@ -735,7 +734,6 @@ msgstr[1] "%d ans"
 
 #: rhodecode/lib/utils2.py:336
 #, python-format
-#| msgid "month"
 msgid "%d month"
 msgid_plural "%d months"
 msgstr[0] "%d mois"
@@ -743,7 +741,6 @@ msgstr[1] "%d mois"
 
 #: rhodecode/lib/utils2.py:337
 #, python-format
-#| msgid "day"
 msgid "%d day"
 msgid_plural "%d days"
 msgstr[0] "%d jour"
@@ -751,7 +748,6 @@ msgstr[1] "%d jours"
 
 #: rhodecode/lib/utils2.py:338
 #, python-format
-#| msgid "hour"
 msgid "%d hour"
 msgid_plural "%d hours"
 msgstr[0] "%d heure"
@@ -759,7 +755,6 @@ msgstr[1] "%d heures"
 
 #: rhodecode/lib/utils2.py:339
 #, python-format
-#| msgid "minute"
 msgid "%d minute"
 msgid_plural "%d minutes"
 msgstr[0] "%d minute"
@@ -767,7 +762,6 @@ msgstr[1] "%d minutes"
 
 #: rhodecode/lib/utils2.py:340
 #, python-format
-#| msgid "second"
 msgid "%d second"
 msgid_plural "%d seconds"
 msgstr[0] "%d seconde"
@@ -775,13 +769,11 @@ msgstr[1] "%d secondes"
 
 #: rhodecode/lib/utils2.py:355
 #, python-format
-#| msgid "ago"
 msgid "%s ago"
 msgstr "Il y a %s"
 
 #: rhodecode/lib/utils2.py:357
 #, python-format
-#| msgid " and %s more"
 msgid "%s and %s ago"
 msgstr "Il y a %s et %s"
 
@@ -1770,7 +1762,6 @@ msgid "Groups"
 msgstr "Groupes"
 
 #: rhodecode/templates/admin/repos_groups/repos_groups.html:12
-#: rhodecode/templates/changeset/changeset_file_comment.html:101
 msgid "with"
 msgstr "avec support de"
 
@@ -2533,17 +2524,22 @@ msgid "Submitting..."
 msgstr "Envoi…"
 
 #: rhodecode/templates/changeset/changeset_file_comment.html:38
+msgid "Commenting on line {1}."
+msgstr "Commentaire sur la ligne {1}."
+
+#: rhodecode/templates/changeset/changeset_file_comment.html:39
+#: rhodecode/templates/changeset/changeset_file_comment.html:100
 #, python-format
-msgid "Commenting on line {1}. Comments parsed using %s syntax with %s support."
-msgstr "Commentaire sur la ligne {1}. Les commentaires sont analysés avec la syntaxe %s, avec le support des %s."
+msgid "Comments parsed using %s syntax with %s support."
+msgstr "Les commentaires sont analysés avec la syntaxe %s, avec le support de la commande %s."
 
 #: rhodecode/templates/changeset/changeset_file_comment.html:41
-#: rhodecode/templates/changeset/changeset_file_comment.html:101
+#: rhodecode/templates/changeset/changeset_file_comment.html:102
 msgid "Use @username inside this text to send notification to this RhodeCode user"
 msgstr "Utilisez @nomutilisateur dans ce texte pour envoyer une notification à l’utilisateur RhodeCode en question."
 
 #: rhodecode/templates/changeset/changeset_file_comment.html:47
-#: rhodecode/templates/changeset/changeset_file_comment.html:106
+#: rhodecode/templates/changeset/changeset_file_comment.html:107
 msgid "Comment"
 msgstr "Commentaire"
 
@@ -2553,7 +2549,6 @@ msgid "Hide"
 msgstr "Masquer"
 
 #: rhodecode/templates/changeset/changeset_file_comment.html:55
-#| msgid "You need to be a signed in to view this page"
 msgid "You need to be logged in to comment."
 msgstr "Vous devez être connecté pour poster des commentaires."
 
@@ -2564,18 +2559,6 @@ msgstr "Se connecter maintenant"
 #: rhodecode/templates/changeset/changeset_file_comment.html:97
 msgid "Leave a comment"
 msgstr "Laisser un commentaire"
-
-#: rhodecode/templates/changeset/changeset_file_comment.html:100
-msgid "Comments parsed using"
-msgstr "Les commentaires sont traités par un parseur"
-
-#: rhodecode/templates/changeset/changeset_file_comment.html:100
-msgid "syntax"
-msgstr " "
-
-#: rhodecode/templates/changeset/changeset_file_comment.html:101
-msgid "support"
-msgstr "."
 
 #: rhodecode/templates/changeset/changeset_range.html:29
 msgid "Compare View"
@@ -3058,5 +3041,3 @@ msgstr "fichié modifié"
 msgid "file removed"
 msgstr "fichier supprimé"
 
-#~ msgid "Commenting on line"
-#~ msgstr "Commentaire sur la ligne"
