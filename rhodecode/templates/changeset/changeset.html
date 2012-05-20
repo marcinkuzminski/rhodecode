@@ -39,7 +39,7 @@
                   ${c.ignorews_url(request.GET)}
                   ${c.context_url(request.GET)}
                 </div>
-                <div class="comments-number" style="float:right;padding-right:5px">${len(c.comments)} comment(s) (${c.inline_cnt} ${_('inline')})</div>
+                <div class="comments-number" style="float:right;padding-right:5px">${ungettext("%d comment", "%d comments", len(c.comments)) % len(c.comments)} ${ungettext("(%d inline)", "(%d inline)", c.inline_cnt) % c.inline_cnt}</div>
 			</div>
 		</div>
 	    <div id="changeset_content">

@@ -66,7 +66,7 @@
 
 
 <%def name="inlines(changeset)">
-    <div class="comments-number">${len(c.comments)} comment(s) (${c.inline_cnt} ${_('inline')})</div>
+    <div class="comments-number">${ungettext("%d comment", "%d comments", len(c.comments)) % len(c.comments)} ${ungettext("(%d inline)", "(%d inline)", c.inline_cnt) % c.inline_cnt}</div>
     %for path, lines in c.inline_comments:
         % for line,comments in lines.iteritems():
             <div style="display:none" class="inline-comment-placeholder" path="${path}" target_id="${h.safeid(h.safe_unicode(path))}">
