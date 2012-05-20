@@ -23,10 +23,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 import unittest
+import datetime
 from rhodecode.tests import *
+
 
 proto = 'http'
 TEST_URLS = [
@@ -116,3 +116,16 @@ class TestLibs(unittest.TestCase):
         'marian.user', 'marco-polo', 'marco_polo'
         ], key=lambda k: k.lower())
         self.assertEqual(s, extract_mentioned_users(sample))
+
+    def test_age(self):
+        from rhodecode.lib.utils2 import age
+        n = datetime.datetime.now()
+        delt = lambda *args, **kwargs: datetime.timedelta(*args, **kwargs)
+        self.assertEqual(age(n), u'just now')
+        self.assertEqual(age(n - delt(seconds=1)), u'1 second ago')
+        self.assertEqual(age(n - delt(seconds=60 * 2)), u'2 minutes ago')
+        self.assertEqual(age(n - delt(hours=1)), u'1 hour ago')
+        self.assertEqual(age(n - delt(hours=24)), u'1 day ago')
+        self.assertEqual(age(n - delt(hours=24 * 5)), u'5 days ago')
+        self.assertEqual(age(n - delt(hours=24 * 32)), u'1 month and 2 days ago')
+        self.assertEqual(age(n - delt(hours=24 * 400)), u'1 year and 1 month ago')
