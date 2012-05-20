@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: RhodeCode 1.4.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2012-05-19 23:46+0200\n"
+"POT-Creation-Date: 2012-05-20 10:14+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1742,7 +1742,6 @@ msgid "Groups"
 msgstr ""
 
 #: rhodecode/templates/admin/repos_groups/repos_groups.html:12
-#: rhodecode/templates/changeset/changeset_file_comment.html:101
 msgid "with"
 msgstr ""
 
@@ -2493,17 +2492,22 @@ msgid "Submitting..."
 msgstr ""
 
 #: rhodecode/templates/changeset/changeset_file_comment.html:38
+msgid "Commenting on line {1}."
+msgstr ""
+
+#: rhodecode/templates/changeset/changeset_file_comment.html:39
+#: rhodecode/templates/changeset/changeset_file_comment.html:100
 #, python-format
-msgid "Commenting on line {1}. Comments parsed using %s syntax with %s support."
+msgid "Comments parsed using %s syntax with %s support."
 msgstr ""
 
 #: rhodecode/templates/changeset/changeset_file_comment.html:41
-#: rhodecode/templates/changeset/changeset_file_comment.html:101
+#: rhodecode/templates/changeset/changeset_file_comment.html:102
 msgid "Use @username inside this text to send notification to this RhodeCode user"
 msgstr ""
 
 #: rhodecode/templates/changeset/changeset_file_comment.html:47
-#: rhodecode/templates/changeset/changeset_file_comment.html:106
+#: rhodecode/templates/changeset/changeset_file_comment.html:107
 msgid "Comment"
 msgstr ""
 
@@ -2522,18 +2526,6 @@ msgstr ""
 
 #: rhodecode/templates/changeset/changeset_file_comment.html:97
 msgid "Leave a comment"
-msgstr ""
-
-#: rhodecode/templates/changeset/changeset_file_comment.html:100
-msgid "Comments parsed using"
-msgstr ""
-
-#: rhodecode/templates/changeset/changeset_file_comment.html:100
-msgid "syntax"
-msgstr ""
-
-#: rhodecode/templates/changeset/changeset_file_comment.html:101
-msgid "support"
 msgstr ""
 
 #: rhodecode/templates/changeset/changeset_range.html:29
