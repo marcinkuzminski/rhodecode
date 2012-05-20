@@ -11,7 +11,8 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
     &raquo;
     ${h.link_to(c.repo_name,h.url('summary_home',repo_name=c.repo_name))}
     &raquo;
-    ${_('Changelog')} - ${_('showing ')} ${c.size if c.size <= c.total_cs else c.total_cs} ${_('out of')} ${c.total_cs} ${_('revisions')}
+    <% size = c.size if c.size <= c.total_cs else c.total_cs %>
+    ${_('Changelog')} - ${ungettext('showing %d out of %d revision', 'showing %d out of %d revisions', size) % (size, c.total_cs)}
 </%def>
 
 <%def name="page_nav()">
