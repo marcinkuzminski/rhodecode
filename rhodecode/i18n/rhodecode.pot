@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: RhodeCode 1.4.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2012-05-20 10:14+0200\n"
+"POT-Creation-Date: 2012-05-20 10:47+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2475,8 +2475,19 @@ msgstr ""
 
 #: rhodecode/templates/changeset/changeset.html:42
 #: rhodecode/templates/changeset/changeset_file_comment.html:69
-msgid "inline"
-msgstr ""
+#, python-format
+msgid "%d comment"
+msgid_plural "%d comments"
+msgstr[0] ""
+msgstr[1] ""
+
+#: rhodecode/templates/changeset/changeset.html:42
+#: rhodecode/templates/changeset/changeset_file_comment.html:69
+#, python-format
+msgid "(%d inline)"
+msgid_plural "(%d inline)"
+msgstr[0] ""
+msgstr[1] ""
 
 #: rhodecode/templates/changeset/changeset.html:97
 #, python-format
