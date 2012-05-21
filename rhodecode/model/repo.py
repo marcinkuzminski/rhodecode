@@ -458,8 +458,12 @@ class RepoModel(BaseModel):
                 )
         )
         backend = get_backend(alias)
-
-        backend(repo_path, create=True, src_url=clone_uri)
+        if alias == 'hg':
+            backend(repo_path, create=True, src_url=clone_uri)
+        elif alias == 'git':
+            backend(repo_path, create=True, src_url=clone_uri, bare=True)
+        else:
+            raise Exception('Undefined alias %s' % alias)
 
     def __rename_repo(self, old, new):
         """
