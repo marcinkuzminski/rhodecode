@@ -42,6 +42,8 @@ from rhodecode.lib.utils import repo_name_slug
 from rhodecode.lib.utils2 import str2bool, safe_unicode, safe_str, \
     get_changeset_safe
 from rhodecode.lib.markup_renderer import MarkupRenderer
+from rhodecode.lib.vcs.exceptions import ChangesetDoesNotExistError
+from rhodecode.lib.vcs.backends.base import BaseChangeset
 
 log = logging.getLogger(__name__)
 
@@ -447,22 +449,30 @@ def action_parser(user_log, feed=False):
 
         repo = user_log.repository.scm_instance
 
-        message = lambda rev: rev.message
-        lnk = lambda rev, repo_name: (
-            link_to('r%s:%s' % (rev.revision, rev.short_id),
-                    url('changeset_home', repo_name=repo_name,
-                        revision=rev.raw_id),
-                    title=tooltip(message(rev)), class_='tooltip')
-        )
+        def lnk(rev, repo_name):
+
+            if isinstance(rev, BaseChangeset):
+                lbl = 'r%s:%s' % (rev.revision, rev.short_id)
+                _url = url('changeset_home', repo_name=repo_name, 
+                           revision=rev.raw_id)
+                title = tooltip(rev.message)
+            else:
+                lbl = '%s' % rev
+                _url = '#'
+                title = _('Changeset not found')
+
+            return link_to(lbl, _url, title=title, class_='tooltip',)
 
         revs = []
         if len(filter(lambda v: v != '', revs_ids)) > 0:
-            # get only max revs_top_limit of changeset for performance/ui reasons
-            revs = [
-                x for x in repo.get_changesets(revs_ids[0],
-                                               revs_ids[:revs_top_limit][-1])
-            ]
-
+            for rev in revs_ids[:revs_top_limit]:
+                try:
+                    rev = repo.get_changeset(rev)
+                    revs.append(rev)
+                except ChangesetDoesNotExistError:
+                    log.error('cannot find revision %s in this repo' % rev)
+                    revs.append(rev)
+                    continue
         cs_links = []
         cs_links.append(" " + ', '.join(
             [lnk(rev, repo_name) for rev in revs[:revs_limit]]
