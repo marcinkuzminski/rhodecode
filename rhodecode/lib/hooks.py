@@ -24,13 +24,15 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import os
 import sys
+import binascii
+from inspect import isfunction
 
 from mercurial.scmutil import revrange
 from mercurial.node import nullrev
+
 from rhodecode import EXTENSIONS
 from rhodecode.lib import helpers as h
 from rhodecode.lib.utils import action_logger
-from inspect import isfunction
 
 
 def _get_scm_size(alias, root_path):
@@ -134,8 +136,8 @@ def log_push_action(ui, repo, **kwargs):
                 return (len(repo) - 1, 0)
 
         stop, start = get_revs(repo, [node + ':'])
-
-        revs = (str(repo[r]) for r in xrange(start, stop + 1))
+        h = binascii.hexlify
+        revs = (h(repo[r].node()) for r in xrange(start, stop + 1))
     elif scm == 'git':
         revs = []
 
