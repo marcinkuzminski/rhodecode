@@ -212,6 +212,10 @@ def make_map(config):
         #EXTRAS USER ROUTES
         m.connect("user_perm", "/users_perm/{id}",
                   action="update_perm", conditions=dict(method=["PUT"]))
+        m.connect("user_emails", "/users_emails/{id}",
+                  action="add_email", conditions=dict(method=["PUT"]))
+        m.connect("user_emails_delete", "/users_emails/{id}",
+                  action="delete_email", conditions=dict(method=["DELETE"]))
 
     #ADMIN USERS REST ROUTES
     with rmap.submapper(path_prefix=ADMIN_PREFIX,

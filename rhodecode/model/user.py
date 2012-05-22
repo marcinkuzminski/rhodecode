@@ -36,7 +36,7 @@ from rhodecode.model import BaseModel
 from rhodecode.model.db import User, UserRepoToPerm, Repository, Permission, \
     UserToPerm, UsersGroupRepoToPerm, UsersGroupToPerm, UsersGroupMember, \
     Notification, RepoGroup, UserRepoGroupToPerm, UsersGroup,\
-    UsersGroupRepoGroupToPerm
+    UsersGroupRepoGroupToPerm, UserEmailMap
 from rhodecode.lib.exceptions import DefaultUserException, \
     UserOwnsReposException
 
@@ -585,5 +585,31 @@ class UserModel(BaseModel):
                 .filter(UserToPerm.user == user)\
                 .filter(UserToPerm.permission == perm)\
                 .scalar()
+        if obj:
+            self.sa.delete(obj)
+
+    def add_extra_email(self, user, email):
+        """
+        Adds email address to UserEmailMap
+
+        :param user:
+        :param email:
+        """
+        user = self.__get_user(user)
+        obj = UserEmailMap()
+        obj.user = user
+        obj.email = email
+        self.sa.add(obj)
+        return obj
+
+    def delete_extra_email(self, user, email_id):
+        """
+        Removes email address from UserEmailMap
+
+        :param user:
+        :param email_id:
+        """
+        user = self.__get_user(user)
+        obj = UserEmailMap.query().get(email_id)
         if obj:
             self.sa.delete(obj)

@@ -3712,6 +3712,21 @@ div#legend_container table td,div#legend_choices table td {
 	padding:0px 0px 0px 10px;
 }
 
+.emails_wrap{
+	padding: 0px 20px;
+}
+
+.emails_wrap .email_entry{
+    height: 30px;
+    padding:0px 0px 0px 10px;
+}
+.emails_wrap .email_entry .email{
+	float: left
+}
+.emails_wrap .email_entry .email_action{
+	float: left
+}
+
 /*README STYLE*/
 
 div.readme {

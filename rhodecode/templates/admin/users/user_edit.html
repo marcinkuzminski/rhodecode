@@ -158,4 +158,48 @@
     </div>
     ${h.end_form()}
 </div>
+<div class="box box-right">
+    <!-- box / title -->
+    <div class="title">
+        <h5>${_('Email addresses')}</h5>
+    </div>
+    
+    <div class="emails_wrap">
+      <table class="noborder">
+      %for em in c.user_email_map:
+        <tr>
+            <td><div class="gravatar"><img alt="gravatar" src="${h.gravatar_url(em.user.email,16)}"/> </div></td>
+            <td><div class="email">${em.email}</div></td>
+            <td>
+              ${h.form(url('user_emails_delete', id=c.user.user_id),method='delete')}
+                  ${h.hidden('del_email',em.email_id)}
+                  ${h.submit('remove_',_('delete'),id="remove_email_%s" % em.email_id,
+                  class_="delete_icon action_button", onclick="return  confirm('"+_('Confirm to delete this email: %s') % em.email+"');")}
+              ${h.end_form()}            
+            </td>
+        </tr>
+      %endfor
+      </table>
+    </div>
+    
+    ${h.form(url('user_emails', id=c.user.user_id),method='put')}
+    <div class="form">
+        <!-- fields -->
+        <div class="fields">
+             <div class="field">
+                <div class="label">
+                    <label for="email">${_('New email address')}:</label>
+                </div>
+                <div class="input">
+                    ${h.text('new_email', class_='medium')}
+                </div>
+             </div>        
+            <div class="buttons">
+              ${h.submit('save',_('Add'),class_="ui-button")}
+              ${h.reset('reset',_('Reset'),class_="ui-button")}
+            </div>
+        </div>
+    </div>
+    ${h.end_form()}
+</div>
 </%def>

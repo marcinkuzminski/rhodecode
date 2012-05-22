@@ -38,7 +38,7 @@ from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator
 from rhodecode.lib.base import BaseController, render
 
-from rhodecode.model.db import User, Permission
+from rhodecode.model.db import User, Permission, UserEmailMap
 from rhodecode.model.forms import UserForm
 from rhodecode.model.user import UserModel
 from rhodecode.model.meta import Session
@@ -171,7 +171,8 @@ class UsersController(BaseController):
         c.user.permissions = {}
         c.granted_permissions = UserModel().fill_perms(c.user)\
             .permissions['global']
-
+        c.user_email_map = UserEmailMap.query()\
+                        .filter(UserEmailMap.user == c.user).all()
         defaults = c.user.get_dict()
         perm = Permission.get_by_key('hg.create.repository')
         defaults.update({'create_repo_perm': UserModel().has_perm(id, perm)})
@@ -208,4 +209,31 @@ class UsersController(BaseController):
             h.flash(_("Revoked 'repository create' permission to user"),
                     category='success')
             Session.commit()
+        return redirect(url('edit_user', id=id))
+
+    def add_email(self, id):
+        """PUT /user_emails/id: Update an existing item"""
+        # url('user_emails', id=ID, method='put')
+
+        #TODO: validation and form !!!
+        email = request.POST.get('new_email')
+        user_model = UserModel()
+
+        try:
+            user_model.add_extra_email(id, email)
+            Session.commit()
+            h.flash(_("Added email %s to user" % email), category='success')
+        except Exception:
+            log.error(traceback.format_exc())
+            h.flash(_('An error occurred during email saving'),
+                    category='error')
+        return redirect(url('edit_user', id=id))
+
+    def delete_email(self, id):
+        """DELETE /user_emails_delete/id: Delete an existing item"""
+        # url('user_emails_delete', id=ID, method='delete')
+        user_model = UserModel()
+        user_model.delete_extra_email(id, request.POST.get('del_email'))
+        Session.commit()
+        h.flash(_("Removed email from user"), category='success')
         return redirect(url('edit_user', id=id))
