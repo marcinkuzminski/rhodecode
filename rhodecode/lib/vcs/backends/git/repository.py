@@ -94,15 +94,20 @@ class GitRepository(BaseRepository):
         if isinstance(cmd, basestring):
             cmd = [cmd]
             _str_cmd = True
+ 
+        gitenv = os.environ
+        gitenv['GIT_CONFIG_NOGLOBAL'] = '1'
 
-        cmd = ['GIT_CONFIG_NOGLOBAL=1', 'git'] + _copts + cmd
+        cmd = ['git'] + _copts + cmd
         if _str_cmd:
             cmd = ' '.join(cmd)
         try:
             opts = dict(
                 shell=isinstance(cmd, basestring),
                 stdout=PIPE,
-                stderr=PIPE)
+                stderr=PIPE,
+                env=gitenv,
+            )
             if os.path.isdir(self.path):
                 opts['cwd'] = self.path
             p = Popen(cmd, **opts)
