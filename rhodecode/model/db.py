@@ -48,6 +48,7 @@ from rhodecode.lib.caching_query import FromCache
 
 from rhodecode.model.meta import Base, Session
 import hashlib
+from sqlalchemy.exc import DatabaseError
 
 
 log = logging.getLogger(__name__)
@@ -381,8 +382,23 @@ class User(Base, BaseModel):
 
         if cache:
             q = q.options(FromCache("sql_cache_short",
-                                    "get_api_key_%s" % email))
-        return q.scalar()
+                                    "get_email_key_%s" % email))
+
+        ret = q.scalar()
+        if ret is None:
+            q = UserEmailMap.query()
+            # try fetching in alternate email map
+            if case_insensitive:
+                q = q.filter(UserEmailMap.email.ilike(email))
+            else:
+                q = q.filter(UserEmailMap.email == email)
+            q = q.options(joinedload(UserEmailMap.user))
+            if cache:
+                q = q.options(FromCache("sql_cache_short",
+                                        "get_email_map_key_%s" % email))
+            ret = getattr(q.scalar(), 'user', None)
+
+        return ret
 
     def update_lastlogin(self):
         """Update user lastlogin"""
@@ -401,6 +417,38 @@ class User(Base, BaseModel):
             short_contact=self.short_contact,
             full_contact=self.full_contact
         )
+
+
+class UserEmailMap(Base, BaseModel):
+    __tablename__ = 'user_email_map'
+    __table_args__ = (
+        UniqueConstraint('email'),
+        {'extend_existing': True, 'mysql_engine':'InnoDB',
+         'mysql_charset': 'utf8'}
+    )
+    __mapper_args__ = {}
+
+    email_id = Column("email_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
+    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=True, unique=None, default=None)
+    _email = Column("email", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=False, default=None)
+
+    user = relationship('User')
+
+    @validates('_email')
+    def validate_email(self, key, email):
+        # check if this email is not main one
+        main_email = Session.query(User).filter(User.email == email).scalar()
+        if main_email is not None:
+            raise AttributeError('email %s is present is user table' % email)
+        return email
+
+    @hybrid_property
+    def email(self):
+        return self._email
+
+    @email.setter
+    def email(self, val):
+        self._email = val.lower() if val else None
 
 
 class UserLog(Base, BaseModel):

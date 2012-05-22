@@ -6,8 +6,8 @@ from rhodecode.model.repos_group import ReposGroupModel
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.db import RepoGroup, User, Notification, UserNotification, \
     UsersGroup, UsersGroupMember, Permission, UsersGroupRepoGroupToPerm,\
-    Repository
-from sqlalchemy.exc import IntegrityError
+    Repository, UserEmailMap
+from sqlalchemy.exc import IntegrityError, DatabaseError
 from rhodecode.model.user import UserModel
 
 from rhodecode.model.meta import Session
@@ -181,7 +181,8 @@ class TestUser(unittest.TestCase):
         super(TestUser, self).__init__(methodName=methodName)
 
     def test_create_and_remove(self):
-        usr = UserModel().create_or_update(username=u'test_user', password=u'qweqwe',
+        usr = UserModel().create_or_update(username=u'test_user', 
+                                           password=u'qweqwe',
                                      email=u'u232@rhodecode.org',
                                      name=u'u1', lastname=u'u1')
         Session.commit()
@@ -200,6 +201,50 @@ class TestUser(unittest.TestCase):
         Session.commit()
 
         self.assertEqual(UsersGroupMember.query().all(), [])
+
+    def test_additonal_email_as_main(self):
+        usr = UserModel().create_or_update(username=u'test_user', 
+                                           password=u'qweqwe',
+                                     email=u'main_email@rhodecode.org',
+                                     name=u'u1', lastname=u'u1')
+        Session.commit()
+
+        def do():
+            m = UserEmailMap()
+            m.email = u'main_email@rhodecode.org'
+            m.user = usr
+            Session.add(m)
+            Session.commit()
+        self.assertRaises(AttributeError, do)
+
+        UserModel().delete(usr.user_id)
+        Session.commit()
+
+    def test_extra_email_map(self):
+        usr = UserModel().create_or_update(username=u'test_user', 
+                                           password=u'qweqwe',
+                                     email=u'main_email@rhodecode.org',
+                                     name=u'u1', lastname=u'u1')
+        Session.commit()
+
+        m = UserEmailMap()
+        m.email = u'main_email2@rhodecode.org'
+        m.user = usr
+        Session.add(m)
+        Session.commit()
+
+        u = User.get_by_email(email='main_email@rhodecode.org')
+        self.assertEqual(usr.user_id, u.user_id)
+        self.assertEqual(usr.username, u.username)
+
+        u = User.get_by_email(email='main_email2@rhodecode.org')
+        self.assertEqual(usr.user_id, u.user_id)
+        self.assertEqual(usr.username, u.username)
+        u = User.get_by_email(email='main_email3@rhodecode.org')
+        self.assertEqual(None, u)
+
+        UserModel().delete(usr.user_id)
+        Session.commit()
 
 
 class TestNotifications(unittest.TestCase):
