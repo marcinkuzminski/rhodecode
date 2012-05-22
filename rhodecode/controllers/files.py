@@ -22,7 +22,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
+from __future__ import with_statement
 import os
 import logging
 import traceback
@@ -32,6 +32,7 @@ from pylons import request, response, tmpl_context as c, url
 from pylons.i18n.translation import _
 from pylons.controllers.util import redirect
 from pylons.decorators import jsonify
+from paste.fileapp import FileApp, _FileIter
 
 from rhodecode.lib import diffs
 from rhodecode.lib import helpers as h
@@ -360,23 +361,26 @@ class FilesController(BaseRepoController):
         except (ImproperArchiveTypeError, KeyError):
             return _('Unknown archive type')
 
-        archive = tempfile.NamedTemporaryFile(mode='w+r+b', delete=False)
-        cs.fill_archive(stream=archive, kind=fileformat, subrepos=subrepos)
-        archive.close()
-        response.content_type = content_type
-        response.content_disposition = 'attachment; filename=%s-%s%s' \
-            % (repo_name, revision[:12], ext)
-        response.content_length = str(os.path.getsize(archive.name))
+        fd, archive = tempfile.mkstemp()
+        t = open(archive, 'wb')
+        cs.fill_archive(stream=t, kind=fileformat, subrepos=subrepos)
+        t.close()
 
-        def get_chunked_archive(tmpfile):
+        def get_chunked_archive(archive):
+            stream = open(archive, 'rb')
             while True:
-                data = tmpfile.read(16 * 1024)
+                data = stream.read(16 * 1024)
                 if not data:
-                    tmpfile.close()
-                    os.unlink(tmpfile.name)
+                    stream.close()
+                    os.close(fd)
+                    os.remove(archive)
                     break
                 yield data
-        return get_chunked_archive(tmpfile=open(archive.name,'rb'))
+
+        response.content_disposition = str('attachment; filename=%s-%s%s' \
+                                           % (repo_name, revision[:12], ext))
+        response.content_type = str(content_type)
+        return get_chunked_archive(archive)
 
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
                                    'repository.admin')

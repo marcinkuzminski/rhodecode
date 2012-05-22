@@ -458,8 +458,12 @@ class RepoModel(BaseModel):
                 )
         )
         backend = get_backend(alias)
-
-        backend(repo_path, create=True, src_url=clone_uri)
+        if alias == 'hg':
+            backend(repo_path, create=True, src_url=clone_uri)
+        elif alias == 'git':
+            backend(repo_path, create=True, src_url=clone_uri, bare=True)
+        else:
+            raise Exception('Undefined alias %s' % alias)
 
     def __rename_repo(self, old, new):
         """
@@ -489,10 +493,15 @@ class RepoModel(BaseModel):
         """
         rm_path = os.path.join(self.repos_path, repo.repo_name)
         log.info("Removing %s" % (rm_path))
-        # disable hg/git
+        # disable hg/git internal that it doesn't get detected as repo
         alias = repo.repo_type
-        shutil.move(os.path.join(rm_path, '.%s' % alias),
-                    os.path.join(rm_path, 'rm__.%s' % alias))
+
+        bare = getattr(repo.scm_instance, 'bare', False)
+
+        if not bare:
+            # skip this for bare git repos
+            shutil.move(os.path.join(rm_path, '.%s' % alias),
+                        os.path.join(rm_path, 'rm__.%s' % alias))
         # disable repo
         _d = 'rm__%s__%s' % (datetime.now().strftime('%Y%m%d_%H%M%S_%f'),
                              repo.repo_name)

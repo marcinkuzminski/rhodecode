@@ -94,7 +94,7 @@ setup(
     main = pylons.util:PylonsInstaller
 
     [paste.global_paster_command]
-    setup-rhodecode=rhodecode.config.setup:SetupCommand
+    setup-rhodecode=rhodecode.config.setup_rhodecode:SetupCommand
     make-index=rhodecode.lib.indexers:MakeIndex
     make-rcext=rhodecode.config.rcextensions.make_rcextensions:MakeRcExt
     upgrade-db=rhodecode.lib.dbmigrate:UpgradeDb

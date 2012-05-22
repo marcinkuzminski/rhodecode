@@ -193,19 +193,19 @@ class TestFilesController(TestController):
             short = '27cd5cce30c9%s' % arch_ext
             fname = '27cd5cce30c96924232dffcd24178a07ffeb5dfc%s' % arch_ext
             filename = '%s-%s' % (HG_REPO, short)
-            response = self.app.get(url(controller='files', 
+            response = self.app.get(url(controller='files',
                                         action='archivefile',
                                         repo_name=HG_REPO,
                                         fname=fname))
 
             self.assertEqual(response.status, '200 OK')
-            self.assertEqual(response.response._headers.items(),
-             [('Pragma', 'no-cache'),
-              ('Cache-Control', 'no-cache'),
-              ('Content-Type', '%s; charset=utf-8' % info[0]),
-              ('Content-Disposition', 'attachment; filename=%s' % filename),
-             ]
-            )
+            heads = [
+                ('Pragma', 'no-cache'), 
+                ('Cache-Control', 'no-cache'), 
+                ('Content-Disposition', 'attachment; filename=%s' % filename),
+                ('Content-Type', '%s; charset=utf-8' % info[0]),
+            ]
+            self.assertEqual(response.response._headers.items(), heads)
 
     def test_archival_wrong_ext(self):
         self.log_user()
@@ -213,7 +213,8 @@ class TestFilesController(TestController):
         for arch_ext in ['tar', 'rar', 'x', '..ax', '.zipz']:
             fname = '27cd5cce30c96924232dffcd24178a07ffeb5dfc%s' % arch_ext
 
-            response = self.app.get(url(controller='files', action='archivefile',
+            response = self.app.get(url(controller='files', 
+                                        action='archivefile',
                                         repo_name=HG_REPO,
                                         fname=fname))
             response.mustcontain('Unknown archive type')
@@ -221,10 +222,11 @@ class TestFilesController(TestController):
     def test_archival_wrong_revision(self):
         self.log_user()
 
-        for rev in ['00x000000', 'tar', 'wrong', '@##$@$424213232', '232dffcd']:
+        for rev in ['00x000000', 'tar', 'wrong', '@##$@$42413232', '232dffcd']:
             fname = '%s.zip' % rev
 
-            response = self.app.get(url(controller='files', action='archivefile',
+            response = self.app.get(url(controller='files',
+                                        action='archivefile',
                                         repo_name=HG_REPO,
                                         fname=fname))
             response.mustcontain('Unknown revision')

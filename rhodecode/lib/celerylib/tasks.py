@@ -39,7 +39,7 @@ from pylons.i18n.translation import _
 
 from rhodecode.lib.vcs import get_backend
 
-from rhodecode import CELERY_ON
+from rhodecode import CELERY_ON, CELERY_EAGER
 from rhodecode.lib.utils2 import safe_str
 from rhodecode.lib.celerylib import run_task, locked_task, dbsession, \
     str2bool, __get_lockkey, LockHeld, DaemonLock, get_session

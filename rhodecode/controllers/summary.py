@@ -51,6 +51,7 @@ from rhodecode.lib.celerylib import run_task
 from rhodecode.lib.celerylib.tasks import get_commits_stats
 from rhodecode.lib.helpers import RepoPage
 from rhodecode.lib.compat import json, OrderedDict
+from rhodecode.lib.vcs.nodes import FileNode
 
 log = logging.getLogger(__name__)
 
@@ -197,6 +198,8 @@ class SummaryController(BaseRepoController):
                 for f in README_FILES:
                     try:
                         readme = cs.get_node(f)
+                        if not isinstance(readme, FileNode):
+                            continue
                         readme_file = f
                         readme_data = renderer.render(readme.content, f)
                         log.debug('Found readme %s' % readme_file)

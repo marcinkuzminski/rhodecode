@@ -47,6 +47,7 @@ def load_environment(global_conf, app_conf, initial=False):
 
     # store some globals into rhodecode
     rhodecode.CELERY_ON = str2bool(config['app_conf'].get('use_celery'))
+    rhodecode.CELERY_EAGER = str2bool(config['app_conf'].get('celery.always.eager'))
 
     config['routes.map'] = make_map(config)
     config['pylons.app_globals'] = app_globals.Globals(config)

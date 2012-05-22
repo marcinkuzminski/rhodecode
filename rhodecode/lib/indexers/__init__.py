@@ -129,13 +129,15 @@ class MakeIndex(BasePasterCommand):
                           default=False)
 
 
-class ResultWrapper(object):
-    def __init__(self, search_type, searcher, matcher, highlight_items):
+class WhooshResultWrapper(object):
+    def __init__(self, search_type, searcher, matcher, highlight_items,
+                 repo_location):
         self.search_type = search_type
         self.searcher = searcher
         self.matcher = matcher
         self.highlight_items = highlight_items
         self.fragment_size = 200
+        self.repo_location = repo_location
 
     @LazyProperty
     def doc_ids(self):
@@ -178,8 +180,9 @@ class ResultWrapper(object):
 
     def get_full_content(self, docid):
         res = self.searcher.stored_fields(docid[0])
-        f_path = res['path'][res['path'].find(res['repository']) \
-                             + len(res['repository']):].lstrip('/')
+        full_repo_path = jn(self.repo_location, res['repository'])
+        f_path = res['path'].split(full_repo_path)[-1]
+        f_path = f_path.lstrip(os.sep)
 
         content_short = self.get_short_content(res, docid[1])
         res.update({'content_short': content_short,

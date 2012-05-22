@@ -35,7 +35,7 @@ from hashlib import md5
 from decorator import decorator
 
 from rhodecode.lib.vcs.utils.lazy import LazyProperty
-from rhodecode import CELERY_ON
+from rhodecode import CELERY_ON, CELERY_EAGER
 from rhodecode.lib.utils2 import str2bool, safe_str
 from rhodecode.lib.pidlock import DaemonLock, LockHeld
 from rhodecode.model import init_model
@@ -122,7 +122,7 @@ def dbsession(func):
             ret = func(*fargs, **fkwargs)
             return ret
         finally:
-            if CELERY_ON:
+            if CELERY_ON and CELERY_EAGER is False:
                 meta.Session.remove()
 
     return decorator(__wrapper, func)

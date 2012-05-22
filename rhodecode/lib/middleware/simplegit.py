@@ -62,7 +62,9 @@ class SimpleGitUploadPackHandler(dulserver.UploadPackHandler):
 
 
 dulserver.DEFAULT_HANDLERS = {
+  #git-ls-remote, git-clone, git-fetch and git-pull
   'git-upload-pack': SimpleGitUploadPackHandler,
+  #git-push
   'git-receive-pack': dulserver.ReceivePackHandler,
 }
 
@@ -195,7 +197,6 @@ class SimpleGit(BaseVCSController):
 
         baseui = make_ui('db')
         self.__inject_extras(repo_path, baseui, extras)
-
 
         try:
             # invalidate cache on push

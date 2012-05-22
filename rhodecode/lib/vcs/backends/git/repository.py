@@ -66,6 +66,7 @@ class GitRepository(BaseRepository):
                 'config'),
             abspath(get_user_home(), '.gitconfig'),
         ]
+        self.bare = self._repo.bare
 
     @LazyProperty
     def revisions(self):
@@ -93,15 +94,20 @@ class GitRepository(BaseRepository):
         if isinstance(cmd, basestring):
             cmd = [cmd]
             _str_cmd = True
+ 
+        gitenv = os.environ
+        gitenv['GIT_CONFIG_NOGLOBAL'] = '1'
 
-        cmd = ['GIT_CONFIG_NOGLOBAL=1', 'git'] + _copts + cmd
+        cmd = ['git'] + _copts + cmd
         if _str_cmd:
             cmd = ' '.join(cmd)
         try:
             opts = dict(
                 shell=isinstance(cmd, basestring),
                 stdout=PIPE,
-                stderr=PIPE)
+                stderr=PIPE,
+                env=gitenv,
+            )
             if os.path.isdir(self.path):
                 opts['cwd'] = self.path
             p = Popen(cmd, **opts)
@@ -226,9 +232,10 @@ class GitRepository(BaseRepository):
         try:
             return time.mktime(self.get_changeset().date.timetuple())
         except RepositoryError:
+            idx_loc = '' if self.bare else '.git'
             # fallback to filesystem
-            in_path = os.path.join(self.path, '.git', "index")
-            he_path = os.path.join(self.path, '.git', "HEAD")
+            in_path = os.path.join(self.path, idx_loc, "index")
+            he_path = os.path.join(self.path, idx_loc, "HEAD")
             if os.path.exists(in_path):
                 return os.stat(in_path).st_mtime
             else:
@@ -236,8 +243,9 @@ class GitRepository(BaseRepository):
 
     @LazyProperty
     def description(self):
+        idx_loc = '' if self.bare else '.git'
         undefined_description = u'unknown'
-        description_path = os.path.join(self.path, '.git', 'description')
+        description_path = os.path.join(self.path, idx_loc, 'description')
         if os.path.isfile(description_path):
             return safe_unicode(open(description_path).read())
         else:

@@ -38,7 +38,6 @@ class GitChangeset(BaseChangeset):
         self._tree_id = commit.tree
 
         self.message = safe_unicode(commit.message)
-
         #self.branch = None
         self.tags = []
         self.nodes = {}
