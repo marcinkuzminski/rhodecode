@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: RhodeCode 1.4.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2012-05-20 11:45+0200\n"
+"POT-Creation-Date: 2012-05-24 09:24-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -140,12 +140,12 @@ msgstr ""
 msgid "Changesets"
 msgstr ""
 
-#: rhodecode/controllers/files.py:462 rhodecode/controllers/summary.py:227
+#: rhodecode/controllers/files.py:462 rhodecode/controllers/summary.py:230
 #: rhodecode/templates/branches/branches.html:5
 msgid "Branches"
 msgstr ""
 
-#: rhodecode/controllers/files.py:463 rhodecode/controllers/summary.py:228
+#: rhodecode/controllers/files.py:463 rhodecode/controllers/summary.py:231
 #: rhodecode/templates/tags/tags.html:5
 msgid "Tags"
 msgstr ""
@@ -198,15 +198,15 @@ msgstr ""
 msgid "Your password reset was successful, new password has been sent to your email"
 msgstr ""
 
-#: rhodecode/controllers/search.py:113
+#: rhodecode/controllers/search.py:114
 msgid "Invalid search query. Try quoting it."
 msgstr ""
 
-#: rhodecode/controllers/search.py:118
+#: rhodecode/controllers/search.py:119
 msgid "There is no index to search in. Please run whoosh indexer"
 msgstr ""
 
-#: rhodecode/controllers/search.py:122
+#: rhodecode/controllers/search.py:123
 msgid "An error occurred during this search operation"
 msgstr ""
 
@@ -238,11 +238,11 @@ msgstr ""
 msgid "An error occurred during deletion of %s"
 msgstr ""
 
-#: rhodecode/controllers/summary.py:137
+#: rhodecode/controllers/summary.py:138
 msgid "No data loaded yet"
 msgstr ""
 
-#: rhodecode/controllers/summary.py:141
+#: rhodecode/controllers/summary.py:142
 #: rhodecode/templates/summary/summary.html:139
 msgid "Statistics are disabled for this repository"
 msgstr ""
@@ -619,94 +619,98 @@ msgstr ""
 msgid "No changes detected"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:412
+#: rhodecode/lib/helpers.py:414
 msgid "True"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:416
+#: rhodecode/lib/helpers.py:418
 msgid "False"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:475
+#: rhodecode/lib/helpers.py:462
+msgid "Changeset not found"
+msgstr ""
+
+#: rhodecode/lib/helpers.py:485
 #, python-format
 msgid "Show all combined changesets %s->%s"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:481
+#: rhodecode/lib/helpers.py:491
 msgid "compare view"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:501
+#: rhodecode/lib/helpers.py:511
 msgid "and"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:502
+#: rhodecode/lib/helpers.py:512
 #, python-format
 msgid "%s more"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:503 rhodecode/templates/changelog/changelog.html:40
+#: rhodecode/lib/helpers.py:513 rhodecode/templates/changelog/changelog.html:40
 msgid "revisions"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:526
+#: rhodecode/lib/helpers.py:536
 msgid "fork name "
 msgstr ""
 
-#: rhodecode/lib/helpers.py:529
+#: rhodecode/lib/helpers.py:539
 msgid "[deleted] repository"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:530 rhodecode/lib/helpers.py:535
+#: rhodecode/lib/helpers.py:540 rhodecode/lib/helpers.py:545
 msgid "[created] repository"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:531
+#: rhodecode/lib/helpers.py:541
 msgid "[created] repository as fork"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:532 rhodecode/lib/helpers.py:536
+#: rhodecode/lib/helpers.py:542 rhodecode/lib/helpers.py:546
 msgid "[forked] repository"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:533 rhodecode/lib/helpers.py:537
+#: rhodecode/lib/helpers.py:543 rhodecode/lib/helpers.py:547
 msgid "[updated] repository"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:534
+#: rhodecode/lib/helpers.py:544
 msgid "[delete] repository"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:538
+#: rhodecode/lib/helpers.py:548
 msgid "[pushed] into"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:539
+#: rhodecode/lib/helpers.py:549
 msgid "[committed via RhodeCode] into"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:540
+#: rhodecode/lib/helpers.py:550
 msgid "[pulled from remote] into"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:541
+#: rhodecode/lib/helpers.py:551
 msgid "[pulled] from"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:542
+#: rhodecode/lib/helpers.py:552
 msgid "[started following] repository"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:543
+#: rhodecode/lib/helpers.py:553
 msgid "[stopped following] repository"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:721
+#: rhodecode/lib/helpers.py:731
 #, python-format
 msgid " and %s more"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:725
+#: rhodecode/lib/helpers.py:735
 msgid "No Files"
 msgstr ""
 
