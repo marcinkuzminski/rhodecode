@@ -75,7 +75,7 @@ def wrapped_diff(filenode_old, filenode_new, cut_off_limit=None,
         stats = diff_processor.stat()
         size = len(diff or '')
     else:
-        diff = wrap_to_table(_('Changeset was to big and was cut off, use '
+        diff = wrap_to_table(_('Changeset was too big and was cut off, use '
                                'diff menu to display this diff'))
         stats = (0, 0)
         size = 0
