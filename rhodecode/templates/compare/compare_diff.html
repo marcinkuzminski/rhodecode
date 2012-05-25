@@ -1,0 +1,82 @@
+## -*- coding: utf-8 -*-
+<%inherit file="/base/base.html"/>
+
+<%def name="title()">
+    TODO FIll this in
+</%def>
+
+<%def name="breadcrumbs_links()">
+    ${h.link_to(u'Home',h.url('/'))}
+    &raquo;
+    ${h.link_to(c.repo_name,h.url('summary_home',repo_name=c.repo_name))}
+    &raquo;
+    TODO! 
+</%def>
+
+<%def name="page_nav()">
+    ${self.menu('changelog')}
+</%def>
+
+<%def name="main()">
+<div class="box">
+    <!-- box / title -->
+    <div class="title">
+        ${self.breadcrumbs()}
+    </div>
+    <div class="table">
+        <div id="body" class="diffblock">
+            <div class="code-header cv">
+                <h3 class="code-header-title">${_('Compare View')}</h3>
+                <div>
+                ${'%s@%s' % (c.org_repo.repo_name, c.org_ref)} -> ${'%s@%s' % (c.other_repo.repo_name, c.other_ref)}
+                </div>
+            </div>
+        </div>
+        <div id="changeset_compare_view_content">
+            <div class="container">
+            <table class="compare_view_commits noborder">
+            %for cnt,cs in enumerate(c.cs_ranges):
+                <tr>
+                <td><div class="gravatar"><img alt="gravatar" src="${h.gravatar_url(h.email(cs.author),14)}"/></div></td>
+                <td>${h.link_to('r%s:%s' % (cs.revision,h.short_id(cs.raw_id)),h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id))}</td>
+                <td><div class="author">${h.person(cs.author)}</div></td>
+                <td><span class="tooltip" title="${h.age(cs.date)}">${cs.date}</span></td>
+                <td>
+                  %if hasattr(c,'statuses') and c.statuses:
+                    <div title="${_('Changeset status')}" class="changeset-status-ico"><img src="${h.url('/images/icons/flag_status_%s.png' % c.statuses[cnt])}" /></div>
+                  %endif
+                </td>
+                <td><div class="message">${h.urlify_commit(h.wrap_paragraphs(cs.message),c.repo_name)}</div></td>
+                </tr>
+            %endfor
+            </table>
+            </div>
+            <div style="font-size:1.1em;font-weight: bold;clear:both;padding-top:10px">${_('Files affected')}</div>
+            <div class="cs_files">
+              %for change,filenode,diff,cs1,cs2,st in c.changes[cs.raw_id]:
+                  <div class="cs_${change}">${h.link_to(h.safe_unicode(filenode.path),h.url.current(anchor=h.FID(cs.raw_id,filenode.path)))}</div>
+              %endfor
+            </div>
+        </div>
+
+    </div>
+
+     <script type="text/javascript">
+
+      YUE.onDOMReady(function(){
+
+          YUE.on(YUQ('.diff-menu-activate'),'click',function(e){
+              var act = e.currentTarget.nextElementSibling;
+
+              if(YUD.hasClass(act,'active')){
+                  YUD.removeClass(act,'active');
+                  YUD.setStyle(act,'display','none');
+              }else{
+                  YUD.addClass(act,'active');
+                  YUD.setStyle(act,'display','');
+              }
+          });
+      })
+    </script>
+    </div>
+</%def>

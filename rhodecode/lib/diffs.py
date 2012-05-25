@@ -522,3 +522,32 @@ class DiffProcessor(object):
         Returns tuple of added, and removed lines for this instance
         """
         return self.adds, self.removes
+
+
+def differ(org_repo, org_ref, other_repo, other_ref):
+    """
+
+    :param org_repo:
+    :type org_repo:
+    :param org_ref:
+    :type org_ref:
+    :param other_repo:
+    :type other_repo:
+    :param other_ref:
+    :type other_ref:
+    """
+    ignore_whitespace = False
+    context = 3
+    from mercurial import patch
+    from mercurial.mdiff import diffopts
+
+    org_repo = org_repo.scm_instance._repo
+    other_repo = other_repo.scm_instance._repo
+
+    org_ref = org_ref[1]
+    other_ref = other_ref[1]
+
+    opts = diffopts(git=True, ignorews=ignore_whitespace, context=context)
+
+    return ''.join(patch.diff(org_repo, node1=org_ref, node2=other_ref,
+                              opts=opts))
