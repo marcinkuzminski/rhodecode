@@ -44,6 +44,7 @@ from rhodecode.lib.utils2 import str2bool, safe_unicode, safe_str, \
 from rhodecode.lib.markup_renderer import MarkupRenderer
 from rhodecode.lib.vcs.exceptions import ChangesetDoesNotExistError
 from rhodecode.lib.vcs.backends.base import BaseChangeset
+from rhodecode.model.db import URL_SEP
 
 log = logging.getLogger(__name__)
 
@@ -885,7 +886,6 @@ def urlify_commit(text_, repository=None, link_=None):
 
         return ''.join(links)
 
-
     # urlify changesets - extrac revisions and make link out of them
     text_ = urlify_changesets(escaper(text_), repository)
 
@@ -912,7 +912,8 @@ def urlify_commit(text_, repository=None, link_=None):
                 url = ISSUE_SERVER_LNK.replace('{id}', issue_id)
                 if repository:
                     url = url.replace('{repo}', repository)
-
+                    repo_name = repository.split(URL_SEP)[-1]
+                    url = url.replace('{repo_name}', repo_name)
                 return tmpl % {
                      'pref': pref,
                      'cls': 'issue-tracker-link',

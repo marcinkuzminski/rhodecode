@@ -47,7 +47,7 @@ from rhodecode.lib.caching_query import FromCache
 from rhodecode.model.meta import Base, Session
 import hashlib
 
-
+URL_SEP = '/'
 log = logging.getLogger(__name__)
 
 #==============================================================================
@@ -523,7 +523,7 @@ class Repository(Base, BaseModel):
 
     @classmethod
     def url_sep(cls):
-        return '/'
+        return URL_SEP
 
     @classmethod
     def get_by_repo_name(cls, repo_name):
@@ -776,7 +776,7 @@ class RepoGroup(Base, BaseModel):
 
     @classmethod
     def url_sep(cls):
-        return '/'
+        return URL_SEP
 
     @classmethod
     def get_by_group_name(cls, group_name, cache=False, case_insensitive=False):
