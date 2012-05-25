@@ -411,6 +411,9 @@ OUTPUT::
                 "repo_name" :   "<reponame>"
                 "type" :        "<type>",
                 "description" : "<description>",
+                "clone_uri" :   "<clone_uri>",
+                "private": :    "<bool>",
+                "created_on" :  "<datetimecreated>",
                 "members" :     [
                                   { 
                                     "type": "user",
@@ -459,7 +462,10 @@ OUTPUT::
                 "id" :          "<id>",
                 "repo_name" :   "<reponame>"
                 "type" :        "<type>",
-                "description" : "<description>"
+                "description" : "<description>",
+                "clone_uri" :   "<clone_uri>",
+                "private": :    "<bool>",
+                "created_on" :  "<datetimecreated>",
               },
               …
             ]
