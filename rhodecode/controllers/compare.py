@@ -25,11 +25,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import logging
 import traceback
+import binascii
 
 from webob.exc import HTTPNotFound
 from pylons import request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
 
+from rhodecode.lib import helpers as h
 from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib import diffs
@@ -89,12 +91,15 @@ class CompareController(BaseRepoController):
         #case two independent repos
         if org_repo != other_repo:
             from mercurial import discovery
-            import binascii
             out = discovery.findcommonoutgoing(org_repo._repo, other_repo._repo)
             for cs in map(binascii.hexlify, out.missing):
                 changesets.append(org_repo.get_changeset(cs))
         else:
-            for cs in map(binascii.hexlify, out):
+            revs = ['ancestors(%s) and not ancestors(%s)' % (org_ref[1],
+                                                             other_ref[1])]
+            from mercurial import scmutil
+            out = scmutil.revrange(org_repo._repo, revs)
+            for cs in reversed(out):
                 changesets.append(org_repo.get_changeset(cs))
 
         return changesets
@@ -112,19 +117,18 @@ class CompareController(BaseRepoController):
 
         c.org_ref = org_ref[1]
         c.other_ref = other_ref[1]
-        cs1 = org_repo.scm_instance.get_changeset(org_ref[1])
-        cs2 = other_repo.scm_instance.get_changeset(other_ref[1])
 
         _diff = diffs.differ(org_repo, org_ref, other_repo, other_ref)
         diff_processor = diffs.DiffProcessor(_diff, format='gitdiff')
+        _parsed = diff_processor.prepare()
 
-        diff = diff_processor.as_html(enable_comments=False)
-        stats = diff_processor.stat()
+        c.files = []
+        c.changes = {}
 
-        c.changes = [('change?', None, diff, cs1, cs2, stats,)]
+        for f in _parsed:
+            fid = h.FID('', f['filename'])
+            c.files.append([fid, f['operation'], f['filename'], f['stats']])
+            diff = diff_processor.as_html(enable_comments=False, diff_lines=[f])
+            c.changes[fid] = [f['operation'], f['filename'], diff]
 
         return render('compare/compare_diff.html')
-
-
-
-        

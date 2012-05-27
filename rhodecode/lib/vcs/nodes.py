@@ -431,8 +431,10 @@ class RemovedFileNode(FileNode):
     name, kind or state (or methods/attributes checking those two) would raise
     RemovedFileNodeError.
     """
-    ALLOWED_ATTRIBUTES = ['name', 'path', 'state', 'is_root', 'is_file',
-        'is_dir', 'kind', 'added', 'changed', 'not_changed', 'removed']
+    ALLOWED_ATTRIBUTES = [
+        'name', 'path', 'state', 'is_root', 'is_file', 'is_dir', 'kind', 
+        'added', 'changed', 'not_changed', 'removed'
+    ]
 
     def __init__(self, path):
         """

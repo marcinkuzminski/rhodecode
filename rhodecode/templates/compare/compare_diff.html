@@ -2,7 +2,7 @@
 <%inherit file="/base/base.html"/>
 
 <%def name="title()">
-    TODO FIll this in
+    ${c.repo_name} ${_('Compare')} ${'%s@%s' % (c.org_repo.repo_name, c.org_ref)} -> ${'%s@%s' % (c.other_repo.repo_name, c.other_ref)}
 </%def>
 
 <%def name="breadcrumbs_links()">
@@ -10,7 +10,7 @@
     &raquo;
     ${h.link_to(c.repo_name,h.url('summary_home',repo_name=c.repo_name))}
     &raquo;
-    TODO! 
+    ${_('Compare')}
 </%def>
 
 <%def name="page_nav()">
@@ -35,7 +35,7 @@
         <div id="changeset_compare_view_content">
             <div class="container">
             <table class="compare_view_commits noborder">
-            %for cnt,cs in enumerate(c.cs_ranges):
+            %for cnt, cs in enumerate(c.cs_ranges):
                 <tr>
                 <td><div class="gravatar"><img alt="gravatar" src="${h.gravatar_url(h.email(cs.author),14)}"/></div></td>
                 <td>${h.link_to('r%s:%s' % (cs.revision,h.short_id(cs.raw_id)),h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id))}</td>
@@ -53,14 +53,22 @@
             </div>
             <div style="font-size:1.1em;font-weight: bold;clear:both;padding-top:10px">${_('Files affected')}</div>
             <div class="cs_files">
-              %for change,filenode,diff,cs1,cs2,st in c.changes[cs.raw_id]:
-                  <div class="cs_${change}">${h.link_to(h.safe_unicode(filenode.path),h.url.current(anchor=h.FID(cs.raw_id,filenode.path)))}</div>
+              %for fid, change, f, stat in c.files:              
+                  <div class="cs_${change}">
+                    <div class="node">${h.link_to(h.safe_unicode(f),h.url.current(anchor=fid))}</div>
+                    <div class="changes">${h.fancy_file_stats(stat)}</div>
+                  </div>
               %endfor
             </div>
         </div>
-
     </div>
-
+    
+    ## diff block
+    <%namespace name="diff_block" file="/changeset/diff_block.html"/>
+    %for fid, change, f, stat in c.files:
+      ${diff_block.diff_block_simple([c.changes[fid]])}
+    %endfor
+    
      <script type="text/javascript">
 
       YUE.onDOMReady(function(){

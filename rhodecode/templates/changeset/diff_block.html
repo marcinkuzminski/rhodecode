@@ -1,12 +1,12 @@
 ## -*- coding: utf-8 -*-
 ##usage:
 ## <%namespace name="diff_block" file="/changeset/diff_block.html"/>
-## ${diff_block.diff_block(changes)}
+## ${diff_block.diff_block(change)}
 ##
-<%def name="diff_block(changes)">
+<%def name="diff_block(change)">
 
-%for change,filenode,diff,cs1,cs2,stat in changes:
-    %if change !='removed':
+%for op,filenode,diff,cs1,cs2,stat in change:
+    %if op !='removed':
     <div id="${h.FID(filenode.changeset.raw_id,filenode.path)}_target" style="clear:both;margin-top:25px"></div>
     <div id="${h.FID(filenode.changeset.raw_id,filenode.path)}" class="diffblock  margined comm">
         <div class="code-header">
@@ -38,4 +38,24 @@
     %endif
 %endfor
 
+</%def>
+
+<%def name="diff_block_simple(change)">
+
+  %for op,filenode_path,diff in change:
+    <div id="${h.FID('',filenode_path)}_target" style="clear:both;margin-top:25px"></div>
+    <div id="${h.FID('',filenode_path)}" class="diffblock  margined comm">      
+      <div class="code-header">
+          <div class="changeset_header">
+              <div class="changeset_file">
+                  <a href="#">${h.safe_unicode(filenode_path)}</a>
+              </div>
+          </div>
+      </div>
+        <div class="code-body">
+            <div class="full_f_path" path="${h.safe_unicode(filenode_path)}"></div>
+            ${diff|n}
+        </div>
+    </div>
+  %endfor
 </%def>
