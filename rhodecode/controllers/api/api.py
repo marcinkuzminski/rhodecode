@@ -391,6 +391,9 @@ class ApiController(JSONRPCController):
             id=repo.repo_id,
             repo_name=repo.repo_name,
             type=repo.repo_type,
+            clone_uri=repo.clone_uri,
+            private=repo.private,
+            created_on=repo.created_on,
             description=repo.description,
             members=members
         )
@@ -404,13 +407,16 @@ class ApiController(JSONRPCController):
         """
 
         result = []
-        for repository in Repository.getAll():
+        for repo in Repository.getAll():
             result.append(
                 dict(
-                    id=repository.repo_id,
-                    repo_name=repository.repo_name,
-                    type=repository.repo_type,
-                    description=repository.description
+                    id=repo.repo_id,
+                    repo_name=repo.repo_name,
+                    type=repo.repo_type,
+                    clone_uri=repo.clone_uri,
+                    private=repo.private,
+                    created_on=repo.created_on,
+                    description=repo.description,
                 )
             )
         return result
