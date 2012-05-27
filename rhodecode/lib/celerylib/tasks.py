@@ -75,7 +75,7 @@ def get_logger(cls):
 @dbsession
 def whoosh_index(repo_location, full_index):
     from rhodecode.lib.indexers.daemon import WhooshIndexingDaemon
-    log = whoosh_index.get_logger(whoosh_index)
+    log = get_logger(whoosh_index)
     DBS = get_session()
 
     index_location = config['index_dir']
