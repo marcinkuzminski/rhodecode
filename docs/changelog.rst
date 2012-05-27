@@ -14,12 +14,25 @@ news
 ++++
  
 - new codereview system
+- email map, allowing users to have multiple email addresses mapped into
+  their accounts
 - changed setup-app into setup-rhodecode and added default options to it.
- 
+- new git repos are created as bare now by default
+
 fixes
 +++++
 
-
+- improved translations
+- fixes issue #455 Creating an archive generates an exception on Windows
+- fixes #448 Download ZIP archive keeps file in /tmp open and results 
+  in out of disk space
+- fixes issue #454 Search results under Windows include proceeding
+  backslash
+- fixed issue #450. Rhodecode no longer will crash when bad revision is
+  present in journal data.
+- fix for issue #417, git execution was broken on windows for certain
+  commands.
+- fixed #413. Don't disable .git directory for bare repos on deleting
 
 1.3.6 (**2012-05-17**)
 ----------------------
