@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: RhodeCode 1.2.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2012-05-24 22:18+0200\n"
+"POT-Creation-Date: 2012-05-27 17:41+0200\n"
 "PO-Revision-Date: 2012-04-05 17:37+0800\n"
 "Last-Translator: mikespook <mikespook@gmail.com>\n"
 "Language-Team: mikespook\n"
@@ -19,7 +19,6 @@ msgstr ""
 
 #: rhodecode/controllers/changelog.py:96
 #, fuzzy
-#| msgid "branches"
 msgid "All Branches"
 msgstr "分支"
 
@@ -33,7 +32,6 @@ msgstr ""
 
 #: rhodecode/controllers/changeset.py:153
 #, fuzzy, python-format
-#| msgid "File contents"
 msgid "%s line context"
 msgstr "文件内容"
 
@@ -85,7 +83,6 @@ msgstr "新增"
 
 #: rhodecode/controllers/files.py:87
 #, fuzzy, python-format
-#| msgid "There are no files yet"
 msgid "There are no files yet %s"
 msgstr "尚无文件"
 
@@ -109,19 +106,16 @@ msgstr "提交时发生错误"
 
 #: rhodecode/controllers/files.py:288
 #, fuzzy, python-format
-#| msgid "Edited %s via RhodeCode"
 msgid "Added %s via RhodeCode"
 msgstr "通过 RhodeCode 修改了 %s"
 
 #: rhodecode/controllers/files.py:302
 #, fuzzy
-#| msgid "File contents"
 msgid "No content"
 msgstr "文件内容"
 
 #: rhodecode/controllers/files.py:306
 #, fuzzy
-#| msgid "File names"
 msgid "No filename"
 msgstr "文件名"
 
@@ -454,13 +448,11 @@ msgstr ""
 
 #: rhodecode/controllers/admin/repos.py:407
 #, fuzzy, python-format
-#| msgid "created repository %s from %s"
 msgid "Marked repo %s as fork of %s"
 msgstr "新版本库 %s 基于 %s 建立。"
 
 #: rhodecode/controllers/admin/repos.py:411
 #, fuzzy
-#| msgid "An error occurred during this search operation"
 msgid "An error occurred during this operation"
 msgstr "在搜索操作中发生异常"
 
@@ -506,7 +498,6 @@ msgstr ""
 
 #: rhodecode/controllers/admin/repos_groups.py:240
 #, fuzzy
-#| msgid "An error occurred during this search operation"
 msgid "An error occurred during deletion of group user"
 msgstr "在搜索操作中发生异常"
 
@@ -639,161 +630,149 @@ msgid "You need to be a signed in to view this page"
 msgstr "必须登录才能访问该页面"
 
 #: rhodecode/lib/diffs.py:78
-#, fuzzy
-#| msgid "Changeset is to big and was cut off, see raw changeset instead"
-msgid "Changeset was to big and was cut off, use diff menu to display this diff"
+msgid "Changeset was too big and was cut off, use diff menu to display this diff"
 msgstr "变更集因过大而被截断，可查看原始变更集作为替代"
 
 #: rhodecode/lib/diffs.py:88
 #, fuzzy
-#| msgid "No changesets yet"
 msgid "No changes detected"
 msgstr "尚无修订"
 
-#: rhodecode/lib/helpers.py:414
+#: rhodecode/lib/helpers.py:415
 msgid "True"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:418
+#: rhodecode/lib/helpers.py:419
 msgid "False"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:462
+#: rhodecode/lib/helpers.py:463
 #, fuzzy
-#| msgid "changeset"
 msgid "Changeset not found"
 msgstr "修改"
 
-#: rhodecode/lib/helpers.py:485
+#: rhodecode/lib/helpers.py:486
 #, python-format
 msgid "Show all combined changesets %s->%s"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:491
+#: rhodecode/lib/helpers.py:492
 msgid "compare view"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:511
+#: rhodecode/lib/helpers.py:512
 msgid "and"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:512
+#: rhodecode/lib/helpers.py:513
 #, python-format
 msgid "%s more"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:513 rhodecode/templates/changelog/changelog.html:40
+#: rhodecode/lib/helpers.py:514 rhodecode/templates/changelog/changelog.html:40
 msgid "revisions"
 msgstr "修订"
 
-#: rhodecode/lib/helpers.py:536
+#: rhodecode/lib/helpers.py:537
 msgid "fork name "
 msgstr "分支名称"
 
-#: rhodecode/lib/helpers.py:539
+#: rhodecode/lib/helpers.py:540
 msgid "[deleted] repository"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:540 rhodecode/lib/helpers.py:545
+#: rhodecode/lib/helpers.py:541 rhodecode/lib/helpers.py:546
 msgid "[created] repository"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:541
-#, fuzzy, python-format
-#| msgid "created repository %s"
+#: rhodecode/lib/helpers.py:542
+#, fuzzy
 msgid "[created] repository as fork"
 msgstr "建立版本库 %s"
 
-#: rhodecode/lib/helpers.py:542 rhodecode/lib/helpers.py:546
+#: rhodecode/lib/helpers.py:543 rhodecode/lib/helpers.py:547
 msgid "[forked] repository"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:543 rhodecode/lib/helpers.py:547
+#: rhodecode/lib/helpers.py:544 rhodecode/lib/helpers.py:548
 msgid "[updated] repository"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:544
+#: rhodecode/lib/helpers.py:545
 msgid "[delete] repository"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:548
+#: rhodecode/lib/helpers.py:549
 msgid "[pushed] into"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:549
+#: rhodecode/lib/helpers.py:550
 msgid "[committed via RhodeCode] into"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:550
+#: rhodecode/lib/helpers.py:551
 msgid "[pulled from remote] into"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:551
+#: rhodecode/lib/helpers.py:552
 msgid "[pulled] from"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:552
+#: rhodecode/lib/helpers.py:553
 msgid "[started following] repository"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:553
+#: rhodecode/lib/helpers.py:554
 msgid "[stopped following] repository"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:731
+#: rhodecode/lib/helpers.py:732
 #, python-format
 msgid " and %s more"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:735
+#: rhodecode/lib/helpers.py:736
 msgid "No Files"
 msgstr "没有文件"
 
 #: rhodecode/lib/utils2.py:335
 #, fuzzy, python-format
-#| msgid "year"
 msgid "%d year"
 msgid_plural "%d years"
 msgstr[0] "年"
 
 #: rhodecode/lib/utils2.py:336
 #, fuzzy, python-format
-#| msgid "month"
 msgid "%d month"
 msgid_plural "%d months"
 msgstr[0] "月"
 
 #: rhodecode/lib/utils2.py:337
 #, fuzzy, python-format
-#| msgid "day"
 msgid "%d day"
 msgid_plural "%d days"
 msgstr[0] "日"
 
 #: rhodecode/lib/utils2.py:338
 #, fuzzy, python-format
-#| msgid "hour"
 msgid "%d hour"
 msgid_plural "%d hours"
 msgstr[0] "时"
 
 #: rhodecode/lib/utils2.py:339
 #, fuzzy, python-format
-#| msgid "minute"
 msgid "%d minute"
 msgid_plural "%d minutes"
 msgstr[0] "分"
 
 #: rhodecode/lib/utils2.py:340
 #, fuzzy, python-format
-#| msgid "second"
 msgid "%d second"
 msgid_plural "%d seconds"
 msgstr[0] "秒"
 
 #: rhodecode/lib/utils2.py:355
 #, fuzzy, python-format
-#| msgid "ago"
 msgid "%s ago"
 msgstr "之前"
 
@@ -808,7 +787,6 @@ msgstr "现在"
 
 #: rhodecode/lib/celerylib/tasks.py:269
 #, fuzzy
-#| msgid "Your password reset link was sent"
 msgid "password reset link"
 msgstr "密码重置链接已经发送"
 
@@ -845,8 +823,6 @@ msgstr "该用户组名称已经存在"
 
 #: rhodecode/model/forms.py:117
 #, fuzzy
-#| msgid "" "Group name may only contain alphanumeric characters underscores,
-#| periods " "or dashes and must begin with alphanumeric character"
 msgid ""
 "RepoGroup name may only contain  alphanumeric characters underscores, "
 "periods or dashes and must begin with alphanumeric character"
@@ -862,7 +838,6 @@ msgstr "该组已经存在"
 
 #: rhodecode/model/forms.py:176
 #, fuzzy
-#| msgid "This repository already exists"
 msgid "Repository with this name already exists"
 msgstr "这个版本库已经存在"
 
@@ -897,7 +872,6 @@ msgstr "该版本库名称被禁用"
 
 #: rhodecode/model/forms.py:310
 #, fuzzy, python-format
-#| msgid "This repository already exists in group \"%s\""
 msgid "This repository already exists in a group \"%s\""
 msgstr "组中已经存在该版本库"
 
@@ -968,7 +942,6 @@ msgstr ""
 
 #: rhodecode/model/notification.py:176
 #, fuzzy
-#| msgid "commit message"
 msgid "sent message"
 msgstr "提交信息"
 
@@ -978,13 +951,11 @@ msgstr ""
 
 #: rhodecode/model/notification.py:178
 #, fuzzy
-#| msgid "You have successfully registered into rhodecode"
 msgid "registered in RhodeCode"
 msgstr "成功注册到 rhodecode"
 
 #: rhodecode/model/user.py:235
 #, fuzzy
-#| msgid "[RhodeCode] New User registration"
 msgid "new user registration"
 msgstr "[RhodeCode] 新用户注册"
 
@@ -998,8 +969,6 @@ msgstr "由于是系统帐号，无法删除该用户"
 
 #: rhodecode/model/user.py:306
 #, fuzzy, python-format
-#| msgid "" "This user still owns %s repositories and cannot be removed. Switch
-#| owners" " or remove those repositories"
 msgid ""
 "user \"%s\" still owns %s repositories and cannot be removed. Switch "
 "owners or remove those repositories. %s"
@@ -1131,7 +1100,6 @@ msgstr "订阅 atom %s"
 
 #: rhodecode/templates/index_base.html:130
 #, fuzzy
-#| msgid "group name"
 msgid "Group Name"
 msgstr "组名"
 
@@ -1160,7 +1128,6 @@ msgstr ""
 #: rhodecode/templates/index_base.html:159
 #: rhodecode/templates/admin/repos/repos.html:85
 #, fuzzy
-#| msgid "Last change"
 msgid "Last Change"
 msgstr "最后修改"
 
@@ -1192,7 +1159,6 @@ msgstr ""
 #: rhodecode/templates/journal/journal.html:206
 #: rhodecode/templates/tags/tags.html:64
 #, fuzzy
-#| msgid "Loading file list..."
 msgid "Loading..."
 msgstr "加载文件列表..."
 
@@ -1223,7 +1189,6 @@ msgstr "密码"
 
 #: rhodecode/templates/login.html:50
 #, fuzzy
-#| msgid "member"
 msgid "Remember me"
 msgstr "成员"
 
@@ -1337,7 +1302,6 @@ msgstr ""
 #: rhodecode/templates/switch_to_list.html:35
 #: rhodecode/templates/bookmarks/bookmarks_data.html:32
 #, fuzzy
-#| msgid "There are no forks yet"
 msgid "There are no bookmarks yet"
 msgstr "尚未有任何分支"
 
@@ -1471,20 +1435,17 @@ msgstr ""
 
 #: rhodecode/templates/admin/notifications/notifications_data.html:38
 #, fuzzy
-#| msgid "No actions yet"
 msgid "No notifications here yet"
 msgstr "尚无操作"
 
 #: rhodecode/templates/admin/notifications/show_notification.html:5
 #: rhodecode/templates/admin/notifications/show_notification.html:11
 #, fuzzy
-#| msgid "show annotation"
 msgid "Show notification"
 msgstr "显示注释"
 
 #: rhodecode/templates/admin/notifications/show_notification.html:9
 #, fuzzy
-#| msgid "Location"
 msgid "Notifications"
 msgstr "位置"
 
@@ -1582,7 +1543,6 @@ msgstr "类型"
 
 #: rhodecode/templates/admin/repos/repo_add_base.html:42
 #, fuzzy
-#| msgid "Repository creation"
 msgid "Type of repository to create."
 msgstr "建立版本库"
 
@@ -1643,8 +1603,7 @@ msgid "Enable download menu on summary page."
 msgstr ""
 
 #: rhodecode/templates/admin/repos/repo_edit.html:108
-#, fuzzy, python-format
-#| msgid "Changes on %s repository"
+#, fuzzy
 msgid "Change owner of this repository."
 msgstr "%s 库的修改"
 
@@ -1825,7 +1784,6 @@ msgstr "删除"
 #: rhodecode/templates/admin/repos/repos.html:68
 #: rhodecode/templates/admin/users/user_edit_my_account.html:158
 #, fuzzy, python-format
-#| msgid "Confirm to delete this repository"
 msgid "Confirm to delete this repository: %s"
 msgstr "确认删除版本库"
 
@@ -1893,7 +1851,6 @@ msgstr "添加组"
 
 #: rhodecode/templates/admin/repos_groups/repos_groups_show.html:35
 #, fuzzy
-#| msgid "Number of repositories"
 msgid "Number of toplevel repositories"
 msgstr "版本库数量"
 
@@ -1905,7 +1862,6 @@ msgstr "操作"
 
 #: rhodecode/templates/admin/repos_groups/repos_groups_show.html:54
 #, fuzzy, python-format
-#| msgid "Confirm to delete this group"
 msgid "Confirm to delete this group: %s"
 msgstr "确认删除该组"
 
@@ -2058,13 +2014,11 @@ msgstr ""
 
 #: rhodecode/templates/admin/settings/settings.html:199
 #, fuzzy
-#| msgid "Email"
 msgid "Email to"
 msgstr "电子邮件"
 
 #: rhodecode/templates/admin/settings/settings.html:207
 #, fuzzy
-#| msgid "second"
 msgid "Send"
 msgstr "秒"
 
@@ -2074,7 +2028,6 @@ msgstr ""
 
 #: rhodecode/templates/admin/settings/settings.html:216
 #, fuzzy
-#| msgid "Show"
 msgid "show"
 msgstr "显示"
 
@@ -2094,7 +2047,6 @@ msgstr "添加新用户"
 
 #: rhodecode/templates/admin/users/user_add.html:50
 #, fuzzy
-#| msgid "Passwords do not match"
 msgid "Password confirmation"
 msgstr "密码不符"
 
@@ -2155,20 +2107,17 @@ msgstr "我的账户"
 #: rhodecode/templates/admin/users/user_edit_my_account.html:116
 #: rhodecode/templates/journal/journal.html:32
 #, fuzzy
-#| msgid "Empty repository"
 msgid "My repos"
 msgstr "空版本库"
 
 #: rhodecode/templates/admin/users/user_edit_my_account.html:116
 #, fuzzy
-#| msgid "permissions"
 msgid "My permissions"
 msgstr "权限"
 
 #: rhodecode/templates/admin/users/user_edit_my_account.html:121
 #: rhodecode/templates/journal/journal.html:37
 #, fuzzy
-#| msgid "add"
 msgid "ADD"
 msgstr "新增"
 
@@ -2200,7 +2149,6 @@ msgstr ""
 #: rhodecode/templates/admin/users/user_edit_my_account.html:184
 #: rhodecode/templates/admin/users/user_edit_my_account.html:285
 #, fuzzy
-#| msgid "permissions"
 msgid "Permission"
 msgstr "权限"
 
@@ -2241,7 +2189,6 @@ msgstr ""
 
 #: rhodecode/templates/admin/users/users.html:56
 #, fuzzy, python-format
-#| msgid "Confirm to delete this user"
 msgid "Confirm to delete this user: %s"
 msgstr "确认删除该用户"
 
@@ -2288,7 +2235,6 @@ msgstr "添加全部项目"
 
 #: rhodecode/templates/admin/users_groups/users_group_edit.html:126
 #, fuzzy
-#| msgid "Choosen group members"
 msgid "Group members"
 msgstr "选择组成员"
 
@@ -2306,7 +2252,6 @@ msgstr "组名"
 
 #: rhodecode/templates/admin/users_groups/users_groups.html:45
 #, fuzzy, python-format
-#| msgid "Confirm to delete this group"
 msgid "Confirm to delete this users group: %s"
 msgstr "确认删除该组"
 
@@ -2324,7 +2269,6 @@ msgstr "忘记密码？"
 
 #: rhodecode/templates/base/base.html:107
 #, fuzzy
-#| msgid "Login"
 msgid "Log In"
 msgstr "登录"
 
@@ -2468,7 +2412,6 @@ msgstr "搜索"
 
 #: rhodecode/templates/base/root.html:53
 #, fuzzy
-#| msgid "Add another member"
 msgid "add another comment"
 msgstr "添加成员"
 
@@ -2493,7 +2436,6 @@ msgstr ""
 #: rhodecode/templates/tags/tags.html:39
 #: rhodecode/templates/tags/tags_data.html:8
 #, fuzzy
-#| msgid "author"
 msgid "Author"
 msgstr "作者"
 
@@ -2614,7 +2556,6 @@ msgstr "下载 diff"
 #: rhodecode/templates/changeset/changeset.html:42
 #: rhodecode/templates/changeset/changeset_file_comment.html:69
 #, fuzzy, python-format
-#| msgid "commit"
 msgid "%d comment"
 msgid_plural "%d comments"
 msgstr[0] "提交"
@@ -2657,7 +2598,6 @@ msgstr ""
 #: rhodecode/templates/changeset/changeset_file_comment.html:47
 #: rhodecode/templates/changeset/changeset_file_comment.html:107
 #, fuzzy
-#| msgid "commit"
 msgid "Comment"
 msgstr "提交"
 
@@ -2668,7 +2608,6 @@ msgstr ""
 
 #: rhodecode/templates/changeset/changeset_file_comment.html:55
 #, fuzzy
-#| msgid "You need to be a signed in to view this page"
 msgid "You need to be logged in to comment."
 msgstr "必须登录才能访问该页面"
 
@@ -2694,7 +2633,6 @@ msgstr ""
 
 #: rhodecode/templates/changeset/diff_block.html:27
 #, fuzzy
-#| msgid "File contents"
 msgid "show inline comments"
 msgstr "文件内容"
 
@@ -2767,39 +2705,33 @@ msgstr "编辑文件"
 
 #: rhodecode/templates/files/files_add.html:19
 #, fuzzy
-#| msgid "edit file"
 msgid "add file"
 msgstr "编辑文件"
 
 #: rhodecode/templates/files/files_add.html:40
 #, fuzzy
-#| msgid "add new user"
 msgid "Add new file"
 msgstr "添加新用户"
 
 #: rhodecode/templates/files/files_add.html:45
 #, fuzzy
-#| msgid "File names"
 msgid "File Name"
 msgstr "文件名"
 
 #: rhodecode/templates/files/files_add.html:49
 #: rhodecode/templates/files/files_add.html:58
 #, fuzzy
-#| msgid "hour"
 msgid "or"
 msgstr "时"
 
 #: rhodecode/templates/files/files_add.html:49
 #: rhodecode/templates/files/files_add.html:54
 #, fuzzy
-#| msgid "edit file"
 msgid "Upload file"
 msgstr "编辑文件"
 
 #: rhodecode/templates/files/files_add.html:58
-#, fuzzy, python-format
-#| msgid "created user %s"
+#, fuzzy
 msgid "Create new file"
 msgstr "创建用户 %s"
 
@@ -2847,7 +2779,6 @@ msgstr "搜索文件列表"
 #: rhodecode/templates/files/files_browser.html:31
 #: rhodecode/templates/shortlog/shortlog_data.html:65
 #, fuzzy
-#| msgid "add new user"
 msgid "add new file"
 msgstr "添加新用户"
 
@@ -2865,7 +2796,6 @@ msgstr ""
 
 #: rhodecode/templates/files/files_browser.html:50
 #, fuzzy
-#| msgid "next revision"
 msgid "Last Revision"
 msgstr "下一个修订"
 
@@ -2899,13 +2829,11 @@ msgstr "下载原始文件"
 
 #: rhodecode/templates/files/files_edit.html:54
 #, fuzzy
-#| msgid "show source"
 msgid "source"
 msgstr "显示代码"
 
 #: rhodecode/templates/files/files_edit.html:59
 #, fuzzy
-#| msgid "edit file"
 msgid "Editing file"
 msgstr "编辑文件"
 
@@ -2932,7 +2860,6 @@ msgstr ""
 
 #: rhodecode/templates/files/files_ypjax.html:5
 #, fuzzy
-#| msgid "show annotation"
 msgid "annotation"
 msgstr "显示注释"
 
@@ -2962,7 +2889,6 @@ msgstr "私有"
 
 #: rhodecode/templates/forks/fork.html:65
 #, fuzzy
-#| msgid "permissions"
 msgid "Copy permissions"
 msgstr "权限"
 
@@ -2992,7 +2918,6 @@ msgstr ""
 
 #: rhodecode/templates/journal/journal.html:32
 #, fuzzy
-#| msgid "Cache"
 msgid "Watched"
 msgstr "缓存"
 
@@ -3062,7 +2987,6 @@ msgstr ""
 
 #: rhodecode/templates/shortlog/shortlog_data.html:18
 #, fuzzy
-#| msgid "commit message"
 msgid "No commit message"
 msgstr "提交信息"
 
@@ -3076,7 +3000,6 @@ msgstr ""
 
 #: rhodecode/templates/shortlog/shortlog_data.html:79
 #, fuzzy
-#| msgid "Git repository"
 msgid "Existing repository?"
 msgstr "Git 版本库"
 
@@ -3087,13 +3010,11 @@ msgstr "概要"
 #: rhodecode/templates/summary/summary.html:44
 #: rhodecode/templates/summary/summary.html:47
 #, fuzzy
-#| msgid "author"
 msgid "ATOM"
 msgstr "作者"
 
 #: rhodecode/templates/summary/summary.html:77
 #, fuzzy, python-format
-#| msgid "No changes"
 msgid "Non changable ID %s"
 msgstr "无变更"
 
@@ -3119,7 +3040,6 @@ msgstr ""
 
 #: rhodecode/templates/summary/summary.html:133
 #, fuzzy
-#| msgid "edit file"
 msgid "Trending files"
 msgstr "编辑文件"
 
@@ -3159,7 +3079,6 @@ msgstr ""
 
 #: rhodecode/templates/summary/summary.html:211
 #, fuzzy
-#| msgid "quick filter..."
 msgid "Quick start"
 msgstr "快速过滤..."
 
@@ -3199,58 +3118,4 @@ msgstr "文件已更改"
 #: rhodecode/templates/summary/summary.html:647
 msgid "file removed"
 msgstr "文件已删除"
-
-#~ msgid "Diff is to big and was cut off, see raw diff instead"
-#~ msgstr "差异比较因过大而被截断，可查看原始差异比较作为替代"
-
-#~ msgid "Binary file"
-#~ msgstr "二进制文件"
-
-#~ msgid "ADD NEW REPOSITORY"
-#~ msgstr "新增版本库"
-
-#~ msgid "Percentage of stats gathered"
-#~ msgstr ""
-
-#~ msgid "My repositories"
-#~ msgstr "我的版本库"
-
-#~ msgid "links"
-#~ msgstr "连接"
-
-#~ msgid "showing "
-#~ msgstr ""
-
-#~ msgid "out of"
-#~ msgstr ""
-
-#~ msgid "%s files affected with %s additions and %s deletions."
-#~ msgstr ""
-
-#~ msgid "No changes in this file"
-#~ msgstr "没有任何修改"
-
-#~ msgid "Diff is to big to display"
-#~ msgstr ""
-
-#~ msgid "File annotate"
-#~ msgstr "文件注释"
-
-#~ msgid "annotate"
-#~ msgstr "注释"
-
-#~ msgid "Following"
-#~ msgstr "跟随中"
-
-#~ msgid "by"
-#~ msgstr ""
-
-#~ msgid "Trending source files"
-#~ msgstr ""
-
-#~ msgid "Feeds"
-#~ msgstr "订阅"
-
-#~ msgid "Loaded in"
-#~ msgstr ""
 

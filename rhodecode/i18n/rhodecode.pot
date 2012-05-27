@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: RhodeCode 1.4.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2012-05-24 22:18+0200\n"
+"POT-Creation-Date: 2012-05-27 17:41+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -612,105 +612,105 @@ msgid "You need to be a signed in to view this page"
 msgstr ""
 
 #: rhodecode/lib/diffs.py:78
-msgid "Changeset was to big and was cut off, use diff menu to display this diff"
+msgid "Changeset was too big and was cut off, use diff menu to display this diff"
 msgstr ""
 
 #: rhodecode/lib/diffs.py:88
 msgid "No changes detected"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:414
+#: rhodecode/lib/helpers.py:415
 msgid "True"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:418
+#: rhodecode/lib/helpers.py:419
 msgid "False"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:462
+#: rhodecode/lib/helpers.py:463
 msgid "Changeset not found"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:485
+#: rhodecode/lib/helpers.py:486
 #, python-format
 msgid "Show all combined changesets %s->%s"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:491
+#: rhodecode/lib/helpers.py:492
 msgid "compare view"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:511
+#: rhodecode/lib/helpers.py:512
 msgid "and"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:512
+#: rhodecode/lib/helpers.py:513
 #, python-format
 msgid "%s more"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:513 rhodecode/templates/changelog/changelog.html:40
+#: rhodecode/lib/helpers.py:514 rhodecode/templates/changelog/changelog.html:40
 msgid "revisions"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:536
+#: rhodecode/lib/helpers.py:537
 msgid "fork name "
 msgstr ""
 
-#: rhodecode/lib/helpers.py:539
+#: rhodecode/lib/helpers.py:540
 msgid "[deleted] repository"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:540 rhodecode/lib/helpers.py:545
+#: rhodecode/lib/helpers.py:541 rhodecode/lib/helpers.py:546
 msgid "[created] repository"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:541
+#: rhodecode/lib/helpers.py:542
 msgid "[created] repository as fork"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:542 rhodecode/lib/helpers.py:546
+#: rhodecode/lib/helpers.py:543 rhodecode/lib/helpers.py:547
 msgid "[forked] repository"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:543 rhodecode/lib/helpers.py:547
+#: rhodecode/lib/helpers.py:544 rhodecode/lib/helpers.py:548
 msgid "[updated] repository"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:544
+#: rhodecode/lib/helpers.py:545
 msgid "[delete] repository"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:548
+#: rhodecode/lib/helpers.py:549
 msgid "[pushed] into"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:549
+#: rhodecode/lib/helpers.py:550
 msgid "[committed via RhodeCode] into"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:550
+#: rhodecode/lib/helpers.py:551
 msgid "[pulled from remote] into"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:551
+#: rhodecode/lib/helpers.py:552
 msgid "[pulled] from"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:552
+#: rhodecode/lib/helpers.py:553
 msgid "[started following] repository"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:553
+#: rhodecode/lib/helpers.py:554
 msgid "[stopped following] repository"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:731
+#: rhodecode/lib/helpers.py:732
 #, python-format
 msgid " and %s more"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:735
+#: rhodecode/lib/helpers.py:736
 msgid "No Files"
 msgstr ""
 

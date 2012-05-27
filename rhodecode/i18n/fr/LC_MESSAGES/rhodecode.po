@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: RhodeCode 1.1.5\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2012-05-24 22:18+0200\n"
+"POT-Creation-Date: 2012-05-27 17:41+0200\n"
 "PO-Revision-Date: 2012-05-20 11:36+0100\n"
 "Last-Translator: Vincent Duvert <vincent@duvert.net>\n"
 "Language-Team: fr <LL@li.org>\n"
@@ -652,7 +652,7 @@ msgid "You need to be a signed in to view this page"
 msgstr "Vous devez être connecté pour visualiser cette page."
 
 #: rhodecode/lib/diffs.py:78
-msgid "Changeset was to big and was cut off, use diff menu to display this diff"
+msgid "Changeset was too big and was cut off, use diff menu to display this diff"
 msgstr ""
 "Cet ensemble de changements était trop gros pour être affiché et a été "
 "découpé, utilisez le menu « Diff » pour afficher les différences."
@@ -661,100 +661,99 @@ msgstr ""
 msgid "No changes detected"
 msgstr "Aucun changement détecté."
 
-#: rhodecode/lib/helpers.py:414
+#: rhodecode/lib/helpers.py:415
 msgid "True"
 msgstr "Vrai"
 
-#: rhodecode/lib/helpers.py:418
+#: rhodecode/lib/helpers.py:419
 msgid "False"
 msgstr "Faux"
 
-#: rhodecode/lib/helpers.py:462
+#: rhodecode/lib/helpers.py:463
 #, fuzzy
-#| msgid "No changesets yet"
 msgid "Changeset not found"
 msgstr "Dépôt vide"
 
-#: rhodecode/lib/helpers.py:485
+#: rhodecode/lib/helpers.py:486
 #, python-format
 msgid "Show all combined changesets %s->%s"
 msgstr "Afficher les changements combinés %s->%s"
 
-#: rhodecode/lib/helpers.py:491
+#: rhodecode/lib/helpers.py:492
 msgid "compare view"
 msgstr "vue de comparaison"
 
-#: rhodecode/lib/helpers.py:511
+#: rhodecode/lib/helpers.py:512
 msgid "and"
 msgstr "et"
 
-#: rhodecode/lib/helpers.py:512
+#: rhodecode/lib/helpers.py:513
 #, python-format
 msgid "%s more"
 msgstr "%s de plus"
 
-#: rhodecode/lib/helpers.py:513 rhodecode/templates/changelog/changelog.html:40
+#: rhodecode/lib/helpers.py:514 rhodecode/templates/changelog/changelog.html:40
 msgid "revisions"
 msgstr "révisions"
 
-#: rhodecode/lib/helpers.py:536
+#: rhodecode/lib/helpers.py:537
 msgid "fork name "
 msgstr "Nom du fork"
 
-#: rhodecode/lib/helpers.py:539
+#: rhodecode/lib/helpers.py:540
 msgid "[deleted] repository"
 msgstr "[a supprimé] le dépôt"
 
-#: rhodecode/lib/helpers.py:540 rhodecode/lib/helpers.py:545
+#: rhodecode/lib/helpers.py:541 rhodecode/lib/helpers.py:546
 msgid "[created] repository"
 msgstr "[a créé] le dépôt"
 
-#: rhodecode/lib/helpers.py:541
+#: rhodecode/lib/helpers.py:542
 msgid "[created] repository as fork"
 msgstr "[a créé] le dépôt en tant que fork"
 
-#: rhodecode/lib/helpers.py:542 rhodecode/lib/helpers.py:546
+#: rhodecode/lib/helpers.py:543 rhodecode/lib/helpers.py:547
 msgid "[forked] repository"
 msgstr "[a forké] le dépôt"
 
-#: rhodecode/lib/helpers.py:543 rhodecode/lib/helpers.py:547
+#: rhodecode/lib/helpers.py:544 rhodecode/lib/helpers.py:548
 msgid "[updated] repository"
 msgstr "[a mis à jour] le dépôt"
 
-#: rhodecode/lib/helpers.py:544
+#: rhodecode/lib/helpers.py:545
 msgid "[delete] repository"
 msgstr "[a supprimé] le dépôt"
 
-#: rhodecode/lib/helpers.py:548
+#: rhodecode/lib/helpers.py:549
 msgid "[pushed] into"
 msgstr "[a pushé] dans"
 
-#: rhodecode/lib/helpers.py:549
+#: rhodecode/lib/helpers.py:550
 msgid "[committed via RhodeCode] into"
 msgstr "[a commité via RhodeCode] dans"
 
-#: rhodecode/lib/helpers.py:550
+#: rhodecode/lib/helpers.py:551
 msgid "[pulled from remote] into"
 msgstr "[a pullé depuis un site distant] dans"
 
-#: rhodecode/lib/helpers.py:551
+#: rhodecode/lib/helpers.py:552
 msgid "[pulled] from"
 msgstr "[a pullé] depuis"
 
-#: rhodecode/lib/helpers.py:552
+#: rhodecode/lib/helpers.py:553
 msgid "[started following] repository"
 msgstr "[suit maintenant] le dépôt"
 
-#: rhodecode/lib/helpers.py:553
+#: rhodecode/lib/helpers.py:554
 msgid "[stopped following] repository"
 msgstr "[ne suit plus] le dépôt"
 
-#: rhodecode/lib/helpers.py:731
+#: rhodecode/lib/helpers.py:732
 #, python-format
 msgid " and %s more"
 msgstr "et %s de plus"
 
-#: rhodecode/lib/helpers.py:735
+#: rhodecode/lib/helpers.py:736
 msgid "No Files"
 msgstr "Aucun fichier"
 
