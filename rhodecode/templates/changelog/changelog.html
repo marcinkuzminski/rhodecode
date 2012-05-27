@@ -55,7 +55,7 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
 								<div class="gravatar">
 									<img alt="gravatar" src="${h.gravatar_url(h.email(cs.author),16)}"/>
 								</div>
-								<div title="${cs.author}" class="user">${h.person(cs.author)}</div>
+								<div title="${cs.author}" class="user">${h.shorter(h.person(cs.author),22)}</div>
 							</div>
                             <div class="date">${cs.date}</div>
 						</div>
