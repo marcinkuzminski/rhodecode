@@ -279,6 +279,7 @@ class DiffProcessor(object):
                     tag,
                     l['line'][last:]
                 )
+
             do(line)
             do(next_)
 
@@ -377,8 +378,8 @@ class DiffProcessor(object):
             pass
 
         # highlight inline changes
-        for _ in files:
-            for chunk in chunks:
+        for diff_data in files:
+            for chunk in diff_data['chunks']:
                 lineiter = iter(chunk)
                 try:
                     while 1:
@@ -434,7 +435,7 @@ class DiffProcessor(object):
                 new_lineno_class='lineno old', old_lineno_class='lineno new',
                 code_class='code', enable_comments=False, diff_lines=None):
         """
-        Return udiff as html table with customized css classes
+        Return given diff as html table with customized css classes
         """
         def _link_to_if(condition, label, url):
             """
@@ -535,6 +536,8 @@ class DiffProcessor(object):
 
 def differ(org_repo, org_ref, other_repo, other_ref):
     """
+    General differ between branches, bookmarks or separate but releated 
+    repositories
 
     :param org_repo:
     :type org_repo:
