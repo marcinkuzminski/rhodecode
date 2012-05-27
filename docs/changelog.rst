@@ -33,6 +33,7 @@ fixes
 - fix for issue #417, git execution was broken on windows for certain
   commands.
 - fixed #413. Don't disable .git directory for bare repos on deleting
+- fixed issue #459. Changed the way of obtaining logger in reindex task.
 
 1.3.6 (**2012-05-17**)
 ----------------------
