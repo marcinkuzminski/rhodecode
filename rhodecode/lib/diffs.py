@@ -171,7 +171,7 @@ class DiffProcessor(object):
 
     def _extract_rev(self, line1, line2):
         """
-        Extract the filename and revision hint from a line.
+        Extract the operation (A/M/D), filename and revision hint from a line.
         """
 
         try:
@@ -189,11 +189,15 @@ class DiffProcessor(object):
                 filename = (old_filename
                             if old_filename != '/dev/null' else new_filename)
 
-                return filename, new_rev, old_rev
+                operation = 'D' if new_filename == '/dev/null' else None
+                if not operation:
+                    operation = 'M' if old_filename != '/dev/null' else 'A'
+
+                return operation, filename, new_rev, old_rev
         except (ValueError, IndexError):
             pass
 
-        return None, None, None
+        return None, None, None, None
 
     def _parse_gitdiff(self, diffiterator):
         def line_decoder(l):
@@ -288,6 +292,7 @@ class DiffProcessor(object):
             line = lineiter.next()
             # skip first context
             skipfirst = True
+
             while 1:
                 # continue until we found the old file
                 if not line.startswith('--- '):
@@ -295,17 +300,21 @@ class DiffProcessor(object):
                     continue
 
                 chunks = []
-                filename, old_rev, new_rev = \
+                stats = [0, 0]
+                operation, filename, old_rev, new_rev = \
                     self._extract_rev(line, lineiter.next())
                 files.append({
                     'filename':         filename,
                     'old_revision':     old_rev,
                     'new_revision':     new_rev,
-                    'chunks':           chunks
+                    'chunks':           chunks,
+                    'operation':        operation,
+                    'stats':            stats,
                 })
 
                 line = lineiter.next()
                 while line:
+
                     match = self._chunk_re.match(line)
                     if not match:
                         break
@@ -346,9 +355,11 @@ class DiffProcessor(object):
                         elif command == '+':
                             affects_new = True
                             action = 'add'
+                            stats[0] += 1
                         elif command == '-':
                             affects_old = True
                             action = 'del'
+                            stats[1] += 1
                         else:
                             affects_old = affects_new = True
                             action = 'unmod'
@@ -362,7 +373,6 @@ class DiffProcessor(object):
                             'line':         line
                         })
                         line = lineiter.next()
-
         except StopIteration:
             pass
 
@@ -370,7 +380,6 @@ class DiffProcessor(object):
         for _ in files:
             for chunk in chunks:
                 lineiter = iter(chunk)
-                #first = True
                 try:
                     while 1:
                         line = lineiter.next()
@@ -382,7 +391,6 @@ class DiffProcessor(object):
                             self.differ(line, nextline)
                 except StopIteration:
                     pass
-
         return files
 
     def prepare(self):
@@ -424,7 +432,7 @@ class DiffProcessor(object):
 
     def as_html(self, table_class='code-difftable', line_class='line',
                 new_lineno_class='lineno old', old_lineno_class='lineno new',
-                code_class='code', enable_comments=False):
+                code_class='code', enable_comments=False, diff_lines=None):
         """
         Return udiff as html table with customized css classes
         """
@@ -440,7 +448,8 @@ class DiffProcessor(object):
                 }
             else:
                 return label
-        diff_lines = self.prepare()
+        if diff_lines is None:
+            diff_lines = self.prepare()
         _html_empty = True
         _html = []
         _html.append('''<table class="%(table_class)s">\n''' % {
