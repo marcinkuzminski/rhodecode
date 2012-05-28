@@ -338,12 +338,14 @@ class SettingsController(BaseController):
             return redirect(url('users'))
 
         defaults = c.user.get_dict()
-        return htmlfill.render(
-            render('admin/users/user_edit_my_account.html'),
+
+        c.form = htmlfill.render(
+            render('admin/users/user_edit_my_account_form.html'),
             defaults=defaults,
             encoding="UTF-8",
             force_defaults=False
         )
+        return render('admin/users/user_edit_my_account.html')
 
     def my_account_update(self):
         """PUT /_admin/my_account_update: Update an existing item"""
@@ -373,12 +375,13 @@ class SettingsController(BaseController):
                 .all()
             c.user_repos = ScmModel().get_repos(all_repos)
 
-            return htmlfill.render(
-                render('admin/users/user_edit_my_account.html'),
+            c.form = htmlfill.render(
+                render('admin/users/user_edit_my_account_form.html'),
                 defaults=errors.value,
                 errors=errors.error_dict or {},
                 prefix_error=False,
                 encoding="UTF-8")
+            return render('admin/users/user_edit_my_account.html')
         except Exception:
             log.error(traceback.format_exc())
             h.flash(_('error occurred during update of user %s') \

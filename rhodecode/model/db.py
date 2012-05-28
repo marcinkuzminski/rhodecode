@@ -27,11 +27,13 @@ import os
 import logging
 import datetime
 import traceback
+import hashlib
 from collections import defaultdict
 
 from sqlalchemy import *
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship, joinedload, class_mapper, validates
+from sqlalchemy.exc import DatabaseError
 from beaker.cache import cache_region, region_invalidate
 
 from pylons.i18n.translation import lazy_ugettext as _
@@ -47,8 +49,7 @@ from rhodecode.lib.compat import json
 from rhodecode.lib.caching_query import FromCache
 
 from rhodecode.model.meta import Base, Session
-import hashlib
-from sqlalchemy.exc import DatabaseError
+
 
 URL_SEP = '/'
 log = logging.getLogger(__name__)
@@ -155,6 +156,7 @@ class BaseModel(object):
             return safe_str(self.__unicode__())
         return '<DB:%s>' % (self.__class__.__name__)
 
+
 class RhodeCodeSetting(Base, BaseModel):
     __tablename__ = 'rhodecode_settings'
     __table_args__ = (
@@ -225,7 +227,7 @@ class RhodeCodeSetting(Base, BaseModel):
                 .filter(cls.app_settings_name.startswith('ldap_')).all()
         fd = {}
         for row in ret:
-            fd.update({row.app_settings_name:row.app_settings_value})
+            fd.update({row.app_settings_name: row.app_settings_value})
 
         return fd
 
@@ -761,18 +763,27 @@ class Repository(Base, BaseModel):
     def scm_instance(self):
         return self.__get_instance()
 
-    @property
-    def scm_instance_cached(self):
+    def scm_instance_cached(self, cache_map=None):
         @cache_region('long_term')
         def _c(repo_name):
             return self.__get_instance()
         rn = self.repo_name
         log.debug('Getting cached instance of repo')
-        inv = self.invalidate
-        if inv is not None:
+
+        if cache_map:
+            # get using prefilled cache_map
+            invalidate_repo = cache_map[self.repo_name]
+            if invalidate_repo:
+                invalidate_repo = (None if invalidate_repo.cache_active
+                                   else invalidate_repo)
+        else:
+            # get from invalidate
+            invalidate_repo = self.invalidate
+
+        if invalidate_repo is not None:
             region_invalidate(_c, None, rn)
             # update our cache
-            CacheInvalidation.set_valid(inv.cache_key)
+            CacheInvalidation.set_valid(invalidate_repo.cache_key)
         return _c(rn)
 
     def __get_instance(self):
@@ -1140,6 +1151,7 @@ class CacheInvalidation(Base, BaseModel):
     __tablename__ = 'cache_invalidation'
     __table_args__ = (
         UniqueConstraint('cache_key'),
+        Index('key_idx', 'cache_key'),
         {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'},
     )
@@ -1156,6 +1168,7 @@ class CacheInvalidation(Base, BaseModel):
     def __unicode__(self):
         return u"<%s('%s:%s')>" % (self.__class__.__name__,
                                   self.cache_id, self.cache_key)
+
     @classmethod
     def clear_cache(cls):
         cls.query().delete()
@@ -1241,6 +1254,40 @@ class CacheInvalidation(Base, BaseModel):
         inv_obj.cache_active = True
         Session.add(inv_obj)
         Session.commit()
+
+    @classmethod
+    def get_cache_map(cls):
+
+        class cachemapdict(dict):
+
+            def __init__(self, *args, **kwargs):
+                fixkey = kwargs.get('fixkey')
+                if fixkey:
+                    del kwargs['fixkey']
+                self.fixkey = fixkey
+                super(cachemapdict, self).__init__(*args, **kwargs)
+
+            def __getattr__(self, name):
+                key = name
+                if self.fixkey:
+                    key, _prefix, _org_key = cls._get_key(key)
+                if key in self.__dict__:
+                    return self.__dict__[key]
+                else:
+                    return self[key]
+
+            def __getitem__(self, key):
+                if self.fixkey:
+                    key, _prefix, _org_key = cls._get_key(key)
+                try:
+                    return super(cachemapdict, self).__getitem__(key)
+                except KeyError:
+                    return
+
+        cache_map = cachemapdict(fixkey=True)
+        for obj in cls.query().all():
+            cache_map[obj.cache_key] = cachemapdict(obj.get_dict())
+        return cache_map
 
 
 class ChangesetComment(Base, BaseModel):

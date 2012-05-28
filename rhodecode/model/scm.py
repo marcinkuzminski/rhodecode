@@ -28,6 +28,8 @@ import traceback
 import logging
 import cStringIO
 
+from sqlalchemy import func
+
 from rhodecode.lib.vcs import get_backend
 from rhodecode.lib.vcs.exceptions import RepositoryError
 from rhodecode.lib.vcs.utils.lazy import LazyProperty
@@ -77,8 +79,12 @@ class CachedRepoList(object):
         return '<%s (%s)>' % (self.__class__.__name__, self.__len__())
 
     def __iter__(self):
+        # pre-propagated cache_map to save executing select statements
+        # for each repo
+        cache_map = CacheInvalidation.get_cache_map()
+
         for dbr in self.db_repo_list:
-            scmr = dbr.scm_instance_cached
+            scmr = dbr.scm_instance_cached(cache_map)
             # check permission at this level
             if not HasRepoPermissionAny(
                 'repository.read', 'repository.write', 'repository.admin'
@@ -219,7 +225,7 @@ class ScmModel(BaseModel):
         if all_repos is None:
             all_repos = self.sa.query(Repository)\
                         .filter(Repository.group_id == None)\
-                        .order_by(Repository.repo_name).all()
+                        .order_by(func.lower(Repository.repo_name)).all()
 
         repo_iter = CachedRepoList(all_repos, repos_path=self.repos_path,
                                    order_by=sort_key)
