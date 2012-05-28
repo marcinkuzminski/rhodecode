@@ -28,6 +28,8 @@ import traceback
 import logging
 import cStringIO
 
+from sqlalchemy import func
+
 from rhodecode.lib.vcs import get_backend
 from rhodecode.lib.vcs.exceptions import RepositoryError
 from rhodecode.lib.vcs.utils.lazy import LazyProperty
@@ -223,7 +225,7 @@ class ScmModel(BaseModel):
         if all_repos is None:
             all_repos = self.sa.query(Repository)\
                         .filter(Repository.group_id == None)\
-                        .order_by(Repository.repo_name).all()
+                        .order_by(func.lower(Repository.repo_name)).all()
 
         repo_iter = CachedRepoList(all_repos, repos_path=self.repos_path,
                                    order_by=sort_key)
