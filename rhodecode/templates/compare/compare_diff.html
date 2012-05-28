@@ -26,7 +26,7 @@
     <div class="table">
         <div id="body" class="diffblock">
             <div class="code-header cv">
-                <h3 class="code-header-title">${_('Compare View')}</h3>
+                <h3 class="code-header-title">${_('Compare View')} <a href="${c.swap_url}">swap</a></h3>
                 <div>
                 ${'%s@%s' % (c.org_repo.repo_name, c.org_ref)} -> ${'%s@%s' % (c.other_repo.repo_name, c.other_ref)}
                 </div>

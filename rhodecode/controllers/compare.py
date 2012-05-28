@@ -91,8 +91,19 @@ class CompareController(BaseRepoController):
         #case two independent repos
         if org_repo != other_repo:
             from mercurial import discovery
-            out = discovery.findcommonoutgoing(org_repo._repo, other_repo._repo)
-            for cs in map(binascii.hexlify, out.missing):
+            other = org_repo._repo
+            repo = other_repo._repo
+            onlyheads = None
+            tmp = discovery.findcommonincoming(repo=repo,
+                                               remote=other,
+                                               heads=onlyheads, force=False)
+            common, incoming, rheads = tmp
+            if not incoming:
+                revs = []
+            else:
+                revs = other.changelog.findmissing(common, rheads)
+
+            for cs in map(binascii.hexlify, revs):
                 changesets.append(org_repo.get_changeset(cs))
         else:
             revs = ['ancestors(%s) and not ancestors(%s)' % (org_ref[1],
@@ -106,7 +117,9 @@ class CompareController(BaseRepoController):
 
     def index(self, ref):
         org_repo, org_ref, other_repo, other_ref = self._handle_ref(ref)
-
+        c.swap_url = h.url('compare_home', repo_name=c.repo_name,
+                           ref='%s...%s' % (':'.join(other_ref),
+                                            ':'.join(org_ref)))
         c.org_repo = org_repo = Repository.get_by_repo_name(org_repo)
         c.other_repo = other_repo = Repository.get_by_repo_name(other_repo)
 
@@ -117,15 +130,16 @@ class CompareController(BaseRepoController):
 
         c.org_ref = org_ref[1]
         c.other_ref = other_ref[1]
-
-        _diff = diffs.differ(org_repo, org_ref, other_repo, other_ref)
+        # diff needs to have swapped org with other to generate proper diff
+        _diff = diffs.differ(other_repo, other_ref, org_repo, org_ref)
         diff_processor = diffs.DiffProcessor(_diff, format='gitdiff')
         _parsed = diff_processor.prepare()
 
         c.files = []
         c.changes = {}
-
-        for f in _parsed:
+        # sort Added first then Modified last Deleted files
+        sorter = lambda info: {'A': 0, 'M': 1, 'D': 2}.get(info['operation'])
+        for f in sorted(_parsed, key=sorter):
             fid = h.FID('', f['filename'])
             c.files.append([fid, f['operation'], f['filename'], f['stats']])
             diff = diff_processor.as_html(enable_comments=False, diff_lines=[f])
