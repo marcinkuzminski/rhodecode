@@ -77,8 +77,12 @@ class CachedRepoList(object):
         return '<%s (%s)>' % (self.__class__.__name__, self.__len__())
 
     def __iter__(self):
+        # pre-propagated cache_map to save executing select statements
+        # for each repo
+        cache_map = CacheInvalidation.get_cache_map()
+
         for dbr in self.db_repo_list:
-            scmr = dbr.scm_instance_cached
+            scmr = dbr.scm_instance_cached(cache_map)
             # check permission at this level
             if not HasRepoPermissionAny(
                 'repository.read', 'repository.write', 'repository.admin'
