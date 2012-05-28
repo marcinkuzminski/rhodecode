@@ -25,7 +25,7 @@ Or::
     pip install rhodecode
 
 If you prefer to install RhodeCode manually simply grab latest release from
-http://pypi.python.org/pypi/rhodecode, decompress the archive and run::
+http://pypi.python.org/pypi/RhodeCode, decompress the archive and run::
 
     python setup.py install
 
