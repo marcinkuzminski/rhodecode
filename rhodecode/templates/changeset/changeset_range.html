@@ -2,7 +2,7 @@
 <%inherit file="/base/base.html"/>
 
 <%def name="title()">
-    ${c.repo_name} ${_('Changesets')} - r${c.cs_ranges[0].revision}:${h.short_id(c.cs_ranges[0].raw_id)} -> r${c.cs_ranges[-1].revision}:${h.short_id(c.cs_ranges[-1].raw_id)} - ${c.rhodecode_name}
+    ${_('%s Changesets') % c.repo_name} - r${c.cs_ranges[0].revision}:${h.short_id(c.cs_ranges[0].raw_id)} -> r${c.cs_ranges[-1].revision}:${h.short_id(c.cs_ranges[-1].raw_id)} - ${c.rhodecode_name}
 </%def>
 
 <%def name="breadcrumbs_links()">
