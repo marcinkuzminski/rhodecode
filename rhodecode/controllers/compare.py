@@ -86,24 +86,30 @@ class CompareController(BaseRepoController):
 
         raise HTTPNotFound
 
-    def _get_changesets(self, org_repo, org_ref, other_repo, other_ref):
+    def _get_discovery(self,org_repo, org_ref, other_repo, other_ref):
+        from mercurial import discovery
+        other = org_repo._repo
+        repo = other_repo._repo
+        tmp = discovery.findcommonincoming(
+                  repo=repo,  # other_repo we check for incoming
+                  remote=other,  # org_repo source for incoming
+                  heads=[other[org_ref[1]].node()],
+                  force=False
+        )
+        return tmp
+
+    def _get_changesets(self, org_repo, org_ref, other_repo, other_ref, tmp):
         changesets = []
         #case two independent repos
         if org_repo != other_repo:
-            from mercurial import discovery
-            other = org_repo._repo
-            repo = other_repo._repo
-            onlyheads = None
-            tmp = discovery.findcommonincoming(repo=repo,
-                                               remote=other,
-                                               heads=onlyheads, force=False)
             common, incoming, rheads = tmp
+
             if not incoming:
                 revs = []
             else:
-                revs = other.changelog.findmissing(common, rheads)
+                revs = org_repo._repo.changelog.findmissing(common, rheads)
 
-            for cs in map(binascii.hexlify, revs):
+            for cs in reversed(map(binascii.hexlify, revs)):
                 changesets.append(org_repo.get_changeset(cs))
         else:
             revs = ['ancestors(%s) and not ancestors(%s)' % (org_ref[1],
@@ -117,21 +123,26 @@ class CompareController(BaseRepoController):
 
     def index(self, ref):
         org_repo, org_ref, other_repo, other_ref = self._handle_ref(ref)
-        c.swap_url = h.url('compare_home', repo_name=c.repo_name,
+        c.swap_url = h.url('compare_home', repo_name=other_repo,
                            ref='%s...%s' % (':'.join(other_ref),
-                                            ':'.join(org_ref)))
+                                            ':'.join(org_ref)),
+                           repo=org_repo)
         c.org_repo = org_repo = Repository.get_by_repo_name(org_repo)
         c.other_repo = other_repo = Repository.get_by_repo_name(other_repo)
-
-        c.cs_ranges = self._get_changesets(org_repo.scm_instance,
+        tmp = self._get_discovery(org_repo.scm_instance,
                                            org_ref,
                                            other_repo.scm_instance,
                                            other_ref)
+        c.cs_ranges = self._get_changesets(org_repo.scm_instance,
+                                           org_ref,
+                                           other_repo.scm_instance,
+                                           other_ref,
+                                           tmp)
 
         c.org_ref = org_ref[1]
         c.other_ref = other_ref[1]
         # diff needs to have swapped org with other to generate proper diff
-        _diff = diffs.differ(other_repo, other_ref, org_repo, org_ref)
+        _diff = diffs.differ(other_repo, other_ref, org_repo, org_ref, tmp)
         diff_processor = diffs.DiffProcessor(_diff, format='gitdiff')
         _parsed = diff_processor.prepare()
 

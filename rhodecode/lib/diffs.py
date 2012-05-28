@@ -26,16 +26,23 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import re
+import io
 import difflib
 import markupsafe
+
 from itertools import tee, imap
+
+from mercurial import patch
+from mercurial.mdiff import diffopts
+from mercurial.bundlerepo import bundlerepository
+from mercurial import localrepo
 
 from pylons.i18n.translation import _
 
 from rhodecode.lib.vcs.exceptions import VCSError
 from rhodecode.lib.vcs.nodes import FileNode, SubModuleNode
 from rhodecode.lib.helpers import escape
-from rhodecode.lib.utils import EmptyChangeset
+from rhodecode.lib.utils import EmptyChangeset, make_ui
 
 
 def wrap_to_table(str_):
@@ -534,7 +541,7 @@ class DiffProcessor(object):
         return self.adds, self.removes
 
 
-def differ(org_repo, org_ref, other_repo, other_ref):
+def differ(org_repo, org_ref, other_repo, other_ref, discovery_data=None):
     """
     General differ between branches, bookmarks or separate but releated 
     repositories
@@ -548,18 +555,55 @@ def differ(org_repo, org_ref, other_repo, other_ref):
     :param other_ref:
     :type other_ref:
     """
+
     ignore_whitespace = False
     context = 3
-    from mercurial import patch
-    from mercurial.mdiff import diffopts
-
     org_repo = org_repo.scm_instance._repo
     other_repo = other_repo.scm_instance._repo
-
+    opts = diffopts(git=True, ignorews=ignore_whitespace, context=context)
     org_ref = org_ref[1]
     other_ref = other_ref[1]
 
-    opts = diffopts(git=True, ignorews=ignore_whitespace, context=context)
+    if org_repo != other_repo:
 
-    return ''.join(patch.diff(org_repo, node1=org_ref, node2=other_ref,
-                              opts=opts))
+        common, incoming, rheads = discovery_data
+        # create a bundle (uncompressed if other repo is not local)
+        if other_repo.capable('getbundle'):
+            # disable repo hooks here since it's just bundle !
+            # patch and reset hooks section of UI config to not run any
+            # hooks on fetching archives with subrepos
+            for k, _ in other_repo.ui.configitems('hooks'):
+                other_repo.ui.setconfig('hooks', k, None)
+
+            unbundle = other_repo.getbundle('incoming', common=common,
+                                            heads=rheads)
+
+            buf = io.BytesIO()
+            while True:
+                chunk = unbundle._stream.read(1024*4)
+                if not chunk:
+                    break
+                buf.write(chunk)
+
+            buf.seek(0)
+            unbundle._stream = buf
+
+        class InMemoryBundleRepo(bundlerepository):
+            def __init__(self, ui, path, bundlestream):
+                self._tempparent = None
+                localrepo.localrepository.__init__(self, ui, path)
+                self.ui.setconfig('phases', 'publish', False)
+
+                self.bundle = bundlestream
+
+                # dict with the mapping 'filename' -> position in the bundle
+                self.bundlefilespos = {}
+
+        ui = make_ui('db')
+        bundlerepo = InMemoryBundleRepo(ui, path=other_repo.root,
+                                        bundlestream=unbundle)
+        return ''.join(patch.diff(bundlerepo, node1=org_ref, node2=other_ref,
+                                  opts=opts))
+    else:
+        return ''.join(patch.diff(org_repo, node1=org_ref, node2=other_ref,
+                                  opts=opts))
