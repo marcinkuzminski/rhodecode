@@ -29,9 +29,14 @@ http://pypi.python.org/pypi/RhodeCode, decompress the archive and run::
 
     python setup.py install
 
+Step by step installation example for Windows
+---------------------------------------------
 
-Step by step installation example
----------------------------------
+:ref:`installation_win`
+
+
+Step by step installation example for Linux
+-------------------------------------------
 
 
 For installing RhodeCode i highly recommend using separate virtualenv_. This
