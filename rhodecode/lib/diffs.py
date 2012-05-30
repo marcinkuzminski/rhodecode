@@ -546,6 +546,18 @@ class DiffProcessor(object):
         return self.adds, self.removes
 
 
+class InMemoryBundleRepo(bundlerepository):
+    def __init__(self, ui, path, bundlestream):
+        self._tempparent = None
+        localrepo.localrepository.__init__(self, ui, path)
+        self.ui.setconfig('phases', 'publish', False)
+
+        self.bundle = bundlestream
+
+        # dict with the mapping 'filename' -> position in the bundle
+        self.bundlefilespos = {}
+
+
 def differ(org_repo, org_ref, other_repo, other_ref, discovery_data=None):
     """
     General differ between branches, bookmarks or separate but releated 
@@ -561,7 +573,7 @@ def differ(org_repo, org_ref, other_repo, other_ref, discovery_data=None):
     :type other_ref:
     """
 
-    ignore_whitespace = False
+    bundlerepo = ignore_whitespace = False
     context = 3
     org_repo = org_repo.scm_instance._repo
     other_repo = other_repo.scm_instance._repo
@@ -572,8 +584,9 @@ def differ(org_repo, org_ref, other_repo, other_ref, discovery_data=None):
     if org_repo != other_repo:
 
         common, incoming, rheads = discovery_data
+
         # create a bundle (uncompressed if other repo is not local)
-        if other_repo.capable('getbundle'):
+        if other_repo.capable('getbundle') and incoming:
             # disable repo hooks here since it's just bundle !
             # patch and reset hooks section of UI config to not run any
             # hooks on fetching archives with subrepos
@@ -593,22 +606,10 @@ def differ(org_repo, org_ref, other_repo, other_ref, discovery_data=None):
             buf.seek(0)
             unbundle._stream = buf
 
-        class InMemoryBundleRepo(bundlerepository):
-            def __init__(self, ui, path, bundlestream):
-                self._tempparent = None
-                localrepo.localrepository.__init__(self, ui, path)
-                self.ui.setconfig('phases', 'publish', False)
-
-                self.bundle = bundlestream
-
-                # dict with the mapping 'filename' -> position in the bundle
-                self.bundlefilespos = {}
-
-        ui = make_ui('db')
-        bundlerepo = InMemoryBundleRepo(ui, path=other_repo.root,
-                                        bundlestream=unbundle)
-        return ''.join(patch.diff(bundlerepo, node1=org_ref, node2=other_ref,
-                                  opts=opts))
+            ui = make_ui('db')
+            bundlerepo = InMemoryBundleRepo(ui, path=org_repo.root,
+                                            bundlestream=unbundle)
+        return ''.join(patch.diff(bundlerepo or org_repo, node2=other_ref, opts=opts))
     else:
         return ''.join(patch.diff(org_repo, node1=org_ref, node2=other_ref,
                                   opts=opts))

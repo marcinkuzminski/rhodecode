@@ -25,7 +25,9 @@
         ${self.breadcrumbs()}
     </div>
     <!-- end box / title -->
+    %if c.repo_branches:
     <div class="info_box" id="compare_branches" style="clear: both;padding: 10px 19px;vertical-align: right;text-align: right;"><a href="#" class="ui-btn small">${_('Compare branches')}</a></div>
+    %endif
     <div class="table">
         <%include file='branches_data.html'/>
     </div>

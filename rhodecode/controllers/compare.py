@@ -58,7 +58,7 @@ class CompareController(BaseRepoController):
         :param ref: <orginal_reference>...<other_reference>
         :type ref: str
         """
-        org_repo = c.rhodecode_repo.name
+        org_repo = c.rhodecode_db_repo.repo_name
 
         def org_parser(org):
             _repo = org_repo
@@ -70,7 +70,6 @@ class CompareController(BaseRepoController):
             _repo = org_repo
             name, val = other.split(':')
             if _other_repo:
-                #TODO: do an actual repo loookup within rhodecode
                 _repo = _other_repo
 
             return _repo, (name, val)
@@ -86,14 +85,19 @@ class CompareController(BaseRepoController):
 
         raise HTTPNotFound
 
-    def _get_discovery(self,org_repo, org_ref, other_repo, other_ref):
+    def _get_discovery(self, org_repo, org_ref, other_repo, other_ref):
         from mercurial import discovery
         other = org_repo._repo
         repo = other_repo._repo
+        tip = other[org_ref[1]]
+        log.debug('Doing discovery for %s@%s vs %s@%s' % (
+                        org_repo, org_ref, other_repo, other_ref)
+        )
+        log.debug('Filter heads are %s[%s]' % (tip, org_ref[1]))
         tmp = discovery.findcommonincoming(
                   repo=repo,  # other_repo we check for incoming
                   remote=other,  # org_repo source for incoming
-                  heads=[other[org_ref[1]].node()],
+                  heads=[tip.node()],
                   force=False
         )
         return tmp
@@ -123,13 +127,19 @@ class CompareController(BaseRepoController):
 
     def index(self, ref):
         org_repo, org_ref, other_repo, other_ref = self._handle_ref(ref)
+
         c.swap_url = h.url('compare_home', repo_name=other_repo,
                            ref='%s...%s' % (':'.join(other_ref),
                                             ':'.join(org_ref)),
                            repo=org_repo)
         c.org_repo = org_repo = Repository.get_by_repo_name(org_repo)
         c.other_repo = other_repo = Repository.get_by_repo_name(other_repo)
-        tmp = self._get_discovery(org_repo.scm_instance,
+
+        if c.org_repo is None or c.other_repo is None:
+            log.error('Could not found repo %s or %s' % (org_repo, other_repo))
+            raise HTTPNotFound
+
+        discovery_data = self._get_discovery(org_repo.scm_instance,
                                            org_ref,
                                            other_repo.scm_instance,
                                            other_ref)
@@ -137,12 +147,13 @@ class CompareController(BaseRepoController):
                                            org_ref,
                                            other_repo.scm_instance,
                                            other_ref,
-                                           tmp)
+                                           discovery_data)
 
         c.org_ref = org_ref[1]
         c.other_ref = other_ref[1]
         # diff needs to have swapped org with other to generate proper diff
-        _diff = diffs.differ(other_repo, other_ref, org_repo, org_ref, tmp)
+        _diff = diffs.differ(other_repo, other_ref, org_repo, org_ref,
+                             discovery_data)
         diff_processor = diffs.DiffProcessor(_diff, format='gitdiff')
         _parsed = diff_processor.prepare()
 
