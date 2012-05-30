@@ -416,10 +416,12 @@ def make_map(config):
                  controller='changeset', action='raw_changeset',
                  revision='tip', conditions=dict(function=check_repo))
 
-    rmap.connect('compare_home',
-                 '/{repo_name:.*}/compare/{ref:.*}',
+    rmap.connect('compare_url',
+                 '/{repo_name:.*}/compare/{org_ref_type}@{org_ref}...{other_ref_type}@{other_ref}',
                  controller='compare', action='index',
-                 conditions=dict(function=check_repo))
+                 conditions=dict(function=check_repo),
+                 requirements=dict(org_ref_type='(branch|book|tag)',
+                                   other_ref_type='(branch|book|tag)'))
 
     rmap.connect('pullrequest_home',
                  '/{repo_name:.*}/pull-request/new',

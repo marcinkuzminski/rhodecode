@@ -49,41 +49,6 @@ class CompareController(BaseRepoController):
     def __before__(self):
         super(CompareController, self).__before__()
 
-    def _handle_ref(self, ref):
-        """
-        Parse the org...other string
-        Possible formats are 
-            `(branch|book|tag):<name>...(branch|book|tag):<othername>`
-
-        :param ref: <orginal_reference>...<other_reference>
-        :type ref: str
-        """
-        org_repo = c.rhodecode_db_repo.repo_name
-
-        def org_parser(org):
-            _repo = org_repo
-            name, val = org.split(':')
-            return _repo, (name, val)
-
-        def other_parser(other):
-            _other_repo = request.GET.get('repo')
-            _repo = org_repo
-            name, val = other.split(':')
-            if _other_repo:
-                _repo = _other_repo
-
-            return _repo, (name, val)
-
-        if '...' in ref:
-            try:
-                org, other = ref.split('...')
-                org_repo, org_ref = org_parser(org)
-                other_repo, other_ref = other_parser(other)
-                return org_repo, org_ref, other_repo, other_ref
-            except:
-                log.error(traceback.format_exc())
-
-        raise HTTPNotFound
 
     def _get_discovery(self, org_repo, org_ref, other_repo, other_ref):
         from mercurial import discovery
@@ -125,13 +90,18 @@ class CompareController(BaseRepoController):
 
         return changesets
 
-    def index(self, ref):
-        org_repo, org_ref, other_repo, other_ref = self._handle_ref(ref)
+    def index(self, org_ref_type, org_ref, other_ref_type, other_ref):
 
-        c.swap_url = h.url('compare_home', repo_name=other_repo,
-                           ref='%s...%s' % (':'.join(other_ref),
-                                            ':'.join(org_ref)),
-                           repo=org_repo)
+        org_repo = c.rhodecode_db_repo.repo_name
+        org_ref = (org_ref_type, org_ref)
+        other_ref = (other_ref_type, other_ref)
+        other_repo = request.GET.get('repo', org_repo)
+
+        c.swap_url = h.url('compare_url', repo_name=other_repo,
+              org_ref_type=other_ref[0], org_ref=other_ref[1],
+              other_ref_type=org_ref[0], other_ref=org_ref[1],
+              repo=org_repo)
+
         c.org_repo = org_repo = Repository.get_by_repo_name(org_repo)
         c.other_repo = other_repo = Repository.get_by_repo_name(other_repo)
 

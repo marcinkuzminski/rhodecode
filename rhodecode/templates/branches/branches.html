@@ -37,10 +37,11 @@ YUE.on('compare_branches','click',function(e){
 	YUE.preventDefault(e);
 	var org = YUQ('input[name=compare_org]:checked')[0];
 	var other = YUQ('input[name=compare_other]:checked')[0];
-	var compare_url = "${h.url('compare_home',repo_name=c.repo_name,ref='__ORG__...__OTHER__')}";
+
 	if(org && other){
-		var u = compare_url.replace('__ORG__','branch:'+org.value)
-		                   .replace('__OTHER__','branch:'+other.value);
+	    var compare_url = "${h.url('compare_url',repo_name=c.repo_name,org_ref_type='branch',org_ref='__ORG__',other_ref_type='branch',other_ref='__OTHER__')}";
+		var u = compare_url.replace('__ORG__',org.value)
+		                   .replace('__OTHER__',other.value);
 		window.location=u;
 	}
 	
