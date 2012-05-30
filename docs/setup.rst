@@ -34,6 +34,11 @@ entering this "root" path ``setup-rhodecode`` will also prompt you for a usernam
 and password for the initial admin account which ``setup-rhodecode`` sets 
 up for you.
 
+setup process can be fully automated, example for lazy::
+
+    paster setup-rhodecode production.ini --user=marcink --password=secret --email=marcin@rhodecode.org --repos=/home/marcink/my_repos
+    
+
 - The ``setup-rhodecode`` command will create all of the needed tables and an 
   admin account. When choosing a root path you can either use a new empty 
   location, or a location which already contains existing repositories. If you

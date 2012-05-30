@@ -286,7 +286,6 @@ class DiffProcessor(object):
                     tag,
                     l['line'][last:]
                 )
-
             do(line)
             do(next_)
 
@@ -298,9 +297,6 @@ class DiffProcessor(object):
         files = []
         try:
             line = lineiter.next()
-            # skip first context
-            skipfirst = True
-
             while 1:
                 # continue until we found the old file
                 if not line.startswith('--- '):
@@ -322,7 +318,6 @@ class DiffProcessor(object):
 
                 line = lineiter.next()
                 while line:
-
                     match = self._chunk_re.match(line)
                     if not match:
                         break
@@ -334,20 +329,20 @@ class DiffProcessor(object):
                         [int(x or 1) for x in match.groups()[:-1]]
                     old_line -= 1
                     new_line -= 1
-                    context = len(match.groups()) == 5
+                    gr = match.groups()
+                    context = len(gr) == 5
                     old_end += old_line
                     new_end += new_line
 
                     if context:
-                        if not skipfirst:
+                        # skip context only if it's first line
+                        if int(gr[0]) > 1:
                             lines.append({
                                 'old_lineno': '...',
                                 'new_lineno': '...',
                                 'action':     'context',
                                 'line':       line,
                             })
-                        else:
-                            skipfirst = False
 
                     line = lineiter.next()
                     while old_line < old_end or new_line < new_end:
@@ -372,14 +367,24 @@ class DiffProcessor(object):
                             affects_old = affects_new = True
                             action = 'unmod'
 
-                        old_line += affects_old
-                        new_line += affects_new
-                        lines.append({
-                            'old_lineno':   affects_old and old_line or '',
-                            'new_lineno':   affects_new and new_line or '',
-                            'action':       action,
-                            'line':         line
-                        })
+                        if line.find('No newline at end of file') != -1:
+                            lines.append({
+                                'old_lineno':   '...',
+                                'new_lineno':   '...',
+                                'action':       'context',
+                                'line':         line
+                            })
+
+                        else:
+                            old_line += affects_old
+                            new_line += affects_new
+                            lines.append({
+                                'old_lineno':   affects_old and old_line or '',
+                                'new_lineno':   affects_new and new_line or '',
+                                'action':       action,
+                                'line':         line
+                            })
+
                         line = lineiter.next()
         except StopIteration:
             pass
@@ -393,7 +398,7 @@ class DiffProcessor(object):
                         line = lineiter.next()
                         if line['action'] != 'unmod':
                             nextline = lineiter.next()
-                            if nextline['action'] == 'unmod' or \
+                            if nextline['action'] in ['unmod', 'context'] or \
                                nextline['action'] == line['action']:
                                 continue
                             self.differ(line, nextline)
