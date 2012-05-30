@@ -286,8 +286,6 @@ class DiffProcessor(object):
         files = []
         try:
             line = lineiter.next()
-            # skip first context
-            skipfirst = True
             while 1:
                 # continue until we found the old file
                 if not line.startswith('--- '):
@@ -317,22 +315,23 @@ class DiffProcessor(object):
                         [int(x or 1) for x in match.groups()[:-1]]
                     old_line -= 1
                     new_line -= 1
-                    context = len(match.groups()) == 5
+                    gr = match.groups()
+                    context = len(gr) == 5
                     old_end += old_line
                     new_end += new_line
 
                     if context:
-                        if not skipfirst:
+                        # skip context only if it's first line
+                        if int(gr[0]) > 1:
                             lines.append({
                                 'old_lineno': '...',
                                 'new_lineno': '...',
                                 'action':     'context',
                                 'line':       line,
                             })
-                        else:
-                            skipfirst = False
 
                     line = lineiter.next()
+
                     while old_line < old_end or new_line < new_end:
                         if line:
                             command, line = line[0], line[1:]
