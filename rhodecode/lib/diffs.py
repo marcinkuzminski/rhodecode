@@ -573,7 +573,8 @@ def differ(org_repo, org_ref, other_repo, other_ref, discovery_data=None):
     :type other_ref:
     """
 
-    bundlerepo = ignore_whitespace = False
+    bundlerepo = None
+    ignore_whitespace = False
     context = 3
     org_repo = org_repo.scm_instance._repo
     other_repo = other_repo.scm_instance._repo
@@ -598,18 +599,20 @@ def differ(org_repo, org_ref, other_repo, other_ref, discovery_data=None):
 
             buf = io.BytesIO()
             while True:
-                chunk = unbundle._stream.read(1024*4)
+                chunk = unbundle._stream.read(1024 * 4)
                 if not chunk:
                     break
                 buf.write(chunk)
 
             buf.seek(0)
+            # replace chunked _stream with data that can do tell() and seek()
             unbundle._stream = buf
 
             ui = make_ui('db')
             bundlerepo = InMemoryBundleRepo(ui, path=org_repo.root,
                                             bundlestream=unbundle)
-        return ''.join(patch.diff(bundlerepo or org_repo, node2=other_ref, opts=opts))
+        return ''.join(patch.diff(bundlerepo or org_repo, node2=other_ref,
+                                  opts=opts))
     else:
         return ''.join(patch.diff(org_repo, node1=org_ref, node2=other_ref,
                                   opts=opts))
