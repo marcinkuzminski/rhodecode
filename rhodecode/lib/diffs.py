@@ -352,14 +352,24 @@ class DiffProcessor(object):
                             affects_old = affects_new = True
                             action = 'unmod'
 
-                        old_line += affects_old
-                        new_line += affects_new
-                        lines.append({
-                            'old_lineno':   affects_old and old_line or '',
-                            'new_lineno':   affects_new and new_line or '',
-                            'action':       action,
-                            'line':         line
-                        })
+                        if line.find('No newline at end of file') != -1:
+                            lines.append({
+                                'old_lineno':   '...',
+                                'new_lineno':   '...',
+                                'action':       'context',
+                                'line':         line
+                            })
+
+                        else:
+                            old_line += affects_old
+                            new_line += affects_new
+                            lines.append({
+                                'old_lineno':   affects_old and old_line or '',
+                                'new_lineno':   affects_new and new_line or '',
+                                'action':       action,
+                                'line':         line
+                            })
+
                         line = lineiter.next()
 
         except StopIteration:
@@ -369,13 +379,12 @@ class DiffProcessor(object):
         for _ in files:
             for chunk in chunks:
                 lineiter = iter(chunk)
-                #first = True
                 try:
                     while 1:
                         line = lineiter.next()
                         if line['action'] != 'unmod':
                             nextline = lineiter.next()
-                            if nextline['action'] == 'unmod' or \
+                            if nextline['action'] in ['unmod', 'context'] or \
                                nextline['action'] == line['action']:
                                 continue
                             self.differ(line, nextline)
