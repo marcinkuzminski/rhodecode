@@ -156,14 +156,25 @@ class ApiController(JSONRPCController):
             password = PasswordGenerator().gen_password(length=8)
 
         try:
-            usr = UserModel().create_or_update(
+            user = UserModel().create_or_update(
                 username, password, email, firstname,
                 lastname, active, admin, ldap_dn
             )
             Session.commit()
             return dict(
-                id=usr.user_id,
-                msg='created new user %s' % username
+                id=user.user_id,
+                msg='created new user %s' % username,
+                user=dict(
+                    id=user.user_id,
+                    username=user.username,
+                    firstname=user.name,
+                    lastname=user.lastname,
+                    email=user.email,
+                    active=user.active,
+                    admin=user.admin,
+                    ldap_dn=user.ldap_dn,
+                    last_login=user.last_login,
+                )
             )
         except Exception:
             log.error(traceback.format_exc())
@@ -185,8 +196,9 @@ class ApiController(JSONRPCController):
         :param admin:
         :param ldap_dn:
         """
-        if not UserModel().get_user(userid):
-            raise JSONRPCError("user %s does not exist" % username)
+        usr = UserModel().get_user(userid)
+        if not usr:
+            raise JSONRPCError("user ID:%s does not exist" % userid)
 
         try:
             usr = UserModel().create_or_update(
@@ -196,11 +208,34 @@ class ApiController(JSONRPCController):
             Session.commit()
             return dict(
                 id=usr.user_id,
-                msg='updated user %s' % username
+                msg='updated user ID:%s %s' % (usr.user_id, usr.username)
             )
         except Exception:
             log.error(traceback.format_exc())
-            raise JSONRPCError('failed to update user %s' % username)
+            raise JSONRPCError('failed to update user %s' % userid)
+
+    @HasPermissionAllDecorator('hg.admin')
+    def delete_user(self, apiuser, userid):
+        """"
+        Deletes an user
+
+        :param apiuser:
+        """
+        usr = UserModel().get_user(userid)
+        if not usr:
+            raise JSONRPCError("user ID:%s does not exist" % userid)
+
+        try:
+            UserModel().delete(userid)
+            Session.commit()
+            return dict(
+                id=usr.user_id,
+                msg='deleted user ID:%s %s' % (usr.user_id, usr.username)
+            )
+        except Exception:
+            log.error(traceback.format_exc())
+            raise JSONRPCError('failed to delete ID:%s %s' % (usr.user_id,
+                                                              usr.username))
 
     @HasPermissionAllDecorator('hg.admin')
     def get_users_group(self, apiuser, group_name):

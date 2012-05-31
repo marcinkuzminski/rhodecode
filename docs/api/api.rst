@@ -187,7 +187,18 @@ OUTPUT::
 
     result: {
               "id" : "<new_user_id>",
-              "msg" : "created new user <username>"
+              "msg" : "created new user <username>",
+              "user": {
+                "id" :       "<id>",
+                "username" : "<username>",
+                "firstname": "<firstname>",
+                "lastname" : "<lastname>",
+                "email" :    "<email>",
+                "active" :   "<bool>",
+                "admin" :    "<bool>",
+                "ldap_dn" :  "<ldap_dn>",
+                "last_login": "<last_login>",
+              },
             }
     error:  null
 
@@ -195,7 +206,7 @@ OUTPUT::
 update_user
 -----------
 
-updates current one if such user exists. This command can 
+updates given user if such user exists. This command can 
 be executed only using api_key belonging to user with admin rights.
 
 
@@ -220,7 +231,33 @@ OUTPUT::
 
     result: {
               "id" : "<edited_user_id>",
-              "msg" : "updated user <username>"
+              "msg" : "updated user ID:<userid> <username>"
+            }
+    error:  null
+
+
+delete_user
+-----------
+
+
+deletes givenuser if such user exists. This command can 
+be executed only using api_key belonging to user with admin rights.
+
+
+INPUT::
+
+    id : <id_for_response>
+    api_key : "<api_key>"
+    method :  "delete_user"
+    args :    {
+                "userid" : "<user_id or username>",
+              }
+
+OUTPUT::
+
+    result: {
+              "id" : "<edited_user_id>",
+              "msg" : "deleted user ID:<userid> <username>"
             }
     error:  null
 
