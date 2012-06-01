@@ -213,7 +213,7 @@ def make_map(config):
         m.connect("user_perm", "/users_perm/{id}",
                   action="update_perm", conditions=dict(method=["PUT"]))
 
-    #ADMIN USERS REST ROUTES
+    #ADMIN USERS GROUPS REST ROUTES
     with rmap.submapper(path_prefix=ADMIN_PREFIX,
                         controller='admin/users_groups') as m:
         m.connect("users_groups", "/users_groups",
