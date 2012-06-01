@@ -454,7 +454,7 @@ def action_parser(user_log, feed=False):
 
             if isinstance(rev, BaseChangeset):
                 lbl = 'r%s:%s' % (rev.revision, rev.short_id)
-                _url = url('changeset_home', repo_name=repo_name, 
+                _url = url('changeset_home', repo_name=repo_name,
                            revision=rev.raw_id)
                 title = tooltip(rev.message)
             else:

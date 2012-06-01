@@ -200,8 +200,8 @@ class TestFilesController(TestController):
 
             self.assertEqual(response.status, '200 OK')
             heads = [
-                ('Pragma', 'no-cache'), 
-                ('Cache-Control', 'no-cache'), 
+                ('Pragma', 'no-cache'),
+                ('Cache-Control', 'no-cache'),
                 ('Content-Disposition', 'attachment; filename=%s' % filename),
                 ('Content-Type', '%s; charset=utf-8' % info[0]),
             ]
@@ -213,7 +213,7 @@ class TestFilesController(TestController):
         for arch_ext in ['tar', 'rar', 'x', '..ax', '.zipz']:
             fname = '27cd5cce30c96924232dffcd24178a07ffeb5dfc%s' % arch_ext
 
-            response = self.app.get(url(controller='files', 
+            response = self.app.get(url(controller='files',
                                         action='archivefile',
                                         repo_name=HG_REPO,
                                         fname=fname))

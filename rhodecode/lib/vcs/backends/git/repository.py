@@ -94,7 +94,7 @@ class GitRepository(BaseRepository):
         if isinstance(cmd, basestring):
             cmd = [cmd]
             _str_cmd = True
- 
+
         gitenv = os.environ
         gitenv['GIT_CONFIG_NOGLOBAL'] = '1'
 
