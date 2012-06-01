@@ -47,6 +47,7 @@ from rhodecode.model.db import ChangesetComment
 from rhodecode.model.comment import ChangesetCommentsModel
 from rhodecode.model.meta import Session
 from rhodecode.lib.diffs import wrapped_diff
+from rhodecode.model.repo import RepoModel
 
 log = logging.getLogger(__name__)
 
@@ -165,6 +166,9 @@ class ChangesetController(BaseRepoController):
     def __before__(self):
         super(ChangesetController, self).__before__()
         c.affected_files_cut_off = 60
+        repo_model = RepoModel()
+        c.users_array = repo_model.get_users_js()
+        c.users_groups_array = repo_model.get_users_groups_js()
 
     def index(self, revision):
 

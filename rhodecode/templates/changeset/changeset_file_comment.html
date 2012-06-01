@@ -38,8 +38,10 @@
           <div class="comment-help">${_('Commenting on line {1}.')}
           ${(_('Comments parsed using %s syntax with %s support.') % (('<a href="%s">RST</a>' % h.url('rst_help')),
           	'<span style="color:#003367" class="tooltip" title="%s">@mention</span>' %
-          	_('Use @username inside this text to send notification to this RhodeCode user')))|n}</div>
-          <textarea id="text_{1}" name="text"></textarea>
+          	_('Use @username inside this text to send notification to this RhodeCode user')))|n}
+          </div>
+            <div class="mentions-container" id="mentions_container_{1}"></div>
+            <textarea id="text_{1}" name="text" class="yui-ac-input"></textarea>   
       </div>
       <div class="comment-button">
       <input type="hidden" name="f_path" value="{0}">
@@ -92,7 +94,7 @@
         </div>
     %endfor
     %if c.rhodecode_user.username != 'default':
-    <div class="comment-form">
+    <div class="comment-form ac">
         ${h.form(h.url('changeset_comment', repo_name=c.repo_name, revision=changeset.raw_id))}
         <strong>${_('Leave a comment')}</strong>
         <div class="clearfix">
@@ -101,6 +103,7 @@
           		'<span style="color:#003367" class="tooltip" title="%s">@mention</span>' %
           		_('Use @username inside this text to send notification to this RhodeCode user')))|n}
             </div>
+                <div class="mentions-container" id="mentions_container"></div>
                 ${h.textarea('text')}
         </div>
         <div class="comment-button">
@@ -110,4 +113,17 @@
     </div>
     %endif
 </div>
+<script>
+YUE.onDOMReady(function () {
+
+   MentionsAutoComplete(
+   'text',
+   'mentions_container',
+   ${c.users_array|n},
+   ${c.users_groups_array|n},
+   "${_('Group')}",
+   "${_('members')}"
+   ); 
+});
+</script>
 </%def>
