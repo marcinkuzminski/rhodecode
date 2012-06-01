@@ -118,6 +118,7 @@ class TestLibs(unittest.TestCase):
         self.assertEqual(s, extract_mentioned_users(sample))
 
     def test_age(self):
+        import calendar
         from rhodecode.lib.utils2 import age
         n = datetime.datetime.now()
         delt = lambda *args, **kwargs: datetime.timedelta(*args, **kwargs)
@@ -127,5 +128,6 @@ class TestLibs(unittest.TestCase):
         self.assertEqual(age(n - delt(hours=1)), u'1 hour ago')
         self.assertEqual(age(n - delt(hours=24)), u'1 day ago')
         self.assertEqual(age(n - delt(hours=24 * 5)), u'5 days ago')
-        self.assertEqual(age(n - delt(hours=24 * 32)), u'1 month and 2 days ago')
+        self.assertEqual(age(n - delt(hours=24 * (calendar.mdays[n.month-1] + 2))),
+                         u'1 month and 2 days ago')
         self.assertEqual(age(n - delt(hours=24 * 400)), u'1 year and 1 month ago')
