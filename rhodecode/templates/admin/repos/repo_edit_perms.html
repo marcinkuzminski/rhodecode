@@ -117,12 +117,7 @@ YUE.onDOMReady(function () {
         YUD.setStyle('add_perm', 'opacity', '0.6');
         YUD.setStyle('add_perm', 'cursor', 'default');
     });
-    MembersAutoComplete(
-    		  ${c.users_array|n},
-    		  ${c.users_groups_array|n},
-    		  "${_('Group')}",
-    		  "${_('members')}"
-    		);
+    MembersAutoComplete(${c.users_array|n}, ${c.users_groups_array|n});
 });
 
 </script>

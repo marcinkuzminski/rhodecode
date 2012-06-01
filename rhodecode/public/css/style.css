@@ -2821,10 +2821,10 @@ table.code-browser .submodule-dir {
 }
 
 .mentions-container{
-	width: 100% !important;
+	width: 90% !important;
 }
 .mentions-container .yui-ac-content{
-	width: 90% !important;
+	width: 100% !important;
 }
 
 .ac {

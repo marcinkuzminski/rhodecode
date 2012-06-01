@@ -44,6 +44,24 @@ String.prototype.format = function() {
 
 }();
 
+String.prototype.strip = function(char) {
+	if(char === undefined){
+	    char = '\\s';
+	}
+	return this.replace(new RegExp('^'+char+'+|'+char+'+$','g'), '');
+}
+String.prototype.lstrip = function(char) {
+	if(char === undefined){
+	    char = '\\s';
+	}
+	return this.replace(new RegExp('^'+char+'+'),'');
+}
+String.prototype.rstrip = function(char) {
+	if(char === undefined){
+	    char = '\\s';
+	}
+	return this.replace(new RegExp(''+char+'+$'),'');
+}
 
 /**
  * SmartColorGenerator
@@ -447,7 +465,7 @@ var injectInlineForm = function(tr){
 		  
 		  ajaxPOST(submit_url, postData, success);
 	  });
-	  
+	  // callbacks
 	  tooltip_activate();
 };
 
@@ -819,7 +837,7 @@ var deleteNotification = function(url, notification_id,callbacks){
 
 /** MEMBERS AUTOCOMPLETE WIDGET **/
 
-var MembersAutoComplete = function (users_list, groups_list, group_lbl, members_lbl) {
+var MembersAutoComplete = function (users_list, groups_list) {
     var myUsers = users_list;
     var myGroups = groups_list;
 
@@ -834,9 +852,11 @@ var MembersAutoComplete = function (users_list, groups_list, group_lbl, members_
             // Match against each name of each contact
             for (; i < l; i++) {
                 contact = myUsers[i];
-                if ((contact.fname.toLowerCase().indexOf(query) > -1) || (contact.lname.toLowerCase().indexOf(query) > -1) || (contact.nname && (contact.nname.toLowerCase().indexOf(query) > -1))) {
-                    matches[matches.length] = contact;
-                }
+                if (((contact.fname+"").toLowerCase().indexOf(query) > -1) || 
+                   	 ((contact.lname+"").toLowerCase().indexOf(query) > -1) || 
+                   	 ((contact.nname) && ((contact.nname).toLowerCase().indexOf(query) > -1))) {
+                       matches[matches.length] = contact;
+                   }
             }
             return matches;
         };
@@ -912,21 +932,22 @@ var MembersAutoComplete = function (users_list, groups_list, group_lbl, members_
                 var grname = oResultData.grname;
                 var grmembers = oResultData.grmembers;
                 var grnameMatchIndex = grname.toLowerCase().indexOf(query);
-                var grprefix = "{0}: ".format(group_lbl);
+                var grprefix = "{0}: ".format(_TM['Group']);
                 var grsuffix = " (" + grmembers + "  )";
-                var grsuffix = " ({0}  {1})".format(grmembers, members_lbl);
+                var grsuffix = " ({0}  {1})".format(grmembers, _TM['members']);
 
                 if (grnameMatchIndex > -1) {
                     return _gravatar(grprefix + highlightMatch(grname, query, grnameMatchIndex) + grsuffix,null,true);
                 }
 			    return _gravatar(grprefix + oResultData.grname + grsuffix, null,true);
             // Users
-            } else if (oResultData.fname != undefined) {
-                var fname = oResultData.fname,
-                    lname = oResultData.lname,
-                    nname = oResultData.nname || "",
-                    // Guard against null value
-                    fnameMatchIndex = fname.toLowerCase().indexOf(query),
+            } else if (oResultData.nname != undefined) {
+                var fname = oResultData.fname || "";
+                var lname = oResultData.lname || "";
+                var nname = oResultData.nname;
+                
+                // Guard against null value
+                var fnameMatchIndex = fname.toLowerCase().indexOf(query),
                     lnameMatchIndex = lname.toLowerCase().indexOf(query),
                     nnameMatchIndex = nname.toLowerCase().indexOf(query),
                     displayfname, displaylname, displaynname;
@@ -988,7 +1009,7 @@ var MembersAutoComplete = function (users_list, groups_list, group_lbl, members_
 }
 
 
-var MentionsAutoComplete = function (divid, cont, users_list, groups_list, group_lbl, members_lbl) {
+var MentionsAutoComplete = function (divid, cont, users_list, groups_list) {
     var myUsers = users_list;
     var myGroups = groups_list;
 
@@ -1008,7 +1029,9 @@ var MentionsAutoComplete = function (divid, cont, users_list, groups_list, group
             // Match against each name of each contact
             for (; i < l; i++) {
                 contact = myUsers[i];
-                if ((contact.fname.toLowerCase().indexOf(query) > -1) || (contact.lname.toLowerCase().indexOf(query) > -1) || (contact.nname && (contact.nname.toLowerCase().indexOf(query) > -1))) {
+                if (((contact.fname+"").toLowerCase().indexOf(query) > -1) || 
+                	 ((contact.lname+"").toLowerCase().indexOf(query) > -1) || 
+                	 ((contact.nname) && ((contact.nname).toLowerCase().indexOf(query) > -1))) {
                     matches[matches.length] = contact;
                 }
             }
@@ -1023,6 +1046,7 @@ var MentionsAutoComplete = function (divid, cont, users_list, groups_list, group
 
     // DataScheme for owner
     var ownerDS = new YAHOO.util.FunctionDataSource(matchUsers);
+
     ownerDS.responseSchema = {
         fields: ["id", "fname", "lname", "nname", "gravatar_lnk"]
     };
@@ -1056,12 +1080,13 @@ var MentionsAutoComplete = function (divid, cont, users_list, groups_list, group
             	tmpl = '<div class="ac-container-wrap"><img class="perm-gravatar-ac" src="{0}"/>{1}</div>'
             	return tmpl.format(em,res)
             }
-            if (oResultData.fname != undefined) {
-                var fname = oResultData.fname,
-                    lname = oResultData.lname,
-                    nname = oResultData.nname || "",
-                    // Guard against null value
-                    fnameMatchIndex = fname.toLowerCase().indexOf(query),
+            if (oResultData.nname != undefined) {
+                var fname = oResultData.fname || "";
+                var lname = oResultData.lname || "";
+                var nname = oResultData.nname;
+                
+                // Guard against null value
+                var fnameMatchIndex = fname.toLowerCase().indexOf(query),
                     lnameMatchIndex = lname.toLowerCase().indexOf(query),
                     nnameMatchIndex = nname.toLowerCase().indexOf(query),
                     displayfname, displaylname, displaynname;
@@ -1138,7 +1163,7 @@ var MentionsAutoComplete = function (divid, cont, users_list, groups_list, group
 		chunks.push(org.substr(max_pos)) // postfix chunk
 
 		// clean up msg2 for filtering and regex match
-		var msg2 = msg2.replace(' ','').replace('\n','');
+		var msg2 = msg2.lstrip(' ').lstrip('\n');
 
 		if(re.test(msg2)){
 			var unam = re.exec(msg2)[1];
@@ -1168,8 +1193,6 @@ var MentionsAutoComplete = function (divid, cont, users_list, groups_list, group
         ownerAC: ownerAC,
     };
 }
-
-
 
 
 /**

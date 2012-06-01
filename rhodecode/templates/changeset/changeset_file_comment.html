@@ -30,7 +30,7 @@
 
 <%def name="comment_inline_form(changeset)">
 <div id='comment-inline-form-template' style="display:none">
-  <div class="comment-inline-form">
+  <div class="comment-inline-form ac">
   %if c.rhodecode_user.username != 'default':
     <div class="overlay"><div class="overlay-text">${_('Submitting...')}</div></div>
       ${h.form(h.url('changeset_comment', repo_name=c.repo_name, revision=changeset.raw_id),class_='inline-form')}
@@ -41,7 +41,7 @@
           	_('Use @username inside this text to send notification to this RhodeCode user')))|n}
           </div>
             <div class="mentions-container" id="mentions_container_{1}"></div>
-            <textarea id="text_{1}" name="text" class="yui-ac-input"></textarea>   
+            <textarea id="text_{1}" name="text" class="yui-ac-input"></textarea>
       </div>
       <div class="comment-button">
       <input type="hidden" name="f_path" value="{0}">
@@ -115,15 +115,7 @@
 </div>
 <script>
 YUE.onDOMReady(function () {
-
-   MentionsAutoComplete(
-   'text',
-   'mentions_container',
-   ${c.users_array|n},
-   ${c.users_groups_array|n},
-   "${_('Group')}",
-   "${_('members')}"
-   ); 
+   MentionsAutoComplete('text', 'mentions_container', _USERS_AC_DATA, _GROUPS_AC_DATA);
 });
 </script>
 </%def>
