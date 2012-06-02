@@ -20,6 +20,8 @@ news
 - new git repos are created as bare now by default
 - #464 added links to groups in permission box
 - #465 mentions autocomplete inside comments boxes
+- #469 added --update-only option to whoosh to re-index only given list
+  of repos in index 
 
 fixes
 +++++

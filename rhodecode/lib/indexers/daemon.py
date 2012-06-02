@@ -53,11 +53,12 @@ log = logging.getLogger('whoosh_indexer')
 
 class WhooshIndexingDaemon(object):
     """
-    Daemon for atomic jobs
+    Daemon for atomic indexing jobs
     """
 
     def __init__(self, indexname=IDX_NAME, index_location=None,
-                 repo_location=None, sa=None, repo_list=None):
+                 repo_location=None, sa=None, repo_list=None,
+                 repo_update_list=None):
         self.indexname = indexname
 
         self.index_location = index_location
@@ -70,13 +71,23 @@ class WhooshIndexingDaemon(object):
 
         self.repo_paths = ScmModel(sa).repo_scan(self.repo_location)
 
+        #filter repo list
         if repo_list:
-            filtered_repo_paths = {}
+            self.filtered_repo_paths = {}
             for repo_name, repo in self.repo_paths.items():
                 if repo_name in repo_list:
-                    filtered_repo_paths[repo_name] = repo
+                    self.filtered_repo_paths[repo_name] = repo
 
-            self.repo_paths = filtered_repo_paths
+            self.repo_paths = self.filtered_repo_paths
+
+        #filter update repo list
+        self.filtered_repo_update_paths = {}
+        if repo_update_list:
+            self.filtered_repo_update_paths = {}
+            for repo_name, repo in self.repo_paths.items():
+                if repo_name in repo_update_list:
+                    self.filtered_repo_update_paths[repo_name] = repo
+            self.repo_paths = self.filtered_repo_update_paths
 
         self.initial = False
         if not os.path.isdir(self.index_location):
@@ -172,8 +183,8 @@ class WhooshIndexingDaemon(object):
         log.debug('>>> FINISHED BUILDING INDEX <<<')
 
     def update_index(self):
-        log.debug(('STARTING INCREMENTAL INDEXING UPDATE FOR EXTENSIONS %s '
-                   'AND REPOS %s') % (INDEX_EXTENSIONS, self.repo_paths))
+        log.debug((u'STARTING INCREMENTAL INDEXING UPDATE FOR EXTENSIONS %s '
+                   'AND REPOS %s') % (INDEX_EXTENSIONS, self.repo_paths.keys()))
 
         idx = open_dir(self.index_location, indexname=self.indexname)
         # The set of all paths in the index
@@ -187,18 +198,16 @@ class WhooshIndexingDaemon(object):
         # Loop over the stored fields in the index
         for fields in reader.all_stored_fields():
             indexed_path = fields['path']
+            indexed_repo_path = fields['repository']
             indexed_paths.add(indexed_path)
 
-            repo = self.repo_paths[fields['repository']]
+            if not indexed_repo_path in self.filtered_repo_update_paths:
+                continue
+
+            repo = self.repo_paths[indexed_repo_path]
 
             try:
                 node = self.get_node(repo, indexed_path)
-            except (ChangesetError, NodeDoesNotExistError):
-                # This file was deleted since it was indexed
-                log.debug('removing from index %s' % indexed_path)
-                writer.delete_by_term('path', indexed_path)
-
-            else:
                 # Check if this file was changed since it was indexed
                 indexed_time = fields['modtime']
                 mtime = self.get_node_mtime(node)
@@ -208,6 +217,10 @@ class WhooshIndexingDaemon(object):
                     log.debug('adding to reindex list %s' % indexed_path)
                     writer.delete_by_term('path', indexed_path)
                     to_index.add(indexed_path)
+            except (ChangesetError, NodeDoesNotExistError):
+                # This file was deleted since it was indexed
+                log.debug('removing from index %s' % indexed_path)
+                writer.delete_by_term('path', indexed_path)
 
         # Loop over the files in the filesystem
         # Assume we have a function that gathers the filenames of the

@@ -93,6 +93,8 @@ class MakeIndex(BasePasterCommand):
             if self.options.repo_location else RepoModel().repos_path
         repo_list = map(strip, self.options.repo_list.split(',')) \
             if self.options.repo_list else None
+        repo_update_list = map(strip, self.options.repo_update_list.split(',')) \
+            if self.options.repo_update_list else None
         load_rcextensions(config['here'])
         #======================================================================
         # WHOOSH DAEMON
@@ -103,7 +105,8 @@ class MakeIndex(BasePasterCommand):
             l = DaemonLock(file_=jn(dn(dn(index_location)), 'make_index.lock'))
             WhooshIndexingDaemon(index_location=index_location,
                                  repo_location=repo_location,
-                                 repo_list=repo_list,)\
+                                 repo_list=repo_list,
+                                 repo_update_list=repo_update_list)\
                 .run(full_index=self.options.full_index)
             l.release()
         except LockHeld:
@@ -119,7 +122,14 @@ class MakeIndex(BasePasterCommand):
                           action='store',
                           dest='repo_list',
                           help="Specifies a comma separated list of repositores "
-                                "to build index on OPTIONAL",
+                                "to build index on. If not given all repositories "
+                                "are scanned for indexing. OPTIONAL",
+                          )
+        self.parser.add_option('--update-only',
+                          action='store',
+                          dest='repo_update_list',
+                          help="Specifies a comma separated list of repositores "
+                                "to re-build index on. OPTIONAL",
                           )
         self.parser.add_option('-f',
                           action='store_true',
