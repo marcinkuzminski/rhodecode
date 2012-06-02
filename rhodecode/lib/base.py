@@ -30,6 +30,16 @@ from rhodecode.model.scm import ScmModel
 log = logging.getLogger(__name__)
 
 
+def _get_ip_addr(environ):
+    proxy_key = 'HTTP_X_REAL_IP'
+    proxy_key2 = 'HTTP_X_FORWARDED_FOR'
+    def_key = 'REMOTE_ADDR'
+
+    return environ.get(proxy_key2,
+                       environ.get(proxy_key, environ.get(def_key, '0.0.0.0'))
+                       )
+
+
 class BasicAuth(AuthBasicAuthenticator):
 
     def __init__(self, realm, authfunc, auth_http_code=None):
@@ -117,15 +127,7 @@ class BaseVCSController(object):
         return True
 
     def _get_ip_addr(self, environ):
-        proxy_key = 'HTTP_X_REAL_IP'
-        proxy_key2 = 'HTTP_X_FORWARDED_FOR'
-        def_key = 'REMOTE_ADDR'
-
-        return environ.get(proxy_key2,
-                           environ.get(proxy_key,
-                                       environ.get(def_key, '0.0.0.0')
-                            )
-                        )
+        return _get_ip_addr(environ)
 
     def __call__(self, environ, start_response):
         start = time.time()
@@ -153,6 +155,7 @@ class BaseController(WSGIController):
 
         self.sa = meta.Session
         self.scm_model = ScmModel(self.sa)
+        self.ip_addr = ''
 
     def __call__(self, environ, start_response):
         """Invoke the Controller"""
@@ -161,6 +164,7 @@ class BaseController(WSGIController):
         # available in environ['pylons.routes_dict']
         start = time.time()
         try:
+            self.ip_addr = _get_ip_addr(environ)
             # make sure that we update permissions each time we call controller
             api_key = request.GET.get('api_key')
             cookie_store = CookieStoreWrapper(session.get('rhodecode_user'))
