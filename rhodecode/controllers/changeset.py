@@ -40,7 +40,7 @@ from rhodecode.lib.vcs.nodes import FileNode
 import rhodecode.lib.helpers as h
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseRepoController, render
-from rhodecode.lib.utils import EmptyChangeset
+from rhodecode.lib.utils import EmptyChangeset, action_logger
 from rhodecode.lib.compat import OrderedDict
 from rhodecode.lib import diffs
 from rhodecode.model.db import ChangesetComment
@@ -373,7 +373,12 @@ class ChangesetController(BaseRepoController):
             f_path=request.POST.get('f_path'),
             line_no=request.POST.get('line')
         )
+        action_logger(self.rhodecode_user,
+                      'user_commented_revision:%s' % revision,
+                      c.rhodecode_db_repo, self.ip_addr, self.sa)
+
         Session.commit()
+
         if not request.environ.get('HTTP_X_PARTIAL_XHR'):
             return redirect(h.url('changeset_home', repo_name=repo_name,
                                   revision=revision))

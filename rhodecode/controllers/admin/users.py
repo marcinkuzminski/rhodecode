@@ -42,6 +42,7 @@ from rhodecode.model.db import User, Permission
 from rhodecode.model.forms import UserForm
 from rhodecode.model.user import UserModel
 from rhodecode.model.meta import Session
+from rhodecode.lib.utils import action_logger
 
 log = logging.getLogger(__name__)
 
@@ -76,10 +77,12 @@ class UsersController(BaseController):
         try:
             form_result = user_form.to_python(dict(request.POST))
             user_model.create(form_result)
-            h.flash(_('created user %s') % form_result['username'],
+            usr = form_result['username']
+            action_logger(self.rhodecode_user, 'admin_created_user:%s' % usr,
+                          None, self.ip_addr, self.sa)
+            h.flash(_('created user %s') % usr,
                     category='success')
             Session.commit()
-            #action_logger(self.rhodecode_user, 'new_user', '', '', self.sa)
         except formencode.Invalid, errors:
             return htmlfill.render(
                 render('admin/users/user_add.html'),
@@ -115,6 +118,9 @@ class UsersController(BaseController):
         try:
             form_result = _form.to_python(dict(request.POST))
             user_model.update(id, form_result)
+            usr = form_result['username']
+            action_logger(self.rhodecode_user, 'admin_updated_user:%s' % usr,
+                          None, self.ip_addr, self.sa)
             h.flash(_('User updated successfully'), category='success')
             Session.commit()
         except formencode.Invalid, errors:

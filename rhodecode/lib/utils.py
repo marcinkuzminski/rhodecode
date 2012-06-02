@@ -146,13 +146,14 @@ def action_logger(user, action, repo, ipaddr='', sa=None, commit=False):
             repo_name = repo.lstrip('/')
             repo_obj = Repository.get_by_repo_name(repo_name)
         else:
-            raise Exception('You have to provide repository to action logger')
+            repo_obj = None
+            repo_name = ''
 
         user_log = UserLog()
         user_log.user_id = user_obj.user_id
         user_log.action = safe_unicode(action)
 
-        user_log.repository_id = repo_obj.repo_id
+        user_log.repository = repo_obj
         user_log.repository_name = repo_name
 
         user_log.action_date = datetime.datetime.now()

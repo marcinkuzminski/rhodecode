@@ -192,7 +192,6 @@ class JournalController(BaseController):
                          ttl=self.ttl)
 
         for entry in journal[:self.feed_nr]:
-            #tmpl = h.action_parser(entry)[0]
             action, action_extra = h.action_parser(entry, feed=True)
             title = "%s - %s %s" % (entry.user.short_contact, action,
                                  entry.repository.repo_name)
@@ -226,7 +225,6 @@ class JournalController(BaseController):
                          ttl=self.ttl)
 
         for entry in journal[:self.feed_nr]:
-            #tmpl = h.action_parser(entry)[0]
             action, action_extra = h.action_parser(entry, feed=True)
             title = "%s - %s %s" % (entry.user.short_contact, action,
                                  entry.repository.repo_name)

@@ -537,22 +537,57 @@ def action_parser(user_log, feed=False):
         return _('fork name ') + str(link_to(action_params, url('summary_home',
                                           repo_name=repo_name,)))
 
-    action_map = {'user_deleted_repo': (_('[deleted] repository'), None),
-           'user_created_repo': (_('[created] repository'), None),
-           'user_created_fork': (_('[created] repository as fork'), None),
-           'user_forked_repo': (_('[forked] repository'), get_fork_name),
-           'user_updated_repo': (_('[updated] repository'), None),
-           'admin_deleted_repo': (_('[delete] repository'), None),
-           'admin_created_repo': (_('[created] repository'), None),
-           'admin_forked_repo': (_('[forked] repository'), None),
-           'admin_updated_repo': (_('[updated] repository'), None),
-           'push': (_('[pushed] into'), get_cs_links),
-           'push_local': (_('[committed via RhodeCode] into'), get_cs_links),
-           'push_remote': (_('[pulled from remote] into'), get_cs_links),
-           'pull': (_('[pulled] from'), None),
-           'started_following_repo': (_('[started following] repository'), None),
-           'stopped_following_repo': (_('[stopped following] repository'), None),
-            }
+    def get_user_name():
+        user_name = action_params
+        return user_name
+
+    def get_users_group():
+        group_name = action_params
+        return group_name
+
+    # action : translated str, callback(extractor), icon
+    action_map = {
+    'user_deleted_repo':         (_('[deleted] repository'), None,
+                                  'database_delete.png'),
+    'user_created_repo':         (_('[created] repository'), None,
+                                  'database_add.png'),
+    'user_created_fork':         (_('[created] repository as fork'), None,
+                                  'arrow_divide.png'),
+    'user_forked_repo':          (_('[forked] repository'), get_fork_name,
+                                  'arrow_divide.png'),
+    'user_updated_repo':         (_('[updated] repository'), None,
+                                  'database_edit.png'),
+    'admin_deleted_repo':        (_('[delete] repository'), None,
+                                  'database_delete.png'),
+    'admin_created_repo':        (_('[created] repository'), None,
+                                  'database_add.png'),
+    'admin_forked_repo':         (_('[forked] repository'), None,
+                                  'arrow_divide.png'),
+    'admin_updated_repo':        (_('[updated] repository'), None,
+                                 'database_edit.png'),
+    'admin_created_user':        (_('[created] user'), get_user_name,
+                                 'user_add.png'),
+    'admin_updated_user':        (_('[updated] user'), get_user_name,
+                                 'user_edit.png'),
+    'admin_created_users_group': (_('[created] users group'), get_users_group,
+                                  'group_add.png'),
+    'admin_updated_users_group': (_('[updated] users group'), get_users_group,
+                                  'group_edit.png'),
+    'user_commented_revision':   (_('[commented] on revision'), get_cs_links,
+                                  'comment_add.png'),
+    'push':                      (_('[pushed] into'), get_cs_links,
+                                  'script_add.png'),
+    'push_local':                (_('[committed via RhodeCode] into'), get_cs_links,
+                                  'script_edit.png'),
+    'push_remote':               (_('[pulled from remote] into'), get_cs_links,
+                                  'connect.png'),
+    'pull':                      (_('[pulled] from'), None,
+                                  'down_16.png'),
+    'started_following_repo':    (_('[started following] repository'), None,
+                                  'heart_add.png'),
+    'stopped_following_repo':    (_('[stopped following] repository'), None,
+                                  'heart_delete.png'),
+    }
 
     action_str = action_map.get(action, action)
     if feed:
@@ -567,36 +602,21 @@ def action_parser(user_log, feed=False):
     if callable(action_str[1]):
         action_params_func = action_str[1]
 
-    return [literal(action), action_params_func]
+    def action_parser_icon():
+        action = user_log.action
+        action_params = None
+        x = action.split(':')
 
+        if len(x) > 1:
+            action, action_params = x
 
-def action_parser_icon(user_log):
-    action = user_log.action
-    action_params = None
-    x = action.split(':')
+        tmpl = """<img src="%s%s" alt="%s"/>"""
+        ico = action_map.get(action, ['', '', ''])[2]
+        return literal(tmpl % ((url('/images/icons/')), ico, action))
 
-    if len(x) > 1:
-        action, action_params = x
+    # returned callbacks we need to call to get
+    return [lambda: literal(action), action_params_func, action_parser_icon]
 
-    tmpl = """<img src="%s%s" alt="%s"/>"""
-    map = {'user_deleted_repo':'database_delete.png',
-           'user_created_repo':'database_add.png',
-           'user_created_fork':'arrow_divide.png',
-           'user_forked_repo':'arrow_divide.png',
-           'user_updated_repo':'database_edit.png',
-           'admin_deleted_repo':'database_delete.png',
-           'admin_created_repo':'database_add.png',
-           'admin_forked_repo':'arrow_divide.png',
-           'admin_updated_repo':'database_edit.png',
-           'push':'script_add.png',
-           'push_local':'script_edit.png',
-           'push_remote':'connect.png',
-           'pull':'down_16.png',
-           'started_following_repo':'heart_add.png',
-           'stopped_following_repo':'heart_delete.png',
-            }
-    return literal(tmpl % ((url('/images/icons/')),
-                           map.get(action, action), action))
 
 
 #==============================================================================
