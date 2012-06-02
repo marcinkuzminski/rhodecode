@@ -72,10 +72,10 @@ if __py_version__ < (2, 6):
     requirements.append("pysqlite")
 
 if is_windows:
-    requirements.append("mercurial>=2.2.1,<2.3")
+    requirements.append("mercurial>=2.2.2,<2.3")
 else:
     requirements.append("py-bcrypt")
-    requirements.append("mercurial>=2.2.1,<2.3")
+    requirements.append("mercurial>=2.2.2,<2.3")
 
 
 def get_version():

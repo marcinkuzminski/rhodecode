@@ -13,5 +13,6 @@ dulwich>=0.8.5,<0.9.0
 webob==1.0.8
 markdown==2.1.1
 docutils==0.8.1
+simplejson==2.5.2
 py-bcrypt
-mercurial>=2.2.1,<2.3
+mercurial>=2.2.2,<2.3
