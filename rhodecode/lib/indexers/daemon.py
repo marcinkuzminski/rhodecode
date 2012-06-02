@@ -172,8 +172,8 @@ class WhooshIndexingDaemon(object):
         log.debug('>>> FINISHED BUILDING INDEX <<<')
 
     def update_index(self):
-        log.debug('STARTING INCREMENTAL INDEXING UPDATE FOR EXTENSIONS %s' %
-                  INDEX_EXTENSIONS)
+        log.debug(('STARTING INCREMENTAL INDEXING UPDATE FOR EXTENSIONS %s '
+                   'AND REPOS %s') % (INDEX_EXTENSIONS, self.repo_paths))
 
         idx = open_dir(self.index_location, indexname=self.indexname)
         # The set of all paths in the index
@@ -215,6 +215,7 @@ class WhooshIndexingDaemon(object):
         ri_cnt = riwc_cnt = 0
         for repo_name, repo in self.repo_paths.items():
             for path in self.get_paths(repo):
+                path = safe_unicode(path)
                 if path in to_index or path not in indexed_paths:
                     # This is either a file that's changed, or a new file
                     # that wasn't indexed before. So index it!
