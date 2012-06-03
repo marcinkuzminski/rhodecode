@@ -41,6 +41,8 @@ except ImportError:
 
 
 CONFIG_NAME = '.rhodecode'
+FORMAT_PRETTY = 'pretty'
+FORMAT_JSON = 'json'
 
 
 class RcConf(object):
@@ -114,12 +116,14 @@ class RcConf(object):
             pass
 
 
-def api_call(apikey, apihost, method=None, **kw):
+def api_call(apikey, apihost, format, method=None, **kw):
     """
     Api_call wrapper for RhodeCode
 
     :param apikey:
     :param apihost:
+    :param format: formatting, pretty means prints and pprint of json
+     json returns unparsed json
     :param method:
     """
     def _build_data(random_id):
@@ -142,13 +146,19 @@ def api_call(apikey, apihost, method=None, **kw):
     req = urllib2.Request('%s/_admin/api' % apihost,
                       data=json.dumps(_build_data(id_)),
                       headers={'content-type': 'text/plain'})
-    print 'calling %s to %s' % (req.get_data(), apihost)
+    if format == FORMAT_PRETTY:
+        sys.stdout.write('calling %s to %s \n' % (req.get_data(), apihost))
     ret = urllib2.urlopen(req)
-    json_data = json.loads(ret.read())
+    raw_json = ret.read()
+    json_data = json.loads(raw_json)
     id_ret = json_data['id']
     _formatted_json = pprint.pformat(json_data)
     if id_ret == id_:
-        print 'rhodecode said:\n%s' % (_formatted_json)
+        if format == FORMAT_JSON:
+            sys.stdout.write(str(raw_json))
+        else:
+            sys.stdout.write('rhodecode returned:\n%s\n' % (_formatted_json))
+
     else:
         raise Exception('something went wrong. '
                         'ID mismatch got %s, expected %s | %s' % (
@@ -156,7 +166,7 @@ def api_call(apikey, apihost, method=None, **kw):
 
 
 def argparser(argv):
-    usage = ("rhodecode_api [-h] [--apikey APIKEY] [--apihost APIHOST] "
+    usage = ("rhodecode_api [-h] [--format=FORMAT] [--apikey=APIKEY] [--apihost=APIHOST] "
              "_create_config or METHOD <key:val> <key2:val> ...")
 
     parser = argparse.ArgumentParser(description='RhodeCode API cli',
@@ -171,7 +181,11 @@ def argparser(argv):
     group.add_argument('method', metavar='METHOD', type=str,
             help='API method name to call followed by key:value attributes',
     )
-
+    group.add_argument('--format', dest='format', type=str,
+            help='output format default: `pretty` can '
+                 'be also `%s`' % FORMAT_JSON,
+            default=FORMAT_PRETTY
+    )
     args, other = parser.parse_known_args()
     return parser, args, other
 
@@ -209,7 +223,7 @@ def main(argv=None):
     method = args.method
     margs = dict(map(lambda s: s.split(':', 1), other))
 
-    api_call(apikey, host, method, **margs)
+    api_call(apikey, host, args.format, method, **margs)
     return 0
 
 if __name__ == '__main__':
