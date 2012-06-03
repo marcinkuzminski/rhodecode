@@ -521,14 +521,22 @@ class ApiController(JSONRPCController):
                     repo_type=repo_type,
                     repo_group=group.group_id if group else None,
                     clone_uri=clone_uri
-                ),
-                owner
+                )
             )
             Session.commit()
 
             return dict(
                 id=repo.repo_id,
-                msg="Created new repository %s" % repo.repo_name
+                msg="Created new repository %s" % (repo.repo_name),
+                repo=dict(
+                    id=repo.repo_id,
+                    repo_name=repo.repo_name,
+                    type=repo.repo_type,
+                    clone_uri=repo.clone_uri,
+                    private=repo.private,
+                    created_on=repo.created_on,
+                    description=repo.description,
+                )
             )
 
         except Exception:

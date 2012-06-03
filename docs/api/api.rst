@@ -571,6 +571,15 @@ OUTPUT::
     result: {
               "id": "<newrepoid>",
               "msg": "Created new repository <reponame>",
+              "repo": {
+                "id" :          "<id>",
+                "repo_name" :   "<reponame>"
+                "type" :        "<type>",
+                "description" : "<description>",
+                "clone_uri" :   "<clone_uri>",
+                "private": :    "<bool>",
+                "created_on" :  "<datetimecreated>",
+              },
             }
     error:  null
 
