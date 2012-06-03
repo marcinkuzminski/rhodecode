@@ -22,6 +22,7 @@ news
 - #465 mentions autocomplete inside comments boxes
 - #469 added --update-only option to whoosh to re-index only given list
   of repos in index 
+- rhodecode-api CLI client
 
 fixes
 +++++

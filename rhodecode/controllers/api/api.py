@@ -389,7 +389,7 @@ class ApiController(JSONRPCController):
 
         repo = RepoModel().get_repo(repoid)
         if repo is None:
-            raise JSONRPCError('unknown repository %s' % repo)
+            raise JSONRPCError('unknown repository "%s"' % (repo or repoid))
 
         members = []
         for user in repo.repo_to_perm:

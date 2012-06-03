@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-    rhodecode.lib.backup_manager
+    rhodecode.bin.backup_manager
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    Mercurial repositories backup manager, it allows to backups all
+    Repositories backup manager, it allows to backups all
     repositories and send it to backup server using RSA key via ssh.
 
     :created_on: Feb 28, 2010
@@ -39,7 +39,7 @@ logging.basicConfig(level=logging.DEBUG,
 class BackupManager(object):
     def __init__(self, repos_location, rsa_key, backup_server):
         today = datetime.datetime.now().weekday() + 1
-        self.backup_file_name = "mercurial_repos.%s.tar.gz" % today
+        self.backup_file_name = "rhodecode_repos.%s.tar.gz" % today
 
         self.id_rsa_path = self.get_id_rsa(rsa_key)
         self.repos_path = self.get_repos_path(repos_location)

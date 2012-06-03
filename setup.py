@@ -87,6 +87,9 @@ setup(
     zip_safe=False,
     paster_plugins=['PasteScript', 'Pylons'],
     entry_points="""
+    [console_scripts]
+    rhodecode-api =  rhodecode.bin.rhodecode_api:main
+
     [paste.app_factory]
     main = rhodecode.config.middleware:make_app
 

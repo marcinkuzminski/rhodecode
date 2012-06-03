@@ -57,15 +57,16 @@ class JSONRPCError(BaseException):
         return str(self.message)
 
 
-def jsonrpc_error(message, code=None):
+def jsonrpc_error(message, retid=None, code=None):
     """
     Generate a Response object with a JSON-RPC error body
     """
     from pylons.controllers.util import Response
-    resp = Response(body=json.dumps(dict(id=None, result=None, error=message)),
-                    status=code,
-                    content_type='application/json')
-    return resp
+    return Response(
+            body=json.dumps(dict(id=retid, result=None, error=message)),
+            status=code,
+            content_type='application/json'
+    )
 
 
 class JSONRPCController(WSGIController):
@@ -94,9 +95,11 @@ class JSONRPCController(WSGIController):
         Parse the request body as JSON, look up the method on the
         controller and if it exists, dispatch to it.
         """
+        self._req_id = None
         if 'CONTENT_LENGTH' not in environ:
             log.debug("No Content-Length")
-            return jsonrpc_error(message="No Content-Length in request")
+            return jsonrpc_error(retid=self._req_id,
+                                 message="No Content-Length in request")
         else:
             length = environ['CONTENT_LENGTH'] or 0
             length = int(environ['CONTENT_LENGTH'])
@@ -104,7 +107,8 @@ class JSONRPCController(WSGIController):
 
         if length == 0:
             log.debug("Content-Length is 0")
-            return jsonrpc_error(message="Content-Length is 0")
+            return jsonrpc_error(retid=self._req_id,
+                                 message="Content-Length is 0")
 
         raw_body = environ['wsgi.input'].read(length)
 
@@ -112,7 +116,8 @@ class JSONRPCController(WSGIController):
             json_body = json.loads(urllib.unquote_plus(raw_body))
         except ValueError, e:
             # catch JSON errors Here
-            return jsonrpc_error(message="JSON parse error ERR:%s RAW:%r" \
+            return jsonrpc_error(retid=self._req_id,
+                                 message="JSON parse error ERR:%s RAW:%r" \
                                  % (e, urllib.unquote_plus(raw_body)))
 
         # check AUTH based on API KEY
@@ -126,22 +131,26 @@ class JSONRPCController(WSGIController):
                                             self._request_params)
             )
         except KeyError, e:
-            return jsonrpc_error(message='Incorrect JSON query missing %s' % e)
+            return jsonrpc_error(retid=self._req_id,
+                                 message='Incorrect JSON query missing %s' % e)
 
         # check if we can find this session using api_key
         try:
             u = User.get_by_api_key(self._req_api_key)
             if u is None:
-                return jsonrpc_error(message='Invalid API KEY')
+                return jsonrpc_error(retid=self._req_id,
+                                     message='Invalid API KEY')
             auth_u = AuthUser(u.user_id, self._req_api_key)
         except Exception, e:
-            return jsonrpc_error(message='Invalid API KEY')
+            return jsonrpc_error(retid=self._req_id,
+                                 message='Invalid API KEY')
 
         self._error = None
         try:
             self._func = self._find_method()
         except AttributeError, e:
-            return jsonrpc_error(message=str(e))
+            return jsonrpc_error(retid=self._req_id,
+                                 message=str(e))
 
         # now that we have a method, add self._req_params to
         # self.kargs and dispatch control to WGIController
@@ -164,9 +173,12 @@ class JSONRPCController(WSGIController):
         USER_SESSION_ATTR = 'apiuser'
 
         if USER_SESSION_ATTR not in arglist:
-            return jsonrpc_error(message='This method [%s] does not support '
-                                 'authentication (missing %s param)' %
-                                 (self._func.__name__, USER_SESSION_ATTR))
+            return jsonrpc_error(
+                retid=self._req_id,
+                message='This method [%s] does not support '
+                         'authentication (missing %s param)' % (
+                                    self._func.__name__, USER_SESSION_ATTR)
+            )
 
         # get our arglist and check if we provided them as args
         for arg, default in func_kwargs.iteritems():
@@ -179,6 +191,7 @@ class JSONRPCController(WSGIController):
             # NotImplementedType (default_empty)
             if (default == default_empty and arg not in self._request_params):
                 return jsonrpc_error(
+                    retid=self._req_id,
                     message=(
                         'Missing non optional `%s` arg in JSON DATA' % arg
                     )
