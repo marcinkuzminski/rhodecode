@@ -437,6 +437,12 @@ class GitRepository(BaseRepository):
         if ignore_whitespace:
             flags.append('-w')
 
+        if hasattr(rev1, 'raw_id'):
+            rev1 = getattr(rev1, 'raw_id')
+
+        if hasattr(rev2, 'raw_id'):
+            rev2 = getattr(rev2, 'raw_id')
+
         if rev1 == self.EMPTY_CHANGESET:
             rev2 = self.get_changeset(rev2).raw_id
             cmd = ' '.join(['show'] + flags + [rev2])
