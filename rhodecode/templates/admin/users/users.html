@@ -46,7 +46,7 @@
                     <td>${h.link_to(user.username,h.url('edit_user', id=user.user_id))}</td>
                     <td>${user.name}</td>
                     <td>${user.lastname}</td>
-                    <td>${user.last_login}</td>
+                    <td>${h.fmt_date(user.last_login)}</td>
                     <td>${h.bool2icon(user.active)}</td>
                     <td>${h.bool2icon(user.admin)}</td>
                     <td>${h.bool2icon(bool(user.ldap_dn))}</td>

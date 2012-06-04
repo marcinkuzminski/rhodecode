@@ -57,7 +57,7 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
 								</div>
 								<div title="${cs.author}" class="user">${h.shorter(h.person(cs.author),22)}</div>
 							</div>
-                            <div class="date">${cs.date}</div>
+                            <div class="date">${h.fmt_date(cs.date)}</div>
 						</div>
 						<div class="mid">
                             <div class="message">${h.urlify_commit(h.wrap_paragraphs(cs.message),c.repo_name,h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id))}</div>

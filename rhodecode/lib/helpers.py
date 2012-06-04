@@ -345,6 +345,14 @@ short_id = lambda x: x[:12]
 hide_credentials = lambda x: ''.join(credentials_filter(x))
 
 
+def fmt_date(date):
+    if date:
+        return (date.strftime(_(u"%a, %d %b %Y %H:%M:%S").encode('utf8'))
+            .decode('utf8'))
+    
+    return ""
+
+
 def is_git(repository):
     if hasattr(repository, 'alias'):
         _type = repository.alias

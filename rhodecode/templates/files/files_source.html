@@ -16,7 +16,7 @@
 	<div class="code-header">
         <div class="stats">
             <div class="left img"><img src="${h.url('/images/icons/file.png')}"/></div>
-            <div class="left item"><pre class="tooltip" title="${c.file.changeset.date}">${h.link_to("r%s:%s" % (c.file.changeset.revision,h.short_id(c.file.changeset.raw_id)),h.url('changeset_home',repo_name=c.repo_name,revision=c.file.changeset.raw_id))}</pre></div>
+            <div class="left item"><pre class="tooltip" title="${h.fmt_date(c.file.changeset.date)}">${h.link_to("r%s:%s" % (c.file.changeset.revision,h.short_id(c.file.changeset.raw_id)),h.url('changeset_home',repo_name=c.repo_name,revision=c.file.changeset.raw_id))}</pre></div>
             <div class="left item"><pre>${h.format_byte_size(c.file.size,binary=True)}</pre></div>
             <div class="left item last"><pre>${c.file.mimetype}</pre></div>
             <div class="buttons">
