@@ -231,6 +231,12 @@ class MercurialRepository(BaseRepository):
         :param context: How many lines before/after changed lines should be
           shown. Defaults to ``3``.
         """
+        if hasattr(rev1, 'raw_id'):
+            rev1 = getattr(rev1, 'raw_id')
+
+        if hasattr(rev2, 'raw_id'):
+            rev2 = getattr(rev2, 'raw_id')
+
         # Check if given revisions are present at repository (may raise
         # ChangesetDoesNotExistError)
         if rev1 != self.EMPTY_CHANGESET:
