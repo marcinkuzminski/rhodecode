@@ -23,6 +23,8 @@ news
 - #469 added --update-only option to whoosh to re-index only given list
   of repos in index 
 - rhodecode-api CLI client
+- new git http protocol replaced buggy dulwich implementation.
+  Now based on pygrack & gitweb
 
 fixes
 +++++

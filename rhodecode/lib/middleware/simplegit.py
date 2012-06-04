@@ -218,11 +218,13 @@ class SimpleGit(BaseVCSController):
         :param repo_name: name of the repository
         :param repo_path: full path to the repository
         """
-        _d = {'/' + repo_name: Repo(repo_path)}
-        backend = dulserver.DictBackend(_d)
-        gitserve = make_wsgi_chain(backend)
 
-        return gitserve
+        from rhodecode.lib.middleware.pygrack import make_wsgi_app
+        app = make_wsgi_app(
+            repo_root=os.path.dirname(repo_path),
+            repo_name=repo_name,
+        )
+        return app
 
     def __get_repository(self, environ):
         """
