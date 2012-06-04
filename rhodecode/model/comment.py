@@ -102,6 +102,7 @@ class ChangesetCommentsModel(BaseModel):
             # add changeset author if it's in rhodecode system
             recipients += [User.get_by_email(author_email)]
 
+            # create notification objects, and emails
             NotificationModel().create(
               created_by=user_id, subject=subj, body=body,
               recipients=recipients, type_=Notification.TYPE_CHANGESET_COMMENT

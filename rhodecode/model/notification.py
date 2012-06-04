@@ -103,8 +103,11 @@ class NotificationModel(BaseModel):
         if with_email is False:
             return notif
 
-        # send email with notification
-        for rec in recipients_objs:
+        #don't send email to person who created this comment
+        rec_objs = set(recipients_objs).difference(set([created_by_obj]))
+
+        # send email with notification to all other participants
+        for rec in rec_objs:
             email_subject = NotificationModel().make_description(notif, False)
             type_ = type_
             email_body = body
