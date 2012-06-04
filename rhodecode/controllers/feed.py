@@ -73,7 +73,7 @@ class FeedController(BaseRepoController):
     def __get_desc(self, cs):
         desc_msg = []
         desc_msg.append('%s %s %s:<br/>' % (cs.author, _('commited on'),
-                                           cs.date))
+                                           h.fmt_date(cs.date)))
         desc_msg.append('<pre>')
         desc_msg.append(cs.message)
         desc_msg.append('\n')
