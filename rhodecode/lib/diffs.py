@@ -128,7 +128,7 @@ class DiffProcessor(object):
     """
     _chunk_re = re.compile(r'@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@(.*)')
 
-    def __init__(self, diff, differ='diff', format='udiff'):
+    def __init__(self, diff, differ='diff', format='gitdiff'):
         """
         :param diff:   a text in diff format or generator
         :param format: format of diff passed, `udiff` or `gitdiff`
@@ -171,7 +171,7 @@ class DiffProcessor(object):
 
     def _extract_rev(self, line1, line2):
         """
-        Extract the filename and revision hint from a line.
+        Extract the operation (A/M/D), filename and revision hint from a line.
         """
 
         try:
@@ -189,11 +189,15 @@ class DiffProcessor(object):
                 filename = (old_filename
                             if old_filename != '/dev/null' else new_filename)
 
-                return filename, new_rev, old_rev
+                operation = 'D' if new_filename == '/dev/null' else None
+                if not operation:
+                    operation = 'M' if old_filename != '/dev/null' else 'A'
+
+                return operation, filename, new_rev, old_rev
         except (ValueError, IndexError):
             pass
 
-        return None, None, None
+        return None, None, None, None
 
     def _parse_gitdiff(self, diffiterator):
         def line_decoder(l):
@@ -278,7 +282,7 @@ class DiffProcessor(object):
             do(line)
             do(next_)
 
-    def _parse_udiff(self):
+    def _parse_udiff(self, inline_diff=True):
         """
         Parse the diff an return data for the template.
         """
@@ -293,13 +297,16 @@ class DiffProcessor(object):
                     continue
 
                 chunks = []
-                filename, old_rev, new_rev = \
+                stats = [0, 0]
+                operation, filename, old_rev, new_rev = \
                     self._extract_rev(line, lineiter.next())
                 files.append({
                     'filename':         filename,
                     'old_revision':     old_rev,
                     'new_revision':     new_rev,
-                    'chunks':           chunks
+                    'chunks':           chunks,
+                    'operation':        operation,
+                    'stats':            stats,
                 })
 
                 line = lineiter.next()
@@ -331,7 +338,6 @@ class DiffProcessor(object):
                             })
 
                     line = lineiter.next()
-
                     while old_line < old_end or new_line < new_end:
                         if line:
                             command, line = line[0], line[1:]
@@ -345,9 +351,11 @@ class DiffProcessor(object):
                         elif command == '+':
                             affects_new = True
                             action = 'add'
+                            stats[0] += 1
                         elif command == '-':
                             affects_old = True
                             action = 'del'
+                            stats[1] += 1
                         else:
                             affects_old = affects_new = True
                             action = 'unmod'
@@ -371,13 +379,16 @@ class DiffProcessor(object):
                             })
 
                         line = lineiter.next()
-
         except StopIteration:
             pass
 
+        sorter = lambda info: {'A': 0, 'M': 1, 'D': 2}.get(info['operation'])
+        if inline_diff is False:
+            return sorted(files, key=sorter)
+
         # highlight inline changes
-        for _ in files:
-            for chunk in chunks:
+        for diff_data in files:
+            for chunk in diff_data['chunks']:
                 lineiter = iter(chunk)
                 try:
                     while 1:
@@ -391,14 +402,14 @@ class DiffProcessor(object):
                 except StopIteration:
                     pass
 
-        return files
+        return sorted(files, key=sorter)
 
-    def prepare(self):
+    def prepare(self, inline_diff=True):
         """
         Prepare the passed udiff for HTML rendering. It'l return a list
         of dicts
         """
-        return self._parse_udiff()
+        return self._parse_udiff(inline_diff=inline_diff)
 
     def _safe_id(self, idstring):
         """Make a string safe for including in an id attribute.
@@ -432,7 +443,7 @@ class DiffProcessor(object):
 
     def as_html(self, table_class='code-difftable', line_class='line',
                 new_lineno_class='lineno old', old_lineno_class='lineno new',
-                code_class='code', enable_comments=False):
+                code_class='code', enable_comments=False, diff_lines=None):
         """
         Return udiff as html table with customized css classes
         """
@@ -448,7 +459,8 @@ class DiffProcessor(object):
                 }
             else:
                 return label
-        diff_lines = self.prepare()
+        if diff_lines is None:
+            diff_lines = self.prepare()
         _html_empty = True
         _html = []
         _html.append('''<table class="%(table_class)s">\n''' % {

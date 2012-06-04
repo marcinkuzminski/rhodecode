@@ -544,6 +544,15 @@ class ApiController(JSONRPCController):
             raise JSONRPCError('failed to create repository %s' % repo_name)
 
     @HasPermissionAnyDecorator('hg.admin')
+    def fork_repo(self, apiuser, repoid):
+        repo = RepoModel().get_repo(repoid)
+        if repo is None:
+            raise JSONRPCError('unknown repository "%s"' % (repo or repoid))
+
+        RepoModel().create_fork(form_data, cur_user)
+
+
+    @HasPermissionAnyDecorator('hg.admin')
     def delete_repo(self, apiuser, repo_name):
         """
         Deletes a given repository

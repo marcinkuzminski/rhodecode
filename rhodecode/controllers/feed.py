@@ -28,11 +28,12 @@ import logging
 from pylons import url, response, tmpl_context as c
 from pylons.i18n.translation import _
 
-from rhodecode.lib.utils2 import safe_unicode
+from webhelpers.feedgenerator import Atom1Feed, Rss201rev2Feed
+
+from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseRepoController
-
-from webhelpers.feedgenerator import Atom1Feed, Rss201rev2Feed
+from rhodecode.lib.diffs import DiffProcessor
 
 log = logging.getLogger(__name__)
 
@@ -49,31 +50,36 @@ class FeedController(BaseRepoController):
         self.title = self.title = _('%s %s feed') % (c.rhodecode_name, '%s')
         self.language = 'en-us'
         self.ttl = "5"
-        self.feed_nr = 10
+        self.feed_nr = 20
 
     def _get_title(self, cs):
-        return "R%s:%s - %s" % (
-            cs.revision, cs.short_id, cs.message
+        return "%s" % (
+            h.shorter(cs.message, 160)
         )
 
     def __changes(self, cs):
         changes = []
 
-        a = [safe_unicode(n.path) for n in cs.added]
-        if a:
-            changes.append('\nA ' + '\nA '.join(a))
+        diffprocessor = DiffProcessor(cs.diff())
+        stats = diffprocessor.prepare(inline_diff=False)
+        for st in stats:
+            st.update({'added': st['stats'][0],
+                       'removed': st['stats'][1]})
+            changes.append('\n %(operation)s %(filename)s '
+                           '(%(added)s lines added, %(removed)s lines removed)'
+                            % st)
+        return changes
 
-        m = [safe_unicode(n.path) for n in cs.changed]
-        if m:
-            changes.append('\nM ' + '\nM '.join(m))
-
-        d = [safe_unicode(n.path) for n in cs.removed]
-        if d:
-            changes.append('\nD ' + '\nD '.join(d))
-
-        changes.append('</pre>')
-
-        return ''.join(changes)
+    def __get_desc(self, cs):
+        desc_msg = []
+        desc_msg.append('%s %s %s:<br/>' % (cs.author, _('commited on'),
+                                           cs.date))
+        desc_msg.append('<pre>')
+        desc_msg.append(cs.message)
+        desc_msg.append('\n')
+        desc_msg.extend(self.__changes(cs))
+        desc_msg.append('</pre>')
+        return desc_msg
 
     def atom(self, repo_name):
         """Produce an atom-1.0 feed via feedgenerator module"""
@@ -87,15 +93,13 @@ class FeedController(BaseRepoController):
         )
 
         for cs in reversed(list(c.rhodecode_repo[-self.feed_nr:])):
-            desc_msg = []
-            desc_msg.append('%s - %s<br/><pre>' % (cs.author, cs.date))
-            desc_msg.append(self.__changes(cs))
-
             feed.add_item(title=self._get_title(cs),
                           link=url('changeset_home', repo_name=repo_name,
                                    revision=cs.raw_id, qualified=True),
                           author_name=cs.author,
-                          description=''.join(desc_msg))
+                          description=''.join(self.__get_desc(cs)),
+                          pubdate=cs.date,
+                          )
 
         response.content_type = feed.mime_type
         return feed.writeString('utf-8')
@@ -112,15 +116,12 @@ class FeedController(BaseRepoController):
         )
 
         for cs in reversed(list(c.rhodecode_repo[-self.feed_nr:])):
-            desc_msg = []
-            desc_msg.append('%s - %s<br/><pre>' % (cs.author, cs.date))
-            desc_msg.append(self.__changes(cs))
-
             feed.add_item(title=self._get_title(cs),
                           link=url('changeset_home', repo_name=repo_name,
                                    revision=cs.raw_id, qualified=True),
                           author_name=cs.author,
-                          description=''.join(desc_msg),
+                          description=''.join(self.__get_desc(cs)),
+                          pubdate=cs.date,
                          )
 
         response.content_type = feed.mime_type
