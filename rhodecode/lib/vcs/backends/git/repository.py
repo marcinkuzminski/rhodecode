@@ -500,6 +500,17 @@ class GitRepository(BaseRepository):
         # If error occurs run_git_command raises RepositoryError already
         self.run_git_command(cmd)
 
+    def fetch(self, url):
+        """
+        Tries to pull changes from external location.
+        """
+        url = self._get_url(url)
+        cmd = ['fetch']
+        cmd.append(url)
+        cmd = ' '.join(cmd)
+        # If error occurs run_git_command raises RepositoryError already
+        self.run_git_command(cmd)
+
     @LazyProperty
     def workdir(self):
         """
