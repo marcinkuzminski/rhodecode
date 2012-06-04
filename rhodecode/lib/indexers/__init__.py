@@ -57,6 +57,7 @@ ANALYZER = RegexTokenizer(expression=r"\w+") | LowercaseFilter()
 
 #INDEX SCHEMA DEFINITION
 SCHEMA = Schema(
+    fileid=ID(unique=True),
     owner=TEXT(),
     repository=TEXT(stored=True),
     path=TEXT(stored=True),
