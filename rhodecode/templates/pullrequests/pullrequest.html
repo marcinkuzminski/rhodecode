@@ -19,7 +19,8 @@
     <div class="title">
         ${self.breadcrumbs()}
     </div>
-    <div style="padding:30px">
+    ${h.form(url('#'),method='put', id='pull_request_form')}
+    <div style="float:left;padding:30px">
         ##ORG
         <div style="float:left">
             <div class="fork_user">
@@ -27,14 +28,14 @@
                     <img alt="gravatar" src="${h.gravatar_url(c.rhodecode_db_repo.user.email,24)}"/>
                 </div>
                 <span style="font-size: 20px">
-                ${h.select('other','',['%s/%s' % (c.rhodecode_db_repo.user.username,c.repo_name)])}:${h.select('other_ref','',c.org_refs)}
+                ${h.select('org_repo','',c.org_repos,class_='refs')}:${h.select('org_ref','',c.org_refs,class_='refs')}
                 </span>
                  <div style="padding:5px 3px 3px 42px;">${c.rhodecode_db_repo.description}</div>
             </div>
             <div style="clear:both;padding-top: 10px"></div>
         </div>
           <div style="float:left;font-size:24px;padding:0px 20px">
-          <img src="${h.url('/images/arrow_right_64.png')}"/>
+          <img height=32 width=32 src="${h.url('/images/arrow_right_64.png')}"/>
           </div>
         
         ##OTHER, most Probably the PARENT OF THIS FORK
@@ -44,16 +45,65 @@
                     <img alt="gravatar" src="${h.gravatar_url(c.rhodecode_db_repo.user.email,24)}"/>
                 </div>
                 <span style="font-size: 20px">
-                ${h.select('orther','',c.sources)}:${h.select('other_ref','',c.org_refs)}
+                ${h.select('other_repo','',c.other_repos,class_='refs')}:${h.select('other_ref','',c.other_refs,class_='refs')}
                 </span>
                  <div style="padding:5px 3px 3px 42px;">${c.rhodecode_db_repo.description}</div>
             </div>
             <div style="clear:both;padding-top: 10px"></div>
         </div>
+       <div style="float:left;padding:5px 5px 5px 15px">
+         <span>
+           <a id="refresh" href="#">
+             <img class="icon" title="${_('Refresh')}" alt="${_('Refresh')}" src="${h.url('/images/icons/arrow_refresh.png')}"/>
+             ${_('refresh overview')}
+           </a>
+         </span>       
+       </div>
+       <div style="clear:both;padding-top: 10px"></div>       
+       <div style="float:left" id="pull_request_overview">
+       </div>        
      </div>
-     
-    <h3>${_('New pull request')} from USER:REF into PARENT:REF</h3>
-    ${h.form(url('#'),method='put')}
+    <div style="float:left; border-left:1px dashed #eee">
+        <h4>${_('Pull request reviewers')}</h4>
+        <div id="reviewers" style="padding:0px 0px 0px 15px">
+        ##TODO: make this nicer :)
+          <table class="table noborder">
+                  <tr>
+                      <td>
+                          <div>
+                              <div style="float:left">
+                                  <div class="text" style="padding: 0px 0px 6px;">${_('Choosen reviewers')}</div>
+                                  ${h.select('review_members',[x[0] for x in c.review_members],c.review_members,multiple=True,size=8,style="min-width:210px")}
+                                 <div  id="remove_all_elements" style="cursor:pointer;text-align:center">
+                                     ${_('Remove all elements')}
+                                     <img alt="remove" style="vertical-align:text-bottom" src="${h.url('/images/icons/arrow_right.png')}"/>
+                                 </div>
+                              </div>
+                              <div style="float:left;width:20px;padding-top:50px">
+                                  <img alt="add" id="add_element"
+                                      style="padding:2px;cursor:pointer"
+                                      src="${h.url('/images/icons/arrow_left.png')}"/>
+                                  <br />
+                                  <img alt="remove" id="remove_element"
+                                      style="padding:2px;cursor:pointer"
+                                      src="${h.url('/images/icons/arrow_right.png')}"/>
+                              </div>
+                              <div style="float:left">
+                                   <div class="text" style="padding: 0px 0px 6px;">${_('Available reviewers')}</div>
+                                   ${h.select('available_members',[],c.available_members,multiple=True,size=8,style="min-width:210px")}
+                                   <div id="add_all_elements" style="cursor:pointer;text-align:center">
+                                         <img alt="add" style="vertical-align:text-bottom" src="${h.url('/images/icons/arrow_left.png')}"/>
+                                          ${_('Add all elements')}
+                                   </div>
+                              </div>
+                          </div>
+                      </td>
+                  </tr>
+          </table>        
+        </div>
+    </div> 
+    <h3>${_('Create new pull request')}</h3>
+    
     <div class="form">
         <!-- fields -->
 
@@ -85,7 +135,51 @@
     </div>
     ${h.end_form()}     
      
-     
 </div>
+
+<script type="text/javascript">
+  MultiSelectWidget('review_members','available_members','pull_request_form');
+  
+  var loadPreview = function(){
+      var url = "${h.url('compare_url', 
+          repo_name='org_repo',
+          org_ref_type='branch', org_ref='org_ref',
+          other_ref_type='branch', other_ref='other_ref',
+          repo='other_repo')}";
+  
+      var select_refs = YUQ('#pull_request_form select.refs')
+    
+      for(var i=0;i<select_refs.length;i++){
+        var select_ref = select_refs[i];
+        var select_ref_data = select_ref.value.split(':');
+        var key = null;
+        var val = null;
+        if(select_ref_data.length>1){
+          key = select_ref.name+"_type";
+          val = select_ref_data[0];
+          url = url.replace(key,val);
+    
+          key = select_ref.name;
+          val = select_ref_data[1];
+          url = url.replace(key,val);
+    
+        }else{
+          key = select_ref.name;
+          val = select_ref.value;
+          url = url.replace(key,val);
+        }
+      }
+    
+      ypjax(url,'pull_request_overview', function(data){})	  
+  }
+  YUE.on('refresh','click',function(e){
+     loadPreview()
+  })
+  
+  //lazy load after 0.5
+  
+  setTimeout(loadPreview,500)
+  
+</script>
 
 </%def>

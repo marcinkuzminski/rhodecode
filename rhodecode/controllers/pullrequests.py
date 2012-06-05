@@ -31,7 +31,7 @@ from pylons.i18n.translation import _
 
 from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
-from webob.exc import HTTPNotFound
+from rhodecode.model.db import User
 
 log = logging.getLogger(__name__)
 
@@ -44,12 +44,15 @@ class PullrequestsController(BaseRepoController):
     def __before__(self):
         super(PullrequestsController, self).__before__()
 
-    def _get_repo_refs(self,repo):
+    def _get_repo_refs(self, repo):
         hist_l = []
 
-        branches_group = ([(k, k) for k in repo.branches.keys()], _("Branches"))
-        bookmarks_group = ([(k, k) for k in repo.bookmarks.keys()], _("Bookmarks"))
-        tags_group = ([(k, k) for k in repo.tags.keys()], _("Tags"))
+        branches_group = ([('branch:' + k, k) for k in repo.branches.keys()],
+                          _("Branches"))
+        bookmarks_group = ([('book:' + k, k) for k in repo.bookmarks.keys()],
+                           _("Bookmarks"))
+        tags_group = ([('tag:' + k, k) for k in repo.tags.keys()],
+                      _("Tags"))
 
         hist_l.append(bookmarks_group)
         hist_l.append(branches_group)
@@ -58,8 +61,30 @@ class PullrequestsController(BaseRepoController):
         return hist_l
 
     def index(self):
+        org_repo = c.rhodecode_db_repo
         c.org_refs = self._get_repo_refs(c.rhodecode_repo)
-        c.sources = []
-        c.sources.append('%s/%s' % (c.rhodecode_db_repo.user.username,
-                                    c.repo_name))
+        c.org_repos = []
+        c.other_repos = []
+        c.org_repos.append((org_repo.repo_name, '%s/%s' % (
+                                org_repo.user.username, c.repo_name))
+                           )
+
+        c.other_refs = c.org_refs
+        c.other_repos.extend(c.org_repos)
+
+        #gather forks and add to this list
+        for fork in org_repo.forks:
+            c.other_repos.append((fork.repo_name, '%s/%s' % (
+                                    fork.user.username, fork.repo_name))
+                                 )
+        #add parents of this fork also
+        c.other_repos.append((org_repo.parent.repo_name, '%s/%s' % (
+                                    org_repo.parent.user.username, 
+                                    org_repo.parent.repo_name))
+                                 )
+
+        #TODO: maybe the owner should be default ?
+        c.review_members = []
+        c.available_members = [(x.user_id, x.username) for x in
+                        User.query().filter(User.username != 'default').all()]
         return render('/pullrequests/pullrequest.html')

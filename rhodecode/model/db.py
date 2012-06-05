@@ -603,6 +603,20 @@ class Repository(Base, BaseModel):
         return q.one().ui_value
 
     @property
+    def forks(self):
+        """
+        Return forks of this repo
+        """
+        return Repository.get_repo_forks(self.repo_id)
+
+    @property
+    def parent(self):
+        """
+        Returns fork parent
+        """
+        return self.fork
+
+    @property
     def just_name(self):
         return self.repo_name.split(Repository.url_sep())[-1]
 

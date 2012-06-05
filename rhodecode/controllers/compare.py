@@ -120,7 +120,8 @@ class CompareController(BaseRepoController):
 
         c.statuses = c.rhodecode_db_repo.statuses([x.raw_id for x in
                                                    c.cs_ranges])
-
+        if request.environ.get('HTTP_X_PARTIAL_XHR'):
+            return render('compare/compare_cs.html')
 
         c.org_ref = org_ref[1]
         c.other_ref = other_ref[1]
