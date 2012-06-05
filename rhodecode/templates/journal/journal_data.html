@@ -11,8 +11,8 @@
 	            <div class="journal_user">${user.name} ${user.lastname}</div>
 	            <div class="journal_action_container">
 	            % for entry in entries:
-		            <div class="journal_icon"> ${h.action_parser_icon(entry)}</div>
-		            <div class="journal_action">${h.action_parser(entry)[0]}</div>
+		            <div class="journal_icon"> ${h.action_parser(entry)[2]()}</div>
+		            <div class="journal_action">${h.action_parser(entry)[0]()}</div>
 		            <div class="journal_repo">
 		                <span class="journal_repo_name">
 		                %if entry.repository is not None:

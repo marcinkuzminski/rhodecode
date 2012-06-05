@@ -65,7 +65,7 @@
 		</div>
 	</div>
 	${h.end_form()}
-
+    <div class="search">
     %if c.cur_search == 'content':
         <%include file='search_content.html'/>
     %elif c.cur_search == 'path':
@@ -75,6 +75,7 @@
     %elif c.cur_search == 'repository':
         <%include file='search_repository.html'/>
     %endif
+    </div>
 </div>
 
 </%def>

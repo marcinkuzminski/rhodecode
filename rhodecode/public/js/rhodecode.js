@@ -44,6 +44,24 @@ String.prototype.format = function() {
 
 }();
 
+String.prototype.strip = function(char) {
+	if(char === undefined){
+	    char = '\\s';
+	}
+	return this.replace(new RegExp('^'+char+'+|'+char+'+$','g'), '');
+}
+String.prototype.lstrip = function(char) {
+	if(char === undefined){
+	    char = '\\s';
+	}
+	return this.replace(new RegExp('^'+char+'+'),'');
+}
+String.prototype.rstrip = function(char) {
+	if(char === undefined){
+	    char = '\\s';
+	}
+	return this.replace(new RegExp(''+char+'+$'),'');
+}
 
 /**
  * SmartColorGenerator
@@ -447,7 +465,7 @@ var injectInlineForm = function(tr){
 		  
 		  ajaxPOST(submit_url, postData, success);
 	  });
-	  
+	  // callbacks
 	  tooltip_activate();
 };
 
@@ -819,7 +837,7 @@ var deleteNotification = function(url, notification_id,callbacks){
 
 /** MEMBERS AUTOCOMPLETE WIDGET **/
 
-var MembersAutoComplete = function (users_list, groups_list, group_lbl, members_lbl) {
+var MembersAutoComplete = function (users_list, groups_list) {
     var myUsers = users_list;
     var myGroups = groups_list;
 
@@ -834,9 +852,11 @@ var MembersAutoComplete = function (users_list, groups_list, group_lbl, members_
             // Match against each name of each contact
             for (; i < l; i++) {
                 contact = myUsers[i];
-                if ((contact.fname.toLowerCase().indexOf(query) > -1) || (contact.lname.toLowerCase().indexOf(query) > -1) || (contact.nname && (contact.nname.toLowerCase().indexOf(query) > -1))) {
-                    matches[matches.length] = contact;
-                }
+                if (((contact.fname+"").toLowerCase().indexOf(query) > -1) || 
+                   	 ((contact.lname+"").toLowerCase().indexOf(query) > -1) || 
+                   	 ((contact.nname) && ((contact.nname).toLowerCase().indexOf(query) > -1))) {
+                       matches[matches.length] = contact;
+                   }
             }
             return matches;
         };
@@ -912,21 +932,22 @@ var MembersAutoComplete = function (users_list, groups_list, group_lbl, members_
                 var grname = oResultData.grname;
                 var grmembers = oResultData.grmembers;
                 var grnameMatchIndex = grname.toLowerCase().indexOf(query);
-                var grprefix = "{0}: ".format(group_lbl);
+                var grprefix = "{0}: ".format(_TM['Group']);
                 var grsuffix = " (" + grmembers + "  )";
-                var grsuffix = " ({0}  {1})".format(grmembers, members_lbl);
+                var grsuffix = " ({0}  {1})".format(grmembers, _TM['members']);
 
                 if (grnameMatchIndex > -1) {
                     return _gravatar(grprefix + highlightMatch(grname, query, grnameMatchIndex) + grsuffix,null,true);
                 }
 			    return _gravatar(grprefix + oResultData.grname + grsuffix, null,true);
             // Users
-            } else if (oResultData.fname != undefined) {
-                var fname = oResultData.fname,
-                    lname = oResultData.lname,
-                    nname = oResultData.nname || "",
-                    // Guard against null value
-                    fnameMatchIndex = fname.toLowerCase().indexOf(query),
+            } else if (oResultData.nname != undefined) {
+                var fname = oResultData.fname || "";
+                var lname = oResultData.lname || "";
+                var nname = oResultData.nname;
+                
+                // Guard against null value
+                var fnameMatchIndex = fname.toLowerCase().indexOf(query),
                     lnameMatchIndex = lname.toLowerCase().indexOf(query),
                     nnameMatchIndex = nname.toLowerCase().indexOf(query),
                     displayfname, displaylname, displaynname;
@@ -987,6 +1008,191 @@ var MembersAutoComplete = function (users_list, groups_list, group_lbl, members_
     };
 }
 
+
+var MentionsAutoComplete = function (divid, cont, users_list, groups_list) {
+    var myUsers = users_list;
+    var myGroups = groups_list;
+
+    // Define a custom search function for the DataSource of users
+    var matchUsers = function (sQuery) {
+    	    var org_sQuery = sQuery;
+    	    if(this.mentionQuery == null){
+    	    	return []    	    	
+    	    }
+    	    sQuery = this.mentionQuery;
+            // Case insensitive matching
+            var query = sQuery.toLowerCase();
+            var i = 0;
+            var l = myUsers.length;
+            var matches = [];
+
+            // Match against each name of each contact
+            for (; i < l; i++) {
+                contact = myUsers[i];
+                if (((contact.fname+"").toLowerCase().indexOf(query) > -1) || 
+                	 ((contact.lname+"").toLowerCase().indexOf(query) > -1) || 
+                	 ((contact.nname) && ((contact.nname).toLowerCase().indexOf(query) > -1))) {
+                    matches[matches.length] = contact;
+                }
+            }
+            return matches
+        };
+
+    //match all
+    var matchAll = function (sQuery) {
+            u = matchUsers(sQuery);
+            return u
+        };
+
+    // DataScheme for owner
+    var ownerDS = new YAHOO.util.FunctionDataSource(matchUsers);
+
+    ownerDS.responseSchema = {
+        fields: ["id", "fname", "lname", "nname", "gravatar_lnk"]
+    };
+
+    // Instantiate AutoComplete for mentions
+    var ownerAC = new YAHOO.widget.AutoComplete(divid, cont, ownerDS);
+    ownerAC.useShadow = false;
+    ownerAC.resultTypeList = false;
+    ownerAC.suppressInputUpdate = true;
+
+    // Helper highlight function for the formatter
+    var highlightMatch = function (full, snippet, matchindex) {
+            return full.substring(0, matchindex) 
+            + "<span class='match'>" 
+            + full.substr(matchindex, snippet.length) 
+            + "</span>" + full.substring(matchindex + snippet.length);
+        };
+
+    // Custom formatter to highlight the matching letters
+    ownerAC.formatResult = function (oResultData, sQuery, sResultMatch) {
+		    var org_sQuery = sQuery;
+		    if(this.dataSource.mentionQuery != null){
+		    	sQuery = this.dataSource.mentionQuery;		    	
+		    }
+
+            var query = sQuery.toLowerCase();
+            var _gravatar = function(res, em, group){
+            	if (group !== undefined){
+            		em = '/images/icons/group.png'
+            	}
+            	tmpl = '<div class="ac-container-wrap"><img class="perm-gravatar-ac" src="{0}"/>{1}</div>'
+            	return tmpl.format(em,res)
+            }
+            if (oResultData.nname != undefined) {
+                var fname = oResultData.fname || "";
+                var lname = oResultData.lname || "";
+                var nname = oResultData.nname;
+                
+                // Guard against null value
+                var fnameMatchIndex = fname.toLowerCase().indexOf(query),
+                    lnameMatchIndex = lname.toLowerCase().indexOf(query),
+                    nnameMatchIndex = nname.toLowerCase().indexOf(query),
+                    displayfname, displaylname, displaynname;
+
+                if (fnameMatchIndex > -1) {
+                    displayfname = highlightMatch(fname, query, fnameMatchIndex);
+                } else {
+                    displayfname = fname;
+                }
+
+                if (lnameMatchIndex > -1) {
+                    displaylname = highlightMatch(lname, query, lnameMatchIndex);
+                } else {
+                    displaylname = lname;
+                }
+
+                if (nnameMatchIndex > -1) {
+                    displaynname = "(" + highlightMatch(nname, query, nnameMatchIndex) + ")";
+                } else {
+                    displaynname = nname ? "(" + nname + ")" : "";
+                }
+
+                return _gravatar(displayfname + " " + displaylname + " " + displaynname, oResultData.gravatar_lnk);
+            } else {
+                return '';
+            }
+        };
+
+    if(ownerAC.itemSelectEvent){
+    	ownerAC.itemSelectEvent.subscribe(function (sType, aArgs) {
+
+            var myAC = aArgs[0]; // reference back to the AC instance
+            var elLI = aArgs[1]; // reference to the selected LI element
+            var oData = aArgs[2]; // object literal of selected item's result data
+            //fill the autocomplete with value
+            if (oData.nname != undefined) {
+                //users
+            	//Replace the mention name with replaced
+            	var re = new RegExp();
+            	var org = myAC.getInputEl().value;
+            	var chunks = myAC.dataSource.chunks
+            	// replace middle chunk(the search term) with actuall  match
+            	chunks[1] = chunks[1].replace('@'+myAC.dataSource.mentionQuery,
+            								  '@'+oData.nname+' ');
+                myAC.getInputEl().value = chunks.join('')
+                YUD.get(myAC.getInputEl()).focus(); // Y U NO WORK !?
+            } else {
+                //groups
+                myAC.getInputEl().value = oData.grname;
+                YUD.get('perm_new_member_type').value = 'users_group';
+            }
+        });
+    }
+
+    // in this keybuffer we will gather current value of search !
+    // since we need to get this just when someone does `@` then we do the
+    // search
+    ownerAC.dataSource.chunks = [];
+    ownerAC.dataSource.mentionQuery = null;
+
+    ownerAC.get_mention = function(msg, max_pos) {
+    	var org = msg;
+    	var re = new RegExp('(?:^@|\s@)([a-zA-Z0-9]{1}[a-zA-Z0-9\-\_\.]+)$')
+    	var chunks  = [];
+
+		
+    	// cut first chunk until curret pos
+		var to_max = msg.substr(0, max_pos);		
+		var at_pos = Math.max(0,to_max.lastIndexOf('@')-1);
+		var msg2 = to_max.substr(at_pos);
+
+		chunks.push(org.substr(0,at_pos))// prefix chunk
+		chunks.push(msg2)                // search chunk
+		chunks.push(org.substr(max_pos)) // postfix chunk
+
+		// clean up msg2 for filtering and regex match
+		var msg2 = msg2.lstrip(' ').lstrip('\n');
+
+		if(re.test(msg2)){
+			var unam = re.exec(msg2)[1];
+			return [unam, chunks];
+		}
+		return [null, null];
+    };    
+	ownerAC.textboxKeyUpEvent.subscribe(function(type, args){
+		
+		var ac_obj = args[0];
+		var currentMessage = args[1];
+		var currentCaretPosition = args[0]._elTextbox.selectionStart;
+
+		var unam = ownerAC.get_mention(currentMessage, currentCaretPosition); 
+		var curr_search = null;
+		if(unam[0]){
+			curr_search = unam[0];
+		}
+		
+		ownerAC.dataSource.chunks = unam[1];
+		ownerAC.dataSource.mentionQuery = curr_search;
+
+	})
+
+    return {
+        ownerDS: ownerDS,
+        ownerAC: ownerAC,
+    };
+}
 
 
 /**

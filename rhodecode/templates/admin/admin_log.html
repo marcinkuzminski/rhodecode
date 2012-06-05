@@ -12,12 +12,13 @@
 	%for cnt,l in enumerate(c.users_log):
 	<tr class="parity${cnt%2}">
 		<td>${h.link_to(l.user.username,h.url('edit_user', id=l.user.user_id))}</td>
-		<td>${h.action_parser(l)[0]}
+		<td>${h.action_parser(l)[0]()}
 		  <div class="journal_action_params">
-		  ${h.literal(h.action_parser(l)[1]())}</div>
+            ${h.literal(h.action_parser(l)[1]())}
+          </div>
 		</td>
 		<td>
-		%if l.repository:
+		%if l.repository is not None:
 		  ${h.link_to(l.repository.repo_name,h.url('summary_home',repo_name=l.repository.repo_name))}
 		%else:
 		  ${l.repository_name}

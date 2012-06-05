@@ -136,6 +136,11 @@ class MercurialChangeset(BaseChangeset):
 
         return _prev(self, branch)
 
+    def diff(self, ignore_whitespace=True, context=3):
+        return ''.join(self._ctx.diff(git=True,
+                                      ignore_whitespace=ignore_whitespace,
+                                      context=context))
+
     def _fix_path(self, path):
         """
         Paths are stored without trailing slash so we need to get rid off it if

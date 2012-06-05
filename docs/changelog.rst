@@ -18,6 +18,13 @@ news
   their accounts
 - changed setup-app into setup-rhodecode and added default options to it.
 - new git repos are created as bare now by default
+- #464 added links to groups in permission box
+- #465 mentions autocomplete inside comments boxes
+- #469 added --update-only option to whoosh to re-index only given list
+  of repos in index 
+- rhodecode-api CLI client
+- new git http protocol replaced buggy dulwich implementation.
+  Now based on pygrack & gitweb
 
 fixes
 +++++

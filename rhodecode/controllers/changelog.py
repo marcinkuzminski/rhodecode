@@ -26,7 +26,6 @@
 import logging
 import traceback
 
-from mercurial import graphmod
 from pylons import request, url, session, tmpl_context as c
 from pylons.controllers.util import redirect
 from pylons.i18n.translation import _
@@ -36,9 +35,8 @@ from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.helpers import RepoPage
 from rhodecode.lib.compat import json
-
+from rhodecode.lib.graphmod import _colored, _dagwalker
 from rhodecode.lib.vcs.exceptions import RepositoryError, ChangesetDoesNotExistError
-from rhodecode.model.db import Repository
 
 log = logging.getLogger(__name__)
 
@@ -118,18 +116,9 @@ class ChangelogController(BaseRepoController):
         data = []
         revs = [x.revision for x in collection]
 
-        if repo.alias == 'git':
-            for _ in revs:
-                vtx = [0, 1]
-                edges = [[0, 0, 1]]
-                data.append(['', vtx, edges])
-
-        elif repo.alias == 'hg':
-            dag = graphmod.dagwalker(repo._repo, revs)
-            c.dag = graphmod.colored(dag, repo._repo)
-            for (id, type, ctx, vtx, edges) in c.dag:
-                if type != graphmod.CHANGESET:
-                    continue
-                data.append(['', vtx, edges])
+        dag = _dagwalker(repo, revs, repo.alias)
+        dag = _colored(dag)
+        for (id, type, ctx, vtx, edges) in dag:
+            data.append(['', vtx, edges])
 
         c.jsdata = json.dumps(data)

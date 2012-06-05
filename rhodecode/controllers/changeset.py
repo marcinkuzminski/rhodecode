@@ -40,7 +40,7 @@ from rhodecode.lib.vcs.nodes import FileNode
 import rhodecode.lib.helpers as h
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseRepoController, render
-from rhodecode.lib.utils import EmptyChangeset
+from rhodecode.lib.utils import EmptyChangeset, action_logger
 from rhodecode.lib.compat import OrderedDict
 from rhodecode.lib import diffs
 from rhodecode.model.db import ChangesetComment, ChangesetStatus
@@ -48,6 +48,7 @@ from rhodecode.model.comment import ChangesetCommentsModel
 from rhodecode.model.changeset_status import ChangesetStatusModel
 from rhodecode.model.meta import Session
 from rhodecode.lib.diffs import wrapped_diff
+from rhodecode.model.repo import RepoModel
 
 log = logging.getLogger(__name__)
 
@@ -166,6 +167,9 @@ class ChangesetController(BaseRepoController):
     def __before__(self):
         super(ChangesetController, self).__before__()
         c.affected_files_cut_off = 60
+        repo_model = RepoModel()
+        c.users_array = repo_model.get_users_js()
+        c.users_groups_array = repo_model.get_users_groups_js()
 
     def index(self, revision):
 
@@ -391,8 +395,12 @@ class ChangesetController(BaseRepoController):
                 c.rhodecode_user.user_id,
                 comm,
             )
+        action_logger(self.rhodecode_user,
+                      'user_commented_revision:%s' % revision,
+                      c.rhodecode_db_repo, self.ip_addr, self.sa)
 
         Session.commit()
+
         if not request.environ.get('HTTP_X_PARTIAL_XHR'):
             return redirect(h.url('changeset_home', repo_name=repo_name,
                                   revision=revision))

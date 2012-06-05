@@ -156,14 +156,25 @@ class ApiController(JSONRPCController):
             password = PasswordGenerator().gen_password(length=8)
 
         try:
-            usr = UserModel().create_or_update(
+            user = UserModel().create_or_update(
                 username, password, email, firstname,
                 lastname, active, admin, ldap_dn
             )
             Session.commit()
             return dict(
-                id=usr.user_id,
-                msg='created new user %s' % username
+                id=user.user_id,
+                msg='created new user %s' % username,
+                user=dict(
+                    id=user.user_id,
+                    username=user.username,
+                    firstname=user.name,
+                    lastname=user.lastname,
+                    email=user.email,
+                    active=user.active,
+                    admin=user.admin,
+                    ldap_dn=user.ldap_dn,
+                    last_login=user.last_login,
+                )
             )
         except Exception:
             log.error(traceback.format_exc())
@@ -185,8 +196,9 @@ class ApiController(JSONRPCController):
         :param admin:
         :param ldap_dn:
         """
-        if not UserModel().get_user(userid):
-            raise JSONRPCError("user %s does not exist" % username)
+        usr = UserModel().get_user(userid)
+        if not usr:
+            raise JSONRPCError("user ID:%s does not exist" % userid)
 
         try:
             usr = UserModel().create_or_update(
@@ -196,11 +208,34 @@ class ApiController(JSONRPCController):
             Session.commit()
             return dict(
                 id=usr.user_id,
-                msg='updated user %s' % username
+                msg='updated user ID:%s %s' % (usr.user_id, usr.username)
             )
         except Exception:
             log.error(traceback.format_exc())
-            raise JSONRPCError('failed to update user %s' % username)
+            raise JSONRPCError('failed to update user %s' % userid)
+
+    @HasPermissionAllDecorator('hg.admin')
+    def delete_user(self, apiuser, userid):
+        """"
+        Deletes an user
+
+        :param apiuser:
+        """
+        usr = UserModel().get_user(userid)
+        if not usr:
+            raise JSONRPCError("user ID:%s does not exist" % userid)
+
+        try:
+            UserModel().delete(userid)
+            Session.commit()
+            return dict(
+                id=usr.user_id,
+                msg='deleted user ID:%s %s' % (usr.user_id, usr.username)
+            )
+        except Exception:
+            log.error(traceback.format_exc())
+            raise JSONRPCError('failed to delete ID:%s %s' % (usr.user_id,
+                                                              usr.username))
 
     @HasPermissionAllDecorator('hg.admin')
     def get_users_group(self, apiuser, group_name):
@@ -354,7 +389,7 @@ class ApiController(JSONRPCController):
 
         repo = RepoModel().get_repo(repoid)
         if repo is None:
-            raise JSONRPCError('unknown repository %s' % repo)
+            raise JSONRPCError('unknown repository "%s"' % (repo or repoid))
 
         members = []
         for user in repo.repo_to_perm:
@@ -486,19 +521,36 @@ class ApiController(JSONRPCController):
                     repo_type=repo_type,
                     repo_group=group.group_id if group else None,
                     clone_uri=clone_uri
-                ),
-                owner
+                )
             )
             Session.commit()
 
             return dict(
                 id=repo.repo_id,
-                msg="Created new repository %s" % repo.repo_name
+                msg="Created new repository %s" % (repo.repo_name),
+                repo=dict(
+                    id=repo.repo_id,
+                    repo_name=repo.repo_name,
+                    type=repo.repo_type,
+                    clone_uri=repo.clone_uri,
+                    private=repo.private,
+                    created_on=repo.created_on,
+                    description=repo.description,
+                )
             )
 
         except Exception:
             log.error(traceback.format_exc())
             raise JSONRPCError('failed to create repository %s' % repo_name)
+
+    @HasPermissionAnyDecorator('hg.admin')
+    def fork_repo(self, apiuser, repoid):
+        repo = RepoModel().get_repo(repoid)
+        if repo is None:
+            raise JSONRPCError('unknown repository "%s"' % (repo or repoid))
+
+        RepoModel().create_fork(form_data, cur_user)
+
 
     @HasPermissionAnyDecorator('hg.admin')
     def delete_repo(self, apiuser, repo_name):

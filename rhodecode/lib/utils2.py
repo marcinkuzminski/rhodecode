@@ -309,7 +309,7 @@ def age(prevdate):
     for num, length in [(5, 60), (4, 60), (3, 24)]:  # seconds, minutes, hours
         part = order[num]
         carry_part = order[num - 1]
-        
+
         if deltas[part] < 0:
             deltas[part] += length
             deltas[carry_part] -= 1
@@ -323,13 +323,13 @@ def age(prevdate):
             deltas['day'] += 29
         else:
             deltas['day'] += month_lengths[prevdate.month - 1]
-        
+
         deltas['month'] -= 1
-    
+
     if deltas['month'] < 0:
         deltas['month'] += 12
         deltas['year'] -= 1
-    
+
     # Format the result
     fmt_funcs = {
         'year': lambda d: ungettext(u'%d year', '%d years', d) % d,
@@ -339,21 +339,21 @@ def age(prevdate):
         'minute': lambda d: ungettext(u'%d minute', '%d minutes', d) % d,
         'second': lambda d: ungettext(u'%d second', '%d seconds', d) % d,
     }
-    
+
     for i, part in enumerate(order):
         value = deltas[part]
         if value == 0:
             continue
-        
+
         if i < 5:
             sub_part = order[i + 1]
             sub_value = deltas[sub_part]
         else:
             sub_value = 0
-        
+
         if sub_value == 0:
             return _(u'%s ago') % fmt_funcs[part](value)
-        
+
         return _(u'%s and %s ago') % (fmt_funcs[part](value),
             fmt_funcs[sub_part](sub_value))
 

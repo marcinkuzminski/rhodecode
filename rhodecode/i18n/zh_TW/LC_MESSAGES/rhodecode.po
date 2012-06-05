@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: RhodeCode 1.2.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2012-05-27 17:41+0200\n"
+"POT-Creation-Date: 2012-06-03 01:06+0200\n"
 "PO-Revision-Date: 2012-05-09 22:23+0800\n"
 "Last-Translator: Nansen <nansenat16@gmail.com>\n"
 "Language-Team: zh_TW <LL@li.org>\n"
@@ -17,26 +17,26 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 0.9.6\n"
 
-#: rhodecode/controllers/changelog.py:96
+#: rhodecode/controllers/changelog.py:95
 #, fuzzy
 msgid "All Branches"
 msgstr "分支"
 
-#: rhodecode/controllers/changeset.py:79
+#: rhodecode/controllers/changeset.py:80
 msgid "show white space"
 msgstr ""
 
-#: rhodecode/controllers/changeset.py:86 rhodecode/controllers/changeset.py:93
+#: rhodecode/controllers/changeset.py:87 rhodecode/controllers/changeset.py:94
 msgid "ignore white space"
 msgstr ""
 
-#: rhodecode/controllers/changeset.py:153
+#: rhodecode/controllers/changeset.py:154
 #, fuzzy, python-format
 msgid "%s line context"
 msgstr "文件內容"
 
-#: rhodecode/controllers/changeset.py:320
-#: rhodecode/controllers/changeset.py:335 rhodecode/lib/diffs.py:62
+#: rhodecode/controllers/changeset.py:324
+#: rhodecode/controllers/changeset.py:339 rhodecode/lib/diffs.py:62
 msgid "binary file"
 msgstr "二進位檔"
 
@@ -184,7 +184,7 @@ msgstr ""
 msgid "%s public journal %s feed"
 msgstr "%s 公開日誌 %s feed"
 
-#: rhodecode/controllers/journal.py:190 rhodecode/controllers/journal.py:224
+#: rhodecode/controllers/journal.py:190 rhodecode/controllers/journal.py:223
 #: rhodecode/templates/admin/repos/repo_edit.html:177
 #: rhodecode/templates/base/base.html:307
 #: rhodecode/templates/base/base.html:309
@@ -219,19 +219,19 @@ msgid "An error occurred during this search operation"
 msgstr ""
 
 #: rhodecode/controllers/settings.py:103
-#: rhodecode/controllers/admin/repos.py:211
+#: rhodecode/controllers/admin/repos.py:213
 #, python-format
 msgid "Repository %s updated successfully"
 msgstr "版本庫 %s 更新完成"
 
 #: rhodecode/controllers/settings.py:121
-#: rhodecode/controllers/admin/repos.py:229
+#: rhodecode/controllers/admin/repos.py:231
 #, python-format
 msgid "error occurred during update of repository %s"
 msgstr ""
 
 #: rhodecode/controllers/settings.py:139
-#: rhodecode/controllers/admin/repos.py:247
+#: rhodecode/controllers/admin/repos.py:249
 #, python-format
 msgid ""
 "%s repository is not mapped to db perhaps it was moved or renamed  from "
@@ -240,14 +240,14 @@ msgid ""
 msgstr ""
 
 #: rhodecode/controllers/settings.py:151
-#: rhodecode/controllers/admin/repos.py:259
+#: rhodecode/controllers/admin/repos.py:261
 #, python-format
 msgid "deleted repository %s"
 msgstr "刪除版本庫 %s"
 
 #: rhodecode/controllers/settings.py:155
-#: rhodecode/controllers/admin/repos.py:269
-#: rhodecode/controllers/admin/repos.py:275
+#: rhodecode/controllers/admin/repos.py:271
+#: rhodecode/controllers/admin/repos.py:277
 #, python-format
 msgid "An error occurred during deletion of %s"
 msgstr ""
@@ -396,62 +396,62 @@ msgstr "建立版本庫 %s 到 %s"
 msgid "created repository %s"
 msgstr "建立版本庫 %s"
 
-#: rhodecode/controllers/admin/repos.py:177
+#: rhodecode/controllers/admin/repos.py:179
 #, python-format
 msgid "error occurred during creation of repository %s"
 msgstr ""
 
-#: rhodecode/controllers/admin/repos.py:264
+#: rhodecode/controllers/admin/repos.py:266
 #, python-format
 msgid "Cannot delete %s it still contains attached forks"
 msgstr ""
 
-#: rhodecode/controllers/admin/repos.py:293
+#: rhodecode/controllers/admin/repos.py:295
 msgid "An error occurred during deletion of repository user"
 msgstr ""
 
-#: rhodecode/controllers/admin/repos.py:312
+#: rhodecode/controllers/admin/repos.py:314
 msgid "An error occurred during deletion of repository users groups"
 msgstr ""
 
-#: rhodecode/controllers/admin/repos.py:329
+#: rhodecode/controllers/admin/repos.py:331
 msgid "An error occurred during deletion of repository stats"
 msgstr ""
 
-#: rhodecode/controllers/admin/repos.py:345
+#: rhodecode/controllers/admin/repos.py:347
 msgid "An error occurred during cache invalidation"
 msgstr ""
 
-#: rhodecode/controllers/admin/repos.py:365
+#: rhodecode/controllers/admin/repos.py:367
 msgid "Updated repository visibility in public journal"
 msgstr ""
 
-#: rhodecode/controllers/admin/repos.py:369
+#: rhodecode/controllers/admin/repos.py:371
 msgid "An error occurred during setting this repository in public journal"
 msgstr ""
 
-#: rhodecode/controllers/admin/repos.py:374 rhodecode/model/forms.py:54
+#: rhodecode/controllers/admin/repos.py:376 rhodecode/model/forms.py:54
 msgid "Token mismatch"
 msgstr ""
 
-#: rhodecode/controllers/admin/repos.py:387
+#: rhodecode/controllers/admin/repos.py:389
 msgid "Pulled from remote location"
 msgstr ""
 
-#: rhodecode/controllers/admin/repos.py:389
+#: rhodecode/controllers/admin/repos.py:391
 msgid "An error occurred during pull from remote location"
 msgstr ""
 
-#: rhodecode/controllers/admin/repos.py:405
+#: rhodecode/controllers/admin/repos.py:407
 msgid "Nothing"
 msgstr ""
 
-#: rhodecode/controllers/admin/repos.py:407
+#: rhodecode/controllers/admin/repos.py:409
 #, fuzzy, python-format
 msgid "Marked repo %s as fork of %s"
 msgstr "建立版本庫 %s 到 %s"
 
-#: rhodecode/controllers/admin/repos.py:411
+#: rhodecode/controllers/admin/repos.py:413
 msgid "An error occurred during this operation"
 msgstr ""
 
@@ -545,77 +545,77 @@ msgstr ""
 msgid "You can't edit this user since it's crucial for entire application"
 msgstr ""
 
-#: rhodecode/controllers/admin/settings.py:365
+#: rhodecode/controllers/admin/settings.py:367
 msgid "Your account was updated successfully"
 msgstr "您的帳號已更新完成"
 
-#: rhodecode/controllers/admin/settings.py:384
-#: rhodecode/controllers/admin/users.py:132
+#: rhodecode/controllers/admin/settings.py:387
+#: rhodecode/controllers/admin/users.py:138
 #, python-format
 msgid "error occurred during update of user %s"
 msgstr ""
 
-#: rhodecode/controllers/admin/users.py:79
+#: rhodecode/controllers/admin/users.py:83
 #, python-format
 msgid "created user %s"
 msgstr "建立使用者 %s"
 
-#: rhodecode/controllers/admin/users.py:92
+#: rhodecode/controllers/admin/users.py:95
 #, python-format
 msgid "error occurred during creation of user %s"
 msgstr ""
 
-#: rhodecode/controllers/admin/users.py:118
+#: rhodecode/controllers/admin/users.py:124
 msgid "User updated successfully"
 msgstr "使用者更新完成"
 
-#: rhodecode/controllers/admin/users.py:149
+#: rhodecode/controllers/admin/users.py:155
 msgid "successfully deleted user"
 msgstr "成功刪除使用者"
 
-#: rhodecode/controllers/admin/users.py:154
+#: rhodecode/controllers/admin/users.py:160
 msgid "An error occurred during deletion of user"
 msgstr ""
 
-#: rhodecode/controllers/admin/users.py:169
+#: rhodecode/controllers/admin/users.py:175
 msgid "You can't edit this user"
 msgstr "您無法編輯這位使用者"
 
-#: rhodecode/controllers/admin/users.py:199
-#: rhodecode/controllers/admin/users_groups.py:215
+#: rhodecode/controllers/admin/users.py:205
+#: rhodecode/controllers/admin/users_groups.py:219
 msgid "Granted 'repository create' permission to user"
 msgstr ""
 
-#: rhodecode/controllers/admin/users.py:208
-#: rhodecode/controllers/admin/users_groups.py:225
+#: rhodecode/controllers/admin/users.py:214
+#: rhodecode/controllers/admin/users_groups.py:229
 msgid "Revoked 'repository create' permission to user"
 msgstr ""
 
-#: rhodecode/controllers/admin/users_groups.py:79
+#: rhodecode/controllers/admin/users_groups.py:84
 #, python-format
 msgid "created users group %s"
 msgstr "建立使用者群組 %s"
 
-#: rhodecode/controllers/admin/users_groups.py:92
+#: rhodecode/controllers/admin/users_groups.py:95
 #, python-format
 msgid "error occurred during creation of users group %s"
 msgstr ""
 
-#: rhodecode/controllers/admin/users_groups.py:128
+#: rhodecode/controllers/admin/users_groups.py:135
 #, python-format
 msgid "updated users group %s"
 msgstr "更新使用者群組 %s"
 
-#: rhodecode/controllers/admin/users_groups.py:148
+#: rhodecode/controllers/admin/users_groups.py:152
 #, python-format
 msgid "error occurred during update of users group %s"
 msgstr ""
 
-#: rhodecode/controllers/admin/users_groups.py:165
+#: rhodecode/controllers/admin/users_groups.py:169
 msgid "successfully deleted users group"
 msgstr "成功移除使用者群組"
 
-#: rhodecode/controllers/admin/users_groups.py:170
+#: rhodecode/controllers/admin/users_groups.py:174
 msgid "An error occurred during deletion of users group"
 msgstr ""
 
@@ -674,61 +674,89 @@ msgstr "修訂"
 msgid "fork name "
 msgstr "fork 名稱"
 
-#: rhodecode/lib/helpers.py:540
+#: rhodecode/lib/helpers.py:550
 msgid "[deleted] repository"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:541 rhodecode/lib/helpers.py:546
+#: rhodecode/lib/helpers.py:552 rhodecode/lib/helpers.py:562
 msgid "[created] repository"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:542
+#: rhodecode/lib/helpers.py:554
 #, fuzzy
 msgid "[created] repository as fork"
 msgstr "建立版本庫 %s"
 
-#: rhodecode/lib/helpers.py:543 rhodecode/lib/helpers.py:547
+#: rhodecode/lib/helpers.py:556 rhodecode/lib/helpers.py:564
 msgid "[forked] repository"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:544 rhodecode/lib/helpers.py:548
+#: rhodecode/lib/helpers.py:558 rhodecode/lib/helpers.py:566
 msgid "[updated] repository"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:545
+#: rhodecode/lib/helpers.py:560
 msgid "[delete] repository"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:549
+#: rhodecode/lib/helpers.py:568
+#, fuzzy, python-format
+#| msgid "created user %s"
+msgid "[created] user"
+msgstr "建立使用者 %s"
+
+#: rhodecode/lib/helpers.py:570
+#, fuzzy, python-format
+#| msgid "updated users group %s"
+msgid "[updated] user"
+msgstr "更新使用者群組 %s"
+
+#: rhodecode/lib/helpers.py:572
+#, fuzzy, python-format
+#| msgid "created users group %s"
+msgid "[created] users group"
+msgstr "建立使用者群組 %s"
+
+#: rhodecode/lib/helpers.py:574
+#, fuzzy, python-format
+#| msgid "updated users group %s"
+msgid "[updated] users group"
+msgstr "更新使用者群組 %s"
+
+#: rhodecode/lib/helpers.py:576
+msgid "[commented] on revision in repository"
+msgstr ""
+
+#: rhodecode/lib/helpers.py:578
 msgid "[pushed] into"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:550
-msgid "[committed via RhodeCode] into"
+#: rhodecode/lib/helpers.py:580
+msgid "[committed via RhodeCode] into repository"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:551
-msgid "[pulled from remote] into"
+#: rhodecode/lib/helpers.py:582
+msgid "[pulled from remote] into repository"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:552
+#: rhodecode/lib/helpers.py:584
 msgid "[pulled] from"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:553
+#: rhodecode/lib/helpers.py:586
 msgid "[started following] repository"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:554
+#: rhodecode/lib/helpers.py:588
 msgid "[stopped following] repository"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:732
+#: rhodecode/lib/helpers.py:752
 #, python-format
 msgid " and %s more"
 msgstr ""
 
-#: rhodecode/lib/helpers.py:736
+#: rhodecode/lib/helpers.py:756
 msgid "No Files"
 msgstr "沒有檔案"
 
@@ -976,7 +1004,7 @@ msgid "Dashboard"
 msgstr "儀表板"
 
 #: rhodecode/templates/index_base.html:6
-#: rhodecode/templates/admin/users/user_edit_my_account.html:115
+#: rhodecode/templates/admin/users/user_edit_my_account.html:31
 #: rhodecode/templates/bookmarks/bookmarks.html:10
 #: rhodecode/templates/branches/branches.html:9
 #: rhodecode/templates/journal/journal.html:31
@@ -1031,10 +1059,10 @@ msgstr "版本庫群組"
 #: rhodecode/templates/admin/repos/repo_edit.html:32
 #: rhodecode/templates/admin/repos/repos.html:36
 #: rhodecode/templates/admin/repos/repos.html:82
-#: rhodecode/templates/admin/users/user_edit_my_account.html:133
-#: rhodecode/templates/admin/users/user_edit_my_account.html:183
-#: rhodecode/templates/admin/users/user_edit_my_account.html:249
-#: rhodecode/templates/admin/users/user_edit_my_account.html:284
+#: rhodecode/templates/admin/users/user_edit_my_account.html:49
+#: rhodecode/templates/admin/users/user_edit_my_account.html:99
+#: rhodecode/templates/admin/users/user_edit_my_account.html:165
+#: rhodecode/templates/admin/users/user_edit_my_account.html:200
 #: rhodecode/templates/bookmarks/bookmarks.html:36
 #: rhodecode/templates/bookmarks/bookmarks_data.html:6
 #: rhodecode/templates/branches/branches.html:36
@@ -1059,7 +1087,7 @@ msgstr "最後修改"
 #: rhodecode/templates/index_base.html:161
 #: rhodecode/templates/admin/repos/repos.html:39
 #: rhodecode/templates/admin/repos/repos.html:87
-#: rhodecode/templates/admin/users/user_edit_my_account.html:251
+#: rhodecode/templates/admin/users/user_edit_my_account.html:167
 #: rhodecode/templates/journal/journal.html:179
 msgid "Tip"
 msgstr ""
@@ -1103,7 +1131,7 @@ msgstr "群組名稱"
 #: rhodecode/templates/index_base.html:148
 #: rhodecode/templates/index_base.html:188
 #: rhodecode/templates/admin/repos/repos.html:112
-#: rhodecode/templates/admin/users/user_edit_my_account.html:270
+#: rhodecode/templates/admin/users/user_edit_my_account.html:186
 #: rhodecode/templates/bookmarks/bookmarks.html:60
 #: rhodecode/templates/branches/branches.html:60
 #: rhodecode/templates/journal/journal.html:202
@@ -1114,7 +1142,7 @@ msgstr ""
 #: rhodecode/templates/index_base.html:149
 #: rhodecode/templates/index_base.html:189
 #: rhodecode/templates/admin/repos/repos.html:113
-#: rhodecode/templates/admin/users/user_edit_my_account.html:271
+#: rhodecode/templates/admin/users/user_edit_my_account.html:187
 #: rhodecode/templates/bookmarks/bookmarks.html:61
 #: rhodecode/templates/branches/branches.html:61
 #: rhodecode/templates/journal/journal.html:203
@@ -1130,7 +1158,7 @@ msgstr "最後修改"
 
 #: rhodecode/templates/index_base.html:190
 #: rhodecode/templates/admin/repos/repos.html:114
-#: rhodecode/templates/admin/users/user_edit_my_account.html:272
+#: rhodecode/templates/admin/users/user_edit_my_account.html:188
 #: rhodecode/templates/bookmarks/bookmarks.html:62
 #: rhodecode/templates/branches/branches.html:62
 #: rhodecode/templates/journal/journal.html:204
@@ -1140,7 +1168,7 @@ msgstr ""
 
 #: rhodecode/templates/index_base.html:191
 #: rhodecode/templates/admin/repos/repos.html:115
-#: rhodecode/templates/admin/users/user_edit_my_account.html:273
+#: rhodecode/templates/admin/users/user_edit_my_account.html:189
 #: rhodecode/templates/bookmarks/bookmarks.html:63
 #: rhodecode/templates/branches/branches.html:63
 #: rhodecode/templates/journal/journal.html:205
@@ -1150,7 +1178,7 @@ msgstr ""
 
 #: rhodecode/templates/index_base.html:192
 #: rhodecode/templates/admin/repos/repos.html:116
-#: rhodecode/templates/admin/users/user_edit_my_account.html:274
+#: rhodecode/templates/admin/users/user_edit_my_account.html:190
 #: rhodecode/templates/bookmarks/bookmarks.html:64
 #: rhodecode/templates/branches/branches.html:64
 #: rhodecode/templates/journal/journal.html:206
@@ -1171,7 +1199,7 @@ msgstr "登入"
 #: rhodecode/templates/admin/admin_log.html:5
 #: rhodecode/templates/admin/users/user_add.html:32
 #: rhodecode/templates/admin/users/user_edit.html:50
-#: rhodecode/templates/admin/users/user_edit_my_account.html:49
+#: rhodecode/templates/admin/users/user_edit_my_account_form.html:26
 #: rhodecode/templates/base/base.html:83
 #: rhodecode/templates/summary/summary.html:113
 msgid "Username"
@@ -1232,21 +1260,21 @@ msgstr "確認密碼"
 #: rhodecode/templates/register.html:47
 #: rhodecode/templates/admin/users/user_add.html:59
 #: rhodecode/templates/admin/users/user_edit.html:86
-#: rhodecode/templates/admin/users/user_edit_my_account.html:76
+#: rhodecode/templates/admin/users/user_edit_my_account_form.html:53
 msgid "First Name"
 msgstr "名"
 
 #: rhodecode/templates/register.html:56
 #: rhodecode/templates/admin/users/user_add.html:68
 #: rhodecode/templates/admin/users/user_edit.html:95
-#: rhodecode/templates/admin/users/user_edit_my_account.html:85
+#: rhodecode/templates/admin/users/user_edit_my_account_form.html:62
 msgid "Last Name"
 msgstr "姓"
 
 #: rhodecode/templates/register.html:65
 #: rhodecode/templates/admin/users/user_add.html:77
 #: rhodecode/templates/admin/users/user_edit.html:104
-#: rhodecode/templates/admin/users/user_edit_my_account.html:94
+#: rhodecode/templates/admin/users/user_edit_my_account_form.html:71
 #: rhodecode/templates/summary/summary.html:115
 msgid "Email"
 msgstr "電子郵件"
@@ -1310,8 +1338,8 @@ msgstr "管理員日誌"
 #: rhodecode/templates/admin/admin_log.html:6
 #: rhodecode/templates/admin/repos/repos.html:41
 #: rhodecode/templates/admin/repos/repos.html:90
-#: rhodecode/templates/admin/users/user_edit_my_account.html:135
-#: rhodecode/templates/admin/users/user_edit_my_account.html:136
+#: rhodecode/templates/admin/users/user_edit_my_account.html:51
+#: rhodecode/templates/admin/users/user_edit_my_account.html:52
 #: rhodecode/templates/journal/journal.html:52
 #: rhodecode/templates/journal/journal.html:53
 msgid "Action"
@@ -1334,7 +1362,7 @@ msgstr "時間"
 msgid "From IP"
 msgstr "來源IP"
 
-#: rhodecode/templates/admin/admin_log.html:52
+#: rhodecode/templates/admin/admin_log.html:53
 msgid "No actions yet"
 msgstr ""
 
@@ -1415,7 +1443,7 @@ msgstr "電子郵件屬性"
 #: rhodecode/templates/admin/settings/hooks.html:73
 #: rhodecode/templates/admin/users/user_edit.html:129
 #: rhodecode/templates/admin/users/user_edit.html:154
-#: rhodecode/templates/admin/users/user_edit_my_account.html:102
+#: rhodecode/templates/admin/users/user_edit_my_account_form.html:79
 #: rhodecode/templates/admin/users_groups/users_group_edit.html:115
 #: rhodecode/templates/settings/repo_settings.html:84
 msgid "Save"
@@ -1570,7 +1598,7 @@ msgstr "編輯版本庫"
 
 #: rhodecode/templates/admin/repos/repo_edit.html:13
 #: rhodecode/templates/admin/users/user_edit.html:13
-#: rhodecode/templates/admin/users/user_edit_my_account.html:155
+#: rhodecode/templates/admin/users/user_edit_my_account.html:71
 #: rhodecode/templates/admin/users_groups/users_group_edit.html:13
 #: rhodecode/templates/files/files_source.html:32
 #: rhodecode/templates/journal/journal.html:72
@@ -1729,37 +1757,26 @@ msgid "private repository"
 msgstr "私有版本庫"
 
 #: rhodecode/templates/admin/repos/repo_edit_perms.html:33
-#: rhodecode/templates/admin/repos/repo_edit_perms.html:53
+#: rhodecode/templates/admin/repos/repo_edit_perms.html:58
 #: rhodecode/templates/admin/repos_groups/repos_group_edit_perms.html:23
 #: rhodecode/templates/admin/repos_groups/repos_group_edit_perms.html:42
 msgid "revoke"
 msgstr ""
 
-#: rhodecode/templates/admin/repos/repo_edit_perms.html:75
+#: rhodecode/templates/admin/repos/repo_edit_perms.html:80
 #: rhodecode/templates/admin/repos_groups/repos_group_edit_perms.html:64
 msgid "Add another member"
 msgstr "新增另ㄧ位成員"
 
-#: rhodecode/templates/admin/repos/repo_edit_perms.html:89
+#: rhodecode/templates/admin/repos/repo_edit_perms.html:94
 #: rhodecode/templates/admin/repos_groups/repos_group_edit_perms.html:78
 msgid "Failed to remove user"
 msgstr "移除使用者失敗"
 
-#: rhodecode/templates/admin/repos/repo_edit_perms.html:104
+#: rhodecode/templates/admin/repos/repo_edit_perms.html:109
 #: rhodecode/templates/admin/repos_groups/repos_group_edit_perms.html:93
 msgid "Failed to remove users group"
 msgstr "移除使用者群組失敗"
-
-#: rhodecode/templates/admin/repos/repo_edit_perms.html:123
-#: rhodecode/templates/admin/repos_groups/repos_group_edit_perms.html:112
-msgid "Group"
-msgstr "群組"
-
-#: rhodecode/templates/admin/repos/repo_edit_perms.html:124
-#: rhodecode/templates/admin/repos_groups/repos_group_edit_perms.html:113
-#: rhodecode/templates/admin/users_groups/users_groups.html:33
-msgid "members"
-msgstr "成員"
 
 #: rhodecode/templates/admin/repos/repos.html:5
 msgid "Repositories administration"
@@ -1778,7 +1795,7 @@ msgid "delete"
 msgstr "刪除"
 
 #: rhodecode/templates/admin/repos/repos.html:68
-#: rhodecode/templates/admin/users/user_edit_my_account.html:158
+#: rhodecode/templates/admin/users/user_edit_my_account.html:74
 #, fuzzy, python-format
 msgid "Confirm to delete this repository: %s"
 msgstr "確認移除這個版本庫"
@@ -1829,7 +1846,7 @@ msgstr "編輯版本庫群組"
 #: rhodecode/templates/admin/settings/settings.html:177
 #: rhodecode/templates/admin/users/user_edit.html:130
 #: rhodecode/templates/admin/users/user_edit.html:155
-#: rhodecode/templates/admin/users/user_edit_my_account.html:103
+#: rhodecode/templates/admin/users/user_edit_my_account_form.html:80
 #: rhodecode/templates/admin/users_groups/users_group_edit.html:116
 #: rhodecode/templates/files/files_add.html:82
 #: rhodecode/templates/files/files_edit.html:68
@@ -2058,17 +2075,17 @@ msgid "Edit user"
 msgstr "編輯使用者"
 
 #: rhodecode/templates/admin/users/user_edit.html:34
-#: rhodecode/templates/admin/users/user_edit_my_account.html:33
+#: rhodecode/templates/admin/users/user_edit_my_account_form.html:10
 msgid "Change your avatar at"
 msgstr "修改您的頭像於"
 
 #: rhodecode/templates/admin/users/user_edit.html:35
-#: rhodecode/templates/admin/users/user_edit_my_account.html:34
+#: rhodecode/templates/admin/users/user_edit_my_account_form.html:11
 msgid "Using"
 msgstr "使用中"
 
 #: rhodecode/templates/admin/users/user_edit.html:43
-#: rhodecode/templates/admin/users/user_edit_my_account.html:43
+#: rhodecode/templates/admin/users/user_edit_my_account_form.html:20
 msgid "API key"
 msgstr ""
 
@@ -2077,12 +2094,12 @@ msgid "LDAP DN"
 msgstr ""
 
 #: rhodecode/templates/admin/users/user_edit.html:68
-#: rhodecode/templates/admin/users/user_edit_my_account.html:58
+#: rhodecode/templates/admin/users/user_edit_my_account_form.html:35
 msgid "New password"
 msgstr "新密碼"
 
 #: rhodecode/templates/admin/users/user_edit.html:77
-#: rhodecode/templates/admin/users/user_edit_my_account.html:67
+#: rhodecode/templates/admin/users/user_edit_my_account_form.html:44
 msgid "New password confirmation"
 msgstr ""
 
@@ -2100,24 +2117,24 @@ msgstr "我的帳號"
 msgid "My Account"
 msgstr "我的帳號"
 
-#: rhodecode/templates/admin/users/user_edit_my_account.html:116
+#: rhodecode/templates/admin/users/user_edit_my_account.html:32
 #: rhodecode/templates/journal/journal.html:32
 #, fuzzy
 msgid "My repos"
 msgstr "空的版本庫"
 
-#: rhodecode/templates/admin/users/user_edit_my_account.html:116
+#: rhodecode/templates/admin/users/user_edit_my_account.html:32
 #, fuzzy
 msgid "My permissions"
 msgstr "權限"
 
-#: rhodecode/templates/admin/users/user_edit_my_account.html:121
+#: rhodecode/templates/admin/users/user_edit_my_account.html:37
 #: rhodecode/templates/journal/journal.html:37
 #, fuzzy
 msgid "ADD"
 msgstr "新增"
 
-#: rhodecode/templates/admin/users/user_edit_my_account.html:134
+#: rhodecode/templates/admin/users/user_edit_my_account.html:50
 #: rhodecode/templates/bookmarks/bookmarks.html:40
 #: rhodecode/templates/bookmarks/bookmarks_data.html:9
 #: rhodecode/templates/branches/branches.html:40
@@ -2127,23 +2144,23 @@ msgstr "新增"
 msgid "Revision"
 msgstr "修訂"
 
-#: rhodecode/templates/admin/users/user_edit_my_account.html:155
+#: rhodecode/templates/admin/users/user_edit_my_account.html:71
 #: rhodecode/templates/journal/journal.html:72
 msgid "private"
 msgstr "私有"
 
-#: rhodecode/templates/admin/users/user_edit_my_account.html:165
+#: rhodecode/templates/admin/users/user_edit_my_account.html:81
 #: rhodecode/templates/journal/journal.html:85
 msgid "No repositories yet"
 msgstr "沒有任何版本庫"
 
-#: rhodecode/templates/admin/users/user_edit_my_account.html:167
+#: rhodecode/templates/admin/users/user_edit_my_account.html:83
 #: rhodecode/templates/journal/journal.html:87
 msgid "create one now"
 msgstr ""
 
-#: rhodecode/templates/admin/users/user_edit_my_account.html:184
-#: rhodecode/templates/admin/users/user_edit_my_account.html:285
+#: rhodecode/templates/admin/users/user_edit_my_account.html:100
+#: rhodecode/templates/admin/users/user_edit_my_account.html:201
 #, fuzzy
 msgid "Permission"
 msgstr "權限"
@@ -2245,6 +2262,11 @@ msgstr "建立新的使用者群組"
 #: rhodecode/templates/admin/users_groups/users_groups.html:32
 msgid "group name"
 msgstr "群組名稱"
+
+#: rhodecode/templates/admin/users_groups/users_groups.html:33
+#: rhodecode/templates/base/root.html:46
+msgid "members"
+msgstr "成員"
 
 #: rhodecode/templates/admin/users_groups/users_groups.html:45
 #, fuzzy, python-format
@@ -2406,21 +2428,25 @@ msgstr ""
 msgid "Search"
 msgstr "搜尋"
 
-#: rhodecode/templates/base/root.html:53
+#: rhodecode/templates/base/root.html:42
 #, fuzzy
 msgid "add another comment"
 msgstr "新增另ㄧ位成員"
 
-#: rhodecode/templates/base/root.html:54
+#: rhodecode/templates/base/root.html:43
 #: rhodecode/templates/journal/journal.html:111
 #: rhodecode/templates/summary/summary.html:52
 msgid "Stop following this repository"
 msgstr "停止追蹤這個版本庫"
 
-#: rhodecode/templates/base/root.html:55
+#: rhodecode/templates/base/root.html:44
 #: rhodecode/templates/summary/summary.html:56
 msgid "Start following this repository"
 msgstr "開始追蹤這個版本庫"
+
+#: rhodecode/templates/base/root.html:45
+msgid "Group"
+msgstr "群組"
 
 #: rhodecode/templates/bookmarks/bookmarks.html:5
 msgid "Bookmarks"
@@ -2550,14 +2576,14 @@ msgid "download diff"
 msgstr "下載差異"
 
 #: rhodecode/templates/changeset/changeset.html:42
-#: rhodecode/templates/changeset/changeset_file_comment.html:69
+#: rhodecode/templates/changeset/changeset_file_comment.html:71
 #, fuzzy, python-format
 msgid "%d comment"
 msgid_plural "%d comments"
 msgstr[0] "遞交"
 
 #: rhodecode/templates/changeset/changeset.html:42
-#: rhodecode/templates/changeset/changeset_file_comment.html:69
+#: rhodecode/templates/changeset/changeset_file_comment.html:71
 #, python-format
 msgid "(%d inline)"
 msgid_plural "(%d inline)"
@@ -2581,37 +2607,37 @@ msgid "Commenting on line {1}."
 msgstr ""
 
 #: rhodecode/templates/changeset/changeset_file_comment.html:39
-#: rhodecode/templates/changeset/changeset_file_comment.html:100
+#: rhodecode/templates/changeset/changeset_file_comment.html:102
 #, python-format
 msgid "Comments parsed using %s syntax with %s support."
 msgstr ""
 
 #: rhodecode/templates/changeset/changeset_file_comment.html:41
-#: rhodecode/templates/changeset/changeset_file_comment.html:102
+#: rhodecode/templates/changeset/changeset_file_comment.html:104
 msgid "Use @username inside this text to send notification to this RhodeCode user"
 msgstr ""
 
-#: rhodecode/templates/changeset/changeset_file_comment.html:47
-#: rhodecode/templates/changeset/changeset_file_comment.html:107
+#: rhodecode/templates/changeset/changeset_file_comment.html:49
+#: rhodecode/templates/changeset/changeset_file_comment.html:110
 #, fuzzy
 msgid "Comment"
 msgstr "遞交"
 
-#: rhodecode/templates/changeset/changeset_file_comment.html:48
-#: rhodecode/templates/changeset/changeset_file_comment.html:59
+#: rhodecode/templates/changeset/changeset_file_comment.html:50
+#: rhodecode/templates/changeset/changeset_file_comment.html:61
 msgid "Hide"
 msgstr ""
 
-#: rhodecode/templates/changeset/changeset_file_comment.html:55
+#: rhodecode/templates/changeset/changeset_file_comment.html:57
 #, fuzzy
 msgid "You need to be logged in to comment."
 msgstr "您必須登入後才能瀏覽這個頁面"
 
-#: rhodecode/templates/changeset/changeset_file_comment.html:55
+#: rhodecode/templates/changeset/changeset_file_comment.html:57
 msgid "Login now"
 msgstr ""
 
-#: rhodecode/templates/changeset/changeset_file_comment.html:97
+#: rhodecode/templates/changeset/changeset_file_comment.html:99
 msgid "Leave a comment"
 msgstr ""
 
@@ -3116,9 +3142,9 @@ msgstr "檔案修改"
 msgid "file removed"
 msgstr "移除檔案"
 
-#~ msgid ""
-#~ "Changeset was to big and was cut"
-#~ " off, use diff menu to display "
-#~ "this diff"
+#~ msgid "[committed via RhodeCode] into"
+#~ msgstr ""
+
+#~ msgid "[pulled from remote] into"
 #~ msgstr ""
 

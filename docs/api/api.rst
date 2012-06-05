@@ -59,6 +59,47 @@ All responses from API will be `HTTP/1.0 200 OK`, if there's an error while
 calling api *error* key from response will contain failure description
 and result will be null.
 
+
+API CLIENT
+++++++++++
+
+From version 1.4 RhodeCode adds a binary script that allows to easily
+communicate with API. After installing RhodeCode a `rhodecode-api` script
+will be available.
+
+To get started quickly simply run::
+
+  rhodecode-api _create_config --apikey=<youapikey> --apihost=<rhodecode host>
+ 
+This will create a file named .config in the directory you executed it storing
+json config file with credentials. You can skip this step and always provide
+both of the arguments to be able to communicate with server
+
+
+after that simply run any api command for example get_repo::
+ 
+ rhodecode-api get_repo
+
+ calling {"api_key": "<apikey>", "id": 75, "args": {}, "method": "get_repo"} to http://127.0.0.1:5000
+ rhodecode said:
+ {'error': 'Missing non optional `repoid` arg in JSON DATA',
+  'id': 75,
+  'result': None}
+
+Ups looks like we forgot to add an argument
+
+Let's try again now giving the repoid as parameters::
+
+    rhodecode-api get_repo repoid:rhodecode   
+ 
+    calling {"api_key": "<apikey>", "id": 39, "args": {"repoid": "rhodecode"}, "method": "get_repo"} to http://127.0.0.1:5000
+    rhodecode said:
+    {'error': None,
+     'id': 39,
+     'result': <json data...>}
+
+
+
 API METHODS
 +++++++++++
 
@@ -187,7 +228,18 @@ OUTPUT::
 
     result: {
               "id" : "<new_user_id>",
-              "msg" : "created new user <username>"
+              "msg" : "created new user <username>",
+              "user": {
+                "id" :       "<id>",
+                "username" : "<username>",
+                "firstname": "<firstname>",
+                "lastname" : "<lastname>",
+                "email" :    "<email>",
+                "active" :   "<bool>",
+                "admin" :    "<bool>",
+                "ldap_dn" :  "<ldap_dn>",
+                "last_login": "<last_login>",
+              },
             }
     error:  null
 
@@ -195,7 +247,7 @@ OUTPUT::
 update_user
 -----------
 
-updates current one if such user exists. This command can 
+updates given user if such user exists. This command can 
 be executed only using api_key belonging to user with admin rights.
 
 
@@ -220,7 +272,33 @@ OUTPUT::
 
     result: {
               "id" : "<edited_user_id>",
-              "msg" : "updated user <username>"
+              "msg" : "updated user ID:<userid> <username>"
+            }
+    error:  null
+
+
+delete_user
+-----------
+
+
+deletes givenuser if such user exists. This command can 
+be executed only using api_key belonging to user with admin rights.
+
+
+INPUT::
+
+    id : <id_for_response>
+    api_key : "<api_key>"
+    method :  "delete_user"
+    args :    {
+                "userid" : "<user_id or username>",
+              }
+
+OUTPUT::
+
+    result: {
+              "id" : "<edited_user_id>",
+              "msg" : "deleted user ID:<userid> <username>"
             }
     error:  null
 
@@ -534,6 +612,15 @@ OUTPUT::
     result: {
               "id": "<newrepoid>",
               "msg": "Created new repository <reponame>",
+              "repo": {
+                "id" :          "<id>",
+                "repo_name" :   "<reponame>"
+                "type" :        "<type>",
+                "description" : "<description>",
+                "clone_uri" :   "<clone_uri>",
+                "private": :    "<bool>",
+                "created_on" :  "<datetimecreated>",
+              },
             }
     error:  null
 

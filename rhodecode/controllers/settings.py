@@ -104,7 +104,7 @@ class SettingsController(BaseRepoController):
                     category='success')
             changed_name = form_result['repo_name_full']
             action_logger(self.rhodecode_user, 'user_updated_repo',
-                          changed_name, '', self.sa)
+                          changed_name, self.ip_addr, self.sa)
             Session.commit()
         except formencode.Invalid, errors:
             c.repo_info = repo_model.get_by_repo_name(repo_name)
@@ -145,7 +145,7 @@ class SettingsController(BaseRepoController):
             return redirect(url('home'))
         try:
             action_logger(self.rhodecode_user, 'user_deleted_repo',
-                              repo_name, '', self.sa)
+                              repo_name, self.ip_addr, self.sa)
             repo_model.delete(repo)
             invalidate_cache('get_repo_cached_%s' % repo_name)
             h.flash(_('deleted repository %s') % repo_name, category='success')

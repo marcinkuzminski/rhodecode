@@ -217,7 +217,7 @@ def make_map(config):
         m.connect("user_emails_delete", "/users_emails/{id}",
                   action="delete_email", conditions=dict(method=["DELETE"]))
 
-    #ADMIN USERS REST ROUTES
+    #ADMIN USERS GROUPS REST ROUTES
     with rmap.submapper(path_prefix=ADMIN_PREFIX,
                         controller='admin/users_groups') as m:
         m.connect("users_groups", "/users_groups",
@@ -346,10 +346,17 @@ def make_map(config):
     rmap.connect('public_journal', '%s/public_journal' % ADMIN_PREFIX,
                  controller='journal', action="public_journal")
 
-    rmap.connect('public_journal_rss', '%s/public_journal_rss' % ADMIN_PREFIX,
+    rmap.connect('public_journal_rss', '%s/public_journal/rss' % ADMIN_PREFIX,
+                 controller='journal', action="public_journal_rss")
+
+    rmap.connect('public_journal_rss_old', '%s/public_journal_rss' % ADMIN_PREFIX,
                  controller='journal', action="public_journal_rss")
 
     rmap.connect('public_journal_atom',
+                 '%s/public_journal/atom' % ADMIN_PREFIX, controller='journal',
+                 action="public_journal_atom")
+
+    rmap.connect('public_journal_atom_old',
                  '%s/public_journal_atom' % ADMIN_PREFIX, controller='journal',
                  action="public_journal_atom")
 

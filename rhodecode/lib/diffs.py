@@ -135,7 +135,7 @@ class DiffProcessor(object):
     """
     _chunk_re = re.compile(r'@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@(.*)')
 
-    def __init__(self, diff, differ='diff', format='udiff'):
+    def __init__(self, diff, differ='diff', format='gitdiff'):
         """
         :param diff:   a text in diff format or generator
         :param format: format of diff passed, `udiff` or `gitdiff`
@@ -289,7 +289,7 @@ class DiffProcessor(object):
             do(line)
             do(next_)
 
-    def _parse_udiff(self):
+    def _parse_udiff(self, inline_diff=True):
         """
         Parse the diff an return data for the template.
         """
@@ -386,8 +386,13 @@ class DiffProcessor(object):
                             })
 
                         line = lineiter.next()
+
         except StopIteration:
             pass
+
+        sorter = lambda info: {'A': 0, 'M': 1, 'D': 2}.get(info['operation'])
+        if inline_diff is False:
+            return sorted(files, key=sorter)
 
         # highlight inline changes
         for diff_data in files:
@@ -404,14 +409,15 @@ class DiffProcessor(object):
                             self.differ(line, nextline)
                 except StopIteration:
                     pass
-        return files
 
-    def prepare(self):
+        return sorted(files, key=sorter)
+
+    def prepare(self, inline_diff=True):
         """
         Prepare the passed udiff for HTML rendering. It'l return a list
         of dicts
         """
-        return self._parse_udiff()
+        return self._parse_udiff(inline_diff=inline_diff)
 
     def _safe_id(self, idstring):
         """Make a string safe for including in an id attribute.

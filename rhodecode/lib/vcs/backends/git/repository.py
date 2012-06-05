@@ -94,7 +94,7 @@ class GitRepository(BaseRepository):
         if isinstance(cmd, basestring):
             cmd = [cmd]
             _str_cmd = True
- 
+
         gitenv = os.environ
         gitenv['GIT_CONFIG_NOGLOBAL'] = '1'
 
@@ -437,6 +437,12 @@ class GitRepository(BaseRepository):
         if ignore_whitespace:
             flags.append('-w')
 
+        if hasattr(rev1, 'raw_id'):
+            rev1 = getattr(rev1, 'raw_id')
+
+        if hasattr(rev2, 'raw_id'):
+            rev2 = getattr(rev2, 'raw_id')
+
         if rev1 == self.EMPTY_CHANGESET:
             rev2 = self.get_changeset(rev2).raw_id
             cmd = ' '.join(['show'] + flags + [rev2])
@@ -495,6 +501,17 @@ class GitRepository(BaseRepository):
         url = self._get_url(url)
         cmd = ['pull']
         cmd.append("--ff-only")
+        cmd.append(url)
+        cmd = ' '.join(cmd)
+        # If error occurs run_git_command raises RepositoryError already
+        self.run_git_command(cmd)
+
+    def fetch(self, url):
+        """
+        Tries to pull changes from external location.
+        """
+        url = self._get_url(url)
+        cmd = ['fetch']
         cmd.append(url)
         cmd = ' '.join(cmd)
         # If error occurs run_git_command raises RepositoryError already

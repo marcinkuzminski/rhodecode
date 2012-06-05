@@ -330,6 +330,11 @@ div.options a {
     z-index: auto !important;
 }
 
+.header-pos-fix{
+	margin-top: -44px;
+	padding-top: 44px;
+}
+
 #header #header-inner #home a {
 	height: 40px;
 	width: 46px;
@@ -2838,6 +2843,13 @@ table.code-browser .submodule-dir {
 	-moz-border-radius: 8px 8px 8px 8px;
 	border-radius: 8px 8px 8px 8px;
 	box-shadow: 0 2px 2px rgba(0, 0, 0, 0.6);
+}
+
+.mentions-container{
+	width: 90% !important;
+}
+.mentions-container .yui-ac-content{
+	width: 100% !important;
 }
 
 .ac {

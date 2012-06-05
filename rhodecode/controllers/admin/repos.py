@@ -151,10 +151,12 @@ class ReposController(BaseController):
             if request.POST.get('user_created'):
                 # created by regular non admin user
                 action_logger(self.rhodecode_user, 'user_created_repo',
-                              form_result['repo_name_full'], '', self.sa)
+                              form_result['repo_name_full'], self.ip_addr,
+                              self.sa)
             else:
                 action_logger(self.rhodecode_user, 'admin_created_repo',
-                              form_result['repo_name_full'], '', self.sa)
+                              form_result['repo_name_full'], self.ip_addr,
+                              self.sa)
             Session.commit()
         except formencode.Invalid, errors:
 
@@ -212,7 +214,7 @@ class ReposController(BaseController):
                     category='success')
             changed_name = repo.repo_name
             action_logger(self.rhodecode_user, 'admin_updated_repo',
-                              changed_name, '', self.sa)
+                              changed_name, self.ip_addr, self.sa)
             Session.commit()
         except formencode.Invalid, errors:
             defaults = self.__load_data(repo_name)
@@ -253,7 +255,7 @@ class ReposController(BaseController):
             return redirect(url('repos'))
         try:
             action_logger(self.rhodecode_user, 'admin_deleted_repo',
-                              repo_name, '', self.sa)
+                              repo_name, self.ip_addr, self.sa)
             repo_model.delete(repo)
             invalidate_cache('get_repo_cached_%s' % repo_name)
             h.flash(_('deleted repository %s') % repo_name, category='success')

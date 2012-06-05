@@ -43,6 +43,7 @@ from rhodecode.model.users_group import UsersGroupModel
 from rhodecode.model.db import User, UsersGroup, Permission, UsersGroupToPerm
 from rhodecode.model.forms import UsersGroupForm
 from rhodecode.model.meta import Session
+from rhodecode.lib.utils import action_logger
 
 log = logging.getLogger(__name__)
 
@@ -76,9 +77,11 @@ class UsersGroupsController(BaseController):
             form_result = users_group_form.to_python(dict(request.POST))
             UsersGroupModel().create(name=form_result['users_group_name'],
                                      active=form_result['users_group_active'])
-            h.flash(_('created users group %s') \
-                    % form_result['users_group_name'], category='success')
-            #action_logger(self.rhodecode_user, 'new_user', '', '', self.sa)
+            gr = form_result['users_group_name']
+            action_logger(self.rhodecode_user,
+                          'admin_created_users_group:%s' % gr,
+                          None, self.ip_addr, self.sa)
+            h.flash(_('created users group %s') % gr, category='success')
             Session.commit()
         except formencode.Invalid, errors:
             return htmlfill.render(
@@ -125,10 +128,11 @@ class UsersGroupsController(BaseController):
         try:
             form_result = users_group_form.to_python(request.POST)
             UsersGroupModel().update(c.users_group, form_result)
-            h.flash(_('updated users group %s') \
-                        % form_result['users_group_name'],
-                    category='success')
-            #action_logger(self.rhodecode_user, 'new_user', '', '', self.sa)
+            gr = form_result['users_group_name']
+            action_logger(self.rhodecode_user,
+                          'admin_updated_users_group:%s' % gr,
+                          None, self.ip_addr, self.sa)
+            h.flash(_('updated users group %s') % gr, category='success')
             Session.commit()
         except formencode.Invalid, errors:
             e = errors.error_dict or {}

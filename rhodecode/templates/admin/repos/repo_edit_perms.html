@@ -46,7 +46,12 @@
             <td>${h.radio('g_perm_%s' % g2p.users_group.users_group_name,'repository.write')}</td>
             <td>${h.radio('g_perm_%s' % g2p.users_group.users_group_name,'repository.admin')}</td>
             <td style="white-space: nowrap;">
-                <img class="perm-gravatar" src="${h.url('/images/icons/group.png')}"/>${g2p.users_group.users_group_name}
+                <img class="perm-gravatar" src="${h.url('/images/icons/group.png')}"/>
+                %if h.HasPermissionAny('hg.admin')():
+                 <a href="${h.url('edit_users_group',id=g2p.users_group.users_group_id)}">${g2p.users_group.users_group_name}</a>
+                %else:
+                 ${g2p.users_group.users_group_name}
+                %endif
             </td>
             <td>
                 <span class="delete_icon action_button" onclick="ajaxActionUsersGroup(${g2p.users_group.users_group_id},'${'id%s'%id(g2p.users_group.users_group_name)}')">
@@ -117,12 +122,7 @@ YUE.onDOMReady(function () {
         YUD.setStyle('add_perm', 'opacity', '0.6');
         YUD.setStyle('add_perm', 'cursor', 'default');
     });
-    MembersAutoComplete(
-    		  ${c.users_array|n},
-    		  ${c.users_groups_array|n},
-    		  "${_('Group')}",
-    		  "${_('members')}"
-    		);
+    MembersAutoComplete(${c.users_array|n}, ${c.users_groups_array|n});
 });
 
 </script>

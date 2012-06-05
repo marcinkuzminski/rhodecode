@@ -194,6 +194,11 @@ class GitChangeset(BaseChangeset):
 
         return _prev(self, branch)
 
+    def diff(self, ignore_whitespace=True, context=3):
+        return ''.join(self.repository.get_diff(self, self.parents[0],
+                                    ignore_whitespace=ignore_whitespace,
+                                    context=context))
+
     def get_file_mode(self, path):
         """
         Returns stat mode of the file at the given ``path``.

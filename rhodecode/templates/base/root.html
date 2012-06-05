@@ -36,6 +36,18 @@
 
         ## JAVASCRIPT ##
         <%def name="js()">
+            <script type="text/javascript">
+            //JS translations map
+            var TRANSLATION_MAP = {
+                'add another comment':'${_("add another comment")}',
+                'Stop following this repository':"${_('Stop following this repository')}",
+                'Start following this repository':"${_('Start following this repository')}",
+                'Group':"${_('Group')}",
+                'members':"${_('members')}"
+
+            };
+            var _TM = TRANSLATION_MAP;
+            </script>
             <script type="text/javascript" src="${h.url('/js/yui.2.9.js')}"></script>
             <!--[if lt IE 9]>
                <script language="javascript" type="text/javascript" src="${h.url('/js/excanvas.min.js')}"></script>
@@ -48,20 +60,13 @@
             <script type="text/javascript">
             var follow_base_url  = "${h.url('toggle_following')}";
 
-            //JS translations map
-            var TRANSLATION_MAP = {
-            	'add another comment':'${_("add another comment")}',
-                'Stop following this repository':"${_('Stop following this repository')}",
-                'Start following this repository':"${_('Start following this repository')}",
-            };
-
             var onSuccessFollow = function(target){
                 var f = YUD.get(target.id);
                 var f_cnt = YUD.get('current_followers_count');
 
                 if(f.getAttribute('class')=='follow'){
                     f.setAttribute('class','following');
-                    f.setAttribute('title',TRANSLATION_MAP['Stop following this repository']);
+                    f.setAttribute('title',_TM['Stop following this repository']);
 
                     if(f_cnt){
                         var cnt = Number(f_cnt.innerHTML)+1;
@@ -70,7 +75,7 @@
                 }
                 else{
                     f.setAttribute('class','follow');
-                    f.setAttribute('title',TRANSLATION_MAP['Start following this repository']);
+                    f.setAttribute('title',_TM['Start following this repository']);
                     if(f_cnt){
                         var cnt = Number(f_cnt.innerHTML)+1;
                         f_cnt.innerHTML = cnt;

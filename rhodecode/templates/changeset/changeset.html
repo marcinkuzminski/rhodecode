@@ -122,7 +122,10 @@
 	    </div>
 
     </div>
-
+    <script>
+    var _USERS_AC_DATA = ${c.users_array|n};
+    var _GROUPS_AC_DATA = ${c.users_groups_array|n};
+    </script>
     ## diff block
     <%namespace name="diff_block" file="/changeset/diff_block.html"/>
     ${diff_block.diff_block(c.changes)}

@@ -360,8 +360,10 @@ class ScmModel(BaseModel):
             # inject ui extra param to log this action via push logger
             for k, v in extras.items():
                 repo._repo.ui.setconfig('rhodecode_extras', k, v)
-
-            repo.pull(clone_uri)
+            if repo.alias == 'git':
+                repo.fetch(clone_uri)
+            else:
+                repo.pull(clone_uri)
             self.mark_for_invalidation(repo_name)
         except:
             log.error(traceback.format_exc())
