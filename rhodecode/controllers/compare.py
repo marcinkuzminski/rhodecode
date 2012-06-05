@@ -49,7 +49,6 @@ class CompareController(BaseRepoController):
     def __before__(self):
         super(CompareController, self).__before__()
 
-
     def _get_discovery(self, org_repo, org_ref, other_repo, other_ref):
         from mercurial import discovery
         other = org_repo._repo
@@ -119,6 +118,10 @@ class CompareController(BaseRepoController):
                                            other_ref,
                                            discovery_data)
 
+        c.statuses = c.rhodecode_db_repo.statuses([x.raw_id for x in
+                                                   c.cs_ranges])
+
+
         c.org_ref = org_ref[1]
         c.other_ref = other_ref[1]
         # diff needs to have swapped org with other to generate proper diff
@@ -129,9 +132,8 @@ class CompareController(BaseRepoController):
 
         c.files = []
         c.changes = {}
-        # sort Added first then Modified last Deleted files
-        sorter = lambda info: {'A': 0, 'M': 1, 'D': 2}.get(info['operation'])
-        for f in sorted(_parsed, key=sorter):
+
+        for f in _parsed:
             fid = h.FID('', f['filename'])
             c.files.append([fid, f['operation'], f['filename'], f['stats']])
             diff = diff_processor.as_html(enable_comments=False, diff_lines=[f])
