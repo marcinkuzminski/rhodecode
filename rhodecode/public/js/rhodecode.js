@@ -205,7 +205,7 @@ function ypjax(url,container,s_call,f_call,args){
 		success:s_wrapper,
 		failure:function(o){
 			console.log(o);
-			YUD.get(container).innerHTML='ERROR';
+			YUD.get(container).innerHTML='ERROR '+o.status;
 			YUD.setStyle(container,'opacity','1.0');
 			YUD.setStyle(container,'color','red');
 		}
@@ -1323,3 +1323,141 @@ var dateSort = function(a, b, desc, field) {
     var compState = comp(a_, b_, desc);
     return compState;
 };
+
+
+
+/* Multi selectors */
+
+var MultiSelectWidget = function(selected_id, available_id, form_id){
+
+
+	//definition of containers ID's
+	var selected_container = selected_id;
+	var available_container = available_id;
+	
+	//temp container for selected storage.
+	var cache = new Array();
+	var av_cache = new Array();
+	var c =  YUD.get(selected_container);
+	var ac = YUD.get(available_container);
+	
+	//get only selected options for further fullfilment
+	for(var i = 0;node =c.options[i];i++){
+	    if(node.selected){
+	        //push selected to my temp storage left overs :)
+	        cache.push(node);
+	    }
+	}
+	
+	//get all available options to cache
+	for(var i = 0;node =ac.options[i];i++){
+	        //push selected to my temp storage left overs :)
+	        av_cache.push(node);
+	}
+	
+	//fill available only with those not in choosen
+	ac.options.length=0;
+	tmp_cache = new Array();
+	
+	for(var i = 0;node = av_cache[i];i++){
+	    var add = true;
+	    for(var i2 = 0;node_2 = cache[i2];i2++){
+	        if(node.value == node_2.value){
+	            add=false;
+	            break;
+	        }
+	    }
+	    if(add){
+	        tmp_cache.push(new Option(node.text, node.value, false, false));
+	    }
+	}
+	
+	for(var i = 0;node = tmp_cache[i];i++){
+	    ac.options[i] = node;
+	}
+	
+	function prompts_action_callback(e){
+	
+	    var choosen = YUD.get(selected_container);
+	    var available = YUD.get(available_container);
+	
+	    //get checked and unchecked options from field
+	    function get_checked(from_field){
+	        //temp container for storage.
+	        var sel_cache = new Array();
+	        var oth_cache = new Array();
+	
+	        for(var i = 0;node = from_field.options[i];i++){
+	            if(node.selected){
+	                //push selected fields :)
+	                sel_cache.push(node);
+	            }
+	            else{
+	                oth_cache.push(node)
+	            }
+	        }
+	
+	        return [sel_cache,oth_cache]
+	    }
+	
+	    //fill the field with given options
+	    function fill_with(field,options){
+	        //clear firtst
+	        field.options.length=0;
+	        for(var i = 0;node = options[i];i++){
+	                field.options[i]=new Option(node.text, node.value,
+	                        false, false);
+	        }
+	
+	    }
+	    //adds to current field
+	    function add_to(field,options){
+	        for(var i = 0;node = options[i];i++){
+	                field.appendChild(new Option(node.text, node.value,
+	                        false, false));
+	        }
+	    }
+	
+	    // add action
+	    if (this.id=='add_element'){
+	        var c = get_checked(available);
+	        add_to(choosen,c[0]);
+	        fill_with(available,c[1]);
+	    }
+	    // remove action
+	    if (this.id=='remove_element'){
+	        var c = get_checked(choosen);
+	        add_to(available,c[0]);
+	        fill_with(choosen,c[1]);
+	    }
+	    // add all elements
+	    if(this.id=='add_all_elements'){
+	        for(var i=0; node = available.options[i];i++){
+	                choosen.appendChild(new Option(node.text,
+	                        node.value, false, false));
+	        }
+	        available.options.length = 0;
+	    }
+	    //remove all elements
+	    if(this.id=='remove_all_elements'){
+	        for(var i=0; node = choosen.options[i];i++){
+	            available.appendChild(new Option(node.text,
+	                    node.value, false, false));
+	        }
+	        choosen.options.length = 0;
+	    }
+	
+	}
+	
+	YUE.addListener(['add_element','remove_element',
+	               'add_all_elements','remove_all_elements'],'click',
+	               prompts_action_callback)
+	if (form_id !== undefined) {
+		YUE.addListener(form_id,'submit',function(){
+		    var choosen = YUD.get(selected_container);
+		    for (var i = 0; i < choosen.options.length; i++) {
+		        choosen.options[i].selected = 'selected';
+		    }
+		});
+	}
+}
