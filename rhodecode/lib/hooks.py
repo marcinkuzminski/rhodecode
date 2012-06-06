@@ -138,7 +138,7 @@ def log_push_action(ui, repo, **kwargs):
 
         stop, start = get_revs(repo, [node + ':'])
         h = binascii.hexlify
-        revs = (h(repo[r].node()) for r in xrange(start, stop + 1))
+        revs = [h(repo[r].node()) for r in xrange(start, stop + 1)]
     elif scm == 'git':
         revs = kwargs.get('_git_revs', [])
         if '_git_revs' in kwargs:
@@ -198,7 +198,7 @@ def log_create_repository(repository_dict, created_by, **kwargs):
 
 def handle_git_post_receive(repo_path, revs, env):
     """
-    A really hacky method that is runned by git pre-receive hook and logs
+    A really hacky method that is runned by git post-receive hook and logs
     an push action together with pushed revisions. It's runned by subprocess
     thus needs all info to be able to create a temp pylons enviroment, connect
     to database and run the logging code. Hacky as sh**t but works. ps.

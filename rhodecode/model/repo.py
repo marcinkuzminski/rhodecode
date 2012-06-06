@@ -476,7 +476,7 @@ class RepoModel(BaseModel):
             tmpl = pkg_resources.resource_string(
                 'rhodecode', jn('config', 'pre_receive_tmpl.py')
             )
-            _hook_file = jn(loc, 'pre-receive')
+            _hook_file = jn(loc, 'post-receive')
             with open(_hook_file, 'wb') as f:
                 f.write(tmpl)
             os.chmod(_hook_file, 0555)

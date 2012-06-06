@@ -271,7 +271,7 @@ class SimpleGit(BaseVCSController):
 
     def _handle_githooks(self, repo_name, action, baseui, environ):
         """
-        Handles pull action, push is handled by pre-receive hook
+        Handles pull action, push is handled by post-receive hook
         """
         from rhodecode.lib.hooks import log_pull_action
         service = environ['QUERY_STRING'].split('=')

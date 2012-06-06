@@ -238,7 +238,7 @@ class RhodeCodeUi(Base, BaseModel):
 
     HOOK_UPDATE = 'changegroup.update'
     HOOK_REPO_SIZE = 'changegroup.repo_size'
-    HOOK_PUSH = 'pretxnchangegroup.push_logger'
+    HOOK_PUSH = 'changegroup.push_logger'
     HOOK_PULL = 'preoutgoing.pull_logger'
 
     ui_id = Column("ui_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
