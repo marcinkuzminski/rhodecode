@@ -139,7 +139,9 @@ def log_push_action(ui, repo, **kwargs):
         h = binascii.hexlify
         revs = (h(repo[r].node()) for r in xrange(start, stop + 1))
     elif scm == 'git':
-        revs = []
+        revs = kwargs.get('_git_revs', [])
+        if '_git_revs' in kwargs:
+            kwargs.pop('_git_revs')
 
     action = action % ','.join(revs)
 
@@ -190,3 +192,59 @@ def log_create_repository(repository_dict, created_by, **kwargs):
         return callback(**kw)
 
     return 0
+
+
+def handle_git_post_receive(repo_path, revs, env):
+    """
+    A really hacky method that is runned by git pre-receive hook and logs
+    an push action together with pushed revisions. It's runned by subprocess
+    thus needs all info to be able to create a temp pylons enviroment, connect
+    to database and run the logging code. Hacky as sh**t but works. ps.
+    GIT SUCKS
+
+    :param repo_path:
+    :type repo_path:
+    :param revs:
+    :type revs:
+    :param env:
+    :type env:
+    """
+    from paste.deploy import appconfig
+    from sqlalchemy import engine_from_config
+    from rhodecode.config.environment import load_environment
+    from rhodecode.model import init_model
+    from rhodecode.model.db import RhodeCodeUi
+    from rhodecode.lib.utils import make_ui
+    from rhodecode.model.db import Repository
+
+    path, ini_name = os.path.split(env['RHODECODE_CONFIG_FILE'])
+    conf = appconfig('config:%s' % ini_name, relative_to=path)
+    load_environment(conf.global_conf, conf.local_conf)
+
+    engine = engine_from_config(conf, 'sqlalchemy.db1.')
+    init_model(engine)
+
+    baseui = make_ui('db')
+    repo = Repository.get_by_full_path(repo_path)
+
+    _hooks = dict(baseui.configitems('hooks')) or {}
+    # if push hook is enabled via web interface
+    if _hooks.get(RhodeCodeUi.HOOK_PUSH):
+
+        extras = {
+         'username': env['RHODECODE_USER'],
+         'repository': repo.repo_name,
+         'scm': 'git',
+         'action': 'push',
+         'ip': env['RHODECODE_CONFIG_IP'],
+        }
+        for k, v in extras.items():
+            baseui.setconfig('rhodecode_extras', k, v)
+        repo = repo.scm_instance
+        repo.ui = baseui
+        old_rev, new_rev = revs[0:-1]
+
+        cmd = 'log ' + old_rev + '..' + new_rev + ' --reverse --pretty=format:"%H"'
+        git_revs = repo.run_git_command(cmd)[0].splitlines()
+
+        log_push_action(baseui, repo, _git_revs=git_revs)

@@ -68,8 +68,9 @@ dulserver.DEFAULT_HANDLERS = {
   'git-receive-pack': dulserver.ReceivePackHandler,
 }
 
-from dulwich.repo import Repo
-from dulwich.web import make_wsgi_chain
+# not used for now until dulwich get's fixed
+#from dulwich.repo import Repo
+#from dulwich.web import make_wsgi_chain
 
 from paste.httpheaders import REMOTE_USER, AUTH_TYPE
 
@@ -77,7 +78,7 @@ from rhodecode.lib.utils2 import safe_str
 from rhodecode.lib.base import BaseVCSController
 from rhodecode.lib.auth import get_container_username
 from rhodecode.lib.utils import is_valid_repo, make_ui
-from rhodecode.model.db import User
+from rhodecode.model.db import User, RhodeCodeUi
 
 from webob.exc import HTTPNotFound, HTTPForbidden, HTTPInternalServerError
 
@@ -205,13 +206,13 @@ class SimpleGit(BaseVCSController):
             self._handle_githooks(repo_name, action, baseui, environ)
 
             log.info('%s action on GIT repo "%s"' % (action, repo_name))
-            app = self.__make_app(repo_name, repo_path)
+            app = self.__make_app(repo_name, repo_path, username)
             return app(environ, start_response)
         except Exception:
             log.error(traceback.format_exc())
             return HTTPInternalServerError()(environ, start_response)
 
-    def __make_app(self, repo_name, repo_path):
+    def __make_app(self, repo_name, repo_path, username):
         """
         Make an wsgi application using dulserver
 
@@ -223,6 +224,7 @@ class SimpleGit(BaseVCSController):
         app = make_wsgi_app(
             repo_root=os.path.dirname(repo_path),
             repo_name=repo_name,
+            username=username,
         )
         return app
 
@@ -268,7 +270,10 @@ class SimpleGit(BaseVCSController):
         return op
 
     def _handle_githooks(self, repo_name, action, baseui, environ):
-        from rhodecode.lib.hooks import log_pull_action, log_push_action
+        """
+        Handles pull action, push is handled by pre-receive hook
+        """
+        from rhodecode.lib.hooks import log_pull_action
         service = environ['QUERY_STRING'].split('=')
         if len(service) < 2:
             return
@@ -278,12 +283,8 @@ class SimpleGit(BaseVCSController):
         _repo = _repo.scm_instance
         _repo._repo.ui = baseui
 
-        push_hook = 'pretxnchangegroup.push_logger'
-        pull_hook = 'preoutgoing.pull_logger'
         _hooks = dict(baseui.configitems('hooks')) or {}
-        if action == 'push' and _hooks.get(push_hook):
-            log_push_action(ui=baseui, repo=_repo._repo)
-        elif action == 'pull' and _hooks.get(pull_hook):
+        if action == 'pull' and _hooks.get(RhodeCodeUi.HOOK_PULL):
             log_pull_action(ui=baseui, repo=_repo._repo)
 
     def __inject_extras(self, repo_path, baseui, extras={}):

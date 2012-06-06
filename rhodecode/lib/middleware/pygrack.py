@@ -41,7 +41,7 @@ class GitRepository(object):
     git_folder_signature = set(['config', 'head', 'info', 'objects', 'refs'])
     commands = ['git-upload-pack', 'git-receive-pack']
 
-    def __init__(self, repo_name, content_path):
+    def __init__(self, repo_name, content_path, username):
         files = set([f.lower() for f in os.listdir(content_path)])
         if  not (self.git_folder_signature.intersection(files)
                 == self.git_folder_signature):
@@ -50,6 +50,7 @@ class GitRepository(object):
         self.valid_accepts = ['application/x-%s-result' %
                               c for c in self.commands]
         self.repo_name = repo_name
+        self.username = username
 
     def _get_fixedpath(self, path):
         """
@@ -115,11 +116,25 @@ class GitRepository(object):
             inputstream = environ['wsgi.input']
 
         try:
+            gitenv = os.environ
+            from rhodecode import CONFIG
+            from rhodecode.lib.base import _get_ip_addr
+            gitenv['RHODECODE_USER'] = self.username
+            gitenv['RHODECODE_CONFIG_IP'] = _get_ip_addr(environ)
+            # forget all configs
+            gitenv['GIT_CONFIG_NOGLOBAL'] = '1'
+            # we need current .ini file used to later initialize rhodecode
+            # env and connect to db
+            gitenv['RHODECODE_CONFIG_FILE'] = CONFIG['__file__']
+            opts = dict(
+                env=gitenv
+            )
             out = subprocessio.SubprocessIOChunker(
                 r'git %s --stateless-rpc "%s"' % (git_command[4:],
                                                   self.content_path),
-                inputstream=inputstream
-                )
+                inputstream=inputstream,
+                **opts
+            )
         except EnvironmentError, e:
             log.exception(e)
             raise exc.HTTPExpectationFailed()
@@ -156,7 +171,7 @@ class GitRepository(object):
 
 class GitDirectory(object):
 
-    def __init__(self, repo_root, repo_name):
+    def __init__(self, repo_root, repo_name, username):
         repo_location = os.path.join(repo_root, repo_name)
         if not os.path.isdir(repo_location):
             raise OSError(repo_location)
@@ -164,19 +179,20 @@ class GitDirectory(object):
         self.content_path = repo_location
         self.repo_name = repo_name
         self.repo_location = repo_location
+        self.username = username
 
     def __call__(self, environ, start_response):
         content_path = self.content_path
         try:
-            app = GitRepository(self.repo_name, content_path)
+            app = GitRepository(self.repo_name, content_path, self.username)
         except (AssertionError, OSError):
             if os.path.isdir(os.path.join(content_path, '.git')):
                 app = GitRepository(self.repo_name,
                                     os.path.join(content_path, '.git'))
             else:
-                return exc.HTTPNotFound()(environ, start_response)
+                return exc.HTTPNotFound()(environ, start_response, self.username)
         return app(environ, start_response)
 
 
-def make_wsgi_app(repo_name, repo_root):
-    return GitDirectory(repo_root, repo_name)
+def make_wsgi_app(repo_name, repo_root, username):
+    return GitDirectory(repo_root, repo_name, username)
