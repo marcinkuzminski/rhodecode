@@ -49,8 +49,6 @@ class JournalController(BaseController):
 
     def __before__(self):
         super(JournalController, self).__before__()
-        self.rhodecode_user = self.rhodecode_user
-        self.title = _('%s public journal %s feed') % (c.rhodecode_name, '%s')
         self.language = 'en-us'
         self.ttl = "5"
         self.feed_nr = 20
@@ -83,6 +81,28 @@ class JournalController(BaseController):
         if request.environ.get('HTTP_X_PARTIAL_XHR'):
             return c.journal_data
         return render('journal/journal.html')
+
+    @LoginRequired(api_access=True)
+    def journal_atom(self):
+        """
+        Produce an atom-1.0 feed via feedgenerator module
+        """
+        following = self.sa.query(UserFollowing)\
+            .filter(UserFollowing.user_id == self.rhodecode_user.user_id)\
+            .options(joinedload(UserFollowing.follows_repository))\
+            .all()
+        return self._atom_feed(following, public=False)
+
+    @LoginRequired(api_access=True)
+    def journal_rss(self):
+        """
+        Produce an rss feed via feedgenerator module
+        """
+        following = self.sa.query(UserFollowing)\
+            .filter(UserFollowing.user_id == self.rhodecode_user.user_id)\
+            .options(joinedload(UserFollowing.follows_repository))\
+            .all()
+        return self._rss_feed(following, public=False)
 
     def _get_daily_aggregate(self, journal):
         groups = []
@@ -173,6 +193,80 @@ class JournalController(BaseController):
             return c.journal_data
         return render('journal/public_journal.html')
 
+    def _atom_feed(self, repos, public=True):
+        journal = self._get_journal_data(repos)
+        if public:
+            _link = url('public_journal_atom', qualified=True)
+            _desc = '%s %s %s' % (c.rhodecode_name, _('public journal'),
+                                  'atom feed')
+        else:
+            _link = url('journal_atom', qualified=True)
+            _desc = '%s %s %s' % (c.rhodecode_name, _('journal'), 'atom feed')
+
+        feed = Atom1Feed(title=_desc,
+                         link=_link,
+                         description=_desc,
+                         language=self.language,
+                         ttl=self.ttl)
+
+        for entry in journal[:self.feed_nr]:
+            action, action_extra, ico = h.action_parser(entry, feed=True)
+            title = "%s - %s %s" % (entry.user.short_contact, action(),
+                                 entry.repository.repo_name)
+            desc = action_extra()
+            _url = None
+            if entry.repository is not None:
+                _url = url('changelog_home',
+                           repo_name=entry.repository.repo_name,
+                           qualified=True)
+
+            feed.add_item(title=title,
+                          pubdate=entry.action_date,
+                          link=_url or url('', qualified=True),
+                          author_email=entry.user.email,
+                          author_name=entry.user.full_contact,
+                          description=desc)
+
+        response.content_type = feed.mime_type
+        return feed.writeString('utf-8')
+
+    def _rss_feed(self, repos, public=True):
+        journal = self._get_journal_data(repos)
+        if public:
+            _link = url('public_journal_atom', qualified=True)
+            _desc = '%s %s %s' % (c.rhodecode_name, _('public journal'),
+                                  'rss feed')
+        else:
+            _link = url('journal_atom', qualified=True)
+            _desc = '%s %s %s' % (c.rhodecode_name, _('journal'), 'rss feed')
+
+        feed = Rss201rev2Feed(title=_desc,
+                         link=_link,
+                         description=_desc,
+                         language=self.language,
+                         ttl=self.ttl)
+
+        for entry in journal[:self.feed_nr]:
+            action, action_extra, ico = h.action_parser(entry, feed=True)
+            title = "%s - %s %s" % (entry.user.short_contact, action(),
+                                 entry.repository.repo_name)
+            desc = action_extra()
+            _url = None
+            if entry.repository is not None:
+                _url = url('changelog_home',
+                           repo_name=entry.repository.repo_name,
+                           qualified=True)
+
+            feed.add_item(title=title,
+                          pubdate=entry.action_date,
+                          link=_url or url('', qualified=True),
+                          author_email=entry.user.email,
+                          author_name=entry.user.full_contact,
+                          description=desc)
+
+        response.content_type = feed.mime_type
+        return feed.writeString('utf-8')
+
     @LoginRequired(api_access=True)
     def public_journal_atom(self):
         """
@@ -183,28 +277,7 @@ class JournalController(BaseController):
             .options(joinedload(UserFollowing.follows_repository))\
             .all()
 
-        journal = self._get_journal_data(c.following)
-
-        feed = Atom1Feed(title=self.title % 'atom',
-                         link=url('public_journal_atom', qualified=True),
-                         description=_('Public journal'),
-                         language=self.language,
-                         ttl=self.ttl)
-
-        for entry in journal[:self.feed_nr]:
-            action, action_extra, ico = h.action_parser(entry, feed=True)
-            title = "%s - %s %s" % (entry.user.short_contact, action(),
-                                 entry.repository.repo_name)
-            desc = action_extra()
-            feed.add_item(title=title,
-                          pubdate=entry.action_date,
-                          link=url('', qualified=True),
-                          author_email=entry.user.email,
-                          author_name=entry.user.full_contact,
-                          description=desc)
-
-        response.content_type = feed.mime_type
-        return feed.writeString('utf-8')
+        return self._atom_feed(c.following)
 
     @LoginRequired(api_access=True)
     def public_journal_rss(self):
@@ -216,25 +289,4 @@ class JournalController(BaseController):
             .options(joinedload(UserFollowing.follows_repository))\
             .all()
 
-        journal = self._get_journal_data(c.following)
-
-        feed = Rss201rev2Feed(title=self.title % 'rss',
-                         link=url('public_journal_rss', qualified=True),
-                         description=_('Public journal'),
-                         language=self.language,
-                         ttl=self.ttl)
-
-        for entry in journal[:self.feed_nr]:
-            action, action_extra, ico = h.action_parser(entry, feed=True)
-            title = "%s - %s %s" % (entry.user.short_contact, action(),
-                                 entry.repository.repo_name)
-            desc = action_extra()
-            feed.add_item(title=title,
-                          pubdate=entry.action_date,
-                          link=url('', qualified=True),
-                          author_email=entry.user.email,
-                          author_name=entry.user.full_contact,
-                          description=desc)
-
-        response.content_type = feed.mime_type
-        return feed.writeString('utf-8')
+        return self._rss_feed(c.following)
