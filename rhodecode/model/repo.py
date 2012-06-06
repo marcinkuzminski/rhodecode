@@ -22,10 +22,13 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from __future__ import with_statement
 import os
 import shutil
 import logging
 import traceback
+import pkg_resources
+from os.path import dirname as dn, join as jn
 from datetime import datetime
 
 from rhodecode.lib.vcs.backends import get_backend
@@ -461,7 +464,23 @@ class RepoModel(BaseModel):
         if alias == 'hg':
             backend(repo_path, create=True, src_url=clone_uri)
         elif alias == 'git':
-            backend(repo_path, create=True, src_url=clone_uri, bare=True)
+            r = backend(repo_path, create=True, src_url=clone_uri, bare=True)
+            # add rhodecode hook into this repo
+
+            loc = jn(r.path, 'hooks')
+            if not r.bare:
+                loc = jn(r.path, '.git', 'hooks')
+            if not os.path.isdir(loc):
+                os.makedirs(loc)
+
+            tmpl = pkg_resources.resource_string(
+                'rhodecode', jn('config', 'pre_receive_tmpl.py')
+            )
+            _hook_file = jn(loc, 'pre-receive')
+            with open(_hook_file, 'wb') as f:
+                f.write(tmpl)
+            os.chmod(_hook_file, 0555)
+
         else:
             raise Exception('Undefined alias %s' % alias)
 

@@ -33,6 +33,7 @@ from mercurial.node import nullrev
 from rhodecode import EXTENSIONS
 from rhodecode.lib import helpers as h
 from rhodecode.lib.utils import action_logger
+from rhodecode.lib.vcs.backends.base import EmptyChangeset
 
 
 def _get_scm_size(alias, root_path):
@@ -242,9 +243,14 @@ def handle_git_post_receive(repo_path, revs, env):
             baseui.setconfig('rhodecode_extras', k, v)
         repo = repo.scm_instance
         repo.ui = baseui
-        old_rev, new_rev = revs[0:-1]
-
-        cmd = 'log ' + old_rev + '..' + new_rev + ' --reverse --pretty=format:"%H"'
+        old_rev, new_rev, ref = revs
+        if old_rev == EmptyChangeset().raw_id:
+            cmd = "for-each-ref --format='%(refname)' 'refs/heads/*'"
+            heads = repo.run_git_command(cmd)[0]
+            heads = heads.replace(ref, '')
+            cmd = 'log ' + new_rev + ' --reverse --pretty=format:"%H" --not ' + heads
+        else:
+            cmd = 'log ' + old_rev + '..' + new_rev + ' --reverse --pretty=format:"%H"'
         git_revs = repo.run_git_command(cmd)[0].splitlines()
 
         log_push_action(baseui, repo, _git_revs=git_revs)
