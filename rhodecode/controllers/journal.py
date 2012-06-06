@@ -83,6 +83,7 @@ class JournalController(BaseController):
         return render('journal/journal.html')
 
     @LoginRequired(api_access=True)
+    @NotAnonymous()
     def journal_atom(self):
         """
         Produce an atom-1.0 feed via feedgenerator module
@@ -94,6 +95,7 @@ class JournalController(BaseController):
         return self._atom_feed(following, public=False)
 
     @LoginRequired(api_access=True)
+    @NotAnonymous()
     def journal_rss(self):
         """
         Produce an rss feed via feedgenerator module
