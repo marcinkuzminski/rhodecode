@@ -16,7 +16,7 @@ def main():
         # rhodecode
         sys.exit(0)
 
-    repo_path = os.path.abspath('.')    
+    repo_path = os.path.abspath('.')
     push_data = sys.stdin.read().strip().split(' ')
     # os.environ is modified here by a subprocess call that
     # runs git and later git executes this hook.

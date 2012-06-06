@@ -196,13 +196,13 @@ class SettingsController(BaseController):
                     hgsettings4 = self.sa.query(RhodeCodeUi)\
                     .filter(RhodeCodeUi.ui_key == RhodeCodeUi.HOOK_REPO_SIZE)\
                     .one()
-                    hgsettings4.ui_active = bool(form_result[_f('hooks_%s' % 
+                    hgsettings4.ui_active = bool(form_result[_f('hooks_%s' %
                                                  RhodeCodeUi.HOOK_REPO_SIZE)])
 
                     hgsettings5 = self.sa.query(RhodeCodeUi)\
                     .filter(RhodeCodeUi.ui_key == RhodeCodeUi.HOOK_PUSH)\
                     .one()
-                    hgsettings5.ui_active = bool(form_result[_f('hooks_%s' % 
+                    hgsettings5.ui_active = bool(form_result[_f('hooks_%s' %
                                                  RhodeCodeUi.HOOK_PUSH)])
 
                     hgsettings6 = self.sa.query(RhodeCodeUi)\
