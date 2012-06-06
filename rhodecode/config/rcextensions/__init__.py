@@ -1,6 +1,7 @@
 # Additional mappings that are not present in the pygments lexers
 # used for building stats
-# format is {'ext':'Name'} eg. {'py':'Python'}
+# format is {'ext':['Names']} eg. {'py':['Python']} note: there can be
+# more than one name for extension
 # NOTE: that this will overide any mappings in LANGUAGES_EXTENSIONS_MAP
 # build by pygments
 EXTRA_MAPPINGS = {}
@@ -39,6 +40,7 @@ def _crhook(*args, **kwargs):
      :param group_id:
      :param created_by:
     """
+
     return 0
 CREATE_REPO_HOOK = _crhook
 
