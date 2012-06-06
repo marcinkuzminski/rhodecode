@@ -249,9 +249,13 @@ def handle_git_post_receive(repo_path, revs, env):
             cmd = "for-each-ref --format='%(refname)' 'refs/heads/*'"
             heads = repo.run_git_command(cmd)[0]
             heads = heads.replace(ref, '')
-            cmd = 'log ' + new_rev + ' --reverse --pretty=format:"%H" --not ' + heads
+            heads = ' '.join(map(lambda c: c.strip('\n').strip(),
+                                 heads.splitlines()))
+            cmd = ('log ' + new_rev +
+                   ' --reverse --pretty=format:"%H" --not ' + heads)
         else:
-            cmd = 'log ' + old_rev + '..' + new_rev + ' --reverse --pretty=format:"%H"'
+            cmd = ('log ' + old_rev + '..' + new_rev +
+                   ' --reverse --pretty=format:"%H"')
         git_revs = repo.run_git_command(cmd)[0].splitlines()
 
         log_push_action(baseui, repo, _git_revs=git_revs)
