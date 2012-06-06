@@ -30,7 +30,6 @@ from inspect import isfunction
 from mercurial.scmutil import revrange
 from mercurial.node import nullrev
 
-from rhodecode import EXTENSIONS
 from rhodecode.lib import helpers as h
 from rhodecode.lib.utils import action_logger
 from rhodecode.lib.vcs.backends.base import EmptyChangeset
@@ -100,6 +99,7 @@ def log_pull_action(ui, repo, **kwargs):
 
     action_logger(username, action, repository, extras['ip'], commit=True)
     # extension hook call
+    from rhodecode import EXTENSIONS
     callback = getattr(EXTENSIONS, 'PULL_HOOK', None)
 
     if isfunction(callback):
@@ -149,6 +149,7 @@ def log_push_action(ui, repo, **kwargs):
     action_logger(username, action, repository, extras['ip'], commit=True)
 
     # extension hook call
+    from rhodecode import EXTENSIONS
     callback = getattr(EXTENSIONS, 'PUSH_HOOK', None)
     if isfunction(callback):
         kw = {'pushed_revs': revs}
@@ -183,7 +184,7 @@ def log_create_repository(repository_dict, created_by, **kwargs):
      'repo_name'
 
     """
-
+    from rhodecode import EXTENSIONS
     callback = getattr(EXTENSIONS, 'CREATE_REPO_HOOK', None)
     if isfunction(callback):
         kw = {}

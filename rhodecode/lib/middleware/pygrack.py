@@ -127,7 +127,8 @@ class GitRepository(object):
             # env and connect to db
             gitenv['RHODECODE_CONFIG_FILE'] = CONFIG['__file__']
             opts = dict(
-                env=gitenv
+                env=gitenv,
+                cwd=os.getcwd()
             )
             out = subprocessio.SubprocessIOChunker(
                 r'git %s --stateless-rpc "%s"' % (git_command[4:],
