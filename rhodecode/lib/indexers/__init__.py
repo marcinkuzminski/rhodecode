@@ -40,7 +40,7 @@ from whoosh.index import create_in, open_dir
 from whoosh.formats import Characters
 from whoosh.highlight import highlight, HtmlFormatter, ContextFragmenter
 
-from webhelpers.html.builder import escape
+from webhelpers.html.builder import escape, literal
 from sqlalchemy import engine_from_config
 
 from rhodecode.model import init_model
@@ -57,6 +57,7 @@ ANALYZER = RegexTokenizer(expression=r"\w+") | LowercaseFilter()
 
 #INDEX SCHEMA DEFINITION
 SCHEMA = Schema(
+    fileid=ID(unique=True),
     owner=TEXT(),
     repository=TEXT(stored=True),
     path=TEXT(stored=True),
@@ -230,7 +231,7 @@ class WhooshResultWrapper(object):
         if self.search_type != 'content':
             return ''
         hl = highlight(
-            text=escape(content),
+            text=content,
             terms=self.highlight_items,
             analyzer=ANALYZER,
             fragmenter=FRAGMENTER,

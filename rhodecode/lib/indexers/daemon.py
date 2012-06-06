@@ -146,10 +146,12 @@ class WhooshIndexingDaemon(object):
             u_content = u''
             indexed += 1
 
+        p = safe_unicode(path)
         writer.add_document(
+            fileid=p,
             owner=unicode(repo.contact),
             repository=safe_unicode(repo_name),
-            path=safe_unicode(path),
+            path=p,
             content=u_content,
             modtime=self.get_node_mtime(node),
             extension=node.extension
@@ -214,8 +216,11 @@ class WhooshIndexingDaemon(object):
                 if mtime > indexed_time:
                     # The file has changed, delete it and add it to the list of
                     # files to reindex
-                    log.debug('adding to reindex list %s' % indexed_path)
-                    writer.delete_by_term('path', indexed_path)
+                    log.debug('adding to reindex list %s mtime: %s vs %s' % (
+                                    indexed_path, mtime, indexed_time)
+                    )
+                    writer.delete_by_term('fileid', indexed_path)
+
                     to_index.add(indexed_path)
             except (ChangesetError, NodeDoesNotExistError):
                 # This file was deleted since it was indexed
@@ -230,6 +235,7 @@ class WhooshIndexingDaemon(object):
             for path in self.get_paths(repo):
                 path = safe_unicode(path)
                 if path in to_index or path not in indexed_paths:
+
                     # This is either a file that's changed, or a new file
                     # that wasn't indexed before. So index it!
                     i, iwc = self.add_doc(writer, path, repo, repo_name)

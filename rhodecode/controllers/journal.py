@@ -192,8 +192,8 @@ class JournalController(BaseController):
                          ttl=self.ttl)
 
         for entry in journal[:self.feed_nr]:
-            action, action_extra = h.action_parser(entry, feed=True)
-            title = "%s - %s %s" % (entry.user.short_contact, action,
+            action, action_extra, ico = h.action_parser(entry, feed=True)
+            title = "%s - %s %s" % (entry.user.short_contact, action(),
                                  entry.repository.repo_name)
             desc = action_extra()
             feed.add_item(title=title,
@@ -225,8 +225,8 @@ class JournalController(BaseController):
                          ttl=self.ttl)
 
         for entry in journal[:self.feed_nr]:
-            action, action_extra = h.action_parser(entry, feed=True)
-            title = "%s - %s %s" % (entry.user.short_contact, action,
+            action, action_extra, ico = h.action_parser(entry, feed=True)
+            title = "%s - %s %s" % (entry.user.short_contact, action(),
                                  entry.repository.repo_name)
             desc = action_extra()
             feed.add_item(title=title,
