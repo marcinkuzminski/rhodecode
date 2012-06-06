@@ -269,6 +269,10 @@ class RhodeCodeUi(Base, BaseModel):
         return q.all()
 
     @classmethod
+    def get_repos_location(cls):
+        return cls.get_by_key('/').one().ui_value
+
+    @classmethod
     def create_or_update_hook(cls, key, val):
         new_ui = cls.get_by_key(key).scalar() or cls()
         new_ui.ui_section = 'hooks'

@@ -174,7 +174,8 @@ class SettingsController(BaseController):
             application_form = ApplicationUiSettingsForm()()
             try:
                 form_result = application_form.to_python(dict(request.POST))
-
+                # fix namespaces for hooks
+                _f = lambda s: s.replace('.', '_')
                 try:
 
                     hgsettings1 = self.sa.query(RhodeCodeUi)\
@@ -187,28 +188,28 @@ class SettingsController(BaseController):
 
                     #HOOKS
                     hgsettings3 = self.sa.query(RhodeCodeUi)\
-                    .filter(RhodeCodeUi.ui_key == 'changegroup.update').one()
-                    hgsettings3.ui_active = \
-                        bool(form_result['hooks_changegroup_update'])
+                    .filter(RhodeCodeUi.ui_key == RhodeCodeUi.HOOK_UPDATE)\
+                    .one()
+                    hgsettings3.ui_active = bool(form_result[_f('hooks_%s' %
+                                                 RhodeCodeUi.HOOK_UPDATE)])
 
                     hgsettings4 = self.sa.query(RhodeCodeUi)\
-                    .filter(RhodeCodeUi.ui_key ==
-                            'changegroup.repo_size').one()
-                    hgsettings4.ui_active = \
-                        bool(form_result['hooks_changegroup_repo_size'])
+                    .filter(RhodeCodeUi.ui_key == RhodeCodeUi.HOOK_REPO_SIZE)\
+                    .one()
+                    hgsettings4.ui_active = bool(form_result[_f('hooks_%s' % 
+                                                 RhodeCodeUi.HOOK_REPO_SIZE)])
 
                     hgsettings5 = self.sa.query(RhodeCodeUi)\
-                    .filter(RhodeCodeUi.ui_key ==
-                            'pretxnchangegroup.push_logger').one()
-                    hgsettings5.ui_active = \
-                        bool(form_result['hooks_pretxnchangegroup'
-                                         '_push_logger'])
+                    .filter(RhodeCodeUi.ui_key == RhodeCodeUi.HOOK_PUSH)\
+                    .one()
+                    hgsettings5.ui_active = bool(form_result[_f('hooks_%s' % 
+                                                 RhodeCodeUi.HOOK_PUSH)])
 
                     hgsettings6 = self.sa.query(RhodeCodeUi)\
-                    .filter(RhodeCodeUi.ui_key ==
-                            'preoutgoing.pull_logger').one()
-                    hgsettings6.ui_active = \
-                        bool(form_result['hooks_preoutgoing_pull_logger'])
+                    .filter(RhodeCodeUi.ui_key == RhodeCodeUi.HOOK_PULL)\
+                    .one()
+                    hgsettings6.ui_active = bool(form_result[_f('hooks_%s' %
+                                                 RhodeCodeUi.HOOK_PULL)])
 
                     self.sa.add(hgsettings1)
                     self.sa.add(hgsettings2)
