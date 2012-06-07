@@ -19,7 +19,7 @@
             h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id),
             title=cs.message)}
         </td>
-        <td><span class="tooltip" title="${cs.date}">
+        <td><span class="tooltip" title="${h.fmt_date(cs.date)}">
                       ${h.age(cs.date)}</span>
         </td>
 		<td title="${cs.author}">${h.person(cs.author)}</td>

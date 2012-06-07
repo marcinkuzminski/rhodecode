@@ -1,7 +1,7 @@
 <%inherit file="/base/base.html"/>
 
 <%def name="title()">
-    ${c.repo_name} ${_('Summary')} - ${c.rhodecode_name}
+    ${_('%s Summary') % c.repo_name} - ${c.rhodecode_name}
 </%def>
 
 <%def name="breadcrumbs_links()">
@@ -163,7 +163,7 @@
                     %endif
 		        %else:
 			        ${h.select('download_options',c.rhodecode_repo.get_changeset().raw_id,c.download_options)}
-			             <span id="${'zip_link'}">${h.link_to('Download as zip',h.url('files_archive_home',repo_name=c.dbrepo.repo_name,fname='tip.zip'),class_="archive_icon ui-btn")}</span>
+			             <span id="${'zip_link'}">${h.link_to(_('Download as zip'), h.url('files_archive_home',repo_name=c.dbrepo.repo_name,fname='tip.zip'),class_="archive_icon ui-btn")}</span>
                     <span style="vertical-align: bottom">
                         <input id="archive_subrepos" type="checkbox" name="subrepos" />
                         <label for="archive_subrepos" class="tooltip" title="${_('Check this to download archive with subrepos')}" >${_('with subrepos')}</label>

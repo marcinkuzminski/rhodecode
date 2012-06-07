@@ -2,7 +2,7 @@
 <%inherit file="/base/base.html"/>
 
 <%def name="title()">
-    ${c.repo_name} ${_('Fork')} - ${c.rhodecode_name}
+    ${_('%s Fork') % c.repo_name} - ${c.rhodecode_name}
 </%def>
 
 <%def name="breadcrumbs_links()">

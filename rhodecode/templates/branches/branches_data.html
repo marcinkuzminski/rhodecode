@@ -17,7 +17,7 @@
                     h.url('files_home',repo_name=c.repo_name,revision=branch[1].raw_id))}</span>
                 </span>
             </td>
-            <td><span class="tooltip" title="${h.age(branch[1].date)}">${branch[1].date}</span></td>
+            <td><span class="tooltip" title="${h.age(branch[1].date)}">${h.fmt_date(branch[1].date)}</span></td>
             <td title="${branch[1].author}">${h.person(branch[1].author)}</td>
             <td>
                 <div>
@@ -35,7 +35,7 @@
                       h.url('changeset_home',repo_name=c.repo_name,revision=branch[1].raw_id))}</span>
                   </span>
               </td>
-              <td><span class="tooltip" title="${h.age(branch[1].date)}">${branch[1].date}</span></td>
+              <td><span class="tooltip" title="${h.age(branch[1].date)}">${h.fmt_date(branch[1].date)}</span></td>
               <td title="${branch[1].author}">${h.person(branch[1].author)}</td>
               <td>
                 <div>

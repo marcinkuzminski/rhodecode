@@ -40,13 +40,13 @@
             <th class="left">${_('action')}</th>
         </tr>
             %for cnt,user in enumerate(c.users_list):
-             %if user.name !='default':
+             %if user.username !='default':
                 <tr class="parity${cnt%2}">
                 	<td><div class="gravatar"><img alt="gravatar" src="${h.gravatar_url(user.email,24)}"/> </div></td>
                     <td>${h.link_to(user.username,h.url('edit_user', id=user.user_id))}</td>
                     <td>${user.name}</td>
                     <td>${user.lastname}</td>
-                    <td>${user.last_login}</td>
+                    <td>${h.fmt_date(user.last_login)}</td>
                     <td>${h.bool2icon(user.active)}</td>
                     <td>${h.bool2icon(user.admin)}</td>
                     <td>${h.bool2icon(bool(user.ldap_dn))}</td>

@@ -16,7 +16,7 @@
                     ${_('private repository')}
                     </span>
                 </td>
-                <td class="private_repo_msg"><img style="vertical-align:bottom" src="${h.url('/images/icons/user.png')}"/>${r2p.user.username}</td>
+                <td class="private_repo_msg"><img style="vertical-align:bottom" src="${h.url('/images/icons/user.png')}"/>${_('default')}</td>
             </tr>
         %else:
         <tr id="id${id(r2p.user.username)}">
@@ -25,7 +25,7 @@
             <td>${h.radio('u_perm_%s' % r2p.user.username,'repository.write')}</td>
             <td>${h.radio('u_perm_%s' % r2p.user.username,'repository.admin')}</td>
             <td style="white-space: nowrap;">
-                <img class="perm-gravatar" src="${h.gravatar_url(r2p.user.email,14)}"/>${r2p.user.username}
+                <img class="perm-gravatar" src="${h.gravatar_url(r2p.user.email,14)}"/>${r2p.user.username if r2p.user.username != 'default' else _('default')}
             </td>
             <td>
               %if r2p.user.username !='default':
