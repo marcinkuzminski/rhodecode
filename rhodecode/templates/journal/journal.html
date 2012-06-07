@@ -9,6 +9,10 @@
 <%def name="page_nav()">
 	${self.menu('home')}
 </%def>
+<%def name="head_extra()">
+<link href="${h.url('journal_atom', api_key=c.rhodecode_user.api_key)}" rel="alternate" title="${_('ATOM journal feed')}" type="application/atom+xml" />
+<link href="${h.url('journal_rss', api_key=c.rhodecode_user.api_key)}" rel="alternate" title="${_('RSS journal feed')}" type="application/rss+xml" />
+</%def>
 <%def name="main()">
 
     <div class="box box-left">
@@ -23,7 +27,7 @@
                  <span><a href="${h.url('journal_rss', api_key=c.rhodecode_user.api_key)}"><img class="icon" title="${_('RSS feed')}" alt="${_('RSS feed')}" src="${h.url('/images/icons/rss_16.png')}"/></a></span>
                </li>
                <li>
-                 <span><a href="${h.url('journal_atom', api_key=c.rhodecode_user.api_key)}"><img class="icon" title="${_('ATOM feed')}" alt="${_('ATOM feed')}" src="${h.url('/images/icons/atom_16.png')}"/></a></span>
+                 <span><a href="${h.url('journal_atom', api_key=c.rhodecode_user.api_key)}"><img class="icon" title="${_('ATOM feed')}" alt="${_('ATOM feed')}" src="${h.url('/images/icons/atom.png')}"/></a></span>
                </li>
              </ul>
 	    </div>
