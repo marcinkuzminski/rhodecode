@@ -474,12 +474,12 @@ class RepoModel(BaseModel):
                 os.makedirs(loc)
 
             tmpl = pkg_resources.resource_string(
-                'rhodecode', jn('config', 'pre_receive_tmpl.py')
+                'rhodecode', jn('config', 'post_receive_tmpl.py')
             )
             _hook_file = jn(loc, 'post-receive')
             with open(_hook_file, 'wb') as f:
                 f.write(tmpl)
-            os.chmod(_hook_file, 0555)
+            os.chmod(_hook_file, 0755)
 
         else:
             raise Exception('Undefined alias %s' % alias)
