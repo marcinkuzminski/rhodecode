@@ -16,6 +16,8 @@ news
 - new codereview system
 - email map, allowing users to have multiple email addresses mapped into
   their accounts
+- improved git-hook system. Now all actions for git are logged into journal
+  including pushed revisions, user and IP address
 - changed setup-app into setup-rhodecode and added default options to it.
 - new git repos are created as bare now by default
 - #464 added links to groups in permission box
@@ -25,6 +27,10 @@ news
 - rhodecode-api CLI client
 - new git http protocol replaced buggy dulwich implementation.
   Now based on pygrack & gitweb
+- Improved RSS/ATOM feeds. Discoverable by browsers using proper headers, and 
+  reformated based on user suggestions. Additional rss/atom feeds for user
+  journal
+- various i18n improvements
 
 fixes
 +++++
@@ -41,6 +47,8 @@ fixes
   commands.
 - fixed #413. Don't disable .git directory for bare repos on deleting
 - fixed issue #459. Changed the way of obtaining logger in reindex task.
+- fixed #453 added ID field in whoosh SCHEMA that solves the issue of
+  reindexing modified files
 
 1.3.6 (**2012-05-17**)
 ----------------------
