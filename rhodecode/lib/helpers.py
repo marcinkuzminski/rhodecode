@@ -108,7 +108,7 @@ class _GetError(object):
 
     def __call__(self, field_name, form_errors):
         tmpl = """<span class="error_msg">%s</span>"""
-        if form_errors and form_errors.has_key(field_name):
+        if form_errors and field_name in form_errors:
             return literal(tmpl % form_errors.get(field_name))
 
 get_error = _GetError()
@@ -117,12 +117,15 @@ get_error = _GetError()
 class _ToolTip(object):
 
     def __call__(self, tooltip_title, trim_at=50):
-        """Special function just to wrap our text into nice formatted
+        """
+        Special function just to wrap our text into nice formatted
         autowrapped text
 
         :param tooltip_title:
         """
-        return escape(tooltip_title)
+        tooltip_title = escape(tooltip_title)
+        tooltip_title = tooltip_title.replace('<', '&lt;').replace('>', '&gt;')
+        return tooltip_title
 tooltip = _ToolTip()
 
 
@@ -349,7 +352,7 @@ def fmt_date(date):
     if date:
         return (date.strftime(_(u"%a, %d %b %Y %H:%M:%S").encode('utf8'))
             .decode('utf8'))
-    
+
     return ""
 
 

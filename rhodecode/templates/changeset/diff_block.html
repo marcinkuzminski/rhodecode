@@ -16,9 +16,9 @@
                     revision=filenode.changeset.raw_id,f_path=h.safe_unicode(filenode.path)))}
                 </div>
                 <div class="diff-actions">
-                  <a href="${h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(filenode.path),diff2=cs2,diff1=cs1,diff='diff',fulldiff=1)}" title="${_('diff')}" class="tooltip"><img class="icon" src="${h.url('/images/icons/page_white_go.png')}"/></a>
-                  <a href="${h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(filenode.path),diff2=cs2,diff1=cs1,diff='raw')}" title="${_('raw diff')}" class="tooltip"><img class="icon" src="${h.url('/images/icons/page_white.png')}"/></a>
-                  <a href="${h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(filenode.path),diff2=cs2,diff1=cs1,diff='download')}" title="${_('download diff')}" class="tooltip"><img class="icon" src="${h.url('/images/icons/page_white_get.png')}"/></a>
+                  <a href="${h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(filenode.path),diff2=cs2,diff1=cs1,diff='diff',fulldiff=1)}" class="tooltip" title="${h.tooltip(_('diff'))}"><img class="icon" src="${h.url('/images/icons/page_white_go.png')}"/></a>
+                  <a href="${h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(filenode.path),diff2=cs2,diff1=cs1,diff='raw')}" class="tooltip" title="${h.tooltip(_('raw diff'))}"><img class="icon" src="${h.url('/images/icons/page_white.png')}"/></a>
+                  <a href="${h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(filenode.path),diff2=cs2,diff1=cs1,diff='download')}" class="tooltip" title="${h.tooltip(_('download diff'))}"><img class="icon" src="${h.url('/images/icons/page_white_get.png')}"/></a>
                   ${c.ignorews_url(request.GET, h.FID(filenode.changeset.raw_id,filenode.path))}
                   ${c.context_url(request.GET, h.FID(filenode.changeset.raw_id,filenode.path))}
                 </div>

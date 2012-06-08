@@ -18,5 +18,7 @@ class TestHomeController(TestController):
                         """open.png"/>""")
 
         response.mustcontain(
-"""<a title="Marcin Kuzminski &lt;marcin@python-works.com&gt;:\n
-merge" class="tooltip" href="/vcs_test_hg/changeset/27cd5cce30c96924232dffcd24178a07ffeb5dfc">r173:27cd5cce30c9</a>""")
+"""<a title="Marcin Kuzminski &amp;lt;marcin@python-works.com&amp;gt;:\n
+merge" class="tooltip" href="/vcs_test_hg/changeset/27cd5cce30c96924232"""
+"""dffcd24178a07ffeb5dfc">r173:27cd5cce30c9</a>"""
+)

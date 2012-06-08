@@ -88,14 +88,14 @@
 		             </td>
 		             <td>
 		             	%if node.is_file():
-		             		<div class="tooltip" title="${node.last_changeset.message}">
+		             		<div class="tooltip" title="${h.tooltip(node.last_changeset.message)}">
 		             		<pre>${'r%s:%s' % (node.last_changeset.revision,node.last_changeset.short_id)}</pre>
                             </div>
 		             	%endif
 		             </td>
 		             <td>
 		             	%if node.is_file():
-		             		<span class="tooltip" title="${h.fmt_date(node.last_changeset.date)}">
+		             		<span class="tooltip" title="${h.tooltip(h.fmt_date(node.last_changeset.date))}">
                             ${h.age(node.last_changeset.date)}</span>
 		             	%endif
 		             </td>

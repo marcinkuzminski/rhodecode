@@ -49,7 +49,7 @@ ${_('%s Changelog') % c.repo_name} - ${c.rhodecode_name}
 						<div class="left">
 							<div>
 							${h.checkbox(cs.short_id,class_="changeset_range")}
-							<span class="tooltip" title="${h.age(cs.date)}"><a href="${h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id)}"><span class="changeset_id">${cs.revision}:<span class="changeset_hash">${h.short_id(cs.raw_id)}</span></span></a></span>
+							<span class="tooltip" title="${h.tooltip(h.age(cs.date))}"><a href="${h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id)}"><span class="changeset_id">${cs.revision}:<span class="changeset_hash">${h.short_id(cs.raw_id)}</span></span></a></span>
 							</div>
 							<div class="author">
 								<div class="gravatar">
@@ -65,7 +65,7 @@ ${_('%s Changelog') % c.repo_name} - ${c.rhodecode_name}
 						</div>
 						<div class="right">
 									<div class="changes">
-                                        <div id="${cs.raw_id}"  style="float:right;" class="changed_total tooltip" title="${_('Affected number of files, click to show more details')}">${len(cs.affected_files)}</div>
+                                        <div id="${cs.raw_id}"  style="float:right;" class="changed_total tooltip" title="${h.tooltip(_('Affected number of files, click to show more details'))}">${len(cs.affected_files)}</div>
                                         <div class="comments-container">
                                         %if len(c.comments.get(cs.raw_id,[])) > 0:
                                             <div class="comments-cnt" title="${('comments')}">
