@@ -341,7 +341,12 @@ def make_map(config):
         m.connect('api', '/api')
 
     #USER JOURNAL
-    rmap.connect('journal', '%s/journal' % ADMIN_PREFIX, controller='journal')
+    rmap.connect('journal', '%s/journal' % ADMIN_PREFIX,
+                 controller='journal', action='index')
+    rmap.connect('journal_rss', '%s/journal/rss' % ADMIN_PREFIX,
+                 controller='journal', action='journal_rss')
+    rmap.connect('journal_atom', '%s/journal/atom' % ADMIN_PREFIX,
+                 controller='journal', action='journal_atom')
 
     rmap.connect('public_journal', '%s/public_journal' % ADMIN_PREFIX,
                  controller='journal', action="public_journal")

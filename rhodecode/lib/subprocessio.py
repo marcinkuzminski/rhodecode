@@ -276,7 +276,7 @@ class BufferedGenerator():
         return self.data[i]
 
 
-class SubprocessIOChunker():
+class SubprocessIOChunker(object):
     '''
     Processor class wrapping handling of subprocess IO.
 
@@ -321,7 +321,7 @@ class SubprocessIOChunker():
 
     '''
     def __init__(self, cmd, inputstream=None, buffer_size=65536,
-                 chunk_size=4096, starting_values=[]):
+                 chunk_size=4096, starting_values=[], **kwargs):
         '''
         Initializes SubprocessIOChunker
 
@@ -342,7 +342,8 @@ class SubprocessIOChunker():
             shell=True,
             stdin=inputstream,
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
+            stderr=subprocess.PIPE,
+            **kwargs
             )
 
         bg_out = BufferedGenerator(_p.stdout, buffer_size, chunk_size, starting_values)

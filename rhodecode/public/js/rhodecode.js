@@ -611,8 +611,8 @@ var renderInlineComments = function(file_comments){
 }
 
 
-var fileBrowserListeners = function(current_url, node_list_url, url_base,
-									truncated_lbl, nomatch_lbl){
+var fileBrowserListeners = function(current_url, node_list_url, url_base){
+	
 	var current_url_branch = +"?branch=__BRANCH__";
 	var url = url_base;
 	var node_url = node_list_url;	
@@ -641,7 +641,7 @@ var fileBrowserListeners = function(current_url, node_list_url, url_base,
 	  YUC.initHeader('X-PARTIAL-XHR',true);
 	  YUC.asyncRequest('GET',url,{
 	      success:function(o){
-	        nodes = JSON.parse(o.responseText);
+	        nodes = JSON.parse(o.responseText).nodes;
 	        YUD.setStyle('node_filter_box_loading','display','none');
 	        YUD.setStyle('node_filter_box','display','');
 	        n_filter.focus();
@@ -685,9 +685,8 @@ var fileBrowserListeners = function(current_url, node_list_url, url_base,
 	                    match.push('<tr><td><a class="browser-{0}" href="{1}">{2}</a></td><td colspan="5"></td></tr>'.format(t,node_url.replace('__FPATH__',n),n_hl));
 	                }
 	                if(match.length >= matches_max){
-	                    match.push('<tr><td>{0}</td><td colspan="5"></td></tr>'.format(truncated_lbl));
+	                    match.push('<tr><td>{0}</td><td colspan="5"></td></tr>'.format(_TM['search truncated']));
 	                }
-	                
 	            }                       
 	        }
 	        if(query != ""){
@@ -695,7 +694,7 @@ var fileBrowserListeners = function(current_url, node_list_url, url_base,
 	            YUD.setStyle('tbody_filtered','display','');
 	            
 	            if (match.length==0){
-	              match.push('<tr><td>{0}</td><td colspan="5"></td></tr>'.format(nomatch_lbl));
+	              match.push('<tr><td>{0}</td><td colspan="5"></td></tr>'.format(_TM['no matching files']));
 	            }                           
 	            
 	            YUD.get('tbody_filtered').innerHTML = match.join("");   

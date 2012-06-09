@@ -1,7 +1,7 @@
 <%inherit file="/base/base.html"/>
 
 <%def name="title()">
-    ${c.repo_name} ${_('Files')} - ${c.rhodecode_name}
+    ${_('%s Files') % c.repo_name} - ${c.rhodecode_name}
 </%def>
 
 <%def name="breadcrumbs_links()">
@@ -41,8 +41,6 @@ var YPJAX_TITLE = "${c.repo_name} ${_('Files')} - ${c.rhodecode_name}";
 var current_url = "${h.url.current()}";
 var node_list_url = '${h.url("files_home",repo_name=c.repo_name,revision=c.changeset.raw_id,f_path='__FPATH__')}';
 var url_base = '${h.url("files_nodelist_home",repo_name=c.repo_name,revision=c.changeset.raw_id,f_path=c.file.path)}';
-var truncated_lbl = "${_('search truncated')}";
-var nomatch_lbl = "${_('no matching files')}";
-fileBrowserListeners(current_url, node_list_url, url_base, truncated_lbl, nomatch_lbl);
+fileBrowserListeners(current_url, node_list_url, url_base);
 </script>
 </%def>

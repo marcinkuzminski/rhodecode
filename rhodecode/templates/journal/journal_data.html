@@ -24,7 +24,7 @@
 		                </span>
 		            </div>
 		            <div class="journal_action_params">${h.literal(h.action_parser(entry)[1]())}</div>
-		            <div class="date"><span class="tooltip" title="${entry.action_date}">${h.age(entry.action_date)}</span></div>
+		            <div class="date"><span class="tooltip" title="${h.tooltip(h.fmt_date(entry.action_date))}">${h.age(entry.action_date)}</span></div>
 	            %endfor
 	            </div>
 	        </div>

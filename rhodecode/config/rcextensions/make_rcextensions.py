@@ -54,7 +54,7 @@ class MakeRcExt(BasePasterCommand):
         logging.config.fileConfig(self.path_to_ini_file)
         from pylons import config
 
-        def _make_file(ext_file):
+        def _make_file(ext_file, tmpl):
             bdir = os.path.split(ext_file)[0]
             if not os.path.isdir(bdir):
                 os.makedirs(bdir)
@@ -71,11 +71,11 @@ class MakeRcExt(BasePasterCommand):
             msg = ('Extension file already exists, do you want '
                    'to overwrite it ? [y/n]')
             if ask_ok(msg):
-                _make_file(ext_file)
+                _make_file(ext_file, tmpl)
             else:
                 log.info('nothing done...')
         else:
-            _make_file(ext_file)
+            _make_file(ext_file, tmpl)
 
     def update_parser(self):
         pass

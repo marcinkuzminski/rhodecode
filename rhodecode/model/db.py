@@ -242,7 +242,7 @@ class RhodeCodeUi(Base, BaseModel):
 
     HOOK_UPDATE = 'changegroup.update'
     HOOK_REPO_SIZE = 'changegroup.repo_size'
-    HOOK_PUSH = 'pretxnchangegroup.push_logger'
+    HOOK_PUSH = 'changegroup.push_logger'
     HOOK_PULL = 'preoutgoing.pull_logger'
 
     ui_id = Column("ui_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -271,6 +271,10 @@ class RhodeCodeUi(Base, BaseModel):
                                     cls.HOOK_PUSH, cls.HOOK_PULL]))
         q = q.filter(cls.ui_section == 'hooks')
         return q.all()
+
+    @classmethod
+    def get_repos_location(cls):
+        return cls.get_by_key('/').one().ui_value
 
     @classmethod
     def create_or_update_hook(cls, key, val):
@@ -585,6 +589,11 @@ class Repository(Base, BaseModel):
                 .options(joinedload(Repository.user))\
                 .options(joinedload(Repository.group))
         return q.scalar()
+
+    @classmethod
+    def get_by_full_path(cls, repo_full_path):
+        repo_name = repo_full_path.split(cls.base_path(), 1)[-1]
+        return cls.get_by_repo_name(repo_name.strip(URL_SEP))
 
     @classmethod
     def get_repo_forks(cls, repo_id):

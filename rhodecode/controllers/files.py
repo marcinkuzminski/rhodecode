@@ -487,4 +487,4 @@ class FilesController(BaseRepoController):
             cs = self.__get_cs_or_redirect(revision, repo_name)
             _d, _f = ScmModel().get_nodes(repo_name, cs.raw_id, f_path,
                                           flat=False)
-            return _d + _f
+            return {'nodes': _d + _f}

@@ -37,7 +37,7 @@
             %for cnt,u_group in enumerate(c.users_groups_list):
                 <tr class="parity${cnt%2}">
                     <td>${h.link_to(u_group.users_group_name,h.url('edit_users_group', id=u_group.users_group_id))}</td>
-                    <td><span class="tooltip" title="${', '.join(map(h.safe_unicode,[x.user.username for x in u_group.members[:50]]))}">${len(u_group.members)}</span></td>
+                    <td><span class="tooltip" title="${h.tooltip(', '.join(map(h.safe_unicode,[x.user.username for x in u_group.members[:50]])))}">${len(u_group.members)}</span></td>
                     <td>${h.bool2icon(u_group.users_group_active)}</td>
                     <td>
                         ${h.form(url('users_group', id=u_group.users_group_id),method='delete')}

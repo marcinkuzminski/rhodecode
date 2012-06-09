@@ -43,9 +43,12 @@
       ${h.form(h.url('changeset_comment', repo_name=c.repo_name, revision=changeset.raw_id),class_='inline-form')}
       <div class="clearfix">
           <div class="comment-help">${_('Commenting on line {1}.')}
-          ${(_('Comments parsed using %s syntax with %s support.') % (('<a href="%s">RST</a>' % h.url('rst_help')),
-          	'<span style="color:#003367" class="tooltip" title="%s">@mention</span>' %
-          	_('Use @username inside this text to send notification to this RhodeCode user')))|n}
+          ${(_('Comments parsed using %s syntax with %s support.') % (
+                 ('<a href="%s">RST</a>' % h.url('rst_help')),
+          	     ('<span style="color:#003367" class="tooltip" title="%s">@mention</span>' % _('Use @username inside this text to send notification to this RhodeCode user'))
+               )
+            )|n
+           }
           </div>
             <div class="mentions-container" id="mentions_container_{1}"></div>
             <textarea id="text_{1}" name="text" class="yui-ac-input"></textarea>

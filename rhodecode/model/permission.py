@@ -31,7 +31,8 @@ from sqlalchemy.exc import DatabaseError
 from rhodecode.lib.caching_query import FromCache
 
 from rhodecode.model import BaseModel
-from rhodecode.model.db import User, Permission, UserToPerm, UserRepoToPerm
+from rhodecode.model.db import User, Permission, UserToPerm, UserRepoToPerm,\
+    UserRepoGroupToPerm
 
 log = logging.getLogger(__name__)
 
@@ -87,23 +88,33 @@ class PermissionModel(BaseModel):
                                        form_result['default_perm'])
                     self.sa.add(p)
 
-                if p.permission.permission_name.startswith('hg.register.'):
+                elif p.permission.permission_name.startswith('hg.register.'):
                     p.permission = self.get_permission_by_name(
                                        form_result['default_register'])
                     self.sa.add(p)
 
-                if p.permission.permission_name.startswith('hg.create.'):
+                elif p.permission.permission_name.startswith('hg.create.'):
                     p.permission = self.get_permission_by_name(
                                         form_result['default_create'])
                     self.sa.add(p)
 
+            _def_name = form_result['default_perm'].split('repository.')[-1]
             #stage 2 update all default permissions for repos if checked
             if form_result['overwrite_default'] == True:
+                _def = self.get_permission_by_name('repository.' + _def_name)
+                # repos
                 for r2p in self.sa.query(UserRepoToPerm)\
-                               .filter(UserRepoToPerm.user == perm_user).all():
-                    r2p.permission = self.get_permission_by_name(
-                                         form_result['default_perm'])
+                               .filter(UserRepoToPerm.user == perm_user)\
+                               .all():
+                    r2p.permission = _def
                     self.sa.add(r2p)
+                # groups
+                _def = self.get_permission_by_name('group.' + _def_name)
+                for g2p in self.sa.query(UserRepoGroupToPerm)\
+                               .filter(UserRepoGroupToPerm.user == perm_user)\
+                               .all():
+                    g2p.permission = _def
+                    self.sa.add(g2p)
 
             # stage 3 set anonymous access
             if perm_user.username == 'default':
