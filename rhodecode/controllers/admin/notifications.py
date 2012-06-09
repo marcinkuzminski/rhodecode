@@ -60,19 +60,23 @@ class NotificationsController(BaseController):
         """GET /_admin/notifications: All items in the collection"""
         # url('notifications')
         c.user = self.rhodecode_user
-        notif = NotificationModel().get_for_user(self.rhodecode_user.user_id)
+        notif = NotificationModel().get_for_user(self.rhodecode_user.user_id,
+                                                 filter_=request.GET)
         p = int(request.params.get('page', 1))
         c.notifications = Page(notif, page=p, items_per_page=10)
+        c.pull_request_type = Notification.TYPE_PULL_REQUEST
         return render('admin/notifications/notifications.html')
 
     def mark_all_read(self):
         if request.environ.get('HTTP_X_PARTIAL_XHR'):
             nm = NotificationModel()
             # mark all read
-            nm.mark_all_read_for_user(self.rhodecode_user.user_id)
+            nm.mark_all_read_for_user(self.rhodecode_user.user_id,
+                                      filter_=request.GET)
             Session.commit()
             c.user = self.rhodecode_user
-            notif = nm.get_for_user(self.rhodecode_user.user_id)
+            notif = nm.get_for_user(self.rhodecode_user.user_id,
+                                    filter_=request.GET)
             c.notifications = Page(notif, page=1, items_per_page=10)
             return render('admin/notifications/notifications_data.html')
 

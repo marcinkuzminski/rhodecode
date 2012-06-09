@@ -36,6 +36,7 @@ from rhodecode.config.conf import DATETIME_FORMAT
 from rhodecode.lib import helpers as h
 from rhodecode.model import BaseModel
 from rhodecode.model.db import Notification, User, UserNotification
+from sqlalchemy.orm import joinedload
 
 log = logging.getLogger(__name__)
 
@@ -136,15 +137,41 @@ class NotificationModel(BaseModel):
             log.error(traceback.format_exc())
             raise
 
-    def get_for_user(self, user):
-        user = self._get_user(user)
-        return user.notifications
+    def get_for_user(self, user, filter_=None):
+        """
+        Get mentions for given user, filter them if filter dict is given
 
-    def mark_all_read_for_user(self, user):
+        :param user:
+        :type user:
+        :param filter:
+        """
         user = self._get_user(user)
-        UserNotification.query()\
+
+        q = UserNotification.query()\
+            .filter(UserNotification.user == user)\
+            .join((Notification, UserNotification.notification_id ==
+                                 Notification.notification_id))
+
+        if filter_:
+            q = q.filter(Notification.type_ == filter_.get('type'))
+
+        return q.all()
+
+    def mark_all_read_for_user(self, user, filter_=None):
+        user = self._get_user(user)
+        q = UserNotification.query()\
+            .filter(UserNotification.user == user)\
             .filter(UserNotification.read == False)\
-            .update({'read': True})
+            .join((Notification, UserNotification.notification_id ==
+                                 Notification.notification_id))
+        if filter_:
+            q = q.filter(Notification.type_ == filter_.get('type'))
+
+        # this is a little inefficient but sqlalchemy doesn't support
+        # update on joined tables :(
+        for obj in q.all():
+            obj.read = True
+            self.sa.add(obj)
 
     def get_unread_cnt_for_user(self, user):
         user = self._get_user(user)
@@ -176,7 +203,8 @@ class NotificationModel(BaseModel):
             notification.TYPE_CHANGESET_COMMENT: _('commented on commit'),
             notification.TYPE_MESSAGE: _('sent message'),
             notification.TYPE_MENTION: _('mentioned you'),
-            notification.TYPE_REGISTRATION: _('registered in RhodeCode')
+            notification.TYPE_REGISTRATION: _('registered in RhodeCode'),
+            notification.TYPE_PULL_REQUEST: _('opened new pull request')
         }
 
         tmpl = "%(user)s %(action)s %(when)s"
