@@ -37,16 +37,9 @@ log = logging.getLogger(__name__)
 
 class UsersGroupModel(BaseModel):
 
-    def __get_user(self, user):
-        return self._get_instance(User, user, callback=User.get_by_username)
-
     def __get_users_group(self, users_group):
         return self._get_instance(UsersGroup, users_group,
                                   callback=UsersGroup.get_by_group_name)
-
-    def __get_perm(self, permission):
-        return self._get_instance(Permission, permission,
-                                  callback=Permission.get_by_key)
 
     def get(self, users_group_id, cache=False):
         return UsersGroup.get(users_group_id)
@@ -115,7 +108,7 @@ class UsersGroupModel(BaseModel):
 
     def add_user_to_group(self, users_group, user):
         users_group = self.__get_users_group(users_group)
-        user = self.__get_user(user)
+        user = self._get_user(user)
 
         for m in users_group.members:
             u = m.user
@@ -138,7 +131,7 @@ class UsersGroupModel(BaseModel):
 
     def remove_user_from_group(self, users_group, user):
         users_group = self.__get_users_group(users_group)
-        user = self.__get_user(user)
+        user = self._get_user(user)
 
         users_group_member = None
         for m in users_group.members:
@@ -160,7 +153,7 @@ class UsersGroupModel(BaseModel):
 
     def has_perm(self, users_group, perm):
         users_group = self.__get_users_group(users_group)
-        perm = self.__get_perm(perm)
+        perm = self._get_perm(perm)
 
         return UsersGroupToPerm.query()\
             .filter(UsersGroupToPerm.users_group == users_group)\
@@ -187,7 +180,7 @@ class UsersGroupModel(BaseModel):
 
     def revoke_perm(self, users_group, perm):
         users_group = self.__get_users_group(users_group)
-        perm = self.__get_perm(perm)
+        perm = self._get_perm(perm)
 
         obj = UsersGroupToPerm.query()\
             .filter(UsersGroupToPerm.users_group == users_group)\

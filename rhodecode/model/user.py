@@ -35,8 +35,8 @@ from rhodecode.lib.caching_query import FromCache
 from rhodecode.model import BaseModel
 from rhodecode.model.db import User, UserRepoToPerm, Repository, Permission, \
     UserToPerm, UsersGroupRepoToPerm, UsersGroupToPerm, UsersGroupMember, \
-    Notification, RepoGroup, UserRepoGroupToPerm, UsersGroup,\
-    UsersGroupRepoGroupToPerm, UserEmailMap
+    Notification, RepoGroup, UserRepoGroupToPerm, UsersGroupRepoGroupToPerm, \
+    UserEmailMap
 from rhodecode.lib.exceptions import DefaultUserException, \
     UserOwnsReposException
 
@@ -61,13 +61,6 @@ PERM_WEIGHTS = {
 
 class UserModel(BaseModel):
 
-    def __get_user(self, user):
-        return self._get_instance(User, user, callback=User.get_by_username)
-
-    def __get_perm(self, permission):
-        return self._get_instance(Permission, permission,
-                                  callback=Permission.get_by_key)
-
     def get(self, user_id, cache=False):
         user = self.sa.query(User)
         if cache:
@@ -76,7 +69,7 @@ class UserModel(BaseModel):
         return user.get(user_id)
 
     def get_user(self, user):
-        return self.__get_user(user)
+        return self._get_user(user)
 
     def get_by_username(self, username, cache=False, case_insensitive=False):
 
@@ -292,7 +285,7 @@ class UserModel(BaseModel):
             raise
 
     def delete(self, user):
-        user = self.__get_user(user)
+        user = self._get_user(user)
 
         try:
             if user.username == 'default':
@@ -545,7 +538,7 @@ class UserModel(BaseModel):
             raise Exception('perm needs to be an instance of Permission class '
                             'got %s instead' % type(perm))
 
-        user = self.__get_user(user)
+        user = self._get_user(user)
 
         return UserToPerm.query().filter(UserToPerm.user == user)\
             .filter(UserToPerm.permission == perm).scalar() is not None
@@ -557,8 +550,8 @@ class UserModel(BaseModel):
         :param user:
         :param perm:
         """
-        user = self.__get_user(user)
-        perm = self.__get_perm(perm)
+        user = self._get_user(user)
+        perm = self._get_perm(perm)
         # if this permission is already granted skip it
         _perm = UserToPerm.query()\
             .filter(UserToPerm.user == user)\
@@ -578,8 +571,8 @@ class UserModel(BaseModel):
         :param user:
         :param perm:
         """
-        user = self.__get_user(user)
-        perm = self.__get_perm(perm)
+        user = self._get_user(user)
+        perm = self._get_perm(perm)
 
         obj = UserToPerm.query()\
                 .filter(UserToPerm.user == user)\
@@ -595,7 +588,7 @@ class UserModel(BaseModel):
         :param user:
         :param email:
         """
-        user = self.__get_user(user)
+        user = self._get_user(user)
         obj = UserEmailMap()
         obj.user = user
         obj.email = email
@@ -609,7 +602,7 @@ class UserModel(BaseModel):
         :param user:
         :param email_id:
         """
-        user = self.__get_user(user)
+        user = self._get_user(user)
         obj = UserEmailMap.query().get(email_id)
         if obj:
             self.sa.delete(obj)

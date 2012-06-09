@@ -39,9 +39,6 @@ log = logging.getLogger(__name__)
 
 class ReposGroupModel(BaseModel):
 
-    def __get_user(self, user):
-        return self._get_instance(User, user, callback=User.get_by_username)
-
     def __get_users_group(self, users_group):
         return self._get_instance(UsersGroup, users_group,
                                   callback=UsersGroup.get_by_group_name)
@@ -49,10 +46,6 @@ class ReposGroupModel(BaseModel):
     def __get_repos_group(self, repos_group):
         return self._get_instance(RepoGroup, repos_group,
                                   callback=RepoGroup.get_by_group_name)
-
-    def __get_perm(self, permission):
-        return self._get_instance(Permission, permission,
-                                  callback=Permission.get_by_key)
 
     @LazyProperty
     def repos_path(self):
@@ -227,8 +220,8 @@ class ReposGroupModel(BaseModel):
         """
 
         repos_group = self.__get_repos_group(repos_group)
-        user = self.__get_user(user)
-        permission = self.__get_perm(perm)
+        user = self._get_user(user)
+        permission = self._get_perm(perm)
 
         # check if we have that permission already
         obj = self.sa.query(UserRepoGroupToPerm)\
@@ -253,7 +246,7 @@ class ReposGroupModel(BaseModel):
         """
 
         repos_group = self.__get_repos_group(repos_group)
-        user = self.__get_user(user)
+        user = self._get_user(user)
 
         obj = self.sa.query(UserRepoGroupToPerm)\
             .filter(UserRepoGroupToPerm.user == user)\
@@ -274,7 +267,7 @@ class ReposGroupModel(BaseModel):
         """
         repos_group = self.__get_repos_group(repos_group)
         group_name = self.__get_users_group(group_name)
-        permission = self.__get_perm(perm)
+        permission = self._get_perm(perm)
 
         # check if we have that permission already
         obj = self.sa.query(UsersGroupRepoGroupToPerm)\

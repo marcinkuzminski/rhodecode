@@ -42,7 +42,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
-
+from rhodecode.model.db import User, Repository, Permission
 from rhodecode.model import meta
 
 log = logging.getLogger(__name__)
@@ -96,3 +96,33 @@ class BaseModel(object):
                     )
                 else:
                     return callback(instance)
+
+    def _get_user(self, user):
+        """
+        Helper method to get user by ID, or username fallback
+
+        :param user:
+        :type user: UserID, username, or User instance
+        """
+        return self._get_instance(User, user,
+                                  callback=User.get_by_username)
+
+    def _get_repo(self, repository):
+        """
+        Helper method to get repository by ID, or repository name
+
+        :param repository:
+        :type repository: RepoID, repository name or Repository Instance
+        """
+        return self._get_instance(Repository, repository,
+                                  callback=Repository.get_by_repo_name)
+
+    def _get_perm(self, permission):
+        """
+        Helper method to get permission by ID, or permission name
+
+        :param permission:
+        :type permission: PermissionID, permission_name or Permission instance
+        """
+        return self._get_instance(Permission, permission,
+                                  callback=Permission.get_by_key)

@@ -24,13 +24,9 @@
 
 
 import logging
-import traceback
 
-from pylons.i18n.translation import _
-
-from rhodecode.lib.utils2 import safe_unicode
 from rhodecode.model import BaseModel
-from rhodecode.model.db import ChangesetStatus, Repository, User
+from rhodecode.model.db import ChangesetStatus
 
 log = logging.getLogger(__name__)
 
@@ -39,13 +35,6 @@ class ChangesetStatusModel(BaseModel):
 
     def __get_changeset_status(self, changeset_status):
         return self._get_instance(ChangesetStatus, changeset_status)
-
-    def __get_repo(self, repository):
-        return self._get_instance(Repository, repository,
-                                  callback=Repository.get_by_repo_name)
-
-    def __get_user(self, user):
-        return self._get_instance(User, user, callback=User.get_by_username)
 
     def get_status(self, repo, revision):
         """
@@ -58,7 +47,7 @@ class ChangesetStatusModel(BaseModel):
         :param revision: 40char hash
         :type revision: str
         """
-        repo = self.__get_repo(repo)
+        repo = self._get_repo(repo)
 
         status = ChangesetStatus.query()\
             .filter(ChangesetStatus.repo == repo)\
@@ -84,7 +73,7 @@ class ChangesetStatusModel(BaseModel):
         :param comment:
         :type comment:
         """
-        repo = self.__get_repo(repo)
+        repo = self._get_repo(repo)
 
         cur_statuses = ChangesetStatus.query()\
             .filter(ChangesetStatus.repo == repo)\
@@ -95,8 +84,8 @@ class ChangesetStatusModel(BaseModel):
                 st.version += 1
                 self.sa.add(st)
         new_status = ChangesetStatus()
-        new_status.author = self.__get_user(user)
-        new_status.repo = self.__get_repo(repo)
+        new_status.author = self._get_user(user)
+        new_status.repo = self._get_repo(repo)
         new_status.status = status
         new_status.revision = revision
         new_status.comment = comment

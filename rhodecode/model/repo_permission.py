@@ -26,28 +26,17 @@
 
 import logging
 from rhodecode.model import BaseModel
-from rhodecode.model.db import UserRepoToPerm, UsersGroupRepoToPerm, Permission,\
-    User, Repository
+from rhodecode.model.db import UserRepoToPerm, UsersGroupRepoToPerm, \
+    Permission
 
 log = logging.getLogger(__name__)
 
 
 class RepositoryPermissionModel(BaseModel):
 
-    def __get_user(self, user):
-        return self._get_instance(User, user, callback=User.get_by_username)
-
-    def __get_repo(self, repository):
-        return self._get_instance(Repository, repository,
-                                  callback=Repository.get_by_repo_name)
-
-    def __get_perm(self, permission):
-        return self._get_instance(Permission, permission,
-                                  callback=Permission.get_by_key)
-
     def get_user_permission(self, repository, user):
-        repository = self.__get_repo(repository)
-        user = self.__get_user(user)
+        repository = self._get_repo(repository)
+        user = self._get_user(user)
 
         return UserRepoToPerm.query() \
                 .filter(UserRepoToPerm.user == user) \
