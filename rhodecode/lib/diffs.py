@@ -617,7 +617,10 @@ def differ(org_repo, org_ref, other_repo, other_ref, discovery_data=None):
             ui = make_ui('db')
             bundlerepo = InMemoryBundleRepo(ui, path=org_repo.root,
                                             bundlestream=unbundle)
-        return ''.join(patch.diff(bundlerepo or org_repo, node2=other_ref,
+
+        return ''.join(patch.diff(bundlerepo or org_repo,
+                                  node1=org_repo[org_ref].node(),
+                                  node2=other_repo[other_ref].node(),
                                   opts=opts))
     else:
         return ''.join(patch.diff(org_repo, node1=org_ref, node2=other_ref,
