@@ -70,8 +70,8 @@
     ##${comment.comment_inline_form(c.changeset)}
 
     ## render comments main comments form and it status
-    ##${comment.comments(h.url('pull_request_comment', repo_name=c.repo_name, pull_request_id=c.pull_request.pull_request_id),
-    ##                   c.current_changeset_status)}
+    ${comment.comments(h.url('pullrequest_comment', repo_name=c.repo_name, pull_request_id=c.pull_request.pull_request_id),
+                       c.current_changeset_status)}
     
 </div>
 

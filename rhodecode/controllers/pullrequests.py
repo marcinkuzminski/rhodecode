@@ -24,19 +24,20 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import logging
 import traceback
-import binascii
 
 from webob.exc import HTTPNotFound
 
 from pylons import request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
 from pylons.i18n.translation import _
+from pylons.decorators import jsonify
 
 from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib import helpers as h
 from rhodecode.lib import diffs
-from rhodecode.model.db import User, PullRequest, Repository, ChangesetStatus
+from rhodecode.lib.utils import action_logger
+from rhodecode.model.db import User, PullRequest, ChangesetStatus
 from rhodecode.model.pull_request import PullRequestModel
 from rhodecode.model.meta import Session
 from rhodecode.model.repo import RepoModel
@@ -208,9 +209,56 @@ class PullrequestsController(BaseRepoController):
                           .get_comments(c.rhodecode_db_repo.repo_id,
                                         pull_request=pull_request_id)
 
-        # changeset(pull-request) statuse
+        # changeset(pull-request) status
         c.current_changeset_status = ChangesetStatusModel()\
-                              .get_status(c.rhodecode_db_repo.repo_id,
-                                          pull_request=pull_request_id)
+                              .get_status(c.pull_request.org_repo,
+                                          pull_request=c.pull_request)
         c.changeset_statuses = ChangesetStatus.STATUSES
         return render('/pullrequests/pullrequest_show.html')
+
+    @jsonify
+    def comment(self, repo_name, pull_request_id):
+
+        status = request.POST.get('changeset_status')
+        change_status = request.POST.get('change_changeset_status')
+
+        comm = ChangesetCommentsModel().create(
+            text=request.POST.get('text'),
+            repo_id=c.rhodecode_db_repo.repo_id,
+            user_id=c.rhodecode_user.user_id,
+            pull_request=pull_request_id,
+            f_path=request.POST.get('f_path'),
+            line_no=request.POST.get('line'),
+            status_change=(ChangesetStatus.get_status_lbl(status) 
+                           if status and change_status else None)
+        )
+
+        # get status if set !
+        if status and change_status:
+            ChangesetStatusModel().set_status(
+                c.rhodecode_db_repo.repo_id,
+                status,
+                c.rhodecode_user.user_id,
+                comm,
+                pull_request=pull_request_id
+            )
+        action_logger(self.rhodecode_user,
+                      'user_commented_pull_request:%s' % pull_request_id,
+                      c.rhodecode_db_repo, self.ip_addr, self.sa)
+
+        Session.commit()
+
+        if not request.environ.get('HTTP_X_PARTIAL_XHR'):
+            return redirect(h.url('pullrequest_show', repo_name=repo_name,
+                                  pull_request_id=pull_request_id))
+
+        data = {
+           'target_id': h.safeid(h.safe_unicode(request.POST.get('f_path'))),
+        }
+        if comm:
+            c.co = comm
+            data.update(comm.get_dict())
+            data.update({'rendered_text':
+                         render('changeset/changeset_comment_block.html')})
+
+        return data

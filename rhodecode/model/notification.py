@@ -198,13 +198,15 @@ class NotificationModel(BaseModel):
         Creates a human readable description based on properties
         of notification object
         """
-
+        #alias
+        _n = notification
         _map = {
-            notification.TYPE_CHANGESET_COMMENT: _('commented on commit'),
-            notification.TYPE_MESSAGE: _('sent message'),
-            notification.TYPE_MENTION: _('mentioned you'),
-            notification.TYPE_REGISTRATION: _('registered in RhodeCode'),
-            notification.TYPE_PULL_REQUEST: _('opened new pull request')
+            _n.TYPE_CHANGESET_COMMENT: _('commented on commit'),
+            _n.TYPE_MESSAGE: _('sent message'),
+            _n.TYPE_MENTION: _('mentioned you'),
+            _n.TYPE_REGISTRATION: _('registered in RhodeCode'),
+            _n.TYPE_PULL_REQUEST: _('opened new pull request'),
+            _n.TYPE_PULL_REQUEST_COMMENT: _('commented on pull request')
         }
 
         tmpl = "%(user)s %(action)s %(when)s"

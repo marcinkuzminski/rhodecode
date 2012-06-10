@@ -55,38 +55,54 @@ class ChangesetCommentsModel(BaseModel):
                 user_objects.append(user_obj)
         return user_objects
 
-    def create(self, text, repo_id, user_id, revision, f_path=None,
-               line_no=None, status_change=None):
+    def create(self, text, repo_id, user_id, revision=None, pull_request=None,
+               f_path=None, line_no=None, status_change=None):
         """
-        Creates new comment for changeset. IF status_change is not none
-        this comment is associated with a status change of changeset
+        Creates new comment for changeset or pull request.
+        IF status_change is not none this comment is associated with a 
+        status change of changeset or changesets associated with pull request
 
         :param text:
         :param repo_id:
         :param user_id:
         :param revision:
+        :param pull_request:
         :param f_path:
         :param line_no:
         :param status_change:
         """
+        if not text:
+            return
 
-        if text:
-            repo = Repository.get(repo_id)
+        repo = Repository.get(repo_id)
+        comment = ChangesetComment()
+        comment.repo = repo
+        comment.user_id = user_id
+        comment.text = text
+        comment.f_path = f_path
+        comment.line_no = line_no
+
+        if revision:
             cs = repo.scm_instance.get_changeset(revision)
             desc = "%s - %s" % (cs.short_id, h.shorter(cs.message, 256))
             author_email = cs.author_email
-            comment = ChangesetComment()
-            comment.repo = repo
-            comment.user_id = user_id
             comment.revision = revision
-            comment.text = text
-            comment.f_path = f_path
-            comment.line_no = line_no
+        elif pull_request:
+            pull_request = self.__get_pull_request(pull_request)
+            comment.pull_request = pull_request
+            desc = ''
+        else:
+            raise Exception('Please specify revision or pull_request_id')
 
-            self.sa.add(comment)
-            self.sa.flush()
-            # make notification
-            line = ''
+        self.sa.add(comment)
+        self.sa.flush()
+
+        # make notification
+        line = ''
+        body = text
+
+        #changeset
+        if revision:
             if line_no:
                 line = _('on line %s') % line_no
             subj = safe_unicode(
@@ -99,34 +115,41 @@ class ChangesetCommentsModel(BaseModel):
                           )
                 )
             )
-
-            body = text
-
+            notification_type = Notification.TYPE_CHANGESET_COMMENT
             # get the current participants of this changeset
             recipients = ChangesetComment.get_users(revision=revision)
-
             # add changeset author if it's in rhodecode system
             recipients += [User.get_by_email(author_email)]
+        #pull request
+        elif pull_request:
+            #TODO: make this something usefull
+            subj = 'commented on pull request something...'
+            notification_type = Notification.TYPE_PULL_REQUEST_COMMENT
+            # get the current participants of this pull request
+            recipients = ChangesetComment.get_users(pull_request_id=
+                                                pull_request.pull_request_id)
+            # add pull request author
+            recipients += [pull_request.author]
 
-            # create notification objects, and emails
+        # create notification objects, and emails
+        NotificationModel().create(
+          created_by=user_id, subject=subj, body=body,
+          recipients=recipients, type_=notification_type,
+          email_kwargs={'status_change': status_change}
+        )
+
+        mention_recipients = set(self._extract_mentions(body))\
+                                .difference(recipients)
+        if mention_recipients:
+            subj = _('[Mention]') + ' ' + subj
             NotificationModel().create(
-              created_by=user_id, subject=subj, body=body,
-              recipients=recipients, type_=Notification.TYPE_CHANGESET_COMMENT,
-              email_kwargs={'status_change': status_change}
+                created_by=user_id, subject=subj, body=body,
+                recipients=mention_recipients,
+                type_=notification_type,
+                email_kwargs={'status_change': status_change}
             )
 
-            mention_recipients = set(self._extract_mentions(body))\
-                                    .difference(recipients)
-            if mention_recipients:
-                subj = _('[Mention]') + ' ' + subj
-                NotificationModel().create(
-                    created_by=user_id, subject=subj, body=body,
-                    recipients=mention_recipients,
-                    type_=Notification.TYPE_CHANGESET_COMMENT,
-                    email_kwargs={'status_change': status_change}
-                )
-
-            return comment
+        return comment
 
     def delete(self, comment):
         """

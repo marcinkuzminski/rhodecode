@@ -390,10 +390,10 @@ class ChangesetController(BaseRepoController):
         if status and change_status:
             ChangesetStatusModel().set_status(
                 c.rhodecode_db_repo.repo_id,
-                revision,
                 status,
                 c.rhodecode_user.user_id,
                 comm,
+                revision=revision,
             )
         action_logger(self.rhodecode_user,
                       'user_commented_revision:%s' % revision,

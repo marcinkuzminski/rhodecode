@@ -457,6 +457,12 @@ def make_map(config):
                  action='show_all', conditions=dict(function=check_repo,
                                                 method=["GET"]))
 
+    rmap.connect('pullrequest_comment',
+                 '/{repo_name:.*}/pull-request-comment/{pull_request_id}',
+                 controller='pullrequests',
+                 action='comment', conditions=dict(function=check_repo,
+                                                method=["POST"]))
+
     rmap.connect('summary_home', '/{repo_name:.*}/summary',
                 controller='summary', conditions=dict(function=check_repo))
 

@@ -85,7 +85,13 @@ ${_('%s Changelog') % c.repo_name} - ${c.rhodecode_name}
                                         <div class="changeset-status-container">
                                             %if c.statuses.get(cs.raw_id):
                                               <div title="${_('Changeset status')}" class="changeset-status-lbl">${c.statuses.get(cs.raw_id)[1]}</div>
-                                              <div class="changeset-status-ico"><img src="${h.url('/images/icons/flag_status_%s.png' % c.statuses.get(cs.raw_id)[0])}" /></div>
+                                              <div class="changeset-status-ico">
+                                              %if c.statuses.get(cs.raw_id)[2]:
+                                                <a class="tooltip" title="${_('Click to open associated pull request')}" href="${h.url('pullrequest_show',repo_name=c.statuses.get(cs.raw_id)[3],pull_request_id=c.statuses.get(cs.raw_id)[2])}"><img src="${h.url('/images/icons/flag_status_%s.png' % c.statuses.get(cs.raw_id)[0])}" /></a>
+                                              %else:
+                                                <img src="${h.url('/images/icons/flag_status_%s.png' % c.statuses.get(cs.raw_id)[0])}" />
+                                              %endif
+                                              </div>
                                             %endif
                                         </div>
 									</div>

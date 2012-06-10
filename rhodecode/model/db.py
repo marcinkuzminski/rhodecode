@@ -766,7 +766,12 @@ class Repository(Base, BaseModel):
             statuses = statuses.filter(ChangesetStatus.revision.in_(revisions))
         grouped = {}
         for stat in statuses.all():
-            grouped[stat.revision] = [str(stat.status), stat.status_lbl]
+            pr_id = pr_repo = None
+            if stat.pull_request:
+                pr_id = stat.pull_request.pull_request_id
+                pr_repo = stat.pull_request.other_repo.repo_name
+            grouped[stat.revision] = [str(stat.status), stat.status_lbl,
+                                      pr_id, pr_repo]
         return grouped
 
     #==========================================================================
@@ -1336,17 +1341,21 @@ class ChangesetComment(Base, BaseModel):
     pull_request = relationship('PullRequest', lazy='joined')
 
     @classmethod
-    def get_users(cls, revision):
+    def get_users(cls, revision=None, pull_request_id=None):
         """
-        Returns user associated with this changesetComment. ie those
+        Returns user associated with this ChangesetComment. ie those
         who actually commented
 
         :param cls:
         :param revision:
         """
-        return Session.query(User)\
-                .filter(cls.revision == revision)\
-                .join(ChangesetComment.author).all()
+        q = Session.query(User)\
+                .join(ChangesetComment.author)
+        if revision:
+            q = q.filter(cls.revision == revision)
+        elif pull_request_id:
+            q = q.filter(cls.pull_request_id == pull_request_id)
+        return q.all()
 
 
 class ChangesetStatus(Base, BaseModel):
@@ -1457,6 +1466,7 @@ class Notification(Base, BaseModel):
     TYPE_MENTION = u'mention'
     TYPE_REGISTRATION = u'registration'
     TYPE_PULL_REQUEST = u'pull_request'
+    TYPE_PULL_REQUEST_COMMENT = u'pull_request_comment'
 
     notification_id = Column('notification_id', Integer(), nullable=False, primary_key=True)
     subject = Column('subject', Unicode(512), nullable=True)

@@ -66,12 +66,15 @@ class ChangesetStatusModel(BaseModel):
         else:
             raise Exception('Please specify revision or pull_request')
 
-        status = q.scalar()
+        # need to use first here since there can be multiple statuses
+        # returned from pull_request
+        status = q.first()
         status = status.status if status else status
         st = status or ChangesetStatus.DEFAULT
         return str(st)
 
-    def set_status(self, repo, revision, status, user, comment):
+    def set_status(self, repo, status, user, comment, revision=None,
+                   pull_request=None):
         """
         Creates new status for changeset or updates the old ones bumping their
         version, leaving the current status at
@@ -89,20 +92,48 @@ class ChangesetStatusModel(BaseModel):
         """
         repo = self._get_repo(repo)
 
-        cur_statuses = ChangesetStatus.query()\
-            .filter(ChangesetStatus.repo == repo)\
-            .filter(ChangesetStatus.revision == revision)\
-            .all()
+        q = ChangesetStatus.query()
+
+        if revision:
+            q = q.filter(ChangesetStatus.repo == repo)
+            q = q.filter(ChangesetStatus.revision == revision)
+        elif pull_request:
+            pull_request = self.__get_pull_request(pull_request)
+            q = q.filter(ChangesetStatus.repo == pull_request.org_repo)
+            q = q.filter(ChangesetStatus.pull_request == pull_request)
+        cur_statuses = q.all()
+
         if cur_statuses:
             for st in cur_statuses:
                 st.version += 1
                 self.sa.add(st)
-        new_status = ChangesetStatus()
-        new_status.author = self._get_user(user)
-        new_status.repo = self._get_repo(repo)
-        new_status.status = status
-        new_status.revision = revision
-        new_status.comment = comment
-        self.sa.add(new_status)
-        return new_status
 
+        def _create_status(user, repo, status, comment, revision, pull_request):
+            new_status = ChangesetStatus()
+            new_status.author = self._get_user(user)
+            new_status.repo = self._get_repo(repo)
+            new_status.status = status
+            new_status.comment = comment
+            new_status.revision = revision
+            new_status.pull_request = pull_request
+            return new_status
+
+        if revision:
+            new_status = _create_status(user=user, repo=repo, status=status,
+                           comment=comment, revision=revision, 
+                           pull_request=None)
+            self.sa.add(new_status)
+            return new_status
+        elif pull_request:
+            #pull request can have more than one revision associated to it
+            #we need to create new version for each one
+            new_statuses = []
+            repo = pull_request.org_repo
+            for rev in pull_request.revisions:
+                new_status = _create_status(user=user, repo=repo,
+                                            status=status, comment=comment,
+                                            revision=rev,
+                                            pull_request=pull_request)
+                new_statuses.append(new_status)
+                self.sa.add(new_status)
+            return new_statuses
