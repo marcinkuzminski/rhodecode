@@ -418,7 +418,6 @@ var injectInlineForm = function(tr){
 	  }	  
 	  YUD.insertAfter(form,parent);
 	  
-	  YUD.get('text_'+lineno).focus();
 	  var f = YUD.get(form);
 	  
 	  var overlay = f.getElementsByClassName('overlay')[0];
@@ -465,8 +464,14 @@ var injectInlineForm = function(tr){
 		  
 		  ajaxPOST(submit_url, postData, success);
 	  });
-	  // callbacks
-	  tooltip_activate();
+	  
+	  setTimeout(function(){
+		  // callbacks
+		  tooltip_activate();
+		  MentionsAutoComplete('text_'+lineno, 'mentions_container_'+lineno, 
+	                         _USERS_AC_DATA, _GROUPS_AC_DATA);
+		  YUD.get('text_'+lineno).focus();
+	  },10)
 };
 
 var deleteComment = function(comment_id){
