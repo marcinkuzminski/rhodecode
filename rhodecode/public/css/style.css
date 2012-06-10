@@ -4151,6 +4151,7 @@ form.comment-inline-form {
     background: #f8f8f8;
     padding: 4px;
     border-bottom: 1px solid #ddd;
+    height: 20px;
 }
 
 .inline-comments .comment .meta img {
@@ -4159,9 +4160,13 @@ form.comment-inline-form {
 
 .inline-comments .comment .meta .user {
     font-weight: bold;
+    float:left;
+    padding: 3px;
 }
 
 .inline-comments .comment .meta .date {
+    float:left;
+    padding: 3px;
 }
 
 .inline-comments .comment .text {
