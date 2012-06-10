@@ -43,7 +43,7 @@ from rhodecode.lib.utils import get_repos as get_filesystem_repos, make_ui, \
     action_logger, EmptyChangeset, REMOVED_REPO_PAT
 from rhodecode.model import BaseModel
 from rhodecode.model.db import Repository, RhodeCodeUi, CacheInvalidation, \
-    UserFollowing, UserLog, User, RepoGroup
+    UserFollowing, UserLog, User, RepoGroup, PullRequest
 
 log = logging.getLogger(__name__)
 
@@ -320,19 +320,21 @@ class ScmModel(BaseModel):
 
         return f is not None
 
-    def get_followers(self, repo_id):
-        if not isinstance(repo_id, int):
-            repo_id = getattr(Repository.get_by_repo_name(repo_id), 'repo_id')
+    def get_followers(self, repo):
+        repo = self._get_repo(repo)
 
         return self.sa.query(UserFollowing)\
-                .filter(UserFollowing.follows_repo_id == repo_id).count()
+                .filter(UserFollowing.follows_repository == repo).count()
 
-    def get_forks(self, repo_id):
-        if not isinstance(repo_id, int):
-            repo_id = getattr(Repository.get_by_repo_name(repo_id), 'repo_id')
-
+    def get_forks(self, repo):
+        repo = self._get_repo(repo)
         return self.sa.query(Repository)\
-                .filter(Repository.fork_id == repo_id).count()
+                .filter(Repository.fork == repo).count()
+
+    def get_pull_requests(self, repo):
+        repo = self._get_repo(repo)
+        return self.sa.query(PullRequest)\
+                .filter(PullRequest.other_repo == repo).count()
 
     def mark_as_fork(self, repo, fork, user):
         repo = self.__get_repo(repo)

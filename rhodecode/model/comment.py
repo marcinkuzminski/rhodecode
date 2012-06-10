@@ -32,7 +32,8 @@ from sqlalchemy.util.compat import defaultdict
 from rhodecode.lib.utils2 import extract_mentioned_users, safe_unicode
 from rhodecode.lib import helpers as h
 from rhodecode.model import BaseModel
-from rhodecode.model.db import ChangesetComment, User, Repository, Notification
+from rhodecode.model.db import ChangesetComment, User, Repository, \
+    Notification, PullRequest
 from rhodecode.model.notification import NotificationModel
 
 log = logging.getLogger(__name__)
@@ -42,6 +43,9 @@ class ChangesetCommentsModel(BaseModel):
 
     def __get_changeset_comment(self, changeset_comment):
         return self._get_instance(ChangesetComment, changeset_comment)
+
+    def __get_pull_request(self, pull_request):
+        return self._get_instance(PullRequest, pull_request)
 
     def _extract_mentions(self, s):
         user_objects = []
@@ -135,7 +139,7 @@ class ChangesetCommentsModel(BaseModel):
 
         return comment
 
-    def get_comments(self, repo_id, revision=None, pull_request_id=None):
+    def get_comments(self, repo_id, revision=None, pull_request=None):
         """
         Get's main comments based on revision or pull_request_id
 
@@ -143,22 +147,24 @@ class ChangesetCommentsModel(BaseModel):
         :type repo_id:
         :param revision:
         :type revision:
-        :param pull_request_id:
-        :type pull_request_id:
+        :param pull_request:
+        :type pull_request:
         """
+
         q = ChangesetComment.query()\
                 .filter(ChangesetComment.repo_id == repo_id)\
                 .filter(ChangesetComment.line_no == None)\
                 .filter(ChangesetComment.f_path == None)
         if revision:
             q = q.filter(ChangesetComment.revision == revision)
-        elif pull_request_id:
-            q = q.filter(ChangesetComment.pull_request_id == pull_request_id)
+        elif pull_request:
+            pull_request = self.__get_pull_request(pull_request)
+            q = q.filter(ChangesetComment.pull_request == pull_request)
         else:
-            raise Exception('Please specify revision or pull_request_id')
+            raise Exception('Please specify revision or pull_request')
         return q.all()
 
-    def get_inline_comments(self, repo_id, revision=None, pull_request_id=None):
+    def get_inline_comments(self, repo_id, revision=None, pull_request=None):
         q = self.sa.query(ChangesetComment)\
             .filter(ChangesetComment.repo_id == repo_id)\
             .filter(ChangesetComment.line_no != None)\
@@ -167,8 +173,9 @@ class ChangesetCommentsModel(BaseModel):
 
         if revision:
             q = q.filter(ChangesetComment.revision == revision)
-        elif pull_request_id:
-            q = q.filter(ChangesetComment.pull_request_id == pull_request_id)
+        elif pull_request:
+            pull_request = self.__get_pull_request(pull_request)
+            q = q.filter(ChangesetComment.pull_request == pull_request)
         else:
             raise Exception('Please specify revision or pull_request_id')
 

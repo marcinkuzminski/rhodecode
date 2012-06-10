@@ -295,7 +295,7 @@ class ChangesetController(BaseRepoController):
                 )
 
         # count inline comments
-        for _, lines in c.inline_comments:
+        for __, lines in c.inline_comments:
             for comments in lines.values():
                 c.inline_cnt += len(comments)
 

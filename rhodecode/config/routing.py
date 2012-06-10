@@ -451,6 +451,12 @@ def make_map(config):
                  action='show', conditions=dict(function=check_repo,
                                                 method=["GET"]))
 
+    rmap.connect('pullrequest_show_all',
+                 '/{repo_name:.*}/pull-request',
+                 controller='pullrequests',
+                 action='show_all', conditions=dict(function=check_repo,
+                                                method=["GET"]))
+
     rmap.connect('summary_home', '/{repo_name:.*}/summary',
                 controller='summary', conditions=dict(function=check_repo))
 

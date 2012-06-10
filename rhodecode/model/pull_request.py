@@ -37,8 +37,13 @@ log = logging.getLogger(__name__)
 
 class PullRequestModel(BaseModel):
 
+    def get_all(self, repo):
+        repo = self._get_repo(repo)
+        return PullRequest.query().filter(PullRequest.other_repo == repo).all()
+
     def create(self, created_by, org_repo, org_ref, other_repo,
                other_ref, revisions, reviewers, title, description=None):
+        created_by_user = self._get_user(created_by)
 
         new = PullRequest()
         new.org_repo = self._get_repo(org_repo)
@@ -48,7 +53,7 @@ class PullRequestModel(BaseModel):
         new.revisions = revisions
         new.title = title
         new.description = description
-
+        new.author = created_by_user
         self.sa.add(new)
 
         #members
@@ -59,7 +64,7 @@ class PullRequestModel(BaseModel):
 
         #notification to reviewers
         notif = NotificationModel()
-        created_by_user = self._get_user(created_by)
+
         subject = safe_unicode(
             h.link_to(
               _('%(user)s wants you to review pull request #%(pr_id)s') % \

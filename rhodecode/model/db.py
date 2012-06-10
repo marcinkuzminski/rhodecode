@@ -1322,7 +1322,8 @@ class ChangesetComment(Base, BaseModel):
     )
     comment_id = Column('comment_id', Integer(), nullable=False, primary_key=True)
     repo_id = Column('repo_id', Integer(), ForeignKey('repositories.repo_id'), nullable=False)
-    revision = Column('revision', String(40), nullable=False)
+    revision = Column('revision', String(40), nullable=True)
+    pull_request_id = Column("pull_request_id", Integer(), ForeignKey('pull_requests.pull_request_id'), nullable=True)
     line_no = Column('line_no', Unicode(10), nullable=True)
     f_path = Column('f_path', Unicode(1000), nullable=True)
     user_id = Column('user_id', Integer(), ForeignKey('users.user_id'), nullable=False)
@@ -1332,6 +1333,7 @@ class ChangesetComment(Base, BaseModel):
     author = relationship('User', lazy='joined')
     repo = relationship('Repository')
     status_change = relationship('ChangesetStatus', uselist=False)
+    pull_request = relationship('PullRequest', lazy='joined')
 
     @classmethod
     def get_users(cls, revision):
@@ -1397,6 +1399,8 @@ class PullRequest(Base, BaseModel):
     pull_request_id = Column('pull_request_id', Integer(), nullable=False, primary_key=True)
     title = Column('title', Unicode(256), nullable=True)
     description = Column('description', Unicode(10240), nullable=True)
+    created_on = Column('created_on', DateTime(timezone=False), nullable=False, default=datetime.datetime.now)
+    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None)
     _revisions = Column('revisions', UnicodeText(20500))  # 500 revisions max
     org_repo_id = Column('org_repo_id', Integer(), ForeignKey('repositories.repo_id'), nullable=False)
     org_ref = Column('org_ref', Unicode(256), nullable=False)
@@ -1411,6 +1415,7 @@ class PullRequest(Base, BaseModel):
     def revisions(self, val):
         self._revisions = ':'.join(val)
 
+    author = relationship('User', lazy='joined')
     reviewers = relationship('PullRequestReviewers')
     org_repo = relationship('Repository', primaryjoin='PullRequest.org_repo_id==Repository.repo_id')
     other_repo = relationship('Repository', primaryjoin='PullRequest.other_repo_id==Repository.repo_id')

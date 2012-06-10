@@ -26,7 +26,7 @@
 import logging
 
 from rhodecode.model import BaseModel
-from rhodecode.model.db import ChangesetStatus
+from rhodecode.model.db import ChangesetStatus, PullRequest
 
 log = logging.getLogger(__name__)
 
@@ -36,23 +36,37 @@ class ChangesetStatusModel(BaseModel):
     def __get_changeset_status(self, changeset_status):
         return self._get_instance(ChangesetStatus, changeset_status)
 
-    def get_status(self, repo, revision):
+    def __get_pull_request(self, pull_request):
+        return self._get_instance(PullRequest, pull_request)
+
+    def get_status(self, repo, revision=None, pull_request=None):
         """
-        Returns status of changeset for given revision and version 0
-        versioning makes a history of statuses, and version == 0 is always the
-        current one
+        Returns latest status of changeset for given revision or for given
+        pull request. Statuses are versioned inside a table itself and
+        version == 0 is always the current one
 
         :param repo:
         :type repo:
-        :param revision: 40char hash
+        :param revision: 40char hash or None
         :type revision: str
+        :param pull_request: pull_request reference
+        :type:
         """
         repo = self._get_repo(repo)
 
-        status = ChangesetStatus.query()\
+        q = ChangesetStatus.query()\
             .filter(ChangesetStatus.repo == repo)\
-            .filter(ChangesetStatus.revision == revision)\
-            .filter(ChangesetStatus.version == 0).scalar()
+            .filter(ChangesetStatus.version == 0)
+
+        if revision:
+            q = q.filter(ChangesetStatus.revision == revision)
+        elif pull_request:
+            pull_request = self.__get_pull_request(pull_request)
+            q = q.filter(ChangesetStatus.pull_request == pull_request)
+        else:
+            raise Exception('Please specify revision or pull_request')
+
+        status = q.scalar()
         status = status.status if status else status
         st = status or ChangesetStatus.DEFAULT
         return str(st)
