@@ -31,7 +31,10 @@ from pylons.i18n.translation import _
 
 from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
-from rhodecode.model.db import User
+from rhodecode.lib import helpers as h
+from rhodecode.model.db import User, PullRequest
+from rhodecode.model.pull_request import PullRequestModel
+from rhodecode.model.meta import Session
 
 log = logging.getLogger(__name__)
 
@@ -71,20 +74,60 @@ class PullrequestsController(BaseRepoController):
 
         c.other_refs = c.org_refs
         c.other_repos.extend(c.org_repos)
-
+        c.default_pull_request = org_repo.repo_name
         #gather forks and add to this list
         for fork in org_repo.forks:
             c.other_repos.append((fork.repo_name, '%s/%s' % (
                                     fork.user.username, fork.repo_name))
                                  )
         #add parents of this fork also
-        c.other_repos.append((org_repo.parent.repo_name, '%s/%s' % (
-                                    org_repo.parent.user.username, 
-                                    org_repo.parent.repo_name))
-                                 )
+        if org_repo.parent:
+            c.default_pull_request = org_repo.parent.repo_name
+            c.other_repos.append((org_repo.parent.repo_name, '%s/%s' % (
+                                        org_repo.parent.user.username,
+                                        org_repo.parent.repo_name))
+                                     )
 
         #TODO: maybe the owner should be default ?
         c.review_members = []
-        c.available_members = [(x.user_id, x.username) for x in
-                        User.query().filter(User.username != 'default').all()]
+        c.available_members = []
+        for u in User.query().filter(User.username != 'default').all():
+            uname = u.username
+            if org_repo.user == u:
+                uname = _('%s (owner)' % u.username)
+                # auto add owner to pull-request recipients
+                c.review_members.append([u.user_id, uname])
+            c.available_members.append([u.user_id, uname])
         return render('/pullrequests/pullrequest.html')
+
+    def create(self, repo_name):
+        req_p = request.POST
+        org_repo = req_p['org_repo']
+        org_ref = req_p['org_ref']
+        other_repo = req_p['other_repo']
+        other_ref = req_p['other_ref']
+        revisions = req_p.getall('revisions')
+        reviewers = req_p.getall('review_members')
+        #TODO: wrap this into a FORM !!!
+
+        title = req_p['pullrequest_title']
+        description = req_p['pullrequest_desc']
+
+        try:
+            model = PullRequestModel()
+            model.create(self.rhodecode_user.user_id, org_repo,
+                         org_ref, other_repo, other_ref, revisions,
+                         reviewers, title, description)
+            Session.commit()
+            h.flash(_('Pull request send'), category='success')
+        except Exception:
+            raise
+            h.flash(_('Error occured during sending pull request'),
+                    category='error')
+            log.error(traceback.format_exc())
+
+        return redirect(url('changelog_home', repo_name=repo_name))
+
+    def show(self, repo_name, pull_request_id):
+        c.pull_request = PullRequest.get(pull_request_id)
+        return render('/pullrequests/pullrequest_show.html')

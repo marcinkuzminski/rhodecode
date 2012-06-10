@@ -1,7 +1,7 @@
 <%inherit file="/base/base.html"/>
 
 <%def name="title()">
-    ${c.repo_name} ${_('Pull request')}
+    ${c.repo_name} ${_('New pull request')}
 </%def>
 
 <%def name="breadcrumbs_links()">
@@ -9,7 +9,7 @@
     &raquo;
     ${h.link_to(c.repo_name,h.url('changelog_home',repo_name=c.repo_name))}
     &raquo;
-    ${_('Pull request')}
+    ${_('New pull request')}
 </%def>
 
 <%def name="main()">
@@ -19,8 +19,16 @@
     <div class="title">
         ${self.breadcrumbs()}
     </div>
-    ${h.form(url('#'),method='put', id='pull_request_form')}
-    <div style="float:left;padding:30px">
+    ${h.form(url('pullrequest', repo_name=c.repo_name), method='post', id='pull_request_form')}
+    <div style="float:left;padding:0px 30px 30px 30px">
+       <div style="padding:0px 5px 5px 5px">
+         <span>
+           <a id="refresh" href="#">
+             <img class="icon" title="${_('Refresh')}" alt="${_('Refresh')}" src="${h.url('/images/icons/arrow_refresh.png')}"/>
+             ${_('refresh overview')}
+           </a>
+         </span>
+       </div>
         ##ORG
         <div style="float:left">
             <div class="fork_user">
@@ -37,7 +45,7 @@
           <div style="float:left;font-size:24px;padding:0px 20px">
           <img height=32 width=32 src="${h.url('/images/arrow_right_64.png')}"/>
           </div>
-        
+
         ##OTHER, most Probably the PARENT OF THIS FORK
         <div style="float:left">
             <div class="fork_user">
@@ -45,26 +53,18 @@
                     <img alt="gravatar" src="${h.gravatar_url(c.rhodecode_db_repo.user.email,24)}"/>
                 </div>
                 <span style="font-size: 20px">
-                ${h.select('other_repo','',c.other_repos,class_='refs')}:${h.select('other_ref','',c.other_refs,class_='refs')}
+                ${h.select('other_repo',c.default_pull_request ,c.other_repos,class_='refs')}:${h.select('other_ref','',c.other_refs,class_='refs')}
                 </span>
                  <div style="padding:5px 3px 3px 42px;">${c.rhodecode_db_repo.description}</div>
             </div>
             <div style="clear:both;padding-top: 10px"></div>
         </div>
-       <div style="float:left;padding:5px 5px 5px 15px">
-         <span>
-           <a id="refresh" href="#">
-             <img class="icon" title="${_('Refresh')}" alt="${_('Refresh')}" src="${h.url('/images/icons/arrow_refresh.png')}"/>
-             ${_('refresh overview')}
-           </a>
-         </span>       
-       </div>
-       <div style="clear:both;padding-top: 10px"></div>       
-       <div style="float:left" id="pull_request_overview">
-       </div>
+       <div style="clear:both;padding-top: 10px"></div>
+       ## overview pulled by ajax
+       <div style="float:left" id="pull_request_overview"></div>
        <div style="float:left;clear:both;padding:10px 10px 10px 0px;display:none">
             <a id="pull_request_overview_url" href="#">${_('Detailed compare view')}</a>
-       </div>               
+       </div>
      </div>
     <div style="float:left; border-left:1px dashed #eee">
         <h4>${_('Pull request reviewers')}</h4>
@@ -75,7 +75,7 @@
                       <td>
                           <div>
                               <div style="float:left">
-                                  <div class="text" style="padding: 0px 0px 6px;">${_('Choosen reviewers')}</div>
+                                  <div class="text" style="padding: 0px 0px 6px;">${_('Chosen reviewers')}</div>
                                   ${h.select('review_members',[x[0] for x in c.review_members],c.review_members,multiple=True,size=8,style="min-width:210px")}
                                  <div  id="remove_all_elements" style="cursor:pointer;text-align:center">
                                      ${_('Remove all elements')}
@@ -102,11 +102,11 @@
                           </div>
                       </td>
                   </tr>
-          </table>        
+          </table>
         </div>
-    </div> 
+    </div>
     <h3>${_('Create new pull request')}</h3>
-    
+
     <div class="form">
         <!-- fields -->
 
@@ -136,23 +136,24 @@
            </div>
         </div>
     </div>
-    ${h.end_form()}     
-     
+    ${h.end_form()}
+
 </div>
 
 <script type="text/javascript">
   MultiSelectWidget('review_members','available_members','pull_request_form');
-  
+
   var loadPreview = function(){
 	  YUD.setStyle(YUD.get('pull_request_overview_url').parentElement,'display','none');
-      var url = "${h.url('compare_url', 
+      var url = "${h.url('compare_url',
           repo_name='org_repo',
           org_ref_type='branch', org_ref='org_ref',
           other_ref_type='branch', other_ref='other_ref',
-          repo='other_repo')}";
-  
+          repo='other_repo',
+          as_form=True)}";
+
       var select_refs = YUQ('#pull_request_form select.refs')
-    
+
       for(var i=0;i<select_refs.length;i++){
         var select_ref = select_refs[i];
         var select_ref_data = select_ref.value.split(':');
@@ -162,31 +163,30 @@
           key = select_ref.name+"_type";
           val = select_ref_data[0];
           url = url.replace(key,val);
-    
+
           key = select_ref.name;
           val = select_ref_data[1];
           url = url.replace(key,val);
-    
+
         }else{
           key = select_ref.name;
           val = select_ref.value;
           url = url.replace(key,val);
         }
       }
-      
+
       ypjax(url,'pull_request_overview', function(data){
     	  YUD.get('pull_request_overview_url').href = url;
     	  YUD.setStyle(YUD.get('pull_request_overview_url').parentElement,'display','');
-      })	  
+      })
   }
   YUE.on('refresh','click',function(e){
      loadPreview()
   })
-  
-  //lazy load after 0.5
-  
-  setTimeout(loadPreview,500)
-  
+
+  //lazy load overview after 0.5s
+  setTimeout(loadPreview, 500)
+
 </script>
 
 </%def>

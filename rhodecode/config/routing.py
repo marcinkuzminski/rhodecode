@@ -436,9 +436,20 @@ def make_map(config):
                                    other_ref_type='(branch|book|tag)'))
 
     rmap.connect('pullrequest_home',
-                 '/{repo_name:.*}/pull-request/new',
-                 controller='pullrequests', action='index',
-                 conditions=dict(function=check_repo))
+                 '/{repo_name:.*}/pull-request/new', controller='pullrequests',
+                 action='index', conditions=dict(function=check_repo,
+                                                 method=["GET"]))
+
+    rmap.connect('pullrequest',
+                 '/{repo_name:.*}/pull-request/new', controller='pullrequests',
+                 action='create', conditions=dict(function=check_repo,
+                                                  method=["POST"]))
+
+    rmap.connect('pullrequest_show',
+                 '/{repo_name:.*}/pull-request/{pull_request_id}',
+                 controller='pullrequests',
+                 action='show', conditions=dict(function=check_repo,
+                                                method=["GET"]))
 
     rmap.connect('summary_home', '/{repo_name:.*}/summary',
                 controller='summary', conditions=dict(function=check_repo))

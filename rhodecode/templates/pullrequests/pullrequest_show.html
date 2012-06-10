@@ -1,0 +1,32 @@
+<%inherit file="/base/base.html"/>
+
+<%def name="title()">
+    ${c.repo_name} ${_('Pull request #%s') % c.pull_request.pull_request_id}
+</%def>
+
+<%def name="breadcrumbs_links()">
+    ${h.link_to(u'Home',h.url('/'))}
+    &raquo;
+    ${h.link_to(c.repo_name,h.url('changelog_home',repo_name=c.repo_name))}
+    &raquo;
+    ${_('Pull request #%s') % c.pull_request.pull_request_id}
+</%def>
+
+<%def name="main()">
+
+<div class="box">
+    <!-- box / title -->
+    <div class="title">
+        ${self.breadcrumbs()}
+    </div>
+    
+    pull request ${c.pull_request} overview...
+
+</div>
+
+<script type="text/javascript">
+
+
+</script>
+
+</%def>

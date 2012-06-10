@@ -181,7 +181,7 @@ class TestUser(unittest.TestCase):
         super(TestUser, self).__init__(methodName=methodName)
 
     def test_create_and_remove(self):
-        usr = UserModel().create_or_update(username=u'test_user', 
+        usr = UserModel().create_or_update(username=u'test_user',
                                            password=u'qweqwe',
                                      email=u'u232@rhodecode.org',
                                      name=u'u1', lastname=u'u1')
@@ -203,7 +203,7 @@ class TestUser(unittest.TestCase):
         self.assertEqual(UsersGroupMember.query().all(), [])
 
     def test_additonal_email_as_main(self):
-        usr = UserModel().create_or_update(username=u'test_user', 
+        usr = UserModel().create_or_update(username=u'test_user',
                                            password=u'qweqwe',
                                      email=u'main_email@rhodecode.org',
                                      name=u'u1', lastname=u'u1')
@@ -221,7 +221,7 @@ class TestUser(unittest.TestCase):
         Session.commit()
 
     def test_extra_email_map(self):
-        usr = UserModel().create_or_update(username=u'test_user', 
+        usr = UserModel().create_or_update(username=u'test_user',
                                            password=u'qweqwe',
                                      email=u'main_email@rhodecode.org',
                                      name=u'u1', lastname=u'u1')

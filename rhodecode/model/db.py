@@ -1371,9 +1371,12 @@ class ChangesetStatus(Base, BaseModel):
     changeset_comment_id = Column('changeset_comment_id', Integer(), ForeignKey('changeset_comments.comment_id'))
     modified_at = Column('modified_at', DateTime(), nullable=False, default=datetime.datetime.now)
     version = Column('version', Integer(), nullable=False, default=0)
+    pull_request_id = Column("pull_request_id", Integer(), ForeignKey('pull_requests.pull_request_id'), nullable=True)
+
     author = relationship('User', lazy='joined')
     repo = relationship('Repository')
     comment = relationship('ChangesetComment', lazy='joined')
+    pull_request = relationship('PullRequest', lazy='joined')
 
     @classmethod
     def get_status_lbl(cls, value):
@@ -1382,6 +1385,59 @@ class ChangesetStatus(Base, BaseModel):
     @property
     def status_lbl(self):
         return ChangesetStatus.get_status_lbl(self.status)
+
+
+class PullRequest(Base, BaseModel):
+    __tablename__ = 'pull_requests'
+    __table_args__ = (
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
+         'mysql_charset': 'utf8'},
+    )
+
+    pull_request_id = Column('pull_request_id', Integer(), nullable=False, primary_key=True)
+    title = Column('title', Unicode(256), nullable=True)
+    description = Column('description', Unicode(10240), nullable=True)
+    _revisions = Column('revisions', UnicodeText(20500))  # 500 revisions max
+    org_repo_id = Column('org_repo_id', Integer(), ForeignKey('repositories.repo_id'), nullable=False)
+    org_ref = Column('org_ref', Unicode(256), nullable=False)
+    other_repo_id = Column('other_repo_id', Integer(), ForeignKey('repositories.repo_id'), nullable=False)
+    other_ref = Column('other_ref', Unicode(256), nullable=False)
+
+    @hybrid_property
+    def revisions(self):
+        return self._revisions.split(':')
+
+    @revisions.setter
+    def revisions(self, val):
+        self._revisions = ':'.join(val)
+
+    reviewers = relationship('PullRequestReviewers')
+    org_repo = relationship('Repository', primaryjoin='PullRequest.org_repo_id==Repository.repo_id')
+    other_repo = relationship('Repository', primaryjoin='PullRequest.other_repo_id==Repository.repo_id')
+
+    def __json__(self):
+        return dict(
+          revisions=self.revisions
+        )
+
+
+class PullRequestReviewers(Base, BaseModel):
+    __tablename__ = 'pull_request_reviewers'
+    __table_args__ = (
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
+         'mysql_charset': 'utf8'},
+    )
+
+    def __init__(self, user=None, pull_request=None):
+        self.user = user
+        self.pull_request = pull_request
+
+    pull_requests_reviewers_id = Column('pull_requests_reviewers_id', Integer(), nullable=False, primary_key=True)
+    pull_request_id = Column("pull_request_id", Integer(), ForeignKey('pull_requests.pull_request_id'), nullable=False)
+    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=True)
+
+    user = relationship('User')
+    pull_request = relationship('PullRequest')
 
 
 class Notification(Base, BaseModel):

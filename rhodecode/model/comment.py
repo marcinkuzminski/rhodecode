@@ -118,7 +118,8 @@ class ChangesetCommentsModel(BaseModel):
                 NotificationModel().create(
                     created_by=user_id, subject=subj, body=body,
                     recipients=mention_recipients,
-                    type_=Notification.TYPE_CHANGESET_COMMENT
+                    type_=Notification.TYPE_CHANGESET_COMMENT,
+                    email_kwargs={'status_change': status_change}
                 )
 
             return comment

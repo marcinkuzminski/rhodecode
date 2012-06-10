@@ -120,6 +120,8 @@ class CompareController(BaseRepoController):
 
         c.statuses = c.rhodecode_db_repo.statuses([x.raw_id for x in
                                                    c.cs_ranges])
+        # defines that we need hidden inputs with changesets
+        c.as_form = request.GET.get('as_form', False)
         if request.environ.get('HTTP_X_PARTIAL_XHR'):
             return render('compare/compare_cs.html')
 

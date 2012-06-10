@@ -226,6 +226,7 @@ class EmailNotificationModel(BaseModel):
     TYPE_CHANGESET_COMMENT = Notification.TYPE_CHANGESET_COMMENT
     TYPE_PASSWORD_RESET = 'passoword_link'
     TYPE_REGISTRATION = Notification.TYPE_REGISTRATION
+    TYPE_PULL_REQUEST = Notification.TYPE_PULL_REQUEST
     TYPE_DEFAULT = 'default'
 
     def __init__(self):
