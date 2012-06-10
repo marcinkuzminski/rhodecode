@@ -31,6 +31,7 @@ news
   reformated based on user suggestions. Additional rss/atom feeds for user
   journal
 - various i18n improvements
+- #478 permissions overview for admin in user edit view
 
 fixes
 +++++

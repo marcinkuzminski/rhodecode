@@ -35,7 +35,8 @@ from pylons.i18n.translation import _
 from rhodecode.lib.exceptions import DefaultUserException, \
     UserOwnsReposException
 from rhodecode.lib import helpers as h
-from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator
+from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator,\
+    AuthUser
 from rhodecode.lib.base import BaseController, render
 
 from rhodecode.model.db import User, Permission, UserEmailMap
@@ -111,7 +112,7 @@ class UsersController(BaseController):
         # url('user', id=ID)
         user_model = UserModel()
         c.user = user_model.get(id)
-
+        c.perm_user = AuthUser(user_id=id)
         _form = UserForm(edit=True, old_data={'user_id': id,
                                               'email': c.user.email})()
         form_result = {}
@@ -174,6 +175,7 @@ class UsersController(BaseController):
         if c.user.username == 'default':
             h.flash(_("You can't edit this user"), category='warning')
             return redirect(url('users'))
+        c.perm_user = AuthUser(user_id=id)
         c.user.permissions = {}
         c.granted_permissions = UserModel().fill_perms(c.user)\
             .permissions['global']

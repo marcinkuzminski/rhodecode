@@ -157,6 +157,52 @@
         </div>
     </div>
     ${h.end_form()}
+
+    ## permissions overview
+    <div id="perms" class="table">
+           %for section in sorted(c.perm_user.permissions.keys()):
+              <div class="perms_section_head">${section.replace("_"," ").capitalize()}</div>
+  
+              <div id='tbl_list_wrap_${section}' class="yui-skin-sam">
+               <table id="tbl_list_${section}">
+                <thead>
+                    <tr>
+                    <th class="left">${_('Name')}</th>
+                    <th class="left">${_('Permission')}</th>
+                </thead>
+                <tbody>
+                %for k in c.perm_user.permissions[section]:
+                     <%
+                     if section != 'global':
+                         section_perm = c.perm_user.permissions[section].get(k)
+                         _perm = section_perm.split('.')[-1]
+                     else:
+                         _perm = section_perm = None
+                     %>
+                    <tr>
+                        <td>
+                            %if section == 'repositories':
+                                <a href="${h.url('summary_home',repo_name=k)}">${k}</a>
+                            %elif section == 'repositories_groups':
+                                <a href="${h.url('repos_group_home',group_name=k)}">${k}</a>
+                            %else:
+                                ${k}
+                            %endif
+                        </td>
+                        <td>
+                            %if section == 'global':
+                             ${h.bool2icon(True)}
+                            %else:
+                            <span class="perm_tag ${_perm}">${section_perm}</span>
+                            %endif
+                         </td>
+                    </tr>
+                %endfor
+                </tbody>
+               </table>
+              </div>
+           %endfor
+    </div>    
 </div>
 <div class="box box-right">
     <!-- box / title -->
