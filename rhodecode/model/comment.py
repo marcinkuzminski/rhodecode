@@ -135,21 +135,44 @@ class ChangesetCommentsModel(BaseModel):
 
         return comment
 
-    def get_comments(self, repo_id, revision):
-        return ChangesetComment.query()\
-                .filter(ChangesetComment.repo_id == repo_id)\
-                .filter(ChangesetComment.revision == revision)\
-                .filter(ChangesetComment.line_no == None)\
-                .filter(ChangesetComment.f_path == None).all()
+    def get_comments(self, repo_id, revision=None, pull_request_id=None):
+        """
+        Get's main comments based on revision or pull_request_id
 
-    def get_inline_comments(self, repo_id, revision):
-        comments = self.sa.query(ChangesetComment)\
+        :param repo_id:
+        :type repo_id:
+        :param revision:
+        :type revision:
+        :param pull_request_id:
+        :type pull_request_id:
+        """
+        q = ChangesetComment.query()\
+                .filter(ChangesetComment.repo_id == repo_id)\
+                .filter(ChangesetComment.line_no == None)\
+                .filter(ChangesetComment.f_path == None)
+        if revision:
+            q = q.filter(ChangesetComment.revision == revision)
+        elif pull_request_id:
+            q = q.filter(ChangesetComment.pull_request_id == pull_request_id)
+        else:
+            raise Exception('Please specify revision or pull_request_id')
+        return q.all()
+
+    def get_inline_comments(self, repo_id, revision=None, pull_request_id=None):
+        q = self.sa.query(ChangesetComment)\
             .filter(ChangesetComment.repo_id == repo_id)\
-            .filter(ChangesetComment.revision == revision)\
             .filter(ChangesetComment.line_no != None)\
             .filter(ChangesetComment.f_path != None)\
             .order_by(ChangesetComment.comment_id.asc())\
-            .all()
+
+        if revision:
+            q = q.filter(ChangesetComment.revision == revision)
+        elif pull_request_id:
+            q = q.filter(ChangesetComment.pull_request_id == pull_request_id)
+        else:
+            raise Exception('Please specify revision or pull_request_id')
+
+        comments = q.all()
 
         paths = defaultdict(lambda: defaultdict(list))
 

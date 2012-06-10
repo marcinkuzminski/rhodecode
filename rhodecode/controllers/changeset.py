@@ -220,10 +220,10 @@ class ChangesetController(BaseRepoController):
 
             c.comments.extend(ChangesetCommentsModel()\
                               .get_comments(c.rhodecode_db_repo.repo_id,
-                                            changeset.raw_id))
+                                            revision=changeset.raw_id))
             inlines = ChangesetCommentsModel()\
                         .get_inline_comments(c.rhodecode_db_repo.repo_id,
-                                             changeset.raw_id)
+                                             revision=changeset.raw_id)
             c.inline_comments.extend(inlines)
             c.changes[changeset.raw_id] = []
             try:
@@ -295,7 +295,7 @@ class ChangesetController(BaseRepoController):
                 )
 
         # count inline comments
-        for path, lines in c.inline_comments:
+        for _, lines in c.inline_comments:
             for comments in lines.values():
                 c.inline_cnt += len(comments)
 

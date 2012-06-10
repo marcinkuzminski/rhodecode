@@ -77,7 +77,8 @@
 </%def>
 
 
-<%def name="inlines(changeset)">
+## generates inlines taken from c.comments var
+<%def name="inlines()">
     <div class="comments-number">${ungettext("%d comment", "%d comments", len(c.comments)) % len(c.comments)} ${ungettext("(%d inline)", "(%d inline)", c.inline_cnt) % c.inline_cnt}</div>
     %for path, lines in c.inline_comments:
         % for line,comments in lines.iteritems():
@@ -92,11 +93,12 @@
 </%def>
 
 ## MAIN COMMENT FORM
-<%def name="comments(changeset)">
+<%def name="comments(post_url, cur_status)">
 
 <div class="comments">
     <div id="inline-comments-container">
-     ${inlines(changeset)}
+    ## generate inlines for this changeset
+     ${inlines()}
     </div>
 
     %for co in c.comments:
@@ -106,7 +108,7 @@
     %endfor
     %if c.rhodecode_user.username != 'default':
     <div class="comment-form ac">
-        ${h.form(h.url('changeset_comment', repo_name=c.repo_name, revision=changeset.raw_id))}
+        ${h.form(post_url)}
         <strong>${_('Leave a comment')}</strong>
         <div class="clearfix">
             <div class="comment-help">
@@ -120,7 +122,7 @@
             <div id="status_block_container" class="status-block" style="display:none">
                 %for status,lbl in c.changeset_statuses:
                     <div class="">
-                        <img src="${h.url('/images/icons/flag_status_%s.png' % status)}" /> <input ${'checked="checked"' if status == h.changeset_status(c.rhodecode_db_repo, c.changeset.raw_id) else ''}" type="radio" name="changeset_status" value="${status}"> <label>${lbl}</label>
+                        <img src="${h.url('/images/icons/flag_status_%s.png' % status)}" /> <input ${'checked="checked"' if status == cur_status else ''}" type="radio" name="changeset_status" value="${status}"> <label>${lbl}</label>
                     </div>                    
                 %endfor
             </div>                 
@@ -137,6 +139,17 @@
 <script>
 YUE.onDOMReady(function () {
    MentionsAutoComplete('text', 'mentions_container', _USERS_AC_DATA, _GROUPS_AC_DATA);
+   
+   // changeset status box listener
+   YUE.on(YUD.get('show_changeset_status_box'),'change',function(e){
+       if(e.currentTarget.checked){
+           YUD.setStyle('status_block_container','display','');  
+       }
+       else{
+           YUD.setStyle('status_block_container','display','none');
+       }
+   })
+   
 });
 </script>
 </%def>

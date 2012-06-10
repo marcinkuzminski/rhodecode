@@ -134,8 +134,10 @@
     <%namespace name="comment" file="/changeset/changeset_file_comment.html"/>
     ${comment.comment_inline_form(c.changeset)}
 
-    ## render comments
-    ${comment.comments(c.changeset)}
+    ## render comments main comments form and it status
+    ${comment.comments(h.url('changeset_comment', repo_name=c.repo_name, revision=c.changeset.raw_id),
+                       h.changeset_status(c.rhodecode_db_repo, c.changeset.raw_id))}
+
     <script type="text/javascript">
       YUE.onDOMReady(function(){
     	  AJAX_COMMENT_URL = "${url('changeset_comment',repo_name=c.repo_name,revision=c.changeset.raw_id)}";
@@ -165,15 +167,7 @@
           // inject comments into they proper positions
           var file_comments = YUQ('.inline-comment-placeholder');
           renderInlineComments(file_comments);
-          
-          YUE.on(YUD.get('show_changeset_status_box'),'change',function(e){
-        	  if(e.currentTarget.checked){
-        		  YUD.setStyle('status_block_container','display','');  
-        	  }
-        	  else{
-        		  YUD.setStyle('status_block_container','display','none');
-        	  }
-          })
+
       })
 
     </script>
