@@ -140,47 +140,13 @@ class PullrequestsController(BaseRepoController):
 
         return redirect(url('changelog_home', repo_name=repo_name))
 
-    def _get_changesets(self, org_repo, org_ref, other_repo, other_ref, tmp):
-        changesets = []
-        #case two independent repos
-        if org_repo != other_repo:
-            common, incoming, rheads = tmp
+    def _load_compare_data(self, pull_request):
+        """
+        Load context data needed for generating compare diff
 
-            if not incoming:
-                revs = []
-            else:
-                revs = org_repo._repo.changelog.findmissing(common, rheads)
-
-            for cs in reversed(map(binascii.hexlify, revs)):
-                changesets.append(org_repo.get_changeset(cs))
-        else:
-            revs = ['ancestors(%s) and not ancestors(%s)' % (org_ref[1],
-                                                             other_ref[1])]
-            from mercurial import scmutil
-            out = scmutil.revrange(org_repo._repo, revs)
-            for cs in reversed(out):
-                changesets.append(org_repo.get_changeset(cs))
-
-        return changesets
-
-    def _get_discovery(self, org_repo, org_ref, other_repo, other_ref):
-        from mercurial import discovery
-        other = org_repo._repo
-        repo = other_repo._repo
-        tip = other[org_ref[1]]
-        log.debug('Doing discovery for %s@%s vs %s@%s' % (
-                        org_repo, org_ref, other_repo, other_ref)
-        )
-        log.debug('Filter heads are %s[%s]' % (tip, org_ref[1]))
-        tmp = discovery.findcommonincoming(
-                  repo=repo,  # other_repo we check for incoming
-                  remote=other,  # org_repo source for incoming
-                  heads=[tip.node()],
-                  force=False
-        )
-        return tmp
-
-    def _compare(self, pull_request):
+        :param pull_request:
+        :type pull_request:
+        """
 
         org_repo = pull_request.org_repo
         org_ref_type, org_ref_, org_ref = pull_request.org_ref.split(':')
@@ -193,22 +159,14 @@ class PullrequestsController(BaseRepoController):
         c.org_repo = org_repo
         c.other_repo = other_repo
 
-        discovery_data = self._get_discovery(org_repo.scm_instance,
-                                           org_ref,
-                                           other_repo.scm_instance,
-                                           other_ref)
-        c.cs_ranges = self._get_changesets(org_repo.scm_instance,
-                                           org_ref,
-                                           other_repo.scm_instance,
-                                           other_ref,
-                                           discovery_data)
+        c.cs_ranges, discovery_data = PullRequestModel().get_compare_data(
+                                       org_repo, org_ref, other_repo, other_ref
+                                      )
 
         c.statuses = c.rhodecode_db_repo.statuses([x.raw_id for x in
                                                    c.cs_ranges])
         # defines that we need hidden inputs with changesets
         c.as_form = request.GET.get('as_form', False)
-        if request.environ.get('HTTP_X_PARTIAL_XHR'):
-            return render('compare/compare_cs.html')
 
         c.org_ref = org_ref[1]
         c.other_ref = other_ref[1]
@@ -232,8 +190,9 @@ class PullrequestsController(BaseRepoController):
         c.users_array = repo_model.get_users_js()
         c.users_groups_array = repo_model.get_users_groups_js()
         c.pull_request = PullRequest.get(pull_request_id)
-        ##TODO: need more generic solution
-        self._compare(c.pull_request)
+
+        # load compare data into template context
+        self._load_compare_data(c.pull_request)
 
         # inline comments
         c.inline_cnt = 0

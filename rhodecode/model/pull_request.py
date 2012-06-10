@@ -24,6 +24,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
+import binascii
 from pylons.i18n.translation import _
 
 from rhodecode.lib import helpers as h
@@ -31,6 +32,8 @@ from rhodecode.model import BaseModel
 from rhodecode.model.db import PullRequest, PullRequestReviewers, Notification
 from rhodecode.model.notification import NotificationModel
 from rhodecode.lib.utils2 import safe_unicode
+
+from rhodecode.lib.vcs.utils.hgcompat import discovery
 
 log = logging.getLogger(__name__)
 
@@ -82,3 +85,103 @@ class PullRequestModel(BaseModel):
                      type_=Notification.TYPE_PULL_REQUEST,)
 
         return new
+
+    def _get_changesets(self, org_repo, org_ref, other_repo, other_ref,
+                        discovery_data):
+        """
+        Returns a list of changesets that are incoming from org_repo@org_ref
+        to other_repo@other_ref
+
+        :param org_repo:
+        :type org_repo:
+        :param org_ref:
+        :type org_ref:
+        :param other_repo:
+        :type other_repo:
+        :param other_ref:
+        :type other_ref:
+        :param tmp:
+        :type tmp:
+        """
+        changesets = []
+        #case two independent repos
+        if org_repo != other_repo:
+            common, incoming, rheads = discovery_data
+
+            if not incoming:
+                revs = []
+            else:
+                revs = org_repo._repo.changelog.findmissing(common, rheads)
+
+            for cs in reversed(map(binascii.hexlify, revs)):
+                changesets.append(org_repo.get_changeset(cs))
+        else:
+            revs = ['ancestors(%s) and not ancestors(%s)' % (org_ref[1],
+                                                             other_ref[1])]
+            from mercurial import scmutil
+            out = scmutil.revrange(org_repo._repo, revs)
+            for cs in reversed(out):
+                changesets.append(org_repo.get_changeset(cs))
+
+        return changesets
+
+    def _get_discovery(self, org_repo, org_ref, other_repo, other_ref):
+        """
+        Get's mercurial discovery data used to calculate difference between
+        repos and refs
+
+        :param org_repo:
+        :type org_repo:
+        :param org_ref:
+        :type org_ref:
+        :param other_repo:
+        :type other_repo:
+        :param other_ref:
+        :type other_ref:
+        """
+
+        other = org_repo._repo
+        repo = other_repo._repo
+        tip = other[org_ref[1]]
+        log.debug('Doing discovery for %s@%s vs %s@%s' % (
+                        org_repo, org_ref, other_repo, other_ref)
+        )
+        log.debug('Filter heads are %s[%s]' % (tip, org_ref[1]))
+        tmp = discovery.findcommonincoming(
+                  repo=repo,  # other_repo we check for incoming
+                  remote=other,  # org_repo source for incoming
+                  heads=[tip.node()],
+                  force=False
+        )
+        return tmp
+
+    def get_compare_data(self, org_repo, org_ref, other_repo, other_ref):
+        """
+        Returns a tuple of incomming changesets, and discoverydata cache
+
+        :param org_repo:
+        :type org_repo:
+        :param org_ref:
+        :type org_ref:
+        :param other_repo:
+        :type other_repo:
+        :param other_ref:
+        :type other_ref:
+        """
+
+        if len(org_ref) != 2 or not isinstance(org_ref, (list, tuple)):
+            raise Exception('org_ref must be a two element list/tuple')
+
+        if len(other_ref) != 2 or not isinstance(org_ref, (list, tuple)):
+            raise Exception('other_ref must be a two element list/tuple')
+
+        discovery_data = self._get_discovery(org_repo.scm_instance,
+                                           org_ref,
+                                           other_repo.scm_instance,
+                                           other_ref)
+        cs_ranges = self._get_changesets(org_repo.scm_instance,
+                                           org_ref,
+                                           other_repo.scm_instance,
+                                           other_ref,
+                                           discovery_data)
+        return cs_ranges, discovery_data
