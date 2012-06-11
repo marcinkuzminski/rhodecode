@@ -44,6 +44,7 @@ from rhodecode.lib.utils2 import str2bool, safe_unicode, safe_str, \
 from rhodecode.lib.markup_renderer import MarkupRenderer
 from rhodecode.lib.vcs.exceptions import ChangesetDoesNotExistError
 from rhodecode.lib.vcs.backends.base import BaseChangeset
+from rhodecode.config.conf import DATE_FORMAT, DATETIME_FORMAT
 from rhodecode.model.db import URL_SEP
 
 log = logging.getLogger(__name__)
@@ -350,8 +351,8 @@ hide_credentials = lambda x: ''.join(credentials_filter(x))
 
 def fmt_date(date):
     if date:
-        return (date.strftime(_(u"%a, %d %b %Y %H:%M:%S").encode('utf8'))
-            .decode('utf8'))
+        _fmt = _(u"%a, %d %b %Y %H:%M:%S").encode('utf8')
+        return date.strftime(_fmt).decode('utf8')
 
     return ""
 
