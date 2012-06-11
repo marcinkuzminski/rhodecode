@@ -78,6 +78,11 @@ class PullrequestsController(BaseRepoController):
 
     def index(self):
         org_repo = c.rhodecode_db_repo
+
+        if org_repo.scm_instance.alias != 'hg':
+            log.error('Review not available for GIT REPOS')
+            raise HTTPNotFound
+
         c.org_refs = self._get_repo_refs(c.rhodecode_repo)
         c.org_repos = []
         c.other_repos = []
@@ -101,7 +106,6 @@ class PullrequestsController(BaseRepoController):
                                         org_repo.parent.repo_name))
                                      )
 
-        #TODO: maybe the owner should be default ?
         c.review_members = []
         c.available_members = []
         for u in User.query().filter(User.username != 'default').all():
@@ -191,6 +195,15 @@ class PullrequestsController(BaseRepoController):
         c.users_array = repo_model.get_users_js()
         c.users_groups_array = repo_model.get_users_groups_js()
         c.pull_request = PullRequest.get(pull_request_id)
+
+        # valid ID
+        if not c.pull_request:
+            raise HTTPNotFound
+
+        # pull_requests repo_name we opened it against
+        # ie. other_repo must match
+        if repo_name != c.pull_request.other_repo.repo_name:
+            raise HTTPNotFound
 
         # load compare data into template context
         self._load_compare_data(c.pull_request)

@@ -68,6 +68,10 @@ class CompareController(BaseRepoController):
             log.error('Could not found repo %s or %s' % (org_repo, other_repo))
             raise HTTPNotFound
 
+        if c.org_repo.scm_instance.alias != 'hg':
+            log.error('Review not available for GIT REPOS')
+            raise HTTPNotFound
+
         c.cs_ranges, discovery_data = PullRequestModel().get_compare_data(
                                        org_repo, org_ref, other_repo, other_ref
                                       )
