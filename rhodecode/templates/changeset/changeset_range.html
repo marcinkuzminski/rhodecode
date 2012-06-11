@@ -54,7 +54,7 @@
 	        <div style="font-size:1.1em;font-weight: bold;clear:both;padding-top:10px">${_('Files affected')}</div>
 	        <div class="cs_files">
 	               %for cs in c.cs_ranges:
-	                   <div class="cur_cs">r${cs}</div>
+	                   <div class="cur_cs">${h.link_to('r%s:%s' % (cs.revision,h.short_id(cs.raw_id)),h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id))}</div>
 	                %for change,filenode,diff,cs1,cs2,st in c.changes[cs.raw_id]:
 	                    <div class="cs_${change}">${h.link_to(h.safe_unicode(filenode.path),h.url.current(anchor=h.FID(cs.raw_id,filenode.path)))}</div>
 	                %endfor
@@ -68,7 +68,8 @@
      %for cs in c.cs_ranges:
           ##${comment.comment_inline_form(cs)}
           ## diff block
-          <h3 style="border:none;padding-top:8px;">${'r%s:%s' % (cs.revision,h.short_id(cs.raw_id))}</h3>
+          <h3 style="padding-top:8px;">${h.link_to('r%s:%s' % (cs.revision,h.short_id(cs.raw_id)),h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id))}</h3>
+          
           ${diff_block.diff_block(c.changes[cs.raw_id])}
           ##${comment.comments(cs)}
 

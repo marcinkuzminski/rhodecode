@@ -32,7 +32,6 @@ import datetime
 from pylons.i18n.translation import _
 
 import rhodecode
-from rhodecode.config.conf import DATETIME_FORMAT
 from rhodecode.lib import helpers as h
 from rhodecode.model import BaseModel
 from rhodecode.model.db import Notification, User, UserNotification
@@ -209,12 +208,12 @@ class NotificationModel(BaseModel):
             _n.TYPE_PULL_REQUEST_COMMENT: _('commented on pull request')
         }
 
-        tmpl = "%(user)s %(action)s %(when)s"
+        # action == _map string
+        tmpl = "%(user)s %(action)s at %(when)s"
         if show_age:
             when = h.age(notification.created_on)
         else:
-            DTF = lambda d: datetime.datetime.strftime(d, DATETIME_FORMAT)
-            when = DTF(notification.created_on)
+            when = h.fmt_date(notification.created_on)
 
         data = dict(
             user=notification.created_by_user.username,
