@@ -364,6 +364,7 @@ def to_message(mail, separator="; "):
 
     return out
 
+
 class MIMEPart(MIMEBase):
     """
     A reimplementation of nearly everything in email.mime to be more useful
@@ -387,7 +388,8 @@ class MIMEPart(MIMEBase):
         self.set_payload(encoded, charset=charset)
 
     def extract_payload(self, mail):
-        if mail.body == None: return  # only None, '' is still ok
+        if mail.body == None:
+            return  # only None, '' is still ok
 
         ctype, ctype_params = mail.content_encoding['Content-Type']
         cdisp, cdisp_params = mail.content_encoding['Content-Disposition']
@@ -415,7 +417,8 @@ class MIMEPart(MIMEBase):
 
 
 def header_to_mime_encoding(value, not_email=False, separator=", "):
-    if not value: return ""
+    if not value:
+        return ""
 
     encoder = Charset(DEFAULT_ENCODING)
     if type(value) == list:
@@ -423,6 +426,7 @@ def header_to_mime_encoding(value, not_email=False, separator=", "):
             v, encoder, not_email) for v in value)
     else:
         return properly_encode_header(value, encoder, not_email)
+
 
 def properly_encode_header(value, encoder, not_email):
     """
