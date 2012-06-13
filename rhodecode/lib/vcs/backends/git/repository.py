@@ -192,7 +192,11 @@ class GitRepository(BaseRepository):
                     "for this repository %s" % (revision, self))
 
         elif is_bstr(revision):
-            if not pattern.match(revision) or revision not in self.revisions:
+            _ref_revision = self._parsed_refs.get(revision)
+            if _ref_revision:  # and _ref_revision[1] in ['H', 'RH', 'T']:
+                return _ref_revision[0]
+
+            elif not pattern.match(revision) or revision not in self.revisions:
                 raise ChangesetDoesNotExistError("Revision %r does not exist "
                     "for this repository %s" % (revision, self))
 
@@ -267,18 +271,9 @@ class GitRepository(BaseRepository):
             if ref.startswith('refs/heads/') and not ref.endswith('/HEAD')]
         return OrderedDict(sorted(_branches, key=sortkey, reverse=False))
 
-    def _heads(self, reverse=False):
-        refs = self._repo.get_refs()
-        heads = {}
-
-        for key, val in refs.items():
-            for ref_key in ['refs/heads/', 'refs/remotes/origin/']:
-                if key.startswith(ref_key):
-                    n = key[len(ref_key):]
-                    if n not in ['HEAD']:
-                        heads[n] = val
-
-        return heads if reverse else dict((y,x) for x,y in heads.iteritems())
+    @LazyProperty
+    def tags(self):
+        return self._get_tags()
 
     def _get_tags(self):
         if not self.revisions:
@@ -287,10 +282,6 @@ class GitRepository(BaseRepository):
         _tags = [('/'.join(ref.split('/')[2:]), head) for ref, head in
             self._repo.get_refs().items() if ref.startswith('refs/tags/')]
         return OrderedDict(sorted(_tags, key=sortkey, reverse=True))
-
-    @LazyProperty
-    def tags(self):
-        return self._get_tags()
 
     def tag(self, name, user, revision=None, message=None, date=None,
             **kwargs):
@@ -334,6 +325,34 @@ class GitRepository(BaseRepository):
             self.tags = self._get_tags()
         except OSError, e:
             raise RepositoryError(e.strerror)
+
+    @LazyProperty
+    def _parsed_refs(self):
+        refs = self._repo.get_refs()
+        keys = [('refs/heads/', 'H'), 
+                ('refs/remotes/origin/', 'RH'),
+                ('refs/tags/', 'T')]
+        _refs = {}
+        for ref, sha in refs.iteritems():
+            for k, type_ in keys:
+                if ref.startswith(k):
+                    _key = ref[len(k):]
+                    _refs[_key] = [sha, type_]
+                    break
+        return _refs
+
+    def _heads(self, reverse=False):
+        refs = self._repo.get_refs()
+        heads = {}
+
+        for key, val in refs.items():
+            for ref_key in ['refs/heads/', 'refs/remotes/origin/']:
+                if key.startswith(ref_key):
+                    n = key[len(ref_key):]
+                    if n not in ['HEAD']:
+                        heads[n] = val
+
+        return heads if reverse else dict((y, x) for x, y in heads.iteritems())
 
     def get_changeset(self, revision=None):
         """
