@@ -599,6 +599,10 @@ def create_test_env(repos_test_path, config):
     tar.extractall(jn(TESTS_TMP_PATH, HG_REPO))
     tar.close()
 
+    #LOAD VCS test stuff
+    from rhodecode.tests.vcs import setup_package
+    setup_package()
+
 
 #==============================================================================
 # PASTER COMMANDS

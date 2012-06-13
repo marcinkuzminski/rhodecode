@@ -32,7 +32,8 @@ class MercurialInMemoryChangeset(BaseInMemoryChangeset):
         from .repository import MercurialRepository
         if not isinstance(message, unicode) or not isinstance(author, unicode):
             raise RepositoryError('Given message and author needs to be '
-                                  'an <unicode> instance')
+                                  'an <unicode> instance got %r & %r instead'
+                                  % (type(message), type(author)))
 
         if branch is None:
             branch = MercurialRepository.DEFAULT_BRANCH_NAME
