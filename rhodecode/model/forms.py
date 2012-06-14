@@ -653,7 +653,7 @@ def PasswordResetForm():
 
 
 def RepoForm(edit=False, old_data={}, supported_backends=BACKENDS.keys(),
-             repo_groups=[]):
+             repo_groups=[], landing_revs=[]):
     class _RepoForm(formencode.Schema):
         allow_extra_fields = True
         filter_extra_fields = False
@@ -666,7 +666,7 @@ def RepoForm(edit=False, old_data={}, supported_backends=BACKENDS.keys(),
         private = StringBoolean(if_missing=False)
         enable_statistics = StringBoolean(if_missing=False)
         enable_downloads = StringBoolean(if_missing=False)
-        landing_rev = UnicodeString(strip=True, min=1, not_empty=True)
+        landing_rev = OneOf(landing_revs, hideList=True)
 
         if edit:
             #this is repo owner
@@ -678,8 +678,8 @@ def RepoForm(edit=False, old_data={}, supported_backends=BACKENDS.keys(),
     return _RepoForm
 
 
-def RepoForkForm(edit=False, old_data={},
-                 supported_backends=BACKENDS.keys(), repo_groups=[]):
+def RepoForkForm(edit=False, old_data={}, supported_backends=BACKENDS.keys(),
+                 repo_groups=[]):
     class _RepoForkForm(formencode.Schema):
         allow_extra_fields = True
         filter_extra_fields = False
@@ -697,8 +697,8 @@ def RepoForkForm(edit=False, old_data={},
     return _RepoForkForm
 
 
-def RepoSettingsForm(edit=False, old_data={},
-                     supported_backends=BACKENDS.keys(), repo_groups=[]):
+def RepoSettingsForm(edit=False, old_data={}, supported_backends=BACKENDS.keys(),
+                     repo_groups=[], landing_revs=[]):
     class _RepoForm(formencode.Schema):
         allow_extra_fields = True
         filter_extra_fields = False
@@ -707,7 +707,7 @@ def RepoSettingsForm(edit=False, old_data={},
         description = UnicodeString(strip=True, min=1, not_empty=True)
         repo_group = OneOf(repo_groups, hideList=True)
         private = StringBoolean(if_missing=False)
-        landing_rev = UnicodeString(strip=True, min=1, not_empty=True)
+        landing_rev = OneOf(landing_revs, hideList=True)
         chained_validators = [ValidRepoName(edit, old_data), ValidPerms(),
                               ValidSettings]
     return _RepoForm
