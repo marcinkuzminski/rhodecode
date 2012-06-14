@@ -295,7 +295,7 @@ class User(Base, BaseModel):
     password = Column("password", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     active = Column("active", Boolean(), nullable=True, unique=None, default=None)
     admin = Column("admin", Boolean(), nullable=True, unique=None, default=False)
-    name = Column("name", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    name = Column("firstname", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     lastname = Column("lastname", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     _email = Column("email", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     last_login = Column("last_login", DateTime(timezone=False), nullable=True, unique=None, default=None)
@@ -500,13 +500,14 @@ class Repository(Base, BaseModel):
     repo_id = Column("repo_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     repo_name = Column("repo_name", String(length=255, convert_unicode=False, assert_unicode=None), nullable=False, unique=True, default=None)
     clone_uri = Column("clone_uri", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=False, default=None)
-    repo_type = Column("repo_type", String(length=255, convert_unicode=False, assert_unicode=None), nullable=False, unique=False, default='hg')
+    repo_type = Column("repo_type", String(length=255, convert_unicode=False, assert_unicode=None), nullable=False, unique=False, default=None)
     user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=False, default=None)
     private = Column("private", Boolean(), nullable=True, unique=None, default=None)
     enable_statistics = Column("statistics", Boolean(), nullable=True, unique=None, default=True)
     enable_downloads = Column("downloads", Boolean(), nullable=True, unique=None, default=True)
     description = Column("description", String(length=10000, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     created_on = Column('created_on', DateTime(timezone=False), nullable=True, unique=None, default=datetime.datetime.now)
+    landing_rev = Column("landing_revision", String(length=255, convert_unicode=False, assert_unicode=None), nullable=False, unique=False, default=None)
 
     fork_id = Column("fork_id", Integer(), ForeignKey('repositories.repo_id'), nullable=True, unique=False, default=None)
     group_id = Column("group_id", Integer(), ForeignKey('groups.group_id'), nullable=True, unique=False, default=None)
@@ -523,7 +524,7 @@ class Repository(Base, BaseModel):
     logs = relationship('UserLog')
 
     def __unicode__(self):
-        return u"<%s('%s:%s')>" % (self.__class__.__name__,self.repo_id,
+        return u"<%s('%s:%s')>" % (self.__class__.__name__, self.repo_id,
                                    self.repo_name)
 
     @classmethod

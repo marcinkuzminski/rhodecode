@@ -42,6 +42,15 @@ ${h.form(url('repos'))}
                 <span class="help-block">${_('Type of repository to create.')}</span>
             </div>
          </div>
+         <div class="field">
+            <div class="label">
+                <label for="landing_rev">${_('Landing revision')}:</label>
+            </div>
+            <div class="input">
+                ${h.select('landing_rev','',c.landing_revs,class_="medium")}
+                <span class="help-block">${_('Default revision for files page, downloads, whoosh and readme')}</span>
+            </div>
+        </div>           
         <div class="field">
             <div class="label label-textarea">
                 <label for="description">${_('Description')}:</label>

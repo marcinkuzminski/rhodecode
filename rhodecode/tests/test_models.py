@@ -136,7 +136,8 @@ class TestReposGroups(unittest.TestCase):
                          repo_group=None,
                          private=False,
                          repo_type='hg',
-                         clone_uri=None)
+                         clone_uri=None,
+                         landing_rev='tip')
         cur_user = User.get_by_username(TEST_USER_ADMIN_LOGIN)
         r = RepoModel().create(form_data, cur_user)
 
@@ -608,7 +609,6 @@ class TestPermissions(unittest.TestCase):
                                                 user=self.anon,
                                                 perm='group.none')
 
-
         u1_auth = AuthUser(user_id=self.u1.user_id)
         self.assertEqual(u1_auth.permissions['repositories_groups'],
                  {u'group1': u'group.none', u'group2': u'group.none'})
@@ -619,13 +619,14 @@ class TestPermissions(unittest.TestCase):
 
         # add repo to group
         form_data = {
-            'repo_name':HG_REPO,
-            'repo_name_full':RepoGroup.url_sep().join([self.g1.group_name,HG_REPO]),
-            'repo_type':'hg',
-            'clone_uri':'',
-            'repo_group':self.g1.group_id,
-            'description':'desc',
-            'private':False
+            'repo_name': HG_REPO,
+            'repo_name_full': RepoGroup.url_sep().join([self.g1.group_name,HG_REPO]),
+            'repo_type': 'hg',
+            'clone_uri': '',
+            'repo_group': self.g1.group_id,
+            'description': 'desc',
+            'private': False,
+            'landing_rev': 'tip'
         }
         self.test_repo = RepoModel().create(form_data, cur_user=self.u1)
         Session.commit()

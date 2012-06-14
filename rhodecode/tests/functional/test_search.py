@@ -1,5 +1,5 @@
-from rhodecode.tests import *
 import os
+from rhodecode.tests import *
 from nose.plugins.skip import SkipTest
 
 
@@ -27,8 +27,7 @@ class TestSearchController(TestController):
         self.log_user()
         response = self.app.get(url(controller='search', action='index'),
                                 {'q': 'def repo'})
-        response.mustcontain('10 results')
-        response.mustcontain('Permission denied')
+        response.mustcontain('39 results')
 
     def test_repo_search(self):
         self.log_user()
@@ -36,4 +35,3 @@ class TestSearchController(TestController):
                                 {'q': 'repository:%s def test' % HG_REPO})
 
         response.mustcontain('4 results')
-        response.mustcontain('Permission denied')

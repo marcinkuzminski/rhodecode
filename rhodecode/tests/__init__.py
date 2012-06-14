@@ -38,13 +38,14 @@ if not is_windows:
 log = logging.getLogger(__name__)
 
 __all__ = [
-    'environ', 'url', 'TestController', 'TESTS_TMP_PATH', 'HG_REPO',
-    'GIT_REPO', 'NEW_HG_REPO', 'NEW_GIT_REPO', 'HG_FORK', 'GIT_FORK',
-    'TEST_USER_ADMIN_LOGIN', 'TEST_USER_REGULAR_LOGIN',
+    'environ', 'url', 'get_new_dir', 'TestController', 'TESTS_TMP_PATH',
+    'HG_REPO', 'GIT_REPO', 'NEW_HG_REPO', 'NEW_GIT_REPO', 'HG_FORK',
+    'GIT_FORK', 'TEST_USER_ADMIN_LOGIN', 'TEST_USER_REGULAR_LOGIN',
     'TEST_USER_REGULAR_PASS', 'TEST_USER_REGULAR_EMAIL',
     'TEST_USER_REGULAR2_LOGIN', 'TEST_USER_REGULAR2_PASS',
-    'TEST_USER_REGULAR2_EMAIL', 'TEST_HG_REPO', 'TEST_GIT_REPO',
-    'HG_REMOTE_REPO', 'GIT_REMOTE_REPO', 'SCM_TESTS',
+    'TEST_USER_REGULAR2_EMAIL', 'TEST_HG_REPO', 'TEST_HG_REPO_CLONE',
+    'TEST_HG_REPO_PULL', 'TEST_GIT_REPO', 'TEST_GIT_REPO_CLONE',
+    'TEST_GIT_REPO_PULL', 'HG_REMOTE_REPO', 'GIT_REMOTE_REPO', 'SCM_TESTS',
 ]
 
 # Invoke websetup with the current config file
@@ -83,21 +84,26 @@ GIT_FORK = 'vcs_test_git_fork'
 SCM_TESTS = ['hg', 'git']
 uniq_suffix = str(int(time.mktime(datetime.datetime.now().timetuple())))
 
-THIS = os.path.abspath(os.path.dirname(__file__))
-
 GIT_REMOTE_REPO = 'git://github.com/codeinn/vcs.git'
+
 TEST_GIT_REPO = jn(TESTS_TMP_PATH, GIT_REPO)
 TEST_GIT_REPO_CLONE = jn(TESTS_TMP_PATH, 'vcsgitclone%s' % uniq_suffix)
 TEST_GIT_REPO_PULL = jn(TESTS_TMP_PATH, 'vcsgitpull%s' % uniq_suffix)
 
 
 HG_REMOTE_REPO = 'http://bitbucket.org/marcinkuzminski/vcs'
-TEST_HG_REPO = jn(TESTS_TMP_PATH, 'vcs-hg')
+
+TEST_HG_REPO = jn(TESTS_TMP_PATH, HG_REPO)
 TEST_HG_REPO_CLONE = jn(TESTS_TMP_PATH, 'vcshgclone%s' % uniq_suffix)
 TEST_HG_REPO_PULL = jn(TESTS_TMP_PATH, 'vcshgpull%s' % uniq_suffix)
 
 TEST_DIR = tempfile.gettempdir()
 TEST_REPO_PREFIX = 'vcs-test'
+
+# cached repos if any !
+# comment out to get some other repos from bb or github
+GIT_REMOTE_REPO = jn(TESTS_TMP_PATH, GIT_REPO)
+HG_REMOTE_REPO = jn(TESTS_TMP_PATH, HG_REPO)
 
 
 def get_new_dir(title):
@@ -112,12 +118,6 @@ def get_new_dir(title):
     name = '-'.join((name, hex))
     path = os.path.join(TEST_DIR, name)
     return get_normalized_path(path)
-
-
-PACKAGE_DIR = os.path.abspath(os.path.join(
-    os.path.dirname(__file__), '..'))
-
-TEST_USER_CONFIG_FILE = jn(THIS, 'aconfig')
 
 
 class TestController(TestCase):

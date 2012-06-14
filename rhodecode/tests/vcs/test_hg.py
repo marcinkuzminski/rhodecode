@@ -156,14 +156,10 @@ class MercurialRepositoryTest(unittest.TestCase):
 
         #active branches
         self.assertTrue('default' in self.repo.branches)
-
-        #closed branches
-        self.assertFalse('web' in self.repo.branches)
-        self.assertFalse('git' in self.repo.branches)
+        self.assertTrue('git' in self.repo.branches)
 
         # closed
-        self.assertTrue('workdir' in self.repo._get_branches(closed=True))
-        self.assertTrue('webvcs' in self.repo._get_branches(closed=True))
+        self.assertTrue('web' in self.repo._get_branches(closed=True))
 
         for name, id in self.repo.branches.items():
             self.assertTrue(isinstance(

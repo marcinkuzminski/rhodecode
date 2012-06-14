@@ -70,6 +70,7 @@ class ReposController(BaseController):
         repo_model = RepoModel()
         c.users_array = repo_model.get_users_js()
         c.users_groups_array = repo_model.get_users_groups_js()
+        c.landing_revs = ScmModel().get_repo_landing_revs()
 
     def __load_data(self, repo_name=None):
         """
@@ -91,6 +92,7 @@ class ReposController(BaseController):
 
             return redirect(url('repos'))
 
+        c.landing_revs = ScmModel().get_repo_landing_revs(c.repo_info)
         c.default_user_id = User.get_by_username('default').user_id
         c.in_public_journal = UserFollowing.query()\
             .filter(UserFollowing.user_id == c.default_user_id)\
@@ -116,6 +118,7 @@ class ReposController(BaseController):
         c.repos_list = [('', _('--REMOVE FORK--'))]
         c.repos_list += [(x.repo_id, x.repo_name) for x in
                    Repository.query().order_by(Repository.repo_name).all()]
+
         return defaults
 
     @HasPermissionAllDecorator('hg.admin')

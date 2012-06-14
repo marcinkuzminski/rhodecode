@@ -52,5 +52,5 @@ def setup_package():
     except VCSTestError, err:
         raise RuntimeError(str(err))
 
-start_dir = os.path.abspath(os.path.dirname(__file__))
-unittest.defaultTestLoader.discover(start_dir)
+#start_dir = os.path.abspath(os.path.dirname(__file__))
+#unittest.defaultTestLoader.discover(start_dir)
