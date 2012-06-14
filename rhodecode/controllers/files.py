@@ -61,7 +61,7 @@ log = logging.getLogger(__name__)
 
 class FilesController(BaseRepoController):
 
-    @LoginRequired()
+
     def __before__(self):
         super(FilesController, self).__before__()
         c.cut_off_limit = self.cut_off_limit
@@ -113,6 +113,7 @@ class FilesController(BaseRepoController):
 
         return file_node
 
+    @LoginRequired()
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
                                    'repository.admin')
     def index(self, repo_name, revision, f_path, annotate=False):
@@ -154,9 +155,14 @@ class FilesController(BaseRepoController):
             c.file = c.changeset.get_node(f_path)
 
             if c.file.is_file():
-                c.file_history = self._get_node_history(c.changeset, f_path)
+                _hist = c.changeset.get_file_history(f_path)
+                c.file_history = self._get_node_history(c.changeset, f_path,
+                                                        _hist)
+                c.authors = []
+                for a in set([x.author for x in _hist]):
+                    c.authors.append((h.email(a), h.person(a)))
             else:
-                c.file_history = []
+                c.authors = c.file_history = []
         except RepositoryError, e:
             h.flash(str(e), category='warning')
             redirect(h.url('files_home', repo_name=repo_name,
@@ -164,6 +170,7 @@ class FilesController(BaseRepoController):
 
         return render('files/files.html')
 
+    @LoginRequired()
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
                                    'repository.admin')
     def rawfile(self, repo_name, revision, f_path):
@@ -176,6 +183,7 @@ class FilesController(BaseRepoController):
         response.content_type = file_node.mimetype
         return file_node.content
 
+    @LoginRequired()
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
                                    'repository.admin')
     def raw(self, repo_name, revision, f_path):
@@ -222,6 +230,7 @@ class FilesController(BaseRepoController):
         response.content_type = mimetype
         return file_node.content
 
+    @LoginRequired()
     @HasRepoPermissionAnyDecorator('repository.write', 'repository.admin')
     def edit(self, repo_name, revision, f_path):
         r_post = request.POST
@@ -271,6 +280,7 @@ class FilesController(BaseRepoController):
 
         return render('files/files_edit.html')
 
+    @LoginRequired()
     @HasRepoPermissionAnyDecorator('repository.write', 'repository.admin')
     def add(self, repo_name, revision, f_path):
         r_post = request.POST
@@ -325,6 +335,7 @@ class FilesController(BaseRepoController):
 
         return render('files/files_add.html')
 
+    @LoginRequired()
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
                                    'repository.admin')
     def archivefile(self, repo_name, fname):
@@ -382,6 +393,7 @@ class FilesController(BaseRepoController):
         response.content_type = str(content_type)
         return get_chunked_archive(archive)
 
+    @LoginRequired()
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
                                    'repository.admin')
     def diff(self, repo_name, f_path):
@@ -454,8 +466,9 @@ class FilesController(BaseRepoController):
 
         return render('files/file_diff.html')
 
-    def _get_node_history(self, cs, f_path):
-        changesets = cs.get_file_history(f_path)
+    def _get_node_history(self, cs, f_path, changesets=None):
+        if changesets is None:
+            changesets = cs.get_file_history(f_path)
         hist_l = []
 
         changesets_group = ([], _("Changesets"))
@@ -479,9 +492,10 @@ class FilesController(BaseRepoController):
 
         return hist_l
 
-    @jsonify
+    @LoginRequired()
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
                                    'repository.admin')
+    @jsonify
     def nodelist(self, repo_name, revision, f_path):
         if request.environ.get('HTTP_X_PARTIAL_XHR'):
             cs = self.__get_cs_or_redirect(revision, repo_name)

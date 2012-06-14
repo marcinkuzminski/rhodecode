@@ -29,6 +29,7 @@ import logging
 import cStringIO
 
 from sqlalchemy import func
+from pylons.i18n.translation import _
 
 from rhodecode.lib.vcs import get_backend
 from rhodecode.lib.vcs.exceptions import RepositoryError
@@ -474,3 +475,40 @@ class ScmModel(BaseModel):
 
     def get_unread_journal(self):
         return self.sa.query(UserLog).count()
+
+    def get_repo_landing_revs(self, repo=None):
+        """
+        Generates select option with tags branches and bookmarks (for hg only)
+        grouped by type
+
+        :param repo:
+        :type repo:
+        """
+
+        hist_l = []
+        choices = []
+        repo = self.__get_repo(repo)
+        hist_l.append(['tip', _('latest tip')])
+        choices.append('tip')
+        if not repo:
+            return choices, hist_l
+
+        repo = repo.scm_instance
+
+        branches_group = ([(k, k) for k, v in
+                           repo.branches.iteritems()], _("Branches"))
+        hist_l.append(branches_group)
+        choices.extend([x[0] for x in branches_group[0]])
+
+        if repo.alias == 'hg':
+            bookmarks_group = ([(k, k) for k, v in
+                                repo.bookmarks.iteritems()], _("Bookmarks"))
+            hist_l.append(bookmarks_group)
+            choices.extend([x[0] for x in bookmarks_group[0]])
+
+        tags_group = ([(k, k) for k, v in
+                       repo.tags.iteritems()], _("Tags"))
+        hist_l.append(tags_group)
+        choices.extend([x[0] for x in tags_group[0]])
+
+        return choices, hist_l

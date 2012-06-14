@@ -15,8 +15,8 @@ class TestSummaryController(TestController):
         #repo type
         response.mustcontain(
             """<img style="margin-bottom:2px" class="icon" """
-            """title="Mercurial repository" alt="Mercurial """
-            """repository" src="/images/icons/hgicon.png"/>"""
+            """title="Mercurial repository" alt="Mercurial repository" """
+            """src="/images/icons/hgicon.png"/>"""
         )
         response.mustcontain(
             """<img style="margin-bottom:2px" class="icon" """
@@ -41,10 +41,33 @@ class TestSummaryController(TestController):
         )
 
         # clone url...
-        response.mustcontain("""<input style="width:80%;margin-left:105px" type="text" id="clone_url" readonly="readonly" value="http://test_admin@localhost:80/vcs_test_hg"/>""")
-        response.mustcontain("""<input style="display:none;width:80%;margin-left:105px" type="text" id="clone_url_id" readonly="readonly" value="http://test_admin@localhost:80/_1"/>""")
+        response.mustcontain("""<input style="width:80%%;margin-left:105px" type="text" id="clone_url" readonly="readonly" value="http://test_admin@localhost:80/%s"/>""" % HG_REPO)
+        response.mustcontain("""<input style="display:none;width:80%%;margin-left:105px" type="text" id="clone_url_id" readonly="readonly" value="http://test_admin@localhost:80/_%s"/>""" % ID)
 
-    def test_index_by_id(self):
+    def test_index_git(self):
+        self.log_user()
+        ID = Repository.get_by_repo_name(GIT_REPO).repo_id
+        response = self.app.get(url(controller='summary',
+                                    action='index',
+                                    repo_name=GIT_REPO))
+
+        #repo type
+        response.mustcontain(
+            """<img style="margin-bottom:2px" class="icon" """
+            """title="Git repository" alt="Git repository" """
+            """src="/images/icons/giticon.png"/>"""
+        )
+        response.mustcontain(
+            """<img style="margin-bottom:2px" class="icon" """
+            """title="public repository" alt="public """
+            """repository" src="/images/icons/lock_open.png"/>"""
+        )
+
+        # clone url...
+        response.mustcontain("""<input style="width:80%%;margin-left:105px" type="text" id="clone_url" readonly="readonly" value="http://test_admin@localhost:80/%s"/>""" % GIT_REPO)
+        response.mustcontain("""<input style="display:none;width:80%%;margin-left:105px" type="text" id="clone_url_id" readonly="readonly" value="http://test_admin@localhost:80/_%s"/>""" % ID)
+
+    def test_index_by_id_hg(self):
         self.log_user()
         ID = Repository.get_by_repo_name(HG_REPO).repo_id
         response = self.app.get(url(controller='summary',
@@ -55,6 +78,21 @@ class TestSummaryController(TestController):
         response.mustcontain("""<img style="margin-bottom:2px" class="icon" """
                         """title="Mercurial repository" alt="Mercurial """
                         """repository" src="/images/icons/hgicon.png"/>""")
+        response.mustcontain("""<img style="margin-bottom:2px" class="icon" """
+                        """title="public repository" alt="public """
+                        """repository" src="/images/icons/lock_open.png"/>""")
+
+    def test_index_by_id_git(self):
+        self.log_user()
+        ID = Repository.get_by_repo_name(GIT_REPO).repo_id
+        response = self.app.get(url(controller='summary',
+                                    action='index',
+                                    repo_name='_%s' % ID))
+
+        #repo type
+        response.mustcontain("""<img style="margin-bottom:2px" class="icon" """
+                        """title="Git repository" alt="Git """
+                        """repository" src="/images/icons/giticon.png"/>""")
         response.mustcontain("""<img style="margin-bottom:2px" class="icon" """
                         """title="public repository" alt="public """
                         """repository" src="/images/icons/lock_open.png"/>""")

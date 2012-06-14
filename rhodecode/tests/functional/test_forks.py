@@ -28,7 +28,7 @@ class TestForksController(TestController):
 
         self.assertTrue("""There are no forks yet""" in response.body)
 
-    def test_index_with_fork(self):
+    def test_index_with_fork_hg(self):
         self.log_user()
 
         # create a fork
@@ -39,19 +39,49 @@ class TestForksController(TestController):
         response = self.app.post(url(controller='forks',
                                      action='fork_create',
                                     repo_name=repo_name),
-                                    {'repo_name':fork_name,
-                                     'repo_group':'',
-                                     'fork_parent_id':org_repo.repo_id,
-                                     'repo_type':'hg',
-                                     'description':description,
-                                     'private':'False'})
+                                    {'repo_name': fork_name,
+                                     'repo_group': '',
+                                     'fork_parent_id': org_repo.repo_id,
+                                     'repo_type': 'hg',
+                                     'description': description,
+                                     'private': 'False',
+                                     'landing_rev': 'tip'})
 
         response = self.app.get(url(controller='forks', action='forks',
                                     repo_name=repo_name))
 
-        self.assertTrue("""<a href="/%s/summary">"""
-                         """vcs_test_hg_fork</a>""" % fork_name
-                         in response.body)
+        response.mustcontain(
+            """<a href="/%s/summary">%s</a>""" % (fork_name, fork_name)
+        )
+
+        #remove this fork
+        response = self.app.delete(url('repo', repo_name=fork_name))
+
+    def test_index_with_fork_git(self):
+        self.log_user()
+
+        # create a fork
+        fork_name = GIT_FORK
+        description = 'fork of vcs test'
+        repo_name = GIT_REPO
+        org_repo = Repository.get_by_repo_name(repo_name)
+        response = self.app.post(url(controller='forks',
+                                     action='fork_create',
+                                    repo_name=repo_name),
+                                    {'repo_name': fork_name,
+                                     'repo_group': '',
+                                     'fork_parent_id': org_repo.repo_id,
+                                     'repo_type': 'git',
+                                     'description': description,
+                                     'private': 'False',
+                                     'landing_rev': 'tip'})
+
+        response = self.app.get(url(controller='forks', action='forks',
+                                    repo_name=repo_name))
+
+        response.mustcontain(
+            """<a href="/%s/summary">%s</a>""" % (fork_name, fork_name)
+        )
 
         #remove this fork
         response = self.app.delete(url('repo', repo_name=fork_name))
@@ -69,11 +99,12 @@ class TestForksController(TestController):
                                      'fork_parent_id':org_repo.repo_id,
                                      'repo_type':'hg',
                                      'description':description,
-                                     'private':'False'})
+                                     'private':'False',
+                                     'landing_rev': 'tip'})
 
         #test if we have a message that fork is ok
-        self.assertTrue('forked %s repository as %s' \
-                      % (repo_name, fork_name) in response.session['flash'][0])
+        self.checkSessionFlash(response,
+                'forked %s repository as %s' % (repo_name, fork_name))
 
         #test if the fork was created in the database
         fork_repo = self.Session.query(Repository)\
@@ -85,10 +116,6 @@ class TestForksController(TestController):
         #test if fork is visible in the list ?
         response = response.follow()
 
-        # check if fork is marked as fork
-        # wait for cache to expire
-        import time
-        time.sleep(10)
         response = self.app.get(url(controller='summary', action='index',
                                     repo_name=fork_name))
 

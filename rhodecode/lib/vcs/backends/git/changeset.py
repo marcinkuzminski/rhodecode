@@ -259,10 +259,11 @@ class GitChangeset(BaseChangeset):
         # --root ==> doesn't put '^' character for bounderies
         # -r sha ==> blames for the given revision
         so, se = self.repository.run_git_command(cmd)
+
         annotate = []
         for i, blame_line in enumerate(so.split('\n')[:-1]):
             ln_no = i + 1
-            id, line = re.split(r' \(.+?\) ', blame_line, 1)
+            id, line = re.split(r' ', blame_line, 1)
             annotate.append((ln_no, self.repository.get_changeset(id), line))
         return annotate
 

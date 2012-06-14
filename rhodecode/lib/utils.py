@@ -448,7 +448,8 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False):
              'description': repo.description \
                 if repo.description != 'unknown' else '%s repository' % name,
              'private': False,
-             'group_id': getattr(group, 'group_id', None)
+             'group_id': getattr(group, 'group_id', None),
+             'landing_rev': repo.DEFAULT_BRANCH_NAME
             }
             rm.create(form_data, user, just_db=True)
     sa.commit()
@@ -558,7 +559,7 @@ def create_test_env(repos_test_path, config):
     install test repository into tmp dir
     """
     from rhodecode.lib.db_manage import DbManage
-    from rhodecode.tests import HG_REPO, TESTS_TMP_PATH
+    from rhodecode.tests import HG_REPO, GIT_REPO, TESTS_TMP_PATH
 
     # PART ONE create db
     dbconf = config['sqlalchemy.db1.url']
@@ -593,11 +594,20 @@ def create_test_env(repos_test_path, config):
         log.debug('remove %s' % data_path)
         shutil.rmtree(data_path)
 
-    #CREATE DEFAULT HG REPOSITORY
+    #CREATE DEFAULT TEST REPOS
     cur_dir = dn(dn(abspath(__file__)))
     tar = tarfile.open(jn(cur_dir, 'tests', "vcs_test_hg.tar.gz"))
     tar.extractall(jn(TESTS_TMP_PATH, HG_REPO))
     tar.close()
+
+    cur_dir = dn(dn(abspath(__file__)))
+    tar = tarfile.open(jn(cur_dir, 'tests', "vcs_test_git.tar.gz"))
+    tar.extractall(jn(TESTS_TMP_PATH, GIT_REPO))
+    tar.close()
+
+    #LOAD VCS test stuff
+    from rhodecode.tests.vcs import setup_package
+    setup_package()
 
 
 #==============================================================================

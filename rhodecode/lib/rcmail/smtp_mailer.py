@@ -21,10 +21,11 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
+import time
 import logging
 import smtplib
 from socket import sslerror
+from email.utils import formatdate
 from rhodecode.lib.rcmail.message import Message
 
 
@@ -59,8 +60,11 @@ class SmtpMailer(object):
 
         if isinstance(recipients, basestring):
             recipients = [recipients]
+        headers = {
+            'Date': formatdate(time.time())
+        }
         msg = Message(subject, recipients, body, html, self.mail_from,
-                      recipients_separator=", ")
+                      recipients_separator=", ", extra_headers=headers)
         raw_msg = msg.to_message()
 
         if self.ssl:

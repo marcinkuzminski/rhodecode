@@ -1,6 +1,7 @@
-from rhodecode.tests import *
 import os
+from rhodecode.tests import *
 from nose.plugins.skip import SkipTest
+
 
 class TestSearchController(TestController):
 
@@ -18,20 +19,19 @@ class TestSearchController(TestController):
         else:
             self.log_user()
             response = self.app.get(url(controller='search', action='index'),
-                                    {'q':HG_REPO})
+                                    {'q': HG_REPO})
             self.assertTrue('There is no index to search in. '
                             'Please run whoosh indexer' in response.body)
 
     def test_normal_search(self):
         self.log_user()
         response = self.app.get(url(controller='search', action='index'),
-                                {'q':'def repo'})
-        self.assertTrue('10 results' in response.body)
-        self.assertTrue('Permission denied' not in response.body)
+                                {'q': 'def repo'})
+        response.mustcontain('39 results')
 
     def test_repo_search(self):
         self.log_user()
         response = self.app.get(url(controller='search', action='index'),
-                                {'q':'repository:%s def test' % HG_REPO})
-        self.assertTrue('4 results' in response.body)
-        self.assertTrue('Permission denied' not in response.body)
+                                {'q': 'repository:%s def test' % HG_REPO})
+
+        response.mustcontain('4 results')

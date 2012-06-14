@@ -422,7 +422,7 @@ class FileNode(Node):
 
     def __repr__(self):
         return '<%s %r @ %s>' % (self.__class__.__name__, self.path,
-                                 self.changeset.short_id)
+                                 getattr(self.changeset, 'short_id', ''))
 
 
 class RemovedFileNode(FileNode):
@@ -559,7 +559,7 @@ class DirNode(Node):
 
     def __repr__(self):
         return '<%s %r @ %s>' % (self.__class__.__name__, self.path,
-                                 self.changeset.short_id)
+                                 getattr(self.changeset, 'short_id', ''))
 
 
 class RootNode(DirNode):
@@ -593,7 +593,7 @@ class SubModuleNode(Node):
 
     def __repr__(self):
         return '<%s %r @ %s>' % (self.__class__.__name__, self.path,
-                                 self.changeset.short_id)
+                                 getattr(self.changeset, 'short_id', ''))
 
     def _extract_submodule_url(self):
         if self.alias == 'git':

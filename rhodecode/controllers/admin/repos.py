@@ -70,6 +70,8 @@ class ReposController(BaseController):
         repo_model = RepoModel()
         c.users_array = repo_model.get_users_js()
         c.users_groups_array = repo_model.get_users_groups_js()
+        choices, c.landing_revs = ScmModel().get_repo_landing_revs()
+        c.landing_revs_choices = choices
 
     def __load_data(self, repo_name=None):
         """
@@ -90,6 +92,9 @@ class ReposController(BaseController):
                       category='error')
 
             return redirect(url('repos'))
+
+        choices, c.landing_revs = ScmModel().get_repo_landing_revs(c.repo_info)
+        c.landing_revs_choices = choices
 
         c.default_user_id = User.get_by_username('default').user_id
         c.in_public_journal = UserFollowing.query()\
@@ -116,6 +121,7 @@ class ReposController(BaseController):
         c.repos_list = [('', _('--REMOVE FORK--'))]
         c.repos_list += [(x.repo_id, x.repo_name) for x in
                    Repository.query().order_by(Repository.repo_name).all()]
+
         return defaults
 
     @HasPermissionAllDecorator('hg.admin')
@@ -137,7 +143,8 @@ class ReposController(BaseController):
         self.__load_defaults()
         form_result = {}
         try:
-            form_result = RepoForm(repo_groups=c.repo_groups_choices)()\
+            form_result = RepoForm(repo_groups=c.repo_groups_choices,
+                                   landing_revs=c.landing_revs_choices)()\
                             .to_python(dict(request.POST))
             RepoModel().create(form_result, self.rhodecode_user)
             if form_result['clone_uri']:
@@ -205,7 +212,8 @@ class ReposController(BaseController):
         repo_model = RepoModel()
         changed_name = repo_name
         _form = RepoForm(edit=True, old_data={'repo_name': repo_name},
-                         repo_groups=c.repo_groups_choices)()
+                         repo_groups=c.repo_groups_choices,
+                         landing_revs=c.landing_revs_choices)()
         try:
             form_result = _form.to_python(dict(request.POST))
             repo = repo_model.update(repo_name, form_result)

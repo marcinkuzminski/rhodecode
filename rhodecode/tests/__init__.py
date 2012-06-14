@@ -10,6 +10,9 @@ setup-app`) and provides the base testing objects.
 import os
 import time
 import logging
+import datetime
+import hashlib
+import tempfile
 from os.path import join as jn
 
 from unittest import TestCase
@@ -27,6 +30,7 @@ from rhodecode.model.db import User
 
 import pylons.test
 
+
 os.environ['TZ'] = 'UTC'
 if not is_windows:
     time.tzset()
@@ -34,11 +38,14 @@ if not is_windows:
 log = logging.getLogger(__name__)
 
 __all__ = [
-    'environ', 'url', 'TestController', 'TESTS_TMP_PATH', 'HG_REPO',
-    'GIT_REPO', 'NEW_HG_REPO', 'NEW_GIT_REPO', 'HG_FORK', 'GIT_FORK',
-    'TEST_USER_ADMIN_LOGIN', 'TEST_USER_REGULAR_LOGIN', 'TEST_USER_REGULAR_PASS',
-    'TEST_USER_REGULAR_EMAIL', 'TEST_USER_REGULAR2_LOGIN',
-    'TEST_USER_REGULAR2_PASS', 'TEST_USER_REGULAR2_EMAIL'
+    'environ', 'url', 'get_new_dir', 'TestController', 'TESTS_TMP_PATH',
+    'HG_REPO', 'GIT_REPO', 'NEW_HG_REPO', 'NEW_GIT_REPO', 'HG_FORK',
+    'GIT_FORK', 'TEST_USER_ADMIN_LOGIN', 'TEST_USER_REGULAR_LOGIN',
+    'TEST_USER_REGULAR_PASS', 'TEST_USER_REGULAR_EMAIL',
+    'TEST_USER_REGULAR2_LOGIN', 'TEST_USER_REGULAR2_PASS',
+    'TEST_USER_REGULAR2_EMAIL', 'TEST_HG_REPO', 'TEST_HG_REPO_CLONE',
+    'TEST_HG_REPO_PULL', 'TEST_GIT_REPO', 'TEST_GIT_REPO_CLONE',
+    'TEST_GIT_REPO_PULL', 'HG_REMOTE_REPO', 'GIT_REMOTE_REPO', 'SCM_TESTS',
 ]
 
 # Invoke websetup with the current config file
@@ -73,6 +80,45 @@ NEW_GIT_REPO = 'vcs_test_git_new'
 HG_FORK = 'vcs_test_hg_fork'
 GIT_FORK = 'vcs_test_git_fork'
 
+## VCS
+SCM_TESTS = ['hg', 'git']
+uniq_suffix = str(int(time.mktime(datetime.datetime.now().timetuple())))
+
+GIT_REMOTE_REPO = 'git://github.com/codeinn/vcs.git'
+
+TEST_GIT_REPO = jn(TESTS_TMP_PATH, GIT_REPO)
+TEST_GIT_REPO_CLONE = jn(TESTS_TMP_PATH, 'vcsgitclone%s' % uniq_suffix)
+TEST_GIT_REPO_PULL = jn(TESTS_TMP_PATH, 'vcsgitpull%s' % uniq_suffix)
+
+
+HG_REMOTE_REPO = 'http://bitbucket.org/marcinkuzminski/vcs'
+
+TEST_HG_REPO = jn(TESTS_TMP_PATH, HG_REPO)
+TEST_HG_REPO_CLONE = jn(TESTS_TMP_PATH, 'vcshgclone%s' % uniq_suffix)
+TEST_HG_REPO_PULL = jn(TESTS_TMP_PATH, 'vcshgpull%s' % uniq_suffix)
+
+TEST_DIR = tempfile.gettempdir()
+TEST_REPO_PREFIX = 'vcs-test'
+
+# cached repos if any !
+# comment out to get some other repos from bb or github
+GIT_REMOTE_REPO = jn(TESTS_TMP_PATH, GIT_REPO)
+HG_REMOTE_REPO = jn(TESTS_TMP_PATH, HG_REPO)
+
+
+def get_new_dir(title):
+    """
+    Returns always new directory path.
+    """
+    from rhodecode.tests.vcs.utils import get_normalized_path
+    name = TEST_REPO_PREFIX
+    if title:
+        name = '-'.join((name, title))
+    hex = hashlib.sha1(str(time.time())).hexdigest()
+    name = '-'.join((name, hex))
+    path = os.path.join(TEST_DIR, name)
+    return get_normalized_path(path)
+
 
 class TestController(TestCase):
 
@@ -90,8 +136,8 @@ class TestController(TestCase):
                  password=TEST_USER_ADMIN_PASS):
         self._logged_username = username
         response = self.app.post(url(controller='login', action='index'),
-                                 {'username':username,
-                                  'password':password})
+                                 {'username': username,
+                                  'password': password})
 
         if 'invalid user name' in response.body:
             self.fail('could not login using %s %s' % (username, password))

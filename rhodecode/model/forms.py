@@ -653,7 +653,7 @@ def PasswordResetForm():
 
 
 def RepoForm(edit=False, old_data={}, supported_backends=BACKENDS.keys(),
-             repo_groups=[]):
+             repo_groups=[], landing_revs=[]):
     class _RepoForm(formencode.Schema):
         allow_extra_fields = True
         filter_extra_fields = False
@@ -662,10 +662,11 @@ def RepoForm(edit=False, old_data={}, supported_backends=BACKENDS.keys(),
         clone_uri = All(UnicodeString(strip=True, min=1, not_empty=False))
         repo_group = OneOf(repo_groups, hideList=True)
         repo_type = OneOf(supported_backends)
-        description = UnicodeString(strip=True, min=1, not_empty=True)
+        description = UnicodeString(strip=True, min=1, not_empty=False)
         private = StringBoolean(if_missing=False)
         enable_statistics = StringBoolean(if_missing=False)
         enable_downloads = StringBoolean(if_missing=False)
+        landing_rev = OneOf(landing_revs, hideList=True)
 
         if edit:
             #this is repo owner
@@ -697,7 +698,7 @@ def RepoForkForm(edit=False, old_data={}, supported_backends=BACKENDS.keys(),
 
 
 def RepoSettingsForm(edit=False, old_data={}, supported_backends=BACKENDS.keys(),
-                     repo_groups=[]):
+                     repo_groups=[], landing_revs=[]):
     class _RepoForm(formencode.Schema):
         allow_extra_fields = True
         filter_extra_fields = False
@@ -706,7 +707,7 @@ def RepoSettingsForm(edit=False, old_data={}, supported_backends=BACKENDS.keys()
         description = UnicodeString(strip=True, min=1, not_empty=True)
         repo_group = OneOf(repo_groups, hideList=True)
         private = StringBoolean(if_missing=False)
-
+        landing_rev = OneOf(landing_revs, hideList=True)
         chained_validators = [ValidRepoName(edit, old_data), ValidPerms(),
                               ValidSettings]
     return _RepoForm

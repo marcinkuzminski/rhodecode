@@ -62,6 +62,15 @@
                 </div>
             </div>
             <div class="field">
+                <div class="label">
+                    <label for="landing_rev">${_('Landing revision')}:</label>
+                </div>
+                <div class="input">
+                    ${h.select('landing_rev','',c.landing_revs,class_="medium")}
+                    <span class="help-block">${_('Default revision for files page, downloads, whoosh and readme')}</span>
+                </div>
+            </div>
+            <div class="field">
                 <div class="label label-textarea">
                     <label for="description">${_('Description')}:</label>
                 </div>
@@ -210,7 +219,7 @@
         </div>
         ${h.end_form()}
 
-        <h3>${_('Set as fork')}</h3>
+        <h3>${_('Set as fork of')}</h3>
         ${h.form(url('repo_as_fork', repo_name=c.repo_info.repo_name),method='put')}
         <div class="form">
            <div class="fields">
@@ -219,7 +228,7 @@
            </div>
                <div class="field" style="border:none;color:#888">
                <ul>
-                    <li>${_('''Manually set this repository as a fork of another''')}</li>
+                    <li>${_('''Manually set this repository as a fork of another from the list''')}</li>
                </ul>
                </div>
         </div>

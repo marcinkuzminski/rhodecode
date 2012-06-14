@@ -69,7 +69,7 @@
           ##${comment.comment_inline_form(cs)}
           ## diff block
           <h3 style="padding-top:8px;">${h.link_to('r%s:%s' % (cs.revision,h.short_id(cs.raw_id)),h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id))}</h3>
-          
+
           ${diff_block.diff_block(c.changes[cs.raw_id])}
           ##${comment.comments(cs)}
 

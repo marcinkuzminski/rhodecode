@@ -1,15 +1,27 @@
 <dl>
-	<dt style="padding-top:10px;font-size:16px">${_('History')}</dt>
+	<dt class="file_history">${_('History')}</dt>
 	<dd>
-		<div>
-		${h.form(h.url('files_diff_home',repo_name=c.repo_name,f_path=c.f_path),method='get')}
-		${h.hidden('diff2',c.file.changeset.raw_id)}
-		${h.select('diff1',c.file.changeset.raw_id,c.file_history)}
-		${h.submit('diff','diff to revision',class_="ui-btn")}
-		${h.submit('show_rev','show at revision',class_="ui-btn")}
-		${h.end_form()}
-		</div>
+        <div>
+    		<div style="float:left">
+    		${h.form(h.url('files_diff_home',repo_name=c.repo_name,f_path=c.f_path),method='get')}
+    		${h.hidden('diff2',c.file.changeset.raw_id)}
+    		${h.select('diff1',c.file.changeset.raw_id,c.file_history)}
+    		${h.submit('diff',_('diff to revision'),class_="ui-btn")}
+    		${h.submit('show_rev',_('show at revision'),class_="ui-btn")}
+    		${h.end_form()}
+    		</div>
+            <div class="file_author">
+                <div class="item">${h.literal(ungettext(u'%s author',u'%s authors',len(c.authors)) % ('<b>%s</b>' % len(c.authors))) }</div>
+                %for email, user in c.authors:
+                  <div class="contributor tooltip" style="float:left" title="${h.tooltip(user)}">
+                    <div class="gravatar" style="margin:1px"><img alt="gravatar" src="${h.gravatar_url(email, 20)}"/> </div>
+                  </div>
+                %endfor
+            </div>
+        </div>
+        <div style="clear:both"></div>
 	</dd>
+
 </dl>
 
 <div id="body" class="codeblock">

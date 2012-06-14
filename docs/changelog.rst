@@ -50,6 +50,7 @@ fixes
 - fixed issue #459. Changed the way of obtaining logger in reindex task.
 - fixed #453 added ID field in whoosh SCHEMA that solves the issue of
   reindexing modified files
+- fixes #481 rhodecode emails are sent without Date header 
 
 1.3.6 (**2012-05-17**)
 ----------------------

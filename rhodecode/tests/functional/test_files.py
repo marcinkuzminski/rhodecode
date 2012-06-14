@@ -186,6 +186,14 @@ class TestFilesController(TestController):
 
         response.mustcontain("""<span style="text-transform: uppercase;"><a href="#">branch: default</a></span>""")
 
+    def test_file_annotation_git(self):
+        self.log_user()
+        response = self.app.get(url(controller='files', action='index',
+                                    repo_name=GIT_REPO,
+                                    revision='master',
+                                    f_path='vcs/nodes.py',
+                                    annotate=True))
+
     def test_archival(self):
         self.log_user()
 
