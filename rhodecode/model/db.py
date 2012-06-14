@@ -428,8 +428,9 @@ class User(Base, BaseModel):
 class UserEmailMap(Base, BaseModel):
     __tablename__ = 'user_email_map'
     __table_args__ = (
+        Index('uem_email_idx', 'email'),
         UniqueConstraint('email'),
-        {'extend_existing': True, 'mysql_engine':'InnoDB',
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'}
     )
     __mapper_args__ = {}
@@ -438,7 +439,7 @@ class UserEmailMap(Base, BaseModel):
     user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=True, unique=None, default=None)
     _email = Column("email", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=False, default=None)
 
-    user = relationship('User')
+    user = relationship('User', lazy='joined')
 
     @validates('_email')
     def validate_email(self, key, email):
@@ -976,6 +977,7 @@ class RepoGroup(Base, BaseModel):
 class Permission(Base, BaseModel):
     __tablename__ = 'permissions'
     __table_args__ = (
+        Index('p_perm_name_idx', 'permission_name'),
         {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'},
     )
@@ -1323,6 +1325,7 @@ class CacheInvalidation(Base, BaseModel):
 class ChangesetComment(Base, BaseModel):
     __tablename__ = 'changeset_comments'
     __table_args__ = (
+        Index('cc_revision_idx', 'revision'),
         {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'},
     )
@@ -1362,6 +1365,8 @@ class ChangesetComment(Base, BaseModel):
 class ChangesetStatus(Base, BaseModel):
     __tablename__ = 'changeset_statuses'
     __table_args__ = (
+        Index('cs_revision_idx', 'revision'),
+        Index('cs_version_idx', 'version'),
         UniqueConstraint('repo_id', 'revision', 'version'),
         {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'}
@@ -1458,6 +1463,7 @@ class PullRequestReviewers(Base, BaseModel):
 class Notification(Base, BaseModel):
     __tablename__ = 'notifications'
     __table_args__ = (
+        Index('notification_type_idx', 'type'),
         {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'},
     )
