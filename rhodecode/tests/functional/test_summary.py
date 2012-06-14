@@ -92,7 +92,7 @@ class TestSummaryController(TestController):
         #repo type
         response.mustcontain("""<img style="margin-bottom:2px" class="icon" """
                         """title="Git repository" alt="Git """
-                        """repository" src="/images/icons/hgicon.png"/>""")
+                        """repository" src="/images/icons/giticon.png"/>""")
         response.mustcontain("""<img style="margin-bottom:2px" class="icon" """
                         """title="public repository" alt="public """
                         """repository" src="/images/icons/lock_open.png"/>""")
