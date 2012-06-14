@@ -43,6 +43,7 @@ from rhodecode.model.forms import RepoSettingsForm
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.db import RepoGroup
 from rhodecode.model.meta import Session
+from rhodecode.model.scm import ScmModel
 
 log = logging.getLogger(__name__)
 
@@ -60,6 +61,8 @@ class SettingsController(BaseRepoController):
         repo_model = RepoModel()
         c.users_array = repo_model.get_users_js()
         c.users_groups_array = repo_model.get_users_groups_js()
+        choices, c.landing_revs = ScmModel().get_repo_landing_revs()
+        c.landing_revs_choices = choices
 
     @HasRepoPermissionAllDecorator('repository.admin')
     def index(self, repo_name):
@@ -94,7 +97,8 @@ class SettingsController(BaseRepoController):
 
         _form = RepoSettingsForm(edit=True,
                                  old_data={'repo_name': repo_name},
-                                 repo_groups=c.repo_groups_choices)()
+                                 repo_groups=c.repo_groups_choices,
+                                 landing_revs=c.landing_revs_choices)()
         try:
             form_result = _form.to_python(dict(request.POST))
 

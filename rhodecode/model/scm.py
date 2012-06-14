@@ -482,24 +482,31 @@ class ScmModel(BaseModel):
         :param repo:
         :type repo:
         """
+
         hist_l = []
+        choices = []
         repo = self.__get_repo(repo)
         hist_l.append(['tip', _('latest tip')])
+        choices.append('tip')
         if not repo:
-            return hist_l
+            return choices, hist_l
 
         repo = repo.scm_instance
+
         branches_group = ([(k, k) for k, v in
                            repo.branches.iteritems()], _("Branches"))
         hist_l.append(branches_group)
+        choices.extend([x[0] for x in branches_group[0]])
 
         if repo.alias == 'hg':
             bookmarks_group = ([(k, k) for k, v in
                                 repo.bookmarks.iteritems()], _("Bookmarks"))
             hist_l.append(bookmarks_group)
+            choices.extend([x[0] for x in bookmarks_group[0]])
 
         tags_group = ([(k, k) for k, v in
                        repo.tags.iteritems()], _("Tags"))
         hist_l.append(tags_group)
+        choices.extend([x[0] for x in tags_group[0]])
 
-        return hist_l
+        return choices, hist_l
