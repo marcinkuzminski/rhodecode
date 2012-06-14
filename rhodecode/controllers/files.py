@@ -182,7 +182,7 @@ class FilesController(BaseRepoController):
 
         response.content_type = file_node.mimetype
         return file_node.content
-    
+
     @LoginRequired()
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
                                    'repository.admin')
