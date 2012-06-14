@@ -2252,6 +2252,20 @@ h3.files_location {
 	padding: 5px !important;
 }
 
+.file_history{
+	padding-top:10px;
+	font-size:16px;
+}
+.file_author{
+	float: left;
+}
+
+.file_author .item{
+	float:left;
+	padding:5px;
+	color: #888;
+}
+
 .tablerow0 {
 	background-color: #F8F8F8;
 }

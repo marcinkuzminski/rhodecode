@@ -154,9 +154,14 @@ class FilesController(BaseRepoController):
             c.file = c.changeset.get_node(f_path)
 
             if c.file.is_file():
-                c.file_history = self._get_node_history(c.changeset, f_path)
+                _hist = c.changeset.get_file_history(f_path)
+                c.file_history = self._get_node_history(c.changeset, f_path,
+                                                        _hist)
+                c.authors = []
+                for a in set([x.author for x in _hist]):
+                    c.authors.append((h.email(a), h.person(a)))
             else:
-                c.file_history = []
+                c.authors = c.file_history = []
         except RepositoryError, e:
             h.flash(str(e), category='warning')
             redirect(h.url('files_home', repo_name=repo_name,
@@ -454,8 +459,9 @@ class FilesController(BaseRepoController):
 
         return render('files/file_diff.html')
 
-    def _get_node_history(self, cs, f_path):
-        changesets = cs.get_file_history(f_path)
+    def _get_node_history(self, cs, f_path, changesets=None):
+        if changesets is None:
+            changesets = cs.get_file_history(f_path)
         hist_l = []
 
         changesets_group = ([], _("Changesets"))
