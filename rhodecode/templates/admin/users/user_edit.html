@@ -162,7 +162,7 @@
     <div id="perms" class="table">
            %for section in sorted(c.perm_user.permissions.keys()):
               <div class="perms_section_head">${section.replace("_"," ").capitalize()}</div>
-  
+
               <div id='tbl_list_wrap_${section}' class="yui-skin-sam">
                <table id="tbl_list_${section}">
                 <thead>
@@ -202,6 +202,6 @@
                </table>
               </div>
            %endfor
-    </div>    
+    </div>
 </div>
 </%def>

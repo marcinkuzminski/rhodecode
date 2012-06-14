@@ -329,7 +329,7 @@ class GitRepository(BaseRepository):
     @LazyProperty
     def _parsed_refs(self):
         refs = self._repo.get_refs()
-        keys = [('refs/heads/', 'H'), 
+        keys = [('refs/heads/', 'H'),
                 ('refs/remotes/origin/', 'RH'),
                 ('refs/tags/', 'T')]
         _refs = {}
