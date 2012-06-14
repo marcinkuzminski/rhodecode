@@ -460,8 +460,9 @@ class LoginRequired(object):
         loc = "%s:%s" % (cls.__class__.__name__, func.__name__)
         log.debug('Checking if %s is authenticated @ %s' % (user.username, loc))
         if user.is_authenticated or api_access_ok:
-            log.info('user %s is authenticated and granted access to %s' % (
-                       user.username, loc)
+            reason = 'RegularAuth' if user.is_authenticated else 'APIAuth'
+            log.info('user %s is authenticated and granted access to %s '
+                     'using %s' % (user.username, loc, reason)
             )
             return func(*fargs, **fkwargs)
         else:
