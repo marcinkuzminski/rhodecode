@@ -120,7 +120,7 @@ class ChangesetStatusModel(BaseModel):
 
         if revision:
             new_status = _create_status(user=user, repo=repo, status=status,
-                           comment=comment, revision=revision, 
+                           comment=comment, revision=revision,
                            pull_request=None)
             self.sa.add(new_status)
             return new_status

@@ -28,7 +28,7 @@ from rhodecode import is_windows
 from rhodecode.model.meta import Session
 from rhodecode.model.db import User
 from rhodecode.tests.nose_parametrized import parameterized
- 
+
 import pylons.test
 
 

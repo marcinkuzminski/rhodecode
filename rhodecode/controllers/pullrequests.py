@@ -62,7 +62,7 @@ class PullrequestsController(BaseRepoController):
                          k, v in repo.branches.iteritems()], _("Branches"))
         bookmarks_group = ([('book:%s:%s' % (k, v), k) for
                          k, v in repo.bookmarks.iteritems()], _("Bookmarks"))
-        tags_group = ([('tag:%s:%s' % (k, v), k) for 
+        tags_group = ([('tag:%s:%s' % (k, v), k) for
                          k, v in repo.tags.iteritems()], _("Tags"))
 
         hist_l.append(bookmarks_group)
@@ -242,7 +242,7 @@ class PullrequestsController(BaseRepoController):
             pull_request=pull_request_id,
             f_path=request.POST.get('f_path'),
             line_no=request.POST.get('line'),
-            status_change=(ChangesetStatus.get_status_lbl(status) 
+            status_change=(ChangesetStatus.get_status_lbl(status)
                            if status and change_status else None)
         )
 

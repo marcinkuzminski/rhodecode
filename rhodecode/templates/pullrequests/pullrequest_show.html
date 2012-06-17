@@ -19,20 +19,20 @@
     <div class="title">
         ${self.breadcrumbs()}
     </div>
-    
+
     <h3>${_('Title')}: ${c.pull_request.title}</h3>
     <div class="changeset-status-container" style="float:left;padding:0px 20px 20px 20px">
         %if c.current_changeset_status:
           <div title="${_('Changeset status')}" class="changeset-status-lbl">[${h.changeset_status_lbl(c.current_changeset_status)}]</div>
           <div class="changeset-status-ico"><img src="${h.url('/images/icons/flag_status_%s.png' % c.current_changeset_status)}" /></div>
         %endif
-    </div>    
+    </div>
     <div style="padding:4px">
       <div>${h.fmt_date(c.pull_request.created_on)}</div>
     </div>
-    
+
     ##DIFF
-    
+
     <div class="table">
         <div id="body" class="diffblock">
             <div style="white-space:pre-wrap;padding:5px">${h.literal(c.pull_request.description)}</div>
@@ -72,7 +72,7 @@
     ## render comments main comments form and it status
     ${comment.comments(h.url('pullrequest_comment', repo_name=c.repo_name, pull_request_id=c.pull_request.pull_request_id),
                        c.current_changeset_status)}
-    
+
 </div>
 
 <script type="text/javascript">

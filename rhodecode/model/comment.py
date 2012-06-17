@@ -59,7 +59,7 @@ class ChangesetCommentsModel(BaseModel):
                f_path=None, line_no=None, status_change=None):
         """
         Creates new comment for changeset or pull request.
-        IF status_change is not none this comment is associated with a 
+        IF status_change is not none this comment is associated with a
         status change of changeset or changesets associated with pull request
 
         :param text:

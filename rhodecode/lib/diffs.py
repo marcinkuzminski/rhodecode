@@ -566,7 +566,7 @@ class InMemoryBundleRepo(bundlerepository):
 
 def differ(org_repo, org_ref, other_repo, other_ref, discovery_data=None):
     """
-    General differ between branches, bookmarks or separate but releated 
+    General differ between branches, bookmarks or separate but releated
     repositories
 
     :param org_repo:

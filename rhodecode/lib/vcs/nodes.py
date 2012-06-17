@@ -432,7 +432,7 @@ class RemovedFileNode(FileNode):
     RemovedFileNodeError.
     """
     ALLOWED_ATTRIBUTES = [
-        'name', 'path', 'state', 'is_root', 'is_file', 'is_dir', 'kind', 
+        'name', 'path', 'state', 'is_root', 'is_file', 'is_dir', 'kind',
         'added', 'changed', 'not_changed', 'removed'
     ]
 

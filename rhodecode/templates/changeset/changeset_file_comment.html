@@ -18,9 +18,9 @@
            <div  style="float:left" class="changeset-status-container">
              <div style="float:left;padding:0px 2px 0px 2px"><span style="font-size: 18px;">&rsaquo;</span></div>
              <div title="${_('Changeset status')}" class="changeset-status-lbl"> ${co.status_change.status_lbl}</div>
-             <div class="changeset-status-ico"><img src="${h.url(str('/images/icons/flag_status_%s.png' % co.status_change.status))}" /></div>             
+             <div class="changeset-status-ico"><img src="${h.url(str('/images/icons/flag_status_%s.png' % co.status_change.status))}" /></div>
            </div>
-        %endif      
+        %endif
       %if h.HasPermissionAny('hg.admin', 'repository.admin')() or co.author.user_id == c.rhodecode_user.user_id:
         <div class="buttons">
           <span onClick="deleteComment(${co.comment_id})" class="delete-comment ui-btn">${_('Delete')}</span>
@@ -117,15 +117,15 @@
           		_('Use @username inside this text to send notification to this RhodeCode user')))|n}
                 | <span class="tooltip" title="${_('Check this to change current status of code-review for this changeset')}"> ${_('change status')}
                   <input style="vertical-align: bottom;margin-bottom:-2px" id="show_changeset_status_box" type="checkbox" name="change_changeset_status" />
-                  </span> 
+                  </span>
             </div>
             <div id="status_block_container" class="status-block" style="display:none">
                 %for status,lbl in c.changeset_statuses:
                     <div class="">
                         <img src="${h.url('/images/icons/flag_status_%s.png' % status)}" /> <input ${'checked="checked"' if status == cur_status else ''}" type="radio" name="changeset_status" value="${status}"> <label>${lbl}</label>
-                    </div>                    
+                    </div>
                 %endfor
-            </div>                 
+            </div>
             <div class="mentions-container" id="mentions_container"></div>
              ${h.textarea('text')}
         </div>
@@ -139,17 +139,17 @@
 <script>
 YUE.onDOMReady(function () {
    MentionsAutoComplete('text', 'mentions_container', _USERS_AC_DATA, _GROUPS_AC_DATA);
-   
+
    // changeset status box listener
    YUE.on(YUD.get('show_changeset_status_box'),'change',function(e){
        if(e.currentTarget.checked){
-           YUD.setStyle('status_block_container','display','');  
+           YUD.setStyle('status_block_container','display','');
        }
        else{
            YUD.setStyle('status_block_container','display','none');
        }
    })
-   
+
 });
 </script>
 </%def>
