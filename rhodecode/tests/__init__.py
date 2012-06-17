@@ -27,7 +27,8 @@ from webtest import TestApp
 from rhodecode import is_windows
 from rhodecode.model.meta import Session
 from rhodecode.model.db import User
-
+from rhodecode.tests.nose_parametrized import parameterized
+ 
 import pylons.test
 
 
@@ -38,9 +39,9 @@ if not is_windows:
 log = logging.getLogger(__name__)
 
 __all__ = [
-    'environ', 'url', 'get_new_dir', 'TestController', 'TESTS_TMP_PATH',
-    'HG_REPO', 'GIT_REPO', 'NEW_HG_REPO', 'NEW_GIT_REPO', 'HG_FORK',
-    'GIT_FORK', 'TEST_USER_ADMIN_LOGIN', 'TEST_USER_REGULAR_LOGIN',
+    'parameterized', 'environ', 'url', 'get_new_dir', 'TestController',
+    'TESTS_TMP_PATH', 'HG_REPO', 'GIT_REPO', 'NEW_HG_REPO', 'NEW_GIT_REPO',
+    'HG_FORK', 'GIT_FORK', 'TEST_USER_ADMIN_LOGIN', 'TEST_USER_REGULAR_LOGIN',
     'TEST_USER_REGULAR_PASS', 'TEST_USER_REGULAR_EMAIL',
     'TEST_USER_REGULAR2_LOGIN', 'TEST_USER_REGULAR2_PASS',
     'TEST_USER_REGULAR2_EMAIL', 'TEST_HG_REPO', 'TEST_HG_REPO_CLONE',
@@ -54,6 +55,7 @@ __all__ = [
 ##RUNNING DESIRED TESTS
 # nosetests -x rhodecode.tests.functional.test_admin_settings:TestSettingsController.test_my_account
 # nosetests --pdb --pdb-failures
+# nosetests --with-coverage --cover-package=rhodecode.model.validators rhodecode.tests.test_validators
 environ = {}
 
 #SOME GLOBALS FOR TESTS

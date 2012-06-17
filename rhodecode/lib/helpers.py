@@ -51,6 +51,20 @@ from rhodecode.model.db import URL_SEP
 log = logging.getLogger(__name__)
 
 
+html_escape_table = {
+    "&": "&amp;",
+    '"': "&quot;",
+    "'": "&apos;",
+    ">": "&gt;",
+    "<": "&lt;",
+}
+
+
+def html_escape(text):
+    """Produce entities within text."""
+    return "".join(html_escape_table.get(c,c) for c in text)
+
+
 def shorter(text, size=20):
     postfix = '...'
     if len(text) > size:
