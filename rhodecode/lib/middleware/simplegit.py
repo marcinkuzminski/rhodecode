@@ -222,7 +222,7 @@ class SimpleGit(BaseVCSController):
 
         from rhodecode.lib.middleware.pygrack import make_wsgi_app
         app = make_wsgi_app(
-            repo_root=os.path.dirname(repo_path),
+            repo_root=safe_str(self.basepath),
             repo_name=repo_name,
             username=username,
         )
