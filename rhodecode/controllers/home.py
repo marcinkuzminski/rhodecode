@@ -26,7 +26,7 @@
 import logging
 
 from pylons import tmpl_context as c, request
-from paste.httpexceptions import HTTPBadRequest
+from webob.exc import HTTPBadRequest
 
 from rhodecode.lib.auth import LoginRequired
 from rhodecode.lib.base import BaseController, render

@@ -247,6 +247,14 @@
                     <span class="short">${c.repository_forks}</span>
                     </a>
                 </li>
+                <li>
+                    <a class="menu_link" title="${_('Pull requests')}" href="${h.url('pullrequest_show_all',repo_name=c.repo_name)}">
+                    <span class="icon_short">
+                        <img src="${h.url('/images/icons/arrow_join.png')}" alt="${_('Pull requests')}" />
+                    </span>
+                    <span class="short">${c.repository_pull_requests}</span>
+                    </a>
+                </li>
                 ${usermenu()}
 	        </ul>
             <script type="text/javascript">

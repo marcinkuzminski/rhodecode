@@ -24,14 +24,15 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
+import binascii
 
 from pylons import tmpl_context as c
-import binascii
 
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.compat import OrderedDict
 from rhodecode.lib.utils2 import safe_unicode
+
 log = logging.getLogger(__name__)
 
 

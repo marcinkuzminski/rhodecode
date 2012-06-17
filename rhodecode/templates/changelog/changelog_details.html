@@ -1,3 +1,5 @@
+## small box that displays changed/added/removed details fetched by AJAX
+
 % if len(c.cs.affected_files) <= c.affected_files_cut_off:
 <span class="removed tooltip" title="<b>${h.tooltip(_('removed'))}</b>${h.changed_tooltip(c.cs.removed)}">${len(c.cs.removed)}</span>
 <span class="changed tooltip" title="<b>${h.tooltip(_('changed'))}</b>${h.changed_tooltip(c.cs.changed)}">${len(c.cs.changed)}</span>

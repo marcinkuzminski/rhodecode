@@ -204,7 +204,7 @@ class BaseRepoController(BaseController):
         super(BaseRepoController, self).__before__()
         if c.repo_name:
 
-            c.rhodecode_db_repo = Repository.get_by_repo_name(c.repo_name)
+            dbr = c.rhodecode_db_repo = Repository.get_by_repo_name(c.repo_name)
             c.rhodecode_repo = c.rhodecode_db_repo.scm_instance
 
             if c.rhodecode_repo is None:
@@ -213,5 +213,7 @@ class BaseRepoController(BaseController):
 
                 redirect(url('home'))
 
-            c.repository_followers = self.scm_model.get_followers(c.repo_name)
-            c.repository_forks = self.scm_model.get_forks(c.repo_name)
+            # some globals counter for menu
+            c.repository_followers = self.scm_model.get_followers(dbr)
+            c.repository_forks = self.scm_model.get_forks(dbr)
+            c.repository_pull_requests = self.scm_model.get_pull_requests(dbr)

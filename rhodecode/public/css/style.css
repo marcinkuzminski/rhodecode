@@ -2352,7 +2352,7 @@ h3.files_location {
     padding: 2px 0px 2px 0px;
 }
 
-.cs_files .cs_added {
+.cs_files .cs_added,.cs_files .cs_A {
 	background: url("../images/icons/page_white_add.png") no-repeat scroll
 		3px;
 	height: 16px;
@@ -2361,7 +2361,7 @@ h3.files_location {
 	text-align: left;
 }
 
-.cs_files .cs_changed {
+.cs_files .cs_changed,.cs_files .cs_M {
 	background: url("../images/icons/page_white_edit.png") no-repeat scroll
 		3px;
 	height: 16px;
@@ -2370,7 +2370,7 @@ h3.files_location {
 	text-align: left;
 }
 
-.cs_files .cs_removed {
+.cs_files .cs_removed,.cs_files .cs_D {
 	background: url("../images/icons/page_white_delete.png") no-repeat
 		scroll 3px;
 	height: 16px;
@@ -2466,6 +2466,31 @@ h3.files_location {
     font-weight: bold !important;
 }
 
+.changeset-status-container{
+    padding-right: 5px;
+    margin-top:1px;
+    float:right;
+    height:14px;
+}
+.code-header .changeset-status-container{
+	float:left;
+	padding:2px 0px 0px 2px;
+}
+.changeset-status-container .changeset-status-lbl{
+	color: rgb(136, 136, 136);
+    float: left;
+    padding: 3px 4px 0px 0px
+}
+.code-header .changeset-status-container .changeset-status-lbl{
+    float: left;
+    padding: 0px 4px 0px 0px;   
+}
+.changeset-status-container .changeset-status-ico{
+    float: left;
+}
+.code-header .changeset-status-container .changeset-status-ico, .container .changeset-status-ico{
+    float: left;
+}
 .right .comments-container{
 	padding-right: 5px;
 	margin-top:1px;
@@ -3713,6 +3738,21 @@ div#legend_container table td,div#legend_choices table td {
 	padding:0px 0px 0px 10px;
 }
 
+.emails_wrap{
+	padding: 0px 20px;
+}
+
+.emails_wrap .email_entry{
+    height: 30px;
+    padding:0px 0px 0px 10px;
+}
+.emails_wrap .email_entry .email{
+	float: left
+}
+.emails_wrap .email_entry .email_action{
+	float: left
+}
+
 /*README STYLE*/
 
 div.readme {
@@ -3917,6 +3957,7 @@ div.rst-block  pre {
     background: #f8f8f8;
     padding: 4px;
     border-bottom: 1px solid #ddd;
+    height: 18px;
 }
 
 .comments .comment .meta img {
@@ -3925,9 +3966,13 @@ div.rst-block  pre {
 
 .comments .comment .meta .user {
     font-weight: bold;
+    float: left;
+    padding: 4px 2px 2px 2px;
 }
 
 .comments .comment .meta .date {
+	float: left;
+	padding:4px 4px 0px 4px;
 }
 
 .comments .comment .text {
@@ -3945,6 +3990,11 @@ div.rst-block  pre {
 }
 
 /** comment form **/
+
+.status-block{
+    height:80px;
+    clear:both	
+}
 
 .comment-form .clearfix{
 	background: #EEE;
@@ -4115,6 +4165,7 @@ form.comment-inline-form {
     background: #f8f8f8;
     padding: 4px;
     border-bottom: 1px solid #ddd;
+    height: 20px;
 }
 
 .inline-comments .comment .meta img {
@@ -4123,9 +4174,13 @@ form.comment-inline-form {
 
 .inline-comments .comment .meta .user {
     font-weight: bold;
+    float:left;
+    padding: 3px;
 }
 
 .inline-comments .comment .meta .date {
+    float:left;
+    padding: 3px;
 }
 
 .inline-comments .comment .text {

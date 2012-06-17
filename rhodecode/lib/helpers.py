@@ -45,9 +45,24 @@ from rhodecode.lib.markup_renderer import MarkupRenderer
 from rhodecode.lib.vcs.exceptions import ChangesetDoesNotExistError
 from rhodecode.lib.vcs.backends.base import BaseChangeset
 from rhodecode.config.conf import DATE_FORMAT, DATETIME_FORMAT
+from rhodecode.model.changeset_status import ChangesetStatusModel
 from rhodecode.model.db import URL_SEP
 
 log = logging.getLogger(__name__)
+
+
+html_escape_table = {
+    "&": "&amp;",
+    '"': "&quot;",
+    "'": "&apos;",
+    ">": "&gt;",
+    "<": "&lt;",
+}
+
+
+def html_escape(text):
+    """Produce entities within text."""
+    return "".join(html_escape_table.get(c,c) for c in text)
 
 
 def shorter(text, size=20):
@@ -340,7 +355,7 @@ flash = _Flash()
 #==============================================================================
 from rhodecode.lib.vcs.utils import author_name, author_email
 from rhodecode.lib.utils2 import credentials_filter, age as _age
-from rhodecode.model.db import User
+from rhodecode.model.db import User, ChangesetStatus
 
 age = lambda  x: _age(x)
 capitalize = lambda x: x.capitalize()
@@ -982,3 +997,11 @@ def rst_w_mentions(source):
     """
     return literal('<div class="rst-block">%s</div>' %
                    MarkupRenderer.rst_with_mentions(source))
+
+
+def changeset_status(repo, revision):
+    return ChangesetStatusModel().get_status(repo, revision)
+
+
+def changeset_status_lbl(changeset_status):
+    return dict(ChangesetStatus.STATUSES).get(changeset_status)

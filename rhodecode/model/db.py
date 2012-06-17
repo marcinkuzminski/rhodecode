@@ -33,7 +33,10 @@ from collections import defaultdict
 from sqlalchemy import *
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship, joinedload, class_mapper, validates
+from sqlalchemy.exc import DatabaseError
 from beaker.cache import cache_region, region_invalidate
+
+from pylons.i18n.translation import lazy_ugettext as _
 
 from rhodecode.lib.vcs import get_backend
 from rhodecode.lib.vcs.utils.helpers import get_scm
@@ -44,6 +47,7 @@ from rhodecode.lib.utils2 import str2bool, safe_str, get_changeset_safe, \
     safe_unicode
 from rhodecode.lib.compat import json
 from rhodecode.lib.caching_query import FromCache
+
 from rhodecode.model.meta import Base, Session
 
 
@@ -384,8 +388,23 @@ class User(Base, BaseModel):
 
         if cache:
             q = q.options(FromCache("sql_cache_short",
-                                    "get_api_key_%s" % email))
-        return q.scalar()
+                                    "get_email_key_%s" % email))
+
+        ret = q.scalar()
+        if ret is None:
+            q = UserEmailMap.query()
+            # try fetching in alternate email map
+            if case_insensitive:
+                q = q.filter(UserEmailMap.email.ilike(email))
+            else:
+                q = q.filter(UserEmailMap.email == email)
+            q = q.options(joinedload(UserEmailMap.user))
+            if cache:
+                q = q.options(FromCache("sql_cache_short",
+                                        "get_email_map_key_%s" % email))
+            ret = getattr(q.scalar(), 'user', None)
+
+        return ret
 
     def update_lastlogin(self):
         """Update user lastlogin"""
@@ -404,6 +423,39 @@ class User(Base, BaseModel):
             short_contact=self.short_contact,
             full_contact=self.full_contact
         )
+
+
+class UserEmailMap(Base, BaseModel):
+    __tablename__ = 'user_email_map'
+    __table_args__ = (
+        Index('uem_email_idx', 'email'),
+        UniqueConstraint('email'),
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
+         'mysql_charset': 'utf8'}
+    )
+    __mapper_args__ = {}
+
+    email_id = Column("email_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
+    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=True, unique=None, default=None)
+    _email = Column("email", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=False, default=None)
+
+    user = relationship('User', lazy='joined')
+
+    @validates('_email')
+    def validate_email(self, key, email):
+        # check if this email is not main one
+        main_email = Session.query(User).filter(User.email == email).scalar()
+        if main_email is not None:
+            raise AttributeError('email %s is present is user table' % email)
+        return email
+
+    @hybrid_property
+    def email(self):
+        return self._email
+
+    @email.setter
+    def email(self, val):
+        self._email = val.lower() if val else None
 
 
 class UserLog(Base, BaseModel):
@@ -522,6 +574,7 @@ class Repository(Base, BaseModel):
     followers = relationship('UserFollowing', primaryjoin='UserFollowing.follows_repo_id==Repository.repo_id', cascade='all')
 
     logs = relationship('UserLog')
+    comments = relationship('ChangesetComment')
 
     def __unicode__(self):
         return u"<%s('%s:%s')>" % (self.__class__.__name__, self.repo_id,
@@ -559,6 +612,20 @@ class Repository(Base, BaseModel):
             .filter(RhodeCodeUi.ui_key == cls.url_sep())
         q = q.options(FromCache("sql_cache_short", "repository_repo_path"))
         return q.one().ui_value
+
+    @property
+    def forks(self):
+        """
+        Return forks of this repo
+        """
+        return Repository.get_repo_forks(self.repo_id)
+
+    @property
+    def parent(self):
+        """
+        Returns fork parent
+        """
+        return self.fork
 
     @property
     def just_name(self):
@@ -684,6 +751,29 @@ class Repository(Base, BaseModel):
         grouped = defaultdict(list)
         for cmt in cmts.all():
             grouped[cmt.revision].append(cmt)
+        return grouped
+
+    def statuses(self, revisions=None):
+        """
+        Returns statuses for this repository
+
+        :param revisions: list of revisions to get statuses for
+        :type revisions: list
+        """
+
+        statuses = ChangesetStatus.query()\
+            .filter(ChangesetStatus.repo == self)\
+            .filter(ChangesetStatus.version == 0)
+        if revisions:
+            statuses = statuses.filter(ChangesetStatus.revision.in_(revisions))
+        grouped = {}
+        for stat in statuses.all():
+            pr_id = pr_repo = None
+            if stat.pull_request:
+                pr_id = stat.pull_request.pull_request_id
+                pr_repo = stat.pull_request.other_repo.repo_name
+            grouped[stat.revision] = [str(stat.status), stat.status_lbl,
+                                      pr_id, pr_repo]
         return grouped
 
     #==========================================================================
@@ -887,6 +977,7 @@ class RepoGroup(Base, BaseModel):
 class Permission(Base, BaseModel):
     __tablename__ = 'permissions'
     __table_args__ = (
+        Index('p_perm_name_idx', 'permission_name'),
         {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'},
     )
@@ -1234,12 +1325,14 @@ class CacheInvalidation(Base, BaseModel):
 class ChangesetComment(Base, BaseModel):
     __tablename__ = 'changeset_comments'
     __table_args__ = (
+        Index('cc_revision_idx', 'revision'),
         {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'},
     )
     comment_id = Column('comment_id', Integer(), nullable=False, primary_key=True)
     repo_id = Column('repo_id', Integer(), ForeignKey('repositories.repo_id'), nullable=False)
-    revision = Column('revision', String(40), nullable=False)
+    revision = Column('revision', String(40), nullable=True)
+    pull_request_id = Column("pull_request_id", Integer(), ForeignKey('pull_requests.pull_request_id'), nullable=True)
     line_no = Column('line_no', Unicode(10), nullable=True)
     f_path = Column('f_path', Unicode(1000), nullable=True)
     user_id = Column('user_id', Integer(), ForeignKey('users.user_id'), nullable=False)
@@ -1248,24 +1341,129 @@ class ChangesetComment(Base, BaseModel):
 
     author = relationship('User', lazy='joined')
     repo = relationship('Repository')
+    status_change = relationship('ChangesetStatus', uselist=False)
+    pull_request = relationship('PullRequest', lazy='joined')
 
     @classmethod
-    def get_users(cls, revision):
+    def get_users(cls, revision=None, pull_request_id=None):
         """
-        Returns user associated with this changesetComment. ie those
+        Returns user associated with this ChangesetComment. ie those
         who actually commented
 
         :param cls:
         :param revision:
         """
-        return Session.query(User)\
-                .filter(cls.revision == revision)\
-                .join(ChangesetComment.author).all()
+        q = Session.query(User)\
+                .join(ChangesetComment.author)
+        if revision:
+            q = q.filter(cls.revision == revision)
+        elif pull_request_id:
+            q = q.filter(cls.pull_request_id == pull_request_id)
+        return q.all()
+
+
+class ChangesetStatus(Base, BaseModel):
+    __tablename__ = 'changeset_statuses'
+    __table_args__ = (
+        Index('cs_revision_idx', 'revision'),
+        Index('cs_version_idx', 'version'),
+        UniqueConstraint('repo_id', 'revision', 'version'),
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
+         'mysql_charset': 'utf8'}
+    )
+
+    STATUSES = [
+        ('not_reviewed', _("Not Reviewed")),  # (no icon) and default
+        ('approved', _("Approved")),
+        ('rejected', _("Rejected")),
+        ('under_review', _("Under Review")),
+    ]
+    DEFAULT = STATUSES[0][0]
+
+    changeset_status_id = Column('changeset_status_id', Integer(), nullable=False, primary_key=True)
+    repo_id = Column('repo_id', Integer(), ForeignKey('repositories.repo_id'), nullable=False)
+    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None)
+    revision = Column('revision', String(40), nullable=False)
+    status = Column('status', String(128), nullable=False, default=DEFAULT)
+    changeset_comment_id = Column('changeset_comment_id', Integer(), ForeignKey('changeset_comments.comment_id'))
+    modified_at = Column('modified_at', DateTime(), nullable=False, default=datetime.datetime.now)
+    version = Column('version', Integer(), nullable=False, default=0)
+    pull_request_id = Column("pull_request_id", Integer(), ForeignKey('pull_requests.pull_request_id'), nullable=True)
+
+    author = relationship('User', lazy='joined')
+    repo = relationship('Repository')
+    comment = relationship('ChangesetComment', lazy='joined')
+    pull_request = relationship('PullRequest', lazy='joined')
+
+    @classmethod
+    def get_status_lbl(cls, value):
+        return dict(cls.STATUSES).get(value)
+
+    @property
+    def status_lbl(self):
+        return ChangesetStatus.get_status_lbl(self.status)
+
+
+class PullRequest(Base, BaseModel):
+    __tablename__ = 'pull_requests'
+    __table_args__ = (
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
+         'mysql_charset': 'utf8'},
+    )
+
+    pull_request_id = Column('pull_request_id', Integer(), nullable=False, primary_key=True)
+    title = Column('title', Unicode(256), nullable=True)
+    description = Column('description', Unicode(10240), nullable=True)
+    created_on = Column('created_on', DateTime(timezone=False), nullable=False, default=datetime.datetime.now)
+    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None)
+    _revisions = Column('revisions', UnicodeText(20500))  # 500 revisions max
+    org_repo_id = Column('org_repo_id', Integer(), ForeignKey('repositories.repo_id'), nullable=False)
+    org_ref = Column('org_ref', Unicode(256), nullable=False)
+    other_repo_id = Column('other_repo_id', Integer(), ForeignKey('repositories.repo_id'), nullable=False)
+    other_ref = Column('other_ref', Unicode(256), nullable=False)
+
+    @hybrid_property
+    def revisions(self):
+        return self._revisions.split(':')
+
+    @revisions.setter
+    def revisions(self, val):
+        self._revisions = ':'.join(val)
+
+    author = relationship('User', lazy='joined')
+    reviewers = relationship('PullRequestReviewers')
+    org_repo = relationship('Repository', primaryjoin='PullRequest.org_repo_id==Repository.repo_id')
+    other_repo = relationship('Repository', primaryjoin='PullRequest.other_repo_id==Repository.repo_id')
+
+    def __json__(self):
+        return dict(
+          revisions=self.revisions
+        )
+
+
+class PullRequestReviewers(Base, BaseModel):
+    __tablename__ = 'pull_request_reviewers'
+    __table_args__ = (
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
+         'mysql_charset': 'utf8'},
+    )
+
+    def __init__(self, user=None, pull_request=None):
+        self.user = user
+        self.pull_request = pull_request
+
+    pull_requests_reviewers_id = Column('pull_requests_reviewers_id', Integer(), nullable=False, primary_key=True)
+    pull_request_id = Column("pull_request_id", Integer(), ForeignKey('pull_requests.pull_request_id'), nullable=False)
+    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=True)
+
+    user = relationship('User')
+    pull_request = relationship('PullRequest')
 
 
 class Notification(Base, BaseModel):
     __tablename__ = 'notifications'
     __table_args__ = (
+        Index('notification_type_idx', 'type'),
         {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'},
     )
@@ -1274,6 +1472,8 @@ class Notification(Base, BaseModel):
     TYPE_MESSAGE = u'message'
     TYPE_MENTION = u'mention'
     TYPE_REGISTRATION = u'registration'
+    TYPE_PULL_REQUEST = u'pull_request'
+    TYPE_PULL_REQUEST_COMMENT = u'pull_request_comment'
 
     notification_id = Column('notification_id', Integer(), nullable=False, primary_key=True)
     subject = Column('subject', Unicode(512), nullable=True)

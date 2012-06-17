@@ -1,0 +1,27 @@
+## Changesets table !
+<div class="container">
+  <table class="compare_view_commits noborder">
+  %if not c.cs_ranges:
+    <tr><td>${_('No changesets')}</td></tr>
+  %else:
+    %for cnt, cs in enumerate(c.cs_ranges):
+        <tr>
+        <td><div class="gravatar"><img alt="gravatar" src="${h.gravatar_url(h.email(cs.author),14)}"/></div></td>
+        <td>
+          %if cs.raw_id in c.statuses:
+            <div title="${c.statuses[cs.raw_id][1]}" class="changeset-status-ico"><img src="${h.url('/images/icons/flag_status_%s.png' % c.statuses[cs.raw_id][0])}" /></div>
+          %endif
+        </td>
+        <td>${h.link_to('r%s:%s' % (cs.revision,h.short_id(cs.raw_id)),h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id))}
+        %if c.as_form:
+          ${h.hidden('revisions',cs.raw_id)}
+        %endif
+        </td>
+        <td><div class="author">${h.person(cs.author)}</div></td>
+        <td><span class="tooltip" title="${h.age(cs.date)}">${cs.date}</span></td>
+        <td><div class="message">${h.urlify_commit(h.wrap_paragraphs(cs.message),c.repo_name)}</div></td>
+        </tr>
+    %endfor
+  %endif
+  </table>
+</div>

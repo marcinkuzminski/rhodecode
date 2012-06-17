@@ -7,6 +7,7 @@
             <th class="left">${_('date')}</th>
             <th class="left">${_('author')}</th>
             <th class="left">${_('revision')}</th>
+            <th class="left">${_('compare')}</th>
         </tr>
       </thead>
 		%for cnt,branch in enumerate(c.repo_branches.items()):
@@ -23,6 +24,10 @@
                 <div>
                     <pre><a href="${h.url('files_home',repo_name=c.repo_name,revision=branch[1].raw_id)}">r${branch[1].revision}:${h.short_id(branch[1].raw_id)}</a></pre>
                 </div>
+            </td>
+            <td>
+                <input class="branch-compare" type="radio" name="compare_org" value="${branch[0]}"/>
+                <input class="branch-compare" type="radio" name="compare_other" value="${branch[0]}"/>
             </td>
 		</tr>
 		%endfor
@@ -42,6 +47,7 @@
                     <pre><a href="${h.url('files_home',repo_name=c.repo_name,revision=branch[1].raw_id)}">r${branch[1].revision}:${h.short_id(branch[1].raw_id)}</a></pre>
                 </div>
               </td>
+              <td></td>
           </tr>
           %endfor
         %endif

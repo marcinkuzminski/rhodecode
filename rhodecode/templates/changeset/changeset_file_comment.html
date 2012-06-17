@@ -7,17 +7,24 @@
   <div class="comment" id="comment-${co.comment_id}" line="${co.line_no}">
     <div class="comment-wrapp">
   	<div class="meta">
-  		<span class="user">
-  			<img src="${h.gravatar_url(co.author.email, 20)}" />
+        <div style="float:left"> <img src="${h.gravatar_url(co.author.email, 20)}" /> </div>
+  		<div class="user">
   			${co.author.username}
-  		</span>
-  		<span class="date">
+  		</div>
+  		<div class="date">
   			${h.age(co.modified_at)}
-  		</span>
+  		</div>
+        %if co.status_change:
+           <div  style="float:left" class="changeset-status-container">
+             <div style="float:left;padding:0px 2px 0px 2px"><span style="font-size: 18px;">&rsaquo;</span></div>
+             <div title="${_('Changeset status')}" class="changeset-status-lbl"> ${co.status_change.status_lbl}</div>
+             <div class="changeset-status-ico"><img src="${h.url(str('/images/icons/flag_status_%s.png' % co.status_change.status))}" /></div>             
+           </div>
+        %endif      
       %if h.HasPermissionAny('hg.admin', 'repository.admin')() or co.author.user_id == c.rhodecode_user.user_id:
-        <span class="buttons">
+        <div class="buttons">
           <span onClick="deleteComment(${co.comment_id})" class="delete-comment ui-btn">${_('Delete')}</span>
-        </span>
+        </div>
       %endif
   	</div>
   	<div class="text">
@@ -70,7 +77,8 @@
 </%def>
 
 
-<%def name="inlines(changeset)">
+## generates inlines taken from c.comments var
+<%def name="inlines()">
     <div class="comments-number">${ungettext("%d comment", "%d comments", len(c.comments)) % len(c.comments)} ${ungettext("(%d inline)", "(%d inline)", c.inline_cnt) % c.inline_cnt}</div>
     %for path, lines in c.inline_comments:
         % for line,comments in lines.iteritems():
@@ -84,11 +92,13 @@
 
 </%def>
 
-<%def name="comments(changeset)">
+## MAIN COMMENT FORM
+<%def name="comments(post_url, cur_status)">
 
 <div class="comments">
     <div id="inline-comments-container">
-     ${inlines(changeset)}
+    ## generate inlines for this changeset
+     ${inlines()}
     </div>
 
     %for co in c.comments:
@@ -98,16 +108,26 @@
     %endfor
     %if c.rhodecode_user.username != 'default':
     <div class="comment-form ac">
-        ${h.form(h.url('changeset_comment', repo_name=c.repo_name, revision=changeset.raw_id))}
+        ${h.form(post_url)}
         <strong>${_('Leave a comment')}</strong>
         <div class="clearfix">
             <div class="comment-help">
                 ${(_('Comments parsed using %s syntax with %s support.') % (('<a href="%s">RST</a>' % h.url('rst_help')),
           		'<span style="color:#003367" class="tooltip" title="%s">@mention</span>' %
           		_('Use @username inside this text to send notification to this RhodeCode user')))|n}
+                | <span class="tooltip" title="${_('Check this to change current status of code-review for this changeset')}"> ${_('change status')}
+                  <input style="vertical-align: bottom;margin-bottom:-2px" id="show_changeset_status_box" type="checkbox" name="change_changeset_status" />
+                  </span> 
             </div>
-                <div class="mentions-container" id="mentions_container"></div>
-                ${h.textarea('text')}
+            <div id="status_block_container" class="status-block" style="display:none">
+                %for status,lbl in c.changeset_statuses:
+                    <div class="">
+                        <img src="${h.url('/images/icons/flag_status_%s.png' % status)}" /> <input ${'checked="checked"' if status == cur_status else ''}" type="radio" name="changeset_status" value="${status}"> <label>${lbl}</label>
+                    </div>                    
+                %endfor
+            </div>                 
+            <div class="mentions-container" id="mentions_container"></div>
+             ${h.textarea('text')}
         </div>
         <div class="comment-button">
         ${h.submit('save', _('Comment'), class_='ui-button')}
@@ -119,6 +139,17 @@
 <script>
 YUE.onDOMReady(function () {
    MentionsAutoComplete('text', 'mentions_container', _USERS_AC_DATA, _GROUPS_AC_DATA);
+   
+   // changeset status box listener
+   YUE.on(YUD.get('show_changeset_status_box'),'change',function(e){
+       if(e.currentTarget.checked){
+           YUD.setStyle('status_block_container','display','');  
+       }
+       else{
+           YUD.setStyle('status_block_container','display','none');
+       }
+   })
+   
 });
 </script>
 </%def>

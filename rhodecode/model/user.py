@@ -35,8 +35,8 @@ from rhodecode.lib.caching_query import FromCache
 from rhodecode.model import BaseModel
 from rhodecode.model.db import User, UserRepoToPerm, Repository, Permission, \
     UserToPerm, UsersGroupRepoToPerm, UsersGroupToPerm, UsersGroupMember, \
-    Notification, RepoGroup, UserRepoGroupToPerm, UsersGroup,\
-    UsersGroupRepoGroupToPerm
+    Notification, RepoGroup, UserRepoGroupToPerm, UsersGroupRepoGroupToPerm, \
+    UserEmailMap
 from rhodecode.lib.exceptions import DefaultUserException, \
     UserOwnsReposException
 
@@ -61,13 +61,6 @@ PERM_WEIGHTS = {
 
 class UserModel(BaseModel):
 
-    def __get_user(self, user):
-        return self._get_instance(User, user, callback=User.get_by_username)
-
-    def __get_perm(self, permission):
-        return self._get_instance(Permission, permission,
-                                  callback=Permission.get_by_key)
-
     def get(self, user_id, cache=False):
         user = self.sa.query(User)
         if cache:
@@ -76,7 +69,7 @@ class UserModel(BaseModel):
         return user.get(user_id)
 
     def get_user(self, user):
-        return self.__get_user(user)
+        return self._get_user(user)
 
     def get_by_username(self, username, cache=False, case_insensitive=False):
 
@@ -94,9 +87,12 @@ class UserModel(BaseModel):
         return User.get_by_api_key(api_key, cache)
 
     def create(self, form_data):
+        from rhodecode.lib.auth import get_crypt_password
         try:
             new_user = User()
             for k, v in form_data.items():
+                if k == 'password':
+                    v = get_crypt_password(v)
                 setattr(new_user, k, v)
 
             new_user.api_key = generate_api_key(form_data['username'])
@@ -272,15 +268,17 @@ class UserModel(BaseModel):
             raise
 
     def update_my_account(self, user_id, form_data):
+        from rhodecode.lib.auth import get_crypt_password
         try:
             user = self.get(user_id, cache=False)
             if user.username == 'default':
                 raise DefaultUserException(
-                                _("You can't Edit this user since it's"
-                                  " crucial for entire application"))
+                    _("You can't Edit this user since it's"
+                      " crucial for entire application")
+                )
             for k, v in form_data.items():
                 if k == 'new_password' and v != '':
-                    user.password = v
+                    user.password = get_crypt_password(v)
                     user.api_key = generate_api_key(user.username)
                 else:
                     if k not in ['admin', 'active']:
@@ -292,7 +290,7 @@ class UserModel(BaseModel):
             raise
 
     def delete(self, user):
-        user = self.__get_user(user)
+        user = self._get_user(user)
 
         try:
             if user.username == 'default':
@@ -545,7 +543,7 @@ class UserModel(BaseModel):
             raise Exception('perm needs to be an instance of Permission class '
                             'got %s instead' % type(perm))
 
-        user = self.__get_user(user)
+        user = self._get_user(user)
 
         return UserToPerm.query().filter(UserToPerm.user == user)\
             .filter(UserToPerm.permission == perm).scalar() is not None
@@ -557,8 +555,8 @@ class UserModel(BaseModel):
         :param user:
         :param perm:
         """
-        user = self.__get_user(user)
-        perm = self.__get_perm(perm)
+        user = self._get_user(user)
+        perm = self._get_perm(perm)
         # if this permission is already granted skip it
         _perm = UserToPerm.query()\
             .filter(UserToPerm.user == user)\
@@ -578,12 +576,38 @@ class UserModel(BaseModel):
         :param user:
         :param perm:
         """
-        user = self.__get_user(user)
-        perm = self.__get_perm(perm)
+        user = self._get_user(user)
+        perm = self._get_perm(perm)
 
         obj = UserToPerm.query()\
                 .filter(UserToPerm.user == user)\
                 .filter(UserToPerm.permission == perm)\
                 .scalar()
+        if obj:
+            self.sa.delete(obj)
+
+    def add_extra_email(self, user, email):
+        """
+        Adds email address to UserEmailMap
+
+        :param user:
+        :param email:
+        """
+        user = self._get_user(user)
+        obj = UserEmailMap()
+        obj.user = user
+        obj.email = email
+        self.sa.add(obj)
+        return obj
+
+    def delete_extra_email(self, user, email_id):
+        """
+        Removes email address from UserEmailMap
+
+        :param user:
+        :param email_id:
+        """
+        user = self._get_user(user)
+        obj = UserEmailMap.query().get(email_id)
         if obj:
             self.sa.delete(obj)

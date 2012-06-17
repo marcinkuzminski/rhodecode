@@ -4,6 +4,8 @@ from rhodecode.model.db import User, Notification
 from rhodecode.lib.utils2 import generate_api_key
 from rhodecode.lib.auth import check_password
 from rhodecode.model.meta import Session
+from rhodecode.lib import helpers as h
+from rhodecode.model import validators
 
 
 class TestLoginController(TestController):
@@ -22,21 +24,21 @@ class TestLoginController(TestController):
 
     def test_login_admin_ok(self):
         response = self.app.post(url(controller='login', action='index'),
-                                 {'username':'test_admin',
-                                  'password':'test12'})
+                                 {'username': 'test_admin',
+                                  'password': 'test12'})
         self.assertEqual(response.status, '302 Found')
-        self.assertEqual(response.session['rhodecode_user'].get('username') ,
+        self.assertEqual(response.session['rhodecode_user'].get('username'),
                          'test_admin')
         response = response.follow()
         self.assertTrue('%s repository' % HG_REPO in response.body)
 
     def test_login_regular_ok(self):
         response = self.app.post(url(controller='login', action='index'),
-                                 {'username':'test_regular',
-                                  'password':'test12'})
+                                 {'username': 'test_regular',
+                                  'password': 'test12'})
 
         self.assertEqual(response.status, '302 Found')
-        self.assertEqual(response.session['rhodecode_user'].get('username') ,
+        self.assertEqual(response.session['rhodecode_user'].get('username'),
                          'test_regular')
         response = response.follow()
         self.assertTrue('%s repository' % HG_REPO in response.body)
@@ -46,8 +48,8 @@ class TestLoginController(TestController):
         test_came_from = '/_admin/users'
         response = self.app.post(url(controller='login', action='index',
                                      came_from=test_came_from),
-                                 {'username':'test_admin',
-                                  'password':'test12'})
+                                 {'username': 'test_admin',
+                                  'password': 'test12'})
         self.assertEqual(response.status, '302 Found')
         response = response.follow()
 
@@ -56,17 +58,16 @@ class TestLoginController(TestController):
 
     def test_login_short_password(self):
         response = self.app.post(url(controller='login', action='index'),
-                                 {'username':'test_admin',
-                                  'password':'as'})
+                                 {'username': 'test_admin',
+                                  'password': 'as'})
         self.assertEqual(response.status, '200 OK')
 
         self.assertTrue('Enter 3 characters or more' in response.body)
 
     def test_login_wrong_username_password(self):
         response = self.app.post(url(controller='login', action='index'),
-                                 {'username':'error',
-                                  'password':'test12'})
-        self.assertEqual(response.status , '200 OK')
+                                 {'username': 'error',
+                                  'password': 'test12'})
 
         self.assertTrue('invalid user name' in response.body)
         self.assertTrue('invalid password' in response.body)
@@ -79,62 +80,63 @@ class TestLoginController(TestController):
         self.assertTrue('Sign Up to RhodeCode' in response.body)
 
     def test_register_err_same_username(self):
+        uname = 'test_admin'
         response = self.app.post(url(controller='login', action='register'),
-                                            {'username':'test_admin',
-                                             'password':'test12',
-                                             'password_confirmation':'test12',
-                                             'email':'goodmail@domain.com',
-                                             'name':'test',
-                                             'lastname':'test'})
+                                            {'username': uname,
+                                             'password': 'test12',
+                                             'password_confirmation': 'test12',
+                                             'email': 'goodmail@domain.com',
+                                             'name': 'test',
+                                             'lastname': 'test'})
 
-        self.assertEqual(response.status , '200 OK')
-        self.assertTrue('This username already exists' in response.body)
+        msg = validators.ValidUsername()._messages['username_exists']
+        msg = h.html_escape(msg % {'username': uname})
+        response.mustcontain(msg)
 
     def test_register_err_same_email(self):
         response = self.app.post(url(controller='login', action='register'),
-                                            {'username':'test_admin_0',
-                                             'password':'test12',
-                                             'password_confirmation':'test12',
-                                             'email':'test_admin@mail.com',
-                                             'name':'test',
-                                             'lastname':'test'})
+                                            {'username': 'test_admin_0',
+                                             'password': 'test12',
+                                             'password_confirmation': 'test12',
+                                             'email': 'test_admin@mail.com',
+                                             'name': 'test',
+                                             'lastname': 'test'})
 
-        self.assertEqual(response.status , '200 OK')
-        response.mustcontain('This e-mail address is already taken')
+        msg = validators.UniqSystemEmail()()._messages['email_taken']
+        response.mustcontain(msg)
 
     def test_register_err_same_email_case_sensitive(self):
         response = self.app.post(url(controller='login', action='register'),
-                                            {'username':'test_admin_1',
-                                             'password':'test12',
-                                             'password_confirmation':'test12',
-                                             'email':'TesT_Admin@mail.COM',
-                                             'name':'test',
-                                             'lastname':'test'})
-        self.assertEqual(response.status , '200 OK')
-        response.mustcontain('This e-mail address is already taken')
+                                            {'username': 'test_admin_1',
+                                             'password': 'test12',
+                                             'password_confirmation': 'test12',
+                                             'email': 'TesT_Admin@mail.COM',
+                                             'name': 'test',
+                                             'lastname': 'test'})
+        msg = validators.UniqSystemEmail()()._messages['email_taken']
+        response.mustcontain(msg)
 
     def test_register_err_wrong_data(self):
         response = self.app.post(url(controller='login', action='register'),
-                                            {'username':'xs',
-                                             'password':'test',
-                                             'password_confirmation':'test',
-                                             'email':'goodmailm',
-                                             'name':'test',
-                                             'lastname':'test'})
-        self.assertEqual(response.status , '200 OK')
+                                            {'username': 'xs',
+                                             'password': 'test',
+                                             'password_confirmation': 'test',
+                                             'email': 'goodmailm',
+                                             'name': 'test',
+                                             'lastname': 'test'})
+        self.assertEqual(response.status, '200 OK')
         response.mustcontain('An email address must contain a single @')
         response.mustcontain('Enter a value 6 characters long or more')
 
     def test_register_err_username(self):
         response = self.app.post(url(controller='login', action='register'),
-                                            {'username':'error user',
-                                             'password':'test12',
-                                             'password_confirmation':'test12',
-                                             'email':'goodmailm',
-                                             'name':'test',
-                                             'lastname':'test'})
+                                            {'username': 'error user',
+                                             'password': 'test12',
+                                             'password_confirmation': 'test12',
+                                             'email': 'goodmailm',
+                                             'name': 'test',
+                                             'lastname': 'test'})
 
-        self.assertEqual(response.status , '200 OK')
         response.mustcontain('An email address must contain a single @')
         response.mustcontain('Username may only contain '
                 'alphanumeric characters underscores, '
@@ -142,41 +144,42 @@ class TestLoginController(TestController):
                 'alphanumeric character')
 
     def test_register_err_case_sensitive(self):
+        usr = 'Test_Admin'
         response = self.app.post(url(controller='login', action='register'),
-                                            {'username':'Test_Admin',
-                                             'password':'test12',
-                                             'password_confirmation':'test12',
-                                             'email':'goodmailm',
-                                             'name':'test',
-                                             'lastname':'test'})
+                                            {'username': usr,
+                                             'password': 'test12',
+                                             'password_confirmation': 'test12',
+                                             'email': 'goodmailm',
+                                             'name': 'test',
+                                             'lastname': 'test'})
 
-        self.assertEqual(response.status , '200 OK')
-        self.assertTrue('An email address must contain a single @' in response.body)
-        self.assertTrue('This username already exists' in response.body)
+        response.mustcontain('An email address must contain a single @')
+        msg = validators.ValidUsername()._messages['username_exists']
+        msg = h.html_escape(msg % {'username': usr})
+        response.mustcontain(msg)
 
     def test_register_special_chars(self):
         response = self.app.post(url(controller='login', action='register'),
-                                            {'username':'xxxaxn',
-                                             'password':'ąćźżąśśśś',
-                                             'password_confirmation':'ąćźżąśśśś',
-                                             'email':'goodmailm@test.plx',
-                                             'name':'test',
-                                             'lastname':'test'})
+                                        {'username': 'xxxaxn',
+                                         'password': 'ąćźżąśśśś',
+                                         'password_confirmation': 'ąćźżąśśśś',
+                                         'email': 'goodmailm@test.plx',
+                                         'name': 'test',
+                                         'lastname': 'test'})
 
-        self.assertEqual(response.status , '200 OK')
-        self.assertTrue('Invalid characters in password' in response.body)
+        msg = validators.ValidPassword()._messages['invalid_password']
+        response.mustcontain(msg)
 
     def test_register_password_mismatch(self):
         response = self.app.post(url(controller='login', action='register'),
-                                            {'username':'xs',
-                                             'password':'123qwe',
-                                             'password_confirmation':'qwe123',
-                                             'email':'goodmailm@test.plxa',
-                                             'name':'test',
-                                             'lastname':'test'})
-
-        self.assertEqual(response.status, '200 OK')
-        response.mustcontain('Passwords do not match')
+                                            {'username': 'xs',
+                                             'password': '123qwe',
+                                             'password_confirmation': 'qwe123',
+                                             'email': 'goodmailm@test.plxa',
+                                             'name': 'test',
+                                             'lastname': 'test'})
+        msg = validators.ValidPasswordsMatch()._messages['password_mismatch']
+        response.mustcontain(msg)
 
     def test_register_ok(self):
         username = 'test_regular4'
@@ -186,13 +189,13 @@ class TestLoginController(TestController):
         lastname = 'testlastname'
 
         response = self.app.post(url(controller='login', action='register'),
-                                            {'username':username,
-                                             'password':password,
-                                             'password_confirmation':password,
-                                             'email':email,
-                                             'name':name,
-                                             'lastname':lastname,
-                                             'admin':True}) # This should be overriden
+                                            {'username': username,
+                                             'password': password,
+                                             'password_confirmation': password,
+                                             'email': email,
+                                             'name': name,
+                                             'lastname': lastname,
+                                             'admin': True})  # This should be overriden
         self.assertEqual(response.status, '302 Found')
         self.checkSessionFlash(response, 'You have successfully registered into rhodecode')
 
@@ -206,12 +209,15 @@ class TestLoginController(TestController):
         self.assertEqual(ret.admin, False)
 
     def test_forgot_password_wrong_mail(self):
+        bad_email = 'marcin@wrongmail.org'
         response = self.app.post(
                         url(controller='login', action='password_reset'),
-                            {'email': 'marcin@wrongmail.org',}
+                            {'email': bad_email, }
         )
 
-        response.mustcontain("This e-mail address doesn't exist")
+        msg = validators.ValidSystemEmail()._messages['non_existing_email']
+        msg = h.html_escape(msg % {'email': bad_email})
+        response.mustcontain()
 
     def test_forgot_password(self):
         response = self.app.get(url(controller='login',
@@ -236,7 +242,7 @@ class TestLoginController(TestController):
 
         response = self.app.post(url(controller='login',
                                      action='password_reset'),
-                                 {'email':email, })
+                                 {'email': email, })
 
         self.checkSessionFlash(response, 'Your password reset link was sent')
 

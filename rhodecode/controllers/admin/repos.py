@@ -28,7 +28,7 @@ import traceback
 import formencode
 from formencode import htmlfill
 
-from paste.httpexceptions import HTTPInternalServerError
+from webob.exc import HTTPInternalServerError
 from pylons import request, session, tmpl_context as c, url
 from pylons.controllers.util import redirect
 from pylons.i18n.translation import _

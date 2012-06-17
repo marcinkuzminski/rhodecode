@@ -212,6 +212,10 @@ def make_map(config):
         #EXTRAS USER ROUTES
         m.connect("user_perm", "/users_perm/{id}",
                   action="update_perm", conditions=dict(method=["PUT"]))
+        m.connect("user_emails", "/users_emails/{id}",
+                  action="add_email", conditions=dict(method=["PUT"]))
+        m.connect("user_emails_delete", "/users_emails/{id}",
+                  action="delete_email", conditions=dict(method=["DELETE"]))
 
     #ADMIN USERS GROUPS REST ROUTES
     with rmap.submapper(path_prefix=ADMIN_PREFIX,
@@ -423,6 +427,41 @@ def make_map(config):
                  '/{repo_name:.*}/raw-changeset/{revision}',
                  controller='changeset', action='raw_changeset',
                  revision='tip', conditions=dict(function=check_repo))
+
+    rmap.connect('compare_url',
+                 '/{repo_name:.*}/compare/{org_ref_type}@{org_ref}...{other_ref_type}@{other_ref}',
+                 controller='compare', action='index',
+                 conditions=dict(function=check_repo),
+                 requirements=dict(org_ref_type='(branch|book|tag)',
+                                   other_ref_type='(branch|book|tag)'))
+
+    rmap.connect('pullrequest_home',
+                 '/{repo_name:.*}/pull-request/new', controller='pullrequests',
+                 action='index', conditions=dict(function=check_repo,
+                                                 method=["GET"]))
+
+    rmap.connect('pullrequest',
+                 '/{repo_name:.*}/pull-request/new', controller='pullrequests',
+                 action='create', conditions=dict(function=check_repo,
+                                                  method=["POST"]))
+
+    rmap.connect('pullrequest_show',
+                 '/{repo_name:.*}/pull-request/{pull_request_id}',
+                 controller='pullrequests',
+                 action='show', conditions=dict(function=check_repo,
+                                                method=["GET"]))
+
+    rmap.connect('pullrequest_show_all',
+                 '/{repo_name:.*}/pull-request',
+                 controller='pullrequests',
+                 action='show_all', conditions=dict(function=check_repo,
+                                                method=["GET"]))
+
+    rmap.connect('pullrequest_comment',
+                 '/{repo_name:.*}/pull-request-comment/{pull_request_id}',
+                 controller='pullrequests',
+                 action='comment', conditions=dict(function=check_repo,
+                                                method=["POST"]))
 
     rmap.connect('summary_home', '/{repo_name:.*}/summary',
                 controller='summary', conditions=dict(function=check_repo))

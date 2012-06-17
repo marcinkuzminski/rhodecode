@@ -48,9 +48,6 @@ log = logging.getLogger(__name__)
 
 class RepoModel(BaseModel):
 
-    def __get_user(self, user):
-        return self._get_instance(User, user, callback=User.get_by_username)
-
     def __get_users_group(self, users_group):
         return self._get_instance(UsersGroup, users_group,
                                   callback=UsersGroup.get_by_group_name)
@@ -58,14 +55,6 @@ class RepoModel(BaseModel):
     def __get_repos_group(self, repos_group):
         return self._get_instance(RepoGroup, repos_group,
                                   callback=RepoGroup.get_by_group_name)
-
-    def __get_repo(self, repository):
-        return self._get_instance(Repository, repository,
-                                  callback=Repository.get_by_repo_name)
-
-    def __get_perm(self, permission):
-        return self._get_instance(Permission, permission,
-                                  callback=Permission.get_by_key)
 
     @LazyProperty
     def repos_path(self):
@@ -86,7 +75,7 @@ class RepoModel(BaseModel):
         return repo.scalar()
 
     def get_repo(self, repository):
-        return self.__get_repo(repository)
+        return self._get_repo(repository)
 
     def get_by_repo_name(self, repo_name, cache=False):
         repo = self.sa.query(Repository)\
@@ -311,7 +300,7 @@ class RepoModel(BaseModel):
         run_task(tasks.create_repo_fork, form_data, cur_user)
 
     def delete(self, repo):
-        repo = self.__get_repo(repo)
+        repo = self._get_repo(repo)
         try:
             self.sa.delete(repo)
             self.__delete_repo(repo)
@@ -328,9 +317,9 @@ class RepoModel(BaseModel):
         :param user: Instance of User, user_id or username
         :param perm: Instance of Permission, or permission_name
         """
-        user = self.__get_user(user)
-        repo = self.__get_repo(repo)
-        permission = self.__get_perm(perm)
+        user = self._get_user(user)
+        repo = self._get_repo(repo)
+        permission = self._get_perm(perm)
 
         # check if we have that permission already
         obj = self.sa.query(UserRepoToPerm)\
@@ -353,8 +342,8 @@ class RepoModel(BaseModel):
         :param user: Instance of User, user_id or username
         """
 
-        user = self.__get_user(user)
-        repo = self.__get_repo(repo)
+        user = self._get_user(user)
+        repo = self._get_repo(repo)
 
         obj = self.sa.query(UserRepoToPerm)\
             .filter(UserRepoToPerm.repository == repo)\
@@ -372,9 +361,9 @@ class RepoModel(BaseModel):
             or users group name
         :param perm: Instance of Permission, or permission_name
         """
-        repo = self.__get_repo(repo)
+        repo = self._get_repo(repo)
         group_name = self.__get_users_group(group_name)
-        permission = self.__get_perm(perm)
+        permission = self._get_perm(perm)
 
         # check if we have that permission already
         obj = self.sa.query(UsersGroupRepoToPerm)\
@@ -399,7 +388,7 @@ class RepoModel(BaseModel):
         :param group_name: Instance of UserGroup, users_group_id,
             or users group name
         """
-        repo = self.__get_repo(repo)
+        repo = self._get_repo(repo)
         group_name = self.__get_users_group(group_name)
 
         obj = self.sa.query(UsersGroupRepoToPerm)\

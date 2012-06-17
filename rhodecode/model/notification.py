@@ -35,14 +35,12 @@ import rhodecode
 from rhodecode.lib import helpers as h
 from rhodecode.model import BaseModel
 from rhodecode.model.db import Notification, User, UserNotification
+from sqlalchemy.orm import joinedload
 
 log = logging.getLogger(__name__)
 
 
 class NotificationModel(BaseModel):
-
-    def __get_user(self, user):
-        return self._get_instance(User, user, callback=User.get_by_username)
 
     def __get_notification(self, notification):
         if isinstance(notification, Notification):
@@ -76,12 +74,12 @@ class NotificationModel(BaseModel):
         if recipients and not getattr(recipients, '__iter__', False):
             raise Exception('recipients must be a list of iterable')
 
-        created_by_obj = self.__get_user(created_by)
+        created_by_obj = self._get_user(created_by)
 
         if recipients:
             recipients_objs = []
             for u in recipients:
-                obj = self.__get_user(u)
+                obj = self._get_user(u)
                 if obj:
                     recipients_objs.append(obj)
             recipients_objs = set(recipients_objs)
@@ -110,6 +108,7 @@ class NotificationModel(BaseModel):
             email_subject = NotificationModel().make_description(notif, False)
             type_ = type_
             email_body = body
+            ## this is passed into template
             kwargs = {'subject': subject, 'body': h.rst_w_mentions(body)}
             kwargs.update(email_kwargs)
             email_body_html = EmailNotificationModel()\
@@ -124,7 +123,7 @@ class NotificationModel(BaseModel):
         # we don't want to remove actual notification just the assignment
         try:
             notification = self.__get_notification(notification)
-            user = self.__get_user(user)
+            user = self._get_user(user)
             if notification and user:
                 obj = UserNotification.query()\
                         .filter(UserNotification.user == user)\
@@ -137,30 +136,56 @@ class NotificationModel(BaseModel):
             log.error(traceback.format_exc())
             raise
 
-    def get_for_user(self, user):
-        user = self.__get_user(user)
-        return user.notifications
+    def get_for_user(self, user, filter_=None):
+        """
+        Get mentions for given user, filter them if filter dict is given
 
-    def mark_all_read_for_user(self, user):
-        user = self.__get_user(user)
-        UserNotification.query()\
-            .filter(UserNotification.read==False)\
-            .update({'read': True})
+        :param user:
+        :type user:
+        :param filter:
+        """
+        user = self._get_user(user)
+
+        q = UserNotification.query()\
+            .filter(UserNotification.user == user)\
+            .join((Notification, UserNotification.notification_id ==
+                                 Notification.notification_id))
+
+        if filter_:
+            q = q.filter(Notification.type_ == filter_.get('type'))
+
+        return q.all()
+
+    def mark_all_read_for_user(self, user, filter_=None):
+        user = self._get_user(user)
+        q = UserNotification.query()\
+            .filter(UserNotification.user == user)\
+            .filter(UserNotification.read == False)\
+            .join((Notification, UserNotification.notification_id ==
+                                 Notification.notification_id))
+        if filter_:
+            q = q.filter(Notification.type_ == filter_.get('type'))
+
+        # this is a little inefficient but sqlalchemy doesn't support
+        # update on joined tables :(
+        for obj in q.all():
+            obj.read = True
+            self.sa.add(obj)
 
     def get_unread_cnt_for_user(self, user):
-        user = self.__get_user(user)
+        user = self._get_user(user)
         return UserNotification.query()\
                 .filter(UserNotification.read == False)\
                 .filter(UserNotification.user == user).count()
 
     def get_unread_for_user(self, user):
-        user = self.__get_user(user)
+        user = self._get_user(user)
         return [x.notification for x in UserNotification.query()\
                 .filter(UserNotification.read == False)\
                 .filter(UserNotification.user == user).all()]
 
     def get_user_notification(self, user, notification):
-        user = self.__get_user(user)
+        user = self._get_user(user)
         notification = self.__get_notification(notification)
 
         return UserNotification.query()\
@@ -172,12 +197,15 @@ class NotificationModel(BaseModel):
         Creates a human readable description based on properties
         of notification object
         """
-
+        #alias
+        _n = notification
         _map = {
-            notification.TYPE_CHANGESET_COMMENT: _('commented on commit'),
-            notification.TYPE_MESSAGE: _('sent message'),
-            notification.TYPE_MENTION: _('mentioned you'),
-            notification.TYPE_REGISTRATION: _('registered in RhodeCode')
+            _n.TYPE_CHANGESET_COMMENT: _('commented on commit'),
+            _n.TYPE_MESSAGE: _('sent message'),
+            _n.TYPE_MENTION: _('mentioned you'),
+            _n.TYPE_REGISTRATION: _('registered in RhodeCode'),
+            _n.TYPE_PULL_REQUEST: _('opened new pull request'),
+            _n.TYPE_PULL_REQUEST_COMMENT: _('commented on pull request')
         }
 
         # action == _map string
@@ -199,6 +227,7 @@ class EmailNotificationModel(BaseModel):
     TYPE_CHANGESET_COMMENT = Notification.TYPE_CHANGESET_COMMENT
     TYPE_PASSWORD_RESET = 'passoword_link'
     TYPE_REGISTRATION = Notification.TYPE_REGISTRATION
+    TYPE_PULL_REQUEST = Notification.TYPE_PULL_REQUEST
     TYPE_DEFAULT = 'default'
 
     def __init__(self):

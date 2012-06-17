@@ -32,6 +32,12 @@ ${_('%s Changelog') % c.repo_name} - ${c.rhodecode_name}
 					<canvas id="graph_canvas"></canvas>
 				</div>
 				<div id="graph_content">
+                    <div class="info_box" style="clear: both;padding: 10px 6px;vertical-align: right;text-align: right;">
+                    %if c.rhodecode_db_repo.fork:
+                        <a title="${_('compare fork with %s' % c.rhodecode_db_repo.fork.repo_name)}" href="${h.url('compare_url',repo_name=c.repo_name,org_ref_type='branch',org_ref='default',other_ref_type='branch',other_ref='default',repo=c.rhodecode_db_repo.fork.repo_name)}" class="ui-btn small">${_('Compare fork')}</a>
+                    %endif
+                    <a href="${h.url('pullrequest_home',repo_name=c.repo_name)}" class="ui-btn small">${_('Open new pull request')}</a>
+                    </div>
 					<div class="container_header">
 				        ${h.form(h.url.current(),method='get')}
 				        <div class="info_box" style="float:left">
@@ -75,6 +81,18 @@ ${_('%s Changelog') % c.repo_name} - ${c.rhodecode_name}
                                               </a>
                                             </div>
                                         %endif
+                                        </div>
+                                        <div class="changeset-status-container">
+                                            %if c.statuses.get(cs.raw_id):
+                                              <div title="${_('Changeset status')}" class="changeset-status-lbl">${c.statuses.get(cs.raw_id)[1]}</div>
+                                              <div class="changeset-status-ico">
+                                              %if c.statuses.get(cs.raw_id)[2]:
+                                                <a class="tooltip" title="${_('Click to open associated pull request')}" href="${h.url('pullrequest_show',repo_name=c.statuses.get(cs.raw_id)[3],pull_request_id=c.statuses.get(cs.raw_id)[2])}"><img src="${h.url('/images/icons/flag_status_%s.png' % c.statuses.get(cs.raw_id)[0])}" /></a>
+                                              %else:
+                                                <img src="${h.url('/images/icons/flag_status_%s.png' % c.statuses.get(cs.raw_id)[0])}" />
+                                              %endif
+                                              </div>
+                                            %endif
                                         </div>
 									</div>
 								   %if cs.parents:

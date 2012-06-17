@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-    rhodecode.model.db
-    ~~~~~~~~~~~~~~~~~~
+    rhodecode.model.db_1_2_0
+    ~~~~~~~~~~~~~~~~~~~~~~~~
 
-    Database Models for RhodeCode
+    Database Models for RhodeCode <=1.2.X
 
     :created_on: Apr 08, 2010
     :author: marcink
