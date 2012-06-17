@@ -220,7 +220,7 @@ class UsersController(BaseController):
         return redirect(url('edit_user', id=id))
 
     def add_email(self, id):
-        """PUT /user_emails/id: Update an existing item"""
+        """POST /user_emails:Add an existing item"""
         # url('user_emails', id=ID, method='put')
 
         #TODO: validation and form !!!

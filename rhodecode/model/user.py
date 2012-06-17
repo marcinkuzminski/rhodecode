@@ -87,9 +87,12 @@ class UserModel(BaseModel):
         return User.get_by_api_key(api_key, cache)
 
     def create(self, form_data):
+        from rhodecode.lib.auth import get_crypt_password
         try:
             new_user = User()
             for k, v in form_data.items():
+                if k == 'password':
+                    v = get_crypt_password(v)
                 setattr(new_user, k, v)
 
             new_user.api_key = generate_api_key(form_data['username'])
@@ -265,15 +268,17 @@ class UserModel(BaseModel):
             raise
 
     def update_my_account(self, user_id, form_data):
+        from rhodecode.lib.auth import get_crypt_password
         try:
             user = self.get(user_id, cache=False)
             if user.username == 'default':
                 raise DefaultUserException(
-                                _("You can't Edit this user since it's"
-                                  " crucial for entire application"))
+                    _("You can't Edit this user since it's"
+                      " crucial for entire application")
+                )
             for k, v in form_data.items():
                 if k == 'new_password' and v != '':
-                    user.password = v
+                    user.password = get_crypt_password(v)
                     user.api_key = generate_api_key(user.username)
                 else:
                     if k not in ['admin', 'active']:

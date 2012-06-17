@@ -199,13 +199,13 @@ class ReposGroupModel(BaseModel):
             log.error(traceback.format_exc())
             raise
 
-    def delete(self, users_group_id):
+    def delete(self, repos_group):
+        repos_group = self.__get_repos_group(repos_group)
         try:
-            users_group = RepoGroup.get(users_group_id)
-            self.sa.delete(users_group)
-            self.__delete_group(users_group)
+            self.sa.delete(repos_group)
+            self.__delete_group(repos_group)
         except:
-            log.error(traceback.format_exc())
+            log.exception('Error removing repos_group %s' % repos_group)
             raise
 
     def grant_user_permission(self, repos_group, user, perm):
