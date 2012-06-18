@@ -125,12 +125,15 @@ class UsersController(BaseController):
             h.flash(_('User updated successfully'), category='success')
             Session.commit()
         except formencode.Invalid, errors:
+            c.user_email_map = UserEmailMap.query()\
+                            .filter(UserEmailMap.user == c.user).all()
+            defaults = errors.value
             e = errors.error_dict or {}
             perm = Permission.get_by_key('hg.create.repository')
-            e.update({'create_repo_perm': user_model.has_perm(id, perm)})
+            defaults.update({'create_repo_perm': user_model.has_perm(id, perm)})
             return htmlfill.render(
                 render('admin/users/user_edit.html'),
-                defaults=errors.value,
+                defaults=defaults,
                 errors=e,
                 prefix_error=False,
                 encoding="UTF-8")
@@ -231,6 +234,9 @@ class UsersController(BaseController):
             user_model.add_extra_email(id, email)
             Session.commit()
             h.flash(_("Added email %s to user" % email), category='success')
+        except formencode.Invalid, error:
+            msg = error.error_dict['email']
+            h.flash(msg, category='error')
         except Exception:
             log.error(traceback.format_exc())
             h.flash(_('An error occurred during email saving'),

@@ -299,3 +299,10 @@ def LdapSettingsForm(tls_reqcert_choices, search_scope_choices,
         ldap_attr_email = v.UnicodeString(strip=True,)
 
     return _LdapSettingsForm
+
+
+def UserExtraEmailForm():
+    class _UserExtraEmailForm(formencode.Schema):
+        email = All(v.UniqSystemEmail(), v.Email)
+
+    return _UserExtraEmailForm

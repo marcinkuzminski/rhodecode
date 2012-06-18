@@ -29,9 +29,11 @@ import traceback
 from pylons import url
 from pylons.i18n.translation import _
 
+from sqlalchemy.exc import DatabaseError
+from sqlalchemy.orm import joinedload
+
 from rhodecode.lib.utils2 import safe_unicode, generate_api_key
 from rhodecode.lib.caching_query import FromCache
-
 from rhodecode.model import BaseModel
 from rhodecode.model.db import User, UserRepoToPerm, Repository, Permission, \
     UserToPerm, UsersGroupRepoToPerm, UsersGroupToPerm, UsersGroupMember, \
@@ -40,9 +42,6 @@ from rhodecode.model.db import User, UserRepoToPerm, Repository, Permission, \
 from rhodecode.lib.exceptions import DefaultUserException, \
     UserOwnsReposException
 
-from sqlalchemy.exc import DatabaseError
-
-from sqlalchemy.orm import joinedload
 
 log = logging.getLogger(__name__)
 
@@ -593,10 +592,14 @@ class UserModel(BaseModel):
         :param user:
         :param email:
         """
+        from rhodecode.model import forms
+        form = forms.UserExtraEmailForm()()
+        data = form.to_python(dict(email=email))
         user = self._get_user(user)
+
         obj = UserEmailMap()
         obj.user = user
-        obj.email = email
+        obj.email = data['email']
         self.sa.add(obj)
         return obj
 

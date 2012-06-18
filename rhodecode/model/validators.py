@@ -14,7 +14,6 @@ from formencode.validators import (
 
 from rhodecode.lib.utils import repo_name_slug
 from rhodecode.model.db import RepoGroup, Repository, UsersGroup, User
-from rhodecode.lib.auth import authenticate
 from rhodecode.lib.exceptions import LdapImportError
 from rhodecode.config.routing import ADMIN_PREFIX
 # silence warnings and pylint
@@ -241,6 +240,8 @@ def ValidAuth():
         }
 
         def validate_python(self, value, state):
+            from rhodecode.lib.auth import authenticate
+
             password = value['password']
             username = value['username']
 

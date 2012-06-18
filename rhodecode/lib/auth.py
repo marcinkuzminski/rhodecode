@@ -38,11 +38,6 @@ from pylons.i18n.translation import _
 from rhodecode import __platform__, PLATFORM_WIN, PLATFORM_OTHERS
 from rhodecode.model.meta import Session
 
-if __platform__ in PLATFORM_WIN:
-    from hashlib import sha256
-if __platform__ in PLATFORM_OTHERS:
-    import bcrypt
-
 from rhodecode.lib.utils2 import str2bool, safe_unicode
 from rhodecode.lib.exceptions import LdapPasswordError, LdapUsernameError
 from rhodecode.lib.utils import get_repo_slug, get_repos_group_slug
@@ -98,8 +93,10 @@ class RhodeCodeCrypto(object):
         :param password: password to hash
         """
         if __platform__ in PLATFORM_WIN:
+            from hashlib import sha256
             return sha256(str_).hexdigest()
         elif __platform__ in PLATFORM_OTHERS:
+            import bcrypt
             return bcrypt.hashpw(str_, bcrypt.gensalt(10))
         else:
             raise Exception('Unknown or unsupported platform %s' \
@@ -116,8 +113,10 @@ class RhodeCodeCrypto(object):
         """
 
         if __platform__ in PLATFORM_WIN:
+            from hashlib import sha256
             return sha256(password).hexdigest() == hashed
         elif __platform__ in PLATFORM_OTHERS:
+            import bcrypt
             return bcrypt.hashpw(password, hashed) == hashed
         else:
             raise Exception('Unknown or unsupported platform %s' \
