@@ -26,6 +26,8 @@ import logging
 import traceback
 
 from webob.exc import HTTPNotFound
+from collections import defaultdict
+from itertools import groupby
 
 from pylons import request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
@@ -199,6 +201,24 @@ class PullrequestsController(BaseRepoController):
         # valid ID
         if not c.pull_request:
             raise HTTPNotFound
+        cc_model = ChangesetCommentsModel()
+        cs_model = ChangesetStatusModel()
+        _cs_statuses = cs_model.get_statuses(c.pull_request.org_repo,
+                                            pull_request=c.pull_request,
+                                            with_revisions=True)
+
+        cs_statuses = defaultdict(list)
+        for st in _cs_statuses:
+            cs_statuses[st.author.username] += [st]
+
+        c.pull_request_reviewers = []
+        for o in c.pull_request.reviewers:
+            st = cs_statuses.get(o.user.username, None)
+            if st:
+                sorter = lambda k: k.version
+                st = [(x, list(y)[0])
+                      for x, y in (groupby(sorted(st, key=sorter), sorter))]
+            c.pull_request_reviewers.append([o.user, st])
 
         # pull_requests repo_name we opened it against
         # ie. other_repo must match
@@ -210,23 +230,23 @@ class PullrequestsController(BaseRepoController):
 
         # inline comments
         c.inline_cnt = 0
-        c.inline_comments = ChangesetCommentsModel()\
-                            .get_inline_comments(c.rhodecode_db_repo.repo_id,
-                                                 pull_request=pull_request_id)
+        c.inline_comments = cc_model.get_inline_comments(
+                                c.rhodecode_db_repo.repo_id,
+                                pull_request=pull_request_id)
         # count inline comments
         for __, lines in c.inline_comments:
             for comments in lines.values():
                 c.inline_cnt += len(comments)
         # comments
-        c.comments = ChangesetCommentsModel()\
-                          .get_comments(c.rhodecode_db_repo.repo_id,
-                                        pull_request=pull_request_id)
+        c.comments = cc_model.get_comments(c.rhodecode_db_repo.repo_id,
+                                           pull_request=pull_request_id)
 
         # changeset(pull-request) status
-        c.current_changeset_status = ChangesetStatusModel()\
-                              .get_status(c.pull_request.org_repo,
-                                          pull_request=c.pull_request)
+        c.current_changeset_status = cs_model.calculate_status(
+                                        c.pull_request_reviewers
+                                     )
         c.changeset_statuses = ChangesetStatus.STATUSES
+
         return render('/pullrequests/pullrequest_show.html')
 
     @jsonify

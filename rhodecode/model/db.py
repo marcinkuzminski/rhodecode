@@ -1371,14 +1371,17 @@ class ChangesetStatus(Base, BaseModel):
         {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'}
     )
+    STATUS_NOT_REVIEWED = DEFAULT = 'not_reviewed'
+    STATUS_APPROVED = 'approved'
+    STATUS_REJECTED = 'rejected'
+    STATUS_UNDER_REVIEW = 'under_review'
 
     STATUSES = [
-        ('not_reviewed', _("Not Reviewed")),  # (no icon) and default
-        ('approved', _("Approved")),
-        ('rejected', _("Rejected")),
-        ('under_review', _("Under Review")),
+        (STATUS_NOT_REVIEWED, _("Not Reviewed")),  # (no icon) and default
+        (STATUS_APPROVED, _("Approved")),
+        (STATUS_REJECTED, _("Rejected")),
+        (STATUS_UNDER_REVIEW, _("Under Review")),
     ]
-    DEFAULT = STATUSES[0][0]
 
     changeset_status_id = Column('changeset_status_id', Integer(), nullable=False, primary_key=True)
     repo_id = Column('repo_id', Integer(), ForeignKey('repositories.repo_id'), nullable=False)
@@ -1394,6 +1397,12 @@ class ChangesetStatus(Base, BaseModel):
     repo = relationship('Repository')
     comment = relationship('ChangesetComment', lazy='joined')
     pull_request = relationship('PullRequest', lazy='joined')
+
+    def __unicode__(self):
+        return u"<%s('%s:%s')>" % (
+            self.__class__.__name__,
+            self.status, self.author
+        )
 
     @classmethod
     def get_status_lbl(cls, value):

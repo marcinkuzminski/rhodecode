@@ -21,38 +21,62 @@
     </div>
 
     <h3>${_('Title')}: ${c.pull_request.title}</h3>
-    <div class="changeset-status-container" style="float:left;padding:0px 20px 20px 20px">
+    <div class="changeset-status-container" style="float:left;padding:0px 20px 0px 20px">
         %if c.current_changeset_status:
           <div title="${_('Changeset status')}" class="changeset-status-lbl">[${h.changeset_status_lbl(c.current_changeset_status)}]</div>
           <div class="changeset-status-ico"><img src="${h.url('/images/icons/flag_status_%s.png' % c.current_changeset_status)}" /></div>
         %endif
     </div>
-    <div style="padding:4px">
+    <div style="padding:4px 4px 10px 4px">
       <div>${h.fmt_date(c.pull_request.created_on)}</div>
     </div>
 
-    ##DIFF
-
-    <div class="table">
-        <div id="body" class="diffblock">
-            <div style="white-space:pre-wrap;padding:5px">${h.literal(c.pull_request.description)}</div>
-        </div>
-        <div id="changeset_compare_view_content">
-            ##CS
-            <div style="font-size:1.1em;font-weight: bold;clear:both;padding-top:10px">${_('Incoming changesets')}</div>
-            <%include file="/compare/compare_cs.html" />
-
-            ## FILES
-            <div style="font-size:1.1em;font-weight: bold;clear:both;padding-top:10px">${_('Files affected')}</div>
-            <div class="cs_files">
-              %for fid, change, f, stat in c.files:
-                  <div class="cs_${change}">
-                    <div class="node">${h.link_to(h.safe_unicode(f),h.url.current(anchor=fid))}</div>
-                    <div class="changes">${h.fancy_file_stats(stat)}</div>
+    ## REVIEWERS
+    <div>
+      <div class="table" style="float:right;width:46%;clear:none">
+          <div id="body" class="diffblock">
+              <div style="white-space:pre-wrap;padding:5px">${_('Pull request reviewers')}</div>
+          </div>
+          <div style="border: 1px solid #CCC">
+            <div class="group_members_wrap">
+              <ul class="group_members">
+              %for user,status in c.pull_request_reviewers:
+                <li>
+                  <div class="group_member">
+                    <div style="float:left;padding:3px">
+                      <img src="${h.url(str('/images/icons/flag_status_%s.png' % (status[0][1].status if status else 'not_reviewed')))}"/>
+                    </div>
+                    <div class="gravatar"><img alt="gravatar" src="${h.gravatar_url(user.email,20)}"/> </div>
+                    <div style="float:left">${user.username}</div>
                   </div>
+                </li>
               %endfor
-            </div>
-        </div>
+              </ul>
+            </div>                
+          </div>
+      </div>
+      ##DIFF
+      <div class="table" style="float:left;width:46%;clear:none">
+          <div id="body" class="diffblock">
+              <div style="white-space:pre-wrap;padding:5px">${h.literal(c.pull_request.description)}</div>
+          </div>
+          <div id="changeset_compare_view_content">
+              ##CS
+              <div style="font-size:1.1em;font-weight: bold;clear:both;padding-top:10px">${_('Incoming changesets')}</div>
+              <%include file="/compare/compare_cs.html" />
+  
+              ## FILES
+              <div style="font-size:1.1em;font-weight: bold;clear:both;padding-top:10px">${_('Files affected')}</div>
+              <div class="cs_files">
+                %for fid, change, f, stat in c.files:
+                    <div class="cs_${change}">
+                      <div class="node">${h.link_to(h.safe_unicode(f),h.url.current(anchor=fid))}</div>
+                      <div class="changes">${h.fancy_file_stats(stat)}</div>
+                    </div>
+                %endfor
+              </div>
+          </div>
+      </div>
     </div>
     <script>
     var _USERS_AC_DATA = ${c.users_array|n};

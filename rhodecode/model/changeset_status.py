@@ -24,6 +24,7 @@
 
 
 import logging
+from collections import  defaultdict
 
 from rhodecode.model import BaseModel
 from rhodecode.model.db import ChangesetStatus, PullRequest
@@ -39,6 +40,52 @@ class ChangesetStatusModel(BaseModel):
     def __get_pull_request(self, pull_request):
         return self._get_instance(PullRequest, pull_request)
 
+    def _get_status_query(self, repo, revision, pull_request,
+                          with_revisions=False):
+        repo = self._get_repo(repo)
+
+        q = ChangesetStatus.query()\
+            .filter(ChangesetStatus.repo == repo)
+        if not with_revisions:
+            q = q.filter(ChangesetStatus.version == 0)
+
+        if revision:
+            q = q.filter(ChangesetStatus.revision == revision)
+        elif pull_request:
+            pull_request = self.__get_pull_request(pull_request)
+            q = q.filter(ChangesetStatus.pull_request == pull_request)
+        else:
+            raise Exception('Please specify revision or pull_request')
+        q.order_by(ChangesetStatus.version.asc())
+        return q
+
+    def calculate_status(self, statuses_by_reviewers):
+        """
+        leading one wins, if number of occurences are equal than weaker wins
+
+        :param statuses_by_reviewers:
+        """
+        status = None
+        votes = defaultdict(int)
+        reviewers_number = len(statuses_by_reviewers)
+        for user, statuses in statuses_by_reviewers:
+            if statuses:
+                ver, latest = statuses[0]
+                votes[latest.status] += 1
+            else:
+                votes[ChangesetStatus.DEFAULT] += 1
+
+        if votes.get(ChangesetStatus.STATUS_APPROVED) == reviewers_number:
+            return ChangesetStatus.STATUS_APPROVED
+        else:
+            return ChangesetStatus.STATUS_UNDER_REVIEW
+
+    def get_statuses(self, repo, revision=None, pull_request=None,
+                     with_revisions=False):
+        q = self._get_status_query(repo, revision, pull_request,
+                                   with_revisions)
+        return q.all()
+
     def get_status(self, repo, revision=None, pull_request=None):
         """
         Returns latest status of changeset for given revision or for given
@@ -52,19 +99,7 @@ class ChangesetStatusModel(BaseModel):
         :param pull_request: pull_request reference
         :type:
         """
-        repo = self._get_repo(repo)
-
-        q = ChangesetStatus.query()\
-            .filter(ChangesetStatus.repo == repo)\
-            .filter(ChangesetStatus.version == 0)
-
-        if revision:
-            q = q.filter(ChangesetStatus.revision == revision)
-        elif pull_request:
-            pull_request = self.__get_pull_request(pull_request)
-            q = q.filter(ChangesetStatus.pull_request == pull_request)
-        else:
-            raise Exception('Please specify revision or pull_request')
+        q = self._get_status_query(repo, revision, pull_request)
 
         # need to use first here since there can be multiple statuses
         # returned from pull_request
