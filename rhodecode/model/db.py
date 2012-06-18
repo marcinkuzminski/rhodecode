@@ -297,7 +297,7 @@ class User(Base, BaseModel):
     user_id = Column("user_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     username = Column("username", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     password = Column("password", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
-    active = Column("active", Boolean(), nullable=True, unique=None, default=None)
+    active = Column("active", Boolean(), nullable=True, unique=None, default=True)
     admin = Column("admin", Boolean(), nullable=True, unique=None, default=False)
     name = Column("firstname", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     lastname = Column("lastname", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
