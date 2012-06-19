@@ -247,6 +247,7 @@ class UserModel(BaseModel):
             raise
 
     def update(self, user_id, form_data):
+        from rhodecode.lib.auth import get_crypt_password
         try:
             user = self.get(user_id, cache=False)
             if user.username == 'default':
@@ -256,7 +257,7 @@ class UserModel(BaseModel):
 
             for k, v in form_data.items():
                 if k == 'new_password' and v != '':
-                    user.password = v
+                    user.password = get_crypt_password(v)
                     user.api_key = generate_api_key(user.username)
                 else:
                     setattr(user, k, v)
