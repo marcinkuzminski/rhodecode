@@ -35,9 +35,17 @@ def _get_ip_addr(environ):
     proxy_key2 = 'HTTP_X_FORWARDED_FOR'
     def_key = 'REMOTE_ADDR'
 
-    return environ.get(proxy_key2,
-                       environ.get(proxy_key, environ.get(def_key, '0.0.0.0'))
-                       )
+    ip = environ.get(proxy_key2)
+    if ip:
+        return ip
+
+    ip = environ.get(proxy_key)
+
+    if ip:
+        return ip
+
+    ip = environ.get(def_key, '0.0.0.0')
+    return ip
 
 
 class BasicAuth(AuthBasicAuthenticator):
@@ -178,12 +186,13 @@ class BaseController(WSGIController):
                 self.rhodecode_user.set_authenticated(
                     cookie_store.get('is_authenticated')
                 )
-            log.info('User: %s accessed %s' % (
-                auth_user, safe_unicode(environ.get('PATH_INFO')))
+            log.info('IP: %s User: %s accessed %s' % (
+               self.ip_addr, auth_user, safe_unicode(environ.get('PATH_INFO')))
             )
             return WSGIController.__call__(self, environ, start_response)
         finally:
-            log.info('Request to %s time: %.3fs' % (
+            log.info('IP: %s Request to %s time: %.3fs' % (
+                _get_ip_addr(environ),
                 safe_unicode(environ.get('PATH_INFO')), time.time() - start)
             )
             meta.Session.remove()
