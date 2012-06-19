@@ -48,6 +48,14 @@ def _get_ip_addr(environ):
     return ip
 
 
+def _get_access_path(environ):
+    path = environ.get('PATH_INFO')
+    org_req = environ.get('pylons.original_request')
+    if org_req:
+        path = org_req.environ.get('PATH_INFO')
+    return path
+
+
 class BasicAuth(AuthBasicAuthenticator):
 
     def __init__(self, realm, authfunc, auth_http_code=None):
@@ -187,13 +195,13 @@ class BaseController(WSGIController):
                     cookie_store.get('is_authenticated')
                 )
             log.info('IP: %s User: %s accessed %s' % (
-               self.ip_addr, auth_user, safe_unicode(environ.get('PATH_INFO')))
+               self.ip_addr, auth_user, safe_unicode(_get_access_path(environ)))
             )
             return WSGIController.__call__(self, environ, start_response)
         finally:
             log.info('IP: %s Request to %s time: %.3fs' % (
                 _get_ip_addr(environ),
-                safe_unicode(environ.get('PATH_INFO')), time.time() - start)
+                safe_unicode(_get_access_path(environ)), time.time() - start)
             )
             meta.Session.remove()
 

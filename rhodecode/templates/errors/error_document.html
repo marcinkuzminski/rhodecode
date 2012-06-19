@@ -1,14 +1,16 @@
 ## -*- coding: utf-8 -*-
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
         <title>Error - ${c.error_message}</title>
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <meta name="robots" content="index, nofollow"/>
+        <link rel="icon" href="${h.url('/images/icons/database_gear.png')}" type="image/png" />
+                
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 	    %if c.redirect_time:
 	        <meta http-equiv="refresh" content="${c.redirect_time}; url=${c.url_redirect}"/>
 	    %endif
-        <link rel="icon" href="${h.url("/images/hgicon.png")}" type="image/png" />
-        <meta name="robots" content="index, nofollow"/>
 
         <!-- stylesheets -->
         <link rel="stylesheet" type="text/css" href="${h.url('/css/style.css')}" media="screen" />
