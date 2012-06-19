@@ -246,7 +246,7 @@ class PullrequestsController(BaseRepoController):
                                         c.pull_request_reviewers
                                      )
         c.changeset_statuses = ChangesetStatus.STATUSES
-
+        c.target_repo = c.pull_request.org_repo.repo_name
         return render('/pullrequests/pullrequest_show.html')
 
     @jsonify
