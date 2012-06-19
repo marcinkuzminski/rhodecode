@@ -20,15 +20,17 @@
         ${self.breadcrumbs()}
     </div>
 
-    <h3>${_('Title')}: ${c.pull_request.title}</h3>
-    <div class="changeset-status-container" style="float:left;padding:0px 20px 0px 20px">
+    <h3>${_('Title')}: ${c.pull_request.title} 
+        <div class="changeset-status-container" style="float:none">
         %if c.current_changeset_status:
-          <div title="${_('Changeset status')}" class="changeset-status-lbl">[${h.changeset_status_lbl(c.current_changeset_status)}]</div>
-          <div class="changeset-status-ico"><img src="${h.url('/images/icons/flag_status_%s.png' % c.current_changeset_status)}" /></div>
+          <div title="${_('Pull request status')}" class="changeset-status-lbl">[${h.changeset_status_lbl(c.current_changeset_status)}]</div>
+          <div class="changeset-status-ico" style="padding:4px"><img src="${h.url('/images/icons/flag_status_%s.png' % c.current_changeset_status)}" /></div>
         %endif
-    </div>
-    <div style="padding:4px 4px 10px 4px">
-      <div>${h.fmt_date(c.pull_request.created_on)}</div>
+        </div>
+    </h3>
+    <div style="white-space:pre-wrap;padding:3px 3px 5px 20px">${h.literal(c.pull_request.description)}</div>
+    <div style="padding:4px 4px 10px 20px">
+      <div>${_('Created on')}: ${h.fmt_date(c.pull_request.created_on)}</div>
     </div>
 
     ## REVIEWERS
@@ -43,7 +45,7 @@
               %for user,status in c.pull_request_reviewers:
                 <li>
                   <div class="group_member">
-                    <div style="float:left;padding:3px">
+                    <div style="float:left;padding:3px" class="tooltip" title="${h.tooltip(h.changeset_status_lbl(status[0][1].status if status else 'not_reviewed'))}">
                       <img src="${h.url(str('/images/icons/flag_status_%s.png' % (status[0][1].status if status else 'not_reviewed')))}"/>
                     </div>
                     <div class="gravatar"><img alt="gravatar" src="${h.gravatar_url(user.email,20)}"/> </div>
@@ -58,7 +60,7 @@
       ##DIFF
       <div class="table" style="float:left;width:46%;clear:none">
           <div id="body" class="diffblock">
-              <div style="white-space:pre-wrap;padding:5px">${h.literal(c.pull_request.description)}</div>
+              <div style="white-space:pre-wrap;padding:5px">${_('Compare view')}</div>
           </div>
           <div id="changeset_compare_view_content">
               ##CS
@@ -98,10 +100,5 @@
                        c.current_changeset_status)}
 
 </div>
-
-<script type="text/javascript">
-
-
-</script>
 
 </%def>
