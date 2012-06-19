@@ -397,7 +397,7 @@ class SettingsController(BaseController):
 
         c.repo_groups = RepoGroup.groups_choices()
         c.repo_groups_choices = map(lambda k: unicode(k[0]), c.repo_groups)
-        c.landing_revs = ScmModel().get_repo_landing_revs()
+        choices, c.landing_revs = ScmModel().get_repo_landing_revs()
 
         new_repo = request.GET.get('repo', '')
         c.new_repo = repo_name_slug(new_repo)
