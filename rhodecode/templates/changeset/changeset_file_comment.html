@@ -35,12 +35,12 @@
 </%def>
 
 
-<%def name="comment_inline_form(changeset)">
+<%def name="comment_inline_form()">
 <div id='comment-inline-form-template' style="display:none">
   <div class="comment-inline-form ac">
   %if c.rhodecode_user.username != 'default':
     <div class="overlay"><div class="overlay-text">${_('Submitting...')}</div></div>
-      ${h.form(h.url('changeset_comment', repo_name=c.repo_name, revision=changeset.raw_id),class_='inline-form')}
+      ${h.form('#', class_='inline-form')}
       <div class="clearfix">
           <div class="comment-help">${_('Commenting on line {1}.')}
           ${(_('Comments parsed using %s syntax with %s support.') % (

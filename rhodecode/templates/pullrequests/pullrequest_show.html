@@ -83,6 +83,8 @@
     <script>
     var _USERS_AC_DATA = ${c.users_array|n};
     var _GROUPS_AC_DATA = ${c.users_groups_array|n};
+    AJAX_COMMENT_URL = "${url('pullrequest_comment',repo_name=c.repo_name,pull_request_id=c.pull_request.pull_request_id)}";
+    AJAX_COMMENT_DELETE_URL = "${url('pullrequest_comment_delete',repo_name=c.repo_name,comment_id='__COMMENT_ID__')}";  
     </script>
 
     ## diff block
@@ -93,11 +95,45 @@
 
     ## template for inline comment form
     <%namespace name="comment" file="/changeset/changeset_file_comment.html"/>
-    ##${comment.comment_inline_form(c.changeset)}
+    ${comment.comment_inline_form()}
 
     ## render comments main comments form and it status
     ${comment.comments(h.url('pullrequest_comment', repo_name=c.repo_name, pull_request_id=c.pull_request.pull_request_id),
                        c.current_changeset_status)}
+
+
+    <script type="text/javascript">
+      YUE.onDOMReady(function(){
+
+          YUE.on(YUQ('.show-inline-comments'),'change',function(e){
+              var show = 'none';
+              var target = e.currentTarget;
+              if(target.checked){
+                  var show = ''
+              }
+              var boxid = YUD.getAttribute(target,'id_for');
+              var comments = YUQ('#{0} .inline-comments'.format(boxid));
+              for(c in comments){
+                 YUD.setStyle(comments[c],'display',show);
+              }
+              var btns = YUQ('#{0} .inline-comments-button'.format(boxid));
+              for(c in btns){
+                  YUD.setStyle(btns[c],'display',show);
+               }
+          })
+
+          YUE.on(YUQ('.line'),'click',function(e){
+              var tr = e.currentTarget;
+              injectInlineForm(tr);
+          });
+
+          // inject comments into they proper positions
+          var file_comments = YUQ('.inline-comment-placeholder');
+          renderInlineComments(file_comments);
+      })
+
+    </script>
+
 
 </div>
 

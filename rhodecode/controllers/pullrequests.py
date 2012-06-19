@@ -25,7 +25,7 @@
 import logging
 import traceback
 
-from webob.exc import HTTPNotFound
+from webob.exc import HTTPNotFound, HTTPForbidden
 from collections import defaultdict
 from itertools import groupby
 
@@ -39,7 +39,8 @@ from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib import helpers as h
 from rhodecode.lib import diffs
 from rhodecode.lib.utils import action_logger
-from rhodecode.model.db import User, PullRequest, ChangesetStatus
+from rhodecode.model.db import User, PullRequest, ChangesetStatus,\
+    ChangesetComment
 from rhodecode.model.pull_request import PullRequestModel
 from rhodecode.model.meta import Session
 from rhodecode.model.repo import RepoModel
@@ -189,7 +190,8 @@ class PullrequestsController(BaseRepoController):
         for f in _parsed:
             fid = h.FID('', f['filename'])
             c.files.append([fid, f['operation'], f['filename'], f['stats']])
-            diff = diff_processor.as_html(enable_comments=False, diff_lines=[f])
+            diff = diff_processor.as_html(enable_comments=True,
+                                          diff_lines=[f])
             c.changes[fid] = [f['operation'], f['filename'], diff]
 
     def show(self, repo_name, pull_request_id):
@@ -295,3 +297,14 @@ class PullrequestsController(BaseRepoController):
                          render('changeset/changeset_comment_block.html')})
 
         return data
+
+    @jsonify
+    def delete_comment(self, repo_name, comment_id):
+        co = ChangesetComment.get(comment_id)
+        owner = lambda: co.author.user_id == c.rhodecode_user.user_id
+        if h.HasPermissionAny('hg.admin', 'repository.admin')() or owner:
+            ChangesetCommentsModel().delete(comment=co)
+            Session.commit()
+            return True
+        else:
+            raise HTTPForbidden()

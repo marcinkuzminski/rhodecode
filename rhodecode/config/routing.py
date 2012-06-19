@@ -463,6 +463,11 @@ def make_map(config):
                  action='comment', conditions=dict(function=check_repo,
                                                 method=["POST"]))
 
+    rmap.connect('pullrequest_comment_delete',
+                 '/{repo_name:.*}/pull-request-comment/{comment_id}/delete',
+                controller='pullrequests', action='delete_comment',
+                conditions=dict(function=check_repo, method=["DELETE"]))
+
     rmap.connect('summary_home', '/{repo_name:.*}/summary',
                 controller='summary', conditions=dict(function=check_repo))
 
