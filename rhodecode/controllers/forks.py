@@ -40,6 +40,7 @@ from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.model.db import Repository, RepoGroup, UserFollowing, User
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.forms import RepoForkForm
+from rhodecode.model.scm import ScmModel
 
 log = logging.getLogger(__name__)
 
@@ -53,6 +54,8 @@ class ForksController(BaseRepoController):
     def __load_defaults(self):
         c.repo_groups = RepoGroup.groups_choices()
         c.repo_groups_choices = map(lambda k: unicode(k[0]), c.repo_groups)
+        choices, c.landing_revs = ScmModel().get_repo_landing_revs()
+        c.landing_revs_choices = choices
 
     def __load_data(self, repo_name=None):
         """
@@ -142,7 +145,6 @@ class ForksController(BaseRepoController):
             force_defaults=False
         )
 
-
     @NotAnonymous()
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
                                    'repository.admin')
@@ -150,7 +152,8 @@ class ForksController(BaseRepoController):
         self.__load_defaults()
         c.repo_info = Repository.get_by_repo_name(repo_name)
         _form = RepoForkForm(old_data={'repo_type': c.repo_info.repo_type},
-                             repo_groups=c.repo_groups_choices,)()
+                             repo_groups=c.repo_groups_choices,
+                             landing_revs=c.landing_revs_choices)()
         form_result = {}
         try:
             form_result = _form.to_python(dict(request.POST))

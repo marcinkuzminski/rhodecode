@@ -194,7 +194,7 @@ def RepoForm(edit=False, old_data={}, supported_backends=BACKENDS.keys(),
 
 
 def RepoForkForm(edit=False, old_data={}, supported_backends=BACKENDS.keys(),
-                 repo_groups=[]):
+                 repo_groups=[], landing_revs=[]):
     class _RepoForkForm(formencode.Schema):
         allow_extra_fields = True
         filter_extra_fields = False
@@ -208,6 +208,7 @@ def RepoForkForm(edit=False, old_data={}, supported_backends=BACKENDS.keys(),
         update_after_clone = v.StringBoolean(if_missing=False)
         fork_parent_id = v.UnicodeString()
         chained_validators = [v.ValidForkName(edit, old_data)]
+        landing_rev = v.OneOf(landing_revs, hideList=True)
 
     return _RepoForkForm
 
