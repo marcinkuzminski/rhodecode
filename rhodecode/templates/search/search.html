@@ -1,13 +1,19 @@
 ## -*- coding: utf-8 -*-
 <%inherit file="/base/base.html"/>
 <%def name="title()">
-   ${_('Search')}
-   ${'"%s"' % c.cur_query if c.cur_query else None}
+   %if c.cur_query:
 	%if c.repo_name:
-		${_('in repository: ') + c.repo_name}
+		${_('Search "%s" in repository: %s') % (c.cur_query, c.repo_name)}
 	%else:
-		${_('in all repositories')}
+		${_('Search "%s" in all repositories') % c.cur_query}
 	%endif
+   %else:
+	%if c.repo_name:
+		${_('Search in repository: %s') % c.repo_name}
+	%else:
+		${_('Search in all repositories')}
+	%endif
+   %endif
 	- ${c.rhodecode_name}
 </%def>
 <%def name="breadcrumbs()">
@@ -21,11 +27,11 @@
 <div class="box">
 	<!-- box / title -->
 	<div class="title">
-		<h5>${_('Search')}
+		<h5>
 		%if c.repo_name:
-			${_('in repository: ') + c.repo_name}
+			${_('Search in repository: %s') % c.repo_name}
 		%else:
-			${_('in all repositories')}
+			${_('Search in all repositories')}
 		%endif
 		</h5>
 	</div>
