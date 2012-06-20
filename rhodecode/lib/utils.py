@@ -235,6 +235,15 @@ def is_valid_repos_group(repos_group_name, base_path):
     if is_valid_repo(repos_group_name, base_path):
         return False
 
+    try:
+        # we need to check bare git repos at higher level
+        # since we might match branches/hooks/info/objects or possible
+        # other things inside bare git repo
+        get_scm(os.path.dirname(full_path))
+        return False
+    except VCSError:
+        pass
+
     # check if it's a valid path
     if os.path.isdir(full_path):
         return True

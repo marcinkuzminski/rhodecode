@@ -44,7 +44,7 @@ from rhodecode.model.repos_group import ReposGroupModel
 from rhodecode.model.forms import ReposGroupForm
 from rhodecode.model.meta import Session
 from rhodecode.model.repo import RepoModel
-from webob.exc import HTTPInternalServerError
+from webob.exc import HTTPInternalServerError, HTTPNotFound
 
 log = logging.getLogger(__name__)
 
@@ -268,8 +268,10 @@ class ReposGroupsController(BaseController):
         the group by id view instead
         """
         group_name = group_name.rstrip('/')
-        id_ = RepoGroup.get_by_group_name(group_name).group_id
-        return self.show(id_)
+        id_ = RepoGroup.get_by_group_name(group_name)
+        if id_:
+            return self.show(id_.group_id)
+        raise HTTPNotFound
 
     @HasReposGroupPermissionAnyDecorator('group.read', 'group.write',
                                          'group.admin')
