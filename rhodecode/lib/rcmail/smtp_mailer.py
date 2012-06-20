@@ -27,6 +27,7 @@ import smtplib
 from socket import sslerror
 from email.utils import formatdate
 from rhodecode.lib.rcmail.message import Message
+from rhodecode.lib.rcmail.utils import DNS_NAME
 
 
 class SmtpMailer(object):
@@ -68,9 +69,11 @@ class SmtpMailer(object):
         raw_msg = msg.to_message()
 
         if self.ssl:
-            smtp_serv = smtplib.SMTP_SSL(self.mail_server, self.mail_port)
+            smtp_serv = smtplib.SMTP_SSL(self.mail_server, self.mail_port,
+                                         local_hostname=DNS_NAME.get_fqdn())
         else:
-            smtp_serv = smtplib.SMTP(self.mail_server, self.mail_port)
+            smtp_serv = smtplib.SMTP(self.mail_server, self.mail_port,
+                                     local_hostname=DNS_NAME.get_fqdn())
 
         if self.tls:
             smtp_serv.ehlo()
@@ -95,4 +98,4 @@ class SmtpMailer(object):
             smtp_serv.quit()
         except sslerror:
             # sslerror is raised in tls connections on closing sometimes
-            pass
+            smtp_serv.close()
