@@ -75,7 +75,7 @@ class ReposGroupsController(BaseController):
         """
         self.__load_defaults()
 
-        repo_group = RepoGroup.get(group_id)
+        repo_group = RepoGroup.get_or_404(group_id)
 
         data = repo_group.get_dict()
 
@@ -277,12 +277,9 @@ class ReposGroupsController(BaseController):
         """GET /repos_groups/id: Show a specific item"""
         # url('repos_group', id=ID)
 
-        c.group = RepoGroup.get(id)
+        c.group = RepoGroup.get_or_404(id)
 
-        if c.group:
-            c.group_repos = c.group.repositories.all()
-        else:
-            return redirect(url('home'))
+        c.group_repos = c.group.repositories.all()
 
         #overwrite our cached list with current filter
         gr_filter = c.group_repos

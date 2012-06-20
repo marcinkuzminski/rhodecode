@@ -172,9 +172,8 @@ class UsersController(BaseController):
     def edit(self, id, format='html'):
         """GET /users/id/edit: Form to edit an existing item"""
         # url('edit_user', id=ID)
-        c.user = User.get(id)
-        if not c.user:
-            return redirect(url('users'))
+        c.user = User.get_or_404(id)
+
         if c.user.username == 'default':
             h.flash(_("You can't edit this user"), category='warning')
             return redirect(url('users'))

@@ -35,6 +35,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship, joinedload, class_mapper, validates
 from sqlalchemy.exc import DatabaseError
 from beaker.cache import cache_region, region_invalidate
+from webob.exc import HTTPNotFound
 
 from pylons.i18n.translation import lazy_ugettext as _
 
@@ -49,6 +50,7 @@ from rhodecode.lib.compat import json
 from rhodecode.lib.caching_query import FromCache
 
 from rhodecode.model.meta import Base, Session
+
 
 
 URL_SEP = '/'
@@ -140,6 +142,14 @@ class BaseModel(object):
     def get(cls, id_):
         if id_:
             return cls.query().get(id_)
+
+    @classmethod
+    def get_or_404(cls, id_):
+        if id_:
+            res = cls.query().get(id_)
+            if not res:
+                raise HTTPNotFound
+            return res
 
     @classmethod
     def getAll(cls):

@@ -198,11 +198,8 @@ class PullrequestsController(BaseRepoController):
         repo_model = RepoModel()
         c.users_array = repo_model.get_users_js()
         c.users_groups_array = repo_model.get_users_groups_js()
-        c.pull_request = PullRequest.get(pull_request_id)
+        c.pull_request = PullRequest.get_or_404(pull_request_id)
 
-        # valid ID
-        if not c.pull_request:
-            raise HTTPNotFound
         cc_model = ChangesetCommentsModel()
         cs_model = ChangesetStatusModel()
         _cs_statuses = cs_model.get_statuses(c.pull_request.org_repo,
