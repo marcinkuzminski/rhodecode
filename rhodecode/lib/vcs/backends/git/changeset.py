@@ -195,7 +195,9 @@ class GitChangeset(BaseChangeset):
         return _prev(self, branch)
 
     def diff(self, ignore_whitespace=True, context=3):
-        return ''.join(self.repository.get_diff(self, self.parents[0],
+        rev1 = self.parents[0] if self.parents else self.repository.EMPTY_CHANGESET
+        rev2 = self
+        return ''.join(self.repository.get_diff(rev1, rev2,
                                     ignore_whitespace=ignore_whitespace,
                                     context=context))
 
