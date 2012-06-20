@@ -8,7 +8,7 @@
 
 <%def name="breadcrumbs_links()">
     <input class="q_filter_box" id="q_filter_bookmarks" size="15" type="text" name="filter" value="${_('quick filter...')}"/>
-    ${h.link_to(u'Home',h.url('/'))}
+    ${h.link_to(_(u'Home'),h.url('/'))}
     &raquo;
     ${h.link_to(c.repo_name,h.url('summary_home',repo_name=c.repo_name))}
     &raquo;

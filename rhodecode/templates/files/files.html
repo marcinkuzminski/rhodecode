@@ -5,7 +5,7 @@
 </%def>
 
 <%def name="breadcrumbs_links()">
-    ${h.link_to(u'Home',h.url('/'))}
+    ${h.link_to(_(u'Home'),h.url('/'))}
     &raquo;
     ${h.link_to(c.repo_name,h.url('files_home',repo_name=c.repo_name))}
     &raquo;
