@@ -223,8 +223,8 @@ class SimpleHg(BaseVCSController):
                 cmd = qry.split('=')[-1]
                 if cmd in mapping:
                     return mapping[cmd]
-                else:
-                    return 'pull'
+
+        return 'pull'
 
     def __inject_extras(self, repo_path, baseui, extras={}):
         """
