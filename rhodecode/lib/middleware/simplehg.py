@@ -70,7 +70,7 @@ class SimpleHg(BaseVCSController):
             return self.application(environ, start_response)
 
         ipaddr = self._get_ip_addr(environ)
-
+        username = None 
         # skip passing error to error controller
         environ['pylons.status_code_redirect'] = True
 
@@ -131,21 +131,19 @@ class SimpleHg(BaseVCSController):
                 #==============================================================
                 # CHECK PERMISSIONS FOR THIS REQUEST USING GIVEN USERNAME
                 #==============================================================
-                if action in ['pull', 'push']:
-                    try:
-                        user = self.__get_user(username)
-                        if user is None or not user.active:
-                            return HTTPForbidden()(environ, start_response)
-                        username = user.username
-                    except:
-                        log.error(traceback.format_exc())
-                        return HTTPInternalServerError()(environ,
-                                                         start_response)
-
-                    #check permissions for this repository
-                    perm = self._check_permission(action, user, repo_name)
-                    if perm is not True:
+                try:
+                    user = self.__get_user(username)
+                    if user is None or not user.active:
                         return HTTPForbidden()(environ, start_response)
+                    username = user.username
+                except:
+                    log.error(traceback.format_exc())
+                    return HTTPInternalServerError()(environ, start_response)
+
+                #check permissions for this repository
+                perm = self._check_permission(action, user, repo_name)
+                if perm is not True:
+                    return HTTPForbidden()(environ, start_response)
 
         # extras are injected into mercurial UI object and later available
         # in hg hooks executed by rhodecode

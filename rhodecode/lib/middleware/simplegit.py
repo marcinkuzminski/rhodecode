@@ -167,21 +167,20 @@ class SimpleGit(BaseVCSController):
                 #==============================================================
                 # CHECK PERMISSIONS FOR THIS REQUEST USING GIVEN USERNAME
                 #==============================================================
-                if action in ['pull', 'push']:
-                    try:
-                        user = self.__get_user(username)
-                        if user is None or not user.active:
-                            return HTTPForbidden()(environ, start_response)
-                        username = user.username
-                    except:
-                        log.error(traceback.format_exc())
-                        return HTTPInternalServerError()(environ,
-                                                         start_response)
-
-                    #check permissions for this repository
-                    perm = self._check_permission(action, user, repo_name)
-                    if perm is not True:
+                try:
+                    user = self.__get_user(username)
+                    if user is None or not user.active:
                         return HTTPForbidden()(environ, start_response)
+                    username = user.username
+                except:
+                    log.error(traceback.format_exc())
+                    return HTTPInternalServerError()(environ, start_response)
+
+                #check permissions for this repository
+                perm = self._check_permission(action, user, repo_name)
+                if perm is not True:
+                    return HTTPForbidden()(environ, start_response)
+
         extras = {
             'ip': ipaddr,
             'username': username,
