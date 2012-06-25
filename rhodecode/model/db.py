@@ -341,6 +341,11 @@ class User(Base, BaseModel):
         self._email = val.lower() if val else None
 
     @property
+    def emails(self):
+        other = UserEmailMap.query().filter(UserEmailMap.user==self).all()
+        return [self.email] + [x.email for x in other]
+
+    @property
     def full_name(self):
         return '%s %s' % (self.name, self.lastname)
 

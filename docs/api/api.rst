@@ -152,6 +152,7 @@ OUTPUT::
                 "firstname": "<firstname>",
                 "lastname" : "<lastname>",
                 "email" :    "<email>",
+                "emails":    "<list_of_all_additional_emails>",
                 "active" :   "<bool>",
                 "admin" :    "<bool>",
                 "ldap_dn" :  "<ldap_dn>",

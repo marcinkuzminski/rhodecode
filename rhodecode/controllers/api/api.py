@@ -97,6 +97,7 @@ class ApiController(JSONRPCController):
             firstname=user.name,
             lastname=user.lastname,
             email=user.email,
+            emails=user.emails,
             active=user.active,
             admin=user.admin,
             ldap_dn=user.ldap_dn,
