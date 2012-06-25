@@ -202,14 +202,25 @@ class ApiController(JSONRPCController):
             raise JSONRPCError("user ID:%s does not exist" % userid)
 
         try:
-            usr = UserModel().create_or_update(
+            user = UserModel().create_or_update(
                 username, password, email, firstname,
                 lastname, active, admin, ldap_dn
             )
             Session.commit()
             return dict(
                 id=usr.user_id,
-                msg='updated user ID:%s %s' % (usr.user_id, usr.username)
+                msg='updated user ID:%s %s' % (user.user_id, user.username),
+                user=dict(
+                    id=user.user_id,
+                    username=user.username,
+                    firstname=user.name,
+                    lastname=user.lastname,
+                    email=user.email,
+                    active=user.active,
+                    admin=user.admin,
+                    ldap_dn=user.ldap_dn,
+                    last_login=user.last_login,
+                )
             )
         except Exception:
             log.error(traceback.format_exc())

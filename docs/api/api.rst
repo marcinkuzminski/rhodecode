@@ -273,7 +273,18 @@ OUTPUT::
 
     result: {
               "id" : "<edited_user_id>",
-              "msg" : "updated user ID:<userid> <username>"
+              "msg" : "updated user ID:<userid> <username>",
+              "user": {
+                "id" :       "<id>",
+                "username" : "<username>",
+                "firstname": "<firstname>",
+                "lastname" : "<lastname>",
+                "email" :    "<email>",
+                "active" :   "<bool>",
+                "admin" :    "<bool>",
+                "ldap_dn" :  "<ldap_dn>",
+                "last_login": "<last_login>",
+              },              
             }
     error:  null
 
