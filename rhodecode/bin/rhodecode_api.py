@@ -142,7 +142,7 @@ def api_call(apikey, apihost, format, method=None, **kw):
 
     if not method:
         raise Exception('please specify method name !')
-    id_ = random.randrange(1, 200)
+    id_ = random.randrange(1, 9999)
     req = urllib2.Request('%s/_admin/api' % apihost,
                       data=json.dumps(_build_data(id_)),
                       headers={'content-type': 'text/plain'})
@@ -221,6 +221,8 @@ def main(argv=None):
     apikey = args.apikey or conf['apikey']
     host = args.apihost or conf['apihost']
     method = args.method
+    if method == '_create_config':
+        sys.exit()
     margs = dict(map(lambda s: s.split(':', 1), other))
 
     api_call(apikey, host, args.format, method, **margs)
