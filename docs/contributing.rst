@@ -27,7 +27,7 @@ enviroment.
 
 
 After finishing your changes make sure all tests passes ok. You can run
-the testsuite running nosetest from the project root.
+the testsuite running ``nosetest`` from the project root.
 
 | Thank you for any contributions!
 |  Marcin
