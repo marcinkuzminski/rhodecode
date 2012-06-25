@@ -61,10 +61,12 @@ class NotificationsController(BaseController):
         # url('notifications')
         c.user = self.rhodecode_user
         notif = NotificationModel().get_for_user(self.rhodecode_user.user_id,
-                                                 filter_=request.GET)
+                                            filter_=request.GET.getall('type'))
         p = int(request.params.get('page', 1))
         c.notifications = Page(notif, page=p, items_per_page=10)
         c.pull_request_type = Notification.TYPE_PULL_REQUEST
+        c.comment_type = [Notification.TYPE_CHANGESET_COMMENT,
+                          Notification.TYPE_PULL_REQUEST_COMMENT]
         return render('admin/notifications/notifications.html')
 
     def mark_all_read(self):
@@ -72,11 +74,11 @@ class NotificationsController(BaseController):
             nm = NotificationModel()
             # mark all read
             nm.mark_all_read_for_user(self.rhodecode_user.user_id,
-                                      filter_=request.GET)
+                                      filter_=request.GET.getall('type'))
             Session.commit()
             c.user = self.rhodecode_user
             notif = nm.get_for_user(self.rhodecode_user.user_id,
-                                    filter_=request.GET)
+                                    filter_=request.GET.getall('type'))
             c.notifications = Page(notif, page=1, items_per_page=10)
             return render('admin/notifications/notifications_data.html')
 

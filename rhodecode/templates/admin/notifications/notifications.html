@@ -24,15 +24,17 @@
         ##    </li>
         ##</ul>
     </div>
-    %if c.notifications:
+    
       <div style="padding:14px 18px;text-align: right;float:left">
       <span id='all' class="ui-btn"><a href="${h.url.current()}">${_('All')}</a></span>
+      <span id='pull_request' class="ui-btn"><a href="${h.url.current(type=c.comment_type)}">${_('Comments')}</a></span>
       <span id='pull_request' class="ui-btn"><a href="${h.url.current(type=c.pull_request_type)}">${_('Pull requests')}</a></span>
       </div>
+      %if c.notifications:
       <div style="padding:14px 18px;text-align: right;float:right">
       <span id='mark_all_read' class="ui-btn">${_('Mark all read')}</span>
       </div>
-    %endif
+      %endif
   <div id='notification_data'>
     <%include file='notifications_data.html'/>
   </div>
@@ -44,12 +46,8 @@ YUE.on(YUQ('.delete-notification'),'click',function(e){
  deleteNotification(url_del,notification_id)
 })
 YUE.on('mark_all_read','click',function(e){
-    var url = "${h.url('notifications_mark_all_read', **request.GET)}";
+    var url = "${h.url('notifications_mark_all_read', **request.GET.mixed())}";
     ypjax(url,'notification_data',function(){
-    	var notification_counter = YUD.get('notification_counter');
-    	if(notification_counter){
-    		notification_counter.innerHTML=0;
-    	}
     	YUE.on(YUQ('.delete-notification'),'click',function(e){
     		 var notification_id = e.currentTarget.id;
     		 deleteNotification(url_del,notification_id)

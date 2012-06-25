@@ -27,7 +27,6 @@
 import os
 import logging
 import traceback
-import datetime
 
 from pylons.i18n.translation import _
 
@@ -35,7 +34,6 @@ import rhodecode
 from rhodecode.lib import helpers as h
 from rhodecode.model import BaseModel
 from rhodecode.model.db import Notification, User, UserNotification
-from sqlalchemy.orm import joinedload
 
 log = logging.getLogger(__name__)
 
@@ -152,7 +150,7 @@ class NotificationModel(BaseModel):
                                  Notification.notification_id))
 
         if filter_:
-            q = q.filter(Notification.type_ == filter_.get('type'))
+            q = q.filter(Notification.type_.in_(filter_))
 
         return q.all()
 
@@ -164,7 +162,7 @@ class NotificationModel(BaseModel):
             .join((Notification, UserNotification.notification_id ==
                                  Notification.notification_id))
         if filter_:
-            q = q.filter(Notification.type_ == filter_.get('type'))
+            q = q.filter(Notification.type_.in_(filter_))
 
         # this is a little inefficient but sqlalchemy doesn't support
         # update on joined tables :(
