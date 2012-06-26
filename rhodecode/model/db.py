@@ -427,6 +427,26 @@ class User(Base, BaseModel):
         Session.add(self)
         log.debug('updated user %s lastlogin' % self.username)
 
+    def get_api_data(self):
+        """
+        Common function for generating user related data for API
+        """
+        user = self
+        data = dict(
+            id=user.user_id,
+            username=user.username,
+            api_key=user.api_key,
+            firstname=user.name,
+            lastname=user.lastname,
+            email=user.email,
+            emails=user.emails,
+            active=user.active,
+            admin=user.admin,
+            ldap_dn=user.ldap_dn,
+            last_login=user.last_login,
+        )
+        return data
+
     def __json__(self):
         return dict(
             user_id=self.user_id,
@@ -733,6 +753,27 @@ class Repository(Base, BaseModel):
         from rhodecode.lib.utils import is_valid_repo
 
         return is_valid_repo(repo_name, cls.base_path())
+
+    def get_api_data(self):
+        """
+        Common function for generating repo api data
+
+        """
+        repo = self
+        data = dict(
+            id=repo.repo_id,
+            repo_name=repo.repo_name,
+            repo_type=repo.repo_type,
+            clone_uri=repo.clone_uri,
+            private=repo.private,
+            created_on=repo.created_on,
+            description=repo.description,
+            landing_rev=repo.landing_rev,
+            owner=repo.user.username,
+            fork_of=repo.fork.repo_name if repo.fork else None
+        )
+
+        return data
 
     #==========================================================================
     # SCM PROPERTIES
