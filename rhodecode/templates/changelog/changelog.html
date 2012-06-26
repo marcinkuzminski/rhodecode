@@ -54,7 +54,7 @@ ${_('%s Changelog') % c.repo_name} - ${c.rhodecode_name}
 					<div id="chg_${cnt+1}" class="container ${'tablerow%s' % (cnt%2)}">
 						<div class="left">
 							<div>
-							${h.checkbox(cs.short_id,class_="changeset_range")}
+							${h.checkbox(cs.raw_id,class_="changeset_range")}
 							<span class="tooltip" title="${h.tooltip(h.age(cs.date))}"><a href="${h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id)}"><span class="changeset_id">${cs.revision}:<span class="changeset_hash">${h.short_id(cs.raw_id)}</span></span></a></span>
 							</div>
 							<div class="author">
@@ -160,8 +160,8 @@ ${_('%s Changelog') % c.repo_name} - ${c.rhodecode_name}
                             		rev_start+'...'+rev_end);
 
                         var link = "<a href="+url+">${_('Show selected changes __S -> __E')}</a>"
-                        link = link.replace('__S',rev_start);
-                        link = link.replace('__E',rev_end);
+                        link = link.replace('__S',rev_start.substr(0,6));
+                        link = link.replace('__E',rev_end.substr(0,6));
                         YUD.get('rev_range_container').innerHTML = link;
                         YUD.setStyle('rev_range_container','display','');
                         }
