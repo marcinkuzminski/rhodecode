@@ -344,8 +344,8 @@ class ScmModel(BaseModel):
         self.sa.add(repo)
         return repo
 
-    def pull_changes(self, repo_name, username):
-        dbrepo = Repository.get_by_repo_name(repo_name)
+    def pull_changes(self, repo, username):
+        dbrepo = self.__get_repo(repo)
         clone_uri = dbrepo.clone_uri
         if not clone_uri:
             raise Exception("This repository doesn't have a clone uri")
@@ -356,7 +356,7 @@ class ScmModel(BaseModel):
                 'ip': '',
                 'username': username,
                 'action': 'push_remote',
-                'repository': repo_name,
+                'repository': repo.repo_name,
                 'scm': repo.alias,
             }
 
@@ -367,7 +367,7 @@ class ScmModel(BaseModel):
                 repo.fetch(clone_uri)
             else:
                 repo.pull(clone_uri)
-            self.mark_for_invalidation(repo_name)
+            self.mark_for_invalidation(repo.repo_name)
         except:
             log.error(traceback.format_exc())
             raise
