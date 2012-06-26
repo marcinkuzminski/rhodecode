@@ -223,7 +223,12 @@ def main(argv=None):
     method = args.method
     if method == '_create_config':
         sys.exit()
-    margs = dict(map(lambda s: s.split(':', 1), other))
+
+    try:
+        margs = dict(map(lambda s: s.split(':', 1), other))
+    except:
+        sys.stderr.write('Error parsing arguments \n')
+        sys.exit()
 
     api_call(apikey, host, args.format, method, **margs)
     return 0
