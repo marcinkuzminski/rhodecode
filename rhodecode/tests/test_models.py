@@ -185,7 +185,7 @@ class TestUser(unittest.TestCase):
         usr = UserModel().create_or_update(username=u'test_user',
                                            password=u'qweqwe',
                                      email=u'u232@rhodecode.org',
-                                     name=u'u1', lastname=u'u1')
+                                     firstname=u'u1', lastname=u'u1')
         Session.commit()
         self.assertEqual(User.get_by_username(u'test_user'), usr)
 
@@ -207,7 +207,7 @@ class TestUser(unittest.TestCase):
         usr = UserModel().create_or_update(username=u'test_user',
                                            password=u'qweqwe',
                                      email=u'main_email@rhodecode.org',
-                                     name=u'u1', lastname=u'u1')
+                                     firstname=u'u1', lastname=u'u1')
         Session.commit()
 
         def do():
@@ -225,7 +225,7 @@ class TestUser(unittest.TestCase):
         usr = UserModel().create_or_update(username=u'test_user',
                                            password=u'qweqwe',
                                      email=u'main_email@rhodecode.org',
-                                     name=u'u1', lastname=u'u1')
+                                     firstname=u'u1', lastname=u'u1')
         Session.commit()
 
         m = UserEmailMap()
@@ -255,7 +255,7 @@ class TestNotifications(unittest.TestCase):
         self.u1 = UserModel().create_or_update(username=u'u1',
                                         password=u'qweqwe',
                                         email=u'u1@rhodecode.org',
-                                        name=u'u1', lastname=u'u1')
+                                        firstname=u'u1', lastname=u'u1')
         Session.commit()
         self.u1 = self.u1.user_id
 
@@ -433,7 +433,7 @@ class TestUsers(unittest.TestCase):
         self.u1 = UserModel().create_or_update(username=u'u1',
                                         password=u'qweqwe',
                                         email=u'u1@rhodecode.org',
-                                        name=u'u1', lastname=u'u1')
+                                        firstname=u'u1', lastname=u'u1')
 
     def tearDown(self):
         perm = Permission.query().all()
@@ -474,16 +474,16 @@ class TestPermissions(unittest.TestCase):
     def setUp(self):
         self.u1 = UserModel().create_or_update(
             username=u'u1', password=u'qweqwe',
-            email=u'u1@rhodecode.org', name=u'u1', lastname=u'u1'
+            email=u'u1@rhodecode.org', firstname=u'u1', lastname=u'u1'
         )
         self.u2 = UserModel().create_or_update(
             username=u'u2', password=u'qweqwe',
-            email=u'u2@rhodecode.org', name=u'u2', lastname=u'u2'
+            email=u'u2@rhodecode.org', firstname=u'u2', lastname=u'u2'
         )
         self.anon = User.get_by_username('default')
         self.a1 = UserModel().create_or_update(
             username=u'a1', password=u'qweqwe',
-            email=u'a1@rhodecode.org', name=u'a1', lastname=u'a1', admin=True
+            email=u'a1@rhodecode.org', firstname=u'a1', lastname=u'a1', admin=True
         )
         Session.commit()
 

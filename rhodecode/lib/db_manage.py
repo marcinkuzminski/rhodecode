@@ -465,7 +465,7 @@ class DbManage(object):
     def create_user(self, username, password, email='', admin=False):
         log.info('creating user %s' % username)
         UserModel().create_or_update(username, password, email,
-                                     name='RhodeCode', lastname='Admin',
+                                     firstname='RhodeCode', lastname='Admin',
                                      active=True, admin=admin)
 
     def create_default_user(self):
@@ -474,7 +474,7 @@ class DbManage(object):
         UserModel().create_or_update(username='default',
                               password=str(uuid.uuid1())[:8],
                               email='anonymous@rhodecode.org',
-                              name='Anonymous', lastname='User')
+                              firstname='Anonymous', lastname='User')
 
     def create_permissions(self):
         # module.(access|create|change|delete)_[name]

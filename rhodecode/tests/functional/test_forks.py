@@ -12,7 +12,7 @@ class TestForksController(TestController):
         self.password = u'qweqwe'
         self.u1 = UserModel().create_or_update(
             username=self.username, password=self.password,
-            email=u'fork_king@rhodecode.org', name=u'u1', lastname=u'u1'
+            email=u'fork_king@rhodecode.org', firstname=u'u1', lastname=u'u1'
         )
         self.Session.commit()
 

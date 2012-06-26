@@ -101,8 +101,8 @@ class UserModel(BaseModel):
             log.error(traceback.format_exc())
             raise
 
-    def create_or_update(self, username, password, email, name, lastname,
-                         active=True, admin=False, ldap_dn=None):
+    def create_or_update(self, username, password, email, firstname='',
+                         lastname='', active=True, admin=False, ldap_dn=None):
         """
         Creates a new instance if not found, or updates current one
 
@@ -110,7 +110,7 @@ class UserModel(BaseModel):
         :param password:
         :param email:
         :param active:
-        :param name:
+        :param firstname:
         :param lastname:
         :param active:
         :param admin:
@@ -124,19 +124,23 @@ class UserModel(BaseModel):
         if user is None:
             log.debug('creating new user %s' % username)
             new_user = User()
+            edit = False
         else:
             log.debug('updating user %s' % username)
             new_user = user
+            edit = True
 
         try:
             new_user.username = username
             new_user.admin = admin
-            new_user.password = get_crypt_password(password)
-            new_user.api_key = generate_api_key(username)
+            # set password only if creating an user or password is changed
+            if edit is False or user.password != password:
+                new_user.password = get_crypt_password(password)
+                new_user.api_key = generate_api_key(username)
             new_user.email = email
             new_user.active = active
             new_user.ldap_dn = safe_unicode(ldap_dn) if ldap_dn else None
-            new_user.name = name
+            new_user.name = firstname
             new_user.lastname = lastname
             self.sa.add(new_user)
             return new_user
