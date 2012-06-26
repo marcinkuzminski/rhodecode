@@ -10,8 +10,10 @@ class TestChangelogController(TestController):
 
         response.mustcontain("""<div id="chg_20" class="container tablerow1">""")
         response.mustcontain(
-            """<input class="changeset_range" id="5e204e7583b9" """
-            """name="5e204e7583b9" type="checkbox" value="1" />"""
+            """<input class="changeset_range" """
+            """id="5e204e7583b9c8e7b93a020bd036564b1e731dae" """
+            """name="5e204e7583b9c8e7b93a020bd036564b1e731dae" """
+            """type="checkbox" value="1" />"""
         )
         response.mustcontain(
             """<span class="changeset_id">154:"""
@@ -29,22 +31,24 @@ class TestChangelogController(TestController):
 
         #pagination
         response = self.app.get(url(controller='changelog', action='index',
-                                    repo_name=HG_REPO), {'page':1})
+                                    repo_name=HG_REPO), {'page': 1})
         response = self.app.get(url(controller='changelog', action='index',
-                                    repo_name=HG_REPO), {'page':2})
+                                    repo_name=HG_REPO), {'page': 2})
         response = self.app.get(url(controller='changelog', action='index',
-                                    repo_name=HG_REPO), {'page':3})
+                                    repo_name=HG_REPO), {'page': 3})
         response = self.app.get(url(controller='changelog', action='index',
-                                    repo_name=HG_REPO), {'page':4})
+                                    repo_name=HG_REPO), {'page': 4})
         response = self.app.get(url(controller='changelog', action='index',
-                                    repo_name=HG_REPO), {'page':5})
+                                    repo_name=HG_REPO), {'page': 5})
         response = self.app.get(url(controller='changelog', action='index',
-                                    repo_name=HG_REPO), {'page':6})
+                                    repo_name=HG_REPO), {'page': 6})
 
         # Test response after pagination...
         response.mustcontain(
-            """<input class="changeset_range" id="46ad32a4f974" """
-            """name="46ad32a4f974" type="checkbox" value="1" />"""
+            """<input class="changeset_range" """
+            """id="46ad32a4f974e45472a898c6b0acb600320579b1" """
+            """name="46ad32a4f974e45472a898c6b0acb600320579b1" """
+            """type="checkbox" value="1" />"""
         )
         response.mustcontain(
             """<span class="changeset_id">64:"""

@@ -170,7 +170,7 @@ class TestReposGroups(unittest.TestCase):
         self.assertEqual(expected, validator.to_python(name))
 
     def test_ValidCloneUri(self):
-            assert False
+            self.fail('TODO:')
 
     def test_ValidForkType(self):
             validator = v.ValidForkType(old_data={'repo_type': 'hg'})
@@ -178,7 +178,7 @@ class TestReposGroups(unittest.TestCase):
             self.assertRaises(formencode.Invalid, validator.to_python, 'git')
 
     def test_ValidPerms(self):
-            assert False
+            self.fail('TODO:')
 
     def test_ValidSettings(self):
         validator = v.ValidSettings()

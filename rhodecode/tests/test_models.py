@@ -262,14 +262,14 @@ class TestNotifications(unittest.TestCase):
         self.u2 = UserModel().create_or_update(username=u'u2',
                                         password=u'qweqwe',
                                         email=u'u2@rhodecode.org',
-                                        name=u'u2', lastname=u'u3')
+                                        firstname=u'u2', lastname=u'u3')
         Session.commit()
         self.u2 = self.u2.user_id
 
         self.u3 = UserModel().create_or_update(username=u'u3',
                                         password=u'qweqwe',
                                         email=u'u3@rhodecode.org',
-                                        name=u'u3', lastname=u'u3')
+                                        firstname=u'u3', lastname=u'u3')
         Session.commit()
         self.u3 = self.u3.user_id
 
