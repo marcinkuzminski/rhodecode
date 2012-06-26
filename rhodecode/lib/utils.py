@@ -458,7 +458,9 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False):
                 if repo.description != 'unknown' else '%s repository' % name,
              'private': False,
              'group_id': getattr(group, 'group_id', None),
-             'landing_rev': repo.DEFAULT_BRANCH_NAME
+             'landing_rev': 'tip',
+             'clone_uri': None,
+             'repo_group': None,
             }
             rm.create(form_data, user, just_db=True)
     sa.commit()
