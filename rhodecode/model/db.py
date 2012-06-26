@@ -433,13 +433,13 @@ class User(Base, BaseModel):
         """
         user = self
         data = dict(
-            id=user.user_id,
+            user_id=user.user_id,
             username=user.username,
-            api_key=user.api_key,
             firstname=user.name,
             lastname=user.lastname,
             email=user.email,
             emails=user.emails,
+            api_key=user.api_key,
             active=user.active,
             admin=user.admin,
             ldap_dn=user.ldap_dn,
@@ -761,7 +761,7 @@ class Repository(Base, BaseModel):
         """
         repo = self
         data = dict(
-            id=repo.repo_id,
+            repo_id=repo.repo_id,
             repo_name=repo.repo_name,
             repo_type=repo.repo_type,
             clone_uri=repo.clone_uri,
