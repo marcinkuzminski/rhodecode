@@ -27,7 +27,7 @@
     
       <div style="padding:14px 18px;text-align: right;float:left">
       <span id='all' class="ui-btn"><a href="${h.url.current()}">${_('All')}</a></span>
-      <span id='pull_request' class="ui-btn"><a href="${h.url.current(type=c.comment_type)}">${_('Comments')}</a></span>
+      <span id='comment' class="ui-btn"><a href="${h.url.current(type=c.comment_type)}">${_('Comments')}</a></span>
       <span id='pull_request' class="ui-btn"><a href="${h.url.current(type=c.pull_request_type)}">${_('Pull requests')}</a></span>
       </div>
       %if c.notifications:
@@ -54,5 +54,11 @@ YUE.on('mark_all_read','click',function(e){
     	})
     });
 })
+
+var current_filter = "${c.current_filter}";
+if (YUD.get(current_filter)){
+	YUD.addClass(current_filter, 'active');
+}
+console.log(current_filter);
 </script>
 </%def>

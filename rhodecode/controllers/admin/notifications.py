@@ -67,6 +67,14 @@ class NotificationsController(BaseController):
         c.pull_request_type = Notification.TYPE_PULL_REQUEST
         c.comment_type = [Notification.TYPE_CHANGESET_COMMENT,
                           Notification.TYPE_PULL_REQUEST_COMMENT]
+
+        _current_filter = request.GET.getall('type')
+        c.current_filter = 'all'
+        if _current_filter == [c.pull_request_type]:
+            c.current_filter = 'pull_request'
+        elif _current_filter == c.comment_type:
+            c.current_filter = 'comment'
+
         return render('admin/notifications/notifications.html')
 
     def mark_all_read(self):
