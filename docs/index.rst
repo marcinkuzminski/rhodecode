@@ -21,6 +21,7 @@ Users Guide
 
    usage/general
    usage/git_support
+   usage/performance
    usage/statistics
    usage/backup
    usage/debugging
