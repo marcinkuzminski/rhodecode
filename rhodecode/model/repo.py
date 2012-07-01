@@ -49,6 +49,7 @@ log = logging.getLogger(__name__)
 class RepoModel(BaseModel):
 
     cls = Repository
+    URL_SEPARATOR = Repository.url_sep()
 
     def __get_users_group(self, users_group):
         return self._get_instance(UsersGroup, users_group,
@@ -203,37 +204,38 @@ class RepoModel(BaseModel):
             log.error(traceback.format_exc())
             raise
 
-    def create(self, form_data, cur_user, just_db=False, fork=False):
+    def create_repo(self, repo_name, repo_type, description, owner,
+                    private=False, clone_uri=None, repos_group=None,
+                    landing_rev='tip', just_db=False, fork_of=None,
+                    copy_fork_permissions=False):
         from rhodecode.model.scm import ScmModel
 
+        owner = self._get_user(owner)
+        fork_of = self._get_repo(fork_of)
+        repo_group = self.__get_repos_group(repos_group)
         try:
-            if fork:
-                fork_parent_id = form_data['fork_parent_id']
 
             # repo name is just a name of repository
             # while repo_name_full is a full qualified name that is combined
             # with name and path of group
-            repo_name = form_data['repo_name']
-            repo_name_full = form_data['repo_name_full']
+            repo_name = repo_name.split(self.URL_SEPARATOR)[-1]
+            repo_name_full = repo_name
 
             new_repo = Repository()
             new_repo.enable_statistics = False
+            new_repo.repo_name = repo_name_full
+            new_repo.repo_type = repo_type
+            new_repo.user = owner
+            new_repo.group = repo_group
+            new_repo.description = description or repo_name
+            new_repo.private = private
+            new_repo.clone_uri = clone_uri
+            new_repo.landing_rev = landing_rev
 
-            for k, v in form_data.items():
-                if k == 'repo_name':
-                    v = repo_name_full
-                if k == 'repo_group':
-                    k = 'group_id'
-                if k == 'description':
-                    v = v or repo_name
-
-                setattr(new_repo, k, v)
-
-            if fork:
-                parent_repo = Repository.get(fork_parent_id)
+            if fork_of:
+                parent_repo = fork_of
                 new_repo.fork = parent_repo
 
-            new_repo.user_id = cur_user.user_id
             self.sa.add(new_repo)
 
             def _create_default_perms():
@@ -245,7 +247,7 @@ class RepoModel(BaseModel):
                         default = p.permission.permission_name
                         break
 
-                default_perm = 'repository.none' if form_data['private'] else default
+                default_perm = 'repository.none' if private else default
 
                 repo_to_perm.permission_id = self.sa.query(Permission)\
                         .filter(Permission.permission_name == default_perm)\
@@ -256,9 +258,9 @@ class RepoModel(BaseModel):
 
                 self.sa.add(repo_to_perm)
 
-            if fork:
-                if form_data.get('copy_permissions'):
-                    repo = Repository.get(fork_parent_id)
+            if fork_of:
+                if copy_fork_permissions:
+                    repo = fork_of
                     user_perms = UserRepoToPerm.query()\
                         .filter(UserRepoToPerm.repository == repo).all()
                     group_perms = UsersGroupRepoToPerm.query()\
@@ -277,19 +279,36 @@ class RepoModel(BaseModel):
                 _create_default_perms()
 
             if not just_db:
-                self.__create_repo(repo_name, form_data['repo_type'],
-                                   form_data['repo_group'],
-                                   form_data['clone_uri'])
+                self.__create_repo(repo_name, repo_type,
+                                   repo_group,
+                                   clone_uri)
                 log_create_repository(new_repo.get_dict(),
-                                      created_by=cur_user.username)
+                                      created_by=owner.username)
 
             # now automatically start following this repository as owner
             ScmModel(self.sa).toggle_following_repo(new_repo.repo_id,
-                                                    cur_user.user_id)
+                                                    owner.user_id)
             return new_repo
         except:
             log.error(traceback.format_exc())
             raise
+
+    def create(self, form_data, cur_user, just_db=False, fork=None):
+
+        repo_name = form_data['repo_name_full']
+        repo_type = form_data['repo_type']
+        description = form_data['description']
+        owner = cur_user
+        private = form_data['private']
+        clone_uri = form_data.get('clone_uri')
+        repos_group = form_data['repo_group']
+        landing_rev = form_data['landing_rev']
+        copy_fork_permissions = form_data.get('copy_permissions')
+        fork_of = form_data.get('fork_parent_id')
+        return self.create_repo(
+            repo_name, repo_type, description, owner, private, clone_uri,
+            repos_group, landing_rev, just_db, fork_of, copy_fork_permissions
+        )
 
     def create_fork(self, form_data, cur_user):
         """
@@ -303,12 +322,13 @@ class RepoModel(BaseModel):
 
     def delete(self, repo):
         repo = self._get_repo(repo)
-        try:
-            self.sa.delete(repo)
-            self.__delete_repo(repo)
-        except:
-            log.error(traceback.format_exc())
-            raise
+        if repo:
+            try:
+                self.sa.delete(repo)
+                self.__delete_repo(repo)
+            except:
+                log.error(traceback.format_exc())
+                raise
 
     def grant_user_permission(self, repo, user, perm):
         """

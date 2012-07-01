@@ -146,7 +146,7 @@ class ReposController(BaseController):
             form_result = RepoForm(repo_groups=c.repo_groups_choices,
                                    landing_revs=c.landing_revs_choices)()\
                             .to_python(dict(request.POST))
-            RepoModel().create(form_result, self.rhodecode_user)
+            RepoModel().create(form_result, self.rhodecode_user.user_id)
             if form_result['clone_uri']:
                 h.flash(_('created repository %s from %s') \
                     % (form_result['repo_name'], form_result['clone_uri']),

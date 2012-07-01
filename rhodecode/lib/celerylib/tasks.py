@@ -373,7 +373,7 @@ def create_repo_fork(form_data, cur_user):
 
     base_path = Repository.base_path()
 
-    fork_repo = RepoModel(DBS).create(form_data, cur_user,
+    fork_repo = RepoModel(DBS).create(form_data, cur_user.user_id,
                                       just_db=True, fork=True)
 
     alias = form_data['repo_type']
