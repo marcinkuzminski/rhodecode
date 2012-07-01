@@ -554,6 +554,17 @@ class UsersGroup(Base, BaseModel):
                                     "get_users_group_%s" % users_group_id))
         return users_group.get(users_group_id)
 
+    def get_api_data(self):
+        users_group = self
+
+        data = dict(
+            id=users_group.users_group_id,
+            group_name=users_group.users_group_name,
+            active=users_group.users_group_active,
+        )
+
+        return data
+
 
 class UsersGroupMember(Base, BaseModel):
     __tablename__ = 'users_groups_members'
