@@ -558,7 +558,7 @@ class UsersGroup(Base, BaseModel):
         users_group = self
 
         data = dict(
-            id=users_group.users_group_id,
+            users_group_id=users_group.users_group_id,
             group_name=users_group.users_group_name,
             active=users_group.users_group_active,
         )
