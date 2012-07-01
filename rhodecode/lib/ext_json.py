@@ -60,7 +60,7 @@ def _obj_dump(obj):
 # Import simplejson
 try:
     # import simplejson initially
-    import simplejson as _sj
+    import simplejson
 
     def extended_encode(obj):
         try:
@@ -70,37 +70,42 @@ try:
         raise TypeError("%r is not JSON serializable" % (obj,))
     # we handle decimals our own it makes unified behavior of json vs
     # simplejson
-    _sj.dumps = functools.partial(_sj.dumps, default=extended_encode,
-                                  use_decimal=False)
-    _sj.dump = functools.partial(_sj.dump, default=extended_encode,
-                                 use_decimal=False)
-    simplejson = _sj
-
+    simplejson.dumps = functools.partial(simplejson.dumps,
+                                         default=extended_encode,
+                                         use_decimal=False)
+    simplejson.dump = functools.partial(simplejson.dump,
+                                        default=extended_encode,
+                                        use_decimal=False)
 except ImportError:
     # no simplejson set it to None
-    _sj = None
+    simplejson = None
 
 
 try:
     # simplejson not found try out regular json module
-    import json as _json
+    import json
 
     # extended JSON encoder for json
-    class ExtendedEncoder(_json.JSONEncoder):
+    class ExtendedEncoder(json.JSONEncoder):
         def default(self, obj):
             try:
                 return _obj_dump(obj)
             except NotImplementedError:
                 pass
-            return _json.JSONEncoder.default(self, obj)
+            return json.JSONEncoder.default(self, obj)
     # monkey-patch JSON encoder to use extended version
-    _json.dumps = functools.partial(_json.dumps, cls=ExtendedEncoder)
-    _json.dump = functools.partial(_json.dump, cls=ExtendedEncoder)
-    stdlib = _json
+    json.dumps = functools.partial(json.dumps, cls=ExtendedEncoder)
+    json.dump = functools.partial(json.dump, cls=ExtendedEncoder)
+
 except ImportError:
-    _json = None
+    json = None
+
+stdlib = json
 
 # set all available json modules
-simplejson = _sj
-stdjson = _json
-json = _sj if _sj else _json
+if simplejson:
+    json = simplejson
+elif json:
+    json = json
+else:
+    raise ImportError('Could not find any json modules')
