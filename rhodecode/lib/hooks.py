@@ -90,7 +90,6 @@ def log_pull_action(ui, repo, **kwargs):
     :param ui:
     :param repo:
     """
-
     extras = dict(repo.ui.configitems('rhodecode_extras'))
     username = extras['username']
     repository = extras['repository']

@@ -224,7 +224,10 @@ class SimpleHg(BaseVCSController):
                 if cmd in mapping:
                     return mapping[cmd]
 
-        return 'pull'
+                return 'pull'
+
+        raise Exception('Unable to detect pull/push action !!'
+                        'Are you using non standard command or client ?')
 
     def __inject_extras(self, repo_path, baseui, extras={}):
         """
