@@ -51,8 +51,7 @@ from rhodecode.lib.caching_query import FromCache
 
 from rhodecode.model import meta
 from rhodecode.model.db import Repository, User, RhodeCodeUi, \
-    UserLog, RepoGroup, RhodeCodeSetting, UserRepoGroupToPerm,\
-    CacheInvalidation
+    UserLog, RepoGroup, RhodeCodeSetting, CacheInvalidation
 from rhodecode.model.meta import Session
 from rhodecode.model.repos_group import ReposGroupModel
 from rhodecode.lib.utils2 import safe_str, safe_unicode
@@ -129,7 +128,7 @@ def action_logger(user, action, repo, ipaddr='', sa=None, commit=False):
     """
 
     if not sa:
-        sa = meta.Session
+        sa = meta.Session()
 
     try:
         if hasattr(user, 'user_id'):
@@ -306,7 +305,7 @@ def make_ui(read_from='file', path=None, checkpaths=True):
                 baseui.setconfig(section, k, v)
 
     elif read_from == 'db':
-        sa = meta.Session
+        sa = meta.Session()
         ret = sa.query(RhodeCodeUi)\
             .options(FromCache("sql_cache_short", "get_hg_ui_settings"))\
             .all()
@@ -399,7 +398,7 @@ def map_groups(path):
 
     :param paths: full path to repository
     """
-    sa = meta.Session
+    sa = meta.Session()
     groups = path.split(Repository.url_sep())
     parent = None
     group = None
@@ -438,7 +437,7 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False):
     :param remove_obsolete: check for obsolete entries in database
     """
     from rhodecode.model.repo import RepoModel
-    sa = meta.Session
+    sa = meta.Session()
     rm = RepoModel()
     user = sa.query(User).filter(User.admin == True).first()
     if user is None:
@@ -447,22 +446,20 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False):
 
     for name, repo in initial_repo_list.items():
         group = map_groups(name)
-        if not rm.get_by_repo_name(name, cache=False):
-            log.info('repository %s not found creating default' % name)
+        if not rm.get_by_repo_name(name):
+            log.info('repository %s not found creating now' % name)
             added.append(name)
-            form_data = {
-             'repo_name': name,
-             'repo_name_full': name,
-             'repo_type': repo.alias,
-             'description': repo.description \
-                if repo.description != 'unknown' else '%s repository' % name,
-             'private': False,
-             'group_id': getattr(group, 'group_id', None),
-             'landing_rev': 'tip',
-             'clone_uri': None,
-             'repo_group': None,
-            }
-            rm.create(form_data, user, just_db=True)
+            desc = (repo.description
+                    if repo.description != 'unknown'
+                    else '%s repository' % name)
+            rm.create_repo(
+                repo_name=name,
+                repo_type=repo.alias,
+                description=desc,
+                repos_group=getattr(group, 'group_id', None),
+                owner=user,
+                just_db=True
+            )
     sa.commit()
     removed = []
     if remove_obsolete:
@@ -589,7 +586,7 @@ def create_test_env(repos_test_path, config):
     dbmanage.admin_prompt()
     dbmanage.create_permissions()
     dbmanage.populate_default_permissions()
-    Session.commit()
+    Session().commit()
     # PART TWO make test repo
     log.debug('making test vcs repositories')
 

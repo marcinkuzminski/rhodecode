@@ -227,6 +227,7 @@ class TestPermissions(unittest.TestCase):
             repo_name=name,
             repo_type='hg',
             description='',
+            repos_group=self.g1,
             owner=self.u1,
         )
         Session().commit()

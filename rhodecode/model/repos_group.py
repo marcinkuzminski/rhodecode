@@ -129,7 +129,7 @@ class ReposGroupModel(BaseModel):
             # delete only if that path really exists
             os.rmdir(rm_path)
 
-    def create(self, group_name, group_description, parent, just_db=False):
+    def create(self, group_name, group_description, parent=None, just_db=False):
         try:
             new_repos_group = RepoGroup()
             new_repos_group.group_description = group_description

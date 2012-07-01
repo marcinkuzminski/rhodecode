@@ -212,21 +212,21 @@ class RepoModel(BaseModel):
 
         owner = self._get_user(owner)
         fork_of = self._get_repo(fork_of)
-        repo_group = self.__get_repos_group(repos_group)
+        repos_group = self.__get_repos_group(repos_group)
         try:
 
             # repo name is just a name of repository
             # while repo_name_full is a full qualified name that is combined
             # with name and path of group
-            repo_name = repo_name.split(self.URL_SEPARATOR)[-1]
             repo_name_full = repo_name
+            repo_name = repo_name.split(self.URL_SEPARATOR)[-1]
 
             new_repo = Repository()
             new_repo.enable_statistics = False
             new_repo.repo_name = repo_name_full
             new_repo.repo_type = repo_type
             new_repo.user = owner
-            new_repo.group = repo_group
+            new_repo.group = repos_group
             new_repo.description = description or repo_name
             new_repo.private = private
             new_repo.clone_uri = clone_uri
@@ -280,7 +280,7 @@ class RepoModel(BaseModel):
 
             if not just_db:
                 self.__create_repo(repo_name, repo_type,
-                                   repo_group,
+                                   repos_group,
                                    clone_uri)
                 log_create_repository(new_repo.get_dict(),
                                       created_by=owner.username)
@@ -290,6 +290,7 @@ class RepoModel(BaseModel):
                                                     owner.user_id)
             return new_repo
         except:
+            print traceback.format_exc()
             log.error(traceback.format_exc())
             raise
 
@@ -435,7 +436,7 @@ class RepoModel(BaseModel):
             log.error(traceback.format_exc())
             raise
 
-    def __create_repo(self, repo_name, alias, new_parent_id, clone_uri=False):
+    def __create_repo(self, repo_name, alias, parent, clone_uri=False):
         """
         makes repository on filesystem. It's group aware means it'll create
         a repository within a group, and alter the paths accordingly of
@@ -448,10 +449,8 @@ class RepoModel(BaseModel):
         """
         from rhodecode.lib.utils import is_valid_repo, is_valid_repos_group
 
-        if new_parent_id:
-            paths = RepoGroup.get(new_parent_id)\
-                .full_path.split(RepoGroup.url_sep())
-            new_parent_path = os.sep.join(paths)
+        if parent:
+            new_parent_path = os.sep.join(parent.full_path_splitted)
         else:
             new_parent_path = ''
 

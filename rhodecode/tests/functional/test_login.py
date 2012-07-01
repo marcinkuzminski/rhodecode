@@ -3,7 +3,6 @@ from rhodecode.tests import *
 from rhodecode.model.db import User, Notification
 from rhodecode.lib.utils2 import generate_api_key
 from rhodecode.lib.auth import check_password
-from rhodecode.model.meta import Session
 from rhodecode.lib import helpers as h
 from rhodecode.model import validators
 
@@ -12,9 +11,9 @@ class TestLoginController(TestController):
 
     def tearDown(self):
         for n in Notification.query().all():
-            Session.delete(n)
+            self.Session().delete(n)
 
-        Session.commit()
+        self.Session().commit()
         self.assertEqual(Notification.query().all(), [])
 
     def test_index(self):
@@ -199,7 +198,7 @@ class TestLoginController(TestController):
         self.assertEqual(response.status, '302 Found')
         self.checkSessionFlash(response, 'You have successfully registered into rhodecode')
 
-        ret = self.Session.query(User).filter(User.username == 'test_regular4').one()
+        ret = self.Session().query(User).filter(User.username == 'test_regular4').one()
         self.assertEqual(ret.username, username)
         self.assertEqual(check_password(password, ret.password), True)
         self.assertEqual(ret.email, email)
@@ -237,8 +236,8 @@ class TestLoginController(TestController):
         new.name = name
         new.lastname = lastname
         new.api_key = generate_api_key(username)
-        self.Session.add(new)
-        self.Session.commit()
+        self.Session().add(new)
+        self.Session().commit()
 
         response = self.app.post(url(controller='login',
                                      action='password_reset'),

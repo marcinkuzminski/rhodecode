@@ -3,8 +3,10 @@
 import os
 from rhodecode.lib import vcs
 
-from rhodecode.model.db import Repository
+from rhodecode.model.db import Repository, RepoGroup
 from rhodecode.tests import *
+from rhodecode.model.repos_group import ReposGroupModel
+from rhodecode.model.repo import RepoModel
 
 
 class TestAdminReposController(TestController):
@@ -36,7 +38,7 @@ class TestAdminReposController(TestController):
                                'created repository %s' % (repo_name))
 
         #test if the repo was created in the database
-        new_repo = self.Session.query(Repository)\
+        new_repo = self.Session().query(Repository)\
             .filter(Repository.repo_name == repo_name).one()
 
         self.assertEqual(new_repo.repo_name, repo_name)
@@ -72,7 +74,7 @@ class TestAdminReposController(TestController):
                                'created repository %s' % (repo_name_unicode))
 
         #test if the repo was created in the database
-        new_repo = self.Session.query(Repository)\
+        new_repo = self.Session().query(Repository)\
             .filter(Repository.repo_name == repo_name_unicode).one()
 
         self.assertEqual(new_repo.repo_name, repo_name_unicode)
@@ -90,8 +92,51 @@ class TestAdminReposController(TestController):
             self.fail('no repo %s in filesystem' % repo_name)
 
     def test_create_hg_in_group(self):
-        #TODO: write test !
-        pass
+        self.log_user()
+
+        ## create GROUP
+        group_name = 'sometest'
+        gr = ReposGroupModel().create(group_name=group_name,
+                                      group_description='test',)
+        self.Session().commit()
+
+        repo_name = 'ingroup'
+        repo_name_full = RepoGroup.url_sep().join([group_name, repo_name])
+        description = 'description for newly created repo'
+        private = False
+        response = self.app.post(url('repos'), {'repo_name': repo_name,
+                                                'repo_type': 'hg',
+                                                'clone_uri': '',
+                                                'repo_group': gr.group_id,
+                                                'description': description,
+                                                'private': private,
+                                                'landing_rev': 'tip'})
+        self.checkSessionFlash(response,
+                               'created repository %s' % (repo_name))
+
+        #test if the repo was created in the database
+        new_repo = self.Session().query(Repository)\
+            .filter(Repository.repo_name == repo_name_full).one()
+
+        self.assertEqual(new_repo.repo_name, repo_name_full)
+        self.assertEqual(new_repo.description, description)
+
+        #test if repository is visible in the list ?
+        response = response.follow()
+
+        response.mustcontain(repo_name_full)
+
+        #test if repository was created on filesystem
+        try:
+            vcs.get_repo(os.path.join(TESTS_TMP_PATH, repo_name_full))
+        except:
+            ReposGroupModel().delete(group_name)
+            self.Session().commit()
+            self.fail('no repo %s in filesystem' % repo_name)
+
+        RepoModel().delete(repo_name_full)
+        ReposGroupModel().delete(group_name)
+        self.Session().commit()
 
     def test_create_git(self):
         self.log_user()
@@ -109,7 +154,7 @@ class TestAdminReposController(TestController):
                                'created repository %s' % (repo_name))
 
         #test if the repo was created in the database
-        new_repo = self.Session.query(Repository)\
+        new_repo = self.Session().query(Repository)\
             .filter(Repository.repo_name == repo_name).one()
 
         self.assertEqual(new_repo.repo_name, repo_name)
@@ -145,7 +190,7 @@ class TestAdminReposController(TestController):
                                'created repository %s' % (repo_name_unicode))
 
         #test if the repo was created in the database
-        new_repo = self.Session.query(Repository)\
+        new_repo = self.Session().query(Repository)\
             .filter(Repository.repo_name == repo_name_unicode).one()
 
         self.assertEqual(new_repo.repo_name, repo_name_unicode)
@@ -192,7 +237,7 @@ class TestAdminReposController(TestController):
                                'created repository %s' % (repo_name))
 
         #test if the repo was created in the database
-        new_repo = self.Session.query(Repository)\
+        new_repo = self.Session().query(Repository)\
             .filter(Repository.repo_name == repo_name).one()
 
         self.assertEqual(new_repo.repo_name, repo_name)
@@ -217,7 +262,7 @@ class TestAdminReposController(TestController):
         response.follow()
 
         #check if repo was deleted from db
-        deleted_repo = self.Session.query(Repository)\
+        deleted_repo = self.Session().query(Repository)\
             .filter(Repository.repo_name == repo_name).scalar()
 
         self.assertEqual(deleted_repo, None)
@@ -241,7 +286,7 @@ class TestAdminReposController(TestController):
                                'created repository %s' % (repo_name))
 
         #test if the repo was created in the database
-        new_repo = self.Session.query(Repository)\
+        new_repo = self.Session().query(Repository)\
             .filter(Repository.repo_name == repo_name).one()
 
         self.assertEqual(new_repo.repo_name, repo_name)
@@ -266,7 +311,7 @@ class TestAdminReposController(TestController):
         response.follow()
 
         #check if repo was deleted from db
-        deleted_repo = self.Session.query(Repository)\
+        deleted_repo = self.Session().query(Repository)\
             .filter(Repository.repo_name == repo_name).scalar()
 
         self.assertEqual(deleted_repo, None)

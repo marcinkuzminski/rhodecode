@@ -1,14 +1,14 @@
+from __future__ import with_statement
 import random
 import mock
 
 from rhodecode.tests import *
-from rhodecode.model.meta import Session
 from rhodecode.lib.compat import json
 from rhodecode.lib.auth import AuthUser
 from rhodecode.model.user import UserModel
 from rhodecode.model.users_group import UsersGroupModel
 from rhodecode.model.repo import RepoModel
-from nose.tools import with_setup
+from rhodecode.model.meta import Session
 
 API_URL = '/_admin/api'
 
@@ -249,7 +249,7 @@ class BaseTestApi(object):
         self._compare_ok(id_, expected, given=response.body)
 
         UserModel().delete(usr.user_id)
-        Session().commit()
+        self.Session().commit()
 
     @mock.patch.object(UserModel, 'create_or_update', crash)
     def test_api_create_user_when_exception_happened(self):
@@ -271,7 +271,7 @@ class BaseTestApi(object):
                                            password=u'qweqwe',
                                            email=u'u232@rhodecode.org',
                                            firstname=u'u1', lastname=u'u1')
-        Session().commit()
+        self.Session().commit()
         username = usr.username
         email = usr.email
         usr_id = usr.user_id
@@ -293,7 +293,7 @@ class BaseTestApi(object):
                                            password=u'qweqwe',
                                            email=u'u232@rhodecode.org',
                                            firstname=u'u1', lastname=u'u1')
-        Session().commit()
+        self.Session().commit()
         username = usr.username
 
         id_, params = _build_data(self.apikey, 'delete_user',
@@ -384,7 +384,7 @@ class BaseTestApi(object):
         RepoModel().grant_users_group_permission(repo=self.REPO,
                                                  group_name=new_group,
                                                  perm='repository.read')
-        Session().commit()
+        self.Session().commit()
         id_, params = _build_data(self.apikey, 'get_repo',
                                   repoid=self.REPO)
         response = self.app.post(API_URL, content_type='application/json',
@@ -617,7 +617,7 @@ class BaseTestApi(object):
         self._compare_ok(id_, expected, given=response.body)
 
         UsersGroupModel().delete(users_group='test_users_group2')
-        Session().commit()
+        self.Session().commit()
 
     def test_api_create_users_group(self):
         group_name = 'some_new_group'
@@ -660,7 +660,7 @@ class BaseTestApi(object):
     def test_api_add_user_to_users_group(self):
         gr_name = 'test_group'
         UsersGroupModel().create(gr_name)
-        Session().commit()
+        self.Session().commit()
         id_, params = _build_data(self.apikey, 'add_user_to_users_group',
                                   usersgroupid=gr_name,
                                   userid=TEST_USER_ADMIN_LOGIN)
@@ -675,7 +675,7 @@ class BaseTestApi(object):
         self._compare_ok(id_, expected, given=response.body)
 
         UsersGroupModel().delete(users_group=gr_name)
-        Session().commit()
+        self.Session().commit()
 
     def test_api_add_user_to_users_group_that_doesnt_exist(self):
         id_, params = _build_data(self.apikey, 'add_user_to_users_group',
@@ -691,7 +691,7 @@ class BaseTestApi(object):
     def test_api_add_user_to_users_group_exception_occurred(self):
         gr_name = 'test_group'
         UsersGroupModel().create(gr_name)
-        Session().commit()
+        self.Session().commit()
         id_, params = _build_data(self.apikey, 'add_user_to_users_group',
                                   usersgroupid=gr_name,
                                   userid=TEST_USER_ADMIN_LOGIN)
@@ -702,13 +702,13 @@ class BaseTestApi(object):
         self._compare_error(id_, expected, given=response.body)
 
         UsersGroupModel().delete(users_group=gr_name)
-        Session().commit()
+        self.Session().commit()
 
     def test_api_remove_user_from_users_group(self):
         gr_name = 'test_group_3'
         gr = UsersGroupModel().create(gr_name)
         UsersGroupModel().add_user_to_group(gr, user=TEST_USER_ADMIN_LOGIN)
-        Session().commit()
+        self.Session().commit()
         id_, params = _build_data(self.apikey, 'remove_user_from_users_group',
                                   usersgroupid=gr_name,
                                   userid=TEST_USER_ADMIN_LOGIN)
@@ -723,14 +723,14 @@ class BaseTestApi(object):
         self._compare_ok(id_, expected, given=response.body)
 
         UsersGroupModel().delete(users_group=gr_name)
-        Session().commit()
+        self.Session().commit()
 
     @mock.patch.object(UsersGroupModel, 'remove_user_from_group', crash)
     def test_api_remove_user_from_users_group_exception_occurred(self):
         gr_name = 'test_group_3'
         gr = UsersGroupModel().create(gr_name)
         UsersGroupModel().add_user_to_group(gr, user=TEST_USER_ADMIN_LOGIN)
-        Session().commit()
+        self.Session().commit()
         id_, params = _build_data(self.apikey, 'remove_user_from_users_group',
                                   usersgroupid=gr_name,
                                   userid=TEST_USER_ADMIN_LOGIN)
@@ -741,7 +741,7 @@ class BaseTestApi(object):
         self._compare_error(id_, expected, given=response.body)
 
         UsersGroupModel().delete(users_group=gr_name)
-        Session().commit()
+        self.Session().commit()
 
     @parameterized.expand([('none', 'repository.none'),
                            ('read', 'repository.read'),
@@ -871,7 +871,7 @@ class BaseTestApi(object):
         RepoModel().grant_users_group_permission(repo=self.REPO,
                                                  group_name=TEST_USERS_GROUP,
                                                  perm='repository.read')
-        Session().commit()
+        self.Session().commit()
         id_, params = _build_data(self.apikey, 'revoke_users_group_permission',
                                   repoid=self.REPO,
                                   usersgroupid=TEST_USERS_GROUP,)
