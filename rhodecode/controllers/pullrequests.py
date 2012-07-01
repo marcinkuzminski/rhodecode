@@ -135,18 +135,19 @@ class PullrequestsController(BaseRepoController):
 
         try:
             model = PullRequestModel()
-            model.create(self.rhodecode_user.user_id, org_repo,
+            pull_request = model.create(self.rhodecode_user.user_id, org_repo,
                          org_ref, other_repo, other_ref, revisions,
                          reviewers, title, description)
             Session.commit()
-            h.flash(_('Pull request send'), category='success')
+            h.flash(_('Successfully opened new pull request'),
+                    category='success')
         except Exception:
-            raise
-            h.flash(_('Error occured during sending pull request'),
+            h.flash(_('Error occurred during sending pull request'),
                     category='error')
             log.error(traceback.format_exc())
 
-        return redirect(url('changelog_home', repo_name=repo_name))
+        return redirect(url('pullrequest_show', repo_name=other_repo,
+                            pull_request_id=pull_request.pull_request_id))
 
     def _load_compare_data(self, pull_request):
         """
