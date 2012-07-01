@@ -64,7 +64,8 @@ log = logging.getLogger(__name__)
 
 engine = engine_from_config(conf, 'sqlalchemy.db1.')
 init_model(engine)
-sa = meta.Session
+sa = meta.Session()
+
 
 class Command(object):
 
@@ -137,7 +138,6 @@ def create_test_repo(force=True):
     if user is None:
         raise Exception('user not found')
 
-
     repo = sa.query(Repository).filter(Repository.repo_name == HG_REPO).scalar()
 
     if repo is None:
@@ -160,6 +160,7 @@ def set_anonymous_access(enable=True):
     print '\tanonymous access is now:', enable
     if enable != User.get_by_username('default').active:
         raise Exception('Cannot set anonymous access')
+
 
 def get_anonymous_access():
     user = User.get_by_username('default')
@@ -235,6 +236,7 @@ def test_clone_anonymous():
         print '\tdisabling anonymous access'
         set_anonymous_access(enable=False)
 
+
 @test_wrapp
 def test_clone_wrong_credentials():
     cwd = path = jn(TESTS_TMP_PATH, HG_REPO)
@@ -264,9 +266,11 @@ def test_clone_wrong_credentials():
     if not """abort: authorization failed"""  in stderr:
         raise Exception('Failure')
 
+
 @test_wrapp
 def test_pull():
     pass
+
 
 @test_wrapp
 def test_push_modify_file(f_name='setup.py'):
@@ -280,6 +284,7 @@ def test_push_modify_file(f_name='setup.py'):
         Command(cwd).execute(cmd)
 
     Command(cwd).execute('hg push %s' % jn(TESTS_TMP_PATH, HG_REPO))
+
 
 @test_wrapp
 def test_push_new_file(commits=15, with_clone=True):
@@ -312,6 +317,7 @@ def test_push_new_file(commits=15, with_clone=True):
 
     Command(cwd).execute('hg push --verbose --debug %s' % push_url)
 
+
 @test_wrapp
 def test_push_wrong_credentials():
     cwd = path = jn(TESTS_TMP_PATH, HG_REPO)
@@ -331,6 +337,7 @@ def test_push_wrong_credentials():
         Command(cwd).execute(cmd)
 
     Command(cwd).execute('hg push %s' % clone_url)
+
 
 @test_wrapp
 def test_push_wrong_path():
@@ -366,9 +373,11 @@ def test_push_wrong_path():
     if not """abort: HTTP Error 403: Forbidden"""  in stderr:
         raise Exception('Failure')
 
+
 @test_wrapp
 def get_logs():
     return UserLog.query().all()
+
 
 @test_wrapp
 def test_logs(initial):

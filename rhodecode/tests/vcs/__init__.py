@@ -22,8 +22,8 @@ function at ``tests/__init__.py``.
 import os
 from rhodecode.lib import vcs
 from rhodecode.lib.vcs.utils.compat import unittest
-from rhodecode.tests import *
 from utils import VCSTestError, SCMFetcher
+from rhodecode.tests import *
 
 
 def setup_package():

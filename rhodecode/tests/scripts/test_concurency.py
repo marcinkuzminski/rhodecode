@@ -79,6 +79,7 @@ class Command(object):
             print stdout, stderr
         return stdout, stderr
 
+
 def get_session():
     engine = engine_from_config(conf, 'sqlalchemy.db1.')
     init_model(engine)
@@ -124,7 +125,6 @@ def create_test_repo(force=True):
     if user is None:
         raise Exception('user not found')
 
-
     repo = sa.query(Repository).filter(Repository.repo_name == HG_REPO).scalar()
 
     if repo is None:
@@ -140,12 +140,14 @@ def create_test_repo(force=True):
 
     print 'done'
 
+
 def set_anonymous_access(enable=True):
     sa = get_session()
     user = sa.query(User).filter(User.username == 'default').one()
     user.active = enable
     sa.add(user)
     sa.commit()
+
 
 def get_anonymous_access():
     sa = get_session()
