@@ -356,18 +356,16 @@ class ScmModel(BaseModel):
                 'ip': '',
                 'username': username,
                 'action': 'push_remote',
-                'repository': repo.repo_name,
+                'repository': dbrepo.repo_name,
                 'scm': repo.alias,
             }
+            Repository.inject_ui(repo, extras=extras)
 
-            # inject ui extra param to log this action via push logger
-            for k, v in extras.items():
-                repo._repo.ui.setconfig('rhodecode_extras', k, v)
             if repo.alias == 'git':
                 repo.fetch(clone_uri)
             else:
                 repo.pull(clone_uri)
-            self.mark_for_invalidation(repo.repo_name)
+            self.mark_for_invalidation(dbrepo.repo_name)
         except:
             log.error(traceback.format_exc())
             raise

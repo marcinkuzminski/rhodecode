@@ -51,8 +51,6 @@ from rhodecode.lib.caching_query import FromCache
 
 from rhodecode.model.meta import Base, Session
 
-
-
 URL_SEP = '/'
 log = logging.getLogger(__name__)
 
@@ -136,7 +134,7 @@ class BaseModel(object):
 
     @classmethod
     def query(cls):
-        return Session.query(cls)
+        return Session().query(cls)
 
     @classmethod
     def get(cls, id_):
@@ -158,7 +156,7 @@ class BaseModel(object):
     @classmethod
     def delete(cls, id_):
         obj = cls.query().get(id_)
-        Session.delete(obj)
+        Session().delete(obj)
 
     def __repr__(self):
         if hasattr(self, '__unicode__'):
@@ -294,7 +292,7 @@ class RhodeCodeUi(Base, BaseModel):
         new_ui.ui_key = key
         new_ui.ui_value = val
 
-        Session.add(new_ui)
+        Session().add(new_ui)
 
 
 class User(Base, BaseModel):
@@ -424,7 +422,7 @@ class User(Base, BaseModel):
     def update_lastlogin(self):
         """Update user lastlogin"""
         self.last_login = datetime.datetime.now()
-        Session.add(self)
+        Session().add(self)
         log.debug('updated user %s lastlogin' % self.username)
 
     def get_api_data(self):
@@ -479,7 +477,7 @@ class UserEmailMap(Base, BaseModel):
     @validates('_email')
     def validate_email(self, key, email):
         # check if this email is not main one
-        main_email = Session.query(User).filter(User.email == email).scalar()
+        main_email = Session().query(User).filter(User.email == email).scalar()
         if main_email is not None:
             raise AttributeError('email %s is present is user table' % email)
         return email
@@ -621,7 +619,7 @@ class Repository(Base, BaseModel):
 
     @classmethod
     def get_by_repo_name(cls, repo_name):
-        q = Session.query(cls).filter(cls.repo_name == repo_name)
+        q = Session().query(cls).filter(cls.repo_name == repo_name)
         q = q.options(joinedload(Repository.fork))\
                 .options(joinedload(Repository.user))\
                 .options(joinedload(Repository.group))
@@ -643,7 +641,7 @@ class Repository(Base, BaseModel):
 
         :param cls:
         """
-        q = Session.query(RhodeCodeUi)\
+        q = Session().query(RhodeCodeUi)\
             .filter(RhodeCodeUi.ui_key == cls.url_sep())
         q = q.options(FromCache("sql_cache_short", "repository_repo_path"))
         return q.one().ui_value
@@ -693,7 +691,7 @@ class Repository(Base, BaseModel):
         Returns base full path for that repository means where it actually
         exists on a filesystem
         """
-        q = Session.query(RhodeCodeUi).filter(RhodeCodeUi.ui_key ==
+        q = Session().query(RhodeCodeUi).filter(RhodeCodeUi.ui_key ==
                                               Repository.url_sep())
         q = q.options(FromCache("sql_cache_short", "repository_repo_path"))
         return q.one().ui_value
@@ -741,6 +739,18 @@ class Repository(Base, BaseModel):
                 baseui.setconfig(ui_.ui_section, ui_.ui_key, ui_.ui_value)
 
         return baseui
+
+    @classmethod
+    def inject_ui(cls, repo, extras={}):
+        from rhodecode.lib.vcs.backends.hg import MercurialRepository
+        from rhodecode.lib.vcs.backends.git import GitRepository
+        required = (MercurialRepository, GitRepository)
+        if not isinstance(repo, required):
+            raise Exception('repo must be instance of %s' % required)
+
+        # inject ui extra param to log this action via push logger
+        for k, v in extras.items():
+            repo._repo.ui.setconfig('rhodecode_extras', k, v)
 
     @classmethod
     def is_valid(cls, repo_name):
@@ -794,7 +804,7 @@ class Repository(Base, BaseModel):
     def last_change(self):
         return self.scm_instance.last_change
 
-    def comments(self, revisions=None):
+    def get_comments(self, revisions=None):
         """
         Returns comments for this repository grouped by revisions
 
@@ -1052,7 +1062,7 @@ class Permission(Base, BaseModel):
 
     @classmethod
     def get_default_perms(cls, default_user_id):
-        q = Session.query(UserRepoToPerm, Repository, cls)\
+        q = Session().query(UserRepoToPerm, Repository, cls)\
          .join((Repository, UserRepoToPerm.repository_id == Repository.repo_id))\
          .join((cls, UserRepoToPerm.permission_id == cls.permission_id))\
          .filter(UserRepoToPerm.user_id == default_user_id)
@@ -1061,7 +1071,7 @@ class Permission(Base, BaseModel):
 
     @classmethod
     def get_default_group_perms(cls, default_user_id):
-        q = Session.query(UserRepoGroupToPerm, RepoGroup, cls)\
+        q = Session().query(UserRepoGroupToPerm, RepoGroup, cls)\
          .join((RepoGroup, UserRepoGroupToPerm.group_id == RepoGroup.group_id))\
          .join((cls, UserRepoGroupToPerm.permission_id == cls.permission_id))\
          .filter(UserRepoGroupToPerm.user_id == default_user_id)
@@ -1091,7 +1101,7 @@ class UserRepoToPerm(Base, BaseModel):
         n.user = user
         n.repository = repository
         n.permission = permission
-        Session.add(n)
+        Session().add(n)
         return n
 
     def __unicode__(self):
@@ -1135,7 +1145,7 @@ class UsersGroupRepoToPerm(Base, BaseModel):
         n.users_group = users_group
         n.repository = repository
         n.permission = permission
-        Session.add(n)
+        Session().add(n)
         return n
 
     def __unicode__(self):
@@ -1281,15 +1291,15 @@ class CacheInvalidation(Base, BaseModel):
 
     @classmethod
     def _get_or_create_key(cls, key, prefix, org_key):
-        inv_obj = Session.query(cls).filter(cls.cache_key == key).scalar()
+        inv_obj = Session().query(cls).filter(cls.cache_key == key).scalar()
         if not inv_obj:
             try:
                 inv_obj = CacheInvalidation(key, org_key)
-                Session.add(inv_obj)
-                Session.commit()
+                Session().add(inv_obj)
+                Session().commit()
             except Exception:
                 log.error(traceback.format_exc())
-                Session.rollback()
+                Session().rollback()
         return inv_obj
 
     @classmethod
@@ -1317,7 +1327,7 @@ class CacheInvalidation(Base, BaseModel):
         """
 
         key, _prefix, _org_key = cls._get_key(key)
-        inv_objs = Session.query(cls).filter(cls.cache_args == _org_key).all()
+        inv_objs = Session().query(cls).filter(cls.cache_args == _org_key).all()
         log.debug('marking %s key[s] %s for invalidation' % (len(inv_objs),
                                                              _org_key))
         try:
@@ -1325,11 +1335,11 @@ class CacheInvalidation(Base, BaseModel):
                 if inv_obj:
                     inv_obj.cache_active = False
 
-                Session.add(inv_obj)
-            Session.commit()
+                Session().add(inv_obj)
+            Session().commit()
         except Exception:
             log.error(traceback.format_exc())
-            Session.rollback()
+            Session().rollback()
 
     @classmethod
     def set_valid(cls, key):
@@ -1340,8 +1350,8 @@ class CacheInvalidation(Base, BaseModel):
         """
         inv_obj = cls.get_by_key(key)
         inv_obj.cache_active = True
-        Session.add(inv_obj)
-        Session.commit()
+        Session().add(inv_obj)
+        Session().commit()
 
     @classmethod
     def get_cache_map(cls):
@@ -1409,7 +1419,7 @@ class ChangesetComment(Base, BaseModel):
         :param cls:
         :param revision:
         """
-        q = Session.query(User)\
+        q = Session().query(User)\
                 .join(ChangesetComment.author)
         if revision:
             q = q.filter(cls.revision == revision)
@@ -1573,7 +1583,7 @@ class Notification(Base, BaseModel):
             assoc = UserNotification()
             assoc.notification = notification
             u.notifications.append(assoc)
-        Session.add(notification)
+        Session().add(notification)
         return notification
 
     @property
@@ -1600,7 +1610,7 @@ class UserNotification(Base, BaseModel):
 
     def mark_as_read(self):
         self.read = True
-        Session.add(self)
+        Session().add(self)
 
 
 class DbMigrateVersion(Base, BaseModel):
