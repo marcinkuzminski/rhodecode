@@ -186,14 +186,14 @@
                             %elif section == 'repositories_groups':
                                 <a href="${h.url('repos_group_home',group_name=k)}">${k}</a>
                             %else:
-                                ${k}
+                                ${h.get_permission_name(k)}
                             %endif
                         </td>
                         <td>
                             %if section == 'global':
-                             ${h.bool2icon(True)}
+                             ${h.bool2icon(k.split('.')[-1] != 'none')}
                             %else:
-                            <span class="perm_tag ${_perm}">${section_perm}</span>
+                             <span class="perm_tag ${_perm}">${section_perm}</span>
                             %endif
                          </td>
                     </tr>
@@ -204,7 +204,7 @@
            %endfor
     </div>
 </div>
-<div class="box box-right">
+<div class="box box-left">
     <!-- box / title -->
     <div class="title">
         <h5>${_('Email addresses')}</h5>

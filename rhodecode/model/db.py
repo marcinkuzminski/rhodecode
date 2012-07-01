@@ -1058,6 +1058,28 @@ class Permission(Base, BaseModel):
         {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'},
     )
+    PERMS = [
+        ('repository.none', _('Repository no access')),
+        ('repository.read', _('Repository read access')),
+        ('repository.write', _('Repository write access')),
+        ('repository.admin', _('Repository admin access')),
+
+        ('group.none', _('Repositories Group no access')),
+        ('group.read', _('Repositories Group read access')),
+        ('group.write', _('Repositories Group write access')),
+        ('group.admin', _('Repositories Group admin access')),
+
+        ('hg.admin', _('RhodeCode Administrator')),
+        ('hg.create.none', _('Repository creation disabled')),
+        ('hg.create.repository', _('Repository creation enabled')),
+        ('hg.register.none', _('Register disabled')),
+        ('hg.register.manual_activate', _('Register new user with RhodeCode '
+                                          'with manual activation')),
+
+        ('hg.register.auto_activate', _('Register new user with RhodeCode '
+                                        'with auto activation')),
+    ]
+
     permission_id = Column("permission_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     permission_name = Column("permission_name", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     permission_longname = Column("permission_longname", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)

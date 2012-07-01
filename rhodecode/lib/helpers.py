@@ -46,7 +46,7 @@ from rhodecode.lib.vcs.exceptions import ChangesetDoesNotExistError
 from rhodecode.lib.vcs.backends.base import BaseChangeset
 from rhodecode.config.conf import DATE_FORMAT, DATETIME_FORMAT
 from rhodecode.model.changeset_status import ChangesetStatusModel
-from rhodecode.model.db import URL_SEP
+from rhodecode.model.db import URL_SEP, Permission
 
 log = logging.getLogger(__name__)
 
@@ -1007,3 +1007,7 @@ def changeset_status(repo, revision):
 
 def changeset_status_lbl(changeset_status):
     return dict(ChangesetStatus.STATUSES).get(changeset_status)
+
+
+def get_permission_name(key):
+    return dict(Permission.PERMS).get(key)
