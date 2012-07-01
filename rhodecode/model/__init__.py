@@ -42,7 +42,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
-from rhodecode.model.db import User, Repository, Permission
 from rhodecode.model import meta
 
 log = logging.getLogger(__name__)
@@ -68,11 +67,13 @@ class BaseModel(object):
     :param sa: If passed it reuses this session instead of creating a new one
     """
 
+    cls = None  # override in child class
+
     def __init__(self, sa=None):
         if sa is not None:
             self.sa = sa
         else:
-            self.sa = meta.Session
+            self.sa = meta.Session()
 
     def _get_instance(self, cls, instance, callback=None):
         """
@@ -104,6 +105,7 @@ class BaseModel(object):
         :param user:
         :type user: UserID, username, or User instance
         """
+        from rhodecode.model.db import User
         return self._get_instance(User, user,
                                   callback=User.get_by_username)
 
@@ -114,6 +116,7 @@ class BaseModel(object):
         :param repository:
         :type repository: RepoID, repository name or Repository Instance
         """
+        from rhodecode.model.db import Repository
         return self._get_instance(Repository, repository,
                                   callback=Repository.get_by_repo_name)
 
@@ -124,5 +127,12 @@ class BaseModel(object):
         :param permission:
         :type permission: PermissionID, permission_name or Permission instance
         """
+        from rhodecode.model.db import Permission
         return self._get_instance(Permission, permission,
                                   callback=Permission.get_by_key)
+
+    def get_all(self):
+        """
+        Returns all instances of what is defined in `cls` class variable
+        """
+        return self.cls.getAll()
