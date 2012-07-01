@@ -34,6 +34,8 @@ log = logging.getLogger(__name__)
 
 class ChangesetStatusModel(BaseModel):
 
+    cls = ChangesetStatus
+
     def __get_changeset_status(self, changeset_status):
         return self._get_instance(ChangesetStatus, changeset_status)
 

@@ -41,6 +41,8 @@ log = logging.getLogger(__name__)
 
 class ChangesetCommentsModel(BaseModel):
 
+    cls = ChangesetComment
+
     def __get_changeset_comment(self, changeset_comment):
         return self._get_instance(ChangesetComment, changeset_comment)
 

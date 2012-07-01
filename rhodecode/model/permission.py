@@ -42,6 +42,8 @@ class PermissionModel(BaseModel):
     Permissions model for RhodeCode
     """
 
+    cls = Permission
+
     def get_permission(self, permission_id, cache=False):
         """
         Get's permissions by id

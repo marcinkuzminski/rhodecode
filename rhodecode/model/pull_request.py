@@ -40,6 +40,8 @@ log = logging.getLogger(__name__)
 
 class PullRequestModel(BaseModel):
 
+    cls = PullRequest
+
     def get_all(self, repo):
         repo = self._get_repo(repo)
         return PullRequest.query().filter(PullRequest.other_repo == repo).all()

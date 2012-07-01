@@ -44,6 +44,9 @@ class UsersGroupModel(BaseModel):
     def get(self, users_group_id, cache=False):
         return UsersGroup.get(users_group_id)
 
+    def get_group(self, users_group):
+        return self.__get_users_group(users_group)
+
     def get_by_name(self, name, cache=False, case_insensitive=False):
         return UsersGroup.get_by_group_name(name, cache, case_insensitive)
 

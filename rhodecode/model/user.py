@@ -59,6 +59,7 @@ PERM_WEIGHTS = {
 
 
 class UserModel(BaseModel):
+    cls = User
 
     def get(self, user_id, cache=False):
         user = self.sa.query(User)
@@ -81,6 +82,9 @@ class UserModel(BaseModel):
             user = user.options(FromCache("sql_cache_short",
                                           "get_user_%s" % username))
         return user.scalar()
+
+    def get_by_email(self, email, cache=False, case_insensitive=False):
+        return User.get_by_email(email, case_insensitive, cache)
 
     def get_by_api_key(self, api_key, cache=False):
         return User.get_by_api_key(api_key, cache)

@@ -40,6 +40,8 @@ log = logging.getLogger(__name__)
 
 class NotificationModel(BaseModel):
 
+    cls = Notification
+
     def __get_notification(self, notification):
         if isinstance(notification, Notification):
             return notification

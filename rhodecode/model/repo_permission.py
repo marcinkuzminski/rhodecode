@@ -34,6 +34,8 @@ log = logging.getLogger(__name__)
 
 class RepositoryPermissionModel(BaseModel):
 
+    cls = UserRepoToPerm
+
     def get_user_permission(self, repository, user):
         repository = self._get_repo(repository)
         user = self._get_user(user)
