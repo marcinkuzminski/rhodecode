@@ -149,6 +149,8 @@ class GitInMemoryChangeset(BaseInMemoryChangeset):
         # Update vcs repository object & recreate dulwich repo
         self.repository.revisions.append(commit.id)
         self.repository._repo = Repo(self.repository.path)
+        # invalidate parsed refs after commit
+        self.repository._parsed_refs = self.repository._get_parsed_refs()
         tip = self.repository.get_changeset()
         self.reset()
         return tip

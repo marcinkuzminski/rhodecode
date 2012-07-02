@@ -312,6 +312,7 @@ class GitRepository(BaseRepository):
             changeset.raw_id)
         self._repo.refs["refs/tags/%s" % name] = changeset._commit.id
 
+        self._parsed_refs = self._get_parsed_refs()
         self.tags = self._get_tags()
         return changeset
 
@@ -331,12 +332,16 @@ class GitRepository(BaseRepository):
         tagpath = posixpath.join(self._repo.refs.path, 'refs', 'tags', name)
         try:
             os.remove(tagpath)
+            self._parsed_refs = self._get_parsed_refs()
             self.tags = self._get_tags()
         except OSError, e:
             raise RepositoryError(e.strerror)
 
     @LazyProperty
     def _parsed_refs(self):
+        return self._get_parsed_refs()
+
+    def _get_parsed_refs(self):
         refs = self._repo.get_refs()
         keys = [('refs/heads/', 'H'),
                 ('refs/remotes/origin/', 'RH'),
