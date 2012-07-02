@@ -32,7 +32,6 @@ from pylons import request, response, tmpl_context as c, url
 from pylons.i18n.translation import _
 from pylons.controllers.util import redirect
 from pylons.decorators import jsonify
-from paste.fileapp import FileApp, _FileIter
 
 from rhodecode.lib import diffs
 from rhodecode.lib import helpers as h
@@ -60,7 +59,6 @@ log = logging.getLogger(__name__)
 
 
 class FilesController(BaseRepoController):
-
 
     def __before__(self):
         super(FilesController, self).__before__()
@@ -166,7 +164,7 @@ class FilesController(BaseRepoController):
         except RepositoryError, e:
             h.flash(str(e), category='warning')
             redirect(h.url('files_home', repo_name=repo_name,
-                           revision=revision))
+                           revision='tip'))
 
         return render('files/files.html')
 

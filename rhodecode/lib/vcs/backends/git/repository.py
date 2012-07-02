@@ -196,9 +196,15 @@ class GitRepository(BaseRepository):
                     "for this repository %s" % (revision, self))
 
         elif is_bstr(revision):
+            # get by branch/tag name
             _ref_revision = self._parsed_refs.get(revision)
+            _tags_shas = self.tags.values()
             if _ref_revision:  # and _ref_revision[1] in ['H', 'RH', 'T']:
                 return _ref_revision[0]
+
+            # maybe it's a tag ? we don't have them in self.revisions
+            elif revision in _tags_shas:
+                return _tags_shas[_tags_shas.index(revision)]
 
             elif not pattern.match(revision) or revision not in self.revisions:
                 raise ChangesetDoesNotExistError("Revision %r does not exist "

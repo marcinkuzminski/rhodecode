@@ -15,6 +15,7 @@ from rhodecode.lib.vcs.nodes import FileNode, DirNode, NodeKind, RootNode, \
 from rhodecode.lib.vcs.utils import safe_unicode
 from rhodecode.lib.vcs.utils import date_fromtimestamp
 from rhodecode.lib.vcs.utils.lazy import LazyProperty
+from dulwich.objects import Commit, Tag
 
 
 class GitChangeset(BaseChangeset):
@@ -26,8 +27,6 @@ class GitChangeset(BaseChangeset):
         self._stat_modes = {}
         self.repository = repository
         self.raw_id = revision
-        self.revision = repository.revisions.index(revision)
-
         self.short_id = self.raw_id[:12]
         self.id = self.raw_id
         try:
@@ -35,7 +34,19 @@ class GitChangeset(BaseChangeset):
         except KeyError:
             raise RepositoryError("Cannot get object with id %s" % self.raw_id)
         self._commit = commit
-        self._tree_id = commit.tree
+
+        if isinstance(commit, Commit):
+            self._tree_id = commit.tree
+            self._commiter_property = 'committer'
+            self._date_property = 'commit_time'
+            self._date_tz_property = 'commit_timezone'
+            self.revision = repository.revisions.index(revision)
+        elif isinstance(commit, Tag):
+            self._commiter_property = 'tagger'
+            self._tree_id = commit.id
+            self._date_property = 'tag_time'
+            self._date_tz_property = 'tag_timezone'
+            self.revision = 'tag'
 
         self.message = safe_unicode(commit.message)
         #self.branch = None
@@ -45,12 +56,12 @@ class GitChangeset(BaseChangeset):
 
     @LazyProperty
     def author(self):
-        return safe_unicode(self._commit.committer)
+        return safe_unicode(getattr(self._commit, self._commiter_property))
 
     @LazyProperty
     def date(self):
-        return date_fromtimestamp(self._commit.commit_time,
-                                  self._commit.commit_timezone)
+        return date_fromtimestamp(getattr(self._commit, self._date_property),
+                                  getattr(self._commit, self._date_tz_property))
 
     @LazyProperty
     def status(self):
@@ -83,7 +94,7 @@ class GitChangeset(BaseChangeset):
         if not path in self._paths:
             path = path.strip('/')
             # set root tree
-            tree = self.repository._repo[self._commit.tree]
+            tree = self.repository._repo[self._tree_id]
             if path == '':
                 self._paths[''] = tree.id
                 return tree.id
@@ -132,8 +143,7 @@ class GitChangeset(BaseChangeset):
         return self._paths[path]
 
     def _get_kind(self, path):
-        id = self._get_id_for_path(path)
-        obj = self.repository._repo[id]
+        obj = self.repository._repo[self._get_id_for_path(path)]
         if isinstance(obj, objects.Blob):
             return NodeKind.FILE
         elif isinstance(obj, objects.Tree):
@@ -148,7 +158,7 @@ class GitChangeset(BaseChangeset):
         Returns list of parents changesets.
         """
         return [self.repository.get_changeset(parent)
-            for parent in self._commit.parents]
+                for parent in self._commit.parents]
 
     def next(self, branch=None):
 
@@ -371,14 +381,14 @@ class GitChangeset(BaseChangeset):
                 raise NodeDoesNotExistError("Cannot find one of parents' "
                     "directories for a given path: %s" % path)
 
-            als = self.repository.alias
             _GL = lambda m: m and objects.S_ISGITLINK(m)
             if _GL(self._stat_modes.get(path)):
-                node = SubModuleNode(path, url=None, changeset=id_, alias=als)
+                node = SubModuleNode(path, url=None, changeset=id_,
+                                     alias=self.repository.alias)
             else:
                 obj = self.repository._repo.get_object(id_)
 
-                if isinstance(obj, objects.Tree):
+                if isinstance(obj, (objects.Tree, objects.Tag)):
                     if path == '':
                         node = RootNode(changeset=self)
                     else:
