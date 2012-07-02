@@ -26,27 +26,24 @@ class GitChangeset(BaseChangeset):
     def __init__(self, repository, revision):
         self._stat_modes = {}
         self.repository = repository
-        self.raw_id = revision
-        self.short_id = self.raw_id[:12]
-        self.id = self.raw_id
+
         try:
-            commit = self.repository._repo.get_object(self.raw_id)
+            commit = self.repository._repo.get_object(revision)
+            if isinstance(commit, Tag):
+                revision = commit.object[1]
+                commit = self.repository._repo.get_object(commit.object[1])
         except KeyError:
-            raise RepositoryError("Cannot get object with id %s" % self.raw_id)
+            raise RepositoryError("Cannot get object with id %s" % revision)
+        self.raw_id = revision
+        self.id = self.raw_id
+        self.short_id = self.raw_id[:12]
         self._commit = commit
 
-        if isinstance(commit, Commit):
-            self._tree_id = commit.tree
-            self._commiter_property = 'committer'
-            self._date_property = 'commit_time'
-            self._date_tz_property = 'commit_timezone'
-            self.revision = repository.revisions.index(revision)
-        elif isinstance(commit, Tag):
-            self._commiter_property = 'tagger'
-            self._tree_id = commit.id
-            self._date_property = 'tag_time'
-            self._date_tz_property = 'tag_timezone'
-            self.revision = 'tag'
+        self._tree_id = commit.tree
+        self._commiter_property = 'committer'
+        self._date_property = 'commit_time'
+        self._date_tz_property = 'commit_timezone'
+        self.revision = repository.revisions.index(revision)
 
         self.message = safe_unicode(commit.message)
         #self.branch = None
@@ -388,7 +385,7 @@ class GitChangeset(BaseChangeset):
             else:
                 obj = self.repository._repo.get_object(id_)
 
-                if isinstance(obj, (objects.Tree, objects.Tag)):
+                if isinstance(obj, objects.Tree):
                     if path == '':
                         node = RootNode(changeset=self)
                     else:
