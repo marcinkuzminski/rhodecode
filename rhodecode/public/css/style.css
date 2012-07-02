@@ -636,6 +636,15 @@ div.options a {
 	padding: 12px 9px 7px 24px;
 }
 
+#header #header-inner #quick li ul li a.pull_request,#header #header-inner #quick li ul li a.pull_request:hover
+    {
+    background: #FFF url("../images/icons/arrow_join.png") no-repeat 4px
+        9px;
+    width: 167px;
+    margin: 0;
+    padding: 12px 9px 7px 24px;
+}
+
 #header #header-inner #quick li ul li a.search,#header #header-inner #quick li ul li a.search:hover
 	{
 	background: #FFF url("../images/icons/search_16.png") no-repeat 4px 9px;
