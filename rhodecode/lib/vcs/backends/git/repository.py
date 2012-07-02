@@ -158,15 +158,19 @@ class GitRepository(BaseRepository):
             raise RepositoryError(err)
 
     def _get_all_revisions(self):
-        cmd = 'rev-list --all --date-order'
+        cmd = 'rev-list --all --reverse --date-order'
         try:
             so, se = self.run_git_command(cmd)
         except RepositoryError:
             # Can be raised for empty repositories
             return []
-        revisions = so.splitlines()
-        revisions.reverse()
-        return revisions
+        return so.splitlines()
+
+    def _get_all_revisions2(self):
+        #alternate implementation using dulwich
+        includes = [x[1][0] for x in self._parsed_refs.iteritems()
+                    if x[1][1] != 'T']
+        return [c.commit.id for c in self._repo.get_walker(include=includes)]
 
     def _get_revision(self, revision):
         """
@@ -264,11 +268,9 @@ class GitRepository(BaseRepository):
     def branches(self):
         if not self.revisions:
             return {}
-        refs = self._repo.refs.as_dict()
         sortkey = lambda ctx: ctx[0]
-        _branches = [('/'.join(ref.split('/')[2:]), head)
-            for ref, head in refs.items()
-            if ref.startswith('refs/heads/') and not ref.endswith('/HEAD')]
+        _branches = [(x[0], x[1][0])
+                     for x in self._parsed_refs.iteritems() if x[1][1] == 'H']
         return OrderedDict(sorted(_branches, key=sortkey, reverse=False))
 
     @LazyProperty
@@ -278,9 +280,10 @@ class GitRepository(BaseRepository):
     def _get_tags(self):
         if not self.revisions:
             return {}
+
         sortkey = lambda ctx: ctx[0]
-        _tags = [('/'.join(ref.split('/')[2:]), head) for ref, head in
-            self._repo.get_refs().items() if ref.startswith('refs/tags/')]
+        _tags = [(x[0], x[1][0])
+                 for x in self._parsed_refs.iteritems() if x[1][1] == 'T']
         return OrderedDict(sorted(_tags, key=sortkey, reverse=True))
 
     def tag(self, name, user, revision=None, message=None, date=None,
