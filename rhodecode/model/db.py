@@ -844,6 +844,16 @@ class Repository(Base, BaseModel):
         if revisions:
             statuses = statuses.filter(ChangesetStatus.revision.in_(revisions))
         grouped = {}
+
+        #maybe we have open new pullrequest without a status ?
+        stat = ChangesetStatus.STATUS_UNDER_REVIEW
+        status_lbl = ChangesetStatus.get_status_lbl(stat)
+        for pr in PullRequest.query().filter(PullRequest.org_repo == self).all():
+            for rev in pr.revisions:
+                pr_id = pr.pull_request_id
+                pr_repo = pr.other_repo.repo_name
+                grouped[rev] = [stat, status_lbl, pr_id, pr_repo]
+
         for stat in statuses.all():
             pr_id = pr_repo = None
             if stat.pull_request:
