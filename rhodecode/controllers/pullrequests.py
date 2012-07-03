@@ -34,6 +34,7 @@ from pylons.controllers.util import abort, redirect
 from pylons.i18n.translation import _
 from pylons.decorators import jsonify
 
+from rhodecode.lib.compat import json
 from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib import helpers as h
@@ -86,6 +87,8 @@ class PullrequestsController(BaseRepoController):
             log.error('Review not available for GIT REPOS')
             raise HTTPNotFound
 
+        other_repos_info = {}
+
         c.org_refs = self._get_repo_refs(c.rhodecode_repo)
         c.org_repos = []
         c.other_repos = []
@@ -95,12 +98,23 @@ class PullrequestsController(BaseRepoController):
 
         c.other_refs = c.org_refs
         c.other_repos.extend(c.org_repos)
+
+        #add orginal repo
+        other_repos_info[org_repo.repo_name] = {
+            'gravatar': h.gravatar_url(org_repo.user.email, 24),
+            'description': org_repo.description
+        }
+
         c.default_pull_request = org_repo.repo_name
         #gather forks and add to this list
         for fork in org_repo.forks:
             c.other_repos.append((fork.repo_name, '%s/%s' % (
                                     fork.user.username, fork.repo_name))
                                  )
+            other_repos_info[fork.repo_name] = {
+                'gravatar': h.gravatar_url(fork.user.email, 24),
+                'description': fork.description
+            }
         #add parents of this fork also
         if org_repo.parent:
             c.default_pull_request = org_repo.parent.repo_name
@@ -108,7 +122,12 @@ class PullrequestsController(BaseRepoController):
                                         org_repo.parent.user.username,
                                         org_repo.parent.repo_name))
                                      )
+            other_repos_info[org_repo.parent.repo_name] = {
+                'gravatar': h.gravatar_url(org_repo.parent.user.email, 24),
+                'description': org_repo.parent.description
+            }
 
+        c.other_repos_info = json.dumps(other_repos_info)
         c.review_members = []
         c.available_members = []
         for u in User.query().filter(User.username != 'default').all():
@@ -134,17 +153,18 @@ class PullrequestsController(BaseRepoController):
         description = req_p['pullrequest_desc']
 
         try:
-            model = PullRequestModel()
-            pull_request = model.create(self.rhodecode_user.user_id, org_repo,
-                         org_ref, other_repo, other_ref, revisions,
-                         reviewers, title, description)
-            Session.commit()
+            pull_request = PullRequestModel().create(
+                self.rhodecode_user.user_id, org_repo, org_ref, other_repo,
+                other_ref, revisions, reviewers, title, description
+            )
+            Session().commit()
             h.flash(_('Successfully opened new pull request'),
                     category='success')
         except Exception:
             h.flash(_('Error occurred during sending pull request'),
                     category='error')
             log.error(traceback.format_exc())
+            return redirect(url('changelog_home', repo_name=org_repo,))
 
         return redirect(url('pullrequest_show', repo_name=other_repo,
                             pull_request_id=pull_request.pull_request_id))
@@ -257,8 +277,8 @@ class PullrequestsController(BaseRepoController):
 
         comm = ChangesetCommentsModel().create(
             text=request.POST.get('text'),
-            repo_id=c.rhodecode_db_repo.repo_id,
-            user_id=c.rhodecode_user.user_id,
+            repo=c.rhodecode_db_repo.repo_id,
+            user=c.rhodecode_user.user_id,
             pull_request=pull_request_id,
             f_path=request.POST.get('f_path'),
             line_no=request.POST.get('line'),
@@ -279,7 +299,7 @@ class PullrequestsController(BaseRepoController):
                       'user_commented_pull_request:%s' % pull_request_id,
                       c.rhodecode_db_repo, self.ip_addr, self.sa)
 
-        Session.commit()
+        Session().commit()
 
         if not request.environ.get('HTTP_X_PARTIAL_XHR'):
             return redirect(h.url('pullrequest_show', repo_name=repo_name,
@@ -302,7 +322,7 @@ class PullrequestsController(BaseRepoController):
         owner = lambda: co.author.user_id == c.rhodecode_user.user_id
         if h.HasPermissionAny('hg.admin', 'repository.admin')() or owner:
             ChangesetCommentsModel().delete(comment=co)
-            Session.commit()
+            Session().commit()
             return True
         else:
             raise HTTPForbidden()

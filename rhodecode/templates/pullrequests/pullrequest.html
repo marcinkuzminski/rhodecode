@@ -50,12 +50,12 @@
         <div style="float:left">
             <div class="fork_user">
                 <div class="gravatar">
-                    <img alt="gravatar" src="${h.gravatar_url(c.rhodecode_db_repo.user.email,24)}"/>
+                    <img id="other_repo_gravatar" alt="gravatar" src=""/>
                 </div>
                 <span style="font-size: 20px">
                 ${h.select('other_repo',c.default_pull_request ,c.other_repos,class_='refs')}:${h.select('other_ref','',c.other_refs,class_='refs')}
                 </span>
-                 <div style="padding:5px 3px 3px 42px;">${c.rhodecode_db_repo.description}</div>
+                 <div id="other_repo_desc" style="padding:5px 3px 3px 42px;"></div>
             </div>
             <div style="clear:both;padding-top: 10px"></div>
         </div>
@@ -142,7 +142,7 @@
 
 <script type="text/javascript">
   MultiSelectWidget('review_members','available_members','pull_request_form');
-
+  var other_repos_info = ${c.other_repos_info|n};
   var loadPreview = function(){
 	  YUD.setStyle(YUD.get('pull_request_overview_url').parentElement,'display','none');
       var url = "${h.url('compare_url',
@@ -176,8 +176,12 @@
       }
 
       ypjax(url,'pull_request_overview', function(data){
+    	  var sel_box = YUQ('#pull_request_form #other_repo')[0];
+    	  var repo_name = sel_box.options[sel_box.selectedIndex].value;
     	  YUD.get('pull_request_overview_url').href = url;
     	  YUD.setStyle(YUD.get('pull_request_overview_url').parentElement,'display','');
+    	  YUD.get('other_repo_gravatar').src = other_repos_info[repo_name]['gravatar'];
+    	  YUD.get('other_repo_desc').innerHTML = other_repos_info[repo_name]['description'];
       })
   }
   YUE.on('refresh','click',function(e){

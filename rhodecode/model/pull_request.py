@@ -29,11 +29,15 @@ from pylons.i18n.translation import _
 
 from rhodecode.lib import helpers as h
 from rhodecode.model import BaseModel
-from rhodecode.model.db import PullRequest, PullRequestReviewers, Notification
+from rhodecode.model.db import PullRequest, PullRequestReviewers, Notification,\
+    ChangesetStatus
 from rhodecode.model.notification import NotificationModel
 from rhodecode.lib.utils2 import safe_unicode
 
 from rhodecode.lib.vcs.utils.hgcompat import discovery
+from rhodecode.model.changeset_status import ChangesetStatusModel
+from rhodecode.model.comment import ChangesetCommentsModel
+from rhodecode.model.meta import Session
 
 log = logging.getLogger(__name__)
 
@@ -48,19 +52,22 @@ class PullRequestModel(BaseModel):
 
     def create(self, created_by, org_repo, org_ref, other_repo,
                other_ref, revisions, reviewers, title, description=None):
+
         created_by_user = self._get_user(created_by)
+        org_repo = self._get_repo(org_repo)
+        other_repo = self._get_repo(other_repo)
 
         new = PullRequest()
-        new.org_repo = self._get_repo(org_repo)
+        new.org_repo = org_repo
         new.org_ref = org_ref
-        new.other_repo = self._get_repo(other_repo)
+        new.other_repo = other_repo
         new.other_ref = other_ref
         new.revisions = revisions
         new.title = title
         new.description = description
         new.author = created_by_user
         self.sa.add(new)
-
+        Session().flush()
         #members
         for member in reviewers:
             _usr = self._get_user(member)
@@ -82,7 +89,7 @@ class PullRequestModel(BaseModel):
             )
         )
         body = description
-        notif.create(created_by=created_by, subject=subject, body=body,
+        notif.create(created_by=created_by_user, subject=subject, body=body,
                      recipients=reviewers,
                      type_=Notification.TYPE_PULL_REQUEST,)
 

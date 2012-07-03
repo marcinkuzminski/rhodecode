@@ -377,8 +377,8 @@ class ChangesetController(BaseRepoController):
 
         comm = ChangesetCommentsModel().create(
             text=request.POST.get('text'),
-            repo_id=c.rhodecode_db_repo.repo_id,
-            user_id=c.rhodecode_user.user_id,
+            repo=c.rhodecode_db_repo.repo_id,
+            user=c.rhodecode_user.user_id,
             revision=revision,
             f_path=request.POST.get('f_path'),
             line_no=request.POST.get('line'),
