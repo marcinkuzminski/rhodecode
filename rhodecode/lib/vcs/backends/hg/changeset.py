@@ -12,8 +12,7 @@ from rhodecode.lib.vcs.nodes import AddedFileNodesGenerator, \
 from rhodecode.lib.vcs.utils import safe_str, safe_unicode, date_fromtimestamp
 from rhodecode.lib.vcs.utils.lazy import LazyProperty
 from rhodecode.lib.vcs.utils.paths import get_dirs_for_path
-
-from ...utils.hgcompat import archival, hex
+from rhodecode.lib.vcs.utils.hgcompat import archival, hex
 
 
 class MercurialChangeset(BaseChangeset):

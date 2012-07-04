@@ -18,7 +18,7 @@ from rhodecode.lib.vcs.utils.lazy import LazyProperty
 from rhodecode.lib.vcs.utils.ordered_dict import OrderedDict
 from rhodecode.lib.vcs.utils.paths import abspath
 
-from ...utils.hgcompat import ui, nullid, match, patch, diffopts, clone, \
+from rhodecode.lib.vcs.utils.hgcompat import ui, nullid, match, patch, diffopts, clone, \
     get_contact, pull, localrepository, RepoLookupError, Abort, RepoError, hex
 
 

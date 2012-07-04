@@ -15,7 +15,6 @@ from rhodecode.lib.vcs.nodes import FileNode, DirNode, NodeKind, RootNode, \
 from rhodecode.lib.vcs.utils import safe_unicode
 from rhodecode.lib.vcs.utils import date_fromtimestamp
 from rhodecode.lib.vcs.utils.lazy import LazyProperty
-from dulwich.objects import Commit, Tag
 
 
 class GitChangeset(BaseChangeset):
@@ -29,7 +28,7 @@ class GitChangeset(BaseChangeset):
 
         try:
             commit = self.repository._repo.get_object(revision)
-            if isinstance(commit, Tag):
+            if isinstance(commit, objects.Tag):
                 revision = commit.object[1]
                 commit = self.repository._repo.get_object(commit.object[1])
         except KeyError:

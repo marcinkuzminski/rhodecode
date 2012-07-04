@@ -4,7 +4,7 @@ import errno
 from rhodecode.lib.vcs.backends.base import BaseInMemoryChangeset
 from rhodecode.lib.vcs.exceptions import RepositoryError
 
-from ...utils.hgcompat import memfilectx, memctx, hex, tolocal
+from rhodecode.lib.vcs.utils.hgcompat import memfilectx, memctx, hex, tolocal
 
 
 class MercurialInMemoryChangeset(BaseInMemoryChangeset):

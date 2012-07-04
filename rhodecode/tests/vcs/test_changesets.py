@@ -119,6 +119,14 @@ class ChangesetsWithCommitsTestCaseixin(BackendTestMixin):
             branch_name=self.repo.DEFAULT_BRANCH_NAME)
         self.assertNotIn(doc_changeset, default_branch_changesets)
 
+    def test_get_changeset_by_branch(self):
+        for branch, sha in self.repo.branches.iteritems():
+            self.assertEqual(sha, self.repo.get_changeset(branch).raw_id)
+
+    def test_get_changeset_by_tag(self):
+        for tag, sha in self.repo.tags.iteritems():
+            self.assertEqual(sha, self.repo.get_changeset(tag).raw_id)
+
 
 class ChangesetsTestCaseMixin(BackendTestMixin):
     recreate_repo_per_test = False
