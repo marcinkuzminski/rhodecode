@@ -66,6 +66,7 @@ def UserForm(edit=False, old_data={}):
                        v.ValidUsername(edit, old_data))
         if edit:
             new_password = All(
+                v.ValidPassword(),
                 v.UnicodeString(strip=False, min=6, not_empty=False)
             )
             password_confirmation = All(
@@ -84,7 +85,7 @@ def UserForm(edit=False, old_data={}):
             )
 
         active = v.StringBoolean(if_missing=False)
-        name = v.UnicodeString(strip=True, min=1, not_empty=False)
+        firstname = v.UnicodeString(strip=True, min=1, not_empty=False)
         lastname = v.UnicodeString(strip=True, min=1, not_empty=False)
         email = All(v.Email(not_empty=True), v.UniqSystemEmail(old_data))
 

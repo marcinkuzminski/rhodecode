@@ -31,13 +31,12 @@ class TestAdminUsersController(TestController):
                              {'username': username,
                                'password': password,
                                'password_confirmation': password_confirmation,
-                               'name': name,
+                               'firstname': name,
                                'active': True,
                                'lastname': lastname,
                                'email': email})
 
         self.checkSessionFlash(response, '''created user %s''' % (username))
-
 
         new_user = self.Session.query(User).\
             filter(User.username == username).one()
@@ -50,7 +49,7 @@ class TestAdminUsersController(TestController):
 
         response.follow()
         response = response.follow()
-        self.assertTrue("""edit">newtestuser</a>""" in response.body)
+        response.mustcontain("""edit">newtestuser</a>""")
 
     def test_create_err(self):
         self.log_user()
@@ -85,8 +84,45 @@ class TestAdminUsersController(TestController):
     def test_new_as_xml(self):
         response = self.app.get(url('formatted_new_user', format='xml'))
 
-    def test_update(self):
-        response = self.app.put(url('user', id=1))
+    @parameterized.expand([('firstname', 'new_username'),
+                           ('lastname', 'new_username'),
+                           ('admin', True),
+                           ('admin', False),
+                           ('ldap_dn', 'test'),
+                           ('ldap_dn', None),
+                           ('active', False),
+                           ('active', True),
+                           ('email', 'some@email.com'),
+                           ])
+    def test_update(self, name, expected):
+        self.log_user()
+        uname = 'testme'
+        usr = UserModel().create_or_update(username=uname, password='qweqwe',
+                                           email='testme@rhodecod.org')
+        self.Session().commit()
+        params = usr.get_api_data()
+        params.update({name: expected})
+        params.update({'password_confirmation': ''})
+        params.update({'new_password': ''})
+        if name == 'email':
+            params['emails'] = [expected]
+        if name == 'ldap_dn':
+            #cannot update this via form
+            params['ldap_dn'] = None
+        try:
+            response = self.app.put(url('user', id=usr.user_id), params)
+
+            self.checkSessionFlash(response, '''User updated successfully''')
+
+            updated_user = User.get_by_username(uname)
+            updated_params = updated_user.get_api_data()
+            updated_params.update({'password_confirmation': ''})
+            updated_params.update({'new_password': ''})
+
+            self.assertEqual(params, updated_params)
+
+        finally:
+            UserModel().delete('testme')
 
     def test_update_browser_fakeout(self):
         response = self.app.post(url('user', id=1), params=dict(_method='put'))
@@ -102,7 +138,7 @@ class TestAdminUsersController(TestController):
         response = self.app.post(url('users'), {'username': username,
                                                'password': password,
                                                'password_confirmation': password,
-                                               'name': name,
+                                               'firstname': name,
                                                'active': True,
                                                'lastname': lastname,
                                                'email': email})

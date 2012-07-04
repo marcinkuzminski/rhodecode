@@ -356,15 +356,14 @@ class SettingsController(BaseController):
         #    h.form(url('admin_settings_my_account_update'),
         #           method='put')
         # url('admin_settings_my_account_update', id=ID)
-        user_model = UserModel()
         uid = self.rhodecode_user.user_id
+        email = self.rhodecode_user.email
         _form = UserForm(edit=True,
-                         old_data={'user_id': uid,
-                                   'email': self.rhodecode_user.email})()
+                         old_data={'user_id': uid, 'email': email})()
         form_result = {}
         try:
             form_result = _form.to_python(dict(request.POST))
-            user_model.update_my_account(uid, form_result)
+            UserModel().update_my_account(uid, form_result)
             h.flash(_('Your account was updated successfully'),
                     category='success')
             Session.commit()

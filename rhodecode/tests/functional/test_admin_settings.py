@@ -4,6 +4,7 @@ from rhodecode.lib.auth import get_crypt_password, check_password
 from rhodecode.model.db import User, RhodeCodeSetting
 from rhodecode.tests import *
 from rhodecode.lib import helpers as h
+from rhodecode.model.user import UserModel
 
 
 class TestAdminSettingsController(TestController):
@@ -68,8 +69,7 @@ class TestAdminSettingsController(TestController):
                          .get_app_settings()['rhodecode_ga_code'], new_ga_code)
 
         response = response.follow()
-        self.assertTrue("""_gaq.push(['_setAccount', '%s']);""" % new_ga_code
-                        in response.body)
+        response.mustcontain("""_gaq.push(['_setAccount', '%s']);""" % new_ga_code)
 
     def test_ga_code_inactive(self):
         self.log_user()
@@ -90,8 +90,8 @@ class TestAdminSettingsController(TestController):
                         .get_app_settings()['rhodecode_ga_code'], new_ga_code)
 
         response = response.follow()
-        self.assertTrue("""_gaq.push(['_setAccount', '%s']);""" % new_ga_code
-                        not in response.body)
+        self.assertFalse("""_gaq.push(['_setAccount', '%s']);""" % new_ga_code
+                         in response.body)
 
     def test_title_change(self):
         self.log_user()
@@ -114,8 +114,7 @@ class TestAdminSettingsController(TestController):
                              new_title.decode('utf-8'))
 
             response = response.follow()
-            self.assertTrue("""<h1><a href="/">%s</a></h1>""" % new_title
-                        in response.body)
+            response.mustcontain("""<h1><a href="/">%s</a></h1>""" % new_title)
 
     def test_my_account(self):
         self.log_user()
@@ -123,74 +122,73 @@ class TestAdminSettingsController(TestController):
 
         self.assertTrue('value="test_admin' in response.body)
 
-    def test_my_account_update(self):
-        self.log_user()
+    @parameterized.expand([('firstname', 'new_username'),
+                           ('lastname', 'new_username'),
+                           ('admin', True),
+                           ('admin', False),
+                           ('ldap_dn', 'test'),
+                           ('ldap_dn', None),
+                           ('active', False),
+                           ('active', True),
+                           ('email', 'some@email.com'),
+                           ])
+    def test_my_account_update(self, name, expected):
+        uname = 'testme'
+        usr = UserModel().create_or_update(username=uname, password='qweqwe',
+                                           email='testme@rhodecod.org')
+        self.Session().commit()
+        params = usr.get_api_data()
+        user_id = usr.user_id
+        self.log_user(username=uname, password='qweqwe')
+        params.update({name: expected})
+        params.update({'password_confirmation': ''})
+        params.update({'new_password': ''})
 
-        new_email = 'new@mail.pl'
-        new_name = 'NewName'
-        new_lastname = 'NewLastname'
-        new_password = 'test123'
+        try:
+            response = self.app.put(url('admin_settings_my_account_update',
+                                        id=user_id), params)
 
-        response = self.app.post(url('admin_settings_my_account_update'),
-                                 params=dict(_method='put',
-                                             username='test_admin',
-                                             new_password=new_password,
-                                             password_confirmation=new_password,
-                                             password='',
-                                             name=new_name,
-                                             lastname=new_lastname,
-                                             email=new_email,))
-        response.follow()
+            self.checkSessionFlash(response,
+                                   'Your account was updated successfully')
 
-        assert 'Your account was updated successfully' in response.session['flash'][0][1], 'no flash message about success of change'
-        user = self.Session.query(User).filter(User.username == 'test_admin').one()
-        assert user.email == new_email, 'incorrect user email after update got %s vs %s' % (user.email, new_email)
-        assert user.name == new_name, 'updated field mismatch %s vs %s' % (user.name, new_name)
-        assert user.lastname == new_lastname, 'updated field mismatch %s vs %s' % (user.lastname, new_lastname)
-        assert check_password(new_password, user.password) is True, 'password field mismatch %s vs %s' % (user.password, new_password)
+            updated_user = User.get_by_username(uname)
+            updated_params = updated_user.get_api_data()
+            updated_params.update({'password_confirmation': ''})
+            updated_params.update({'new_password': ''})
 
-        #bring back the admin settings
-        old_email = 'test_admin@mail.com'
-        old_name = 'RhodeCode'
-        old_lastname = 'Admin'
-        old_password = 'test12'
+            params['last_login'] = updated_params['last_login']
+            if name == 'email':
+                params['emails'] = [expected]
+            if name == 'ldap_dn':
+                #cannot update this via form
+                params['ldap_dn'] = None
+            if name == 'active':
+                #my account cannot deactivate account
+                params['active'] = True
+            if name == 'admin':
+                #my account cannot make you an admin !
+                params['admin'] = False
 
-        response = self.app.post(url('admin_settings_my_account_update'), params=dict(
-                                                            _method='put',
-                                                            username='test_admin',
-                                                            new_password=old_password,
-                                                            password_confirmation=old_password,
-                                                            password='',
-                                                            name=old_name,
-                                                            lastname=old_lastname,
-                                                            email=old_email,))
+            self.assertEqual(params, updated_params)
 
-        response.follow()
-        self.checkSessionFlash(response,
-                               'Your account was updated successfully')
-
-        user = self.Session.query(User).filter(User.username == 'test_admin').one()
-        assert user.email == old_email, 'incorrect user email after update got %s vs %s' % (user.email, old_email)
-
-        assert user.email == old_email, 'incorrect user email after update got %s vs %s' % (user.email, old_email)
-        assert user.name == old_name, 'updated field mismatch %s vs %s' % (user.name, old_name)
-        assert user.lastname == old_lastname, 'updated field mismatch %s vs %s' % (user.lastname, old_lastname)
-        assert check_password(old_password, user.password) is True, 'password updated field mismatch %s vs %s' % (user.password, old_password)
+        finally:
+            UserModel().delete('testme')
 
     def test_my_account_update_err_email_exists(self):
         self.log_user()
 
         new_email = 'test_regular@mail.com'  # already exisitn email
-        response = self.app.post(url('admin_settings_my_account_update'), params=dict(
-                                                            _method='put',
-                                                            username='test_admin',
-                                                            new_password='test12',
-                                                            password_confirmation='test122',
-                                                            name='NewName',
-                                                            lastname='NewLastname',
-                                                            email=new_email,))
+        response = self.app.put(url('admin_settings_my_account_update'),
+                                params=dict(
+                                    username='test_admin',
+                                    new_password='test12',
+                                    password_confirmation='test122',
+                                    firstname='NewName',
+                                    lastname='NewLastname',
+                                    email=new_email,)
+                                )
 
-        assert 'This e-mail address is already taken' in response.body, 'Missing error message about existing email'
+        response.mustcontain('This e-mail address is already taken')
 
     def test_my_account_update_err(self):
         self.log_user('test_regular2', 'test12')
@@ -202,7 +200,7 @@ class TestAdminSettingsController(TestController):
                                             username='test_admin',
                                             new_password='test12',
                                             password_confirmation='test122',
-                                            name='NewName',
+                                            firstname='NewName',
                                             lastname='NewLastname',
                                             email=new_email,)
                                  )

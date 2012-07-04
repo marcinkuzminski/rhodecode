@@ -446,16 +446,14 @@ class User(Base, BaseModel):
         return data
 
     def __json__(self):
-        return dict(
-            user_id=self.user_id,
-            first_name=self.name,
-            last_name=self.lastname,
-            email=self.email,
+        data = dict(
             full_name=self.full_name,
             full_name_or_username=self.full_name_or_username,
             short_contact=self.short_contact,
             full_contact=self.full_contact
         )
+        data.update(self.get_api_data())
+        return data
 
 
 class UserEmailMap(Base, BaseModel):

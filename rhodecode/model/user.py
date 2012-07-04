@@ -96,6 +96,8 @@ class UserModel(BaseModel):
             for k, v in form_data.items():
                 if k == 'password':
                     v = get_crypt_password(v)
+                if k == 'firstname':
+                    k = 'name'
                 setattr(new_user, k, v)
 
             new_user.api_key = generate_api_key(form_data['username'])
@@ -264,12 +266,13 @@ class UserModel(BaseModel):
                                   " crucial for entire application"))
 
             for k, v in form_data.items():
-                if k == 'new_password' and v != '':
+                if k == 'new_password' and v:
                     user.password = get_crypt_password(v)
                     user.api_key = generate_api_key(user.username)
                 else:
+                    if k == 'firstname':
+                        k = 'name'
                     setattr(user, k, v)
-
             self.sa.add(user)
         except:
             log.error(traceback.format_exc())
@@ -285,10 +288,12 @@ class UserModel(BaseModel):
                       " crucial for entire application")
                 )
             for k, v in form_data.items():
-                if k == 'new_password' and v != '':
+                if k == 'new_password' and v:
                     user.password = get_crypt_password(v)
                     user.api_key = generate_api_key(user.username)
                 else:
+                    if k == 'firstname':
+                        k = 'name'
                     if k not in ['admin', 'active']:
                         setattr(user, k, v)
 
