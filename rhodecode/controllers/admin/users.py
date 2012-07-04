@@ -131,6 +131,7 @@ class UsersController(BaseController):
             e = errors.error_dict or {}
             perm = Permission.get_by_key('hg.create.repository')
             defaults.update({'create_repo_perm': user_model.has_perm(id, perm)})
+            defaults.update({'_method': 'put'})
             return htmlfill.render(
                 render('admin/users/user_edit.html'),
                 defaults=defaults,
@@ -141,7 +142,6 @@ class UsersController(BaseController):
             log.error(traceback.format_exc())
             h.flash(_('error occurred during update of user %s') \
                     % form_result.get('username'), category='error')
-
         return redirect(url('users'))
 
     def delete(self, id):
