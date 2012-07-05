@@ -1251,8 +1251,13 @@ var get_group_name = function(node){
 	return name
 }
 var get_date = function(node){
-	var date_ = node.firstElementChild.innerHTML;
+	var date_ = YUD.getAttribute(node.firstElementChild,'date');
 	return date_
+}
+
+var get_age = function(node){
+	console.log(node);
+	return node
 }
 
 var revisionSort = function(a, b, desc, field) {
@@ -1269,8 +1274,12 @@ var revisionSort = function(a, b, desc, field) {
 	  return compState;
 };
 var ageSort = function(a, b, desc, field) {
-    var a_ = a.getData(field);
-    var b_ = b.getData(field);
+    var a_ = fromHTML(a.getData(field));
+    var b_ = fromHTML(b.getData(field));
+    
+    // extract name from table
+    a_ = get_date(a_)
+    b_ = get_date(b_)          
     
     var comp = YAHOO.util.Sort.compare;
     var compState = comp(a_, b_, desc);
