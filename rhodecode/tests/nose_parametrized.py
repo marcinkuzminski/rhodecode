@@ -158,7 +158,7 @@ def imported_from_test():
 def assert_raises(func, exc_type, str_contains=None, repr_contains=None):
     try:
         func()
-    except exc_type as e:
+    except exc_type, e:
         if str_contains is not None and str_contains not in str(e):
             raise AssertionError("%s raised, but %r does not contain %r"
                                  % (exc_type, str(e), str_contains))
