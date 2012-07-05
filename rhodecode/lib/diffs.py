@@ -26,7 +26,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import re
-import io
 import difflib
 import markupsafe
 
@@ -39,6 +38,7 @@ from mercurial import localrepo
 
 from pylons.i18n.translation import _
 
+from rhodecode.lib.compat import BytesIO
 from rhodecode.lib.vcs.exceptions import VCSError
 from rhodecode.lib.vcs.nodes import FileNode, SubModuleNode
 from rhodecode.lib.helpers import escape
@@ -603,7 +603,7 @@ def differ(org_repo, org_ref, other_repo, other_ref, discovery_data=None):
             unbundle = other_repo.getbundle('incoming', common=common,
                                             heads=rheads)
 
-            buf = io.BytesIO()
+            buf = BytesIO()
             while True:
                 chunk = unbundle._stream.read(1024 * 4)
                 if not chunk:

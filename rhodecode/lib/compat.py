@@ -394,3 +394,13 @@ except ImportError:
             result = [x + [y] for x in result for y in pool]
         for prod in result:
             yield tuple(prod)
+
+
+#==============================================================================
+# BytesIO
+#==============================================================================
+
+try:
+    from io import BytesIO
+except ImportError:
+    from cStringIO import StringIO as BytesIO
