@@ -532,6 +532,8 @@ class RepoModel(BaseModel):
             shutil.move(os.path.join(rm_path, '.%s' % alias),
                         os.path.join(rm_path, 'rm__.%s' % alias))
         # disable repo
-        _d = 'rm__%s__%s' % (datetime.now().strftime('%Y%m%d_%H%M%S_%f'),
+        _now = datetime.now()
+        _ms = str(_now.microsecond)
+        _d = 'rm__%s__%s' % (_now.strftime('%Y%m%d_%H%M%S_' + _ms),
                              repo.repo_name)
         shutil.move(rm_path, os.path.join(self.repos_path, _d))
