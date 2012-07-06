@@ -22,7 +22,6 @@ You should have received a copy of the GNU Lesser General Public License
 along with git_http_backend.py Project.
 If not, see <http://www.gnu.org/licenses/>.
 '''
-from __future__ import unicode_literals
 import os
 import subprocess
 import threading
@@ -40,7 +39,7 @@ class StreamFeeder(threading.Thread):
         super(StreamFeeder, self).__init__()
         self.daemon = True
         filelike = False
-        self.bytes = b''
+        self.bytes = bytes()
         if type(source) in (type(''), bytes, bytearray):  # string-like
             self.bytes = bytes(source)
         else:  # can be either file pointer or file-like
