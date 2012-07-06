@@ -42,6 +42,8 @@ __dbversion__ = 6  # defines current db version for migrations
 __platform__ = platform.system()
 __license__ = 'GPLv3'
 __py_version__ = sys.version_info
+__author__ = 'Marcin Kuzminski'
+__url__ = 'http://rhodecode.org'
 
 PLATFORM_WIN = ('Windows')
 PLATFORM_OTHERS = ('Linux', 'Darwin', 'FreeBSD', 'OpenBSD', 'SunOS')
@@ -49,39 +51,6 @@ PLATFORM_OTHERS = ('Linux', 'Darwin', 'FreeBSD', 'OpenBSD', 'SunOS')
 is_windows = __platform__ in PLATFORM_WIN
 is_unix = __platform__ in PLATFORM_OTHERS
 
-requirements = [
-    "Pylons==1.0.0",
-    "Beaker==1.6.3",
-    "WebHelpers==1.3",
-    "formencode==1.2.4",
-    "SQLAlchemy==0.7.8",
-    "Mako==0.7.0",
-    "pygments>=1.4",
-    "whoosh>=2.4.0,<2.5",
-    "celery>=2.2.5,<2.3",
-    "babel",
-    "python-dateutil>=1.5.0,<2.0.0",
-    "dulwich>=0.8.5,<0.9.0",
-    "webob==1.0.8",
-    "markdown==2.1.1",
-    "docutils==0.8.1",
-    "simplejson==2.5.2",
-]
-
-if __py_version__ < (2, 6):
-    requirements.append("pysqlite")
-
-if is_windows:
-    requirements.append("mercurial>=2.2.2,<2.3")
-else:
-    requirements.append("py-bcrypt")
-    requirements.append("mercurial>=2.2.2,<2.3")
-
-
-def get_version():
-    """Returns shorter version (digit parts only) as string."""
-
-    return '.'.join((str(each) for each in VERSION[:3]))
 
 BACKENDS = {
     'hg': 'Mercurial repository',
