@@ -401,7 +401,7 @@ class DiffProcessor(object):
                 try:
                     while 1:
                         line = lineiter.next()
-                        if line['action'] != 'unmod':
+                        if line['action'] not in ['unmod', 'context']:
                             nextline = lineiter.next()
                             if nextline['action'] in ['unmod', 'context'] or \
                                nextline['action'] == line['action']:
