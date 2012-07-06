@@ -329,6 +329,8 @@ class User(Base, BaseModel):
     user_created_notifications = relationship('Notification', cascade='all')
     # comments created by this user
     user_comments = relationship('ChangesetComment', cascade='all')
+    #extra emails for this user
+    user_emails = relationship('UserEmailMap', cascade='all')
 
     @hybrid_property
     def email(self):
