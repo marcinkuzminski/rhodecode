@@ -134,6 +134,7 @@ class DiffProcessor(object):
     can be used to render it in a HTML template.
     """
     _chunk_re = re.compile(r'@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@(.*)')
+    _newline_marker = '\\ No newline at end of file\n'
 
     def __init__(self, diff, differ='diff', format='gitdiff'):
         """
@@ -345,11 +346,17 @@ class DiffProcessor(object):
                             })
 
                     line = lineiter.next()
+
                     while old_line < old_end or new_line < new_end:
                         if line:
-                            command, line = line[0], line[1:]
+                            command = line[0]
+                            if command in ['+', '-', ' ']:
+                                #only modify the line if it's actually a diff
+                                # thing
+                                line = line[1:]
                         else:
                             command = ' '
+
                         affects_old = affects_new = False
 
                         # ignore those if we don't expect them
@@ -367,15 +374,7 @@ class DiffProcessor(object):
                             affects_old = affects_new = True
                             action = 'unmod'
 
-                        if line.find('No newline at end of file') != -1:
-                            lines.append({
-                                'old_lineno':   '...',
-                                'new_lineno':   '...',
-                                'action':       'context',
-                                'line':         line
-                            })
-
-                        else:
+                        if line != self._newline_marker:
                             old_line += affects_old
                             new_line += affects_new
                             lines.append({
@@ -386,6 +385,15 @@ class DiffProcessor(object):
                             })
 
                         line = lineiter.next()
+                        if line == self._newline_marker:
+                            # we need to append to lines, since this is not
+                            # counted in the line specs of diff
+                            lines.append({
+                                'old_lineno':   '...',
+                                'new_lineno':   '...',
+                                'action':       'context',
+                                'line':         line
+                            })
 
         except StopIteration:
             pass
