@@ -22,6 +22,7 @@ You should have received a copy of the GNU Lesser General Public License
 along with git_http_backend.py Project.
 If not, see <http://www.gnu.org/licenses/>.
 '''
+from __future__ import unicode_literals
 import os
 import subprocess
 import threading
@@ -40,22 +41,23 @@ class StreamFeeder(threading.Thread):
         self.daemon = True
         filelike = False
         self.bytes = b''
-        if type(source) in (type(''), bytes, bytearray): # string-like
+        if type(source) in (type(''), bytes, bytearray):  # string-like
             self.bytes = bytes(source)
-        else: # can be either file pointer or file-like
-            if type(source) in (int, long): # file pointer it is
+        else:  # can be either file pointer or file-like
+            if type(source) in (int, long):  # file pointer it is
                 ## converting file descriptor (int) stdin into file-like
                 try:
                     source = os.fdopen(source, 'rb', 16384)
-                except:
+                except Exception:
                     pass
             # let's see if source is file-like by now
             try:
                 filelike = source.read
-            except:
+            except Exception:
                 pass
         if not filelike and not self.bytes:
-            raise TypeError("StreamFeeder's source object must be a readable file-like, a file descriptor, or a string-like.")
+            raise TypeError("StreamFeeder's source object must be a readable "
+                            "file-like, a file descriptor, or a string-like.")
         self.source = source
         self.readiface, self.writeiface = os.pipe()
 
@@ -325,11 +327,11 @@ class SubprocessIOChunker(object):
         '''
         Initializes SubprocessIOChunker
 
-        @param cmd A Subprocess.Popen style "cmd". Can be string or array of strings
-        @param inputstream (Default: None) A file-like, string, or file pointer.
-        @param buffer_size (Default: 65536) A size of total buffer per stream in bytes.
-        @param chunk_size (Default: 4096) A max size of a chunk. Actual chunk may be smaller.
-        @param starting_values (Default: []) An array of strings to put in front of output que.
+        :param cmd: A Subprocess.Popen style "cmd". Can be string or array of strings
+        :param inputstream: (Default: None) A file-like, string, or file pointer.
+        :param buffer_size: (Default: 65536) A size of total buffer per stream in bytes.
+        :param chunk_size: (Default: 4096) A max size of a chunk. Actual chunk may be smaller.
+        :param starting_values: (Default: []) An array of strings to put in front of output que.
         '''
 
         if inputstream:
