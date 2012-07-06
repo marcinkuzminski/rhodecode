@@ -72,6 +72,10 @@ def load_environment(global_conf, app_conf, initial=False):
     config['pylons.strict_tmpl_context'] = True
     test = os.path.split(config['__file__'])[-1] == 'test.ini'
     if test:
+        if os.environ.get('TEST_DB'):
+            # swap config if we pass enviroment variable
+            config['sqlalchemy.db1.url'] = os.environ.get('TEST_DB')
+
         from rhodecode.lib.utils import create_test_env, create_test_index
         from rhodecode.tests import  TESTS_TMP_PATH
         create_test_env(TESTS_TMP_PATH, config)
@@ -80,7 +84,6 @@ def load_environment(global_conf, app_conf, initial=False):
     # MULTIPLE DB configs
     # Setup the SQLAlchemy database engine
     sa_engine_db1 = engine_from_config(config, 'sqlalchemy.db1.')
-
     init_model(sa_engine_db1)
 
     repos_path = make_ui('db').configitems('paths')[0][1]
