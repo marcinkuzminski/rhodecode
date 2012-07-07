@@ -168,7 +168,9 @@ class WhooshIndexingDaemon(object):
 
         idx = create_in(self.index_location, SCHEMA, indexname=IDX_NAME)
         writer = idx.writer()
-        log.debug('BUILDIN INDEX FOR EXTENSIONS %s' % INDEX_EXTENSIONS)
+        log.debug('BUILDING INDEX FOR EXTENSIONS %s '
+                  'AND REPOS %s' % (INDEX_EXTENSIONS, self.repo_paths.keys()))
+
         for repo_name, repo in self.repo_paths.items():
             log.debug('building index @ %s' % repo.path)
             i_cnt = iwc_cnt = 0
@@ -230,8 +232,11 @@ class WhooshIndexingDaemon(object):
         # Loop over the files in the filesystem
         # Assume we have a function that gathers the filenames of the
         # documents to be indexed
-        ri_cnt = riwc_cnt = 0
+        ri_cnt_total = 0  # indexed
+        riwc_cnt_total = 0  # indexed with content
         for repo_name, repo in self.repo_paths.items():
+            ri_cnt = 0   # indexed
+            riwc_cnt = 0  # indexed with content
             for path in self.get_paths(repo):
                 path = safe_unicode(path)
                 if path in to_index or path not in indexed_paths:
@@ -241,9 +246,14 @@ class WhooshIndexingDaemon(object):
                     i, iwc = self.add_doc(writer, path, repo, repo_name)
                     log.debug('re indexing %s' % path)
                     ri_cnt += i
+                    ri_cnt_total += 1
                     riwc_cnt += iwc
-        log.debug('added %s files %s with content for repo %s' % (
-                     ri_cnt + riwc_cnt, riwc_cnt, repo.path)
+                    riwc_cnt_total += iwc
+            log.debug('added %s files %s with content for repo %s' % (
+                         ri_cnt + riwc_cnt, riwc_cnt, repo.path)
+            )
+        log.debug('indexed %s files in total and %s with content' % (
+                    ri_cnt_total, riwc_cnt_total)
         )
         log.debug('>> COMMITING CHANGES <<')
         writer.commit(merge=True)
