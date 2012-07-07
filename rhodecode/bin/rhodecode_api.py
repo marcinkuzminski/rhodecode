@@ -54,8 +54,9 @@ class RcConf(object):
 
     """
 
-    def __init__(self, autoload=True, autocreate=False, config=None):
-        self._conf_name = CONFIG_NAME
+    def __init__(self, config_location=None, autoload=True, autocreate=False,
+                 config=None):
+        self._conf_name = CONFIG_NAME if not config_location else config_location
         self._conf = {}
         if autocreate:
             self.make_config(config)
@@ -83,9 +84,16 @@ class RcConf(object):
         :param config:
         :type config:
         """
+        update = False
+        if os.path.exists(self._conf_name):
+            update = True
         with open(self._conf_name, 'wb') as f:
             json.dump(config, f, indent=4)
-            sys.stdout.write('Updated conf\n')
+
+        if update:
+            sys.stdout.write('Updated config in %s\n' % self._conf_name)
+        else:
+            sys.stdout.write('Created new config in %s\n' % self._conf_name)
 
     def update_config(self, new_config):
         """
@@ -166,8 +174,11 @@ def api_call(apikey, apihost, format, method=None, **kw):
 
 
 def argparser(argv):
-    usage = ("rhodecode_api [-h] [--format=FORMAT] [--apikey=APIKEY] [--apihost=APIHOST] "
-             "_create_config or METHOD <key:val> <key2:val> ...")
+    usage = (
+      "rhodecode_api [-h] [--format=FORMAT] [--apikey=APIKEY] [--apihost=APIHOST] "
+      " [--config=CONFIG] "
+      "_create_config or METHOD <key:val> <key2:val> ..."
+    )
 
     parser = argparse.ArgumentParser(description='RhodeCode API cli',
                                      usage=usage)
@@ -176,6 +187,7 @@ def argparser(argv):
     group = parser.add_argument_group('config')
     group.add_argument('--apikey', help='api access key')
     group.add_argument('--apihost', help='api host')
+    group.add_argument('--config', help='config file')
 
     group = parser.add_argument_group('API')
     group.add_argument('method', metavar='METHOD', type=str,
@@ -207,12 +219,12 @@ def main(argv=None):
     if args.method == '_create_config':
         if not api_credentials_given:
             raise parser.error('_create_config requires --apikey and --apihost')
-        conf = RcConf(autocreate=True, config={'apikey': args.apikey,
+        conf = RcConf(config_location=args.config,
+                      autocreate=True, config={'apikey': args.apikey,
                                                'apihost': args.apihost})
-        sys.stdout.write('Create new config in %s\n' % CONFIG_NAME)
 
     if not conf:
-        conf = RcConf(autoload=True)
+        conf = RcConf(config_location=args.config, autoload=True)
         if not conf:
             if not api_credentials_given:
                 parser.error('Could not find config file and missing '
