@@ -133,7 +133,7 @@ class PullrequestsController(BaseRepoController):
         for u in User.query().filter(User.username != 'default').all():
             uname = u.username
             if org_repo.user == u:
-                uname = _('%s (owner)' % u.username)
+                uname = _('%s (owner)') % u.username
                 # auto add owner to pull-request recipients
                 c.review_members.append([u.user_id, uname])
             c.available_members.append([u.user_id, uname])

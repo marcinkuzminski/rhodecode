@@ -232,7 +232,7 @@ class UsersController(BaseController):
         try:
             user_model.add_extra_email(id, email)
             Session.commit()
-            h.flash(_("Added email %s to user" % email), category='success')
+            h.flash(_("Added email %s to user") % email, category='success')
         except formencode.Invalid, error:
             msg = error.error_dict['email']
             h.flash(msg, category='error')

@@ -218,7 +218,7 @@ class ReposController(BaseController):
             form_result = _form.to_python(dict(request.POST))
             repo = repo_model.update(repo_name, form_result)
             invalidate_cache('get_repo_cached_%s' % repo_name)
-            h.flash(_('Repository %s updated successfully' % repo_name),
+            h.flash(_('Repository %s updated successfully') % repo_name,
                     category='success')
             changed_name = repo.repo_name
             action_logger(self.rhodecode_user, 'admin_updated_repo',
@@ -414,7 +414,7 @@ class ReposController(BaseController):
                                     self.rhodecode_user.username)
             fork = repo.fork.repo_name if repo.fork else _('Nothing')
             Session.commit()
-            h.flash(_('Marked repo %s as fork of %s' % (repo_name,fork)),
+            h.flash(_('Marked repo %s as fork of %s') % (repo_name,fork),
                     category='success')
         except Exception, e:
             raise

@@ -82,7 +82,7 @@ class FilesController(BaseRepoController):
                        repo_name=c.repo_name,
                        revision=0, f_path='')
             add_new = '<a href="%s">[%s]</a>' % (url_, _('add new'))
-            h.flash(h.literal(_('There are no files yet %s' % add_new)),
+            h.flash(h.literal(_('There are no files yet %s') % add_new),
                     category='warning')
             redirect(h.url('summary_home', repo_name=repo_name))
 
@@ -267,7 +267,7 @@ class FilesController(BaseRepoController):
                                              user=self.rhodecode_user,
                                              author=author, message=message,
                                              content=content, f_path=f_path)
-                h.flash(_('Successfully committed to %s' % f_path),
+                h.flash(_('Successfully committed to %s') % f_path,
                         category='success')
 
             except Exception:
@@ -321,7 +321,7 @@ class FilesController(BaseRepoController):
                                            user=self.rhodecode_user,
                                            author=author, message=message,
                                            content=content, f_path=node_path)
-                h.flash(_('Successfully committed to %s' % node_path),
+                h.flash(_('Successfully committed to %s') % node_path,
                         category='success')
             except NodeAlreadyExistsError, e:
                 h.flash(_(e), category='error')
