@@ -8,6 +8,7 @@ from multiprocessing.util import Finalize
 
 from rhodecode.lib.compat import kill
 
+
 class LockHeld(Exception):
     pass
 
@@ -123,6 +124,10 @@ class DaemonLock(object):
         """
         if self.debug:
             print 'creating a file %s and pid: %s' % (pidfile, lockname)
+
+        dir_, file_ = os.path.split(pidfile)
+        if not os.path.isdir(dir_):
+            os.makedirs(dir_)
         pidfile = open(self.pidfile, "wb")
         pidfile.write(lockname)
         pidfile.close
