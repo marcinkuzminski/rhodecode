@@ -47,7 +47,7 @@ use = egg:rhodecode
 full_stack = true
 static_files = true
 # Optional Languages
-# en, fr, pt_BR, zh_CN, zh_TW
+# en, fr, ja, pt_BR, zh_CN, zh_TW
 lang = en
 cache_dir = %(here)s/data
 index_dir = %(here)s/data/index
