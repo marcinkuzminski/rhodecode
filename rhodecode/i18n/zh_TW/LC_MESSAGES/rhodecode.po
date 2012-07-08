@@ -1075,10 +1075,6 @@ msgid "Users group \"%(usersgroup)s\" already exists"
 msgstr "這個使用者群組已存在"
 
 #: rhodecode/model/validators.py:106
-#, fuzzy
-#| msgid "" "RepoGroup name may only contain  alphanumeric characters
-#| underscores, " "periods or dashes and must begin with alphanumeric
-#| character"
 msgid ""
 "users group name may only contain  alphanumeric characters underscores, "
 "periods or dashes and must begin with alphanumeric character"

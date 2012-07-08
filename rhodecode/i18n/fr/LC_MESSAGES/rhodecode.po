@@ -1115,10 +1115,6 @@ msgid "Users group \"%(usersgroup)s\" already exists"
 msgstr "Ce groupe d’utilisateurs existe déjà."
 
 #: rhodecode/model/validators.py:106
-#, fuzzy
-#| msgid "" "RepoGroup name may only contain  alphanumeric characters
-#| underscores, " "periods or dashes and must begin with alphanumeric
-#| character"
 msgid ""
 "users group name may only contain  alphanumeric characters underscores, "
 "periods or dashes and must begin with alphanumeric character"
@@ -1224,9 +1220,6 @@ msgid "e-mail \"%(email)s\" does not exist."
 msgstr "Cette adresse e-mail n’existe pas"
 
 #: rhodecode/model/validators.py:581
-#, fuzzy
-#| msgid "" "The LDAP Login attribute of the CN must be specified - this is the
-#| name " "of the attribute that is equivalent to 'username'"
 msgid ""
 "The LDAP Login attribute of the CN must be specified - this is the name "
 "of the attribute that is equivalent to \"username\""

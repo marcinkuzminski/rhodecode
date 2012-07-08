@@ -1108,10 +1108,6 @@ msgid "Users group \"%(usersgroup)s\" already exists"
 msgstr "Esse grupo de usuários já existe"
 
 #: rhodecode/model/validators.py:106
-#, fuzzy
-#| msgid "" "RepoGroup name may only contain  alphanumeric characters
-#| underscores, " "periods or dashes and must begin with alphanumeric
-#| character"
 msgid ""
 "users group name may only contain  alphanumeric characters underscores, "
 "periods or dashes and must begin with alphanumeric character"
@@ -1215,9 +1211,6 @@ msgid "e-mail \"%(email)s\" does not exist."
 msgstr "Esse endereço de e-mail não existe."
 
 #: rhodecode/model/validators.py:581
-#, fuzzy
-#| msgid "" "The LDAP Login attribute of the CN must be specified - this is the
-#| name " "of the attribute that is equivalent to 'username'"
 msgid ""
 "The LDAP Login attribute of the CN must be specified - this is the name "
 "of the attribute that is equivalent to \"username\""
@@ -2840,8 +2833,8 @@ msgstr "Registro de alterações"
 #, python-format
 msgid "showing %d out of %d revision"
 msgid_plural "showing %d out of %d revisions"
-msgstr[0] "mostrando %d de % revisão"
-msgstr[1] "mostrando %d de % revisões"
+msgstr[0] "mostrando %d de %d revisão"
+msgstr[1] "mostrando %d de %d revisões"
 
 #: rhodecode/templates/changelog/changelog.html:37
 #, python-format
@@ -3302,7 +3295,7 @@ msgstr "próxima revisão"
 msgid "%s author"
 msgid_plural "%s authors"
 msgstr[0] "autor"
-msgstr[1] ""
+msgstr[1] "autors"
 
 #: rhodecode/templates/files/files_source.html:36
 msgid "show source"
