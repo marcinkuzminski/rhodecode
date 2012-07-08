@@ -4,25 +4,27 @@
 
 #this needs to be done on source codes, preferable default/stable branches
  
-python setup.py extract_messages -> get messages from project
-python setup.py init_catalog -l pl -> create a language directory for <pl> lang
-edit the new po file with poedit or any other editor
-python setup.py compile_catalog -> create translation files
+python setup.py extract_messages <- get messages from project
+python setup.py init_catalog -l pl <- create a language directory for <pl> lang
+#edit the new po file with poedit or any other editor
+msgfmt -f -c <updated_file.po> <- check format and errors
+python setup.py compile_catalog <- create translation files
 
 ############# 
 # to update #
 #############
 
-python setup.py extract_messages -> get messages from project
-python setup.py update_catalog -> to update the translations
-edit the new updated po file with poedit
-python setup.py compile_catalog -> create translation files
+python setup.py extract_messages <- get messages from project
+python setup.py update_catalog <- to update the translations
+#edit the new updated po file with poedit
+msgfmt -f -c <updated_file.po> <- check format and errors
+python setup.py compile_catalog <- create translation files
 
 
 ###################
 # change language #
 ###################
 
-`lang=en`
+`lang=pl`
 
 in the .ini file
