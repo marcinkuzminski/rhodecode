@@ -30,6 +30,7 @@ import logging
 import traceback
 
 from dulwich import server as dulserver
+from dulwich.web import LimitedInputFilter, GunzipFilter
 
 
 class SimpleGitUploadPackHandler(dulserver.UploadPackHandler):
@@ -225,6 +226,7 @@ class SimpleGit(BaseVCSController):
             repo_name=repo_name,
             username=username,
         )
+        app = GunzipFilter(LimitedInputFilter(app))
         return app
 
     def __get_repository(self, environ):
