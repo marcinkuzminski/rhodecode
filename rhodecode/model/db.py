@@ -61,37 +61,6 @@ log = logging.getLogger(__name__)
 _hash_key = lambda k: hashlib.md5(safe_str(k)).hexdigest()
 
 
-class ModelSerializer(json.JSONEncoder):
-    """
-    Simple Serializer for JSON,
-
-    usage::
-
-        to make object customized for serialization implement a __json__
-        method that will return a dict for serialization into json
-
-    example::
-
-        class Task(object):
-
-            def __init__(self, name, value):
-                self.name = name
-                self.value = value
-
-            def __json__(self):
-                return dict(name=self.name,
-                            value=self.value)
-
-    """
-
-    def default(self, obj):
-
-        if hasattr(obj, '__json__'):
-            return obj.__json__()
-        else:
-            return json.JSONEncoder.default(self, obj)
-
-
 class BaseModel(object):
     """
     Base Model for all classess
@@ -112,8 +81,13 @@ class BaseModel(object):
             d[k] = getattr(self, k)
 
         # also use __json__() if present to get additional fields
-        for k, val in getattr(self, '__json__', lambda: {})().iteritems():
-            d[k] = val
+        _json_attr = getattr(self, '__json__', None)
+        if _json_attr:
+            # update with attributes from __json__
+            if callable(_json_attr):
+                _json_attr = _json_attr()
+            for k, val in _json_attr.iteritems():
+                d[k] = val
         return d
 
     def get_appstruct(self):
@@ -173,8 +147,8 @@ class RhodeCodeSetting(Base, BaseModel):
          'mysql_charset': 'utf8'}
     )
     app_settings_id = Column("app_settings_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
-    app_settings_name = Column("app_settings_name", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
-    _app_settings_value = Column("app_settings_value", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    app_settings_name = Column("app_settings_name", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    _app_settings_value = Column("app_settings_value", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
 
     def __init__(self, k='', v=''):
         self.app_settings_name = k
@@ -254,9 +228,9 @@ class RhodeCodeUi(Base, BaseModel):
     HOOK_PULL = 'preoutgoing.pull_logger'
 
     ui_id = Column("ui_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
-    ui_section = Column("ui_section", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
-    ui_key = Column("ui_key", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
-    ui_value = Column("ui_value", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    ui_section = Column("ui_section", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    ui_key = Column("ui_key", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    ui_value = Column("ui_value", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     ui_active = Column("ui_active", Boolean(), nullable=True, unique=None, default=True)
 
     @classmethod
@@ -303,16 +277,16 @@ class User(Base, BaseModel):
          'mysql_charset': 'utf8'}
     )
     user_id = Column("user_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
-    username = Column("username", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
-    password = Column("password", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    username = Column("username", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    password = Column("password", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     active = Column("active", Boolean(), nullable=True, unique=None, default=True)
     admin = Column("admin", Boolean(), nullable=True, unique=None, default=False)
-    name = Column("firstname", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
-    lastname = Column("lastname", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
-    _email = Column("email", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    name = Column("firstname", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    lastname = Column("lastname", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    _email = Column("email", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     last_login = Column("last_login", DateTime(timezone=False), nullable=True, unique=None, default=None)
-    ldap_dn = Column("ldap_dn", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
-    api_key = Column("api_key", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    ldap_dn = Column("ldap_dn", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    api_key = Column("api_key", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
 
     user_log = relationship('UserLog', cascade='all')
     user_perms = relationship('UserToPerm', primaryjoin="User.user_id==UserToPerm.user_id", cascade='all')
@@ -470,7 +444,7 @@ class UserEmailMap(Base, BaseModel):
 
     email_id = Column("email_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=True, unique=None, default=None)
-    _email = Column("email", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=False, default=None)
+    _email = Column("email", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=False, default=None)
 
     user = relationship('User', lazy='joined')
 
@@ -500,9 +474,9 @@ class UserLog(Base, BaseModel):
     user_log_id = Column("user_log_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None, default=None)
     repository_id = Column("repository_id", Integer(), ForeignKey('repositories.repo_id'), nullable=True)
-    repository_name = Column("repository_name", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
-    user_ip = Column("user_ip", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
-    action = Column("action", UnicodeText(length=1200000, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    repository_name = Column("repository_name", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    user_ip = Column("user_ip", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    action = Column("action", UnicodeText(1200000, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     action_date = Column("action_date", DateTime(timezone=False), nullable=True, unique=None, default=None)
 
     @property
@@ -521,7 +495,7 @@ class UsersGroup(Base, BaseModel):
     )
 
     users_group_id = Column("users_group_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
-    users_group_name = Column("users_group_name", String(length=255, convert_unicode=False, assert_unicode=None), nullable=False, unique=True, default=None)
+    users_group_name = Column("users_group_name", String(255, convert_unicode=False, assert_unicode=None), nullable=False, unique=True, default=None)
     users_group_active = Column("users_group_active", Boolean(), nullable=True, unique=None, default=None)
 
     members = relationship('UsersGroupMember', cascade="all, delete, delete-orphan", lazy="joined")
@@ -594,16 +568,16 @@ class Repository(Base, BaseModel):
     )
 
     repo_id = Column("repo_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
-    repo_name = Column("repo_name", String(length=255, convert_unicode=False, assert_unicode=None), nullable=False, unique=True, default=None)
-    clone_uri = Column("clone_uri", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=False, default=None)
-    repo_type = Column("repo_type", String(length=255, convert_unicode=False, assert_unicode=None), nullable=False, unique=False, default=None)
+    repo_name = Column("repo_name", String(255, convert_unicode=False, assert_unicode=None), nullable=False, unique=True, default=None)
+    clone_uri = Column("clone_uri", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=False, default=None)
+    repo_type = Column("repo_type", String(255, convert_unicode=False, assert_unicode=None), nullable=False, unique=False, default=None)
     user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=False, default=None)
     private = Column("private", Boolean(), nullable=True, unique=None, default=None)
     enable_statistics = Column("statistics", Boolean(), nullable=True, unique=None, default=True)
     enable_downloads = Column("downloads", Boolean(), nullable=True, unique=None, default=True)
-    description = Column("description", String(length=10000, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    description = Column("description", String(10000, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     created_on = Column('created_on', DateTime(timezone=False), nullable=True, unique=None, default=datetime.datetime.now)
-    landing_rev = Column("landing_revision", String(length=255, convert_unicode=False, assert_unicode=None), nullable=False, unique=False, default=None)
+    landing_rev = Column("landing_revision", String(255, convert_unicode=False, assert_unicode=None), nullable=False, unique=False, default=None)
 
     fork_id = Column("fork_id", Integer(), ForeignKey('repositories.repo_id'), nullable=True, unique=False, default=None)
     group_id = Column("group_id", Integer(), ForeignKey('groups.group_id'), nullable=True, unique=False, default=None)
@@ -941,9 +915,9 @@ class RepoGroup(Base, BaseModel):
     __mapper_args__ = {'order_by': 'group_name'}
 
     group_id = Column("group_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
-    group_name = Column("group_name", String(length=255, convert_unicode=False, assert_unicode=None), nullable=False, unique=True, default=None)
+    group_name = Column("group_name", String(255, convert_unicode=False, assert_unicode=None), nullable=False, unique=True, default=None)
     group_parent_id = Column("group_parent_id", Integer(), ForeignKey('groups.group_id'), nullable=True, unique=None, default=None)
-    group_description = Column("group_description", String(length=10000, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    group_description = Column("group_description", String(10000, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
 
     repo_group_to_perm = relationship('UserRepoGroupToPerm', cascade='all', order_by='UserRepoGroupToPerm.group_to_perm_id')
     users_group_to_perm = relationship('UsersGroupRepoGroupToPerm', cascade='all')
@@ -1091,8 +1065,8 @@ class Permission(Base, BaseModel):
     ]
 
     permission_id = Column("permission_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
-    permission_name = Column("permission_name", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
-    permission_longname = Column("permission_longname", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    permission_name = Column("permission_name", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    permission_longname = Column("permission_longname", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
 
     def __unicode__(self):
         return u"<%s('%s:%s')>" % (
@@ -1297,8 +1271,8 @@ class CacheInvalidation(Base, BaseModel):
          'mysql_charset': 'utf8'},
     )
     cache_id = Column("cache_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
-    cache_key = Column("cache_key", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
-    cache_args = Column("cache_args", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    cache_key = Column("cache_key", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    cache_args = Column("cache_args", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     cache_active = Column("cache_active", Boolean(), nullable=True, unique=None, default=False)
 
     def __init__(self, cache_key, cache_args=''):
@@ -1529,9 +1503,14 @@ class PullRequest(Base, BaseModel):
          'mysql_charset': 'utf8'},
     )
 
+    STATUS_NEW = u'new'
+    STATUS_OPEN = u'open'
+    STATUS_CLOSED = u'closed'
+
     pull_request_id = Column('pull_request_id', Integer(), nullable=False, primary_key=True)
     title = Column('title', Unicode(256), nullable=True)
-    description = Column('description', Unicode(10240), nullable=True)
+    description = Column('description', UnicodeText(10240), nullable=True)
+    status = Column('status', Unicode(256), nullable=False, default=STATUS_NEW)
     created_on = Column('created_on', DateTime(timezone=False), nullable=False, default=datetime.datetime.now)
     user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None)
     _revisions = Column('revisions', UnicodeText(20500))  # 500 revisions max
@@ -1595,7 +1574,7 @@ class Notification(Base, BaseModel):
 
     notification_id = Column('notification_id', Integer(), nullable=False, primary_key=True)
     subject = Column('subject', Unicode(512), nullable=True)
-    body = Column('body', Unicode(50000), nullable=True)
+    body = Column('body', UnicodeText(50000), nullable=True)
     created_by = Column("created_by", Integer(), ForeignKey('users.user_id'), nullable=True)
     created_on = Column('created_on', DateTime(timezone=False), nullable=False, default=datetime.datetime.now)
     type_ = Column('type', Unicode(256))
