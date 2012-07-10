@@ -1608,7 +1608,7 @@ class Notification(Base, BaseModel):
     def recipients(self):
         return [x.user for x in UserNotification.query()\
                 .filter(UserNotification.notification == self)\
-                .order_by(UserNotification.user).all()]
+                .order_by(UserNotification.user_id.asc()).all()]
 
     @classmethod
     def create(cls, created_by, subject, body, recipients, type_=None):
