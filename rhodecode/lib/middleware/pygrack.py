@@ -79,14 +79,14 @@ class GitRepository(object):
         # blows up if you sprinkle "flush" (0000) as "0001\n".
         # It reads binary, per number of bytes specified.
         # if you do add '\n' as part of data, count it.
-        smart_server_advert = '# service=%s' % git_command
+        server_advert = '# service=%s' % git_command
+        packet_len = str(hex(len(server_advert) + 4)[2:].rjust(4, '0')).lower()
         try:
             out = subprocessio.SubprocessIOChunker(
                 r'git %s --stateless-rpc --advertise-refs "%s"' % (
                                 git_command[4:], self.content_path),
                 starting_values=[
-                    str(hex(len(smart_server_advert) + 4)[2:]
-                        .rjust(4, '0') + smart_server_advert + '0000')
+                    packet_len + server_advert + '0000'
                 ]
             )
         except EnvironmentError, e:
@@ -94,6 +94,7 @@ class GitRepository(object):
             raise exc.HTTPExpectationFailed()
         resp = Response()
         resp.content_type = 'application/x-%s-advertisement' % str(git_command)
+        resp.charset = None
         resp.app_iter = out
         return resp
 
