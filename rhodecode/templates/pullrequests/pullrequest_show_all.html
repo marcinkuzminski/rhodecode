@@ -21,7 +21,14 @@
     </div>
 
     %for pr in c.pull_requests:
-        <a href="${h.url('pullrequest_show',repo_name=c.repo_name,pull_request_id=pr.pull_request_id)}">#${pr.pull_request_id}</a>
+        <div>
+          <h4><a href="${h.url('pullrequest_show',repo_name=c.repo_name,pull_request_id=pr.pull_request_id)}">
+          ${_('Pull request #%s opened by %s on %s') % (pr.pull_request_id, pr.author.full_name, h.fmt_date(pr.created_on))}
+          </a>
+          </h4>
+          <h5 style="border:0px;padding-bottom:0px">${_('Title')}: ${pr.title}</h5>
+          <div style="padding:0px 24px">${pr.description}</div>
+        </div>
     %endfor
 
 </div>
