@@ -82,7 +82,7 @@ class PullRequestModel(BaseModel):
               _('%(user)s wants you to review pull request #%(pr_id)s') % \
                 {'user': created_by_user.username,
                  'pr_id': new.pull_request_id},
-              h.url('pullrequest_show', repo_name=other_repo,
+              h.url('pullrequest_show', repo_name=other_repo.repo_name,
                     pull_request_id=new.pull_request_id,
                     qualified=True,
               )
