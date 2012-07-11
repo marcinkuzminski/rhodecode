@@ -232,7 +232,7 @@ div.options a {
 	-moz-border-radius: 0px 0px 8px 8px;
 	border-radius: 0px 0px 8px 8px;
 	height: 37px;
-    background-color: #003B76;
+    background-color: #003B76;    
     background-repeat: repeat-x;
     background-image: -khtml-gradient(linear, left top, left bottom, from(#003B76), to(#00376E) );
     background-image: -moz-linear-gradient(top, #003b76, #00376e);
@@ -1937,7 +1937,7 @@ div.form div.fields div.field div.button {
     padding: 4px;
     position: absolute;
     width: 278px;
-    
+    background-color: #003B76;
     background-repeat: repeat-x;
     background-image: -khtml-gradient(linear, left top, left bottom, from(#003B76), to(#00376E) );
     background-image: -moz-linear-gradient(top, #003b76, #00376e);
