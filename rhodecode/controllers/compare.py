@@ -29,7 +29,9 @@ import traceback
 from webob.exc import HTTPNotFound
 from pylons import request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
+from pylons.i18n.translation import _
 
+from rhodecode.lib.vcs.exceptions import EmptyRepositoryError, RepositoryError
 from rhodecode.lib import helpers as h
 from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
@@ -48,6 +50,29 @@ class CompareController(BaseRepoController):
                                    'repository.admin')
     def __before__(self):
         super(CompareController, self).__before__()
+
+    def __get_cs_or_redirect(self, rev, repo, redirect_after=True):
+        """
+        Safe way to get changeset if error occur it redirects to changeset with
+        proper message
+
+        :param rev: revision to fetch
+        :param repo: repo instance
+        """
+
+        try:
+            type_, rev = rev
+            return repo.scm_instance.get_changeset(rev)
+        except EmptyRepositoryError, e:
+            if not redirect_after:
+                return None
+            h.flash(h.literal(_('There are no changesets yet')),
+                    category='warning')
+            redirect(url('summary_home', repo_name=repo.repo_name))
+
+        except RepositoryError, e:
+            h.flash(str(e), category='warning')
+            redirect(h.url('summary_home', repo_name=repo.repo_name))
 
     def index(self, org_ref_type, org_ref, other_ref_type, other_ref):
 
@@ -71,6 +96,9 @@ class CompareController(BaseRepoController):
         if c.org_repo.scm_instance.alias != 'hg':
             log.error('Review not available for GIT REPOS')
             raise HTTPNotFound
+
+        self.__get_cs_or_redirect(rev=org_ref, repo=org_repo)
+        self.__get_cs_or_redirect(rev=other_ref, repo=other_repo)
 
         c.cs_ranges, discovery_data = PullRequestModel().get_compare_data(
                                        org_repo, org_ref, other_repo, other_ref
