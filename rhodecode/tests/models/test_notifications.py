@@ -61,14 +61,16 @@ class TestNotifications(unittest.TestCase):
         notifications = Notification.query().all()
         self.assertEqual(len(notifications), 1)
 
-        unotification = UserNotification.query()\
-            .filter(UserNotification.notification == notification).all()
-
         self.assertEqual(notifications[0].recipients, [u1, u2])
         self.assertEqual(notification.notification_id,
                          notifications[0].notification_id)
+
+        unotification = UserNotification.query()\
+            .filter(UserNotification.notification == notification).all()
+
         self.assertEqual(len(unotification), len(usrs))
-        self.assertEqual([x.user.user_id for x in unotification], usrs)
+        self.assertEqual(set([x.user.user_id for x in unotification]),
+                         set(usrs))
 
     def test_user_notifications(self):
         self.assertEqual([], Notification.query().all())
