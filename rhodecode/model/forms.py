@@ -151,7 +151,7 @@ def RegisterForm(edit=False, old_data={}):
             v.UnicodeString(strip=False, min=6, not_empty=True)
         )
         active = v.StringBoolean(if_missing=False)
-        name = v.UnicodeString(strip=True, min=1, not_empty=False)
+        firstname = v.UnicodeString(strip=True, min=1, not_empty=False)
         lastname = v.UnicodeString(strip=True, min=1, not_empty=False)
         email = All(v.Email(not_empty=True), v.UniqSystemEmail(old_data))
 

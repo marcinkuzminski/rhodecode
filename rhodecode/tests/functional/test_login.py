@@ -85,7 +85,7 @@ class TestLoginController(TestController):
                                              'password': 'test12',
                                              'password_confirmation': 'test12',
                                              'email': 'goodmail@domain.com',
-                                             'name': 'test',
+                                             'firstname': 'test',
                                              'lastname': 'test'})
 
         msg = validators.ValidUsername()._messages['username_exists']
@@ -98,7 +98,7 @@ class TestLoginController(TestController):
                                              'password': 'test12',
                                              'password_confirmation': 'test12',
                                              'email': 'test_admin@mail.com',
-                                             'name': 'test',
+                                             'firstname': 'test',
                                              'lastname': 'test'})
 
         msg = validators.UniqSystemEmail()()._messages['email_taken']
@@ -110,7 +110,7 @@ class TestLoginController(TestController):
                                              'password': 'test12',
                                              'password_confirmation': 'test12',
                                              'email': 'TesT_Admin@mail.COM',
-                                             'name': 'test',
+                                             'firstname': 'test',
                                              'lastname': 'test'})
         msg = validators.UniqSystemEmail()()._messages['email_taken']
         response.mustcontain(msg)
@@ -121,7 +121,7 @@ class TestLoginController(TestController):
                                              'password': 'test',
                                              'password_confirmation': 'test',
                                              'email': 'goodmailm',
-                                             'name': 'test',
+                                             'firstname': 'test',
                                              'lastname': 'test'})
         self.assertEqual(response.status, '200 OK')
         response.mustcontain('An email address must contain a single @')
@@ -133,7 +133,7 @@ class TestLoginController(TestController):
                                              'password': 'test12',
                                              'password_confirmation': 'test12',
                                              'email': 'goodmailm',
-                                             'name': 'test',
+                                             'firstname': 'test',
                                              'lastname': 'test'})
 
         response.mustcontain('An email address must contain a single @')
@@ -149,7 +149,7 @@ class TestLoginController(TestController):
                                              'password': 'test12',
                                              'password_confirmation': 'test12',
                                              'email': 'goodmailm',
-                                             'name': 'test',
+                                             'firstname': 'test',
                                              'lastname': 'test'})
 
         response.mustcontain('An email address must contain a single @')
@@ -163,7 +163,7 @@ class TestLoginController(TestController):
                                          'password': 'ąćźżąśśśś',
                                          'password_confirmation': 'ąćźżąśśśś',
                                          'email': 'goodmailm@test.plx',
-                                         'name': 'test',
+                                         'firstname': 'test',
                                          'lastname': 'test'})
 
         msg = validators.ValidPassword()._messages['invalid_password']
@@ -175,7 +175,7 @@ class TestLoginController(TestController):
                                              'password': '123qwe',
                                              'password_confirmation': 'qwe123',
                                              'email': 'goodmailm@test.plxa',
-                                             'name': 'test',
+                                             'firstname': 'test',
                                              'lastname': 'test'})
         msg = validators.ValidPasswordsMatch()._messages['password_mismatch']
         response.mustcontain(msg)
@@ -192,7 +192,7 @@ class TestLoginController(TestController):
                                              'password': password,
                                              'password_confirmation': password,
                                              'email': email,
-                                             'name': name,
+                                             'firstname': name,
                                              'lastname': lastname,
                                              'admin': True})  # This should be overriden
         self.assertEqual(response.status, '302 Found')
