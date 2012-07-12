@@ -194,7 +194,7 @@ class GitDirectory(object):
                                     os.path.join(content_path, '.git'),
                                     self.username)
             else:
-                return exc.HTTPNotFound()(environ, start_response, self.username)
+                return exc.HTTPNotFound()(environ, start_response)
         return app(environ, start_response)
 
 
