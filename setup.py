@@ -33,6 +33,7 @@ __platform__ = platform.system()
 is_windows = __platform__ in _get_meta_var('PLATFORM_WIN', _metadata)
 
 requirements = [
+    "waitress==0.8.1",
     "Pylons==1.0.0",
     "Beaker==1.6.3",
     "WebHelpers==1.3",
@@ -49,7 +50,7 @@ requirements = [
     "markdown==2.1.1",
     "docutils==0.8.1",
     "simplejson==2.5.2",
-    "mock"
+    "mock",
 ]
 
 if sys.version_info < (2, 6):

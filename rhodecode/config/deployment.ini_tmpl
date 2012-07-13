@@ -30,15 +30,16 @@ pdebug = false
 
 [server:main]
 ##nr of threads to spawn
-threadpool_workers = 5
+#threadpool_workers = 5
 
 ##max request before thread respawn
-threadpool_max_requests = 10
+#threadpool_max_requests = 10
 
 ##option to use threads of process
-use_threadpool = true
+#use_threadpool = true
 
-use = egg:Paste#http
+#use = egg:Paste#http
+use = egg:waitress#main
 host = 127.0.0.1
 port = 5000
 

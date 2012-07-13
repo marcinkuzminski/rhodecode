@@ -25,19 +25,17 @@
 
 import logging
 import binascii
+
 from pylons.i18n.translation import _
 
+from rhodecode.model.meta import Session
 from rhodecode.lib import helpers as h
 from rhodecode.model import BaseModel
-from rhodecode.model.db import PullRequest, PullRequestReviewers, Notification,\
-    ChangesetStatus
+from rhodecode.model.db import PullRequest, PullRequestReviewers, Notification
 from rhodecode.model.notification import NotificationModel
 from rhodecode.lib.utils2 import safe_unicode
 
 from rhodecode.lib.vcs.utils.hgcompat import discovery
-from rhodecode.model.changeset_status import ChangesetStatusModel
-from rhodecode.model.comment import ChangesetCommentsModel
-from rhodecode.model.meta import Session
 
 log = logging.getLogger(__name__)
 
