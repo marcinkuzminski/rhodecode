@@ -66,6 +66,10 @@ class RepoTemp(object):
 
 
 class CachedRepoList(object):
+    """
+    Cached repo list, uses in-memory cache after initialization, that is
+    super fast
+    """
 
     def __init__(self, db_repo_list, repos_path, order_by=None):
         self.db_repo_list = db_repo_list
@@ -106,7 +110,7 @@ class CachedRepoList(object):
             tmp_d['name'] = dbr.repo_name
             tmp_d['name_sort'] = tmp_d['name'].lower()
             tmp_d['description'] = dbr.description
-            tmp_d['description_sort'] = tmp_d['description']
+            tmp_d['description_sort'] = tmp_d['description'].lower()
             tmp_d['last_change'] = last_change
             tmp_d['last_change_sort'] = time.mktime(last_change.timetuple())
             tmp_d['tip'] = tip.raw_id
@@ -118,6 +122,29 @@ class CachedRepoList(object):
             tmp_d['repo_archives'] = list(scmr._get_archives())
             tmp_d['last_msg'] = tip.message
             tmp_d['author'] = tip.author
+            tmp_d['dbrepo'] = dbr.get_dict()
+            tmp_d['dbrepo_fork'] = dbr.fork.get_dict() if dbr.fork else {}
+            yield tmp_d
+
+
+class SimpleCachedRepoList(CachedRepoList):
+    """
+    Lighter version of CachedRepoList without the scm initialisation
+    """
+
+    def __iter__(self):
+        for dbr in self.db_repo_list:
+            # check permission at this level
+            if not HasRepoPermissionAny(
+                'repository.read', 'repository.write', 'repository.admin'
+            )(dbr.repo_name, 'get repo check'):
+                continue
+
+            tmp_d = {}
+            tmp_d['name'] = dbr.repo_name
+            tmp_d['name_sort'] = tmp_d['name'].lower()
+            tmp_d['description'] = dbr.description
+            tmp_d['description_sort'] = tmp_d['description'].lower()
             tmp_d['dbrepo'] = dbr.get_dict()
             tmp_d['dbrepo_fork'] = dbr.fork.get_dict() if dbr.fork else {}
             yield tmp_d
@@ -215,21 +242,29 @@ class ScmModel(BaseModel):
 
         return repos
 
-    def get_repos(self, all_repos=None, sort_key=None):
+    def get_repos(self, all_repos=None, sort_key=None, simple=False):
         """
         Get all repos from db and for each repo create it's
         backend instance and fill that backed with information from database
 
         :param all_repos: list of repository names as strings
             give specific repositories list, good for filtering
+
+        :param sort_key: initial sorting of repos
+        :param simple: use SimpleCachedList - one without the SCM info
         """
         if all_repos is None:
             all_repos = self.sa.query(Repository)\
                         .filter(Repository.group_id == None)\
                         .order_by(func.lower(Repository.repo_name)).all()
-
-        repo_iter = CachedRepoList(all_repos, repos_path=self.repos_path,
-                                   order_by=sort_key)
+        if simple:
+            repo_iter = SimpleCachedRepoList(all_repos,
+                                             repos_path=self.repos_path,
+                                             order_by=sort_key)
+        else:
+            repo_iter = CachedRepoList(all_repos,
+                                       repos_path=self.repos_path,
+                                       order_by=sort_key)
 
         return repo_iter
 

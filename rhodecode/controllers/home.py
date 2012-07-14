@@ -51,7 +51,8 @@ class HomeController(BaseController):
         if request.is_xhr:
             all_repos = Repository.query().order_by(Repository.repo_name).all()
             c.repos_list = self.scm_model.get_repos(all_repos,
-                                                    sort_key='name_sort')
+                                                    sort_key='name_sort',
+                                                    simple=True)
             return render('/repo_switcher_list.html')
         else:
             return HTTPBadRequest()
