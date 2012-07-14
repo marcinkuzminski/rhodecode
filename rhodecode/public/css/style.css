@@ -219,6 +219,23 @@ div.options a {
     margin-bottom: 0;
     margin-top: 5px;
 }
+a.permalink{
+	visibility: hidden;
+}
+
+a.permalink:hover{
+	text-decoration: none;
+}
+
+h1:hover > a.permalink,
+h2:hover > a.permalink,
+h3:hover > a.permalink,
+h4:hover > a.permalink,
+h5:hover > a.permalink,
+h6:hover > a.permalink,
+div:hover > a.permalink {
+    visibility: visible;
+}
 
 #header {
 	margin: 0;
