@@ -25,6 +25,7 @@ Users Guide
    usage/statistics
    usage/backup
    usage/debugging
+   usage/troubleshooting
 
 **Develop**
 

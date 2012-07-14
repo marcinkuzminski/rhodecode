@@ -54,8 +54,8 @@ copyright = u'%s, Marcin Kuzminski' % (datetime.datetime.now().year)
 # The short X.Y version.
 root = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(root)
-from rhodecode import get_version, __version__
-version = get_version()
+from rhodecode import __version__
+version = __version__
 # The full version, including alpha/beta/rc tags.
 release = __version__
 

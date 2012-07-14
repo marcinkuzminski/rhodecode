@@ -131,7 +131,8 @@ Listed bellow are various support resources that should help.
 
 .. note::
    
-   Please try to read the documentation before posting any issues
+   Please try to read the documentation before posting any issues, especially
+   the **troubleshooting section**
  
 - Join the `Google group <http://groups.google.com/group/rhodecode>`_ and ask
   any questions.

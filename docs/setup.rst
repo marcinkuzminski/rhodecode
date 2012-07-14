@@ -687,43 +687,9 @@ environment.
 Other configuration files
 -------------------------
 
-Some example init.d scripts can be found here, for debian and gentoo:
+Some example init.d scripts can be found in init.d directory::
 
-https://rhodecode.org/rhodecode/files/tip/init.d
-
-
-Troubleshooting
----------------
-
-:Q: **Missing static files?**
-:A: Make sure either to set the `static_files = true` in the .ini file or
-   double check the root path for your http setup. It should point to 
-   for example:
-   /home/my-virtual-python/lib/python2.6/site-packages/rhodecode/public
-   
-| 
-
-:Q: **Can't install celery/rabbitmq**
-:A: Don't worry RhodeCode works without them too. No extra setup is required.
-
-|
- 
-:Q: **Long lasting push timeouts?**
-:A: Make sure you set a longer timeouts in your proxy/fcgi settings, timeouts
-    are caused by https server and not RhodeCode.
-    
-| 
-
-:Q: **Large pushes timeouts?**
-:A: Make sure you set a proper max_body_size for the http server.
-
-|
-
-:Q: **Apache doesn't pass basicAuth on pull/push?**
-:A: Make sure you added `WSGIPassAuthorization true`.
-
-For further questions search the `Issues tracker`_, or post a message in the 
-`google group rhodecode`_
+  https://secure.rhodecode.org/rhodecode/files/beta/init.d
 
 .. _virtualenv: http://pypi.python.org/pypi/virtualenv
 .. _python: http://www.python.org/
