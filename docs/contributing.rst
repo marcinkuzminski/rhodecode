@@ -27,7 +27,8 @@ enviroment.
 
 
 After finishing your changes make sure all tests passes ok. You can run
-the testsuite running ``nosetest`` from the project root.
+the testsuite running ``nosetest`` from the project root, or if you use tox
+run tox for python2.5-2.7 with multiple database test.
 
 | Thank you for any contributions!
 |  Marcin
