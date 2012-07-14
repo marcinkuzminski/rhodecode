@@ -777,6 +777,13 @@ class Repository(Base, BaseModel):
     def get_changeset(self, rev=None):
         return get_changeset_safe(self.scm_instance, rev)
 
+    def get_landing_changeset(self):
+        """
+        Returns landing changeset, or if that doesn't exist returns the tip
+        """
+        cs = self.get_changeset(self.landing_rev) or self.get_changeset()
+        return cs
+
     @property
     def tip(self):
         return self.get_changeset('tip')
