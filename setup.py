@@ -157,6 +157,7 @@ setup(
 
     [paste.global_paster_command]
     setup-rhodecode=rhodecode.config.setup_rhodecode:SetupCommand
+    cleanup-repos=rhodecode.lib.cleanup:CleanupCommand
     make-index=rhodecode.lib.indexers:MakeIndex
     make-rcext=rhodecode.config.rcextensions.make_rcextensions:MakeRcExt
     upgrade-db=rhodecode.lib.dbmigrate:UpgradeDb
