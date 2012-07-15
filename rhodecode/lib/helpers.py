@@ -572,6 +572,13 @@ def action_parser(user_log, feed=False):
         group_name = action_params
         return group_name
 
+    def get_pull_request():
+        pull_request_id = action_params
+        repo_name = user_log.repository.repo_name
+        return link_to(_('Pull request #%s') % pull_request_id,
+                    url('pullrequest_show', repo_name=repo_name,
+                    pull_request_id=pull_request_id))
+
     # action : translated str, callback(extractor), icon
     action_map = {
     'user_deleted_repo':           (_('[deleted] repository'),
@@ -602,8 +609,10 @@ def action_parser(user_log, feed=False):
                                     get_users_group, 'group_edit.png'),
     'user_commented_revision':     (_('[commented] on revision in repository'),
                                     get_cs_links, 'comment_add.png'),
-    'user_commented_pull_request': (_('[commented] on pull request'),
-                                    get_cs_links, 'comment_add.png'),
+    'user_commented_pull_request': (_('[commented] on pull request for'),
+                                    get_pull_request, 'comment_add.png'),
+    'user_closed_pull_request':    (_('[closed] pull request for'),
+                                    get_pull_request, 'tick.png'),
     'push':                        (_('[pushed] into'),
                                     get_cs_links, 'script_add.png'),
     'push_local':                  (_('[committed via RhodeCode] into repository'),
