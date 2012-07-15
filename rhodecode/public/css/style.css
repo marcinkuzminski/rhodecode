@@ -3305,6 +3305,11 @@ div.gravatar img {
 .ui-btn.xsmall{
     padding: 1px 2px 1px 1px;
 }
+
+.ui-btn.large{
+	padding: 6px 12px;
+}
+
 .ui-btn.clone{
 	padding: 5px 2px 6px 1px;
 	margin: 0px -4px 3px 0px;
@@ -3345,6 +3350,7 @@ div.gravatar img {
 
 
 .ui-btn.blue{
+  color:#fff;
   background-color: #339bb9;
   background-repeat: repeat-x;
   background-image: -khtml-gradient(linear, left top, left bottom, from(#5bc0de), to(#339bb9));
@@ -3533,12 +3539,14 @@ div#legend_data,div#legend_container,div#legend_choices
 	margin: 2px 0 0 4px;
 }
 
-div.form div.fields div.field div.button input,#content div.box div.form div.fields div.buttons input,div.form div.fields div.buttons input,#content div.box div.action div.button input
-	{
-	color: #000;
-	font-size: 11px;
-	font-weight: 700;
-	margin: 0;
+div.form div.fields div.field div.button input,
+#content div.box div.form div.fields div.buttons input
+div.form div.fields div.buttons input,
+#content div.box div.action div.button input {
+	/*color: #000;*/
+    font-size: 11px;
+    font-weight: 700;
+    margin: 0;
 }
 
 input.ui-button {
