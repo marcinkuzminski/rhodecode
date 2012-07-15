@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-    rhodecode.model.pull_reuquest
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    rhodecode.model.pull_request
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     pull request model for RhodeCode
 
@@ -25,6 +25,7 @@
 
 import logging
 import binascii
+import datetime
 
 from pylons.i18n.translation import _
 
@@ -43,6 +44,9 @@ log = logging.getLogger(__name__)
 class PullRequestModel(BaseModel):
 
     cls = PullRequest
+
+    def __get_pull_request(self, pull_request):
+        return self._get_instance(PullRequest, pull_request)
 
     def get_all(self, repo):
         repo = self._get_repo(repo)
@@ -92,6 +96,12 @@ class PullRequestModel(BaseModel):
                      type_=Notification.TYPE_PULL_REQUEST,)
 
         return new
+
+    def close_pull_request(self, pull_request):
+        pull_request = self.__get_pull_request(pull_request)
+        pull_request.status = PullRequest.STATUS_CLOSED
+        pull_request.updated_on = datetime.datetime.now()
+        self.sa.add(pull_request)
 
     def _get_changesets(self, org_repo, org_ref, other_repo, other_ref,
                         discovery_data):

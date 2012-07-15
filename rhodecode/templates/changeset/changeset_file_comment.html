@@ -92,9 +92,8 @@
 
 </%def>
 
-## MAIN COMMENT FORM
-<%def name="comments(post_url, cur_status)">
-
+## generate inline comments and the main ones
+<%def name="generate_comments()">
 <div class="comments">
     <div id="inline-comments-container">
     ## generate inlines for this changeset
@@ -106,6 +105,13 @@
           ${comment_block(co)}
         </div>
     %endfor
+</div>    
+</%def>
+
+## MAIN COMMENT FORM
+<%def name="comments(post_url, cur_status, close_btn=False)">
+
+<div class="comments">
     %if c.rhodecode_user.username != 'default':
     <div class="comment-form ac">
         ${h.form(post_url)}
@@ -129,7 +135,10 @@
              ${h.textarea('text')}
         </div>
         <div class="comment-button">
-        ${h.submit('save', _('Comment'), class_='ui-button')}
+        ${h.submit('save', _('Comment'), class_="ui-btn large")}
+        %if close_btn:
+           ${h.submit('save_close', _('Comment and close'), class_='ui-btn blue large')}
+        %endif
         </div>
         ${h.end_form()}
     </div>

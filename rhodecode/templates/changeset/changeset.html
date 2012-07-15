@@ -136,7 +136,10 @@
     <%namespace name="comment" file="/changeset/changeset_file_comment.html"/>
     ${comment.comment_inline_form()}
 
-    ## render comments main comments form and it status
+    ## render comments and inlines
+    ${comment.generate_comments()}
+
+    ## main comment form and it status
     ${comment.comments(h.url('changeset_comment', repo_name=c.repo_name, revision=c.changeset.raw_id),
                        h.changeset_status(c.rhodecode_db_repo, c.changeset.raw_id))}
 

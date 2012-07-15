@@ -396,7 +396,8 @@ var injectInlineForm = function(tr){
 		  return
 	  }
 	  var submit_url = AJAX_COMMENT_URL;
-	  if(YUD.hasClass(tr,'form-open') || YUD.hasClass(tr,'context') || YUD.hasClass(tr,'no-comment')){
+	  var _td = tr.getElementsByClassName('code')[0];
+	  if(YUD.hasClass(tr,'form-open') || YUD.hasClass(tr,'context') || YUD.hasClass(_td,'no-comment')){
 		  return
 	  }	
 	  YUD.addClass(tr,'form-open');

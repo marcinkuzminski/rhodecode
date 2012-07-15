@@ -1519,12 +1519,15 @@ class PullRequest(Base, BaseModel):
     description = Column('description', UnicodeText(10240), nullable=True)
     status = Column('status', Unicode(256), nullable=False, default=STATUS_NEW)
     created_on = Column('created_on', DateTime(timezone=False), nullable=False, default=datetime.datetime.now)
+    updated_on = Column('updated_on', DateTime(timezone=False), nullable=False, default=datetime.datetime.now)
     user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None)
     _revisions = Column('revisions', UnicodeText(20500))  # 500 revisions max
     org_repo_id = Column('org_repo_id', Integer(), ForeignKey('repositories.repo_id'), nullable=False)
     org_ref = Column('org_ref', Unicode(256), nullable=False)
     other_repo_id = Column('other_repo_id', Integer(), ForeignKey('repositories.repo_id'), nullable=False)
     other_ref = Column('other_ref', Unicode(256), nullable=False)
+
+    statuses = relationship('ChangesetStatus')
 
     @hybrid_property
     def revisions(self):
@@ -1538,6 +1541,9 @@ class PullRequest(Base, BaseModel):
     reviewers = relationship('PullRequestReviewers')
     org_repo = relationship('Repository', primaryjoin='PullRequest.org_repo_id==Repository.repo_id')
     other_repo = relationship('Repository', primaryjoin='PullRequest.other_repo_id==Repository.repo_id')
+
+    def is_closed(self):
+        return self.status == self.STATUS_CLOSED
 
     def __json__(self):
         return dict(

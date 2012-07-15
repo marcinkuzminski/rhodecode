@@ -169,7 +169,7 @@ class PullrequestsController(BaseRepoController):
         return redirect(url('pullrequest_show', repo_name=other_repo,
                             pull_request_id=pull_request.pull_request_id))
 
-    def _load_compare_data(self, pull_request):
+    def _load_compare_data(self, pull_request, enable_comments=True):
         """
         Load context data needed for generating compare diff
 
@@ -211,7 +211,7 @@ class PullrequestsController(BaseRepoController):
         for f in _parsed:
             fid = h.FID('', f['filename'])
             c.files.append([fid, f['operation'], f['filename'], f['stats']])
-            diff = diff_processor.as_html(enable_comments=True,
+            diff = diff_processor.as_html(enable_comments=enable_comments,
                                           diff_lines=[f])
             c.changes[fid] = [f['operation'], f['filename'], diff]
 
@@ -246,7 +246,8 @@ class PullrequestsController(BaseRepoController):
             raise HTTPNotFound
 
         # load compare data into template context
-        self._load_compare_data(c.pull_request)
+        enable_comments = not c.pull_request.is_closed()
+        self._load_compare_data(c.pull_request, enable_comments=enable_comments)
 
         # inline comments
         c.inline_cnt = 0
@@ -271,6 +272,9 @@ class PullrequestsController(BaseRepoController):
 
     @jsonify
     def comment(self, repo_name, pull_request_id):
+        pull_request = PullRequest.get_or_404(pull_request_id)
+        if pull_request.is_closed():
+            raise HTTPForbidden()
 
         status = request.POST.get('changeset_status')
         change_status = request.POST.get('change_changeset_status')
@@ -299,6 +303,12 @@ class PullrequestsController(BaseRepoController):
                       'user_commented_pull_request:%s' % pull_request_id,
                       c.rhodecode_db_repo, self.ip_addr, self.sa)
 
+        if request.POST.get('save_close'):
+            PullRequestModel().close_pull_request(pull_request_id)
+            action_logger(self.rhodecode_user,
+                      'user_closed_pull_request:%s' % pull_request_id,
+                      c.rhodecode_db_repo, self.ip_addr, self.sa)
+
         Session().commit()
 
         if not request.environ.get('HTTP_X_PARTIAL_XHR'):
@@ -319,6 +329,10 @@ class PullrequestsController(BaseRepoController):
     @jsonify
     def delete_comment(self, repo_name, comment_id):
         co = ChangesetComment.get(comment_id)
+        if co.pull_request.is_closed():
+            #don't allow deleting comments on closed pull request
+            raise HTTPForbidden()
+
         owner = lambda: co.author.user_id == c.rhodecode_user.user_id
         if h.HasPermissionAny('hg.admin', 'repository.admin')() or owner:
             ChangesetCommentsModel().delete(comment=co)
