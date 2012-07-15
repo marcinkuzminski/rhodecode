@@ -167,6 +167,19 @@ class PullrequestsController(BaseRepoController):
         return redirect(url('pullrequest_show', repo_name=other_repo,
                             pull_request_id=pull_request.pull_request_id))
 
+    @NotAnonymous()
+    @jsonify
+    def update(self, repo_name, pull_request_id):
+        pull_request = PullRequest.get_or_404(pull_request_id)
+        if pull_request.is_closed():
+            raise HTTPForbidden()
+
+        reviewers_ids = map(int, filter(lambda v: v not in [None, ''],
+                   request.POST.get('reviewers_ids', '').split(',')))
+        PullRequestModel().update_reviewers(pull_request_id, reviewers_ids)
+        Session.commit()
+        return True
+
     def _load_compare_data(self, pull_request, enable_comments=True):
         """
         Load context data needed for generating compare diff

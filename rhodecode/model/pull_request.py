@@ -97,6 +97,34 @@ class PullRequestModel(BaseModel):
 
         return new
 
+    def update_reviewers(self, pull_request, reviewers_ids):
+        reviewers_ids = set(reviewers_ids)
+        pull_request = self.__get_pull_request(pull_request)
+        current_reviewers = PullRequestReviewers.query()\
+                            .filter(PullRequestReviewers.pull_request==
+                                   pull_request)\
+                            .all()
+        current_reviewers_ids = set([x.user.user_id for x in current_reviewers])
+
+        to_add = reviewers_ids.difference(current_reviewers_ids)
+        to_remove = current_reviewers_ids.difference(reviewers_ids)
+
+        log.debug("Adding %s reviewers" % to_add)
+        log.debug("Removing %s reviewers" % to_remove)
+
+        for uid in to_add:
+            _usr = self._get_user(uid)
+            reviewer = PullRequestReviewers(_usr, pull_request)
+            self.sa.add(reviewer)
+
+        for uid in to_remove:
+            reviewer = PullRequestReviewers.query()\
+                    .filter(PullRequestReviewers.user_id==uid,
+                            PullRequestReviewers.pull_request==pull_request)\
+                    .scalar()
+            if reviewer:
+                self.sa.delete(reviewer)
+
     def close_pull_request(self, pull_request):
         pull_request = self.__get_pull_request(pull_request)
         pull_request.status = PullRequest.STATUS_CLOSED

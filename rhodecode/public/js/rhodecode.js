@@ -501,6 +501,15 @@ var deleteComment = function(comment_id){
     ajaxPOST(url,postData,success);
 }
 
+var updateReviewers = function(reviewers_ids){
+	var url = AJAX_UPDATE_PULLREQUEST;
+	var postData = {'_method':'put',
+			        'reviewers_ids': reviewers_ids};
+	var success = function(o){
+		window.location.reload();
+	}
+	ajaxPOST(url,postData,success);
+}
 
 var createInlineAddButton = function(tr){
 

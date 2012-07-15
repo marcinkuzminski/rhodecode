@@ -35,32 +35,9 @@
       <div>${_('Created on')}: ${h.fmt_date(c.pull_request.created_on)}</div>
     </div>
 
-    ## REVIEWERS
     <div>
-      <div class="table" style="float:right;width:46%;clear:none">
-          <div id="body" class="diffblock">
-              <div style="white-space:pre-wrap;padding:5px">${_('Pull request reviewers')}</div>
-          </div>
-          <div style="border: 1px solid #CCC">
-            <div class="group_members_wrap">
-              <ul class="group_members">
-              %for user,status in c.pull_request_reviewers:
-                <li>
-                  <div class="group_member">
-                    <div style="float:left;padding:3px" class="tooltip" title="${h.tooltip(h.changeset_status_lbl(status[0][1].status if status else 'not_reviewed'))}">
-                      <img src="${h.url(str('/images/icons/flag_status_%s.png' % (status[0][1].status if status else 'not_reviewed')))}"/>
-                    </div>
-                    <div class="gravatar"><img alt="gravatar" src="${h.gravatar_url(user.email,20)}"/> </div>
-                    <div style="float:left">${user.username}</div>
-                  </div>
-                </li>
-              %endfor
-              </ul>
-            </div>                
-          </div>
-      </div>
       ##DIFF
-      <div class="table" style="float:left;width:46%;clear:none">
+      <div class="table" style="float:left;clear:none">
           <div id="body" class="diffblock">
               <div style="white-space:pre-wrap;padding:5px">${_('Compare view')}</div>
           </div>
@@ -81,12 +58,51 @@
               </div>
           </div>
       </div>
+      ## REVIEWERS
+       <div style="float:left; border-left:1px dashed #eee">
+       <h4>${_('Pull request reviewers')}</h4>
+        <div id="reviewers" style="padding:0px 0px 0px 15px">
+          ## members goes here !
+          <div class="group_members_wrap">
+            <ul id="review_members" class="group_members">
+            %for member,status in c.pull_request_reviewers:
+              <li id="reviewer_${member.user_id}">
+                <div class="reviewers_member">
+                    <div style="float:left;padding:0px 3px 0px 0px" class="tooltip" title="${h.tooltip(h.changeset_status_lbl(status[0][1].status if status else 'not_reviewed'))}">
+                      <img src="${h.url(str('/images/icons/flag_status_%s.png' % (status[0][1].status if status else 'not_reviewed')))}"/>
+                    </div>                
+                  <div class="gravatar"><img alt="gravatar" src="${h.gravatar_url(member.email,14)}"/> </div>
+                  <div style="float:left">${member.full_name} (${_('owner')})</div>
+                  <input type="hidden" value="${member.user_id}" name="review_members" />
+                  %if not c.pull_request.is_closed():
+                  <span class="delete_icon action_button" onclick="removeReviewer(${member.user_id})"></span>
+                  %endif
+                </div>
+              </li>
+            %endfor
+            </ul>
+          </div>                
+          %if not c.pull_request.is_closed():
+          <div class='ac'>
+            <div class="reviewer_ac">
+               ${h.text('user', class_='yui-ac-input')}
+               <span class="help-block">${_('Add reviewer to this pull request.')}</span>
+               <div id="reviewers_container"></div>       
+            </div>
+            <div style="padding:0px 10px">
+             <span id="update_pull_request" class="ui-btn xsmall">${_('save')}</span>
+            </div>
+          </div>
+          %endif
+        </div>      
+       </div>      
     </div>
     <script>
     var _USERS_AC_DATA = ${c.users_array|n};
     var _GROUPS_AC_DATA = ${c.users_groups_array|n};
     AJAX_COMMENT_URL = "${url('pullrequest_comment',repo_name=c.repo_name,pull_request_id=c.pull_request.pull_request_id)}";
-    AJAX_COMMENT_DELETE_URL = "${url('pullrequest_comment_delete',repo_name=c.repo_name,comment_id='__COMMENT_ID__')}";  
+    AJAX_COMMENT_DELETE_URL = "${url('pullrequest_comment_delete',repo_name=c.repo_name,comment_id='__COMMENT_ID__')}";
+    AJAX_UPDATE_PULLREQUEST = "${url('pullrequest_update',repo_name=c.repo_name,pull_request_id=c.pull_request.pull_request_id)}"
     </script>
 
     ## diff block
@@ -112,6 +128,7 @@
 
     <script type="text/javascript">
       YUE.onDOMReady(function(){
+    	  PullRequestAutoComplete('user', 'reviewers_container', _USERS_AC_DATA, _GROUPS_AC_DATA);
 
           YUE.on(YUQ('.show-inline-comments'),'change',function(e){
               var show = 'none';
@@ -138,6 +155,17 @@
           // inject comments into they proper positions
           var file_comments = YUQ('.inline-comment-placeholder');
           renderInlineComments(file_comments);
+          
+          YUE.on(YUD.get('update_pull_request'),'click',function(e){
+        	  
+        	  var reviewers_ids = [];
+        	  var ids = YUQ('#review_members input');
+        	  for(var i=0; i<ids.length;i++){
+        		  var id = ids[i].value
+        		  reviewers_ids.push(id);
+        	  }
+        	  updateReviewers(reviewers_ids);
+          })
       })
     </script>
 
