@@ -928,12 +928,17 @@ var MembersAutoComplete = function (users_list, groups_list) {
     var membersAC = new YAHOO.widget.AutoComplete("perm_new_member_name", "perm_container", memberDS);
     membersAC.useShadow = false;
     membersAC.resultTypeList = false;
+    membersAC.animVert = false;
+    membersAC.animHoriz = false;    
+    membersAC.animSpeed = 0.1;
 
     // Instantiate AutoComplete for owner
     var ownerAC = new YAHOO.widget.AutoComplete("user", "owner_container", ownerDS);
     ownerAC.useShadow = false;
     ownerAC.resultTypeList = false;
-
+    ownerAC.animVert = false;
+    ownerAC.animHoriz = false;
+    ownerAC.animSpeed = 0.1;
 
     // Helper highlight function for the formatter
     var highlightMatch = function (full, snippet, matchindex) {
@@ -1082,7 +1087,10 @@ var MentionsAutoComplete = function (divid, cont, users_list, groups_list) {
     ownerAC.useShadow = false;
     ownerAC.resultTypeList = false;
     ownerAC.suppressInputUpdate = true;
-
+    ownerAC.animVert = false;
+    ownerAC.animHoriz = false;    
+    ownerAC.animSpeed = 0.1;
+    
     // Helper highlight function for the formatter
     var highlightMatch = function (full, snippet, matchindex) {
             return full.substring(0, matchindex) 
