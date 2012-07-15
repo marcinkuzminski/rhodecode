@@ -3002,6 +3002,13 @@ table.code-browser .submodule-dir {
 	text-align: left;
 }
 
+.accept_icon {
+    background: url("../images/icons/accept.png") no-repeat scroll 3px;
+    padding-left: 20px;
+    padding-top: 0px;
+    text-align: left;
+}
+
 .edit_icon {
 	background: url("../images/icons/folder_edit.png") no-repeat scroll 3px;
 	padding-left: 20px;
@@ -4280,7 +4287,7 @@ form.comment-inline-form {
     background: none repeat scroll 0 0 transparent;
     padding: 0px 0px 0px 8px;	
 }
-.notification-header .desc.unread{
+.notification-list .container .notification-header .desc{
     font-weight: bold;
     font-size: 17px;
 }
@@ -4293,6 +4300,11 @@ form.comment-inline-form {
     margin: 0px 20px 0px 20px;
 }
 .notification-header .delete-notifications{
+    float: right;
+    padding-top: 8px;
+    cursor: pointer;
+}
+.notification-header .read-notifications{
     float: right;
     padding-top: 8px;
     cursor: pointer;

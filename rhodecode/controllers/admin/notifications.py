@@ -106,6 +106,18 @@ class NotificationsController(BaseController):
         #    h.form(url('notification', notification_id=ID),
         #           method='put')
         # url('notification', notification_id=ID)
+        try:
+            no = Notification.get(notification_id)
+            owner = lambda: (no.notifications_to_users.user.user_id
+                             == c.rhodecode_user.user_id)
+            if h.HasPermissionAny('hg.admin')() or owner:
+                    NotificationModel().mark_read(c.rhodecode_user.user_id, no)
+                    Session.commit()
+                    return 'ok'
+        except Exception:
+            Session.rollback()
+            log.error(traceback.format_exc())
+        return 'fail'
 
     def delete(self, notification_id):
         """DELETE /_admin/notifications/id: Delete an existing item"""
@@ -120,7 +132,7 @@ class NotificationsController(BaseController):
             no = Notification.get(notification_id)
             owner = lambda: (no.notifications_to_users.user.user_id
                              == c.rhodecode_user.user_id)
-            if h.HasPermissionAny('hg.admin', 'repository.admin')() or owner:
+            if h.HasPermissionAny('hg.admin')() or owner:
                     NotificationModel().delete(c.rhodecode_user.user_id, no)
                     Session.commit()
                     return 'ok'

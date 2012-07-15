@@ -40,25 +40,26 @@
   </div>
 </div>
 <script type="text/javascript">
-var url_del = "${url('notification', notification_id='__NOTIFICATION_ID__')}";
-YUE.on(YUQ('.delete-notification'),'click',function(e){
- var notification_id = e.currentTarget.id;
- deleteNotification(url_del,notification_id)
-})
+var url_action = "${url('notification', notification_id='__NOTIFICATION_ID__')}";
+var run = function(){
+  YUE.on(YUQ('.delete-notification'),'click',function(e){
+   var notification_id = e.currentTarget.id;
+   deleteNotification(url_action,notification_id)
+  })
+  YUE.on(YUQ('.read-notification'),'click',function(e){
+     var notification_id = e.currentTarget.id;
+     readNotification(url_action,notification_id)
+  })
+}
+run()
 YUE.on('mark_all_read','click',function(e){
     var url = "${h.url('notifications_mark_all_read', **request.GET.mixed())}";
-    ypjax(url,'notification_data',function(){
-    	YUE.on(YUQ('.delete-notification'),'click',function(e){
-    		 var notification_id = e.currentTarget.id;
-    		 deleteNotification(url_del,notification_id)
-    	})
-    });
+    ypjax(url,'notification_data',function(){run()});
 })
 
 var current_filter = "${c.current_filter}";
 if (YUD.get(current_filter)){
 	YUD.addClass(current_filter, 'active');
 }
-console.log(current_filter);
 </script>
 </%def>

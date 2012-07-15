@@ -156,6 +156,23 @@ class NotificationModel(BaseModel):
 
         return q.all()
 
+    def mark_read(self, user, notification):
+        try:
+            notification = self.__get_notification(notification)
+            user = self._get_user(user)
+            if notification and user:
+                obj = UserNotification.query()\
+                        .filter(UserNotification.user == user)\
+                        .filter(UserNotification.notification
+                                == notification)\
+                        .one()
+                obj.read = True
+                self.sa.add(obj)
+                return True
+        except Exception:
+            log.error(traceback.format_exc())
+            raise
+
     def mark_all_read_for_user(self, user, filter_=None):
         user = self._get_user(user)
         q = UserNotification.query()\

@@ -839,6 +839,27 @@ var deleteNotification = function(url, notification_id,callbacks){
     											  callback, postData);
 };	
 
+var readNotification = function(url, notification_id,callbacks){
+    var callback = { 
+		success:function(o){
+		    var obj = YUD.get(String("notification_"+notification_id));
+		    YUD.removeClass(obj, 'unread');
+		    var r_button = obj.children[0].getElementsByClassName('read-notification')[0]
+		    
+		    if(r_button.parentNode !== undefined){
+		    	r_button.parentNode.removeChild(r_button);
+			}		    
+			_run_callbacks(callbacks);
+		},
+	    failure:function(o){
+	        alert("error");
+	    },
+	};
+    var postData = '_method=put';
+    var sUrl = url.replace('__NOTIFICATION_ID__',notification_id);
+    var request = YAHOO.util.Connect.asyncRequest('POST', sUrl, 
+    											  callback, postData);
+};	
 
 /** MEMBERS AUTOCOMPLETE WIDGET **/
 
