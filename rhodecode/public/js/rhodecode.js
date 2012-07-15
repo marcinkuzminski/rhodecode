@@ -628,6 +628,12 @@ var renderInlineComments = function(file_comments){
     }	
 }
 
+var removeReviewer = function(reviewer_id){
+	var el = YUD.get('reviewer_{0}'.format(reviewer_id));
+	if (el.parentNode !== undefined){
+		el.parentNode.removeChild(el);
+	}
+}
 
 var fileBrowserListeners = function(current_url, node_list_url, url_base){
 	
@@ -1381,11 +1387,12 @@ var PullRequestAutoComplete = function (divid, cont, users_list, groups_list) {
             		return
             	}
 
-            	var tmpl = '<li>'+
+            	var tmpl = '<li id="reviewer_{2}">'+
 		                      '<div class="reviewers_member">'+
 		                        '<div class="gravatar"><img alt="gravatar" src="{0}"/> </div>'+
 		                        '<div style="float:left">{1}</div>'+
 		                        '<input type="hidden" value="{2}" name="review_members" />'+
+		                        '<span class="delete_icon action_button" onclick="removeReviewer({2})"></span>'+
 		                      '</div>'+
 		                   '</li>'
 
@@ -1393,6 +1400,7 @@ var PullRequestAutoComplete = function (divid, cont, users_list, groups_list) {
             	var element = tmpl.format(oData.gravatar_lnk,displayname,oData.id);
             	members.innerHTML += element;
             	myAC.dataSource.cache.push(oData.id);
+            	YUD.get('user').value = '' 
             }
     	});        
     }

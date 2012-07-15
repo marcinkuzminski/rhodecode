@@ -73,13 +73,14 @@
           <div class="group_members_wrap">
             <ul id="review_members" class="group_members">
             %for member in c.review_members:
-                  <li>
-                    <div class="reviewers_member">
-                      <div class="gravatar"><img alt="gravatar" src="${h.gravatar_url(member.email,14)}"/> </div>
-                      <div style="float:left">${member.full_name} (${_('owner')})</div>
-                      <input type="hidden" value="${member.user_id}" name="review_members" />
-                    </div>
-                 </li>
+              <li id="reviewer_${member.user_id}">
+                <div class="reviewers_member">
+                  <div class="gravatar"><img alt="gravatar" src="${h.gravatar_url(member.email,14)}"/> </div>
+                  <div style="float:left">${member.full_name} (${_('owner')})</div>
+                  <input type="hidden" value="${member.user_id}" name="review_members" />
+                  <span class="delete_icon action_button" onclick="removeReviewer(${member.user_id})"></span>
+                </div>
+              </li>
             %endfor
             </ul>
           </div>                
