@@ -1429,7 +1429,8 @@ tbody .yui-dt-editable { cursor: pointer }
 	margin: 0 0 0 0px;
 }
 
-#content div.box div.form div.fields div.field div.input input {
+#content div.box div.form div.fields div.field div.input input,
+.reviewer_ac input {
 	background: #FFF;
 	border-top: 1px solid #b3b3b3;
 	border-left: 1px solid #b3b3b3;
@@ -1549,10 +1550,19 @@ input.disabled {
 	padding: 5px 5px 5px 0;
 }
 
-#content div.box div.form div.fields div.field input[type=text]:focus,#content div.box div.form div.fields div.field input[type=password]:focus,#content div.box div.form div.fields div.field input[type=file]:focus,#content div.box div.form div.fields div.field textarea:focus,#content div.box div.form div.fields div.field select:focus
+#content div.box div.form div.fields div.field input[type=text]:focus,
+#content div.box div.form div.fields div.field input[type=password]:focus,
+#content div.box div.form div.fields div.field input[type=file]:focus,
+#content div.box div.form div.fields div.field textarea:focus,
+#content div.box div.form div.fields div.field select:focus,
+.reviewer_ac input:focus
 	{
 	background: #f6f6f6;
 	border-color: #666;
+}
+
+.reviewer_ac {
+	padding:10px
 }
 
 div.form div.fields div.field div.button {
@@ -3781,6 +3791,11 @@ div#legend_container table td,div#legend_choices table td {
 .group_members .group_member{
 	height: 30px;
 	padding:0px 0px 0px 10px;
+}
+
+.reviewers_member{
+    height: 15px;
+    padding:0px 0px 0px 10px;	
 }
 
 .emails_wrap{

@@ -36,7 +36,8 @@ from pylons.decorators import jsonify
 
 from rhodecode.lib.compat import json
 from rhodecode.lib.base import BaseRepoController, render
-from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
+from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator,\
+    NotAnonymous
 from rhodecode.lib import helpers as h
 from rhodecode.lib import diffs
 from rhodecode.lib.utils import action_logger
@@ -58,6 +59,9 @@ class PullrequestsController(BaseRepoController):
                                    'repository.admin')
     def __before__(self):
         super(PullrequestsController, self).__before__()
+        repo_model = RepoModel()
+        c.users_array = repo_model.get_users_js()
+        c.users_groups_array = repo_model.get_users_groups_js()
 
     def _get_repo_refs(self, repo):
         hist_l = []
@@ -128,17 +132,10 @@ class PullrequestsController(BaseRepoController):
             }
 
         c.other_repos_info = json.dumps(other_repos_info)
-        c.review_members = []
-        c.available_members = []
-        for u in User.query().filter(User.username != 'default').all():
-            uname = u.username
-            if org_repo.user == u:
-                uname = _('%s (owner)') % u.username
-                # auto add owner to pull-request recipients
-                c.review_members.append([u.user_id, uname])
-            c.available_members.append([u.user_id, uname])
+        c.review_members = [org_repo.user]
         return render('/pullrequests/pullrequest.html')
 
+    @NotAnonymous()
     def create(self, repo_name):
         req_p = request.POST
         org_repo = req_p['org_repo']
@@ -147,6 +144,7 @@ class PullrequestsController(BaseRepoController):
         other_ref = req_p['other_ref']
         revisions = req_p.getall('revisions')
         reviewers = req_p.getall('review_members')
+
         #TODO: wrap this into a FORM !!!
 
         title = req_p['pullrequest_title']

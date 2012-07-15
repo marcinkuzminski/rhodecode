@@ -63,6 +63,18 @@ String.prototype.rstrip = function(char) {
 	return this.replace(new RegExp(''+char+'+$'),'');
 }
 
+
+if(!Array.prototype.indexOf) {
+    Array.prototype.indexOf = function(needle) {
+        for(var i = 0; i < this.length; i++) {
+            if(this[i] === needle) {
+                return i;
+            }
+        }
+        return -1;
+    };
+}
+
 /**
  * SmartColorGenerator
  *
@@ -1204,7 +1216,8 @@ var MentionsAutoComplete = function (divid, cont, users_list, groups_list) {
 			return [unam, chunks];
 		}
 		return [null, null];
-    };    
+    };
+    
 	ownerAC.textboxKeyUpEvent.subscribe(function(type, args){
 		
 		var ac_obj = args[0];
@@ -1225,6 +1238,167 @@ var MentionsAutoComplete = function (divid, cont, users_list, groups_list) {
     return {
         ownerDS: ownerDS,
         ownerAC: ownerAC,
+    };
+}
+
+
+var PullRequestAutoComplete = function (divid, cont, users_list, groups_list) {
+    var myUsers = users_list;
+    var myGroups = groups_list;
+
+    // Define a custom search function for the DataSource of users
+    var matchUsers = function (sQuery) {
+            // Case insensitive matching
+            var query = sQuery.toLowerCase();
+            var i = 0;
+            var l = myUsers.length;
+            var matches = [];
+
+            // Match against each name of each contact
+            for (; i < l; i++) {
+                contact = myUsers[i];
+                if (((contact.fname+"").toLowerCase().indexOf(query) > -1) || 
+                   	 ((contact.lname+"").toLowerCase().indexOf(query) > -1) || 
+                   	 ((contact.nname) && ((contact.nname).toLowerCase().indexOf(query) > -1))) {
+                       matches[matches.length] = contact;
+                   }
+            }
+            return matches;
+        };
+
+    // Define a custom search function for the DataSource of usersGroups
+    var matchGroups = function (sQuery) {
+            // Case insensitive matching
+            var query = sQuery.toLowerCase();
+            var i = 0;
+            var l = myGroups.length;
+            var matches = [];
+
+            // Match against each name of each contact
+            for (; i < l; i++) {
+                matched_group = myGroups[i];
+                if (matched_group.grname.toLowerCase().indexOf(query) > -1) {
+                    matches[matches.length] = matched_group;
+                }
+            }
+            return matches;
+        };
+
+    //match all
+    var matchAll = function (sQuery) {
+            u = matchUsers(sQuery);
+            return u
+        };
+
+    // DataScheme for owner
+    var ownerDS = new YAHOO.util.FunctionDataSource(matchUsers);
+
+    ownerDS.responseSchema = {
+        fields: ["id", "fname", "lname", "nname", "gravatar_lnk"]
+    };
+
+    // Instantiate AutoComplete for mentions
+    var reviewerAC = new YAHOO.widget.AutoComplete(divid, cont, ownerDS);
+    reviewerAC.useShadow = false;
+    reviewerAC.resultTypeList = false;
+    reviewerAC.suppressInputUpdate = true;
+    reviewerAC.animVert = false;
+    reviewerAC.animHoriz = false;    
+    reviewerAC.animSpeed = 0.1;
+    
+    // Helper highlight function for the formatter
+    var highlightMatch = function (full, snippet, matchindex) {
+            return full.substring(0, matchindex) 
+            + "<span class='match'>" 
+            + full.substr(matchindex, snippet.length) 
+            + "</span>" + full.substring(matchindex + snippet.length);
+        };
+
+    // Custom formatter to highlight the matching letters
+    reviewerAC.formatResult = function (oResultData, sQuery, sResultMatch) {
+		    var org_sQuery = sQuery;
+		    if(this.dataSource.mentionQuery != null){
+		    	sQuery = this.dataSource.mentionQuery;		    	
+		    }
+
+            var query = sQuery.toLowerCase();
+            var _gravatar = function(res, em, group){
+            	if (group !== undefined){
+            		em = '/images/icons/group.png'
+            	}
+            	tmpl = '<div class="ac-container-wrap"><img class="perm-gravatar-ac" src="{0}"/>{1}</div>'
+            	return tmpl.format(em,res)
+            }
+            if (oResultData.nname != undefined) {
+                var fname = oResultData.fname || "";
+                var lname = oResultData.lname || "";
+                var nname = oResultData.nname;
+                
+                // Guard against null value
+                var fnameMatchIndex = fname.toLowerCase().indexOf(query),
+                    lnameMatchIndex = lname.toLowerCase().indexOf(query),
+                    nnameMatchIndex = nname.toLowerCase().indexOf(query),
+                    displayfname, displaylname, displaynname;
+
+                if (fnameMatchIndex > -1) {
+                    displayfname = highlightMatch(fname, query, fnameMatchIndex);
+                } else {
+                    displayfname = fname;
+                }
+
+                if (lnameMatchIndex > -1) {
+                    displaylname = highlightMatch(lname, query, lnameMatchIndex);
+                } else {
+                    displaylname = lname;
+                }
+
+                if (nnameMatchIndex > -1) {
+                    displaynname = "(" + highlightMatch(nname, query, nnameMatchIndex) + ")";
+                } else {
+                    displaynname = nname ? "(" + nname + ")" : "";
+                }
+
+                return _gravatar(displayfname + " " + displaylname + " " + displaynname, oResultData.gravatar_lnk);
+            } else {
+                return '';
+            }
+        };
+        
+    //members cache to catch duplicates
+    reviewerAC.dataSource.cache = [];
+    // hack into select event
+    if(reviewerAC.itemSelectEvent){
+    	reviewerAC.itemSelectEvent.subscribe(function (sType, aArgs) {
+
+            var myAC = aArgs[0]; // reference back to the AC instance
+            var elLI = aArgs[1]; // reference to the selected LI element
+            var oData = aArgs[2]; // object literal of selected item's result data
+            var members  = YUD.get('review_members');
+            //fill the autocomplete with value
+
+            if (oData.nname != undefined) {
+            	if (myAC.dataSource.cache.indexOf(oData.id) != -1){
+            		return
+            	}
+
+            	var tmpl = '<li>'+
+		                      '<div class="reviewers_member">'+
+		                        '<div class="gravatar"><img alt="gravatar" src="{0}"/> </div>'+
+		                        '<div style="float:left">{1}</div>'+
+		                        '<input type="hidden" value="{2}" name="review_members" />'+
+		                      '</div>'+
+		                   '</li>'
+
+		        var displayname = "{0} {1} ({2})".format(oData.fname,oData.lname,oData.nname);
+            	var element = tmpl.format(oData.gravatar_lnk,displayname,oData.id);
+            	members.innerHTML += element;
+            	myAC.dataSource.cache.push(oData.id);
+            }
+    	});        
+    }
+    return {
+        ownerDS: ownerDS,
+        reviewerAC: reviewerAC,
     };
 }
 

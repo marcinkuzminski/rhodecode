@@ -69,40 +69,28 @@
     <div style="float:left; border-left:1px dashed #eee">
         <h4>${_('Pull request reviewers')}</h4>
         <div id="reviewers" style="padding:0px 0px 0px 15px">
-        ##TODO: make this nicer :)
-          <table class="table noborder">
-                  <tr>
-                      <td>
-                          <div>
-                              <div style="float:left">
-                                  <div class="text" style="padding: 0px 0px 6px;">${_('Chosen reviewers')}</div>
-                                  ${h.select('review_members',[x[0] for x in c.review_members],c.review_members,multiple=True,size=8,style="min-width:210px")}
-                                 <div  id="remove_all_elements" style="cursor:pointer;text-align:center">
-                                     ${_('Remove all elements')}
-                                     <img alt="remove" style="vertical-align:text-bottom" src="${h.url('/images/icons/arrow_right.png')}"/>
-                                 </div>
-                              </div>
-                              <div style="float:left;width:20px;padding-top:50px">
-                                  <img alt="add" id="add_element"
-                                      style="padding:2px;cursor:pointer"
-                                      src="${h.url('/images/icons/arrow_left.png')}"/>
-                                  <br />
-                                  <img alt="remove" id="remove_element"
-                                      style="padding:2px;cursor:pointer"
-                                      src="${h.url('/images/icons/arrow_right.png')}"/>
-                              </div>
-                              <div style="float:left">
-                                   <div class="text" style="padding: 0px 0px 6px;">${_('Available reviewers')}</div>
-                                   ${h.select('available_members',[],c.available_members,multiple=True,size=8,style="min-width:210px")}
-                                   <div id="add_all_elements" style="cursor:pointer;text-align:center">
-                                         <img alt="add" style="vertical-align:text-bottom" src="${h.url('/images/icons/arrow_left.png')}"/>
-                                          ${_('Add all elements')}
-                                   </div>
-                              </div>
-                          </div>
-                      </td>
-                  </tr>
-          </table>
+          ## members goes here !
+          <div class="group_members_wrap">
+            <ul id="review_members" class="group_members">
+            %for member in c.review_members:
+                  <li>
+                    <div class="reviewers_member">
+                      <div class="gravatar"><img alt="gravatar" src="${h.gravatar_url(member.email,14)}"/> </div>
+                      <div style="float:left">${member.full_name} (${_('owner')})</div>
+                      <input type="hidden" value="${member.user_id}" name="review_members" />
+                    </div>
+                 </li>
+            %endfor
+            </ul>
+          </div>                
+          
+          <div class='ac'>
+            <div class="reviewer_ac">
+               ${h.text('user', class_='yui-ac-input')}
+               <span class="help-block">${_('Add reviewer to this pull request.')}</span>
+               <div id="reviewers_container"></div>           
+            </div>
+          </div>
         </div>
     </div>
     <h3>${_('Create new pull request')}</h3>
@@ -141,7 +129,10 @@
 </div>
 
 <script type="text/javascript">
-  MultiSelectWidget('review_members','available_members','pull_request_form');
+  var _USERS_AC_DATA = ${c.users_array|n};
+  var _GROUPS_AC_DATA = ${c.users_groups_array|n};
+  PullRequestAutoComplete('user', 'reviewers_container', _USERS_AC_DATA, _GROUPS_AC_DATA);
+
   var other_repos_info = ${c.other_repos_info|n};
   var loadPreview = function(){
 	  YUD.setStyle(YUD.get('pull_request_overview_url').parentElement,'display','none');
