@@ -225,11 +225,13 @@ def handle_git_post_receive(repo_path, revs, env):
     init_model(engine)
 
     baseui = make_ui('db')
+    # fix if it's not a bare repo
+    if repo_path.endswith('.git'):
+        repo_path = repo_path[:-4]
     repo = Repository.get_by_full_path(repo_path)
-
     _hooks = dict(baseui.configitems('hooks')) or {}
     # if push hook is enabled via web interface
-    if _hooks.get(RhodeCodeUi.HOOK_PUSH):
+    if repo and _hooks.get(RhodeCodeUi.HOOK_PUSH):
 
         extras = {
          'username': env['RHODECODE_USER'],
@@ -242,18 +244,35 @@ def handle_git_post_receive(repo_path, revs, env):
             baseui.setconfig('rhodecode_extras', k, v)
         repo = repo.scm_instance
         repo.ui = baseui
-        old_rev, new_rev, ref = revs
-        if old_rev == EmptyChangeset().raw_id:
-            cmd = "for-each-ref --format='%(refname)' 'refs/heads/*'"
-            heads = repo.run_git_command(cmd)[0]
-            heads = heads.replace(ref, '')
-            heads = ' '.join(map(lambda c: c.strip('\n').strip(),
-                                 heads.splitlines()))
-            cmd = ('log ' + new_rev +
-                   ' --reverse --pretty=format:"%H" --not ' + heads)
-        else:
-            cmd = ('log ' + old_rev + '..' + new_rev +
-                   ' --reverse --pretty=format:"%H"')
-        git_revs = repo.run_git_command(cmd)[0].splitlines()
+
+        rev_data = []
+        for l in revs:
+            old_rev, new_rev, ref = l.split(' ')
+            _ref_data = ref.split('/')
+            if _ref_data[1] in ['tags', 'heads']:
+                rev_data.append({'old_rev': old_rev,
+                                 'new_rev': new_rev,
+                                 'ref': ref,
+                                 'type': _ref_data[1],
+                                 'name': _ref_data[2].strip()})
+
+        git_revs = []
+        for push_ref  in rev_data:
+            _type = push_ref['type']
+            if _type == 'heads':
+                if push_ref['old_rev'] == EmptyChangeset().raw_id:
+                    cmd = "for-each-ref --format='%(refname)' 'refs/heads/*'"
+                    heads = repo.run_git_command(cmd)[0]
+                    heads = heads.replace(push_ref['ref'], '')
+                    heads = ' '.join(map(lambda c: c.strip('\n').strip(),
+                                         heads.splitlines()))
+                    cmd = (('log %(new_rev)s' % push_ref) +
+                           ' --reverse --pretty=format:"%H" --not ' + heads)
+                else:
+                    cmd = (('log %(old_rev)s..%(new_rev)s' % push_ref) +
+                           ' --reverse --pretty=format:"%H"')
+                git_revs += repo.run_git_command(cmd)[0].splitlines()
+            elif _type == 'tags':
+                git_revs += [push_ref['name']]
 
         log_push_action(baseui, repo, _git_revs=git_revs)
