@@ -96,6 +96,9 @@ class GitRepository(BaseRepository):
             _str_cmd = True
 
         gitenv = os.environ
+        # need to clean fix GIT_DIR !
+        if 'GIT_DIR' in gitenv:
+            del gitenv['GIT_DIR']
         gitenv['GIT_CONFIG_NOGLOBAL'] = '1'
 
         cmd = ['git'] + _copts + cmd
