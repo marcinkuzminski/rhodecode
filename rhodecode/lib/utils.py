@@ -427,7 +427,8 @@ def map_groups(path):
     return group
 
 
-def repo2db_mapper(initial_repo_list, remove_obsolete=False):
+def repo2db_mapper(initial_repo_list, remove_obsolete=False,
+                   install_git_hook=False):
     """
     maps all repos given in initial_repo_list, non existing repositories
     are created, if remove_obsolete is True it also check for db entries
@@ -435,8 +436,11 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False):
 
     :param initial_repo_list: list of repositories found by scanning methods
     :param remove_obsolete: check for obsolete entries in database
+    :param install_git_hook: if this is True, also check and install githook
+        for a repo if missing
     """
     from rhodecode.model.repo import RepoModel
+    from rhodecode.model.scm import ScmModel
     sa = meta.Session()
     rm = RepoModel()
     user = sa.query(User).filter(User.admin == True).first()
@@ -446,7 +450,8 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False):
 
     for name, repo in initial_repo_list.items():
         group = map_groups(name)
-        if not rm.get_by_repo_name(name):
+        repo = rm.get_by_repo_name(name)
+        if not repo:
             log.info('repository %s not found creating now' % name)
             added.append(name)
             desc = (repo.description
@@ -460,6 +465,9 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False):
                 owner=user,
                 just_db=True
             )
+        elif install_git_hook:
+            if repo.repo_type == 'git':
+                ScmModel().install_git_hook(repo.scm_instance)
     sa.commit()
     removed = []
     if remove_obsolete:
@@ -468,9 +476,13 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False):
             if repo.repo_name not in initial_repo_list.keys():
                 log.debug("Removing non existing repository found in db %s" %
                           repo.repo_name)
-                removed.append(repo.repo_name)
-                sa.delete(repo)
-                sa.commit()
+                try:
+                    sa.delete(repo)
+                    sa.commit()
+                    removed.append(repo.repo_name)
+                except:
+                    #don't hold further removals on error
+                    log.error(traceback.format_exc())
 
     # clear cache keys
     log.debug("Clearing cache keys now...")
