@@ -1,0 +1,46 @@
+<div id='repos_list_wrap' class="yui-skin-sam">
+  <table id="repos_list">
+  <thead>
+      <tr>
+      <th></th>
+      <th class="left">${_('Name')}</th>
+      <th class="left">${_('Revision')}</th>
+      <th class="left">${_('Action')}</th>
+      <th class="left">${_('Action')}</th>
+  </thead>
+   <tbody>
+   <%namespace name="dt" file="/data_table/_dt_elements.html"/>
+   %if c.user_repos:
+       %for repo in c.user_repos:
+          <tr>
+              ##QUICK MENU
+              <td class="quick_repo_menu">
+                ${dt.quick_menu(repo['name'])}
+              </td>
+              ##REPO NAME AND ICONS
+              <td class="reponame">
+                ${dt.repo_name(repo['name'],repo['dbrepo']['repo_type'],repo['dbrepo']['private'],repo['dbrepo_fork'].get('repo_name'))}
+              </td>
+              ##LAST REVISION
+              <td>
+                  ${dt.revision(repo['name'],repo['rev'],repo['tip'],repo['author'],repo['last_msg'])}
+              </td>
+              <td><a href="${h.url('repo_settings_home',repo_name=repo['name'])}" title="${_('edit')}"><img class="icon" alt="${_('private')}" src="${h.url('/images/icons/application_form_edit.png')}"/></a></td>
+              <td>
+                ${h.form(url('repo_settings_delete', repo_name=repo['name']),method='delete')}
+                  ${h.submit('remove_%s' % repo['name'],'',class_="delete_icon action_button",onclick="return confirm('"+_('Confirm to delete this repository: %s') % repo['name']+"');")}
+                ${h.end_form()}
+              </td>
+          </tr>
+       %endfor
+   %else:
+      <div style="padding:5px 0px 10px 0px;">
+      ${_('No repositories yet')}
+      %if h.HasPermissionAny('hg.admin','hg.create.repository')():
+          ${h.link_to(_('create one now'),h.url('admin_settings_create_repository'),class_="ui-btn")}
+      %endif
+      </div>
+   %endif
+   </tbody>
+   </table>
+</div>

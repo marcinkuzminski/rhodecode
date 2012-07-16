@@ -1,0 +1,22 @@
+
+<div class="pullrequests_section_head">${_('Opened by me')}</div>
+<ul>
+    %for pull_request in c.my_pull_requests:
+    <li>
+    <a href="${h.url('pullrequest_show',repo_name=pull_request.org_repo.repo_name,pull_request_id=pull_request.pull_request_id)}">
+    ${_('Pull request #%s opened on %s') % (pull_request.pull_request_id, h.fmt_date(pull_request.created_on))}
+    </a>
+    </li>
+    %endfor
+</ul>
+
+<div class="pullrequests_section_head">${_('I participate in')}</div>
+<ul>
+    %for pull_request in c.participate_in_pull_requests:
+    <li>
+    <a href="${h.url('pullrequest_show',repo_name=pull_request.org_repo.repo_name,pull_request_id=pull_request.pull_request_id)}">
+    ${_('Pull request #%s opened by %s on %s') % (pull_request.pull_request_id, pull_request.author.full_name, h.fmt_date(pull_request.created_on))}
+    </a>
+    </li>
+    %endfor
+</ul>

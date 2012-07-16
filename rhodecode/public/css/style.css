@@ -1096,6 +1096,10 @@ tbody .yui-dt-editable { cursor: pointer }
 	color: #FFFFFF;
 }
 
+#content div.box div.title .link-white.current{
+    color: #BFE3FF;
+}
+
 #content div.box div.title ul.links li {
 	list-style: none;
 	float: left;
@@ -4333,6 +4337,15 @@ form.comment-inline-form {
 .notification-body{
 	clear:both;
 	margin: 34px 2px 2px 8px
+}
+
+/****
+PULL REQUESTS
+*****/
+.pullrequests_section_head {
+   padding:10px 10px 10px 0px;
+   font-size:16px;
+   font-weight: bold;
 }
 
 /****

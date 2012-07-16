@@ -296,6 +296,11 @@ def make_map(config):
                   action="my_account_update", conditions=dict(method=["PUT"]))
         m.connect("admin_settings_create_repository", "/create_repository",
                   action="create_repository", conditions=dict(method=["GET"]))
+        m.connect("admin_settings_my_repos", "/my_account/repos",
+                  action="my_account_my_repos", conditions=dict(method=["GET"]))
+        m.connect("admin_settings_my_pullrequests", "/my_account/pull_requests",
+                  action="my_account_my_pullrequests", conditions=dict(method=["GET"]))
+
 
     #NOTIFICATION REST ROUTES
     with rmap.submapper(path_prefix=ADMIN_PREFIX,

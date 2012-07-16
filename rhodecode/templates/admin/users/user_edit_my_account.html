@@ -28,67 +28,27 @@
     <!-- box / title -->
     <div class="title">
         <h5>
-        <input class="q_filter_box" id="q_filter" size="15" type="text" name="filter" value="${_('quick filter...')}"/>
-        <a id="show_my" class="link-white" href="#my">${_('My repos')}</a> / <a id="show_perms" class="link-white" href="#perms">${_('My permissions')}</a>
+        <input class="q_filter_box" id="q_filter" size="15" type="text" name="filter" value="${_('quick filter...')}" style="display: none"/>
         </h5>
-         %if h.HasPermissionAny('hg.admin','hg.create.repository')():
-         <ul class="links">
+         <ul class="links" style="color:#DADADA">
            <li>
-             <span>${h.link_to(_('ADD'),h.url('admin_settings_create_repository'))}</span>
+             <span><a id="show_perms" class="link-white current" href="#perms">${_('My permissions')}</a> </span>
            </li>
+           <li>
+             <span><a id="show_my" class="link-white" href="#my">${_('My repos')}</a> </span>
+           </li>
+           <li>
+             <span><a id="show_pullrequests" class="link-white" href="#perms">${_('My pull requests')}</a> </span>
+           </li>
+           %if h.HasPermissionAny('hg.admin','hg.create.repository')():
+             <li>
+               <span>${h.link_to(_('Add repo'),h.url('admin_settings_create_repository'))}</span>
+             </li>
+           %endif
          </ul>
-         %endif
     </div>
     <!-- end box / title -->
-    <div id="my" class="table">
-        <div id='repos_list_wrap' class="yui-skin-sam">
-        <table id="repos_list">
-	    <thead>
-            <tr>
-            <th></th>
-            <th class="left">${_('Name')}</th>
-            <th class="left">${_('Revision')}</th>
-            <th class="left">${_('Action')}</th>
-            <th class="left">${_('Action')}</th>
-	    </thead>
-	     <tbody>
-         <%namespace name="dt" file="/data_table/_dt_elements.html"/>
-	     %if c.user_repos:
-		     %for repo in c.user_repos:
-		        <tr>
-                    ##QUICK MENU
-                    <td class="quick_repo_menu">
-                      ${dt.quick_menu(repo['name'])}
-                    </td>
-                    ##REPO NAME AND ICONS
-                    <td class="reponame">
-                      ${dt.repo_name(repo['name'],repo['dbrepo']['repo_type'],repo['dbrepo']['private'],repo['dbrepo_fork'].get('repo_name'))}
-                    </td>
-                    ##LAST REVISION
-                    <td>
-                        ${dt.revision(repo['name'],repo['rev'],repo['tip'],repo['author'],repo['last_msg'])}
-                    </td>
-		            <td><a href="${h.url('repo_settings_home',repo_name=repo['name'])}" title="${_('edit')}"><img class="icon" alt="${_('private')}" src="${h.url('/images/icons/application_form_edit.png')}"/></a></td>
-		            <td>
-	                  ${h.form(url('repo_settings_delete', repo_name=repo['name']),method='delete')}
-	                    ${h.submit('remove_%s' % repo['name'],'',class_="delete_icon action_button",onclick="return confirm('"+_('Confirm to delete this repository: %s') % repo['name']+"');")}
-	                  ${h.end_form()}
-		            </td>
-		        </tr>
-		     %endfor
-	     %else:
-            <div style="padding:5px 0px 10px 0px;">
-	     	${_('No repositories yet')}
-	     	%if h.HasPermissionAny('hg.admin','hg.create.repository')():
-	     		${h.link_to(_('create one now'),h.url('admin_settings_create_repository'),class_="ui-btn")}
-	     	%endif
-            </div>
-	     %endif
-	     </tbody>
-	     </table>
-       </div>
-    </div>
-    <div id="perms" class="table" style="display:none">
+    <div id="perms" class="table">
            %for section in sorted(c.rhodecode_user.permissions.keys()):
             <div class="perms_section_head">${section.replace("_"," ").capitalize()}</div>
 
@@ -134,6 +94,9 @@
             </div>
            %endfor
     </div>
+    <div id="my" class="table" style="display:none">
+    </div>    
+    <div id="pullrequests" class="table" style="display:none">
 </div>
 <script type="text/javascript">
 var filter_activate = function(){
@@ -143,21 +106,47 @@ var filter_activate = function(){
     }
     q_filter('q_filter',YUQ('#my tr td a.repo_name'),func);
 }
-
-YUE.on('show_my','click',function(e){
-    YUD.setStyle('perms','display','none');
-    YUD.setStyle('my','display','');
-    YUD.get('q_filter').removeAttribute('disabled');
-    filter_activate();
-    YUE.preventDefault(e);
-})
 YUE.on('show_perms','click',function(e){
+	YUD.addClass('show_perms', 'current');
+	YUD.removeClass('show_my','current');
+	YUD.removeClass('show_pullrequests','current');
+	
     YUD.setStyle('my','display','none');
+    YUD.setStyle('pullrequests','display','none');
     YUD.setStyle('perms','display','');
-    YUD.setAttribute('q_filter','disabled','disabled');
+    YUD.setStyle('q_filter','display','none');
     YUE.preventDefault(e);
 })
+YUE.on('show_my','click',function(e){
+    YUD.addClass('show_my', 'current');
+    YUD.removeClass('show_perms','current');
+    YUD.removeClass('show_pullrequests','current');
+    
+    YUD.setStyle('perms','display','none');
+    YUD.setStyle('pullrequests','display','none');
+    YUD.setStyle('my','display','');
+    YUD.setStyle('q_filter','display','');
+    
+    YUE.preventDefault(e);
+    var url = "${h.url('admin_settings_my_repos')}";
+    ypjax(url, 'my', function(){
+    	table_sort();
+    	filter_activate();
+    });
+})
+YUE.on('show_pullrequests','click',function(e){
+    YUD.addClass('show_pullrequests', 'current');
+    YUD.removeClass('show_my','current');
+    YUD.removeClass('show_perms','current');
 
+    YUD.setStyle('my','display','none');
+    YUD.setStyle('perms','display','none');
+    YUD.setStyle('pullrequests','display','');
+    YUD.setStyle('q_filter','display','none');
+    YUE.preventDefault(e);
+    var url = "${h.url('admin_settings_my_pullrequests')}";
+    ypjax(url, 'pullrequests');
+})
 
 // main table sorting
 var myColumnDefs = [
@@ -170,6 +159,7 @@ var myColumnDefs = [
     {key:"action2",label:"",sortable:false},
 ];
 
+function table_sort(){
 var myDataSource = new YAHOO.util.DataSource(YUD.get("repos_list"));
 myDataSource.responseType = YAHOO.util.DataSource.TYPE_HTMLTABLE;
 myDataSource.responseSchema = {
@@ -224,6 +214,6 @@ myDataSource3.responseSchema = {
 };
 
 new YAHOO.widget.DataTable("tbl_list_wrap_repositories_groups", permsColumnDefs, myDataSource3, trans_defs);
-
+}
 </script>
 </%def>
