@@ -282,10 +282,7 @@ class RepoModel(BaseModel):
                                    clone_uri)
                 log_create_repository(new_repo.get_dict(),
                                       created_by=owner.username)
-            else:
-                # install the githook if it's a git repo
-                if repo_type == 'git':
-                    ScmModel().install_git_hook(repo=new_repo.scm_instance)
+
             # now automatically start following this repository as owner
             ScmModel(self.sa).toggle_following_repo(new_repo.repo_id,
                                                     owner.user_id)
