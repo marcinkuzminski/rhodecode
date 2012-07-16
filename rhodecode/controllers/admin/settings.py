@@ -350,6 +350,7 @@ class SettingsController(BaseController):
         )
         return render('admin/users/user_edit_my_account.html')
 
+    @NotAnonymous()
     def my_account_update(self):
         """PUT /_admin/my_account_update: Update an existing item"""
         # Forms posted to this method should contain a hidden field:
@@ -385,7 +386,8 @@ class SettingsController(BaseController):
                     % form_result.get('username'), category='error')
 
         return redirect(url('my_account'))
-
+    
+    @NotAnonymous()
     def my_account_my_repos(self):
         all_repos = self.sa.query(Repository)\
             .filter(Repository.user_id == self.rhodecode_user.user_id)\
@@ -394,6 +396,7 @@ class SettingsController(BaseController):
         c.user_repos = ScmModel().get_repos(all_repos)
         return render('admin/users/user_edit_my_account_repos.html')
 
+    @NotAnonymous()
     def my_account_my_pullrequests(self):
         c.my_pull_requests = PullRequest.query()\
                                 .filter(PullRequest.user_id==
@@ -420,6 +423,7 @@ class SettingsController(BaseController):
 
         return render('admin/repos/repo_add_create_repository.html')
 
+    @NotAnonymous()
     def get_hg_ui_settings(self):
         ret = self.sa.query(RhodeCodeUi).all()
 
