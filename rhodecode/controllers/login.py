@@ -25,9 +25,10 @@
 
 import logging
 import formencode
+import datetime
 
 from formencode import htmlfill
-
+from webob.exc import HTTPFound
 from pylons.i18n.translation import _
 from pylons.controllers.util import abort, redirect
 from pylons import request, response, session, tmpl_context as c, url
@@ -39,6 +40,7 @@ from rhodecode.model.db import User
 from rhodecode.model.forms import LoginForm, RegisterForm, PasswordResetForm
 from rhodecode.model.user import UserModel
 from rhodecode.model.meta import Session
+
 
 
 log = logging.getLogger(__name__)
@@ -62,6 +64,7 @@ class LoginController(BaseController):
             # import Login Form validator class
             login_form = LoginForm()
             try:
+                session.invalidate()
                 c.form_result = login_form.to_python(dict(request.POST))
                 # form checks for username/password, now we're authenticated
                 username = c.form_result['username']
@@ -70,22 +73,33 @@ class LoginController(BaseController):
                 auth_user.set_authenticated()
                 cs = auth_user.get_cookie_store()
                 session['rhodecode_user'] = cs
+                user.update_lastlogin()
+                Session().commit()
+
                 # If they want to be remembered, update the cookie
                 if c.form_result['remember'] is not False:
-                    session.cookie_expires = False
-                session._set_cookie_values()
-                session._update_cookie_out()
+                    _year = (datetime.datetime.now() +
+                             datetime.timedelta(seconds=60 * 60 * 24 * 365))
+                    session._set_cookie_expires(_year)
+
                 session.save()
 
                 log.info('user %s is now authenticated and stored in '
                          'session, session attrs %s' % (username, cs))
-                user.update_lastlogin()
-                Session.commit()
+
+                # dumps session attrs back to cookie
+                session._update_cookie_out()
+
+                # we set new cookie
+                headers = None
+                if session.request['set_cookie']:
+                    # send set-cookie headers back to response to update cookie
+                    headers = [('Set-Cookie', session.request['cookie_out'])]
 
                 if c.came_from:
-                    return redirect(c.came_from)
+                    raise HTTPFound(location=c.came_from, headers=headers)
                 else:
-                    return redirect(url('home'))
+                    raise HTTPFound(location=url('home'), headers=headers)
 
             except formencode.Invalid, errors:
                 return htmlfill.render(
@@ -115,7 +129,7 @@ class LoginController(BaseController):
                 UserModel().create_registration(form_result)
                 h.flash(_('You have successfully registered into rhodecode'),
                             category='success')
-                Session.commit()
+                Session().commit()
                 return redirect(url('login_home'))
 
             except formencode.Invalid, errors:
