@@ -451,13 +451,14 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False,
     for name, repo in initial_repo_list.items():
         group = map_groups(name)
         db_repo = rm.get_by_repo_name(name)
+        # found repo that is on filesystem not in RhodeCode database
         if not db_repo:
             log.info('repository %s not found creating now' % name)
             added.append(name)
             desc = (repo.description
                     if repo.description != 'unknown'
                     else '%s repository' % name)
-            rm.create_repo(
+            new_repo = rm.create_repo(
                 repo_name=name,
                 repo_type=repo.alias,
                 description=desc,
@@ -465,6 +466,10 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False,
                 owner=user,
                 just_db=True
             )
+            # we added that repo just now, and make sure it has githook
+            # installed
+            if new_repo.repo_type == 'git':
+                ScmModel().install_git_hook(new_repo.scm_instance)
         elif install_git_hook:
             if db_repo.repo_type == 'git':
                 ScmModel().install_git_hook(db_repo.scm_instance)
