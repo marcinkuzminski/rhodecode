@@ -27,8 +27,6 @@ import os
 import shutil
 import logging
 import traceback
-import pkg_resources
-from os.path import dirname as dn, join as jn
 from datetime import datetime
 
 from rhodecode.lib.vcs.backends import get_backend
@@ -284,13 +282,15 @@ class RepoModel(BaseModel):
                                    clone_uri)
                 log_create_repository(new_repo.get_dict(),
                                       created_by=owner.username)
-
+            else:
+                # install the githook if it's a git repo
+                if repo_type == 'git':
+                    ScmModel().install_git_hook(repo=new_repo.scm_instance)
             # now automatically start following this repository as owner
             ScmModel(self.sa).toggle_following_repo(new_repo.repo_id,
                                                     owner.user_id)
             return new_repo
         except:
-            print traceback.format_exc()
             log.error(traceback.format_exc())
             raise
 
@@ -448,6 +448,7 @@ class RepoModel(BaseModel):
         :param clone_uri:
         """
         from rhodecode.lib.utils import is_valid_repo, is_valid_repos_group
+        from rhodecode.model.scm import ScmModel
 
         if parent:
             new_parent_path = os.sep.join(parent.full_path_splitted)
@@ -476,21 +477,7 @@ class RepoModel(BaseModel):
         elif alias == 'git':
             r = backend(repo_path, create=True, src_url=clone_uri, bare=True)
             # add rhodecode hook into this repo
-
-            loc = jn(r.path, 'hooks')
-            if not r.bare:
-                loc = jn(r.path, '.git', 'hooks')
-            if not os.path.isdir(loc):
-                os.makedirs(loc)
-
-            tmpl = pkg_resources.resource_string(
-                'rhodecode', jn('config', 'post_receive_tmpl.py')
-            )
-            _hook_file = jn(loc, 'post-receive')
-            with open(_hook_file, 'wb') as f:
-                f.write(tmpl)
-            os.chmod(_hook_file, 0755)
-
+            ScmModel().install_git_hook(repo=r)
         else:
             raise Exception('Undefined alias %s' % alias)
 
