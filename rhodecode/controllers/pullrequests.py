@@ -84,6 +84,7 @@ class PullrequestsController(BaseRepoController):
         c.repo_name = repo_name
         return render('/pullrequests/pullrequest_show_all.html')
 
+    @NotAnonymous()
     def index(self):
         org_repo = c.rhodecode_db_repo
 
@@ -281,6 +282,7 @@ class PullrequestsController(BaseRepoController):
         c.target_repo = c.pull_request.org_repo.repo_name
         return render('/pullrequests/pullrequest_show.html')
 
+    @NotAnonymous()
     @jsonify
     def comment(self, repo_name, pull_request_id):
         pull_request = PullRequest.get_or_404(pull_request_id)
@@ -337,6 +339,7 @@ class PullrequestsController(BaseRepoController):
 
         return data
 
+    @NotAnonymous()
     @jsonify
     def delete_comment(self, repo_name, comment_id):
         co = ChangesetComment.get(comment_id)
