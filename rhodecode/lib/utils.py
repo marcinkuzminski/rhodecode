@@ -450,8 +450,8 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False,
 
     for name, repo in initial_repo_list.items():
         group = map_groups(name)
-        repo = rm.get_by_repo_name(name)
-        if not repo:
+        db_repo = rm.get_by_repo_name(name)
+        if not db_repo:
             log.info('repository %s not found creating now' % name)
             added.append(name)
             desc = (repo.description
@@ -466,8 +466,8 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False,
                 just_db=True
             )
         elif install_git_hook:
-            if repo.repo_type == 'git':
-                ScmModel().install_git_hook(repo.scm_instance)
+            if db_repo.repo_type == 'git':
+                ScmModel().install_git_hook(db_repo.scm_instance)
     sa.commit()
     removed = []
     if remove_obsolete:
