@@ -43,7 +43,7 @@ from rhodecode.lib.celerylib import tasks, run_task
 from rhodecode.lib.utils import repo2db_mapper, invalidate_cache, \
     set_rhodecode_config, repo_name_slug
 from rhodecode.model.db import RhodeCodeUi, Repository, RepoGroup, \
-    RhodeCodeSetting
+    RhodeCodeSetting, PullRequest, PullRequestReviewers
 from rhodecode.model.forms import UserForm, ApplicationSettingsForm, \
     ApplicationUiSettingsForm
 from rhodecode.model.scm import ScmModel
@@ -51,6 +51,8 @@ from rhodecode.model.user import UserModel
 from rhodecode.model.db import User
 from rhodecode.model.notification import EmailNotificationModel
 from rhodecode.model.meta import Session
+from pylons.decorators import jsonify
+from rhodecode.model.pull_request import PullRequestModel
 
 log = logging.getLogger(__name__)
 
@@ -369,11 +371,6 @@ class SettingsController(BaseController):
             Session.commit()
         except formencode.Invalid, errors:
             c.user = User.get(self.rhodecode_user.user_id)
-            all_repos = self.sa.query(Repository)\
-                .filter(Repository.user_id == c.user.user_id)\
-                .order_by(func.lower(Repository.repo_name))\
-                .all()
-            c.user_repos = ScmModel().get_repos(all_repos)
 
             c.form = htmlfill.render(
                 render('admin/users/user_edit_my_account_form.html'),
@@ -388,6 +385,26 @@ class SettingsController(BaseController):
                     % form_result.get('username'), category='error')
 
         return redirect(url('my_account'))
+
+    def my_account_my_repos(self):
+        all_repos = self.sa.query(Repository)\
+            .filter(Repository.user_id == self.rhodecode_user.user_id)\
+            .order_by(func.lower(Repository.repo_name))\
+            .all()
+        c.user_repos = ScmModel().get_repos(all_repos)
+        return render('admin/users/user_edit_my_account_repos.html')
+
+    def my_account_my_pullrequests(self):
+        c.my_pull_requests = PullRequest.query()\
+                                .filter(PullRequest.user_id==
+                                        self.rhodecode_user.user_id)\
+                                .all()
+        c.participate_in_pull_requests = \
+            [x.pull_request for x in PullRequestReviewers.query()\
+                                    .filter(PullRequestReviewers.user_id==
+                                            self.rhodecode_user.user_id)\
+                                    .all()]
+        return render('admin/users/user_edit_my_account_pullrequests.html')
 
     @NotAnonymous()
     @HasPermissionAnyDecorator('hg.admin', 'hg.create.repository')
