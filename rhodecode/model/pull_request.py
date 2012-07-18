@@ -161,8 +161,20 @@ class PullRequestModel(BaseModel):
             for cs in reversed(map(binascii.hexlify, revs)):
                 changesets.append(org_repo.get_changeset(cs))
         else:
-            revs = ['ancestors(%s) and not ancestors(%s)' % (org_ref[1],
-                                                             other_ref[1])]
+            _revset_predicates = {
+                    'branch': 'branch',
+                    'book': 'bookmark',
+                    'tag': 'tag',
+                    'rev': 'id',
+                }
+
+            revs = [
+                "ancestors(%s('%s')) and not ancestors(%s('%s'))" % (
+                    _revset_predicates[org_ref[0]], org_ref[1],
+                    _revset_predicates[other_ref[0]], other_ref[1]
+               )
+            ]
+
             from mercurial import scmutil
             out = scmutil.revrange(org_repo._repo, revs)
             for cs in reversed(out):
