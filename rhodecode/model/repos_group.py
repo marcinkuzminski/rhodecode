@@ -45,7 +45,7 @@ class ReposGroupModel(BaseModel):
         return self._get_instance(UsersGroup, users_group,
                                   callback=UsersGroup.get_by_group_name)
 
-    def __get_repos_group(self, repos_group):
+    def _get_repos_group(self, repos_group):
         return self._get_instance(RepoGroup, repos_group,
                                   callback=RepoGroup.get_by_group_name)
 
@@ -133,7 +133,7 @@ class ReposGroupModel(BaseModel):
         try:
             new_repos_group = RepoGroup()
             new_repos_group.group_description = group_description
-            new_repos_group.parent_group = self.__get_repos_group(parent)
+            new_repos_group.parent_group = self._get_repos_group(parent)
             new_repos_group.group_name = new_repos_group.get_new_name(group_name)
 
             self.sa.add(new_repos_group)
@@ -202,7 +202,7 @@ class ReposGroupModel(BaseModel):
             raise
 
     def delete(self, repos_group):
-        repos_group = self.__get_repos_group(repos_group)
+        repos_group = self._get_repos_group(repos_group)
         try:
             self.sa.delete(repos_group)
             self.__delete_group(repos_group)
@@ -221,7 +221,7 @@ class ReposGroupModel(BaseModel):
         :param perm: Instance of Permission, or permission_name
         """
 
-        repos_group = self.__get_repos_group(repos_group)
+        repos_group = self._get_repos_group(repos_group)
         user = self._get_user(user)
         permission = self._get_perm(perm)
 
@@ -247,7 +247,7 @@ class ReposGroupModel(BaseModel):
         :param user: Instance of User, user_id or username
         """
 
-        repos_group = self.__get_repos_group(repos_group)
+        repos_group = self._get_repos_group(repos_group)
         user = self._get_user(user)
 
         obj = self.sa.query(UserRepoGroupToPerm)\
@@ -267,7 +267,7 @@ class ReposGroupModel(BaseModel):
             or users group name
         :param perm: Instance of Permission, or permission_name
         """
-        repos_group = self.__get_repos_group(repos_group)
+        repos_group = self._get_repos_group(repos_group)
         group_name = self.__get_users_group(group_name)
         permission = self._get_perm(perm)
 
@@ -295,7 +295,7 @@ class ReposGroupModel(BaseModel):
         :param group_name: Instance of UserGroup, users_group_id,
             or users group name
         """
-        repos_group = self.__get_repos_group(repos_group)
+        repos_group = self._get_repos_group(repos_group)
         group_name = self.__get_users_group(group_name)
 
         obj = self.sa.query(UsersGroupRepoGroupToPerm)\

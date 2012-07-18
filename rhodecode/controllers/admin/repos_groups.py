@@ -301,13 +301,12 @@ class ReposGroupsController(BaseController):
         """GET /repos_groups/id/edit: Form to edit an existing item"""
         # url('edit_repos_group', id=ID)
 
-        id_ = int(id)
-
-        c.repos_group = RepoGroup.get(id_)
-        defaults = self.__load_data(id_)
+        c.repos_group = ReposGroupModel()._get_repos_group(id)
+        defaults = self.__load_data(c.repos_group.group_id)
 
         # we need to exclude this group from the group list for editing
-        c.repo_groups = filter(lambda x: x[0] != id_, c.repo_groups)
+        c.repo_groups = filter(lambda x: x[0] != c.repos_group.group_id,
+                               c.repo_groups)
 
         return htmlfill.render(
             render('admin/repos_groups/repos_groups_edit.html'),

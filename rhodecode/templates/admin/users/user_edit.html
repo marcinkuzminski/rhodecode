@@ -169,6 +169,7 @@
                     <tr>
                     <th class="left">${_('Name')}</th>
                     <th class="left">${_('Permission')}</th>
+                    <th class="left">${_('Edit Permission')}</th>
                 </thead>
                 <tbody>
                 %for k in c.perm_user.permissions[section]:
@@ -195,7 +196,16 @@
                             %else:
                              <span class="perm_tag ${_perm}">${section_perm}</span>
                             %endif
-                         </td>
+                        </td>
+                        <td>
+                            %if section == 'repositories':
+                                <a href="${h.url('edit_repo',repo_name=k,anchor='permissions_manage')}">${_('edit')}</a>
+                            %elif section == 'repositories_groups':
+                                <a href="${h.url('edit_repos_group',id=k,anchor='permissions_manage')}">${_('edit')}</a>
+                            %else:
+                                --
+                            %endif                        
+                        </td>
                     </tr>
                 %endfor
                 </tbody>

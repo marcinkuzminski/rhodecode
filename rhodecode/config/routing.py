@@ -158,8 +158,7 @@ def make_map(config):
                   action="delete", conditions=dict(method=["DELETE"],
                                                    function=check_int))
         m.connect("edit_repos_group", "/repos_groups/{id}/edit",
-                  action="edit", conditions=dict(method=["GET"],
-                                                 function=check_int))
+                  action="edit", conditions=dict(method=["GET"],))
         m.connect("formatted_edit_repos_group",
                   "/repos_groups/{id}.{format}/edit",
                   action="edit", conditions=dict(method=["GET"],

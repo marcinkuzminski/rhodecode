@@ -53,7 +53,7 @@ class RepoModel(BaseModel):
         return self._get_instance(UsersGroup, users_group,
                                   callback=UsersGroup.get_by_group_name)
 
-    def __get_repos_group(self, repos_group):
+    def _get_repos_group(self, repos_group):
         return self._get_instance(RepoGroup, repos_group,
                                   callback=RepoGroup.get_by_group_name)
 
@@ -210,7 +210,7 @@ class RepoModel(BaseModel):
 
         owner = self._get_user(owner)
         fork_of = self._get_repo(fork_of)
-        repos_group = self.__get_repos_group(repos_group)
+        repos_group = self._get_repos_group(repos_group)
         try:
 
             # repo name is just a name of repository
