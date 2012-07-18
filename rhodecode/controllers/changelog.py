@@ -64,7 +64,8 @@ class ChangelogController(BaseRepoController):
             session.save()
         else:
             c.size = int(session.get('changelog_size', default))
-
+        # min size must be 1
+        c.size = max(c.size, 1)
         p = int(request.params.get('page', 1))
         branch_name = request.params.get('branch', None)
         try:
