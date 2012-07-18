@@ -380,6 +380,8 @@ class ScmModel(BaseModel):
     def mark_as_fork(self, repo, fork, user):
         repo = self.__get_repo(repo)
         fork = self.__get_repo(fork)
+        if fork and repo.repo_id == fork.repo_id:
+            raise Exception("Cannot set repository as fork of itself")
         repo.fork = fork
         self.sa.add(repo)
         return repo

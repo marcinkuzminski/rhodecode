@@ -120,8 +120,10 @@ class ReposController(BaseController):
 
         c.repos_list = [('', _('--REMOVE FORK--'))]
         c.repos_list += [(x.repo_id, x.repo_name) for x in
-                   Repository.query().order_by(Repository.repo_name).all()]
+                    Repository.query().order_by(Repository.repo_name).all()
+                    if x.repo_id != c.repo_info.repo_id]
 
+        defaults['id_fork_of'] = db_repo.fork.repo_id if db_repo.fork else ''
         return defaults
 
     @HasPermissionAllDecorator('hg.admin')
@@ -417,11 +419,11 @@ class ReposController(BaseController):
             repo = ScmModel().mark_as_fork(repo_name, fork_id,
                                     self.rhodecode_user.username)
             fork = repo.fork.repo_name if repo.fork else _('Nothing')
-            Session.commit()
-            h.flash(_('Marked repo %s as fork of %s') % (repo_name,fork),
+            Session().commit()
+            h.flash(_('Marked repo %s as fork of %s') % (repo_name, fork),
                     category='success')
         except Exception, e:
-            raise
+            log.error(traceback.format_exc())
             h.flash(_('An error occurred during this operation'),
                     category='error')
 

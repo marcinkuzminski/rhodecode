@@ -160,5 +160,5 @@ class TestController(TestCase):
         if not msg in response.session['flash'][0][1]:
             self.fail(
                 'msg `%s` not found in session flash: got `%s` instead' % (
-                      msg, response.session['flash'][0][1])
+                      msg, response.session['flash'])
             )

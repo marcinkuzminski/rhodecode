@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
 from rhodecode.lib.auth import get_crypt_password, check_password
-from rhodecode.model.db import User, RhodeCodeSetting
+from rhodecode.model.db import User, RhodeCodeSetting, Repository
 from rhodecode.tests import *
 from rhodecode.lib import helpers as h
 from rhodecode.model.user import UserModel
+from rhodecode.model.scm import ScmModel
 
 
 class TestAdminSettingsController(TestController):
@@ -211,3 +212,55 @@ class TestAdminSettingsController(TestController):
                                     old_data={})._messages['username_exists']
         msg = h.html_escape(msg % {'username': 'test_admin'})
         response.mustcontain(u"%s" % msg)
+
+    def test_set_repo_fork_has_no_self_id(self):
+        self.log_user()
+        repo = Repository.get_by_repo_name(HG_REPO)
+        response = self.app.get(url('edit_repo', repo_name=HG_REPO))
+        opt = """<option value="%s">vcs_test_git</option>""" % repo.repo_id
+        assert opt not in response.body
+
+    def test_set_fork_of_repo(self):
+        self.log_user()
+        repo = Repository.get_by_repo_name(HG_REPO)
+        repo2 = Repository.get_by_repo_name(GIT_REPO)
+        response = self.app.put(url('repo_as_fork', repo_name=HG_REPO),
+                                 params=dict(
+                                    id_fork_of=repo2.repo_id
+                                 ))
+        repo = Repository.get_by_repo_name(HG_REPO)
+        repo2 = Repository.get_by_repo_name(GIT_REPO)
+        self.checkSessionFlash(response,
+        'Marked repo %s as fork of %s' % (repo.repo_name, repo2.repo_name))
+
+        assert repo.fork == repo2
+        response = response.follow()
+        # check if given repo is selected
+
+        opt = """<option value="%s" selected="selected">%s</option>""" % (
+                                                repo2.repo_id, repo2.repo_name)
+        response.mustcontain(opt)
+
+        # clean session flash
+        #response = self.app.get(url('edit_repo', repo_name=HG_REPO))
+
+        ## mark it as None
+        response = self.app.put(url('repo_as_fork', repo_name=HG_REPO),
+                                 params=dict(
+                                    id_fork_of=None
+                                 ))
+        repo = Repository.get_by_repo_name(HG_REPO)
+        repo2 = Repository.get_by_repo_name(GIT_REPO)
+        self.checkSessionFlash(response,
+        'Marked repo %s as fork of %s' % (repo.repo_name, "Nothing"))
+        assert repo.fork == None
+
+    def test_set_fork_of_same_repo(self):
+        self.log_user()
+        repo = Repository.get_by_repo_name(HG_REPO)
+        response = self.app.put(url('repo_as_fork', repo_name=HG_REPO),
+                                 params=dict(
+                                    id_fork_of=repo.repo_id
+                                 ))
+        self.checkSessionFlash(response,
+                               'An error occurred during this operation')
