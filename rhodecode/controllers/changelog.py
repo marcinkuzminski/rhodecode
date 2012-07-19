@@ -58,8 +58,7 @@ class ChangelogController(BaseRepoController):
                 int_size = int(request.params.get('size'))
             except ValueError:
                 int_size = default
-            int_size = int_size if int_size <= limit else limit
-            c.size = int_size
+            c.size = max(min(int_size, limit), 1)
             session['changelog_size'] = c.size
             session.save()
         else:
