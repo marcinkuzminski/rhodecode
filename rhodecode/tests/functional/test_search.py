@@ -27,7 +27,7 @@ class TestSearchController(TestController):
         self.log_user()
         response = self.app.get(url(controller='search', action='index'),
                                 {'q': 'def repo'})
-        response.mustcontain('39 results')
+        response.mustcontain('10 results')
 
     def test_repo_search(self):
         self.log_user()
@@ -35,3 +35,44 @@ class TestSearchController(TestController):
                                 {'q': 'repository:%s def test' % HG_REPO})
 
         response.mustcontain('4 results')
+
+    def test_search_last(self):
+        self.log_user()
+        response = self.app.get(url(controller='search', action='index'),
+                                {'q': 'last:t', 'type': 'commit'})
+
+        response.mustcontain('1 results')
+
+    def test_search_commit_message(self):
+        self.log_user()
+        response = self.app.get(url(controller='search', action='index'),
+                                {'q': 'bother to ask where to fetch repo during tests',
+                                 'type': 'commit'})
+
+        response.mustcontain('1 results')
+        response.mustcontain('a00c1b6f5d7a6ae678fd553a8b81d92367f7ecf1')
+
+    def test_search_commit_changed_file(self):
+        self.log_user()
+        response = self.app.get(url(controller='search', action='index'),
+                                {'q': 'changed:tests/utils.py',
+                                 'type': 'commit'})
+
+        response.mustcontain('a00c1b6f5d7a6ae678fd553a8b81d92367f7ecf1')
+
+    def test_search_commit_added_file(self):
+        self.log_user()
+        response = self.app.get(url(controller='search', action='index'),
+                                {'q': 'added:README.rst',
+                                 'type': 'commit'})
+
+        response.mustcontain('1 results')
+        response.mustcontain('3803844fdbd3b711175fc3da9bdacfcd6d29a6fb')
+
+    def test_search_author(self):
+        self.log_user()
+        response = self.app.get(url(controller='search', action='index'),
+                                {'q': 'author:marcin@python-blog.com revision:0',
+                                 'type': 'commit'})
+
+        response.mustcontain('1 results')

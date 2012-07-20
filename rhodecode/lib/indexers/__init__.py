@@ -35,7 +35,7 @@ from string import strip
 from shutil import rmtree
 
 from whoosh.analysis import RegexTokenizer, LowercaseFilter, StopFilter
-from whoosh.fields import TEXT, ID, STORED, Schema, FieldType
+from whoosh.fields import TEXT, ID, STORED, NUMERIC, BOOLEAN, Schema, FieldType
 from whoosh.index import create_in, open_dir
 from whoosh.formats import Characters
 from whoosh.highlight import highlight, HtmlFormatter, ContextFragmenter
@@ -51,9 +51,10 @@ from rhodecode.lib.utils2 import LazyProperty
 from rhodecode.lib.utils import BasePasterCommand, Command, add_cache,\
     load_rcextensions
 
+log = logging.getLogger(__name__)
+
 # CUSTOM ANALYZER wordsplit + lowercase filter
 ANALYZER = RegexTokenizer(expression=r"\w+") | LowercaseFilter()
-
 
 #INDEX SCHEMA DEFINITION
 SCHEMA = Schema(
@@ -71,6 +72,22 @@ IDX_NAME = 'HG_INDEX'
 FORMATTER = HtmlFormatter('span', between='\n<span class="break">...</span>\n')
 FRAGMENTER = ContextFragmenter(200)
 
+CHGSETS_SCHEMA = Schema(
+    path=ID(unique=True, stored=True),
+    revision=NUMERIC(unique=True, stored=True),
+    last=BOOLEAN(),
+    owner=TEXT(),
+    repository=ID(unique=True, stored=True),
+    author=TEXT(stored=True),
+    message=FieldType(format=Characters(), analyzer=ANALYZER,
+                      scorable=True, stored=True),
+    parents=TEXT(),
+    added=TEXT(),
+    removed=TEXT(),
+    changed=TEXT(),
+)
+
+CHGSET_IDX_NAME = 'CHGSET_INDEX'
 
 class MakeIndex(BasePasterCommand):
 
@@ -191,14 +208,20 @@ class WhooshResultWrapper(object):
 
     def get_full_content(self, docid):
         res = self.searcher.stored_fields(docid[0])
+        log.debug('result: %s' % res)
         full_repo_path = jn(self.repo_location, res['repository'])
         f_path = res['path'].split(full_repo_path)[-1]
         f_path = f_path.lstrip(os.sep)
+        res.update({'f_path': f_path})
 
-        content_short = self.get_short_content(res, docid[1])
-        res.update({'content_short': content_short,
-                    'content_short_hl': self.highlight(content_short),
-                    'f_path': f_path})
+        if self.search_type == 'content':
+            content_short = self.get_short_content(res, docid[1])
+            res.update({'content_short': content_short,
+                        'content_short_hl': self.highlight(content_short)})
+        elif self.search_type == 'message':
+            res.update({'message_hl': self.highlight(res['message'])})
+
+        log.debug('result: %s' % res)
 
         return res
 
@@ -216,19 +239,20 @@ class WhooshResultWrapper(object):
         :param size:
         """
         memory = [(0, 0)]
-        for span in self.matcher.spans():
-            start = span.startchar or 0
-            end = span.endchar or 0
-            start_offseted = max(0, start - self.fragment_size)
-            end_offseted = end + self.fragment_size
+        if self.matcher.supports('positions'): 
+            for span in self.matcher.spans():
+                start = span.startchar or 0
+                end = span.endchar or 0
+                start_offseted = max(0, start - self.fragment_size)
+                end_offseted = end + self.fragment_size
 
-            if start_offseted < memory[-1][1]:
-                start_offseted = memory[-1][1]
-            memory.append((start_offseted, end_offseted,))
-            yield (start_offseted, end_offseted,)
+                if start_offseted < memory[-1][1]:
+                    start_offseted = memory[-1][1]
+                memory.append((start_offseted, end_offseted,))
+                yield (start_offseted, end_offseted,)
 
     def highlight(self, content, top=5):
-        if self.search_type != 'content':
+        if self.search_type not in ['content', 'message']:
             return ''
         hl = highlight(
             text=content,

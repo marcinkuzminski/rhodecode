@@ -30,7 +30,7 @@ from pylons import request, config, tmpl_context as c
 
 from rhodecode.lib.auth import LoginRequired
 from rhodecode.lib.base import BaseController, render
-from rhodecode.lib.indexers import SCHEMA, IDX_NAME, WhooshResultWrapper
+from rhodecode.lib.indexers import CHGSETS_SCHEMA, SCHEMA, CHGSET_IDX_NAME, IDX_NAME, WhooshResultWrapper
 
 from webhelpers.paginate import Page
 from webhelpers.util import update_params
@@ -54,25 +54,41 @@ class SearchController(BaseController):
         c.formated_results = []
         c.runtime = ''
         c.cur_query = request.GET.get('q', None)
-        c.cur_type = request.GET.get('type', 'source')
+        c.cur_type = request.GET.get('type', 'content')
         c.cur_search = search_type = {'content': 'content',
-                                      'commit': 'content',
+                                      'commit': 'message',
                                       'path': 'path',
                                       'repository': 'repository'}\
                                       .get(c.cur_type, 'content')
 
+        index_name = {
+            'content': IDX_NAME,
+            'commit': CHGSET_IDX_NAME,
+            'path': IDX_NAME}\
+            .get(c.cur_type, IDX_NAME)
+
+        schema_defn = {
+            'content': SCHEMA,
+            'commit': CHGSETS_SCHEMA,
+            'path': SCHEMA}\
+            .get(c.cur_type, SCHEMA)
+
+        log.debug('IDX: %s' % index_name)
+        log.debug('SCHEMA: %s' % schema_defn)
+
         if c.cur_query:
             cur_query = c.cur_query.lower()
+            log.debug(cur_query)
 
         if c.cur_query:
             p = int(request.params.get('page', 1))
             highlight_items = set()
             try:
                 idx = open_dir(config['app_conf']['index_dir'],
-                               indexname=IDX_NAME)
+                               indexname=index_name)
                 searcher = idx.searcher()
 
-                qp = QueryParser(search_type, schema=SCHEMA)
+                qp = QueryParser(search_type, schema=schema_defn)
                 if c.repo_name:
                     cur_query = u'repository:%s %s' % (c.repo_name, cur_query)
                 try:
@@ -84,13 +100,13 @@ class SearchController(BaseController):
                         highlight_items.add(query.text)
                     else:
                         for i in query.all_terms():
-                            if i[0] == 'content':
+                            if i[0] in ['content', 'message']:
                                 highlight_items.add(i[1])
 
                     matcher = query.matcher(searcher)
 
-                    log.debug(query)
-                    log.debug(highlight_items)
+                    log.debug('query: %s' % query)
+                    log.debug('hl terms: %s' % highlight_items)
                     results = searcher.search(query)
                     res_ln = len(results)
                     c.runtime = '%s results (%.3f seconds)' % (
@@ -99,7 +115,7 @@ class SearchController(BaseController):
 
                     def url_generator(**kw):
                         return update_params("?q=%s&type=%s" \
-                                           % (c.cur_query, c.cur_search), **kw)
+                                           % (c.cur_query, c.cur_type), **kw)
                     repo_location = RepoModel().repos_path
                     c.formated_results = Page(
                         WhooshResultWrapper(search_type, searcher, matcher,
