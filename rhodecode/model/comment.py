@@ -198,6 +198,7 @@ class ChangesetCommentsModel(BaseModel):
             q = q.filter(ChangesetComment.pull_request == pull_request)
         else:
             raise Exception('Please specify revision or pull_request')
+        q = q.order_by(ChangesetComment.created_on)
         return q.all()
 
     def get_inline_comments(self, repo_id, revision=None, pull_request=None):
