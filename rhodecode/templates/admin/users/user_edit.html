@@ -133,7 +133,7 @@
     </div>
     ${h.end_form()}
 </div>
-<div class="box box-right">
+<div style="min-height:780px" class="box box-right">
     <!-- box / title -->
     <div class="title">
         <h5>${_('Permissions')}</h5>
@@ -162,7 +162,9 @@
     <div id="perms" class="table">
            %for section in sorted(c.perm_user.permissions.keys()):
               <div class="perms_section_head">${section.replace("_"," ").capitalize()}</div>
-
+              %if not c.perm_user.permissions[section]:
+                  <span style="color:#B9B9B9">${_('Nothing here yet')}</span>
+              %else:
               <div id='tbl_list_wrap_${section}' class="yui-skin-sam">
                <table id="tbl_list_${section}">
                 <thead>
@@ -211,6 +213,7 @@
                 </tbody>
                </table>
               </div>
+              %endif
            %endfor
     </div>
 </div>
