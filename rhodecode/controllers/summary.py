@@ -191,7 +191,7 @@ class SummaryController(BaseRepoController):
         def _get_readme_from_cache(key):
             readme_data = None
             readme_file = None
-            log.debug('Fetching readme file')
+            log.debug('Looking for README file')
             try:
                 # get's the landing revision! or tip if fails
                 cs = db_repo.get_landing_changeset()
@@ -202,8 +202,9 @@ class SummaryController(BaseRepoController):
                         if not isinstance(readme, FileNode):
                             continue
                         readme_file = f
+                        log.debug('Found README file `%s` rendering...' %
+                                  readme_file)
                         readme_data = renderer.render(readme.content, f)
-                        log.debug('Found readme %s' % readme_file)
                         break
                     except NodeDoesNotExistError:
                         continue
