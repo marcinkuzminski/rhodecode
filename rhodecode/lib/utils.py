@@ -479,7 +479,7 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False,
         # remove from database those repositories that are not in the filesystem
         for repo in sa.query(Repository).all():
             if repo.repo_name not in initial_repo_list.keys():
-                log.debug("Removing non existing repository found in db %s" %
+                log.debug("Removing non existing repository found in db `%s`" %
                           repo.repo_name)
                 try:
                     sa.delete(repo)
@@ -488,6 +488,7 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False,
                 except:
                     #don't hold further removals on error
                     log.error(traceback.format_exc())
+                    sa.rollback()
 
     # clear cache keys
     log.debug("Clearing cache keys now...")
