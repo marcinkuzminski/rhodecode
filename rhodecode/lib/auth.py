@@ -35,7 +35,7 @@ from pylons import config, url, request
 from pylons.controllers.util import abort, redirect
 from pylons.i18n.translation import _
 
-from rhodecode import __platform__, PLATFORM_WIN, PLATFORM_OTHERS
+from rhodecode import __platform__, is_windows, is_unix
 from rhodecode.model.meta import Session
 
 from rhodecode.lib.utils2 import str2bool, safe_unicode
@@ -92,10 +92,10 @@ class RhodeCodeCrypto(object):
 
         :param password: password to hash
         """
-        if __platform__ in PLATFORM_WIN:
+        if is_windows:
             from hashlib import sha256
             return sha256(str_).hexdigest()
-        elif __platform__ in PLATFORM_OTHERS:
+        elif is_unix:
             import bcrypt
             return bcrypt.hashpw(str_, bcrypt.gensalt(10))
         else:
@@ -112,10 +112,10 @@ class RhodeCodeCrypto(object):
         :param hashed: password in hashed form
         """
 
-        if __platform__ in PLATFORM_WIN:
+        if is_windows:
             from hashlib import sha256
             return sha256(password).hexdigest() == hashed
-        elif __platform__ in PLATFORM_OTHERS:
+        elif is_unix:
             import bcrypt
             return bcrypt.hashpw(password, hashed) == hashed
         else:
@@ -235,7 +235,7 @@ def authenticate(username, password):
                                           user_attrs):
                     log.info('created new ldap user %s' % username)
 
-                Session.commit()
+                Session().commit()
                 return True
             except (LdapUsernameError, LdapPasswordError,):
                 pass
@@ -262,7 +262,7 @@ def login_container_auth(username):
         return None
 
     user.update_lastlogin()
-    Session.commit()
+    Session().commit()
 
     log.debug('User %s is now logged in by container authentication',
               user.username)
@@ -768,7 +768,7 @@ class HasReposGroupPermissionAny(PermsFunction):
 class HasReposGroupPermissionAll(PermsFunction):
     def __call__(self, group_name=None, check_Location=''):
         self.group_name = group_name
-        return super(HasReposGroupPermissionAny, self).__call__(check_Location)
+        return super(HasReposGroupPermissionAll, self).__call__(check_Location)
 
     def check_permissions(self):
         try:

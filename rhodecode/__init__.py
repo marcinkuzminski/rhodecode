@@ -46,10 +46,10 @@ __author__ = 'Marcin Kuzminski'
 __url__ = 'http://rhodecode.org'
 
 PLATFORM_WIN = ('Windows')
-PLATFORM_OTHERS = ('Linux', 'Darwin', 'FreeBSD', 'OpenBSD', 'SunOS')
+PLATFORM_OTHERS = ('Linux', 'Darwin', 'FreeBSD', 'OpenBSD', 'SunOS') #depracated
 
 is_windows = __platform__ in PLATFORM_WIN
-is_unix = __platform__ in PLATFORM_OTHERS
+is_unix = not is_windows
 
 
 BACKENDS = {
