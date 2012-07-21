@@ -32,6 +32,10 @@ news
   journal
 - various i18n improvements
 - #478 permissions overview for admin in user edit view
+- File view now displays small gravatars off all authors of given file
+- Implemented landing revisions. Each repository will get landing_rev attribute
+  that defines 'default' revision/branch for generating readme files
+
 
 fixes
 +++++
@@ -50,7 +54,11 @@ fixes
 - fixed issue #459. Changed the way of obtaining logger in reindex task.
 - fixed #453 added ID field in whoosh SCHEMA that solves the issue of
   reindexing modified files
-- fixes #481 rhodecode emails are sent without Date header 
+- fixed #481 rhodecode emails are sent without Date header 
+- fixed #458 wrong count when no repos are present
+- fixed issue #492 missing `\ No newline at end of file` test at the end of 
+  new chunk in html diff
+- full text search now works also for commit messages
 
 1.3.6 (**2012-05-17**)
 ----------------------
