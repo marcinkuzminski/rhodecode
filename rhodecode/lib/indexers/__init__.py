@@ -74,7 +74,6 @@ FRAGMENTER = ContextFragmenter(200)
 
 CHGSETS_SCHEMA = Schema(
     raw_id=ID(unique=True, stored=True),
-    revision=NUMERIC(unique=True, stored=True),
     last=BOOLEAN(),
     owner=TEXT(),
     repository=ID(unique=True, stored=True),

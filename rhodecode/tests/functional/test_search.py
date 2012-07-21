@@ -72,7 +72,7 @@ class TestSearchController(TestController):
     def test_search_author(self):
         self.log_user()
         response = self.app.get(url(controller='search', action='index'),
-                                {'q': 'author:marcin@python-blog.com revision:0',
+                                {'q': 'author:marcin@python-blog.com raw_id:b986218ba1c9b0d6a259fac9b050b1724ed8e545',
                                  'type': 'commit'})
 
         response.mustcontain('1 results')

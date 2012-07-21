@@ -168,23 +168,34 @@ class WhooshIndexingDaemon(object):
         )
         return indexed, indexed_w_content
 
-    def index_changesets(self, writer, repo_name, repo, start_rev=0):
+    def index_changesets(self, writer, repo_name, repo, start_rev=None):
         """
         Add all changeset in the vcs repo starting at start_rev
         to the index writer
+
+        :param writer: the whoosh index writer to add to
+        :param repo_name: name of the repository from whence the
+          changeset originates including the repository group
+        :param repo: the vcs repository instance to index changesets for,
+          the presumption is the repo has changesets to index
+        :param start_rev=None: the full sha id to start indexing from
+          if start_rev is None then index from the first changeset in
+          the repo
         """
 
-        log.debug('indexing changesets in %s[%d:]' % (repo_name, start_rev))
+        if start_rev is None:
+            start_rev = repo[0].raw_id
+
+        log.debug('indexing changesets in %s starting at rev: %s' % (repo_name, start_rev))
 
         indexed=0
-        for cs in repo[start_rev:]:
+        for cs in repo.get_changesets(start=start_rev):
             writer.add_document(
                 raw_id=unicode(cs.raw_id),
                 owner=unicode(repo.contact),
                 repository=safe_unicode(repo_name),
                 author=cs.author,
                 message=cs.message,
-                revision=cs.revision,
                 last=cs.last,
                 added=u' '.join([node.path for node in cs.added]).lower(),
                 removed=u' '.join([node.path for node in cs.removed]).lower(),
@@ -214,21 +225,27 @@ class WhooshIndexingDaemon(object):
             try:
                 for repo_name, repo in self.repo_paths.items():
                     # skip indexing if there aren't any revs in the repo
-                    revs = repo.revisions
-                    if len(revs) < 1:
+                    num_of_revs = len(repo)
+                    if num_of_revs < 1:
                         continue
 
                     qp = QueryParser('repository', schema=CHGSETS_SCHEMA)
                     q = qp.parse(u"last:t AND %s" % repo_name)
 
-                    results = searcher.search(q, sortedby='revision')
+                    results = searcher.search(q)
 
+                    # default to scanning the entire repo
                     last_rev = 0
+                    start_id = None
+
                     if len(results) > 0:
-                        last_rev = results[0]['revision']
+                        # assuming that there is only one result, if not this
+                        # may require a full re-index.
+                        start_id = results[0]['raw_id']
+                        last_rev = repo.get_changeset(revision=start_id).revision
 
                     # there are new changesets to index or a new repo to index
-                    if last_rev == 0 or len(revs) > last_rev + 1:
+                    if last_rev == 0 or num_of_revs > last_rev + 1:
                         # delete the docs in the index for the previous last changeset(s)
                         for hit in results:
                             q = qp.parse(u"last:t AND %s AND raw_id:%s" % 
@@ -236,7 +253,7 @@ class WhooshIndexingDaemon(object):
                             writer.delete_by_query(q)
 
                         # index from the previous last changeset + all new ones
-                        self.index_changesets(writer, repo_name, repo, last_rev)
+                        self.index_changesets(writer, repo_name, repo, start_id)
                         writer_is_dirty = True
 
             finally:
