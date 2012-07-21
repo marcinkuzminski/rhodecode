@@ -367,32 +367,46 @@ def create_repo_fork(form_data, cur_user):
     :param cur_user:
     """
     from rhodecode.model.repo import RepoModel
+    from rhodecode.model.user import UserModel
 
     log = get_logger(create_repo_fork)
     DBS = get_session()
 
     base_path = Repository.base_path()
+    cur_user = UserModel(DBS)._get_user(cur_user)
 
-    fork_repo = RepoModel(DBS).create(form_data, cur_user.user_id,
-                                      just_db=True, fork=True)
-
-    alias = form_data['repo_type']
-    org_repo_name = form_data['org_path']
     fork_name = form_data['repo_name_full']
+    repo_type = form_data['repo_type']
+    description = form_data['description']
+    owner = cur_user
+    private = form_data['private']
+    clone_uri = form_data.get('clone_uri')
+    repos_group = form_data['repo_group']
+    landing_rev = form_data['landing_rev']
+    copy_fork_permissions = form_data.get('copy_permissions')
+    fork_of = RepoModel(DBS)._get_repo(form_data.get('fork_parent_id'))
+
+    fork_repo = RepoModel(DBS).create_repo(
+        fork_name, repo_type, description, owner, private, clone_uri,
+        repos_group, landing_rev, just_db=True, fork_of=fork_of,
+        copy_fork_permissions=copy_fork_permissions
+    )
+
     update_after_clone = form_data['update_after_clone']
-    source_repo_path = os.path.join(base_path, org_repo_name)
+
+    source_repo_path = os.path.join(base_path, fork_of.repo_name)
     destination_fork_path = os.path.join(base_path, fork_name)
 
     log.info('creating fork of %s as %s', source_repo_path,
              destination_fork_path)
-    backend = get_backend(alias)
+    backend = get_backend(repo_type)
     backend(safe_str(destination_fork_path), create=True,
             src_url=safe_str(source_repo_path),
             update_after_clone=update_after_clone)
     log_create_repository(fork_repo.get_dict(), created_by=cur_user.username)
 
     action_logger(cur_user, 'user_forked_repo:%s' % fork_name,
-                   org_repo_name, '', DBS)
+                   fork_of.repo_name, '', DBS)
 
     action_logger(cur_user, 'user_created_fork:%s' % fork_name,
                    fork_name, '', DBS)

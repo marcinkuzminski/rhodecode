@@ -157,12 +157,10 @@ class ForksController(BaseRepoController):
         form_result = {}
         try:
             form_result = _form.to_python(dict(request.POST))
-            # add org_path of repo so we can do a clone from it later
-            form_result['org_path'] = c.repo_info.repo_name
 
             # create fork is done sometimes async on celery, db transaction
             # management is handled there.
-            RepoModel().create_fork(form_result, self.rhodecode_user)
+            RepoModel().create_fork(form_result, self.rhodecode_user.user_id)
             h.flash(_('forked %s repository as %s') \
                       % (repo_name, form_result['repo_name']),
                     category='success')

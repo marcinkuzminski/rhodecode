@@ -206,6 +206,10 @@ class RepoModel(BaseModel):
                     private=False, clone_uri=None, repos_group=None,
                     landing_rev='tip', just_db=False, fork_of=None,
                     copy_fork_permissions=False):
+        """
+        Create repository
+
+        """
         from rhodecode.model.scm import ScmModel
 
         owner = self._get_user(owner)
@@ -292,6 +296,14 @@ class RepoModel(BaseModel):
             raise
 
     def create(self, form_data, cur_user, just_db=False, fork=None):
+        """
+        Backward compatibility function, just a wrapper on top of create_repo
+
+        :param form_data:
+        :param cur_user:
+        :param just_db:
+        :param fork:
+        """
 
         repo_name = form_data['repo_name_full']
         repo_type = form_data['repo_type']
