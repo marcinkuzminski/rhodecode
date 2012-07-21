@@ -3,7 +3,7 @@
     rhodecode.controllers.search
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    Search controller for rhodecode
+    Search controller for RhodeCode
 
     :created_on: Aug 7, 2010
     :author: marcink
@@ -30,7 +30,8 @@ from pylons import request, config, tmpl_context as c
 
 from rhodecode.lib.auth import LoginRequired
 from rhodecode.lib.base import BaseController, render
-from rhodecode.lib.indexers import CHGSETS_SCHEMA, SCHEMA, CHGSET_IDX_NAME, IDX_NAME, WhooshResultWrapper
+from rhodecode.lib.indexers import CHGSETS_SCHEMA, SCHEMA, CHGSET_IDX_NAME, \
+    IDX_NAME, WhooshResultWrapper
 
 from webhelpers.paginate import Page
 from webhelpers.util import update_params
@@ -58,20 +59,20 @@ class SearchController(BaseController):
         c.cur_search = search_type = {'content': 'content',
                                       'commit': 'message',
                                       'path': 'path',
-                                      'repository': 'repository'}\
-                                      .get(c.cur_type, 'content')
+                                      'repository': 'repository'
+                                      }.get(c.cur_type, 'content')
 
         index_name = {
             'content': IDX_NAME,
             'commit': CHGSET_IDX_NAME,
-            'path': IDX_NAME}\
-            .get(c.cur_type, IDX_NAME)
+            'path': IDX_NAME
+        }.get(c.cur_type, IDX_NAME)
 
         schema_defn = {
             'content': SCHEMA,
             'commit': CHGSETS_SCHEMA,
-            'path': SCHEMA}\
-            .get(c.cur_type, SCHEMA)
+            'path': SCHEMA
+        }.get(c.cur_type, SCHEMA)
 
         log.debug('IDX: %s' % index_name)
         log.debug('SCHEMA: %s' % schema_defn)
@@ -137,7 +138,6 @@ class SearchController(BaseController):
             except (Exception):
                 log.error(traceback.format_exc())
                 c.runtime = _('An error occurred during this search operation')
-
 
         # Return a rendered template
         return render('/search/search.html')
