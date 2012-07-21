@@ -73,7 +73,7 @@ FORMATTER = HtmlFormatter('span', between='\n<span class="break">...</span>\n')
 FRAGMENTER = ContextFragmenter(200)
 
 CHGSETS_SCHEMA = Schema(
-    path=ID(unique=True, stored=True),
+    raw_id=ID(unique=True, stored=True),
     revision=NUMERIC(unique=True, stored=True),
     last=BOOLEAN(),
     owner=TEXT(),
@@ -209,15 +209,15 @@ class WhooshResultWrapper(object):
     def get_full_content(self, docid):
         res = self.searcher.stored_fields(docid[0])
         log.debug('result: %s' % res)
-        full_repo_path = jn(self.repo_location, res['repository'])
-        f_path = res['path'].split(full_repo_path)[-1]
-        f_path = f_path.lstrip(os.sep)
-        res.update({'f_path': f_path})
-
         if self.search_type == 'content':
+            full_repo_path = jn(self.repo_location, res['repository'])
+            f_path = res['path'].split(full_repo_path)[-1]
+            f_path = f_path.lstrip(os.sep)
             content_short = self.get_short_content(res, docid[1])
             res.update({'content_short': content_short,
-                        'content_short_hl': self.highlight(content_short)})
+                        'content_short_hl': self.highlight(content_short),
+                        'f_path': f_path
+                      })
         elif self.search_type == 'message':
             res.update({'message_hl': self.highlight(res['message'])})
 

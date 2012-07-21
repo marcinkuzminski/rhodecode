@@ -179,7 +179,7 @@ class WhooshIndexingDaemon(object):
         indexed=0
         for cs in repo[start_rev:]:
             writer.add_document(
-                path=unicode(cs.raw_id),
+                raw_id=unicode(cs.raw_id),
                 owner=unicode(repo.contact),
                 repository=safe_unicode(repo_name),
                 author=cs.author,
@@ -231,8 +231,8 @@ class WhooshIndexingDaemon(object):
                     if last_rev == 0 or len(revs) > last_rev + 1:
                         # delete the docs in the index for the previous last changeset(s)
                         for hit in results:
-                            q = qp.parse(u"last:t AND %s AND path:%s" % 
-                                            (repo_name, hit['path']))
+                            q = qp.parse(u"last:t AND %s AND raw_id:%s" % 
+                                            (repo_name, hit['raw_id']))
                             writer.delete_by_query(q)
 
                         # index from the previous last changeset + all new ones

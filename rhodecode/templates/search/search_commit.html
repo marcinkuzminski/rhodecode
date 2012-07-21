@@ -5,8 +5,8 @@
     <div class="table">
         <div id="body${cnt}" class="codeblock">
             <div class="code-header">
-                <div class="search-path">${h.link_to(h.literal('%s &raquo; %s' % (sr['repository'],sr['f_path'])),
-                h.url('changeset_home',repo_name=sr['repository'],revision=sr['path']))}
+                <div class="search-path">${h.link_to(h.literal('%s &raquo; %s' % (sr['repository'],sr['raw_id'])),
+                h.url('changeset_home',repo_name=sr['repository'],revision=sr['raw_id']))}
                 </div>
             </div>
             <div class="left">
