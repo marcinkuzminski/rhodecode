@@ -46,7 +46,7 @@ python and making things less problematic when doing system python updates.
 - Assuming you have installed virtualenv_ create a new virtual environment 
   using virtualenv command:: 
 
-    virtualenv --no-site-packages /var/www/rhodecode-venv
+    virtualenv --no-site-packages /opt/rhodecode-venv
 
 
 .. note:: Using ``--no-site-packages`` when generating your
@@ -59,10 +59,10 @@ python and making things less problematic when doing system python updates.
    Python's "main" site-packages dir.
 
 
-- this will install new virtualenv_ into `/var/www/rhodecode-venv`. 
+- this will install new virtualenv_ into `/opt/rhodecode-venv`. 
 - Activate the virtualenv_ by running::
 
-    source /var/www/rhodecode-venv/bin/activate
+    source /opt/rhodecode-venv/bin/activate
 
 .. note:: If you're using UNIX, *do not* use ``sudo`` to run the
    ``virtualenv`` script.  It's perfectly acceptable (and desirable)
@@ -71,7 +71,7 @@ python and making things less problematic when doing system python updates.
 - Make a folder for rhodecode data files, and configuration somewhere on the 
   filesystem. For example::
 
-    mkdir /var/www/rhodecode
+    mkdir /opt/rhodecode
   
     
 - Go into the created directory run this command to install rhodecode::
