@@ -558,26 +558,48 @@ class ApiController(JSONRPCController):
             log.error(traceback.format_exc())
             raise JSONRPCError('failed to create repository `%s`' % repo_name)
 
-#    @HasPermissionAnyDecorator('hg.admin')
-#    def fork_repo(self, apiuser, repoid, fork_name):
-#        repo = get_repo_or_error(repoid)
-#
-#        try:
-#            form_data = dict(
-#
-#            )
-#            RepoModel().create_fork(form_data, cur_user=apiuser)
-#            return dict(
-#                msg='Created fork of `%s` as `%s`' % (repo.repo_name,
-#                                                      fork_name),
-#                success=True
-#            )
-#        except Exception:
-#            log.error(traceback.format_exc())
-#            raise JSONRPCError(
-#                'failed to fork repository `%s` as `%s`' % (repo.repo_name,
-#                                                            fork_name)
-#            )
+    @HasPermissionAnyDecorator('hg.admin')
+    def fork_repo(self, apiuser, repoid, fork_name, owner,
+                  description=Optional(''), copy_permissions=Optional(False),
+                  private=Optional(False), landing_rev=Optional('tip')):
+        repo = get_repo_or_error(repoid)
+        repo_name = repo.repo_name
+        owner = get_user_or_error(owner)
+
+        _repo = RepoModel().get_by_repo_name(fork_name)
+        if _repo:
+            type_ = 'fork' if _repo.fork else 'repo'
+            raise JSONRPCError("%s `%s` already exist" % (type_, fork_name))
+
+        try:
+            # create structure of groups and return the last group
+            group = map_groups(fork_name)
+
+            form_data = dict(
+                repo_name=fork_name,
+                repo_name_full=fork_name,
+                repo_group=group,
+                repo_type=repo.repo_type,
+                description=Optional.extract(description),
+                private=Optional.extract(private),
+                copy_permissions=Optional.extract(copy_permissions),
+                landing_rev=Optional.extract(landing_rev),
+                update_after_clone=False,
+                fork_parent_id=repo.repo_id,
+            )
+            RepoModel().create_fork(form_data, cur_user=owner)
+            return dict(
+                msg='Created fork of `%s` as `%s`' % (repo.repo_name,
+                                                      fork_name),
+                success=True  # cannot return the repo data here since fork
+                              # cann be done async
+            )
+        except Exception:
+            log.error(traceback.format_exc())
+            raise JSONRPCError(
+                'failed to fork repository `%s` as `%s`' % (repo_name,
+                                                            fork_name)
+            )
 
     @HasPermissionAnyDecorator('hg.admin')
     def delete_repo(self, apiuser, repoid):

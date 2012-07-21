@@ -68,6 +68,15 @@ def create_repo(repo_name, repo_type):
     return r
 
 
+def create_fork(fork_name, fork_type, fork_of):
+    fork = RepoModel(Session())._get_repo(fork_of)
+    r = create_repo(fork_name, fork_type)
+    r.fork = fork
+    Session().add(r)
+    Session().commit()
+    return r
+
+
 def destroy_repo(repo_name):
     RepoModel().delete(repo_name)
     Session().commit()
@@ -571,18 +580,98 @@ class BaseTestApi(object):
     def test_api_delete_repo_exception_occurred(self):
         repo_name = 'api_delete_me'
         create_repo(repo_name, self.REPO_TYPE)
-        with mock.patch.object(RepoModel, 'delete', crash):
-            id_, params = _build_data(self.apikey, 'delete_repo',
-                                      repoid=repo_name,)
+        try:
+            with mock.patch.object(RepoModel, 'delete', crash):
+                id_, params = _build_data(self.apikey, 'delete_repo',
+                                          repoid=repo_name,)
+                response = self.app.post(API_URL, content_type='application/json',
+                                         params=params)
+
+                expected = 'failed to delete repository `%s`' % repo_name
+                self._compare_error(id_, expected, given=response.body)
+        finally:
+            destroy_repo(repo_name)
+
+    def test_api_fork_repo(self):
+        fork_name = 'api-repo-fork'
+        id_, params = _build_data(self.apikey, 'fork_repo',
+                                    repoid=self.REPO,
+                                    fork_name=fork_name,
+                                    owner=TEST_USER_ADMIN_LOGIN,
+                                  )
+        response = self.app.post(API_URL, content_type='application/json',
+                                 params=params)
+
+        ret = {
+            'msg': 'Created fork of `%s` as `%s`' % (self.REPO,
+                                                     fork_name),
+            'success': True
+        }
+        expected = ret
+        self._compare_ok(id_, expected, given=response.body)
+        destroy_repo(fork_name)
+
+    def test_api_fork_repo_unknown_owner(self):
+        fork_name = 'api-repo-fork'
+        owner = 'i-dont-exist'
+        id_, params = _build_data(self.apikey, 'fork_repo',
+                                    repoid=self.REPO,
+                                    fork_name=fork_name,
+                                    owner=owner,
+                                  )
+        response = self.app.post(API_URL, content_type='application/json',
+                                 params=params)
+        expected = 'user `%s` does not exist' % owner
+        self._compare_error(id_, expected, given=response.body)
+
+    def test_api_fork_repo_fork_exists(self):
+        fork_name = 'api-repo-fork'
+        create_fork(fork_name, self.REPO_TYPE, self.REPO)
+
+        try:
+            fork_name = 'api-repo-fork'
+
+            id_, params = _build_data(self.apikey, 'fork_repo',
+                                        repoid=self.REPO,
+                                        fork_name=fork_name,
+                                        owner=TEST_USER_ADMIN_LOGIN,
+                                      )
             response = self.app.post(API_URL, content_type='application/json',
                                      params=params)
 
-            expected = 'failed to delete repository `%s`' % repo_name
+            expected = "fork `%s` already exist" % fork_name
             self._compare_error(id_, expected, given=response.body)
-        destroy_repo(repo_name)
+        finally:
+            destroy_repo(fork_name)
 
-    def test_api_fork_repo(self):
-        self.failIf(False, 'TODO:')
+    def test_api_fork_repo_repo_exists(self):
+        fork_name = self.REPO
+
+        id_, params = _build_data(self.apikey, 'fork_repo',
+                                    repoid=self.REPO,
+                                    fork_name=fork_name,
+                                    owner=TEST_USER_ADMIN_LOGIN,
+                                  )
+        response = self.app.post(API_URL, content_type='application/json',
+                                 params=params)
+
+        expected = "repo `%s` already exist" % fork_name
+        self._compare_error(id_, expected, given=response.body)
+
+    @mock.patch.object(RepoModel, 'create_fork', crash)
+    def test_api_fork_repo_exception_occurred(self):
+        fork_name = 'api-repo-fork'
+        id_, params = _build_data(self.apikey, 'fork_repo',
+                                    repoid=self.REPO,
+                                    fork_name=fork_name,
+                                    owner=TEST_USER_ADMIN_LOGIN,
+                                  )
+        response = self.app.post(API_URL, content_type='application/json',
+                                 params=params)
+
+        expected = 'failed to fork repository `%s` as `%s`' % (self.REPO,
+                                                               fork_name)
+        self._compare_error(id_, expected, given=response.body)
 
     def test_api_get_users_group(self):
         id_, params = _build_data(self.apikey, 'get_users_group',
