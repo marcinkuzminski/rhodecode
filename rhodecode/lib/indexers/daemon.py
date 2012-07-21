@@ -42,7 +42,8 @@ sys.path.append(project_path)
 from rhodecode.config.conf import INDEX_EXTENSIONS
 from rhodecode.model.scm import ScmModel
 from rhodecode.lib.utils2 import safe_unicode
-from rhodecode.lib.indexers import SCHEMA, IDX_NAME, CHGSETS_SCHEMA, CHGSET_IDX_NAME
+from rhodecode.lib.indexers import SCHEMA, IDX_NAME, CHGSETS_SCHEMA, \
+    CHGSET_IDX_NAME
 
 from rhodecode.lib.vcs.exceptions import ChangesetError, RepositoryError, \
     NodeDoesNotExistError
@@ -114,11 +115,11 @@ class WhooshIndexingDaemon(object):
         index_paths_ = set()
         try:
             tip = repo.get_changeset('tip')
-            for topnode, dirs, files in tip.walk('/'):
+            for _topnode, _dirs, files in tip.walk('/'):
                 for f in files:
                     index_paths_.add(jn(repo.path, f.path))
 
-        except RepositoryError, e:
+        except RepositoryError:
             log.debug(traceback.format_exc())
             pass
         return index_paths_
@@ -186,10 +187,12 @@ class WhooshIndexingDaemon(object):
         if start_rev is None:
             start_rev = repo[0].raw_id
 
-        log.debug('indexing changesets in %s starting at rev: %s' % (repo_name, start_rev))
+        log.debug('indexing changesets in %s starting at rev: %s' %
+                  (repo_name, start_rev))
 
-        indexed=0
+        indexed = 0
         for cs in repo.get_changesets(start=start_rev):
+            log.debug('    >> %s' % cs)
             writer.add_document(
                 raw_id=unicode(cs.raw_id),
                 owner=unicode(repo.contact),
@@ -205,8 +208,16 @@ class WhooshIndexingDaemon(object):
             indexed += 1
 
         log.debug('indexed %d changesets for repo %s' % (indexed, repo_name))
+        return indexed
 
     def index_files(self, file_idx_writer, repo_name, repo):
+        """
+        Index files for given repo_name
+
+        :param file_idx_writer: the whoosh index writer to add to
+        :param repo_name: name of the repository we're indexing
+        :param repo: instance of vcs repo
+        """
         i_cnt = iwc_cnt = 0
         log.debug('building index for [%s]' % repo.path)
         for idx_path in self.get_paths(repo):
@@ -214,7 +225,9 @@ class WhooshIndexingDaemon(object):
             i_cnt += i
             iwc_cnt += iwc
 
-        log.debug('added %s files %s with content for repo %s' % (i_cnt + iwc_cnt, iwc_cnt, repo.path))
+        log.debug('added %s files %s with content for repo %s' %
+                  (i_cnt + iwc_cnt, iwc_cnt, repo.path))
+        return i_cnt, iwc_cnt
 
     def update_changeset_index(self):
         idx = open_dir(self.index_location, indexname=CHGSET_IDX_NAME)
@@ -223,6 +236,7 @@ class WhooshIndexingDaemon(object):
             writer = idx.writer()
             writer_is_dirty = False
             try:
+                indexed_total = 0
                 for repo_name, repo in self.repo_paths.items():
                     # skip indexing if there aren't any revs in the repo
                     num_of_revs = len(repo)
@@ -246,16 +260,20 @@ class WhooshIndexingDaemon(object):
 
                     # there are new changesets to index or a new repo to index
                     if last_rev == 0 or num_of_revs > last_rev + 1:
-                        # delete the docs in the index for the previous last changeset(s)
+                        # delete the docs in the index for the previous
+                        # last changeset(s)
                         for hit in results:
-                            q = qp.parse(u"last:t AND %s AND raw_id:%s" % 
+                            q = qp.parse(u"last:t AND %s AND raw_id:%s" %
                                             (repo_name, hit['raw_id']))
                             writer.delete_by_query(q)
 
                         # index from the previous last changeset + all new ones
-                        self.index_changesets(writer, repo_name, repo, start_id)
+                        indexed_total += self.index_changesets(writer,
+                                                repo_name, repo, start_id)
                         writer_is_dirty = True
-
+                log.debug('indexed %s changesets for repo %s' % (
+                             indexed_total, repo_name)
+                )
             finally:
                 if writer_is_dirty:
                     log.debug('>> COMMITING CHANGES TO CHANGESET INDEX<<')
@@ -263,6 +281,7 @@ class WhooshIndexingDaemon(object):
                     log.debug('>> COMMITTED CHANGES TO CHANGESET INDEX<<')
                 else:
                     writer.cancel
+                    log.debug('>> NOTHING TO COMMIT<<')
 
     def update_file_index(self):
         log.debug((u'STARTING INCREMENTAL INDEXING UPDATE FOR EXTENSIONS %s '
@@ -296,10 +315,11 @@ class WhooshIndexingDaemon(object):
                         indexed_time = fields['modtime']
                         mtime = self.get_node_mtime(node)
                         if mtime > indexed_time:
-                            # The file has changed, delete it and add it to the list of
-                            # files to reindex
-                            log.debug('adding to reindex list %s mtime: %s vs %s' % (
-                                            indexed_path, mtime, indexed_time)
+                            # The file has changed, delete it and add it to
+                            # the list of files to reindex
+                            log.debug(
+                                'adding to reindex list %s mtime: %s vs %s' % (
+                                    indexed_path, mtime, indexed_time)
                             )
                             writer.delete_by_term('fileid', indexed_path)
                             writer_is_dirty = True
@@ -347,6 +367,7 @@ class WhooshIndexingDaemon(object):
                 writer.commit(merge=True)
                 log.debug('>>> FINISHED REBUILDING INDEX <<<')
             else:
+                log.debug('>> NOTHING TO COMMIT<<')
                 writer.cancel()
 
     def build_indexes(self):
@@ -357,7 +378,8 @@ class WhooshIndexingDaemon(object):
         if not os.path.exists(self.index_location):
             os.mkdir(self.index_location)
 
-        chgset_idx = create_in(self.index_location, CHGSETS_SCHEMA, indexname=CHGSET_IDX_NAME)
+        chgset_idx = create_in(self.index_location, CHGSETS_SCHEMA,
+                               indexname=CHGSET_IDX_NAME)
         chgset_idx_writer = chgset_idx.writer()
 
         file_idx = create_in(self.index_location, SCHEMA, indexname=IDX_NAME)
