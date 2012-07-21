@@ -61,13 +61,13 @@ class DbManage(object):
         init_model(engine)
         self.sa = meta.Session
 
-    def create_tables(self, override=False):
+    def create_tables(self, override=False, defaults={}):
         """
         Create a auth database
         """
-
+        quiet = defaults.get('quiet')
         log.info("Any existing database is going to be destroyed")
-        if self.tests:
+        if self.tests or quiet:
             destroy = True
         else:
             destroy = ask_ok('Are you sure to destroy old database ? [y/n]')
