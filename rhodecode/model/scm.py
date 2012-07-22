@@ -436,11 +436,8 @@ class ScmModel(BaseModel):
                        author=author,
                        parents=[cs], branch=cs.branch)
 
-        new_cs = tip.short_id
-        action = 'push_local:%s' % new_cs
-
+        action = 'push_local:%s' % tip.raw_id
         action_logger(user, action, repo_name)
-
         self.mark_for_invalidation(repo_name)
 
     def create_node(self, repo, repo_name, cs, user, author, message, content,
@@ -476,11 +473,9 @@ class ScmModel(BaseModel):
         tip = m.commit(message=message,
                        author=author,
                        parents=parents, branch=cs.branch)
-        new_cs = tip.short_id
-        action = 'push_local:%s' % new_cs
 
+        action = 'push_local:%s' % tip.raw_id
         action_logger(user, action, repo_name)
-
         self.mark_for_invalidation(repo_name)
 
     def get_nodes(self, repo_name, revision, root_path='/', flat=True):
