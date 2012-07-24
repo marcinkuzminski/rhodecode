@@ -278,6 +278,28 @@ class UserModel(BaseModel):
             log.error(traceback.format_exc())
             raise
 
+    def update_user(self, user, **kwargs):
+        from rhodecode.lib.auth import get_crypt_password
+        try:
+            user = self._get_user(user)
+            if user.username == 'default':
+                raise DefaultUserException(
+                    _("You can't Edit this user since it's"
+                      " crucial for entire application")
+                )
+
+            for k, v in kwargs.items():
+                if k == 'password' and v:
+                    v = get_crypt_password(v)
+                    user.api_key = generate_api_key(user.username)
+
+                setattr(user, k, v)
+            self.sa.add(user)
+            return user
+        except:
+            log.error(traceback.format_exc())
+            raise
+
     def update_my_account(self, user_id, form_data):
         from rhodecode.lib.auth import get_crypt_password
         try:

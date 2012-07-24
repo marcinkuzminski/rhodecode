@@ -260,24 +260,25 @@ class ApiController(JSONRPCController):
 
         user = get_user_or_error(userid)
 
-        #return old attribute if Optional is passed. We don't change parameter
-        # so user doesn't get updated parameters
-        get = lambda attr, name: (
-                getattr(user, name) if isinstance(attr, Optional) else attr
-        )
+        # call function and store only updated arguments
+        updates = {}
+
+        def store_update(attr, name):
+            if not isinstance(attr, Optional):
+                updates[name] = attr
 
         try:
 
-            user = UserModel().create_or_update(
-                username=get(username, 'username'),
-                password=get(password, 'password'),
-                email=get(email, 'email'),
-                firstname=get(firstname, 'name'),
-                lastname=get(lastname, 'lastname'),
-                active=get(active, 'active'),
-                admin=get(admin, 'admin'),
-                ldap_dn=get(ldap_dn, 'ldap_dn')
-            )
+            store_update(username, 'username')
+            store_update(password, 'password')
+            store_update(email, 'email')
+            store_update(firstname, 'name')
+            store_update(lastname, 'lastname')
+            store_update(active, 'active')
+            store_update(admin, 'admin')
+            store_update(ldap_dn, 'ldap_dn')
+
+            user = UserModel().update_user(user, **updates)
             Session().commit()
             return dict(
                 msg='updated user ID:%s %s' % (user.user_id, user.username),

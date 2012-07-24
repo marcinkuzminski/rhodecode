@@ -373,7 +373,7 @@ class BaseTestApi(object):
         expected = ret
         self._compare_ok(id_, expected, given=response.body)
 
-    @mock.patch.object(UserModel, 'create_or_update', crash)
+    @mock.patch.object(UserModel, 'update_user', crash)
     def test_api_update_user_when_exception_happens(self):
         usr = UserModel().get_by_username(TEST_USER_ADMIN_LOGIN)
         ret = jsonify(usr.get_api_data())
