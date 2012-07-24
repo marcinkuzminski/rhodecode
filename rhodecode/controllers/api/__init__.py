@@ -30,6 +30,7 @@ import logging
 import types
 import urllib
 import traceback
+import time
 
 from rhodecode.lib.compat import izip_longest, json
 
@@ -43,6 +44,8 @@ HTTPBadRequest, HTTPError
 
 from rhodecode.model.db import User
 from rhodecode.lib.auth import AuthUser
+from rhodecode.lib.base import _get_ip_addr, _get_access_path
+from rhodecode.lib.utils2 import safe_unicode
 
 log = logging.getLogger('JSONRPC')
 
@@ -95,6 +98,7 @@ class JSONRPCController(WSGIController):
         Parse the request body as JSON, look up the method on the
         controller and if it exists, dispatch to it.
         """
+        start = time.time()
         self._req_id = None
         if 'CONTENT_LENGTH' not in environ:
             log.debug("No Content-Length")
@@ -218,7 +222,10 @@ class JSONRPCController(WSGIController):
         headers.append(('Content-Length', str(len(output[0]))))
         replace_header(headers, 'Content-Type', 'application/json')
         start_response(status[0], headers, exc_info[0])
-
+        log.info('IP: %s Request to %s time: %.3fs' % (
+            _get_ip_addr(environ),
+            safe_unicode(_get_access_path(environ)), time.time() - start)
+        )
         return output
 
     def _dispatch_call(self):
