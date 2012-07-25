@@ -49,7 +49,7 @@ class TestAdminUsersController(TestController):
 
         response.follow()
         response = response.follow()
-        response.mustcontain("""edit">newtestuser</a>""")
+        response.mustcontain("""newtestuser""")
 
     def test_create_err(self):
         self.log_user()
