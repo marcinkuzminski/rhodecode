@@ -148,7 +148,8 @@ class ReposController(BaseController):
             form_result = RepoForm(repo_groups=c.repo_groups_choices,
                                    landing_revs=c.landing_revs_choices)()\
                             .to_python(dict(request.POST))
-            RepoModel().create(form_result, self.rhodecode_user.user_id)
+            new_repo = RepoModel().create(form_result,
+                                          self.rhodecode_user.user_id)
             if form_result['clone_uri']:
                 h.flash(_('created repository %s from %s') \
                     % (form_result['repo_name'], form_result['clone_uri']),
@@ -188,9 +189,8 @@ class ReposController(BaseController):
             msg = _('error occurred during creation of repository %s') \
                     % form_result.get('repo_name')
             h.flash(msg, category='error')
-        if request.POST.get('user_created'):
-            return redirect(url('home'))
-        return redirect(url('repos'))
+        #redirect to our new repo !
+        return redirect(url('summary_home', repo_name=new_repo.repo_name))
 
     @HasPermissionAllDecorator('hg.admin')
     def new(self, format='html'):
