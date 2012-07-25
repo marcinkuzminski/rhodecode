@@ -1734,7 +1734,12 @@ div.form div.fields div.field div.button {
 	float: right;
 }
 
-#content div.box div.pagination-wh a,#content div.box div.pagination-wh span.pager_dotdot
+#content div.box div.pagination-wh a,
+#content div.box div.pagination-wh span.pager_dotdot,
+#content div.box div.pagination-wh span.yui-pg-previous,
+#content div.box div.pagination-wh span.yui-pg-last,
+#content div.box div.pagination-wh span.yui-pg-next,
+#content div.box div.pagination-wh span.yui-pg-first
 	{
 	height: 1%;
 	float: left;

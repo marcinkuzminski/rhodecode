@@ -6,7 +6,7 @@
 </%def>
 
 <%def name="breadcrumbs_links()">
-    ${h.link_to(_('Admin'),h.url('admin_home'))} &raquo; ${_('Users')}
+    <input class="q_filter_box" id="q_filter" size="15" type="text" name="filter" value="${_('quick filter...')}"/> ${h.link_to(_('Admin'),h.url('admin_home'))} &raquo; <span id="user_count">0</span> ${_('users')}
 </%def>
 
 <%def name="page_nav()">
@@ -17,49 +17,132 @@
 <div class="box">
     <!-- box / title -->
     <div class="title">
-        ${self.breadcrumbs()}
+        ${self.breadcrumbs()} 
         <ul class="links">
           <li>
             <span>${h.link_to(_(u'ADD NEW USER'),h.url('new_user'))}</span>
           </li>
-
         </ul>
     </div>
     <!-- end box / title -->
-    <div class="table">
-        <table class="table_disp">
-        <tr class="header">
-        	<th></th>
-            <th class="left">${_('username')}</th>
-            <th class="left">${_('name')}</th>
-            <th class="left">${_('lastname')}</th>
-            <th class="left">${_('last login')}</th>
-            <th class="left">${_('active')}</th>
-            <th class="left">${_('admin')}</th>
-            <th class="left">${_('ldap')}</th>
-            <th class="left">${_('action')}</th>
-        </tr>
-            %for cnt,user in enumerate(c.users_list):
-             %if user.username !='default':
-                <tr class="parity${cnt%2}">
-                	<td><div class="gravatar"><img alt="gravatar" src="${h.gravatar_url(user.email,24)}"/> </div></td>
-                    <td>${h.link_to(user.username,h.url('edit_user', id=user.user_id))}</td>
-                    <td>${user.name}</td>
-                    <td>${user.lastname}</td>
-                    <td>${h.fmt_date(user.last_login)}</td>
-                    <td>${h.bool2icon(user.active)}</td>
-                    <td>${h.bool2icon(user.admin)}</td>
-                    <td>${h.bool2icon(bool(user.ldap_dn))}</td>
-                    <td>
-                        ${h.form(url('delete_user', id=user.user_id),method='delete')}
-                            ${h.submit('remove_',_('delete'),id="remove_user_%s" % user.user_id,
-                            class_="delete_icon action_button",onclick="return confirm('"+_('Confirm to delete this user: %s') % user.username+"');")}
-                        ${h.end_form()}
-                    </td>
-                </tr>
-             %endif
-            %endfor
-        </table>
-    </div>
+    <div class="table yui-skin-sam" id="users_list_wrap"></div>
+    <div id="user-paginator" style="padding: 0px 0px 0px 20px"></div>
 </div>
+
+<script>
+  var url = "${h.url('formatted_users', format='json')}";
+  var data = ${c.data|n};
+  var myDataSource = new YAHOO.util.DataSource(data);
+  myDataSource.responseType = YAHOO.util.DataSource.TYPE_JSON;
+
+  myDataSource.responseSchema = {
+	  resultsList: "records",
+      fields: [
+          {key: "gravatar"},
+          {key: "raw_username"},
+          {key: "username"},
+          {key: "firstname"},
+          {key: "lastname"},
+          {key: "last_login"},
+          {key: "active"},
+          {key: "admin"},
+          {key: "ldap"},
+          {key: "action"},
+      ]
+   };
+  myDataSource.doBeforeCallback = function(req,raw,res,cb) {
+      // This is the filter function
+      var data     = res.results || [],
+          filtered = [],
+          i,l;
+     
+      if (req) {
+          req = req.toLowerCase();
+          for (i = 0; i<data.length; i++) {
+        	  var pos = data[i].raw_username.toLowerCase().indexOf(req)
+              if (pos != -1) {
+                  filtered.push(data[i]);
+              }
+          }
+          res.results = filtered;
+      }
+      YUD.get('user_count').innerHTML = res.results.length;
+      return res;
+  }
+
+  // main table sorting
+  var myColumnDefs = [
+      {key:"gravatar",label:"",sortable:false,},                      
+      {key:"username",label:"${_('username')}",sortable:true,
+    	  sortOptions: { sortFunction: linkSort }
+      },
+      {key:"firstname",label:"${_('firstname')}",sortable:true,},
+      {key:"lastname",label:"${_('lastname')}",sortable:true,},
+      {key:"last_login",label:"${_('last login')}",sortable:true,},
+      {key:"active",label:"${_('active')}",sortable:true,},
+      {key:"admin",label:"${_('admin')}",sortable:true,},
+      {key:"ldap",label:"${_('ldap')}",sortable:true,},
+      {key:"action",label:"${_('action')}",sortable:false},
+  ];
+
+  var myDataTable = new YAHOO.widget.DataTable("users_list_wrap", myColumnDefs, myDataSource,{
+    sortedBy:{key:"username",dir:"asc"},
+    paginator: new YAHOO.widget.Paginator({
+        rowsPerPage: 15,
+        alwaysVisible: false,
+        template : "{PreviousPageLink} {FirstPageLink} {PageLinks} {LastPageLink} {NextPageLink}",
+        pageLinks: 5,
+        containerClass: 'pagination-wh',
+        currentPageClass: 'pager_curpage',
+        pageLinkClass: 'pager_link',
+        nextPageLinkLabel: '&gt;',
+        previousPageLinkLabel: '&lt;',
+        firstPageLinkLabel: '&lt;&lt;',
+        lastPageLinkLabel: '&gt;&gt;',
+        containers:['user-paginator']
+    }),
+
+    MSG_SORTASC:"${_('Click to sort ascending')}",
+    MSG_SORTDESC:"${_('Click to sort descending')}",
+    MSG_EMPTY:"${_('No records found.')}",
+    MSG_ERROR:"${_('Data error.')}",
+    MSG_LOADING:"${_('Loading...')}",
+  }
+  );
+  myDataTable.subscribe('postRenderEvent',function(oArgs) {
+
+  });
+  
+  var filterTimeout = null;
+
+  updateFilter  = function () {
+      // Reset timeout
+      filterTimeout = null;
+
+      // Reset sort
+      var state = myDataTable.getState();
+          state.sortedBy = {key:'username', dir:YAHOO.widget.DataTable.CLASS_ASC};
+
+      // Get filtered data
+      myDataSource.sendRequest(YUD.get('q_filter').value,{
+          success : myDataTable.onDataReturnInitializeTable,
+          failure : myDataTable.onDataReturnInitializeTable,
+          scope   : myDataTable,
+          argument: state
+      });
+
+  };  
+  YUE.on('q_filter','click',function(){
+      YUD.get('q_filter').value = '';
+   });
+
+  YUE.on('q_filter','keyup',function (e) {
+      clearTimeout(filterTimeout);
+      filterTimeout = setTimeout(updateFilter,600);
+  });  
+  
+  
+  
+</script>
+
 </%def>

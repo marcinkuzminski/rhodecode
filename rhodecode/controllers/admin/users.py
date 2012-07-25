@@ -26,6 +26,7 @@
 import logging
 import traceback
 import formencode
+from pylons import response
 
 from formencode import htmlfill
 from pylons import request, session, tmpl_context as c, url, config
@@ -35,7 +36,7 @@ from pylons.i18n.translation import _
 from rhodecode.lib.exceptions import DefaultUserException, \
     UserOwnsReposException
 from rhodecode.lib import helpers as h
-from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator,\
+from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator, \
     AuthUser
 from rhodecode.lib.base import BaseController, render
 
@@ -44,6 +45,7 @@ from rhodecode.model.forms import UserForm
 from rhodecode.model.user import UserModel
 from rhodecode.model.meta import Session
 from rhodecode.lib.utils import action_logger
+from rhodecode.lib.compat import json
 
 log = logging.getLogger(__name__)
 
@@ -66,7 +68,48 @@ class UsersController(BaseController):
         """GET /users: All items in the collection"""
         # url('users')
 
-        c.users_list = self.sa.query(User).all()
+        c.users_list = User.query().order_by(User.username).all()
+
+        users_data = []
+        total_records = len(c.users_list)
+        grav_tmpl = """<div class="gravatar"><img alt="gravatar" src="%s"/> </div>"""
+        usr_tmpl = """<a href="%s">%s</a>""" % (h.url('edit_user', id='__ID__'), '%s')
+        usr_tmpl = usr_tmpl.replace('__ID__', '%s')
+        edit_tmpl = '''
+            <form action="/_admin/users/%s" method="post">
+            <div style="display:none">
+            <input name="_method" type="hidden" value="%s">
+            </div>
+            <input class="delete_icon action_button" id="remove_user_%s" 
+            name="remove_" onclick="return confirm('%s');" 
+            type="submit" value="delete">
+            </form>
+        '''
+        for user in c.users_list:
+            users_data.append({
+                "gravatar": grav_tmpl % h.gravatar_url(user.email, 24),
+                "raw_username": user.username,
+                "username": usr_tmpl % (user.user_id, user.username),
+                "firstname": user.name,
+                "lastname": user.lastname,
+                "last_login": h.fmt_date(user.last_login),
+                "active": h.bool2icon(user.active),
+                "admin": h.bool2icon(user.admin),
+                "ldap": h.bool2icon(bool(user.ldap_dn)),
+                "action": edit_tmpl % (user.user_id, _('delete'),
+                    user.user_id,
+                    _('Confirm to delete this user: %s') % user.username
+                ),
+            })
+
+        c.data = json.dumps({
+            "totalRecords": total_records,
+            "startIndex": 0,
+            "sort": None,
+            "dir": "asc",
+            "records": users_data
+        })
+
         return render('admin/users/users.html')
 
     def create(self):
