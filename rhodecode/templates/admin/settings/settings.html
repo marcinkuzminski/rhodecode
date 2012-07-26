@@ -38,6 +38,7 @@
 		                <span class="tooltip" title="${h.tooltip(_('In case a repository was deleted from filesystem and there are leftovers in the database check this option to scan obsolete data in database and remove it.'))}">
 		                ${_('destroy old data')}</span> </label>
 		            </div>
+                    <span class="help-block">${_('Rescan repositories location for new repositories. Also deletes obsolete if `destroy` flag is checked ')}</span>
 		        </div>
 			</div>
 
@@ -131,6 +132,7 @@
 						${h.checkbox('web_push_ssl','true')}
 						<label for="web_push_ssl">${_('require ssl for vcs operations')}</label>
 					</div>
+                    <span class="help-block">${_('RhodeCode will require SSL for pushing or pulling. If SSL is missing it will return HTTP Error 406: Not Acceptable')}</span>
 				</div>
              </div>
 
@@ -169,6 +171,7 @@
 					<span id="path_unlock" class="tooltip"
 						title="${h.tooltip(_('This a crucial application setting. If you are really sure you need to change this, you must restart application in order to make this setting take effect. Click this label to unlock.'))}">
 		                ${_('unlock')}</span>
+                    <span class="help-block">${_('Location where repositories are stored. After changing this value a restart, and rescan is required')}</span>
                 </div>
             </div>
 
