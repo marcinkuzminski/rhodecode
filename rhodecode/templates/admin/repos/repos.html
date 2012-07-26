@@ -5,9 +5,8 @@
     ${_('Repositories administration')} - ${c.rhodecode_name}
 </%def>
 
-
 <%def name="breadcrumbs_links()">
-    ${h.link_to(_('Admin'),h.url('admin_home'))} &raquo; ${_('Repositories')}
+    <input class="q_filter_box" id="q_filter" size="15" type="text" name="filter" value="${_('quick filter...')}"/> ${h.link_to(_('Admin'),h.url('admin_home'))} &raquo; <span id="repo_count">0</span> ${_('repositories')}
 </%def>
 <%def name="page_nav()">
 	${self.menu('admin')}
@@ -23,102 +22,114 @@
           </li>
         </ul>
     </div>
+    <div class="table yui-skin-sam" id="repos_list_wrap"></div>
+    <div id="user-paginator" style="padding: 0px 0px 0px 20px"></div>
+    
 
-    <div class="table">
-        <div id='repos_list_wrap' class="yui-skin-sam">
-        <%cnt=0%>
-        <%namespace name="dt" file="/data_table/_dt_elements.html"/>
-
-        <table id="repos_list">
-         <thead>
-          <tr>
-            <th class="left"></th>
-  	        <th class="left">${_('Name')}</th>
-  	        <th class="left">${_('Description')}</th>
-  	        <th class="left">${_('Last change')}</th>
-  	        <th class="left">${_('Tip')}</th>
-  	        <th class="left">${_('Contact')}</th>
-            <th class="left">${_('Action')}</th>
-          </tr>
-         </thead>
-
-          %for cnt,repo in enumerate(c.repos_list):
-          <tr class="parity${(cnt+1)%2}">
-              <td class="quick_repo_menu">
-                ${dt.quick_menu(repo['name'])}
-              </td>
-              <td class="reponame">
-                ${dt.repo_name(repo['name'],repo['dbrepo']['repo_type'],repo['dbrepo']['private'],repo['dbrepo_fork'].get('repo_name'), admin=True)}
-              </td>
-              ##DESCRIPTION
-              <td><span class="tooltip" title="${h.tooltip(repo['description'])}">
-                 ${h.truncate(repo['description'],60)}</span>
-              </td>
-              ##LAST CHANGE
-              <td>
-                <span class="tooltip" date="${repo['last_change']}" title="${h.tooltip(repo['last_change'])}">${h.age(repo['last_change'])}</span>
-              </td>
-              ##LAST REVISION
-              <td>
-                  ${dt.revision(repo['name'],repo['rev'],repo['tip'],repo['author'],repo['last_msg'])}
-              </td>
-            <td title="${repo['contact']}">${h.person(repo['contact'])}</td>
-              <td>
-                ${h.form(url('repo', repo_name=repo['name']),method='delete')}
-                  ${h.submit('remove_%s' % repo['name'],_('delete'),class_="delete_icon action_button",onclick="return confirm('"+_('Confirm to delete this repository: %s') % repo['name']+"');")}
-                ${h.end_form()}
-              </td>
-          </tr>
-          %endfor
-        </table>
-        </div>
-    </div>
 </div>
 <script>
+  var url = "${h.url('formatted_users', format='json')}";
+  var data = ${c.data|n};
+  var myDataSource = new YAHOO.util.DataSource(data);
+  myDataSource.responseType = YAHOO.util.DataSource.TYPE_JSON;
+
+  myDataSource.responseSchema = {
+      resultsList: "records",
+      fields: [
+         {key:"menu"},
+         {key:"raw_name"},
+         {key:"name"},
+         {key:"desc"},
+         {key:"owner"},
+         {key:"action"},
+      ]
+   };
+  myDataSource.doBeforeCallback = function(req,raw,res,cb) {
+      // This is the filter function
+      var data     = res.results || [],
+          filtered = [],
+          i,l;
+     
+      if (req) {
+          req = req.toLowerCase();
+          for (i = 0; i<data.length; i++) {
+              var pos = data[i].raw_name.toLowerCase().indexOf(req)
+              if (pos != -1) {
+                  filtered.push(data[i]);
+              }
+          }
+          res.results = filtered;
+      }
+      YUD.get('repo_count').innerHTML = res.results.length;
+      return res;
+  }
 
   // main table sorting
   var myColumnDefs = [
       {key:"menu",label:"",sortable:false,className:"quick_repo_menu hidden"},
       {key:"name",label:"${_('Name')}",sortable:true,
-          sortOptions: { sortFunction: nameSort }},
+    	  sortOptions: { sortFunction: nameSort }},
       {key:"desc",label:"${_('Description')}",sortable:true},
-      {key:"last_change",label:"${_('Last Change')}",sortable:true,
-          sortOptions: { sortFunction: ageSort }},
-      {key:"tip",label:"${_('Tip')}",sortable:true,
-          sortOptions: { sortFunction: revisionSort }},
       {key:"owner",label:"${_('Owner')}",sortable:true},
       {key:"action",label:"${_('Action')}",sortable:false},
   ];
 
-  var myDataSource = new YAHOO.util.DataSource(YUD.get("repos_list"));
+  var myDataTable = new YAHOO.widget.DataTable("repos_list_wrap", myColumnDefs, myDataSource,{
+    sortedBy:{key:"name",dir:"asc"},
+    paginator: new YAHOO.widget.Paginator({
+        rowsPerPage: 15,
+        alwaysVisible: false,
+        template : "{PreviousPageLink} {FirstPageLink} {PageLinks} {LastPageLink} {NextPageLink}",
+        pageLinks: 5,
+        containerClass: 'pagination-wh',
+        currentPageClass: 'pager_curpage',
+        pageLinkClass: 'pager_link',
+        nextPageLinkLabel: '&gt;',
+        previousPageLinkLabel: '&lt;',
+        firstPageLinkLabel: '&lt;&lt;',
+        lastPageLinkLabel: '&gt;&gt;',
+        containers:['user-paginator']
+    }),
 
-  myDataSource.responseType = YAHOO.util.DataSource.TYPE_HTMLTABLE;
-
-  myDataSource.responseSchema = {
-      fields: [
-          {key:"menu"},
-          {key:"name"},
-          {key:"desc"},
-          {key:"last_change"},
-          {key:"tip"},
-          {key:"owner"},
-          {key:"action"},
-      ]
-  };
-
-  var myDataTable = new YAHOO.widget.DataTable("repos_list_wrap", myColumnDefs, myDataSource,
-          {
-            sortedBy:{key:"name",dir:"asc"},
-            MSG_SORTASC:"${_('Click to sort ascending')}",
-            MSG_SORTDESC:"${_('Click to sort descending')}",
-            MSG_EMPTY:"${_('No records found.')}",
-            MSG_ERROR:"${_('Data error.')}",
-            MSG_LOADING:"${_('Loading...')}",
-          }
+    MSG_SORTASC:"${_('Click to sort ascending')}",
+    MSG_SORTDESC:"${_('Click to sort descending')}",
+    MSG_EMPTY:"${_('No records found.')}",
+    MSG_ERROR:"${_('Data error.')}",
+    MSG_LOADING:"${_('Loading...')}",
+  }
   );
   myDataTable.subscribe('postRenderEvent',function(oArgs) {
       tooltip_activate();
       quick_repo_menu();
   });
+  
+  var filterTimeout = null;
+
+  updateFilter  = function () {
+      // Reset timeout
+      filterTimeout = null;
+
+      // Reset sort
+      var state = myDataTable.getState();
+          state.sortedBy = {key:'name', dir:YAHOO.widget.DataTable.CLASS_ASC};
+
+      // Get filtered data
+      myDataSource.sendRequest(YUD.get('q_filter').value,{
+          success : myDataTable.onDataReturnInitializeTable,
+          failure : myDataTable.onDataReturnInitializeTable,
+          scope   : myDataTable,
+          argument: state
+      });
+
+  };  
+  YUE.on('q_filter','click',function(){
+      YUD.get('q_filter').value = '';
+   });
+
+  YUE.on('q_filter','keyup',function (e) {
+      clearTimeout(filterTimeout);
+      filterTimeout = setTimeout(updateFilter,600);
+  });  
 </script>
+
 </%def>
