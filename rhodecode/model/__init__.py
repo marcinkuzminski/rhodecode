@@ -43,6 +43,7 @@
 
 import logging
 from rhodecode.model import meta
+from rhodecode.lib.utils2 import safe_str
 
 log = logging.getLogger(__name__)
 
@@ -86,7 +87,7 @@ class BaseModel(object):
 
         if isinstance(instance, cls):
             return instance
-        elif isinstance(instance, (int, long)) or str(instance).isdigit():
+        elif isinstance(instance, (int, long)) or safe_str(instance).isdigit():
             return cls.get(instance)
         else:
             if instance:

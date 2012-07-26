@@ -186,7 +186,7 @@ class ScmModel(BaseModel):
         cls = Repository
         if isinstance(instance, cls):
             return instance
-        elif isinstance(instance, int) or str(instance).isdigit():
+        elif isinstance(instance, int) or safe_str(instance).isdigit():
             return cls.get(instance)
         elif isinstance(instance, basestring):
             return cls.get_by_repo_name(instance)
