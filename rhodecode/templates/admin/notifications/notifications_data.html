@@ -21,7 +21,7 @@ unread = lambda n:{False:'unread'}.get(n)
       %if not notification.read:
       <div class="read-notifications">
         <span id="${notification.notification.notification_id}" class="read-notification accept_icon action"></span>
-      </div>      
+      </div>
       %endif
     </div>
     <div class="notification-subject">${h.literal(notification.notification.subject)}</div>

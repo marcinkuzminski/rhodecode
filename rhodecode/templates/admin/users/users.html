@@ -17,7 +17,7 @@
 <div class="box">
     <!-- box / title -->
     <div class="title">
-        ${self.breadcrumbs()} 
+        ${self.breadcrumbs()}
         <ul class="links">
           <li>
             <span>${h.link_to(_(u'ADD NEW USER'),h.url('new_user'))}</span>
@@ -55,7 +55,7 @@
       var data     = res.results || [],
           filtered = [],
           i,l;
-     
+
       if (req) {
           req = req.toLowerCase();
           for (i = 0; i<data.length; i++) {
@@ -72,7 +72,7 @@
 
   // main table sorting
   var myColumnDefs = [
-      {key:"gravatar",label:"",sortable:false,},                      
+      {key:"gravatar",label:"",sortable:false,},
       {key:"username",label:"${_('username')}",sortable:true,
     	  sortOptions: { sortFunction: linkSort }
       },
@@ -112,7 +112,7 @@
   myDataTable.subscribe('postRenderEvent',function(oArgs) {
 
   });
-  
+
   var filterTimeout = null;
 
   updateFilter  = function () {
@@ -131,7 +131,7 @@
           argument: state
       });
 
-  };  
+  };
   YUE.on('q_filter','click',function(){
       YUD.get('q_filter').value = '';
    });
@@ -139,7 +139,7 @@
   YUE.on('q_filter','keyup',function (e) {
       clearTimeout(filterTimeout);
       filterTimeout = setTimeout(updateFilter,600);
-  });  
+  });
 </script>
 
 </%def>

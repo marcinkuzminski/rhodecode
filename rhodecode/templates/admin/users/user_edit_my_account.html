@@ -95,7 +95,7 @@
            %endfor
     </div>
     <div id="my" class="table" style="display:none">
-    </div>    
+    </div>
     <div id="pullrequests" class="table" style="display:none">
 </div>
 <script type="text/javascript">
@@ -110,7 +110,7 @@ YUE.on('show_perms','click',function(e){
 	YUD.addClass('show_perms', 'current');
 	YUD.removeClass('show_my','current');
 	YUD.removeClass('show_pullrequests','current');
-	
+
     YUD.setStyle('my','display','none');
     YUD.setStyle('pullrequests','display','none');
     YUD.setStyle('perms','display','');
@@ -121,12 +121,12 @@ YUE.on('show_my','click',function(e){
     YUD.addClass('show_my', 'current');
     YUD.removeClass('show_perms','current');
     YUD.removeClass('show_pullrequests','current');
-    
+
     YUD.setStyle('perms','display','none');
     YUD.setStyle('pullrequests','display','none');
     YUD.setStyle('my','display','');
     YUD.setStyle('q_filter','display','');
-    
+
     YUE.preventDefault(e);
     var url = "${h.url('admin_settings_my_repos')}";
     ypjax(url, 'my', function(){

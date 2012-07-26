@@ -185,7 +185,3 @@ class TestNotifications(unittest.TestCase):
                          .get_unread_cnt_for_user(self.u2), 1)
         self.assertEqual(NotificationModel()
                          .get_unread_cnt_for_user(self.u3), 2)
-
-
-
-

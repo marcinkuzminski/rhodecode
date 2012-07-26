@@ -140,4 +140,3 @@ class CleanupCommand(BasePasterCommand):
                                action='store_true',
                                dest='dont_ask',
                                help=("Don't ask to remove repos"))
-        

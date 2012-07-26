@@ -73,7 +73,7 @@ class SimpleHg(BaseVCSController):
             return HTTPNotAcceptable('SSL REQUIRED !')(environ, start_response)
 
         ipaddr = self._get_ip_addr(environ)
-        username = None 
+        username = None
         # skip passing error to error controller
         environ['pylons.status_code_redirect'] = True
 

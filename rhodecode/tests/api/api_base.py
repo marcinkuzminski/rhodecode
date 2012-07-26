@@ -988,4 +988,3 @@ class BaseTestApi(object):
                     TEST_USERS_GROUP, self.REPO
                 )
         self._compare_error(id_, expected, given=response.body)
-

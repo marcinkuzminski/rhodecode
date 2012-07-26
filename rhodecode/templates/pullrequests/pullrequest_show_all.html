@@ -25,7 +25,7 @@
           <h4>
           %if pr.is_closed():
           <img src="${h.url('/images/icons/tick.png')}" alt="${_('Closed')}" />
-          %endif          
+          %endif
           <a href="${h.url('pullrequest_show',repo_name=c.repo_name,pull_request_id=pr.pull_request_id)}">
           ${_('Pull request #%s opened by %s on %s') % (pr.pull_request_id, pr.author.full_name, h.fmt_date(pr.created_on))}
           </a>

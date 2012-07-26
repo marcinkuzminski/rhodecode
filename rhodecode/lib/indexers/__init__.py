@@ -238,7 +238,7 @@ class WhooshResultWrapper(object):
         :param size:
         """
         memory = [(0, 0)]
-        if self.matcher.supports('positions'): 
+        if self.matcher.supports('positions'):
             for span in self.matcher.spans():
                 start = span.startchar or 0
                 end = span.endchar or 0

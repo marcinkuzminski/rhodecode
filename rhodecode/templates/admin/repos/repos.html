@@ -24,7 +24,7 @@
     </div>
     <div class="table yui-skin-sam" id="repos_list_wrap"></div>
     <div id="user-paginator" style="padding: 0px 0px 0px 20px"></div>
-    
+
 
 </div>
 <script>
@@ -49,7 +49,7 @@
       var data     = res.results || [],
           filtered = [],
           i,l;
-     
+
       if (req) {
           req = req.toLowerCase();
           for (i = 0; i<data.length; i++) {
@@ -102,7 +102,7 @@
       tooltip_activate();
       quick_repo_menu();
   });
-  
+
   var filterTimeout = null;
 
   updateFilter  = function () {
@@ -121,7 +121,7 @@
           argument: state
       });
 
-  };  
+  };
   YUE.on('q_filter','click',function(){
       YUD.get('q_filter').value = '';
    });
@@ -129,7 +129,7 @@
   YUE.on('q_filter','keyup',function (e) {
       clearTimeout(filterTimeout);
       filterTimeout = setTimeout(updateFilter,600);
-  });  
+  });
 </script>
 
 </%def>

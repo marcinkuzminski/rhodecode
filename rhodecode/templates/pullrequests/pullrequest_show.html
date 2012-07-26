@@ -21,12 +21,12 @@
     </div>
         %if c.pull_request.is_closed():
         <div style="padding:10px; font-size:22px;width:100%;text-align: center; color:#88D882">${_('Closed %s') % (h.age(c.pull_request.updated_on))}</div>
-        %endif        
-    <h3>${_('Title')}: ${c.pull_request.title} 
+        %endif
+    <h3>${_('Title')}: ${c.pull_request.title}
         <div class="changeset-status-container" style="float:none">
         %if c.current_changeset_status:
           <div title="${_('Pull request status')}" class="changeset-status-lbl">[${h.changeset_status_lbl(c.current_changeset_status)}]</div>
-          <div class="changeset-status-ico" style="padding:4px"><img src="${h.url('/images/icons/flag_status_%s.png' % c.current_changeset_status)}" /></div>          
+          <div class="changeset-status-ico" style="padding:4px"><img src="${h.url('/images/icons/flag_status_%s.png' % c.current_changeset_status)}" /></div>
         %endif
         </div>
     </h3>
@@ -45,7 +45,7 @@
               ##CS
               <div style="font-size:1.1em;font-weight: bold;clear:both;padding-top:10px">${_('Incoming changesets')}</div>
               <%include file="/compare/compare_cs.html" />
-  
+
               ## FILES
               <div style="font-size:1.1em;font-weight: bold;clear:both;padding-top:10px">${_('Files affected')}</div>
               <div class="cs_files">
@@ -70,7 +70,7 @@
                 <div class="reviewers_member">
                     <div style="float:left;padding:0px 3px 0px 0px" class="tooltip" title="${h.tooltip(h.changeset_status_lbl(status[0][1].status if status else 'not_reviewed'))}">
                       <img src="${h.url(str('/images/icons/flag_status_%s.png' % (status[0][1].status if status else 'not_reviewed')))}"/>
-                    </div>                
+                    </div>
                   <div class="gravatar"><img alt="gravatar" src="${h.gravatar_url(member.email,14)}"/> </div>
                   <div style="float:left">${member.full_name} (${_('owner')})</div>
                   <input type="hidden" value="${member.user_id}" name="review_members" />
@@ -81,21 +81,21 @@
               </li>
             %endfor
             </ul>
-          </div>                
+          </div>
           %if not c.pull_request.is_closed():
           <div class='ac'>
             <div class="reviewer_ac">
                ${h.text('user', class_='yui-ac-input')}
                <span class="help-block">${_('Add reviewer to this pull request.')}</span>
-               <div id="reviewers_container"></div>       
+               <div id="reviewers_container"></div>
             </div>
             <div style="padding:0px 10px">
              <span id="update_pull_request" class="ui-btn xsmall">${_('save')}</span>
             </div>
           </div>
           %endif
-        </div>      
-       </div>      
+        </div>
+       </div>
     </div>
     <script>
     var _USERS_AC_DATA = ${c.users_array|n};
@@ -114,10 +114,10 @@
     ## template for inline comment form
     <%namespace name="comment" file="/changeset/changeset_file_comment.html"/>
     ${comment.comment_inline_form()}
-    
+
     ## render comments and inlines
     ${comment.generate_comments()}
-    
+
     % if not c.pull_request.is_closed():
       ## main comment form and it status
       ${comment.comments(h.url('pullrequest_comment', repo_name=c.repo_name,
@@ -155,9 +155,9 @@
           // inject comments into they proper positions
           var file_comments = YUQ('.inline-comment-placeholder');
           renderInlineComments(file_comments);
-          
+
           YUE.on(YUD.get('update_pull_request'),'click',function(e){
-        	  
+
         	  var reviewers_ids = [];
         	  var ids = YUQ('#review_members input');
         	  for(var i=0; i<ids.length;i++){

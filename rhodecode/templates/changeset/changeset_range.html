@@ -72,7 +72,7 @@
           <a class="tooltip" title="${h.tooltip(cs.message)}" href="${h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id)}">${'r%s:%s' % (cs.revision,h.short_id(cs.raw_id))}</a>
            <div class="gravatar">
                <img alt="gravatar" src="${h.gravatar_url(h.email(cs.author),20)}"/>
-           </div>            
+           </div>
            </h3>
           ${diff_block.diff_block(c.changes[cs.raw_id])}
           ##${comment.comments(cs)}

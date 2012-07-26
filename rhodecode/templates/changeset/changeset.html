@@ -126,7 +126,7 @@
     var _USERS_AC_DATA = ${c.users_array|n};
     var _GROUPS_AC_DATA = ${c.users_groups_array|n};
     AJAX_COMMENT_URL = "${url('changeset_comment',repo_name=c.repo_name,revision=c.changeset.raw_id)}";
-    AJAX_COMMENT_DELETE_URL = "${url('changeset_comment_delete',repo_name=c.repo_name,comment_id='__COMMENT_ID__')}";    
+    AJAX_COMMENT_DELETE_URL = "${url('changeset_comment_delete',repo_name=c.repo_name,comment_id='__COMMENT_ID__')}";
     </script>
     ## diff block
     <%namespace name="diff_block" file="/changeset/diff_block.html"/>
