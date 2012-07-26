@@ -592,7 +592,7 @@ class Repository(Base, BaseModel):
     followers = relationship('UserFollowing', primaryjoin='UserFollowing.follows_repo_id==Repository.repo_id', cascade='all')
 
     logs = relationship('UserLog')
-    comments = relationship('ChangesetComment')
+    comments = relationship('ChangesetComment', cascade="all, delete, delete-orphan")
 
     def __unicode__(self):
         return u"<%s('%s:%s')>" % (self.__class__.__name__, self.repo_id,
