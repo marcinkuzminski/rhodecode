@@ -65,7 +65,7 @@ class UsersGroupsController(BaseController):
     def index(self, format='html'):
         """GET /users_groups: All items in the collection"""
         # url('users_groups')
-        c.users_groups_list = self.sa.query(UsersGroup).all()
+        c.users_groups_list = UsersGroup().query().all()
         return render('admin/users_groups/users_groups.html')
 
     def create(self):
@@ -82,7 +82,7 @@ class UsersGroupsController(BaseController):
                           'admin_created_users_group:%s' % gr,
                           None, self.ip_addr, self.sa)
             h.flash(_('created users group %s') % gr, category='success')
-            Session.commit()
+            Session().commit()
         except formencode.Invalid, errors:
             return htmlfill.render(
                 render('admin/users_groups/users_group_add.html'),
@@ -117,7 +117,7 @@ class UsersGroupsController(BaseController):
                            c.group_members_obj]
 
         c.available_members = [(x.user_id, x.username) for x in
-                               self.sa.query(User).all()]
+                               User.query().all()]
 
         available_members = [safe_unicode(x[0]) for x in c.available_members]
 
@@ -133,7 +133,7 @@ class UsersGroupsController(BaseController):
                           'admin_updated_users_group:%s' % gr,
                           None, self.ip_addr, self.sa)
             h.flash(_('updated users group %s') % gr, category='success')
-            Session.commit()
+            Session().commit()
         except formencode.Invalid, errors:
             e = errors.error_dict or {}
 
@@ -165,7 +165,7 @@ class UsersGroupsController(BaseController):
 
         try:
             UsersGroupModel().delete(id)
-            Session.commit()
+            Session().commit()
             h.flash(_('successfully deleted users group'), category='success')
         except UsersGroupsAssignedException, e:
             h.flash(e, category='error')
@@ -183,7 +183,7 @@ class UsersGroupsController(BaseController):
         """GET /users_groups/id/edit: Form to edit an existing item"""
         # url('edit_users_group', id=ID)
 
-        c.users_group = self.sa.query(UsersGroup).get(id)
+        c.users_group = UsersGroup.get(id)
         if not c.users_group:
             return redirect(url('users_groups'))
 
@@ -192,7 +192,7 @@ class UsersGroupsController(BaseController):
         c.group_members = [(x.user_id, x.username) for x in
                            c.group_members_obj]
         c.available_members = [(x.user_id, x.username) for x in
-                               self.sa.query(User).all()]
+                               User.query().all()]
         defaults = c.users_group.get_dict()
         perm = Permission.get_by_key('hg.create.repository')
         defaults.update({'create_repo_perm':
@@ -219,7 +219,7 @@ class UsersGroupsController(BaseController):
             h.flash(_("Granted 'repository create' permission to user"),
                     category='success')
 
-            Session.commit()
+            Session().commit()
         else:
             perm = Permission.get_by_key('hg.create.repository')
             UsersGroupModel().revoke_perm(id, perm)
@@ -228,5 +228,5 @@ class UsersGroupsController(BaseController):
             UsersGroupModel().grant_perm(id, perm)
             h.flash(_("Revoked 'repository create' permission to user"),
                     category='success')
-            Session.commit()
+            Session().commit()
         return redirect(url('edit_users_group', id=id))

@@ -59,7 +59,7 @@ class DbManage(object):
     def init_db(self):
         engine = create_engine(self.dburi, echo=self.log_sql)
         init_model(engine)
-        self.sa = meta.Session
+        self.sa = meta.Session()
 
     def create_tables(self, override=False, defaults={}):
         """
@@ -445,18 +445,25 @@ class DbManage(object):
         paths.ui_key = '/'
         paths.ui_value = path
 
-        hgsettings1 = RhodeCodeSetting('realm', 'RhodeCode authentication')
-        hgsettings2 = RhodeCodeSetting('title', 'RhodeCode')
-        hgsettings3 = RhodeCodeSetting('ga_code', '')
+        sett1 = RhodeCodeSetting('realm', 'RhodeCode authentication')
+        sett2 = RhodeCodeSetting('title', 'RhodeCode')
+        sett3 = RhodeCodeSetting('ga_code', '')
+
+        sett4 = RhodeCodeSetting('show_public_icon', True)
+        sett5 = RhodeCodeSetting('show_private_icon', True)
+        sett6 = RhodeCodeSetting('stylify_metatags', False)
 
         self.sa.add(web1)
         self.sa.add(web2)
         self.sa.add(web3)
         self.sa.add(web4)
         self.sa.add(paths)
-        self.sa.add(hgsettings1)
-        self.sa.add(hgsettings2)
-        self.sa.add(hgsettings3)
+        self.sa.add(sett1)
+        self.sa.add(sett2)
+        self.sa.add(sett3)
+        self.sa.add(sett4)
+        self.sa.add(sett5)
+        self.sa.add(sett6)
 
         self.create_ldap_options()
 

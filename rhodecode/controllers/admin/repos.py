@@ -167,7 +167,7 @@ class ReposController(BaseController):
                 action_logger(self.rhodecode_user, 'admin_created_repo',
                               form_result['repo_name_full'], self.ip_addr,
                               self.sa)
-            Session.commit()
+            Session().commit()
         except formencode.Invalid, errors:
 
             c.new_repo = errors.value['repo_name']
@@ -229,7 +229,7 @@ class ReposController(BaseController):
             changed_name = repo.repo_name
             action_logger(self.rhodecode_user, 'admin_updated_repo',
                               changed_name, self.ip_addr, self.sa)
-            Session.commit()
+            Session().commit()
         except formencode.Invalid, errors:
             defaults = self.__load_data(repo_name)
             defaults.update(errors.value)
@@ -273,7 +273,7 @@ class ReposController(BaseController):
             repo_model.delete(repo)
             invalidate_cache('get_repo_cached_%s' % repo_name)
             h.flash(_('deleted repository %s') % repo_name, category='success')
-            Session.commit()
+            Session().commit()
         except IntegrityError, e:
             if e.message.find('repositories_fork_id_fkey') != -1:
                 log.error(traceback.format_exc())
@@ -303,7 +303,7 @@ class ReposController(BaseController):
         try:
             RepoModel().revoke_user_permission(repo=repo_name,
                                                user=request.POST['user_id'])
-            Session.commit()
+            Session().commit()
         except Exception:
             log.error(traceback.format_exc())
             h.flash(_('An error occurred during deletion of repository user'),
@@ -322,7 +322,7 @@ class ReposController(BaseController):
             RepoModel().revoke_users_group_permission(
                 repo=repo_name, group_name=request.POST['users_group_id']
             )
-            Session.commit()
+            Session().commit()
         except Exception:
             log.error(traceback.format_exc())
             h.flash(_('An error occurred during deletion of repository'
@@ -340,7 +340,7 @@ class ReposController(BaseController):
 
         try:
             RepoModel().delete_stats(repo_name)
-            Session.commit()
+            Session().commit()
         except Exception, e:
             h.flash(_('An error occurred during deletion of repository stats'),
                     category='error')
@@ -356,7 +356,7 @@ class ReposController(BaseController):
 
         try:
             ScmModel().mark_for_invalidation(repo_name)
-            Session.commit()
+            Session().commit()
         except Exception, e:
             h.flash(_('An error occurred during cache invalidation'),
                     category='error')
@@ -380,7 +380,7 @@ class ReposController(BaseController):
                 self.scm_model.toggle_following_repo(repo_id, user_id)
                 h.flash(_('Updated repository visibility in public journal'),
                         category='success')
-                Session.commit()
+                Session().commit()
             except:
                 h.flash(_('An error occurred during setting this'
                           ' repository in public journal'),

@@ -115,7 +115,7 @@ class ReposGroupsController(BaseController):
                     group_description=form_result['group_description'],
                     parent=form_result['group_parent_id']
             )
-            Session.commit()
+            Session().commit()
             h.flash(_('created repos group %s') \
                     % form_result['group_name'], category='success')
             #TODO: in futureaction_logger(, '', '', '', self.sa)
@@ -162,7 +162,7 @@ class ReposGroupsController(BaseController):
         try:
             form_result = repos_group_form.to_python(dict(request.POST))
             ReposGroupModel().update(id, form_result)
-            Session.commit()
+            Session().commit()
             h.flash(_('updated repos group %s') \
                     % form_result['group_name'], category='success')
             #TODO: in futureaction_logger(, '', '', '', self.sa)
@@ -201,7 +201,7 @@ class ReposGroupsController(BaseController):
 
         try:
             ReposGroupModel().delete(id)
-            Session.commit()
+            Session().commit()
             h.flash(_('removed repos group %s') % gr.group_name, category='success')
             #TODO: in future action_logger(, '', '', '', self.sa)
         except IntegrityError, e:
@@ -234,7 +234,7 @@ class ReposGroupsController(BaseController):
             ReposGroupModel().revoke_user_permission(
                 repos_group=group_name, user=request.POST['user_id']
             )
-            Session.commit()
+            Session().commit()
         except Exception:
             log.error(traceback.format_exc())
             h.flash(_('An error occurred during deletion of group user'),
@@ -254,7 +254,7 @@ class ReposGroupsController(BaseController):
                 repos_group=group_name,
                 group_name=request.POST['users_group_id']
             )
-            Session.commit()
+            Session().commit()
         except Exception:
             log.error(traceback.format_exc())
             h.flash(_('An error occurred during deletion of group'
@@ -291,7 +291,7 @@ class ReposGroupsController(BaseController):
 
         c.repo_cnt = 0
 
-        c.groups = self.sa.query(RepoGroup).order_by(RepoGroup.group_name)\
+        c.groups = RepoGroup.query().order_by(RepoGroup.group_name)\
             .filter(RepoGroup.group_parent_id == id).all()
 
         return render('admin/repos_groups/repos_groups.html')

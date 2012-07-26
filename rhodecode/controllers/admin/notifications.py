@@ -83,7 +83,7 @@ class NotificationsController(BaseController):
             # mark all read
             nm.mark_all_read_for_user(self.rhodecode_user.user_id,
                                       filter_=request.GET.getall('type'))
-            Session.commit()
+            Session().commit()
             c.user = self.rhodecode_user
             notif = nm.get_for_user(self.rhodecode_user.user_id,
                                     filter_=request.GET.getall('type'))
@@ -112,7 +112,7 @@ class NotificationsController(BaseController):
                              == c.rhodecode_user.user_id)
             if h.HasPermissionAny('hg.admin')() or owner:
                     NotificationModel().mark_read(c.rhodecode_user.user_id, no)
-                    Session.commit()
+                    Session().commit()
                     return 'ok'
         except Exception:
             Session.rollback()
@@ -134,7 +134,7 @@ class NotificationsController(BaseController):
                              == c.rhodecode_user.user_id)
             if h.HasPermissionAny('hg.admin')() or owner:
                     NotificationModel().delete(c.rhodecode_user.user_id, no)
-                    Session.commit()
+                    Session().commit()
                     return 'ok'
         except Exception:
             Session.rollback()
@@ -158,7 +158,7 @@ class NotificationsController(BaseController):
             if unotification:
                 if unotification.read is False:
                     unotification.mark_as_read()
-                    Session.commit()
+                    Session().commit()
                 c.notification = no
 
                 return render('admin/notifications/show_notification.html')

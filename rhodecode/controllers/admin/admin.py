@@ -45,7 +45,7 @@ class AdminController(BaseController):
     @HasPermissionAllDecorator('hg.admin')
     def index(self):
 
-        users_log = self.sa.query(UserLog)\
+        users_log = UserLog.query()\
                 .options(joinedload(UserLog.user))\
                 .options(joinedload(UserLog.repository))\
                 .order_by(UserLog.action_date.desc())

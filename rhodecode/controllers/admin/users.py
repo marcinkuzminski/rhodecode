@@ -126,7 +126,7 @@ class UsersController(BaseController):
                           None, self.ip_addr, self.sa)
             h.flash(_('created user %s') % usr,
                     category='success')
-            Session.commit()
+            Session().commit()
         except formencode.Invalid, errors:
             return htmlfill.render(
                 render('admin/users/user_add.html'),
@@ -166,7 +166,7 @@ class UsersController(BaseController):
             action_logger(self.rhodecode_user, 'admin_updated_user:%s' % usr,
                           None, self.ip_addr, self.sa)
             h.flash(_('User updated successfully'), category='success')
-            Session.commit()
+            Session().commit()
         except formencode.Invalid, errors:
             c.user_email_map = UserEmailMap.query()\
                             .filter(UserEmailMap.user == c.user).all()
@@ -198,7 +198,7 @@ class UsersController(BaseController):
         user_model = UserModel()
         try:
             user_model.delete(id)
-            Session.commit()
+            Session().commit()
             h.flash(_('successfully deleted user'), category='success')
         except (UserOwnsReposException, DefaultUserException), e:
             h.flash(e, category='warning')
@@ -252,7 +252,7 @@ class UsersController(BaseController):
             user_model.grant_perm(id, perm)
             h.flash(_("Granted 'repository create' permission to user"),
                     category='success')
-            Session.commit()
+            Session().commit()
         else:
             perm = Permission.get_by_key('hg.create.repository')
             user_model.revoke_perm(id, perm)
@@ -261,7 +261,7 @@ class UsersController(BaseController):
             user_model.grant_perm(id, perm)
             h.flash(_("Revoked 'repository create' permission to user"),
                     category='success')
-            Session.commit()
+            Session().commit()
         return redirect(url('edit_user', id=id))
 
     def add_email(self, id):
@@ -274,7 +274,7 @@ class UsersController(BaseController):
 
         try:
             user_model.add_extra_email(id, email)
-            Session.commit()
+            Session().commit()
             h.flash(_("Added email %s to user") % email, category='success')
         except formencode.Invalid, error:
             msg = error.error_dict['email']
@@ -290,6 +290,6 @@ class UsersController(BaseController):
         # url('user_emails_delete', id=ID, method='delete')
         user_model = UserModel()
         user_model.delete_extra_email(id, request.POST.get('del_email'))
-        Session.commit()
+        Session().commit()
         h.flash(_("Removed email from user"), category='success')
         return redirect(url('edit_user', id=id))
