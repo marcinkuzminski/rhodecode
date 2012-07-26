@@ -128,9 +128,9 @@
                            <img class="icon" title="${_('Git repository')}" alt="${_('Git repository')}" src="${h.url('/images/icons/giticon.png')}"/>
                          %endif
 
-                        %if entry.follows_repository.private:
+                        %if entry.follows_repository.private and c.visual.show_private_icon:
                           <img class="icon" title="${_('private repository')}" alt="${_('private repository')}" src="${h.url('/images/icons/lock.png')}"/>
-                        %else:
+                        %elif not entry.follows_repository.private and c.visual.show_public_icon:
                           <img class="icon" title="${_('public repository')}" alt="${_('public repository')}" src="${h.url('/images/icons/lock_open.png')}"/>
                         %endif
                         <span class="watched_repo">

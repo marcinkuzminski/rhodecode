@@ -242,23 +242,30 @@ def ApplicationSettingsForm():
     return _ApplicationSettingsForm
 
 
+def ApplicationVisualisationForm():
+    class _ApplicationVisualisationForm(formencode.Schema):
+        allow_extra_fields = True
+        filter_extra_fields = False
+        rhodecode_show_public_icon = v.StringBoolean(if_missing=False)
+        rhodecode_show_private_icon = v.StringBoolean(if_missing=False)
+        rhodecode_stylify_metatags = v.StringBoolean(if_missing=False)
+
+    return _ApplicationVisualisationForm
+
+
 def ApplicationUiSettingsForm():
     class _ApplicationUiSettingsForm(formencode.Schema):
         allow_extra_fields = True
         filter_extra_fields = False
-        web_push_ssl = v.OneOf(['true', 'false'], if_missing='false')
+        web_push_ssl = v.StringBoolean(if_missing=False)
         paths_root_path = All(
             v.ValidPath(),
             v.UnicodeString(strip=True, min=1, not_empty=True)
         )
-        hooks_changegroup_update = v.OneOf(['True', 'False'],
-                                           if_missing=False)
-        hooks_changegroup_repo_size = v.OneOf(['True', 'False'],
-                                              if_missing=False)
-        hooks_changegroup_push_logger = v.OneOf(['True', 'False'],
-                                                if_missing=False)
-        hooks_preoutgoing_pull_logger = v.OneOf(['True', 'False'],
-                                                if_missing=False)
+        hooks_changegroup_update = v.StringBoolean(if_missing=False)
+        hooks_changegroup_repo_size = v.StringBoolean(if_missing=False)
+        hooks_changegroup_push_logger = v.StringBoolean(if_missing=False)
+        hooks_preoutgoing_pull_logger = v.StringBoolean(if_missing=False)
 
     return _ApplicationUiSettingsForm
 
@@ -268,7 +275,7 @@ def DefaultPermissionsForm(perms_choices, register_choices, create_choices):
         allow_extra_fields = True
         filter_extra_fields = True
         overwrite_default = v.StringBoolean(if_missing=False)
-        anonymous = v.OneOf(['True', 'False'], if_missing=False)
+        anonymous = v.StringBoolean(if_missing=False)
         default_perm = v.OneOf(perms_choices)
         default_register = v.OneOf(register_choices)
         default_create = v.OneOf(create_choices)

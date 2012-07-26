@@ -9,6 +9,7 @@ import StringIO
 import urllib
 import math
 import logging
+import re
 
 from datetime import datetime
 from pygments.formatters.html import HtmlFormatter
@@ -428,6 +429,26 @@ def person(author):
 
     # Still nothing?  Just pass back the author name then
     return _author
+
+
+def desc_stylize(value):
+    """
+    converts tags from value into html equivalent
+
+    :param value:
+    """
+    value = re.sub(r'\[see\ \=\>\ *([a-zA-Z0-9\/\=\?\&\ \:\/\.\-]*)\]',
+                   '<div class="metatag" tag="see">see =&gt; \\1 </div>', value)
+    value = re.sub(r'\[license\ \=\>\ *([a-zA-Z0-9\/\=\?\&\ \:\/\.\-]*)\]',
+                   '<div class="metatag" tag="license"><a href="http:\/\/www.opensource.org/licenses/\\1">\\1</a></div>', value)
+    value = re.sub(r'\[(requires|recommends|conflicts|base)\ \=\>\ *([a-zA-Z\-\/]*)\]',
+                   '<div class="metatag" tag="\\1">\\1 =&gt; <a href="/\\2">\\2</a></div>', value)
+    value = re.sub(r'\[(lang|language)\ \=\>\ *([a-zA-Z\-\/]*)\]',
+                   '<div class="metatag" tag="lang">\\2</div>', value)
+    value = re.sub(r'\[([a-z]+)\]',
+                  '<div class="metatag" tag="\\1">\\1</div>', value)
+
+    return value
 
 
 def bool2icon(value):

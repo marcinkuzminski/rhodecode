@@ -41,7 +41,11 @@
                             ${h.link_to(gr.name,url('repos_group_home',group_name=gr.group_name))}
                             </div>
                         </td>
-                        <td>${gr.group_description}</td>
+                        %if c.visual.stylify_metatags:
+                            <td>${h.desc_stylize(gr.group_description)}</td>
+                        %else:
+                            <td>${gr.group_description}</td>
+                        %endif
                         ## this is commented out since for multi nested repos can be HEAVY!
                         ## in number of executed queries during traversing uncomment at will
                         ##<td><b>${gr.repositories_recursive_count}</b></td>
@@ -85,7 +89,11 @@
                     </td>
                     ##DESCRIPTION
                     <td><span class="tooltip" title="${h.tooltip(repo['description'])}">
+                       %if c.visual.stylify_metatags:
+                       ${h.urlify_text(h.desc_stylize(h.truncate(repo['description'],60)))}</span>
+                       %else:
                        ${h.truncate(repo['description'],60)}</span>
+                       %endif
                     </td>
                     ##LAST CHANGE DATE
                     <td>

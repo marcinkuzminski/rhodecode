@@ -1827,6 +1827,81 @@ div.form div.fields div.field div.button {
 	
 }
 
+#summary .metatag {
+    display: inline-block;
+    padding: 3px 5px;
+    margin-bottom: 3px;
+    margin-right: 1px;
+    border-radius: 5px;
+}
+
+#content div.box #summary p {
+    margin-bottom: -5px;
+        width: 600px;
+        white-space: pre-wrap;
+}
+
+#content div.box #summary p:last-child {
+    margin-bottom: 9px;
+}
+
+#content div.box #summary p:first-of-type {
+    margin-top: 9px;
+}
+
+ .metatag {
+    display: inline-block;
+    margin-right: 1px;
+    -webkit-border-radius: 4px 4px 4px 4px;
+    -khtml-border-radius: 4px 4px 4px 4px;
+    -moz-border-radius: 4px 4px 4px 4px;
+    border-radius: 4px 4px 4px 4px;
+    
+    border: solid 1px #9CF;
+    padding: 2px 3px 2px 3px !important;
+    background-color: #DEF;    
+}
+
+.metatag[tag="dead"] {
+	background-color: #E44;
+}
+
+.metatag[tag="stale"] {
+    background-color: #EA4;
+}
+
+.metatag[tag="featured"] {
+	background-color: #AEA;
+}
+
+.metatag[tag="requires"] { 
+	background-color: #9CF;
+}
+
+.metatag[tag="recommends"] { 
+	background-color: #BDF; 
+}
+
+.metatag[tag="lang"] { 
+    background-color: #FAF474; 
+}
+
+.metatag[tag="license"] {
+    border: solid 1px #9CF;
+    background-color: #DEF;
+    target-new: tab !important;
+}
+.metatag[tag="see"] {
+    border: solid 1px #CBD;
+    background-color: #EDF;
+}
+
+a.metatag[tag="license"]:hover {
+    background-color: #003367;
+    color: #FFF;
+    text-decoration: none;
+}
+
 #summary .desc {
 	white-space: pre;
 	width: 100%;

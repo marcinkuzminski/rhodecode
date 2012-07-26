@@ -104,7 +104,11 @@
 			  <div class="label-summary">
 			      <label>${_('Description')}:</label>
 			  </div>
-			  <div class="input ${summary(c.show_stats)} desc">${h.urlify_text(c.dbrepo.description)}</div>
+              %if c.visual.stylify_metatags:
+                <div class="input ${summary(c.show_stats)} desc">${h.urlify_text(h.desc_stylize(c.dbrepo.description))}</div>
+              %else:
+                <div class="input ${summary(c.show_stats)} desc">${h.urlify_text(c.dbrepo.description)}</div>
+              %endif        
 			 </div>
 
 			 <div class="field">

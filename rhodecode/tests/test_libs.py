@@ -131,3 +131,19 @@ class TestLibs(unittest.TestCase):
         self.assertEqual(age(n - delt(hours=24 * (calendar.mdays[n.month-1] + 2))),
                          u'1 month and 2 days ago')
         self.assertEqual(age(n - delt(hours=24 * 400)), u'1 year and 1 month ago')
+
+    def test_tag_exctrator(self):
+        sample = (
+            "hello pta[tag] gog [[]] [[] sda ero[or]d [me =>>< sa]"
+            "[requires] [stale] [see<>=>] [see => http://url.com]"
+            "[requires => url] [lang => python] [just a tag]"
+            "[,d] [ => ULR ] [obsolete] [desc]]"
+        )
+        from rhodecode.lib.helpers import desc_stylize
+        res = desc_stylize(sample)
+        self.assertTrue('<div class="metatag" tag="tag">tag</div>' in res)
+        self.assertTrue('<div class="metatag" tag="obsolete">obsolete</div>' in res)
+        self.assertTrue('<div class="metatag" tag="stale">stale</div>' in res)
+        self.assertTrue('<div class="metatag" tag="lang">python</div>' in res)
+        self.assertTrue('<div class="metatag" tag="requires">requires =&gt; <a href="/url">url</a></div>' in res)
+        self.assertTrue('<div class="metatag" tag="tag">tag</div>' in res)

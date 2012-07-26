@@ -182,9 +182,16 @@ class RhodeCodeSetting(Base, BaseModel):
         )
 
     @classmethod
-    def get_by_name(cls, ldap_key):
+    def get_by_name(cls, key):
         return cls.query()\
-            .filter(cls.app_settings_name == ldap_key).scalar()
+            .filter(cls.app_settings_name == key).scalar()
+
+    @classmethod
+    def get_by_name_or_create(cls, key):
+        res = cls.get_by_name(key)
+        if not res:
+            res = cls(key)
+        return res
 
     @classmethod
     def get_app_settings(cls, cache=False):
@@ -589,8 +596,8 @@ class Repository(Base, BaseModel):
     users_group_to_perm = relationship('UsersGroupRepoToPerm', cascade='all')
     stats = relationship('Statistics', cascade='all', uselist=False)
 
-    followers = relationship('UserFollowing', 
-                             primaryjoin='UserFollowing.follows_repo_id==Repository.repo_id', 
+    followers = relationship('UserFollowing',
+                             primaryjoin='UserFollowing.follows_repo_id==Repository.repo_id',
                              cascade='all')
 
     logs = relationship('UserLog')
@@ -1547,7 +1554,7 @@ class PullRequest(Base, BaseModel):
         self._revisions = ':'.join(val)
 
     author = relationship('User', lazy='joined')
-    reviewers = relationship('PullRequestReviewers', 
+    reviewers = relationship('PullRequestReviewers',
                              cascade="all, delete, delete-orphan")
     org_repo = relationship('Repository', primaryjoin='PullRequest.org_repo_id==Repository.repo_id')
     other_repo = relationship('Repository', primaryjoin='PullRequest.other_repo_id==Repository.repo_id')

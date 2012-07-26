@@ -144,20 +144,21 @@ class ReposController(BaseController):
         template = _tmpl_lookup.get_template('data_table/_dt_elements.html')
 
         quick_menu = lambda repo_name: (template.get_def("quick_menu")
-                                        .render(repo_name, _=_, h=h))
+                                        .render(repo_name, _=_, h=h, c=c))
         repo_lnk = lambda name, rtype, private, fork_of: (
             template.get_def("repo_name")
-            .render(name, rtype, private, fork_of, short_name=False, 
-                    admin=True, _=_, h=h))
+            .render(name, rtype, private, fork_of, short_name=False,
+                    admin=True, _=_, h=h, c=c))
 
         repo_actions = lambda repo_name: (template.get_def("repo_actions")
-                                       .render(repo_name, _=_, h=h))
+                                       .render(repo_name, _=_, h=h, c=c))
 
         for repo in c.repos_list:
             repos_data.append({
                 "menu": quick_menu(repo.repo_name),
                 "raw_name": repo.repo_name,
-                "name": repo_lnk(repo.repo_name, repo.repo_type, repo.private, repo.fork),
+                "name": repo_lnk(repo.repo_name, repo.repo_type,
+                                 repo.private, repo.fork),
                 "desc": repo.description,
                 "owner": repo.user.username,
                 "action": repo_actions(repo.repo_name),

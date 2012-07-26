@@ -116,6 +116,63 @@
     </div>
     ${h.end_form()}
 
+    <h3>${_('Visualisation settings')}</h3>
+    ${h.form(url('admin_setting', setting_id='visual'),method='put')}
+    <div class="form">
+        <!-- fields -->
+
+        <div class="fields">
+
+             <div class="field">
+                <div class="label label-checkbox">
+                    <label>${_('Icons')}:</label>
+                </div>
+                <div class="checkboxes">
+                    <div class="checkbox">
+                        ${h.checkbox('rhodecode_show_public_icon','True')}
+                        <label for="rhodecode_show_public_icon">${_('Show public repo icon on repositories')}</label>
+                    </div>
+                    <div class="checkbox">
+                        ${h.checkbox('rhodecode_show_private_icon','True')}
+                        <label for="rhodecode_show_private_icon">${_('Show private repo icon on repositories')}</label>
+                    </div>
+                 </div>
+             </div>
+
+             <div class="field">
+                <div class="label label-checkbox">
+                    <label>${_('Meta-Tagging')}:</label>
+                </div>
+                <div class="checkboxes">
+                    <div class="checkbox">
+                        ${h.checkbox('rhodecode_stylify_metatags','True')}
+                        <label for="rhodecode_stylify_metatags">${_('Stylify recognised metatags:')}</label>
+                    </div>
+                    <div style="padding-left: 20px;">
+                        <ul> <!-- Fix style here -->
+                            <li>[featured] <span class="metatag" tag="featured">featured</span></li>
+                            <li>[stale] <span class="metatag" tag="stale">stale</span></li>
+                            <li>[dead] <span class="metatag" tag="dead">dead</span></li>
+                            <li>[lang =&gt; lang] <span class="metatag" tag="lang" >lang</span></li>
+                            <li>[license =&gt; License] <span class="metatag" tag="license"><a href="http://www.opensource.org/licenses/License" >License</a></span></li>                            
+                            <li>[requires =&gt; Repo] <span class="metatag" tag="requires" >requires =&gt; <a href="#" >Repo</a></span></li>
+                            <li>[recommends =&gt; Repo] <span class="metatag" tag="recommends" >recommends =&gt; <a href="#" >Repo</a></span></li>
+                            <li>[see =&gt; URI] <span class="metatag" tag="see">see =&gt; <a href="#">URI</a> </span></li>
+                        </ul>
+                    </div>
+                 </div>
+             </div>
+
+             <div class="buttons">
+                 ${h.submit('save',_('Save settings'),class_="ui-btn large")}
+                 ${h.reset('reset',_('Reset'),class_="ui-btn large")}
+             </div>
+
+        </div>
+    </div>
+    ${h.end_form()}
+
+
     <h3>${_('VCS settings')}</h3>
     ${h.form(url('admin_setting', setting_id='vcs'),method='put')}
     <div class="form">

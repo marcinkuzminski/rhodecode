@@ -78,15 +78,15 @@ class UsersController(BaseController):
 
         grav_tmpl = lambda user_email, size: (
                 template.get_def("user_gravatar")
-                .render(user_email, size, _=_, h=h))
+                .render(user_email, size, _=_, h=h, c=c))
 
         user_lnk = lambda user_id, username: (
                 template.get_def("user_name")
-                .render(user_id, username, _=_, h=h))
+                .render(user_id, username, _=_, h=h, c=c))
 
         user_actions = lambda user_id, username: (
                 template.get_def("user_actions")
-                .render(user_id, username, _=_, h=h))
+                .render(user_id, username, _=_, h=h, c=c))
 
         for user in c.users_list:
             users_data.append({

@@ -17,7 +17,7 @@ from pylons.templating import render_mako as render
 
 from rhodecode import __version__, BACKENDS
 
-from rhodecode.lib.utils2 import str2bool, safe_unicode
+from rhodecode.lib.utils2 import str2bool, safe_unicode, AttributeDict
 from rhodecode.lib.auth import AuthUser, get_container_username, authfunc,\
     HasPermissionAnyMiddleware, CookieStoreWrapper
 from rhodecode.lib.utils import get_repo_slug, invalidate_cache
@@ -158,7 +158,7 @@ class BaseVCSController(object):
             log.debug('proto is %s and SSL is required BAD REQUEST !'
                       % org_proto)
             return False
-        return True 
+        return True
 
     def __call__(self, environ, start_response):
         start = time.time()
@@ -178,6 +178,12 @@ class BaseController(WSGIController):
         c.rhodecode_name = config.get('rhodecode_title')
         c.use_gravatar = str2bool(config.get('use_gravatar'))
         c.ga_code = config.get('rhodecode_ga_code')
+        # Visual options
+        c.visual = AttributeDict({})
+        c.visual.show_public_icon = str2bool(config.get('rhodecode_show_public_icon'))
+        c.visual.show_private_icon = str2bool(config.get('rhodecode_show_private_icon'))
+        c.visual.stylify_metatags = str2bool(config.get('rhodecode_stylify_metatags'))
+
         c.repo_name = get_repo_slug(request)
         c.backends = BACKENDS.keys()
         c.unread_notifications = NotificationModel()\

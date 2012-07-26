@@ -45,7 +45,7 @@ from rhodecode.lib.utils import repo2db_mapper, invalidate_cache, \
 from rhodecode.model.db import RhodeCodeUi, Repository, RepoGroup, \
     RhodeCodeSetting, PullRequest, PullRequestReviewers
 from rhodecode.model.forms import UserForm, ApplicationSettingsForm, \
-    ApplicationUiSettingsForm
+    ApplicationUiSettingsForm, ApplicationVisualisationForm
 from rhodecode.model.scm import ScmModel
 from rhodecode.model.user import UserModel
 from rhodecode.model.db import User
@@ -143,15 +143,15 @@ class SettingsController(BaseController):
                 )
 
             try:
-                sett1 = RhodeCodeSetting.get_by_name('title')
+                sett1 = RhodeCodeSetting.get_by_name_or_create('title')
                 sett1.app_settings_value = form_result['rhodecode_title']
                 Session().add(sett1)
 
-                sett2 = RhodeCodeSetting.get_by_name('realm')
+                sett2 = RhodeCodeSetting.get_by_name_or_create('realm')
                 sett2.app_settings_value = form_result['rhodecode_realm']
                 Session().add(sett2)
 
-                sett3 = RhodeCodeSetting.get_by_name('ga_code')
+                sett3 = RhodeCodeSetting.get_by_name_or_create('ga_code')
                 sett3.app_settings_value = form_result['rhodecode_ga_code']
                 Session().add(sett3)
 
@@ -164,6 +164,47 @@ class SettingsController(BaseController):
                 h.flash(_('error occurred during updating '
                           'application settings'),
                           category='error')
+
+        if setting_id == 'visual':
+
+            application_form = ApplicationVisualisationForm()()
+            try:
+                form_result = application_form.to_python(dict(request.POST))
+            except formencode.Invalid, errors:
+                return htmlfill.render(
+                     render('admin/settings/settings.html'),
+                     defaults=errors.value,
+                     errors=errors.error_dict or {},
+                     prefix_error=False,
+                     encoding="UTF-8"
+                )
+
+            try:
+                sett1 = RhodeCodeSetting.get_by_name_or_create('show_public_icon')
+                sett1.app_settings_value = \
+                    form_result['rhodecode_show_public_icon']
+
+                sett2 = RhodeCodeSetting.get_by_name_or_create('show_private_icon')
+                sett2.app_settings_value = \
+                    form_result['rhodecode_show_private_icon']
+
+                sett3 = RhodeCodeSetting.get_by_name_or_create('stylify_metatags')
+                sett3.app_settings_value = \
+                    form_result['rhodecode_stylify_metatags']
+
+                Session().add(sett1)
+                Session().add(sett2)
+                Session().add(sett3)
+                Session().commit()
+                set_rhodecode_config(config)
+                h.flash(_('Updated visualisation settings'),
+                        category='success')
+
+            except Exception:
+                log.error(traceback.format_exc())
+                h.flash(_('error occurred during updating '
+                          'visualisation settings'),
+                        category='error')
 
         if setting_id == 'vcs':
             application_form = ApplicationUiSettingsForm()()

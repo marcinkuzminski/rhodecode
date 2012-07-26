@@ -443,3 +443,9 @@ def extract_mentioned_users(s):
         usrs.add(username)
 
     return sorted(list(usrs), key=lambda k: k.lower())
+
+class AttributeDict(dict):
+    def __getattr__(self, attr):
+        return self.get(attr, None)
+    __setattr__ = dict.__setitem__
+    __delattr__ = dict.__delitem__
