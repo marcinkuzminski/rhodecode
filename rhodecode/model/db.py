@@ -589,10 +589,20 @@ class Repository(Base, BaseModel):
     users_group_to_perm = relationship('UsersGroupRepoToPerm', cascade='all')
     stats = relationship('Statistics', cascade='all', uselist=False)
 
-    followers = relationship('UserFollowing', primaryjoin='UserFollowing.follows_repo_id==Repository.repo_id', cascade='all')
+    followers = relationship('UserFollowing', 
+                             primaryjoin='UserFollowing.follows_repo_id==Repository.repo_id', 
+                             cascade='all')
 
     logs = relationship('UserLog')
     comments = relationship('ChangesetComment', cascade="all, delete, delete-orphan")
+
+    pull_requests_org = relationship('PullRequest',
+                    primaryjoin='PullRequest.org_repo_id==Repository.repo_id',
+                    cascade="all, delete, delete-orphan")
+
+    pull_requests_other = relationship('PullRequest',
+                    primaryjoin='PullRequest.other_repo_id==Repository.repo_id',
+                    cascade="all, delete, delete-orphan")
 
     def __unicode__(self):
         return u"<%s('%s:%s')>" % (self.__class__.__name__, self.repo_id,
@@ -1528,8 +1538,6 @@ class PullRequest(Base, BaseModel):
     other_repo_id = Column('other_repo_id', Integer(), ForeignKey('repositories.repo_id'), nullable=False)
     other_ref = Column('other_ref', Unicode(256), nullable=False)
 
-    statuses = relationship('ChangesetStatus')
-
     @hybrid_property
     def revisions(self):
         return self._revisions.split(':')
@@ -1539,9 +1547,13 @@ class PullRequest(Base, BaseModel):
         self._revisions = ':'.join(val)
 
     author = relationship('User', lazy='joined')
-    reviewers = relationship('PullRequestReviewers')
+    reviewers = relationship('PullRequestReviewers', 
+                             cascade="all, delete, delete-orphan")
     org_repo = relationship('Repository', primaryjoin='PullRequest.org_repo_id==Repository.repo_id')
     other_repo = relationship('Repository', primaryjoin='PullRequest.other_repo_id==Repository.repo_id')
+    statuses = relationship('ChangesetStatus')
+    comments = relationship('ChangesetComment',
+                             cascade="all, delete, delete-orphan")
 
     def is_closed(self):
         return self.status == self.STATUS_CLOSED
