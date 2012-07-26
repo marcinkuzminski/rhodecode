@@ -2,6 +2,12 @@
 ## usage:
 ## <%namespace name="dt" file="/data_table/_dt_elements.html"/>
 
+<%def name="repo_actions(repo_name)">
+  ${h.form(h.url('repo', repo_name=repo_name),method='delete')}
+    ${h.submit('remove_%s' % repo_name,_('delete'),class_="delete_icon action_button",onclick="return confirm('"+_('Confirm to delete this repository: %s') % repo_name+"');")}
+  ${h.end_form()}
+</%def>
+
 <%def name="quick_menu(repo_name)">
   <ul class="menu_items hidden">
     <li style="border-top:1px solid #003367;margin-left:18px;padding-left:-99px"></li>
@@ -87,3 +93,19 @@
   %endif
   </div>
 </%def>
+
+<%def name="user_gravatar(email, size=24)">
+    <div class="gravatar"><img alt="gravatar" src="${h.gravatar_url(email, size)}"/> </div>
+</%def>
+
+<%def name="user_actions(user_id, username)">
+  ${h.form(h.url('delete_user', id=user_id),method='delete')}
+      ${h.submit('remove_',_('delete'),id="remove_user_%s" % user_id,
+      class_="delete_icon action_button",onclick="return confirm('"+_('Confirm to delete this user: %s') % username+"');")}
+  ${h.end_form()}
+</%def>
+
+<%def name="user_name(user_id, username)">
+    ${h.link_to(username,h.url('edit_user', id=user_id))}
+</%def>
+

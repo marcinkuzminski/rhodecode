@@ -40,6 +40,7 @@ from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator, \
     AuthUser
 from rhodecode.lib.base import BaseController, render
 
+import rhodecode
 from rhodecode.model.db import User, Permission, UserEmailMap
 from rhodecode.model.forms import UserForm
 from rhodecode.model.user import UserModel
@@ -72,34 +73,33 @@ class UsersController(BaseController):
 
         users_data = []
         total_records = len(c.users_list)
-        grav_tmpl = """<div class="gravatar"><img alt="gravatar" src="%s"/> </div>"""
-        usr_tmpl = """<a href="%s">%s</a>""" % (h.url('edit_user', id='__ID__'), '%s')
-        usr_tmpl = usr_tmpl.replace('__ID__', '%s')
-        edit_tmpl = '''
-            <form action="/_admin/users/%s" method="post">
-            <div style="display:none">
-            <input name="_method" type="hidden" value="%s">
-            </div>
-            <input class="delete_icon action_button" id="remove_user_%s" 
-            name="remove_" onclick="return confirm('%s');" 
-            type="submit" value="delete">
-            </form>
-        '''
+        _tmpl_lookup = rhodecode.CONFIG['pylons.app_globals'].mako_lookup
+        template = _tmpl_lookup.get_template('data_table/_dt_elements.html')
+
+        grav_tmpl = lambda user_email, size: (
+                template.get_def("user_gravatar")
+                .render(user_email, size, _=_, h=h))
+
+        user_lnk = lambda user_id, username: (
+                template.get_def("user_name")
+                .render(user_id, username, _=_, h=h))
+
+        user_actions = lambda user_id, username: (
+                template.get_def("user_actions")
+                .render(user_id, username, _=_, h=h))
+
         for user in c.users_list:
             users_data.append({
-                "gravatar": grav_tmpl % h.gravatar_url(user.email, 24),
+                "gravatar": grav_tmpl(user. email, 24),
                 "raw_username": user.username,
-                "username": usr_tmpl % (user.user_id, user.username),
+                "username": user_lnk(user.user_id, user.username),
                 "firstname": user.name,
                 "lastname": user.lastname,
                 "last_login": h.fmt_date(user.last_login),
                 "active": h.bool2icon(user.active),
                 "admin": h.bool2icon(user.admin),
                 "ldap": h.bool2icon(bool(user.ldap_dn)),
-                "action": edit_tmpl % (user.user_id, _('delete'),
-                    user.user_id,
-                    _('Confirm to delete this user: %s') % user.username
-                ),
+                "action": user_actions(user.user_id, user.username),
             })
 
         c.data = json.dumps({
