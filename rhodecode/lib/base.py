@@ -23,7 +23,7 @@ from rhodecode.lib.auth import AuthUser, get_container_username, authfunc,\
 from rhodecode.lib.utils import get_repo_slug, invalidate_cache
 from rhodecode.model import meta
 
-from rhodecode.model.db import Repository
+from rhodecode.model.db import Repository, RhodeCodeUi
 from rhodecode.model.notification import NotificationModel
 from rhodecode.model.scm import ScmModel
 
@@ -144,6 +144,21 @@ class BaseVCSController(object):
 
     def _get_ip_addr(self, environ):
         return _get_ip_addr(environ)
+
+    def _check_ssl(self, environ, start_response):
+        """
+        Checks the SSL check flag and returns False if SSL is not present
+        and required True otherwise
+        """
+        org_proto = environ['wsgi._org_proto']
+        #check if we have SSL required  ! if not it's a bad request !
+        require_ssl = str2bool(RhodeCodeUi.get_by_key('push_ssl')\
+                               .scalar().ui_value)
+        if require_ssl and org_proto == 'http':
+            log.debug('proto is %s and SSL is required BAD REQUEST !'
+                      % org_proto)
+            return False
+        return True 
 
     def __call__(self, environ, start_response):
         start = time.time()

@@ -312,7 +312,7 @@ def make_ui(read_from='file', path=None, checkpaths=True):
 
         hg_ui = ret
         for ui_ in hg_ui:
-            if ui_.ui_active:
+            if ui_.ui_active and ui_.ui_key != 'push_ssl':
                 log.debug('settings ui from db[%s]%s:%s', ui_.ui_section,
                           ui_.ui_key, ui_.ui_value)
                 baseui.setconfig(ui_.ui_section, ui_.ui_key, ui_.ui_value)

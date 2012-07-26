@@ -33,6 +33,8 @@ from mercurial.error import RepoError
 from mercurial.hgweb import hgweb_mod
 
 from paste.httpheaders import REMOTE_USER, AUTH_TYPE
+from webob.exc import HTTPNotFound, HTTPForbidden, HTTPInternalServerError, \
+    HTTPBadRequest, HTTPNotAcceptable
 
 from rhodecode.lib.utils2 import safe_str
 from rhodecode.lib.base import BaseVCSController
@@ -40,7 +42,6 @@ from rhodecode.lib.auth import get_container_username
 from rhodecode.lib.utils import make_ui, is_valid_repo, ui_sections
 from rhodecode.model.db import User
 
-from webob.exc import HTTPNotFound, HTTPForbidden, HTTPInternalServerError
 
 log = logging.getLogger(__name__)
 
@@ -68,6 +69,8 @@ class SimpleHg(BaseVCSController):
     def _handle_request(self, environ, start_response):
         if not is_mercurial(environ):
             return self.application(environ, start_response)
+        if not self._check_ssl(environ, start_response):
+            return HTTPNotAcceptable('SSL REQUIRED !')(environ, start_response)
 
         ipaddr = self._get_ip_addr(environ)
         username = None 

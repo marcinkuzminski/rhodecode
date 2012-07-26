@@ -74,14 +74,14 @@ dulserver.DEFAULT_HANDLERS = {
 #from dulwich.web import make_wsgi_chain
 
 from paste.httpheaders import REMOTE_USER, AUTH_TYPE
+from webob.exc import HTTPNotFound, HTTPForbidden, HTTPInternalServerError, \
+    HTTPBadRequest, HTTPNotAcceptable
 
 from rhodecode.lib.utils2 import safe_str
 from rhodecode.lib.base import BaseVCSController
 from rhodecode.lib.auth import get_container_username
 from rhodecode.lib.utils import is_valid_repo, make_ui
 from rhodecode.model.db import User, RhodeCodeUi
-
-from webob.exc import HTTPNotFound, HTTPForbidden, HTTPInternalServerError
 
 log = logging.getLogger(__name__)
 
@@ -104,7 +104,8 @@ class SimpleGit(BaseVCSController):
 
         if not is_git(environ):
             return self.application(environ, start_response)
-
+        if not self._check_ssl(environ, start_response):
+            return HTTPNotAcceptable('SSL REQUIRED !')(environ, start_response)
         ipaddr = self._get_ip_addr(environ)
         username = None
         self._git_first_op = False
