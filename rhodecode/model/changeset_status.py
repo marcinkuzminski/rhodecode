@@ -28,6 +28,7 @@ from collections import  defaultdict
 
 from rhodecode.model import BaseModel
 from rhodecode.model.db import ChangesetStatus, PullRequest
+from rhodecode.lib.exceptions import StatusChangeOnClosedPullRequestError
 
 log = logging.getLogger(__name__)
 
@@ -111,7 +112,7 @@ class ChangesetStatusModel(BaseModel):
         return str(st)
 
     def set_status(self, repo, status, user, comment, revision=None,
-                   pull_request=None):
+                   pull_request=None, dont_allow_on_closed_pull_request=False):
         """
         Creates new status for changeset or updates the old ones bumping their
         version, leaving the current status at
@@ -126,6 +127,9 @@ class ChangesetStatusModel(BaseModel):
         :type user:
         :param comment:
         :type comment:
+        :param dont_allow_on_closed_pull_request: don't allow a status change
+            if last status was for pull request and it's closed. We shouldn't
+            mess around this manually
         """
         repo = self._get_repo(repo)
 
@@ -139,6 +143,14 @@ class ChangesetStatusModel(BaseModel):
             q = q.filter(ChangesetStatus.repo == pull_request.org_repo)
             q = q.filter(ChangesetStatus.pull_request == pull_request)
         cur_statuses = q.all()
+
+        #if statuses exists and last is associated with a closed pull request
+        # we need to check if we can allow this status change
+        if (dont_allow_on_closed_pull_request and cur_statuses 
+            and cur_statuses[0].pull_request.status == PullRequest.STATUS_CLOSED):
+            raise StatusChangeOnClosedPullRequestError(
+                'Changing status on closed pull request is not allowed'
+            )
 
         if cur_statuses:
             for st in cur_statuses:

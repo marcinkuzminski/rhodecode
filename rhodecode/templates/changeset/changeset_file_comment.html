@@ -17,8 +17,8 @@
         %if co.status_change:
            <div  style="float:left" class="changeset-status-container">
              <div style="float:left;padding:0px 2px 0px 2px"><span style="font-size: 18px;">&rsaquo;</span></div>
-             <div title="${_('Changeset status')}" class="changeset-status-lbl"> ${co.status_change.status_lbl}</div>
-             <div class="changeset-status-ico"><img src="${h.url(str('/images/icons/flag_status_%s.png' % co.status_change.status))}" /></div>
+             <div title="${_('Changeset status')}" class="changeset-status-lbl"> ${co.status_change[0].status_lbl}</div>
+             <div class="changeset-status-ico"><img src="${h.url(str('/images/icons/flag_status_%s.png' % co.status_change[0].status))}" /></div>
            </div>
         %endif
       %if h.HasPermissionAny('hg.admin', 'repository.admin')() or co.author.user_id == c.rhodecode_user.user_id:

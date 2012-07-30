@@ -50,3 +50,7 @@ class UserOwnsReposException(Exception):
 
 class UsersGroupsAssignedException(Exception):
     pass
+
+
+class StatusChangeOnClosedPullRequestError(Exception):
+    pass

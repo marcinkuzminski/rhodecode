@@ -49,6 +49,7 @@ from rhodecode.model.changeset_status import ChangesetStatusModel
 from rhodecode.model.meta import Session
 from rhodecode.lib.diffs import wrapped_diff
 from rhodecode.model.repo import RepoModel
+from rhodecode.lib.exceptions import StatusChangeOnClosedPullRequestError
 
 log = logging.getLogger(__name__)
 
@@ -388,18 +389,31 @@ class ChangesetController(BaseRepoController):
 
         # get status if set !
         if status and change_status:
-            ChangesetStatusModel().set_status(
-                c.rhodecode_db_repo.repo_id,
-                status,
-                c.rhodecode_user.user_id,
-                comm,
-                revision=revision,
-            )
+            # if latest status was from pull request and it's closed
+            # disallow changing status ! 
+            # dont_allow_on_closed_pull_request = True !
+
+            try:
+                ChangesetStatusModel().set_status(
+                    c.rhodecode_db_repo.repo_id,
+                    status,
+                    c.rhodecode_user.user_id,
+                    comm,
+                    revision=revision,
+                    dont_allow_on_closed_pull_request=True
+                )
+            except StatusChangeOnClosedPullRequestError:
+                log.error(traceback.format_exc())
+                msg = _('Changing status on a changeset associated with'
+                        'a closed pull request is not allowed')
+                h.flash(msg, category='warning')
+                return redirect(h.url('changeset_home', repo_name=repo_name,
+                                      revision=revision))
         action_logger(self.rhodecode_user,
                       'user_commented_revision:%s' % revision,
                       c.rhodecode_db_repo, self.ip_addr, self.sa)
 
-        Session.commit()
+        Session().commit()
 
         if not request.environ.get('HTTP_X_PARTIAL_XHR'):
             return redirect(h.url('changeset_home', repo_name=repo_name,
@@ -422,7 +436,7 @@ class ChangesetController(BaseRepoController):
         owner = lambda: co.author.user_id == c.rhodecode_user.user_id
         if h.HasPermissionAny('hg.admin', 'repository.admin')() or owner:
             ChangesetCommentsModel().delete(comment=co)
-            Session.commit()
+            Session().commit()
             return True
         else:
             raise HTTPForbidden()

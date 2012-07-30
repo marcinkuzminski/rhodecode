@@ -1449,7 +1449,7 @@ class ChangesetComment(Base, BaseModel):
 
     author = relationship('User', lazy='joined')
     repo = relationship('Repository')
-    status_change = relationship('ChangesetStatus', uselist=False)
+    status_change = relationship('ChangesetStatus', cascade="all, delete, delete-orphan")
     pull_request = relationship('PullRequest', lazy='joined')
 
     @classmethod
