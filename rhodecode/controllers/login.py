@@ -26,6 +26,7 @@
 import logging
 import formencode
 import datetime
+import urlparse
 
 from formencode import htmlfill
 from webob.exc import HTTPFound
@@ -96,6 +97,19 @@ class LoginController(BaseController):
                     # send set-cookie headers back to response to update cookie
                     headers = [('Set-Cookie', session.request['cookie_out'])]
 
+                allowed_schemes = ['http', 'https', 'ftp']
+                parsed = urlparse.urlparse(c.came_from)
+                server_parsed = urlparse.urlparse(url.current())
+
+                if parsed.scheme and parsed.scheme not in allowed_schemes:
+                    log.error('Suspicious URL scheme detected %s for url %s' %
+                              (parsed.scheme, parsed))
+                    c.came_from = url('home')
+                elif server_parsed.netloc != parsed.netloc:
+                    log.error('Suspicious NETLOC detected %s for url %s'
+                              'server url is: %s' %
+                              (parsed.netloc, parsed, server_parsed))
+                    c.came_from = url('home')
                 if c.came_from:
                     raise HTTPFound(location=c.came_from, headers=headers)
                 else:
