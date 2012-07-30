@@ -338,6 +338,9 @@ class SubprocessIOChunker(object):
             input_streamer.start()
             inputstream = input_streamer.output
 
+        if isinstance(cmd, (list, tuple)):
+            cmd = ' '.join(cmd)
+
         _p = subprocess.Popen(cmd,
             bufsize=-1,
             shell=True,
@@ -367,8 +370,8 @@ class SubprocessIOChunker(object):
                 pass
             bg_out.stop()
             bg_err.stop()
-            err = '%r' % ''.join(bg_err)
-            raise EnvironmentError("Subprocess exited due to an error.\n" + err)
+            err = '%s' % ''.join(bg_err)
+            raise EnvironmentError("Subprocess exited due to an error:\n" + err)
 
         self.process = _p
         self.output = bg_out
@@ -379,7 +382,7 @@ class SubprocessIOChunker(object):
 
     def next(self):
         if self.process.poll():
-            err = '%r' % ''.join(self.error)
+            err = '%s' % ''.join(self.error)
             raise EnvironmentError("Subprocess exited due to an error:\n" + err)
         return self.output.next()
 

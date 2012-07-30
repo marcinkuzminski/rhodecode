@@ -13,6 +13,8 @@ import os
 import re
 import time
 import posixpath
+import logging
+import traceback
 from dulwich.repo import Repo, NotGitRepository
 #from dulwich.config import ConfigFile
 from string import Template
@@ -33,6 +35,10 @@ from .workdir import GitWorkdir
 from .changeset import GitChangeset
 from .inmemory import GitInMemoryChangeset
 from .config import ConfigFile
+from rhodecode.lib import subprocessio
+
+
+log = logging.getLogger(__name__)
 
 
 class GitRepository(BaseRepository):
@@ -106,22 +112,18 @@ class GitRepository(BaseRepository):
             cmd = ' '.join(cmd)
         try:
             opts = dict(
-                shell=isinstance(cmd, basestring),
-                stdout=PIPE,
-                stderr=PIPE,
                 env=gitenv,
             )
             if os.path.isdir(self.path):
                 opts['cwd'] = self.path
-            p = Popen(cmd, **opts)
-        except OSError, err:
+            p = subprocessio.SubprocessIOChunker(cmd, **opts)
+        except (EnvironmentError, OSError), err:
+            log.error(traceback.format_exc())
             raise RepositoryError("Couldn't run git command (%s).\n"
-                "Original error was:%s" % (cmd, err))
-        so, se = p.communicate()
-        if not se.startswith("fatal: bad default revision 'HEAD'") and \
-            p.returncode != 0:
-            raise RepositoryError("Couldn't run git command (%s).\n"
-                "stderr:\n%s" % (cmd, se))
+                                  "Original error was:%s" % (cmd, err))
+
+        so = ''.join(p)
+        se = None
         return so, se
 
     def _check_url(self, url):
@@ -161,6 +163,13 @@ class GitRepository(BaseRepository):
             raise RepositoryError(err)
 
     def _get_all_revisions(self):
+        # we must check if this repo is not empty, since later command
+        # fails if it is. And it's cheaper to ask than throw the subprocess
+        # errors
+        try:
+            self._repo.head()
+        except KeyError:
+            return []
         cmd = 'rev-list --all --reverse --date-order'
         try:
             so, se = self.run_git_command(cmd)
