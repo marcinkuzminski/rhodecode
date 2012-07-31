@@ -55,6 +55,25 @@ class TestLoginController(TestController):
         self.assertEqual(response.status, '200 OK')
         self.assertTrue('Users administration' in response.body)
 
+    @parameterized.expand([
+          ('data:text/html,<script>window.alert("xss")</script>',),
+          ('mailto:test@rhodecode.org',),
+          ('file:///etc/passwd',),
+          ('ftp://some.ftp.server',),
+          ('http://other.domain',),
+    ])
+    def test_login_bad_came_froms(self, url_came_from):
+        response = self.app.post(url(controller='login', action='index',
+                                     came_from=url_came_from),
+                                 {'username': 'test_admin',
+                                  'password': 'test12'})
+        self.assertEqual(response.status, '302 Found')
+        self.assertEqual(response._environ['paste.testing_variables']
+                         ['tmpl_context'].came_from, '/')
+        response = response.follow()
+
+        self.assertEqual(response.status, '200 OK')
+
     def test_login_short_password(self):
         response = self.app.post(url(controller='login', action='index'),
                                  {'username': 'test_admin',

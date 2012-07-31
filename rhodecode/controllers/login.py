@@ -43,7 +43,6 @@ from rhodecode.model.user import UserModel
 from rhodecode.model.meta import Session
 
 
-
 log = logging.getLogger(__name__)
 
 
@@ -54,7 +53,7 @@ class LoginController(BaseController):
 
     def index(self):
         # redirect if already logged in
-        c.came_from = request.GET.get('came_from', None)
+        c.came_from = request.GET.get('came_from')
 
         if self.rhodecode_user.is_authenticated \
                             and self.rhodecode_user.username != 'default':
@@ -97,20 +96,20 @@ class LoginController(BaseController):
                     # send set-cookie headers back to response to update cookie
                     headers = [('Set-Cookie', session.request['cookie_out'])]
 
-                allowed_schemes = ['http', 'https', 'ftp']
-                parsed = urlparse.urlparse(c.came_from)
-                server_parsed = urlparse.urlparse(url.current())
-
-                if parsed.scheme and parsed.scheme not in allowed_schemes:
-                    log.error('Suspicious URL scheme detected %s for url %s' %
-                              (parsed.scheme, parsed))
-                    c.came_from = url('home')
-                elif server_parsed.netloc != parsed.netloc:
-                    log.error('Suspicious NETLOC detected %s for url %s'
-                              'server url is: %s' %
-                              (parsed.netloc, parsed, server_parsed))
-                    c.came_from = url('home')
+                allowed_schemes = ['http', 'https']
                 if c.came_from:
+                    parsed = urlparse.urlparse(c.came_from)
+                    server_parsed = urlparse.urlparse(url.current())
+                    if parsed.scheme and parsed.scheme not in allowed_schemes:
+                        log.error(
+                            'Suspicious URL scheme detected %s for url %s' %
+                            (parsed.scheme, parsed))
+                        c.came_from = url('home')
+                    elif server_parsed.netloc != parsed.netloc:
+                        log.error('Suspicious NETLOC detected %s for url %s'
+                                  'server url is: %s' %
+                                  (parsed.netloc, parsed, server_parsed))
+                        c.came_from = url('home')
                     raise HTTPFound(location=c.came_from, headers=headers)
                 else:
                     raise HTTPFound(location=url('home'), headers=headers)
