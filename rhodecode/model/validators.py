@@ -377,6 +377,8 @@ def ValidCloneUri():
                 httpsrepository(make_ui('db'), url).capabilities
             elif proto == 'http':
                 httprepository(make_ui('db'), url).capabilities
+            elif proto == 'svn+http':
+                svnremoterepo(make_ui('db'), url).capabilities
         elif repo_type == 'git':
             #TODO: write a git url validator
             pass
@@ -385,7 +387,7 @@ def ValidCloneUri():
         messages = {
             'clone_uri': _(u'invalid clone url'),
             'invalid_clone_uri': _(u'Invalid clone url, provide a '
-                                    'valid clone http\s url')
+                                    'valid clone http(s)/svn+http(s) url')
         }
 
         def validate_python(self, value, state):
@@ -394,8 +396,21 @@ def ValidCloneUri():
 
             if not url:
                 pass
-            elif url.startswith('https') or url.startswith('http'):
-                _type = 'https' if url.startswith('https') else 'http'
+            elif url.startswith('https') or \
+                url.startswith('http') or \
+                url.startswith('svn+http'):
+                if url.startswith('https'):
+                    _type = 'https'
+                elif url.startswith('http'):
+                    _type = 'http'
+                elif url.startswith('svn+http'):
+                    try:
+                        from hgsubversion.svnrepo import svnremoterepo
+                        global svnremoterepo
+                    except ImportError:
+                        raise formencode.Invalid(_('invalid clone url: hgsubversion '
+                                                   'is not installed'), value, state)
+                    _type = 'svn+http'
                 try:
                     url_handler(repo_type, url, _type, make_ui('db'))
                 except Exception:

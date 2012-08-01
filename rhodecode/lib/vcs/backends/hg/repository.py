@@ -270,6 +270,9 @@ class MercurialRepository(BaseRepository):
         if os.path.isdir(url) or url.startswith('file:'):
             return True
 
+        if('+' in url[:url.find('://')]):
+            url = url[url.find('+')+1:]
+
         handlers = []
         test_uri, authinfo = Url(url).authinfo()
 
