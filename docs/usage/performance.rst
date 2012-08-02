@@ -8,10 +8,11 @@ Optimizing RhodeCode Performance
 Follow these few steps to improve performance of RhodeCode system.
 
 
-1. Increase cache::
+1. Increase cache
 
-    in the .ini file    
-    beaker.cache.sql_cache_long.expire=3600 <-- set this to higher number
+    in the .ini file::
+       
+     beaker.cache.sql_cache_long.expire=3600 <-- set this to higher number
 
     This option affects the cache expiration time for main page. Having
     few hundreds of repositories on main page can sometimes make the system
