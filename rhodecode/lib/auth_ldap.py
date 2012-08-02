@@ -27,6 +27,7 @@ import logging
 
 from rhodecode.lib.exceptions import LdapConnectionError, LdapUsernameError, \
     LdapPasswordError
+from rhodecode.lib.utils2 import safe_str
 
 log = logging.getLogger(__name__)
 
@@ -60,15 +61,15 @@ class AuthLdap(object):
         self.LDAP_SERVER_PORT = port
 
         # USE FOR READ ONLY BIND TO LDAP SERVER
-        self.LDAP_BIND_DN = bind_dn
-        self.LDAP_BIND_PASS = bind_pass
+        self.LDAP_BIND_DN = safe_str(bind_dn)
+        self.LDAP_BIND_PASS = safe_str(bind_pass)
 
         self.LDAP_SERVER = "%s://%s:%s" % (ldap_server_type,
                                            self.LDAP_SERVER_ADDRESS,
                                            self.LDAP_SERVER_PORT)
 
-        self.BASE_DN = base_dn
-        self.LDAP_FILTER = ldap_filter
+        self.BASE_DN = safe_str(base_dn)
+        self.LDAP_FILTER = safe_str(ldap_filter)
         self.SEARCH_SCOPE = getattr(ldap, 'SCOPE_%s' % search_scope)
         self.attr_login = attr_login
 
