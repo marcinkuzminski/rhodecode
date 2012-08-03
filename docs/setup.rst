@@ -532,6 +532,15 @@ Sample config for nginx using proxy::
        access_log      /var/log/nginx/rhodecode.access.log;
        error_log       /var/log/nginx/rhodecode.error.log;
 
+       # uncomment if you have nginx with chunking module compiled
+       # fixes the issues of having to put postBuffer data for large git
+       # pushes       
+       #chunkin on;
+       #error_page 411 = @my_411_error;
+       #location @my_411_error {
+       #    chunkin_resume;
+       #}
+
        location / {
             try_files $uri @rhode;
        }
