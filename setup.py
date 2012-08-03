@@ -60,10 +60,10 @@ if sys.version_info <= (2, 6):
     requirements.append("unittest2")
 
 if is_windows:
-    requirements.append("mercurial>=2.2.3,<2.3")
+    requirements.append("mercurial>=2.3.0,<2.4")
 else:
     requirements.append("py-bcrypt")
-    requirements.append("mercurial>=2.2.3,<2.3")
+    requirements.append("mercurial>=2.3.0,<2.4")
 
 
 dependency_links = [
