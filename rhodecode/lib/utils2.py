@@ -417,6 +417,7 @@ def get_changeset_safe(repo, rev):
     """
     from rhodecode.lib.vcs.backends.base import BaseRepository
     from rhodecode.lib.vcs.exceptions import RepositoryError
+    from rhodecode.lib.vcs.backends.base import EmptyChangeset
     if not isinstance(repo, BaseRepository):
         raise Exception('You must pass an Repository '
                         'object as first argument got %s', type(repo))
@@ -424,7 +425,6 @@ def get_changeset_safe(repo, rev):
     try:
         cs = repo.get_changeset(rev)
     except RepositoryError:
-        from rhodecode.lib.utils import EmptyChangeset
         cs = EmptyChangeset(requested_revision=rev)
     return cs
 

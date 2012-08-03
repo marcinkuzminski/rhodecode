@@ -13,3 +13,5 @@ from mercurial.mdiff import diffopts
 from mercurial.node import hex
 from mercurial.encoding import tolocal
 from mercurial import discovery
+from mercurial import localrepo
+from mercurial import scmutil

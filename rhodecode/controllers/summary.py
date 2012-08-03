@@ -45,7 +45,7 @@ from rhodecode.model.db import Statistics, CacheInvalidation
 from rhodecode.lib.utils2 import safe_unicode
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseRepoController, render
-from rhodecode.lib.utils import EmptyChangeset
+from rhodecode.lib.vcs.backends.base import EmptyChangeset
 from rhodecode.lib.markup_renderer import MarkupRenderer
 from rhodecode.lib.celerylib import run_task
 from rhodecode.lib.celerylib.tasks import get_commits_stats

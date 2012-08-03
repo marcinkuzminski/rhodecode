@@ -346,50 +346,6 @@ def invalidate_cache(cache_key, *args):
         ScmModel().mark_for_invalidation(name)
 
 
-class EmptyChangeset(BaseChangeset):
-    """
-    An dummy empty changeset. It's possible to pass hash when creating
-    an EmptyChangeset
-    """
-
-    def __init__(self, cs='0' * 40, repo=None, requested_revision=None,
-                 alias=None):
-        self._empty_cs = cs
-        self.revision = -1
-        self.message = ''
-        self.author = ''
-        self.date = ''
-        self.repository = repo
-        self.requested_revision = requested_revision
-        self.alias = alias
-
-    @LazyProperty
-    def raw_id(self):
-        """
-        Returns raw string identifying this changeset, useful for web
-        representation.
-        """
-
-        return self._empty_cs
-
-    @LazyProperty
-    def branch(self):
-        return get_backend(self.alias).DEFAULT_BRANCH_NAME
-
-    @LazyProperty
-    def short_id(self):
-        return self.raw_id[:12]
-
-    def get_file_changeset(self, path):
-        return self
-
-    def get_file_content(self, path):
-        return u''
-
-    def get_file_size(self, path):
-        return 0
-
-
 def map_groups(path):
     """
     Given a full path to a repository, create all nested groups that this

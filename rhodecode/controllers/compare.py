@@ -71,6 +71,7 @@ class CompareController(BaseRepoController):
             redirect(url('summary_home', repo_name=repo.repo_name))
 
         except RepositoryError, e:
+            log.error(traceback.format_exc())
             h.flash(str(e), category='warning')
             redirect(h.url('summary_home', repo_name=repo.repo_name))
 

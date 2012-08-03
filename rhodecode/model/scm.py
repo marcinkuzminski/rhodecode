@@ -40,13 +40,14 @@ from rhodecode.lib.vcs import get_backend
 from rhodecode.lib.vcs.exceptions import RepositoryError
 from rhodecode.lib.vcs.utils.lazy import LazyProperty
 from rhodecode.lib.vcs.nodes import FileNode
+from rhodecode.lib.vcs.backends.base import EmptyChangeset
 
 from rhodecode import BACKENDS
 from rhodecode.lib import helpers as h
 from rhodecode.lib.utils2 import safe_str, safe_unicode
 from rhodecode.lib.auth import HasRepoPermissionAny, HasReposGroupPermissionAny
 from rhodecode.lib.utils import get_repos as get_filesystem_repos, make_ui, \
-    action_logger, EmptyChangeset, REMOVED_REPO_PAT
+    action_logger, REMOVED_REPO_PAT
 from rhodecode.model import BaseModel
 from rhodecode.model.db import Repository, RhodeCodeUi, CacheInvalidation, \
     UserFollowing, UserLog, User, RepoGroup, PullRequest
@@ -414,6 +415,12 @@ class ScmModel(BaseModel):
 
     def commit_change(self, repo, repo_name, cs, user, author, message,
                       content, f_path):
+        """
+        Commits changes
+
+        :param repo: SCM instance
+
+        """
 
         if repo.alias == 'hg':
             from rhodecode.lib.vcs.backends.hg import \
@@ -439,6 +446,7 @@ class ScmModel(BaseModel):
         action = 'push_local:%s' % tip.raw_id
         action_logger(user, action, repo_name)
         self.mark_for_invalidation(repo_name)
+        return tip
 
     def create_node(self, repo, repo_name, cs, user, author, message, content,
                       f_path):
@@ -477,6 +485,7 @@ class ScmModel(BaseModel):
         action = 'push_local:%s' % tip.raw_id
         action_logger(user, action, repo_name)
         self.mark_for_invalidation(repo_name)
+        return tip
 
     def get_nodes(self, repo_name, revision, root_path='/', flat=True):
         """

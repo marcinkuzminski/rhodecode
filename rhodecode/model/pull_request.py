@@ -36,7 +36,7 @@ from rhodecode.model.db import PullRequest, PullRequestReviewers, Notification
 from rhodecode.model.notification import NotificationModel
 from rhodecode.lib.utils2 import safe_unicode
 
-from rhodecode.lib.vcs.utils.hgcompat import discovery
+from rhodecode.lib.vcs.utils.hgcompat import discovery, localrepo, scmutil
 
 log = logging.getLogger(__name__)
 
@@ -150,13 +150,9 @@ class PullRequestModel(BaseModel):
         """
         changesets = []
         #case two independent repos
-        if org_repo != other_repo:
-            common, incoming, rheads = discovery_data
-
-            if not incoming:
-                revs = []
-            else:
-                revs = org_repo._repo.changelog.findmissing(common, rheads)
+        common, incoming, rheads = discovery_data
+        if org_repo != other_repo and incoming:
+            revs = org_repo._repo.changelog.findmissing(common, rheads)
 
             for cs in reversed(map(binascii.hexlify, revs)):
                 changesets.append(org_repo.get_changeset(cs))
@@ -175,7 +171,6 @@ class PullRequestModel(BaseModel):
                )
             ]
 
-            from mercurial import scmutil
             out = scmutil.revrange(org_repo._repo, revs)
             for cs in reversed(out):
                 changesets.append(org_repo.get_changeset(cs))
@@ -197,17 +192,22 @@ class PullRequestModel(BaseModel):
         :type other_ref:
         """
 
-        other = org_repo._repo
-        repo = other_repo._repo
-        tip = other[org_ref[1]]
+        _org_repo = org_repo._repo
+        org_rev_type, org_rev = org_ref
+
+        _other_repo = other_repo._repo
+        other_rev_type, other_rev = other_ref
+
         log.debug('Doing discovery for %s@%s vs %s@%s' % (
                         org_repo, org_ref, other_repo, other_ref)
         )
-        log.debug('Filter heads are %s[%s]' % (tip, org_ref[1]))
+        #log.debug('Filter heads are %s[%s]' % ('', org_ref[1]))
+        org_peer = localrepo.locallegacypeer(_org_repo.local())
         tmp = discovery.findcommonincoming(
-                  repo=repo,  # other_repo we check for incoming
-                  remote=other,  # org_repo source for incoming
-                  heads=[tip.node()],
+                  repo=_other_repo,  # other_repo we check for incoming
+                  remote=org_peer,  # org_repo source for incoming
+                  heads=[_other_repo[other_rev].node(),
+                         _org_repo[org_rev].node()],
                   force=False
         )
         return tmp
@@ -237,8 +237,9 @@ class PullRequestModel(BaseModel):
                                            other_repo.scm_instance,
                                            other_ref)
         cs_ranges = self._get_changesets(org_repo.scm_instance,
-                                           org_ref,
-                                           other_repo.scm_instance,
-                                           other_ref,
-                                           discovery_data)
+                                         org_ref,
+                                         other_repo.scm_instance,
+                                         other_ref,
+                                         discovery_data)
+
         return cs_ranges, discovery_data

@@ -34,15 +34,16 @@ from itertools import tee, imap
 from mercurial import patch
 from mercurial.mdiff import diffopts
 from mercurial.bundlerepo import bundlerepository
-from mercurial import localrepo
 
 from pylons.i18n.translation import _
 
 from rhodecode.lib.compat import BytesIO
+from rhodecode.lib.vcs.utils.hgcompat import localrepo
 from rhodecode.lib.vcs.exceptions import VCSError
 from rhodecode.lib.vcs.nodes import FileNode, SubModuleNode
+from rhodecode.lib.vcs.backends.base import EmptyChangeset
 from rhodecode.lib.helpers import escape
-from rhodecode.lib.utils import EmptyChangeset, make_ui
+from rhodecode.lib.utils import make_ui
 
 
 def wrap_to_table(str_):
@@ -599,9 +600,9 @@ def differ(org_repo, org_ref, other_repo, other_ref, discovery_data=None):
     if org_repo != other_repo:
 
         common, incoming, rheads = discovery_data
-
+        other_repo_peer = localrepo.locallegacypeer(other_repo.local())
         # create a bundle (uncompressed if other repo is not local)
-        if other_repo.capable('getbundle') and incoming:
+        if other_repo_peer.capable('getbundle') and incoming:
             # disable repo hooks here since it's just bundle !
             # patch and reset hooks section of UI config to not run any
             # hooks on fetching archives with subrepos

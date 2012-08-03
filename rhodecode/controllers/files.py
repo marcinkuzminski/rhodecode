@@ -40,7 +40,7 @@ from rhodecode.lib.compat import OrderedDict
 from rhodecode.lib.utils2 import convert_line_endings, detect_mode, safe_str
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseRepoController, render
-from rhodecode.lib.utils import EmptyChangeset
+from rhodecode.lib.vcs.backends.base import EmptyChangeset
 from rhodecode.lib.vcs.conf import settings
 from rhodecode.lib.vcs.exceptions import RepositoryError, \
     ChangesetDoesNotExistError, EmptyRepositoryError, \

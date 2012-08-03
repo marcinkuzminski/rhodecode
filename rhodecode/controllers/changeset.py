@@ -40,7 +40,7 @@ from rhodecode.lib.vcs.nodes import FileNode
 import rhodecode.lib.helpers as h
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseRepoController, render
-from rhodecode.lib.utils import EmptyChangeset, action_logger
+from rhodecode.lib.utils import action_logger
 from rhodecode.lib.compat import OrderedDict
 from rhodecode.lib import diffs
 from rhodecode.model.db import ChangesetComment, ChangesetStatus
@@ -50,6 +50,7 @@ from rhodecode.model.meta import Session
 from rhodecode.lib.diffs import wrapped_diff
 from rhodecode.model.repo import RepoModel
 from rhodecode.lib.exceptions import StatusChangeOnClosedPullRequestError
+from rhodecode.lib.vcs.backends.base import EmptyChangeset
 
 log = logging.getLogger(__name__)
 
