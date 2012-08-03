@@ -79,7 +79,9 @@ def load_environment(global_conf, app_conf, initial=False):
         from rhodecode.lib.utils import create_test_env, create_test_index
         from rhodecode.tests import  TESTS_TMP_PATH
         create_test_env(TESTS_TMP_PATH, config)
-        create_test_index(TESTS_TMP_PATH, config, True)
+        # set RC_WHOOSH_TEST_DISABLE=1 to disable whoosh index during tests
+        if not int(os.environ.get('RC_WHOOSH_TEST_DISABLE', 0)):
+            create_test_index(TESTS_TMP_PATH, config, True)
 
     # MULTIPLE DB configs
     # Setup the SQLAlchemy database engine
