@@ -11,9 +11,9 @@
 			${h.form(h.url.current())}
 			<div class="info_box">
 	          <span class="rev">${_('view')}@rev</span>
-	          <a class="ui-btn" href="${c.url_prev}" title="${_('previous revision')}">&laquo;</a>
+	          <a class="ui-btn ypjax-link" href="${c.url_prev}" title="${_('previous revision')}">&laquo;</a>
 	          ${h.text('at_rev',value=c.changeset.revision,size=5)}
-	          <a class="ui-btn" href="${c.url_next}" title="${_('next revision')}">&raquo;</a>
+	          <a class="ui-btn ypjax-link" href="${c.url_next}" title="${_('next revision')}">&raquo;</a>
 	          ## ${h.submit('view',_('view'),class_="ui-btn")}
 		    </div>
 			${h.end_form()}

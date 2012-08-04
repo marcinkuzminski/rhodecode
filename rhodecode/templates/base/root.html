@@ -55,11 +55,22 @@
                <script language="javascript" type="text/javascript" src="${h.url('/js/excanvas.min.js')}"></script>
             <![endif]-->
             <script type="text/javascript" src="${h.url('/js/yui.flot.js')}"></script>
+            <script type="text/javascript" src="${h.url('/js/native.history.js')}"></script>
             <script type="text/javascript" src="${h.url('/js/rhodecode.js')}"></script>
            ## EXTRA FOR JS
            ${self.js_extra()}
 
             <script type="text/javascript">
+            (function(window,undefined){
+
+                // Prepare
+                var History = window.History; // Note: We are using a capital H instead of a lower h
+                if ( !History.enabled ) {
+                     // History.js is disabled for this browser.
+                     // This is because we can optionally choose to support HTML4 browsers or not.
+                    return false;
+                }
+            })(window);
             var follow_base_url  = "${h.url('toggle_following')}";
 
             var onSuccessFollow = function(target){

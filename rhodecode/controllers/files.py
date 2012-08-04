@@ -166,6 +166,9 @@ class FilesController(BaseRepoController):
             redirect(h.url('files_home', repo_name=repo_name,
                            revision='tip'))
 
+        if request.environ.get('HTTP_X_PARTIAL_XHR'):
+            return render('files/files_ypjax.html')
+
         return render('files/files.html')
 
     @LoginRequired()

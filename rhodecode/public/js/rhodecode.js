@@ -714,8 +714,9 @@ var fileBrowserListeners = function(current_url, node_list_url, url_base){
 	                    var t = nodes[i].type;
 	                    var n_hl = n.substring(0,pos)
 	                      +"<b>{0}</b>".format(n.substring(pos,pos+query.length))
-	                      +n.substring(pos+query.length)                    
-	                    match.push('<tr><td><a class="browser-{0}" href="{1}">{2}</a></td><td colspan="5"></td></tr>'.format(t,node_url.replace('__FPATH__',n),n_hl));
+	                      +n.substring(pos+query.length)
+	                    node_url = node_url.replace('__FPATH__',n);
+	                    match.push('<tr><td><a class="browser-{0}" href="{1}">{2}</a></td><td colspan="5"></td></tr>'.format(t,node_url,n_hl));
 	                }
 	                if(match.length >= matches_max){
 	                    match.push('<tr><td>{0}</td><td colspan="5"></td></tr>'.format(_TM['search truncated']));

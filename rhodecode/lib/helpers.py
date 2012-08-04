@@ -153,7 +153,8 @@ class _FilesBreadCrumbs(object):
             paths = safe_unicode(paths)
         url_l = [link_to(repo_name, url('files_home',
                                         repo_name=repo_name,
-                                        revision=rev, f_path=''))]
+                                        revision=rev, f_path=''),
+                         class_='ypjax-link')]
         paths_l = paths.split('/')
         for cnt, p in enumerate(paths_l):
             if p != '':
@@ -162,7 +163,8 @@ class _FilesBreadCrumbs(object):
                                          repo_name=repo_name,
                                          revision=rev,
                                          f_path='/'.join(paths_l[:cnt + 1])
-                                         )
+                                         ),
+                                     class_='ypjax-link'
                                      )
                              )
 

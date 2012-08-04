@@ -1,7 +1,7 @@
 <%inherit file="/base/base.html"/>
 
 <%def name="title()">
-    ${_('%s Files') % c.repo_name} - ${c.rhodecode_name}
+    ${_('%s files') % c.repo_name} - ${c.rhodecode_name}
 </%def>
 
 <%def name="breadcrumbs_links()">
@@ -36,11 +36,97 @@
 		</div>
     </div>
 </div>
+
 <script type="text/javascript">
-var YPJAX_TITLE = "${c.repo_name} ${_('Files')} - ${c.rhodecode_name}";
-var current_url = "${h.url.current()}";
-var node_list_url = '${h.url("files_home",repo_name=c.repo_name,revision=c.changeset.raw_id,f_path='__FPATH__')}';
-var url_base = '${h.url("files_nodelist_home",repo_name=c.repo_name,revision=c.changeset.raw_id,f_path=c.file.path)}';
-fileBrowserListeners(current_url, node_list_url, url_base);
+var CACHE = {};
+var CACHE_EXPIRE = 60*1000; //cache for 60s
+
+var ypjax_links = function(){
+    YUE.on(YUQ('.ypjax-link'), 'click',function(e){
+    	
+    	//don't do ypjax on middle click
+    	if(e.which == 2){ 
+    		return true;
+    	}
+        var el = e.currentTarget;
+        var url = el.href;
+        
+        var _base_url = '${h.url("files_home",repo_name=c.repo_name,revision='',f_path='')}';
+        _base_url = _base_url.replace('//','/')
+        
+        //extract rev and the f_path from url.
+        parts = url.split(_base_url)
+        if(parts.length != 2){
+        	return false;
+        }
+        
+        var parts2 = parts[1].split('/');
+      	var rev = parts2.shift(); // pop the first element which is the revision
+      	var f_path = parts2.join('/');
+        
+        var title = "${_('%s files') % c.repo_name}" + " - " + f_path;
+        
+        //used to construct links from the search list
+        var node_list_url = '${h.url("files_home",repo_name=c.repo_name,revision='__REV__',f_path='__FPATH__')}';
+        node_list_url = node_list_url.replace('__REV__',rev);
+        //send the nodelist request to this url
+        var url_base = '${h.url("files_nodelist_home",repo_name=c.repo_name,revision='__REV__',f_path='__FPATH__')}';
+        url_base = url_base.replace('__REV__',rev).replace('__FPATH__', f_path)
+        
+        // Change our States and save some data for handling events
+        var data = {url:url,title:title, url_base:url_base,
+                    node_list_url:node_list_url};
+        History.pushState(data, title, url);        
+        
+        //now we're sure that we can do ypjax things
+        YUE.preventDefault(e)
+        return false;
+    });
+}
+
+var callbacks = function(State){
+    ypjax_links();
+    tooltip_activate();
+    fileBrowserListeners(State.url, State.data.node_list_url, State.data.url_base);
+    // Inform Google Analytics of the change
+    if ( typeof window.pageTracker !== 'undefined' ) {
+        window.pageTracker._trackPageview(State.url);
+    }	
+}
+
+YUE.onDOMReady(function(){ 
+    ypjax_links();
+    var container = 'files_data';
+    //Bind to StateChange Event
+    History.Adapter.bind(window,'statechange',function(){
+        var State = History.getState();
+        cache_key = State.url;
+        //check if we have this request in cache maybe ?
+        var _cache_obj = CACHE[cache_key];
+        var _cur_time = new Date().getTime();
+        // get from cache if it's there and not yet expired !
+        if(_cache_obj !== undefined && _cache_obj[0] > _cur_time){
+            YUD.get(container).innerHTML=_cache_obj[1];
+            YUD.setStyle(container,'opacity','1.0');
+
+            //callbacks after ypjax call
+            callbacks(State);
+        }
+        else{
+          ypjax(State.url,container,function(o){
+          	//callbacks after ypjax call
+          	callbacks(State);
+          	if (o !== undefined){
+          	  //store our request in cache
+          	  var _expire_on = new Date().getTime()+CACHE_EXPIRE;
+              CACHE[cache_key] = [_expire_on, o.responseText];
+            }
+          });
+        }
+    });    
+
+});
+
 </script>
+
 </%def>

@@ -132,6 +132,8 @@
           return node.parentNode.parentNode.parentNode.parentNode;
       }
 
+      var sort_by = "name";
+      var sort_dir = "asc";
 
       // groups table sorting
       var myColumnDefs = [
@@ -192,7 +194,7 @@
 
       var myDataTable = new YAHOO.widget.DataTable("repos_list_wrap", myColumnDefs, myDataSource,
               {
-               sortedBy:{key:"name",dir:"asc"},
+               sortedBy:{key:sort_by,dir:sort_dir},
                MSG_SORTASC:"${_('Click to sort ascending')}",
                MSG_SORTDESC:"${_('Click to sort descending')}",
                MSG_EMPTY:"${_('No records found.')}",
