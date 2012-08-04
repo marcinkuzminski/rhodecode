@@ -81,7 +81,7 @@ class FilesController(BaseRepoController):
             url_ = url('files_add_home',
                        repo_name=c.repo_name,
                        revision=0, f_path='')
-            add_new = '<a href="%s">[%s]</a>' % (url_, _('add new'))
+            add_new = '<a href="%s">[%s]</a>' % (url_, _('click here to add new file'))
             h.flash(h.literal(_('There are no files yet %s') % add_new),
                     category='warning')
             redirect(h.url('summary_home', repo_name=repo_name))
