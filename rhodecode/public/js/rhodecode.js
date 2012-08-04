@@ -217,9 +217,8 @@ function ypjax(url,container,s_call,f_call,args){
 		success:s_wrapper,
 		failure:function(o){
 			console.log(o);
-			YUD.get(container).innerHTML='ERROR '+o.status;
+			YUD.get(container).innerHTML='<span class="error_red">ERROR: {0}</span>'.format(o.status);
 			YUD.setStyle(container,'opacity','1.0');
-			YUD.setStyle(container,'color','red');
 		}
 	},args);
 	

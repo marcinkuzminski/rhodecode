@@ -3220,6 +3220,10 @@ table.code-browser .submodule-dir {
 	
 }
 
+.error_red {
+	color:red;
+}
+
 .error_msg {
 	background-color: #c43c35;
 	background-repeat: repeat-x;
