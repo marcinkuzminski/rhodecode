@@ -55,7 +55,7 @@ var ypjax_links = function(){
     	
         var el = e.currentTarget;
         var url = el.href;
-        
+
         var _base_url = '${h.url("files_home",repo_name=c.repo_name,revision='',f_path='')}';
         _base_url = _base_url.replace('//','/')
         
@@ -72,8 +72,8 @@ var ypjax_links = function(){
         var title = "${_('%s files') % c.repo_name}" + " - " + f_path;
         
         var _node_list_url = node_list_url.replace('__REV__',rev);
-        var _url_base = url_base.replace('__REV__',rev).replace('__FPATH__', f_path)
-        
+        var _url_base = url_base.replace('__REV__',rev).replace('__FPATH__', f_path);
+
         // Change our States and save some data for handling events
         var data = {url:url,title:title, url_base:_url_base,
                     node_list_url:_node_list_url};
@@ -131,7 +131,7 @@ YUE.onDOMReady(function(){
        url: "${h.url.current()}",
        data: {
          node_list_url: node_list_url.replace('__REV__',"${c.changeset.raw_id}"),
-         url_base: url_base.replace('__REV__',"${c.changeset.raw_id}").replace('__FPATH__', "${c.file.path}")
+         url_base: url_base.replace('__REV__',"${c.changeset.raw_id}").replace('__FPATH__', "${h.safe_unicode(c.file.path)}")
        }
     }
     fileBrowserListeners(_State.url, _State.data.node_list_url, _State.data.url_base);
