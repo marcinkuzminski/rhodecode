@@ -69,7 +69,7 @@ def make_map(config):
     rmap.connect('home', '/', controller='home', action='index')
     rmap.connect('repo_switcher', '/repos', controller='home',
                  action='repo_switcher')
-    rmap.connect('branch_tag_switcher', '/branches-tags/{repo_name:.*}',
+    rmap.connect('branch_tag_switcher', '/branches-tags/{repo_name:.*?}',
                  controller='home', action='branch_tag_switcher')
     rmap.connect('bugtracker',
                  "http://bitbucket.org/marcinkuzminski/rhodecode/issues",
@@ -93,49 +93,49 @@ def make_map(config):
              action="new", conditions=dict(method=["GET"]))
         m.connect("formatted_new_repo", "/repos/new.{format}",
              action="new", conditions=dict(method=["GET"]))
-        m.connect("/repos/{repo_name:.*}",
+        m.connect("/repos/{repo_name:.*?}",
              action="update", conditions=dict(method=["PUT"],
                                               function=check_repo))
-        m.connect("/repos/{repo_name:.*}",
+        m.connect("/repos/{repo_name:.*?}",
              action="delete", conditions=dict(method=["DELETE"],
                                               function=check_repo))
-        m.connect("edit_repo", "/repos/{repo_name:.*}/edit",
+        m.connect("edit_repo", "/repos/{repo_name:.*?}/edit",
              action="edit", conditions=dict(method=["GET"],
                                             function=check_repo))
-        m.connect("formatted_edit_repo", "/repos/{repo_name:.*}.{format}/edit",
+        m.connect("formatted_edit_repo", "/repos/{repo_name:.*?}.{format}/edit",
              action="edit", conditions=dict(method=["GET"],
                                             function=check_repo))
-        m.connect("repo", "/repos/{repo_name:.*}",
+        m.connect("repo", "/repos/{repo_name:.*?}",
              action="show", conditions=dict(method=["GET"],
                                             function=check_repo))
-        m.connect("formatted_repo", "/repos/{repo_name:.*}.{format}",
+        m.connect("formatted_repo", "/repos/{repo_name:.*?}.{format}",
              action="show", conditions=dict(method=["GET"],
                                             function=check_repo))
         #ajax delete repo perm user
-        m.connect('delete_repo_user', "/repos_delete_user/{repo_name:.*}",
+        m.connect('delete_repo_user', "/repos_delete_user/{repo_name:.*?}",
              action="delete_perm_user",
              conditions=dict(method=["DELETE"], function=check_repo))
 
         #ajax delete repo perm users_group
         m.connect('delete_repo_users_group',
-                  "/repos_delete_users_group/{repo_name:.*}",
+                  "/repos_delete_users_group/{repo_name:.*?}",
                   action="delete_perm_users_group",
                   conditions=dict(method=["DELETE"], function=check_repo))
 
         #settings actions
-        m.connect('repo_stats', "/repos_stats/{repo_name:.*}",
+        m.connect('repo_stats', "/repos_stats/{repo_name:.*?}",
                   action="repo_stats", conditions=dict(method=["DELETE"],
                                                        function=check_repo))
-        m.connect('repo_cache', "/repos_cache/{repo_name:.*}",
+        m.connect('repo_cache', "/repos_cache/{repo_name:.*?}",
                   action="repo_cache", conditions=dict(method=["DELETE"],
                                                        function=check_repo))
-        m.connect('repo_public_journal', "/repos_public_journal/{repo_name:.*}",
+        m.connect('repo_public_journal', "/repos_public_journal/{repo_name:.*?}",
                   action="repo_public_journal", conditions=dict(method=["PUT"],
                                                         function=check_repo))
-        m.connect('repo_pull', "/repo_pull/{repo_name:.*}",
+        m.connect('repo_pull', "/repo_pull/{repo_name:.*?}",
                   action="repo_pull", conditions=dict(method=["PUT"],
                                                       function=check_repo))
-        m.connect('repo_as_fork', "/repo_as_fork/{repo_name:.*}",
+        m.connect('repo_as_fork', "/repo_as_fork/{repo_name:.*?}",
                   action="repo_as_fork", conditions=dict(method=["PUT"],
                                                       function=check_repo))
 
@@ -300,7 +300,6 @@ def make_map(config):
         m.connect("admin_settings_my_pullrequests", "/my_account/pull_requests",
                   action="my_account_my_pullrequests", conditions=dict(method=["GET"]))
 
-
     #NOTIFICATION REST ROUTES
     with rmap.submapper(path_prefix=ADMIN_PREFIX,
                         controller='admin/notifications') as m:
@@ -394,18 +393,18 @@ def make_map(config):
                  controller='login', action='password_reset_confirmation')
 
     #FEEDS
-    rmap.connect('rss_feed_home', '/{repo_name:.*}/feed/rss',
+    rmap.connect('rss_feed_home', '/{repo_name:.*?}/feed/rss',
                 controller='feed', action='rss',
                 conditions=dict(function=check_repo))
 
-    rmap.connect('atom_feed_home', '/{repo_name:.*}/feed/atom',
+    rmap.connect('atom_feed_home', '/{repo_name:.*?}/feed/atom',
                 controller='feed', action='atom',
                 conditions=dict(function=check_repo))
 
     #==========================================================================
     # REPOSITORY ROUTES
     #==========================================================================
-    rmap.connect('summary_home', '/{repo_name:.*}',
+    rmap.connect('summary_home', '/{repo_name:.*?}',
                 controller='summary',
                 conditions=dict(function=check_repo))
 
@@ -413,159 +412,159 @@ def make_map(config):
                 controller='admin/repos_groups', action="show_by_name",
                 conditions=dict(function=check_group))
 
-    rmap.connect('changeset_home', '/{repo_name:.*}/changeset/{revision}',
+    rmap.connect('changeset_home', '/{repo_name:.*?}/changeset/{revision}',
                 controller='changeset', revision='tip',
                 conditions=dict(function=check_repo))
 
     rmap.connect('changeset_comment',
-                 '/{repo_name:.*}/changeset/{revision}/comment',
+                 '/{repo_name:.*?}/changeset/{revision}/comment',
                 controller='changeset', revision='tip', action='comment',
                 conditions=dict(function=check_repo))
 
     rmap.connect('changeset_comment_delete',
-                 '/{repo_name:.*}/changeset/comment/{comment_id}/delete',
+                 '/{repo_name:.*?}/changeset/comment/{comment_id}/delete',
                 controller='changeset', action='delete_comment',
                 conditions=dict(function=check_repo, method=["DELETE"]))
 
     rmap.connect('raw_changeset_home',
-                 '/{repo_name:.*}/raw-changeset/{revision}',
+                 '/{repo_name:.*?}/raw-changeset/{revision}',
                  controller='changeset', action='raw_changeset',
                  revision='tip', conditions=dict(function=check_repo))
 
     rmap.connect('compare_url',
-                 '/{repo_name:.*}/compare/{org_ref_type}@{org_ref}...{other_ref_type}@{other_ref}',
+                 '/{repo_name:.*?}/compare/{org_ref_type}@{org_ref}...{other_ref_type}@{other_ref}',
                  controller='compare', action='index',
                  conditions=dict(function=check_repo),
                  requirements=dict(org_ref_type='(branch|book|tag|rev)',
                                    other_ref_type='(branch|book|tag|rev)'))
 
     rmap.connect('pullrequest_home',
-                 '/{repo_name:.*}/pull-request/new', controller='pullrequests',
+                 '/{repo_name:.*?}/pull-request/new', controller='pullrequests',
                  action='index', conditions=dict(function=check_repo,
                                                  method=["GET"]))
 
     rmap.connect('pullrequest',
-                 '/{repo_name:.*}/pull-request/new', controller='pullrequests',
+                 '/{repo_name:.*?}/pull-request/new', controller='pullrequests',
                  action='create', conditions=dict(function=check_repo,
                                                   method=["POST"]))
 
     rmap.connect('pullrequest_show',
-                 '/{repo_name:.*}/pull-request/{pull_request_id}',
+                 '/{repo_name:.*?}/pull-request/{pull_request_id}',
                  controller='pullrequests',
                  action='show', conditions=dict(function=check_repo,
                                                 method=["GET"]))
     rmap.connect('pullrequest_update',
-                 '/{repo_name:.*}/pull-request/{pull_request_id}',
+                 '/{repo_name:.*?}/pull-request/{pull_request_id}',
                  controller='pullrequests',
                  action='update', conditions=dict(function=check_repo,
                                                 method=["PUT"]))
 
     rmap.connect('pullrequest_show_all',
-                 '/{repo_name:.*}/pull-request',
+                 '/{repo_name:.*?}/pull-request',
                  controller='pullrequests',
                  action='show_all', conditions=dict(function=check_repo,
                                                 method=["GET"]))
 
     rmap.connect('pullrequest_comment',
-                 '/{repo_name:.*}/pull-request-comment/{pull_request_id}',
+                 '/{repo_name:.*?}/pull-request-comment/{pull_request_id}',
                  controller='pullrequests',
                  action='comment', conditions=dict(function=check_repo,
                                                 method=["POST"]))
 
     rmap.connect('pullrequest_comment_delete',
-                 '/{repo_name:.*}/pull-request-comment/{comment_id}/delete',
+                 '/{repo_name:.*?}/pull-request-comment/{comment_id}/delete',
                 controller='pullrequests', action='delete_comment',
                 conditions=dict(function=check_repo, method=["DELETE"]))
 
-    rmap.connect('summary_home', '/{repo_name:.*}/summary',
+    rmap.connect('summary_home', '/{repo_name:.*?}/summary',
                 controller='summary', conditions=dict(function=check_repo))
 
-    rmap.connect('shortlog_home', '/{repo_name:.*}/shortlog',
+    rmap.connect('shortlog_home', '/{repo_name:.*?}/shortlog',
                 controller='shortlog', conditions=dict(function=check_repo))
 
-    rmap.connect('branches_home', '/{repo_name:.*}/branches',
+    rmap.connect('branches_home', '/{repo_name:.*?}/branches',
                 controller='branches', conditions=dict(function=check_repo))
 
-    rmap.connect('tags_home', '/{repo_name:.*}/tags',
+    rmap.connect('tags_home', '/{repo_name:.*?}/tags',
                 controller='tags', conditions=dict(function=check_repo))
 
-    rmap.connect('bookmarks_home', '/{repo_name:.*}/bookmarks',
+    rmap.connect('bookmarks_home', '/{repo_name:.*?}/bookmarks',
                 controller='bookmarks', conditions=dict(function=check_repo))
 
-    rmap.connect('changelog_home', '/{repo_name:.*}/changelog',
+    rmap.connect('changelog_home', '/{repo_name:.*?}/changelog',
                 controller='changelog', conditions=dict(function=check_repo))
 
-    rmap.connect('changelog_details', '/{repo_name:.*}/changelog_details/{cs}',
+    rmap.connect('changelog_details', '/{repo_name:.*?}/changelog_details/{cs}',
                 controller='changelog', action='changelog_details',
                 conditions=dict(function=check_repo))
 
-    rmap.connect('files_home', '/{repo_name:.*}/files/{revision}/{f_path:.*}',
+    rmap.connect('files_home', '/{repo_name:.*?}/files/{revision}/{f_path:.*}',
                 controller='files', revision='tip', f_path='',
                 conditions=dict(function=check_repo))
 
-    rmap.connect('files_diff_home', '/{repo_name:.*}/diff/{f_path:.*}',
+    rmap.connect('files_diff_home', '/{repo_name:.*?}/diff/{f_path:.*}',
                 controller='files', action='diff', revision='tip', f_path='',
                 conditions=dict(function=check_repo))
 
     rmap.connect('files_rawfile_home',
-                 '/{repo_name:.*}/rawfile/{revision}/{f_path:.*}',
+                 '/{repo_name:.*?}/rawfile/{revision}/{f_path:.*}',
                  controller='files', action='rawfile', revision='tip',
                  f_path='', conditions=dict(function=check_repo))
 
     rmap.connect('files_raw_home',
-                 '/{repo_name:.*}/raw/{revision}/{f_path:.*}',
+                 '/{repo_name:.*?}/raw/{revision}/{f_path:.*}',
                  controller='files', action='raw', revision='tip', f_path='',
                  conditions=dict(function=check_repo))
 
     rmap.connect('files_annotate_home',
-                 '/{repo_name:.*}/annotate/{revision}/{f_path:.*}',
+                 '/{repo_name:.*?}/annotate/{revision}/{f_path:.*}',
                  controller='files', action='index', revision='tip',
                  f_path='', annotate=True, conditions=dict(function=check_repo))
 
     rmap.connect('files_edit_home',
-                 '/{repo_name:.*}/edit/{revision}/{f_path:.*}',
+                 '/{repo_name:.*?}/edit/{revision}/{f_path:.*}',
                  controller='files', action='edit', revision='tip',
                  f_path='', conditions=dict(function=check_repo))
 
     rmap.connect('files_add_home',
-                 '/{repo_name:.*}/add/{revision}/{f_path:.*}',
+                 '/{repo_name:.*?}/add/{revision}/{f_path:.*}',
                  controller='files', action='add', revision='tip',
                  f_path='', conditions=dict(function=check_repo))
 
-    rmap.connect('files_archive_home', '/{repo_name:.*}/archive/{fname}',
+    rmap.connect('files_archive_home', '/{repo_name:.*?}/archive/{fname}',
                 controller='files', action='archivefile',
                 conditions=dict(function=check_repo))
 
     rmap.connect('files_nodelist_home',
-                 '/{repo_name:.*}/nodelist/{revision}/{f_path:.*}',
+                 '/{repo_name:.*?}/nodelist/{revision}/{f_path:.*}',
                 controller='files', action='nodelist',
                 conditions=dict(function=check_repo))
 
-    rmap.connect('repo_settings_delete', '/{repo_name:.*}/settings',
+    rmap.connect('repo_settings_delete', '/{repo_name:.*?}/settings',
                 controller='settings', action="delete",
                 conditions=dict(method=["DELETE"], function=check_repo))
 
-    rmap.connect('repo_settings_update', '/{repo_name:.*}/settings',
+    rmap.connect('repo_settings_update', '/{repo_name:.*?}/settings',
                 controller='settings', action="update",
                 conditions=dict(method=["PUT"], function=check_repo))
 
-    rmap.connect('repo_settings_home', '/{repo_name:.*}/settings',
+    rmap.connect('repo_settings_home', '/{repo_name:.*?}/settings',
                 controller='settings', action='index',
                 conditions=dict(function=check_repo))
 
-    rmap.connect('repo_fork_create_home', '/{repo_name:.*}/fork',
+    rmap.connect('repo_fork_create_home', '/{repo_name:.*?}/fork',
                 controller='forks', action='fork_create',
                 conditions=dict(function=check_repo, method=["POST"]))
 
-    rmap.connect('repo_fork_home', '/{repo_name:.*}/fork',
+    rmap.connect('repo_fork_home', '/{repo_name:.*?}/fork',
                 controller='forks', action='fork',
                 conditions=dict(function=check_repo))
 
-    rmap.connect('repo_forks_home', '/{repo_name:.*}/forks',
+    rmap.connect('repo_forks_home', '/{repo_name:.*?}/forks',
                  controller='forks', action='forks',
                  conditions=dict(function=check_repo))
 
-    rmap.connect('repo_followers_home', '/{repo_name:.*}/followers',
+    rmap.connect('repo_followers_home', '/{repo_name:.*?}/followers',
                  controller='followers', action='followers',
                  conditions=dict(function=check_repo))
 
