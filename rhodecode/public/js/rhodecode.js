@@ -219,7 +219,8 @@ function ypjax(url,container,s_call,f_call,args){
 			console.log(o);
 			YUD.get(container).innerHTML='<span class="error_red">ERROR: {0}</span>'.format(o.status);
 			YUD.setStyle(container,'opacity','1.0');
-		}
+		},
+		cache:false
 	},args);
 	
 };
