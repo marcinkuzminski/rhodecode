@@ -40,14 +40,19 @@
 <script type="text/javascript">
 var CACHE = {};
 var CACHE_EXPIRE = 60*1000; //cache for 60s
+//used to construct links from the search list
+var node_list_url = '${h.url("files_home",repo_name=c.repo_name,revision='__REV__',f_path='__FPATH__')}';
+//send the nodelist request to this url
+var url_base = '${h.url("files_nodelist_home",repo_name=c.repo_name,revision='__REV__',f_path='__FPATH__')}';
 
 var ypjax_links = function(){
     YUE.on(YUQ('.ypjax-link'), 'click',function(e){
     	
     	//don't do ypjax on middle click
-    	if(e.which == 2){ 
+    	if(e.which == 2 || !History.enabled){ 
     		return true;
     	}
+    	
         var el = e.currentTarget;
         var url = el.href;
         
@@ -66,16 +71,12 @@ var ypjax_links = function(){
         
         var title = "${_('%s files') % c.repo_name}" + " - " + f_path;
         
-        //used to construct links from the search list
-        var node_list_url = '${h.url("files_home",repo_name=c.repo_name,revision='__REV__',f_path='__FPATH__')}';
-        node_list_url = node_list_url.replace('__REV__',rev);
-        //send the nodelist request to this url
-        var url_base = '${h.url("files_nodelist_home",repo_name=c.repo_name,revision='__REV__',f_path='__FPATH__')}';
-        url_base = url_base.replace('__REV__',rev).replace('__FPATH__', f_path)
+        var _node_list_url = node_list_url.replace('__REV__',rev);
+        var _url_base = url_base.replace('__REV__',rev).replace('__FPATH__', f_path)
         
         // Change our States and save some data for handling events
-        var data = {url:url,title:title, url_base:url_base,
-                    node_list_url:node_list_url};
+        var data = {url:url,title:title, url_base:_url_base,
+                    node_list_url:_node_list_url};
         History.pushState(data, title, url);        
         
         //now we're sure that we can do ypjax things
@@ -124,7 +125,16 @@ YUE.onDOMReady(function(){
           });
         }
     });    
-
+ 
+    // init the search filter
+    var _State = {
+       url: "${h.url.current()}",
+       data: {
+         node_list_url: node_list_url.replace('__REV__',"${c.changeset.raw_id}"),
+         url_base: url_base.replace('__REV__',"${c.changeset.raw_id}").replace('__FPATH__', "${c.file.path}")
+       }
+    }
+    fileBrowserListeners(_State.url, _State.data.node_list_url, _State.data.url_base);
 });
 
 </script>
