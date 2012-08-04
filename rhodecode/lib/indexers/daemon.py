@@ -196,6 +196,7 @@ class WhooshIndexingDaemon(object):
             writer.add_document(
                 raw_id=unicode(cs.raw_id),
                 owner=unicode(repo.contact),
+                date=cs._timestamp,
                 repository=safe_unicode(repo_name),
                 author=cs.author,
                 message=cs.message,

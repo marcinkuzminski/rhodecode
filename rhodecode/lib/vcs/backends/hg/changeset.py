@@ -52,6 +52,10 @@ class MercurialChangeset(BaseChangeset):
         return date_fromtimestamp(*self._ctx.date())
 
     @LazyProperty
+    def _timestamp(self):
+        return self._ctx.date()[0]
+
+    @LazyProperty
     def status(self):
         """
         Returns modified, added, removed, deleted files for current changeset

@@ -60,6 +60,10 @@ class GitChangeset(BaseChangeset):
                                   getattr(self._commit, self._date_tz_property))
 
     @LazyProperty
+    def _timestamp(self):
+        return getattr(self._commit, self._date_property)
+
+    @LazyProperty
     def status(self):
         """
         Returns modified, added, removed, deleted files for current changeset
