@@ -312,10 +312,14 @@ def make_ui(read_from='file', path=None, checkpaths=True):
 
         hg_ui = ret
         for ui_ in hg_ui:
-            if ui_.ui_active and ui_.ui_key != 'push_ssl':
+            if ui_.ui_active:
                 log.debug('settings ui from db[%s]%s:%s', ui_.ui_section,
                           ui_.ui_key, ui_.ui_value)
                 baseui.setconfig(ui_.ui_section, ui_.ui_key, ui_.ui_value)
+            if ui_.ui_key == 'push_ssl':
+                # force set push_ssl requirement to False, rhodecode
+                # handles that
+                baseui.setconfig(ui_.ui_section, ui_.ui_key, False)
 
         meta.Session.remove()
     return baseui
