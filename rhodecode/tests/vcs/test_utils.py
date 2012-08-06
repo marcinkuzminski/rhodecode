@@ -259,7 +259,7 @@ class TestGetUserHome(unittest.TestCase):
 
     @mock.patch.object(os, 'environ', {})
     def test_defaults_to_none(self):
-        self.assertEqual(get_user_home(), None)
+        self.assertEqual(get_user_home(), '')
 
     @mock.patch.object(os, 'environ', {'HOME': '/home/foobar'})
     def test_unix_like(self):
