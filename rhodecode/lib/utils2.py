@@ -24,6 +24,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import re
+import time
 from datetime import datetime
 from pylons.i18n.translation import _, ungettext
 from rhodecode.lib.vcs.utils.lazy import LazyProperty
@@ -429,6 +430,11 @@ def get_changeset_safe(repo, rev):
     return cs
 
 
+def datetime_to_time(dt):
+    if dt:
+        return time.mktime(dt.timetuple())
+
+
 MENTIONS_REGEX = r'(?:^@|\s@)([a-zA-Z0-9]{1}[a-zA-Z0-9\-\_\.]+)(?:\s{1})'
 
 
@@ -443,6 +449,7 @@ def extract_mentioned_users(s):
         usrs.add(username)
 
     return sorted(list(usrs), key=lambda k: k.lower())
+
 
 class AttributeDict(dict):
     def __getattr__(self, attr):

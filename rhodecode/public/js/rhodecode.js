@@ -1529,6 +1529,15 @@ var ageSort = function(a, b, desc, field) {
     return compState;
 };
 
+var lastLoginSort = function(a, b, desc, field) {
+	var a_ = a.getData('last_login_raw') || 0;
+    var b_ = b.getData('last_login_raw') || 0;
+    
+    var comp = YAHOO.util.Sort.compare;
+    var compState = comp(a_, b_, desc);
+    return compState;
+};
+
 var nameSort = function(a, b, desc, field) {
     var a_ = fromHTML(a.getData(field));
     var b_ = fromHTML(b.getData(field));

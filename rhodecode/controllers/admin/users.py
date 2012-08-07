@@ -47,6 +47,7 @@ from rhodecode.model.user import UserModel
 from rhodecode.model.meta import Session
 from rhodecode.lib.utils import action_logger
 from rhodecode.lib.compat import json
+from rhodecode.lib.utils2 import datetime_to_time
 
 log = logging.getLogger(__name__)
 
@@ -89,6 +90,7 @@ class UsersController(BaseController):
                 .render(user_id, username, _=_, h=h, c=c))
 
         for user in c.users_list:
+
             users_data.append({
                 "gravatar": grav_tmpl(user. email, 24),
                 "raw_username": user.username,
@@ -96,6 +98,7 @@ class UsersController(BaseController):
                 "firstname": user.name,
                 "lastname": user.lastname,
                 "last_login": h.fmt_date(user.last_login),
+                "last_login_raw": datetime_to_time(user.last_login),
                 "active": h.bool2icon(user.active),
                 "admin": h.bool2icon(user.admin),
                 "ldap": h.bool2icon(bool(user.ldap_dn)),
