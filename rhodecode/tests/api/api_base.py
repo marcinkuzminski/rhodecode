@@ -9,6 +9,7 @@ from rhodecode.model.user import UserModel
 from rhodecode.model.users_group import UsersGroupModel
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.meta import Session
+from rhodecode.model.scm import ScmModel
 
 API_URL = '/_admin/api'
 
@@ -213,6 +214,23 @@ class BaseTestApi(object):
                                  params=params)
 
         expected = 'Unable to pull changes from `%s`' % self.REPO
+        self._compare_error(id_, expected, given=response.body)
+
+    def test_api_rescan_repos(self):
+        id_, params = _build_data(self.apikey, 'rescan_repos')
+        response = self.app.post(API_URL, content_type='application/json',
+                                 params=params)
+
+        expected = {'added': [], 'removed': []}
+        self._compare_ok(id_, expected, given=response.body)
+
+    @mock.patch.object(ScmModel, 'repo_scan', crash)
+    def test_api_rescann_error(self):
+        id_, params = _build_data(self.apikey, 'rescan_repos',)
+        response = self.app.post(API_URL, content_type='application/json',
+                                 params=params)
+
+        expected = 'Unable to rescan repositories'
         self._compare_error(id_, expected, given=response.body)
 
     def test_api_create_existing_user(self):

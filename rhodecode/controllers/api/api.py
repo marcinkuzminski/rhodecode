@@ -31,7 +31,7 @@ import logging
 from rhodecode.controllers.api import JSONRPCController, JSONRPCError
 from rhodecode.lib.auth import HasPermissionAllDecorator, \
     HasPermissionAnyDecorator, PasswordGenerator, AuthUser
-from rhodecode.lib.utils import map_groups
+from rhodecode.lib.utils import map_groups, repo2db_mapper
 from rhodecode.model.meta import Session
 from rhodecode.model.scm import ScmModel
 from rhodecode.model.repo import RepoModel
@@ -159,6 +159,28 @@ class ApiController(JSONRPCController):
             log.error(traceback.format_exc())
             raise JSONRPCError(
                 'Unable to pull changes from `%s`' % repo.repo_name
+            )
+
+    @HasPermissionAllDecorator('hg.admin')
+    def rescan_repos(self, apiuser, remove_obsolete=Optional(False)):
+        """
+        Dispatch rescan repositories action. If remove_obsolete is set
+        than also delete repos that are in database but not in the filesystem.
+        aka "clean zombies"
+
+        :param apiuser:
+        :param remove_obsolete:
+        """
+
+        try:
+            rm_obsolete = Optional.extract(remove_obsolete)
+            added, removed = repo2db_mapper(ScmModel().repo_scan(),
+                                            remove_obsolete=rm_obsolete)
+            return {'added': added, 'removed': removed}
+        except Exception:
+            log.error(traceback.format_exc())
+            raise JSONRPCError(
+                'Unable to rescan repositories'
             )
 
     @HasPermissionAllDecorator('hg.admin')

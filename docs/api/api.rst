@@ -127,6 +127,31 @@ OUTPUT::
     error :  null
 
 
+rescan_repos
+------------
+
+Dispatch rescan repositories action. If remove_obsolete is set
+RhodeCode will delete repos that are in database but not in the filesystem.
+This command can be executed only using api_key belonging to user with admin 
+rights.
+
+INPUT::
+
+    id : <id_for_response>
+    api_key : "<api_key>"
+    method :  "rescan_repos"
+    args :    {
+                "remove_obsolete" : "<boolean = Optional(False)>"
+              }
+
+OUTPUT::
+
+    id : <id_given_in_input>
+    result : "{'added': [<list of names of added repos>], 
+               'removed': [<list of names of removed repos>]}"
+    error :  null
+
+
 get_user
 --------
 
