@@ -370,14 +370,15 @@ def SlugifyName():
 def ValidCloneUri():
     from rhodecode.lib.utils import make_ui
 
-    def url_handler(repo_type, url, proto, ui=None):
+    def url_handler(repo_type, url, ui=None):
         if repo_type == 'hg':
             from mercurial.httprepo import httprepository, httpsrepository
-            if proto == 'https':
+            if url.startswith('https'):
                 httpsrepository(make_ui('db'), url).capabilities
-            elif proto == 'http':
+            elif url.startswith('http'):
                 httprepository(make_ui('db'), url).capabilities
-            elif proto == 'svn+http':
+            elif url.startswith('svn+http'):
+                from hgsubversion.svnrepo import svnremoterepo
                 svnremoterepo(make_ui('db'), url).capabilities
         elif repo_type == 'git':
             #TODO: write a git url validator
@@ -396,34 +397,15 @@ def ValidCloneUri():
 
             if not url:
                 pass
-            elif url.startswith('https') or \
-                url.startswith('http') or \
-                url.startswith('svn+http'):
-                if url.startswith('https'):
-                    _type = 'https'
-                elif url.startswith('http'):
-                    _type = 'http'
-                elif url.startswith('svn+http'):
-                    try:
-                        from hgsubversion.svnrepo import svnremoterepo
-                        global svnremoterepo
-                    except ImportError:
-                        raise formencode.Invalid(_('invalid clone url: hgsubversion '
-                                                   'is not installed'), value, state)
-                    _type = 'svn+http'
+            else:
                 try:
-                    url_handler(repo_type, url, _type, make_ui('db'))
+                    url_handler(repo_type, url, make_ui('db'))
                 except Exception:
                     log.exception('Url validation failed')
                     msg = M(self, 'clone_uri')
                     raise formencode.Invalid(msg, value, state,
                         error_dict=dict(clone_uri=msg)
                     )
-            else:
-                msg = M(self, 'invalid_clone_uri', state)
-                raise formencode.Invalid(msg, value, state,
-                    error_dict=dict(clone_uri=msg)
-                )
     return _validator
 
 
