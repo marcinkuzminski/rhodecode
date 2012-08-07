@@ -75,6 +75,20 @@ if(!Array.prototype.indexOf) {
     };
 }
 
+// IE(CRAP) doesn't support previousElementSibling
+var prevElementSibling = function( el ) {
+    if( el.previousElementSibling ) {
+        return el.previousElementSibling;
+    } else {
+        while( el = el.previousSibling ) {
+            if( el.nodeType === 1 ) return el;
+        }
+    }
+}
+
+
+
+
 /**
  * SmartColorGenerator
  *
@@ -483,7 +497,10 @@ var injectInlineForm = function(tr){
 		  tooltip_activate();
 		  MentionsAutoComplete('text_'+lineno, 'mentions_container_'+lineno, 
 	                         _USERS_AC_DATA, _GROUPS_AC_DATA);
-		  YUD.get('text_'+lineno).focus();
+		  var _e = YUD.get('text_'+lineno);
+		  if(_e){
+			  _e.focus();
+		  }
 	  },10)
 };
 
@@ -492,7 +509,7 @@ var deleteComment = function(comment_id){
     var postData = {'_method':'delete'};
     var success = function(o){
         var n = YUD.get('comment-tr-'+comment_id);
-        var root = n.previousElementSibling.previousElementSibling;
+        var root = prevElementSibling(prevElementSibling(n));
         n.parentNode.removeChild(n);
 
         // scann nodes, and attach add button to last one
@@ -1234,23 +1251,24 @@ var MentionsAutoComplete = function (divid, cont, users_list, groups_list) {
 		return [null, null];
     };
     
-	ownerAC.textboxKeyUpEvent.subscribe(function(type, args){
-		
-		var ac_obj = args[0];
-		var currentMessage = args[1];
-		var currentCaretPosition = args[0]._elTextbox.selectionStart;
-
-		var unam = ownerAC.get_mention(currentMessage, currentCaretPosition); 
-		var curr_search = null;
-		if(unam[0]){
-			curr_search = unam[0];
-		}
-		
-		ownerAC.dataSource.chunks = unam[1];
-		ownerAC.dataSource.mentionQuery = curr_search;
-
-	})
-
+    if (ownerAC.textboxKeyUpEvent){
+		ownerAC.textboxKeyUpEvent.subscribe(function(type, args){
+			
+			var ac_obj = args[0];
+			var currentMessage = args[1];
+			var currentCaretPosition = args[0]._elTextbox.selectionStart;
+	
+			var unam = ownerAC.get_mention(currentMessage, currentCaretPosition); 
+			var curr_search = null;
+			if(unam[0]){
+				curr_search = unam[0];
+			}
+			
+			ownerAC.dataSource.chunks = unam[1];
+			ownerAC.dataSource.mentionQuery = curr_search;
+	
+		})
+	}	
     return {
         ownerDS: ownerDS,
         ownerAC: ownerAC,
