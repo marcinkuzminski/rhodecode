@@ -227,6 +227,7 @@ class ReposController(BaseController):
             msg = _('error occurred during creation of repository %s') \
                     % form_result.get('repo_name')
             h.flash(msg, category='error')
+            return redirect(url('repos'))
         #redirect to our new repo !
         return redirect(url('summary_home', repo_name=new_repo.repo_name))
 
