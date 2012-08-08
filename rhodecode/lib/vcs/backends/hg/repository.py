@@ -249,7 +249,8 @@ class MercurialRepository(BaseRepository):
                                         ignorews=ignore_whitespace,
                                         context=context)))
 
-    def _check_url(self, url):
+    @classmethod
+    def _check_url(cls, url):
         """
         Function will check given url and try to verify if it's a valid
         link. Sometimes it may happened that mercurial will issue basic
@@ -271,7 +272,7 @@ class MercurialRepository(BaseRepository):
             return True
 
         if('+' in url[:url.find('://')]):
-            url = url[url.find('+')+1:]
+            url = url[url.find('+') + 1:]
 
         handlers = []
         test_uri, authinfo = Url(url).authinfo()
@@ -318,7 +319,7 @@ class MercurialRepository(BaseRepository):
                 if not update_after_clone:
                     opts.update({'noupdate': True})
                 try:
-                    self._check_url(url)
+                    MercurialRepository._check_url(url)
                     clone(self.baseui, url, self.path, **opts)
 #                except urllib2.URLError:
 #                    raise Abort("Got HTTP 404 error")

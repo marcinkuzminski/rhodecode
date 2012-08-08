@@ -15,6 +15,8 @@ import time
 import posixpath
 import logging
 import traceback
+import urllib
+import urllib2
 from dulwich.repo import Repo, NotGitRepository
 #from dulwich.config import ConfigFile
 from string import Template
@@ -126,7 +128,8 @@ class GitRepository(BaseRepository):
         se = None
         return so, se
 
-    def _check_url(self, url):
+    @classmethod
+    def _check_url(cls, url):
         """
         Functon will check given url and try to verify if it's a valid
         link. Sometimes it may happened that mercurial will issue basic
@@ -135,9 +138,45 @@ class GitRepository(BaseRepository):
 
         On failures it'll raise urllib2.HTTPError
         """
+        from mercurial.util import url as Url
 
-        #TODO: implement this
-        pass
+        # those authnadlers are patched for python 2.6.5 bug an
+        # infinit looping when given invalid resources
+        from mercurial.url import httpbasicauthhandler, httpdigestauthhandler
+
+        # check first if it's not an local url
+        if os.path.isdir(url) or url.startswith('file:'):
+            return True
+
+        if('+' in url[:url.find('://')]):
+            url = url[url.find('+') + 1:]
+
+        handlers = []
+        test_uri, authinfo = Url(url).authinfo()
+        if not test_uri.endswith('info/refs'):
+            test_uri = test_uri.rstrip('/') + '/info/refs'
+        if authinfo:
+            #create a password manager
+            passmgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
+            passmgr.add_password(*authinfo)
+
+            handlers.extend((httpbasicauthhandler(passmgr),
+                             httpdigestauthhandler(passmgr)))
+
+        o = urllib2.build_opener(*handlers)
+        o.addheaders = [('User-Agent', 'git/1.7.8.0')]  # fake some git
+
+        q = {"service": 'git-upload-pack'}
+        qs = '?%s' % urllib.urlencode(q)
+        cu = "%s%s" % (test_uri, qs)
+        req = urllib2.Request(cu, None, {})
+
+        try:
+            resp = o.open(req)
+            return resp.code == 200
+        except Exception, e:
+            # means it cannot be cloned
+            raise urllib2.URLError(e)
 
     def _get_repo(self, create, src_url=None, update_after_clone=False,
             bare=False):
@@ -148,7 +187,7 @@ class GitRepository(BaseRepository):
                                   "given (clone operation creates repository)")
         try:
             if create and src_url:
-                self._check_url(src_url)
+                GitRepository._check_url(src_url)
                 self.clone(src_url, update_after_clone, bare)
                 return Repo(self.path)
             elif create:
