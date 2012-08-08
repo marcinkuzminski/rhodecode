@@ -219,6 +219,27 @@
                     ${h.link_to(_('advanced setup'),url('admin_edit_setting',setting_id='hooks'),class_="ui-btn")}
                 </div>
              </div>
+             <div class="field">
+                <div class="label label-checkbox">
+                    <label>${_('Mercurial Extensions')}:</label>
+                </div>
+                <div class="checkboxes">
+                    <div class="checkbox">
+                        ${h.checkbox('extensions_largefiles','True')}
+                        <label for="extensions_hgsubversion">${_('largefiles extensions')}</label>
+                    </div>
+                    <div class="checkbox">
+                        ${h.checkbox('extensions_hgsubversion','True')}
+                        <label for="extensions_hgsubversion">${_('hgsubversion extensions')}</label>
+                    </div>
+                    <span class="help-block">${_('Requires hgsubversion library installed. Allows clonning from svn remote locations')}</span>
+                    ##<div class="checkbox">
+                    ##    ${h.checkbox('extensions_hggit','True')}
+                    ##    <label for="extensions_hggit">${_('hg-git extensions')}</label>
+                    ##</div>
+                    ##<span class="help-block">${_('Requires hg-git library installed. Allows clonning from git remote locations')}</span>                    
+                </div>
+             </div>             
             <div class="field">
                 <div class="label">
                     <label for="paths_root_path">${_('Repositories location')}:</label>

@@ -346,12 +346,20 @@ class DbManage(object):
         hgsubversion.ui_value = ''
         hgsubversion.ui_active = False
 
+        # enable hggit disabled by default
+        hggit = RhodeCodeUi()
+        hggit.ui_section = 'extensions'
+        hggit.ui_key = 'hggit'
+        hggit.ui_value = ''
+        hggit.ui_active = False
+
         self.sa.add(hooks1)
         self.sa.add(hooks2)
         self.sa.add(hooks3)
         self.sa.add(hooks4)
         self.sa.add(largefiles)
         self.sa.add(hgsubversion)
+        self.sa.add(hggit)
 
     def create_ldap_options(self, skip_existing=False):
         """Creates ldap settings"""

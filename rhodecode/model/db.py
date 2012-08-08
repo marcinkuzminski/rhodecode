@@ -242,7 +242,7 @@ class RhodeCodeUi(Base, BaseModel):
 
     @classmethod
     def get_by_key(cls, key):
-        return cls.query().filter(cls.ui_key == key)
+        return cls.query().filter(cls.ui_key == key).scalar()
 
     @classmethod
     def get_builtin_hooks(cls):
@@ -263,11 +263,11 @@ class RhodeCodeUi(Base, BaseModel):
 
     @classmethod
     def get_repos_location(cls):
-        return cls.get_by_key('/').one().ui_value
+        return cls.get_by_key('/').ui_value
 
     @classmethod
     def create_or_update_hook(cls, key, val):
-        new_ui = cls.get_by_key(key).scalar() or cls()
+        new_ui = cls.get_by_key(key) or cls()
         new_ui.ui_section = 'hooks'
         new_ui.ui_active = True
         new_ui.ui_key = key

@@ -152,8 +152,7 @@ class BaseVCSController(object):
         """
         org_proto = environ['wsgi._org_proto']
         #check if we have SSL required  ! if not it's a bad request !
-        require_ssl = str2bool(RhodeCodeUi.get_by_key('push_ssl')\
-                               .scalar().ui_value)
+        require_ssl = str2bool(RhodeCodeUi.get_by_key('push_ssl').ui_value)
         if require_ssl and org_proto == 'http':
             log.debug('proto is %s and SSL is required BAD REQUEST !'
                       % org_proto)

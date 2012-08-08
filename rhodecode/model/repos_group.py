@@ -55,7 +55,7 @@ class ReposGroupModel(BaseModel):
         Get's the repositories root path from database
         """
 
-        q = RhodeCodeUi.get_by_key('/').one()
+        q = RhodeCodeUi.get_by_key('/')
         return q.ui_value
 
     def _create_default_perms(self, new_group):

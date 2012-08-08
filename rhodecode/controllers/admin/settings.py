@@ -79,7 +79,7 @@ class SettingsController(BaseController):
         # url('admin_settings')
 
         defaults = RhodeCodeSetting.get_app_settings()
-        defaults.update(self.get_hg_ui_settings())
+        defaults.update(self._get_hg_ui_settings())
 
         return htmlfill.render(
             render('admin/settings/settings.html'),
@@ -123,7 +123,7 @@ class SettingsController(BaseController):
                       category='success')
 
         if setting_id == 'whoosh':
-            repo_location = self.get_hg_ui_settings()['paths_root_path']
+            repo_location = self._get_hg_ui_settings()['paths_root_path']
             full_index = request.POST.get('full_index', False)
             run_task(tasks.whoosh_index, repo_location, full_index)
             h.flash(_('Whoosh reindex task scheduled'), category='success')
@@ -220,51 +220,55 @@ class SettingsController(BaseController):
                 )
 
             try:
-                # fix namespaces for hooks
+                # fix namespaces for hooks and extensions
                 _f = lambda s: s.replace('.', '_')
 
-                sett1 = RhodeCodeUi.query()\
-                        .filter(RhodeCodeUi.ui_key == 'push_ssl').one()
-                sett1.ui_value = form_result['web_push_ssl']
+                sett = RhodeCodeUi.get_by_key('push_ssl')
+                sett.ui_value = form_result['web_push_ssl']
+                Session().add(sett)
 
-                sett2 = RhodeCodeUi.query()\
-                        .filter(RhodeCodeUi.ui_key == '/').one()
-                sett2.ui_value = form_result['paths_root_path']
+                sett = RhodeCodeUi.get_by_key('/')
+                sett.ui_value = form_result['paths_root_path']
+                Session().add(sett)
 
                 #HOOKS
-                sett3 = RhodeCodeUi.query()\
-                        .filter(RhodeCodeUi.ui_key == RhodeCodeUi.HOOK_UPDATE)\
-                        .one()
-                sett3.ui_active = bool(form_result[_f('hooks_%s' %
-                                        RhodeCodeUi.HOOK_UPDATE)])
+                sett = RhodeCodeUi.get_by_key(RhodeCodeUi.HOOK_UPDATE)
+                sett.ui_active = form_result[_f('hooks_%s' %
+                                                RhodeCodeUi.HOOK_UPDATE)]
+                Session().add(sett)
 
-                sett4 = RhodeCodeUi.query()\
-                        .filter(RhodeCodeUi.ui_key == RhodeCodeUi.HOOK_REPO_SIZE)\
-                        .one()
-                sett4.ui_active = bool(form_result[_f('hooks_%s' %
-                                             RhodeCodeUi.HOOK_REPO_SIZE)])
+                sett = RhodeCodeUi.get_by_key(RhodeCodeUi.HOOK_REPO_SIZE)
+                sett.ui_active = form_result[_f('hooks_%s' %
+                                                RhodeCodeUi.HOOK_REPO_SIZE)]
+                Session().add(sett)
 
-                sett5 = RhodeCodeUi.query()\
-                        .filter(RhodeCodeUi.ui_key == RhodeCodeUi.HOOK_PUSH)\
-                        .one()
-                sett5.ui_active = bool(form_result[_f('hooks_%s' %
-                                             RhodeCodeUi.HOOK_PUSH)])
+                sett = RhodeCodeUi.get_by_key(RhodeCodeUi.HOOK_PUSH)
+                sett.ui_active = form_result[_f('hooks_%s' %
+                                                RhodeCodeUi.HOOK_PUSH)]
+                Session().add(sett)
 
-                sett6 = RhodeCodeUi.query()\
-                        .filter(RhodeCodeUi.ui_key == RhodeCodeUi.HOOK_PULL)\
-                        .one()
-                sett6.ui_active = bool(form_result[_f('hooks_%s' %
-                                             RhodeCodeUi.HOOK_PULL)])
+                sett = RhodeCodeUi.get_by_key(RhodeCodeUi.HOOK_PULL)
+                sett.ui_active = form_result[_f('hooks_%s' %
+                                                 RhodeCodeUi.HOOK_PULL)]
 
-                Session().add(sett1)
-                Session().add(sett2)
-                Session().add(sett3)
-                Session().add(sett4)
-                Session().add(sett5)
-                Session().add(sett6)
+                Session().add(sett)
+
+                ## EXTENSIONS
+                sett = RhodeCodeUi.get_by_key('largefiles')
+                sett.ui_active = form_result[_f('extensions_largefiles')]
+                Session().add(sett)
+
+                sett = RhodeCodeUi.get_by_key('hgsubversion')
+                sett.ui_active = form_result[_f('extensions_hgsubversion')]
+                Session().add(sett)
+
+#                sett = RhodeCodeUi.get_by_key('hggit')
+#                sett.ui_active = form_result[_f('extensions_hggit')]
+#                Session().add(sett)
+
                 Session().commit()
 
-                h.flash(_('Updated mercurial settings'), category='success')
+                h.flash(_('Updated VCS settings'), category='success')
 
             except Exception:
                 log.error(traceback.format_exc())
@@ -455,8 +459,7 @@ class SettingsController(BaseController):
 
         return render('admin/repos/repo_add_create_repository.html')
 
-    @NotAnonymous()
-    def get_hg_ui_settings(self):
+    def _get_hg_ui_settings(self):
         ret = RhodeCodeUi.query().all()
 
         if not ret:
@@ -471,7 +474,7 @@ class SettingsController(BaseController):
             if k.find('.') != -1:
                 k = k.replace('.', '_')
 
-            if each.ui_section == 'hooks':
+            if each.ui_section in ['hooks', 'extensions']:
                 v = each.ui_active
 
             settings[each.ui_section + '_' + k] = v
