@@ -176,7 +176,7 @@ class GitRepository(BaseRepository):
             return resp.code == 200
         except Exception, e:
             # means it cannot be cloned
-            raise urllib2.URLError(e)
+            raise urllib2.URLError("[%s] %s" % (url, e))
 
     def _get_repo(self, create, src_url=None, update_after_clone=False,
             bare=False):

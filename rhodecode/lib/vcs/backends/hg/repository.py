@@ -300,7 +300,7 @@ class MercurialRepository(BaseRepository):
             return resp.code == 200
         except Exception, e:
             # means it cannot be cloned
-            raise urllib2.URLError(e)
+            raise urllib2.URLError("[%s] %s" % (url, e))
 
     def _get_repo(self, create, src_url=None, update_after_clone=False):
         """
@@ -312,6 +312,7 @@ class MercurialRepository(BaseRepository):
         location at given clone_point. Additionally it'll make update to
         working copy accordingly to ``update_after_clone`` flag
         """
+
         try:
             if src_url:
                 url = str(self._get_url(src_url))
@@ -325,6 +326,7 @@ class MercurialRepository(BaseRepository):
 #                    raise Abort("Got HTTP 404 error")
                 except Exception:
                     raise
+
                 # Don't try to create if we've already cloned repo
                 create = False
             return localrepository(self.baseui, self.path, create=create)

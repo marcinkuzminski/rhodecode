@@ -372,17 +372,29 @@ def ValidCloneUri():
 
     def url_handler(repo_type, url, ui=None):
         if repo_type == 'hg':
-            from mercurial.httprepo import httprepository, httpsrepository
-            if url.startswith('https'):
-                httpsrepository(make_ui('db'), url).capabilities
-            elif url.startswith('http'):
-                httprepository(make_ui('db'), url).capabilities
+            from rhodecode.lib.vcs.backends.hg.repository import MercurialRepository
+            from mercurial.httppeer import httppeer
+            if url.startswith('http'):
+                ## initially check if it's at least the proper URL
+                ## or does it pass basic auth
+                MercurialRepository._check_url(url)
+                httppeer(make_ui('db'), url)._capabilities()
             elif url.startswith('svn+http'):
                 from hgsubversion.svnrepo import svnremoterepo
                 svnremoterepo(make_ui('db'), url).capabilities
+            elif url.startswith('git+http'):
+                raise NotImplementedError()
+
         elif repo_type == 'git':
-            #TODO: write a git url validator
-            pass
+            from rhodecode.lib.vcs.backends.git.repository import GitRepository
+            if url.startswith('http'):
+                ## initially check if it's at least the proper URL
+                ## or does it pass basic auth
+                GitRepository._check_url(url)
+            elif url.startswith('svn+http'):
+                raise NotImplementedError()
+            elif url.startswith('hg+http'):
+                raise NotImplementedError()
 
     class _validator(formencode.validators.FancyValidator):
         messages = {

@@ -36,7 +36,8 @@ news
 - Implemented landing revisions. Each repository will get landing_rev attribute
   that defines 'default' revision/branch for generating readme files
 - Implemented #509, RhodeCode enforces SSL for push/pulling if requested.
-  
+- Import remote svn repositories to mercurial using hgsubversion  
+
 
 fixes
 +++++

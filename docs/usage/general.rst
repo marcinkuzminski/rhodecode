@@ -83,3 +83,26 @@ Trending source files are calculated based on pre defined dict of known
 types and extensions. If You miss some extension or Would like to scan some
 custom files it's possible to add new types in `LANGUAGES_EXTENSIONS_MAP` dict
 located in `/rhodecode/lib/celerylib/tasks.py`
+
+
+Cloning remote repositories
+---------------------------
+
+RhodeCode has an ability to clone remote repos from given remote locations.
+Currently it support following options:
+
+- hg  -> hg clone
+- svn -> hg clone
+- git -> git clone
+
+
+.. note::
+    
+    - *`svn -> hg` cloning requires `hgsubversion` library to be installed.*
+
+If you need to clone repositories that are protected via basic auth, you
+might pass the url with stored credentials inside eg. 
+`http://user:passw@remote.server/repo, RhodeCode will try to login and clone
+using given credentials. Please take a note that they will be stored as
+plaintext inside the database. RhodeCode will remove auth info when showing the 
+clone url in summary page.
