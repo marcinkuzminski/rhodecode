@@ -339,11 +339,19 @@ class DbManage(object):
         largefiles.ui_key = 'largefiles'
         largefiles.ui_value = ''
 
+        # enable hgsubversion disabled by default
+        hgsubversion = RhodeCodeUi()
+        hgsubversion.ui_section = 'extensions'
+        hgsubversion.ui_key = 'hgsubversion'
+        hgsubversion.ui_value = ''
+        hgsubversion.ui_active = False
+
         self.sa.add(hooks1)
         self.sa.add(hooks2)
         self.sa.add(hooks3)
         self.sa.add(hooks4)
         self.sa.add(largefiles)
+        self.sa.add(hgsubversion)
 
     def create_ldap_options(self, skip_existing=False):
         """Creates ldap settings"""
