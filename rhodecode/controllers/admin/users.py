@@ -33,6 +33,7 @@ from pylons import request, session, tmpl_context as c, url, config
 from pylons.controllers.util import redirect
 from pylons.i18n.translation import _
 
+import rhodecode
 from rhodecode.lib.exceptions import DefaultUserException, \
     UserOwnsReposException
 from rhodecode.lib import helpers as h
@@ -40,14 +41,13 @@ from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator, \
     AuthUser
 from rhodecode.lib.base import BaseController, render
 
-import rhodecode
-from rhodecode.model.db import User, Permission, UserEmailMap
+from rhodecode.model.db import User, UserEmailMap
 from rhodecode.model.forms import UserForm
 from rhodecode.model.user import UserModel
 from rhodecode.model.meta import Session
 from rhodecode.lib.utils import action_logger
 from rhodecode.lib.compat import json
-from rhodecode.lib.utils2 import datetime_to_time
+from rhodecode.lib.utils2 import datetime_to_time, str2bool
 
 log = logging.getLogger(__name__)
 
@@ -175,9 +175,11 @@ class UsersController(BaseController):
                             .filter(UserEmailMap.user == c.user).all()
             defaults = errors.value
             e = errors.error_dict or {}
-            perm = Permission.get_by_key('hg.create.repository')
-            defaults.update({'create_repo_perm': user_model.has_perm(id, perm)})
-            defaults.update({'_method': 'put'})
+            defaults.update({
+                'create_repo_perm': user_model.has_perm(id, 'hg.create.repository'),
+                'fork_repo_perm': user_model.has_perm(id, 'hg.fork.repository'),
+                '_method': 'put'
+            })
             return htmlfill.render(
                 render('admin/users/user_edit.html'),
                 defaults=defaults,
@@ -188,7 +190,7 @@ class UsersController(BaseController):
             log.error(traceback.format_exc())
             h.flash(_('error occurred during update of user %s') \
                     % form_result.get('username'), category='error')
-        return redirect(url('users'))
+        return redirect(url('edit_user', id=id))
 
     def delete(self, id):
         """DELETE /users/id: Delete an existing item"""
@@ -198,9 +200,9 @@ class UsersController(BaseController):
         #    h.form(url('delete_user', id=ID),
         #           method='delete')
         # url('user', id=ID)
-        user_model = UserModel()
+        usr = User.get_or_404(id)
         try:
-            user_model.delete(id)
+            UserModel().delete(usr)
             Session().commit()
             h.flash(_('successfully deleted user'), category='success')
         except (UserOwnsReposException, DefaultUserException), e:
@@ -223,15 +225,19 @@ class UsersController(BaseController):
         if c.user.username == 'default':
             h.flash(_("You can't edit this user"), category='warning')
             return redirect(url('users'))
+
         c.perm_user = AuthUser(user_id=id)
         c.user.permissions = {}
         c.granted_permissions = UserModel().fill_perms(c.user)\
             .permissions['global']
         c.user_email_map = UserEmailMap.query()\
                         .filter(UserEmailMap.user == c.user).all()
+        user_model = UserModel()
         defaults = c.user.get_dict()
-        perm = Permission.get_by_key('hg.create.repository')
-        defaults.update({'create_repo_perm': UserModel().has_perm(id, perm)})
+        defaults.update({
+            'create_repo_perm': user_model.has_perm(id, 'hg.create.repository'),
+            'fork_repo_perm': user_model.has_perm(id, 'hg.fork.repository'),
+        })
 
         return htmlfill.render(
             render('admin/users/user_edit.html'),
@@ -243,28 +249,44 @@ class UsersController(BaseController):
     def update_perm(self, id):
         """PUT /users_perm/id: Update an existing item"""
         # url('user_perm', id=ID, method='put')
+        usr = User.get_or_404(id)
+        grant_create_perm = str2bool(request.POST.get('create_repo_perm'))
+        grant_fork_perm = str2bool(request.POST.get('fork_repo_perm'))
+        inherit_perms = str2bool(request.POST.get('inherit_default_permissions'))
 
-        grant_perm = request.POST.get('create_repo_perm', False)
         user_model = UserModel()
 
-        if grant_perm:
-            perm = Permission.get_by_key('hg.create.none')
-            user_model.revoke_perm(id, perm)
+        try:
+            usr.inherit_default_permissions = inherit_perms
+            Session().add(usr)
 
-            perm = Permission.get_by_key('hg.create.repository')
-            user_model.grant_perm(id, perm)
-            h.flash(_("Granted 'repository create' permission to user"),
-                    category='success')
-            Session().commit()
-        else:
-            perm = Permission.get_by_key('hg.create.repository')
-            user_model.revoke_perm(id, perm)
+            if grant_create_perm:
+                user_model.revoke_perm(usr, 'hg.create.none')
+                user_model.grant_perm(usr, 'hg.create.repository')
+                h.flash(_("Granted 'repository create' permission to user"),
+                        category='success')
+            else:
+                user_model.revoke_perm(usr, 'hg.create.repository')
+                user_model.grant_perm(usr, 'hg.create.none')
+                h.flash(_("Revoked 'repository create' permission to user"),
+                        category='success')
 
-            perm = Permission.get_by_key('hg.create.none')
-            user_model.grant_perm(id, perm)
-            h.flash(_("Revoked 'repository create' permission to user"),
-                    category='success')
+            if grant_fork_perm:
+                user_model.revoke_perm(usr, 'hg.fork.none')
+                user_model.grant_perm(usr, 'hg.fork.repository')
+                h.flash(_("Granted 'repository fork' permission to user"),
+                        category='success')
+            else:
+                user_model.revoke_perm(usr, 'hg.fork.repository')
+                user_model.grant_perm(usr, 'hg.fork.none')
+                h.flash(_("Revoked 'repository fork' permission to user"),
+                        category='success')
+
             Session().commit()
+        except Exception:
+            log.error(traceback.format_exc())
+            h.flash(_('An error occurred during permissions saving'),
+                    category='error')
         return redirect(url('edit_user', id=id))
 
     def add_email(self, id):

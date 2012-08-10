@@ -294,6 +294,7 @@ class User(Base, BaseModel):
     last_login = Column("last_login", DateTime(timezone=False), nullable=True, unique=None, default=None)
     ldap_dn = Column("ldap_dn", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     api_key = Column("api_key", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    inherit_default_permissions = Column("inherit_default_permissions", Boolean(), nullable=False, unique=None, default=True)
 
     user_log = relationship('UserLog', cascade='all')
     user_perms = relationship('UserToPerm', primaryjoin="User.user_id==UserToPerm.user_id", cascade='all')
@@ -504,6 +505,7 @@ class UsersGroup(Base, BaseModel):
     users_group_id = Column("users_group_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     users_group_name = Column("users_group_name", String(255, convert_unicode=False, assert_unicode=None), nullable=False, unique=True, default=None)
     users_group_active = Column("users_group_active", Boolean(), nullable=True, unique=None, default=None)
+    inherit_default_permissions = Column("users_group_inherit_default_permissions", Boolean(), nullable=False, unique=None, default=True)
 
     members = relationship('UsersGroupMember', cascade="all, delete, delete-orphan", lazy="joined")
     users_group_to_perm = relationship('UsersGroupToPerm', cascade='all')
@@ -1084,6 +1086,8 @@ class Permission(Base, BaseModel):
         ('hg.admin', _('RhodeCode Administrator')),
         ('hg.create.none', _('Repository creation disabled')),
         ('hg.create.repository', _('Repository creation enabled')),
+        ('hg.fork.none', _('Repository forking disabled')),
+        ('hg.fork.repository', _('Repository forking enabled')),
         ('hg.register.none', _('Register disabled')),
         ('hg.register.manual_activate', _('Register new user with RhodeCode '
                                           'with manual activation')),
@@ -1091,6 +1095,24 @@ class Permission(Base, BaseModel):
         ('hg.register.auto_activate', _('Register new user with RhodeCode '
                                         'with auto activation')),
     ]
+
+    # defines which permissions are more important higher the more important
+    PERM_WEIGHTS = {
+        'repository.none': 0,
+        'repository.read': 1,
+        'repository.write': 3,
+        'repository.admin': 4,
+
+        'group.none': 0,
+        'group.read': 1,
+        'group.write': 3,
+        'group.admin': 4,
+
+        'hg.fork.none': 0,
+        'hg.fork.repository': 1,
+        'hg.create.none': 0,
+        'hg.create.repository':1
+    }
 
     permission_id = Column("permission_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     permission_name = Column("permission_name", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)

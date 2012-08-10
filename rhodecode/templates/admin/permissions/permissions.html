@@ -37,7 +37,7 @@
                 </div>
             </div>
 			<div class="field">
-				<div class="label label-select">
+				<div class="label">
 					<label for="default_perm">${_('Repository permission')}:</label>
 				</div>
 				<div class="select">
@@ -66,7 +66,14 @@
 					${h.select('default_create','',c.create_choices)}
 				</div>
              </div>
-
+             <div class="field">
+                <div class="label">
+                    <label for="default_fork">${_('Repository forking')}:</label>
+                </div>
+                <div class="select">
+                    ${h.select('default_fork','',c.fork_choices)}
+                </div>
+             </div>
 	        <div class="buttons">
 	        ${h.submit('set',_('set'),class_="ui-btn large")}
 	        </div>

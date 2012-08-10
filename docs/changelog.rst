@@ -37,7 +37,7 @@ news
   that defines 'default' revision/branch for generating readme files
 - Implemented #509, RhodeCode enforces SSL for push/pulling if requested.
 - Import remote svn repositories to mercurial using hgsubversion  
-
+- Fixed #508 RhodeCode now has a option to explicitly set forking permissions
 
 fixes
 +++++

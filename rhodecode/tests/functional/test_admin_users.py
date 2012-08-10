@@ -6,6 +6,7 @@ from rhodecode.lib.auth import check_password
 from rhodecode.model.user import UserModel
 from rhodecode.model import validators
 from rhodecode.lib import helpers as h
+from rhodecode.model.meta import Session
 
 
 class TestAdminUsersController(TestController):
@@ -172,45 +173,118 @@ class TestAdminUsersController(TestController):
         perm_none = Permission.get_by_key('hg.create.none')
         perm_create = Permission.get_by_key('hg.create.repository')
 
-        user = User.get_by_username(TEST_USER_REGULAR_LOGIN)
+        user = UserModel().create_or_update(username='dummy', password='qwe',
+                                            email='dummy', firstname='a',
+                                            lastname='b')
+        Session().commit()
+        uid = user.user_id
 
-        #User should have None permission on creation repository
-        self.assertEqual(UserModel().has_perm(user, perm_none), False)
-        self.assertEqual(UserModel().has_perm(user, perm_create), False)
+        try:
+            #User should have None permission on creation repository
+            self.assertEqual(UserModel().has_perm(user, perm_none), False)
+            self.assertEqual(UserModel().has_perm(user, perm_create), False)
 
-        response = self.app.post(url('user_perm', id=user.user_id),
-                                 params=dict(_method='put',
-                                             create_repo_perm=True))
+            response = self.app.post(url('user_perm', id=uid),
+                                     params=dict(_method='put',
+                                                 create_repo_perm=True))
 
-        perm_none = Permission.get_by_key('hg.create.none')
-        perm_create = Permission.get_by_key('hg.create.repository')
+            perm_none = Permission.get_by_key('hg.create.none')
+            perm_create = Permission.get_by_key('hg.create.repository')
 
-        user = User.get_by_username(TEST_USER_REGULAR_LOGIN)
-        #User should have None permission on creation repository
-        self.assertEqual(UserModel().has_perm(user, perm_none), False)
-        self.assertEqual(UserModel().has_perm(user, perm_create), True)
+            #User should have None permission on creation repository
+            self.assertEqual(UserModel().has_perm(uid, perm_none), False)
+            self.assertEqual(UserModel().has_perm(uid, perm_create), True)
+        finally:
+            UserModel().delete(uid)
+            Session().commit()
 
     def test_revoke_perm_create_repo(self):
         self.log_user()
         perm_none = Permission.get_by_key('hg.create.none')
         perm_create = Permission.get_by_key('hg.create.repository')
 
-        user = User.get_by_username(TEST_USER_REGULAR2_LOGIN)
+        user = UserModel().create_or_update(username='dummy', password='qwe',
+                                            email='dummy', firstname='a',
+                                            lastname='b')
+        Session().commit()
+        uid = user.user_id
 
-        #User should have None permission on creation repository
-        self.assertEqual(UserModel().has_perm(user, perm_none), False)
-        self.assertEqual(UserModel().has_perm(user, perm_create), False)
+        try:
+            #User should have None permission on creation repository
+            self.assertEqual(UserModel().has_perm(user, perm_none), False)
+            self.assertEqual(UserModel().has_perm(user, perm_create), False)
 
-        response = self.app.post(url('user_perm', id=user.user_id),
-                                 params=dict(_method='put'))
+            response = self.app.post(url('user_perm', id=uid),
+                                     params=dict(_method='put'))
 
-        perm_none = Permission.get_by_key('hg.create.none')
-        perm_create = Permission.get_by_key('hg.create.repository')
+            perm_none = Permission.get_by_key('hg.create.none')
+            perm_create = Permission.get_by_key('hg.create.repository')
 
-        user = User.get_by_username(TEST_USER_REGULAR2_LOGIN)
-        #User should have None permission on creation repository
-        self.assertEqual(UserModel().has_perm(user, perm_none), True)
-        self.assertEqual(UserModel().has_perm(user, perm_create), False)
+            #User should have None permission on creation repository
+            self.assertEqual(UserModel().has_perm(uid, perm_none), True)
+            self.assertEqual(UserModel().has_perm(uid, perm_create), False)
+        finally:
+            UserModel().delete(uid)
+            Session().commit()
+
+    def test_add_perm_fork_repo(self):
+        self.log_user()
+        perm_none = Permission.get_by_key('hg.fork.none')
+        perm_fork = Permission.get_by_key('hg.fork.repository')
+
+        user = UserModel().create_or_update(username='dummy', password='qwe',
+                                            email='dummy', firstname='a',
+                                            lastname='b')
+        Session().commit()
+        uid = user.user_id
+
+        try:
+            #User should have None permission on creation repository
+            self.assertEqual(UserModel().has_perm(user, perm_none), False)
+            self.assertEqual(UserModel().has_perm(user, perm_fork), False)
+
+            response = self.app.post(url('user_perm', id=uid),
+                                     params=dict(_method='put',
+                                                 create_repo_perm=True))
+
+            perm_none = Permission.get_by_key('hg.create.none')
+            perm_create = Permission.get_by_key('hg.create.repository')
+
+            #User should have None permission on creation repository
+            self.assertEqual(UserModel().has_perm(uid, perm_none), False)
+            self.assertEqual(UserModel().has_perm(uid, perm_create), True)
+        finally:
+            UserModel().delete(uid)
+            Session().commit()
+
+    def test_revoke_perm_fork_repo(self):
+        self.log_user()
+        perm_none = Permission.get_by_key('hg.fork.none')
+        perm_fork = Permission.get_by_key('hg.fork.repository')
+
+        user = UserModel().create_or_update(username='dummy', password='qwe',
+                                            email='dummy', firstname='a',
+                                            lastname='b')
+        Session().commit()
+        uid = user.user_id
+
+        try:
+            #User should have None permission on creation repository
+            self.assertEqual(UserModel().has_perm(user, perm_none), False)
+            self.assertEqual(UserModel().has_perm(user, perm_fork), False)
+
+            response = self.app.post(url('user_perm', id=uid),
+                                     params=dict(_method='put'))
+
+            perm_none = Permission.get_by_key('hg.create.none')
+            perm_create = Permission.get_by_key('hg.create.repository')
+
+            #User should have None permission on creation repository
+            self.assertEqual(UserModel().has_perm(uid, perm_none), True)
+            self.assertEqual(UserModel().has_perm(uid, perm_create), False)
+        finally:
+            UserModel().delete(uid)
+            Session().commit()
 
     def test_edit_as_xml(self):
         response = self.app.get(url('formatted_edit_user', id=1, format='xml'))

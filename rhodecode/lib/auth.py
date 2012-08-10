@@ -350,6 +350,7 @@ class  AuthUser(object):
             log.debug('Auth User lookup by USER NAME %s' % self.username)
             dbuser = login_container_auth(self.username)
             if dbuser is not None:
+                log.debug('filling all attributes to object')
                 for k, v in dbuser.get_dict().items():
                     setattr(self, k, v)
                 self.set_authenticated()

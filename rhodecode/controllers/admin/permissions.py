@@ -71,6 +71,15 @@ class PermissionsController(BaseController):
         self.create_choices = [('hg.create.none', _('Disabled')),
                                ('hg.create.repository', _('Enabled'))]
 
+        self.fork_choices = [('hg.fork.none', _('Disabled')),
+                             ('hg.fork.repository', _('Enabled'))]
+
+        # set the global template variables
+        c.perms_choices = self.perms_choices
+        c.register_choices = self.register_choices
+        c.create_choices = self.create_choices
+        c.fork_choices = self.fork_choices
+
     def index(self, format='html'):
         """GET /permissions: All items in the collection"""
         # url('permissions')
@@ -96,7 +105,8 @@ class PermissionsController(BaseController):
 
         _form = DefaultPermissionsForm([x[0] for x in self.perms_choices],
                                        [x[0] for x in self.register_choices],
-                                       [x[0] for x in self.create_choices])()
+                                       [x[0] for x in self.create_choices],
+                                       [x[0] for x in self.fork_choices])()
 
         try:
             form_result = _form.to_python(dict(request.POST))
@@ -107,9 +117,6 @@ class PermissionsController(BaseController):
                     category='success')
 
         except formencode.Invalid, errors:
-            c.perms_choices = self.perms_choices
-            c.register_choices = self.register_choices
-            c.create_choices = self.create_choices
             defaults = errors.value
 
             return htmlfill.render(
@@ -141,10 +148,8 @@ class PermissionsController(BaseController):
     def edit(self, id, format='html'):
         """GET /permissions/id/edit: Form to edit an existing item"""
         #url('edit_permission', id=ID)
-        c.perms_choices = self.perms_choices
-        c.register_choices = self.register_choices
-        c.create_choices = self.create_choices
 
+        #this form can only edit default user permissions
         if id == 'default':
             default_user = User.get_by_username('default')
             defaults = {'_method': 'put',
@@ -160,10 +165,14 @@ class PermissionsController(BaseController):
                 if p.permission.permission_name.startswith('hg.create.'):
                     defaults['default_create'] = p.permission.permission_name
 
+                if p.permission.permission_name.startswith('hg.fork.'):
+                    defaults['default_fork'] = p.permission.permission_name
+
             return htmlfill.render(
-                        render('admin/permissions/permissions.html'),
-                        defaults=defaults,
-                        encoding="UTF-8",
-                        force_defaults=True,)
+                render('admin/permissions/permissions.html'),
+                defaults=defaults,
+                encoding="UTF-8",
+                force_defaults=True,
+            )
         else:
             return redirect(url('admin_home'))

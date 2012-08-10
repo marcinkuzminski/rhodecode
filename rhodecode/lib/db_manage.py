@@ -513,27 +513,32 @@ class DbManage(object):
     def populate_default_permissions(self):
         log.info('creating default user permissions')
 
-        default_user = self.sa.query(User)\
-        .filter(User.username == 'default').scalar()
+        default_user = User.get_by_username('default')
 
         reg_perm = UserToPerm()
         reg_perm.user = default_user
         reg_perm.permission = self.sa.query(Permission)\
-        .filter(Permission.permission_name == 'hg.register.manual_activate')\
-        .scalar()
+         .filter(Permission.permission_name == 'hg.register.manual_activate')\
+         .scalar()
+        self.sa.add(reg_perm)
 
         create_repo_perm = UserToPerm()
         create_repo_perm.user = default_user
         create_repo_perm.permission = self.sa.query(Permission)\
-        .filter(Permission.permission_name == 'hg.create.repository')\
-        .scalar()
+         .filter(Permission.permission_name == 'hg.create.repository')\
+         .scalar()
+        self.sa.add(create_repo_perm)
+
+        default_fork_perm = UserToPerm()
+        default_fork_perm.user = default_user
+        default_fork_perm.permission = self.sa.query(Permission)\
+         .filter(Permission.permission_name == 'hg.fork.repository')\
+         .scalar()
+        self.sa.add(default_fork_perm)
 
         default_repo_perm = UserToPerm()
         default_repo_perm.user = default_user
         default_repo_perm.permission = self.sa.query(Permission)\
-        .filter(Permission.permission_name == 'repository.read')\
-        .scalar()
-
-        self.sa.add(reg_perm)
-        self.sa.add(create_repo_perm)
+         .filter(Permission.permission_name == 'repository.read')\
+         .scalar()
         self.sa.add(default_repo_perm)

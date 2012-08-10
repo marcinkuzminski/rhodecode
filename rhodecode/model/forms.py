@@ -274,7 +274,8 @@ def ApplicationUiSettingsForm():
     return _ApplicationUiSettingsForm
 
 
-def DefaultPermissionsForm(perms_choices, register_choices, create_choices):
+def DefaultPermissionsForm(perms_choices, register_choices, create_choices,
+                           fork_choices):
     class _DefaultPermissionsForm(formencode.Schema):
         allow_extra_fields = True
         filter_extra_fields = True
@@ -283,6 +284,7 @@ def DefaultPermissionsForm(perms_choices, register_choices, create_choices):
         default_perm = v.OneOf(perms_choices)
         default_register = v.OneOf(register_choices)
         default_create = v.OneOf(create_choices)
+        default_fork = v.OneOf(fork_choices)
 
     return _DefaultPermissionsForm
 

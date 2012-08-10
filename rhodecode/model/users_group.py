@@ -165,10 +165,8 @@ class UsersGroupModel(BaseModel):
             .filter(UsersGroupToPerm.permission == perm).scalar() is not None
 
     def grant_perm(self, users_group, perm):
-        if not isinstance(perm, Permission):
-            raise Exception('perm needs to be an instance of Permission class')
-
         users_group = self.__get_users_group(users_group)
+        perm = self._get_perm(perm)
 
         # if this permission is already granted skip it
         _perm = UsersGroupToPerm.query()\

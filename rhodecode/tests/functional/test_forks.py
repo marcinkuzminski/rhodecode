@@ -3,6 +3,7 @@ from rhodecode.tests import *
 from rhodecode.model.db import Repository
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.user import UserModel
+from rhodecode.model.meta import Session
 
 
 class TestForksController(TestController):
@@ -14,11 +15,11 @@ class TestForksController(TestController):
             username=self.username, password=self.password,
             email=u'fork_king@rhodecode.org', firstname=u'u1', lastname=u'u1'
         )
-        self.Session.commit()
+        Session().commit()
 
     def tearDown(self):
-        self.Session.delete(self.u1)
-        self.Session.commit()
+        Session().delete(self.u1)
+        Session().commit()
 
     def test_index(self):
         self.log_user()
@@ -27,6 +28,20 @@ class TestForksController(TestController):
                                     repo_name=repo_name))
 
         self.assertTrue("""There are no forks yet""" in response.body)
+
+    def test_no_permissions_to_fork(self):
+        usr = self.log_user(TEST_USER_REGULAR_LOGIN,
+                            TEST_USER_REGULAR_PASS)['user_id']
+        user_model = UserModel()
+        user_model.revoke_perm(usr, 'hg.fork.repository')
+        user_model.grant_perm(usr, 'hg.fork.none')
+        u = UserModel().get(usr)
+        u.inherit_default_permissions = False
+        Session().commit()
+        # try create a fork
+        repo_name = HG_REPO
+        self.app.post(url(controller='forks', action='fork_create',
+                          repo_name=repo_name), {}, status=403)
 
     def test_index_with_fork_hg(self):
         self.log_user()
@@ -107,7 +122,7 @@ class TestForksController(TestController):
                 'forked %s repository as %s' % (repo_name, fork_name))
 
         #test if the fork was created in the database
-        fork_repo = self.Session.query(Repository)\
+        fork_repo = Session().query(Repository)\
             .filter(Repository.repo_name == fork_name).one()
 
         self.assertEqual(fork_repo.repo_name, fork_name)
@@ -125,7 +140,7 @@ class TestForksController(TestController):
         usr = self.log_user(self.username, self.password)['user_id']
         repo_name = HG_REPO
 
-        forks = self.Session.query(Repository)\
+        forks = Session().query(Repository)\
             .filter(Repository.fork_id != None)\
             .all()
         self.assertEqual(1, len(forks))
@@ -134,7 +149,7 @@ class TestForksController(TestController):
         RepoModel().grant_user_permission(repo=forks[0],
                                           user=usr,
                                           perm='repository.read')
-        self.Session.commit()
+        Session().commit()
 
         response = self.app.get(url(controller='forks', action='forks',
                                     repo_name=repo_name))
@@ -145,7 +160,7 @@ class TestForksController(TestController):
         usr = self.log_user(self.username, self.password)['user_id']
         repo_name = HG_REPO
 
-        forks = self.Session.query(Repository)\
+        forks = Session().query(Repository)\
             .filter(Repository.fork_id != None)\
             .all()
         self.assertEqual(1, len(forks))
@@ -153,7 +168,7 @@ class TestForksController(TestController):
         # set none
         RepoModel().grant_user_permission(repo=forks[0],
                                           user=usr, perm='repository.none')
-        self.Session.commit()
+        Session().commit()
         # fork shouldn't be there
         response = self.app.get(url(controller='forks', action='forks',
                                     repo_name=repo_name))

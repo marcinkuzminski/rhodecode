@@ -36,6 +36,10 @@ class TestPermissions(unittest.TestCase):
             username=u'u2', password=u'qweqwe',
             email=u'u2@rhodecode.org', firstname=u'u2', lastname=u'u2'
         )
+        self.u3 = UserModel().create_or_update(
+            username=u'u3', password=u'qweqwe',
+            email=u'u3@rhodecode.org', firstname=u'u3', lastname=u'u3'
+        )
         self.anon = User.get_by_username('default')
         self.a1 = UserModel().create_or_update(
             username=u'a1', password=u'qweqwe',
@@ -48,6 +52,7 @@ class TestPermissions(unittest.TestCase):
             RepoModel().delete(repo=self.test_repo)
         UserModel().delete(self.u1)
         UserModel().delete(self.u2)
+        UserModel().delete(self.u3)
         UserModel().delete(self.a1)
         if hasattr(self, 'g1'):
             ReposGroupModel().delete(self.g1.group_id)
@@ -126,10 +131,11 @@ class TestPermissions(unittest.TestCase):
         self.assertEqual(a1_auth.permissions['repositories_groups'],
                          perms['repositories_groups'])
 
-    def test_propagated_permission_from_users_group(self):
+    def test_propagated_permission_from_users_group_by_explicit_perms_exist(self):
         # make group
         self.ug1 = UsersGroupModel().create('G1')
         # add user to group
+
         UsersGroupModel().add_user_to_group(self.ug1, self.u1)
 
         # set permission to lower
@@ -140,11 +146,12 @@ class TestPermissions(unittest.TestCase):
         self.assertEqual(u1_auth.permissions['repositories'][HG_REPO],
                          new_perm)
 
-        # grant perm for group this should override permission from user
-        new_perm = 'repository.write'
+        # grant perm for group this should not override permission from user
+        # since it has explicitly set
+        new_perm_gr = 'repository.write'
         RepoModel().grant_users_group_permission(repo=HG_REPO,
                                                  group_name=self.ug1,
-                                                 perm=new_perm)
+                                                 perm=new_perm_gr)
         # check perms
         u1_auth = AuthUser(user_id=self.u1.user_id)
         perms = {
@@ -156,6 +163,31 @@ class TestPermissions(unittest.TestCase):
         self.assertEqual(u1_auth.permissions['repositories'][HG_REPO],
                          new_perm)
         self.assertEqual(u1_auth.permissions['repositories_groups'],
+                         perms['repositories_groups'])
+
+    def test_propagated_permission_from_users_group(self):
+        # make group
+        self.ug1 = UsersGroupModel().create('G1')
+        # add user to group
+
+        UsersGroupModel().add_user_to_group(self.ug1, self.u3)
+
+        # grant perm for group this should override default permission from user
+        new_perm_gr = 'repository.write'
+        RepoModel().grant_users_group_permission(repo=HG_REPO,
+                                                 group_name=self.ug1,
+                                                 perm=new_perm_gr)
+        # check perms
+        u3_auth = AuthUser(user_id=self.u3.user_id)
+        perms = {
+            'repositories_groups': {},
+            'global': set([u'hg.create.repository', u'repository.read',
+                           u'hg.register.manual_activate']),
+            'repositories': {u'vcs_test_hg': u'repository.read'}
+        }
+        self.assertEqual(u3_auth.permissions['repositories'][HG_REPO],
+                         new_perm_gr)
+        self.assertEqual(u3_auth.permissions['repositories_groups'],
                          perms['repositories_groups'])
 
     def test_propagated_permission_from_users_group_lower_weight(self):
@@ -315,3 +347,92 @@ class TestPermissions(unittest.TestCase):
         u1_auth = AuthUser(user_id=self.u1.user_id)
         self.assertEqual(u1_auth.permissions['repositories_groups'],
                          {u'group1': u'group.read'})
+
+    def test_inherited_permissions_from_default_on_user_enabled(self):
+        user_model = UserModel()
+        # enable fork and create on default user
+        usr = 'default'
+        user_model.revoke_perm(usr, 'hg.create.none')
+        user_model.grant_perm(usr, 'hg.create.repository')
+        user_model.revoke_perm(usr, 'hg.fork.none')
+        user_model.grant_perm(usr, 'hg.fork.repository')
+        # make sure inherit flag is turned on
+        self.u1.inherit_default_permissions = True
+        Session().commit()
+        u1_auth = AuthUser(user_id=self.u1.user_id)
+        # this user will have inherited permissions from default user
+        self.assertEqual(u1_auth.permissions['global'],
+                         set(['hg.create.repository', 'hg.fork.repository',
+                              'hg.register.manual_activate',
+                              'repository.read']))
+
+    def test_inherited_permissions_from_default_on_user_disabled(self):
+        user_model = UserModel()
+        # disable fork and create on default user
+        usr = 'default'
+        user_model.revoke_perm(usr, 'hg.create.repository')
+        user_model.grant_perm(usr, 'hg.create.none')
+        user_model.revoke_perm(usr, 'hg.fork.repository')
+        user_model.grant_perm(usr, 'hg.fork.none')
+        # make sure inherit flag is turned on
+        self.u1.inherit_default_permissions = True
+        Session().commit()
+        u1_auth = AuthUser(user_id=self.u1.user_id)
+        # this user will have inherited permissions from default user
+        self.assertEqual(u1_auth.permissions['global'],
+                         set(['hg.create.none', 'hg.fork.none',
+                              'hg.register.manual_activate',
+                              'repository.read']))
+
+    def test_non_inherited_permissions_from_default_on_user_enabled(self):
+        user_model = UserModel()
+        # enable fork and create on default user
+        usr = 'default'
+        user_model.revoke_perm(usr, 'hg.create.none')
+        user_model.grant_perm(usr, 'hg.create.repository')
+        user_model.revoke_perm(usr, 'hg.fork.none')
+        user_model.grant_perm(usr, 'hg.fork.repository')
+
+        #disable global perms on specific user
+        user_model.revoke_perm(self.u1, 'hg.create.repository')
+        user_model.grant_perm(self.u1, 'hg.create.none')
+        user_model.revoke_perm(self.u1, 'hg.fork.repository')
+        user_model.grant_perm(self.u1, 'hg.fork.none')
+
+        # make sure inherit flag is turned off
+        self.u1.inherit_default_permissions = False
+        Session().commit()
+        u1_auth = AuthUser(user_id=self.u1.user_id)
+        # this user will have non inherited permissions from he's
+        # explicitly set permissions
+        self.assertEqual(u1_auth.permissions['global'],
+                         set(['hg.create.none', 'hg.fork.none',
+                              'hg.register.manual_activate',
+                              'repository.read']))
+
+    def test_non_inherited_permissions_from_default_on_user_disabled(self):
+        user_model = UserModel()
+        # disable fork and create on default user
+        usr = 'default'
+        user_model.revoke_perm(usr, 'hg.create.repository')
+        user_model.grant_perm(usr, 'hg.create.none')
+        user_model.revoke_perm(usr, 'hg.fork.repository')
+        user_model.grant_perm(usr, 'hg.fork.none')
+
+        #enable global perms on specific user
+        user_model.revoke_perm(self.u1, 'hg.create.none')
+        user_model.grant_perm(self.u1, 'hg.create.repository')
+        user_model.revoke_perm(self.u1, 'hg.fork.none')
+        user_model.grant_perm(self.u1, 'hg.fork.repository')
+
+        # make sure inherit flag is turned off
+        self.u1.inherit_default_permissions = False
+        Session().commit()
+        u1_auth = AuthUser(user_id=self.u1.user_id)
+        # this user will have non inherited permissions from he's
+        # explicitly set permissions
+        self.assertEqual(u1_auth.permissions['global'],
+                         set(['hg.create.repository', 'hg.fork.repository',
+                              'hg.register.manual_activate',
+                              'repository.read']))
+

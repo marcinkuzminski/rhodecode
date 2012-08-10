@@ -35,7 +35,8 @@ import rhodecode.lib.helpers as h
 
 from rhodecode.lib.helpers import Page
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator, \
-    NotAnonymous, HasRepoPermissionAny
+    NotAnonymous, HasRepoPermissionAny, HasPermissionAllDecorator,\
+    HasPermissionAnyDecorator
 from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.model.db import Repository, RepoGroup, UserFollowing, User
 from rhodecode.model.repo import RepoModel
@@ -123,6 +124,7 @@ class ForksController(BaseRepoController):
         return render('/forks/forks.html')
 
     @NotAnonymous()
+    @HasPermissionAnyDecorator('hg.admin', 'hg.fork.repository')
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
                                    'repository.admin')
     def fork(self, repo_name):
@@ -146,6 +148,7 @@ class ForksController(BaseRepoController):
         )
 
     @NotAnonymous()
+    @HasPermissionAnyDecorator('hg.admin', 'hg.fork.repository')
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
                                    'repository.admin')
     def fork_create(self, repo_name):
