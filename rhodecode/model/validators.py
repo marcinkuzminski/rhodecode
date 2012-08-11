@@ -9,9 +9,8 @@ from pylons.i18n.translation import _
 from webhelpers.pylonslib.secure_form import authentication_token
 
 from formencode.validators import (
-    UnicodeString, OneOf, Int, Number, Regex, Email, Bool, StringBoolean, Set
+    UnicodeString, OneOf, Int, Number, Regex, Email, Bool, StringBoolean, Set,
 )
-
 from rhodecode.lib.utils import repo_name_slug
 from rhodecode.model.db import RepoGroup, Repository, UsersGroup, User
 from rhodecode.lib.exceptions import LdapImportError

@@ -24,6 +24,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import logging
 import traceback
+import formencode
 
 from webob.exc import HTTPNotFound, HTTPForbidden
 from collections import defaultdict
@@ -48,6 +49,7 @@ from rhodecode.model.meta import Session
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.comment import ChangesetCommentsModel
 from rhodecode.model.changeset_status import ChangesetStatusModel
+from rhodecode.model.forms import PullRequestForm
 
 log = logging.getLogger(__name__)
 
@@ -138,18 +140,31 @@ class PullrequestsController(BaseRepoController):
 
     @NotAnonymous()
     def create(self, repo_name):
-        req_p = request.POST
-        org_repo = req_p['org_repo']
-        org_ref = req_p['org_ref']
-        other_repo = req_p['other_repo']
-        other_ref = req_p['other_ref']
-        revisions = req_p.getall('revisions')
-        reviewers = req_p.getall('review_members')
 
-        #TODO: wrap this into a FORM !!!
+        try:
+            _form = PullRequestForm()().to_python(request.POST)
+        except formencode.Invalid, errors:
+            log.error(traceback.format_exc())
+            if errors.error_dict.get('revisions'):
+                msg = _('Cannot open a pull request with '
+                        'empty list of changesets')
+            elif errors.error_dict.get('pullrequest_title'):
+                msg = _('Pull request requires a title with min. 3 chars')
+            else:
+                msg = _('error during creation of pull request')
 
-        title = req_p['pullrequest_title']
-        description = req_p['pullrequest_desc']
+            h.flash(msg, 'error')
+            return redirect(url('pullrequest_home', repo_name=repo_name))
+
+        org_repo = _form['org_repo']
+        org_ref = _form['org_ref']
+        other_repo = _form['other_repo']
+        other_ref = _form['other_ref']
+        revisions = _form['revisions']
+        reviewers = _form['review_members']
+
+        title = _form['pullrequest_title']
+        description = _form['pullrequest_desc']
 
         try:
             pull_request = PullRequestModel().create(
@@ -163,7 +178,7 @@ class PullrequestsController(BaseRepoController):
             h.flash(_('Error occurred during sending pull request'),
                     category='error')
             log.error(traceback.format_exc())
-            return redirect(url('changelog_home', repo_name=org_repo,))
+            return redirect(url('pullrequest_home', repo_name=repo_name))
 
         return redirect(url('pullrequest_show', repo_name=other_repo,
                             pull_request_id=pull_request.pull_request_id))
@@ -190,12 +205,19 @@ class PullrequestsController(BaseRepoController):
         """
 
         org_repo = pull_request.org_repo
-        org_ref_type, org_ref_, org_ref = pull_request.org_ref.split(':')
-        other_repo = pull_request.other_repo
-        other_ref_type, other_ref, other_ref_ = pull_request.other_ref.split(':')
+        (org_ref_type,
+         org_ref_name,
+         org_ref_rev) = pull_request.org_ref.split(':')
 
-        org_ref = (org_ref_type, org_ref)
-        other_ref = (other_ref_type, other_ref)
+        other_repo = pull_request.other_repo
+        (other_ref_type,
+         other_ref_name,
+         other_ref_rev) = pull_request.other_ref.split(':')
+
+        # dispite opening revisions for bookmarks/branches/tags, we always
+        # convert this to rev to prevent changes after book or branch change
+        org_ref = ('rev', org_ref_rev)
+        other_ref = ('rev', other_ref_rev)
 
         c.org_repo = org_repo
         c.other_repo = other_repo

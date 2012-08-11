@@ -321,3 +321,22 @@ def UserExtraEmailForm():
         email = All(v.UniqSystemEmail(), v.Email)
 
     return _UserExtraEmailForm
+
+
+def PullRequestForm():
+    class _PullRequestForm(formencode.Schema):
+        allow_extra_fields = True
+        filter_extra_fields = True
+
+        user = v.UnicodeString(strip=True, required=True)
+        org_repo = v.UnicodeString(strip=True, required=True)
+        org_ref = v.UnicodeString(strip=True, required=True)
+        other_repo = v.UnicodeString(strip=True, required=True)
+        other_ref = v.UnicodeString(strip=True, required=True)
+        revisions = v.Set(required=True)
+        review_members = v.Set(required=True)
+
+        pullrequest_title = v.UnicodeString(strip=True, required=True, min=3)
+        pullrequest_desc = v.UnicodeString(strip=True, required=False)
+
+    return _PullRequestForm
