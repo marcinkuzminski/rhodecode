@@ -22,14 +22,33 @@
         %if c.pull_request.is_closed():
         <div style="padding:10px; font-size:22px;width:100%;text-align: center; color:#88D882">${_('Closed %s') % (h.age(c.pull_request.updated_on))}</div>
         %endif
-    <h3>${_('Title')}: ${c.pull_request.title}
-        <div class="changeset-status-container" style="float:none">
-        %if c.current_changeset_status:
-          <div title="${_('Pull request status')}" class="changeset-status-lbl">[${h.changeset_status_lbl(c.current_changeset_status)}]</div>
-          <div class="changeset-status-ico" style="padding:4px"><img src="${h.url('/images/icons/flag_status_%s.png' % c.current_changeset_status)}" /></div>
-        %endif
-        </div>
-    </h3>
+    <h3>${_('Title')}: ${c.pull_request.title}</h3>
+        
+    <div class="form">
+      <div id="summary" class="fields">
+         <div class="field">
+          <div class="label-summary">
+              <label>${_('Status')}:</label>
+          </div>
+          <div class="input">
+            <div class="changeset-status-container" style="float:none;clear:both">
+            %if c.current_changeset_status:
+              <div title="${_('Pull request status')}" class="changeset-status-lbl">[${h.changeset_status_lbl(c.current_changeset_status)}]</div>
+              <div class="changeset-status-ico" style="padding:1px 4px"><img src="${h.url('/images/icons/flag_status_%s.png' % c.current_changeset_status)}" /></div>
+            %endif
+            </div>
+          </div>
+         </div>
+         <div class="field">
+          <div class="label-summary">
+              <label>${_('Still not reviewed by')}:</label>
+          </div>
+          <div class="input">
+            <div>${ungettext('%d reviewer', '%d reviewers',len(c.pull_request_pending_reviewers)) % len(c.pull_request_pending_reviewers)}</div>
+          </div>
+         </div>                
+      </div>
+    </div>    
     <div style="white-space:pre-wrap;padding:3px 3px 5px 20px">${h.literal(c.pull_request.description)}</div>
     <div style="padding:4px 4px 10px 20px">
       <div>${_('Created on')}: ${h.fmt_date(c.pull_request.created_on)}</div>

@@ -192,6 +192,7 @@ class PullrequestsController(BaseRepoController):
 
         reviewers_ids = map(int, filter(lambda v: v not in [None, ''],
                    request.POST.get('reviewers_ids', '').split(',')))
+
         PullRequestModel().update_reviewers(pull_request_id, reviewers_ids)
         Session.commit()
         return True
@@ -266,12 +267,15 @@ class PullrequestsController(BaseRepoController):
             cs_statuses[st.author.username] += [st]
 
         c.pull_request_reviewers = []
+        c.pull_request_pending_reviewers = []
         for o in c.pull_request.reviewers:
             st = cs_statuses.get(o.user.username, None)
             if st:
                 sorter = lambda k: k.version
                 st = [(x, list(y)[0])
                       for x, y in (groupby(sorted(st, key=sorter), sorter))]
+            else:
+                c.pull_request_pending_reviewers.append(o.user)
             c.pull_request_reviewers.append([o.user, st])
 
         # pull_requests repo_name we opened it against
