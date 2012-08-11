@@ -435,8 +435,10 @@ def make_map(config):
                  '/{repo_name:.*?}/compare/{org_ref_type}@{org_ref}...{other_ref_type}@{other_ref}',
                  controller='compare', action='index',
                  conditions=dict(function=check_repo),
-                 requirements=dict(org_ref_type='(branch|book|tag|rev)',
-                                   other_ref_type='(branch|book|tag|rev)'))
+                 requirements=dict(
+                            org_ref_type='(branch|book|tag|rev|org_ref_type)',
+                            other_ref_type='(branch|book|tag|rev|other_ref_type)')
+                 )
 
     rmap.connect('pullrequest_home',
                  '/{repo_name:.*?}/pull-request/new', controller='pullrequests',

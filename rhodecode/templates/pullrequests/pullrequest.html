@@ -138,11 +138,11 @@
   var loadPreview = function(){
 	  YUD.setStyle(YUD.get('pull_request_overview_url').parentElement,'display','none');
       var url = "${h.url('compare_url',
-          repo_name='org_repo',
-          org_ref_type='branch', org_ref='org_ref',
-          other_ref_type='branch', other_ref='other_ref',
-          repo='other_repo',
-          as_form=True)}";
+    	                 repo_name='org_repo',
+    	                 org_ref_type='org_ref_type', org_ref='org_ref',
+                         other_ref_type='other_ref_type', other_ref='other_ref',
+                         repo='other_repo',
+                         as_form=True)}";
 
       var select_refs = YUQ('#pull_request_form select.refs')
 
