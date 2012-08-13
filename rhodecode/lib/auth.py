@@ -324,6 +324,7 @@ class  AuthUser(object):
         self.email = ''
         self.is_authenticated = False
         self.admin = False
+        self.inherit_default_permissions = False
         self.permissions = {}
         self._api_key = api_key
         self.propagate_data()
