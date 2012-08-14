@@ -81,6 +81,7 @@ from rhodecode.lib.utils2 import safe_str
 from rhodecode.lib.base import BaseVCSController
 from rhodecode.lib.auth import get_container_username
 from rhodecode.lib.utils import is_valid_repo, make_ui
+from rhodecode.lib.compat import json
 from rhodecode.model.db import User, RhodeCodeUi
 
 log = logging.getLogger(__name__)
@@ -122,7 +123,7 @@ class SimpleGit(BaseVCSController):
             return HTTPInternalServerError()(environ, start_response)
 
         # quick check if that dir exists...
-        if is_valid_repo(repo_name, self.basepath) is False:
+        if is_valid_repo(repo_name, self.basepath, 'git') is False:
             return HTTPNotFound()(environ, start_response)
 
         #======================================================================
@@ -190,7 +191,8 @@ class SimpleGit(BaseVCSController):
             'repository': repo_name,
             'scm': 'git',
         }
-
+        # set the environ variables for this request
+        os.environ['RC_SCM_DATA'] = json.dumps(extras)
         #===================================================================
         # GIT REQUEST HANDLING
         #===================================================================

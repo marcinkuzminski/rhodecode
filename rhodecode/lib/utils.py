@@ -203,19 +203,24 @@ def get_repos(path, recursive=False):
     return _get_repos(path)
 
 
-def is_valid_repo(repo_name, base_path):
+def is_valid_repo(repo_name, base_path, scm=None):
     """
-    Returns True if given path is a valid repository False otherwise
+    Returns True if given path is a valid repository False otherwise.
+    If scm param is given also compare if given scm is the same as expected 
+    from scm parameter
 
     :param repo_name:
     :param base_path:
+    :param scm:
 
     :return True: if given path is a valid repository
     """
     full_path = os.path.join(safe_str(base_path), safe_str(repo_name))
 
     try:
-        get_scm(full_path)
+        scm_ = get_scm(full_path)
+        if scm:
+            return scm_[0] == scm
         return True
     except VCSError:
         return False

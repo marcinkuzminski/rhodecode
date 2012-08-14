@@ -33,6 +33,7 @@ from mercurial.node import nullrev
 from rhodecode.lib import helpers as h
 from rhodecode.lib.utils import action_logger
 from rhodecode.lib.vcs.backends.base import EmptyChangeset
+from rhodecode.lib.compat import json
 
 
 def _get_scm_size(alias, root_path):
@@ -90,12 +91,23 @@ def log_pull_action(ui, repo, **kwargs):
     :param ui:
     :param repo:
     """
+    try:
+        rc_extras = json.loads(os.environ.get('RC_SCM_DATA', "{}"))
+    except:
+        rc_extras = {}
     extras = dict(repo.ui.configitems('rhodecode_extras'))
-    username = extras['username']
-    repository = extras['repository']
-    scm = extras['scm']
-    action = 'pull'
+    if 'username' in extras:
+        username = extras['username']
+        repository = extras['repository']
+        scm = extras['scm']
+    elif 'username' in rc_extras:
+        username = rc_extras['username']
+        repository = rc_extras['repository']
+        scm = rc_extras['scm']
+    else:
+        raise Exception('Missing data in repo.ui and os.environ')
 
+    action = 'pull'
     action_logger(username, action, repository, extras['ip'], commit=True)
     # extension hook call
     from rhodecode import EXTENSIONS
@@ -116,11 +128,24 @@ def log_push_action(ui, repo, **kwargs):
     :param repo: repo object containing the `ui` object
     """
 
+    try:
+        rc_extras = json.loads(os.environ.get('RC_SCM_DATA', "{}"))
+    except:
+        rc_extras = {}
+
     extras = dict(repo.ui.configitems('rhodecode_extras'))
-    username = extras['username']
-    repository = extras['repository']
-    action = extras['action'] + ':%s'
-    scm = extras['scm']
+    if 'username' in extras:
+        username = extras['username']
+        repository = extras['repository']
+        scm = extras['scm']
+    elif 'username' in rc_extras:
+        username = rc_extras['username']
+        repository = rc_extras['repository']
+        scm = rc_extras['scm']
+    else:
+        raise Exception('Missing data in repo.ui and os.environ')
+
+    action = 'push' + ':%s'
 
     if scm == 'hg':
         node = kwargs['node']

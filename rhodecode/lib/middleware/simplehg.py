@@ -40,6 +40,7 @@ from rhodecode.lib.utils2 import safe_str
 from rhodecode.lib.base import BaseVCSController
 from rhodecode.lib.auth import get_container_username
 from rhodecode.lib.utils import make_ui, is_valid_repo, ui_sections
+from rhodecode.lib.compat import json
 from rhodecode.model.db import User
 
 
@@ -87,7 +88,7 @@ class SimpleHg(BaseVCSController):
             return HTTPInternalServerError()(environ, start_response)
 
         # quick check if that dir exists...
-        if is_valid_repo(repo_name, self.basepath) is False:
+        if is_valid_repo(repo_name, self.basepath, 'hg') is False:
             return HTTPNotFound()(environ, start_response)
 
         #======================================================================
@@ -157,7 +158,8 @@ class SimpleHg(BaseVCSController):
             'repository': repo_name,
             'scm': 'hg',
         }
-
+        # set the environ variables for this request
+        os.environ['RC_SCM_DATA'] = json.dumps(extras)
         #======================================================================
         # MERCURIAL REQUEST HANDLING
         #======================================================================
