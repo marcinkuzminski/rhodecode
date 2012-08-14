@@ -692,6 +692,10 @@ HasRepoPermissionAny, HasRepoPermissionAll
 #==============================================================================
 
 def gravatar_url(email_address, size=30):
+    if(config['app_conf'].get('alternative_gravatar')):
+        if(str2bool(config['app_conf'].get('alternative_gravatar_hash'))):
+            email_address = hashlib.md5(email_address.lower()).hexdigest()
+        return "%s/%s?s=%s" % (config['app_conf'].get('alternative_gravatar').strip('/'), email_address, size)
     if (not str2bool(config['app_conf'].get('use_gravatar')) or
         not email_address or email_address == 'anonymous@rhodecode.org'):
         f = lambda a, l: min(l, key=lambda x: abs(x - a))
