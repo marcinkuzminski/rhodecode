@@ -280,7 +280,7 @@ ui_sections = ['alias', 'auth',
                 'ui', 'web', ]
 
 
-def make_ui(read_from='file', path=None, checkpaths=True):
+def make_ui(read_from='file', path=None, checkpaths=True, clear_session=True):
     """
     A function that will read python rc files or database
     and make an mercurial ui object from read options
@@ -325,8 +325,8 @@ def make_ui(read_from='file', path=None, checkpaths=True):
                 # force set push_ssl requirement to False, rhodecode
                 # handles that
                 baseui.setconfig(ui_.ui_section, ui_.ui_key, False)
-
-        meta.Session.remove()
+        if clear_session:
+            meta.Session.remove()
     return baseui
 
 

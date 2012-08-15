@@ -377,10 +377,10 @@ def ValidCloneUri():
                 ## initially check if it's at least the proper URL
                 ## or does it pass basic auth
                 MercurialRepository._check_url(url)
-                httppeer(make_ui('db'), url)._capabilities()
+                httppeer(ui, url)._capabilities()
             elif url.startswith('svn+http'):
                 from hgsubversion.svnrepo import svnremoterepo
-                svnremoterepo(make_ui('db'), url).capabilities
+                svnremoterepo(ui, url).capabilities
             elif url.startswith('git+http'):
                 raise NotImplementedError()
 
@@ -410,7 +410,7 @@ def ValidCloneUri():
                 pass
             else:
                 try:
-                    url_handler(repo_type, url, make_ui('db'))
+                    url_handler(repo_type, url, make_ui('db', clear_session=False))
                 except Exception:
                     log.exception('Url validation failed')
                     msg = M(self, 'clone_uri')
