@@ -89,6 +89,7 @@ CHGSETS_SCHEMA = Schema(
 
 CHGSET_IDX_NAME = 'CHGSET_INDEX'
 
+
 class MakeIndex(BasePasterCommand):
 
     max_args = 1
@@ -218,6 +219,11 @@ class WhooshResultWrapper(object):
                         'content_short_hl': self.highlight(content_short),
                         'f_path': f_path
                       })
+        elif self.search_type == 'path':
+            full_repo_path = jn(self.repo_location, res['repository'])
+            f_path = res['path'].split(full_repo_path)[-1]
+            f_path = f_path.lstrip(os.sep)
+            res.update({'f_path': f_path})
         elif self.search_type == 'message':
             res.update({'message_hl': self.highlight(res['message'])})
 

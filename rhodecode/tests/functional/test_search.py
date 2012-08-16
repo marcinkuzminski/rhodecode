@@ -90,3 +90,10 @@ class TestSearchController(TestController):
                      'type': 'commit'})
 
         response.mustcontain('1 results')
+
+    def test_search_file_name(self):
+        self.log_user()
+        response = self.app.get(url(controller='search', action='index'),
+                    {'q': 'README.rst', 'type': 'path'})
+
+        response.mustcontain('2 results')
