@@ -103,16 +103,18 @@ class PullrequestsController(BaseRepoController):
                                 org_repo.user.username, c.repo_name))
                            )
 
-        c.other_refs = c.org_refs
+        # add org repo to other so we can open pull request agains itself
         c.other_repos.extend(c.org_repos)
 
+        c.default_pull_request = org_repo.repo_name
+        c.default_revs = self._get_repo_refs(org_repo.scm_instance)
         #add orginal repo
         other_repos_info[org_repo.repo_name] = {
             'gravatar': h.gravatar_url(org_repo.user.email, 24),
-            'description': org_repo.description
+            'description': org_repo.description,
+            'revs': h.select('other_ref', '', c.default_revs, class_='refs')
         }
 
-        c.default_pull_request = org_repo.repo_name
         #gather forks and add to this list
         for fork in org_repo.forks:
             c.other_repos.append((fork.repo_name, '%s/%s' % (
@@ -120,7 +122,10 @@ class PullrequestsController(BaseRepoController):
                                  )
             other_repos_info[fork.repo_name] = {
                 'gravatar': h.gravatar_url(fork.user.email, 24),
-                'description': fork.description
+                'description': fork.description,
+                'revs': h.select('other_ref', '',
+                                 self._get_repo_refs(fork.scm_instance),
+                                 class_='refs')
             }
         #add parents of this fork also
         if org_repo.parent:
@@ -131,7 +136,10 @@ class PullrequestsController(BaseRepoController):
                                      )
             other_repos_info[org_repo.parent.repo_name] = {
                 'gravatar': h.gravatar_url(org_repo.parent.user.email, 24),
-                'description': org_repo.parent.description
+                'description': org_repo.parent.description,
+                'revs': h.select('other_ref', '',
+                                 self._get_repo_refs(org_repo.parent.scm_instance),
+                                 class_='refs')
             }
 
         c.other_repos_info = json.dumps(other_repos_info)
@@ -140,14 +148,12 @@ class PullrequestsController(BaseRepoController):
 
     @NotAnonymous()
     def create(self, repo_name):
-
         try:
             _form = PullRequestForm()().to_python(request.POST)
         except formencode.Invalid, errors:
             log.error(traceback.format_exc())
             if errors.error_dict.get('revisions'):
-                msg = _('Cannot open a pull request with '
-                        'empty list of changesets')
+                msg = 'Revisions: %s' % errors.error_dict['revisions']
             elif errors.error_dict.get('pullrequest_title'):
                 msg = _('Pull request requires a title with min. 3 chars')
             else:
@@ -215,7 +221,7 @@ class PullrequestsController(BaseRepoController):
          other_ref_name,
          other_ref_rev) = pull_request.other_ref.split(':')
 
-        # dispite opening revisions for bookmarks/branches/tags, we always
+        # despite opening revisions for bookmarks/branches/tags, we always
         # convert this to rev to prevent changes after book or branch change
         org_ref = ('rev', org_ref_rev)
         other_ref = ('rev', other_ref_rev)
