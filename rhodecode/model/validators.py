@@ -10,15 +10,44 @@ from webhelpers.pylonslib.secure_form import authentication_token
 
 from formencode.validators import (
     UnicodeString, OneOf, Int, Number, Regex, Email, Bool, StringBoolean, Set,
+    NotEmpty
 )
 from rhodecode.lib.utils import repo_name_slug
-from rhodecode.model.db import RepoGroup, Repository, UsersGroup, User
+from rhodecode.model.db import RepoGroup, Repository, UsersGroup, User,\
+    ChangesetStatus
 from rhodecode.lib.exceptions import LdapImportError
 from rhodecode.config.routing import ADMIN_PREFIX
+
 # silence warnings and pylint
-UnicodeString, OneOf, Int, Number, Regex, Email, Bool, StringBoolean, Set
+UnicodeString, OneOf, Int, Number, Regex, Email, Bool, StringBoolean, Set, \
+    NotEmpty
 
 log = logging.getLogger(__name__)
+
+
+class UniqueList(formencode.FancyValidator):
+    """
+    Unique List !
+    """
+    messages = dict(
+        empty=_('Value cannot be an empty list'),
+        missing_value=_('Value cannot be an empty list'),
+    )
+
+    def _to_python(self, value, state):
+        if isinstance(value, list):
+            return value
+        elif isinstance(value, set):
+            return list(value)
+        elif isinstance(value, tuple):
+            return list(value)
+        elif value is None:
+            return []
+        else:
+            return [value]
+
+    def empty_value(self, value):
+        return []
 
 
 class StateObj(object):
@@ -596,6 +625,36 @@ def AttrLoginValidator():
                 msg = M(self, 'invalid_cn', state)
                 raise formencode.Invalid(msg, value, state,
                     error_dict=dict(ldap_attr_login=msg)
+                )
+
+    return _validator
+
+
+def NotReviewedRevisions():
+    class _validator(formencode.validators.FancyValidator):
+        messages = {
+            'rev_already_reviewed':
+                  _(u'Revisions %(revs)s are already part of pull request '
+                    'or have set status')
+        }
+
+        def validate_python(self, value, state):
+            # check revisions if they are not reviewed, or a part of another
+            # pull request
+            statuses = ChangesetStatus.query()\
+                .filter(ChangesetStatus.revision.in_(value)).all()
+            errors = []
+            for cs in statuses:
+                if cs.pull_request_id:
+                    errors.append(['pull_req', cs.revision[:12]])
+                elif cs.status:
+                    errors.append(['status', cs.revision[:12]])
+
+            if errors:
+                revs = ','.join([x[1] for x in errors])
+                msg = M(self, 'rev_already_reviewed', state, revs=revs)
+                raise formencode.Invalid(msg, value, state,
+                    error_dict=dict(revisions=revs)
                 )
 
     return _validator
