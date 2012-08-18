@@ -10,6 +10,9 @@ from rhodecode.model.users_group import UsersGroupModel
 from rhodecode.model.meta import Session
 from rhodecode.model.repos_group import ReposGroupModel
 from rhodecode.config.routing import ADMIN_PREFIX
+from rhodecode.model.db import ChangesetStatus
+from rhodecode.model.changeset_status import ChangesetStatusModel
+from rhodecode.model.comment import ChangesetCommentsModel
 
 
 class TestReposGroups(unittest.TestCase):
@@ -222,3 +225,22 @@ class TestReposGroups(unittest.TestCase):
     def test_AttrLoginValidator(self):
         validator = v.AttrLoginValidator()
         self.assertRaises(formencode.Invalid, validator.to_python, 123)
+
+    def test_NotReviewedRevisions(self):
+        validator = v.NotReviewedRevisions()
+        rev = '0' * 40
+        # add status for a rev, that should throw an error because it is already
+        # reviewed
+        new_status = ChangesetStatus()
+        new_status.author = ChangesetStatusModel()._get_user(TEST_USER_ADMIN_LOGIN)
+        new_status.repo = ChangesetStatusModel()._get_repo(HG_REPO)
+        new_status.status = ChangesetStatus.STATUS_APPROVED
+        new_status.comment = None
+        new_status.revision = rev
+        Session().add(new_status)
+        Session().commit()
+        try:
+            self.assertRaises(formencode.Invalid, validator.to_python, [rev])
+        finally:
+            Session().delete(new_status)
+            Session().commit()
