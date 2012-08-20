@@ -183,7 +183,7 @@
            %for section in sorted(c.perm_user.permissions.keys()):
               <div class="perms_section_head">${section.replace("_"," ").capitalize()}</div>
               %if not c.perm_user.permissions[section]:
-                  <span style="color:#B9B9B9">${_('Nothing here yet')}</span>
+                  <span class="empty_data">${_('Nothing here yet')}</span>
               %else:
               <div id='tbl_list_wrap_${section}' class="yui-skin-sam">
                <table id="tbl_list_${section}">

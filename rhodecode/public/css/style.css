@@ -219,6 +219,11 @@ div.options a {
     margin-bottom: 0;
     margin-top: 5px;
 }
+
+.empty_data{
+    color:#B9B9B9;	
+}
+
 a.permalink{
 	visibility: hidden;
 }
