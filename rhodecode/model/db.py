@@ -1467,6 +1467,7 @@ class ChangesetComment(Base, BaseModel):
     revision = Column('revision', String(40), nullable=True)
     pull_request_id = Column("pull_request_id", Integer(), ForeignKey('pull_requests.pull_request_id'), nullable=True)
     line_no = Column('line_no', Unicode(10), nullable=True)
+    hl_lines = Column('hl_lines', Unicode(512), nullable=True)
     f_path = Column('f_path', Unicode(1000), nullable=True)
     user_id = Column('user_id', Integer(), ForeignKey('users.user_id'), nullable=False)
     text = Column('text', Unicode(25000), nullable=False)
