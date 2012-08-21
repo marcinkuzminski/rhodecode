@@ -28,6 +28,7 @@ import logging
 import datetime
 import traceback
 import hashlib
+import time
 from collections import defaultdict
 
 from sqlalchemy import *
@@ -232,7 +233,9 @@ class RhodeCodeUi(Base, BaseModel):
     HOOK_UPDATE = 'changegroup.update'
     HOOK_REPO_SIZE = 'changegroup.repo_size'
     HOOK_PUSH = 'changegroup.push_logger'
-    HOOK_PULL = 'preoutgoing.pull_logger'
+    HOOK_PRE_PUSH = 'prechangegroup.pre_push'
+    HOOK_PULL = 'outgoing.pull_logger'
+    HOOK_PRE_PULL = 'preoutgoing.pre_pull'
 
     ui_id = Column("ui_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     ui_section = Column("ui_section", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
@@ -247,17 +250,17 @@ class RhodeCodeUi(Base, BaseModel):
     @classmethod
     def get_builtin_hooks(cls):
         q = cls.query()
-        q = q.filter(cls.ui_key.in_([cls.HOOK_UPDATE,
-                                    cls.HOOK_REPO_SIZE,
-                                    cls.HOOK_PUSH, cls.HOOK_PULL]))
+        q = q.filter(cls.ui_key.in_([cls.HOOK_UPDATE, cls.HOOK_REPO_SIZE,
+                                     cls.HOOK_PUSH, cls.HOOK_PRE_PUSH,
+                                     cls.HOOK_PULL, cls.HOOK_PRE_PULL]))
         return q.all()
 
     @classmethod
     def get_custom_hooks(cls):
         q = cls.query()
-        q = q.filter(~cls.ui_key.in_([cls.HOOK_UPDATE,
-                                    cls.HOOK_REPO_SIZE,
-                                    cls.HOOK_PUSH, cls.HOOK_PULL]))
+        q = q.filter(~cls.ui_key.in_([cls.HOOK_UPDATE, cls.HOOK_REPO_SIZE,
+                                      cls.HOOK_PUSH, cls.HOOK_PRE_PUSH,
+                                      cls.HOOK_PULL, cls.HOOK_PRE_PULL]))
         q = q.filter(cls.ui_section == 'hooks')
         return q.all()
 
@@ -280,9 +283,13 @@ class User(Base, BaseModel):
     __tablename__ = 'users'
     __table_args__ = (
         UniqueConstraint('username'), UniqueConstraint('email'),
+        Index('u_username_idx', 'username'),
+        Index('u_email_idx', 'email'),
         {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'}
     )
+    DEFAULT_USER = 'default'
+
     user_id = Column("user_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     username = Column("username", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     password = Column("password", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
@@ -572,6 +579,7 @@ class Repository(Base, BaseModel):
     __tablename__ = 'repositories'
     __table_args__ = (
         UniqueConstraint('repo_name'),
+        Index('r_repo_name_idx', 'repo_name'),
         {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'},
     )
@@ -587,6 +595,8 @@ class Repository(Base, BaseModel):
     description = Column("description", String(10000, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     created_on = Column('created_on', DateTime(timezone=False), nullable=True, unique=None, default=datetime.datetime.now)
     landing_rev = Column("landing_revision", String(255, convert_unicode=False, assert_unicode=None), nullable=False, unique=False, default=None)
+    enable_locking = Column("enable_locking", Boolean(), nullable=False, unique=None, default=False)
+    _locked = Column("locked", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=False, default=None)
 
     fork_id = Column("fork_id", Integer(), ForeignKey('repositories.repo_id'), nullable=True, unique=False, default=None)
     group_id = Column("group_id", Integer(), ForeignKey('groups.group_id'), nullable=True, unique=False, default=None)
@@ -616,6 +626,21 @@ class Repository(Base, BaseModel):
     def __unicode__(self):
         return u"<%s('%s:%s')>" % (self.__class__.__name__, self.repo_id,
                                    self.repo_name)
+
+    @hybrid_property
+    def locked(self):
+        # always should return [user_id, timelocked]
+        if self._locked:
+            _lock_info = self._locked.split(':')
+            return int(_lock_info[0]), _lock_info[1]
+        return [None, None]
+
+    @locked.setter
+    def locked(self, val):
+        if val and isinstance(val, (list, tuple)):
+            self._locked = ':'.join(map(str, val))
+        else:
+            self._locked = None
 
     @classmethod
     def url_sep(cls):
@@ -744,7 +769,7 @@ class Repository(Base, BaseModel):
             if ui_.ui_key == 'push_ssl':
                 # force set push_ssl requirement to False, rhodecode
                 # handles that
-                baseui.setconfig(ui_.ui_section, ui_.ui_key, False)                
+                baseui.setconfig(ui_.ui_section, ui_.ui_key, False)
 
         return baseui
 
@@ -792,6 +817,18 @@ class Repository(Base, BaseModel):
         )
 
         return data
+
+    @classmethod
+    def lock(cls, repo, user_id):
+        repo.locked = [user_id, time.time()]
+        Session().add(repo)
+        Session().commit()
+
+    @classmethod
+    def unlock(cls, repo):
+        repo.locked = None
+        Session().add(repo)
+        Session().commit()
 
     #==========================================================================
     # SCM PROPERTIES

@@ -807,7 +807,7 @@ class HasPermissionAnyMiddleware(object):
         return self.check_permissions()
 
     def check_permissions(self):
-        log.debug('checking mercurial protocol '
+        log.debug('checking VCS protocol '
                   'permissions %s for user:%s repository:%s', self.user_perms,
                                                 self.username, self.repo_name)
         if self.required_perms.intersection(self.user_perms):

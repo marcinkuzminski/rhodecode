@@ -381,6 +381,7 @@ class ReposController(BaseController):
             RepoModel().delete_stats(repo_name)
             Session().commit()
         except Exception, e:
+            log.error(traceback.format_exc())
             h.flash(_('An error occurred during deletion of repository stats'),
                     category='error')
         return redirect(url('edit_repo', repo_name=repo_name))
@@ -397,7 +398,28 @@ class ReposController(BaseController):
             ScmModel().mark_for_invalidation(repo_name)
             Session().commit()
         except Exception, e:
+            log.error(traceback.format_exc())
             h.flash(_('An error occurred during cache invalidation'),
+                    category='error')
+        return redirect(url('edit_repo', repo_name=repo_name))
+
+    @HasPermissionAllDecorator('hg.admin')
+    def repo_locking(self, repo_name):
+        """
+        Unlock repository when it is locked !
+
+        :param repo_name:
+        """
+
+        try:
+            repo = Repository.get_by_repo_name(repo_name)
+            if request.POST.get('set_lock'):
+                Repository.lock(repo, c.rhodecode_user.user_id)
+            elif request.POST.get('set_unlock'):
+                Repository.unlock(repo)
+        except Exception, e:
+            log.error(traceback.format_exc())
+            h.flash(_('An error occurred during unlocking'),
                     category='error')
         return redirect(url('edit_repo', repo_name=repo_name))
 

@@ -182,6 +182,7 @@ def RepoForm(edit=False, old_data={}, supported_backends=BACKENDS.keys(),
         private = v.StringBoolean(if_missing=False)
         enable_statistics = v.StringBoolean(if_missing=False)
         enable_downloads = v.StringBoolean(if_missing=False)
+        enable_locking = v.StringBoolean(if_missing=False)
         landing_rev = v.OneOf(landing_revs, hideList=True)
 
         if edit:
@@ -265,7 +266,7 @@ def ApplicationUiSettingsForm():
         hooks_changegroup_update = v.StringBoolean(if_missing=False)
         hooks_changegroup_repo_size = v.StringBoolean(if_missing=False)
         hooks_changegroup_push_logger = v.StringBoolean(if_missing=False)
-        hooks_preoutgoing_pull_logger = v.StringBoolean(if_missing=False)
+        hooks_outgoing_pull_logger = v.StringBoolean(if_missing=False)
 
         extensions_largefiles = v.StringBoolean(if_missing=False)
         extensions_hgsubversion = v.StringBoolean(if_missing=False)

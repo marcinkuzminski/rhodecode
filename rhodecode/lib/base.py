@@ -8,6 +8,7 @@ import traceback
 
 from paste.auth.basic import AuthBasicAuthenticator
 from paste.httpexceptions import HTTPUnauthorized, HTTPForbidden
+from webob.exc import HTTPClientError
 from paste.httpheaders import WWW_AUTHENTICATE
 
 from pylons import config, tmpl_context as c, request, session, url
@@ -17,15 +18,17 @@ from pylons.templating import render_mako as render
 
 from rhodecode import __version__, BACKENDS
 
-from rhodecode.lib.utils2 import str2bool, safe_unicode, AttributeDict
+from rhodecode.lib.utils2 import str2bool, safe_unicode, AttributeDict,\
+    safe_str
 from rhodecode.lib.auth import AuthUser, get_container_username, authfunc,\
     HasPermissionAnyMiddleware, CookieStoreWrapper
 from rhodecode.lib.utils import get_repo_slug, invalidate_cache
 from rhodecode.model import meta
 
-from rhodecode.model.db import Repository, RhodeCodeUi
+from rhodecode.model.db import Repository, RhodeCodeUi, User
 from rhodecode.model.notification import NotificationModel
 from rhodecode.model.scm import ScmModel
+from rhodecode.model.meta import Session
 
 log = logging.getLogger(__name__)
 
@@ -158,6 +161,49 @@ class BaseVCSController(object):
                       % org_proto)
             return False
         return True
+
+    def _check_locking_state(self, environ, action, repo, user_id):
+        """
+        Checks locking on this repository, if locking is enabled and lock is
+        present returns a tuple of make_lock, locked, locked_by.
+        make_lock can have 3 states None (do nothing) True, make lock
+        False release lock, This value is later propagated to hooks, which
+        do the locking. Think about this as signals passed to hooks what to do.
+
+        """
+        locked = False
+        make_lock = None
+        repo = Repository.get_by_repo_name(repo)
+        user = User.get(user_id)
+
+        # this is kind of hacky, but due to how mercurial handles client-server
+        # server see all operation on changeset; bookmarks, phases and
+        # obsolescence marker in different transaction, we don't want to check
+        # locking on those
+        obsolete_call = environ['QUERY_STRING'] in ['cmd=listkeys',]
+        locked_by = repo.locked
+        if repo and repo.enable_locking and not obsolete_call:
+            if action == 'push':
+                #check if it's already locked !, if it is compare users
+                user_id, _date = repo.locked
+                if user.user_id == user_id:
+                    log.debug('Got push from user, now unlocking' % (user))
+                    # unlock if we have push from user who locked
+                    make_lock = False
+                else:
+                    # we're not the same user who locked, ban with 423 !
+                    locked = True
+            if action == 'pull':
+                if repo.locked[0] and repo.locked[1]:
+                    locked = True
+                else:
+                    log.debug('Setting lock on repo %s by %s' % (repo, user))
+                    make_lock = True
+
+        else:
+            log.debug('Repository %s do not have locking enabled' % (repo))
+
+        return make_lock, locked, locked_by
 
     def __call__(self, environ, start_response):
         start = time.time()

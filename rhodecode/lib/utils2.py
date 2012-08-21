@@ -25,7 +25,7 @@
 
 import re
 import time
-from datetime import datetime
+import datetime
 from pylons.i18n.translation import _, ungettext
 from rhodecode.lib.vcs.utils.lazy import LazyProperty
 
@@ -300,7 +300,7 @@ def age(prevdate):
     deltas = {}
 
     # Get date parts deltas
-    now = datetime.now()
+    now = datetime.datetime.now()
     for part in order:
         deltas[part] = getattr(now, part) - getattr(prevdate, part)
 
@@ -434,6 +434,15 @@ def datetime_to_time(dt):
     if dt:
         return time.mktime(dt.timetuple())
 
+
+def time_to_datetime(tm):
+    if tm:
+        if isinstance(tm, basestring):
+            try:
+                tm = float(tm)
+            except ValueError:
+                return
+        return datetime.datetime.fromtimestamp(tm)
 
 MENTIONS_REGEX = r'(?:^@|\s@)([a-zA-Z0-9]{1}[a-zA-Z0-9\-\_\.]+)(?:\s{1})'
 

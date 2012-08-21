@@ -108,6 +108,15 @@
                 </div>
             </div>
             <div class="field">
+                <div class="label label-checkbox">
+                    <label for="enable_locking">${_('Enable locking')}:</label>
+                </div>
+                <div class="checkboxes">
+                    ${h.checkbox('enable_locking',value="True")}
+                    <span class="help-block">${_('Enable lock-by-pulling on repository.')}</span>
+                </div>
+            </div>            
+            <div class="field">
                 <div class="label">
                     <label for="user">${_('Owner')}:</label>
                 </div>
@@ -196,26 +205,31 @@
                 </div>
                <div class="field" style="border:none;color:#888">
                <ul>
-                    <li>${_('''All actions made on this repository will be accessible to everyone in public journal''')}
+                    <li>${_('All actions made on this repository will be accessible to everyone in public journal')}
                     </li>
                </ul>
                </div>
         </div>
         ${h.end_form()}
 
-        <h3>${_('Delete')}</h3>
-        ${h.form(url('repo', repo_name=c.repo_info.repo_name),method='delete')}
+        <h3>${_('Locking')}</h3>
+        ${h.form(url('repo_locking', repo_name=c.repo_info.repo_name),method='put')}
         <div class="form">
            <div class="fields">
-               ${h.submit('remove_%s' % c.repo_info.repo_name,_('Remove this repository'),class_="ui-btn red",onclick="return confirm('"+_('Confirm to delete this repository')+"');")}
+              %if c.repo_info.locked[0]:
+               ${h.submit('set_unlock' ,_('Unlock locked repo'),class_="ui-btn",onclick="return confirm('"+_('Confirm to unlock repository')+"');")}
+               ${'Locked by %s on %s' % (h.person_by_id(c.repo_info.locked[0]),h.fmt_date(h.time_to_datetime(c.repo_info.locked[1])))}
+              %else:
+                ${h.submit('set_lock',_('lock repo'),class_="ui-btn",onclick="return confirm('"+_('Confirm to lock repository')+"');")}
+                ${_('Repository is not locked')}
+              %endif
            </div>
            <div class="field" style="border:none;color:#888">
            <ul>
-                <li>${_('''This repository will be renamed in a special way in order to be unaccesible for RhodeCode and VCS systems.
-                         If you need fully delete it from filesystem please do it manually''')}
+                <li>${_('Force locking on repository. Works only when anonymous access is disabled')}
                 </li>
            </ul>
-           </div>
+           </div>           
         </div>
         ${h.end_form()}
 
@@ -231,10 +245,24 @@
                     <li>${_('''Manually set this repository as a fork of another from the list''')}</li>
                </ul>
                </div>
-        </div>
+        </div>        
         ${h.end_form()}
-
+        
+        <h3>${_('Delete')}</h3>
+        ${h.form(url('repo', repo_name=c.repo_info.repo_name),method='delete')}
+        <div class="form">
+           <div class="fields">
+               ${h.submit('remove_%s' % c.repo_info.repo_name,_('Remove this repository'),class_="ui-btn red",onclick="return confirm('"+_('Confirm to delete this repository')+"');")}
+           </div>
+           <div class="field" style="border:none;color:#888">
+           <ul>
+                <li>${_('''This repository will be renamed in a special way in order to be unaccesible for RhodeCode and VCS systems.
+                         If you need fully delete it from filesystem please do it manually''')}
+                </li>
+           </ul>
+           </div>
+        </div>
+        ${h.end_form()}        
 </div>
-
 
 </%def>

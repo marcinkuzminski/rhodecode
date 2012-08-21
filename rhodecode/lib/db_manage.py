@@ -307,37 +307,47 @@ class DbManage(object):
         hooks1.ui_key = hooks1_key
         hooks1.ui_value = 'hg update >&2'
         hooks1.ui_active = False
+        self.sa.add(hooks1)
 
         hooks2_key = RhodeCodeUi.HOOK_REPO_SIZE
         hooks2_ = self.sa.query(RhodeCodeUi)\
             .filter(RhodeCodeUi.ui_key == hooks2_key).scalar()
-
         hooks2 = RhodeCodeUi() if hooks2_ is None else hooks2_
         hooks2.ui_section = 'hooks'
         hooks2.ui_key = hooks2_key
         hooks2.ui_value = 'python:rhodecode.lib.hooks.repo_size'
+        self.sa.add(hooks2)
 
         hooks3 = RhodeCodeUi()
         hooks3.ui_section = 'hooks'
         hooks3.ui_key = RhodeCodeUi.HOOK_PUSH
         hooks3.ui_value = 'python:rhodecode.lib.hooks.log_push_action'
+        self.sa.add(hooks3)
 
         hooks4 = RhodeCodeUi()
         hooks4.ui_section = 'hooks'
-        hooks4.ui_key = RhodeCodeUi.HOOK_PULL
-        hooks4.ui_value = 'python:rhodecode.lib.hooks.log_pull_action'
+        hooks4.ui_key = RhodeCodeUi.HOOK_PRE_PUSH
+        hooks4.ui_value = 'python:rhodecode.lib.hooks.pre_push'
+        self.sa.add(hooks4)
 
-        # For mercurial 1.7 set backward comapatibility with format
-        dotencode_disable = RhodeCodeUi()
-        dotencode_disable.ui_section = 'format'
-        dotencode_disable.ui_key = 'dotencode'
-        dotencode_disable.ui_value = 'false'
+        hooks5 = RhodeCodeUi()
+        hooks5.ui_section = 'hooks'
+        hooks5.ui_key = RhodeCodeUi.HOOK_PULL
+        hooks5.ui_value = 'python:rhodecode.lib.hooks.log_pull_action'
+        self.sa.add(hooks5)
+
+        hooks6 = RhodeCodeUi()
+        hooks6.ui_section = 'hooks'
+        hooks6.ui_key = RhodeCodeUi.HOOK_PRE_PULL
+        hooks6.ui_value = 'python:rhodecode.lib.hooks.pre_pull'
+        self.sa.add(hooks6)
 
         # enable largefiles
         largefiles = RhodeCodeUi()
         largefiles.ui_section = 'extensions'
         largefiles.ui_key = 'largefiles'
         largefiles.ui_value = ''
+        self.sa.add(largefiles)
 
         # enable hgsubversion disabled by default
         hgsubversion = RhodeCodeUi()
@@ -345,6 +355,7 @@ class DbManage(object):
         hgsubversion.ui_key = 'hgsubversion'
         hgsubversion.ui_value = ''
         hgsubversion.ui_active = False
+        self.sa.add(hgsubversion)
 
         # enable hggit disabled by default
         hggit = RhodeCodeUi()
@@ -352,13 +363,6 @@ class DbManage(object):
         hggit.ui_key = 'hggit'
         hggit.ui_value = ''
         hggit.ui_active = False
-
-        self.sa.add(hooks1)
-        self.sa.add(hooks2)
-        self.sa.add(hooks3)
-        self.sa.add(hooks4)
-        self.sa.add(largefiles)
-        self.sa.add(hgsubversion)
         self.sa.add(hggit)
 
     def create_ldap_options(self, skip_existing=False):
@@ -460,6 +464,11 @@ class DbManage(object):
         paths.ui_section = 'paths'
         paths.ui_key = '/'
         paths.ui_value = path
+
+        phases = RhodeCodeUi()
+        phases.ui_section = 'phases'
+        phases.ui_key = 'publish'
+        phases.ui_value = False
 
         sett1 = RhodeCodeSetting('realm', 'RhodeCode authentication')
         sett2 = RhodeCodeSetting('title', 'RhodeCode')

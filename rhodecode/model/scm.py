@@ -571,34 +571,41 @@ class ScmModel(BaseModel):
         if not os.path.isdir(loc):
             os.makedirs(loc)
 
-        tmpl = pkg_resources.resource_string(
+        tmpl_post = pkg_resources.resource_string(
             'rhodecode', jn('config', 'post_receive_tmpl.py')
         )
+        tmpl_pre = pkg_resources.resource_string(
+            'rhodecode', jn('config', 'pre_receive_tmpl.py')
+        )
 
-        _hook_file = jn(loc, 'post-receive')
-        _rhodecode_hook = False
-        log.debug('Installing git hook in repo %s' % repo)
-        if os.path.exists(_hook_file):
-            # let's take a look at this hook, maybe it's rhodecode ?
-            log.debug('hook exists, checking if it is from rhodecode')
-            _HOOK_VER_PAT = re.compile(r'^RC_HOOK_VER')
-            with open(_hook_file, 'rb') as f:
-                data = f.read()
-                matches = re.compile(r'(?:%s)\s*=\s*(.*)'
-                                     % 'RC_HOOK_VER').search(data)
-                if matches:
-                    try:
-                        ver = matches.groups()[0]
-                        log.debug('got %s it is rhodecode' % (ver))
-                        _rhodecode_hook = True
-                    except:
-                        log.error(traceback.format_exc())
+        for h_type, tmpl in [('pre', tmpl_pre), ('post', tmpl_post)]:
+            _hook_file = jn(loc, '%s-receive' % h_type)
+            _rhodecode_hook = False
+            log.debug('Installing git hook in repo %s' % repo)
+            if os.path.exists(_hook_file):
+                # let's take a look at this hook, maybe it's rhodecode ?
+                log.debug('hook exists, checking if it is from rhodecode')
+                _HOOK_VER_PAT = re.compile(r'^RC_HOOK_VER')
+                with open(_hook_file, 'rb') as f:
+                    data = f.read()
+                    matches = re.compile(r'(?:%s)\s*=\s*(.*)'
+                                         % 'RC_HOOK_VER').search(data)
+                    if matches:
+                        try:
+                            ver = matches.groups()[0]
+                            log.debug('got %s it is rhodecode' % (ver))
+                            _rhodecode_hook = True
+                        except:
+                            log.error(traceback.format_exc())
+            else:
+                # there is no hook in this dir, so we want to create one
+                _rhodecode_hook = True
 
-        if _rhodecode_hook or force_create:
-            log.debug('writing hook file !')
-            with open(_hook_file, 'wb') as f:
-                tmpl = tmpl.replace('_TMPL_', rhodecode.__version__)
-                f.write(tmpl)
-            os.chmod(_hook_file, 0755)
-        else:
-            log.debug('skipping writing hook file')
+            if _rhodecode_hook or force_create:
+                log.debug('writing %s hook file !' % h_type)
+                with open(_hook_file, 'wb') as f:
+                    tmpl = tmpl.replace('_TMPL_', rhodecode.__version__)
+                    f.write(tmpl)
+                os.chmod(_hook_file, 0755)
+            else:
+                log.debug('skipping writing hook file')

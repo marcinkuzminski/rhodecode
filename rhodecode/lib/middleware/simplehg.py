@@ -42,6 +42,7 @@ from rhodecode.lib.auth import get_container_username
 from rhodecode.lib.utils import make_ui, is_valid_repo, ui_sections
 from rhodecode.lib.compat import json
 from rhodecode.model.db import User
+from rhodecode.lib.exceptions import HTTPLockedRC
 
 
 log = logging.getLogger(__name__)
@@ -157,15 +158,31 @@ class SimpleHg(BaseVCSController):
             'action': action,
             'repository': repo_name,
             'scm': 'hg',
+            'make_lock': None,
+            'locked_by': [None, None]
         }
-        # set the environ variables for this request
-        os.environ['RC_SCM_DATA'] = json.dumps(extras)
         #======================================================================
         # MERCURIAL REQUEST HANDLING
         #======================================================================
         repo_path = os.path.join(safe_str(self.basepath), safe_str(repo_name))
         log.debug('Repository path is %s' % repo_path)
 
+        # CHECK LOCKING only if it's not ANONYMOUS USER
+        if username != User.DEFAULT_USER:
+            log.debug('Checking locking on repository')
+            (make_lock,
+             locked,
+             locked_by) = self._check_locking_state(
+                            environ=environ, action=action,
+                            repo=repo_name, user_id=user.user_id
+                       )
+            # store the make_lock for later evaluation in hooks
+            extras.update({'make_lock': make_lock,
+                           'locked_by': locked_by})
+
+        # set the environ variables for this request
+        os.environ['RC_SCM_DATA'] = json.dumps(extras)
+        log.debug('HOOKS extras is %s' % extras)
         baseui = make_ui('db')
         self.__inject_extras(repo_path, baseui, extras)
 
@@ -179,6 +196,9 @@ class SimpleHg(BaseVCSController):
         except RepoError, e:
             if str(e).find('not found') != -1:
                 return HTTPNotFound()(environ, start_response)
+        except HTTPLockedRC, e:
+            log.debug('Repositry LOCKED ret code 423!')
+            return e(environ, start_response)
         except Exception:
             log.error(traceback.format_exc())
             return HTTPInternalServerError()(environ, start_response)

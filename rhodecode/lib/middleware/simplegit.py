@@ -31,6 +31,8 @@ import traceback
 
 from dulwich import server as dulserver
 from dulwich.web import LimitedInputFilter, GunzipFilter
+from rhodecode.lib.exceptions import HTTPLockedRC
+from rhodecode.lib.hooks import pre_pull
 
 
 class SimpleGitUploadPackHandler(dulserver.UploadPackHandler):
@@ -102,11 +104,11 @@ def is_git(environ):
 class SimpleGit(BaseVCSController):
 
     def _handle_request(self, environ, start_response):
-
         if not is_git(environ):
             return self.application(environ, start_response)
         if not self._check_ssl(environ, start_response):
             return HTTPNotAcceptable('SSL REQUIRED !')(environ, start_response)
+
         ipaddr = self._get_ip_addr(environ)
         username = None
         self._git_first_op = False
@@ -184,21 +186,39 @@ class SimpleGit(BaseVCSController):
                 if perm is not True:
                     return HTTPForbidden()(environ, start_response)
 
+        # extras are injected into UI object and later available
+        # in hooks executed by rhodecode
         extras = {
             'ip': ipaddr,
             'username': username,
             'action': action,
             'repository': repo_name,
             'scm': 'git',
+            'make_lock': None,
+            'locked_by': [None, None]
         }
-        # set the environ variables for this request
-        os.environ['RC_SCM_DATA'] = json.dumps(extras)
+
         #===================================================================
         # GIT REQUEST HANDLING
         #===================================================================
         repo_path = os.path.join(safe_str(self.basepath), safe_str(repo_name))
         log.debug('Repository path is %s' % repo_path)
 
+        # CHECK LOCKING only if it's not ANONYMOUS USER
+        if username != User.DEFAULT_USER:
+            log.debug('Checking locking on repository')
+            (make_lock,
+             locked,
+             locked_by) = self._check_locking_state(
+                            environ=environ, action=action,
+                            repo=repo_name, user_id=user.user_id
+                       )
+            # store the make_lock for later evaluation in hooks
+            extras.update({'make_lock': make_lock,
+                           'locked_by': locked_by})
+        # set the environ variables for this request
+        os.environ['RC_SCM_DATA'] = json.dumps(extras)
+        log.debug('HOOKS extras is %s' % extras)
         baseui = make_ui('db')
         self.__inject_extras(repo_path, baseui, extras)
 
@@ -209,13 +229,16 @@ class SimpleGit(BaseVCSController):
             self._handle_githooks(repo_name, action, baseui, environ)
 
             log.info('%s action on GIT repo "%s"' % (action, repo_name))
-            app = self.__make_app(repo_name, repo_path, username)
+            app = self.__make_app(repo_name, repo_path, extras)
             return app(environ, start_response)
+        except HTTPLockedRC, e:
+            log.debug('Repositry LOCKED ret code 423!')
+            return e(environ, start_response)
         except Exception:
             log.error(traceback.format_exc())
             return HTTPInternalServerError()(environ, start_response)
 
-    def __make_app(self, repo_name, repo_path, username):
+    def __make_app(self, repo_name, repo_path, extras):
         """
         Make an wsgi application using dulserver
 
@@ -227,7 +250,7 @@ class SimpleGit(BaseVCSController):
         app = make_wsgi_app(
             repo_root=safe_str(self.basepath),
             repo_name=repo_name,
-            username=username,
+            extras=extras,
         )
         app = GunzipFilter(LimitedInputFilter(app))
         return app
@@ -279,6 +302,7 @@ class SimpleGit(BaseVCSController):
         """
         from rhodecode.lib.hooks import log_pull_action
         service = environ['QUERY_STRING'].split('=')
+
         if len(service) < 2:
             return
 
@@ -288,6 +312,9 @@ class SimpleGit(BaseVCSController):
         _repo._repo.ui = baseui
 
         _hooks = dict(baseui.configitems('hooks')) or {}
+        if action == 'pull':
+            # stupid git, emulate pre-pull hook !
+            pre_pull(ui=baseui, repo=_repo._repo)
         if action == 'pull' and _hooks.get(RhodeCodeUi.HOOK_PULL):
             log_pull_action(ui=baseui, repo=_repo._repo)
 

@@ -41,7 +41,7 @@ class GitRepository(object):
     git_folder_signature = set(['config', 'head', 'info', 'objects', 'refs'])
     commands = ['git-upload-pack', 'git-receive-pack']
 
-    def __init__(self, repo_name, content_path, username):
+    def __init__(self, repo_name, content_path, extras):
         files = set([f.lower() for f in os.listdir(content_path)])
         if  not (self.git_folder_signature.intersection(files)
                 == self.git_folder_signature):
@@ -50,7 +50,7 @@ class GitRepository(object):
         self.valid_accepts = ['application/x-%s-result' %
                               c for c in self.commands]
         self.repo_name = repo_name
-        self.username = username
+        self.extras = extras
 
     def _get_fixedpath(self, path):
         """
@@ -67,7 +67,7 @@ class GitRepository(object):
         HTTP /info/refs request.
         """
 
-        git_command = request.GET['service']
+        git_command = request.GET.get('service')
         if git_command not in self.commands:
             log.debug('command %s not allowed' % git_command)
             return exc.HTTPMethodNotAllowed()
@@ -119,9 +119,8 @@ class GitRepository(object):
         try:
             gitenv = os.environ
             from rhodecode import CONFIG
-            from rhodecode.lib.base import _get_ip_addr
-            gitenv['RHODECODE_USER'] = self.username
-            gitenv['RHODECODE_CONFIG_IP'] = _get_ip_addr(environ)
+            from rhodecode.lib.compat import json
+            gitenv['RHODECODE_EXTRAS'] = json.dumps(self.extras)
             # forget all configs
             gitenv['GIT_CONFIG_NOGLOBAL'] = '1'
             # we need current .ini file used to later initialize rhodecode
@@ -174,7 +173,7 @@ class GitRepository(object):
 
 class GitDirectory(object):
 
-    def __init__(self, repo_root, repo_name, username):
+    def __init__(self, repo_root, repo_name, extras):
         repo_location = os.path.join(repo_root, repo_name)
         if not os.path.isdir(repo_location):
             raise OSError(repo_location)
@@ -182,12 +181,12 @@ class GitDirectory(object):
         self.content_path = repo_location
         self.repo_name = repo_name
         self.repo_location = repo_location
-        self.username = username
+        self.extras = extras
 
     def __call__(self, environ, start_response):
         content_path = self.content_path
         try:
-            app = GitRepository(self.repo_name, content_path, self.username)
+            app = GitRepository(self.repo_name, content_path, self.extras)
         except (AssertionError, OSError):
             if os.path.isdir(os.path.join(content_path, '.git')):
                 app = GitRepository(self.repo_name,
@@ -198,5 +197,5 @@ class GitDirectory(object):
         return app(environ, start_response)
 
 
-def make_wsgi_app(repo_name, repo_root, username):
-    return GitDirectory(repo_root, repo_name, username)
+def make_wsgi_app(repo_name, repo_root, extras):
+    return GitDirectory(repo_root, repo_name, extras)

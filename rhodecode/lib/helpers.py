@@ -41,7 +41,7 @@ from webhelpers.html.tags import _set_input_attrs, _set_id_attr, \
 from rhodecode.lib.annotate import annotate_highlight
 from rhodecode.lib.utils import repo_name_slug
 from rhodecode.lib.utils2 import str2bool, safe_unicode, safe_str, \
-    get_changeset_safe
+    get_changeset_safe, datetime_to_time, time_to_datetime
 from rhodecode.lib.markup_renderer import MarkupRenderer
 from rhodecode.lib.vcs.exceptions import ChangesetDoesNotExistError
 from rhodecode.lib.vcs.backends.base import BaseChangeset
@@ -437,6 +437,19 @@ def person(author):
 
     # Still nothing?  Just pass back the author name then
     return _author
+
+
+def person_by_id(id_):
+    # attr to return from fetched user
+    person_getter = lambda usr: usr.username
+
+    #maybe it's an ID ?
+    if str(id_).isdigit() or isinstance(id_, int):
+        id_ = int(id_)
+        user = User.get(id_)
+        if user is not None:
+            return person_getter(user)
+    return id_
 
 
 def desc_stylize(value):
