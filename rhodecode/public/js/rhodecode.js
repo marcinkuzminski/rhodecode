@@ -398,7 +398,7 @@ var createInlineForm = function(parent_tr, f_path, line) {
 	
 	// create event for hide button
 	form = new YAHOO.util.Element(form);
-	var form_hide_button = new YAHOO.util.Element(form.getElementsByClassName('hide-inline-form')[0]);
+	var form_hide_button = new YAHOO.util.Element(YUD.getElementsByClassName('hide-inline-form',null,form)[0]);
 	form_hide_button.on('click', function(e) {
 		var newtr = e.currentTarget.parentNode.parentNode.parentNode.parentNode.parentNode;
 		if(YUD.hasClass(newtr.nextElementSibling,'inline-comments-button')){
@@ -422,12 +422,12 @@ var injectInlineForm = function(tr){
 		  return
 	  }
 	  var submit_url = AJAX_COMMENT_URL;
-	  var _td = tr.getElementsByClassName('code')[0];
+	  var _td = YUD.getElementsByClassName('code',null,tr)[0];
 	  if(YUD.hasClass(tr,'form-open') || YUD.hasClass(tr,'context') || YUD.hasClass(_td,'no-comment')){
 		  return
 	  }	
 	  YUD.addClass(tr,'form-open');
-	  var node = tr.parentNode.parentNode.parentNode.getElementsByClassName('full_f_path')[0];
+	  var node = YUD.getElementsByClassName('full_f_path',null,tr.parentNode.parentNode.parentNode)[0];
 	  var f_path = YUD.getAttribute(node,'path');
 	  var lineno = getLineNo(tr);
 	  var form = createInlineForm(tr, f_path, lineno, submit_url);
@@ -447,8 +447,8 @@ var injectInlineForm = function(tr){
 	  
 	  var f = YUD.get(form);
 	  
-	  var overlay = f.getElementsByClassName('overlay')[0];
-	  var _form = f.getElementsByClassName('inline-form')[0];
+	  var overlay = YUD.getElementsByClassName('overlay',null,f)[0];
+	  var _form = YUD.getElementsByClassName('inline-form',null,f)[0];
 	  
 	  form.on('submit',function(e){
 		  YUE.preventDefault(e);
@@ -568,8 +568,8 @@ var placeAddButton = function(target_tr){
 		  // next element are comments !
 		  if(YUD.hasClass(n,'inline-comments')){
 			  last_node = n;
-			  //also remove the comment button from previos
-			  var comment_add_buttons = last_node.getElementsByClassName('add-comment');
+			  //also remove the comment button from previous
+			  var comment_add_buttons = YUD.getElementsByClassName('add-comment',null,last_node);
 			  for(var i=0;i<comment_add_buttons.length;i++){
 				  var b = comment_add_buttons[i];
 				  b.parentNode.removeChild(b);
@@ -582,7 +582,7 @@ var placeAddButton = function(target_tr){
 	  
     var add = createInlineAddButton(target_tr);
     // get the comment div
-    var comment_block = last_node.getElementsByClassName('comment')[0];
+    var comment_block = YUD.getElementsByClassName('comment',null,last_node)[0];
     // attach add button
     YUD.insertAfter(add,comment_block);	
 }
@@ -889,7 +889,7 @@ var readNotification = function(url, notification_id,callbacks){
 		success:function(o){
 		    var obj = YUD.get(String("notification_"+notification_id));
 		    YUD.removeClass(obj, 'unread');
-		    var r_button = obj.children[0].getElementsByClassName('read-notification')[0]
+		    var r_button = YUD.getElementsByClassName('read-notification',null,obj.children[0])[0];
 		    
 		    if(r_button.parentNode !== undefined){
 		    	r_button.parentNode.removeChild(r_button);

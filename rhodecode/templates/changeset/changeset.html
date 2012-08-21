@@ -149,6 +149,9 @@
           YUE.on(YUQ('.show-inline-comments'),'change',function(e){
               var show = 'none';
               var target = e.currentTarget;
+              if(target == null){
+                  target = this;
+              }
               if(target.checked){
                   var show = ''
               }
@@ -165,6 +168,9 @@
 
           YUE.on(YUQ('.line'),'click',function(e){
               var tr = e.currentTarget;
+              if(tr == null){
+                  tr = this;
+              }
               injectInlineForm(tr);
           });
 
