@@ -53,7 +53,7 @@
 	             <div class="left">
 	                 <div class="author">
 	                     <div class="gravatar">
-	                         <img alt="gravatar" src="${h.gravatar_url(h.email(c.changeset.author),20)}"/>
+	                         <img alt="gravatar" src="${h.gravatar_url(h.email_or_none(c.changeset.author),20)}"/>
 	                     </div>
 	                     <span>${h.person(c.changeset.author)}</span><br/>
 	                     <span><a href="mailto:${h.email_or_none(c.changeset.author)}">${h.email_or_none(c.changeset.author)}</a></span><br/>

@@ -396,8 +396,14 @@ def is_hg(repository):
 
 
 def email_or_none(author):
+    # extract email from the commit string
     _email = email(author)
     if _email != '':
+        # check it against RhodeCode database, and use the MAIN email for this
+        # user
+        user = User.get_by_email(_email, case_insensitive=True, cache=True)
+        if user is not None:
+            return user.email
         return _email
 
     # See if it contains a username we can get an email from
