@@ -234,6 +234,15 @@ class FilesController(BaseRepoController):
     @LoginRequired()
     @HasRepoPermissionAnyDecorator('repository.write', 'repository.admin')
     def edit(self, repo_name, revision, f_path):
+        repo = Repository.get_by_repo_name(repo_name)
+        if repo.enable_locking and repo.locked[0]:
+            h.flash(_('This repository is has been locked by %s on %s')
+                % (h.person_by_id(repo.locked[0]),
+                   h.fmt_date(h.time_to_datetime(repo.locked[1]))),
+                  'warning')
+            return redirect(h.url('files_home',
+                                  repo_name=repo_name, revision='tip'))
+
         r_post = request.POST
 
         c.cs = self.__get_cs_or_redirect(revision, repo_name)
@@ -284,6 +293,16 @@ class FilesController(BaseRepoController):
     @LoginRequired()
     @HasRepoPermissionAnyDecorator('repository.write', 'repository.admin')
     def add(self, repo_name, revision, f_path):
+
+        repo = Repository.get_by_repo_name(repo_name)
+        if repo.enable_locking and repo.locked[0]:
+            h.flash(_('This repository is has been locked by %s on %s')
+                % (h.person_by_id(repo.locked[0]),
+                   h.fmt_date(h.time_to_datetime(repo.locked[1]))),
+                  'warning')
+            return redirect(h.url('files_home',
+                                  repo_name=repo_name, revision='tip'))
+
         r_post = request.POST
         c.cs = self.__get_cs_or_redirect(revision, repo_name,
                                          redirect_after=False)
