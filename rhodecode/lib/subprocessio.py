@@ -25,7 +25,7 @@ If not, see <http://www.gnu.org/licenses/>.
 import os
 import subprocess
 import threading
-from collections import deque
+from rhodecode.lib.compat import deque
 
 
 class StreamFeeder(threading.Thread):
