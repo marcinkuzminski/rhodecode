@@ -530,3 +530,56 @@ else:
             memo[id(self)] = result
             result.__init__(deepcopy(tuple(self), memo))
             return result
+
+
+#==============================================================================
+# threading.Event
+#==============================================================================
+
+if __py_version__ >= (2, 6):
+    from threading import Event
+else:
+    from threading import _Verbose, Condition, Lock
+
+    def Event(*args, **kwargs):
+        return _Event(*args, **kwargs)
+
+    class _Event(_Verbose):
+
+        # After Tim Peters' event class (without is_posted())
+
+        def __init__(self, verbose=None):
+            _Verbose.__init__(self, verbose)
+            self.__cond = Condition(Lock())
+            self.__flag = False
+
+        def isSet(self):
+            return self.__flag
+
+        is_set = isSet
+
+        def set(self):
+            self.__cond.acquire()
+            try:
+                self.__flag = True
+                self.__cond.notify_all()
+            finally:
+                self.__cond.release()
+
+        def clear(self):
+            self.__cond.acquire()
+            try:
+                self.__flag = False
+            finally:
+                self.__cond.release()
+
+        def wait(self, timeout=None):
+            self.__cond.acquire()
+            try:
+                if not self.__flag:
+                    self.__cond.wait(timeout)
+            finally:
+                self.__cond.release()
+
+
+

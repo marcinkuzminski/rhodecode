@@ -25,7 +25,7 @@ If not, see <http://www.gnu.org/licenses/>.
 import os
 import subprocess
 import threading
-from rhodecode.lib.compat import deque
+from rhodecode.lib.compat import deque, Event
 
 
 class StreamFeeder(threading.Thread):
@@ -89,16 +89,16 @@ class InputStreamChunker(threading.Thread):
         self.chunk_count_max = int(buffer_size / chunk_size) + 1
         self.chunk_size = chunk_size
 
-        self.data_added = threading.Event()
+        self.data_added = Event()
         self.data_added.clear()
 
-        self.keep_reading = threading.Event()
+        self.keep_reading = Event()
         self.keep_reading.set()
 
-        self.EOF = threading.Event()
+        self.EOF = Event()
         self.EOF.clear()
 
-        self.go = threading.Event()
+        self.go = Event()
         self.go.set()
 
     def stop(self):
