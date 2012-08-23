@@ -30,7 +30,7 @@
       <div id="notification_${c.notification.notification_id}">
         <div class="notification-header">
           <div class="gravatar">
-              <img alt="gravatar" src="${h.gravatar_url(h.email(c.notification.created_by_user.email),24)}"/>
+              <img alt="gravatar" src="${h.gravatar_url(h.email_or_none(c.notification.created_by_user.email),24)}"/>
           </div>
           <div class="desc">
               ${c.notification.description}

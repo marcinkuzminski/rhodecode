@@ -12,7 +12,7 @@
             <div class="left">
                 <div class="author">
                     <div class="gravatar">
-                        <img alt="gravatar" src="${h.gravatar_url(h.email(sr['author']),20)}"/>
+                        <img alt="gravatar" src="${h.gravatar_url(h.email_or_none(sr['author']),20)}"/>
                     </div>
                     <span>${h.person(sr['author'])}</span><br/>
                     <span><a href="mailto:${h.email_or_none(sr['author'])}">${h.email_or_none(sr['author'])}</a></span><br/>

@@ -10,7 +10,7 @@ unread = lambda n:{False:'unread'}.get(n)
   <div id="notification_${notification.notification.notification_id}" class="container ${unread(notification.read)}">
     <div class="notification-header">
       <div class="gravatar">
-          <img alt="gravatar" src="${h.gravatar_url(h.email(notification.notification.created_by_user.email),24)}"/>
+          <img alt="gravatar" src="${h.gravatar_url(h.email_or_none(notification.notification.created_by_user.email),24)}"/>
       </div>
       <div class="desc ${unread(notification.read)}">
       <a href="${url('notification', notification_id=notification.notification.notification_id)}">${notification.notification.description}</a>

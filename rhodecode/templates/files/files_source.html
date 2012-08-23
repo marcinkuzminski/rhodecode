@@ -48,7 +48,7 @@
         </div>
         <div class="author">
             <div class="gravatar">
-                <img alt="gravatar" src="${h.gravatar_url(h.email(c.file.changeset.author),16)}"/>
+                <img alt="gravatar" src="${h.gravatar_url(h.email_or_none(c.file.changeset.author),16)}"/>
             </div>
             <div title="${c.file.changeset.author}" class="user">${h.person(c.file.changeset.author)}</div>
         </div>
