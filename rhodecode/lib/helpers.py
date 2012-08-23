@@ -416,9 +416,9 @@ def email_or_none(author):
     return None
 
 
-def person(author):
+def person(author, show_attr="username_and_name"):
     # attr to return from fetched user
-    person_getter = lambda usr: usr.username
+    person_getter = lambda usr: getattr(usr, show_attr)
 
     # Valid email in the attribute passed, see if they're in the system
     _email = email(author)
@@ -439,9 +439,9 @@ def person(author):
     return _author
 
 
-def person_by_id(id_):
+def person_by_id(id_, show_attr="username_and_name"):
     # attr to return from fetched user
-    person_getter = lambda usr: usr.username
+    person_getter = lambda usr: getattr(usr, show_attr)
 
     #maybe it's an ID ?
     if str(id_).isdigit() or isinstance(id_, int):

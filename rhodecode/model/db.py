@@ -330,26 +330,35 @@ class User(Base, BaseModel):
         self._email = val.lower() if val else None
 
     @property
+    def firstname(self):
+        # alias for future
+        return self.name
+
+    @property
     def emails(self):
         other = UserEmailMap.query().filter(UserEmailMap.user==self).all()
         return [self.email] + [x.email for x in other]
 
     @property
+    def username_and_name(self):
+        return '%s (%s %s)' % (self.username, self.firstname, self.lastname)
+
+    @property
     def full_name(self):
-        return '%s %s' % (self.name, self.lastname)
+        return '%s %s' % (self.firstname, self.lastname)
 
     @property
     def full_name_or_username(self):
-        return ('%s %s' % (self.name, self.lastname)
-                if (self.name and self.lastname) else self.username)
+        return ('%s %s' % (self.firstname, self.lastname)
+                if (self.firstname and self.lastname) else self.username)
 
     @property
     def full_contact(self):
-        return '%s %s <%s>' % (self.name, self.lastname, self.email)
+        return '%s %s <%s>' % (self.firstname, self.lastname, self.email)
 
     @property
     def short_contact(self):
-        return '%s %s' % (self.name, self.lastname)
+        return '%s %s' % (self.firstname, self.lastname)
 
     @property
     def is_admin(self):
