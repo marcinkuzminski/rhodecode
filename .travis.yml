@@ -13,10 +13,17 @@ env:
 before_script:
   - mysql -e 'create database rhodecode_test;'
   - psql -c 'create database rhodecode_test;' -U postgres
+  - git --version
+
+before_install:
+  - sudo add-apt-repository ppa:pdoes/ppa -y
+  - sudo apt-get update -y
+  - sudo apt-get install git -y
 
 install:
   - pip install mysql-python psycopg2 mock unittest2
   - pip install . --use-mirrors
+
 # command to run tests
 script: nosetests
 
