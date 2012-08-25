@@ -71,7 +71,7 @@ ${_('%s Changelog') % c.repo_name} - ${c.rhodecode_name}
 						</div>
 						<div class="right">
 									<div class="changes">
-                                        <div id="${cs.raw_id}"  style="float:right;" class="changed_total tooltip" title="${h.tooltip(_('Affected number of files, click to show more details'))}">${len(cs.affected_files)}</div>
+                                        <div id="changed_total_${cs.raw_id}" style="float:right;" class="changed_total tooltip" title="${h.tooltip(_('Affected number of files, click to show more details'))}">${len(cs.affected_files)}</div>
                                         <div class="comments-container">
                                         %if len(c.comments.get(cs.raw_id,[])) > 0:
                                             <div class="comments-cnt" title="${('comments')}">
@@ -201,9 +201,9 @@ ${_('%s Changelog') % c.repo_name} - ${c.rhodecode_name}
 
                     // Fetch changeset details
                     YUE.on(YUD.getElementsByClassName('changed_total'),'click',function(e){
-                    	var id = e.currentTarget.id
-                    	var url = "${h.url('changelog_details',repo_name=c.repo_name,cs='__CS__')}"
-                    	var url = url.replace('__CS__',id);
+                    	var id = e.currentTarget.id;
+                    	var url = "${h.url('changelog_details',repo_name=c.repo_name,cs='__CS__')}";
+                    	var url = url.replace('__CS__',id.replace('changed_total_',''));
                     	ypjax(url,id,function(){tooltip_activate()});
                     });
 
