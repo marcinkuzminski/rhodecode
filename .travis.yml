@@ -16,6 +16,7 @@ before_script:
   - git --version
 
 before_install:
+  - sudo apt-get remove git
   - sudo add-apt-repository ppa:pdoes/ppa -y
   - sudo apt-get update -y
   - sudo apt-get install git -y
