@@ -69,7 +69,22 @@ class TestSearchController(TestController):
                                 {'q': 'changed:tests/utils.py',
                                  'type': 'commit'})
 
-        response.mustcontain('a00c1b6f5d7a6ae678fd553a8b81d92367f7ecf1')
+        response.mustcontain('20 results')
+
+    def test_search_commit_changed_files_get_commit(self):
+        self.log_user()
+        response = self.app.get(url(controller='search', action='index'),
+                                {'q': 'changed:vcs/utils/lazy.py',
+                                 'type': 'commit'})
+
+        response.mustcontain('7 results')
+        response.mustcontain('36e0fc9d2808c5022a24f49d6658330383ed8666')
+        response.mustcontain('af182745859d779f17336241a0815d15166ae1ee')
+        response.mustcontain('17438a11f72b93f56d0e08e7d1fa79a378578a82')
+        response.mustcontain('33fa3223355104431402a888fa77a4e9956feb3e')
+        response.mustcontain('d1f898326327e20524fe22417c22d71064fe54a1')
+        response.mustcontain('fe568b4081755c12abf6ba673ba777fc02a415f3')
+        response.mustcontain('bafe786f0d8c2ff7da5c1dcfcfa577de0b5e92f1')
 
     def test_search_commit_added_file(self):
         self.log_user()
