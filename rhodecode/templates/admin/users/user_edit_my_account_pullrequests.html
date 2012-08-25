@@ -4,9 +4,16 @@
     %if c.my_pull_requests:
       %for pull_request in c.my_pull_requests:
       <li>
+      <div style="float:left">
       <a href="${h.url('pullrequest_show',repo_name=pull_request.other_repo.repo_name,pull_request_id=pull_request.pull_request_id)}">
       ${_('Pull request #%s opened on %s') % (pull_request.pull_request_id, h.fmt_date(pull_request.created_on))}
       </a>
+      </div>
+      <div style="float:left;margin-top: -5px">
+        ${h.form(url('pullrequest_delete', repo_name=pull_request.other_repo.repo_name, pull_request_id=pull_request.pull_request_id),method='delete')}
+          ${h.submit('remove_%s' % pull_request.pull_request_id,'',class_="delete_icon action_button",onclick="return confirm('"+_('Confirm to delete this pull request')+"');")}
+        ${h.end_form()}
+     </div>      
       </li>
       %endfor
    %else:
@@ -14,7 +21,7 @@
    %endif
 </ul>
 
-<div class="pullrequests_section_head">${_('I participate in')}</div>
+<div class="pullrequests_section_head" style="clear:both">${_('I participate in')}</div>
 <ul>
     %if c.my_pull_requests:
       %for pull_request in c.participate_in_pull_requests:

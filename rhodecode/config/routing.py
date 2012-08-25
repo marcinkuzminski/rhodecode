@@ -462,6 +462,11 @@ def make_map(config):
                  controller='pullrequests',
                  action='update', conditions=dict(function=check_repo,
                                                 method=["PUT"]))
+    rmap.connect('pullrequest_delete',
+                 '/{repo_name:.*?}/pull-request/{pull_request_id}',
+                 controller='pullrequests',
+                 action='delete', conditions=dict(function=check_repo,
+                                                method=["DELETE"]))
 
     rmap.connect('pullrequest_show_all',
                  '/{repo_name:.*?}/pull-request',

@@ -203,6 +203,20 @@ class PullrequestsController(BaseRepoController):
         Session.commit()
         return True
 
+    @NotAnonymous()
+    @jsonify
+    def delete(self, repo_name, pull_request_id):
+        pull_request = PullRequest.get_or_404(pull_request_id)
+        #only owner can delete it !
+        if pull_request.author.user_id == c.rhodecode_user.user_id:
+            PullRequestModel().delete(pull_request)
+            Session().commit()
+            h.flash(_('Successfully deleted pull request'),
+                    category='success')
+            return redirect(url('admin_settings_my_account'))
+        else:
+            raise HTTPForbidden()
+
     def _load_compare_data(self, pull_request, enable_comments=True):
         """
         Load context data needed for generating compare diff

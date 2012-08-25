@@ -125,6 +125,10 @@ class PullRequestModel(BaseModel):
             if reviewer:
                 self.sa.delete(reviewer)
 
+    def delete(self, pull_request):
+        pull_request = self.__get_pull_request(pull_request)
+        Session().delete(pull_request)
+
     def close_pull_request(self, pull_request):
         pull_request = self.__get_pull_request(pull_request)
         pull_request.status = PullRequest.STATUS_CLOSED
