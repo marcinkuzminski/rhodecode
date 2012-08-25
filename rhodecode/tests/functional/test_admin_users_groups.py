@@ -104,9 +104,9 @@ class TestAdminUsersGroupsController(TestController):
             .filter(UsersGroupToPerm.users_group == ug).all()
 
         self.assertEqual(
-            [[x.users_group_id, x.permission_id, ] for x in perms],
-            [[ug.users_group_id, p.permission_id],
-             [ug.users_group_id, p2.permission_id]]
+            sorted([[x.users_group_id, x.permission_id, ] for x in perms]),
+            sorted([[ug.users_group_id, p.permission_id],
+             [ug.users_group_id, p2.permission_id]])
         )
 
         # DELETE !
