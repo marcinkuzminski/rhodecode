@@ -23,7 +23,7 @@ class TestChangelogController(TestController):
         response.mustcontain("""Small update at simplevcs app""")
 
         response.mustcontain(
-            """<div id="5e204e7583b9c8e7b93a020bd036564b1e731dae"  """
+            """<div id="changed_total_5e204e7583b9c8e7b93a020bd036564b1e731dae" """
             """style="float:right;" class="changed_total tooltip" """
             """title="Affected number of files, click to show """
             """more details">3</div>"""
@@ -56,7 +56,7 @@ class TestChangelogController(TestController):
         )
 
         response.mustcontain(
-            """<div id="46ad32a4f974e45472a898c6b0acb600320579b1"  """
+            """<div id="changed_total_46ad32a4f974e45472a898c6b0acb600320579b1" """
             """style="float:right;" class="changed_total tooltip" """
             """title="Affected number of files, click to show """
             """more details">21</div>"""
