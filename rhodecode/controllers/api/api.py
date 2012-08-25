@@ -38,6 +38,7 @@ from rhodecode.model.repo import RepoModel
 from rhodecode.model.user import UserModel
 from rhodecode.model.users_group import UsersGroupModel
 from rhodecode.model.permission import PermissionModel
+from rhodecode.model.db import Repository
 
 log = logging.getLogger(__name__)
 
@@ -180,7 +181,34 @@ class ApiController(JSONRPCController):
         except Exception:
             log.error(traceback.format_exc())
             raise JSONRPCError(
-                'Unable to rescan repositories'
+                'Error occurred during rescan repositories action'
+            )
+
+    @HasPermissionAllDecorator('hg.admin')
+    def lock(self, apiuser, repoid, userid, locked):
+        """
+        Set locking state on particular repository by given user
+
+        :param apiuser:
+        :param repoid:
+        :param userid:
+        :param locked:
+        """
+        repo = get_repo_or_error(repoid)
+        user = get_user_or_error(userid)
+        locked = bool(locked)
+        try:
+            if locked:
+                Repository.lock(repo, user.user_id)
+            else:
+                Repository.unlock(repo)
+
+            return ('User `%s` set lock state for repo `%s` to `%s`'
+                    % (user.username, repo.repo_name, locked))
+        except Exception:
+            log.error(traceback.format_exc())
+            raise JSONRPCError(
+                'Error occurred locking repository `%s`' % repo.repo_name
             )
 
     @HasPermissionAllDecorator('hg.admin')

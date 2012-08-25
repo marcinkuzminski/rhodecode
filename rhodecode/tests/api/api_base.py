@@ -10,6 +10,7 @@ from rhodecode.model.users_group import UsersGroupModel
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.meta import Session
 from rhodecode.model.scm import ScmModel
+from rhodecode.model.db import Repository
 
 API_URL = '/_admin/api'
 
@@ -230,7 +231,41 @@ class BaseTestApi(object):
         response = self.app.post(API_URL, content_type='application/json',
                                  params=params)
 
-        expected = 'Unable to rescan repositories'
+        expected = 'Error occurred during rescan repositories action'
+        self._compare_error(id_, expected, given=response.body)
+
+    def test_api_lock_repo_lock_aquire(self):
+        id_, params = _build_data(self.apikey, 'lock',
+                                  userid=TEST_USER_ADMIN_LOGIN,
+                                  repoid=self.REPO,
+                                  locked=True)
+        response = self.app.post(API_URL, content_type='application/json',
+                                 params=params)
+        expected = ('User `%s` set lock state for repo `%s` to `%s`'
+                   % (TEST_USER_ADMIN_LOGIN, self.REPO, True))
+        self._compare_ok(id_, expected, given=response.body)
+
+    def test_api_lock_repo_lock_release(self):
+        id_, params = _build_data(self.apikey, 'lock',
+                                  userid=TEST_USER_ADMIN_LOGIN,
+                                  repoid=self.REPO,
+                                  locked=False)
+        response = self.app.post(API_URL, content_type='application/json',
+                                 params=params)
+        expected = ('User `%s` set lock state for repo `%s` to `%s`'
+                   % (TEST_USER_ADMIN_LOGIN, self.REPO, False))
+        self._compare_ok(id_, expected, given=response.body)
+
+    @mock.patch.object(Repository, 'lock', crash)
+    def test_api_lock_error(self):
+        id_, params = _build_data(self.apikey, 'lock',
+                                  userid=TEST_USER_ADMIN_LOGIN,
+                                  repoid=self.REPO,
+                                  locked=True)
+        response = self.app.post(API_URL, content_type='application/json',
+                                 params=params)
+
+        expected = 'Error occurred locking repository `%s`' % self.REPO
         self._compare_error(id_, expected, given=response.body)
 
     def test_api_create_existing_user(self):
