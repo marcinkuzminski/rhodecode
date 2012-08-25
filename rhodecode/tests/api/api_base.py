@@ -37,6 +37,12 @@ def crash(*args, **kwargs):
     raise Exception('Total Crash !')
 
 
+def api_call(test_obj, params):
+    response = test_obj.app.post(API_URL, content_type='application/json',
+                                 params=params)
+    return response
+
+
 TEST_USERS_GROUP = 'test_users_group'
 
 
@@ -141,24 +147,21 @@ class BaseTestApi(object):
 
     def test_api_wrong_key(self):
         id_, params = _build_data('trololo', 'get_user')
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
 
         expected = 'Invalid API KEY'
         self._compare_error(id_, expected, given=response.body)
 
     def test_api_missing_non_optional_param(self):
         id_, params = _build_data(self.apikey, 'get_user')
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
 
         expected = 'Missing non optional `userid` arg in JSON DATA'
         self._compare_error(id_, expected, given=response.body)
 
     def test_api_get_users(self):
         id_, params = _build_data(self.apikey, 'get_users',)
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
         ret_all = []
         for usr in UserModel().get_all():
             ret = usr.get_api_data()
@@ -169,8 +172,7 @@ class BaseTestApi(object):
     def test_api_get_user(self):
         id_, params = _build_data(self.apikey, 'get_user',
                                   userid=TEST_USER_ADMIN_LOGIN)
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
 
         usr = UserModel().get_by_username(TEST_USER_ADMIN_LOGIN)
         ret = usr.get_api_data()
@@ -182,8 +184,7 @@ class BaseTestApi(object):
     def test_api_get_user_that_does_not_exist(self):
         id_, params = _build_data(self.apikey, 'get_user',
                                   userid='trololo')
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
 
         expected = "user `%s` does not exist" % 'trololo'
         self._compare_error(id_, expected, given=response.body)
@@ -211,16 +212,14 @@ class BaseTestApi(object):
     def test_api_pull_error(self):
         id_, params = _build_data(self.apikey, 'pull',
                                   repoid=self.REPO,)
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
 
         expected = 'Unable to pull changes from `%s`' % self.REPO
         self._compare_error(id_, expected, given=response.body)
 
     def test_api_rescan_repos(self):
         id_, params = _build_data(self.apikey, 'rescan_repos')
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
 
         expected = {'added': [], 'removed': []}
         self._compare_ok(id_, expected, given=response.body)
@@ -228,8 +227,7 @@ class BaseTestApi(object):
     @mock.patch.object(ScmModel, 'repo_scan', crash)
     def test_api_rescann_error(self):
         id_, params = _build_data(self.apikey, 'rescan_repos',)
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
 
         expected = 'Error occurred during rescan repositories action'
         self._compare_error(id_, expected, given=response.body)
@@ -239,8 +237,7 @@ class BaseTestApi(object):
                                   userid=TEST_USER_ADMIN_LOGIN,
                                   repoid=self.REPO,
                                   locked=True)
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
         expected = ('User `%s` set lock state for repo `%s` to `%s`'
                    % (TEST_USER_ADMIN_LOGIN, self.REPO, True))
         self._compare_ok(id_, expected, given=response.body)
@@ -250,8 +247,7 @@ class BaseTestApi(object):
                                   userid=TEST_USER_ADMIN_LOGIN,
                                   repoid=self.REPO,
                                   locked=False)
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
         expected = ('User `%s` set lock state for repo `%s` to `%s`'
                    % (TEST_USER_ADMIN_LOGIN, self.REPO, False))
         self._compare_ok(id_, expected, given=response.body)
@@ -262,8 +258,7 @@ class BaseTestApi(object):
                                   userid=TEST_USER_ADMIN_LOGIN,
                                   repoid=self.REPO,
                                   locked=True)
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
 
         expected = 'Error occurred locking repository `%s`' % self.REPO
         self._compare_error(id_, expected, given=response.body)
@@ -273,8 +268,7 @@ class BaseTestApi(object):
                                   username=TEST_USER_ADMIN_LOGIN,
                                   email='test@foo.com',
                                   password='trololo')
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
 
         expected = "user `%s` already exist" % TEST_USER_ADMIN_LOGIN
         self._compare_error(id_, expected, given=response.body)
@@ -284,8 +278,7 @@ class BaseTestApi(object):
                                   username=TEST_USER_ADMIN_LOGIN + 'new',
                                   email=TEST_USER_REGULAR_EMAIL,
                                   password='trololo')
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
 
         expected = "email `%s` already exist" % TEST_USER_REGULAR_EMAIL
         self._compare_error(id_, expected, given=response.body)
@@ -298,8 +291,7 @@ class BaseTestApi(object):
                                   username=username,
                                   email=email,
                                   password='trololo')
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
 
         usr = UserModel().get_by_username(username)
         ret = dict(
@@ -311,7 +303,7 @@ class BaseTestApi(object):
         self._compare_ok(id_, expected, given=response.body)
 
         UserModel().delete(usr.user_id)
-        self.Session().commit()
+        Session().commit()
 
     @mock.patch.object(UserModel, 'create_or_update', crash)
     def test_api_create_user_when_exception_happened(self):
@@ -323,8 +315,7 @@ class BaseTestApi(object):
                                   username=username,
                                   email=email,
                                   password='trololo')
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
         expected = 'failed to create user `%s`' % username
         self._compare_error(id_, expected, given=response.body)
 
@@ -333,7 +324,7 @@ class BaseTestApi(object):
                                            password=u'qweqwe',
                                            email=u'u232@rhodecode.org',
                                            firstname=u'u1', lastname=u'u1')
-        self.Session().commit()
+        Session().commit()
         username = usr.username
         email = usr.email
         usr_id = usr.user_id
@@ -341,8 +332,7 @@ class BaseTestApi(object):
 
         id_, params = _build_data(self.apikey, 'delete_user',
                                   userid=username,)
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
 
         ret = {'msg': 'deleted user ID:%s %s' % (usr_id, username),
                'user': None}
@@ -355,13 +345,12 @@ class BaseTestApi(object):
                                            password=u'qweqwe',
                                            email=u'u232@rhodecode.org',
                                            firstname=u'u1', lastname=u'u1')
-        self.Session().commit()
+        Session().commit()
         username = usr.username
 
         id_, params = _build_data(self.apikey, 'delete_user',
                                   userid=username,)
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
         ret = 'failed to delete ID:%s %s' % (usr.user_id,
                                              usr.username)
         expected = ret
@@ -383,8 +372,7 @@ class BaseTestApi(object):
         kw = {name: expected,
               'userid': usr.user_id}
         id_, params = _build_data(self.apikey, 'update_user', **kw)
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
 
         ret = {
         'msg': 'updated user ID:%s %s' % (usr.user_id, self.TEST_USER_LOGIN),
@@ -402,8 +390,7 @@ class BaseTestApi(object):
         id_, params = _build_data(self.apikey, 'update_user',
                                   userid=TEST_USER_ADMIN_LOGIN)
 
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
         ret = {
         'msg': 'updated user ID:%s %s' % (usr.user_id, TEST_USER_ADMIN_LOGIN),
         'user': ret
@@ -417,8 +404,7 @@ class BaseTestApi(object):
         id_, params = _build_data(self.apikey, 'update_user',
                                   userid=usr.user_id)
 
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
         ret = {
         'msg': 'updated user ID:%s %s' % (usr.user_id, TEST_USER_ADMIN_LOGIN),
         'user': ret
@@ -433,8 +419,7 @@ class BaseTestApi(object):
         id_, params = _build_data(self.apikey, 'update_user',
                                   userid=usr.user_id)
 
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
         ret = 'failed to update user `%s`' % usr.user_id
 
         expected = ret
@@ -446,11 +431,10 @@ class BaseTestApi(object):
         RepoModel().grant_users_group_permission(repo=self.REPO,
                                                  group_name=new_group,
                                                  perm='repository.read')
-        self.Session().commit()
+        Session().commit()
         id_, params = _build_data(self.apikey, 'get_repo',
                                   repoid=self.REPO)
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
 
         repo = RepoModel().get_by_repo_name(self.REPO)
         ret = repo.get_api_data()
@@ -481,8 +465,7 @@ class BaseTestApi(object):
     def test_api_get_repo_that_doesn_not_exist(self):
         id_, params = _build_data(self.apikey, 'get_repo',
                                   repoid='no-such-repo')
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
 
         ret = 'repository `%s` does not exist' % 'no-such-repo'
         expected = ret
@@ -490,8 +473,7 @@ class BaseTestApi(object):
 
     def test_api_get_repos(self):
         id_, params = _build_data(self.apikey, 'get_repos')
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
 
         result = []
         for repo in RepoModel().get_all():
@@ -511,8 +493,7 @@ class BaseTestApi(object):
                                   repoid=self.REPO, revision=rev,
                                   root_path=path,
                                   ret_type=ret_type)
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
 
         # we don't the actual return types here since it's tested somewhere
         # else
@@ -525,8 +506,7 @@ class BaseTestApi(object):
         id_, params = _build_data(self.apikey, 'get_repo_nodes',
                                   repoid=self.REPO, revision=rev,
                                   root_path=path,)
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
 
         expected = 'failed to get repo: `%s` nodes' % self.REPO
         self._compare_error(id_, expected, given=response.body)
@@ -537,8 +517,7 @@ class BaseTestApi(object):
         id_, params = _build_data(self.apikey, 'get_repo_nodes',
                                   repoid=self.REPO, revision=rev,
                                   root_path=path,)
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
 
         expected = 'failed to get repo: `%s` nodes' % self.REPO
         self._compare_error(id_, expected, given=response.body)
@@ -551,8 +530,7 @@ class BaseTestApi(object):
                                   repoid=self.REPO, revision=rev,
                                   root_path=path,
                                   ret_type=ret_type)
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
 
         expected = 'ret_type must be one of %s' % (['files', 'dirs', 'all'])
         self._compare_error(id_, expected, given=response.body)
@@ -564,8 +542,7 @@ class BaseTestApi(object):
                                     owner=TEST_USER_ADMIN_LOGIN,
                                     repo_type='hg',
                                   )
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
 
         repo = RepoModel().get_by_repo_name(repo_name)
         ret = {
@@ -584,8 +561,7 @@ class BaseTestApi(object):
                                     owner=owner,
                                     repo_type='hg',
                                   )
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
         expected = 'user `%s` does not exist' % owner
         self._compare_error(id_, expected, given=response.body)
 
@@ -596,8 +572,7 @@ class BaseTestApi(object):
                                     owner=TEST_USER_ADMIN_LOGIN,
                                     repo_type='hg',
                                   )
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
         expected = "repo `%s` already exist" % repo_name
         self._compare_error(id_, expected, given=response.body)
 
@@ -609,8 +584,7 @@ class BaseTestApi(object):
                                     owner=TEST_USER_ADMIN_LOGIN,
                                     repo_type='hg',
                                   )
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
         expected = 'failed to create repository `%s`' % repo_name
         self._compare_error(id_, expected, given=response.body)
 
@@ -620,8 +594,7 @@ class BaseTestApi(object):
 
         id_, params = _build_data(self.apikey, 'delete_repo',
                                   repoid=repo_name,)
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
 
         ret = {
             'msg': 'Deleted repository `%s`' % repo_name,
@@ -637,8 +610,7 @@ class BaseTestApi(object):
             with mock.patch.object(RepoModel, 'delete', crash):
                 id_, params = _build_data(self.apikey, 'delete_repo',
                                           repoid=repo_name,)
-                response = self.app.post(API_URL, content_type='application/json',
-                                         params=params)
+                response = api_call(self, params)
 
                 expected = 'failed to delete repository `%s`' % repo_name
                 self._compare_error(id_, expected, given=response.body)
@@ -652,8 +624,7 @@ class BaseTestApi(object):
                                     fork_name=fork_name,
                                     owner=TEST_USER_ADMIN_LOGIN,
                                   )
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
 
         ret = {
             'msg': 'Created fork of `%s` as `%s`' % (self.REPO,
@@ -672,8 +643,7 @@ class BaseTestApi(object):
                                     fork_name=fork_name,
                                     owner=owner,
                                   )
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
         expected = 'user `%s` does not exist' % owner
         self._compare_error(id_, expected, given=response.body)
 
@@ -689,8 +659,7 @@ class BaseTestApi(object):
                                         fork_name=fork_name,
                                         owner=TEST_USER_ADMIN_LOGIN,
                                       )
-            response = self.app.post(API_URL, content_type='application/json',
-                                     params=params)
+            response = api_call(self, params)
 
             expected = "fork `%s` already exist" % fork_name
             self._compare_error(id_, expected, given=response.body)
@@ -705,8 +674,7 @@ class BaseTestApi(object):
                                     fork_name=fork_name,
                                     owner=TEST_USER_ADMIN_LOGIN,
                                   )
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
 
         expected = "repo `%s` already exist" % fork_name
         self._compare_error(id_, expected, given=response.body)
@@ -719,8 +687,7 @@ class BaseTestApi(object):
                                     fork_name=fork_name,
                                     owner=TEST_USER_ADMIN_LOGIN,
                                   )
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
 
         expected = 'failed to fork repository `%s` as `%s`' % (self.REPO,
                                                                fork_name)
@@ -729,8 +696,7 @@ class BaseTestApi(object):
     def test_api_get_users_group(self):
         id_, params = _build_data(self.apikey, 'get_users_group',
                                   usersgroupid=TEST_USERS_GROUP)
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
 
         users_group = UsersGroupModel().get_group(TEST_USERS_GROUP)
         members = []
@@ -748,8 +714,7 @@ class BaseTestApi(object):
         make_users_group('test_users_group2')
 
         id_, params = _build_data(self.apikey, 'get_users_groups',)
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
 
         expected = []
         for gr_name in [TEST_USERS_GROUP, 'test_users_group2']:
@@ -759,14 +724,13 @@ class BaseTestApi(object):
         self._compare_ok(id_, expected, given=response.body)
 
         UsersGroupModel().delete(users_group='test_users_group2')
-        self.Session().commit()
+        Session().commit()
 
     def test_api_create_users_group(self):
         group_name = 'some_new_group'
         id_, params = _build_data(self.apikey, 'create_users_group',
                                   group_name=group_name)
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
 
         ret = {
             'msg': 'created new users group `%s`' % group_name,
@@ -782,8 +746,7 @@ class BaseTestApi(object):
     def test_api_get_users_group_that_exist(self):
         id_, params = _build_data(self.apikey, 'create_users_group',
                                   group_name=TEST_USERS_GROUP)
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
 
         expected = "users group `%s` already exist" % TEST_USERS_GROUP
         self._compare_error(id_, expected, given=response.body)
@@ -793,8 +756,7 @@ class BaseTestApi(object):
         group_name = 'exception_happens'
         id_, params = _build_data(self.apikey, 'create_users_group',
                                   group_name=group_name)
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
 
         expected = 'failed to create group `%s`' % group_name
         self._compare_error(id_, expected, given=response.body)
@@ -802,12 +764,11 @@ class BaseTestApi(object):
     def test_api_add_user_to_users_group(self):
         gr_name = 'test_group'
         UsersGroupModel().create(gr_name)
-        self.Session().commit()
+        Session().commit()
         id_, params = _build_data(self.apikey, 'add_user_to_users_group',
                                   usersgroupid=gr_name,
                                   userid=TEST_USER_ADMIN_LOGIN)
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
 
         expected = {
                     'msg': 'added member `%s` to users group `%s`' % (
@@ -817,14 +778,13 @@ class BaseTestApi(object):
         self._compare_ok(id_, expected, given=response.body)
 
         UsersGroupModel().delete(users_group=gr_name)
-        self.Session().commit()
+        Session().commit()
 
     def test_api_add_user_to_users_group_that_doesnt_exist(self):
         id_, params = _build_data(self.apikey, 'add_user_to_users_group',
                                   usersgroupid='false-group',
                                   userid=TEST_USER_ADMIN_LOGIN)
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
 
         expected = 'users group `%s` does not exist' % 'false-group'
         self._compare_error(id_, expected, given=response.body)
@@ -833,29 +793,27 @@ class BaseTestApi(object):
     def test_api_add_user_to_users_group_exception_occurred(self):
         gr_name = 'test_group'
         UsersGroupModel().create(gr_name)
-        self.Session().commit()
+        Session().commit()
         id_, params = _build_data(self.apikey, 'add_user_to_users_group',
                                   usersgroupid=gr_name,
                                   userid=TEST_USER_ADMIN_LOGIN)
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
 
         expected = 'failed to add member to users group `%s`' % gr_name
         self._compare_error(id_, expected, given=response.body)
 
         UsersGroupModel().delete(users_group=gr_name)
-        self.Session().commit()
+        Session().commit()
 
     def test_api_remove_user_from_users_group(self):
         gr_name = 'test_group_3'
         gr = UsersGroupModel().create(gr_name)
         UsersGroupModel().add_user_to_group(gr, user=TEST_USER_ADMIN_LOGIN)
-        self.Session().commit()
+        Session().commit()
         id_, params = _build_data(self.apikey, 'remove_user_from_users_group',
                                   usersgroupid=gr_name,
                                   userid=TEST_USER_ADMIN_LOGIN)
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
 
         expected = {
                     'msg': 'removed member `%s` from users group `%s`' % (
@@ -865,25 +823,24 @@ class BaseTestApi(object):
         self._compare_ok(id_, expected, given=response.body)
 
         UsersGroupModel().delete(users_group=gr_name)
-        self.Session().commit()
+        Session().commit()
 
     @mock.patch.object(UsersGroupModel, 'remove_user_from_group', crash)
     def test_api_remove_user_from_users_group_exception_occurred(self):
         gr_name = 'test_group_3'
         gr = UsersGroupModel().create(gr_name)
         UsersGroupModel().add_user_to_group(gr, user=TEST_USER_ADMIN_LOGIN)
-        self.Session().commit()
+        Session().commit()
         id_, params = _build_data(self.apikey, 'remove_user_from_users_group',
                                   usersgroupid=gr_name,
                                   userid=TEST_USER_ADMIN_LOGIN)
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
 
         expected = 'failed to remove member from users group `%s`' % gr_name
         self._compare_error(id_, expected, given=response.body)
 
         UsersGroupModel().delete(users_group=gr_name)
-        self.Session().commit()
+        Session().commit()
 
     @parameterized.expand([('none', 'repository.none'),
                            ('read', 'repository.read'),
@@ -894,8 +851,7 @@ class BaseTestApi(object):
                                   repoid=self.REPO,
                                   userid=TEST_USER_ADMIN_LOGIN,
                                   perm=perm)
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
 
         ret = {
                 'msg': 'Granted perm: `%s` for user: `%s` in repo: `%s`' % (
@@ -912,8 +868,7 @@ class BaseTestApi(object):
                                   repoid=self.REPO,
                                   userid=TEST_USER_ADMIN_LOGIN,
                                   perm=perm)
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
 
         expected = 'permission `%s` does not exist' % perm
         self._compare_error(id_, expected, given=response.body)
@@ -925,8 +880,7 @@ class BaseTestApi(object):
                                   repoid=self.REPO,
                                   userid=TEST_USER_ADMIN_LOGIN,
                                   perm=perm)
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
 
         expected = 'failed to edit permission for user: `%s` in repo: `%s`' % (
                     TEST_USER_ADMIN_LOGIN, self.REPO
@@ -937,8 +891,7 @@ class BaseTestApi(object):
         id_, params = _build_data(self.apikey, 'revoke_user_permission',
                                   repoid=self.REPO,
                                   userid=TEST_USER_ADMIN_LOGIN,)
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
 
         expected = {
             'msg': 'Revoked perm for user: `%s` in repo: `%s`' % (
@@ -953,8 +906,7 @@ class BaseTestApi(object):
         id_, params = _build_data(self.apikey, 'revoke_user_permission',
                                   repoid=self.REPO,
                                   userid=TEST_USER_ADMIN_LOGIN,)
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
 
         expected = 'failed to edit permission for user: `%s` in repo: `%s`' % (
                     TEST_USER_ADMIN_LOGIN, self.REPO
@@ -970,8 +922,7 @@ class BaseTestApi(object):
                                   repoid=self.REPO,
                                   usersgroupid=TEST_USERS_GROUP,
                                   perm=perm)
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
 
         ret = {
             'msg': 'Granted perm: `%s` for users group: `%s` in repo: `%s`' % (
@@ -988,8 +939,7 @@ class BaseTestApi(object):
                                   repoid=self.REPO,
                                   usersgroupid=TEST_USERS_GROUP,
                                   perm=perm)
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
 
         expected = 'permission `%s` does not exist' % perm
         self._compare_error(id_, expected, given=response.body)
@@ -1001,8 +951,7 @@ class BaseTestApi(object):
                                   repoid=self.REPO,
                                   usersgroupid=TEST_USERS_GROUP,
                                   perm=perm)
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
 
         expected = 'failed to edit permission for users group: `%s` in repo: `%s`' % (
                     TEST_USERS_GROUP, self.REPO
@@ -1013,12 +962,11 @@ class BaseTestApi(object):
         RepoModel().grant_users_group_permission(repo=self.REPO,
                                                  group_name=TEST_USERS_GROUP,
                                                  perm='repository.read')
-        self.Session().commit()
+        Session().commit()
         id_, params = _build_data(self.apikey, 'revoke_users_group_permission',
                                   repoid=self.REPO,
                                   usersgroupid=TEST_USERS_GROUP,)
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
 
         expected = {
             'msg': 'Revoked perm for users group: `%s` in repo: `%s`' % (
@@ -1034,8 +982,7 @@ class BaseTestApi(object):
         id_, params = _build_data(self.apikey, 'revoke_users_group_permission',
                                   repoid=self.REPO,
                                   usersgroupid=TEST_USERS_GROUP,)
-        response = self.app.post(API_URL, content_type='application/json',
-                                 params=params)
+        response = api_call(self, params)
 
         expected = 'failed to edit permission for users group: `%s` in repo: `%s`' % (
                     TEST_USERS_GROUP, self.REPO
