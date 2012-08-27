@@ -540,7 +540,10 @@ Sample config for nginx using proxy::
        #location @my_411_error {
        #    chunkin_resume;
        #}
-
+       
+       # uncomment if you want to serve static files by nginx
+       #root /path/to/installation/rhodecode/public;
+       
        location / {
             try_files $uri @rhode;
        }
