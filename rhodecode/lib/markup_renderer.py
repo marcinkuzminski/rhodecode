@@ -26,6 +26,7 @@
 
 import re
 import logging
+import traceback
 
 from rhodecode.lib.utils2 import safe_unicode, MENTIONS_REGEX
 
@@ -93,7 +94,7 @@ class MarkupRenderer(object):
         return '<br />' + source.replace("\n", '<br />')
 
     @classmethod
-    def markdown(cls, source):
+    def markdown(cls, source, safe=True):
         source = safe_unicode(source)
         try:
             import markdown as __markdown
@@ -101,9 +102,15 @@ class MarkupRenderer(object):
         except ImportError:
             log.warning('Install markdown to use this function')
             return cls.plain(source)
+        except Exception:
+            log.error(traceback.format_exc())
+            if safe:
+                return source
+            else:
+                raise
 
     @classmethod
-    def rst(cls, source):
+    def rst(cls, source, safe=True):
         source = safe_unicode(source)
         try:
             from docutils.core import publish_parts
@@ -125,6 +132,12 @@ class MarkupRenderer(object):
         except ImportError:
             log.warning('Install docutils to use this function')
             return cls.plain(source)
+        except Exception:
+            log.error(traceback.format_exc())
+            if safe:
+                return source
+            else:
+                raise
 
     @classmethod
     def rst_with_mentions(cls, source):
