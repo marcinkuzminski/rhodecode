@@ -74,11 +74,8 @@ class ReposGroupsController(BaseController):
         :param group_id:
         """
         self.__load_defaults()
-
         repo_group = RepoGroup.get_or_404(group_id)
-
         data = repo_group.get_dict()
-
         data['group_name'] = repo_group.name
 
         # fill repository users
@@ -179,7 +176,7 @@ class ReposGroupsController(BaseController):
             h.flash(_('error occurred during update of repos group %s') \
                     % request.POST.get('group_name'), category='error')
 
-        return redirect(url('repos_groups'))
+        return redirect(url('edit_repos_group', id=id))
 
     @HasPermissionAnyDecorator('hg.admin')
     def delete(self, id):
@@ -202,10 +199,11 @@ class ReposGroupsController(BaseController):
         try:
             ReposGroupModel().delete(id)
             Session().commit()
-            h.flash(_('removed repos group %s') % gr.group_name, category='success')
+            h.flash(_('removed repos group %s') % gr.group_name,
+                    category='success')
             #TODO: in future action_logger(, '', '', '', self.sa)
         except IntegrityError, e:
-            if e.message.find('groups_group_parent_id_fkey') != -1:
+            if str(e.message).find('groups_group_parent_id_fkey') != -1:
                 log.error(traceback.format_exc())
                 h.flash(_('Cannot delete this group it still contains '
                           'subgroups'),

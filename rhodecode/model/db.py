@@ -994,6 +994,7 @@ class RepoGroup(Base, BaseModel):
     group_name = Column("group_name", String(255, convert_unicode=False, assert_unicode=None), nullable=False, unique=True, default=None)
     group_parent_id = Column("group_parent_id", Integer(), ForeignKey('groups.group_id'), nullable=True, unique=None, default=None)
     group_description = Column("group_description", String(10000, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    enable_locking = Column("enable_locking", Boolean(), nullable=False, unique=None, default=False)
 
     repo_group_to_perm = relationship('UserRepoGroupToPerm', cascade='all', order_by='UserRepoGroupToPerm.group_to_perm_id')
     users_group_to_perm = relationship('UsersGroupRepoGroupToPerm', cascade='all')
@@ -1099,6 +1100,24 @@ class RepoGroup(Base, BaseModel):
             return cnt
 
         return cnt + children_count(self)
+
+    def recursive_groups_and_repos(self):
+        """
+        Recursive return all groups, with repositories in those groups
+        """
+        all_ = []
+
+        def _get_members(root_gr):
+            for r in root_gr.repositories:
+                all_.append(r)
+            childs = root_gr.children.all()
+            if childs:
+                for gr in childs:
+                    all_.append(gr)
+                    _get_members(gr)
+
+        _get_members(self)
+        return [self] + all_
 
     def get_new_name(self, group_name):
         """

@@ -127,7 +127,7 @@ def ReposGroupForm(edit=False, old_data={}, available_groups=[]):
         group_parent_id = v.OneOf(available_groups, hideList=False,
                                         testValueList=True,
                                         if_missing=None, not_empty=False)
-
+        enable_locking = v.StringBoolean(if_missing=False)
         chained_validators = [v.ValidReposGroup(edit, old_data),
                               v.ValidPerms('group')]
 

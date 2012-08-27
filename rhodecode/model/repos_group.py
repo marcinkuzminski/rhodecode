@@ -183,10 +183,19 @@ class ReposGroupModel(BaseModel):
             repos_group.group_description = form_data['group_description']
             repos_group.parent_group = RepoGroup.get(form_data['group_parent_id'])
             repos_group.group_parent_id = form_data['group_parent_id']
+            repos_group.enable_locking = form_data['enable_locking']
             repos_group.group_name = repos_group.get_new_name(form_data['group_name'])
             new_path = repos_group.full_path
 
             self.sa.add(repos_group)
+
+            # iterate over all members of this groups and set the locking !
+            # this can be potentially heavy operation
+
+            for obj in repos_group.recursive_groups_and_repos():
+                #set the value from it's parent
+                obj.enable_locking = repos_group.enable_locking
+                self.sa.add(obj)
 
             # we need to get all repositories from this new group and
             # rename them accordingly to new group path
