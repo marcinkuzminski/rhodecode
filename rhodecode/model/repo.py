@@ -234,6 +234,9 @@ class RepoModel(BaseModel):
             new_repo.clone_uri = clone_uri
             new_repo.landing_rev = landing_rev
 
+            if repos_group:
+                new_repo.enable_locking = repos_group.enable_locking
+
             if fork_of:
                 parent_repo = fork_of
                 new_repo.fork = parent_repo
