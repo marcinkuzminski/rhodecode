@@ -713,9 +713,12 @@ HasRepoPermissionAny, HasRepoPermissionAll
 def gravatar_url(email_address, size=30):
     if(str2bool(config['app_conf'].get('use_gravatar')) and
        config['app_conf'].get('alternative_gravatar_url')):
-        return config['app_conf'].get('alternative_gravatar_url') % {'email': email_address,
-                                                                     'md5email': hashlib.md5(email_address.lower()).hexdigest(),
-                                                                     'size': size}
+        tmpl = config['app_conf'].get('alternative_gravatar_url', '')
+        tmpl = tmpl.replace('{email}', email_address)\
+                   .replace('{md5email}', hashlib.md5(email_address.lower()).hexdigest())\
+                   .replace('{size}', str(size))
+        return tmpl
+
     if (not str2bool(config['app_conf'].get('use_gravatar')) or
         not email_address or email_address == 'anonymous@rhodecode.org'):
         f = lambda a, l: min(l, key=lambda x: abs(x - a))
