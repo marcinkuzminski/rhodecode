@@ -110,9 +110,9 @@ def pre_push(ui, repo, **kwargs):
         raise Exception('Missing data in repo.ui and os.environ')
 
     usr = User.get_by_username(username)
-
     if locked_by[0] and usr.user_id != int(locked_by[0]):
-        raise HTTPLockedRC(username, repository)
+        locked_by = User.get(locked_by[0]).username
+        raise HTTPLockedRC(repository, locked_by)
 
 
 def pre_pull(ui, repo, **kwargs):
@@ -137,7 +137,8 @@ def pre_pull(ui, repo, **kwargs):
         raise Exception('Missing data in repo.ui and os.environ')
 
     if locked_by[0]:
-        raise HTTPLockedRC(username, repository)
+        locked_by = User.get(locked_by[0]).username
+        raise HTTPLockedRC(repository, locked_by)
 
 
 def log_pull_action(ui, repo, **kwargs):
