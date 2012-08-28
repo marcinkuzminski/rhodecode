@@ -60,20 +60,23 @@
             </td>
         </tr>
     %endfor
-    <tr id="add_perm_input">
-        <td>${h.radio('perm_new_member','repository.none')}</td>
-        <td>${h.radio('perm_new_member','repository.read')}</td>
-        <td>${h.radio('perm_new_member','repository.write')}</td>
-        <td>${h.radio('perm_new_member','repository.admin')}</td>
-        <td class='ac'>
-            <div class="perm_ac" id="perm_ac">
-                ${h.text('perm_new_member_name',class_='yui-ac-input')}
-                ${h.hidden('perm_new_member_type')}
-                <div id="perm_container"></div>
-            </div>
-        </td>
-        <td></td>
-    </tr>
+    <%
+    _tmpl = h.literal("""' \
+        <td><input type="radio" value="repository.none" name="perm_new_member_{0}" id="perm_new_member_{0}"></td> \
+        <td><input type="radio" value="repository.read" name="perm_new_member_{0}" id="perm_new_member_{0}"></td> \
+        <td><input type="radio" value="repository.write" name="perm_new_member_{0}" id="perm_new_member_{0}"></td> \
+        <td><input type="radio" value="repository.admin" name="perm_new_member_{0}" id="perm_new_member_{0}"></td> \
+        <td class="ac"> \
+            <div class="perm_ac" id="perm_ac_{0}"> \
+                <input class="yui-ac-input" id="perm_new_member_name_{0}" name="perm_new_member_name_{0}" value="" type="text"> \
+                <input id="perm_new_member_type_{0}" name="perm_new_member_type_{0}" value="" type="hidden">  \
+                <div id="perm_container_{0}"></div> \
+            </div> \
+        </td> \
+        <td></td>'""")
+    %>    
+    ## ADD HERE DYNAMICALLY NEW INPUTS FROM THE '_tmpl'    
+    <tr class="new_members last_new_member" id="add_perm_input"></tr>
     <tr>
         <td colspan="6">
             <span id="add_perm" class="add_icon" style="cursor: pointer;">
@@ -118,11 +121,8 @@ YUE.onDOMReady(function () {
         YUD.setStyle('add_perm_input', 'display', 'none');
     }
     YAHOO.util.Event.addListener('add_perm', 'click', function () {
-        YUD.setStyle('add_perm_input', 'display', '');
-        YUD.setStyle('add_perm', 'opacity', '0.6');
-        YUD.setStyle('add_perm', 'cursor', 'default');
+        addPermAction(${_tmpl}, ${c.users_array|n}, ${c.users_groups_array|n});
     });
-    MembersAutoComplete(${c.users_array|n}, ${c.users_groups_array|n});
 });
 
 </script>

@@ -908,7 +908,7 @@ var readNotification = function(url, notification_id,callbacks){
 
 /** MEMBERS AUTOCOMPLETE WIDGET **/
 
-var MembersAutoComplete = function (users_list, groups_list) {
+var MembersAutoComplete = function (divid, cont, users_list, groups_list) {
     var myUsers = users_list;
     var myGroups = groups_list;
 
@@ -970,7 +970,7 @@ var MembersAutoComplete = function (users_list, groups_list) {
     };
 
     // Instantiate AutoComplete for perms
-    var membersAC = new YAHOO.widget.AutoComplete("perm_new_member_name", "perm_container", memberDS);
+    var membersAC = new YAHOO.widget.AutoComplete(divid, cont, memberDS);
     membersAC.useShadow = false;
     membersAC.resultTypeList = false;
     membersAC.animVert = false;
@@ -1055,7 +1055,7 @@ var MembersAutoComplete = function (users_list, groups_list) {
     ownerAC.formatResult = custom_formatter;
 
     var myHandler = function (sType, aArgs) {
-
+    		var nextId = divid.split('perm_new_member_name_')[1];
             var myAC = aArgs[0]; // reference back to the AC instance
             var elLI = aArgs[1]; // reference to the selected LI element
             var oData = aArgs[2]; // object literal of selected item's result data
@@ -1063,11 +1063,11 @@ var MembersAutoComplete = function (users_list, groups_list) {
             if (oData.nname != undefined) {
                 //users
                 myAC.getInputEl().value = oData.nname;
-                YUD.get('perm_new_member_type').value = 'user';
+                YUD.get('perm_new_member_type_'+nextId).value = 'user';
             } else {
                 //groups
                 myAC.getInputEl().value = oData.grname;
-                YUD.get('perm_new_member_type').value = 'users_group';
+                YUD.get('perm_new_member_type_'+nextId).value = 'users_group';
             }
         };
 
@@ -1602,6 +1602,25 @@ var linkSort = function(a, b, desc, field) {
 	  return compState;
 }
 
+var addPermAction = function(_html, users_list, groups_list){
+    var elmts = YUD.getElementsByClassName('last_new_member');
+    var last_node = elmts[elmts.length-1];
+    if (last_node){
+       var next_id = (YUD.getElementsByClassName('new_members')).length;
+       _html = _html.format(next_id);
+       last_node.innerHTML = _html;
+       YUD.setStyle(last_node, 'display', '');
+       YUD.removeClass(last_node, 'last_new_member');
+       MembersAutoComplete("perm_new_member_name_"+next_id, 
+               "perm_container_"+next_id, users_list, groups_list);          
+       //create new last NODE
+       var el = document.createElement('tr');
+       el.id = 'add_perm_input';
+       YUD.addClass(el,'last_new_member');
+       YUD.addClass(el,'new_members');
+       YUD.insertAfter(el, last_node);
+    }	
+}
 
 /* Multi selectors */
 

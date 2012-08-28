@@ -5,6 +5,7 @@ import os
 import re
 import formencode
 import logging
+from collections import defaultdict
 from pylons.i18n.translation import _
 from webhelpers.pylonslib.secure_form import authentication_token
 
@@ -12,6 +13,7 @@ from formencode.validators import (
     UnicodeString, OneOf, Int, Number, Regex, Email, Bool, StringBoolean, Set,
     NotEmpty
 )
+from rhodecode.lib.compat import OrderedSet
 from rhodecode.lib.utils import repo_name_slug
 from rhodecode.model.db import RepoGroup, Repository, UsersGroup, User,\
     ChangesetStatus
@@ -477,20 +479,34 @@ def ValidPerms(type_='repo'):
         }
 
         def to_python(self, value, state):
-            perms_update = []
-            perms_new = []
+            perms_update = OrderedSet()
+            perms_new = OrderedSet()
             # build a list of permission to update and new permission to create
-            for k, v in value.items():
-                # means new added member to permissions
-                if k.startswith('perm_new_member'):
-                    new_perm = value.get('perm_new_member', False)
-                    new_member = value.get('perm_new_member_name', False)
-                    new_type = value.get('perm_new_member_type')
 
-                    if new_member and new_perm:
-                        if (new_member, new_perm, new_type) not in perms_new:
-                            perms_new.append((new_member, new_perm, new_type))
-                elif k.startswith('u_perm_') or k.startswith('g_perm_'):
+            #CLEAN OUT ORG VALUE FROM NEW MEMBERS, and group them using
+            new_perms_group = defaultdict(dict)
+            for k, v in value.copy().iteritems():
+                if k.startswith('perm_new_member'):
+                    del value[k]
+                    _type, part = k.split('perm_new_member_')
+                    args = part.split('_')
+                    if len(args) == 1:
+                        new_perms_group[args[0]]['perm'] = v
+                    elif len(args) == 2:
+                        _key, pos = args
+                        new_perms_group[pos][_key] = v
+
+            # fill new permissions in order of how they were added
+            for k in sorted(map(int, new_perms_group.keys())):
+                perm_dict = new_perms_group[str(k)]
+                new_member = perm_dict['name']
+                new_perm = perm_dict['perm']
+                new_type = perm_dict['type']
+                if new_member and new_perm and new_type:
+                    perms_new.add((new_member, new_perm, new_type))
+
+            for k, v in value.iteritems():
+                if k.startswith('u_perm_') or k.startswith('g_perm_'):
                     member = k[7:]
                     t = {'u': 'user',
                          'g': 'users_group'
@@ -500,10 +516,10 @@ def ValidPerms(type_='repo'):
                             # set none for default when updating to
                             # private repo
                             v = EMPTY_PERM
-                    perms_update.append((member, v, t))
+                    perms_update.add((member, v, t))
 
-            value['perms_updates'] = perms_update
-            value['perms_new'] = perms_new
+            value['perms_updates'] = list(perms_update)
+            value['perms_new'] = list(perms_new)
 
             # update permissions
             for k, v, t in perms_new:

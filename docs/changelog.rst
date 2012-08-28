@@ -39,6 +39,9 @@ news
 - Import remote svn repositories to mercurial using hgsubversion  
 - Fixed #508 RhodeCode now has a option to explicitly set forking permissions
 - RhodeCode can use alternative server for generating avatar icons
+- implemented repositories locking. Pull locks, push unlocks. Also can be done
+  via API calls
+- #538 form for permissions can handle multiple users at once 
 
 fixes
 +++++

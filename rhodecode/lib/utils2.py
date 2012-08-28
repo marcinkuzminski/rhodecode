@@ -273,7 +273,6 @@ def engine_from_config(configuration, prefix='sqlalchemy.', **kwargs):
                 context._query_start_time = time.time()
                 log.info(color_sql(">>>>> STARTING QUERY >>>>>"))
 
-
             def after_cursor_execute(conn, cursor, statement,
                                     parameters, context, executemany):
                 total = time.time() - context._query_start_time
