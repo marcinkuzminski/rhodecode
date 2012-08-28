@@ -53,7 +53,8 @@ class TestReposGroups(unittest.TestCase):
             group_description=desc,
             group_parent_id=parent_id,
             perms_updates=[],
-            perms_new=[]
+            perms_new=[],
+            enable_locking=False
         )
         gr = ReposGroupModel().update(id_, form_data)
         return gr
@@ -130,7 +131,8 @@ class TestReposGroups(unittest.TestCase):
                          private=False,
                          repo_type='hg',
                          clone_uri=None,
-                         landing_rev='tip')
+                         landing_rev='tip',
+                         enable_locking=False)
         cur_user = User.get_by_username(TEST_USER_ADMIN_LOGIN)
         r = RepoModel().create(form_data, cur_user)
 
