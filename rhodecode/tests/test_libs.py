@@ -25,8 +25,9 @@
 
 import unittest
 import datetime
+import hashlib
+import mock
 from rhodecode.tests import *
-
 
 proto = 'http'
 TEST_URLS = [
@@ -147,3 +148,30 @@ class TestLibs(unittest.TestCase):
         self.assertTrue('<div class="metatag" tag="lang">python</div>' in res)
         self.assertTrue('<div class="metatag" tag="requires">requires =&gt; <a href="/url">url</a></div>' in res)
         self.assertTrue('<div class="metatag" tag="tag">tag</div>' in res)
+
+    def test_alternative_gravatar(self):
+        from rhodecode.lib.helpers import gravatar_url
+        _md5 = lambda s: hashlib.md5(s).hexdigest()
+
+        def fake_conf(**kwargs):
+            from pylons import config
+            config['app_conf'] = {}
+            config['app_conf']['use_gravatar'] = True
+            config['app_conf'].update(kwargs)
+            return config
+        fake = fake_conf(alternative_gravatar_url='http://test.com/{email}')
+        with mock.patch('pylons.config', fake):
+            grav = gravatar_url(email_address='test@foo.com', size=24)
+            assert grav == 'http://test.com/test@foo.com'
+
+        fake = fake_conf(alternative_gravatar_url='http://test.com/{md5email}')
+        with mock.patch('pylons.config', fake):
+            em = 'test@foo.com'
+            grav = gravatar_url(email_address=em, size=24)
+            assert grav == 'http://test.com/%s' % (_md5(em))
+
+        fake = fake_conf(alternative_gravatar_url='http://test.com/{md5email}/{size}')
+        with mock.patch('pylons.config', fake):
+            em = 'test@foo.com'
+            grav = gravatar_url(email_address=em, size=24)
+            assert grav == 'http://test.com/%s/%s' % (_md5(em), 24)
