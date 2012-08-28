@@ -263,7 +263,7 @@ class ApiController(JSONRPCController):
         if UserModel().get_by_email(email, case_insensitive=True):
             raise JSONRPCError("email `%s` already exist" % email)
 
-        if ldap_dn:
+        if Optional.extract(ldap_dn):
             # generate temporary password if ldap_dn
             password = PasswordGenerator().gen_password(length=8)
 
