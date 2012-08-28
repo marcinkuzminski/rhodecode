@@ -171,7 +171,7 @@ class BaseVCSController(object):
         do the locking. Think about this as signals passed to hooks what to do.
 
         """
-        locked = False
+        locked = False  # defines that locked error should be thrown to user
         make_lock = None
         repo = Repository.get_by_repo_name(repo)
         user = User.get(user_id)
@@ -187,7 +187,7 @@ class BaseVCSController(object):
                 #check if it's already locked !, if it is compare users
                 user_id, _date = repo.locked
                 if user.user_id == user_id:
-                    log.debug('Got push from user, now unlocking' % (user))
+                    log.debug('Got push from user %s, now unlocking' % (user))
                     # unlock if we have push from user who locked
                     make_lock = False
                 else:
@@ -202,7 +202,8 @@ class BaseVCSController(object):
 
         else:
             log.debug('Repository %s do not have locking enabled' % (repo))
-
+        log.debug('FINAL locking values make_lock:%s,locked:%s,locked_by:%s'
+                  % (make_lock, locked, locked_by))
         return make_lock, locked, locked_by
 
     def __call__(self, environ, start_response):
