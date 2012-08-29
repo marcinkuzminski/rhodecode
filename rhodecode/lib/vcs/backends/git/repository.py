@@ -115,6 +115,7 @@ class GitRepository(BaseRepository):
         try:
             opts = dict(
                 env=gitenv,
+                shell=False,
             )
             if os.path.isdir(self.path):
                 opts['cwd'] = self.path
@@ -124,9 +125,7 @@ class GitRepository(BaseRepository):
             raise RepositoryError("Couldn't run git command (%s).\n"
                                   "Original error was:%s" % (cmd, err))
 
-        so = ''.join(p)
-        se = None
-        return so, se
+        return ''.join(p.output), ''.join(p.error)
 
     @classmethod
     def _check_url(cls, url):

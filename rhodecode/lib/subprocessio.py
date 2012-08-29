@@ -341,9 +341,10 @@ class SubprocessIOChunker(object):
         if isinstance(cmd, (list, tuple)):
             cmd = ' '.join(cmd)
 
+        _shell = kwargs.get('shell') or True
+        kwargs['shell'] = _shell
         _p = subprocess.Popen(cmd,
             bufsize=-1,
-            shell=True,
             stdin=inputstream,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
