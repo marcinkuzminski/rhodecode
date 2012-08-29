@@ -410,14 +410,27 @@ class GitChangeset(BaseChangeset):
         """
         Get's a fast accessible file changes for given changeset
         """
+        #OLD SOLUTION
+        #files = set()
+        #for f in (self.added + self.changed + self.removed):
+        #    files.add(f.path)
+        #files = list(files) 
 
-        return self.added + self.changed
+        _r = self.repository._repo
+        files = set()
+        for parent in self.parents:
+            changes = _r.object_store.tree_changes(_r[parent.raw_id].tree,
+                                                   _r[self.raw_id].tree)
+            for (oldpath, newpath), (_, _), (_, _) in changes:
+                files.add(newpath or oldpath)
+        return list(files)
 
     @LazyProperty
     def _diff_name_status(self):
         output = []
         for parent in self.parents:
-            cmd = 'diff --name-status %s %s --encoding=utf8' % (parent.raw_id, self.raw_id)
+            cmd = 'diff --name-status %s %s --encoding=utf8' % (parent.raw_id,
+                                                                self.raw_id)
             so, se = self.repository.run_git_command(cmd)
             output.append(so.strip())
         return '\n'.join(output)
