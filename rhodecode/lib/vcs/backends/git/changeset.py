@@ -9,7 +9,7 @@ from rhodecode.lib.vcs.exceptions import NodeDoesNotExistError
 from rhodecode.lib.vcs.exceptions import VCSError
 from rhodecode.lib.vcs.exceptions import ChangesetDoesNotExistError
 from rhodecode.lib.vcs.exceptions import ImproperArchiveTypeError
-from rhodecode.lib.vcs.backends.base import BaseChangeset
+from rhodecode.lib.vcs.backends.base import BaseChangeset, EmptyChangeset
 from rhodecode.lib.vcs.nodes import FileNode, DirNode, NodeKind, RootNode, \
     RemovedFileNode, SubModuleNode
 from rhodecode.lib.vcs.utils import safe_unicode
@@ -410,20 +410,8 @@ class GitChangeset(BaseChangeset):
         """
         Get's a fast accessible file changes for given changeset
         """
-        #OLD SOLUTION
-        #files = set()
-        #for f in (self.added + self.changed + self.removed):
-        #    files.add(f.path)
-        #files = list(files) 
-
-        _r = self.repository._repo
-        files = set()
-        for parent in self.parents:
-            changes = _r.object_store.tree_changes(_r[parent.raw_id].tree,
-                                                   _r[self.raw_id].tree)
-            for (oldpath, newpath), (_, _), (_, _) in changes:
-                files.add(newpath or oldpath)
-        return list(files)
+        a, m, d = self._changes_cache
+        return list(a.union(m).union(d))
 
     @LazyProperty
     def _diff_name_status(self):
@@ -435,27 +423,43 @@ class GitChangeset(BaseChangeset):
             output.append(so.strip())
         return '\n'.join(output)
 
+    @LazyProperty
+    def _changes_cache(self):
+        added = set()
+        modified = set()
+        deleted = set()
+        _r = self.repository._repo
+
+        parents = self.parents
+        if not self.parents:
+            parents = [EmptyChangeset()]
+        for parent in parents:
+            if isinstance(parent, EmptyChangeset):
+                oid = None
+            else:
+                oid = _r[parent.raw_id].tree
+            changes = _r.object_store.tree_changes(oid, _r[self.raw_id].tree)
+            for (oldpath, newpath), (_, _), (_, _) in changes:
+                if newpath and oldpath:
+                    modified.add(newpath)
+                elif newpath and not oldpath:
+                    added.add(newpath)
+                elif not newpath and oldpath:
+                    deleted.add(oldpath)
+        return added, modified, deleted
+
     def _get_paths_for_status(self, status):
         """
         Returns sorted list of paths for given ``status``.
 
         :param status: one of: *added*, *modified* or *deleted*
         """
-        paths = set()
-        char = status[0].upper()
-        for line in self._diff_name_status.splitlines():
-            if not line:
-                continue
-
-            if line.startswith(char):
-                splitted = line.split(char, 1)
-                if not len(splitted) == 2:
-                    raise VCSError("Couldn't parse diff result:\n%s\n\n and "
-                        "particularly that line: %s" % (self._diff_name_status,
-                        line))
-                _path = splitted[1].strip()
-                paths.add(_path)
-        return sorted(paths)
+        a, m, d = self._changes_cache
+        return sorted({
+            'added': list(a),
+            'modified': list(m),
+            'deleted': list(d)}[status]
+        )
 
     @LazyProperty
     def added(self):
