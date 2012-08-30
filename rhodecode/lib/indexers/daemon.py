@@ -201,9 +201,9 @@ class WhooshIndexingDaemon(object):
                 author=cs.author,
                 message=cs.message,
                 last=cs.last,
-                added=u' '.join([node.path for node in cs.added]).lower(),
-                removed=u' '.join([node.path for node in cs.removed]).lower(),
-                changed=u' '.join([node.path for node in cs.changed]).lower(),
+                added=u' '.join([safe_unicode(node.path) for node in cs.added]).lower(),
+                removed=u' '.join([safe_unicode(node.path) for node in cs.removed]).lower(),
+                changed=u' '.join([safe_unicode(node.path) for node in cs.changed]).lower(),
                 parents=u' '.join([cs.raw_id for cs in cs.parents]),
             )
             indexed += 1
