@@ -188,10 +188,9 @@ class GitDirectory(object):
         try:
             app = GitRepository(self.repo_name, content_path, self.extras)
         except (AssertionError, OSError):
-            if os.path.isdir(os.path.join(content_path, '.git')):
-                app = GitRepository(self.repo_name,
-                                    os.path.join(content_path, '.git'),
-                                    self.username)
+            content_path = os.path.join(content_path, '.git')
+            if os.path.isdir(content_path):
+                app = GitRepository(self.repo_name, content_path, self.extras)
             else:
                 return exc.HTTPNotFound()(environ, start_response)
         return app(environ, start_response)
