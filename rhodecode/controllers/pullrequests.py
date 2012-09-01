@@ -195,13 +195,16 @@ class PullrequestsController(BaseRepoController):
         pull_request = PullRequest.get_or_404(pull_request_id)
         if pull_request.is_closed():
             raise HTTPForbidden()
+        #only owner or admin can update it
+        owner = pull_request.author.user_id == c.rhodecode_user.user_id
+        if h.HasPermissionAny('hg.admin', 'repository.admin')() or owner:
+            reviewers_ids = map(int, filter(lambda v: v not in [None, ''],
+                       request.POST.get('reviewers_ids', '').split(',')))
 
-        reviewers_ids = map(int, filter(lambda v: v not in [None, ''],
-                   request.POST.get('reviewers_ids', '').split(',')))
-
-        PullRequestModel().update_reviewers(pull_request_id, reviewers_ids)
-        Session.commit()
-        return True
+            PullRequestModel().update_reviewers(pull_request_id, reviewers_ids)
+            Session.commit()
+            return True
+        raise HTTPForbidden()
 
     @NotAnonymous()
     @jsonify
@@ -214,8 +217,7 @@ class PullrequestsController(BaseRepoController):
             h.flash(_('Successfully deleted pull request'),
                     category='success')
             return redirect(url('admin_settings_my_account'))
-        else:
-            raise HTTPForbidden()
+        raise HTTPForbidden()
 
     def _load_compare_data(self, pull_request, enable_comments=True):
         """
