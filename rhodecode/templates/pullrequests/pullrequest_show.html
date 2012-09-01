@@ -93,7 +93,7 @@
                   <div class="gravatar"><img alt="gravatar" src="${h.gravatar_url(member.email,14)}"/> </div>
                   <div style="float:left">${member.full_name} (${_('owner')})</div>
                   <input type="hidden" value="${member.user_id}" name="review_members" />
-                  %if not c.pull_request.is_closed():
+                  %if not c.pull_request.is_closed() and (h.HasPermissionAny('hg.admin', 'repository.admin')() or c.pull_request.author.user_id == c.rhodecode_user.user_id):
                   <span class="delete_icon action_button" onclick="removeReviewer(${member.user_id})"></span>
                   %endif
                 </div>
@@ -103,6 +103,7 @@
           </div>
           %if not c.pull_request.is_closed():
           <div class='ac'>
+            %if h.HasPermissionAny('hg.admin', 'repository.admin')() or c.pull_request.author.user_id == c.rhodecode_user.user_id:
             <div class="reviewer_ac">
                ${h.text('user', class_='yui-ac-input')}
                <span class="help-block">${_('Add reviewer to this pull request.')}</span>
@@ -111,6 +112,7 @@
             <div style="padding:0px 10px">
              <span id="update_pull_request" class="ui-btn xsmall">${_('save')}</span>
             </div>
+            %endif
           </div>
           %endif
         </div>
