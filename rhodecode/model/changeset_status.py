@@ -146,8 +146,9 @@ class ChangesetStatusModel(BaseModel):
 
         #if statuses exists and last is associated with a closed pull request
         # we need to check if we can allow this status change
-        if (dont_allow_on_closed_pull_request and cur_statuses 
-            and cur_statuses[0].pull_request.status == PullRequest.STATUS_CLOSED):
+        if (dont_allow_on_closed_pull_request and cur_statuses
+            and getattr(cur_statuses[0].pull_request, 'status', '')
+                == PullRequest.STATUS_CLOSED):
             raise StatusChangeOnClosedPullRequestError(
                 'Changing status on closed pull request is not allowed'
             )
