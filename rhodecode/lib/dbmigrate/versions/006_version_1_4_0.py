@@ -68,7 +68,7 @@ def upgrade(migrate_engine):
     col.alter(index=Index('u_email_idx', 'email'))
     col.alter(name="firstname", table=tbl)
 
-    inherit_default_permissions = Column("inherit_default_permissions",
+    inherit_default_permissions = Column("users_group_inherit_default_permission",
                                          Boolean(), nullable=True, unique=None,
                                          default=True)
     inherit_default_permissions.create(table=tbl)
