@@ -187,6 +187,7 @@ class DbManage(object):
 
                 print ('installing new hooks')
                 hooks4 = RhodeCodeUi()
+                hooks4.ui_section = 'hooks'
                 hooks4.ui_key = RhodeCodeUi.HOOK_PRE_PUSH
                 hooks4.ui_value = 'python:rhodecode.lib.hooks.pre_push'
                 Session().add(hooks4)

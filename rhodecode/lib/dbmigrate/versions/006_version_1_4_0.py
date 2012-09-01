@@ -75,6 +75,17 @@ def upgrade(migrate_engine):
     inherit_default_permissions.alter(nullable=False, default=True, table=tbl)
 
     #==========================================================================
+    # GROUPS TABLE
+    #==========================================================================
+    from rhodecode.lib.dbmigrate.schema.db_1_3_0 import RepoGroup
+    tbl = RepoGroup.__table__
+    inherit_default_permissions = Column("inherit_default_permissions",
+                                         Boolean(), nullable=True, unique=None,
+                                         default=True)
+    inherit_default_permissions.create(table=tbl)
+    inherit_default_permissions.alter(nullable=False, default=True, table=tbl)
+
+    #==========================================================================
     # REPOSITORIES
     #==========================================================================
     from rhodecode.lib.dbmigrate.schema.db_1_3_0 import Repository
