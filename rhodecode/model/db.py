@@ -469,7 +469,8 @@ class UserEmailMap(Base, BaseModel):
     email_id = Column("email_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=True, unique=None, default=None)
     _email = Column("email", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=False, default=None)
-
+    
+    test = Column("test", String(255),nullable=False,default=True)
     user = relationship('User', lazy='joined')
 
     @validates('_email')

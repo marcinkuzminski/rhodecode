@@ -94,6 +94,7 @@ class ANSIColumnGenerator(AlterTableVisitor, SchemaGenerator):
 
         table = self.start_alter_table(column)
         self.append("ADD ")
+
         self.append(self.get_column_specification(column))
 
         for cons in column.constraints:

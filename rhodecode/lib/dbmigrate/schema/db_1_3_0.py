@@ -1290,3 +1290,31 @@ class DbMigrateVersion(Base, BaseModel):
     repository_id = Column('repository_id', String(250), primary_key=True)
     repository_path = Column('repository_path', Text)
     version = Column('version', Integer)
+
+## this is migration from 1_4_0, but now it's here to overcome a problem of
+## attaching a FK to this from 1_3_0 !
+
+
+class PullRequest(Base, BaseModel):
+    __tablename__ = 'pull_requests'
+    __table_args__ = (
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
+         'mysql_charset': 'utf8'},
+    )
+
+    STATUS_NEW = u'new'
+    STATUS_OPEN = u'open'
+    STATUS_CLOSED = u'closed'
+
+    pull_request_id = Column('pull_request_id', Integer(), nullable=False, primary_key=True)
+    title = Column('title', Unicode(256), nullable=True)
+    description = Column('description', UnicodeText(10240), nullable=True)
+    status = Column('status', Unicode(256), nullable=False, default=STATUS_NEW)
+    created_on = Column('created_on', DateTime(timezone=False), nullable=False, default=datetime.datetime.now)
+    updated_on = Column('updated_on', DateTime(timezone=False), nullable=False, default=datetime.datetime.now)
+    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None)
+    _revisions = Column('revisions', UnicodeText(20500))  # 500 revisions max
+    org_repo_id = Column('org_repo_id', Integer(), ForeignKey('repositories.repo_id'), nullable=False)
+    org_ref = Column('org_ref', Unicode(256), nullable=False)
+    other_repo_id = Column('other_repo_id', Integer(), ForeignKey('repositories.repo_id'), nullable=False)
+    other_ref = Column('other_ref', Unicode(256), nullable=False)
