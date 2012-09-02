@@ -194,6 +194,14 @@ class DbManage(object):
                 notify('re-checking permissions')
                 self.klass.create_permissions()
 
+                notify('installing new UI options')
+                sett4 = RhodeCodeSetting('show_public_icon', True)
+                Session().add(sett4)
+                sett5 = RhodeCodeSetting('show_private_icon', True)
+                Session().add(sett5)
+                sett6 = RhodeCodeSetting('stylify_metatags', False)
+                Session().add(sett6)
+
                 notify('fixing old PULL hook')
                 _pull = RhodeCodeUi.get_by_key('preoutgoing.pull_logger')
                 if _pull:
