@@ -40,13 +40,20 @@ from rhodecode.model.db import User, Permission, RhodeCodeUi, \
     UserRepoGroupToPerm
 
 from sqlalchemy.engine import create_engine
-from sqlalchemy.schema import MetaData
 from rhodecode.model.repos_group import ReposGroupModel
 #from rhodecode.model import meta
 from rhodecode.model.meta import Session, Base
 
 
 log = logging.getLogger(__name__)
+
+
+def notify(msg):
+    """
+    Notification for migrations messages
+    """
+    ml = len(msg) + (4 * 2)
+    print >> sys.stdout, ('*** %s ***\n%s' % (msg, '*' * ml)).upper()
 
 
 class DbManage(object):
@@ -130,7 +137,7 @@ class DbManage(object):
                    ' as version %s' % curr_version)
             api.version_control(db_uri, repository_path, curr_version)
 
-        print (msg)
+        notify(msg)
 
         if curr_version == __dbversion__:
             sys.exit('This database is already at the newest version')
@@ -138,6 +145,7 @@ class DbManage(object):
         #======================================================================
         # UPGRADE STEPS
         #======================================================================
+
         class UpgradeSteps(object):
             """
             Those steps follow schema versions so for example schema
@@ -149,32 +157,32 @@ class DbManage(object):
 
             def step_0(self):
                 # step 0 is the schema upgrade, and than follow proper upgrades
-                print ('attempting to do database upgrade to version %s' \
+                notify('attempting to do database upgrade to version %s' \
                                 % __dbversion__)
                 api.upgrade(db_uri, repository_path, __dbversion__)
-                print ('Schema upgrade completed')
+                notify('Schema upgrade completed')
 
             def step_1(self):
                 pass
 
             def step_2(self):
-                print ('Patching repo paths for newer version of RhodeCode')
+                notify('Patching repo paths for newer version of RhodeCode')
                 self.klass.fix_repo_paths()
 
-                print ('Patching default user of RhodeCode')
+                notify('Patching default user of RhodeCode')
                 self.klass.fix_default_user()
 
                 log.info('Changing ui settings')
                 self.klass.create_ui_settings()
 
             def step_3(self):
-                print ('Adding additional settings into RhodeCode db')
+                notify('Adding additional settings into RhodeCode db')
                 self.klass.fix_settings()
-                print ('Adding ldap defaults')
+                notify('Adding ldap defaults')
                 self.klass.create_ldap_options(skip_existing=True)
 
             def step_4(self):
-                print ('create permissions and fix groups')
+                notify('create permissions and fix groups')
                 self.klass.create_permissions()
                 self.klass.fixup_groups()
 
@@ -182,23 +190,37 @@ class DbManage(object):
                 pass
 
             def step_6(self):
-                print ('re-checking permissions')
+
+                notify('re-checking permissions')
                 self.klass.create_permissions()
 
-                print ('installing new hooks')
+                notify('fixing old PULL hook')
+                _pull = RhodeCodeUi.get_by_key('preoutgoing.pull_logger')
+                if _pull:
+                    _pull.ui_key = RhodeCodeUi.HOOK_PULL
+                    Session().add(_pull)
+
+                notify('fixing old PUSH hook')
+                _push = RhodeCodeUi.get_by_key('pretxnchangegroup.push_logger')
+                if _push:
+                    _push.ui_key = RhodeCodeUi.HOOK_PUSH
+                    Session().add(_push)
+
+                notify('installing new pre-push hook')
                 hooks4 = RhodeCodeUi()
                 hooks4.ui_section = 'hooks'
                 hooks4.ui_key = RhodeCodeUi.HOOK_PRE_PUSH
                 hooks4.ui_value = 'python:rhodecode.lib.hooks.pre_push'
                 Session().add(hooks4)
 
+                notify('installing new pre-pull hook')
                 hooks6 = RhodeCodeUi()
                 hooks6.ui_section = 'hooks'
                 hooks6.ui_key = RhodeCodeUi.HOOK_PRE_PULL
                 hooks6.ui_value = 'python:rhodecode.lib.hooks.pre_pull'
                 Session().add(hooks6)
 
-                print ('installing hgsubversion option')
+                notify('installing hgsubversion option')
                 # enable hgsubversion disabled by default
                 hgsubversion = RhodeCodeUi()
                 hgsubversion.ui_section = 'extensions'
@@ -207,7 +229,7 @@ class DbManage(object):
                 hgsubversion.ui_active = False
                 Session().add(hgsubversion)
 
-                print ('installing hg git option')
+                notify('installing hg git option')
                 # enable hggit disabled by default
                 hggit = RhodeCodeUi()
                 hggit.ui_section = 'extensions'
@@ -216,16 +238,20 @@ class DbManage(object):
                 hggit.ui_active = False
                 Session().add(hggit)
 
-                print ('re-check default permissions')
+                notify('re-check default permissions')
                 self.klass.populate_default_permissions()
 
         upgrade_steps = [0] + range(curr_version + 1, __dbversion__ + 1)
 
         # CALL THE PROPER ORDER OF STEPS TO PERFORM FULL UPGRADE
+        _step = None
         for step in upgrade_steps:
-            print ('performing upgrade step %s' % step)
+            notify('performing upgrade step %s' % step)
             getattr(UpgradeSteps(self), 'step_%s' % step)()
             self.sa.commit()
+            _step = step
+
+        notify('upgrade to version %s successful' % _step)
 
     def fix_repo_paths(self):
         """
