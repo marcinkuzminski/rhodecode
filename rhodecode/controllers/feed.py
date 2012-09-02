@@ -59,8 +59,14 @@ class FeedController(BaseRepoController):
 
     def __changes(self, cs):
         changes = []
-
-        diffprocessor = DiffProcessor(cs.diff())
+        _diff = cs.diff()
+        # we need to protect from parsing huge diffs here other way
+        # we can kill the server, 32*1024 chars is a reasonable limit
+        HUGE_DIFF = 32 * 1024
+        if len(_diff) > HUGE_DIFF:
+            changes = ['\n ' + _('Changeset was too big and was cut off...')]
+            return changes
+        diffprocessor = DiffProcessor(_diff)
         stats = diffprocessor.prepare(inline_diff=False)
         for st in stats:
             st.update({'added': st['stats'][0],
