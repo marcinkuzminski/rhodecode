@@ -207,6 +207,9 @@
                      %endif
                    %endif
                    	<li>${h.link_to(_('fork'),h.url('repo_fork_home',repo_name=c.repo_name),class_='fork')}</li>
+                    %if h.is_hg(c.rhodecode_repo):
+                     <li>${h.link_to(_('Open new pull request'),h.url('pullrequest_home',repo_name=c.repo_name),class_='pull_request')}</li>
+                    %endif
                    	<li>${h.link_to(_('search'),h.url('search_repo',search_repo=c.repo_name),class_='search')}</li>
 
                     % if h.HasPermissionAll('hg.admin')('access admin main page'):
@@ -245,6 +248,14 @@
                         <img src="${h.url('/images/icons/arrow_divide.png')}" alt="${_('Forks')}" />
                     </span>
                     <span class="short">${c.repository_forks}</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="menu_link" title="${_('Pull requests')}" href="${h.url('pullrequest_show_all',repo_name=c.repo_name)}">
+                    <span class="icon_short">
+                        <img src="${h.url('/images/icons/arrow_join.png')}" alt="${_('Pull requests')}" />
+                    </span>
+                    <span class="short">${c.repository_pull_requests}</span>
                     </a>
                 </li>
                 ${usermenu()}

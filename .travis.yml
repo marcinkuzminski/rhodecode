@@ -1,0 +1,38 @@
+language: python
+python:
+  - "2.5"
+  - "2.6"
+  - "2.7"
+
+env:  
+  - TEST_DB=sqlite:////tmp/rhodecode_test.sqlite
+  - TEST_DB=mysql://root@127.0.0.1/rhodecode_test
+  - TEST_DB=postgresql://postgres@127.0.0.1/rhodecode_test
+
+# command to install dependencies
+before_script:
+  - mysql -e 'create database rhodecode_test;'
+  - psql -c 'create database rhodecode_test;' -U postgres
+  - git --version
+
+before_install:
+  - sudo apt-get remove git
+  - sudo add-apt-repository ppa:pdoes/ppa -y
+  - sudo apt-get update -y
+  - sudo apt-get install git -y
+
+install:
+  - pip install mysql-python psycopg2 mock unittest2
+  - pip install . --use-mirrors
+
+# command to run tests
+script: nosetests
+
+notifications:
+    email:
+        - marcinkuz@gmail.com
+    irc: "irc.freenode.org#rhodecode"
+
+branches:
+  only:
+    - dev

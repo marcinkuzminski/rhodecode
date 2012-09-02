@@ -9,6 +9,7 @@ import StringIO
 import urllib
 import math
 import logging
+import re
 
 from datetime import datetime
 from pygments.formatters.html import HtmlFormatter
@@ -40,10 +41,29 @@ from webhelpers.html.tags import _set_input_attrs, _set_id_attr, \
 from rhodecode.lib.annotate import annotate_highlight
 from rhodecode.lib.utils import repo_name_slug
 from rhodecode.lib.utils2 import str2bool, safe_unicode, safe_str, \
-    get_changeset_safe
+    get_changeset_safe, datetime_to_time, time_to_datetime
 from rhodecode.lib.markup_renderer import MarkupRenderer
+from rhodecode.lib.vcs.exceptions import ChangesetDoesNotExistError
+from rhodecode.lib.vcs.backends.base import BaseChangeset
+from rhodecode.config.conf import DATE_FORMAT, DATETIME_FORMAT
+from rhodecode.model.changeset_status import ChangesetStatusModel
+from rhodecode.model.db import URL_SEP, Permission
 
 log = logging.getLogger(__name__)
+
+
+html_escape_table = {
+    "&": "&amp;",
+    '"': "&quot;",
+    "'": "&apos;",
+    ">": "&gt;",
+    "<": "&lt;",
+}
+
+
+def html_escape(text):
+    """Produce entities within text."""
+    return "".join(html_escape_table.get(c,c) for c in text)
 
 
 def shorter(text, size=20):
@@ -105,7 +125,7 @@ class _GetError(object):
 
     def __call__(self, field_name, form_errors):
         tmpl = """<span class="error_msg">%s</span>"""
-        if form_errors and form_errors.has_key(field_name):
+        if form_errors and field_name in form_errors:
             return literal(tmpl % form_errors.get(field_name))
 
 get_error = _GetError()
@@ -114,12 +134,15 @@ get_error = _GetError()
 class _ToolTip(object):
 
     def __call__(self, tooltip_title, trim_at=50):
-        """Special function just to wrap our text into nice formatted
+        """
+        Special function just to wrap our text into nice formatted
         autowrapped text
 
         :param tooltip_title:
         """
-        return escape(tooltip_title)
+        tooltip_title = escape(tooltip_title)
+        tooltip_title = tooltip_title.replace('<', '&lt;').replace('>', '&gt;')
+        return tooltip_title
 tooltip = _ToolTip()
 
 
@@ -130,7 +153,8 @@ class _FilesBreadCrumbs(object):
             paths = safe_unicode(paths)
         url_l = [link_to(repo_name, url('files_home',
                                         repo_name=repo_name,
-                                        revision=rev, f_path=''))]
+                                        revision=rev, f_path=''),
+                         class_='ypjax-link')]
         paths_l = paths.split('/')
         for cnt, p in enumerate(paths_l):
             if p != '':
@@ -139,7 +163,8 @@ class _FilesBreadCrumbs(object):
                                          repo_name=repo_name,
                                          revision=rev,
                                          f_path='/'.join(paths_l[:cnt + 1])
-                                         )
+                                         ),
+                                     class_='ypjax-link'
                                      )
                              )
 
@@ -333,13 +358,21 @@ flash = _Flash()
 #==============================================================================
 from rhodecode.lib.vcs.utils import author_name, author_email
 from rhodecode.lib.utils2 import credentials_filter, age as _age
-from rhodecode.model.db import User
+from rhodecode.model.db import User, ChangesetStatus
 
 age = lambda  x: _age(x)
 capitalize = lambda x: x.capitalize()
 email = author_email
 short_id = lambda x: x[:12]
 hide_credentials = lambda x: ''.join(credentials_filter(x))
+
+
+def fmt_date(date):
+    if date:
+        _fmt = _(u"%a, %d %b %Y %H:%M:%S").encode('utf8')
+        return date.strftime(_fmt).decode('utf8')
+
+    return ""
 
 
 def is_git(repository):
@@ -363,8 +396,14 @@ def is_hg(repository):
 
 
 def email_or_none(author):
+    # extract email from the commit string
     _email = email(author)
     if _email != '':
+        # check it against RhodeCode database, and use the MAIN email for this
+        # user
+        user = User.get_by_email(_email, case_insensitive=True, cache=True)
+        if user is not None:
+            return user.email
         return _email
 
     # See if it contains a username we can get an email from
@@ -377,9 +416,9 @@ def email_or_none(author):
     return None
 
 
-def person(author):
+def person(author, show_attr="username_and_name"):
     # attr to return from fetched user
-    person_getter = lambda usr: usr.username
+    person_getter = lambda usr: getattr(usr, show_attr)
 
     # Valid email in the attribute passed, see if they're in the system
     _email = email(author)
@@ -398,6 +437,39 @@ def person(author):
 
     # Still nothing?  Just pass back the author name then
     return _author
+
+
+def person_by_id(id_, show_attr="username_and_name"):
+    # attr to return from fetched user
+    person_getter = lambda usr: getattr(usr, show_attr)
+
+    #maybe it's an ID ?
+    if str(id_).isdigit() or isinstance(id_, int):
+        id_ = int(id_)
+        user = User.get(id_)
+        if user is not None:
+            return person_getter(user)
+    return id_
+
+
+def desc_stylize(value):
+    """
+    converts tags from value into html equivalent
+
+    :param value:
+    """
+    value = re.sub(r'\[see\ \=\>\ *([a-zA-Z0-9\/\=\?\&\ \:\/\.\-]*)\]',
+                   '<div class="metatag" tag="see">see =&gt; \\1 </div>', value)
+    value = re.sub(r'\[license\ \=\>\ *([a-zA-Z0-9\/\=\?\&\ \:\/\.\-]*)\]',
+                   '<div class="metatag" tag="license"><a href="http:\/\/www.opensource.org/licenses/\\1">\\1</a></div>', value)
+    value = re.sub(r'\[(requires|recommends|conflicts|base)\ \=\>\ *([a-zA-Z\-\/]*)\]',
+                   '<div class="metatag" tag="\\1">\\1 =&gt; <a href="/\\2">\\2</a></div>', value)
+    value = re.sub(r'\[(lang|language)\ \=\>\ *([a-zA-Z\-\/]*)\]',
+                   '<div class="metatag" tag="lang">\\2</div>', value)
+    value = re.sub(r'\[([a-z]+)\]',
+                  '<div class="metatag" tag="\\1">\\1</div>', value)
+
+    return value
 
 
 def bool2icon(value):
@@ -447,22 +519,30 @@ def action_parser(user_log, feed=False):
 
         repo = user_log.repository.scm_instance
 
-        message = lambda rev: rev.message
-        lnk = lambda rev, repo_name: (
-            link_to('r%s:%s' % (rev.revision, rev.short_id),
-                    url('changeset_home', repo_name=repo_name,
-                        revision=rev.raw_id),
-                    title=tooltip(message(rev)), class_='tooltip')
-        )
+        def lnk(rev, repo_name):
+
+            if isinstance(rev, BaseChangeset):
+                lbl = 'r%s:%s' % (rev.revision, rev.short_id)
+                _url = url('changeset_home', repo_name=repo_name,
+                           revision=rev.raw_id)
+                title = tooltip(rev.message)
+            else:
+                lbl = '%s' % rev
+                _url = '#'
+                title = _('Changeset not found')
+
+            return link_to(lbl, _url, title=title, class_='tooltip',)
 
         revs = []
         if len(filter(lambda v: v != '', revs_ids)) > 0:
-            # get only max revs_top_limit of changeset for performance/ui reasons
-            revs = [
-                x for x in repo.get_changesets(revs_ids[0],
-                                               revs_ids[:revs_top_limit][-1])
-            ]
-
+            for rev in revs_ids[:revs_top_limit]:
+                try:
+                    rev = repo.get_changeset(rev)
+                    revs.append(rev)
+                except ChangesetDoesNotExistError:
+                    log.error('cannot find revision %s in this repo' % rev)
+                    revs.append(rev)
+                    continue
         cs_links = []
         cs_links.append(" " + ', '.join(
             [lnk(rev, repo_name) for rev in revs[:revs_limit]]
@@ -526,22 +606,68 @@ def action_parser(user_log, feed=False):
         return _('fork name ') + str(link_to(action_params, url('summary_home',
                                           repo_name=repo_name,)))
 
-    action_map = {'user_deleted_repo': (_('[deleted] repository'), None),
-           'user_created_repo': (_('[created] repository'), None),
-           'user_created_fork': (_('[created] repository as fork'), None),
-           'user_forked_repo': (_('[forked] repository'), get_fork_name),
-           'user_updated_repo': (_('[updated] repository'), None),
-           'admin_deleted_repo': (_('[delete] repository'), None),
-           'admin_created_repo': (_('[created] repository'), None),
-           'admin_forked_repo': (_('[forked] repository'), None),
-           'admin_updated_repo': (_('[updated] repository'), None),
-           'push': (_('[pushed] into'), get_cs_links),
-           'push_local': (_('[committed via RhodeCode] into'), get_cs_links),
-           'push_remote': (_('[pulled from remote] into'), get_cs_links),
-           'pull': (_('[pulled] from'), None),
-           'started_following_repo': (_('[started following] repository'), None),
-           'stopped_following_repo': (_('[stopped following] repository'), None),
-            }
+    def get_user_name():
+        user_name = action_params
+        return user_name
+
+    def get_users_group():
+        group_name = action_params
+        return group_name
+
+    def get_pull_request():
+        pull_request_id = action_params
+        repo_name = user_log.repository.repo_name
+        return link_to(_('Pull request #%s') % pull_request_id,
+                    url('pullrequest_show', repo_name=repo_name,
+                    pull_request_id=pull_request_id))
+
+    # action : translated str, callback(extractor), icon
+    action_map = {
+    'user_deleted_repo':           (_('[deleted] repository'),
+                                    None, 'database_delete.png'),
+    'user_created_repo':           (_('[created] repository'),
+                                    None, 'database_add.png'),
+    'user_created_fork':           (_('[created] repository as fork'),
+                                    None, 'arrow_divide.png'),
+    'user_forked_repo':            (_('[forked] repository'),
+                                    get_fork_name, 'arrow_divide.png'),
+    'user_updated_repo':           (_('[updated] repository'),
+                                    None, 'database_edit.png'),
+    'admin_deleted_repo':          (_('[delete] repository'),
+                                    None, 'database_delete.png'),
+    'admin_created_repo':          (_('[created] repository'),
+                                    None, 'database_add.png'),
+    'admin_forked_repo':           (_('[forked] repository'),
+                                    None, 'arrow_divide.png'),
+    'admin_updated_repo':          (_('[updated] repository'),
+                                    None, 'database_edit.png'),
+    'admin_created_user':          (_('[created] user'),
+                                    get_user_name, 'user_add.png'),
+    'admin_updated_user':          (_('[updated] user'),
+                                    get_user_name, 'user_edit.png'),
+    'admin_created_users_group':   (_('[created] users group'),
+                                    get_users_group, 'group_add.png'),
+    'admin_updated_users_group':   (_('[updated] users group'),
+                                    get_users_group, 'group_edit.png'),
+    'user_commented_revision':     (_('[commented] on revision in repository'),
+                                    get_cs_links, 'comment_add.png'),
+    'user_commented_pull_request': (_('[commented] on pull request for'),
+                                    get_pull_request, 'comment_add.png'),
+    'user_closed_pull_request':    (_('[closed] pull request for'),
+                                    get_pull_request, 'tick.png'),
+    'push':                        (_('[pushed] into'),
+                                    get_cs_links, 'script_add.png'),
+    'push_local':                  (_('[committed via RhodeCode] into repository'),
+                                    get_cs_links, 'script_edit.png'),
+    'push_remote':                 (_('[pulled from remote] into repository'),
+                                    get_cs_links, 'connect.png'),
+    'pull':                        (_('[pulled] from'),
+                                    None, 'down_16.png'),
+    'started_following_repo':      (_('[started following] repository'),
+                                    None, 'heart_add.png'),
+    'stopped_following_repo':      (_('[stopped following] repository'),
+                                    None, 'heart_delete.png'),
+    }
 
     action_str = action_map.get(action, action)
     if feed:
@@ -556,36 +682,21 @@ def action_parser(user_log, feed=False):
     if callable(action_str[1]):
         action_params_func = action_str[1]
 
-    return [literal(action), action_params_func]
+    def action_parser_icon():
+        action = user_log.action
+        action_params = None
+        x = action.split(':')
 
+        if len(x) > 1:
+            action, action_params = x
 
-def action_parser_icon(user_log):
-    action = user_log.action
-    action_params = None
-    x = action.split(':')
+        tmpl = """<img src="%s%s" alt="%s"/>"""
+        ico = action_map.get(action, ['', '', ''])[2]
+        return literal(tmpl % ((url('/images/icons/')), ico, action))
 
-    if len(x) > 1:
-        action, action_params = x
+    # returned callbacks we need to call to get
+    return [lambda: literal(action), action_params_func, action_parser_icon]
 
-    tmpl = """<img src="%s%s" alt="%s"/>"""
-    map = {'user_deleted_repo':'database_delete.png',
-           'user_created_repo':'database_add.png',
-           'user_created_fork':'arrow_divide.png',
-           'user_forked_repo':'arrow_divide.png',
-           'user_updated_repo':'database_edit.png',
-           'admin_deleted_repo':'database_delete.png',
-           'admin_created_repo':'database_add.png',
-           'admin_forked_repo':'arrow_divide.png',
-           'admin_updated_repo':'database_edit.png',
-           'push':'script_add.png',
-           'push_local':'script_edit.png',
-           'push_remote':'connect.png',
-           'pull':'down_16.png',
-           'started_following_repo':'heart_add.png',
-           'stopped_following_repo':'heart_delete.png',
-            }
-    return literal(tmpl % ((url('/images/icons/')),
-                           map.get(action, action), action))
 
 
 #==============================================================================
@@ -600,6 +711,14 @@ HasRepoPermissionAny, HasRepoPermissionAll
 #==============================================================================
 
 def gravatar_url(email_address, size=30):
+    if(str2bool(config['app_conf'].get('use_gravatar')) and
+       config['app_conf'].get('alternative_gravatar_url')):
+        tmpl = config['app_conf'].get('alternative_gravatar_url', '')
+        tmpl = tmpl.replace('{email}', email_address)\
+                   .replace('{md5email}', hashlib.md5(email_address.lower()).hexdigest())\
+                   .replace('{size}', str(size))
+        return tmpl
+
     if (not str2bool(config['app_conf'].get('use_gravatar')) or
         not email_address or email_address == 'anonymous@rhodecode.org'):
         f = lambda a, l: min(l, key=lambda x: abs(x - a))
@@ -875,7 +994,6 @@ def urlify_commit(text_, repository=None, link_=None):
 
         return ''.join(links)
 
-
     # urlify changesets - extrac revisions and make link out of them
     text_ = urlify_changesets(escaper(text_), repository)
 
@@ -902,7 +1020,8 @@ def urlify_commit(text_, repository=None, link_=None):
                 url = ISSUE_SERVER_LNK.replace('{id}', issue_id)
                 if repository:
                     url = url.replace('{repo}', repository)
-
+                    repo_name = repository.split(URL_SEP)[-1]
+                    url = url.replace('{repo_name}', repo_name)
                 return tmpl % {
                      'pref': pref,
                      'cls': 'issue-tracker-link',
@@ -939,3 +1058,15 @@ def rst_w_mentions(source):
     """
     return literal('<div class="rst-block">%s</div>' %
                    MarkupRenderer.rst_with_mentions(source))
+
+
+def changeset_status(repo, revision):
+    return ChangesetStatusModel().get_status(repo, revision)
+
+
+def changeset_status_lbl(changeset_status):
+    return dict(ChangesetStatus.STATUSES).get(changeset_status)
+
+
+def get_permission_name(key):
+    return dict(Permission.PERMS).get(key)

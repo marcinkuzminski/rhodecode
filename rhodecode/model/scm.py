@@ -22,26 +22,35 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from __future__ import with_statement
 import os
+import re
 import time
 import traceback
 import logging
 import cStringIO
+import pkg_resources
+from os.path import dirname as dn, join as jn
 
+from sqlalchemy import func
+from pylons.i18n.translation import _
+
+import rhodecode
 from rhodecode.lib.vcs import get_backend
 from rhodecode.lib.vcs.exceptions import RepositoryError
 from rhodecode.lib.vcs.utils.lazy import LazyProperty
 from rhodecode.lib.vcs.nodes import FileNode
+from rhodecode.lib.vcs.backends.base import EmptyChangeset
 
 from rhodecode import BACKENDS
 from rhodecode.lib import helpers as h
 from rhodecode.lib.utils2 import safe_str, safe_unicode
 from rhodecode.lib.auth import HasRepoPermissionAny, HasReposGroupPermissionAny
 from rhodecode.lib.utils import get_repos as get_filesystem_repos, make_ui, \
-    action_logger, EmptyChangeset, REMOVED_REPO_PAT
+    action_logger, REMOVED_REPO_PAT
 from rhodecode.model import BaseModel
 from rhodecode.model.db import Repository, RhodeCodeUi, CacheInvalidation, \
-    UserFollowing, UserLog, User, RepoGroup
+    UserFollowing, UserLog, User, RepoGroup, PullRequest
 
 log = logging.getLogger(__name__)
 
@@ -63,6 +72,10 @@ class RepoTemp(object):
 
 
 class CachedRepoList(object):
+    """
+    Cached repo list, uses in-memory cache after initialization, that is
+    super fast
+    """
 
     def __init__(self, db_repo_list, repos_path, order_by=None):
         self.db_repo_list = db_repo_list
@@ -77,8 +90,12 @@ class CachedRepoList(object):
         return '<%s (%s)>' % (self.__class__.__name__, self.__len__())
 
     def __iter__(self):
+        # pre-propagated cache_map to save executing select statements
+        # for each repo
+        cache_map = CacheInvalidation.get_cache_map()
+
         for dbr in self.db_repo_list:
-            scmr = dbr.scm_instance_cached
+            scmr = dbr.scm_instance_cached(cache_map)
             # check permission at this level
             if not HasRepoPermissionAny(
                 'repository.read', 'repository.write', 'repository.admin'
@@ -99,7 +116,7 @@ class CachedRepoList(object):
             tmp_d['name'] = dbr.repo_name
             tmp_d['name_sort'] = tmp_d['name'].lower()
             tmp_d['description'] = dbr.description
-            tmp_d['description_sort'] = tmp_d['description']
+            tmp_d['description_sort'] = tmp_d['description'].lower()
             tmp_d['last_change'] = last_change
             tmp_d['last_change_sort'] = time.mktime(last_change.timetuple())
             tmp_d['tip'] = tip.raw_id
@@ -111,6 +128,29 @@ class CachedRepoList(object):
             tmp_d['repo_archives'] = list(scmr._get_archives())
             tmp_d['last_msg'] = tip.message
             tmp_d['author'] = tip.author
+            tmp_d['dbrepo'] = dbr.get_dict()
+            tmp_d['dbrepo_fork'] = dbr.fork.get_dict() if dbr.fork else {}
+            yield tmp_d
+
+
+class SimpleCachedRepoList(CachedRepoList):
+    """
+    Lighter version of CachedRepoList without the scm initialisation
+    """
+
+    def __iter__(self):
+        for dbr in self.db_repo_list:
+            # check permission at this level
+            if not HasRepoPermissionAny(
+                'repository.read', 'repository.write', 'repository.admin'
+            )(dbr.repo_name, 'get repo check'):
+                continue
+
+            tmp_d = {}
+            tmp_d['name'] = dbr.repo_name
+            tmp_d['name_sort'] = tmp_d['name'].lower()
+            tmp_d['description'] = dbr.description
+            tmp_d['description_sort'] = tmp_d['description'].lower()
             tmp_d['dbrepo'] = dbr.get_dict()
             tmp_d['dbrepo_fork'] = dbr.fork.get_dict() if dbr.fork else {}
             yield tmp_d
@@ -147,7 +187,7 @@ class ScmModel(BaseModel):
         cls = Repository
         if isinstance(instance, cls):
             return instance
-        elif isinstance(instance, int) or str(instance).isdigit():
+        elif isinstance(instance, int) or safe_str(instance).isdigit():
             return cls.get(instance)
         elif isinstance(instance, basestring):
             return cls.get_by_repo_name(instance)
@@ -208,21 +248,29 @@ class ScmModel(BaseModel):
 
         return repos
 
-    def get_repos(self, all_repos=None, sort_key=None):
+    def get_repos(self, all_repos=None, sort_key=None, simple=False):
         """
         Get all repos from db and for each repo create it's
         backend instance and fill that backed with information from database
 
         :param all_repos: list of repository names as strings
             give specific repositories list, good for filtering
+
+        :param sort_key: initial sorting of repos
+        :param simple: use SimpleCachedList - one without the SCM info
         """
         if all_repos is None:
             all_repos = self.sa.query(Repository)\
                         .filter(Repository.group_id == None)\
-                        .order_by(Repository.repo_name).all()
-
-        repo_iter = CachedRepoList(all_repos, repos_path=self.repos_path,
-                                   order_by=sort_key)
+                        .order_by(func.lower(Repository.repo_name)).all()
+        if simple:
+            repo_iter = SimpleCachedRepoList(all_repos,
+                                             repos_path=self.repos_path,
+                                             order_by=sort_key)
+        else:
+            repo_iter = CachedRepoList(all_repos,
+                                       repos_path=self.repos_path,
+                                       order_by=sort_key)
 
         return repo_iter
 
@@ -314,29 +362,33 @@ class ScmModel(BaseModel):
 
         return f is not None
 
-    def get_followers(self, repo_id):
-        if not isinstance(repo_id, int):
-            repo_id = getattr(Repository.get_by_repo_name(repo_id), 'repo_id')
+    def get_followers(self, repo):
+        repo = self._get_repo(repo)
 
         return self.sa.query(UserFollowing)\
-                .filter(UserFollowing.follows_repo_id == repo_id).count()
+                .filter(UserFollowing.follows_repository == repo).count()
 
-    def get_forks(self, repo_id):
-        if not isinstance(repo_id, int):
-            repo_id = getattr(Repository.get_by_repo_name(repo_id), 'repo_id')
-
+    def get_forks(self, repo):
+        repo = self._get_repo(repo)
         return self.sa.query(Repository)\
-                .filter(Repository.fork_id == repo_id).count()
+                .filter(Repository.fork == repo).count()
+
+    def get_pull_requests(self, repo):
+        repo = self._get_repo(repo)
+        return self.sa.query(PullRequest)\
+                .filter(PullRequest.other_repo == repo).count()
 
     def mark_as_fork(self, repo, fork, user):
         repo = self.__get_repo(repo)
         fork = self.__get_repo(fork)
+        if fork and repo.repo_id == fork.repo_id:
+            raise Exception("Cannot set repository as fork of itself")
         repo.fork = fork
         self.sa.add(repo)
         return repo
 
-    def pull_changes(self, repo_name, username):
-        dbrepo = Repository.get_by_repo_name(repo_name)
+    def pull_changes(self, repo, username):
+        dbrepo = self.__get_repo(repo)
         clone_uri = dbrepo.clone_uri
         if not clone_uri:
             raise Exception("This repository doesn't have a clone uri")
@@ -347,22 +399,28 @@ class ScmModel(BaseModel):
                 'ip': '',
                 'username': username,
                 'action': 'push_remote',
-                'repository': repo_name,
+                'repository': dbrepo.repo_name,
                 'scm': repo.alias,
             }
+            Repository.inject_ui(repo, extras=extras)
 
-            # inject ui extra param to log this action via push logger
-            for k, v in extras.items():
-                repo._repo.ui.setconfig('rhodecode_extras', k, v)
-
-            repo.pull(clone_uri)
-            self.mark_for_invalidation(repo_name)
+            if repo.alias == 'git':
+                repo.fetch(clone_uri)
+            else:
+                repo.pull(clone_uri)
+            self.mark_for_invalidation(dbrepo.repo_name)
         except:
             log.error(traceback.format_exc())
             raise
 
     def commit_change(self, repo, repo_name, cs, user, author, message,
                       content, f_path):
+        """
+        Commits changes
+
+        :param repo: SCM instance
+
+        """
 
         if repo.alias == 'hg':
             from rhodecode.lib.vcs.backends.hg import \
@@ -385,12 +443,10 @@ class ScmModel(BaseModel):
                        author=author,
                        parents=[cs], branch=cs.branch)
 
-        new_cs = tip.short_id
-        action = 'push_local:%s' % new_cs
-
+        action = 'push_local:%s' % tip.raw_id
         action_logger(user, action, repo_name)
-
         self.mark_for_invalidation(repo_name)
+        return tip
 
     def create_node(self, repo, repo_name, cs, user, author, message, content,
                       f_path):
@@ -425,12 +481,11 @@ class ScmModel(BaseModel):
         tip = m.commit(message=message,
                        author=author,
                        parents=parents, branch=cs.branch)
-        new_cs = tip.short_id
-        action = 'push_local:%s' % new_cs
 
+        action = 'push_local:%s' % tip.raw_id
         action_logger(user, action, repo_name)
-
         self.mark_for_invalidation(repo_name)
+        return tip
 
     def get_nodes(self, repo_name, revision, root_path='/', flat=True):
         """
@@ -464,3 +519,93 @@ class ScmModel(BaseModel):
 
     def get_unread_journal(self):
         return self.sa.query(UserLog).count()
+
+    def get_repo_landing_revs(self, repo=None):
+        """
+        Generates select option with tags branches and bookmarks (for hg only)
+        grouped by type
+
+        :param repo:
+        :type repo:
+        """
+
+        hist_l = []
+        choices = []
+        repo = self.__get_repo(repo)
+        hist_l.append(['tip', _('latest tip')])
+        choices.append('tip')
+        if not repo:
+            return choices, hist_l
+
+        repo = repo.scm_instance
+
+        branches_group = ([(k, k) for k, v in
+                           repo.branches.iteritems()], _("Branches"))
+        hist_l.append(branches_group)
+        choices.extend([x[0] for x in branches_group[0]])
+
+        if repo.alias == 'hg':
+            bookmarks_group = ([(k, k) for k, v in
+                                repo.bookmarks.iteritems()], _("Bookmarks"))
+            hist_l.append(bookmarks_group)
+            choices.extend([x[0] for x in bookmarks_group[0]])
+
+        tags_group = ([(k, k) for k, v in
+                       repo.tags.iteritems()], _("Tags"))
+        hist_l.append(tags_group)
+        choices.extend([x[0] for x in tags_group[0]])
+
+        return choices, hist_l
+
+    def install_git_hook(self, repo, force_create=False):
+        """
+        Creates a rhodecode hook inside a git repository
+
+        :param repo: Instance of VCS repo
+        :param force_create: Create even if same name hook exists
+        """
+
+        loc = jn(repo.path, 'hooks')
+        if not repo.bare:
+            loc = jn(repo.path, '.git', 'hooks')
+        if not os.path.isdir(loc):
+            os.makedirs(loc)
+
+        tmpl_post = pkg_resources.resource_string(
+            'rhodecode', jn('config', 'post_receive_tmpl.py')
+        )
+        tmpl_pre = pkg_resources.resource_string(
+            'rhodecode', jn('config', 'pre_receive_tmpl.py')
+        )
+
+        for h_type, tmpl in [('pre', tmpl_pre), ('post', tmpl_post)]:
+            _hook_file = jn(loc, '%s-receive' % h_type)
+            _rhodecode_hook = False
+            log.debug('Installing git hook in repo %s' % repo)
+            if os.path.exists(_hook_file):
+                # let's take a look at this hook, maybe it's rhodecode ?
+                log.debug('hook exists, checking if it is from rhodecode')
+                _HOOK_VER_PAT = re.compile(r'^RC_HOOK_VER')
+                with open(_hook_file, 'rb') as f:
+                    data = f.read()
+                    matches = re.compile(r'(?:%s)\s*=\s*(.*)'
+                                         % 'RC_HOOK_VER').search(data)
+                    if matches:
+                        try:
+                            ver = matches.groups()[0]
+                            log.debug('got %s it is rhodecode' % (ver))
+                            _rhodecode_hook = True
+                        except:
+                            log.error(traceback.format_exc())
+            else:
+                # there is no hook in this dir, so we want to create one
+                _rhodecode_hook = True
+
+            if _rhodecode_hook or force_create:
+                log.debug('writing %s hook file !' % h_type)
+                with open(_hook_file, 'wb') as f:
+                    tmpl = tmpl.replace('_TMPL_', rhodecode.__version__)
+                    f.write(tmpl)
+                os.chmod(_hook_file, 0755)
+            else:
+                log.debug('skipping writing hook file')

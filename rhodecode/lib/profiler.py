@@ -1,5 +1,7 @@
 from __future__ import with_statement
 
+import gc
+import objgraph
 import cProfile
 import pstats
 import cgi
@@ -26,7 +28,7 @@ class ProfilingMiddleware(object):
             profiler.snapshot_stats()
 
             stats = pstats.Stats(profiler)
-            stats.sort_stats('cumulative')
+            stats.sort_stats('calls') #cummulative
 
             # Redirect output
             out = StringIO()
@@ -43,6 +45,11 @@ class ProfilingMiddleware(object):
                 resp += ('<pre style="text-align:left; '
                          'border-top: 4px dashed red; padding: 1em;">')
                 resp += cgi.escape(out.getvalue(), True)
+
+                ct = objgraph.show_most_common_types()
+                print ct
+
+                resp += ct if ct else '---'
 
                 output = StringIO()
                 pprint.pprint(environ, output, depth=3)

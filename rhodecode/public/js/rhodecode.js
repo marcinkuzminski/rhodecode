@@ -44,6 +44,50 @@ String.prototype.format = function() {
 
 }();
 
+String.prototype.strip = function(char) {
+	if(char === undefined){
+	    char = '\\s';
+	}
+	return this.replace(new RegExp('^'+char+'+|'+char+'+$','g'), '');
+}
+String.prototype.lstrip = function(char) {
+	if(char === undefined){
+	    char = '\\s';
+	}
+	return this.replace(new RegExp('^'+char+'+'),'');
+}
+String.prototype.rstrip = function(char) {
+	if(char === undefined){
+	    char = '\\s';
+	}
+	return this.replace(new RegExp(''+char+'+$'),'');
+}
+
+
+if(!Array.prototype.indexOf) {
+    Array.prototype.indexOf = function(needle) {
+        for(var i = 0; i < this.length; i++) {
+            if(this[i] === needle) {
+                return i;
+            }
+        }
+        return -1;
+    };
+}
+
+// IE(CRAP) doesn't support previousElementSibling
+var prevElementSibling = function( el ) {
+    if( el.previousElementSibling ) {
+        return el.previousElementSibling;
+    } else {
+        while( el = el.previousSibling ) {
+            if( el.nodeType === 1 ) return el;
+        }
+    }
+}
+
+
+
 
 /**
  * SmartColorGenerator
@@ -187,10 +231,10 @@ function ypjax(url,container,s_call,f_call,args){
 		success:s_wrapper,
 		failure:function(o){
 			console.log(o);
-			YUD.get(container).innerHTML='ERROR';
+			YUD.get(container).innerHTML='<span class="error_red">ERROR: {0}</span>'.format(o.status);
 			YUD.setStyle(container,'opacity','1.0');
-			YUD.setStyle(container,'color','red');
-		}
+		},
+		cache:false
 	},args);
 	
 };
@@ -354,7 +398,7 @@ var createInlineForm = function(parent_tr, f_path, line) {
 	
 	// create event for hide button
 	form = new YAHOO.util.Element(form);
-	var form_hide_button = new YAHOO.util.Element(form.getElementsByClassName('hide-inline-form')[0]);
+	var form_hide_button = new YAHOO.util.Element(YUD.getElementsByClassName('hide-inline-form',null,form)[0]);
 	form_hide_button.on('click', function(e) {
 		var newtr = e.currentTarget.parentNode.parentNode.parentNode.parentNode.parentNode;
 		if(YUD.hasClass(newtr.nextElementSibling,'inline-comments-button')){
@@ -378,11 +422,12 @@ var injectInlineForm = function(tr){
 		  return
 	  }
 	  var submit_url = AJAX_COMMENT_URL;
-	  if(YUD.hasClass(tr,'form-open') || YUD.hasClass(tr,'context') || YUD.hasClass(tr,'no-comment')){
+	  var _td = YUD.getElementsByClassName('code',null,tr)[0];
+	  if(YUD.hasClass(tr,'form-open') || YUD.hasClass(tr,'context') || YUD.hasClass(_td,'no-comment')){
 		  return
 	  }	
 	  YUD.addClass(tr,'form-open');
-	  var node = tr.parentNode.parentNode.parentNode.getElementsByClassName('full_f_path')[0];
+	  var node = YUD.getElementsByClassName('full_f_path',null,tr.parentNode.parentNode.parentNode)[0];
 	  var f_path = YUD.getAttribute(node,'path');
 	  var lineno = getLineNo(tr);
 	  var form = createInlineForm(tr, f_path, lineno, submit_url);
@@ -400,11 +445,10 @@ var injectInlineForm = function(tr){
 	  }	  
 	  YUD.insertAfter(form,parent);
 	  
-	  YUD.get('text_'+lineno).focus();
 	  var f = YUD.get(form);
 	  
-	  var overlay = f.getElementsByClassName('overlay')[0];
-	  var _form = f.getElementsByClassName('inline-form')[0];
+	  var overlay = YUD.getElementsByClassName('overlay',null,f)[0];
+	  var _form = YUD.getElementsByClassName('inline-form',null,f)[0];
 	  
 	  form.on('submit',function(e){
 		  YUE.preventDefault(e);
@@ -448,7 +492,16 @@ var injectInlineForm = function(tr){
 		  ajaxPOST(submit_url, postData, success);
 	  });
 	  
-	  tooltip_activate();
+	  setTimeout(function(){
+		  // callbacks
+		  tooltip_activate();
+		  MentionsAutoComplete('text_'+lineno, 'mentions_container_'+lineno, 
+	                         _USERS_AC_DATA, _GROUPS_AC_DATA);
+		  var _e = YUD.get('text_'+lineno);
+		  if(_e){
+			  _e.focus();
+		  }
+	  },10)
 };
 
 var deleteComment = function(comment_id){
@@ -456,7 +509,7 @@ var deleteComment = function(comment_id){
     var postData = {'_method':'delete'};
     var success = function(o){
         var n = YUD.get('comment-tr-'+comment_id);
-        var root = n.previousElementSibling.previousElementSibling;
+        var root = prevElementSibling(prevElementSibling(n));
         n.parentNode.removeChild(n);
 
         // scann nodes, and attach add button to last one
@@ -465,6 +518,15 @@ var deleteComment = function(comment_id){
     ajaxPOST(url,postData,success);
 }
 
+var updateReviewers = function(reviewers_ids){
+	var url = AJAX_UPDATE_PULLREQUEST;
+	var postData = {'_method':'put',
+			        'reviewers_ids': reviewers_ids};
+	var success = function(o){
+		window.location.reload();
+	}
+	ajaxPOST(url,postData,success);
+}
 
 var createInlineAddButton = function(tr){
 
@@ -506,8 +568,8 @@ var placeAddButton = function(target_tr){
 		  // next element are comments !
 		  if(YUD.hasClass(n,'inline-comments')){
 			  last_node = n;
-			  //also remove the comment button from previos
-			  var comment_add_buttons = last_node.getElementsByClassName('add-comment');
+			  //also remove the comment button from previous
+			  var comment_add_buttons = YUD.getElementsByClassName('add-comment',null,last_node);
 			  for(var i=0;i<comment_add_buttons.length;i++){
 				  var b = comment_add_buttons[i];
 				  b.parentNode.removeChild(b);
@@ -520,7 +582,7 @@ var placeAddButton = function(target_tr){
 	  
     var add = createInlineAddButton(target_tr);
     // get the comment div
-    var comment_block = last_node.getElementsByClassName('comment')[0];
+    var comment_block = YUD.getElementsByClassName('comment',null,last_node)[0];
     // attach add button
     YUD.insertAfter(add,comment_block);	
 }
@@ -592,9 +654,15 @@ var renderInlineComments = function(file_comments){
     }	
 }
 
+var removeReviewer = function(reviewer_id){
+	var el = YUD.get('reviewer_{0}'.format(reviewer_id));
+	if (el.parentNode !== undefined){
+		el.parentNode.removeChild(el);
+	}
+}
 
-var fileBrowserListeners = function(current_url, node_list_url, url_base,
-									truncated_lbl, nomatch_lbl){
+var fileBrowserListeners = function(current_url, node_list_url, url_base){
+	
 	var current_url_branch = +"?branch=__BRANCH__";
 	var url = url_base;
 	var node_url = node_list_url;	
@@ -623,7 +691,7 @@ var fileBrowserListeners = function(current_url, node_list_url, url_base,
 	  YUC.initHeader('X-PARTIAL-XHR',true);
 	  YUC.asyncRequest('GET',url,{
 	      success:function(o){
-	        nodes = JSON.parse(o.responseText);
+	        nodes = JSON.parse(o.responseText).nodes;
 	        YUD.setStyle('node_filter_box_loading','display','none');
 	        YUD.setStyle('node_filter_box','display','');
 	        n_filter.focus();
@@ -663,13 +731,13 @@ var fileBrowserListeners = function(current_url, node_list_url, url_base,
 	                    var t = nodes[i].type;
 	                    var n_hl = n.substring(0,pos)
 	                      +"<b>{0}</b>".format(n.substring(pos,pos+query.length))
-	                      +n.substring(pos+query.length)                    
-	                    match.push('<tr><td><a class="browser-{0}" href="{1}">{2}</a></td><td colspan="5"></td></tr>'.format(t,node_url.replace('__FPATH__',n),n_hl));
+	                      +n.substring(pos+query.length)
+	                    node_url = node_url.replace('__FPATH__',n);
+	                    match.push('<tr><td><a class="browser-{0}" href="{1}">{2}</a></td><td colspan="5"></td></tr>'.format(t,node_url,n_hl));
 	                }
 	                if(match.length >= matches_max){
-	                    match.push('<tr><td>{0}</td><td colspan="5"></td></tr>'.format(truncated_lbl));
+	                    match.push('<tr><td>{0}</td><td colspan="5"></td></tr>'.format(_TM['search truncated']));
 	                }
-	                
 	            }                       
 	        }
 	        if(query != ""){
@@ -677,7 +745,7 @@ var fileBrowserListeners = function(current_url, node_list_url, url_base,
 	            YUD.setStyle('tbody_filtered','display','');
 	            
 	            if (match.length==0){
-	              match.push('<tr><td>{0}</td><td colspan="5"></td></tr>'.format(nomatch_lbl));
+	              match.push('<tr><td>{0}</td><td colspan="5"></td></tr>'.format(_TM['no matching files']));
 	            }                           
 	            
 	            YUD.get('tbody_filtered').innerHTML = match.join("");   
@@ -816,10 +884,31 @@ var deleteNotification = function(url, notification_id,callbacks){
     											  callback, postData);
 };	
 
+var readNotification = function(url, notification_id,callbacks){
+    var callback = { 
+		success:function(o){
+		    var obj = YUD.get(String("notification_"+notification_id));
+		    YUD.removeClass(obj, 'unread');
+		    var r_button = YUD.getElementsByClassName('read-notification',null,obj.children[0])[0];
+		    
+		    if(r_button.parentNode !== undefined){
+		    	r_button.parentNode.removeChild(r_button);
+			}		    
+			_run_callbacks(callbacks);
+		},
+	    failure:function(o){
+	        alert("error");
+	    },
+	};
+    var postData = '_method=put';
+    var sUrl = url.replace('__NOTIFICATION_ID__',notification_id);
+    var request = YAHOO.util.Connect.asyncRequest('POST', sUrl, 
+    											  callback, postData);
+};	
 
 /** MEMBERS AUTOCOMPLETE WIDGET **/
 
-var MembersAutoComplete = function (users_list, groups_list, group_lbl, members_lbl) {
+var MembersAutoComplete = function (divid, cont, users_list, groups_list) {
     var myUsers = users_list;
     var myGroups = groups_list;
 
@@ -834,9 +923,11 @@ var MembersAutoComplete = function (users_list, groups_list, group_lbl, members_
             // Match against each name of each contact
             for (; i < l; i++) {
                 contact = myUsers[i];
-                if ((contact.fname.toLowerCase().indexOf(query) > -1) || (contact.lname.toLowerCase().indexOf(query) > -1) || (contact.nname && (contact.nname.toLowerCase().indexOf(query) > -1))) {
-                    matches[matches.length] = contact;
-                }
+                if (((contact.fname+"").toLowerCase().indexOf(query) > -1) || 
+                   	 ((contact.lname+"").toLowerCase().indexOf(query) > -1) || 
+                   	 ((contact.nname) && ((contact.nname).toLowerCase().indexOf(query) > -1))) {
+                       matches[matches.length] = contact;
+                   }
             }
             return matches;
         };
@@ -879,15 +970,20 @@ var MembersAutoComplete = function (users_list, groups_list, group_lbl, members_
     };
 
     // Instantiate AutoComplete for perms
-    var membersAC = new YAHOO.widget.AutoComplete("perm_new_member_name", "perm_container", memberDS);
+    var membersAC = new YAHOO.widget.AutoComplete(divid, cont, memberDS);
     membersAC.useShadow = false;
     membersAC.resultTypeList = false;
+    membersAC.animVert = false;
+    membersAC.animHoriz = false;    
+    membersAC.animSpeed = 0.1;
 
     // Instantiate AutoComplete for owner
     var ownerAC = new YAHOO.widget.AutoComplete("user", "owner_container", ownerDS);
     ownerAC.useShadow = false;
     ownerAC.resultTypeList = false;
-
+    ownerAC.animVert = false;
+    ownerAC.animHoriz = false;
+    ownerAC.animSpeed = 0.1;
 
     // Helper highlight function for the formatter
     var highlightMatch = function (full, snippet, matchindex) {
@@ -912,21 +1008,22 @@ var MembersAutoComplete = function (users_list, groups_list, group_lbl, members_
                 var grname = oResultData.grname;
                 var grmembers = oResultData.grmembers;
                 var grnameMatchIndex = grname.toLowerCase().indexOf(query);
-                var grprefix = "{0}: ".format(group_lbl);
+                var grprefix = "{0}: ".format(_TM['Group']);
                 var grsuffix = " (" + grmembers + "  )";
-                var grsuffix = " ({0}  {1})".format(grmembers, members_lbl);
+                var grsuffix = " ({0}  {1})".format(grmembers, _TM['members']);
 
                 if (grnameMatchIndex > -1) {
                     return _gravatar(grprefix + highlightMatch(grname, query, grnameMatchIndex) + grsuffix,null,true);
                 }
 			    return _gravatar(grprefix + oResultData.grname + grsuffix, null,true);
             // Users
-            } else if (oResultData.fname != undefined) {
-                var fname = oResultData.fname,
-                    lname = oResultData.lname,
-                    nname = oResultData.nname || "",
-                    // Guard against null value
-                    fnameMatchIndex = fname.toLowerCase().indexOf(query),
+            } else if (oResultData.nname != undefined) {
+                var fname = oResultData.fname || "";
+                var lname = oResultData.lname || "";
+                var nname = oResultData.nname;
+                
+                // Guard against null value
+                var fnameMatchIndex = fname.toLowerCase().indexOf(query),
                     lnameMatchIndex = lname.toLowerCase().indexOf(query),
                     nnameMatchIndex = nname.toLowerCase().indexOf(query),
                     displayfname, displaylname, displaynname;
@@ -958,7 +1055,7 @@ var MembersAutoComplete = function (users_list, groups_list, group_lbl, members_
     ownerAC.formatResult = custom_formatter;
 
     var myHandler = function (sType, aArgs) {
-
+    		var nextId = divid.split('perm_new_member_name_')[1];
             var myAC = aArgs[0]; // reference back to the AC instance
             var elLI = aArgs[1]; // reference to the selected LI element
             var oData = aArgs[2]; // object literal of selected item's result data
@@ -966,11 +1063,11 @@ var MembersAutoComplete = function (users_list, groups_list, group_lbl, members_
             if (oData.nname != undefined) {
                 //users
                 myAC.getInputEl().value = oData.nname;
-                YUD.get('perm_new_member_type').value = 'user';
+                YUD.get('perm_new_member_type_'+nextId).value = 'user';
             } else {
                 //groups
                 myAC.getInputEl().value = oData.grname;
-                YUD.get('perm_new_member_type').value = 'users_group';
+                YUD.get('perm_new_member_type_'+nextId).value = 'users_group';
             }
         };
 
@@ -987,6 +1084,359 @@ var MembersAutoComplete = function (users_list, groups_list, group_lbl, members_
     };
 }
 
+
+var MentionsAutoComplete = function (divid, cont, users_list, groups_list) {
+    var myUsers = users_list;
+    var myGroups = groups_list;
+
+    // Define a custom search function for the DataSource of users
+    var matchUsers = function (sQuery) {
+    	    var org_sQuery = sQuery;
+    	    if(this.mentionQuery == null){
+    	    	return []    	    	
+    	    }
+    	    sQuery = this.mentionQuery;
+            // Case insensitive matching
+            var query = sQuery.toLowerCase();
+            var i = 0;
+            var l = myUsers.length;
+            var matches = [];
+
+            // Match against each name of each contact
+            for (; i < l; i++) {
+                contact = myUsers[i];
+                if (((contact.fname+"").toLowerCase().indexOf(query) > -1) || 
+                	 ((contact.lname+"").toLowerCase().indexOf(query) > -1) || 
+                	 ((contact.nname) && ((contact.nname).toLowerCase().indexOf(query) > -1))) {
+                    matches[matches.length] = contact;
+                }
+            }
+            return matches
+        };
+
+    //match all
+    var matchAll = function (sQuery) {
+            u = matchUsers(sQuery);
+            return u
+        };
+
+    // DataScheme for owner
+    var ownerDS = new YAHOO.util.FunctionDataSource(matchUsers);
+
+    ownerDS.responseSchema = {
+        fields: ["id", "fname", "lname", "nname", "gravatar_lnk"]
+    };
+
+    // Instantiate AutoComplete for mentions
+    var ownerAC = new YAHOO.widget.AutoComplete(divid, cont, ownerDS);
+    ownerAC.useShadow = false;
+    ownerAC.resultTypeList = false;
+    ownerAC.suppressInputUpdate = true;
+    ownerAC.animVert = false;
+    ownerAC.animHoriz = false;    
+    ownerAC.animSpeed = 0.1;
+    
+    // Helper highlight function for the formatter
+    var highlightMatch = function (full, snippet, matchindex) {
+            return full.substring(0, matchindex) 
+            + "<span class='match'>" 
+            + full.substr(matchindex, snippet.length) 
+            + "</span>" + full.substring(matchindex + snippet.length);
+        };
+
+    // Custom formatter to highlight the matching letters
+    ownerAC.formatResult = function (oResultData, sQuery, sResultMatch) {
+		    var org_sQuery = sQuery;
+		    if(this.dataSource.mentionQuery != null){
+		    	sQuery = this.dataSource.mentionQuery;		    	
+		    }
+
+            var query = sQuery.toLowerCase();
+            var _gravatar = function(res, em, group){
+            	if (group !== undefined){
+            		em = '/images/icons/group.png'
+            	}
+            	tmpl = '<div class="ac-container-wrap"><img class="perm-gravatar-ac" src="{0}"/>{1}</div>'
+            	return tmpl.format(em,res)
+            }
+            if (oResultData.nname != undefined) {
+                var fname = oResultData.fname || "";
+                var lname = oResultData.lname || "";
+                var nname = oResultData.nname;
+                
+                // Guard against null value
+                var fnameMatchIndex = fname.toLowerCase().indexOf(query),
+                    lnameMatchIndex = lname.toLowerCase().indexOf(query),
+                    nnameMatchIndex = nname.toLowerCase().indexOf(query),
+                    displayfname, displaylname, displaynname;
+
+                if (fnameMatchIndex > -1) {
+                    displayfname = highlightMatch(fname, query, fnameMatchIndex);
+                } else {
+                    displayfname = fname;
+                }
+
+                if (lnameMatchIndex > -1) {
+                    displaylname = highlightMatch(lname, query, lnameMatchIndex);
+                } else {
+                    displaylname = lname;
+                }
+
+                if (nnameMatchIndex > -1) {
+                    displaynname = "(" + highlightMatch(nname, query, nnameMatchIndex) + ")";
+                } else {
+                    displaynname = nname ? "(" + nname + ")" : "";
+                }
+
+                return _gravatar(displayfname + " " + displaylname + " " + displaynname, oResultData.gravatar_lnk);
+            } else {
+                return '';
+            }
+        };
+
+    if(ownerAC.itemSelectEvent){
+    	ownerAC.itemSelectEvent.subscribe(function (sType, aArgs) {
+
+            var myAC = aArgs[0]; // reference back to the AC instance
+            var elLI = aArgs[1]; // reference to the selected LI element
+            var oData = aArgs[2]; // object literal of selected item's result data
+            //fill the autocomplete with value
+            if (oData.nname != undefined) {
+                //users
+            	//Replace the mention name with replaced
+            	var re = new RegExp();
+            	var org = myAC.getInputEl().value;
+            	var chunks = myAC.dataSource.chunks
+            	// replace middle chunk(the search term) with actuall  match
+            	chunks[1] = chunks[1].replace('@'+myAC.dataSource.mentionQuery,
+            								  '@'+oData.nname+' ');
+                myAC.getInputEl().value = chunks.join('')
+                YUD.get(myAC.getInputEl()).focus(); // Y U NO WORK !?
+            } else {
+                //groups
+                myAC.getInputEl().value = oData.grname;
+                YUD.get('perm_new_member_type').value = 'users_group';
+            }
+        });
+    }
+
+    // in this keybuffer we will gather current value of search !
+    // since we need to get this just when someone does `@` then we do the
+    // search
+    ownerAC.dataSource.chunks = [];
+    ownerAC.dataSource.mentionQuery = null;
+
+    ownerAC.get_mention = function(msg, max_pos) {
+    	var org = msg;
+    	var re = new RegExp('(?:^@|\s@)([a-zA-Z0-9]{1}[a-zA-Z0-9\-\_\.]+)$')
+    	var chunks  = [];
+
+		
+    	// cut first chunk until curret pos
+		var to_max = msg.substr(0, max_pos);		
+		var at_pos = Math.max(0,to_max.lastIndexOf('@')-1);
+		var msg2 = to_max.substr(at_pos);
+
+		chunks.push(org.substr(0,at_pos))// prefix chunk
+		chunks.push(msg2)                // search chunk
+		chunks.push(org.substr(max_pos)) // postfix chunk
+
+		// clean up msg2 for filtering and regex match
+		var msg2 = msg2.lstrip(' ').lstrip('\n');
+
+		if(re.test(msg2)){
+			var unam = re.exec(msg2)[1];
+			return [unam, chunks];
+		}
+		return [null, null];
+    };
+    
+    if (ownerAC.textboxKeyUpEvent){
+		ownerAC.textboxKeyUpEvent.subscribe(function(type, args){
+			
+			var ac_obj = args[0];
+			var currentMessage = args[1];
+			var currentCaretPosition = args[0]._elTextbox.selectionStart;
+	
+			var unam = ownerAC.get_mention(currentMessage, currentCaretPosition); 
+			var curr_search = null;
+			if(unam[0]){
+				curr_search = unam[0];
+			}
+			
+			ownerAC.dataSource.chunks = unam[1];
+			ownerAC.dataSource.mentionQuery = curr_search;
+	
+		})
+	}	
+    return {
+        ownerDS: ownerDS,
+        ownerAC: ownerAC,
+    };
+}
+
+
+var PullRequestAutoComplete = function (divid, cont, users_list, groups_list) {
+    var myUsers = users_list;
+    var myGroups = groups_list;
+
+    // Define a custom search function for the DataSource of users
+    var matchUsers = function (sQuery) {
+            // Case insensitive matching
+            var query = sQuery.toLowerCase();
+            var i = 0;
+            var l = myUsers.length;
+            var matches = [];
+
+            // Match against each name of each contact
+            for (; i < l; i++) {
+                contact = myUsers[i];
+                if (((contact.fname+"").toLowerCase().indexOf(query) > -1) || 
+                   	 ((contact.lname+"").toLowerCase().indexOf(query) > -1) || 
+                   	 ((contact.nname) && ((contact.nname).toLowerCase().indexOf(query) > -1))) {
+                       matches[matches.length] = contact;
+                   }
+            }
+            return matches;
+        };
+
+    // Define a custom search function for the DataSource of usersGroups
+    var matchGroups = function (sQuery) {
+            // Case insensitive matching
+            var query = sQuery.toLowerCase();
+            var i = 0;
+            var l = myGroups.length;
+            var matches = [];
+
+            // Match against each name of each contact
+            for (; i < l; i++) {
+                matched_group = myGroups[i];
+                if (matched_group.grname.toLowerCase().indexOf(query) > -1) {
+                    matches[matches.length] = matched_group;
+                }
+            }
+            return matches;
+        };
+
+    //match all
+    var matchAll = function (sQuery) {
+            u = matchUsers(sQuery);
+            return u
+        };
+
+    // DataScheme for owner
+    var ownerDS = new YAHOO.util.FunctionDataSource(matchUsers);
+
+    ownerDS.responseSchema = {
+        fields: ["id", "fname", "lname", "nname", "gravatar_lnk"]
+    };
+
+    // Instantiate AutoComplete for mentions
+    var reviewerAC = new YAHOO.widget.AutoComplete(divid, cont, ownerDS);
+    reviewerAC.useShadow = false;
+    reviewerAC.resultTypeList = false;
+    reviewerAC.suppressInputUpdate = true;
+    reviewerAC.animVert = false;
+    reviewerAC.animHoriz = false;    
+    reviewerAC.animSpeed = 0.1;
+    
+    // Helper highlight function for the formatter
+    var highlightMatch = function (full, snippet, matchindex) {
+            return full.substring(0, matchindex) 
+            + "<span class='match'>" 
+            + full.substr(matchindex, snippet.length) 
+            + "</span>" + full.substring(matchindex + snippet.length);
+        };
+
+    // Custom formatter to highlight the matching letters
+    reviewerAC.formatResult = function (oResultData, sQuery, sResultMatch) {
+		    var org_sQuery = sQuery;
+		    if(this.dataSource.mentionQuery != null){
+		    	sQuery = this.dataSource.mentionQuery;		    	
+		    }
+
+            var query = sQuery.toLowerCase();
+            var _gravatar = function(res, em, group){
+            	if (group !== undefined){
+            		em = '/images/icons/group.png'
+            	}
+            	tmpl = '<div class="ac-container-wrap"><img class="perm-gravatar-ac" src="{0}"/>{1}</div>'
+            	return tmpl.format(em,res)
+            }
+            if (oResultData.nname != undefined) {
+                var fname = oResultData.fname || "";
+                var lname = oResultData.lname || "";
+                var nname = oResultData.nname;
+                
+                // Guard against null value
+                var fnameMatchIndex = fname.toLowerCase().indexOf(query),
+                    lnameMatchIndex = lname.toLowerCase().indexOf(query),
+                    nnameMatchIndex = nname.toLowerCase().indexOf(query),
+                    displayfname, displaylname, displaynname;
+
+                if (fnameMatchIndex > -1) {
+                    displayfname = highlightMatch(fname, query, fnameMatchIndex);
+                } else {
+                    displayfname = fname;
+                }
+
+                if (lnameMatchIndex > -1) {
+                    displaylname = highlightMatch(lname, query, lnameMatchIndex);
+                } else {
+                    displaylname = lname;
+                }
+
+                if (nnameMatchIndex > -1) {
+                    displaynname = "(" + highlightMatch(nname, query, nnameMatchIndex) + ")";
+                } else {
+                    displaynname = nname ? "(" + nname + ")" : "";
+                }
+
+                return _gravatar(displayfname + " " + displaylname + " " + displaynname, oResultData.gravatar_lnk);
+            } else {
+                return '';
+            }
+        };
+        
+    //members cache to catch duplicates
+    reviewerAC.dataSource.cache = [];
+    // hack into select event
+    if(reviewerAC.itemSelectEvent){
+    	reviewerAC.itemSelectEvent.subscribe(function (sType, aArgs) {
+
+            var myAC = aArgs[0]; // reference back to the AC instance
+            var elLI = aArgs[1]; // reference to the selected LI element
+            var oData = aArgs[2]; // object literal of selected item's result data
+            var members  = YUD.get('review_members');
+            //fill the autocomplete with value
+
+            if (oData.nname != undefined) {
+            	if (myAC.dataSource.cache.indexOf(oData.id) != -1){
+            		return
+            	}
+
+            	var tmpl = '<li id="reviewer_{2}">'+
+		                      '<div class="reviewers_member">'+
+		                        '<div class="gravatar"><img alt="gravatar" src="{0}"/> </div>'+
+		                        '<div style="float:left">{1}</div>'+
+		                        '<input type="hidden" value="{2}" name="review_members" />'+
+		                        '<span class="delete_icon action_button" onclick="removeReviewer({2})"></span>'+
+		                      '</div>'+
+		                   '</li>'
+
+		        var displayname = "{0} {1} ({2})".format(oData.fname,oData.lname,oData.nname);
+            	var element = tmpl.format(oData.gravatar_lnk,displayname,oData.id);
+            	members.innerHTML += element;
+            	myAC.dataSource.cache.push(oData.id);
+            	YUD.get('user').value = '' 
+            }
+    	});        
+    }
+    return {
+        ownerDS: ownerDS,
+        reviewerAC: reviewerAC,
+    };
+}
 
 
 /**
@@ -1041,8 +1491,16 @@ var get_group_name = function(node){
 	return name
 }
 var get_date = function(node){
-	var date_ = node.firstElementChild.innerHTML;
+	var date_ = YUD.getAttribute(node.firstElementChild,'date');
 	return date_
+}
+
+var get_age = function(node){
+	return node
+}
+
+var get_link = function(node){
+	return node.firstElementChild.text;
 }
 
 var revisionSort = function(a, b, desc, field) {
@@ -1059,8 +1517,21 @@ var revisionSort = function(a, b, desc, field) {
 	  return compState;
 };
 var ageSort = function(a, b, desc, field) {
-    var a_ = a.getData(field);
-    var b_ = b.getData(field);
+    var a_ = fromHTML(a.getData(field));
+    var b_ = fromHTML(b.getData(field));
+    
+    // extract name from table
+    a_ = get_date(a_)
+    b_ = get_date(b_)          
+    
+    var comp = YAHOO.util.Sort.compare;
+    var compState = comp(a_, b_, desc);
+    return compState;
+};
+
+var lastLoginSort = function(a, b, desc, field) {
+	var a_ = a.getData('last_login_raw') || 0;
+    var b_ = b.getData('last_login_raw') || 0;
     
     var comp = YAHOO.util.Sort.compare;
     var compState = comp(a_, b_, desc);
@@ -1070,7 +1541,7 @@ var ageSort = function(a, b, desc, field) {
 var nameSort = function(a, b, desc, field) {
     var a_ = fromHTML(a.getData(field));
     var b_ = fromHTML(b.getData(field));
-    
+
     // extract name from table
     a_ = get_name(a_)
     b_ = get_name(b_)          
@@ -1117,3 +1588,172 @@ var dateSort = function(a, b, desc, field) {
     var compState = comp(a_, b_, desc);
     return compState;
 };
+
+var linkSort = function(a, b, desc, field) {
+	  var a_ = fromHTML(a.getData(field));
+	  var b_ = fromHTML(a.getData(field));
+	  
+	  // extract url text from string nodes 
+	  a_ = get_link(a_)
+	  b_ = get_link(b_)
+
+	  var comp = YAHOO.util.Sort.compare;
+	  var compState = comp(a_, b_, desc);
+	  return compState;
+}
+
+var addPermAction = function(_html, users_list, groups_list){
+    var elmts = YUD.getElementsByClassName('last_new_member');
+    var last_node = elmts[elmts.length-1];
+    if (last_node){
+       var next_id = (YUD.getElementsByClassName('new_members')).length;
+       _html = _html.format(next_id);
+       last_node.innerHTML = _html;
+       YUD.setStyle(last_node, 'display', '');
+       YUD.removeClass(last_node, 'last_new_member');
+       MembersAutoComplete("perm_new_member_name_"+next_id, 
+               "perm_container_"+next_id, users_list, groups_list);          
+       //create new last NODE
+       var el = document.createElement('tr');
+       el.id = 'add_perm_input';
+       YUD.addClass(el,'last_new_member');
+       YUD.addClass(el,'new_members');
+       YUD.insertAfter(el, last_node);
+    }	
+}
+
+/* Multi selectors */
+
+var MultiSelectWidget = function(selected_id, available_id, form_id){
+
+
+	//definition of containers ID's
+	var selected_container = selected_id;
+	var available_container = available_id;
+	
+	//temp container for selected storage.
+	var cache = new Array();
+	var av_cache = new Array();
+	var c =  YUD.get(selected_container);
+	var ac = YUD.get(available_container);
+	
+	//get only selected options for further fullfilment
+	for(var i = 0;node =c.options[i];i++){
+	    if(node.selected){
+	        //push selected to my temp storage left overs :)
+	        cache.push(node);
+	    }
+	}
+	
+	//get all available options to cache
+	for(var i = 0;node =ac.options[i];i++){
+	        //push selected to my temp storage left overs :)
+	        av_cache.push(node);
+	}
+	
+	//fill available only with those not in choosen
+	ac.options.length=0;
+	tmp_cache = new Array();
+	
+	for(var i = 0;node = av_cache[i];i++){
+	    var add = true;
+	    for(var i2 = 0;node_2 = cache[i2];i2++){
+	        if(node.value == node_2.value){
+	            add=false;
+	            break;
+	        }
+	    }
+	    if(add){
+	        tmp_cache.push(new Option(node.text, node.value, false, false));
+	    }
+	}
+	
+	for(var i = 0;node = tmp_cache[i];i++){
+	    ac.options[i] = node;
+	}
+	
+	function prompts_action_callback(e){
+	
+	    var choosen = YUD.get(selected_container);
+	    var available = YUD.get(available_container);
+	
+	    //get checked and unchecked options from field
+	    function get_checked(from_field){
+	        //temp container for storage.
+	        var sel_cache = new Array();
+	        var oth_cache = new Array();
+	
+	        for(var i = 0;node = from_field.options[i];i++){
+	            if(node.selected){
+	                //push selected fields :)
+	                sel_cache.push(node);
+	            }
+	            else{
+	                oth_cache.push(node)
+	            }
+	        }
+	
+	        return [sel_cache,oth_cache]
+	    }
+	
+	    //fill the field with given options
+	    function fill_with(field,options){
+	        //clear firtst
+	        field.options.length=0;
+	        for(var i = 0;node = options[i];i++){
+	                field.options[i]=new Option(node.text, node.value,
+	                        false, false);
+	        }
+	
+	    }
+	    //adds to current field
+	    function add_to(field,options){
+	        for(var i = 0;node = options[i];i++){
+	                field.appendChild(new Option(node.text, node.value,
+	                        false, false));
+	        }
+	    }
+	
+	    // add action
+	    if (this.id=='add_element'){
+	        var c = get_checked(available);
+	        add_to(choosen,c[0]);
+	        fill_with(available,c[1]);
+	    }
+	    // remove action
+	    if (this.id=='remove_element'){
+	        var c = get_checked(choosen);
+	        add_to(available,c[0]);
+	        fill_with(choosen,c[1]);
+	    }
+	    // add all elements
+	    if(this.id=='add_all_elements'){
+	        for(var i=0; node = available.options[i];i++){
+	                choosen.appendChild(new Option(node.text,
+	                        node.value, false, false));
+	        }
+	        available.options.length = 0;
+	    }
+	    //remove all elements
+	    if(this.id=='remove_all_elements'){
+	        for(var i=0; node = choosen.options[i];i++){
+	            available.appendChild(new Option(node.text,
+	                    node.value, false, false));
+	        }
+	        choosen.options.length = 0;
+	    }
+	
+	}
+	
+	YUE.addListener(['add_element','remove_element',
+	               'add_all_elements','remove_all_elements'],'click',
+	               prompts_action_callback)
+	if (form_id !== undefined) {
+		YUE.addListener(form_id,'submit',function(){
+		    var choosen = YUD.get(selected_container);
+		    for (var i = 0; i < choosen.options.length; i++) {
+		        choosen.options[i].selected = 'selected';
+		    }
+		});
+	}
+}

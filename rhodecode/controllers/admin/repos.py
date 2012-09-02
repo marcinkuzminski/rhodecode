@@ -28,12 +28,13 @@ import traceback
 import formencode
 from formencode import htmlfill
 
-from paste.httpexceptions import HTTPInternalServerError
+from webob.exc import HTTPInternalServerError
 from pylons import request, session, tmpl_context as c, url
 from pylons.controllers.util import redirect
 from pylons.i18n.translation import _
 from sqlalchemy.exc import IntegrityError
 
+import rhodecode
 from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator, \
     HasPermissionAnyDecorator, HasRepoPermissionAllDecorator
@@ -45,6 +46,7 @@ from rhodecode.model.db import User, Repository, UserFollowing, RepoGroup
 from rhodecode.model.forms import RepoForm
 from rhodecode.model.scm import ScmModel
 from rhodecode.model.repo import RepoModel
+from rhodecode.lib.compat import json
 
 log = logging.getLogger(__name__)
 
@@ -70,6 +72,8 @@ class ReposController(BaseController):
         repo_model = RepoModel()
         c.users_array = repo_model.get_users_js()
         c.users_groups_array = repo_model.get_users_groups_js()
+        choices, c.landing_revs = ScmModel().get_repo_landing_revs()
+        c.landing_revs_choices = choices
 
     def __load_data(self, repo_name=None):
         """
@@ -90,6 +94,9 @@ class ReposController(BaseController):
                       category='error')
 
             return redirect(url('repos'))
+
+        choices, c.landing_revs = ScmModel().get_repo_landing_revs(c.repo_info)
+        c.landing_revs_choices = choices
 
         c.default_user_id = User.get_by_username('default').user_id
         c.in_public_journal = UserFollowing.query()\
@@ -115,7 +122,10 @@ class ReposController(BaseController):
 
         c.repos_list = [('', _('--REMOVE FORK--'))]
         c.repos_list += [(x.repo_id, x.repo_name) for x in
-                   Repository.query().order_by(Repository.repo_name).all()]
+                    Repository.query().order_by(Repository.repo_name).all()
+                    if x.repo_id != c.repo_info.repo_id]
+
+        defaults['id_fork_of'] = db_repo.fork.repo_id if db_repo.fork else ''
         return defaults
 
     @HasPermissionAllDecorator('hg.admin')
@@ -123,9 +133,45 @@ class ReposController(BaseController):
         """GET /repos: All items in the collection"""
         # url('repos')
 
-        c.repos_list = ScmModel().get_repos(Repository.query()
-                                            .order_by(Repository.repo_name)
-                                            .all(), sort_key='name_sort')
+        c.repos_list = Repository.query()\
+                        .order_by(Repository.repo_name)\
+                        .all()
+
+        repos_data = []
+        total_records = len(c.repos_list)
+
+        _tmpl_lookup = rhodecode.CONFIG['pylons.app_globals'].mako_lookup
+        template = _tmpl_lookup.get_template('data_table/_dt_elements.html')
+
+        quick_menu = lambda repo_name: (template.get_def("quick_menu")
+                                        .render(repo_name, _=_, h=h, c=c))
+        repo_lnk = lambda name, rtype, private, fork_of: (
+            template.get_def("repo_name")
+            .render(name, rtype, private, fork_of, short_name=False,
+                    admin=True, _=_, h=h, c=c))
+
+        repo_actions = lambda repo_name: (template.get_def("repo_actions")
+                                       .render(repo_name, _=_, h=h, c=c))
+
+        for repo in c.repos_list:
+            repos_data.append({
+                "menu": quick_menu(repo.repo_name),
+                "raw_name": repo.repo_name,
+                "name": repo_lnk(repo.repo_name, repo.repo_type,
+                                 repo.private, repo.fork),
+                "desc": repo.description,
+                "owner": repo.user.username,
+                "action": repo_actions(repo.repo_name),
+            })
+
+        c.data = json.dumps({
+            "totalRecords": total_records,
+            "startIndex": 0,
+            "sort": "name",
+            "dir": "asc",
+            "records": repos_data
+        })
+
         return render('admin/repos/repos.html')
 
     @HasPermissionAnyDecorator('hg.admin', 'hg.create.repository')
@@ -137,9 +183,11 @@ class ReposController(BaseController):
         self.__load_defaults()
         form_result = {}
         try:
-            form_result = RepoForm(repo_groups=c.repo_groups_choices)()\
+            form_result = RepoForm(repo_groups=c.repo_groups_choices,
+                                   landing_revs=c.landing_revs_choices)()\
                             .to_python(dict(request.POST))
-            RepoModel().create(form_result, self.rhodecode_user)
+            new_repo = RepoModel().create(form_result,
+                                          self.rhodecode_user.user_id)
             if form_result['clone_uri']:
                 h.flash(_('created repository %s from %s') \
                     % (form_result['repo_name'], form_result['clone_uri']),
@@ -151,11 +199,13 @@ class ReposController(BaseController):
             if request.POST.get('user_created'):
                 # created by regular non admin user
                 action_logger(self.rhodecode_user, 'user_created_repo',
-                              form_result['repo_name_full'], '', self.sa)
+                              form_result['repo_name_full'], self.ip_addr,
+                              self.sa)
             else:
                 action_logger(self.rhodecode_user, 'admin_created_repo',
-                              form_result['repo_name_full'], '', self.sa)
-            Session.commit()
+                              form_result['repo_name_full'], self.ip_addr,
+                              self.sa)
+            Session().commit()
         except formencode.Invalid, errors:
 
             c.new_repo = errors.value['repo_name']
@@ -177,9 +227,9 @@ class ReposController(BaseController):
             msg = _('error occurred during creation of repository %s') \
                     % form_result.get('repo_name')
             h.flash(msg, category='error')
-        if request.POST.get('user_created'):
-            return redirect(url('home'))
-        return redirect(url('repos'))
+            return redirect(url('repos'))
+        #redirect to our new repo !
+        return redirect(url('summary_home', repo_name=new_repo.repo_name))
 
     @HasPermissionAllDecorator('hg.admin')
     def new(self, format='html'):
@@ -202,18 +252,23 @@ class ReposController(BaseController):
         self.__load_defaults()
         repo_model = RepoModel()
         changed_name = repo_name
+        #override the choices with extracted revisions !
+        choices, c.landing_revs = ScmModel().get_repo_landing_revs(repo_name)
+        c.landing_revs_choices = choices
+
         _form = RepoForm(edit=True, old_data={'repo_name': repo_name},
-                         repo_groups=c.repo_groups_choices)()
+                         repo_groups=c.repo_groups_choices,
+                         landing_revs=c.landing_revs_choices)()
         try:
             form_result = _form.to_python(dict(request.POST))
             repo = repo_model.update(repo_name, form_result)
             invalidate_cache('get_repo_cached_%s' % repo_name)
-            h.flash(_('Repository %s updated successfully' % repo_name),
+            h.flash(_('Repository %s updated successfully') % repo_name,
                     category='success')
             changed_name = repo.repo_name
             action_logger(self.rhodecode_user, 'admin_updated_repo',
-                              changed_name, '', self.sa)
-            Session.commit()
+                              changed_name, self.ip_addr, self.sa)
+            Session().commit()
         except formencode.Invalid, errors:
             defaults = self.__load_data(repo_name)
             defaults.update(errors.value)
@@ -253,11 +308,11 @@ class ReposController(BaseController):
             return redirect(url('repos'))
         try:
             action_logger(self.rhodecode_user, 'admin_deleted_repo',
-                              repo_name, '', self.sa)
+                              repo_name, self.ip_addr, self.sa)
             repo_model.delete(repo)
             invalidate_cache('get_repo_cached_%s' % repo_name)
             h.flash(_('deleted repository %s') % repo_name, category='success')
-            Session.commit()
+            Session().commit()
         except IntegrityError, e:
             if e.message.find('repositories_fork_id_fkey') != -1:
                 log.error(traceback.format_exc())
@@ -287,7 +342,7 @@ class ReposController(BaseController):
         try:
             RepoModel().revoke_user_permission(repo=repo_name,
                                                user=request.POST['user_id'])
-            Session.commit()
+            Session().commit()
         except Exception:
             log.error(traceback.format_exc())
             h.flash(_('An error occurred during deletion of repository user'),
@@ -306,7 +361,7 @@ class ReposController(BaseController):
             RepoModel().revoke_users_group_permission(
                 repo=repo_name, group_name=request.POST['users_group_id']
             )
-            Session.commit()
+            Session().commit()
         except Exception:
             log.error(traceback.format_exc())
             h.flash(_('An error occurred during deletion of repository'
@@ -324,8 +379,9 @@ class ReposController(BaseController):
 
         try:
             RepoModel().delete_stats(repo_name)
-            Session.commit()
+            Session().commit()
         except Exception, e:
+            log.error(traceback.format_exc())
             h.flash(_('An error occurred during deletion of repository stats'),
                     category='error')
         return redirect(url('edit_repo', repo_name=repo_name))
@@ -340,9 +396,30 @@ class ReposController(BaseController):
 
         try:
             ScmModel().mark_for_invalidation(repo_name)
-            Session.commit()
+            Session().commit()
         except Exception, e:
+            log.error(traceback.format_exc())
             h.flash(_('An error occurred during cache invalidation'),
+                    category='error')
+        return redirect(url('edit_repo', repo_name=repo_name))
+
+    @HasPermissionAllDecorator('hg.admin')
+    def repo_locking(self, repo_name):
+        """
+        Unlock repository when it is locked !
+
+        :param repo_name:
+        """
+
+        try:
+            repo = Repository.get_by_repo_name(repo_name)
+            if request.POST.get('set_lock'):
+                Repository.lock(repo, c.rhodecode_user.user_id)
+            elif request.POST.get('set_unlock'):
+                Repository.unlock(repo)
+        except Exception, e:
+            log.error(traceback.format_exc())
+            h.flash(_('An error occurred during unlocking'),
                     category='error')
         return redirect(url('edit_repo', repo_name=repo_name))
 
@@ -364,7 +441,7 @@ class ReposController(BaseController):
                 self.scm_model.toggle_following_repo(repo_id, user_id)
                 h.flash(_('Updated repository visibility in public journal'),
                         category='success')
-                Session.commit()
+                Session().commit()
             except:
                 h.flash(_('An error occurred during setting this'
                           ' repository in public journal'),
@@ -403,11 +480,11 @@ class ReposController(BaseController):
             repo = ScmModel().mark_as_fork(repo_name, fork_id,
                                     self.rhodecode_user.username)
             fork = repo.fork.repo_name if repo.fork else _('Nothing')
-            Session.commit()
-            h.flash(_('Marked repo %s as fork of %s' % (repo_name,fork)),
+            Session().commit()
+            h.flash(_('Marked repo %s as fork of %s') % (repo_name, fork),
                     category='success')
         except Exception, e:
-            raise
+            log.error(traceback.format_exc())
             h.flash(_('An error occurred during this operation'),
                     category='error')
 

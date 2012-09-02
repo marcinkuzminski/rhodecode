@@ -8,6 +8,7 @@ import traceback
 
 from paste.auth.basic import AuthBasicAuthenticator
 from paste.httpexceptions import HTTPUnauthorized, HTTPForbidden
+from webob.exc import HTTPClientError
 from paste.httpheaders import WWW_AUTHENTICATE
 
 from pylons import config, tmpl_context as c, request, session, url
@@ -17,17 +18,45 @@ from pylons.templating import render_mako as render
 
 from rhodecode import __version__, BACKENDS
 
-from rhodecode.lib.utils2 import str2bool, safe_unicode
+from rhodecode.lib.utils2 import str2bool, safe_unicode, AttributeDict,\
+    safe_str
 from rhodecode.lib.auth import AuthUser, get_container_username, authfunc,\
     HasPermissionAnyMiddleware, CookieStoreWrapper
 from rhodecode.lib.utils import get_repo_slug, invalidate_cache
 from rhodecode.model import meta
 
-from rhodecode.model.db import Repository
+from rhodecode.model.db import Repository, RhodeCodeUi, User
 from rhodecode.model.notification import NotificationModel
 from rhodecode.model.scm import ScmModel
+from rhodecode.model.meta import Session
 
 log = logging.getLogger(__name__)
+
+
+def _get_ip_addr(environ):
+    proxy_key = 'HTTP_X_REAL_IP'
+    proxy_key2 = 'HTTP_X_FORWARDED_FOR'
+    def_key = 'REMOTE_ADDR'
+
+    ip = environ.get(proxy_key2)
+    if ip:
+        return ip
+
+    ip = environ.get(proxy_key)
+
+    if ip:
+        return ip
+
+    ip = environ.get(def_key, '0.0.0.0')
+    return ip
+
+
+def _get_access_path(environ):
+    path = environ.get('PATH_INFO')
+    org_req = environ.get('pylons.original_request')
+    if org_req:
+        path = org_req.environ.get('PATH_INFO')
+    return path
 
 
 class BasicAuth(AuthBasicAuthenticator):
@@ -117,15 +146,65 @@ class BaseVCSController(object):
         return True
 
     def _get_ip_addr(self, environ):
-        proxy_key = 'HTTP_X_REAL_IP'
-        proxy_key2 = 'HTTP_X_FORWARDED_FOR'
-        def_key = 'REMOTE_ADDR'
+        return _get_ip_addr(environ)
 
-        return environ.get(proxy_key2,
-                           environ.get(proxy_key,
-                                       environ.get(def_key, '0.0.0.0')
-                            )
-                        )
+    def _check_ssl(self, environ, start_response):
+        """
+        Checks the SSL check flag and returns False if SSL is not present
+        and required True otherwise
+        """
+        org_proto = environ['wsgi._org_proto']
+        #check if we have SSL required  ! if not it's a bad request !
+        require_ssl = str2bool(RhodeCodeUi.get_by_key('push_ssl').ui_value)
+        if require_ssl and org_proto == 'http':
+            log.debug('proto is %s and SSL is required BAD REQUEST !'
+                      % org_proto)
+            return False
+        return True
+
+    def _check_locking_state(self, environ, action, repo, user_id):
+        """
+        Checks locking on this repository, if locking is enabled and lock is
+        present returns a tuple of make_lock, locked, locked_by.
+        make_lock can have 3 states None (do nothing) True, make lock
+        False release lock, This value is later propagated to hooks, which
+        do the locking. Think about this as signals passed to hooks what to do.
+
+        """
+        locked = False  # defines that locked error should be thrown to user
+        make_lock = None
+        repo = Repository.get_by_repo_name(repo)
+        user = User.get(user_id)
+
+        # this is kind of hacky, but due to how mercurial handles client-server
+        # server see all operation on changeset; bookmarks, phases and
+        # obsolescence marker in different transaction, we don't want to check
+        # locking on those
+        obsolete_call = environ['QUERY_STRING'] in ['cmd=listkeys',]
+        locked_by = repo.locked
+        if repo and repo.enable_locking and not obsolete_call:
+            if action == 'push':
+                #check if it's already locked !, if it is compare users
+                user_id, _date = repo.locked
+                if user.user_id == user_id:
+                    log.debug('Got push from user %s, now unlocking' % (user))
+                    # unlock if we have push from user who locked
+                    make_lock = False
+                else:
+                    # we're not the same user who locked, ban with 423 !
+                    locked = True
+            if action == 'pull':
+                if repo.locked[0] and repo.locked[1]:
+                    locked = True
+                else:
+                    log.debug('Setting lock on repo %s by %s' % (repo, user))
+                    make_lock = True
+
+        else:
+            log.debug('Repository %s do not have locking enabled' % (repo))
+        log.debug('FINAL locking values make_lock:%s,locked:%s,locked_by:%s'
+                  % (make_lock, locked, locked_by))
+        return make_lock, locked, locked_by
 
     def __call__(self, environ, start_response):
         start = time.time()
@@ -145,6 +224,12 @@ class BaseController(WSGIController):
         c.rhodecode_name = config.get('rhodecode_title')
         c.use_gravatar = str2bool(config.get('use_gravatar'))
         c.ga_code = config.get('rhodecode_ga_code')
+        # Visual options
+        c.visual = AttributeDict({})
+        c.visual.show_public_icon = str2bool(config.get('rhodecode_show_public_icon'))
+        c.visual.show_private_icon = str2bool(config.get('rhodecode_show_private_icon'))
+        c.visual.stylify_metatags = str2bool(config.get('rhodecode_stylify_metatags'))
+
         c.repo_name = get_repo_slug(request)
         c.backends = BACKENDS.keys()
         c.unread_notifications = NotificationModel()\
@@ -153,6 +238,7 @@ class BaseController(WSGIController):
 
         self.sa = meta.Session
         self.scm_model = ScmModel(self.sa)
+        self.ip_addr = ''
 
     def __call__(self, environ, start_response):
         """Invoke the Controller"""
@@ -161,6 +247,7 @@ class BaseController(WSGIController):
         # available in environ['pylons.routes_dict']
         start = time.time()
         try:
+            self.ip_addr = _get_ip_addr(environ)
             # make sure that we update permissions each time we call controller
             api_key = request.GET.get('api_key')
             cookie_store = CookieStoreWrapper(session.get('rhodecode_user'))
@@ -174,13 +261,14 @@ class BaseController(WSGIController):
                 self.rhodecode_user.set_authenticated(
                     cookie_store.get('is_authenticated')
                 )
-            log.info('User: %s accessed %s' % (
-                auth_user, safe_unicode(environ.get('PATH_INFO')))
+            log.info('IP: %s User: %s accessed %s' % (
+               self.ip_addr, auth_user, safe_unicode(_get_access_path(environ)))
             )
             return WSGIController.__call__(self, environ, start_response)
         finally:
-            log.info('Request to %s time: %.3fs' % (
-                safe_unicode(environ.get('PATH_INFO')), time.time() - start)
+            log.info('IP: %s Request to %s time: %.3fs' % (
+                _get_ip_addr(environ),
+                safe_unicode(_get_access_path(environ)), time.time() - start)
             )
             meta.Session.remove()
 
@@ -200,7 +288,7 @@ class BaseRepoController(BaseController):
         super(BaseRepoController, self).__before__()
         if c.repo_name:
 
-            c.rhodecode_db_repo = Repository.get_by_repo_name(c.repo_name)
+            dbr = c.rhodecode_db_repo = Repository.get_by_repo_name(c.repo_name)
             c.rhodecode_repo = c.rhodecode_db_repo.scm_instance
 
             if c.rhodecode_repo is None:
@@ -209,5 +297,7 @@ class BaseRepoController(BaseController):
 
                 redirect(url('home'))
 
-            c.repository_followers = self.scm_model.get_followers(c.repo_name)
-            c.repository_forks = self.scm_model.get_forks(c.repo_name)
+            # some globals counter for menu
+            c.repository_followers = self.scm_model.get_followers(dbr)
+            c.repository_forks = self.scm_model.get_forks(dbr)
+            c.repository_pull_requests = self.scm_model.get_pull_requests(dbr)

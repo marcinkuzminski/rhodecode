@@ -62,6 +62,15 @@
                 </div>
             </div>
             <div class="field">
+                <div class="label">
+                    <label for="landing_rev">${_('Landing revision')}:</label>
+                </div>
+                <div class="input">
+                    ${h.select('landing_rev','',c.landing_revs,class_="medium")}
+                    <span class="help-block">${_('Default revision for files page, downloads, whoosh and readme')}</span>
+                </div>
+            </div>
+            <div class="field">
                 <div class="label label-textarea">
                     <label for="description">${_('Description')}:</label>
                 </div>
@@ -99,6 +108,15 @@
                 </div>
             </div>
             <div class="field">
+                <div class="label label-checkbox">
+                    <label for="enable_locking">${_('Enable locking')}:</label>
+                </div>
+                <div class="checkboxes">
+                    ${h.checkbox('enable_locking',value="True")}
+                    <span class="help-block">${_('Enable lock-by-pulling on repository.')}</span>
+                </div>
+            </div>            
+            <div class="field">
                 <div class="label">
                     <label for="user">${_('Owner')}:</label>
                 </div>
@@ -120,8 +138,8 @@
                 </div>
 
                 <div class="buttons">
-                  ${h.submit('save','Save',class_="ui-button")}
-                  ${h.reset('reset','Reset',class_="ui-button")}
+                  ${h.submit('save',_('Save'),class_="ui-btn large")}
+                  ${h.reset('reset',_('Reset'),class_="ui-btn large")}
                 </div>
             </div>
     </div>
@@ -187,13 +205,49 @@
                 </div>
                <div class="field" style="border:none;color:#888">
                <ul>
-                    <li>${_('''All actions made on this repository will be accessible to everyone in public journal''')}
+                    <li>${_('All actions made on this repository will be accessible to everyone in public journal')}
                     </li>
                </ul>
                </div>
         </div>
         ${h.end_form()}
 
+        <h3>${_('Locking')}</h3>
+        ${h.form(url('repo_locking', repo_name=c.repo_info.repo_name),method='put')}
+        <div class="form">
+           <div class="fields">
+              %if c.repo_info.locked[0]:
+               ${h.submit('set_unlock' ,_('Unlock locked repo'),class_="ui-btn",onclick="return confirm('"+_('Confirm to unlock repository')+"');")}
+               ${'Locked by %s on %s' % (h.person_by_id(c.repo_info.locked[0]),h.fmt_date(h.time_to_datetime(c.repo_info.locked[1])))}
+              %else:
+                ${h.submit('set_lock',_('lock repo'),class_="ui-btn",onclick="return confirm('"+_('Confirm to lock repository')+"');")}
+                ${_('Repository is not locked')}
+              %endif
+           </div>
+           <div class="field" style="border:none;color:#888">
+           <ul>
+                <li>${_('Force locking on repository. Works only when anonymous access is disabled')}
+                </li>
+           </ul>
+           </div>           
+        </div>
+        ${h.end_form()}
+
+        <h3>${_('Set as fork of')}</h3>
+        ${h.form(url('repo_as_fork', repo_name=c.repo_info.repo_name),method='put')}
+        <div class="form">
+           <div class="fields">
+               ${h.select('id_fork_of','',c.repos_list,class_="medium")}
+               ${h.submit('set_as_fork_%s' % c.repo_info.repo_name,_('set'),class_="ui-btn",)}
+           </div>
+               <div class="field" style="border:none;color:#888">
+               <ul>
+                    <li>${_('''Manually set this repository as a fork of another from the list''')}</li>
+               </ul>
+               </div>
+        </div>        
+        ${h.end_form()}
+        
         <h3>${_('Delete')}</h3>
         ${h.form(url('repo', repo_name=c.repo_info.repo_name),method='delete')}
         <div class="form">
@@ -208,24 +262,7 @@
            </ul>
            </div>
         </div>
-        ${h.end_form()}
-
-        <h3>${_('Set as fork')}</h3>
-        ${h.form(url('repo_as_fork', repo_name=c.repo_info.repo_name),method='put')}
-        <div class="form">
-           <div class="fields">
-               ${h.select('id_fork_of','',c.repos_list,class_="medium")}
-               ${h.submit('set_as_fork_%s' % c.repo_info.repo_name,_('set'),class_="ui-btn",)}
-           </div>
-               <div class="field" style="border:none;color:#888">
-               <ul>
-                    <li>${_('''Manually set this repository as a fork of another''')}</li>
-               </ul>
-               </div>
-        </div>
-        ${h.end_form()}
-
+        ${h.end_form()}        
 </div>
-
 
 </%def>

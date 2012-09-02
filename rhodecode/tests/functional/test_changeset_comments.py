@@ -40,8 +40,8 @@ class TestChangeSetCommentsController(TestController):
                                 repo_name=HG_REPO, revision=rev))
         # test DB
         self.assertEqual(ChangesetComment.query().count(), 1)
-        self.assertTrue('''<div class="comments-number">%s '''
-                        '''comment(s) (0 inline)</div>''' % 1 in response.body)
+        response.mustcontain('''<div class="comments-number">%s comment '''
+                             '''(0 inline)</div>''' % 1)
 
         self.assertEqual(Notification.query().count(), 1)
         self.assertEqual(ChangesetComment.query().count(), 1)
@@ -76,7 +76,7 @@ class TestChangeSetCommentsController(TestController):
         #test DB
         self.assertEqual(ChangesetComment.query().count(), 1)
         response.mustcontain(
-            '''<div class="comments-number">0 comment(s)'''
+            '''<div class="comments-number">0 comments'''
             ''' (%s inline)</div>''' % 1
         )
         response.mustcontain(
@@ -115,8 +115,8 @@ class TestChangeSetCommentsController(TestController):
                                 repo_name=HG_REPO, revision=rev))
         # test DB
         self.assertEqual(ChangesetComment.query().count(), 1)
-        self.assertTrue('''<div class="comments-number">%s '''
-                        '''comment(s) (0 inline)</div>''' % 1 in response.body)
+        response.mustcontain('''<div class="comments-number">%s '''
+                             '''comment (0 inline)</div>''' % 1)
 
         self.assertEqual(Notification.query().count(), 2)
         users = [x.user.username for x in UserNotification.query().all()]
@@ -148,5 +148,5 @@ class TestChangeSetCommentsController(TestController):
 
         response = self.app.get(url(controller='changeset', action='index',
                                 repo_name=HG_REPO, revision=rev))
-        self.assertTrue('''<div class="comments-number">0 comment(s)'''
-                        ''' (0 inline)</div>''' in response.body)
+        response.mustcontain('''<div class="comments-number">0 comments'''
+                             ''' (0 inline)</div>''')

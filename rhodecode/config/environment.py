@@ -72,19 +72,28 @@ def load_environment(global_conf, app_conf, initial=False):
     config['pylons.strict_tmpl_context'] = True
     test = os.path.split(config['__file__'])[-1] == 'test.ini'
     if test:
+        if os.environ.get('TEST_DB'):
+            # swap config if we pass enviroment variable
+            config['sqlalchemy.db1.url'] = os.environ.get('TEST_DB')
+
         from rhodecode.lib.utils import create_test_env, create_test_index
         from rhodecode.tests import  TESTS_TMP_PATH
-        create_test_env(TESTS_TMP_PATH, config)
-        create_test_index(TESTS_TMP_PATH, config, True)
+        # set RC_NO_TMP_PATH=1 to disable re-creating the database and
+        # test repos
+        if not int(os.environ.get('RC_NO_TMP_PATH', 0)):
+            create_test_env(TESTS_TMP_PATH, config)
+        # set RC_WHOOSH_TEST_DISABLE=1 to disable whoosh index during tests
+        if not int(os.environ.get('RC_WHOOSH_TEST_DISABLE', 0)):
+            create_test_index(TESTS_TMP_PATH, config, True)
 
     # MULTIPLE DB configs
     # Setup the SQLAlchemy database engine
     sa_engine_db1 = engine_from_config(config, 'sqlalchemy.db1.')
-
     init_model(sa_engine_db1)
 
     repos_path = make_ui('db').configitems('paths')[0][1]
-    repo2db_mapper(ScmModel().repo_scan(repos_path))
+    repo2db_mapper(ScmModel().repo_scan(repos_path),
+                   remove_obsolete=False, install_git_hook=False)
     set_available_permissions(config)
     config['base_path'] = repos_path
     set_rhodecode_config(config)

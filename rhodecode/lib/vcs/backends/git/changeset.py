@@ -9,7 +9,7 @@ from rhodecode.lib.vcs.exceptions import NodeDoesNotExistError
 from rhodecode.lib.vcs.exceptions import VCSError
 from rhodecode.lib.vcs.exceptions import ChangesetDoesNotExistError
 from rhodecode.lib.vcs.exceptions import ImproperArchiveTypeError
-from rhodecode.lib.vcs.backends.base import BaseChangeset
+from rhodecode.lib.vcs.backends.base import BaseChangeset, EmptyChangeset
 from rhodecode.lib.vcs.nodes import FileNode, DirNode, NodeKind, RootNode, \
     RemovedFileNode, SubModuleNode
 from rhodecode.lib.vcs.utils import safe_unicode
@@ -25,17 +25,24 @@ class GitChangeset(BaseChangeset):
     def __init__(self, repository, revision):
         self._stat_modes = {}
         self.repository = repository
-        self.raw_id = revision
-        self.revision = repository.revisions.index(revision)
 
-        self.short_id = self.raw_id[:12]
-        self.id = self.raw_id
         try:
-            commit = self.repository._repo.get_object(self.raw_id)
+            commit = self.repository._repo.get_object(revision)
+            if isinstance(commit, objects.Tag):
+                revision = commit.object[1]
+                commit = self.repository._repo.get_object(commit.object[1])
         except KeyError:
-            raise RepositoryError("Cannot get object with id %s" % self.raw_id)
+            raise RepositoryError("Cannot get object with id %s" % revision)
+        self.raw_id = revision
+        self.id = self.raw_id
+        self.short_id = self.raw_id[:12]
         self._commit = commit
+
         self._tree_id = commit.tree
+        self._commiter_property = 'committer'
+        self._date_property = 'commit_time'
+        self._date_tz_property = 'commit_timezone'
+        self.revision = repository.revisions.index(revision)
 
         self.message = safe_unicode(commit.message)
         #self.branch = None
@@ -45,12 +52,16 @@ class GitChangeset(BaseChangeset):
 
     @LazyProperty
     def author(self):
-        return safe_unicode(self._commit.committer)
+        return safe_unicode(getattr(self._commit, self._commiter_property))
 
     @LazyProperty
     def date(self):
-        return date_fromtimestamp(self._commit.commit_time,
-                                  self._commit.commit_timezone)
+        return date_fromtimestamp(getattr(self._commit, self._date_property),
+                                  getattr(self._commit, self._date_tz_property))
+
+    @LazyProperty
+    def _timestamp(self):
+        return getattr(self._commit, self._date_property)
 
     @LazyProperty
     def status(self):
@@ -83,7 +94,7 @@ class GitChangeset(BaseChangeset):
         if not path in self._paths:
             path = path.strip('/')
             # set root tree
-            tree = self.repository._repo[self._commit.tree]
+            tree = self.repository._repo[self._tree_id]
             if path == '':
                 self._paths[''] = tree.id
                 return tree.id
@@ -132,8 +143,7 @@ class GitChangeset(BaseChangeset):
         return self._paths[path]
 
     def _get_kind(self, path):
-        id = self._get_id_for_path(path)
-        obj = self.repository._repo[id]
+        obj = self.repository._repo[self._get_id_for_path(path)]
         if isinstance(obj, objects.Blob):
             return NodeKind.FILE
         elif isinstance(obj, objects.Tree):
@@ -148,7 +158,7 @@ class GitChangeset(BaseChangeset):
         Returns list of parents changesets.
         """
         return [self.repository.get_changeset(parent)
-            for parent in self._commit.parents]
+                for parent in self._commit.parents]
 
     def next(self, branch=None):
 
@@ -193,6 +203,13 @@ class GitChangeset(BaseChangeset):
             return cs
 
         return _prev(self, branch)
+
+    def diff(self, ignore_whitespace=True, context=3):
+        rev1 = self.parents[0] if self.parents else self.repository.EMPTY_CHANGESET
+        rev2 = self
+        return ''.join(self.repository.get_diff(rev1, rev2,
+                                    ignore_whitespace=ignore_whitespace,
+                                    context=context))
 
     def get_file_mode(self, path):
         """
@@ -254,10 +271,11 @@ class GitChangeset(BaseChangeset):
         # --root ==> doesn't put '^' character for bounderies
         # -r sha ==> blames for the given revision
         so, se = self.repository.run_git_command(cmd)
+
         annotate = []
         for i, blame_line in enumerate(so.split('\n')[:-1]):
             ln_no = i + 1
-            id, line = re.split(r' \(.+?\) ', blame_line, 1)
+            id, line = re.split(r' ', blame_line, 1)
             annotate.append((ln_no, self.repository.get_changeset(id), line))
         return annotate
 
@@ -363,10 +381,10 @@ class GitChangeset(BaseChangeset):
                 raise NodeDoesNotExistError("Cannot find one of parents' "
                     "directories for a given path: %s" % path)
 
-            als = self.repository.alias
             _GL = lambda m: m and objects.S_ISGITLINK(m)
             if _GL(self._stat_modes.get(path)):
-                node = SubModuleNode(path, url=None, changeset=id_, alias=als)
+                node = SubModuleNode(path, url=None, changeset=id_,
+                                     alias=self.repository.alias)
             else:
                 obj = self.repository._repo.get_object(id_)
 
@@ -392,17 +410,43 @@ class GitChangeset(BaseChangeset):
         """
         Get's a fast accessible file changes for given changeset
         """
-
-        return self.added + self.changed
+        a, m, d = self._changes_cache
+        return list(a.union(m).union(d))
 
     @LazyProperty
     def _diff_name_status(self):
         output = []
         for parent in self.parents:
-            cmd = 'diff --name-status %s %s --encoding=utf8' % (parent.raw_id, self.raw_id)
+            cmd = 'diff --name-status %s %s --encoding=utf8' % (parent.raw_id,
+                                                                self.raw_id)
             so, se = self.repository.run_git_command(cmd)
             output.append(so.strip())
         return '\n'.join(output)
+
+    @LazyProperty
+    def _changes_cache(self):
+        added = set()
+        modified = set()
+        deleted = set()
+        _r = self.repository._repo
+
+        parents = self.parents
+        if not self.parents:
+            parents = [EmptyChangeset()]
+        for parent in parents:
+            if isinstance(parent, EmptyChangeset):
+                oid = None
+            else:
+                oid = _r[parent.raw_id].tree
+            changes = _r.object_store.tree_changes(oid, _r[self.raw_id].tree)
+            for (oldpath, newpath), (_, _), (_, _) in changes:
+                if newpath and oldpath:
+                    modified.add(newpath)
+                elif newpath and not oldpath:
+                    added.add(newpath)
+                elif not newpath and oldpath:
+                    deleted.add(oldpath)
+        return added, modified, deleted
 
     def _get_paths_for_status(self, status):
         """
@@ -410,21 +454,12 @@ class GitChangeset(BaseChangeset):
 
         :param status: one of: *added*, *modified* or *deleted*
         """
-        paths = set()
-        char = status[0].upper()
-        for line in self._diff_name_status.splitlines():
-            if not line:
-                continue
-
-            if line.startswith(char):
-                splitted = line.split(char, 1)
-                if not len(splitted) == 2:
-                    raise VCSError("Couldn't parse diff result:\n%s\n\n and "
-                        "particularly that line: %s" % (self._diff_name_status,
-                        line))
-                _path = splitted[1].strip()
-                paths.add(_path)
-        return sorted(paths)
+        a, m, d = self._changes_cache
+        return sorted({
+            'added': list(a),
+            'modified': list(m),
+            'deleted': list(d)}[status]
+        )
 
     @LazyProperty
     def added(self):

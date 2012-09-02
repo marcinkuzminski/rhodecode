@@ -22,6 +22,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from __future__ import with_statement
 import os
 import shutil
 import logging
@@ -45,24 +46,16 @@ log = logging.getLogger(__name__)
 
 class RepoModel(BaseModel):
 
-    def __get_user(self, user):
-        return self._get_instance(User, user, callback=User.get_by_username)
+    cls = Repository
+    URL_SEPARATOR = Repository.url_sep()
 
     def __get_users_group(self, users_group):
         return self._get_instance(UsersGroup, users_group,
                                   callback=UsersGroup.get_by_group_name)
 
-    def __get_repos_group(self, repos_group):
+    def _get_repos_group(self, repos_group):
         return self._get_instance(RepoGroup, repos_group,
                                   callback=RepoGroup.get_by_group_name)
-
-    def __get_repo(self, repository):
-        return self._get_instance(Repository, repository,
-                                  callback=Repository.get_by_repo_name)
-
-    def __get_perm(self, permission):
-        return self._get_instance(Permission, permission,
-                                  callback=Permission.get_by_key)
 
     @LazyProperty
     def repos_path(self):
@@ -83,7 +76,7 @@ class RepoModel(BaseModel):
         return repo.scalar()
 
     def get_repo(self, repository):
-        return self.__get_repo(repository)
+        return self._get_repo(repository)
 
     def get_by_repo_name(self, repo_name, cache=False):
         repo = self.sa.query(Repository)\
@@ -209,37 +202,45 @@ class RepoModel(BaseModel):
             log.error(traceback.format_exc())
             raise
 
-    def create(self, form_data, cur_user, just_db=False, fork=False):
+    def create_repo(self, repo_name, repo_type, description, owner,
+                    private=False, clone_uri=None, repos_group=None,
+                    landing_rev='tip', just_db=False, fork_of=None,
+                    copy_fork_permissions=False):
+        """
+        Create repository
+
+        """
         from rhodecode.model.scm import ScmModel
 
+        owner = self._get_user(owner)
+        fork_of = self._get_repo(fork_of)
+        repos_group = self._get_repos_group(repos_group)
         try:
-            if fork:
-                fork_parent_id = form_data['fork_parent_id']
 
             # repo name is just a name of repository
             # while repo_name_full is a full qualified name that is combined
             # with name and path of group
-            repo_name = form_data['repo_name']
-            repo_name_full = form_data['repo_name_full']
+            repo_name_full = repo_name
+            repo_name = repo_name.split(self.URL_SEPARATOR)[-1]
 
             new_repo = Repository()
             new_repo.enable_statistics = False
+            new_repo.repo_name = repo_name_full
+            new_repo.repo_type = repo_type
+            new_repo.user = owner
+            new_repo.group = repos_group
+            new_repo.description = description or repo_name
+            new_repo.private = private
+            new_repo.clone_uri = clone_uri
+            new_repo.landing_rev = landing_rev
 
-            for k, v in form_data.items():
-                if k == 'repo_name':
-                    v = repo_name_full
-                if k == 'repo_group':
-                    k = 'group_id'
-                if k == 'description':
-                    v = v or repo_name
+            if repos_group:
+                new_repo.enable_locking = repos_group.enable_locking
 
-                setattr(new_repo, k, v)
-
-            if fork:
-                parent_repo = Repository.get(fork_parent_id)
+            if fork_of:
+                parent_repo = fork_of
                 new_repo.fork = parent_repo
 
-            new_repo.user_id = cur_user.user_id
             self.sa.add(new_repo)
 
             def _create_default_perms():
@@ -251,7 +252,7 @@ class RepoModel(BaseModel):
                         default = p.permission.permission_name
                         break
 
-                default_perm = 'repository.none' if form_data['private'] else default
+                default_perm = 'repository.none' if private else default
 
                 repo_to_perm.permission_id = self.sa.query(Permission)\
                         .filter(Permission.permission_name == default_perm)\
@@ -262,9 +263,9 @@ class RepoModel(BaseModel):
 
                 self.sa.add(repo_to_perm)
 
-            if fork:
-                if form_data.get('copy_permissions'):
-                    repo = Repository.get(fork_parent_id)
+            if fork_of:
+                if copy_fork_permissions:
+                    repo = fork_of
                     user_perms = UserRepoToPerm.query()\
                         .filter(UserRepoToPerm.repository == repo).all()
                     group_perms = UsersGroupRepoToPerm.query()\
@@ -283,19 +284,44 @@ class RepoModel(BaseModel):
                 _create_default_perms()
 
             if not just_db:
-                self.__create_repo(repo_name, form_data['repo_type'],
-                                   form_data['repo_group'],
-                                   form_data['clone_uri'])
+                self.__create_repo(repo_name, repo_type,
+                                   repos_group,
+                                   clone_uri)
                 log_create_repository(new_repo.get_dict(),
-                                      created_by=cur_user.username)
+                                      created_by=owner.username)
 
             # now automatically start following this repository as owner
             ScmModel(self.sa).toggle_following_repo(new_repo.repo_id,
-                                                    cur_user.user_id)
+                                                    owner.user_id)
             return new_repo
         except:
             log.error(traceback.format_exc())
             raise
+
+    def create(self, form_data, cur_user, just_db=False, fork=None):
+        """
+        Backward compatibility function, just a wrapper on top of create_repo
+
+        :param form_data:
+        :param cur_user:
+        :param just_db:
+        :param fork:
+        """
+
+        repo_name = form_data['repo_name_full']
+        repo_type = form_data['repo_type']
+        description = form_data['description']
+        owner = cur_user
+        private = form_data['private']
+        clone_uri = form_data.get('clone_uri')
+        repos_group = form_data['repo_group']
+        landing_rev = form_data['landing_rev']
+        copy_fork_permissions = form_data.get('copy_permissions')
+        fork_of = form_data.get('fork_parent_id')
+        return self.create_repo(
+            repo_name, repo_type, description, owner, private, clone_uri,
+            repos_group, landing_rev, just_db, fork_of, copy_fork_permissions
+        )
 
     def create_fork(self, form_data, cur_user):
         """
@@ -308,13 +334,14 @@ class RepoModel(BaseModel):
         run_task(tasks.create_repo_fork, form_data, cur_user)
 
     def delete(self, repo):
-        repo = self.__get_repo(repo)
-        try:
-            self.sa.delete(repo)
-            self.__delete_repo(repo)
-        except:
-            log.error(traceback.format_exc())
-            raise
+        repo = self._get_repo(repo)
+        if repo:
+            try:
+                self.sa.delete(repo)
+                self.__delete_repo(repo)
+            except:
+                log.error(traceback.format_exc())
+                raise
 
     def grant_user_permission(self, repo, user, perm):
         """
@@ -325,9 +352,9 @@ class RepoModel(BaseModel):
         :param user: Instance of User, user_id or username
         :param perm: Instance of Permission, or permission_name
         """
-        user = self.__get_user(user)
-        repo = self.__get_repo(repo)
-        permission = self.__get_perm(perm)
+        user = self._get_user(user)
+        repo = self._get_repo(repo)
+        permission = self._get_perm(perm)
 
         # check if we have that permission already
         obj = self.sa.query(UserRepoToPerm)\
@@ -350,8 +377,8 @@ class RepoModel(BaseModel):
         :param user: Instance of User, user_id or username
         """
 
-        user = self.__get_user(user)
-        repo = self.__get_repo(repo)
+        user = self._get_user(user)
+        repo = self._get_repo(repo)
 
         obj = self.sa.query(UserRepoToPerm)\
             .filter(UserRepoToPerm.repository == repo)\
@@ -369,9 +396,9 @@ class RepoModel(BaseModel):
             or users group name
         :param perm: Instance of Permission, or permission_name
         """
-        repo = self.__get_repo(repo)
+        repo = self._get_repo(repo)
         group_name = self.__get_users_group(group_name)
-        permission = self.__get_perm(perm)
+        permission = self._get_perm(perm)
 
         # check if we have that permission already
         obj = self.sa.query(UsersGroupRepoToPerm)\
@@ -396,7 +423,7 @@ class RepoModel(BaseModel):
         :param group_name: Instance of UserGroup, users_group_id,
             or users group name
         """
-        repo = self.__get_repo(repo)
+        repo = self._get_repo(repo)
         group_name = self.__get_users_group(group_name)
 
         obj = self.sa.query(UsersGroupRepoToPerm)\
@@ -421,7 +448,7 @@ class RepoModel(BaseModel):
             log.error(traceback.format_exc())
             raise
 
-    def __create_repo(self, repo_name, alias, new_parent_id, clone_uri=False):
+    def __create_repo(self, repo_name, alias, parent, clone_uri=False):
         """
         makes repository on filesystem. It's group aware means it'll create
         a repository within a group, and alter the paths accordingly of
@@ -433,11 +460,10 @@ class RepoModel(BaseModel):
         :param clone_uri:
         """
         from rhodecode.lib.utils import is_valid_repo, is_valid_repos_group
+        from rhodecode.model.scm import ScmModel
 
-        if new_parent_id:
-            paths = RepoGroup.get(new_parent_id)\
-                .full_path.split(RepoGroup.url_sep())
-            new_parent_path = os.sep.join(paths)
+        if parent:
+            new_parent_path = os.sep.join(parent.full_path_splitted)
         else:
             new_parent_path = ''
 
@@ -458,8 +484,14 @@ class RepoModel(BaseModel):
                 )
         )
         backend = get_backend(alias)
-
-        backend(repo_path, create=True, src_url=clone_uri)
+        if alias == 'hg':
+            backend(repo_path, create=True, src_url=clone_uri)
+        elif alias == 'git':
+            r = backend(repo_path, create=True, src_url=clone_uri, bare=True)
+            # add rhodecode hook into this repo
+            ScmModel().install_git_hook(repo=r)
+        else:
+            raise Exception('Undefined alias %s' % alias)
 
     def __rename_repo(self, old, new):
         """
@@ -489,11 +521,18 @@ class RepoModel(BaseModel):
         """
         rm_path = os.path.join(self.repos_path, repo.repo_name)
         log.info("Removing %s" % (rm_path))
-        # disable hg/git
+        # disable hg/git internal that it doesn't get detected as repo
         alias = repo.repo_type
-        shutil.move(os.path.join(rm_path, '.%s' % alias),
-                    os.path.join(rm_path, 'rm__.%s' % alias))
+
+        bare = getattr(repo.scm_instance, 'bare', False)
+
+        if not bare:
+            # skip this for bare git repos
+            shutil.move(os.path.join(rm_path, '.%s' % alias),
+                        os.path.join(rm_path, 'rm__.%s' % alias))
         # disable repo
-        _d = 'rm__%s__%s' % (datetime.now().strftime('%Y%m%d_%H%M%S_%f'),
+        _now = datetime.now()
+        _ms = str(_now.microsecond).rjust(6, '0')
+        _d = 'rm__%s__%s' % (_now.strftime('%Y%m%d_%H%M%S_' + _ms),
                              repo.repo_name)
         shutil.move(rm_path, os.path.join(self.repos_path, _d))

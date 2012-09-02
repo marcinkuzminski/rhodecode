@@ -2,6 +2,7 @@ syntax: glob
 *.pyc
 *.swp
 *.sqlite
+*.tox
 *.egg-info
 *.egg
 
@@ -20,3 +21,4 @@ syntax: regexp
 ^RhodeCode\.egg-info$
 ^rc\.ini$
 ^fabfile.py
+^\.rhodecode$

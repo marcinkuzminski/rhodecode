@@ -3,15 +3,16 @@
 <%inherit file="/base/base.html"/>
 
 <%def name="title()">
-${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
+${_('%s Changelog') % c.repo_name} - ${c.rhodecode_name}
 </%def>
 
 <%def name="breadcrumbs_links()">
-    ${h.link_to(u'Home',h.url('/'))}
+    ${h.link_to(_(u'Home'),h.url('/'))}
     &raquo;
     ${h.link_to(c.repo_name,h.url('summary_home',repo_name=c.repo_name))}
     &raquo;
-    ${_('Changelog')} - ${_('showing ')} ${c.size if c.size <= c.total_cs else c.total_cs} ${_('out of')} ${c.total_cs} ${_('revisions')}
+    <% size = c.size if c.size <= c.total_cs else c.total_cs %>
+    ${_('Changelog')} - ${ungettext('showing %d out of %d revision', 'showing %d out of %d revisions', size) % (size, c.total_cs)}
 </%def>
 
 <%def name="page_nav()">
@@ -31,6 +32,14 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
 					<canvas id="graph_canvas"></canvas>
 				</div>
 				<div id="graph_content">
+                    <div class="info_box" style="clear: both;padding: 10px 6px;vertical-align: right;text-align: right;">
+                    %if c.rhodecode_db_repo.fork:
+                        <a title="${_('compare fork with %s' % c.rhodecode_db_repo.fork.repo_name)}" href="${h.url('compare_url',repo_name=c.repo_name,org_ref_type='branch',org_ref='default',other_ref_type='branch',other_ref='default',repo=c.rhodecode_db_repo.fork.repo_name)}" class="ui-btn small">${_('Compare fork')}</a>
+                    %endif
+                    %if h.is_hg(c.rhodecode_repo):
+                    <a href="${h.url('pullrequest_home',repo_name=c.repo_name)}" class="ui-btn small">${_('Open new pull request')}</a>
+                    %endif
+                    </div>
 					<div class="container_header">
 				        ${h.form(h.url.current(),method='get')}
 				        <div class="info_box" style="float:left">
@@ -47,24 +56,24 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
 					<div id="chg_${cnt+1}" class="container ${'tablerow%s' % (cnt%2)}">
 						<div class="left">
 							<div>
-							${h.checkbox(cs.short_id,class_="changeset_range")}
-							<span class="tooltip" title="${h.age(cs.date)}"><a href="${h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id)}"><span class="changeset_id">${cs.revision}:<span class="changeset_hash">${h.short_id(cs.raw_id)}</span></span></a></span>
+							${h.checkbox(cs.raw_id,class_="changeset_range")}
+							<span class="tooltip" title="${h.tooltip(h.age(cs.date))}"><a href="${h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id)}"><span class="changeset_id">${cs.revision}:<span class="changeset_hash">${h.short_id(cs.raw_id)}</span></span></a></span>
 							</div>
 							<div class="author">
 								<div class="gravatar">
-									<img alt="gravatar" src="${h.gravatar_url(h.email(cs.author),16)}"/>
+									<img alt="gravatar" src="${h.gravatar_url(h.email_or_none(cs.author),16)}"/>
 								</div>
-								<div title="${cs.author}" class="user">${h.person(cs.author)}</div>
+								<div title="${cs.author}" class="user">${h.shorter(h.person(cs.author),22)}</div>
 							</div>
-                            <div class="date">${cs.date}</div>
+                            <div class="date">${h.fmt_date(cs.date)}</div>
 						</div>
 						<div class="mid">
-                            <div class="message">${h.urlify_commit(h.wrap_paragraphs(cs.message),c.repo_name,h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id))}</div>
+                            <div class="message">${h.urlify_commit(cs.message, c.repo_name,h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id))}</div>
                             <div class="expand"><span class="expandtext">&darr; ${_('show more')} &darr;</span></div>
 						</div>
 						<div class="right">
 									<div class="changes">
-                                        <div id="${cs.raw_id}"  style="float:right;" class="changed_total tooltip" title="${_('Affected number of files, click to show more details')}">${len(cs.affected_files)}</div>
+                                        <div id="changed_total_${cs.raw_id}" style="float:right;" class="changed_total tooltip" title="${h.tooltip(_('Affected number of files, click to show more details'))}">${len(cs.affected_files)}</div>
                                         <div class="comments-container">
                                         %if len(c.comments.get(cs.raw_id,[])) > 0:
                                             <div class="comments-cnt" title="${('comments')}">
@@ -74,6 +83,18 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
                                               </a>
                                             </div>
                                         %endif
+                                        </div>
+                                        <div class="changeset-status-container">
+                                            %if c.statuses.get(cs.raw_id):
+                                              <div title="${_('Changeset status')}" class="changeset-status-lbl">${c.statuses.get(cs.raw_id)[1]}</div>
+                                              <div class="changeset-status-ico">
+                                              %if c.statuses.get(cs.raw_id)[2]:
+                                                <a class="tooltip" title="${_('Click to open associated pull request')}" href="${h.url('pullrequest_show',repo_name=c.statuses.get(cs.raw_id)[3],pull_request_id=c.statuses.get(cs.raw_id)[2])}"><img src="${h.url('/images/icons/flag_status_%s.png' % c.statuses.get(cs.raw_id)[0])}" /></a>
+                                              %else:
+                                                <img src="${h.url('/images/icons/flag_status_%s.png' % c.statuses.get(cs.raw_id)[0])}" />
+                                              %endif
+                                              </div>
+                                            %endif
                                         </div>
 									</div>
 								   %if cs.parents:
@@ -141,8 +162,8 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
                             		rev_start+'...'+rev_end);
 
                         var link = "<a href="+url+">${_('Show selected changes __S -> __E')}</a>"
-                        link = link.replace('__S',rev_start);
-                        link = link.replace('__E',rev_end);
+                        link = link.replace('__S',rev_start.substr(0,6));
+                        link = link.replace('__E',rev_end.substr(0,6));
                         YUD.get('rev_range_container').innerHTML = link;
                         YUD.setStyle('rev_range_container','display','');
                         }
@@ -182,9 +203,9 @@ ${c.repo_name} ${_('Changelog')} - ${c.rhodecode_name}
 
                     // Fetch changeset details
                     YUE.on(YUD.getElementsByClassName('changed_total'),'click',function(e){
-                    	var id = e.currentTarget.id
-                    	var url = "${h.url('changelog_details',repo_name=c.repo_name,cs='__CS__')}"
-                    	var url = url.replace('__CS__',id);
+                    	var id = e.currentTarget.id;
+                    	var url = "${h.url('changelog_details',repo_name=c.repo_name,cs='__CS__')}";
+                    	var url = url.replace('__CS__',id.replace('changed_total_',''));
                     	ypjax(url,id,function(){tooltip_activate()});
                     });
 

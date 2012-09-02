@@ -49,6 +49,7 @@ class SQLiteHelper(SQLiteCommon):
         else:
             column = delta
             table = self._to_table(column.table)
+
         self.recreate_table(table,column,delta)
 
 class SQLiteColumnGenerator(SQLiteSchemaGenerator,

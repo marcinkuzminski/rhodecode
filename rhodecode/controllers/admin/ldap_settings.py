@@ -40,6 +40,7 @@ from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator
 from rhodecode.lib.exceptions import LdapImportError
 from rhodecode.model.forms import LdapSettingsForm
 from rhodecode.model.db import RhodeCodeSetting
+from rhodecode.model.meta import Session
 
 log = logging.getLogger(__name__)
 
@@ -119,9 +120,9 @@ class LdapSettingsController(BaseController):
                             v = ldap_active
                         setting = RhodeCodeSetting.get_by_name(k)
                         setting.app_settings_value = v
-                        self.sa.add(setting)
+                        Session().add(setting)
 
-                self.sa.commit()
+                Session().commit()
                 h.flash(_('Ldap settings updated successfully'),
                         category='success')
                 if not ldap_active:

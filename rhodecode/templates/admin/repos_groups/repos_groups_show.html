@@ -51,7 +51,7 @@
                       <td><b>${gr.repositories.count()}</b></td>
 		               <td>
 		                 ${h.form(url('repos_group', id=gr.group_id),method='delete')}
-		                   ${h.submit('remove_%s' % gr.name,'delete',class_="delete_icon action_button",onclick="return confirm('"+_('Confirm to delete this group: %s') % gr.name+"');")}
+		                   ${h.submit('remove_%s' % gr.name,_('delete'),class_="delete_icon action_button",onclick="return confirm('"+_('Confirm to delete this group: %s') % gr.name+"');")}
 		                 ${h.end_form()}
 		               </td>
                   </tr>

@@ -17,7 +17,7 @@
                     h.url('files_home',repo_name=c.repo_name,revision=book[1].raw_id))}</span>
                 </span>
             </td>
-            <td><span class="tooltip" title="${h.age(book[1].date)}">${book[1].date}</span></td>
+            <td><span class="tooltip" title="${h.tooltip(h.age(book[1].date))}">${h.fmt_date(book[1].date)}</span></td>
 	        <td title="${book[1].author}">${h.person(book[1].author)}</td>
 	        <td>
               <div>

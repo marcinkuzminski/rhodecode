@@ -16,7 +16,7 @@ import mimetypes
 from pygments import lexers
 
 from rhodecode.lib.vcs.utils.lazy import LazyProperty
-from rhodecode.lib.vcs.utils import safe_unicode, safe_str
+from rhodecode.lib.vcs.utils import safe_unicode
 from rhodecode.lib.vcs.exceptions import NodeError
 from rhodecode.lib.vcs.exceptions import RemovedFileNodeError
 from rhodecode.lib.vcs.backends.base import EmptyChangeset
@@ -422,7 +422,7 @@ class FileNode(Node):
 
     def __repr__(self):
         return '<%s %r @ %s>' % (self.__class__.__name__, self.path,
-                                 self.changeset.short_id)
+                                 getattr(self.changeset, 'short_id', ''))
 
 
 class RemovedFileNode(FileNode):
@@ -431,8 +431,10 @@ class RemovedFileNode(FileNode):
     name, kind or state (or methods/attributes checking those two) would raise
     RemovedFileNodeError.
     """
-    ALLOWED_ATTRIBUTES = ['name', 'path', 'state', 'is_root', 'is_file',
-        'is_dir', 'kind', 'added', 'changed', 'not_changed', 'removed']
+    ALLOWED_ATTRIBUTES = [
+        'name', 'path', 'state', 'is_root', 'is_file', 'is_dir', 'kind',
+        'added', 'changed', 'not_changed', 'removed'
+    ]
 
     def __init__(self, path):
         """
@@ -557,7 +559,7 @@ class DirNode(Node):
 
     def __repr__(self):
         return '<%s %r @ %s>' % (self.__class__.__name__, self.path,
-                                 self.changeset.short_id)
+                                 getattr(self.changeset, 'short_id', ''))
 
 
 class RootNode(DirNode):
@@ -591,7 +593,7 @@ class SubModuleNode(Node):
 
     def __repr__(self):
         return '<%s %r @ %s>' % (self.__class__.__name__, self.path,
-                                 self.changeset.short_id)
+                                 getattr(self.changeset, 'short_id', ''))
 
     def _extract_submodule_url(self):
         if self.alias == 'git':

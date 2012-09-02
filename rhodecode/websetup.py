@@ -38,7 +38,7 @@ def setup_app(command, conf, vars):
     dbconf = conf['sqlalchemy.db1.url']
     dbmanage = DbManage(log_sql=True, dbconf=dbconf, root=conf['here'],
                         tests=False)
-    dbmanage.create_tables(override=True)
+    dbmanage.create_tables(override=True, defaults=command.options.__dict__)
     dbmanage.set_db_version()
     opts = dbmanage.config_prompt(None, defaults=command.options.__dict__)
     dbmanage.create_settings(opts)

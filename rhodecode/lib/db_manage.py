@@ -31,17 +31,20 @@ import logging
 from os.path import dirname as dn, join as jn
 
 from rhodecode import __dbversion__
-from rhodecode.model import meta
 
 from rhodecode.model.user import UserModel
 from rhodecode.lib.utils import ask_ok
 from rhodecode.model import init_model
 from rhodecode.model.db import User, Permission, RhodeCodeUi, \
-    RhodeCodeSetting, UserToPerm, DbMigrateVersion, RepoGroup,\
+    RhodeCodeSetting, UserToPerm, DbMigrateVersion, RepoGroup, \
     UserRepoGroupToPerm
 
 from sqlalchemy.engine import create_engine
+from sqlalchemy.schema import MetaData
 from rhodecode.model.repos_group import ReposGroupModel
+#from rhodecode.model import meta
+from rhodecode.model.meta import Session, Base
+
 
 log = logging.getLogger(__name__)
 
@@ -59,25 +62,25 @@ class DbManage(object):
     def init_db(self):
         engine = create_engine(self.dburi, echo=self.log_sql)
         init_model(engine)
-        self.sa = meta.Session
+        self.sa = Session()
 
-    def create_tables(self, override=False):
+    def create_tables(self, override=False, defaults={}):
         """
         Create a auth database
         """
-
+        quiet = defaults.get('quiet')
         log.info("Any existing database is going to be destroyed")
-        if self.tests:
+        if self.tests or quiet:
             destroy = True
         else:
             destroy = ask_ok('Are you sure to destroy old database ? [y/n]')
         if not destroy:
             sys.exit()
         if destroy:
-            meta.Base.metadata.drop_all()
+            Base.metadata.drop_all()
 
         checkfirst = not override
-        meta.Base.metadata.create_all(checkfirst=checkfirst)
+        Base.metadata.create_all(checkfirst=checkfirst)
         log.info('Created tables for %s' % self.dbname)
 
     def set_db_version(self):
@@ -178,6 +181,44 @@ class DbManage(object):
             def step_5(self):
                 pass
 
+            def step_6(self):
+                print ('re-checking permissions')
+                self.klass.create_permissions()
+
+                print ('installing new hooks')
+                hooks4 = RhodeCodeUi()
+                hooks4.ui_section = 'hooks'
+                hooks4.ui_key = RhodeCodeUi.HOOK_PRE_PUSH
+                hooks4.ui_value = 'python:rhodecode.lib.hooks.pre_push'
+                Session().add(hooks4)
+
+                hooks6 = RhodeCodeUi()
+                hooks6.ui_section = 'hooks'
+                hooks6.ui_key = RhodeCodeUi.HOOK_PRE_PULL
+                hooks6.ui_value = 'python:rhodecode.lib.hooks.pre_pull'
+                Session().add(hooks6)
+
+                print ('installing hgsubversion option')
+                # enable hgsubversion disabled by default
+                hgsubversion = RhodeCodeUi()
+                hgsubversion.ui_section = 'extensions'
+                hgsubversion.ui_key = 'hgsubversion'
+                hgsubversion.ui_value = ''
+                hgsubversion.ui_active = False
+                Session().add(hgsubversion)
+
+                print ('installing hg git option')
+                # enable hggit disabled by default
+                hggit = RhodeCodeUi()
+                hggit.ui_section = 'extensions'
+                hggit.ui_key = 'hggit'
+                hggit.ui_value = ''
+                hggit.ui_active = False
+                Session().add(hggit)
+
+                print ('re-check default permissions')
+                self.klass.populate_default_permissions()
+
         upgrade_steps = [0] + range(curr_version + 1, __dbversion__ + 1)
 
         # CALL THE PROPER ORDER OF STEPS TO PERFORM FULL UPGRADE
@@ -274,9 +315,9 @@ class DbManage(object):
             self.create_user(username, password, email, True)
         else:
             log.info('creating admin and regular test users')
-            from rhodecode.tests import TEST_USER_ADMIN_LOGIN,\
-            TEST_USER_ADMIN_PASS, TEST_USER_ADMIN_EMAIL,\
-            TEST_USER_REGULAR_LOGIN, TEST_USER_REGULAR_PASS,\
+            from rhodecode.tests import TEST_USER_ADMIN_LOGIN, \
+            TEST_USER_ADMIN_PASS, TEST_USER_ADMIN_EMAIL, \
+            TEST_USER_REGULAR_LOGIN, TEST_USER_REGULAR_PASS, \
             TEST_USER_REGULAR_EMAIL, TEST_USER_REGULAR2_LOGIN, \
             TEST_USER_REGULAR2_PASS, TEST_USER_REGULAR2_EMAIL
 
@@ -305,43 +346,63 @@ class DbManage(object):
         hooks1.ui_key = hooks1_key
         hooks1.ui_value = 'hg update >&2'
         hooks1.ui_active = False
+        self.sa.add(hooks1)
 
         hooks2_key = RhodeCodeUi.HOOK_REPO_SIZE
         hooks2_ = self.sa.query(RhodeCodeUi)\
             .filter(RhodeCodeUi.ui_key == hooks2_key).scalar()
-
         hooks2 = RhodeCodeUi() if hooks2_ is None else hooks2_
         hooks2.ui_section = 'hooks'
         hooks2.ui_key = hooks2_key
         hooks2.ui_value = 'python:rhodecode.lib.hooks.repo_size'
+        self.sa.add(hooks2)
 
         hooks3 = RhodeCodeUi()
         hooks3.ui_section = 'hooks'
         hooks3.ui_key = RhodeCodeUi.HOOK_PUSH
         hooks3.ui_value = 'python:rhodecode.lib.hooks.log_push_action'
+        self.sa.add(hooks3)
 
         hooks4 = RhodeCodeUi()
         hooks4.ui_section = 'hooks'
-        hooks4.ui_key = RhodeCodeUi.HOOK_PULL
-        hooks4.ui_value = 'python:rhodecode.lib.hooks.log_pull_action'
+        hooks4.ui_key = RhodeCodeUi.HOOK_PRE_PUSH
+        hooks4.ui_value = 'python:rhodecode.lib.hooks.pre_push'
+        self.sa.add(hooks4)
 
-        # For mercurial 1.7 set backward comapatibility with format
-        dotencode_disable = RhodeCodeUi()
-        dotencode_disable.ui_section = 'format'
-        dotencode_disable.ui_key = 'dotencode'
-        dotencode_disable.ui_value = 'false'
+        hooks5 = RhodeCodeUi()
+        hooks5.ui_section = 'hooks'
+        hooks5.ui_key = RhodeCodeUi.HOOK_PULL
+        hooks5.ui_value = 'python:rhodecode.lib.hooks.log_pull_action'
+        self.sa.add(hooks5)
+
+        hooks6 = RhodeCodeUi()
+        hooks6.ui_section = 'hooks'
+        hooks6.ui_key = RhodeCodeUi.HOOK_PRE_PULL
+        hooks6.ui_value = 'python:rhodecode.lib.hooks.pre_pull'
+        self.sa.add(hooks6)
 
         # enable largefiles
         largefiles = RhodeCodeUi()
         largefiles.ui_section = 'extensions'
         largefiles.ui_key = 'largefiles'
         largefiles.ui_value = ''
-
-        self.sa.add(hooks1)
-        self.sa.add(hooks2)
-        self.sa.add(hooks3)
-        self.sa.add(hooks4)
         self.sa.add(largefiles)
+
+        # enable hgsubversion disabled by default
+        hgsubversion = RhodeCodeUi()
+        hgsubversion.ui_section = 'extensions'
+        hgsubversion.ui_key = 'hgsubversion'
+        hgsubversion.ui_value = ''
+        hgsubversion.ui_active = False
+        self.sa.add(hgsubversion)
+
+        # enable hggit disabled by default
+        hggit = RhodeCodeUi()
+        hggit.ui_section = 'extensions'
+        hggit.ui_key = 'hggit'
+        hggit.ui_value = ''
+        hggit.ui_active = False
+        self.sa.add(hggit)
 
     def create_ldap_options(self, skip_existing=False):
         """Creates ldap settings"""
@@ -443,18 +504,30 @@ class DbManage(object):
         paths.ui_key = '/'
         paths.ui_value = path
 
-        hgsettings1 = RhodeCodeSetting('realm', 'RhodeCode authentication')
-        hgsettings2 = RhodeCodeSetting('title', 'RhodeCode')
-        hgsettings3 = RhodeCodeSetting('ga_code', '')
+        phases = RhodeCodeUi()
+        phases.ui_section = 'phases'
+        phases.ui_key = 'publish'
+        phases.ui_value = False
+
+        sett1 = RhodeCodeSetting('realm', 'RhodeCode authentication')
+        sett2 = RhodeCodeSetting('title', 'RhodeCode')
+        sett3 = RhodeCodeSetting('ga_code', '')
+
+        sett4 = RhodeCodeSetting('show_public_icon', True)
+        sett5 = RhodeCodeSetting('show_private_icon', True)
+        sett6 = RhodeCodeSetting('stylify_metatags', False)
 
         self.sa.add(web1)
         self.sa.add(web2)
         self.sa.add(web3)
         self.sa.add(web4)
         self.sa.add(paths)
-        self.sa.add(hgsettings1)
-        self.sa.add(hgsettings2)
-        self.sa.add(hgsettings3)
+        self.sa.add(sett1)
+        self.sa.add(sett2)
+        self.sa.add(sett3)
+        self.sa.add(sett4)
+        self.sa.add(sett5)
+        self.sa.add(sett6)
 
         self.create_ldap_options()
 
@@ -463,7 +536,7 @@ class DbManage(object):
     def create_user(self, username, password, email='', admin=False):
         log.info('creating user %s' % username)
         UserModel().create_or_update(username, password, email,
-                                     name='RhodeCode', lastname='Admin',
+                                     firstname='RhodeCode', lastname='Admin',
                                      active=True, admin=admin)
 
     def create_default_user(self):
@@ -472,64 +545,39 @@ class DbManage(object):
         UserModel().create_or_update(username='default',
                               password=str(uuid.uuid1())[:8],
                               email='anonymous@rhodecode.org',
-                              name='Anonymous', lastname='User')
+                              firstname='Anonymous', lastname='User')
 
     def create_permissions(self):
         # module.(access|create|change|delete)_[name]
         # module.(none|read|write|admin)
-        perms = [
-         ('repository.none', 'Repository no access'),
-         ('repository.read', 'Repository read access'),
-         ('repository.write', 'Repository write access'),
-         ('repository.admin', 'Repository admin access'),
 
-         ('group.none', 'Repositories Group no access'),
-         ('group.read', 'Repositories Group read access'),
-         ('group.write', 'Repositories Group write access'),
-         ('group.admin', 'Repositories Group admin access'),
-
-         ('hg.admin', 'Hg Administrator'),
-         ('hg.create.repository', 'Repository create'),
-         ('hg.create.none', 'Repository creation disabled'),
-         ('hg.register.none', 'Register disabled'),
-         ('hg.register.manual_activate', 'Register new user with RhodeCode '
-                                         'without manual activation'),
-
-         ('hg.register.auto_activate', 'Register new user with RhodeCode '
-                                        'without auto activation'),
-        ]
-
-        for p in perms:
+        for p in Permission.PERMS:
             if not Permission.get_by_key(p[0]):
                 new_perm = Permission()
                 new_perm.permission_name = p[0]
-                new_perm.permission_longname = p[1]
+                new_perm.permission_longname = p[0]
                 self.sa.add(new_perm)
 
     def populate_default_permissions(self):
         log.info('creating default user permissions')
 
-        default_user = self.sa.query(User)\
-        .filter(User.username == 'default').scalar()
+        default_user = User.get_by_username('default')
 
-        reg_perm = UserToPerm()
-        reg_perm.user = default_user
-        reg_perm.permission = self.sa.query(Permission)\
-        .filter(Permission.permission_name == 'hg.register.manual_activate')\
-        .scalar()
+        for def_perm in ['hg.register.manual_activate', 'hg.create.repository',
+                         'hg.fork.repository', 'repository.read']:
 
-        create_repo_perm = UserToPerm()
-        create_repo_perm.user = default_user
-        create_repo_perm.permission = self.sa.query(Permission)\
-        .filter(Permission.permission_name == 'hg.create.repository')\
-        .scalar()
-
-        default_repo_perm = UserToPerm()
-        default_repo_perm.user = default_user
-        default_repo_perm.permission = self.sa.query(Permission)\
-        .filter(Permission.permission_name == 'repository.read')\
-        .scalar()
-
-        self.sa.add(reg_perm)
-        self.sa.add(create_repo_perm)
-        self.sa.add(default_repo_perm)
+            perm = self.sa.query(Permission)\
+             .filter(Permission.permission_name == def_perm)\
+             .scalar()
+            if not perm:
+                raise Exception(
+                  'CRITICAL: permission %s not found inside database !!'
+                  % def_perm
+                )
+            if not UserToPerm.query()\
+                .filter(UserToPerm.permission == perm)\
+                .filter(UserToPerm.user == default_user).scalar():
+                reg_perm = UserToPerm()
+                reg_perm.user = default_user
+                reg_perm.permission = perm
+                self.sa.add(reg_perm)

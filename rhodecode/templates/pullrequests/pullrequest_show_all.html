@@ -1,0 +1,42 @@
+<%inherit file="/base/base.html"/>
+
+<%def name="title()">
+    ${c.repo_name} ${_('all pull requests')}
+</%def>
+
+<%def name="breadcrumbs_links()">
+    ${h.link_to(_(u'Home'),h.url('/'))}
+    &raquo;
+    ${h.link_to(c.repo_name,h.url('changelog_home',repo_name=c.repo_name))}
+    &raquo;
+    ${_('All pull requests')}
+</%def>
+
+<%def name="main()">
+
+<div class="box">
+    <!-- box / title -->
+    <div class="title">
+        ${self.breadcrumbs()}
+    </div>
+
+    %for pr in c.pull_requests:
+        <div>
+          <h4>
+          %if pr.is_closed():
+          <img src="${h.url('/images/icons/tick.png')}" alt="${_('Closed')}" />
+          %endif
+          <a href="${h.url('pullrequest_show',repo_name=c.repo_name,pull_request_id=pr.pull_request_id)}">
+          ${_('Pull request #%s opened by %s on %s') % (pr.pull_request_id, pr.author.full_name, h.fmt_date(pr.created_on))}
+          </a>
+          </h4>
+          <h5 style="border:0px;padding-bottom:0px">${_('Title')}: ${pr.title}</h5>
+          <div style="padding:0px 24px">${pr.description}</div>
+        </div>
+    %endfor
+
+</div>
+
+<script type="text/javascript"></script>
+
+</%def>

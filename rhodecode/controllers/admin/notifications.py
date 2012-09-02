@@ -60,19 +60,33 @@ class NotificationsController(BaseController):
         """GET /_admin/notifications: All items in the collection"""
         # url('notifications')
         c.user = self.rhodecode_user
-        notif = NotificationModel().get_for_user(self.rhodecode_user.user_id)
+        notif = NotificationModel().get_for_user(self.rhodecode_user.user_id,
+                                            filter_=request.GET.getall('type'))
         p = int(request.params.get('page', 1))
         c.notifications = Page(notif, page=p, items_per_page=10)
+        c.pull_request_type = Notification.TYPE_PULL_REQUEST
+        c.comment_type = [Notification.TYPE_CHANGESET_COMMENT,
+                          Notification.TYPE_PULL_REQUEST_COMMENT]
+
+        _current_filter = request.GET.getall('type')
+        c.current_filter = 'all'
+        if _current_filter == [c.pull_request_type]:
+            c.current_filter = 'pull_request'
+        elif _current_filter == c.comment_type:
+            c.current_filter = 'comment'
+
         return render('admin/notifications/notifications.html')
 
     def mark_all_read(self):
         if request.environ.get('HTTP_X_PARTIAL_XHR'):
             nm = NotificationModel()
             # mark all read
-            nm.mark_all_read_for_user(self.rhodecode_user.user_id)
-            Session.commit()
+            nm.mark_all_read_for_user(self.rhodecode_user.user_id,
+                                      filter_=request.GET.getall('type'))
+            Session().commit()
             c.user = self.rhodecode_user
-            notif = nm.get_for_user(self.rhodecode_user.user_id)
+            notif = nm.get_for_user(self.rhodecode_user.user_id,
+                                    filter_=request.GET.getall('type'))
             c.notifications = Page(notif, page=1, items_per_page=10)
             return render('admin/notifications/notifications_data.html')
 
@@ -92,6 +106,18 @@ class NotificationsController(BaseController):
         #    h.form(url('notification', notification_id=ID),
         #           method='put')
         # url('notification', notification_id=ID)
+        try:
+            no = Notification.get(notification_id)
+            owner = lambda: (no.notifications_to_users.user.user_id
+                             == c.rhodecode_user.user_id)
+            if h.HasPermissionAny('hg.admin')() or owner:
+                    NotificationModel().mark_read(c.rhodecode_user.user_id, no)
+                    Session().commit()
+                    return 'ok'
+        except Exception:
+            Session.rollback()
+            log.error(traceback.format_exc())
+        return 'fail'
 
     def delete(self, notification_id):
         """DELETE /_admin/notifications/id: Delete an existing item"""
@@ -106,9 +132,9 @@ class NotificationsController(BaseController):
             no = Notification.get(notification_id)
             owner = lambda: (no.notifications_to_users.user.user_id
                              == c.rhodecode_user.user_id)
-            if h.HasPermissionAny('hg.admin', 'repository.admin')() or owner:
+            if h.HasPermissionAny('hg.admin')() or owner:
                     NotificationModel().delete(c.rhodecode_user.user_id, no)
-                    Session.commit()
+                    Session().commit()
                     return 'ok'
         except Exception:
             Session.rollback()
@@ -132,7 +158,7 @@ class NotificationsController(BaseController):
             if unotification:
                 if unotification.read is False:
                     unotification.mark_as_read()
-                    Session.commit()
+                    Session().commit()
                 c.notification = no
 
                 return render('admin/notifications/show_notification.html')

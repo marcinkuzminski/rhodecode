@@ -34,15 +34,16 @@ from pylons.i18n.translation import _
 
 from rhodecode.lib import helpers as h
 from rhodecode.lib.exceptions import UsersGroupsAssignedException
-from rhodecode.lib.utils2 import safe_unicode
+from rhodecode.lib.utils2 import safe_unicode, str2bool
 from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator
 from rhodecode.lib.base import BaseController, render
 
 from rhodecode.model.users_group import UsersGroupModel
 
-from rhodecode.model.db import User, UsersGroup, Permission, UsersGroupToPerm
+from rhodecode.model.db import User, UsersGroup
 from rhodecode.model.forms import UsersGroupForm
 from rhodecode.model.meta import Session
+from rhodecode.lib.utils import action_logger
 
 log = logging.getLogger(__name__)
 
@@ -64,7 +65,7 @@ class UsersGroupsController(BaseController):
     def index(self, format='html'):
         """GET /users_groups: All items in the collection"""
         # url('users_groups')
-        c.users_groups_list = self.sa.query(UsersGroup).all()
+        c.users_groups_list = UsersGroup().query().all()
         return render('admin/users_groups/users_groups.html')
 
     def create(self):
@@ -76,10 +77,12 @@ class UsersGroupsController(BaseController):
             form_result = users_group_form.to_python(dict(request.POST))
             UsersGroupModel().create(name=form_result['users_group_name'],
                                      active=form_result['users_group_active'])
-            h.flash(_('created users group %s') \
-                    % form_result['users_group_name'], category='success')
-            #action_logger(self.rhodecode_user, 'new_user', '', '', self.sa)
-            Session.commit()
+            gr = form_result['users_group_name']
+            action_logger(self.rhodecode_user,
+                          'admin_created_users_group:%s' % gr,
+                          None, self.ip_addr, self.sa)
+            h.flash(_('created users group %s') % gr, category='success')
+            Session().commit()
         except formencode.Invalid, errors:
             return htmlfill.render(
                 render('admin/users_groups/users_group_add.html'),
@@ -114,7 +117,7 @@ class UsersGroupsController(BaseController):
                            c.group_members_obj]
 
         c.available_members = [(x.user_id, x.username) for x in
-                               self.sa.query(User).all()]
+                               User.query().all()]
 
         available_members = [safe_unicode(x[0]) for x in c.available_members]
 
@@ -125,21 +128,27 @@ class UsersGroupsController(BaseController):
         try:
             form_result = users_group_form.to_python(request.POST)
             UsersGroupModel().update(c.users_group, form_result)
-            h.flash(_('updated users group %s') \
-                        % form_result['users_group_name'],
-                    category='success')
-            #action_logger(self.rhodecode_user, 'new_user', '', '', self.sa)
-            Session.commit()
+            gr = form_result['users_group_name']
+            action_logger(self.rhodecode_user,
+                          'admin_updated_users_group:%s' % gr,
+                          None, self.ip_addr, self.sa)
+            h.flash(_('updated users group %s') % gr, category='success')
+            Session().commit()
         except formencode.Invalid, errors:
+            ug_model = UsersGroupModel()
+            defaults = errors.value
             e = errors.error_dict or {}
-
-            perm = Permission.get_by_key('hg.create.repository')
-            e.update({'create_repo_perm':
-                         UsersGroupModel().has_perm(id, perm)})
+            defaults.update({
+                'create_repo_perm': ug_model.has_perm(id,
+                                                      'hg.create.repository'),
+                'fork_repo_perm': ug_model.has_perm(id,
+                                                    'hg.fork.repository'),
+                '_method': 'put'
+            })
 
             return htmlfill.render(
                 render('admin/users_groups/users_group_edit.html'),
-                defaults=errors.value,
+                defaults=defaults,
                 errors=e,
                 prefix_error=False,
                 encoding="UTF-8")
@@ -148,7 +157,7 @@ class UsersGroupsController(BaseController):
             h.flash(_('error occurred during update of users group %s') \
                     % request.POST.get('users_group_name'), category='error')
 
-        return redirect(url('users_groups'))
+        return redirect(url('edit_users_group', id=id))
 
     def delete(self, id):
         """DELETE /users_groups/id: Delete an existing item"""
@@ -158,10 +167,10 @@ class UsersGroupsController(BaseController):
         #    h.form(url('users_group', id=ID),
         #           method='delete')
         # url('users_group', id=ID)
-
+        usr_gr = UsersGroup.get_or_404(id)
         try:
-            UsersGroupModel().delete(id)
-            Session.commit()
+            UsersGroupModel().delete(usr_gr)
+            Session().commit()
             h.flash(_('successfully deleted users group'), category='success')
         except UsersGroupsAssignedException, e:
             h.flash(e, category='error')
@@ -179,20 +188,23 @@ class UsersGroupsController(BaseController):
         """GET /users_groups/id/edit: Form to edit an existing item"""
         # url('edit_users_group', id=ID)
 
-        c.users_group = self.sa.query(UsersGroup).get(id)
-        if not c.users_group:
-            return redirect(url('users_groups'))
+        c.users_group = UsersGroup.get_or_404(id)
 
         c.users_group.permissions = {}
         c.group_members_obj = [x.user for x in c.users_group.members]
         c.group_members = [(x.user_id, x.username) for x in
                            c.group_members_obj]
         c.available_members = [(x.user_id, x.username) for x in
-                               self.sa.query(User).all()]
+                               User.query().all()]
+        ug_model = UsersGroupModel()
         defaults = c.users_group.get_dict()
-        perm = Permission.get_by_key('hg.create.repository')
-        defaults.update({'create_repo_perm':
-                         UsersGroupModel().has_perm(c.users_group, perm)})
+        defaults.update({
+            'create_repo_perm': ug_model.has_perm(c.users_group,
+                                                  'hg.create.repository'),
+            'fork_repo_perm': ug_model.has_perm(c.users_group,
+                                                'hg.fork.repository'),
+        })
+
         return htmlfill.render(
             render('admin/users_groups/users_group_edit.html'),
             defaults=defaults,
@@ -204,25 +216,43 @@ class UsersGroupsController(BaseController):
         """PUT /users_perm/id: Update an existing item"""
         # url('users_group_perm', id=ID, method='put')
 
-        grant_perm = request.POST.get('create_repo_perm', False)
+        users_group = UsersGroup.get_or_404(id)
+        grant_create_perm = str2bool(request.POST.get('create_repo_perm'))
+        grant_fork_perm = str2bool(request.POST.get('fork_repo_perm'))
+        inherit_perms = str2bool(request.POST.get('inherit_default_permissions'))
 
-        if grant_perm:
-            perm = Permission.get_by_key('hg.create.none')
-            UsersGroupModel().revoke_perm(id, perm)
+        usersgroup_model = UsersGroupModel()
 
-            perm = Permission.get_by_key('hg.create.repository')
-            UsersGroupModel().grant_perm(id, perm)
-            h.flash(_("Granted 'repository create' permission to user"),
-                    category='success')
+        try:
+            users_group.inherit_default_permissions = inherit_perms
+            Session().add(users_group)
 
-            Session.commit()
-        else:
-            perm = Permission.get_by_key('hg.create.repository')
-            UsersGroupModel().revoke_perm(id, perm)
+            if grant_create_perm:
+                usersgroup_model.revoke_perm(id, 'hg.create.none')
+                usersgroup_model.grant_perm(id, 'hg.create.repository')
+                h.flash(_("Granted 'repository create' permission to users group"),
+                        category='success')
+            else:
+                usersgroup_model.revoke_perm(id, 'hg.create.repository')
+                usersgroup_model.grant_perm(id, 'hg.create.none')
+                h.flash(_("Revoked 'repository create' permission to users group"),
+                        category='success')
 
-            perm = Permission.get_by_key('hg.create.none')
-            UsersGroupModel().grant_perm(id, perm)
-            h.flash(_("Revoked 'repository create' permission to user"),
-                    category='success')
-            Session.commit()
+            if grant_fork_perm:
+                usersgroup_model.revoke_perm(id, 'hg.fork.none')
+                usersgroup_model.grant_perm(id, 'hg.fork.repository')
+                h.flash(_("Granted 'repository fork' permission to users group"),
+                        category='success')
+            else:
+                usersgroup_model.revoke_perm(id, 'hg.fork.repository')
+                usersgroup_model.grant_perm(id, 'hg.fork.none')
+                h.flash(_("Revoked 'repository fork' permission to users group"),
+                        category='success')
+
+            Session().commit()
+        except Exception:
+            log.error(traceback.format_exc())
+            h.flash(_('An error occurred during permissions saving'),
+                    category='error')
+
         return redirect(url('edit_users_group', id=id))

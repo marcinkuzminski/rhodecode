@@ -26,7 +26,7 @@
 import logging
 
 from pylons import tmpl_context as c, request
-from paste.httpexceptions import HTTPBadRequest
+from webob.exc import HTTPBadRequest
 
 from rhodecode.lib.auth import LoginRequired
 from rhodecode.lib.base import BaseController, render
@@ -51,7 +51,8 @@ class HomeController(BaseController):
         if request.is_xhr:
             all_repos = Repository.query().order_by(Repository.repo_name).all()
             c.repos_list = self.scm_model.get_repos(all_repos,
-                                                    sort_key='name_sort')
+                                                    sort_key='name_sort',
+                                                    simple=True)
             return render('/repo_switcher_list.html')
         else:
             return HTTPBadRequest()

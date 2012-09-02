@@ -40,13 +40,17 @@ from rhodecode.lib.vcs.nodes import FileNode
 import rhodecode.lib.helpers as h
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseRepoController, render
-from rhodecode.lib.utils import EmptyChangeset
+from rhodecode.lib.utils import action_logger
 from rhodecode.lib.compat import OrderedDict
 from rhodecode.lib import diffs
-from rhodecode.model.db import ChangesetComment
+from rhodecode.model.db import ChangesetComment, ChangesetStatus
 from rhodecode.model.comment import ChangesetCommentsModel
+from rhodecode.model.changeset_status import ChangesetStatusModel
 from rhodecode.model.meta import Session
 from rhodecode.lib.diffs import wrapped_diff
+from rhodecode.model.repo import RepoModel
+from rhodecode.lib.exceptions import StatusChangeOnClosedPullRequestError
+from rhodecode.lib.vcs.backends.base import EmptyChangeset
 
 log = logging.getLogger(__name__)
 
@@ -165,6 +169,9 @@ class ChangesetController(BaseRepoController):
     def __before__(self):
         super(ChangesetController, self).__before__()
         c.affected_files_cut_off = 60
+        repo_model = RepoModel()
+        c.users_array = repo_model.get_users_js()
+        c.users_groups_array = repo_model.get_users_groups_js()
 
     def index(self, revision):
 
@@ -201,18 +208,24 @@ class ChangesetController(BaseRepoController):
 
         cumulative_diff = 0
         c.cut_off = False  # defines if cut off limit is reached
-
+        c.changeset_statuses = ChangesetStatus.STATUSES
         c.comments = []
+        c.statuses = []
         c.inline_comments = []
         c.inline_cnt = 0
         # Iterate over ranges (default changeset view is always one changeset)
         for changeset in c.cs_ranges:
+
+            c.statuses.extend([ChangesetStatusModel()\
+                              .get_status(c.rhodecode_db_repo.repo_id,
+                                          changeset.raw_id)])
+
             c.comments.extend(ChangesetCommentsModel()\
                               .get_comments(c.rhodecode_db_repo.repo_id,
-                                            changeset.raw_id))
+                                            revision=changeset.raw_id))
             inlines = ChangesetCommentsModel()\
                         .get_inline_comments(c.rhodecode_db_repo.repo_id,
-                                             changeset.raw_id)
+                                             revision=changeset.raw_id)
             c.inline_comments.extend(inlines)
             c.changes[changeset.raw_id] = []
             try:
@@ -284,7 +297,7 @@ class ChangesetController(BaseRepoController):
                 )
 
         # count inline comments
-        for path, lines in c.inline_comments:
+        for __, lines in c.inline_comments:
             for comments in lines.values():
                 c.inline_cnt += len(comments)
 
@@ -361,15 +374,48 @@ class ChangesetController(BaseRepoController):
 
     @jsonify
     def comment(self, repo_name, revision):
+        status = request.POST.get('changeset_status')
+        change_status = request.POST.get('change_changeset_status')
+
         comm = ChangesetCommentsModel().create(
             text=request.POST.get('text'),
-            repo_id=c.rhodecode_db_repo.repo_id,
-            user_id=c.rhodecode_user.user_id,
+            repo=c.rhodecode_db_repo.repo_id,
+            user=c.rhodecode_user.user_id,
             revision=revision,
             f_path=request.POST.get('f_path'),
-            line_no=request.POST.get('line')
+            line_no=request.POST.get('line'),
+            status_change=(ChangesetStatus.get_status_lbl(status)
+                           if status and change_status else None)
         )
-        Session.commit()
+
+        # get status if set !
+        if status and change_status:
+            # if latest status was from pull request and it's closed
+            # disallow changing status ! 
+            # dont_allow_on_closed_pull_request = True !
+
+            try:
+                ChangesetStatusModel().set_status(
+                    c.rhodecode_db_repo.repo_id,
+                    status,
+                    c.rhodecode_user.user_id,
+                    comm,
+                    revision=revision,
+                    dont_allow_on_closed_pull_request=True
+                )
+            except StatusChangeOnClosedPullRequestError:
+                log.error(traceback.format_exc())
+                msg = _('Changing status on a changeset associated with'
+                        'a closed pull request is not allowed')
+                h.flash(msg, category='warning')
+                return redirect(h.url('changeset_home', repo_name=repo_name,
+                                      revision=revision))
+        action_logger(self.rhodecode_user,
+                      'user_commented_revision:%s' % revision,
+                      c.rhodecode_db_repo, self.ip_addr, self.sa)
+
+        Session().commit()
+
         if not request.environ.get('HTTP_X_PARTIAL_XHR'):
             return redirect(h.url('changeset_home', repo_name=repo_name,
                                   revision=revision))
@@ -391,7 +437,7 @@ class ChangesetController(BaseRepoController):
         owner = lambda: co.author.user_id == c.rhodecode_user.user_id
         if h.HasPermissionAny('hg.admin', 'repository.admin')() or owner:
             ChangesetCommentsModel().delete(comment=co)
-            Session.commit()
+            Session().commit()
             return True
         else:
             raise HTTPForbidden()

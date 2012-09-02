@@ -72,25 +72,26 @@ RhodeCode Features
   Each request can be logged and authenticated.
 - Runs on threads unlike hgweb. You can make multiple pulls/pushes simultaneous.
   Supports http/https and LDAP
-- Full permissions (private/read/write/admin) and authentication per project. 
-  One account for web interface and mercurial_ push/pull/clone operations.
+- Full permissions (private/read/write/admin) for each repository, additional
+  explicit forking and repository permissions.
 - Have built in users groups for easier permission management
 - Repository groups let you group repos and manage them easier.
 - Users can fork other users repo. RhodeCode have also compare view to see
   combined changeset for all changeset made within single push.
 - Build in commit-api let's you add, edit and commit files right from RhodeCode
   interface using simple editor or upload form for binaries.
+- Powerfull pull-request driven review system with inline commenting, and
+  changeset statuses, notification system.
+- Importing SVN repositories from remote locations into RhodeCode.
 - Mako templates let's you customize the look and feel of the application.
 - Beautiful diffs, annotations and source code browsing all colored by pygments. 
-  Raw diffs are made in git-diff format, including git_ binary-patches
+  Raw diffs are made in git-diff format, including GIT_ binary-patches
 - Mercurial_ branch graph and yui-flot powered graphs with zooming and statistics
 - Admin interface with user/permission management. Admin activity journal, logs
   pulls, pushes, forks, registrations and other actions made by all users.
 - Server side forks. It is possible to fork a project and modify it freely 
   without breaking the main repository. You can even write Your own hooks 
   and install them
-- code review with notification system, inline commenting, all parsed using
-  rst syntax
 - rst and markdown README support for repositories  
 - Full text search powered by Whoosh on the source files, and file names.
   Build in indexing daemons, with optional incremental index build
@@ -110,8 +111,9 @@ Incoming / Plans
 ----------------
 
 - Finer granular permissions per branch, repo group or subrepo
-- pull requests and web based merges
-- per line file history
+- Pull requests with web based merges
+- Per line file history
+- Simple issue tracker 
 - SSH based authentication with server side key management
 - Commit based built in wiki system
 - More statistics and graph (global annotation + some more statistics)
@@ -131,7 +133,8 @@ Listed bellow are various support resources that should help.
 
 .. note::
    
-   Please try to read the documentation before posting any issues
+   Please try to read the documentation before posting any issues, especially
+   the **troubleshooting section**
  
 - Join the `Google group <http://groups.google.com/group/rhodecode>`_ and ask
   any questions.

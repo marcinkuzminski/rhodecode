@@ -28,14 +28,22 @@
 import re
 import difflib
 import markupsafe
+
 from itertools import tee, imap
+
+from mercurial import patch
+from mercurial.mdiff import diffopts
+from mercurial.bundlerepo import bundlerepository
 
 from pylons.i18n.translation import _
 
+from rhodecode.lib.compat import BytesIO
+from rhodecode.lib.vcs.utils.hgcompat import localrepo
 from rhodecode.lib.vcs.exceptions import VCSError
 from rhodecode.lib.vcs.nodes import FileNode, SubModuleNode
+from rhodecode.lib.vcs.backends.base import EmptyChangeset
 from rhodecode.lib.helpers import escape
-from rhodecode.lib.utils import EmptyChangeset
+from rhodecode.lib.utils import make_ui
 
 
 def wrap_to_table(str_):
@@ -75,7 +83,7 @@ def wrapped_diff(filenode_old, filenode_new, cut_off_limit=None,
         stats = diff_processor.stat()
         size = len(diff or '')
     else:
-        diff = wrap_to_table(_('Changeset was to big and was cut off, use '
+        diff = wrap_to_table(_('Changeset was too big and was cut off, use '
                                'diff menu to display this diff'))
         stats = (0, 0)
         size = 0
@@ -127,8 +135,9 @@ class DiffProcessor(object):
     can be used to render it in a HTML template.
     """
     _chunk_re = re.compile(r'@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@(.*)')
+    _newline_marker = '\\ No newline at end of file\n'
 
-    def __init__(self, diff, differ='diff', format='udiff'):
+    def __init__(self, diff, differ='diff', format='gitdiff'):
         """
         :param diff:   a text in diff format or generator
         :param format: format of diff passed, `udiff` or `gitdiff`
@@ -171,7 +180,7 @@ class DiffProcessor(object):
 
     def _extract_rev(self, line1, line2):
         """
-        Extract the filename and revision hint from a line.
+        Extract the operation (A/M/D), filename and revision hint from a line.
         """
 
         try:
@@ -189,11 +198,15 @@ class DiffProcessor(object):
                 filename = (old_filename
                             if old_filename != '/dev/null' else new_filename)
 
-                return filename, new_rev, old_rev
+                operation = 'D' if new_filename == '/dev/null' else None
+                if not operation:
+                    operation = 'M' if old_filename != '/dev/null' else 'A'
+
+                return operation, filename, new_rev, old_rev
         except (ValueError, IndexError):
             pass
 
-        return None, None, None
+        return None, None, None, None
 
     def _parse_gitdiff(self, diffiterator):
         def line_decoder(l):
@@ -278,7 +291,7 @@ class DiffProcessor(object):
             do(line)
             do(next_)
 
-    def _parse_udiff(self):
+    def _parse_udiff(self, inline_diff=True):
         """
         Parse the diff an return data for the template.
         """
@@ -286,8 +299,6 @@ class DiffProcessor(object):
         files = []
         try:
             line = lineiter.next()
-            # skip first context
-            skipfirst = True
             while 1:
                 # continue until we found the old file
                 if not line.startswith('--- '):
@@ -295,13 +306,16 @@ class DiffProcessor(object):
                     continue
 
                 chunks = []
-                filename, old_rev, new_rev = \
+                stats = [0, 0]
+                operation, filename, old_rev, new_rev = \
                     self._extract_rev(line, lineiter.next())
                 files.append({
                     'filename':         filename,
                     'old_revision':     old_rev,
                     'new_revision':     new_rev,
-                    'chunks':           chunks
+                    'chunks':           chunks,
+                    'operation':        operation,
+                    'stats':            stats,
                 })
 
                 line = lineiter.next()
@@ -317,27 +331,33 @@ class DiffProcessor(object):
                         [int(x or 1) for x in match.groups()[:-1]]
                     old_line -= 1
                     new_line -= 1
-                    context = len(match.groups()) == 5
+                    gr = match.groups()
+                    context = len(gr) == 5
                     old_end += old_line
                     new_end += new_line
 
                     if context:
-                        if not skipfirst:
+                        # skip context only if it's first line
+                        if int(gr[0]) > 1:
                             lines.append({
                                 'old_lineno': '...',
                                 'new_lineno': '...',
                                 'action':     'context',
                                 'line':       line,
                             })
-                        else:
-                            skipfirst = False
 
                     line = lineiter.next()
+
                     while old_line < old_end or new_line < new_end:
                         if line:
-                            command, line = line[0], line[1:]
+                            command = line[0]
+                            if command in ['+', '-', ' ']:
+                                #only modify the line if it's actually a diff
+                                # thing
+                                line = line[1:]
                         else:
                             command = ' '
+
                         affects_old = affects_new = False
 
                         # ignore those if we don't expect them
@@ -346,51 +366,67 @@ class DiffProcessor(object):
                         elif command == '+':
                             affects_new = True
                             action = 'add'
+                            stats[0] += 1
                         elif command == '-':
                             affects_old = True
                             action = 'del'
+                            stats[1] += 1
                         else:
                             affects_old = affects_new = True
                             action = 'unmod'
 
-                        old_line += affects_old
-                        new_line += affects_new
-                        lines.append({
-                            'old_lineno':   affects_old and old_line or '',
-                            'new_lineno':   affects_new and new_line or '',
-                            'action':       action,
-                            'line':         line
-                        })
+                        if line != self._newline_marker:
+                            old_line += affects_old
+                            new_line += affects_new
+                            lines.append({
+                                'old_lineno':   affects_old and old_line or '',
+                                'new_lineno':   affects_new and new_line or '',
+                                'action':       action,
+                                'line':         line
+                            })
+
                         line = lineiter.next()
+                        if line == self._newline_marker:
+                            # we need to append to lines, since this is not
+                            # counted in the line specs of diff
+                            lines.append({
+                                'old_lineno':   '...',
+                                'new_lineno':   '...',
+                                'action':       'context',
+                                'line':         line
+                            })
 
         except StopIteration:
             pass
 
+        sorter = lambda info: {'A': 0, 'M': 1, 'D': 2}.get(info['operation'])
+        if inline_diff is False:
+            return sorted(files, key=sorter)
+
         # highlight inline changes
-        for _ in files:
-            for chunk in chunks:
+        for diff_data in files:
+            for chunk in diff_data['chunks']:
                 lineiter = iter(chunk)
-                #first = True
                 try:
                     while 1:
                         line = lineiter.next()
-                        if line['action'] != 'unmod':
+                        if line['action'] not in ['unmod', 'context']:
                             nextline = lineiter.next()
-                            if nextline['action'] == 'unmod' or \
+                            if nextline['action'] in ['unmod', 'context'] or \
                                nextline['action'] == line['action']:
                                 continue
                             self.differ(line, nextline)
                 except StopIteration:
                     pass
 
-        return files
+        return sorted(files, key=sorter)
 
-    def prepare(self):
+    def prepare(self, inline_diff=True):
         """
         Prepare the passed udiff for HTML rendering. It'l return a list
         of dicts
         """
-        return self._parse_udiff()
+        return self._parse_udiff(inline_diff=inline_diff)
 
     def _safe_id(self, idstring):
         """Make a string safe for including in an id attribute.
@@ -424,9 +460,9 @@ class DiffProcessor(object):
 
     def as_html(self, table_class='code-difftable', line_class='line',
                 new_lineno_class='lineno old', old_lineno_class='lineno new',
-                code_class='code', enable_comments=False):
+                code_class='code', enable_comments=False, diff_lines=None):
         """
-        Return udiff as html table with customized css classes
+        Return given diff as html table with customized css classes
         """
         def _link_to_if(condition, label, url):
             """
@@ -440,7 +476,8 @@ class DiffProcessor(object):
                 }
             else:
                 return label
-        diff_lines = self.prepare()
+        if diff_lines is None:
+            diff_lines = self.prepare()
         _html_empty = True
         _html = []
         _html.append('''<table class="%(table_class)s">\n''' % {
@@ -522,3 +559,78 @@ class DiffProcessor(object):
         Returns tuple of added, and removed lines for this instance
         """
         return self.adds, self.removes
+
+
+class InMemoryBundleRepo(bundlerepository):
+    def __init__(self, ui, path, bundlestream):
+        self._tempparent = None
+        localrepo.localrepository.__init__(self, ui, path)
+        self.ui.setconfig('phases', 'publish', False)
+
+        self.bundle = bundlestream
+
+        # dict with the mapping 'filename' -> position in the bundle
+        self.bundlefilespos = {}
+
+
+def differ(org_repo, org_ref, other_repo, other_ref, discovery_data=None):
+    """
+    General differ between branches, bookmarks or separate but releated
+    repositories
+
+    :param org_repo:
+    :type org_repo:
+    :param org_ref:
+    :type org_ref:
+    :param other_repo:
+    :type other_repo:
+    :param other_ref:
+    :type other_ref:
+    """
+
+    bundlerepo = None
+    ignore_whitespace = False
+    context = 3
+    org_repo = org_repo.scm_instance._repo
+    other_repo = other_repo.scm_instance._repo
+    opts = diffopts(git=True, ignorews=ignore_whitespace, context=context)
+    org_ref = org_ref[1]
+    other_ref = other_ref[1]
+
+    if org_repo != other_repo:
+
+        common, incoming, rheads = discovery_data
+        other_repo_peer = localrepo.locallegacypeer(other_repo.local())
+        # create a bundle (uncompressed if other repo is not local)
+        if other_repo_peer.capable('getbundle') and incoming:
+            # disable repo hooks here since it's just bundle !
+            # patch and reset hooks section of UI config to not run any
+            # hooks on fetching archives with subrepos
+            for k, _ in other_repo.ui.configitems('hooks'):
+                other_repo.ui.setconfig('hooks', k, None)
+
+            unbundle = other_repo.getbundle('incoming', common=common,
+                                            heads=rheads)
+
+            buf = BytesIO()
+            while True:
+                chunk = unbundle._stream.read(1024 * 4)
+                if not chunk:
+                    break
+                buf.write(chunk)
+
+            buf.seek(0)
+            # replace chunked _stream with data that can do tell() and seek()
+            unbundle._stream = buf
+
+            ui = make_ui('db')
+            bundlerepo = InMemoryBundleRepo(ui, path=org_repo.root,
+                                            bundlestream=unbundle)
+
+        return ''.join(patch.diff(bundlerepo or org_repo,
+                                  node1=org_repo[org_ref].node(),
+                                  node2=other_repo[other_ref].node(),
+                                  opts=opts))
+    else:
+        return ''.join(patch.diff(org_repo, node1=org_ref, node2=other_ref,
+                                  opts=opts))

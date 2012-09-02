@@ -1,13 +1,19 @@
 ## -*- coding: utf-8 -*-
 <%inherit file="/base/base.html"/>
 <%def name="title()">
-   ${_('Search')}
-   ${'"%s"' % c.cur_query if c.cur_query else None}
+   %if c.cur_query:
 	%if c.repo_name:
-		${_('in repository: ') + c.repo_name}
+		${_('Search "%s" in repository: %s') % (c.cur_query, c.repo_name)}
 	%else:
-		${_('in all repositories')}
+		${_('Search "%s" in all repositories') % c.cur_query}
 	%endif
+   %else:
+	%if c.repo_name:
+		${_('Search in repository: %s') % c.repo_name}
+	%else:
+		${_('Search in all repositories')}
+	%endif
+   %endif
 	- ${c.rhodecode_name}
 </%def>
 <%def name="breadcrumbs()">
@@ -21,11 +27,11 @@
 <div class="box">
 	<!-- box / title -->
 	<div class="title">
-		<h5>${_('Search')}
+		<h5>
 		%if c.repo_name:
-			${_('in repository: ') + c.repo_name}
+			${_('Search in repository: %s') % c.repo_name}
 		%else:
-			${_('in all repositories')}
+			${_('Search in all repositories')}
 		%endif
 		</h5>
 	</div>
@@ -55,7 +61,7 @@
 	            </div>
                 <div class="select">
                     ${h.select('type',c.cur_type,[('content',_('File contents')),
-                        ##('commit',_('Commit messages')),
+                        ('commit',_('Commit messages')),
                         ('path',_('File names')),
                         ##('repository',_('Repository names')),
                         ])}
@@ -65,16 +71,17 @@
 		</div>
 	</div>
 	${h.end_form()}
-
-    %if c.cur_search == 'content':
+    <div class="search">
+    %if c.cur_type == 'content':
         <%include file='search_content.html'/>
-    %elif c.cur_search == 'path':
+    %elif c.cur_type == 'path':
         <%include file='search_path.html'/>
-    %elif c.cur_search == 'commit':
+    %elif c.cur_type == 'commit':
         <%include file='search_commit.html'/>
-    %elif c.cur_search == 'repository':
+    %elif c.cur_type == 'repository':
         <%include file='search_repository.html'/>
     %endif
+    </div>
 </div>
 
 </%def>

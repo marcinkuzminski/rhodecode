@@ -23,6 +23,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from webob.exc import HTTPClientError
+
 
 class LdapUsernameError(Exception):
     pass
@@ -50,3 +52,20 @@ class UserOwnsReposException(Exception):
 
 class UsersGroupsAssignedException(Exception):
     pass
+
+
+class StatusChangeOnClosedPullRequestError(Exception):
+    pass
+
+
+class HTTPLockedRC(HTTPClientError):
+    """
+    Special Exception For locked Repos in RhodeCode
+    """
+    code = 423
+    title = explanation = 'Repository Locked'
+
+    def __init__(self, reponame, username, *args, **kwargs):
+        self.title = self.explanation = ('Repository `%s` locked by '
+                                         'user `%s`' % (reponame, username))
+        super(HTTPLockedRC, self).__init__(*args, **kwargs)

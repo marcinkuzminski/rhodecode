@@ -35,12 +35,12 @@ from string import strip
 from shutil import rmtree
 
 from whoosh.analysis import RegexTokenizer, LowercaseFilter, StopFilter
-from whoosh.fields import TEXT, ID, STORED, Schema, FieldType
+from whoosh.fields import TEXT, ID, STORED, NUMERIC, BOOLEAN, Schema, FieldType
 from whoosh.index import create_in, open_dir
 from whoosh.formats import Characters
 from whoosh.highlight import highlight, HtmlFormatter, ContextFragmenter
 
-from webhelpers.html.builder import escape
+from webhelpers.html.builder import escape, literal
 from sqlalchemy import engine_from_config
 
 from rhodecode.model import init_model
@@ -51,12 +51,14 @@ from rhodecode.lib.utils2 import LazyProperty
 from rhodecode.lib.utils import BasePasterCommand, Command, add_cache,\
     load_rcextensions
 
+log = logging.getLogger(__name__)
+
 # CUSTOM ANALYZER wordsplit + lowercase filter
 ANALYZER = RegexTokenizer(expression=r"\w+") | LowercaseFilter()
 
-
 #INDEX SCHEMA DEFINITION
 SCHEMA = Schema(
+    fileid=ID(unique=True),
     owner=TEXT(),
     repository=TEXT(stored=True),
     path=TEXT(stored=True),
@@ -69,6 +71,23 @@ SCHEMA = Schema(
 IDX_NAME = 'HG_INDEX'
 FORMATTER = HtmlFormatter('span', between='\n<span class="break">...</span>\n')
 FRAGMENTER = ContextFragmenter(200)
+
+CHGSETS_SCHEMA = Schema(
+    raw_id=ID(unique=True, stored=True),
+    date=NUMERIC(stored=True),
+    last=BOOLEAN(),
+    owner=TEXT(),
+    repository=ID(unique=True, stored=True),
+    author=TEXT(stored=True),
+    message=FieldType(format=Characters(), analyzer=ANALYZER,
+                      scorable=True, stored=True),
+    parents=TEXT(),
+    added=TEXT(),
+    removed=TEXT(),
+    changed=TEXT(),
+)
+
+CHGSET_IDX_NAME = 'CHGSET_INDEX'
 
 
 class MakeIndex(BasePasterCommand):
@@ -93,6 +112,8 @@ class MakeIndex(BasePasterCommand):
             if self.options.repo_location else RepoModel().repos_path
         repo_list = map(strip, self.options.repo_list.split(',')) \
             if self.options.repo_list else None
+        repo_update_list = map(strip, self.options.repo_update_list.split(',')) \
+            if self.options.repo_update_list else None
         load_rcextensions(config['here'])
         #======================================================================
         # WHOOSH DAEMON
@@ -103,7 +124,8 @@ class MakeIndex(BasePasterCommand):
             l = DaemonLock(file_=jn(dn(dn(index_location)), 'make_index.lock'))
             WhooshIndexingDaemon(index_location=index_location,
                                  repo_location=repo_location,
-                                 repo_list=repo_list,)\
+                                 repo_list=repo_list,
+                                 repo_update_list=repo_update_list)\
                 .run(full_index=self.options.full_index)
             l.release()
         except LockHeld:
@@ -119,7 +141,14 @@ class MakeIndex(BasePasterCommand):
                           action='store',
                           dest='repo_list',
                           help="Specifies a comma separated list of repositores "
-                                "to build index on OPTIONAL",
+                                "to build index on. If not given all repositories "
+                                "are scanned for indexing. OPTIONAL",
+                          )
+        self.parser.add_option('--update-only',
+                          action='store',
+                          dest='repo_update_list',
+                          help="Specifies a comma separated list of repositores "
+                                "to re-build index on. OPTIONAL",
                           )
         self.parser.add_option('-f',
                           action='store_true',
@@ -129,13 +158,15 @@ class MakeIndex(BasePasterCommand):
                           default=False)
 
 
-class ResultWrapper(object):
-    def __init__(self, search_type, searcher, matcher, highlight_items):
+class WhooshResultWrapper(object):
+    def __init__(self, search_type, searcher, matcher, highlight_items,
+                 repo_location):
         self.search_type = search_type
         self.searcher = searcher
         self.matcher = matcher
         self.highlight_items = highlight_items
         self.fragment_size = 200
+        self.repo_location = repo_location
 
     @LazyProperty
     def doc_ids(self):
@@ -178,13 +209,25 @@ class ResultWrapper(object):
 
     def get_full_content(self, docid):
         res = self.searcher.stored_fields(docid[0])
-        f_path = res['path'][res['path'].find(res['repository']) \
-                             + len(res['repository']):].lstrip('/')
+        log.debug('result: %s' % res)
+        if self.search_type == 'content':
+            full_repo_path = jn(self.repo_location, res['repository'])
+            f_path = res['path'].split(full_repo_path)[-1]
+            f_path = f_path.lstrip(os.sep)
+            content_short = self.get_short_content(res, docid[1])
+            res.update({'content_short': content_short,
+                        'content_short_hl': self.highlight(content_short),
+                        'f_path': f_path
+                      })
+        elif self.search_type == 'path':
+            full_repo_path = jn(self.repo_location, res['repository'])
+            f_path = res['path'].split(full_repo_path)[-1]
+            f_path = f_path.lstrip(os.sep)
+            res.update({'f_path': f_path})
+        elif self.search_type == 'message':
+            res.update({'message_hl': self.highlight(res['message'])})
 
-        content_short = self.get_short_content(res, docid[1])
-        res.update({'content_short': content_short,
-                    'content_short_hl': self.highlight(content_short),
-                    'f_path': f_path})
+        log.debug('result: %s' % res)
 
         return res
 
@@ -202,22 +245,23 @@ class ResultWrapper(object):
         :param size:
         """
         memory = [(0, 0)]
-        for span in self.matcher.spans():
-            start = span.startchar or 0
-            end = span.endchar or 0
-            start_offseted = max(0, start - self.fragment_size)
-            end_offseted = end + self.fragment_size
+        if self.matcher.supports('positions'):
+            for span in self.matcher.spans():
+                start = span.startchar or 0
+                end = span.endchar or 0
+                start_offseted = max(0, start - self.fragment_size)
+                end_offseted = end + self.fragment_size
 
-            if start_offseted < memory[-1][1]:
-                start_offseted = memory[-1][1]
-            memory.append((start_offseted, end_offseted,))
-            yield (start_offseted, end_offseted,)
+                if start_offseted < memory[-1][1]:
+                    start_offseted = memory[-1][1]
+                memory.append((start_offseted, end_offseted,))
+                yield (start_offseted, end_offseted,)
 
     def highlight(self, content, top=5):
-        if self.search_type != 'content':
+        if self.search_type not in ['content', 'message']:
             return ''
         hl = highlight(
-            text=escape(content),
+            text=content,
             terms=self.highlight_items,
             analyzer=ANALYZER,
             fragmenter=FRAGMENTER,

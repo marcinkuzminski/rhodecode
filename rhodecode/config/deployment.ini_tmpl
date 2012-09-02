@@ -30,22 +30,31 @@ pdebug = false
 
 [server:main]
 ##nr of threads to spawn
-threadpool_workers = 5
+#threadpool_workers = 5
 
 ##max request before thread respawn
-threadpool_max_requests = 10
+#threadpool_max_requests = 10
 
 ##option to use threads of process
-use_threadpool = true
+#use_threadpool = true
 
-use = egg:Paste#http
+#use = egg:Paste#http
+use = egg:waitress#main
 host = 127.0.0.1
 port = 5000
 
+[filter:proxy-prefix]
+# prefix middleware for rc
+use = egg:PasteDeploy#prefix
+prefix = /<your-prefix>
+
 [app:main]
 use = egg:rhodecode
+#filter-with = proxy-prefix
 full_stack = true
 static_files = true
+# Optional Languages
+# en, fr, ja, pt_BR, zh_CN, zh_TW
 lang = en
 cache_dir = %(here)s/data
 index_dir = %(here)s/data/index
@@ -54,6 +63,15 @@ cut_off_limit = 256000
 force_https = false
 commit_parse_limit = 50
 use_gravatar = true
+
+## alternative_gravatar_url allows you to use your own avatar server application
+## the following parts of the URL will be replaced
+## {email}        user email
+## {md5email}     md5 hash of the user email (like at gravatar.com)
+## {size}         size of the image that is expected from the server application
+#alternative_gravatar_url = http://myavatarserver.com/getbyemail/{email}/{size}
+#alternative_gravatar_url = http://myavatarserver.com/getbymd5/{md5email}?s={size}
+
 container_auth_enabled = false
 proxypass_auth_enabled = false
 default_encoding = utf8
@@ -78,7 +96,8 @@ default_encoding = utf8
 issue_pat = (?:\s*#)(\d+)
 
 ## server url to the issue, each {id} will be replaced with match
-## fetched from the regex and {repo} is replaced with repository name
+## fetched from the regex and {repo} is replaced with full repository name
+## including groups {repo_name} is replaced with just name of repo
 
 issue_server_link = https://myissueserver.com/{repo}/issue/{id}
 
@@ -165,30 +184,34 @@ beaker.cache.sql_cache_long.key_length = 256
 ## The storage uses the Container API 
 ## that is also used by the cache system.
 
-## db session example
-
+## db session ##
 #beaker.session.type = ext:database
 #beaker.session.sa.url = postgresql://postgres:qwe@localhost/rhodecode
 #beaker.session.table_name = db_session 
 
-## encrypted cookie session, good for many instances
+## encrypted cookie client side session, good for many instances ##
 #beaker.session.type = cookie
 
-beaker.session.type = file
-beaker.session.key = rhodecode
-# secure cookie requires AES python libraries
-#beaker.session.encrypt_key = ${app_instance_secret}
-#beaker.session.validate_key = ${app_instance_secret}
-beaker.session.timeout = 36000
-beaker.session.httponly = true
+## file based cookies (default) ##
+#beaker.session.type = file
 
-## uncomment for https secure cookie
+
+beaker.session.key = rhodecode
+## secure cookie requires AES python libraries ##
+#beaker.session.encrypt_key = g654dcno0-9873jhgfreyu
+#beaker.session.validate_key = 9712sds2212c--zxc123
+## sets session as invalid if it haven't been accessed for given amount of time
+beaker.session.timeout = 2592000
+beaker.session.httponly = true
+#beaker.session.cookie_path = /<your-prefix>
+
+## uncomment for https secure cookie ##
 beaker.session.secure = false
 
-##auto save the session to not to use .save()
+## auto save the session to not to use .save() ##
 beaker.session.auto = False
 
-##true exire at browser close
+## default cookie expiration time in seconds `true` expire at browser close ##
 #beaker.session.cookie_expires = 3600
 
 

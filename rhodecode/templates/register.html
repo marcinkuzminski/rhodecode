@@ -44,10 +44,10 @@
 
 	             <div class="field">
 	                <div class="label">
-	                    <label for="name">${_('First Name')}:</label>
+	                    <label for="firstname">${_('First Name')}:</label>
 	                </div>
 	                <div class="input">
-	                    ${h.text('name',class_="medium")}
+	                    ${h.text('firstname',class_="medium")}
 	                </div>
 	             </div>
 
@@ -71,7 +71,7 @@
 
 	            <div class="buttons">
 		            <div class="nohighlight">
-		              ${h.submit('sign_up',_('Sign Up'),class_="ui-button")}
+		              ${h.submit('sign_up',_('Sign Up'),class_="ui-btn large")}
 		              %if c.auto_active:
 					  	<div class="activation_msg">${_('Your account will be activated right after registration')}</div>
 					  %else:

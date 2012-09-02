@@ -27,12 +27,18 @@ import os
 import logging
 import datetime
 import traceback
+import hashlib
+import time
 from collections import defaultdict
 
 from sqlalchemy import *
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship, joinedload, class_mapper, validates
+from sqlalchemy.exc import DatabaseError
 from beaker.cache import cache_region, region_invalidate
+from webob.exc import HTTPNotFound
+
+from pylons.i18n.translation import lazy_ugettext as _
 
 from rhodecode.lib.vcs import get_backend
 from rhodecode.lib.vcs.utils.helpers import get_scm
@@ -45,9 +51,8 @@ from rhodecode.lib.compat import json
 from rhodecode.lib.caching_query import FromCache
 
 from rhodecode.model.meta import Base, Session
-import hashlib
 
-
+URL_SEP = '/'
 log = logging.getLogger(__name__)
 
 #==============================================================================
@@ -55,37 +60,6 @@ log = logging.getLogger(__name__)
 #==============================================================================
 
 _hash_key = lambda k: hashlib.md5(safe_str(k)).hexdigest()
-
-
-class ModelSerializer(json.JSONEncoder):
-    """
-    Simple Serializer for JSON,
-
-    usage::
-
-        to make object customized for serialization implement a __json__
-        method that will return a dict for serialization into json
-
-    example::
-
-        class Task(object):
-
-            def __init__(self, name, value):
-                self.name = name
-                self.value = value
-
-            def __json__(self):
-                return dict(name=self.name,
-                            value=self.value)
-
-    """
-
-    def default(self, obj):
-
-        if hasattr(obj, '__json__'):
-            return obj.__json__()
-        else:
-            return json.JSONEncoder.default(self, obj)
 
 
 class BaseModel(object):
@@ -108,8 +82,13 @@ class BaseModel(object):
             d[k] = getattr(self, k)
 
         # also use __json__() if present to get additional fields
-        for k, val in getattr(self, '__json__', lambda: {})().iteritems():
-            d[k] = val
+        _json_attr = getattr(self, '__json__', None)
+        if _json_attr:
+            # update with attributes from __json__
+            if callable(_json_attr):
+                _json_attr = _json_attr()
+            for k, val in _json_attr.iteritems():
+                d[k] = val
         return d
 
     def get_appstruct(self):
@@ -130,12 +109,20 @@ class BaseModel(object):
 
     @classmethod
     def query(cls):
-        return Session.query(cls)
+        return Session().query(cls)
 
     @classmethod
     def get(cls, id_):
         if id_:
             return cls.query().get(id_)
+
+    @classmethod
+    def get_or_404(cls, id_):
+        if id_:
+            res = cls.query().get(id_)
+            if not res:
+                raise HTTPNotFound
+            return res
 
     @classmethod
     def getAll(cls):
@@ -144,7 +131,7 @@ class BaseModel(object):
     @classmethod
     def delete(cls, id_):
         obj = cls.query().get(id_)
-        Session.delete(obj)
+        Session().delete(obj)
 
     def __repr__(self):
         if hasattr(self, '__unicode__'):
@@ -152,16 +139,17 @@ class BaseModel(object):
             return safe_str(self.__unicode__())
         return '<DB:%s>' % (self.__class__.__name__)
 
+
 class RhodeCodeSetting(Base, BaseModel):
     __tablename__ = 'rhodecode_settings'
     __table_args__ = (
         UniqueConstraint('app_settings_name'),
-        {'extend_existing': True, 'mysql_engine':'InnoDB',
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'}
     )
     app_settings_id = Column("app_settings_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
-    app_settings_name = Column("app_settings_name", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
-    _app_settings_value = Column("app_settings_value", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    app_settings_name = Column("app_settings_name", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    _app_settings_value = Column("app_settings_value", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
 
     def __init__(self, k='', v=''):
         self.app_settings_name = k
@@ -195,9 +183,16 @@ class RhodeCodeSetting(Base, BaseModel):
         )
 
     @classmethod
-    def get_by_name(cls, ldap_key):
+    def get_by_name(cls, key):
         return cls.query()\
-            .filter(cls.app_settings_name == ldap_key).scalar()
+            .filter(cls.app_settings_name == key).scalar()
+
+    @classmethod
+    def get_by_name_or_create(cls, key):
+        res = cls.get_by_name(key)
+        if not res:
+            res = cls(key)
+        return res
 
     @classmethod
     def get_app_settings(cls, cache=False):
@@ -222,7 +217,7 @@ class RhodeCodeSetting(Base, BaseModel):
                 .filter(cls.app_settings_name.startswith('ldap_')).all()
         fd = {}
         for row in ret:
-            fd.update({row.app_settings_name:row.app_settings_value})
+            fd.update({row.app_settings_name: row.app_settings_value})
 
         return fd
 
@@ -231,71 +226,82 @@ class RhodeCodeUi(Base, BaseModel):
     __tablename__ = 'rhodecode_ui'
     __table_args__ = (
         UniqueConstraint('ui_key'),
-        {'extend_existing': True, 'mysql_engine':'InnoDB',
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'}
     )
 
     HOOK_UPDATE = 'changegroup.update'
     HOOK_REPO_SIZE = 'changegroup.repo_size'
-    HOOK_PUSH = 'pretxnchangegroup.push_logger'
-    HOOK_PULL = 'preoutgoing.pull_logger'
+    HOOK_PUSH = 'changegroup.push_logger'
+    HOOK_PRE_PUSH = 'prechangegroup.pre_push'
+    HOOK_PULL = 'outgoing.pull_logger'
+    HOOK_PRE_PULL = 'preoutgoing.pre_pull'
 
     ui_id = Column("ui_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
-    ui_section = Column("ui_section", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
-    ui_key = Column("ui_key", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
-    ui_value = Column("ui_value", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    ui_section = Column("ui_section", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    ui_key = Column("ui_key", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    ui_value = Column("ui_value", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     ui_active = Column("ui_active", Boolean(), nullable=True, unique=None, default=True)
 
     @classmethod
     def get_by_key(cls, key):
-        return cls.query().filter(cls.ui_key == key)
+        return cls.query().filter(cls.ui_key == key).scalar()
 
     @classmethod
     def get_builtin_hooks(cls):
         q = cls.query()
-        q = q.filter(cls.ui_key.in_([cls.HOOK_UPDATE,
-                                    cls.HOOK_REPO_SIZE,
-                                    cls.HOOK_PUSH, cls.HOOK_PULL]))
+        q = q.filter(cls.ui_key.in_([cls.HOOK_UPDATE, cls.HOOK_REPO_SIZE,
+                                     cls.HOOK_PUSH, cls.HOOK_PRE_PUSH,
+                                     cls.HOOK_PULL, cls.HOOK_PRE_PULL]))
         return q.all()
 
     @classmethod
     def get_custom_hooks(cls):
         q = cls.query()
-        q = q.filter(~cls.ui_key.in_([cls.HOOK_UPDATE,
-                                    cls.HOOK_REPO_SIZE,
-                                    cls.HOOK_PUSH, cls.HOOK_PULL]))
+        q = q.filter(~cls.ui_key.in_([cls.HOOK_UPDATE, cls.HOOK_REPO_SIZE,
+                                      cls.HOOK_PUSH, cls.HOOK_PRE_PUSH,
+                                      cls.HOOK_PULL, cls.HOOK_PRE_PULL]))
         q = q.filter(cls.ui_section == 'hooks')
         return q.all()
 
     @classmethod
+    def get_repos_location(cls):
+        return cls.get_by_key('/').ui_value
+
+    @classmethod
     def create_or_update_hook(cls, key, val):
-        new_ui = cls.get_by_key(key).scalar() or cls()
+        new_ui = cls.get_by_key(key) or cls()
         new_ui.ui_section = 'hooks'
         new_ui.ui_active = True
         new_ui.ui_key = key
         new_ui.ui_value = val
 
-        Session.add(new_ui)
+        Session().add(new_ui)
 
 
 class User(Base, BaseModel):
     __tablename__ = 'users'
     __table_args__ = (
         UniqueConstraint('username'), UniqueConstraint('email'),
-        {'extend_existing': True, 'mysql_engine':'InnoDB',
+        Index('u_username_idx', 'username'),
+        Index('u_email_idx', 'email'),
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'}
     )
+    DEFAULT_USER = 'default'
+
     user_id = Column("user_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
-    username = Column("username", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
-    password = Column("password", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
-    active = Column("active", Boolean(), nullable=True, unique=None, default=None)
+    username = Column("username", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    password = Column("password", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    active = Column("active", Boolean(), nullable=True, unique=None, default=True)
     admin = Column("admin", Boolean(), nullable=True, unique=None, default=False)
-    name = Column("name", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
-    lastname = Column("lastname", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
-    _email = Column("email", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    name = Column("firstname", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    lastname = Column("lastname", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    _email = Column("email", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     last_login = Column("last_login", DateTime(timezone=False), nullable=True, unique=None, default=None)
-    ldap_dn = Column("ldap_dn", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
-    api_key = Column("api_key", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    ldap_dn = Column("ldap_dn", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    api_key = Column("api_key", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    inherit_default_permissions = Column("inherit_default_permissions", Boolean(), nullable=False, unique=None, default=True)
 
     user_log = relationship('UserLog', cascade='all')
     user_perms = relationship('UserToPerm', primaryjoin="User.user_id==UserToPerm.user_id", cascade='all')
@@ -312,6 +318,8 @@ class User(Base, BaseModel):
     user_created_notifications = relationship('Notification', cascade='all')
     # comments created by this user
     user_comments = relationship('ChangesetComment', cascade='all')
+    #extra emails for this user
+    user_emails = relationship('UserEmailMap', cascade='all')
 
     @hybrid_property
     def email(self):
@@ -322,21 +330,35 @@ class User(Base, BaseModel):
         self._email = val.lower() if val else None
 
     @property
+    def firstname(self):
+        # alias for future
+        return self.name
+
+    @property
+    def emails(self):
+        other = UserEmailMap.query().filter(UserEmailMap.user==self).all()
+        return [self.email] + [x.email for x in other]
+
+    @property
+    def username_and_name(self):
+        return '%s (%s %s)' % (self.username, self.firstname, self.lastname)
+
+    @property
     def full_name(self):
-        return '%s %s' % (self.name, self.lastname)
+        return '%s %s' % (self.firstname, self.lastname)
 
     @property
     def full_name_or_username(self):
-        return ('%s %s' % (self.name, self.lastname)
-                if (self.name and self.lastname) else self.username)
+        return ('%s %s' % (self.firstname, self.lastname)
+                if (self.firstname and self.lastname) else self.username)
 
     @property
     def full_contact(self):
-        return '%s %s <%s>' % (self.name, self.lastname, self.email)
+        return '%s %s <%s>' % (self.firstname, self.lastname, self.email)
 
     @property
     def short_contact(self):
-        return '%s %s' % (self.name, self.lastname)
+        return '%s %s' % (self.firstname, self.lastname)
 
     @property
     def is_admin(self):
@@ -379,40 +401,105 @@ class User(Base, BaseModel):
 
         if cache:
             q = q.options(FromCache("sql_cache_short",
-                                    "get_api_key_%s" % email))
-        return q.scalar()
+                                    "get_email_key_%s" % email))
+
+        ret = q.scalar()
+        if ret is None:
+            q = UserEmailMap.query()
+            # try fetching in alternate email map
+            if case_insensitive:
+                q = q.filter(UserEmailMap.email.ilike(email))
+            else:
+                q = q.filter(UserEmailMap.email == email)
+            q = q.options(joinedload(UserEmailMap.user))
+            if cache:
+                q = q.options(FromCache("sql_cache_short",
+                                        "get_email_map_key_%s" % email))
+            ret = getattr(q.scalar(), 'user', None)
+
+        return ret
 
     def update_lastlogin(self):
         """Update user lastlogin"""
         self.last_login = datetime.datetime.now()
-        Session.add(self)
+        Session().add(self)
         log.debug('updated user %s lastlogin' % self.username)
 
+    def get_api_data(self):
+        """
+        Common function for generating user related data for API
+        """
+        user = self
+        data = dict(
+            user_id=user.user_id,
+            username=user.username,
+            firstname=user.name,
+            lastname=user.lastname,
+            email=user.email,
+            emails=user.emails,
+            api_key=user.api_key,
+            active=user.active,
+            admin=user.admin,
+            ldap_dn=user.ldap_dn,
+            last_login=user.last_login,
+        )
+        return data
+
     def __json__(self):
-        return dict(
-            user_id=self.user_id,
-            first_name=self.name,
-            last_name=self.lastname,
-            email=self.email,
+        data = dict(
             full_name=self.full_name,
             full_name_or_username=self.full_name_or_username,
             short_contact=self.short_contact,
             full_contact=self.full_contact
         )
+        data.update(self.get_api_data())
+        return data
+
+
+class UserEmailMap(Base, BaseModel):
+    __tablename__ = 'user_email_map'
+    __table_args__ = (
+        Index('uem_email_idx', 'email'),
+        UniqueConstraint('email'),
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
+         'mysql_charset': 'utf8'}
+    )
+    __mapper_args__ = {}
+
+    email_id = Column("email_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
+    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=True, unique=None, default=None)
+    _email = Column("email", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=False, default=None)
+    user = relationship('User', lazy='joined')
+
+    @validates('_email')
+    def validate_email(self, key, email):
+        # check if this email is not main one
+        main_email = Session().query(User).filter(User.email == email).scalar()
+        if main_email is not None:
+            raise AttributeError('email %s is present is user table' % email)
+        return email
+
+    @hybrid_property
+    def email(self):
+        return self._email
+
+    @email.setter
+    def email(self, val):
+        self._email = val.lower() if val else None
 
 
 class UserLog(Base, BaseModel):
     __tablename__ = 'user_logs'
     __table_args__ = (
-        {'extend_existing': True, 'mysql_engine':'InnoDB',
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'},
     )
     user_log_id = Column("user_log_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None, default=None)
     repository_id = Column("repository_id", Integer(), ForeignKey('repositories.repo_id'), nullable=True)
-    repository_name = Column("repository_name", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
-    user_ip = Column("user_ip", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
-    action = Column("action", UnicodeText(length=1200000, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    repository_name = Column("repository_name", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    user_ip = Column("user_ip", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    action = Column("action", UnicodeText(1200000, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     action_date = Column("action_date", DateTime(timezone=False), nullable=True, unique=None, default=None)
 
     @property
@@ -426,13 +513,14 @@ class UserLog(Base, BaseModel):
 class UsersGroup(Base, BaseModel):
     __tablename__ = 'users_groups'
     __table_args__ = (
-        {'extend_existing': True, 'mysql_engine':'InnoDB',
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'},
     )
 
     users_group_id = Column("users_group_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
-    users_group_name = Column("users_group_name", String(length=255, convert_unicode=False, assert_unicode=None), nullable=False, unique=True, default=None)
+    users_group_name = Column("users_group_name", String(255, convert_unicode=False, assert_unicode=None), nullable=False, unique=True, default=None)
     users_group_active = Column("users_group_active", Boolean(), nullable=True, unique=None, default=None)
+    inherit_default_permissions = Column("users_group_inherit_default_permissions", Boolean(), nullable=False, unique=None, default=True)
 
     members = relationship('UsersGroupMember', cascade="all, delete, delete-orphan", lazy="joined")
     users_group_to_perm = relationship('UsersGroupToPerm', cascade='all')
@@ -464,11 +552,22 @@ class UsersGroup(Base, BaseModel):
                                     "get_users_group_%s" % users_group_id))
         return users_group.get(users_group_id)
 
+    def get_api_data(self):
+        users_group = self
+
+        data = dict(
+            users_group_id=users_group.users_group_id,
+            group_name=users_group.users_group_name,
+            active=users_group.users_group_active,
+        )
+
+        return data
+
 
 class UsersGroupMember(Base, BaseModel):
     __tablename__ = 'users_groups_members'
     __table_args__ = (
-        {'extend_existing': True, 'mysql_engine':'InnoDB',
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'},
     )
 
@@ -488,20 +587,24 @@ class Repository(Base, BaseModel):
     __tablename__ = 'repositories'
     __table_args__ = (
         UniqueConstraint('repo_name'),
-        {'extend_existing': True, 'mysql_engine':'InnoDB',
+        Index('r_repo_name_idx', 'repo_name'),
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'},
     )
 
     repo_id = Column("repo_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
-    repo_name = Column("repo_name", String(length=255, convert_unicode=False, assert_unicode=None), nullable=False, unique=True, default=None)
-    clone_uri = Column("clone_uri", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=False, default=None)
-    repo_type = Column("repo_type", String(length=255, convert_unicode=False, assert_unicode=None), nullable=False, unique=False, default='hg')
+    repo_name = Column("repo_name", String(255, convert_unicode=False, assert_unicode=None), nullable=False, unique=True, default=None)
+    clone_uri = Column("clone_uri", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=False, default=None)
+    repo_type = Column("repo_type", String(255, convert_unicode=False, assert_unicode=None), nullable=False, unique=False, default=None)
     user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=False, default=None)
     private = Column("private", Boolean(), nullable=True, unique=None, default=None)
     enable_statistics = Column("statistics", Boolean(), nullable=True, unique=None, default=True)
     enable_downloads = Column("downloads", Boolean(), nullable=True, unique=None, default=True)
-    description = Column("description", String(length=10000, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    description = Column("description", String(10000, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     created_on = Column('created_on', DateTime(timezone=False), nullable=True, unique=None, default=datetime.datetime.now)
+    landing_rev = Column("landing_revision", String(255, convert_unicode=False, assert_unicode=None), nullable=False, unique=False, default=None)
+    enable_locking = Column("enable_locking", Boolean(), nullable=False, unique=None, default=False)
+    _locked = Column("locked", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=False, default=None)
 
     fork_id = Column("fork_id", Integer(), ForeignKey('repositories.repo_id'), nullable=True, unique=False, default=None)
     group_id = Column("group_id", Integer(), ForeignKey('groups.group_id'), nullable=True, unique=False, default=None)
@@ -513,25 +616,56 @@ class Repository(Base, BaseModel):
     users_group_to_perm = relationship('UsersGroupRepoToPerm', cascade='all')
     stats = relationship('Statistics', cascade='all', uselist=False)
 
-    followers = relationship('UserFollowing', primaryjoin='UserFollowing.follows_repo_id==Repository.repo_id', cascade='all')
+    followers = relationship('UserFollowing',
+                             primaryjoin='UserFollowing.follows_repo_id==Repository.repo_id',
+                             cascade='all')
 
     logs = relationship('UserLog')
+    comments = relationship('ChangesetComment', cascade="all, delete, delete-orphan")
+
+    pull_requests_org = relationship('PullRequest',
+                    primaryjoin='PullRequest.org_repo_id==Repository.repo_id',
+                    cascade="all, delete, delete-orphan")
+
+    pull_requests_other = relationship('PullRequest',
+                    primaryjoin='PullRequest.other_repo_id==Repository.repo_id',
+                    cascade="all, delete, delete-orphan")
 
     def __unicode__(self):
-        return u"<%s('%s:%s')>" % (self.__class__.__name__,self.repo_id,
+        return u"<%s('%s:%s')>" % (self.__class__.__name__, self.repo_id,
                                    self.repo_name)
+
+    @hybrid_property
+    def locked(self):
+        # always should return [user_id, timelocked]
+        if self._locked:
+            _lock_info = self._locked.split(':')
+            return int(_lock_info[0]), _lock_info[1]
+        return [None, None]
+
+    @locked.setter
+    def locked(self, val):
+        if val and isinstance(val, (list, tuple)):
+            self._locked = ':'.join(map(str, val))
+        else:
+            self._locked = None
 
     @classmethod
     def url_sep(cls):
-        return '/'
+        return URL_SEP
 
     @classmethod
     def get_by_repo_name(cls, repo_name):
-        q = Session.query(cls).filter(cls.repo_name == repo_name)
+        q = Session().query(cls).filter(cls.repo_name == repo_name)
         q = q.options(joinedload(Repository.fork))\
                 .options(joinedload(Repository.user))\
                 .options(joinedload(Repository.group))
         return q.scalar()
+
+    @classmethod
+    def get_by_full_path(cls, repo_full_path):
+        repo_name = repo_full_path.split(cls.base_path(), 1)[-1]
+        return cls.get_by_repo_name(repo_name.strip(URL_SEP))
 
     @classmethod
     def get_repo_forks(cls, repo_id):
@@ -544,10 +678,24 @@ class Repository(Base, BaseModel):
 
         :param cls:
         """
-        q = Session.query(RhodeCodeUi)\
+        q = Session().query(RhodeCodeUi)\
             .filter(RhodeCodeUi.ui_key == cls.url_sep())
         q = q.options(FromCache("sql_cache_short", "repository_repo_path"))
         return q.one().ui_value
+
+    @property
+    def forks(self):
+        """
+        Return forks of this repo
+        """
+        return Repository.get_repo_forks(self.repo_id)
+
+    @property
+    def parent(self):
+        """
+        Returns fork parent
+        """
+        return self.fork
 
     @property
     def just_name(self):
@@ -580,7 +728,7 @@ class Repository(Base, BaseModel):
         Returns base full path for that repository means where it actually
         exists on a filesystem
         """
-        q = Session.query(RhodeCodeUi).filter(RhodeCodeUi.ui_key ==
+        q = Session().query(RhodeCodeUi).filter(RhodeCodeUi.ui_key ==
                                               Repository.url_sep())
         q = q.options(FromCache("sql_cache_short", "repository_repo_path"))
         return q.one().ui_value
@@ -626,8 +774,24 @@ class Repository(Base, BaseModel):
                 log.debug('settings ui from db[%s]%s:%s', ui_.ui_section,
                           ui_.ui_key, ui_.ui_value)
                 baseui.setconfig(ui_.ui_section, ui_.ui_key, ui_.ui_value)
+            if ui_.ui_key == 'push_ssl':
+                # force set push_ssl requirement to False, rhodecode
+                # handles that
+                baseui.setconfig(ui_.ui_section, ui_.ui_key, False)
 
         return baseui
+
+    @classmethod
+    def inject_ui(cls, repo, extras={}):
+        from rhodecode.lib.vcs.backends.hg import MercurialRepository
+        from rhodecode.lib.vcs.backends.git import GitRepository
+        required = (MercurialRepository, GitRepository)
+        if not isinstance(repo, required):
+            raise Exception('repo must be instance of %s' % required)
+
+        # inject ui extra param to log this action via push logger
+        for k, v in extras.items():
+            repo._repo.ui.setconfig('rhodecode_extras', k, v)
 
     @classmethod
     def is_valid(cls, repo_name):
@@ -641,12 +805,52 @@ class Repository(Base, BaseModel):
 
         return is_valid_repo(repo_name, cls.base_path())
 
+    def get_api_data(self):
+        """
+        Common function for generating repo api data
+
+        """
+        repo = self
+        data = dict(
+            repo_id=repo.repo_id,
+            repo_name=repo.repo_name,
+            repo_type=repo.repo_type,
+            clone_uri=repo.clone_uri,
+            private=repo.private,
+            created_on=repo.created_on,
+            description=repo.description,
+            landing_rev=repo.landing_rev,
+            owner=repo.user.username,
+            fork_of=repo.fork.repo_name if repo.fork else None
+        )
+
+        return data
+
+    @classmethod
+    def lock(cls, repo, user_id):
+        repo.locked = [user_id, time.time()]
+        Session().add(repo)
+        Session().commit()
+
+    @classmethod
+    def unlock(cls, repo):
+        repo.locked = None
+        Session().add(repo)
+        Session().commit()
+
     #==========================================================================
     # SCM PROPERTIES
     #==========================================================================
 
     def get_changeset(self, rev=None):
         return get_changeset_safe(self.scm_instance, rev)
+
+    def get_landing_changeset(self):
+        """
+        Returns landing changeset, or if that doesn't exist returns the tip
+        """
+        cs = self.get_changeset(self.landing_rev) or self.get_changeset()
+        return cs
 
     @property
     def tip(self):
@@ -660,7 +864,7 @@ class Repository(Base, BaseModel):
     def last_change(self):
         return self.scm_instance.last_change
 
-    def comments(self, revisions=None):
+    def get_comments(self, revisions=None):
         """
         Returns comments for this repository grouped by revisions
 
@@ -673,6 +877,39 @@ class Repository(Base, BaseModel):
         grouped = defaultdict(list)
         for cmt in cmts.all():
             grouped[cmt.revision].append(cmt)
+        return grouped
+
+    def statuses(self, revisions=None):
+        """
+        Returns statuses for this repository
+
+        :param revisions: list of revisions to get statuses for
+        :type revisions: list
+        """
+
+        statuses = ChangesetStatus.query()\
+            .filter(ChangesetStatus.repo == self)\
+            .filter(ChangesetStatus.version == 0)
+        if revisions:
+            statuses = statuses.filter(ChangesetStatus.revision.in_(revisions))
+        grouped = {}
+
+        #maybe we have open new pullrequest without a status ?
+        stat = ChangesetStatus.STATUS_UNDER_REVIEW
+        status_lbl = ChangesetStatus.get_status_lbl(stat)
+        for pr in PullRequest.query().filter(PullRequest.org_repo == self).all():
+            for rev in pr.revisions:
+                pr_id = pr.pull_request_id
+                pr_repo = pr.other_repo.repo_name
+                grouped[rev] = [stat, status_lbl, pr_id, pr_repo]
+
+        for stat in statuses.all():
+            pr_id = pr_repo = None
+            if stat.pull_request:
+                pr_id = stat.pull_request.pull_request_id
+                pr_repo = stat.pull_request.other_repo.repo_name
+            grouped[stat.revision] = [str(stat.status), stat.status_lbl,
+                                      pr_id, pr_repo]
         return grouped
 
     #==========================================================================
@@ -693,18 +930,27 @@ class Repository(Base, BaseModel):
     def scm_instance(self):
         return self.__get_instance()
 
-    @property
-    def scm_instance_cached(self):
+    def scm_instance_cached(self, cache_map=None):
         @cache_region('long_term')
         def _c(repo_name):
             return self.__get_instance()
         rn = self.repo_name
         log.debug('Getting cached instance of repo')
-        inv = self.invalidate
-        if inv is not None:
+
+        if cache_map:
+            # get using prefilled cache_map
+            invalidate_repo = cache_map[self.repo_name]
+            if invalidate_repo:
+                invalidate_repo = (None if invalidate_repo.cache_active
+                                   else invalidate_repo)
+        else:
+            # get from invalidate
+            invalidate_repo = self.invalidate
+
+        if invalidate_repo is not None:
             region_invalidate(_c, None, rn)
             # update our cache
-            CacheInvalidation.set_valid(inv.cache_key)
+            CacheInvalidation.set_valid(invalidate_repo.cache_key)
         return _c(rn)
 
     def __get_instance(self):
@@ -738,15 +984,16 @@ class RepoGroup(Base, BaseModel):
     __table_args__ = (
         UniqueConstraint('group_name', 'group_parent_id'),
         CheckConstraint('group_id != group_parent_id'),
-        {'extend_existing': True, 'mysql_engine':'InnoDB',
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'},
     )
     __mapper_args__ = {'order_by': 'group_name'}
 
     group_id = Column("group_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
-    group_name = Column("group_name", String(length=255, convert_unicode=False, assert_unicode=None), nullable=False, unique=True, default=None)
+    group_name = Column("group_name", String(255, convert_unicode=False, assert_unicode=None), nullable=False, unique=True, default=None)
     group_parent_id = Column("group_parent_id", Integer(), ForeignKey('groups.group_id'), nullable=True, unique=None, default=None)
-    group_description = Column("group_description", String(length=10000, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    group_description = Column("group_description", String(10000, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    enable_locking = Column("enable_locking", Boolean(), nullable=False, unique=None, default=False)
 
     repo_group_to_perm = relationship('UserRepoGroupToPerm', cascade='all', order_by='UserRepoGroupToPerm.group_to_perm_id')
     users_group_to_perm = relationship('UsersGroupRepoGroupToPerm', cascade='all')
@@ -776,7 +1023,7 @@ class RepoGroup(Base, BaseModel):
 
     @classmethod
     def url_sep(cls):
-        return '/'
+        return URL_SEP
 
     @classmethod
     def get_by_group_name(cls, group_name, cache=False, case_insensitive=False):
@@ -853,6 +1100,24 @@ class RepoGroup(Base, BaseModel):
 
         return cnt + children_count(self)
 
+    def recursive_groups_and_repos(self):
+        """
+        Recursive return all groups, with repositories in those groups
+        """
+        all_ = []
+
+        def _get_members(root_gr):
+            for r in root_gr.repositories:
+                all_.append(r)
+            childs = root_gr.children.all()
+            if childs:
+                for gr in childs:
+                    all_.append(gr)
+                    _get_members(gr)
+
+        _get_members(self)
+        return [self] + all_
+
     def get_new_name(self, group_name):
         """
         returns new full group name based on parent and new name
@@ -867,12 +1132,55 @@ class RepoGroup(Base, BaseModel):
 class Permission(Base, BaseModel):
     __tablename__ = 'permissions'
     __table_args__ = (
-        {'extend_existing': True, 'mysql_engine':'InnoDB',
+        Index('p_perm_name_idx', 'permission_name'),
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'},
     )
+    PERMS = [
+        ('repository.none', _('Repository no access')),
+        ('repository.read', _('Repository read access')),
+        ('repository.write', _('Repository write access')),
+        ('repository.admin', _('Repository admin access')),
+
+        ('group.none', _('Repositories Group no access')),
+        ('group.read', _('Repositories Group read access')),
+        ('group.write', _('Repositories Group write access')),
+        ('group.admin', _('Repositories Group admin access')),
+
+        ('hg.admin', _('RhodeCode Administrator')),
+        ('hg.create.none', _('Repository creation disabled')),
+        ('hg.create.repository', _('Repository creation enabled')),
+        ('hg.fork.none', _('Repository forking disabled')),
+        ('hg.fork.repository', _('Repository forking enabled')),
+        ('hg.register.none', _('Register disabled')),
+        ('hg.register.manual_activate', _('Register new user with RhodeCode '
+                                          'with manual activation')),
+
+        ('hg.register.auto_activate', _('Register new user with RhodeCode '
+                                        'with auto activation')),
+    ]
+
+    # defines which permissions are more important higher the more important
+    PERM_WEIGHTS = {
+        'repository.none': 0,
+        'repository.read': 1,
+        'repository.write': 3,
+        'repository.admin': 4,
+
+        'group.none': 0,
+        'group.read': 1,
+        'group.write': 3,
+        'group.admin': 4,
+
+        'hg.fork.none': 0,
+        'hg.fork.repository': 1,
+        'hg.create.none': 0,
+        'hg.create.repository':1
+    }
+
     permission_id = Column("permission_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
-    permission_name = Column("permission_name", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
-    permission_longname = Column("permission_longname", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    permission_name = Column("permission_name", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    permission_longname = Column("permission_longname", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
 
     def __unicode__(self):
         return u"<%s('%s:%s')>" % (
@@ -885,7 +1193,7 @@ class Permission(Base, BaseModel):
 
     @classmethod
     def get_default_perms(cls, default_user_id):
-        q = Session.query(UserRepoToPerm, Repository, cls)\
+        q = Session().query(UserRepoToPerm, Repository, cls)\
          .join((Repository, UserRepoToPerm.repository_id == Repository.repo_id))\
          .join((cls, UserRepoToPerm.permission_id == cls.permission_id))\
          .filter(UserRepoToPerm.user_id == default_user_id)
@@ -894,7 +1202,7 @@ class Permission(Base, BaseModel):
 
     @classmethod
     def get_default_group_perms(cls, default_user_id):
-        q = Session.query(UserRepoGroupToPerm, RepoGroup, cls)\
+        q = Session().query(UserRepoGroupToPerm, RepoGroup, cls)\
          .join((RepoGroup, UserRepoGroupToPerm.group_id == RepoGroup.group_id))\
          .join((cls, UserRepoGroupToPerm.permission_id == cls.permission_id))\
          .filter(UserRepoGroupToPerm.user_id == default_user_id)
@@ -906,7 +1214,7 @@ class UserRepoToPerm(Base, BaseModel):
     __tablename__ = 'repo_to_perm'
     __table_args__ = (
         UniqueConstraint('user_id', 'repository_id', 'permission_id'),
-        {'extend_existing': True, 'mysql_engine':'InnoDB',
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'}
     )
     repo_to_perm_id = Column("repo_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -924,7 +1232,7 @@ class UserRepoToPerm(Base, BaseModel):
         n.user = user
         n.repository = repository
         n.permission = permission
-        Session.add(n)
+        Session().add(n)
         return n
 
     def __unicode__(self):
@@ -935,7 +1243,7 @@ class UserToPerm(Base, BaseModel):
     __tablename__ = 'user_to_perm'
     __table_args__ = (
         UniqueConstraint('user_id', 'permission_id'),
-        {'extend_existing': True, 'mysql_engine':'InnoDB',
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'}
     )
     user_to_perm_id = Column("user_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -950,7 +1258,7 @@ class UsersGroupRepoToPerm(Base, BaseModel):
     __tablename__ = 'users_group_repo_to_perm'
     __table_args__ = (
         UniqueConstraint('repository_id', 'users_group_id', 'permission_id'),
-        {'extend_existing': True, 'mysql_engine':'InnoDB',
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'}
     )
     users_group_to_perm_id = Column("users_group_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -968,7 +1276,7 @@ class UsersGroupRepoToPerm(Base, BaseModel):
         n.users_group = users_group
         n.repository = repository
         n.permission = permission
-        Session.add(n)
+        Session().add(n)
         return n
 
     def __unicode__(self):
@@ -979,7 +1287,7 @@ class UsersGroupToPerm(Base, BaseModel):
     __tablename__ = 'users_group_to_perm'
     __table_args__ = (
         UniqueConstraint('users_group_id', 'permission_id',),
-        {'extend_existing': True, 'mysql_engine':'InnoDB',
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'}
     )
     users_group_to_perm_id = Column("users_group_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -994,7 +1302,7 @@ class UserRepoGroupToPerm(Base, BaseModel):
     __tablename__ = 'user_repo_group_to_perm'
     __table_args__ = (
         UniqueConstraint('user_id', 'group_id', 'permission_id'),
-        {'extend_existing': True, 'mysql_engine':'InnoDB',
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'}
     )
 
@@ -1012,7 +1320,7 @@ class UsersGroupRepoGroupToPerm(Base, BaseModel):
     __tablename__ = 'users_group_repo_group_to_perm'
     __table_args__ = (
         UniqueConstraint('users_group_id', 'group_id'),
-        {'extend_existing': True, 'mysql_engine':'InnoDB',
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'}
     )
 
@@ -1030,7 +1338,7 @@ class Statistics(Base, BaseModel):
     __tablename__ = 'statistics'
     __table_args__ = (
          UniqueConstraint('repository_id'),
-         {'extend_existing': True, 'mysql_engine':'InnoDB',
+         {'extend_existing': True, 'mysql_engine': 'InnoDB',
           'mysql_charset': 'utf8'}
     )
     stat_id = Column("stat_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -1048,7 +1356,7 @@ class UserFollowing(Base, BaseModel):
     __table_args__ = (
         UniqueConstraint('user_id', 'follows_repository_id'),
         UniqueConstraint('user_id', 'follows_user_id'),
-        {'extend_existing': True, 'mysql_engine':'InnoDB',
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'}
     )
 
@@ -1072,12 +1380,13 @@ class CacheInvalidation(Base, BaseModel):
     __tablename__ = 'cache_invalidation'
     __table_args__ = (
         UniqueConstraint('cache_key'),
-        {'extend_existing': True, 'mysql_engine':'InnoDB',
+        Index('key_idx', 'cache_key'),
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'},
     )
     cache_id = Column("cache_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
-    cache_key = Column("cache_key", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
-    cache_args = Column("cache_args", String(length=255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    cache_key = Column("cache_key", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    cache_args = Column("cache_args", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     cache_active = Column("cache_active", Boolean(), nullable=True, unique=None, default=False)
 
     def __init__(self, cache_key, cache_args=''):
@@ -1088,6 +1397,7 @@ class CacheInvalidation(Base, BaseModel):
     def __unicode__(self):
         return u"<%s('%s:%s')>" % (self.__class__.__name__,
                                   self.cache_id, self.cache_key)
+
     @classmethod
     def clear_cache(cls):
         cls.query().delete()
@@ -1112,15 +1422,15 @@ class CacheInvalidation(Base, BaseModel):
 
     @classmethod
     def _get_or_create_key(cls, key, prefix, org_key):
-        inv_obj = Session.query(cls).filter(cls.cache_key == key).scalar()
+        inv_obj = Session().query(cls).filter(cls.cache_key == key).scalar()
         if not inv_obj:
             try:
                 inv_obj = CacheInvalidation(key, org_key)
-                Session.add(inv_obj)
-                Session.commit()
+                Session().add(inv_obj)
+                Session().commit()
             except Exception:
                 log.error(traceback.format_exc())
-                Session.rollback()
+                Session().rollback()
         return inv_obj
 
     @classmethod
@@ -1148,7 +1458,7 @@ class CacheInvalidation(Base, BaseModel):
         """
 
         key, _prefix, _org_key = cls._get_key(key)
-        inv_objs = Session.query(cls).filter(cls.cache_args == _org_key).all()
+        inv_objs = Session().query(cls).filter(cls.cache_args == _org_key).all()
         log.debug('marking %s key[s] %s for invalidation' % (len(inv_objs),
                                                              _org_key))
         try:
@@ -1156,11 +1466,11 @@ class CacheInvalidation(Base, BaseModel):
                 if inv_obj:
                     inv_obj.cache_active = False
 
-                Session.add(inv_obj)
-            Session.commit()
+                Session().add(inv_obj)
+            Session().commit()
         except Exception:
             log.error(traceback.format_exc())
-            Session.rollback()
+            Session().rollback()
 
     @classmethod
     def set_valid(cls, key):
@@ -1171,46 +1481,211 @@ class CacheInvalidation(Base, BaseModel):
         """
         inv_obj = cls.get_by_key(key)
         inv_obj.cache_active = True
-        Session.add(inv_obj)
-        Session.commit()
+        Session().add(inv_obj)
+        Session().commit()
+
+    @classmethod
+    def get_cache_map(cls):
+
+        class cachemapdict(dict):
+
+            def __init__(self, *args, **kwargs):
+                fixkey = kwargs.get('fixkey')
+                if fixkey:
+                    del kwargs['fixkey']
+                self.fixkey = fixkey
+                super(cachemapdict, self).__init__(*args, **kwargs)
+
+            def __getattr__(self, name):
+                key = name
+                if self.fixkey:
+                    key, _prefix, _org_key = cls._get_key(key)
+                if key in self.__dict__:
+                    return self.__dict__[key]
+                else:
+                    return self[key]
+
+            def __getitem__(self, key):
+                if self.fixkey:
+                    key, _prefix, _org_key = cls._get_key(key)
+                try:
+                    return super(cachemapdict, self).__getitem__(key)
+                except KeyError:
+                    return
+
+        cache_map = cachemapdict(fixkey=True)
+        for obj in cls.query().all():
+            cache_map[obj.cache_key] = cachemapdict(obj.get_dict())
+        return cache_map
 
 
 class ChangesetComment(Base, BaseModel):
     __tablename__ = 'changeset_comments'
     __table_args__ = (
-        {'extend_existing': True, 'mysql_engine':'InnoDB',
+        Index('cc_revision_idx', 'revision'),
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'},
     )
     comment_id = Column('comment_id', Integer(), nullable=False, primary_key=True)
     repo_id = Column('repo_id', Integer(), ForeignKey('repositories.repo_id'), nullable=False)
-    revision = Column('revision', String(40), nullable=False)
+    revision = Column('revision', String(40), nullable=True)
+    pull_request_id = Column("pull_request_id", Integer(), ForeignKey('pull_requests.pull_request_id'), nullable=True)
     line_no = Column('line_no', Unicode(10), nullable=True)
+    hl_lines = Column('hl_lines', Unicode(512), nullable=True)
     f_path = Column('f_path', Unicode(1000), nullable=True)
     user_id = Column('user_id', Integer(), ForeignKey('users.user_id'), nullable=False)
     text = Column('text', Unicode(25000), nullable=False)
-    modified_at = Column('modified_at', DateTime(), nullable=False, default=datetime.datetime.now)
+    created_on = Column('created_on', DateTime(timezone=False), nullable=False, default=datetime.datetime.now)
+    modified_at = Column('modified_at', DateTime(timezone=False), nullable=False, default=datetime.datetime.now)
 
     author = relationship('User', lazy='joined')
     repo = relationship('Repository')
+    status_change = relationship('ChangesetStatus', cascade="all, delete, delete-orphan")
+    pull_request = relationship('PullRequest', lazy='joined')
 
     @classmethod
-    def get_users(cls, revision):
+    def get_users(cls, revision=None, pull_request_id=None):
         """
-        Returns user associated with this changesetComment. ie those
+        Returns user associated with this ChangesetComment. ie those
         who actually commented
 
         :param cls:
         :param revision:
         """
-        return Session.query(User)\
-                .filter(cls.revision == revision)\
-                .join(ChangesetComment.author).all()
+        q = Session().query(User)\
+                .join(ChangesetComment.author)
+        if revision:
+            q = q.filter(cls.revision == revision)
+        elif pull_request_id:
+            q = q.filter(cls.pull_request_id == pull_request_id)
+        return q.all()
+
+
+class ChangesetStatus(Base, BaseModel):
+    __tablename__ = 'changeset_statuses'
+    __table_args__ = (
+        Index('cs_revision_idx', 'revision'),
+        Index('cs_version_idx', 'version'),
+        UniqueConstraint('repo_id', 'revision', 'version'),
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
+         'mysql_charset': 'utf8'}
+    )
+    STATUS_NOT_REVIEWED = DEFAULT = 'not_reviewed'
+    STATUS_APPROVED = 'approved'
+    STATUS_REJECTED = 'rejected'
+    STATUS_UNDER_REVIEW = 'under_review'
+
+    STATUSES = [
+        (STATUS_NOT_REVIEWED, _("Not Reviewed")),  # (no icon) and default
+        (STATUS_APPROVED, _("Approved")),
+        (STATUS_REJECTED, _("Rejected")),
+        (STATUS_UNDER_REVIEW, _("Under Review")),
+    ]
+
+    changeset_status_id = Column('changeset_status_id', Integer(), nullable=False, primary_key=True)
+    repo_id = Column('repo_id', Integer(), ForeignKey('repositories.repo_id'), nullable=False)
+    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None)
+    revision = Column('revision', String(40), nullable=False)
+    status = Column('status', String(128), nullable=False, default=DEFAULT)
+    changeset_comment_id = Column('changeset_comment_id', Integer(), ForeignKey('changeset_comments.comment_id'))
+    modified_at = Column('modified_at', DateTime(), nullable=False, default=datetime.datetime.now)
+    version = Column('version', Integer(), nullable=False, default=0)
+    pull_request_id = Column("pull_request_id", Integer(), ForeignKey('pull_requests.pull_request_id'), nullable=True)
+
+    author = relationship('User', lazy='joined')
+    repo = relationship('Repository')
+    comment = relationship('ChangesetComment', lazy='joined')
+    pull_request = relationship('PullRequest', lazy='joined')
+
+    def __unicode__(self):
+        return u"<%s('%s:%s')>" % (
+            self.__class__.__name__,
+            self.status, self.author
+        )
+
+    @classmethod
+    def get_status_lbl(cls, value):
+        return dict(cls.STATUSES).get(value)
+
+    @property
+    def status_lbl(self):
+        return ChangesetStatus.get_status_lbl(self.status)
+
+
+class PullRequest(Base, BaseModel):
+    __tablename__ = 'pull_requests'
+    __table_args__ = (
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
+         'mysql_charset': 'utf8'},
+    )
+
+    STATUS_NEW = u'new'
+    STATUS_OPEN = u'open'
+    STATUS_CLOSED = u'closed'
+
+    pull_request_id = Column('pull_request_id', Integer(), nullable=False, primary_key=True)
+    title = Column('title', Unicode(256), nullable=True)
+    description = Column('description', UnicodeText(10240), nullable=True)
+    status = Column('status', Unicode(256), nullable=False, default=STATUS_NEW)
+    created_on = Column('created_on', DateTime(timezone=False), nullable=False, default=datetime.datetime.now)
+    updated_on = Column('updated_on', DateTime(timezone=False), nullable=False, default=datetime.datetime.now)
+    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None)
+    _revisions = Column('revisions', UnicodeText(20500))  # 500 revisions max
+    org_repo_id = Column('org_repo_id', Integer(), ForeignKey('repositories.repo_id'), nullable=False)
+    org_ref = Column('org_ref', Unicode(256), nullable=False)
+    other_repo_id = Column('other_repo_id', Integer(), ForeignKey('repositories.repo_id'), nullable=False)
+    other_ref = Column('other_ref', Unicode(256), nullable=False)
+
+    @hybrid_property
+    def revisions(self):
+        return self._revisions.split(':')
+
+    @revisions.setter
+    def revisions(self, val):
+        self._revisions = ':'.join(val)
+
+    author = relationship('User', lazy='joined')
+    reviewers = relationship('PullRequestReviewers',
+                             cascade="all, delete, delete-orphan")
+    org_repo = relationship('Repository', primaryjoin='PullRequest.org_repo_id==Repository.repo_id')
+    other_repo = relationship('Repository', primaryjoin='PullRequest.other_repo_id==Repository.repo_id')
+    statuses = relationship('ChangesetStatus')
+    comments = relationship('ChangesetComment',
+                             cascade="all, delete, delete-orphan")
+
+    def is_closed(self):
+        return self.status == self.STATUS_CLOSED
+
+    def __json__(self):
+        return dict(
+          revisions=self.revisions
+        )
+
+
+class PullRequestReviewers(Base, BaseModel):
+    __tablename__ = 'pull_request_reviewers'
+    __table_args__ = (
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
+         'mysql_charset': 'utf8'},
+    )
+
+    def __init__(self, user=None, pull_request=None):
+        self.user = user
+        self.pull_request = pull_request
+
+    pull_requests_reviewers_id = Column('pull_requests_reviewers_id', Integer(), nullable=False, primary_key=True)
+    pull_request_id = Column("pull_request_id", Integer(), ForeignKey('pull_requests.pull_request_id'), nullable=False)
+    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=True)
+
+    user = relationship('User')
+    pull_request = relationship('PullRequest')
 
 
 class Notification(Base, BaseModel):
     __tablename__ = 'notifications'
     __table_args__ = (
-        {'extend_existing': True, 'mysql_engine':'InnoDB',
+        Index('notification_type_idx', 'type'),
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'},
     )
 
@@ -1218,10 +1693,12 @@ class Notification(Base, BaseModel):
     TYPE_MESSAGE = u'message'
     TYPE_MENTION = u'mention'
     TYPE_REGISTRATION = u'registration'
+    TYPE_PULL_REQUEST = u'pull_request'
+    TYPE_PULL_REQUEST_COMMENT = u'pull_request_comment'
 
     notification_id = Column('notification_id', Integer(), nullable=False, primary_key=True)
     subject = Column('subject', Unicode(512), nullable=True)
-    body = Column('body', Unicode(50000), nullable=True)
+    body = Column('body', UnicodeText(50000), nullable=True)
     created_by = Column("created_by", Integer(), ForeignKey('users.user_id'), nullable=True)
     created_on = Column('created_on', DateTime(timezone=False), nullable=False, default=datetime.datetime.now)
     type_ = Column('type', Unicode(256))
@@ -1234,7 +1711,7 @@ class Notification(Base, BaseModel):
     def recipients(self):
         return [x.user for x in UserNotification.query()\
                 .filter(UserNotification.notification == self)\
-                .order_by(UserNotification.user).all()]
+                .order_by(UserNotification.user_id.asc()).all()]
 
     @classmethod
     def create(cls, created_by, subject, body, recipients, type_=None):
@@ -1252,7 +1729,7 @@ class Notification(Base, BaseModel):
             assoc = UserNotification()
             assoc.notification = notification
             u.notifications.append(assoc)
-        Session.add(notification)
+        Session().add(notification)
         return notification
 
     @property
@@ -1265,7 +1742,7 @@ class UserNotification(Base, BaseModel):
     __tablename__ = 'user_to_notification'
     __table_args__ = (
         UniqueConstraint('user_id', 'notification_id'),
-        {'extend_existing': True, 'mysql_engine':'InnoDB',
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'}
     )
     user_id = Column('user_id', Integer(), ForeignKey('users.user_id'), primary_key=True)
@@ -1279,13 +1756,13 @@ class UserNotification(Base, BaseModel):
 
     def mark_as_read(self):
         self.read = True
-        Session.add(self)
+        Session().add(self)
 
 
 class DbMigrateVersion(Base, BaseModel):
     __tablename__ = 'db_migrate_version'
     __table_args__ = (
-        {'extend_existing': True, 'mysql_engine':'InnoDB',
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'},
     )
     repository_id = Column('repository_id', String(250), primary_key=True)

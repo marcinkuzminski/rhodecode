@@ -24,6 +24,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import re
+import time
+import datetime
+from pylons.i18n.translation import _, ungettext
 from rhodecode.lib.vcs.utils.lazy import LazyProperty
 
 
@@ -270,7 +273,6 @@ def engine_from_config(configuration, prefix='sqlalchemy.', **kwargs):
                 context._query_start_time = time.time()
                 log.info(color_sql(">>>>> STARTING QUERY >>>>>"))
 
-
             def after_cursor_execute(conn, cursor, statement,
                                     parameters, context, executemany):
                 total = time.time() - context._query_start_time
@@ -284,40 +286,76 @@ def engine_from_config(configuration, prefix='sqlalchemy.', **kwargs):
     return engine
 
 
-def age(curdate):
+def age(prevdate):
     """
     turns a datetime into an age string.
 
-    :param curdate: datetime object
+    :param prevdate: datetime object
     :rtype: unicode
     :returns: unicode words describing age
     """
 
-    from datetime import datetime
-    from webhelpers.date import time_ago_in_words
+    order = ['year', 'month', 'day', 'hour', 'minute', 'second']
+    deltas = {}
 
-    _ = lambda s: s
+    # Get date parts deltas
+    now = datetime.datetime.now()
+    for part in order:
+        deltas[part] = getattr(now, part) - getattr(prevdate, part)
 
-    if not curdate:
-        return ''
+    # Fix negative offsets (there is 1 second between 10:59:59 and 11:00:00,
+    # not 1 hour, -59 minutes and -59 seconds)
 
-    agescales = [(_(u"year"), 3600 * 24 * 365),
-                 (_(u"month"), 3600 * 24 * 30),
-                 (_(u"day"), 3600 * 24),
-                 (_(u"hour"), 3600),
-                 (_(u"minute"), 60),
-                 (_(u"second"), 1), ]
+    for num, length in [(5, 60), (4, 60), (3, 24)]:  # seconds, minutes, hours
+        part = order[num]
+        carry_part = order[num - 1]
 
-    age = datetime.now() - curdate
-    age_seconds = (age.days * agescales[2][1]) + age.seconds
-    pos = 1
-    for scale in agescales:
-        if scale[1] <= age_seconds:
-            if pos == 6:
-                pos = 5
-            return '%s %s' % (time_ago_in_words(curdate,
-                                                agescales[pos][0]), _('ago'))
-        pos += 1
+        if deltas[part] < 0:
+            deltas[part] += length
+            deltas[carry_part] -= 1
+
+    # Same thing for days except that the increment depends on the (variable)
+    # number of days in the month
+    month_lengths = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+    if deltas['day'] < 0:
+        if prevdate.month == 2 and (prevdate.year % 4 == 0 and
+            (prevdate.year % 100 != 0 or prevdate.year % 400 == 0)):
+            deltas['day'] += 29
+        else:
+            deltas['day'] += month_lengths[prevdate.month - 1]
+
+        deltas['month'] -= 1
+
+    if deltas['month'] < 0:
+        deltas['month'] += 12
+        deltas['year'] -= 1
+
+    # Format the result
+    fmt_funcs = {
+        'year': lambda d: ungettext(u'%d year', '%d years', d) % d,
+        'month': lambda d: ungettext(u'%d month', '%d months', d) % d,
+        'day': lambda d: ungettext(u'%d day', '%d days', d) % d,
+        'hour': lambda d: ungettext(u'%d hour', '%d hours', d) % d,
+        'minute': lambda d: ungettext(u'%d minute', '%d minutes', d) % d,
+        'second': lambda d: ungettext(u'%d second', '%d seconds', d) % d,
+    }
+
+    for i, part in enumerate(order):
+        value = deltas[part]
+        if value == 0:
+            continue
+
+        if i < 5:
+            sub_part = order[i + 1]
+            sub_value = deltas[sub_part]
+        else:
+            sub_value = 0
+
+        if sub_value == 0:
+            return _(u'%s ago') % fmt_funcs[part](value)
+
+        return _(u'%s and %s ago') % (fmt_funcs[part](value),
+            fmt_funcs[sub_part](sub_value))
 
     return _(u'just now')
 
@@ -379,6 +417,7 @@ def get_changeset_safe(repo, rev):
     """
     from rhodecode.lib.vcs.backends.base import BaseRepository
     from rhodecode.lib.vcs.exceptions import RepositoryError
+    from rhodecode.lib.vcs.backends.base import EmptyChangeset
     if not isinstance(repo, BaseRepository):
         raise Exception('You must pass an Repository '
                         'object as first argument got %s', type(repo))
@@ -386,10 +425,23 @@ def get_changeset_safe(repo, rev):
     try:
         cs = repo.get_changeset(rev)
     except RepositoryError:
-        from rhodecode.lib.utils import EmptyChangeset
         cs = EmptyChangeset(requested_revision=rev)
     return cs
 
+
+def datetime_to_time(dt):
+    if dt:
+        return time.mktime(dt.timetuple())
+
+
+def time_to_datetime(tm):
+    if tm:
+        if isinstance(tm, basestring):
+            try:
+                tm = float(tm)
+            except ValueError:
+                return
+        return datetime.datetime.fromtimestamp(tm)
 
 MENTIONS_REGEX = r'(?:^@|\s@)([a-zA-Z0-9]{1}[a-zA-Z0-9\-\_\.]+)(?:\s{1})'
 
@@ -405,3 +457,10 @@ def extract_mentioned_users(s):
         usrs.add(username)
 
     return sorted(list(usrs), key=lambda k: k.lower())
+
+
+class AttributeDict(dict):
+    def __getattr__(self, attr):
+        return self.get(attr, None)
+    __setattr__ = dict.__setitem__
+    __delattr__ = dict.__delitem__

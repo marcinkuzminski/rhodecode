@@ -1,11 +1,11 @@
 <%inherit file="/base/base.html"/>
 
 <%def name="title()">
-    ${c.repo_name} ${_('Summary')} - ${c.rhodecode_name}
+    ${_('%s Summary') % c.repo_name} - ${c.rhodecode_name}
 </%def>
 
 <%def name="breadcrumbs_links()">
-    ${h.link_to(u'Home',h.url('/'))}
+    ${h.link_to(_(u'Home'),h.url('/'))}
     &raquo;
     ${h.link_to(c.dbrepo.just_name,h.url('summary_home',repo_name=c.repo_name))}
     &raquo;
@@ -14,6 +14,11 @@
 
 <%def name="page_nav()">
 	${self.menu('summary')}
+</%def>
+
+<%def name="head_extra()">
+<link href="${h.url('atom_feed_home',repo_name=c.dbrepo.repo_name,api_key=c.rhodecode_user.api_key)}" rel="alternate" title="${_('repo %s ATOM feed') % c.repo_name}" type="application/atom+xml" />
+<link href="${h.url('rss_feed_home',repo_name=c.dbrepo.repo_name,api_key=c.rhodecode_user.api_key)}" rel="alternate" title="${_('repo %s RSS feed') % c.repo_name}" type="application/rss+xml" />
 </%def>
 
 <%def name="main()">
@@ -99,7 +104,11 @@
 			  <div class="label-summary">
 			      <label>${_('Description')}:</label>
 			  </div>
-			  <div class="input ${summary(c.show_stats)} desc">${h.urlify_text(c.dbrepo.description)}</div>
+              %if c.visual.stylify_metatags:
+                <div class="input ${summary(c.show_stats)} desc">${h.urlify_text(h.desc_stylize(c.dbrepo.description))}</div>
+              %else:
+                <div class="input ${summary(c.show_stats)} desc">${h.urlify_text(c.dbrepo.description)}</div>
+              %endif        
 			 </div>
 
 			 <div class="field">
@@ -158,10 +167,10 @@
                     %endif
 		        %else:
 			        ${h.select('download_options',c.rhodecode_repo.get_changeset().raw_id,c.download_options)}
-			             <span id="${'zip_link'}">${h.link_to('Download as zip',h.url('files_archive_home',repo_name=c.dbrepo.repo_name,fname='tip.zip'),class_="archive_icon ui-btn")}</span>
+			             <span id="${'zip_link'}">${h.link_to(_('Download as zip'), h.url('files_archive_home',repo_name=c.dbrepo.repo_name,fname='tip.zip'),class_="archive_icon ui-btn")}</span>
                     <span style="vertical-align: bottom">
                         <input id="archive_subrepos" type="checkbox" name="subrepos" />
-                        <label for="archive_subrepos" class="tooltip" title="${_('Check this to download archive with subrepos')}" >${_('with subrepos')}</label>
+                        <label for="archive_subrepos" class="tooltip" title="${h.tooltip(_('Check this to download archive with subrepos'))}" >${_('with subrepos')}</label>
                     </span>
 			    %endif
 			  </div>
@@ -220,11 +229,14 @@
 </div>
 
 %if c.readme_data:
-<div class="box" style="background-color: #FAFAFA">
-    <div id="readme" class="title">
-        <div class="breadcrumbs"><a href="${h.url('files_home',repo_name=c.repo_name,revision='tip',f_path=c.readme_file)}">${c.readme_file}</a></div>
+<div id="readme" class="box header-pos-fix" style="background-color: #FAFAFA">
+    <div id="readme" class="title" title="${_("Readme file at revision '%s'" % c.rhodecode_db_repo.landing_rev)}">
+        <div class="breadcrumbs">
+            <a href="${h.url('files_home',repo_name=c.repo_name,revision='tip',f_path=c.readme_file)}">${c.readme_file}</a>
+            <a class="permalink" href="#readme" title="${_('Permalink to this readme')}">&para;</a>
+        </div>
     </div>
-    <div class="readme">
+    <div id="readme" class="readme">
       <div class="readme_box">
         ${c.readme_data|n}
       </div>

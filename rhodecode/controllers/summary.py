@@ -45,12 +45,13 @@ from rhodecode.model.db import Statistics, CacheInvalidation
 from rhodecode.lib.utils2 import safe_unicode
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseRepoController, render
-from rhodecode.lib.utils import EmptyChangeset
+from rhodecode.lib.vcs.backends.base import EmptyChangeset
 from rhodecode.lib.markup_renderer import MarkupRenderer
 from rhodecode.lib.celerylib import run_task
 from rhodecode.lib.celerylib.tasks import get_commits_stats
 from rhodecode.lib.helpers import RepoPage
 from rhodecode.lib.compat import json, OrderedDict
+from rhodecode.lib.vcs.nodes import FileNode
 
 log = logging.getLogger(__name__)
 
@@ -179,27 +180,31 @@ class SummaryController(BaseRepoController):
         if c.enable_downloads:
             c.download_options = self._get_download_links(c.rhodecode_repo)
 
-        c.readme_data, c.readme_file = self.__get_readme_data(
-            c.rhodecode_db_repo.repo_name, c.rhodecode_repo
-        )
+        c.readme_data, c.readme_file = \
+            self.__get_readme_data(c.rhodecode_db_repo)
         return render('summary/summary.html')
 
-    def __get_readme_data(self, repo_name, repo):
+    def __get_readme_data(self, db_repo):
+        repo_name = db_repo.repo_name
 
         @cache_region('long_term')
         def _get_readme_from_cache(key):
             readme_data = None
             readme_file = None
-            log.debug('Fetching readme file')
+            log.debug('Looking for README file')
             try:
-                cs = repo.get_changeset()  # fetches TIP
+                # get's the landing revision! or tip if fails
+                cs = db_repo.get_landing_changeset()
                 renderer = MarkupRenderer()
                 for f in README_FILES:
                     try:
                         readme = cs.get_node(f)
+                        if not isinstance(readme, FileNode):
+                            continue
                         readme_file = f
+                        log.debug('Found README file `%s` rendering...' %
+                                  readme_file)
                         readme_data = renderer.render(readme.content, f)
-                        log.debug('Found readme %s' % readme_file)
                         break
                     except NodeDoesNotExistError:
                         continue

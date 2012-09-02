@@ -51,8 +51,7 @@ from rhodecode.lib.caching_query import FromCache
 
 from rhodecode.model import meta
 from rhodecode.model.db import Repository, User, RhodeCodeUi, \
-    UserLog, RepoGroup, RhodeCodeSetting, UserRepoGroupToPerm,\
-    CacheInvalidation
+    UserLog, RepoGroup, RhodeCodeSetting, CacheInvalidation
 from rhodecode.model.meta import Session
 from rhodecode.model.repos_group import ReposGroupModel
 from rhodecode.lib.utils2 import safe_str, safe_unicode
@@ -129,7 +128,7 @@ def action_logger(user, action, repo, ipaddr='', sa=None, commit=False):
     """
 
     if not sa:
-        sa = meta.Session
+        sa = meta.Session()
 
     try:
         if hasattr(user, 'user_id'):
@@ -146,13 +145,14 @@ def action_logger(user, action, repo, ipaddr='', sa=None, commit=False):
             repo_name = repo.lstrip('/')
             repo_obj = Repository.get_by_repo_name(repo_name)
         else:
-            raise Exception('You have to provide repository to action logger')
+            repo_obj = None
+            repo_name = ''
 
         user_log = UserLog()
         user_log.user_id = user_obj.user_id
         user_log.action = safe_unicode(action)
 
-        user_log.repository_id = repo_obj.repo_id
+        user_log.repository = repo_obj
         user_log.repository_name = repo_name
 
         user_log.action_date = datetime.datetime.now()
@@ -203,19 +203,24 @@ def get_repos(path, recursive=False):
     return _get_repos(path)
 
 
-def is_valid_repo(repo_name, base_path):
+def is_valid_repo(repo_name, base_path, scm=None):
     """
-    Returns True if given path is a valid repository False otherwise
+    Returns True if given path is a valid repository False otherwise.
+    If scm param is given also compare if given scm is the same as expected 
+    from scm parameter
 
     :param repo_name:
     :param base_path:
+    :param scm:
 
     :return True: if given path is a valid repository
     """
     full_path = os.path.join(safe_str(base_path), safe_str(repo_name))
 
     try:
-        get_scm(full_path)
+        scm_ = get_scm(full_path)
+        if scm:
+            return scm_[0] == scm
         return True
     except VCSError:
         return False
@@ -233,6 +238,15 @@ def is_valid_repos_group(repos_group_name, base_path):
     # check if it's not a repo
     if is_valid_repo(repos_group_name, base_path):
         return False
+
+    try:
+        # we need to check bare git repos at higher level
+        # since we might match branches/hooks/info/objects or possible
+        # other things inside bare git repo
+        get_scm(os.path.dirname(full_path))
+        return False
+    except VCSError:
+        pass
 
     # check if it's a valid path
     if os.path.isdir(full_path):
@@ -266,7 +280,7 @@ ui_sections = ['alias', 'auth',
                 'ui', 'web', ]
 
 
-def make_ui(read_from='file', path=None, checkpaths=True):
+def make_ui(read_from='file', path=None, checkpaths=True, clear_session=True):
     """
     A function that will read python rc files or database
     and make an mercurial ui object from read options
@@ -296,7 +310,7 @@ def make_ui(read_from='file', path=None, checkpaths=True):
                 baseui.setconfig(section, k, v)
 
     elif read_from == 'db':
-        sa = meta.Session
+        sa = meta.Session()
         ret = sa.query(RhodeCodeUi)\
             .options(FromCache("sql_cache_short", "get_hg_ui_settings"))\
             .all()
@@ -307,8 +321,12 @@ def make_ui(read_from='file', path=None, checkpaths=True):
                 log.debug('settings ui from db[%s]%s:%s', ui_.ui_section,
                           ui_.ui_key, ui_.ui_value)
                 baseui.setconfig(ui_.ui_section, ui_.ui_key, ui_.ui_value)
-
-        meta.Session.remove()
+            if ui_.ui_key == 'push_ssl':
+                # force set push_ssl requirement to False, rhodecode
+                # handles that
+                baseui.setconfig(ui_.ui_section, ui_.ui_key, False)
+        if clear_session:
+            meta.Session.remove()
     return baseui
 
 
@@ -337,50 +355,6 @@ def invalidate_cache(cache_key, *args):
         ScmModel().mark_for_invalidation(name)
 
 
-class EmptyChangeset(BaseChangeset):
-    """
-    An dummy empty changeset. It's possible to pass hash when creating
-    an EmptyChangeset
-    """
-
-    def __init__(self, cs='0' * 40, repo=None, requested_revision=None,
-                 alias=None):
-        self._empty_cs = cs
-        self.revision = -1
-        self.message = ''
-        self.author = ''
-        self.date = ''
-        self.repository = repo
-        self.requested_revision = requested_revision
-        self.alias = alias
-
-    @LazyProperty
-    def raw_id(self):
-        """
-        Returns raw string identifying this changeset, useful for web
-        representation.
-        """
-
-        return self._empty_cs
-
-    @LazyProperty
-    def branch(self):
-        return get_backend(self.alias).DEFAULT_BRANCH_NAME
-
-    @LazyProperty
-    def short_id(self):
-        return self.raw_id[:12]
-
-    def get_file_changeset(self, path):
-        return self
-
-    def get_file_content(self, path):
-        return u''
-
-    def get_file_size(self, path):
-        return 0
-
-
 def map_groups(path):
     """
     Given a full path to a repository, create all nested groups that this
@@ -389,7 +363,7 @@ def map_groups(path):
 
     :param paths: full path to repository
     """
-    sa = meta.Session
+    sa = meta.Session()
     groups = path.split(Repository.url_sep())
     parent = None
     group = None
@@ -418,7 +392,8 @@ def map_groups(path):
     return group
 
 
-def repo2db_mapper(initial_repo_list, remove_obsolete=False):
+def repo2db_mapper(initial_repo_list, remove_obsolete=False,
+                   install_git_hook=False):
     """
     maps all repos given in initial_repo_list, non existing repositories
     are created, if remove_obsolete is True it also check for db entries
@@ -426,9 +401,12 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False):
 
     :param initial_repo_list: list of repositories found by scanning methods
     :param remove_obsolete: check for obsolete entries in database
+    :param install_git_hook: if this is True, also check and install githook
+        for a repo if missing
     """
     from rhodecode.model.repo import RepoModel
-    sa = meta.Session
+    from rhodecode.model.scm import ScmModel
+    sa = meta.Session()
     rm = RepoModel()
     user = sa.query(User).filter(User.admin == True).first()
     if user is None:
@@ -437,30 +415,45 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False):
 
     for name, repo in initial_repo_list.items():
         group = map_groups(name)
-        if not rm.get_by_repo_name(name, cache=False):
-            log.info('repository %s not found creating default' % name)
+        db_repo = rm.get_by_repo_name(name)
+        # found repo that is on filesystem not in RhodeCode database
+        if not db_repo:
+            log.info('repository %s not found creating now' % name)
             added.append(name)
-            form_data = {
-             'repo_name': name,
-             'repo_name_full': name,
-             'repo_type': repo.alias,
-             'description': repo.description \
-                if repo.description != 'unknown' else '%s repository' % name,
-             'private': False,
-             'group_id': getattr(group, 'group_id', None)
-            }
-            rm.create(form_data, user, just_db=True)
+            desc = (repo.description
+                    if repo.description != 'unknown'
+                    else '%s repository' % name)
+            new_repo = rm.create_repo(
+                repo_name=name,
+                repo_type=repo.alias,
+                description=desc,
+                repos_group=getattr(group, 'group_id', None),
+                owner=user,
+                just_db=True
+            )
+            # we added that repo just now, and make sure it has githook
+            # installed
+            if new_repo.repo_type == 'git':
+                ScmModel().install_git_hook(new_repo.scm_instance)
+        elif install_git_hook:
+            if db_repo.repo_type == 'git':
+                ScmModel().install_git_hook(db_repo.scm_instance)
     sa.commit()
     removed = []
     if remove_obsolete:
         # remove from database those repositories that are not in the filesystem
         for repo in sa.query(Repository).all():
             if repo.repo_name not in initial_repo_list.keys():
-                log.debug("Removing non existing repository found in db %s" %
+                log.debug("Removing non existing repository found in db `%s`" %
                           repo.repo_name)
-                removed.append(repo.repo_name)
-                sa.delete(repo)
-                sa.commit()
+                try:
+                    sa.delete(repo)
+                    sa.commit()
+                    removed.append(repo.repo_name)
+                except:
+                    #don't hold further removals on error
+                    log.error(traceback.format_exc())
+                    sa.rollback()
 
     # clear cache keys
     log.debug("Clearing cache keys now...")
@@ -557,7 +550,7 @@ def create_test_env(repos_test_path, config):
     install test repository into tmp dir
     """
     from rhodecode.lib.db_manage import DbManage
-    from rhodecode.tests import HG_REPO, TESTS_TMP_PATH
+    from rhodecode.tests import HG_REPO, GIT_REPO, TESTS_TMP_PATH
 
     # PART ONE create db
     dbconf = config['sqlalchemy.db1.url']
@@ -576,7 +569,7 @@ def create_test_env(repos_test_path, config):
     dbmanage.admin_prompt()
     dbmanage.create_permissions()
     dbmanage.populate_default_permissions()
-    Session.commit()
+    Session().commit()
     # PART TWO make test repo
     log.debug('making test vcs repositories')
 
@@ -592,11 +585,20 @@ def create_test_env(repos_test_path, config):
         log.debug('remove %s' % data_path)
         shutil.rmtree(data_path)
 
-    #CREATE DEFAULT HG REPOSITORY
+    #CREATE DEFAULT TEST REPOS
     cur_dir = dn(dn(abspath(__file__)))
     tar = tarfile.open(jn(cur_dir, 'tests', "vcs_test_hg.tar.gz"))
     tar.extractall(jn(TESTS_TMP_PATH, HG_REPO))
     tar.close()
+
+    cur_dir = dn(dn(abspath(__file__)))
+    tar = tarfile.open(jn(cur_dir, 'tests', "vcs_test_git.tar.gz"))
+    tar.extractall(jn(TESTS_TMP_PATH, GIT_REPO))
+    tar.close()
+
+    #LOAD VCS test stuff
+    from rhodecode.tests.vcs import setup_package
+    setup_package()
 
 
 #==============================================================================

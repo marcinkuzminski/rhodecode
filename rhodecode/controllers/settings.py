@@ -43,6 +43,7 @@ from rhodecode.model.forms import RepoSettingsForm
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.db import RepoGroup
 from rhodecode.model.meta import Session
+from rhodecode.model.scm import ScmModel
 
 log = logging.getLogger(__name__)
 
@@ -60,6 +61,8 @@ class SettingsController(BaseRepoController):
         repo_model = RepoModel()
         c.users_array = repo_model.get_users_js()
         c.users_groups_array = repo_model.get_users_groups_js()
+        choices, c.landing_revs = ScmModel().get_repo_landing_revs()
+        c.landing_revs_choices = choices
 
     @HasRepoPermissionAllDecorator('repository.admin')
     def index(self, repo_name):
@@ -94,17 +97,18 @@ class SettingsController(BaseRepoController):
 
         _form = RepoSettingsForm(edit=True,
                                  old_data={'repo_name': repo_name},
-                                 repo_groups=c.repo_groups_choices)()
+                                 repo_groups=c.repo_groups_choices,
+                                 landing_revs=c.landing_revs_choices)()
         try:
             form_result = _form.to_python(dict(request.POST))
 
             repo_model.update(repo_name, form_result)
             invalidate_cache('get_repo_cached_%s' % repo_name)
-            h.flash(_('Repository %s updated successfully' % repo_name),
+            h.flash(_('Repository %s updated successfully') % repo_name,
                     category='success')
             changed_name = form_result['repo_name_full']
             action_logger(self.rhodecode_user, 'user_updated_repo',
-                          changed_name, '', self.sa)
+                          changed_name, self.ip_addr, self.sa)
             Session.commit()
         except formencode.Invalid, errors:
             c.repo_info = repo_model.get_by_repo_name(repo_name)
@@ -145,7 +149,7 @@ class SettingsController(BaseRepoController):
             return redirect(url('home'))
         try:
             action_logger(self.rhodecode_user, 'user_deleted_repo',
-                              repo_name, '', self.sa)
+                              repo_name, self.ip_addr, self.sa)
             repo_model.delete(repo)
             invalidate_cache('get_repo_cached_%s' % repo_name)
             h.flash(_('deleted repository %s') % repo_name, category='success')

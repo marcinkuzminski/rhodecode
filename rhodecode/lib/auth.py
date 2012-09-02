@@ -35,13 +35,8 @@ from pylons import config, url, request
 from pylons.controllers.util import abort, redirect
 from pylons.i18n.translation import _
 
-from rhodecode import __platform__, PLATFORM_WIN, PLATFORM_OTHERS
+from rhodecode import __platform__, is_windows, is_unix
 from rhodecode.model.meta import Session
-
-if __platform__ in PLATFORM_WIN:
-    from hashlib import sha256
-if __platform__ in PLATFORM_OTHERS:
-    import bcrypt
 
 from rhodecode.lib.utils2 import str2bool, safe_unicode
 from rhodecode.lib.exceptions import LdapPasswordError, LdapUsernameError
@@ -97,9 +92,11 @@ class RhodeCodeCrypto(object):
 
         :param password: password to hash
         """
-        if __platform__ in PLATFORM_WIN:
+        if is_windows:
+            from hashlib import sha256
             return sha256(str_).hexdigest()
-        elif __platform__ in PLATFORM_OTHERS:
+        elif is_unix:
+            import bcrypt
             return bcrypt.hashpw(str_, bcrypt.gensalt(10))
         else:
             raise Exception('Unknown or unsupported platform %s' \
@@ -115,9 +112,11 @@ class RhodeCodeCrypto(object):
         :param hashed: password in hashed form
         """
 
-        if __platform__ in PLATFORM_WIN:
+        if is_windows:
+            from hashlib import sha256
             return sha256(password).hexdigest() == hashed
-        elif __platform__ in PLATFORM_OTHERS:
+        elif is_unix:
+            import bcrypt
             return bcrypt.hashpw(password, hashed) == hashed
         else:
             raise Exception('Unknown or unsupported platform %s' \
@@ -236,7 +235,7 @@ def authenticate(username, password):
                                           user_attrs):
                     log.info('created new ldap user %s' % username)
 
-                Session.commit()
+                Session().commit()
                 return True
             except (LdapUsernameError, LdapPasswordError,):
                 pass
@@ -263,7 +262,7 @@ def login_container_auth(username):
         return None
 
     user.update_lastlogin()
-    Session.commit()
+    Session().commit()
 
     log.debug('User %s is now logged in by container authentication',
               user.username)
@@ -325,6 +324,7 @@ class  AuthUser(object):
         self.email = ''
         self.is_authenticated = False
         self.admin = False
+        self.inherit_default_permissions = False
         self.permissions = {}
         self._api_key = api_key
         self.propagate_data()
@@ -351,6 +351,7 @@ class  AuthUser(object):
             log.debug('Auth User lookup by USER NAME %s' % self.username)
             dbuser = login_container_auth(self.username)
             if dbuser is not None:
+                log.debug('filling all attributes to object')
                 for k, v in dbuser.get_dict().items():
                     setattr(self, k, v)
                 self.set_authenticated()
@@ -460,8 +461,9 @@ class LoginRequired(object):
         loc = "%s:%s" % (cls.__class__.__name__, func.__name__)
         log.debug('Checking if %s is authenticated @ %s' % (user.username, loc))
         if user.is_authenticated or api_access_ok:
-            log.info('user %s is authenticated and granted access to %s' % (
-                       user.username, loc)
+            reason = 'RegularAuth' if user.is_authenticated else 'APIAuth'
+            log.info('user %s is authenticated and granted access to %s '
+                     'using %s' % (user.username, loc, reason)
             )
             return func(*fargs, **fkwargs)
         else:
@@ -768,7 +770,7 @@ class HasReposGroupPermissionAny(PermsFunction):
 class HasReposGroupPermissionAll(PermsFunction):
     def __call__(self, group_name=None, check_Location=''):
         self.group_name = group_name
-        return super(HasReposGroupPermissionAny, self).__call__(check_Location)
+        return super(HasReposGroupPermissionAll, self).__call__(check_Location)
 
     def check_permissions(self):
         try:
@@ -805,7 +807,7 @@ class HasPermissionAnyMiddleware(object):
         return self.check_permissions()
 
     def check_permissions(self):
-        log.debug('checking mercurial protocol '
+        log.debug('checking VCS protocol '
                   'permissions %s for user:%s repository:%s', self.user_perms,
                                                 self.username, self.repo_name)
         if self.required_perms.intersection(self.user_perms):

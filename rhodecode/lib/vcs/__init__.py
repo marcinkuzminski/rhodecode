@@ -10,7 +10,7 @@
     :copyright: (c) 2010-2011 by Marcin Kuzminski, Lukasz Balcerzak.
 """
 
-VERSION = (0, 2, 3, 'dev')
+VERSION = (0, 3, 0, 'dev')
 
 __version__ = '.'.join((str(each) for each in VERSION[:4]))
 

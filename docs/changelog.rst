@@ -4,6 +4,66 @@
 Changelog
 =========
 
+1.4.0 (**2012-09-03**)
+----------------------
+
+news
+++++
+ 
+- new codereview system
+- email map, allowing users to have multiple email addresses mapped into
+  their accounts
+- improved git-hook system. Now all actions for git are logged into journal
+  including pushed revisions, user and IP address
+- changed setup-app into setup-rhodecode and added default options to it.
+- new git repos are created as bare now by default
+- #464 added links to groups in permission box
+- #465 mentions autocomplete inside comments boxes
+- #469 added --update-only option to whoosh to re-index only given list
+  of repos in index 
+- rhodecode-api CLI client
+- new git http protocol replaced buggy dulwich implementation.
+  Now based on pygrack & gitweb
+- Improved RSS/ATOM feeds. Discoverable by browsers using proper headers, and 
+  reformated based on user suggestions. Additional rss/atom feeds for user
+  journal
+- various i18n improvements
+- #478 permissions overview for admin in user edit view
+- File view now displays small gravatars off all authors of given file
+- Implemented landing revisions. Each repository will get landing_rev attribute
+  that defines 'default' revision/branch for generating readme files
+- Implemented #509, RhodeCode enforces SSL for push/pulling if requested at 
+  earliest possible call.
+- Import remote svn repositories to mercurial using hgsubversion.
+- Fixed #508 RhodeCode now has a option to explicitly set forking permissions
+- RhodeCode can use alternative server for generating avatar icons
+- implemented repositories locking. Pull locks, push unlocks. Also can be done
+  via API calls
+- #538 form for permissions can handle multiple users at once 
+
+fixes
++++++
+
+- improved translations
+- fixes issue #455 Creating an archive generates an exception on Windows
+- fixes #448 Download ZIP archive keeps file in /tmp open and results 
+  in out of disk space
+- fixes issue #454 Search results under Windows include proceeding
+  backslash
+- fixed issue #450. Rhodecode no longer will crash when bad revision is
+  present in journal data.
+- fix for issue #417, git execution was broken on windows for certain
+  commands.
+- fixed #413. Don't disable .git directory for bare repos on deleting
+- fixed issue #459. Changed the way of obtaining logger in reindex task.
+- fixed #453 added ID field in whoosh SCHEMA that solves the issue of
+  reindexing modified files
+- fixed #481 rhodecode emails are sent without Date header 
+- fixed #458 wrong count when no repos are present
+- fixed issue #492 missing `\ No newline at end of file` test at the end of 
+  new chunk in html diff
+- full text search now works also for commit messages
+
 1.3.6 (**2012-05-17**)
 ----------------------
 

@@ -32,7 +32,6 @@ from pylons import request, response, tmpl_context as c, url
 from pylons.i18n.translation import _
 from pylons.controllers.util import redirect
 from pylons.decorators import jsonify
-from paste.fileapp import FileApp, _FileIter
 
 from rhodecode.lib import diffs
 from rhodecode.lib import helpers as h
@@ -41,7 +40,7 @@ from rhodecode.lib.compat import OrderedDict
 from rhodecode.lib.utils2 import convert_line_endings, detect_mode, safe_str
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseRepoController, render
-from rhodecode.lib.utils import EmptyChangeset
+from rhodecode.lib.vcs.backends.base import EmptyChangeset
 from rhodecode.lib.vcs.conf import settings
 from rhodecode.lib.vcs.exceptions import RepositoryError, \
     ChangesetDoesNotExistError, EmptyRepositoryError, \
@@ -61,7 +60,6 @@ log = logging.getLogger(__name__)
 
 class FilesController(BaseRepoController):
 
-    @LoginRequired()
     def __before__(self):
         super(FilesController, self).__before__()
         c.cut_off_limit = self.cut_off_limit
@@ -83,8 +81,8 @@ class FilesController(BaseRepoController):
             url_ = url('files_add_home',
                        repo_name=c.repo_name,
                        revision=0, f_path='')
-            add_new = '<a href="%s">[%s]</a>' % (url_, _('add new'))
-            h.flash(h.literal(_('There are no files yet %s' % add_new)),
+            add_new = '<a href="%s">[%s]</a>' % (url_, _('click here to add new file'))
+            h.flash(h.literal(_('There are no files yet %s') % add_new),
                     category='warning')
             redirect(h.url('summary_home', repo_name=repo_name))
 
@@ -113,6 +111,7 @@ class FilesController(BaseRepoController):
 
         return file_node
 
+    @LoginRequired()
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
                                    'repository.admin')
     def index(self, repo_name, revision, f_path, annotate=False):
@@ -154,16 +153,25 @@ class FilesController(BaseRepoController):
             c.file = c.changeset.get_node(f_path)
 
             if c.file.is_file():
-                c.file_history = self._get_node_history(c.changeset, f_path)
+                _hist = c.changeset.get_file_history(f_path)
+                c.file_history = self._get_node_history(c.changeset, f_path,
+                                                        _hist)
+                c.authors = []
+                for a in set([x.author for x in _hist]):
+                    c.authors.append((h.email(a), h.person(a)))
             else:
-                c.file_history = []
+                c.authors = c.file_history = []
         except RepositoryError, e:
             h.flash(str(e), category='warning')
             redirect(h.url('files_home', repo_name=repo_name,
-                           revision=revision))
+                           revision='tip'))
+
+        if request.environ.get('HTTP_X_PARTIAL_XHR'):
+            return render('files/files_ypjax.html')
 
         return render('files/files.html')
 
+    @LoginRequired()
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
                                    'repository.admin')
     def rawfile(self, repo_name, revision, f_path):
@@ -176,6 +184,7 @@ class FilesController(BaseRepoController):
         response.content_type = file_node.mimetype
         return file_node.content
 
+    @LoginRequired()
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
                                    'repository.admin')
     def raw(self, repo_name, revision, f_path):
@@ -222,8 +231,18 @@ class FilesController(BaseRepoController):
         response.content_type = mimetype
         return file_node.content
 
+    @LoginRequired()
     @HasRepoPermissionAnyDecorator('repository.write', 'repository.admin')
     def edit(self, repo_name, revision, f_path):
+        repo = Repository.get_by_repo_name(repo_name)
+        if repo.enable_locking and repo.locked[0]:
+            h.flash(_('This repository is has been locked by %s on %s')
+                % (h.person_by_id(repo.locked[0]),
+                   h.fmt_date(h.time_to_datetime(repo.locked[1]))),
+                  'warning')
+            return redirect(h.url('files_home',
+                                  repo_name=repo_name, revision='tip'))
+
         r_post = request.POST
 
         c.cs = self.__get_cs_or_redirect(revision, repo_name)
@@ -260,7 +279,7 @@ class FilesController(BaseRepoController):
                                              user=self.rhodecode_user,
                                              author=author, message=message,
                                              content=content, f_path=f_path)
-                h.flash(_('Successfully committed to %s' % f_path),
+                h.flash(_('Successfully committed to %s') % f_path,
                         category='success')
 
             except Exception:
@@ -271,8 +290,19 @@ class FilesController(BaseRepoController):
 
         return render('files/files_edit.html')
 
+    @LoginRequired()
     @HasRepoPermissionAnyDecorator('repository.write', 'repository.admin')
     def add(self, repo_name, revision, f_path):
+
+        repo = Repository.get_by_repo_name(repo_name)
+        if repo.enable_locking and repo.locked[0]:
+            h.flash(_('This repository is has been locked by %s on %s')
+                % (h.person_by_id(repo.locked[0]),
+                   h.fmt_date(h.time_to_datetime(repo.locked[1]))),
+                  'warning')
+            return redirect(h.url('files_home',
+                                  repo_name=repo_name, revision='tip'))
+
         r_post = request.POST
         c.cs = self.__get_cs_or_redirect(revision, repo_name,
                                          redirect_after=False)
@@ -313,7 +343,7 @@ class FilesController(BaseRepoController):
                                            user=self.rhodecode_user,
                                            author=author, message=message,
                                            content=content, f_path=node_path)
-                h.flash(_('Successfully committed to %s' % node_path),
+                h.flash(_('Successfully committed to %s') % node_path,
                         category='success')
             except NodeAlreadyExistsError, e:
                 h.flash(_(e), category='error')
@@ -325,6 +355,7 @@ class FilesController(BaseRepoController):
 
         return render('files/files_add.html')
 
+    @LoginRequired()
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
                                    'repository.admin')
     def archivefile(self, repo_name, fname):
@@ -361,27 +392,28 @@ class FilesController(BaseRepoController):
         except (ImproperArchiveTypeError, KeyError):
             return _('Unknown archive type')
 
-        fd, _archive_name = tempfile.mkstemp(suffix='rcarchive')
-        with open(_archive_name, 'wb') as f:
-            cs.fill_archive(stream=f, kind=fileformat, subrepos=subrepos)
+        fd, archive = tempfile.mkstemp()
+        t = open(archive, 'wb')
+        cs.fill_archive(stream=t, kind=fileformat, subrepos=subrepos)
+        t.close()
 
-        content_disposition = 'attachment; filename=%s-%s%s' \
-            % (repo_name, revision[:12], ext)
-        content_length = os.path.getsize(_archive_name)
+        def get_chunked_archive(archive):
+            stream = open(archive, 'rb')
+            while True:
+                data = stream.read(16 * 1024)
+                if not data:
+                    stream.close()
+                    os.close(fd)
+                    os.remove(archive)
+                    break
+                yield data
 
-        headers = [('Content-Disposition', str(content_disposition)),
-                   ('Content-Type', str(content_type)),
-                   ('Content-Length', str(content_length))]
+        response.content_disposition = str('attachment; filename=%s-%s%s' \
+                                           % (repo_name, revision[:12], ext))
+        response.content_type = str(content_type)
+        return get_chunked_archive(archive)
 
-        class _DestroyingFileWrapper(_FileIter):
-            def close(self):
-                self.file.close
-                os.remove(self.file.name)
-
-        request.environ['wsgi.file_wrapper'] = _DestroyingFileWrapper
-        fapp = FileApp(_archive_name, headers=headers)
-        return fapp(request.environ, self.start_response)
-
+    @LoginRequired()
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
                                    'repository.admin')
     def diff(self, repo_name, f_path):
@@ -454,8 +486,9 @@ class FilesController(BaseRepoController):
 
         return render('files/file_diff.html')
 
-    def _get_node_history(self, cs, f_path):
-        changesets = cs.get_file_history(f_path)
+    def _get_node_history(self, cs, f_path, changesets=None):
+        if changesets is None:
+            changesets = cs.get_file_history(f_path)
         hist_l = []
 
         changesets_group = ([], _("Changesets"))
@@ -479,12 +512,13 @@ class FilesController(BaseRepoController):
 
         return hist_l
 
-    @jsonify
+    @LoginRequired()
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
                                    'repository.admin')
+    @jsonify
     def nodelist(self, repo_name, revision, f_path):
         if request.environ.get('HTTP_X_PARTIAL_XHR'):
             cs = self.__get_cs_or_redirect(revision, repo_name)
             _d, _f = ScmModel().get_nodes(repo_name, cs.raw_id, f_path,
                                           flat=False)
-            return _d + _f
+            return {'nodes': _d + _f}

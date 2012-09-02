@@ -83,7 +83,8 @@ class GitInMemoryChangeset(BaseInMemoryChangeset):
                     curtree = newtree
                 parent[reversed_dirnames[-1]] = DIRMOD, curtree.id
             else:
-                parent.add(node.mode, node_path, blob.id)
+                parent.add(name=node_path, mode=node.mode, hexsha=blob.id)
+
             new_trees.append(parent)
             # Update ancestors
             for parent, tree, path in reversed([(a[1], b[1], b[0]) for a, b in
@@ -123,7 +124,7 @@ class GitInMemoryChangeset(BaseInMemoryChangeset):
         commit.parents = [p._commit.id for p in self.parents if p]
         commit.author = commit.committer = safe_str(author)
         commit.encoding = ENCODING
-        commit.message = safe_str(message) + ' '
+        commit.message = safe_str(message)
 
         # Compute date
         if date is None:
@@ -148,6 +149,8 @@ class GitInMemoryChangeset(BaseInMemoryChangeset):
         # Update vcs repository object & recreate dulwich repo
         self.repository.revisions.append(commit.id)
         self.repository._repo = Repo(self.repository.path)
+        # invalidate parsed refs after commit
+        self.repository._parsed_refs = self.repository._get_parsed_refs()
         tip = self.repository.get_changeset()
         self.reset()
         return tip

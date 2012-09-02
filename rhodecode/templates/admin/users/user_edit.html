@@ -83,10 +83,10 @@
 
              <div class="field">
                 <div class="label">
-                    <label for="name">${_('First Name')}:</label>
+                    <label for="firstname">${_('First Name')}:</label>
                 </div>
                 <div class="input">
-                    ${h.text('name',class_='medium')}
+                    ${h.text('firstname',class_='medium')}
                 </div>
              </div>
 
@@ -126,14 +126,14 @@
                 </div>
              </div>
             <div class="buttons">
-              ${h.submit('save',_('Save'),class_="ui-button")}
-              ${h.reset('reset',_('Reset'),class_="ui-button")}
+              ${h.submit('save',_('Save'),class_="ui-btn large")}
+              ${h.reset('reset',_('Reset'),class_="ui-btn large")}
             </div>
     	</div>
     </div>
     ${h.end_form()}
 </div>
-<div class="box box-right">
+<div style="min-height:780px" class="box box-right">
     <!-- box / title -->
     <div class="title">
         <h5>${_('Permissions')}</h5>
@@ -144,15 +144,138 @@
         <div class="fields">
              <div class="field">
                 <div class="label label-checkbox">
+                    <label for="inherit_permissions">${_('Inherit default permissions')}:</label>
+                </div>
+                <div class="checkboxes">
+                    ${h.checkbox('inherit_default_permissions',value=True)}
+                </div>
+                <span class="help-block">${h.literal(_('Select to inherit permissions from %s settings. '
+                                             'With this selected below options does not have any action') % h.link_to('default', url('edit_permission', id='default')))}</span>
+             </div>
+             <div id="inherit_overlay" style="${'opacity:0.3' if c.user.inherit_default_permissions else ''}" >        
+             <div class="field">
+                <div class="label label-checkbox">
                     <label for="create_repo_perm">${_('Create repositories')}:</label>
                 </div>
                 <div class="checkboxes">
                     ${h.checkbox('create_repo_perm',value=True)}
                 </div>
              </div>
+             <div class="field">
+                <div class="label label-checkbox">
+                    <label for="fork_repo_perm">${_('Fork repositories')}:</label>
+                </div>
+                <div class="checkboxes">
+                    ${h.checkbox('fork_repo_perm',value=True)}
+                </div>
+             </div>
+             </div>             
             <div class="buttons">
-              ${h.submit('save',_('Save'),class_="ui-button")}
-              ${h.reset('reset',_('Reset'),class_="ui-button")}
+              ${h.submit('save',_('Save'),class_="ui-btn large")}
+              ${h.reset('reset',_('Reset'),class_="ui-btn large")}
+            </div>
+        </div>
+    </div>
+    ${h.end_form()}
+
+    ## permissions overview
+    <div id="perms" class="table">
+           %for section in sorted(c.perm_user.permissions.keys()):
+              <div class="perms_section_head">${section.replace("_"," ").capitalize()}</div>
+              %if not c.perm_user.permissions[section]:
+                  <span class="empty_data">${_('Nothing here yet')}</span>
+              %else:
+              <div id='tbl_list_wrap_${section}' class="yui-skin-sam">
+               <table id="tbl_list_${section}">
+                <thead>
+                    <tr>
+                    <th class="left">${_('Name')}</th>
+                    <th class="left">${_('Permission')}</th>
+                    <th class="left">${_('Edit Permission')}</th>
+                </thead>
+                <tbody>
+                %for k in c.perm_user.permissions[section]:
+                     <%
+                     if section != 'global':
+                         section_perm = c.perm_user.permissions[section].get(k)
+                         _perm = section_perm.split('.')[-1]
+                     else:
+                         _perm = section_perm = None
+                     %>
+                    <tr>
+                        <td>
+                            %if section == 'repositories':
+                                <a href="${h.url('summary_home',repo_name=k)}">${k}</a>
+                            %elif section == 'repositories_groups':
+                                <a href="${h.url('repos_group_home',group_name=k)}">${k}</a>
+                            %else:
+                                ${h.get_permission_name(k)}
+                            %endif
+                        </td>
+                        <td>
+                            %if section == 'global':
+                             ${h.bool2icon(k.split('.')[-1] != 'none')}
+                            %else:
+                             <span class="perm_tag ${_perm}">${section_perm}</span>
+                            %endif
+                        </td>
+                        <td>
+                            %if section == 'repositories':
+                                <a href="${h.url('edit_repo',repo_name=k,anchor='permissions_manage')}">${_('edit')}</a>
+                            %elif section == 'repositories_groups':
+                                <a href="${h.url('edit_repos_group',id=k,anchor='permissions_manage')}">${_('edit')}</a>
+                            %else:
+                                --
+                            %endif
+                        </td>
+                    </tr>
+                %endfor
+                </tbody>
+               </table>
+              </div>
+              %endif
+           %endfor
+    </div>
+</div>
+<div class="box box-left">
+    <!-- box / title -->
+    <div class="title">
+        <h5>${_('Email addresses')}</h5>
+    </div>
+
+    <div class="emails_wrap">
+      <table class="noborder">
+      %for em in c.user_email_map:
+        <tr>
+            <td><div class="gravatar"><img alt="gravatar" src="${h.gravatar_url(em.user.email,16)}"/> </div></td>
+            <td><div class="email">${em.email}</div></td>
+            <td>
+              ${h.form(url('user_emails_delete', id=c.user.user_id),method='delete')}
+                  ${h.hidden('del_email',em.email_id)}
+                  ${h.submit('remove_',_('delete'),id="remove_email_%s" % em.email_id,
+                  class_="delete_icon action_button", onclick="return  confirm('"+_('Confirm to delete this email: %s') % em.email+"');")}
+              ${h.end_form()}
+            </td>
+        </tr>
+      %endfor
+      </table>
+    </div>
+
+    ${h.form(url('user_emails', id=c.user.user_id),method='put')}
+    <div class="form">
+        <!-- fields -->
+        <div class="fields">
+             <div class="field">
+                <div class="label">
+                    <label for="email">${_('New email address')}:</label>
+                </div>
+                <div class="input">
+                    ${h.text('new_email', class_='medium')}
+                </div>
+             </div>
+            <div class="buttons">
+              ${h.submit('save',_('Add'),class_="ui-btn large")}
+              ${h.reset('reset',_('Reset'),class_="ui-btn large")}
             </div>
         </div>
     </div>

@@ -2,11 +2,11 @@
 <%inherit file="/base/base.html"/>
 
 <%def name="title()">
-    ${c.repo_name} ${_('Settings')} - ${c.rhodecode_name}
+    ${_('%s Settings') % c.repo_name} - ${c.rhodecode_name}
 </%def>
 
 <%def name="breadcrumbs_links()">
-    ${h.link_to(u'Home',h.url('/'))}
+    ${h.link_to(_(u'Home'),h.url('/'))}
     &raquo;
     ${h.link_to(c.repo_info.repo_name,h.url('summary_home',repo_name=c.repo_info.repo_name))}
     &raquo;
@@ -53,6 +53,15 @@
                 </div>
             </div>
             <div class="field">
+                <div class="label">
+                    <label for="landing_rev">${_('Landing revision')}:</label>
+                </div>
+                <div class="input">
+                    ${h.select('landing_rev','',c.landing_revs,class_="medium")}
+                    <span class="help-block">${_('Default revision for files page, downloads, whoosh and readme')}</span>
+                </div>
+            </div>
+            <div class="field">
                 <div class="label label-textarea">
                     <label for="description">${_('Description')}:</label>
                 </div>
@@ -81,8 +90,8 @@
                 </div>
 
             <div class="buttons">
-              ${h.submit('save','Save',class_="ui-button")}
-              ${h.reset('reset','Reset',class_="ui-button")}
+              ${h.submit('save',_('Save'),class_="ui-btn large")}
+              ${h.reset('reset',_('Reset'),class_="ui-btn large")}
             </div>
         </div>
     </div>

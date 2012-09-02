@@ -38,11 +38,12 @@
 		                <span class="tooltip" title="${h.tooltip(_('In case a repository was deleted from filesystem and there are leftovers in the database check this option to scan obsolete data in database and remove it.'))}">
 		                ${_('destroy old data')}</span> </label>
 		            </div>
+                    <span class="help-block">${_('Rescan repositories location for new repositories. Also deletes obsolete if `destroy` flag is checked ')}</span>
 		        </div>
 			</div>
 
             <div class="buttons">
-            ${h.submit('rescan',_('Rescan repositories'),class_="ui-button")}
+            ${h.submit('rescan',_('Rescan repositories'),class_="ui-btn large")}
             </div>
         </div>
     </div>
@@ -67,7 +68,7 @@
             </div>
 
             <div class="buttons">
-            ${h.submit('reindex',_('Reindex'),class_="ui-button")}
+            ${h.submit('reindex',_('Reindex'),class_="ui-btn large")}
             </div>
         </div>
     </div>
@@ -108,15 +109,72 @@
             </div>
 
             <div class="buttons">
-                ${h.submit('save',_('Save settings'),class_="ui-button")}
-                ${h.reset('reset',_('Reset'),class_="ui-button")}
+                ${h.submit('save',_('Save settings'),class_="ui-btn large")}
+                ${h.reset('reset',_('Reset'),class_="ui-btn large")}
            </div>
         </div>
     </div>
     ${h.end_form()}
 
-    <h3>${_('Mercurial settings')}</h3>
-    ${h.form(url('admin_setting', setting_id='mercurial'),method='put')}
+    <h3>${_('Visualisation settings')}</h3>
+    ${h.form(url('admin_setting', setting_id='visual'),method='put')}
+    <div class="form">
+        <!-- fields -->
+
+        <div class="fields">
+
+             <div class="field">
+                <div class="label label-checkbox">
+                    <label>${_('Icons')}:</label>
+                </div>
+                <div class="checkboxes">
+                    <div class="checkbox">
+                        ${h.checkbox('rhodecode_show_public_icon','True')}
+                        <label for="rhodecode_show_public_icon">${_('Show public repo icon on repositories')}</label>
+                    </div>
+                    <div class="checkbox">
+                        ${h.checkbox('rhodecode_show_private_icon','True')}
+                        <label for="rhodecode_show_private_icon">${_('Show private repo icon on repositories')}</label>
+                    </div>
+                 </div>
+             </div>
+
+             <div class="field">
+                <div class="label label-checkbox">
+                    <label>${_('Meta-Tagging')}:</label>
+                </div>
+                <div class="checkboxes">
+                    <div class="checkbox">
+                        ${h.checkbox('rhodecode_stylify_metatags','True')}
+                        <label for="rhodecode_stylify_metatags">${_('Stylify recognised metatags:')}</label>
+                    </div>
+                    <div style="padding-left: 20px;">
+                        <ul> <!-- Fix style here -->
+                            <li>[featured] <span class="metatag" tag="featured">featured</span></li>
+                            <li>[stale] <span class="metatag" tag="stale">stale</span></li>
+                            <li>[dead] <span class="metatag" tag="dead">dead</span></li>
+                            <li>[lang =&gt; lang] <span class="metatag" tag="lang" >lang</span></li>
+                            <li>[license =&gt; License] <span class="metatag" tag="license"><a href="http://www.opensource.org/licenses/License" >License</a></span></li>                            
+                            <li>[requires =&gt; Repo] <span class="metatag" tag="requires" >requires =&gt; <a href="#" >Repo</a></span></li>
+                            <li>[recommends =&gt; Repo] <span class="metatag" tag="recommends" >recommends =&gt; <a href="#" >Repo</a></span></li>
+                            <li>[see =&gt; URI] <span class="metatag" tag="see">see =&gt; <a href="#">URI</a> </span></li>
+                        </ul>
+                    </div>
+                 </div>
+             </div>
+
+             <div class="buttons">
+                 ${h.submit('save',_('Save settings'),class_="ui-btn large")}
+                 ${h.reset('reset',_('Reset'),class_="ui-btn large")}
+             </div>
+
+        </div>
+    </div>
+    ${h.end_form()}
+
+
+    <h3>${_('VCS settings')}</h3>
+    ${h.form(url('admin_setting', setting_id='vcs'),method='put')}
     <div class="form">
         <!-- fields -->
 
@@ -129,8 +187,9 @@
                 <div class="checkboxes">
 					<div class="checkbox">
 						${h.checkbox('web_push_ssl','true')}
-						<label for="web_push_ssl">${_('require ssl for pushing')}</label>
+						<label for="web_push_ssl">${_('require ssl for vcs operations')}</label>
 					</div>
+                    <span class="help-block">${_('RhodeCode will require SSL for pushing or pulling. If SSL is missing it will return HTTP Error 406: Not Acceptable')}</span>
 				</div>
              </div>
 
@@ -148,18 +207,39 @@
 						<label for="hooks_changegroup_repo_size">${_('Show repository size after push')}</label>
 					</div>
                     <div class="checkbox">
-                        ${h.checkbox('hooks_pretxnchangegroup_push_logger','True')}
-                        <label for="hooks_pretxnchangegroup_push_logger">${_('Log user push commands')}</label>
+                        ${h.checkbox('hooks_changegroup_push_logger','True')}
+                        <label for="hooks_changegroup_push_logger">${_('Log user push commands')}</label>
                     </div>
                     <div class="checkbox">
-                        ${h.checkbox('hooks_preoutgoing_pull_logger','True')}
-                        <label for="hooks_preoutgoing_pull_logger">${_('Log user pull commands')}</label>
+                        ${h.checkbox('hooks_outgoing_pull_logger','True')}
+                        <label for="hooks_outgoing_pull_logger">${_('Log user pull commands')}</label>
                     </div>
 				</div>
                 <div class="input" style="margin-top:10px">
                     ${h.link_to(_('advanced setup'),url('admin_edit_setting',setting_id='hooks'),class_="ui-btn")}
                 </div>
              </div>
+             <div class="field">
+                <div class="label label-checkbox">
+                    <label>${_('Mercurial Extensions')}:</label>
+                </div>
+                <div class="checkboxes">
+                    <div class="checkbox">
+                        ${h.checkbox('extensions_largefiles','True')}
+                        <label for="extensions_hgsubversion">${_('largefiles extensions')}</label>
+                    </div>
+                    <div class="checkbox">
+                        ${h.checkbox('extensions_hgsubversion','True')}
+                        <label for="extensions_hgsubversion">${_('hgsubversion extensions')}</label>
+                    </div>
+                    <span class="help-block">${_('Requires hgsubversion library installed. Allows clonning from svn remote locations')}</span>
+                    ##<div class="checkbox">
+                    ##    ${h.checkbox('extensions_hggit','True')}
+                    ##    <label for="extensions_hggit">${_('hg-git extensions')}</label>
+                    ##</div>
+                    ##<span class="help-block">${_('Requires hg-git library installed. Allows clonning from git remote locations')}</span>                    
+                </div>
+             </div>             
             <div class="field">
                 <div class="label">
                     <label for="paths_root_path">${_('Repositories location')}:</label>
@@ -169,12 +249,13 @@
 					<span id="path_unlock" class="tooltip"
 						title="${h.tooltip(_('This a crucial application setting. If you are really sure you need to change this, you must restart application in order to make this setting take effect. Click this label to unlock.'))}">
 		                ${_('unlock')}</span>
+                    <span class="help-block">${_('Location where repositories are stored. After changing this value a restart, and rescan is required')}</span>
                 </div>
             </div>
 
             <div class="buttons">
-                ${h.submit('save',_('Save settings'),class_="ui-button")}
-                ${h.reset('reset',_('Reset'),class_="ui-button")}
+                ${h.submit('save',_('Save settings'),class_="ui-btn large")}
+                ${h.reset('reset',_('Reset'),class_="ui-btn large")}
            </div>
         </div>
     </div>
@@ -204,7 +285,7 @@
             </div>
 
             <div class="buttons">
-            ${h.submit('send',_('Send'),class_="ui-button")}
+            ${h.submit('send',_('Send'),class_="ui-btn large")}
             </div>
         </div>
     </div>

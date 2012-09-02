@@ -11,9 +11,9 @@
 			${h.form(h.url.current())}
 			<div class="info_box">
 	          <span class="rev">${_('view')}@rev</span>
-	          <a class="ui-btn" href="${c.url_prev}" title="${_('previous revision')}">&laquo;</a>
+	          <a class="ui-btn ypjax-link" href="${c.url_prev}" title="${_('previous revision')}">&laquo;</a>
 	          ${h.text('at_rev',value=c.changeset.revision,size=5)}
-	          <a class="ui-btn" href="${c.url_next}" title="${_('next revision')}">&raquo;</a>
+	          <a class="ui-btn ypjax-link" href="${c.url_next}" title="${_('next revision')}">&raquo;</a>
 	          ## ${h.submit('view',_('view'),class_="ui-btn")}
 		    </div>
 			${h.end_form()}
@@ -88,14 +88,14 @@
 		             </td>
 		             <td>
 		             	%if node.is_file():
-		             		<div class="tooltip" title="${node.last_changeset.message}">
+		             		<div class="tooltip" title="${h.tooltip(node.last_changeset.message)}">
 		             		<pre>${'r%s:%s' % (node.last_changeset.revision,node.last_changeset.short_id)}</pre>
                             </div>
 		             	%endif
 		             </td>
 		             <td>
 		             	%if node.is_file():
-		             		<span class="tooltip" title="${node.last_changeset.date}">
+		             		<span class="tooltip" title="${h.tooltip(h.fmt_date(node.last_changeset.date))}">
                             ${h.age(node.last_changeset.date)}</span>
 		             	%endif
 		             </td>

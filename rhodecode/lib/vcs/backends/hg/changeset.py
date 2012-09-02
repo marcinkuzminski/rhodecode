@@ -12,8 +12,7 @@ from rhodecode.lib.vcs.nodes import AddedFileNodesGenerator, \
 from rhodecode.lib.vcs.utils import safe_str, safe_unicode, date_fromtimestamp
 from rhodecode.lib.vcs.utils.lazy import LazyProperty
 from rhodecode.lib.vcs.utils.paths import get_dirs_for_path
-
-from ...utils.hgcompat import archival, hex
+from rhodecode.lib.vcs.utils.hgcompat import archival, hex
 
 
 class MercurialChangeset(BaseChangeset):
@@ -51,6 +50,10 @@ class MercurialChangeset(BaseChangeset):
     @LazyProperty
     def date(self):
         return date_fromtimestamp(*self._ctx.date())
+
+    @LazyProperty
+    def _timestamp(self):
+        return self._ctx.date()[0]
 
     @LazyProperty
     def status(self):
@@ -135,6 +138,11 @@ class MercurialChangeset(BaseChangeset):
             return cs
 
         return _prev(self, branch)
+
+    def diff(self, ignore_whitespace=True, context=3):
+        return ''.join(self._ctx.diff(git=True,
+                                      ignore_whitespace=ignore_whitespace,
+                                      context=context))
 
     def _fix_path(self, path):
         """

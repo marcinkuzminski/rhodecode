@@ -30,6 +30,9 @@ import logging
 import traceback
 
 from dulwich import server as dulserver
+from dulwich.web import LimitedInputFilter, GunzipFilter
+from rhodecode.lib.exceptions import HTTPLockedRC
+from rhodecode.lib.hooks import pre_pull
 
 
 class SimpleGitUploadPackHandler(dulserver.UploadPackHandler):
@@ -62,22 +65,26 @@ class SimpleGitUploadPackHandler(dulserver.UploadPackHandler):
 
 
 dulserver.DEFAULT_HANDLERS = {
+  #git-ls-remote, git-clone, git-fetch and git-pull
   'git-upload-pack': SimpleGitUploadPackHandler,
+  #git-push
   'git-receive-pack': dulserver.ReceivePackHandler,
 }
 
-from dulwich.repo import Repo
-from dulwich.web import make_wsgi_chain
+# not used for now until dulwich get's fixed
+#from dulwich.repo import Repo
+#from dulwich.web import make_wsgi_chain
 
 from paste.httpheaders import REMOTE_USER, AUTH_TYPE
+from webob.exc import HTTPNotFound, HTTPForbidden, HTTPInternalServerError, \
+    HTTPBadRequest, HTTPNotAcceptable
 
 from rhodecode.lib.utils2 import safe_str
 from rhodecode.lib.base import BaseVCSController
 from rhodecode.lib.auth import get_container_username
 from rhodecode.lib.utils import is_valid_repo, make_ui
-from rhodecode.model.db import User
-
-from webob.exc import HTTPNotFound, HTTPForbidden, HTTPInternalServerError
+from rhodecode.lib.compat import json
+from rhodecode.model.db import User, RhodeCodeUi
 
 log = logging.getLogger(__name__)
 
@@ -97,9 +104,10 @@ def is_git(environ):
 class SimpleGit(BaseVCSController):
 
     def _handle_request(self, environ, start_response):
-
         if not is_git(environ):
             return self.application(environ, start_response)
+        if not self._check_ssl(environ, start_response):
+            return HTTPNotAcceptable('SSL REQUIRED !')(environ, start_response)
 
         ipaddr = self._get_ip_addr(environ)
         username = None
@@ -117,7 +125,7 @@ class SimpleGit(BaseVCSController):
             return HTTPInternalServerError()(environ, start_response)
 
         # quick check if that dir exists...
-        if is_valid_repo(repo_name, self.basepath) is False:
+        if is_valid_repo(repo_name, self.basepath, 'git') is False:
             return HTTPNotFound()(environ, start_response)
 
         #======================================================================
@@ -164,27 +172,30 @@ class SimpleGit(BaseVCSController):
                 #==============================================================
                 # CHECK PERMISSIONS FOR THIS REQUEST USING GIVEN USERNAME
                 #==============================================================
-                if action in ['pull', 'push']:
-                    try:
-                        user = self.__get_user(username)
-                        if user is None or not user.active:
-                            return HTTPForbidden()(environ, start_response)
-                        username = user.username
-                    except:
-                        log.error(traceback.format_exc())
-                        return HTTPInternalServerError()(environ,
-                                                         start_response)
-
-                    #check permissions for this repository
-                    perm = self._check_permission(action, user, repo_name)
-                    if perm is not True:
+                try:
+                    user = self.__get_user(username)
+                    if user is None or not user.active:
                         return HTTPForbidden()(environ, start_response)
+                    username = user.username
+                except:
+                    log.error(traceback.format_exc())
+                    return HTTPInternalServerError()(environ, start_response)
+
+                #check permissions for this repository
+                perm = self._check_permission(action, user, repo_name)
+                if perm is not True:
+                    return HTTPForbidden()(environ, start_response)
+
+        # extras are injected into UI object and later available
+        # in hooks executed by rhodecode
         extras = {
             'ip': ipaddr,
             'username': username,
             'action': action,
             'repository': repo_name,
             'scm': 'git',
+            'make_lock': None,
+            'locked_by': [None, None]
         }
 
         #===================================================================
@@ -193,9 +204,23 @@ class SimpleGit(BaseVCSController):
         repo_path = os.path.join(safe_str(self.basepath), safe_str(repo_name))
         log.debug('Repository path is %s' % repo_path)
 
+        # CHECK LOCKING only if it's not ANONYMOUS USER
+        if username != User.DEFAULT_USER:
+            log.debug('Checking locking on repository')
+            (make_lock,
+             locked,
+             locked_by) = self._check_locking_state(
+                            environ=environ, action=action,
+                            repo=repo_name, user_id=user.user_id
+                       )
+            # store the make_lock for later evaluation in hooks
+            extras.update({'make_lock': make_lock,
+                           'locked_by': locked_by})
+        # set the environ variables for this request
+        os.environ['RC_SCM_DATA'] = json.dumps(extras)
+        log.debug('HOOKS extras is %s' % extras)
         baseui = make_ui('db')
         self.__inject_extras(repo_path, baseui, extras)
-
 
         try:
             # invalidate cache on push
@@ -204,24 +229,31 @@ class SimpleGit(BaseVCSController):
             self._handle_githooks(repo_name, action, baseui, environ)
 
             log.info('%s action on GIT repo "%s"' % (action, repo_name))
-            app = self.__make_app(repo_name, repo_path)
+            app = self.__make_app(repo_name, repo_path, extras)
             return app(environ, start_response)
+        except HTTPLockedRC, e:
+            log.debug('Repositry LOCKED ret code 423!')
+            return e(environ, start_response)
         except Exception:
             log.error(traceback.format_exc())
             return HTTPInternalServerError()(environ, start_response)
 
-    def __make_app(self, repo_name, repo_path):
+    def __make_app(self, repo_name, repo_path, extras):
         """
         Make an wsgi application using dulserver
 
         :param repo_name: name of the repository
         :param repo_path: full path to the repository
         """
-        _d = {'/' + repo_name: Repo(repo_path)}
-        backend = dulserver.DictBackend(_d)
-        gitserve = make_wsgi_chain(backend)
 
-        return gitserve
+        from rhodecode.lib.middleware.pygrack import make_wsgi_app
+        app = make_wsgi_app(
+            repo_root=safe_str(self.basepath),
+            repo_name=repo_name,
+            extras=extras,
+        )
+        app = GunzipFilter(LimitedInputFilter(app))
+        return app
 
     def __get_repository(self, environ):
         """
@@ -265,8 +297,12 @@ class SimpleGit(BaseVCSController):
         return op
 
     def _handle_githooks(self, repo_name, action, baseui, environ):
-        from rhodecode.lib.hooks import log_pull_action, log_push_action
+        """
+        Handles pull action, push is handled by post-receive hook
+        """
+        from rhodecode.lib.hooks import log_pull_action
         service = environ['QUERY_STRING'].split('=')
+
         if len(service) < 2:
             return
 
@@ -275,12 +311,11 @@ class SimpleGit(BaseVCSController):
         _repo = _repo.scm_instance
         _repo._repo.ui = baseui
 
-        push_hook = 'pretxnchangegroup.push_logger'
-        pull_hook = 'preoutgoing.pull_logger'
         _hooks = dict(baseui.configitems('hooks')) or {}
-        if action == 'push' and _hooks.get(push_hook):
-            log_push_action(ui=baseui, repo=_repo._repo)
-        elif action == 'pull' and _hooks.get(pull_hook):
+        if action == 'pull':
+            # stupid git, emulate pre-pull hook !
+            pre_pull(ui=baseui, repo=_repo._repo)
+        if action == 'pull' and _hooks.get(RhodeCodeUi.HOOK_PULL):
             log_pull_action(ui=baseui, repo=_repo._repo)
 
     def __inject_extras(self, repo_path, baseui, extras={}):

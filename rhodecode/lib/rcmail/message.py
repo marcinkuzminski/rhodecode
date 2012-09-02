@@ -3,6 +3,7 @@ from rhodecode.lib.rcmail.response import MailResponse
 from rhodecode.lib.rcmail.exceptions import BadHeaders
 from rhodecode.lib.rcmail.exceptions import InvalidMessage
 
+
 class Attachment(object):
     """
     Encapsulates file attachment information.
@@ -134,13 +135,13 @@ class Message(object):
         """
 
         if not self.recipients:
-            raise InvalidMessage, "No recipients have been added"
+            raise InvalidMessage("No recipients have been added")
 
         if not self.body and not self.html:
-            raise InvalidMessage, "No body has been set"
+            raise InvalidMessage("No body has been set")
 
         if not self.sender:
-            raise InvalidMessage, "No sender address has been set"
+            raise InvalidMessage("No sender address has been set")
 
         if self.is_bad_headers():
             raise BadHeaders

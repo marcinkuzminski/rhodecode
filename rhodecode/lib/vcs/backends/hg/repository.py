@@ -18,7 +18,7 @@ from rhodecode.lib.vcs.utils.lazy import LazyProperty
 from rhodecode.lib.vcs.utils.ordered_dict import OrderedDict
 from rhodecode.lib.vcs.utils.paths import abspath
 
-from ...utils.hgcompat import ui, nullid, match, patch, diffopts, clone, \
+from rhodecode.lib.vcs.utils.hgcompat import ui, nullid, match, patch, diffopts, clone, \
     get_contact, pull, localrepository, RepoLookupError, Abort, RepoError, hex
 
 
@@ -231,6 +231,12 @@ class MercurialRepository(BaseRepository):
         :param context: How many lines before/after changed lines should be
           shown. Defaults to ``3``.
         """
+        if hasattr(rev1, 'raw_id'):
+            rev1 = getattr(rev1, 'raw_id')
+
+        if hasattr(rev2, 'raw_id'):
+            rev2 = getattr(rev2, 'raw_id')
+
         # Check if given revisions are present at repository (may raise
         # ChangesetDoesNotExistError)
         if rev1 != self.EMPTY_CHANGESET:
@@ -243,7 +249,8 @@ class MercurialRepository(BaseRepository):
                                         ignorews=ignore_whitespace,
                                         context=context)))
 
-    def _check_url(self, url):
+    @classmethod
+    def _check_url(cls, url):
         """
         Function will check given url and try to verify if it's a valid
         link. Sometimes it may happened that mercurial will issue basic
@@ -263,6 +270,9 @@ class MercurialRepository(BaseRepository):
         # check first if it's not an local url
         if os.path.isdir(url) or url.startswith('file:'):
             return True
+
+        if('+' in url[:url.find('://')]):
+            url = url[url.find('+') + 1:]
 
         handlers = []
         test_uri, authinfo = Url(url).authinfo()
@@ -290,7 +300,7 @@ class MercurialRepository(BaseRepository):
             return resp.code == 200
         except Exception, e:
             # means it cannot be cloned
-            raise urllib2.URLError(e)
+            raise urllib2.URLError("[%s] %s" % (url, e))
 
     def _get_repo(self, create, src_url=None, update_after_clone=False):
         """
@@ -302,6 +312,7 @@ class MercurialRepository(BaseRepository):
         location at given clone_point. Additionally it'll make update to
         working copy accordingly to ``update_after_clone`` flag
         """
+
         try:
             if src_url:
                 url = str(self._get_url(src_url))
@@ -309,12 +320,13 @@ class MercurialRepository(BaseRepository):
                 if not update_after_clone:
                     opts.update({'noupdate': True})
                 try:
-                    self._check_url(url)
+                    MercurialRepository._check_url(url)
                     clone(self.baseui, url, self.path, **opts)
 #                except urllib2.URLError:
 #                    raise Abort("Got HTTP 404 error")
                 except Exception:
                     raise
+
                 # Don't try to create if we've already cloned repo
                 create = False
             return localrepository(self.baseui, self.path, create=create)

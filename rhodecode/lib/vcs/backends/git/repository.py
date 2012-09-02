@@ -13,6 +13,10 @@ import os
 import re
 import time
 import posixpath
+import logging
+import traceback
+import urllib
+import urllib2
 from dulwich.repo import Repo, NotGitRepository
 #from dulwich.config import ConfigFile
 from string import Template
@@ -33,6 +37,10 @@ from .workdir import GitWorkdir
 from .changeset import GitChangeset
 from .inmemory import GitInMemoryChangeset
 from .config import ConfigFile
+from rhodecode.lib import subprocessio
+
+
+log = logging.getLogger(__name__)
 
 
 class GitRepository(BaseRepository):
@@ -66,6 +74,7 @@ class GitRepository(BaseRepository):
                 'config'),
             abspath(get_user_home(), '.gitconfig'),
         ]
+        self.bare = self._repo.bare
 
     @LazyProperty
     def revisions(self):
@@ -94,28 +103,32 @@ class GitRepository(BaseRepository):
             cmd = [cmd]
             _str_cmd = True
 
-        cmd = ['GIT_CONFIG_NOGLOBAL=1', 'git'] + _copts + cmd
+        gitenv = os.environ
+        # need to clean fix GIT_DIR !
+        if 'GIT_DIR' in gitenv:
+            del gitenv['GIT_DIR']
+        gitenv['GIT_CONFIG_NOGLOBAL'] = '1'
+
+        cmd = ['git'] + _copts + cmd
         if _str_cmd:
             cmd = ' '.join(cmd)
         try:
             opts = dict(
-                shell=isinstance(cmd, basestring),
-                stdout=PIPE,
-                stderr=PIPE)
+                env=gitenv,
+                shell=False,
+            )
             if os.path.isdir(self.path):
                 opts['cwd'] = self.path
-            p = Popen(cmd, **opts)
-        except OSError, err:
+            p = subprocessio.SubprocessIOChunker(cmd, **opts)
+        except (EnvironmentError, OSError), err:
+            log.error(traceback.format_exc())
             raise RepositoryError("Couldn't run git command (%s).\n"
-                "Original error was:%s" % (cmd, err))
-        so, se = p.communicate()
-        if not se.startswith("fatal: bad default revision 'HEAD'") and \
-            p.returncode != 0:
-            raise RepositoryError("Couldn't run git command (%s).\n"
-                "stderr:\n%s" % (cmd, se))
-        return so, se
+                                  "Original error was:%s" % (cmd, err))
 
-    def _check_url(self, url):
+        return ''.join(p.output), ''.join(p.error)
+
+    @classmethod
+    def _check_url(cls, url):
         """
         Functon will check given url and try to verify if it's a valid
         link. Sometimes it may happened that mercurial will issue basic
@@ -124,9 +137,45 @@ class GitRepository(BaseRepository):
 
         On failures it'll raise urllib2.HTTPError
         """
+        from mercurial.util import url as Url
 
-        #TODO: implement this
-        pass
+        # those authnadlers are patched for python 2.6.5 bug an
+        # infinit looping when given invalid resources
+        from mercurial.url import httpbasicauthhandler, httpdigestauthhandler
+
+        # check first if it's not an local url
+        if os.path.isdir(url) or url.startswith('file:'):
+            return True
+
+        if('+' in url[:url.find('://')]):
+            url = url[url.find('+') + 1:]
+
+        handlers = []
+        test_uri, authinfo = Url(url).authinfo()
+        if not test_uri.endswith('info/refs'):
+            test_uri = test_uri.rstrip('/') + '/info/refs'
+        if authinfo:
+            #create a password manager
+            passmgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
+            passmgr.add_password(*authinfo)
+
+            handlers.extend((httpbasicauthhandler(passmgr),
+                             httpdigestauthhandler(passmgr)))
+
+        o = urllib2.build_opener(*handlers)
+        o.addheaders = [('User-Agent', 'git/1.7.8.0')]  # fake some git
+
+        q = {"service": 'git-upload-pack'}
+        qs = '?%s' % urllib.urlencode(q)
+        cu = "%s%s" % (test_uri, qs)
+        req = urllib2.Request(cu, None, {})
+
+        try:
+            resp = o.open(req)
+            return resp.code == 200
+        except Exception, e:
+            # means it cannot be cloned
+            raise urllib2.URLError("[%s] %s" % (url, e))
 
     def _get_repo(self, create, src_url=None, update_after_clone=False,
             bare=False):
@@ -137,7 +186,7 @@ class GitRepository(BaseRepository):
                                   "given (clone operation creates repository)")
         try:
             if create and src_url:
-                self._check_url(src_url)
+                GitRepository._check_url(src_url)
                 self.clone(src_url, update_after_clone, bare)
                 return Repo(self.path)
             elif create:
@@ -152,15 +201,26 @@ class GitRepository(BaseRepository):
             raise RepositoryError(err)
 
     def _get_all_revisions(self):
-        cmd = 'rev-list --all --date-order'
+        # we must check if this repo is not empty, since later command
+        # fails if it is. And it's cheaper to ask than throw the subprocess
+        # errors
+        try:
+            self._repo.head()
+        except KeyError:
+            return []
+        cmd = 'rev-list --all --reverse --date-order'
         try:
             so, se = self.run_git_command(cmd)
         except RepositoryError:
             # Can be raised for empty repositories
             return []
-        revisions = so.splitlines()
-        revisions.reverse()
-        return revisions
+        return so.splitlines()
+
+    def _get_all_revisions2(self):
+        #alternate implementation using dulwich
+        includes = [x[1][0] for x in self._parsed_refs.iteritems()
+                    if x[1][1] != 'T']
+        return [c.commit.id for c in self._repo.get_walker(include=includes)]
 
     def _get_revision(self, revision):
         """
@@ -186,7 +246,17 @@ class GitRepository(BaseRepository):
                     "for this repository %s" % (revision, self))
 
         elif is_bstr(revision):
-            if not pattern.match(revision) or revision not in self.revisions:
+            # get by branch/tag name
+            _ref_revision = self._parsed_refs.get(revision)
+            _tags_shas = self.tags.values()
+            if _ref_revision:  # and _ref_revision[1] in ['H', 'RH', 'T']:
+                return _ref_revision[0]
+
+            # maybe it's a tag ? we don't have them in self.revisions
+            elif revision in _tags_shas:
+                return _tags_shas[_tags_shas.index(revision)]
+
+            elif not pattern.match(revision) or revision not in self.revisions:
                 raise ChangesetDoesNotExistError("Revision %r does not exist "
                     "for this repository %s" % (revision, self))
 
@@ -226,9 +296,10 @@ class GitRepository(BaseRepository):
         try:
             return time.mktime(self.get_changeset().date.timetuple())
         except RepositoryError:
+            idx_loc = '' if self.bare else '.git'
             # fallback to filesystem
-            in_path = os.path.join(self.path, '.git', "index")
-            he_path = os.path.join(self.path, '.git', "HEAD")
+            in_path = os.path.join(self.path, idx_loc, "index")
+            he_path = os.path.join(self.path, idx_loc, "HEAD")
             if os.path.exists(in_path):
                 return os.stat(in_path).st_mtime
             else:
@@ -236,8 +307,9 @@ class GitRepository(BaseRepository):
 
     @LazyProperty
     def description(self):
+        idx_loc = '' if self.bare else '.git'
         undefined_description = u'unknown'
-        description_path = os.path.join(self.path, '.git', 'description')
+        description_path = os.path.join(self.path, idx_loc, 'description')
         if os.path.isfile(description_path):
             return safe_unicode(open(description_path).read())
         else:
@@ -252,37 +324,23 @@ class GitRepository(BaseRepository):
     def branches(self):
         if not self.revisions:
             return {}
-        refs = self._repo.refs.as_dict()
         sortkey = lambda ctx: ctx[0]
-        _branches = [('/'.join(ref.split('/')[2:]), head)
-            for ref, head in refs.items()
-            if ref.startswith('refs/heads/') and not ref.endswith('/HEAD')]
+        _branches = [(x[0], x[1][0])
+                     for x in self._parsed_refs.iteritems() if x[1][1] == 'H']
         return OrderedDict(sorted(_branches, key=sortkey, reverse=False))
-
-    def _heads(self, reverse=False):
-        refs = self._repo.get_refs()
-        heads = {}
-
-        for key, val in refs.items():
-            for ref_key in ['refs/heads/', 'refs/remotes/origin/']:
-                if key.startswith(ref_key):
-                    n = key[len(ref_key):]
-                    if n not in ['HEAD']:
-                        heads[n] = val
-
-        return heads if reverse else dict((y,x) for x,y in heads.iteritems())
-
-    def _get_tags(self):
-        if not self.revisions:
-            return {}
-        sortkey = lambda ctx: ctx[0]
-        _tags = [('/'.join(ref.split('/')[2:]), head) for ref, head in
-            self._repo.get_refs().items() if ref.startswith('refs/tags/')]
-        return OrderedDict(sorted(_tags, key=sortkey, reverse=True))
 
     @LazyProperty
     def tags(self):
         return self._get_tags()
+
+    def _get_tags(self):
+        if not self.revisions:
+            return {}
+
+        sortkey = lambda ctx: ctx[0]
+        _tags = [(x[0], x[1][0])
+                 for x in self._parsed_refs.iteritems() if x[1][1] == 'T']
+        return OrderedDict(sorted(_tags, key=sortkey, reverse=True))
 
     def tag(self, name, user, revision=None, message=None, date=None,
             **kwargs):
@@ -304,6 +362,7 @@ class GitRepository(BaseRepository):
             changeset.raw_id)
         self._repo.refs["refs/tags/%s" % name] = changeset._commit.id
 
+        self._parsed_refs = self._get_parsed_refs()
         self.tags = self._get_tags()
         return changeset
 
@@ -323,9 +382,41 @@ class GitRepository(BaseRepository):
         tagpath = posixpath.join(self._repo.refs.path, 'refs', 'tags', name)
         try:
             os.remove(tagpath)
+            self._parsed_refs = self._get_parsed_refs()
             self.tags = self._get_tags()
         except OSError, e:
             raise RepositoryError(e.strerror)
+
+    @LazyProperty
+    def _parsed_refs(self):
+        return self._get_parsed_refs()
+
+    def _get_parsed_refs(self):
+        refs = self._repo.get_refs()
+        keys = [('refs/heads/', 'H'),
+                ('refs/remotes/origin/', 'RH'),
+                ('refs/tags/', 'T')]
+        _refs = {}
+        for ref, sha in refs.iteritems():
+            for k, type_ in keys:
+                if ref.startswith(k):
+                    _key = ref[len(k):]
+                    _refs[_key] = [sha, type_]
+                    break
+        return _refs
+
+    def _heads(self, reverse=False):
+        refs = self._repo.get_refs()
+        heads = {}
+
+        for key, val in refs.items():
+            for ref_key in ['refs/heads/', 'refs/remotes/origin/']:
+                if key.startswith(ref_key):
+                    n = key[len(ref_key):]
+                    if n not in ['HEAD']:
+                        heads[n] = val
+
+        return heads if reverse else dict((y, x) for x, y in heads.iteritems())
 
     def get_changeset(self, revision=None):
         """
@@ -429,6 +520,12 @@ class GitRepository(BaseRepository):
         if ignore_whitespace:
             flags.append('-w')
 
+        if hasattr(rev1, 'raw_id'):
+            rev1 = getattr(rev1, 'raw_id')
+
+        if hasattr(rev2, 'raw_id'):
+            rev2 = getattr(rev2, 'raw_id')
+
         if rev1 == self.EMPTY_CHANGESET:
             rev2 = self.get_changeset(rev2).raw_id
             cmd = ' '.join(['show'] + flags + [rev2])
@@ -487,6 +584,17 @@ class GitRepository(BaseRepository):
         url = self._get_url(url)
         cmd = ['pull']
         cmd.append("--ff-only")
+        cmd.append(url)
+        cmd = ' '.join(cmd)
+        # If error occurs run_git_command raises RepositoryError already
+        self.run_git_command(cmd)
+
+    def fetch(self, url):
+        """
+        Tries to pull changes from external location.
+        """
+        url = self._get_url(url)
+        cmd = ['fetch']
         cmd.append(url)
         cmd = ' '.join(cmd)
         # If error occurs run_git_command raises RepositoryError already

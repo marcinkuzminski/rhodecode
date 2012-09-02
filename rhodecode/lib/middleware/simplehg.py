@@ -33,14 +33,17 @@ from mercurial.error import RepoError
 from mercurial.hgweb import hgweb_mod
 
 from paste.httpheaders import REMOTE_USER, AUTH_TYPE
+from webob.exc import HTTPNotFound, HTTPForbidden, HTTPInternalServerError, \
+    HTTPBadRequest, HTTPNotAcceptable
 
 from rhodecode.lib.utils2 import safe_str
 from rhodecode.lib.base import BaseVCSController
 from rhodecode.lib.auth import get_container_username
 from rhodecode.lib.utils import make_ui, is_valid_repo, ui_sections
+from rhodecode.lib.compat import json
 from rhodecode.model.db import User
+from rhodecode.lib.exceptions import HTTPLockedRC
 
-from webob.exc import HTTPNotFound, HTTPForbidden, HTTPInternalServerError
 
 log = logging.getLogger(__name__)
 
@@ -68,9 +71,11 @@ class SimpleHg(BaseVCSController):
     def _handle_request(self, environ, start_response):
         if not is_mercurial(environ):
             return self.application(environ, start_response)
+        if not self._check_ssl(environ, start_response):
+            return HTTPNotAcceptable('SSL REQUIRED !')(environ, start_response)
 
         ipaddr = self._get_ip_addr(environ)
-
+        username = None
         # skip passing error to error controller
         environ['pylons.status_code_redirect'] = True
 
@@ -84,7 +89,7 @@ class SimpleHg(BaseVCSController):
             return HTTPInternalServerError()(environ, start_response)
 
         # quick check if that dir exists...
-        if is_valid_repo(repo_name, self.basepath) is False:
+        if is_valid_repo(repo_name, self.basepath, 'hg') is False:
             return HTTPNotFound()(environ, start_response)
 
         #======================================================================
@@ -131,21 +136,19 @@ class SimpleHg(BaseVCSController):
                 #==============================================================
                 # CHECK PERMISSIONS FOR THIS REQUEST USING GIVEN USERNAME
                 #==============================================================
-                if action in ['pull', 'push']:
-                    try:
-                        user = self.__get_user(username)
-                        if user is None or not user.active:
-                            return HTTPForbidden()(environ, start_response)
-                        username = user.username
-                    except:
-                        log.error(traceback.format_exc())
-                        return HTTPInternalServerError()(environ,
-                                                         start_response)
-
-                    #check permissions for this repository
-                    perm = self._check_permission(action, user, repo_name)
-                    if perm is not True:
+                try:
+                    user = self.__get_user(username)
+                    if user is None or not user.active:
                         return HTTPForbidden()(environ, start_response)
+                    username = user.username
+                except:
+                    log.error(traceback.format_exc())
+                    return HTTPInternalServerError()(environ, start_response)
+
+                #check permissions for this repository
+                perm = self._check_permission(action, user, repo_name)
+                if perm is not True:
+                    return HTTPForbidden()(environ, start_response)
 
         # extras are injected into mercurial UI object and later available
         # in hg hooks executed by rhodecode
@@ -155,14 +158,31 @@ class SimpleHg(BaseVCSController):
             'action': action,
             'repository': repo_name,
             'scm': 'hg',
+            'make_lock': None,
+            'locked_by': [None, None]
         }
-
         #======================================================================
         # MERCURIAL REQUEST HANDLING
         #======================================================================
         repo_path = os.path.join(safe_str(self.basepath), safe_str(repo_name))
         log.debug('Repository path is %s' % repo_path)
 
+        # CHECK LOCKING only if it's not ANONYMOUS USER
+        if username != User.DEFAULT_USER:
+            log.debug('Checking locking on repository')
+            (make_lock,
+             locked,
+             locked_by) = self._check_locking_state(
+                            environ=environ, action=action,
+                            repo=repo_name, user_id=user.user_id
+                       )
+            # store the make_lock for later evaluation in hooks
+            extras.update({'make_lock': make_lock,
+                           'locked_by': locked_by})
+
+        # set the environ variables for this request
+        os.environ['RC_SCM_DATA'] = json.dumps(extras)
+        log.debug('HOOKS extras is %s' % extras)
         baseui = make_ui('db')
         self.__inject_extras(repo_path, baseui, extras)
 
@@ -176,6 +196,9 @@ class SimpleHg(BaseVCSController):
         except RepoError, e:
             if str(e).find('not found') != -1:
                 return HTTPNotFound()(environ, start_response)
+        except HTTPLockedRC, e:
+            log.debug('Repositry LOCKED ret code 423!')
+            return e(environ, start_response)
         except Exception:
             log.error(traceback.format_exc())
             return HTTPInternalServerError()(environ, start_response)
@@ -225,8 +248,11 @@ class SimpleHg(BaseVCSController):
                 cmd = qry.split('=')[-1]
                 if cmd in mapping:
                     return mapping[cmd]
-                else:
-                    return 'pull'
+
+                return 'pull'
+
+        raise Exception('Unable to detect pull/push action !!'
+                        'Are you using non standard command or client ?')
 
     def __inject_extras(self, repo_path, baseui, extras={}):
         """

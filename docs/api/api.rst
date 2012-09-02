@@ -7,7 +7,7 @@ API
 
 Starting from RhodeCode version 1.2 a simple API was implemented.
 There's a single schema for calling all api methods. API is implemented
-with JSON protocol both ways. An url to send API request in RhodeCode is
+with JSON protocol both ways. An url to send API request to RhodeCode is
 <your_server>/_admin/api
 
 API ACCESS FOR WEB VIEWS
@@ -59,6 +59,47 @@ All responses from API will be `HTTP/1.0 200 OK`, if there's an error while
 calling api *error* key from response will contain failure description
 and result will be null.
 
+
+API CLIENT
+++++++++++
+
+From version 1.4 RhodeCode adds a script that allows to easily
+communicate with API. After installing RhodeCode a `rhodecode-api` script
+will be available.
+
+To get started quickly simply run::
+
+  rhodecode-api _create_config --apikey=<youapikey> --apihost=<rhodecode host>
+ 
+This will create a file named .config in the directory you executed it storing
+json config file with credentials. You can skip this step and always provide
+both of the arguments to be able to communicate with server
+
+
+after that simply run any api command for example get_repo::
+ 
+ rhodecode-api get_repo
+
+ calling {"api_key": "<apikey>", "id": 75, "args": {}, "method": "get_repo"} to http://127.0.0.1:5000
+ rhodecode said:
+ {'error': 'Missing non optional `repoid` arg in JSON DATA',
+  'id': 75,
+  'result': None}
+
+Ups looks like we forgot to add an argument
+
+Let's try again now giving the repoid as parameters::
+
+    rhodecode-api get_repo repoid:rhodecode   
+ 
+    calling {"api_key": "<apikey>", "id": 39, "args": {"repoid": "rhodecode"}, "method": "get_repo"} to http://127.0.0.1:5000
+    rhodecode said:
+    {'error': None,
+     'id': 39,
+     'result': <json data...>}
+
+
+
 API METHODS
 +++++++++++
 
@@ -76,12 +117,64 @@ INPUT::
     api_key : "<api_key>"
     method :  "pull"
     args :    {
-                "repo_name" : "<reponame>"
+                "repoid" : "<reponame or repo_id>"
               }
 
 OUTPUT::
 
-    result : "Pulled from <reponame>"
+    id : <id_given_in_input>
+    result : "Pulled from `<reponame>`"
+    error :  null
+
+
+rescan_repos
+------------
+
+Dispatch rescan repositories action. If remove_obsolete is set
+RhodeCode will delete repos that are in database but not in the filesystem.
+This command can be executed only using api_key belonging to user with admin 
+rights.
+
+INPUT::
+
+    id : <id_for_response>
+    api_key : "<api_key>"
+    method :  "rescan_repos"
+    args :    {
+                "remove_obsolete" : "<boolean = Optional(False)>"
+              }
+
+OUTPUT::
+
+    id : <id_given_in_input>
+    result : "{'added': [<list of names of added repos>], 
+               'removed': [<list of names of removed repos>]}"
+    error :  null
+
+
+lock
+----
+
+Set locking state on given repository by given user.
+This command can be executed only using api_key belonging to user with admin 
+rights.
+
+INPUT::
+
+    id : <id_for_response>
+    api_key : "<api_key>"
+    method :  "lock"
+    args :    {
+                "repoid" : "<reponame or repo_id>"
+                "userid" : "<user_id or username>",
+                "locked" : "<bool true|false>"
+                
+              }
+
+OUTPUT::
+
+    id : <id_given_in_input>
+    result : "User `<username>` set lock state for repo `<reponame>` to `true|false`"
     error :  null
 
 
@@ -104,13 +197,15 @@ INPUT::
 
 OUTPUT::
 
+    id : <id_given_in_input>
     result: None if user does not exist or 
             {
-                "id" :       "<id>",
+                "user_id" :  "<user_id>",
                 "username" : "<username>",
                 "firstname": "<firstname>",
                 "lastname" : "<lastname>",
                 "email" :    "<email>",
+                "emails":    "<list_of_all_additional_emails>",
                 "active" :   "<bool>",
                 "admin" :    "<bool>",
                 "ldap_dn" :  "<ldap_dn>",
@@ -143,13 +238,15 @@ INPUT::
 
 OUTPUT::
 
+    id : <id_given_in_input>
     result: [
               {
-                "id" :       "<id>",
+                "user_id" :  "<user_id>",
                 "username" : "<username>",
                 "firstname": "<firstname>",
                 "lastname" : "<lastname>",
                 "email" :    "<email>",
+                "emails":    "<list_of_all_additional_emails>",
                 "active" :   "<bool>",
                 "admin" :    "<bool>",
                 "ldap_dn" :  "<ldap_dn>",
@@ -174,20 +271,32 @@ INPUT::
     method :  "create_user"
     args :    {
                 "username" :  "<username>",
-                "password" :  "<password>",
                 "email" :     "<useremail>",
-                "firstname" : "<firstname> = None",
-                "lastname" :  "<lastname> = None",
-                "active" :    "<bool> = True",
-                "admin" :     "<bool> = False",
-                "ldap_dn" :   "<ldap_dn> = None"
+                "password" :  "<password>",
+                "firstname" : "<firstname> = Optional(None)",
+                "lastname" :  "<lastname> = Optional(None)",
+                "active" :    "<bool> = Optional(True)",
+                "admin" :     "<bool> = Optional(False)",
+                "ldap_dn" :   "<ldap_dn> = Optional(None)"
               }
 
 OUTPUT::
 
+    id : <id_given_in_input>
     result: {
-              "id" : "<new_user_id>",
-              "msg" : "created new user <username>"
+              "msg" : "created new user `<username>`",
+              "user": {
+                "user_id" :  "<user_id>",
+                "username" : "<username>",
+                "firstname": "<firstname>",
+                "lastname" : "<lastname>",
+                "email" :    "<email>",
+                "emails":    "<list_of_all_additional_emails>",
+                "active" :   "<bool>",
+                "admin" :    "<bool>",
+                "ldap_dn" :  "<ldap_dn>",
+                "last_login": "<last_login>",
+              },
             }
     error:  null
 
@@ -195,7 +304,7 @@ OUTPUT::
 update_user
 -----------
 
-updates current one if such user exists. This command can 
+updates given user if such user exists. This command can 
 be executed only using api_key belonging to user with admin rights.
 
 
@@ -206,21 +315,60 @@ INPUT::
     method :  "update_user"
     args :    {
                 "userid" : "<user_id or username>",
-                "username" :  "<username>",
-                "password" :  "<password>",
-                "email" :     "<useremail>",
-                "firstname" : "<firstname>",
-                "lastname" :  "<lastname>",
-                "active" :    "<bool>",
-                "admin" :     "<bool>",
-                "ldap_dn" :   "<ldap_dn>"
+                "username" :  "<username> = Optional",
+                "email" :     "<useremail> = Optional",
+                "password" :  "<password> = Optional",
+                "firstname" : "<firstname> = Optional",
+                "lastname" :  "<lastname> = Optional",
+                "active" :    "<bool> = Optional",
+                "admin" :     "<bool> = Optional",
+                "ldap_dn" :   "<ldap_dn> = Optional"
               }
 
 OUTPUT::
 
+    id : <id_given_in_input>
     result: {
-              "id" : "<edited_user_id>",
-              "msg" : "updated user <username>"
+              "msg" : "updated user ID:<userid> <username>",
+              "user": {
+                "user_id" :  "<user_id>",
+                "username" : "<username>",
+                "firstname": "<firstname>",
+                "lastname" : "<lastname>",
+                "email" :    "<email>",
+                "emails":    "<list_of_all_additional_emails>",
+                "active" :   "<bool>",
+                "admin" :    "<bool>",
+                "ldap_dn" :  "<ldap_dn>",
+                "last_login": "<last_login>",
+              },              
+            }
+    error:  null
+
+
+delete_user
+-----------
+
+
+deletes givenuser if such user exists. This command can 
+be executed only using api_key belonging to user with admin rights.
+
+
+INPUT::
+
+    id : <id_for_response>
+    api_key : "<api_key>"
+    method :  "delete_user"
+    args :    {
+                "userid" : "<user_id or username>",
+              }
+
+OUTPUT::
+
+    id : <id_given_in_input>
+    result: {
+              "msg" : "deleted user ID:<userid> <username>",
+              "user": null
             }
     error:  null
 
@@ -238,25 +386,29 @@ INPUT::
     api_key : "<api_key>"
     method :  "get_users_group"
     args :    {
-                "group_name" : "<name>"
+                "usersgroupid" : "<users group id or name>"
               }
 
 OUTPUT::
 
+    id : <id_given_in_input>
     result : None if group not exist
              {
-               "id" :         "<id>",
-               "group_name" : "<groupname>",
-               "active":      "<bool>",
+               "users_group_id" : "<id>",
+               "group_name" :     "<groupname>",
+               "active":          "<bool>",
                "members" :  [
-                              { "id" :       "<userid>",
+                              { 
+                                "user_id" :  "<user_id>",
                                 "username" : "<username>",
                                 "firstname": "<firstname>",
                                 "lastname" : "<lastname>",
                                 "email" :    "<email>",
+                                "emails":    "<list_of_all_additional_emails>",
                                 "active" :   "<bool>",
                                 "admin" :    "<bool>",
-                                "ldap" :     "<ldap_dn>"
+                                "ldap_dn" :  "<ldap_dn>",
+                                "last_login": "<last_login>",
                               },
                               …
                             ]
@@ -280,25 +432,29 @@ INPUT::
 
 OUTPUT::
 
+    id : <id_given_in_input>
     result : [
                {
-                 "id" :         "<id>",
-                 "group_name" : "<groupname>",
-                 "active":      "<bool>",
-                 "members" :  [
-	    	                    {
-	    	                      "id" :       "<userid>",
-	                              "username" : "<username>",
-	                              "firstname": "<firstname>",
-	                              "lastname" : "<lastname>",
-	                              "email" :    "<email>",
-	                              "active" :   "<bool>",
-	                              "admin" :    "<bool>",
-	                              "ldap" :     "<ldap_dn>"
-	                            },
-	    	                    …
-	                          ]
-	            }
+               "users_group_id" : "<id>",
+               "group_name" :     "<groupname>",
+               "active":          "<bool>",
+               "members" :  [
+                              { 
+                                "user_id" :  "<user_id>",
+                                "username" : "<username>",
+                                "firstname": "<firstname>",
+                                "lastname" : "<lastname>",
+                                "email" :    "<email>",
+                                "emails":    "<list_of_all_additional_emails>",
+                                "active" :   "<bool>",
+                                "admin" :    "<bool>",
+                                "ldap_dn" :  "<ldap_dn>",
+                                "last_login": "<last_login>",
+                              },
+                              …
+                            ]
+               },
+               …
               ]
     error : null
 
@@ -317,14 +473,34 @@ INPUT::
     method :  "create_users_group"
     args:     {
                 "group_name":  "<groupname>",
-                "active":"<bool> = True"
+                "active":"<bool> = Optional(True)"
               }
 
 OUTPUT::
 
+    id : <id_given_in_input>
     result: {
-              "id":  "<newusersgroupid>",
-              "msg": "created new users group <groupname>"
+              "msg": "created new users group `<groupname>`",
+              "users_group": {
+                     "users_group_id" : "<id>",
+                     "group_name" :     "<groupname>",
+                     "active":          "<bool>",
+                     "members" :  [
+                                  { 
+                                    "user_id" :  "<user_id>",
+                                    "username" : "<username>",
+                                    "firstname": "<firstname>",
+                                    "lastname" : "<lastname>",
+                                    "email" :    "<email>",
+                                    "emails":    "<list_of_all_additional_emails>",
+                                    "active" :   "<bool>",
+                                    "admin" :    "<bool>",
+                                    "ldap_dn" :  "<ldap_dn>",
+                                    "last_login": "<last_login>",
+                                  },
+                                  …
+                     ]
+               },
             }
     error:  null
 
@@ -343,16 +519,16 @@ INPUT::
     api_key : "<api_key>"
     method :  "add_user_users_group"
     args:     {
-                "group_name" :  "<groupname>",
-                "username" :   "<username>"
+                "usersgroupid" : "<users group id or name>",
+                "userid" : "<user_id or username>",
               }
 
 OUTPUT::
 
+    id : <id_given_in_input>
     result: {
-              "id":  "<newusersgroupmemberid>",
               "success": True|False # depends on if member is in group
-              "msg": "added member <username> to users group <groupname> | 
+              "msg": "added member `<username>` to users group `<groupname>` | 
                       User is already in that group"
             }
     error:  null
@@ -372,12 +548,13 @@ INPUT::
     api_key : "<api_key>"
     method :  "remove_user_from_users_group"
     args:     {
-                "group_name" :  "<groupname>",
-                "username" :   "<username>"
+                "usersgroupid" : "<users group id or name>",
+                "userid" : "<user_id or username>",
               }
 
 OUTPUT::
 
+    id : <id_given_in_input>
     result: {
               "success":  True|False,  # depends on if member is in group
               "msg": "removed member <username> from users group <groupname> | 
@@ -405,23 +582,32 @@ INPUT::
 
 OUTPUT::
 
+    id : <id_given_in_input>
     result: None if repository does not exist or
             {
-                "id" :          "<id>",
+                "repo_id" :     "<repo_id>",
                 "repo_name" :   "<reponame>"
-                "type" :        "<type>",
+                "repo_type" :   "<repo_type>",
+                "clone_uri" :   "<clone_uri>",
+                "private": :    "<bool>",
+                "created_on" :  "<datetimecreated>",                
                 "description" : "<description>",
+                "landing_rev":  "<landing_rev>",
+                "owner":        "<repo_owner>",
+                "fork_of":  "<name_of_fork_parent>",
                 "members" :     [
                                   { 
                                     "type": "user",
-                                    "id" :         "<userid>",
-                                    "username" :   "<username>",
-                                    "firstname":   "<firstname>",
-                                    "lastname" :   "<lastname>",
-                                    "email" :      "<email>",
-                                    "active" :     "<bool>",
-                                    "admin" :      "<bool>",
-                                    "ldap" :       "<ldap_dn>",
+                                    "user_id" :  "<user_id>",
+                                    "username" : "<username>",
+                                    "firstname": "<firstname>",
+                                    "lastname" : "<lastname>",
+                                    "email" :    "<email>",
+                                    "emails":    "<list_of_all_additional_emails>",
+                                    "active" :   "<bool>",
+                                    "admin" :    "<bool>",
+                                    "ldap_dn" :  "<ldap_dn>",
+                                    "last_login": "<last_login>",
                                     "permission" : "repository.(read|write|admin)"
                                   },
                                   …
@@ -454,12 +640,19 @@ INPUT::
 
 OUTPUT::
 
+    id : <id_given_in_input>
     result: [
               {
-                "id" :          "<id>",
+                "repo_id" :     "<repo_id>",
                 "repo_name" :   "<reponame>"
-                "type" :        "<type>",
-                "description" : "<description>"
+                "repo_type" :   "<repo_type>",
+                "clone_uri" :   "<clone_uri>",
+                "private": :    "<bool>",
+                "created_on" :  "<datetimecreated>",                
+                "description" : "<description>",
+                "landing_rev":  "<landing_rev>",
+                "owner":        "<repo_owner>",
+                "fork_of":  "<name_of_fork_parent>",
               },
               …
             ]
@@ -481,14 +674,15 @@ INPUT::
     api_key : "<api_key>"
     method :  "get_repo_nodes"
     args:     {
-                "repo_name" : "<reponame>",
+                "repoid" : "<reponame or repo_id>"
                 "revision"  : "<revision>",
                 "root_path" : "<root_path>",
-                "ret_type"  : "<ret_type>" = 'all'
+                "ret_type"  : "<ret_type> = Optional('all')"
               }
 
 OUTPUT::
 
+    id : <id_given_in_input>
     result: [
               {
                 "name" :        "<name>"
@@ -516,18 +710,31 @@ INPUT::
     method :  "create_repo"
     args:     {
                 "repo_name" :   "<reponame>",
-                "owner_name" :  "<ownername>",
-                "description" : "<description> = ''",
-                "repo_type" :   "<type> = 'hg'",
-                "private" :     "<bool> = False",
-                "clone_uri" :   "<clone_uri> = None",
+                "owner" :       "<onwer_name_or_id>",
+                "repo_type" :   "<repo_type>",
+                "description" : "<description> = Optional('')",
+                "private" :     "<bool> = Optional(False)",
+                "clone_uri" :   "<clone_uri> = Optional(None)",
+                "landing_rev" : "<landing_rev> = Optional('tip')",
               }
 
 OUTPUT::
 
+    id : <id_given_in_input>
     result: {
-              "id": "<newrepoid>",
-              "msg": "Created new repository <reponame>",
+              "msg": "Created new repository `<reponame>`",
+              "repo": {
+                "repo_id" :     "<repo_id>",
+                "repo_name" :   "<reponame>"
+                "repo_type" :   "<repo_type>",
+                "clone_uri" :   "<clone_uri>",
+                "private": :    "<bool>",
+                "created_on" :  "<datetimecreated>",                
+                "description" : "<description>",
+                "landing_rev":  "<landing_rev>",
+                "owner":        "<repo_owner>",
+                "fork_of":  "<name_of_fork_parent>",
+              },
             }
     error:  null
 
@@ -545,13 +752,15 @@ INPUT::
     api_key : "<api_key>"
     method :  "delete_repo"
     args:     {
-                "repo_name" :   "<reponame>",
+                "repoid" : "<reponame or repo_id>"
               }
 
 OUTPUT::
 
+    id : <id_given_in_input>
     result: {
-              "msg": "Deleted repository <reponame>",
+              "msg": "Deleted repository `<reponame>`",
+              "success": true
             }
     error:  null
 
@@ -570,15 +779,17 @@ INPUT::
     api_key : "<api_key>"
     method :  "grant_user_permission"
     args:     {
-                "repo_name" :  "<reponame>",
-                "username" :   "<username>",
+                "repoid" : "<reponame or repo_id>"
+                "userid" : "<username or user_id>"
                 "perm" :       "(repository.(none|read|write|admin))",
               }
 
 OUTPUT::
 
+    id : <id_given_in_input>
     result: {
-              "msg" : "Granted perm: <perm> for user: <username> in repo: <reponame>"
+              "msg" : "Granted perm: `<perm>` for user: `<username>` in repo: `<reponame>`",
+              "success": true
             }
     error:  null
 
@@ -596,14 +807,16 @@ INPUT::
     api_key : "<api_key>"
     method  : "revoke_user_permission"
     args:     {
-                "repo_name" :  "<reponame>",
-                "username" :   "<username>",
+                "repoid" : "<reponame or repo_id>"
+                "userid" : "<username or user_id>"
               }
 
 OUTPUT::
 
+    id : <id_given_in_input>
     result: {
-              "msg" : "Revoked perm for user: <suername> in repo: <reponame>"
+              "msg" : "Revoked perm for user: `<username>` in repo: `<reponame>`",
+              "success": true
             }
     error:  null
 
@@ -622,15 +835,17 @@ INPUT::
     api_key : "<api_key>"
     method :  "grant_users_group_permission"
     args:     {
-                "repo_name" : "<reponame>",
-                "group_name" : "<usersgroupname>",
+                "repoid" : "<reponame or repo_id>"
+                "usersgroupid" : "<users group id or name>"
                 "perm" : "(repository.(none|read|write|admin))",
               }
 
 OUTPUT::
 
+    id : <id_given_in_input>
     result: {
-              "msg" : "Granted perm: <perm> for group: <usersgroupname> in repo: <reponame>"
+              "msg" : "Granted perm: `<perm>` for group: `<usersgroupname>` in repo: `<reponame>`",
+              "success": true
             }
     error:  null
     
@@ -647,13 +862,15 @@ INPUT::
     api_key : "<api_key>"
     method  : "revoke_users_group_permission"
     args:     {
-                "repo_name" :  "<reponame>",
-                "users_group" :   "<usersgroupname>",
+                "repoid" : "<reponame or repo_id>"
+                "usersgroupid" : "<users group id or name>"
               }
 
 OUTPUT::
 
+    id : <id_given_in_input>
     result: {
-              "msg" : "Revoked perm for group: <usersgroupname> in repo: <reponame>"
+              "msg" : "Revoked perm for group: `<usersgroupname>` in repo: `<reponame>`",
+              "success": true
             }
     error:  null
