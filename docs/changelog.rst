@@ -35,8 +35,9 @@ news
 - File view now displays small gravatars off all authors of given file
 - Implemented landing revisions. Each repository will get landing_rev attribute
   that defines 'default' revision/branch for generating readme files
-- Implemented #509, RhodeCode enforces SSL for push/pulling if requested.
-- Import remote svn repositories to mercurial using hgsubversion  
+- Implemented #509, RhodeCode enforces SSL for push/pulling if requested at 
+  earliest possible call.
+- Import remote svn repositories to mercurial using hgsubversion.
 - Fixed #508 RhodeCode now has a option to explicitly set forking permissions
 - RhodeCode can use alternative server for generating avatar icons
 - implemented repositories locking. Pull locks, push unlocks. Also can be done

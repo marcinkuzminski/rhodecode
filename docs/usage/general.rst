@@ -62,7 +62,6 @@ the _<ID> syntax can be used anywhere in the system so urls with repo_name
 for changelogs, files and other can be exchanged with _<ID> syntax.
 
 
-
 Mailing
 -------
 
