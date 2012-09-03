@@ -247,7 +247,12 @@ class DbManage(object):
                 Session().add(hggit)
 
                 notify('re-check default permissions')
-                self.klass.populate_default_permissions()
+                default_user = User.get_by_username(User.DEFAULT_USER)
+                perm = Permission.get_by_key('hg.fork.repository')
+                reg_perm = UserToPerm()
+                reg_perm.user = default_user
+                reg_perm.permission = perm
+                Session().add(reg_perm)
 
         upgrade_steps = [0] + range(curr_version + 1, __dbversion__ + 1)
 
