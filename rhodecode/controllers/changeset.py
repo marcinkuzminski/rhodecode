@@ -376,9 +376,13 @@ class ChangesetController(BaseRepoController):
     def comment(self, repo_name, revision):
         status = request.POST.get('changeset_status')
         change_status = request.POST.get('change_changeset_status')
+        text = request.POST.get('text')
+        if status and change_status:
+            text = text or (_('Status change -> %s')
+                            % ChangesetStatus.get_status_lbl(status))
 
         comm = ChangesetCommentsModel().create(
-            text=request.POST.get('text'),
+            text=text,
             repo=c.rhodecode_db_repo.repo_id,
             user=c.rhodecode_user.user_id,
             revision=revision,

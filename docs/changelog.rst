@@ -4,11 +4,27 @@
 Changelog
 =========
 
-1.4.0 (**2012-XX-XX**)
+
+1.4.1 (**2012-XX-XX**)
 ----------------------
 
 :status: in-progress
 :branch: beta
+
+news
+++++
+
+- always put a comment about code-review status change even if user send
+  empty data 
+
+fixes
++++++
+
+- fixed migrations of permissions that can lead to inconsistency issue
+
+
+1.4.0 (**2012-09-03**)
+----------------------
 
 news
 ++++
