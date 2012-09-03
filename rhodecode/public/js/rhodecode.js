@@ -373,18 +373,17 @@ var q_filter = function(target,nodes,display_element){
 };
 
 var tableTr = function(cls, body){
-	var _el = document.createElement('table');
-	
+	var _el = document.createElement('div');
 	var cont = new YAHOO.util.Element(body);
 	var comment_id = fromHTML(body).children[0].id.split('comment-')[1];
 	var id = 'comment-tr-{0}'.format(comment_id);
-	var _html = ('tbody><tr id="{0}" class="{1}">'+
+	var _html = ('<table><tbody><tr id="{0}" class="{1}">'+
 	              '<td class="lineno-inline new-inline"></td>'+
     			  '<td class="lineno-inline old-inline"></td>'+ 
                   '<td>{2}</td>'+
-                 '</tr>').format(id, cls, body);
+                 '</tr></tbody></table>').format(id, cls, body);
 	_el.innerHTML = _html;
-	return _el.children[0].children[0];
+	return _el.children[0].children[0].children[0];
 };
 
 /** comments **/
@@ -445,13 +444,11 @@ var injectInlineForm = function(tr){
 		  }
 	  }	  
 	  YUD.insertAfter(form,parent);
-	  
 	  var f = YUD.get(form);
-	  
 	  var overlay = YUD.getElementsByClassName('overlay',null,f)[0];
 	  var _form = YUD.getElementsByClassName('inline-form',null,f)[0];
 	  
-	  form.on('submit',function(e){
+	  YUE.on(YUD.get(_form), 'submit',function(e){
 		  YUE.preventDefault(e);
 		  
 		  //ajax submit
