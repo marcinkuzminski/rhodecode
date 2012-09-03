@@ -1534,7 +1534,7 @@ class ChangesetComment(Base, BaseModel):
     hl_lines = Column('hl_lines', Unicode(512), nullable=True)
     f_path = Column('f_path', Unicode(1000), nullable=True)
     user_id = Column('user_id', Integer(), ForeignKey('users.user_id'), nullable=False)
-    text = Column('text', Unicode(25000), nullable=False)
+    text = Column('text', UnicodeText(25000), nullable=False)
     created_on = Column('created_on', DateTime(timezone=False), nullable=False, default=datetime.datetime.now)
     modified_at = Column('modified_at', DateTime(timezone=False), nullable=False, default=datetime.datetime.now)
 
