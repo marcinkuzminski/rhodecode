@@ -372,18 +372,19 @@ var q_filter = function(target,nodes,display_element){
 	}	
 };
 
-var tableTr = function(cls,body){
-	var tr = document.createElement('tr');
-	YUD.addClass(tr, cls);
-	
+var tableTr = function(cls, body){
+	var _el = document.createElement('table');
 	
 	var cont = new YAHOO.util.Element(body);
 	var comment_id = fromHTML(body).children[0].id.split('comment-')[1];
-	tr.id = 'comment-tr-{0}'.format(comment_id);
-	tr.innerHTML = '<td class="lineno-inline new-inline"></td>'+
-    				 '<td class="lineno-inline old-inline"></td>'+ 
-                     '<td>{0}</td>'.format(body);
-	return tr;
+	var id = 'comment-tr-{0}'.format(comment_id);
+	var _html = ('tbody><tr id="{0}" class="{1}">'+
+	              '<td class="lineno-inline new-inline"></td>'+
+    			  '<td class="lineno-inline old-inline"></td>'+ 
+                  '<td>{2}</td>'+
+                 '</tr>').format(id, cls, body);
+	_el.innerHTML = _html;
+	return _el.children[0].children[0];
 };
 
 /** comments **/
@@ -395,7 +396,7 @@ var createInlineForm = function(parent_tr, f_path, line) {
 	var tmpl = YUD.get('comment-inline-form-template').innerHTML;
 	tmpl = tmpl.format(f_path, line);
 	var form = tableTr('comment-form-inline',tmpl)
-	
+
 	// create event for hide button
 	form = new YAHOO.util.Element(form);
 	var form_hide_button = new YAHOO.util.Element(YUD.getElementsByClassName('hide-inline-form',null,form)[0]);
