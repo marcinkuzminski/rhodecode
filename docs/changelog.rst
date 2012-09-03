@@ -5,7 +5,7 @@ Changelog
 =========
 
 
-1.4.1 (**2012-XX-XX**)
+1.4.1 (**2012-09-04**)
 ----------------------
 
 :status: in-progress
@@ -16,11 +16,17 @@ news
 
 - always put a comment about code-review status change even if user send
   empty data 
+- modified_on column saves repository update and it's going to be used
+  later for light version of main page ref #500
 
 fixes
 +++++
 
-- fixed migrations of permissions that can lead to inconsistency issue
+- fixed migrations of permissions that can lead to inconsistency.
+  Some users sent feedback that after upgrading from older versions issues with updating
+  default permissions occured. RhodeCode detects that now and resets default user
+  permission to initial state if there is a need for that. Also forces users to set
+  the default value for new forking permission. 
 
 
 1.4.0 (**2012-09-03**)

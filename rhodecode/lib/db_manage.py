@@ -255,7 +255,14 @@ class DbManage(object):
                 Session().add(reg_perm)
 
             def step_7(self):
-                pass
+                perm_fixes = self.klass.reset_permissions(User.DEFAULT_USER)
+                Session().commit()
+                if perm_fixes:
+                    notify('There was an inconsistent state of permissions '
+                           'detected for default user. Permissions are now '
+                           'reset to the default value for default user. '
+                           'Please validate and check default permissions '
+                           'in admin panel')
 
         upgrade_steps = [0] + range(curr_version + 1, __dbversion__ + 1)
 
@@ -478,6 +485,28 @@ class DbManage(object):
                 log.debug('missing default permission for group %s adding' % g)
                 ReposGroupModel()._create_default_perms(g)
 
+    def reset_permissions(self, username):
+        """
+        Resets permissions to default state, usefull when old systems had
+        bad permissions, we must clean them up
+
+        :param username:
+        :type username:
+        """
+        default_user = User.get_by_username(username)
+        if not default_user:
+            return
+
+        u2p = UserToPerm.query()\
+            .filter(UserToPerm.user == default_user).all()
+        fixed = False
+        if len(u2p) != len(User.DEFAULT_PERMISSIONS):
+            for p in u2p:
+                Session().delete(p)
+            fixed = True
+            self.populate_default_permissions()
+        return fixed
+
     def config_prompt(self, test_repo_path='', retries=3, defaults={}):
         _path = defaults.get('repos_location')
         if retries == 3:
@@ -605,8 +634,7 @@ class DbManage(object):
 
         default_user = User.get_by_username('default')
 
-        for def_perm in ['hg.register.manual_activate', 'hg.create.repository',
-                         'hg.fork.repository', 'repository.read']:
+        for def_perm in User.DEFAULT_PERMISSIONS:
 
             perm = self.sa.query(Permission)\
              .filter(Permission.permission_name == def_perm)\
