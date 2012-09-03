@@ -254,6 +254,9 @@ class DbManage(object):
                 reg_perm.permission = perm
                 Session().add(reg_perm)
 
+            def step_7(self):
+                pass
+
         upgrade_steps = [0] + range(curr_version + 1, __dbversion__ + 1)
 
         # CALL THE PROPER ORDER OF STEPS TO PERFORM FULL UPGRADE
