@@ -91,7 +91,7 @@ def repo_name_slug(value):
     slug = remove_formatting(value)
     slug = strip_tags(slug)
 
-    for c in """=[]\;'"<>,/~!@#$%^&*()+{}|: """:
+    for c in """`?=[]\;'"<>,/~!@#$%^&*()+{}|: """:
         slug = slug.replace(c, '-')
     slug = recursive_replace(slug, '-')
     slug = collapse(slug, '-')
