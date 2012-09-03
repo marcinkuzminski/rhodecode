@@ -407,6 +407,15 @@ except ImportError:
 
 
 #==============================================================================
+# bytes
+#==============================================================================
+if __py_version__ >= (2, 6):
+    _bytes = bytes
+else:
+    # in py2.6 bytes is a synonim for str
+    _bytes = str
+
+#==============================================================================
 # deque
 #==============================================================================
 
@@ -416,11 +425,11 @@ else:
     #need to implement our own deque with maxlen
     class deque(object):
 
-        def __init__(self, iterable=(), maxlen=-1):
+        def __init__(self, iterable=(), maxlen= -1):
             if not hasattr(self, 'data'):
                 self.left = self.right = 0
                 self.data = {}
-            self.maxlen = maxlen
+            self.maxlen = maxlen or -1
             self.extend(iterable)
 
         def append(self, x):
@@ -537,9 +546,9 @@ else:
 #==============================================================================
 
 if __py_version__ >= (2, 6):
-    from threading import Event
+    from threading import Event, Thread
 else:
-    from threading import _Verbose, Condition, Lock
+    from threading import _Verbose, Condition, Lock, Thread
 
     def Event(*args, **kwargs):
         return _Event(*args, **kwargs)

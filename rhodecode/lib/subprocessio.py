@@ -24,11 +24,10 @@ If not, see <http://www.gnu.org/licenses/>.
 '''
 import os
 import subprocess
-import threading
-from rhodecode.lib.compat import deque, Event
+from rhodecode.lib.compat import deque, Event, Thread, _bytes
 
 
-class StreamFeeder(threading.Thread):
+class StreamFeeder(Thread):
     """
     Normal writing into pipe-like is blocking once the buffer is filled.
     This thread allows a thread to seep data from a file-like into a pipe
@@ -39,9 +38,9 @@ class StreamFeeder(threading.Thread):
         super(StreamFeeder, self).__init__()
         self.daemon = True
         filelike = False
-        self.bytes = bytes()
-        if type(source) in (type(''), bytes, bytearray):  # string-like
-            self.bytes = bytes(source)
+        self.bytes = _bytes()
+        if type(source) in (type(''), _bytes, bytearray):  # string-like
+            self.bytes = _bytes(source)
         else:  # can be either file pointer or file-like
             if type(source) in (int, long):  # file pointer it is
                 ## converting file descriptor (int) stdin into file-like
@@ -77,7 +76,7 @@ class StreamFeeder(threading.Thread):
         return self.readiface
 
 
-class InputStreamChunker(threading.Thread):
+class InputStreamChunker(Thread):
     def __init__(self, source, target, buffer_size, chunk_size):
 
         super(InputStreamChunker, self).__init__()
@@ -121,6 +120,7 @@ class InputStreamChunker(threading.Thread):
         da = self.data_added
         go = self.go
         b = s.read(cs)
+
         while b and go.is_set():
             if len(t) > ccm:
                 kr.clear()
@@ -180,7 +180,7 @@ class BufferedGenerator():
             self.worker.data_added.wait(0.2)
         if len(self.data):
             self.worker.keep_reading.set()
-            return bytes(self.data.popleft())
+            return _bytes(self.data.popleft())
         elif self.worker.EOF.is_set():
             raise StopIteration
 

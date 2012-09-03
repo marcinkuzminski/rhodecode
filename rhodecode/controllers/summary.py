@@ -195,6 +195,8 @@ class SummaryController(BaseRepoController):
             try:
                 # get's the landing revision! or tip if fails
                 cs = db_repo.get_landing_changeset()
+                if isinstance(cs, EmptyChangeset):
+                    raise EmptyRepositoryError()
                 renderer = MarkupRenderer()
                 for f in README_FILES:
                     try:

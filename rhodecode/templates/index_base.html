@@ -42,7 +42,7 @@
                             </div>
                         </td>
                         %if c.visual.stylify_metatags:
-                            <td>${h.desc_stylize(gr.group_description)}</td>
+                            <td>${h.urlify_text(h.desc_stylize(gr.group_description))}</td>
                         %else:
                             <td>${gr.group_description}</td>
                         %endif
