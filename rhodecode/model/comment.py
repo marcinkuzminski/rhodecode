@@ -125,16 +125,15 @@ class ChangesetCommentsModel(BaseModel):
             recipients += [User.get_by_email(author_email)]
         #pull request
         elif pull_request:
+            _url = h.url('pullrequest_show',
+                repo_name=pull_request.other_repo.repo_name,
+                pull_request_id=pull_request.pull_request_id,
+                anchor='comment-%s' % comment.comment_id,
+                qualified=True,
+            )
             subj = safe_unicode(
                 h.link_to('Re pull request: %(desc)s %(line)s' % \
-                          {'desc': desc, 'line': line},
-                          h.url('pullrequest_show',
-                                repo_name=pull_request.other_repo.repo_name,
-                                pull_request_id=pull_request.pull_request_id,
-                                anchor='comment-%s' % comment.comment_id,
-                                qualified=True,
-                          )
-                )
+                          {'desc': desc, 'line': line}, _url)
             )
 
             notification_type = Notification.TYPE_PULL_REQUEST_COMMENT
@@ -144,22 +143,36 @@ class ChangesetCommentsModel(BaseModel):
             # add pull request author
             recipients += [pull_request.author]
 
+            # add the reviewers to notification
+            recipients += [x.user for x in pull_request.reviewers]
+
+            #set some variables for email notification
+            kwargs = {
+                'pr_id': pull_request.pull_request_id,
+                'status_change': status_change,
+                'pr_comment_url': _url,
+                'pr_comment_user': h.person(user.email),
+                'pr_target_repo': h.url('summary_home',
+                                   repo_name=pull_request.other_repo.repo_name,
+                                   qualified=True)
+            }
         # create notification objects, and emails
         NotificationModel().create(
-          created_by=user, subject=subj, body=body,
-          recipients=recipients, type_=notification_type,
-          email_kwargs={'status_change': status_change}
+            created_by=user, subject=subj, body=body,
+            recipients=recipients, type_=notification_type,
+            email_kwargs=kwargs
         )
 
         mention_recipients = set(self._extract_mentions(body))\
                                 .difference(recipients)
         if mention_recipients:
+            kwargs.update({'pr_mention': True})
             subj = _('[Mention]') + ' ' + subj
             NotificationModel().create(
                 created_by=user, subject=subj, body=body,
                 recipients=mention_recipients,
                 type_=notification_type,
-                email_kwargs={'status_change': status_change}
+                email_kwargs=kwargs
             )
 
         return comment
