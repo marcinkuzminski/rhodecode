@@ -123,6 +123,9 @@ class ChangesetCommentsModel(BaseModel):
             recipients = ChangesetComment.get_users(revision=revision)
             # add changeset author if it's in rhodecode system
             recipients += [User.get_by_email(author_email)]
+            email_kwargs = {
+                'status_change': status_change,
+            }
         #pull request
         elif pull_request:
             _url = h.url('pullrequest_show',
@@ -147,7 +150,7 @@ class ChangesetCommentsModel(BaseModel):
             recipients += [x.user for x in pull_request.reviewers]
 
             #set some variables for email notification
-            kwargs = {
+            email_kwargs = {
                 'pr_id': pull_request.pull_request_id,
                 'status_change': status_change,
                 'pr_comment_url': _url,
@@ -160,7 +163,7 @@ class ChangesetCommentsModel(BaseModel):
         NotificationModel().create(
             created_by=user, subject=subj, body=body,
             recipients=recipients, type_=notification_type,
-            email_kwargs=kwargs
+            email_kwargs=email_kwargs
         )
 
         mention_recipients = set(self._extract_mentions(body))\
