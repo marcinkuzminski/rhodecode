@@ -5,7 +5,7 @@ Changelog
 =========
 
 
-1.4.1 (**2012-09-04**)
+1.4.1 (**2012-09-05**)
 ----------------------
 
 :status: in-progress
@@ -32,6 +32,7 @@ fixes
 - #535 improved apache wsgi example configuration in docs
 - fixes #550 mercurial repositories comparision failed when origin repo had
   additional not-common changesets
+- fixed status of code-review in preview windows of pull request
 
 1.4.0 (**2012-09-03**)
 ----------------------
