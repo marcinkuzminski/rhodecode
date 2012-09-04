@@ -30,7 +30,8 @@ fixes
   resets default user permission to initial state if there is a need for that.
   Also forces users to set the default value for new forking permission. 
 - #535 improved apache wsgi example configuration in docs
-
+- fixes #550 mercurial repositories comparision failed when origin repo had
+  additional not-common changesets
 
 1.4.0 (**2012-09-03**)
 ----------------------

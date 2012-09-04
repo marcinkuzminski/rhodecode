@@ -610,7 +610,7 @@ def differ(org_repo, org_ref, other_repo, other_ref, discovery_data=None):
                 other_repo.ui.setconfig('hooks', k, None)
 
             unbundle = other_repo.getbundle('incoming', common=common,
-                                            heads=rheads)
+                                            heads=None)
 
             buf = BytesIO()
             while True:

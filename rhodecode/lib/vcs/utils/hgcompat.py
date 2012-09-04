@@ -15,3 +15,4 @@ from mercurial.encoding import tolocal
 from mercurial import discovery
 from mercurial import localrepo
 from mercurial import scmutil
+from mercurial.discovery import findcommonoutgoing

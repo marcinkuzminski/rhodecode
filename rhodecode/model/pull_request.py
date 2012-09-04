@@ -36,7 +36,8 @@ from rhodecode.model.db import PullRequest, PullRequestReviewers, Notification
 from rhodecode.model.notification import NotificationModel
 from rhodecode.lib.utils2 import safe_unicode
 
-from rhodecode.lib.vcs.utils.hgcompat import discovery, localrepo, scmutil
+from rhodecode.lib.vcs.utils.hgcompat import discovery, localrepo, scmutil, \
+    findcommonoutgoing
 
 log = logging.getLogger(__name__)
 
@@ -164,7 +165,9 @@ class PullRequestModel(BaseModel):
         #case two independent repos
         common, incoming, rheads = discovery_data
         if org_repo != other_repo and incoming:
-            revs = org_repo._repo.changelog.findmissing(common, rheads)
+            obj = findcommonoutgoing(org_repo._repo,
+                                     localrepo.locallegacypeer(other_repo._repo.local()))
+            revs = obj.missing
 
             for cs in reversed(map(binascii.hexlify, revs)):
                 changesets.append(org_repo.get_changeset(cs))
