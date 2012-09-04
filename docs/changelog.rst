@@ -29,6 +29,7 @@ fixes
   with updating default permissions occurred. RhodeCode detects that now and
   resets default user permission to initial state if there is a need for that.
   Also forces users to set the default value for new forking permission. 
+- #535 improved apache wsgi example configuration in docs
 
 
 1.4.0 (**2012-09-03**)
