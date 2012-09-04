@@ -18,15 +18,17 @@ news
   empty data 
 - modified_on column saves repository update and it's going to be used
   later for light version of main page ref #500
+- pull request notifications send much nicer emails with details about pull
+  request
 
 fixes
 +++++
 
 - fixed migrations of permissions that can lead to inconsistency.
-  Some users sent feedback that after upgrading from older versions issues with updating
-  default permissions occured. RhodeCode detects that now and resets default user
-  permission to initial state if there is a need for that. Also forces users to set
-  the default value for new forking permission. 
+  Some users sent feedback that after upgrading from older versions issues 
+  with updating default permissions occurred. RhodeCode detects that now and
+  resets default user permission to initial state if there is a need for that.
+  Also forces users to set the default value for new forking permission. 
 
 
 1.4.0 (**2012-09-03**)

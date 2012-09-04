@@ -1,0 +1,20 @@
+## -*- coding: utf-8 -*-
+<%inherit file="main.html"/>
+            
+User <b>${pr_user_created}</b> opened pull request for repository 
+${pr_repo_url} and wants you to review changes.
+
+<div>title: ${pr_title}</div>
+<div>description:</div>
+<p>
+${body}
+</p>
+
+<div>revisions for reviewing</div>
+<ul>
+%for r in pr_revisions:
+    <li>${r}</li>
+%endfor
+</ul>
+
+View this pull request here: ${pr_url}

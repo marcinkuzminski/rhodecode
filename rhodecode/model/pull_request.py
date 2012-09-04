@@ -79,22 +79,30 @@ class PullRequestModel(BaseModel):
         #notification to reviewers
         notif = NotificationModel()
 
+        pr_url = h.url('pullrequest_show', repo_name=other_repo.repo_name,
+                       pull_request_id=new.pull_request_id,
+                       qualified=True,
+        )
         subject = safe_unicode(
             h.link_to(
               _('%(user)s wants you to review pull request #%(pr_id)s') % \
                 {'user': created_by_user.username,
                  'pr_id': new.pull_request_id},
-              h.url('pullrequest_show', repo_name=other_repo.repo_name,
-                    pull_request_id=new.pull_request_id,
-                    qualified=True,
-              )
+                pr_url
             )
         )
         body = description
+        kwargs = {
+            'pr_title': title,
+            'pr_user_created': h.person(created_by_user.email),
+            'pr_repo_url': h.url('summary_home', repo_name=other_repo.repo_name,
+                                 qualified=True,),
+            'pr_url': pr_url,
+            'pr_revisions': revisions
+        }
         notif.create(created_by=created_by_user, subject=subject, body=body,
                      recipients=reviewers,
-                     type_=Notification.TYPE_PULL_REQUEST,)
-
+                     type_=Notification.TYPE_PULL_REQUEST, email_kwargs=kwargs)
         return new
 
     def update_reviewers(self, pull_request, reviewers_ids):

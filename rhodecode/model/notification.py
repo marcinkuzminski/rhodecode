@@ -255,7 +255,8 @@ class EmailNotificationModel(BaseModel):
          self.TYPE_CHANGESET_COMMENT: 'email_templates/changeset_comment.html',
          self.TYPE_PASSWORD_RESET: 'email_templates/password_reset.html',
          self.TYPE_REGISTRATION: 'email_templates/registration.html',
-         self.TYPE_DEFAULT: 'email_templates/default.html'
+         self.TYPE_DEFAULT: 'email_templates/default.html',
+         self.TYPE_PULL_REQUEST: 'email_templates/pull_request.html',
         }
 
     def get_email_tmpl(self, type_, **kwargs):
