@@ -249,8 +249,7 @@ class PullrequestsController(BaseRepoController):
                                        org_repo, org_ref, other_repo, other_ref
                                       )
 
-        c.statuses = c.rhodecode_db_repo.statuses([x.raw_id for x in
-                                                   c.cs_ranges])
+        c.statuses = org_repo.statuses([x.raw_id for x in c.cs_ranges])
         # defines that we need hidden inputs with changesets
         c.as_form = request.GET.get('as_form', False)
 
@@ -277,6 +276,7 @@ class PullrequestsController(BaseRepoController):
         c.users_array = repo_model.get_users_js()
         c.users_groups_array = repo_model.get_users_groups_js()
         c.pull_request = PullRequest.get_or_404(pull_request_id)
+        c.target_repo = c.pull_request.org_repo.repo_name
 
         cc_model = ChangesetCommentsModel()
         cs_model = ChangesetStatusModel()
@@ -322,12 +322,20 @@ class PullrequestsController(BaseRepoController):
         c.comments = cc_model.get_comments(c.rhodecode_db_repo.repo_id,
                                            pull_request=pull_request_id)
 
-        # changeset(pull-request) status
-        c.current_changeset_status = cs_model.calculate_status(
-                                        c.pull_request_reviewers
-                                     )
+        try:
+            cur_status = c.statuses[c.pull_request.revisions[0]][0]
+        except:
+            log.error(traceback.format_exc())
+            cur_status = 'undefined'
+        if c.pull_request.is_closed() and 0:
+            c.current_changeset_status = cur_status
+        else:
+            # changeset(pull-request) status calulation based on reviewers
+            c.current_changeset_status = cs_model.calculate_status(
+                                            c.pull_request_reviewers,
+                                         )
         c.changeset_statuses = ChangesetStatus.STATUSES
-        c.target_repo = c.pull_request.org_repo.repo_name
+
         return render('/pullrequests/pullrequest_show.html')
 
     @NotAnonymous()

@@ -20,7 +20,7 @@
         ${self.breadcrumbs()}
     </div>
         %if c.pull_request.is_closed():
-        <div style="padding:10px; font-size:22px;width:100%;text-align: center; color:#88D882">${_('Closed %s') % (h.age(c.pull_request.updated_on))}</div>
+        <div style="padding:10px; font-size:22px;width:100%;text-align: center; color:#88D882">${_('Closed %s') % (h.age(c.pull_request.updated_on))} ${_('with status %s') % h.changeset_status_lbl(c.current_changeset_status)}</div>
         %endif
     <h3>${_('Title')}: ${c.pull_request.title}</h3>
         
