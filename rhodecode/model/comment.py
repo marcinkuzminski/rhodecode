@@ -169,13 +169,13 @@ class ChangesetCommentsModel(BaseModel):
         mention_recipients = set(self._extract_mentions(body))\
                                 .difference(recipients)
         if mention_recipients:
-            kwargs.update({'pr_mention': True})
+            email_kwargs.update({'pr_mention': True})
             subj = _('[Mention]') + ' ' + subj
             NotificationModel().create(
                 created_by=user, subject=subj, body=body,
                 recipients=mention_recipients,
                 type_=notification_type,
-                email_kwargs=kwargs
+                email_kwargs=email_kwargs
             )
 
         return comment
