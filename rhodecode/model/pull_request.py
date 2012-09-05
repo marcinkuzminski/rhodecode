@@ -166,7 +166,8 @@ class PullRequestModel(BaseModel):
         common, incoming, rheads = discovery_data
         if org_repo != other_repo and incoming:
             obj = findcommonoutgoing(org_repo._repo,
-                                     localrepo.locallegacypeer(other_repo._repo.local()))
+                        localrepo.locallegacypeer(other_repo._repo.local()),
+                        force=True)
             revs = obj.missing
 
             for cs in reversed(map(binascii.hexlify, revs)):
@@ -216,6 +217,7 @@ class PullRequestModel(BaseModel):
         log.debug('Doing discovery for %s@%s vs %s@%s' % (
                         org_repo, org_ref, other_repo, other_ref)
         )
+
         #log.debug('Filter heads are %s[%s]' % ('', org_ref[1]))
         org_peer = localrepo.locallegacypeer(_org_repo.local())
         tmp = discovery.findcommonincoming(
@@ -223,7 +225,7 @@ class PullRequestModel(BaseModel):
                   remote=org_peer,  # org_repo source for incoming
                   heads=[_other_repo[other_rev].node(),
                          _org_repo[org_rev].node()],
-                  force=False
+                  force=True
         )
         return tmp
 
