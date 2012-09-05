@@ -23,7 +23,7 @@
         <div style="padding:10px; font-size:22px;width:100%;text-align: center; color:#88D882">${_('Closed %s') % (h.age(c.pull_request.updated_on))} ${_('with status %s') % h.changeset_status_lbl(c.current_changeset_status)}</div>
         %endif
     <h3>${_('Title')}: ${c.pull_request.title}</h3>
-        
+
     <div class="form">
       <div id="summary" class="fields">
          <div class="field">
@@ -46,9 +46,9 @@
           <div class="input">
             <div class="tooltip" title="${h.tooltip(','.join([x.username for x in c.pull_request_pending_reviewers]))}">${ungettext('%d reviewer', '%d reviewers',len(c.pull_request_pending_reviewers)) % len(c.pull_request_pending_reviewers)}</div>
           </div>
-         </div>                
+         </div>
       </div>
-    </div>    
+    </div>
     <div style="white-space:pre-wrap;padding:3px 3px 5px 20px">${h.literal(c.pull_request.description)}</div>
     <div style="padding:4px 4px 10px 20px">
       <div>${_('Created on')}: ${h.fmt_date(c.pull_request.created_on)}</div>

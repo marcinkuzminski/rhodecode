@@ -435,4 +435,3 @@ class TestPermissions(unittest.TestCase):
                          set(['hg.create.repository', 'hg.fork.repository',
                               'hg.register.manual_activate',
                               'repository.read']))
-

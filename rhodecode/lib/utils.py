@@ -206,7 +206,7 @@ def get_repos(path, recursive=False):
 def is_valid_repo(repo_name, base_path, scm=None):
     """
     Returns True if given path is a valid repository False otherwise.
-    If scm param is given also compare if given scm is the same as expected 
+    If scm param is given also compare if given scm is the same as expected
     from scm parameter
 
     :param repo_name:

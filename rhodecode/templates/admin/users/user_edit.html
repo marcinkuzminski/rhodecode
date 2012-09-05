@@ -152,7 +152,7 @@
                 <span class="help-block">${h.literal(_('Select to inherit permissions from %s settings. '
                                              'With this selected below options does not have any action') % h.link_to('default', url('edit_permission', id='default')))}</span>
              </div>
-             <div id="inherit_overlay" style="${'opacity:0.3' if c.user.inherit_default_permissions else ''}" >        
+             <div id="inherit_overlay" style="${'opacity:0.3' if c.user.inherit_default_permissions else ''}" >
              <div class="field">
                 <div class="label label-checkbox">
                     <label for="create_repo_perm">${_('Create repositories')}:</label>
@@ -169,7 +169,7 @@
                     ${h.checkbox('fork_repo_perm',value=True)}
                 </div>
              </div>
-             </div>             
+             </div>
             <div class="buttons">
               ${h.submit('save',_('Save'),class_="ui-btn large")}
               ${h.reset('reset',_('Reset'),class_="ui-btn large")}

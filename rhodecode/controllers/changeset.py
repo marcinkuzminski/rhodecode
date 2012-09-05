@@ -395,7 +395,7 @@ class ChangesetController(BaseRepoController):
         # get status if set !
         if status and change_status:
             # if latest status was from pull request and it's closed
-            # disallow changing status ! 
+            # disallow changing status !
             # dont_allow_on_closed_pull_request = True !
 
             try:
