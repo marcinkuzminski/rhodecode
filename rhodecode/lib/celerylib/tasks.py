@@ -402,7 +402,7 @@ def create_repo_fork(form_data, cur_user):
     backend = get_backend(repo_type)
     backend(safe_str(destination_fork_path), create=True,
             src_url=safe_str(source_repo_path),
-            update_after_clone=update_after_clone)
+            update_after_clone=update_after_clone, bare=True)
     log_create_repository(fork_repo.get_dict(), created_by=cur_user.username)
 
     action_logger(cur_user, 'user_forked_repo:%s' % fork_name,

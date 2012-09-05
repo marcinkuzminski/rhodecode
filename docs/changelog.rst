@@ -33,6 +33,7 @@ fixes
 - fixes #550 mercurial repositories comparision failed when origin repo had
   additional not-common changesets
 - fixed status of code-review in preview windows of pull request
+- git forks were not initialized at bare repos
 
 1.4.0 (**2012-09-03**)
 ----------------------
