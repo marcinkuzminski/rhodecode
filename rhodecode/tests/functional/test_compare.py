@@ -289,5 +289,6 @@ class TestCompareController(TestController):
             response.mustcontain("""file2-line1-from-fork""")
             response.mustcontain("""file3-line1-from-fork""")
         finally:
-            RepoModel().delete(r1_id)
             RepoModel().delete(r2_id)
+            RepoModel().delete(r1_id)
+
