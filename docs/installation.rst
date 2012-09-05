@@ -11,8 +11,8 @@ clients. Minimal version of hg client known working fine with RhodeCode is
 **1.6**. If you're using older client, please upgrade.
 
 
-Installing RhodeCode from Cheese Shop
--------------------------------------
+Installing RhodeCode from PyPI (aka "Cheeseshop")
+-------------------------------------------------
 
 Rhodecode requires python version 2.5 or higher.
 
