@@ -1425,13 +1425,14 @@ class CacheInvalidation(Base, BaseModel):
         return cls.query().filter(cls.cache_key == key).scalar()
 
     @classmethod
-    def _get_or_create_key(cls, key, prefix, org_key):
+    def _get_or_create_key(cls, key, prefix, org_key, commit=True):
         inv_obj = Session().query(cls).filter(cls.cache_key == key).scalar()
         if not inv_obj:
             try:
                 inv_obj = CacheInvalidation(key, org_key)
                 Session().add(inv_obj)
-                Session().commit()
+                if commit:
+                    Session().commit()
             except Exception:
                 log.error(traceback.format_exc())
                 Session().rollback()

@@ -413,6 +413,11 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False,
         raise Exception('Missing administrative account !')
     added = []
 
+#    # clear cache keys
+#    log.debug("Clearing cache keys now...")
+#    CacheInvalidation.clear_cache()
+#    sa.commit()
+
     for name, repo in initial_repo_list.items():
         group = map_groups(name)
         db_repo = rm.get_by_repo_name(name)
@@ -438,6 +443,10 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False,
         elif install_git_hook:
             if db_repo.repo_type == 'git':
                 ScmModel().install_git_hook(db_repo.scm_instance)
+        # during starting install all cache keys for all repositories in the
+        # system, this will register all repos and multiple instances
+        key, _prefix, _org_key = CacheInvalidation._get_key(name)
+        CacheInvalidation._get_or_create_key(key, _prefix, _org_key, commit=False)
     sa.commit()
     removed = []
     if remove_obsolete:
@@ -455,10 +464,6 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False,
                     log.error(traceback.format_exc())
                     sa.rollback()
 
-    # clear cache keys
-    log.debug("Clearing cache keys now...")
-    CacheInvalidation.clear_cache()
-    sa.commit()
     return added, removed
 
 
