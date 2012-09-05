@@ -746,6 +746,16 @@ class Repository(Base, BaseModel):
         p += self.repo_name.split(Repository.url_sep())
         return os.path.join(*p)
 
+    @property
+    def cache_keys(self):
+        """
+        Returns associated cache keys for that repo
+        """
+        return CacheInvalidation.query()\
+            .filter(CacheInvalidation.cache_args == self.repo_name)\
+            .order_by(CacheInvalidation.cache_key)\
+            .all()
+
     def get_new_name(self, repo_name):
         """
         returns new full repository name based on assigned group and new new
@@ -1401,6 +1411,13 @@ class CacheInvalidation(Base, BaseModel):
     def __unicode__(self):
         return u"<%s('%s:%s')>" % (self.__class__.__name__,
                                   self.cache_id, self.cache_key)
+
+    @property
+    def prefix(self):
+        _split = self.cache_key.split(self.cache_args, 1)
+        if _split and len(_split) == 2:
+            return _split[0]
+        return ''
 
     @classmethod
     def clear_cache(cls):
