@@ -20,6 +20,7 @@ news
   later for light version of main page ref #500
 - pull request notifications send much nicer emails with details about pull
   request
+- #551 show breadcrumbs in summary view for repositories inside a group
 
 fixes
 +++++
