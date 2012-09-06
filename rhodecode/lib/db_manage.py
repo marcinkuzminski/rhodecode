@@ -543,7 +543,15 @@ class DbManage(object):
             retries -= 1
             return self.config_prompt(test_repo_path, retries)
 
-        return path
+        real_path = os.path.realpath(path)
+
+        if real_path != path:
+            if not ask_ok(('Path looks like a symlink, Rhodecode will store '
+                           'given path as %s ? [y/n]') % (real_path)):
+                log.error('Canceled by user')
+                sys.exit(-1)
+
+        return real_path
 
     def create_settings(self, path):
 
