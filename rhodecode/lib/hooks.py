@@ -34,10 +34,9 @@ from rhodecode.lib import helpers as h
 from rhodecode.lib.utils import action_logger
 from rhodecode.lib.vcs.backends.base import EmptyChangeset
 from rhodecode.lib.compat import json
-from rhodecode.model.db import Repository, User
-from rhodecode.lib.utils2 import safe_str
 from rhodecode.lib.exceptions import HTTPLockedRC
-
+from rhodecode.lib.utils2 import safe_str
+from rhodecode.model.db import Repository, User
 
 def _get_scm_size(alias, root_path):
 
@@ -330,7 +329,12 @@ def handle_git_receive(repo_path, revs, env, hook_type='post'):
     # fix if it's not a bare repo
     if repo_path.endswith('.git'):
         repo_path = repo_path[:-4]
+
     repo = Repository.get_by_full_path(repo_path)
+    if not repo:
+        raise OSError('Repository %s not found in database'
+                      % (safe_str(repo_path)))
+
     _hooks = dict(baseui.configitems('hooks')) or {}
 
     extras = json.loads(env['RHODECODE_EXTRAS'])
