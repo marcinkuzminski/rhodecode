@@ -92,7 +92,7 @@ try:
                 return _obj_dump(obj)
             except NotImplementedError:
                 pass
-            return json.JSONEncoder.default(self, obj)
+            raise TypeError("%r is not JSON serializable" % (obj,))
     # monkey-patch JSON encoder to use extended version
     json.dumps = functools.partial(json.dumps, cls=ExtendedEncoder)
     json.dump = functools.partial(json.dump, cls=ExtendedEncoder)
