@@ -24,7 +24,7 @@ If not, see <http://www.gnu.org/licenses/>.
 '''
 import os
 import subprocess
-from rhodecode.lib.compat import deque, Event, Thread, _bytes
+from rhodecode.lib.compat import deque, Event, Thread, _bytes, _bytearray
 
 
 class StreamFeeder(Thread):
@@ -39,7 +39,7 @@ class StreamFeeder(Thread):
         self.daemon = True
         filelike = False
         self.bytes = _bytes()
-        if type(source) in (type(''), _bytes, bytearray):  # string-like
+        if type(source) in (type(''), _bytes, _bytearray):  # string-like
             self.bytes = _bytes(source)
         else:  # can be either file pointer or file-like
             if type(source) in (int, long):  # file pointer it is
