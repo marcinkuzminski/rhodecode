@@ -278,6 +278,10 @@ class RhodeCodeUi(Base, BaseModel):
 
         Session().add(new_ui)
 
+    def __repr__(self):
+        return '<DB:%s[%s:%s]>' % (self.__class__.__name__, self.ui_key,
+                                   self.ui_value)
+
 
 class User(Base, BaseModel):
     __tablename__ = 'users'
