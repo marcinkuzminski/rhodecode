@@ -152,12 +152,14 @@ class SimpleHg(BaseVCSController):
 
         # extras are injected into mercurial UI object and later available
         # in hg hooks executed by rhodecode
+        from rhodecode import CONFIG
         extras = {
             'ip': ipaddr,
             'username': username,
             'action': action,
             'repository': repo_name,
             'scm': 'hg',
+            'config': CONFIG['__file__'],
             'make_lock': None,
             'locked_by': [None, None]
         }
