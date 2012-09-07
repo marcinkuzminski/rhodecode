@@ -68,6 +68,12 @@
             </span>
         </td>
     </tr>
+    <tr>
+        <td colspan="6">
+           ${h.checkbox('recursive',value="True", label=_('apply to parents'))}
+           <span class="help-block">${_('Set or revoke permission to all children of that group, including repositories and other groups')}</span>
+        </td>
+    </tr>
 </table>
 <script type="text/javascript">
 function ajaxActionUser(user_id, field_id) {
@@ -81,7 +87,8 @@ function ajaxActionUser(user_id, field_id) {
             alert("${_('Failed to remove user')}");
         },
     };
-    var postData = '_method=delete&user_id=' + user_id;
+    var recursive = YUD.get('recursive').checked;
+    var postData = '_method=delete&recursive={0}&user_id={1}'.format(recursive,user_id);
     var request = YAHOO.util.Connect.asyncRequest('POST', sUrl, callback, postData);
 };
 
@@ -96,7 +103,8 @@ function ajaxActionUsersGroup(users_group_id,field_id){
             alert("${_('Failed to remove users group')}");
         },
     };
-    var postData = '_method=delete&users_group_id='+users_group_id;
+    var recursive = YUD.get('recursive').checked;
+    var postData = '_method=delete&recursive={0}&users_group_id={1}'.format(recursive,users_group_id);
     var request = YAHOO.util.Connect.asyncRequest('POST', sUrl, callback, postData);
 };
 

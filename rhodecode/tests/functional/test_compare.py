@@ -291,4 +291,3 @@ class TestCompareController(TestController):
         finally:
             RepoModel().delete(r2_id)
             RepoModel().delete(r1_id)
-

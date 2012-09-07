@@ -45,6 +45,7 @@ from rhodecode.model.forms import ReposGroupForm
 from rhodecode.model.meta import Session
 from rhodecode.model.repo import RepoModel
 from webob.exc import HTTPInternalServerError, HTTPNotFound
+from rhodecode.lib.utils2 import str2bool
 
 log = logging.getLogger(__name__)
 
@@ -162,7 +163,7 @@ class ReposGroupsController(BaseController):
             Session().commit()
             h.flash(_('updated repos group %s') \
                     % form_result['group_name'], category='success')
-            #TODO: in futureaction_logger(, '', '', '', self.sa)
+            #TODO: in future action_logger(, '', '', '', self.sa)
         except formencode.Invalid, errors:
 
             return htmlfill.render(
@@ -227,10 +228,11 @@ class ReposGroupsController(BaseController):
 
         :param group_name:
         """
-
         try:
-            ReposGroupModel().revoke_user_permission(
-                repos_group=group_name, user=request.POST['user_id']
+            recursive = str2bool(request.POST.get('recursive', False))
+            ReposGroupModel().delete_permission(
+                repos_group=group_name, obj=request.POST['user_id'],
+                obj_type='user', recursive=recursive
             )
             Session().commit()
         except Exception:
@@ -248,9 +250,10 @@ class ReposGroupsController(BaseController):
         """
 
         try:
-            ReposGroupModel().revoke_users_group_permission(
-                repos_group=group_name,
-                group_name=request.POST['users_group_id']
+            recursive = str2bool(request.POST.get('recursive', False))
+            ReposGroupModel().delete_permission(
+                repos_group=group_name, obj=request.POST['users_group_id'],
+                obj_type='users_group', recursive=recursive
             )
             Session().commit()
         except Exception:
