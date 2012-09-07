@@ -37,6 +37,11 @@ fixes
 - git forks were not initialized at bare repos
 - fixes #555 fixes issues with comparing non-related repositories
 - fixes #557 follower counter always counts up
+- fixed issue #560 require push ssl checkbox wasn't shown when option was
+  enabled
+- fixed #559
+- fixed issue #559 fixed bug in routing that mapped repo names with <name>_<num> in name as
+  if it was a request to url by repository ID
 
 1.4.0 (**2012-09-03**)
 ----------------------
