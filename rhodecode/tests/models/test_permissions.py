@@ -1,7 +1,7 @@
 import os
 import unittest
 from rhodecode.tests import *
-
+from rhodecode.tests.models.common import _make_group
 from rhodecode.model.repos_group import ReposGroupModel
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.db import RepoGroup, User, UsersGroupRepoGroupToPerm
@@ -11,16 +11,6 @@ from rhodecode.model.meta import Session
 from rhodecode.model.users_group import UsersGroupModel
 from rhodecode.lib.auth import AuthUser
 
-
-def _make_group(path, desc='desc', parent_id=None,
-                 skip_if_exists=False):
-
-    gr = RepoGroup.get_by_group_name(path)
-    if gr and skip_if_exists:
-        return gr
-
-    gr = ReposGroupModel().create(path, desc, parent_id)
-    return gr
 
 
 class TestPermissions(unittest.TestCase):
@@ -435,4 +425,3 @@ class TestPermissions(unittest.TestCase):
                          set(['hg.create.repository', 'hg.fork.repository',
                               'hg.register.manual_activate',
                               'repository.read']))
-

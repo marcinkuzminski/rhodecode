@@ -400,9 +400,19 @@ def create_repo_fork(form_data, cur_user):
     log.info('creating fork of %s as %s', source_repo_path,
              destination_fork_path)
     backend = get_backend(repo_type)
-    backend(safe_str(destination_fork_path), create=True,
-            src_url=safe_str(source_repo_path),
-            update_after_clone=update_after_clone)
+
+    if repo_type == 'git':
+        backend(safe_str(destination_fork_path), create=True,
+                src_url=safe_str(source_repo_path),
+                update_after_clone=update_after_clone,
+                bare=True)
+    elif repo_type == 'hg':
+        backend(safe_str(destination_fork_path), create=True,
+                src_url=safe_str(source_repo_path),
+                update_after_clone=update_after_clone)
+    else:
+        raise Exception('Unknown backend type %s' % repo_type)
+
     log_create_repository(fork_repo.get_dict(), created_by=cur_user.username)
 
     action_logger(cur_user, 'user_forked_repo:%s' % fork_name,

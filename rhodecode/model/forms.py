@@ -128,6 +128,7 @@ def ReposGroupForm(edit=False, old_data={}, available_groups=[]):
                                         testValueList=True,
                                         if_missing=None, not_empty=False)
         enable_locking = v.StringBoolean(if_missing=False)
+        recursive = v.StringBoolean(if_missing=False)
         chained_validators = [v.ValidReposGroup(edit, old_data),
                               v.ValidPerms('group')]
 

@@ -51,6 +51,7 @@ from rhodecode.model.user import UserModel
 from rhodecode.model.db import User
 from rhodecode.model.notification import EmailNotificationModel
 from rhodecode.model.meta import Session
+from rhodecode.lib.utils2 import str2bool
 
 log = logging.getLogger(__name__)
 
@@ -471,6 +472,9 @@ class SettingsController(BaseController):
             if k == '/':
                 k = 'root_path'
 
+            if k == 'push_ssl':
+                v = str2bool(v)
+
             if k.find('.') != -1:
                 k = k.replace('.', '_')
 
@@ -478,5 +482,4 @@ class SettingsController(BaseController):
                 v = each.ui_active
 
             settings[each.ui_section + '_' + k] = v
-
         return settings

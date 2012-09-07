@@ -34,7 +34,7 @@ def make_map(config):
 
         try:
             by_id = repo_name.split('_')
-            if len(by_id) == 2 and by_id[1].isdigit():
+            if len(by_id) == 2 and by_id[1].isdigit() and by_id[0] == '':
                 repo_name = Repository.get(by_id[1]).repo_name
                 match_dict['repo_name'] = repo_name
         except:

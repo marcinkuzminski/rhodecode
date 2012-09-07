@@ -64,7 +64,7 @@ class ChangesetStatusModel(BaseModel):
 
     def calculate_status(self, statuses_by_reviewers):
         """
-        leading one wins, if number of occurences are equal than weaker wins
+        leading one wins, if number of occurrences are equal than weaker wins
 
         :param statuses_by_reviewers:
         """

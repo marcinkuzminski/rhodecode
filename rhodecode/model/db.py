@@ -278,6 +278,10 @@ class RhodeCodeUi(Base, BaseModel):
 
         Session().add(new_ui)
 
+    def __repr__(self):
+        return '<DB:%s[%s:%s]>' % (self.__class__.__name__, self.ui_key,
+                                   self.ui_value)
+
 
 class User(Base, BaseModel):
     __tablename__ = 'users'
@@ -289,7 +293,10 @@ class User(Base, BaseModel):
          'mysql_charset': 'utf8'}
     )
     DEFAULT_USER = 'default'
-
+    DEFAULT_PERMISSIONS = [
+        'hg.register.manual_activate', 'hg.create.repository',
+        'hg.fork.repository', 'repository.read'
+    ]
     user_id = Column("user_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     username = Column("username", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     password = Column("password", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
@@ -602,6 +609,7 @@ class Repository(Base, BaseModel):
     enable_downloads = Column("downloads", Boolean(), nullable=True, unique=None, default=True)
     description = Column("description", String(10000, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     created_on = Column('created_on', DateTime(timezone=False), nullable=True, unique=None, default=datetime.datetime.now)
+    updated_on = Column('updated_on', DateTime(timezone=False), nullable=True, unique=None, default=datetime.datetime.now)
     landing_rev = Column("landing_revision", String(255, convert_unicode=False, assert_unicode=None), nullable=False, unique=False, default=None)
     enable_locking = Column("enable_locking", Boolean(), nullable=False, unique=None, default=False)
     _locked = Column("locked", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=False, default=None)
@@ -741,6 +749,16 @@ class Repository(Base, BaseModel):
         # into a valid system path
         p += self.repo_name.split(Repository.url_sep())
         return os.path.join(*p)
+
+    @property
+    def cache_keys(self):
+        """
+        Returns associated cache keys for that repo
+        """
+        return CacheInvalidation.query()\
+            .filter(CacheInvalidation.cache_args == self.repo_name)\
+            .order_by(CacheInvalidation.cache_key)\
+            .all()
 
     def get_new_name(self, repo_name):
         """
@@ -1398,6 +1416,13 @@ class CacheInvalidation(Base, BaseModel):
         return u"<%s('%s:%s')>" % (self.__class__.__name__,
                                   self.cache_id, self.cache_key)
 
+    @property
+    def prefix(self):
+        _split = self.cache_key.split(self.cache_args, 1)
+        if _split and len(_split) == 2:
+            return _split[0]
+        return ''
+
     @classmethod
     def clear_cache(cls):
         cls.query().delete()
@@ -1421,13 +1446,14 @@ class CacheInvalidation(Base, BaseModel):
         return cls.query().filter(cls.cache_key == key).scalar()
 
     @classmethod
-    def _get_or_create_key(cls, key, prefix, org_key):
+    def _get_or_create_key(cls, key, prefix, org_key, commit=True):
         inv_obj = Session().query(cls).filter(cls.cache_key == key).scalar()
         if not inv_obj:
             try:
                 inv_obj = CacheInvalidation(key, org_key)
                 Session().add(inv_obj)
-                Session().commit()
+                if commit:
+                    Session().commit()
             except Exception:
                 log.error(traceback.format_exc())
                 Session().rollback()

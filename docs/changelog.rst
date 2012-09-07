@@ -4,6 +4,45 @@
 Changelog
 =========
 
+
+1.4.1 (**2012-09-07**)
+----------------------
+
+:status: in-progress
+:branch: beta
+
+news
+++++
+
+- always put a comment about code-review status change even if user send
+  empty data 
+- modified_on column saves repository update and it's going to be used
+  later for light version of main page ref #500
+- pull request notifications send much nicer emails with details about pull
+  request
+- #551 show breadcrumbs in summary view for repositories inside a group
+
+fixes
++++++
+
+- fixed migrations of permissions that can lead to inconsistency.
+  Some users sent feedback that after upgrading from older versions issues 
+  with updating default permissions occurred. RhodeCode detects that now and
+  resets default user permission to initial state if there is a need for that.
+  Also forces users to set the default value for new forking permission. 
+- #535 improved apache wsgi example configuration in docs
+- fixes #550 mercurial repositories comparision failed when origin repo had
+  additional not-common changesets
+- fixed status of code-review in preview windows of pull request
+- git forks were not initialized at bare repos
+- fixes #555 fixes issues with comparing non-related repositories
+- fixes #557 follower counter always counts up
+- fixed issue #560 require push ssl checkbox wasn't shown when option was
+  enabled
+- fixed #559
+- fixed issue #559 fixed bug in routing that mapped repo names with <name>_<num> in name as
+  if it was a request to url by repository ID
+
 1.4.0 (**2012-09-03**)
 ----------------------
 

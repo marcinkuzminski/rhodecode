@@ -368,6 +368,7 @@ class RepoModel(BaseModel):
         obj.user = user
         obj.permission = permission
         self.sa.add(obj)
+        log.debug('Granted perm %s to %s on %s' % (perm, user, repo))
 
     def revoke_user_permission(self, repo, user):
         """
@@ -383,8 +384,10 @@ class RepoModel(BaseModel):
         obj = self.sa.query(UserRepoToPerm)\
             .filter(UserRepoToPerm.repository == repo)\
             .filter(UserRepoToPerm.user == user)\
-            .one()
-        self.sa.delete(obj)
+            .scalar()
+        if obj:
+            self.sa.delete(obj)
+            log.debug('Revoked perm on %s on %s' % (repo, user))
 
     def grant_users_group_permission(self, repo, group_name, perm):
         """
@@ -414,6 +417,7 @@ class RepoModel(BaseModel):
         obj.users_group = group_name
         obj.permission = permission
         self.sa.add(obj)
+        log.debug('Granted perm %s to %s on %s' % (perm, group_name, repo))
 
     def revoke_users_group_permission(self, repo, group_name):
         """
@@ -429,8 +433,10 @@ class RepoModel(BaseModel):
         obj = self.sa.query(UsersGroupRepoToPerm)\
             .filter(UsersGroupRepoToPerm.repository == repo)\
             .filter(UsersGroupRepoToPerm.users_group == group_name)\
-            .one()
-        self.sa.delete(obj)
+            .scalar()
+        if obj:
+            self.sa.delete(obj)
+            log.debug('Revoked perm to %s on %s' % (repo, group_name))
 
     def delete_stats(self, repo_name):
         """

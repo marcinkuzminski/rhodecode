@@ -1,0 +1,15 @@
+## -*- coding: utf-8 -*-
+<%inherit file="main.html"/>
+
+User <b>${pr_comment_user}</b> commented on pull request #${pr_id} for
+repository ${pr_target_repo}
+
+<p>
+${body}
+
+%if status_change:
+    <span>New status -> ${status_change}</span>
+%endif
+</p>
+
+View this comment here: ${pr_comment_url}

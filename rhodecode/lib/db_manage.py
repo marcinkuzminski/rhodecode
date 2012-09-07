@@ -247,7 +247,22 @@ class DbManage(object):
                 Session().add(hggit)
 
                 notify('re-check default permissions')
-                self.klass.populate_default_permissions()
+                default_user = User.get_by_username(User.DEFAULT_USER)
+                perm = Permission.get_by_key('hg.fork.repository')
+                reg_perm = UserToPerm()
+                reg_perm.user = default_user
+                reg_perm.permission = perm
+                Session().add(reg_perm)
+
+            def step_7(self):
+                perm_fixes = self.klass.reset_permissions(User.DEFAULT_USER)
+                Session().commit()
+                if perm_fixes:
+                    notify('There was an inconsistent state of permissions '
+                           'detected for default user. Permissions are now '
+                           'reset to the default value for default user. '
+                           'Please validate and check default permissions '
+                           'in admin panel')
 
         upgrade_steps = [0] + range(curr_version + 1, __dbversion__ + 1)
 
@@ -470,6 +485,28 @@ class DbManage(object):
                 log.debug('missing default permission for group %s adding' % g)
                 ReposGroupModel()._create_default_perms(g)
 
+    def reset_permissions(self, username):
+        """
+        Resets permissions to default state, usefull when old systems had
+        bad permissions, we must clean them up
+
+        :param username:
+        :type username:
+        """
+        default_user = User.get_by_username(username)
+        if not default_user:
+            return
+
+        u2p = UserToPerm.query()\
+            .filter(UserToPerm.user == default_user).all()
+        fixed = False
+        if len(u2p) != len(User.DEFAULT_PERMISSIONS):
+            for p in u2p:
+                Session().delete(p)
+            fixed = True
+            self.populate_default_permissions()
+        return fixed
+
     def config_prompt(self, test_repo_path='', retries=3, defaults={}):
         _path = defaults.get('repos_location')
         if retries == 3:
@@ -506,7 +543,15 @@ class DbManage(object):
             retries -= 1
             return self.config_prompt(test_repo_path, retries)
 
-        return path
+        real_path = os.path.realpath(path)
+
+        if real_path != path:
+            if not ask_ok(('Path looks like a symlink, Rhodecode will store '
+                           'given path as %s ? [y/n]') % (real_path)):
+                log.error('Canceled by user')
+                sys.exit(-1)
+
+        return real_path
 
     def create_settings(self, path):
 
@@ -597,8 +642,7 @@ class DbManage(object):
 
         default_user = User.get_by_username('default')
 
-        for def_perm in ['hg.register.manual_activate', 'hg.create.repository',
-                         'hg.fork.repository', 'repository.read']:
+        for def_perm in User.DEFAULT_PERMISSIONS:
 
             perm = self.sa.query(Permission)\
              .filter(Permission.permission_name == def_perm)\

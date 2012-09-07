@@ -32,7 +32,7 @@ from rhodecode.lib.utils2 import LazyProperty
 
 from rhodecode.model import BaseModel
 from rhodecode.model.db import RepoGroup, RhodeCodeUi, UserRepoGroupToPerm, \
-    User, Permission, UsersGroupRepoGroupToPerm, UsersGroup
+    User, Permission, UsersGroupRepoGroupToPerm, UsersGroup, Repository
 
 log = logging.getLogger(__name__)
 
@@ -115,11 +115,12 @@ class ReposGroupModel(BaseModel):
                             'existing dir %s' % new_path)
         shutil.move(old_path, new_path)
 
-    def __delete_group(self, group):
+    def __delete_group(self, group, force_delete=False):
         """
         Deletes a group from a filesystem
 
         :param group: instance of group from database
+        :param force_delete: use shutil rmtree to remove all objects
         """
         paths = group.full_path.split(RepoGroup.url_sep())
         paths = os.sep.join(paths)
@@ -127,7 +128,10 @@ class ReposGroupModel(BaseModel):
         rm_path = os.path.join(self.repos_path, paths)
         if os.path.isdir(rm_path):
             # delete only if that path really exists
-            os.rmdir(rm_path)
+            if force_delete:
+                shutil.rmtree(rm_path)
+            else:
+                os.rmdir(rm_path)  # this raises an exception when there are still objects inside
 
     def create(self, group_name, group_description, parent=None, just_db=False):
         try:
@@ -150,32 +154,79 @@ class ReposGroupModel(BaseModel):
             log.error(traceback.format_exc())
             raise
 
+    def _update_permissions(self, repos_group, perms_new=None,
+                            perms_updates=None, recursive=False):
+        from rhodecode.model.repo import RepoModel
+        if not perms_new:
+            perms_new = []
+        if not perms_updates:
+            perms_updates = []
+
+        def _set_perm_user(obj, user, perm):
+            if isinstance(obj, RepoGroup):
+                ReposGroupModel().grant_user_permission(
+                    repos_group=obj, user=user, perm=perm
+                )
+            elif isinstance(obj, Repository):
+                # we set group permission but we have to switch to repo
+                # permission
+                perm = perm.replace('group.', 'repository.')
+                RepoModel().grant_user_permission(
+                    repo=obj, user=user, perm=perm
+                )
+
+        def _set_perm_group(obj, users_group, perm):
+            if isinstance(obj, RepoGroup):
+                ReposGroupModel().grant_users_group_permission(
+                    repos_group=obj, group_name=users_group, perm=perm
+                )
+            elif isinstance(obj, Repository):
+                # we set group permission but we have to switch to repo
+                # permission
+                perm = perm.replace('group.', 'repository.')
+                RepoModel().grant_users_group_permission(
+                    repo=obj, group_name=users_group, perm=perm
+                )
+        updates = []
+        log.debug('Now updating permissions for %s in recursive mode:%s'
+                  % (repos_group, recursive))
+
+        for obj in repos_group.recursive_groups_and_repos():
+            if not recursive:
+                obj = repos_group
+
+            # update permissions
+            for member, perm, member_type in perms_updates:
+                ## set for user
+                if member_type == 'user':
+                    # this updates also current one if found
+                    _set_perm_user(obj, user=member, perm=perm)
+                ## set for users group
+                else:
+                    _set_perm_group(obj, users_group=member, perm=perm)
+            # set new permissions
+            for member, perm, member_type in perms_new:
+                if member_type == 'user':
+                    _set_perm_user(obj, user=member, perm=perm)
+                else:
+                    _set_perm_group(obj, users_group=member, perm=perm)
+            updates.append(obj)
+            #if it's not recursive call
+            # break the loop and don't proceed with other changes
+            if not recursive:
+                break
+        return updates
+
     def update(self, repos_group_id, form_data):
 
         try:
             repos_group = RepoGroup.get(repos_group_id)
-
-            # update permissions
-            for member, perm, member_type in form_data['perms_updates']:
-                if member_type == 'user':
-                    # this updates also current one if found
-                    ReposGroupModel().grant_user_permission(
-                        repos_group=repos_group, user=member, perm=perm
-                    )
-                else:
-                    ReposGroupModel().grant_users_group_permission(
-                        repos_group=repos_group, group_name=member, perm=perm
-                    )
-            # set new permissions
-            for member, perm, member_type in form_data['perms_new']:
-                if member_type == 'user':
-                    ReposGroupModel().grant_user_permission(
-                        repos_group=repos_group, user=member, perm=perm
-                    )
-                else:
-                    ReposGroupModel().grant_users_group_permission(
-                        repos_group=repos_group, group_name=member, perm=perm
-                    )
+            recursive = form_data['recursive']
+            # iterate over all members(if in recursive mode) of this groups and
+            # set the permissions !
+            # this can be potentially heavy operation
+            self._update_permissions(repos_group, form_data['perms_new'],
+                                     form_data['perms_updates'], recursive)
 
             old_path = repos_group.full_path
 
@@ -191,7 +242,6 @@ class ReposGroupModel(BaseModel):
 
             # iterate over all members of this groups and set the locking !
             # this can be potentially heavy operation
-
             for obj in repos_group.recursive_groups_and_repos():
                 #set the value from it's parent
                 obj.enable_locking = repos_group.enable_locking
@@ -210,14 +260,53 @@ class ReposGroupModel(BaseModel):
             log.error(traceback.format_exc())
             raise
 
-    def delete(self, repos_group):
+    def delete(self, repos_group, force_delete=False):
         repos_group = self._get_repos_group(repos_group)
         try:
             self.sa.delete(repos_group)
-            self.__delete_group(repos_group)
+            self.__delete_group(repos_group, force_delete)
         except:
             log.exception('Error removing repos_group %s' % repos_group)
             raise
+
+    def delete_permission(self, repos_group, obj, obj_type, recursive):
+        """
+        Revokes permission for repos_group for given obj(user or users_group),
+        obj_type can be user or users group
+
+        :param repos_group:
+        :param obj: user or users group id
+        :param obj_type: user or users group type
+        :param recursive: recurse to all children of group
+        """
+        from rhodecode.model.repo import RepoModel
+        repos_group = self._get_repos_group(repos_group)
+
+        for el in repos_group.recursive_groups_and_repos():
+            if not recursive:
+                # if we don't recurse set the permission on only the top level
+                # object
+                el = repos_group
+
+            if isinstance(el, RepoGroup):
+                if obj_type == 'user':
+                    ReposGroupModel().revoke_user_permission(el, user=obj)
+                elif obj_type == 'users_group':
+                    ReposGroupModel().revoke_users_group_permission(el, group_name=obj)
+                else:
+                    raise Exception('undefined object type %s' % obj_type)
+            elif isinstance(el, Repository):
+                if obj_type == 'user':
+                    RepoModel().revoke_user_permission(el, user=obj)
+                elif obj_type == 'users_group':
+                    RepoModel().revoke_users_group_permission(el, group_name=obj)
+                else:
+                    raise Exception('undefined object type %s' % obj_type)
+
+            #if it's not recursive call
+            # break the loop and don't proceed with other changes
+            if not recursive:
+                break
 
     def grant_user_permission(self, repos_group, user, perm):
         """
@@ -246,6 +335,7 @@ class ReposGroupModel(BaseModel):
         obj.user = user
         obj.permission = permission
         self.sa.add(obj)
+        log.debug('Granted perm %s to %s on %s' % (perm, user, repos_group))
 
     def revoke_user_permission(self, repos_group, user):
         """
@@ -262,8 +352,10 @@ class ReposGroupModel(BaseModel):
         obj = self.sa.query(UserRepoGroupToPerm)\
             .filter(UserRepoGroupToPerm.user == user)\
             .filter(UserRepoGroupToPerm.group == repos_group)\
-            .one()
-        self.sa.delete(obj)
+            .scalar()
+        if obj:
+            self.sa.delete(obj)
+            log.debug('Revoked perm on %s on %s' % (repos_group, user))
 
     def grant_users_group_permission(self, repos_group, group_name, perm):
         """
@@ -294,6 +386,7 @@ class ReposGroupModel(BaseModel):
         obj.users_group = group_name
         obj.permission = permission
         self.sa.add(obj)
+        log.debug('Granted perm %s to %s on %s' % (perm, group_name, repos_group))
 
     def revoke_users_group_permission(self, repos_group, group_name):
         """
@@ -310,5 +403,7 @@ class ReposGroupModel(BaseModel):
         obj = self.sa.query(UsersGroupRepoGroupToPerm)\
             .filter(UsersGroupRepoGroupToPerm.group == repos_group)\
             .filter(UsersGroupRepoGroupToPerm.users_group == group_name)\
-            .one()
-        self.sa.delete(obj)
+            .scalar()
+        if obj:
+            self.sa.delete(obj)
+            log.debug('Revoked perm to %s on %s' % (repos_group, group_name))

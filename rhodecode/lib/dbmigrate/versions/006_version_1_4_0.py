@@ -49,7 +49,7 @@ def upgrade(migrate_engine):
     tbl = ChangesetStatus.__table__
     tbl.create()
 
-    ## RESET COMPLETLY THE metadata for sqlalchemy to use the 1_3_0 Base 
+    ## RESET COMPLETLY THE metadata for sqlalchemy to use the 1_3_0 Base
     Base = declarative_base()
     Base.metadata.clear()
     Base.metadata = MetaData()

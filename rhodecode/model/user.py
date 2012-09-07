@@ -564,7 +564,7 @@ class UserModel(BaseModel):
             rg_k = perm.UserRepoGroupToPerm.group.group_name
             p = perm.Permission.permission_name
             cur_perm = user.permissions[GK][rg_k]
-            if PERM_WEIGHTS[p] > PERM_WEIGHTS[cur_perm]:
+            if PERM_WEIGHTS[p] > PERM_WEIGHTS[cur_perm] or 1:  # disable check
                 user.permissions[GK][rg_k] = p
 
         # REPO GROUP + USER GROUP
@@ -588,7 +588,7 @@ class UserModel(BaseModel):
             cur_perm = user.permissions[GK][g_k]
             # overwrite permission only if it's greater than permission
             # given from other sources
-            if PERM_WEIGHTS[p] > PERM_WEIGHTS[cur_perm]:
+            if PERM_WEIGHTS[p] > PERM_WEIGHTS[cur_perm] or 1:  # disable check
                 user.permissions[GK][g_k] = p
 
         return user

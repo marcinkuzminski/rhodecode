@@ -47,38 +47,38 @@ var url_base = '${h.url("files_nodelist_home",repo_name=c.repo_name,revision='__
 
 var ypjax_links = function(){
     YUE.on(YUQ('.ypjax-link'), 'click',function(e){
-    	
+
     	//don't do ypjax on middle click
-    	if(e.which == 2 || !History.enabled){ 
+    	if(e.which == 2 || !History.enabled){
     		return true;
     	}
-    	
+
         var el = e.currentTarget;
         var url = el.href;
 
         var _base_url = '${h.url("files_home",repo_name=c.repo_name,revision='',f_path='')}';
         _base_url = _base_url.replace('//','/')
-        
+
         //extract rev and the f_path from url.
         parts = url.split(_base_url)
         if(parts.length != 2){
         	return false;
         }
-        
+
         var parts2 = parts[1].split('/');
       	var rev = parts2.shift(); // pop the first element which is the revision
       	var f_path = parts2.join('/');
-        
+
         var title = "${_('%s files') % c.repo_name}" + " - " + f_path;
-        
+
         var _node_list_url = node_list_url.replace('__REV__',rev);
         var _url_base = url_base.replace('__REV__',rev).replace('__FPATH__', f_path);
 
         // Change our States and save some data for handling events
         var data = {url:url,title:title, url_base:_url_base,
                     node_list_url:_node_list_url};
-        History.pushState(data, title, url);        
-        
+        History.pushState(data, title, url);
+
         //now we're sure that we can do ypjax things
         YUE.preventDefault(e)
         return false;
@@ -92,10 +92,10 @@ var callbacks = function(State){
     // Inform Google Analytics of the change
     if ( typeof window.pageTracker !== 'undefined' ) {
         window.pageTracker._trackPageview(State.url);
-    }	
+    }
 }
 
-YUE.onDOMReady(function(){ 
+YUE.onDOMReady(function(){
     ypjax_links();
     var container = 'files_data';
     //Bind to StateChange Event
@@ -124,8 +124,8 @@ YUE.onDOMReady(function(){
             }
           });
         }
-    });    
- 
+    });
+
     // init the search filter
     var _State = {
        url: "${h.url.current()}",

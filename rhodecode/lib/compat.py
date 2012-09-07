@@ -589,6 +589,3 @@ else:
                     self.__cond.wait(timeout)
             finally:
                 self.__cond.release()
-
-
-

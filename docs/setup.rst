@@ -667,11 +667,20 @@ that, you'll need to:
 
 Here is a sample excerpt from an Apache Virtual Host configuration file::
 
-    WSGIDaemonProcess pylons user=www-data group=www-data processes=1 \
+    WSGIDaemonProcess pylons \
         threads=4 \
         python-path=/home/web/rhodecode/pyenv/lib/python2.6/site-packages
     WSGIScriptAlias / /home/web/rhodecode/dispatch.wsgi
     WSGIPassAuthorization On
+
+.. note::
+   when running apache as root please add: `user=www-data group=www-data` 
+   into above configuration
+
+.. note::
+   RhodeCode cannot be runned in multiprocess mode in apache, make sure
+   you don't specify `processes=num` directive in the config
+
 
 Example wsgi dispatch script::
 

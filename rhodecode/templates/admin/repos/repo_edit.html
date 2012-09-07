@@ -115,7 +115,7 @@
                     ${h.checkbox('enable_locking',value="True")}
                     <span class="help-block">${_('Enable lock-by-pulling on repository.')}</span>
                 </div>
-            </div>            
+            </div>
             <div class="field">
                 <div class="label">
                     <label for="user">${_('Owner')}:</label>
@@ -188,6 +188,20 @@
         <div class="form">
            <div class="fields">
                ${h.submit('reset_cache_%s' % c.repo_info.repo_name,_('Invalidate repository cache'),class_="ui-btn",onclick="return confirm('"+_('Confirm to invalidate repository cache')+"');")}
+              <div class="field" style="border:none;color:#888">
+              <ul>
+                  <li>${_('Manually invalidate cache for this repository. On first access repository will be cached again')}
+                  </li>
+              </ul>
+              </div>
+              <div class="field" style="border:none;">
+                ${_('List of cached values')}
+                  <ul>
+                  %for cache in c.repo_info.cache_keys:
+                      <li>INSTANCE ID:${cache.prefix or '-'} ${cache.cache_args} CACHED: ${h.bool2icon(cache.cache_active)}</li>
+                  %endfor
+                  </ul>
+              </div>
            </div>
         </div>
         ${h.end_form()}
@@ -195,20 +209,20 @@
         <h3>${_('Public journal')}</h3>
         ${h.form(url('repo_public_journal', repo_name=c.repo_info.repo_name),method='put')}
         <div class="form">
-                ${h.hidden('auth_token',str(h.get_token()))}
-                <div class="field">
-                %if c.in_public_journal:
-                    ${h.submit('set_public_%s' % c.repo_info.repo_name,_('Remove from public journal'),class_="ui-btn")}
-                %else:
-		            ${h.submit('set_public_%s' % c.repo_info.repo_name,_('Add to public journal'),class_="ui-btn")}
-		        %endif
-                </div>
-               <div class="field" style="border:none;color:#888">
-               <ul>
-                    <li>${_('All actions made on this repository will be accessible to everyone in public journal')}
-                    </li>
-               </ul>
-               </div>
+          ${h.hidden('auth_token',str(h.get_token()))}
+          <div class="field">
+          %if c.in_public_journal:
+            ${h.submit('set_public_%s' % c.repo_info.repo_name,_('Remove from public journal'),class_="ui-btn")}
+          %else:
+            ${h.submit('set_public_%s' % c.repo_info.repo_name,_('Add to public journal'),class_="ui-btn")}
+          %endif
+          </div>
+         <div class="field" style="border:none;color:#888">
+         <ul>
+              <li>${_('All actions made on this repository will be accessible to everyone in public journal')}
+              </li>
+         </ul>
+         </div>
         </div>
         ${h.end_form()}
 
@@ -229,7 +243,7 @@
                 <li>${_('Force locking on repository. Works only when anonymous access is disabled')}
                 </li>
            </ul>
-           </div>           
+           </div>
         </div>
         ${h.end_form()}
 
@@ -245,9 +259,9 @@
                     <li>${_('''Manually set this repository as a fork of another from the list''')}</li>
                </ul>
                </div>
-        </div>        
+        </div>
         ${h.end_form()}
-        
+
         <h3>${_('Delete')}</h3>
         ${h.form(url('repo', repo_name=c.repo_info.repo_name),method='delete')}
         <div class="form">
@@ -262,7 +276,7 @@
            </ul>
            </div>
         </div>
-        ${h.end_form()}        
+        ${h.end_form()}
 </div>
 
 </%def>

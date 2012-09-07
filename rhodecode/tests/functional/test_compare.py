@@ -30,17 +30,17 @@ class TestCompareController(TestController):
         response.mustcontain('''<a href="/%s/changeset/c5ddebc06eaaba3010c2d66ea6ec9d074eb0f678">r112:c5ddebc06eaa</a>''' % HG_REPO)
 
         ## files diff
-        response.mustcontain('''<div class="node"><a href="/%s/compare/tag@%s...tag@%s#C--1c5cf9e91c12">docs/api/utils/index.rst</a></div>''' % (HG_REPO, tag1,  tag2))
-        response.mustcontain('''<div class="node"><a href="/%s/compare/tag@%s...tag@%s#C--e3305437df55">test_and_report.sh</a></div>''' % (HG_REPO, tag1,  tag2))
-        response.mustcontain('''<div class="node"><a href="/%s/compare/tag@%s...tag@%s#C--c8e92ef85cd1">.hgignore</a></div>''' % (HG_REPO, tag1,  tag2))
-        response.mustcontain('''<div class="node"><a href="/%s/compare/tag@%s...tag@%s#C--6e08b694d687">.hgtags</a></div>''' % (HG_REPO, tag1,  tag2))
-        response.mustcontain('''<div class="node"><a href="/%s/compare/tag@%s...tag@%s#C--2c14b00f3393">docs/api/index.rst</a></div>''' % (HG_REPO, tag1,  tag2))
-        response.mustcontain('''<div class="node"><a href="/%s/compare/tag@%s...tag@%s#C--430ccbc82bdf">vcs/__init__.py</a></div>''' % (HG_REPO, tag1,  tag2))
-        response.mustcontain('''<div class="node"><a href="/%s/compare/tag@%s...tag@%s#C--9c390eb52cd6">vcs/backends/hg.py</a></div>''' % (HG_REPO, tag1,  tag2))
-        response.mustcontain('''<div class="node"><a href="/%s/compare/tag@%s...tag@%s#C--ebb592c595c0">vcs/utils/__init__.py</a></div>''' % (HG_REPO, tag1,  tag2))
-        response.mustcontain('''<div class="node"><a href="/%s/compare/tag@%s...tag@%s#C--7abc741b5052">vcs/utils/annotate.py</a></div>''' % (HG_REPO, tag1,  tag2))
-        response.mustcontain('''<div class="node"><a href="/%s/compare/tag@%s...tag@%s#C--2ef0ef106c56">vcs/utils/diffs.py</a></div>''' % (HG_REPO, tag1,  tag2))
-        response.mustcontain('''<div class="node"><a href="/%s/compare/tag@%s...tag@%s#C--3150cb87d4b7">vcs/utils/lazy.py</a></div>''' % (HG_REPO, tag1,  tag2))
+        response.mustcontain('''<div class="node"><a href="/%s/compare/tag@%s...tag@%s#C--1c5cf9e91c12">docs/api/utils/index.rst</a></div>''' % (HG_REPO, tag1, tag2))
+        response.mustcontain('''<div class="node"><a href="/%s/compare/tag@%s...tag@%s#C--e3305437df55">test_and_report.sh</a></div>''' % (HG_REPO, tag1, tag2))
+        response.mustcontain('''<div class="node"><a href="/%s/compare/tag@%s...tag@%s#C--c8e92ef85cd1">.hgignore</a></div>''' % (HG_REPO, tag1, tag2))
+        response.mustcontain('''<div class="node"><a href="/%s/compare/tag@%s...tag@%s#C--6e08b694d687">.hgtags</a></div>''' % (HG_REPO, tag1, tag2))
+        response.mustcontain('''<div class="node"><a href="/%s/compare/tag@%s...tag@%s#C--2c14b00f3393">docs/api/index.rst</a></div>''' % (HG_REPO, tag1, tag2))
+        response.mustcontain('''<div class="node"><a href="/%s/compare/tag@%s...tag@%s#C--430ccbc82bdf">vcs/__init__.py</a></div>''' % (HG_REPO, tag1, tag2))
+        response.mustcontain('''<div class="node"><a href="/%s/compare/tag@%s...tag@%s#C--9c390eb52cd6">vcs/backends/hg.py</a></div>''' % (HG_REPO, tag1, tag2))
+        response.mustcontain('''<div class="node"><a href="/%s/compare/tag@%s...tag@%s#C--ebb592c595c0">vcs/utils/__init__.py</a></div>''' % (HG_REPO, tag1, tag2))
+        response.mustcontain('''<div class="node"><a href="/%s/compare/tag@%s...tag@%s#C--7abc741b5052">vcs/utils/annotate.py</a></div>''' % (HG_REPO, tag1, tag2))
+        response.mustcontain('''<div class="node"><a href="/%s/compare/tag@%s...tag@%s#C--2ef0ef106c56">vcs/utils/diffs.py</a></div>''' % (HG_REPO, tag1, tag2))
+        response.mustcontain('''<div class="node"><a href="/%s/compare/tag@%s...tag@%s#C--3150cb87d4b7">vcs/utils/lazy.py</a></div>''' % (HG_REPO, tag1, tag2))
 
     def test_index_branch(self):
         self.log_user()
@@ -183,7 +183,111 @@ class TestCompareController(TestController):
             ## files
             response.mustcontain("""<a href="/%s/compare/branch@%s...branch@%s#C--826e8142e6ba">file1</a>""" % (r2_name, rev1, rev2))
 
-
         finally:
             RepoModel().delete(r1_id)
             RepoModel().delete(r2_id)
+
+    def test_org_repo_new_commits_after_forking(self):
+        self.log_user()
+
+        repo1 = RepoModel().create_repo(repo_name='one', repo_type='hg',
+                                        description='diff-test',
+                                        owner=TEST_USER_ADMIN_LOGIN)
+
+        Session().commit()
+        r1_id = repo1.repo_id
+        r1_name = repo1.repo_name
+
+        #commit something initially !
+        cs0 = ScmModel().create_node(
+            repo=repo1.scm_instance, repo_name=r1_name,
+            cs=EmptyChangeset(alias='hg'), user=TEST_USER_ADMIN_LOGIN,
+            author=TEST_USER_ADMIN_LOGIN,
+            message='commit1',
+            content='line1',
+            f_path='file1'
+        )
+        Session().commit()
+        self.assertEqual(repo1.scm_instance.revisions, [cs0.raw_id])
+        #fork the repo1
+        repo2 = RepoModel().create_repo(repo_name='one-fork', repo_type='hg',
+                                description='compare-test',
+                                clone_uri=repo1.repo_full_path,
+                                owner=TEST_USER_ADMIN_LOGIN, fork_of='one')
+        Session().commit()
+        self.assertEqual(repo2.scm_instance.revisions, [cs0.raw_id])
+        r2_id = repo2.repo_id
+        r2_name = repo2.repo_name
+
+        #make 3 new commits in fork
+        cs1 = ScmModel().create_node(
+            repo=repo2.scm_instance, repo_name=r2_name,
+            cs=repo2.scm_instance[-1], user=TEST_USER_ADMIN_LOGIN,
+            author=TEST_USER_ADMIN_LOGIN,
+            message='commit1-fork',
+            content='file1-line1-from-fork',
+            f_path='file1-fork'
+        )
+        cs2 = ScmModel().create_node(
+            repo=repo2.scm_instance, repo_name=r2_name,
+            cs=cs1, user=TEST_USER_ADMIN_LOGIN,
+            author=TEST_USER_ADMIN_LOGIN,
+            message='commit2-fork',
+            content='file2-line1-from-fork',
+            f_path='file2-fork'
+        )
+        cs3 = ScmModel().create_node(
+            repo=repo2.scm_instance, repo_name=r2_name,
+            cs=cs2, user=TEST_USER_ADMIN_LOGIN,
+            author=TEST_USER_ADMIN_LOGIN,
+            message='commit3-fork',
+            content='file3-line1-from-fork',
+            f_path='file3-fork'
+        )
+
+        #compare !
+        rev1 = 'default'
+        rev2 = 'default'
+        response = self.app.get(url(controller='compare', action='index',
+                                    repo_name=r2_name,
+                                    org_ref_type="branch",
+                                    org_ref=rev1,
+                                    other_ref_type="branch",
+                                    other_ref=rev2,
+                                    repo=r1_name
+                                    ))
+
+        try:
+            response.mustcontain('%s@%s -> %s@%s' % (r2_name, rev1, r1_name, rev2))
+            response.mustcontain("""file1-line1-from-fork""")
+            response.mustcontain("""file2-line1-from-fork""")
+            response.mustcontain("""file3-line1-from-fork""")
+
+            #add new commit into parent !
+            cs0 = ScmModel().create_node(
+                repo=repo1.scm_instance, repo_name=r1_name,
+                cs=EmptyChangeset(alias='hg'), user=TEST_USER_ADMIN_LOGIN,
+                author=TEST_USER_ADMIN_LOGIN,
+                message='commit2',
+                content='line1',
+                f_path='file2'
+            )
+            #compare !
+            rev1 = 'default'
+            rev2 = 'default'
+            response = self.app.get(url(controller='compare', action='index',
+                                        repo_name=r2_name,
+                                        org_ref_type="branch",
+                                        org_ref=rev1,
+                                        other_ref_type="branch",
+                                        other_ref=rev2,
+                                        repo=r1_name
+                                        ))
+
+            response.mustcontain('%s@%s -> %s@%s' % (r2_name, rev1, r1_name, rev2))
+            response.mustcontain("""file1-line1-from-fork""")
+            response.mustcontain("""file2-line1-from-fork""")
+            response.mustcontain("""file3-line1-from-fork""")
+        finally:
+            RepoModel().delete(r2_id)
+            RepoModel().delete(r1_id)

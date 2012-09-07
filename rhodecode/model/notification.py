@@ -245,6 +245,7 @@ class EmailNotificationModel(BaseModel):
     TYPE_PASSWORD_RESET = 'passoword_link'
     TYPE_REGISTRATION = Notification.TYPE_REGISTRATION
     TYPE_PULL_REQUEST = Notification.TYPE_PULL_REQUEST
+    TYPE_PULL_REQUEST_COMMENT = Notification.TYPE_PULL_REQUEST_COMMENT
     TYPE_DEFAULT = 'default'
 
     def __init__(self):
@@ -255,7 +256,9 @@ class EmailNotificationModel(BaseModel):
          self.TYPE_CHANGESET_COMMENT: 'email_templates/changeset_comment.html',
          self.TYPE_PASSWORD_RESET: 'email_templates/password_reset.html',
          self.TYPE_REGISTRATION: 'email_templates/registration.html',
-         self.TYPE_DEFAULT: 'email_templates/default.html'
+         self.TYPE_DEFAULT: 'email_templates/default.html',
+         self.TYPE_PULL_REQUEST: 'email_templates/pull_request.html',
+         self.TYPE_PULL_REQUEST_COMMENT: 'email_templates/pull_request_comment.html',
         }
 
     def get_email_tmpl(self, type_, **kwargs):

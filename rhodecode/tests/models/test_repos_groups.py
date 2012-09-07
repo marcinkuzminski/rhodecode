@@ -4,7 +4,7 @@ from rhodecode.tests import *
 
 from rhodecode.model.repos_group import ReposGroupModel
 from rhodecode.model.repo import RepoModel
-from rhodecode.model.db import RepoGroup, User
+from rhodecode.model.db import RepoGroup, User, Repository
 from rhodecode.model.meta import Session
 from sqlalchemy.exc import IntegrityError
 
@@ -15,7 +15,8 @@ def _make_group(path, desc='desc', parent_id=None,
     gr = RepoGroup.get_by_group_name(path)
     if gr and skip_if_exists:
         return gr
-
+    if isinstance(parent_id, RepoGroup):
+        parent_id = parent_id.group_id
     gr = ReposGroupModel().create(path, desc, parent_id)
     return gr
 
@@ -54,7 +55,8 @@ class TestReposGroups(unittest.TestCase):
             group_parent_id=parent_id,
             perms_updates=[],
             perms_new=[],
-            enable_locking=False
+            enable_locking=False,
+            recursive=False
         )
         gr = ReposGroupModel().update(id_, form_data)
         return gr
@@ -132,7 +134,8 @@ class TestReposGroups(unittest.TestCase):
                          repo_type='hg',
                          clone_uri=None,
                          landing_rev='tip',
-                         enable_locking=False)
+                         enable_locking=False,
+                         recursive=False)
         cur_user = User.get_by_username(TEST_USER_ADMIN_LOGIN)
         r = RepoModel().create(form_data, cur_user)
 

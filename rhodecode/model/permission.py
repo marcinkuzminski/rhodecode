@@ -77,7 +77,7 @@ class PermissionModel(BaseModel):
                                 form_result['perm_user_name']).scalar()
         u2p = self.sa.query(UserToPerm).filter(UserToPerm.user ==
                                                perm_user).all()
-        if len(u2p) != 4:
+        if len(u2p) != len(User.DEFAULT_PERMISSIONS):
             raise Exception('Defined: %s should be 4  permissions for default'
                             ' user. This should not happen please verify'
                             ' your database' % len(u2p))

@@ -178,7 +178,7 @@ class GitRepository(BaseRepository):
             raise urllib2.URLError("[%s] %s" % (url, e))
 
     def _get_repo(self, create, src_url=None, update_after_clone=False,
-            bare=False):
+                  bare=False):
         if create and os.path.exists(self.path):
             raise RepositoryError("Location already exist")
         if src_url and not create:
