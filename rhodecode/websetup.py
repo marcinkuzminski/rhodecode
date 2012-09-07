@@ -48,3 +48,4 @@ def setup_app(command, conf, vars):
     dbmanage.populate_default_permissions()
     Session.commit()
     load_environment(conf.global_conf, conf.local_conf, initial=True)
+    dbmanage.finish()

@@ -30,7 +30,7 @@ import uuid
 import logging
 from os.path import dirname as dn, join as jn
 
-from rhodecode import __dbversion__
+from rhodecode import __dbversion__, __py_version__
 
 from rhodecode.model.user import UserModel
 from rhodecode.lib.utils import ask_ok
@@ -659,3 +659,12 @@ class DbManage(object):
                 reg_perm.user = default_user
                 reg_perm.permission = perm
                 self.sa.add(reg_perm)
+
+    def finish(self):
+        """
+        Function executed at the end of setup
+        """
+        if not __py_version__ >= (2, 6):
+            notify('Python2.5 detected, please switch '
+                   'egg:waitress#main -> egg:Paste#http '
+                   'in your .ini file')
