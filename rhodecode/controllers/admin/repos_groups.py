@@ -292,9 +292,9 @@ class ReposGroupsController(BaseController):
 
         c.repo_cnt = 0
 
-        c.groups = RepoGroup.query().order_by(RepoGroup.group_name)\
+        groups = RepoGroup.query().order_by(RepoGroup.group_name)\
             .filter(RepoGroup.group_parent_id == id).all()
-
+        c.groups = self.scm_model.get_repos_groups(groups)
         return render('admin/repos_groups/repos_groups.html')
 
     @HasPermissionAnyDecorator('hg.admin')
