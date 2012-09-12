@@ -141,6 +141,7 @@ def make_map(config):
         m.connect('repo_locking', "/repo_locking/{repo_name:.*?}",
                   action="repo_locking", conditions=dict(method=["PUT"],
                                                       function=check_repo))
+
     with rmap.submapper(path_prefix=ADMIN_PREFIX,
                         controller='admin/repos_groups') as m:
         m.connect("repos_groups", "/repos_groups",
@@ -560,6 +561,10 @@ def make_map(config):
     rmap.connect('repo_settings_home', '/{repo_name:.*?}/settings',
                 controller='settings', action='index',
                 conditions=dict(function=check_repo))
+
+    rmap.connect('toggle_locking', "/{repo_name:.*?}/locking_toggle",
+                 controller='settings', action="toggle_locking",
+                 conditions=dict(method=["GET"], function=check_repo))
 
     rmap.connect('repo_fork_create_home', '/{repo_name:.*?}/fork',
                 controller='forks', action='fork_create',

@@ -206,11 +206,20 @@
                          <li>${h.link_to(_('settings'),h.url('repo_settings_home',repo_name=c.repo_name),class_='settings')}</li>
                      %endif
                    %endif
+
                    	<li>${h.link_to(_('fork'),h.url('repo_fork_home',repo_name=c.repo_name),class_='fork')}</li>
                     %if h.is_hg(c.rhodecode_repo):
                      <li>${h.link_to(_('Open new pull request'),h.url('pullrequest_home',repo_name=c.repo_name),class_='pull_request')}</li>
                     %endif
                    	<li>${h.link_to(_('search'),h.url('search_repo',search_repo=c.repo_name),class_='search')}</li>
+
+                    %if h.HasRepoPermissionAny('repository.write','repository.admin')(c.repo_name) and c.rhodecode_db_repo.enable_locking:
+                      %if c.rhodecode_db_repo.locked[0]:
+                        <li>${h.link_to(_('unlock'), h.url('toggle_locking',repo_name=c.repo_name),class_='locking_del')}</li>
+                      %else:
+                        <li>${h.link_to(_('lock'), h.url('toggle_locking',repo_name=c.repo_name),class_='locking_add')}</li>
+                      %endif
+                    %endif
 
                     % if h.HasPermissionAll('hg.admin')('access admin main page'):
                      <li>
@@ -227,7 +236,7 @@
                             <li class="last">${h.link_to(_('settings'),h.url('admin_settings'),class_='settings')}</li>
                         </ul>
                         </%def>
-
+                        ## ADMIN MENU
                         ${admin_menu()}
                      </li>
                     % endif
