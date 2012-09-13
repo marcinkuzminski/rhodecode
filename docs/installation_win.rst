@@ -7,8 +7,14 @@ Step by step Installation for Windows
 
 RhodeCode step-by-step install Guide for Windows  
 
-Target OS: Windows XP SP3 English (Clean installation) 
+Target OS: Windows XP SP3 32bit English (Clean installation) 
 + All Windows Updates until 24-may-2012 
+
+.. note::
+    
+   This installation is for 32bit systems, for 64bit windows you might need
+   to download proper 64bit version of "Windows Installer" and Win32py
+   extensions
 
 Step1 - Install Visual Studio 2008 Express
 ------------------------------------------
