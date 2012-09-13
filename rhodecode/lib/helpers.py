@@ -10,6 +10,7 @@ import urllib
 import math
 import logging
 import re
+import urlparse
 
 from datetime import datetime
 from pygments.formatters.html import HtmlFormatter
@@ -711,11 +712,15 @@ HasRepoPermissionAny, HasRepoPermissionAll
 #==============================================================================
 
 def gravatar_url(email_address, size=30):
+    from pylons import url  ## doh, we need to re-import url to mock it later
     if(str2bool(config['app_conf'].get('use_gravatar')) and
        config['app_conf'].get('alternative_gravatar_url')):
         tmpl = config['app_conf'].get('alternative_gravatar_url', '')
+        parsed_url = urlparse.urlparse(url.current(qualified=True))
         tmpl = tmpl.replace('{email}', email_address)\
-                   .replace('{md5email}', hashlib.md5(email_address.lower()).hexdigest())\
+                   .replace('{md5email}', hashlib.md5(email_address.lower()).hexdigest()) \
+                   .replace('{netloc}', parsed_url.netloc)\
+                   .replace('{scheme}', parsed_url.scheme)\
                    .replace('{size}', str(size))
         return tmpl
 
