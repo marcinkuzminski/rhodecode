@@ -1027,14 +1027,20 @@ class RepoGroup(Base, BaseModel):
                                   self.group_name)
 
     @classmethod
-    def groups_choices(cls):
+    def groups_choices(cls, check_perms=False):
         from webhelpers.html import literal as _literal
+        from rhodecode.model.scm import ScmModel
+        groups = cls.query().all()
+        if check_perms:
+            #filter group user have access to, it's done
+            #magically inside ScmModel based on current user
+            groups = ScmModel().get_repos_groups(groups)
         repo_groups = [('', '')]
         sep = ' &raquo; '
         _name = lambda k: _literal(sep.join(k))
 
         repo_groups.extend([(x.group_id, _name(x.full_path_splitted))
-                              for x in cls.query().all()])
+                              for x in groups])
 
         repo_groups = sorted(repo_groups, key=lambda t: t[1].split(sep)[0])
         return repo_groups

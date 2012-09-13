@@ -56,7 +56,7 @@ class SettingsController(BaseRepoController):
         super(SettingsController, self).__before__()
 
     def __load_defaults(self):
-        c.repo_groups = RepoGroup.groups_choices()
+        c.repo_groups = RepoGroup.groups_choices(check_perms=True)
         c.repo_groups_choices = map(lambda k: unicode(k[0]), c.repo_groups)
 
         repo_model = RepoModel()

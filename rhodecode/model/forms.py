@@ -177,7 +177,8 @@ def RepoForm(edit=False, old_data={}, supported_backends=BACKENDS.keys(),
         repo_name = All(v.UnicodeString(strip=True, min=1, not_empty=True),
                         v.SlugifyName())
         clone_uri = All(v.UnicodeString(strip=True, min=1, not_empty=False))
-        repo_group = v.OneOf(repo_groups, hideList=True)
+        repo_group = All(v.CanWriteGroup(),
+                         v.OneOf(repo_groups, hideList=True))
         repo_type = v.OneOf(supported_backends)
         description = v.UnicodeString(strip=True, min=1, not_empty=False)
         private = v.StringBoolean(if_missing=False)
@@ -203,7 +204,8 @@ def RepoForkForm(edit=False, old_data={}, supported_backends=BACKENDS.keys(),
         filter_extra_fields = False
         repo_name = All(v.UnicodeString(strip=True, min=1, not_empty=True),
                         v.SlugifyName())
-        repo_group = v.OneOf(repo_groups, hideList=True)
+        repo_group = All(v.CanWriteGroup(),
+                         v.OneOf(repo_groups, hideList=True))
         repo_type = All(v.ValidForkType(old_data), v.OneOf(supported_backends))
         description = v.UnicodeString(strip=True, min=1, not_empty=True)
         private = v.StringBoolean(if_missing=False)

@@ -19,6 +19,7 @@ from rhodecode.model.db import RepoGroup, Repository, UsersGroup, User,\
     ChangesetStatus
 from rhodecode.lib.exceptions import LdapImportError
 from rhodecode.config.routing import ADMIN_PREFIX
+from rhodecode.lib.auth import HasReposGroupPermissionAny
 
 # silence warnings and pylint
 UnicodeString, OneOf, Int, Number, Regex, Email, Bool, StringBoolean, Set, \
@@ -460,6 +461,25 @@ def ValidForkType(old_data={}):
         def validate_python(self, value, state):
             if old_data['repo_type'] != value:
                 msg = M(self, 'invalid_fork_type', state)
+                raise formencode.Invalid(msg, value, state,
+                    error_dict=dict(repo_type=msg)
+                )
+    return _validator
+
+
+def CanWriteGroup():
+    class _validator(formencode.validators.FancyValidator):
+        messages = {
+            'permission_denied': _(u"You don't have permissions "
+                                   "to create repository in this group")
+        }
+
+        def validate_python(self, value, state):
+            gr = RepoGroup.get(value)
+            if not HasReposGroupPermissionAny(
+                'group.write', 'group.admin'
+            )(gr.group_name, 'get group of repo form'):
+                msg = M(self, 'permission_denied', state)
                 raise formencode.Invalid(msg, value, state,
                     error_dict=dict(repo_type=msg)
                 )

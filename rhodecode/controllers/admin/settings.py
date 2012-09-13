@@ -451,7 +451,7 @@ class SettingsController(BaseController):
     def create_repository(self):
         """GET /_admin/create_repository: Form to create a new item"""
 
-        c.repo_groups = RepoGroup.groups_choices()
+        c.repo_groups = RepoGroup.groups_choices(check_perms=True)
         c.repo_groups_choices = map(lambda k: unicode(k[0]), c.repo_groups)
         choices, c.landing_revs = ScmModel().get_repo_landing_revs()
 
