@@ -14,8 +14,17 @@ Changelog
 news
 ++++
 
+- added option to menu to quick lock/unlock repository for users that have
+  write access to
+- Implemented permissions for writing to repo
+  groups. Now only write access to group allows to create a repostiory
+  within that group
+- #565 Add support for {netloc} and {scheme} to alternative_gravatar_url
+
 fixes
 +++++
+
+- fixed visual permissions check on repos groups inside groups
 
 
 1.4.1 (**2012-09-05**)
