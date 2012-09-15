@@ -40,6 +40,7 @@ from whoosh.index import open_dir, EmptyIndexError
 from whoosh.qparser import QueryParser, QueryParserError
 from whoosh.query import Phrase, Wildcard, Term, Prefix
 from rhodecode.model.repo import RepoModel
+from rhodecode.lib.utils2 import safe_str
 
 log = logging.getLogger(__name__)
 
@@ -116,7 +117,7 @@ class SearchController(BaseController):
 
                     def url_generator(**kw):
                         return update_params("?q=%s&type=%s" \
-                                           % (c.cur_query, c.cur_type), **kw)
+                        % (safe_str(c.cur_query), safe_str(c.cur_type)), **kw)
                     repo_location = RepoModel().repos_path
                     c.formated_results = Page(
                         WhooshResultWrapper(search_type, searcher, matcher,
