@@ -238,6 +238,7 @@ class WhooshIndexingDaemon(object):
             writer_is_dirty = False
             try:
                 indexed_total = 0
+                repo_name = None
                 for repo_name, repo in self.repo_paths.items():
                     # skip indexing if there aren't any revs in the repo
                     num_of_revs = len(repo)
