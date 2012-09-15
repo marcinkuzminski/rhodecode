@@ -280,10 +280,10 @@ class WhooshIndexingDaemon(object):
                 if writer_is_dirty:
                     log.debug('>> COMMITING CHANGES TO CHANGESET INDEX<<')
                     writer.commit(merge=True)
-                    log.debug('>> COMMITTED CHANGES TO CHANGESET INDEX<<')
+                    log.debug('>>> FINISHED REBUILDING CHANGESET INDEX <<<')
                 else:
                     writer.cancel
-                    log.debug('>> NOTHING TO COMMIT<<')
+                    log.debug('>> NOTHING TO COMMIT TO CHANGESET INDEX<<')
 
     def update_file_index(self):
         log.debug((u'STARTING INCREMENTAL INDEXING UPDATE FOR EXTENSIONS %s '
@@ -365,11 +365,11 @@ class WhooshIndexingDaemon(object):
             )
         finally:
             if writer_is_dirty:
-                log.debug('>> COMMITING CHANGES <<')
+                log.debug('>> COMMITING CHANGES TO FILE INDEX <<')
                 writer.commit(merge=True)
-                log.debug('>>> FINISHED REBUILDING INDEX <<<')
+                log.debug('>>> FINISHED REBUILDING FILE INDEX <<<')
             else:
-                log.debug('>> NOTHING TO COMMIT<<')
+                log.debug('>> NOTHING TO COMMIT TO FILE INDEX <<')
                 writer.cancel()
 
     def build_indexes(self):
