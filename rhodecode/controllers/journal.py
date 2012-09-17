@@ -41,6 +41,7 @@ from rhodecode.model.db import UserLog, UserFollowing, Repository, User
 from rhodecode.model.meta import Session
 from sqlalchemy.sql.expression import func
 from rhodecode.model.scm import ScmModel
+from rhodecode.lib.utils2 import safe_int
 
 log = logging.getLogger(__name__)
 
@@ -57,7 +58,7 @@ class JournalController(BaseController):
     @NotAnonymous()
     def index(self):
         # Return a rendered template
-        p = int(request.params.get('page', 1))
+        p = safe_int(request.params.get('page', 1), 1)
 
         c.user = User.get(self.rhodecode_user.user_id)
         all_repos = self.sa.query(Repository)\
@@ -177,7 +178,7 @@ class JournalController(BaseController):
     @LoginRequired()
     def public_journal(self):
         # Return a rendered template
-        p = int(request.params.get('page', 1))
+        p = safe_int(request.params.get('page', 1), 1)
 
         c.following = self.sa.query(UserFollowing)\
             .filter(UserFollowing.user_id == self.rhodecode_user.user_id)\

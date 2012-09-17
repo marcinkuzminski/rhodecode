@@ -40,7 +40,7 @@ from whoosh.index import open_dir, EmptyIndexError
 from whoosh.qparser import QueryParser, QueryParserError
 from whoosh.query import Phrase, Wildcard, Term, Prefix
 from rhodecode.model.repo import RepoModel
-from rhodecode.lib.utils2 import safe_str
+from rhodecode.lib.utils2 import safe_str, safe_int
 
 log = logging.getLogger(__name__)
 
@@ -83,7 +83,7 @@ class SearchController(BaseController):
             log.debug(cur_query)
 
         if c.cur_query:
-            p = int(request.params.get('page', 1))
+            p = safe_int(request.params.get('page', 1), 1)
             highlight_items = set()
             try:
                 idx = open_dir(config['app_conf']['index_dir'],

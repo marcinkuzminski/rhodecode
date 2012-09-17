@@ -31,6 +31,7 @@ from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.helpers import RepoPage
 from pylons.controllers.util import redirect
+from rhodecode.lib.utils2 import safe_int
 
 log = logging.getLogger(__name__)
 
@@ -44,8 +45,8 @@ class ShortlogController(BaseRepoController):
         super(ShortlogController, self).__before__()
 
     def index(self, repo_name):
-        p = int(request.params.get('page', 1))
-        size = int(request.params.get('size', 20))
+        p = safe_int(request.params.get('page', 1), 1)
+        size = safe_int(request.params.get('size', 20), 20)
 
         def url_generator(**kw):
             return url('shortlog_home', repo_name=repo_name, size=size, **kw)
