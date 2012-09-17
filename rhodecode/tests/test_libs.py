@@ -169,7 +169,7 @@ class TestLibs(unittest.TestCase):
             fake = fake_conf(alternative_gravatar_url='http://test.com/{email}')
             with mock.patch('pylons.config', fake):
                     from pylons import url
-                    assert url.current() == 'http://server.com'
+                    assert url.current() == 'https://server.com'
                     grav = gravatar_url(email_address='test@foo.com', size=24)
                     assert grav == 'http://test.com/test@foo.com'
 
