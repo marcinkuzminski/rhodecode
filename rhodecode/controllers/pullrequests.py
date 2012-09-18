@@ -81,6 +81,19 @@ class PullrequestsController(BaseRepoController):
 
         return hist_l
 
+    def _get_default_rev(self, repo):
+        """
+        Get's default revision to do compare on pull request
+
+        :param repo:
+        """
+        repo = repo.scm_instance
+        if 'default' in repo.branches:
+            return 'default'
+        else:
+            #if repo doesn't have default branch return first found
+            return repo.branches.keys()[0]
+
     def show_all(self, repo_name):
         c.pull_requests = PullRequestModel().get_all(repo_name)
         c.repo_name = repo_name
@@ -106,7 +119,8 @@ class PullrequestsController(BaseRepoController):
         # add org repo to other so we can open pull request agains itself
         c.other_repos.extend(c.org_repos)
 
-        c.default_pull_request = org_repo.repo_name
+        c.default_pull_request = org_repo.repo_name  # repo name pre-selected
+        c.default_pull_request_rev = self._get_default_rev(org_repo)  # revision pre-selected
         c.default_revs = self._get_repo_refs(org_repo.scm_instance)
         #add orginal repo
         other_repos_info[org_repo.repo_name] = {
@@ -130,6 +144,8 @@ class PullrequestsController(BaseRepoController):
         #add parents of this fork also
         if org_repo.parent:
             c.default_pull_request = org_repo.parent.repo_name
+            c.default_pull_request_rev = self._get_default_rev(org_repo.parent)
+            c.default_revs = self._get_repo_refs(org_repo.parent.scm_instance)
             c.other_repos.append((org_repo.parent.repo_name, '%s/%s' % (
                                         org_repo.parent.user.username,
                                         org_repo.parent.repo_name))
