@@ -135,6 +135,7 @@
   PullRequestAutoComplete('user', 'reviewers_container', _USERS_AC_DATA, _GROUPS_AC_DATA);
 
   var other_repos_info = ${c.other_repos_info|n};
+  
   var loadPreview = function(){
 	  YUD.setStyle(YUD.get('pull_request_overview_url').parentElement,'display','none');
       var url = "${h.url('compare_url',
@@ -167,6 +168,12 @@
         }
       }
 
+      YUE.on('other_repo', 'change', function(e){
+    	  var repo_name = e.currentTarget.value;
+    	  // replace the <select> of changed repo
+    	  YUD.get('other_ref').innerHTML = other_repos_info[repo_name]['revs'];
+      });
+      
       ypjax(url,'pull_request_overview', function(data){
     	  var sel_box = YUQ('#pull_request_form #other_repo')[0];
     	  var repo_name = sel_box.options[sel_box.selectedIndex].value;
