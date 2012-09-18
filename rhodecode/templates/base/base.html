@@ -201,9 +201,9 @@
                    <ul>
                    %if h.HasRepoPermissionAll('repository.admin')(c.repo_name):
                      %if h.HasPermissionAll('hg.admin')('access settings on repository'):
-                         <li>${h.link_to(_('settings'),h.url('edit_repo',repo_name=c.repo_name),class_='settings')}</li>
+                         <li>${h.link_to(_('repository settings'),h.url('edit_repo',repo_name=c.repo_name),class_='settings')}</li>
                      %else:
-                         <li>${h.link_to(_('settings'),h.url('repo_settings_home',repo_name=c.repo_name),class_='settings')}</li>
+                         <li>${h.link_to(_('repository settings'),h.url('repo_settings_home',repo_name=c.repo_name),class_='settings')}</li>
                      %endif
                    %endif
 
