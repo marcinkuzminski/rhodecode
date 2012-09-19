@@ -5,7 +5,7 @@ Changelog
 =========
 
 
-1.4.2 (**2012-XX-XX**)
+1.4.2 (**2012-09-12**)
 ----------------------
 
 :status: in-progress
@@ -20,14 +20,19 @@ news
   groups. Now only write access to group allows to create a repostiory
   within that group
 - #565 Add support for {netloc} and {scheme} to alternative_gravatar_url
+- updated translation for zh_CN 
 
 fixes
 +++++
 
 - fixed visual permissions check on repos groups inside groups
+- fixed issues with non-ascii search terms in search, and indexers
+- fixed parsing of page number in GET parameters
+- fixed issues with generating pull-request overview for repos with
+  bookmarks and tags, also preview doesn't loose chosen revision from
+  select dropdown
 
-
-1.4.1 (**2012-09-05**)
+1.4.1 (**2012-09-07**)
 ----------------------
 
 news
