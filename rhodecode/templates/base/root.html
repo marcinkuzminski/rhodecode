@@ -9,8 +9,8 @@
 
         ## CSS ###
         <%def name="css()">
-            <link rel="stylesheet" type="text/css" href="${h.url('/css/style.css')}" media="screen"/>
-            <link rel="stylesheet" type="text/css" href="${h.url('/css/pygments.css')}"/>
+            <link rel="stylesheet" type="text/css" href="${h.url('/css/style.css', ver=c.rhodecode_version)}" media="screen"/>
+            <link rel="stylesheet" type="text/css" href="${h.url('/css/pygments.css', ver=c.rhodecode_version)}"/>
             ## EXTRA FOR CSS
             ${self.css_extra()}
         </%def>
@@ -50,13 +50,13 @@
             };
             var _TM = TRANSLATION_MAP;
             </script>
-            <script type="text/javascript" src="${h.url('/js/yui.2.9.js')}"></script>
+            <script type="text/javascript" src="${h.url('/js/yui.2.9.js', ver=c.rhodecode_version)}"></script>
             <!--[if lt IE 9]>
                <script language="javascript" type="text/javascript" src="${h.url('/js/excanvas.min.js')}"></script>
             <![endif]-->
-            <script type="text/javascript" src="${h.url('/js/yui.flot.js')}"></script>
-            <script type="text/javascript" src="${h.url('/js/native.history.js')}"></script>
-            <script type="text/javascript" src="${h.url('/js/rhodecode.js')}"></script>
+            <script type="text/javascript" src="${h.url('/js/yui.flot.js', ver=c.rhodecode_version)}"></script>
+            <script type="text/javascript" src="${h.url('/js/native.history.js', ver=c.rhodecode_version)}"></script>
+            <script type="text/javascript" src="${h.url('/js/rhodecode.js', ver=c.rhodecode_version)}"></script>
            ## EXTRA FOR JS
            ${self.js_extra()}
 

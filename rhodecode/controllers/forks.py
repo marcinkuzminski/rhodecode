@@ -42,6 +42,7 @@ from rhodecode.model.db import Repository, RepoGroup, UserFollowing, User
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.forms import RepoForkForm
 from rhodecode.model.scm import ScmModel
+from rhodecode.lib.utils2 import safe_int
 
 log = logging.getLogger(__name__)
 
@@ -53,7 +54,7 @@ class ForksController(BaseRepoController):
         super(ForksController, self).__before__()
 
     def __load_defaults(self):
-        c.repo_groups = RepoGroup.groups_choices()
+        c.repo_groups = RepoGroup.groups_choices(check_perms=True)
         c.repo_groups_choices = map(lambda k: unicode(k[0]), c.repo_groups)
         choices, c.landing_revs = ScmModel().get_repo_landing_revs()
         c.landing_revs_choices = choices
@@ -105,7 +106,7 @@ class ForksController(BaseRepoController):
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
                                    'repository.admin')
     def forks(self, repo_name):
-        p = int(request.params.get('page', 1))
+        p = safe_int(request.params.get('page', 1), 1)
         repo_id = c.rhodecode_db_repo.repo_id
         d = []
         for r in Repository.get_repo_forks(repo_id):

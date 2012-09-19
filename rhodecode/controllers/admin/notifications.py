@@ -39,6 +39,7 @@ from rhodecode.model.notification import NotificationModel
 from rhodecode.lib.auth import LoginRequired, NotAnonymous
 from rhodecode.lib import helpers as h
 from rhodecode.model.meta import Session
+from rhodecode.lib.utils2 import safe_int
 
 
 log = logging.getLogger(__name__)
@@ -62,7 +63,8 @@ class NotificationsController(BaseController):
         c.user = self.rhodecode_user
         notif = NotificationModel().get_for_user(self.rhodecode_user.user_id,
                                             filter_=request.GET.getall('type'))
-        p = int(request.params.get('page', 1))
+
+        p = safe_int(request.params.get('page', 1), 1)
         c.notifications = Page(notif, page=p, items_per_page=10)
         c.pull_request_type = Notification.TYPE_PULL_REQUEST
         c.comment_type = [Notification.TYPE_CHANGESET_COMMENT,

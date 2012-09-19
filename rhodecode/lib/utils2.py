@@ -147,6 +147,23 @@ def generate_api_key(username, salt=None):
     return hashlib.sha1(username + salt).hexdigest()
 
 
+def safe_int(val, default=None):
+    """
+    Returns int() of val if val is not convertable to int use default
+    instead
+
+    :param val:
+    :param default:
+    """
+
+    try:
+        val = int(val)
+    except ValueError:
+        val = default
+
+    return val
+
+
 def safe_unicode(str_, from_encoding=None):
     """
     safe unicode function. Does few trick to turn str_ into unicode

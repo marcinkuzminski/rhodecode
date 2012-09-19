@@ -32,6 +32,7 @@ from webhelpers.paginate import Page
 from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator
 from rhodecode.lib.base import BaseController, render
 from rhodecode.model.db import UserLog
+from rhodecode.lib.utils2 import safe_int
 
 log = logging.getLogger(__name__)
 
@@ -50,7 +51,7 @@ class AdminController(BaseController):
                 .options(joinedload(UserLog.repository))\
                 .order_by(UserLog.action_date.desc())
 
-        p = int(request.params.get('page', 1))
+        p = safe_int(request.params.get('page', 1), 1)
         c.users_log = Page(users_log, page=p, items_per_page=10)
         c.log_data = render('admin/admin_log.html')
 

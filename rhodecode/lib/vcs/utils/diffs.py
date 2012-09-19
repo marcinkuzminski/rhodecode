@@ -13,6 +13,7 @@ from mercurial.match import match
 
 from rhodecode.lib.vcs.exceptions import VCSError
 from rhodecode.lib.vcs.nodes import FileNode, NodeError
+from rhodecode.lib.vcs.utils import safe_unicode
 
 
 def get_udiff(filenode_old, filenode_new, show_whitespace=True):
@@ -149,7 +150,7 @@ class DiffProcessor(object):
                 self.adds += 1
             elif l.startswith('-') and not l.startswith('---'):
                 self.removes += 1
-            return l.decode('utf8', 'replace')
+            return safe_unicode(l)
 
         output = list(diffiterator)
         size = len(output)

@@ -9,6 +9,10 @@ env:
   - TEST_DB=mysql://root@127.0.0.1/rhodecode_test
   - TEST_DB=postgresql://postgres@127.0.0.1/rhodecode_test
 
+services:
+  - mysql
+  - postgresql
+
 # command to install dependencies
 before_script:
   - mysql -e 'create database rhodecode_test;'

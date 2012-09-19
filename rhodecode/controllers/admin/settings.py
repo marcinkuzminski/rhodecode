@@ -256,14 +256,31 @@ class SettingsController(BaseController):
 
                 ## EXTENSIONS
                 sett = RhodeCodeUi.get_by_key('largefiles')
+                if not sett:
+                    #make one if it's not there !
+                    sett = RhodeCodeUi()
+                    sett.ui_key = 'largefiles'
+                    sett.ui_section = 'extensions'
                 sett.ui_active = form_result[_f('extensions_largefiles')]
                 Session().add(sett)
 
                 sett = RhodeCodeUi.get_by_key('hgsubversion')
+                if not sett:
+                    #make one if it's not there !
+                    sett = RhodeCodeUi()
+                    sett.ui_key = 'hgsubversion'
+                    sett.ui_section = 'extensions'
+
                 sett.ui_active = form_result[_f('extensions_hgsubversion')]
                 Session().add(sett)
 
 #                sett = RhodeCodeUi.get_by_key('hggit')
+#                if not sett:
+#                    #make one if it's not there !
+#                    sett = RhodeCodeUi()
+#                    sett.ui_key = 'hggit'
+#                    sett.ui_section = 'extensions'
+#
 #                sett.ui_active = form_result[_f('extensions_hggit')]
 #                Session().add(sett)
 
@@ -451,7 +468,7 @@ class SettingsController(BaseController):
     def create_repository(self):
         """GET /_admin/create_repository: Form to create a new item"""
 
-        c.repo_groups = RepoGroup.groups_choices()
+        c.repo_groups = RepoGroup.groups_choices(check_perms=True)
         c.repo_groups_choices = map(lambda k: unicode(k[0]), c.repo_groups)
         choices, c.landing_revs = ScmModel().get_repo_landing_revs()
 

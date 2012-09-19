@@ -3,37 +3,40 @@
 # This file is distributed under the same license as the RhodeCode project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2011.
 # mikespook <mikespook@gmail.com>, 2012.
+# xpol <xpolife@gmail.com>, 2012.
 msgid ""
 msgstr ""
 "Project-Id-Version: RhodeCode 1.2.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2012-09-02 20:30+0200\n"
-"PO-Revision-Date: 2012-04-05 17:37+0800\n"
-"Last-Translator: mikespook <mikespook@gmail.com>\n"
+"PO-Revision-Date: 2012-09-19 13:27+0800\n"
+"Last-Translator: xpol <xpolife@gmail.com>\n"
 "Language-Team: mikespook\n"
-"Plural-Forms: nplurals=1; plural=0\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 0.9.6\n"
+"X-Generator: Poedit 1.5.3\n"
+"X-Poedit-Basepath: E:\\home\\rhodecode\n"
+"X-Poedit-SourceCharset: UTF-8\n"
 
 #: rhodecode/controllers/changelog.py:94
-#, fuzzy
 msgid "All Branches"
-msgstr "分支"
+msgstr "所有分支"
 
 #: rhodecode/controllers/changeset.py:83
 msgid "show white space"
-msgstr ""
+msgstr "显示空白字符"
 
 #: rhodecode/controllers/changeset.py:90 rhodecode/controllers/changeset.py:97
 msgid "ignore white space"
-msgstr ""
+msgstr "忽略空白字符"
 
 #: rhodecode/controllers/changeset.py:157
-#, fuzzy, python-format
+#, python-format
 msgid "%s line context"
-msgstr "文件内容"
+msgstr "%s 行上下文"
 
 #: rhodecode/controllers/changeset.py:333
 #: rhodecode/controllers/changeset.py:348 rhodecode/lib/diffs.py:70
@@ -42,21 +45,21 @@ msgstr "二进制文件"
 
 #: rhodecode/controllers/changeset.py:408
 msgid ""
-"Changing status on a changeset associated witha closed pull request is "
-"not allowed"
-msgstr ""
+"Changing status on a changeset associated witha closed pull request is not "
+"allowed"
+msgstr "不允许修改已关闭拉取请求的修订集状态"
 
 #: rhodecode/controllers/compare.py:69
-#, fuzzy
 msgid "There are no changesets yet"
-msgstr "没有任何变更"
+msgstr "还没有修订集"
 
 #: rhodecode/controllers/error.py:69
 msgid "Home page"
 msgstr "主页"
 
 #: rhodecode/controllers/error.py:98
-msgid "The request could not be understood by the server due to malformed syntax."
+msgid ""
+"The request could not be understood by the server due to malformed syntax."
 msgstr "由于错误的语法，服务器无法对请求进行响应。"
 
 #: rhodecode/controllers/error.py:101
@@ -88,24 +91,22 @@ msgid "%s %s feed"
 msgstr "%s %s 订阅"
 
 #: rhodecode/controllers/feed.py:75
-#, fuzzy
 msgid "commited on"
-msgstr "提交"
+msgstr "提交于"
 
 #: rhodecode/controllers/files.py:84
-#, fuzzy
 msgid "click here to add new file"
-msgstr "添加新用户"
+msgstr "点击此处添加新文件"
 
 #: rhodecode/controllers/files.py:85
-#, fuzzy, python-format
+#, python-format
 msgid "There are no files yet %s"
-msgstr "尚无文件"
+msgstr "还没有文件 %s"
 
 #: rhodecode/controllers/files.py:239 rhodecode/controllers/files.py:299
 #, python-format
 msgid "This repository is has been locked by %s on %s"
-msgstr ""
+msgstr "版本库由 %s 于 %s 锁定"
 
 #: rhodecode/controllers/files.py:266
 #, python-format
@@ -126,19 +127,17 @@ msgid "Error occurred during commit"
 msgstr "提交时发生错误"
 
 #: rhodecode/controllers/files.py:318
-#, fuzzy, python-format
+#, python-format
 msgid "Added %s via RhodeCode"
-msgstr "通过 RhodeCode 修改了 %s"
+msgstr "通过 RhodeCode 添加了 %s"
 
 #: rhodecode/controllers/files.py:332
-#, fuzzy
 msgid "No content"
-msgstr "文件内容"
+msgstr "无内容"
 
 #: rhodecode/controllers/files.py:336
-#, fuzzy
 msgid "No filename"
-msgstr "文件名"
+msgstr "无文件名"
 
 #: rhodecode/controllers/files.py:378
 msgid "downloads disabled"
@@ -161,7 +160,7 @@ msgstr "未知包类型"
 #: rhodecode/templates/changeset/changeset_range.html:13
 #: rhodecode/templates/changeset/changeset_range.html:31
 msgid "Changesets"
-msgstr "变更集"
+msgstr "修订集"
 
 #: rhodecode/controllers/files.py:495 rhodecode/controllers/pullrequests.py:72
 #: rhodecode/controllers/summary.py:232 rhodecode/model/scm.py:543
@@ -176,18 +175,20 @@ msgstr "标签"
 #: rhodecode/controllers/forks.py:73 rhodecode/controllers/admin/repos.py:90
 #, python-format
 msgid ""
-"%s repository is not mapped to db perhaps it was created or renamed from "
-"the filesystem please run the application again in order to rescan "
-"repositories"
+"%s repository is not mapped to db perhaps it was created or renamed from the "
+"filesystem please run the application again in order to rescan repositories"
 msgstr ""
+"版本库 %s 没有映射到数据库，可能是从文件系统创建或者重命名，请重启 RhodeCode "
+"以重新扫描版本库"
 
 #: rhodecode/controllers/forks.py:133 rhodecode/controllers/settings.py:72
 #, python-format
 msgid ""
-"%s repository is not mapped to db perhaps it was created or renamed from "
-"the file system please run the application again in order to rescan "
-"repositories"
+"%s repository is not mapped to db perhaps it was created or renamed from the "
+"file system please run the application again in order to rescan repositories"
 msgstr ""
+" 版本库 %s 没有映射到数据库，可能是从文件系统创建或者重命名，请重启 "
+"RhodeCode 以重新扫描版本库"
 
 #: rhodecode/controllers/forks.py:167
 #, python-format
@@ -197,10 +198,9 @@ msgstr "版本库 %s 被分支到 %s"
 #: rhodecode/controllers/forks.py:181
 #, python-format
 msgid "An error occurred during repository forking %s"
-msgstr ""
+msgstr "在分支版本库 %s 的时候发生错误"
 
 #: rhodecode/controllers/journal.py:202 rhodecode/controllers/journal.py:239
-#, fuzzy
 msgid "public journal"
 msgstr "公共日志"
 
@@ -219,37 +219,32 @@ msgstr "密码重置链接已经发送"
 
 #: rhodecode/controllers/login.py:184
 msgid ""
-"Your password reset was successful, new password has been sent to your "
-"email"
+"Your password reset was successful, new password has been sent to your email"
 msgstr "密码已经成功重置，新密码已经发送到你的邮箱"
 
 #: rhodecode/controllers/pullrequests.py:74 rhodecode/model/scm.py:549
 msgid "Bookmarks"
-msgstr ""
+msgstr "书签"
 
 #: rhodecode/controllers/pullrequests.py:158
 msgid "Pull request requires a title with min. 3 chars"
-msgstr ""
+msgstr "拉取请求的标题至少 3 个字符"
 
 #: rhodecode/controllers/pullrequests.py:160
-#, fuzzy
 msgid "error during creation of pull request"
-msgstr "提交时发生错误"
+msgstr "提交拉取请求时发生错误"
 
 #: rhodecode/controllers/pullrequests.py:181
-#, fuzzy
 msgid "Successfully opened new pull request"
-msgstr "用户删除成功"
+msgstr "成功提交拉取请求"
 
 #: rhodecode/controllers/pullrequests.py:184
-#, fuzzy
 msgid "Error occurred during sending pull request"
-msgstr "提交时发生错误"
+msgstr "提交拉取请求时发生错误"
 
 #: rhodecode/controllers/pullrequests.py:217
-#, fuzzy
 msgid "Successfully deleted pull request"
-msgstr "用户删除成功"
+msgstr "成功删除拉取请求"
 
 #: rhodecode/controllers/search.py:131
 msgid "Invalid search query. Try quoting it."
@@ -273,16 +268,17 @@ msgstr "版本库 %s 成功更新"
 #: rhodecode/controllers/admin/repos.py:284
 #, python-format
 msgid "error occurred during update of repository %s"
-msgstr ""
+msgstr "在更新版本库 %s 的时候发生错误"
 
 #: rhodecode/controllers/settings.py:143
 #: rhodecode/controllers/admin/repos.py:302
 #, python-format
 msgid ""
-"%s repository is not mapped to db perhaps it was moved or renamed  from "
-"the filesystem please run the application again in order to rescan "
-"repositories"
+"%s repository is not mapped to db perhaps it was moved or renamed  from the "
+"filesystem please run the application again in order to rescan repositories"
 msgstr ""
+"版本库 %s 没有映射到数据库，可能是从文件系统创建或者重命名，请重启 RhodeCode "
+"以重新扫描版本库"
 
 #: rhodecode/controllers/settings.py:155
 #: rhodecode/controllers/admin/repos.py:314
@@ -295,11 +291,11 @@ msgstr "已经删除版本库 %s"
 #: rhodecode/controllers/admin/repos.py:330
 #, python-format
 msgid "An error occurred during deletion of %s"
-msgstr ""
+msgstr "在删除 %s 的时候发生错误"
 
 #: rhodecode/controllers/summary.py:138
 msgid "No data loaded yet"
-msgstr ""
+msgstr "数据未加载"
 
 #: rhodecode/controllers/summary.py:142
 #: rhodecode/templates/summary/summary.html:148
@@ -308,35 +304,35 @@ msgstr "该版本库统计功能已经禁用"
 
 #: rhodecode/controllers/admin/ldap_settings.py:50
 msgid "BASE"
-msgstr ""
+msgstr "BASE"
 
 #: rhodecode/controllers/admin/ldap_settings.py:51
 msgid "ONELEVEL"
-msgstr ""
+msgstr "ONELEVEL"
 
 #: rhodecode/controllers/admin/ldap_settings.py:52
 msgid "SUBTREE"
-msgstr ""
+msgstr "SUBTREE"
 
 #: rhodecode/controllers/admin/ldap_settings.py:56
 msgid "NEVER"
-msgstr ""
+msgstr "NEVER"
 
 #: rhodecode/controllers/admin/ldap_settings.py:57
 msgid "ALLOW"
-msgstr ""
+msgstr "ALLOW"
 
 #: rhodecode/controllers/admin/ldap_settings.py:58
 msgid "TRY"
-msgstr ""
+msgstr "TRY"
 
 #: rhodecode/controllers/admin/ldap_settings.py:59
 msgid "DEMAND"
-msgstr ""
+msgstr "DEMAND"
 
 #: rhodecode/controllers/admin/ldap_settings.py:60
 msgid "HARD"
-msgstr ""
+msgstr "HARD"
 
 #: rhodecode/controllers/admin/ldap_settings.py:64
 msgid "No encryption"
@@ -344,11 +340,11 @@ msgstr "未加密"
 
 #: rhodecode/controllers/admin/ldap_settings.py:65
 msgid "LDAPS connection"
-msgstr ""
+msgstr "LDAPS 连接"
 
 #: rhodecode/controllers/admin/ldap_settings.py:66
 msgid "START_TLS on LDAP connection"
-msgstr ""
+msgstr "LDAP 连接上的 START_TLS"
 
 #: rhodecode/controllers/admin/ldap_settings.py:126
 msgid "Ldap settings updated successfully"
@@ -356,11 +352,11 @@ msgstr "LDAP 设置已经成功更新"
 
 #: rhodecode/controllers/admin/ldap_settings.py:130
 msgid "Unable to activate ldap. The \"python-ldap\" library is missing."
-msgstr "无法启用 LDAP。库“python-ldap”缺失。"
+msgstr "无法启用 LDAP。缺失“python-ldap”库。"
 
 #: rhodecode/controllers/admin/ldap_settings.py:147
 msgid "error occurred during update of ldap settings"
-msgstr ""
+msgstr "更新 LDAP 设置时发生错误"
 
 #: rhodecode/controllers/admin/permissions.py:59
 msgid "None"
@@ -427,11 +423,11 @@ msgstr "成功更新默认权限"
 
 #: rhodecode/controllers/admin/permissions.py:130
 msgid "error occurred during update of permissions"
-msgstr ""
+msgstr "更新权限时发生错误"
 
 #: rhodecode/controllers/admin/repos.py:123
 msgid "--REMOVE FORK--"
-msgstr ""
+msgstr "-- 移除分支 --"
 
 #: rhodecode/controllers/admin/repos.py:192
 #, python-format
@@ -446,67 +442,65 @@ msgstr "建立版本库 %s"
 #: rhodecode/controllers/admin/repos.py:227
 #, python-format
 msgid "error occurred during creation of repository %s"
-msgstr ""
+msgstr "创建版本库时发生错误 %s"
 
 #: rhodecode/controllers/admin/repos.py:319
 #, python-format
 msgid "Cannot delete %s it still contains attached forks"
-msgstr ""
+msgstr "无法删除 %s 因为它还有其他分支版本库"
 
 #: rhodecode/controllers/admin/repos.py:348
 msgid "An error occurred during deletion of repository user"
-msgstr ""
+msgstr "删除版本库用户时发生错误"
 
 #: rhodecode/controllers/admin/repos.py:367
 msgid "An error occurred during deletion of repository users groups"
-msgstr ""
+msgstr "删除版本库用户组时发生错误"
 
 #: rhodecode/controllers/admin/repos.py:385
 msgid "An error occurred during deletion of repository stats"
-msgstr ""
+msgstr "删除版本库统计时发生错误"
 
 #: rhodecode/controllers/admin/repos.py:402
 msgid "An error occurred during cache invalidation"
-msgstr ""
+msgstr "清除缓存时发生错误"
 
 #: rhodecode/controllers/admin/repos.py:422
-#, fuzzy
 msgid "An error occurred during unlocking"
-msgstr "在搜索操作中发生异常"
+msgstr "解锁时发生错误"
 
 #: rhodecode/controllers/admin/repos.py:442
 msgid "Updated repository visibility in public journal"
-msgstr ""
+msgstr "成功更新在公共日志中的可见性"
 
 #: rhodecode/controllers/admin/repos.py:446
 msgid "An error occurred during setting this repository in public journal"
-msgstr ""
+msgstr "设置版本库到公共日志时发生错误"
 
 #: rhodecode/controllers/admin/repos.py:451 rhodecode/model/validators.py:299
 msgid "Token mismatch"
-msgstr ""
+msgstr "令牌不匹配"
 
 #: rhodecode/controllers/admin/repos.py:464
 msgid "Pulled from remote location"
-msgstr ""
+msgstr "成功拉取自远程路径"
 
 #: rhodecode/controllers/admin/repos.py:466
 msgid "An error occurred during pull from remote location"
-msgstr ""
+msgstr "从远程路径拉取时发生错误"
 
 #: rhodecode/controllers/admin/repos.py:482
 msgid "Nothing"
-msgstr ""
+msgstr "无"
 
 #: rhodecode/controllers/admin/repos.py:484
-#, fuzzy, python-format
+#, python-format
 msgid "Marked repo %s as fork of %s"
-msgstr "新版本库 %s 基于 %s 建立。"
+msgstr "成功将版本库 %s 标记为从 %s 分支"
 
 #: rhodecode/controllers/admin/repos.py:488
-#, fuzzy
 msgid "An error occurred during this operation"
-msgstr "在搜索操作中发生异常"
+msgstr "在搜索操作中发生错误"
 
 #: rhodecode/controllers/admin/repos_groups.py:116
 #, python-format
@@ -516,7 +510,7 @@ msgstr "建立版本库组 %s"
 #: rhodecode/controllers/admin/repos_groups.py:129
 #, python-format
 msgid "error occurred during creation of repos group %s"
-msgstr ""
+msgstr "创建版本库组时发生错误 %s"
 
 #: rhodecode/controllers/admin/repos_groups.py:163
 #, python-format
@@ -526,12 +520,12 @@ msgstr "更新版本库组 %s"
 #: rhodecode/controllers/admin/repos_groups.py:176
 #, python-format
 msgid "error occurred during update of repos group %s"
-msgstr ""
+msgstr "更新版本库组时发生错误 %s"
 
 #: rhodecode/controllers/admin/repos_groups.py:194
 #, python-format
 msgid "This group contains %s repositores and cannot be deleted"
-msgstr ""
+msgstr "这个组内有 %s 个版本库因而无法删除"
 
 #: rhodecode/controllers/admin/repos_groups.py:202
 #, python-format
@@ -540,27 +534,26 @@ msgstr "移除版本库组 %s"
 
 #: rhodecode/controllers/admin/repos_groups.py:208
 msgid "Cannot delete this group it still contains subgroups"
-msgstr ""
+msgstr "不能删除包含子组的组"
 
 #: rhodecode/controllers/admin/repos_groups.py:213
 #: rhodecode/controllers/admin/repos_groups.py:218
 #, python-format
 msgid "error occurred during deletion of repos group %s"
-msgstr ""
+msgstr "删除版本库组时发生错误 %s"
 
 #: rhodecode/controllers/admin/repos_groups.py:238
-#, fuzzy
 msgid "An error occurred during deletion of group user"
-msgstr "在搜索操作中发生异常"
+msgstr "删除组用户时发生错误"
 
 #: rhodecode/controllers/admin/repos_groups.py:258
 msgid "An error occurred during deletion of group users groups"
-msgstr ""
+msgstr "删除版本库组的用户组时发生错误"
 
 #: rhodecode/controllers/admin/settings.py:121
 #, python-format
 msgid "Repositories successfully rescanned added: %s,removed: %s"
-msgstr ""
+msgstr "重新扫描版本库成功，增加 %s， 移除 %s"
 
 #: rhodecode/controllers/admin/settings.py:129
 msgid "Whoosh reindex task scheduled"
@@ -573,26 +566,23 @@ msgstr "更新应用设置"
 #: rhodecode/controllers/admin/settings.py:164
 #: rhodecode/controllers/admin/settings.py:275
 msgid "error occurred during updating application settings"
-msgstr ""
+msgstr "更新设置时发生错误"
 
 #: rhodecode/controllers/admin/settings.py:200
-#, fuzzy
 msgid "Updated visualisation settings"
-msgstr "更新应用设置"
+msgstr "成功更新可视化设置"
 
 #: rhodecode/controllers/admin/settings.py:205
-#, fuzzy
 msgid "error occurred during updating visualisation settings"
-msgstr "提交时发生错误"
+msgstr "更新可视化设置时发生错误"
 
 #: rhodecode/controllers/admin/settings.py:271
-#, fuzzy
 msgid "Updated VCS settings"
-msgstr "更新 mercurial 设置"
+msgstr "成功更新版本控制系统设置"
 
 #: rhodecode/controllers/admin/settings.py:285
 msgid "Added new hook"
-msgstr "新增钩子"
+msgstr "新建钩子"
 
 #: rhodecode/controllers/admin/settings.py:297
 msgid "Updated hooks"
@@ -600,15 +590,15 @@ msgstr "更新钩子"
 
 #: rhodecode/controllers/admin/settings.py:301
 msgid "error occurred during hook creation"
-msgstr ""
+msgstr "创建钩子时发生错误"
 
 #: rhodecode/controllers/admin/settings.py:320
 msgid "Email task created"
-msgstr ""
+msgstr "已创建电子邮件任务"
 
 #: rhodecode/controllers/admin/settings.py:375
 msgid "You can't edit this user since it's crucial for entire application"
-msgstr ""
+msgstr "由于是系统帐号，无法编辑该用户"
 
 #: rhodecode/controllers/admin/settings.py:406
 msgid "Your account was updated successfully"
@@ -618,7 +608,7 @@ msgstr "你的帐号已经更新完成"
 #: rhodecode/controllers/admin/users.py:191
 #, python-format
 msgid "error occurred during update of user %s"
-msgstr ""
+msgstr "更新用户 %s 时发生错误"
 
 #: rhodecode/controllers/admin/users.py:130
 #, python-format
@@ -628,7 +618,7 @@ msgstr "创建用户 %s"
 #: rhodecode/controllers/admin/users.py:142
 #, python-format
 msgid "error occurred during creation of user %s"
-msgstr ""
+msgstr "创建用户 %s 时发生错误"
 
 #: rhodecode/controllers/admin/users.py:171
 msgid "User updated successfully"
@@ -640,7 +630,7 @@ msgstr "用户删除成功"
 
 #: rhodecode/controllers/admin/users.py:212
 msgid "An error occurred during deletion of user"
-msgstr ""
+msgstr "删除用户时发生错误"
 
 #: rhodecode/controllers/admin/users.py:226
 msgid "You can't edit this user"
@@ -648,42 +638,37 @@ msgstr "无法编辑该用户"
 
 #: rhodecode/controllers/admin/users.py:266
 msgid "Granted 'repository create' permission to user"
-msgstr ""
+msgstr "已授予用户‘创建版本库’的权限"
 
 #: rhodecode/controllers/admin/users.py:271
 msgid "Revoked 'repository create' permission to user"
-msgstr ""
+msgstr "已撤销用户‘创建版本库’的权限"
 
 #: rhodecode/controllers/admin/users.py:277
-#, fuzzy
 msgid "Granted 'repository fork' permission to user"
-msgstr "版本库权限"
+msgstr "成功授予了用户“分支版本库”权限"
 
 #: rhodecode/controllers/admin/users.py:282
-#, fuzzy
 msgid "Revoked 'repository fork' permission to user"
-msgstr "版本库权限"
+msgstr "成功撤销用户“分支版本库”权限"
 
 #: rhodecode/controllers/admin/users.py:288
 #: rhodecode/controllers/admin/users_groups.py:255
-#, fuzzy
 msgid "An error occurred during permissions saving"
-msgstr "在搜索操作中发生异常"
+msgstr "保存权限时发生错误"
 
 #: rhodecode/controllers/admin/users.py:303
 #, python-format
 msgid "Added email %s to user"
-msgstr ""
+msgstr "已为用户添加电子邮件 %s"
 
 #: rhodecode/controllers/admin/users.py:309
-#, fuzzy
 msgid "An error occurred during email saving"
-msgstr "在搜索操作中发生异常"
+msgstr "保存电子邮件时发生错误"
 
 #: rhodecode/controllers/admin/users.py:319
-#, fuzzy
 msgid "Removed email from user"
-msgstr "移除版本库组 %s"
+msgstr "成功删除用户电子邮件"
 
 #: rhodecode/controllers/admin/users_groups.py:84
 #, python-format
@@ -693,7 +678,7 @@ msgstr "建立用户组 %s"
 #: rhodecode/controllers/admin/users_groups.py:95
 #, python-format
 msgid "error occurred during creation of users group %s"
-msgstr ""
+msgstr "创建用户组 %s 时发生错误"
 
 #: rhodecode/controllers/admin/users_groups.py:135
 #, python-format
@@ -703,7 +688,7 @@ msgstr "更新用户组 %s"
 #: rhodecode/controllers/admin/users_groups.py:157
 #, python-format
 msgid "error occurred during update of users group %s"
-msgstr ""
+msgstr "更新用户组 %s 时发生错误"
 
 #: rhodecode/controllers/admin/users_groups.py:174
 msgid "successfully deleted users group"
@@ -711,23 +696,23 @@ msgstr "删除用户组成功"
 
 #: rhodecode/controllers/admin/users_groups.py:179
 msgid "An error occurred during deletion of users group"
-msgstr ""
+msgstr "删除用户组时发生错误"
 
 #: rhodecode/controllers/admin/users_groups.py:233
 msgid "Granted 'repository create' permission to users group"
-msgstr ""
+msgstr "已授予用户组‘创建版本库’的权限"
 
 #: rhodecode/controllers/admin/users_groups.py:238
 msgid "Revoked 'repository create' permission to users group"
-msgstr ""
+msgstr "已撤销用户组‘创建版本库’的权限"
 
 #: rhodecode/controllers/admin/users_groups.py:244
 msgid "Granted 'repository fork' permission to users group"
-msgstr ""
+msgstr "已授予用户组‘分支版本库’的权限"
 
 #: rhodecode/controllers/admin/users_groups.py:249
 msgid "Revoked 'repository fork' permission to users group"
-msgstr ""
+msgstr "已撤销用户组‘分支版本库’的权限"
 
 #: rhodecode/lib/auth.py:499
 msgid "You need to be a registered user to perform this action"
@@ -738,51 +723,51 @@ msgid "You need to be a signed in to view this page"
 msgstr "必须登录才能访问该页面"
 
 #: rhodecode/lib/diffs.py:86
-msgid "Changeset was too big and was cut off, use diff menu to display this diff"
-msgstr "变更集因过大而被截断，可查看原始变更集作为替代"
+msgid ""
+"Changeset was too big and was cut off, use diff menu to display this diff"
+msgstr "修订集因过大而被截断，可查看原始修订集作为替代"
 
 #: rhodecode/lib/diffs.py:96
-#, fuzzy
 msgid "No changes detected"
-msgstr "尚无修订"
+msgstr "未发现差异"
 
 #: rhodecode/lib/helpers.py:372
 #, python-format
 msgid "%a, %d %b %Y %H:%M:%S"
-msgstr ""
+msgstr "%Y/%b/%d %H:%M:%S %a"
 
 #: rhodecode/lib/helpers.py:484
 msgid "True"
-msgstr ""
+msgstr "是"
 
 #: rhodecode/lib/helpers.py:488
 msgid "False"
-msgstr ""
+msgstr "否"
 
 #: rhodecode/lib/helpers.py:532
-#, fuzzy
 msgid "Changeset not found"
-msgstr "修改"
+msgstr "未找到修订集"
 
 #: rhodecode/lib/helpers.py:555
 #, python-format
 msgid "Show all combined changesets %s->%s"
-msgstr ""
+msgstr "显示合并的修订集 %s->%s"
 
 #: rhodecode/lib/helpers.py:561
 msgid "compare view"
-msgstr ""
+msgstr "比较显示"
 
 #: rhodecode/lib/helpers.py:581
 msgid "and"
-msgstr ""
+msgstr "还有"
 
 #: rhodecode/lib/helpers.py:582
 #, python-format
 msgid "%s more"
-msgstr ""
+msgstr "%s 个"
 
-#: rhodecode/lib/helpers.py:583 rhodecode/templates/changelog/changelog.html:48
+#: rhodecode/lib/helpers.py:583
+#: rhodecode/templates/changelog/changelog.html:48
 msgid "revisions"
 msgstr "修订"
 
@@ -795,257 +780,235 @@ msgstr "分支名称"
 #: rhodecode/templates/pullrequests/pullrequest_show.html:12
 #, python-format
 msgid "Pull request #%s"
-msgstr ""
+msgstr "拉取请求 #%s"
 
 #: rhodecode/lib/helpers.py:626
 msgid "[deleted] repository"
-msgstr ""
+msgstr "[删除] 版本库"
 
 #: rhodecode/lib/helpers.py:628 rhodecode/lib/helpers.py:638
 msgid "[created] repository"
-msgstr ""
+msgstr "[创建] 版本库"
 
 #: rhodecode/lib/helpers.py:630
-#, fuzzy
 msgid "[created] repository as fork"
-msgstr "建立版本库 %s"
+msgstr "[创建] 分支版本库"
 
 #: rhodecode/lib/helpers.py:632 rhodecode/lib/helpers.py:640
 msgid "[forked] repository"
-msgstr ""
+msgstr "[分支] 版本库"
 
 #: rhodecode/lib/helpers.py:634 rhodecode/lib/helpers.py:642
 msgid "[updated] repository"
-msgstr ""
+msgstr "[更新] 版本库"
 
 #: rhodecode/lib/helpers.py:636
 msgid "[delete] repository"
-msgstr ""
+msgstr "[删除] 版本库"
 
 #: rhodecode/lib/helpers.py:644
-#, fuzzy
 msgid "[created] user"
-msgstr "创建用户 %s"
+msgstr "[创建] 用户"
 
 #: rhodecode/lib/helpers.py:646
-#, fuzzy
 msgid "[updated] user"
-msgstr "更新用户组 %s"
+msgstr "[更新] 用户"
 
 #: rhodecode/lib/helpers.py:648
-#, fuzzy
 msgid "[created] users group"
-msgstr "建立用户组 %s"
+msgstr "[创建] 用户组"
 
 #: rhodecode/lib/helpers.py:650
-#, fuzzy
 msgid "[updated] users group"
-msgstr "更新用户组 %s"
+msgstr "[更新] 用户组"
 
 #: rhodecode/lib/helpers.py:652
 msgid "[commented] on revision in repository"
-msgstr ""
+msgstr "[评论] 了版本库中的修订"
 
 #: rhodecode/lib/helpers.py:654
-#, fuzzy
 msgid "[commented] on pull request for"
-msgstr "创建用户 %s"
+msgstr "[评论] 拉取请求"
 
 #: rhodecode/lib/helpers.py:656
 msgid "[closed] pull request for"
-msgstr ""
+msgstr "[关闭] 拉取请求"
 
 #: rhodecode/lib/helpers.py:658
 msgid "[pushed] into"
-msgstr ""
+msgstr "[推送] 到"
 
 #: rhodecode/lib/helpers.py:660
 msgid "[committed via RhodeCode] into repository"
-msgstr ""
+msgstr "[通过 RhodeCode 提交] 到版本库"
 
 #: rhodecode/lib/helpers.py:662
 msgid "[pulled from remote] into repository"
-msgstr ""
+msgstr "[远程拉取] 到版本库"
 
 #: rhodecode/lib/helpers.py:664
 msgid "[pulled] from"
-msgstr ""
+msgstr "[拉取] 自"
 
 #: rhodecode/lib/helpers.py:666
 msgid "[started following] repository"
-msgstr ""
+msgstr "[开始关注] 版本库"
 
 #: rhodecode/lib/helpers.py:668
 msgid "[stopped following] repository"
-msgstr ""
+msgstr "[停止关注] 版本库"
 
 #: rhodecode/lib/helpers.py:840
 #, python-format
 msgid " and %s more"
-msgstr ""
+msgstr "还有 %s 个"
 
 #: rhodecode/lib/helpers.py:844
 msgid "No Files"
 msgstr "没有文件"
 
 #: rhodecode/lib/utils2.py:335
-#, fuzzy, python-format
+#, python-format
 msgid "%d year"
 msgid_plural "%d years"
-msgstr[0] "年"
+msgstr[0] "%d 年"
 
 #: rhodecode/lib/utils2.py:336
-#, fuzzy, python-format
+#, python-format
 msgid "%d month"
 msgid_plural "%d months"
-msgstr[0] "月"
+msgstr[0] "%d 月"
 
 #: rhodecode/lib/utils2.py:337
-#, fuzzy, python-format
+#, python-format
 msgid "%d day"
 msgid_plural "%d days"
-msgstr[0] "日"
+msgstr[0] "%d 天"
 
 #: rhodecode/lib/utils2.py:338
-#, fuzzy, python-format
+#, python-format
 msgid "%d hour"
 msgid_plural "%d hours"
-msgstr[0] "时"
+msgstr[0] "%d 小时"
 
 #: rhodecode/lib/utils2.py:339
-#, fuzzy, python-format
+#, python-format
 msgid "%d minute"
 msgid_plural "%d minutes"
-msgstr[0] "分"
+msgstr[0] "%d 分钟"
 
 #: rhodecode/lib/utils2.py:340
-#, fuzzy, python-format
+#, python-format
 msgid "%d second"
 msgid_plural "%d seconds"
-msgstr[0] "秒"
+msgstr[0] "%d 秒"
 
 #: rhodecode/lib/utils2.py:355
-#, fuzzy, python-format
+#, python-format
 msgid "%s ago"
-msgstr "之前"
+msgstr "%s 之前"
 
 #: rhodecode/lib/utils2.py:357
 #, python-format
 msgid "%s and %s ago"
-msgstr ""
+msgstr "%s 零 %s 之前"
 
 #: rhodecode/lib/utils2.py:360
 msgid "just now"
-msgstr "现在"
+msgstr "刚才"
 
 #: rhodecode/lib/celerylib/tasks.py:269
-#, fuzzy
 msgid "password reset link"
-msgstr "密码重置链接已经发送"
+msgstr "密码重置链接"
 
 #: rhodecode/model/comment.py:110
 #, python-format
 msgid "on line %s"
-msgstr ""
+msgstr "在 %s 行"
 
 #: rhodecode/model/comment.py:157
 msgid "[Mention]"
-msgstr ""
+msgstr "[提及]"
 
 #: rhodecode/model/db.py:1140
-#, fuzzy
 msgid "Repository no access"
-msgstr "个版本库"
+msgstr "无版本库访问权限"
 
 #: rhodecode/model/db.py:1141
-#, fuzzy
 msgid "Repository read access"
-msgstr "这个版本库已经存在"
+msgstr "版本库读取权限"
 
 #: rhodecode/model/db.py:1142
-#, fuzzy
 msgid "Repository write access"
-msgstr "个版本库"
+msgstr "版本库写入权限"
 
 #: rhodecode/model/db.py:1143
-#, fuzzy
 msgid "Repository admin access"
-msgstr "个版本库"
+msgstr "版本库管理权限"
 
 #: rhodecode/model/db.py:1145
-#, fuzzy
 msgid "Repositories Group no access"
-msgstr "版本库组"
+msgstr "无版本库组访问权限"
 
 #: rhodecode/model/db.py:1146
-#, fuzzy
 msgid "Repositories Group read access"
-msgstr "版本库组"
+msgstr "版本库组读取权限"
 
 #: rhodecode/model/db.py:1147
-#, fuzzy
 msgid "Repositories Group write access"
-msgstr "版本库组"
+msgstr "版本库组写入"
 
 #: rhodecode/model/db.py:1148
-#, fuzzy
 msgid "Repositories Group admin access"
-msgstr "版本库组"
+msgstr "版本库组管理权限"
 
 #: rhodecode/model/db.py:1150
-#, fuzzy
 msgid "RhodeCode Administrator"
-msgstr "用户管理员"
+msgstr "RhodeCode 管理员"
 
 #: rhodecode/model/db.py:1151
-#, fuzzy
 msgid "Repository creation disabled"
-msgstr "建立版本库"
+msgstr "禁用创建版本库"
 
 #: rhodecode/model/db.py:1152
-#, fuzzy
 msgid "Repository creation enabled"
-msgstr "建立版本库"
+msgstr "允许创建版本库"
 
 #: rhodecode/model/db.py:1153
-#, fuzzy
 msgid "Repository forking disabled"
-msgstr "建立版本库"
+msgstr "禁用分支 版本库"
 
 #: rhodecode/model/db.py:1154
-#, fuzzy
 msgid "Repository forking enabled"
-msgstr "建立版本库"
+msgstr "允许分支版本库"
 
 #: rhodecode/model/db.py:1155
-#, fuzzy
 msgid "Register disabled"
-msgstr "禁用"
+msgstr "禁用注册"
 
 #: rhodecode/model/db.py:1156
 msgid "Register new user with RhodeCode with manual activation"
-msgstr ""
+msgstr "用手动激活注册新用户"
 
 #: rhodecode/model/db.py:1159
 msgid "Register new user with RhodeCode with auto activation"
-msgstr ""
+msgstr "用自动激活注册新用户"
 
 #: rhodecode/model/db.py:1579
 msgid "Not Reviewed"
-msgstr ""
+msgstr "未检视"
 
 #: rhodecode/model/db.py:1580
-#, fuzzy
 msgid "Approved"
-msgstr "移除"
+msgstr "已批准"
 
 #: rhodecode/model/db.py:1581
 msgid "Rejected"
-msgstr ""
+msgstr "驳回"
 
 #: rhodecode/model/db.py:1582
 msgid "Under Review"
-msgstr ""
+msgstr "检视中"
 
 #: rhodecode/model/forms.py:43
 msgid "Please enter a login"
@@ -1054,7 +1017,7 @@ msgstr "请登录"
 #: rhodecode/model/forms.py:44
 #, python-format
 msgid "Enter a value %(min)i characters long or more"
-msgstr ""
+msgstr "输入一个不少于 %(min)i 个字符的值"
 
 #: rhodecode/model/forms.py:52
 msgid "Please enter a password"
@@ -1063,46 +1026,42 @@ msgstr "请输入密码"
 #: rhodecode/model/forms.py:53
 #, python-format
 msgid "Enter %(min)i characters or more"
-msgstr ""
+msgstr "输入少于 %(min)i 个字符"
 
 #: rhodecode/model/notification.py:220
 msgid "commented on commit"
-msgstr ""
+msgstr "评论了评论"
 
 #: rhodecode/model/notification.py:221
-#, fuzzy
 msgid "sent message"
-msgstr "提交信息"
+msgstr "发送信息"
 
 #: rhodecode/model/notification.py:222
 msgid "mentioned you"
-msgstr ""
+msgstr "提到了你"
 
 #: rhodecode/model/notification.py:223
-#, fuzzy
 msgid "registered in RhodeCode"
-msgstr "成功注册到 rhodecode"
+msgstr "注册到 RhodeCode"
 
 #: rhodecode/model/notification.py:224
 msgid "opened new pull request"
-msgstr ""
+msgstr "创建新的拉取请求"
 
 #: rhodecode/model/notification.py:225
 msgid "commented on pull request"
-msgstr ""
+msgstr "评论了拉取请求"
 
 #: rhodecode/model/pull_request.py:84
 #, python-format
 msgid "%(user)s wants you to review pull request #%(pr_id)s"
-msgstr ""
+msgstr "%(user)s 想要你检视拉取请求 #%(pr_id)s"
 
 #: rhodecode/model/scm.py:535
-#, fuzzy
 msgid "latest tip"
-msgstr "最后登录"
+msgstr "最后 tip 版本"
 
 #: rhodecode/model/user.py:230
-#, fuzzy
 msgid "new user registration"
 msgstr "[RhodeCode] 新用户注册"
 
@@ -1116,71 +1075,73 @@ msgid "You can't remove this user since it's crucial for entire application"
 msgstr "由于是系统帐号，无法删除该用户"
 
 #: rhodecode/model/user.py:329
-#, fuzzy, python-format
+#, python-format
 msgid ""
-"user \"%s\" still owns %s repositories and cannot be removed. Switch "
-"owners or remove those repositories. %s"
-msgstr "由于该用户拥有版本库 %s 因而无法删除，请变更版本库所有者或删除版本库"
+"user \"%s\" still owns %s repositories and cannot be removed. Switch owners "
+"or remove those repositories. %s"
+msgstr ""
+"由于用户 \"%s\" 拥有版本库 %s 因而无法删除，请修改版本库所有者或删除版本"
+"库。%s"
 
 #: rhodecode/model/validators.py:35 rhodecode/model/validators.py:36
 msgid "Value cannot be an empty list"
-msgstr ""
+msgstr "值不能为空"
 
 #: rhodecode/model/validators.py:82
-#, fuzzy, python-format
+#, python-format
 msgid "Username \"%(username)s\" already exists"
-msgstr "该用户名已经存在"
+msgstr "用户名称 %(username)s 已经存在"
 
 #: rhodecode/model/validators.py:84
 #, python-format
 msgid "Username \"%(username)s\" is forbidden"
-msgstr ""
+msgstr "不允许用户名 \"%(username)s\""
 
 #: rhodecode/model/validators.py:86
 msgid ""
-"Username may only contain alphanumeric characters underscores, periods or"
-" dashes and must begin with alphanumeric character"
-msgstr "只能使用字母、数字、下划线、小数点或减号作为用户名，且必须由数字或字母开头"
+"Username may only contain alphanumeric characters underscores, periods or "
+"dashes and must begin with alphanumeric character"
+msgstr ""
+"只能使用字母、数字、下划线、小数点或减号作为用户名，且必须由数字或字母开头"
 
 #: rhodecode/model/validators.py:114
-#, fuzzy, python-format
+#, python-format
 msgid "Username %(username)s is not valid"
-msgstr "用户或用户组名称无效"
+msgstr "用户名称 %(username)s 无效"
 
 #: rhodecode/model/validators.py:133
-#, fuzzy
 msgid "Invalid users group name"
-msgstr "无效用户名"
+msgstr "无效的用户组名"
 
 #: rhodecode/model/validators.py:134
-#, fuzzy, python-format
+#, python-format
 msgid "Users group \"%(usersgroup)s\" already exists"
-msgstr "该用户组名称已经存在"
+msgstr "用户组 \"%(usersgroup)s\" 已经存在"
 
 #: rhodecode/model/validators.py:136
 msgid ""
 "users group name may only contain  alphanumeric characters underscores, "
 "periods or dashes and must begin with alphanumeric character"
-msgstr "只能使用字母、数字、下划线、小数点或减号作为用户组名，且必须由数字或字母开头"
+msgstr ""
+"只能使用字母、数字、下划线、小数点或减号作为用户组名，且必须由数字或字母开头"
 
 #: rhodecode/model/validators.py:174
 msgid "Cannot assign this group as parent"
-msgstr ""
+msgstr "不能将这个组作为 parent"
 
 #: rhodecode/model/validators.py:175
-#, fuzzy, python-format
+#, python-format
 msgid "Group \"%(group_name)s\" already exists"
-msgstr "该用户名已经存在"
+msgstr "组 \"%(group_name)s\" 已经存在"
 
 #: rhodecode/model/validators.py:177
-#, fuzzy, python-format
+#, python-format
 msgid "Repository with name \"%(group_name)s\" already exists"
-msgstr "这个版本库已经存在"
+msgstr "已经存在名为 \"%(group_name)s\" 的版本库"
 
 #: rhodecode/model/validators.py:235
-#, fuzzy
 msgid "Invalid characters (non-ascii) in password"
-msgstr "密码含有无效字符"
+msgstr "密码含有无效（非ASCII）字符"
 
 #: rhodecode/model/validators.py:250
 msgid "Passwords do not match"
@@ -1199,37 +1160,36 @@ msgid "Your account is disabled"
 msgstr "该帐号已被禁用"
 
 #: rhodecode/model/validators.py:313
-#, fuzzy, python-format
+#, python-format
 msgid "Repository name %(repo)s is disallowed"
-msgstr "该版本库名称被禁用"
+msgstr "版本库名称不能为 %(repo)s"
 
 #: rhodecode/model/validators.py:315
-#, fuzzy, python-format
+#, python-format
 msgid "Repository named %(repo)s already exists"
-msgstr "这个版本库已经存在"
+msgstr "已经存在版本库 %(repo)s"
 
 #: rhodecode/model/validators.py:316
-#, fuzzy, python-format
+#, python-format
 msgid "Repository \"%(repo)s\" already exists in group \"%(group)s\""
-msgstr "组中已经存在该版本库"
+msgstr "版本库组 \"%(group)s\" 中已经存在版本库 \"%(repo)s\""
 
 #: rhodecode/model/validators.py:318
-#, fuzzy, python-format
+#, python-format
 msgid "Repositories group with name \"%(repo)s\" already exists"
-msgstr "这个版本库已经存在"
+msgstr "已经存在名为 \"%(repo)s\" 的版本库组"
 
 #: rhodecode/model/validators.py:431
 msgid "invalid clone url"
-msgstr "无效的 clone 地址"
+msgstr "无效的克隆地址"
 
 #: rhodecode/model/validators.py:432
 msgid "Invalid clone url, provide a valid clone http(s)/svn+http(s) url"
-msgstr ""
+msgstr "无效的克隆地址，提供一个有效的克隆 http(s) 或 svn+http(s) 地址"
 
 #: rhodecode/model/validators.py:457
-#, fuzzy
 msgid "Fork have to be the same type as parent"
-msgstr "分支必须使用相同的版本库类型"
+msgstr "分支必须使用和父版本库相同的类型"
 
 #: rhodecode/model/validators.py:478
 msgid "This username or users group name is not valid"
@@ -1244,24 +1204,24 @@ msgid "This e-mail address is already taken"
 msgstr "该邮件地址已被使用"
 
 #: rhodecode/model/validators.py:597
-#, fuzzy, python-format
+#, python-format
 msgid "e-mail \"%(email)s\" does not exist."
-msgstr "该邮件地址不存在"
+msgstr "邮件地址  \"%(email)s\" 不存在"
 
 #: rhodecode/model/validators.py:634
 msgid ""
-"The LDAP Login attribute of the CN must be specified - this is the name "
-"of the attribute that is equivalent to \"username\""
-msgstr ""
+"The LDAP Login attribute of the CN must be specified - this is the name of "
+"the attribute that is equivalent to \"username\""
+msgstr "LDAP 登陆属性的 CN 必须指定 - 这个名字作为用户名"
 
 #: rhodecode/model/validators.py:653
 #, python-format
 msgid "Revisions %(revs)s are already part of pull request or have set status"
-msgstr ""
+msgstr "修订 %(revs)s 已经包含在拉取请求中或者或者已经设置状态"
 
 #: rhodecode/templates/index.html:3
 msgid "Dashboard"
-msgstr ""
+msgstr "控制面板"
 
 #: rhodecode/templates/index_base.html:6
 #: rhodecode/templates/repo_switcher_list.html:4
@@ -1285,7 +1245,7 @@ msgstr "个版本库"
 #: rhodecode/templates/index_base.html:15
 #: rhodecode/templates/admin/repos/repos.html:21
 msgid "ADD REPOSITORY"
-msgstr "新增版本库"
+msgstr "新建版本库"
 
 #: rhodecode/templates/index_base.html:29
 #: rhodecode/templates/admin/repos_groups/repos_groups_add.html:32
@@ -1351,7 +1311,7 @@ msgstr "最后修改"
 #: rhodecode/templates/admin/users/user_edit_my_account.html:159
 #: rhodecode/templates/journal/journal.html:188
 msgid "Tip"
-msgstr ""
+msgstr "Tip"
 
 #: rhodecode/templates/index_base.html:74
 #: rhodecode/templates/index_base.html:173
@@ -1364,26 +1324,25 @@ msgstr "所有者"
 #: rhodecode/templates/summary/summary.html:48
 #: rhodecode/templates/summary/summary.html:51
 msgid "RSS"
-msgstr ""
+msgstr "RSS"
 
 #: rhodecode/templates/index_base.html:76
 msgid "Atom"
-msgstr ""
+msgstr "Atom"
 
 #: rhodecode/templates/index_base.html:110
 #: rhodecode/templates/index_base.html:112
 #, python-format
 msgid "Subscribe to %s rss feed"
-msgstr "订阅 rss %s"
+msgstr "订阅 %s 的 RSS"
 
 #: rhodecode/templates/index_base.html:117
 #: rhodecode/templates/index_base.html:119
 #, python-format
 msgid "Subscribe to %s atom feed"
-msgstr "订阅 atom %s"
+msgstr "订阅 %s 的 Atom"
 
 #: rhodecode/templates/index_base.html:140
-#, fuzzy
 msgid "Group Name"
 msgstr "组名"
 
@@ -1397,7 +1356,7 @@ msgstr "组名"
 #: rhodecode/templates/journal/journal.html:211
 #: rhodecode/templates/tags/tags.html:60
 msgid "Click to sort ascending"
-msgstr ""
+msgstr "点击以升序排列"
 
 #: rhodecode/templates/index_base.html:159
 #: rhodecode/templates/index_base.html:199
@@ -1409,10 +1368,9 @@ msgstr ""
 #: rhodecode/templates/journal/journal.html:212
 #: rhodecode/templates/tags/tags.html:61
 msgid "Click to sort descending"
-msgstr ""
+msgstr "点击以降序排列"
 
 #: rhodecode/templates/index_base.html:169
-#, fuzzy
 msgid "Last Change"
 msgstr "最后修改"
 
@@ -1425,7 +1383,7 @@ msgstr "最后修改"
 #: rhodecode/templates/journal/journal.html:213
 #: rhodecode/templates/tags/tags.html:62
 msgid "No records found."
-msgstr ""
+msgstr "没有找到记录"
 
 #: rhodecode/templates/index_base.html:201
 #: rhodecode/templates/admin/repos/repos.html:97
@@ -1436,7 +1394,7 @@ msgstr ""
 #: rhodecode/templates/journal/journal.html:214
 #: rhodecode/templates/tags/tags.html:63
 msgid "Data error."
-msgstr ""
+msgstr "数据错误"
 
 #: rhodecode/templates/index_base.html:202
 #: rhodecode/templates/admin/repos/repos.html:98
@@ -1446,9 +1404,8 @@ msgstr ""
 #: rhodecode/templates/branches/branches.html:81
 #: rhodecode/templates/journal/journal.html:215
 #: rhodecode/templates/tags/tags.html:64
-#, fuzzy
 msgid "Loading..."
-msgstr "加载文件列表..."
+msgstr "载入中..."
 
 #: rhodecode/templates/login.html:5 rhodecode/templates/login.html:54
 msgid "Sign In"
@@ -1476,9 +1433,8 @@ msgid "Password"
 msgstr "密码"
 
 #: rhodecode/templates/login.html:50
-#, fuzzy
 msgid "Remember me"
-msgstr "成员"
+msgstr "记住密码"
 
 #: rhodecode/templates/login.html:60
 msgid "Forgot your password ?"
@@ -1585,13 +1541,12 @@ msgstr "没有任何标签"
 #: rhodecode/templates/switch_to_list.html:28
 #: rhodecode/templates/bookmarks/bookmarks.html:15
 msgid "bookmarks"
-msgstr ""
+msgstr "书签"
 
 #: rhodecode/templates/switch_to_list.html:35
 #: rhodecode/templates/bookmarks/bookmarks_data.html:32
-#, fuzzy
 msgid "There are no bookmarks yet"
-msgstr "尚未有任何分支"
+msgstr "无书签"
 
 #: rhodecode/templates/admin/admin.html:5
 #: rhodecode/templates/admin/admin.html:9
@@ -1626,7 +1581,7 @@ msgstr "来源 IP"
 
 #: rhodecode/templates/admin/admin_log.html:53
 msgid "No actions yet"
-msgstr "尚无操作"
+msgstr "无操作"
 
 #: rhodecode/templates/admin/ldap/ldap.html:5
 msgid "LDAP administration"
@@ -1634,7 +1589,7 @@ msgstr "LDAP 管理员"
 
 #: rhodecode/templates/admin/ldap/ldap.html:11
 msgid "Ldap"
-msgstr ""
+msgstr "LDAP"
 
 #: rhodecode/templates/admin/ldap/ldap.html:28
 msgid "Connection settings"
@@ -1670,15 +1625,15 @@ msgstr "搜索设置"
 
 #: rhodecode/templates/admin/ldap/ldap.html:59
 msgid "Base DN"
-msgstr ""
+msgstr "Base DN"
 
 #: rhodecode/templates/admin/ldap/ldap.html:63
 msgid "LDAP Filter"
-msgstr ""
+msgstr "LDAP 过滤器"
 
 #: rhodecode/templates/admin/ldap/ldap.html:67
 msgid "LDAP Search Scope"
-msgstr ""
+msgstr "LDAP 搜索范围"
 
 #: rhodecode/templates/admin/ldap/ldap.html:70
 msgid "Attribute mappings"
@@ -1715,42 +1670,38 @@ msgstr "保存"
 #: rhodecode/templates/admin/notifications/notifications.html:5
 #: rhodecode/templates/admin/notifications/notifications.html:9
 msgid "My Notifications"
-msgstr ""
+msgstr "我的通知"
 
 #: rhodecode/templates/admin/notifications/notifications.html:29
 msgid "All"
-msgstr ""
+msgstr "全部"
 
 #: rhodecode/templates/admin/notifications/notifications.html:30
-#, fuzzy
 msgid "Comments"
-msgstr "提交"
+msgstr "评论"
 
 #: rhodecode/templates/admin/notifications/notifications.html:31
 #: rhodecode/templates/base/base.html:254
 #: rhodecode/templates/base/base.html:256
 msgid "Pull requests"
-msgstr ""
+msgstr "拉取请求"
 
 #: rhodecode/templates/admin/notifications/notifications.html:35
 msgid "Mark all read"
-msgstr ""
+msgstr "全部标记为已读"
 
 #: rhodecode/templates/admin/notifications/notifications_data.html:39
-#, fuzzy
 msgid "No notifications here yet"
-msgstr "尚无操作"
+msgstr "无通知"
 
 #: rhodecode/templates/admin/notifications/show_notification.html:5
 #: rhodecode/templates/admin/notifications/show_notification.html:11
-#, fuzzy
 msgid "Show notification"
-msgstr "显示注释"
+msgstr "显示通知"
 
 #: rhodecode/templates/admin/notifications/show_notification.html:9
-#, fuzzy
 msgid "Notifications"
-msgstr "位置"
+msgstr "通知"
 
 #: rhodecode/templates/admin/permissions/permissions.html:5
 msgid "Permissions administration"
@@ -1780,9 +1731,10 @@ msgstr "版本库权限"
 #: rhodecode/templates/admin/permissions/permissions.html:49
 msgid ""
 "All default permissions on each repository will be reset to choosen "
-"permission, note that all custom default permission on repositories will "
-"be lost"
+"permission, note that all custom default permission on repositories will be "
+"lost"
 msgstr ""
+"所有版本库的默认权限将被重置到选择的权限，所有版本库的自定义权限将被丢弃"
 
 #: rhodecode/templates/admin/permissions/permissions.html:50
 msgid "overwrite existing settings"
@@ -1797,9 +1749,8 @@ msgid "Repository creation"
 msgstr "建立版本库"
 
 #: rhodecode/templates/admin/permissions/permissions.html:71
-#, fuzzy
 msgid "Repository forking"
-msgstr "建立版本库"
+msgstr "版本库分支"
 
 #: rhodecode/templates/admin/permissions/permissions.html:78
 #: rhodecode/templates/admin/repos/repo_edit.html:241
@@ -1819,19 +1770,19 @@ msgstr "版本库"
 
 #: rhodecode/templates/admin/repos/repo_add.html:13
 msgid "add new"
-msgstr "新增"
+msgstr "新建"
 
 #: rhodecode/templates/admin/repos/repo_add_base.html:20
 #: rhodecode/templates/summary/summary.html:95
 #: rhodecode/templates/summary/summary.html:96
 msgid "Clone from"
-msgstr "clone 自"
+msgstr "克隆自"
 
 #: rhodecode/templates/admin/repos/repo_add_base.html:24
 #: rhodecode/templates/admin/repos/repo_edit.html:44
 #: rhodecode/templates/settings/repo_settings.html:43
 msgid "Optional http[s] url from which repository should be cloned."
-msgstr ""
+msgstr "可选的，指定版本库应该从哪个 http[s] 地址克隆。"
 
 #: rhodecode/templates/admin/repos/repo_add_base.html:29
 #: rhodecode/templates/admin/repos/repo_edit.html:49
@@ -1844,7 +1795,7 @@ msgstr "版本库组"
 #: rhodecode/templates/admin/repos/repo_add_base.html:33
 #: rhodecode/templates/forks/fork.html:54
 msgid "Optionaly select a group to put this repository into."
-msgstr ""
+msgstr "可选的，选择一个组将版本库放到其中"
 
 #: rhodecode/templates/admin/repos/repo_add_base.html:38
 #: rhodecode/templates/admin/repos/repo_edit.html:58
@@ -1852,31 +1803,30 @@ msgid "Type"
 msgstr "类型"
 
 #: rhodecode/templates/admin/repos/repo_add_base.html:42
-#, fuzzy
 msgid "Type of repository to create."
-msgstr "建立版本库"
+msgstr "要创建的版本库类型"
 
 #: rhodecode/templates/admin/repos/repo_add_base.html:47
 #: rhodecode/templates/admin/repos/repo_edit.html:66
 #: rhodecode/templates/forks/fork.html:41
 #: rhodecode/templates/settings/repo_settings.html:57
-#, fuzzy
 msgid "Landing revision"
-msgstr "下一个修订"
+msgstr "默认修订"
 
 #: rhodecode/templates/admin/repos/repo_add_base.html:51
 #: rhodecode/templates/admin/repos/repo_edit.html:70
 #: rhodecode/templates/forks/fork.html:45
 #: rhodecode/templates/settings/repo_settings.html:61
 msgid "Default revision for files page, downloads, whoosh and readme"
-msgstr ""
+msgstr "文件浏览、下载、whoosh和readme的默认修订版本"
 
 #: rhodecode/templates/admin/repos/repo_add_base.html:60
 #: rhodecode/templates/admin/repos/repo_edit.html:79
 #: rhodecode/templates/forks/fork.html:63
 #: rhodecode/templates/settings/repo_settings.html:70
-msgid "Keep it short and to the point. Use a README file for longer descriptions."
-msgstr ""
+msgid ""
+"Keep it short and to the point. Use a README file for longer descriptions."
+msgstr "保持简短。用 README 文件来写更长的描述。"
 
 #: rhodecode/templates/admin/repos/repo_add_base.html:69
 #: rhodecode/templates/admin/repos/repo_edit.html:89
@@ -1885,15 +1835,15 @@ msgstr ""
 msgid ""
 "Private repositories are only visible to people explicitly added as "
 "collaborators."
-msgstr ""
+msgstr "私有版本库只对显示添加的合作者可见。"
 
 #: rhodecode/templates/admin/repos/repo_add_base.html:73
 msgid "add"
-msgstr "新增"
+msgstr "新建"
 
 #: rhodecode/templates/admin/repos/repo_add_create_repository.html:9
 msgid "add new repository"
-msgstr "新增版本库"
+msgstr "新建版本库"
 
 #: rhodecode/templates/admin/repos/repo_edit.html:5
 msgid "Edit repository"
@@ -1913,12 +1863,12 @@ msgstr "编辑"
 #: rhodecode/templates/admin/repos/repo_edit.html:40
 #: rhodecode/templates/settings/repo_settings.html:39
 msgid "Clone uri"
-msgstr "clone 地址"
+msgstr "克隆地址"
 
 #: rhodecode/templates/admin/repos/repo_edit.html:53
 #: rhodecode/templates/settings/repo_settings.html:52
 msgid "Optional select a group to put this repository into."
-msgstr ""
+msgstr "可选的，选择一个组将版本库放到其中"
 
 #: rhodecode/templates/admin/repos/repo_edit.html:94
 msgid "Enable statistics"
@@ -1926,7 +1876,7 @@ msgstr "启用统计"
 
 #: rhodecode/templates/admin/repos/repo_edit.html:98
 msgid "Enable statistics window on summary page."
-msgstr ""
+msgstr "启用概况页的统计窗口"
 
 #: rhodecode/templates/admin/repos/repo_edit.html:103
 msgid "Enable downloads"
@@ -1934,22 +1884,20 @@ msgstr "启用下载"
 
 #: rhodecode/templates/admin/repos/repo_edit.html:107
 msgid "Enable download menu on summary page."
-msgstr ""
+msgstr "启用概况页的下载菜单"
 
 #: rhodecode/templates/admin/repos/repo_edit.html:112
 #: rhodecode/templates/admin/repos_groups/repos_groups_edit.html:66
-#, fuzzy
 msgid "Enable locking"
-msgstr "启用"
+msgstr "启用锁定"
 
 #: rhodecode/templates/admin/repos/repo_edit.html:116
 msgid "Enable lock-by-pulling on repository."
-msgstr ""
+msgstr "启用版本库的拉取锁定"
 
 #: rhodecode/templates/admin/repos/repo_edit.html:126
-#, fuzzy
 msgid "Change owner of this repository."
-msgstr "%s 库的修改"
+msgstr "修改这个版本库的所有者"
 
 #: rhodecode/templates/admin/repos/repo_edit.html:142
 #: rhodecode/templates/admin/repos_groups/repos_groups_edit.html:75
@@ -1986,11 +1934,11 @@ msgstr "确认移除当前统计"
 
 #: rhodecode/templates/admin/repos/repo_edit.html:162
 msgid "Fetched to rev"
-msgstr ""
+msgstr "获取到修订"
 
 #: rhodecode/templates/admin/repos/repo_edit.html:163
 msgid "Stats gathered"
-msgstr ""
+msgstr "已收集的统计"
 
 #: rhodecode/templates/admin/repos/repo_edit.html:171
 msgid "Remote"
@@ -1998,11 +1946,11 @@ msgstr "远程"
 
 #: rhodecode/templates/admin/repos/repo_edit.html:175
 msgid "Pull changes from remote location"
-msgstr ""
+msgstr "从远程路径拉取修订集"
 
 #: rhodecode/templates/admin/repos/repo_edit.html:175
 msgid "Confirm to pull changes from remote side"
-msgstr ""
+msgstr "确认从远程拉取修订集"
 
 #: rhodecode/templates/admin/repos/repo_edit.html:186
 msgid "Cache"
@@ -2010,7 +1958,7 @@ msgstr "缓存"
 
 #: rhodecode/templates/admin/repos/repo_edit.html:190
 msgid "Invalidate repository cache"
-msgstr ""
+msgstr "清除版本库缓存"
 
 #: rhodecode/templates/admin/repos/repo_edit.html:190
 msgid "Confirm to invalidate repository cache"
@@ -2033,49 +1981,46 @@ msgstr "添加到公共日志"
 
 #: rhodecode/templates/admin/repos/repo_edit.html:208
 msgid ""
-"All actions made on this repository will be accessible to everyone in "
-"public journal"
-msgstr ""
+"All actions made on this repository will be accessible to everyone in public "
+"journal"
+msgstr "任何人都可以在公共日志上看到这个版本库上的所有动作"
 
 #: rhodecode/templates/admin/repos/repo_edit.html:215
-#, fuzzy
 msgid "Locking"
-msgstr "解锁"
+msgstr "锁定"
 
 #: rhodecode/templates/admin/repos/repo_edit.html:220
 msgid "Unlock locked repo"
-msgstr ""
+msgstr "解锁版本库"
 
 #: rhodecode/templates/admin/repos/repo_edit.html:220
-#, fuzzy
 msgid "Confirm to unlock repository"
-msgstr "确认删除版本库"
+msgstr "确认解锁版本库"
 
 #: rhodecode/templates/admin/repos/repo_edit.html:223
 msgid "lock repo"
-msgstr ""
+msgstr "锁定版本库"
 
 #: rhodecode/templates/admin/repos/repo_edit.html:223
-#, fuzzy
 msgid "Confirm to lock repository"
-msgstr "确认删除版本库"
+msgstr "确认锁定版本库"
 
 #: rhodecode/templates/admin/repos/repo_edit.html:224
-#, fuzzy
 msgid "Repository is not locked"
-msgstr "个版本库"
+msgstr "版本库未锁定"
 
 #: rhodecode/templates/admin/repos/repo_edit.html:229
-msgid "Force locking on repository. Works only when anonymous access is disabled"
-msgstr ""
+msgid ""
+"Force locking on repository. Works only when anonymous access is disabled"
+msgstr "强制锁定版本库。只有在禁止匿名访问时候才有效"
 
 #: rhodecode/templates/admin/repos/repo_edit.html:236
 msgid "Set as fork of"
-msgstr ""
+msgstr "设置 fork 自"
 
 #: rhodecode/templates/admin/repos/repo_edit.html:245
 msgid "Manually set this repository as a fork of another from the list"
-msgstr ""
+msgstr "从列表中手动设置这个版本库 fork 自另一版本库"
 
 #: rhodecode/templates/admin/repos/repo_edit.html:251
 #: rhodecode/templates/changeset/changeset_file_comment.html:26
@@ -2093,11 +2038,13 @@ msgstr "确认删除版本库"
 
 #: rhodecode/templates/admin/repos/repo_edit.html:259
 msgid ""
-"This repository will be renamed in a special way in order to be "
-"unaccesible for RhodeCode and VCS systems.\n"
-"                         If you need fully delete it from filesystem "
-"please do it manually"
+"This repository will be renamed in a special way in order to be unaccesible "
+"for RhodeCode and VCS systems.\n"
+"                         If you need fully delete it from filesystem please "
+"do it manually"
 msgstr ""
+"这个版本库将以特殊的方式重命名这样 RhodeCode 和版本控制系统将不能访问它。\n"
+"                         如果需要从文件系统完全删除，你需要手动操作"
 
 #: rhodecode/templates/admin/repos/repo_edit_perms.html:3
 #: rhodecode/templates/admin/repos_groups/repos_group_edit_perms.html:3
@@ -2136,16 +2083,15 @@ msgstr "私有版本库"
 #: rhodecode/templates/admin/repos/repo_edit_perms.html:19
 #: rhodecode/templates/admin/repos/repo_edit_perms.html:28
 #: rhodecode/templates/admin/repos_groups/repos_group_edit_perms.html:18
-#, fuzzy
 msgid "default"
-msgstr "删除"
+msgstr "默认"
 
 #: rhodecode/templates/admin/repos/repo_edit_perms.html:33
 #: rhodecode/templates/admin/repos/repo_edit_perms.html:58
 #: rhodecode/templates/admin/repos_groups/repos_group_edit_perms.html:23
 #: rhodecode/templates/admin/repos_groups/repos_group_edit_perms.html:42
 msgid "revoke"
-msgstr ""
+msgstr "移除"
 
 #: rhodecode/templates/admin/repos/repo_edit_perms.html:83
 #: rhodecode/templates/admin/repos_groups/repos_group_edit_perms.html:67
@@ -2172,7 +2118,7 @@ msgstr "组"
 
 #: rhodecode/templates/admin/repos_groups/repos_groups.html:12
 msgid "with"
-msgstr ""
+msgstr "有"
 
 #: rhodecode/templates/admin/repos_groups/repos_groups_add.html:5
 msgid "Add repos group"
@@ -2210,9 +2156,9 @@ msgstr "编辑版本库组"
 
 #: rhodecode/templates/admin/repos_groups/repos_groups_edit.html:70
 msgid ""
-"Enable lock-by-pulling on group. This option will be applied to all other"
-" groups and repositories inside"
-msgstr ""
+"Enable lock-by-pulling on group. This option will be applied to all other "
+"groups and repositories inside"
+msgstr "启用组的拉取锁定。这个选项将应用到组内的其他组和版本库"
 
 #: rhodecode/templates/admin/repos_groups/repos_groups_show.html:5
 msgid "Repositories groups administration"
@@ -2223,9 +2169,8 @@ msgid "ADD NEW GROUP"
 msgstr "添加组"
 
 #: rhodecode/templates/admin/repos_groups/repos_groups_show.html:35
-#, fuzzy
 msgid "Number of toplevel repositories"
-msgstr "版本库数量"
+msgstr "顶层版本库数量"
 
 #: rhodecode/templates/admin/repos_groups/repos_groups_show.html:36
 #: rhodecode/templates/admin/users/users.html:87
@@ -2242,9 +2187,9 @@ msgid "delete"
 msgstr "删除"
 
 #: rhodecode/templates/admin/repos_groups/repos_groups_show.html:54
-#, fuzzy, python-format
+#, python-format
 msgid "Confirm to delete this group: %s"
-msgstr "确认删除该组"
+msgstr "确认删除该版本库组: %s"
 
 #: rhodecode/templates/admin/repos_groups/repos_groups_show.html:62
 msgid "There are no repositories groups yet"
@@ -2287,10 +2232,11 @@ msgstr "重新扫描选项"
 
 #: rhodecode/templates/admin/settings/settings.html:38
 msgid ""
-"In case a repository was deleted from filesystem and there are leftovers "
-"in the database check this option to scan obsolete data in database and "
-"remove it."
-msgstr "如果版本库已经从文件系统删除，但数据库仍然有遗留信息，请勾选该项进行清理"
+"In case a repository was deleted from filesystem and there are leftovers in "
+"the database check this option to scan obsolete data in database and remove "
+"it."
+msgstr ""
+"如果版本库已经从文件系统删除，但数据库仍然有遗留信息，请勾选该项进行清理"
 
 #: rhodecode/templates/admin/settings/settings.html:39
 msgid "destroy old data"
@@ -2298,9 +2244,10 @@ msgstr "清理旧数据"
 
 #: rhodecode/templates/admin/settings/settings.html:41
 msgid ""
-"Rescan repositories location for new repositories. Also deletes obsolete "
-"if `destroy` flag is checked "
+"Rescan repositories location for new repositories. Also deletes obsolete if "
+"`destroy` flag is checked "
 msgstr ""
+"重新扫描版本库路径以发现新版本库。 同时删除过时的，如果设置有 `destroy` 标志"
 
 #: rhodecode/templates/admin/settings/settings.html:46
 msgid "Rescan repositories"
@@ -2332,11 +2279,11 @@ msgstr "应用名称"
 
 #: rhodecode/templates/admin/settings/settings.html:95
 msgid "Realm text"
-msgstr ""
+msgstr "Realm text"
 
 #: rhodecode/templates/admin/settings/settings.html:104
 msgid "GA code"
-msgstr ""
+msgstr "GA code"
 
 #: rhodecode/templates/admin/settings/settings.html:112
 #: rhodecode/templates/admin/settings/settings.html:167
@@ -2345,56 +2292,52 @@ msgid "Save settings"
 msgstr "保存设置"
 
 #: rhodecode/templates/admin/settings/settings.html:119
-#, fuzzy
 msgid "Visualisation settings"
-msgstr "全局设置"
+msgstr "可视化设置"
 
 #: rhodecode/templates/admin/settings/settings.html:128
-#, fuzzy
 msgid "Icons"
-msgstr "选项"
+msgstr "图标"
 
 #: rhodecode/templates/admin/settings/settings.html:133
 msgid "Show public repo icon on repositories"
-msgstr ""
+msgstr "显示公共版本库图标"
 
 #: rhodecode/templates/admin/settings/settings.html:137
-#, fuzzy
 msgid "Show private repo icon on repositories"
-msgstr "私有版本库"
+msgstr "显示私有版本库图标"
 
 #: rhodecode/templates/admin/settings/settings.html:144
-#, fuzzy
 msgid "Meta-Tagging"
-msgstr "设置"
+msgstr "元标记"
 
 #: rhodecode/templates/admin/settings/settings.html:149
 msgid "Stylify recognised metatags:"
-msgstr ""
+msgstr "样式化识别的元标记"
 
 #: rhodecode/templates/admin/settings/settings.html:176
-#, fuzzy
 msgid "VCS settings"
-msgstr "设置"
+msgstr "版本控制系统设置"
 
 #: rhodecode/templates/admin/settings/settings.html:185
 msgid "Web"
-msgstr ""
+msgstr "网络"
 
 #: rhodecode/templates/admin/settings/settings.html:190
-#, fuzzy
 msgid "require ssl for vcs operations"
-msgstr "使用 SSL 推送"
+msgstr "要求使用 SSL进行版本控制系统操作"
 
 #: rhodecode/templates/admin/settings/settings.html:192
 msgid ""
-"RhodeCode will require SSL for pushing or pulling. If SSL is missing it "
-"will return HTTP Error 406: Not Acceptable"
+"RhodeCode will require SSL for pushing or pulling. If SSL is missing it will "
+"return HTTP Error 406: Not Acceptable"
 msgstr ""
+"勾选后 RhodeCode 将要求使用 SSL 进行推送和拉取。如果没有使用 SSL 将返回 HTTP "
+"406错误：Not Acceptable"
 
 #: rhodecode/templates/admin/settings/settings.html:198
 msgid "Hooks"
-msgstr ""
+msgstr "钩子"
 
 #: rhodecode/templates/admin/settings/settings.html:203
 msgid "Update repository after push (hg update)"
@@ -2417,23 +2360,22 @@ msgid "advanced setup"
 msgstr "高级设置"
 
 #: rhodecode/templates/admin/settings/settings.html:224
-#, fuzzy
 msgid "Mercurial Extensions"
-msgstr "Mercurial 版本库"
+msgstr "Mercurial 扩展"
 
 #: rhodecode/templates/admin/settings/settings.html:229
 msgid "largefiles extensions"
-msgstr ""
+msgstr "大文件扩展"
 
 #: rhodecode/templates/admin/settings/settings.html:233
 msgid "hgsubversion extensions"
-msgstr ""
+msgstr "hgsubversion 扩展"
 
 #: rhodecode/templates/admin/settings/settings.html:235
 msgid ""
 "Requires hgsubversion library installed. Allows clonning from svn remote "
 "locations"
-msgstr ""
+msgstr " 允许从远程 svn 地址克隆。需要安装 hgsubversion 库"
 
 #: rhodecode/templates/admin/settings/settings.html:245
 msgid "Repositories location"
@@ -2442,8 +2384,8 @@ msgstr "版本库路径"
 #: rhodecode/templates/admin/settings/settings.html:250
 msgid ""
 "This a crucial application setting. If you are really sure you need to "
-"change this, you must restart application in order to make this setting "
-"take effect. Click this label to unlock."
+"change this, you must restart application in order to make this setting take "
+"effect. Click this label to unlock."
 msgstr "这是一个关键设置。如果确认修改该项设置，请重启服务以便设置生效。"
 
 #: rhodecode/templates/admin/settings/settings.html:251
@@ -2452,30 +2394,27 @@ msgstr "解锁"
 
 #: rhodecode/templates/admin/settings/settings.html:252
 msgid ""
-"Location where repositories are stored. After changing this value a "
-"restart, and rescan is required"
-msgstr ""
+"Location where repositories are stored. After changing this value a restart, "
+"and rescan is required"
+msgstr "版本库存储路径。 修改后需要重启和重新扫描"
 
 #: rhodecode/templates/admin/settings/settings.html:272
 msgid "Test Email"
-msgstr ""
+msgstr "测试邮件"
 
 #: rhodecode/templates/admin/settings/settings.html:280
-#, fuzzy
 msgid "Email to"
-msgstr "电子邮件"
+msgstr "发送到"
 
 #: rhodecode/templates/admin/settings/settings.html:288
-#, fuzzy
 msgid "Send"
-msgstr "秒"
+msgstr "发送"
 
 #: rhodecode/templates/admin/settings/settings.html:294
 msgid "System Info and Packages"
-msgstr ""
+msgstr "系统和软件包信息"
 
 #: rhodecode/templates/admin/settings/settings.html:297
-#, fuzzy
 msgid "show"
 msgstr "显示"
 
@@ -2493,9 +2432,8 @@ msgid "add new user"
 msgstr "添加新用户"
 
 #: rhodecode/templates/admin/users/user_add.html:50
-#, fuzzy
 msgid "Password confirmation"
-msgstr "密码不符"
+msgstr "确认密码"
 
 #: rhodecode/templates/admin/users/user_add.html:86
 #: rhodecode/templates/admin/users/user_edit.html:113
@@ -2521,11 +2459,11 @@ msgstr "使用中"
 #: rhodecode/templates/admin/users/user_edit.html:43
 #: rhodecode/templates/admin/users/user_edit_my_account_form.html:20
 msgid "API key"
-msgstr ""
+msgstr "API 密钥"
 
 #: rhodecode/templates/admin/users/user_edit.html:59
 msgid "LDAP DN"
-msgstr ""
+msgstr "LDAP DN"
 
 #: rhodecode/templates/admin/users/user_edit.html:68
 #: rhodecode/templates/admin/users/user_edit_my_account_form.html:35
@@ -2535,13 +2473,12 @@ msgstr "新密码"
 #: rhodecode/templates/admin/users/user_edit.html:77
 #: rhodecode/templates/admin/users/user_edit_my_account_form.html:44
 msgid "New password confirmation"
-msgstr ""
+msgstr "确认新密码"
 
 #: rhodecode/templates/admin/users/user_edit.html:147
 #: rhodecode/templates/admin/users_groups/users_group_edit.html:108
-#, fuzzy
 msgid "Inherit default permissions"
-msgstr "默认权限"
+msgstr "继承默认权限"
 
 #: rhodecode/templates/admin/users/user_edit.html:152
 #: rhodecode/templates/admin/users_groups/users_group_edit.html:113
@@ -2549,7 +2486,7 @@ msgstr "默认权限"
 msgid ""
 "Select to inherit permissions from %s settings. With this selected below "
 "options does not have any action"
-msgstr ""
+msgstr "勾选以从 %s 继承权限设置。 勾选后下面的选项将不起作用"
 
 #: rhodecode/templates/admin/users/user_edit.html:158
 #: rhodecode/templates/admin/users_groups/users_group_edit.html:119
@@ -2558,48 +2495,41 @@ msgstr "创建版本库"
 
 #: rhodecode/templates/admin/users/user_edit.html:166
 #: rhodecode/templates/admin/users_groups/users_group_edit.html:127
-#, fuzzy
 msgid "Fork repositories"
-msgstr "个版本库"
+msgstr "分支版本库"
 
 #: rhodecode/templates/admin/users/user_edit.html:186
 #: rhodecode/templates/admin/users/user_edit_my_account_pullrequests.html:22
 #: rhodecode/templates/admin/users/user_edit_my_account_pullrequests.html:39
-#, fuzzy
 msgid "Nothing here yet"
-msgstr "尚无操作"
+msgstr "无条目"
 
 #: rhodecode/templates/admin/users/user_edit.html:193
 #: rhodecode/templates/admin/users/user_edit_my_account.html:60
 #: rhodecode/templates/admin/users/user_edit_my_account.html:194
-#, fuzzy
 msgid "Permission"
 msgstr "权限"
 
 #: rhodecode/templates/admin/users/user_edit.html:194
-#, fuzzy
 msgid "Edit Permission"
-msgstr "版本库权限"
+msgstr "编辑权限"
 
 #: rhodecode/templates/admin/users/user_edit.html:243
-#, fuzzy
 msgid "Email addresses"
 msgstr "邮件地址"
 
 #: rhodecode/templates/admin/users/user_edit.html:256
-#, fuzzy, python-format
+#, python-format
 msgid "Confirm to delete this email: %s"
-msgstr "确认删除该用户"
+msgstr "确认删除邮件地址: %s"
 
 #: rhodecode/templates/admin/users/user_edit.html:270
-#, fuzzy
 msgid "New email address"
-msgstr "邮件地址"
+msgstr "增加邮件地址"
 
 #: rhodecode/templates/admin/users/user_edit.html:277
-#, fuzzy
 msgid "Add"
-msgstr "新增"
+msgstr "增加"
 
 #: rhodecode/templates/admin/users/user_edit_my_account.html:5
 #: rhodecode/templates/base/base.html:124
@@ -2611,49 +2541,44 @@ msgid "My Account"
 msgstr "我的账户"
 
 #: rhodecode/templates/admin/users/user_edit_my_account.html:35
-#, fuzzy
 msgid "My permissions"
-msgstr "权限"
+msgstr "我的权限"
 
 #: rhodecode/templates/admin/users/user_edit_my_account.html:38
 #: rhodecode/templates/journal/journal.html:41
-#, fuzzy
 msgid "My repos"
-msgstr "空版本库"
+msgstr "我的版本库"
 
 #: rhodecode/templates/admin/users/user_edit_my_account.html:41
-#, fuzzy
 msgid "My pull requests"
-msgstr "创建用户 %s"
+msgstr "我的拉取请求"
 
 #: rhodecode/templates/admin/users/user_edit_my_account.html:45
-#, fuzzy
 msgid "Add repo"
-msgstr "新增"
+msgstr "新建版本库"
 
 #: rhodecode/templates/admin/users/user_edit_my_account_pullrequests.html:2
 msgid "Opened by me"
-msgstr ""
+msgstr "我创建的"
 
 #: rhodecode/templates/admin/users/user_edit_my_account_pullrequests.html:10
 #, python-format
 msgid "Pull request #%s opened on %s"
-msgstr ""
+msgstr "拉取请求 #%s 创建于 %s"
 
 #: rhodecode/templates/admin/users/user_edit_my_account_pullrequests.html:15
-#, fuzzy
 msgid "Confirm to delete this pull request"
-msgstr "确认删除版本库"
+msgstr "确认删除拉取请求"
 
 #: rhodecode/templates/admin/users/user_edit_my_account_pullrequests.html:26
 msgid "I participate in"
-msgstr ""
+msgstr "我参与的"
 
 #: rhodecode/templates/admin/users/user_edit_my_account_pullrequests.html:33
 #: rhodecode/templates/pullrequests/pullrequest_show_all.html:30
 #, python-format
 msgid "Pull request #%s opened by %s on %s"
-msgstr ""
+msgstr "拉取请求 #%s 由 %s 创建于 %s"
 
 #: rhodecode/templates/admin/users/user_edit_my_account_repos.html:7
 #: rhodecode/templates/bookmarks/bookmarks.html:40
@@ -2672,9 +2597,9 @@ msgstr "私有"
 
 #: rhodecode/templates/admin/users/user_edit_my_account_repos.html:31
 #: rhodecode/templates/data_table/_dt_elements.html:7
-#, fuzzy, python-format
+#, python-format
 msgid "Confirm to delete this repository: %s"
-msgstr "确认删除版本库"
+msgstr "确认删除版本库: %s"
 
 #: rhodecode/templates/admin/users/user_edit_my_account_repos.html:38
 #: rhodecode/templates/journal/journal.html:94
@@ -2684,7 +2609,7 @@ msgstr "没有任何版本库"
 #: rhodecode/templates/admin/users/user_edit_my_account_repos.html:40
 #: rhodecode/templates/journal/journal.html:96
 msgid "create one now"
-msgstr ""
+msgstr "创建一个"
 
 #: rhodecode/templates/admin/users/users.html:5
 msgid "Users administration"
@@ -2704,7 +2629,6 @@ msgid "username"
 msgstr "用户名"
 
 #: rhodecode/templates/admin/users/users.html:80
-#, fuzzy
 msgid "firstname"
 msgstr "名"
 
@@ -2724,7 +2648,7 @@ msgstr "启用"
 #: rhodecode/templates/admin/users/users.html:86
 #: rhodecode/templates/base/base.html:226
 msgid "ldap"
-msgstr ""
+msgstr "LDAP"
 
 #: rhodecode/templates/admin/users_groups/users_group_add.html:5
 msgid "Add users group"
@@ -2768,9 +2692,8 @@ msgid "Add all elements"
 msgstr "添加全部项目"
 
 #: rhodecode/templates/admin/users_groups/users_group_edit.html:146
-#, fuzzy
 msgid "Group members"
-msgstr "选择组成员"
+msgstr "拥护者成员"
 
 #: rhodecode/templates/admin/users_groups/users_groups.html:5
 msgid "Users groups administration"
@@ -2790,9 +2713,9 @@ msgid "members"
 msgstr "成员"
 
 #: rhodecode/templates/admin/users_groups/users_groups.html:45
-#, fuzzy, python-format
+#, python-format
 msgid "Confirm to delete this users group: %s"
-msgstr "确认删除该组"
+msgstr "确认删除该组: %s"
 
 #: rhodecode/templates/base/base.html:41
 msgid "Submit a bug"
@@ -2800,20 +2723,19 @@ msgstr "提交 bug"
 
 #: rhodecode/templates/base/base.html:77
 msgid "Login to your account"
-msgstr ""
+msgstr "登录"
 
 #: rhodecode/templates/base/base.html:100
 msgid "Forgot password ?"
 msgstr "忘记密码？"
 
 #: rhodecode/templates/base/base.html:107
-#, fuzzy
 msgid "Log In"
 msgstr "登录"
 
 #: rhodecode/templates/base/base.html:118
 msgid "Inbox"
-msgstr ""
+msgstr "收件箱"
 
 #: rhodecode/templates/base/base.html:122
 #: rhodecode/templates/base/base.html:300
@@ -2830,7 +2752,8 @@ msgstr ""
 #: rhodecode/templates/files/files_add.html:15
 #: rhodecode/templates/files/files_edit.html:15
 #: rhodecode/templates/followers/followers.html:9
-#: rhodecode/templates/forks/fork.html:9 rhodecode/templates/forks/forks.html:9
+#: rhodecode/templates/forks/fork.html:9
+#: rhodecode/templates/forks/forks.html:9
 #: rhodecode/templates/pullrequests/pullrequest.html:8
 #: rhodecode/templates/pullrequests/pullrequest_show.html:8
 #: rhodecode/templates/pullrequests/pullrequest_show_all.html:8
@@ -2861,12 +2784,12 @@ msgstr "切换版本库"
 
 #: rhodecode/templates/base/base.html:146
 msgid "Products"
-msgstr ""
+msgstr "产品"
 
 #: rhodecode/templates/base/base.html:152
 #: rhodecode/templates/base/base.html:182
 msgid "loading..."
-msgstr ""
+msgstr "载入中..."
 
 #: rhodecode/templates/base/base.html:158
 #: rhodecode/templates/base/base.html:160
@@ -2885,7 +2808,7 @@ msgstr "概况"
 #: rhodecode/templates/data_table/_dt_elements.html:25
 #: rhodecode/templates/data_table/_dt_elements.html:27
 msgid "Changelog"
-msgstr "修改记录"
+msgstr "修订记录"
 
 #: rhodecode/templates/base/base.html:175
 #: rhodecode/templates/base/base.html:177
@@ -2900,7 +2823,7 @@ msgstr "切换到"
 #: rhodecode/templates/data_table/_dt_elements.html:33
 #: rhodecode/templates/data_table/_dt_elements.html:35
 msgid "Files"
-msgstr "档案"
+msgstr "浏览"
 
 #: rhodecode/templates/base/base.html:195
 #: rhodecode/templates/base/base.html:199
@@ -2917,12 +2840,12 @@ msgstr "设置"
 #: rhodecode/templates/data_table/_dt_elements.html:80
 #: rhodecode/templates/forks/fork.html:13
 msgid "fork"
-msgstr ""
+msgstr "分支"
 
 #: rhodecode/templates/base/base.html:211
 #: rhodecode/templates/changelog/changelog.html:40
 msgid "Open new pull request"
-msgstr ""
+msgstr "新建拉取请求"
 
 #: rhodecode/templates/base/base.html:213
 msgid "search"
@@ -2943,12 +2866,12 @@ msgstr "权限"
 #: rhodecode/templates/base/base.html:238
 #: rhodecode/templates/base/base.html:240
 msgid "Followers"
-msgstr "跟随者"
+msgstr "关注者"
 
 #: rhodecode/templates/base/base.html:246
 #: rhodecode/templates/base/base.html:248
 msgid "Forks"
-msgstr ""
+msgstr "分支"
 
 #: rhodecode/templates/base/base.html:327
 #: rhodecode/templates/base/base.html:329
@@ -2958,20 +2881,19 @@ msgid "Search"
 msgstr "搜索"
 
 #: rhodecode/templates/base/root.html:42
-#, fuzzy
 msgid "add another comment"
-msgstr "添加成员"
+msgstr "添加新的评论"
 
 #: rhodecode/templates/base/root.html:43
 #: rhodecode/templates/journal/journal.html:120
 #: rhodecode/templates/summary/summary.html:57
 msgid "Stop following this repository"
-msgstr "停止跟随该版本库"
+msgstr "停止关注该版本库"
 
 #: rhodecode/templates/base/root.html:44
 #: rhodecode/templates/summary/summary.html:61
 msgid "Start following this repository"
-msgstr "开始跟随该版本库"
+msgstr "开始关注该版本库"
 
 #: rhodecode/templates/base/root.html:45
 msgid "Group"
@@ -2979,7 +2901,7 @@ msgstr "组"
 
 #: rhodecode/templates/base/root.html:47
 msgid "search truncated"
-msgstr ""
+msgstr "搜索被截断"
 
 #: rhodecode/templates/base/root.html:48
 msgid "no matching files"
@@ -2988,31 +2910,28 @@ msgstr "没有符合的文件"
 #: rhodecode/templates/bookmarks/bookmarks.html:5
 #, python-format
 msgid "%s Bookmarks"
-msgstr ""
+msgstr "%s 书签"
 
 #: rhodecode/templates/bookmarks/bookmarks.html:39
 #: rhodecode/templates/bookmarks/bookmarks_data.html:8
 #: rhodecode/templates/branches/branches.html:54
 #: rhodecode/templates/tags/tags.html:39
 #: rhodecode/templates/tags/tags_data.html:8
-#, fuzzy
 msgid "Author"
 msgstr "作者"
 
 #: rhodecode/templates/branches/branches.html:5
-#, fuzzy, python-format
+#, python-format
 msgid "%s Branches"
-msgstr "分支"
+msgstr "%s 分支"
 
 #: rhodecode/templates/branches/branches.html:29
-#, fuzzy
 msgid "Compare branches"
-msgstr "分支"
+msgstr "比较分支"
 
 #: rhodecode/templates/branches/branches.html:57
 #: rhodecode/templates/compare/compare_diff.html:5
 #: rhodecode/templates/compare/compare_diff.html:13
-#, fuzzy
 msgid "Compare"
 msgstr "比较显示"
 
@@ -3035,31 +2954,30 @@ msgid "revision"
 msgstr "修订"
 
 #: rhodecode/templates/branches/branches_data.html:10
-#, fuzzy
 msgid "compare"
 msgstr "比较显示"
 
 #: rhodecode/templates/changelog/changelog.html:6
-#, fuzzy, python-format
+#, python-format
 msgid "%s Changelog"
-msgstr "修改记录"
+msgstr "%s 修订记录"
 
 #: rhodecode/templates/changelog/changelog.html:15
 #, python-format
 msgid "showing %d out of %d revision"
 msgid_plural "showing %d out of %d revisions"
-msgstr[0] ""
+msgstr[0] "显示 %2d 中的 %1d 个版本"
 
 #: rhodecode/templates/changelog/changelog.html:37
 #: rhodecode/templates/forks/forks_data.html:19
 #, python-format
 msgid "compare fork with %s"
-msgstr ""
+msgstr "与 %s 比较"
 
 #: rhodecode/templates/changelog/changelog.html:37
 #: rhodecode/templates/forks/forks_data.html:21
 msgid "Compare fork"
-msgstr ""
+msgstr "比较分支"
 
 #: rhodecode/templates/changelog/changelog.html:46
 msgid "Show"
@@ -3068,33 +2986,32 @@ msgstr "显示"
 #: rhodecode/templates/changelog/changelog.html:72
 #: rhodecode/templates/summary/summary.html:364
 msgid "show more"
-msgstr ""
+msgstr "显示更多"
 
 #: rhodecode/templates/changelog/changelog.html:76
 msgid "Affected number of files, click to show more details"
-msgstr ""
+msgstr "影响的文件数，点击显示详细信息"
 
 #: rhodecode/templates/changelog/changelog.html:89
 #: rhodecode/templates/changeset/changeset.html:38
 #: rhodecode/templates/changeset/changeset_file_comment.html:20
 #: rhodecode/templates/changeset/changeset_range.html:46
-#, fuzzy
 msgid "Changeset status"
-msgstr "变更集"
+msgstr "修订集状态"
 
 #: rhodecode/templates/changelog/changelog.html:92
 msgid "Click to open associated pull request"
-msgstr ""
+msgstr "点击建立相关的拉取请求"
 
 #: rhodecode/templates/changelog/changelog.html:102
 #: rhodecode/templates/changeset/changeset.html:78
 msgid "Parent"
-msgstr ""
+msgstr "父版本"
 
 #: rhodecode/templates/changelog/changelog.html:108
 #: rhodecode/templates/changeset/changeset.html:84
 msgid "No parents"
-msgstr ""
+msgstr "无父版本"
 
 #: rhodecode/templates/changelog/changelog.html:113
 #: rhodecode/templates/changeset/changeset.html:88
@@ -3112,7 +3029,7 @@ msgstr "分支"
 
 #: rhodecode/templates/changelog/changelog.html:122
 msgid "bookmark"
-msgstr ""
+msgstr "书签"
 
 #: rhodecode/templates/changelog/changelog.html:128
 #: rhodecode/templates/changeset/changeset.html:96
@@ -3121,7 +3038,7 @@ msgstr "标签"
 
 #: rhodecode/templates/changelog/changelog.html:164
 msgid "Show selected changes __S -> __E"
-msgstr ""
+msgstr "显示选定的修订集 __S -> __E"
 
 #: rhodecode/templates/changelog/changelog.html:255
 msgid "There are no changes yet"
@@ -3150,16 +3067,16 @@ msgstr "添加"
 #: rhodecode/templates/changeset/changeset.html:72
 #, python-format
 msgid "affected %s files"
-msgstr ""
+msgstr "影响 %s 文件"
 
 #: rhodecode/templates/changeset/changeset.html:6
-#, fuzzy, python-format
+#, python-format
 msgid "%s Changeset"
-msgstr "无变更"
+msgstr "%s 修订集"
 
 #: rhodecode/templates/changeset/changeset.html:14
 msgid "Changeset"
-msgstr ""
+msgstr "修订集"
 
 #: rhodecode/templates/changeset/changeset.html:43
 #: rhodecode/templates/changeset/diff_block.html:20
@@ -3173,87 +3090,85 @@ msgstr "下载 diff"
 
 #: rhodecode/templates/changeset/changeset.html:48
 #: rhodecode/templates/changeset/changeset_file_comment.html:82
-#, fuzzy, python-format
+#, python-format
 msgid "%d comment"
 msgid_plural "%d comments"
-msgstr[0] "提交"
+msgstr[0] "%d 条评论"
 
 #: rhodecode/templates/changeset/changeset.html:48
 #: rhodecode/templates/changeset/changeset_file_comment.html:82
 #, python-format
 msgid "(%d inline)"
 msgid_plural "(%d inline)"
-msgstr[0] ""
+msgstr[0] "(%d 内嵌)"
 
 #: rhodecode/templates/changeset/changeset.html:103
 #, python-format
 msgid "%s files affected with %s insertions and %s deletions:"
-msgstr ""
+msgstr "%s 个文件受影响包括 %s 行插入和 %s 行删除："
 
 #: rhodecode/templates/changeset/changeset.html:119
 msgid "Changeset was too big and was cut off..."
-msgstr ""
+msgstr "修订集太大已被截断......"
 
 #: rhodecode/templates/changeset/changeset_file_comment.html:42
 msgid "Submitting..."
-msgstr ""
+msgstr "提交中……"
 
 #: rhodecode/templates/changeset/changeset_file_comment.html:45
 msgid "Commenting on line {1}."
-msgstr ""
+msgstr "在 {1} 行上评论"
 
 #: rhodecode/templates/changeset/changeset_file_comment.html:46
 #: rhodecode/templates/changeset/changeset_file_comment.html:121
 #, python-format
 msgid "Comments parsed using %s syntax with %s support."
-msgstr ""
+msgstr "评论使用 %s 语法并支持 %s"
 
 #: rhodecode/templates/changeset/changeset_file_comment.html:48
 #: rhodecode/templates/changeset/changeset_file_comment.html:123
-msgid "Use @username inside this text to send notification to this RhodeCode user"
-msgstr ""
+msgid ""
+"Use @username inside this text to send notification to this RhodeCode user"
+msgstr "在文本中使用 @用户名 以发送通知到该 RhodeCode 用户"
 
 #: rhodecode/templates/changeset/changeset_file_comment.html:59
 #: rhodecode/templates/changeset/changeset_file_comment.html:138
-#, fuzzy
 msgid "Comment"
-msgstr "提交"
+msgstr "评论"
 
 #: rhodecode/templates/changeset/changeset_file_comment.html:60
 #: rhodecode/templates/changeset/changeset_file_comment.html:71
 msgid "Hide"
-msgstr ""
+msgstr "影藏"
 
 #: rhodecode/templates/changeset/changeset_file_comment.html:67
-#, fuzzy
 msgid "You need to be logged in to comment."
-msgstr "必须登录才能访问该页面"
+msgstr "必须登录才能评论"
 
 #: rhodecode/templates/changeset/changeset_file_comment.html:67
 msgid "Login now"
-msgstr ""
+msgstr "现在登陆"
 
 #: rhodecode/templates/changeset/changeset_file_comment.html:118
 msgid "Leave a comment"
-msgstr ""
+msgstr "发表评论"
 
 #: rhodecode/templates/changeset/changeset_file_comment.html:124
 msgid "Check this to change current status of code-review for this changeset"
-msgstr ""
+msgstr "勾选以改变这个修订集的代码审查状态"
 
 #: rhodecode/templates/changeset/changeset_file_comment.html:124
-#, fuzzy
 msgid "change status"
-msgstr "变更集"
+msgstr "改变状态"
 
 #: rhodecode/templates/changeset/changeset_file_comment.html:140
 msgid "Comment and close"
-msgstr ""
+msgstr "评论并关闭"
 
 #: rhodecode/templates/changeset/changeset_range.html:5
-#, fuzzy, python-format
+#, python-format
 msgid "%s Changesets"
-msgstr "变更集"
+msgstr "%s 修订集"
 
 #: rhodecode/templates/changeset/changeset_range.html:29
 #: rhodecode/templates/compare/compare_diff.html:29
@@ -3264,26 +3179,23 @@ msgstr "比较显示"
 #: rhodecode/templates/compare/compare_diff.html:41
 #: rhodecode/templates/pullrequests/pullrequest_show.html:69
 msgid "Files affected"
-msgstr ""
+msgstr "影响文件"
 
 #: rhodecode/templates/changeset/diff_block.html:19
 msgid "diff"
-msgstr ""
+msgstr "差别"
 
 #: rhodecode/templates/changeset/diff_block.html:27
-#, fuzzy
 msgid "show inline comments"
-msgstr "文件内容"
+msgstr "显示内嵌评论"
 
 #: rhodecode/templates/compare/compare_cs.html:5
-#, fuzzy
 msgid "No changesets"
-msgstr "尚无修订"
+msgstr "无修订"
 
 #: rhodecode/templates/compare/compare_diff.html:37
-#, fuzzy
 msgid "Outgoing changesets"
-msgstr "尚无修订"
+msgstr "传出修订集"
 
 #: rhodecode/templates/data_table/_dt_elements.html:39
 #: rhodecode/templates/data_table/_dt_elements.html:41
@@ -3313,40 +3225,40 @@ msgstr "公共版本库"
 #: rhodecode/templates/summary/summary.html:87
 #: rhodecode/templates/summary/summary.html:88
 msgid "Fork of"
-msgstr ""
+msgstr "分支自"
 
 #: rhodecode/templates/data_table/_dt_elements.html:92
 msgid "No changesets yet"
-msgstr "尚无修订"
+msgstr "无修订"
 
 #: rhodecode/templates/data_table/_dt_elements.html:104
-#, fuzzy, python-format
+#, python-format
 msgid "Confirm to delete this user: %s"
-msgstr "确认删除该用户"
+msgstr "确认删除用户: %s"
 
 #: rhodecode/templates/email_templates/main.html:8
 msgid "This is an notification from RhodeCode."
-msgstr ""
+msgstr "这是 RhodeCode 发送的一个通知。"
 
 #: rhodecode/templates/errors/error_document.html:46
 #, python-format
 msgid "You will be redirected to %s in %s seconds"
-msgstr ""
+msgstr "%1s 秒后你将重定向到 %2s"
 
 #: rhodecode/templates/files/file_diff.html:4
-#, fuzzy, python-format
+#, python-format
 msgid "%s File diff"
-msgstr "文件 diff"
+msgstr "%s 文件差异"
 
 #: rhodecode/templates/files/file_diff.html:12
 msgid "File diff"
-msgstr "文件 diff"
+msgstr "文件差异"
 
 #: rhodecode/templates/files/files.html:4
 #: rhodecode/templates/files/files.html:72
-#, fuzzy, python-format
+#, python-format
 msgid "%s files"
-msgstr "文件"
+msgstr "%s 文件"
 
 #: rhodecode/templates/files/files.html:12
 #: rhodecode/templates/summary/summary.html:340
@@ -3355,41 +3267,35 @@ msgstr "文件"
 
 #: rhodecode/templates/files/files_add.html:4
 #: rhodecode/templates/files/files_edit.html:4
-#, fuzzy, python-format
+#, python-format
 msgid "%s Edit file"
-msgstr "编辑文件"
+msgstr "%s 编辑文件"
 
 #: rhodecode/templates/files/files_add.html:19
-#, fuzzy
 msgid "add file"
-msgstr "编辑文件"
+msgstr "新建文件"
 
 #: rhodecode/templates/files/files_add.html:40
-#, fuzzy
 msgid "Add new file"
-msgstr "添加新用户"
+msgstr "新建文件"
 
 #: rhodecode/templates/files/files_add.html:45
-#, fuzzy
 msgid "File Name"
 msgstr "文件名"
 
 #: rhodecode/templates/files/files_add.html:49
 #: rhodecode/templates/files/files_add.html:58
-#, fuzzy
 msgid "or"
-msgstr "时"
+msgstr "或者"
 
 #: rhodecode/templates/files/files_add.html:49
 #: rhodecode/templates/files/files_add.html:54
-#, fuzzy
 msgid "Upload file"
-msgstr "编辑文件"
+msgstr "上传文件"
 
 #: rhodecode/templates/files/files_add.html:58
-#, fuzzy
 msgid "Create new file"
-msgstr "创建用户 %s"
+msgstr "创建新文件"
 
 #: rhodecode/templates/files/files_add.html:63
 #: rhodecode/templates/files/files_edit.html:39
@@ -3399,7 +3305,7 @@ msgstr "位置"
 
 #: rhodecode/templates/files/files_add.html:67
 msgid "use / to separate directories"
-msgstr ""
+msgstr "使用 / 目录分隔符"
 
 #: rhodecode/templates/files/files_add.html:77
 #: rhodecode/templates/files/files_edit.html:63
@@ -3426,7 +3332,7 @@ msgstr "下一个修订"
 
 #: rhodecode/templates/files/files_browser.html:23
 msgid "follow current branch"
-msgstr ""
+msgstr "沿着当前分支"
 
 #: rhodecode/templates/files/files_browser.html:27
 msgid "search file list"
@@ -3434,9 +3340,8 @@ msgstr "搜索文件列表"
 
 #: rhodecode/templates/files/files_browser.html:31
 #: rhodecode/templates/shortlog/shortlog_data.html:65
-#, fuzzy
 msgid "add new file"
-msgstr "添加新用户"
+msgstr "新建文件"
 
 #: rhodecode/templates/files/files_browser.html:35
 msgid "Loading file list..."
@@ -3448,20 +3353,19 @@ msgstr "大小"
 
 #: rhodecode/templates/files/files_browser.html:49
 msgid "Mimetype"
-msgstr ""
+msgstr "MIME 类型"
 
 #: rhodecode/templates/files/files_browser.html:50
-#, fuzzy
 msgid "Last Revision"
-msgstr "下一个修订"
+msgstr "最后修订号"
 
 #: rhodecode/templates/files/files_browser.html:51
 msgid "Last modified"
-msgstr "最后修改"
+msgstr "最后修改于"
 
 #: rhodecode/templates/files/files_browser.html:52
 msgid "Last commiter"
-msgstr "最后提交"
+msgstr "最后提交者"
 
 #: rhodecode/templates/files/files_edit.html:19
 msgid "edit file"
@@ -3484,12 +3388,10 @@ msgid "download as raw"
 msgstr "下载原始文件"
 
 #: rhodecode/templates/files/files_edit.html:54
-#, fuzzy
 msgid "source"
-msgstr "显示代码"
+msgstr "显示源文件"
 
 #: rhodecode/templates/files/files_edit.html:59
-#, fuzzy
 msgid "Editing file"
 msgstr "编辑文件"
 
@@ -3498,20 +3400,18 @@ msgid "History"
 msgstr "历史"
 
 #: rhodecode/templates/files/files_source.html:9
-#, fuzzy
 msgid "diff to revision"
-msgstr "下一个修订"
+msgstr "比较差异"
 
 #: rhodecode/templates/files/files_source.html:10
-#, fuzzy
 msgid "show at revision"
-msgstr "下一个修订"
+msgstr "显示修订"
 
 #: rhodecode/templates/files/files_source.html:14
-#, fuzzy, python-format
+#, python-format
 msgid "%s author"
 msgid_plural "%s authors"
-msgstr[0] "作者"
+msgstr[0] "%s 个作者"
 
 #: rhodecode/templates/files/files_source.html:36
 msgid "show source"
@@ -3528,39 +3428,37 @@ msgstr "文件过大，不能显示"
 
 #: rhodecode/templates/files/files_source.html:124
 msgid "Selection link"
-msgstr ""
+msgstr "选择链接"
 
 #: rhodecode/templates/files/files_ypjax.html:5
-#, fuzzy
 msgid "annotation"
 msgstr "显示注释"
 
 #: rhodecode/templates/files/files_ypjax.html:15
 msgid "Go back"
-msgstr ""
+msgstr "返回"
 
 #: rhodecode/templates/files/files_ypjax.html:16
 msgid "No files at given path"
-msgstr ""
+msgstr "指定的路径中没有文件"
 
 #: rhodecode/templates/followers/followers.html:5
-#, fuzzy, python-format
+#, python-format
 msgid "%s Followers"
-msgstr "跟随者"
+msgstr "%s 个关注者"
 
 #: rhodecode/templates/followers/followers.html:13
 msgid "followers"
-msgstr "跟随者"
+msgstr "关注者"
 
 #: rhodecode/templates/followers/followers_data.html:12
-#, fuzzy
 msgid "Started following -"
-msgstr "开始跟随"
+msgstr "开始关注 - "
 
 #: rhodecode/templates/forks/fork.html:5
-#, fuzzy, python-format
+#, python-format
 msgid "%s Fork"
-msgstr "分支"
+msgstr "%s 的分支"
 
 #: rhodecode/templates/forks/fork.html:31
 msgid "Fork name"
@@ -3571,30 +3469,29 @@ msgid "Private"
 msgstr "私有"
 
 #: rhodecode/templates/forks/fork.html:77
-#, fuzzy
 msgid "Copy permissions"
-msgstr "权限"
+msgstr "拷贝权限"
 
 #: rhodecode/templates/forks/fork.html:81
 msgid "Copy permissions from forked repository"
-msgstr ""
+msgstr "从被分支版本库拷贝权限"
 
 #: rhodecode/templates/forks/fork.html:86
 msgid "Update after clone"
-msgstr ""
+msgstr "克隆后更新"
 
 #: rhodecode/templates/forks/fork.html:90
 msgid "Checkout source after making a clone"
-msgstr ""
+msgstr "完成克隆后检出源代码"
 
 #: rhodecode/templates/forks/fork.html:94
 msgid "fork this repository"
 msgstr "对该版本库建立分支"
 
 #: rhodecode/templates/forks/forks.html:5
-#, fuzzy, python-format
+#, python-format
 msgid "%s Forks"
-msgstr "分支"
+msgstr "%s 的分支"
 
 #: rhodecode/templates/forks/forks.html:13
 msgid "forks"
@@ -3606,47 +3503,42 @@ msgstr "已有分支"
 
 #: rhodecode/templates/forks/forks_data.html:38
 msgid "There are no forks yet"
-msgstr "尚未有任何分支"
+msgstr "无分支"
 
 #: rhodecode/templates/journal/journal.html:13
-#, fuzzy
 msgid "ATOM journal feed"
-msgstr "公共日志 %s %s 订阅"
+msgstr "订阅日志 ATOM"
 
 #: rhodecode/templates/journal/journal.html:14
-#, fuzzy
 msgid "RSS journal feed"
-msgstr "公共日志 %s %s 订阅"
+msgstr "订阅日志 RSS"
 
 #: rhodecode/templates/journal/journal.html:24
 #: rhodecode/templates/pullrequests/pullrequest.html:27
 msgid "Refresh"
-msgstr ""
+msgstr "刷新"
 
 #: rhodecode/templates/journal/journal.html:27
 #: rhodecode/templates/journal/public_journal.html:24
-#, fuzzy
 msgid "RSS feed"
-msgstr "%s %s 订阅"
+msgstr "订阅 RSS"
 
 #: rhodecode/templates/journal/journal.html:30
 #: rhodecode/templates/journal/public_journal.html:27
 msgid "ATOM feed"
-msgstr ""
+msgstr "订阅 ATOM"
 
 #: rhodecode/templates/journal/journal.html:41
-#, fuzzy
 msgid "Watched"
-msgstr "缓存"
+msgstr "关注的"
 
 #: rhodecode/templates/journal/journal.html:46
-#, fuzzy
 msgid "ADD"
-msgstr "新增"
+msgstr "新建版本库"
 
 #: rhodecode/templates/journal/journal.html:114
 msgid "following user"
-msgstr "跟随中用户"
+msgstr "关注用户"
 
 #: rhodecode/templates/journal/journal.html:114
 msgid "user"
@@ -3654,21 +3546,19 @@ msgstr "用户"
 
 #: rhodecode/templates/journal/journal.html:147
 msgid "You are not following any users or repositories"
-msgstr "尚未跟随任何用户或版本库"
+msgstr "未关注任何用户或版本库"
 
 #: rhodecode/templates/journal/journal_data.html:47
 msgid "No entries yet"
-msgstr ""
+msgstr "没有条目"
 
 #: rhodecode/templates/journal/public_journal.html:13
-#, fuzzy
 msgid "ATOM public journal feed"
-msgstr "公共日志 %s %s 订阅"
+msgstr "订阅公共日志 ATOM"
 
 #: rhodecode/templates/journal/public_journal.html:14
-#, fuzzy
 msgid "RSS public journal feed"
-msgstr "公共日志 %s %s 订阅"
+msgstr "订阅公共日志 RSS"
 
 #: rhodecode/templates/journal/public_journal.html:21
 msgid "Public Journal"
@@ -3677,127 +3567,117 @@ msgstr "公共日志"
 #: rhodecode/templates/pullrequests/pullrequest.html:4
 #: rhodecode/templates/pullrequests/pullrequest.html:12
 msgid "New pull request"
-msgstr ""
+msgstr "新建拉取请求"
 
 #: rhodecode/templates/pullrequests/pullrequest.html:28
 msgid "refresh overview"
-msgstr ""
+msgstr "刷新概览"
 
 #: rhodecode/templates/pullrequests/pullrequest.html:66
-#, fuzzy
 msgid "Detailed compare view"
-msgstr "比较显示"
+msgstr "详细比较显示"
 
 #: rhodecode/templates/pullrequests/pullrequest.html:70
 #: rhodecode/templates/pullrequests/pullrequest_show.html:82
 msgid "Pull request reviewers"
-msgstr ""
+msgstr "拉取请求检视人员"
 
 #: rhodecode/templates/pullrequests/pullrequest.html:79
 #: rhodecode/templates/pullrequests/pullrequest_show.html:94
-#, fuzzy
 msgid "owner"
 msgstr "所有者"
 
 #: rhodecode/templates/pullrequests/pullrequest.html:91
 #: rhodecode/templates/pullrequests/pullrequest_show.html:109
 msgid "Add reviewer to this pull request."
-msgstr ""
+msgstr "为这个拉取请求增加检视人员"
 
 #: rhodecode/templates/pullrequests/pullrequest.html:97
-#, fuzzy
 msgid "Create new pull request"
-msgstr "创建用户 %s"
+msgstr "创建新的拉取请求"
 
 #: rhodecode/templates/pullrequests/pullrequest.html:106
 #: rhodecode/templates/pullrequests/pullrequest_show.html:25
 #: rhodecode/templates/pullrequests/pullrequest_show_all.html:33
-#, fuzzy
 msgid "Title"
-msgstr "写"
+msgstr "标题"
 
 #: rhodecode/templates/pullrequests/pullrequest.html:115
-#, fuzzy
 msgid "description"
 msgstr "描述"
 
 #: rhodecode/templates/pullrequests/pullrequest.html:123
 msgid "Send pull request"
-msgstr ""
+msgstr "发送拉取请求"
 
 #: rhodecode/templates/pullrequests/pullrequest_show.html:23
 #, python-format
 msgid "Closed %s"
-msgstr ""
+msgstr "关闭于 %s"
 
 #: rhodecode/templates/pullrequests/pullrequest_show.html:31
-#, fuzzy
 msgid "Status"
-msgstr "变更集"
+msgstr "状态"
 
 #: rhodecode/templates/pullrequests/pullrequest_show.html:36
 msgid "Pull request status"
-msgstr ""
+msgstr "拉取请求状态"
 
 #: rhodecode/templates/pullrequests/pullrequest_show.html:44
 msgid "Still not reviewed by"
-msgstr ""
+msgstr "还未检视的检视人员"
 
 #: rhodecode/templates/pullrequests/pullrequest_show.html:47
 #, python-format
 msgid "%d reviewer"
 msgid_plural "%d reviewers"
-msgstr[0] ""
+msgstr[0] "%d 个检视者"
 
 #: rhodecode/templates/pullrequests/pullrequest_show.html:54
-#, fuzzy
 msgid "Created on"
-msgstr "创建用户 %s"
+msgstr "创建于 %s"
 
 #: rhodecode/templates/pullrequests/pullrequest_show.html:61
-#, fuzzy
 msgid "Compare view"
 msgstr "比较显示"
 
 #: rhodecode/templates/pullrequests/pullrequest_show.html:65
-#, fuzzy
 msgid "Incoming changesets"
-msgstr "尚无修订"
+msgstr "传入修订集"
 
 #: rhodecode/templates/pullrequests/pullrequest_show_all.html:4
-#, fuzzy
 msgid "all pull requests"
-msgstr "创建用户 %s"
+msgstr "所有拉取请求"
 
 #: rhodecode/templates/pullrequests/pullrequest_show_all.html:12
 msgid "All pull requests"
-msgstr ""
+msgstr "所有拉取请求"
 
 #: rhodecode/templates/pullrequests/pullrequest_show_all.html:27
 msgid "Closed"
-msgstr ""
+msgstr "已关闭"
 
+# 中文中 repo name 在前面 serch term在后面
 #: rhodecode/templates/search/search.html:6
-#, fuzzy, python-format
+#, python-format
 msgid "Search \"%s\" in repository: %s"
-msgstr "在版本库："
+msgstr "在版本库 %2s 中搜索 \"%1s\""
 
 #: rhodecode/templates/search/search.html:8
-#, fuzzy, python-format
+#, python-format
 msgid "Search \"%s\" in all repositories"
-msgstr "在所有的版本库"
+msgstr "在所有的版本库中搜索  \"%s\""
 
 #: rhodecode/templates/search/search.html:12
 #: rhodecode/templates/search/search.html:32
-#, fuzzy, python-format
+#, python-format
 msgid "Search in repository: %s"
-msgstr "在版本库："
+msgstr "在版本库 %s 中搜索"
 
 #: rhodecode/templates/search/search.html:14
 #: rhodecode/templates/search/search.html:34
-#, fuzzy
 msgid "Search in all repositories"
-msgstr "在所有的版本库"
+msgstr "在所有的版本库中搜索"
 
 #: rhodecode/templates/search/search.html:48
 msgid "Search term"
@@ -3812,7 +3692,6 @@ msgid "File contents"
 msgstr "文件内容"
 
 #: rhodecode/templates/search/search.html:64
-#, fuzzy
 msgid "Commit messages"
 msgstr "提交信息"
 
@@ -3827,14 +3706,14 @@ msgid "Permission denied"
 msgstr "权限不足"
 
 #: rhodecode/templates/settings/repo_settings.html:5
-#, fuzzy, python-format
+#, python-format
 msgid "%s Settings"
-msgstr "设置"
+msgstr "%s 设置"
 
 #: rhodecode/templates/shortlog/shortlog.html:5
-#, fuzzy, python-format
+#, python-format
 msgid "%s Shortlog"
-msgstr "简短日志"
+msgstr "%s 简短日志"
 
 #: rhodecode/templates/shortlog/shortlog.html:14
 msgid "shortlog"
@@ -3842,55 +3721,52 @@ msgstr "简短日志"
 
 #: rhodecode/templates/shortlog/shortlog_data.html:7
 msgid "age"
-msgstr ""
+msgstr "时间"
 
 #: rhodecode/templates/shortlog/shortlog_data.html:18
-#, fuzzy
 msgid "No commit message"
-msgstr "提交信息"
+msgstr "没有提交信息"
 
 #: rhodecode/templates/shortlog/shortlog_data.html:62
 msgid "Add or upload files directly via RhodeCode"
-msgstr ""
+msgstr "通过 RhodeCode 直接添加或者上传文件"
 
 #: rhodecode/templates/shortlog/shortlog_data.html:71
 msgid "Push new repo"
-msgstr ""
+msgstr "Push 新版本库"
 
 #: rhodecode/templates/shortlog/shortlog_data.html:79
-#, fuzzy
 msgid "Existing repository?"
-msgstr "Git 版本库"
+msgstr "现有版本库？"
 
 #: rhodecode/templates/summary/summary.html:4
-#, fuzzy, python-format
+#, python-format
 msgid "%s Summary"
-msgstr "概要"
+msgstr "%s 概要"
 
 #: rhodecode/templates/summary/summary.html:12
 msgid "summary"
 msgstr "概要"
 
 #: rhodecode/templates/summary/summary.html:20
-#, fuzzy, python-format
+#, python-format
 msgid "repo %s ATOM feed"
-msgstr "订阅 atom %s"
+msgstr "订阅 ATOM %s"
 
 #: rhodecode/templates/summary/summary.html:21
-#, fuzzy, python-format
+#, python-format
 msgid "repo %s RSS feed"
-msgstr "订阅 rss %s"
+msgstr "订阅 RSS %s"
 
 #: rhodecode/templates/summary/summary.html:49
 #: rhodecode/templates/summary/summary.html:52
-#, fuzzy
 msgid "ATOM"
-msgstr "作者"
+msgstr "ATOM"
 
 #: rhodecode/templates/summary/summary.html:82
-#, fuzzy, python-format
+#, python-format
 msgid "Non changable ID %s"
-msgstr "无变更"
+msgstr "不可变 ID %s"
 
 #: rhodecode/templates/summary/summary.html:87
 msgid "public"
@@ -3898,7 +3774,7 @@ msgstr "公共"
 
 #: rhodecode/templates/summary/summary.html:95
 msgid "remote clone"
-msgstr "远程 clone"
+msgstr "远程克隆"
 
 #: rhodecode/templates/summary/summary.html:116
 msgid "Contact"
@@ -3906,20 +3782,19 @@ msgstr "联系方式"
 
 #: rhodecode/templates/summary/summary.html:130
 msgid "Clone url"
-msgstr "clone 地址"
+msgstr "克隆地址"
 
 #: rhodecode/templates/summary/summary.html:133
 msgid "Show by Name"
-msgstr ""
+msgstr "以名字显示"
 
 #: rhodecode/templates/summary/summary.html:134
 msgid "Show by ID"
-msgstr ""
+msgstr "以 ID 显示"
 
 #: rhodecode/templates/summary/summary.html:142
-#, fuzzy
 msgid "Trending files"
-msgstr "编辑文件"
+msgstr "文件趋势图"
 
 #: rhodecode/templates/summary/summary.html:150
 #: rhodecode/templates/summary/summary.html:166
@@ -3933,50 +3808,48 @@ msgstr "下载"
 
 #: rhodecode/templates/summary/summary.html:162
 msgid "There are no downloads yet"
-msgstr "尚无任何下载"
+msgstr "无下载"
 
 #: rhodecode/templates/summary/summary.html:164
 msgid "Downloads are disabled for this repository"
 msgstr "这个版本库的下载已经禁用"
 
 #: rhodecode/templates/summary/summary.html:170
-#, fuzzy
 msgid "Download as zip"
-msgstr "下载原始文件"
+msgstr "下载 zip 包"
 
 #: rhodecode/templates/summary/summary.html:173
 msgid "Check this to download archive with subrepos"
-msgstr ""
+msgstr "勾选以下载包含子版本库的压缩包"
 
 #: rhodecode/templates/summary/summary.html:173
 msgid "with subrepos"
-msgstr ""
+msgstr "包括子版本库"
 
 #: rhodecode/templates/summary/summary.html:186
 msgid "Commit activity by day / author"
-msgstr ""
+msgstr "按日期或作者的提交活动"
 
 #: rhodecode/templates/summary/summary.html:197
 msgid "Stats gathered: "
-msgstr ""
+msgstr "已收集的统计: "
 
 #: rhodecode/templates/summary/summary.html:218
 msgid "Shortlog"
 msgstr "简短日志"
 
 #: rhodecode/templates/summary/summary.html:220
-#, fuzzy
 msgid "Quick start"
-msgstr "快速过滤..."
+msgstr "快速入门"
 
 #: rhodecode/templates/summary/summary.html:233
 #, python-format
 msgid "Readme file at revision '%s'"
-msgstr ""
+msgstr "修订 '%s' 中的README"
 
 #: rhodecode/templates/summary/summary.html:236
 msgid "Permalink to this readme"
-msgstr ""
+msgstr "这个 README 的固定链接"
 
 #: rhodecode/templates/summary/summary.html:293
 #, python-format
@@ -4016,7 +3889,6 @@ msgid "file removed"
 msgstr "文件已删除"
 
 #: rhodecode/templates/tags/tags.html:5
-#, fuzzy, python-format
+#, python-format
 msgid "%s Tags"
-msgstr "之前"
-
+msgstr "%s 标签"

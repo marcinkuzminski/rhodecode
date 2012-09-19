@@ -39,6 +39,7 @@ from rhodecode.lib import diffs
 
 from rhodecode.model.db import Repository
 from rhodecode.model.pull_request import PullRequestModel
+from webob.exc import HTTPBadRequest
 
 log = logging.getLogger(__name__)
 
@@ -51,10 +52,12 @@ class CompareController(BaseRepoController):
     def __before__(self):
         super(CompareController, self).__before__()
 
-    def __get_cs_or_redirect(self, rev, repo, redirect_after=True):
+    def __get_cs_or_redirect(self, rev, repo, redirect_after=True,
+                             partial=False):
         """
         Safe way to get changeset if error occur it redirects to changeset with
-        proper message
+        proper message. If partial is set then don't do redirect raise Exception
+        instead
 
         :param rev: revision to fetch
         :param repo: repo instance
@@ -73,7 +76,9 @@ class CompareController(BaseRepoController):
         except RepositoryError, e:
             log.error(traceback.format_exc())
             h.flash(str(e), category='warning')
-            redirect(h.url('summary_home', repo_name=repo.repo_name))
+            if not partial:
+                redirect(h.url('summary_home', repo_name=repo.repo_name))
+            raise HTTPBadRequest()
 
     def index(self, org_ref_type, org_ref, other_ref_type, other_ref):
 
@@ -97,9 +102,9 @@ class CompareController(BaseRepoController):
         if c.org_repo.scm_instance.alias != 'hg':
             log.error('Review not available for GIT REPOS')
             raise HTTPNotFound
-
-        self.__get_cs_or_redirect(rev=org_ref, repo=org_repo)
-        self.__get_cs_or_redirect(rev=other_ref, repo=other_repo)
+        partial = request.environ.get('HTTP_X_PARTIAL_XHR')
+        self.__get_cs_or_redirect(rev=org_ref, repo=org_repo, partial=partial)
+        self.__get_cs_or_redirect(rev=other_ref, repo=other_repo, partial=partial)
 
         c.cs_ranges, discovery_data = PullRequestModel().get_compare_data(
                                        org_repo, org_ref, other_repo, other_ref
@@ -110,7 +115,7 @@ class CompareController(BaseRepoController):
         c.target_repo = c.repo_name
         # defines that we need hidden inputs with changesets
         c.as_form = request.GET.get('as_form', False)
-        if request.environ.get('HTTP_X_PARTIAL_XHR'):
+        if partial:
             return render('compare/compare_cs.html')
 
         c.org_ref = org_ref[1]

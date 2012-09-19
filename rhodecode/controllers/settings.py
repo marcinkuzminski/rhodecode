@@ -35,13 +35,14 @@ from pylons.i18n.translation import _
 
 import rhodecode.lib.helpers as h
 
-from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAllDecorator
+from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAllDecorator,\
+    HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.utils import invalidate_cache, action_logger
 
 from rhodecode.model.forms import RepoSettingsForm
 from rhodecode.model.repo import RepoModel
-from rhodecode.model.db import RepoGroup
+from rhodecode.model.db import RepoGroup, Repository
 from rhodecode.model.meta import Session
 from rhodecode.model.scm import ScmModel
 
@@ -55,7 +56,7 @@ class SettingsController(BaseRepoController):
         super(SettingsController, self).__before__()
 
     def __load_defaults(self):
-        c.repo_groups = RepoGroup.groups_choices()
+        c.repo_groups = RepoGroup.groups_choices(check_perms=True)
         c.repo_groups_choices = map(lambda k: unicode(k[0]), c.repo_groups)
 
         repo_model = RepoModel()
@@ -109,7 +110,7 @@ class SettingsController(BaseRepoController):
             changed_name = form_result['repo_name_full']
             action_logger(self.rhodecode_user, 'user_updated_repo',
                           changed_name, self.ip_addr, self.sa)
-            Session.commit()
+            Session().commit()
         except formencode.Invalid, errors:
             c.repo_info = repo_model.get_by_repo_name(repo_name)
             c.users_array = repo_model.get_users_js()
@@ -153,10 +154,38 @@ class SettingsController(BaseRepoController):
             repo_model.delete(repo)
             invalidate_cache('get_repo_cached_%s' % repo_name)
             h.flash(_('deleted repository %s') % repo_name, category='success')
-            Session.commit()
+            Session().commit()
         except Exception:
             log.error(traceback.format_exc())
             h.flash(_('An error occurred during deletion of %s') % repo_name,
                     category='error')
 
         return redirect(url('home'))
+
+    @HasRepoPermissionAnyDecorator('repository.write', 'repository.admin')
+    def toggle_locking(self, repo_name):
+        """
+        Toggle locking of repository by simple GET call to url
+
+        :param repo_name:
+        """
+
+        try:
+            repo = Repository.get_by_repo_name(repo_name)
+
+            if repo.enable_locking:
+                if repo.locked[0]:
+                    Repository.unlock(repo)
+                    action = _('unlocked')
+                else:
+                    Repository.lock(repo, c.rhodecode_user.user_id)
+                    action = _('locked')
+
+                h.flash(_('Repository has been %s') % action,
+                        category='success')
+        except Exception, e:
+            log.error(traceback.format_exc())
+            h.flash(_('An error occurred during unlocking'),
+                    category='error')
+        return redirect(url('summary_home', repo_name=repo_name))
+

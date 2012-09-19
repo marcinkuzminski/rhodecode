@@ -37,6 +37,7 @@ from rhodecode.lib.helpers import RepoPage
 from rhodecode.lib.compat import json
 from rhodecode.lib.graphmod import _colored, _dagwalker
 from rhodecode.lib.vcs.exceptions import RepositoryError, ChangesetDoesNotExistError
+from rhodecode.lib.utils2 import safe_int
 
 log = logging.getLogger(__name__)
 
@@ -65,7 +66,7 @@ class ChangelogController(BaseRepoController):
             c.size = int(session.get('changelog_size', default))
         # min size must be 1
         c.size = max(c.size, 1)
-        p = int(request.params.get('page', 1))
+        p = safe_int(request.params.get('page', 1), 1)
         branch_name = request.params.get('branch', None)
         try:
             if branch_name:

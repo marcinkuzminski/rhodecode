@@ -86,7 +86,18 @@ var prevElementSibling = function( el ) {
     }
 }
 
-
+var setSelectValue = function(select, val){
+	var selection =  YUD.get(select);
+	
+    // select element
+    for(var i=0;i<selection.options.length;i++){
+    	console.log(selection.options[i].innerHTML);
+        if (selection.options[i].innerHTML == val) {
+            selection.selectedIndex = i;
+            break;
+        }
+    }	
+}
 
 
 /**

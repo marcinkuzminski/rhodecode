@@ -44,6 +44,7 @@ from rhodecode.lib.vcs.nodes import FileNode, SubModuleNode
 from rhodecode.lib.vcs.backends.base import EmptyChangeset
 from rhodecode.lib.helpers import escape
 from rhodecode.lib.utils import make_ui
+from rhodecode.lib.utils2 import safe_unicode
 
 
 def wrap_to_table(str_):
@@ -214,7 +215,7 @@ class DiffProcessor(object):
                 self.adds += 1
             elif l.startswith('-') and not l.startswith('---'):
                 self.removes += 1
-            return l.decode('utf8', 'replace')
+            return safe_unicode(l)
 
         output = list(diffiterator)
         size = len(output)
