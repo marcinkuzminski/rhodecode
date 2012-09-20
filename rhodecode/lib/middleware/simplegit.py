@@ -188,12 +188,14 @@ class SimpleGit(BaseVCSController):
 
         # extras are injected into UI object and later available
         # in hooks executed by rhodecode
+        from rhodecode import CONFIG
         extras = {
             'ip': ipaddr,
             'username': username,
             'action': action,
             'repository': repo_name,
             'scm': 'git',
+            'config': CONFIG['__file__'],
             'make_lock': None,
             'locked_by': [None, None]
         }
