@@ -14,6 +14,8 @@ Changelog
 news
 ++++
 
+- #558 Added config file to hooks extra data
+
 fixes
 +++++
 
