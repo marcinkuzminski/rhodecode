@@ -16,6 +16,7 @@ news
 
 - #558 Added config file to hooks extra data
 - bumbped mercurial version to 2.3.1
+- #518 added possibility of specifing multiple patterns for issues
 
 fixes
 +++++

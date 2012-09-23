@@ -1007,19 +1007,23 @@ def urlify_commit(text_, repository=None, link_=None):
 
         # allow multiple issue servers to be used
         valid_indices = [
-            x.group(1) 
-            for x in map(lambda x: re.match(r'issue_pat(.*)', x), conf.keys()) 
-            if x and conf.has_key('issue_server_link'+x.group(1)) and conf.has_key('issue_prefix'+x.group(1))
-            ]
+            x.group(1)
+            for x in map(lambda x: re.match(r'issue_pat(.*)', x), conf.keys())
+            if x and 'issue_server_link%s' % x.group(1) in conf
+            and 'issue_prefix%s' % x.group(1) in conf
+        ]
 
-        #log.debug('found issue server suffixes ' + ','.join(valid_indices) + ' during valuation of: \n' + newtext)
+        log.debug('found issue server suffixes `%s` during valuation of: %s'
+                  % (','.join(valid_indices), newtext))
 
         for pattern_index in valid_indices:
-            ISSUE_PATTERN = conf.get('issue_pat'+pattern_index)
-            ISSUE_SERVER_LNK = conf.get('issue_server_link'+pattern_index)
-            ISSUE_PREFIX = conf.get('issue_prefix'+pattern_index)
+            ISSUE_PATTERN = conf.get('issue_pat%s' % pattern_index)
+            ISSUE_SERVER_LNK = conf.get('issue_server_link%s' % pattern_index)
+            ISSUE_PREFIX = conf.get('issue_prefix%s' % pattern_index)
 
-            #log.debug(ISSUE_PATTERN + ' ' + ISSUE_SERVER_LNK + ' ' + ISSUE_PREFIX)
+            log.debug('pattern suffix `%s` PAT:%s SERVER_LINK:%s PREFIX:%s'
+                      % (pattern_index, ISSUE_PATTERN, ISSUE_SERVER_LNK,
+                         ISSUE_PREFIX))
 
             URL_PAT = re.compile(r'%s' % ISSUE_PATTERN)
 
@@ -1048,9 +1052,8 @@ def urlify_commit(text_, repository=None, link_=None):
                      'issue-prefix': ISSUE_PREFIX,
                      'serv': ISSUE_SERVER_LNK,
                 }
-
             newtext = URL_PAT.sub(url_func, newtext)
-            #log.debug('after '+pattern_index+':\n'+newtext)
+            log.debug('processed prefix:`%s` => %s' % (pattern_index, newtext))
 
         # if we actually did something above
         if valid_indices:
