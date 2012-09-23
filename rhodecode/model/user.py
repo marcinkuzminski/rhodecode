@@ -524,8 +524,12 @@ class UserModel(BaseModel):
             p = perm.Permission.permission_name
             cur_perm = user.permissions[RK][r_k]
             # overwrite permission only if it's greater than permission
-            # given from other sources
+            # given from other sources - disabled with `or 1` now
             if PERM_WEIGHTS[p] > PERM_WEIGHTS[cur_perm] or 1:  # disable check
+                if perm.Repository.user_id == uid:
+                    # set admin if owner
+                    p = 'repository.admin'
+
                 user.permissions[RK][r_k] = p
 
         # user explicit permissions for repositories

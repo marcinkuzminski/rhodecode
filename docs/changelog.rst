@@ -15,9 +15,12 @@ news
 ++++
 
 - #558 Added config file to hooks extra data
+- bumbped mercurial version to 2.3.1
 
 fixes
 +++++
+
+- fixed #570 explicit users group permissions can overwrite owner permissions
 
 1.4.2 (**2012-09-12**)
 ----------------------
