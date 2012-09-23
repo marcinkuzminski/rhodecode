@@ -4262,10 +4262,23 @@ form.comment-form {
 }
 
 div.comment-inline-form {
-    margin-top: 5px;
-    padding:2px 6px 8px 6px;
-
+    padding:4px 0px 6px 0px;
 }
+
+
+tr.hl-comment{
+/*
+	background-color: #FFFFCC !important;
+*/
+}
+
+/*
+tr.hl-comment pre {
+	border-top: 2px solid #FFEE33;
+	border-left: 2px solid #FFEE33;
+	border-right: 2px solid #FFEE33;
+}
+*/
 
 .comment-inline-form strong {
     display: block;

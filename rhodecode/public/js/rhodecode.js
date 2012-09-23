@@ -417,6 +417,7 @@ var createInlineForm = function(parent_tr, f_path, line) {
 		}
 		removeInlineForm(newtr);
 		YUD.removeClass(parent_tr, 'form-open');
+		YUD.removeClass(parent_tr, 'hl-comment');
 		
 	});
 	
@@ -438,6 +439,7 @@ var injectInlineForm = function(tr){
 		  return
 	  }	
 	  YUD.addClass(tr,'form-open');
+	  YUD.addClass(tr,'hl-comment');
 	  var node = YUD.getElementsByClassName('full_f_path',null,tr.parentNode.parentNode.parentNode)[0];
 	  var f_path = YUD.getAttribute(node,'path');
 	  var lineno = getLineNo(tr);
