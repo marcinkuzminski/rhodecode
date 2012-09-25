@@ -328,8 +328,8 @@ def handle_git_receive(repo_path, revs, env, hook_type='post'):
 
     baseui = make_ui('db')
     # fix if it's not a bare repo
-    if repo_path.endswith('.git'):
-        repo_path = repo_path[:-4]
+    if repo_path.endswith(os.sep + '.git'):
+        repo_path = repo_path[:-5]
 
     repo = Repository.get_by_full_path(repo_path)
     if not repo:
