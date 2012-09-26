@@ -118,18 +118,15 @@ class GitRepository(object):
 
         try:
             gitenv = os.environ
-            from rhodecode import CONFIG
             from rhodecode.lib.compat import json
             gitenv['RHODECODE_EXTRAS'] = json.dumps(self.extras)
             # forget all configs
             gitenv['GIT_CONFIG_NOGLOBAL'] = '1'
-            # we need current .ini file used to later initialize rhodecode
-            # env and connect to db
-            gitenv['RHODECODE_CONFIG_FILE'] = CONFIG['__file__']
             opts = dict(
                 env=gitenv,
                 cwd=os.getcwd()
             )
+
             out = subprocessio.SubprocessIOChunker(
                 r'git %s --stateless-rpc "%s"' % (git_command[4:],
                                                   self.content_path),
