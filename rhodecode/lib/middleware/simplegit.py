@@ -79,7 +79,7 @@ from paste.httpheaders import REMOTE_USER, AUTH_TYPE
 from webob.exc import HTTPNotFound, HTTPForbidden, HTTPInternalServerError, \
     HTTPBadRequest, HTTPNotAcceptable
 
-from rhodecode.lib.utils2 import safe_str
+from rhodecode.lib.utils2 import safe_str, fix_PATH
 from rhodecode.lib.base import BaseVCSController
 from rhodecode.lib.auth import get_container_username
 from rhodecode.lib.utils import is_valid_repo, make_ui
@@ -220,6 +220,7 @@ class SimpleGit(BaseVCSController):
                            'locked_by': locked_by})
         # set the environ variables for this request
         os.environ['RC_SCM_DATA'] = json.dumps(extras)
+        fix_PATH()
         log.debug('HOOKS extras is %s' % extras)
         baseui = make_ui('db')
         self.__inject_extras(repo_path, baseui, extras)
