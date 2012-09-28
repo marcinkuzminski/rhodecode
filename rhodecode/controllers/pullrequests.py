@@ -50,6 +50,7 @@ from rhodecode.model.repo import RepoModel
 from rhodecode.model.comment import ChangesetCommentsModel
 from rhodecode.model.changeset_status import ChangesetStatusModel
 from rhodecode.model.forms import PullRequestForm
+from rhodecode.lib.vcs.exceptions import EmptyRepositoryError
 
 log = logging.getLogger(__name__)
 
@@ -106,6 +107,13 @@ class PullrequestsController(BaseRepoController):
         if org_repo.scm_instance.alias != 'hg':
             log.error('Review not available for GIT REPOS')
             raise HTTPNotFound
+
+        try:
+            org_repo.scm_instance.get_changeset()
+        except EmptyRepositoryError, e:
+            h.flash(h.literal(_('There are no changesets yet')),
+                    category='warning')
+            redirect(url('summary_home', repo_name=org_repo.repo_name))
 
         other_repos_info = {}
 
