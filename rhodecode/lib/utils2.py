@@ -481,3 +481,19 @@ class AttributeDict(dict):
         return self.get(attr, None)
     __setattr__ = dict.__setitem__
     __delattr__ = dict.__delitem__
+
+
+def fix_PATH(os_=None):
+    """
+    Get current active python path, and append it to PATH variable to fix issues
+    of subprocess calls and different python versions
+    """
+    import sys
+    if os_ is None:
+        import os
+    else:
+        os = os_
+
+    cur_path = os.path.split(sys.executable)[0]
+    if not os.environ['PATH'].startswith(cur_path):
+        os.environ['PATH'] = '%s:%s' % (cur_path, os.environ['PATH'])

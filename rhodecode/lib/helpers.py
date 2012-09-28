@@ -1000,16 +1000,32 @@ def urlify_commit(text_, repository=None, link_=None):
         return ''.join(links)
 
     # urlify changesets - extrac revisions and make link out of them
-    text_ = urlify_changesets(escaper(text_), repository)
+    newtext = urlify_changesets(escaper(text_), repository)
 
     try:
         conf = config['app_conf']
 
-        URL_PAT = re.compile(r'%s' % conf.get('issue_pat'))
+        # allow multiple issue servers to be used
+        valid_indices = [
+            x.group(1)
+            for x in map(lambda x: re.match(r'issue_pat(.*)', x), conf.keys())
+            if x and 'issue_server_link%s' % x.group(1) in conf
+            and 'issue_prefix%s' % x.group(1) in conf
+        ]
 
-        if URL_PAT:
-            ISSUE_SERVER_LNK = conf.get('issue_server_link')
-            ISSUE_PREFIX = conf.get('issue_prefix')
+        log.debug('found issue server suffixes `%s` during valuation of: %s'
+                  % (','.join(valid_indices), newtext))
+
+        for pattern_index in valid_indices:
+            ISSUE_PATTERN = conf.get('issue_pat%s' % pattern_index)
+            ISSUE_SERVER_LNK = conf.get('issue_server_link%s' % pattern_index)
+            ISSUE_PREFIX = conf.get('issue_prefix%s' % pattern_index)
+
+            log.debug('pattern suffix `%s` PAT:%s SERVER_LINK:%s PREFIX:%s'
+                      % (pattern_index, ISSUE_PATTERN, ISSUE_SERVER_LNK,
+                         ISSUE_PREFIX))
+
+            URL_PAT = re.compile(r'%s' % ISSUE_PATTERN)
 
             def url_func(match_obj):
                 pref = ''
@@ -1027,6 +1043,7 @@ def urlify_commit(text_, repository=None, link_=None):
                     url = url.replace('{repo}', repository)
                     repo_name = repository.split(URL_SEP)[-1]
                     url = url.replace('{repo_name}', repo_name)
+
                 return tmpl % {
                      'pref': pref,
                      'cls': 'issue-tracker-link',
@@ -1035,9 +1052,11 @@ def urlify_commit(text_, repository=None, link_=None):
                      'issue-prefix': ISSUE_PREFIX,
                      'serv': ISSUE_SERVER_LNK,
                 }
+            newtext = URL_PAT.sub(url_func, newtext)
+            log.debug('processed prefix:`%s` => %s' % (pattern_index, newtext))
 
-            newtext = URL_PAT.sub(url_func, text_)
-
+        # if we actually did something above
+        if valid_indices:
             if link_:
                 # wrap not links into final link => link_
                 newtext = linkify_others(newtext, link_)
@@ -1047,7 +1066,7 @@ def urlify_commit(text_, repository=None, link_=None):
         log.error(traceback.format_exc())
         pass
 
-    return text_
+    return newtext
 
 
 def rst(source):

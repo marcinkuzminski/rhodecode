@@ -2,6 +2,7 @@ import os
 import socket
 import logging
 import subprocess
+import traceback
 
 from webob import Request, Response, exc
 
@@ -90,7 +91,7 @@ class GitRepository(object):
                 ]
             )
         except EnvironmentError, e:
-            log.exception(e)
+            log.error(traceback.format_exc())
             raise exc.HTTPExpectationFailed()
         resp = Response()
         resp.content_type = 'application/x-%s-advertisement' % str(git_command)
@@ -118,34 +119,33 @@ class GitRepository(object):
 
         try:
             gitenv = os.environ
-            from rhodecode import CONFIG
             from rhodecode.lib.compat import json
             gitenv['RHODECODE_EXTRAS'] = json.dumps(self.extras)
             # forget all configs
             gitenv['GIT_CONFIG_NOGLOBAL'] = '1'
-            # we need current .ini file used to later initialize rhodecode
-            # env and connect to db
-            gitenv['RHODECODE_CONFIG_FILE'] = CONFIG['__file__']
             opts = dict(
                 env=gitenv,
                 cwd=os.getcwd()
             )
+            cmd = r'git %s --stateless-rpc "%s"' % (git_command[4:],
+                                                    self.content_path),
+            log.debug('handling cmd %s' % cmd)
             out = subprocessio.SubprocessIOChunker(
-                r'git %s --stateless-rpc "%s"' % (git_command[4:],
-                                                  self.content_path),
+                cmd,
                 inputstream=inputstream,
                 **opts
             )
         except EnvironmentError, e:
-            log.exception(e)
+            log.error(traceback.format_exc())
             raise exc.HTTPExpectationFailed()
 
         if git_command in [u'git-receive-pack']:
             # updating refs manually after each push.
             # Needed for pre-1.7.0.4 git clients using regular HTTP mode.
-            subprocess.call(u'git --git-dir "%s" '
-                            'update-server-info' % self.content_path,
-                            shell=True)
+            cmd = (u'git --git-dir "%s" '
+                    'update-server-info' % self.content_path)
+            log.debug('handling cmd %s' % cmd)
+            subprocess.call(cmd, shell=True)
 
         resp = Response()
         resp.content_type = 'application/x-%s-result' % git_command.encode('utf8')
@@ -164,9 +164,9 @@ class GitRepository(object):
             resp = app(request, environ)
         except exc.HTTPException, e:
             resp = e
-            log.exception(e)
+            log.error(traceback.format_exc())
         except Exception, e:
-            log.exception(e)
+            log.error(traceback.format_exc())
             resp = exc.HTTPInternalServerError()
         return resp(environ, start_response)
 

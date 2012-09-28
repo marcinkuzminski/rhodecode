@@ -27,7 +27,6 @@
 import os
 import logging
 import traceback
-import urllib
 
 from mercurial.error import RepoError
 from mercurial.hgweb import hgweb_mod
@@ -36,7 +35,7 @@ from paste.httpheaders import REMOTE_USER, AUTH_TYPE
 from webob.exc import HTTPNotFound, HTTPForbidden, HTTPInternalServerError, \
     HTTPBadRequest, HTTPNotAcceptable
 
-from rhodecode.lib.utils2 import safe_str
+from rhodecode.lib.utils2 import safe_str, fix_PATH
 from rhodecode.lib.base import BaseVCSController
 from rhodecode.lib.auth import get_container_username
 from rhodecode.lib.utils import make_ui, is_valid_repo, ui_sections
@@ -152,12 +151,14 @@ class SimpleHg(BaseVCSController):
 
         # extras are injected into mercurial UI object and later available
         # in hg hooks executed by rhodecode
+        from rhodecode import CONFIG
         extras = {
             'ip': ipaddr,
             'username': username,
             'action': action,
             'repository': repo_name,
             'scm': 'hg',
+            'config': CONFIG['__file__'],
             'make_lock': None,
             'locked_by': [None, None]
         }
@@ -182,6 +183,7 @@ class SimpleHg(BaseVCSController):
 
         # set the environ variables for this request
         os.environ['RC_SCM_DATA'] = json.dumps(extras)
+        fix_PATH()
         log.debug('HOOKS extras is %s' % extras)
         baseui = make_ui('db')
         self.__inject_extras(repo_path, baseui, extras)

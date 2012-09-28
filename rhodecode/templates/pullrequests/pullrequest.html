@@ -21,14 +21,7 @@
     </div>
     ${h.form(url('pullrequest', repo_name=c.repo_name), method='post', id='pull_request_form')}
     <div style="float:left;padding:0px 30px 30px 30px">
-       <div style="padding:0px 5px 5px 5px">
-         <span>
-           <a id="refresh" href="#">
-             <img class="icon" title="${_('Refresh')}" alt="${_('Refresh')}" src="${h.url('/images/icons/arrow_refresh.png')}"/>
-             ${_('refresh overview')}
-           </a>
-         </span>
-       </div>
+
         ##ORG
         <div style="float:left">
             <div class="fork_user">
@@ -55,6 +48,11 @@
                 <span style="font-size: 20px">
                 ${h.select('other_repo',c.default_pull_request ,c.other_repos,class_='refs')}:${h.select('other_ref',c.default_pull_request_rev,c.default_revs,class_='refs')}
                 </span>
+         <span style="padding:3px">
+           <a id="refresh" href="#" class="tooltip" title="${h.tooltip(_('refresh overview'))}">
+             <img style="margin:3px" class="icon" title="${_('Refresh')}" alt="${_('Refresh')}" src="${h.url('/images/icons/arrow_refresh.png')}"/>
+           </a>
+         </span>
                  <div id="other_repo_desc" style="padding:5px 3px 3px 42px;"></div>
             </div>
             <div style="clear:both;padding-top: 10px"></div>

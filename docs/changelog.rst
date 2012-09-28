@@ -5,6 +5,24 @@ Changelog
 =========
 
 
+1.4.3 (**2012-09-28**)
+----------------------
+
+news
+++++
+
+- #558 Added config file to hooks extra data
+- bumped mercurial version to 2.3.1
+- #518 added possibility of specifying multiple patterns for issues
+
+fixes
++++++
+
+- fixed #570 explicit users group permissions can overwrite owner permissions
+- fixed #578 set proper PATH with current Python for Git
+  hooks to execute within same Python as RhodeCode 
+- fixed issue with Git bare repos that ends with .git in name
+
 1.4.2 (**2012-09-12**)
 ----------------------
 

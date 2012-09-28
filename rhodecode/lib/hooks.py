@@ -317,8 +317,9 @@ def handle_git_receive(repo_path, revs, env, hook_type='post'):
     from rhodecode.model import init_model
     from rhodecode.model.db import RhodeCodeUi
     from rhodecode.lib.utils import make_ui
+    extras = json.loads(env['RHODECODE_EXTRAS'])
 
-    path, ini_name = os.path.split(env['RHODECODE_CONFIG_FILE'])
+    path, ini_name = os.path.split(extras['config'])
     conf = appconfig('config:%s' % ini_name, relative_to=path)
     load_environment(conf.global_conf, conf.local_conf)
 
@@ -327,8 +328,8 @@ def handle_git_receive(repo_path, revs, env, hook_type='post'):
 
     baseui = make_ui('db')
     # fix if it's not a bare repo
-    if repo_path.endswith('.git'):
-        repo_path = repo_path[:-4]
+    if repo_path.endswith(os.sep + '.git'):
+        repo_path = repo_path[:-5]
 
     repo = Repository.get_by_full_path(repo_path)
     if not repo:
@@ -337,7 +338,6 @@ def handle_git_receive(repo_path, revs, env, hook_type='post'):
 
     _hooks = dict(baseui.configitems('hooks')) or {}
 
-    extras = json.loads(env['RHODECODE_EXTRAS'])
     for k, v in extras.items():
         baseui.setconfig('rhodecode_extras', k, v)
     repo = repo.scm_instance

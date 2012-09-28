@@ -10,7 +10,7 @@ from rhodecode.model.user import UserModel
 from rhodecode.model.meta import Session
 from rhodecode.model.users_group import UsersGroupModel
 from rhodecode.lib.auth import AuthUser
-
+from rhodecode.tests.api.api_base import create_repo
 
 
 class TestPermissions(unittest.TestCase):
@@ -40,6 +40,7 @@ class TestPermissions(unittest.TestCase):
     def tearDown(self):
         if hasattr(self, 'test_repo'):
             RepoModel().delete(repo=self.test_repo)
+
         UserModel().delete(self.u1)
         UserModel().delete(self.u2)
         UserModel().delete(self.u3)
@@ -425,3 +426,47 @@ class TestPermissions(unittest.TestCase):
                          set(['hg.create.repository', 'hg.fork.repository',
                               'hg.register.manual_activate',
                               'repository.read']))
+
+    def test_owner_permissions_doesnot_get_overwritten_by_group(self):
+        #create repo as USER,
+        self.test_repo = repo = RepoModel().create_repo(repo_name='myownrepo',
+                                repo_type='hg',
+                                description='desc',
+                                owner=self.u1)
+
+        Session().commit()
+        #he has permissions of admin as owner
+        u1_auth = AuthUser(user_id=self.u1.user_id)
+        self.assertEqual(u1_auth.permissions['repositories']['myownrepo'],
+                         'repository.admin')
+        #set his permission as users group, he should still be admin
+        self.ug1 = UsersGroupModel().create('G1')
+        # add user to group
+        UsersGroupModel().add_user_to_group(self.ug1, self.u1)
+        RepoModel().grant_users_group_permission(repo, group_name=self.ug1,
+                                                 perm='repository.none')
+
+        Session().commit()
+        u1_auth = AuthUser(user_id=self.u1.user_id)
+        self.assertEqual(u1_auth.permissions['repositories']['myownrepo'],
+                         'repository.admin')
+
+    def test_owner_permissions_doesnot_get_overwritten_by_others(self):
+        #create repo as USER,
+        self.test_repo = repo = RepoModel().create_repo(repo_name='myownrepo',
+                                repo_type='hg',
+                                description='desc',
+                                owner=self.u1)
+
+        Session().commit()
+        #he has permissions of admin as owner
+        u1_auth = AuthUser(user_id=self.u1.user_id)
+        self.assertEqual(u1_auth.permissions['repositories']['myownrepo'],
+                         'repository.admin')
+        #set his permission as user, he should still be admin
+        RepoModel().grant_user_permission(repo, user=self.u1,
+                                          perm='repository.none')
+        Session().commit()
+        u1_auth = AuthUser(user_id=self.u1.user_id)
+        self.assertEqual(u1_auth.permissions['repositories']['myownrepo'],
+                         'repository.admin')
