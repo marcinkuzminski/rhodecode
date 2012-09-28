@@ -14,6 +14,7 @@ news
 - #558 Added config file to hooks extra data
 - bumped mercurial version to 2.3.1
 - #518 added possibility of specifying multiple patterns for issues
+- update codemirror to latest version
 
 fixes
 +++++
