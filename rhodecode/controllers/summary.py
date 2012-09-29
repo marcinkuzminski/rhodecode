@@ -78,6 +78,8 @@ class SummaryController(BaseRepoController):
 
         c.repo_changesets = RepoPage(c.rhodecode_repo, page=1,
                                      items_per_page=10, url=url_generator)
+        page_revisions = [x.raw_id for x in list(c.repo_changesets)]
+        c.statuses = c.rhodecode_db_repo.statuses(page_revisions)
 
         if self.rhodecode_user.username == 'default':
             # for default(anonymous) user we don't need to pass credentials

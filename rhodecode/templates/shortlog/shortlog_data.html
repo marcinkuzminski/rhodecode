@@ -12,7 +12,22 @@
 %for cnt,cs in enumerate(c.repo_changesets):
 	<tr class="parity${cnt%2}">
         <td>
-            <div><pre><a href="${h.url('files_home',repo_name=c.repo_name,revision=cs.raw_id)}">r${cs.revision}:${h.short_id(cs.raw_id)}</a></pre></div>
+          <div>
+            <div class="changeset-status-container">
+              %if c.statuses.get(cs.raw_id):
+                <div class="changeset-status-ico">
+                %if c.statuses.get(cs.raw_id)[2]:
+                  <a class="tooltip" title="${_('Click to open associated pull request')}" href="${h.url('pullrequest_show',repo_name=c.statuses.get(cs.raw_id)[3],pull_request_id=c.statuses.get(cs.raw_id)[2])}">
+                    <img src="${h.url('/images/icons/flag_status_%s.png' % c.statuses.get(cs.raw_id)[0])}" />
+                  </a>
+                %else:
+                  <img src="${h.url('/images/icons/flag_status_%s.png' % c.statuses.get(cs.raw_id)[0])}" />
+                %endif
+                </div>
+              %endif
+            </div>            
+            <pre><a href="${h.url('files_home',repo_name=c.repo_name,revision=cs.raw_id)}">r${cs.revision}:${h.short_id(cs.raw_id)}</a></pre>
+         </div>
         </td>
         <td>
             ${h.link_to(h.truncate(cs.message,50) or _('No commit message'),
