@@ -18,7 +18,7 @@ from rhodecode.config.routing import make_map
 from rhodecode.lib import helpers
 from rhodecode.lib.auth import set_available_permissions
 from rhodecode.lib.utils import repo2db_mapper, make_ui, set_rhodecode_config,\
-    load_rcextensions
+    load_rcextensions, check_git_version
 from rhodecode.lib.utils2 import engine_from_config, str2bool
 from rhodecode.model import init_model
 from rhodecode.model.scm import ScmModel
@@ -85,6 +85,9 @@ def load_environment(global_conf, app_conf, initial=False):
         # set RC_WHOOSH_TEST_DISABLE=1 to disable whoosh index during tests
         if not int(os.environ.get('RC_WHOOSH_TEST_DISABLE', 0)):
             create_test_index(TESTS_TMP_PATH, config, True)
+
+    #check git version
+    check_git_version()
 
     # MULTIPLE DB configs
     # Setup the SQLAlchemy database engine

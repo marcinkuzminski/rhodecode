@@ -41,7 +41,7 @@ from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator, \
 from rhodecode.lib.base import BaseController, render
 from rhodecode.lib.celerylib import tasks, run_task
 from rhodecode.lib.utils import repo2db_mapper, invalidate_cache, \
-    set_rhodecode_config, repo_name_slug
+    set_rhodecode_config, repo_name_slug, check_git_version
 from rhodecode.model.db import RhodeCodeUi, Repository, RepoGroup, \
     RhodeCodeSetting, PullRequest, PullRequestReviewers
 from rhodecode.model.forms import UserForm, ApplicationSettingsForm, \
@@ -68,7 +68,8 @@ class SettingsController(BaseController):
         c.admin_user = session.get('admin_user')
         c.admin_username = session.get('admin_username')
         c.modules = sorted([(p.project_name, p.version)
-                            for p in pkg_resources.working_set],
+                            for p in pkg_resources.working_set]
+                           + [('git', check_git_version())],
                            key=lambda k: k[0].lower())
         c.py_version = platform.python_version()
         c.platform = platform.platform()

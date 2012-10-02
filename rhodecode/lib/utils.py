@@ -672,3 +672,38 @@ class BasePasterCommand(Command):
         self.path_to_ini_file = os.path.realpath(conf)
         conf = paste.deploy.appconfig('config:' + self.path_to_ini_file)
         pylonsconfig.init_app(conf.global_conf, conf.local_conf)
+
+
+def check_git_version():
+    """
+    Checks what version of git is installed in system, and issues a warning
+    if it's to old for RhodeCode to properly work.
+    """
+    import subprocess
+    from distutils.version import StrictVersion
+    from rhodecode import BACKENDS
+
+    p = subprocess.Popen('git --version', shell=True,
+                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, stderr = p.communicate()
+    ver = (stdout.split(' ')[-1] or '').strip() or '0.0.0'
+    try:
+        _ver = StrictVersion(ver)
+    except:
+        _ver = StrictVersion('0.0.0')
+        stderr = traceback.format_exc()
+
+    req_ver = '1.7.4'
+    to_old_git = False
+    if  _ver <= StrictVersion(req_ver):
+        to_old_git = True
+
+    if 'git' in BACKENDS:
+        log.debug('GIT version detected: %s' % stdout)
+        if stderr:
+            log.warning('Unable to detect git version org error was:%r' % stderr)
+        elif to_old_git:
+            log.warning('RhodeCode detected git version %s, which is to old '
+                        'for the system to function properly make sure '
+                        'it is at least in version %s' % (ver, req_ver))
+    return _ver
