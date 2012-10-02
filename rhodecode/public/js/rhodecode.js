@@ -673,10 +673,7 @@ var removeReviewer = function(reviewer_id){
 }
 
 var fileBrowserListeners = function(current_url, node_list_url, url_base){
-	
 	var current_url_branch = +"?branch=__BRANCH__";
-	var url = url_base;
-	var node_url = node_list_url;	
 
 	YUE.on('stay_at_branch','click',function(e){
 	    if(e.target.checked){
@@ -700,7 +697,7 @@ var fileBrowserListeners = function(current_url, node_list_url, url_base){
 	  YUD.setStyle('search_activate_id','display','none');
 	  YUD.setStyle('add_node_id','display','none');
 	  YUC.initHeader('X-PARTIAL-XHR',true);
-	  YUC.asyncRequest('GET',url,{
+	  YUC.asyncRequest('GET', node_list_url, {
 	      success:function(o){
 	        nodes = JSON.parse(o.responseText).nodes;
 	        YUD.setStyle('node_filter_box_loading','display','none');
@@ -743,8 +740,8 @@ var fileBrowserListeners = function(current_url, node_list_url, url_base){
 	                    var n_hl = n.substring(0,pos)
 	                      +"<b>{0}</b>".format(n.substring(pos,pos+query.length))
 	                      +n.substring(pos+query.length)
-	                    node_url = node_url.replace('__FPATH__',n);
-	                    match.push('<tr><td><a class="browser-{0}" href="{1}">{2}</a></td><td colspan="5"></td></tr>'.format(t,node_url,n_hl));
+	                    var new_url = url_base.replace('__FPATH__',n);
+	                    match.push('<tr><td><a class="browser-{0}" href="{1}">{2}</a></td><td colspan="5"></td></tr>'.format(t,new_url,n_hl));
 	                }
 	                if(match.length >= matches_max){
 	                    match.push('<tr><td>{0}</td><td colspan="5"></td></tr>'.format(_TM['search truncated']));
