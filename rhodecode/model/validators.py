@@ -666,7 +666,7 @@ def AttrLoginValidator():
     return _validator
 
 
-def NotReviewedRevisions():
+def NotReviewedRevisions(repo_id):
     class _validator(formencode.validators.FancyValidator):
         messages = {
             'rev_already_reviewed':
@@ -678,7 +678,10 @@ def NotReviewedRevisions():
             # check revisions if they are not reviewed, or a part of another
             # pull request
             statuses = ChangesetStatus.query()\
-                .filter(ChangesetStatus.revision.in_(value)).all()
+                .filter(ChangesetStatus.revision.in_(value))\
+                .filter(ChangesetStatus.repo_id == repo_id)\
+                .all()
+
             errors = []
             for cs in statuses:
                 if cs.pull_request_id:

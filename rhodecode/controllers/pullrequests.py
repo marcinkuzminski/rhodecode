@@ -172,8 +172,9 @@ class PullrequestsController(BaseRepoController):
 
     @NotAnonymous()
     def create(self, repo_name):
+        repo = RepoModel()._get_repo(repo_name)
         try:
-            _form = PullRequestForm()().to_python(request.POST)
+            _form = PullRequestForm(repo.repo_id)().to_python(request.POST)
         except formencode.Invalid, errors:
             log.error(traceback.format_exc())
             if errors.error_dict.get('revisions'):
