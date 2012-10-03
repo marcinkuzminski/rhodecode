@@ -272,6 +272,12 @@ class PullrequestsController(BaseRepoController):
         c.cs_ranges, discovery_data = PullRequestModel().get_compare_data(
                                        org_repo, org_ref, other_repo, other_ref
                                       )
+        if c.cs_ranges:
+            # case we want a simple diff without incoming changesets, just
+            # for review purposes. Make the diff on the forked repo, with
+            # revision that is common ancestor
+            other_ref = ('rev', c.cs_ranges[-1].parents[0].raw_id)
+            other_repo = org_repo
 
         c.statuses = org_repo.statuses([x.raw_id for x in c.cs_ranges])
         # defines that we need hidden inputs with changesets
