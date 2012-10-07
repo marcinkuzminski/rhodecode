@@ -705,5 +705,5 @@ def check_git_version():
         elif to_old_git:
             log.warning('RhodeCode detected git version %s, which is too old '
                         'for the system to function properly. Make sure '
-                        'it is at least in version %s' % (ver, req_ver))
+                        'its version is at least %s' % (ver, req_ver))
     return _ver
