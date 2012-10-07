@@ -136,7 +136,7 @@ def action_logger(user, action, repo, ipaddr='', sa=None, commit=False):
         elif isinstance(user, basestring):
             user_obj = User.get_by_username(user)
         else:
-            raise Exception('You have to provide user object or username')
+            raise Exception('You have to provide a user object or a username')
 
         if hasattr(repo, 'repo_id'):
             repo_obj = Repository.get(repo.repo_id)
@@ -255,7 +255,7 @@ def is_valid_repos_group(repos_group_name, base_path):
     return False
 
 
-def ask_ok(prompt, retries=4, complaint='Yes or no, please!'):
+def ask_ok(prompt, retries=4, complaint='Yes or no please!'):
     while True:
         ok = raw_input(prompt)
         if ok in ('y', 'ye', 'yes'):
@@ -299,7 +299,7 @@ def make_ui(read_from='file', path=None, checkpaths=True, clear_session=True):
 
     if read_from == 'file':
         if not os.path.isfile(path):
-            log.debug('hgrc file is not present at %s skipping...' % path)
+            log.debug('hgrc file is not present at %s, skipping...' % path)
             return False
         log.debug('reading hgrc from %s' % path)
         cfg = config.config()
@@ -410,7 +410,7 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False,
     rm = RepoModel()
     user = sa.query(User).filter(User.admin == True).first()
     if user is None:
-        raise Exception('Missing administrative account !')
+        raise Exception('Missing administrative account!')
     added = []
 
 #    # clear cache keys
@@ -423,7 +423,7 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False,
         db_repo = rm.get_by_repo_name(name)
         # found repo that is on filesystem not in RhodeCode database
         if not db_repo:
-            log.info('repository %s not found creating now' % name)
+            log.info('repository %s not found, creating now' % name)
             added.append(name)
             desc = (repo.description
                     if repo.description != 'unknown'
@@ -446,7 +446,7 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False,
         # during starting install all cache keys for all repositories in the
         # system, this will register all repos and multiple instances
         key, _prefix, _org_key = CacheInvalidation._get_key(name)
-        log.debug("Creating cache key for %s instance_id:`%s`" % (name, _prefix))
+        log.debug("Creating a cache key for %s instance_id:`%s`" % (name, _prefix))
         CacheInvalidation._get_or_create_key(key, _prefix, _org_key, commit=False)
     sa.commit()
     removed = []
@@ -454,7 +454,7 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False,
         # remove from database those repositories that are not in the filesystem
         for repo in sa.query(Repository).all():
             if repo.repo_name not in initial_repo_list.keys():
-                log.debug("Removing non existing repository found in db `%s`" %
+                log.debug("Removing non-existing repository found in db `%s`" %
                           repo.repo_name)
                 try:
                     sa.delete(repo)
@@ -677,7 +677,7 @@ class BasePasterCommand(Command):
 def check_git_version():
     """
     Checks what version of git is installed in system, and issues a warning
-    if it's to old for RhodeCode to properly work.
+    if it's too old for RhodeCode to properly work.
     """
     import subprocess
     from distutils.version import StrictVersion
@@ -703,7 +703,7 @@ def check_git_version():
         if stderr:
             log.warning('Unable to detect git version org error was:%r' % stderr)
         elif to_old_git:
-            log.warning('RhodeCode detected git version %s, which is to old '
-                        'for the system to function properly make sure '
+            log.warning('RhodeCode detected git version %s, which is too old '
+                        'for the system to function properly. Make sure '
                         'it is at least in version %s' % (ver, req_ver))
     return _ver
