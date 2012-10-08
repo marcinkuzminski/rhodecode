@@ -10,7 +10,7 @@ from rhodecode.model.users_group import UsersGroupModel
 from rhodecode.model.meta import Session
 from rhodecode.model.repos_group import ReposGroupModel
 from rhodecode.config.routing import ADMIN_PREFIX
-from rhodecode.model.db import ChangesetStatus
+from rhodecode.model.db import ChangesetStatus, Repository
 from rhodecode.model.changeset_status import ChangesetStatusModel
 from rhodecode.model.comment import ChangesetCommentsModel
 
@@ -227,7 +227,8 @@ class TestReposGroups(unittest.TestCase):
         self.assertRaises(formencode.Invalid, validator.to_python, 123)
 
     def test_NotReviewedRevisions(self):
-        validator = v.NotReviewedRevisions()
+        repo_id = Repository.get_by_repo_name(HG_REPO).repo_id
+        validator = v.NotReviewedRevisions(repo_id)
         rev = '0' * 40
         # add status for a rev, that should throw an error because it is already
         # reviewed
