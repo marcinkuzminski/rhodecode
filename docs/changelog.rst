@@ -34,6 +34,7 @@ fixes
 - fixes #591 git backend was causing encoding errors when handling binary
   files - added a test case for VCS lib tests
 - fixed #597 commits in future get negative age.
+- fixed #598 API docs methods had wrong members parameter as returned data
 
 1.4.3 (**2012-09-28**)
 ----------------------
