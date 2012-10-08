@@ -24,6 +24,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import os
 import sys
+import time
 import binascii
 from inspect import isfunction
 
@@ -37,6 +38,7 @@ from rhodecode.lib.compat import json
 from rhodecode.lib.exceptions import HTTPLockedRC
 from rhodecode.lib.utils2 import safe_str
 from rhodecode.model.db import Repository, User
+
 
 def _get_scm_size(alias, root_path):
 
@@ -262,7 +264,6 @@ def log_create_repository(repository_dict, created_by, **kwargs):
 
     :param repository: dict dump of repository object
     :param created_by: username who created repository
-    :param created_date: date of creation
 
     available keys of repository_dict:
 
@@ -290,6 +291,45 @@ def log_create_repository(repository_dict, created_by, **kwargs):
         return callback(**kw)
 
     return 0
+
+
+def log_delete_repository(repository_dict, deleted_by, **kwargs):
+    """
+    Post delete repository Hook. This is a dummy function for admins to re-use
+    if needed. It's taken from rhodecode-extensions module and executed
+    if present
+
+    :param repository: dict dump of repository object
+    :param deleted_by: username who deleted the repository
+
+    available keys of repository_dict:
+
+     'repo_type',
+     'description',
+     'private',
+     'created_on',
+     'enable_downloads',
+     'repo_id',
+     'user_id',
+     'enable_statistics',
+     'clone_uri',
+     'fork_id',
+     'group_id',
+     'repo_name'
+
+    """
+    from rhodecode import EXTENSIONS
+    callback = getattr(EXTENSIONS, 'DELETE_REPO_HOOK', None)
+    if isfunction(callback):
+        kw = {}
+        kw.update(repository_dict)
+        kw.update({'deleted_by': deleted_by,
+                   'deleted_on': time.time()})
+        kw.update(kwargs)
+        return callback(**kw)
+
+    return 0
+
 
 handle_git_pre_receive = (lambda repo_path, revs, env:
     handle_git_receive(repo_path, revs, env, hook_type='pre'))

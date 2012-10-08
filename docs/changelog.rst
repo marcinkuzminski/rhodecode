@@ -17,6 +17,7 @@ news
 - #574 Show pull request status also in shortlog (if any)
 - remember selected tab in my account page
 - Bumped mercurial version to 2.3.2
+- #595 rcextension hook for repository delete
 
 fixes
 +++++

@@ -40,9 +40,35 @@ def _crhook(*args, **kwargs):
      :param group_id:
      :param created_by:
     """
-
     return 0
 CREATE_REPO_HOOK = _crhook
+
+
+#==============================================================================
+# POST DELETE REPOSITORY HOOK
+#==============================================================================
+# this function will be executed after each repository deletion
+def _dlhook(*args, **kwargs):
+    """
+    Post create repository HOOK
+    kwargs available:
+     :param repo_name:
+     :param repo_type:
+     :param description:
+     :param private:
+     :param created_on:
+     :param enable_downloads:
+     :param repo_id:
+     :param user_id:
+     :param enable_statistics:
+     :param clone_uri:
+     :param fork_id:
+     :param group_id:
+     :param deleted_by:
+     :param deleted_on:
+    """
+    return 0
+DELETE_REPO_HOOK = _dlhook
 
 
 #==============================================================================
