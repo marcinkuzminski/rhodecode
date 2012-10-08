@@ -33,6 +33,7 @@ fixes
   status. Checks now are made also for the repository.
 - fixes #591 git backend was causing encoding errors when handling binary
   files - added a test case for VCS lib tests
+- fixed #597 commits in future get negative age.
 
 1.4.3 (**2012-09-28**)
 ----------------------

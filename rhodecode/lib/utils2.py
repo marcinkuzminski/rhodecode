@@ -314,9 +314,14 @@ def age(prevdate):
 
     order = ['year', 'month', 'day', 'hour', 'minute', 'second']
     deltas = {}
+    future = False
 
     # Get date parts deltas
     now = datetime.datetime.now()
+    if prevdate > now:
+        now, prevdate = prevdate, now
+        future = True
+
     for part in order:
         deltas[part] = getattr(now, part) - getattr(prevdate, part)
 
@@ -369,10 +374,16 @@ def age(prevdate):
             sub_value = 0
 
         if sub_value == 0:
-            return _(u'%s ago') % fmt_funcs[part](value)
-
-        return _(u'%s and %s ago') % (fmt_funcs[part](value),
-            fmt_funcs[sub_part](sub_value))
+            if future:
+                return _(u'in %s') % fmt_funcs[part](value)
+            else:
+                return _(u'%s ago') % fmt_funcs[part](value)
+        if future:
+            return _(u'in %s and %s') % (fmt_funcs[part](value),
+                fmt_funcs[sub_part](sub_value))
+        else:
+            return _(u'%s and %s ago') % (fmt_funcs[part](value),
+                fmt_funcs[sub_part](sub_value))
 
     return _(u'just now')
 
