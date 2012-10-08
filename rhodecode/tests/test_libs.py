@@ -145,7 +145,7 @@ class TestLibs(unittest.TestCase):
         self.assertEqual(age(n + delt(hours=24)), u'in 1 day')
         self.assertEqual(age(n + delt(hours=24 * 5)), u'in 5 days')
         self.assertEqual(age(n + delt(hours=24 * (calendar.mdays[n.month - 1] + 2))),
-                         u'in 1 month and 1 days')
+                         u'in 1 month and 1 day')
         self.assertEqual(age(n + delt(hours=24 * 400)), u'in 1 year and 1 month')
 
     def test_tag_exctrator(self):
