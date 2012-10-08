@@ -118,7 +118,7 @@ var show_perms = function(e){
     YUD.setStyle('my','display','none');
     YUD.setStyle('pullrequests','display','none');
     YUD.setStyle('perms','display','');
-    YUD.setStyle('q_filter','display','none');	
+    YUD.setStyle('q_filter','display','none');
 }
 YUE.on('show_perms','click',function(e){
     show_perms();
@@ -134,12 +134,12 @@ var show_my = function(e){
     YUD.setStyle('my','display','');
     YUD.setStyle('q_filter','display','');
 
-    
+
     var url = "${h.url('admin_settings_my_repos')}";
     ypjax(url, 'my', function(){
         table_sort();
         filter_activate();
-    });	
+    });
 }
 YUE.on('show_my','click',function(e){
 	show_my(e);
@@ -154,9 +154,9 @@ var show_pullrequests = function(e){
     YUD.setStyle('perms','display','none');
     YUD.setStyle('pullrequests','display','');
     YUD.setStyle('q_filter','display','none');
-    
+
     var url = "${h.url('admin_settings_my_pullrequests')}";
-    ypjax(url, 'pullrequests');	
+    ypjax(url, 'pullrequests');
 }
 YUE.on('show_pullrequests','click',function(e){
 	show_pullrequests(e)
@@ -167,12 +167,12 @@ var tabs = {
     'my': show_my,
     'pullrequests': show_pullrequests
 }
-var url = location.href.split('#'); 
-if (url[1]) { 
-    //We have a hash 
+var url = location.href.split('#');
+if (url[1]) {
+    //We have a hash
     var tabHash = url[1];
     console.log(tabs, tabHash)
-    tabs[tabHash]();   
+    tabs[tabHash]();
 }
 
 // main table sorting

@@ -133,7 +133,7 @@
   PullRequestAutoComplete('user', 'reviewers_container', _USERS_AC_DATA, _GROUPS_AC_DATA);
 
   var other_repos_info = ${c.other_repos_info|n};
-  
+
   var loadPreview = function(){
 	  YUD.setStyle(YUD.get('pull_request_overview_url').parentElement,'display','none');
       var url = "${h.url('compare_url',
@@ -150,18 +150,18 @@
         var select_ref_data = select_ref.value.split(':');
         var key = null;
         var val = null;
-        
+
         if(select_ref_data.length>1){
           key = select_ref.name+"_type";
           val = select_ref_data[0];
           url = url.replace(key,val);
           rev_data[key] = val;
-          
+
           key = select_ref.name;
           val = select_ref_data[1];
           url = url.replace(key,val);
           rev_data[key] = val;
-          
+
         }else{
           key = select_ref.name;
           val = select_ref.value;
@@ -175,7 +175,7 @@
     	  // replace the <select> of changed repo
     	  YUD.get('other_ref').innerHTML = other_repos_info[repo_name]['revs'];
       });
-      
+
       ypjax(url,'pull_request_overview', function(data){
     	  var sel_box = YUQ('#pull_request_form #other_repo')[0];
     	  var repo_name = sel_box.options[sel_box.selectedIndex].value;

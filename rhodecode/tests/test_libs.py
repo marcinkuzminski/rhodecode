@@ -210,4 +210,3 @@ class TestLibs(unittest.TestCase):
                 em = 'test@foo.com'
                 grav = gravatar_url(email_address=em, size=24)
                 assert grav == 'https://server.com/%s/%s' % (_md5(em), 24)
-
