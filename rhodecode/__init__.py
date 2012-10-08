@@ -26,7 +26,7 @@
 import sys
 import platform
 
-VERSION = (1, 4, 3)
+VERSION = (1, 4, 4)
 
 try:
     from rhodecode.lib import get_current_revision

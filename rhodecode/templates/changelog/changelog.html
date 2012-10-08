@@ -33,6 +33,7 @@ ${_('%s Changelog') % c.repo_name} - ${c.rhodecode_name}
 				</div>
 				<div id="graph_content">
                     <div class="info_box" style="clear: both;padding: 10px 6px;vertical-align: right;text-align: right;">
+                    <a href="#" class="ui-btn small" id="rev_range_container" style="display:none"></a>
                     %if c.rhodecode_db_repo.fork:
                         <a title="${_('compare fork with %s' % c.rhodecode_db_repo.fork.repo_name)}" href="${h.url('compare_url',repo_name=c.repo_name,org_ref_type='branch',org_ref='default',other_ref_type='branch',other_ref='default',repo=c.rhodecode_db_repo.fork.repo_name)}" class="ui-btn small">${_('Compare fork')}</a>
                     %endif
@@ -48,7 +49,6 @@ ${_('%s Changelog') % c.repo_name} - ${c.rhodecode_name}
 				          ${_('revisions')}
 				        </div>
 				        ${h.end_form()}
-					<div id="rev_range_container" style="display:none"></div>
                     <div style="float:right">${h.select('branch_filter',c.branch_name,c.branch_filters)}</div>
 					</div>
 
@@ -161,15 +161,15 @@ ${_('%s Changelog') % c.repo_name} - ${c.rhodecode_name}
                             var url = url_tmpl.replace('__REVRANGE__',
                             		rev_start+'...'+rev_end);
 
-                        var link = "<a href="+url+">${_('Show selected changes __S -> __E')}</a>"
+                        var link = "${_('Show selected changes __S -> __E')}";
                         link = link.replace('__S',rev_start.substr(0,6));
                         link = link.replace('__E',rev_end.substr(0,6));
+                        YUD.get('rev_range_container').href = url;
                         YUD.get('rev_range_container').innerHTML = link;
                         YUD.setStyle('rev_range_container','display','');
                         }
                         else{
                         	YUD.setStyle('rev_range_container','display','none');
-
                         }
                     });
 

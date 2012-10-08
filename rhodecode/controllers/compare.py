@@ -40,6 +40,7 @@ from rhodecode.lib import diffs
 from rhodecode.model.db import Repository
 from rhodecode.model.pull_request import PullRequestModel
 from webob.exc import HTTPBadRequest
+from rhodecode.lib.utils2 import str2bool
 
 log = logging.getLogger(__name__)
 
@@ -86,11 +87,13 @@ class CompareController(BaseRepoController):
         org_ref = (org_ref_type, org_ref)
         other_ref = (other_ref_type, other_ref)
         other_repo = request.GET.get('repo', org_repo)
+        bundle_compare = str2bool(request.GET.get('bundle', True))
 
         c.swap_url = h.url('compare_url', repo_name=other_repo,
               org_ref_type=other_ref[0], org_ref=other_ref[1],
               other_ref_type=org_ref[0], other_ref=org_ref[1],
-              repo=org_repo)
+              repo=org_repo, as_form=request.GET.get('as_form'),
+              bundle=bundle_compare)
 
         c.org_repo = org_repo = Repository.get_by_repo_name(org_repo)
         c.other_repo = other_repo = Repository.get_by_repo_name(other_repo)
@@ -107,8 +110,8 @@ class CompareController(BaseRepoController):
         self.__get_cs_or_redirect(rev=other_ref, repo=other_repo, partial=partial)
 
         c.cs_ranges, discovery_data = PullRequestModel().get_compare_data(
-                                       org_repo, org_ref, other_repo, other_ref
-                                      )
+                                    org_repo, org_ref, other_repo, other_ref
+                                    )
 
         c.statuses = c.rhodecode_db_repo.statuses([x.raw_id for x in
                                                    c.cs_ranges])
@@ -118,11 +121,18 @@ class CompareController(BaseRepoController):
         if partial:
             return render('compare/compare_cs.html')
 
+        if not bundle_compare and c.cs_ranges:
+            # case we want a simple diff without incoming changesets, just
+            # for review purposes. Make the diff on the forked repo, with
+            # revision that is common ancestor
+            other_ref = ('rev', c.cs_ranges[-1].parents[0].raw_id)
+            other_repo = org_repo
+
         c.org_ref = org_ref[1]
         c.other_ref = other_ref[1]
-        # diff needs to have swapped org with other to generate proper diff
+
         _diff = diffs.differ(other_repo, other_ref, org_repo, org_ref,
-                             discovery_data)
+                             discovery_data, bundle_compare=bundle_compare)
         diff_processor = diffs.DiffProcessor(_diff, format='gitdiff')
         _parsed = diff_processor.prepare()
 

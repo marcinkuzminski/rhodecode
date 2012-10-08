@@ -254,7 +254,8 @@ class TestCompareController(TestController):
                                     org_ref=rev1,
                                     other_ref_type="branch",
                                     other_ref=rev2,
-                                    repo=r1_name
+                                    repo=r1_name,
+                                    bundle=True,
                                     ))
 
         try:
@@ -262,6 +263,112 @@ class TestCompareController(TestController):
             response.mustcontain("""file1-line1-from-fork""")
             response.mustcontain("""file2-line1-from-fork""")
             response.mustcontain("""file3-line1-from-fork""")
+
+            #add new commit into parent !
+            cs0 = ScmModel().create_node(
+                repo=repo1.scm_instance, repo_name=r1_name,
+                cs=EmptyChangeset(alias='hg'), user=TEST_USER_ADMIN_LOGIN,
+                author=TEST_USER_ADMIN_LOGIN,
+                message='commit2',
+                content='line1-from-new-parent',
+                f_path='file2'
+            )
+            #compare !
+            rev1 = 'default'
+            rev2 = 'default'
+            response = self.app.get(url(controller='compare', action='index',
+                                        repo_name=r2_name,
+                                        org_ref_type="branch",
+                                        org_ref=rev1,
+                                        other_ref_type="branch",
+                                        other_ref=rev2,
+                                        repo=r1_name,
+                                        bundle=True,
+                                        ))
+
+            response.mustcontain('%s@%s -> %s@%s' % (r2_name, rev1, r1_name, rev2))
+            response.mustcontain("""<a href="#">file2</a>""")  # new commit from parent
+            response.mustcontain("""line1-from-new-parent""")
+            response.mustcontain("""file1-line1-from-fork""")
+            response.mustcontain("""file2-line1-from-fork""")
+            response.mustcontain("""file3-line1-from-fork""")
+        finally:
+            RepoModel().delete(r2_id)
+            RepoModel().delete(r1_id)
+
+    def test_org_repo_new_commits_after_forking_simple_diff(self):
+        self.log_user()
+
+        repo1 = RepoModel().create_repo(repo_name='one', repo_type='hg',
+                                        description='diff-test',
+                                        owner=TEST_USER_ADMIN_LOGIN)
+
+        Session().commit()
+        r1_id = repo1.repo_id
+        r1_name = repo1.repo_name
+
+        #commit something initially !
+        cs0 = ScmModel().create_node(
+            repo=repo1.scm_instance, repo_name=r1_name,
+            cs=EmptyChangeset(alias='hg'), user=TEST_USER_ADMIN_LOGIN,
+            author=TEST_USER_ADMIN_LOGIN,
+            message='commit1',
+            content='line1',
+            f_path='file1'
+        )
+        Session().commit()
+        self.assertEqual(repo1.scm_instance.revisions, [cs0.raw_id])
+        #fork the repo1
+        repo2 = RepoModel().create_repo(repo_name='one-fork', repo_type='hg',
+                                description='compare-test',
+                                clone_uri=repo1.repo_full_path,
+                                owner=TEST_USER_ADMIN_LOGIN, fork_of='one')
+        Session().commit()
+        self.assertEqual(repo2.scm_instance.revisions, [cs0.raw_id])
+        r2_id = repo2.repo_id
+        r2_name = repo2.repo_name
+
+        #make 3 new commits in fork
+        cs1 = ScmModel().create_node(
+            repo=repo2.scm_instance, repo_name=r2_name,
+            cs=repo2.scm_instance[-1], user=TEST_USER_ADMIN_LOGIN,
+            author=TEST_USER_ADMIN_LOGIN,
+            message='commit1-fork',
+            content='file1-line1-from-fork',
+            f_path='file1-fork'
+        )
+        cs2 = ScmModel().create_node(
+            repo=repo2.scm_instance, repo_name=r2_name,
+            cs=cs1, user=TEST_USER_ADMIN_LOGIN,
+            author=TEST_USER_ADMIN_LOGIN,
+            message='commit2-fork',
+            content='file2-line1-from-fork',
+            f_path='file2-fork'
+        )
+        cs3 = ScmModel().create_node(
+            repo=repo2.scm_instance, repo_name=r2_name,
+            cs=cs2, user=TEST_USER_ADMIN_LOGIN,
+            author=TEST_USER_ADMIN_LOGIN,
+            message='commit3-fork',
+            content='file3-line1-from-fork',
+            f_path='file3-fork'
+        )
+
+        #compare !
+        rev1 = 'default'
+        rev2 = 'default'
+        response = self.app.get(url(controller='compare', action='index',
+                                    repo_name=r2_name,
+                                    org_ref_type="branch",
+                                    org_ref=rev1,
+                                    other_ref_type="branch",
+                                    other_ref=rev2,
+                                    repo=r1_name,
+                                    bundle=False,
+                                    ))
+
+        try:
+            #response.mustcontain('%s@%s -> %s@%s' % (r2_name, rev1, r1_name, rev2))
 
             #add new commit into parent !
             cs0 = ScmModel().create_node(
@@ -281,13 +388,16 @@ class TestCompareController(TestController):
                                         org_ref=rev1,
                                         other_ref_type="branch",
                                         other_ref=rev2,
-                                        repo=r1_name
+                                        repo=r1_name,
+                                        bundle=False
                                         ))
-
+            rev2 = cs0.parents[0].raw_id
             response.mustcontain('%s@%s -> %s@%s' % (r2_name, rev1, r1_name, rev2))
             response.mustcontain("""file1-line1-from-fork""")
             response.mustcontain("""file2-line1-from-fork""")
             response.mustcontain("""file3-line1-from-fork""")
+            self.assertFalse("""<a href="#">file2</a>""" in response.body)  # new commit from parent
+            self.assertFalse("""line1-from-new-parent"""  in response.body)
         finally:
             RepoModel().delete(r2_id)
             RepoModel().delete(r1_id)

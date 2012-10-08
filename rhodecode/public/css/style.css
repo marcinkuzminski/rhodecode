@@ -2544,8 +2544,8 @@ h3.files_location {
 }
 
 #graph_content #rev_range_container {
-	padding: 7px 20px;
 	float: left;
+	margin: 0px 0px 0px 3px;
 }
 
 #graph_content .container {

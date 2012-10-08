@@ -28,6 +28,7 @@
 import re
 import difflib
 import markupsafe
+import logging
 
 from itertools import tee, imap
 
@@ -45,6 +46,8 @@ from rhodecode.lib.vcs.backends.base import EmptyChangeset
 from rhodecode.lib.helpers import escape
 from rhodecode.lib.utils import make_ui
 from rhodecode.lib.utils2 import safe_unicode
+
+log = logging.getLogger(__name__)
 
 
 def wrap_to_table(str_):
@@ -574,7 +577,8 @@ class InMemoryBundleRepo(bundlerepository):
         self.bundlefilespos = {}
 
 
-def differ(org_repo, org_ref, other_repo, other_ref, discovery_data=None):
+def differ(org_repo, org_ref, other_repo, other_ref, discovery_data=None,
+           bundle_compare=False):
     """
     General differ between branches, bookmarks or separate but releated
     repositories
@@ -598,7 +602,7 @@ def differ(org_repo, org_ref, other_repo, other_ref, discovery_data=None):
     org_ref = org_ref[1]
     other_ref = other_ref[1]
 
-    if org_repo != other_repo:
+    if org_repo != other_repo and bundle_compare:
 
         common, incoming, rheads = discovery_data
         other_repo_peer = localrepo.locallegacypeer(other_repo.local())
@@ -633,5 +637,7 @@ def differ(org_repo, org_ref, other_repo, other_ref, discovery_data=None):
                                   node2=other_repo[other_ref].node(),
                                   opts=opts))
     else:
+        log.debug('running diff between %s@%s and %s@%s'
+                  % (org_repo, org_ref, other_repo, other_ref))
         return ''.join(patch.diff(org_repo, node1=org_ref, node2=other_ref,
                                   opts=opts))

@@ -327,7 +327,7 @@ def UserExtraEmailForm():
     return _UserExtraEmailForm
 
 
-def PullRequestForm():
+def PullRequestForm(repo_id):
     class _PullRequestForm(formencode.Schema):
         allow_extra_fields = True
         filter_extra_fields = True
@@ -337,7 +337,7 @@ def PullRequestForm():
         org_ref = v.UnicodeString(strip=True, required=True)
         other_repo = v.UnicodeString(strip=True, required=True)
         other_ref = v.UnicodeString(strip=True, required=True)
-        revisions = All(v.NotReviewedRevisions()(), v.UniqueList(not_empty=True))
+        revisions = All(v.NotReviewedRevisions(repo_id)(), v.UniqueList(not_empty=True))
         review_members = v.UniqueList(not_empty=True)
 
         pullrequest_title = v.UnicodeString(strip=True, required=True, min=3)

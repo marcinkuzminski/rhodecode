@@ -497,3 +497,11 @@ def fix_PATH(os_=None):
     cur_path = os.path.split(sys.executable)[0]
     if not os.environ['PATH'].startswith(cur_path):
         os.environ['PATH'] = '%s:%s' % (cur_path, os.environ['PATH'])
+
+
+def obfuscate_url_pw(engine):
+    from sqlalchemy.engine import url
+    url = url.make_url(engine)
+    if url.password:
+        url.password = 'XXXXX'
+    return str(url)

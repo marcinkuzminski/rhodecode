@@ -53,6 +53,8 @@ class ShortlogController(BaseRepoController):
 
         c.repo_changesets = RepoPage(c.rhodecode_repo, page=p,
                                     items_per_page=size, url=url_generator)
+        page_revisions = [x.raw_id for x in list(c.repo_changesets)]
+        c.statuses = c.rhodecode_db_repo.statuses(page_revisions)
 
         if not c.repo_changesets:
             return redirect(url('summary_home', repo_name=repo_name))

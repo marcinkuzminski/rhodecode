@@ -43,7 +43,7 @@
 
 import logging
 from rhodecode.model import meta
-from rhodecode.lib.utils2 import safe_str
+from rhodecode.lib.utils2 import safe_str, obfuscate_url_pw
 
 log = logging.getLogger(__name__)
 
@@ -56,7 +56,8 @@ def init_model(engine):
 
     :param engine: engine to bind to
     """
-    log.info("initializing db for %s" % engine)
+    engine_str = obfuscate_url_pw(str(engine.url))
+    log.info("initializing db for %s" % engine_str)
     meta.Base.metadata.bind = engine
 
 

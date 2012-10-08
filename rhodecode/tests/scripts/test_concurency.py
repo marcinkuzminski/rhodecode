@@ -46,15 +46,15 @@ from rhodecode.lib.auth import get_crypt_password
 from rhodecode.tests import TESTS_TMP_PATH, NEW_HG_REPO, HG_REPO
 from rhodecode.config.environment import load_environment
 
-rel_path = dn(dn(dn(os.path.abspath(__file__))))
-conf = appconfig('config:development.ini', relative_to=rel_path)
+rel_path = dn(dn(dn(dn(os.path.abspath(__file__)))))
+conf = appconfig('config:rc.ini', relative_to=rel_path)
 load_environment(conf.global_conf, conf.local_conf)
 
 add_cache(conf)
 
 USER = 'test_admin'
 PASS = 'test12'
-HOST = 'hg.local'
+HOST = 'rc.local'
 METHOD = 'pull'
 DEBUG = True
 log = logging.getLogger(__name__)
@@ -130,10 +130,10 @@ def create_test_repo(force=True):
     if repo is None:
         print 'repo not found creating'
 
-        form_data = {'repo_name':HG_REPO,
-                     'repo_type':'hg',
+        form_data = {'repo_name': HG_REPO,
+                     'repo_type': 'hg',
                      'private':False,
-                     'clone_uri':'' }
+                     'clone_uri': '' }
         rm = RepoModel(sa)
         rm.base_path = '/home/hg'
         rm.create(form_data, user)
@@ -158,7 +158,7 @@ def get_anonymous_access():
 # TESTS
 #==============================================================================
 def test_clone_with_credentials(no_errors=False, repo=HG_REPO, method=METHOD,
-                                seq=None):
+                                seq=None, backend='hg'):
     cwd = path = jn(TESTS_TMP_PATH, repo)
 
     if seq == None:
@@ -172,20 +172,23 @@ def test_clone_with_credentials(no_errors=False, repo=HG_REPO, method=METHOD,
         raise
 
     clone_url = 'http://%(user)s:%(pass)s@%(host)s/%(cloned_repo)s' % \
-                  {'user':USER,
-                   'pass':PASS,
-                   'host':HOST,
-                   'cloned_repo':repo, }
+                  {'user': USER,
+                   'pass': PASS,
+                   'host': HOST,
+                   'cloned_repo': repo, }
 
     dest = path + seq
     if method == 'pull':
-        stdout, stderr = Command(cwd).execute('hg', method, '--cwd', dest, clone_url)
+        stdout, stderr = Command(cwd).execute(backend, method, '--cwd', dest, clone_url)
     else:
-        stdout, stderr = Command(cwd).execute('hg', method, clone_url, dest)
-
+        stdout, stderr = Command(cwd).execute(backend, method, clone_url, dest)
+        print stdout,'sdasdsadsa'
         if no_errors is False:
-            assert """adding file changes""" in stdout, 'no messages about cloning'
-            assert """abort""" not in stderr , 'got error from clone'
+            if backend == 'hg':
+                assert """adding file changes""" in stdout, 'no messages about cloning'
+                assert """abort""" not in stderr , 'got error from clone'
+            elif backend == 'git':
+                assert """Cloning into""" in stdout, 'no messages about cloning'
 
 if __name__ == '__main__':
     try:
@@ -198,15 +201,20 @@ if __name__ == '__main__':
         except:
             pass
 
+        try:
+            backend = sys.argv[4]
+        except:
+            backend = 'hg'
+
         if METHOD == 'pull':
             seq = _RandomNameSequence().next()
             test_clone_with_credentials(repo=sys.argv[1], method='clone',
-                                        seq=seq)
+                                        seq=seq, backend=backend)
         s = time.time()
         for i in range(1, int(sys.argv[2]) + 1):
             print 'take', i
             test_clone_with_credentials(repo=sys.argv[1], method=METHOD,
-                                        seq=seq)
+                                        seq=seq, backend=backend)
         print 'time taken %.3f' % (time.time() - s)
     except Exception, e:
         raise
