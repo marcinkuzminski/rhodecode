@@ -684,9 +684,12 @@ def check_git_version():
     from rhodecode import BACKENDS
 
     p = subprocess.Popen('git --version', shell=True,
-                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = p.communicate()
     ver = (stdout.split(' ')[-1] or '').strip() or '0.0.0'
+    if len(ver.split('.')) > 3:
+        #StrictVersion needs to be only 3 element type
+        ver = '.'.join(ver.split('.')[:3])
     try:
         _ver = StrictVersion(ver)
     except:
