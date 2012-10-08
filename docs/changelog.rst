@@ -14,6 +14,7 @@ news
 - #574 Show pull request status also in shortlog (if any)
 - remember selected tab in my account page
 - Bumped mercurial version to 2.3.2
+- #595 rcextension hook for repository delete
 
 fixes
 +++++
@@ -30,6 +31,8 @@ fixes
   status. Checks now are made also for the repository.
 - fixes #591 git backend was causing encoding errors when handling binary
   files - added a test case for VCS lib tests
+- fixed #597 commits in future get negative age.
+- fixed #598 API docs methods had wrong members parameter as returned data
 
 1.4.3 (**2012-09-28**)
 ----------------------

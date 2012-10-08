@@ -438,21 +438,6 @@ OUTPUT::
                "users_group_id" : "<id>",
                "group_name" :     "<groupname>",
                "active":          "<bool>",
-               "members" :  [
-                              { 
-                                "user_id" :  "<user_id>",
-                                "username" : "<username>",
-                                "firstname": "<firstname>",
-                                "lastname" : "<lastname>",
-                                "email" :    "<email>",
-                                "emails":    "<list_of_all_additional_emails>",
-                                "active" :   "<bool>",
-                                "admin" :    "<bool>",
-                                "ldap_dn" :  "<ldap_dn>",
-                                "last_login": "<last_login>",
-                              },
-                              …
-                            ]
                },
                …
               ]
@@ -485,21 +470,6 @@ OUTPUT::
                      "users_group_id" : "<id>",
                      "group_name" :     "<groupname>",
                      "active":          "<bool>",
-                     "members" :  [
-                                  { 
-                                    "user_id" :  "<user_id>",
-                                    "username" : "<username>",
-                                    "firstname": "<firstname>",
-                                    "lastname" : "<lastname>",
-                                    "email" :    "<email>",
-                                    "emails":    "<list_of_all_additional_emails>",
-                                    "active" :   "<bool>",
-                                    "admin" :    "<bool>",
-                                    "ldap_dn" :  "<ldap_dn>",
-                                    "last_login": "<last_login>",
-                                  },
-                                  …
-                     ]
                },
             }
     error:  null

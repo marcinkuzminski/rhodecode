@@ -188,4 +188,3 @@ class SettingsController(BaseRepoController):
             h.flash(_('An error occurred during unlocking'),
                     category='error')
         return redirect(url('summary_home', repo_name=repo_name))
-

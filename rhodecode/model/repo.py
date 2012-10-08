@@ -33,7 +33,7 @@ from rhodecode.lib.vcs.backends import get_backend
 from rhodecode.lib.compat import json
 from rhodecode.lib.utils2 import LazyProperty, safe_str, safe_unicode
 from rhodecode.lib.caching_query import FromCache
-from rhodecode.lib.hooks import log_create_repository
+from rhodecode.lib.hooks import log_create_repository, log_delete_repository
 
 from rhodecode.model import BaseModel
 from rhodecode.model.db import Repository, UserRepoToPerm, User, Permission, \
@@ -336,9 +336,13 @@ class RepoModel(BaseModel):
     def delete(self, repo):
         repo = self._get_repo(repo)
         if repo:
+            old_repo_dict = repo.get_dict()
+            owner = repo.user
             try:
                 self.sa.delete(repo)
                 self.__delete_repo(repo)
+                log_delete_repository(old_repo_dict,
+                                      deleted_by=owner.username)
             except:
                 log.error(traceback.format_exc())
                 raise
