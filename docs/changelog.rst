@@ -13,8 +13,26 @@ Changelog
 news
 ++++
 
+- obfuscate db password in logs for engine connection string
+- #574 Show pull request status also in shortlog (if any)
+- remember selected tab in my account page
+- Bumped mercurial version to 2.3.2
+
 fixes
 +++++
+
+- Add git version detection to warn users that Git used in system is to
+  old. Ref #588 - also show git version in system details in settings page
+- fixed files quick filter links
+- #590 Add GET flag that controls the way the diff are generated, for pull
+  requests we want to use non-bundle based diffs, That are far better for
+  doing code reviews. The /compare url still uses bundle compare for full
+  comparison including the incoming changesets
+- Fixed #585, checks for status of revision where to strict, and made
+  opening pull request with those revision impossible due to previously set
+  status. Checks now are made also for the repository.
+- fixes #591 git backend was causing encoding errors when handling binary
+  files - added a test case for VCS lib tests
 
 1.4.3 (**2012-09-28**)
 ----------------------
