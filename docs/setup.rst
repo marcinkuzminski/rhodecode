@@ -71,8 +71,8 @@ functionality. To do this simply execute::
 
 This will create `rcextensions` package in the same place that your `ini` file
 lives. With `rcextensions` it's possible to add additional mapping for whoosh, 
-stats and add additional code into the push/pull/create repo hooks. For example
-for sending signals to build-bots such as jenkins.
+stats and add additional code into the push/pull/create/delete repo hooks.
+For example for sending signals to build-bots such as jenkins.
 Please see the `__init__.py` file inside `rcextensions` package 
 for more details.
 
