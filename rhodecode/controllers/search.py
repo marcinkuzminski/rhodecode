@@ -24,7 +24,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import logging
 import traceback
-
+import urllib
 from pylons.i18n.translation import _
 from pylons import request, config, tmpl_context as c
 
@@ -41,6 +41,7 @@ from whoosh.qparser import QueryParser, QueryParserError
 from whoosh.query import Phrase, Wildcard, Term, Prefix
 from rhodecode.model.repo import RepoModel
 from rhodecode.lib.utils2 import safe_str, safe_int
+
 
 log = logging.getLogger(__name__)
 
@@ -116,8 +117,9 @@ class SearchController(BaseController):
                     )
 
                     def url_generator(**kw):
+                        q = urllib.quote(safe_str(c.cur_query))
                         return update_params("?q=%s&type=%s" \
-                        % (safe_str(c.cur_query), safe_str(c.cur_type)), **kw)
+                        % (q, safe_str(c.cur_type)), **kw)
                     repo_location = RepoModel().repos_path
                     c.formated_results = Page(
                         WhooshResultWrapper(search_type, searcher, matcher,
