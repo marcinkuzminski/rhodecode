@@ -8,8 +8,7 @@ import traceback
 
 from paste.auth.basic import AuthBasicAuthenticator
 from paste.httpexceptions import HTTPUnauthorized, HTTPForbidden
-from webob.exc import HTTPClientError
-from paste.httpheaders import WWW_AUTHENTICATE
+from paste.httpheaders import WWW_AUTHENTICATE, AUTHORIZATION
 
 from pylons import config, tmpl_context as c, request, session, url
 from pylons.controllers import WSGIController
@@ -73,6 +72,23 @@ class BasicAuth(AuthBasicAuthenticator):
             # RhodeCode config
             return HTTPForbidden(headers=head)
         return HTTPUnauthorized(headers=head)
+
+    def authenticate(self, environ):
+        authorization = AUTHORIZATION(environ)
+        if not authorization:
+            return self.build_authentication()
+        (authmeth, auth) = authorization.split(' ', 1)
+        if 'basic' != authmeth.lower():
+            return self.build_authentication()
+        auth = auth.strip().decode('base64')
+        _parts = auth.split(':', 1)
+        if len(_parts) == 2:
+            username, password = _parts
+            if self.authfunc(environ, username, password):
+                return username
+        return self.build_authentication()
+
+    __call__ = authenticate
 
 
 class BaseVCSController(object):
