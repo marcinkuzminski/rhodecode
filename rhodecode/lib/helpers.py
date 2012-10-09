@@ -604,8 +604,8 @@ def action_parser(user_log, feed=False):
 
     def get_fork_name():
         repo_name = action_params
-        return _('fork name ') + str(link_to(action_params, url('summary_home',
-                                          repo_name=repo_name,)))
+        _url = url('summary_home', repo_name=repo_name)
+        return _('fork name %s') % link_to(action_params, _url)
 
     def get_user_name():
         user_name = action_params
