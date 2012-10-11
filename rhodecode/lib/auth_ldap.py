@@ -57,17 +57,19 @@ class AuthLdap(object):
         OPT_X_TLS_DEMAND = 2
         self.TLS_REQCERT = getattr(ldap, 'OPT_X_TLS_%s' % tls_reqcert,
                                    OPT_X_TLS_DEMAND)
-        self.LDAP_SERVER_ADDRESS = server
+        # split server into list
+        self.LDAP_SERVER_ADDRESS = server.split(',')
         self.LDAP_SERVER_PORT = port
 
         # USE FOR READ ONLY BIND TO LDAP SERVER
         self.LDAP_BIND_DN = safe_str(bind_dn)
         self.LDAP_BIND_PASS = safe_str(bind_pass)
-
-        self.LDAP_SERVER = "%s://%s:%s" % (ldap_server_type,
-                                           self.LDAP_SERVER_ADDRESS,
-                                           self.LDAP_SERVER_PORT)
-
+        _LDAP_SERVERS = []
+        for host in self.LDAP_SERVER_ADDRESS:
+            _LDAP_SERVERS.append("%s://%s:%s" % (ldap_server_type,
+                                                     host.replace(' ', ''),
+                                                     self.LDAP_SERVER_PORT))
+        self.LDAP_SERVER = str(', '.join(s for s in _LDAP_SERVERS))
         self.BASE_DN = safe_str(base_dn)
         self.LDAP_FILTER = safe_str(ldap_filter)
         self.SEARCH_SCOPE = getattr(ldap, 'SCOPE_%s' % search_scope)
