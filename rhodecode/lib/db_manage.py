@@ -543,9 +543,9 @@ class DbManage(object):
             retries -= 1
             return self.config_prompt(test_repo_path, retries)
 
-        real_path = os.path.realpath(path)
+        real_path = os.path.normpath(os.path.realpath(path))
 
-        if real_path != path:
+        if real_path != os.path.normpath(path):
             if not ask_ok(('Path looks like a symlink, Rhodecode will store '
                            'given path as %s ? [y/n]') % (real_path)):
                 log.error('Canceled by user')
