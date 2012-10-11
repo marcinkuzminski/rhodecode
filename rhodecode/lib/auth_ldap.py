@@ -117,6 +117,8 @@ class AuthLdap(object):
                 server.start_tls_s()
 
             if self.LDAP_BIND_DN and self.LDAP_BIND_PASS:
+                log.debug('Trying simple_bind with password and given DN: %s'
+                          % self.LDAP_BIND_DN)
                 server.simple_bind_s(self.LDAP_BIND_DN, self.LDAP_BIND_PASS)
 
             filter_ = '(&%s(%s=%s))' % (self.LDAP_FILTER, self.attr_login,
