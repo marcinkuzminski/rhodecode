@@ -57,32 +57,39 @@ def notify(msg):
 
 
 class DbManage(object):
-    def __init__(self, log_sql, dbconf, root, tests=False):
+    def __init__(self, log_sql, dbconf, root, tests=False, cli_args={}):
         self.dbname = dbconf.split('/')[-1]
         self.tests = tests
         self.root = root
         self.dburi = dbconf
         self.log_sql = log_sql
         self.db_exists = False
+        self.cli_args = cli_args
         self.init_db()
+        global ask_ok
+
+        if self.cli_args.get('force_ask') is True:
+            ask_ok = lambda *args, **kwargs: True
+        elif self.cli_args.get('force_ask') is False:
+            ask_ok = lambda *args, **kwargs: False
 
     def init_db(self):
         engine = create_engine(self.dburi, echo=self.log_sql)
         init_model(engine)
         self.sa = Session()
 
-    def create_tables(self, override=False, defaults={}):
+    def create_tables(self, override=False):
         """
         Create a auth database
         """
-        quiet = defaults.get('quiet')
+
         log.info("Any existing database is going to be destroyed")
-        if self.tests or quiet:
+        if self.tests:
             destroy = True
         else:
             destroy = ask_ok('Are you sure to destroy old database ? [y/n]')
         if not destroy:
-            sys.exit()
+            sys.exit('Nothing done')
         if destroy:
             Base.metadata.drop_all()
 
@@ -328,11 +335,12 @@ class DbManage(object):
             self.sa.rollback()
             raise
 
-    def admin_prompt(self, second=False, defaults={}):
+    def admin_prompt(self, second=False):
         if not self.tests:
             import getpass
 
             # defaults
+            defaults = self.cli_args
             username = defaults.get('username')
             password = defaults.get('password')
             email = defaults.get('email')
@@ -507,7 +515,8 @@ class DbManage(object):
             self.populate_default_permissions()
         return fixed
 
-    def config_prompt(self, test_repo_path='', retries=3, defaults={}):
+    def config_prompt(self, test_repo_path='', retries=3):
+        defaults = self.cli_args
         _path = defaults.get('repos_location')
         if retries == 3:
             log.info('Setting up repositories config')
