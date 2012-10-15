@@ -2551,6 +2551,11 @@ h3.files_location {
 	margin: 0px 0px 0px 3px;
 }
 
+#graph_content #rev_range_clear {
+    float: left;
+    margin: 0px 0px 0px 3px;
+}
+
 #graph_content .container {
 	border-bottom: 1px solid #DDD;
 	height: 56px;
