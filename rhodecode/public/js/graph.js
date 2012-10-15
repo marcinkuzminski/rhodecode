@@ -32,13 +32,8 @@ function BranchRenderer() {
 	this.ctx.strokeStyle = 'rgb(0, 0, 0)';
 	this.ctx.fillStyle = 'rgb(0, 0, 0)';
 	this.cur = [0, 0];
-	this.max_column = 1;
 	this.line_width = 2.5;
 	this.dot_radius = 5.5;
-	
-	this.scale = function(height) {
-		this.box_size = Math.floor(height/1.2);
-	}
 	
 	this.setColor = function(color, bg, fg) {
 		color %= colors.length;
@@ -58,9 +53,9 @@ function BranchRenderer() {
 		var rela = document.getElementById('graph');
 		var pad = width;
 		var scale = 22;
+		var box_size = Math.floor(scale/1.2);
 
 		for (var i in data) {
-			this.scale(scale);
 
 			var row = document.getElementById("chg_"+idx);
 			if (row == null)
@@ -83,18 +78,10 @@ function BranchRenderer() {
 				end = line[1];
 				color = line[2];
 
-				if (start > this.max_column) {
-					this.max_column = start;
-				}
-				
-				if (end > this.max_column) {
-					this.max_column = end;
-				}
-				
 				this.setColor(color, 0.0, 0.65);
 
 				
-				x = pad-(this.box_size * start - 1 + scale);
+				x = pad-(box_size * start - 1 + scale);
 				
 				this.ctx.lineWidth=this.line_width;
 				this.ctx.beginPath();
@@ -103,12 +90,12 @@ function BranchRenderer() {
 				
 				if (start == end)
 				{
-					x = pad-((1 + this.box_size * end) + scale-2);
+					x = pad-((1 + box_size * end) + scale-2);
 					this.ctx.lineTo(x,nextY+extra,3);
 				}
 				else
 				{
-					var x2 = pad-((1 + this.box_size * end) + scale-2);
+					var x2 = pad-((1 + box_size * end) + scale-2);
 					var ymid = (rowY+nextY) / 2;
 					this.ctx.bezierCurveTo (x,ymid,x2,ymid,x2,nextY);
 				}
