@@ -61,32 +61,33 @@ a:hover {
 	text-decoration: underline;
 }
 
-h1,h2,h3,h4,h5,h6 {
+h1,h2,h3,h4,h5,h6,
+div.h1,div.h2,div.h3,div.h4,div.h5,div.h6 {
 	color: #292929;
 	font-weight: 700;
 }
 
-h1 {
+h1,div.h1 {
 	font-size: 22px;
 }
 
-h2 {
+h2,div.h2 {
 	font-size: 20px;
 }
 
-h3 {
+h3,div.h3 {
 	font-size: 18px;
 }
 
-h4 {
+h4,div.h4 {
 	font-size: 16px;
 }
 
-h5 {
+h5,div.h5 {
 	font-size: 14px;
 }
 
-h6 {
+h6,div.h6 {
 	font-size: 11px;
 }
 
@@ -1143,7 +1144,9 @@ tbody .yui-dt-editable { cursor: pointer }
 	text-decoration: none;
 }
 
-#content div.box h1,#content div.box h2,#content div.box h3,#content div.box h4,#content div.box h5,#content div.box h6
+#content div.box h1,#content div.box h2,#content div.box h3,#content div.box h4,#content div.box h5,#content div.box h6,
+#content div.box div.h1,#content div.box div.h2,#content div.box div.h3,#content div.box div.h4,#content div.box div.h5,#content div.box div.h6
+
 	{
 	clear: both;
 	overflow: hidden;
