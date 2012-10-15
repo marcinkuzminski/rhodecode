@@ -32,8 +32,8 @@ function BranchRenderer() {
 	this.ctx.strokeStyle = 'rgb(0, 0, 0)';
 	this.ctx.fillStyle = 'rgb(0, 0, 0)';
 	this.cur = [0, 0];
-	this.line_width = 2.5;
-	this.dot_radius = 5.5;
+	this.line_width = 2.0;
+	this.dot_radius = 3.5;
 	
 	this.setColor = function(color, bg, fg) {
 		color %= colors.length;
