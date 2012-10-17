@@ -37,7 +37,8 @@ from rhodecode.lib import diffs
 from rhodecode.lib import helpers as h
 
 from rhodecode.lib.compat import OrderedDict
-from rhodecode.lib.utils2 import convert_line_endings, detect_mode, safe_str
+from rhodecode.lib.utils2 import convert_line_endings, detect_mode, safe_str,\
+    str2bool
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.vcs.backends.base import EmptyChangeset
@@ -430,6 +431,18 @@ class FilesController(BaseRepoController):
         c.context_url = _context_url
         c.changes = OrderedDict()
         c.changes[diff2] = []
+
+        #special case if we want a show rev only, it's impl here
+        #to reduce JS and callbacks
+        if request.GET.get('show_rev'):
+            if str2bool(request.GET.get('annotate', 'False')):
+                _url = url('files_annotate_home', repo_name=c.repo_name,
+                           revision=diff1, f_path=c.f_path)
+            else:
+                _url = url('files_home', repo_name=c.repo_name,
+                           revision=diff1, f_path=c.f_path)
+
+            return redirect(_url)
         try:
             if diff1 not in ['', None, 'None', '0' * 12, '0' * 40]:
                 c.changeset_1 = c.rhodecode_repo.get_changeset(diff1)

@@ -8,6 +8,7 @@
     		${h.select('diff1',c.file_changeset.raw_id,c.file_history)}
     		${h.submit('diff',_('diff to revision'),class_="ui-btn")}
     		${h.submit('show_rev',_('show at revision'),class_="ui-btn")}
+            ${h.hidden('annotate', c.annotate)}
     		${h.end_form()}
     		</div>
             <div class="file_author">
@@ -111,16 +112,7 @@ YUE.onDOMReady(function(){
     window.location.hash = old_hash;
 
     }
-    YUE.on('show_rev','click',function(e){
-    	YUE.preventDefault(e);
-        var cs = YUD.get('diff1').value;
-        %if c.annotate:
-          var url = "${h.url('files_annotate_home',repo_name=c.repo_name,revision='__CS__',f_path=c.f_path)}".replace('__CS__',cs);
-        %else:
-          var url = "${h.url('files_home',repo_name=c.repo_name,revision='__CS__',f_path=c.f_path)}".replace('__CS__',cs);
-        %endif
-        window.location = url;
-    });
+
     YUE.on('hlcode','mouseup',getSelectionLink("${_('Selection link')}"))
    });
 </script>
