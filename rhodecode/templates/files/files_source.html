@@ -4,8 +4,8 @@
         <div>
     		<div style="float:left">
     		${h.form(h.url('files_diff_home',repo_name=c.repo_name,f_path=c.f_path),method='get')}
-    		${h.hidden('diff2',c.file.changeset.raw_id)}
-    		${h.select('diff1',c.file.changeset.raw_id,c.file_history)}
+    		${h.hidden('diff2',c.file_changeset.raw_id)}
+    		${h.select('diff1',c.file_changeset.raw_id,c.file_history)}
     		${h.submit('diff',_('diff to revision'),class_="ui-btn")}
     		${h.submit('show_rev',_('show at revision'),class_="ui-btn")}
     		${h.end_form()}
@@ -28,31 +28,31 @@
 	<div class="code-header">
         <div class="stats">
             <div class="left img"><img src="${h.url('/images/icons/file.png')}"/></div>
-            <div class="left item"><pre class="tooltip" title="${h.tooltip(h.fmt_date(c.file.changeset.date))}">${h.link_to("r%s:%s" % (c.file.changeset.revision,h.short_id(c.file.changeset.raw_id)),h.url('changeset_home',repo_name=c.repo_name,revision=c.file.changeset.raw_id))}</pre></div>
+            <div class="left item"><pre class="tooltip" title="${h.tooltip(h.fmt_date(c.file_changeset.date))}">${h.link_to("r%s:%s" % (c.file_changeset.revision,h.short_id(c.file_changeset.raw_id)),h.url('changeset_home',repo_name=c.repo_name,revision=c.file_changeset.raw_id))}</pre></div>
             <div class="left item"><pre>${h.format_byte_size(c.file.size,binary=True)}</pre></div>
             <div class="left item last"><pre>${c.file.mimetype}</pre></div>
             <div class="buttons">
               %if c.annotate:
-                ${h.link_to(_('show source'),    h.url('files_home',         repo_name=c.repo_name,revision=c.file.changeset.raw_id,f_path=c.f_path),class_="ui-btn")}
+                ${h.link_to(_('show source'),    h.url('files_home',         repo_name=c.repo_name,revision=c.file_changeset.raw_id,f_path=c.f_path),class_="ui-btn")}
               %else:
-                ${h.link_to(_('show annotation'),h.url('files_annotate_home',repo_name=c.repo_name,revision=c.file.changeset.raw_id,f_path=c.f_path),class_="ui-btn")}
+                ${h.link_to(_('show annotation'),h.url('files_annotate_home',repo_name=c.repo_name,revision=c.file_changeset.raw_id,f_path=c.f_path),class_="ui-btn")}
               %endif
-              ${h.link_to(_('show as raw'),h.url('files_raw_home',repo_name=c.repo_name,revision=c.file.changeset.raw_id,f_path=c.f_path),class_="ui-btn")}
-              ${h.link_to(_('download as raw'),h.url('files_rawfile_home',repo_name=c.repo_name,revision=c.file.changeset.raw_id,f_path=c.f_path),class_="ui-btn")}
+              ${h.link_to(_('show as raw'),h.url('files_raw_home',repo_name=c.repo_name,revision=c.file_changeset.raw_id,f_path=c.f_path),class_="ui-btn")}
+              ${h.link_to(_('download as raw'),h.url('files_rawfile_home',repo_name=c.repo_name,revision=c.file_changeset.raw_id,f_path=c.f_path),class_="ui-btn")}
               % if h.HasRepoPermissionAny('repository.write','repository.admin')(c.repo_name):
                % if not c.file.is_binary:
-                ${h.link_to(_('edit'),h.url('files_edit_home',repo_name=c.repo_name,revision=c.file.changeset.raw_id,f_path=c.f_path),class_="ui-btn")}
+                ${h.link_to(_('edit'),h.url('files_edit_home',repo_name=c.repo_name,revision=c.file_changeset.raw_id,f_path=c.f_path),class_="ui-btn")}
                % endif
               % endif
             </div>
         </div>
         <div class="author">
             <div class="gravatar">
-                <img alt="gravatar" src="${h.gravatar_url(h.email_or_none(c.file.changeset.author),16)}"/>
+                <img alt="gravatar" src="${h.gravatar_url(h.email_or_none(c.file_changeset.author),16)}"/>
             </div>
-            <div title="${c.file.changeset.author}" class="user">${h.person(c.file.changeset.author)}</div>
+            <div title="${c.file_changeset.author}" class="user">${h.person(c.file_changeset.author)}</div>
         </div>
-		<div class="commit">${h.urlify_commit(c.file.changeset.message,c.repo_name)}</div>
+		<div class="commit">${h.urlify_commit(c.file_changeset.message,c.repo_name)}</div>
 	</div>
 	<div class="code-body">
 	   %if c.file.is_binary:
@@ -66,7 +66,7 @@
             %endif
 		%else:
 			${_('File is too big to display')} ${h.link_to(_('show as raw'),
-			h.url('files_raw_home',repo_name=c.repo_name,revision=c.file.changeset.raw_id,f_path=c.f_path))}
+			h.url('files_raw_home',repo_name=c.repo_name,revision=c.file_changeset.raw_id,f_path=c.f_path))}
 		%endif
      %endif
 	</div>
