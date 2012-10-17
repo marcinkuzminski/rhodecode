@@ -153,9 +153,8 @@ class FilesController(BaseRepoController):
             c.file = c.changeset.get_node(f_path)
 
             if c.file.is_file():
-                _hist = c.changeset.get_file_history(f_path)
-                c.file_history = self._get_node_history(c.changeset, f_path,
-                                                        _hist)
+                _hist = c.rhodecode_repo.get_changeset().get_file_history(f_path)
+                c.file_history = self._get_node_history(None, f_path, _hist)
                 c.authors = []
                 for a in set([x.author for x in _hist]):
                     c.authors.append((h.email(a), h.person(a)))
@@ -487,8 +486,12 @@ class FilesController(BaseRepoController):
         return render('files/file_diff.html')
 
     def _get_node_history(self, cs, f_path, changesets=None):
+        if cs is None:
+            # if we pass empty CS calculate history based on tip
+            cs = c.rhodecode_repo.get_changeset()
         if changesets is None:
             changesets = cs.get_file_history(f_path)
+
         hist_l = []
 
         changesets_group = ([], _("Changesets"))
