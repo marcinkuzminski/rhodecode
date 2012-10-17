@@ -149,8 +149,8 @@ class PullrequestsController(BaseRepoController):
                                  self._get_repo_refs(fork.scm_instance),
                                  class_='refs')
             }
-        #add parents of this fork also
-        if org_repo.parent:
+        #add parents of this fork also, but only if it's not empty
+        if org_repo.parent and org_repo.parent.scm_instance.revisions:
             c.default_pull_request = org_repo.parent.repo_name
             c.default_pull_request_rev = self._get_default_rev(org_repo.parent)
             c.default_revs = self._get_repo_refs(org_repo.parent.scm_instance)
