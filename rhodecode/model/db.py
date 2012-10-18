@@ -856,6 +856,10 @@ class Repository(Base, BaseModel):
         Session().add(repo)
         Session().commit()
 
+    @property
+    def last_db_change(self):
+        return self.updated_on
+
     #==========================================================================
     # SCM PROPERTIES
     #==========================================================================

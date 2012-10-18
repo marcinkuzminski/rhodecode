@@ -185,18 +185,23 @@ class SettingsController(BaseController):
                 sett1 = RhodeCodeSetting.get_by_name_or_create('show_public_icon')
                 sett1.app_settings_value = \
                     form_result['rhodecode_show_public_icon']
+                Session().add(sett1)
 
                 sett2 = RhodeCodeSetting.get_by_name_or_create('show_private_icon')
                 sett2.app_settings_value = \
                     form_result['rhodecode_show_private_icon']
+                Session().add(sett2)
 
                 sett3 = RhodeCodeSetting.get_by_name_or_create('stylify_metatags')
                 sett3.app_settings_value = \
                     form_result['rhodecode_stylify_metatags']
-
-                Session().add(sett1)
-                Session().add(sett2)
                 Session().add(sett3)
+
+                sett4 = RhodeCodeSetting.get_by_name_or_create('lightweight_dashboard')
+                sett4.app_settings_value = \
+                    form_result['rhodecode_lightweight_dashboard']
+                Session().add(sett4)
+
                 Session().commit()
                 set_rhodecode_config(config)
                 h.flash(_('Updated visualisation settings'),

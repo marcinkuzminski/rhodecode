@@ -76,8 +76,8 @@
     ${h.link_to(get_name(name),h.url('summary_home',repo_name=name),class_="repo_name")}
    %endif
    %if fork_of:
-        <a href="${h.url('summary_home',repo_name=fork_of)}">
-        <img class="icon" alt="${_('fork')}" title="${_('Fork of')} ${fork_of}" src="${h.url('/images/icons/arrow_divide.png')}"/></a>
+        <a href="${h.url('summary_home',repo_name=fork_of.repo_name)}">
+        <img class="icon" alt="${_('fork')}" title="${_('Fork of')} ${fork_of.repo_name}" src="${h.url('/images/icons/arrow_divide.png')}"/></a>
    %endif
   </div>
 </%def>
@@ -92,6 +92,22 @@
       ${_('No changesets yet')}
   %endif
   </div>
+</%def>
+
+<%def name="rss(name)">
+  %if c.rhodecode_user.username != 'default':
+    <a title="${_('Subscribe to %s rss feed')% name}" class="rss_icon"  href="${h.url('rss_feed_home',repo_name=name,api_key=c.rhodecode_user.api_key)}"></a>
+  %else:
+    <a title="${_('Subscribe to %s rss feed')% name}" class="rss_icon"  href="${h.url('rss_feed_home',repo_name=name)}"></a>
+  %endif
+</%def>
+
+<%def name="atom(name)">
+  %if c.rhodecode_user.username != 'default':
+    <a title="${_('Subscribe to %s atom feed')% name}"  class="atom_icon" href="${h.url('atom_feed_home',repo_name=name,api_key=c.rhodecode_user.api_key)}"></a>
+  %else:
+    <a title="${_('Subscribe to %s atom feed')% name}"  class="atom_icon" href="${h.url('atom_feed_home',repo_name=name)}"></a>
+  %endif
 </%def>
 
 <%def name="user_gravatar(email, size=24)">

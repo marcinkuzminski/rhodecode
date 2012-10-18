@@ -254,6 +254,8 @@ def ApplicationVisualisationForm():
         rhodecode_show_private_icon = v.StringBoolean(if_missing=False)
         rhodecode_stylify_metatags = v.StringBoolean(if_missing=False)
 
+        rhodecode_lightweight_dashboard = v.StringBoolean(if_missing=False)
+
     return _ApplicationVisualisationForm
 
 

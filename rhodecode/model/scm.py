@@ -115,6 +115,7 @@ class CachedRepoList(object):
             tmp_d = {}
             tmp_d['name'] = dbr.repo_name
             tmp_d['name_sort'] = tmp_d['name'].lower()
+            tmp_d['raw_name'] = tmp_d['name'].lower()
             tmp_d['description'] = dbr.description
             tmp_d['description_sort'] = tmp_d['description'].lower()
             tmp_d['last_change'] = last_change
@@ -149,6 +150,7 @@ class SimpleCachedRepoList(CachedRepoList):
             tmp_d = {}
             tmp_d['name'] = dbr.repo_name
             tmp_d['name_sort'] = tmp_d['name'].lower()
+            tmp_d['raw_name'] = tmp_d['name'].lower()
             tmp_d['description'] = dbr.description
             tmp_d['description_sort'] = tmp_d['description'].lower()
             tmp_d['dbrepo'] = dbr.get_dict()

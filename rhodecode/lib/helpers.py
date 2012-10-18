@@ -42,7 +42,7 @@ from webhelpers.html.tags import _set_input_attrs, _set_id_attr, \
 from rhodecode.lib.annotate import annotate_highlight
 from rhodecode.lib.utils import repo_name_slug
 from rhodecode.lib.utils2 import str2bool, safe_unicode, safe_str, \
-    get_changeset_safe, datetime_to_time, time_to_datetime
+    get_changeset_safe, datetime_to_time, time_to_datetime, AttributeDict
 from rhodecode.lib.markup_renderer import MarkupRenderer
 from rhodecode.lib.vcs.exceptions import ChangesetDoesNotExistError
 from rhodecode.lib.vcs.backends.base import BaseChangeset
