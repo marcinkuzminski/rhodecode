@@ -288,30 +288,6 @@ errormator.request_keys_blacklist =
 # (by default the client ignores own entries: errormator_client.client)
 errormator.log_namespace_blacklist =  
 
-#
-# YOU SHOULD NOT NEED TO TWEAK THIS
-#
-
-# leave server_name empty for auto discovery
-# errormator.server_name =
-
-# connection timeout when communicating with API
-# errormator.timeout = 10
-
-# reraise exceptions when wsgi catches exception
-# errormator.reraise_exceptions = true
-
-# enables 500 error logging
-errormator.report_errors = true  
-
-# how often send data to mothership Errormator (default 5s)
-errormator.buffer_flush_interval = 5
-
-# send all data after request is finished - handy for crons or other voliatile applications
-errormator.force_send = false
-
-# custom filter callable to override sensitive data filtering
-# errormator.filter_callable = foo.bar.baz:callable_name
 
 ################
 ### [sentry] ###
