@@ -47,6 +47,7 @@ from rhodecode.model.forms import RepoForm
 from rhodecode.model.scm import ScmModel
 from rhodecode.model.repo import RepoModel
 from rhodecode.lib.compat import json
+from sqlalchemy.sql.expression import func
 
 log = logging.getLogger(__name__)
 
@@ -134,7 +135,7 @@ class ReposController(BaseController):
         # url('repos')
 
         c.repos_list = Repository.query()\
-                        .order_by(Repository.repo_name)\
+                        .order_by(func.lower(Repository.repo_name))\
                         .all()
 
         repos_data = []
@@ -156,7 +157,7 @@ class ReposController(BaseController):
         for repo in c.repos_list:
             repos_data.append({
                 "menu": quick_menu(repo.repo_name),
-                "raw_name": repo.repo_name,
+                "raw_name": repo.repo_name.lower(),
                 "name": repo_lnk(repo.repo_name, repo.repo_type,
                                  repo.private, repo.fork),
                 "desc": repo.description,
