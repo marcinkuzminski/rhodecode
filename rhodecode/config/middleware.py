@@ -53,6 +53,13 @@ def make_app(global_conf, full_stack=True, static_files=True, **app_conf):
 
     if asbool(full_stack):
 
+        from rhodecode.lib.middleware.sentry import Sentry
+        from rhodecode.lib.middleware.errormator import Errormator
+        if Errormator:
+            app = Errormator(app, config)
+        elif Sentry:
+            app = Sentry(app, config)
+
         # Handle Python exceptions
         app = ErrorHandler(app, global_conf, **config['pylons.errorware'])
 
