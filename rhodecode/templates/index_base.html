@@ -98,7 +98,7 @@
                     </td>
                     ##LAST CHANGE DATE
                     <td>
-                      <span class="tooltip" date="${repo['last_change']}" title="${h.tooltip(h.fmt_date(repo['last_change']))}">${h.age(repo['last_change'])}</span>
+                      ${dt.last_change(repo['last_change'])}
                     </td>
                     ##LAST REVISION
                     <td>
@@ -232,7 +232,7 @@
                {key:"raw_name"},
                {key:"name"},
                {key:"desc"},
-               //{key:"last_change"},
+               {key:"last_change"},
                {key:"owner"},
                {key:"rss"},
                {key:"atom"},
@@ -264,8 +264,8 @@
             {key:"name",label:"${_('Name')}",sortable:true,
                 sortOptions: { sortFunction: nameSort }},
             {key:"desc",label:"${_('Description')}",sortable:true},
-            //{key:"last_change",label:"${_('Last Change')}",sortable:true,
-            //    sortOptions: { sortFunction: ageSort }},
+            {key:"last_change",label:"${_('Last Change')}",sortable:true,
+                sortOptions: { sortFunction: ageSort }},
             {key:"owner",label:"${_('Owner')}",sortable:true},
             {key:"rss",label:"",sortable:false},
             {key:"atom",label:"",sortable:false},

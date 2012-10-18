@@ -82,7 +82,9 @@
   </div>
 </%def>
 
-
+<%def name="last_change(last_change)">
+  <span class="tooltip" date="${last_change}" title="${h.tooltip(h.fmt_date(last_change))}">${h.age(last_change)}</span>
+</%def>
 
 <%def name="revision(name,rev,tip,author,last_msg)">
   <div>

@@ -874,6 +874,15 @@ class Repository(Base, BaseModel):
         cs = self.get_changeset(self.landing_rev) or self.get_changeset()
         return cs
 
+    def update_last_change(self, last_change=None):
+        if last_change is None:
+            last_change = datetime.datetime.now()
+        if self.updated_on is None or self.updated_on != last_change:
+            log.debug('updated repo %s with new date %s' % (self, last_change))
+            self.updated_on = last_change
+            Session().add(self)
+            Session().commit()
+
     @property
     def tip(self):
         return self.get_changeset('tip')

@@ -70,6 +70,8 @@ class HomeController(BaseController):
                 template.get_def("repo_name")
                 .render(name, rtype, private, fork_of, short_name=False,
                         admin=False, _=_, h=h, c=c))
+            last_change = lambda last_change:  (template.get_def("last_change")
+                                           .render(last_change, _=_, h=h, c=c))
             rss_lnk = lambda repo_name: (template.get_def("rss")
                                            .render(repo_name, _=_, h=h, c=c))
             atom_lnk = lambda repo_name: (template.get_def("atom")
@@ -81,7 +83,7 @@ class HomeController(BaseController):
                     "raw_name": repo.repo_name.lower(),
                     "name": repo_lnk(repo.repo_name, repo.repo_type,
                                      repo.private, repo.fork),
-                    "last_change": h.age(repo.last_db_change),
+                    "last_change": last_change(repo.last_db_change),
                     "desc": repo.description,
                     "owner": h.person(repo.user.username),
                     "rss": rss_lnk(repo.repo_name),
