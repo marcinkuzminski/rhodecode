@@ -118,11 +118,15 @@ class BaseModel(object):
 
     @classmethod
     def get_or_404(cls, id_):
-        if id_:
-            res = cls.query().get(id_)
-            if not res:
-                raise HTTPNotFound
-            return res
+        try:
+            id_ = int(id_)
+        except (TypeError, ValueError):
+            raise HTTPNotFound
+
+        res = cls.query().get(id_)
+        if not res:
+            raise HTTPNotFound
+        return res
 
     @classmethod
     def getAll(cls):
