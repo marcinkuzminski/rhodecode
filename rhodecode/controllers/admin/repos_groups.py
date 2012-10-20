@@ -35,17 +35,20 @@ from pylons.i18n.translation import _
 
 from sqlalchemy.exc import IntegrityError
 
+import rhodecode
 from rhodecode.lib import helpers as h
+from rhodecode.lib.ext_json import json
 from rhodecode.lib.auth import LoginRequired, HasPermissionAnyDecorator,\
     HasReposGroupPermissionAnyDecorator
 from rhodecode.lib.base import BaseController, render
-from rhodecode.model.db import RepoGroup
+from rhodecode.model.db import RepoGroup, Repository
 from rhodecode.model.repos_group import ReposGroupModel
 from rhodecode.model.forms import ReposGroupForm
 from rhodecode.model.meta import Session
 from rhodecode.model.repo import RepoModel
 from webob.exc import HTTPInternalServerError, HTTPNotFound
 from rhodecode.lib.utils2 import str2bool
+from sqlalchemy.sql.expression import func
 
 log = logging.getLogger(__name__)
 
@@ -281,20 +284,66 @@ class ReposGroupsController(BaseController):
         # url('repos_group', id=ID)
 
         c.group = RepoGroup.get_or_404(id)
-
         c.group_repos = c.group.repositories.all()
 
         #overwrite our cached list with current filter
         gr_filter = c.group_repos
-        c.cached_repo_list = self.scm_model.get_repos(all_repos=gr_filter)
-
-        c.repos_list = c.cached_repo_list
-
         c.repo_cnt = 0
 
         groups = RepoGroup.query().order_by(RepoGroup.group_name)\
             .filter(RepoGroup.group_parent_id == id).all()
         c.groups = self.scm_model.get_repos_groups(groups)
+
+        if c.visual.lightweight_dashboard is False:
+            c.cached_repo_list = self.scm_model.get_repos(all_repos=gr_filter)
+
+            c.repos_list = c.cached_repo_list
+        ## lightweight version of dashboard
+        else:
+            c.repos_list = Repository.query()\
+                            .filter(Repository.group_id == id)\
+                            .order_by(func.lower(Repository.repo_name))\
+                            .all()
+            repos_data = []
+            total_records = len(c.repos_list)
+
+            _tmpl_lookup = rhodecode.CONFIG['pylons.app_globals'].mako_lookup
+            template = _tmpl_lookup.get_template('data_table/_dt_elements.html')
+
+            quick_menu = lambda repo_name: (template.get_def("quick_menu")
+                                            .render(repo_name, _=_, h=h, c=c))
+            repo_lnk = lambda name, rtype, private, fork_of: (
+                template.get_def("repo_name")
+                .render(name, rtype, private, fork_of, short_name=False,
+                        admin=False, _=_, h=h, c=c))
+            last_change = lambda last_change:  (template.get_def("last_change")
+                                           .render(last_change, _=_, h=h, c=c))
+            rss_lnk = lambda repo_name: (template.get_def("rss")
+                                           .render(repo_name, _=_, h=h, c=c))
+            atom_lnk = lambda repo_name: (template.get_def("atom")
+                                           .render(repo_name, _=_, h=h, c=c))
+
+            for repo in c.repos_list:
+                repos_data.append({
+                    "menu": quick_menu(repo.repo_name),
+                    "raw_name": repo.repo_name.lower(),
+                    "name": repo_lnk(repo.repo_name, repo.repo_type,
+                                     repo.private, repo.fork),
+                    "last_change": last_change(repo.last_db_change),
+                    "desc": repo.description,
+                    "owner": h.person(repo.user.username),
+                    "rss": rss_lnk(repo.repo_name),
+                    "atom": atom_lnk(repo.repo_name),
+                })
+
+            c.data = json.dumps({
+                "totalRecords": total_records,
+                "startIndex": 0,
+                "sort": "name",
+                "dir": "asc",
+                "records": repos_data
+            })        
+        
         return render('admin/repos_groups/repos_groups.html')
 
     @HasPermissionAnyDecorator('hg.admin')
