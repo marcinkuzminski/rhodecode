@@ -61,11 +61,6 @@ class JournalController(BaseController):
         p = safe_int(request.params.get('page', 1), 1)
 
         c.user = User.get(self.rhodecode_user.user_id)
-        all_repos = self.sa.query(Repository)\
-                     .filter(Repository.user_id == c.user.user_id)\
-                     .order_by(func.lower(Repository.repo_name)).all()
-
-        c.user_repos = ScmModel().get_repos(all_repos)
 
         c.following = self.sa.query(UserFollowing)\
             .filter(UserFollowing.user_id == self.rhodecode_user.user_id)\
@@ -82,6 +77,16 @@ class JournalController(BaseController):
         if request.environ.get('HTTP_X_PARTIAL_XHR'):
             return c.journal_data
         return render('journal/journal.html')
+
+    @LoginRequired()
+    @NotAnonymous()
+    def index_my_repos(self):
+        if request.environ.get('HTTP_X_PARTIAL_XHR'):
+            all_repos = self.sa.query(Repository)\
+                     .filter(Repository.user_id == c.user.user_id)\
+                     .order_by(func.lower(Repository.repo_name)).all()
+            c.user_repos = ScmModel().get_repos(all_repos)
+            return render('journal/journal_page_repos.html')
 
     @LoginRequired(api_access=True)
     @NotAnonymous()
