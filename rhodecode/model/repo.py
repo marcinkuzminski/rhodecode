@@ -544,5 +544,8 @@ class RepoModel(BaseModel):
         _now = datetime.now()
         _ms = str(_now.microsecond).rjust(6, '0')
         _d = 'rm__%s__%s' % (_now.strftime('%Y%m%d_%H%M%S_' + _ms),
-                             repo.repo_name)
+                             repo.just_name)
+        if repo.group:
+            args = repo.group.full_path_splitted + [_d]
+            _d = os.path.join(*args)
         shutil.move(rm_path, os.path.join(self.repos_path, _d))
