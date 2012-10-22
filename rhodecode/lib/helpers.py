@@ -491,15 +491,17 @@ def bool2icon(value):
     return value
 
 
-def action_parser(user_log, feed=False):
+def action_parser(user_log, feed=False, parse_cs=True):
     """
     This helper will action_map the specified string action into translated
     fancy names with icons and links
 
     :param user_log: user log instance
     :param feed: use output for feeds (no html and fancy icons)
+    :param parse_cs: parse Changesets into VCS instances
     """
-
+    if request.GET.get('lightweight'):
+        parse_cs = False
     action = user_log.action
     action_params = ' '
 
@@ -518,32 +520,43 @@ def action_parser(user_log, feed=False):
 
         repo_name = user_log.repository.repo_name
 
-        repo = user_log.repository.scm_instance
-
         def lnk(rev, repo_name):
 
-            if isinstance(rev, BaseChangeset):
-                lbl = 'r%s:%s' % (rev.revision, rev.short_id)
+            if isinstance(rev, BaseChangeset) or isinstance(rev, AttributeDict):
+                if rev.revision:
+                    lbl = 'r%s:%s' % (rev.revision, rev.short_id)
+                else:
+                    lbl = '%s' % (rev.short_id)
                 _url = url('changeset_home', repo_name=repo_name,
                            revision=rev.raw_id)
-                title = tooltip(rev.message)
+                title = tooltip(rev.message) if parse_cs else ''
             else:
                 lbl = '%s' % rev
                 _url = '#'
                 title = _('Changeset not found')
 
-            return link_to(lbl, _url, title=title, class_='tooltip',)
+            return link_to(lbl, _url, title=title, 
+                           class_='tooltip' if parse_cs else '',)
 
         revs = []
         if len(filter(lambda v: v != '', revs_ids)) > 0:
+            if parse_cs:
+                repo = user_log.repository.scm_instance
             for rev in revs_ids[:revs_top_limit]:
-                try:
-                    rev = repo.get_changeset(rev)
+                if parse_cs:
+                    try:
+                        rev = repo.get_changeset(rev)
+                        revs.append(rev)
+                    except ChangesetDoesNotExistError:
+                        log.error('cannot find revision %s in this repo' % rev)
+                        revs.append(rev)
+                        continue
+                else:
+                    rev = AttributeDict({
+                        'short_id': rev[:12],
+                        'raw_id': rev,
+                    })
                     revs.append(rev)
-                except ChangesetDoesNotExistError:
-                    log.error('cannot find revision %s in this repo' % rev)
-                    revs.append(rev)
-                    continue
         cs_links = []
         cs_links.append(" " + ', '.join(
             [lnk(rev, repo_name) for rev in revs[:revs_limit]]
