@@ -500,7 +500,8 @@ def action_parser(user_log, feed=False, parse_cs=True):
     :param feed: use output for feeds (no html and fancy icons)
     :param parse_cs: parse Changesets into VCS instances
     """
-    if request.GET.get('lightweight'):
+    from pylons import tmpl_context as c
+    if c.visual.lightweight_journal:
         parse_cs = False
     action = user_log.action
     action_params = ' '
@@ -531,7 +532,7 @@ def action_parser(user_log, feed=False, parse_cs=True):
                            revision=rev.raw_id)
                 title = tooltip(rev.message) if parse_cs else ''
             else:
-                lbl = '%s' % rev
+                lbl = ('%s' % rev)[:12]
                 _url = '#'
                 title = _('Changeset not found')
 

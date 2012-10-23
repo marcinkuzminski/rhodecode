@@ -255,6 +255,7 @@ def ApplicationVisualisationForm():
         rhodecode_stylify_metatags = v.StringBoolean(if_missing=False)
 
         rhodecode_lightweight_dashboard = v.StringBoolean(if_missing=False)
+        rhodecode_lightweight_journal = v.StringBoolean(if_missing=False)
 
     return _ApplicationVisualisationForm
 

@@ -202,6 +202,11 @@ class SettingsController(BaseController):
                     form_result['rhodecode_lightweight_dashboard']
                 Session().add(sett4)
 
+                sett5 = RhodeCodeSetting.get_by_name_or_create('lightweight_journal')
+                sett5.app_settings_value = \
+                    form_result['rhodecode_lightweight_journal']
+                Session().add(sett5)
+
                 Session().commit()
                 set_rhodecode_config(config)
                 h.flash(_('Updated visualisation settings'),
