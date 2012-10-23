@@ -568,7 +568,7 @@ def action_parser(user_log, feed=False, parse_cs=True):
             ' <div class="compare_view tooltip" title="%s">'
             '<a href="%s">%s</a> </div>' % (
                 _('Show all combined changesets %s->%s') % (
-                    revs_ids[0], revs_ids[-1]
+                    revs_ids[0][:12], revs_ids[-1][:12]
                 ),
                 url('changeset_home', repo_name=repo_name,
                     revision='%s...%s' % (revs_ids[0], revs_ids[-1])
