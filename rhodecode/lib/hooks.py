@@ -36,7 +36,7 @@ from rhodecode.lib.utils import action_logger
 from rhodecode.lib.vcs.backends.base import EmptyChangeset
 from rhodecode.lib.compat import json
 from rhodecode.lib.exceptions import HTTPLockedRC
-from rhodecode.lib.utils2 import safe_str
+from rhodecode.lib.utils2 import safe_str, datetime_to_time
 from rhodecode.model.db import Repository, User
 
 

@@ -64,7 +64,7 @@ html_escape_table = {
 
 def html_escape(text):
     """Produce entities within text."""
-    return "".join(html_escape_table.get(c,c) for c in text)
+    return "".join(html_escape_table.get(c, c) for c in text)
 
 
 def shorter(text, size=20):
@@ -491,7 +491,7 @@ def bool2icon(value):
     return value
 
 
-def action_parser(user_log, feed=False, parse_cs=True):
+def action_parser(user_log, feed=False, parse_cs=False):
     """
     This helper will action_map the specified string action into translated
     fancy names with icons and links
@@ -500,9 +500,7 @@ def action_parser(user_log, feed=False, parse_cs=True):
     :param feed: use output for feeds (no html and fancy icons)
     :param parse_cs: parse Changesets into VCS instances
     """
-    from pylons import tmpl_context as c
-    if c.visual.lightweight_journal:
-        parse_cs = False
+
     action = user_log.action
     action_params = ' '
 
@@ -522,42 +520,42 @@ def action_parser(user_log, feed=False, parse_cs=True):
         repo_name = user_log.repository.repo_name
 
         def lnk(rev, repo_name):
-
             if isinstance(rev, BaseChangeset) or isinstance(rev, AttributeDict):
-                if rev.revision:
-                    lbl = 'r%s:%s' % (rev.revision, rev.short_id)
-                else:
-                    lbl = '%s' % (rev.short_id)
+                lbl = '%s' % (rev.short_id[:8])
                 _url = url('changeset_home', repo_name=repo_name,
                            revision=rev.raw_id)
-                title = tooltip(rev.message) if parse_cs else ''
+                title = tooltip(rev.message)
             else:
+                ## changeset cannot be found/striped/removed etc.
                 lbl = ('%s' % rev)[:12]
                 _url = '#'
                 title = _('Changeset not found')
-
-            return link_to(lbl, _url, title=title, 
-                           class_='tooltip' if parse_cs else '',)
+            if parse_cs:
+                return link_to(lbl, _url, title=title, class_='tooltip')
+            return link_to(lbl, _url, raw_id=rev.raw_id, class_='journal-cs')
 
         revs = []
         if len(filter(lambda v: v != '', revs_ids)) > 0:
-            if parse_cs:
-                repo = user_log.repository.scm_instance
+            repo = None
             for rev in revs_ids[:revs_top_limit]:
+                # we want parsed changesets, or new log store format is bad
                 if parse_cs:
                     try:
-                        rev = repo.get_changeset(rev)
-                        revs.append(rev)
+                        if repo is None:
+                            repo = user_log.repository.scm_instance
+                        _rev = repo.get_changeset(rev)
+                        revs.append(_rev)
                     except ChangesetDoesNotExistError:
                         log.error('cannot find revision %s in this repo' % rev)
                         revs.append(rev)
                         continue
                 else:
-                    rev = AttributeDict({
+                    _rev = AttributeDict({
                         'short_id': rev[:12],
                         'raw_id': rev,
+                        'message': '',
                     })
-                    revs.append(rev)
+                    revs.append(_rev)
         cs_links = []
         cs_links.append(" " + ', '.join(
             [lnk(rev, repo_name) for rev in revs[:revs_limit]]
