@@ -24,7 +24,7 @@ from rhodecode.lib.auth import AuthUser, get_container_username, authfunc,\
 from rhodecode.lib.utils import get_repo_slug, invalidate_cache
 from rhodecode.model import meta
 
-from rhodecode.model.db import Repository, RhodeCodeUi, User
+from rhodecode.model.db import Repository, RhodeCodeUi, User, RhodeCodeSetting
 from rhodecode.model.notification import NotificationModel
 from rhodecode.model.scm import ScmModel
 from rhodecode.model.meta import Session
@@ -242,11 +242,13 @@ class BaseController(WSGIController):
         c.ga_code = config.get('rhodecode_ga_code')
         # Visual options
         c.visual = AttributeDict({})
-        c.visual.show_public_icon = str2bool(config.get('rhodecode_show_public_icon'))
-        c.visual.show_private_icon = str2bool(config.get('rhodecode_show_private_icon'))
-        c.visual.stylify_metatags = str2bool(config.get('rhodecode_stylify_metatags'))
-        c.visual.lightweight_dashboard = str2bool(config.get('rhodecode_lightweight_dashboard'))
-        c.visual.lightweight_journal = str2bool(config.get('rhodecode_lightweight_dashboard'))
+        rc_config = RhodeCodeSetting.get_app_settings()
+
+        c.visual.show_public_icon = str2bool(rc_config.get('rhodecode_show_public_icon'))
+        c.visual.show_private_icon = str2bool(rc_config.get('rhodecode_show_private_icon'))
+        c.visual.stylify_metatags = str2bool(rc_config.get('rhodecode_stylify_metatags'))
+        c.visual.lightweight_dashboard = str2bool(rc_config.get('rhodecode_lightweight_dashboard'))
+        c.visual.lightweight_journal = str2bool(rc_config.get('rhodecode_lightweight_dashboard'))
 
         c.repo_name = get_repo_slug(request)
         c.backends = BACKENDS.keys()
