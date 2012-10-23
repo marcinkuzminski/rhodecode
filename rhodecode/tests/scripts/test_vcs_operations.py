@@ -322,11 +322,8 @@ class TestVCSOperations(unittest.TestCase):
         #pull fails since repo is locked
         clone_url = _construct_url(GIT_REPO)
         stdout, stderr = Command('/tmp').execute('git clone', clone_url)
-        msg = ("""abort: HTTP Error 423: Repository `%s` locked by user `%s`"""
+        msg = ("""423 Repository `%s` locked by user `%s`"""
                 % (GIT_REPO, TEST_USER_ADMIN_LOGIN))
-        #TODO: fix this somehow later on GIT, GIT is stupid and even if we throw
-        # back 423 to it, it makes ANOTHER request and we fail there with 405 :/
-        msg = "405 Method Not Allowed"
         assert msg in stderr
 
     def test_push_on_locked_repo_by_other_user_hg(self):
