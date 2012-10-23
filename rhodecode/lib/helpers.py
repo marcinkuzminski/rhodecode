@@ -1070,10 +1070,9 @@ def urlify_commit(text_, repository=None, link_=None):
             log.debug('processed prefix:`%s` => %s' % (pattern_index, newtext))
 
         # if we actually did something above
-        if valid_indices:
-            if link_:
-                # wrap not links into final link => link_
-                newtext = linkify_others(newtext, link_)
+        if link_:
+            # wrap not links into final link => link_
+            newtext = linkify_others(newtext, link_)
 
             return literal(newtext)
     except:
