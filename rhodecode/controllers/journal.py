@@ -59,9 +59,7 @@ class JournalController(BaseController):
     def index(self):
         # Return a rendered template
         p = safe_int(request.params.get('page', 1), 1)
-
         c.user = User.get(self.rhodecode_user.user_id)
-
         c.following = self.sa.query(UserFollowing)\
             .filter(UserFollowing.user_id == self.rhodecode_user.user_id)\
             .options(joinedload(UserFollowing.follows_repository))\
@@ -70,7 +68,6 @@ class JournalController(BaseController):
         journal = self._get_journal_data(c.following)
 
         c.journal_pager = Page(journal, page=p, items_per_page=20)
-
         c.journal_day_aggreagate = self._get_daily_aggregate(c.journal_pager)
 
         c.journal_data = render('journal/journal_data.html')
@@ -81,6 +78,7 @@ class JournalController(BaseController):
     @LoginRequired()
     @NotAnonymous()
     def index_my_repos(self):
+        c.user = User.get(self.rhodecode_user.user_id)
         if request.environ.get('HTTP_X_PARTIAL_XHR'):
             all_repos = self.sa.query(Repository)\
                      .filter(Repository.user_id == c.user.user_id)\
