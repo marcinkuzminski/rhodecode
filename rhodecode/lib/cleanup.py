@@ -88,7 +88,7 @@ class CleanupCommand(BasePasterCommand):
 
         repos_location = RhodeCodeUi.get_repos_location()
         to_remove = []
-        for dn, dirs, f in os.walk(str(repos_location)):
+        for dn, dirs, f in os.walk(safe_str(repos_location)):
             for loc in dirs:
                 if REMOVED_REPO_PAT.match(loc):
                     to_remove.append([loc, self._extract_date(loc)])

@@ -46,7 +46,7 @@ def _get_scm_size(alias, root_path):
         alias += '.'
 
     size_scm, size_root = 0, 0
-    for path, dirs, files in os.walk(root_path):
+    for path, dirs, files in os.walk(safe_str(root_path)):
         if path.find(alias) != -1:
             for f in files:
                 try:
