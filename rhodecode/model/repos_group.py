@@ -27,6 +27,7 @@ import os
 import logging
 import traceback
 import shutil
+import datetime
 
 from rhodecode.lib.utils2 import LazyProperty
 
@@ -126,12 +127,18 @@ class ReposGroupModel(BaseModel):
         paths = os.sep.join(paths)
 
         rm_path = os.path.join(self.repos_path, paths)
+        log.info("Removing group %s" % (rm_path))
+        # delete only if that path really exists
         if os.path.isdir(rm_path):
-            # delete only if that path really exists
             if force_delete:
                 shutil.rmtree(rm_path)
             else:
-                os.rmdir(rm_path)  # this raises an exception when there are still objects inside
+                #archive that group`
+                _now = datetime.datetime.now()
+                _ms = str(_now.microsecond).rjust(6, '0')
+                _d = 'rm__%s_GROUP_%s' % (_now.strftime('%Y%m%d_%H%M%S_' + _ms),
+                                          group.name)
+                shutil.move(rm_path, os.path.join(self.repos_path, _d))
 
     def create(self, group_name, group_description, parent=None, just_db=False):
         try:
