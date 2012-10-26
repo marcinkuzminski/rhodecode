@@ -465,7 +465,7 @@ def desc_stylize(value):
                    '<div class="metatag" tag="license"><a href="http:\/\/www.opensource.org/licenses/\\1">\\1</a></div>', value)
     value = re.sub(r'\[(requires|recommends|conflicts|base)\ \=\>\ *([a-zA-Z\-\/]*)\]',
                    '<div class="metatag" tag="\\1">\\1 =&gt; <a href="/\\2">\\2</a></div>', value)
-    value = re.sub(r'\[(lang|language)\ \=\>\ *([a-zA-Z\-\/]*)\]',
+    value = re.sub(r'\[(lang|language)\ \=\>\ *([a-zA-Z\-\/\#\+]*)\]',
                    '<div class="metatag" tag="lang">\\2</div>', value)
     value = re.sub(r'\[([a-z]+)\]',
                   '<div class="metatag" tag="\\1">\\1</div>', value)
