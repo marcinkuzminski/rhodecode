@@ -940,7 +940,6 @@ def fancy_file_stats(stats):
 
 
 def urlify_text(text_):
-    import re
 
     url_pat = re.compile(r'''(http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]'''
                          '''|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+)''')
@@ -959,7 +958,7 @@ def urlify_changesets(text_, repository):
     :param text_:
     :param repository:
     """
-    import re
+
     URL_PAT = re.compile(r'([0-9a-fA-F]{12,})')
 
     def url_func(match_obj):
@@ -994,7 +993,6 @@ def urlify_commit(text_, repository=None, link_=None):
     :param repository:
     :param link_: changeset link
     """
-    import re
     import traceback
 
     def escaper(string):
@@ -1071,13 +1069,11 @@ def urlify_commit(text_, repository=None, link_=None):
         if link_:
             # wrap not links into final link => link_
             newtext = linkify_others(newtext, link_)
-
-            return literal(newtext)
     except:
         log.error(traceback.format_exc())
         pass
 
-    return newtext
+    return literal(newtext)
 
 
 def rst(source):
