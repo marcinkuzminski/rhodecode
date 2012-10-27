@@ -11,7 +11,8 @@ from rhodecode.lib.vcs.exceptions import ChangesetDoesNotExistError
 from rhodecode.lib.vcs.exceptions import ImproperArchiveTypeError
 from rhodecode.lib.vcs.backends.base import BaseChangeset, EmptyChangeset
 from rhodecode.lib.vcs.nodes import FileNode, DirNode, NodeKind, RootNode, \
-    RemovedFileNode, SubModuleNode
+    RemovedFileNode, SubModuleNode, ChangedFileNodesGenerator,\
+    AddedFileNodesGenerator, RemovedFileNodesGenerator
 from rhodecode.lib.vcs.utils import safe_unicode
 from rhodecode.lib.vcs.utils import date_fromtimestamp
 from rhodecode.lib.vcs.utils.lazy import LazyProperty
@@ -468,7 +469,8 @@ class GitChangeset(BaseChangeset):
         """
         if not self.parents:
             return list(self._get_file_nodes())
-        return [self.get_node(path) for path in self._get_paths_for_status('added')]
+        return AddedFileNodesGenerator([n for n in
+                                self._get_paths_for_status('added')], self)
 
     @LazyProperty
     def changed(self):
@@ -477,7 +479,8 @@ class GitChangeset(BaseChangeset):
         """
         if not self.parents:
             return []
-        return [self.get_node(path) for path in self._get_paths_for_status('modified')]
+        return ChangedFileNodesGenerator([n for n in
+                                self._get_paths_for_status('modified')], self)
 
     @LazyProperty
     def removed(self):
@@ -486,4 +489,5 @@ class GitChangeset(BaseChangeset):
         """
         if not self.parents:
             return []
-        return [RemovedFileNode(path) for path in self._get_paths_for_status('deleted')]
+        return RemovedFileNodesGenerator([n for n in
+                                self._get_paths_for_status('deleted')], self)

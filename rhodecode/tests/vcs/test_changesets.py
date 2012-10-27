@@ -5,7 +5,8 @@ import datetime
 from base import BackendTestMixin
 from conf import SCM_TESTS
 from rhodecode.lib.vcs.backends.base import BaseChangeset
-from rhodecode.lib.vcs.nodes import FileNode
+from rhodecode.lib.vcs.nodes import FileNode, AddedFileNodesGenerator,\
+    ChangedFileNodesGenerator, RemovedFileNodesGenerator
 from rhodecode.lib.vcs.exceptions import BranchDoesNotExistError
 from rhodecode.lib.vcs.exceptions import ChangesetDoesNotExistError
 from rhodecode.lib.vcs.exceptions import RepositoryError
@@ -308,13 +309,16 @@ class ChangesetsChangesTestCaseMixin(BackendTestMixin):
 
     def test_head_added(self):
         changeset = self.repo.get_changeset()
+        self.assertTrue(isinstance(changeset.added, AddedFileNodesGenerator))
         self.assertItemsEqual(changeset.added, [
             changeset.get_node('fallout'),
         ])
+        self.assertTrue(isinstance(changeset.changed, ChangedFileNodesGenerator))
         self.assertItemsEqual(changeset.changed, [
             changeset.get_node('foo/bar'),
             changeset.get_node('foobar'),
         ])
+        self.assertTrue(isinstance(changeset.removed, RemovedFileNodesGenerator))
         self.assertEqual(len(changeset.removed), 1)
         self.assertEqual(list(changeset.removed)[0].path, 'qwe')
 
