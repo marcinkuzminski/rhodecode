@@ -27,7 +27,6 @@
 
 import re
 import difflib
-import markupsafe
 import logging
 
 from itertools import tee, imap
@@ -171,7 +170,9 @@ class DiffProcessor(object):
             self.differ = self._highlight_line_udiff
 
     def escaper(self, string):
-        return markupsafe.escape(string)
+        return string.replace('&', '&amp;')\
+                .replace('<', '&lt;')\
+                .replace('>', '&gt;')
 
     def copy_iterator(self):
         """
@@ -300,6 +301,7 @@ class DiffProcessor(object):
         Parse the diff an return data for the template.
         """
         lineiter = self.lines
+
         files = []
         try:
             line = lineiter.next()
@@ -323,6 +325,7 @@ class DiffProcessor(object):
                 })
 
                 line = lineiter.next()
+
                 while line:
                     match = self._chunk_re.match(line)
                     if not match:
@@ -551,6 +554,7 @@ class DiffProcessor(object):
                     _html.append('''\n\t\t<pre>%(code)s</pre>\n''' % {
                         'code': change['line']
                     })
+
                     _html.append('''\t</td>''')
                     _html.append('''\n</tr>\n''')
         _html.append('''</table>''')
