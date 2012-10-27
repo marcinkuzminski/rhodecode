@@ -26,6 +26,8 @@
 import re
 import time
 import datetime
+import webob
+
 from pylons.i18n.translation import _, ungettext
 from rhodecode.lib.vcs.utils.lazy import LazyProperty
 
@@ -516,3 +518,8 @@ def obfuscate_url_pw(engine):
     if url.password:
         url.password = 'XXXXX'
     return str(url)
+
+
+def get_server_url(environ):
+    req = webob.Request(environ)
+    return req.host_url + req.script_name

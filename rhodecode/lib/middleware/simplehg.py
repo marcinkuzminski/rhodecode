@@ -35,7 +35,7 @@ from paste.httpheaders import REMOTE_USER, AUTH_TYPE
 from webob.exc import HTTPNotFound, HTTPForbidden, HTTPInternalServerError, \
     HTTPBadRequest, HTTPNotAcceptable
 
-from rhodecode.lib.utils2 import safe_str, fix_PATH
+from rhodecode.lib.utils2 import safe_str, fix_PATH, get_server_url
 from rhodecode.lib.base import BaseVCSController
 from rhodecode.lib.auth import get_container_username
 from rhodecode.lib.utils import make_ui, is_valid_repo, ui_sections
@@ -152,6 +152,7 @@ class SimpleHg(BaseVCSController):
         # extras are injected into mercurial UI object and later available
         # in hg hooks executed by rhodecode
         from rhodecode import CONFIG
+        server_url = get_server_url(environ)
         extras = {
             'ip': ipaddr,
             'username': username,
@@ -159,6 +160,7 @@ class SimpleHg(BaseVCSController):
             'repository': repo_name,
             'scm': 'hg',
             'config': CONFIG['__file__'],
+            'server_url': server_url,
             'make_lock': None,
             'locked_by': [None, None]
         }
