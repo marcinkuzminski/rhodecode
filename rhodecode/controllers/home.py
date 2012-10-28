@@ -108,7 +108,7 @@ class HomeController(BaseController):
                                                     simple=True)
             return render('/repo_switcher_list.html')
         else:
-            return HTTPBadRequest()
+            raise HTTPBadRequest()
 
     def branch_tag_switcher(self, repo_name):
         if request.is_xhr:
@@ -116,4 +116,4 @@ class HomeController(BaseController):
             c.rhodecode_repo = c.rhodecode_db_repo.scm_instance
             return render('/switch_to_list.html')
         else:
-            return HTTPBadRequest()
+            raise HTTPBadRequest()
