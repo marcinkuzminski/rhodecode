@@ -91,7 +91,6 @@ var setSelectValue = function(select, val){
 	
     // select element
     for(var i=0;i<selection.options.length;i++){
-    	console.log(selection.options[i].innerHTML);
         if (selection.options[i].innerHTML == val) {
             selection.selectedIndex = i;
             break;
@@ -325,7 +324,6 @@ var show_changeset_tooltip = function(){
 		var repo_name = YUD.getAttribute(target,'repo_name');
 		var ttid = 'tt-'+rid;
 		var success = function(o){
-			console.log(o.responseText);
 			var json = JSON.parse(o.responseText);
 			YUD.addClass(target,'tooltip')
 			YUD.setAttribute(target, 'title',json['message']);
