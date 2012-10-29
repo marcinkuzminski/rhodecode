@@ -18,7 +18,7 @@ import traceback
 import urllib
 import urllib2
 from dulwich.repo import Repo, NotGitRepository
-#from dulwich.config import ConfigFile
+from dulwich.objects import Tag
 from string import Template
 from subprocess import Popen, PIPE
 from rhodecode.lib.vcs.backends.base import BaseRepository
@@ -401,6 +401,10 @@ class GitRepository(BaseRepository):
             for k, type_ in keys:
                 if ref.startswith(k):
                     _key = ref[len(k):]
+                    if type_ == 'T':
+                        obj = self._repo.get_object(sha)
+                        if isinstance(obj, Tag):
+                            sha = self._repo.get_object(sha).object[1]
                     _refs[_key] = [sha, type_]
                     break
         return _refs

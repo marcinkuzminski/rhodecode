@@ -46,8 +46,7 @@ class GitChangeset(BaseChangeset):
         self.revision = repository.revisions.index(revision)
 
         self.message = safe_unicode(commit.message)
-        #self.branch = None
-        self.tags = []
+
         self.nodes = {}
         self._paths = {}
 
@@ -70,6 +69,14 @@ class GitChangeset(BaseChangeset):
         Returns modified, added, removed, deleted files for current changeset
         """
         return self.changed, self.added, self.removed
+
+    @LazyProperty
+    def tags(self):
+        _tags = []
+        for tname, tsha in self.repository.tags.iteritems():
+            if tsha == self.raw_id:
+                _tags.append(tname)
+        return _tags
 
     @LazyProperty
     def branch(self):
