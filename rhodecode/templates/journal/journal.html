@@ -153,7 +153,11 @@
     }    
     
     YUE.on('refresh','click',function(e){
-        ypjax(e.currentTarget.href,"journal",function(){show_more_event();tooltip_activate();});
+        ypjax(e.currentTarget.href,"journal",function(){
+        	show_more_event();
+        	tooltip_activate();
+        	show_changeset_tooltip();
+        	});
         YUE.preventDefault(e);
     });
 

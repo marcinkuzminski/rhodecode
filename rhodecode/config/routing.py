@@ -436,6 +436,9 @@ def make_map(config):
                  controller='changeset', action='raw_changeset',
                  revision='tip', conditions=dict(function=check_repo))
 
+    rmap.connect('changeset_info', '/changeset_info/{repo_name:.*?}/{revision}',
+                 controller='changeset', action='changeset_info')
+
     rmap.connect('compare_url',
                  '/{repo_name:.*?}/compare/{org_ref_type}@{org_ref:.*?}...{other_ref_type}@{other_ref:.*?}',
                  controller='compare', action='index',

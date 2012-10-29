@@ -26,7 +26,7 @@
 import logging
 import traceback
 from collections import defaultdict
-from webob.exc import HTTPForbidden
+from webob.exc import HTTPForbidden, HTTPBadRequest
 
 from pylons import tmpl_context as c, url, request, response
 from pylons.i18n.translation import _
@@ -445,3 +445,10 @@ class ChangesetController(BaseRepoController):
             return True
         else:
             raise HTTPForbidden()
+
+    @jsonify
+    def changeset_info(self, repo_name, revision):
+        if request.is_xhr or 1:
+            return c.rhodecode_repo.get_changeset(revision)
+        else:
+            raise HTTPBadRequest()

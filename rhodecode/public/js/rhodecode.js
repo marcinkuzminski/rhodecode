@@ -250,6 +250,24 @@ function ypjax(url,container,s_call,f_call,args){
 	
 };
 
+var ajaxGET = function(url,success) {
+	// Set special header for ajax == HTTP_X_PARTIAL_XHR
+	YUC.initHeader('X-PARTIAL-XHR',true);
+
+    var sUrl = url;
+    var callback = {
+        success: success,
+        failure: function (o) {
+            alert("error");
+        },
+    };
+
+    var request = YAHOO.util.Connect.asyncRequest('GET', sUrl, callback);
+    return request;
+};
+
+
+
 var ajaxPOST = function(url,postData,success) {
 	// Set special header for ajax == HTTP_X_PARTIAL_XHR
 	YUC.initHeader('X-PARTIAL-XHR',true);
@@ -282,27 +300,8 @@ var ajaxPOST = function(url,postData,success) {
  * tooltip activate
  */
 var tooltip_activate = function(){
-    function toolTipsId(){
-        var ids = [];
-        var tts = YUQ('.tooltip');
-        for (var i = 0; i < tts.length; i++) {
-            // if element doesn't not have and id 
-        	//  autogenerate one for tooltip 
-            if (!tts[i].id){
-                tts[i].id='tt'+((i*100)+tts.length);
-            }
-            ids.push(tts[i].id);
-        }
-        return ids
-    };
-    var myToolTips = new YAHOO.widget.Tooltip("tooltip", {
-        context: [[toolTipsId()],"tl","bl",null,[0,5]],
-        monitorresize:false,
-        xyoffset :[0,0],
-        autodismissdelay:300000,
-        hidedelay:5,
-        showdelay:20,
-    });
+	yt = YAHOO.yuitip.main;
+	YUE.onDOMReady(yt.init);
 };
 
 /**
@@ -316,6 +315,140 @@ var show_more_event = function(){
     });
 };
 
+/**
+ * show changeset tooltip
+ */
+var show_changeset_tooltip = function(){
+	YUE.on(YUD.getElementsByClassName('lazy-cs'), 'mouseover', function(e){
+		var target = e.currentTarget;
+		var rid = YUD.getAttribute(target,'raw_id');
+		var repo_name = YUD.getAttribute(target,'repo_name');
+		var ttid = 'tt-'+rid;
+		var success = function(o){
+			console.log(o.responseText);
+			var json = JSON.parse(o.responseText);
+			YUD.addClass(target,'tooltip')
+			YUD.setAttribute(target, 'title',json['message']);
+			YAHOO.yuitip.main.show_yuitip(e, target);
+		}
+		if(rid && !YUD.hasClass(target, 'tooltip')){
+			YUD.setAttribute(target,'id',ttid);
+			ajaxGET('/changeset_info/{0}/{1}'.format(repo_name,rid), success)
+		}
+	});
+};
+
+
+/**
+ * TOOLTIP IMPL.
+ */
+YAHOO.namespace('yuitip');
+YAHOO.yuitip.main = {
+
+	YE:			YAHOO.util.Event,
+	Dom:		YAHOO.util.Dom,
+	$:			YAHOO.util.Dom.get,
+
+	bgColor:	'#000',
+	speed:		0.3,
+	opacity:	0.9,
+	offset:		[15,15],
+	useAnim:	false,
+	maxWidth:	200,
+	add_links:	true,
+
+	init: function(){
+		yt._tooltip = '';
+		yt.tipBox = yt.$('tip-box');
+		if(!yt.tipBox){
+			yt.tipBox = document.createElement('div');
+			document.body.appendChild(yt.tipBox);
+			yt.tipBox.id = 'tip-box';
+		}
+
+		yt.Dom.setStyle(yt.tipBox, 'display', 'none');
+		yt.Dom.setStyle(yt.tipBox, 'position', 'absolute');
+		if(yt.maxWidth !== null){
+			yt.Dom.setStyle(yt.tipBox, 'max-width', yt.maxWidth+'px');
+		}
+
+		var yuitips = yt.Dom.getElementsByClassName('tooltip');
+
+		if(yt.add_links === true){
+			var links = document.getElementsByTagName('a');
+			var linkLen = links.length;
+			for(i=0;i<linkLen;i++){
+				yuitips.push(links[i]);
+			}
+		}
+
+		var yuiLen = yuitips.length;
+
+		for(i=0;i<yuiLen;i++){
+			yt.YE.on(yuitips[i], 'mouseover', yt.show_yuitip, yuitips[i]);
+			yt.YE.on(yuitips[i], 'mousemove', yt.move_yuitip, yuitips[i]);
+			yt.YE.on(yuitips[i], 'mouseout', yt.close_yuitip, yuitips[i]);
+		}
+	},
+
+	show_yuitip: function(e, el){
+		yt.YE.stopEvent(e);
+		if(el.tagName.toLowerCase() === 'img'){
+			yt.tipText = el.alt ? el.alt : '';
+		} else {
+			yt.tipText = el.title ? el.title : '';
+		}
+
+		
+		if(yt.tipText !== ''){
+			// save org title
+			yt._tooltip = yt.tipText;
+			// reset title to not show org tooltips
+			YUD.setAttribute(el, 'title', '');
+
+			var newTipText = yt.tipText.split(' - ');
+			var tipLen = newTipText.length;
+			yt.tipText = '';
+			for(var i=0;i<tipLen;i++){
+				yt.tipText+= newTipText[i]+"<br/>";
+			}
+			yt.tipBox.innerHTML = yt.tipText;
+			yt.Dom.setStyle(yt.tipBox, 'display', 'block');
+			if(yt.useAnim === true){
+				yt.Dom.setStyle(yt.tipBox, 'opacity', '0');
+				var newAnim = new YAHOO.util.Anim(yt.tipBox,
+					{
+						opacity: { to: yt.opacity }
+					}, yt.speed, YAHOO.util.Easing.easeOut
+				);
+				newAnim.animate();
+			}
+		}
+	},
+
+	move_yuitip: function(e, el){
+		yt.YE.stopEvent(e);
+		var movePos = yt.YE.getXY(e);
+		yt.Dom.setStyle(yt.tipBox, 'top', (movePos[1] + yt.offset[1]) + 'px');
+		yt.Dom.setStyle(yt.tipBox, 'left', (movePos[0] + yt.offset[0]) + 'px');
+	},
+
+	close_yuitip: function(e, el){
+		yt.YE.stopEvent(e);
+	
+		if(yt.useAnim === true){
+			var newAnim = new YAHOO.util.Anim(yt.tipBox,
+				{
+					opacity: { to: 0 }
+				}, yt.speed, YAHOO.util.Easing.easeOut
+			);
+			newAnim.animate();
+		} else {
+			yt.Dom.setStyle(yt.tipBox, 'display', 'none');
+		}
+		YUD.setAttribute(el,'title', yt._tooltip);
+	}
+}
 
 /**
  * Quick filter widget

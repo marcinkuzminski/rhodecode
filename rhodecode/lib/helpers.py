@@ -532,7 +532,8 @@ def action_parser(user_log, feed=False, parse_cs=False):
                 title = _('Changeset not found')
             if parse_cs:
                 return link_to(lbl, _url, title=title, class_='tooltip')
-            return link_to(lbl, _url, raw_id=rev.raw_id, class_='journal-cs')
+            return link_to(lbl, _url, raw_id=rev.raw_id, repo_name=repo_name,
+                           class_='lazy-cs')
 
         revs = []
         if len(filter(lambda v: v != '', revs_ids)) > 0:

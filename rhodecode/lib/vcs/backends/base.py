@@ -372,6 +372,15 @@ class BaseChangeset(object):
     def __eq__(self, other):
         return self.raw_id == other.raw_id
 
+    def __json__(self):
+        return dict(
+            short_id=self.short_id,
+            raw_id=self.raw_id,
+            message=self.message,
+            date=self.date,
+            author=self.author,
+        )
+
     @LazyProperty
     def last(self):
         if self.repository is None:
