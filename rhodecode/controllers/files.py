@@ -157,7 +157,7 @@ class FilesController(BaseRepoController):
                 _hist = c.rhodecode_repo.get_changeset().get_file_history(f_path)
                 c.file_changeset = c.changeset
                 if _hist:
-                    c.file_changeset = (c.changeset 
+                    c.file_changeset = (c.changeset
                                         if c.changeset.revision < _hist[0].revision
                                         else _hist[0])
                 c.file_history = self._get_node_history(None, f_path, _hist)

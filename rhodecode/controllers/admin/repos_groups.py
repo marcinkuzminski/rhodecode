@@ -342,8 +342,8 @@ class ReposGroupsController(BaseController):
                 "sort": "name",
                 "dir": "asc",
                 "records": repos_data
-            })        
-        
+            })
+
         return render('admin/repos_groups/repos_groups.html')
 
     @HasPermissionAnyDecorator('hg.admin')

@@ -76,4 +76,3 @@ merge" class="tooltip" href="/vcs_test_hg/changeset/27cd5cce30c96924232"""
             response.mustcontain("""var data = {"totalRecords": %s""" % len(Repository.getAll()))
         finally:
             set_l_dash(False)
-

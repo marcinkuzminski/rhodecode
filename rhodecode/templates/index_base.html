@@ -163,7 +163,7 @@
               firstPageLinkLabel: '&lt;&lt;',
               lastPageLinkLabel: '&gt;&gt;',
               containers:['user-paginator']
-          }),          
+          }),
           MSG_SORTASC:"${_('Click to sort ascending')}",
           MSG_SORTDESC:"${_('Click to sort descending')}"
       });
@@ -224,7 +224,7 @@
         var data = ${c.data|n};
         var myDataSource = new YAHOO.util.DataSource(data);
         myDataSource.responseType = YAHOO.util.DataSource.TYPE_JSON;
-      
+
         myDataSource.responseSchema = {
             resultsList: "records",
             fields: [
@@ -243,7 +243,7 @@
             var data     = res.results || [],
                 filtered = [],
                 i,l;
-      
+
             if (req) {
                 req = req.toLowerCase();
                 for (i = 0; i<data.length; i++) {
@@ -257,7 +257,7 @@
             YUD.get('repo_count').innerHTML = res.results.length;
             return res;
         }
-      
+
         // main table sorting
         var myColumnDefs = [
             {key:"menu",label:"",sortable:false,className:"quick_repo_menu hidden"},
@@ -270,7 +270,7 @@
             {key:"rss",label:"",sortable:false},
             {key:"atom",label:"",sortable:false},
         ];
-      
+
         var myDataTable = new YAHOO.widget.DataTable("repos_list_wrap", myColumnDefs, myDataSource,{
           sortedBy:{key:"name",dir:"asc"},
           paginator: new YAHOO.widget.Paginator({
@@ -287,7 +287,7 @@
               lastPageLinkLabel: '&gt;&gt;',
               containers:['user-paginator']
           }),
-      
+
           MSG_SORTASC:"${_('Click to sort ascending')}",
           MSG_SORTDESC:"${_('Click to sort descending')}",
           MSG_EMPTY:"${_('No records found.')}",
@@ -299,17 +299,17 @@
             tooltip_activate();
             quick_repo_menu();
         });
-      
+
         var filterTimeout = null;
-      
+
         updateFilter  = function () {
             // Reset timeout
             filterTimeout = null;
-      
+
             // Reset sort
             var state = myDataTable.getState();
                 state.sortedBy = {key:'name', dir:YAHOO.widget.DataTable.CLASS_ASC};
-      
+
             // Get filtered data
             myDataSource.sendRequest(YUD.get('q_filter').value,{
                 success : myDataTable.onDataReturnInitializeTable,
@@ -317,16 +317,15 @@
                 scope   : myDataTable,
                 argument: state
             });
-      
+
         };
         YUE.on('q_filter','click',function(){
             YUD.get('q_filter').value = '';
          });
-      
+
         YUE.on('q_filter','keyup',function (e) {
             clearTimeout(filterTimeout);
             filterTimeout = setTimeout(updateFilter,600);
         });
       </script>
     % endif
-    

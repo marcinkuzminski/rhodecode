@@ -63,15 +63,15 @@
                       </span>
                       %endif
                   %endif:
-                 
+
                    ## locking icon
                     %if c.rhodecode_db_repo.enable_locking:
                       %if c.rhodecode_db_repo.locked[0]:
-                        <span class="locking_locked tooltip" title="${_('Repository locked by %s') % h.person_by_id(c.rhodecode_db_repo.locked[0])}"></span>                     
+                        <span class="locking_locked tooltip" title="${_('Repository locked by %s') % h.person_by_id(c.rhodecode_db_repo.locked[0])}"></span>
                       %else:
                         <span class="locking_unlocked tooltip" title="${_('Repository unlocked')}"></span>
                       %endif
-                    %endif                   
+                    %endif
                  ##REPO TYPE
 		         %if h.is_hg(c.dbrepo):
 		           <img style="margin-bottom:2px" class="icon" title="${_('Mercurial repository')}" alt="${_('Mercurial repository')}" src="${h.url('/images/icons/hgicon.png')}"/>

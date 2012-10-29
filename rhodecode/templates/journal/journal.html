@@ -38,7 +38,7 @@
         <div class="title">
             <h5>
             <input class="q_filter_box" id="q_filter" size="15" type="text" name="filter" value="${_('quick filter...')}"/>
-            <a id="show_watched" class="link-white" href="#watched">${_('Watched')}</a> / <a id="show_my" class="link-white" href="#my">${_('My repos')}</a> 
+            <a id="show_watched" class="link-white" href="#watched">${_('Watched')}</a> / <a id="show_my" class="link-white" href="#my">${_('My repos')}</a>
             </h5>
              %if h.HasPermissionAny('hg.admin','hg.create.repository')():
              <ul class="links">
@@ -117,10 +117,10 @@
             var nodes = YUQ('#my tr td a.repo_name');
             var func = function(node){
                 return node.parentNode.parentNode.parentNode;
-            }            
+            }
             q_filter('q_filter',nodes,func);
-        });        
-        
+        });
+
     }
     YUE.on('show_my','click',function(e){
         show_my(e);
@@ -140,7 +140,7 @@
     })
     //init watched
     show_watched();
-    
+
     var tabs = {
         'watched': show_watched,
         'my': show_my,
@@ -150,8 +150,8 @@
         //We have a hash
         var tabHash = url[1];
         tabs[tabHash]();
-    }    
-    
+    }
+
     YUE.on('refresh','click',function(e){
         ypjax(e.currentTarget.href,"journal",function(){
         	show_more_event();
