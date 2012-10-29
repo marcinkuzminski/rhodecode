@@ -353,7 +353,7 @@ YAHOO.yuitip.main = {
 	offset:		[15,15],
 	useAnim:	false,
 	maxWidth:	200,
-	add_links:	true,
+	add_links:	false,
 
 	init: function(){
 		yt._tooltip = '';
