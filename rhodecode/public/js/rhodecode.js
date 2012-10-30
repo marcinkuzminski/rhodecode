@@ -327,6 +327,7 @@ var show_changeset_tooltip = function(){
 			var json = JSON.parse(o.responseText);
 			YUD.addClass(target,'tooltip')
 			YUD.setAttribute(target, 'title',json['message']);
+			YAHOO.yuitip.main.set_listeners(target);
 			YAHOO.yuitip.main.show_yuitip(e, target);
 		}
 		if(rid && !YUD.hasClass(target, 'tooltip')){
@@ -343,8 +344,6 @@ var show_changeset_tooltip = function(){
 YAHOO.namespace('yuitip');
 YAHOO.yuitip.main = {
 
-	YE:			YAHOO.util.Event,
-	Dom:		YAHOO.util.Dom,
 	$:			YAHOO.util.Dom.get,
 
 	bgColor:	'#000',
@@ -352,8 +351,15 @@ YAHOO.yuitip.main = {
 	opacity:	0.9,
 	offset:		[15,15],
 	useAnim:	false,
-	maxWidth:	200,
+	maxWidth:	300,
 	add_links:	false,
+	yuitips:    [],
+
+	set_listeners: function(tt){
+		YUE.on(tt, 'mouseover', yt.show_yuitip,  tt);
+		YUE.on(tt, 'mousemove', yt.move_yuitip,  tt);
+		YUE.on(tt, 'mouseout',  yt.close_yuitip, tt);		
+	},
 
 	init: function(){
 		yt._tooltip = '';
@@ -364,13 +370,13 @@ YAHOO.yuitip.main = {
 			yt.tipBox.id = 'tip-box';
 		}
 
-		yt.Dom.setStyle(yt.tipBox, 'display', 'none');
-		yt.Dom.setStyle(yt.tipBox, 'position', 'absolute');
+		YUD.setStyle(yt.tipBox, 'display', 'none');
+		YUD.setStyle(yt.tipBox, 'position', 'absolute');
 		if(yt.maxWidth !== null){
-			yt.Dom.setStyle(yt.tipBox, 'max-width', yt.maxWidth+'px');
+			YUD.setStyle(yt.tipBox, 'max-width', yt.maxWidth+'px');
 		}
 
-		var yuitips = yt.Dom.getElementsByClassName('tooltip');
+		var yuitips = YUD.getElementsByClassName('tooltip');
 
 		if(yt.add_links === true){
 			var links = document.getElementsByTagName('a');
@@ -383,37 +389,28 @@ YAHOO.yuitip.main = {
 		var yuiLen = yuitips.length;
 
 		for(i=0;i<yuiLen;i++){
-			yt.YE.on(yuitips[i], 'mouseover', yt.show_yuitip, yuitips[i]);
-			yt.YE.on(yuitips[i], 'mousemove', yt.move_yuitip, yuitips[i]);
-			yt.YE.on(yuitips[i], 'mouseout', yt.close_yuitip, yuitips[i]);
+			yt.set_listeners(yuitips[i]);
 		}
 	},
 
 	show_yuitip: function(e, el){
-		yt.YE.stopEvent(e);
+		YUE.stopEvent(e);
 		if(el.tagName.toLowerCase() === 'img'){
 			yt.tipText = el.alt ? el.alt : '';
 		} else {
 			yt.tipText = el.title ? el.title : '';
 		}
 
-		
 		if(yt.tipText !== ''){
 			// save org title
 			yt._tooltip = yt.tipText;
 			// reset title to not show org tooltips
 			YUD.setAttribute(el, 'title', '');
 
-			var newTipText = yt.tipText.split(' - ');
-			var tipLen = newTipText.length;
-			yt.tipText = '';
-			for(var i=0;i<tipLen;i++){
-				yt.tipText+= newTipText[i]+"<br/>";
-			}
 			yt.tipBox.innerHTML = yt.tipText;
-			yt.Dom.setStyle(yt.tipBox, 'display', 'block');
+			YUD.setStyle(yt.tipBox, 'display', 'block');
 			if(yt.useAnim === true){
-				yt.Dom.setStyle(yt.tipBox, 'opacity', '0');
+				YUD.setStyle(yt.tipBox, 'opacity', '0');
 				var newAnim = new YAHOO.util.Anim(yt.tipBox,
 					{
 						opacity: { to: yt.opacity }
@@ -425,14 +422,14 @@ YAHOO.yuitip.main = {
 	},
 
 	move_yuitip: function(e, el){
-		yt.YE.stopEvent(e);
-		var movePos = yt.YE.getXY(e);
-		yt.Dom.setStyle(yt.tipBox, 'top', (movePos[1] + yt.offset[1]) + 'px');
-		yt.Dom.setStyle(yt.tipBox, 'left', (movePos[0] + yt.offset[0]) + 'px');
+		YUE.stopEvent(e);
+		var movePos = YUE.getXY(e);
+		YUD.setStyle(yt.tipBox, 'top', (movePos[1] + yt.offset[1]) + 'px');
+		YUD.setStyle(yt.tipBox, 'left', (movePos[0] + yt.offset[0]) + 'px');
 	},
 
 	close_yuitip: function(e, el){
-		yt.YE.stopEvent(e);
+		YUE.stopEvent(e);
 	
 		if(yt.useAnim === true){
 			var newAnim = new YAHOO.util.Anim(yt.tipBox,
@@ -442,7 +439,7 @@ YAHOO.yuitip.main = {
 			);
 			newAnim.animate();
 		} else {
-			yt.Dom.setStyle(yt.tipBox, 'display', 'none');
+			YUD.setStyle(yt.tipBox, 'display', 'none');
 		}
 		YUD.setAttribute(el,'title', yt._tooltip);
 	}
