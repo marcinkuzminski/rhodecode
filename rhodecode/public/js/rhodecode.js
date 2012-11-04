@@ -327,11 +327,13 @@ var show_changeset_tooltip = function(){
 			var json = JSON.parse(o.responseText);
 			YUD.addClass(target,'tooltip')
 			YUD.setAttribute(target, 'title',json['message']);
-			YAHOO.yuitip.main.set_listeners(target);
 			YAHOO.yuitip.main.show_yuitip(e, target);
 		}
 		if(rid && !YUD.hasClass(target, 'tooltip')){
 			YUD.setAttribute(target,'id',ttid);
+			YUD.setAttribute(target, 'title',_TM['loading...']);
+			YAHOO.yuitip.main.set_listeners(target);
+			YAHOO.yuitip.main.show_yuitip(e, target);			
 			ajaxGET('/changeset_info/{0}/{1}'.format(repo_name,rid), success)
 		}
 	});
@@ -351,7 +353,7 @@ YAHOO.yuitip.main = {
 	opacity:	0.9,
 	offset:		[15,15],
 	useAnim:	false,
-	maxWidth:	300,
+	maxWidth:	600,
 	add_links:	false,
 	yuitips:    [],
 

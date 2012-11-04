@@ -34,7 +34,11 @@
 <script type="text/javascript">
   YUE.onDOMReady(function(){
 	YUE.delegate("user_log","click",function(e, matchedEl, container){
-		ypjax(e.target.href,"user_log",function(){show_more_event();tooltip_activate();});
+		ypjax(e.target.href,"user_log",function(){
+			show_more_event();
+			tooltip_activate();
+			show_changeset_tooltip();
+		});
 		YUE.preventDefault(e);
 	},'.pager_link');
 
