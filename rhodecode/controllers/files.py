@@ -46,7 +46,7 @@ from rhodecode.lib.vcs.conf import settings
 from rhodecode.lib.vcs.exceptions import RepositoryError, \
     ChangesetDoesNotExistError, EmptyRepositoryError, \
     ImproperArchiveTypeError, VCSError, NodeAlreadyExistsError,\
-    NodeDoesNotExistError
+    NodeDoesNotExistError, ChangesetError
 from rhodecode.lib.vcs.nodes import FileNode
 
 from rhodecode.model.repo import RepoModel
@@ -155,14 +155,12 @@ class FilesController(BaseRepoController):
             c.file = c.changeset.get_node(f_path)
 
             if c.file.is_file():
-                _hist = c.rhodecode_repo.get_changeset().get_file_history(f_path)
+                c.file_history, _hist = self._get_node_history(c.changeset, f_path)
                 c.file_changeset = c.changeset
                 if _hist:
                     c.file_changeset = (c.changeset
                                         if c.changeset.revision < _hist[0].revision
                                         else _hist[0])
-                c.file_history = self._get_node_history(c.changeset, f_path,
-                                                        _hist)
                 c.authors = []
                 for a in set([x.author for x in _hist]):
                     c.authors.append((h.email(a), h.person(a)))
@@ -519,7 +517,7 @@ class FilesController(BaseRepoController):
         if changesets is None:
             try:
                 changesets = tip_cs.get_file_history(f_path)
-            except NodeDoesNotExistError:
+            except (NodeDoesNotExistError, ChangesetError):
                 #this node is not present at tip !
                 changesets = cs.get_file_history(f_path)
 
@@ -544,7 +542,7 @@ class FilesController(BaseRepoController):
             tags_group[0].append((chs, name),)
         hist_l.append(tags_group)
 
-        return hist_l
+        return hist_l, changesets
 
     @LoginRequired()
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
