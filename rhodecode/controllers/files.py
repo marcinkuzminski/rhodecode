@@ -45,7 +45,8 @@ from rhodecode.lib.vcs.backends.base import EmptyChangeset
 from rhodecode.lib.vcs.conf import settings
 from rhodecode.lib.vcs.exceptions import RepositoryError, \
     ChangesetDoesNotExistError, EmptyRepositoryError, \
-    ImproperArchiveTypeError, VCSError, NodeAlreadyExistsError
+    ImproperArchiveTypeError, VCSError, NodeAlreadyExistsError,\
+    NodeDoesNotExistError
 from rhodecode.lib.vcs.nodes import FileNode
 
 from rhodecode.model.repo import RepoModel
@@ -160,7 +161,8 @@ class FilesController(BaseRepoController):
                     c.file_changeset = (c.changeset
                                         if c.changeset.revision < _hist[0].revision
                                         else _hist[0])
-                c.file_history = self._get_node_history(None, f_path, _hist)
+                c.file_history = self._get_node_history(c.changeset, f_path,
+                                                        _hist)
                 c.authors = []
                 for a in set([x.author for x in _hist]):
                     c.authors.append((h.email(a), h.person(a)))
@@ -504,11 +506,22 @@ class FilesController(BaseRepoController):
         return render('files/file_diff.html')
 
     def _get_node_history(self, cs, f_path, changesets=None):
-        if cs is None:
-            # if we pass empty CS calculate history based on tip
-            cs = c.rhodecode_repo.get_changeset()
+        """
+        get changesets history for given node
+
+        :param cs: changeset to calculate history
+        :param f_path: path for node to calculate history for
+        :param changesets: if passed don't calculate history and take
+            changesets defined in this list
+        """
+        # calculate history based on tip
+        tip_cs = c.rhodecode_repo.get_changeset()
         if changesets is None:
-            changesets = cs.get_file_history(f_path)
+            try:
+                changesets = tip_cs.get_file_history(f_path)
+            except NodeDoesNotExistError:
+                #this node is not present at tip !
+                changesets = cs.get_file_history(f_path)
 
         hist_l = []
 
