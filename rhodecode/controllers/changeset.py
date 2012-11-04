@@ -448,7 +448,10 @@ class ChangesetController(BaseRepoController):
 
     @jsonify
     def changeset_info(self, repo_name, revision):
-        if request.is_xhr or 1:
-            return c.rhodecode_repo.get_changeset(revision)
+        if request.is_xhr:
+            try:
+                return c.rhodecode_repo.get_changeset(revision)
+            except ChangesetDoesNotExistError, e:
+                return EmptyChangeset(message=str(e))
         else:
             raise HTTPBadRequest()
