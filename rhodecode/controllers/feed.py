@@ -80,6 +80,19 @@ class FeedController(BaseRepoController):
         desc_msg = []
         desc_msg.append('%s %s %s:<br/>' % (cs.author, _('commited on'),
                                            h.fmt_date(cs.date)))
+        #branches, tags, bookmarks
+        if cs.branch:
+            desc_msg.append('branch: %s<br/>' % cs.branch)
+        if h.is_hg(c.rhodecode_repo):
+            for book in cs.bookmarks:
+                desc_msg.append('bookmark: %s<br/>' % book)
+        for tag in cs.tags:
+            desc_msg.append('tag: %s<br/>' % tag)
+        # rev link
+        _url = url('changeset_home', repo_name=cs.repository.name,
+                   revision=cs.raw_id, qualified=True)
+        desc_msg.append('changesest: <a href="%s">%s</a>' % (_url, cs.raw_id[:8]))
+
         desc_msg.append('<pre>')
         desc_msg.append(cs.message)
         desc_msg.append('\n')
