@@ -778,30 +778,8 @@ class Repository(Base, BaseModel):
         """
         Creates an db based ui object for this repository
         """
-        from mercurial import ui
-        from mercurial import config
-        baseui = ui.ui()
-
-        #clean the baseui object
-        baseui._ocfg = config.config()
-        baseui._ucfg = config.config()
-        baseui._tcfg = config.config()
-
-        ret = RhodeCodeUi.query()\
-            .options(FromCache("sql_cache_short", "repository_repo_ui")).all()
-
-        hg_ui = ret
-        for ui_ in hg_ui:
-            if ui_.ui_active:
-                log.debug('settings ui from db[%s]%s:%s', ui_.ui_section,
-                          ui_.ui_key, ui_.ui_value)
-                baseui.setconfig(ui_.ui_section, ui_.ui_key, ui_.ui_value)
-            if ui_.ui_key == 'push_ssl':
-                # force set push_ssl requirement to False, rhodecode
-                # handles that
-                baseui.setconfig(ui_.ui_section, ui_.ui_key, False)
-
-        return baseui
+        from rhodecode.lib.utils import make_ui
+        return make_ui('db', clear_session=False)
 
     @classmethod
     def inject_ui(cls, repo, extras={}):
