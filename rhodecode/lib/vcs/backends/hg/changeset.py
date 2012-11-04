@@ -95,6 +95,14 @@ class MercurialChangeset(BaseChangeset):
         return [self.repository.get_changeset(parent.rev())
                 for parent in self._ctx.parents() if parent.rev() >= 0]
 
+    @LazyProperty
+    def children(self):
+        """
+        Returns list of children changesets.
+        """
+        return [self.repository.get_changeset(child.rev())
+                for child in self._ctx.children() if child.rev() >= 0]
+
     def next(self, branch=None):
 
         if branch and self.branch != branch:

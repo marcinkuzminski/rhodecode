@@ -395,6 +395,13 @@ class BaseChangeset(object):
         raise NotImplementedError
 
     @LazyProperty
+    def children(self):
+        """
+        Returns list of children changesets.
+        """
+        raise NotImplementedError
+
+    @LazyProperty
     def id(self):
         """
         Returns string identifying this changeset.
