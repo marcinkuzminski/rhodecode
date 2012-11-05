@@ -55,9 +55,9 @@
 	        <div class="cs_files">
 	               %for cs in c.cs_ranges:
 	                   <div class="cur_cs">${h.link_to('r%s:%s' % (cs.revision,h.short_id(cs.raw_id)),h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id))}</div>
-	                %for change,filenode,diff,cs1,cs2,st in c.changes[cs.raw_id]:
-	                    <div class="cs_${change}">${h.link_to(h.safe_unicode(filenode.path),h.url.current(anchor=h.FID(cs.raw_id,filenode.path)))}</div>
-	                %endfor
+	                  %for FID, (cs1, cs2, change, path, diff, stats) in c.changes[cs.raw_id].iteritems():
+	                    <div class="cs_${change}">${h.link_to(h.safe_unicode(path),h.url.current(anchor=FID))}</div>
+	                  %endfor
 	               %endfor
 	        </div>
 	    </div>

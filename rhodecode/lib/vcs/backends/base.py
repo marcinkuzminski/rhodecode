@@ -934,9 +934,9 @@ class EmptyChangeset(BaseChangeset):
     """
 
     def __init__(self, cs='0' * 40, repo=None, requested_revision=None,
-                 alias=None, message='', author='', date=''):
+                 alias=None, revision=-1, message='', author='', date=''):
         self._empty_cs = cs
-        self.revision = -1
+        self.revision = revision
         self.message = message
         self.author = author
         self.date = date

@@ -640,19 +640,22 @@ class GitSpecificWithRepoTest(BackendTestMixin, unittest.TestCase):
     def test_get_diff_runs_git_command_with_hashes(self):
         self.repo.run_git_command = mock.Mock(return_value=['', ''])
         self.repo.get_diff(0, 1)
-        self.repo.run_git_command.assert_called_once_with('diff -U%s %s %s' %
+        self.repo.run_git_command.assert_called_once_with(
+          'diff -U%s --full-index --binary -p -M --abbrev=40 %s %s' %
             (3, self.repo._get_revision(0), self.repo._get_revision(1)))
 
     def test_get_diff_runs_git_command_with_str_hashes(self):
         self.repo.run_git_command = mock.Mock(return_value=['', ''])
         self.repo.get_diff(self.repo.EMPTY_CHANGESET, 1)
-        self.repo.run_git_command.assert_called_once_with('show -U%s %s' %
+        self.repo.run_git_command.assert_called_once_with(
+            'show -U%s --full-index --binary -p -M --abbrev=40 %s' %
             (3, self.repo._get_revision(1)))
 
     def test_get_diff_runs_git_command_with_path_if_its_given(self):
         self.repo.run_git_command = mock.Mock(return_value=['', ''])
         self.repo.get_diff(0, 1, 'foo')
-        self.repo.run_git_command.assert_called_once_with('diff -U%s %s %s -- "foo"'
+        self.repo.run_git_command.assert_called_once_with(
+          'diff -U%s --full-index --binary -p -M --abbrev=40 %s %s -- "foo"'
             % (3, self.repo._get_revision(0), self.repo._get_revision(1)))
 
 

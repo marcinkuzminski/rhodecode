@@ -1,9 +1,11 @@
-%if h.is_hg(c.scm_type):
-# ${c.scm_type.upper()} changeset patch
+%if h.is_hg(c.rhodecode_repo):
+# ${c.rhodecode_repo.alias.upper()} changeset patch
 # User ${c.changeset.author|n}
 # Date ${c.changeset.date}
 # Node ID ${c.changeset.raw_id}
 ${c.parent_tmpl}
 ${c.changeset.message}
 %endif
-${c.diffs|n}
+%for FID, (cs1, cs2, change, path, diff, stats) in c.changes[c.changeset.raw_id].iteritems():
+${diff|n}
+%endfor

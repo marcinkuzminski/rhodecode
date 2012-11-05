@@ -58,9 +58,9 @@ if not BASE_URI.endswith('/'):
 
 print 'Crawling @ %s' % BASE_URI
 BASE_URI += '%s'
-PROJECT_PATH = jn('/', 'home', 'marcink', 'hg_repos')
+PROJECT_PATH = jn('/', 'home', 'marcink', 'repos')
 PROJECTS = [
-    'linux-magx-pbranch',
+    #'linux-magx-pbranch',
     'CPython',
     'rhodecode_tip',
 ]
@@ -95,9 +95,12 @@ def test_changelog_walk(proj, pages=100):
 
         page = '/'.join((proj, 'changelog',))
 
-        full_uri = (BASE_URI % page) + '?' + urllib.urlencode({'page':i})
+        full_uri = (BASE_URI % page) + '?' + urllib.urlencode({'page': i})
         s = time.time()
         f = o.open(full_uri)
+
+        assert f.url == full_uri, 'URL:%s does not match %s' % (f.url, full_uri)
+
         size = len(f.read())
         e = time.time() - s
         total_time += e

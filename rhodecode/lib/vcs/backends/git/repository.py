@@ -520,7 +520,7 @@ class GitRepository(BaseRepository):
         :param context: How many lines before/after changed lines should be
           shown. Defaults to ``3``.
         """
-        flags = ['-U%s' % context]
+        flags = ['-U%s' % context, '--full-index', '--binary', '-p', '-M', '--abbrev=40']
         if ignore_whitespace:
             flags.append('-w')
 
@@ -540,6 +540,7 @@ class GitRepository(BaseRepository):
 
         if path:
             cmd += ' -- "%s"' % path
+
         stdout, stderr = self.run_git_command(cmd)
         # If we used 'show' command, strip first few lines (until actual diff
         # starts)

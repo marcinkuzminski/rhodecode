@@ -299,7 +299,7 @@ class PullrequestsController(BaseRepoController):
             fid = h.FID('', f['filename'])
             c.files.append([fid, f['operation'], f['filename'], f['stats']])
             diff = diff_processor.as_html(enable_comments=enable_comments,
-                                          diff_lines=[f])
+                                          parsed_lines=[f])
             c.changes[fid] = [f['operation'], f['filename'], diff]
 
     def show(self, repo_name, pull_request_id):

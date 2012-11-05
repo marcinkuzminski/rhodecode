@@ -5,37 +5,37 @@
 ##
 <%def name="diff_block(change)">
 
-%for op,filenode,diff,cs1,cs2,stat in change:
-    %if op !='removed':
-    <div id="${h.FID(filenode.changeset.raw_id,filenode.path)}_target" style="clear:both;margin-top:25px"></div>
-    <div id="${h.FID(filenode.changeset.raw_id,filenode.path)}" class="diffblock  margined comm">
+%for FID,(cs1, cs2, change, path, diff, stats) in change.iteritems():
+    ##%if op !='removed':
+    <div id="${FID}_target" style="clear:both;margin-top:25px"></div>
+    <div id="${FID}" class="diffblock  margined comm">
         <div class="code-header">
             <div class="changeset_header">
                 <div class="changeset_file">
-                    ${h.link_to_if(change!='removed',h.safe_unicode(filenode.path),h.url('files_home',repo_name=c.repo_name,
-                    revision=filenode.changeset.raw_id,f_path=h.safe_unicode(filenode.path)))}
+                    ${h.link_to_if(change!='removed',h.safe_unicode(path),h.url('files_home',repo_name=c.repo_name,
+                    revision=cs2,f_path=h.safe_unicode(path)))}
                 </div>
                 <div class="diff-actions">
-                  <a href="${h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(filenode.path),diff2=cs2,diff1=cs1,diff='diff',fulldiff=1)}" class="tooltip" title="${h.tooltip(_('diff'))}"><img class="icon" src="${h.url('/images/icons/page_white_go.png')}"/></a>
-                  <a href="${h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(filenode.path),diff2=cs2,diff1=cs1,diff='raw')}" class="tooltip" title="${h.tooltip(_('raw diff'))}"><img class="icon" src="${h.url('/images/icons/page_white.png')}"/></a>
-                  <a href="${h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(filenode.path),diff2=cs2,diff1=cs1,diff='download')}" class="tooltip" title="${h.tooltip(_('download diff'))}"><img class="icon" src="${h.url('/images/icons/page_white_get.png')}"/></a>
-                  ${c.ignorews_url(request.GET, h.FID(filenode.changeset.raw_id,filenode.path))}
-                  ${c.context_url(request.GET, h.FID(filenode.changeset.raw_id,filenode.path))}
+                  <a href="${h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(path),diff2=cs2,diff1=cs1,diff='diff',fulldiff=1)}" class="tooltip" title="${h.tooltip(_('diff'))}"><img class="icon" src="${h.url('/images/icons/page_white_go.png')}"/></a>
+                  <a href="${h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(path),diff2=cs2,diff1=cs1,diff='raw')}" class="tooltip" title="${h.tooltip(_('raw diff'))}"><img class="icon" src="${h.url('/images/icons/page_white.png')}"/></a>
+                  <a href="${h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(path),diff2=cs2,diff1=cs1,diff='download')}" class="tooltip" title="${h.tooltip(_('download diff'))}"><img class="icon" src="${h.url('/images/icons/page_white_get.png')}"/></a>
+                  ${c.ignorews_url(request.GET, h.FID(cs2,path))}
+                  ${c.context_url(request.GET, h.FID(cs2,path))}
                 </div>
                 <span style="float:right;margin-top:-3px">
                   <label>
                   ${_('show inline comments')}
-                  ${h.checkbox('',checked="checked",class_="show-inline-comments",id_for=h.FID(filenode.changeset.raw_id,filenode.path))}
+                  ${h.checkbox('',checked="checked",class_="show-inline-comments",id_for=h.FID(cs2,path))}
                   </label>
                 </span>
             </div>
         </div>
         <div class="code-body">
-            <div class="full_f_path" path="${h.safe_unicode(filenode.path)}"></div>
+            <div class="full_f_path" path="${h.safe_unicode(path)}"></div>
             ${diff|n}
         </div>
     </div>
-    %endif
+    ##%endif
 %endfor
 
 </%def>

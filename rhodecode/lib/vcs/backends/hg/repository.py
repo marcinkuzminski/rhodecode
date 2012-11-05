@@ -242,8 +242,11 @@ class MercurialRepository(BaseRepository):
         if rev1 != self.EMPTY_CHANGESET:
             self.get_changeset(rev1)
         self.get_changeset(rev2)
+        if path:
+            file_filter = match(self.path, '', [path])
+        else:
+            file_filter = None
 
-        file_filter = match(self.path, '', [path])
         return ''.join(patch.diff(self._repo, rev1, rev2, match=file_filter,
                           opts=diffopts(git=True,
                                         ignorews=ignore_whitespace,

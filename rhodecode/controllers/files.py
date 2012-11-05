@@ -438,6 +438,7 @@ class FilesController(BaseRepoController):
 
         #special case if we want a show rev only, it's impl here
         #to reduce JS and callbacks
+
         if request.GET.get('show_rev'):
             if str2bool(request.GET.get('annotate', 'False')):
                 _url = url('files_annotate_home', repo_name=c.repo_name,
@@ -450,18 +451,31 @@ class FilesController(BaseRepoController):
         try:
             if diff1 not in ['', None, 'None', '0' * 12, '0' * 40]:
                 c.changeset_1 = c.rhodecode_repo.get_changeset(diff1)
-                node1 = c.changeset_1.get_node(f_path)
+                try:
+                    node1 = c.changeset_1.get_node(f_path)
+                except NodeDoesNotExistError:
+                    c.changeset_1 = EmptyChangeset(cs=diff1,
+                                                   revision=c.changeset_1.revision,
+                                                   repo=c.rhodecode_repo)
+                    node1 = FileNode(f_path, '', changeset=c.changeset_1)
             else:
                 c.changeset_1 = EmptyChangeset(repo=c.rhodecode_repo)
-                node1 = FileNode('.', '', changeset=c.changeset_1)
+                node1 = FileNode(f_path, '', changeset=c.changeset_1)
 
             if diff2 not in ['', None, 'None', '0' * 12, '0' * 40]:
                 c.changeset_2 = c.rhodecode_repo.get_changeset(diff2)
-                node2 = c.changeset_2.get_node(f_path)
+                try:
+                    node2 = c.changeset_2.get_node(f_path)
+                except NodeDoesNotExistError:
+                    c.changeset_2 = EmptyChangeset(cs=diff2,
+                                                   revision=c.changeset_2.revision,
+                                                   repo=c.rhodecode_repo)
+                    node2 = FileNode(f_path, '', changeset=c.changeset_2)
             else:
                 c.changeset_2 = EmptyChangeset(repo=c.rhodecode_repo)
-                node2 = FileNode('.', '', changeset=c.changeset_2)
+                node2 = FileNode(f_path, '', changeset=c.changeset_2)
         except RepositoryError:
+            log.error(traceback.format_exc())
             return redirect(url('files_home', repo_name=c.repo_name,
                                 f_path=f_path))
 
@@ -476,7 +490,7 @@ class FilesController(BaseRepoController):
             response.content_disposition = (
                 'attachment; filename=%s' % diff_name
             )
-            return diff.raw_diff()
+            return diff.as_raw()
 
         elif c.action == 'raw':
             _diff = diffs.get_gitdiff(node1, node2,
@@ -484,7 +498,7 @@ class FilesController(BaseRepoController):
                                       context=line_context)
             diff = diffs.DiffProcessor(_diff, format='gitdiff')
             response.content_type = 'text/plain'
-            return diff.raw_diff()
+            return diff.as_raw()
 
         else:
             fid = h.FID(diff2, node2.path)
@@ -498,8 +512,12 @@ class FilesController(BaseRepoController):
                                          ignore_whitespace=ign_whitespace_lcl,
                                          line_context=line_context_lcl,
                                          enable_comments=False)
-
-            c.changes = [('', node2, diff, cs1, cs2, st,)]
+            op = ''
+            filename = node1.path
+            cs_changes = {
+                'fid': [cs1, cs2, op, filename, diff, st]
+            }
+            c.changes = cs_changes
 
         return render('files/file_diff.html')
 

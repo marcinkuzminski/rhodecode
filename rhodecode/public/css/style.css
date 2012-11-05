@@ -2506,6 +2506,42 @@ h3.files_location {
 	font-size: 9px;
     padding: 2px 0px 2px 0px;
 }
+/*new binary*/
+.cs_files .changes .bin1 {
+    background-color: #BBFFBB;
+    float: left;
+    text-align: center;
+    font-size: 9px;
+    padding: 2px 0px 2px 0px;
+}
+
+/*deleted binary*/
+.cs_files .changes .bin2 {
+    background-color: #FF8888;
+    float: left;
+    text-align: center;
+    font-size: 9px;
+    padding: 2px 0px 2px 0px;
+}
+
+/*mod binary*/
+.cs_files .changes .bin3 {
+    background-color: #DDDDDD;
+    float: left;
+    text-align: center;
+    font-size: 9px;
+    padding: 2px 0px 2px 0px;
+}
+
+/*rename file*/
+.cs_files .changes .bin4 {
+    background-color: #6D99FF;
+    float: left;
+    text-align: center;
+    font-size: 9px;
+    padding: 2px 0px 2px 0px;
+}
+
 
 .cs_files .cs_added,.cs_files .cs_A {
 	background: url("../images/icons/page_white_add.png") no-repeat scroll

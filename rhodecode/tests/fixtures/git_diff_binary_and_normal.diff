@@ -1,0 +1,570 @@
+diff --git a/img/baseline-10px.png b/img/baseline-10px.png
+new file mode 100644
+index 0000000000000000000000000000000000000000..16095dcbf5c9ea41caeb1e3e41d647d425222ed1
+GIT binary patch
+literal 152
+zcmeAS@N?(olHy`uVBq!ia0vp^j6j^i!3HGVb)pi0lw^r(L`iUdT1k0gQ7VIDN`6wR
+zf@f}GdTLN=VoGJ<$y6JlA}dc9$B>F!Nx%O8w`Ue+77%bXFxq5j_~-xsZV_1~1zCBH
+y)y@U((_~Lrb!=|_@`K?vV_&A58+!u-Gs6x+MGjBnI|qTLFnGH9xvX<aXaWHBd@WW0
+
+literal 0
+HcmV?d00001
+
+diff --git a/img/baseline-20px.png b/img/baseline-20px.png
+deleted file mode 100644
+index 6894c4c8289e8600b595caf70d481324e640b8bd..0000000000000000000000000000000000000000
+GIT binary patch
+literal 0
+HcmV?d00001
+
+literal 127
+zcmeAS@N?(olHy`uVBq!ia0vp^j6j^i!3HGVb)pi0lw^r(L`iUdT1k0gQ7VIDN`6wR
+zf@f}GdTLN=VoGJ<$y6JlB1KOZ$B>F!Nk9Jow`XSN<z!=HoHesY!R@WWAwG@Mj0y)B
+YKKcpQXiYX%0xD+kboFyt=akR{0IF0Y6aWAK
+
+diff --git a/index.html b/index.html
+index 9aa2355b0d5f3dd324c8191637703c944ca14fca..654d5cc338e5cb27b41e09739363b025242d8acf 100644
+--- a/index.html
++++ b/index.html
+@@ -2,7 +2,7 @@
+ <html lang="en">
+   <head>
+     <meta charset="utf-8">
+-    <title>Baseline</title>
++    <title>Twitter Baseline</title>
+ 
+     <!-- // Less.js at the ready! -->
+     <link rel="stylesheet/less" type="text/css" media="all" href="less/baseline.less" />
+@@ -11,6 +11,7 @@
+     <!-- // jQuery! -->
+     <script type="text/javascript" src="http://code.jquery.com/jquery-1.5.2.min.js"></script>
+     <script type="text/javascript" src="http://tablesorter.com/jquery.tablesorter.min.js"></script>
++    <script type="text/javascript" src="js/jquery/hashgrid.js"></script>
+     <script type="text/javascript">
+       $(document).ready(function(){
+         // Active state in top nav
+@@ -36,7 +37,7 @@
+ <!--
+ 		<style>
+ 		  body {
+-		    background: url(img/baseline-20px.png) repeat 0 0, url(img/grid-940px.png) repeat-y top center;
++		    background: url(img/baseline-10px.png) repeat 0 0, url(img/grid-940px.png) repeat-y top center;
+ 		    background-color: #fff;
+ 		  }
+ 		</style>
+diff --git a/js/global.js b/js/global.js
+deleted file mode 100644
+index a934a3360ef6bdf340a036e6f3475daa7a54103c..0000000000000000000000000000000000000000
+--- a/js/global.js
++++ /dev/null
+@@ -1,75 +0,0 @@
+-$(document).ready(function(){
+-  // Get Heights
+-  windowHeight = $(window).height();
+-  documentHeight = $(document).height();
+-  sidebarHeight = windowHeight - 40;
+-  containerHeight = windowHeight - 40;
+-  
+-  // Get Widths
+-  windowWidth = $(window).width();
+-  containerWidth = windowWidth - 200;
+-  
+-  if (windowHeight < containerHeight) {
+-  
+-    // Set Dimensions for default state (before resize)
+-    $('div#sidebar').css({
+-      height: sidebarHeight
+-    });
+-    $('div#container').css({
+-      width: containerWidth,
+-      height: containerHeight
+-    });
+-    
+-  } else {
+-  
+-    // During resize, set widths
+-    $(window).resize(function() {
+-      console.log('Window Height: ' + $(window).height() + ', Sidebar Height:' + ($(window).height() - 40));
+-  
+-  	  // Get Heights
+-  	  windowHeight = $(window).height();
+-  	  sidebarHeight = windowHeight - 40;
+-  	  containerHeight = windowHeight - 40;
+-  	  
+-      // Get Widths
+-  	  windowWidth = $(window).width();
+-  	  containerWidth = windowWidth - 200;
+-  
+-  	  // Set Dimensions for default state (before resize)
+-  	  $('div#sidebar').css({
+-  	    height: sidebarHeight
+-  	  });
+-  	  $('div#container').css({
+-  	    width: containerWidth,
+-  	    height: containerHeight
+-  	  });
+-    });
+-    // console.log('omgz window is less than container so... fuck.');
+-    $('div#sidebar').css({
+-      height: documentHeight - 40
+-    });
+-    
+-  }
+-  
+-  
+-  
+-/*
+-  // Toggle Calendars
+-  $('div#sidebar ul li a').click(function() {
+-    if ($(this).is('#toggleMonthView')) {
+-      console.log('toggle month');
+-      $(this).addClass('active');
+-      $('#toggleListView').removeClass('active');
+-      $('table#monthView').show();
+-      $('table#listView').hide();
+-    } else {
+-      console.log('toggle list');
+-      $(this).addClass('active');
+-      $('#toggleMonthView').removeClass('active');
+-      $('table#listView').show();
+-      $('table#monthView').hide();
+-    }
+-    return false;
+-  });    
+-*/
+-});
+diff --git a/js/jquery/hashgrid.js b/js/jquery/hashgrid.js
+new file mode 100755
+index 0000000000000000000000000000000000000000..db7af7989499dd359737a880828f8d1b08571f81
+--- /dev/null
++++ b/js/jquery/hashgrid.js
+@@ -0,0 +1,340 @@
++/**
++ * hashgrid (jQuery version)
++ * http://github.com/dotjay/hashgrid
++ * Version 5, 3 Nov 2010
++ * Written by Jon Gibbins, dotjay.co.uk, accessibility.co.uk
++ * Contibutors:
++ * Sean Coates, seancoates.com
++ * Phil Dokas, jetless.org
++ *
++ * // Using a basic #grid setup
++ * var grid = new hashgrid();
++ *
++ * // Using #grid with a custom id (e.g. #mygrid)
++ * var grid = new hashgrid("mygrid");
++ *
++ * // Using #grid with additional options
++ * var grid = new hashgrid({
++ *     id: 'mygrid',            // id for the grid container
++ *     modifierKey: 'alt',      // optional 'ctrl', 'alt' or 'shift'
++ *     showGridKey: 's',        // key to show the grid
++ *     holdGridKey: 'enter',    // key to hold the grid in place
++ *     foregroundKey: 'f',      // key to toggle foreground/background
++ *     jumpGridsKey: 'd',       // key to cycle through the grid classes
++ *     numberOfGrids: 2,        // number of grid classes used
++ *     classPrefix: 'class',    // prefix for the grid classes
++ *     cookiePrefix: 'mygrid'   // prefix for the cookie name
++ * });
++ */
++if (typeof jQuery == "undefined") {
++	alert("Hashgrid: jQuery not loaded. Make sure it's linked to your pages.");
++}
++
++
++/**
++ * hashgrid overlay
++ */
++var hashgrid = function(set) {
++
++	var options = {
++		id: 'grid',             // id for the grid container
++		modifierKey: null,      // optional 'ctrl', 'alt' or 'shift'
++		showGridKey: 'g',       // key to show the grid
++		holdGridKey: 'h',       // key to hold the grid in place
++		foregroundKey: 'f',     // key to toggle foreground/background
++		jumpGridsKey: 'j',      // key to cycle through the grid classes
++		numberOfGrids: 1,       // number of grid classes used
++		classPrefix: 'grid-',   // prefix for the grid classes
++		cookiePrefix: 'hashgrid'// prefix for the cookie name
++	};
++	var overlayOn = false,
++		sticky = false,
++		overlayZState = 'B',
++		overlayZBackground = -1,
++		overlayZForeground = 9999,
++		classNumber = 1;
++
++	// Apply options
++	if (typeof set == 'object') {
++		var k;
++		for (k in set) options[k] = set[k];
++	}
++	else if (typeof set == 'string') {
++		options.id = set;
++	}
++
++	// Remove any conflicting overlay
++	if ($('#' + options.id).length > 0) {
++		$('#' + options.id).remove();
++	}
++
++	// Create overlay, hidden before adding to DOM
++	var overlayEl = $('<div></div>');
++	overlayEl
++		.attr('id', options.id)
++		.css({
++			display: 'none',
++			'pointer-events': 'none'
++		});
++	$("body").prepend(overlayEl);
++	var overlay = $('#' + options.id);
++
++	// Unless a custom z-index is set, ensure the overlay will be behind everything
++	if (overlay.css('z-index') == 'auto') overlay.css('z-index', overlayZBackground);
++
++	// Override the default overlay height with the actual page height
++	var pageHeight = parseFloat($(document).height());
++	overlay.height(pageHeight);
++
++	// Add the first grid line so that we can measure it
++	overlay.append('<div id="' + options.id + '-horiz" class="horiz first-line">');
++
++	// Position off-screen and display to calculate height
++	var top = overlay.css("top");
++	overlay.css({
++		top: "-999px",
++		display: "block"
++	});
++
++	// Calculate the number of grid lines needed
++	var line = $('#' + options.id + '-horiz'),
++		lineHeight = line.outerHeight();
++
++	// Hide and reset top
++	overlay.css({
++		display: "none",
++		top: top
++	});
++
++	// Break on zero line height
++	if (lineHeight <= 0) return true;
++
++	// Add the remaining grid lines
++	var i, numGridLines = Math.floor(pageHeight / lineHeight);
++	for (i = numGridLines - 1; i >= 1; i--) {
++		overlay.append('<div class="horiz"></div>');
++	}
++
++	// vertical grid
++	overlay.append($('<div class="vert-container"></div>'));
++	var overlayVert = overlay.children('.vert-container');
++	var gridWidth = overlay.width();
++	overlayVert.css({width: gridWidth, position: 'absolute', top: 0});
++	overlayVert.append('<div class="vert first-line">&nbsp;</div>');
++
++	// 30 is an arbitrarily large number...
++	// can't calculate the margin width properly
++	for (i = 0; i < 30; i++) {
++		overlayVert.append('<div class="vert">&nbsp;</div>');
++	}
++
++	overlayVert.children()
++		.height(pageHeight)
++		.css({display: 'inline-block'});
++
++	// Check for saved state
++	var overlayCookie = readCookie(options.cookiePrefix + options.id);
++	if (typeof overlayCookie == 'string') {
++		var state = overlayCookie.split(',');
++		state[2] = Number(state[2]);
++		if ((typeof state[2] == 'number') && !isNaN(state[2])) {
++			classNumber = state[2].toFixed(0);
++			overlay.addClass(options.classPrefix + classNumber);
++		}
++		if (state[1] == 'F') {
++			overlayZState = 'F';
++			overlay.css('z-index', overlayZForeground);
++		}
++		if (state[0] == '1') {
++			overlayOn = true;
++			sticky = true;
++			showOverlay();
++		}
++	}
++	else {
++		overlay.addClass(options.classPrefix + classNumber);
++	}
++
++	// Keyboard controls
++	$(document).bind('keydown', keydownHandler);
++	$(document).bind('keyup', keyupHandler);
++
++	/**
++	 * Helpers
++	 */
++
++	function getModifier(e) {
++		if (options.modifierKey == null) return true; // Bypass by default
++		var m = true;
++		switch(options.modifierKey) {
++			case 'ctrl':
++				m = (e.ctrlKey ? e.ctrlKey : false);
++				break;
++
++			case 'alt':
++				m = (e.altKey ? e.altKey : false);
++				break;
++
++			case 'shift':
++				m = (e.shiftKey ? e.shiftKey : false);
++				break;
++		}
++		return m;
++	}
++
++	function getKey(e) {
++		var k = false, c = (e.keyCode ? e.keyCode : e.which);
++		// Handle keywords
++		if (c == 13) k = 'enter';
++		// Handle letters
++		else k = String.fromCharCode(c).toLowerCase();
++		return k;
++	}
++
++	function saveState() {
++		createCookie(options.cookiePrefix + options.id, (sticky ? '1' : '0') + ',' + overlayZState + ',' + classNumber, 1);
++	}
++
++	function showOverlay() {
++		overlay.show();
++		overlayVert.css({width: overlay.width()});
++		// hide any vertical blocks that aren't at the top of the viewport
++		overlayVert.children('.vert').each(function () {
++			$(this).css('display','inline-block');
++			if ($(this).offset().top > 0) {
++				$(this).hide();
++			}
++		});
++	}
++
++	/**
++	 * Event handlers
++	 */
++
++	function keydownHandler(e) {
++		var source = e.target.tagName.toLowerCase();
++		if ((source == 'input') || (source == 'textarea') || (source == 'select')) return true;
++		var m = getModifier(e);
++		if (!m) return true;
++		var k = getKey(e);
++		if (!k) return true;
++		switch(k) {
++			case options.showGridKey:
++				if (!overlayOn) {
++					showOverlay();
++					overlayOn = true;
++				}
++				else if (sticky) {
++					overlay.hide();
++					overlayOn = false;
++					sticky = false;
++					saveState();
++				}
++				break;
++			case options.holdGridKey:
++				if (overlayOn && !sticky) {
++					// Turn sticky overlay on
++					sticky = true;
++					saveState();
++				}
++				break;
++			case options.foregroundKey:
++				if (overlayOn) {
++					// Toggle sticky overlay z-index
++					if (overlay.css('z-index') == overlayZForeground) {
++						overlay.css('z-index', overlayZBackground);
++						overlayZState = 'B';
++					}
++					else {
++						overlay.css('z-index', overlayZForeground);
++						overlayZState = 'F';
++					}
++					saveState();
++				}
++				break;
++			case options.jumpGridsKey:
++				if (overlayOn && (options.numberOfGrids > 1)) {
++					// Cycle through the available grids
++					overlay.removeClass(options.classPrefix + classNumber);
++					classNumber++;
++					if (classNumber > options.numberOfGrids) classNumber = 1;
++					overlay.addClass(options.classPrefix + classNumber);
++					showOverlay();
++					if (/webkit/.test( navigator.userAgent.toLowerCase() )) {
++						forceRepaint();
++					}
++					saveState();
++				}
++				break;
++		}
++	}
++
++	function keyupHandler(e) {
++		var m = getModifier(e);
++		if (!m) return true;
++		var k = getKey(e);
++		if (!k) return true;
++		if ((k == options.showGridKey) && !sticky) {
++			overlay.hide();
++			overlayOn = false;
++		}
++	}
++
++	/**
++	 * Cookie functions
++	 *
++	 * By Peter-Paul Koch:
++	 * http://www.quirksmode.org/js/cookies.html
++	 */
++	function createCookie(name,value,days) {
++		if (days) {
++			var date = new Date();
++			date.setTime(date.getTime()+(days*24*60*60*1000));
++			var expires = "; expires="+date.toGMTString();
++		}
++		else var expires = "";
++		document.cookie = name+"="+value+expires+"; path=/";
++	}
++
++	function readCookie(name) {
++		var nameEQ = name + "=";
++		var ca = document.cookie.split(';');
++		for(var i=0;i < ca.length;i++) {
++			var c = ca[i];
++			while (c.charAt(0)==' ') c = c.substring(1,c.length);
++			if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
++		}
++		return null;
++	}
++
++	function eraseCookie(name) {
++		createCookie(name,"",-1);
++	}
++
++	/**
++	 * Forces a repaint (because WebKit has issues)
++	 * http://www.sitepoint.com/forums/showthread.php?p=4538763
++	 * http://www.phpied.com/the-new-game-show-will-it-reflow/
++	 */
++	function forceRepaint() {
++		var ss = document.styleSheets[0];
++		try {
++			ss.addRule('.xxxxxx', 'position: relative');
++			ss.removeRule(ss.rules.length - 1);
++		} catch(e){}
++	}
++
++}
++
++
++/**
++ * You can call hashgrid from your own code, but it's loaded here as
++ * an example for your convenience.
++ */
++$(document).ready(function() {
++
++	var grid = new hashgrid({
++		numberOfGrids: 2
++	});
++
++});
+diff --git a/less/docs.less b/less/docs.less
+index 165ddb142019d6ec45aae1fa3fdbb3cbcea3bfdb..30b561118c290925a213d987691dfcbeafeb8f44 100644
+--- a/less/docs.less
++++ b/less/docs.less
+@@ -1,3 +1,10 @@
++body {
++  #gradient > .vertical-three-colors(#eee, #fff, 0.15, #fff);
++  background-attachment: fixed;
++  background-position: 0 40px;
++  position: relative;
++}
++
+ // Give us some love
+ header,
+ section,
+@@ -77,3 +84,30 @@ aside {
+ section {
+   margin-bottom: 40px;
+ }
++
++// Hashgrid grid
++/**
++ * Grid
++ */
++#grid {
++  width: 980px;
++  position: absolute;
++  top: 0;
++  left: 50%;
++  margin-left: -490px;
++}
++#grid div.vert {
++  width: 39px;
++  border: solid darkturquoise;
++  border-width: 0 1px;
++  margin-right: 19px;
++}
++#grid div.vert.first-line {
++  margin-left: 19px;
++}
++#grid div.horiz {
++  height: 19px;
++  border-bottom: 1px dotted rgba(255,0,0,.25);
++  margin: 0;
++  padding: 0;
++}
+diff --git a/less/scaffolding.less b/less/scaffolding.less
+index 2191d98b3f3f805b62eb3b60f1cb4f0be5bf1aa8..88bcf714a9f075cd7ba60033022f21ff95efc776 100644
+--- a/less/scaffolding.less
++++ b/less/scaffolding.less
+@@ -7,7 +7,7 @@
+ -------------------------------------------------- */
+ 
+ div.row {
+-  .clearfix;
++  .clearfix();
+   div.span1   { .columns(1); }
+   div.span2   { .columns(2); }
+   div.span3   { .columns(3); }
+@@ -34,8 +34,6 @@ html, body {
+   background-color: #fff;
+ }
+ body {
+-  #gradient > .vertical-three-colors(#eee, #fff, 0.25, #fff);
+-  background-attachment: fixed;
+   margin: 0;
+   .sans-serif(normal,14px,20px);
+   color: @gray;
+diff --git a/readme.markdown b/readme.markdown
+index 36b357b31afdee5fffbeddeba3144ffbd98d9778..41966346963824f2ce5497b8275c3a15c2044ac9 100644
+--- a/readme.markdown
++++ b/readme.markdown
+@@ -1,13 +1,4 @@
+ TODOS
+ 
+-* Write "Using Twitter BP" section
+-** Two ways to use: LESS.js or compiled
+-** Not meant to be 100% bulletproof, but is 90% bulletproof (stats?)
+-** Advanced framework for fast prototyping, internal app development, bootstraping new websites
+-** Can be easily modified to provide more legacy support
+-
+-* Add grid examples back in
+ * Cross browser checks? Show this anywhere?
+-* Add layouts section back in
+-
+-* Point JS libraries to public library links instead of within the repo
+\ No newline at end of file
++* Add layouts section back in
+\ No newline at end of file

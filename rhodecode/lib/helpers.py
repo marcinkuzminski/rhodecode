@@ -891,27 +891,7 @@ def fancy_file_stats(stats):
 
     :param stats: two element list of added/deleted lines of code
     """
-
-    a, d, t = stats[0], stats[1], stats[0] + stats[1]
-    width = 100
-    unit = float(width) / (t or 1)
-
-    # needs > 9% of width to be visible or 0 to be hidden
-    a_p = max(9, unit * a) if a > 0 else 0
-    d_p = max(9, unit * d) if d > 0 else 0
-    p_sum = a_p + d_p
-
-    if p_sum > width:
-        #adjust the percentage to be == 100% since we adjusted to 9
-        if a_p > d_p:
-            a_p = a_p - (p_sum - width)
-        else:
-            d_p = d_p - (p_sum - width)
-
-    a_v = a if a > 0 else ''
-    d_v = d if d > 0 else ''
-
-    def cgen(l_type):
+    def cgen(l_type, a_v, d_v):
         mapping = {'tr': 'top-right-rounded-corner-mid',
                    'tl': 'top-left-rounded-corner-mid',
                    'br': 'bottom-right-rounded-corner-mid',
@@ -931,11 +911,38 @@ def fancy_file_stats(stats):
         if l_type == 'd' and not a_v:
             return ' '.join(map(map_getter, ['tr', 'br', 'tl', 'bl']))
 
+    a, d = stats[0], stats[1]
+    width = 100
+
+    if a == 'b':
+        #binary mode
+        b_d = '<div class="bin%s %s" style="width:100%%">%s</div>' % (d, cgen('a', a_v='', d_v=0), 'bin')
+        b_a = '<div class="bin1" style="width:0%%">%s</div>' % ('bin')
+        return literal('<div style="width:%spx">%s%s</div>' % (width, b_a, b_d))
+
+    t = stats[0] + stats[1]
+    unit = float(width) / (t or 1)
+
+    # needs > 9% of width to be visible or 0 to be hidden
+    a_p = max(9, unit * a) if a > 0 else 0
+    d_p = max(9, unit * d) if d > 0 else 0
+    p_sum = a_p + d_p
+
+    if p_sum > width:
+        #adjust the percentage to be == 100% since we adjusted to 9
+        if a_p > d_p:
+            a_p = a_p - (p_sum - width)
+        else:
+            d_p = d_p - (p_sum - width)
+
+    a_v = a if a > 0 else ''
+    d_v = d if d > 0 else ''
+
     d_a = '<div class="added %s" style="width:%s%%">%s</div>' % (
-        cgen('a'), a_p, a_v
+        cgen('a', a_v, d_v), a_p, a_v
     )
     d_d = '<div class="deleted %s" style="width:%s%%">%s</div>' % (
-        cgen('d'), d_p, d_v
+        cgen('d', a_v, d_v), d_p, d_v
     )
     return literal('<div style="width:%spx">%s%s</div>' % (width, d_a, d_d))
 
