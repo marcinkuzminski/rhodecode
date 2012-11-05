@@ -396,6 +396,7 @@ class ScmModel(BaseModel):
             raise Exception("This repository doesn't have a clone uri")
 
         repo = dbrepo.scm_instance
+        from rhodecode import CONFIG
         try:
             extras = {
                 'ip': '',
@@ -403,7 +404,11 @@ class ScmModel(BaseModel):
                 'action': 'push_remote',
                 'repository': dbrepo.repo_name,
                 'scm': repo.alias,
+                'config': CONFIG['__file__'],
+                'make_lock': None,
+                'locked_by': [None, None]
             }
+
             Repository.inject_ui(repo, extras=extras)
 
             if repo.alias == 'git':
