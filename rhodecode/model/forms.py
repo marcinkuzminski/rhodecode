@@ -227,7 +227,8 @@ def RepoSettingsForm(edit=False, old_data={},
         repo_name = All(v.UnicodeString(strip=True, min=1, not_empty=True),
                         v.SlugifyName())
         description = v.UnicodeString(strip=True, min=1, not_empty=True)
-        repo_group = v.OneOf(repo_groups, hideList=True)
+        repo_group = All(v.CanWriteGroup(),
+                         v.OneOf(repo_groups, hideList=True))
         private = v.StringBoolean(if_missing=False)
         landing_rev = v.OneOf(landing_revs, hideList=True)
         chained_validators = [v.ValidRepoName(edit, old_data), v.ValidPerms(),
