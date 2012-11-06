@@ -3935,12 +3935,13 @@ div#legend_container table td,div#legend_choices table td {
 
 
 .group_members_wrap{
-	
+	min-height: 85px;
+	padding-left: 20px;
 }
 
 .group_members .group_member{
 	height: 30px;
-	padding:0px 0px 0px 10px;
+	padding:0px 0px 0px 0px;
 }
 
 .reviewers_member{
