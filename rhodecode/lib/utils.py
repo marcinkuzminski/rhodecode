@@ -307,7 +307,7 @@ def make_ui(read_from='file', path=None, checkpaths=True, clear_session=True):
         for section in ui_sections:
             for k, v in cfg.items(section):
                 log.debug('settings ui from file[%s]%s:%s' % (section, k, v))
-                baseui.setconfig(section, k, v)
+                baseui.setconfig(safe_str(section), safe_str(k), safe_str(v))
 
     elif read_from == 'db':
         sa = meta.Session()
@@ -320,11 +320,13 @@ def make_ui(read_from='file', path=None, checkpaths=True, clear_session=True):
             if ui_.ui_active:
                 log.debug('settings ui from db[%s]%s:%s', ui_.ui_section,
                           ui_.ui_key, ui_.ui_value)
-                baseui.setconfig(ui_.ui_section, ui_.ui_key, ui_.ui_value)
+                baseui.setconfig(safe_str(ui_.ui_section), safe_str(ui_.ui_key),
+                                 safe_str(ui_.ui_value))
             if ui_.ui_key == 'push_ssl':
                 # force set push_ssl requirement to False, rhodecode
                 # handles that
-                baseui.setconfig(ui_.ui_section, ui_.ui_key, False)
+                baseui.setconfig(safe_str(ui_.ui_section), safe_str(ui_.ui_key),
+                                 False)
         if clear_session:
             meta.Session.remove()
     return baseui
