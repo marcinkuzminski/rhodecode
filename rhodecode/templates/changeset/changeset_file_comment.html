@@ -12,7 +12,7 @@
   			${co.author.username}
   		</div>
   		<div class="date">
-  			${h.age(co.modified_at)}
+  			${h.age(co.modified_at)} <a class="permalink" href="#comment-${co.comment_id}">&para;</a>
   		</div>
         %if co.status_change:
            <div  style="float:left" class="changeset-status-container">

@@ -353,9 +353,9 @@ div:hover > a.permalink {
     z-index: auto !important;
 }
 
-.header-pos-fix{
-	margin-top: -44px;
-	padding-top: 44px;
+.header-pos-fix, .anchor{
+	margin-top: -46px;
+	padding-top: 46px;
 }
 
 #header #header-inner #home a {
