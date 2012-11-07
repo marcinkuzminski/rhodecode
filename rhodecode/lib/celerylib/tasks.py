@@ -50,6 +50,7 @@ from rhodecode.lib.compat import json, OrderedDict
 from rhodecode.lib.hooks import log_create_repository
 
 from rhodecode.model.db import Statistics, Repository, User
+from rhodecode.model.scm import ScmModel
 
 
 add_cache(config)
@@ -402,17 +403,19 @@ def create_repo_fork(form_data, cur_user):
     backend = get_backend(repo_type)
 
     if repo_type == 'git':
-        backend(safe_str(destination_fork_path), create=True,
+        r = backend(safe_str(destination_fork_path), create=True,
                 src_url=safe_str(source_repo_path),
                 update_after_clone=update_after_clone,
                 bare=True)
     elif repo_type == 'hg':
-        backend(safe_str(destination_fork_path), create=True,
+        r = backend(safe_str(destination_fork_path), create=True,
                 src_url=safe_str(source_repo_path),
                 update_after_clone=update_after_clone)
     else:
         raise Exception('Unknown backend type %s' % repo_type)
 
+    # add rhodecode hook into this repo
+    ScmModel().install_git_hook(repo=r)
     log_create_repository(fork_repo.get_dict(), created_by=cur_user.username)
 
     action_logger(cur_user, 'user_forked_repo:%s' % fork_name,
