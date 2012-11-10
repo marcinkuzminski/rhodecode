@@ -262,7 +262,7 @@ class DiffProcessor(object):
             self.adds += 1
         elif l.startswith('-') and not l.startswith('---'):
             self.removes += 1
-        return l
+        return safe_unicode(l)
 
     def _highlight_line_difflib(self, line, next_):
         """
@@ -574,9 +574,10 @@ class DiffProcessor(object):
 
     def as_raw(self, diff_lines=None):
         """
-        Returns raw string as udiff
+        Returns raw string diff
         """
-        return u''.join(imap(self._line_counter, self._diff.splitlines(1)))
+        return self._diff
+        #return u''.join(imap(self._line_counter, self._diff.splitlines(1)))
 
     def as_html(self, table_class='code-difftable', line_class='line',
                 new_lineno_class='lineno old', old_lineno_class='lineno new',

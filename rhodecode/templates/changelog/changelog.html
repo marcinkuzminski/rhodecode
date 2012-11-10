@@ -157,13 +157,14 @@ ${_('%s Changelog') % c.repo_name} - ${c.rhodecode_name}
                                 checked_checkboxes.push(checkboxes[pos]);
                             }
                         }
-
-                        if(checked_checkboxes.length>0){
-                          // modify open pull request to show we have selected cs
-                          YUD.get('open_new_pr').innerHTML = _TM['Open new pull request for selected changesets'];
-
-                        }else{
-                          YUD.get('open_new_pr').innerHTML = _TM['Open new pull request'];
+                        if(YUD.get('open_new_pr')){
+                          if(checked_checkboxes.length>0){
+                            // modify open pull request to show we have selected cs
+                            YUD.get('open_new_pr').innerHTML = _TM['Open new pull request for selected changesets'];
+  
+                          }else{
+                            YUD.get('open_new_pr').innerHTML = _TM['Open new pull request'];
+                          }
                         }
 
                         if(checked_checkboxes.length>1){

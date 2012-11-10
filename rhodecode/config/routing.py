@@ -421,6 +421,28 @@ def make_map(config):
                 controller='changeset', revision='tip',
                 conditions=dict(function=check_repo))
 
+    #still working url for backward compat.
+    rmap.connect('raw_changeset_home_depraced',
+                 '/{repo_name:.*?}/raw-changeset/{revision}',
+                 controller='changeset', action='changeset_raw',
+                 revision='tip', conditions=dict(function=check_repo))
+
+    ## new URLs
+    rmap.connect('changeset_raw_home',
+                 '/{repo_name:.*?}/changeset-diff/{revision}',
+                 controller='changeset', action='changeset_raw',
+                 revision='tip', conditions=dict(function=check_repo))
+
+    rmap.connect('changeset_patch_home',
+                 '/{repo_name:.*?}/changeset-patch/{revision}',
+                 controller='changeset', action='changeset_patch',
+                 revision='tip', conditions=dict(function=check_repo))
+
+    rmap.connect('changeset_download_home',
+                 '/{repo_name:.*?}/changeset-download/{revision}',
+                 controller='changeset', action='changeset_download',
+                 revision='tip', conditions=dict(function=check_repo))
+
     rmap.connect('changeset_comment',
                  '/{repo_name:.*?}/changeset/{revision}/comment',
                 controller='changeset', revision='tip', action='comment',
@@ -430,11 +452,6 @@ def make_map(config):
                  '/{repo_name:.*?}/changeset/comment/{comment_id}/delete',
                 controller='changeset', action='delete_comment',
                 conditions=dict(function=check_repo, method=["DELETE"]))
-
-    rmap.connect('raw_changeset_home',
-                 '/{repo_name:.*?}/raw-changeset/{revision}',
-                 controller='changeset', action='raw_changeset',
-                 revision='tip', conditions=dict(function=check_repo))
 
     rmap.connect('changeset_info', '/changeset_info/{repo_name:.*?}/{revision}',
                  controller='changeset', action='changeset_info')

@@ -51,6 +51,7 @@ from rhodecode.lib.diffs import LimitedDiffContainer
 from rhodecode.model.repo import RepoModel
 from rhodecode.lib.exceptions import StatusChangeOnClosedPullRequestError
 from rhodecode.lib.vcs.backends.base import EmptyChangeset
+from rhodecode.lib.utils2 import safe_unicode
 
 log = logging.getLogger(__name__)
 
@@ -179,12 +180,11 @@ class ChangesetController(BaseRepoController):
         c.users_array = repo_model.get_users_js()
         c.users_groups_array = repo_model.get_users_groups_js()
 
-    def index(self, revision):
-        method = request.GET.get('diff', 'show')
+    def index(self, revision, method='show'):
         c.anchor_url = anchor_url
         c.ignorews_url = _ignorews_url
         c.context_url = _context_url
-        limit_off = request.GET.get('fulldiff')
+        c.fulldiff = fulldiff = request.GET.get('fulldiff')
         #get ranges of revisions if preset
         rev_range = revision.split('...')[:2]
         enable_comments = True
@@ -243,7 +243,7 @@ class ChangesetController(BaseRepoController):
 
             _diff = c.rhodecode_repo.get_diff(cs1, cs2,
                 ignore_whitespace=ign_whitespace_lcl, context=context_lcl)
-            diff_limit = self.cut_off_limit if not limit_off else None
+            diff_limit = self.cut_off_limit if not fulldiff else None
             diff_processor = diffs.DiffProcessor(_diff,
                                                  vcs=c.rhodecode_repo.alias,
                                                  format='gitdiff',
@@ -281,20 +281,30 @@ class ChangesetController(BaseRepoController):
                                      for x in c.changeset.parents])
         if method == 'download':
             response.content_type = 'text/plain'
-            response.content_disposition = 'attachment; filename=%s.patch' \
-                                            % revision
-            return render('changeset/raw_changeset.html')
+            response.content_disposition = 'attachment; filename=%s.diff' \
+                                            % revision[:12]
+            return diff
+        elif method == 'patch':
+            response.content_type = 'text/plain'
+            c.diff = safe_unicode(diff)
+            return render('changeset/patch_changeset.html')
         elif method == 'raw':
             response.content_type = 'text/plain'
-            return render('changeset/raw_changeset.html')
+            return diff
         elif method == 'show':
             if len(c.cs_ranges) == 1:
                 return render('changeset/changeset.html')
             else:
                 return render('changeset/changeset_range.html')
 
-    def raw_changeset(self, revision):
-        return self.index(revision)
+    def changeset_raw(self, revision):
+        return self.index(revision, method='raw')
+
+    def changeset_patch(self, revision):
+        return self.index(revision, method='patch')
+
+    def changeset_download(self, revision):
+        return self.index(revision, method='download')
 
     @jsonify
     def comment(self, repo_name, revision):
