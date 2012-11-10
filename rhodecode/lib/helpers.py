@@ -521,10 +521,23 @@ def action_parser(user_log, feed=False, parse_cs=False):
 
         def lnk(rev, repo_name):
             if isinstance(rev, BaseChangeset) or isinstance(rev, AttributeDict):
-                lbl = '%s' % (rev.short_id[:8])
-                _url = url('changeset_home', repo_name=repo_name,
-                           revision=rev.raw_id)
-                title = tooltip(rev.message)
+                lazy_cs = True
+                if getattr(rev, 'op', None) and getattr(rev, 'ref_name', None):
+                    lazy_cs = False
+                    lbl = '?'
+                    if rev.op == 'delete_branch':
+                        lbl = '%s' % _('Deleted branch: %s') % rev.ref_name
+                        title = ''
+                    elif rev.op == 'tag':
+                        lbl = '%s' % _('Created tag: %s') % rev.ref_name
+                        title = ''
+                    _url = '#'
+
+                else:
+                    lbl = '%s' % (rev.short_id[:8])
+                    _url = url('changeset_home', repo_name=repo_name,
+                               revision=rev.raw_id)
+                    title = tooltip(rev.message)
             else:
                 ## changeset cannot be found/striped/removed etc.
                 lbl = ('%s' % rev)[:12]
@@ -533,12 +546,16 @@ def action_parser(user_log, feed=False, parse_cs=False):
             if parse_cs:
                 return link_to(lbl, _url, title=title, class_='tooltip')
             return link_to(lbl, _url, raw_id=rev.raw_id, repo_name=repo_name,
-                           class_='lazy-cs')
+                           class_='lazy-cs' if lazy_cs else '')
 
         revs = []
         if len(filter(lambda v: v != '', revs_ids)) > 0:
             repo = None
             for rev in revs_ids[:revs_top_limit]:
+                _op = _name = None
+                if len(rev.split('=>')) == 2:
+                    _op, _name = rev.split('=>')
+
                 # we want parsed changesets, or new log store format is bad
                 if parse_cs:
                     try:
@@ -555,6 +572,8 @@ def action_parser(user_log, feed=False, parse_cs=False):
                         'short_id': rev[:12],
                         'raw_id': rev,
                         'message': '',
+                        'op': _op,
+                        'ref_name': _name
                     })
                     revs.append(_rev)
         cs_links = []

@@ -412,11 +412,17 @@ def handle_git_receive(repo_path, revs, env, hook_type='post'):
                                          heads.splitlines()))
                     cmd = (('log %(new_rev)s' % push_ref) +
                            ' --reverse --pretty=format:"%H" --not ' + heads)
+                    git_revs += repo.run_git_command(cmd)[0].splitlines()
+
+                elif push_ref['new_rev'] == EmptyChangeset().raw_id:
+                    #delete branch case
+                    git_revs += ['delete_branch=>%s' % push_ref['name']]
                 else:
                     cmd = (('log %(old_rev)s..%(new_rev)s' % push_ref) +
                            ' --reverse --pretty=format:"%H"')
-                git_revs += repo.run_git_command(cmd)[0].splitlines()
+                    git_revs += repo.run_git_command(cmd)[0].splitlines()
+
             elif _type == 'tags':
-                git_revs += [push_ref['name']]
+                git_revs += ['tag=>%s' % push_ref['name']]
 
         log_push_action(baseui, repo, _git_revs=git_revs)
