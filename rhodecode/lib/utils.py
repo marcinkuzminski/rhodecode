@@ -700,7 +700,7 @@ def check_git_version():
 
     req_ver = '1.7.4'
     to_old_git = False
-    if  _ver <= StrictVersion(req_ver):
+    if  _ver < StrictVersion(req_ver):
         to_old_git = True
 
     if 'git' in BACKENDS:
