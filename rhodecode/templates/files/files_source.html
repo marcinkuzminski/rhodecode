@@ -103,7 +103,9 @@ YUE.onDOMReady(function(){
     //load history of file
     YUE.on('load_node_history', 'click', function(e){
         var _url = node_history_url.replace('__REV__','${c.file_changeset.raw_id}').replace('__FPATH__', '${c.f_path}');
-        ypjax(_url, 'node_history', function(o){})
+        ypjax(_url, 'node_history', function(o){
+        	tooltip_activate();
+        })
     });    
 
    });

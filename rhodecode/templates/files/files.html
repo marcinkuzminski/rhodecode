@@ -101,7 +101,9 @@ var callbacks = function(State){
       YUE.removeListener('load_node_history', 'click');
       YUE.on('load_node_history', 'click', function(e){
           var _url = node_history_url.replace('__REV__',State.data.rev).replace('__FPATH__', State.data.f_path);
-          ypjax(_url, 'node_history', function(o){})
+          ypjax(_url, 'node_history', function(o){
+        	  tooltip_activate();
+          })
       });
     }
     // Inform Google Analytics of the change
