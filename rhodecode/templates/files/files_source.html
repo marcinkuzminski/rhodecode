@@ -1,29 +1,13 @@
-<dl>
-	<dt class="file_history">${_('History')}</dt>
-	<dd>
-        <div>
-    		<div style="float:left">
-    		${h.form(h.url('files_diff_home',repo_name=c.repo_name,f_path=c.f_path),method='get')}
-    		${h.hidden('diff2',c.file_changeset.raw_id)}
-    		${h.select('diff1',c.file_changeset.raw_id,c.file_history)}
-    		${h.submit('diff',_('diff to revision'),class_="ui-btn")}
-    		${h.submit('show_rev',_('show at revision'),class_="ui-btn")}
-            ${h.hidden('annotate', c.annotate)}
-    		${h.end_form()}
-    		</div>
-            <div class="file_author">
-                <div class="item">${h.literal(ungettext(u'%s author',u'%s authors',len(c.authors)) % ('<b>%s</b>' % len(c.authors))) }</div>
-                %for email, user in c.authors:
-                  <div class="contributor tooltip" style="float:left" title="${h.tooltip(user)}">
-                    <div class="gravatar" style="margin:1px"><img alt="gravatar" src="${h.gravatar_url(email, 20)}"/> </div>
-                  </div>
-                %endfor
-            </div>
-        </div>
-        <div style="clear:both"></div>
-	</dd>
+<div id="node_history">
+%if c.load_full_history:
+    <%include file='files_history_box.html'/>
+%else:
+    <div style="padding-bottom:10px">
+        <span id="load_node_history" class="ui-btn">${_('Load file history')}</span>
+    </div>
+%endif
+</div>
 
-</dl>
 
 <div id="body" class="codeblock">
 	<div class="code-header">
@@ -113,6 +97,15 @@ YUE.onDOMReady(function(){
 
     }
 
-    YUE.on('hlcode','mouseup',getSelectionLink("${_('Selection link')}"))
+    // select code link event
+    YUE.on('hlcode', 'mouseup', getSelectionLink);
+
+    //load history of file
+    YUE.on('load_node_history', 'click', function(e){
+        var _url = node_history_url.replace('__REV__','${c.file_changeset.raw_id}').replace('__FPATH__', '${c.f_path}');
+        ypjax(_url, 'node_history', function(o){})
+    });    
+
    });
+   
 </script>

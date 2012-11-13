@@ -39,11 +39,13 @@
 
 <script type="text/javascript">
 var CACHE = {};
-var CACHE_EXPIRE = 60*1000; //cache for 60s
+var CACHE_EXPIRE = 5*60*1000; //cache for 5*60s
 //used to construct links from the search list
 var url_base = '${h.url("files_home",repo_name=c.repo_name,revision='__REV__',f_path='__FPATH__')}';
 //send the nodelist request to this url
 var node_list_url = '${h.url("files_nodelist_home",repo_name=c.repo_name,revision='__REV__',f_path='__FPATH__')}';
+// send the node history requst to this url
+var node_history_url = '${h.url("files_history_home",repo_name=c.repo_name,revision='__REV__',f_path='__FPATH__')}';
 
 var ypjax_links = function(){
     YUE.on(YUQ('.ypjax-link'), 'click',function(e){
@@ -76,7 +78,7 @@ var ypjax_links = function(){
 
         // Change our States and save some data for handling events
         var data = {url:url,title:title, url_base:_url_base,
-                    node_list_url:_node_list_url};
+                    node_list_url:_node_list_url, rev:rev, f_path:f_path};
         History.pushState(data, title, url);
 
         //now we're sure that we can do ypjax things
@@ -89,8 +91,19 @@ var callbacks = function(State){
     ypjax_links();
     tooltip_activate();
     fileBrowserListeners(State.url, State.data.node_list_url, State.data.url_base);
-    YUE.on('hlcode','mouseup',getSelectionLink("${_('Selection link')}"));
-
+    
+    if(YUD.get('hlcode')){
+    	YUE.on('hlcode', 'mouseup', getSelectionLink);
+    }
+    //console.log(State);
+    if(YUD.get('load_node_history')){
+      //remove all listeners due to problems of history state
+      YUE.removeListener('load_node_history', 'click');
+      YUE.on('load_node_history', 'click', function(e){
+          var _url = node_history_url.replace('__REV__',State.data.rev).replace('__FPATH__', State.data.f_path);
+          ypjax(_url, 'node_history', function(o){})
+      });
+    }
     // Inform Google Analytics of the change
     if ( typeof window.pageTracker !== 'undefined' ) {
         window.pageTracker._trackPageview(State.url);
@@ -133,7 +146,9 @@ YUE.onDOMReady(function(){
        url: "${h.url.current()}",
        data: {
          node_list_url: node_list_url.replace('__REV__',"${c.changeset.raw_id}").replace('__FPATH__', "${h.safe_unicode(c.file.path)}"),
-         url_base: url_base.replace('__REV__',"${c.changeset.raw_id}")
+         url_base: url_base.replace('__REV__',"${c.changeset.raw_id}"),
+         rev:"${c.changeset.raw_id}",
+         f_path: "${h.safe_unicode(c.file.path)}"
        }
     }
     fileBrowserListeners(_State.url, _State.data.node_list_url, _State.data.url_base);

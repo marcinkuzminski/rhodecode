@@ -951,54 +951,53 @@ var getIdentNode = function(n){
 	}
 };
 
-var  getSelectionLink = function(selection_link_label) {
-	return function(){
-	    //get selection from start/to nodes    	
-	    if (typeof window.getSelection != "undefined") {
-	    	s = window.getSelection();
+var  getSelectionLink = function(e) {
 	
-	       	from = getIdentNode(s.anchorNode);
-	       	till = getIdentNode(s.focusNode);
+	//get selection from start/to nodes    	
+	if (typeof window.getSelection != "undefined") {
+		s = window.getSelection();
+	
+	   	from = getIdentNode(s.anchorNode);
+	   	till = getIdentNode(s.focusNode);
+	   	
+	    f_int = parseInt(from.id.replace('L',''));
+	    t_int = parseInt(till.id.replace('L',''));
+	    
+	    if (f_int > t_int){
+	    	//highlight from bottom 
+	    	offset = -35;
+	    	ranges = [t_int,f_int];
+	    	
+	    }
+	    else{
+	    	//highligth from top 
+	    	offset = 35;
+	    	ranges = [f_int,t_int];
+	    }
+	    
+	    if (ranges[0] != ranges[1]){
+	        if(YUD.get('linktt') == null){
+	            hl_div = document.createElement('div');
+	            hl_div.id = 'linktt';
+	        }
+	        anchor = '#L'+ranges[0]+'-'+ranges[1];
+	        hl_div.innerHTML = '';
+	        l = document.createElement('a');
+	        l.href = location.href.substring(0,location.href.indexOf('#'))+anchor;
+	        l.innerHTML = _TM['Selection link'];
+	        hl_div.appendChild(l);
 	        
-	        f_int = parseInt(from.id.replace('L',''));
-	        t_int = parseInt(till.id.replace('L',''));
+	        YUD.get('body').appendChild(hl_div);
 	        
-	        if (f_int > t_int){
-	        	//highlight from bottom 
-	        	offset = -35;
-	        	ranges = [t_int,f_int];
-	        	
-	        }
-	        else{
-	        	//highligth from top 
-	        	offset = 35;
-	        	ranges = [f_int,t_int];
-	        }
+	        xy = YUD.getXY(till.id);
 	        
-	        if (ranges[0] != ranges[1]){
-	            if(YUD.get('linktt') == null){
-	                hl_div = document.createElement('div');
-	                hl_div.id = 'linktt';
-	            }
-	            anchor = '#L'+ranges[0]+'-'+ranges[1];
-	            hl_div.innerHTML = '';
-	            l = document.createElement('a');
-	            l.href = location.href.substring(0,location.href.indexOf('#'))+anchor;
-	            l.innerHTML = selection_link_label;
-	            hl_div.appendChild(l);
-	            
-	            YUD.get('body').appendChild(hl_div);
-	            
-	            xy = YUD.getXY(till.id);
-	            
-	            YUD.addClass('linktt','yui-tt');
-	            YUD.setStyle('linktt','top',xy[1]+offset+'px');
-	            YUD.setStyle('linktt','left',xy[0]+'px');
-	            YUD.setStyle('linktt','visibility','visible');
-	        }
-	        else{
-	        	YUD.setStyle('linktt','visibility','hidden');
-	        }
+	        YUD.addClass('linktt','yui-tt');
+	        YUD.setStyle('linktt','top',xy[1]+offset+'px');
+	        YUD.setStyle('linktt','left',xy[0]+'px');
+	        YUD.setStyle('linktt','visibility','visible');
+	    }
+	    else{
+	    	YUD.setStyle('linktt','visibility','hidden');
 	    }
 	}
 };

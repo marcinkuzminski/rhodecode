@@ -155,12 +155,16 @@ class FilesController(BaseRepoController):
             c.file = c.changeset.get_node(f_path)
 
             if c.file.is_file():
-                c.file_history, _hist = self._get_node_history(c.changeset, f_path)
-                c.file_changeset = c.changeset
-                if _hist:
-                    c.file_changeset = (c.changeset
-                                        if c.changeset.revision < _hist[0].revision
-                                        else _hist[0])
+                c.load_full_history = False
+                file_last_cs = c.file.last_changeset
+                c.file_changeset = (c.changeset
+                                    if c.changeset.revision < file_last_cs.revision
+                                    else file_last_cs)
+                _hist = []
+                c.file_history = []
+                if c.load_full_history:
+                    c.file_history, _hist = self._get_node_history(c.changeset, f_path)
+
                 c.authors = []
                 for a in set([x.author for x in _hist]):
                     c.authors.append((h.email(a), h.person(a)))
@@ -175,6 +179,23 @@ class FilesController(BaseRepoController):
             return render('files/files_ypjax.html')
 
         return render('files/files.html')
+
+    def history(self, repo_name, revision, f_path, annotate=False):
+        if request.environ.get('HTTP_X_PARTIAL_XHR'):
+            c.changeset = self.__get_cs_or_redirect(revision, repo_name)
+            c.f_path = f_path
+            c.annotate = annotate
+            c.file = c.changeset.get_node(f_path)
+            if c.file.is_file():
+                file_last_cs = c.file.last_changeset
+                c.file_changeset = (c.changeset
+                                    if c.changeset.revision < file_last_cs.revision
+                                    else file_last_cs)
+                c.file_history, _hist = self._get_node_history(c.changeset, f_path)
+                c.authors = []
+                for a in set([x.author for x in _hist]):
+                    c.authors.append((h.email(a), h.person(a)))
+                return render('files/files_history_box.html')
 
     @LoginRequired()
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
@@ -530,6 +551,8 @@ class FilesController(BaseRepoController):
         :param changesets: if passed don't calculate history and take
             changesets defined in this list
         """
+        import time
+        s = time.time()
         # calculate history based on tip
         tip_cs = c.rhodecode_repo.get_changeset()
         if changesets is None:
@@ -538,7 +561,7 @@ class FilesController(BaseRepoController):
             except (NodeDoesNotExistError, ChangesetError):
                 #this node is not present at tip !
                 changesets = cs.get_file_history(f_path)
-
+        print time.time()-s
         hist_l = []
 
         changesets_group = ([], _("Changesets"))
@@ -546,10 +569,11 @@ class FilesController(BaseRepoController):
         tags_group = ([], _("Tags"))
         _hg = cs.repository.alias == 'hg'
         for chs in changesets:
-            _branch = '(%s)' % chs.branch if _hg else ''
+            #_branch = '(%s)' % chs.branch if _hg else ''
+            _branch = chs.branch
             n_desc = 'r%s:%s %s' % (chs.revision, chs.short_id, _branch)
             changesets_group[0].append((chs.raw_id, n_desc,))
-
+        print time.time()-s
         hist_l.append(changesets_group)
 
         for name, chs in c.rhodecode_repo.branches.items():
@@ -559,7 +583,7 @@ class FilesController(BaseRepoController):
         for name, chs in c.rhodecode_repo.tags.items():
             tags_group[0].append((chs, name),)
         hist_l.append(tags_group)
-
+        print time.time()-s
         return hist_l, changesets
 
     @LoginRequired()
