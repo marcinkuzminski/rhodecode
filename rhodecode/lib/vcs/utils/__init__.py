@@ -38,12 +38,12 @@ def safe_unicode(str_, from_encoding=None):
     :rtype: unicode
     :returns: unicode object
     """
+    from rhodecode.lib.utils2 import safe_unicode
+    return safe_unicode(str_, from_encoding)
+
     if isinstance(str_, unicode):
         return str_
-    if not from_encoding:
-        import rhodecode
-        DEFAULT_ENCODING = rhodecode.CONFIG.get('default_encoding', 'utf8')
-        from_encoding = DEFAULT_ENCODING
+
     try:
         return unicode(str_)
     except UnicodeDecodeError:
@@ -75,13 +75,12 @@ def safe_str(unicode_, to_encoding=None):
     :rtype: str
     :returns: str object
     """
+    from rhodecode.lib.utils2 import safe_str
+    return safe_str(unicode_, to_encoding)
 
     if isinstance(unicode_, str):
         return unicode_
-    if not to_encoding:
-        import rhodecode
-        DEFAULT_ENCODING = rhodecode.CONFIG.get('default_encoding', 'utf8')
-        to_encoding = DEFAULT_ENCODING
+
     try:
         return unicode_.encode(to_encoding)
     except UnicodeEncodeError:

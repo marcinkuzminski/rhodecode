@@ -76,6 +76,8 @@ use_gravatar = true
 
 container_auth_enabled = false
 proxypass_auth_enabled = false
+## default encoding used to convert from and to unicode
+## can be also a comma seperated list of encoding in case of mixed encodings
 default_encoding = utf8
 
 ## overwrite schema of clone url
