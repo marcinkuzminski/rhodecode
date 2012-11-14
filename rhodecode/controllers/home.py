@@ -77,6 +77,12 @@ class HomeController(BaseController):
             atom_lnk = lambda repo_name: (template.get_def("atom")
                                            .render(repo_name, _=_, h=h, c=c))
 
+            def desc(desc):
+                if c.visual.stylify_metatags:
+                    return h.urlify_text(h.desc_stylize(h.truncate(desc, 60)))
+                else:
+                    return h.urlify_text(h.truncate(desc, 60))
+
             for repo in c.repos_list:
                 repos_data.append({
                     "menu": quick_menu(repo.repo_name),
@@ -84,7 +90,7 @@ class HomeController(BaseController):
                     "name": repo_lnk(repo.repo_name, repo.repo_type,
                                      repo.private, repo.fork),
                     "last_change": last_change(repo.last_db_change),
-                    "desc": repo.description,
+                    "desc": desc(repo.description),
                     "owner": h.person(repo.user.username),
                     "rss": rss_lnk(repo.repo_name),
                     "atom": atom_lnk(repo.repo_name),
