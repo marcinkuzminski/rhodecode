@@ -44,6 +44,10 @@ class MercurialChangeset(BaseChangeset):
         return safe_unicode(self._ctx.description())
 
     @LazyProperty
+    def commiter(self):
+        return safe_unicode(self.auhtor)
+
+    @LazyProperty
     def author(self):
         return safe_unicode(self._ctx.user())
 

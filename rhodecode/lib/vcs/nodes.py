@@ -353,6 +353,7 @@ class FileNode(Node):
 
     @LazyProperty
     def mimetype_main(self):
+        return ['', '']
         return self.mimetype.split('/')[0]
 
     @LazyProperty
@@ -410,6 +411,7 @@ class FileNode(Node):
         """
         Returns True if file has binary content.
         """
+        return False
         _bin = '\0' in self._get_content()
         return _bin
 

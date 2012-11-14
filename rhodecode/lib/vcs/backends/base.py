@@ -432,6 +432,30 @@ class BaseChangeset(object):
         raise NotImplementedError
 
     @LazyProperty
+    def commiter(self):
+        """
+        Returns Commiter for given commit
+        """
+
+        raise NotImplementedError
+
+    @LazyProperty
+    def commiter_name(self):
+        """
+        Returns Author name for given commit
+        """
+
+        return author_name(self.commiter)
+
+    @LazyProperty
+    def commiter_email(self):
+        """
+        Returns Author email address for given commit
+        """
+
+        return author_email(self.commiter)
+
+    @LazyProperty
     def author(self):
         """
         Returns Author for given commit

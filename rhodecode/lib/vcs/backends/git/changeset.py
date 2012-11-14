@@ -41,6 +41,7 @@ class GitChangeset(BaseChangeset):
 
         self._tree_id = commit.tree
         self._commiter_property = 'committer'
+        self._author_property = 'author'
         self._date_property = 'commit_time'
         self._date_tz_property = 'commit_timezone'
         self.revision = repository.revisions.index(revision)
@@ -51,8 +52,12 @@ class GitChangeset(BaseChangeset):
         self._paths = {}
 
     @LazyProperty
-    def author(self):
+    def commiter(self):
         return safe_unicode(getattr(self._commit, self._commiter_property))
+
+    @LazyProperty
+    def author(self):
+        return safe_unicode(getattr(self._commit, self._author_property))
 
     @LazyProperty
     def date(self):
