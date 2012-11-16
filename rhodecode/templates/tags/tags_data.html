@@ -7,6 +7,7 @@
             <th class="left">${_('Date')}</th>
             <th class="left">${_('Author')}</th>
             <th class="left">${_('Revision')}</th>
+            <th class="left">${_('Compare')}</th>
     	</tr>
       </thead>
 		%for cnt,tag in enumerate(c.repo_tags.items()):
@@ -25,6 +26,10 @@
                     <pre><a href="${h.url('files_home',repo_name=c.repo_name,revision=tag[1].raw_id)}">r${tag[1].revision}:${h.short_id(tag[1].raw_id)}</a></pre>
                 </div>
             </td>
+            <td>
+                <input class="branch-compare" type="radio" name="compare_org" value="${tag[0]}"/>
+                <input class="branch-compare" type="radio" name="compare_other" value="${tag[0]}"/>
+            </td>            
 		</tr>
 		%endfor
     </table>

@@ -102,9 +102,14 @@ class CompareController(BaseRepoController):
             log.error('Could not found repo %s or %s' % (org_repo, other_repo))
             raise HTTPNotFound
 
-        if c.org_repo.scm_instance.alias != 'hg':
-            log.error('Review not available for GIT REPOS')
+        if c.org_repo != c.other_repo and h.is_git(c.rhodecode_repo):
+            log.error('compare of two remote repos not available for GIT REPOS')
             raise HTTPNotFound
+
+        if c.org_repo.scm_instance.alias != c.other_repo.scm_instance.alias:
+            log.error('compare of two different kind of remote repos not available')
+            raise HTTPNotFound
+
         partial = request.environ.get('HTTP_X_PARTIAL_XHR')
         self.__get_cs_or_redirect(rev=org_ref, repo=org_repo, partial=partial)
         self.__get_cs_or_redirect(rev=other_ref, repo=other_repo, partial=partial)

@@ -26,6 +26,7 @@
 import logging
 import binascii
 import datetime
+import re
 
 from pylons.i18n.translation import _
 
@@ -144,7 +145,7 @@ class PullRequestModel(BaseModel):
         pull_request.updated_on = datetime.datetime.now()
         self.sa.add(pull_request)
 
-    def _get_changesets(self, org_repo, org_ref, other_repo, other_ref,
+    def _get_changesets(self, alias, org_repo, org_ref, other_repo, other_ref,
                         discovery_data):
         """
         Returns a list of changesets that are incoming from org_repo@org_ref
@@ -173,23 +174,33 @@ class PullRequestModel(BaseModel):
             for cs in reversed(map(binascii.hexlify, revs)):
                 changesets.append(org_repo.get_changeset(cs))
         else:
-            _revset_predicates = {
-                    'branch': 'branch',
-                    'book': 'bookmark',
-                    'tag': 'tag',
-                    'rev': 'id',
-                }
+            #no remote compare do it on the same repository
+            if alias == 'hg':
+                _revset_predicates = {
+                        'branch': 'branch',
+                        'book': 'bookmark',
+                        'tag': 'tag',
+                        'rev': 'id',
+                    }
 
-            revs = [
-                "ancestors(%s('%s')) and not ancestors(%s('%s'))" % (
-                    _revset_predicates[org_ref[0]], org_ref[1],
-                    _revset_predicates[other_ref[0]], other_ref[1]
-               )
-            ]
+                revs = [
+                    "ancestors(%s('%s')) and not ancestors(%s('%s'))" % (
+                        _revset_predicates[org_ref[0]], org_ref[1],
+                        _revset_predicates[other_ref[0]], other_ref[1]
+                   )
+                ]
 
-            out = scmutil.revrange(org_repo._repo, revs)
-            for cs in reversed(out):
-                changesets.append(org_repo.get_changeset(cs))
+                out = scmutil.revrange(org_repo._repo, revs)
+                for cs in reversed(out):
+                    changesets.append(org_repo.get_changeset(cs))
+            elif alias == 'git':
+                so, se = org_repo.run_git_command(
+                    'log --pretty="format: %%H" -s -p %s..%s' % (org_ref[1],
+                                                                     other_ref[1])
+                )
+                ids = re.findall(r'[0-9a-fA-F]{40}', so)
+                for cs in reversed(ids):
+                    changesets.append(org_repo.get_changeset(cs))
 
         return changesets
 
@@ -231,7 +242,8 @@ class PullRequestModel(BaseModel):
 
     def get_compare_data(self, org_repo, org_ref, other_repo, other_ref):
         """
-        Returns a tuple of incomming changesets, and discoverydata cache
+        Returns a tuple of incomming changesets, and discoverydata cache for
+        mercurial repositories
 
         :param org_repo:
         :type org_repo:
@@ -249,14 +261,17 @@ class PullRequestModel(BaseModel):
         if len(other_ref) != 2 or not isinstance(org_ref, (list, tuple)):
             raise Exception('other_ref must be a two element list/tuple')
 
-        discovery_data = self._get_discovery(org_repo.scm_instance,
-                                           org_ref,
-                                           other_repo.scm_instance,
-                                           other_ref)
-        cs_ranges = self._get_changesets(org_repo.scm_instance,
-                                         org_ref,
-                                         other_repo.scm_instance,
-                                         other_ref,
+        org_repo_scm = org_repo.scm_instance
+        other_repo_scm = other_repo.scm_instance
+
+        alias = org_repo.scm_instance.alias
+        discovery_data = [None, None, None]
+        if alias == 'hg':
+            discovery_data = self._get_discovery(org_repo_scm, org_ref,
+                                               other_repo_scm, other_ref)
+        cs_ranges = self._get_changesets(alias,
+                                         org_repo_scm, org_ref,
+                                         other_repo_scm, other_ref,
                                          discovery_data)
 
         return cs_ranges, discovery_data

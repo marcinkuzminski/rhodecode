@@ -720,13 +720,21 @@ def differ(org_repo, org_ref, other_repo, other_ref, discovery_data=None,
     bundlerepo = None
     ignore_whitespace = ignore_whitespace
     context = context
-    org_repo = org_repo.scm_instance._repo
+    org_repo_scm = org_repo.scm_instance
+    org_repo = org_repo_scm._repo
     other_repo = other_repo.scm_instance._repo
     opts = diffopts(git=True, ignorews=ignore_whitespace, context=context)
     org_ref = org_ref[1]
     other_ref = other_ref[1]
 
-    if org_repo != other_repo and bundle_compare:
+    if org_repo == other_repo:
+        log.debug('running diff between %s@%s and %s@%s'
+                  % (org_repo, org_ref, other_repo, other_ref))
+        _diff = org_repo_scm.get_diff(rev1=other_ref, rev2=org_ref,
+            ignore_whitespace=ignore_whitespace, context=context)
+        return _diff
+
+    elif bundle_compare:
 
         common, incoming, rheads = discovery_data
         other_repo_peer = localrepo.locallegacypeer(other_repo.local())
@@ -760,8 +768,4 @@ def differ(org_repo, org_ref, other_repo, other_ref, discovery_data=None,
                                   node1=org_repo[org_ref].node(),
                                   node2=other_repo[other_ref].node(),
                                   opts=opts))
-    else:
-        log.debug('running diff between %s@%s and %s@%s'
-                  % (org_repo, org_ref, other_repo, other_ref))
-        return ''.join(patch.diff(org_repo, node1=org_ref, node2=other_ref,
-                                  opts=opts))
+
