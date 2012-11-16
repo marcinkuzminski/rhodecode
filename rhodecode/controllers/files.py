@@ -551,8 +551,6 @@ class FilesController(BaseRepoController):
         :param changesets: if passed don't calculate history and take
             changesets defined in this list
         """
-        import time
-        s = time.time()
         # calculate history based on tip
         tip_cs = c.rhodecode_repo.get_changeset()
         if changesets is None:
@@ -561,7 +559,6 @@ class FilesController(BaseRepoController):
             except (NodeDoesNotExistError, ChangesetError):
                 #this node is not present at tip !
                 changesets = cs.get_file_history(f_path)
-        print time.time()-s
         hist_l = []
 
         changesets_group = ([], _("Changesets"))
@@ -571,9 +568,8 @@ class FilesController(BaseRepoController):
         for chs in changesets:
             #_branch = '(%s)' % chs.branch if _hg else ''
             _branch = chs.branch
-            n_desc = 'r%s:%s %s' % (chs.revision, chs.short_id, _branch)
+            n_desc = 'r%s:%s (%s)' % (chs.revision, chs.short_id, _branch)
             changesets_group[0].append((chs.raw_id, n_desc,))
-        print time.time()-s
         hist_l.append(changesets_group)
 
         for name, chs in c.rhodecode_repo.branches.items():
@@ -583,7 +579,7 @@ class FilesController(BaseRepoController):
         for name, chs in c.rhodecode_repo.tags.items():
             tags_group[0].append((chs, name),)
         hist_l.append(tags_group)
-        print time.time()-s
+
         return hist_l, changesets
 
     @LoginRequired()

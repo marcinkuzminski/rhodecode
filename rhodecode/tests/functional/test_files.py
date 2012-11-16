@@ -73,6 +73,22 @@ class TestFilesController(TestController):
                                     revision='27cd5cce30c96924232dffcd24178a07ffeb5dfc',
                                     f_path='vcs/nodes.py'))
 
+        response.mustcontain("""<div class="commit">Partially implemented <a class="issue-tracker-link" href="https://myissueserver.com/vcs_test_hg/issue/16">#16</a>. filecontent/commit message/author/node name are safe_unicode now.
+In addition some other __str__ are unicode as well
+Added test for unicode
+Improved test to clone into uniq repository.
+removed extra unicode conversion in diff.</div>
+""")
+
+        response.mustcontain("""<span style="text-transform: uppercase;"><a href="#">branch: default</a></span>""")
+
+    def test_file_source_history(self):
+        self.log_user()
+        response = self.app.get(url(controller='files', action='history',
+                                    repo_name=HG_REPO,
+                                    revision='27cd5cce30c96924232dffcd24178a07ffeb5dfc',
+                                    f_path='vcs/nodes.py'),
+                                extra_environ={'HTTP_X_PARTIAL_XHR': '1'},)
         #test or history
         response.mustcontain("""<optgroup label="Changesets">
 <option selected="selected" value="8911406ad776fdd3d0b9932a2e89677e57405a48">r167:8911406ad776 (default)</option>
@@ -123,15 +139,6 @@ class TestFilesController(TestController):
 </optgroup>
 """)
 
-        response.mustcontain("""<div class="commit">Partially implemented <a class="issue-tracker-link" href="https://myissueserver.com/vcs_test_hg/issue/16">#16</a>. filecontent/commit message/author/node name are safe_unicode now.
-In addition some other __str__ are unicode as well
-Added test for unicode
-Improved test to clone into uniq repository.
-removed extra unicode conversion in diff.</div>
-""")
-
-        response.mustcontain("""<span style="text-transform: uppercase;"><a href="#">branch: default</a></span>""")
-
     def test_file_annotation(self):
         self.log_user()
         response = self.app.get(url(controller='files', action='index',
@@ -140,6 +147,16 @@ removed extra unicode conversion in diff.</div>
                                     f_path='vcs/nodes.py',
                                     annotate=True))
 
+        response.mustcontain("""<span style="text-transform: uppercase;"><a href="#">branch: default</a></span>""")
+
+    def test_file_annotation_history(self):
+        self.log_user()
+        response = self.app.get(url(controller='files', action='history',
+                                    repo_name=HG_REPO,
+                                    revision='27cd5cce30c96924232dffcd24178a07ffeb5dfc',
+                                    f_path='vcs/nodes.py',
+                                    annotate=True),
+                                extra_environ={'HTTP_X_PARTIAL_XHR': '1'})
 
         response.mustcontain("""<optgroup label="Changesets">
 <option selected="selected" value="8911406ad776fdd3d0b9932a2e89677e57405a48">r167:8911406ad776 (default)</option>
@@ -188,8 +205,6 @@ removed extra unicode conversion in diff.</div>
 <option value="a7e60bff65d57ac3a1a1ce3b12a70f8a9e8a7720">0.1.2</option>
 <option value="eb3a60fc964309c1a318b8dfe26aa2d1586c85ae">0.1.1</option>
 </optgroup>""")
-
-        response.mustcontain("""<span style="text-transform: uppercase;"><a href="#">branch: default</a></span>""")
 
     def test_file_annotation_git(self):
         self.log_user()
