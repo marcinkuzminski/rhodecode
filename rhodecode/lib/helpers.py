@@ -45,7 +45,7 @@ from rhodecode.lib.utils2 import str2bool, safe_unicode, safe_str, \
     get_changeset_safe, datetime_to_time, time_to_datetime, AttributeDict
 from rhodecode.lib.markup_renderer import MarkupRenderer
 from rhodecode.lib.vcs.exceptions import ChangesetDoesNotExistError
-from rhodecode.lib.vcs.backends.base import BaseChangeset
+from rhodecode.lib.vcs.backends.base import BaseChangeset, EmptyChangeset
 from rhodecode.config.conf import DATE_FORMAT, DATETIME_FORMAT
 from rhodecode.model.changeset_status import ChangesetStatusModel
 from rhodecode.model.db import URL_SEP, Permission
@@ -881,7 +881,7 @@ def changed_tooltip(nodes):
         return ': ' + _('No Files')
 
 
-def repo_link(groups_and_repos):
+def repo_link(groups_and_repos, last_url=None):
     """
     Makes a breadcrumbs link to repo within a group
     joins &raquo; on each group to create a fancy link
@@ -890,17 +890,20 @@ def repo_link(groups_and_repos):
         group >> subgroup >> repo
 
     :param groups_and_repos:
+    :param last_url:
     """
     groups, repo_name = groups_and_repos
+    last_link = link_to(repo_name, last_url) if last_url else repo_name
 
     if not groups:
+        if last_url:
+            return last_link
         return repo_name
     else:
         def make_link(group):
-            return link_to(group.name, url('repos_group_home',
-                                           group_name=group.group_name))
-        return literal(' &raquo; '.join(map(make_link, groups)) + \
-                       " &raquo; " + repo_name)
+            return link_to(group.name,
+                           url('repos_group_home', group_name=group.group_name))
+        return literal(' &raquo; '.join(map(make_link, groups) + [last_link]))
 
 
 def fancy_file_stats(stats):
