@@ -47,6 +47,9 @@
                   </div>
               %endfor
             </div>
+            % if c.limited_diff:
+              <h5>${_('Changeset was too big and was cut off...')}</h5>
+            % endif            
         </div>
     </div>
 
@@ -55,7 +58,9 @@
     %for fid, change, f, stat in c.files:
       ${diff_block.diff_block_simple([c.changes[fid]])}
     %endfor
-
+    % if c.limited_diff:
+      <h4>${_('Changeset was too big and was cut off...')}</h4>
+    % endif
      <script type="text/javascript">
 
       YUE.onDOMReady(function(){

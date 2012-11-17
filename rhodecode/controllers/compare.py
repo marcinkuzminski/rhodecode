@@ -41,6 +41,7 @@ from rhodecode.model.db import Repository
 from rhodecode.model.pull_request import PullRequestModel
 from webob.exc import HTTPBadRequest
 from rhodecode.lib.utils2 import str2bool
+from rhodecode.lib.diffs import LimitedDiffContainer
 
 log = logging.getLogger(__name__)
 
@@ -88,6 +89,7 @@ class CompareController(BaseRepoController):
         other_ref = (other_ref_type, other_ref)
         other_repo = request.GET.get('repo', org_repo)
         bundle_compare = str2bool(request.GET.get('bundle', True))
+        c.fulldiff = fulldiff = request.GET.get('fulldiff')
 
         c.swap_url = h.url('compare_url', repo_name=other_repo,
               org_ref_type=other_ref[0], org_ref=other_ref[1],
@@ -138,8 +140,14 @@ class CompareController(BaseRepoController):
 
         _diff = diffs.differ(other_repo, other_ref, org_repo, org_ref,
                              discovery_data, bundle_compare=bundle_compare)
-        diff_processor = diffs.DiffProcessor(_diff, format='gitdiff')
+        diff_limit = self.cut_off_limit if not fulldiff else None
+        diff_processor = diffs.DiffProcessor(_diff, format='gitdiff',
+                                             diff_limit=diff_limit)
         _parsed = diff_processor.prepare()
+
+        c.limited_diff = False
+        if isinstance(_parsed, LimitedDiffContainer):
+            c.limited_diff = True
 
         c.files = []
         c.changes = {}
