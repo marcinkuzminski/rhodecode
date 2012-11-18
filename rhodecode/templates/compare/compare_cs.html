@@ -2,7 +2,7 @@
 <div class="container">
   <table class="compare_view_commits noborder">
   %if not c.cs_ranges:
-    <tr><td>${_('No changesets')}</td></tr>
+    <span class="empty_data">${_('No changesets')}</span>
   %else:
     %for cnt, cs in enumerate(c.cs_ranges):
         <tr>

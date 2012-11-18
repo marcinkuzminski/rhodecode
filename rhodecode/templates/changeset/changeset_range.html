@@ -26,7 +26,7 @@
     <div class="table">
 		<div id="body" class="diffblock">
 			<div class="code-header cv">
-		        <h3 class="code-header-title">${_('Compare View')}</h3>
+		        <h3 class="code-header-title">${_('Compare View')} / ${h.link_to(_('Show combined compare'),h.url('compare_url',repo_name=c.repo_name,org_ref_type='rev',org_ref=getattr(c.cs_ranges[0].parents[0] if c.cs_ranges[0].parents else h.EmptyChangeset(),'raw_id'),other_ref_type='rev',other_ref=c.cs_ranges[-1].raw_id))}</h3>
                 <div>
 				${_('Changesets')} - r${c.cs_ranges[0].revision}:${h.short_id(c.cs_ranges[0].raw_id)} -> r${c.cs_ranges[-1].revision}:${h.short_id(c.cs_ranges[-1].raw_id)}
 				</div>

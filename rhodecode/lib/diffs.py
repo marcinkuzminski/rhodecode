@@ -702,52 +702,48 @@ class InMemoryBundleRepo(bundlerepository):
 
 
 def differ(org_repo, org_ref, other_repo, other_ref, discovery_data=None,
-           bundle_compare=False, context=3, ignore_whitespace=False):
+           remote_compare=False, context=3, ignore_whitespace=False):
     """
-    General differ between branches, bookmarks, revisions of two remote related
-    repositories
+    General differ between branches, bookmarks, revisions of two remote or
+    local but related repositories
 
     :param org_repo:
-    :type org_repo:
     :param org_ref:
-    :type org_ref:
     :param other_repo:
     :type other_repo:
-    :param other_ref:
     :type other_ref:
     """
 
-    bundlerepo = None
-    ignore_whitespace = ignore_whitespace
-    context = context
     org_repo_scm = org_repo.scm_instance
+    other_repo_scm = other_repo.scm_instance
+
     org_repo = org_repo_scm._repo
-    other_repo = other_repo.scm_instance._repo
-    opts = diffopts(git=True, ignorews=ignore_whitespace, context=context)
+    other_repo = other_repo_scm._repo
+
     org_ref = org_ref[1]
     other_ref = other_ref[1]
 
     if org_repo == other_repo:
         log.debug('running diff between %s@%s and %s@%s'
                   % (org_repo, org_ref, other_repo, other_ref))
-        _diff = org_repo_scm.get_diff(rev1=other_ref, rev2=org_ref,
+        _diff = org_repo_scm.get_diff(rev1=org_ref, rev2=other_ref,
             ignore_whitespace=ignore_whitespace, context=context)
         return _diff
 
-    elif bundle_compare:
-
+    elif remote_compare:
+        opts = diffopts(git=True, ignorews=ignore_whitespace, context=context)
         common, incoming, rheads = discovery_data
-        other_repo_peer = localrepo.locallegacypeer(other_repo.local())
+        org_repo_peer = localrepo.locallegacypeer(org_repo.local())
         # create a bundle (uncompressed if other repo is not local)
-        if other_repo_peer.capable('getbundle') and incoming:
+        if org_repo_peer.capable('getbundle'):
             # disable repo hooks here since it's just bundle !
             # patch and reset hooks section of UI config to not run any
             # hooks on fetching archives with subrepos
-            for k, _ in other_repo.ui.configitems('hooks'):
-                other_repo.ui.setconfig('hooks', k, None)
+            for k, _ in org_repo.ui.configitems('hooks'):
+                org_repo.ui.setconfig('hooks', k, None)
 
-            unbundle = other_repo.getbundle('incoming', common=common,
-                                            heads=None)
+            unbundle = org_repo.getbundle('incoming', common=common,
+                                          heads=None)
 
             buf = BytesIO()
             while True:
@@ -764,8 +760,9 @@ def differ(org_repo, org_ref, other_repo, other_ref, discovery_data=None,
             bundlerepo = InMemoryBundleRepo(ui, path=org_repo.root,
                                             bundlestream=unbundle)
 
-        return ''.join(patch.diff(bundlerepo or org_repo,
-                                  node1=org_repo[org_ref].node(),
-                                  node2=other_repo[other_ref].node(),
-                                  opts=opts))
+            return ''.join(patch.diff(bundlerepo,
+                                      node1=other_repo[other_ref].node(),
+                                      node2=org_repo[org_ref].node(),
+                                      opts=opts))
 
+    return ''

@@ -88,14 +88,14 @@ class CompareController(BaseRepoController):
         org_ref = (org_ref_type, org_ref)
         other_ref = (other_ref_type, other_ref)
         other_repo = request.GET.get('repo', org_repo)
-        bundle_compare = str2bool(request.GET.get('bundle', True))
+        remote_compare = str2bool(request.GET.get('bundle', True))
         c.fulldiff = fulldiff = request.GET.get('fulldiff')
 
         c.swap_url = h.url('compare_url', repo_name=other_repo,
               org_ref_type=other_ref[0], org_ref=other_ref[1],
               other_ref_type=org_ref[0], other_ref=org_ref[1],
               repo=org_repo, as_form=request.GET.get('as_form'),
-              bundle=bundle_compare)
+              bundle=remote_compare)
 
         c.org_repo = org_repo = Repository.get_by_repo_name(org_repo)
         c.other_repo = other_repo = Repository.get_by_repo_name(other_repo)
@@ -128,20 +128,21 @@ class CompareController(BaseRepoController):
         if partial:
             return render('compare/compare_cs.html')
 
-        if not bundle_compare and c.cs_ranges:
+        c.org_ref = org_ref[1]
+        c.other_ref = other_ref[1]
+
+        if not remote_compare and c.cs_ranges:
             # case we want a simple diff without incoming changesets, just
             # for review purposes. Make the diff on the forked repo, with
             # revision that is common ancestor
             other_ref = ('rev', c.cs_ranges[-1].parents[0].raw_id)
             other_repo = org_repo
 
-        c.org_ref = org_ref[1]
-        c.other_ref = other_ref[1]
-
-        _diff = diffs.differ(other_repo, other_ref, org_repo, org_ref,
-                             discovery_data, bundle_compare=bundle_compare)
         diff_limit = self.cut_off_limit if not fulldiff else None
-        diff_processor = diffs.DiffProcessor(_diff, format='gitdiff',
+        _diff = diffs.differ(org_repo, org_ref, other_repo, other_ref,
+                             discovery_data, remote_compare=remote_compare)
+
+        diff_processor = diffs.DiffProcessor(_diff or '', format='gitdiff',
                                              diff_limit=diff_limit)
         _parsed = diff_processor.prepare()
 
@@ -151,8 +152,13 @@ class CompareController(BaseRepoController):
 
         c.files = []
         c.changes = {}
-
+        c.lines_added = 0
+        c.lines_deleted = 0
         for f in _parsed:
+            st = f['stats']
+            if st[0] != 'b':
+                c.lines_added += st[0]
+                c.lines_deleted += st[1]
             fid = h.FID('', f['filename'])
             c.files.append([fid, f['operation'], f['filename'], f['stats']])
             diff = diff_processor.as_html(enable_comments=False, parsed_lines=[f])

@@ -51,6 +51,7 @@ from rhodecode.model.comment import ChangesetCommentsModel
 from rhodecode.model.changeset_status import ChangesetStatusModel
 from rhodecode.model.forms import PullRequestForm
 from rhodecode.lib.vcs.exceptions import EmptyRepositoryError
+from rhodecode.lib.vcs.backends.base import EmptyChangeset
 
 log = logging.getLogger(__name__)
 
@@ -277,7 +278,9 @@ class PullrequestsController(BaseRepoController):
             # case we want a simple diff without incoming changesets, just
             # for review purposes. Make the diff on the forked repo, with
             # revision that is common ancestor
-            other_ref = ('rev', c.cs_ranges[-1].parents[0].raw_id)
+            other_ref = ('rev', getattr(c.cs_ranges[-1].parents[0]
+                                        if c.cs_ranges[-1].parents
+                                        else EmptyChangeset(), 'raw_id'))
             other_repo = org_repo
 
         c.statuses = org_repo.statuses([x.raw_id for x in c.cs_ranges])
@@ -286,9 +289,9 @@ class PullrequestsController(BaseRepoController):
 
         c.org_ref = org_ref[1]
         c.other_ref = other_ref[1]
-        # diff needs to have swapped org with other to generate proper diff
-        _diff = diffs.differ(other_repo, other_ref, org_repo, org_ref,
+        _diff = diffs.differ(org_repo, org_ref, other_repo, other_ref,
                              discovery_data)
+
         diff_processor = diffs.DiffProcessor(_diff, format='gitdiff')
         _parsed = diff_processor.prepare()
 

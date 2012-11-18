@@ -185,21 +185,21 @@ class PullRequestModel(BaseModel):
 
                 revs = [
                     "ancestors(%s('%s')) and not ancestors(%s('%s'))" % (
+                        _revset_predicates[other_ref[0]], other_ref[1],
                         _revset_predicates[org_ref[0]], org_ref[1],
-                        _revset_predicates[other_ref[0]], other_ref[1]
                    )
                 ]
 
                 out = scmutil.revrange(org_repo._repo, revs)
-                for cs in reversed(out):
+                for cs in (out):
                     changesets.append(org_repo.get_changeset(cs))
             elif alias == 'git':
                 so, se = org_repo.run_git_command(
-                    'log --pretty="format: %%H" -s -p %s..%s' % (org_ref[1],
+                    'log --reverse --pretty="format: %%H" -s -p %s..%s' % (org_ref[1],
                                                                      other_ref[1])
                 )
                 ids = re.findall(r'[0-9a-fA-F]{40}', so)
-                for cs in reversed(ids):
+                for cs in (ids):
                     changesets.append(org_repo.get_changeset(cs))
 
         return changesets
