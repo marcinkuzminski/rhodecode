@@ -108,9 +108,9 @@
 	        </div>
 	        <span>
             % if c.limited_diff:
-            ${_('%s files affected:') % (len(c.changeset.affected_files))}
+            ${ungettext('%s file changed','%s files changed',len(c.changeset.affected_files)) % (len(c.changeset.affected_files))}:
             % else:
-	        ${_('%s files affected with %s insertions and %s deletions:') % (len(c.changeset.affected_files),c.lines_added,c.lines_deleted)}
+	        ${ungettext('%s file changed with %s insertions and %s deletions','%s files changed with %s insertions and %s deletions', len(c.changeset.affected_files)) % (len(c.changeset.affected_files),c.lines_added,c.lines_deleted)}:
 	        %endif
             </span>
 	        <div class="cs_files">
