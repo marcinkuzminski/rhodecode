@@ -41,7 +41,7 @@ sys.path.append(project_path)
 
 from rhodecode.config.conf import INDEX_EXTENSIONS
 from rhodecode.model.scm import ScmModel
-from rhodecode.lib.utils2 import safe_unicode
+from rhodecode.lib.utils2 import safe_unicode, safe_str
 from rhodecode.lib.indexers import SCHEMA, IDX_NAME, CHGSETS_SCHEMA, \
     CHGSET_IDX_NAME
 
@@ -119,7 +119,7 @@ class WhooshIndexingDaemon(object):
             tip = repo.get_changeset('tip')
             for _topnode, _dirs, files in tip.walk('/'):
                 for f in files:
-                    index_paths_.add(jn(repo.path, f.path))
+                    index_paths_.add(jn(safe_str(repo.path), safe_str(f.path)))
 
         except RepositoryError:
             log.debug(traceback.format_exc())
