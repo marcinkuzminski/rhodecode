@@ -203,6 +203,8 @@ ${_('%s Changelog') % c.repo_name} - ${c.rhodecode_name}
                             YUD.setStyle('rev_range_container','display','');
                             YUD.setStyle('rev_range_clear','display','');
 
+                            YUD.get('open_new_pr').href += '?rev_start={0}&rev_end={1}'.format(rev_start,rev_end);
+                            
                         }
                         else{
                         	YUD.setStyle('rev_range_container','display','none');

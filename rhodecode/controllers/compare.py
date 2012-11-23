@@ -42,6 +42,7 @@ from rhodecode.model.pull_request import PullRequestModel
 from webob.exc import HTTPBadRequest
 from rhodecode.lib.utils2 import str2bool
 from rhodecode.lib.diffs import LimitedDiffContainer
+from rhodecode.lib.vcs.backends.base import EmptyChangeset
 
 log = logging.getLogger(__name__)
 
@@ -88,14 +89,16 @@ class CompareController(BaseRepoController):
         org_ref = (org_ref_type, org_ref)
         other_ref = (other_ref_type, other_ref)
         other_repo = request.GET.get('repo', org_repo)
-        remote_compare = str2bool(request.GET.get('bundle', True))
+        incoming_changesets = str2bool(request.GET.get('bundle', False))
         c.fulldiff = fulldiff = request.GET.get('fulldiff')
+        rev_start = request.GET.get('rev_start')
+        rev_end = request.GET.get('rev_end')
 
         c.swap_url = h.url('compare_url', repo_name=other_repo,
               org_ref_type=other_ref[0], org_ref=other_ref[1],
               other_ref_type=org_ref[0], other_ref=org_ref[1],
               repo=org_repo, as_form=request.GET.get('as_form'),
-              bundle=remote_compare)
+              bundle=incoming_changesets)
 
         c.org_repo = org_repo = Repository.get_by_repo_name(org_repo)
         c.other_repo = other_repo = Repository.get_by_repo_name(other_repo)
@@ -116,8 +119,13 @@ class CompareController(BaseRepoController):
         self.__get_cs_or_redirect(rev=org_ref, repo=org_repo, partial=partial)
         self.__get_cs_or_redirect(rev=other_ref, repo=other_repo, partial=partial)
 
+        if rev_start and rev_end:
+            #replace our org_ref with given CS
+            org_ref = ('rev', rev_start)
+            other_ref = ('rev', rev_end)
+
         c.cs_ranges, discovery_data = PullRequestModel().get_compare_data(
-                                    org_repo, org_ref, other_repo, other_ref
+                                    org_repo, org_ref, other_repo, other_ref,
                                     )
 
         c.statuses = c.rhodecode_db_repo.statuses([x.raw_id for x in
@@ -131,16 +139,22 @@ class CompareController(BaseRepoController):
         c.org_ref = org_ref[1]
         c.other_ref = other_ref[1]
 
-        if not remote_compare and c.cs_ranges:
+        if not incoming_changesets and c.cs_ranges and c.org_repo != c.other_repo:
             # case we want a simple diff without incoming changesets, just
             # for review purposes. Make the diff on the forked repo, with
             # revision that is common ancestor
-            other_ref = ('rev', c.cs_ranges[-1].parents[0].raw_id)
+            _org_ref = org_ref
+            org_ref = ('rev', getattr(c.cs_ranges[0].parents[0]
+                                      if c.cs_ranges[0].parents
+                                      else EmptyChangeset(), 'raw_id'))
+            log.debug('Changed org_ref from %s to %s' % (_org_ref, org_ref))
             other_repo = org_repo
 
         diff_limit = self.cut_off_limit if not fulldiff else None
+
         _diff = diffs.differ(org_repo, org_ref, other_repo, other_ref,
-                             discovery_data, remote_compare=remote_compare)
+                             discovery_data,
+                             remote_compare=incoming_changesets)
 
         diff_processor = diffs.DiffProcessor(_diff or '', format='gitdiff',
                                              diff_limit=diff_limit)

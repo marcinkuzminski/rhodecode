@@ -58,7 +58,7 @@
       <div>${_('Created on')}: ${h.fmt_date(c.pull_request.created_on)}</div>
     </div>
 
-    <div style="min-height:160px">
+    <div style="overflow: auto;">
       ##DIFF
       <div class="table" style="float:left;clear:none">
           <div id="body" class="diffblock">
@@ -66,33 +66,41 @@
           </div>
           <div id="changeset_compare_view_content">
               ##CS
-              <div style="font-size:1.1em;font-weight: bold;clear:both;padding-top:10px">${_('Incoming changesets')}</div>
+              <div style="font-size:1.1em;font-weight: bold;clear:both;padding-top:10px">${ungettext('Showing %s commit','Showing %s commits', len(c.cs_ranges)) % len(c.cs_ranges)}</div>
               <%include file="/compare/compare_cs.html" />
-
+  
               ## FILES
-              <div id="affected_files">
-              % if c.files:
-                <div style="font-size:1.1em;font-weight: bold;clear:both;padding-top:10px">${_('Files affected')}</div>
-                <div class="cs_files">
+              <div style="font-size:1.1em;font-weight: bold;clear:both;padding-top:10px">
+              
+              % if c.limited_diff:
+                  ${ungettext('%s file changed', '%s files changed', len(c.files)) % len(c.files)}
+              % else:
+                  ${ungettext('%s file changed with %s insertions and %s deletions','%s files changed with %s insertions and %s deletions', len(c.files)) % (len(c.files),c.lines_added,c.lines_deleted)}:
+              %endif
+              
+              </div>
+              <div class="cs_files">
+                %if not c.files:
+                   <span class="empty_data">${_('No files')}</span>
+                %endif
                 %for fid, change, f, stat in c.files:
                     <div class="cs_${change}">
                       <div class="node">${h.link_to(h.safe_unicode(f),h.url.current(anchor=fid))}</div>
                       <div class="changes">${h.fancy_file_stats(stat)}</div>
                     </div>
                 %endfor
-               </div>
-              %else:
-                <div class="ui-btn" style="text-align: center;margin-top:5px">${_('Click to load diff details')}</div>
-              %endif
               </div>
+              % if c.limited_diff:
+                <h5>${_('Changeset was too big and was cut off...')}</h5>
+              % endif            
           </div>
       </div>
       ## REVIEWERS
        <div style="float:left; border-left:1px dashed #eee">
        <h4>${_('Pull request reviewers')}</h4>
-        <div id="reviewers" style="padding:0px 0px 0px 15px">
+        <div id="reviewers" style="padding:0px 0px 5px 10px">
           ## members goes here !
-          <div class="group_members_wrap">
+          <div class="group_members_wrap" style="min-height:45px">
             <ul id="review_members" class="group_members">
             %for member,status in c.pull_request_reviewers:
               <li id="reviewer_${member.user_id}">
@@ -137,12 +145,14 @@
     </script>
 
     ## diff block
-    <div id="diff_block_container" style="clear:both;">
     <%namespace name="diff_block" file="/changeset/diff_block.html"/>
     %for fid, change, f, stat in c.files:
       ${diff_block.diff_block_simple([c.changes[fid]])}
     %endfor
-    </div>
+    % if c.limited_diff:
+      <h4>${_('Changeset was too big and was cut off...')}</h4>
+    % endif
+
 
     ## template for inline comment form
     <%namespace name="comment" file="/changeset/changeset_file_comment.html"/>

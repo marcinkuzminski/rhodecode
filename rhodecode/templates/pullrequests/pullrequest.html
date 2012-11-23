@@ -21,7 +21,9 @@
     </div>
     ${h.form(url('pullrequest', repo_name=c.repo_name), method='post', id='pull_request_form')}
     <div style="float:left;padding:0px 30px 30px 30px">
-
+        <input type="hidden" name="rev_start" value="${request.GET.get('rev_start')}" />
+        <input type="hidden" name="rev_end" value="${request.GET.get('rev_end')}" />
+        
         ##ORG
         <div style="float:left">
             <div class="fork_user">
@@ -141,7 +143,9 @@
     	                 org_ref_type='org_ref_type', org_ref='org_ref',
                          other_ref_type='other_ref_type', other_ref='other_ref',
                          repo='other_repo',
-                         as_form=True, bundle=False)}";
+                         as_form=True, bundle=False,
+                         rev_start=request.GET.get('rev_start',''),
+                         rev_end=request.GET.get('rev_end',''))}";
 
       var select_refs = YUQ('#pull_request_form select.refs')
       var rev_data = {}; // gather the org/other ref and repo here

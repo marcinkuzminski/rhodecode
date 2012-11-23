@@ -52,6 +52,8 @@ from rhodecode.model.changeset_status import ChangesetStatusModel
 from rhodecode.model.forms import PullRequestForm
 from rhodecode.lib.vcs.exceptions import EmptyRepositoryError
 from rhodecode.lib.vcs.backends.base import EmptyChangeset
+from rhodecode.lib.diffs import LimitedDiffContainer
+from rhodecode.lib.utils2 import str2bool
 
 log = logging.getLogger(__name__)
 
@@ -195,6 +197,17 @@ class PullrequestsController(BaseRepoController):
         revisions = _form['revisions']
         reviewers = _form['review_members']
 
+        # if we have cherry picked pull request we don't care what is in
+        # org_ref/other_ref
+        rev_start = request.POST.get('rev_start')
+        rev_end = request.POST.get('rev_end')
+
+        if rev_start and rev_end:
+            # this is swapped to simulate that rev_end is a revision from
+            # parent of the fork
+            org_ref = 'rev:%s:%s' % (rev_end, rev_end)
+            other_ref = 'rev:%s:%s' % (rev_start, rev_start)
+
         title = _form['pullrequest_title']
         description = _form['pullrequest_desc']
 
@@ -228,7 +241,7 @@ class PullrequestsController(BaseRepoController):
                        request.POST.get('reviewers_ids', '').split(',')))
 
             PullRequestModel().update_reviewers(pull_request_id, reviewers_ids)
-            Session.commit()
+            Session().commit()
             return True
         raise HTTPForbidden()
 
@@ -242,7 +255,7 @@ class PullrequestsController(BaseRepoController):
             Session().commit()
             h.flash(_('Successfully deleted pull request'),
                     category='success')
-            return redirect(url('admin_settings_my_account'))
+            return redirect(url('admin_settings_my_account', anchor='pullrequests'))
         raise HTTPForbidden()
 
     def _load_compare_data(self, pull_request, enable_comments=True):
@@ -252,13 +265,15 @@ class PullrequestsController(BaseRepoController):
         :param pull_request:
         :type pull_request:
         """
+        rev_start = request.GET.get('rev_start')
+        rev_end = request.GET.get('rev_end')
 
         org_repo = pull_request.org_repo
         (org_ref_type,
          org_ref_name,
          org_ref_rev) = pull_request.org_ref.split(':')
 
-        other_repo = pull_request.other_repo
+        other_repo = org_repo
         (other_ref_type,
          other_ref_name,
          other_ref_rev) = pull_request.other_ref.split(':')
@@ -271,34 +286,44 @@ class PullrequestsController(BaseRepoController):
         c.org_repo = org_repo
         c.other_repo = other_repo
 
-        c.cs_ranges, discovery_data = PullRequestModel().get_compare_data(
-                                       org_repo, org_ref, other_repo, other_ref
-                                      )
-        if c.cs_ranges:
-            # case we want a simple diff without incoming changesets, just
-            # for review purposes. Make the diff on the forked repo, with
-            # revision that is common ancestor
-            other_ref = ('rev', getattr(c.cs_ranges[-1].parents[0]
-                                        if c.cs_ranges[-1].parents
-                                        else EmptyChangeset(), 'raw_id'))
-            other_repo = org_repo
+        c.fulldiff = fulldiff = request.GET.get('fulldiff')
+
+        c.cs_ranges = [org_repo.get_changeset(x) for x in pull_request.revisions]
+
+        other_ref = ('rev', getattr(c.cs_ranges[0].parents[0]
+                                  if c.cs_ranges[0].parents
+                                  else EmptyChangeset(), 'raw_id'))
 
         c.statuses = org_repo.statuses([x.raw_id for x in c.cs_ranges])
+        c.target_repo = c.repo_name
         # defines that we need hidden inputs with changesets
         c.as_form = request.GET.get('as_form', False)
 
         c.org_ref = org_ref[1]
         c.other_ref = other_ref[1]
-        _diff = diffs.differ(org_repo, org_ref, other_repo, other_ref,
-                             discovery_data)
 
-        diff_processor = diffs.DiffProcessor(_diff, format='gitdiff')
+        diff_limit = self.cut_off_limit if not fulldiff else None
+
+        #we swap org/other ref since we run a simple diff on one repo
+        _diff = diffs.differ(org_repo, other_ref, other_repo, org_ref)
+
+        diff_processor = diffs.DiffProcessor(_diff or '', format='gitdiff',
+                                             diff_limit=diff_limit)
         _parsed = diff_processor.prepare()
+
+        c.limited_diff = False
+        if isinstance(_parsed, LimitedDiffContainer):
+            c.limited_diff = True
 
         c.files = []
         c.changes = {}
-
+        c.lines_added = 0
+        c.lines_deleted = 0
         for f in _parsed:
+            st = f['stats']
+            if st[0] != 'b':
+                c.lines_added += st[0]
+                c.lines_deleted += st[1]
             fid = h.FID('', f['filename'])
             c.files.append([fid, f['operation'], f['filename'], f['stats']])
             diff = diff_processor.as_html(enable_comments=enable_comments,

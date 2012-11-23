@@ -152,27 +152,30 @@ class PullRequestModel(BaseModel):
         to other_repo@other_ref
 
         :param org_repo:
-        :type org_repo:
         :param org_ref:
-        :type org_ref:
         :param other_repo:
-        :type other_repo:
         :param other_ref:
-        :type other_ref:
         :param tmp:
-        :type tmp:
         """
+
         changesets = []
         #case two independent repos
         common, incoming, rheads = discovery_data
-        if org_repo != other_repo and incoming:
+        if org_repo != other_repo:
+            revs = [
+                org_repo._repo.lookup(org_ref[1]),
+                org_repo._repo.lookup(other_ref[1]),
+            ]
+
             obj = findcommonoutgoing(org_repo._repo,
                         localrepo.locallegacypeer(other_repo._repo.local()),
+                        revs,
                         force=True)
             revs = obj.missing
 
-            for cs in reversed(map(binascii.hexlify, revs)):
-                changesets.append(org_repo.get_changeset(cs))
+            for cs in map(binascii.hexlify, revs):
+                _cs = org_repo.get_changeset(cs)
+                changesets.append(_cs)
         else:
             #no remote compare do it on the same repository
             if alias == 'hg':
@@ -234,8 +237,8 @@ class PullRequestModel(BaseModel):
         tmp = discovery.findcommonincoming(
                   repo=_other_repo,  # other_repo we check for incoming
                   remote=org_peer,  # org_repo source for incoming
-                  heads=[_other_repo[other_rev].node(),
-                         _org_repo[org_rev].node()],
+#                  heads=[_other_repo[other_rev].node(),
+#                         _org_repo[org_rev].node()],
                   force=True
         )
         return tmp

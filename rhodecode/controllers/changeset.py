@@ -194,7 +194,7 @@ class ChangesetController(BaseRepoController):
                 rev_start = rev_range[0]
                 rev_end = rev_range[1]
                 rev_ranges = c.rhodecode_repo.get_changesets(start=rev_start,
-                                                            end=rev_end)
+                                                             end=rev_end)
             else:
                 rev_ranges = [c.rhodecode_repo.get_changeset(revision)]
 

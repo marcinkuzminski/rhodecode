@@ -726,7 +726,7 @@ def differ(org_repo, org_ref, other_repo, other_ref, discovery_data=None,
 
     if org_repo == other_repo:
         log.debug('running diff between %s@%s and %s@%s'
-                  % (org_repo, org_ref, other_repo, other_ref))
+                  % (org_repo.path, org_ref, other_repo.path, other_ref))
         _diff = org_repo_scm.get_diff(rev1=org_ref, rev2=other_ref,
             ignore_whitespace=ignore_whitespace, context=context)
         return _diff
@@ -742,8 +742,7 @@ def differ(org_repo, org_ref, other_repo, other_ref, discovery_data=None,
             # hooks on fetching archives with subrepos
             for k, _ in org_repo.ui.configitems('hooks'):
                 org_repo.ui.setconfig('hooks', k, None)
-
-            unbundle = org_repo.getbundle('incoming', common=common,
+            unbundle = org_repo.getbundle('incoming', common=None,
                                           heads=None)
 
             buf = BytesIO()
