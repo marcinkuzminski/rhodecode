@@ -160,8 +160,8 @@ class DiffProcessor(object):
     mentioned in the diff together with a dict of meta information that
     can be used to render it in a HTML template.
     """
-    _chunk_re = re.compile(r'@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@(.*)')
-    _newline_marker = '\\ No newline at end of file\n'
+    _chunk_re = re.compile(r'^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@(.*)')
+    _newline_marker = re.compile(r'^\\ No newline at end of file')
     _git_header_re = re.compile(r"""
         #^diff[ ]--git
             [ ]a/(?P<a_path>.+?)[ ]b/(?P<b_path>.+?)\n
@@ -348,6 +348,12 @@ class DiffProcessor(object):
         else:
             raise Exception('VCS type %s is not supported' % self.vcs)
 
+    def _clean_line(self, line, command):
+        if command in ['+', '-', ' ']:
+            #only modify the line if it's actually a diff thing
+            line = line[1:]
+        return line
+
     def _parse_gitdiff(self, inline_diff=True):
         _files = []
         diff_container = lambda arg: arg
@@ -489,14 +495,9 @@ class DiffProcessor(object):
                 line = lineiter.next()
 
                 while old_line < old_end or new_line < new_end:
+                    command = ' '
                     if line:
                         command = line[0]
-                        if command in ['+', '-', ' ']:
-                            #only modify the line if it's actually a diff
-                            # thing
-                            line = line[1:]
-                    else:
-                        command = ' '
 
                     affects_old = affects_new = False
 
@@ -515,26 +516,26 @@ class DiffProcessor(object):
                         affects_old = affects_new = True
                         action = 'unmod'
 
-                    if line != self._newline_marker:
+                    if not self._newline_marker.match(line):
                         old_line += affects_old
                         new_line += affects_new
                         lines.append({
                             'old_lineno':   affects_old and old_line or '',
                             'new_lineno':   affects_new and new_line or '',
                             'action':       action,
-                            'line':         line
+                            'line':         self._clean_line(line, command)
                         })
 
                     line = lineiter.next()
 
-                    if line == self._newline_marker:
+                    if self._newline_marker.match(line):
                         # we need to append to lines, since this is not
                         # counted in the line specs of diff
                         lines.append({
                             'old_lineno':   '...',
                             'new_lineno':   '...',
                             'action':       'context',
-                            'line':         line
+                            'line':         self._clean_line(line, command)
                         })
 
         except StopIteration:

@@ -53,6 +53,13 @@ DIFF_FIXTURES = {
         (u'img/baseline-20px.png', 'D', ['b', DEL_FILENODE]),
         (u'js/global.js',          'D', [0, 75])
     ],
+    'diff_with_diff_data.diff': [
+        (u'vcs/backends/base.py', 'M', [18, 2]),
+        (u'vcs/backends/git/repository.py', 'M', [46, 15]),
+        (u'vcs/backends/hg.py', 'M', [22, 3]),
+        (u'vcs/tests/test_git.py', 'M', [5, 5]),
+        (u'vcs/tests/test_repository.py', 'M', [174, 2])
+    ],
 #    'large_diff.diff': [
 #
 #    ],
