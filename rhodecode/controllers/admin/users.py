@@ -158,13 +158,18 @@ class UsersController(BaseController):
         # url('user', id=ID)
         user_model = UserModel()
         c.user = user_model.get(id)
+        c.ldap_dn = c.user.ldap_dn
         c.perm_user = AuthUser(user_id=id)
         _form = UserForm(edit=True, old_data={'user_id': id,
                                               'email': c.user.email})()
         form_result = {}
         try:
             form_result = _form.to_python(dict(request.POST))
-            user_model.update(id, form_result)
+            skip_attrs = []
+            if c.ldap_dn:
+                #forbid updating username for ldap accounts
+                skip_attrs = ['username']
+            user_model.update(id, form_result, skip_attrs=skip_attrs)
             usr = form_result['username']
             action_logger(self.rhodecode_user, 'admin_updated_user:%s' % usr,
                           None, self.ip_addr, self.sa)
@@ -233,6 +238,7 @@ class UsersController(BaseController):
         c.user_email_map = UserEmailMap.query()\
                         .filter(UserEmailMap.user == c.user).all()
         user_model = UserModel()
+        c.ldap_dn = c.user.ldap_dn
         defaults = c.user.get_dict()
         defaults.update({
             'create_repo_perm': user_model.has_perm(id, 'hg.create.repository'),

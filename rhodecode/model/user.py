@@ -246,7 +246,7 @@ class UserModel(BaseModel):
             log.error(traceback.format_exc())
             raise
 
-    def update(self, user_id, form_data):
+    def update(self, user_id, form_data, skip_attrs=[]):
         from rhodecode.lib.auth import get_crypt_password
         try:
             user = self.get(user_id, cache=False)
@@ -256,6 +256,8 @@ class UserModel(BaseModel):
                                   " crucial for entire application"))
 
             for k, v in form_data.items():
+                if k in skip_attrs:
+                    continue
                 if k == 'new_password' and v:
                     user.password = get_crypt_password(v)
                     user.api_key = generate_api_key(user.username)
