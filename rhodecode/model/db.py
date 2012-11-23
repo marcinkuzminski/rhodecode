@@ -1506,7 +1506,6 @@ class CacheInvalidation(Base, BaseModel):
                   % (len(inv_objs), key, repo_name))
         try:
             for inv_obj in inv_objs:
-                print inv_obj
                 inv_obj.cache_active = False
                 Session().add(inv_obj)
             Session().commit()
