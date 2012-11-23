@@ -279,6 +279,18 @@ def safe_str(unicode_, to_encoding=None):
     return safe_str
 
 
+def remove_suffix(s, suffix):
+    if s.endswith(suffix):
+        s = s[:-1 * len(suffix)]
+    return s
+
+
+def remove_prefix(s, prefix):
+    if s.startswith(prefix):
+        s = s[:-1 * len(prefix)]
+    return s
+
+
 def engine_from_config(configuration, prefix='sqlalchemy.', **kwargs):
     """
     Custom engine_from_config functions that makes sure we use NullPool for

@@ -46,7 +46,7 @@ from rhodecode.lib.vcs.exceptions import VCSError
 from rhodecode.lib.vcs.utils.lazy import LazyProperty
 
 from rhodecode.lib.utils2 import str2bool, safe_str, get_changeset_safe, \
-    safe_unicode
+    safe_unicode, remove_suffix
 from rhodecode.lib.compat import json
 from rhodecode.lib.caching_query import FromCache
 
@@ -941,6 +941,7 @@ class Repository(Base, BaseModel):
 
     @LazyProperty
     def scm_instance(self):
+        return self.scm_instance_cached()
         return self.__get_instance()
 
     def scm_instance_cached(self, cache_map=None):
@@ -1440,7 +1441,11 @@ class CacheInvalidation(Base, BaseModel):
         iid = rhodecode.CONFIG.get('instance_id')
         if iid:
             prefix = iid
-        return "%s%s" % (prefix, key), prefix, key.rstrip('_README')
+        #remove specific suffixes like _README or _RSS
+        key = remove_suffix(key, '_README')
+        key = remove_suffix(key, '_RSS')
+        key = remove_suffix(key, '_ATOM')
+        return "%s%s" % (prefix, key), prefix, key
 
     @classmethod
     def get_by_key(cls, key):
