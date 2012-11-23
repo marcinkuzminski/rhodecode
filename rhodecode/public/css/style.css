@@ -4092,6 +4092,14 @@ div.readme .readme_box pre {
 	border-radius: 3px;
 }
 
+div.readme .readme_box table {
+    display: table;
+	border-collapse: separate;
+	border-spacing: 2px;
+	border-color: gray;
+	width: auto !important;
+}
+
 
 /** RST STYLE **/
 
