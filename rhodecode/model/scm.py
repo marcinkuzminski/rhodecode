@@ -291,7 +291,7 @@ class ScmModel(BaseModel):
 
         :param repo_name: this repo that should invalidation take place
         """
-        CacheInvalidation.set_invalidate(repo_name)
+        CacheInvalidation.set_invalidate(repo_name=repo_name)
 
     def toggle_following_repo(self, follow_repo_id, user_id):
 

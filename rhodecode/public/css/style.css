@@ -1627,6 +1627,7 @@ div.form div.fields div.field div.button {
 	background: #eee;
 	border-bottom: 1px solid #ddd;
 	padding: 5px 0px 5px 5px;
+	text-align: left;
 }
 
 #content div.box table th.left {

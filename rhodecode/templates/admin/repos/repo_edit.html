@@ -196,11 +196,20 @@
               </div>
               <div class="field" style="border:none;">
                 ${_('List of cached values')}
-                  <ul>
+                   <table>
+                   <tr>
+                    <th>${_('Prefix')}</th>
+                    <th>${_('Key')}</th>
+                    <th>${_('Active')}</th>
+                    </tr>
                   %for cache in c.repo_info.cache_keys:
-                      <li>INSTANCE ID:${cache.prefix or '-'} ${cache.cache_args} CACHED: ${h.bool2icon(cache.cache_active)}</li>
+                      <tr>
+                        <td>${cache.prefix or '-'}</td> 
+                        <td>${cache.cache_key}</td>
+                        <td>${h.bool2icon(cache.cache_active)}</td>
+                      </tr>
                   %endfor
-                  </ul>
+                  </table>
               </div>
            </div>
         </div>

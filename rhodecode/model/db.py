@@ -937,7 +937,7 @@ class Repository(Base, BaseModel):
         """
         set a cache for invalidation for this instance
         """
-        CacheInvalidation.set_invalidate(self.repo_name)
+        CacheInvalidation.set_invalidate(repo_name=self.repo_name)
 
     @LazyProperty
     def scm_instance(self):
@@ -1438,25 +1438,27 @@ class CacheInvalidation(Base, BaseModel):
         """
         import rhodecode
         prefix = ''
+        org_key = key
         iid = rhodecode.CONFIG.get('instance_id')
         if iid:
             prefix = iid
-        #remove specific suffixes like _README or _RSS
-        key = remove_suffix(key, '_README')
-        key = remove_suffix(key, '_RSS')
-        key = remove_suffix(key, '_ATOM')
-        return "%s%s" % (prefix, key), prefix, key
+
+        return "%s%s" % (prefix, key), prefix, org_key
 
     @classmethod
     def get_by_key(cls, key):
         return cls.query().filter(cls.cache_key == key).scalar()
 
     @classmethod
-    def _get_or_create_key(cls, key, prefix, org_key, commit=True):
+    def get_by_repo_name(cls, repo_name):
+        return cls.query().filter(cls.cache_args == repo_name).all()
+
+    @classmethod
+    def _get_or_create_key(cls, key, repo_name, commit=True):
         inv_obj = Session().query(cls).filter(cls.cache_key == key).scalar()
         if not inv_obj:
             try:
-                inv_obj = CacheInvalidation(key, org_key)
+                inv_obj = CacheInvalidation(key, repo_name)
                 Session().add(inv_obj)
                 if commit:
                     Session().commit()
@@ -1474,30 +1476,38 @@ class CacheInvalidation(Base, BaseModel):
 
         :param key:
         """
+        repo_name = key
+        repo_name = remove_suffix(repo_name, '_README')
+        repo_name = remove_suffix(repo_name, '_RSS')
+        repo_name = remove_suffix(repo_name, '_ATOM')
 
+        # adds instance prefix
         key, _prefix, _org_key = cls._get_key(key)
-        inv = cls._get_or_create_key(key, _prefix, _org_key)
+        inv = cls._get_or_create_key(key, repo_name)
 
         if inv and inv.cache_active is False:
             return inv
 
     @classmethod
-    def set_invalidate(cls, key):
+    def set_invalidate(cls, key=None, repo_name=None):
         """
-        Mark this Cache key for invalidation
+        Mark this Cache key for invalidation, either by key or whole
+        cache sets based on repo_name
 
         :param key:
         """
+        if key:
+            key, _prefix, _org_key = cls._get_key(key)
+            inv_objs = Session().query(cls).filter(cls.cache_key == key).all()
+        elif repo_name:
+            inv_objs = Session().query(cls).filter(cls.cache_args == repo_name).all()
 
-        key, _prefix, _org_key = cls._get_key(key)
-        inv_objs = Session().query(cls).filter(cls.cache_args == _org_key).all()
-        log.debug('marking %s key[s] %s for invalidation' % (len(inv_objs),
-                                                             _org_key))
+        log.debug('marking %s key[s] for invalidation based on key=%s,repo_name=%s'
+                  % (len(inv_objs), key, repo_name))
         try:
             for inv_obj in inv_objs:
-                if inv_obj:
-                    inv_obj.cache_active = False
-
+                print inv_obj
+                inv_obj.cache_active = False
                 Session().add(inv_obj)
             Session().commit()
         except Exception:
