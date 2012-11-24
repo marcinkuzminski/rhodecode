@@ -941,7 +941,10 @@ class Repository(Base, BaseModel):
 
     @LazyProperty
     def scm_instance(self):
-        return self.scm_instance_cached()
+        import rhodecode
+        full_cache = str2bool(rhodecode.CONFIG.get('vcs_full_cache'))
+        if full_cache:
+            return self.scm_instance_cached()
         return self.__get_instance()
 
     def scm_instance_cached(self, cache_map=None):
