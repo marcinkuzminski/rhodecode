@@ -111,8 +111,9 @@ class TestCompareController(TestController):
             response.mustcontain("""<a href="/%s/compare/branch@%s...branch@%s#C--826e8142e6ba">file1</a>""" % (repo2.repo_name, rev1, rev2))
 
         finally:
-            RepoModel().delete(r1_id)
             RepoModel().delete(r2_id)
+            RepoModel().delete(r1_id)
+            
 
     def test_compare_forks_on_branch_extra_commits_origin_has_incomming_hg(self):
         self.log_user()
@@ -168,8 +169,8 @@ class TestCompareController(TestController):
             response.mustcontain("""<a href="/%s/compare/branch@%s...branch@%s#C--826e8142e6ba">file1</a>""" % (repo2.repo_name, rev1, rev2))
 
         finally:
-            RepoModel().delete(r1_id)
             RepoModel().delete(r2_id)
+            RepoModel().delete(r1_id)
 
 
 #    def test_compare_remote_repos_remote_flag_off(self):
