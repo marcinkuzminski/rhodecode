@@ -91,7 +91,7 @@ var callbacks = function(State){
     ypjax_links();
     tooltip_activate();
     fileBrowserListeners(State.url, State.data.node_list_url, State.data.url_base);
-    
+
     if(YUD.get('hlcode')){
     	YUE.on('hlcode', 'mouseup', getSelectionLink);
     }

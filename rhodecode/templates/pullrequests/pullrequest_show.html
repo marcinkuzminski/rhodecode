@@ -68,16 +68,16 @@
               ##CS
               <div style="font-size:1.1em;font-weight: bold;clear:both;padding-top:10px">${ungettext('Showing %s commit','Showing %s commits', len(c.cs_ranges)) % len(c.cs_ranges)}</div>
               <%include file="/compare/compare_cs.html" />
-  
+
               ## FILES
               <div style="font-size:1.1em;font-weight: bold;clear:both;padding-top:10px">
-              
+
               % if c.limited_diff:
                   ${ungettext('%s file changed', '%s files changed', len(c.files)) % len(c.files)}
               % else:
                   ${ungettext('%s file changed with %s insertions and %s deletions','%s files changed with %s insertions and %s deletions', len(c.files)) % (len(c.files),c.lines_added,c.lines_deleted)}:
               %endif
-              
+
               </div>
               <div class="cs_files">
                 %if not c.files:
@@ -92,7 +92,7 @@
               </div>
               % if c.limited_diff:
                 <h5>${_('Changeset was too big and was cut off...')}</h5>
-              % endif            
+              % endif
           </div>
       </div>
       ## REVIEWERS

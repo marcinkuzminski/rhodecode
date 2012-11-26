@@ -180,4 +180,3 @@ class FeedController(BaseRepoController):
             region_invalidate(_get_feed_from_cache, None, key)
             CacheInvalidation.set_valid(inv.cache_key)
         return _get_feed_from_cache(key)
-
