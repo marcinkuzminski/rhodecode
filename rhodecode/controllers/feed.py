@@ -36,6 +36,7 @@ from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseRepoController
 from rhodecode.lib.diffs import DiffProcessor, LimitedDiffContainer
 from rhodecode.model.db import CacheInvalidation
+from rhodecode.lib.utils2 import safe_int, str2bool
 
 log = logging.getLogger(__name__)
 
@@ -52,10 +53,13 @@ class FeedController(BaseRepoController):
         self.title = self.title = _('%s %s feed') % (c.rhodecode_name, '%s')
         self.language = 'en-us'
         self.ttl = "5"
-        self.feed_nr = 20
+        import rhodecode
+        CONF = rhodecode.CONFIG
+        self.include_diff = str2bool(CONF.get('rss_include_diff', False))
+        self.feed_nr = safe_int(CONF.get('rss_items_per_page', 20))
         # we need to protect from parsing huge diffs here other way
-        # we can kill the server, 32*1024 chars is a reasonable limit
-        self.feed_diff_limit = 32 * 1024
+        # we can kill the server
+        self.feed_diff_limit = safe_int(CONF.get('rss_cut_off_limit'), 32 * 1024)
 
     def _get_title(self, cs):
         return "%s" % (
@@ -80,7 +84,7 @@ class FeedController(BaseRepoController):
         if limited_diff:
             changes = changes + ['\n ' +
                                  _('Changeset was too big and was cut off...')]
-        return changes
+        return diff_processor, changes
 
     def __get_desc(self, cs):
         desc_msg = []
@@ -95,6 +99,7 @@ class FeedController(BaseRepoController):
                 desc_msg.append('bookmark: %s<br/>' % book)
         for tag in cs.tags:
             desc_msg.append('tag: %s<br/>' % tag)
+        diff_processor, changes = self.__changes(cs)
         # rev link
         _url = url('changeset_home', repo_name=cs.repository.name,
                    revision=cs.raw_id, qualified=True)
@@ -103,7 +108,10 @@ class FeedController(BaseRepoController):
         desc_msg.append('<pre>')
         desc_msg.append(cs.message)
         desc_msg.append('\n')
-        desc_msg.extend(self.__changes(cs))
+        desc_msg.extend(changes)
+        if self.include_diff:
+            desc_msg.append('\n\n')
+            desc_msg.append(diff_processor.as_raw())
         desc_msg.append('</pre>')
         return desc_msg
 

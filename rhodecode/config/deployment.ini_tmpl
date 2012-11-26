@@ -65,6 +65,13 @@ force_https = false
 commit_parse_limit = 50
 use_gravatar = true
 
+## RSS feed options
+
+rss_cut_off_limit = 256000
+rss_items_per_page = 10
+rss_include_diff = false
+
+
 ## alternative_gravatar_url allows you to use your own avatar server application
 ## the following parts of the URL will be replaced
 ## {email}        user email
