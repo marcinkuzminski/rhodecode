@@ -46,7 +46,7 @@ requirements = [
     "celery>=2.2.5,<2.3",
     "babel",
     "python-dateutil>=1.5.0,<2.0.0",
-    "dulwich>=0.8.6,<0.9.0",
+    "dulwich>=0.8.7,<0.9.0",
     "markdown==2.2.1",
     "docutils==0.8.1",
     "simplejson==2.5.2",
