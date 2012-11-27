@@ -46,7 +46,7 @@ from rhodecode.lib.vcs.conf import settings
 from rhodecode.lib.vcs.exceptions import RepositoryError, \
     ChangesetDoesNotExistError, EmptyRepositoryError, \
     ImproperArchiveTypeError, VCSError, NodeAlreadyExistsError,\
-    NodeDoesNotExistError, ChangesetError
+    NodeDoesNotExistError, ChangesetError, NodeError
 from rhodecode.lib.vcs.nodes import FileNode
 
 from rhodecode.model.repo import RepoModel
@@ -495,7 +495,7 @@ class FilesController(BaseRepoController):
             else:
                 c.changeset_2 = EmptyChangeset(repo=c.rhodecode_repo)
                 node2 = FileNode(f_path, '', changeset=c.changeset_2)
-        except RepositoryError:
+        except (RepositoryError, NodeError):
             log.error(traceback.format_exc())
             return redirect(url('files_home', repo_name=c.repo_name,
                                 f_path=f_path))
