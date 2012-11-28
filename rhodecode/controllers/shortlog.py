@@ -73,7 +73,6 @@ class ShortlogController(BaseRepoController):
         collection = c.rhodecode_repo
         c.file_history = f_path
         if f_path:
-            f_path = f_path.lstrip('/')
             # get the history for the file !
             tip_cs = c.rhodecode_repo.get_changeset()
             try:

@@ -32,6 +32,10 @@ def make_map(config):
         from rhodecode.model.db import Repository
         repo_name = match_dict.get('repo_name')
 
+        if match_dict.get('f_path'):
+            #fix for multiple initial slashes that causes errors
+            match_dict['f_path'] = match_dict['f_path'].lstrip('/')
+
         try:
             by_id = repo_name.split('_')
             if len(by_id) == 2 and by_id[1].isdigit() and by_id[0] == '':
