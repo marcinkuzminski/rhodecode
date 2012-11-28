@@ -66,12 +66,14 @@ class ShortlogController(BaseRepoController):
     def index(self, repo_name, revision=None, f_path=None):
         p = safe_int(request.params.get('page', 1), 1)
         size = safe_int(request.params.get('size', 20), 20)
-
-        def url_generator(**kw):
-            return url('shortlog_home', repo_name=repo_name, size=size, **kw)
-
         collection = c.rhodecode_repo
         c.file_history = f_path
+
+        def url_generator(**kw):
+            if f_path:
+                return url('shortlog_file_home', repo_name=repo_name,
+                           revision=revision, f_path=f_path, size=size, **kw)
+            return url('shortlog_home', repo_name=repo_name, size=size, **kw)
         if f_path:
             # get the history for the file !
             tip_cs = c.rhodecode_repo.get_changeset()
