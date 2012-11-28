@@ -181,7 +181,7 @@ class MercurialChangeset(BaseChangeset):
         path = self._fix_path(path)
         if self._get_kind(path) != NodeKind.FILE:
             raise ChangesetError("File does not exist for revision %r at "
-                " %r" % (self.revision, path))
+                " %r" % (self.raw_id, path))
         return self._ctx.filectx(path)
 
     def _extract_submodules(self):

@@ -514,6 +514,10 @@ def make_map(config):
     rmap.connect('shortlog_home', '/{repo_name:.*?}/shortlog',
                 controller='shortlog', conditions=dict(function=check_repo))
 
+    rmap.connect('shortlog_file_home', '/{repo_name:.*?}/shortlog/{revision}/{f_path:.*}',
+                controller='shortlog', f_path=None,
+                conditions=dict(function=check_repo))
+
     rmap.connect('branches_home', '/{repo_name:.*?}/branches',
                 controller='branches', conditions=dict(function=check_repo))
 

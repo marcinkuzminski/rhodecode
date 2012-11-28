@@ -11,7 +11,13 @@
     &raquo;
     ${h.link_to(c.repo_name,h.url('summary_home',repo_name=c.repo_name))}
     &raquo;
-    ${_('shortlog')}
+    %if c.file_history:
+        ${h.link_to(_('shortlog'),h.url('shortlog_home',repo_name=c.repo_name))}
+        &raquo;
+        ${c.file_history}
+    %else:
+        ${_('shortlog')}
+    %endif
 </%def>
 
 <%def name="page_nav()">

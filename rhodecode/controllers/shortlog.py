@@ -26,12 +26,16 @@
 import logging
 
 from pylons import tmpl_context as c, request, url
+from pylons.i18n.translation import _
 
+from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.helpers import RepoPage
 from pylons.controllers.util import redirect
 from rhodecode.lib.utils2 import safe_int
+from rhodecode.lib.vcs.exceptions import NodeDoesNotExistError, ChangesetError,\
+    RepositoryError
 
 log = logging.getLogger(__name__)
 
@@ -44,19 +48,53 @@ class ShortlogController(BaseRepoController):
     def __before__(self):
         super(ShortlogController, self).__before__()
 
-    def index(self, repo_name):
+    def __get_cs_or_redirect(self, rev, repo_name, redirect_after=True):
+        """
+        Safe way to get changeset if error occur it redirects to tip with
+        proper message
+
+        :param rev: revision to fetch
+        :param repo_name: repo name to redirect after
+        """
+
+        try:
+            return c.rhodecode_repo.get_changeset(rev)
+        except RepositoryError, e:
+            h.flash(str(e), category='warning')
+            redirect(h.url('shortlog_home', repo_name=repo_name))
+
+    def index(self, repo_name, revision=None, f_path=None):
         p = safe_int(request.params.get('page', 1), 1)
         size = safe_int(request.params.get('size', 20), 20)
 
         def url_generator(**kw):
             return url('shortlog_home', repo_name=repo_name, size=size, **kw)
 
-        c.repo_changesets = RepoPage(c.rhodecode_repo, page=p,
+        collection = c.rhodecode_repo
+        c.file_history = f_path
+        if f_path:
+            f_path = f_path.lstrip('/')
+            # get the history for the file !
+            tip_cs = c.rhodecode_repo.get_changeset()
+            try:
+                collection = tip_cs.get_file_history(f_path)
+            except (NodeDoesNotExistError, ChangesetError):
+                #this node is not present at tip !
+                try:
+                    cs = self.__get_cs_or_redirect(revision, repo_name)
+                    collection = cs.get_file_history(f_path)
+                except RepositoryError, e:
+                    h.flash(str(e), category='warning')
+                    redirect(h.url('shortlog_home', repo_name=repo_name))
+            collection = list(reversed(collection))
+
+        c.repo_changesets = RepoPage(collection, page=p,
                                     items_per_page=size, url=url_generator)
-        page_revisions = [x.raw_id for x in list(c.repo_changesets)]
+        page_revisions = [x.raw_id for x in list(collection)]
         c.statuses = c.rhodecode_db_repo.statuses(page_revisions)
 
         if not c.repo_changesets:
+            h.flash(_('There are no changesets yet'), category='warning')
             return redirect(url('summary_home', repo_name=repo_name))
 
         c.shortlog_data = render('shortlog/shortlog_data.html')

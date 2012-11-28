@@ -2650,15 +2650,14 @@ h3.files_location {
 #graph_content .container .mid .message a:hover{
 	text-decoration: none;
 }
-#content #graph_content .message .revision-link,
-#changeset_content .container .message .revision-link
+
+.revision-link
  {
 	color:#3F6F9F;
     font-weight: bold !important;
 }
 
-#content #graph_content .message .issue-tracker-link,
-#changeset_content .container .message .issue-tracker-link{
+.issue-tracker-link{
     color:#3F6F9F;
     font-weight: bold !important;
 }

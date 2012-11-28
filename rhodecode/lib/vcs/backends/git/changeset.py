@@ -162,6 +162,13 @@ class GitChangeset(BaseChangeset):
         elif isinstance(obj, objects.Tree):
             return NodeKind.DIR
 
+    def _get_filectx(self, path):
+        path = self._fix_path(path)
+        if self._get_kind(path) != NodeKind.FILE:
+            raise ChangesetError("File does not exist for revision %r at "
+                " %r" % (self.raw_id, path))
+        return path
+
     def _get_file_nodes(self):
         return chain(*(t[2] for t in self.walk()))
 
@@ -264,6 +271,7 @@ class GitChangeset(BaseChangeset):
         which is generally not good. Should be replaced with algorithm
         iterating commits.
         """
+        self._get_filectx(path)
         cmd = 'log --pretty="format: %%H" -s -p %s -- "%s"' % (
                   self.id, path
                )
