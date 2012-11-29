@@ -235,17 +235,15 @@ class MercurialChangeset(BaseChangeset):
 
     def get_file_annotate(self, path):
         """
-        Returns a list of three element tuples with lineno,changeset and line
+        Returns a generator of four element tuples with
+            lineno, sha, changeset lazy loader and line
         """
+
         fctx = self._get_filectx(path)
-        annotate = []
         for i, annotate_data in enumerate(fctx.annotate()):
             ln_no = i + 1
-            annotate.append((ln_no, self.repository\
-                             .get_changeset(hex(annotate_data[0].node())),
-                             annotate_data[1],))
-
-        return annotate
+            sha = hex(annotate_data[0].node())
+            yield (ln_no, sha, lambda: self.repository.get_changeset(sha), annotate_data[1],)
 
     def fill_archive(self, stream=None, kind='tgz', prefix=None,
                      subrepos=False):

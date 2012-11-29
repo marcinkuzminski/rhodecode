@@ -272,6 +272,7 @@ class GitChangeset(BaseChangeset):
         iterating commits.
         """
         self._get_filectx(path)
+
         cmd = 'log --pretty="format: %%H" -s -p %s -- "%s"' % (
                   self.id, path
                )
@@ -279,9 +280,24 @@ class GitChangeset(BaseChangeset):
         ids = re.findall(r'[0-9a-fA-F]{40}', so)
         return [self.repository.get_changeset(id) for id in ids]
 
+    def get_file_history_2(self, path):
+        """
+        Returns history of file as reversed list of ``Changeset`` objects for
+        which file at given ``path`` has been modified.
+
+        """
+        self._get_filectx(path)
+        from dulwich.walk import Walker
+        include = [self.id]
+        walker = Walker(self.repository._repo.object_store, include,
+                        paths=[path], max_entries=1)
+        return [self.repository.get_changeset(sha) 
+                for sha in (x.commit.id for x in walker)]
+
     def get_file_annotate(self, path):
         """
-        Returns a list of three element tuples with lineno,changeset and line
+        Returns a generator of four element tuples with
+            lineno, sha, changeset lazy loader and line
 
         TODO: This function now uses os underlying 'git' command which is
         generally not good. Should be replaced with algorithm iterating
@@ -293,12 +309,10 @@ class GitChangeset(BaseChangeset):
         # -r sha ==> blames for the given revision
         so, se = self.repository.run_git_command(cmd)
 
-        annotate = []
         for i, blame_line in enumerate(so.split('\n')[:-1]):
             ln_no = i + 1
-            id, line = re.split(r' ', blame_line, 1)
-            annotate.append((ln_no, self.repository.get_changeset(id), line))
-        return annotate
+            sha, line = re.split(r' ', blame_line, 1)
+            yield (ln_no, sha, lambda: self.repository.get_changeset(sha), line)
 
     def fill_archive(self, stream=None, kind='tgz', prefix=None,
                      subrepos=False):
