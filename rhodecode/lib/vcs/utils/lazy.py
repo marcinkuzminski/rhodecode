@@ -26,3 +26,21 @@ class LazyProperty(object):
             return self
         result = obj.__dict__[self.__name__] = self._func(obj)
         return result
+
+import threading
+
+
+class ThreadLocalLazyProperty(LazyProperty):
+    """
+    Same as above but uses thread local dict for cache storage.
+    """
+
+    def __get__(self, obj, klass=None):
+        if obj is None:
+            return self
+        if not hasattr(obj, '__tl_dict__'):
+            obj.__tl_dict__ = threading.local().__dict__
+
+        result = obj.__tl_dict__[self.__name__] = self._func(obj)
+        return result
+

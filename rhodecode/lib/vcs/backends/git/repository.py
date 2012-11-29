@@ -29,7 +29,7 @@ from rhodecode.lib.vcs.exceptions import RepositoryError
 from rhodecode.lib.vcs.exceptions import TagAlreadyExistError
 from rhodecode.lib.vcs.exceptions import TagDoesNotExistError
 from rhodecode.lib.vcs.utils import safe_unicode, makedate, date_fromtimestamp
-from rhodecode.lib.vcs.utils.lazy import LazyProperty
+from rhodecode.lib.vcs.utils.lazy import LazyProperty, ThreadLocalLazyProperty
 from rhodecode.lib.vcs.utils.ordered_dict import OrderedDict
 from rhodecode.lib.vcs.utils.paths import abspath
 from rhodecode.lib.vcs.utils.paths import get_user_home
@@ -63,7 +63,7 @@ class GitRepository(BaseRepository):
             abspath(get_user_home(), '.gitconfig'),
         ]
 
-    @LazyProperty
+    @ThreadLocalLazyProperty
     def _repo(self):
         repo = Repo(self.path)
         #temporary set that to now at later we will move it to constructor
