@@ -58,12 +58,12 @@ class GitRepository(BaseRepository):
         self.bare = repo.bare
 
         self._config_files = [
-            bare and abspath(self.path, 'config') or abspath(self.path, '.git',
-                'config'),
+            bare and abspath(self.path, 'config')
+                     or abspath(self.path, '.git', 'config'),
             abspath(get_user_home(), '.gitconfig'),
         ]
 
-    @property
+    @LazyProperty
     def _repo(self):
         repo = Repo(self.path)
         #temporary set that to now at later we will move it to constructor
