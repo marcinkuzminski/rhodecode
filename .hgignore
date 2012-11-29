@@ -18,6 +18,6 @@ syntax: regexp
 ^rhodecode\.db$
 ^test\.db$
 ^RhodeCode\.egg-info$
-^rc\.ini$
+^rc.*\.ini$
 ^fabfile.py
 ^\.rhodecode$
