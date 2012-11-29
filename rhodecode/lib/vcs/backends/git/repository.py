@@ -54,7 +54,18 @@ class GitRepository(BaseRepository):
                  update_after_clone=False, bare=False):
 
         self.path = abspath(repo_path)
-        self._repo = self._get_repo(create, src_url, update_after_clone, bare)
+        repo = self._get_repo(create, src_url, update_after_clone, bare)
+        self.bare = repo.bare
+
+        self._config_files = [
+            bare and abspath(self.path, 'config') or abspath(self.path, '.git',
+                'config'),
+            abspath(get_user_home(), '.gitconfig'),
+        ]
+
+    @property
+    def _repo(self):
+        repo = Repo(self.path)
         #temporary set that to now at later we will move it to constructor
         baseui = None
         if baseui is None:
@@ -62,19 +73,15 @@ class GitRepository(BaseRepository):
             baseui = ui()
         # patch the instance of GitRepo with an "FAKE" ui object to add
         # compatibility layer with Mercurial
-        setattr(self._repo, 'ui', baseui)
+        setattr(repo, 'ui', baseui)
+        return repo
 
+    @property
+    def head(self):
         try:
-            self.head = self._repo.head()
+            return self._repo.head()
         except KeyError:
-            self.head = None
-
-        self._config_files = [
-            bare and abspath(self.path, 'config') or abspath(self.path, '.git',
-                'config'),
-            abspath(get_user_home(), '.gitconfig'),
-        ]
-        self.bare = self._repo.bare
+            return None
 
     @LazyProperty
     def revisions(self):
