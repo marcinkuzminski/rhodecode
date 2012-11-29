@@ -271,6 +271,10 @@ class DbManage(object):
                            'Please validate and check default permissions '
                            'in admin panel')
 
+            def step_8(self):
+                self.klass.populate_default_permissions()
+                Session().commit()
+
         upgrade_steps = [0] + range(curr_version + 1, __dbversion__ + 1)
 
         # CALL THE PROPER ORDER OF STEPS TO PERFORM FULL UPGRADE

@@ -282,14 +282,16 @@ def ApplicationUiSettingsForm():
     return _ApplicationUiSettingsForm
 
 
-def DefaultPermissionsForm(perms_choices, register_choices, create_choices,
+def DefaultPermissionsForm(repo_perms_choices, group_perms_choices, register_choices, create_choices,
                            fork_choices):
     class _DefaultPermissionsForm(formencode.Schema):
         allow_extra_fields = True
         filter_extra_fields = True
-        overwrite_default = v.StringBoolean(if_missing=False)
+        overwrite_default_repo = v.StringBoolean(if_missing=False)
+        overwrite_default_group = v.StringBoolean(if_missing=False)
         anonymous = v.StringBoolean(if_missing=False)
-        default_perm = v.OneOf(perms_choices)
+        default_repo_perm = v.OneOf(repo_perms_choices)
+        default_group_perm = v.OneOf(group_perms_choices)
         default_register = v.OneOf(register_choices)
         default_create = v.OneOf(create_choices)
         default_fork = v.OneOf(fork_choices)

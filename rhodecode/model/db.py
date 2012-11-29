@@ -299,7 +299,7 @@ class User(Base, BaseModel):
     DEFAULT_USER = 'default'
     DEFAULT_PERMISSIONS = [
         'hg.register.manual_activate', 'hg.create.repository',
-        'hg.fork.repository', 'repository.read'
+        'hg.fork.repository', 'repository.read', 'group.read'
     ]
     user_id = Column("user_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     username = Column("username", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)

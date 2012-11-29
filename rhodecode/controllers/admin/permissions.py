@@ -56,10 +56,14 @@ class PermissionsController(BaseController):
         c.admin_username = session.get('admin_username')
         super(PermissionsController, self).__before__()
 
-        self.perms_choices = [('repository.none', _('None'),),
-                              ('repository.read', _('Read'),),
-                              ('repository.write', _('Write'),),
-                              ('repository.admin', _('Admin'),)]
+        self.repo_perms_choices = [('repository.none', _('None'),),
+                                   ('repository.read', _('Read'),),
+                                   ('repository.write', _('Write'),),
+                                   ('repository.admin', _('Admin'),)]
+        self.group_perms_choices = [('group.none', _('None'),),
+                                    ('group.read', _('Read'),),
+                                    ('group.write', _('Write'),),
+                                    ('group.admin', _('Admin'),)]
         self.register_choices = [
             ('hg.register.none',
                 _('disabled')),
@@ -75,7 +79,8 @@ class PermissionsController(BaseController):
                              ('hg.fork.repository', _('Enabled'))]
 
         # set the global template variables
-        c.perms_choices = self.perms_choices
+        c.repo_perms_choices = self.repo_perms_choices
+        c.group_perms_choices = self.group_perms_choices
         c.register_choices = self.register_choices
         c.create_choices = self.create_choices
         c.fork_choices = self.fork_choices
@@ -103,7 +108,8 @@ class PermissionsController(BaseController):
 
         permission_model = PermissionModel()
 
-        _form = DefaultPermissionsForm([x[0] for x in self.perms_choices],
+        _form = DefaultPermissionsForm([x[0] for x in self.repo_perms_choices],
+                                       [x[0] for x in self.group_perms_choices],
                                        [x[0] for x in self.register_choices],
                                        [x[0] for x in self.create_choices],
                                        [x[0] for x in self.fork_choices])()
@@ -157,7 +163,10 @@ class PermissionsController(BaseController):
 
             for p in default_user.user_perms:
                 if p.permission.permission_name.startswith('repository.'):
-                    defaults['default_perm'] = p.permission.permission_name
+                    defaults['default_repo_perm'] = p.permission.permission_name
+
+                if p.permission.permission_name.startswith('group.'):
+                    defaults['default_group_perm'] = p.permission.permission_name
 
                 if p.permission.permission_name.startswith('hg.register.'):
                     defaults['default_register'] = p.permission.permission_name
