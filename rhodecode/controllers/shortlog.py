@@ -74,7 +74,9 @@ class ShortlogController(BaseRepoController):
                 return url('shortlog_file_home', repo_name=repo_name,
                            revision=revision, f_path=f_path, size=size, **kw)
             return url('shortlog_home', repo_name=repo_name, size=size, **kw)
+
         if f_path:
+            log.debug('generating shortlog for path %s' % f_path)
             # get the history for the file !
             tip_cs = c.rhodecode_repo.get_changeset()
             try:
@@ -90,8 +92,8 @@ class ShortlogController(BaseRepoController):
             collection = list(reversed(collection))
 
         c.repo_changesets = RepoPage(collection, page=p,
-                                    items_per_page=size, url=url_generator)
-        page_revisions = [x.raw_id for x in list(collection)]
+                                     items_per_page=size, url=url_generator)
+        page_revisions = [x.raw_id for x in list(c.repo_changesets)]
         c.statuses = c.rhodecode_db_repo.statuses(page_revisions)
 
         if not c.repo_changesets:
