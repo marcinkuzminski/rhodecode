@@ -724,7 +724,7 @@ def differ(org_repo, org_ref, other_repo, other_ref, discovery_data=None,
     org_ref = org_ref[1]
     other_ref = other_ref[1]
 
-    if org_repo == other_repo:
+    if org_repo_scm == other_repo_scm:
         log.debug('running diff between %s@%s and %s@%s'
                   % (org_repo.path, org_ref, other_repo.path, other_ref))
         _diff = org_repo_scm.get_diff(rev1=org_ref, rev2=other_ref,
