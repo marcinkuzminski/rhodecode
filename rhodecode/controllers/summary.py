@@ -97,7 +97,7 @@ class SummaryController(BaseRepoController):
         uri_tmpl = uri_tmpl.replace('{', '%(').replace('}', ')s')
         decoded_path = safe_unicode(urllib.unquote(parsed_url.path))
         uri_dict = {
-           'user': username,
+           'user': urllib.quote(username),
            'pass': password,
            'scheme': parsed_url.scheme,
            'netloc': parsed_url.netloc,
