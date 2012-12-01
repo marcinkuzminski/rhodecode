@@ -92,7 +92,7 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
     DBS = get_session()
     lockkey = __get_lockkey('get_commits_stats', repo_name, ts_min_y,
                             ts_max_y)
-    lockkey_path = config['here']
+    lockkey_path = config['app_conf']['cache_dir']
 
     log.info('running task with lockkey %s' % lockkey)
 

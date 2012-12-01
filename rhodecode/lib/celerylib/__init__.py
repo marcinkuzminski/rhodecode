@@ -93,7 +93,7 @@ def __get_lockkey(func, *fargs, **fkwargs):
 def locked_task(func):
     def __wrapper(func, *fargs, **fkwargs):
         lockkey = __get_lockkey(func, *fargs, **fkwargs)
-        lockkey_path = config['here']
+        lockkey_path = config['app_conf']['cache_dir']
 
         log.info('running task with lockkey %s' % lockkey)
         try:
