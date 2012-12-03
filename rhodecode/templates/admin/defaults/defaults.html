@@ -21,7 +21,7 @@
     <div class="title">
         ${self.breadcrumbs()}
     </div>
-    
+
     <h3>${_('Repositories defaults')}</h3>
 
     ${h.form(url('default', id='defaults'),method='put')}
@@ -29,7 +29,7 @@
         <!-- fields -->
 
         <div class="fields">
-        
+
             <div class="field">
                 <div class="label">
                     <label for="default_repo_type">${_('Type')}:</label>
@@ -37,7 +37,7 @@
                 <div class="input">
                     ${h.select('default_repo_type','hg',c.backends,class_="medium")}
                 </div>
-            </div>        
+            </div>
 
             <div class="field">
                 <div class="label label-checkbox">
@@ -86,8 +86,8 @@
         </div>
     </div>
     ${h.end_form()}
-    
+
     ##<h3>${_('Groups defaults')}</h3>
-    
+
 </div>
 </%def>

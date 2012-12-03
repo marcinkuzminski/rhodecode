@@ -291,7 +291,7 @@ class GitChangeset(BaseChangeset):
         include = [self.id]
         walker = Walker(self.repository._repo.object_store, include,
                         paths=[path], max_entries=1)
-        return [self.repository.get_changeset(sha) 
+        return [self.repository.get_changeset(sha)
                 for sha in (x.commit.id for x in walker)]
 
     def get_file_annotate(self, path):

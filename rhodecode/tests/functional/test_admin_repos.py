@@ -26,7 +26,7 @@ class TestAdminReposController(TestController):
         self.log_user()
         repo_name = NEW_HG_REPO
         description = 'description for newly created repo'
-        response = self.app.post(url('repos'), 
+        response = self.app.post(url('repos'),
                         _get_repo_create_params(repo_private=False,
                                                 repo_name=repo_name,
                                                 repo_description=description))
@@ -262,7 +262,7 @@ class TestAdminReposController(TestController):
         repo_name = 'vcs_test_new_to_delete'
         description = 'description for newly created repo'
         private = False
-        response = self.app.post(url('repos'), 
+        response = self.app.post(url('repos'),
                         _get_repo_create_params(repo_private=False,
                                                 repo_type='git',
                                                 repo_name=repo_name,

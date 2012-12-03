@@ -182,5 +182,3 @@ def _get_repo_create_params(**custom):
         defs.update({'repo_name_full': defs['repo_name']})
 
     return defs
-
-

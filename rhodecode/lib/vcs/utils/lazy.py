@@ -43,4 +43,3 @@ class ThreadLocalLazyProperty(LazyProperty):
 
         result = obj.__tl_dict__[self.__name__] = self._func(obj)
         return result
-
