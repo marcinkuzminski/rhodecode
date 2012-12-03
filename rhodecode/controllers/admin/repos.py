@@ -42,7 +42,8 @@ from rhodecode.lib.base import BaseController, render
 from rhodecode.lib.utils import invalidate_cache, action_logger, repo_name_slug
 from rhodecode.lib.helpers import get_token
 from rhodecode.model.meta import Session
-from rhodecode.model.db import User, Repository, UserFollowing, RepoGroup
+from rhodecode.model.db import User, Repository, UserFollowing, RepoGroup,\
+    RhodeCodeSetting
 from rhodecode.model.forms import RepoForm
 from rhodecode.model.scm import ScmModel
 from rhodecode.model.repo import RepoModel

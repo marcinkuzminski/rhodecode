@@ -481,7 +481,15 @@ class SettingsController(BaseController):
         new_repo = request.GET.get('repo', '')
         c.new_repo = repo_name_slug(new_repo)
 
-        return render('admin/repos/repo_add_create_repository.html')
+        ## apply the defaults from defaults page
+        defaults = RhodeCodeSetting.get_default_repo_settings(strip_prefix=True)
+        return htmlfill.render(
+            render('admin/repos/repo_add_create_repository.html'),
+            defaults=defaults,
+            errors={},
+            prefix_error=False,
+            encoding="UTF-8"
+        )
 
     def _get_hg_ui_settings(self):
         ret = RhodeCodeUi.query().all()

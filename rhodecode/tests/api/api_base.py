@@ -61,15 +61,10 @@ def destroy_users_group(name=TEST_USERS_GROUP):
 
 def create_repo(repo_name, repo_type):
     # create new repo
-    form_data = dict(repo_name=repo_name,
-                     repo_name_full=repo_name,
-                     fork_name=None,
-                     description='description %s' % repo_name,
-                     repo_group=None,
-                     private=False,
-                     repo_type=repo_type,
-                     clone_uri=None,
-                     landing_rev='tip')
+    form_data = _get_repo_create_params(
+                    repo_name_full=repo_name,
+                    repo_description='description %s' % repo_name,
+                )
     cur_user = UserModel().get_by_username(TEST_USER_ADMIN_LOGIN)
     r = RepoModel().create(form_data, cur_user)
     Session().commit()

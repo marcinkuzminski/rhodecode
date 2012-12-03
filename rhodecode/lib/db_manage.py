@@ -273,6 +273,7 @@ class DbManage(object):
 
             def step_8(self):
                 self.klass.populate_default_permissions()
+                self.klass.create_default_options(skip_existing=True)
                 Session().commit()
 
         upgrade_steps = [0] + range(curr_version + 1, __dbversion__ + 1)
@@ -482,6 +483,22 @@ class DbManage(object):
             setting = RhodeCodeSetting(k, v)
             self.sa.add(setting)
 
+    def create_default_options(self, skip_existing=False):
+        """Creates default settings"""
+
+        for k, v in [
+            ('default_repo_enable_locking',  False),
+            ('default_repo_enable_downloads', False),
+            ('default_repo_enable_statistics', False),
+            ('default_repo_private', False),
+            ('default_repo_type', 'hg')]:
+
+            if skip_existing and RhodeCodeSetting.get_by_name(k) != None:
+                log.debug('Skipping option %s' % k)
+                continue
+            setting = RhodeCodeSetting(k, v)
+            self.sa.add(setting)
+
     def fixup_groups(self):
         def_usr = User.get_by_username('default')
         for g in RepoGroup.query().all():
@@ -622,6 +639,7 @@ class DbManage(object):
         self.sa.add(sett6)
 
         self.create_ldap_options()
+        self.create_default_options()
 
         log.info('created ui config')
 

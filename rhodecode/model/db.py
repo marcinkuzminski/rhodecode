@@ -46,7 +46,7 @@ from rhodecode.lib.vcs.exceptions import VCSError
 from rhodecode.lib.vcs.utils.lazy import LazyProperty
 
 from rhodecode.lib.utils2 import str2bool, safe_str, get_changeset_safe, \
-    safe_unicode, remove_suffix
+    safe_unicode, remove_suffix, remove_prefix
 from rhodecode.lib.compat import json
 from rhodecode.lib.caching_query import FromCache
 
@@ -167,7 +167,11 @@ class RhodeCodeSetting(Base, BaseModel):
     @hybrid_property
     def app_settings_value(self):
         v = self._app_settings_value
-        if self.app_settings_name == 'ldap_active':
+        if self.app_settings_name in ["ldap_active",
+                                      "default_repo_enable_statistics",
+                                      "default_repo_enable_locking",
+                                      "default_repo_private",
+                                      "default_repo_enable_downloads"]:
             v = str2bool(v)
         return v
 
@@ -222,6 +226,19 @@ class RhodeCodeSetting(Base, BaseModel):
         fd = {}
         for row in ret:
             fd.update({row.app_settings_name: row.app_settings_value})
+
+        return fd
+
+    @classmethod
+    def get_default_repo_settings(cls, cache=False, strip_prefix=False):
+        ret = cls.query()\
+                .filter(cls.app_settings_name.startswith('default_')).all()
+        fd = {}
+        for row in ret:
+            key = row.app_settings_name
+            if strip_prefix:
+                key = remove_prefix(key, prefix='default_')
+            fd.update({key: row.app_settings_value})
 
         return fd
 

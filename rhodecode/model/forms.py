@@ -173,19 +173,19 @@ def RepoForm(edit=False, old_data={}, supported_backends=BACKENDS.keys(),
              repo_groups=[], landing_revs=[]):
     class _RepoForm(formencode.Schema):
         allow_extra_fields = True
-        filter_extra_fields = False
+        filter_extra_fields = True
         repo_name = All(v.UnicodeString(strip=True, min=1, not_empty=True),
                         v.SlugifyName())
-        clone_uri = All(v.UnicodeString(strip=True, min=1, not_empty=False))
         repo_group = All(v.CanWriteGroup(),
                          v.OneOf(repo_groups, hideList=True))
         repo_type = v.OneOf(supported_backends)
-        description = v.UnicodeString(strip=True, min=1, not_empty=False)
-        private = v.StringBoolean(if_missing=False)
-        enable_statistics = v.StringBoolean(if_missing=False)
-        enable_downloads = v.StringBoolean(if_missing=False)
-        enable_locking = v.StringBoolean(if_missing=False)
-        landing_rev = v.OneOf(landing_revs, hideList=True)
+        repo_description = v.UnicodeString(strip=True, min=1, not_empty=False)
+        repo_private = v.StringBoolean(if_missing=False)
+        repo_enable_statistics = v.StringBoolean(if_missing=False)
+        repo_enable_downloads = v.StringBoolean(if_missing=False)
+        repo_enable_locking = v.StringBoolean(if_missing=False)
+        repo_landing_rev = v.OneOf(landing_revs, hideList=True)
+        clone_uri = All(v.UnicodeString(strip=True, min=1, not_empty=False))
 
         if edit:
             #this is repo owner
@@ -218,9 +218,8 @@ def RepoForkForm(edit=False, old_data={}, supported_backends=BACKENDS.keys(),
     return _RepoForkForm
 
 
-def RepoSettingsForm(edit=False, old_data={},
-                     supported_backends=BACKENDS.keys(), repo_groups=[],
-                     landing_revs=[]):
+def RepoSettingsForm(edit=False, old_data={}, supported_backends=BACKENDS.keys(),
+                     repo_groups=[], landing_revs=[]):
     class _RepoForm(formencode.Schema):
         allow_extra_fields = True
         filter_extra_fields = False
@@ -282,8 +281,8 @@ def ApplicationUiSettingsForm():
     return _ApplicationUiSettingsForm
 
 
-def DefaultPermissionsForm(repo_perms_choices, group_perms_choices, register_choices, create_choices,
-                           fork_choices):
+def DefaultPermissionsForm(repo_perms_choices, group_perms_choices,
+                           register_choices, create_choices, fork_choices):
     class _DefaultPermissionsForm(formencode.Schema):
         allow_extra_fields = True
         filter_extra_fields = True
@@ -297,6 +296,19 @@ def DefaultPermissionsForm(repo_perms_choices, group_perms_choices, register_cho
         default_fork = v.OneOf(fork_choices)
 
     return _DefaultPermissionsForm
+
+
+def DefaultsForm(edit=False, old_data={}, supported_backends=BACKENDS.keys()):
+    class _DefaultsForm(formencode.Schema):
+        allow_extra_fields = True
+        filter_extra_fields = True
+        default_repo_type = v.OneOf(supported_backends)
+        default_repo_private = v.StringBoolean(if_missing=False)
+        default_repo_enable_statistics = v.StringBoolean(if_missing=False)
+        default_repo_enable_downloads = v.StringBoolean(if_missing=False)
+        default_repo_enable_locking = v.StringBoolean(if_missing=False)
+
+    return _DefaultsForm
 
 
 def LdapSettingsForm(tls_reqcert_choices, search_scope_choices,

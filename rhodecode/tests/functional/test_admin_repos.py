@@ -26,14 +26,10 @@ class TestAdminReposController(TestController):
         self.log_user()
         repo_name = NEW_HG_REPO
         description = 'description for newly created repo'
-        private = False
-        response = self.app.post(url('repos'), {'repo_name': repo_name,
-                                                'repo_type': 'hg',
-                                                'clone_uri': '',
-                                                'repo_group': '',
-                                                'description': description,
-                                                'private': private,
-                                                'landing_rev': 'tip'})
+        response = self.app.post(url('repos'), 
+                        _get_repo_create_params(repo_private=False,
+                                                repo_name=repo_name,
+                                                repo_description=description))
         self.checkSessionFlash(response,
                                'created repository %s' % (repo_name))
 
@@ -63,13 +59,10 @@ class TestAdminReposController(TestController):
         description = 'description for newly created repo' + non_ascii
         description_unicode = description.decode('utf8')
         private = False
-        response = self.app.post(url('repos'), {'repo_name': repo_name,
-                                                'repo_type': 'hg',
-                                                'clone_uri': '',
-                                                'repo_group': '',
-                                                'description': description,
-                                                'private': private,
-                                                'landing_rev': 'tip'})
+        response = self.app.post(url('repos'),
+                        _get_repo_create_params(repo_private=False,
+                                                repo_name=repo_name,
+                                                repo_description=description))
         self.checkSessionFlash(response,
                                'created repository %s' % (repo_name_unicode))
 
@@ -103,14 +96,12 @@ class TestAdminReposController(TestController):
         repo_name = 'ingroup'
         repo_name_full = RepoGroup.url_sep().join([group_name, repo_name])
         description = 'description for newly created repo'
-        private = False
-        response = self.app.post(url('repos'), {'repo_name': repo_name,
-                                                'repo_type': 'hg',
-                                                'clone_uri': '',
-                                                'repo_group': gr.group_id,
-                                                'description': description,
-                                                'private': private,
-                                                'landing_rev': 'tip'})
+        response = self.app.post(url('repos'),
+                        _get_repo_create_params(repo_private=False,
+                                                repo_name=repo_name,
+                                                repo_description=description,
+                                                repo_group=gr.group_id,))
+
         self.checkSessionFlash(response,
                                'created repository %s' % (repo_name))
 
@@ -142,14 +133,12 @@ class TestAdminReposController(TestController):
         self.log_user()
         repo_name = NEW_GIT_REPO
         description = 'description for newly created repo'
-        private = False
-        response = self.app.post(url('repos'), {'repo_name': repo_name,
-                                                'repo_type': 'git',
-                                                'clone_uri': '',
-                                                'repo_group': '',
-                                                'description': description,
-                                                'private': private,
-                                                'landing_rev': 'tip'})
+
+        response = self.app.post(url('repos'),
+                        _get_repo_create_params(repo_private=False,
+                                                repo_type='git',
+                                                repo_name=repo_name,
+                                                repo_description=description))
         self.checkSessionFlash(response,
                                'created repository %s' % (repo_name))
 
@@ -179,13 +168,12 @@ class TestAdminReposController(TestController):
         description = 'description for newly created repo' + non_ascii
         description_unicode = description.decode('utf8')
         private = False
-        response = self.app.post(url('repos'), {'repo_name': repo_name,
-                                                'repo_type': 'git',
-                                                'clone_uri': '',
-                                                'repo_group': '',
-                                                'description': description,
-                                                'private': private,
-                                                'landing_rev': 'tip'})
+        response = self.app.post(url('repos'),
+                        _get_repo_create_params(repo_private=False,
+                                                repo_type='git',
+                                                repo_name=repo_name,
+                                                repo_description=description))
+
         self.checkSessionFlash(response,
                                'created repository %s' % (repo_name_unicode))
 
@@ -226,13 +214,12 @@ class TestAdminReposController(TestController):
         repo_name = 'vcs_test_new_to_delete'
         description = 'description for newly created repo'
         private = False
-        response = self.app.post(url('repos'), {'repo_name': repo_name,
-                                                'repo_type': 'hg',
-                                                'clone_uri': '',
-                                                'repo_group': '',
-                                                'description': description,
-                                                'private': private,
-                                                'landing_rev': 'tip'})
+        response = self.app.post(url('repos'),
+                        _get_repo_create_params(repo_private=False,
+                                                repo_type='hg',
+                                                repo_name=repo_name,
+                                                repo_description=description))
+
         self.checkSessionFlash(response,
                                'created repository %s' % (repo_name))
 
@@ -275,13 +262,12 @@ class TestAdminReposController(TestController):
         repo_name = 'vcs_test_new_to_delete'
         description = 'description for newly created repo'
         private = False
-        response = self.app.post(url('repos'), {'repo_name': repo_name,
-                                                'repo_type': 'git',
-                                                'clone_uri': '',
-                                                'repo_group': '',
-                                                'description': description,
-                                                'private': private,
-                                                'landing_rev': 'tip'})
+        response = self.app.post(url('repos'), 
+                        _get_repo_create_params(repo_private=False,
+                                                repo_type='git',
+                                                repo_name=repo_name,
+                                                repo_description=description))
+
         self.checkSessionFlash(response,
                                'created repository %s' % (repo_name))
 

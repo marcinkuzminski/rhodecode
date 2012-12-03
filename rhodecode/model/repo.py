@@ -37,7 +37,8 @@ from rhodecode.lib.hooks import log_create_repository, log_delete_repository
 
 from rhodecode.model import BaseModel
 from rhodecode.model.db import Repository, UserRepoToPerm, User, Permission, \
-    Statistics, UsersGroup, UsersGroupRepoToPerm, RhodeCodeUi, RepoGroup
+    Statistics, UsersGroup, UsersGroupRepoToPerm, RhodeCodeUi, RepoGroup,\
+    RhodeCodeSetting
 from rhodecode.lib import helpers as h
 
 
@@ -205,7 +206,8 @@ class RepoModel(BaseModel):
     def create_repo(self, repo_name, repo_type, description, owner,
                     private=False, clone_uri=None, repos_group=None,
                     landing_rev='tip', just_db=False, fork_of=None,
-                    copy_fork_permissions=False):
+                    copy_fork_permissions=False, enable_statistics=False,
+                    enable_locking=False, enable_downloads=False):
         """
         Create repository
 
@@ -233,6 +235,10 @@ class RepoModel(BaseModel):
             new_repo.private = private
             new_repo.clone_uri = clone_uri
             new_repo.landing_rev = landing_rev
+
+            new_repo.enable_statistics = enable_statistics
+            new_repo.enable_locking = enable_locking
+            new_repo.enable_downloads = enable_downloads
 
             if repos_group:
                 new_repo.enable_locking = repos_group.enable_locking
@@ -307,20 +313,27 @@ class RepoModel(BaseModel):
         :param just_db:
         :param fork:
         """
-
+        owner = cur_user
         repo_name = form_data['repo_name_full']
         repo_type = form_data['repo_type']
-        description = form_data['description']
-        owner = cur_user
-        private = form_data['private']
+        description = form_data['repo_description']
+        private = form_data['repo_private']
         clone_uri = form_data.get('clone_uri')
         repos_group = form_data['repo_group']
-        landing_rev = form_data['landing_rev']
+        landing_rev = form_data['repo_landing_rev']
         copy_fork_permissions = form_data.get('copy_permissions')
         fork_of = form_data.get('fork_parent_id')
+
+        ##defaults
+        defs = RhodeCodeSetting.get_default_repo_settings(strip_prefix=True)
+        enable_statistics = defs.get('repo_enable_statistic')
+        enable_locking = defs.get('repo_enable_locking')
+        enable_downloads = defs.get('repo_enable_downloads')
+
         return self.create_repo(
             repo_name, repo_type, description, owner, private, clone_uri,
-            repos_group, landing_rev, just_db, fork_of, copy_fork_permissions
+            repos_group, landing_rev, just_db, fork_of, copy_fork_permissions,
+            enable_statistics, enable_locking, enable_downloads
         )
 
     def create_fork(self, form_data, cur_user):

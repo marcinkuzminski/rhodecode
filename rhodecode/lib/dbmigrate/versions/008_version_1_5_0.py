@@ -23,6 +23,7 @@ def upgrade(migrate_engine):
     """
     pass
 
+
 def downgrade(migrate_engine):
     meta = MetaData()
     meta.bind = migrate_engine

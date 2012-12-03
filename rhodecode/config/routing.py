@@ -262,6 +262,10 @@ def make_map(config):
     rmap.resource('permission', 'permissions',
                   controller='admin/permissions', path_prefix=ADMIN_PREFIX)
 
+    #ADMIN DEFAULTS REST ROUTES
+    rmap.resource('default', 'defaults',
+                  controller='admin/defaults', path_prefix=ADMIN_PREFIX)
+
     ##ADMIN LDAP SETTINGS
     rmap.connect('ldap_settings', '%s/ldap' % ADMIN_PREFIX,
                  controller='admin/ldap_settings', action='ldap_settings',

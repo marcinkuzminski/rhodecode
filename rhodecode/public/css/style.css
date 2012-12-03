@@ -626,6 +626,14 @@ div:hover > a.permalink {
 	padding: 12px 9px 7px 24px;
 }
 
+#header #header-inner #quick li ul li a.defaults,#header #header-inner #quick li ul li a.defaults:hover
+    {
+    background: #FFF url("../images/icons/wrench.png") no-repeat 4px 9px;
+    width: 167px;
+    margin: 0;
+    padding: 12px 9px 7px 24px;
+}
+
 #header #header-inner #quick li ul li a.settings,#header #header-inner #quick li ul li a.settings:hover
 	{
 	background: #FFF url("../images/icons/cog.png") no-repeat 4px 9px;

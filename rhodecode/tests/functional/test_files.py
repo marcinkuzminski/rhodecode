@@ -1,10 +1,19 @@
 from rhodecode.tests import *
+from rhodecode.model.db import Repository
+from rhodecode.model.meta import Session
 
 ARCHIVE_SPECS = {
     '.tar.bz2': ('application/x-bzip2', 'tbz2', ''),
     '.tar.gz': ('application/x-gzip', 'tgz', ''),
     '.zip': ('application/zip', 'zip', ''),
 }
+
+
+def _set_downloads(repo_name, set_to):
+    repo = Repository.get_by_repo_name(repo_name)
+    repo.enable_downloads = set_to
+    Session().add(repo)
+    Session().commit()
 
 
 class TestFilesController(TestController):
@@ -216,7 +225,7 @@ removed extra unicode conversion in diff.</div>
 
     def test_archival(self):
         self.log_user()
-
+        _set_downloads(HG_REPO, set_to=True)
         for arch_ext, info in ARCHIVE_SPECS.items():
             short = '27cd5cce30c9%s' % arch_ext
             fname = '27cd5cce30c96924232dffcd24178a07ffeb5dfc%s' % arch_ext
@@ -237,7 +246,7 @@ removed extra unicode conversion in diff.</div>
 
     def test_archival_wrong_ext(self):
         self.log_user()
-
+        _set_downloads(HG_REPO, set_to=True)
         for arch_ext in ['tar', 'rar', 'x', '..ax', '.zipz']:
             fname = '27cd5cce30c96924232dffcd24178a07ffeb5dfc%s' % arch_ext
 
@@ -249,7 +258,7 @@ removed extra unicode conversion in diff.</div>
 
     def test_archival_wrong_revision(self):
         self.log_user()
-
+        _set_downloads(HG_REPO, set_to=True)
         for rev in ['00x000000', 'tar', 'wrong', '@##$@$42413232', '232dffcd']:
             fname = '%s.zip' % rev
 
