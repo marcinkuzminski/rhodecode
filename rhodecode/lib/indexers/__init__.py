@@ -35,7 +35,7 @@ from string import strip
 from shutil import rmtree
 
 from whoosh.analysis import RegexTokenizer, LowercaseFilter, StopFilter
-from whoosh.fields import TEXT, ID, STORED, NUMERIC, BOOLEAN, Schema, FieldType
+from whoosh.fields import TEXT, ID, STORED, NUMERIC, BOOLEAN, Schema, FieldType, DATETIME
 from whoosh.index import create_in, open_dir
 from whoosh.formats import Characters
 from whoosh.highlight import highlight, HtmlFormatter, ContextFragmenter
@@ -88,6 +88,15 @@ CHGSETS_SCHEMA = Schema(
 )
 
 CHGSET_IDX_NAME = 'CHGSET_INDEX'
+
+# used only to generate queries in journal
+JOURNAL_SCHEMA = Schema(
+    username=TEXT(),
+    date=DATETIME(),
+    action=TEXT(),
+    repository=TEXT(),
+    ip=TEXT(),
+)
 
 
 class MakeIndex(BasePasterCommand):

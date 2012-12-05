@@ -6,7 +6,12 @@
 </%def>
 
 <%def name="breadcrumbs_links()">
+    <form id="filter_form">
+    <input class="q_filter_box" id="q_filter" size="15" type="text" name="filter" value="${c.search_term or _('quick filter...')}"/>
+    <input type='submit' value="${_('filter')}" class="ui-btn"/>
     ${_('Admin journal')}
+    </form>
+    ${h.end_form()}
 </%def>
 
 <%def name="page_nav()">
@@ -25,4 +30,16 @@
 	    </div>
 	</div>
 </div>
+
+<script>
+YUE.on('q_filter','click',function(){
+    YUD.get('q_filter').value = '';
+});
+YUE.on('filter_form','submit',function(e){
+	YUE.preventDefault(e)
+    var val = YUD.get('q_filter').value;
+	window.location = "${url.current(filter='__FILTER__')}".replace('__FILTER__',val);
+ });
+</script>
 </%def>
+
