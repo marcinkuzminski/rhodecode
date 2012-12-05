@@ -32,6 +32,8 @@ import paste
 import beaker
 import tarfile
 import shutil
+import decorator
+import warnings
 from os.path import abspath
 from os.path import dirname as dn, join as jn
 
@@ -714,3 +716,27 @@ def check_git_version():
                         'for the system to function properly. Make sure '
                         'its version is at least %s' % (ver, req_ver))
     return _ver
+
+
+@decorator.decorator
+def jsonify(func, *args, **kwargs):
+    """Action decorator that formats output for JSON
+
+    Given a function that will return content, this decorator will turn
+    the result into JSON, with a content-type of 'application/json' and
+    output it.
+
+    """
+    from pylons.decorators.util import get_pylons
+    from rhodecode.lib.ext_json import json
+    pylons = get_pylons(args)
+    pylons.response.headers['Content-Type'] = 'application/json; charset=utf-8'
+    data = func(*args, **kwargs)
+    if isinstance(data, (list, tuple)):
+        msg = "JSON responses with Array envelopes are susceptible to " \
+              "cross-site data leak attacks, see " \
+              "http://wiki.pylonshq.com/display/pylonsfaq/Warnings"
+        warnings.warn(msg, Warning, 2)
+        log.warning(msg)
+    log.debug("Returning JSON wrapped action output")
+    return json.dumps(data, encoding='utf-8')

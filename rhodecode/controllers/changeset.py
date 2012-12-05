@@ -31,11 +31,10 @@ from webob.exc import HTTPForbidden, HTTPBadRequest
 from pylons import tmpl_context as c, url, request, response
 from pylons.i18n.translation import _
 from pylons.controllers.util import redirect
-from pylons.decorators import jsonify
+from rhodecode.lib.utils import jsonify
 
-from rhodecode.lib.vcs.exceptions import RepositoryError, ChangesetError, \
+from rhodecode.lib.vcs.exceptions import RepositoryError, \
     ChangesetDoesNotExistError
-from rhodecode.lib.vcs.nodes import FileNode
 
 import rhodecode.lib.helpers as h
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
@@ -47,8 +46,8 @@ from rhodecode.model.db import ChangesetComment, ChangesetStatus
 from rhodecode.model.comment import ChangesetCommentsModel
 from rhodecode.model.changeset_status import ChangesetStatusModel
 from rhodecode.model.meta import Session
-from rhodecode.lib.diffs import LimitedDiffContainer
 from rhodecode.model.repo import RepoModel
+from rhodecode.lib.diffs import LimitedDiffContainer
 from rhodecode.lib.exceptions import StatusChangeOnClosedPullRequestError
 from rhodecode.lib.vcs.backends.base import EmptyChangeset
 from rhodecode.lib.utils2 import safe_unicode

@@ -31,7 +31,7 @@ import tempfile
 from pylons import request, response, tmpl_context as c, url
 from pylons.i18n.translation import _
 from pylons.controllers.util import redirect
-from pylons.decorators import jsonify
+from rhodecode.lib.utils import jsonify
 
 from rhodecode.lib import diffs
 from rhodecode.lib import helpers as h
