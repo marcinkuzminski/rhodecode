@@ -63,56 +63,56 @@
             </div>
             <div class="field">
                 <div class="label">
-                    <label for="landing_rev">${_('Landing revision')}:</label>
+                    <label for="repo_landing_rev">${_('Landing revision')}:</label>
                 </div>
                 <div class="input">
-                    ${h.select('landing_rev','',c.landing_revs,class_="medium")}
+                    ${h.select('repo_landing_rev','',c.landing_revs,class_="medium")}
                     <span class="help-block">${_('Default revision for files page, downloads, whoosh and readme')}</span>
                 </div>
             </div>
             <div class="field">
                 <div class="label label-textarea">
-                    <label for="description">${_('Description')}:</label>
+                    <label for="repo_description">${_('Description')}:</label>
                 </div>
                 <div class="textarea text-area editor">
-                    ${h.textarea('description')}
+                    ${h.textarea('repo_description')}
                     <span class="help-block">${_('Keep it short and to the point. Use a README file for longer descriptions.')}</span>
                 </div>
             </div>
 
             <div class="field">
                 <div class="label label-checkbox">
-                    <label for="private">${_('Private repository')}:</label>
+                    <label for="repo_private">${_('Private repository')}:</label>
                 </div>
                 <div class="checkboxes">
-                    ${h.checkbox('private',value="True")}
+                    ${h.checkbox('repo_private',value="True")}
                     <span class="help-block">${_('Private repositories are only visible to people explicitly added as collaborators.')}</span>
                 </div>
             </div>
             <div class="field">
                 <div class="label label-checkbox">
-                    <label for="enable_statistics">${_('Enable statistics')}:</label>
+                    <label for="repo_enable_statistics">${_('Enable statistics')}:</label>
                 </div>
                 <div class="checkboxes">
-                    ${h.checkbox('enable_statistics',value="True")}
+                    ${h.checkbox('repo_enable_statistics',value="True")}
                     <span class="help-block">${_('Enable statistics window on summary page.')}</span>
                 </div>
             </div>
             <div class="field">
                 <div class="label label-checkbox">
-                    <label for="enable_downloads">${_('Enable downloads')}:</label>
+                    <label for="repo_enable_downloads">${_('Enable downloads')}:</label>
                 </div>
                 <div class="checkboxes">
-                    ${h.checkbox('enable_downloads',value="True")}
+                    ${h.checkbox('repo_enable_downloads',value="True")}
                     <span class="help-block">${_('Enable download menu on summary page.')}</span>
                 </div>
             </div>
             <div class="field">
                 <div class="label label-checkbox">
-                    <label for="enable_locking">${_('Enable locking')}:</label>
+                    <label for="repo_enable_locking">${_('Enable locking')}:</label>
                 </div>
                 <div class="checkboxes">
-                    ${h.checkbox('enable_locking',value="True")}
+                    ${h.checkbox('repo_enable_locking',value="True")}
                     <span class="help-block">${_('Enable lock-by-pulling on repository.')}</span>
                 </div>
             </div>
