@@ -35,7 +35,7 @@ from sqlalchemy.sql.expression import or_
 from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator
 from rhodecode.lib.base import BaseController, render
 from rhodecode.model.db import UserLog, User
-from rhodecode.lib.utils2 import safe_int, remove_prefix
+from rhodecode.lib.utils2 import safe_int, remove_prefix, remove_suffix
 from rhodecode.lib.indexers import JOURNAL_SCHEMA
 
 
@@ -50,13 +50,26 @@ def _filter(user_log, search_term):
     :param user_log:
     :param search_term:
     """
+    log.debug('Initial search term: %r' % search_term)
     qry = None
     if search_term:
         qp = QueryParser('repository', schema=JOURNAL_SCHEMA)
         qry = qp.parse(unicode(search_term))
-        log.debug('Filtering using query %r' % qry)
+        log.debug('Filtering using parsed query %r' % qry)
+
+    def wildcard_handler(col, wc_term):
+        if wc_term.startswith('*') and not wc_term.endswith('*'):
+            #postfix == endswith
+            wc_term = remove_prefix(wc_term, prefix='*')
+            return getattr(col, 'endswith')(wc_term)
+        elif wc_term.startswith('*') and wc_term.endswith('*'):
+            #wildcard == ilike
+            wc_term = remove_prefix(wc_term, prefix='*')
+            wc_term = remove_suffix(wc_term, suffix='*')
+            return getattr(col, 'contains')(wc_term)
 
     def get_filterion(field, val, term):
+
         if field == 'repository':
             field = getattr(UserLog, 'repository_name')
         elif field == 'ip':
@@ -64,27 +77,14 @@ def _filter(user_log, search_term):
         elif field == 'date':
             field = getattr(UserLog, 'action_date')
         elif field == 'username':
-            ##special case for username
-            if isinstance(term, query.Wildcard):
-                #only support wildcards with * at beggining
-                val = remove_prefix(val, prefix='*')
-                return getattr(UserLog, 'user_id').in_(
-                    [x.user_id for x in
-                     User.query().filter(User.username.endswith(val))])
-            elif isinstance(term, query.Prefix):
-                return getattr(UserLog, 'user_id').in_(
-                    [x.user_id for x in
-                     User.query().filter(User.username.startswith(val))])
-            # term == exact match, case insensitive
-            field = getattr(UserLog, 'user')
-            val = User.get_by_username(val, case_insensitive=True)
-
+            field = getattr(UserLog, 'username')
         else:
             field = getattr(UserLog, field)
+        log.debug('filter field: %s val=>%s' % (field, val))
 
         #sql filtering
         if isinstance(term, query.Wildcard):
-            return field.endsswith(val)
+            return wildcard_handler(field, val)
         elif isinstance(term, query.Prefix):
             return field.startswith(val)
         return field == val
@@ -101,8 +101,7 @@ def _filter(user_log, search_term):
         for term in qry:
             field = term.fieldname
             val = term.text
-            if isinstance(term, query.Term):
-                filters.append(get_filterion(field, val, term))
+            filters.append(get_filterion(field, val, term))
         user_log = user_log.filter(or_(*filters))
 
     return user_log

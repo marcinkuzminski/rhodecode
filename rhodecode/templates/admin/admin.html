@@ -8,8 +8,8 @@
 <%def name="breadcrumbs_links()">
     <form id="filter_form">
     <input class="q_filter_box" id="q_filter" size="15" type="text" name="filter" value="${c.search_term or _('quick filter...')}"/>
-    <input type='submit' value="${_('filter')}" class="ui-btn"/>
-    ${_('Admin journal')}
+    <input type='submit' value="${_('filter')}" class="ui-btn" style="padding:0px 2px 0px 2px;margin:0px"/>
+    ${_('Admin journal')} - ${ungettext('%s entry', '%s entries', c.users_log.item_count) % (c.users_log.item_count)}
     </form>
     ${h.end_form()}
 </%def>

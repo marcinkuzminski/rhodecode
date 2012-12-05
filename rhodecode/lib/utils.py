@@ -134,7 +134,7 @@ def action_logger(user, action, repo, ipaddr='', sa=None, commit=False):
 
     try:
         if hasattr(user, 'user_id'):
-            user_obj = user
+            user_obj = User.get(user.user_id)
         elif isinstance(user, basestring):
             user_obj = User.get_by_username(user)
         else:
@@ -152,6 +152,7 @@ def action_logger(user, action, repo, ipaddr='', sa=None, commit=False):
 
         user_log = UserLog()
         user_log.user_id = user_obj.user_id
+        user_log.username = user_obj.username
         user_log.action = safe_unicode(action)
 
         user_log.repository = repo_obj

@@ -649,7 +649,11 @@ def action_parser(user_log, feed=False, parse_cs=False):
 
     def get_pull_request():
         pull_request_id = action_params
-        repo_name = user_log.repository.repo_name
+        deleted = user_log.repository is None
+        if deleted:
+            repo_name = user_log.repository_name
+        else:
+            repo_name = user_log.repository.repo_name
         return link_to(_('Pull request #%s') % pull_request_id,
                     url('pullrequest_show', repo_name=repo_name,
                     pull_request_id=pull_request_id))
