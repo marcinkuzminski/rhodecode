@@ -6,9 +6,13 @@
         % for user,entries in items:
 	        <div class="journal_container">
 	            <div class="gravatar">
-	                <img alt="gravatar" src="${h.gravatar_url(user.email,24)}"/>
+	                <img alt="gravatar" src="${h.gravatar_url(user.email if user else 'anonymous@rhodecode.org',24)}"/>
 	            </div>
-	            <div class="journal_user">${user.name} ${user.lastname}</div>
+                %if user:
+	               <div class="journal_user">${user.name} ${user.lastname}</div>
+                %else:
+                    <div class="journal_user deleted">${entries[0].username}</div>
+                %endif
 	            <div class="journal_action_container">
 	            % for entry in entries:
 		            <div class="journal_icon"> ${h.action_parser(entry)[2]()}</div>

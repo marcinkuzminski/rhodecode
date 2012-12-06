@@ -2327,6 +2327,15 @@ a.metatag[tag="license"]:hover {
 	height: 30px;
 }
 
+#journal .journal_user.deleted {
+    color: #747474;
+    font-size: 14px;
+    font-weight: normal;
+    height: 30px;
+    font-style: italic;
+}
+
+
 #journal .journal_icon {
 	clear: both;
 	float: left;
