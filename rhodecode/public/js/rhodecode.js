@@ -339,6 +339,58 @@ var show_changeset_tooltip = function(){
 	});
 };
 
+var onSuccessFollow = function(target){
+    var f = YUD.get(target.id);
+    var f_cnt = YUD.get('current_followers_count');
+
+    if(YUD.hasClass(f, 'follow')){
+        f.setAttribute('class','following');
+        f.setAttribute('title',_TM['Stop following this repository']);
+
+        if(f_cnt){
+            var cnt = Number(f_cnt.innerHTML)+1;
+            f_cnt.innerHTML = cnt;
+        }
+    }
+    else{
+        f.setAttribute('class','follow');
+        f.setAttribute('title',_TM['Start following this repository']);
+        if(f_cnt){
+            var cnt = Number(f_cnt.innerHTML)-1;
+            f_cnt.innerHTML = cnt;
+        }
+    }
+}
+
+var toggleFollowingUser = function(target,fallows_user_id,token,user_id){
+    args = 'follows_user_id='+fallows_user_id;
+    args+= '&amp;auth_token='+token;
+    if(user_id != undefined){
+        args+="&amp;user_id="+user_id;
+    }
+    YUC.asyncRequest('POST',TOGGLE_FOLLOW_URL,{
+        success:function(o){
+        	onSuccessFollow(target);
+        }
+    },args);
+    return false;
+}
+
+var toggleFollowingRepo = function(target,fallows_repo_id,token,user_id){
+
+    args = 'follows_repo_id='+fallows_repo_id;
+    args+= '&amp;auth_token='+token;
+    if(user_id != undefined){
+        args+="&amp;user_id="+user_id;
+    }
+    YUC.asyncRequest('POST',TOGGLE_FOLLOW_URL,{
+        success:function(o){
+        	onSuccessFollow(target);
+        }
+    },args);
+    return false;
+}
+
 
 /**
  * TOOLTIP IMPL.
