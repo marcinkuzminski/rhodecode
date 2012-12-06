@@ -4,7 +4,15 @@
     ${_('Journal')} - ${c.rhodecode_name}
 </%def>
 <%def name="breadcrumbs()">
-	${c.rhodecode_name}
+    <h5>
+    <form id="filter_form">
+    <input class="q_filter_box ${'' if c.search_term else 'initial'}" id="j_filter" size="15" type="text" name="filter" value="${c.search_term or _('quick filter...')}"/>
+    <span class="tooltip" title="${h.tooltip(h.journal_filter_help())}">?</span>
+    <input type='submit' value="${_('filter')}" class="ui-btn" style="padding:0px 2px 0px 2px;margin:0px"/>
+    ${_('journal')} - ${ungettext('%s entry', '%s entries', c.journal_pager.item_count) % (c.journal_pager.item_count)}
+    </form>
+    ${h.end_form()}
+    </h5>
 </%def>
 <%def name="page_nav()">
 	${self.menu('home')}
@@ -18,18 +26,18 @@
     <div class="box box-left">
 	    <!-- box / title -->
 	    <div class="title">
-	        <h5>${_('Journal')}</h5>
-             <ul class="links">
-               <li>
-                 <span><a id="refresh" href="${h.url('journal')}"><img class="icon" title="${_('Refresh')}" alt="${_('Refresh')}" src="${h.url('/images/icons/arrow_refresh.png')}"/></a></span>
-               </li>
-               <li>
-                 <span><a href="${h.url('journal_rss', api_key=c.rhodecode_user.api_key)}"><img class="icon" title="${_('RSS feed')}" alt="${_('RSS feed')}" src="${h.url('/images/icons/rss_16.png')}"/></a></span>
-               </li>
-               <li>
-                 <span><a href="${h.url('journal_atom', api_key=c.rhodecode_user.api_key)}"><img class="icon" title="${_('ATOM feed')}" alt="${_('ATOM feed')}" src="${h.url('/images/icons/atom.png')}"/></a></span>
-               </li>
-             </ul>
+         ${self.breadcrumbs()}
+         <ul class="links">
+           <li>
+             <span><a id="refresh" href="${h.url('journal')}"><img class="icon" title="${_('Refresh')}" alt="${_('Refresh')}" src="${h.url('/images/icons/arrow_refresh.png')}"/></a></span>
+           </li>
+           <li>
+             <span><a href="${h.url('journal_rss', api_key=c.rhodecode_user.api_key)}"><img class="icon" title="${_('RSS feed')}" alt="${_('RSS feed')}" src="${h.url('/images/icons/rss_16.png')}"/></a></span>
+           </li>
+           <li>
+             <span><a href="${h.url('journal_atom', api_key=c.rhodecode_user.api_key)}"><img class="icon" title="${_('ATOM feed')}" alt="${_('ATOM feed')}" src="${h.url('/images/icons/atom.png')}"/></a></span>
+           </li>
+         </ul>
 	    </div>
 	    <div id="journal">${c.journal_data}</div>
     </div>
@@ -106,6 +114,26 @@
     </div>
 
     <script type="text/javascript">
+    
+    YUE.on('j_filter','click',function(){
+        var jfilter = YUD.get('j_filter');
+        if(YUD.hasClass(jfilter, 'initial')){
+            jfilter.value = '';
+        }
+    });
+    var fix_j_filter_width = function(len){
+        YUD.setStyle(YUD.get('j_filter'),'width',Math.max(80, len*6.50)+'px');
+    }
+    YUE.on('j_filter','keyup',function(){
+        fix_j_filter_width(YUD.get('j_filter').value.length);
+    });
+    YUE.on('filter_form','submit',function(e){
+        YUE.preventDefault(e)
+        var val = YUD.get('j_filter').value;
+        window.location = "${url.current(filter='__FILTER__')}".replace('__FILTER__',val);
+    });
+    fix_j_filter_width(YUD.get('j_filter').value.length);    
+    
     var show_my = function(e){
         YUD.setStyle('watched','display','none');
         YUD.setStyle('my','display','');
@@ -153,7 +181,7 @@
     }
 
     YUE.on('refresh','click',function(e){
-        ypjax(e.currentTarget.href,"journal",function(){
+        ypjax("${h.url.current(filter=c.search_term)}","journal",function(){
         	show_more_event();
         	tooltip_activate();
         	show_changeset_tooltip();

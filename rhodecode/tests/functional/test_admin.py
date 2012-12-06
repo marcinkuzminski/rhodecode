@@ -101,3 +101,15 @@ class TestAdminController(TestController):
         response = self.app.get(url(controller='admin/admin', action='index',
                                     filter='action:*pull_request*'))
         response.mustcontain('187 entries')
+
+    def test_filter_journal_filter_on_date(self):
+        self.log_user()
+        response = self.app.get(url(controller='admin/admin', action='index',
+                                    filter='date:20121010'))
+        response.mustcontain('47 entries')
+
+    def test_filter_journal_filter_on_date_2(self):
+        self.log_user()
+        response = self.app.get(url(controller='admin/admin', action='index',
+                                    filter='date:20121020'))
+        response.mustcontain('17 entries')

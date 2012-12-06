@@ -30,19 +30,20 @@ from sqlalchemy.orm import joinedload
 from webhelpers.paginate import Page
 from whoosh.qparser.default import QueryParser
 from whoosh import query
-from sqlalchemy.sql.expression import or_
+from sqlalchemy.sql.expression import or_, and_
 
 from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator
 from rhodecode.lib.base import BaseController, render
 from rhodecode.model.db import UserLog, User
 from rhodecode.lib.utils2 import safe_int, remove_prefix, remove_suffix
 from rhodecode.lib.indexers import JOURNAL_SCHEMA
+from whoosh.qparser.dateparse import DateParserPlugin
 
 
 log = logging.getLogger(__name__)
 
 
-def _filter(user_log, search_term):
+def _journal_filter(user_log, search_term):
     """
     Filters sqlalchemy user_log based on search_term with whoosh Query language
     http://packages.python.org/Whoosh/querylang.html
@@ -54,6 +55,7 @@ def _filter(user_log, search_term):
     qry = None
     if search_term:
         qp = QueryParser('repository', schema=JOURNAL_SCHEMA)
+        qp.add_plugin(DateParserPlugin())
         qry = qp.parse(unicode(search_term))
         log.debug('Filtering using parsed query %r' % qry)
 
@@ -87,20 +89,25 @@ def _filter(user_log, search_term):
             return wildcard_handler(field, val)
         elif isinstance(term, query.Prefix):
             return field.startswith(val)
+        elif isinstance(term, query.DateRange):
+            return and_(field >= val[0], field <= val[1])
         return field == val
 
-    if isinstance(qry, (query.And, query.Term, query.Prefix, query.Wildcard)):
+    if isinstance(qry, (query.And, query.Term, query.Prefix, query.Wildcard,
+                        query.DateRange)):
         if not isinstance(qry, query.And):
             qry = [qry]
         for term in qry:
             field = term.fieldname
-            val = term.text
+            val = (term.text if not isinstance(term, query.DateRange)
+                   else [term.startdate, term.enddate])
             user_log = user_log.filter(get_filterion(field, val, term))
     elif isinstance(qry, query.Or):
         filters = []
         for term in qry:
             field = term.fieldname
-            val = term.text
+            val = (term.text if not isinstance(term, query.DateRange)
+                   else [term.startdate, term.enddate])
             filters.append(get_filterion(field, val, term))
         user_log = user_log.filter(or_(*filters))
 
@@ -122,7 +129,7 @@ class AdminController(BaseController):
         #FILTERING
         c.search_term = request.GET.get('filter')
         try:
-            users_log = _filter(users_log, c.search_term)
+            users_log = _journal_filter(users_log, c.search_term)
         except:
             # we want this to crash for now
             raise

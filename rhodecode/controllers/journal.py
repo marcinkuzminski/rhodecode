@@ -42,6 +42,7 @@ from rhodecode.model.meta import Session
 from sqlalchemy.sql.expression import func
 from rhodecode.model.scm import ScmModel
 from rhodecode.lib.utils2 import safe_int
+from rhodecode.controllers.admin.admin import _journal_filter
 
 log = logging.getLogger(__name__)
 
@@ -65,9 +66,14 @@ class JournalController(BaseController):
             .options(joinedload(UserFollowing.follows_repository))\
             .all()
 
+        #FILTERING
+        c.search_term = request.GET.get('filter')
         journal = self._get_journal_data(c.following)
 
-        c.journal_pager = Page(journal, page=p, items_per_page=20)
+        def url_generator(**kw):
+            return url.current(filter=c.search_term, **kw)
+
+        c.journal_pager = Page(journal, page=p, items_per_page=20, url=url_generator)
         c.journal_day_aggreagate = self._get_daily_aggregate(c.journal_pager)
 
         c.journal_data = render('journal/journal_data.html')
@@ -141,9 +147,15 @@ class JournalController(BaseController):
         if filtering_criterion is not None:
             journal = self.sa.query(UserLog)\
                 .options(joinedload(UserLog.user))\
-                .options(joinedload(UserLog.repository))\
-                .filter(filtering_criterion)\
-                .order_by(UserLog.action_date.desc())
+                .options(joinedload(UserLog.repository))
+            #filter
+            try:
+                journal = _journal_filter(journal, c.search_term)
+            except:
+                # we want this to crash for now
+                raise
+            journal = journal.filter(filtering_criterion)\
+                        .order_by(UserLog.action_date.desc())
         else:
             journal = []
 

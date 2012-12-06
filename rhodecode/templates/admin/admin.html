@@ -7,25 +7,8 @@
 
 <%def name="breadcrumbs_links()">
     <form id="filter_form">
-    <input class="q_filter_box ${'' if c.search_term else 'initial'}" id="q_filter" size="15" type="text" name="filter" value="${c.search_term or _('quick filter...')}"/>
-    <span class="tooltip" title="${h.tooltip(_('''
-        Example search query:
-            "repository:vcs"
-            "username:marcin"
-        
-        You can use wildcards using '*'
-            "repositroy:vcs*" - search everything starting with 'vcs'
-            "repository:*vcs*" - search for repository containing 'vcs'
-        Use AND / OR operators in queries
-            "repository:vcs OR repository:test"
-            "username:test AND repository:test*"
-        List of valid search filters:
-            repository:
-            username:
-            action:
-            ip:
-            date:
-    '''))}">?</span>
+    <input class="q_filter_box ${'' if c.search_term else 'initial'}" id="j_filter" size="15" type="text" name="filter" value="${c.search_term or _('journal filter...')}"/>
+    <span class="tooltip" title="${h.tooltip(h.journal_filter_help())}">?</span>
     <input type='submit' value="${_('filter')}" class="ui-btn" style="padding:0px 2px 0px 2px;margin:0px"/>
     ${_('Admin journal')} - ${ungettext('%s entry', '%s entries', c.users_log.item_count) % (c.users_log.item_count)}
     </form>
@@ -50,24 +33,24 @@
 </div>
 
 <script>
-YUE.on('q_filter','click',function(){
-	var qfilter = YUD.get('q_filter');
-	if(YUD.hasClass(qfilter, 'initial')){
-		qfilter.value = '';
+YUE.on('j_filter','click',function(){
+	var jfilter = YUD.get('j_filter');
+	if(YUD.hasClass(jfilter, 'initial')){
+		jfilter.value = '';
 	}
 });
-var fix_q_filter_width = function(len){
-    YUD.setStyle(YUD.get('q_filter'),'width',Math.max(80, len*6.50)+'px');
+var fix_j_filter_width = function(len){
+    YUD.setStyle(YUD.get('j_filter'),'width',Math.max(80, len*6.50)+'px');
 }
-YUE.on('q_filter','keyup',function(){
-	fix_q_filter_width(YUD.get('q_filter').value.length);
+YUE.on('j_filter','keyup',function(){
+	fix_j_filter_width(YUD.get('j_filter').value.length);
 });
 YUE.on('filter_form','submit',function(e){
 	YUE.preventDefault(e)
-    var val = YUD.get('q_filter').value;
+    var val = YUD.get('j_filter').value;
 	window.location = "${url.current(filter='__FILTER__')}".replace('__FILTER__',val);
 });
-fix_q_filter_width(YUD.get('q_filter').value.length);
+fix_j_filter_width(YUD.get('j_filter').value.length);
 </script>
 </%def>
 

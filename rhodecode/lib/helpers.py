@@ -11,6 +11,7 @@ import math
 import logging
 import re
 import urlparse
+import textwrap
 
 from datetime import datetime
 from pygments.formatters.html import HtmlFormatter
@@ -1135,3 +1136,23 @@ def changeset_status_lbl(changeset_status):
 
 def get_permission_name(key):
     return dict(Permission.PERMS).get(key)
+
+
+def journal_filter_help():
+    return _(textwrap.dedent('''
+        Example filter terms:
+            repository:vcs
+            username:marcin
+            action:*push*
+            ip:127.0.0.1
+            date:20120101
+            date:[20120101100000 TO 20120102]
+
+        Generate wildcards using '*' character:
+            "repositroy:vcs*" - search everything starting with 'vcs'
+            "repository:*vcs*" - search for repository containing 'vcs'
+
+        Optional AND / OR operators in queries
+            "repository:vcs OR repository:test"
+            "username:test AND repository:test*"
+    '''))
