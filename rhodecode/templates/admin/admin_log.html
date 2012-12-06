@@ -39,20 +39,20 @@
 
 <script type="text/javascript">
   YUE.onDOMReady(function(){
-	YUE.delegate("user_log","click",function(e, matchedEl, container){
-		ypjax(e.target.href,"user_log",function(){
-			show_more_event();
-			tooltip_activate();
-			show_changeset_tooltip();
-		});
-		YUE.preventDefault(e);
-	},'.pager_link');
+    YUE.delegate("user_log","click",function(e, matchedEl, container){
+        ypjax(e.target.href,"user_log",function(){
+            show_more_event();
+            tooltip_activate();
+            show_changeset_tooltip();
+        });
+        YUE.preventDefault(e);
+    },'.pager_link');
 
-	YUE.delegate("user_log","click",function(e,matchedEl,container){
-	      var el = e.target;
-	      YUD.setStyle(YUD.get(el.id.substring(1)),'display','');
-	      YUD.setStyle(el.parentNode,'display','none');
-	  },'.show_more');
+    YUE.delegate("user_log","click",function(e,matchedEl,container){
+          var el = e.target;
+          YUD.setStyle(YUD.get(el.id.substring(1)),'display','');
+          YUD.setStyle(el.parentNode,'display','none');
+      },'.show_more');
   });
 </script>
 
