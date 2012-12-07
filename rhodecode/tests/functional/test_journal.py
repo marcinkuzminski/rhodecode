@@ -3,6 +3,7 @@ from rhodecode.model.db import UserFollowing, User, Repository
 from rhodecode.lib.helpers import get_token
 import datetime
 
+
 class TestJournalController(TestController):
 
     def test_index(self):
@@ -34,9 +35,10 @@ class TestJournalController(TestController):
         self.log_user()
         response = self.app.get(url(controller='journal', action='index'),)
 
+    def test_public_journal_atom(self):
+        self.log_user()
+        response = self.app.get(url(controller='journal', action='public_journal_atom'),)
 
-    def __add_repo(self):
-        pass
-
-    def __remove_repo(self):
-        pass
+    def test_public_journal_rss(self):
+        self.log_user()
+        response = self.app.get(url(controller='journal', action='public_journal_rss'),)

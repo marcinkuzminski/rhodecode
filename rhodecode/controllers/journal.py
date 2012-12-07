@@ -41,7 +41,7 @@ from rhodecode.model.db import UserLog, UserFollowing, Repository, User
 from rhodecode.model.meta import Session
 from sqlalchemy.sql.expression import func
 from rhodecode.model.scm import ScmModel
-from rhodecode.lib.utils2 import safe_int
+from rhodecode.lib.utils2 import safe_int, AttributeDict
 from rhodecode.controllers.admin.admin import _journal_filter
 
 log = logging.getLogger(__name__)
@@ -54,6 +54,7 @@ class JournalController(BaseController):
         self.language = 'en-us'
         self.ttl = "5"
         self.feed_nr = 20
+        c.search_term = request.GET.get('filter')
 
     @LoginRequired()
     @NotAnonymous()
@@ -66,8 +67,6 @@ class JournalController(BaseController):
             .options(joinedload(UserFollowing.follows_repository))\
             .all()
 
-        #FILTERING
-        c.search_term = request.GET.get('filter')
         journal = self._get_journal_data(c.following)
 
         def url_generator(**kw):
@@ -229,9 +228,15 @@ class JournalController(BaseController):
                          ttl=self.ttl)
 
         for entry in journal[:self.feed_nr]:
+            user = entry.user
+            if user is None:
+                #fix deleted users
+                user = AttributeDict({'short_contact': entry.username,
+                                      'email': '',
+                                      'full_contact': ''})
             action, action_extra, ico = h.action_parser(entry, feed=True)
-            title = "%s - %s %s" % (entry.user.short_contact, action(),
-                                 entry.repository.repo_name)
+            title = "%s - %s %s" % (user.short_contact, action(),
+                                    entry.repository.repo_name)
             desc = action_extra()
             _url = None
             if entry.repository is not None:
@@ -242,8 +247,8 @@ class JournalController(BaseController):
             feed.add_item(title=title,
                           pubdate=entry.action_date,
                           link=_url or url('', qualified=True),
-                          author_email=entry.user.email,
-                          author_name=entry.user.full_contact,
+                          author_email=user.email,
+                          author_name=user.full_contact,
                           description=desc)
 
         response.content_type = feed.mime_type
@@ -266,9 +271,15 @@ class JournalController(BaseController):
                          ttl=self.ttl)
 
         for entry in journal[:self.feed_nr]:
+            user = entry.user
+            if user is None:
+                #fix deleted users
+                user = AttributeDict({'short_contact': entry.username,
+                                      'email': '',
+                                      'full_contact': ''})
             action, action_extra, ico = h.action_parser(entry, feed=True)
-            title = "%s - %s %s" % (entry.user.short_contact, action(),
-                                 entry.repository.repo_name)
+            title = "%s - %s %s" % (user.short_contact, action(),
+                                    entry.repository.repo_name)
             desc = action_extra()
             _url = None
             if entry.repository is not None:
@@ -279,8 +290,8 @@ class JournalController(BaseController):
             feed.add_item(title=title,
                           pubdate=entry.action_date,
                           link=_url or url('', qualified=True),
-                          author_email=entry.user.email,
-                          author_name=entry.user.full_contact,
+                          author_email=user.email,
+                          author_name=user.full_contact,
                           description=desc)
 
         response.content_type = feed.mime_type
