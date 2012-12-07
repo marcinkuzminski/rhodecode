@@ -17,15 +17,28 @@ class TestAdminController(TestController):
     def setup_class(cls):
         UserLog.query().delete()
         Session().commit()
+
+        def strptime(val):
+            fmt = '%Y-%m-%d %H:%M:%S'
+            if '.' not in val:
+                return datetime.datetime.strptime(val, fmt)
+
+            nofrag, frag = val.split(".")
+            date = datetime.datetime.strptime(nofrag, fmt)
+
+            frag = frag[:6]  # truncate to microseconds
+            frag += (6 - len(frag)) * '0'  # add 0s
+            return date.replace(microsecond=int(frag))
+
         with open(os.path.join(FIXTURES, 'journal_dump.csv')) as f:
             for row in csv.DictReader(f):
                 ul = UserLog()
                 for k, v in row.iteritems():
                     v = safe_unicode(v)
                     if k == 'action_date':
-                        v = datetime.datetime.strptime(v, '%Y-%m-%d %H:%M:%S.%f')
+                        v = strptime(v)
                     if k in ['user_id', 'repository_id']:
-                        #nullable due to FK problems
+                        # nullable due to FK problems
                         v = None
                     setattr(ul, k, v)
                 Session().add(ul)
