@@ -176,6 +176,12 @@ class PullRequestModel(BaseModel):
             for cs in map(binascii.hexlify, revs):
                 _cs = org_repo.get_changeset(cs)
                 changesets.append(_cs)
+            # in case we have revisions filter out the ones not in given range
+            if org_ref[0] == 'rev' and other_ref[0] == 'rev':
+                revs = [x.raw_id for x in changesets]
+                start = org_ref[1]
+                stop = other_ref[1]
+                changesets = changesets[revs.index(start):revs.index(stop) + 1]
         else:
             #no remote compare do it on the same repository
             if alias == 'hg':
@@ -276,5 +282,4 @@ class PullRequestModel(BaseModel):
                                          org_repo_scm, org_ref,
                                          other_repo_scm, other_ref,
                                          discovery_data)
-
         return cs_ranges, discovery_data
