@@ -24,6 +24,9 @@ class TestAdminController(TestController):
                     v = safe_unicode(v)
                     if k == 'action_date':
                         v = datetime.datetime.strptime(v, '%Y-%m-%d %H:%M:%S.%f')
+                    if k in ['user_id', 'repository_id']:
+                        #nullable due to FK problems
+                        v = None
                     setattr(ul, k, v)
                 Session().add(ul)
             Session().commit()
@@ -49,6 +52,12 @@ class TestAdminController(TestController):
                                     filter='repository:rhodecode'))
         response.mustcontain('3 entries')
 
+    def test_filter_journal_filter_exact_match_on_repository_CamelCase(self):
+        self.log_user()
+        response = self.app.get(url(controller='admin/admin', action='index',
+                                    filter='repository:RhodeCode'))
+        response.mustcontain('3 entries')
+
     def test_filter_journal_filter_wildcard_on_repository(self):
         self.log_user()
         response = self.app.get(url(controller='admin/admin', action='index',
@@ -59,6 +68,12 @@ class TestAdminController(TestController):
         self.log_user()
         response = self.app.get(url(controller='admin/admin', action='index',
                                     filter='repository:test*'))
+        response.mustcontain('257 entries')
+
+    def test_filter_journal_filter_prefix_on_repository_CamelCase(self):
+        self.log_user()
+        response = self.app.get(url(controller='admin/admin', action='index',
+                                    filter='repository:Test*'))
         response.mustcontain('257 entries')
 
     def test_filter_journal_filter_prefix_on_repository_and_user(self):
@@ -77,6 +92,12 @@ class TestAdminController(TestController):
         self.log_user()
         response = self.app.get(url(controller='admin/admin', action='index',
                                     filter='username:demo'))
+        response.mustcontain('1087 entries')
+
+    def test_filter_journal_filter_exact_match_on_username_camelCase(self):
+        self.log_user()
+        response = self.app.get(url(controller='admin/admin', action='index',
+                                    filter='username:DemO'))
         response.mustcontain('1087 entries')
 
     def test_filter_journal_filter_wildcard_on_username(self):
