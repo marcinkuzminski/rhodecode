@@ -34,7 +34,7 @@
 		<div class="diffblock">
             <div class="parents">
                 %if c.changeset.parents:
-                 %for n, p_cs in enumerate(reversed(c.changeset.parents),1):
+                 %for n, p_cs in enumerate(reversed(c.changeset.parents)):
                     <span class="changeset_hash">&laquo; ${h.link_to('%s:%s' % (p_cs.revision,p_cs.raw_id[:6]),h.url('changeset_home',repo_name=c.repo_name,revision=p_cs.raw_id),title=p_cs.message)}</span>
                     <br>
                  %endfor
@@ -44,7 +44,7 @@
             </div>
             <div class="children">
                 %if c.changeset.children:
-                 %for n, p_cs in enumerate(reversed(c.changeset.children),1):
+                 %for n, p_cs in enumerate(reversed(c.changeset.children)):
                     <span class="changeset_hash">${h.link_to('%s:%s' % (p_cs.revision,p_cs.raw_id[:6]),h.url('changeset_home',repo_name=c.repo_name,revision=p_cs.raw_id),title=p_cs.message)} &raquo;</span>
                     <br>
                  %endfor
