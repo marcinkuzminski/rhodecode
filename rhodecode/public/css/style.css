@@ -4646,6 +4646,15 @@ div.diffblock .code-header{
     padding:10px 0 10px 0;
     height: 14px;
 }
+
+div.diffblock .code-header.banner{
+    border-bottom: 1px solid #CCCCCC;
+    background: #EEEEEE;
+    height: 14px;
+    margin: 0px 95px 0px 95px;
+    padding: 3px 3px 11px 3px;
+}
+
 div.diffblock .code-header.cv{
     height: 34px;
 }
@@ -4667,6 +4676,32 @@ div.diffblock .code-header div{
     font-weight: bold;
     font-size: 14px;
 }
+
+div.diffblock .parents {
+    float: left;
+    height: 26px;
+    width:100px;
+    font-size: 10px;
+    font-weight: 400;
+    vertical-align: middle;
+    padding: 0px 2px 2px 2px;
+    background-color:#eeeeee;
+    border-bottom: 1px solid #CCCCCC;
+}
+
+div.diffblock .children {
+    float: right;
+    height: 26px;
+    width:100px;
+    font-size: 10px;
+    font-weight: 400;
+    vertical-align: middle;
+    text-align: right;
+    padding: 0px 2px 2px 2px;
+    background-color:#eeeeee;
+    border-bottom: 1px solid #CCCCCC;
+}
+
 div.diffblock .code-body{
     background: #FFFFFF;
 }

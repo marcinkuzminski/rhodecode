@@ -32,7 +32,28 @@
     </script>
     <div class="table">
 		<div class="diffblock">
-			<div class="code-header">
+            <div class="parents">
+                %if c.changeset.parents:
+                 %for n, p_cs in enumerate(reversed(c.changeset.parents),1):
+                    <span class="changeset_hash">&laquo; ${h.link_to('%s:%s' % (p_cs.revision,p_cs.raw_id[:6]),h.url('changeset_home',repo_name=c.repo_name,revision=p_cs.raw_id),title=p_cs.message)}</span>
+                    <br>
+                 %endfor
+                 %else:
+                    <span>${_('No parents')}</span>
+                 %endif                
+            </div>
+            <div class="children">
+                %if c.changeset.children:
+                 %for n, p_cs in enumerate(reversed(c.changeset.children),1):
+                    <span class="changeset_hash">${h.link_to('%s:%s' % (p_cs.revision,p_cs.raw_id[:6]),h.url('changeset_home',repo_name=c.repo_name,revision=p_cs.raw_id),title=p_cs.message)} &raquo;</span>
+                    <br>
+                 %endfor
+                 %else:
+                    <span>${_('No children')}</span>
+                 %endif                
+            </div>              
+			<div class="code-header banner">
+      
                 <div class="hash">
                  r${c.changeset.revision}:${h.short_id(c.changeset.raw_id)}
                 </div>
@@ -53,7 +74,7 @@
                   ${c.context_url(request.GET)}
                 </div>
                 <div class="comments-number" style="float:right;padding-right:5px">${ungettext("%d comment", "%d comments", len(c.comments)) % len(c.comments)} ${ungettext("(%d inline)", "(%d inline)", c.inline_cnt) % c.inline_cnt}</div>
-			</div>
+            </div>          
 		</div>
 	    <div id="changeset_content">
 			<div class="container">
@@ -80,16 +101,6 @@
 	                    % endif
 		             </div>
 
-		            %if c.changeset.parents:
-		             %for p_cs in reversed(c.changeset.parents):
-		                 <div class="parent">${_('Parent')}
-                     <span class="changeset_id">${p_cs.revision}:<span class="changeset_hash">${h.link_to(h.short_id(p_cs.raw_id),
-		                     h.url('changeset_home',repo_name=c.repo_name,revision=p_cs.raw_id),title=p_cs.message)}</span></span>
-		                 </div>
-		             %endfor
-                    %else:
-                        <div class="parent">${_('No parents')}</div>
-                    %endif
 		         <span class="logtags">
                  %if len(c.changeset.parents)>1:
                  <span class="merge">${_('merge')}</span>
