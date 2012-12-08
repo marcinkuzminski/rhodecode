@@ -749,7 +749,13 @@ HasRepoPermissionAny, HasRepoPermissionAll
 #==============================================================================
 
 def gravatar_url(email_address, size=30):
-    from pylons import url  ## doh, we need to re-import url to mock it later
+    from pylons import url  # doh, we need to re-import url to mock it later
+
+    if (not str2bool(config['app_conf'].get('use_gravatar')) or
+        not email_address or email_address == 'anonymous@rhodecode.org'):
+        f = lambda a, l: min(l, key=lambda x: abs(x - a))
+        return url("/images/user%s.png" % f(size, [14, 16, 20, 24, 30]))
+
     if(str2bool(config['app_conf'].get('use_gravatar')) and
        config['app_conf'].get('alternative_gravatar_url')):
         tmpl = config['app_conf'].get('alternative_gravatar_url', '')
@@ -760,11 +766,6 @@ def gravatar_url(email_address, size=30):
                    .replace('{scheme}', parsed_url.scheme)\
                    .replace('{size}', str(size))
         return tmpl
-
-    if (not str2bool(config['app_conf'].get('use_gravatar')) or
-        not email_address or email_address == 'anonymous@rhodecode.org'):
-        f = lambda a, l: min(l, key=lambda x: abs(x - a))
-        return url("/images/user%s.png" % f(size, [14, 16, 20, 24, 30]))
 
     ssl_enabled = 'https' == request.environ.get('wsgi.url_scheme')
     default = 'identicon'
