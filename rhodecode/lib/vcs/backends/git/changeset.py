@@ -180,6 +180,21 @@ class GitChangeset(BaseChangeset):
         return [self.repository.get_changeset(parent)
                 for parent in self._commit.parents]
 
+    @LazyProperty
+    def children(self):
+        """
+        Returns list of children changesets.
+        """
+        so, se = self.repository.run_git_command(
+            "rev-list --all --children | grep '^%s'" % self.raw_id
+        )
+
+        children = []
+        for l in so.splitlines():
+            childs = l.split(' ')[1:]
+            children.extend(childs)
+        return [self.repository.get_changeset(cs) for cs in children]
+
     def next(self, branch=None):
 
         if branch and self.branch != branch:
