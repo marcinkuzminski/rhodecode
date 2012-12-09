@@ -1004,7 +1004,7 @@ var getIdentNode = function(n){
 };
 
 var  getSelectionLink = function(e) {
-	
+
 	//get selection from start/to nodes    	
 	if (typeof window.getSelection != "undefined") {
 		s = window.getSelection();
@@ -1026,27 +1026,28 @@ var  getSelectionLink = function(e) {
 	    	offset = 35;
 	    	ranges = [f_int,t_int];
 	    }
-	    
+	    // if we select more than 2 lines
 	    if (ranges[0] != ranges[1]){
 	        if(YUD.get('linktt') == null){
 	            hl_div = document.createElement('div');
 	            hl_div.id = 'linktt';
 	        }
-	        anchor = '#L'+ranges[0]+'-'+ranges[1];
 	        hl_div.innerHTML = '';
-	        l = document.createElement('a');
-	        l.href = location.href.substring(0,location.href.indexOf('#'))+anchor;
-	        l.innerHTML = _TM['Selection link'];
-	        hl_div.appendChild(l);
-	        
+
+	        anchor = '#L'+ranges[0]+'-'+ranges[1];
+	        var link = document.createElement('a');
+	        link.href = location.href.substring(0,location.href.indexOf('#'))+anchor;
+	        link.innerHTML = _TM['Selection link'];
+	        hl_div.appendChild(link);
 	        YUD.get('body').appendChild(hl_div);
 	        
 	        xy = YUD.getXY(till.id);
-	        
-	        YUD.addClass('linktt','yui-tt');
+
+	        YUD.addClass('linktt', 'hl-tip-box');
 	        YUD.setStyle('linktt','top',xy[1]+offset+'px');
 	        YUD.setStyle('linktt','left',xy[0]+'px');
 	        YUD.setStyle('linktt','visibility','visible');
+
 	    }
 	    else{
 	    	YUD.setStyle('linktt','visibility','hidden');

@@ -3074,6 +3074,25 @@ table.code-browser .submodule-dir {
 	-webkit-box-shadow: 0 2px 2px rgba(0, 0, 0, 0.6);
 }
 
+.hl-tip-box {
+    visibility: hidden;
+    position: absolute;
+    color: #666;
+    background-color: #FFF;
+    border: 2px solid #003367;
+    font: 100% sans-serif;
+    width: auto;
+    opacity: 1px;
+    padding: 8px;
+    white-space: pre-wrap;
+    -webkit-border-radius: 8px 8px 8px 8px;
+    -khtml-border-radius: 8px 8px 8px 8px;
+    -moz-border-radius: 8px 8px 8px 8px;
+    border-radius: 8px 8px 8px 8px;
+    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.6);
+}
+
+
 .mentions-container{
 	width: 90% !important;
 }
