@@ -160,7 +160,7 @@ class SettingsController(BaseRepoController):
             h.flash(_('An error occurred during deletion of %s') % repo_name,
                     category='error')
 
-        return redirect(url('home'))
+        return redirect(url('admin_settings_my_account', anchor='my'))
 
     @HasRepoPermissionAnyDecorator('repository.write', 'repository.admin')
     def toggle_locking(self, repo_name):
