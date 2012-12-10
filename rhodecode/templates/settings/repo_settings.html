@@ -88,12 +88,35 @@
                 <div class="input">
                     <%include file="../admin/repos/repo_edit_perms.html"/>
                 </div>
-
+            </div>
+            
+            <div class="field">
+                <div class="label">
+                    <label for="">${_('Remove repo')}:</label>
+                </div>
+                <div class="checkboxes">
+                  ${h.form(url('repo_settings_delete', repo_name=c.repo_info.repo_name),method='delete')}
+                  <div class="">
+                     <div class="fields">
+                         ${h.submit('remove_%s' % c.repo_info.repo_name,_('Remove this repository'),class_="ui-btn red",onclick="return confirm('"+_('Confirm to delete this repository')+"');")}
+                     </div>
+                     <div class="field" style="border:none;color:#888">
+                     <ul>
+                          <li>${_('''This repository will be renamed in a special way in order to be unaccesible for RhodeCode and VCS systems.
+                                   If you need fully delete it from file system please do it manually''')}
+                          </li>
+                     </ul>
+                     </div>
+                  </div>
+                  ${h.end_form()}
+                </div>
+            </div>
+        
             <div class="buttons">
               ${h.submit('save',_('Save'),class_="ui-btn large")}
               ${h.reset('reset',_('Reset'),class_="ui-btn large")}
             </div>
-        </div>
+        
     </div>
     ${h.end_form()}
 </div>
