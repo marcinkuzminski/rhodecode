@@ -193,6 +193,9 @@ class DiffProcessor(object):
         (?:^\+\+\+[ ](b/(?P<b_file>.+)|/dev/null)(?:\n|$))?
     """, re.VERBOSE | re.MULTILINE)
 
+    #used for inline highlighter word split
+    _token_re = re.compile(r'()(&gt;|&lt;|&amp;|\W+?)')
+
     def __init__(self, diff, vcs='hg', format='gitdiff', diff_limit=None):
         """
         :param diff:   a text in diff format
@@ -274,9 +277,8 @@ class DiffProcessor(object):
         else:
             old, new = next_, line
 
-        oldwords = re.split(r'(\W)', old['line'])
-        newwords = re.split(r'(\W)', new['line'])
-
+        oldwords = self._token_re.split(old['line'])
+        newwords = self._token_re.split(new['line'])
         sequence = difflib.SequenceMatcher(None, oldwords, newwords)
 
         oldfragments, newfragments = [], []
