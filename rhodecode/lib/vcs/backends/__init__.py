@@ -30,7 +30,7 @@ def get_repo(path=None, alias=None, create=False):
     if path is None:
         path = abspath(os.path.curdir)
     try:
-        scm, path = get_scm(path, search_recursively=True)
+        scm, path = get_scm(path, search_up=True)
         path = abspath(path)
         alias = scm
     except VCSError:
