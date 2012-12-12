@@ -274,7 +274,7 @@
         var myDataTable = new YAHOO.widget.DataTable("repos_list_wrap", myColumnDefs, myDataSource,{
           sortedBy:{key:"name",dir:"asc"},
           paginator: new YAHOO.widget.Paginator({
-              rowsPerPage: 15,
+              rowsPerPage: ${c.visual.lightweight_dashboard_items},
               alwaysVisible: false,
               template : "{PreviousPageLink} {FirstPageLink} {PageLinks} {LastPageLink} {NextPageLink}",
               pageLinks: 5,

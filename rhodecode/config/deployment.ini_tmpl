@@ -29,6 +29,7 @@ pdebug = false
 #smtp_auth = 
 
 [server:main]
+## PASTE
 ##nr of threads to spawn
 #threadpool_workers = 5
 
@@ -39,7 +40,11 @@ pdebug = false
 #use_threadpool = true
 
 #use = egg:Paste#http
+
+#WAITRESS
+threads = 5
 use = egg:waitress#main
+
 host = 127.0.0.1
 port = 5000
 
@@ -63,6 +68,8 @@ cut_off_limit = 256000
 vcs_full_cache = True
 force_https = false
 commit_parse_limit = 50
+# number of items displayed in lightweight dashboard before paginating
+dashboard_items = 100
 use_gravatar = true
 
 ## RSS feed options

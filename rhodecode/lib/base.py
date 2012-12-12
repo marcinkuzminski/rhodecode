@@ -18,7 +18,7 @@ from pylons.templating import render_mako as render
 from rhodecode import __version__, BACKENDS
 
 from rhodecode.lib.utils2 import str2bool, safe_unicode, AttributeDict,\
-    safe_str
+    safe_str, safe_int
 from rhodecode.lib.auth import AuthUser, get_container_username, authfunc,\
     HasPermissionAnyMiddleware, CookieStoreWrapper
 from rhodecode.lib.utils import get_repo_slug, invalidate_cache
@@ -248,6 +248,7 @@ class BaseController(WSGIController):
         c.visual.show_private_icon = str2bool(rc_config.get('rhodecode_show_private_icon'))
         c.visual.stylify_metatags = str2bool(rc_config.get('rhodecode_stylify_metatags'))
         c.visual.lightweight_dashboard = str2bool(rc_config.get('rhodecode_lightweight_dashboard'))
+        c.visual.lightweight_dashboard_items = safe_int(config.get('dashboard_items', 100))
 
         c.repo_name = get_repo_slug(request)
         c.backends = BACKENDS.keys()
