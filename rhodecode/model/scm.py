@@ -225,7 +225,7 @@ class ScmModel(BaseModel):
 
         for name, path in get_filesystem_repos(repos_path, recursive=True):
             # skip removed repos
-            if REMOVED_REPO_PAT.match(name):
+            if REMOVED_REPO_PAT.match(name) or path[0] is None:
                 continue
 
             # name need to be decomposed and put back together using the /

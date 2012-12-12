@@ -78,6 +78,9 @@ def get_scms_for_path(path):
         if os.path.isdir(dirname):
             result.append(key)
             continue
+        dirname = os.path.join(path, 'rm__.' + key)
+        if os.path.isdir(dirname):
+            return [None]
         # We still need to check if it's not bare repository as
         # bare repos don't have working directories
         try:
