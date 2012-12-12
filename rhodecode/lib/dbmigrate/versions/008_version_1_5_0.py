@@ -32,27 +32,27 @@ def upgrade(migrate_engine):
     # create username column
     username.create(table=tbl)
 
-    #alter user_id to not null
+    _Session = Session()
+    ## after adding that column fix all usernames
+    users_log = _Session.query(UserLog)\
+            .options(joinedload(UserLog.user))\
+            .options(joinedload(UserLog.repository)).all()
+
+    for entry in users_log:
+        entry.username = entry.user.username
+        _Session.add(entry)
+    _Session.commit()
+
+    #alter username to not null
     from rhodecode.lib.dbmigrate.schema.db_1_5_0 import UserLog
     tbl_name = UserLog.__tablename__
     tbl = Table(tbl_name,
                 MetaData(bind=migrate_engine), autoload=True,
                 autoload_with=migrate_engine)
-    col = tbl.columns.user_id
+    col = tbl.columns.username
 
     # remove nullability from revision field
-    col.alter(nullable=True)
-
-
-
-    ## after adding that column fix all usernames
-    users_log = UserLog.query()\
-            .options(joinedload(UserLog.user))\
-            .options(joinedload(UserLog.repository)).all()
-    for entry in users_log:
-        entry.username = entry.user.username
-        Session().add(entry)
-    Session().commit()
+    col.alter(nullable=False)
 
 
 def downgrade(migrate_engine):
