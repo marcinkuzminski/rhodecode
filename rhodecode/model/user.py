@@ -545,7 +545,7 @@ class UserModel(BaseModel):
             .filter(UsersGroupMember.user_id == uid)\
             .all()
 
-        multiple_counter = collections.Counter()
+        multiple_counter = collections.defaultdict(int)
         for perm in user_repo_perms_from_users_groups:
             r_k = perm.UsersGroupRepoToPerm.repository.repo_name
             multiple_counter[r_k] += 1
@@ -602,7 +602,7 @@ class UserModel(BaseModel):
          .filter(UsersGroupMember.user_id == uid)\
          .all()
 
-        multiple_counter = collections.Counter()
+        multiple_counter = collections.defaultdict(int)
         for perm in user_repo_group_perms_from_users_groups:
             g_k = perm.UsersGroupRepoGroupToPerm.group.group_name
             multiple_counter[g_k] += 1
