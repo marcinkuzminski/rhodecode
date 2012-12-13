@@ -159,16 +159,18 @@ def log_pull_action(ui, repo, **kwargs):
         repository = extras['repository']
         scm = extras['scm']
         make_lock = extras['make_lock']
+        ip = extras['ip']
     elif 'username' in rc_extras:
         username = rc_extras['username']
         repository = rc_extras['repository']
         scm = rc_extras['scm']
         make_lock = rc_extras['make_lock']
+        ip = rc_extras['ip']
     else:
         raise Exception('Missing data in repo.ui and os.environ')
     user = User.get_by_username(username)
     action = 'pull'
-    action_logger(user, action, repository, extras['ip'], commit=True)
+    action_logger(user, action, repository, ip, commit=True)
     # extension hook call
     from rhodecode import EXTENSIONS
     callback = getattr(EXTENSIONS, 'PULL_HOOK', None)
