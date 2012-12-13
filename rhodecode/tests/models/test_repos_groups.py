@@ -136,7 +136,7 @@ class TestReposGroups(unittest.TestCase):
         form_data['repo_group'] = g1.group_id
         form_data['perms_new'] = []
         form_data['perms_updates'] = []
-        RepoModel().update(r.repo_name, form_data)
+        RepoModel().update(r.repo_name, **form_data)
         self.assertEqual(r.repo_name, 'g1/john')
 
         self.__update_group(g1.group_id, 'g1', parent_id=g2.group_id)

@@ -97,6 +97,7 @@ class ReposController(BaseController):
 
             return redirect(url('repos'))
 
+        ##override defaults for exact repo info here git/hg etc
         choices, c.landing_revs = ScmModel().get_repo_landing_revs(c.repo_info)
         c.landing_revs_choices = choices
 
@@ -239,7 +240,15 @@ class ReposController(BaseController):
         new_repo = request.GET.get('repo', '')
         c.new_repo = repo_name_slug(new_repo)
         self.__load_defaults()
-        return render('admin/repos/repo_add.html')
+        ## apply the defaults from defaults page
+        defaults = RhodeCodeSetting.get_default_repo_settings(strip_prefix=True)
+        return htmlfill.render(
+            render('admin/repos/repo_add.html'),
+            defaults=defaults,
+            errors={},
+            prefix_error=False,
+            encoding="UTF-8"
+        )
 
     @HasPermissionAllDecorator('hg.admin')
     def update(self, repo_name):
@@ -263,7 +272,7 @@ class ReposController(BaseController):
                          landing_revs=c.landing_revs_choices)()
         try:
             form_result = _form.to_python(dict(request.POST))
-            repo = repo_model.update(repo_name, form_result)
+            repo = repo_model.update(repo_name, **form_result)
             invalidate_cache('get_repo_cached_%s' % repo_name)
             h.flash(_('Repository %s updated successfully') % repo_name,
                     category='success')

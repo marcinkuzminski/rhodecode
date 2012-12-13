@@ -65,22 +65,37 @@ class SettingsController(BaseRepoController):
         choices, c.landing_revs = ScmModel().get_repo_landing_revs()
         c.landing_revs_choices = choices
 
-    @HasRepoPermissionAllDecorator('repository.admin')
-    def index(self, repo_name):
-        repo_model = RepoModel()
-        c.repo_info = repo = repo_model.get_by_repo_name(repo_name)
-        if not repo:
+    def __load_data(self, repo_name=None):
+        """
+        Load defaults settings for edit, and update
+
+        :param repo_name:
+        """
+        self.__load_defaults()
+
+        c.repo_info = db_repo = Repository.get_by_repo_name(repo_name)
+        repo = db_repo.scm_instance
+
+        if c.repo_info is None:
             h.flash(_('%s repository is not mapped to db perhaps'
-                      ' it was created or renamed from the file system'
+                      ' it was created or renamed from the filesystem'
                       ' please run the application again'
                       ' in order to rescan repositories') % repo_name,
                       category='error')
 
             return redirect(url('home'))
 
-        self.__load_defaults()
+        ##override defaults for exact repo info here git/hg etc
+        choices, c.landing_revs = ScmModel().get_repo_landing_revs(c.repo_info)
+        c.landing_revs_choices = choices
 
         defaults = RepoModel()._get_defaults(repo_name)
+
+        return defaults
+
+    @HasRepoPermissionAllDecorator('repository.admin')
+    def index(self, repo_name):
+        defaults = self.__load_data(repo_name)
 
         return htmlfill.render(
             render('settings/repo_settings.html'),
@@ -91,10 +106,12 @@ class SettingsController(BaseRepoController):
 
     @HasRepoPermissionAllDecorator('repository.admin')
     def update(self, repo_name):
+        self.__load_defaults()
         repo_model = RepoModel()
         changed_name = repo_name
-
-        self.__load_defaults()
+        #override the choices with extracted revisions !
+        choices, c.landing_revs = ScmModel().get_repo_landing_revs(repo_name)
+        c.landing_revs_choices = choices
 
         _form = RepoSettingsForm(edit=True,
                                  old_data={'repo_name': repo_name},
@@ -102,8 +119,7 @@ class SettingsController(BaseRepoController):
                                  landing_revs=c.landing_revs_choices)()
         try:
             form_result = _form.to_python(dict(request.POST))
-
-            repo_model.update(repo_name, form_result)
+            repo_model.update(repo_name, **form_result)
             invalidate_cache('get_repo_cached_%s' % repo_name)
             h.flash(_('Repository %s updated successfully') % repo_name,
                     category='success')
@@ -112,15 +128,15 @@ class SettingsController(BaseRepoController):
                           changed_name, self.ip_addr, self.sa)
             Session().commit()
         except formencode.Invalid, errors:
-            c.repo_info = repo_model.get_by_repo_name(repo_name)
-            c.users_array = repo_model.get_users_js()
-            errors.value.update({'user': c.repo_info.user.username})
+            defaults = self.__load_data(repo_name)
+            defaults.update(errors.value)
             return htmlfill.render(
                 render('settings/repo_settings.html'),
                 defaults=errors.value,
                 errors=errors.error_dict or {},
                 prefix_error=False,
                 encoding="UTF-8")
+
         except Exception:
             log.error(traceback.format_exc())
             h.flash(_('error occurred during update of repository %s') \
