@@ -694,12 +694,12 @@ class PermsFunction(object):
             return False
         self.user_perms = user.permissions
         if self.check_permissions():
-            log.debug('Permission granted for user: %s @ %s', user,
+            log.debug('Permission to %s granted for user: %s @ %s', self.repo_name, user,
                       check_Location or 'unspecified location')
             return True
 
         else:
-            log.debug('Permission denied for user: %s @ %s', user,
+            log.debug('Permission to %s denied for user: %s @ %s', self.repo_name, user,
                         check_Location or 'unspecified location')
             return False
 
