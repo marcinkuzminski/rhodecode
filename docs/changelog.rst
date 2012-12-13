@@ -77,6 +77,8 @@ fixes
 - fixes #666 move lockkey path location to cache_dir to ensure this path is
   always writable for rhodecode server
 - many more small fixes and improvements
+- fixed issues with recursive scans on removed repositories that could take
+  long time on instance start
 
 1.4.4 (**2012-10-08**)
 ----------------------
